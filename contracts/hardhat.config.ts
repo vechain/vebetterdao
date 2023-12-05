@@ -1,9 +1,9 @@
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
-import '@nomiclabs/hardhat-truffle5';
 import { VECHAIN_URL_SOLO, VECHAIN_URL_MAINNET, VECHAIN_URL_TESTNET } from '@vechain/hardhat-vechain'
-import '@vechain/hardhat-ethers'
-import "dotenv/config";
+import '@nomiclabs/hardhat-truffle5';
+import '@vechain/hardhat-vechain';
+import '@vechain/hardhat-web3';
 
 const config: HardhatUserConfig = {
   solidity: "0.8.20",
