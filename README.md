@@ -15,6 +15,10 @@ We're using [turbo](https://www.npmjs.com/package/turbo) and yarn to manage the 
 - apps: Contains apps or backends and in general application layer services;
 - packages: reusable and sharable code, libraries, configurations;
 
+### Developing with monorepo
+
+I suggest installing [this](https://marketplace.visualstudio.com/items?itemName=folke.vscode-monorepo-workspace) extension for a better DX. Not sure what's the IntelliJ's equivalent
+
 ### Setting up the dev environment
 
 #### Install packages
