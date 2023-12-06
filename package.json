@@ -1,27 +1,29 @@
 {
-    "name": "b3tr-monorepo",
-    "private": true,
-    "scripts": {
-      "build": "turbo build",
-      "dev": "turbo dev",
-      "lint": "turbo lint",
-      "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-      "hardhat:compile": "turbo run compile --scope=contracts",
-      "hardhat:test": "turbo run test --scope=contracts"
-    },
-    "devDependencies": {
-      "@repo/eslint-config": "*",
-      "@repo/typescript-config": "*",
-      "prettier": "^3.1.0",
-      "turbo": "latest"
-    },
-    "engines": {
-      "node": ">=18"
-    },
-    "packageManager": "yarn@1.22.19",
-    "workspaces": [
-      "apps/*",
-      "packages/*"
-    ]
-  }
-  
+  "name": "b3tr-monorepo",
+  "private": true,
+  "scripts": {
+    "build": "dotenv -- turbo build",
+    "dev": "dotenv -- turbo dev",
+    "lint": "turbo lint",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "hardhat:compile": "turbo run compile --scope=contracts",
+    "hardhat:deploy": "turbo run deploy --scope=contracts",
+    "hardhat:test": "turbo run test --scope=contracts"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "*",
+    "@repo/typescript-config": "*",
+    "prettier": "^3.1.0",
+    "turbo": "latest",
+    "dotenv-cli": "latest"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "packageManager": "yarn@1.22.19",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}
