@@ -17,9 +17,13 @@
     "next": "14.0.3",
     "react": "^18",
     "react-dom": "^18",
-    "react-icons": "^4.12.0"
+    "react-icons": "^4.12.0",
+    "@repo/contracts": "*"
   },
   "devDependencies": {
+    "@next/eslint-plugin-next": "^14.0.2",
+    "@repo/eslint-config": "*",
+    "@repo/typescript-config": "*",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
