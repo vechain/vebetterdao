@@ -4,6 +4,7 @@ services:
     image: vechain/thor:latest
     hostname: thor-solo
     container_name: thor-solo
+    user: root
     environment:
       - DOCKER=1
     entrypoint:
