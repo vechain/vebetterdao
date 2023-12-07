@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   thor-solo:
-    image: vechain/thor:v2.0.0
+    image: vechain/thor:latest
     hostname: thor-solo
     container_name: thor-solo
     environment:
