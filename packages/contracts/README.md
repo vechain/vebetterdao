@@ -12,6 +12,8 @@ This repository contains the smart contracts for the B3TR project.
 ```
 yarn
 node: ^16.20 || ^18.16 || >=20
+docker
+docker-compose
 ```
 
 ### Local development setup
