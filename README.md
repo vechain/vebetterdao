@@ -36,7 +36,13 @@ yarn install
 This step requires you to have Docker installed
 
 ```
-make run-solo
+make solo-up
+```
+
+And to take is down again
+
+```
+make solo-down
 ```
 
 #### Deploy the contracts
