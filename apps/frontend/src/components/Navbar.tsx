@@ -3,6 +3,8 @@ import { VechainLogo } from "./VechainLogo";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 import { usePathname } from "next/navigation";
 
+import { useEffect } from "react";
+
 const Menu = [
   { name: "Home", href: "/" },
   { name: "Staking", href: "/staking" },
