@@ -1,6 +1,6 @@
 {
   "name": "@repo/contracts",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "main": "main.ts",
   "types": "main.ts",
   "license": "MIT",
@@ -27,13 +27,13 @@
     "@vechain/hardhat-ethers": "^0.1.4",
     "@vechain/hardhat-vechain": "^0.1.4",
     "@vechain/web3-providers-connex": "^1.1.2",
-    "hardhat": "^2.12.6",
+    "hardhat": "^2.13.0",
     "hardhat-gas-reporter": "^1.0.8",
     "solidity-coverage": "^0.8.1",
     "ts-node": ">=8.0.0",
     "typechain": "^8.1.0",
     "typescript": ">=4.5.0",
-    "@openzeppelin/contracts": "^5.0.0",
+    "@openzeppelin/contracts": "^5.0.1",
     "chai": "^4.2.0",
     "dotenv": "^16.3.1"
   },

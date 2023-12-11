@@ -1,60 +1,75 @@
-import { artifacts, contract, network } from "hardhat";
-import { Contract, ContractFactory, BaseContract, ethers } from "ethers";
+import { ethers } from "hardhat";
+import { HttpNetworkConfig } from "hardhat/types";
 import { expect } from "chai";
-import hre from "hardhat";
 
+describe("B3TR", function () {
 
-contract('B3TR Token', function (accounts) {
-    let contractInstance = artifacts.require("B3TR");
-    const deployer = accounts[0];
-    const operator = accounts[1];
+    let cachedContractInstance: any = null;
+    async function deploy(forceDeploy = false) {
+        if (!forceDeploy && cachedContractInstance !== null) {
+            return cachedContractInstance;
+        }
 
-    before(async () => {
-        const Contract = await hre.ethers.getContractFactory("B3TR")
-        const contract = await Contract.deploy(operator);
-        await contract.waitForDeployment()
+        // Contracts are deployed using the first signer/account by default
+        const [owner, otherAccount, operatorAccount] = await ethers.getSigners();
 
-        contractInstance = contract;
-    });
+        const B3TRContract = await ethers.getContractFactory("B3TR");
+        const contractInstance = await B3TRContract.deploy(operatorAccount);
 
-    describe('Max supply', function () {
-        it('max supply is set correctly', async function () {
-            const res = await contractInstance.maxSupply();
-            expect(String(res)).to.eql('1000000000000000000000000000');
-        });
+        const abiArray = B3TRContract.interface["fragments"];
+        const abi = JSON.stringify(abiArray);
 
-        // cannot be minted more than max supply
-    })
+        cachedContractInstance = { contractInstance, owner, otherAccount, abi, operatorAccount };
 
-    describe('Access Control', function () {
+        return cachedContractInstance;
+    }
+
+    describe("Access Control", function () {
+
+        const thorSoloUrl = "http://127.0.0.1:8669";
+        const config = {
+            chainId: 1,
+            from: undefined,
+            gas: 10000,
+            gasPrice: 10000,
+            gasMultiplier: 1,
+            url: thorSoloUrl,
+            accounts: 'remote',
+            timeout: 1000,
+            httpHeaders: { ['test']: 'test' } as { [name: string]: string },
+        } as unknown as HttpNetworkConfig;
+
         it('admin role is set correctly upon deploy', async function () {
+            const { contractInstance, owner } = await deploy();
+
             const defaultAdminRole = await contractInstance.DEFAULT_ADMIN_ROLE()
 
-            const res = await contractInstance.hasRole(defaultAdminRole, deployer);
+            const res = await contractInstance.hasRole(defaultAdminRole, owner);
             expect(res).to.eql(true);
         })
 
         it('operator role is set correctly upon deploy', async function () {
+            const { contractInstance, owner, otherAccount, operatorAccount } = await deploy();
             const operatorRole = await contractInstance.OPERATOR_ROLE()
 
-            const res = await contractInstance.hasRole(operatorRole, operator);
+            const res = await contractInstance.hasRole(operatorRole, operatorAccount);
             expect(res).to.eql(true);
 
             // test that operator role is not set for other accounts
-            expect(await contractInstance.hasRole(operatorRole, accounts[2])).to.eql(false);
+            expect(await contractInstance.hasRole(operatorRole, otherAccount)).to.eql(false);
         })
 
-
-        // test that only admin can grant operator role
         it('only admin can grant operator role', async function () {
+            const { contractInstance, owner, otherAccount } = await deploy();
+
             const operatorRole = await contractInstance.OPERATOR_ROLE()
-            const defaultAdminRole = await contractInstance.DEFAULT_ADMIN_ROLE()
 
-            await contractInstance.connect(accounts[2]).grantRole(operatorRole, accounts[2])
+            expect(await contractInstance.hasRole(operatorRole, otherAccount)).to.eql(false);
 
-            await contractInstance.grantRole(operatorRole, accounts[2]);
-            expect(await contractInstance.hasRole(operatorRole, accounts[2])).to.eql(true);
-            expect(await contractInstance.hasRole(operatorRole, accounts[1])).to.eql(false);
+            expect(contractInstance.connect(otherAccount).grantRole(operatorRole, otherAccount)).to.be.revertedWithoutReason
+
+            await contractInstance.connect(owner).grantRole(operatorRole, otherAccount);
+            expect(await contractInstance.hasRole(operatorRole, otherAccount)).to.eql(true);
         })
 
         // test that only admin can revoke operator role
@@ -64,6 +79,36 @@ contract('B3TR Token', function (accounts) {
 
 
         // test that only admin can revoke admin role
+    });
 
+    describe("Max supply", function () {
+        it('max supply is set correctly', async function () {
+            const { contractInstance } = await deploy(true);
+
+            const res = await contractInstance.maxSupply();
+            expect(String(res)).to.eql('1000000000000000000000000000');
+        });
+
+        it('only operator can mint', async function () {
+            const { contractInstance, otherAccount, owner } = await deploy();
+
+            expect(contractInstance.mint(otherAccount, ethers.parseEther('1'))).to.be.revertedWithoutReason
+            const operatorRole = await contractInstance.OPERATOR_ROLE()
+
+            await contractInstance.grantRole(operatorRole, owner);
+            await expect(contractInstance.mint(otherAccount, ethers.parseEther('1'))).not.to.be.reverted
+
+            const balance = await contractInstance.balanceOf(otherAccount);
+            expect(String(balance)).to.eql(ethers.parseEther('1').toString());
+        })
+
+        it('cannot be minted more than max supply', async function () {
+            const { contractInstance, otherAccount, owner } = await deploy();
+            const operatorRole = await contractInstance.OPERATOR_ROLE()
+
+            await contractInstance.grantRole(operatorRole, owner);
+            await expect(contractInstance.mint(otherAccount, ethers.parseEther('1000000001'))).to.be.reverted
+        })
     })
+
 });

@@ -51,6 +51,10 @@ make solo-down
 yarn hardhat:deploy
 ```
 
+By default it will deploy to the solo node.
+You can change the network by adding the `--network` flag. For example, to deploy to the testnet, run `yarn hardhat:deploy --network vechain_testnet`.
+If you are not deploying to the solo node, you will need to import the `MNEMONIC` environment variable which will be used to deploy the contracts. Just copy the `.env.example` in file in `packages/contracts` to `.env` and set the `MNEMONIC` variable.
+
 #### Add the contract address in the .env
 
 Copy the address printed in console in the previous step and create new `.env` file with the following key:

@@ -59,7 +59,7 @@ docker-compose
    This command will automatically execute the `deploy.ts` script in the `scripts` folder. You can customize the script to deploy your contracts.
    By default it will deploy to the solo node.
    You can change the network by adding the `--network` flag. For example, to deploy to the testnet, run `yarn deploy --network vechain_testnet`.
-   If you are not deploying to the solo node, you will need to set the `MNEMONIC` environment variable to set the mnemonic of the wallet to use for deployment. Just copy the `.env.example` file to `.env` and set the `MNEMONIC` variable.
+   If you are not deploying to the solo node, you will need to import the `MNEMONIC` environment variable which will be used to deploy the contracts. Just copy the `.env.example` file to `.env` and set the `MNEMONIC` variable.
 
 ## Additional features
 
