@@ -33,11 +33,7 @@ contract B3TR is ERC20Capped, AccessControl {
      * - the caller must have the {OPERATOR_ROLE}.
      * - supply must not exceed cap.
      */
-    function mint(
-        address to,
-        uint256 amount
-    ) external onlyRole(OPERATOR_ROLE) returns (bool) {
+    function mint(address to, uint256 amount) external onlyRole(OPERATOR_ROLE) {
         _mint(to, amount);
-        return true;
     }
 }
