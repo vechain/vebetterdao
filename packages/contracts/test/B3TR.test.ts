@@ -72,13 +72,58 @@ describe("B3TR", function () {
             expect(await contractInstance.hasRole(operatorRole, otherAccount)).to.eql(true);
         })
 
-        // test that only admin can revoke operator role
+        it('only admin can revoke operator role', async function () {
+            const { contractInstance, owner, otherAccount } = await deploy();
+
+            const operatorRole = await contractInstance.OPERATOR_ROLE()
+
+            await contractInstance.connect(owner).grantRole(operatorRole, otherAccount);
+            expect(await contractInstance.hasRole(operatorRole, otherAccount)).to.eql(true);
+
+            expect(contractInstance.connect(otherAccount).revokeRole(operatorRole, otherAccount)).to.be.revertedWithoutReason
+
+            await contractInstance.connect(owner).revokeRole(operatorRole, otherAccount);
+            expect(await contractInstance.hasRole(operatorRole, otherAccount)).to.eql(false);
+        })
+
+        it('only admin can grant admin role', async function () {
+            const { contractInstance, owner, otherAccount } = await deploy();
+
+            const adminRole = await contractInstance.DEFAULT_ADMIN_ROLE()
+
+            // at the beginning owner is admin
+            expect(await contractInstance.hasRole(adminRole, otherAccount)).to.eql(false);
+            expect(await contractInstance.hasRole(adminRole, owner)).to.eql(true);
+
+            expect(contractInstance.connect(otherAccount).grantRole(adminRole, otherAccount)).to.be.revertedWithoutReason
+
+            await contractInstance.connect(owner).grantRole(adminRole, otherAccount);
+            expect(await contractInstance.hasRole(adminRole, otherAccount)).to.eql(true);
+
+            // owner is still admin until it is revoked
+            expect(await contractInstance.hasRole(adminRole, owner)).to.eql(true);
+        })
 
 
-        // test that only admin can grant admin role
+        it('only admin can revoke admin role', async function () {
+            const { contractInstance, owner, otherAccount, operatorAccount } = await deploy();
 
+            const adminRole = await contractInstance.DEFAULT_ADMIN_ROLE()
 
-        // test that only admin can revoke admin role
+            // after last test both owner and otherAccount are admin
+            expect(await contractInstance.hasRole(adminRole, otherAccount)).to.eql(true)
+            expect(await contractInstance.hasRole(adminRole, owner)).to.eql(true);
+
+            expect(contractInstance.connect(operatorAccount).revokeRole(adminRole, owner)).to.be.revertedWithoutReason
+
+            await contractInstance.connect(otherAccount).revokeRole(adminRole, owner);
+
+            // owner is no longer admin
+            expect(await contractInstance.hasRole(adminRole, owner)).to.eql(false);
+
+            // otherAccount is still admin until
+            expect(await contractInstance.hasRole(adminRole, otherAccount)).to.eql(true);
+        })
     });
 
     describe("Max supply", function () {
