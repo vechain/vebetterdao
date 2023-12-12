@@ -25,7 +25,7 @@ describe("B3TR", function () {
     }
 
     describe("Deployment", function () {
-        it("Should deploy the contract", async function () {
+        it("should deploy the contract", async function () {
             const { contractInstance } = await deploy()
             await contractInstance.waitForDeployment()
             const address = await contractInstance.getAddress()
@@ -33,7 +33,7 @@ describe("B3TR", function () {
             expect(address).not.to.eql(undefined)
         })
 
-        it("Should have the correct name", async function () {
+        it("should have the correct name", async function () {
             const { contractInstance } = await deploy()
 
             const res = await contractInstance.name()
@@ -43,7 +43,7 @@ describe("B3TR", function () {
             expect(res2).to.eql('B3TR')
         })
 
-        it("Should have the correct max supply", async function () {
+        it("should have the correct max supply", async function () {
             const { contractInstance } = await deploy()
 
             const res = await contractInstance.maxSupply()
