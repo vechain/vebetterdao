@@ -134,8 +134,18 @@ describe("B3TR", function () {
             expect(String(res)).to.eql('1000000000000000000000000000');
         });
 
-        it('only operator can mint', async function () {
+        it('cannot be minted more than max supply', async function () {
             const { contractInstance, otherAccount, owner } = await deploy();
+            const operatorRole = await contractInstance.OPERATOR_ROLE()
+
+            await contractInstance.grantRole(operatorRole, owner);
+            await expect(contractInstance.mint(otherAccount, ethers.parseEther('1000000001'))).to.be.revertedWith('B3TR: max supply reached')
+        })
+    })
+
+    describe("Mint", function () {
+        it('only operator can mint', async function () {
+            const { contractInstance, otherAccount, owner } = await deploy(true);
 
             expect(contractInstance.mint(otherAccount, ethers.parseEther('1'))).to.be.revertedWithoutReason
             const operatorRole = await contractInstance.OPERATOR_ROLE()
@@ -146,14 +156,5 @@ describe("B3TR", function () {
             const balance = await contractInstance.balanceOf(otherAccount);
             expect(String(balance)).to.eql(ethers.parseEther('1').toString());
         })
-
-        it('cannot be minted more than max supply', async function () {
-            const { contractInstance, otherAccount, owner } = await deploy();
-            const operatorRole = await contractInstance.OPERATOR_ROLE()
-
-            await contractInstance.grantRole(operatorRole, owner);
-            await expect(contractInstance.mint(otherAccount, ethers.parseEther('1000000001'))).to.be.reverted
-        })
     })
-
 });
