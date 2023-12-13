@@ -140,3 +140,4 @@ dist
 contracts/package-lock.json
 
 .idea/
+.vscode/
