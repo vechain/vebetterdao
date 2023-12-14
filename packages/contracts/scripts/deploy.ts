@@ -1,14 +1,18 @@
-import { artifacts, network } from "hardhat";
+import { ethers, network } from "hardhat";
+import hre from "hardhat";
 
-const B3TR = "B3TR"; // Declare a global variable for the contract name
-const Contract = artifacts.require(B3TR);
-
+const DEFAULT_OPERATOR = "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68"
 
 async function main() {
-  const deployedContract = await Contract.new();
+  console.log(`Deploying contracts on ${network.name}...`);
+
+  const Storage = await ethers.getContractFactory('B3TR'); // Use the global variable
+  const storage = await Storage.deploy(DEFAULT_OPERATOR);
+
+  await storage.waitForDeployment();
 
   console.log(
-    `${B3TR} deployed to ${deployedContract.address} on ${network.name}` // Use the global variable
+    `B3TR contract deployed at address ${await storage.getAddress()}`
   );
 
   // close the script
@@ -19,5 +23,5 @@ async function main() {
 // and properly handle errors.
 main().catch((error) => {
   console.error(error);
-  process.exitCode = 1;
+  process.exit(1);
 });
