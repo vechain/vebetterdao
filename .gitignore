@@ -138,3 +138,6 @@ dist
 .DS_Store
 
 contracts/package-lock.json
+
+.idea/
+.vscode/
