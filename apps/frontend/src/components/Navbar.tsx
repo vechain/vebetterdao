@@ -4,6 +4,7 @@ import { ThemeSwitcher } from "./ThemeSwitcher";
 import { usePathname } from "next/navigation";
 
 import dynamic from "next/dynamic";
+import { Link } from "@chakra-ui/next-js";
 
 const Menu = [
   { name: "Home", href: "/" },
@@ -24,17 +25,17 @@ const MenuButtons = () => {
       {Menu.map((item) => {
         const isActive = pathname === item.href;
         return (
-          <Button
-            as="a"
-            key={item.name}
-            variant={isActive ? "solid" : "ghost"}
-            colorScheme={isActive ? "blue" : undefined}
-            w="full"
-            justifyContent="center"
-            href={item.href}
-          >
-            {item.name}
-          </Button>
+          <Link href={item.href} key={item.name}>
+            <Button
+              key={item.name}
+              variant={isActive ? "solid" : "ghost"}
+              colorScheme={isActive ? "blue" : undefined}
+              w="full"
+              justifyContent="center"
+            >
+              {item.name}
+            </Button>
+          </Link>
         );
       })}
     </VStack>
