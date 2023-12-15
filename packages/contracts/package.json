@@ -8,7 +8,6 @@
     "test": "npx hardhat test",
     "compile": "npx hardhat compile",
     "deploy": "npx hardhat run scripts/deploy.ts",
-    "dev": "tsx watch main.ts",
     "build": "esbuild main.ts --bundle --platform=node --outfile=dist/index.js",
     "start-solo": "docker compose up",
     "stop-solo": "docker compose down",

@@ -139,5 +139,6 @@ dist
 
 contracts/package-lock.json
 
+# IDE files
 .idea/
 .vscode/
