@@ -4,7 +4,6 @@ import { Container } from "@chakra-ui/react";
 import { Providers } from "./providers";
 
 import { SideBar } from "@/components/Navbar";
-import { ConnectButtonWithModal } from "@vechain/dapp-kit-react";
 
 export default function RootLayout({
   children,
@@ -23,7 +22,6 @@ export default function RootLayout({
             justifyContent={["flex-start"]}
             flexDirection={["column", "row"]}
           >
-            <ConnectButtonWithModal />
             <SideBar />
             {children}
           </Container>

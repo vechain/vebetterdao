@@ -1,14 +1,20 @@
-import { Button, VStack } from "@chakra-ui/react";
+import { Box, Button, VStack } from "@chakra-ui/react";
 import { VechainLogo } from "./VechainLogo";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 import { usePathname } from "next/navigation";
 
-import { useEffect } from "react";
+import dynamic from "next/dynamic";
 
 const Menu = [
   { name: "Home", href: "/" },
   { name: "Staking", href: "/staking" },
 ];
+
+const ConnectButtonWithModal = dynamic(
+  () =>
+    import("@vechain/dapp-kit-react").then((mod) => mod.ConnectButtonWithModal),
+  { ssr: false }
+);
 
 const MenuButtons = () => {
   const pathname = usePathname();
@@ -49,7 +55,10 @@ export const SideBar = () => {
       mr="8"
       justify="space-between"
     >
-      <VechainLogo />
+      <VStack spacing={8}>
+        <VechainLogo />
+        <ConnectButtonWithModal />
+      </VStack>
       <MenuButtons />
       <ThemeSwitcher />
     </VStack>
