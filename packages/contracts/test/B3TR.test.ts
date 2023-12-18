@@ -46,9 +46,6 @@ describe("B3TR", function () {
         it("should have the correct max supply", async function () {
             const { contractInstance } = await deploy()
 
-            const res = await contractInstance.maxSupply()
-            expect(String(res)).to.eql('1000000000000000000000000000')
-
             const cap = await contractInstance.cap()
             expect(String(cap)).to.eql('1000000000000000000000000000')
         })

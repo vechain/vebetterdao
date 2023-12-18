@@ -16,16 +16,6 @@ contract B3TR is ERC20Capped, AccessControl {
     }
 
     /**
-     * @dev See {ERC20Capped-cap()}.
-     * Proxy function to cap()
-     *
-     * @return the cap of the token.
-     */
-    function maxSupply() external view returns (uint256) {
-        return cap();
-    }
-
-    /**
      * @dev See {ERC20-_mint}.
      *
      * Requirements:
