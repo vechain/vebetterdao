@@ -1,0 +1,47 @@
+version: "3.7"
+
+services:
+  mongo-node1:
+    hostname: mongo-node1
+    image: mongo:6
+    command: [ "mongod", "--replSet", "rs0", "--keyFile", "/data/keys/keyfile" ]
+    entrypoint:
+      - bash
+      - -c
+      - |
+        chmod 400 /data/keys/keyfile
+        chown 999:999 /data/keys/keyfile
+        exec docker-entrypoint.sh $$@
+    expose:
+      - 27017
+    ports:
+      - "27017:27017"
+    restart: always
+    volumes:
+      - b3tr-data-1:/data/db
+      - ./keys:/data/keys
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: b3tr
+    healthcheck:
+      test: [ "CMD","mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+    deploy:
+      resources:
+        limits:
+          memory: 4096m
+        reservations:
+          memory: 1024m
+    networks:
+      - b3tr-database
+
+networks:
+  b3tr-database:
+    driver: bridge
+    name: b3tr-database
+
+volumes:
+  b3tr-data-1:
