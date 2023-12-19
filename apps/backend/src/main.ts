@@ -14,6 +14,7 @@ async function bootstrap() {
     .setTitle("B3tr API")
     .setDescription("Backend services for B3tr")
     .setVersion("0.0.1")
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("api", app, document);

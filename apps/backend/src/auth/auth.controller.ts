@@ -3,7 +3,7 @@ import { AuthService } from "./auth.service";
 import { CertificateDto } from "./auth.model";
 import { AuthGuard } from "./auth.guard";
 import { error } from "console";
-import { ApiTags, ApiOperation, ApiBody, ApiResponse } from "@nestjs/swagger";
+import { ApiTags, ApiOperation, ApiBody, ApiResponse, ApiBearerAuth } from "@nestjs/swagger";
 
 @ApiTags("auth")
 @Controller("auth")
@@ -27,6 +27,7 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Get("profile")
+  @ApiBearerAuth()
   @ApiOperation({ summary: "Get profile" })
   @ApiResponse({ status: 200, description: "Successful retrieval of profile" })
   @ApiResponse({ status: 401, description: "Unauthorized" })
