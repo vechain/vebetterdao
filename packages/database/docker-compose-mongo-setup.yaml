@@ -1,0 +1,19 @@
+version: "3.7"
+
+services:
+  mongo-setup:
+    build:
+      context: .
+    environment:
+      MONGO_HOST: "mongo-node1"
+      MONGO_ADMIN_USER: "root"
+      MONGO_ADMIN_PASSWORD: "password"
+      MONGO_B3TR_USER: "indexer"
+      MONGO_B3TR_PASSWORD: "password"
+    restart: "no"
+    networks:
+      - b3tr-database
+
+networks:
+  b3tr-database:
+    name: b3tr-database
