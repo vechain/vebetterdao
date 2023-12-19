@@ -5,3 +5,7 @@ if (!process.env.MONGO_URI) {
 export const dbConstants = {
   uri: process.env.MONGO_URI,
 };
+
+export const apiConstants = {
+  port: process.env.PORT ?? 3001,
+};
