@@ -9,6 +9,7 @@ import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persist
 
 import type { WalletConnectOptions } from "@vechain/dapp-kit";
 import dynamic from "next/dynamic";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 const DAppKitProvider = dynamic(() => import("@vechain/dapp-kit-react").then(mod => mod.DAppKitProvider), {
   ssr: false,
@@ -38,6 +39,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         usePersistence
         walletConnectOptions={walletConnectOptions}>
         <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
+          <ReactQueryDevtools initialIsOpen={false} />
           <ChakraProvider>{children}</ChakraProvider>
         </PersistQueryClientProvider>
       </DAppKitProvider>
