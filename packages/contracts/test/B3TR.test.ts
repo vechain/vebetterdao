@@ -1,5 +1,4 @@
 import { ethers } from "hardhat"
-import { HttpNetworkConfig } from "hardhat/types"
 import { expect } from "chai"
 
 describe("B3TR", function () {
@@ -172,6 +171,26 @@ describe("B3TR", function () {
 
             const balance = await contractInstance.balanceOf(otherAccount)
             expect(String(balance)).to.eql(ethers.parseEther('1').toString())
+        })
+    })
+
+    describe.only("Token details", function () {
+        it('returns expected information', async function () {
+            const { contractInstance } = await deploy()
+
+            const name = await contractInstance.name()
+            const symbol = await contractInstance.symbol()
+            const decimals = await contractInstance.decimals()
+            const cap = await contractInstance.cap()
+            const totalSupply = await contractInstance.totalSupply()
+
+            const tokenDetails = await contractInstance.tokenDetails()
+
+            expect(tokenDetails[0]).to.eql(name)
+            expect(tokenDetails[1]).to.eql(symbol)
+            expect(tokenDetails[2]).to.eql(decimals)
+            expect(tokenDetails[3]).to.eql(totalSupply)
+            expect(tokenDetails[4]).to.eql(cap)
         })
     })
 })
