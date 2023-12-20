@@ -26,4 +26,15 @@ contract B3TR is ERC20Capped, AccessControl {
     function mint(address to, uint256 amount) external onlyRole(MINTER_ROLE) {
         _mint(to, amount);
     }
+
+    /**
+     * Proxy function to get all token details in one call
+     */
+    function tokenDetails()
+        external
+        view
+        returns (string memory, string memory, uint8, uint256, uint256)
+    {
+        return (name(), symbol(), decimals(), totalSupply(), cap());
+    }
 }
