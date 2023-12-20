@@ -1,15 +1,16 @@
 // app/providers.tsx
 "use client";
 
-import { queryClient } from "@/api";
+import { persister, queryClient } from "@/api";
 import { CacheProvider } from "@chakra-ui/next-js";
 import { ChakraProvider } from "@chakra-ui/react";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
-import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 
 import type { WalletConnectOptions } from "@vechain/dapp-kit";
 import dynamic from "next/dynamic";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+
+import { networkConfig } from "@/config";
 
 const DAppKitProvider = dynamic(() => import("@vechain/dapp-kit-react").then(mod => mod.DAppKitProvider), {
   ssr: false,
@@ -25,18 +26,13 @@ const walletConnectOptions: WalletConnectOptions = {
   },
 };
 
-// to persist react-query daya in LS
-const persister = createSyncStoragePersister({
-  storage: window.localStorage,
-});
-
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <CacheProvider>
       <DAppKitProvider
-        genesis="test"
-        nodeUrl="https://testnet.vechain.org/"
         usePersistence
+        genesis={networkConfig.network.genesis}
+        nodeUrl={networkConfig.nodeUrl}
         walletConnectOptions={walletConnectOptions}>
         <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
           <ReactQueryDevtools initialIsOpen={false} />
