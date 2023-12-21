@@ -20,7 +20,7 @@ export const BalanceCard = ({ address, tokenDetailsQueryResult: { data: tokenDet
 
     const scaledNumber = FormattingUtils.scaleNumberDown(balance, decimals);
     return FormattingUtils.humanNumber(scaledNumber, scaledNumber);
-  }, [tokenDetails]);
+  }, [tokenDetails, balance]);
 
   if (!balance && !isLoading)
     return (

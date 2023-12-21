@@ -55,8 +55,6 @@ export const getB3trBalance = async (thor: Connex.Thor, address?: string): Promi
         .call(address)
 
     if (res.vmError) return Promise.reject(new Error(res.vmError))
-
-
     return res.decoded[0]
 }
 
