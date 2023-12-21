@@ -6,7 +6,8 @@
   "pipeline": {
     "build": {
       "dependsOn": ["^build", "@repo/contracts#compile"],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "outputs": [".next/**", "!.next/cache/**"],
+      "dotEnv": [".env.production.local", ".env.local", ".env.production", ".env"]
     },
     "lint": {
       "dependsOn": ["^lint"]
@@ -14,7 +15,8 @@
     "dev": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["@repo/contracts#compile"]
+      "dependsOn": ["@repo/contracts#compile"],
+      "dotEnv": [".env.development.local", ".env.local", ".env.development", ".env"]
     },
     "clean": {
       "cache": false

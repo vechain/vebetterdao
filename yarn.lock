@@ -3391,6 +3391,52 @@
   dependencies:
     defer-to-connect "^2.0.1"
 
+"@tanstack/query-core@5.14.2":
+  version "5.14.2"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.14.2.tgz#ef0c1a93e142d5cce90b0ac2d0333a88fc0fbb95"
+  integrity sha512-QmoJvC72sSWs3hgGis8JdmlDvqLfYGWUK4UG6OR9Q6t28JMN9m2FDwKPqoSJ9YVocELCSjMt/FGjEiLfk8000Q==
+
+"@tanstack/query-devtools@5.13.5":
+  version "5.13.5"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-devtools/-/query-devtools-5.13.5.tgz#1f9f9ea198b99b824bcb989c434db9c847b6230b"
+  integrity sha512-effSYz9AWcZ6sNd+c8LCBYFIuDZApoCTXEpRlEYChBZpMz9QUUVMLToThwCyUY49+T5pANL3XxgZf3HV7hwJlg==
+
+"@tanstack/query-persist-client-core@5.14.2":
+  version "5.14.2"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-persist-client-core/-/query-persist-client-core-5.14.2.tgz#57f9583a5559438aa5bb33b22189deee4284d60c"
+  integrity sha512-xkegtYnO5Mi/uOdr7EHyevUkQxVcIzJagvjgh2oJ1L6PocNdaQ2J1dby1I+bBBT7RxS/6ZZ5gG08F+A1mRgM+A==
+  dependencies:
+    "@tanstack/query-core" "5.14.2"
+
+"@tanstack/query-sync-storage-persister@^5.14.2":
+  version "5.14.2"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-sync-storage-persister/-/query-sync-storage-persister-5.14.2.tgz#527ea507b65d0b5c69e6f64be255d6ea8ab825ec"
+  integrity sha512-XDRCXSxmqbNn4iHsZp5D0kv1Jh6YPHtzMZys/b/DHUnExmFJELau1jdktPPfGEaU0kGVes8UT6VEUq+EglzqWg==
+  dependencies:
+    "@tanstack/query-core" "5.14.2"
+    "@tanstack/query-persist-client-core" "5.14.2"
+
+"@tanstack/react-query-devtools@^5.14.2":
+  version "5.14.2"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query-devtools/-/react-query-devtools-5.14.2.tgz#9ea915988e2266a4dc8c8c5f02fb86760ed11dd8"
+  integrity sha512-qSV88emQbUNM61IWCZqUdqjShPNyVcQnEaAJMFM1eaCAcUnDIpRtsGRMNEYYAjuWAXbkCjAo/JdwArF/z5hyMQ==
+  dependencies:
+    "@tanstack/query-devtools" "5.13.5"
+
+"@tanstack/react-query-persist-client@^5.14.2":
+  version "5.14.2"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query-persist-client/-/react-query-persist-client-5.14.2.tgz#35425d6ad081cd6bcc44d64cd27faa7d3d0657e6"
+  integrity sha512-dE/853tW3V4nVPmY25t1jlMzPwHTQ4GzMU1v+0B59An7OZpBVha2o6OpK2p3gcjq6Hv5jLJOlVPIUBStajrIvg==
+  dependencies:
+    "@tanstack/query-persist-client-core" "5.14.2"
+
+"@tanstack/react-query@^5.14.2":
+  version "5.14.2"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.14.2.tgz#b66c9710609118c07bfe6fca0147c6735a4c95a5"
+  integrity sha512-SbOzV7UBW8ED3tOnyn6kqNGscnOAfoxShYlbvaQo/5528mDZKpvrwoL/1du1/ukSC6RMAiKmx95SrYqlwPzWDw==
+  dependencies:
+    "@tanstack/query-core" "5.14.2"
+
 "@truffle/abi-utils@^1.0.3":
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/@truffle/abi-utils/-/abi-utils-1.0.3.tgz#9f0df7a8aaf5e815bee47e0ad26bd4c91e4045f2"
@@ -4257,30 +4303,30 @@
     randombytes "^2.1.0"
     thor-devkit "^2.0.5"
 
-"@vechain/dapp-kit-react@*":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit-react/-/dapp-kit-react-0.0.3.tgz#651177f123f5d66c581fe52f9c0e11eb45f5031a"
-  integrity sha512-nH5p76l52N3/LMGlvty7uX+NZycOnxgJ5KotYDT8Kh55K+8V9v9NkCePzb8p6Q182TV3ZeJ+bKLstfJfqvbXuA==
+"@vechain/dapp-kit-react@^0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit-react/-/dapp-kit-react-0.0.4.tgz#9ae11f60744beb6882ac9d0734b93bcc9e29da88"
+  integrity sha512-YgxeXuMiiwsDJVHI6rhovsgQBy4Q5JgeLuvN92l6d+XfagQkCRcxbvfvLmeB/sJneTwFoEDnv0p6UXV4+rUEiQ==
   dependencies:
     "@heroicons/react" "^2.0.18"
     "@lit/react" "^1.0.1"
     "@vechain/connex" "2.1.0"
     "@vechain/connex-framework" "2.1.0"
-    "@vechain/dapp-kit" "0.0.3"
-    "@vechain/dapp-kit-ui" "0.0.3"
+    "@vechain/dapp-kit" "0.0.4"
+    "@vechain/dapp-kit-ui" "0.0.4"
     "@vechain/picasso" "^2.1.1"
     react-icons "^4.11.0"
     styled-components "^6.1.0"
     thor-devkit "^2.0.9"
     valtio "^1.12.1"
 
-"@vechain/dapp-kit-ui@*", "@vechain/dapp-kit-ui@0.0.3":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit-ui/-/dapp-kit-ui-0.0.3.tgz#0427008cc1a4a3d8687634fb78b2548d97000ba8"
-  integrity sha512-ttGCGhYz9l/ofcYlhrDxK9uIYlzTBByhoma8sX8OIy9icBoByKB4wQGvhJHat0TK1PqmhVuL33BnK05uGFMljA==
+"@vechain/dapp-kit-ui@0.0.4", "@vechain/dapp-kit-ui@^0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit-ui/-/dapp-kit-ui-0.0.4.tgz#219f72d033e2af9fe2a805c2344210c7ae463656"
+  integrity sha512-QLjzpJMWuHbA2EDzjYfUAHLHEpf/0+RzUhePwAPiP05HBI0c02+DRTBSb4mpTKE7DblJgYlR/Dhhe1vGwfuF6A==
   dependencies:
     "@lit/context" "^1.1.0"
-    "@vechain/dapp-kit" "0.0.3"
+    "@vechain/dapp-kit" "0.0.4"
     "@vechain/picasso" "2.1.1"
     "@wagmi/core" "^1.4.5"
     "@web3modal/ethereum" "^2.7.1"
@@ -4290,10 +4336,10 @@
     valtio "^1.12.1"
     viem "^1.18.4"
 
-"@vechain/dapp-kit@*", "@vechain/dapp-kit@0.0.3":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit/-/dapp-kit-0.0.3.tgz#d21810c663d1654fec9d5a804eabfd28230ea0f7"
-  integrity sha512-4AGm4NSgeTry2btt06idEnarbSjD7orzLpTuCh5FRiWXpRgbhM1n8NgcggQt7tTItern2FAkk1R3rnFxd/dfug==
+"@vechain/dapp-kit@0.0.4", "@vechain/dapp-kit@^0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit/-/dapp-kit-0.0.4.tgz#b479dbad2cd301e5fc2190cfa9dff968b79f28d9"
+  integrity sha512-bMZkN0xg8LHYtuUhvcRdQEJaJmrqPoN/NexA79EYKF12ZjsWOAYM9VK6qRaqX77EtH3jnnvMNej/FXYnCbMoVA==
   dependencies:
     "@vechain/connex" "2.1.0"
     "@vechain/connex-driver" "2.1.0"

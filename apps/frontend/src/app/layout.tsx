@@ -5,11 +5,7 @@ import { Providers } from "./providers";
 
 import { SideBar } from "@/components/Navbar";
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
@@ -20,8 +16,7 @@ export default function RootLayout({
             display={["flex"]}
             alignItems={["center"]}
             justifyContent={["flex-start"]}
-            flexDirection={["column", "row"]}
-          >
+            flexDirection={["column", "row"]}>
             <SideBar />
             {children}
           </Container>

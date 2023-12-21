@@ -53,6 +53,9 @@ export const SideBar = () => {
       top={0}
       left={0}
       boxShadow={"md"}
+      borderLeftWidth={1}
+      borderRightWidth={1}
+      borderColor={"gray.500"}
       mr="8"
       justify="space-between"
     >
