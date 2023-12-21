@@ -1,4 +1,5 @@
-import { Box, Button, VStack } from "@chakra-ui/react";
+"use client";
+import { Button, VStack } from "@chakra-ui/react";
 import { VechainLogo } from "./VechainLogo";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 import { usePathname } from "next/navigation";
@@ -12,17 +13,20 @@ const Menu = [
 ];
 
 const ConnectButtonWithModal = dynamic(
-  () =>
-    import("@vechain/dapp-kit-react").then((mod) => mod.ConnectButtonWithModal),
-  { ssr: false }
+  async () => {
+    const { ConnectButtonWithModal } = await import("@vechain/dapp-kit-react");
+    return ConnectButtonWithModal;
+  },
+  {
+    ssr: false,
+  },
 );
-
 const MenuButtons = () => {
   const pathname = usePathname();
 
   return (
     <VStack spacing={1}>
-      {Menu.map((item) => {
+      {Menu.map(item => {
         const isActive = pathname === item.href;
         return (
           <Link href={item.href} key={item.name}>
@@ -31,8 +35,7 @@ const MenuButtons = () => {
               variant={isActive ? "solid" : "ghost"}
               colorScheme={isActive ? "blue" : undefined}
               w="full"
-              justifyContent="center"
-            >
+              justifyContent="center">
               {item.name}
             </Button>
           </Link>
@@ -58,7 +61,7 @@ export const SideBar = () => {
       borderColor={"gray.500"}
       mr="8"
       justify="space-between"
-    >
+      zIndex={10}>
       <VStack spacing={8}>
         <VechainLogo />
         <ConnectButtonWithModal />

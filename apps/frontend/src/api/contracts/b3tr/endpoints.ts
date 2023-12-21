@@ -37,3 +37,24 @@ export const getB3trTokenDetails = async (thor: Connex.Thor): Promise<TokenDetai
         totalSupply: res.decoded[4]
     }
 }
+
+/**
+ *  Get the b3tr balance of an address from the contract
+ * @param thor  The thor instance
+ * @param address  The address to get the balance of. If not provided, will return an error (for better react-query DX)
+ * @returns {Promise<string>}  The balance of the address
+ */
+export const getB3trBalance = async (thor: Connex.Thor, address?: string): Promise<string> => {
+    if (!address) return Promise.reject(new Error("Address not provided"))
+    const functionAbi = abi.find((e) => e.name === "balanceOf")
+    if (!functionAbi) return Promise.reject(new Error("Function abi not found for balanceOf"))
+    const res = await thor
+        .account(B3TR_CONTRACT)
+        .method(functionAbi)
+        .call(address)
+
+    if (res.vmError) return Promise.reject(new Error(res.vmError))
+
+
+    return res.decoded[0]
+}

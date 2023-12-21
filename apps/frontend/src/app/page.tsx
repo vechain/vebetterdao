@@ -2,9 +2,11 @@
 
 import { useB3trTokenDetails } from "@/api";
 import { Box, Heading, StackDivider, Text, VStack } from "@chakra-ui/react";
-import { TokenDetailsCard } from "@/components";
+import { BalanceCard, TokenDetailsCard } from "@/components";
+import { useWallet } from "@vechain/dapp-kit-react";
 
 export default function Home() {
+  const { account } = useWallet();
   const tokenDetailsQueryResult = useB3trTokenDetails();
 
   return (
@@ -16,6 +18,7 @@ export default function Home() {
         <Text>Use the navigation bar on the left to navigate to the different pages.</Text>
       </Box>
       <TokenDetailsCard tokenDetailsQueryResult={tokenDetailsQueryResult} />
+      <BalanceCard address={account ?? undefined} tokenDetailsQueryResult={tokenDetailsQueryResult} />
     </VStack>
   );
 }
