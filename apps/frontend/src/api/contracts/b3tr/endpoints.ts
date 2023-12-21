@@ -12,7 +12,7 @@ if (!B3TR_CONTRACT) throw new Error("NEXT_PUBLIC_B3TR_CONTRACT_ADDRESS not set")
  * @returns  {Promise<{name: string, symbol: string, decimals: number, totalSupply: string}>}
  */
 
-type TokenDetails = {
+export type TokenDetails = {
     name: string,
     symbol: string,
     decimals: number,
