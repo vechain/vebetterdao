@@ -59,3 +59,29 @@ export const getB3trBalance = async (thor: Connex.Thor, address?: string): Promi
 
     return res.decoded[0]
 }
+
+/**
+ * Build the clause to mint B3TR tokens for the given address and amount
+    * @param thor thor instance
+    * @param address the address to mint the tokens to
+    * @param amount the amount of tokens to mint
+ * @returns the clause to mint B3TR tokens
+ */
+export const buildMintB3trTx = (
+    thor: Connex.Thor,
+    address: string,
+    amount: string,
+): Connex.Vendor.TxMessage[0] => {
+    const functionAbi = abi.find((e) => e.name === "mint")
+    if (!functionAbi) throw new Error("Function abi not found for mint")
+    const clause = thor
+        .account(B3TR_CONTRACT)
+        .method(functionAbi)
+        .asClause(address, amount)
+
+    return {
+        ...clause,
+        comment: `Mint ${amount} B3TR to ${address}`,
+        abi: functionAbi,
+    }
+}
