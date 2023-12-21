@@ -54,6 +54,7 @@ export const SideBar = () => {
       position={"sticky"}
       top={0}
       left={0}
+      zIndex={10}
       boxShadow={"md"}
       borderLeftWidth={1}
       borderRightWidth={1}

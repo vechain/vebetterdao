@@ -15,10 +15,11 @@ import { useWallet } from "@vechain/dapp-kit-react";
 import { useForm } from "react-hook-form";
 import { AddressUtils } from "@repo/utils";
 import { useMemo } from "react";
+import { useMintB3tr } from "@/hooks";
 
 type FormData = {
-  address: string;
-  amount: number;
+  address?: string;
+  amount?: number;
 };
 
 export const MintNewB3trCard = () => {
@@ -34,12 +35,25 @@ export const MintNewB3trCard = () => {
   const {
     handleSubmit,
     register,
-    formState: { errors, isSubmitting },
+    watch,
+    formState: { errors },
   } = useForm<FormData>();
 
-  const onSubmit = async (data: FormData) => {
-    console.log(data);
+  const address = watch("address");
+  const amount = watch("amount");
+
+  const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useMintB3tr({
+    address,
+    amount: amount?.toString(),
+  });
+
+  const onSubmit = async (_data: FormData) => {
+    if (address && amount) {
+      sendTransaction();
+    }
   };
+
+  const isLoading = isTxReceiptLoading || sendTransactionPending;
 
   return (
     <Card w="full">
@@ -74,7 +88,7 @@ export const MintNewB3trCard = () => {
               />
               <FormErrorMessage>{errors.amount?.message}</FormErrorMessage>
             </FormControl>
-            <Button colorScheme="teal" isLoading={isSubmitting} type="submit" alignSelf={"flex-end"}>
+            <Button colorScheme="teal" isLoading={isLoading} type="submit" alignSelf={"flex-end"}>
               Submit
             </Button>
           </VStack>
