@@ -1,5 +1,5 @@
-// app/providers.tsx
 "use client"
+// app/providers.tsx
 
 import { persister, queryClient } from "@/api"
 import { CacheProvider } from "@chakra-ui/next-js"
@@ -12,9 +12,15 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 
 import { networkConfig } from "@/config"
 
-const DAppKitProvider = dynamic(() => import("@vechain/dapp-kit-react").then(mod => mod.DAppKitProvider), {
-  ssr: false,
-})
+const DAppKitProvider = dynamic(
+  async () => {
+    const { DAppKitProvider } = await import("@vechain/dapp-kit-react")
+    return DAppKitProvider
+  },
+  {
+    ssr: false,
+  },
+)
 
 const walletConnectOptions: WalletConnectOptions = {
   projectId: "a0b855ceaf109dbc8426479a4c3d38d8",
