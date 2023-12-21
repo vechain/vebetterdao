@@ -1,4 +1,5 @@
-import { Box, Button, VStack } from "@chakra-ui/react";
+"use client";
+import { Button, VStack } from "@chakra-ui/react";
 import { VechainLogo } from "./VechainLogo";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 import { usePathname } from "next/navigation";
@@ -12,10 +13,14 @@ const Menu = [
 ];
 
 const ConnectButtonWithModal = dynamic(
-  () => import("@vechain/dapp-kit-react").then(mod => mod.ConnectButtonWithModal),
-  { ssr: false },
+  async () => {
+    const { ConnectButtonWithModal } = await import("@vechain/dapp-kit-react");
+    return ConnectButtonWithModal;
+  },
+  {
+    ssr: false,
+  },
 );
-
 const MenuButtons = () => {
   const pathname = usePathname();
 

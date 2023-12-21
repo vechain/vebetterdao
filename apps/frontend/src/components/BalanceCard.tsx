@@ -22,19 +22,15 @@ export const BalanceCard = ({ address, tokenDetailsQueryResult: { data: tokenDet
     return FormattingUtils.humanNumber(scaledNumber, scaledNumber);
   }, [tokenDetails]);
 
-  if (!tokenDetails && !isLoading)
+  if (!balance && !isLoading)
     return (
       <Card w="full">
         <CardHeader>
           <Heading size="sm">Your balance</Heading>
         </CardHeader>
         <CardBody>
-          <Heading size="lg" textAlign={"center"}>
-            Unable to load your balance
-          </Heading>
-          <Text fontSize="sm" textAlign={"center"}>
-            Connect your wallet first
-          </Text>
+          <Heading size="md">Unable to load your balance</Heading>
+          <Text fontSize="sm">Connect your wallet first</Text>
         </CardBody>
       </Card>
     );
