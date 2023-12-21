@@ -4,7 +4,7 @@ import { QueryClient } from "@tanstack/react-query";
 
 // to persist react-query daya in LS
 export const persister = createSyncStoragePersister({
-    storage: window.localStorage,
+    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
 });
 
 export const queryClient = new QueryClient({
