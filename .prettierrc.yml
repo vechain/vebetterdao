@@ -3,6 +3,6 @@ bracketSameLine: true
 bracketSpacing: true
 singleQuote: false
 trailingComma: "all"
-semi: true
+semi: false
 tabWidth: 2
 printWidth: 120
