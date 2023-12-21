@@ -10,7 +10,4 @@ export const useB3trTokenDetails = () => {
         queryKey: geB3TrTokenDetailsQueryKey(),
         queryFn: () => getB3trTokenDetails(thor)
     })
-
-
-
 }
