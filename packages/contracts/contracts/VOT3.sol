@@ -17,6 +17,11 @@ contract VOT3 is
     IERC20 public b3tr;
     bool public canTransfer = false;
 
+    modifier transferEnabled() {
+        require(canTransfer, "Transfers disabled");
+        _;
+    }
+
     constructor(
         address _b3tr
     ) ERC20("VOT3", "VOT3") ERC20Permit("VOT3") {
@@ -47,18 +52,15 @@ contract VOT3 is
     }
 
     // Make not transferable
-    function transfer(address to, uint256 value) public override(ERC20) returns (bool) {
-        require(canTransfer, "Transfers disabled");
+    function transfer(address to, uint256 value) public override(ERC20) transferEnabled() returns (bool) {
         return super.transfer(to, value);
     }
 
-    function approve(address spender, uint256 value) public override(ERC20) returns (bool) {
-        require(canTransfer, "Transfers disabled");
+    function approve(address spender, uint256 value) public override(ERC20) transferEnabled() returns (bool) {
         return super.approve(spender, value);
     }
     
-    function transferFrom(address from, address to, uint256 value) public override(ERC20) returns (bool) {
-        require(canTransfer, "Transfers disabled");
+    function transferFrom(address from, address to, uint256 value) public override(ERC20) transferEnabled() returns (bool) {
         return super.transferFrom(from, to, value);
     }
 
