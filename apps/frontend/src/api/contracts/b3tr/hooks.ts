@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query"
-import { getTokenDetails } from "./endpoints"
+import { getB3trTokenDetails } from "./endpoints"
 import { useConnex } from "@vechain/dapp-kit-react"
 
-const getTokenDetailsQueryKey = () => ["tokenDetails"]
-export const useTokenDetails = () => {
+const geB3TrTokenDetailsQueryKey = () => ["b3trTokenDetails"]
+export const useB3trTokenDetails = () => {
     const { thor } = useConnex()
 
     return useQuery({
-        queryKey: getTokenDetailsQueryKey(),
-        queryFn: () => getTokenDetails(thor)
+        queryKey: geB3TrTokenDetailsQueryKey(),
+        queryFn: () => getB3trTokenDetails(thor)
     })
 
 

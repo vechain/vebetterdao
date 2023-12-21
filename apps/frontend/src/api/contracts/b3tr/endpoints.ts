@@ -7,7 +7,7 @@ if (!B3TR_CONTRACT) throw new Error("NEXT_PUBLIC_B3TR_CONTRACT_ADDRESS not set")
 
 
 /**
- *  Get the token details from the contract
+ *  Get the b3tr token details from the contract
  * @param thor 
  * @returns  {Promise<{name: string, symbol: string, decimals: number, totalSupply: string}>}
  */
@@ -19,7 +19,7 @@ type TokenDetails = {
     circulatingSupply: string,
     totalSupply: string
 }
-export const getTokenDetails = async (thor: Connex.Thor): Promise<TokenDetails> => {
+export const getB3trTokenDetails = async (thor: Connex.Thor): Promise<TokenDetails> => {
     const functionAbi = abi.find((e) => e.name === "tokenDetails")
     if (!functionAbi) return Promise.reject(new Error("Function abi not found for tokenDetails"))
     const res = await thor

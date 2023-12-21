@@ -1,6 +1,6 @@
 "use client";
 
-import { useTokenDetails } from "@/api";
+import { useB3trTokenDetails } from "@/api";
 import {
   Box,
   Card,
@@ -18,7 +18,7 @@ import { useMemo } from "react";
 import { FormattingUtils } from "@repo/utils";
 
 export default function Home() {
-  const { data: tokenDetails } = useTokenDetails();
+  const { data: tokenDetails } = useB3trTokenDetails();
 
   const supplyProgressPercentage = useMemo(() => {
     if (!tokenDetails) {
