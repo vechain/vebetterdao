@@ -17,27 +17,27 @@ export const ROUND_DECIMAL_PRECISE = 6
  * @returns the scaled up result as a string
  */
 export const scaleNumberUp = (
-    val: BigNumber.Value,
-    scaleDecimal: number,
-    roundDecimal = 0,
-    roundingStrategy: RoundingMode = BigNumber.ROUND_HALF_UP,
+  val: BigNumber.Value,
+  scaleDecimal: number,
+  roundDecimal = 0,
+  roundingStrategy: RoundingMode = BigNumber.ROUND_HALF_UP,
 ): string => {
-    try {
-        if (scaleDecimal === 0) return new BigNumber(val).toFixed()
-        if (scaleDecimal < 0) throw Error("Decimal value must be greater than or equal to 0")
-        const valBn = new BigNumber(val)
-        if (valBn.isNaN()) throw Error("The value provided is NaN.")
+  try {
+    if (scaleDecimal === 0) return new BigNumber(val).toFixed()
+    if (scaleDecimal < 0) throw Error("Decimal value must be greater than or equal to 0")
+    const valBn = new BigNumber(val)
+    if (valBn.isNaN()) throw Error("The value provided is NaN.")
 
-        const amount = valBn.times(`1${"0".repeat(scaleDecimal)}`)
+    const amount = valBn.times(`1${"0".repeat(scaleDecimal)}`)
 
-        if (scaleDecimal === roundDecimal) return amount.toFixed()
+    if (scaleDecimal === roundDecimal) return amount.toFixed()
 
-        return amount.toFixed(roundDecimal, roundingStrategy)
-    } catch (e) {
-        console.error("scaleNumberUp", e)
-        throw e
-        // throw VeWorldErrors.internal(`Failed to scale number up (${val})`, e)
-    }
+    return amount.toFixed(roundDecimal, roundingStrategy)
+  } catch (e) {
+    console.error("scaleNumberUp", e)
+    throw e
+    // throw VeWorldErrors.internal(`Failed to scale number up (${val})`, e)
+  }
 }
 
 /**
@@ -49,28 +49,28 @@ export const scaleNumberUp = (
  * @returns the scaled up result as a string
  */
 export const scaleNumberDown = (
-    val: BigNumber.Value,
-    scaleDecimal: number,
-    roundDecimal = 0,
-    roundingStrategy: RoundingMode = BigNumber.ROUND_HALF_UP,
+  val: BigNumber.Value,
+  scaleDecimal: number,
+  roundDecimal = 0,
+  roundingStrategy: RoundingMode = BigNumber.ROUND_HALF_UP,
 ): string => {
-    try {
-        if (scaleDecimal === 0) return new BigNumber(val).toFixed()
-        if (scaleDecimal < 0) throw Error("Decimal value must be greater than or equal to 0")
+  try {
+    if (scaleDecimal === 0) return new BigNumber(val).toFixed()
+    if (scaleDecimal < 0) throw Error("Decimal value must be greater than or equal to 0")
 
-        const valBn = new BigNumber(val)
-        if (valBn.isNaN()) throw Error("The value provided is NaN.")
+    const valBn = new BigNumber(val)
+    if (valBn.isNaN()) throw Error("The value provided is NaN.")
 
-        const amount = valBn.dividedBy(new BigNumber(10).pow(scaleDecimal))
+    const amount = valBn.dividedBy(new BigNumber(10).pow(scaleDecimal))
 
-        if (scaleDecimal === roundDecimal) return amount.toFixed()
+    if (scaleDecimal === roundDecimal) return amount.toFixed()
 
-        return amount.toFixed(roundDecimal, roundingStrategy)
-    } catch (e) {
-        console.error("scaleNumberDown", e)
-        throw e
-        // throw VeWorldErrors.internal(`Failed to scale number down (${val})`, e)
-    }
+    return amount.toFixed(roundDecimal, roundingStrategy)
+  } catch (e) {
+    console.error("scaleNumberDown", e)
+    throw e
+    // throw VeWorldErrors.internal(`Failed to scale number down (${val})`, e)
+  }
 }
 
 /**
@@ -81,9 +81,9 @@ export const scaleNumberDown = (
  * @returns the formatted time
  */
 export const convertToFiatBalance = (balance: string, rate: number, decimals: number, roundDecimals: number = 2) => {
-    const fiatBalance = new BigNumber(balance).multipliedBy(rate)
+  const fiatBalance = new BigNumber(balance).multipliedBy(rate)
 
-    return scaleNumberDown(fiatBalance, decimals, roundDecimals, BigNumber.ROUND_DOWN)
+  return scaleNumberDown(fiatBalance, decimals, roundDecimals, BigNumber.ROUND_DOWN)
 }
 
 export type DateType = "short" | "full" | "long" | "medium" | undefined
@@ -97,43 +97,43 @@ export type DateType = "short" | "full" | "long" | "medium" | undefined
  */
 
 function roundDownSignificantDigits(numbers: number, decimals: number = 0) {
-    if (typeof numbers !== "number" || typeof decimals !== "number") {
-        throw new Error("Invalid input: number and decimals must be of type number")
-    }
+  if (typeof numbers !== "number" || typeof decimals !== "number") {
+    throw new Error("Invalid input: number and decimals must be of type number")
+  }
 
-    const significantDigits = parseInt(numbers.toExponential().split("e-")[1] || "0", 10)
+  const significantDigits = parseInt(numbers.toExponential().split("e-")[1] || "0", 10)
 
-    const effectiveDecimals = Math.max(0, decimals + significantDigits)
-    const scaleFactor = Math.pow(10, effectiveDecimals)
+  const effectiveDecimals = Math.max(0, decimals + significantDigits)
+  const scaleFactor = Math.pow(10, effectiveDecimals)
 
-    return Math.floor(numbers * scaleFactor) / scaleFactor
+  return Math.floor(numbers * scaleFactor) / scaleFactor
 }
 
 export const humanNumber = (
-    formattedValue: BigNumber.Value,
-    originalValue?: BigNumber.Value,
-    symbol: string | null = null,
+  formattedValue: BigNumber.Value,
+  originalValue?: BigNumber.Value,
+  symbol: string | null = null,
 ) => {
-    const suffix = symbol ? " " + symbol : ""
+  const suffix = symbol ? " " + symbol : ""
 
-    let formatter = new Intl.NumberFormat("en", {
-        style: "decimal",
-        minimumFractionDigits: Number.parseFloat(formattedValue.toString()) % 1 === 0 ? 0 : 2,
-    })
+  let formatter = new Intl.NumberFormat("en", {
+    style: "decimal",
+    minimumFractionDigits: Number.parseFloat(formattedValue.toString()) % 1 === 0 ? 0 : 2,
+  })
 
-    let value = formatter.format(roundDownSignificantDigits(Number(formattedValue), 2))
+  let value = formatter.format(roundDownSignificantDigits(Number(formattedValue), 2))
 
-    //If the original number got scaled down to 0
-    if (!isZero(originalValue) && isZero(value)) {
-        value = "< 0.01"
-    }
+  //If the original number got scaled down to 0
+  if (!isZero(originalValue) && isZero(value)) {
+    value = "< 0.01"
+  }
 
-    return value + suffix
+  return value + suffix
 }
 
 export const isZero = (value?: BigNumber.Value) => {
-    if (!value && value !== 0) return false
-    return new BigNumber(value).isZero()
+  if (!value && value !== 0) return false
+  return new BigNumber(value).isZero()
 }
 
 /**
@@ -144,26 +144,26 @@ export const isZero = (value?: BigNumber.Value) => {
  * @returns the formatted address
  */
 export const humanAddress = (address: string, lengthBefore = 4, lengthAfter = 10) => {
-    const before = address.substring(0, lengthBefore)
-    const after = address.substring(address.length - lengthAfter)
-    return `${before}…${after}`
+  const before = address.substring(0, lengthBefore)
+  const after = address.substring(address.length - lengthAfter)
+  return `${before}…${after}`
 }
 
 export const humanUrl = (url: string, lengthBefore = 8, lengthAfter = 6) => {
-    const before = url.substring(0, lengthBefore)
-    const after = url.substring(url.length - lengthAfter)
-    return `${before}…${after}`
+  const before = url.substring(0, lengthBefore)
+  const after = url.substring(url.length - lengthAfter)
+  return `${before}…${after}`
 }
 
 export const formatAlias = (alias: string, maxLength = 18, lengthBefore = 6, lengthAfter = 6) => {
-    if (alias.length <= maxLength) return alias
-    const before = alias.substring(0, lengthBefore)
-    const after = alias.substring(alias.length - lengthAfter)
-    const formatted = `${before}…${after}`
+  if (alias.length <= maxLength) return alias
+  const before = alias.substring(0, lengthBefore)
+  const after = alias.substring(alias.length - lengthAfter)
+  const formatted = `${before}…${after}`
 
-    if (formatted.length > alias.length - 2) return alias
+  if (formatted.length > alias.length - 2) return alias
 
-    return formatted
+  return formatted
 }
 
 /**
@@ -172,7 +172,7 @@ export const formatAlias = (alias: string, maxLength = 18, lengthBefore = 6, len
  * @returns url without HTTP / HTTPS prefix
  */
 export const removeUrlProtocolAndPath = (url: string) => {
-    return new URL(url).host
+  return new URL(url).host
 }
 
 // /**
@@ -192,11 +192,11 @@ export const removeUrlProtocolAndPath = (url: string) => {
 // }
 
 export const limitChars = (text: string) => {
-    if (text.length <= 24) {
-        return text
-    } else {
-        return text.slice(0, 24)
-    }
+  if (text.length <= 24) {
+    return text
+  } else {
+    return text.slice(0, 24)
+  }
 }
 
 /**
@@ -221,82 +221,82 @@ export const limitChars = (text: string) => {
  * @returns A boolean value indicating whether all strings in the input array are valid percentages.
  */
 export const validateStringPercentages = (percentages: string[]): boolean => {
-    // Check if percentages is a non-empty array
-    if (percentages.length === 0) return false
+  // Check if percentages is a non-empty array
+  if (percentages.length === 0) return false
 
-    for (const percentage of percentages) {
-        // Check if string ends with '%'
-        if (!percentage.endsWith("%")) {
-            return false
-        }
-
-        // Check if the prefix is a valid number between 0 and 100
-        let value = Number(percentage.slice(0, -1))
-        if (!isFinite(value) || value < 0 || value > 100) {
-            return false
-        }
+  for (const percentage of percentages) {
+    // Check if string ends with '%'
+    if (!percentage.endsWith("%")) {
+      return false
     }
 
-    // If we made it this far, all strings are valid percentages
-    return true
+    // Check if the prefix is a valid number between 0 and 100
+    let value = Number(percentage.slice(0, -1))
+    if (!isFinite(value) || value < 0 || value > 100) {
+      return false
+    }
+  }
+
+  // If we made it this far, all strings are valid percentages
+  return true
 }
 
 export function formatToHumanNumber(amount: string, decimals: number, foramtToCurrency = true): string {
-    // Convert the amount to a floating point number
-    const numberAmount = parseFloat(amount)
-    const scale = 100
+  // Convert the amount to a floating point number
+  const numberAmount = parseFloat(amount)
+  const scale = 100
 
-    if (isNaN(numberAmount)) {
-        return "Invalid amount"
-    }
+  if (isNaN(numberAmount)) {
+    return "Invalid amount"
+  }
 
-    // Round the number to the specified decimal places
-    const roundedAmount = Math.floor(numberAmount * scale) / scale
+  // Round the number to the specified decimal places
+  const roundedAmount = Math.floor(numberAmount * scale) / scale
 
-    let amountString = ""
+  let amountString = ""
 
-    if (foramtToCurrency) {
-        amountString = roundedAmount.toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-    } else {
-        amountString = roundedAmount.toFixed(decimals)
-    }
+  if (foramtToCurrency) {
+    amountString = roundedAmount.toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+  } else {
+    amountString = roundedAmount.toFixed(decimals)
+  }
 
-    // switch (locale) {
-    //     // Euro locales with comma for decimal and period for thousands
-    //     case "AT": // Austria
-    //     case "BE": // Belgium
-    //     case "CY": // Cyprus
-    //     case "FI": // Finland
-    //     case "FR": // France
-    //     case "DE": // Germany
-    //     case "GR": // Greece
-    //     case "IT": // Italy
-    //     case "LV": // Latvia
-    //     case "LT": // Lithuania
-    //     case "LU": // Luxembourg
-    //     case "MT": // Malta
-    //     case "NL": // the Netherlands
-    //     case "PT": // Portugal
-    //     case "SK": // Slovakia
-    //     case "SI": // Slovenia
-    //     case "ES": // Spain
-    //         amountString = amountString
-    //             .replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-    //             .replace(/\.(\d+)$/, ",$1")
-    //         break
+  // switch (locale) {
+  //     // Euro locales with comma for decimal and period for thousands
+  //     case "AT": // Austria
+  //     case "BE": // Belgium
+  //     case "CY": // Cyprus
+  //     case "FI": // Finland
+  //     case "FR": // France
+  //     case "DE": // Germany
+  //     case "GR": // Greece
+  //     case "IT": // Italy
+  //     case "LV": // Latvia
+  //     case "LT": // Lithuania
+  //     case "LU": // Luxembourg
+  //     case "MT": // Malta
+  //     case "NL": // the Netherlands
+  //     case "PT": // Portugal
+  //     case "SK": // Slovakia
+  //     case "SI": // Slovenia
+  //     case "ES": // Spain
+  //         amountString = amountString
+  //             .replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+  //             .replace(/\.(\d+)$/, ",$1")
+  //         break
 
-    //     // Euro locales with dot for decimal and comma for thousands
-    //     case "IE": // English (Ireland)
-    //     case "EE": // Estonian
-    //     case "US":
-    //     default:
-    //         amountString = amountString.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-    //         break
-    // }
+  //     // Euro locales with dot for decimal and comma for thousands
+  //     case "IE": // English (Ireland)
+  //     case "EE": // Estonian
+  //     case "US":
+  //     default:
+  //         amountString = amountString.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+  //         break
+  // }
 
-    if (!isZero(numberAmount) && isZero(roundedAmount)) {
-        amountString = "< 0.01"
-    }
+  if (!isZero(numberAmount) && isZero(roundedAmount)) {
+    amountString = "< 0.01"
+  }
 
-    return amountString
+  return amountString
 }

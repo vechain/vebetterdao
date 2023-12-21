@@ -1,6 +1,3 @@
-import * as FormattingUtils from './FormattingUtils';
+import * as FormattingUtils from "./FormattingUtils"
 
-
-export {
-    FormattingUtils,
-}
+export { FormattingUtils }

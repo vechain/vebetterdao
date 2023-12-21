@@ -1,29 +1,28 @@
-import { Box, Button, VStack } from "@chakra-ui/react";
-import { VechainLogo } from "./VechainLogo";
-import { ThemeSwitcher } from "./ThemeSwitcher";
-import { usePathname } from "next/navigation";
+import { Box, Button, VStack } from "@chakra-ui/react"
+import { VechainLogo } from "./VechainLogo"
+import { ThemeSwitcher } from "./ThemeSwitcher"
+import { usePathname } from "next/navigation"
 
-import dynamic from "next/dynamic";
-import { Link } from "@chakra-ui/next-js";
+import dynamic from "next/dynamic"
+import { Link } from "@chakra-ui/next-js"
 
 const Menu = [
   { name: "Home", href: "/" },
   { name: "Staking", href: "/staking" },
-];
+]
 
 const ConnectButtonWithModal = dynamic(
-  () =>
-    import("@vechain/dapp-kit-react").then((mod) => mod.ConnectButtonWithModal),
-  { ssr: false }
-);
+  () => import("@vechain/dapp-kit-react").then(mod => mod.ConnectButtonWithModal),
+  { ssr: false },
+)
 
 const MenuButtons = () => {
-  const pathname = usePathname();
+  const pathname = usePathname()
 
   return (
     <VStack spacing={1}>
-      {Menu.map((item) => {
-        const isActive = pathname === item.href;
+      {Menu.map(item => {
+        const isActive = pathname === item.href
         return (
           <Link href={item.href} key={item.name}>
             <Button
@@ -31,16 +30,15 @@ const MenuButtons = () => {
               variant={isActive ? "solid" : "ghost"}
               colorScheme={isActive ? "blue" : undefined}
               w="full"
-              justifyContent="center"
-            >
+              justifyContent="center">
               {item.name}
             </Button>
           </Link>
-        );
+        )
       })}
     </VStack>
-  );
-};
+  )
+}
 
 export const SideBar = () => {
   return (
@@ -57,8 +55,7 @@ export const SideBar = () => {
       borderRightWidth={1}
       borderColor={"gray.500"}
       mr="8"
-      justify="space-between"
-    >
+      justify="space-between">
       <VStack spacing={8}>
         <VechainLogo />
         <ConnectButtonWithModal />
@@ -66,5 +63,5 @@ export const SideBar = () => {
       <MenuButtons />
       <ThemeSwitcher />
     </VStack>
-  );
-};
+  )
+}

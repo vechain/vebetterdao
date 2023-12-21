@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import { Box, Heading, Text } from "@chakra-ui/react";
+import { Box, Heading, Text } from "@chakra-ui/react"
 
 export default function StakingPage() {
   return (
@@ -10,5 +10,5 @@ export default function StakingPage() {
       </Heading>
       <Text>Swap B3TR for vB3TR and stake it to earn rewards.</Text>
     </Box>
-  );
+  )
 }

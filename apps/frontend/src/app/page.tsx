@@ -1,11 +1,11 @@
-"use client";
+"use client"
 
-import { useB3trTokenDetails } from "@/api";
-import { Box, Heading, StackDivider, Text, VStack } from "@chakra-ui/react";
-import { TokenDetailsCard } from "@/components";
+import { useB3trTokenDetails } from "@/api"
+import { Box, Heading, StackDivider, Text, VStack } from "@chakra-ui/react"
+import { TokenDetailsCard } from "@/components"
 
 export default function Home() {
-  const tokenDetailsQueryResult = useB3trTokenDetails();
+  const tokenDetailsQueryResult = useB3trTokenDetails()
 
   return (
     <VStack spacing={4} divider={<StackDivider />}>
@@ -17,5 +17,5 @@ export default function Home() {
       </Box>
       <TokenDetailsCard tokenDetailsQueryResult={tokenDetailsQueryResult} />
     </VStack>
-  );
+  )
 }
