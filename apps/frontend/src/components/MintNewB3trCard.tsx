@@ -16,6 +16,7 @@ import { useForm } from "react-hook-form";
 import { AddressUtils } from "@repo/utils";
 import { useMemo } from "react";
 import { useMintB3tr } from "@/hooks";
+import { scaleNumberUp } from "@repo/utils/FormattingUtils";
 
 type FormData = {
   address?: string;
@@ -41,14 +42,18 @@ export const MintNewB3trCard = () => {
 
   const address = watch("address");
   const amount = watch("amount");
+  const amountWithDecimals = useMemo(() => {
+    if (!amount || !tokenDetails) return undefined;
+    return scaleNumberUp(amount, tokenDetails.decimals);
+  }, [amount, tokenDetails]);
 
   const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useMintB3tr({
     address,
-    amount: amount?.toString(),
+    amount: amountWithDecimals?.toString(),
   });
 
   const onSubmit = async (_data: FormData) => {
-    if (address && amount) {
+    if (address && amountWithDecimals) {
       sendTransaction();
     }
   };
