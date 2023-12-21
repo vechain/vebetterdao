@@ -7,7 +7,7 @@ import { useWallet } from "@vechain/dapp-kit-react";
 
 export default function Home() {
   const { account } = useWallet();
-  const { data: tokenDetails, isLoading: isTokenDetailsLoading } = useB3trTokenDetails();
+  const tokenDetailsQueryResult = useB3trTokenDetails();
 
   return (
     <VStack spacing={4} divider={<StackDivider />}>
@@ -17,8 +17,8 @@ export default function Home() {
         </Heading>
         <Text>Use the navigation bar on the left to navigate to the different pages.</Text>
       </Box>
-      <TokenDetailsCard tokenDetails={tokenDetails} isLoading={isTokenDetailsLoading} />
-      <BalanceCard address={account ?? undefined} tokenDetails={tokenDetails} />
+      <TokenDetailsCard tokenDetailsQueryResult={tokenDetailsQueryResult} />
+      <BalanceCard address={account ?? undefined} tokenDetailsQueryResult={tokenDetailsQueryResult} />
     </VStack>
   );
 }

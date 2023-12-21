@@ -1,13 +1,14 @@
 import { TokenDetails, useB3trBalance } from "@/api";
 import { Card, CardHeader, CardBody, Heading, Text, HStack } from "@chakra-ui/react";
 import { FormattingUtils } from "@repo/utils";
+import { UseQueryResult } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 type Props = {
   address?: string;
-  tokenDetails?: TokenDetails;
+  tokenDetailsQueryResult: UseQueryResult<TokenDetails, Error>;
 };
-export const BalanceCard = ({ address, tokenDetails }: Props) => {
+export const BalanceCard = ({ address, tokenDetailsQueryResult: { data: tokenDetails } }: Props) => {
   const { data: balance, isLoading } = useB3trBalance(address);
 
   const formattedBalance = useMemo(() => {
