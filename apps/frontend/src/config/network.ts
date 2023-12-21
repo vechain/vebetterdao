@@ -25,7 +25,14 @@ const getNetwork = () => {
 }
 
 
+const getB3trContractAddress = () => {
+    const B3TR_CONTRACT = process.env.NEXT_PUBLIC_B3TR_CONTRACT_ADDRESS
+    if (!B3TR_CONTRACT) throw new Error("NEXT_PUBLIC_B3TR_CONTRACT_ADDRESS not set")
+    return B3TR_CONTRACT
+}
+
 export const networkConfig = {
     nodeUrl: getNodeUrl(),
     network: getNetwork(),
+    b3trContractAddress: getB3trContractAddress()
 }

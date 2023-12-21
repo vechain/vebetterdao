@@ -1,10 +1,9 @@
+import { networkConfig } from "@/config"
 import Contract from "@repo/contracts/artifacts/contracts/B3TR.sol/B3TR.json"
 const abi = Contract.abi
 
 
-const B3TR_CONTRACT = process.env.NEXT_PUBLIC_B3TR_CONTRACT_ADDRESS
-if (!B3TR_CONTRACT) throw new Error("NEXT_PUBLIC_B3TR_CONTRACT_ADDRESS not set")
-
+const B3TR_CONTRACT = networkConfig.b3trContractAddress
 
 /**
  *  Get the b3tr token details from the contract
