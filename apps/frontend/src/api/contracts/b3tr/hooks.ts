@@ -4,21 +4,21 @@ import { useConnex } from "@vechain/dapp-kit-react"
 
 const getB3TrTokenDetailsQueryKey = () => ["b3trTokenDetails"]
 export const useB3trTokenDetails = () => {
-    const { thor } = useConnex()
+  const { thor } = useConnex()
 
-    return useQuery({
-        queryKey: getB3TrTokenDetailsQueryKey(),
-        queryFn: () => getB3trTokenDetails(thor)
-    })
+  return useQuery({
+    queryKey: getB3TrTokenDetailsQueryKey(),
+    queryFn: () => getB3trTokenDetails(thor),
+  })
 }
 
 const getB3TrBalanceQueryKey = (address?: string) => ["b3trBalance", address]
 export const useB3trBalance = (address?: string) => {
-    const { thor } = useConnex()
+  const { thor } = useConnex()
 
-    return useQuery({
-        queryKey: getB3TrBalanceQueryKey(address),
-        queryFn: () => getB3trBalance(thor, address),
-        enabled: !!address
-    })
+  return useQuery({
+    queryKey: getB3TrBalanceQueryKey(address),
+    queryFn: () => getB3trBalance(thor, address),
+    enabled: !!address,
+  })
 }

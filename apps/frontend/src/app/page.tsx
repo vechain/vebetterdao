@@ -1,13 +1,13 @@
-"use client";
+"use client"
 
-import { useB3trTokenDetails } from "@/api";
-import { Box, Heading, StackDivider, Text, VStack } from "@chakra-ui/react";
-import { BalanceCard, TokenDetailsCard } from "@/components";
-import { useWallet } from "@vechain/dapp-kit-react";
+import { useB3trTokenDetails } from "@/api"
+import { Box, Heading, StackDivider, Text, VStack } from "@chakra-ui/react"
+import { BalanceCard, TokenDetailsCard } from "@/components"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 export default function Home() {
-  const { account } = useWallet();
-  const tokenDetailsQueryResult = useB3trTokenDetails();
+  const { account } = useWallet()
+  const tokenDetailsQueryResult = useB3trTokenDetails()
 
   return (
     <VStack spacing={4} divider={<StackDivider />}>
@@ -20,5 +20,5 @@ export default function Home() {
       <TokenDetailsCard tokenDetailsQueryResult={tokenDetailsQueryResult} />
       <BalanceCard address={account ?? undefined} tokenDetailsQueryResult={tokenDetailsQueryResult} />
     </VStack>
-  );
+  )
 }

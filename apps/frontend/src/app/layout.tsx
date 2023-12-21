@@ -1,9 +1,9 @@
-"use client";
+"use client"
 // app/layout.tsx
-import { Container } from "@chakra-ui/react";
-import { Providers } from "./providers";
+import { Container } from "@chakra-ui/react"
+import { Providers } from "./providers"
 
-import { SideBar } from "@/components/Navbar";
+import { SideBar } from "@/components/Navbar"
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -23,5 +23,5 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </Providers>
       </body>
     </html>
-  );
+  )
 }
