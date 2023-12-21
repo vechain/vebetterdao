@@ -5,7 +5,7 @@ import { Box, Heading, StackDivider, Text, VStack } from "@chakra-ui/react";
 import { TokenDetailsCard } from "@/components";
 
 export default function Home() {
-  const { data: tokenDetails, isLoading: isTokenDetailsLoading } = useB3trTokenDetails();
+  const tokenDetailsQueryResult = useB3trTokenDetails();
 
   return (
     <VStack spacing={4} divider={<StackDivider />}>
@@ -15,7 +15,7 @@ export default function Home() {
         </Heading>
         <Text>Use the navigation bar on the left to navigate to the different pages.</Text>
       </Box>
-      <TokenDetailsCard tokenDetails={tokenDetails} isLoading={isTokenDetailsLoading} />
+      <TokenDetailsCard tokenDetailsQueryResult={tokenDetailsQueryResult} />
     </VStack>
   );
 }

@@ -12,13 +12,13 @@ import {
   Progress,
 } from "@chakra-ui/react";
 import { FormattingUtils } from "@repo/utils";
+import { UseQueryResult } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 type Props = {
-  tokenDetails?: TokenDetails;
-  isLoading?: boolean;
+  tokenDetailsQueryResult: UseQueryResult<TokenDetails, Error>;
 };
-export const TokenDetailsCard = ({ tokenDetails, isLoading = false }: Props) => {
+export const TokenDetailsCard = ({ tokenDetailsQueryResult: { data: tokenDetails, isLoading, error } }: Props) => {
   const supplyProgressPercentage = useMemo(() => {
     if (!tokenDetails) {
       return 0;
@@ -41,6 +41,23 @@ export const TokenDetailsCard = ({ tokenDetails, isLoading = false }: Props) => 
     const scaledNumber = FormattingUtils.scaleNumberDown(tokenDetails.totalSupply, tokenDetails.decimals);
     return FormattingUtils.humanNumber(scaledNumber, scaledNumber);
   }, [tokenDetails]);
+
+  if (error)
+    return (
+      <Card w="full">
+        <CardHeader>
+          <Heading size="sm">Token Details</Heading>
+        </CardHeader>
+        <CardBody>
+          <Heading size="lg" textAlign={"center"}>
+            Unable to load token details
+          </Heading>
+          <Text fontSize="sm" textAlign={"center"}>
+            {error.message}
+          </Text>
+        </CardBody>
+      </Card>
+    );
 
   if (!tokenDetails && !isLoading)
     return (
