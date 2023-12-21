@@ -1,12 +1,13 @@
 import { networkConfig } from "@/config"
 import Contract from "@repo/contracts/artifacts/contracts/B3TR.sol/B3TR.json"
+import { FormattingUtils } from "@repo/utils"
 const abi = Contract.abi
 
 
 const B3TR_CONTRACT = networkConfig.b3trContractAddress
 
 /**
- *  Get the b3tr token details from the contract
+ *  Get the b3tr token details from the contract. circulatingSupply and totalSupply are scaled down to the decimals of the token
  * @param thor 
  * @returns  {Promise<{name: string, symbol: string, decimals: number, totalSupply: string}>}
  */
@@ -33,8 +34,8 @@ export const getB3trTokenDetails = async (thor: Connex.Thor): Promise<TokenDetai
         name: res.decoded[0],
         symbol: res.decoded[1],
         decimals: res.decoded[2],
-        circulatingSupply: res.decoded[3],
-        totalSupply: res.decoded[4]
+        circulatingSupply: FormattingUtils.scaleNumberDown(res.decoded[3], res.decoded[2]),
+        totalSupply: FormattingUtils.scaleNumberDown(res.decoded[4], res.decoded[2])
     }
 }
 

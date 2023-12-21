@@ -30,16 +30,14 @@ export const TokenDetailsCard = ({ tokenDetailsQueryResult: { data: tokenDetails
     if (!tokenDetails) {
       return 0;
     }
-    const scaledNumber = FormattingUtils.scaleNumberDown(tokenDetails.circulatingSupply, tokenDetails.decimals);
-    return FormattingUtils.humanNumber(scaledNumber, scaledNumber);
+    return FormattingUtils.humanNumber(tokenDetails.circulatingSupply, tokenDetails.circulatingSupply);
   }, [tokenDetails]);
 
   const formattedTotalSupply = useMemo(() => {
     if (!tokenDetails) {
       return 0;
     }
-    const scaledNumber = FormattingUtils.scaleNumberDown(tokenDetails.totalSupply, tokenDetails.decimals);
-    return FormattingUtils.humanNumber(scaledNumber, scaledNumber);
+    return FormattingUtils.humanNumber(tokenDetails.totalSupply, tokenDetails.totalSupply);
   }, [tokenDetails]);
 
   if (error)
