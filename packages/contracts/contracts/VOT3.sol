@@ -34,7 +34,7 @@ contract VOT3 is
         canTransfer = _canTransfer;
     }
 
-    function lockB3tr(uint256 amount) public {
+    function stake(uint256 amount) public {
         require(
             b3tr.transferFrom(msg.sender, address(this), amount),
             "Transfer failed"
@@ -42,7 +42,7 @@ contract VOT3 is
         _mint(msg.sender, amount);
     }
 
-    function unlockB3tr(uint256 amount) public {
+    function unstake(uint256 amount) public {
         require(
             balanceOf(msg.sender) >= amount,
             "Insufficient Vot3 Tokens"

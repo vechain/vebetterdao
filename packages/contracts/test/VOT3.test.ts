@@ -72,7 +72,7 @@ describe("VOT3", function () {
         .reverted
 
       // Lock B3TR to get VOT3
-      await expect(vot3.connect(otherAccount).lockB3tr(ethers.parseEther("9"))).not.to.be.reverted
+      await expect(vot3.connect(otherAccount).stake(ethers.parseEther("9"))).not.to.be.reverted
 
       // Check balances
       expect(await b3tr.balanceOf(otherAccount)).to.eql(ethers.parseEther("991"))
@@ -92,7 +92,7 @@ describe("VOT3", function () {
 
       // Lock B3TR to get VOT3
       try {
-        await vot3.lockB3tr(ethers.parseEther("10"))
+        await vot3.stake(ethers.parseEther("10"))
         assert.fail("The transaction should have failed")
       } catch (err: any) {
         assert(err.message.includes("execution reverted"), "Expected an 'execution reverted' error")
@@ -113,7 +113,7 @@ describe("VOT3", function () {
       await expect(b3tr.connect(otherAccount).approve(vot3Address, ethers.parseEther("9"))).not.to.be.reverted
 
       // Lock B3TR to get VOT3
-      await expect(vot3.connect(otherAccount).lockB3tr(ethers.parseEther("9"))).not.to.be.reverted
+      await expect(vot3.connect(otherAccount).stake(ethers.parseEther("9"))).not.to.be.reverted
 
       // Check balances
       expect(await b3tr.balanceOf(otherAccount)).to.eql(ethers.parseEther("991"))
@@ -124,7 +124,7 @@ describe("VOT3", function () {
       await new Promise(resolve => setTimeout(resolve, 10000))
 
       // Unlock B3TR to burn VOT3
-      await expect(vot3.connect(otherAccount).unlockB3tr(ethers.parseEther("9"))).not.to.be.reverted
+      await expect(vot3.connect(otherAccount).unstake(ethers.parseEther("9"))).not.to.be.reverted
 
       // Check balances
       expect(await b3tr.balanceOf(otherAccount)).to.eql(ethers.parseEther("1000"))
@@ -143,7 +143,7 @@ describe("VOT3", function () {
         .reverted
 
       // Lock B3TR to get VOT3
-      await expect(vot3.connect(otherAccount).lockB3tr(ethers.parseEther("9"))).not.to.be.reverted
+      await expect(vot3.connect(otherAccount).stake(ethers.parseEther("9"))).not.to.be.reverted
 
       // Check balances
       expect(await b3tr.balanceOf(otherAccount)).to.eql(ethers.parseEther("991"))
@@ -152,7 +152,7 @@ describe("VOT3", function () {
 
       // Unlock B3TR to burn VOT3
       try {
-        await vot3.connect(otherAccount).unlockB3tr(ethers.parseEther("10"))
+        await vot3.connect(otherAccount).unstake(ethers.parseEther("10"))
         assert.fail("The transaction should have failed")
       } catch (err: any) {
         assert(err.message.includes("execution reverted"), "Expected an 'execution reverted' error")
@@ -172,7 +172,7 @@ describe("VOT3", function () {
         .reverted
 
       // Lock B3TR to get VOT3
-      await expect(vot3.connect(otherAccount).lockB3tr(ethers.parseEther("9"))).not.to.be.reverted
+      await expect(vot3.connect(otherAccount).stake(ethers.parseEther("9"))).not.to.be.reverted
 
       try {
         await vot3.connect(otherAccount).transfer(owner, ethers.parseEther("1"))
@@ -193,7 +193,7 @@ describe("VOT3", function () {
         .reverted
 
       // Lock B3TR to get VOT3
-      await expect(vot3.connect(otherAccount).lockB3tr(ethers.parseEther("9"))).not.to.be.reverted
+      await expect(vot3.connect(otherAccount).stake(ethers.parseEther("9"))).not.to.be.reverted
 
       try {
         // Approve myself to spend VOT3
@@ -217,7 +217,7 @@ describe("VOT3", function () {
         .reverted
 
       // Lock B3TR to get VOT3
-      await expect(vot3.connect(otherAccount).lockB3tr(ethers.parseEther("9"))).not.to.be.reverted
+      await expect(vot3.connect(otherAccount).stake(ethers.parseEther("9"))).not.to.be.reverted
 
       try {
         await vot3.connect(otherAccount).approve(owner, ethers.parseEther("1"))
@@ -240,7 +240,7 @@ describe("VOT3", function () {
         .reverted
 
       // Lock B3TR to get VOT3
-      await expect(vot3.connect(otherAccount).lockB3tr(ethers.parseEther("9"))).not.to.be.reverted
+      await expect(vot3.connect(otherAccount).stake(ethers.parseEther("9"))).not.to.be.reverted
 
       // Enable canTransfer
       await expect(vot3.connect(owner).setCanTransfer(true)).not.to.be.reverted
@@ -264,7 +264,7 @@ describe("VOT3", function () {
         .reverted
 
       // Lock B3TR to get VOT3
-      await expect(vot3.connect(otherAccount).lockB3tr(ethers.parseEther("9"))).not.to.be.reverted
+      await expect(vot3.connect(otherAccount).stake(ethers.parseEther("9"))).not.to.be.reverted
 
       // Enable canTransfer
       await expect(vot3.connect(owner).setCanTransfer(true)).not.to.be.reverted
@@ -292,7 +292,7 @@ describe("VOT3", function () {
         .reverted
 
       // Lock B3TR to get VOT3
-      await expect(vot3.connect(otherAccount).lockB3tr(ethers.parseEther("9"))).not.to.be.reverted
+      await expect(vot3.connect(otherAccount).stake(ethers.parseEther("9"))).not.to.be.reverted
 
       // Enable canTransfer
       await expect(vot3.connect(owner).setCanTransfer(true)).not.to.be.reverted
