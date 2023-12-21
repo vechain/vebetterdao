@@ -302,7 +302,7 @@ describe("VOT3", function () {
     })
   })
 
-  describe.only("Toggle transferability", function () {
+  describe("Toggle transferability", function () {
     it("Only admin can change canTransfer (true)", async function () {
       const { b3tr, vot3, owner, minterAccount, otherAccount } = await deploy(true)
 
