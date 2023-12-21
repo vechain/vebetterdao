@@ -9,21 +9,24 @@ type EnhancedClause = Connex.VM.Clause & {
     abi?: object
 }
 type UseSendTransactionProps = {
+    signerAccount?: string | null
     clauses:
     | EnhancedClause[]
     | (() => EnhancedClause[])
     | (() => Promise<EnhancedClause[]>)
-    onSuccess?: () => void | Promise<void>
+    onTxConfirmed?: () => void | Promise<void>
 }
 
 /**
  * Generic hook to send a transaction and wait for the txReceipt
+ * @param signerAccount the signer account to use
  * @param clauses clauses to send in the transaction
- * @param onSuccess callback to run when the upgrade is successful
+ * @param onTxConfirmed callback to run when the tx is confirmed
  */
 export const useSendTransaction = ({
+    signerAccount,
     clauses,
-    onSuccess,
+    onTxConfirmed,
 }: UseSendTransactionProps) => {
     const toast = useToast()
     const { vendor } = useConnex()
@@ -41,8 +44,11 @@ export const useSendTransaction = ({
     }
 
     const sendTransaction = async () => {
-        return await convertClauses(clauses).then(clauses =>
-            vendor.sign("tx", clauses).request(),
+        if (signerAccount) throw new Error("signerAccount is required")
+        return await convertClauses(clauses).then(clauses => {
+            if (signerAccount) return vendor.sign("tx", clauses).signer(signerAccount).request()
+            return vendor.sign("tx", clauses).request()
+        },
         )
     }
 
@@ -73,8 +79,18 @@ export const useSendTransaction = ({
 
     useEffect(() => {
         if (!txReceipt) return
-        onSuccess?.()
-    }, [onSuccess, txReceipt])
+        if (txReceipt.reverted) {
+            toast({
+                title: "Transaction reverted.",
+                status: "error",
+                position: "bottom-left",
+                duration: 5000,
+                isClosable: true,
+            })
+            return
+        }
+        onTxConfirmed?.()
+    }, [onTxConfirmed, txReceipt])
 
     /**
      * TODO: In case of errors, call the callback

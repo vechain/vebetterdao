@@ -57,11 +57,9 @@ export const useMintB3tr = ({
         if (invalidateCache) {
             await queryClient.refetchQueries({
                 queryKey: getB3TrTokenDetailsQueryKey(),
-                type: "all",
             })
             await queryClient.refetchQueries({
                 queryKey: getB3TrBalanceQueryKey(account ?? undefined),
-                type: "all",
             })
         }
 
@@ -83,8 +81,9 @@ export const useMintB3tr = ({
     ])
 
     const result = useSendTransaction({
+        signerAccount: account,
         clauses: buildClauses,
-        onSuccess: handleOnSuccess,
+        onTxConfirmed: handleOnSuccess,
     })
 
     return result
