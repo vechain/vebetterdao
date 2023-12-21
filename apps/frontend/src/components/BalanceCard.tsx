@@ -1,26 +1,26 @@
-import { TokenDetails, useB3trBalance } from "@/api";
-import { Card, CardHeader, CardBody, Heading, Text, HStack } from "@chakra-ui/react";
-import { FormattingUtils } from "@repo/utils";
-import { UseQueryResult } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { TokenDetails, useB3trBalance } from "@/api"
+import { Card, CardHeader, CardBody, Heading, Text, HStack } from "@chakra-ui/react"
+import { FormattingUtils } from "@repo/utils"
+import { UseQueryResult } from "@tanstack/react-query"
+import { useMemo } from "react"
 
 type Props = {
-  address?: string;
-  tokenDetailsQueryResult: UseQueryResult<TokenDetails, Error>;
-};
+  address?: string
+  tokenDetailsQueryResult: UseQueryResult<TokenDetails, Error>
+}
 export const BalanceCard = ({ address, tokenDetailsQueryResult: { data: tokenDetails } }: Props) => {
-  const { data: balance, isLoading } = useB3trBalance(address);
+  const { data: balance, isLoading } = useB3trBalance(address)
 
   const formattedBalance = useMemo(() => {
     if (!balance) {
-      return 0;
+      return 0
     }
 
-    const decimals = tokenDetails?.decimals ?? 18;
+    const decimals = tokenDetails?.decimals ?? 18
 
-    const scaledNumber = FormattingUtils.scaleNumberDown(balance, decimals);
-    return FormattingUtils.humanNumber(scaledNumber, scaledNumber);
-  }, [tokenDetails]);
+    const scaledNumber = FormattingUtils.scaleNumberDown(balance, decimals)
+    return FormattingUtils.humanNumber(scaledNumber, scaledNumber)
+  }, [tokenDetails])
 
   if (!balance && !isLoading)
     return (
@@ -33,7 +33,7 @@ export const BalanceCard = ({ address, tokenDetailsQueryResult: { data: tokenDet
           <Text fontSize="sm">Connect your wallet first</Text>
         </CardBody>
       </Card>
-    );
+    )
 
   return (
     <Card w="full">
@@ -49,5 +49,5 @@ export const BalanceCard = ({ address, tokenDetailsQueryResult: { data: tokenDet
         </HStack>
       </CardBody>
     </Card>
-  );
-};
+  )
+}
