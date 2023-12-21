@@ -1,10 +1,9 @@
+import { networkConfig } from "@/config"
 import Contract from "@repo/contracts/artifacts/contracts/B3TR.sol/B3TR.json"
 const abi = Contract.abi
 
 
-const B3TR_CONTRACT = process.env.NEXT_PUBLIC_B3TR_CONTRACT_ADDRESS
-if (!B3TR_CONTRACT) throw new Error("NEXT_PUBLIC_B3TR_CONTRACT_ADDRESS not set")
-
+const B3TR_CONTRACT = networkConfig.b3trContractAddress
 
 /**
  *  Get the b3tr token details from the contract
@@ -27,7 +26,6 @@ export const getB3trTokenDetails = async (thor: Connex.Thor): Promise<TokenDetai
         .method(functionAbi)
         .call()
 
-    console.log(res)
     if (res.vmError) return Promise.reject(new Error(res.vmError))
 
 
@@ -38,4 +36,25 @@ export const getB3trTokenDetails = async (thor: Connex.Thor): Promise<TokenDetai
         circulatingSupply: res.decoded[3],
         totalSupply: res.decoded[4]
     }
+}
+
+/**
+ *  Get the b3tr balance of an address from the contract
+ * @param thor  The thor instance
+ * @param address  The address to get the balance of. If not provided, will return an error (for better react-query DX)
+ * @returns {Promise<string>}  The balance of the address
+ */
+export const getB3trBalance = async (thor: Connex.Thor, address?: string): Promise<string> => {
+    if (!address) return Promise.reject(new Error("Address not provided"))
+    const functionAbi = abi.find((e) => e.name === "balanceOf")
+    if (!functionAbi) return Promise.reject(new Error("Function abi not found for balanceOf"))
+    const res = await thor
+        .account(B3TR_CONTRACT)
+        .method(functionAbi)
+        .call(address)
+
+    if (res.vmError) return Promise.reject(new Error(res.vmError))
+
+
+    return res.decoded[0]
 }
