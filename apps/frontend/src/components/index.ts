@@ -1,4 +1,5 @@
 export * from "./BalanceCard"
+export * from "./MintNewB3trCard"
 export * from "./Navbar"
 export * from "./ThemeSwitcher"
 export * from "./TokenDetailsCard"
