@@ -2,7 +2,7 @@
 
 import { useB3trTokenDetails } from "@/api"
 import { Box, Heading, StackDivider, Text, VStack } from "@chakra-ui/react"
-import { BalanceCard, TokenDetailsCard } from "@/components"
+import { BalanceCard, MintNewB3trCard, TokenDetailsCard } from "@/components"
 import { useWallet } from "@vechain/dapp-kit-react"
 
 export default function Home() {
@@ -19,6 +19,7 @@ export default function Home() {
       </Box>
       <TokenDetailsCard tokenDetailsQueryResult={tokenDetailsQueryResult} />
       <BalanceCard address={account ?? undefined} tokenDetailsQueryResult={tokenDetailsQueryResult} />
+      <MintNewB3trCard />
     </VStack>
   )
 }

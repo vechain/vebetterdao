@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { getB3trBalance, getB3trTokenDetails } from "./endpoints"
 import { useConnex } from "@vechain/dapp-kit-react"
 
-const getB3TrTokenDetailsQueryKey = () => ["b3trTokenDetails"]
+export const getB3TrTokenDetailsQueryKey = () => ["b3trTokenDetails"]
 export const useB3trTokenDetails = () => {
   const { thor } = useConnex()
 
@@ -12,7 +12,7 @@ export const useB3trTokenDetails = () => {
   })
 }
 
-const getB3TrBalanceQueryKey = (address?: string) => ["b3trBalance", address]
+export const getB3TrBalanceQueryKey = (address?: string) => ["b3trBalance", address]
 export const useB3trBalance = (address?: string) => {
   const { thor } = useConnex()
 

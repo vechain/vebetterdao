@@ -1,11 +1,13 @@
 "use client"
-import { Button, VStack } from "@chakra-ui/react"
+import { Box, Button, Text, VStack } from "@chakra-ui/react"
 import { VechainLogo } from "./VechainLogo"
 import { ThemeSwitcher } from "./ThemeSwitcher"
 import { usePathname } from "next/navigation"
 
 import dynamic from "next/dynamic"
 import { Link } from "@chakra-ui/next-js"
+import { useUserHasMinterRole } from "@/api"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 const Menu = [
   { name: "Home", href: "/" },
@@ -13,13 +15,8 @@ const Menu = [
 ]
 
 const ConnectButtonWithModal = dynamic(
-  async () => {
-    const { ConnectButtonWithModal } = await import("@vechain/dapp-kit-react")
-    return ConnectButtonWithModal
-  },
-  {
-    ssr: false,
-  },
+  () => import("@vechain/dapp-kit-react").then(mod => mod.ConnectButtonWithModal),
+  { ssr: false },
 )
 const MenuButtons = () => {
   const pathname = usePathname()
@@ -46,6 +43,8 @@ const MenuButtons = () => {
 }
 
 export const SideBar = () => {
+  const { account } = useWallet()
+  const { data: hasMinterRole } = useUserHasMinterRole(account ?? undefined)
   return (
     <VStack
       px={12}
@@ -55,16 +54,19 @@ export const SideBar = () => {
       position={"sticky"}
       top={0}
       left={0}
+      zIndex={10}
       boxShadow={"md"}
       borderLeftWidth={1}
       borderRightWidth={1}
       borderColor={"gray.500"}
       mr="8"
-      justify="space-between"
-      zIndex={10}>
+      justify="space-between">
       <VStack spacing={8}>
         <VechainLogo />
-        <ConnectButtonWithModal />
+        <VStack spacing={1}>
+          <ConnectButtonWithModal />
+          <Text color="orange.500"> {hasMinterRole ? "Minter" : ""}</Text>
+        </VStack>
       </VStack>
       <MenuButtons />
       <ThemeSwitcher />
