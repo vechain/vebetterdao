@@ -44,7 +44,6 @@ export const useSendTransaction = ({
     }
 
     const sendTransaction = async () => {
-        if (signerAccount) throw new Error("signerAccount is required")
         return await convertClauses(clauses).then(clauses => {
             if (signerAccount) return vendor.sign("tx", clauses).signer(signerAccount).request()
             return vendor.sign("tx", clauses).request()
@@ -56,13 +55,13 @@ export const useSendTransaction = ({
         mutate: runSendTransaction,
         data: sendTransactionTx,
         isPending: sendTransactionPending,
-        isError: sendTransactionError,
+        error: sendTransactionError,
     } = useMutation({
         mutationFn: sendTransaction,
-        onError: () => {
+        onError: (error) => {
             toast({
                 title: "Error while signing the transaction.",
-                description: `Have you rejected it? Please try again.`,
+                description: `${error.message}`,
                 status: "error",
                 position: "bottom-left",
                 duration: 5000,

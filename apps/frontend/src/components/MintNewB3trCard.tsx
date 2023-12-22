@@ -42,18 +42,16 @@ export const MintNewB3trCard = () => {
 
   const address = watch("address");
   const amount = watch("amount");
-  const amountWithDecimals = useMemo(() => {
-    if (!amount || !tokenDetails) return undefined;
-    return scaleNumberUp(amount, tokenDetails.decimals);
-  }, [amount, tokenDetails]);
 
-  const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useMintB3tr({
+  const { sendTransaction, isTxReceiptLoading, sendTransactionPending, sendTransactionError } = useMintB3tr({
     address,
-    amount: amountWithDecimals?.toString(),
+    amount,
   });
 
+  console.log({ sendTransactionError });
+
   const onSubmit = async (_data: FormData) => {
-    if (address && amountWithDecimals) {
+    if (address && amount) {
       sendTransaction();
     }
   };

@@ -62,24 +62,31 @@ export const getB3trBalance = async (thor: Connex.Thor, address?: string): Promi
  * Build the clause to mint B3TR tokens for the given address and amount
     * @param thor thor instance
     * @param address the address to mint the tokens to
-    * @param amount the amount of tokens to mint
+    * @param amount the amount of tokens to mint. Should not already include decimals
+    * @param decimals the decimals of the token
  * @returns the clause to mint B3TR tokens
  */
 export const buildMintB3trTx = (
     thor: Connex.Thor,
     address: string,
-    amount: string,
+    amount: string | number,
+    decimals = 18,
 ): Connex.Vendor.TxMessage[0] => {
     const functionAbi = abi.find((e) => e.name === "mint")
     if (!functionAbi) throw new Error("Function abi not found for mint")
+
+    const formattedAmount = FormattingUtils.humanNumber(amount ?? 0, amount)
+    const formattedAddress = FormattingUtils.humanAddress(address)
+    const amountWithDecimals = FormattingUtils.scaleNumberUp(amount, decimals)
+
     const clause = thor
         .account(B3TR_CONTRACT)
         .method(functionAbi)
-        .asClause(address, amount)
+        .asClause(address, amountWithDecimals)
 
     return {
         ...clause,
-        comment: `Mint ${amount} B3TR to ${address}`,
+        comment: `Mint ${formattedAmount} B3TR to ${formattedAddress}`,
         abi: functionAbi,
     }
 }
