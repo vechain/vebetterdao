@@ -6,12 +6,14 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
 
 type Props = {
-  address?: string
+  balanceQueryResult: UseQueryResult<string, Error>
   tokenDetailsQueryResult: UseQueryResult<TokenDetails, Error>
 }
-export const BalanceCard = ({ address, tokenDetailsQueryResult: { data: tokenDetails } }: Props) => {
+export const BalanceCard = ({
+  balanceQueryResult: { data: balance, isLoading, error },
+  tokenDetailsQueryResult: { data: tokenDetails },
+}: Props) => {
   const { account } = useWallet()
-  const { data: balance, isLoading, error } = useB3trBalance(address)
 
   const formattedBalance = useMemo(() => {
     if (!balance) {
@@ -28,7 +30,7 @@ export const BalanceCard = ({ address, tokenDetailsQueryResult: { data: tokenDet
     return (
       <Card w="full">
         <CardHeader>
-          <Heading size="sm">Your balance</Heading>
+          <Heading size="sm">Your {tokenDetails?.symbol} balance</Heading>
         </CardHeader>
         <CardBody>
           <Heading size="md" color={"lightskyblue"}>
@@ -56,7 +58,7 @@ export const BalanceCard = ({ address, tokenDetailsQueryResult: { data: tokenDet
   return (
     <Card w="full">
       <CardHeader>
-        <Heading size="sm">Your balance</Heading>
+        <Heading size="sm">Your {tokenDetails?.symbol} balance</Heading>
       </CardHeader>
       <CardBody>
         <HStack spacing={2}>
