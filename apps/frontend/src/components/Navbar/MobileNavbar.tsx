@@ -1,4 +1,5 @@
 import {
+  Box,
   Drawer,
   DrawerBody,
   DrawerCloseButton,
@@ -16,6 +17,7 @@ import dynamic from "next/dynamic"
 import { FaBars } from "react-icons/fa"
 import { NavbarMenu } from "./NavbarMenu"
 import { NavbarLogo } from "./NavbarLogo"
+import { ThemeSwitcher } from "../ThemeSwitcher"
 
 const ConnectButtonWithModal = dynamic(
   () => import("@vechain/dapp-kit-react").then(mod => mod.ConnectButtonWithModal),
@@ -29,10 +31,13 @@ const MobileMenuDrawer: React.FC<Omit<DrawerProps, "children">> = props => {
       <DrawerContent>
         <DrawerCloseButton />
         <DrawerHeader>{"Menu"}</DrawerHeader>
-        <DrawerBody>
+        <DrawerBody display={"flex"} flexDirection={"column"} justifyContent={"space-between"}>
           <VStack spacing={4} w="full">
             <NavbarMenu />
           </VStack>
+          <Box w="full" alignSelf="flex-end">
+            <ThemeSwitcher w={"full"} withText={true} />
+          </Box>
         </DrawerBody>
       </DrawerContent>
     </Drawer>
@@ -45,7 +50,6 @@ export const MobileNavBar = () => {
   return (
     <>
       <NavbarLogo />
-
       <HStack gap={2}>
         <ConnectButtonWithModal />
         <IconButton onClick={openMenu} icon={<Icon as={FaBars} />} aria-label="Open menu" />
