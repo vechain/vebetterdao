@@ -5,11 +5,11 @@
   "types": "main.ts",
   "license": "MIT",
   "scripts": {
-    "test": "npx hardhat test",
+    "test": "yarn start-solo && sleep 5 && npx hardhat test; yarn stop-solo",
     "compile": "npx hardhat compile",
     "deploy": "npx hardhat run scripts/deploy.ts",
     "build": "esbuild main.ts --bundle --platform=node --outfile=dist/index.js",
-    "start-solo": "docker compose up",
+    "start-solo": "docker compose up -d",
     "stop-solo": "docker compose down",
     "clean": "rm -rf dist artifacts node_modules"
   },
