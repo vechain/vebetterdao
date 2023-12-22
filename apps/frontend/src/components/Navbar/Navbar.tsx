@@ -14,6 +14,7 @@ export const Navbar: React.FC = () => {
 
   return (
     <Box
+      bg={bg}
       px={0}
       position={"sticky"}
       top={0}
