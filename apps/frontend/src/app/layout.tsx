@@ -3,21 +3,22 @@
 import { Container } from "@chakra-ui/react"
 import { Providers } from "./providers"
 
-import { SideBar } from "@/components/Navbar"
+import { Navbar } from "@/components/Navbar/Navbar"
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
         <Providers>
+          <Navbar />
           <Container
-            maxW="container.xl"
+            mt={6}
+            maxW={"container.xl"}
             minH="100vh"
             display={["flex"]}
             alignItems={["center"]}
             justifyContent={["flex-start"]}
-            flexDirection={["column", "row"]}>
-            <SideBar />
+            flexDirection={["column"]}>
             {children}
           </Container>
         </Providers>
