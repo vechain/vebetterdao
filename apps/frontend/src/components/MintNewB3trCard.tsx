@@ -17,7 +17,6 @@ import { useForm } from "react-hook-form"
 import { AddressUtils, FormattingUtils } from "@repo/utils"
 import { useMemo } from "react"
 import { useMintB3tr } from "@/hooks"
-import { scaleNumberUp } from "@repo/utils/FormattingUtils"
 
 type FormData = {
   address?: string
