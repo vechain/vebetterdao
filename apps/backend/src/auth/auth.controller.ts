@@ -1,9 +1,9 @@
-import { Body, Controller, Get, HttpCode, HttpException, HttpStatus, Post, Request, UseGuards } from "@nestjs/common";
-import { AuthService } from "./auth.service";
-import { CertificateDto } from "./auth.model";
-import { AuthGuard } from "./auth.guard";
-import { error } from "console";
-import { ApiTags, ApiOperation, ApiBody, ApiResponse, ApiBearerAuth } from "@nestjs/swagger";
+import { Body, Controller, Get, HttpCode, HttpException, HttpStatus, Post, Request, UseGuards } from "@nestjs/common"
+import { AuthService } from "./auth.service"
+import { CertificateDto } from "./auth.model"
+import { AuthGuard } from "./auth.guard"
+import { error } from "console"
+import { ApiTags, ApiOperation, ApiBody, ApiResponse, ApiBearerAuth } from "@nestjs/swagger"
 
 @ApiTags("auth")
 @Controller("auth")
@@ -18,10 +18,10 @@ export class AuthController {
   @ApiResponse({ status: 401, description: "Unauthorized" })
   async signIn(@Body() cert: CertificateDto) {
     try {
-      return await this.authService.signIn(cert);
+      return await this.authService.signIn(cert)
     } catch (e) {
-      error(e);
-      throw new HttpException("Unauthorized", HttpStatus.UNAUTHORIZED);
+      error(e)
+      throw new HttpException("Unauthorized", HttpStatus.UNAUTHORIZED)
     }
   }
 
@@ -32,6 +32,6 @@ export class AuthController {
   @ApiResponse({ status: 200, description: "Successful retrieval of profile" })
   @ApiResponse({ status: 401, description: "Unauthorized" })
   getProfile(@Request() req) {
-    return req.user;
+    return req.user
   }
 }

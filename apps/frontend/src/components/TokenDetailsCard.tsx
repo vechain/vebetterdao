@@ -1,4 +1,4 @@
-import { TokenDetails } from "@/api";
+import { TokenDetails } from "@/api"
 import {
   Card,
   CardHeader,
@@ -10,35 +10,35 @@ import {
   StackDivider,
   HStack,
   Progress,
-} from "@chakra-ui/react";
-import { FormattingUtils } from "@repo/utils";
-import { UseQueryResult } from "@tanstack/react-query";
-import { useMemo } from "react";
+} from "@chakra-ui/react"
+import { FormattingUtils } from "@repo/utils"
+import { UseQueryResult } from "@tanstack/react-query"
+import { useMemo } from "react"
 
 type Props = {
-  tokenDetailsQueryResult: UseQueryResult<TokenDetails, Error>;
-};
+  tokenDetailsQueryResult: UseQueryResult<TokenDetails, Error>
+}
 export const TokenDetailsCard = ({ tokenDetailsQueryResult: { data: tokenDetails, isLoading, error } }: Props) => {
   const supplyProgressPercentage = useMemo(() => {
     if (!tokenDetails) {
-      return 0;
+      return 0
     }
-    return (Number(tokenDetails.circulatingSupply) / Number(tokenDetails.totalSupply)) * 100;
-  }, [tokenDetails]);
+    return (Number(tokenDetails.circulatingSupply) / Number(tokenDetails.totalSupply)) * 100
+  }, [tokenDetails])
 
   const formattedCirculatingSupply = useMemo(() => {
     if (!tokenDetails) {
-      return 0;
+      return 0
     }
-    return FormattingUtils.humanNumber(tokenDetails.circulatingSupply, tokenDetails.circulatingSupply);
-  }, [tokenDetails]);
+    return FormattingUtils.humanNumber(tokenDetails.circulatingSupply, tokenDetails.circulatingSupply)
+  }, [tokenDetails])
 
   const formattedTotalSupply = useMemo(() => {
     if (!tokenDetails) {
-      return 0;
+      return 0
     }
-    return FormattingUtils.humanNumber(tokenDetails.totalSupply, tokenDetails.totalSupply);
-  }, [tokenDetails]);
+    return FormattingUtils.humanNumber(tokenDetails.totalSupply, tokenDetails.totalSupply)
+  }, [tokenDetails])
 
   if (error)
     return (
@@ -55,7 +55,7 @@ export const TokenDetailsCard = ({ tokenDetailsQueryResult: { data: tokenDetails
           </Text>
         </CardBody>
       </Card>
-    );
+    )
 
   if (!tokenDetails && !isLoading)
     return (
@@ -72,7 +72,7 @@ export const TokenDetailsCard = ({ tokenDetailsQueryResult: { data: tokenDetails
           </Text>
         </CardBody>
       </Card>
-    );
+    )
 
   return (
     <Card w="full">
@@ -125,5 +125,5 @@ export const TokenDetailsCard = ({ tokenDetailsQueryResult: { data: tokenDetails
         </VStack>
       </CardBody>
     </Card>
-  );
-};
+  )
+}

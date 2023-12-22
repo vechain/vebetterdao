@@ -4,7 +4,7 @@ services:
   mongo-node1:
     hostname: mongo-node1
     image: mongo:6
-    command: [ "mongod", "--replSet", "rs0", "--keyFile", "/data/keys/keyfile" ]
+    command: ["mongod", "--replSet", "rs0", "--keyFile", "/data/keys/keyfile"]
     entrypoint:
       - bash
       - -c
@@ -25,7 +25,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: password
       MONGO_INITDB_DATABASE: b3tr
     healthcheck:
-      test: [ "CMD","mongosh", "--eval", "db.adminCommand('ping')" ]
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 3s
       timeout: 5s
       retries: 20

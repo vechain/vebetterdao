@@ -82,7 +82,7 @@ module.exports = {
       },
     },
   },
-};
+}
 ```
 
 ### Clauses support
@@ -91,7 +91,7 @@ Vechain Thor network supports sending multiple clauses as part of one transactio
 a chain. Hardhat plugin supports Vechain tx construction with multiple clauses. Example code:
 
 ```js
-const clauseBuilder = new ClausesBuilder(baseContract);
+const clauseBuilder = new ClausesBuilder(baseContract)
 const tx = await clauseBuilder
   .withClause({
     args: [1],
@@ -103,7 +103,7 @@ const tx = await clauseBuilder
     abi: JSON.stringify([{ type: "function", name: "method2" }]),
     method: "method2",
   })
-  .send();
+  .send()
 ```
 
 ### Insigth explorer

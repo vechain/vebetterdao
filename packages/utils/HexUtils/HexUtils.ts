@@ -10,8 +10,8 @@ const HEX_REGEX = /^(0[xX])?[a-fA-F0-9]+$/
  * @throws an error if the input is not a valid hex string
  */
 export const removePrefix = (hex: string): string => {
-    validate(hex)
-    return hex.replace(PREFIX_REGEX, "")
+  validate(hex)
+  return hex.replace(PREFIX_REGEX, "")
 }
 
 /**
@@ -23,8 +23,8 @@ export const removePrefix = (hex: string): string => {
  * @throws an error if the input is not a valid hex string
  */
 export const addPrefix = (hex: string): string => {
-    validate(hex)
-    return PREFIX_REGEX.test(hex) ? hex.replace(PREFIX_REGEX, PREFIX) : `${PREFIX}${hex}`
+  validate(hex)
+  return PREFIX_REGEX.test(hex) ? hex.replace(PREFIX_REGEX, PREFIX) : `${PREFIX}${hex}`
 }
 
 /**
@@ -33,7 +33,7 @@ export const addPrefix = (hex: string): string => {
  * @throws an error if the input is not a valid hex string
  */
 export const validate = (hex: string) => {
-    if (!isValid(hex)) throw Error("Provided hex value is not valid")
+  if (!isValid(hex)) throw Error("Provided hex value is not valid")
 }
 
 /**
@@ -42,22 +42,21 @@ export const validate = (hex: string) => {
  * @returns boolean representing whether the input hex is valid
  */
 export const isValid = (hex?: string | null): boolean => {
-    return !!hex && HEX_REGEX.test(hex)
+  return !!hex && HEX_REGEX.test(hex)
 }
 
 export const isInvalid = (hex?: string | null): boolean => {
-    return !isValid(hex)
+  return !isValid(hex)
 }
 
-
 export const normalize = (hex: string): string => {
-    return addPrefix(hex.toLowerCase().trim())
+  return addPrefix(hex.toLowerCase().trim())
 }
 
 export const compare = (hex1: string, hex2: string): boolean => {
-    try {
-        return removePrefix(hex1).toLowerCase() === removePrefix(hex2).toLowerCase()
-    } catch (e) {
-        return false
-    }
+  try {
+    return removePrefix(hex1).toLowerCase() === removePrefix(hex2).toLowerCase()
+  } catch (e) {
+    return false
+  }
 }

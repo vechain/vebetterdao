@@ -1,30 +1,30 @@
-"use client";
-import { Box, Button, Text, VStack } from "@chakra-ui/react";
-import { VechainLogo } from "./VechainLogo";
-import { ThemeSwitcher } from "./ThemeSwitcher";
-import { usePathname } from "next/navigation";
+"use client"
+import { Box, Button, Text, VStack } from "@chakra-ui/react"
+import { VechainLogo } from "./VechainLogo"
+import { ThemeSwitcher } from "./ThemeSwitcher"
+import { usePathname } from "next/navigation"
 
-import dynamic from "next/dynamic";
-import { Link } from "@chakra-ui/next-js";
-import { useUserHasMinterRole } from "@/api";
-import { useWallet } from "@vechain/dapp-kit-react";
+import dynamic from "next/dynamic"
+import { Link } from "@chakra-ui/next-js"
+import { useUserHasMinterRole } from "@/api"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 const Menu = [
   { name: "Home", href: "/" },
   { name: "Staking", href: "/staking" },
-];
+]
 
 const ConnectButtonWithModal = dynamic(
   () => import("@vechain/dapp-kit-react").then(mod => mod.ConnectButtonWithModal),
   { ssr: false },
-);
+)
 const MenuButtons = () => {
-  const pathname = usePathname();
+  const pathname = usePathname()
 
   return (
     <VStack spacing={1}>
       {Menu.map(item => {
-        const isActive = pathname === item.href;
+        const isActive = pathname === item.href
         return (
           <Link href={item.href} key={item.name}>
             <Button
@@ -36,15 +36,15 @@ const MenuButtons = () => {
               {item.name}
             </Button>
           </Link>
-        );
+        )
       })}
     </VStack>
-  );
-};
+  )
+}
 
 export const SideBar = () => {
-  const { account } = useWallet();
-  const { data: hasMinterRole } = useUserHasMinterRole(account ?? undefined);
+  const { account } = useWallet()
+  const { data: hasMinterRole } = useUserHasMinterRole(account ?? undefined)
   return (
     <VStack
       px={12}
@@ -71,5 +71,5 @@ export const SideBar = () => {
       <MenuButtons />
       <ThemeSwitcher />
     </VStack>
-  );
-};
+  )
+}

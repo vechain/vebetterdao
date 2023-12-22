@@ -3,7 +3,6 @@ import Contract from "@repo/contracts/artifacts/contracts/B3TR.sol/B3TR.json"
 import { FormattingUtils } from "@repo/utils"
 const abi = Contract.abi
 
-
 const B3TR_CONTRACT = networkConfig.b3trContractAddress
 
 /**
@@ -13,19 +12,16 @@ const B3TR_CONTRACT = networkConfig.b3trContractAddress
  */
 
 export type TokenDetails = {
-    name: string,
-    symbol: string,
-    decimals: number,
-    circulatingSupply: string,
+    name: string
+    symbol: string
+    decimals: number
+    circulatingSupply: string
     totalSupply: string
 }
 export const getB3trTokenDetails = async (thor: Connex.Thor): Promise<TokenDetails> => {
-    const functionAbi = abi.find((e) => e.name === "tokenDetails")
+    const functionAbi = abi.find(e => e.name === "tokenDetails")
     if (!functionAbi) return Promise.reject(new Error("Function abi not found for tokenDetails"))
-    const res = await thor
-        .account(B3TR_CONTRACT)
-        .method(functionAbi)
-        .call()
+    const res = await thor.account(B3TR_CONTRACT).method(functionAbi).call()
 
     if (res.vmError) return Promise.reject(new Error(res.vmError))
 
@@ -47,12 +43,9 @@ export const getB3trTokenDetails = async (thor: Connex.Thor): Promise<TokenDetai
  */
 export const getB3trBalance = async (thor: Connex.Thor, address?: string): Promise<string> => {
     if (!address) return Promise.reject(new Error("Address not provided"))
-    const functionAbi = abi.find((e) => e.name === "balanceOf")
+    const functionAbi = abi.find(e => e.name === "balanceOf")
     if (!functionAbi) return Promise.reject(new Error("Function abi not found for balanceOf"))
-    const res = await thor
-        .account(B3TR_CONTRACT)
-        .method(functionAbi)
-        .call(address)
+    const res = await thor.account(B3TR_CONTRACT).method(functionAbi).call(address)
 
     if (res.vmError) return Promise.reject(new Error(res.vmError))
     return res.decoded[0]
