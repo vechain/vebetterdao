@@ -22,10 +22,10 @@ export const NavbarMenu = () => {
 
         return (
           <Button
+            w={["full", "full", "auto"]}
             leftIcon={<Icon as={route.icon} />}
             key={route.name}
-            variant={"ghost"}
-            borderBottom={isSelected ? "2px solid" : "none"}
+            variant={isSelected ? "solid" : "ghost"}
             onClick={onClick}>
             {route.name}
           </Button>

@@ -24,7 +24,6 @@ export const Navbar: React.FC = () => {
       w={"full"}
       borderBottomWidth={"1px"}>
       <Container
-        px={["auto", 0]}
         w="full"
         display="flex"
         flexDirection="row"

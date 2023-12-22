@@ -11,18 +11,18 @@ const ConnectButtonWithModal = dynamic(
 
 export const DesktopNavBar = () => {
   return (
-    <Container display={"flex"} justifyContent={"space-between"} w={"full"} maxW="7xl">
-      <HStack w={"25%"} justifyContent={"start"}>
+    <>
+      <HStack flex={1} justifyContent={"start"}>
         <NavbarLogo />
       </HStack>
 
-      <HStack spacing={4} w={"50%"} justifyContent={"center"}>
+      <HStack flex={1.5} spacing={4} justifyContent={"center"}>
         <NavbarMenu />
       </HStack>
-      <HStack spacing={4} w={"25%"} justifyContent={"end"}>
+      <HStack flex={1} spacing={4} justifyContent={"end"}>
         <ThemeSwitcher />
         <ConnectButtonWithModal />
       </HStack>
-    </Container>
+    </>
   )
 }
