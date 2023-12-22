@@ -26,9 +26,6 @@ jobs:
           node-version: 20
           cache: "yarn"
 
-      - name: Setup Docker
-        uses: docker-practice/actions-setup-docker@v1
-
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
