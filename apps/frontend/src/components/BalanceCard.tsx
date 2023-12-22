@@ -2,6 +2,7 @@ import { TokenDetails, useB3trBalance } from "@/api"
 import { Card, CardHeader, CardBody, Heading, Text, HStack } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { UseQueryResult } from "@tanstack/react-query"
+import { useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
 
 type Props = {
@@ -9,7 +10,8 @@ type Props = {
   tokenDetailsQueryResult: UseQueryResult<TokenDetails, Error>
 }
 export const BalanceCard = ({ address, tokenDetailsQueryResult: { data: tokenDetails } }: Props) => {
-  const { data: balance, isLoading } = useB3trBalance(address)
+  const { account } = useWallet()
+  const { data: balance, isLoading, error } = useB3trBalance(address)
 
   const formattedBalance = useMemo(() => {
     if (!balance) {
@@ -22,6 +24,20 @@ export const BalanceCard = ({ address, tokenDetailsQueryResult: { data: tokenDet
     return FormattingUtils.humanNumber(scaledNumber, scaledNumber)
   }, [tokenDetails, balance])
 
+  if (!account)
+    return (
+      <Card w="full">
+        <CardHeader>
+          <Heading size="sm">Your balance</Heading>
+        </CardHeader>
+        <CardBody>
+          <Heading size="md" color={"lightskyblue"}>
+            Connect your wallet first
+          </Heading>
+        </CardBody>
+      </Card>
+    )
+
   if (!balance && !isLoading)
     return (
       <Card w="full">
@@ -29,8 +45,10 @@ export const BalanceCard = ({ address, tokenDetailsQueryResult: { data: tokenDet
           <Heading size="sm">Your balance</Heading>
         </CardHeader>
         <CardBody>
-          <Heading size="md">Unable to load your balance</Heading>
-          <Text fontSize="sm">Connect your wallet first</Text>
+          <Heading size="md" color="orange">
+            Unable to load your balance
+          </Heading>
+          <Text fontSize="sm">{error?.message}</Text>
         </CardBody>
       </Card>
     )

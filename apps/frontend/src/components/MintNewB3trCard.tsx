@@ -1,4 +1,4 @@
-import { useB3trTokenDetails, useUserHasMinterRole } from "@/api";
+import { useB3trTokenDetails, useUserHasMinterRole } from "@/api"
 import {
   Button,
   Card,
@@ -9,54 +9,89 @@ import {
   FormLabel,
   Heading,
   Input,
+  Text,
   VStack,
-} from "@chakra-ui/react";
-import { useWallet } from "@vechain/dapp-kit-react";
-import { useForm } from "react-hook-form";
-import { AddressUtils } from "@repo/utils";
-import { useMemo } from "react";
-import { useMintB3tr } from "@/hooks";
-import { scaleNumberUp } from "@repo/utils/FormattingUtils";
+} from "@chakra-ui/react"
+import { useWallet } from "@vechain/dapp-kit-react"
+import { useForm } from "react-hook-form"
+import { AddressUtils, FormattingUtils } from "@repo/utils"
+import { useMemo } from "react"
+import { useMintB3tr } from "@/hooks"
+import { scaleNumberUp } from "@repo/utils/FormattingUtils"
 
 type FormData = {
-  address?: string;
-  amount?: number;
-};
+  address?: string
+  amount?: number
+}
 
 export const MintNewB3trCard = () => {
-  const { account } = useWallet();
-  const { data: tokenDetails } = useB3trTokenDetails();
-  const { data: hasMinterRole } = useUserHasMinterRole(account ?? undefined);
+  const { account } = useWallet()
+  const { data: tokenDetails } = useB3trTokenDetails()
+  const { data: hasMinterRole, isLoading: hasMinterRoleLoading } = useUserHasMinterRole(account ?? undefined)
 
   const availableSupply = useMemo(() => {
-    if (!tokenDetails) return 0;
-    return Number(tokenDetails.totalSupply) - Number(tokenDetails.circulatingSupply);
-  }, [tokenDetails]);
+    if (!tokenDetails) return 0
+    return Number(tokenDetails.totalSupply) - Number(tokenDetails.circulatingSupply)
+  }, [tokenDetails])
 
   const {
     handleSubmit,
     register,
     watch,
     formState: { errors },
-  } = useForm<FormData>();
+  } = useForm<FormData>()
 
-  const address = watch("address");
-  const amount = watch("amount");
+  const address = watch("address")
+  const amount = watch("amount")
 
   const { sendTransaction, isTxReceiptLoading, sendTransactionPending, sendTransactionError } = useMintB3tr({
     address,
     amount,
-  });
+  })
 
-  console.log({ sendTransactionError });
+  console.log({ sendTransactionError })
 
   const onSubmit = async (_data: FormData) => {
     if (address && amount) {
-      sendTransaction();
+      sendTransaction()
     }
-  };
+  }
 
-  const isLoading = isTxReceiptLoading || sendTransactionPending;
+  const isLoading = isTxReceiptLoading || sendTransactionPending
+
+  const defaultMinterAddress = FormattingUtils.humanAddress("0x435933c8064b4Ae76bE665428e0307eF2cCFBD68")
+
+  if (!account)
+    return (
+      <Card w="full">
+        <CardHeader>
+          <Heading size="md">Mint New B3TR</Heading>
+        </CardHeader>
+        <CardBody>
+          <Heading size="md" color="lightskyblue">
+            Connect your wallet to get started
+          </Heading>
+          <Text fontSize="sm">Use {defaultMinterAddress} (#2 of demo mnemonic) to get a minter account</Text>
+        </CardBody>
+      </Card>
+    )
+
+  if (!hasMinterRole && !hasMinterRoleLoading)
+    return (
+      <Card w="full">
+        <CardHeader>
+          <Heading size="md">Mint New B3TR</Heading>
+        </CardHeader>
+        <CardBody>
+          <Heading size="md" color="orange">
+            You don't have minter role
+          </Heading>
+          <Text fontSize="sm">
+            Connect your wallet with {defaultMinterAddress} (#2 of demo mnemonic) to get started{" "}
+          </Text>
+        </CardBody>
+      </Card>
+    )
 
   return (
     <Card w="full">
@@ -98,5 +133,5 @@ export const MintNewB3trCard = () => {
         </form>
       </CardBody>
     </Card>
-  );
-};
+  )
+}
