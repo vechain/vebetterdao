@@ -1,17 +1,19 @@
-import { TokenDetails, useB3trBalance } from "@/api"
-import { Card, CardHeader, CardBody, Heading, Text, HStack } from "@chakra-ui/react"
+import { TokenDetails } from "@/api"
+import { Card, CardHeader, CardBody, Heading, Text, HStack, Spinner, Skeleton } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { UseQueryResult } from "@tanstack/react-query"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
 
 type Props = {
-  address?: string
+  balanceQueryResult: UseQueryResult<string, Error>
   tokenDetailsQueryResult: UseQueryResult<TokenDetails, Error>
 }
-export const BalanceCard = ({ address, tokenDetailsQueryResult: { data: tokenDetails } }: Props) => {
+export const BalanceCard = ({
+  balanceQueryResult: { data: balance, isLoading: balanceLoading, error },
+  tokenDetailsQueryResult: { data: tokenDetails, isLoading: tokenDetailsLoading },
+}: Props) => {
   const { account } = useWallet()
-  const { data: balance, isLoading, error } = useB3trBalance(address)
 
   const formattedBalance = useMemo(() => {
     if (!balance) {
@@ -24,11 +26,16 @@ export const BalanceCard = ({ address, tokenDetailsQueryResult: { data: tokenDet
     return FormattingUtils.humanNumber(scaledNumber, scaledNumber)
   }, [tokenDetails, balance])
 
+  const isLoading = balanceLoading || tokenDetailsLoading
+  const loadingSymbolPlaceholder = tokenDetailsLoading ? "B3TR" : undefined
+
+  console.log({ loadingSymbolPlaceholder })
+
   if (!account)
     return (
       <Card w="full">
         <CardHeader>
-          <Heading size="sm">Your balance</Heading>
+          <Heading size="sm">Your {tokenDetails?.symbol} balance</Heading>
         </CardHeader>
         <CardBody>
           <Heading size="md" color={"lightskyblue"}>
@@ -38,7 +45,7 @@ export const BalanceCard = ({ address, tokenDetailsQueryResult: { data: tokenDet
       </Card>
     )
 
-  if (!balance && !isLoading)
+  if (!balance && !balanceLoading)
     return (
       <Card w="full">
         <CardHeader>
@@ -56,14 +63,21 @@ export const BalanceCard = ({ address, tokenDetailsQueryResult: { data: tokenDet
   return (
     <Card w="full">
       <CardHeader>
-        <Heading size="sm">Your balance</Heading>
+        <HStack justify={"space-between"} align={"center"} w="full">
+          <Heading size="sm">Your {tokenDetails?.symbol} balance</Heading>
+          {isLoading && <Spinner size="sm" />}
+        </HStack>
       </CardHeader>
       <CardBody>
         <HStack spacing={2}>
-          <Heading size="lg">{formattedBalance}</Heading>
-          <Text fontSize="sm" as="sub">
-            {tokenDetails?.symbol}
-          </Text>
+          <Heading size="lg">
+            <Skeleton isLoaded={!balanceLoading}>{formattedBalance}</Skeleton>
+          </Heading>
+          <Skeleton isLoaded={!tokenDetailsLoading}>
+            <Text fontSize="sm" as="sub">
+              {tokenDetails?.symbol ?? loadingSymbolPlaceholder}
+            </Text>
+          </Skeleton>
         </HStack>
       </CardBody>
     </Card>
