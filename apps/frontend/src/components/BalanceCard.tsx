@@ -1,5 +1,5 @@
-import { TokenDetails, useB3trBalance } from "@/api"
-import { Card, CardHeader, CardBody, Heading, Text, HStack } from "@chakra-ui/react"
+import { TokenDetails } from "@/api"
+import { Card, CardHeader, CardBody, Heading, Text, HStack, Spinner, Skeleton } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { UseQueryResult } from "@tanstack/react-query"
 import { useWallet } from "@vechain/dapp-kit-react"
@@ -10,8 +10,8 @@ type Props = {
   tokenDetailsQueryResult: UseQueryResult<TokenDetails, Error>
 }
 export const BalanceCard = ({
-  balanceQueryResult: { data: balance, isLoading, error },
-  tokenDetailsQueryResult: { data: tokenDetails },
+  balanceQueryResult: { data: balance, isLoading: balanceLoading, error },
+  tokenDetailsQueryResult: { data: tokenDetails, isLoading: tokenDetailsLoading },
 }: Props) => {
   const { account } = useWallet()
 
@@ -25,6 +25,11 @@ export const BalanceCard = ({
     const scaledNumber = FormattingUtils.scaleNumberDown(balance, decimals)
     return FormattingUtils.humanNumber(scaledNumber, scaledNumber)
   }, [tokenDetails, balance])
+
+  const isLoading = balanceLoading || tokenDetailsLoading
+  const loadingSymbolPlaceholder = tokenDetailsLoading ? "B3TR" : undefined
+
+  console.log({ loadingSymbolPlaceholder })
 
   if (!account)
     return (
@@ -40,7 +45,7 @@ export const BalanceCard = ({
       </Card>
     )
 
-  if (!balance && !isLoading)
+  if (!balance && !balanceLoading)
     return (
       <Card w="full">
         <CardHeader>
@@ -58,14 +63,21 @@ export const BalanceCard = ({
   return (
     <Card w="full">
       <CardHeader>
-        <Heading size="sm">Your {tokenDetails?.symbol} balance</Heading>
+        <HStack justify={"space-between"} align={"center"} w="full">
+          <Heading size="sm">Your {tokenDetails?.symbol} balance</Heading>
+          {isLoading && <Spinner size="sm" />}
+        </HStack>
       </CardHeader>
       <CardBody>
         <HStack spacing={2}>
-          <Heading size="lg">{formattedBalance}</Heading>
-          <Text fontSize="sm" as="sub">
-            {tokenDetails?.symbol}
-          </Text>
+          <Heading size="lg">
+            <Skeleton isLoaded={!balanceLoading}>{formattedBalance}</Skeleton>
+          </Heading>
+          <Skeleton isLoaded={!tokenDetailsLoading}>
+            <Text fontSize="sm" as="sub">
+              {tokenDetails?.symbol ?? loadingSymbolPlaceholder}
+            </Text>
+          </Skeleton>
         </HStack>
       </CardBody>
     </Card>
