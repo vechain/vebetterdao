@@ -19,8 +19,8 @@ interface DeployInstance {
 
 const defaultVotingPeriod = 45818
 const defaultVotingTreashold = 0
-
-describe("Governor", function () {
+//TODO: move deploy() inside a helper file
+describe("Governor and TimeLock", function () {
     let cachedDeployInstance: DeployInstance
     async function deploy(forceDeploy = false, votingTreshold = defaultVotingTreashold): Promise<DeployInstance> {
         if (!forceDeploy && cachedDeployInstance !== undefined) {
@@ -95,7 +95,7 @@ describe("Governor", function () {
         })
     })
 
-    describe.only("Proposal Creation", function () {
+    describe("Proposal Creation", function () {
         const description = "Test Proposal: testing propsal with random description!"
         let encodedFunctionCall: string = ""
         let proposalId: number = 0
@@ -120,7 +120,7 @@ describe("Governor", function () {
         })
 
         it("cannot create a proposal if VOT3 holder but NO DELEGATION", async function () {
-            const { governor, B3trContract, otherAccount, vot3, b3tr, owner, minterAccount } = await deploy(true, 1)
+            const { governor, B3trContract, otherAccount, vot3, b3tr, owner, minterAccount } = await deploy()
 
             // Before creating a proposal, we need to mint some VOT3 tokens to the owner
             await b3tr.connect(minterAccount).mint(owner, ethers.parseEther("1000"))
@@ -150,7 +150,7 @@ describe("Governor", function () {
             await b3tr.connect(minterAccount).mint(owner, ethers.parseEther("1000"))
             await b3tr.approve(await vot3.getAddress(), ethers.parseEther("9"))
             await vot3.stake(ethers.parseEther("9"))
-            // then we need to delegate the votes to the owner (self-delegation)
+            // then we need to delegate the votes to ourself (self-delegation)
             // this needs to be done because by default voting power is calculated only when you delegate
             await vot3.delegate(await owner.getAddress())
 
@@ -222,22 +222,50 @@ describe("Governor", function () {
 
             expect(proposalId).to.eql(retrievedProposalId)
         })
+
+        it("ANY user that holds VOT3 and DELEGATED can create a proposal", async function () {
+            const { governor, B3trContract, otherAccount, vot3, b3tr, owner, minterAccount } = await deploy(true, 1)
+
+            // Before creating a proposal, we need to mint some VOT3 tokens to the owner
+            await b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))
+            await b3tr.connect(otherAccount).approve(await vot3.getAddress(), ethers.parseEther("9"))
+            await vot3.connect(otherAccount).stake(ethers.parseEther("9"))
+            // then we need to delegate the votes to ourself (self-delegation)
+            // this needs to be done because by default voting power is calculated only when you delegate
+            await vot3.connect(otherAccount).delegate(await otherAccount.getAddress())
+
+            // Now we can create a proposal
+            const b3trAddress = await b3tr.getAddress()
+            encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+
+            //TODO: move this inside the helper file
+            // We also need to wait a block to update the proposer's votes snapshote
+            // since we do not support ethers' evm_mine yet, we need to wait for a block with a timeout function
+            let startingBlock = await governor.clock()
+            let currentBlock
+            do {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                currentBlock = await governor.clock()
+            } while (startingBlock === currentBlock)
+
+            await governor.connect(otherAccount).propose(
+                [b3trAddress],
+                [0],
+                [encodedFunctionCall],
+                description,
+            )
+        })
     })
 
-    // can index proposals
+    describe("Proposal Indexing", function () {
 
-    // anyone can create a proposal?
+    })
 
-    // vote can be executed after proposal is passed
+    describe("Proposal Voting", function () {
 
-    // it("should not create a proposal if not a VOT3 owner", async function () {
-    //     const { governor, otherAccount } = await deploy()
+    })
 
-    //     // Create a proposal
-    //     await expect(governor.connect(otherAccount).createProposal("Test Proposal", "This is a test proposal")).to.be.revertedWith("Governor: Only VOT3 owners can create proposals")
-    // })
+    describe("Proposal Execution", function () {
 
-    // PROPOSAL VOTING
-
-    // PROPOSAL EXECUTION
+    })
 })
