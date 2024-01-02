@@ -1,69 +1,12 @@
 import { assert, ethers } from "hardhat"
 import { expect } from "chai"
-import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
-import { BigNumberish, Contract, ContractFactory } from "ethers"
-import { time } from "@nomicfoundation/hardhat-network-helpers"
+import { defaultVotingPeriod, defaultVotingTreashold, getOrDeployContractInstances } from "./helpers"
 
-interface DeployInstance {
-    B3trContract: ContractFactory
-    b3tr: any
-    vot3: any
-    timeLock: any
-    governor: any
-    owner: HardhatEthersSigner
-    otherAccount: HardhatEthersSigner
-    minterAccount: HardhatEthersSigner
-    timelockAdmin: HardhatEthersSigner
-    otherAccounts: HardhatEthersSigner[]
-}
-
-const defaultVotingPeriod = 45818
-const defaultVotingTreashold = 0
-//TODO: move deploy() inside a helper file
 describe("Governor and TimeLock", function () {
-    let cachedDeployInstance: DeployInstance
-    async function deploy(forceDeploy = false, votingTreshold = defaultVotingTreashold): Promise<DeployInstance> {
-        if (!forceDeploy && cachedDeployInstance !== undefined) {
-            return cachedDeployInstance
-        }
 
-        // Contracts are deployed using the first signer/account by default
-        const [owner, otherAccount, minterAccount, timelockAdmin, ...otherAccounts] = await ethers.getSigners()
-
-        // Deploy B3TR
-        const B3trContract = await ethers.getContractFactory("B3TR")
-        const b3tr = await B3trContract.deploy(minterAccount)
-
-        // Deploy VOT3
-        const Vot3Contract = await ethers.getContractFactory("VOT3")
-        const vot3 = await Vot3Contract.deploy(await b3tr.getAddress())
-
-        // Deploy TimeLock
-        const TimeLockContract = await ethers.getContractFactory("TimeLock")
-        const timeLock = await TimeLockContract.deploy(
-            3600,
-            [],
-            [],
-            timelockAdmin,
-        )
-
-        // Deploy Governor
-        const GovernorContract = await ethers.getContractFactory("GovernorContract")
-        const governor = await GovernorContract.deploy(
-            await vot3.getAddress(),
-            await timeLock.getAddress(),
-            4, // quroum percentage
-            defaultVotingPeriod, // voting period
-            1, // voting delay
-            votingTreshold, // voting treshold
-        )
-
-        cachedDeployInstance = { B3trContract, b3tr, vot3, timeLock, governor, owner, otherAccount, minterAccount, timelockAdmin, otherAccounts }
-        return cachedDeployInstance
-    }
-    describe("Deployment", function () {
+    describe("Governor deployment", function () {
         it("should set constructors correctly", async function () {
-            const { governor, B3trContract, otherAccount, vot3, b3tr, owner, timeLock } = await deploy(true)
+            const { governor, B3trContract, otherAccount, vot3, b3tr, owner, timeLock } = await getOrDeployContractInstances(true)
             const votingDelay = (await governor.votingDelay()).toString()
             const votesThreshold = (await governor.proposalThreshold()).toString()
             const votingPeriod = (await governor.votingPeriod()).toString()
@@ -101,7 +44,7 @@ describe("Governor and TimeLock", function () {
         let proposalId: number = 0
 
         it("cannot create a proposal if NOT a VOT3 holder", async function () {
-            const { governor, B3trContract, otherAccount, vot3, b3tr, owner } = await deploy(true, 1)
+            const { governor, B3trContract, otherAccount, vot3, b3tr, owner } = await getOrDeployContractInstances(true, 1)
 
             const b3trAddress = await b3tr.getAddress()
             encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
@@ -120,7 +63,7 @@ describe("Governor and TimeLock", function () {
         })
 
         it("cannot create a proposal if VOT3 holder but NO DELEGATION", async function () {
-            const { governor, B3trContract, otherAccount, vot3, b3tr, owner, minterAccount } = await deploy()
+            const { governor, B3trContract, otherAccount, vot3, b3tr, owner, minterAccount } = await getOrDeployContractInstances()
 
             // Before creating a proposal, we need to mint some VOT3 tokens to the owner
             await b3tr.connect(minterAccount).mint(owner, ethers.parseEther("1000"))
@@ -144,7 +87,7 @@ describe("Governor and TimeLock", function () {
         })
 
         it("can create a proposal if VOT3 holder that self-delegated", async function () {
-            const { governor, B3trContract, otherAccount, vot3, b3tr, owner, minterAccount } = await deploy(true, 1)
+            const { governor, B3trContract, otherAccount, vot3, b3tr, owner, minterAccount } = await getOrDeployContractInstances(true, 1)
 
             // Before creating a proposal, we need to mint some VOT3 tokens to the owner
             await b3tr.connect(minterAccount).mint(owner, ethers.parseEther("1000"))
@@ -209,7 +152,7 @@ describe("Governor and TimeLock", function () {
         })
 
         it("can calculate the proposal id from the proposal parameters", async function () {
-            const { governor, B3trContract, otherAccount, vot3, b3tr, owner } = await deploy(false)
+            const { governor, B3trContract, otherAccount, vot3, b3tr, owner } = await getOrDeployContractInstances(false)
 
             const b3trAddress = await b3tr.getAddress()
 
@@ -224,7 +167,7 @@ describe("Governor and TimeLock", function () {
         })
 
         it("ANY user that holds VOT3 and DELEGATED can create a proposal", async function () {
-            const { governor, B3trContract, otherAccount, vot3, b3tr, owner, minterAccount } = await deploy(true, 1)
+            const { governor, B3trContract, otherAccount, vot3, b3tr, owner, minterAccount } = await getOrDeployContractInstances(true, 1)
 
             // Before creating a proposal, we need to mint some VOT3 tokens to the owner
             await b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))

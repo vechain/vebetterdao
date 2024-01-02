@@ -1,40 +1,12 @@
 import { assert, ethers } from "hardhat"
 import { expect } from "chai"
-import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
-
-interface DeployInstance {
-  b3tr: any
-  vot3: any
-  owner: HardhatEthersSigner
-  otherAccount: HardhatEthersSigner
-  minterAccount: HardhatEthersSigner
-}
+import { getOrDeployContractInstances } from "./helpers"
 
 describe("VOT3", function () {
-  let cachedDeployInstance: DeployInstance
-  async function deploy(forceDeploy = false): Promise<DeployInstance> {
-    if (!forceDeploy && cachedDeployInstance !== undefined) {
-      return cachedDeployInstance
-    }
-
-    // Contracts are deployed using the first signer/account by default
-    const [owner, otherAccount, minterAccount] = await ethers.getSigners()
-
-    // Deploy B3TR
-    const B3trContract = await ethers.getContractFactory("B3TR")
-    const b3tr = await B3trContract.deploy(minterAccount)
-
-    // Deploy VOT3
-    const Vot3Contract = await ethers.getContractFactory("VOT3")
-    const vot3 = await Vot3Contract.deploy(await b3tr.getAddress())
-
-    cachedDeployInstance = { b3tr, vot3, owner, otherAccount, minterAccount }
-    return cachedDeployInstance
-  }
 
   describe("Deployment", function () {
     it("should deploy the contract", async function () {
-      const { vot3 } = await deploy()
+      const { vot3 } = await getOrDeployContractInstances()
       await vot3.waitForDeployment()
       const address = await vot3.getAddress()
 
@@ -42,7 +14,7 @@ describe("VOT3", function () {
     })
 
     it("should have the correct name", async function () {
-      const { vot3 } = await deploy()
+      const { vot3 } = await getOrDeployContractInstances()
 
       const res = await vot3.name()
       expect(res).to.eql("VOT3")
@@ -52,7 +24,7 @@ describe("VOT3", function () {
     })
 
     it("admin role is set correctly upon deploy", async function () {
-      const { vot3, owner } = await deploy()
+      const { vot3, owner } = await getOrDeployContractInstances()
 
       const defaultAdminRole = await vot3.DEFAULT_ADMIN_ROLE()
 
@@ -63,7 +35,7 @@ describe("VOT3", function () {
 
   describe("Lock B3TR", function () {
     it("should lock B3TR and mint VOT3", async function () {
-      const { b3tr, vot3, minterAccount, otherAccount } = await deploy(true)
+      const { b3tr, vot3, minterAccount, otherAccount } = await getOrDeployContractInstances(true)
 
       // Mint some B3TR
       await expect(b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))).not.to.be.reverted
@@ -82,7 +54,7 @@ describe("VOT3", function () {
     })
 
     it("should not lock B3TR if not enough B3TR approved", async function () {
-      const { b3tr, vot3, minterAccount, otherAccount } = await deploy(true)
+      const { b3tr, vot3, minterAccount, otherAccount } = await getOrDeployContractInstances(true)
 
       // Mint some B3TR
       await expect(b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))).not.to.be.reverted
@@ -103,7 +75,7 @@ describe("VOT3", function () {
 
   describe("Unlock B3TR", function () {
     it("should burn VOT3 and unlock B3TR", async function () {
-      const { b3tr, vot3, minterAccount, otherAccount } = await deploy(true)
+      const { b3tr, vot3, minterAccount, otherAccount } = await getOrDeployContractInstances(true)
 
       const vot3Address = await vot3.getAddress()
 
@@ -134,7 +106,7 @@ describe("VOT3", function () {
     })
 
     it("should not unlock B3TR if not enough VOT3", async function () {
-      const { b3tr, vot3, minterAccount, otherAccount } = await deploy(true)
+      const { b3tr, vot3, minterAccount, otherAccount } = await getOrDeployContractInstances(true)
 
       // Mint some B3TR
       await expect(b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))).not.to.be.reverted
@@ -163,7 +135,7 @@ describe("VOT3", function () {
 
   describe("VOT3 should not be transferable by default", function () {
     it("transfer", async function () {
-      const { b3tr, vot3, owner, minterAccount, otherAccount } = await deploy(true)
+      const { b3tr, vot3, owner, minterAccount, otherAccount } = await getOrDeployContractInstances(true)
 
       // Mint some B3TR
       await expect(b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))).not.to.be.reverted
@@ -184,7 +156,7 @@ describe("VOT3", function () {
     })
 
     it("transferFrom", async function () {
-      const { b3tr, vot3, owner, minterAccount, otherAccount } = await deploy(true)
+      const { b3tr, vot3, owner, minterAccount, otherAccount } = await getOrDeployContractInstances(true)
 
       // Mint some B3TR
       await expect(b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))).not.to.be.reverted
@@ -208,7 +180,7 @@ describe("VOT3", function () {
     })
 
     it("approve", async function () {
-      const { b3tr, vot3, owner, minterAccount, otherAccount } = await deploy(true)
+      const { b3tr, vot3, owner, minterAccount, otherAccount } = await getOrDeployContractInstances(true)
 
       // Mint some B3TR
       await expect(b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))).not.to.be.reverted
@@ -231,7 +203,7 @@ describe("VOT3", function () {
 
   describe("VOT3 should be transferable after canTransfer is enabled", function () {
     it("transfer", async function () {
-      const { b3tr, vot3, owner, minterAccount, otherAccount } = await deploy(true)
+      const { b3tr, vot3, owner, minterAccount, otherAccount } = await getOrDeployContractInstances(true)
 
       // Mint some B3TR
       await expect(b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))).not.to.be.reverted
@@ -255,7 +227,7 @@ describe("VOT3", function () {
     })
 
     it("transferFrom", async function () {
-      const { b3tr, vot3, owner, minterAccount, otherAccount } = await deploy(true)
+      const { b3tr, vot3, owner, minterAccount, otherAccount } = await getOrDeployContractInstances(true)
 
       // Mint some B3TR
       await expect(b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))).not.to.be.reverted
@@ -283,7 +255,7 @@ describe("VOT3", function () {
     })
 
     it("approve", async function () {
-      const { b3tr, vot3, owner, minterAccount, otherAccount } = await deploy(true)
+      const { b3tr, vot3, owner, minterAccount, otherAccount } = await getOrDeployContractInstances(true)
 
       // Mint some B3TR
       await expect(b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))).not.to.be.reverted
@@ -305,7 +277,7 @@ describe("VOT3", function () {
 
   describe("Toggle transferability", function () {
     it("Only admin can change canTransfer (true)", async function () {
-      const { b3tr, vot3, owner, minterAccount, otherAccount } = await deploy(true)
+      const { b3tr, vot3, owner, minterAccount, otherAccount } = await getOrDeployContractInstances(true)
 
       // Mint some B3TR
       await expect(b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))).not.to.be.reverted
@@ -327,7 +299,7 @@ describe("VOT3", function () {
     })
 
     it("Only admin can change canTransfer (false)", async function () {
-      const { b3tr, vot3, owner, minterAccount, otherAccount } = await deploy(true)
+      const { b3tr, vot3, owner, minterAccount, otherAccount } = await getOrDeployContractInstances(true)
 
       // Mint some B3TR
       await expect(b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))).not.to.be.reverted
@@ -349,7 +321,7 @@ describe("VOT3", function () {
     })
 
     it("Only admin can change canTransfer (multiple)", async function () {
-      const { b3tr, vot3, owner, minterAccount, otherAccount } = await deploy(true)
+      const { b3tr, vot3, owner, minterAccount, otherAccount } = await getOrDeployContractInstances(true)
 
       // Mint some B3TR
       await expect(b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))).not.to.be.reverted
@@ -376,7 +348,7 @@ describe("VOT3", function () {
     })
 
     it("Non admin can't change canTransfer", async function () {
-      const { b3tr, vot3, owner, minterAccount, otherAccount } = await deploy(true)
+      const { b3tr, vot3, owner, minterAccount, otherAccount } = await getOrDeployContractInstances(true)
 
       try {
         await vot3.connect(otherAccount).setCanTransfer(true)
