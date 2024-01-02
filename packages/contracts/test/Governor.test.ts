@@ -1,7 +1,7 @@
 import { assert, ethers } from "hardhat"
 import { expect } from "chai"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
-import { Contract, ContractFactory } from "ethers"
+import { BigNumberish, Contract, ContractFactory } from "ethers"
 
 interface DeployInstance {
     B3trContract: ContractFactory
@@ -15,6 +15,8 @@ interface DeployInstance {
     timelockAdmin: HardhatEthersSigner
     otherAccounts: HardhatEthersSigner[]
 }
+
+const defaultVotingPeriod = 45818
 
 describe("Governor", function () {
     let cachedDeployInstance: DeployInstance
@@ -49,7 +51,7 @@ describe("Governor", function () {
             await vot3.getAddress(),
             await timeLock.getAddress(),
             4, // quroum percentage
-            45818, // voting period
+            defaultVotingPeriod, // voting period
             1, // voting delay
             0, // voting treshold
         )
@@ -57,7 +59,7 @@ describe("Governor", function () {
         cachedDeployInstance = { B3trContract, b3tr, vot3, timeLock, governor, owner, otherAccount, minterAccount, timelockAdmin, otherAccounts }
         return cachedDeployInstance
     }
-    describe("Deployment", function () {
+    describe.only("Deployment", function () {
         it("should set constructors correctly", async function () {
             const { governor, B3trContract, otherAccount, vot3, b3tr, owner } = await deploy(true)
             const votingDelay = (await governor.votingDelay()).toString()
@@ -68,8 +70,8 @@ describe("Governor", function () {
 
             // proposers votes should be 0
             const clock = await governor.clock()
-            const proposerVotes = (await governor.getVotes(owner, parseInt(clock.toString()) - 1)).toString()
-            expect(proposerVotes).to.eql("0")
+            const proposerVotes = await governor.getVotes(owner, (clock - BigInt(1)).toString())
+            expect(proposerVotes.toString()).to.eql("0")
         })
     })
 
@@ -94,22 +96,32 @@ describe("Governor", function () {
 
             const proposeReceipt = await tx.wait()
 
-            // Get the proposal id
-            // let proposalId: number = 0;
-            // Decode the logs to find the specific event
-            for (const log of proposeReceipt.logs) {
-                const decoded = governor.interface.parseLog(log);
-                // Process the event
-                if (decoded.name == "ProposalCreated") {
-                    proposalId = decoded.args[0];
-                }
-            }
+            // Check that the ProposalCreated event was emitted with the correct parameters
+            const event = proposeReceipt.logs[0]
+            const decodedLogs = governor.interface.parseLog(event);
+            console.log(decodedLogs);
 
+            expect(decodedLogs.name).to.eql("ProposalCreated")
+            proposalId = decodedLogs.args[0];
             expect(proposalId).not.to.be.null
 
-            // che altro dovrei controllare quando creo una proposal?
-
-            // che l'evento ritorna le cose giuste
+            // proposer is the owner
+            expect(decodedLogs.args[1]).to.eql(await owner.getAddress())
+            // targets are correct
+            expect(decodedLogs.args[2]).to.eql([b3trAddress])
+            // values are correct
+            expect(decodedLogs.args[3].toString()).to.eql("0")
+            // calldatas are correct
+            expect(decodedLogs.args[5]).to.eql([encodedFunctionCall])
+            // description is correct
+            expect(decodedLogs.args[8]).to.eql(description)
+            // block when proposal will start
+            const voteStart = decodedLogs.args[6]
+            expect(voteStart).not.to.be.null
+            // block when proposal will end
+            const voteEnd = decodedLogs.args[7]
+            expect(voteEnd).not.to.be.null
+            expect(voteEnd).to.eql(voteStart + BigInt(defaultVotingPeriod))
 
             // che lo stato della proposal sia pending
 
