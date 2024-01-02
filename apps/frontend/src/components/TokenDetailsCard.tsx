@@ -10,6 +10,8 @@ import {
   StackDivider,
   HStack,
   Progress,
+  Spinner,
+  Skeleton,
 } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { UseQueryResult } from "@tanstack/react-query"
@@ -77,7 +79,10 @@ export const TokenDetailsCard = ({ tokenDetailsQueryResult: { data: tokenDetails
   return (
     <Card w="full">
       <CardHeader>
-        <Heading size="sm">Token Details</Heading>
+        <HStack justify={"space-between"} align={"center"} w="full">
+          <Heading size="sm">Token Details</Heading>
+          {isLoading && <Spinner size={"sm"} />}
+        </HStack>
       </CardHeader>
       <CardBody>
         <VStack spacing={4} divider={<StackDivider />} w="full" justify={"flex-start"} align={"flex-start"}>
@@ -86,7 +91,7 @@ export const TokenDetailsCard = ({ tokenDetailsQueryResult: { data: tokenDetails
               Name
             </Heading>
             <Text pt="2" fontSize="sm">
-              {tokenDetails?.name}
+              <Skeleton isLoaded={!isLoading}>{tokenDetails?.name ?? "B3TR"}</Skeleton>
             </Text>
           </Box>
           <Box>
@@ -94,7 +99,7 @@ export const TokenDetailsCard = ({ tokenDetailsQueryResult: { data: tokenDetails
               Symbol
             </Heading>
             <Text pt="2" fontSize="sm">
-              {tokenDetails?.symbol}
+              <Skeleton isLoaded={!isLoading}>{tokenDetails?.symbol ?? "B3TR"}</Skeleton>
             </Text>
           </Box>
 
@@ -103,7 +108,7 @@ export const TokenDetailsCard = ({ tokenDetailsQueryResult: { data: tokenDetails
               Decimals
             </Heading>
             <Text pt="2" fontSize="sm">
-              {tokenDetails?.decimals}
+              <Skeleton isLoaded={!isLoading}>{tokenDetails?.decimals ?? 18} </Skeleton>
             </Text>
           </Box>
           <Box w="full">
@@ -111,13 +116,19 @@ export const TokenDetailsCard = ({ tokenDetailsQueryResult: { data: tokenDetails
               Circulating Supply
             </Heading>
             <VStack w="full" spacing={1}>
-              <Progress mt="4" value={supplyProgressPercentage} w="full" />
+              <Skeleton isLoaded={!isLoading} w="full" mt="4">
+                <Progress value={supplyProgressPercentage} w="full" />
+              </Skeleton>
               <HStack w="full" justify="space-between">
                 <Text fontSize="sm" textAlign="right">
-                  {formattedCirculatingSupply} {tokenDetails?.symbol}
+                  <Skeleton isLoaded={!isLoading}>
+                    {formattedCirculatingSupply} {tokenDetails?.symbol ?? "B3TR"}
+                  </Skeleton>
                 </Text>
                 <Text fontSize="sm" textAlign="left">
-                  {formattedTotalSupply} {tokenDetails?.symbol}
+                  <Skeleton isLoaded={!isLoading}>
+                    {formattedTotalSupply} {tokenDetails?.symbol ?? "B3TR"}
+                  </Skeleton>
                 </Text>
               </HStack>
             </VStack>

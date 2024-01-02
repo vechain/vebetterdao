@@ -20,8 +20,6 @@ export const getMinterRoleValue = async (thor: Connex.Thor): Promise<string> => 
 
     if (res.vmError) return Promise.reject(new Error(res.vmError))
 
-    console.log({ minterRoleValuer: res.decoded[0] })
-
     return res.decoded[0]
 }
 
@@ -43,8 +41,6 @@ export const getUserHasRole = async (thor: Connex.Thor, role?: string, address?:
         .call(role, address)
 
     if (res.vmError) return Promise.reject(new Error(res.vmError))
-
-    console.log({ getUserHasRole: res.decoded[0] })
 
     return res.decoded[0]
 }

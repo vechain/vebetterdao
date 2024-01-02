@@ -48,8 +48,6 @@ export const MintNewB3trCard = () => {
     amount,
   })
 
-  console.log({ sendTransactionError })
-
   const onSubmit = async (_data: FormData) => {
     if (address && amount) {
       sendTransaction()

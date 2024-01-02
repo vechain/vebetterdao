@@ -57,11 +57,20 @@ If you are not deploying to the solo node, you will need to import the `MNEMONIC
 
 #### Add the contract address in the .env
 
-Copy the address printed in console in the previous step and create new `.env` file with the following key:
+Create a new env file starting from the existing template using
+
+`cp .env.example .env`
 
 ```
-NEXT_PUBLIC_B3TR_CONTRACT_ADDRESS=0x.....
+NEXT_PUBLIC_B3TR_CONTRACT_ADDRESS=0x...
+NEXT_PUBLIC_VOT3_CONTRACT_ADDRESS=0x...
+NEXT_PUBLIC_NODE_URL=http://localhost:8669
+NEXT_PUBLIC_NETWORK_TYPE=solo
 ```
+
+Override `NEXT_PUBLIC_B3TR_CONTRACT_ADDRESS` and `NEXT_PUBLIC_VOT3_CONTRACT_ADDRESS` with the addresses outputted in the previous step.
+`NEXT_PUBLIC_NODE_URL` and `NEXT_PUBLIC_NETWORK_TYPE` define the network config using by the dapp, and should match the network where the contract are deployed
+Values defined in `.env.example` are good for local development using solo.
 
 #### Run the dev server
 
