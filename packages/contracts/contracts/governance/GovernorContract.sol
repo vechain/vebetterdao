@@ -16,6 +16,15 @@ contract GovernorContract is
   GovernorVotesQuorumFraction,
   GovernorTimelockControl
 {
+  /**
+   * @notice Construct a GovernorBravo contract
+   * @param _timelock The address of the Timelock
+   * @param _vot3Token The address of the Vot3 token used for voting
+   * @param _quorumPercentage quorum as a percentage of the total supply at the block a proposal’s voting power is retrieved
+   * @param _initialVotingPeriod How long does a proposal remain open to votes
+   * @param _initialVotingDelay How long after a proposal is created should voting power be fixed
+   * @param _initialProposalThreshold The Proposal Threshold is the amount of voting power that an account needs to make a proposal
+   */
   constructor(
     IVotes _vot3Token,
     TimelockController _timelock,
