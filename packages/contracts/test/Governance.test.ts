@@ -2,6 +2,7 @@ import { assert, ethers } from "hardhat"
 import { expect } from "chai"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { BigNumberish, Contract, ContractFactory } from "ethers"
+import { time } from "@nomicfoundation/hardhat-network-helpers"
 
 interface DeployInstance {
     B3trContract: ContractFactory
@@ -17,10 +18,11 @@ interface DeployInstance {
 }
 
 const defaultVotingPeriod = 45818
+const defaultVotingTreashold = 0
 
 describe("Governor", function () {
     let cachedDeployInstance: DeployInstance
-    async function deploy(forceDeploy = false): Promise<DeployInstance> {
+    async function deploy(forceDeploy = false, votingTreshold = defaultVotingTreashold): Promise<DeployInstance> {
         if (!forceDeploy && cachedDeployInstance !== undefined) {
             return cachedDeployInstance
         }
@@ -53,13 +55,13 @@ describe("Governor", function () {
             4, // quroum percentage
             defaultVotingPeriod, // voting period
             1, // voting delay
-            0, // voting treshold
+            votingTreshold, // voting treshold
         )
 
         cachedDeployInstance = { B3trContract, b3tr, vot3, timeLock, governor, owner, otherAccount, minterAccount, timelockAdmin, otherAccounts }
         return cachedDeployInstance
     }
-    describe.only("Deployment", function () {
+    describe("Deployment", function () {
         it("should set constructors correctly", async function () {
             const { governor, B3trContract, otherAccount, vot3, b3tr, owner, timeLock } = await deploy(true)
             const votingDelay = (await governor.votingDelay()).toString()
@@ -67,7 +69,7 @@ describe("Governor", function () {
             const votingPeriod = (await governor.votingPeriod()).toString()
 
             expect(votingDelay).to.eql("1")
-            expect(votesThreshold).to.eql("0")
+            expect(votesThreshold).to.eql(defaultVotingTreashold.toString())
             expect(votingPeriod).to.eql(defaultVotingPeriod.toString())
 
             // proposers votes should be 0
@@ -86,6 +88,10 @@ describe("Governor", function () {
             // check that the TimeLock address is correct
             const timeLockAddress = await governor.timelock()
             expect(timeLockAddress).to.eql(await timeLock.getAddress())
+
+            // clock mode is set correctly
+            const clockMode = await governor.CLOCK_MODE()
+            expect(clockMode.toString()).to.eql("mode=blocknumber&from=default")
         })
     })
 
@@ -94,11 +100,72 @@ describe("Governor", function () {
         let encodedFunctionCall: string = ""
         let proposalId: number = 0
 
-        it("can create a proposal if VOT3 holder", async function () {
-            const { governor, B3trContract, otherAccount, vot3, b3tr, owner } = await deploy(true)
+        it("cannot create a proposal if NOT a VOT3 holder", async function () {
+            const { governor, B3trContract, otherAccount, vot3, b3tr, owner } = await deploy(true, 1)
 
             const b3trAddress = await b3tr.getAddress()
             encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+
+            try {
+                await governor.propose(
+                    [b3trAddress],
+                    [0],
+                    [encodedFunctionCall],
+                    description,
+                )
+                assert.fail("The transaction should have failed")
+            } catch (err: any) {
+                assert(err.message.includes("execution reverted"), "Expected an 'execution reverted' error")
+            }
+        })
+
+        it("cannot create a proposal if VOT3 holder but NO DELEGATION", async function () {
+            const { governor, B3trContract, otherAccount, vot3, b3tr, owner, minterAccount } = await deploy(true, 1)
+
+            // Before creating a proposal, we need to mint some VOT3 tokens to the owner
+            await b3tr.connect(minterAccount).mint(owner, ethers.parseEther("1000"))
+            await b3tr.approve(await vot3.getAddress(), ethers.parseEther("9"))
+            await vot3.stake(ethers.parseEther("9"))
+
+            const b3trAddress = await b3tr.getAddress()
+            encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+
+            try {
+                await governor.propose(
+                    [b3trAddress],
+                    [0],
+                    [encodedFunctionCall],
+                    description,
+                )
+                assert.fail("The transaction should have failed")
+            } catch (err: any) {
+                assert(err.message.includes("execution reverted"), "Expected an 'execution reverted' error")
+            }
+        })
+
+        it("can create a proposal if VOT3 holder that self-delegated", async function () {
+            const { governor, B3trContract, otherAccount, vot3, b3tr, owner, minterAccount } = await deploy(true, 1)
+
+            // Before creating a proposal, we need to mint some VOT3 tokens to the owner
+            await b3tr.connect(minterAccount).mint(owner, ethers.parseEther("1000"))
+            await b3tr.approve(await vot3.getAddress(), ethers.parseEther("9"))
+            await vot3.stake(ethers.parseEther("9"))
+            // then we need to delegate the votes to the owner (self-delegation)
+            // this needs to be done because by default voting power is calculated only when you delegate
+            await vot3.delegate(await owner.getAddress())
+
+            // Now we can create a proposal
+            const b3trAddress = await b3tr.getAddress()
+            encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+
+            // We also need to wait a block to update the proposer's votes snapshote
+            // since we do not support ethers' evm_mine yet, we need to wait for a block with a timeout function
+            let startingBlock = await governor.clock()
+            let currentBlock
+            do {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                currentBlock = await governor.clock()
+            } while (startingBlock === currentBlock)
 
             const tx = await governor.propose(
                 [b3trAddress],
