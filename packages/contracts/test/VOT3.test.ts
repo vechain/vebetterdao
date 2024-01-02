@@ -28,7 +28,8 @@ describe("VOT3", function () {
     const Vot3Contract = await ethers.getContractFactory("VOT3")
     const vot3 = await Vot3Contract.deploy(await b3tr.getAddress())
 
-    return { b3tr, vot3, owner, otherAccount, minterAccount }
+    cachedDeployInstance = { b3tr, vot3, owner, otherAccount, minterAccount }
+    return cachedDeployInstance
   }
 
   describe("Deployment", function () {
@@ -203,7 +204,7 @@ describe("VOT3", function () {
         // Transfer VOT3
         await vot3.connect(otherAccount).transferFrom(otherAccount, owner, ethers.parseEther("1"))
         assert.fail("The transaction should have failed")
-      } catch (err: any) {}
+      } catch (err: any) { }
     })
 
     it("approve", async function () {
