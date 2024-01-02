@@ -1,6 +1,6 @@
 import { assert, ethers } from "hardhat"
 import { expect } from "chai"
-import { defaultVotingPeriod, defaultVotingTreashold, getOrDeployContractInstances } from "./helpers"
+import { defaultVotingPeriod, defaultVotingTreashold, getOrDeployContractInstances, waitForNextBlock } from "./helpers"
 
 describe("Governor and TimeLock", function () {
 
@@ -102,13 +102,7 @@ describe("Governor and TimeLock", function () {
             encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
 
             // We also need to wait a block to update the proposer's votes snapshote
-            // since we do not support ethers' evm_mine yet, we need to wait for a block with a timeout function
-            let startingBlock = await governor.clock()
-            let currentBlock
-            do {
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                currentBlock = await governor.clock()
-            } while (startingBlock === currentBlock)
+            await waitForNextBlock()
 
             const tx = await governor.propose(
                 [b3trAddress],
@@ -181,15 +175,8 @@ describe("Governor and TimeLock", function () {
             const b3trAddress = await b3tr.getAddress()
             encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
 
-            //TODO: move this inside the helper file
             // We also need to wait a block to update the proposer's votes snapshote
-            // since we do not support ethers' evm_mine yet, we need to wait for a block with a timeout function
-            let startingBlock = await governor.clock()
-            let currentBlock
-            do {
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                currentBlock = await governor.clock()
-            } while (startingBlock === currentBlock)
+            await waitForNextBlock()
 
             await governor.connect(otherAccount).propose(
                 [b3trAddress],
