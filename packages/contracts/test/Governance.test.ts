@@ -155,7 +155,7 @@ describe("Governor and TimeLock", function () {
     })
 
     // the tests descibed in this section cannot be run in isolation, but in cascade
-    describe("Proposal Voting", function () {
+    describe.only("Proposal Voting", function () {
         let voter1: HardhatEthersSigner
         let voter2: HardhatEthersSigner
         let voter3: HardhatEthersSigner
@@ -278,9 +278,61 @@ describe("Governor and TimeLock", function () {
             expect(decodedLogs?.args[2].toString()).to.eql("1")
             // votes
             expect(decodedLogs?.args[3].toString()).not.to.eql("0")
+
+            const hasVoted = await governor.hasVoted(proposalId, await voter3.getAddress())
+            expect(hasVoted).to.eql(true)
         })
 
-        //cannot vote if user bought VOT3 after the proposal creation
+        it('vote has weight 0 if self-delegated VOT3 holder after snapshot', async function () {
+            const { governor, otherAccounts } = await getOrDeployContractInstances(false)
+
+            const proposalState = await governor.state(proposalId)
+            expect(proposalState.toString()).to.eql("1")
+
+            const newVoter = otherAccounts[4]
+            await mintAndDelegate(newVoter, "1000")
+
+            const tx = await governor.connect(newVoter).castVote(proposalId, 1)
+            const proposeReceipt = await tx.wait()
+            const event = proposeReceipt?.logs[0]
+            const decodedLogs = governor.interface.parseLog({
+                topics: [...(event?.topics as string[])],
+                data: event ? event.data : "",
+            });
+
+            //event exists
+            expect(decodedLogs?.name).to.eql("VoteCast")
+            // voter
+            expect(decodedLogs?.args[0]).to.eql(await newVoter.getAddress())
+            // proposal id
+            expect(decodedLogs?.args[1]).to.eql(proposalId)
+            // support
+            expect(decodedLogs?.args[2].toString()).to.eql("1")
+            // votes
+            expect(decodedLogs?.args[3].toString()).to.eql("0")
+        })
+
+        it('can count votes correctly', async function () {
+            const { governor } = await getOrDeployContractInstances(false)
+
+            //vote against
+            await governor.connect(voter4).castVote(proposalId, 0)
+
+            // now we should have the following votes:
+            // voter1: 0 yes
+            // voter2: 0 yes
+            // voter3: 1000 yes
+            // voter4: 9 no
+            // abstain: 0
+            const votes = await governor.proposalVotes(proposalId)
+
+            // against votes
+            expect(votes[0]).to.eql(ethers.parseEther("9"))
+            // for
+            expect(votes[1]).to.eql(ethers.parseEther("1000"))
+            // abstain
+            expect(votes[2].toString()).to.eql("0")
+        })
 
     })
 

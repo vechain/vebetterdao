@@ -16,7 +16,7 @@ interface DeployInstance {
     otherAccounts: HardhatEthersSigner[]
 }
 
-export const defaultVotingPeriod = 45818
+export const defaultVotingPeriod = 20
 export const defaultVotingTreashold = 0
 export const defaultVotingDelay = 1
 
