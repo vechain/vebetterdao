@@ -5,7 +5,7 @@ import { FormattingUtils } from "@repo/utils"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { memo, useMemo } from "react"
 
-type Props = {}
+const swapPercentage = 0.1
 
 export const RedeemB3trButton = memo(() => {
   const { account } = useWallet()
@@ -21,9 +21,10 @@ export const RedeemB3trButton = memo(() => {
       return { formattedBalance: "0", scaledBalance: "0" }
     }
 
+    const balanceToSwap = Number(balance) * swapPercentage
     const decimals = tokenDetails?.decimals ?? 18
 
-    const scaledBalance = FormattingUtils.scaleNumberDown(balance, decimals)
+    const scaledBalance = FormattingUtils.scaleNumberDown(balanceToSwap, decimals)
     const formattedBalance = FormattingUtils.humanNumber(scaledBalance, scaledBalance)
     return { formattedBalance, scaledBalance }
   }, [tokenDetails, balance])

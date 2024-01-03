@@ -7,6 +7,8 @@ import { memo, useMemo } from "react"
 
 type Props = {}
 
+const swapPercentage = 0.1
+
 export const SwapB3trButton: React.FC<Props> = memo(() => {
   const { account } = useWallet()
   const { data: balance, isLoading: isBalanceLoading } = useB3trBalance(account ?? undefined)
@@ -21,9 +23,11 @@ export const SwapB3trButton: React.FC<Props> = memo(() => {
       return { formattedBalance: "0", scaledBalance: "0" }
     }
 
+    const balanceToSwap = Number(balance) * swapPercentage
+
     const decimals = tokenDetails?.decimals ?? 18
 
-    const scaledBalance = FormattingUtils.scaleNumberDown(balance, decimals)
+    const scaledBalance = FormattingUtils.scaleNumberDown(balanceToSwap, decimals)
     const formattedBalance = FormattingUtils.humanNumber(scaledBalance, scaledBalance)
     return { formattedBalance, scaledBalance }
   }, [tokenDetails, balance])
