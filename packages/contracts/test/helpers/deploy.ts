@@ -17,11 +17,11 @@ interface DeployInstance {
 }
 
 export const defaultVotingPeriod = 15
-export const defaultVotingTreashold = 0
+export const defaultVotingTreshold = 0
 export const defaultVotingDelay = 1
 
 let cachedDeployInstance: DeployInstance | undefined = undefined
-export const getOrDeployContractInstances = async (forceDeploy: boolean = false, votingTreshold = defaultVotingTreashold) => {
+export const getOrDeployContractInstances = async (forceDeploy: boolean = false, votingTreshold = defaultVotingTreshold, votingPeriod = defaultVotingPeriod) => {
     if (!forceDeploy && cachedDeployInstance !== undefined) {
         return cachedDeployInstance
     }
@@ -40,7 +40,7 @@ export const getOrDeployContractInstances = async (forceDeploy: boolean = false,
     // Deploy TimeLock
     const TimeLockContract = await ethers.getContractFactory("TimeLock")
     const timeLock = await TimeLockContract.deploy(
-        3600,
+        5, //5 seconds min delay for execute
         [],
         [],
         timelockAdmin,
@@ -52,12 +52,19 @@ export const getOrDeployContractInstances = async (forceDeploy: boolean = false,
         await vot3.getAddress(),
         await timeLock.getAddress(),
         4, // quroum percentage
-        defaultVotingPeriod, // voting period
+        votingPeriod, // voting period
         defaultVotingDelay, // voting delay
         votingTreshold, // voting treshold
     )
     await governor.waitForDeployment()
-    console.log(`Governor deployed at block ${await governor.clock()}`)
+
+    // Set governor as proposer and executor
+    const PROPOSER_ROLE = await timeLock.PROPOSER_ROLE()
+    const EXECUTOR_ROLE = await timeLock.EXECUTOR_ROLE()
+    const CANCELLER_ROLE = await timeLock.CANCELLER_ROLE()
+    await timeLock.connect(timelockAdmin).grantRole(PROPOSER_ROLE, await governor.getAddress())
+    await timeLock.connect(timelockAdmin).grantRole(EXECUTOR_ROLE, await governor.getAddress())
+    await timeLock.connect(timelockAdmin).grantRole(CANCELLER_ROLE, await governor.getAddress())
 
     cachedDeployInstance = { B3trContract, b3tr, vot3, timeLock, governor, owner, otherAccount, minterAccount, timelockAdmin, otherAccounts }
     return cachedDeployInstance

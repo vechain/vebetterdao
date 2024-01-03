@@ -78,6 +78,13 @@ export const getProposalIdFromTx = async (tx: ContractTransactionResponse, gover
     return decodedLogs?.args[0]
 }
 
+export const waitForVotingPeriodToStart = async (proposalId: number, governor: GovernorContract) => {
+    // wait for the proposal to be in active state
+    const voteDealy = await governor.votingDelay()
+    const blocksToMove = parseInt((voteDealy + BigInt(1)).toString())
+    await moveBlocks(blocksToMove)
+}
+
 export const waitForVotingPeriodToEnd = async (proposalId: number, governor: GovernorContract) => {
     const deadline = await governor.proposalDeadline(proposalId)
     // console.log(`Waiting for proposal ${proposalId} to end at block ${deadline}`);
