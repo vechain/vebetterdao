@@ -1,13 +1,14 @@
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
-import { ContractFactory } from "ethers"
+import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers"
 import { ethers } from "hardhat"
+import { B3TR, GovernorContract, GovernorContract__factory, TimeLock, VOT3 } from "../../typechain-types"
 
 interface DeployInstance {
     B3trContract: ContractFactory
-    b3tr: any
-    vot3: any
-    timeLock: any
-    governor: any
+    b3tr: B3TR & { deploymentTransaction(): ContractTransactionResponse; }
+    vot3: VOT3 & { deploymentTransaction(): ContractTransactionResponse; }
+    timeLock: TimeLock & { deploymentTransaction(): ContractTransactionResponse; }
+    governor: GovernorContract & { deploymentTransaction(): ContractTransactionResponse; }
     owner: HardhatEthersSigner
     otherAccount: HardhatEthersSigner
     minterAccount: HardhatEthersSigner

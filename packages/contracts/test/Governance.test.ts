@@ -1,8 +1,12 @@
 import { assert, ethers } from "hardhat"
 import { expect } from "chai"
-import { defaultVotingPeriod, defaultVotingTreashold, getOrDeployContractInstances, waitForNextBlock } from "./helpers"
+import { createProposal, defaultVotingPeriod, defaultVotingTreashold, getOrDeployContractInstances, waitForNextBlock } from "./helpers"
+import { EventLog, Log } from "ethers"
 
 describe("Governor and TimeLock", function () {
+    const description = "Test Proposal: testing propsal with random description!"
+    const functionToCall = "tokenDetails"
+    let proposalId: number = 0
 
     describe("Governor deployment", function () {
         it("should set constructors correctly", async function () {
@@ -38,31 +42,20 @@ describe("Governor and TimeLock", function () {
         })
     })
 
-    describe("Proposal Creation", function () {
-        const description = "Test Proposal: testing propsal with random description!"
-        let encodedFunctionCall: string = ""
-        let proposalId: number = 0
-
+    describe.only("Proposal Creation", function () {
         it("cannot create a proposal if NOT a VOT3 holder", async function () {
             const { governor, B3trContract, otherAccount, vot3, b3tr, owner } = await getOrDeployContractInstances(true, 1)
 
-            const b3trAddress = await b3tr.getAddress()
-            encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
-
             try {
-                await governor.propose(
-                    [b3trAddress],
-                    [0],
-                    [encodedFunctionCall],
-                    description,
-                )
+                await createProposal(governor, b3tr, B3trContract, owner, description, functionToCall, [])
+
                 assert.fail("The transaction should have failed")
             } catch (err: any) {
                 assert(err.message.includes("execution reverted"), "Expected an 'execution reverted' error")
             }
         })
 
-        it("cannot create a proposal if VOT3 holder but NO DELEGATION", async function () {
+        it("cannot create a proposal if user did not delegated", async function () {
             const { governor, B3trContract, otherAccount, vot3, b3tr, owner, minterAccount } = await getOrDeployContractInstances()
 
             // Before creating a proposal, we need to mint some VOT3 tokens to the owner
@@ -70,16 +63,9 @@ describe("Governor and TimeLock", function () {
             await b3tr.approve(await vot3.getAddress(), ethers.parseEther("9"))
             await vot3.stake(ethers.parseEther("9"))
 
-            const b3trAddress = await b3tr.getAddress()
-            encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
-
             try {
-                await governor.propose(
-                    [b3trAddress],
-                    [0],
-                    [encodedFunctionCall],
-                    description,
-                )
+                await createProposal(governor, b3tr, B3trContract, owner, description, functionToCall, [])
+
                 assert.fail("The transaction should have failed")
             } catch (err: any) {
                 assert(err.message.includes("execution reverted"), "Expected an 'execution reverted' error")
@@ -99,44 +85,46 @@ describe("Governor and TimeLock", function () {
 
             // Now we can create a proposal
             const b3trAddress = await b3tr.getAddress()
-            encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+            const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
 
             // We also need to wait a block to update the proposer's votes snapshote
             await waitForNextBlock()
 
-            const tx = await governor.propose(
-                [b3trAddress],
-                [0],
-                [encodedFunctionCall],
-                description,
-            )
+            const tx = await createProposal(governor, b3tr, B3trContract, owner, description, functionToCall, [])
 
             const proposeReceipt = await tx.wait()
 
+            expect(proposeReceipt).not.to.be.null
+
             // Check that the ProposalCreated event was emitted with the correct parameters
-            const event = proposeReceipt.logs[0]
-            const decodedLogs = governor.interface.parseLog(event);
+            const event = proposeReceipt?.logs[0]
+            expect(event).not.to.be.undefined
+
+            const decodedLogs = governor.interface.parseLog({
+                topics: [...(event?.topics as string[])],
+                data: event ? event.data : "",
+            });
 
             //event exists
-            expect(decodedLogs.name).to.eql("ProposalCreated")
+            expect(decodedLogs?.name).to.eql("ProposalCreated")
             // proposal id
-            proposalId = decodedLogs.args[0];
+            proposalId = decodedLogs?.args[0];
             expect(proposalId).not.to.be.null
             // proposer is the owner
-            expect(decodedLogs.args[1]).to.eql(await owner.getAddress())
+            expect(decodedLogs?.args[1]).to.eql(await owner.getAddress())
             // targets are correct
-            expect(decodedLogs.args[2]).to.eql([b3trAddress])
+            expect(decodedLogs?.args[2]).to.eql([b3trAddress])
             // values are correct
-            expect(decodedLogs.args[3].toString()).to.eql("0")
+            expect(decodedLogs?.args[3].toString()).to.eql("0")
             // calldatas are correct
-            expect(decodedLogs.args[5]).to.eql([encodedFunctionCall])
+            expect(decodedLogs?.args[5]).to.eql([encodedFunctionCall])
             // description is correct
-            expect(decodedLogs.args[8]).to.eql(description)
+            expect(decodedLogs?.args[8]).to.eql(description)
             // block when proposal will start
-            const voteStart = decodedLogs.args[6]
+            const voteStart = decodedLogs?.args[6]
             expect(voteStart).not.to.be.null
             // block when proposal will end
-            const voteEnd = decodedLogs.args[7]
+            const voteEnd = decodedLogs?.args[7]
             expect(voteEnd).not.to.be.null
             expect(voteEnd).to.eql(voteStart + BigInt(defaultVotingPeriod))
 
@@ -149,6 +137,7 @@ describe("Governor and TimeLock", function () {
             const { governor, B3trContract, otherAccount, vot3, b3tr, owner } = await getOrDeployContractInstances(false)
 
             const b3trAddress = await b3tr.getAddress()
+            const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
 
             const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description));
             const retrievedProposalId = await governor.hashProposal([b3trAddress],
@@ -171,21 +160,15 @@ describe("Governor and TimeLock", function () {
             // this needs to be done because by default voting power is calculated only when you delegate
             await vot3.connect(otherAccount).delegate(await otherAccount.getAddress())
 
-            // Now we can create a proposal
-            const b3trAddress = await b3tr.getAddress()
-            encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
-
             // We also need to wait a block to update the proposer's votes snapshote
             await waitForNextBlock()
 
-            await governor.connect(otherAccount).propose(
-                [b3trAddress],
-                [0],
-                [encodedFunctionCall],
-                description,
-            )
+            // Now we can create a proposal
+            await createProposal(governor, b3tr, B3trContract, otherAccount, description, functionToCall, [])
         })
     })
+
+
 
     describe("Proposal Indexing", function () {
 
