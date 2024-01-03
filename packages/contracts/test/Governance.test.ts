@@ -2,14 +2,14 @@ import { assert, ethers } from "hardhat"
 import { expect } from "chai"
 import {
     createProposal,
-    defaultVotingDelay,
     defaultVotingPeriod,
     defaultVotingTreashold,
     getOrDeployContractInstances,
     getProposalIdFromTx,
     mintAndDelegate,
     moveBlocks,
-    waitForNextBlock
+    waitForNextBlock,
+    waitForVotingPeriodToEnd,
 } from "./helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 
@@ -154,7 +154,7 @@ describe("Governor and TimeLock", function () {
         })
     })
 
-    // the tests descibed in this section cannot be run in isolation, but in cascade
+    // the tests descibed in this section cannot be run in isolation, but need to run in cascade
     describe.only("Proposal Voting", function () {
         let voter1: HardhatEthersSigner
         let voter2: HardhatEthersSigner
@@ -334,6 +334,36 @@ describe("Governor and TimeLock", function () {
             expect(votes[2].toString()).to.eql("0")
         })
 
+        it('cannot vote twice', async function () {
+            const { governor } = await getOrDeployContractInstances(false)
+
+            const proposalState = await governor.state(proposalId)
+            expect(proposalState.toString()).to.eql("1")
+
+            try {
+                await governor.connect(voter3).castVote(proposalId, 1)
+                assert.fail("The transaction should have failed")
+            } catch (err: any) {
+                assert(err.message.includes("execution reverted"), "Expected an 'execution reverted' error")
+            }
+        })
+
+        it('cannot vote after voting period ends', async function () {
+            const { governor, otherAccounts } = await getOrDeployContractInstances(false)
+
+            await waitForVotingPeriodToEnd(proposalId, governor)
+
+            const proposalState = await governor.state(proposalId)
+            expect(proposalState.toString()).to.eql("4") // succeeded
+
+            const voter5 = otherAccounts[5]
+            try {
+                await governor.connect(voter5).castVote(proposalId, 1)
+                assert.fail("The transaction should have failed")
+            } catch (err: any) {
+                assert(err.message.includes("execution reverted"), "Expected an 'execution reverted' error")
+            }
+        }).timeout(1800000)
     })
 
     describe("Proposal Execution", function () {

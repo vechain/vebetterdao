@@ -16,7 +16,7 @@ interface DeployInstance {
     otherAccounts: HardhatEthersSigner[]
 }
 
-export const defaultVotingPeriod = 20
+export const defaultVotingPeriod = 15
 export const defaultVotingTreashold = 0
 export const defaultVotingDelay = 1
 
@@ -56,6 +56,8 @@ export const getOrDeployContractInstances = async (forceDeploy: boolean = false,
         defaultVotingDelay, // voting delay
         votingTreshold, // voting treshold
     )
+    await governor.waitForDeployment()
+    console.log(`Governor deployed at block ${await governor.clock()}`)
 
     cachedDeployInstance = { B3trContract, b3tr, vot3, timeLock, governor, owner, otherAccount, minterAccount, timelockAdmin, otherAccounts }
     return cachedDeployInstance

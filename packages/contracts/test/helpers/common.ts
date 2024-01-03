@@ -16,6 +16,7 @@ export const waitForNextBlock = async () => {
 
 export const moveBlocks = async (blocks: number) => {
     for (let i = 0; i < blocks; i++) {
+        // console.log(`Moving to block +${i+1}`);
         await waitForNextBlock()
     }
 }
@@ -75,4 +76,15 @@ export const getProposalIdFromTx = async (tx: ContractTransactionResponse, gover
     });
 
     return decodedLogs?.args[0]
+}
+
+export const waitForVotingPeriodToEnd = async (proposalId: number, governor: GovernorContract) => {
+    const deadline = await governor.proposalDeadline(proposalId)
+    // console.log(`Waiting for proposal ${proposalId} to end at block ${deadline}`);
+
+    const currentBlock = await governor.clock()
+    // console.log(`Current block is ${currentBlock}`);
+
+
+    await moveBlocks(parseInt((deadline - currentBlock + BigInt(1)).toString()))
 }
