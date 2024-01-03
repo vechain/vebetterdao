@@ -65,9 +65,21 @@ export const useSendTransaction = ({ signerAccount, clauses, onTxConfirmed }: Us
     isError: isTxReceiptError,
   } = useGetTxReceipt(sendTransactionTx?.txid)
 
+  const explainTxRevertReason = async (txReceipt: Connex.Thor.Transaction.Receipt) => {
+    if (!txReceipt.reverted) return
+    const transactionData = await thor.transaction(txReceipt.meta.txID).get()
+    if (!transactionData) return
+    console.log({ transactionData })
+
+    const explained = await thor.explain(transactionData.clauses).caller(transactionData.origin).execute()
+    console.log({ explained })
+    return explained
+  }
+
   useEffect(() => {
     if (!txReceipt) return
     if (txReceipt.reverted) {
+      ;(async () => explainTxRevertReason(txReceipt))()
       toast({
         title: "Transaction reverted.",
         status: "error",
