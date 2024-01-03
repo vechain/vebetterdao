@@ -47,7 +47,7 @@ describe("Governor and TimeLock", function () {
             const { governor, B3trContract, otherAccount, vot3, b3tr, owner } = await getOrDeployContractInstances(true, 1)
 
             try {
-                await createProposal(governor, b3tr, B3trContract, owner, description, functionToCall, [])
+                await createProposal(governor, b3tr, B3trContract, owner, description, functionToCall, [], true)
 
                 assert.fail("The transaction should have failed")
             } catch (err: any) {
@@ -64,7 +64,7 @@ describe("Governor and TimeLock", function () {
             await vot3.stake(ethers.parseEther("9"))
 
             try {
-                await createProposal(governor, b3tr, B3trContract, owner, description, functionToCall, [])
+                await createProposal(governor, b3tr, B3trContract, owner, description, functionToCall, [], true)
 
                 assert.fail("The transaction should have failed")
             } catch (err: any) {
@@ -75,25 +75,9 @@ describe("Governor and TimeLock", function () {
         it("can create a proposal if VOT3 holder that self-delegated", async function () {
             const { governor, B3trContract, otherAccount, vot3, b3tr, owner, minterAccount } = await getOrDeployContractInstances(true, 1)
 
-            // Before creating a proposal, we need to mint some VOT3 tokens to the owner
-            await b3tr.connect(minterAccount).mint(owner, ethers.parseEther("1000"))
-            await b3tr.approve(await vot3.getAddress(), ethers.parseEther("9"))
-            await vot3.stake(ethers.parseEther("9"))
-            // then we need to delegate the votes to ourself (self-delegation)
-            // this needs to be done because by default voting power is calculated only when you delegate
-            await vot3.delegate(await owner.getAddress())
-
             // Now we can create a proposal
-            const b3trAddress = await b3tr.getAddress()
-            const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
-
-            // We also need to wait a block to update the proposer's votes snapshote
-            await waitForNextBlock()
-
             const tx = await createProposal(governor, b3tr, B3trContract, owner, description, functionToCall, [])
-
             const proposeReceipt = await tx.wait()
-
             expect(proposeReceipt).not.to.be.null
 
             // Check that the ProposalCreated event was emitted with the correct parameters
@@ -113,10 +97,12 @@ describe("Governor and TimeLock", function () {
             // proposer is the owner
             expect(decodedLogs?.args[1]).to.eql(await owner.getAddress())
             // targets are correct
+            const b3trAddress = await b3tr.getAddress()
             expect(decodedLogs?.args[2]).to.eql([b3trAddress])
             // values are correct
             expect(decodedLogs?.args[3].toString()).to.eql("0")
             // calldatas are correct
+            const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
             expect(decodedLogs?.args[5]).to.eql([encodedFunctionCall])
             // description is correct
             expect(decodedLogs?.args[8]).to.eql(description)
@@ -140,6 +126,7 @@ describe("Governor and TimeLock", function () {
             const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
 
             const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description));
+
             const retrievedProposalId = await governor.hashProposal([b3trAddress],
                 [0],
                 [encodedFunctionCall],
@@ -151,17 +138,6 @@ describe("Governor and TimeLock", function () {
 
         it("ANY user that holds VOT3 and DELEGATED can create a proposal", async function () {
             const { governor, B3trContract, otherAccount, vot3, b3tr, owner, minterAccount } = await getOrDeployContractInstances(true, 1)
-
-            // Before creating a proposal, we need to mint some VOT3 tokens to the owner
-            await b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))
-            await b3tr.connect(otherAccount).approve(await vot3.getAddress(), ethers.parseEther("9"))
-            await vot3.connect(otherAccount).stake(ethers.parseEther("9"))
-            // then we need to delegate the votes to ourself (self-delegation)
-            // this needs to be done because by default voting power is calculated only when you delegate
-            await vot3.connect(otherAccount).delegate(await otherAccount.getAddress())
-
-            // We also need to wait a block to update the proposer's votes snapshote
-            await waitForNextBlock()
 
             // Now we can create a proposal
             await createProposal(governor, b3tr, B3trContract, otherAccount, description, functionToCall, [])
