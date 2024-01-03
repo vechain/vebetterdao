@@ -8,10 +8,19 @@ import { useMemo } from "react"
 type Props = {
   balanceQueryResult: UseQueryResult<string, Error>
   tokenDetailsQueryResult: UseQueryResult<TokenDetails, Error>
+  componentRight?: React.ReactNode
 }
+/**
+ * BalanceCard displays the balance of the current account
+ * @param param0  balanceQueryResult: UseQueryResult<string, Error>
+ * @param param1 tokenDetailsQueryResult: UseQueryResult<TokenDetails, Error>
+ * @param param2 componentRight?: React.ReactNode
+ * @returns BalanceCard
+ */
 export const BalanceCard = ({
   balanceQueryResult: { data: balance, isLoading: balanceLoading, error },
   tokenDetailsQueryResult: { data: tokenDetails, isLoading: tokenDetailsLoading },
+  componentRight,
 }: Props) => {
   const { account } = useWallet()
 
@@ -69,15 +78,18 @@ export const BalanceCard = ({
         </HStack>
       </CardHeader>
       <CardBody>
-        <HStack spacing={2}>
-          <Heading size="lg">
-            <Skeleton isLoaded={!balanceLoading}>{formattedBalance}</Skeleton>
-          </Heading>
-          <Skeleton isLoaded={!tokenDetailsLoading}>
-            <Text fontSize="sm" as="sub">
-              {tokenDetails?.symbol ?? loadingSymbolPlaceholder}
-            </Text>
-          </Skeleton>
+        <HStack justify={"space-between"} align={"center"} w="full">
+          <HStack spacing={2}>
+            <Heading size="lg">
+              <Skeleton isLoaded={!balanceLoading}>{formattedBalance}</Skeleton>
+            </Heading>
+            <Skeleton isLoaded={!tokenDetailsLoading}>
+              <Text fontSize="sm" as="sub">
+                {tokenDetails?.symbol ?? loadingSymbolPlaceholder}
+              </Text>
+            </Skeleton>
+          </HStack>
+          {componentRight}
         </HStack>
       </CardBody>
     </Card>
