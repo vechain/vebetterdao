@@ -154,8 +154,8 @@ describe("Governor and TimeLock", function () {
         })
     })
 
-    // the tests descibed in this section cannot be run in isolation but in cascade
-    describe.only("Proposal Voting", function () {
+    // the tests descibed in this section cannot be run in isolation, but in cascade
+    describe("Proposal Voting", function () {
         let voter1: HardhatEthersSigner
         let voter2: HardhatEthersSigner
         let voter3: HardhatEthersSigner
@@ -165,6 +165,7 @@ describe("Governor and TimeLock", function () {
             voter1 = otherAccounts[0] // with no VOT3
             voter2 = otherAccounts[1] // with VOT3 but no delegation
             voter3 = otherAccounts[2] // with VOT3 and delegation
+            voter4 = otherAccounts[3] // with VOT3 and delegation
 
             // Before trying to vote we need to mint some VOT3 tokens to the voter2
             await b3tr.connect(minterAccount).mint(voter2, ethers.parseEther("1000"))
@@ -253,7 +254,7 @@ describe("Governor and TimeLock", function () {
             expect(decodedLogs?.args[3].toString()).to.eql("0")
         })
 
-        it('can vote if a VOT3 holder that self-delegated before the proposal creation', async function () {
+        it('can vote if self-delegated VOT3 holder before snapshot', async function () {
             const { governor } = await getOrDeployContractInstances(false)
 
             const proposalState = await governor.state(proposalId)
