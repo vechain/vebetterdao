@@ -1,7 +1,17 @@
 import { assert, ethers } from "hardhat"
 import { expect } from "chai"
-import { createProposal, defaultVotingPeriod, defaultVotingTreashold, getOrDeployContractInstances, waitForNextBlock } from "./helpers"
-import { EventLog, Log } from "ethers"
+import {
+    createProposal,
+    defaultVotingDelay,
+    defaultVotingPeriod,
+    defaultVotingTreashold,
+    getOrDeployContractInstances,
+    getProposalIdFromTx,
+    mintAndDelegate,
+    moveBlocks,
+    waitForNextBlock
+} from "./helpers"
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 
 describe("Governor and TimeLock", function () {
     const description = "Test Proposal: testing propsal with random description!"
@@ -42,7 +52,7 @@ describe("Governor and TimeLock", function () {
         })
     })
 
-    describe.only("Proposal Creation", function () {
+    describe("Proposal Creation", function () {
         it("cannot create a proposal if NOT a VOT3 holder", async function () {
             const { governor, B3trContract, otherAccount, vot3, b3tr, owner } = await getOrDeployContractInstances(true, 1)
 
@@ -144,13 +154,132 @@ describe("Governor and TimeLock", function () {
         })
     })
 
+    // the tests descibed in this section cannot be run in isolation but in cascade
+    describe.only("Proposal Voting", function () {
+        let voter1: HardhatEthersSigner
+        let voter2: HardhatEthersSigner
+        let voter3: HardhatEthersSigner
+        let voter4: HardhatEthersSigner
+        this.beforeAll(async function () {
+            const { vot3, b3tr, otherAccounts, minterAccount } = await getOrDeployContractInstances(true, 1)
+            voter1 = otherAccounts[0] // with no VOT3
+            voter2 = otherAccounts[1] // with VOT3 but no delegation
+            voter3 = otherAccounts[2] // with VOT3 and delegation
 
+            // Before trying to vote we need to mint some VOT3 tokens to the voter2
+            await b3tr.connect(minterAccount).mint(voter2, ethers.parseEther("1000"))
+            await b3tr.connect(voter2).approve(await vot3.getAddress(), ethers.parseEther("9"))
+            await vot3.connect(voter2).stake(ethers.parseEther("9"))
 
-    describe("Proposal Indexing", function () {
+            // we do it here but will use in the next test
+            await mintAndDelegate(voter3, "1000")
+            await mintAndDelegate(voter4, "9")
 
-    })
+            // Let's wait a block to update the votes snapshot
+            await waitForNextBlock()
+        })
 
-    describe("Proposal Voting", function () {
+        it('cannot vote if proposal is not in active state', async function () {
+            const { governor, B3trContract, otherAccount, b3tr } = await getOrDeployContractInstances(false)
+            // Now we can create a new proposal
+            const tx = await createProposal(governor, b3tr, B3trContract, otherAccount, description, functionToCall, [])
+            proposalId = await getProposalIdFromTx(tx, governor)
+
+            const proposalState = await governor.state(proposalId)
+            expect(proposalState.toString()).to.eql("0")
+
+            try {
+                await governor.connect(voter3).castVote(proposalId, 1)
+                assert.fail("The transaction should have failed")
+            } catch (err: any) {
+                assert(err.message.includes("execution reverted"), "Expected an 'execution reverted' error")
+            }
+        })
+
+        it('user without VOT3 can vote with weight 0', async function () {
+            const { governor } = await getOrDeployContractInstances(false)
+
+            // wait for the proposal to be in active state
+            const voteDealy = await governor.votingDelay()
+            const blocksToMove = parseInt((voteDealy + BigInt(1)).toString())
+            await moveBlocks(blocksToMove)
+            const proposalState = await governor.state(proposalId)
+            expect(proposalState.toString()).to.eql("1")
+
+            //vote
+            const tx = await governor.connect(voter1).castVote(proposalId, 1)
+            const proposeReceipt = await tx.wait()
+            const event = proposeReceipt?.logs[0]
+            const decodedLogs = governor.interface.parseLog({
+                topics: [...(event?.topics as string[])],
+                data: event ? event.data : "",
+            });
+
+            //event exists
+            expect(decodedLogs?.name).to.eql("VoteCast")
+            // voter
+            expect(decodedLogs?.args[0]).to.eql(await voter1.getAddress())
+            // proposal id
+            expect(decodedLogs?.args[1]).to.eql(proposalId)
+            // support
+            expect(decodedLogs?.args[2].toString()).to.eql("1")
+            // votes
+            expect(decodedLogs?.args[3].toString()).to.eql("0")
+        })
+
+        it('user that did not delegated can vote with weight 0', async function () {
+            const { governor } = await getOrDeployContractInstances(false)
+
+            const proposalState = await governor.state(proposalId)
+            expect(proposalState.toString()).to.eql("1")
+
+            const tx = await governor.connect(voter2).castVote(proposalId, 1)
+            const proposeReceipt = await tx.wait()
+            const event = proposeReceipt?.logs[0]
+            const decodedLogs = governor.interface.parseLog({
+                topics: [...(event?.topics as string[])],
+                data: event ? event.data : "",
+            });
+
+            //event exists
+            expect(decodedLogs?.name).to.eql("VoteCast")
+            // voter
+            expect(decodedLogs?.args[0]).to.eql(await voter2.getAddress())
+            // proposal id
+            expect(decodedLogs?.args[1]).to.eql(proposalId)
+            // support
+            expect(decodedLogs?.args[2].toString()).to.eql("1")
+            // votes
+            expect(decodedLogs?.args[3].toString()).to.eql("0")
+        })
+
+        it('can vote if a VOT3 holder that self-delegated before the proposal creation', async function () {
+            const { governor } = await getOrDeployContractInstances(false)
+
+            const proposalState = await governor.state(proposalId)
+            expect(proposalState.toString()).to.eql("1")
+
+            const tx = await governor.connect(voter3).castVote(proposalId, 1)
+            const proposeReceipt = await tx.wait()
+            const event = proposeReceipt?.logs[0]
+            const decodedLogs = governor.interface.parseLog({
+                topics: [...(event?.topics as string[])],
+                data: event ? event.data : "",
+            });
+
+            //event exists
+            expect(decodedLogs?.name).to.eql("VoteCast")
+            // voter
+            expect(decodedLogs?.args[0]).to.eql(await voter3.getAddress())
+            // proposal id
+            expect(decodedLogs?.args[1]).to.eql(proposalId)
+            // support
+            expect(decodedLogs?.args[2].toString()).to.eql("1")
+            // votes
+            expect(decodedLogs?.args[3].toString()).not.to.eql("0")
+        })
+
+        //cannot vote if user bought VOT3 after the proposal creation
 
     })
 

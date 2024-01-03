@@ -18,6 +18,7 @@ interface DeployInstance {
 
 export const defaultVotingPeriod = 45818
 export const defaultVotingTreashold = 0
+export const defaultVotingDelay = 1
 
 let cachedDeployInstance: DeployInstance | undefined = undefined
 export const getOrDeployContractInstances = async (forceDeploy: boolean = false, votingTreshold = defaultVotingTreashold) => {
@@ -52,7 +53,7 @@ export const getOrDeployContractInstances = async (forceDeploy: boolean = false,
         await timeLock.getAddress(),
         4, // quroum percentage
         defaultVotingPeriod, // voting period
-        1, // voting delay
+        defaultVotingDelay, // voting delay
         votingTreshold, // voting treshold
     )
 

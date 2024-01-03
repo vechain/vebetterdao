@@ -14,6 +14,12 @@ export const waitForNextBlock = async () => {
     } while (startingBlock === currentBlock)
 }
 
+export const moveBlocks = async (blocks: number) => {
+    for (let i = 0; i < blocks; i++) {
+        await waitForNextBlock()
+    }
+}
+
 export const mintAndDelegate = async (receiver: HardhatEthersSigner, amount: string) => {
     const { b3tr, vot3, minterAccount } = await getOrDeployContractInstances(false)
 
@@ -58,4 +64,15 @@ export const createProposal = async (
     )
 
     return tx
+}
+
+export const getProposalIdFromTx = async (tx: ContractTransactionResponse, governor: GovernorContract) => {
+    const proposeReceipt = await tx.wait()
+    const event = proposeReceipt?.logs[0]
+    const decodedLogs = governor.interface.parseLog({
+        topics: [...(event?.topics as string[])],
+        data: event ? event.data : "",
+    });
+
+    return decodedLogs?.args[0]
 }
