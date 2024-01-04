@@ -38,8 +38,6 @@ export const MintNewB3trCard = () => {
     return Number(tokenDetails.totalSupply) - Number(tokenDetails.circulatingSupply)
   }, [tokenDetails])
 
-  console.log({ status })
-
   const {
     handleSubmit,
     register,

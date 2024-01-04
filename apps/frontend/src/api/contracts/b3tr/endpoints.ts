@@ -23,7 +23,6 @@ export const getB3trTokenDetails = async (thor: Connex.Thor): Promise<TokenDetai
   const functionAbi = abi.find(e => e.name === "tokenDetails")
   if (!functionAbi) return Promise.reject(new Error("Function abi not found for tokenDetails"))
   const res = await thor.account(B3TR_CONTRACT).method(functionAbi).call()
-  console.log({ res })
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 

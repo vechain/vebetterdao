@@ -38,8 +38,6 @@ export const BalanceCard = ({
   const isLoading = balanceLoading || tokenDetailsLoading
   const loadingSymbolPlaceholder = tokenDetailsLoading ? "B3TR" : undefined
 
-  console.log({ loadingSymbolPlaceholder })
-
   if (!account)
     return (
       <Card w="full">
