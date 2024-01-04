@@ -91,7 +91,9 @@ export const TokenDetailsCard = ({ tokenDetailsQueryResult: { data: tokenDetails
               Name
             </Heading>
             <Text pt="2" fontSize="sm">
-              <Skeleton isLoaded={!isLoading}>{tokenDetails?.name ?? "B3TR"}</Skeleton>
+              <Skeleton isLoaded={!isLoading} as="span">
+                {tokenDetails?.name ?? "B3TR"}
+              </Skeleton>
             </Text>
           </Box>
           <Box>
@@ -99,7 +101,9 @@ export const TokenDetailsCard = ({ tokenDetailsQueryResult: { data: tokenDetails
               Symbol
             </Heading>
             <Text pt="2" fontSize="sm">
-              <Skeleton isLoaded={!isLoading}>{tokenDetails?.symbol ?? "B3TR"}</Skeleton>
+              <Skeleton isLoaded={!isLoading} as="span">
+                {tokenDetails?.symbol ?? "B3TR"}
+              </Skeleton>
             </Text>
           </Box>
 
@@ -108,7 +112,9 @@ export const TokenDetailsCard = ({ tokenDetailsQueryResult: { data: tokenDetails
               Decimals
             </Heading>
             <Text pt="2" fontSize="sm">
-              <Skeleton isLoaded={!isLoading}>{tokenDetails?.decimals ?? 18} </Skeleton>
+              <Skeleton isLoaded={!isLoading} as="span">
+                {tokenDetails?.decimals ?? 18}{" "}
+              </Skeleton>
             </Text>
           </Box>
           <Box w="full">
@@ -121,12 +127,12 @@ export const TokenDetailsCard = ({ tokenDetailsQueryResult: { data: tokenDetails
               </Skeleton>
               <HStack w="full" justify="space-between">
                 <Text fontSize="sm" textAlign="right">
-                  <Skeleton isLoaded={!isLoading}>
+                  <Skeleton isLoaded={!isLoading} as="span">
                     {formattedCirculatingSupply} {tokenDetails?.symbol ?? "B3TR"}
                   </Skeleton>
                 </Text>
                 <Text fontSize="sm" textAlign="left">
-                  <Skeleton isLoaded={!isLoading}>
+                  <Skeleton isLoaded={!isLoading} as="span">
                     {formattedTotalSupply} {tokenDetails?.symbol ?? "B3TR"}
                   </Skeleton>
                 </Text>
