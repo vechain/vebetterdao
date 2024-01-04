@@ -376,7 +376,7 @@ describe("Governor and TimeLock", function () {
             ))
         })
 
-        it.only('cannot execute a proposal without queueing it to TimeLock first', async function () {
+        it('cannot execute a proposal without queueing it to TimeLock first', async function () {
             const { governor, otherAccounts, b3tr, B3trContract, otherAccount: proposer } = await getOrDeployContractInstances(true, 0, 3)
 
             // load votes
