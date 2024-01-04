@@ -37,12 +37,14 @@ contracts-compile: #@ Compile the contracts.
 	$(NAV_CONTRACTS); yarn compile
 contracts-deploy: contracts-compile solo-up #@ Deploy the contracts.
 	$(NAV_CONTRACTS); yarn deploy
-contracts-test: contracts-compile solo-up #@ Test the contracts.
-	$$(NAV_CONTRACTS); yarn test
+contracts-test: contracts-compile #@ Test the contracts.
+	$(NAV_CONTRACTS); yarn test
 
 # Apps
 install: #@ Install the dependencies.
 	yarn install
 build: install #@ Build the app.
 	yarn build
+test: #@ Test the app.
+	yarn test
 .PHONY:build
