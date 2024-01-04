@@ -88,9 +88,6 @@ describe("VOT3", function () {
       expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("9"))
       expect(await b3tr.balanceOf(vot3Address)).to.eql(ethers.parseEther("9"))
 
-      // Wait 10 seconds
-      await new Promise(resolve => setTimeout(resolve, 10000))
-
       // Unlock B3TR to burn VOT3
       await expect(vot3.connect(otherAccount).unstake(ethers.parseEther("9"))).not.to.be.reverted
 

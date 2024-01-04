@@ -26,7 +26,12 @@ type FormData = {
 export const MintNewB3trCard = () => {
   const { account } = useWallet()
   const { data: tokenDetails } = useB3trTokenDetails()
-  const { data: hasMinterRole, isLoading: hasMinterRoleLoading } = useUserHasMinterRole(account ?? undefined)
+  const {
+    data: hasMinterRole,
+    isLoading: hasMinterRoleLoading,
+    error,
+    status,
+  } = useUserHasMinterRole(account ?? undefined)
 
   const availableSupply = useMemo(() => {
     if (!tokenDetails) return 0
@@ -69,6 +74,21 @@ export const MintNewB3trCard = () => {
             Connect your wallet to get started
           </Heading>
           <Text fontSize="sm">Use {defaultMinterAddress} (#2 of demo mnemonic) to get a minter account</Text>
+        </CardBody>
+      </Card>
+    )
+
+  if (error)
+    return (
+      <Card w="full">
+        <CardHeader>
+          <Heading size="md">Mint New B3TR</Heading>
+        </CardHeader>
+        <CardBody>
+          <Heading size="md" color="lightskyblue">
+            Error loading minter role
+          </Heading>
+          <Text fontSize="sm">{error.message}</Text>
         </CardBody>
       </Card>
     )

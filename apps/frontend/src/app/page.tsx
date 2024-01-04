@@ -2,7 +2,7 @@
 
 import { useB3trBalance, useB3trTokenDetails, useVot3Balance, useVot3TokenDetails } from "@/api"
 import { Stack, StackDivider, VStack } from "@chakra-ui/react"
-import { BalanceCard, MintNewB3trCard, TokenDetailsCard } from "@/components"
+import { BalanceCard, MintNewB3trCard, RedeemB3trButton, SwapB3trButton, TokenDetailsCard } from "@/components"
 import { useWallet } from "@vechain/dapp-kit-react"
 
 export default function Home() {
@@ -22,6 +22,7 @@ export default function Home() {
           <BalanceCard
             balanceQueryResult={b3trBalanceQueryResult}
             tokenDetailsQueryResult={b3trTokenDetailsQueryResult}
+            componentRight={<SwapB3trButton />}
           />
         </VStack>
         <VStack spacing={4} w="full">
@@ -29,6 +30,7 @@ export default function Home() {
           <BalanceCard
             balanceQueryResult={vot3BalanceQueryResult}
             tokenDetailsQueryResult={vot3TokenDetailsQueryResult}
+            componentRight={<RedeemB3trButton />}
           />
         </VStack>
       </Stack>
