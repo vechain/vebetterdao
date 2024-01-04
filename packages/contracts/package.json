@@ -5,7 +5,7 @@
   "types": "main.ts",
   "license": "MIT",
   "scripts": {
-    "test": "yarn start-solo && sleep 5 && npx hardhat test",
+    "test": "yarn start-solo && sleep 5 && npx hardhat test && yarn stop-solo",
     "compile": "npx hardhat compile",
     "deploy": "npx hardhat run scripts/deploy.ts",
     "build": "esbuild main.ts --bundle --platform=node --outfile=dist/index.js",
@@ -26,7 +26,7 @@
     "@vechain/hardhat-ethers": "^0.1.4",
     "@vechain/hardhat-vechain": "^0.1.4",
     "@vechain/web3-providers-connex": "^1.1.2",
-    "hardhat": "^2.19.1",
+    "hardhat": "^2.13.0",
     "hardhat-gas-reporter": "^1.0.8",
     "solidity-coverage": "^0.8.1",
     "ts-node": ">=8.0.0",
@@ -40,7 +40,7 @@
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
     "@nomicfoundation/hardhat-verify": "^1.1.1",
     "@typechain/ethers-v6": "^0.4.3",
-    "ethers": "^6.9.0",
-    "hardhat": "^2.19.1"
+    "ethers": "^6.7.1",
+    "hardhat": "^2.13.0"
   }
 }
