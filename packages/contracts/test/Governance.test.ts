@@ -11,10 +11,11 @@ import {
     waitForNextBlock,
     waitForVotingPeriodToEnd,
     waitForVotingPeriodToStart,
+    catchRevert
 } from "./helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 
-describe("Governor and TimeLock", function () {
+describe.only("Governor and TimeLock", function () {
     const description = "Test Proposal: testing propsal with random description!"
     const functionToCall = "tokenDetails"
     let proposalId: number = 0
@@ -56,14 +57,7 @@ describe("Governor and TimeLock", function () {
     describe("Proposal Creation", function () {
         it("cannot create a proposal if NOT a VOT3 holder", async function () {
             const { governor, B3trContract, otherAccount, vot3, b3tr, owner } = await getOrDeployContractInstances(true, 1)
-
-            try {
-                await createProposal(governor, b3tr, B3trContract, owner, description, functionToCall, [], true)
-
-                assert.fail("The transaction should have failed")
-            } catch (err: any) {
-                assert(err.message.includes("execution reverted"), "Expected an 'execution reverted' error")
-            }
+            await catchRevert(createProposal(governor, b3tr, B3trContract, owner, description, functionToCall, [], true))
         })
 
         it("cannot create a proposal if user did not delegated", async function () {
@@ -74,13 +68,7 @@ describe("Governor and TimeLock", function () {
             await b3tr.approve(await vot3.getAddress(), ethers.parseEther("9"))
             await vot3.stake(ethers.parseEther("9"))
 
-            try {
-                await createProposal(governor, b3tr, B3trContract, owner, description, functionToCall, [], true)
-
-                assert.fail("The transaction should have failed")
-            } catch (err: any) {
-                assert(err.message.includes("execution reverted"), "Expected an 'execution reverted' error")
-            }
+            await catchRevert(createProposal(governor, b3tr, B3trContract, owner, description, functionToCall, [], true))
         })
 
         it("can create a proposal if VOT3 holder that self-delegated", async function () {
@@ -190,12 +178,7 @@ describe("Governor and TimeLock", function () {
             const proposalState = await governor.state(proposalId)
             expect(proposalState.toString()).to.eql("0")
 
-            try {
-                await governor.connect(voter3).castVote(proposalId, 1)
-                assert.fail("The transaction should have failed")
-            } catch (err: any) {
-                assert(err.message.includes("execution reverted"), "Expected an 'execution reverted' error")
-            }
+            await catchRevert(governor.connect(voter3).castVote(proposalId, 1))
         })
 
         it('user without VOT3 can vote with weight 0', async function () {
@@ -341,12 +324,7 @@ describe("Governor and TimeLock", function () {
             const proposalState = await governor.state(proposalId)
             expect(proposalState.toString()).to.eql("1")
 
-            try {
-                await governor.connect(voter3).castVote(proposalId, 1)
-                assert.fail("The transaction should have failed")
-            } catch (err: any) {
-                assert(err.message.includes("execution reverted"), "Expected an 'execution reverted' error")
-            }
+            await catchRevert(governor.connect(voter3).castVote(proposalId, 1))
         })
 
         it('cannot vote after voting period ends', async function () {
@@ -358,12 +336,7 @@ describe("Governor and TimeLock", function () {
             expect(proposalState.toString()).to.eql("4") // succeeded
 
             const voter5 = otherAccounts[5]
-            try {
-                await governor.connect(voter5).castVote(proposalId, 1)
-                assert.fail("The transaction should have failed")
-            } catch (err: any) {
-                assert(err.message.includes("execution reverted"), "Expected an 'execution reverted' error")
-            }
+            await catchRevert(governor.connect(voter5).castVote(proposalId, 1))
         }).timeout(1800000)
     })
 
@@ -395,18 +368,12 @@ describe("Governor and TimeLock", function () {
             const b3trAddress = await b3tr.getAddress()
             const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
             const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
-            try {
-                await governor.execute(
-                    [b3trAddress],
-                    [0],
-                    [encodedFunctionCall],
-                    descriptionHash
-                )
-
-                assert.fail("The transaction should have failed")
-            } catch (err: any) {
-                assert(err.message.includes("execution reverted"), "Expected an 'execution reverted' error")
-            }
+            await catchRevert(governor.queue(
+                [b3trAddress],
+                [0],
+                [encodedFunctionCall],
+                descriptionHash
+            ))
         })
 
         it('cannot execute a proposal without queueing it to TimeLock first', async function () {
@@ -436,18 +403,12 @@ describe("Governor and TimeLock", function () {
             const b3trAddress = await b3tr.getAddress()
             const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
             const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
-            try {
-                await governor.execute(
-                    [b3trAddress],
-                    [0],
-                    [encodedFunctionCall],
-                    descriptionHash
-                )
-
-                assert.fail("The transaction should have failed")
-            } catch (err: any) {
-                assert(err.message.includes("execution reverted"), "Expected an 'execution reverted' error")
-            }
+            await catchRevert(governor.execute(
+                [b3trAddress],
+                [0],
+                [encodedFunctionCall],
+                descriptionHash
+            ))
         })
 
         it('can correctly queue proposal if vote succeeded', async function () {
