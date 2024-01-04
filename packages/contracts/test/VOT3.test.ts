@@ -1,6 +1,6 @@
 import { assert, ethers } from "hardhat"
 import { expect } from "chai"
-import { getOrDeployContractInstances } from "./helpers"
+import { catchRevert, getOrDeployContractInstances } from "./helpers"
 
 describe("VOT3", function () {
 
@@ -64,12 +64,7 @@ describe("VOT3", function () {
         .reverted
 
       // Lock B3TR to get VOT3
-      try {
-        await vot3.stake(ethers.parseEther("10"))
-        assert.fail("The transaction should have failed")
-      } catch (err: any) {
-        assert(err.message.includes("execution reverted"), "Expected an 'execution reverted' error")
-      }
+      await catchRevert(vot3.stake(ethers.parseEther("10")))
     })
   })
 
@@ -124,12 +119,7 @@ describe("VOT3", function () {
       expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("9"))
 
       // Unlock B3TR to burn VOT3
-      try {
-        await vot3.connect(otherAccount).unstake(ethers.parseEther("10"))
-        assert.fail("The transaction should have failed")
-      } catch (err: any) {
-        assert(err.message.includes("execution reverted"), "Expected an 'execution reverted' error")
-      }
+      await catchRevert(vot3.connect(otherAccount).unstake(ethers.parseEther("10")))
     })
   })
 
@@ -147,12 +137,7 @@ describe("VOT3", function () {
       // Lock B3TR to get VOT3
       await expect(vot3.connect(otherAccount).stake(ethers.parseEther("9"))).not.to.be.reverted
 
-      try {
-        await vot3.connect(otherAccount).transfer(owner, ethers.parseEther("1"))
-        assert.fail("The transaction should have failed")
-      } catch (err: any) {
-        assert(err.message.includes("execution reverted"), "Expected an 'execution reverted' error")
-      }
+      await catchRevert(vot3.connect(otherAccount).transfer(owner, ethers.parseEther("1")))
     })
 
     it("transferFrom", async function () {
@@ -192,12 +177,7 @@ describe("VOT3", function () {
       // Lock B3TR to get VOT3
       await expect(vot3.connect(otherAccount).stake(ethers.parseEther("9"))).not.to.be.reverted
 
-      try {
-        await vot3.connect(otherAccount).approve(owner, ethers.parseEther("1"))
-        assert.fail("The transaction should have failed")
-      } catch (err: any) {
-        assert(err.message.includes("execution reverted"), "Expected an 'execution reverted' error")
-      }
+      await catchRevert(vot3.connect(otherAccount).approve(owner, ethers.parseEther("1")))
     })
   })
 
@@ -282,12 +262,7 @@ describe("VOT3", function () {
       // Mint some B3TR
       await expect(b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))).not.to.be.reverted
 
-      try {
-        await vot3.connect(otherAccount).setCanTransfer(true)
-        assert.fail("The transaction should have failed")
-      } catch (err: any) {
-        assert(err.message.includes("execution reverted"), "Expected an 'execution reverted' error")
-      }
+      await catchRevert(vot3.connect(otherAccount).setCanTransfer(true))
 
       // Check flag
       expect(await vot3.canTransfer()).to.eql(false)
@@ -304,12 +279,7 @@ describe("VOT3", function () {
       // Mint some B3TR
       await expect(b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))).not.to.be.reverted
 
-      try {
-        await vot3.connect(otherAccount).setCanTransfer(true)
-        assert.fail("The transaction should have failed")
-      } catch (err: any) {
-        assert(err.message.includes("execution reverted"), "Expected an 'execution reverted' error")
-      }
+      await catchRevert(vot3.connect(otherAccount).setCanTransfer(true))
 
       // Check flag
       expect(await vot3.canTransfer()).to.eql(false)
@@ -326,12 +296,7 @@ describe("VOT3", function () {
       // Mint some B3TR
       await expect(b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))).not.to.be.reverted
 
-      try {
-        await vot3.connect(otherAccount).setCanTransfer(true)
-        assert.fail("The transaction should have failed")
-      } catch (err: any) {
-        assert(err.message.includes("execution reverted"), "Expected an 'execution reverted' error")
-      }
+      await catchRevert(vot3.connect(otherAccount).setCanTransfer(true))
 
       // Check flag
       expect(await vot3.canTransfer()).to.eql(false)
@@ -350,12 +315,7 @@ describe("VOT3", function () {
     it("Non admin can't change canTransfer", async function () {
       const { b3tr, vot3, owner, minterAccount, otherAccount } = await getOrDeployContractInstances(true)
 
-      try {
-        await vot3.connect(otherAccount).setCanTransfer(true)
-        assert.fail("The transaction should have failed")
-      } catch (err: any) {
-        assert(err.message.includes("execution reverted"), "Expected an 'execution reverted' error")
-      }
+      await catchRevert(vot3.connect(otherAccount).setCanTransfer(true))
 
       // Check flag
       expect(await vot3.canTransfer()).to.eql(false)
