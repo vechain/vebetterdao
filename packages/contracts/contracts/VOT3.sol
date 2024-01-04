@@ -38,7 +38,6 @@ contract VOT3 is ERC20, ERC20Permit, ERC20Votes, AccessControl {
     require(b3tr.transfer(msg.sender, amount), "Transfer failed");
   }
 
-  // Make not transferable
   function transfer(address to, uint256 value) public override(ERC20) transferEnabled returns (bool) {
     return super.transfer(to, value);
   }
