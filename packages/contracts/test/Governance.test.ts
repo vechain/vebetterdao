@@ -439,19 +439,58 @@ describe("Governor and TimeLock", function () {
             const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
             const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
 
-            const queueingTx = await governor.queue(
+            await governor.queue(
                 [b3trAddress],
                 [0],
                 [encodedFunctionCall],
                 descriptionHash
             )
 
-            const proposeReceipt = await queueingTx.wait()
-            const events = proposeReceipt?.logs ?? []
-
             // proposal should be in queued state
             proposalState = await governor.state(proposalId)
             expect(proposalState.toString()).to.eql("5")
         })
+
+        // this test needs the previous one to be run first
+        it('can correctly execute proposal after it was queued', async function () {
+            const { governor, timeLock, otherAccounts, b3tr, B3trContract, otherAccount: proposer } = await getOrDeployContractInstances(false)
+
+            // proposal should be in queued state
+            let proposalState = await governor.state(proposalId)
+            expect(proposalState.toString()).to.eql("5")
+
+            // execute it
+            const b3trAddress = await b3tr.getAddress()
+            const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
+            const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
+
+            await governor.execute(
+                [b3trAddress],
+                [0],
+                [encodedFunctionCall],
+                descriptionHash
+            )
+
+            // proposal should be in executed state
+            proposalState = await governor.state(proposalId)
+            expect(proposalState.toString()).to.eql("7")
+        })
+
+        it('cannot execute proposal twice', async function () {
+            const { governor, timeLock, otherAccounts, b3tr, B3trContract, otherAccount: proposer } = await getOrDeployContractInstances(false)
+
+            // execute it
+            const b3trAddress = await b3tr.getAddress()
+            const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
+            const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
+
+            await catchRevert(governor.execute(
+                [b3trAddress],
+                [0],
+                [encodedFunctionCall],
+                descriptionHash
+            ))
+        })
+
     })
 })

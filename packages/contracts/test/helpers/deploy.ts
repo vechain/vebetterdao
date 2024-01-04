@@ -40,7 +40,7 @@ export const getOrDeployContractInstances = async (forceDeploy: boolean = false,
     // Deploy TimeLock
     const TimeLockContract = await ethers.getContractFactory("TimeLock")
     const timeLock = await TimeLockContract.deploy(
-        1, //1 seconds min delay for execute
+        0, //0 seconds delay for immediate execution
         [],
         [],
         timelockAdmin,
