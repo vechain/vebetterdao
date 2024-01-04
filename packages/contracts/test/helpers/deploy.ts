@@ -40,7 +40,7 @@ export const getOrDeployContractInstances = async (forceDeploy: boolean = false,
     // Deploy TimeLock
     const TimeLockContract = await ethers.getContractFactory("TimeLock")
     const timeLock = await TimeLockContract.deploy(
-        5, //5 seconds min delay for execute
+        1, //1 seconds min delay for execute
         [],
         [],
         timelockAdmin,
@@ -58,7 +58,7 @@ export const getOrDeployContractInstances = async (forceDeploy: boolean = false,
     )
     await governor.waitForDeployment()
 
-    // Set governor as proposer and executor
+    // Set up roles
     const PROPOSER_ROLE = await timeLock.PROPOSER_ROLE()
     const EXECUTOR_ROLE = await timeLock.EXECUTOR_ROLE()
     const CANCELLER_ROLE = await timeLock.CANCELLER_ROLE()

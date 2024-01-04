@@ -14,7 +14,7 @@ import {
 } from "./helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 
-describe.only("Governor and TimeLock", function () {
+describe("Governor and TimeLock", function () {
     const description = "Test Proposal: testing propsal with random description!"
     const functionToCall = "tokenDetails"
     let proposalId: number = 0
@@ -409,7 +409,7 @@ describe.only("Governor and TimeLock", function () {
             }
         })
 
-        it('cannot execute a proposal withouth queueing it to TimeLock', async function () {
+        it('cannot execute a proposal without queueing it to TimeLock first', async function () {
             const { governor, otherAccounts, b3tr, B3trContract, otherAccount: proposer } = await getOrDeployContractInstances(true, 0, 3)
 
             // load votes
@@ -470,7 +470,7 @@ describe.only("Governor and TimeLock", function () {
 
             // wait
             await waitForVotingPeriodToEnd(proposalId, governor)
-            const proposalState = await governor.state(proposalId)
+            let proposalState = await governor.state(proposalId)
             expect(proposalState.toString()).to.eql("4") // succeded
 
             // queue it
@@ -488,17 +488,9 @@ describe.only("Governor and TimeLock", function () {
             const proposeReceipt = await queueingTx.wait()
             const events = proposeReceipt?.logs ?? []
 
-            // iterate and decode events
-            let decodedLogs: any
-            for (const event of events) {
-                decodedLogs = governor.interface.parseLog({
-                    topics: [...(event?.topics as string[])],
-                    data: event ? event.data : "",
-                });
-            }
-
-            //event exists
-            expect(decodedLogs?.name).to.eql("ProposalQueued")
+            // proposal should be in queued state
+            proposalState = await governor.state(proposalId)
+            expect(proposalState.toString()).to.eql("5")
         })
     })
 })
