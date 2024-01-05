@@ -1,30 +1,30 @@
 import { ethers, network } from "hardhat"
-import * as deploy from "./deploy"
+import { deployAll } from "./deploy/deploy"
+import { config } from "@repo/config"
 
-const B3TR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_B3TR_CONTRACT_ADDRESS
+const { b3trContractAddress } = config
 
-const checkContractsDeployment = async () => {
+async function main() {
+  console.log(`Checking contracts deployment on ${network.name}...`)
+  await checkContractsDeployment()
+  process.exit(0)
+}
+
+async function checkContractsDeployment() {
   try {
-    if (!B3TR_CONTRACT_ADDRESS) throw new Error("NEXT_PUBLIC_B3TR_CONTRACT_ADDRESS is not set")
-    const code = await ethers.provider.getCode(B3TR_CONTRACT_ADDRESS)
+    const code = await ethers.provider.getCode(b3trContractAddress)
     if (code === "0x") {
-      console.log(`B3tr contract not deployed at address ${B3TR_CONTRACT_ADDRESS}`)
-      await deploy.main()
+      console.log(`B3tr contract not deployed at address ${b3trContractAddress}`)
+      await deployAll()
     } else console.log(`B3tr contract already deployed`)
   } catch (e) {
     console.log(e)
   }
 }
 
-const main = async () => {
-  console.log(`Checking contracts deployment on ${network.name}...`)
-  await checkContractsDeployment()
-  process.exit(0)
-}
-
-main()
-  .then(() => process.exit(0))
-  .catch(error => {
-    console.error(error)
-    process.exit(1)
-  })
+// We recommend this pattern to be able to use async/await everywhere
+// and properly handle errors.
+main().catch(error => {
+  console.error(error)
+  process.exit(1)
+})

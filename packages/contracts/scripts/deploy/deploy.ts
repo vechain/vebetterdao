@@ -1,5 +1,5 @@
 import { ethers, network } from "hardhat"
-import { B3TR, GovernorContract, TimeLock, VOT3 } from "../typechain-types"
+import { B3TR, GovernorContract, TimeLock, VOT3 } from "../../typechain-types"
 
 const DEFAULT_MINTER = "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68" //2nd account from mnemonic of solo network
 const TIMELOCK_ADMIN = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa" //1st account from mnemonic of solo network
@@ -12,7 +12,7 @@ const VOTING_PERIOD = 45818 // blocks - how long the vote lasts.
 const VOTING_DELAY = 1 // How many blocks till a proposal vote becomes active
 const PROPOSAL_THRESHOLD = 1 // How many votes are needed to create a proposal
 
-export async function main() {
+export async function deployAll() {
   console.log(`Deploying contracts on ${network.name}...`)
 
   // Deploy the contracts
@@ -89,10 +89,3 @@ async function deployGovernor(vot3Address: string, timelockAddress: string): Pro
 
   return contract
 }
-
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
-main().catch(error => {
-  console.error(error)
-  process.exit(1)
-})
