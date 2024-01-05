@@ -5,7 +5,7 @@
   "types": "main.ts",
   "license": "MIT",
   "scripts": {
-    "test": "yarn start-solo && sleep 5 && npx hardhat test; yarn stop-solo",
+    "test": "ts-node test.ts",
     "compile": "npx hardhat compile",
     "deploy": "npx hardhat run scripts/deploy.ts",
     "build": "esbuild main.ts --bundle --platform=node --outfile=dist/index.js",
