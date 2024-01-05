@@ -6,7 +6,7 @@
     "build": {
       "dependsOn": ["^build", "@repo/contracts#compile"],
       "outputs": [".next/**", "!.next/cache/**"],
-      "dotEnv": [".env.production.local", ".env.local", ".env.production", ".env"]
+      "dotEnv": [".env", ".env.config"]
     },
     "lint": {
       "dependsOn": ["^lint"]
@@ -18,11 +18,12 @@
       "cache": false,
       "persistent": true,
       "dependsOn": ["//#solo-up", "@repo/contracts#check-contracts-deployment"],
-      "dotEnv": [".env.development.local", ".env.local", ".env.development", ".env"]
+      "dotEnv": [".env", ".env.config"]
     },
     "@repo/contracts#check-contracts-deployment": {
+      "cache": false,
       "dependsOn": ["^compile", "//#solo-up"],
-      "dotEnv": [".env.production.local", ".env.local", ".env.production", ".env"]
+      "dotEnv": [".env", ".env.config"]
     },
     "clean": {
       "cache": false

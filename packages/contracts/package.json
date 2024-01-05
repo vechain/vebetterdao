@@ -7,7 +7,7 @@
   "scripts": {
     "test": "ts-node test.ts",
     "compile": "npx hardhat compile",
-    "deploy": "npx hardhat run scripts/deploy.ts",
+    "deploy": "npx hardhat run scripts/deploy",
     "check-contracts-deployment": "npx hardhat run scripts/checkContractsDeployment.ts",
     "build": "esbuild main.ts --bundle --platform=node --outfile=dist/index.js",
     "start-solo": "docker compose up -d",
@@ -15,6 +15,7 @@
     "clean": "rm -rf dist artifacts node_modules"
   },
   "dependencies": {
+    "@repo/config": "*",
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",
     "@nomicfoundation/hardhat-ethers": "^3.0.4",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.0",
