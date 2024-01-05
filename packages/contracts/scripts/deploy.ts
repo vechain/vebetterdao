@@ -1,4 +1,4 @@
-import { ethers, network, config } from "hardhat"
+import { ethers, network } from "hardhat"
 import { B3TR, GovernorContract, TimeLock, VOT3 } from "../typechain-types"
 
 const DEFAULT_MINTER = "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68" //2nd account from mnemonic of solo network
@@ -12,7 +12,7 @@ const VOTING_PERIOD = 45818 // blocks - how long the vote lasts.
 const VOTING_DELAY = 1 // How many blocks till a proposal vote becomes active
 const PROPOSAL_THRESHOLD = 1 // How many votes are needed to create a proposal
 
-async function main() {
+export async function main() {
   console.log(`Deploying contracts on ${network.name}...`)
 
   // Deploy the contracts
@@ -62,12 +62,7 @@ async function deployVot3Token(b3trAddress: string): Promise<VOT3> {
 async function deployTimeLock(): Promise<TimeLock> {
   console.log(`Deploying TimeLock contract`)
   const TimeLockContract = await ethers.getContractFactory("TimeLock")
-  const contract = await TimeLockContract.deploy(
-    MIN_DELAY,
-    [],
-    [],
-    TIMELOCK_ADMIN,
-  )
+  const contract = await TimeLockContract.deploy(MIN_DELAY, [], [], TIMELOCK_ADMIN)
 
   await contract.waitForDeployment()
 
@@ -76,10 +71,7 @@ async function deployTimeLock(): Promise<TimeLock> {
   return contract
 }
 
-async function deployGovernor(
-  vot3Address: string,
-  timelockAddress: string,
-): Promise<GovernorContract> {
+async function deployGovernor(vot3Address: string, timelockAddress: string): Promise<GovernorContract> {
   console.log(`Deploying Governor contract`)
   const GovernorContract = await ethers.getContractFactory("GovernorContract")
   const contract = await GovernorContract.deploy(
