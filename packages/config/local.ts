@@ -1,7 +1,7 @@
 import { Config } from "."
 export const localConfig: Config = {
-  b3trContractAddress: "0xcB643cC8aF6853AC0396110D1a93242810729093",
-  vot3ContractAddress: "0x42E40b63E948c477b04c539E8064439c883ac8c1",
+  b3trContractAddress: "0x6BE58620eEaC63fBe066DC09989A0Ac9F9Fd898a",
+  vot3ContractAddress: "0x87464cd39BC0822E08962519810D2234b9F6011a",
   nodeUrl: "http://localhost:8669",
   networkType: "solo",
 }

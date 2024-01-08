@@ -38,9 +38,15 @@ async function overrideLocalConfigWithNewContracts(contracts: Awaited<ReturnType
     vot3ContractAddress: contracts.vot3Address,
   }
 
-  const localConfigPath = path.resolve("../../../config/local.ts")
+  const toWrite = `import { Config } from \".\" \n export const localConfig: Config = ${JSON.stringify(
+    newConfig,
+    null,
+    2,
+  )}`
+
+  const localConfigPath = path.resolve("../config/local.ts")
   console.log(`Writing new config file to ${localConfigPath}`)
-  fs.writeFileSync(localConfigPath, JSON.stringify(newConfig, null, 2))
+  fs.writeFileSync(localConfigPath, toWrite)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
