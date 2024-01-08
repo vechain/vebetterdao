@@ -16,9 +16,9 @@
   "devDependencies": {
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
+    "dotenv-cli": "latest",
     "prettier": "^3.1.0",
-    "turbo": "latest",
-    "dotenv-cli": "latest"
+    "turbo": "^1.10.16"
   },
   "engines": {
     "node": ">=18"
