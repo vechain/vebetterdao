@@ -4,7 +4,7 @@
   "scripts": {
     "test": "turbo run test",
     "build": "dotenv -- turbo build",
-    "dev": "dotenv -- turbo dev --",
+    "dev": "dotenv -e .env.config -- turbo dev --",
     "lint": "turbo lint",
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",

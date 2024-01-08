@@ -31,8 +31,14 @@ export async function deployAll() {
   await timelock.grantRole(EXECUTOR_ROLE, await governor.getAddress())
   await timelock.grantRole(CANCELLER_ROLE, await governor.getAddress())
 
+  return {
+    governorAddress: await governor.getAddress(),
+    timelockAddress: await timelock.getAddress(),
+    b3trAddress: await b3tr.getAddress(),
+    vot3Address: await vot3.getAddress(),
+  }
+
   // close the script
-  process.exit(0)
 }
 
 async function deployB3trToken(): Promise<B3TR> {

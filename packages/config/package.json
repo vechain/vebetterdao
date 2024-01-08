@@ -1,9 +1,10 @@
 {
-    "name": "@repo/config",
-    "version": "0.0.0",
-    "private": true,
-    "files": [
-      "index"
-    ]
-  }
-  
+  "name": "@repo/config",
+  "version": "0.0.0",
+  "private": true,
+  "files": [
+    "index",
+    "model",
+    "local"
+  ]
+}
