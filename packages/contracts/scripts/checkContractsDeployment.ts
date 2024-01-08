@@ -6,7 +6,7 @@ import path from "path"
 
 const { b3trContractAddress } = config
 
-const isSoloNetwork = process.env.NETWORK_TYPE === "solo"
+const isSoloNetwork = config.network.id === "solo"
 
 async function main() {
   console.log(`Checking contracts deployment on ${network.name}...`)

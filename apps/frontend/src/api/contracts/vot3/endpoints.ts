@@ -1,10 +1,10 @@
-import { networkConfig } from "@/config"
+import { config } from "@repo/config"
 import Contract from "@repo/contracts/artifacts/contracts/VOT3.sol/VOT3.json"
 import { TokenDetails } from "../b3tr"
 import { FormattingUtils } from "@repo/utils"
 const abi = Contract.abi
 
-const VOT3_CONTRACT = networkConfig.vot3ContractAddress
+const VOT3_CONTRACT = config.vot3ContractAddress
 
 /**
  *  Get the b3tr token details from the contract. circulatingSupply and totalSupply are scaled down to the decimals of the token

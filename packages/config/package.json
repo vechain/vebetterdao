@@ -6,5 +6,8 @@
     "index",
     "model",
     "local"
-  ]
+  ],
+  "dependencies": {
+    "@repo/constants": "*"
+  }
 }

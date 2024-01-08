@@ -1,8 +1,8 @@
-import { networkConfig } from "@/config"
+import { config } from "@repo/config"
 import Contract from "@repo/contracts/artifacts/contracts/B3TR.sol/B3TR.json"
 const abi = Contract.abi
 
-const B3TR_CONTRACT = networkConfig.b3trContractAddress
+const B3TR_CONTRACT = config.b3trContractAddress
 
 /**
  *  Get b3tr token value for the minter role from the contract, whhich can be used to query for role

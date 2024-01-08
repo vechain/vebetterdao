@@ -10,7 +10,7 @@ import type { WalletConnectOptions } from "@vechain/dapp-kit"
 import dynamic from "next/dynamic"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 
-import { networkConfig } from "@/config"
+import { config } from "@repo/config"
 
 const DAppKitProvider = dynamic(
   async () => {
@@ -37,8 +37,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <CacheProvider>
       <DAppKitProvider
         usePersistence
-        genesis={networkConfig.network.genesis}
-        nodeUrl={networkConfig.nodeUrl}
+        genesis={config.network.genesis}
+        nodeUrl={config.nodeUrl}
         walletConnectOptions={walletConnectOptions}>
         <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
           <ReactQueryDevtools initialIsOpen={false} />
