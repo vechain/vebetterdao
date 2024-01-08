@@ -36,6 +36,8 @@ async function overrideLocalConfigWithNewContracts(contracts: Awaited<ReturnType
     ...config,
     b3trContractAddress: contracts.b3trAddress,
     vot3ContractAddress: contracts.vot3Address,
+    governorContractAddress: contracts.governorAddress,
+    timelockContractAddress: contracts.timelockAddress,
   }
 
   const toWrite = `import { Config } from \".\" \n export const localConfig: Config = ${JSON.stringify(

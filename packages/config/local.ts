@@ -1,13 +1,14 @@
-import { NETWORK_TYPE } from "@repo/constants"
 import { Config } from "."
 export const localConfig: Config = {
-  b3trContractAddress: "0xb3f0fcd3eBb8fcd8C665f54bF8CcC80a672d0229",
-  vot3ContractAddress: "0x32b58E677E77D9FB712a1f15d60182A5C28BfC3f",
+  b3trContractAddress: "0x47357379eFd356960b3CFa40FbB56cC19636618b",
+  vot3ContractAddress: "0x657BbfA5a1Df03388e5572cce4b17F3dD885534C",
+  governorContractAddress: "0x32b58E677E77D9FB712a1f15d60182A5C28BfC3f",
+  timelockContractAddress: "0x32b58E677E77D9FB712a1f15d60182A5C28BfC3f",
   nodeUrl: "http://localhost:8669",
   network: {
     id: "solo",
     name: "solo",
-    type: NETWORK_TYPE.SOLO,
+    type: "solo",
     defaultNet: true,
     urls: ["http://localhost:8669"],
     explorerUrl: "https://explore-testnet.vechain.org",
