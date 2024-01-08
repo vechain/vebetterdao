@@ -3,11 +3,7 @@
 /**
  * The type of network that we are connected to (indentified by the genesis block)
  * */
-export enum NETWORK_TYPE {
-  MAIN = "main",
-  TEST = "test",
-  SOLO = "solo",
-}
+export type NETWORK_TYPE = "main" | "test" | "solo" | "custom"
 
 /**
  * A model for the VechainThor network that we are connected to
@@ -125,11 +121,11 @@ export const genesises = {
   which(gid: string) {
     switch (gid) {
       case this.main.id:
-        return NETWORK_TYPE.MAIN
+        return "main"
       case this.test.id:
-        return NETWORK_TYPE.TEST
+        return "test"
       case this.solo.id:
-        return NETWORK_TYPE.SOLO
+        return "solo"
     }
   },
 }
@@ -139,9 +135,9 @@ export const DEFAULT_GAS_COEFFICIENT = 0
 export const BASE_GAS_PRICE = "0x000000000000000000000000000000000000626173652d6761732d7072696365"
 
 export const defaultMainNetwork: Network = {
-  id: NETWORK_TYPE.MAIN,
-  name: NETWORK_TYPE.MAIN,
-  type: NETWORK_TYPE.MAIN,
+  id: "main",
+  name: "main",
+  type: "main",
   defaultNet: true,
   urls: THOR_MAIN_URLS,
   explorerUrl: MAIN_EXPLORER_URL,
@@ -149,9 +145,9 @@ export const defaultMainNetwork: Network = {
 }
 
 export const defaultTestNetwork: Network = {
-  id: NETWORK_TYPE.TEST,
-  name: NETWORK_TYPE.TEST,
-  type: NETWORK_TYPE.TEST,
+  id: "test",
+  name: "test",
+  type: "test",
   defaultNet: true,
   urls: THOR_TESTNET_URLS,
   explorerUrl: TEST_EXPLORER_URL,
@@ -159,9 +155,9 @@ export const defaultTestNetwork: Network = {
 }
 
 export const defaultSoloNetwork: Network = {
-  id: NETWORK_TYPE.SOLO,
-  name: NETWORK_TYPE.SOLO,
-  type: NETWORK_TYPE.SOLO,
+  id: "solo",
+  name: "solo",
+  type: "solo",
   defaultNet: true,
   urls: THOR_SOLO_URLS,
   explorerUrl: TEST_EXPLORER_URL,

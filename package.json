@@ -4,13 +4,14 @@
   "scripts": {
     "test": "turbo run test",
     "build": "dotenv -- turbo build",
-    "dev": "dotenv -- turbo dev",
+    "dev": "dotenv -e .env.config -- turbo dev --",
     "lint": "turbo lint",
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "hardhat:compile": "turbo run compile --scope=contracts",
     "hardhat:deploy": "turbo run deploy --scope=contracts",
-    "hardhat:test": "turbo run test --scope=contracts"
+    "hardhat:test": "turbo run test --scope=contracts",
+    "solo-up": "make solo-up"
   },
   "devDependencies": {
     "@repo/eslint-config": "*",

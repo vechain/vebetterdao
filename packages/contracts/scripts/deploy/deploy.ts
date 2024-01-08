@@ -1,5 +1,5 @@
-import { ethers, network, config } from "hardhat"
-import { B3TR, GovernorContract, TimeLock, VOT3 } from "../typechain-types"
+import { ethers, network } from "hardhat"
+import { B3TR, GovernorContract, TimeLock, VOT3 } from "../../typechain-types"
 
 const DEFAULT_MINTER = "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68" //2nd account from mnemonic of solo network
 const TIMELOCK_ADMIN = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa" //1st account from mnemonic of solo network
@@ -12,7 +12,7 @@ const VOTING_PERIOD = 45818 // blocks - how long the vote lasts.
 const VOTING_DELAY = 1 // How many blocks till a proposal vote becomes active
 const PROPOSAL_THRESHOLD = 1 // How many votes are needed to create a proposal
 
-async function main() {
+export async function deployAll() {
   console.log(`Deploying contracts on ${network.name}...`)
 
   // Deploy the contracts
@@ -31,8 +31,14 @@ async function main() {
   await timelock.grantRole(EXECUTOR_ROLE, await governor.getAddress())
   await timelock.grantRole(CANCELLER_ROLE, await governor.getAddress())
 
+  return {
+    governorAddress: await governor.getAddress(),
+    timelockAddress: await timelock.getAddress(),
+    b3trAddress: await b3tr.getAddress(),
+    vot3Address: await vot3.getAddress(),
+  }
+
   // close the script
-  process.exit(0)
 }
 
 async function deployB3trToken(): Promise<B3TR> {
@@ -62,12 +68,7 @@ async function deployVot3Token(b3trAddress: string): Promise<VOT3> {
 async function deployTimeLock(): Promise<TimeLock> {
   console.log(`Deploying TimeLock contract`)
   const TimeLockContract = await ethers.getContractFactory("TimeLock")
-  const contract = await TimeLockContract.deploy(
-    MIN_DELAY,
-    [],
-    [],
-    TIMELOCK_ADMIN,
-  )
+  const contract = await TimeLockContract.deploy(MIN_DELAY, [], [], TIMELOCK_ADMIN)
 
   await contract.waitForDeployment()
 
@@ -76,10 +77,7 @@ async function deployTimeLock(): Promise<TimeLock> {
   return contract
 }
 
-async function deployGovernor(
-  vot3Address: string,
-  timelockAddress: string,
-): Promise<GovernorContract> {
+async function deployGovernor(vot3Address: string, timelockAddress: string): Promise<GovernorContract> {
   console.log(`Deploying Governor contract`)
   const GovernorContract = await ethers.getContractFactory("GovernorContract")
   const contract = await GovernorContract.deploy(
@@ -97,10 +95,3 @@ async function deployGovernor(
 
   return contract
 }
-
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
-main().catch(error => {
-  console.error(error)
-  process.exit(1)
-})
