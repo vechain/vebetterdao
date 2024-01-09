@@ -113,29 +113,29 @@ export const createProposalAndExecuteIt = async (
     args: any[] = []
 ) => {
     // load votes
-    console.log("Loading votes");
+    // console.log("Loading votes");
     await mintAndDelegate(voter, "1000")
     await waitForNextBlock()
 
     // create a new proposal
-    console.log("Creating proposal");
+    // console.log("Creating proposal");
     const tx = await createProposal(governor, contractToCall, Contract, proposer, description, functionToCall, args)
     const proposalId = await getProposalIdFromTx(tx, governor)
 
     // wait
-    console.log("Waiting for voting period to start");
+    // console.log("Waiting for voting period to start");
     await waitForVotingPeriodToStart(proposalId, governor)
 
     // vote
-    console.log("Voting");
+    // console.log("Voting");
     await governor.connect(voter).castVote(proposalId, 1) // vote for
 
     // wait
-    console.log("Waiting for voting period to end");
+    // console.log("Waiting for voting period to end");
     await waitForVotingPeriodToEnd(proposalId, governor)
 
     // queue it
-    console.log("Queueing");
+    // console.log("Queueing");
     const encodedFunctionCall = Contract.interface.encodeFunctionData(functionToCall, args)
     const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
     await governor.queue(
@@ -147,7 +147,7 @@ export const createProposalAndExecuteIt = async (
     await waitForNextBlock()
 
     // execute it
-    console.log("Executing");
+    // console.log("Executing");
     await governor.execute(
         [await contractToCall.getAddress()],
         [0],
