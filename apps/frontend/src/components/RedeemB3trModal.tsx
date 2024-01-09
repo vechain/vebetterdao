@@ -1,5 +1,5 @@
-import { useB3trBalance, useB3trTokenDetails } from "@/api"
-import { useStakeB3tr } from "@/hooks"
+import { useVot3Balance, useVot3TokenDetails } from "@/api"
+import { useUnstakeB3tr } from "@/hooks"
 import {
   ModalOverlay,
   ModalContent,
@@ -29,10 +29,10 @@ type FormData = {
   amount: string
 }
 
-export const SwapB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
+export const RedeemB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
   const { account } = useWallet()
-  const { data: balance, isLoading: isBalanceLoading } = useB3trBalance(account ?? undefined)
-  const { data: tokenDetails, isLoading: isTokensDetailsLoading } = useB3trTokenDetails()
+  const { data: balance, isLoading: isBalanceLoading } = useVot3Balance(account ?? undefined)
+  const { data: tokenDetails, isLoading: isTokensDetailsLoading } = useVot3TokenDetails()
 
   const formattedBalance = useMemo(() => {
     if (!balance) {
@@ -66,7 +66,7 @@ export const SwapB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
     return { formattedAmount, scaledAmount }
   }, [tokenDetails, balance, watchPercentageAmount])
 
-  const { sendTransaction, isTxReceiptLoading, sendTransactionPending, sendTransactionError } = useStakeB3tr({
+  const { sendTransaction, isTxReceiptLoading, sendTransactionPending, sendTransactionError } = useUnstakeB3tr({
     amount: scaledAmount,
   })
 
@@ -77,15 +77,15 @@ export const SwapB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
       <ModalOverlay />
       <form onSubmit={handleSubmit(() => sendTransaction())}>
         <ModalContent>
-          <ModalHeader>Swap B3TR</ModalHeader>
+          <ModalHeader>Redeem B3TR</ModalHeader>
 
           <ModalCloseButton />
           <ModalBody>
             <Text mb="4" fontSize={"sm"}>
-              Swapping B3TR will give you a 1:1 ratio of VOT3 tokens, which can be used to vote on proposals.
+              Redeem your B3TR for VOT3 tokens at a 1:1 ratio.
             </Text>
             <FormControl>
-              <FormLabel>Amount to swap</FormLabel>
+              <FormLabel>Amount to redeem</FormLabel>
               <Controller
                 name="amount"
                 control={control}
@@ -101,16 +101,16 @@ export const SwapB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
                 )}
               />
               <HStack justify="space-between">
-                <Text fontSize="sm">0 B3TR</Text>
-                <Text fontSize="sm">{formattedBalance} B3TR</Text>
+                <Text fontSize="sm">0 VOT3</Text>
+                <Text fontSize="sm">{formattedBalance} VOT3</Text>
               </HStack>
-              <FormHelperText>{`You've selected ${formattedAmount} B3TR `}</FormHelperText>
+              <FormHelperText>{`You've selected ${formattedAmount} VOT3 `}</FormHelperText>
             </FormControl>
           </ModalBody>
 
           <ModalFooter>
             <Button type="submit" onClick={onClose} isLoading={isButtonLoading}>
-              Swap
+              Redeem
             </Button>
           </ModalFooter>
         </ModalContent>

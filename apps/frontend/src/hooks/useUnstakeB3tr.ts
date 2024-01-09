@@ -4,7 +4,6 @@ import { useQueryClient } from "@tanstack/react-query"
 import { useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
 import { useConnex, useWallet } from "@vechain/dapp-kit-react"
-import { scaleNumberUp } from "@repo/utils/FormattingUtils"
 import { FormattingUtils } from "@repo/utils"
 
 type useMintB3trProps = {
