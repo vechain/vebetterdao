@@ -45,7 +45,7 @@ export const createProposal = async (
     proposer: HardhatEthersSigner,
     description: string = "",
     functionTocall: string = "tokenDetails",
-    values: number[] = [],
+    args: any[] = [],
     avoidMintingAndDelegating: boolean = false, // in some scenarios we want the operation to fail if the proposer does not have enough VOT3
 ): Promise<ContractTransactionResponse> => {
     // the proposer needs to have some delegated VOT3 to be able to create a proposal
@@ -61,7 +61,7 @@ export const createProposal = async (
     }
 
     const address = await contractToCall.getAddress()
-    const encodedFunctionCall = ContractFactory.interface.encodeFunctionData(functionTocall, values)
+    const encodedFunctionCall = ContractFactory.interface.encodeFunctionData(functionTocall, args)
 
     const tx = await governor.connect(proposer).propose(
         [address],
@@ -100,4 +100,58 @@ export const waitForVotingPeriodToEnd = async (proposalId: number, governor: Gov
 
 
     await moveBlocks(parseInt((deadline - currentBlock + BigInt(1)).toString()))
+}
+
+export const createProposalAndExecuteIt = async (
+    proposer: HardhatEthersSigner,
+    voter: HardhatEthersSigner,
+    governor: GovernorContract,
+    contractToCall: BaseContract,
+    Contract: ContractFactory,
+    description: string,
+    functionToCall: string,
+    args: any[] = []
+) => {
+    // load votes
+    console.log("Loading votes");
+    await mintAndDelegate(voter, "1000")
+    await waitForNextBlock()
+
+    // create a new proposal
+    console.log("Creating proposal");
+    const tx = await createProposal(governor, contractToCall, Contract, proposer, description, functionToCall, args)
+    const proposalId = await getProposalIdFromTx(tx, governor)
+
+    // wait
+    console.log("Waiting for voting period to start");
+    await waitForVotingPeriodToStart(proposalId, governor)
+
+    // vote
+    console.log("Voting");
+    await governor.connect(voter).castVote(proposalId, 1) // vote for
+
+    // wait
+    console.log("Waiting for voting period to end");
+    await waitForVotingPeriodToEnd(proposalId, governor)
+
+    // queue it
+    console.log("Queueing");
+    const encodedFunctionCall = Contract.interface.encodeFunctionData(functionToCall, args)
+    const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
+    await governor.queue(
+        [await contractToCall.getAddress()],
+        [0],
+        [encodedFunctionCall],
+        descriptionHash
+    )
+    await waitForNextBlock()
+
+    // execute it
+    console.log("Executing");
+    await governor.execute(
+        [await contractToCall.getAddress()],
+        [0],
+        [encodedFunctionCall],
+        descriptionHash
+    )
 }
