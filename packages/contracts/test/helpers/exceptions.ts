@@ -1,4 +1,5 @@
 import { assert } from "chai"
+import { network } from "hardhat"
 
 async function tryCatch(promise: any, reason: any) {
     try {
@@ -10,6 +11,6 @@ async function tryCatch(promise: any, reason: any) {
         assert(error.message.includes(reason), `Expected an ${reason} error`)
     }
 }
-
-export const catchRevert = async function (promise: any) { await tryCatch(promise, "execution reverted") }
+const revertReason = network.name === "hardhat" ? "VM Exception while processing transaction" : "execution reverted"
+export const catchRevert = async function (promise: any) { await tryCatch(promise, revertReason) }
 export const catchOutOfGas = async function (promise: any) { await tryCatch(promise, "out of gas") }

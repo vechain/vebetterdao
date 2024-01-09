@@ -1,10 +1,16 @@
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
 import { B3TR, GovernorContract } from "../../typechain-types";
 import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { getOrDeployContractInstances } from "./deploy";
+import { mine } from "@nomicfoundation/hardhat-network-helpers";
 
 export const waitForNextBlock = async () => {
+    if (network.name === "hardhat") {
+        await mine(1)
+        return
+    }
+
     // since we do not support ethers' evm_mine yet, we need to wait for a block with a timeout function
     let startingBlock = await ethers.provider.getBlockNumber()
     let currentBlock
