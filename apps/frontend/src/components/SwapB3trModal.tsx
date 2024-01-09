@@ -73,10 +73,10 @@ export const SwapB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
   const isButtonLoading = isTxReceiptLoading || sendTransactionPending
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} trapFocus={true}>
+    <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
       <ModalOverlay />
       <form onSubmit={handleSubmit(() => sendTransaction())}>
-        <ModalContent>
+        <ModalContent h={320}>
           <ModalHeader>Swap B3TR</ModalHeader>
 
           <ModalCloseButton />
