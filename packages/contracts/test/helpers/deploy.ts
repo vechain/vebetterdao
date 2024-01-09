@@ -1,7 +1,7 @@
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers"
 import { ethers } from "hardhat"
-import { B3TR, GovernorContract, GovernorContract__factory, TimeLock, VOT3 } from "../../typechain-types"
+import { B3TR, B3trApps, GovernorContract, TimeLock, VOT3 } from "../../typechain-types"
 
 interface DeployInstance {
     B3trContract: ContractFactory
@@ -9,6 +9,7 @@ interface DeployInstance {
     vot3: VOT3 & { deploymentTransaction(): ContractTransactionResponse; }
     timeLock: TimeLock & { deploymentTransaction(): ContractTransactionResponse; }
     governor: GovernorContract & { deploymentTransaction(): ContractTransactionResponse; }
+    b3trApps: B3trApps & { deploymentTransaction(): ContractTransactionResponse; }
     owner: HardhatEthersSigner
     otherAccount: HardhatEthersSigner
     minterAccount: HardhatEthersSigner
@@ -45,6 +46,7 @@ export const getOrDeployContractInstances = async (forceDeploy: boolean = false,
         [],
         timelockAdmin,
     )
+    await timeLock.waitForDeployment()
 
     // Deploy Governor
     const GovernorContract = await ethers.getContractFactory("GovernorContract")
@@ -66,6 +68,11 @@ export const getOrDeployContractInstances = async (forceDeploy: boolean = false,
     await timeLock.connect(timelockAdmin).grantRole(EXECUTOR_ROLE, await governor.getAddress())
     await timeLock.connect(timelockAdmin).grantRole(CANCELLER_ROLE, await governor.getAddress())
 
-    cachedDeployInstance = { B3trContract, b3tr, vot3, timeLock, governor, owner, otherAccount, minterAccount, timelockAdmin, otherAccounts }
+    // Deploy B3trApps
+    const B3trAppsContract = await ethers.getContractFactory("B3trApps")
+    const b3trApps = await B3trAppsContract.deploy(await timeLock.getAddress())
+    await b3trApps.waitForDeployment()
+
+    cachedDeployInstance = { B3trContract, b3tr, vot3, timeLock, b3trApps, governor, owner, otherAccount, minterAccount, timelockAdmin, otherAccounts }
     return cachedDeployInstance
 }
