@@ -109,7 +109,7 @@ export const RedeemB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
           </ModalBody>
 
           <ModalFooter>
-            <Button type="submit" onClick={onClose} isLoading={isButtonLoading}>
+            <Button type="submit" isLoading={isButtonLoading}>
               Redeem
             </Button>
           </ModalFooter>
