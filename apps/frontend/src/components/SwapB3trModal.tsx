@@ -1,5 +1,5 @@
-import { useB3trBalance, useB3trTokenDetails } from "@/api"
-import { useStakeB3tr } from "@/hooks"
+import { TokenDetails, useB3trBalance, useB3trTokenDetails, useVot3Balance, useVot3TokenDetails } from "@/api"
+import { useStakeB3tr, useUnstakeB3tr } from "@/hooks"
 import {
   ModalOverlay,
   ModalContent,
@@ -17,9 +17,10 @@ import {
 } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { useMemo } from "react"
-import { Controller, useForm } from "react-hook-form"
+import { useEffect, useMemo, useState } from "react"
+import { Control, Controller, useForm } from "react-hook-form"
 import { SliderWithTooltip } from "./SliderWithTooltip"
+import { ConfirmTransactionModalContent, TransactionStatus } from "./ConfirmTransactionModalContent"
 
 type Props = {
   isOpen: boolean
@@ -33,14 +34,6 @@ export const SwapB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
   const { account } = useWallet()
   const { data: balance, isLoading: isBalanceLoading } = useB3trBalance(account ?? undefined)
   const { data: tokenDetails, isLoading: isTokensDetailsLoading } = useB3trTokenDetails()
-
-  const formattedBalance = useMemo(() => {
-    if (!balance) {
-      return "0"
-    }
-    const scaledAmount = FormattingUtils.scaleNumberDown(balance, tokenDetails?.decimals ?? 18)
-    return FormattingUtils.humanNumber(scaledAmount, scaledAmount)
-  }, [balance])
 
   const {
     handleSubmit,
@@ -66,55 +59,127 @@ export const SwapB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
     return { formattedAmount, scaledAmount }
   }, [tokenDetails, balance, watchPercentageAmount])
 
-  const { sendTransaction, isTxReceiptLoading, sendTransactionPending, sendTransactionError } = useStakeB3tr({
+  const {
+    sendTransaction,
+    isTxReceiptLoading,
+    sendTransactionPending,
+    sendTransactionError,
+    txReceipt,
+    txReceiptError,
+  } = useStakeB3tr({
     amount: scaledAmount,
   })
 
-  const isButtonLoading = isTxReceiptLoading || sendTransactionPending
+  // worfklow status is one of "ready" | "pending" | "waitingConfirmation" | "success" | "error"
+  // ready: the user has not clicked on the button yet
+  // pending: the user has clicked on the button and we're waiting for the transaction to be sent
+  // waitingConfirmation: the transaction has been sent and we're waiting for the transaction to be confirmed by the chain
+  // success: the transaction has been confirmed by the chain
+  // error: the transaction has failed
+  // this cannot be a derived value since we need tochange it with user actions (onTryAgain)
+  const [status, setStatus] = useState<TransactionStatus | "ready">("ready")
+
+  useEffect(() => {
+    if (sendTransactionPending) return setStatus("pending")
+
+    if (isTxReceiptLoading) return setStatus("waitingConfirmation")
+
+    if (sendTransactionError || txReceiptError) return setStatus("error")
+
+    if (txReceipt) return setStatus("success")
+
+    return setStatus("ready")
+  }, [isTxReceiptLoading, sendTransactionPending, sendTransactionError, txReceipt, txReceiptError])
+
+  const onSuccess = () => {
+    setStatus("ready")
+    onClose()
+  }
+
+  const renderContent = useMemo(() => {
+    if (status !== "ready")
+      return (
+        <ConfirmTransactionModalContent
+          description={`Swap ${formattedAmount} B3TR`}
+          status={status}
+          error={sendTransactionError?.message ?? txReceiptError?.message}
+          onSuccess={onSuccess}
+          onTryAgain={() => setStatus("ready")}
+        />
+      )
+    return (
+      <SwapB3trModalFormContent
+        balance={balance}
+        tokenDetails={tokenDetails}
+        formattedAmount={formattedAmount}
+        control={control}
+      />
+    )
+  }, [status, balance, tokenDetails, formattedAmount, control])
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
       <ModalOverlay />
       <form onSubmit={handleSubmit(() => sendTransaction())}>
-        <ModalContent h={320}>
-          <ModalHeader>Swap B3TR</ModalHeader>
-
-          <ModalCloseButton />
-          <ModalBody>
-            <Text mb="4" fontSize={"sm"}>
-              Swapping B3TR will give you a 1:1 ratio of VOT3 tokens, which can be used to vote on proposals.
-            </Text>
-            <FormControl>
-              <FormLabel>Amount to swap</FormLabel>
-              <Controller
-                name="amount"
-                control={control}
-                rules={{
-                  maxLength: 100,
-                }}
-                render={({ field: { onChange, value } }) => (
-                  <SliderWithTooltip
-                    value={Number(value)}
-                    onChange={onChange}
-                    tooltipLabel={`${formattedAmount} B3TR`}
-                  />
-                )}
-              />
-              <HStack justify="space-between">
-                <Text fontSize="sm">0 B3TR</Text>
-                <Text fontSize="sm">{formattedBalance} B3TR</Text>
-              </HStack>
-              <FormHelperText>{`You've selected ${formattedAmount} B3TR `}</FormHelperText>
-            </FormControl>
-          </ModalBody>
-
-          <ModalFooter>
-            <Button type="submit" isLoading={isButtonLoading}>
-              Swap
-            </Button>
-          </ModalFooter>
-        </ModalContent>
+        <ModalContent h={320}>{renderContent}</ModalContent>
       </form>
     </Modal>
+  )
+}
+
+type RedeemB3trModalFormContentProps = {
+  balance?: string
+  tokenDetails?: TokenDetails
+  formattedAmount: string
+  control: Control<FormData, any>
+}
+
+const SwapB3trModalFormContent: React.FC<RedeemB3trModalFormContentProps> = ({
+  balance,
+  tokenDetails,
+  formattedAmount,
+  control,
+}) => {
+  const formattedBalance = useMemo(() => {
+    if (!balance) {
+      return "0"
+    }
+    const scaledAmount = FormattingUtils.scaleNumberDown(balance, tokenDetails?.decimals ?? 18)
+    return FormattingUtils.humanNumber(scaledAmount, scaledAmount)
+  }, [balance])
+
+  return (
+    <>
+      <ModalHeader>Swap B3TR</ModalHeader>
+
+      <ModalCloseButton />
+      <ModalBody>
+        <Text mb="4" fontSize={"sm"}>
+          Swap your B3TR for VOT3 at a 1:1 ratio. V0t3 is used to vote on proposals.
+        </Text>
+        <FormControl>
+          <FormLabel>Amount to swap</FormLabel>
+          <Controller
+            name="amount"
+            control={control}
+            rules={{
+              maxLength: 100,
+            }}
+            render={({ field: { onChange, value } }) => (
+              <SliderWithTooltip value={Number(value)} onChange={onChange} tooltipLabel={`${formattedAmount} B3TR`} />
+            )}
+          />
+          <HStack justify="space-between">
+            <Text fontSize="sm">0 B3TR</Text>
+            <Text fontSize="sm">{formattedBalance} B3TR</Text>
+          </HStack>
+          <FormHelperText>{`You've selected ${formattedAmount} B3TR `}</FormHelperText>
+        </FormControl>
+      </ModalBody>
+
+      <ModalFooter>
+        <Button type="submit">Swap</Button>
+      </ModalFooter>
+    </>
   )
 }

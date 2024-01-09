@@ -100,7 +100,7 @@ export const RedeemB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
     if (status !== "ready")
       return (
         <ConfirmTransactionModalContent
-          description="Redeeming B3TR"
+          description={`Redeem ${formattedAmount} B3TR`}
           status={status}
           error={sendTransactionError?.message ?? txReceiptError?.message}
           onSuccess={onSuccess}
