@@ -14,11 +14,15 @@ import {
   FormErrorMessage,
   Input,
   VStack,
+  FormHelperText,
+  Text,
+  HStack,
 } from "@chakra-ui/react"
 import { AddressUtils, FormattingUtils } from "@repo/utils"
 import { useMemo } from "react"
-import { FieldErrors, UseFormRegister, useForm } from "react-hook-form"
+import { FieldErrors, UseFormRegister, UseFormSetValue, useForm } from "react-hook-form"
 import { ConfirmTransactionModalContent } from "./ConfirmTransactionModalContent"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 type Props = {
   isOpen: boolean
@@ -42,6 +46,7 @@ export const MinB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
     handleSubmit,
     register,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<FormData>()
 
@@ -89,16 +94,16 @@ export const MinB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
       )
     return (
       <form onSubmit={handleSubmit(data => onSubmit(data))}>
-        <SwapB3trModalFormContent tokenDetails={tokenDetails} register={register} errors={errors} />
+        <SwapB3trModalFormContent tokenDetails={tokenDetails} register={register} errors={errors} setValue={setValue} />
       </form>
     )
   }, [status, tokenDetails, formattedAmount, register, errors, handleSubmit, sendTransactionError, txReceiptError])
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
+    <Modal isOpen={isOpen} onClose={onClose} isCentered={true}>
       <ModalOverlay />
 
-      <ModalContent h={320}>{renderContent}</ModalContent>
+      <ModalContent h={360}>{renderContent}</ModalContent>
     </Modal>
   )
 }
@@ -107,13 +112,34 @@ type RedeemB3trModalFormContentProps = {
   tokenDetails?: TokenDetails
   register: UseFormRegister<FormData>
   errors: FieldErrors<FormData>
+  setValue: UseFormSetValue<FormData>
 }
 
-const SwapB3trModalFormContent: React.FC<RedeemB3trModalFormContentProps> = ({ tokenDetails, register, errors }) => {
+const SwapB3trModalFormContent: React.FC<RedeemB3trModalFormContentProps> = ({
+  tokenDetails,
+  register,
+  errors,
+  setValue,
+}) => {
+  const { account } = useWallet()
   const availableSupply = useMemo(() => {
-    if (!tokenDetails) return 0
-    return Number(tokenDetails.totalSupply) - Number(tokenDetails.circulatingSupply)
+    if (!tokenDetails) return { amount: 0, formattedAmount: "0" }
+    const amount = Number(tokenDetails.totalSupply) - Number(tokenDetails.circulatingSupply)
+    return {
+      amount,
+      formattedAmount: FormattingUtils.humanNumber(amount, amount),
+    }
   }, [tokenDetails])
+
+  const selectCurrentAddress = () => {
+    if (account) {
+      setValue("address", account)
+    }
+  }
+
+  const selectPercentageOfSupply = (percentage: number) => {
+    setValue("amount", availableSupply.amount * (percentage / 100))
+  }
 
   return (
     <>
@@ -132,7 +158,15 @@ const SwapB3trModalFormContent: React.FC<RedeemB3trModalFormContentProps> = ({ t
                 validate: value => AddressUtils.isValid(value) || "Invalid address",
               })}
             />
-            <FormErrorMessage>{errors.address?.message}</FormErrorMessage>
+            {errors.address?.message ? (
+              <FormErrorMessage>{errors.address?.message}</FormErrorMessage>
+            ) : (
+              <FormHelperText>
+                <Button variant={"link"} size="sm" onClick={selectCurrentAddress}>
+                  Click here to use the current address
+                </Button>
+              </FormHelperText>
+            )}
           </FormControl>
           <FormControl isInvalid={!!errors.amount}>
             <FormLabel htmlFor="amount">Amount</FormLabel>
@@ -142,10 +176,25 @@ const SwapB3trModalFormContent: React.FC<RedeemB3trModalFormContentProps> = ({ t
               {...register("amount", {
                 required: "Amount is required",
                 validate: value =>
-                  isNaN(Number(value)) ? "Invalid number" : Number(value) <= availableSupply || "Not enough supply",
+                  isNaN(Number(value))
+                    ? "Invalid number"
+                    : Number(value) <= availableSupply.amount || "Not enough supply",
               })}
             />
-            <FormErrorMessage>{errors.amount?.message}</FormErrorMessage>
+            {errors.amount?.message ? (
+              <FormErrorMessage>{errors.amount?.message}</FormErrorMessage>
+            ) : (
+              <FormHelperText>
+                <HStack justify={"space-between"} align={"center"}>
+                  <Text>
+                    Available: {availableSupply.formattedAmount} {tokenDetails?.symbol}
+                  </Text>
+                  <Button variant={"link"} size="sm" onClick={() => selectPercentageOfSupply(1)}>
+                    Click here to use 1%
+                  </Button>
+                </HStack>
+              </FormHelperText>
+            )}
           </FormControl>
         </VStack>
       </ModalBody>
