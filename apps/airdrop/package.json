@@ -1,0 +1,19 @@
+{
+  "name": "airdrop",
+  "version": "0.0.1",
+  "main": "airdrop.ts",
+  "private": true,
+  "scripts": {
+    "airdrop": "ts-node airdrop.ts"
+  },
+  "dependencies": {
+    "@repo/constants": "*",
+    "@repo/contracts": "*",
+    "@repo/utils": "*",
+    "@vechainfoundation/vechain-sdk-core": "0.0.1",
+    "@vechainfoundation/vechain-sdk-errors": "0.0.1",
+    "@vechainfoundation/vechain-sdk-network": "0.0.1",
+    "ts-node": ">=8.0.0"
+  },
+  "devDependencies": {}
+}
