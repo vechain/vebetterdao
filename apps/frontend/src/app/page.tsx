@@ -4,6 +4,7 @@ import { useB3trBalance, useB3trTokenDetails, useVot3Balance, useVot3TokenDetail
 import { Stack, StackDivider, VStack } from "@chakra-ui/react"
 import { BalanceCard, MintNewB3trCard, RedeemB3trButton, SwapB3trButton, TokenDetailsCard } from "@/components"
 import { useWallet } from "@vechain/dapp-kit-react"
+import { TokensBreakdownPieChart } from "@/components/TokensBreakdownPieChart"
 
 export default function Home() {
   const { account } = useWallet()
@@ -16,6 +17,7 @@ export default function Home() {
 
   return (
     <VStack spacing={4} divider={<StackDivider />} w="full">
+      <TokensBreakdownPieChart />
       <Stack direction={["column", "column", "row"]} spacing={4} w="full" divider={<StackDivider />}>
         <VStack spacing={4} w="full">
           <TokenDetailsCard tokenDetailsQueryResult={b3trTokenDetailsQueryResult} />
