@@ -62,7 +62,7 @@ export const useSendTransaction = ({ signerAccount, clauses, onTxConfirmed }: Us
   const {
     data: txReceipt,
     isFetching: isTxReceiptLoading,
-    isError: isTxReceiptError,
+    error: txReceiptError,
   } = useGetTxReceipt(sendTransactionTx?.txid)
 
   const explainTxRevertReason = async (txReceipt: Connex.Thor.Transaction.Receipt) => {
@@ -102,7 +102,7 @@ export const useSendTransaction = ({ signerAccount, clauses, onTxConfirmed }: Us
     sendTransactionPending,
     sendTransactionError,
     isTxReceiptLoading,
-    isTxReceiptError,
+    txReceiptError,
     txReceipt,
   }
 }
