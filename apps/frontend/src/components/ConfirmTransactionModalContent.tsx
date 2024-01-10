@@ -1,7 +1,7 @@
-import { Alert, AlertDescription, AlertIcon, AlertTitle, Button, ModalHeader, VStack } from "@chakra-ui/react"
 import { useEffect, useMemo } from "react"
+import { Alert, AlertDescription, AlertIcon, AlertTitle, Button, ModalHeader, VStack } from "@chakra-ui/react"
+import { TransactionStatus } from "@/hooks"
 
-export type TransactionStatus = "pending" | "waitingConfirmation" | "success" | "error"
 type Props = {
   description: string
   status: TransactionStatus
