@@ -57,6 +57,7 @@ const start = async () => {
     if (receipt.reverted) throw Error("Transaction reverted")
 
     console.log(`Tx was successful. TxId: ${receipt.meta.txID}`)
+    console.log(`The following drops were made: ${JSON.stringify(batch)}`)
   }
 }
 
