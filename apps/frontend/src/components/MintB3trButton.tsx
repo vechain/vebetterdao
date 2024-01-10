@@ -49,7 +49,7 @@ export const MintB3trButton: React.FC<Props> = () => {
     <>
       <MinB3trModal isOpen={isOpen} onClose={onClose} />
       <Button size="sm" isDisabled={buttonDisabled} onClick={onOpen} variant="link" colorScheme="teal">
-        Mint B3tr
+        Mint B3TR
       </Button>
     </>
   )
