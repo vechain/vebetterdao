@@ -1,5 +1,5 @@
 export * from "./BalanceCard"
-export * from "./MintNewB3trCard"
+export * from "./MintB3trButton"
 export * from "./Navbar"
 export * from "./RedeemB3trButton"
 export * from "./SwapB3trButton"
