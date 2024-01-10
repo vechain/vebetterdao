@@ -1,5 +1,5 @@
 import { TokenDetails, useB3trBalance, useB3trTokenDetails, useVot3Balance, useVot3TokenDetails } from "@/api"
-import { useStakeB3tr, useUnstakeB3tr } from "@/hooks"
+import { useStakeB3tr } from "@/hooks"
 import {
   ModalOverlay,
   ModalContent,
@@ -17,10 +17,10 @@ import {
 } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { useEffect, useMemo, useState } from "react"
+import { useMemo } from "react"
 import { Control, Controller, useForm } from "react-hook-form"
 import { SliderWithTooltip } from "./SliderWithTooltip"
-import { ConfirmTransactionModalContent, TransactionStatus } from "./ConfirmTransactionModalContent"
+import { ConfirmTransactionModalContent } from "./ConfirmTransactionModalContent"
 
 type Props = {
   isOpen: boolean
@@ -66,33 +66,14 @@ export const SwapB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
     sendTransactionError,
     txReceipt,
     txReceiptError,
+    status,
+    resetStatus,
   } = useStakeB3tr({
     amount: scaledAmount,
   })
 
-  // worfklow status is one of "ready" | "pending" | "waitingConfirmation" | "success" | "error"
-  // ready: the user has not clicked on the button yet
-  // pending: the user has clicked on the button and we're waiting for the transaction to be sent
-  // waitingConfirmation: the transaction has been sent and we're waiting for the transaction to be confirmed by the chain
-  // success: the transaction has been confirmed by the chain
-  // error: the transaction has failed
-  // this cannot be a derived value since we need tochange it with user actions (onTryAgain)
-  const [status, setStatus] = useState<TransactionStatus | "ready">("ready")
-
-  useEffect(() => {
-    if (sendTransactionPending) return setStatus("pending")
-
-    if (isTxReceiptLoading) return setStatus("waitingConfirmation")
-
-    if (sendTransactionError || txReceiptError) return setStatus("error")
-
-    if (txReceipt) return setStatus("success")
-
-    return setStatus("ready")
-  }, [isTxReceiptLoading, sendTransactionPending, sendTransactionError, txReceipt, txReceiptError])
-
   const onSuccess = () => {
-    setStatus("ready")
+    resetStatus()
     onClose()
   }
 
@@ -104,7 +85,7 @@ export const SwapB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
           status={status}
           error={sendTransactionError?.message ?? txReceiptError?.message}
           onSuccess={onSuccess}
-          onTryAgain={() => setStatus("ready")}
+          onTryAgain={resetStatus}
         />
       )
     return (
