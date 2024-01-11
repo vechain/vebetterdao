@@ -1,46 +1,78 @@
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, TooltipProps } from "recharts"
+import { PieChart, Pie, Cell, ResponsiveContainer, Sector } from "recharts"
 import { useB3trTokenDetails } from "@/api"
-import {
-  Box,
-  Card,
-  CardBody,
-  CardHeader,
-  Fade,
-  Heading,
-  Text,
-  VStack,
-  useColorModeValue,
-  useMediaQuery,
-  useToken,
-} from "@chakra-ui/react"
-import { useMemo } from "react"
+import { Box, Card, CardBody, CardHeader, Heading, VStack, useColorModeValue, useToken } from "@chakra-ui/react"
+import { useMemo, useState } from "react"
 import { FormattingUtils } from "@repo/utils"
 import BigNumber from "bignumber.js"
-import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent"
+import { PieSectorDataItem } from "recharts/types/polar/Pie"
+import { ActiveShape } from "recharts/types/util/types"
 
-const CustomTooltip = <TValue extends ValueType, TName extends NameType>({
-  totalSupply,
-  active,
-  payload,
-  label,
-}: TooltipProps<ValueType, NameType> & { totalSupply: number }) => {
-  const valuePercentage = useMemo(() => {
-    if (!active || !payload || !payload[0] || !totalSupply) return 0
-    const value = payload[0].value as number
-    return (value / totalSupply) * 100
-  }, [active, payload, totalSupply])
-  if (!active) return null
+const RenderActiveShape: ActiveShape<PieSectorDataItem> = ({ ...props }) => {
+  const RADIAN = Math.PI / 180
+  const { cx, cy, midAngle, innerRadius, outerRadius, startAngle, endAngle, fill, payload, percent, value } = props
+  const sin = Math.sin(-RADIAN * midAngle)
+  const cos = Math.cos(-RADIAN * midAngle)
+  const sx = cx + (outerRadius + 10) * cos
+  const sy = cy + (outerRadius + 10) * sin
+  const mx = cx + (outerRadius + 30) * cos
+  const my = cy + (outerRadius + 30) * sin
+  const ex = mx + (cos >= 0 ? 1 : -1) * 22
+  const ey = my
+  const textAnchor = cos >= 0 ? "start" : "end"
+
+  const [gray200, gray500] = useToken("colors", ["gray.500", "gray.200"])
+  const grayColor = useColorModeValue(gray200, gray500)
+
+  const formattedValue = FormattingUtils.humanNumber(value, value)
 
   return (
-    <Fade in={true}>
-      <Box p={4} color="white" mt="4" bg="gray.500" rounded="md" shadow="md">
-        {valuePercentage.toFixed(2)}%
-      </Box>
-    </Fade>
+    <g>
+      <text
+        x={cx}
+        y={cy}
+        dy={8}
+        textAnchor="middle"
+        fill={fill}
+        style={{
+          fontSize: "16px",
+          fontWeight: "bold",
+        }}>
+        {payload.name}
+      </text>
+      <Sector
+        cx={cx}
+        cy={cy}
+        innerRadius={innerRadius}
+        outerRadius={outerRadius}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        fill={fill}
+      />
+      <Sector
+        cx={cx}
+        cy={cy}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        innerRadius={outerRadius + 6}
+        outerRadius={outerRadius + 10}
+        fill={fill}
+      />
+      <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={fill} fill="none" />
+      <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
+      <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} textAnchor={textAnchor} fill={fill}>{`${formattedValue}`}</text>
+      <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} dy={18} textAnchor={textAnchor} fill={grayColor}>
+        {`(Rate ${(percent * 100).toFixed(2)}%)`}
+      </text>
+    </g>
   )
 }
+
 export const CirculatingSupplyPieChart = () => {
-  const [isDesktop] = useMediaQuery("(min-width: 800px)")
+  const [selectedPieIndex, setSelectedPieIndex] = useState(0)
+
+  const onPinEnter = (_: any, index: number) => {
+    setSelectedPieIndex(index)
+  }
 
   const [primary500, primary200, gray500, gray200] = useToken("colors", [
     "primary.500",
@@ -60,8 +92,8 @@ export const CirculatingSupplyPieChart = () => {
     const lockedSupply = new BigNumber(b3trTokenDetails.totalSupply).minus(circulatingSupply).toNumber()
 
     return [
-      { name: "Circulating supply", value: circulatingSupply, color: primaryColor },
-      { name: "Locked supply", value: lockedSupply, color: grayColor },
+      { name: "Circulating", value: circulatingSupply, color: primaryColor },
+      { name: "Locked", value: lockedSupply, color: grayColor },
     ]
   }, [b3trTokenDetails, b3trTokenDetails, primaryColor, grayColor])
 
@@ -75,17 +107,11 @@ export const CirculatingSupplyPieChart = () => {
     return percentage.toNumber()
   }, [b3trTokenDetails])
 
-  const totalSupply = useMemo(() => {
-    if (!b3trTokenDetails) return 0
-
-    return new BigNumber(b3trTokenDetails.totalSupply).toNumber()
-  }, [b3trTokenDetails])
-
   return (
     <Card w={["full", "full", "50%"]} h={400}>
       <CardHeader>
         <VStack spacing={2} justify={"flex-start"} align="flex-start">
-          <Heading size="md">Circulating supply</Heading>
+          <Heading size="md">Supply breakdown</Heading>
         </VStack>
       </CardHeader>
       <CardBody w="full">
@@ -95,6 +121,9 @@ export const CirculatingSupplyPieChart = () => {
               <Pie
                 data={data}
                 dataKey="value"
+                activeIndex={selectedPieIndex}
+                activeShape={RenderActiveShape}
+                onMouseEnter={onPinEnter}
                 // startAngle={180}
                 // endAngle={0}
                 paddingAngle={5}
@@ -102,20 +131,14 @@ export const CirculatingSupplyPieChart = () => {
                 // cy="50%"
                 outerRadius={"80%"}
                 innerRadius={"60%"}
-                fill="#8884d8"
-                label={({ name, value }) => `${FormattingUtils.humanNumber(value, value)} ${name}`}>
+                fill="#8884d8">
                 {data.map(entry => (
                   <Cell key={`cell-${entry.name}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip content={props => <CustomTooltip totalSupply={totalSupply} {...props} />} />
             </PieChart>
           </ResponsiveContainer>
         </Box>
-        <Text textAlign={"center"} size="sm">
-          Current B3TR/VOT3 ratio is
-          <b> 1:{circulatingSupplyPercentage}</b>
-        </Text>
       </CardBody>
     </Card>
   )

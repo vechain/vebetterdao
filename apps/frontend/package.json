@@ -25,6 +25,7 @@
     "@vechain/dapp-kit": "^0.0.4",
     "@vechain/dapp-kit-react": "^0.0.4",
     "@vechain/dapp-kit-ui": "^0.0.4",
+    "dayjs": "^1.11.10",
     "framer-motion": "^10.17.9",
     "next": "14.0.4",
     "react": "^18",
