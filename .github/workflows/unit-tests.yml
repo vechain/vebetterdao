@@ -26,6 +26,10 @@ jobs:
           node-version: 20
           cache: "yarn"
 
+      - name: Configure npm for private package
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GH_READ_PACKAGES_TOKEN }}" >> .npmrc
+
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
