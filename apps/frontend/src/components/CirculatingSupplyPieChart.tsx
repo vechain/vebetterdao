@@ -128,7 +128,7 @@ export const CirculatingSupplyPieChart = () => {
   }, [b3trTokenDetails])
 
   return (
-    <Card w={["full", "full", "50%"]} h={550}>
+    <Card w={"full"} h="full">
       <CardHeader>
         <VStack spacing={0} justify={"flex-start"} align="flex-start">
           <Heading size="md">Supply breakdown</Heading>

@@ -19,7 +19,6 @@ import { config } from "@repo/config"
 import { useMemo, useState } from "react"
 import { FormattingUtils } from "@repo/utils"
 import BigNumber from "bignumber.js"
-import dayjs from "dayjs"
 import { ActiveShape } from "recharts/types/util/types"
 import { PieSectorDataItem } from "recharts/types/polar/Pie"
 
@@ -83,7 +82,7 @@ const RenderActiveShape: ActiveShape<PieSectorDataItem> = ({ ...props }) => {
   )
 }
 
-export const TokensBreakdownPieChart = () => {
+export const TvlBreakdownPieChart = () => {
   const [selectedPieIndex, setSelectedPieIndex] = useState(0)
 
   const onPinEnter = (_: any, index: number) => {
@@ -133,7 +132,7 @@ export const TokensBreakdownPieChart = () => {
   }, [b3trTokenDetails, vot3ContractB3trBalance])
 
   return (
-    <Card w={["full", "full", "50%"]} h={550}>
+    <Card w={"full"} h="full">
       <CardHeader>
         <VStack spacing={0} justify={"flex-start"} align="flex-start">
           <Heading size="md">TVL breakdown</Heading>
