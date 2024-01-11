@@ -1,7 +1,7 @@
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers"
 import { ethers } from "hardhat"
-import { B3TR, B3trApps, GovernorContract, TimeLock, VOT3 } from "../../typechain-types"
+import { B3TR, B3trApps, GovernorContract, TimeLock, VOT3, VotingContract } from "../../typechain-types"
 
 interface DeployInstance {
     B3trContract: ContractFactory
@@ -9,7 +9,7 @@ interface DeployInstance {
     vot3: VOT3 & { deploymentTransaction(): ContractTransactionResponse; }
     timeLock: TimeLock & { deploymentTransaction(): ContractTransactionResponse; }
     governor: GovernorContract & { deploymentTransaction(): ContractTransactionResponse; }
-    b3trApps: B3trApps & { deploymentTransaction(): ContractTransactionResponse; }
+    appVotingContract: VotingContract & { deploymentTransaction(): ContractTransactionResponse; }
     owner: HardhatEthersSigner
     otherAccount: HardhatEthersSigner
     minterAccount: HardhatEthersSigner
@@ -68,11 +68,18 @@ export const getOrDeployContractInstances = async (forceDeploy: boolean = false,
     await timeLock.connect(timelockAdmin).grantRole(EXECUTOR_ROLE, await governor.getAddress())
     await timeLock.connect(timelockAdmin).grantRole(CANCELLER_ROLE, await governor.getAddress())
 
-    // Deploy B3trApps
-    const B3trAppsContract = await ethers.getContractFactory("B3trApps")
-    const b3trApps = await B3trAppsContract.deploy(await timeLock.getAddress())
-    await b3trApps.waitForDeployment()
+    // Deploy Governor
+    const VotingContract = await ethers.getContractFactory("VotingContract")
+    const appVotingContract = await VotingContract.deploy(
+        await vot3.getAddress(),
+        1, // quroum percentage
+        votingPeriod, // voting period
+        defaultVotingDelay, // voting delay
+        votingTreshold, // voting treshold
+        await timeLock.getAddress()
+    )
+    await appVotingContract.waitForDeployment()
 
-    cachedDeployInstance = { B3trContract, b3tr, vot3, timeLock, b3trApps, governor, owner, otherAccount, minterAccount, timelockAdmin, otherAccounts }
+    cachedDeployInstance = { B3trContract, b3tr, vot3, timeLock, appVotingContract, governor, owner, otherAccount, minterAccount, timelockAdmin, otherAccounts }
     return cachedDeployInstance
 }

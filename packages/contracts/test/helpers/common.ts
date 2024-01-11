@@ -1,5 +1,5 @@
 import { ethers, network } from "hardhat";
-import { B3TR, GovernorContract } from "../../typechain-types";
+import { B3TR, GovernorContract, VotingContract } from "../../typechain-types";
 import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { getOrDeployContractInstances } from "./deploy";
@@ -22,7 +22,7 @@ export const waitForNextBlock = async () => {
 
 export const moveBlocks = async (blocks: number) => {
     for (let i = 0; i < blocks; i++) {
-        // console.log(`Moving to block +${i+1}`);
+        // console.log(`Moving to block +${i + 1}`);
         await waitForNextBlock()
     }
 }
@@ -84,14 +84,14 @@ export const getProposalIdFromTx = async (tx: ContractTransactionResponse, gover
     return decodedLogs?.args[0]
 }
 
-export const waitForVotingPeriodToStart = async (proposalId: number, governor: GovernorContract) => {
+export const waitForVotingPeriodToStart = async (proposalId: number, governor: GovernorContract | VotingContract) => {
     // wait for the proposal to be in active state
     const voteDealy = await governor.votingDelay()
     const blocksToMove = parseInt((voteDealy + BigInt(1)).toString())
     await moveBlocks(blocksToMove)
 }
 
-export const waitForVotingPeriodToEnd = async (proposalId: number, governor: GovernorContract) => {
+export const waitForVotingPeriodToEnd = async (proposalId: number, governor: GovernorContract | VotingContract) => {
     const deadline = await governor.proposalDeadline(proposalId)
     // console.log(`Waiting for proposal ${proposalId} to end at block ${deadline}`);
 
