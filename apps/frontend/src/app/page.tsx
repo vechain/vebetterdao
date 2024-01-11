@@ -7,7 +7,6 @@ import {
   MintB3trButton,
   RedeemB3trButton,
   SwapB3trButton,
-  TokenDetailsCard,
   TvlBreakdownPieChart,
   CirculatingSupplyPieChart,
 } from "@/components"
@@ -29,6 +28,7 @@ export default function Home() {
         direction={["column", "column", "row"]}
         justifyContent="stretch"
         alignItems={"stretch"}
+        divider={<StackDivider />}
         spacing={4}>
         <Box w={["100%", "100%", "50%"]}>
           <CirculatingSupplyPieChart />

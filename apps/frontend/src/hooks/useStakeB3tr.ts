@@ -11,6 +11,7 @@ import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTran
 import { useCallback } from "react"
 import { useConnex, useWallet } from "@vechain/dapp-kit-react"
 import { FormattingUtils } from "@repo/utils"
+import { config } from "@repo/config"
 
 type useMintB3trProps = {
   amount?: string | number
@@ -53,9 +54,22 @@ export const useStakeB3tr = ({
         queryKey: getB3TrBalanceQueryKey(account ?? undefined),
       })
 
+      await queryClient.cancelQueries({
+        queryKey: getB3TrBalanceQueryKey(config.vot3ContractAddress),
+      })
+
       await queryClient.refetchQueries({
         queryKey: getB3TrBalanceQueryKey(account ?? undefined),
       })
+
+      await queryClient.cancelQueries({
+        queryKey: getB3TrBalanceQueryKey(config.vot3ContractAddress),
+      })
+
+      await queryClient.refetchQueries({
+        queryKey: getB3TrBalanceQueryKey(config.vot3ContractAddress),
+      })
+
       await queryClient.cancelQueries({
         queryKey: getVot3BalanceQueryKey(account ?? undefined),
       })
