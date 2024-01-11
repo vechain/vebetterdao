@@ -75,9 +75,14 @@
       ]
     },
     "test": {
+      "cache": false,
       "dependsOn": [
-        "//#solo-up",
+        "@repo/contracts#check-contracts-deployment",
         "^test"
+      ],
+      "dotEnv": [
+        ".env",
+        ".env.config"
       ]
     }
   }
