@@ -169,13 +169,19 @@ export const TvlBreakdownPieChart = () => {
         <Alert status="info" borderRadius={"lg"} mt={8}>
           <AlertIcon />
           <Box>
-            <AlertTitle>The current TVL ratio is {formattedTvlRatio} </AlertTitle>
+            <AlertTitle>
+              The current TVL ratio is {formattedTvlRatio}
+              <Text as="sup">*</Text>{" "}
+            </AlertTitle>
             <AlertDescription>
               This means that for every 1 B3TR in circulation, there are {(1 / tvlRatio).toFixed(2)} B3TR locked in
               VOT3.
             </AlertDescription>
           </Box>
         </Alert>
+        <Text fontSize="xs" mt={2}>
+          <Text as="sup">*</Text> If B3TR was trading at $1
+        </Text>
       </CardBody>
     </Card>
   )
