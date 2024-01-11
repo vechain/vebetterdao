@@ -124,7 +124,7 @@ export const TokensBreakdownPieChart = () => {
   }, [b3trTokenDetails, vot3ContractB3trBalance, b3trTokenDetails, primaryColor, secondaryColor])
 
   const { tvlRatio, formattedTvlRatio } = useMemo(() => {
-    if (!b3trTokenDetails || !vot3ContractB3trBalance) return 0
+    if (!b3trTokenDetails || !vot3ContractB3trBalance) return { tvlRatio: 0, formattedTvlRatio: "0" }
 
     const scaledVot3ContractB3trBalance = new BigNumber(
       FormattingUtils.scaleNumberDown(vot3ContractB3trBalance, b3trTokenDetails.decimals),
