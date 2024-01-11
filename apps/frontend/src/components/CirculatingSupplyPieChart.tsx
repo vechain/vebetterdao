@@ -1,6 +1,20 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Sector } from "recharts"
 import { useB3trTokenDetails } from "@/api"
-import { Box, Card, CardBody, CardHeader, Heading, VStack, useColorModeValue, useToken } from "@chakra-ui/react"
+import {
+  Alert,
+  AlertDescription,
+  AlertIcon,
+  AlertTitle,
+  Box,
+  Card,
+  CardBody,
+  CardHeader,
+  Heading,
+  Text,
+  VStack,
+  useColorModeValue,
+  useToken,
+} from "@chakra-ui/react"
 import { useMemo, useState } from "react"
 import { FormattingUtils } from "@repo/utils"
 import BigNumber from "bignumber.js"
@@ -107,11 +121,20 @@ export const CirculatingSupplyPieChart = () => {
     return percentage.toNumber()
   }, [b3trTokenDetails])
 
+  const formattedTotalSupply = useMemo(() => {
+    if (!b3trTokenDetails) return 0
+
+    return FormattingUtils.humanNumber(b3trTokenDetails.totalSupply)
+  }, [b3trTokenDetails])
+
   return (
-    <Card w={["full", "full", "50%"]} h={400}>
+    <Card w={["full", "full", "50%"]} h={550}>
       <CardHeader>
-        <VStack spacing={2} justify={"flex-start"} align="flex-start">
+        <VStack spacing={0} justify={"flex-start"} align="flex-start">
           <Heading size="md">Supply breakdown</Heading>
+          <Text fontSize="sm" color="gray">
+            How much B3TR is in circulation and how much is locked?
+          </Text>
         </VStack>
       </CardHeader>
       <CardBody w="full">
@@ -139,6 +162,16 @@ export const CirculatingSupplyPieChart = () => {
             </PieChart>
           </ResponsiveContainer>
         </Box>
+        <Alert status="info" borderRadius={"lg"} mt={8}>
+          <AlertIcon />
+          <Box>
+            <AlertTitle>The total supply of B3TR is {formattedTotalSupply}</AlertTitle>
+            <AlertDescription>
+              The circulating supply is the amount of B3TR that is currently in circulation. The locked supply is the
+              amount of B3TR that is locked in the contract and is not in circulation.
+            </AlertDescription>
+          </Box>
+        </Alert>
       </CardBody>
     </Card>
   )

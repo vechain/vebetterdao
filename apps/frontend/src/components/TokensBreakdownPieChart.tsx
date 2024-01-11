@@ -1,6 +1,20 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Sector } from "recharts"
 import { useB3trBalance, useB3trTokenDetails } from "@/api"
-import { Box, Card, CardBody, CardHeader, Heading, Text, VStack, useColorModeValue, useToken } from "@chakra-ui/react"
+import {
+  Alert,
+  AlertDescription,
+  AlertIcon,
+  AlertTitle,
+  Box,
+  Card,
+  CardBody,
+  CardHeader,
+  Heading,
+  Text,
+  VStack,
+  useColorModeValue,
+  useToken,
+} from "@chakra-ui/react"
 import { config } from "@repo/config"
 import { useMemo, useState } from "react"
 import { FormattingUtils } from "@repo/utils"
@@ -109,32 +123,33 @@ export const TokensBreakdownPieChart = () => {
     ]
   }, [b3trTokenDetails, vot3ContractB3trBalance, b3trTokenDetails, primaryColor, secondaryColor])
 
-  const b3trVot3Ratio = useMemo(() => {
+  const { tvlRatio, formattedTvlRatio } = useMemo(() => {
     if (!b3trTokenDetails || !vot3ContractB3trBalance) return 0
 
     const scaledVot3ContractB3trBalance = new BigNumber(
       FormattingUtils.scaleNumberDown(vot3ContractB3trBalance, b3trTokenDetails.decimals),
     ).toNumber()
 
-    const notLockedB3tr = new BigNumber(b3trTokenDetails.circulatingSupply)
-      .minus(scaledVot3ContractB3trBalance)
-      .toNumber()
+    const circulatingSupply = new BigNumber(b3trTokenDetails.circulatingSupply).toNumber()
 
-    const ratio = scaledVot3ContractB3trBalance / notLockedB3tr
-    return FormattingUtils.humanNumber(ratio, ratio)
+    const ratio = circulatingSupply / scaledVot3ContractB3trBalance
+    return { tvlRatio: ratio, formattedTvlRatio: FormattingUtils.humanNumber(ratio, ratio) }
   }, [b3trTokenDetails, vot3ContractB3trBalance])
 
   return (
-    <Card w={["full", "full", "50%"]} h={400}>
+    <Card w={["full", "full", "50%"]} h={550}>
       <CardHeader>
-        <VStack spacing={2} justify={"flex-start"} align="flex-start">
-          <Heading size="md">Global BT3R/VOT3 breakdown</Heading>
+        <VStack spacing={0} justify={"flex-start"} align="flex-start">
+          <Heading size="md">TVL breakdown</Heading>
+          <Text fontSize="sm" color="gray">
+            How much B3TR is locked in VOT3?
+          </Text>
         </VStack>
       </CardHeader>
       <CardBody w="full">
         <Box w="full" h="250">
           <ResponsiveContainer width={"99%"} height={"100%"}>
-            <PieChart title="B3TR/VOT3 breakdown" desc={`Current B3TR/VOT3 ratio is 1:${b3trVot3Ratio}`}>
+            <PieChart title="TVL breakdown" desc={`Current TVL ratio is ${formattedTvlRatio}`}>
               <Pie
                 activeIndex={selectedPieIndex}
                 onMouseEnter={onPinEnter}
@@ -156,7 +171,16 @@ export const TokensBreakdownPieChart = () => {
             </PieChart>
           </ResponsiveContainer>
         </Box>
-        <Text size="sm">As of {dayjs().format("DD/MM/YYYY")}</Text>
+        <Alert status="info" borderRadius={"lg"} mt={8}>
+          <AlertIcon />
+          <Box>
+            <AlertTitle>The current TVL ratio is {formattedTvlRatio} </AlertTitle>
+            <AlertDescription>
+              This means that for every 1 B3TR in circulation, there are {(1 / tvlRatio).toFixed(2)} B3TR locked in
+              VOT3.
+            </AlertDescription>
+          </Box>
+        </Alert>
       </CardBody>
     </Card>
   )
