@@ -75,11 +75,7 @@ const RenderActiveShape: ActiveShape<PieSectorDataItem> = ({ ...props }) => {
       />
       <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={fill} fill="none" />
       <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
-      <text
-        x={ex + (cos >= 0 ? 1 : -1) * 12}
-        y={ey}
-        textAnchor={textAnchor}
-        fill={fill}>{`${formattedValue} ${payload.name}`}</text>
+      <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} textAnchor={textAnchor} fill={fill}>{`${formattedValue}`}</text>
       <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} dy={18} textAnchor={textAnchor} fill={grayColor}>
         {`(Rate ${(percent * 100).toFixed(2)}%)`}
       </text>
@@ -95,10 +91,10 @@ export const TokensBreakdownPieChart = () => {
   }
 
   const [primary500, primary200, secondary500, secondary200] = useToken("colors", [
-    "primary.500",
-    "primary.200",
-    "secondary.500",
-    "secondary.200",
+    "green.500",
+    "green.200",
+    "orange.500",
+    "orange.200",
   ])
   const primaryColor = useColorModeValue(primary500, primary200)
   const secondaryColor = useColorModeValue(secondary500, secondary200)
@@ -118,8 +114,8 @@ export const TokensBreakdownPieChart = () => {
       .toNumber()
 
     return [
-      { name: "B3TR", value: notLockedB3tr, color: primaryColor },
-      { name: "VOT3", value: scaledVot3ContractB3trBalance, color: secondaryColor },
+      { name: "Locked", value: scaledVot3ContractB3trBalance, color: secondaryColor },
+      { name: "Free", value: notLockedB3tr, color: primaryColor },
     ]
   }, [b3trTokenDetails, vot3ContractB3trBalance, b3trTokenDetails, primaryColor, secondaryColor])
 
