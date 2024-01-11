@@ -76,6 +76,7 @@
     },
     "test": {
       "dependsOn": [
+        "//#solo-up",
         "^test"
       ]
     }
