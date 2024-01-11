@@ -1,10 +1,11 @@
 "use client"
 
 import { useB3trBalance, useB3trTokenDetails, useVot3Balance, useVot3TokenDetails } from "@/api"
-import { Stack, StackDivider, VStack } from "@chakra-ui/react"
+import { HStack, Stack, StackDivider, VStack } from "@chakra-ui/react"
 import { BalanceCard, MintB3trButton, RedeemB3trButton, SwapB3trButton, TokenDetailsCard } from "@/components"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { TokensBreakdownPieChart } from "@/components/TokensBreakdownPieChart"
+import { CirculatingSupplyPieChart } from "@/components/CirculatingSupplyPieChart"
 
 export default function Home() {
   const { account } = useWallet()
@@ -17,7 +18,10 @@ export default function Home() {
 
   return (
     <VStack spacing={4} divider={<StackDivider />} w="full">
-      <TokensBreakdownPieChart />
+      <HStack w="full" justifyContent="space-between" spacing={4}>
+        <CirculatingSupplyPieChart />
+        <TokensBreakdownPieChart />
+      </HStack>
       <Stack direction={["column", "column", "row"]} spacing={4} w="full" divider={<StackDivider />}>
         <VStack spacing={4} w="full">
           <TokenDetailsCard tokenDetailsQueryResult={b3trTokenDetailsQueryResult} />

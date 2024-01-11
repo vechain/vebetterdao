@@ -10,6 +10,7 @@ import {
   Text,
   VStack,
   useColorModeValue,
+  useMediaQuery,
   useToken,
 } from "@chakra-ui/react"
 import { config } from "@repo/config"
@@ -40,6 +41,8 @@ const CustomTooltip = <TValue extends ValueType, TName extends NameType>({
   )
 }
 export const TokensBreakdownPieChart = () => {
+  const [isDesktop] = useMediaQuery("(min-width: 800px)")
+
   const [primary500, primary200, secondary500, secondary200] = useToken("colors", [
     "primary.500",
     "primary.200",
@@ -85,39 +88,44 @@ export const TokensBreakdownPieChart = () => {
   }, [b3trTokenDetails, vot3ContractB3trBalance])
 
   return (
-    <Card w="50%" h={400}>
+    <Card w={["full", "full", "50%"]} h={400}>
       <CardHeader>
         <VStack spacing={2} justify={"flex-start"} align="flex-start">
-          <Heading size="md">BT3R/VOT3 breakdown</Heading>
-          <Text>Current B3TR/VOT3 ratio is 1:{b3trVot3Ratio}</Text>
+          <Heading size="md">Global BT3R/VOT3 breakdown</Heading>
         </VStack>
       </CardHeader>
       <CardBody w="full">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart width={400} height={400}>
-            <Pie
-              dataKey="value"
-              startAngle={180}
-              endAngle={0}
-              paddingAngle={5}
-              data={data}
-              cx="50%"
-              cy="50%"
-              outerRadius={80}
-              innerRadius={60}
-              fill="#8884d8"
-              label={({ name, value }) => `${FormattingUtils.humanNumber(value, value)} ${name}`}>
-              {data.map(entry => (
-                <Cell key={`cell-${entry.name}`} fill={entry.color} />
-              ))}
-            </Pie>
-            <Tooltip
-              content={props => (
-                <CustomTooltip circulatingSupply={Number(b3trTokenDetails?.circulatingSupply)} {...props} />
-              )}
-            />
-          </PieChart>
-        </ResponsiveContainer>
+        <Box w="full" h="250">
+          <ResponsiveContainer width={"99%"} height={"100%"}>
+            <PieChart title="B3TR/VOT3 breakdown" desc={`Current B3TR/VOT3 ratio is 1:${b3trVot3Ratio}`}>
+              <Pie
+                data={data}
+                dataKey="value"
+                // startAngle={180}
+                // endAngle={0}
+                paddingAngle={5}
+                // cx="50%"
+                // cy="50%"
+                outerRadius={"80%"}
+                innerRadius={"60%"}
+                fill="#8884d8"
+                label={({ name, value }) => `${FormattingUtils.humanNumber(value, value)} ${name}`}>
+                {data.map(entry => (
+                  <Cell key={`cell-${entry.name}`} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip
+                content={props => (
+                  <CustomTooltip circulatingSupply={Number(b3trTokenDetails?.circulatingSupply)} {...props} />
+                )}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </Box>
+        <Text textAlign={"center"} size="sm">
+          Current B3TR/VOT3 ratio is
+          <b> 1:{b3trVot3Ratio}</b>
+        </Text>
       </CardBody>
     </Card>
   )
