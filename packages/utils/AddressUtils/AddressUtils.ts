@@ -19,7 +19,6 @@ export const compareAddresses = (address1?: string, address2?: string): boolean 
   try {
     return HexUtils.normalize(address1) === HexUtils.normalize(address2)
   } catch (e) {
-    console.warn("Got error:", e, "Trying to compare address1:", address1, "with address2:", address2)
     return false
   }
 }
@@ -46,7 +45,6 @@ export const isValid = (addr: string | undefined | null): boolean => {
     address.toChecksumed(HexUtils.addPrefix(addr))
     return true
   } catch (e) {
-    console.warn("AddressUtils:isValid", e)
     return false
   }
 }

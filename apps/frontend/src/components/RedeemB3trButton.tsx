@@ -1,13 +1,11 @@
-import { useB3trBalance, useB3trTokenDetails, useVot3Balance, useVot3TokenDetails } from "@/api"
-import { useStakeB3tr, useUnstakeB3tr } from "@/hooks"
-import { Button } from "@chakra-ui/react"
-import { FormattingUtils } from "@repo/utils"
+import { useVot3Balance, useVot3TokenDetails } from "@/api"
+import { Button, useDisclosure } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { memo, useMemo } from "react"
+import { RedeemB3trModal } from "./RedeemB3trModal"
 
-const swapPercentage = 0.1
+type Props = {}
 
-export const RedeemB3trButton = memo(() => {
+export const RedeemB3trButton: React.FC<Props> = () => {
   const { account } = useWallet()
   const { data: balance, isLoading: isBalanceLoading } = useVot3Balance(account ?? undefined)
   const { data: tokenDetails, isLoading: isTokensDetailsLoading } = useVot3TokenDetails()
@@ -16,28 +14,14 @@ export const RedeemB3trButton = memo(() => {
 
   const buttonDisabled = isLoading || !balance || balance === "0"
 
-  const { formattedBalance, scaledBalance } = useMemo(() => {
-    if (!balance) {
-      return { formattedBalance: "0", scaledBalance: "0" }
-    }
-
-    const balanceToSwap = Number(balance) * swapPercentage
-    const decimals = tokenDetails?.decimals ?? 18
-
-    const scaledBalance = FormattingUtils.scaleNumberDown(balanceToSwap, decimals)
-    const formattedBalance = FormattingUtils.humanNumber(scaledBalance, scaledBalance)
-    return { formattedBalance, scaledBalance }
-  }, [tokenDetails, balance])
-
-  const { sendTransaction, isTxReceiptLoading, sendTransactionPending, sendTransactionError } = useUnstakeB3tr({
-    amount: scaledBalance,
-  })
-
-  const isButtonLoading = isTxReceiptLoading || sendTransactionPending
+  const { isOpen, onClose, onOpen } = useDisclosure()
 
   return (
-    <Button size="sm" isDisabled={buttonDisabled} onClick={() => sendTransaction()} isLoading={isButtonLoading}>
-      Redeem
-    </Button>
+    <>
+      <RedeemB3trModal isOpen={isOpen} onClose={onClose} />
+      <Button size="sm" isDisabled={buttonDisabled} onClick={onOpen}>
+        Redeem
+      </Button>
+    </>
   )
-})
+}

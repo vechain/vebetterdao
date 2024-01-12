@@ -8,19 +8,22 @@ import { useMemo } from "react"
 type Props = {
   balanceQueryResult: UseQueryResult<string, Error>
   tokenDetailsQueryResult: UseQueryResult<TokenDetails, Error>
-  componentRight?: React.ReactNode
+  componentUpperRight?: React.ReactNode
+  componentLowerRight?: React.ReactNode
 }
 /**
  * BalanceCard displays the balance of the current account
  * @param param0  balanceQueryResult: UseQueryResult<string, Error>
  * @param param1 tokenDetailsQueryResult: UseQueryResult<TokenDetails, Error>
- * @param param2 componentRight?: React.ReactNode
+ * @param param2 componentUpperRight?: React.ReactNode
+ * @param param2 componentLowerRight?: React.ReactNode
  * @returns BalanceCard
  */
 export const BalanceCard = ({
   balanceQueryResult: { data: balance, isLoading: balanceLoading, error },
   tokenDetailsQueryResult: { data: tokenDetails, isLoading: tokenDetailsLoading },
-  componentRight,
+  componentUpperRight,
+  componentLowerRight,
 }: Props) => {
   const { account } = useWallet()
 
@@ -72,7 +75,7 @@ export const BalanceCard = ({
       <CardHeader>
         <HStack justify={"space-between"} align={"center"} w="full">
           <Heading size="sm">Your {tokenDetails?.symbol} balance</Heading>
-          {isLoading && <Spinner size="sm" />}
+          {isLoading ? <Spinner size="sm" /> : componentUpperRight}
         </HStack>
       </CardHeader>
       <CardBody>
@@ -87,7 +90,7 @@ export const BalanceCard = ({
               </Text>
             </Skeleton>
           </HStack>
-          {componentRight}
+          {componentLowerRight}
         </HStack>
       </CardBody>
     </Card>

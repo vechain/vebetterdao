@@ -1,5 +1,15 @@
 ## B3TR Monorepo
 
+```
+ _______    _______  ___________  _______
+|   _  "\  /" __   )("     _   ")/"      \
+(. |_)  :)(__/ _) ./ )__/  \\__/|:        |
+|:     \/     /  //     \\_ /   |_____/   )
+(|  _  \\  __ \_ \\     |.  |    //      /
+|: |_)  :)(: \__) :\    \:  |   |:  __   \
+(_______/  \_______)     \__|   |__|  \___)
+```
+
 B3TR monorepo intended to contain everything around dapps, contracts, utils and in general everything needed to setup and deploy the B3TR ecosystem
 
 ### Why a monorepo ?
@@ -31,21 +41,23 @@ nvm use
 yarn install
 ```
 
-#### Spin up thor-solo
+#### Spin up the project
 
-This step requires you to have Docker installed
-
-```
-make solo-up
-```
-
-And to take is down again
+> docker and the compose plugin (prev docker-compose) are required in order to run the project
 
 ```
-make solo-down
+yarn dev
 ```
 
-#### Deploy the contracts
+This command relies on a turbo pipeline which:
+
+- start the required docker containers (solo);
+- check if the contracts specified under `./packages/config/local` have been deployed, possibly deploying them if they weren't (config is updated automatically);
+- run the frontend using the updated config;
+
+### Manually deploy the contracts
+
+Contracts are automatically updated for local development, in case you need to deploy them in othwer networks, you can use
 
 ```
 yarn hardhat:deploy
@@ -54,26 +66,3 @@ yarn hardhat:deploy
 By default it will deploy to the solo node.
 You can change the network by adding the `--network` flag. For example, to deploy to the testnet, run `yarn hardhat:deploy --network vechain_testnet`.
 If you are not deploying to the solo node, you will need to import the `MNEMONIC` environment variable which will be used to deploy the contracts. Just copy the `.env.example` in file in `packages/contracts` to `.env` and set the `MNEMONIC` variable.
-
-#### Add the contract address in the .env
-
-Create a new env file starting from the existing template using
-
-`cp .env.example .env`
-
-```
-NEXT_PUBLIC_B3TR_CONTRACT_ADDRESS=0x...
-NEXT_PUBLIC_VOT3_CONTRACT_ADDRESS=0x...
-NEXT_PUBLIC_NODE_URL=http://localhost:8669
-NEXT_PUBLIC_NETWORK_TYPE=solo
-```
-
-Override `NEXT_PUBLIC_B3TR_CONTRACT_ADDRESS` and `NEXT_PUBLIC_VOT3_CONTRACT_ADDRESS` with the addresses outputted in the previous step.
-`NEXT_PUBLIC_NODE_URL` and `NEXT_PUBLIC_NETWORK_TYPE` define the network config using by the dapp, and should match the network where the contract are deployed
-Values defined in `.env.example` are good for local development using solo.
-
-#### Run the dev server
-
-```
-yarn dev
-```

@@ -7,10 +7,11 @@ import {
 } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
-import { useSendTransaction } from "./useSendTransaction"
+import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
 import { useConnex, useWallet } from "@vechain/dapp-kit-react"
 import { FormattingUtils } from "@repo/utils"
+import { config } from "@repo/config"
 
 type useMintB3trProps = {
   amount?: string | number
@@ -24,14 +25,13 @@ type useMintB3trProps = {
  * @param amount the amount of tokens to stake. Should not already include decimals
  * @param onSuccess callback to run when the upgrade is successful
  * @param invalidateCache boolean to indicate if the related react-query cache should be updated (default: true)
- * @returns sendTransaction function to send the tx
- * @returns sendTransactionLoading boolean to indicate if the tx is waiting for confirmation
- * @returns sendTransactionError boolean to indicate if the upgrade has failed
- * @returns isTxReceiptLoading boolean to indicate if the tx receipt is loading
- * @returns isTxReceiptError boolean to indicate if the tx receipt has failed
- * @returns txReceipt the tx receipt
+ * @returns see {@link UseSendTransactionReturnValue}
  */
-export const useStakeB3tr = ({ amount, onSuccess, invalidateCache = true }: useMintB3trProps) => {
+export const useStakeB3tr = ({
+  amount,
+  onSuccess,
+  invalidateCache = true,
+}: useMintB3trProps): UseSendTransactionReturnValue => {
   const { thor } = useConnex()
   const { account } = useWallet()
   const toast = useToast()
@@ -54,9 +54,22 @@ export const useStakeB3tr = ({ amount, onSuccess, invalidateCache = true }: useM
         queryKey: getB3TrBalanceQueryKey(account ?? undefined),
       })
 
+      await queryClient.cancelQueries({
+        queryKey: getB3TrBalanceQueryKey(config.vot3ContractAddress),
+      })
+
       await queryClient.refetchQueries({
         queryKey: getB3TrBalanceQueryKey(account ?? undefined),
       })
+
+      await queryClient.cancelQueries({
+        queryKey: getB3TrBalanceQueryKey(config.vot3ContractAddress),
+      })
+
+      await queryClient.refetchQueries({
+        queryKey: getB3TrBalanceQueryKey(config.vot3ContractAddress),
+      })
+
       await queryClient.cancelQueries({
         queryKey: getVot3BalanceQueryKey(account ?? undefined),
       })
