@@ -1,5 +1,5 @@
 import { ethers, network } from "hardhat";
-import { B3TR, GovernorContract, VotingContract } from "../../typechain-types";
+import { AppVotingGovernor, B3TR, GovernorContract, VotingContract } from "../../typechain-types";
 import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { getOrDeployContractInstances } from "./deploy";
@@ -154,4 +154,27 @@ export const createProposalAndExecuteIt = async (
         [encodedFunctionCall],
         descriptionHash
     )
+}
+
+export const addApp = async (
+    proposer: HardhatEthersSigner,
+    voter: HardhatEthersSigner,
+    appAddress: string,
+    governor: GovernorContract,
+    appVotingContract: AppVotingGovernor,
+    appCode: string = "test_app" + Math.random()
+) => {
+    console.log("Create proposal to add a new App and execute it");
+
+    await createProposalAndExecuteIt(
+        proposer,
+        voter,
+        governor,
+        appVotingContract,
+        await ethers.getContractFactory("B3trApps"),
+        "Add app to the list", "addApp",
+        [appCode, "Bike 4 Life" + Math.random(), appAddress]
+    )
+
+    console.log("Done");
 }
