@@ -24,7 +24,7 @@ The airdrop expects an input file as referenced by the `INPUT_FILE` env variable
 
 ### Running
 
-When you have configured the application correctly simply run `yarn install` followed by `yarn airdrop` to run the airdrop. You can run either from this directory or from the root of the monorepo. If you run from the root if the monorepo, turbo will ensure that the thor solo is running and the contracts have been deployed. If you run from this directory you must ensure the thor node is up and the contracts are deployed.
+When you have configured the application correctly simply run `yarn install` followed by `yarn airdrop` to run the airdrop. You should run this from the root of the monorepo. Turbo will ensure that the thor solo is running and the contracts have been deployed.
 
 ### Troubleshooting
 
