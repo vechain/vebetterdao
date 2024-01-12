@@ -2,7 +2,7 @@
   "name": "b3tr-monorepo",
   "private": true,
   "scripts": {
-    "test": "turbo run test",
+    "test": "dotenv -e .env.config -- turbo run test --",
     "build": "dotenv -- turbo build",
     "dev": "dotenv -e .env.config -- turbo dev --",
     "lint": "turbo lint",
@@ -11,7 +11,8 @@
     "hardhat:compile": "turbo run compile --scope=contracts",
     "hardhat:deploy": "turbo run deploy --scope=contracts",
     "hardhat:test": "turbo run test --scope=contracts",
-    "solo-up": "make solo-up"
+    "solo-up": "make solo-up",
+    "airdrop": "dotenv -e .env.config -- turbo airdrop --"
   },
   "devDependencies": {
     "@repo/eslint-config": "*",

@@ -1,4 +1,4 @@
-import { removePrefix, addPrefix, validate, isValid, compare } from "./HexUtils"
+import { removePrefix, addPrefix, validate, isValid, compare, generateRandom } from "./HexUtils"
 
 const hexLowercaseHasPrefix = "0x38983243287eef8773264910fe003"
 const hexLowercaseNoPrefix = "38983243287eef8773264910fe003"
@@ -206,5 +206,23 @@ describe("HexUtils tests", () => {
     test("different hex should be false", () => {
       expect(compare("0x23", "0x2345")).toBeFalsy()
     })
+  })
+
+  // Generate Random
+  test("Generate Random", () => {
+    for (let len = 1; len < 1000; len++) {
+      const randHex = generateRandom(len)
+      expect(isValid(randHex)).toBeTruthy()
+      expect(randHex.length).toBe(len + 2)
+      expect(/^0x/.test(randHex)).toBeTruthy()
+    }
+  })
+
+  test("Generate Random - length 0", () => {
+    expect(() => generateRandom(0)).toThrow()
+  })
+
+  test("Generate Random - length -1", () => {
+    expect(() => generateRandom(-1)).toThrow()
   })
 })
