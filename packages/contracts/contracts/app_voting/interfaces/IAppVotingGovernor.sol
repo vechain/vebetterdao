@@ -29,6 +29,11 @@ interface IAppVotingGovernor is IERC165, IERC6372 {
   event ProposalExecuted(uint256 proposalId);
 
   /**
+   * @dev Emitted when a vote is casted.
+   */
+  event VoteCasted(address account, uint256 proposalId, uint256[] candidateCodes, uint256[] weights);
+
+  /**
    * @notice module:core
    * @dev Name of the governor instance (used in building the ERC712 domain separator).
    */

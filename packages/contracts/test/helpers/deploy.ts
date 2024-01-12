@@ -1,7 +1,7 @@
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers"
 import { ethers } from "hardhat"
-import { B3TR, B3trApps, GovernorContract, TimeLock, VOT3, VotingContract } from "../../typechain-types"
+import { B3TR, B3trApps, GovernorContract, TimeLock, VOT3, AppVotingContract } from "../../typechain-types"
 
 interface DeployInstance {
     B3trContract: ContractFactory
@@ -9,7 +9,7 @@ interface DeployInstance {
     vot3: VOT3 & { deploymentTransaction(): ContractTransactionResponse; }
     timeLock: TimeLock & { deploymentTransaction(): ContractTransactionResponse; }
     governor: GovernorContract & { deploymentTransaction(): ContractTransactionResponse; }
-    appVotingContract: VotingContract & { deploymentTransaction(): ContractTransactionResponse; }
+    appVotingContract: AppVotingContract & { deploymentTransaction(): ContractTransactionResponse; }
     owner: HardhatEthersSigner
     otherAccount: HardhatEthersSigner
     minterAccount: HardhatEthersSigner
@@ -69,8 +69,8 @@ export const getOrDeployContractInstances = async (forceDeploy: boolean = false,
     await timeLock.connect(timelockAdmin).grantRole(CANCELLER_ROLE, await governor.getAddress())
 
     // Deploy Governor
-    const VotingContract = await ethers.getContractFactory("VotingContract")
-    const appVotingContract = await VotingContract.deploy(
+    const AppVotingContract = await ethers.getContractFactory("AppVotingContract")
+    const appVotingContract = await AppVotingContract.deploy(
         await vot3.getAddress(),
         1, // quroum percentage
         votingPeriod, // voting period

@@ -233,6 +233,7 @@ abstract contract AppVotingGovernor is
     // mark as executed before calls to avoid reentrancy
     _proposals[proposalId].executed = true;
 
+    // TODO: execute something
     // before execute: register governance call in queue.
     // if (_executor() != address(this)) {
     //   for (uint256 i = 0; i < targets.length; ++i) {
@@ -280,7 +281,7 @@ abstract contract AppVotingGovernor is
       _countVote(proposalId, candidateCodes[i], weights[i]);
     }
 
-    // emit VoteCast(account, proposalId, candidateCode, weight);
+    emit VoteCasted(account, proposalId, candidateCodes, weights);
   }
 
   /**

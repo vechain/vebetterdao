@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "./AppVotingGovernor.sol";
-import "./modules/GovernorCounting.sol";
-import "./modules/GovernorVotes.sol";
-import "./modules/GovernorVotesQuorumFraction.sol";
-import "./modules/GovernorSettings.sol";
+import "./app_voting/AppVotingGovernor.sol";
+import "./app_voting/modules/GovernorCounting.sol";
+import "./app_voting/modules/GovernorVotes.sol";
+import "./app_voting/modules/GovernorVotesQuorumFraction.sol";
+import "./app_voting/modules/GovernorSettings.sol";
 
 // import "./B3trApps.sol";
 
-contract VotingContract is
+contract AppVotingContract is
   AppVotingGovernor,
   GovernorSettings,
   GovernorCounting,
