@@ -1,64 +1,44 @@
-import { Recipient, RecipientInput } from "./model/input"
-import { buildMintB3trTx, signAndSendTx } from "./utils/TxUtils"
-import { addressUtils } from "@vechainfoundation/vechain-sdk-core"
-import { HttpClient, ThorClient } from "@vechainfoundation/vechain-sdk-network"
-import { loadEnvVariables } from "./utils/EnvUtils"
-import B3tr from "@repo/contracts/artifacts/contracts/B3TR.sol/B3TR.json"
-import { config } from "@repo/config"
+import { logger } from "./utils/Logger"
+import { buildTx, signAndSendTx } from "./utils/TxUtils"
+import { addressUtils } from "@vechain/vechain-sdk-core"
+import { HttpClient, ThorClient } from "@vechain/vechain-sdk-network"
+import { Env } from "./model/env"
+import { readInputFile } from "./utils/InputUtils"
 
-console.log("Starting airdrop...")
+export const airdrop = async (env: Env, nodeUrl: string, b3trContractAddress: string) => {
+  logger.info("Starting airdrop...")
 
-const thorNetwork = new HttpClient(config.nodeUrl)
-const thorClient = new ThorClient(thorNetwork)
-
-const abi = B3tr.abi
-if (!abi) throw new Error("ABI not found for B3TR contract")
-
-// Reads the input JSON file and returns an array of addresses
-const readInputFile = async (path: string): Promise<Recipient[]> => {
-  // Read file
-  const fs = require("fs")
-  const fileContents = fs.readFileSync(path, "utf8")
-
-  // Parse JSON as RecipientInput
-  const recipientInput = JSON.parse(fileContents) as RecipientInput
-  if (!recipientInput.recipients) throw new Error("Input file does not contain recipients")
-
-  // Return array of addresses
-  return recipientInput.recipients
-}
-
-const start = async () => {
-  // Read environment variables
-  const env = loadEnvVariables()
+  const thorNetwork = new HttpClient(nodeUrl)
+  const thorClient = new ThorClient(thorNetwork)
 
   const signer = addressUtils.fromPrivateKey(env.pk)
+
+  logger.info(`Sending ${env.type} airdrop for ${signer}`)
 
   // Read input file
   const recipients = await readInputFile(env.recipientInputFilePath)
 
-  // Loop over recipients in batches of 100
-  const batchSize = process.env.MAX_CLAUSES_PER_TX ? parseInt(process.env.MAX_CLAUSES_PER_TX) : 100
+  // Group recipients into batches
   const batches = []
-  for (let i = 0; i < recipients.length; i += batchSize) {
-    batches.push(recipients.slice(i, i + batchSize))
+  for (let i = 0; i < recipients.length; i += env.batchSize) {
+    batches.push(recipients.slice(i, i + env.batchSize))
   }
 
   // Send batches
   for (const batch of batches) {
     // Send airdrop
-    const tx = await buildMintB3trTx(thorClient, config.b3trContractAddress, abi, batch, signer, env.gasPriceCoef)
+    const tx = await buildTx(thorClient, b3trContractAddress, env.type, batch, signer, env.gasPriceCoef)
 
-    console.log(`Sending tx with ${batch.length} clauses`)
+    logger.info(`Sending tx with ${batch.length} clauses`)
 
     // Sign the transaction
     const receipt = await signAndSendTx(thorClient, tx, env.pk)
 
     if (receipt.reverted) throw Error("Transaction reverted")
 
-    console.log(`Tx was successful. TxId: ${receipt.meta.txID}`)
-    console.log(`The following drops were made: ${JSON.stringify(batch)}`)
+    logger.info(`Tx was successful. TxId: ${receipt.meta.txID}`)
+    logger.info(`The following drops were made: ${JSON.stringify(batch)}`)
   }
-}
 
-start()
+  logger.info("Airdrop completed!")
+}

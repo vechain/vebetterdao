@@ -28,7 +28,7 @@ jobs:
 
       - name: Configure npm for private package
         run: |
-          echo "@vechainfoundation:registry=https://npm.pkg.github.com/" >> .npmrc
+          echo "@vechain:registry=https://npm.pkg.github.com/" >> .npmrc
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.GH_READ_PACKAGES_TOKEN }}" >> .npmrc
           echo "registry=https://registry.npmjs.org/" >> .npmrc
 

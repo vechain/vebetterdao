@@ -1,9 +1,9 @@
 import { Config } from "." 
  export const localConfig: Config = {
-  "b3trContractAddress": "0x02563E04a7F3432906033B1830812fBe126Cf0f8",
-  "vot3ContractAddress": "0xcFEE91C0169498cDEb707fE721b31abC49DDeBd4",
-  "governorContractAddress": "0x43645A6211Fa327D427e518C1Fb51DC7B4aC8a84",
-  "timelockContractAddress": "0x431944ff57e0eac749C83985043F1Cb419043236",
+  "b3trContractAddress": "0xE9B5aF4A2d5a9Af68d4967D3E024d8F2D0137CAB",
+  "vot3ContractAddress": "0xC4Fb847622a73eB2783D187f7b6d665191BcFA97",
+  "governorContractAddress": "0xa2cfC4680aE53355482ac796e18e134a44EaC91D",
+  "timelockContractAddress": "0x7730319172719A3DcB50F225bCAE947A372bC70f",
   "nodeUrl": "http://localhost:8669",
   "network": {
     "id": "solo",

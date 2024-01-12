@@ -10,16 +10,11 @@
   "pipeline": {
     "build": {
       "dependsOn": [
-        "^build",
         "@repo/contracts#compile"
       ],
       "outputs": [
         ".next/**",
         "!.next/cache/**"
-      ],
-      "dotEnv": [
-        ".env",
-        ".env.config"
       ]
     },
     "lint": {
@@ -35,10 +30,6 @@
       "persistent": true,
       "dependsOn": [
         "@repo/contracts#check-contracts-deployment"
-      ],
-      "dotEnv": [
-        ".env",
-        ".env.config"
       ]
     },
     "@repo/contracts#check-contracts-deployment": {
@@ -46,10 +37,6 @@
       "dependsOn": [
         "^compile",
         "//#solo-up"
-      ],
-      "dotEnv": [
-        ".env",
-        ".env.config"
       ]
     },
     "clean": {
@@ -68,21 +55,12 @@
       "dependsOn": [
         "@repo/contracts#check-contracts-deployment",
         "^airdrop"
-      ],
-      "dotEnv": [
-        ".env",
-        ".env.config"
       ]
     },
     "test": {
       "cache": false,
       "dependsOn": [
-        "@repo/contracts#check-contracts-deployment",
-        "^test"
-      ],
-      "dotEnv": [
-        ".env",
-        ".env.config"
+        "@repo/contracts#check-contracts-deployment"
       ]
     }
   }

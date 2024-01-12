@@ -8,6 +8,7 @@ A tool for airdropping B3tr tokens to multiple users.
 
 First you must create a `.env` file in the root of the app. `.env.template` can be used as a guide for this. You must provide values for the following:
 
+- `AIRDROP_TYPE` - The type of airdrop to perform (mint or transfer)
 - `NEXT_PUBLIC_NETWORK_TYPE` - What network to connect to
 - `INPUT_FILE` - The location of a file containing the addresses and amounts to airdrop
 - `SIGNING_PK` - The private key to sign the transactions with _(must be in hex format)_
@@ -31,4 +32,4 @@ This facility is currently using a pre-release version of the [vechain-sdk](http
 
 Next create a access token on github with read:package permissions on [vechain-sdk](https://github.com/vechainfoundation/vechain-sdk/tree/main)
 
-Finally run `npm login --scope=@vechainfoundation --auth-type=legacy --registry=https://npm.pkg.github.com` using your username and and token as the password.
+Finally run `npm login --scope=@vechain --auth-type=legacy --registry=https://npm.pkg.github.com` using your username and and token as the password.

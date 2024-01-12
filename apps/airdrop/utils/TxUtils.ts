@@ -7,14 +7,19 @@ import {
   networkInfo,
   TransactionHandler,
   unitsUtils,
-} from "@vechainfoundation/vechain-sdk-core"
-import { Poll, ThorClient, TransactionReceipt } from "@vechainfoundation/vechain-sdk-network"
+} from "@vechain/vechain-sdk-core"
+import { ThorClient, TransactionReceipt } from "@vechain/vechain-sdk-network"
+import B3tr from "@repo/contracts/artifacts/contracts/B3TR.sol/B3TR.json"
 import { addPrefix, generateRandom } from "@repo/utils/HexUtils"
+import { Type } from "../model/env"
 
-export const buildMintB3trTx = async (
+const abi = B3tr.abi
+if (!abi) throw new Error("ABI not found for B3TR contract")
+
+export const buildTx = async (
   thorClient: ThorClient,
   contractAddr: string,
-  abi: any,
+  type: Type,
   recipients: Recipient[],
   caller: string,
   gasPriceCoef: number,
@@ -22,7 +27,7 @@ export const buildMintB3trTx = async (
   // 1 - Create the clauses
   const clauses: TransactionClause[] = []
   for (const recipient of recipients) {
-    const clause = contract.clauseBuilder.functionInteraction(contractAddr, abi, "mint", [
+    const clause = contract.clauseBuilder.functionInteraction(contractAddr, abi, type, [
       recipient.address,
       unitsUtils.parseUnits(recipient.amount, 18),
     ])
@@ -42,8 +47,7 @@ export const buildMintB3trTx = async (
     expiration: 32,
     clauses,
     gasPriceCoef,
-    // TODO: Remove this buffer of 15_000 once the gas estimate calculation is fixed (https://github.com/vechainfoundation/vechain-sdk/issues/463)
-    gas: gas.totalGas + 15_000,
+    gas: gas.totalGas,
     dependsOn: null,
     nonce: generateRandom(16),
   }
@@ -61,14 +65,7 @@ export const signAndSendTx = async (
   const res = await thorClient.transactions.sendRawTransaction(addPrefix(signed.encoded.toString("hex")))
 
   // Wait for the receipt
-  const receipt = await Poll.SyncPoll(
-    // Get the receipt of the transaction
-    async () => await thorClient.transactions.getTransactionReceipt(res.id),
-    // Polling interval is 3 seconds
-    { requestIntervalInMilliseconds: 3000 },
-  ).waitUntil(rec => {
-    return rec !== null
-  })
+  const receipt = await thorClient.transactions.waitForTransaction(res.id)
 
   if (!receipt) throw new Error("Failed to get tx receipt")
 
