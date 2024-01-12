@@ -19,11 +19,6 @@ abstract contract GovernorCounting is AppVotingGovernor {
   //proposal -> user -> hasVoted
   mapping(uint256 => mapping(address => bool)) public _hasUserVotedProposal;
 
-  struct RoundResult {
-    App app;
-    uint256 votes;
-  }
-
   // /**
   //  * @dev Lookup to future votes is not available.
   //  */
@@ -43,16 +38,6 @@ abstract contract GovernorCounting is AppVotingGovernor {
   function _hasVoted(uint256 proposalId, address account) internal view virtual override returns (bool) {
     return _hasUserVotedProposal[proposalId][account];
   }
-
-  /**
-   * @dev Accessor to the internal vote counts.
-   */
-  //   function proposalVotes(
-  //     uint256 proposalId
-  //   ) public view virtual returns (uint256 againstVotes, uint256 forVotes, uint256 abstainVotes) {
-  //     ProposalVote storage proposalVote = _proposalVotes[proposalId];
-  //     return (proposalVote.againstVotes, proposalVote.forVotes, proposalVote.abstainVotes);
-  //   }
 
   //   /**
   //    * @dev See {Governor-_quorumReached}.
@@ -140,6 +125,7 @@ abstract contract GovernorCounting is AppVotingGovernor {
     return (apps, votesArray);
   }
 
+  // of ongoing round
   function getCurrentRoundResults() public view virtual returns (App[] memory app, uint256[] memory votes) {
     uint256[] memory votesArray = new uint256[](apps.length);
     // for each app, get the votes and return the resulting array
