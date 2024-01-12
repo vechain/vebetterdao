@@ -68,6 +68,19 @@ abstract contract GovernorCounting is AppVotingGovernor {
     _push(_appCheckpoints[bytes32(candidateCode)], _add, SafeCast.toUint208(weight));
   }
 
+  function realTimeTotalVotes() external view virtual returns (uint256) {
+    return _totalCheckpoints.latest();
+  }
+
+  function totalVotes(uint256 proposalId) external view returns (uint256) {
+    return _totalVotes(proposalId);
+  }
+
+  // This can work only for proposals that are finished because we cannot see the future
+  function _totalVotes(uint256 proposalId) internal view virtual override returns (uint256) {
+    return _totalCheckpoints.upperLookupRecent(uint48(proposalDeadline(proposalId)));
+  }
+
   function _resetVotes() internal virtual override {
     // reset totalCheckpoints
     _push(_totalCheckpoints, _subtract, SafeCast.toUint208(_totalCheckpoints.latest()));
@@ -89,6 +102,10 @@ abstract contract GovernorCounting is AppVotingGovernor {
     return _appCheckpoints[appCode].latest();
   }
 
+  function getAppVotes(bytes32 appCode, uint256 timepoint) external view virtual override returns (uint256) {
+    return _getAppVotes(appCode, timepoint);
+  }
+
   /**
    * @dev Returns the amount of votes that `app` had at a specific moment in the past. If the `clock()` is
    * configured to use block numbers, this will return the value at the end of the corresponding block.
@@ -97,7 +114,7 @@ abstract contract GovernorCounting is AppVotingGovernor {
    *
    * - `timepoint` must be in the past. If operating using block numbers, the block must be already mined.
    */
-  function getAppVotes(bytes32 appCode, uint256 timepoint) public view virtual override returns (uint256) {
+  function _getAppVotes(bytes32 appCode, uint256 timepoint) internal view virtual override returns (uint256) {
     // qua si potrebbe accettare proposalId come parametro e ritrovarci blocco di quando la proposta è finita e poi fare il lookup
     uint48 currentTimepoint = clock();
     if (timepoint >= currentTimepoint) {
@@ -106,7 +123,16 @@ abstract contract GovernorCounting is AppVotingGovernor {
     return _appCheckpoints[appCode].upperLookupRecent(SafeCast.toUint48(timepoint));
   }
 
-  function getRoundResults(uint256 proposalId) public view virtual returns (App[] memory app, uint256[] memory votes) {
+  function getRoundResults(
+    uint256 proposalId
+  ) public view virtual returns (App[] memory app, uint256[] memory votes, uint256[] memory percentages) {
+    (app, votes, percentages) = _getRoundResults(proposalId);
+    return (app, votes, percentages);
+  }
+
+  function _getRoundResults(
+    uint256 proposalId
+  ) internal view virtual override returns (App[] memory app, uint256[] memory votes, uint256[] memory percentages) {
     ProposalState currentState = state(proposalId);
     // vote succceeds if proposal duration ended and quorum was reached
     require(
@@ -116,13 +142,18 @@ abstract contract GovernorCounting is AppVotingGovernor {
     );
 
     uint256[] memory votesArray = new uint256[](apps.length);
+    uint256[] memory percentagesArray = new uint256[](apps.length);
+    uint256 roundTotalVotes = _totalVotes(proposalId);
     // for each app, get the votes and return the resulting array
     for (uint256 i = 0; i < apps.length; i++) {
-      uint256 appVotes = getAppVotes(apps[i].code, proposalDeadline(proposalId));
+      uint256 appVotes = _getAppVotes(apps[i].code, proposalDeadline(proposalId));
       votesArray[i] = appVotes;
+      // calculate percentage
+      uint256 percentage = (appVotes * 100) / roundTotalVotes;
+      percentagesArray[i] = percentage;
     }
 
-    return (apps, votesArray);
+    return (apps, votesArray, percentagesArray);
   }
 
   // of ongoing round

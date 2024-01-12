@@ -233,6 +233,12 @@ abstract contract AppVotingGovernor is
     // mark as executed before calls to avoid reentrancy
     _proposals[proposalId].executed = true;
 
+    // get app votes
+    App[] memory apps;
+    uint256[] memory votes = new uint256[](apps.length);
+    uint256[] memory percentages = new uint256[](apps.length);
+    (apps, votes, percentages) = _getRoundResults(proposalId);
+
     // TODO: execute something
     // before execute: register governance call in queue.
     // if (_executor() != address(this)) {
@@ -501,7 +507,7 @@ abstract contract AppVotingGovernor is
    */
   function _voteSucceeded(uint256 proposalId) internal view virtual returns (bool);
 
-  function getAppVotes(bytes32 appCode, uint256 timepoint) external view virtual returns (uint256);
+  function _getAppVotes(bytes32 appCode, uint256 timepoint) internal view virtual returns (uint256);
 
   /**
    * @dev Register a vote for `proposalId` by `account` with a given `support`, voting `weight` and voting `params`.
@@ -544,4 +550,10 @@ abstract contract AppVotingGovernor is
    * @dev Get the voting weight of `account` at a specific `timepoint`, for a vote as described by `params`.
    */
   function _getVotes(address account, uint256 timepoint, bytes memory params) internal view virtual returns (uint256);
+
+  function _totalVotes(uint256 proposalId) internal view virtual returns (uint256);
+
+  function _getRoundResults(
+    uint256 proposalId
+  ) internal view virtual returns (App[] memory, uint256[] memory, uint256[] memory);
 }

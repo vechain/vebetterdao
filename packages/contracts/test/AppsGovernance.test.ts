@@ -103,6 +103,9 @@ describe("Apps Governance", function () {
             tx = await appVotingContract.connect(voter1).castVotes(proposalId.toString(), [app1Code], [ethers.parseEther("100")])
             console.log("Vote casted");
 
+            console.log("Real time total votes", ethers.formatEther(await appVotingContract.realTimeTotalVotes()));
+
+
             console.log("Check current votes");
             votes = await appVotingContract.getCurrentAppVotes(app1Code)
             console.log("Votes for app 1: ", ethers.formatEther(votes));
@@ -112,6 +115,8 @@ describe("Apps Governance", function () {
             console.log("Voter2 votes 50 for app 1 and 50 for app 2");
             tx = await appVotingContract.connect(voter2).castVotes(proposalId.toString(), [app1Code, app2Code], [ethers.parseEther("50"), ethers.parseEther("50")])
             console.log("Vote casted");
+
+            console.log("Real time total votes", ethers.formatEther(await appVotingContract.realTimeTotalVotes()));
 
             console.log("Check current votes");
             votes = await appVotingContract.getCurrentAppVotes(app1Code)
@@ -162,6 +167,8 @@ describe("Apps Governance", function () {
             // await waitForNextBlock()
             // console.log("Past total supply",
             //     ethers.formatEther(await vot3.getPastTotalSupply(tx.blockNumber)))
+
+            console.log("Check total votes of round 1", ethers.formatEther(await appVotingContract.totalVotes(proposalId.toString())));
 
             console.log("Votes should be resetted, let's check:");
             votes = await appVotingContract.getCurrentAppVotes(app1Code)
