@@ -132,9 +132,7 @@ export const CirculatingSupplyPieChart = () => {
       <CardHeader>
         <VStack spacing={0} justify={"flex-start"} align="flex-start">
           <Heading size="md">Supply breakdown</Heading>
-          <Text fontSize="sm" color="gray">
-            How much B3TR is in circulation and how much is locked?
-          </Text>
+          <Text fontSize="sm">How much B3TR is in circulation and how much is locked?</Text>
         </VStack>
       </CardHeader>
       <CardBody w="full">

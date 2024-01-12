@@ -136,9 +136,7 @@ export const TvlBreakdownPieChart = () => {
       <CardHeader>
         <VStack spacing={0} justify={"flex-start"} align="flex-start">
           <Heading size="md">TVL breakdown</Heading>
-          <Text fontSize="sm" color="gray">
-            How much B3TR is locked in VOT3?
-          </Text>
+          <Text fontSize="sm">How much B3TR is locked in VOT3?</Text>
         </VStack>
       </CardHeader>
       <CardBody w="full">
