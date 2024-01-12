@@ -1,5 +1,5 @@
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
-import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers"
+import { ContractFactory, ContractTransactionResponse } from "ethers"
 import { ethers } from "hardhat"
 import { B3TR, B3trApps, GovernorContract, TimeLock, VOT3, AppVotingContract } from "../../typechain-types"
 
@@ -22,21 +22,25 @@ export const defaultVotingTreshold = 0
 export const defaultVotingDelay = 1
 
 let cachedDeployInstance: DeployInstance | undefined = undefined
-export const getOrDeployContractInstances = async (forceDeploy: boolean = false, votingTreshold = defaultVotingTreshold, votingPeriod = defaultVotingPeriod) => {
-    if (!forceDeploy && cachedDeployInstance !== undefined) {
-        return cachedDeployInstance
-    }
+export const getOrDeployContractInstances = async (
+  forceDeploy: boolean = false,
+  votingTreshold = defaultVotingTreshold,
+  votingPeriod = defaultVotingPeriod,
+) => {
+  if (!forceDeploy && cachedDeployInstance !== undefined) {
+    return cachedDeployInstance
+  }
 
-    // Contracts are deployed using the first signer/account by default
-    const [owner, otherAccount, minterAccount, timelockAdmin, ...otherAccounts] = await ethers.getSigners()
+  // Contracts are deployed using the first signer/account by default
+  const [owner, otherAccount, minterAccount, timelockAdmin, ...otherAccounts] = await ethers.getSigners()
 
-    // Deploy B3TR
-    const B3trContract = await ethers.getContractFactory("B3TR")
-    const b3tr = await B3trContract.deploy(minterAccount)
+  // Deploy B3TR
+  const B3trContract = await ethers.getContractFactory("B3TR")
+  const b3tr = await B3trContract.deploy(minterAccount)
 
-    // Deploy VOT3
-    const Vot3Contract = await ethers.getContractFactory("VOT3")
-    const vot3 = await Vot3Contract.deploy(await b3tr.getAddress())
+  // Deploy VOT3
+  const Vot3Contract = await ethers.getContractFactory("VOT3")
+  const vot3 = await Vot3Contract.deploy(await b3tr.getAddress())
 
     // Deploy TimeLock
     const TimeLockContract = await ethers.getContractFactory("TimeLock")
@@ -48,25 +52,25 @@ export const getOrDeployContractInstances = async (forceDeploy: boolean = false,
     )
     await timeLock.waitForDeployment()
 
-    // Deploy Governor
-    const GovernorContract = await ethers.getContractFactory("GovernorContract")
-    const governor = await GovernorContract.deploy(
-        await vot3.getAddress(),
-        await timeLock.getAddress(),
-        4, // quroum percentage
-        votingPeriod, // voting period
-        defaultVotingDelay, // voting delay
-        votingTreshold, // voting treshold
-    )
-    await governor.waitForDeployment()
+  // Deploy Governor
+  const GovernorContract = await ethers.getContractFactory("GovernorContract")
+  const governor = await GovernorContract.deploy(
+    await vot3.getAddress(),
+    await timeLock.getAddress(),
+    4, // quroum percentage
+    votingPeriod, // voting period
+    defaultVotingDelay, // voting delay
+    votingTreshold, // voting treshold
+  )
+  await governor.waitForDeployment()
 
-    // Set up roles
-    const PROPOSER_ROLE = await timeLock.PROPOSER_ROLE()
-    const EXECUTOR_ROLE = await timeLock.EXECUTOR_ROLE()
-    const CANCELLER_ROLE = await timeLock.CANCELLER_ROLE()
-    await timeLock.connect(timelockAdmin).grantRole(PROPOSER_ROLE, await governor.getAddress())
-    await timeLock.connect(timelockAdmin).grantRole(EXECUTOR_ROLE, await governor.getAddress())
-    await timeLock.connect(timelockAdmin).grantRole(CANCELLER_ROLE, await governor.getAddress())
+  // Set up roles
+  const PROPOSER_ROLE = await timeLock.PROPOSER_ROLE()
+  const EXECUTOR_ROLE = await timeLock.EXECUTOR_ROLE()
+  const CANCELLER_ROLE = await timeLock.CANCELLER_ROLE()
+  await timeLock.connect(timelockAdmin).grantRole(PROPOSER_ROLE, await governor.getAddress())
+  await timeLock.connect(timelockAdmin).grantRole(EXECUTOR_ROLE, await governor.getAddress())
+  await timeLock.connect(timelockAdmin).grantRole(CANCELLER_ROLE, await governor.getAddress())
 
     // Deploy Governor
     const AppVotingContract = await ethers.getContractFactory("AppVotingContract")

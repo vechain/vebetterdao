@@ -1,15 +1,26 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDotEnv": [".env", ".env.config"],
-  "globalDependencies": ["**/.env.*local"],
+  "globalDotEnv": [
+    ".env",
+    ".env.config"
+  ],
+  "globalDependencies": [
+    "**/.env.*local"
+  ],
   "pipeline": {
     "build": {
-      "dependsOn": ["^build", "@repo/contracts#compile"],
-      "outputs": [".next/**", "!.next/cache/**"],
-      "dotEnv": [".env", ".env.config"]
+      "dependsOn": [
+        "@repo/contracts#compile"
+      ],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**"
+      ]
     },
     "lint": {
-      "dependsOn": ["^lint"]
+      "dependsOn": [
+        "^lint"
+      ]
     },
     "//#solo-up": {
       "cache": false
@@ -17,13 +28,16 @@
     "dev": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["//#solo-up", "@repo/contracts#check-contracts-deployment"],
-      "dotEnv": [".env", ".env.config"]
+      "dependsOn": [
+        "@repo/contracts#check-contracts-deployment"
+      ]
     },
     "@repo/contracts#check-contracts-deployment": {
       "cache": false,
-      "dependsOn": ["^compile", "//#solo-up"],
-      "dotEnv": [".env", ".env.config"]
+      "dependsOn": [
+        "^compile",
+        "//#solo-up"
+      ]
     },
     "clean": {
       "cache": false
@@ -32,10 +46,22 @@
       "cache": false
     },
     "deploy": {
-      "dependsOn": ["^deploy"]
+      "dependsOn": [
+        "^deploy"
+      ]
+    },
+    "airdrop": {
+      "cache": false,
+      "dependsOn": [
+        "@repo/contracts#check-contracts-deployment",
+        "^airdrop"
+      ]
     },
     "test": {
-      "dependsOn": ["^test"]
+      "cache": false,
+      "dependsOn": [
+        "@repo/contracts#check-contracts-deployment"
+      ]
     }
   }
 }

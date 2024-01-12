@@ -47,7 +47,7 @@ docker-compose
     yarn test
    ```
 
-   By default the tests will run against the solo node so the solo node has to be up and running locally.
+   By default the tests will run against the solo node so the solo node has to be up and running locally. Alternatively if you run the tests from the root of the monorepo, turbo will ensure the solo node is up.
    You can change the network by adding the `--network` flag. For example, to run the tests against the testnet, run `yarn test --network vechain_testnet`.
 
 5. Deploy

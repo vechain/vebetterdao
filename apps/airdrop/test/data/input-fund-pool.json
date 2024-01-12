@@ -1,0 +1,12 @@
+{
+    "recipients": [
+        {
+            "address": "0x0F872421Dc479F3c11eDd89512731814D0598dB5",
+            "amount": "10000000"
+        },
+        {
+            "address": "0xF370940aBDBd2583bC80bfc19d19bc216C88Ccf0",
+            "amount": "20000000"
+        }
+    ]
+}

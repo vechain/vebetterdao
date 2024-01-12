@@ -1,3 +1,4 @@
+import crypto from "crypto"
 const PREFIX = "0x"
 const PREFIX_REGEX = /^0[xX]/
 const HEX_REGEX = /^(0[xX])?[a-fA-F0-9]+$/
@@ -59,4 +60,16 @@ export const compare = (hex1: string, hex2: string): boolean => {
   } catch (e) {
     return false
   }
+}
+
+/**
+ * Generate a random hex string of the defined length
+ * @param size - the length of the random hex output
+ * @returns a random hex string of length `size`
+ */
+export const generateRandom = (size: number): string => {
+  if (size < 1) throw Error("Size must be > 0")
+  const randBuffer = crypto.randomBytes(Math.ceil(size / 2))
+  if (!randBuffer) throw Error("Failed to generate random hex")
+  return `${PREFIX}${randBuffer.toString("hex").substring(0, size)}`
 }
