@@ -11,6 +11,7 @@ import dynamic from "next/dynamic"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 
 import { config } from "@repo/config"
+import { theme } from "./theme"
 
 const DAppKitProvider = dynamic(
   async () => {
@@ -42,7 +43,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         walletConnectOptions={walletConnectOptions}>
         <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
           <ReactQueryDevtools initialIsOpen={false} />
-          <ChakraProvider>{children}</ChakraProvider>
+          <ChakraProvider theme={theme}>{children}</ChakraProvider>
         </PersistQueryClientProvider>
       </DAppKitProvider>
     </CacheProvider>
