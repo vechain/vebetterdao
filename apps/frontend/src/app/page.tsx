@@ -1,8 +1,15 @@
 "use client"
 
 import { useB3trBalance, useB3trTokenDetails, useVot3Balance, useVot3TokenDetails } from "@/api"
-import { Stack, StackDivider, VStack } from "@chakra-ui/react"
-import { BalanceCard, MintB3trButton, RedeemB3trButton, SwapB3trButton, TokenDetailsCard } from "@/components"
+import { Box, Stack, StackDivider, VStack } from "@chakra-ui/react"
+import {
+  BalanceCard,
+  MintB3trButton,
+  RedeemB3trButton,
+  SwapB3trButton,
+  TvlBreakdownPieChart,
+  CirculatingSupplyPieChart,
+} from "@/components"
 import { useWallet } from "@vechain/dapp-kit-react"
 
 export default function Home() {
@@ -16,9 +23,22 @@ export default function Home() {
 
   return (
     <VStack spacing={4} divider={<StackDivider />} w="full">
+      <Stack
+        w="full"
+        direction={["column", "column", "row"]}
+        justifyContent="stretch"
+        alignItems={"stretch"}
+        divider={<StackDivider />}
+        spacing={4}>
+        <Box w={["100%", "100%", "50%"]}>
+          <CirculatingSupplyPieChart />
+        </Box>
+        <Box w={["100%", "100%", "50%"]}>
+          <TvlBreakdownPieChart />
+        </Box>
+      </Stack>
       <Stack direction={["column", "column", "row"]} spacing={4} w="full" divider={<StackDivider />}>
         <VStack spacing={4} w="full">
-          <TokenDetailsCard tokenDetailsQueryResult={b3trTokenDetailsQueryResult} />
           <BalanceCard
             balanceQueryResult={b3trBalanceQueryResult}
             tokenDetailsQueryResult={b3trTokenDetailsQueryResult}
@@ -27,7 +47,6 @@ export default function Home() {
           />
         </VStack>
         <VStack spacing={4} w="full">
-          <TokenDetailsCard tokenDetailsQueryResult={vot3TokenDetailsQueryResult} />
           <BalanceCard
             balanceQueryResult={vot3BalanceQueryResult}
             tokenDetailsQueryResult={vot3TokenDetailsQueryResult}
