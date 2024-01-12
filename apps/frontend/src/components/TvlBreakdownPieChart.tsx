@@ -104,9 +104,7 @@ export const TvlBreakdownPieChart = () => {
   const data = useMemo(() => {
     if (!b3trTokenDetails || !vot3ContractB3trBalance) return []
 
-    const scaledVot3ContractB3trBalance = new BigNumber(
-      FormattingUtils.scaleNumberDown(vot3ContractB3trBalance, b3trTokenDetails.decimals),
-    ).toNumber()
+    const scaledVot3ContractB3trBalance = new BigNumber(vot3ContractB3trBalance.scaled).toNumber()
 
     const notLockedB3tr = new BigNumber(b3trTokenDetails.circulatingSupply)
       .minus(scaledVot3ContractB3trBalance)
@@ -121,9 +119,7 @@ export const TvlBreakdownPieChart = () => {
   const { tvlRatio, formattedTvlRatio } = useMemo(() => {
     if (!b3trTokenDetails || !vot3ContractB3trBalance) return { tvlRatio: 0, formattedTvlRatio: "0" }
 
-    const scaledVot3ContractB3trBalance = new BigNumber(
-      FormattingUtils.scaleNumberDown(vot3ContractB3trBalance, b3trTokenDetails.decimals),
-    ).toNumber()
+    const scaledVot3ContractB3trBalance = new BigNumber(vot3ContractB3trBalance.scaled).toNumber()
 
     const circulatingSupply = new BigNumber(b3trTokenDetails.circulatingSupply).toNumber()
 

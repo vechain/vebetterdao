@@ -11,12 +11,11 @@ export const getTxReceipt = (txId?: string) => ["TX_RECEIPT", txId]
  * @returns  the tx receipt
  */
 export const useGetTxReceipt = (txId?: string, blocksTimeout?: number) => {
-    const { thor } = useConnex()
-    return useQuery(
-        {
-            queryKey: getTxReceipt(txId),
-            queryFn: () => pollForReceipt(thor, txId, blocksTimeout),
-            enabled: !!txId, staleTime: Infinity
-        },
-    )
+  const { thor } = useConnex()
+  return useQuery({
+    queryKey: getTxReceipt(txId),
+    queryFn: () => pollForReceipt(thor, txId, blocksTimeout),
+    enabled: !!txId,
+    staleTime: Infinity,
+  })
 }
