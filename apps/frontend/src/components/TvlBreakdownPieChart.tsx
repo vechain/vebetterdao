@@ -16,7 +16,7 @@ import {
   useToken,
 } from "@chakra-ui/react"
 import { config } from "@repo/config"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { FormattingUtils } from "@repo/utils"
 import BigNumber from "bignumber.js"
 import { ActiveShape } from "recharts/types/util/types"
@@ -126,6 +126,14 @@ export const TvlBreakdownPieChart = () => {
     const ratio = circulatingSupply / scaledVot3ContractB3trBalance
     return { tvlRatio: ratio, formattedTvlRatio: FormattingUtils.humanNumber(ratio, ratio) }
   }, [b3trTokenDetails, vot3ContractB3trBalance])
+
+  useEffect(() => {
+    if (!vot3ContractB3trBalance) return
+
+    if (vot3ContractB3trBalance.scaled === "0") return setSelectedPieIndex(1)
+
+    return setSelectedPieIndex(0)
+  }, [b3trTokenDetails])
 
   return (
     <Card w={"full"} h="full">
