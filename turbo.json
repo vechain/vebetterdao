@@ -53,8 +53,7 @@
     "airdrop": {
       "cache": false,
       "dependsOn": [
-        "@repo/contracts#check-contracts-deployment",
-        "^airdrop"
+        "@repo/contracts#check-contracts-deployment"
       ]
     },
     "test": {
