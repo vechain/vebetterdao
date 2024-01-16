@@ -1,12 +1,10 @@
-import { TokenDetails } from "@/api"
+import { TokenBalance, TokenDetails } from "@/api"
 import { Card, CardHeader, CardBody, Heading, Text, HStack, Spinner, Skeleton } from "@chakra-ui/react"
-import { FormattingUtils } from "@repo/utils"
 import { UseQueryResult } from "@tanstack/react-query"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { useMemo } from "react"
 
 type Props = {
-  balanceQueryResult: UseQueryResult<string, Error>
+  balanceQueryResult: UseQueryResult<TokenBalance, Error>
   tokenDetailsQueryResult: UseQueryResult<TokenDetails, Error>
   componentUpperRight?: React.ReactNode
   componentLowerRight?: React.ReactNode
@@ -26,17 +24,6 @@ export const BalanceCard = ({
   componentLowerRight,
 }: Props) => {
   const { account } = useWallet()
-
-  const formattedBalance = useMemo(() => {
-    if (!balance) {
-      return 0
-    }
-
-    const decimals = tokenDetails?.decimals ?? 18
-
-    const scaledNumber = FormattingUtils.scaleNumberDown(balance, decimals)
-    return FormattingUtils.humanNumber(scaledNumber, scaledNumber)
-  }, [tokenDetails, balance])
 
   const isLoading = balanceLoading || tokenDetailsLoading
   const loadingSymbolPlaceholder = tokenDetailsLoading ? "B3TR" : undefined
@@ -82,7 +69,7 @@ export const BalanceCard = ({
         <HStack justify={"space-between"} align={"center"} w="full">
           <HStack spacing={2}>
             <Heading size="lg">
-              <Skeleton isLoaded={!balanceLoading}>{formattedBalance}</Skeleton>
+              <Skeleton isLoaded={!balanceLoading}>{balance?.formatted}</Skeleton>
             </Heading>
             <Skeleton isLoaded={!tokenDetailsLoading}>
               <Text fontSize="sm" as="sub">
