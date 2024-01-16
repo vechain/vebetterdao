@@ -15,7 +15,7 @@ import {
   StatHelpText,
   StatLabel,
   StatNumber,
-  VStack,
+  Stack,
 } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { BalancePieChart } from "./BalancePieChart"
@@ -115,24 +115,22 @@ export const BalanceCard: React.FC<Props> = () => {
         </HStack>
       </CardHeader>
       <CardBody>
-        <VStack spacing={8} w="full">
+        <Stack direction={["column", "column", "row"]} spacing={8} w="full">
           <BalancePieChart b3trBalance={b3trBalance} vot3Balance={vot3Balance} />
-          <StatGroup w="full">
+          <StatGroup w="full" flexDirection={"column"}>
             <Stat>
               <StatLabel>B3TR</StatLabel>
               <StatNumber>{b3trBalance?.formatted}</StatNumber>
-              <StatHelpText>
-                <StatHelpText>You own {percentageOfB3trSupply}% of the circulating supply</StatHelpText>
-              </StatHelpText>
+              <StatHelpText>{percentageOfB3trSupply}% of the circulating supply</StatHelpText>
             </Stat>
 
             <Stat>
               <StatLabel>VOT3</StatLabel>
               <StatNumber>{vot3Balance?.formatted}</StatNumber>
-              <StatHelpText>You own {percentageOfVot3Supply}% of the circulating supply</StatHelpText>
+              <StatHelpText>{percentageOfVot3Supply}% of the circulating supply</StatHelpText>
             </Stat>
           </StatGroup>
-        </VStack>
+        </Stack>
       </CardBody>
     </Card>
   )

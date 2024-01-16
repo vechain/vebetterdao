@@ -117,7 +117,7 @@ export const BalancePieChart: React.FC<Props> = ({ b3trBalance, vot3Balance }) =
     )
 
   return (
-    <Box w="full" h="150">
+    <Box w="full" h="200">
       <ResponsiveContainer width={"99%"} height={"100%"}>
         <PieChart title="TVL breakdown" desc={`Balances`}>
           <Pie
