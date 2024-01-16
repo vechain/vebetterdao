@@ -23,6 +23,7 @@ import { useMemo } from "react"
 import BigNumber from "bignumber.js"
 import { SwapB3trButton } from "./SwapB3trButton"
 import { RedeemB3trButton } from "./RedeemB3trButton"
+import { config } from "@repo/config"
 
 type Props = {}
 /**
@@ -46,6 +47,8 @@ export const BalanceCard: React.FC<Props> = () => {
     error: vot3BalanceError,
   } = useVot3Balance(account ?? undefined)
 
+  const { data: vot3ContractB3trBalance } = useB3trBalance(config.vot3ContractAddress)
+
   const isLoading = b3trBalanceLoading || vot3BalanceLoading
 
   const percentageOfB3trSupply = useMemo(() => {
@@ -58,12 +61,10 @@ export const BalanceCard: React.FC<Props> = () => {
   }, [b3trTokenDetails, b3trBalance])
 
   const percentageOfVot3Supply = useMemo(() => {
-    if (!vot3TokenDetails || !vot3Balance) return undefined
+    if (!vot3ContractB3trBalance || !vot3Balance) return undefined
 
-    const circulatingSupply = new BigNumber(vot3TokenDetails.circulatingSupply)
+    const circulatingSupply = new BigNumber(vot3ContractB3trBalance.scaled)
     const balance = new BigNumber(vot3Balance.scaled)
-
-    console.log(circulatingSupply.toString(), balance.toString())
 
     return balance.dividedBy(circulatingSupply).multipliedBy(100).toFixed(2)
   }, [vot3TokenDetails, vot3Balance])
@@ -75,7 +76,7 @@ export const BalanceCard: React.FC<Props> = () => {
           <Heading size="sm">Your balance</Heading>
         </CardHeader>
         <CardBody>
-          <Alert status="success">
+          <Alert status="info" borderRadius={"lg"}>
             <AlertIcon />
             Connect your wallet first
           </Alert>
@@ -90,7 +91,7 @@ export const BalanceCard: React.FC<Props> = () => {
           <Heading size="sm">Your balance</Heading>
         </CardHeader>
         <CardBody>
-          <Alert status="error">
+          <Alert status="error" borderRadius={"lg"}>
             <AlertIcon />
             <AlertTitle>Error fetching your balances</AlertTitle>
             <AlertDescription>{b3trBalanceError?.message ?? vot3BalanceError?.message}</AlertDescription>
@@ -128,7 +129,7 @@ export const BalanceCard: React.FC<Props> = () => {
             <Stat>
               <StatLabel>VOT3</StatLabel>
               <StatNumber>{vot3Balance?.formatted}</StatNumber>
-              <StatHelpText>[TODO]: You own {percentageOfVot3Supply}% of the circulating supply</StatHelpText>
+              <StatHelpText>You own {percentageOfVot3Supply}% of the circulating supply</StatHelpText>
             </Stat>
           </StatGroup>
         </VStack>

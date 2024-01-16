@@ -1,6 +1,6 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Sector } from "recharts"
 import { TokenBalance } from "@/api"
-import { Box, Heading, Text, useColorModeValue, useToken } from "@chakra-ui/react"
+import { Alert, AlertDescription, AlertIcon, AlertTitle, Box, useColorModeValue, useToken } from "@chakra-ui/react"
 import React, { useMemo, useState } from "react"
 import { FormattingUtils } from "@repo/utils"
 import { ActiveShape } from "recharts/types/util/types"
@@ -105,13 +105,14 @@ export const BalancePieChart: React.FC<Props> = ({ b3trBalance, vot3Balance }) =
 
   if (hasNoBalance)
     return (
-      <Box w={"full"} h={"150"}>
-        <Heading size="lg" textAlign={"center"}>
-          You have no balance
-        </Heading>
-        <Text size="sm" textAlign={"center"}>
-          Mint some tokens first
-        </Text>
+      <Box h={"150"}>
+        <Alert status="warning" borderRadius={"lg"}>
+          <AlertIcon />
+          <Box>
+            <AlertTitle>You have no balance</AlertTitle>
+            <AlertDescription>Mint some tokens to get started.</AlertDescription>
+          </Box>
+        </Alert>
       </Box>
     )
 

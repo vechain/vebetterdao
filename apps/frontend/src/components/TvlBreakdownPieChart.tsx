@@ -135,6 +135,8 @@ export const TvlBreakdownPieChart = () => {
     return setSelectedPieIndex(0)
   }, [b3trTokenDetails])
 
+  const noData = useMemo(() => data.every(d => d.value === 0), [data])
+
   return (
     <Card w={"full"} h="full">
       <CardHeader>
@@ -144,30 +146,42 @@ export const TvlBreakdownPieChart = () => {
         </VStack>
       </CardHeader>
       <CardBody w="full">
-        <Box w="full" h="250">
-          <ResponsiveContainer width={"99%"} height={"100%"}>
-            <PieChart title="TVL breakdown" desc={`Current TVL ratio is ${formattedTvlRatio}`}>
-              <Pie
-                activeIndex={selectedPieIndex}
-                onMouseEnter={onPinEnter}
-                activeShape={RenderActiveShape}
-                data={data}
-                dataKey="value"
-                // startAngle={180}
-                // endAngle={0}
-                paddingAngle={5}
-                // cx="50%"
-                // cy="50%"
-                outerRadius={"80%"}
-                innerRadius={"60%"}
-                fill="#8884d8">
-                {data.map(entry => (
-                  <Cell key={`cell-${entry.name}`} fill={entry.color} />
-                ))}
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
-        </Box>
+        {noData ? (
+          <Box h={"250"}>
+            <Alert status="warning" borderRadius={"lg"}>
+              <AlertIcon />
+              <Box>
+                <AlertTitle>No B3TR or vote in circulation</AlertTitle>
+                <AlertDescription>Mint some tokens to get started.</AlertDescription>
+              </Box>
+            </Alert>
+          </Box>
+        ) : (
+          <Box w="full" h="250">
+            <ResponsiveContainer width={"99%"} height={"100%"}>
+              <PieChart title="TVL breakdown" desc={`Current TVL ratio is ${formattedTvlRatio}`}>
+                <Pie
+                  activeIndex={selectedPieIndex}
+                  onMouseEnter={onPinEnter}
+                  activeShape={RenderActiveShape}
+                  data={data}
+                  dataKey="value"
+                  // startAngle={180}
+                  // endAngle={0}
+                  paddingAngle={5}
+                  // cx="50%"
+                  // cy="50%"
+                  outerRadius={"80%"}
+                  innerRadius={"60%"}
+                  fill="#8884d8">
+                  {data.map(entry => (
+                    <Cell key={`cell-${entry.name}`} fill={entry.color} />
+                  ))}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+          </Box>
+        )}
         <Alert status="info" borderRadius={"lg"} mt={8}>
           <AlertIcon />
           <Box>
