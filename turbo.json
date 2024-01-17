@@ -50,12 +50,6 @@
         "^deploy"
       ]
     },
-    "airdrop": {
-      "cache": false,
-      "dependsOn": [
-        "@repo/contracts#check-contracts-deployment"
-      ]
-    },
     "test": {
       "cache": false,
       "dependsOn": [

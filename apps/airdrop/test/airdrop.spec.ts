@@ -1,4 +1,4 @@
-import { config } from "@repo/config"
+import { getConfig } from "@repo/config"
 import { airdrop } from "../airdrop"
 import { Env, Type } from "../model/env"
 import { getTestKey } from "./utils/pks"
@@ -6,6 +6,8 @@ import { getBalance, getOrDeployB3tr } from "./utils/contract"
 import { unitsUtils } from "@vechain/vechain-sdk-core"
 import { logger } from "../utils/Logger"
 import { readInputFile } from "../utils/InputUtils"
+
+const config = getConfig()
 
 describe("airdrop - mint", () => {
   it("balances should be updated", async () => {
@@ -19,6 +21,7 @@ describe("airdrop - mint", () => {
       batchSize: 3,
       pk: minter.pk,
       gasPriceCoef: 0,
+      config,
     }
 
     await airdrop(env, config.nodeUrl, b3trContractAddress)
@@ -45,6 +48,7 @@ describe("airdrop - transfer", () => {
       batchSize: 11,
       pk: transferKey.pk,
       gasPriceCoef: 128,
+      config,
     }
 
     await airdrop(env, config.nodeUrl, b3trContractAddress)

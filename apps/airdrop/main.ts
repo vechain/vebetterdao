@@ -1,12 +1,16 @@
-import { loadEnvVariables } from "./utils/EnvUtils"
+import { loadEnvVariables } from "./utils/InputUtils"
 import { airdrop } from "./airdrop"
-import { config } from "@repo/config"
+import { logger } from "./utils/Logger"
 
 export const start = async () => {
-  // Read environment variables
-  const env = loadEnvVariables()
+  try {
+    // Read environment variables
+    const env = await loadEnvVariables()
 
-  await airdrop(env, config.nodeUrl, config.b3trContractAddress)
+    await airdrop(env, env.config.nodeUrl, env.config.b3trContractAddress)
+  } catch (e) {
+    logger.error("The airdrop failed with the following error: ", e)
+  }
 }
 
 start()

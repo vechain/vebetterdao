@@ -42,9 +42,6 @@ export const airdrop = async (env: Env, nodeUrl: string, b3trContractAddress: st
     }
 
     logger.info("Airdrop completed!")
-  } catch (e) {
-    logger.error(e)
-    throw e
   } finally {
     // Close the thor client
     thorClient.destroy()

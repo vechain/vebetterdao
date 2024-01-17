@@ -1,10 +1,11 @@
 import B3tr from "@repo/contracts/artifacts/contracts/B3TR.sol/B3TR.json"
 import { HttpClient, ThorClient } from "@vechain/vechain-sdk-network"
-import { config } from "@repo/config"
+import { getConfig } from "@repo/config"
 import { getTestKey } from "./pks"
 import { logger } from "../../utils/Logger"
 import { DeployParams } from "@vechain/vechain-sdk-core"
 
+const config = getConfig()
 const thorNetwork = new HttpClient(config.nodeUrl)
 const thorClient = new ThorClient(thorNetwork)
 

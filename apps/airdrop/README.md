@@ -4,20 +4,6 @@
 
 A tool for airdropping B3tr tokens to multiple users.
 
-### Configuring .env file
-
-First you must create a `.env` file in the root of the app. `.env.template` can be used as a guide for this. You must provide values for the following:
-
-- `AIRDROP_TYPE` - The type of airdrop to perform (mint or transfer)
-- `NEXT_PUBLIC_NETWORK_TYPE` - What network to connect to
-- `INPUT_FILE` - The location of a file containing the addresses and amounts to airdrop
-- `SIGNING_PK` - The private key to sign the transactions with _(must be in hex format)_
-
-Optional:
-
-- `GAS_PRICE_COEF` - The gas price coefficient _(defaults to 0 if omitted)_
-- `MAX_CLAUSES_PER_TX` - The max number of clauses per transaction _(defaults to 100 if omitted)_
-
 ### Setting up input file
 
 The airdrop expects an input file as referenced by the `INPUT_FILE` env variable. This file contains the addresses and amounts for each airdrop recipient. See `input.json.template` for details of the structure of this file.
