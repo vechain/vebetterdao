@@ -81,7 +81,7 @@ export const buildCreateProposalTx = (
 
   return {
     ...clause,
-    comment: `Mint ${formattedAmount} B3TR to ${formattedAddress}`,
-    abi: functionAbi,
+    comment: `Create proposal to ${targets} with values ${values} and callData ${callData}`,
+    abi: proposalAbi,
   }
 }
