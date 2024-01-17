@@ -32,11 +32,15 @@
         "@repo/contracts#check-contracts-deployment"
       ]
     },
+    "@repo/config#check-or-generate-local-config": {
+      "cache": false
+    },
     "@repo/contracts#check-contracts-deployment": {
       "cache": false,
       "dependsOn": [
         "^compile",
-        "//#solo-up"
+        "//#solo-up",
+        "@repo/config#check-or-generate-local-config"
       ]
     },
     "clean": {
@@ -48,6 +52,12 @@
     "deploy": {
       "dependsOn": [
         "^deploy"
+      ]
+    },
+    "airdrop": {
+      "cache": false,
+      "dependsOn": [
+        "@repo/contracts#check-contracts-deployment"
       ]
     },
     "test": {

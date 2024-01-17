@@ -19,10 +19,7 @@ import { NavbarMenu } from "./NavbarMenu"
 import { NavbarLogo } from "./NavbarLogo"
 import { ThemeSwitcher } from "../ThemeSwitcher"
 
-const ConnectButtonWithModal = dynamic(
-  () => import("@vechain/dapp-kit-react").then(mod => mod.ConnectButtonWithModal),
-  { ssr: false },
-)
+const WalletButton = dynamic(() => import("@vechain/dapp-kit-react").then(mod => mod.WalletButton), { ssr: false })
 
 const MobileMenuDrawer: React.FC<Omit<DrawerProps, "children">> = props => {
   return (
@@ -51,7 +48,7 @@ export const MobileNavBar = () => {
     <>
       <NavbarLogo />
       <HStack gap={2}>
-        <ConnectButtonWithModal />
+        <WalletButton />
         <IconButton onClick={openMenu} icon={<Icon as={FaBars} />} aria-label="Open menu" />
       </HStack>
       <MobileMenuDrawer isOpen={isMenuOpen} onClose={closeMenu} />
