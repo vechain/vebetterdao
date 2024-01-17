@@ -28,7 +28,7 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
 
   //TODO: decode the events
   const events = await getEvents({ thor, filterCriteria })
-  console.log({ events })
+  return events
 }
 
 /**
@@ -77,7 +77,7 @@ export const buildCreateProposalTx = (
 
   //TODO: Is values correct here ? The entire function was built considering that values are the parameters of the functions to call
   // and not the values to send to the propose method
-  const clause = thor.account(GOVERNANCE_CONTRACT).method(proposalAbi).asClause(targets, values, callData, description)
+  const clause = thor.account(GOVERNANCE_CONTRACT).method(proposalAbi).asClause(targets, [0], callData, description)
 
   return {
     ...clause,

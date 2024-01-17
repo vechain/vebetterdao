@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { getProposalCreatedEvents } from "./endpoints"
+import { getProposalsEvents } from "./endpoints"
 import { useConnex } from "@vechain/dapp-kit-react"
 
 export const useProposalCreatedEvents = () => {
@@ -7,7 +7,7 @@ export const useProposalCreatedEvents = () => {
 
   return useQuery({
     queryKey: ["proposalCreatedEvents"],
-    queryFn: () => getProposalCreatedEvents(thor),
+    queryFn: async () => await getProposalsEvents(thor),
     enabled: !!thor,
   })
 }
