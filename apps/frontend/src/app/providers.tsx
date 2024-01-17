@@ -10,8 +10,10 @@ import type { WalletConnectOptions } from "@vechain/dapp-kit"
 import dynamic from "next/dynamic"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 
-import { config } from "@repo/config"
+import { getConfig } from "@repo/config"
 import { theme } from "./theme"
+
+const config = getConfig()
 
 const DAppKitProvider = dynamic(
   async () => {
