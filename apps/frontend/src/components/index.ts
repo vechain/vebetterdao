@@ -1,5 +1,7 @@
 export * from "./BalanceCard"
 export * from "./CirculatingSupplyPieChart"
+export * from "./CreateProposalButton"
+export * from "./CreateProposalModal"
 export * from "./MintB3trButton"
 export * from "./Navbar"
 export * from "./RedeemB3trButton"
