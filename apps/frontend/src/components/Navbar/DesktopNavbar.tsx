@@ -1,13 +1,10 @@
-import { Container, HStack } from "@chakra-ui/react"
+import { HStack } from "@chakra-ui/react"
 import { NavbarLogo } from "./NavbarLogo"
 import { NavbarMenu } from "./NavbarMenu"
 import { ThemeSwitcher } from "../ThemeSwitcher"
 import dynamic from "next/dynamic"
 
-const ConnectButtonWithModal = dynamic(
-  () => import("@vechain/dapp-kit-react").then(mod => mod.ConnectButtonWithModal),
-  { ssr: false },
-)
+const WalletButton = dynamic(() => import("@vechain/dapp-kit-react").then(mod => mod.WalletButton), { ssr: false })
 
 export const DesktopNavBar = () => {
   return (
@@ -21,7 +18,7 @@ export const DesktopNavBar = () => {
       </HStack>
       <HStack flex={1} spacing={4} justifyContent={"end"}>
         <ThemeSwitcher />
-        <ConnectButtonWithModal />
+        <WalletButton />
       </HStack>
     </>
   )
