@@ -1,13 +1,13 @@
 import { HexUtils } from "@repo/utils"
 import { Env, KeyType, Type } from "../model/env"
-import * as readline from "readline"
 import { logger } from "./Logger"
 import { keystore, addressUtils, Keystore } from "@vechain/vechain-sdk-core"
 import { Recipient, RecipientInput } from "../model/input"
 import { Config, getConfig } from "@repo/config"
 import fs from "fs"
+import { askUserForInput } from "./UserInput"
 
-const cleanPath = (path: string): string => {
+export const cleanPath = (path: string): string => {
   return path.replace(/['"]+/g, "").trim()
 }
 
@@ -17,56 +17,27 @@ export const readInputFile = async (path: string): Promise<Recipient[]> => {
   path = cleanPath(path)
 
   // Read file
-  const fileContents = fs.readFileSync(path, "utf8")
+  let fileContents: string
+  try {
+    fileContents = fs.readFileSync(path, "utf8")
+  } catch (e) {
+    throw new Error("Failed to load file. Please ensure the path is correct and the file exists")
+  }
 
   // Parse JSON as RecipientInput
-  const recipientInput = JSON.parse(fileContents) as RecipientInput
+  let recipientInput: RecipientInput
+  try {
+    recipientInput = JSON.parse(fileContents) as RecipientInput
+  } catch (e) {
+    throw new Error("Failed to parse JSON. Please ensure the file contains valid JSON")
+  }
   if (!recipientInput.recipients) throw new Error("Input file does not contain recipients")
 
   // Return array of addresses
   return recipientInput.recipients
 }
 
-const askUserForInput = async (question: string, isSensitive = false, defaultValue?: string): Promise<string> => {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  })
-
-  if (isSensitive) {
-    const listener = (char: string, key: any) => {
-      if (key && key.name !== "enter" && key.name !== "return" && key.name !== "backspace") {
-        readline.moveCursor(process.stdout, -1, 0)
-        process.stdout.write("*")
-      }
-    }
-    process.stdin.on("keypress", listener)
-
-    rl.on("close", () => {
-      process.stdin.removeListener("keypress", listener)
-    })
-  }
-
-  let answer: string | undefined
-  try {
-    answer = await new Promise<string>((resolve, reject) => {
-      rl.question(question, (res: string) => {
-        if (!res && defaultValue) {
-          res = defaultValue
-          if (!isSensitive) process.stdout.write(`Using default value '${defaultValue}'\n`)
-        }
-        if (!res || res.trim() === "") reject(Error("No input provided"))
-        resolve(res.trim())
-      })
-    })
-    return answer
-  } finally {
-    process.stdout.write("\n")
-    rl.close()
-  }
-}
-
-const getNetworkConfig = async (): Promise<Config> => {
+export const getNetworkConfig = async (): Promise<Config> => {
   const networkType = await askUserForInput(
     "What network would you like to use?\n - 'solo' for the solo network (default)\n - 'test' for the testnet (not supported yet)\n - 'main' for mainnet (not supported yet)\n",
   )
@@ -82,7 +53,7 @@ const getNetworkConfig = async (): Promise<Config> => {
   }
 }
 
-const getAirdropType = async (): Promise<Type> => {
+export const getAirdropType = async (): Promise<Type> => {
   const typeStr = await askUserForInput(
     "What type of airdrop would you like to do? \n - 'mint'\n - 'transfer' (default)\n",
     false,
@@ -98,7 +69,7 @@ const getAirdropType = async (): Promise<Type> => {
   return type
 }
 
-const getInputFilePath = async (): Promise<string> => {
+export const getInputFilePath = async (): Promise<string> => {
   try {
     const path = await askUserForInput(
       "Where is your input file located? \n  - enter the file path or drag and drop the file\n",
@@ -114,7 +85,7 @@ const getInputFilePath = async (): Promise<string> => {
   return await getInputFilePath()
 }
 
-const getGasPriceCoef = async (): Promise<number> => {
+export const getGasPriceCoef = async (): Promise<number> => {
   const gasPriceCoefStr = await askUserForInput(
     "Please enter the gas price coefficient\n - enter a value between 0-255 or leave blank to default to 0\n",
     false,
@@ -128,7 +99,7 @@ const getGasPriceCoef = async (): Promise<number> => {
   return gasPriceCoef
 }
 
-const getBatchSize = async (): Promise<number> => {
+export const getBatchSize = async (): Promise<number> => {
   const batchSizeStr = await askUserForInput(
     "How many clauses would you like per transaction?\n - enter an integer value (default to 100)\n",
     false,
@@ -147,7 +118,7 @@ const getBatchSize = async (): Promise<number> => {
  * defaults to keystore as it is the more secured and recommended option
  * @returns
  */
-const getKeyType = async (): Promise<KeyType> => {
+export const getKeyType = async (): Promise<KeyType> => {
   try {
     const typeStr = await askUserForInput(
       "How would you like to sign the transactions?\n - 'pk' to use a private key \n - 'keystore' to use a keystore file (default)\n",
@@ -167,7 +138,7 @@ const getKeyType = async (): Promise<KeyType> => {
  * Get the the private key from the user
  * @returns The private key as a Buffer
  */
-const getPrivateKey = async (): Promise<Buffer> => {
+export const getPrivateKey = async (): Promise<Buffer> => {
   try {
     const pkStr = await askUserForInput(
       "\nPlease enter your private key\n - enter the hexadecimal value for your private key\n ",
@@ -183,7 +154,7 @@ const getPrivateKey = async (): Promise<Buffer> => {
   }
 }
 
-const getKeystore = async (): Promise<Keystore> => {
+export const getKeystore = async (): Promise<Keystore> => {
   try {
     const path = await askUserForInput(
       "Where is your keystore file located? \n - enter the file path or drag and drop the file\n",
@@ -202,7 +173,7 @@ const getKeystore = async (): Promise<Keystore> => {
   return await getKeystore()
 }
 
-const unlockKeystore = async (ks: Keystore): Promise<Buffer> => {
+export const unlockKeystore = async (ks: Keystore): Promise<Buffer> => {
   try {
     const password = await askUserForInput(
       "\nUnlock your keystore file\n - enter the password to unlock your keystore file\n ",
@@ -259,6 +230,7 @@ export const loadEnvVariables = async (): Promise<Env> => {
     batchSize,
     pk,
     gasPriceCoef,
-    config,
+    nodeUrl: config.nodeUrl,
+    b3trContractAddress: config.b3trContractAddress,
   }
 }

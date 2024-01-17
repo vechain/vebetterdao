@@ -1,18 +1,18 @@
-import { getConfig } from "@repo/config"
-import { airdrop } from "../airdrop"
-import { Env, Type } from "../model/env"
-import { getTestKey } from "./utils/pks"
-import { getBalance, getOrDeployB3tr } from "./utils/contract"
+import { airdrop } from "./airdrop"
+import { Env, Type } from "./model/env"
+import { getTestKey } from "./test/utils/pks"
+import { getBalance, getOrDeployB3tr } from "./test/utils/contract"
 import { unitsUtils } from "@vechain/vechain-sdk-core"
-import { logger } from "../utils/Logger"
-import { readInputFile } from "../utils/InputUtils"
+import { logger } from "./utils/Logger"
+import { readInputFile } from "./utils/InputUtils"
 
-const config = getConfig()
+// Running tests against solo node
+const nodeUrl = "http://localhost:8669"
 
 describe("airdrop - mint", () => {
   it("balances should be updated", async () => {
     const minter = getTestKey(1)
-    const b3trContractAddress = await getOrDeployB3tr(minter.address, true)
+    const b3trContractAddress = await getOrDeployB3tr(nodeUrl, minter.address, true)
     const inputFile = "./test/data/input-fund-pool.json"
 
     const env: Env = {
@@ -21,15 +21,16 @@ describe("airdrop - mint", () => {
       batchSize: 3,
       pk: minter.pk,
       gasPriceCoef: 0,
-      config,
+      nodeUrl,
+      b3trContractAddress,
     }
 
-    await airdrop(env, config.nodeUrl, b3trContractAddress)
+    await airdrop(env)
 
     const recipients = await readInputFile(inputFile)
 
     for (const r of recipients) {
-      expect(await getBalance(b3trContractAddress, r.address)).toBe(unitsUtils.parseUnits(r.amount, 18))
+      expect(await getBalance(nodeUrl, b3trContractAddress, r.address)).toBe(unitsUtils.parseUnits(r.amount, 18))
     }
   }, 100000)
 })
@@ -38,7 +39,7 @@ describe("airdrop - mint", () => {
 describe("airdrop - transfer", () => {
   it("balances should be updated", async () => {
     const transferKey = getTestKey(3)
-    const b3trContractAddress = await getOrDeployB3tr("", false)
+    const b3trContractAddress = await getOrDeployB3tr(nodeUrl, "", false)
     const inputFile = "./test/data/input-transfer-airdrop.json"
     logger.info(`Transfer key: ${transferKey.address}`)
 
@@ -48,15 +49,16 @@ describe("airdrop - transfer", () => {
       batchSize: 11,
       pk: transferKey.pk,
       gasPriceCoef: 128,
-      config,
+      nodeUrl,
+      b3trContractAddress,
     }
 
-    await airdrop(env, config.nodeUrl, b3trContractAddress)
+    await airdrop(env)
 
     const recipients = await readInputFile(inputFile)
 
     for (const r of recipients) {
-      expect(await getBalance(b3trContractAddress, r.address)).toBe(unitsUtils.parseUnits(r.amount, 18))
+      expect(await getBalance(nodeUrl, b3trContractAddress, r.address)).toBe(unitsUtils.parseUnits(r.amount, 18))
     }
   }, 100000)
 })

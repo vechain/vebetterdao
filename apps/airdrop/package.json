@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "airdrop": "ts-node main.ts",
-    "test": "NEXT_PUBLIC_NETWORK_TYPE=solo jest --config jest.config.js --detectOpenHandles --forceExit"
+    "test": "jest --config jest.config.js --detectOpenHandles --forceExit"
   },
   "dependencies": {
     "@repo/constants": "*",

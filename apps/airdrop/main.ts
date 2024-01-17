@@ -7,7 +7,7 @@ export const start = async () => {
     // Read environment variables
     const env = await loadEnvVariables()
 
-    await airdrop(env, env.config.nodeUrl, env.config.b3trContractAddress)
+    await airdrop(env)
   } catch (e) {
     logger.error("The airdrop failed with the following error: ", e)
   }

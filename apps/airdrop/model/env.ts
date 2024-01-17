@@ -1,5 +1,3 @@
-import { Config } from "@repo/config"
-
 export enum Type {
   MINT = "mint",
   TRANSFER = "transfer",
@@ -11,7 +9,8 @@ export interface Env {
   batchSize: number
   pk: Buffer
   gasPriceCoef: number
-  config: Config
+  nodeUrl: string
+  b3trContractAddress: string
 }
 
 export enum KeyType {
