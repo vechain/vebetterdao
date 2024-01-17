@@ -142,3 +142,5 @@ contracts/package-lock.json
 # IDE files
 .idea/
 .vscode/
+
+packages/config/local.ts
