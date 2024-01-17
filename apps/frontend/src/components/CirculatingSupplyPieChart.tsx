@@ -9,17 +9,19 @@ import {
   Card,
   CardBody,
   CardHeader,
+  HStack,
   Heading,
   Text,
   VStack,
   useColorModeValue,
   useToken,
 } from "@chakra-ui/react"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { FormattingUtils } from "@repo/utils"
 import BigNumber from "bignumber.js"
 import { PieSectorDataItem } from "recharts/types/polar/Pie"
 import { ActiveShape } from "recharts/types/util/types"
+import { MintB3trButton } from "./MintB3trButton"
 
 const RenderActiveShape: ActiveShape<PieSectorDataItem> = ({ ...props }) => {
   const RADIAN = Math.PI / 180
@@ -127,13 +129,24 @@ export const CirculatingSupplyPieChart = () => {
     return FormattingUtils.humanNumber(b3trTokenDetails.totalSupply)
   }, [b3trTokenDetails])
 
+  useEffect(() => {
+    if (!b3trTokenDetails) return
+
+    if (b3trTokenDetails.circulatingSupply === "0") return setSelectedPieIndex(1)
+
+    return setSelectedPieIndex(0)
+  }, [b3trTokenDetails])
+
   return (
     <Card w={"full"} h="full">
       <CardHeader>
-        <VStack spacing={0} justify={"flex-start"} align="flex-start">
-          <Heading size="md">Supply breakdown</Heading>
-          <Text fontSize="sm">How much B3TR is in circulation and how much is locked?</Text>
-        </VStack>
+        <HStack justify={"space-between"} align={"center"} w="full">
+          <VStack spacing={0} justify={"flex-start"} align="flex-start">
+            <Heading size="md">Supply breakdown</Heading>
+            <Text fontSize="sm">How much B3TR is in circulation and how much is locked?</Text>
+          </VStack>
+          <MintB3trButton />
+        </HStack>
       </CardHeader>
       <CardBody w="full">
         <Box w="full" h="250">

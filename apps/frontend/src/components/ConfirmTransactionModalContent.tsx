@@ -113,7 +113,7 @@ export const ConfirmTransactionModalContent: React.FC<Props> = ({
     if (status === "success") {
       timeout = setTimeout(() => {
         onSuccess?.()
-      }, 3000)
+      }, 1500)
     }
     return () => {
       clearTimeout(timeout)
