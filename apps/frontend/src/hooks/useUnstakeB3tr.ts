@@ -5,7 +5,9 @@ import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTran
 import { useCallback } from "react"
 import { useConnex, useWallet } from "@vechain/dapp-kit-react"
 import { FormattingUtils } from "@repo/utils"
-import { config } from "@repo/config"
+import { getConfig } from "@repo/config"
+
+const config = getConfig()
 
 type useMintB3trProps = {
   amount?: string | number
