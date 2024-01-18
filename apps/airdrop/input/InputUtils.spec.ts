@@ -28,11 +28,13 @@ describe("getNetworkConfig", () => {
 
   it("should return the solo config", async () => {
     // Mock call to askUserForInput
-    mock.mockResolvedValue("solo")
+    mock.mockResolvedValueOnce("solo")
 
     const config = await getNetworkConfig()
+
+    expect(mock).toHaveBeenCalledTimes(1)
     expect(config.nodeUrl).toBe("http://localhost:8669")
-  })
+  }, 5000)
 
   it("should ask the user again if they provide an invalid value", async () => {
     mock.mockResolvedValueOnce("invalid").mockResolvedValueOnce("solo")
@@ -41,7 +43,7 @@ describe("getNetworkConfig", () => {
 
     expect(mock).toHaveBeenCalledTimes(2)
     expect(config.nodeUrl).toBe("http://localhost:8669")
-  })
+  }, 5000)
 })
 
 describe("getAirdropType", () => {
@@ -52,28 +54,33 @@ describe("getAirdropType", () => {
 
   it("should return the transfer type", async () => {
     // Mock call to askUserForInput
-    mock.mockResolvedValue("transfer")
+    mock.mockResolvedValueOnce("transfer")
 
     const type = await getAirdropType()
+
+    expect(mock).toHaveBeenCalledTimes(1)
     expect(type).toBe("transfer")
-  })
+  }, 5000)
 
   it("should return the mint type", async () => {
     // Mock call to askUserForInput
-    mock.mockResolvedValue("mint")
+    mock.mockResolvedValueOnce("mint")
 
     const type = await getAirdropType()
+
+    expect(mock).toHaveBeenCalledTimes(1)
     expect(type).toBe("mint")
-  })
+  }, 5000)
 
   it("should ask the user again if they provide an invalid value", async () => {
     // Mock call to askUserForInput
     mock.mockResolvedValueOnce("invalid").mockResolvedValueOnce("mint")
 
     const type = await getAirdropType()
+
     expect(mock).toHaveBeenCalledTimes(2)
     expect(type).toBe("mint")
-  })
+  }, 5000)
 })
 
 describe("getInputFilePath", () => {
@@ -84,20 +91,23 @@ describe("getInputFilePath", () => {
 
   it("should return the input file path", async () => {
     // Mock call to askUserForInput
-    mock.mockResolvedValue("./test/data/input-fund-pool.json")
+    mock.mockResolvedValueOnce("./test/data/input-fund-pool.json")
 
     const path = await getInputFilePath()
+
+    expect(mock).toHaveBeenCalledTimes(1)
     expect(path).toBe("./test/data/input-fund-pool.json")
-  })
+  }, 5000)
 
   it("should ask the user again if they provide an invalid value", async () => {
     // Mock call to askUserForInput
     mock.mockResolvedValueOnce("invalid").mockResolvedValueOnce("./test/data/input-fund-pool.json")
 
     const path = await getInputFilePath()
+
     expect(mock).toHaveBeenCalledTimes(2)
     expect(path).toBe("./test/data/input-fund-pool.json")
-  })
+  }, 5000)
 
   it("should ask the user again if the file doesn't pass validation", async () => {
     // Mock call to askUserForInput
@@ -106,9 +116,10 @@ describe("getInputFilePath", () => {
       .mockResolvedValueOnce("./test/data/input-fund-pool.json")
 
     const path = await getInputFilePath()
+
     expect(mock).toHaveBeenCalledTimes(2)
     expect(path).toBe("./test/data/input-fund-pool.json")
-  })
+  }, 5000)
 })
 
 describe("getGasPriceCoef", () => {
@@ -119,20 +130,23 @@ describe("getGasPriceCoef", () => {
 
   it("should return the gas price coefficient", async () => {
     // Mock call to askUserForInput
-    mock.mockResolvedValue("128")
+    mock.mockResolvedValueOnce("128")
 
     const gasPriceCoef = await getGasPriceCoef()
+
+    expect(mock).toHaveBeenCalledTimes(1)
     expect(gasPriceCoef).toBe(128)
-  })
+  }, 5000)
 
   it("should ask the user again if they provide an invalid value", async () => {
     // Mock call to askUserForInput
     mock.mockResolvedValueOnce("invalid").mockResolvedValueOnce("128")
 
     const gasPriceCoef = await getGasPriceCoef()
+
     expect(mock).toHaveBeenCalledTimes(2)
     expect(gasPriceCoef).toBe(128)
-  })
+  }, 5000)
 })
 
 describe("getBatchSize", () => {
@@ -143,20 +157,23 @@ describe("getBatchSize", () => {
 
   it("should return the batch size", async () => {
     // Mock call to askUserForInput
-    mock.mockResolvedValue("128")
+    mock.mockResolvedValueOnce("128")
 
     const batchSize = await getBatchSize()
+
+    expect(mock).toHaveBeenCalledTimes(1)
     expect(batchSize).toBe(128)
-  })
+  }, 5000)
 
   it("should ask the user again if they provide an invalid value", async () => {
     // Mock call to askUserForInput
     mock.mockResolvedValueOnce("invalid").mockResolvedValueOnce("128")
 
     const batchSize = await getBatchSize()
+
     expect(mock).toHaveBeenCalledTimes(2)
     expect(batchSize).toBe(128)
-  })
+  }, 5000)
 })
 
 describe("getKeyType", () => {
@@ -167,28 +184,33 @@ describe("getKeyType", () => {
 
   it("should return the key type", async () => {
     // Mock call to askUserForInput
-    mock.mockResolvedValue("keystore")
+    mock.mockResolvedValueOnce("keystore")
 
     const keyType = await getKeyType()
+
+    expect(mock).toHaveBeenCalledTimes(1)
     expect(keyType).toBe("keystore")
-  })
+  }, 5000)
 
   it("should return the key type", async () => {
     // Mock call to askUserForInput
-    mock.mockResolvedValue("pk")
+    mock.mockResolvedValueOnce("pk")
 
     const keyType = await getKeyType()
+
+    expect(mock).toHaveBeenCalledTimes(1)
     expect(keyType).toBe("pk")
-  })
+  }, 5000)
 
   it("should ask the user again if they provide an invalid value", async () => {
     // Mock call to askUserForInput
     mock.mockResolvedValueOnce("invalid").mockResolvedValueOnce("keystore")
 
     const keyType = await getKeyType()
+
     expect(mock).toHaveBeenCalledTimes(2)
     expect(keyType).toBe("keystore")
-  })
+  }, 5000)
 })
 
 describe("getPrivateKey", () => {
@@ -200,20 +222,24 @@ describe("getPrivateKey", () => {
   it("should return the private key", async () => {
     const key = getTestKey(1)
     // Mock call to askUserForInput
-    mock.mockResolvedValue(key.pk.toString("hex"))
+    mock.mockResolvedValueOnce(key.pk.toString("hex"))
 
     const privateKey = await getPrivateKey()
+
+    expect(mock).toHaveBeenCalledTimes(1)
     expect(privateKey.toString("hex")).toBe(key.pk.toString("hex"))
-  })
+  }, 5000)
 
   it("hex with prefix should return the private key", async () => {
     const key = getTestKey(1)
     // Mock call to askUserForInput
-    mock.mockResolvedValue(HexUtils.addPrefix(key.pk.toString("hex")))
+    mock.mockResolvedValueOnce(HexUtils.addPrefix(key.pk.toString("hex")))
 
     const privateKey = await getPrivateKey()
+
+    expect(mock).toHaveBeenCalledTimes(1)
     expect(privateKey.toString("hex")).toBe(key.pk.toString("hex"))
-  })
+  }, 5000)
 
   it("should ask the user again if they provide an invalid value", async () => {
     const key = getTestKey(1)
@@ -221,9 +247,10 @@ describe("getPrivateKey", () => {
     mock.mockResolvedValueOnce("invalid").mockResolvedValueOnce(key.pk.toString("hex"))
 
     const privateKey = await getPrivateKey()
+
     expect(mock).toHaveBeenCalledTimes(2)
     expect(privateKey.toString("hex")).toBe(key.pk.toString("hex"))
-  })
+  }, 5000)
 })
 
 describe("getKeystore and unlockKeystore", () => {
@@ -241,15 +268,16 @@ describe("getKeystore and unlockKeystore", () => {
 
     expect(mock).toHaveBeenCalledTimes(2)
     expect(privateKey.toString("hex")).toBe(key.pk.toString("hex"))
-  })
+  }, 5000)
 
   it("invalid keystore path should ask the user again", async () => {
     // Mock call to askUserForInput
     mock.mockResolvedValueOnce("invalid").mockResolvedValueOnce("./test/test-keystore.json")
+
     await getKeystore()
 
     expect(mock).toHaveBeenCalledTimes(2)
-  })
+  }, 5000)
 
   it("invalid password should ask the user again", async () => {
     const key = getTestKey(0)
@@ -258,10 +286,11 @@ describe("getKeystore and unlockKeystore", () => {
       .mockResolvedValueOnce("./test/test-keystore.json")
       .mockResolvedValueOnce("invalid")
       .mockResolvedValueOnce("Password1!")
+
     const keystore = await getKeystore()
     const privateKey = await unlockKeystore(keystore)
 
     expect(mock).toHaveBeenCalledTimes(3)
     expect(privateKey.toString("hex")).toBe(key.pk.toString("hex"))
-  })
+  }, 5000)
 })

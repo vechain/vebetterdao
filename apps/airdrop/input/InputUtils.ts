@@ -10,6 +10,8 @@ import { validateRecipients } from "../recipient/RecipientValidator"
 export const getNetworkConfig = async (): Promise<Config> => {
   const networkType = await askUserForInput(
     "What network would you like to use?\n - 'solo' for the solo network (default)\n - 'test' for the testnet (not supported yet)\n - 'main' for mainnet (not supported yet)\n",
+    false,
+    "solo",
   )
   try {
     const config = getConfig(networkType)
