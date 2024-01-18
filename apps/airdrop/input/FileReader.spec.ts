@@ -30,11 +30,15 @@ describe("readInputFile", () => {
   it("should return an array of Recipients", async () => {
     const recipients = await readInputFile("./test/data/input-fund-pool.json")
     expect(recipients).toBeDefined()
-    expect(recipients.length).toBe(2)
-    expect(recipients[0].address).toBe("0x0F872421Dc479F3c11eDd89512731814D0598dB5")
+    expect(recipients.length).toBe(4)
+    expect(recipients[0].address).toBe("0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa")
     expect(recipients[0].amount).toBe("10000000")
-    expect(recipients[1].address).toBe("0xF370940aBDBd2583bC80bfc19d19bc216C88Ccf0")
-    expect(recipients[1].amount).toBe("20000000")
+    expect(recipients[1].address).toBe("0x435933c8064b4Ae76bE665428e0307eF2cCFBD68")
+    expect(recipients[1].amount).toBe("10000000")
+    expect(recipients[2].address).toBe("0x0F872421Dc479F3c11eDd89512731814D0598dB5")
+    expect(recipients[2].amount).toBe("10000000")
+    expect(recipients[3].address).toBe("0xF370940aBDBd2583bC80bfc19d19bc216C88Ccf0")
+    expect(recipients[3].amount).toBe("20000000")
   })
 
   it("should throw an error if the file doesn't exist", async () => {
