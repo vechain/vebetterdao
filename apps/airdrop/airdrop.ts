@@ -1,9 +1,9 @@
-import { logger } from "./utils/Logger"
-import { buildTx, signAndSendTx } from "./utils/TxUtils"
+import { logger } from "./logging/Logger"
+import { buildTx, signAndSendTx } from "./transaction/TxUtils"
 import { addressUtils } from "@vechain/vechain-sdk-core"
 import { HttpClient, ThorClient } from "@vechain/vechain-sdk-network"
-import { Env } from "./model/env"
-import { readInputFile } from "./utils/InputUtils"
+import { Env } from "./env"
+import { readInputFile } from "./input/FileReader"
 
 export const airdrop = async (env: Env) => {
   logger.info("Starting airdrop...")

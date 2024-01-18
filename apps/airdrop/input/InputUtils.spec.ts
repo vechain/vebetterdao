@@ -5,7 +5,6 @@ jest.mock("./UserInput", () => ({
 import { HexUtils } from "@repo/utils"
 import { getTestKey } from "../test/utils/pks"
 import {
-  cleanPath,
   getAirdropType,
   getBatchSize,
   getGasPriceCoef,
@@ -14,69 +13,12 @@ import {
   getKeystore,
   getNetworkConfig,
   getPrivateKey,
-  readInputFile,
   unlockKeystore,
 } from "./InputUtils"
 import { askUserForInput } from "./UserInput"
 
 // Cast to jest.Mock to get access to mock-specific properties
 const mock = askUserForInput as jest.Mock
-
-describe("cleanPath", () => {
-  it("should remove single quotes", () => {
-    expect(cleanPath("'foo'")).toBe("foo")
-  })
-
-  it("should remove double quotes", () => {
-    expect(cleanPath('"foo"')).toBe("foo")
-  })
-
-  it("should remove single and double quotes", () => {
-    expect(cleanPath("'foo\"")).toBe("foo")
-  })
-
-  it("should remove whitespace", () => {
-    expect(cleanPath(" foo ")).toBe("foo")
-  })
-
-  it("should remove whitespace and quotes", () => {
-    expect(cleanPath(" 'foo' ")).toBe("foo")
-  })
-
-  it("should allow alphanumberic to pass through", () => {
-    expect(cleanPath("foo123")).toBe("foo123")
-  })
-})
-
-describe("readInputFile", () => {
-  it("should return an array of Recipients", async () => {
-    const recipients = await readInputFile("./test/data/input-fund-pool.json")
-    expect(recipients).toBeDefined()
-    expect(recipients.length).toBe(2)
-    expect(recipients[0].address).toBe("0x0F872421Dc479F3c11eDd89512731814D0598dB5")
-    expect(recipients[0].amount).toBe("10000000")
-    expect(recipients[1].address).toBe("0xF370940aBDBd2583bC80bfc19d19bc216C88Ccf0")
-    expect(recipients[1].amount).toBe("20000000")
-  })
-
-  it("should throw an error if the file doesn't exist", async () => {
-    await expect(readInputFile("./test/data/file-doesnt-exist.json")).rejects.toThrow(
-      "Failed to load file. Please ensure the path is correct and the file exists",
-    )
-  })
-
-  it("should throw an error if the file doesn't contain valid JSON", async () => {
-    await expect(readInputFile("./test/data/invalid-json.json")).rejects.toThrow(
-      "Failed to parse JSON. Please ensure the file contains valid JSON",
-    )
-  })
-
-  it("should throw an error if the file doesn't contain recipients", async () => {
-    await expect(readInputFile("./test/data/valid-json-no-recipients.json")).rejects.toThrow(
-      "Input file does not contain recipients",
-    )
-  })
-})
 
 describe("getNetworkConfig", () => {
   beforeEach(() => {
@@ -151,6 +93,17 @@ describe("getInputFilePath", () => {
   it("should ask the user again if they provide an invalid value", async () => {
     // Mock call to askUserForInput
     mock.mockResolvedValueOnce("invalid").mockResolvedValueOnce("./test/data/input-fund-pool.json")
+
+    const path = await getInputFilePath()
+    expect(mock).toHaveBeenCalledTimes(2)
+    expect(path).toBe("./test/data/input-fund-pool.json")
+  })
+
+  it("should ask the user again if the file doesn't pass validation", async () => {
+    // Mock call to askUserForInput
+    mock
+      .mockResolvedValueOnce("./test/data/input-invalid-address.json")
+      .mockResolvedValueOnce("./test/data/input-fund-pool.json")
 
     const path = await getInputFilePath()
     expect(mock).toHaveBeenCalledTimes(2)

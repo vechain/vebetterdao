@@ -1,10 +1,10 @@
 import { airdrop } from "./airdrop"
-import { Env, Type } from "./model/env"
+import { Env, Type } from "./env"
 import { getTestKey } from "./test/utils/pks"
 import { getBalance, getOrDeployB3tr } from "./test/utils/contract"
 import { unitsUtils } from "@vechain/vechain-sdk-core"
-import { logger } from "./utils/Logger"
-import { readInputFile } from "./utils/InputUtils"
+import { logger } from "./logging/Logger"
+import { readInputFile } from "./input/FileReader"
 
 // Running tests against solo node
 const nodeUrl = "http://localhost:8669"

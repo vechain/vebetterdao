@@ -1,6 +1,6 @@
-import { loadEnvVariables } from "./utils/InputUtils"
+import { loadEnvVariables } from "./input/InputUtils"
 import { airdrop } from "./airdrop"
-import { logger } from "./utils/Logger"
+import { logger } from "./logging/Logger"
 
 export const start = async () => {
   try {

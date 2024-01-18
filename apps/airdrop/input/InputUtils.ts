@@ -1,41 +1,11 @@
 import { HexUtils } from "@repo/utils"
-import { Env, KeyType, Type } from "../model/env"
-import { logger } from "./Logger"
+import { Env, KeyType, Type } from "../env"
+import { logger } from "../logging/Logger"
 import { keystore, addressUtils, Keystore } from "@vechain/vechain-sdk-core"
-import { Recipient, RecipientInput } from "../model/input"
 import { Config, getConfig } from "@repo/config"
-import fs from "fs"
 import { askUserForInput } from "./UserInput"
-
-export const cleanPath = (path: string): string => {
-  return path.replace(/['"]+/g, "").trim()
-}
-
-// Reads the input JSON file and returns an array of addresses
-export const readInputFile = async (path: string): Promise<Recipient[]> => {
-  // Remove surrounding quotes and whitespace if any
-  path = cleanPath(path)
-
-  // Read file
-  let fileContents: string
-  try {
-    fileContents = fs.readFileSync(path, "utf8")
-  } catch (e) {
-    throw new Error("Failed to load file. Please ensure the path is correct and the file exists")
-  }
-
-  // Parse JSON as RecipientInput
-  let recipientInput: RecipientInput
-  try {
-    recipientInput = JSON.parse(fileContents) as RecipientInput
-  } catch (e) {
-    throw new Error("Failed to parse JSON. Please ensure the file contains valid JSON")
-  }
-  if (!recipientInput.recipients) throw new Error("Input file does not contain recipients")
-
-  // Return array of addresses
-  return recipientInput.recipients
-}
+import { readInputFile, readKeystoreFile } from "./FileReader"
+import { validateRecipients } from "../recipient/RecipientValidator"
 
 export const getNetworkConfig = async (): Promise<Config> => {
   const networkType = await askUserForInput(
@@ -78,9 +48,16 @@ export const getInputFilePath = async (): Promise<string> => {
     // Validate path and file
     const recipients = await readInputFile(path)
     if (!recipients) throw new Error("No recipients found in input file")
+
+    const problems = validateRecipients(recipients)
+
+    if (problems.length > 0) {
+      throw new Error(`Invalid input file. ${problems.join("\n")}`)
+    }
+
     return path
   } catch (e) {
-    logger.error("Please enter a valid input file location or drag and drop the file\n")
+    logger.error("Please enter a valid input file location or drag and drop the file\n", e)
   }
   return await getInputFilePath()
 }
@@ -160,10 +137,7 @@ export const getKeystore = async (): Promise<Keystore> => {
       "Where is your keystore file located? \n - enter the file path or drag and drop the file\n",
     )
     // Validate path and file
-    const fileContents = fs.readFileSync(cleanPath(path), "utf8")
-    if (!fileContents) throw new Error("Invalid keystore file path")
-
-    const ks = JSON.parse(fileContents) as Keystore
+    const ks = readKeystoreFile(path)
 
     if (!keystore.isValid(ks)) throw new Error("Invalid keystore file")
     return ks
