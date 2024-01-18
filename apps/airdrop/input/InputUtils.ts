@@ -6,6 +6,7 @@ import { Config, getConfig } from "@repo/config"
 import { askUserForInput } from "./UserInput"
 import { readInputFile, readKeystoreFile } from "./FileReader"
 import { validateRecipients } from "../recipient/RecipientValidator"
+import { Recipient } from "../recipient/recipient"
 
 export const getNetworkConfig = async (): Promise<Config> => {
   const networkType = await askUserForInput(
@@ -42,26 +43,37 @@ export const getAirdropType = async (): Promise<Type> => {
 }
 
 export const getInputFilePath = async (): Promise<string> => {
+  const path = await askUserForInput(
+    "Where is your input file located? \n  - enter the file path or drag and drop the file\n",
+  )
+
+  let recipients: Recipient[] = []
   try {
-    const path = await askUserForInput(
-      "Where is your input file located? \n  - enter the file path or drag and drop the file\n",
-    )
-
     // Validate path and file
-    const recipients = await readInputFile(path)
-    if (!recipients) throw new Error("No recipients found in input file")
-
-    const problems = validateRecipients(recipients)
-
-    if (problems.length > 0) {
-      throw new Error(`Invalid input file. ${problems.join("\n")}`)
-    }
-
-    return path
+    recipients = await readInputFile(path)
   } catch (e) {
-    logger.error("Please enter a valid input file location or drag and drop the file\n", e)
+    logger.error("Failed to load input file. Please try again\n", e)
+    return await getInputFilePath()
   }
-  return await getInputFilePath()
+
+  if (!recipients) {
+    logger.error("No recipients found in the input file. Please try again\n")
+    return await getInputFilePath()
+  }
+
+  // Run validation on the recipients
+  const problems = validateRecipients(recipients)
+
+  if (problems.length > 0) {
+    logger.warn("The input file failed to pass validation:")
+    for (const problem of problems) {
+      logger.warn(` - ${problem}`)
+    }
+    logger.info("\n")
+    return await getInputFilePath()
+  }
+
+  return path
 }
 
 export const getGasPriceCoef = async (): Promise<number> => {
