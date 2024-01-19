@@ -1,10 +1,10 @@
 import { getEvents } from "@/api/blockchain"
-import { config } from "@repo/config"
+import { getConfig } from "@repo/config"
 import Contract from "@repo/contracts/artifacts/contracts/governance/GovernorContract.sol/GovernorContract.json"
 import { abi, address } from "thor-devkit"
 const contractAbi = Contract.abi
 
-const GOVERNANCE_CONTRACT = config.governorContractAddress
+const GOVERNANCE_CONTRACT = getConfig().governorContractAddress
 
 export const getProposalsEvents = async (thor: Connex.Thor) => {
   const proposalCreatedAbi = contractAbi.find(abi => abi.name === "ProposalCreated")
