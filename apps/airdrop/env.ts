@@ -11,6 +11,7 @@ export interface Env {
   gasPriceCoef: number
   nodeUrl: string
   b3trContractAddress: string
+  networkType: string
 }
 
 export enum KeyType {

@@ -1,13 +1,23 @@
-import { loadEnvVariables } from "./input/InputUtils"
-import { airdrop } from "./airdrop"
-import { logger } from "./logging/Logger"
+import { confirmAirdrop, loadEnvVariables } from "./src/input/InputUtils"
+import { airdrop } from "./src/airdrop"
+import { logger } from "./src/logging/Logger"
 
 export const start = async () => {
   try {
     // Read environment variables
     const env = await loadEnvVariables()
 
-    await airdrop(env)
+    // Simulate the airdrop
+    const simRes = await airdrop(env, true)
+
+    if (simRes.success) {
+      logger.info("The airdrop simulation was successful")
+    } else {
+      logger.error("The airdrop simulation failed. Exiting...")
+      return
+    }
+
+    ;(await confirmAirdrop(simRes)) ? await airdrop(env) : logger.info("Airdrop cancelled")
   } catch (e) {
     logger.error("The airdrop failed with the following error: ", e)
   }

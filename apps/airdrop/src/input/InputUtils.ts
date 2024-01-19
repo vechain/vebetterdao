@@ -1,5 +1,5 @@
 import { HexUtils } from "@repo/utils"
-import { Env, KeyType, Type } from "../env"
+import { Env, KeyType, Type } from "../../env"
 import { logger } from "../logging/Logger"
 import { keystore, addressUtils, Keystore } from "@vechain/vechain-sdk-core"
 import { Config, getConfig } from "@repo/config"
@@ -8,6 +8,8 @@ import { validateRecipients } from "../recipient/RecipientValidator"
 import { Recipient } from "../recipient/recipient"
 import fs from "fs"
 import { prompt } from "enquirer"
+import { AirdropResponse } from "../airdrop"
+import numeral from "numeral"
 
 type Response = {
   answer: string
@@ -244,6 +246,19 @@ const getKey = async (keyType: KeyType): Promise<Buffer> => {
   throw new Error("Invalid key type")
 }
 
+export const confirmAirdrop = async (simRes: AirdropResponse): Promise<boolean> => {
+  const res = await prompt<Response>([
+    {
+      type: "select",
+      name: "answer",
+      message: `${numeral(simRes.totalAmount).format("0,0")} tokens with be airdropped to ${numeral(simRes.numRecipients).format("0,0")} recipients. Proceed?`,
+      choices: ["No", "Yes"],
+    },
+  ])
+
+  return res.answer === "Yes"
+}
+
 export const loadEnvVariables = async (): Promise<Env> => {
   // Get network config
   const config = await getNetworkConfig()
@@ -274,5 +289,6 @@ export const loadEnvVariables = async (): Promise<Env> => {
     gasPriceCoef,
     nodeUrl: config.nodeUrl,
     b3trContractAddress: config.b3trContractAddress,
+    networkType: config.network.type,
   }
 }

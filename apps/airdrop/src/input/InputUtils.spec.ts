@@ -1,7 +1,7 @@
 import enquirer from "enquirer"
 
 import { HexUtils } from "@repo/utils"
-import { getTestKey } from "../test/utils/pks"
+import { getTestKey } from "../../test/utils/pks"
 import {
   BASE_PATH,
   getAirdropType,
@@ -18,7 +18,7 @@ import {
   validateKeystore,
   validatePrivateKey,
 } from "./InputUtils"
-import { KeyType } from "../env"
+import { KeyType } from "../../env"
 
 describe("getNetworkConfig", () => {
   afterEach(() => {
