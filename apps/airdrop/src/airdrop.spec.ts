@@ -23,6 +23,7 @@ describe("airdrop - mint", () => {
       gasPriceCoef: 0,
       nodeUrl,
       b3trContractAddress,
+      networkType: "solo",
     }
 
     await airdrop(env)
@@ -51,6 +52,7 @@ describe("airdrop - transfer", () => {
       gasPriceCoef: 128,
       nodeUrl,
       b3trContractAddress,
+      networkType: "solo",
     }
 
     await airdrop(env)
