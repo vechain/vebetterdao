@@ -3,7 +3,6 @@ import { expect } from "chai"
 import { getOrDeployContractInstances } from "./helpers"
 
 describe("B3TR", function () {
-
   describe("Deployment", function () {
     it("should deploy the contract", async function () {
       const { b3tr } = await getOrDeployContractInstances()

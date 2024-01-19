@@ -1,9 +1,10 @@
-import { config } from "@repo/config"
+import { getConfig } from "@repo/config"
 import Contract from "@repo/contracts/artifacts/contracts/B3TR.sol/B3TR.json"
 import { FormattingUtils } from "@repo/utils"
 import { TokenBalance, TokenDetails } from ".."
 const abi = Contract.abi
 
+const config = getConfig()
 const B3TR_CONTRACT = config.b3trContractAddress
 const VOT3_CONTRACT = config.vot3ContractAddress
 

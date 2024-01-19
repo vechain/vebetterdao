@@ -5,10 +5,10 @@ import { HttpClient, ThorClient } from "@vechain/vechain-sdk-network"
 import { Env } from "./model/env"
 import { readInputFile } from "./utils/InputUtils"
 
-export const airdrop = async (env: Env, nodeUrl: string, b3trContractAddress: string) => {
+export const airdrop = async (env: Env) => {
   logger.info("Starting airdrop...")
 
-  const thorNetwork = new HttpClient(nodeUrl)
+  const thorNetwork = new HttpClient(env.nodeUrl)
   const thorClient = new ThorClient(thorNetwork)
 
   try {
@@ -28,7 +28,7 @@ export const airdrop = async (env: Env, nodeUrl: string, b3trContractAddress: st
     // Send batches
     for (const batch of batches) {
       // Send airdrop
-      const tx = await buildTx(thorClient, b3trContractAddress, env.type, batch, signer, env.gasPriceCoef)
+      const tx = await buildTx(thorClient, env.b3trContractAddress, env.type, batch, signer, env.gasPriceCoef)
 
       logger.info(`Sending tx with ${batch.length} clauses`)
 
@@ -42,9 +42,6 @@ export const airdrop = async (env: Env, nodeUrl: string, b3trContractAddress: st
     }
 
     logger.info("Airdrop completed!")
-  } catch (e) {
-    logger.error(e)
-    throw e
   } finally {
     // Close the thor client
     thorClient.destroy()

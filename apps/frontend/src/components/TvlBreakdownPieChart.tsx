@@ -15,12 +15,14 @@ import {
   useColorModeValue,
   useToken,
 } from "@chakra-ui/react"
-import { config } from "@repo/config"
+import { getConfig } from "@repo/config"
 import { useEffect, useMemo, useState } from "react"
 import { FormattingUtils } from "@repo/utils"
 import BigNumber from "bignumber.js"
 import { ActiveShape } from "recharts/types/util/types"
 import { PieSectorDataItem } from "recharts/types/polar/Pie"
+
+const config = getConfig()
 
 const RenderActiveShape: ActiveShape<PieSectorDataItem> = ({ ...props }) => {
   const RADIAN = Math.PI / 180

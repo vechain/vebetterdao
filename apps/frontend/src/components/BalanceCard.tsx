@@ -23,7 +23,9 @@ import { useMemo } from "react"
 import BigNumber from "bignumber.js"
 import { SwapB3trButton } from "./SwapB3trButton"
 import { RedeemB3trButton } from "./RedeemB3trButton"
-import { config } from "@repo/config"
+import { getConfig } from "@repo/config"
+
+const config = getConfig()
 
 type Props = {}
 /**

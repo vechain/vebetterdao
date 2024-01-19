@@ -11,8 +11,7 @@
     "hardhat:compile": "turbo run compile --scope=contracts",
     "hardhat:deploy": "turbo run deploy --scope=contracts",
     "hardhat:test": "turbo run test --scope=contracts",
-    "solo-up": "make solo-up",
-    "airdrop": "dotenv -e .env.config -- turbo airdrop"
+    "solo-up": "make solo-up"
   },
   "devDependencies": {
     "@repo/eslint-config": "*",
