@@ -1,7 +1,7 @@
 import B3tr from "@repo/contracts/artifacts/contracts/B3TR.sol/B3TR.json"
 import { HttpClient, ThorClient } from "@vechain/vechain-sdk-network"
 import { getTestKey } from "./pks"
-import { logger } from "../../utils/Logger"
+import { logger } from "../../logging/Logger"
 import { DeployParams } from "@vechain/vechain-sdk-core"
 
 let cachedB3tr: string | undefined = undefined

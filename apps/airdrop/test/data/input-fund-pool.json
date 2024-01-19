@@ -1,6 +1,14 @@
 {
     "recipients": [
         {
+            "address": "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",
+            "amount": "10000000"
+        },
+        {
+            "address": "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68",
+            "amount": "10000000"
+        },
+        {
             "address": "0x0F872421Dc479F3c11eDd89512731814D0598dB5",
             "amount": "10000000"
         },
