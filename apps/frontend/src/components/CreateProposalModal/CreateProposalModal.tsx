@@ -13,6 +13,10 @@ import {
   Input,
   Select,
   VStack,
+  Icon,
+  HStack,
+  Heading,
+  ModalFooter,
 } from "@chakra-ui/react"
 import { AddressUtils, FormattingUtils } from "@repo/utils"
 import { type } from "os"
@@ -25,6 +29,7 @@ import { getConfig } from "@repo/config"
 import { useEffect, useMemo } from "react"
 import { GenerateFunctionToCallParamsInput } from "./GenerateFunctionToCallParamsInput.tsx"
 import { register } from "module"
+import { FaPlus } from "react-icons/fa6"
 
 const config = getConfig()
 type ExecutorAvailableContracts = {
@@ -116,11 +121,16 @@ export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
     <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Create new proposal</ModalHeader>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <ModalHeader>
+            <HStack spacing={2}>
+              <Icon as={FaPlus} />
+              <Heading size="md">Create new proposal</Heading>
+            </HStack>
+          </ModalHeader>
 
-        <ModalCloseButton />
-        <ModalBody>
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <ModalCloseButton />
+          <ModalBody>
             <VStack spacing={4} w="full">
               <FormControl isInvalid={!!errors.description}>
                 <FormLabel htmlFor="description">Description</FormLabel>
@@ -190,11 +200,14 @@ export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
                   />
                 )
               })}
-
-              <Button type="submit">Create proposal</Button>
             </VStack>
-          </form>
-        </ModalBody>
+          </ModalBody>
+          <ModalFooter>
+            <Button type="submit" leftIcon={<Icon as={FaPlus} />}>
+              Create proposal
+            </Button>
+          </ModalFooter>
+        </form>
       </ModalContent>
     </Modal>
   )
