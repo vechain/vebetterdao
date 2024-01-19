@@ -9,11 +9,9 @@ import {
   getGasPriceCoef,
   getInputFilePath,
   getKeyType,
-  getKeystore,
   getNetworkConfig,
   getPrivateKey,
   getPrivateKeyFromKeystore,
-  unlockKeystore,
   validateBatchSize,
   validateGasPriceCoef,
   validateInputFilePath,
@@ -21,7 +19,6 @@ import {
   validatePrivateKey,
 } from "./InputUtils"
 import { KeyType } from "../env"
-import { readKeystoreFile } from "./FileReader"
 
 describe("getNetworkConfig", () => {
   afterEach(() => {
