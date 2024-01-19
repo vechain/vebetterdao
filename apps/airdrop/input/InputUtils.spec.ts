@@ -1,10 +1,9 @@
-jest.mock("./UserInput", () => ({
-  askUserForInput: jest.fn(),
-}))
+import enquirer from "enquirer"
 
 import { HexUtils } from "@repo/utils"
 import { getTestKey } from "../test/utils/pks"
 import {
+  BASE_PATH,
   getAirdropType,
   getBatchSize,
   getGasPriceCoef,
@@ -13,284 +12,280 @@ import {
   getKeystore,
   getNetworkConfig,
   getPrivateKey,
+  getPrivateKeyFromKeystore,
   unlockKeystore,
+  validateBatchSize,
+  validateGasPriceCoef,
+  validateInputFilePath,
+  validateKeystore,
+  validatePrivateKey,
 } from "./InputUtils"
-import { askUserForInput } from "./UserInput"
-
-// Cast to jest.Mock to get access to mock-specific properties
-const mock = askUserForInput as jest.Mock
+import { KeyType } from "../env"
+import { readKeystoreFile } from "./FileReader"
 
 describe("getNetworkConfig", () => {
-  beforeEach(() => {
-    // Clear mock history before each test
-    mock.mockClear()
+  afterEach(() => {
+    jest.restoreAllMocks()
   })
-
   it("should return the solo config", async () => {
     // Mock call to askUserForInput
-    mock.mockResolvedValueOnce("solo")
+    jest.spyOn(enquirer, "prompt").mockResolvedValueOnce({ answer: "solo" })
 
     const config = await getNetworkConfig()
 
-    expect(mock).toHaveBeenCalledTimes(1)
-    expect(config.nodeUrl).toBe("http://localhost:8669")
-  }, 5000)
-
-  it("should ask the user again if they provide an invalid value", async () => {
-    mock.mockResolvedValueOnce("invalid").mockResolvedValueOnce("solo")
-
-    const config = await getNetworkConfig()
-
-    expect(mock).toHaveBeenCalledTimes(2)
+    // expect(mock).toHaveBeenCalledTimes(1)
     expect(config.nodeUrl).toBe("http://localhost:8669")
   }, 5000)
 })
 
+describe("validateInputFilePath", () => {
+  it("should return if the input file path is valid", async () => {
+    const res = await validateInputFilePath("input-fund-pool.json")
+
+    expect(res).toBe(true)
+  })
+  it("should return a string if the input file path is invalid", async () => {
+    const res = await validateInputFilePath("invalid-input-fund-pool.json")
+
+    expect(res).toBe("Failed to load input file. Please try again")
+  })
+  it("should return a string if the input file path is invalid", async () => {
+    const res = await validateInputFilePath("invalid-input-fund-pool.json")
+
+    expect(res).toBe("Failed to load input file. Please try again")
+  })
+  it("should return a string if no recipients are found in the input file", async () => {
+    const res = await validateInputFilePath("valid-json-no-recipients.json")
+
+    expect(res).toBe("Failed to load input file. Please try again")
+  })
+  it("should return a string if the input file contains invalid JSON", async () => {
+    const res = await validateInputFilePath("invalid-json.json")
+
+    expect(res).toBe("Failed to load input file. Please try again")
+  })
+  it("should return details of the validation errors if the input file fails validation", async () => {
+    const res = await validateInputFilePath("input-invalid-address.json")
+
+    expect(res).toBe(
+      "The input file failed to pass validation:\n - Invalid address: not an address\n - Invalid amount: -1",
+    )
+  })
+})
+
 describe("getAirdropType", () => {
-  beforeEach(() => {
-    // Clear mock history before each test
-    mock.mockClear()
+  afterEach(() => {
+    jest.restoreAllMocks()
   })
 
   it("should return the transfer type", async () => {
     // Mock call to askUserForInput
-    mock.mockResolvedValueOnce("transfer")
+    jest.spyOn(enquirer, "prompt").mockResolvedValueOnce({ answer: "transfer" })
 
     const type = await getAirdropType()
 
-    expect(mock).toHaveBeenCalledTimes(1)
     expect(type).toBe("transfer")
   }, 5000)
 
   it("should return the mint type", async () => {
     // Mock call to askUserForInput
-    mock.mockResolvedValueOnce("mint")
+    jest.spyOn(enquirer, "prompt").mockResolvedValueOnce({ answer: "mint" })
 
     const type = await getAirdropType()
 
-    expect(mock).toHaveBeenCalledTimes(1)
-    expect(type).toBe("mint")
-  }, 5000)
-
-  it("should ask the user again if they provide an invalid value", async () => {
-    // Mock call to askUserForInput
-    mock.mockResolvedValueOnce("invalid").mockResolvedValueOnce("mint")
-
-    const type = await getAirdropType()
-
-    expect(mock).toHaveBeenCalledTimes(2)
     expect(type).toBe("mint")
   }, 5000)
 })
 
 describe("getInputFilePath", () => {
-  beforeEach(() => {
-    // Clear mock history before each test
-    mock.mockClear()
+  afterEach(() => {
+    jest.restoreAllMocks()
   })
 
   it("should return the input file path", async () => {
     // Mock call to askUserForInput
-    mock.mockResolvedValueOnce("./test/data/input-fund-pool.json")
+    jest.spyOn(enquirer, "prompt").mockResolvedValueOnce({ answer: "input-fund-pool.json" })
 
     const path = await getInputFilePath()
 
-    expect(mock).toHaveBeenCalledTimes(1)
-    expect(path).toBe("./test/data/input-fund-pool.json")
-  }, 5000)
-
-  it("should ask the user again if they provide an invalid value", async () => {
-    // Mock call to askUserForInput
-    mock.mockResolvedValueOnce("invalid").mockResolvedValueOnce("./test/data/input-fund-pool.json")
-
-    const path = await getInputFilePath()
-
-    expect(mock).toHaveBeenCalledTimes(2)
-    expect(path).toBe("./test/data/input-fund-pool.json")
-  }, 5000)
-
-  it("should ask the user again if the file doesn't pass validation", async () => {
-    // Mock call to askUserForInput
-    mock
-      .mockResolvedValueOnce("./test/data/input-invalid-address.json")
-      .mockResolvedValueOnce("./test/data/input-fund-pool.json")
-
-    const path = await getInputFilePath()
-
-    expect(mock).toHaveBeenCalledTimes(2)
-    expect(path).toBe("./test/data/input-fund-pool.json")
+    expect(path).toBe(`${BASE_PATH}/input-fund-pool.json`)
   }, 5000)
 })
 
+describe("validateGasPriceCoef", () => {
+  it("should return true if the gas price coefficient is valid", async () => {
+    const res = validateGasPriceCoef("128")
+
+    expect(res).toBe(true)
+  })
+
+  it("should return a string if the gas price coefficient is invalid", async () => {
+    const res = validateGasPriceCoef("invalid")
+
+    expect(res).toBe("Invalid coefficient. Must be an integer in the range 0-255")
+  })
+
+  it("should return a string if the gas price coefficient is out of range", async () => {
+    const res = validateGasPriceCoef("256")
+
+    expect(res).toBe("Invalid coefficient. Must be an integer in the range 0-255")
+  })
+
+  it("should return a string if the gas price coefficient is negative", async () => {
+    const res = validateGasPriceCoef("-1")
+
+    expect(res).toBe("Invalid coefficient. Must be an integer in the range 0-255")
+  })
+})
+
 describe("getGasPriceCoef", () => {
-  beforeEach(() => {
-    // Clear mock history before each test
-    mock.mockClear()
+  afterEach(() => {
+    jest.restoreAllMocks()
   })
 
   it("should return the gas price coefficient", async () => {
     // Mock call to askUserForInput
-    mock.mockResolvedValueOnce("128")
+    jest.spyOn(enquirer, "prompt").mockResolvedValueOnce({ answer: "128" })
 
     const gasPriceCoef = await getGasPriceCoef()
 
-    expect(mock).toHaveBeenCalledTimes(1)
-    expect(gasPriceCoef).toBe(128)
-  }, 5000)
-
-  it("should ask the user again if they provide an invalid value", async () => {
-    // Mock call to askUserForInput
-    mock.mockResolvedValueOnce("invalid").mockResolvedValueOnce("128")
-
-    const gasPriceCoef = await getGasPriceCoef()
-
-    expect(mock).toHaveBeenCalledTimes(2)
     expect(gasPriceCoef).toBe(128)
   }, 5000)
 })
 
+describe("validateBatchSize", () => {
+  it("should return true if the batch size is valid", async () => {
+    const res = validateBatchSize("100")
+
+    expect(res).toBe(true)
+  })
+
+  it("batch size must be at least 1", async () => {
+    const res = validateBatchSize("0")
+
+    expect(res).toBe("Invalid batch size. Must be a positive integer larger than 0")
+  })
+
+  it("should return a string if the batch size is invalid", async () => {
+    const res = validateBatchSize("invalid")
+
+    expect(res).toBe("Invalid batch size. Must be a positive integer larger than 0")
+  })
+
+  it("should return a string if the batch size is negative", async () => {
+    const res = validateBatchSize("-1")
+
+    expect(res).toBe("Invalid batch size. Must be a positive integer larger than 0")
+  })
+})
+
 describe("getBatchSize", () => {
-  beforeEach(() => {
-    // Clear mock history before each test
-    mock.mockClear()
+  afterEach(() => {
+    jest.restoreAllMocks()
   })
 
   it("should return the batch size", async () => {
     // Mock call to askUserForInput
-    mock.mockResolvedValueOnce("128")
+    jest.spyOn(enquirer, "prompt").mockResolvedValueOnce({ answer: "128" })
 
     const batchSize = await getBatchSize()
 
-    expect(mock).toHaveBeenCalledTimes(1)
-    expect(batchSize).toBe(128)
-  }, 5000)
-
-  it("should ask the user again if they provide an invalid value", async () => {
-    // Mock call to askUserForInput
-    mock.mockResolvedValueOnce("invalid").mockResolvedValueOnce("128")
-
-    const batchSize = await getBatchSize()
-
-    expect(mock).toHaveBeenCalledTimes(2)
     expect(batchSize).toBe(128)
   }, 5000)
 })
 
 describe("getKeyType", () => {
-  beforeEach(() => {
-    // Clear mock history before each test
-    mock.mockClear()
+  afterEach(() => {
+    jest.restoreAllMocks()
   })
 
   it("should return the key type", async () => {
     // Mock call to askUserForInput
-    mock.mockResolvedValueOnce("keystore")
+    jest.spyOn(enquirer, "prompt").mockResolvedValueOnce({ answer: KeyType.KEYSTORE })
 
     const keyType = await getKeyType()
 
-    expect(mock).toHaveBeenCalledTimes(1)
-    expect(keyType).toBe("keystore")
+    expect(keyType).toBe(KeyType.KEYSTORE)
   }, 5000)
 
   it("should return the key type", async () => {
     // Mock call to askUserForInput
-    mock.mockResolvedValueOnce("pk")
+    jest.spyOn(enquirer, "prompt").mockResolvedValueOnce({ answer: KeyType.PRIVATE_KEY })
 
     const keyType = await getKeyType()
 
-    expect(mock).toHaveBeenCalledTimes(1)
-    expect(keyType).toBe("pk")
-  }, 5000)
-
-  it("should ask the user again if they provide an invalid value", async () => {
-    // Mock call to askUserForInput
-    mock.mockResolvedValueOnce("invalid").mockResolvedValueOnce("keystore")
-
-    const keyType = await getKeyType()
-
-    expect(mock).toHaveBeenCalledTimes(2)
-    expect(keyType).toBe("keystore")
+    expect(keyType).toBe(KeyType.PRIVATE_KEY)
   }, 5000)
 })
 
+describe("validatePrivateKey", () => {
+  it("should return true if the private key is valid", () => {
+    const res = validatePrivateKey(getTestKey(0).pk.toString("hex"))
+
+    expect(res).toBe(true)
+  })
+
+  it("should return a string if the private key is invalid", () => {
+    const res = validatePrivateKey("not a private key")
+
+    expect(res).toBe("Invalid private key")
+  })
+})
+
 describe("getPrivateKey", () => {
-  beforeEach(() => {
-    // Clear mock history before each test
-    mock.mockClear()
+  afterEach(() => {
+    jest.restoreAllMocks()
   })
 
   it("should return the private key", async () => {
     const key = getTestKey(1)
     // Mock call to askUserForInput
-    mock.mockResolvedValueOnce(key.pk.toString("hex"))
+    jest.spyOn(enquirer, "prompt").mockResolvedValueOnce({ answer: key.pk.toString("hex") })
 
     const privateKey = await getPrivateKey()
 
-    expect(mock).toHaveBeenCalledTimes(1)
     expect(privateKey.toString("hex")).toBe(key.pk.toString("hex"))
   }, 5000)
 
   it("hex with prefix should return the private key", async () => {
     const key = getTestKey(1)
     // Mock call to askUserForInput
-    mock.mockResolvedValueOnce(HexUtils.addPrefix(key.pk.toString("hex")))
+    jest.spyOn(enquirer, "prompt").mockResolvedValueOnce({ answer: HexUtils.addPrefix(key.pk.toString("hex")) })
 
     const privateKey = await getPrivateKey()
 
-    expect(mock).toHaveBeenCalledTimes(1)
-    expect(privateKey.toString("hex")).toBe(key.pk.toString("hex"))
-  }, 5000)
-
-  it("should ask the user again if they provide an invalid value", async () => {
-    const key = getTestKey(1)
-    // Mock call to askUserForInput
-    mock.mockResolvedValueOnce("invalid").mockResolvedValueOnce(key.pk.toString("hex"))
-
-    const privateKey = await getPrivateKey()
-
-    expect(mock).toHaveBeenCalledTimes(2)
     expect(privateKey.toString("hex")).toBe(key.pk.toString("hex"))
   }, 5000)
 })
 
-describe("getKeystore and unlockKeystore", () => {
-  beforeEach(() => {
-    // Clear mock history before each test
-    mock.mockClear()
+describe("validateKeystore", () => {
+  it("should return true if the keystore is valid", async () => {
+    const res = validateKeystore("test-keystore.json")
+
+    expect(res).toBe(true)
+  })
+
+  it("should return a string if the keystore is invalid", async () => {
+    const res = validateKeystore("invalid-keystore.json")
+
+    expect(res).toBe("Failed to read keystore file. Please try again")
+  })
+})
+
+describe("getPrivateKeyFromKeystore", () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
   })
   it("valid keystore path and password should return the private key", async () => {
     const key = getTestKey(0)
     // Mock call to askUserForInput
-    mock.mockResolvedValueOnce("./test/test-keystore.json").mockResolvedValueOnce("Password1!")
+    jest
+      .spyOn(enquirer, "prompt")
+      .mockResolvedValueOnce({ answer: "test-keystore.json" })
+      .mockResolvedValueOnce({ answer: "Password1!" })
 
-    const keystore = await getKeystore()
-    const privateKey = await unlockKeystore(keystore)
+    const privateKey = await getPrivateKeyFromKeystore()
 
-    expect(mock).toHaveBeenCalledTimes(2)
-    expect(privateKey.toString("hex")).toBe(key.pk.toString("hex"))
-  }, 5000)
-
-  it("invalid keystore path should ask the user again", async () => {
-    // Mock call to askUserForInput
-    mock.mockResolvedValueOnce("invalid").mockResolvedValueOnce("./test/test-keystore.json")
-
-    await getKeystore()
-
-    expect(mock).toHaveBeenCalledTimes(2)
-  }, 5000)
-
-  it("invalid password should ask the user again", async () => {
-    const key = getTestKey(0)
-    // Mock call to askUserForInput
-    mock
-      .mockResolvedValueOnce("./test/test-keystore.json")
-      .mockResolvedValueOnce("invalid")
-      .mockResolvedValueOnce("Password1!")
-
-    const keystore = await getKeystore()
-    const privateKey = await unlockKeystore(keystore)
-
-    expect(mock).toHaveBeenCalledTimes(3)
     expect(privateKey.toString("hex")).toBe(key.pk.toString("hex"))
   }, 5000)
 })

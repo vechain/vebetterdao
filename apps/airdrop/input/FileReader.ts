@@ -11,7 +11,7 @@ export const readFile = (path: string): string => {
   try {
     return fs.readFileSync(path, "utf8")
   } catch (e) {
-    throw new Error("Failed to load file. Please ensure the path is correct and the file exists")
+    throw new Error(`Failed to load file. Please ensure the path is correct and the file exists at: ${path}`)
   }
 }
 

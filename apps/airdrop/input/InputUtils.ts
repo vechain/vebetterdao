@@ -3,102 +3,131 @@ import { Env, KeyType, Type } from "../env"
 import { logger } from "../logging/Logger"
 import { keystore, addressUtils, Keystore } from "@vechain/vechain-sdk-core"
 import { Config, getConfig } from "@repo/config"
-import { askUserForInput } from "./UserInput"
 import { readInputFile, readKeystoreFile } from "./FileReader"
 import { validateRecipients } from "../recipient/RecipientValidator"
 import { Recipient } from "../recipient/recipient"
+import fs from "fs"
+import { prompt } from "enquirer"
 
-export const getNetworkConfig = async (): Promise<Config> => {
-  const networkType = await askUserForInput(
-    "What network would you like to use?\n - 'solo' for the solo network (default)\n - 'test' for the testnet (not supported yet)\n - 'main' for mainnet (not supported yet)\n",
-    false,
-    "solo",
-  )
-  try {
-    const config = getConfig(networkType)
-    if (!config) {
-      throw new Error("Invalid network type")
-    }
-    return config
-  } catch (e) {
-    logger.error("Invalid network type. Please enter either 'solo', 'test' or 'main'\n")
-    return await getNetworkConfig()
-  }
+type Response = {
+  answer: string
 }
 
+// Get the path from an env variable or set current directory as default
+export const BASE_PATH = process.env.INPUT_FILE_DIRECTORY ?? "."
+const parsePath = (file: string): string => BASE_PATH + "/" + file
+
+export const getNetworkConfig = async (): Promise<Config> => {
+  const res = await prompt<Response>([
+    {
+      type: "select",
+      name: "answer",
+      message: "What network would you like to use?",
+      choices: ["solo", "testnet", "mainnet"],
+    },
+  ])
+  return getConfig(res.answer)
+}
+
+const parseAirdropType = (airdropType: string): Type | undefined => Object.values(Type).find(e => e === airdropType)
+
 export const getAirdropType = async (): Promise<Type> => {
-  const typeStr = await askUserForInput(
-    "What type of airdrop would you like to do? \n - 'mint'\n - 'transfer' (default)\n",
-    false,
-    Type.TRANSFER,
-  )
-  const type = Object.values(Type).find(e => e === typeStr)
-  if (!type) {
-    logger.error(
-      "Invalid airdrop type. Please enter either 'mint' or 'transfer' or leave it blank to default to 'transfer'\n",
-    )
-    return await getAirdropType()
-  }
+  const res = await prompt<Response>([
+    {
+      type: "select",
+      name: "answer",
+      message: "What type of airdrop would you like to do?",
+      choices: [Type.MINT, Type.TRANSFER],
+    },
+  ])
+  const type = parseAirdropType(res.answer)
+  if (!type) throw new Error("Invalid airdrop type")
   return type
 }
 
-export const getInputFilePath = async (): Promise<string> => {
-  const path = await askUserForInput(
-    "Where is your input file located? \n  - enter the file path or drag and drop the file\n",
-  )
-
+export const validateInputFilePath = async (path: string): Promise<boolean | string> => {
   let recipients: Recipient[] = []
   try {
     // Validate path and file
-    recipients = await readInputFile(path)
+    recipients = await readInputFile(parsePath(path))
   } catch (e) {
-    logger.error("Failed to load input file. Please try again\n", e)
-    return await getInputFilePath()
-  }
-
-  if (!recipients) {
-    logger.error("No recipients found in the input file. Please try again\n")
-    return await getInputFilePath()
+    return "Failed to load input file. Please try again"
   }
 
   // Run validation on the recipients
   const problems = validateRecipients(recipients)
-
   if (problems.length > 0) {
-    logger.warn("The input file failed to pass validation:")
+    let message = "The input file failed to pass validation:"
     for (const problem of problems) {
-      logger.warn(` - ${problem}`)
+      message = `${message}\n - ${problem}`
     }
-    logger.info("\n")
-    return await getInputFilePath()
+    return message
   }
-
-  return path
+  return true
 }
 
+export const getInputFilePath = async (): Promise<string> => {
+  logger.info(`Reading input files from: ${BASE_PATH}`)
+  const files = fs.readdirSync(BASE_PATH)
+
+  const response = await prompt<Response>({
+    type: "select",
+    name: "answer",
+    message: "Select an input file containing the recipients and amounts",
+    choices: files,
+    validate: validateInputFilePath,
+  })
+
+  return parsePath(response.answer)
+}
+
+export const validateGasPriceCoef = (gasPriceCoef: string): boolean | string => {
+  const gasPriceCoefInt = parseInt(gasPriceCoef)
+  if (isNaN(gasPriceCoefInt) || gasPriceCoefInt < 0 || gasPriceCoefInt > 255) {
+    return "Invalid coefficient. Must be an integer in the range 0-255"
+  }
+  return true
+}
 export const getGasPriceCoef = async (): Promise<number> => {
-  const gasPriceCoefStr = await askUserForInput(
-    "Please enter the gas price coefficient\n - enter a value between 0-255 or leave blank to default to 0\n",
-    false,
-    "0",
-  )
-  const gasPriceCoef = parseInt(gasPriceCoefStr)
+  const res = await prompt<Response>([
+    {
+      type: "input",
+      name: "answer",
+      message: "Gas price coefficient (0-255)",
+      initial: 0,
+      validate: validateGasPriceCoef,
+    },
+  ])
+
+  const gasPriceCoef = parseInt(res.answer)
   if (isNaN(gasPriceCoef)) {
-    logger.error("Please enter a valid gas price coefficient or leave blank to default to 0\n")
+    logger.error("Please enter a valid gas price coefficient")
     return await getGasPriceCoef()
   }
   return gasPriceCoef
 }
 
+export const validateBatchSize = (batchSize: string): boolean | string => {
+  const batchSizeInt = parseInt(batchSize)
+  if (isNaN(batchSizeInt) || batchSizeInt < 1) {
+    return "Invalid batch size. Must be a positive integer larger than 0"
+  }
+  return true
+}
 export const getBatchSize = async (): Promise<number> => {
-  const batchSizeStr = await askUserForInput(
-    "How many clauses would you like per transaction?\n - enter an integer value (default to 100)\n",
-    false,
-    "100",
-  )
-  const batchSize = parseInt(batchSizeStr)
+  const res = await prompt<Response>([
+    {
+      type: "input",
+      name: "answer",
+      message: "How many clauses would you like per transaction?",
+      initial: 100,
+      validate: validateBatchSize,
+    },
+  ])
+
+  const batchSize = parseInt(res.answer)
   if (isNaN(batchSize)) {
-    logger.error("Please enter a valid integer or leave blank to default to 100\n")
+    logger.error("Please enter a valid integer or leave blank to default to 100")
     return await getBatchSize()
   }
   return batchSize
@@ -110,72 +139,97 @@ export const getBatchSize = async (): Promise<number> => {
  * @returns
  */
 export const getKeyType = async (): Promise<KeyType> => {
-  try {
-    const typeStr = await askUserForInput(
-      "How would you like to sign the transactions?\n - 'pk' to use a private key \n - 'keystore' to use a keystore file (default)\n",
-      false,
-      KeyType.KEYSTORE,
-    )
-    const type = Object.values(KeyType).find(e => e === typeStr)
-    if (!type) throw new Error("Invalid key type")
-    return type
-  } catch (e) {
-    logger.error("Please enter 'pk' or 'keystore' or leave blank to default to 'keystore'\n")
-    return await getKeyType()
-  }
+  const res = await prompt<Response>([
+    {
+      type: "select",
+      name: "answer",
+      message: "How would you like to sign the transactions?",
+      choices: [KeyType.KEYSTORE, KeyType.PRIVATE_KEY],
+    },
+  ])
+
+  const type = Object.values(KeyType).find(e => e === res.answer)
+  if (!type) throw new Error("Invalid key type")
+  return type
 }
 
+export const validatePrivateKey = (pk: string): boolean | string => {
+  try {
+    const pkBuf = Buffer.from(HexUtils.removePrefix(pk), "hex")
+    // Validate the private key by trying to get the address
+    addressUtils.fromPrivateKey(pkBuf)
+    return true
+  } catch (e) {
+    return "Invalid private key"
+  }
+}
 /**
  * Get the the private key from the user
  * @returns The private key as a Buffer
  */
 export const getPrivateKey = async (): Promise<Buffer> => {
-  try {
-    const pkStr = await askUserForInput(
-      "\nPlease enter your private key\n - enter the hexadecimal value for your private key\n ",
-      true,
-    )
-    const pk = Buffer.from(HexUtils.removePrefix(pkStr), "hex")
-    // Validate the private key by trying to get the address
-    addressUtils.fromPrivateKey(pk)
-    return pk
-  } catch (e) {
-    logger.error("Please enter a valid hexadecimal private key\n")
-    return await getPrivateKey()
-  }
+  const res = await prompt<Response>([
+    {
+      type: "password",
+      name: "answer",
+      message: "Please enter your private key",
+      validate: validatePrivateKey,
+    },
+  ])
+
+  return Buffer.from(HexUtils.removePrefix(res.answer), "hex")
 }
 
-export const getKeystore = async (): Promise<Keystore> => {
+export const validateKeystore = (file: string): boolean | string => {
   try {
-    const path = await askUserForInput(
-      "Where is your keystore file located? \n - enter the file path or drag and drop the file\n",
-    )
-    // Validate path and file
-    const ks = readKeystoreFile(path)
-
-    if (!keystore.isValid(ks)) throw new Error("Invalid keystore file")
-    return ks
+    const ks = readKeystoreFile(parsePath(file))
+    if (!keystore.isValid(ks)) return "Invalid keystore file. Please try again"
+    return true
   } catch (e) {
-    logger.error("Please enter a valid keystore file location\n", e)
+    return "Failed to read keystore file. Please try again"
   }
-  return await getKeystore()
+}
+export const getKeystore = async (): Promise<Keystore> => {
+  const files = fs.readdirSync(BASE_PATH)
+
+  const response = await prompt<Response>({
+    type: "select",
+    name: "answer",
+    message: "Select a keystore file",
+    choices: files,
+    validate: validateKeystore,
+  })
+
+  const path = parsePath(response.answer)
+
+  return readKeystoreFile(path)
+}
+
+export const validateUnlockKeystore = async (password: string, ks: Keystore): Promise<boolean | string> => {
+  try {
+    await keystore.decrypt(ks, password)
+    return true
+  } catch (e) {
+    return "Invalid password. Please try again"
+  }
 }
 
 export const unlockKeystore = async (ks: Keystore): Promise<Buffer> => {
-  try {
-    const password = await askUserForInput(
-      "\nUnlock your keystore file\n - enter the password to unlock your keystore file\n ",
-      true,
-    )
-    const ksAccount = await keystore.decrypt(ks, password)
-    return Buffer.from(HexUtils.removePrefix(ksAccount.privateKey), "hex")
-  } catch (e) {
-    logger.error("Failed to unlock the keystore file. Please try again.\n")
-    return await unlockKeystore(ks)
-  }
+  const res = await prompt<Response>([
+    {
+      type: "password",
+      name: "answer",
+      message: "Unlock your keystore",
+      validate: async (password: string) => await validateUnlockKeystore(password, ks),
+    },
+  ])
+
+  const acct = await keystore.decrypt(ks, res.answer)
+
+  return Buffer.from(HexUtils.removePrefix(acct.privateKey), "hex")
 }
 
-const getPrivateKeyFromKeystore = async (): Promise<Buffer> => {
+export const getPrivateKeyFromKeystore = async (): Promise<Buffer> => {
   const ks = await getKeystore()
   return await unlockKeystore(ks)
 }

@@ -62,7 +62,7 @@ describe("readInputFile", () => {
 
 describe("readKeystoreFile", () => {
   it("should return a Keystore", () => {
-    const keystore = readKeystoreFile("./test/test-keystore.json")
+    const keystore = readKeystoreFile("./test/data/test-keystore.json")
     expect(keystore).toBeDefined()
   })
 

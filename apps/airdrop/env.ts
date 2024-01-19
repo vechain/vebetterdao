@@ -14,6 +14,6 @@ export interface Env {
 }
 
 export enum KeyType {
-  PRIVATE_KEY = "pk",
+  PRIVATE_KEY = "private key",
   KEYSTORE = "keystore",
 }
