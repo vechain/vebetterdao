@@ -51,7 +51,7 @@ export const airdrop = async (env: Env, simulate = false): Promise<AirdropRespon
         if (receipt.reverted) throw Error("Transaction reverted")
 
         logger.info(`Tx was successful. TxId: ${receipt.meta.txID}`)
-        logger.info(`The following drops were made: ${JSON.stringify(batch)}`)
+        logger.info(`Successful airdrops: ${JSON.stringify(batch)}`)
       }
 
       // Update response
