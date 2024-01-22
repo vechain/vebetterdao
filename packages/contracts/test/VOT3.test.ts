@@ -125,7 +125,7 @@ describe("VOT3", function () {
       await catchRevert(vot3.connect(otherAccount).unstake(ethers.parseEther("10")))
     })
 
-    it.only("should not unlock B3TR if not enough staked balance, even if there is enough VOT3 balance)", async function () {
+    it("should not unlock B3TR if not enough staked balance, even if there is enough VOT3 balance)", async function () {
       const { b3tr, vot3, owner, minterAccount, otherAccount, otherAccounts } = await getOrDeployContractInstances(true)
 
       // Mint some B3TR to two accounts
