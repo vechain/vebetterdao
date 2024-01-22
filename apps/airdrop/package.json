@@ -4,7 +4,8 @@
   "main": "main.ts",
   "private": true,
   "scripts": {
-    "airdrop": "INPUT_FILE_DIRECTORY=./test/data ts-node main.ts",
+    "airdrop": "ts-node main.ts",
+    "cli": "INPUT_FILE_DIRECTORY=./test/data ts-node main-cli.ts",
     "test": " NODE_ENV=test INPUT_FILE_DIRECTORY=./test/data jest --config jest.config.js --detectOpenHandles --forceExit"
   },
   "dependencies": {

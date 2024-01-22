@@ -1,23 +1,26 @@
 import { HexUtils } from "@repo/utils"
-import { Env, KeyType, Type } from "../../env"
+import { Env, KeyType, Type, parseAirdropType } from "../../env"
 import { logger } from "../logging/Logger"
-import { keystore, addressUtils, Keystore } from "@vechain/vechain-sdk-core"
+import { keystore, Keystore } from "@vechain/vechain-sdk-core"
 import { Config, getConfig } from "@repo/config"
-import { readInputFile, readKeystoreFile } from "./FileReader"
-import { validateRecipients } from "../recipient/RecipientValidator"
-import { Recipient } from "../recipient/recipient"
 import fs from "fs"
 import { prompt } from "enquirer"
 import { AirdropResponse } from "../airdrop"
 import numeral from "numeral"
+import { BASE_PATH, parsePath } from "./PathUtils"
+import {
+  validateBatchSize,
+  validateGasPriceCoef,
+  validateInputFilePath,
+  validateKeystore,
+  validatePrivateKey,
+  validateUnlockKeystore,
+} from "./InputValidation"
+import { readKeystoreFile } from "./FileReader"
 
 type Response = {
   answer: string
 }
-
-// Get the path from an env variable or set current directory as default
-export const BASE_PATH = process.env.INPUT_FILE_DIRECTORY ?? "."
-const parsePath = (file: string): string => BASE_PATH + "/" + file
 
 export const getNetworkConfig = async (): Promise<Config> => {
   const res = await prompt<Response>([
@@ -31,8 +34,6 @@ export const getNetworkConfig = async (): Promise<Config> => {
   return getConfig(res.answer)
 }
 
-const parseAirdropType = (airdropType: string): Type | undefined => Object.values(Type).find(e => e === airdropType)
-
 export const getAirdropType = async (): Promise<Type> => {
   const res = await prompt<Response>([
     {
@@ -45,27 +46,6 @@ export const getAirdropType = async (): Promise<Type> => {
   const type = parseAirdropType(res.answer)
   if (!type) throw new Error("Invalid airdrop type")
   return type
-}
-
-export const validateInputFilePath = async (path: string): Promise<boolean | string> => {
-  let recipients: Recipient[] = []
-  try {
-    // Validate path and file
-    recipients = await readInputFile(parsePath(path))
-  } catch (e) {
-    return "Failed to load input file. Please try again"
-  }
-
-  // Run validation on the recipients
-  const problems = validateRecipients(recipients)
-  if (problems.length > 0) {
-    let message = "The input file failed to pass validation:"
-    for (const problem of problems) {
-      message = `${message}\n - ${problem}`
-    }
-    return message
-  }
-  return true
 }
 
 export const getInputFilePath = async (): Promise<string> => {
@@ -83,13 +63,6 @@ export const getInputFilePath = async (): Promise<string> => {
   return parsePath(response.answer)
 }
 
-export const validateGasPriceCoef = (gasPriceCoef: string): boolean | string => {
-  const gasPriceCoefInt = parseInt(gasPriceCoef)
-  if (isNaN(gasPriceCoefInt) || gasPriceCoefInt < 0 || gasPriceCoefInt > 255) {
-    return "Invalid coefficient. Must be an integer in the range 0-255"
-  }
-  return true
-}
 export const getGasPriceCoef = async (): Promise<number> => {
   const res = await prompt<Response>([
     {
@@ -109,13 +82,6 @@ export const getGasPriceCoef = async (): Promise<number> => {
   return gasPriceCoef
 }
 
-export const validateBatchSize = (batchSize: string): boolean | string => {
-  const batchSizeInt = parseInt(batchSize)
-  if (isNaN(batchSizeInt) || batchSizeInt < 1) {
-    return "Invalid batch size. Must be a positive integer larger than 0"
-  }
-  return true
-}
 export const getBatchSize = async (): Promise<number> => {
   const res = await prompt<Response>([
     {
@@ -155,16 +121,6 @@ export const getKeyType = async (): Promise<KeyType> => {
   return type
 }
 
-export const validatePrivateKey = (pk: string): boolean | string => {
-  try {
-    const pkBuf = Buffer.from(HexUtils.removePrefix(pk), "hex")
-    // Validate the private key by trying to get the address
-    addressUtils.fromPrivateKey(pkBuf)
-    return true
-  } catch (e) {
-    return "Invalid private key"
-  }
-}
 /**
  * Get the the private key from the user
  * @returns The private key as a Buffer
@@ -182,15 +138,6 @@ export const getPrivateKey = async (): Promise<Buffer> => {
   return Buffer.from(HexUtils.removePrefix(res.answer), "hex")
 }
 
-export const validateKeystore = (file: string): boolean | string => {
-  try {
-    const ks = readKeystoreFile(parsePath(file))
-    if (!keystore.isValid(ks)) return "Invalid keystore file. Please try again"
-    return true
-  } catch (e) {
-    return "Failed to read keystore file. Please try again"
-  }
-}
 export const getKeystore = async (): Promise<Keystore> => {
   const files = fs.readdirSync(BASE_PATH)
 
@@ -205,15 +152,6 @@ export const getKeystore = async (): Promise<Keystore> => {
   const path = parsePath(response.answer)
 
   return readKeystoreFile(path)
-}
-
-export const validateUnlockKeystore = async (password: string, ks: Keystore): Promise<boolean | string> => {
-  try {
-    await keystore.decrypt(ks, password)
-    return true
-  } catch (e) {
-    return "Invalid password. Please try again"
-  }
 }
 
 export const unlockKeystore = async (ks: Keystore): Promise<Buffer> => {
@@ -259,7 +197,7 @@ export const confirmAirdrop = async (simRes: AirdropResponse): Promise<boolean> 
   return res.answer === "Yes"
 }
 
-export const loadEnvVariables = async (): Promise<Env> => {
+export const getUserInput = async (): Promise<Env> => {
   // Get network config
   const config = await getNetworkConfig()
 

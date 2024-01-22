@@ -10,7 +10,17 @@ The airdrop expects an input file as referenced by the `INPUT_FILE` env variable
 
 ### Running
 
-When you have configured the application correctly simply run `yarn install` followed by `yarn airdrop` to run the airdrop. You should run this from the root of the monorepo. Turbo will ensure that the thor solo is running and the contracts have been deployed.
+To ensure you are using the correct node version run `nvm use`. Run `yarn install` to ensure the dependencies are installed correctly.
+
+The airdrop facility can be run either via a `CLI` or using environment variables.
+
+#### Command Line Interface (CLI)
+
+When you run the airdrop in CLI mode, you will be prompted to enter the relevant details for the airdrop. Simply run `yarn cli` and follow the instructions.
+
+#### Env Variables
+
+The CLI is appropriate when we are running the airdrop locally. However we may want to automate the airdrop. In this scenario it makes sense to configure the airdrop via a env variables instead. Simply create a `.env` file from the `.env.template` file contained in the repo and configure the values as you wish. Then run the airdrop with `yarn airdrop`.
 
 ### Troubleshooting
 
