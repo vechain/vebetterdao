@@ -16,6 +16,7 @@ import {
   StatLabel,
   StatNumber,
   Stack,
+  Box,
 } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { BalancePieChart } from "./BalancePieChart"
@@ -71,6 +72,10 @@ export const BalanceCard: React.FC<Props> = () => {
     return balance.dividedBy(circulatingSupply).multipliedBy(100).toFixed(2)
   }, [vot3TokenDetails, vot3Balance])
 
+  const hasNoBalance = useMemo(() => {
+    return b3trBalance?.scaled === "0" && vot3Balance?.scaled === "0"
+  }, [b3trBalance, vot3Balance])
+
   if (!account)
     return (
       <Card w="full">
@@ -118,20 +123,32 @@ export const BalanceCard: React.FC<Props> = () => {
       </CardHeader>
       <CardBody>
         <Stack direction={["column", "column", "row"]} spacing={8} w="full">
-          <BalancePieChart b3trBalance={b3trBalance} vot3Balance={vot3Balance} />
-          <StatGroup w="full" flexDirection={"column"}>
-            <Stat>
-              <StatLabel>B3TR</StatLabel>
-              <StatNumber>{b3trBalance?.formatted}</StatNumber>
-              <StatHelpText>{percentageOfB3trSupply}% of the circulating supply</StatHelpText>
-            </Stat>
+          {hasNoBalance ? (
+            <Alert status="warning" borderRadius={"lg"}>
+              <AlertIcon />
+              <Box>
+                <AlertTitle>You have no balance</AlertTitle>
+                <AlertDescription>Mint some tokens to get started.</AlertDescription>
+              </Box>
+            </Alert>
+          ) : (
+            <>
+              <BalancePieChart b3trBalance={b3trBalance} vot3Balance={vot3Balance} />
+              <StatGroup w="full" flexDirection={"column"}>
+                <Stat>
+                  <StatLabel>B3TR</StatLabel>
+                  <StatNumber>{b3trBalance?.formatted}</StatNumber>
+                  <StatHelpText>{percentageOfB3trSupply}% of the circulating supply</StatHelpText>
+                </Stat>
 
-            <Stat>
-              <StatLabel>VOT3</StatLabel>
-              <StatNumber>{vot3Balance?.formatted}</StatNumber>
-              <StatHelpText>{percentageOfVot3Supply}% of the circulating supply</StatHelpText>
-            </Stat>
-          </StatGroup>
+                <Stat>
+                  <StatLabel>VOT3</StatLabel>
+                  <StatNumber>{vot3Balance?.formatted}</StatNumber>
+                  <StatHelpText>{percentageOfVot3Supply}% of the circulating supply</StatHelpText>
+                </Stat>
+              </StatGroup>
+            </>
+          )}
         </Stack>
       </CardBody>
     </Card>
