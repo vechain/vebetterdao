@@ -189,7 +189,7 @@ export const confirmAirdrop = async (simRes: AirdropResponse): Promise<boolean> 
     {
       type: "select",
       name: "answer",
-      message: `${numeral(simRes.totalAmount).format("0,0")} tokens with be airdropped to ${numeral(simRes.numRecipients).format("0,0")} recipients. Proceed?`,
+      message: `${numeral(simRes.totalAmount).format("0,0")} tokens will be airdropped to ${numeral(simRes.numRecipients).format("0,0")} recipients. Proceed?`,
       choices: ["No", "Yes"],
     },
   ])
