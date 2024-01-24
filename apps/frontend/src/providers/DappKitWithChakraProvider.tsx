@@ -18,7 +18,7 @@ const DAppKitProvider = dynamic(
 const walletConnectOptions: WalletConnectOptions = {
   projectId: "a0b855ceaf109dbc8426479a4c3d38d8",
   metadata: {
-    name: "b3t",
+    name: "b3tr",
     description: "b3tr",
     url: typeof window !== "undefined" ? window.location.origin : "",
     icons: [typeof window !== "undefined" ? `${window.location.origin}/images/logo/my-dapp.png` : ""],
