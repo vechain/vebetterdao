@@ -1,7 +1,7 @@
 import { airdrop } from "./airdrop"
-import { Env, Type } from "./env"
-import { getTestKey } from "./test/utils/pks"
-import { getBalance, getOrDeployB3tr } from "./test/utils/contract"
+import { Env, Type } from "../env"
+import { getTestKey } from "../test/utils/pks"
+import { getBalance, getOrDeployB3tr } from "../test/utils/contract"
 import { unitsUtils } from "@vechain/vechain-sdk-core"
 import { logger } from "./logging/Logger"
 import { readInputFile } from "./input/FileReader"
@@ -23,6 +23,7 @@ describe("airdrop - mint", () => {
       gasPriceCoef: 0,
       nodeUrl,
       b3trContractAddress,
+      networkType: "solo",
     }
 
     await airdrop(env)
@@ -51,6 +52,7 @@ describe("airdrop - transfer", () => {
       gasPriceCoef: 128,
       nodeUrl,
       b3trContractAddress,
+      networkType: "solo",
     }
 
     await airdrop(env)

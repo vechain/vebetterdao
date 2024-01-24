@@ -4,7 +4,8 @@
   "main": "main.ts",
   "private": true,
   "scripts": {
-    "airdrop": "INPUT_FILE_DIRECTORY=./test/data ts-node main.ts",
+    "airdrop": "ts-node main.ts",
+    "cli": "INPUT_FILE_DIRECTORY=./test/data ts-node main-cli.ts",
     "test": " NODE_ENV=test INPUT_FILE_DIRECTORY=./test/data jest --config jest.config.js --detectOpenHandles --forceExit"
   },
   "dependencies": {
@@ -15,11 +16,13 @@
     "@vechain/vechain-sdk-errors": "^0.0.3",
     "@vechain/vechain-sdk-network": "^0.0.3",
     "enquirer": "^2.4.1",
+    "numeral": "^2.0.6",
     "ts-node": ">=8.0.0",
     "winston": "^3.11.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.11",
+    "@types/numeral": "^2.0.5",
     "ts-jest": "^29.1.1"
   }
 }
