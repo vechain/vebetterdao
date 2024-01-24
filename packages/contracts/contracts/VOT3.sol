@@ -11,6 +11,7 @@ import "@openzeppelin/contracts/utils/Nonces.sol";
 contract VOT3 is ERC20, ERC20Permit, ERC20Votes, AccessControl {
   IERC20 public b3tr;
   bool public canTransfer = false;
+  mapping(address account => uint256) private _stakedBalances;
 
   modifier transferEnabled() {
     require(canTransfer, "Transfers disabled");
@@ -27,14 +28,21 @@ contract VOT3 is ERC20, ERC20Permit, ERC20Votes, AccessControl {
     canTransfer = _canTransfer;
   }
 
+  function stakedBalanceOf(address account) public view returns (uint256) {
+    return _stakedBalances[account];
+  }
+
   function stake(uint256 amount) external {
     require(b3tr.transferFrom(msg.sender, address(this), amount), "Transfer failed");
     _mint(msg.sender, amount);
+    _stakedBalances[msg.sender] += amount;
   }
 
   function unstake(uint256 amount) external {
     require(balanceOf(msg.sender) >= amount, "Insufficient Vot3 Tokens");
+    require(_stakedBalances[msg.sender] >= amount, "Insufficient staked Vot3 Tokens");
     _burn(msg.sender, amount);
+    _stakedBalances[msg.sender] -= amount;
     require(b3tr.transfer(msg.sender, amount), "Transfer failed");
   }
 
