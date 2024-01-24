@@ -1,4 +1,4 @@
-import { Recipient } from "../model/input"
+import { Recipient } from "../recipient/recipient"
 import {
   Transaction,
   TransactionBody,
@@ -11,7 +11,7 @@ import {
 import { ThorClient, TransactionReceipt } from "@vechain/vechain-sdk-network"
 import B3tr from "@repo/contracts/artifacts/contracts/B3TR.sol/B3TR.json"
 import { addPrefix, generateRandom } from "@repo/utils/HexUtils"
-import { Type } from "../model/env"
+import { Type } from "../../env"
 
 const abi = B3tr.abi
 if (!abi) throw new Error("ABI not found for B3TR contract")
