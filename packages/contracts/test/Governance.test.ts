@@ -1,4 +1,4 @@
-import { assert, ethers } from "hardhat"
+import { ethers } from "hardhat"
 import { expect } from "chai"
 import {
     createProposal,
@@ -6,14 +6,14 @@ import {
     defaultVotingTreshold,
     getOrDeployContractInstances,
     getProposalIdFromTx,
-    mintAndDelegate,
-    moveBlocks,
+    mintAndSelfDelegate,
     waitForNextBlock,
     waitForVotingPeriodToEnd,
-    waitForVotingPeriodToStart,
-    catchRevert
+    catchRevert,
+    waitForProposalToBeActive,
 } from "./helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
+import { describe, it } from "mocha"
 
 describe("Governor and TimeLock", function () {
     const description = "Test Proposal: testing propsal with random description!"
@@ -22,7 +22,7 @@ describe("Governor and TimeLock", function () {
 
     describe("Governor deployment", function () {
         it("should set constructors correctly", async function () {
-            const { governor, B3trContract, otherAccount, vot3, b3tr, owner, timeLock } = await getOrDeployContractInstances(true)
+            const { governor, vot3, owner, timeLock } = await getOrDeployContractInstances(true)
             const votingDelay = (await governor.votingDelay()).toString()
             const votesThreshold = (await governor.proposalThreshold()).toString()
             const votingPeriod = (await governor.votingPeriod()).toString()
@@ -56,23 +56,27 @@ describe("Governor and TimeLock", function () {
 
     describe("Proposal Creation", function () {
         it("cannot create a proposal if NOT a VOT3 holder", async function () {
-            const { governor, B3trContract, otherAccount, vot3, b3tr, owner } = await getOrDeployContractInstances(true, 1)
-            await catchRevert(createProposal(governor, b3tr, B3trContract, owner, description, functionToCall, [], true))
+            const { governor, B3trContract, b3tr, owner } = await getOrDeployContractInstances(true, 1)
+            await catchRevert(
+                createProposal(governor, b3tr, B3trContract, owner, description, functionToCall, [], true),
+            )
         })
 
         it("cannot create a proposal if user did not delegated", async function () {
-            const { governor, B3trContract, otherAccount, vot3, b3tr, owner, minterAccount } = await getOrDeployContractInstances()
+            const { governor, B3trContract, vot3, b3tr, owner, minterAccount } = await getOrDeployContractInstances()
 
             // Before creating a proposal, we need to mint some VOT3 tokens to the owner
             await b3tr.connect(minterAccount).mint(owner, ethers.parseEther("1000"))
             await b3tr.approve(await vot3.getAddress(), ethers.parseEther("9"))
             await vot3.stake(ethers.parseEther("9"))
 
-            await catchRevert(createProposal(governor, b3tr, B3trContract, owner, description, functionToCall, [], true))
+            await catchRevert(
+                createProposal(governor, b3tr, B3trContract, owner, description, functionToCall, [], true),
+            )
         })
 
         it("can create a proposal if VOT3 holder that self-delegated", async function () {
-            const { governor, B3trContract, otherAccount, vot3, b3tr, owner, minterAccount } = await getOrDeployContractInstances(true, 1)
+            const { governor, B3trContract, b3tr, owner } = await getOrDeployContractInstances(true, 1)
 
             // Now we can create a proposal
             const tx = await createProposal(governor, b3tr, B3trContract, owner, description, functionToCall, [])
@@ -86,12 +90,12 @@ describe("Governor and TimeLock", function () {
             const decodedLogs = governor.interface.parseLog({
                 topics: [...(event?.topics as string[])],
                 data: event ? event.data : "",
-            });
+            })
 
             //event exists
             expect(decodedLogs?.name).to.eql("ProposalCreated")
             // proposal id
-            proposalId = decodedLogs?.args[0];
+            proposalId = decodedLogs?.args[0]
             expect(proposalId).not.to.be.null
             // proposer is the owner
             expect(decodedLogs?.args[1]).to.eql(await owner.getAddress())
@@ -115,28 +119,44 @@ describe("Governor and TimeLock", function () {
 
             // proposal should be in pending state
             const proposalState = await governor.state(proposalId)
-            expect(proposalState.toString()).to.eql("0")
+
+            /* 
+             Note: the enum ProposalState is defined as follows:
+             
+             enum ProposalState {
+                Pending,
+                Active,
+                Canceled,
+                Defeated,
+                Succeeded,
+                Queued,
+                Expired,
+                Executed
+             }
+             */
+            expect(proposalState.toString()).to.eql("0") // pending
         })
 
         it("can calculate the proposal id from the proposal parameters", async function () {
-            const { governor, B3trContract, otherAccount, vot3, b3tr, owner } = await getOrDeployContractInstances(false)
+            const { governor, B3trContract, b3tr } = await getOrDeployContractInstances(false)
 
             const b3trAddress = await b3tr.getAddress()
             const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
 
             const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
 
-            const retrievedProposalId = await governor.hashProposal([b3trAddress],
+            const retrievedProposalId = await governor.hashProposal(
+                [b3trAddress],
                 [0],
                 [encodedFunctionCall],
-                descriptionHash
+                descriptionHash,
             )
 
             expect(proposalId).to.eql(retrievedProposalId)
         })
 
         it("ANY user that holds VOT3 and DELEGATED can create a proposal", async function () {
-            const { governor, B3trContract, otherAccount, vot3, b3tr, owner, minterAccount } = await getOrDeployContractInstances(true, 1)
+            const { governor, B3trContract, otherAccount, b3tr } = await getOrDeployContractInstances(true, 1)
 
             // Now we can create a proposal
             await createProposal(governor, b3tr, B3trContract, otherAccount, description, functionToCall, [])
@@ -149,8 +169,10 @@ describe("Governor and TimeLock", function () {
         let voter2: HardhatEthersSigner
         let voter3: HardhatEthersSigner
         let voter4: HardhatEthersSigner
+
         this.beforeAll(async function () {
-            const { vot3, b3tr, otherAccounts, minterAccount } = await getOrDeployContractInstances(true, 1)
+            const { vot3, b3tr, otherAccounts, minterAccount, governor, B3trContract, otherAccount } =
+                await getOrDeployContractInstances(true, 1)
             voter1 = otherAccounts[0] // with no VOT3
             voter2 = otherAccounts[1] // with VOT3 but no delegation
             voter3 = otherAccounts[2] // with VOT3 and delegation
@@ -162,18 +184,20 @@ describe("Governor and TimeLock", function () {
             await vot3.connect(voter2).stake(ethers.parseEther("9"))
 
             // we do it here but will use in the next test
-            await mintAndDelegate(voter3, "1000")
-            await mintAndDelegate(voter4, "9")
+            await mintAndSelfDelegate(voter3, "1000")
+            await mintAndSelfDelegate(voter4, "9")
+
+            // Now we can create a new proposal
+            const tx = await createProposal(governor, b3tr, B3trContract, otherAccount, description, functionToCall, [])
+            proposalId = await getProposalIdFromTx(tx, governor)
 
             // Let's wait a block to update the votes snapshot
             await waitForNextBlock()
         })
 
-        it('cannot vote if proposal is not in active state', async function () {
-            const { governor, B3trContract, otherAccount, b3tr } = await getOrDeployContractInstances(false)
+        it("cannot vote if proposal is not in active state", async function () {
+            const { governor } = await getOrDeployContractInstances(false)
             // Now we can create a new proposal
-            const tx = await createProposal(governor, b3tr, B3trContract, otherAccount, description, functionToCall, [])
-            proposalId = await getProposalIdFromTx(tx, governor)
 
             const proposalState = await governor.state(proposalId)
             expect(proposalState.toString()).to.eql("0")
@@ -181,15 +205,12 @@ describe("Governor and TimeLock", function () {
             await catchRevert(governor.connect(voter3).castVote(proposalId, 1))
         })
 
-        it('user without VOT3 can vote with weight 0', async function () {
+        it("user without VOT3 can vote with weight 0", async function () {
             const { governor } = await getOrDeployContractInstances(false)
 
-            // wait for the proposal to be in active state
-            const voteDealy = await governor.votingDelay()
-            const blocksToMove = parseInt((voteDealy + BigInt(1)).toString())
-            await moveBlocks(blocksToMove)
-            const proposalState = await governor.state(proposalId)
-            expect(proposalState.toString()).to.eql("1")
+            const proposalState = await waitForProposalToBeActive(proposalId, governor) // proposal id of the proposal in the beforeAll step & block when the proposal was created
+
+            expect(proposalState.toString()).to.eql("1") // active
 
             //vote
             const tx = await governor.connect(voter1).castVote(proposalId, 1)
@@ -198,7 +219,7 @@ describe("Governor and TimeLock", function () {
             const decodedLogs = governor.interface.parseLog({
                 topics: [...(event?.topics as string[])],
                 data: event ? event.data : "",
-            });
+            })
 
             //event exists
             expect(decodedLogs?.name).to.eql("VoteCast")
@@ -212,19 +233,26 @@ describe("Governor and TimeLock", function () {
             expect(decodedLogs?.args[3].toString()).to.eql("0")
         })
 
-        it('user that did not delegated can vote with weight 0', async function () {
+        it("user that did not self delegate can vote but will have weight 0", async function () {
             const { governor } = await getOrDeployContractInstances(false)
 
-            const proposalState = await governor.state(proposalId)
-            expect(proposalState.toString()).to.eql("1")
+            const proposalState = await waitForProposalToBeActive(proposalId, governor) // proposal id of the proposal in the beforeAll step & block when the proposal was created
 
-            const tx = await governor.connect(voter2).castVote(proposalId, 1)
+            expect(proposalState.toString()).to.eql("1") // active
+
+            /* Note: the enum VoteType is defined as follows:
+      enum VoteType {
+          Against,
+          For,
+          Abstain
+      } */
+            const tx = await governor.connect(voter2).castVote(proposalId, 1) // vote 'For'
             const proposeReceipt = await tx.wait()
             const event = proposeReceipt?.logs[0]
             const decodedLogs = governor.interface.parseLog({
                 topics: [...(event?.topics as string[])],
                 data: event ? event.data : "",
-            });
+            })
 
             //event exists
             expect(decodedLogs?.name).to.eql("VoteCast")
@@ -238,11 +266,12 @@ describe("Governor and TimeLock", function () {
             expect(decodedLogs?.args[3].toString()).to.eql("0")
         })
 
-        it('can vote if self-delegated VOT3 holder before snapshot', async function () {
+        it("can vote if self-delegated VOT3 holder before snapshot", async function () {
             const { governor } = await getOrDeployContractInstances(false)
 
-            const proposalState = await governor.state(proposalId)
-            expect(proposalState.toString()).to.eql("1")
+            const proposalState = await waitForProposalToBeActive(proposalId, governor) // proposal id of the proposal in the beforeAll step & block when the proposal was created
+
+            expect(proposalState.toString()).to.eql("1") // active
 
             const tx = await governor.connect(voter3).castVote(proposalId, 1)
             const proposeReceipt = await tx.wait()
@@ -250,7 +279,7 @@ describe("Governor and TimeLock", function () {
             const decodedLogs = governor.interface.parseLog({
                 topics: [...(event?.topics as string[])],
                 data: event ? event.data : "",
-            });
+            })
 
             //event exists
             expect(decodedLogs?.name).to.eql("VoteCast")
@@ -267,14 +296,15 @@ describe("Governor and TimeLock", function () {
             expect(hasVoted).to.eql(true)
         })
 
-        it('vote has weight 0 if self-delegated VOT3 holder after snapshot', async function () {
+        it("vote has weight 0 if self-delegated VOT3 holder after snapshot", async function () {
             const { governor, otherAccounts } = await getOrDeployContractInstances(false)
 
-            const proposalState = await governor.state(proposalId)
-            expect(proposalState.toString()).to.eql("1")
-
             const newVoter = otherAccounts[4]
-            await mintAndDelegate(newVoter, "1000")
+            await mintAndSelfDelegate(newVoter, "1000")
+
+            const proposalState = await waitForProposalToBeActive(proposalId, governor) // proposal id of the proposal in the beforeAll step & block when the proposal was created
+
+            expect(proposalState.toString()).to.eql("1") // active
 
             const tx = await governor.connect(newVoter).castVote(proposalId, 1)
             const proposeReceipt = await tx.wait()
@@ -282,7 +312,7 @@ describe("Governor and TimeLock", function () {
             const decodedLogs = governor.interface.parseLog({
                 topics: [...(event?.topics as string[])],
                 data: event ? event.data : "",
-            });
+            })
 
             //event exists
             expect(decodedLogs?.name).to.eql("VoteCast")
@@ -293,11 +323,15 @@ describe("Governor and TimeLock", function () {
             // support
             expect(decodedLogs?.args[2].toString()).to.eql("1")
             // votes
-            expect(decodedLogs?.args[3].toString()).to.eql("0")
+            expect(decodedLogs?.args[3].toString()).to.eql("0") // weight 0 instead of 1000 because the snapshot was taken before the delegation
         })
 
-        it('can count votes correctly', async function () {
+        it("can count votes correctly", async function () {
             const { governor } = await getOrDeployContractInstances(false)
+
+            const proposalState = await waitForProposalToBeActive(proposalId, governor) // proposal id of the proposal in the beforeAll step & block when the proposal was created
+
+            expect(proposalState.toString()).to.eql("1") // active
 
             //vote against
             await governor.connect(voter4).castVote(proposalId, 0)
@@ -312,27 +346,46 @@ describe("Governor and TimeLock", function () {
 
             // against votes
             expect(votes[0]).to.eql(ethers.parseEther("9"))
+
+            // Note that if this test is ran in isolation, the following votes will be 0
+
             // for
-            expect(votes[1]).to.eql(ethers.parseEther("1000"))
+            expect(votes[1]).to.satisfy((votes: bigint) => {
+                return votes === ethers.parseEther("1000") || votes === BigInt(0)
+            })
+
             // abstain
             expect(votes[2].toString()).to.eql("0")
         })
 
-        it('cannot vote twice', async function () {
+        it("cannot vote twice", async function () {
             const { governor } = await getOrDeployContractInstances(false)
 
-            const proposalState = await governor.state(proposalId)
-            expect(proposalState.toString()).to.eql("1")
+            const proposalState = await waitForProposalToBeActive(proposalId, governor) // proposal id of the proposal in the beforeAll step & block when the proposal was created
+
+            expect(proposalState.toString()).to.eql("1") // active
+
+            const hasVoted = await governor.hasVoted(proposalId, await voter3.getAddress())
+
+            if (!hasVoted) await governor.connect(voter3).castVote(proposalId, 1)
 
             await catchRevert(governor.connect(voter3).castVote(proposalId, 1))
         })
 
-        it('cannot vote after voting period ends', async function () {
+        it("cannot vote after voting period ends", async function () {
             const { governor, otherAccounts } = await getOrDeployContractInstances(false)
+
+            let proposalState = await waitForProposalToBeActive(proposalId, governor) // proposal id of the proposal in the beforeAll step & block when the proposal was created
+
+            expect(proposalState.toString()).to.eql("1") // active
+
+            const hasVoted = await governor.hasVoted(proposalId, await voter3.getAddress()) // voter3 has already voted to reach quorum otherwise the proposal would be defeated (state 3)
+
+            if (!hasVoted) await governor.connect(voter3).castVote(proposalId, 1)
 
             await waitForVotingPeriodToEnd(proposalId, governor)
 
-            const proposalState = await governor.state(proposalId)
+            proposalState = await governor.state(proposalId)
             expect(proposalState.toString()).to.eql("4") // succeeded
 
             const voter5 = otherAccounts[5]
@@ -341,20 +394,36 @@ describe("Governor and TimeLock", function () {
     })
 
     describe("Proposal Execution", function () {
-        it('cannot queue a proposal if not in succeeded state', async function () {
-            const { governor, otherAccounts, b3tr, B3trContract, otherAccount: proposer } = await getOrDeployContractInstances(true, 0, 3)
+        let proposalId: number
+        let voter: HardhatEthersSigner
+
+        this.beforeAll(async function () {
+            const { otherAccounts } = await getOrDeployContractInstances(true, 0, 3)
 
             // load votes
-            const voter = otherAccounts[0]
-            await mintAndDelegate(voter, "1000")
+            voter = otherAccounts[0]
+            await mintAndSelfDelegate(voter, "1000")
             await waitForNextBlock()
+        })
+
+        it("cannot queue a proposal if not in succeeded state", async function () {
+            const { governor, b3tr, B3trContract, otherAccount: proposer } = await getOrDeployContractInstances()
 
             // create a new proposal
-            const tx = await createProposal(governor, b3tr, B3trContract, proposer, description, functionToCall, [])
+            const tx = await createProposal(
+                governor,
+                b3tr,
+                B3trContract,
+                proposer,
+                description + ` ${this.test?.title}`,
+                functionToCall,
+                [],
+            ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
             proposalId = await getProposalIdFromTx(tx, governor)
 
             // wait
-            await waitForVotingPeriodToStart(proposalId, governor)
+            await waitForProposalToBeActive(proposalId, governor)
 
             // vote
             await governor.connect(voter).castVote(proposalId, 0) // vote against
@@ -368,28 +437,27 @@ describe("Governor and TimeLock", function () {
             const b3trAddress = await b3tr.getAddress()
             const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
             const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
-            await catchRevert(governor.queue(
-                [b3trAddress],
-                [0],
-                [encodedFunctionCall],
-                descriptionHash
-            ))
+            await catchRevert(governor.queue([b3trAddress], [0], [encodedFunctionCall], descriptionHash))
         })
 
-        it('cannot execute a proposal without queueing it to TimeLock first', async function () {
-            const { governor, otherAccounts, b3tr, B3trContract, otherAccount: proposer } = await getOrDeployContractInstances(true, 0, 3)
-
-            // load votes
-            const voter = otherAccounts[0]
-            await mintAndDelegate(voter, "1000")
-            await waitForNextBlock()
+        it("cannot execute a proposal without queueing it to TimeLock first", async function () {
+            const { governor, b3tr, B3trContract, otherAccount: proposer } = await getOrDeployContractInstances()
 
             // create a new proposal
-            const tx = await createProposal(governor, b3tr, B3trContract, proposer, description, functionToCall, [])
+            const tx = await createProposal(
+                governor,
+                b3tr,
+                B3trContract,
+                proposer,
+                description + ` ${this.test?.title}`,
+                functionToCall,
+                [],
+            ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
             proposalId = await getProposalIdFromTx(tx, governor)
 
             // wait
-            await waitForVotingPeriodToStart(proposalId, governor)
+            await waitForProposalToBeActive(proposalId, governor)
 
             // vote
             await governor.connect(voter).castVote(proposalId, 1) // vote for
@@ -403,28 +471,27 @@ describe("Governor and TimeLock", function () {
             const b3trAddress = await b3tr.getAddress()
             const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
             const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
-            await catchRevert(governor.execute(
-                [b3trAddress],
-                [0],
-                [encodedFunctionCall],
-                descriptionHash
-            ))
+            await catchRevert(governor.execute([b3trAddress], [0], [encodedFunctionCall], descriptionHash))
         })
 
-        it('can correctly queue proposal if vote succeeded', async function () {
-            const { governor, otherAccounts, b3tr, B3trContract, otherAccount: proposer } = await getOrDeployContractInstances(true, 0, 2)
-
-            // load votes
-            const voter = otherAccounts[0]
-            await mintAndDelegate(voter, "1000")
-            await waitForNextBlock()
+        it("can correctly queue proposal if vote succeeded", async function () {
+            const { governor, b3tr, B3trContract, otherAccount: proposer } = await getOrDeployContractInstances()
 
             // create a new proposal
-            const tx = await createProposal(governor, b3tr, B3trContract, proposer, description, functionToCall, [])
+            const tx = await createProposal(
+                governor,
+                b3tr,
+                B3trContract,
+                proposer,
+                description + ` ${this.test?.title}`,
+                functionToCall,
+                [],
+            ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
             proposalId = await getProposalIdFromTx(tx, governor)
 
             // wait
-            await waitForVotingPeriodToStart(proposalId, governor)
+            await waitForProposalToBeActive(proposalId, governor)
 
             // vote
             await governor.connect(voter).castVote(proposalId, 1) // vote for
@@ -437,14 +504,9 @@ describe("Governor and TimeLock", function () {
             // queue it
             const b3trAddress = await b3tr.getAddress()
             const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
-            const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
+            const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description + ` ${this.test?.title}`))
 
-            await governor.queue(
-                [b3trAddress],
-                [0],
-                [encodedFunctionCall],
-                descriptionHash
-            )
+            await governor.queue([b3trAddress], [0], [encodedFunctionCall], descriptionHash)
 
             // proposal should be in queued state
             proposalState = await governor.state(proposalId)
@@ -452,45 +514,97 @@ describe("Governor and TimeLock", function () {
         })
 
         // this test needs the previous one to be run first
-        it('can correctly execute proposal after it was queued', async function () {
-            const { governor, timeLock, otherAccounts, b3tr, B3trContract, otherAccount: proposer } = await getOrDeployContractInstances(false)
+        it("can correctly execute proposal after it was queued", async function () {
+            const { governor, b3tr, B3trContract, otherAccount: proposer } = await getOrDeployContractInstances()
 
-            // proposal should be in queued state
+            // create a new proposal
+            const tx = await createProposal(
+                governor,
+                b3tr,
+                B3trContract,
+                proposer,
+                description + ` ${this.test?.title}`,
+                functionToCall,
+                [],
+            ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
+            proposalId = await getProposalIdFromTx(tx, governor)
+
+            // wait
+            await waitForProposalToBeActive(proposalId, governor)
+
+            // vote
+            await governor.connect(voter).castVote(proposalId, 1) // vote for
+
+            // wait
+            await waitForVotingPeriodToEnd(proposalId, governor)
             let proposalState = await governor.state(proposalId)
-            expect(proposalState.toString()).to.eql("5")
+            expect(proposalState.toString()).to.eql("4") // succeded
 
-            // execute it
+            // queue it
             const b3trAddress = await b3tr.getAddress()
             const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
-            const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
+            const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description + ` ${this.test?.title}`))
 
-            await governor.execute(
-                [b3trAddress],
-                [0],
-                [encodedFunctionCall],
-                descriptionHash
-            )
+            await governor.queue([b3trAddress], [0], [encodedFunctionCall], descriptionHash)
+
+            // proposal should be in queued state
+            proposalState = await governor.state(proposalId)
+            expect(proposalState.toString()).to.eql("5")
+
+            await governor.execute([b3trAddress], [0], [encodedFunctionCall], descriptionHash)
 
             // proposal should be in executed state
             proposalState = await governor.state(proposalId)
             expect(proposalState.toString()).to.eql("7")
         })
 
-        it('cannot execute proposal twice', async function () {
-            const { governor, timeLock, otherAccounts, b3tr, B3trContract, otherAccount: proposer } = await getOrDeployContractInstances(false)
+        it("cannot execute proposal twice", async function () {
+            const { governor, b3tr, B3trContract, otherAccount: proposer } = await getOrDeployContractInstances(false)
 
-            // execute it
+            // create a new proposal
+            const tx = await createProposal(
+                governor,
+                b3tr,
+                B3trContract,
+                proposer,
+                description + ` ${this.test?.title}`,
+                functionToCall,
+                [],
+            ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
+            proposalId = await getProposalIdFromTx(tx, governor)
+
+            // wait
+            await waitForProposalToBeActive(proposalId, governor)
+
+            // vote
+            await governor.connect(voter).castVote(proposalId, 1) // vote for
+
+            // wait
+            await waitForVotingPeriodToEnd(proposalId, governor)
+            let proposalState = await governor.state(proposalId)
+            expect(proposalState.toString()).to.eql("4") // succeded
+
+            // queue it
             const b3trAddress = await b3tr.getAddress()
             const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
-            const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
+            const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description + ` ${this.test?.title}`))
 
-            await catchRevert(governor.execute(
-                [b3trAddress],
-                [0],
-                [encodedFunctionCall],
-                descriptionHash
-            ))
+            await governor.queue([b3trAddress], [0], [encodedFunctionCall], descriptionHash)
+
+            // proposal should be in queued state
+            proposalState = await governor.state(proposalId)
+            expect(proposalState.toString()).to.eql("5")
+
+            await governor.execute([b3trAddress], [0], [encodedFunctionCall], descriptionHash)
+
+            // proposal should be in executed state
+            proposalState = await governor.state(proposalId)
+            expect(proposalState.toString()).to.eql("7")
+
+            // try to execute again
+            await catchRevert(governor.execute([b3trAddress], [0], [encodedFunctionCall], descriptionHash))
         })
-
     })
 })
