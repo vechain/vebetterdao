@@ -1,17 +1,17 @@
 import { ethers } from "hardhat"
-import { createProposalAndExecuteIt, getOrDeployContractInstances, mintAndSelfDelegate, waitForVotingPeriodToEnd, waitForProposalToBeActive } from "./helpers"
-import { expect } from "chai"
+import {
+    createProposalAndExecuteIt,
+    getOrDeployContractInstances,
+    mintAndSelfDelegate,
+    waitForVotingPeriodToEnd,
+    waitForProposalToBeActive
+} from "./helpers"
 import { keccak256 } from "ethers"
-import { wait } from "@vechain/web3-providers-connex/dist/utils"
-import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
-import { AppVotingGovernor, GovernorContract } from "../typechain-types"
 
-describe("Apps Governance", function () {
+describe("X-Apps Allocation Governance", function () {
     describe("Add app, start round and vote", function () {
-        it("Governor should be able to add app", async function () {
+        it("Governor should be able to add x-app", async function () {
             const {
-                b3tr,
-                vot3,
                 governor,
                 appVotingContract,
                 otherAccounts,
