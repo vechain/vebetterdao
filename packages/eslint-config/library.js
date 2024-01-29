@@ -30,11 +30,5 @@ module.exports = {
     {
       files: ["*.js?(x)", "*.ts?(x)"],
     },
-  ],
-  rules: {
-    "prettier/prettier": [
-      "error",
-      { singleQuote: false, trailingComma: "all", tabWidth: 4, semi: false, printWidth: 120 },
-    ],
-  }
+  ]
 }
