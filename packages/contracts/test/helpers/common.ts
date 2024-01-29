@@ -1,9 +1,9 @@
-import { ethers, network } from "hardhat";
-import { B3TR, GovernorContract } from "../../typechain-types";
-import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers";
-import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { getOrDeployContractInstances } from "./deploy";
-import { mine } from "@nomicfoundation/hardhat-network-helpers";
+import { ethers, network } from "hardhat"
+import { GovernorContract } from "../../typechain-types"
+import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers"
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
+import { getOrDeployContractInstances } from "./deploy"
+import { mine } from "@nomicfoundation/hardhat-network-helpers"
 
 export const waitForNextBlock = async () => {
     if (network.name === "hardhat") {
@@ -15,7 +15,7 @@ export const waitForNextBlock = async () => {
     let startingBlock = await ethers.provider.getBlockNumber()
     let currentBlock
     do {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 1000))
         currentBlock = await ethers.provider.getBlockNumber()
     } while (startingBlock === currentBlock)
 }
@@ -27,7 +27,7 @@ export const moveBlocks = async (blocks: number) => {
     }
 }
 
-export const mintAndDelegate = async (receiver: HardhatEthersSigner, amount: string) => {
+export const mintAndSelfDelegate = async (receiver: HardhatEthersSigner, amount: string) => {
     const { b3tr, vot3, minterAccount } = await getOrDeployContractInstances(false)
 
     await b3tr.connect(minterAccount).mint(receiver, ethers.parseEther(amount))
@@ -50,12 +50,12 @@ export const createProposal = async (
 ): Promise<ContractTransactionResponse> => {
     // the proposer needs to have some delegated VOT3 to be able to create a proposal
     const clock = await governor.clock()
-    const proposerVotes = await governor.getVotes(proposer, (clock - BigInt(1)))
+    const proposerVotes = await governor.getVotes(proposer, clock - BigInt(1))
     const votesThreshold = await governor.proposalThreshold()
 
     if (votesThreshold > proposerVotes && !avoidMintingAndDelegating) {
         //The proposer needs to have some delegated VOT3 to be able to create a proposal
-        await mintAndDelegate(proposer, (votesThreshold + BigInt(1)).toString())
+        await mintAndSelfDelegate(proposer, (votesThreshold + BigInt(1)).toString())
         // We also need to wait a block to update the proposer's votes snapshot
         await waitForNextBlock()
     }
@@ -63,12 +63,7 @@ export const createProposal = async (
     const address = await contractToCall.getAddress()
     const encodedFunctionCall = ContractFactory.interface.encodeFunctionData(functionTocall, values)
 
-    const tx = await governor.connect(proposer).propose(
-        [address],
-        [0],
-        [encodedFunctionCall],
-        description,
-    )
+    const tx = await governor.connect(proposer).propose([address], [0], [encodedFunctionCall], description)
 
     return tx
 }
@@ -79,16 +74,9 @@ export const getProposalIdFromTx = async (tx: ContractTransactionResponse, gover
     const decodedLogs = governor.interface.parseLog({
         topics: [...(event?.topics as string[])],
         data: event ? event.data : "",
-    });
+    })
 
     return decodedLogs?.args[0]
-}
-
-export const waitForVotingPeriodToStart = async (proposalId: number, governor: GovernorContract) => {
-    // wait for the proposal to be in active state
-    const voteDealy = await governor.votingDelay()
-    const blocksToMove = parseInt((voteDealy + BigInt(1)).toString())
-    await moveBlocks(blocksToMove)
 }
 
 export const waitForVotingPeriodToEnd = async (proposalId: number, governor: GovernorContract) => {
@@ -98,6 +86,22 @@ export const waitForVotingPeriodToEnd = async (proposalId: number, governor: Gov
     const currentBlock = await governor.clock()
     // console.log(`Current block is ${currentBlock}`);
 
-
     await moveBlocks(parseInt((deadline - currentBlock + BigInt(1)).toString()))
+}
+
+export const waitForProposalToBeActive = async (proposalId: number, governor: GovernorContract): Promise<bigint> => {
+    let proposalState = await governor.state(proposalId) // proposal id of the proposal in the beforeAll step
+
+    if (proposalState.toString() !== "1") {
+        const currentBlock = await governor.clock() // Or ethers.provider.getBlockNumber()
+        const proposalSnapshot = await governor.proposalSnapshot(proposalId) // Block of when the proposal is active for voting. The next block is when the proposal is active
+
+        const blocksToMove = parseInt((proposalSnapshot - currentBlock + BigInt(1)).toString()) // Blocks to wait until the proposal is active
+        await moveBlocks(blocksToMove)
+
+        // Update the proposal state
+        proposalState = await governor.state(proposalId)
+    }
+
+    return proposalState
 }

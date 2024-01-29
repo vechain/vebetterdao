@@ -13,85 +13,85 @@ const VOTING_DELAY = 1 // How many blocks till a proposal vote becomes active
 const PROPOSAL_THRESHOLD = 1 // How many votes are needed to create a proposal
 
 export async function deployAll() {
-  console.log(`Deploying contracts on ${network.name}...`)
+    console.log(`Deploying contracts on ${network.name}...`)
 
-  // Deploy the contracts
-  const b3tr = await deployB3trToken()
-  const vot3 = await deployVot3Token(await b3tr.getAddress())
+    // Deploy the contracts
+    const b3tr = await deployB3trToken()
+    const vot3 = await deployVot3Token(await b3tr.getAddress())
 
-  // Deploy the governance contract
-  const timelock = await deployTimeLock()
-  const governor = await deployGovernor(await vot3.getAddress(), await timelock.getAddress())
+    // Deploy the governance contract
+    const timelock = await deployTimeLock()
+    const governor = await deployGovernor(await vot3.getAddress(), await timelock.getAddress())
 
-  // Set proposer, canceller and executor role to timelock
-  const PROPOSER_ROLE = await timelock.PROPOSER_ROLE()
-  const EXECUTOR_ROLE = await timelock.EXECUTOR_ROLE()
-  const CANCELLER_ROLE = await timelock.CANCELLER_ROLE()
-  await timelock.grantRole(PROPOSER_ROLE, await governor.getAddress())
-  await timelock.grantRole(EXECUTOR_ROLE, await governor.getAddress())
-  await timelock.grantRole(CANCELLER_ROLE, await governor.getAddress())
+    // Set proposer, canceller and executor role to timelock
+    const PROPOSER_ROLE = await timelock.PROPOSER_ROLE()
+    const EXECUTOR_ROLE = await timelock.EXECUTOR_ROLE()
+    const CANCELLER_ROLE = await timelock.CANCELLER_ROLE()
+    await timelock.grantRole(PROPOSER_ROLE, await governor.getAddress())
+    await timelock.grantRole(EXECUTOR_ROLE, await governor.getAddress())
+    await timelock.grantRole(CANCELLER_ROLE, await governor.getAddress())
 
-  return {
-    governorAddress: await governor.getAddress(),
-    timelockAddress: await timelock.getAddress(),
-    b3trAddress: await b3tr.getAddress(),
-    vot3Address: await vot3.getAddress(),
-  }
+    return {
+        governorAddress: await governor.getAddress(),
+        timelockAddress: await timelock.getAddress(),
+        b3trAddress: await b3tr.getAddress(),
+        vot3Address: await vot3.getAddress(),
+    }
 
-  // close the script
+    // close the script
 }
 
 async function deployB3trToken(): Promise<B3TR> {
-  console.log(`Deploying B3tr contract`)
-  const B3trContract = await ethers.getContractFactory("B3TR") // Use the global variable
-  const contract = await B3trContract.deploy(DEFAULT_MINTER)
+    console.log(`Deploying B3tr contract`)
+    const B3trContract = await ethers.getContractFactory("B3TR") // Use the global variable
+    const contract = await B3trContract.deploy(DEFAULT_MINTER)
 
-  await contract.waitForDeployment()
+    await contract.waitForDeployment()
 
-  console.log(`B3tr contract deployed at address ${await contract.getAddress()}`)
+    console.log(`B3tr contract deployed at address ${await contract.getAddress()}`)
 
-  return contract
+    return contract
 }
 
 async function deployVot3Token(b3trAddress: string): Promise<VOT3> {
-  console.log(`Deploying Vot3 contract`)
-  const Vot3Contract = await ethers.getContractFactory("VOT3") // Use the global variable
-  const contract = await Vot3Contract.deploy(b3trAddress)
+    console.log(`Deploying Vot3 contract`)
+    const Vot3Contract = await ethers.getContractFactory("VOT3") // Use the global variable
+    const contract = await Vot3Contract.deploy(b3trAddress)
 
-  await contract.waitForDeployment()
+    await contract.waitForDeployment()
 
-  console.log(`Vot3 contract deployed at address ${await contract.getAddress()}`)
+    console.log(`Vot3 contract deployed at address ${await contract.getAddress()}`)
 
-  return contract
+    return contract
 }
 
 async function deployTimeLock(): Promise<TimeLock> {
-  console.log(`Deploying TimeLock contract`)
-  const TimeLockContract = await ethers.getContractFactory("TimeLock")
-  const contract = await TimeLockContract.deploy(MIN_DELAY, [], [], TIMELOCK_ADMIN)
+    console.log(`Deploying TimeLock contract`)
+    const TimeLockContract = await ethers.getContractFactory("TimeLock")
+    const contract = await TimeLockContract.deploy(MIN_DELAY, [], [], TIMELOCK_ADMIN)
 
-  await contract.waitForDeployment()
+    await contract.waitForDeployment()
 
-  console.log(`TimeLock contract deployed at address ${await contract.getAddress()}`)
+    console.log(`TimeLock contract deployed at address ${await contract.getAddress()}`)
 
-  return contract
+    return contract
 }
 
 async function deployGovernor(vot3Address: string, timelockAddress: string): Promise<GovernorContract> {
-  console.log(`Deploying Governor contract`)
-  const GovernorContract = await ethers.getContractFactory("GovernorContract")
-  const contract = await GovernorContract.deploy(
-    vot3Address,
-    timelockAddress,
-    QUORUM_PERCENTAGE,
-    VOTING_PERIOD,
-    VOTING_DELAY,
-    PROPOSAL_THRESHOLD,
-  )
+    console.log(`Deploying Governor contract`)
+    const GovernorContract = await ethers.getContractFactory("GovernorContract")
+    const contract = await GovernorContract.deploy(
+        vot3Address,
+        timelockAddress,
+        QUORUM_PERCENTAGE,
+        VOTING_PERIOD,
+        VOTING_DELAY,
+        PROPOSAL_THRESHOLD,
+    )
 
-  await contract.waitForDeployment()
+    await contract.waitForDeployment()
 
-  console.log(`Governor contract deployed at address ${await contract.getAddress()}`)
+    console.log(`Governor contract deployed at address ${await contract.getAddress()}`)
 
-  return contract
+    return contract
 }
