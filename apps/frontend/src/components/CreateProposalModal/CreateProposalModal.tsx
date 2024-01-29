@@ -18,30 +18,17 @@ import {
   Heading,
   ModalFooter,
 } from "@chakra-ui/react"
-import { AddressUtils, FormattingUtils } from "@repo/utils"
-import { type } from "os"
+import { FormattingUtils } from "@repo/utils"
 import { useFieldArray, useForm } from "react-hook-form"
-import Vot3ContractJson from "@repo/contracts/artifacts/contracts/VOT3.sol/VOT3.json"
-import B3trContractJson from "@repo/contracts/artifacts/contracts/B3TR.sol/B3TR.json"
-import GovernorContractJson from "@repo/contracts/artifacts/contracts/governance/GovernorContract.sol/GovernorContract.json"
-import TimelockContractJson from "@repo/contracts/artifacts/contracts/governance/Timelock.sol/Timelock.json"
+
 import { getConfig } from "@repo/config"
 import { useEffect, useMemo } from "react"
-import { GenerateFunctionToCallParamsInput } from "./GenerateFunctionToCallParamsInput.tsx"
-import { register } from "module"
+import { GenerateFunctionToCallParamsInput } from "./GenerateFunctionToCallParamsInput"
 import { FaPlus } from "react-icons/fa6"
+import { ProposalAction, useCreateProposal } from "@/hooks/useCreateProposal"
 
 const config = getConfig()
-type ExecutorAvailableContracts = {
-  abi: typeof B3trContractJson | typeof Vot3ContractJson | typeof GovernorContractJson | typeof TimelockContractJson
-  address: string
-}
-const AvailableContracts: ExecutorAvailableContracts[] = [
-  { abi: B3trContractJson, address: config.b3trContractAddress },
-  { abi: Vot3ContractJson, address: config.vot3ContractAddress },
-  { abi: GovernorContractJson, address: config.governorContractAddress },
-  { abi: TimelockContractJson, address: config.timelockContractAddress },
-]
+const AvailableContracts = config.governanceAvailableContracts
 
 type Props = {
   isOpen: boolean
@@ -51,10 +38,8 @@ export type FunctionParamsField = { id: string; name: string; type: string; inte
 
 export type FormData = {
   description?: string
-  contractAddress?: string
   functionToCall?: string
-  functionParams?: FunctionParamsField[]
-}
+} & Omit<ProposalAction, "contractAbi">
 
 export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
   const {
@@ -72,6 +57,7 @@ export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
   })
 
   const watchContract = watch("contractAddress")
+  const watchDescription = watch("description")
 
   const selectedExecutorContract = useMemo(() => {
     if (!watchContract) {
@@ -91,6 +77,19 @@ export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
   const watchFunctionToCall = watch("functionToCall")
 
+  /**
+   * This is the selected abi for the function to call
+   * We need to infer this because object cannot be used as a value in the input
+   */
+  const selectedAbi = useMemo(() => {
+    if (!watchFunctionToCall) return undefined
+
+    return selectedContractFunctions.find(contractFunction => contractFunction.name === watchFunctionToCall)
+  }, [watchFunctionToCall])
+
+  /**
+   * This is the list of inputs for the selected function to call
+   */
   const selectedContractFunctionInputs = useMemo(() => {
     if (!watchFunctionToCall) {
       return []
@@ -98,6 +97,8 @@ export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
     return selectedContractFunctions.find(contractFunction => contractFunction.name === watchFunctionToCall)?.inputs
   }, [watchFunctionToCall])
+
+  console.log({ selectedAbi })
 
   //Create the fields for the function params inputs
   useEffect(() => {
@@ -107,8 +108,6 @@ export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
     })
   }, [selectedContractFunctionInputs])
 
-  const onSubmit = (data: FormData) => console.log(data)
-
   useEffect(() => {
     console.log({ fields })
   }, [fields])
@@ -116,6 +115,19 @@ export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
   useEffect(() => {
     console.log({ errors })
   }, [errors])
+
+  const createProposal = useCreateProposal({
+    actions: [
+      {
+        contractAbi: selectedAbi,
+        contractAddress: watchContract,
+        functionParams: fields.map(field => field.value),
+      },
+    ],
+    description: watchDescription,
+  })
+
+  const onSubmit = (data: FormData) => createProposal.sendTransaction()
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
@@ -158,7 +170,7 @@ export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
                   })}
                   variant="outline">
                   {AvailableContracts.map(contract => (
-                    <option value={contract.address}>
+                    <option value={contract.address} key={contract.address}>
                       {contract.abi.contractName} ({FormattingUtils.humanAddress(contract.address)})
                     </option>
                   ))}
@@ -180,8 +192,10 @@ export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
                     required: "functionToCall is required",
                   })}
                   variant="outline">
-                  {selectedContractFunctions.map(contractFunction => (
-                    <option value={contractFunction.name}>{contractFunction.name}</option>
+                  {selectedContractFunctions.map(contractAbi => (
+                    <option value={contractAbi.name} key={contractAbi.name}>
+                      {contractAbi.name}
+                    </option>
                   ))}
                 </Select>
                 {errors.functionToCall?.message ? (
@@ -193,6 +207,7 @@ export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
               {fields?.map((field, index) => {
                 return (
                   <GenerateFunctionToCallParamsInput
+                    key={field.id}
                     field={field}
                     index={index}
                     register={register}
