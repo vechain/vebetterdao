@@ -2,7 +2,7 @@
 // app/providers.tsx
 
 import { persister, queryClient } from "@/api"
-import { CacheProvider, CacheProvider } from "@chakra-ui/next-js"
+import { CacheProvider } from "@chakra-ui/next-js"
 import { ChakraProvider } from "@chakra-ui/react"
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client"
 
