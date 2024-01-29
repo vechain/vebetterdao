@@ -1,7 +1,7 @@
 import { getEvents } from "@/api/blockchain"
 import { getConfig } from "@repo/config"
 import Contract from "@repo/contracts/artifacts/contracts/governance/GovernorContract.sol/GovernorContract.json"
-import { abi, address } from "thor-devkit"
+import { abi } from "thor-devkit"
 const contractAbi = Contract.abi
 
 const GOVERNANCE_CONTRACT = getConfig().governorContractAddress
@@ -43,28 +43,29 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
  */
 export const buildCreateProposalTx = (
   thor: Connex.Thor,
-  contractsAbi: (typeof Contract.abi)[],
+  contractsAbi: (typeof Contract.abi)[number][],
   targets: string[],
   values: number[][],
-  functionsAbiNames: string[],
   description: string,
 ): Connex.Vendor.TxMessage[0] => {
+  console.log({
+    contractsAbi,
+    targets,
+    values,
+    description,
+  })
   // all the arrays must have the same length as there is a 1 to 1 mapping between the elements
-  const arrays = [contractsAbi, targets, values, functionsAbiNames]
+  const arrays = [contractsAbi, targets, values]
   const lengths = arrays.map(array => array.length)
   const firstLength = lengths[0]
   if (lengths.some(length => length !== firstLength))
-    throw new Error("contractsAbi, targets, values and functionsAbiNames must have the same length")
+    throw new Error("contractsAbi, targets, values must have the same length")
 
   const callData: string[] = []
   // build the callData for each contractAbi
   for (const [index, contractAbi] of contractsAbi.entries()) {
-    const abiName = functionsAbiNames[index] as string
-    const target = targets[index] as string
     const functionCallValues = values[index] as number[]
-    const functionAbi = contractAbi.find(e => e.name === abiName)
-    if (!functionAbi) throw new Error(`Function abi not found for ${abiName}`)
-    const functionAbiInstance = new abi.Function(functionAbi as abi.Function.Definition)
+    const functionAbiInstance = new abi.Function(contractAbi as abi.Function.Definition)
     const encodedCallData = functionAbiInstance.encode(functionCallValues)
     callData.push(encodedCallData)
   }

@@ -1,79 +1,121 @@
-import { getB3TrTokenDetailsQueryKey, getB3TrBalanceQueryKey, buildMintB3trTx, useB3trTokenDetails } from "@/api"
+import {
+  getB3TrTokenDetailsQueryKey,
+  getB3TrBalanceQueryKey,
+  useB3trTokenDetails,
+  buildCreateProposalTx,
+  queryClient,
+} from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
 import { useConnex, useWallet } from "@vechain/dapp-kit-react"
-import { FormattingUtils } from "@repo/utils"
+import { getConfig } from "@repo/config"
 
-type useMintB3trProps = {
-  address?: string
-  amount?: string | number
-  onSuccess?: () => void
-  invalidateCache?: boolean
-  onSuccessMessageTitle?: string
+const config = getConfig()
+const governanceAvailableContracts = config.governanceAvailableContracts
+type AvailableContractAbis = (typeof governanceAvailableContracts)[number]["abi"]["abi"][number]
+/**
+ * Represent a single parameter of the function to call in the smart contract
+ * This is used to typing the inputs of the abi definition
+ */
+export type FunctionParamsField = { id: string; name: string; type: string; internalType: string; value: any }
+/**
+ * Represent a single action to be exeuted in case the proposal is successful
+ * This is equal to a smart contract call to the given function with the given params
+ */
+export type ProposalAction = {
+  contractAddress: string
+  contractAbi?: AvailableContractAbis
+  functionParams: FunctionParamsField[]
 }
 /**
- * Hook to create a proposal with the given calldata
- * @param address the address to mint the tokens to
- * @param amount the amount of tokens to mint. Should not already include decimals
- * @param onSuccess callback to run when the upgrade is successful
+ * Data required to create a proposal. Multiple actions could be provided in case we want multiple function to be executed
+ */
+export type useCreateProposalProps = {
+  description?: string
+  actions: ProposalAction[]
+  invalidateCache?: boolean
+  onSuccess?: () => void
+}
+
+/**
+ * Hook to create a proposal with the given calldata or actions. I.e functions to call if the proposal is executed
+ * @param description The description of the proposal
+ * @param actions the functions we want to execute in case the proposal is successful
  * @param invalidateCache boolean to indicate if the related react-query cache should be updated (default: true)
  * @returns see {@link UseSendTransactionReturnValue}
  */
 export const useCreateProposal = ({
-  address,
-  amount,
-  onSuccess,
+  description,
+  actions,
   invalidateCache = true,
-}: useMintB3trProps): UseSendTransactionReturnValue => {
+  onSuccess,
+}: useCreateProposalProps): UseSendTransactionReturnValue => {
   const { thor } = useConnex()
   const { account } = useWallet()
   const toast = useToast()
   const queryClient = useQueryClient()
 
-  const { data: tokenDetails } = useB3trTokenDetails()
-
   const buildClauses = useCallback(() => {
-    if (!address) throw new Error("address is required")
-    if (!amount) throw new Error("amount is required")
-    if (!tokenDetails) throw new Error("tokenDetails is required")
+    if (!description) throw new Error("description is required")
+    if (!actions) throw new Error("actions is required")
 
-    const clauses = buildMintB3trTx(thor, address, amount, tokenDetails.decimals)
+    type ReducedActions = {
+      contractsAbi: AvailableContractAbis[]
+      contractsAddress: string[]
+      functionsParams: any[][]
+    }
+    // Using Array.reduce to map objects into separate arrays based on keys
+    const res: ReducedActions = actions.reduce(
+      (result, obj) => {
+        if (!obj.contractAbi) throw new Error("contractAbi is required")
+        result.contractsAbi.push(obj.contractAbi)
+        result.contractsAddress.push(obj.contractAddress)
+        result.functionsParams.push(obj.functionParams.map(param => param.value))
+        return result
+      },
+      { contractsAbi: [], contractsAddress: [], functionsParams: [] } as ReducedActions,
+    )
+
+    const clauses = buildCreateProposalTx(
+      thor,
+      res.contractsAbi,
+      res.contractsAddress,
+      res.functionsParams,
+      description,
+    )
     return [clauses]
-  }, [thor, address, amount, tokenDetails])
+  }, [thor, actions])
 
   //Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {
     if (invalidateCache) {
-      await queryClient.cancelQueries({
-        queryKey: getB3TrTokenDetailsQueryKey(),
-      })
-
-      await queryClient.refetchQueries({
-        queryKey: getB3TrTokenDetailsQueryKey(),
-      })
-      await queryClient.cancelQueries({
-        queryKey: getB3TrBalanceQueryKey(account ?? undefined),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getB3TrBalanceQueryKey(account ?? undefined),
-      })
+      //   await queryClient.cancelQueries({
+      //     queryKey: getB3TrTokenDetailsQueryKey(),
+      //   })
+      //   await queryClient.refetchQueries({
+      //     queryKey: getB3TrTokenDetailsQueryKey(),
+      //   })
+      //   await queryClient.cancelQueries({
+      //     queryKey: getB3TrBalanceQueryKey(account ?? undefined),
+      //   })
+      //   await queryClient.refetchQueries({
+      //     queryKey: getB3TrBalanceQueryKey(account ?? undefined),
+      //   })
+      //TODO: refetch the proposals
     }
 
-    const formattedAmount = FormattingUtils.humanNumber(amount ?? 0, amount)
-    const formattedAddress = FormattingUtils.humanAddress(address ?? "")
-
     toast({
-      title: "Tokens minted succesfully",
-      description: `You have minted ${formattedAmount} B3TR to ${formattedAddress}`,
+      title: "Proposal created",
+      description: `Your proposal has been created successfully`,
       status: "success",
       position: "bottom-left",
       duration: 5000,
       isClosable: true,
     })
     onSuccess?.()
-  }, [invalidateCache, queryClient, toast, onSuccess, account, amount, address])
+  }, [invalidateCache, queryClient, toast, onSuccess])
 
   const result = useSendTransaction({
     signerAccount: account,
