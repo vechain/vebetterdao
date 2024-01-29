@@ -40,7 +40,8 @@ async function overrideLocalConfigWithNewContracts(contracts: Awaited<ReturnType
     timelockContractAddress: contracts.timelockAddress,
   }
 
-  const toWrite = `import { Config } from \".\" \n export const localConfig: Config = ${JSON.stringify(
+  // eslint-disable-next-line
+    const toWrite = `import { Config } from \".\" \n export const localConfig: Config = ${JSON.stringify(
     newConfig,
     null,
     2,

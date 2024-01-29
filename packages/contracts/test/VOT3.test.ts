@@ -1,6 +1,7 @@
 import { assert, ethers } from "hardhat"
 import { expect } from "chai"
 import { catchRevert, getOrDeployContractInstances } from "./helpers"
+import { describe, it } from "mocha"
 
 describe("VOT3", function () {
   describe("Deployment", function () {
@@ -366,7 +367,7 @@ describe("VOT3", function () {
     })
 
     it("Non admin can't change canTransfer", async function () {
-      const { b3tr, vot3, owner, minterAccount, otherAccount } = await getOrDeployContractInstances(true)
+      const { vot3, otherAccount } = await getOrDeployContractInstances(true)
 
       await catchRevert(vot3.connect(otherAccount).setCanTransfer(true))
 

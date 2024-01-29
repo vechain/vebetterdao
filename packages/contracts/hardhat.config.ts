@@ -15,9 +15,9 @@ module.exports = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 200
-      }
-    }
+        runs: 200,
+      },
+    },
   },
   mocha: {
     timeout: 180000,
@@ -39,7 +39,7 @@ module.exports = {
     vechain_testnet: {
       url: VECHAIN_URL_TESTNET,
       accounts: {
-        mnemonic: process.env.MNEOMIC || "",
+        mnemonic: process.env.MNEMONIC || "",
         count: 10,
       },
       restful: true,
@@ -48,7 +48,7 @@ module.exports = {
     vechain_mainnet: {
       url: VECHAIN_URL_MAINNET,
       accounts: {
-        mnemonic: process.env.MNEOMIC || "",
+        mnemonic: process.env.MNEMONIC || "",
         count: 1,
       },
       restful: true,
