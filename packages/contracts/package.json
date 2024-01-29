@@ -6,6 +6,7 @@
   "license": "MIT",
   "scripts": {
     "test": "npx hardhat test",
+    "test:hardhat": "npx hardhat test --network hardhat",
     "compile": "npx hardhat compile",
     "deploy": "npx hardhat run scripts/deploy",
     "check-contracts-deployment": "npx hardhat run scripts/checkContractsDeployment.ts",
