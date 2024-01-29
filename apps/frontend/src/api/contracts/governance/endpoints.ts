@@ -1,17 +1,17 @@
 import { getEvents } from "@/api/blockchain"
 import { getConfig } from "@repo/config"
-import Contract from "@repo/contracts/artifacts/contracts/governance/GovernorContract.sol/GovernorContract.json"
+import GovernorContract from "@repo/contracts/artifacts/contracts/governance/GovernorContract.sol/GovernorContract.json"
 import { abi } from "thor-devkit"
-const contractAbi = Contract.abi
+const governorContractAbi = GovernorContract.abi
 
 const GOVERNANCE_CONTRACT = getConfig().governorContractAddress
 
 export const getProposalsEvents = async (thor: Connex.Thor) => {
-  const proposalCreatedAbi = contractAbi.find(abi => abi.name === "ProposalCreated")
+  const proposalCreatedAbi = governorContractAbi.find(abi => abi.name === "ProposalCreated")
   if (!proposalCreatedAbi) throw new Error("ProposalCreated event not found")
   const proposalCreatedEvent = new abi.Event(proposalCreatedAbi as abi.Event.Definition)
 
-  const proposalCanceledAbi = contractAbi.find(abi => abi.name === "ProposalCanceled")
+  const proposalCanceledAbi = governorContractAbi.find(abi => abi.name === "ProposalCanceled")
   if (!proposalCanceledAbi) throw new Error("ProposalCanceled event not found")
   const proposalCanceledEvent = new abi.Event(proposalCanceledAbi as abi.Event.Definition)
 
@@ -43,7 +43,7 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
  */
 export const buildCreateProposalTx = (
   thor: Connex.Thor,
-  contractsAbi: (typeof Contract.abi)[number][],
+  contractsAbi: (typeof governorContractAbi)[number][],
   targets: string[],
   values: (string | number)[][],
   description: string,
@@ -73,7 +73,7 @@ export const buildCreateProposalTx = (
   }
 
   // build the clause to create the proposal with the given parameters
-  const proposalAbi = contractAbi.find(abi => abi.name === "propose")
+  const proposalAbi = governorContractAbi.find(abi => abi.name === "propose")
   if (!proposalAbi) throw new Error("Proposal abi not found")
   const proposalAbiInstance = new abi.Function(proposalAbi as abi.Function.Definition)
   //   const encodedProposalData = proposalAbiInstance.encode([contractsAbi, targets, values, callData, description])

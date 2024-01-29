@@ -1,4 +1,4 @@
-import { buildCreateProposalTx } from "@/api"
+import { buildCreateProposalTx, buildDelegateVot3Tx } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
@@ -87,6 +87,7 @@ export const useCreateProposal = ({
 
   const buildClauses = useCallback(
     (description: string, actions: ProposalAction[]) => {
+      if (!account) throw new Error("Account is required")
       type ReducedActions = {
         contractsAbi: AvailableContractAbis[]
         contractsAddress: string[]
@@ -105,7 +106,7 @@ export const useCreateProposal = ({
         { contractsAbi: [], contractsAddress: [], functionsParams: [] } as ReducedActions,
       )
 
-      const clauses = buildCreateProposalTx(
+      const createProposalClause = buildCreateProposalTx(
         thor,
         res.contractsAbi,
         res.contractsAddress,
@@ -113,10 +114,12 @@ export const useCreateProposal = ({
         description,
       )
 
-      console.log({ clauses })
-      return [clauses]
+      const delegateClause = buildDelegateVot3Tx(thor, account)
+
+      console.log({ createProposalClause, delegateClause })
+      return [delegateClause, createProposalClause]
     },
-    [thor],
+    [thor, account],
   )
 
   const onMutate = useCallback(

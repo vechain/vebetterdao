@@ -1,8 +1,7 @@
 import { useGetTxReceipt } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { UseMutateFunction, useMutation } from "@tanstack/react-query"
-import { useConnex } from "@vechain/dapp-kit-react"
-import error from "next/error"
+import { useConnex, useWallet } from "@vechain/dapp-kit-react"
 import { useCallback, useEffect, useState } from "react"
 
 /**
@@ -72,6 +71,7 @@ export const useSendTransaction = ({
 }: UseSendTransactionProps): UseSendTransactionReturnValue => {
   const toast = useToast()
   const { vendor, thor } = useConnex()
+  const { account } = useWallet()
 
   async function convertClauses(
     clauses: EnhancedClause[] | (() => EnhancedClause[]) | (() => Promise<EnhancedClause[]>),
@@ -147,6 +147,7 @@ export const useSendTransaction = ({
   }
 
   useEffect(() => {
+    console.log({ txReceipt })
     if (!txReceipt) return
     if (txReceipt.reverted) {
       ;(async () => explainTxRevertReason(txReceipt))()
