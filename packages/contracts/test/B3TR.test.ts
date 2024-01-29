@@ -1,6 +1,7 @@
 import { ethers } from "hardhat"
 import { expect } from "chai"
 import { getOrDeployContractInstances } from "./helpers"
+import { describe, it } from "mocha"
 
 describe("B3TR", function () {
   describe("Deployment", function () {
@@ -39,7 +40,7 @@ describe("B3TR", function () {
     })
 
     it("minter role is set correctly upon deploy", async function () {
-      const { b3tr, owner, otherAccount, minterAccount } = await getOrDeployContractInstances()
+      const { b3tr, otherAccount, minterAccount } = await getOrDeployContractInstances()
       const operatorRole = await b3tr.MINTER_ROLE()
 
       const res = await b3tr.hasRole(operatorRole, minterAccount)
