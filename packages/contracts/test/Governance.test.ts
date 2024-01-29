@@ -186,9 +186,6 @@ describe("Governor and TimeLock", function () {
       // Now we can create a new proposal
       const tx = await createProposal(governor, b3tr, B3trContract, otherAccount, description, functionToCall, [])
       proposalId = await getProposalIdFromTx(tx, governor)
-
-      // Let's wait a block to update the votes snapshot
-      await waitForNextBlock()
     })
 
     it("cannot vote if proposal is not in active state", async function () {
