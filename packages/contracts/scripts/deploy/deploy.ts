@@ -3,7 +3,6 @@ import { B3TR, GovernorContract, TimeLock, VOT3 } from "../../typechain-types"
 
 const DEFAULT_MINTER = "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68" //2nd account from mnemonic of solo network
 const TIMELOCK_ADMIN = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa" //1st account from mnemonic of solo network
-const ADDRESS_ZERO = "0x0000000000000000000000000000000000000000"
 
 // Governor Values
 const QUORUM_PERCENTAGE = 4 // 4 -> Need 4% of voters to pass
