@@ -1,10 +1,4 @@
-import {
-  getB3TrTokenDetailsQueryKey,
-  getB3TrBalanceQueryKey,
-  useB3trTokenDetails,
-  buildCreateProposalTx,
-  queryClient,
-} from "@/api"
+import { buildCreateProposalTx } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
@@ -33,11 +27,13 @@ export type ProposalAction = {
  * Data required to create a proposal. Multiple actions could be provided in case we want multiple function to be executed
  */
 export type useCreateProposalProps = {
-  description?: string
-  actions: ProposalAction[]
   invalidateCache?: boolean
   onSuccess?: () => void
 }
+
+type useCreateProposalReturnValue = {
+  sendTransaction: (description?: string, actions?: ProposalAction[]) => Promise<void>
+} & Omit<UseSendTransactionReturnValue, "sendTransaction">
 
 /**
  * Hook to create a proposal with the given calldata or actions. I.e functions to call if the proposal is executed
@@ -47,46 +43,13 @@ export type useCreateProposalProps = {
  * @returns see {@link UseSendTransactionReturnValue}
  */
 export const useCreateProposal = ({
-  description,
-  actions,
   invalidateCache = true,
   onSuccess,
-}: useCreateProposalProps): UseSendTransactionReturnValue => {
+}: useCreateProposalProps): useCreateProposalReturnValue => {
   const { thor } = useConnex()
   const { account } = useWallet()
   const toast = useToast()
   const queryClient = useQueryClient()
-
-  const buildClauses = useCallback(() => {
-    if (!description) throw new Error("description is required")
-    if (!actions) throw new Error("actions is required")
-
-    type ReducedActions = {
-      contractsAbi: AvailableContractAbis[]
-      contractsAddress: string[]
-      functionsParams: any[][]
-    }
-    // Using Array.reduce to map objects into separate arrays based on keys
-    const res: ReducedActions = actions.reduce(
-      (result, obj) => {
-        if (!obj.contractAbi) throw new Error("contractAbi is required")
-        result.contractsAbi.push(obj.contractAbi)
-        result.contractsAddress.push(obj.contractAddress)
-        result.functionsParams.push(obj.functionParams.map(param => param.value))
-        return result
-      },
-      { contractsAbi: [], contractsAddress: [], functionsParams: [] } as ReducedActions,
-    )
-
-    const clauses = buildCreateProposalTx(
-      thor,
-      res.contractsAbi,
-      res.contractsAddress,
-      res.functionsParams,
-      description,
-    )
-    return [clauses]
-  }, [thor, actions])
 
   //Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {
@@ -119,9 +82,53 @@ export const useCreateProposal = ({
 
   const result = useSendTransaction({
     signerAccount: account,
-    clauses: buildClauses,
     onTxConfirmed: handleOnSuccess,
   })
 
-  return result
+  const buildClauses = useCallback(
+    (description: string, actions: ProposalAction[]) => {
+      type ReducedActions = {
+        contractsAbi: AvailableContractAbis[]
+        contractsAddress: string[]
+        functionsParams: (string | number)[][]
+      }
+      console.log({ actions })
+      // Using Array.reduce to map objects into separate arrays based on keys
+      const res: ReducedActions = actions.reduce(
+        (result, obj) => {
+          if (!obj.contractAbi) throw new Error("contractAbi is required")
+          result.contractsAbi.push(obj.contractAbi)
+          result.contractsAddress.push(obj.contractAddress)
+          result.functionsParams.push(obj.functionParams.map(param => param.value))
+          return result
+        },
+        { contractsAbi: [], contractsAddress: [], functionsParams: [] } as ReducedActions,
+      )
+
+      const clauses = buildCreateProposalTx(
+        thor,
+        res.contractsAbi,
+        res.contractsAddress,
+        res.functionsParams,
+        description,
+      )
+
+      console.log({ clauses })
+      return [clauses]
+    },
+    [thor],
+  )
+
+  const onMutate = useCallback(
+    async (description?: string, actions?: ProposalAction[]) => {
+      if (!description) throw new Error("description is required")
+      if (!actions) throw new Error("actions is required")
+
+      const clauses = buildClauses(description, actions)
+      return result.sendTransaction(clauses)
+    },
+    [buildClauses],
+  )
+
+  return { ...result, sendTransaction: onMutate }
 }

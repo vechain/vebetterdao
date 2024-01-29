@@ -2,6 +2,7 @@ import { useGetTxReceipt } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { UseMutateFunction, useMutation } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
+import error from "next/error"
 import { useCallback, useEffect, useState } from "react"
 
 /**
@@ -31,7 +32,7 @@ type EnhancedClause = Connex.VM.Clause & {
  */
 type UseSendTransactionProps = {
   signerAccount?: string | null
-  clauses: EnhancedClause[] | (() => EnhancedClause[]) | (() => Promise<EnhancedClause[]>)
+  clauses?: EnhancedClause[] | (() => EnhancedClause[]) | (() => Promise<EnhancedClause[]>)
   onTxConfirmed?: () => void | Promise<void>
 }
 
@@ -47,7 +48,7 @@ type UseSendTransactionProps = {
  * @param resetStatus function to reset the status to "ready"
  */
 export type UseSendTransactionReturnValue = {
-  sendTransaction: UseMutateFunction<Connex.Vendor.TxResponse, Error, void, unknown>
+  sendTransaction: UseMutateFunction<Connex.Vendor.TxResponse, Error, EnhancedClause[] | undefined, unknown>
   sendTransactionPending: boolean
   sendTransactionError: Error | null
   isTxReceiptLoading: boolean
@@ -82,10 +83,30 @@ export const useSendTransaction = ({
   }
 
   const sendTransaction = async () => {
+    if (!clauses) throw new Error("clauses is required")
     return await convertClauses(clauses).then(clauses => {
       if (signerAccount) return vendor.sign("tx", clauses).signer(signerAccount).request()
       return vendor.sign("tx", clauses).request()
     })
+  }
+
+  /**
+   * Send a transaction with the given clauses (in case you need to pass data to build the clauses to mutate directly)
+   * @returns see {@link UseSendTransactionReturnValue}
+   */
+  const sendTransactionWithClauses = async (clauses: EnhancedClause[]) => {
+    if (signerAccount) return vendor.sign("tx", clauses).signer(signerAccount).request()
+    return vendor.sign("tx", clauses).request()
+  }
+
+  /**
+   *  Send a transaction with the given clauses (in case you need to pass data to build the clauses to mutate directly)
+   * @param clauses clauses to send in the transaction
+   * @returns see {@link UseSendTransactionReturnValue}
+   */
+  const sendTransactionAdapter = async (clauses?: EnhancedClause[]) => {
+    if (clauses) return await sendTransactionWithClauses(clauses)
+    return await sendTransaction()
   }
 
   const {
@@ -94,8 +115,9 @@ export const useSendTransaction = ({
     isPending: sendTransactionPending,
     error: sendTransactionError,
   } = useMutation({
-    mutationFn: sendTransaction,
+    mutationFn: sendTransactionAdapter,
     onError: error => {
+      console.error(error)
       toast({
         title: "Error while signing the transaction.",
         description: `${error.message}`,

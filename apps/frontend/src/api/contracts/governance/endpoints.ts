@@ -45,7 +45,7 @@ export const buildCreateProposalTx = (
   thor: Connex.Thor,
   contractsAbi: (typeof Contract.abi)[number][],
   targets: string[],
-  values: number[][],
+  values: (string | number)[][],
   description: string,
 ): Connex.Vendor.TxMessage[0] => {
   console.log({
@@ -64,9 +64,11 @@ export const buildCreateProposalTx = (
   const callData: string[] = []
   // build the callData for each contractAbi
   for (const [index, contractAbi] of contractsAbi.entries()) {
-    const functionCallValues = values[index] as number[]
+    const functionCallValues = values[index] as (string | number)[]
+    console.log({ functionCallValues })
     const functionAbiInstance = new abi.Function(contractAbi as abi.Function.Definition)
-    const encodedCallData = functionAbiInstance.encode(functionCallValues)
+    console.log({ functionAbiInstance })
+    const encodedCallData = functionAbiInstance.encode(...functionCallValues)
     callData.push(encodedCallData)
   }
 

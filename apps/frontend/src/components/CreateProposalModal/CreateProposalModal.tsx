@@ -116,18 +116,18 @@ export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
     console.log({ errors })
   }, [errors])
 
-  const createProposal = useCreateProposal({
-    actions: [
-      {
-        contractAbi: selectedAbi,
-        contractAddress: watchContract,
-        functionParams: fields.map(field => field.value),
-      },
-    ],
-    description: watchDescription,
-  })
+  const createProposal = useCreateProposal({})
 
-  const onSubmit = (data: FormData) => createProposal.sendTransaction()
+  const onSubmit = (data: FormData) => {
+    console.log({ data })
+    createProposal.sendTransaction(data.description, [
+      {
+        contractAddress: data.contractAddress,
+        contractAbi: selectedAbi,
+        functionParams: data.functionParams,
+      },
+    ])
+  }
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
