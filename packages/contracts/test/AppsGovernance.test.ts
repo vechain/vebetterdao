@@ -1,5 +1,5 @@
 import { ethers } from "hardhat"
-import { addApp, createProposal, createProposalAndExecuteIt, getOrDeployContractInstances, getProposalIdFromTx, mintAndDelegate, waitForNextBlock, waitForVotingPeriodToEnd, waitForVotingPeriodToStart } from "./helpers"
+import { createProposalAndExecuteIt, getOrDeployContractInstances, mintAndSelfDelegate, waitForVotingPeriodToEnd, waitForProposalToBeActive } from "./helpers"
 import { expect } from "chai"
 import { keccak256 } from "ethers"
 import { wait } from "@vechain/web3-providers-connex/dist/utils"
@@ -8,7 +8,7 @@ import { AppVotingGovernor, GovernorContract } from "../typechain-types"
 
 describe("Apps Governance", function () {
     describe("Add app, start round and vote", function () {
-        it.only("Governor should be able to add app", async function () {
+        it("Governor should be able to add app", async function () {
             const {
                 b3tr,
                 vot3,
@@ -22,9 +22,9 @@ describe("Apps Governance", function () {
             const voter1 = otherAccounts[0]
             const voter2 = otherAccounts[1]
             const voter3 = otherAccounts[2]
-            await mintAndDelegate(voter1, "100")
-            await mintAndDelegate(voter2, "100")
-            await mintAndDelegate(voter3, "100")
+            await mintAndSelfDelegate(voter1, "100")
+            await mintAndSelfDelegate(voter2, "100")
+            await mintAndSelfDelegate(voter3, "100")
             // console.log("Done", await appVotingContract.clock());
             // await waitForNextBlock()
             // console.log("Past total supply",
@@ -93,7 +93,7 @@ describe("Apps Governance", function () {
 
             // As normal governance proposal there is a voting delay period, but this can be set to 0
             console.log("Wait for voting period to start");
-            await waitForVotingPeriodToStart(proposalId, appVotingContract)
+            await waitForProposalToBeActive(proposalId, appVotingContract)
             console.log("----------------------------------------------------");
 
             console.log("START VOTING");
@@ -176,7 +176,7 @@ describe("Apps Governance", function () {
             votes = await appVotingContract.getCurrentAppVotes(app2Code)
             console.log("Votes for app 2: ", ethers.formatEther(votes));
 
-            await waitForVotingPeriodToStart(proposalId2, appVotingContract)
+            await waitForProposalToBeActive(proposalId2, appVotingContract)
 
             console.log("I should still be able to see votes of round 1 while voting for round 2");
             const resultRound1 = await appVotingContract.getRoundResults(proposalId.toString())

@@ -11,6 +11,7 @@ import {
   waitForVotingPeriodToEnd,
   catchRevert,
   waitForProposalToBeActive,
+  defaultVotingDelay,
 } from "./helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it } from "mocha"
@@ -27,7 +28,7 @@ describe("Governor and TimeLock", function () {
       const votesThreshold = (await governor.proposalThreshold()).toString()
       const votingPeriod = (await governor.votingPeriod()).toString()
 
-      expect(votingDelay).to.eql("1")
+      expect(votingDelay).to.eql(defaultVotingDelay.toString())
       expect(votesThreshold).to.eql(defaultVotingTreshold.toString())
       expect(votingPeriod).to.eql(defaultVotingPeriod.toString())
 
@@ -198,7 +199,7 @@ describe("Governor and TimeLock", function () {
       const proposalState = await governor.state(proposalId)
       expect(proposalState.toString()).to.eql("0")
 
-      await catchRevert(governor.connect(voter3).castVote(proposalId, 1))
+      await catchRevert(governor.connect(voter1).castVote(proposalId, 1))
     })
 
     it("user without VOT3 can vote with weight 0", async function () {
@@ -269,6 +270,9 @@ describe("Governor and TimeLock", function () {
 
       expect(proposalState.toString()).to.eql("1") // active
 
+      let hasVoted = await governor.hasVoted(proposalId, await voter3.getAddress())
+      expect(hasVoted).to.eql(false)
+
       const tx = await governor.connect(voter3).castVote(proposalId, 1)
       const proposeReceipt = await tx.wait()
       const event = proposeReceipt?.logs[0]
@@ -288,7 +292,7 @@ describe("Governor and TimeLock", function () {
       // votes
       expect(decodedLogs?.args[3].toString()).not.to.eql("0")
 
-      const hasVoted = await governor.hasVoted(proposalId, await voter3.getAddress())
+      hasVoted = await governor.hasVoted(proposalId, await voter3.getAddress())
       expect(hasVoted).to.eql(true)
     })
 

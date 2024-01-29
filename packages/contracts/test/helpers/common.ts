@@ -1,5 +1,5 @@
 import { ethers, network } from "hardhat"
-import { GovernorContract } from "../../typechain-types"
+import { AppVotingGovernor, GovernorContract } from "../../typechain-types"
 import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { getOrDeployContractInstances } from "./deploy"
@@ -79,7 +79,7 @@ export const getProposalIdFromTx = async (tx: ContractTransactionResponse, gover
   return decodedLogs?.args[0]
 }
 
-export const waitForVotingPeriodToEnd = async (proposalId: number, governor: GovernorContract) => {
+export const waitForVotingPeriodToEnd = async (proposalId: number, governor: GovernorContract | AppVotingGovernor) => {
   const deadline = await governor.proposalDeadline(proposalId)
   // console.log(`Waiting for proposal ${proposalId} to end at block ${deadline}`);
 
@@ -89,7 +89,7 @@ export const waitForVotingPeriodToEnd = async (proposalId: number, governor: Gov
   await moveBlocks(parseInt((deadline - currentBlock + BigInt(1)).toString()))
 }
 
-export const waitForProposalToBeActive = async (proposalId: number, governor: GovernorContract): Promise<bigint> => {
+export const waitForProposalToBeActive = async (proposalId: number, governor: GovernorContract | AppVotingGovernor): Promise<bigint> => {
   let proposalState = await governor.state(proposalId) // proposal id of the proposal in the beforeAll step
 
   if (proposalState.toString() !== "1") {
@@ -107,78 +107,78 @@ export const waitForProposalToBeActive = async (proposalId: number, governor: Go
 }
 
 export const createProposalAndExecuteIt = async (
-    proposer: HardhatEthersSigner,
-    voter: HardhatEthersSigner,
-    governor: GovernorContract,
-    contractToCall: BaseContract,
-    Contract: ContractFactory,
-    description: string,
-    functionToCall: string,
-    args: any[] = []
+  proposer: HardhatEthersSigner,
+  voter: HardhatEthersSigner,
+  governor: GovernorContract,
+  contractToCall: BaseContract,
+  Contract: ContractFactory,
+  description: string,
+  functionToCall: string,
+  args: any[] = []
 ) => {
-    // load votes
-    // console.log("Loading votes");
-    await mintAndDelegate(voter, "1000")
-    await waitForNextBlock()
+  // load votes
+  // console.log("Loading votes");
+  await mintAndSelfDelegate(voter, "1000")
+  await waitForNextBlock()
 
-    // create a new proposal
-    // console.log("Creating proposal");
-    const tx = await createProposal(governor, contractToCall, Contract, proposer, description, functionToCall, args)
-    const proposalId = await getProposalIdFromTx(tx, governor)
+  // create a new proposal
+  // console.log("Creating proposal");
+  const tx = await createProposal(governor, contractToCall, Contract, proposer, description, functionToCall, args)
+  const proposalId = await getProposalIdFromTx(tx, governor)
 
-    // wait
-    // console.log("Waiting for voting period to start");
-    await waitForVotingPeriodToStart(proposalId, governor)
+  // wait
+  // console.log("Waiting for voting period to start");
+  await waitForProposalToBeActive(proposalId, governor)
 
-    // vote
-    // console.log("Voting");
-    await governor.connect(voter).castVote(proposalId, 1) // vote for
+  // vote
+  // console.log("Voting");
+  await governor.connect(voter).castVote(proposalId, 1) // vote for
 
-    // wait
-    // console.log("Waiting for voting period to end");
-    await waitForVotingPeriodToEnd(proposalId, governor)
+  // wait
+  // console.log("Waiting for voting period to end");
+  await waitForVotingPeriodToEnd(proposalId, governor)
 
-    // queue it
-    // console.log("Queueing");
-    const encodedFunctionCall = Contract.interface.encodeFunctionData(functionToCall, args)
-    const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
-    await governor.queue(
-        [await contractToCall.getAddress()],
-        [0],
-        [encodedFunctionCall],
-        descriptionHash
-    )
-    await waitForNextBlock()
+  // queue it
+  // console.log("Queueing");
+  const encodedFunctionCall = Contract.interface.encodeFunctionData(functionToCall, args)
+  const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
+  await governor.queue(
+    [await contractToCall.getAddress()],
+    [0],
+    [encodedFunctionCall],
+    descriptionHash
+  )
+  await waitForNextBlock()
 
-    // execute it
-    // console.log("Executing");
-    await governor.execute(
-        [await contractToCall.getAddress()],
-        [0],
-        [encodedFunctionCall],
-        descriptionHash
-    )
+  // execute it
+  // console.log("Executing");
+  await governor.execute(
+    [await contractToCall.getAddress()],
+    [0],
+    [encodedFunctionCall],
+    descriptionHash
+  )
 }
 
 export const addApp = async (
-    proposer: HardhatEthersSigner,
-    voter: HardhatEthersSigner,
-    appAddress: string,
-    governor: GovernorContract,
-    appVotingContract: AppVotingGovernor,
-    appCode: string = "test_app" + Math.random()
+  proposer: HardhatEthersSigner,
+  voter: HardhatEthersSigner,
+  appAddress: string,
+  governor: GovernorContract,
+  appVotingContract: AppVotingGovernor,
+  appCode: string = "test_app" + Math.random()
 ) => {
-    console.log("Create proposal to add a new App and execute it");
+  console.log("Create proposal to add a new App and execute it");
 
-    await createProposalAndExecuteIt(
-        proposer,
-        voter,
-        governor,
-        appVotingContract,
-        await ethers.getContractFactory("B3trApps"),
-        "Add app to the list", "addApp",
-        [appCode, "Bike 4 Life" + Math.random(), appAddress]
-    )
+  await createProposalAndExecuteIt(
+    proposer,
+    voter,
+    governor,
+    appVotingContract,
+    await ethers.getContractFactory("B3trApps"),
+    "Add app to the list", "addApp",
+    [appCode, "Bike 4 Life" + Math.random(), appAddress]
+  )
 
-    console.log("Done");
+  console.log("Done");
 }

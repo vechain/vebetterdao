@@ -4,22 +4,22 @@ import { ethers } from "hardhat"
 import { B3TR, B3trApps, GovernorContract, TimeLock, VOT3, AppVotingContract } from "../../typechain-types"
 
 interface DeployInstance {
-    B3trContract: ContractFactory
-    b3tr: B3TR & { deploymentTransaction(): ContractTransactionResponse; }
-    vot3: VOT3 & { deploymentTransaction(): ContractTransactionResponse; }
-    timeLock: TimeLock & { deploymentTransaction(): ContractTransactionResponse; }
-    governor: GovernorContract & { deploymentTransaction(): ContractTransactionResponse; }
-    appVotingContract: AppVotingContract & { deploymentTransaction(): ContractTransactionResponse; }
-    owner: HardhatEthersSigner
-    otherAccount: HardhatEthersSigner
-    minterAccount: HardhatEthersSigner
-    timelockAdmin: HardhatEthersSigner
-    otherAccounts: HardhatEthersSigner[]
+  B3trContract: ContractFactory
+  b3tr: B3TR & { deploymentTransaction(): ContractTransactionResponse; }
+  vot3: VOT3 & { deploymentTransaction(): ContractTransactionResponse; }
+  timeLock: TimeLock & { deploymentTransaction(): ContractTransactionResponse; }
+  governor: GovernorContract & { deploymentTransaction(): ContractTransactionResponse; }
+  appVotingContract: AppVotingContract & { deploymentTransaction(): ContractTransactionResponse; }
+  owner: HardhatEthersSigner
+  otherAccount: HardhatEthersSigner
+  minterAccount: HardhatEthersSigner
+  timelockAdmin: HardhatEthersSigner
+  otherAccounts: HardhatEthersSigner[]
 }
 
 export const defaultVotingPeriod = 15
 export const defaultVotingTreshold = 0
-export const defaultVotingDelay = 1
+export const defaultVotingDelay = 2
 
 let cachedDeployInstance: DeployInstance | undefined = undefined
 export const getOrDeployContractInstances = async (
@@ -42,15 +42,15 @@ export const getOrDeployContractInstances = async (
   const Vot3Contract = await ethers.getContractFactory("VOT3")
   const vot3 = await Vot3Contract.deploy(await b3tr.getAddress())
 
-    // Deploy TimeLock
-    const TimeLockContract = await ethers.getContractFactory("TimeLock")
-    const timeLock = await TimeLockContract.deploy(
-        0, //0 seconds delay for immediate execution
-        [],
-        [],
-        timelockAdmin,
-    )
-    await timeLock.waitForDeployment()
+  // Deploy TimeLock
+  const TimeLockContract = await ethers.getContractFactory("TimeLock")
+  const timeLock = await TimeLockContract.deploy(
+    0, //0 seconds delay for immediate execution
+    [],
+    [],
+    timelockAdmin,
+  )
+  await timeLock.waitForDeployment()
 
   // Deploy Governor
   const GovernorContract = await ethers.getContractFactory("GovernorContract")
@@ -72,18 +72,18 @@ export const getOrDeployContractInstances = async (
   await timeLock.connect(timelockAdmin).grantRole(EXECUTOR_ROLE, await governor.getAddress())
   await timeLock.connect(timelockAdmin).grantRole(CANCELLER_ROLE, await governor.getAddress())
 
-    // Deploy Governor
-    const AppVotingContract = await ethers.getContractFactory("AppVotingContract")
-    const appVotingContract = await AppVotingContract.deploy(
-        await vot3.getAddress(),
-        1, // quroum percentage
-        votingPeriod, // voting period
-        defaultVotingDelay, // voting delay
-        votingTreshold, // voting treshold
-        await timeLock.getAddress()
-    )
-    await appVotingContract.waitForDeployment()
+  // Deploy Governor
+  const AppVotingContract = await ethers.getContractFactory("AppVotingContract")
+  const appVotingContract = await AppVotingContract.deploy(
+    await vot3.getAddress(),
+    1, // quroum percentage
+    votingPeriod, // voting period
+    defaultVotingDelay, // voting delay
+    votingTreshold, // voting treshold
+    await timeLock.getAddress()
+  )
+  await appVotingContract.waitForDeployment()
 
-    cachedDeployInstance = { B3trContract, b3tr, vot3, timeLock, appVotingContract, governor, owner, otherAccount, minterAccount, timelockAdmin, otherAccounts }
-    return cachedDeployInstance
+  cachedDeployInstance = { B3trContract, b3tr, vot3, timeLock, appVotingContract, governor, owner, otherAccount, minterAccount, timelockAdmin, otherAccounts }
+  return cachedDeployInstance
 }
