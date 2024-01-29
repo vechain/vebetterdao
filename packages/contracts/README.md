@@ -106,7 +106,7 @@ const tx = await clauseBuilder
   .send()
 ```
 
-### Insigth explorer
+### Insight explorer
 
 If you need to inspect the transaction, you can use the `insight` explorer. We recomend using [this](https://github.com/vechainfoundation/rewards-insight-app/tree/main) repo since it handles the solo network.
 

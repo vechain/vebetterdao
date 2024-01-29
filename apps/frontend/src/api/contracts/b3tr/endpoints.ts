@@ -1,8 +1,10 @@
-import { config } from "@repo/config"
+import { getConfig } from "@repo/config"
 import Contract from "@repo/contracts/artifacts/contracts/B3TR.sol/B3TR.json"
 import { FormattingUtils } from "@repo/utils"
+import { TokenBalance, TokenDetails } from ".."
 const abi = Contract.abi
 
+const config = getConfig()
 const B3TR_CONTRACT = config.b3trContractAddress
 const VOT3_CONTRACT = config.vot3ContractAddress
 
@@ -14,13 +16,6 @@ console.log({ B3TR_CONTRACT, VOT3_CONTRACT })
  * @returns  {Promise<{name: string, symbol: string, decimals: number, totalSupply: string}>}
  */
 
-export type TokenDetails = {
-  name: string
-  symbol: string
-  decimals: number
-  circulatingSupply: string
-  totalSupply: string
-}
 export const getB3trTokenDetails = async (thor: Connex.Thor): Promise<TokenDetails> => {
   const functionAbi = abi.find(e => e.name === "tokenDetails")
   if (!functionAbi) return Promise.reject(new Error("Function abi not found for tokenDetails"))
@@ -41,16 +36,30 @@ export const getB3trTokenDetails = async (thor: Connex.Thor): Promise<TokenDetai
  *  Get the b3tr balance of an address from the contract
  * @param thor  The thor instance
  * @param address  The address to get the balance of. If not provided, will return an error (for better react-query DX)
- * @returns {Promise<string>}  The balance of the address
+ * @param scaleDecimals  The decimals of the token. Defaults to 18
+ * @returns Balance of the token in the form of {@link TokenBalance} (original, scaled down and formatted)
  */
-export const getB3trBalance = async (thor: Connex.Thor, address?: string): Promise<string> => {
+export const getB3trBalance = async (
+  thor: Connex.Thor,
+  address?: string,
+  scaleDecimals: number = 18,
+): Promise<TokenBalance> => {
   if (!address) return Promise.reject(new Error("Address not provided"))
   const functionAbi = abi.find(e => e.name === "balanceOf")
   if (!functionAbi) return Promise.reject(new Error("Function abi not found for balanceOf"))
   const res = await thor.account(B3TR_CONTRACT).method(functionAbi).call(address)
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
-  return res.decoded[0]
+
+  const original = res.decoded[0]
+  const scaled = FormattingUtils.scaleNumberDown(original, scaleDecimals)
+  const formatted = scaled === "0" ? "0" : FormattingUtils.humanNumber(scaled)
+
+  return {
+    original,
+    scaled,
+    formatted,
+  }
 }
 
 /**

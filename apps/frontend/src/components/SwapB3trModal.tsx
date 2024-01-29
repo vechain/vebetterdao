@@ -1,4 +1,4 @@
-import { TokenDetails, useB3trBalance, useB3trTokenDetails, useVot3Balance, useVot3TokenDetails } from "@/api"
+import { TokenBalance, useB3trBalance } from "@/api"
 import { useStakeB3tr } from "@/hooks"
 import {
   ModalOverlay,
@@ -33,7 +33,6 @@ type FormData = {
 export const SwapB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
   const { account } = useWallet()
   const { data: balance, isLoading: isBalanceLoading } = useB3trBalance(account ?? undefined)
-  const { data: tokenDetails, isLoading: isTokensDetailsLoading } = useB3trTokenDetails()
 
   const {
     handleSubmit,
@@ -50,14 +49,11 @@ export const SwapB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
     }
 
     const parsedPercentageAmount = Number(watchPercentageAmount) / 100
-    const balanceToSwap = Number(balance) * parsedPercentageAmount
+    const balanceToSwap = Number(balance.scaled) * parsedPercentageAmount
 
-    const decimals = tokenDetails?.decimals ?? 18
-
-    const scaledAmount = FormattingUtils.scaleNumberDown(balanceToSwap, decimals)
-    const formattedAmount = FormattingUtils.humanNumber(scaledAmount, scaledAmount)
-    return { formattedAmount, scaledAmount }
-  }, [tokenDetails, balance, watchPercentageAmount])
+    const formattedAmount = FormattingUtils.humanNumber(balanceToSwap)
+    return { formattedAmount, scaledAmount: balanceToSwap }
+  }, [balance, watchPercentageAmount])
 
   const {
     sendTransaction,
@@ -88,15 +84,8 @@ export const SwapB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
           onTryAgain={resetStatus}
         />
       )
-    return (
-      <SwapB3trModalFormContent
-        balance={balance}
-        tokenDetails={tokenDetails}
-        formattedAmount={formattedAmount}
-        control={control}
-      />
-    )
-  }, [status, balance, tokenDetails, formattedAmount, control])
+    return <SwapB3trModalFormContent balance={balance} formattedAmount={formattedAmount} control={control} />
+  }, [status, balance, formattedAmount, control])
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
@@ -109,26 +98,12 @@ export const SwapB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
 }
 
 type RedeemB3trModalFormContentProps = {
-  balance?: string
-  tokenDetails?: TokenDetails
+  balance?: TokenBalance
   formattedAmount: string
   control: Control<FormData, any>
 }
 
-const SwapB3trModalFormContent: React.FC<RedeemB3trModalFormContentProps> = ({
-  balance,
-  tokenDetails,
-  formattedAmount,
-  control,
-}) => {
-  const formattedBalance = useMemo(() => {
-    if (!balance) {
-      return "0"
-    }
-    const scaledAmount = FormattingUtils.scaleNumberDown(balance, tokenDetails?.decimals ?? 18)
-    return FormattingUtils.humanNumber(scaledAmount, scaledAmount)
-  }, [balance])
-
+const SwapB3trModalFormContent: React.FC<RedeemB3trModalFormContentProps> = ({ balance, formattedAmount, control }) => {
   return (
     <>
       <ModalHeader>Swap B3TR</ModalHeader>
@@ -152,7 +127,7 @@ const SwapB3trModalFormContent: React.FC<RedeemB3trModalFormContentProps> = ({
           />
           <HStack justify="space-between">
             <Text fontSize="sm">0 B3TR</Text>
-            <Text fontSize="sm">{formattedBalance} B3TR</Text>
+            <Text fontSize="sm">{balance?.formatted} B3TR</Text>
           </HStack>
           <FormHelperText>{`You've selected ${formattedAmount} B3TR `}</FormHelperText>
         </FormControl>

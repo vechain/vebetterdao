@@ -4,21 +4,22 @@ import { useConnex } from "@vechain/dapp-kit-react"
 
 export const getVot3TokenDetailsQueryKey = () => ["tokenDetails", "vot3"]
 export const useVot3TokenDetails = () => {
-    const { thor } = useConnex()
+  const { thor } = useConnex()
 
-    return useQuery({
-        queryKey: getVot3TokenDetailsQueryKey(),
-        queryFn: () => getVot3TokenDetails(thor),
-    })
+  return useQuery({
+    queryKey: getVot3TokenDetailsQueryKey(),
+    queryFn: () => getVot3TokenDetails(thor),
+  })
 }
 
 export const getVot3BalanceQueryKey = (address?: string) => ["balance", "vot3", address]
 export const useVot3Balance = (address?: string) => {
-    const { thor } = useConnex()
+  const { thor } = useConnex()
+  const { data: tokenDetails } = useVot3TokenDetails()
 
-    return useQuery({
-        queryKey: getVot3BalanceQueryKey(address),
-        queryFn: () => getVot3Balance(thor, address),
-        enabled: !!address,
-    })
+  return useQuery({
+    queryKey: getVot3BalanceQueryKey(address),
+    queryFn: () => getVot3Balance(thor, address, tokenDetails?.decimals),
+    enabled: !!address && !!tokenDetails?.decimals,
+  })
 }

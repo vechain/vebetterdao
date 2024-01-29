@@ -4,27 +4,23 @@
 
 A tool for airdropping B3tr tokens to multiple users.
 
-### Configuring .env file
-
-First you must create a `.env` file in the root of the app. `.env.template` can be used as a guide for this. You must provide values for the following:
-
-- `AIRDROP_TYPE` - The type of airdrop to perform (mint or transfer)
-- `NEXT_PUBLIC_NETWORK_TYPE` - What network to connect to
-- `INPUT_FILE` - The location of a file containing the addresses and amounts to airdrop
-- `SIGNING_PK` - The private key to sign the transactions with _(must be in hex format)_
-
-Optional:
-
-- `GAS_PRICE_COEF` - The gas price coefficient _(defaults to 0 if omitted)_
-- `MAX_CLAUSES_PER_TX` - The max number of clauses per transaction _(defaults to 100 if omitted)_
-
 ### Setting up input file
 
 The airdrop expects an input file as referenced by the `INPUT_FILE` env variable. This file contains the addresses and amounts for each airdrop recipient. See `input.json.template` for details of the structure of this file.
 
 ### Running
 
-When you have configured the application correctly simply run `yarn install` followed by `yarn airdrop` to run the airdrop. You should run this from the root of the monorepo. Turbo will ensure that the thor solo is running and the contracts have been deployed.
+To ensure you are using the correct node version run `nvm use`. Run `yarn install` to ensure the dependencies are installed correctly.
+
+The airdrop facility can be run either via a `CLI` or using environment variables.
+
+#### Command Line Interface (CLI)
+
+When you run the airdrop in CLI mode, you will be prompted to enter the relevant details for the airdrop. Simply run `yarn cli` and follow the instructions.
+
+#### Env Variables
+
+The CLI is appropriate when we are running the airdrop locally. However we may want to automate the airdrop. In this scenario it makes sense to configure the airdrop via a env variables instead. Simply create a `.env` file from the `.env.template` file contained in the repo and configure the values as you wish. Then run the airdrop with `yarn airdrop`.
 
 ### Troubleshooting
 
