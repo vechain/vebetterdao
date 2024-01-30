@@ -121,7 +121,7 @@ describe("VOT3", function () {
       expect(await vot3.stakedBalanceOf(otherAccount)).to.eql(ethers.parseEther("9"))
 
       // Unlock B3TR to burn VOT3
-      await catchRevert(vot3.connect(otherAccount).unstake(ethers.parseEther("10")))
+      await catchRevert(vot3.connect(otherAccount).unstake(ethers.parseEther("10"), { gasLimit: 10_000_000 }))
     })
 
     it("should not unlock B3TR if not enough staked balance, even if there is enough VOT3 balance)", async function () {
@@ -138,10 +138,10 @@ describe("VOT3", function () {
         .reverted
 
       // Lock B3TR to get VOT3
-      await expect(vot3.connect(otherAccount).stake(ethers.parseEther("7"))).not.to.be.reverted
-      // Wait 10 seconds, TODO: can we fix this?
-      await new Promise(resolve => setTimeout(resolve, 10000))
-      await expect(vot3.connect(otherAccounts[0]).stake(ethers.parseEther("8"))).not.to.be.reverted
+      await expect(vot3.connect(otherAccount).stake(ethers.parseEther("7"), { gasLimit: 10_000_000 })).not.to.be
+        .reverted
+      await expect(vot3.connect(otherAccounts[0]).stake(ethers.parseEther("8"), { gasLimit: 10_000_000 })).not.to.be
+        .reverted
 
       // Check balances
       expect(await b3tr.balanceOf(await vot3.getAddress())).to.eql(ethers.parseEther("15"))
@@ -153,7 +153,6 @@ describe("VOT3", function () {
       expect(await b3tr.balanceOf(otherAccounts[0])).to.eql(ethers.parseEther("992"))
       expect(await vot3.balanceOf(otherAccounts[0])).to.eql(ethers.parseEther("8"))
       expect(await vot3.stakedBalanceOf(otherAccounts[0])).to.eql(ethers.parseEther("8"))
-
       // Enable canTransfer
       await expect(vot3.connect(owner).setCanTransfer(true)).not.to.be.reverted
 
@@ -168,10 +167,11 @@ describe("VOT3", function () {
       expect(await vot3.stakedBalanceOf(otherAccounts[0])).to.eql(ethers.parseEther("8"))
 
       // Attempt to unlock 8 VOT3 from otherAccount
-      await catchRevert(vot3.connect(otherAccount).unstake(ethers.parseEther("8")))
+      await catchRevert(vot3.connect(otherAccount).unstake(ethers.parseEther("8"), { gasLimit: 10_000_000 }))
 
       // Finally unlock 7 VOT3 from otherAccount
-      await expect(vot3.connect(otherAccount).unstake(ethers.parseEther("7"))).not.to.be.reverted
+      await expect(vot3.connect(otherAccount).unstake(ethers.parseEther("7"), { gasLimit: 10_000_000 })).not.to.be
+        .reverted
     })
   })
 

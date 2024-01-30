@@ -60,13 +60,13 @@ describe("Governor and TimeLock", function () {
       await catchRevert(createProposal(governor, b3tr, B3trContract, owner, description, functionToCall, [], true))
     })
 
-    it("can create a proposal if user did not manually self delegated (because of automatic self-delegation)", async function () {
-      const { governor, B3trContract, vot3, b3tr, owner, minterAccount } = await getOrDeployContractInstances()
+    it("can create a proposal even if user did not manually self delegated (because of automatic self-delegation)", async function () {
+      const { governor, B3trContract, vot3, b3tr, owner, minterAccount } = await getOrDeployContractInstances(true)
 
       // Before creating a proposal, we need to mint some VOT3 tokens to the owner
       await b3tr.connect(minterAccount).mint(owner, ethers.parseEther("1000"))
       await b3tr.approve(await vot3.getAddress(), ethers.parseEther("9"))
-      await vot3.stake(ethers.parseEther("9"))
+      await vot3.stake(ethers.parseEther("9"), { gasLimit: 10_000_000 })
 
       await createProposal(governor, b3tr, B3trContract, owner, description, functionToCall, [], true)
     })
