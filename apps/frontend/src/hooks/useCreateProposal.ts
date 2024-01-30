@@ -113,9 +113,9 @@ export const useCreateProposal = ({
         description,
       )
 
-      const delegateClause = buildDelegateVot3Tx(thor, account)
+      //   const delegateClause = buildDelegateVot3Tx(thor, account)
 
-      return [delegateClause, createProposalClause]
+      return [createProposalClause]
     },
     [thor, account],
   )
