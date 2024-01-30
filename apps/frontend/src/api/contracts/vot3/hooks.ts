@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { getVot3Balance, getVot3TokenDetails } from "./endpoints"
+import { getVot3Balance, getVot3Delegates, getVot3TokenDetails } from "./endpoints"
 import { useConnex } from "@vechain/dapp-kit-react"
 
 export const getVot3TokenDetailsQueryKey = () => ["tokenDetails", "vot3"]
@@ -21,5 +21,16 @@ export const useVot3Balance = (address?: string) => {
     queryKey: getVot3BalanceQueryKey(address),
     queryFn: () => getVot3Balance(thor, address, tokenDetails?.decimals),
     enabled: !!address && !!tokenDetails?.decimals,
+  })
+}
+
+export const getVot3DelegatesQueryKey = (address?: string) => ["vot3", "delegates", address]
+export const useVot3Delegates = (address?: string) => {
+  const { thor } = useConnex()
+
+  return useQuery({
+    queryKey: getVot3BalanceQueryKey(address),
+    queryFn: () => getVot3Delegates(thor, address),
+    enabled: !!address,
   })
 }

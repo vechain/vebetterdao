@@ -17,8 +17,9 @@ import {
   HStack,
   Heading,
   ModalFooter,
+  Box,
 } from "@chakra-ui/react"
-import { FormattingUtils } from "@repo/utils"
+import { AddressUtils, FormattingUtils } from "@repo/utils"
 import { useFieldArray, useForm } from "react-hook-form"
 
 import { getConfig } from "@repo/config"
@@ -26,6 +27,9 @@ import { useEffect, useMemo } from "react"
 import { GenerateFunctionToCallParamsInput } from "./GenerateFunctionToCallParamsInput"
 import { FaPlus } from "react-icons/fa6"
 import { ProposalAction, useCreateProposal } from "@/hooks/useCreateProposal"
+import { useVot3Delegates } from "@/api"
+import { useWallet } from "@vechain/dapp-kit-react"
+import { useDelegateVot3 } from "@/hooks/useDelegateVot3"
 
 const config = getConfig()
 const AvailableContracts = config.governanceAvailableContracts
@@ -42,6 +46,12 @@ export type FormData = {
 } & Omit<ProposalAction, "contractAbi">
 
 export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
+  const { account } = useWallet()
+
+  const { data: vot3Delegates, isLoading: isVot3DelegatesLoading } = useVot3Delegates(account ?? undefined)
+
+  const { sendTransaction: delegate } = useDelegateVot3({ address: account ?? undefined })
+
   const {
     handleSubmit,
     register,
@@ -57,7 +67,6 @@ export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
   })
 
   const watchContract = watch("contractAddress")
-  const watchDescription = watch("description")
 
   const selectedExecutorContract = useMemo(() => {
     if (!watchContract) {
@@ -118,6 +127,36 @@ export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
       },
     ])
   }
+
+  const hasSelfDelegated = AddressUtils.compareAddresses(account ?? "", vot3Delegates ?? "")
+
+  const delegationMessage = useMemo(() => {
+    if (!vot3Delegates)
+      return (
+        <Heading size="xs" color="orange">
+          Your address is not self-delegated to VOT3. Click
+          <Button variant="link" onClick={() => delegate()}>
+            here
+          </Button>
+          to do so
+        </Heading>
+      )
+    if (!hasSelfDelegated)
+      return (
+        <Heading size="xs" color="orange">
+          Your address is not self-delegated to VOT3. Click
+          <Button variant="link" onClick={() => delegate()}>
+            here
+          </Button>
+          to do so
+        </Heading>
+      )
+    return (
+      <Heading size="xs" color="green">
+        Your address is self-delegated to VOT3
+      </Heading>
+    )
+  }, [isVot3DelegatesLoading, hasSelfDelegated, delegate])
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
@@ -205,10 +244,13 @@ export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
                   />
                 )
               })}
+              <Box alignSelf={"flex-start"} mt={2}>
+                {delegationMessage}
+              </Box>
             </VStack>
           </ModalBody>
           <ModalFooter>
-            <Button type="submit" leftIcon={<Icon as={FaPlus} />}>
+            <Button type="submit" leftIcon={<Icon as={FaPlus} />} isDisabled={!hasSelfDelegated}>
               Create proposal
             </Button>
           </ModalFooter>

@@ -115,6 +115,22 @@ export const buildUnstakeStakeB3trTx = (
 }
 
 /**
+ *  Get the vot3 balance of an address from the contract
+ * @param thor  The thor instance
+ * @param address  The address to check the delegates of. If not provided, will return an error (for better react-query DX)
+ * @returns the address chosen as delegate
+ */
+export const getVot3Delegates = async (thor: Connex.Thor, address?: string): Promise<string> => {
+  if (!address) return Promise.reject(new Error("Address not provided"))
+  const functionAbi = abi.find(e => e.name === "delegates")
+  if (!functionAbi) return Promise.reject(new Error("Function abi not found for delegates"))
+  const res = await thor.account(VOT3_CONTRACT).method(functionAbi).call(address)
+
+  if (res.vmError) return Promise.reject(new Error(res.vmError))
+
+  return res.decoded[0]
+}
+/**
  * Build the clause to delegate votes to the given address (used to delegate votes to the governance contract)
  * @param thor thor instance
  * @param address the address to mint the tokens to
