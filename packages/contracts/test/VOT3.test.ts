@@ -417,7 +417,7 @@ describe("VOT3", function () {
       expect(await vot3.delegates(otherAccount)).to.eql(otherAccount.address)
     })
 
-    it("Vote power is being tracked correclty", async function () {
+    it("Vote power is being tracked correctly", async function () {
       const { vot3, owner, minterAccount, otherAccount } = await getOrDeployContractInstances(true)
       // enable transferability
       await vot3.connect(owner).setCanTransfer(true)
