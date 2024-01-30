@@ -90,11 +90,9 @@ describe("VOT3", function () {
       expect(await vot3.stakedBalanceOf(otherAccount)).to.eql(ethers.parseEther("9"))
       expect(await b3tr.balanceOf(vot3Address)).to.eql(ethers.parseEther("9"))
 
-      // Wait 10 seconds, TODO: can we fix this?
-      await new Promise(resolve => setTimeout(resolve, 10000))
-
       // Unlock B3TR to burn VOT3
-      await expect(vot3.connect(otherAccount).unstake(ethers.parseEther("9"))).not.to.be.reverted
+      await expect(vot3.connect(otherAccount).unstake(ethers.parseEther("9"), { gasLimit: 10_000_000 })).not.to.be
+        .reverted
 
       // Check balances
       expect(await b3tr.balanceOf(otherAccount)).to.eql(ethers.parseEther("1000"))
@@ -433,7 +431,9 @@ describe("VOT3", function () {
       expect(await vot3.delegates(otherAccount)).to.eql(otherAccount.address)
 
       // transfer
-      const tx = await vot3.connect(otherAccount).transfer(minterAccount, ethers.parseEther("1"))
+      let tx = await vot3
+        .connect(otherAccount)
+        .transfer(minterAccount, ethers.parseEther("1"), { gasLimit: 10_000_000 })
       const receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
 
@@ -444,13 +444,15 @@ describe("VOT3", function () {
       expect(await vot3.getPastVotes(otherAccount, receipt.blockNumber - 1)).to.eql(ethers.parseEther("1000"))
 
       // transfer back
-      await vot3.connect(minterAccount).transfer(otherAccount, ethers.parseEther("1"))
+      await vot3.connect(minterAccount).transfer(otherAccount, ethers.parseEther("1"), { gasLimit: 10_000_000 })
+
       expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("1000"))
       expect(await vot3.getVotes(otherAccount)).to.eql(ethers.parseEther("1000"))
       expect(await vot3.delegates(otherAccount)).to.eql(otherAccount.address)
 
       // unstake
-      await vot3.connect(otherAccount).unstake(ethers.parseEther("1000"))
+      await vot3.connect(otherAccount).unstake(ethers.parseEther("1000"), { gasLimit: 10_000_000 })
+
       expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("0"))
       expect(await vot3.getVotes(otherAccount)).to.eql(ethers.parseEther("0"))
       expect(await vot3.delegates(otherAccount)).to.eql(otherAccount.address)
@@ -459,7 +461,7 @@ describe("VOT3", function () {
       expect(await vot3.delegates(await vot3.getAddress())).to.eql("0x0000000000000000000000000000000000000000")
     })
 
-    it.only("Automatic self-delegation should be triggered only once", async function () {
+    it("Automatic self-delegation should be triggered only once", async function () {
       const { vot3, b3tr, owner, minterAccount, otherAccount } = await getOrDeployContractInstances(true)
       // enable transferability
       await vot3.connect(owner).setCanTransfer(true)
@@ -506,7 +508,7 @@ describe("VOT3", function () {
       await getVot3Tokens(otherAccount, "1000")
 
       // delegate to another user
-      await vot3.connect(otherAccount).delegate(minterAccount.address)
+      await vot3.connect(otherAccount).delegate(minterAccount.address, { gasLimit: 10_000_000 })
 
       expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("1000"))
       expect(await vot3.getVotes(otherAccount)).to.eql(ethers.parseEther("0"))
