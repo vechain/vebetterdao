@@ -61,6 +61,11 @@ contract VOT3 is ERC20, ERC20Permit, ERC20Votes, AccessControl {
   // Overrides required by Solidity
   function _update(address from, address to, uint256 amount) internal override(ERC20, ERC20Votes) {
     super._update(from, to, amount);
+
+    // If we are not unstaking tokens and if user hasn't delegated yet then delegate to self
+    if (to != address(this) && delegates(to) == address(0)) {
+      _delegate(to, to);
+    }
   }
 
   function nonces(address owner) public view virtual override(ERC20Permit, Nonces) returns (uint256) {
