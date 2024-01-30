@@ -1,6 +1,7 @@
 import { getEvents } from "@/api/blockchain"
 import { getConfig } from "@repo/config"
 import GovernorContract from "@repo/contracts/artifacts/contracts/governance/GovernorContract.sol/GovernorContract.json"
+import dayjs from "dayjs"
 import { abi } from "thor-devkit"
 const governorContractAbi = GovernorContract.abi
 
@@ -29,6 +30,36 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
   //TODO: decode the events
   const events = await getEvents({ thor, filterCriteria })
   return events
+}
+
+/**
+ * Get the current proposal threshold from the governor contract (i.e the number of votes required to create a proposal)
+ * @param thor  the thor client
+ * @returns  the current proposal threshold
+ */
+export const getProposalThreshold = async (thor: Connex.Thor) => {
+  const proposalThresholdAbi = governorContractAbi.find(abi => abi.name === "proposalThreshold")
+  if (!proposalThresholdAbi) throw new Error("proposalThreshold function not found")
+  const res = await thor.account(GOVERNANCE_CONTRACT).method(proposalThresholdAbi).call()
+
+  if (res.vmError) return Promise.reject(new Error(res.vmError))
+  return res.decoded[0]
+}
+
+/**
+ * Get the votes of the given address at the given timepoint
+ * @param thor  the thor client
+ * @returns the votes of the given address at the given timepoint
+ */
+export const getVotes = async (thor: Connex.Thor, address?: string, timepoint: number = dayjs().unix()) => {
+  if (!address) throw new Error("address is required")
+  const getVotesAbi = governorContractAbi.find(abi => abi.name === "getVotes")
+  if (!getVotesAbi) throw new Error("getVotes function not found")
+  const res = await thor.account(GOVERNANCE_CONTRACT).method(getVotesAbi).call(address, timepoint)
+
+  if (res.vmError) return Promise.reject(new Error(res.vmError))
+
+  return res.decoded[0]
 }
 
 /**

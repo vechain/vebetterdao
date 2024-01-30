@@ -27,7 +27,7 @@ import { useEffect, useMemo } from "react"
 import { GenerateFunctionToCallParamsInput } from "./GenerateFunctionToCallParamsInput"
 import { FaPlus } from "react-icons/fa6"
 import { ProposalAction, useCreateProposal } from "@/hooks/useCreateProposal"
-import { useVot3Delegates } from "@/api"
+import { useGetVotes, useProposalThreshold, useVot3Delegates } from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useDelegateVot3 } from "@/hooks/useDelegateVot3"
 
@@ -48,9 +48,13 @@ export type FormData = {
 export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
   const { account } = useWallet()
 
+  const { data: proposalThreshold } = useProposalThreshold()
   const { data: vot3Delegates, isLoading: isVot3DelegatesLoading } = useVot3Delegates(account ?? undefined)
 
   const { sendTransaction: delegate } = useDelegateVot3({ address: account ?? undefined })
+  const { data: votes, error } = useGetVotes(account ?? undefined)
+
+  console.log({ votes, error, vot3Delegates })
 
   const {
     handleSubmit,
@@ -156,7 +160,7 @@ export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
         Your address is self-delegated to VOT3
       </Heading>
     )
-  }, [isVot3DelegatesLoading, hasSelfDelegated, delegate])
+  }, [isVot3DelegatesLoading, hasSelfDelegated, delegate, proposalThreshold])
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>

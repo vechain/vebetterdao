@@ -24,12 +24,17 @@ export const useVot3Balance = (address?: string) => {
   })
 }
 
+/**
+ * Return the address the user has delegated his votes to (if any)
+ * @param address the address of the user
+ * @returns  the address the user has delegated his votes to (if any)
+ */
 export const getVot3DelegatesQueryKey = (address?: string) => ["vot3", "delegates", address]
 export const useVot3Delegates = (address?: string) => {
   const { thor } = useConnex()
 
   return useQuery({
-    queryKey: getVot3BalanceQueryKey(address),
+    queryKey: getVot3DelegatesQueryKey(address),
     queryFn: () => getVot3Delegates(thor, address),
     enabled: !!address,
   })
