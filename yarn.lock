@@ -4476,25 +4476,25 @@
     randombytes "^2.1.0"
     thor-devkit "^2.0.5"
 
-"@vechain/dapp-kit-react@^1.0.2":
-  version "1.0.2"
-  resolved "https://npm.pkg.github.com/download/@vechain/dapp-kit-react/1.0.2/0fb6b6f4a81f90d77f986289446f93bfdbcd5150#0fb6b6f4a81f90d77f986289446f93bfdbcd5150"
-  integrity sha512-lGwYBrkhIzHclN7b6aCcf1ZTF3lmZcCKD7D08fz54s6nZhhYypv88zDjXuInQLgXTZpxkaj1LnvRyr7VPWjuIA==
+"@vechain/dapp-kit-react@^1.0.3":
+  version "1.0.3"
+  resolved "https://npm.pkg.github.com/download/@vechain/dapp-kit-react/1.0.3/35e254b5ec4ba1acb9cb3afd136e90b2f2baf259#35e254b5ec4ba1acb9cb3afd136e90b2f2baf259"
+  integrity sha512-41nNaa0uRFZQvAdophyH8d/fQ8ilI2TPNtYYMeT9lR6UpMbn+oKZFsn505XiCCq74ceSpArfNVrM5Rr3NeHWPQ==
   dependencies:
     "@lit/react" "^1.0.1"
     "@vechain/connex" "2.1.0"
     "@vechain/connex-framework" "2.1.0"
-    "@vechain/dapp-kit" "1.0.2"
-    "@vechain/dapp-kit-ui" "1.0.2"
+    "@vechain/dapp-kit" "*"
+    "@vechain/dapp-kit-ui" "*"
     thor-devkit "^2.0.9"
     valtio "^1.12.1"
 
-"@vechain/dapp-kit-ui@1.0.2", "@vechain/dapp-kit-ui@^1.0.2":
-  version "1.0.2"
-  resolved "https://npm.pkg.github.com/download/@vechain/dapp-kit-ui/1.0.2/51728dde50fd8c70c04727c67b17d7663fc0d356#51728dde50fd8c70c04727c67b17d7663fc0d356"
-  integrity sha512-eVJ4Gx9FGTOqvCh28SzLAhAM1I5OY20KAWi37zhdPHH8inpHlhp/AmdcHDEQmF8Yj9WPGeYnKiI5WX24qObyHQ==
+"@vechain/dapp-kit-ui@*", "@vechain/dapp-kit-ui@^1.0.3":
+  version "1.0.3"
+  resolved "https://npm.pkg.github.com/download/@vechain/dapp-kit-ui/1.0.3/b94f2d3f1002071eca671c1b5af85a6106d51743#b94f2d3f1002071eca671c1b5af85a6106d51743"
+  integrity sha512-kzj2Fz0iNqUtfxNKOlJDOMpshTBGkuzPYX0VptuDuQPhKinEfVWNbt2Pr0j24HyvOC2INq2m+/YTTE4lOTanWA==
   dependencies:
-    "@vechain/dapp-kit" "1.0.2"
+    "@vechain/dapp-kit" "*"
     "@vechain/picasso" "2.1.1"
     "@wagmi/core" "^1.4.5"
     "@web3modal/ethereum" "^2.7.1"
@@ -4504,10 +4504,10 @@
     valtio "^1.12.1"
     viem "^1.18.4"
 
-"@vechain/dapp-kit@1.0.2", "@vechain/dapp-kit@^1.0.2":
-  version "1.0.2"
-  resolved "https://npm.pkg.github.com/download/@vechain/dapp-kit/1.0.2/9057265cb216630507b80282da622ee38b8306a8#9057265cb216630507b80282da622ee38b8306a8"
-  integrity sha512-6egVFQlnkL38DPw+ABszcWeTJPZlj85ZNSCfQnI3uM6MS3Wr2rqD3w80e40RmlVDdjGcZnoAJZxzyuhilsl77g==
+"@vechain/dapp-kit@*", "@vechain/dapp-kit@^1.0.3":
+  version "1.0.3"
+  resolved "https://npm.pkg.github.com/download/@vechain/dapp-kit/1.0.3/53cd5bf1335ea8a8e4682d22d4f76a28a7e6eee2#53cd5bf1335ea8a8e4682d22d4f76a28a7e6eee2"
+  integrity sha512-upOaB28+KBTYDxACOWU5+potjVwkdkS5ZwIqEuc6B8yS4j0pvi1PpNpIdcK92XfHhtLjgadJctXVDks8Vw4vZg==
   dependencies:
     "@vechain/connex" "2.1.0"
     "@vechain/connex-driver" "2.1.0"

@@ -48,12 +48,6 @@ export const buildCreateProposalTx = (
   values: (string | number)[][],
   description: string,
 ): Connex.Vendor.TxMessage[0] => {
-  console.log({
-    contractsAbi,
-    targets,
-    values,
-    description,
-  })
   // all the arrays must have the same length as there is a 1 to 1 mapping between the elements
   const arrays = [contractsAbi, targets, values]
   const lengths = arrays.map(array => array.length)
@@ -65,9 +59,7 @@ export const buildCreateProposalTx = (
   // build the callData for each contractAbi
   for (const [index, contractAbi] of contractsAbi.entries()) {
     const functionCallValues = values[index] as (string | number)[]
-    console.log({ functionCallValues })
     const functionAbiInstance = new abi.Function(contractAbi as abi.Function.Definition)
-    console.log({ functionAbiInstance })
     const encodedCallData = functionAbiInstance.encode(...functionCallValues)
     callData.push(encodedCallData)
   }
@@ -75,11 +67,7 @@ export const buildCreateProposalTx = (
   // build the clause to create the proposal with the given parameters
   const proposalAbi = governorContractAbi.find(abi => abi.name === "propose")
   if (!proposalAbi) throw new Error("Proposal abi not found")
-  const proposalAbiInstance = new abi.Function(proposalAbi as abi.Function.Definition)
-  //   const encodedProposalData = proposalAbiInstance.encode([contractsAbi, targets, values, callData, description])
 
-  //TODO: Is values correct here ? The entire function was built considering that values are the parameters of the functions to call
-  // and not the values to send to the propose method
   const clause = thor.account(GOVERNANCE_CONTRACT).method(proposalAbi).asClause(targets, [0], callData, description)
 
   return {

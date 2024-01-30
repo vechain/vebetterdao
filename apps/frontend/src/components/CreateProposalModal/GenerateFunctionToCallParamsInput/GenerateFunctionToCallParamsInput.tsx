@@ -16,7 +16,6 @@ type Props = {
 }
 
 export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({ field, index, error, register }) => {
-  console.log({ field, error })
   if (field.type === "address") {
     return (
       <FormControl key={field.id} isInvalid={!!error}>

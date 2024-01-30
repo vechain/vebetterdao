@@ -98,8 +98,6 @@ export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
     return selectedContractFunctions.find(contractFunction => contractFunction.name === watchFunctionToCall)?.inputs
   }, [watchFunctionToCall])
 
-  console.log({ selectedAbi })
-
   //Create the fields for the function params inputs
   useEffect(() => {
     setValue("functionParams", [])
@@ -107,14 +105,6 @@ export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
       append({ ...input, id: input.name, value: "" })
     })
   }, [selectedContractFunctionInputs])
-
-  useEffect(() => {
-    console.log({ fields })
-  }, [fields])
-
-  useEffect(() => {
-    console.log({ errors })
-  }, [errors])
 
   const createProposal = useCreateProposal({})
 

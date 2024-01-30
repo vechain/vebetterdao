@@ -93,7 +93,6 @@ export const useCreateProposal = ({
         contractsAddress: string[]
         functionsParams: (string | number)[][]
       }
-      console.log({ actions })
       // Using Array.reduce to map objects into separate arrays based on keys
       const res: ReducedActions = actions.reduce(
         (result, obj) => {
@@ -116,7 +115,6 @@ export const useCreateProposal = ({
 
       const delegateClause = buildDelegateVot3Tx(thor, account)
 
-      console.log({ createProposalClause, delegateClause })
       return [delegateClause, createProposalClause]
     },
     [thor, account],
