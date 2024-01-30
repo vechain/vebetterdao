@@ -27,7 +27,7 @@ import { useEffect, useMemo } from "react"
 import { GenerateFunctionToCallParamsInput } from "./GenerateFunctionToCallParamsInput"
 import { FaPlus } from "react-icons/fa6"
 import { ProposalAction, useCreateProposal } from "@/hooks/useCreateProposal"
-import { useGetVotes, useProposalThreshold, useVot3Delegates } from "@/api"
+import { useGetVotes, useProposalThreshold, useVot3Balance, useVot3Delegates } from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useDelegateVot3 } from "@/hooks/useDelegateVot3"
 
@@ -52,9 +52,9 @@ export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
   const { data: vot3Delegates, isLoading: isVot3DelegatesLoading } = useVot3Delegates(account ?? undefined)
 
   const { sendTransaction: delegate } = useDelegateVot3({ address: account ?? undefined })
-  const { data: votes, error } = useGetVotes(account ?? undefined)
+  const { data: votes, isLoading: votesLoading } = useGetVotes(account ?? undefined)
 
-  console.log({ votes, error, vot3Delegates })
+  const { data: vot3Balance } = useVot3Balance(account ?? undefined)
 
   const {
     handleSubmit,
@@ -132,35 +132,43 @@ export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
     ])
   }
 
-  const hasSelfDelegated = AddressUtils.compareAddresses(account ?? "", vot3Delegates ?? "")
-
   const delegationMessage = useMemo(() => {
-    if (!vot3Delegates)
-      return (
-        <Heading size="xs" color="orange">
-          Your address is not self-delegated to VOT3. Click
-          <Button variant="link" onClick={() => delegate()}>
-            here
-          </Button>
-          to do so
-        </Heading>
-      )
-    if (!hasSelfDelegated)
-      return (
-        <Heading size="xs" color="orange">
-          Your address is not self-delegated to VOT3. Click
-          <Button variant="link" onClick={() => delegate()}>
-            here
-          </Button>
-          to do so
-        </Heading>
-      )
+    if (!votes || !vot3Balance || !proposalThreshold) return null
+
+    if (Number(votes) < Number(proposalThreshold)) {
+      if (Number(vot3Balance) > Number(proposalThreshold)) {
+        return (
+          <Heading size="xs" color="orange">
+            Your address is not self-delegated to VOT3. Click
+            <Button variant="link" onClick={() => delegate()}>
+              here
+            </Button>
+            to do so
+          </Heading>
+        )
+      } else {
+        return (
+          <Heading size="xs" color="orange">
+            You have not enough balance or delegated VOT3. You need to have at least {proposalThreshold} VOT3 to create
+            a proposal
+          </Heading>
+        )
+      }
+    }
+
     return (
       <Heading size="xs" color="green">
         Your address is self-delegated to VOT3
       </Heading>
     )
-  }, [isVot3DelegatesLoading, hasSelfDelegated, delegate, proposalThreshold])
+  }, [votes, vot3Balance, proposalThreshold])
+
+  const canCreateAProposal = useMemo(() => {
+    if (!votes || !vot3Balance || !proposalThreshold) return false
+
+    if (Number(votes) < Number(proposalThreshold)) return false
+    return true
+  }, [votes, vot3Balance, proposalThreshold])
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
@@ -254,7 +262,7 @@ export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
             </VStack>
           </ModalBody>
           <ModalFooter>
-            <Button type="submit" leftIcon={<Icon as={FaPlus} />} isDisabled={!hasSelfDelegated}>
+            <Button type="submit" leftIcon={<Icon as={FaPlus} />} isDisabled={!canCreateAProposal}>
               Create proposal
             </Button>
           </ModalFooter>

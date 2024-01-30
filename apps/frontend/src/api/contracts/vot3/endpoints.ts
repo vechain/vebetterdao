@@ -130,6 +130,24 @@ export const getVot3Delegates = async (thor: Connex.Thor, address?: string): Pro
 
   return res.decoded[0]
 }
+
+/**
+ * Get the number of votes of the given address (includes the delegated ones)
+ * @param thor  the thor client
+ * @returns the votes of the given address
+ */
+export const getVotes = async (thor: Connex.Thor, address?: string) => {
+  if (!address) throw new Error("address is required")
+
+  const getVotesAbi = abi.find(abi => abi.name === "getVotes")
+  if (!getVotesAbi) throw new Error("getVotes function not found")
+  const res = await thor.account(VOT3_CONTRACT).method(getVotesAbi).call(address)
+
+  if (res.vmError) return Promise.reject(new Error(res.vmError))
+
+  return res.decoded[0]
+}
+
 /**
  * Build the clause to delegate votes to the given address (used to delegate votes to the governance contract)
  * @param thor thor instance

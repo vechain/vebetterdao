@@ -46,21 +46,27 @@ export const getProposalThreshold = async (thor: Connex.Thor) => {
   return res.decoded[0]
 }
 
-/**
- * Get the votes of the given address at the given timepoint
- * @param thor  the thor client
- * @returns the votes of the given address at the given timepoint
- */
-export const getVotes = async (thor: Connex.Thor, address?: string, timepoint: number = dayjs().unix()) => {
-  if (!address) throw new Error("address is required")
-  const getVotesAbi = governorContractAbi.find(abi => abi.name === "getVotes")
-  if (!getVotesAbi) throw new Error("getVotes function not found")
-  const res = await thor.account(GOVERNANCE_CONTRACT).method(getVotesAbi).call(address, timepoint)
+// /**
+//  * Get the votes of the given address at the given timepoint
+//  * @param thor  the thor client
+//  * @returns the votes of the given address at the given timepoint
+//  */
+// export const getVotes = async (thor: Connex.Thor, address?: string) => {
+//   if (!address) throw new Error("address is required")
 
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
+//   const timepoint = thor.status.head.number
 
-  return res.decoded[0]
-}
+//   console.log({ timepoint })
+
+//   const getVotesAbi = governorContractAbi.find(abi => abi.name === "getVotes")
+//   if (!getVotesAbi) throw new Error("getVotes function not found")
+//   const res = await thor.account(GOVERNANCE_CONTRACT).method(getVotesAbi).call(address, timepoint)
+
+//   console.log({ res })
+//   if (res.vmError) return Promise.reject(new Error(res.vmError))
+
+//   return res.decoded[0]
+// }
 
 /**
  * Build the clause to create a proposal with the given parameters
