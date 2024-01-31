@@ -217,7 +217,7 @@ describe("VOT3", function () {
         await vot3.connect(otherAccount).transferFrom(otherAccount, owner, ethers.parseEther("1"))
         assert.fail("The transaction should have failed")
       } catch (err: any) {
-        console.log("")
+        /* empty */
       }
     })
 
