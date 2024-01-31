@@ -6,6 +6,31 @@ const governorContractAbi = GovernorContract.abi
 
 const GOVERNANCE_CONTRACT = getConfig().governorContractAddress
 
+type ProposalCreatedEvent = {
+  proposalId: string
+  proposer: string
+  targets: string[]
+  values: string[]
+  signatures: string[]
+  callDatas: string[]
+  voteStart: string
+  voteEnd: string
+  description: string
+}
+
+type ProposalCanceledEvent = {
+  proposalId: string
+}
+
+type ProposalExecutedEvent = {
+  proposalId: string
+}
+
+type ProposalQueuedEvent = {
+  proposalId: string
+  etaSeconds: string
+}
+
 export const getProposalsEvents = async (thor: Connex.Thor) => {
   const proposalCreatedAbi = governorContractAbi.find(abi => abi.name === "ProposalCreated")
   if (!proposalCreatedAbi) throw new Error("ProposalCreated event not found")
@@ -15,6 +40,18 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
   if (!proposalCanceledAbi) throw new Error("ProposalCanceled event not found")
   const proposalCanceledEvent = new abi.Event(proposalCanceledAbi as abi.Event.Definition)
 
+  const proposalExecutedAbi = governorContractAbi.find(abi => abi.name === "ProposalExecuted")
+  if (!proposalExecutedAbi) throw new Error("ProposalExecuted event not found")
+  const proposalExecutedEvent = new abi.Event(proposalExecutedAbi as abi.Event.Definition)
+
+  const proposalQueuedAbi = governorContractAbi.find(abi => abi.name === "ProposalQueued")
+  if (!proposalQueuedAbi) throw new Error("ProposalQueued event not found")
+  const proposalQueuedEvent = new abi.Event(proposalQueuedAbi as abi.Event.Definition)
+
+  /**
+   * Filter criteria to get the events from the governor contract that we are interested in
+   * This way we can get all of them in one call
+   */
   const filterCriteria = [
     {
       address: GOVERNANCE_CONTRACT,
@@ -24,11 +61,78 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
       address: GOVERNANCE_CONTRACT,
       topic0: proposalCanceledEvent.signature,
     },
+    {
+      address: GOVERNANCE_CONTRACT,
+      topic0: proposalExecutedEvent.signature,
+    },
+    {
+      address: GOVERNANCE_CONTRACT,
+      topic0: proposalQueuedEvent.signature,
+    },
   ]
 
-  //TODO: decode the events
   const events = await getEvents({ thor, filterCriteria })
-  return events
+
+  console.log({ events })
+
+  /**
+   * Decode the events to get the data we are interested in (i.e the proposals)
+   */
+  const decodedCreatedProposalEvents: ProposalCreatedEvent[] = []
+  const decodedCanceledProposalEvents: ProposalCanceledEvent[] = []
+  const decodedExecutedProposalEvents: ProposalExecutedEvent[] = []
+  const decodedQueuedProposalEvents: ProposalQueuedEvent[] = []
+  events.forEach(event => {
+    switch (event.topics[0]) {
+      case proposalCreatedEvent.signature: {
+        const decoded = proposalCreatedEvent.decode(event.data, event.topics)
+        decodedCreatedProposalEvents.push({
+          proposalId: decoded[0],
+          proposer: decoded[1],
+          targets: decoded[2],
+          values: decoded[3],
+          signatures: decoded[4],
+          callDatas: decoded[5],
+          voteStart: decoded[6],
+          voteEnd: decoded[7],
+          description: decoded[8],
+        })
+        break
+      }
+      case proposalCanceledEvent.signature: {
+        const decoded = proposalCanceledEvent.decode(event.data, event.topics)
+        decodedCanceledProposalEvents.push({
+          proposalId: decoded[0],
+        })
+        break
+      }
+      case proposalExecutedEvent.signature: {
+        const decoded = proposalExecutedEvent.decode(event.data, event.topics)
+        decodedExecutedProposalEvents.push({
+          proposalId: decoded[0],
+        })
+        break
+      }
+      case proposalQueuedEvent.signature: {
+        const decoded = proposalQueuedEvent.decode(event.data, event.topics)
+        decodedQueuedProposalEvents.push({
+          proposalId: decoded[0],
+          etaSeconds: decoded[1],
+        })
+        break
+      }
+      default: {
+        throw new Error("Unknown event")
+      }
+    }
+  })
+
+  return {
+    created: decodedCreatedProposalEvents,
+    canceled: decodedCanceledProposalEvents,
+    executed: decodedExecutedProposalEvents,
+    queued: decodedQueuedProposalEvents,
+  }
 }
 
 /**

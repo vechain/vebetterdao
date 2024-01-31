@@ -1,12 +1,12 @@
 "use client"
 
-import { useProposalCreatedEvents } from "@/api"
+import { useProposalsEvents } from "@/api"
 import { CreateProposalButton } from "@/components"
 import { Box, HStack, Heading, Icon, Text, VStack } from "@chakra-ui/react"
 import { FaScroll } from "react-icons/fa"
 
 export default function ProposalsPage() {
-  const { data } = useProposalCreatedEvents()
+  const { data } = useProposalsEvents()
   console.log({ data })
 
   return (
@@ -19,7 +19,7 @@ export default function ProposalsPage() {
               Proposals
             </Heading>
           </HStack>
-          <Text fontSize="lg">Total: {data?.length}</Text>
+          <Text fontSize="lg">Total: {data?.created.length}</Text>
         </Box>
         <CreateProposalButton />
       </HStack>

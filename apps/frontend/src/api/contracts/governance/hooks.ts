@@ -2,12 +2,17 @@ import { useQuery } from "@tanstack/react-query"
 import { getProposalThreshold, getProposalsEvents } from "./endpoints"
 import { useConnex } from "@vechain/dapp-kit-react"
 
-export const getProposalsCreatedEventsQueryKey = () => ["proposalCreatedEvents"]
-export const useProposalCreatedEvents = () => {
+export const getProposalEvents = () => ["proposalsEvents"]
+
+/**
+ *  Hook to get the proposals events from the governor contract (i.e the proposals created, canceled and executed)
+ * @returns  the proposals events
+ */
+export const useProposalsEvents = () => {
   const { thor } = useConnex()
 
   return useQuery({
-    queryKey: getProposalsCreatedEventsQueryKey(),
+    queryKey: getProposalEvents(),
     queryFn: async () => await getProposalsEvents(thor),
     enabled: !!thor,
   })
