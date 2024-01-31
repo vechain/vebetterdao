@@ -112,7 +112,8 @@ describe("VOT3", function () {
         .reverted
 
       // Lock B3TR to get VOT3
-      await expect(vot3.connect(otherAccount).stake(ethers.parseEther("9"))).not.to.be.reverted
+      await expect(vot3.connect(otherAccount).stake(ethers.parseEther("9"), { gasLimit: 10_000_000 })).not.to.be
+        .reverted
 
       // Check balances
       expect(await b3tr.balanceOf(otherAccount)).to.eql(ethers.parseEther("991"))
@@ -157,7 +158,9 @@ describe("VOT3", function () {
       await expect(vot3.connect(owner).setCanTransfer(true)).not.to.be.reverted
 
       // Transfer VOT3 from otherAccounts[0] to otherAccount
-      await expect(vot3.connect(otherAccounts[0]).transfer(otherAccount, ethers.parseEther("2"))).not.to.be.reverted
+      await expect(
+        vot3.connect(otherAccounts[0]).transfer(otherAccount, ethers.parseEther("2"), { gasLimit: 10_000_000 }),
+      ).not.to.be.reverted
 
       // Check balances
       expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("9"))
@@ -213,7 +216,9 @@ describe("VOT3", function () {
         // Transfer VOT3
         await vot3.connect(otherAccount).transferFrom(otherAccount, owner, ethers.parseEther("1"))
         assert.fail("The transaction should have failed")
-      } catch (err: any) { }
+      } catch (err: any) {
+        console.log("Error: ", err.message)
+      }
     })
 
     it("approve", async function () {
@@ -435,7 +440,7 @@ describe("VOT3", function () {
         .connect(otherAccount)
         .transfer(minterAccount, ethers.parseEther("1"), { gasLimit: 10_000_000 })
       const receipt = await tx.wait()
-      if (!receipt) throw new Error("No receipt")
+      if (!receipt) assert.fail("No receipt")
 
       expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("999"))
       expect(await vot3.getVotes(otherAccount)).to.eql(ethers.parseEther("999"))
@@ -477,7 +482,7 @@ describe("VOT3", function () {
       let proposeReceipt = await tx.wait()
 
       let events = proposeReceipt?.logs
-      if (!events) throw new Error("No events")
+      if (!events) assert.fail("No events")
 
       // DelegateChanged event should be emitted
       let delegateChangedEvents = events.filter(
@@ -492,7 +497,7 @@ describe("VOT3", function () {
       proposeReceipt = await secondTx.wait()
 
       events = proposeReceipt?.logs
-      if (!events) throw new Error("No events")
+      if (!events) assert.fail("No events")
 
       // DelegateChanged event should be emitted
       delegateChangedEvents = events.filter((event: any) => event.fragment && event.fragment.name === "DelegateChanged")
