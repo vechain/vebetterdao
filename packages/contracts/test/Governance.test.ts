@@ -65,8 +65,8 @@ describe("Governor and TimeLock", function () {
 
       // Before creating a proposal, we need to mint some VOT3 tokens to the owner
       await b3tr.connect(minterAccount).mint(owner, ethers.parseEther("1000"))
-      await b3tr.approve(await vot3.getAddress(), ethers.parseEther("9"))
-      await vot3.stake(ethers.parseEther("9"), { gasLimit: 10_000_000 })
+      await b3tr.connect(owner).approve(await vot3.getAddress(), ethers.parseEther("9"))
+      await vot3.connect(owner).stake(ethers.parseEther("9"), { gasLimit: 10_000_000 })
 
       await createProposal(governor, b3tr, B3trContract, owner, description, functionToCall, [], true)
     })

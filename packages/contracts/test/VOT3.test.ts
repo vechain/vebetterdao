@@ -479,9 +479,9 @@ describe("VOT3", function () {
 
       // Lock B3TR to get VOT3
       const tx = await vot3.connect(otherAccount).stake(ethers.parseEther("1000"))
-      let proposeReceipt = await tx.wait()
+      let receipt = await tx.wait()
 
-      let events = proposeReceipt?.logs
+      let events = receipt?.logs
       if (!events) assert.fail("No events")
 
       // DelegateChanged event should be emitted
@@ -494,12 +494,12 @@ describe("VOT3", function () {
       await b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))
       await b3tr.connect(otherAccount).approve(await vot3.getAddress(), ethers.parseEther("1000"))
       const secondTx = await vot3.connect(otherAccount).stake(ethers.parseEther("1000"))
-      proposeReceipt = await secondTx.wait()
+      receipt = await secondTx.wait()
 
-      events = proposeReceipt?.logs
+      events = receipt?.logs
       if (!events) assert.fail("No events")
 
-      // DelegateChanged event should be emitted
+      // DelegateChanged event should not be emitted
       delegateChangedEvents = events.filter((event: any) => event.fragment && event.fragment.name === "DelegateChanged")
       expect(delegateChangedEvents).to.eql([])
     })

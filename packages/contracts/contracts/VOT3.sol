@@ -62,8 +62,8 @@ contract VOT3 is ERC20, ERC20Permit, ERC20Votes, AccessControl {
   function _update(address from, address to, uint256 amount) internal override(ERC20, ERC20Votes) {
     super._update(from, to, amount);
 
-    // self-delegate if the user is neither unstaking nor has delegated previously
-    if (to != address(this) && delegates(to) == address(0)) {
+    // self-delegate if the user is neither unstaking nor has delegated previously nor burning tokens
+    if (to != address(0) && to != address(this) && delegates(to) == address(0)) {
       _delegate(to, to);
     }
   }
