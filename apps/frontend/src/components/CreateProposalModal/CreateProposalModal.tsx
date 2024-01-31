@@ -30,6 +30,7 @@ import { useGetVotes, useProposalThreshold, useVot3Balance, useVot3Delegates } f
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useDelegateVot3 } from "@/hooks/useDelegateVot3"
 import { governanceAvailableContracts } from "@/constants"
+import { ConfirmTransactionModalContent } from "../ConfirmTransactionModalContent"
 
 const AvailableContracts = governanceAvailableContracts
 
@@ -45,6 +46,44 @@ export type FormData = {
 } & Omit<ProposalAction, "contractAbi">
 
 export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
+  const { sendTransaction, status, sendTransactionError, txReceiptError, resetStatus } = useCreateProposal({})
+
+  const onSuccess = () => {
+    resetStatus()
+    onClose()
+  }
+
+  const onSubmit = (description?: string, actions?: ProposalAction[]) => {
+    sendTransaction(description, actions)
+  }
+
+  const renderContent = useMemo(() => {
+    if (status !== "ready")
+      return (
+        <ConfirmTransactionModalContent
+          description={`Create a proposal`}
+          status={status}
+          error={sendTransactionError?.message ?? txReceiptError?.message}
+          onSuccess={onSuccess}
+          onTryAgain={resetStatus}
+        />
+      )
+    return <CreateProposalModalForm onSubmit={onSubmit} />
+  }, [status])
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
+      <ModalOverlay />
+      <ModalContent>{renderContent}</ModalContent>
+    </Modal>
+  )
+}
+
+type CreateProposalModalFormProps = {
+  onSubmit: (description?: string, actions?: ProposalAction[]) => void
+}
+
+export const CreateProposalModalForm: React.FC<CreateProposalModalFormProps> = ({ onSubmit }) => {
   const { account } = useWallet()
 
   const { data: proposalThreshold } = useProposalThreshold()
@@ -118,11 +157,9 @@ export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
     })
   }, [selectedContractFunctionInputs])
 
-  const createProposal = useCreateProposal({})
-
-  const onSubmit = (data: FormData) => {
+  const handleOnSubmit = (data: FormData) => {
     console.log({ data })
-    createProposal.sendTransaction(data.description, [
+    onSubmit(data.description, [
       {
         contractAddress: data.contractAddress,
         contractAbi: selectedAbi,
@@ -158,7 +195,7 @@ export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
     return <></>
   }, [votes, vot3Balance, proposalThreshold])
 
-  const canCreateAProposal = useMemo(() => {
+  const canCreateProposal = useMemo(() => {
     if (!votes || !vot3Balance || !proposalThreshold) return false
 
     if (Number(votes) < Number(proposalThreshold)) return false
@@ -166,103 +203,98 @@ export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
   }, [votes, vot3Balance, proposalThreshold])
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
-      <ModalOverlay />
-      <ModalContent>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <ModalHeader>
-            <HStack spacing={2}>
-              <Icon as={FaPlus} />
-              <Heading size="md">Create new proposal</Heading>
-            </HStack>
-          </ModalHeader>
+    <form onSubmit={handleSubmit(handleOnSubmit)}>
+      <ModalHeader>
+        <HStack spacing={2}>
+          <Icon as={FaPlus} />
+          <Heading size="md">Create new proposal</Heading>
+        </HStack>
+      </ModalHeader>
 
-          <ModalCloseButton />
-          <ModalBody>
-            <VStack spacing={4} w="full">
-              <FormControl isInvalid={!!errors.description}>
-                <FormLabel htmlFor="description">Description</FormLabel>
-                <Input
-                  id="description"
-                  placeholder="Receiver address..."
-                  {...register("description", {
-                    required: "Description is required",
-                  })}
-                />
-                {errors.description?.message ? (
-                  <FormErrorMessage>{errors.description?.message}</FormErrorMessage>
-                ) : (
-                  <FormHelperText>Provide a description for your proposal</FormHelperText>
-                )}
-              </FormControl>
-
-              <FormControl isInvalid={!!errors.contractAddress}>
-                <FormLabel htmlFor="contract">Contract</FormLabel>
-                <Select
-                  id="contractAddress"
-                  placeholder="Select the contract..."
-                  {...register("contractAddress", {
-                    required: "contractAddress is required",
-                  })}
-                  variant="outline">
-                  {AvailableContracts.map(contract => (
-                    <option value={contract.address} key={contract.address}>
-                      {contract.abi.contractName} ({FormattingUtils.humanAddress(contract.address)})
-                    </option>
-                  ))}
-                </Select>
-                {errors.contractAddress?.message ? (
-                  <FormErrorMessage>{errors.contractAddress?.message}</FormErrorMessage>
-                ) : (
-                  <FormHelperText>Select the contract you want to execute your proposal to</FormHelperText>
-                )}
-              </FormControl>
-
-              <FormControl isInvalid={!!errors.functionToCall}>
-                <FormLabel htmlFor="functionToCall">Function to call</FormLabel>
-                <Select
-                  id="functionToCall"
-                  isDisabled={!watchContract}
-                  placeholder="Select the contract..."
-                  {...register("functionToCall", {
-                    required: "functionToCall is required",
-                  })}
-                  variant="outline">
-                  {selectedContractFunctions.map(contractAbi => (
-                    <option value={contractAbi.name} key={contractAbi.name}>
-                      {contractAbi.name}
-                    </option>
-                  ))}
-                </Select>
-                {errors.functionToCall?.message ? (
-                  <FormErrorMessage>{errors.functionToCall?.message}</FormErrorMessage>
-                ) : (
-                  <FormHelperText>Select the function to call in the SC selected</FormHelperText>
-                )}
-              </FormControl>
-              {fields?.map((field, index) => {
-                return (
-                  <GenerateFunctionToCallParamsInput
-                    key={field.id}
-                    field={field}
-                    index={index}
-                    register={register}
-                    error={errors.functionParams?.[index]?.value}
-                  />
-                )
+      <ModalCloseButton />
+      <ModalBody>
+        <VStack spacing={4} w="full">
+          <FormControl isInvalid={!!errors.description}>
+            <FormLabel htmlFor="description">Description</FormLabel>
+            <Input
+              id="description"
+              placeholder="Receiver address..."
+              {...register("description", {
+                required: "Description is required",
               })}
-              <Box alignSelf={"flex-start"} mt={2}>
-                {delegationMessage}
-              </Box>
-            </VStack>
-          </ModalBody>
-          <ModalFooter>
-            <Button type="submit" leftIcon={<Icon as={FaPlus} />} isDisabled={!canCreateAProposal}>
-              Create proposal
-            </Button>
-          </ModalFooter>
-        </form>
-      </ModalContent>
-    </Modal>
+            />
+            {errors.description?.message ? (
+              <FormErrorMessage>{errors.description?.message}</FormErrorMessage>
+            ) : (
+              <FormHelperText>Provide a description for your proposal</FormHelperText>
+            )}
+          </FormControl>
+
+          <FormControl isInvalid={!!errors.contractAddress}>
+            <FormLabel htmlFor="contract">Contract</FormLabel>
+            <Select
+              id="contractAddress"
+              placeholder="Select the contract..."
+              {...register("contractAddress", {
+                required: "contractAddress is required",
+              })}
+              variant="outline">
+              {AvailableContracts.map(contract => (
+                <option value={contract.address} key={contract.address}>
+                  {contract.abi.contractName} ({FormattingUtils.humanAddress(contract.address)})
+                </option>
+              ))}
+            </Select>
+            {errors.contractAddress?.message ? (
+              <FormErrorMessage>{errors.contractAddress?.message}</FormErrorMessage>
+            ) : (
+              <FormHelperText>Select the contract you want to execute your proposal to</FormHelperText>
+            )}
+          </FormControl>
+
+          <FormControl isInvalid={!!errors.functionToCall}>
+            <FormLabel htmlFor="functionToCall">Function to call</FormLabel>
+            <Select
+              id="functionToCall"
+              isDisabled={!watchContract}
+              placeholder="Select the contract..."
+              {...register("functionToCall", {
+                required: "functionToCall is required",
+              })}
+              variant="outline">
+              {selectedContractFunctions.map(contractAbi => (
+                <option value={contractAbi.name} key={contractAbi.name}>
+                  {contractAbi.name}
+                </option>
+              ))}
+            </Select>
+            {errors.functionToCall?.message ? (
+              <FormErrorMessage>{errors.functionToCall?.message}</FormErrorMessage>
+            ) : (
+              <FormHelperText>Select the function to call in the SC selected</FormHelperText>
+            )}
+          </FormControl>
+          {fields?.map((field, index) => {
+            return (
+              <GenerateFunctionToCallParamsInput
+                key={field.id}
+                field={field}
+                index={index}
+                register={register}
+                error={errors.functionParams?.[index]?.value}
+              />
+            )
+          })}
+          <Box alignSelf={"flex-start"} mt={2}>
+            {delegationMessage}
+          </Box>
+        </VStack>
+      </ModalBody>
+      <ModalFooter>
+        <Button type="submit" leftIcon={<Icon as={FaPlus} />} isDisabled={!canCreateProposal}>
+          Create proposal
+        </Button>
+      </ModalFooter>
+    </form>
   )
 }
