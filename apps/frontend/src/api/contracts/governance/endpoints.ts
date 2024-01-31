@@ -1,7 +1,6 @@
 import { getEvents } from "@/api/blockchain"
 import { getConfig } from "@repo/config"
 import GovernorContract from "@repo/contracts/artifacts/contracts/governance/GovernorContract.sol/GovernorContract.json"
-import dayjs from "dayjs"
 import { abi } from "thor-devkit"
 const governorContractAbi = GovernorContract.abi
 

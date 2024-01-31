@@ -1,11 +1,4 @@
-import {
-  getB3TrTokenDetailsQueryKey,
-  getB3TrBalanceQueryKey,
-  buildMintB3trTx,
-  useB3trTokenDetails,
-  buildDelegateVot3Tx,
-  getVot3DelegatesQueryKey,
-} from "@/api"
+import { useB3trTokenDetails, buildDelegateVot3Tx, getVotesQueryKey } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
@@ -51,11 +44,11 @@ export const useDelegateVot3 = ({
   const handleOnSuccess = useCallback(async () => {
     if (invalidateCache) {
       await queryClient.cancelQueries({
-        queryKey: getVot3DelegatesQueryKey(account ?? ""),
+        queryKey: getVotesQueryKey(account ?? ""),
       })
 
       await queryClient.refetchQueries({
-        queryKey: getVot3DelegatesQueryKey(account ?? ""),
+        queryKey: getVotesQueryKey(account ?? ""),
       })
     }
 

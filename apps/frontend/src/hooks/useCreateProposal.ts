@@ -1,4 +1,4 @@
-import { buildCreateProposalTx } from "@/api"
+import { buildCreateProposalTx, getProposalsCreatedEventsQueryKey } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
@@ -54,18 +54,12 @@ export const useCreateProposal = ({
   //Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {
     if (invalidateCache) {
-      //   await queryClient.cancelQueries({
-      //     queryKey: getB3TrTokenDetailsQueryKey(),
-      //   })
-      //   await queryClient.refetchQueries({
-      //     queryKey: getB3TrTokenDetailsQueryKey(),
-      //   })
-      //   await queryClient.cancelQueries({
-      //     queryKey: getB3TrBalanceQueryKey(account ?? undefined),
-      //   })
-      //   await queryClient.refetchQueries({
-      //     queryKey: getB3TrBalanceQueryKey(account ?? undefined),
-      //   })
+      await queryClient.cancelQueries({
+        queryKey: getProposalsCreatedEventsQueryKey(),
+      })
+      await queryClient.refetchQueries({
+        queryKey: getProposalsCreatedEventsQueryKey(),
+      })
       //TODO: refetch the proposals
     }
 
