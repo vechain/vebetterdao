@@ -6,7 +6,7 @@ import {
   defaultVotingTreshold,
   getOrDeployContractInstances,
   getProposalIdFromTx,
-  mintAndSelfDelegate,
+  getVot3Tokens,
   waitForNextBlock,
   waitForVotingPeriodToEnd,
   catchRevert,
@@ -60,15 +60,15 @@ describe("Governor and TimeLock", function () {
       await catchRevert(createProposal(governor, b3tr, B3trContract, owner, description, functionToCall, [], true))
     })
 
-    it("cannot create a proposal if user did not delegated", async function () {
-      const { governor, B3trContract, vot3, b3tr, owner, minterAccount } = await getOrDeployContractInstances()
+    it("can create a proposal even if user did not manually self delegated (because of automatic self-delegation)", async function () {
+      const { governor, B3trContract, vot3, b3tr, owner, minterAccount } = await getOrDeployContractInstances(true)
 
       // Before creating a proposal, we need to mint some VOT3 tokens to the owner
       await b3tr.connect(minterAccount).mint(owner, ethers.parseEther("1000"))
-      await b3tr.approve(await vot3.getAddress(), ethers.parseEther("9"))
-      await vot3.stake(ethers.parseEther("9"))
+      await b3tr.connect(owner).approve(await vot3.getAddress(), ethers.parseEther("9"))
+      await vot3.connect(owner).stake(ethers.parseEther("9"), { gasLimit: 10_000_000 })
 
-      await catchRevert(createProposal(governor, b3tr, B3trContract, owner, description, functionToCall, [], true))
+      await createProposal(governor, b3tr, B3trContract, owner, description, functionToCall, [], true)
     })
 
     it("can create a proposal if VOT3 holder that self-delegated", async function () {
@@ -180,8 +180,8 @@ describe("Governor and TimeLock", function () {
       await vot3.connect(voter2).stake(ethers.parseEther("9"))
 
       // we do it here but will use in the next test
-      await mintAndSelfDelegate(voter3, "1000")
-      await mintAndSelfDelegate(voter4, "9")
+      await getVot3Tokens(voter3, "1000")
+      await getVot3Tokens(voter4, "9")
 
       // Now we can create a new proposal
       const tx = await createProposal(governor, b3tr, B3trContract, otherAccount, description, functionToCall, [])
@@ -226,39 +226,6 @@ describe("Governor and TimeLock", function () {
       expect(decodedLogs?.args[3].toString()).to.eql("0")
     })
 
-    it("user that did not self delegate can vote but will have weight 0", async function () {
-      const { governor } = await getOrDeployContractInstances(false)
-
-      const proposalState = await waitForProposalToBeActive(proposalId, governor) // proposal id of the proposal in the beforeAll step & block when the proposal was created
-
-      expect(proposalState.toString()).to.eql("1") // active
-
-      /* Note: the enum VoteType is defined as follows:
-      enum VoteType {
-          Against,
-          For,
-          Abstain
-      } */
-      const tx = await governor.connect(voter2).castVote(proposalId, 1) // vote 'For'
-      const proposeReceipt = await tx.wait()
-      const event = proposeReceipt?.logs[0]
-      const decodedLogs = governor.interface.parseLog({
-        topics: [...(event?.topics as string[])],
-        data: event ? event.data : "",
-      })
-
-      //event exists
-      expect(decodedLogs?.name).to.eql("VoteCast")
-      // voter
-      expect(decodedLogs?.args[0]).to.eql(await voter2.getAddress())
-      // proposal id
-      expect(decodedLogs?.args[1]).to.eql(proposalId)
-      // support
-      expect(decodedLogs?.args[2].toString()).to.eql("1")
-      // votes
-      expect(decodedLogs?.args[3].toString()).to.eql("0")
-    })
-
     it("can vote if self-delegated VOT3 holder before snapshot", async function () {
       const { governor } = await getOrDeployContractInstances(false)
 
@@ -289,11 +256,11 @@ describe("Governor and TimeLock", function () {
       expect(hasVoted).to.eql(true)
     })
 
-    it("vote has weight 0 if self-delegated VOT3 holder after snapshot", async function () {
+    it("vote has weight 0 if self-delegated VOT3 holder after the proposal snapshot", async function () {
       const { governor, otherAccounts } = await getOrDeployContractInstances(false)
 
       const newVoter = otherAccounts[4]
-      await mintAndSelfDelegate(newVoter, "1000")
+      await getVot3Tokens(newVoter, "1000")
 
       const proposalState = await waitForProposalToBeActive(proposalId, governor) // proposal id of the proposal in the beforeAll step & block when the proposal was created
 
@@ -395,7 +362,7 @@ describe("Governor and TimeLock", function () {
 
       // load votes
       voter = otherAccounts[0]
-      await mintAndSelfDelegate(voter, "1000")
+      await getVot3Tokens(voter, "1000")
       await waitForNextBlock()
     })
 

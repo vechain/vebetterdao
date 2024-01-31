@@ -1,9 +1,11 @@
 import { assert } from "chai"
+import { ContractTransactionResponse } from "ethers"
 import { network } from "hardhat"
 
-async function tryCatch(promise: any, reason: any) {
+async function tryCatch(promise: Promise<ContractTransactionResponse>, reason: any) {
   try {
-    await promise
+    const tx: ContractTransactionResponse = await promise
+    await tx.wait()
     throw null
   } catch (error: any) {
     assert(error, "Expected an error but did not get one")
@@ -11,9 +13,9 @@ async function tryCatch(promise: any, reason: any) {
   }
 }
 const revertReason = network.name === "hardhat" ? "VM Exception while processing transaction" : "execution reverted"
-export const catchRevert = async function (promise: any) {
+export const catchRevert = async function (promise: Promise<ContractTransactionResponse>) {
   await tryCatch(promise, revertReason)
 }
-export const catchOutOfGas = async function (promise: any) {
+export const catchOutOfGas = async function (promise: Promise<ContractTransactionResponse>) {
   await tryCatch(promise, "out of gas")
 }

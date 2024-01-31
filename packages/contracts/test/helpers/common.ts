@@ -27,17 +27,6 @@ export const moveBlocks = async (blocks: number) => {
   }
 }
 
-export const mintAndSelfDelegate = async (receiver: HardhatEthersSigner, amount: string) => {
-  const { b3tr, vot3, minterAccount } = await getOrDeployContractInstances(false)
-
-  await b3tr.connect(minterAccount).mint(receiver, ethers.parseEther(amount))
-  await b3tr.connect(receiver).approve(await vot3.getAddress(), ethers.parseEther(amount))
-  await vot3.connect(receiver).stake(ethers.parseEther(amount))
-  // then we need to delegate the votes to ourself (self-delegation)
-  // this needs to be done because by default voting power is calculated only when you delegate
-  await vot3.connect(receiver).delegate(await receiver.getAddress())
-}
-
 export const createProposal = async (
   governor: GovernorContract,
   contractToCall: BaseContract,
@@ -55,7 +44,7 @@ export const createProposal = async (
 
   if (votesThreshold > proposerVotes && !avoidMintingAndDelegating) {
     //The proposer needs to have some delegated VOT3 to be able to create a proposal
-    await mintAndSelfDelegate(proposer, (votesThreshold + BigInt(1)).toString())
+    await getVot3Tokens(proposer, (votesThreshold + BigInt(1)).toString())
     // We also need to wait a block to update the proposer's votes snapshot
     await waitForNextBlock()
   }
@@ -104,4 +93,18 @@ export const waitForProposalToBeActive = async (proposalId: number, governor: Go
   }
 
   return proposalState
+}
+
+// Mint some B3TR and swap for VOT3
+export const getVot3Tokens = async (receiver: HardhatEthersSigner, amount: string) => {
+  const { b3tr, vot3, minterAccount } = await getOrDeployContractInstances(false)
+
+  // Mint some B3TR
+  await b3tr.connect(minterAccount).mint(receiver, ethers.parseEther(amount))
+
+  // Approve VOT3 to spend B3TR on behalf of otherAccount. N.B. this is an important step and could be included in a multi clause transaction
+  await b3tr.connect(receiver).approve(await vot3.getAddress(), ethers.parseEther(amount))
+
+  // Lock B3TR to get VOT3
+  await vot3.connect(receiver).stake(ethers.parseEther(amount))
 }
