@@ -1,7 +1,7 @@
 import { useGetTxReceipt } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { UseMutateFunction, useMutation } from "@tanstack/react-query"
-import { useConnex, useWallet } from "@vechain/dapp-kit-react"
+import { useConnex } from "@vechain/dapp-kit-react"
 import { useCallback, useEffect, useState } from "react"
 
 /**
@@ -71,7 +71,6 @@ export const useSendTransaction = ({
 }: UseSendTransactionProps): UseSendTransactionReturnValue => {
   const toast = useToast()
   const { vendor, thor } = useConnex()
-  const { account } = useWallet()
 
   async function convertClauses(
     clauses: EnhancedClause[] | (() => EnhancedClause[]) | (() => Promise<EnhancedClause[]>),
@@ -99,16 +98,15 @@ export const useSendTransaction = ({
     return vendor.sign("tx", clauses).request()
   }
 
-  /**
-   *  Send a transaction with the given clauses (in case you need to pass data to build the clauses to mutate directly)
-   * @param clauses clauses to send in the transaction
-   * @returns see {@link UseSendTransactionReturnValue}
-   */
-  const sendTransactionAdapter = async (clauses?: EnhancedClause[]) => {
-    if (clauses) return await sendTransactionWithClauses(clauses)
-    return await sendTransaction()
-  }
-
+  const sendTransactionAdapter = useCallback(
+    async (_clauses?: EnhancedClause[]) => {
+      if (_clauses) {
+        return await sendTransactionWithClauses(_clauses)
+      }
+      return await sendTransaction()
+    },
+    [sendTransactionWithClauses, sendTransaction],
+  )
   const {
     mutate: runSendTransaction,
     data: sendTransactionTx,

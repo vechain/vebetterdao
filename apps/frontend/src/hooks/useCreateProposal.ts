@@ -128,7 +128,7 @@ export const useCreateProposal = ({
       const clauses = buildClauses(description, actions)
       return result.sendTransaction(clauses)
     },
-    [buildClauses],
+    [buildClauses, result],
   )
 
   return { ...result, sendTransaction: onMutate }

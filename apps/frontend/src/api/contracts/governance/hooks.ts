@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
-import { getProposalThreshold, getProposalsEvents, getVotes } from "./endpoints"
+import { getProposalThreshold, getProposalsEvents } from "./endpoints"
 import { useConnex } from "@vechain/dapp-kit-react"
-import { address } from "thor-devkit"
 
 export const useProposalCreatedEvents = () => {
   const { thor } = useConnex()
@@ -27,18 +26,3 @@ export const useProposalThreshold = () => {
     enabled: !!thor,
   })
 }
-
-// export const getVotesQueryKey = (address?: string) => ["votes", address]
-// /**
-//  *  Hook to get the votes of the given address
-//  * @returns
-//  */
-// export const useGetVotes = (address?: string) => {
-//   const { thor } = useConnex()
-
-//   return useQuery({
-//     queryKey: getVotesQueryKey(address),
-//     queryFn: async () => await getVotes(thor, address),
-//     enabled: !!thor && !!address,
-//   })
-// }

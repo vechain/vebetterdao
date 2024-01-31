@@ -140,7 +140,7 @@ export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
         return (
           <Heading size="xs" color="orange">
             Your address is not self-delegated to VOT3. Click
-            <Button variant="link" onClick={() => delegate()}>
+            <Button variant="link" onClick={() => delegate(undefined)}>
               here
             </Button>
             to do so
