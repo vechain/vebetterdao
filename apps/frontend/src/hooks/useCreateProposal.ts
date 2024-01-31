@@ -1,13 +1,13 @@
-import { buildCreateProposalTx, buildDelegateVot3Tx } from "@/api"
+import { buildCreateProposalTx } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
 import { useConnex, useWallet } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
+import { governanceAvailableContracts } from "@/constants"
 
 const config = getConfig()
-const governanceAvailableContracts = config.governanceAvailableContracts
 type AvailableContractAbis = (typeof governanceAvailableContracts)[number]["abi"]["abi"][number]
 /**
  * Represent a single parameter of the function to call in the smart contract

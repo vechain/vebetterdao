@@ -19,10 +19,9 @@ import {
   ModalFooter,
   Box,
 } from "@chakra-ui/react"
-import { AddressUtils, FormattingUtils } from "@repo/utils"
+import { FormattingUtils } from "@repo/utils"
 import { useFieldArray, useForm } from "react-hook-form"
 
-import { getConfig } from "@repo/config"
 import { useEffect, useMemo } from "react"
 import { GenerateFunctionToCallParamsInput } from "./GenerateFunctionToCallParamsInput"
 import { FaPlus } from "react-icons/fa6"
@@ -30,9 +29,9 @@ import { ProposalAction, useCreateProposal } from "@/hooks/useCreateProposal"
 import { useGetVotes, useProposalThreshold, useVot3Balance, useVot3Delegates } from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useDelegateVot3 } from "@/hooks/useDelegateVot3"
+import { governanceAvailableContracts } from "@/constants"
 
-const config = getConfig()
-const AvailableContracts = config.governanceAvailableContracts
+const AvailableContracts = governanceAvailableContracts
 
 type Props = {
   isOpen: boolean
@@ -156,11 +155,7 @@ export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
       }
     }
 
-    return (
-      <Heading size="xs" color="green">
-        Your address is self-delegated to VOT3
-      </Heading>
-    )
+    return <></>
   }, [votes, vot3Balance, proposalThreshold])
 
   const canCreateAProposal = useMemo(() => {
