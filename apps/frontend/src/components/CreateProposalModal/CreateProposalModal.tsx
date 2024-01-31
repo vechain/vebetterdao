@@ -98,8 +98,8 @@ export const CreateProposalModalForm: React.FC<CreateProposalModalFormProps> = (
     handleSubmit,
     register,
     watch,
-    setValue,
     control,
+    setValue,
     formState: { errors },
   } = useForm<FormData>()
 
@@ -151,11 +151,16 @@ export const CreateProposalModalForm: React.FC<CreateProposalModalFormProps> = (
 
   //Create the fields for the function params inputs
   useEffect(() => {
-    setValue("functionParams", [])
+    setValue("functionToCall", undefined)
+  }, [watchContract])
+
+  //Create the fields for the function params inputs
+  useEffect(() => {
+    remove()
     selectedContractFunctionInputs?.forEach(input => {
       append({ ...input, id: input.name, value: "" })
     })
-  }, [selectedContractFunctionInputs])
+  }, [selectedContractFunctionInputs, remove, append])
 
   const handleOnSubmit = (data: FormData) => {
     console.log({ data })
@@ -218,7 +223,7 @@ export const CreateProposalModalForm: React.FC<CreateProposalModalFormProps> = (
             <FormLabel htmlFor="description">Description</FormLabel>
             <Input
               id="description"
-              placeholder="Receiver address..."
+              placeholder="Insert the proposal description..."
               {...register("description", {
                 required: "Description is required",
               })}
@@ -277,7 +282,7 @@ export const CreateProposalModalForm: React.FC<CreateProposalModalFormProps> = (
           {fields?.map((field, index) => {
             return (
               <GenerateFunctionToCallParamsInput
-                key={field.id}
+                key={`${field.id} - ${index}`}
                 field={field}
                 index={index}
                 register={register}
