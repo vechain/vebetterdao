@@ -3,8 +3,13 @@
 import { deployAll } from "./deploy"
 
 // and properly handle errors.
-deployAll()
-  .then(process.exit(0))
+const execute = async () => {
+  const contracts = await deployAll()
+  console.log(contracts)
+}
+
+execute()
+  .then(() => process.exit(0))
   .catch(error => {
     console.error(error)
     process.exit(1)
