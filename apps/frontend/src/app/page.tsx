@@ -2,11 +2,8 @@
 
 import { Box, Stack, StackDivider, VStack } from "@chakra-ui/react"
 import { BalanceCard, TvlBreakdownPieChart, CirculatingSupplyPieChart } from "@/components"
-import { useWallet } from "@vechain/dapp-kit-react"
 
 export default function Home() {
-  const { account } = useWallet()
-
   return (
     <VStack spacing={4} divider={<StackDivider />} w="full">
       <Box w="full">

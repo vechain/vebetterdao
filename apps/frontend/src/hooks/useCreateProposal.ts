@@ -1,4 +1,10 @@
-import { buildCreateProposalTx, getProposalEvents } from "@/api"
+import {
+  buildCreateProposalTx,
+  getActiveProposalsQueryKey,
+  getIncomingProposalsQueryKey,
+  getPastProposalsQueryKey,
+  getProposalEvents,
+} from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
@@ -59,6 +65,27 @@ export const useCreateProposal = ({
       })
       await queryClient.refetchQueries({
         queryKey: getProposalEvents(),
+      })
+
+      await queryClient.cancelQueries({
+        queryKey: getActiveProposalsQueryKey(),
+      })
+      await queryClient.refetchQueries({
+        queryKey: getActiveProposalsQueryKey(),
+      })
+
+      await queryClient.cancelQueries({
+        queryKey: getIncomingProposalsQueryKey(),
+      })
+      await queryClient.refetchQueries({
+        queryKey: getIncomingProposalsQueryKey(),
+      })
+
+      await queryClient.cancelQueries({
+        queryKey: getPastProposalsQueryKey(),
+      })
+      await queryClient.refetchQueries({
+        queryKey: getPastProposalsQueryKey(),
       })
       //TODO: refetch the proposals
     }

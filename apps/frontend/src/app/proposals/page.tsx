@@ -17,6 +17,8 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
+import { useConnex } from "@vechain/dapp-kit-react"
+import { useEffect } from "react"
 import { FaScroll } from "react-icons/fa"
 
 export default function ProposalsPage() {
@@ -24,6 +26,16 @@ export default function ProposalsPage() {
   const { data: activeProposals } = useActiveProposals()
   const { data: incomingProposals } = useIncomingProposals()
   const { data: pastProposals } = usePastProposals()
+
+  const { thor } = useConnex()
+
+  useEffect(() => {
+    console.log("Latest block:", thor.status.head.number)
+  }, [thor])
+
+  useEffect(() => {
+    console.log({ proposalsEvents })
+  }, [proposalsEvents])
 
   return (
     <VStack w="full" spacing={8} alignItems={"flex-start"}>
@@ -39,7 +51,7 @@ export default function ProposalsPage() {
         </Box>
         <CreateProposalButton />
       </HStack>
-      <Tabs position="relative" variant="unstyled">
+      <Tabs position="relative" variant="unstyled" w="full">
         <TabList>
           <Tab>Active ({activeProposals?.length})</Tab>
           <Tab isDisabled={incomingProposals?.length === 0}>Incoming ({incomingProposals?.length})</Tab>
@@ -48,7 +60,7 @@ export default function ProposalsPage() {
         <TabIndicator mt="-1.5px" height="2px" bg="blue.500" borderRadius="1px" />
         <TabPanels>
           <TabPanel>
-            <Grid templateColumns="repeat(3, 1fr)" gap={6}>
+            <Grid templateColumns="repeat(2, 1fr)" gap={6}>
               {activeProposals?.map(proposal => <ProposalCard proposal={proposal} key={proposal.proposalId} />)}
             </Grid>
           </TabPanel>
