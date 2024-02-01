@@ -1,7 +1,7 @@
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { ContractFactory, ContractTransactionResponse } from "ethers"
 import { ethers } from "hardhat"
-import { B3TR, GovernorContract, TimeLock, VOT3 } from "../../typechain-types"
+import { B3TR, GovernorContract, TimeLock, VOT3, B3TRBadge } from "../../typechain-types"
 
 interface DeployInstance {
   B3trContract: ContractFactory
@@ -9,6 +9,7 @@ interface DeployInstance {
   vot3: VOT3 & { deploymentTransaction(): ContractTransactionResponse }
   timeLock: TimeLock & { deploymentTransaction(): ContractTransactionResponse }
   governor: GovernorContract & { deploymentTransaction(): ContractTransactionResponse }
+  b3trBadge: B3TRBadge & { deploymentTransaction(): ContractTransactionResponse }
   owner: HardhatEthersSigner
   otherAccount: HardhatEthersSigner
   minterAccount: HardhatEthersSigner
@@ -20,12 +21,17 @@ export const defaultVotingPeriod = 15
 export const defaultVotingTreshold = 0
 export const defaultVotingDelay = 1
 
+export const NFT_BADGE_NAME = "B3TRBadge"
+export const NFT_BADGE_SYMBOL = "B3TR"
+export const DEFAULT_MAX_MINTABLE_LEVEL = 1
+
 let cachedDeployInstance: DeployInstance | undefined = undefined
-export const getOrDeployContractInstances = async (
-  forceDeploy: boolean = false,
+export const getOrDeployContractInstances = async ({
+  forceDeploy = false,
   votingTreshold = defaultVotingTreshold,
   votingPeriod = defaultVotingPeriod,
-) => {
+  maxMintableLevel = DEFAULT_MAX_MINTABLE_LEVEL,
+}) => {
   if (!forceDeploy && cachedDeployInstance !== undefined) {
     return cachedDeployInstance
   }
@@ -70,12 +76,18 @@ export const getOrDeployContractInstances = async (
   await timeLock.connect(timelockAdmin).grantRole(EXECUTOR_ROLE, await governor.getAddress())
   await timeLock.connect(timelockAdmin).grantRole(CANCELLER_ROLE, await governor.getAddress())
 
+  const NFTBadgeContract = await ethers.getContractFactory("B3TRBadge")
+  const b3trBadge = await NFTBadgeContract.deploy(NFT_BADGE_NAME, NFT_BADGE_SYMBOL, owner, maxMintableLevel)
+
+  await b3trBadge.waitForDeployment()
+
   cachedDeployInstance = {
     B3trContract,
     b3tr,
     vot3,
     timeLock,
     governor,
+    b3trBadge,
     owner,
     otherAccount,
     minterAccount,
