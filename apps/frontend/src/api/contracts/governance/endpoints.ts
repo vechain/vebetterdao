@@ -6,7 +6,7 @@ const governorContractAbi = GovernorContract.abi
 
 const GOVERNANCE_CONTRACT = getConfig().governorContractAddress
 
-type ProposalCreatedEvent = {
+export type ProposalCreatedEvent = {
   proposalId: string
   proposer: string
   targets: string[]
@@ -18,15 +18,15 @@ type ProposalCreatedEvent = {
   description: string
 }
 
-type ProposalCanceledEvent = {
+export type ProposalCanceledEvent = {
   proposalId: string
 }
 
-type ProposalExecutedEvent = {
+export type ProposalExecutedEvent = {
   proposalId: string
 }
 
-type ProposalQueuedEvent = {
+export type ProposalQueuedEvent = {
   proposalId: string
   etaSeconds: string
 }
@@ -82,6 +82,8 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
   const decodedCanceledProposalEvents: ProposalCanceledEvent[] = []
   const decodedExecutedProposalEvents: ProposalExecutedEvent[] = []
   const decodedQueuedProposalEvents: ProposalQueuedEvent[] = []
+
+  //   TODO: runtime validation with zod ?
   events.forEach(event => {
     switch (event.topics[0]) {
       case proposalCreatedEvent.signature: {
@@ -133,6 +135,26 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
     executed: decodedExecutedProposalEvents,
     queued: decodedQueuedProposalEvents,
   }
+}
+
+export enum ProposalState {
+  Pending,
+  Active,
+  Canceled,
+  Defeated,
+  Succeeded,
+  Queued,
+  Expired,
+  Executed,
+}
+
+export const getProposalState = async (thor: Connex.Thor, proposalId: string): Promise<ProposalState> => {
+  const stateAbi = governorContractAbi.find(abi => abi.name === "state")
+  if (!stateAbi) throw new Error("state function not found")
+  const res = await thor.account(GOVERNANCE_CONTRACT).method(stateAbi).call(proposalId)
+
+  if (res.vmError) return Promise.reject(new Error(res.vmError))
+  return res.decoded[0]
 }
 
 /**

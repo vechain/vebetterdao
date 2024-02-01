@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { getProposalThreshold, getProposalsEvents } from "./endpoints"
+import { getProposalState, getProposalThreshold, getProposalsEvents } from "./endpoints"
 import { useConnex } from "@vechain/dapp-kit-react"
 
 export const getProposalThresholdQueryKey = () => ["proposalThreshold"]
@@ -119,5 +119,21 @@ export const usePastProposals = () => {
       )
     },
     enabled: !!thor && !!proposalsEvents,
+  })
+}
+
+export const getProposalStateQueryKey = (proposalId: string) => ["proposalState", proposalId]
+/**
+ *  Hook to get the proposal state from the governor contract
+ * @param proposalId  the proposal id to get the state of
+ * @returns  the proposal state
+ */
+export const useProposalState = (proposalId: string) => {
+  const { thor } = useConnex()
+
+  return useQuery({
+    queryKey: getProposalStateQueryKey(proposalId),
+    queryFn: async () => await getProposalState(thor, proposalId),
+    enabled: !!thor,
   })
 }
