@@ -99,23 +99,6 @@ export const BalancePieChart: React.FC<Props> = ({ b3trBalance, vot3Balance }) =
     ]
   }, [b3trBalance, vot3Balance, primaryColor, secondaryColor])
 
-  const hasNoBalance = useMemo(() => {
-    return b3trBalance?.scaled === "0" && vot3Balance?.scaled === "0"
-  }, [b3trBalance, vot3Balance])
-
-  if (hasNoBalance)
-    return (
-      <Box h={"150"}>
-        <Alert status="warning" borderRadius={"lg"}>
-          <AlertIcon />
-          <Box>
-            <AlertTitle>You have no balance</AlertTitle>
-            <AlertDescription>Mint some tokens to get started.</AlertDescription>
-          </Box>
-        </Alert>
-      </Box>
-    )
-
   return (
     <Box w="full" h="200">
       <ResponsiveContainer width={"99%"} height={"100%"}>

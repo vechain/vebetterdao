@@ -1,5 +1,14 @@
 import { useEffect, useMemo } from "react"
-import { Alert, AlertDescription, AlertIcon, AlertTitle, Button, ModalHeader, VStack } from "@chakra-ui/react"
+import {
+  Alert,
+  AlertDescription,
+  AlertIcon,
+  AlertTitle,
+  Button,
+  ModalBody,
+  ModalHeader,
+  VStack,
+} from "@chakra-ui/react"
 import { TransactionStatus } from "@/hooks"
 
 type Props = {
@@ -123,9 +132,11 @@ export const ConfirmTransactionModalContent: React.FC<Props> = ({
   return (
     <>
       <ModalHeader>{description}</ModalHeader>
-      <VStack alignSelf={"center"} h="full" justify={"center"} spacing={4}>
-        {statusComponent}
-      </VStack>
+      <ModalBody>
+        <VStack alignSelf={"center"} h="full" justify={"center"} spacing={4}>
+          {statusComponent}
+        </VStack>
+      </ModalBody>
     </>
   )
 }
