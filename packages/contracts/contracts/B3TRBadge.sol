@@ -27,7 +27,7 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl {
     MAX_LEVEL = maxLevel;
   }
 
-  // Mints the Badge for the given address to the given level
+  // Mints the highest level Badge the caller is allowed to mint
   function freeMint() public {
     // TODO: Get User's X/Economic node type and check max mintable level
     // TODO: Check if that X/Economic node has not already been used to mint a Badge (e.g., MintedLevelOfXNode[xNodeId])
