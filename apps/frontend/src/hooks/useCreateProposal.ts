@@ -1,10 +1,4 @@
-import {
-  buildCreateProposalTx,
-  getActiveProposalsQueryKey,
-  getIncomingProposalsQueryKey,
-  getPastProposalsQueryKey,
-  getProposalEvents,
-} from "@/api"
+import { buildCreateProposalTx, getProposalEvents } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
@@ -13,7 +7,6 @@ import { useConnex, useWallet } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
 import { governanceAvailableContracts } from "@/constants"
 
-const config = getConfig()
 type AvailableContractAbis = (typeof governanceAvailableContracts)[number]["abi"]["abi"][number]
 /**
  * Represent a single parameter of the function to call in the smart contract
@@ -66,28 +59,6 @@ export const useCreateProposal = ({
       await queryClient.refetchQueries({
         queryKey: getProposalEvents(),
       })
-
-      await queryClient.cancelQueries({
-        queryKey: getActiveProposalsQueryKey(),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getActiveProposalsQueryKey(),
-      })
-
-      await queryClient.cancelQueries({
-        queryKey: getIncomingProposalsQueryKey(),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getIncomingProposalsQueryKey(),
-      })
-
-      await queryClient.cancelQueries({
-        queryKey: getPastProposalsQueryKey(),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getPastProposalsQueryKey(),
-      })
-      //TODO: refetch the proposals
     }
 
     toast({
