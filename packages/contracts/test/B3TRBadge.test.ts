@@ -116,6 +116,33 @@ describe("B3TRBadge", () => {
       expect(await b3trBadge.xNodeTypeToMaxMintableLevel(5)).to.equal(6)
       expect(await b3trBadge.xNodeTypeToMaxMintableLevel(6)).to.equal(7)
     })
+
+    it("Should be able to mint again after transferring a badge", async () => {
+      const { b3trBadge, otherAccount, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      await b3trBadge.connect(owner).freeMint()
+
+      await b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 0)
+
+      await b3trBadge.connect(owner).freeMint()
+
+      expect(await b3trBadge.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 badge
+      expect(await b3trBadge.balanceOf(await owner.getAddress())).to.equal(1) // Owner has 1 badge
+
+      expect(await b3trBadge.ownerOf(0)).to.equal(await otherAccount.getAddress()) // Owner of the first badge is the otherAccount
+      expect(await b3trBadge.ownerOf(1)).to.equal(await owner.getAddress()) // Owner of the second badge is the owner
+
+      expect(await b3trBadge.totalSupply()).to.equal(2) // Total supply is 2
+
+      expect(await b3trBadge.levelOf(0)).to.equal(1) // Level 1
+      expect(await b3trBadge.levelOf(1)).to.equal(1) // Level 1
+
+      expect(await b3trBadge.tokenByIndex(0)).to.equal(0) // Token ID of the first badge is 0
+      expect(await b3trBadge.tokenByIndex(1)).to.equal(1) // Token ID of the second badge is 1
+
+      expect(await b3trBadge.tokenOfOwnerByIndex(await otherAccount.getAddress(), 0)).to.equal(0) // Token ID of the first badge owned by otherAccount is 0
+      expect(await b3trBadge.tokenOfOwnerByIndex(await owner.getAddress(), 0)).to.equal(1) // Token ID of the first badge owned by owner is 1
+    })
   })
 
   describe("Transferring", () => {
