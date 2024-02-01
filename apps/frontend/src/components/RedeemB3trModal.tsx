@@ -90,7 +90,7 @@ export const RedeemB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
       <ModalOverlay />
-      <form onSubmit={handleSubmit(() => sendTransaction())}>
+      <form onSubmit={handleSubmit(() => sendTransaction(undefined))}>
         <ModalContent h={320}>{renderContent}</ModalContent>
       </form>
     </Modal>

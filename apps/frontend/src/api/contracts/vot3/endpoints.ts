@@ -113,3 +113,58 @@ export const buildUnstakeStakeB3trTx = (
     abi: functionAbi,
   }
 }
+
+/**
+ *  Get the vot3 balance of an address from the contract
+ * @param thor  The thor instance
+ * @param address  The address to check the delegates of. If not provided, will return an error (for better react-query DX)
+ * @returns the address chosen as delegate
+ */
+export const getVot3Delegates = async (thor: Connex.Thor, address?: string): Promise<string> => {
+  if (!address) return Promise.reject(new Error("Address not provided"))
+  const functionAbi = abi.find(e => e.name === "delegates")
+  if (!functionAbi) return Promise.reject(new Error("Function abi not found for delegates"))
+  const res = await thor.account(VOT3_CONTRACT).method(functionAbi).call(address)
+
+  if (res.vmError) return Promise.reject(new Error(res.vmError))
+
+  return res.decoded[0]
+}
+
+/**
+ * Get the number of votes of the given address (includes the delegated ones)
+ * @param thor  the thor client
+ * @returns the votes of the given address
+ */
+export const getVotes = async (thor: Connex.Thor, address?: string) => {
+  if (!address) throw new Error("address is required")
+
+  const getVotesAbi = abi.find(abi => abi.name === "getVotes")
+  if (!getVotesAbi) throw new Error("getVotes function not found")
+  const res = await thor.account(VOT3_CONTRACT).method(getVotesAbi).call(address)
+
+  if (res.vmError) return Promise.reject(new Error(res.vmError))
+
+  return res.decoded[0]
+}
+
+/**
+ * Build the clause to delegate votes to the given address (used to delegate votes to the governance contract)
+ * @param thor thor instance
+ * @param address the address to mint the tokens to
+ * @returns the clause to delegate votes
+ */
+export const buildDelegateVot3Tx = (thor: Connex.Thor, address: string): Connex.Vendor.TxMessage[0] => {
+  const functionAbi = abi.find(e => e.name === "delegate")
+  if (!functionAbi) throw new Error("Function abi not found for mint")
+
+  const clause = thor.account(VOT3_CONTRACT).method(functionAbi).asClause(address)
+
+  const formattedAddress = FormattingUtils.humanAddress(address)
+
+  return {
+    ...clause,
+    comment: `Delegate VOT£ to ${formattedAddress}`,
+    abi: functionAbi,
+  }
+}

@@ -31,7 +31,7 @@ type EnhancedClause = Connex.VM.Clause & {
  */
 type UseSendTransactionProps = {
   signerAccount?: string | null
-  clauses: EnhancedClause[] | (() => EnhancedClause[]) | (() => Promise<EnhancedClause[]>)
+  clauses?: EnhancedClause[] | (() => EnhancedClause[]) | (() => Promise<EnhancedClause[]>)
   onTxConfirmed?: () => void | Promise<void>
 }
 
@@ -47,7 +47,7 @@ type UseSendTransactionProps = {
  * @param resetStatus function to reset the status to "ready"
  */
 export type UseSendTransactionReturnValue = {
-  sendTransaction: UseMutateFunction<Connex.Vendor.TxResponse, Error, void, unknown>
+  sendTransaction: UseMutateFunction<Connex.Vendor.TxResponse, Error, EnhancedClause[] | undefined, unknown>
   sendTransactionPending: boolean
   sendTransactionError: Error | null
   isTxReceiptLoading: boolean
@@ -82,20 +82,40 @@ export const useSendTransaction = ({
   }
 
   const sendTransaction = async () => {
+    if (!clauses) throw new Error("clauses is required")
     return await convertClauses(clauses).then(clauses => {
       if (signerAccount) return vendor.sign("tx", clauses).signer(signerAccount).request()
       return vendor.sign("tx", clauses).request()
     })
   }
 
+  /**
+   * Send a transaction with the given clauses (in case you need to pass data to build the clauses to mutate directly)
+   * @returns see {@link UseSendTransactionReturnValue}
+   */
+  const sendTransactionWithClauses = async (clauses: EnhancedClause[]) => {
+    if (signerAccount) return vendor.sign("tx", clauses).signer(signerAccount).request()
+    return vendor.sign("tx", clauses).request()
+  }
+
+  const sendTransactionAdapter = useCallback(
+    async (_clauses?: EnhancedClause[]) => {
+      if (_clauses) {
+        return await sendTransactionWithClauses(_clauses)
+      }
+      return await sendTransaction()
+    },
+    [sendTransactionWithClauses, sendTransaction],
+  )
   const {
     mutate: runSendTransaction,
     data: sendTransactionTx,
     isPending: sendTransactionPending,
     error: sendTransactionError,
   } = useMutation({
-    mutationFn: sendTransaction,
+    mutationFn: sendTransactionAdapter,
     onError: error => {
+      console.error(error)
       toast({
         title: "Error while signing the transaction.",
         description: `${error.message}`,
@@ -125,6 +145,7 @@ export const useSendTransaction = ({
   }
 
   useEffect(() => {
+    console.log({ txReceipt })
     if (!txReceipt) return
     if (txReceipt.reverted) {
       ;(async () => explainTxRevertReason(txReceipt))()

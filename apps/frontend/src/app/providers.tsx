@@ -8,11 +8,8 @@ import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client
 
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 
-import { getConfig } from "@repo/config"
 import { theme } from "./theme"
 import { DappKitWithChakraProvider } from "@/providers/DappKitWithChakraProvider"
-
-const config = getConfig()
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (

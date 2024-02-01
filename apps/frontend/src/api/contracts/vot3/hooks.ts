@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { getVot3Balance, getVot3TokenDetails } from "./endpoints"
+import { getVot3Balance, getVot3Delegates, getVot3TokenDetails, getVotes } from "./endpoints"
 import { useConnex } from "@vechain/dapp-kit-react"
 
 export const getVot3TokenDetailsQueryKey = () => ["tokenDetails", "vot3"]
@@ -21,5 +21,36 @@ export const useVot3Balance = (address?: string) => {
     queryKey: getVot3BalanceQueryKey(address),
     queryFn: () => getVot3Balance(thor, address, tokenDetails?.decimals),
     enabled: !!address && !!tokenDetails?.decimals,
+  })
+}
+
+/**
+ * Return the address the user has delegated his votes to (if any)
+ * @param address the address of the user
+ * @returns  the address the user has delegated his votes to (if any)
+ */
+export const getVot3DelegatesQueryKey = (address?: string) => ["vot3", "delegates", address]
+export const useVot3Delegates = (address?: string) => {
+  const { thor } = useConnex()
+
+  return useQuery({
+    queryKey: getVot3DelegatesQueryKey(address),
+    queryFn: () => getVot3Delegates(thor, address),
+    enabled: !!address,
+  })
+}
+
+export const getVotesQueryKey = (address?: string) => ["votes", address]
+/**
+ *  Hook to get the number of votes of the given address (includes the delegated ones)
+ * @returns the number of votes of the given address (includes the delegated ones)
+ */
+export const useGetVotes = (address?: string) => {
+  const { thor } = useConnex()
+
+  return useQuery({
+    queryKey: getVotesQueryKey(address),
+    queryFn: async () => await getVotes(thor, address),
+    enabled: !!thor && !!address,
   })
 }

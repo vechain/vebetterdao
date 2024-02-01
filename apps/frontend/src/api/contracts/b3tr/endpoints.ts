@@ -8,8 +8,6 @@ const config = getConfig()
 const B3TR_CONTRACT = config.b3trContractAddress
 const VOT3_CONTRACT = config.vot3ContractAddress
 
-console.log({ B3TR_CONTRACT, VOT3_CONTRACT })
-
 /**
  *  Get the b3tr token details from the contract. circulatingSupply and totalSupply are scaled down to the decimals of the token
  * @param thor

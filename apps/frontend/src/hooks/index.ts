@@ -1,3 +1,4 @@
+export * from "./useCreateProposal"
 export * from "./useMintB3tr"
 export * from "./useSendTransaction"
 export * from "./useStakeB3tr"

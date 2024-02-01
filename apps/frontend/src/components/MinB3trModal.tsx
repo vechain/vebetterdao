@@ -72,7 +72,7 @@ export const MinB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
   const onSubmit = (_data: FormData) => {
     if (address && amount) {
-      sendTransaction()
+      sendTransaction(undefined)
     }
   }
 

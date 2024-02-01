@@ -153,7 +153,7 @@ export const TvlBreakdownPieChart = () => {
             <Alert status="warning" borderRadius={"lg"}>
               <AlertIcon />
               <Box>
-                <AlertTitle>No B3TR or vote in circulation</AlertTitle>
+                <AlertTitle>No B3TR or VOT3 in circulation</AlertTitle>
                 <AlertDescription>Mint some tokens to get started.</AlertDescription>
               </Box>
             </Alert>

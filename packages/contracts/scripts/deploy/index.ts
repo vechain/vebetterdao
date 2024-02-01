@@ -4,8 +4,7 @@ import { deployAll } from "./deploy"
 
 // and properly handle errors.
 const execute = async () => {
-  const contracts = await deployAll()
-  console.log(contracts)
+  await deployAll()
 }
 
 execute()
