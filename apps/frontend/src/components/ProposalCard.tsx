@@ -1,10 +1,23 @@
 import { ProposalCreatedEvent, ProposalState, useProposalState } from "@/api"
-import { Box, Card, CardBody, CardFooter, CardHeader, Code, HStack, Heading, Tag, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Card,
+  CardBody,
+  CardFooter,
+  CardHeader,
+  Code,
+  HStack,
+  Heading,
+  Spacer,
+  Tag,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { AddressButton } from "./AddressButton"
 import { useMemo } from "react"
 import { governanceAvailableContracts } from "@/constants"
 import { abi } from "thor-devkit"
-import { AddressUtils } from "@repo/utils"
+import { AddressUtils, ContractUtils } from "@repo/utils"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 
 type Props = {
@@ -20,25 +33,34 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
       const contract = governanceAvailableContracts.find(c => AddressUtils.compareAddresses(c.address, contractAddress))
       if (!contract) continue
 
-      //try to decode the call data till we find a match
-      for (const method of contract.abi.abi) {
-        if (method.type !== "function") continue
-        try {
-          const decodedCallData = abi.decodeParameters(method.inputs, proposal.callDatas[index] as string)
+      const calldata = proposal.callDatas[index] as string
 
-          decoded.push({
-            contract: { ...contract, address: contractAddress },
-            method: method,
-            params: decodedCallData,
+      try {
+        // The first 10 characters of the call data is the function to call, all the rest is the eventual encoded parameters
+        //TODO: use correct type of ABI
+        //@ts-ignore
+        const decodedMethod = ContractUtils.resolveAbiFunctionFromCalldata(calldata, contract.abi)
+        let _decodedCallData
+
+        if (decodedMethod) {
+          console.log({
+            decodedMethod,
+            calldata,
           })
-          break
-        } catch (e) {}
-      }
+          _decodedCallData = abi.decodeParameters(decodedMethod.inputs, calldata)
+        }
+        decoded.push({
+          contract: { ...contract, address: contractAddress },
+          method: decodedMethod,
+          params: _decodedCallData,
+        })
+      } catch (e) {}
     }
     return decoded
   }, [proposal])
 
   console.log({ decodedCallDatas })
+
   return (
     <Card flex={1}>
       <CardHeader>
@@ -65,18 +87,35 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
                 </HStack>
                 <HStack w="full" justify={"space-between"}>
                   <Text>Method</Text>
-                  <Code>
-                    {target.method.name}({target.method.inputs?.map(i => `${i.type} ${i.name}`)})
-                  </Code>
+                  {target.method ? (
+                    <Code>
+                      {target.method.name}({target.method.inputs.map(i => `${i.type} ${i.name}`).join(", ")})
+                    </Code>
+                  ) : (
+                    <Code>Unknown</Code>
+                  )}
                 </HStack>
+                {target.method?.inputs.length && (
+                  <HStack w="full" justify={"space-between"}>
+                    <Text>Params</Text>
+                    <VStack align="flex-start">
+                      {target.method.inputs.map((input, i) => (
+                        <HStack key={i} w="full" justify={"space-between"}>
+                          <Code>{target.params?.[input.name]}</Code>
+                        </HStack>
+                      ))}
+                    </VStack>
+                  </HStack>
+                )}
               </VStack>
             ))}
           </CardBody>
         </Card>
-        <Box>
-          <Text>Proposer</Text>
-          <AddressButton address={proposal.proposer} buttonSize="xs" addressFontSize="xs" />
-        </Box>
+        <Spacer h={4} />
+        <HStack justify={"space-between"}>
+          <Heading size="sm"> Proposer</Heading>
+          <AddressButton address={proposal.proposer} buttonSize="sm" addressFontSize="sm" />
+        </HStack>
       </CardBody>
       <CardFooter>
         <HStack justify={"space-between"} w="full">
