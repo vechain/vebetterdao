@@ -60,15 +60,20 @@ export default function ProposalsPage() {
         <TabIndicator mt="-1.5px" height="2px" bg="blue.500" borderRadius="1px" />
         <TabPanels>
           <TabPanel>
-            <Grid templateColumns="repeat(2, 1fr)" gap={6}>
+            <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6}>
               {activeProposals?.map(proposal => <ProposalCard proposal={proposal} key={proposal.proposalId} />)}
             </Grid>
           </TabPanel>
           <TabPanel>
-            <p>two!</p>
+            <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6}>
+              {incomingProposals?.map(proposal => <ProposalCard proposal={proposal} key={proposal.proposalId} />)}
+            </Grid>
           </TabPanel>
+
           <TabPanel>
-            <p>three!</p>
+            <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6}>
+              {pastProposals?.map(proposal => <ProposalCard proposal={proposal} key={proposal.proposalId} />)}
+            </Grid>
           </TabPanel>
         </TabPanels>
       </Tabs>
