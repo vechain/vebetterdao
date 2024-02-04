@@ -1,5 +1,5 @@
 import { BaseContract } from "ethers"
-import { XAllocationVoting } from "../../typechain-types"
+import { XAllocationPool, XAllocationVoting } from "../../typechain-types"
 
 export const filterEventsByName = (events: any[], eventName: string) => {
   return events.filter(event => event.fragment && event.fragment.name === eventName)
@@ -27,7 +27,6 @@ export const parseAlloctionProposalCreatedEvent = (event: any, xAllocationVoting
     voteStart: decoded?.args[2],
     voteEnd: decoded?.args[3],
     description: decoded?.args[4],
-    appsCodes: decoded?.args[5],
   }
 }
 
@@ -39,5 +38,14 @@ export const parseAllocationVoteCastEvent = (event: any, xAllocationVoting: XAll
     proposalId: decoded?.args[1],
     apps: decoded?.args[2],
     voteWeights: decoded?.args[3],
+  }
+}
+
+export const parseAppAddedEvent = (event: any, xAllocationPool: XAllocationPool) => {
+  const decoded = decodeEvent(event, xAllocationPool)
+
+  return {
+    id: decoded?.args[0],
+    address: decoded?.args[1],
   }
 }

@@ -5,7 +5,7 @@ import { IERC165, ERC165 } from "@openzeppelin/contracts/utils/introspection/ERC
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Context } from "@openzeppelin/contracts/utils/Context.sol";
 import { Nonces } from "@openzeppelin/contracts/utils/Nonces.sol";
-import { IXAllocationVotingGovernor, IERC6372 } from "./interfaces/IXAllocationVotingGovernor.sol";
+import { IXAllocationVotingGovernor, IERC6372 } from "../interfaces/IXAllocationVotingGovernor.sol";
 
 /**
  * @dev Core of the x-allocation votes governance system, designed to be extended through various modules.
@@ -163,28 +163,19 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   function _countVote(
     uint256 proposalId,
     address account,
-    bytes32[] memory appCodes,
+    bytes32[] memory appIds,
     uint256[] memory voteWeights
   ) internal virtual;
 
   /**
    * @dev See {IXAllocationVotingGovernor-proposeNewAllocationRound}. This function has opt-in frontrunning protection, described in {_isValidDescriptionForProposer}.
    */
-  //TODO: should callable only by external x-allocation-pool contract
-  function proposeNewAllocationRound(
-    bytes32[] memory appsToVote,
-    string memory description
-  ) public virtual returns (uint256) {
+  function proposeNewAllocationRound(string memory description) public virtual returns (uint256) {
     address proposer = _msgSender();
 
     // check description restriction
     if (!_isValidDescriptionForProposer(proposer, description)) {
       revert GovernorRestrictedProposer(proposer);
-    }
-
-    // there should be at least 1 app to vote
-    if (appsToVote.length == 0) {
-      revert("Governor: no apps to vote");
     }
 
     // check that there isn't an already ongoing proposal
@@ -197,7 +188,7 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
       );
     }
 
-    return _propose(description, proposer, appsToVote);
+    return _propose(description, proposer);
   }
 
   /**
@@ -205,11 +196,7 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
    *
    * Emits a {IXAllocationVotingGovernor-ProposalCreated} event.
    */
-  function _propose(
-    string memory description,
-    address proposer,
-    bytes32[] memory appsToVote
-  ) internal virtual returns (uint256 proposalId) {
+  function _propose(string memory description, address proposer) internal virtual returns (uint256 proposalId) {
     ++_proposalCount;
     proposalId = _proposalCount;
 
@@ -224,9 +211,8 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
     proposal.proposer = proposer;
     proposal.voteStart = SafeCast.toUint48(snapshot);
     proposal.voteDuration = SafeCast.toUint32(duration);
-    proposal.appsToVote = appsToVote;
 
-    emit AllocationProposalCreated(proposalId, proposer, snapshot, snapshot + duration, description, appsToVote);
+    emit AllocationProposalCreated(proposalId, proposer, snapshot, snapshot + duration, description);
 
     // Using a named return variable to avoid stack too deep errors
   }
@@ -254,17 +240,17 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
    */
   function castVote(
     uint256 proposalId,
-    bytes32[] memory appCodes,
+    bytes32[] memory appIds,
     uint256[] memory voteWeights
   ) public virtual returns (uint256) {
     _validateStateBitmap(proposalId, _encodeStateBitmap(AllocationProposalState.Active));
 
-    require(appCodes.length == voteWeights.length, "XAllocationVotingGovernor: apps and weights length mismatch");
-    require(appCodes.length > 0, "XAllocationVotingGovernor: no apps to vote for");
+    require(appIds.length == voteWeights.length, "XAllocationVotingGovernor: apps and weights length mismatch");
+    require(appIds.length > 0, "XAllocationVotingGovernor: no apps to vote for");
 
     address voter = _msgSender();
 
-    _countVote(proposalId, voter, appCodes, voteWeights);
+    _countVote(proposalId, voter, appIds, voteWeights);
   }
 
   /**

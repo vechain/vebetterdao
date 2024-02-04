@@ -21,18 +21,21 @@ contract XAllocationVoting is
    * @param _initialVotingPeriod How long does a proposal remain open to votes
    * @param _initialVotingDelay How long after a proposal is created should become active
    * @param _b3trGovernance The address of the B3trGovernance DAO
+   * @param _xAllocationPool The address of the XAllocationPool
    */
   constructor(
     IVotes _vot3Token,
     uint256 _quorumPercentage,
     uint32 _initialVotingPeriod,
     uint48 _initialVotingDelay,
-    address _b3trGovernance
+    address _b3trGovernance,
+    address _xAllocationPool
   )
     XAllocationVotingGovernor("XAllocationVoting", _b3trGovernance)
     GovernorSettings(_initialVotingDelay, _initialVotingPeriod)
     GovernorVotes(_vot3Token)
     GovernorVotesQuorumFraction(_quorumPercentage)
+    GovernorXAllocationVotesCounting(_xAllocationPool)
   {}
 
   // The following functions are overrides required by Solidity.

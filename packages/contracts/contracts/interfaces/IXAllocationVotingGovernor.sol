@@ -20,8 +20,6 @@ import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
  *
  * Votable applications are defined by the x-allocation pool and are identified by their code, this way we can change their
  * withdrawal address in case of a security breach. The governor only allows voting for these applications.
- *
- * The propose function should be callable only by the x-allocation pool, so the apps can be only added by the x-allocation pool.
  */
 interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   enum AllocationProposalState {
@@ -84,6 +82,11 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   error GovernorInvalidVoteType();
 
   /**
+   * @dev The `app` is not present in the list with the available apps for voting in this proposal.
+   */
+  error GovernorAppNotAvailableForVoting(bytes32 app);
+
+  /**
    * @dev Emitted when a proposal is created.
    */
   event AllocationProposalCreated(
@@ -91,8 +94,7 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
     address proposer,
     uint256 voteStart,
     uint256 voteEnd,
-    string description,
-    bytes32[] appsCodes
+    string description
   );
 
   /**
@@ -104,12 +106,7 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
    * @dev Emitted when votes are cast.
    *
    */
-  event AllocationVoteCast(
-    address indexed voter,
-    uint256 indexed proposalId,
-    bytes32[] appsCodes,
-    uint256[] voteWeights
-  );
+  event AllocationVoteCast(address indexed voter, uint256 indexed proposalId, bytes32[] appsIds, uint256[] voteWeights);
 
   /**
    * @notice module:core
@@ -240,10 +237,7 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
    *
    * Emits a {AllocationProposalCreated} event.
    */
-  function proposeNewAllocationRound(
-    bytes32[] memory appsToVote,
-    string memory description
-  ) external returns (uint256 proposalId);
+  function proposeNewAllocationRound(string memory description) external returns (uint256 proposalId);
 
   /**
    * @dev Cast multiple votes at once
@@ -252,7 +246,7 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
    */
   function castVote(
     uint256 proposalId,
-    bytes32[] memory appsCodes,
+    bytes32[] memory appsIds,
     uint256[] memory voteWeights
   ) external returns (uint256 balance);
 }

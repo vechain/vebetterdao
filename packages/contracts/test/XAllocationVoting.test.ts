@@ -15,12 +15,13 @@ import { describe, it } from "mocha"
 describe.only("XAllocation Voting", function () {
   describe("Allocation rounds", function () {
     it("Should be able to propose a new allocation round successfully", async function () {
-      const { xAllocationVoting, otherAccounts } = await getOrDeployContractInstances({
+      const { xAllocationVoting, xAllocationPool, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
-      const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
-      let tx = await xAllocationVoting.proposeNewAllocationRound([app1], "First allocation round")
+      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
+
+      let tx = await xAllocationVoting.proposeNewAllocationRound("First allocation round")
       let receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
 
@@ -28,12 +29,8 @@ describe.only("XAllocation Voting", function () {
       let allocationProposalCreated = filterEventsByName(receipt.logs, "AllocationProposalCreated")
       expect(allocationProposalCreated).not.to.eql([])
 
-      let { proposalId, appsCodes: appsAvailableToVote } = parseAlloctionProposalCreatedEvent(
-        allocationProposalCreated[0],
-        xAllocationVoting,
-      )
+      let { proposalId } = parseAlloctionProposalCreatedEvent(allocationProposalCreated[0], xAllocationVoting)
       expect(proposalId).to.eql(BigInt(1))
-      expect(appsAvailableToVote).to.eql([app1])
 
       //Prposal should be pending
       let proposalState = await xAllocationVoting.state(proposalId)
@@ -47,14 +44,13 @@ describe.only("XAllocation Voting", function () {
     })
 
     it("Should not be able to propose a new allocation round if there is an active one", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount } = await getOrDeployContractInstances({
+      const { xAllocationVoting, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
-      const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
       await getVot3Tokens(otherAccount, "1000")
 
-      let tx = await xAllocationVoting.proposeNewAllocationRound([app1], "First allocation round")
+      let tx = await xAllocationVoting.proposeNewAllocationRound("First allocation round")
       let receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
 
@@ -62,73 +58,49 @@ describe.only("XAllocation Voting", function () {
       let allocationProposalCreated = filterEventsByName(receipt.logs, "AllocationProposalCreated")
       expect(allocationProposalCreated).not.to.eql([])
 
-      let { proposalId, appsCodes: appsAvailableToVote } = parseAlloctionProposalCreatedEvent(
-        allocationProposalCreated[0],
-        xAllocationVoting,
-      )
-      expect(proposalId).to.eql(BigInt(1))
-      expect(appsAvailableToVote).to.eql([app1])
+      let { proposalId } = parseAlloctionProposalCreatedEvent(allocationProposalCreated[0], xAllocationVoting)
 
       //Prposal should be pending
       let proposalState = await xAllocationVoting.state(proposalId)
       expect(proposalState).to.eql(BigInt(0))
 
       // should not be able to propose a new allocation round if there is an active one
-      await catchRevert(xAllocationVoting.proposeNewAllocationRound([app1], "First allocation round"))
+      await catchRevert(xAllocationVoting.proposeNewAllocationRound("First allocation round"))
 
       await waitForProposalToBeActive(proposalId, xAllocationVoting)
 
       // should not be able to propose a new allocation round if there is an active one
-      await catchRevert(xAllocationVoting.proposeNewAllocationRound([app1], "First allocation round"))
+      await catchRevert(xAllocationVoting.proposeNewAllocationRound("First allocation round"))
     })
 
     it("Should be able to propose a new allocation round if the previous one ended", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount } = await getOrDeployContractInstances({
+      const { xAllocationVoting, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
-      const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
       await getVot3Tokens(otherAccount, "1000")
 
-      let tx = await xAllocationVoting.proposeNewAllocationRound([app1], "First allocation round")
+      let tx = await xAllocationVoting.proposeNewAllocationRound("First allocation round")
       let receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
 
       // Event should be emitted
       let allocationProposalCreated = filterEventsByName(receipt.logs, "AllocationProposalCreated")
-      expect(allocationProposalCreated).not.to.eql([])
-
-      let { proposalId, appsCodes: appsAvailableToVote } = parseAlloctionProposalCreatedEvent(
-        allocationProposalCreated[0],
-        xAllocationVoting,
-      )
-      expect(proposalId).to.eql(BigInt(1))
-      expect(appsAvailableToVote).to.eql([app1])
-
-      //Prposal should be pending
-      let proposalState = await xAllocationVoting.state(proposalId)
-      expect(proposalState).to.eql(BigInt(0))
-
-      // should not be able to propose a new allocation round if there is an active one
-      await catchRevert(xAllocationVoting.proposeNewAllocationRound([app1], "First allocation round"))
+      let { proposalId } = parseAlloctionProposalCreatedEvent(allocationProposalCreated[0], xAllocationVoting)
 
       await waitForProposalToBeActive(proposalId, xAllocationVoting)
       await waitForVotingPeriodToEnd(proposalId, xAllocationVoting)
 
       // should not be able to propose a new allocation round if there is an active one
-      tx = await xAllocationVoting.proposeNewAllocationRound([app1], "Second allocation round")
+      tx = await xAllocationVoting.proposeNewAllocationRound("Second allocation round")
       receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
 
       allocationProposalCreated = filterEventsByName(receipt.logs, "AllocationProposalCreated")
       expect(allocationProposalCreated).not.to.eql([])
-      ;({ proposalId, appsCodes: appsAvailableToVote } = parseAlloctionProposalCreatedEvent(
-        allocationProposalCreated[0],
-        xAllocationVoting,
-      ))
+      ;({ proposalId } = parseAlloctionProposalCreatedEvent(allocationProposalCreated[0], xAllocationVoting))
 
       expect(proposalId).to.eql(BigInt(2))
-      expect(appsAvailableToVote).to.eql([app1])
     })
 
     it("At least one app needed to propose a new allocation round", async function () {})
@@ -136,16 +108,17 @@ describe.only("XAllocation Voting", function () {
 
   describe("Allocation Voting", function () {
     it("I cannot cast a vote with higher balance than I have", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, otherAccounts, otherAccount, xAllocationPool, owner } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
       await getVot3Tokens(otherAccount, "1000")
 
-      //   await xAllocationPool.addApp(app1.address)
-
-      let tx = await xAllocationVoting.proposeNewAllocationRound([app1], "First allocation round")
+      let tx = await xAllocationVoting.proposeNewAllocationRound("First allocation round")
       let receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
       // Event should be emitted
@@ -160,16 +133,16 @@ describe.only("XAllocation Voting", function () {
       )
     })
     it("I should be able to cast a vote", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, otherAccounts, otherAccount, xAllocationPool, owner } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
       await getVot3Tokens(otherAccount, "1000")
 
-      //   await xAllocationPool.addApp(app1.address)
-
-      let tx = await xAllocationVoting.proposeNewAllocationRound([app1], "First allocation round")
+      let tx = await xAllocationVoting.proposeNewAllocationRound("First allocation round")
       let receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
       // Event should be emitted
@@ -206,16 +179,16 @@ describe.only("XAllocation Voting", function () {
     })
 
     it("I should not be able to cast vote twice", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, otherAccounts, otherAccount, xAllocationPool, owner } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
       await getVot3Tokens(otherAccount, "1000")
 
-      //   await xAllocationPool.addApp(app1.address)
-
-      let tx = await xAllocationVoting.proposeNewAllocationRound([app1], "First allocation round")
+      let tx = await xAllocationVoting.proposeNewAllocationRound("First allocation round")
       let receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
       // Event should be emitted
@@ -235,16 +208,16 @@ describe.only("XAllocation Voting", function () {
     })
 
     it("Cannot cast a vote if the allocation round ended", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, otherAccounts, otherAccount, xAllocationPool, owner } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
       await getVot3Tokens(otherAccount, "1000")
 
-      //   await xAllocationPool.addApp(app1.address)
-
-      let tx = await xAllocationVoting.proposeNewAllocationRound([app1], "First allocation round")
+      let tx = await xAllocationVoting.proposeNewAllocationRound("First allocation round")
       let receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
       // Event should be emitted
@@ -266,15 +239,18 @@ describe.only("XAllocation Voting", function () {
     })
 
     it("I should be able to vote for multiple apps", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, otherAccounts, otherAccount, xAllocationPool, owner } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await xAllocationPool.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address)
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
 
       await getVot3Tokens(otherAccount, "1000")
 
-      let tx = await xAllocationVoting.proposeNewAllocationRound([app1, app2], "Second allocation round")
+      let tx = await xAllocationVoting.proposeNewAllocationRound("Second allocation round")
       let receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
 
@@ -313,10 +289,14 @@ describe.only("XAllocation Voting", function () {
     })
 
     it("Votes should be tracked correctly", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, otherAccounts, otherAccount, xAllocationPool, owner } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await xAllocationPool.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address)
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       const voter2 = otherAccounts[3]
       const voter3 = otherAccounts[4]
@@ -325,7 +305,7 @@ describe.only("XAllocation Voting", function () {
       await getVot3Tokens(voter2, "1000")
       await getVot3Tokens(voter3, "1000")
 
-      let tx = await xAllocationVoting.proposeNewAllocationRound([app1, app2], "Second allocation round")
+      let tx = await xAllocationVoting.proposeNewAllocationRound("Second allocation round")
       let receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
 

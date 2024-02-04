@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import { XAllocationVotingGovernor } from "../XAllocationVotingGovernor.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+import { IXAllocationPool } from "../../interfaces/IXAllocationPool.sol";
 
 abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor {
   // ogni round di allocazione gli utenti possono votare una frazione del loro balance per le app disponibili per il voto di quel round
@@ -22,6 +23,13 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
   }
 
   mapping(uint256 proposalId => AllocationRoundVote) internal _allocationRoundVotes;
+
+  //TODO: handle possibility to update this
+  IXAllocationPool public xAllocationPool;
+
+  constructor(address xAllocationPool_) {
+    xAllocationPool = IXAllocationPool(xAllocationPool_);
+  }
 
   /**
    * @dev See {IXAllocationVotingGovernor-COUNTING_MODE}.
@@ -57,8 +65,9 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
     for (uint256 i = 0; i < apps.length; i++) {
       totalWeight += weights[i];
 
-      // TODO: require che app fa parte della lista delle app votate per questo round
-      // require(proposal.appsToVote[apps[i]] == apps[i], "Governor: app not available for voting in this proposal");
+      if (!xAllocationPool.isAppAvailableForAllocationVoting(apps[i])) {
+        revert GovernorAppNotAvailableForVoting(apps[i]);
+      }
 
       _allocationRoundVotes[proposalId].votesReceived[apps[i]] += weights[i];
     }
