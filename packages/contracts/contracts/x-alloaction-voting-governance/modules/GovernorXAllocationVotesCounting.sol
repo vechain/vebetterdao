@@ -23,6 +23,14 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
 
   mapping(uint256 proposalId => AllocationRoundVote) internal _allocationRoundVotes;
 
+  /**
+   * @dev See {IXAllocationVotingGovernor-COUNTING_MODE}.
+   */
+  // solhint-disable-next-line func-name-mixedcase
+  function COUNTING_MODE() public pure virtual override returns (string memory) {
+    return "support=x-allocations&quorum=auto";
+  }
+
   function getAppVotes(uint256 proposalId, bytes32 app) public view returns (uint256) {
     return _allocationRoundVotes[proposalId].votesReceived[app];
   }
@@ -34,11 +42,12 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
   // l'utente quando fa il cast dei voti per un round di allocazione può passare tanti address di app quante ne vuole votare e
   // per ognuna di queste app può passare un peso di voto
   // il peso di voto è una frazione del suo balance
-  function _castVotesForAllocationRound(
+  function _countVotes(
     uint256 proposalId,
+    address voter,
     bytes32[] memory apps,
     uint256[] memory weights
-  ) internal virtual {
+  ) internal virtual override {
     require(apps.length == weights.length, "GovernorXAllocationVotesCounting: apps and weights length mismatch");
     require(apps.length > 0, "GovernorXAllocationVotesCounting: no apps to vote for");
 
@@ -55,13 +64,34 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
 
     require(
       totalWeight <=
-        getVotes(msg.sender, proposal.voteStart) - _allocationRoundVotes[proposalId].totalVotesUserCasted[msg.sender],
+        getVotes(voter, proposal.voteStart) - _allocationRoundVotes[proposalId].totalVotesUserCasted[voter],
       "Governor: account has insufficient voting power for this proposal"
     );
 
     _allocationRoundVotes[proposalId].totalVotes += totalWeight;
-    _allocationRoundVotes[proposalId].hasVoted[msg.sender] = true;
+    _allocationRoundVotes[proposalId].hasVoted[voter] = true;
 
     // emit event
+  }
+
+  function hasVoted(uint256 proposalId, address user) public view returns (bool) {
+    //TODO: implement
+  }
+
+  function _quorumReached(uint256 proposalId) internal view virtual override returns (bool) {
+    //TODO: implement
+  }
+
+  function _voteSucceeded(uint256 proposalId) internal view virtual override returns (bool) {
+    //TODO: implement
+  }
+
+  function _countVote(
+    uint256 proposalId,
+    address account,
+    bytes32 appCode,
+    uint256 voteWeight
+  ) internal virtual override {
+    // TODO: implement
   }
 }

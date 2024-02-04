@@ -163,9 +163,19 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   function _countVote(uint256 proposalId, address account, bytes32 appCode, uint256 voteWeight) internal virtual;
 
   /**
+   * @dev Register a vote for `proposalId` by `account` for multiple given `apps` with fractionalized `voteWeights`.
+   */
+  function _countVotes(
+    uint256 proposalId,
+    address account,
+    bytes32[] memory appCodes,
+    uint256[] memory voteWeights
+  ) internal virtual;
+
+  /**
    * @dev See {IXAllocationVotingGovernor-proposeNewAllocationRound}. This function has opt-in frontrunning protection, described in {_isValidDescriptionForProposer}.
    */
-  //TODO: callable only by external contract
+  //TODO: should callable only by external x-allocation-pool contract
   function proposeNewAllocationRound(
     bytes32[] memory appsToVote,
     string memory description
@@ -260,18 +270,18 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
     bytes32[] memory appCodes,
     uint256[] memory voteWeights
   ) public virtual returns (uint256) {
-    address voter = _msgSender();
-    uint256 weightBalance = 0;
-
-    for (uint256 i = 0; i < appCodes.length; i++) {
-      uint256 weight = _castVote(proposalId, voter, appCodes[i], voteWeights[i]);
-      weightBalance += weight;
+    _validateStateBitmap(proposalId, _encodeStateBitmap(AllocationProposalState.Active));
+    if (appCodes.length != voteWeights.length) {
+      revert("Governor: appCodes and voteWeights length mismatch");
     }
-    return weightBalance;
+
+    address voter = _msgSender();
+
+    _countVotes(proposalId, voter, appCodes, voteWeights);
   }
 
   /**
-   * @dev Internal vote casting mechanism: Check that the vote is pending, that it has not been cast yet, retrieve
+   * @dev Internal vote casting mechanism: Check that the vote is active, that it has not been cast yet, retrieve
    * voting weight using {IXAllocationVotingGovernor-getVotes} and call the {_countVote} internal function.
    *
    * Emits a {IXAllocationVotingGovernor-VoteCast} event.
@@ -283,7 +293,9 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
     uint256 voteWeight
   ) internal virtual returns (uint256) {
     _validateStateBitmap(proposalId, _encodeStateBitmap(AllocationProposalState.Active));
+    // _countVote(proposalId, account, appCode, voteWeight);
 
+    //TODO: check that user has enough balance to cast vote
     //TODO: implement
     // uint256 weight = _getVotes(account, proposalSnapshot(proposalId), params);
     // _countVote(proposalId, account, support, weight, params);
