@@ -7,13 +7,12 @@ import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
 /**
  * @dev Interface of the distribution allocation voting for the x-allocation pool.
  * This interface was forked from OpenZeppelin's IGovernor.sol and modified to fit the needs of the x-allocation pool.
- * Some states were removed; canceling, queuing, and executing proposals were removed. Some errors were removed.
- * Instead of hashProposalId we have an incremental id, and the propose process was simplified.
+ * Some states were removed; canceling, queuing, executing proposals, vote with signature were removed. Some errors were removed.
+ * Instead of hashProposal (to obtain id) we have an incremental id, and the propose process was simplified.
  *
- * We think of proposals as rounds of voting, and the proposalId is the round number.
+ * Proposals should be considered as voting rounds, and the proposalId is the round number.
  * There should be only one proposal per time.
  *
- * Vote with signature also was removed.
  * Events were updated to fit the new governor.
  *
  * There is no proposalThreshold, anyone can propose a new round.

@@ -375,6 +375,8 @@ describe.only("X-Allocation Voting", function () {
       expect(allocationProposalCreated).not.to.eql([])
       let { proposalId } = parseAlloctionProposalCreatedEvent(allocationProposalCreated[0], xAllocationVoting)
 
+      await waitForProposalToBeActive(proposalId, xAllocationVoting)
+
       // I should be able to vote for multiple apps
       tx = await xAllocationVoting
         .connect(otherAccount)
@@ -429,6 +431,8 @@ describe.only("X-Allocation Voting", function () {
       let allocationProposalCreated = filterEventsByName(receipt.logs, "AllocationProposalCreated")
       expect(allocationProposalCreated).not.to.eql([])
       let { proposalId } = parseAlloctionProposalCreatedEvent(allocationProposalCreated[0], xAllocationVoting)
+
+      await waitForProposalToBeActive(proposalId, xAllocationVoting)
 
       tx = await xAllocationVoting
         .connect(otherAccount)
@@ -491,7 +495,8 @@ describe.only("X-Allocation Voting", function () {
       expect(allocationProposalCreated).not.to.eql([])
       let { proposalId } = parseAlloctionProposalCreatedEvent(allocationProposalCreated[0], xAllocationVoting)
 
-      // I should be able to vote for multiple apps
+      await waitForProposalToBeActive(proposalId, xAllocationVoting)
+
       await catchRevert(
         xAllocationVoting.connect(otherAccount).castVote(proposalId, [app3], [ethers.parseEther("300")]),
       )
@@ -506,6 +511,92 @@ describe.only("X-Allocation Voting", function () {
 
       let totalVotes = await xAllocationVoting.getAllocationRoundTotalVotes(proposalId)
       expect(totalVotes).to.eql(ethers.parseEther("0"))
+    })
+
+    it("Allocation proposal should be successfull if quorum was reached", async function () {
+      const { xAllocationVoting, otherAccounts, otherAccount, xAllocationPool, owner, vot3 } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, true)
+      const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await xAllocationPool.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, true)
+      const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+
+      await getVot3Tokens(otherAccount, "1000")
+
+      let tx = await xAllocationVoting.proposeNewAllocationRound("Allocation round")
+      let receipt = await tx.wait()
+      if (!receipt) throw new Error("No receipt")
+
+      const timepoint = receipt.blockNumber
+
+      let allocationProposalCreated = filterEventsByName(receipt.logs, "AllocationProposalCreated")
+      expect(allocationProposalCreated).not.to.eql([])
+      let { proposalId } = parseAlloctionProposalCreatedEvent(allocationProposalCreated[0], xAllocationVoting)
+
+      await waitForProposalToBeActive(proposalId, xAllocationVoting)
+
+      tx = await xAllocationVoting
+        .connect(otherAccount)
+        .castVote(proposalId, [app1, app2], [ethers.parseEther("300"), ethers.parseEther("200")])
+      receipt = await tx.wait()
+
+      await waitForVotingPeriodToEnd(proposalId, xAllocationVoting)
+
+      // Check totalSupply
+      const totalSupply = await vot3.getPastTotalSupply(timepoint)
+      // Check quorum
+      const quorum = await xAllocationVoting.quorum(timepoint)
+      // calculate how much is needed to reach quorum from total supply
+      const neededVotes = (Number(ethers.formatEther(quorum)) * Number(ethers.formatEther(totalSupply))) / 100
+      expect(500).to.be.greaterThan(neededVotes)
+
+      // quorum should be reached and proposal should be successful
+      expect(await xAllocationVoting.state(proposalId)).to.eql(BigInt(3))
+    })
+
+    it("Allocation proposal should be defeated if quorum was not reached", async function () {
+      const { xAllocationVoting, otherAccounts, otherAccount, xAllocationPool, owner, vot3 } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, true)
+      const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await xAllocationPool.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, true)
+      const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+
+      await getVot3Tokens(otherAccount, "1000")
+
+      let tx = await xAllocationVoting.proposeNewAllocationRound("Allocation round")
+      let receipt = await tx.wait()
+      if (!receipt) throw new Error("No receipt")
+      const timepoint = receipt.blockNumber
+
+      let allocationProposalCreated = filterEventsByName(receipt.logs, "AllocationProposalCreated")
+      expect(allocationProposalCreated).not.to.eql([])
+      let { proposalId } = parseAlloctionProposalCreatedEvent(allocationProposalCreated[0], xAllocationVoting)
+
+      await waitForProposalToBeActive(proposalId, xAllocationVoting)
+
+      tx = await xAllocationVoting
+        .connect(otherAccount)
+        .castVote(proposalId, [app1, app2], [ethers.parseEther("1"), ethers.parseEther("1")])
+      receipt = await tx.wait()
+
+      await waitForVotingPeriodToEnd(proposalId, xAllocationVoting)
+
+      // Check totalSupply
+      const totalSupply = await vot3.getPastTotalSupply(timepoint)
+      // Check quorum
+      const quorum = await xAllocationVoting.quorum(timepoint)
+      // calculate how much is needed to reach quorum from total supply
+      const neededVotes = (Number(ethers.formatEther(quorum)) * Number(ethers.formatEther(totalSupply))) / 100
+      expect(neededVotes).to.be.greaterThan(2)
+
+      expect(await xAllocationVoting.state(proposalId)).to.eql(BigInt(2))
     })
   })
 })
