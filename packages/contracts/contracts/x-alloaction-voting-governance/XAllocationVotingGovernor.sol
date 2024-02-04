@@ -250,7 +250,7 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   }
 
   /**
-   * @dev See {IXAllocationVotingGovernor-castVotes}.
+   * @dev See {IXAllocationVotingGovernor-castVote}.
    */
   function castVote(
     uint256 proposalId,
@@ -258,9 +258,9 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
     uint256[] memory voteWeights
   ) public virtual returns (uint256) {
     _validateStateBitmap(proposalId, _encodeStateBitmap(AllocationProposalState.Active));
-    if (appCodes.length != voteWeights.length) {
-      revert("Governor: appCodes and voteWeights length mismatch");
-    }
+
+    require(appCodes.length == voteWeights.length, "XAllocationVotingGovernor: apps and weights length mismatch");
+    require(appCodes.length > 0, "XAllocationVotingGovernor: no apps to vote for");
 
     address voter = _msgSender();
 
