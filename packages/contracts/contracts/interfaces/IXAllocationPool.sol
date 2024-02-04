@@ -14,5 +14,5 @@ abstract contract IXAllocationPool {
 
   function addApp(address appAddress, string memory name, bool availableForAllocationVoting) public virtual;
 
-  function getApp(bytes32 id) public view virtual returns (address);
+  function getApp(bytes32 id) public view virtual returns (App memory);
 }

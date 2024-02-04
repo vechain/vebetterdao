@@ -41,9 +41,9 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
   }
 
   // Function to retrieve an app by ID
-  function getApp(bytes32 id) public view override returns (address) {
+  function getApp(bytes32 id) public view override returns (App memory) {
     require(apps[id].addr != address(0), "App does not exist");
-    return apps[id].addr;
+    return apps[id];
   }
 
   // Function to retrieve all apps

@@ -1,5 +1,5 @@
 import { ethers, network } from "hardhat"
-import { GovernorContract, XAllocationVoting } from "../../typechain-types"
+import { GovernorContract, XAllocationPool, XAllocationVoting } from "../../typechain-types"
 import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { getOrDeployContractInstances } from "./deploy"
@@ -100,7 +100,7 @@ export const waitForProposalToBeActive = async (
 
 // Mint some B3TR and swap for VOT3
 export const getVot3Tokens = async (receiver: HardhatEthersSigner, amount: string) => {
-  const { b3tr, vot3, minterAccount } = await getOrDeployContractInstances(false)
+  const { b3tr, vot3, minterAccount } = await getOrDeployContractInstances({ forceDeploy: false })
 
   // Mint some B3TR
   await b3tr.connect(minterAccount).mint(receiver, ethers.parseEther(amount))
@@ -110,4 +110,69 @@ export const getVot3Tokens = async (receiver: HardhatEthersSigner, amount: strin
 
   // Lock B3TR to get VOT3
   await vot3.connect(receiver).stake(ethers.parseEther(amount))
+}
+
+export const createProposalAndExecuteIt = async (
+  proposer: HardhatEthersSigner,
+  voter: HardhatEthersSigner,
+  governor: GovernorContract,
+  contractToCall: BaseContract,
+  Contract: ContractFactory,
+  description: string,
+  functionToCall: string,
+  args: any[] = [],
+) => {
+  // load votes
+  // console.log("Loading votes");
+  await getVot3Tokens(voter, "1000")
+  await waitForNextBlock()
+
+  // create a new proposal
+  // console.log("Creating proposal");
+  const tx = await createProposal(governor, contractToCall, Contract, proposer, description, functionToCall, args)
+  const proposalId = await getProposalIdFromTx(tx, governor)
+
+  // wait
+  // console.log("Waiting for voting period to start");
+  await waitForProposalToBeActive(proposalId, governor)
+
+  // vote
+  // console.log("Voting");
+  await governor.connect(voter).castVote(proposalId, 1) // vote for
+
+  // wait
+  // console.log("Waiting for voting period to end");
+  await waitForVotingPeriodToEnd(proposalId, governor)
+
+  // queue it
+  // console.log("Queueing");
+  const encodedFunctionCall = Contract.interface.encodeFunctionData(functionToCall, args)
+  const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
+  await governor.queue([await contractToCall.getAddress()], [0], [encodedFunctionCall], descriptionHash)
+  await waitForNextBlock()
+
+  // execute it
+  // console.log("Executing");
+  await governor.execute([await contractToCall.getAddress()], [0], [encodedFunctionCall], descriptionHash)
+}
+
+export const addAppThroughGovernance = async (
+  proposer: HardhatEthersSigner,
+  voter: HardhatEthersSigner,
+  governor: GovernorContract,
+  xAllocationPool: XAllocationPool,
+  appName: string = "Bike 4 Life" + Math.random(),
+  appAddress: string,
+  availableForAllocationVoting: boolean = true,
+) => {
+  await createProposalAndExecuteIt(
+    proposer,
+    voter,
+    governor,
+    xAllocationPool,
+    await ethers.getContractFactory("XAllocationPool"),
+    "Add app to the list",
+    "addApp",
+    [appAddress, appName, availableForAllocationVoting],
+  )
 }

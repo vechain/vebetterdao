@@ -1,6 +1,12 @@
 import { ethers } from "hardhat"
 import { expect } from "chai"
-import { catchRevert, filterEventsByName, getOrDeployContractInstances, parseAppAddedEvent } from "./helpers"
+import {
+  catchRevert,
+  createProposalAndExecuteIt,
+  filterEventsByName,
+  getOrDeployContractInstances,
+  parseAppAddedEvent,
+} from "./helpers"
 import { describe, it } from "mocha"
 
 describe.only("XAllocation Voting", function () {
@@ -36,6 +42,32 @@ describe.only("XAllocation Voting", function () {
       )
     })
 
-    it("Should be possible to add a new app through the DAO")
+    it("Should be possible to add a new app through the DAO", async function () {
+      const { xAllocationPool, otherAccounts, governor } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      const proposer = otherAccounts[0]
+      const voter1 = otherAccounts[1]
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("Bike 4 Life"))
+
+      // check that app does not exists
+      await expect(xAllocationPool.getApp(app1Id)).to.be.reverted
+
+      await createProposalAndExecuteIt(
+        proposer,
+        voter1,
+        governor,
+        xAllocationPool,
+        await ethers.getContractFactory("XAllocationPool"),
+        "Add app to the list",
+        "addApp",
+        [otherAccounts[1].address, "Bike 4 Life", true],
+      )
+
+      // check that app was added
+      const app = await xAllocationPool.getApp(app1Id)
+      expect(app[0]).to.eql(app1Id)
+      expect(app[1]).to.eql(otherAccounts[1].address)
+      expect(app[2]).to.eql(true)
+    })
   })
 })
