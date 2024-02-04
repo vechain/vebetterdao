@@ -87,11 +87,12 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
   }
 
   function _quorumReached(uint256 proposalId) internal view virtual override returns (bool) {
-    //TODO: implement
+    return quorum(proposalSnapshot(proposalId)) <= getAllocationRoundTotalVotes(proposalId);
   }
 
+  // vote is successful if quorum is reached
   function _voteSucceeded(uint256 proposalId) internal view virtual override returns (bool) {
-    //TODO: implement
+    return _quorumReached(proposalId);
   }
 
   function getXAllocationPoolAddress() public view returns (address) {

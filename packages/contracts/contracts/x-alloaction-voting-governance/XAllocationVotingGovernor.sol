@@ -24,8 +24,6 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
     address proposer;
     uint48 voteStart;
     uint32 voteDuration;
-    bool canceled;
-    bytes32[] appsToVote;
   }
 
   bytes32 private constant ALL_PROPOSAL_STATES_BITMAP =
@@ -111,7 +109,7 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
 
     if (deadline >= currentTimepoint) {
       return AllocationProposalState.Active;
-    } else if (!_quorumReached(proposalId) || !_voteSucceeded(proposalId)) {
+    } else if (!_voteSucceeded(proposalId)) {
       return AllocationProposalState.Defeated;
     } else {
       return AllocationProposalState.Succeeded;

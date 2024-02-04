@@ -98,11 +98,6 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   );
 
   /**
-   * @dev Emitted when a proposal is canceled.
-   */
-  event ProposalCanceled(uint256 proposalId);
-
-  /**
    * @dev Emitted when votes are cast.
    *
    */
