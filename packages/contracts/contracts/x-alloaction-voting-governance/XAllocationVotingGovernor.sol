@@ -238,11 +238,7 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   /**
    * @dev See {IXAllocationVotingGovernor-castVote}.
    */
-  function castVote(
-    uint256 proposalId,
-    bytes32[] memory appIds,
-    uint256[] memory voteWeights
-  ) public virtual returns (uint256) {
+  function castVote(uint256 proposalId, bytes32[] memory appIds, uint256[] memory voteWeights) public virtual {
     _validateStateBitmap(proposalId, _encodeStateBitmap(AllocationProposalState.Active));
 
     require(appIds.length == voteWeights.length, "XAllocationVotingGovernor: apps and weights length mismatch");
