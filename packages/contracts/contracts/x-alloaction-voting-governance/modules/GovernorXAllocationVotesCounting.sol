@@ -48,9 +48,9 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
     bytes32[] memory apps,
     uint256[] memory weights
   ) internal virtual override {
-    require(apps.length == weights.length, "GovernorXAllocationVotesCounting: apps and weights length mismatch");
-    require(apps.length > 0, "GovernorXAllocationVotesCounting: no apps to vote for");
-
+    if (hasVoted(proposalId, voter)) {
+      revert GovernorAlreadyCastVote(voter);
+    }
     ProposalCore storage proposal = _proposals[proposalId];
 
     uint256 totalWeight = 0;
@@ -58,6 +58,7 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
       totalWeight += weights[i];
 
       // TODO: require che app fa parte della lista delle app votate per questo round
+      // require(proposal.appsToVote[apps[i]] == apps[i], "Governor: app not available for voting in this proposal");
 
       _allocationRoundVotes[proposalId].votesReceived[apps[i]] += weights[i];
     }
@@ -76,7 +77,7 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
   }
 
   function hasVoted(uint256 proposalId, address user) public view returns (bool) {
-    //TODO: implement
+    return _allocationRoundVotes[proposalId].hasVoted[user];
   }
 
   function _quorumReached(uint256 proposalId) internal view virtual override returns (bool) {
