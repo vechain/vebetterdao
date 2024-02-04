@@ -12,7 +12,7 @@ import { IXAllocationVotingGovernor, IERC6372 } from "./interfaces/IXAllocationV
  *
  * This contract is abstract and requires several functions to be implemented in various modules:
  *
- * - A counting module must implement {quorum}, {_quorumReached}, {_voteSucceeded}, {_countVote}, {_countVotes}
+ * - A counting module must implement {quorum}, {_quorumReached}, {_voteSucceeded}, and {_countVote}
  * - A voting module must implement {_getVotes}
  * - Additionally, {votingPeriod} must also be implemented
  */
@@ -158,14 +158,9 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   function _getVotes(address account, uint256 timepoint, bytes memory params) internal view virtual returns (uint256);
 
   /**
-   * @dev Register a vote for `proposalId` by `account` for a given `app` with a specific `voteWeight`.
-   */
-  function _countVote(uint256 proposalId, address account, bytes32 appCode, uint256 voteWeight) internal virtual;
-
-  /**
    * @dev Register a vote for `proposalId` by `account` for multiple given `apps` with fractionalized `voteWeights`.
    */
-  function _countVotes(
+  function _countVote(
     uint256 proposalId,
     address account,
     bytes32[] memory appCodes,
@@ -255,17 +250,9 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   }
 
   /**
-   * @dev See {IXAllocationVotingGovernor-castVote}.
-   */
-  function castVote(uint256 proposalId, bytes32 appCode, uint256 voteWeight) public virtual returns (uint256) {
-    address voter = _msgSender();
-    return _castVote(proposalId, voter, appCode, voteWeight);
-  }
-
-  /**
    * @dev See {IXAllocationVotingGovernor-castVotes}.
    */
-  function castVotes(
+  function castVote(
     uint256 proposalId,
     bytes32[] memory appCodes,
     uint256[] memory voteWeights
@@ -277,32 +264,7 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
 
     address voter = _msgSender();
 
-    _countVotes(proposalId, voter, appCodes, voteWeights);
-  }
-
-  /**
-   * @dev Internal vote casting mechanism: Check that the vote is active, that it has not been cast yet, retrieve
-   * voting weight using {IXAllocationVotingGovernor-getVotes} and call the {_countVote} internal function.
-   *
-   * Emits a {IXAllocationVotingGovernor-VoteCast} event.
-   */
-  function _castVote(
-    uint256 proposalId,
-    address account,
-    bytes32 appCode,
-    uint256 voteWeight
-  ) internal virtual returns (uint256) {
-    _validateStateBitmap(proposalId, _encodeStateBitmap(AllocationProposalState.Active));
-    // _countVote(proposalId, account, appCode, voteWeight);
-
-    //TODO: check that user has enough balance to cast vote
-    //TODO: implement
-    // uint256 weight = _getVotes(account, proposalSnapshot(proposalId), params);
-    // _countVote(proposalId, account, support, weight, params);
-
-    // emit AllocationVoteCast(account, proposalId, support, weight, reason);
-
-    // return weight;
+    _countVote(proposalId, voter, appCodes, voteWeights);
   }
 
   /**

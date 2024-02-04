@@ -101,10 +101,15 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   event ProposalCanceled(uint256 proposalId);
 
   /**
-   * @dev Emitted when a vote is cast.
+   * @dev Emitted when votes are cast.
    *
    */
-  event AllocationVoteCast(address indexed voter, uint256 proposalId, bytes32[] appsCodes, uint256[] voteWeights);
+  event AllocationVoteCast(
+    address indexed voter,
+    uint256 indexed proposalId,
+    bytes32[] appsCodes,
+    uint256[] voteWeights
+  );
 
   /**
    * @notice module:core
@@ -241,18 +246,11 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   ) external returns (uint256 proposalId);
 
   /**
-   * @dev Cast a vote
-   *
-   * Emits a {AllocationVoteCast} event.
-   */
-  function castVote(uint256 proposalId, bytes32 appCode, uint256 voteWeight) external returns (uint256 balance);
-
-  /**
    * @dev Cast multiple votes at once
    *
    * Emits a {AllocationVoteCast} event.
    */
-  function castVotes(
+  function castVote(
     uint256 proposalId,
     bytes32[] memory appsCodes,
     uint256[] memory voteWeights

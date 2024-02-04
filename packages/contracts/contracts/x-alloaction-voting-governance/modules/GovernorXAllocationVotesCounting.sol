@@ -42,7 +42,7 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
   // l'utente quando fa il cast dei voti per un round di allocazione può passare tanti address di app quante ne vuole votare e
   // per ognuna di queste app può passare un peso di voto
   // il peso di voto è una frazione del suo balance
-  function _countVotes(
+  function _countVote(
     uint256 proposalId,
     address voter,
     bytes32[] memory apps,
@@ -72,6 +72,7 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
     _allocationRoundVotes[proposalId].hasVoted[voter] = true;
 
     // emit event
+    emit AllocationVoteCast(voter, proposalId, apps, weights);
   }
 
   function hasVoted(uint256 proposalId, address user) public view returns (bool) {
@@ -84,14 +85,5 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
 
   function _voteSucceeded(uint256 proposalId) internal view virtual override returns (bool) {
     //TODO: implement
-  }
-
-  function _countVote(
-    uint256 proposalId,
-    address account,
-    bytes32 appCode,
-    uint256 voteWeight
-  ) internal virtual override {
-    // TODO: implement
   }
 }
