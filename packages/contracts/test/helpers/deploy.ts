@@ -10,7 +10,6 @@ import {
   XAllocationVoting,
   XAllocationPool,
 } from "../../typechain-types"
-import { time } from "@nomicfoundation/hardhat-network-helpers"
 
 interface DeployInstance {
   B3trContract: ContractFactory
