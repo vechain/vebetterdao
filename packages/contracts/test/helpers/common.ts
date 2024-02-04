@@ -1,5 +1,5 @@
 import { ethers, network } from "hardhat"
-import { GovernorContract } from "../../typechain-types"
+import { GovernorContract, XAllocationVoting } from "../../typechain-types"
 import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { getOrDeployContractInstances } from "./deploy"
@@ -68,7 +68,7 @@ export const getProposalIdFromTx = async (tx: ContractTransactionResponse, gover
   return decodedLogs?.args[0]
 }
 
-export const waitForVotingPeriodToEnd = async (proposalId: number, governor: GovernorContract) => {
+export const waitForVotingPeriodToEnd = async (proposalId: number, governor: GovernorContract | XAllocationVoting) => {
   const deadline = await governor.proposalDeadline(proposalId)
   // console.log(`Waiting for proposal ${proposalId} to end at block ${deadline}`);
 
@@ -78,7 +78,10 @@ export const waitForVotingPeriodToEnd = async (proposalId: number, governor: Gov
   await moveBlocks(parseInt((deadline - currentBlock + BigInt(1)).toString()))
 }
 
-export const waitForProposalToBeActive = async (proposalId: number, governor: GovernorContract): Promise<bigint> => {
+export const waitForProposalToBeActive = async (
+  proposalId: number,
+  governor: GovernorContract | XAllocationVoting,
+): Promise<bigint> => {
   let proposalState = await governor.state(proposalId) // proposal id of the proposal in the beforeAll step
 
   if (proposalState.toString() !== "1") {
