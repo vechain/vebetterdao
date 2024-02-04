@@ -16,7 +16,7 @@ import { describe, it } from "mocha"
 describe.only("XAllocation Voting", function () {
   describe("Deployment", function () {
     it("Admins and addresses should be set correctly", async function () {
-      const { xAllocationVoting, xAllocationPool, governor, owner, timeLock } = await getOrDeployContractInstances({
+      const { xAllocationVoting, xAllocationPool, owner, timeLock } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
       const ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000"
