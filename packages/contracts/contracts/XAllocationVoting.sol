@@ -6,13 +6,15 @@ import "./x-alloaction-voting-governance/modules/GovernorXAllocationVotesCountin
 import "./x-alloaction-voting-governance/modules/GovernorVotes.sol";
 import "./x-alloaction-voting-governance/modules/GovernorVotesQuorumFraction.sol";
 import "./x-alloaction-voting-governance/modules/GovernorSettings.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract XAllocationVoting is
   XAllocationVotingGovernor,
   GovernorSettings,
   GovernorXAllocationVotesCounting,
   GovernorVotes,
-  GovernorVotesQuorumFraction
+  GovernorVotesQuorumFraction,
+  AccessControl
 {
   /**
    * @notice Construct a XAllocationVotingGovernor contract
@@ -20,25 +22,37 @@ contract XAllocationVoting is
    * @param _quorumPercentage quorum as a percentage of the total supply at the block a proposal’s voting power is retrieved
    * @param _initialVotingPeriod How long does a proposal remain open to votes
    * @param _initialVotingDelay How long after a proposal is created should become active
-   * @param _b3trGovernance The address of the B3trGovernance DAO
+   * @param _b3trGovernor The address of the B3trGovernor DAO
    * @param _xAllocationPool The address of the XAllocationPool
+   * @param _admins The addresses of the admins (DAO + another address) that can update the XAllocationPool address, only DAO will remain in the final version
    */
   constructor(
     IVotes _vot3Token,
     uint256 _quorumPercentage,
     uint32 _initialVotingPeriod,
     uint48 _initialVotingDelay,
-    address _b3trGovernance,
-    address _xAllocationPool
+    address _b3trGovernor,
+    address _xAllocationPool,
+    address[] memory _admins
   )
-    XAllocationVotingGovernor("XAllocationVoting", _b3trGovernance)
+    XAllocationVotingGovernor("XAllocationVoting", _b3trGovernor)
     GovernorSettings(_initialVotingDelay, _initialVotingPeriod)
     GovernorVotes(_vot3Token)
     GovernorVotesQuorumFraction(_quorumPercentage)
     GovernorXAllocationVotesCounting(_xAllocationPool)
-  {}
+  {
+    for (uint256 i = 0; i < _admins.length; i++) {
+      _grantRole(DEFAULT_ADMIN_ROLE, _admins[i]);
+    }
+  }
 
-  // The following functions are overrides required by Solidity.
+  function setXAllocationPoolAddress(address _xAllocationPool) public override onlyRole(DEFAULT_ADMIN_ROLE) {
+    xAllocationPool = IXAllocationPool(_xAllocationPool);
+  }
+
+  function setB3trGovernanceAddress(address _newB3trGovernorAddress) public override onlyRole(DEFAULT_ADMIN_ROLE) {
+    _b3trGovernor = _newB3trGovernorAddress;
+  }
 
   function votingDelay() public view override(XAllocationVotingGovernor, GovernorSettings) returns (uint256) {
     return super.votingDelay();
@@ -56,5 +70,11 @@ contract XAllocationVoting is
 
   function state(uint256 proposalId) public view override(XAllocationVotingGovernor) returns (AllocationProposalState) {
     return super.state(proposalId);
+  }
+
+  function supportsInterface(
+    bytes4 interfaceId
+  ) public view override(AccessControl, XAllocationVotingGovernor) returns (bool) {
+    return super.supportsInterface(interfaceId);
   }
 }

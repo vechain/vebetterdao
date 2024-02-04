@@ -30,8 +30,10 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
 
   bytes32 private constant ALL_PROPOSAL_STATES_BITMAP =
     bytes32((2 ** (uint8(type(AllocationProposalState).max) + 1)) - 1);
+
   string private _name;
-  address private _b3trGovernance;
+
+  address internal _b3trGovernor;
 
   mapping(uint256 proposalId => ProposalCore) internal _proposals;
 
@@ -40,7 +42,7 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
    * parameter setters in {GovernorSettings} are protected using this modifier.
    */
   modifier onlyGovernance() {
-    if (getB3trGovernanceAddress() != _msgSender()) {
+    if (getB3trGovernorAddress() != _msgSender()) {
       revert GovernorOnlyExecutor(_msgSender());
     }
     _;
@@ -49,9 +51,9 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   /**
    * @dev Sets the value for {name} and {version}
    */
-  constructor(string memory name_, address b3trGovernance_) {
+  constructor(string memory name_, address b3trGovernor_) {
     _name = name_;
-    _b3trGovernance = b3trGovernance_;
+    _b3trGovernor = b3trGovernor_;
   }
 
   /**
@@ -83,15 +85,10 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   }
 
   /**
-   * Returns the address of the B3trGovernance contract.
+   * Returns the address of the B3trGovernor contract.
    */
-  function getB3trGovernanceAddress() public view returns (address) {
-    return _b3trGovernance;
-  }
-
-  //TODO: add also an admin role
-  function setB3trGovernanceAddress(address newB3trGovernance) public onlyGovernance {
-    _b3trGovernance = newB3trGovernance;
+  function getB3trGovernorAddress() public view returns (address) {
+    return _b3trGovernor;
   }
 
   /**
@@ -391,4 +388,6 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
    * @inheritdoc IXAllocationVotingGovernor
    */
   function quorum(uint256 timepoint) public view virtual returns (uint256);
+
+  function setB3trGovernanceAddress(address newB3trGovernance) public virtual;
 }

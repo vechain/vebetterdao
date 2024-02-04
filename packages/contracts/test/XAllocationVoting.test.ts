@@ -2,6 +2,7 @@ import { ethers } from "hardhat"
 import { expect } from "chai"
 import {
   catchRevert,
+  createProposalAndExecuteIt,
   filterEventsByName,
   getOrDeployContractInstances,
   getVot3Tokens,
@@ -13,6 +14,53 @@ import {
 import { describe, it } from "mocha"
 
 describe.only("XAllocation Voting", function () {
+  describe("Deployment", function () {
+    it("Admins and addresses should be set correctly", async function () {
+      const { xAllocationVoting, xAllocationPool, governor, owner, timeLock } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+      const ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000"
+
+      expect(await xAllocationVoting.hasRole(ADMIN_ROLE, await timeLock.getAddress())).to.eql(true)
+      expect(await xAllocationVoting.hasRole(ADMIN_ROLE, owner.address)).to.eql(true)
+
+      expect(await xAllocationVoting.getXAllocationPoolAddress()).to.eql(await xAllocationPool.getAddress())
+      expect(await xAllocationVoting.getB3trGovernorAddress()).to.eql(await timeLock.getAddress())
+    })
+  })
+  describe("Settings", function () {
+    it("Should be able to change x-allocation pool address", async function () {
+      const { xAllocationVoting, otherAccounts, governor } = await getOrDeployContractInstances({
+        forceDeploy: false,
+      })
+
+      const initialAddress = await xAllocationVoting.getXAllocationPoolAddress()
+      expect(initialAddress).to.exist
+
+      await createProposalAndExecuteIt(
+        otherAccounts[1],
+        otherAccounts[2],
+        governor,
+        xAllocationVoting,
+        await ethers.getContractFactory("XAllocationVoting"),
+        "Update xAllocationPool address in XAllocationVoting",
+        "setXAllocationPoolAddress",
+        [otherAccounts[3].address],
+      )
+
+      const updatedAddress = await xAllocationVoting.getXAllocationPoolAddress()
+      expect(updatedAddress).to.eql(otherAccounts[3].address)
+    })
+
+    // should be able to change quorum
+
+    // should be able to change voting period
+
+    // should be able to change voting delay
+
+    // should be able to change B3trGovernanceAddress
+  })
+
   describe("Allocation rounds", function () {
     it("Should be able to propose a new allocation round successfully", async function () {
       const { xAllocationVoting, xAllocationPool, otherAccounts, owner } = await getOrDeployContractInstances({

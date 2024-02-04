@@ -6,26 +6,26 @@ import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { IXAllocationPool } from "../../interfaces/IXAllocationPool.sol";
 
+/**
+ * @title GovernorXAllocationVotesCounting
+ *
+ * @dev Extension of {XAllocationVotingGovernor} for counting votes for allocation rounds.
+ *
+ * Every round of allocation users can vote a fraction of their balance for the available apps for that round.
+ */
+
 abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor {
-  // ogni round di allocazione gli utenti possono votare una frazione del loro balance per le app disponibili per il voto di quel round
-
-  // quindi ogni round avrà un conteggio dei voti separato
-
-  // lo smart contract dell'allocazione per contare quanti soldi deve ricevere
-  // ogni app controlla per ogni round quanti voti totali ci sono stati e quanti voti ha ricevuto quell'app
-
   struct AllocationRoundVote {
     mapping(bytes32 app => uint256) votesReceived;
     uint256 totalVotes;
     mapping(address user => bool) hasVoted;
-    mapping(address user => uint256) totalVotesUserCasted; // cosi può votare più volte, in caso servisse scalare
-    // ovviamente deve poter usare solo i voti restanti quando andrà a votare nuovamente
+    // Save how much votes a user has casted so if we want to allow multiple votes we can scale
+    mapping(address user => uint256) totalVotesUserCasted;
   }
 
   mapping(uint256 proposalId => AllocationRoundVote) internal _allocationRoundVotes;
 
-  //TODO: handle possibility to update this
-  IXAllocationPool public xAllocationPool;
+  IXAllocationPool internal xAllocationPool;
 
   constructor(address xAllocationPool_) {
     xAllocationPool = IXAllocationPool(xAllocationPool_);
@@ -39,17 +39,6 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
     return "support=x-allocations&quorum=auto";
   }
 
-  function getAppVotes(uint256 proposalId, bytes32 app) public view returns (uint256) {
-    return _allocationRoundVotes[proposalId].votesReceived[app];
-  }
-
-  function getAllocationRoundTotalVotes(uint256 proposalId) public view returns (uint256) {
-    return _allocationRoundVotes[proposalId].totalVotes;
-  }
-
-  // l'utente quando fa il cast dei voti per un round di allocazione può passare tanti address di app quante ne vuole votare e
-  // per ognuna di queste app può passare un peso di voto
-  // il peso di voto è una frazione del suo balance
   function _countVote(
     uint256 proposalId,
     address voter,
@@ -59,6 +48,7 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
     if (hasVoted(proposalId, voter)) {
       revert GovernorAlreadyCastVote(voter);
     }
+
     ProposalCore storage proposal = _proposals[proposalId];
 
     uint256 totalWeight = 0;
@@ -81,8 +71,15 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
     _allocationRoundVotes[proposalId].totalVotes += totalWeight;
     _allocationRoundVotes[proposalId].hasVoted[voter] = true;
 
-    // emit event
     emit AllocationVoteCast(voter, proposalId, apps, weights);
+  }
+
+  function getAppVotes(uint256 proposalId, bytes32 app) public view returns (uint256) {
+    return _allocationRoundVotes[proposalId].votesReceived[app];
+  }
+
+  function getAllocationRoundTotalVotes(uint256 proposalId) public view returns (uint256) {
+    return _allocationRoundVotes[proposalId].totalVotes;
   }
 
   function hasVoted(uint256 proposalId, address user) public view returns (bool) {
@@ -96,4 +93,10 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
   function _voteSucceeded(uint256 proposalId) internal view virtual override returns (bool) {
     //TODO: implement
   }
+
+  function getXAllocationPoolAddress() public view returns (address) {
+    return address(xAllocationPool);
+  }
+
+  function setXAllocationPoolAddress(address xAllocationPool_) public virtual;
 }

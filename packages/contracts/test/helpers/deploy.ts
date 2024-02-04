@@ -105,6 +105,7 @@ export const getOrDeployContractInstances = async ({
     0, // voting delay
     await timeLock.getAddress(),
     await xAllocationPool.getAddress(),
+    [await timeLock.getAddress(), owner.address],
   )
   await xAllocationVoting.waitForDeployment()
 
