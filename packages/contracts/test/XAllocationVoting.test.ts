@@ -15,7 +15,9 @@ import { describe, it } from "mocha"
 describe.only("XAllocation Voting", function () {
   describe("Allocation rounds", function () {
     it("Should be able to propose a new allocation round successfully", async function () {
-      const { xAllocationVoting, otherAccounts } = await getOrDeployContractInstances(true)
+      const { xAllocationVoting, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
       let tx = await xAllocationVoting.proposeNewAllocationRound([app1], "First allocation round")
@@ -45,7 +47,9 @@ describe.only("XAllocation Voting", function () {
     })
 
     it("Should not be able to propose a new allocation round if there is an active one", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount } = await getOrDeployContractInstances(true)
+      const { xAllocationVoting, otherAccounts, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
       await getVot3Tokens(otherAccount, "1000")
@@ -79,7 +83,9 @@ describe.only("XAllocation Voting", function () {
     })
 
     it("Should be able to propose a new allocation round if the previous one ended", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount } = await getOrDeployContractInstances(true)
+      const { xAllocationVoting, otherAccounts, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
       await getVot3Tokens(otherAccount, "1000")
@@ -130,7 +136,9 @@ describe.only("XAllocation Voting", function () {
 
   describe("Allocation Voting", function () {
     it("I cannot cast a vote with higher balance than I have", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount } = await getOrDeployContractInstances(true)
+      const { xAllocationVoting, otherAccounts, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
       await getVot3Tokens(otherAccount, "1000")
@@ -152,7 +160,9 @@ describe.only("XAllocation Voting", function () {
       )
     })
     it("I should be able to cast a vote", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount } = await getOrDeployContractInstances(true)
+      const { xAllocationVoting, otherAccounts, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
       await getVot3Tokens(otherAccount, "1000")
@@ -196,7 +206,9 @@ describe.only("XAllocation Voting", function () {
     })
 
     it("I should not be able to cast vote twice", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount } = await getOrDeployContractInstances(true)
+      const { xAllocationVoting, otherAccounts, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
       await getVot3Tokens(otherAccount, "1000")
@@ -223,7 +235,9 @@ describe.only("XAllocation Voting", function () {
     })
 
     it("Cannot cast a vote if the allocation round ended", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount } = await getOrDeployContractInstances(true)
+      const { xAllocationVoting, otherAccounts, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
       await getVot3Tokens(otherAccount, "1000")
@@ -252,7 +266,9 @@ describe.only("XAllocation Voting", function () {
     })
 
     it("I should be able to vote for multiple apps", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount } = await getOrDeployContractInstances(true)
+      const { xAllocationVoting, otherAccounts, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
 
@@ -297,7 +313,9 @@ describe.only("XAllocation Voting", function () {
     })
 
     it("Votes should be tracked correctly", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount } = await getOrDeployContractInstances(true)
+      const { xAllocationVoting, otherAccounts, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       const voter2 = otherAccounts[3]
