@@ -1,7 +1,7 @@
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { ContractFactory, ContractTransactionResponse } from "ethers"
 import { ethers } from "hardhat"
-import { B3TR, GovernorContract, TimeLock, VOT3 } from "../../typechain-types"
+import { B3TR, GovernorContract, TimeLock, VOT3, XAllocationVoting } from "../../typechain-types"
 
 interface DeployInstance {
   B3trContract: ContractFactory
@@ -9,6 +9,7 @@ interface DeployInstance {
   vot3: VOT3 & { deploymentTransaction(): ContractTransactionResponse }
   timeLock: TimeLock & { deploymentTransaction(): ContractTransactionResponse }
   governor: GovernorContract & { deploymentTransaction(): ContractTransactionResponse }
+  xAllocationVoting: XAllocationVoting & { deploymentTransaction(): ContractTransactionResponse }
   owner: HardhatEthersSigner
   otherAccount: HardhatEthersSigner
   minterAccount: HardhatEthersSigner
@@ -62,6 +63,17 @@ export const getOrDeployContractInstances = async (
   )
   await governor.waitForDeployment()
 
+  // Deploy XAllocationVoting
+  const XAllocationVotingContract = await ethers.getContractFactory("XAllocationVoting")
+  const xAllocationVoting = await XAllocationVotingContract.deploy(
+    await vot3.getAddress(),
+    4, // quroum percentage
+    votingPeriod, // voting period
+    0, // voting delay
+    await timeLock.getAddress(),
+  )
+  await xAllocationVoting.waitForDeployment()
+
   // Set up roles
   const PROPOSER_ROLE = await timeLock.PROPOSER_ROLE()
   const EXECUTOR_ROLE = await timeLock.EXECUTOR_ROLE()
@@ -76,6 +88,7 @@ export const getOrDeployContractInstances = async (
     vot3,
     timeLock,
     governor,
+    xAllocationVoting,
     owner,
     otherAccount,
     minterAccount,
