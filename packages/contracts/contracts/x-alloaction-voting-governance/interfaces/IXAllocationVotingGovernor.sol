@@ -127,8 +127,10 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
    * There are 2 standard keys: `support` and `quorum`.
    *
    * - `support=bravo` refers to the vote options 0 = Against, 1 = For, 2 = Abstain, as in `GovernorBravo`.
+   * - `support=x-allocations` refers to the fractionalized vote for each x-application.
    * - `quorum=bravo` means that only For votes are counted towards quorum.
    * - `quorum=for,abstain` means that both For and Abstain votes are counted towards quorum.
+   * - `quorum=auto` means that the contract defines the logic for counting the quorum.
    *
    * If a counting module makes use of encoded `params`, it should  include this under a `params` key with a unique
    * name that describes the behavior. For example:
@@ -233,7 +235,10 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
    *
    * Emits a {AllocationProposalCreated} event.
    */
-  function proposeNewAllocationRound(string memory description) external returns (uint256 proposalId);
+  function proposeNewAllocationRound(
+    bytes32[] memory appsToVote,
+    string memory description
+  ) external returns (uint256 proposalId);
 
   /**
    * @dev Cast a vote
