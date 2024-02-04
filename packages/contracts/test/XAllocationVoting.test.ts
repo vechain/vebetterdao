@@ -352,43 +352,43 @@ describe.only("XAllocation Voting", function () {
       expect(totalVotes).to.eql(ethers.parseEther("1400"))
     })
 
-    // it("I should be able to vote only for apps available in the allocation round", async function () {
-    //   const { xAllocationVoting, otherAccounts, otherAccount } = await getOrDeployContractInstances(true)
-    //   const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-    //   const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
-    //   const app3 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+    it("I should be able to vote only for apps available in the allocation round", async function () {
+      const { xAllocationVoting, otherAccounts, otherAccount, xAllocationPool, owner } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
-    //   await getVot3Tokens(otherAccount, "1000")
+      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
+      const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await xAllocationPool.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address)
+      const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+      const app3 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
 
-    //   let tx = await xAllocationVoting.proposeNewAllocationRound([app1, app2], "Second allocation round")
-    //   let receipt = await tx.wait()
-    //   if (!receipt) throw new Error("No receipt")
+      await getVot3Tokens(otherAccount, "1000")
 
-    //   let allocationProposalCreated = filterEventsByName(receipt.logs, "AllocationProposalCreated")
-    //   expect(allocationProposalCreated).not.to.eql([])
-    //   let { proposalId } = parseAlloctionProposalCreatedEvent(allocationProposalCreated[0], xAllocationVoting)
+      let tx = await xAllocationVoting.proposeNewAllocationRound("Second allocation round")
+      let receipt = await tx.wait()
+      if (!receipt) throw new Error("No receipt")
 
-    //   // I should be able to vote for multiple apps
-    //   // await catchRevert(
-    //   await xAllocationVoting.connect(otherAccount).castVote(proposalId, [app3], [ethers.parseEther("300")])
-    //   // )
+      let allocationProposalCreated = filterEventsByName(receipt.logs, "AllocationProposalCreated")
+      expect(allocationProposalCreated).not.to.eql([])
+      let { proposalId } = parseAlloctionProposalCreatedEvent(allocationProposalCreated[0], xAllocationVoting)
 
-    //   // Votes should be tracked correctly
-    //   let appVotes = await xAllocationVoting.getAppVotes(proposalId, app1)
-    //   console.log(appVotes.toString())
+      // I should be able to vote for multiple apps
+      await catchRevert(
+        xAllocationVoting.connect(otherAccount).castVote(proposalId, [app3], [ethers.parseEther("300")]),
+      )
 
-    //   expect(appVotes).to.eql(ethers.parseEther("0"))
-    //   appVotes = await xAllocationVoting.getAppVotes(proposalId, app2)
-    //   console.log(appVotes.toString())
-    //   expect(appVotes).to.eql(ethers.parseEther("0"))
-    //   appVotes = await xAllocationVoting.getAppVotes(proposalId, app3)
-    //   console.log(appVotes.toString())
-    //   // expect(appVotes).to.eql(ethers.parseEther("0"))
+      // Votes should be tracked correctly
+      let appVotes = await xAllocationVoting.getAppVotes(proposalId, app1)
+      expect(appVotes).to.eql(ethers.parseEther("0"))
+      appVotes = await xAllocationVoting.getAppVotes(proposalId, app2)
+      expect(appVotes).to.eql(ethers.parseEther("0"))
+      appVotes = await xAllocationVoting.getAppVotes(proposalId, app3)
+      expect(appVotes).to.eql(ethers.parseEther("0"))
 
-    //   let totalVotes = await xAllocationVoting.getAllocationRoundTotalVotes(proposalId)
-    //   console.log(totalVotes.toString())
-
-    //   expect(totalVotes).to.eql(ethers.parseEther("0"))
-    // })
+      let totalVotes = await xAllocationVoting.getAllocationRoundTotalVotes(proposalId)
+      expect(totalVotes).to.eql(ethers.parseEther("0"))
+    })
   })
 })
