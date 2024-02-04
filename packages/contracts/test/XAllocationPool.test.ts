@@ -9,7 +9,7 @@ describe.only("XAllocation Voting", function () {
       const { xAllocationPool, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
-      let tx = await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
+      let tx = await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, true)
       let receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
 
@@ -23,16 +23,16 @@ describe.only("XAllocation Voting", function () {
 
     it("Should not be able to add an app if it is already added", async function () {
       const { xAllocationPool, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
-      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
+      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, true)
 
-      await catchRevert(xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address))
+      await catchRevert(xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, true))
     })
 
     it("Only admin address should be able to add an app", async function () {
       const { xAllocationPool, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
 
       await catchRevert(
-        xAllocationPool.connect(otherAccounts[0]).addApp(otherAccounts[0].address, otherAccounts[0].address),
+        xAllocationPool.connect(otherAccounts[0]).addApp(otherAccounts[0].address, otherAccounts[0].address, true),
       )
     })
 
