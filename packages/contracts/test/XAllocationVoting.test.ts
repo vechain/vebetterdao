@@ -13,7 +13,7 @@ import {
 } from "./helpers"
 import { describe, it } from "mocha"
 
-describe.only("XAllocation Voting", function () {
+describe.only("X-Allocation Voting", function () {
   describe("Deployment", function () {
     it("Admins and addresses should be set correctly", async function () {
       const { xAllocationVoting, xAllocationPool, owner, timeLock } = await getOrDeployContractInstances({
@@ -29,7 +29,7 @@ describe.only("XAllocation Voting", function () {
     })
   })
   describe("Settings", function () {
-    it("Should be able to change x-allocation pool address", async function () {
+    it("B3TRGovernor should be able to change x-allocation pool address", async function () {
       const { xAllocationVoting, otherAccounts, governor } = await getOrDeployContractInstances({
         forceDeploy: false,
       })
@@ -52,13 +52,82 @@ describe.only("XAllocation Voting", function () {
       expect(updatedAddress).to.eql(otherAccounts[3].address)
     })
 
-    // should be able to change quorum
+    it("Admin should be able to change x-allocation pool address", async function () {
+      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
+        forceDeploy: false,
+      })
+      const ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000"
+      expect(await xAllocationVoting.hasRole(ADMIN_ROLE, owner.address)).to.eql(true)
 
-    // should be able to change voting period
+      const initialAddress = await xAllocationVoting.getXAllocationPoolAddress()
+      expect(initialAddress).to.exist
 
-    // should be able to change voting delay
+      await xAllocationVoting.connect(owner).setXAllocationPoolAddress(otherAccounts[3].address)
 
-    // should be able to change B3trGovernanceAddress
+      const updatedAddress = await xAllocationVoting.getXAllocationPoolAddress()
+      expect(updatedAddress).to.eql(otherAccounts[3].address)
+    })
+
+    it("Only admin should be able to change x-allocation pool address", async function () {
+      const { xAllocationVoting, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: false,
+      })
+      const ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000"
+
+      const initialAddress = await xAllocationVoting.getXAllocationPoolAddress()
+      expect(initialAddress).to.exist
+
+      expect(await xAllocationVoting.hasRole(ADMIN_ROLE, otherAccounts[0].address)).to.eql(false)
+
+      await catchRevert(xAllocationVoting.connect(otherAccounts[0]).setXAllocationPoolAddress(otherAccounts[3].address))
+
+      const updatedAddress = await xAllocationVoting.getXAllocationPoolAddress()
+      expect(updatedAddress).to.eql(initialAddress)
+    })
+
+    // B3TRGovernor should be able to change quorum
+
+    // only B3TRGovernor should be able to change quorum
+
+    // B3TRGovernor should be able to change voting period
+    // only B3TRGovernor should be able to change voting period
+
+    // B3TRGovernor should be able to change voting delay
+    // only B3TRGovernor should be able to change voting delay
+
+    it("Should be able to change B3trGovernanceAddress with admin role", async function () {
+      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
+        forceDeploy: false,
+      })
+      const ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000"
+
+      const initialAddress = await xAllocationVoting.getB3trGovernorAddress()
+      expect(initialAddress).to.exist
+
+      expect(await xAllocationVoting.hasRole(ADMIN_ROLE, owner.address)).to.eql(true)
+
+      await xAllocationVoting.connect(owner).setB3trGovernanceAddress(otherAccounts[3].address)
+
+      const updatedAddress = await xAllocationVoting.getB3trGovernorAddress()
+      expect(updatedAddress).to.eql(otherAccounts[3].address)
+    })
+
+    it("Only admin should be able to change B3trGovernanceAddress", async function () {
+      const { xAllocationVoting, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: false,
+      })
+      const ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000"
+
+      const initialAddress = await xAllocationVoting.getB3trGovernorAddress()
+      expect(initialAddress).to.exist
+
+      expect(await xAllocationVoting.hasRole(ADMIN_ROLE, otherAccounts[0].address)).to.eql(false)
+
+      await catchRevert(xAllocationVoting.connect(otherAccounts[0]).setB3trGovernanceAddress(otherAccounts[3].address))
+
+      const updatedAddress = await xAllocationVoting.getB3trGovernorAddress()
+      expect(updatedAddress).to.eql(initialAddress)
+    })
   })
 
   describe("Allocation rounds", function () {

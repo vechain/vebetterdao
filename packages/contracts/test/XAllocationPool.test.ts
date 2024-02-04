@@ -9,8 +9,8 @@ import {
 } from "./helpers"
 import { describe, it } from "mocha"
 
-describe.only("XAllocation Voting", function () {
-  describe("XAllocationPool", function () {
+describe.only("X-Allocation Pool", function () {
+  describe("Add app", function () {
     it("Should be able to add an app successfully", async function () {
       const { xAllocationPool, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
