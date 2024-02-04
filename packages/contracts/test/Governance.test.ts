@@ -22,7 +22,9 @@ describe("Governor and TimeLock", function () {
 
   describe("Governor deployment", function () {
     it("should set constructors correctly", async function () {
-      const { governor, vot3, owner, timeLock } = await getOrDeployContractInstances(true)
+      const { governor, vot3, owner, timeLock } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
       const votingDelay = (await governor.votingDelay()).toString()
       const votesThreshold = (await governor.proposalThreshold()).toString()
       const votingPeriod = (await governor.votingPeriod()).toString()
@@ -56,12 +58,17 @@ describe("Governor and TimeLock", function () {
 
   describe("Proposal Creation", function () {
     it("cannot create a proposal if NOT a VOT3 holder", async function () {
-      const { governor, B3trContract, b3tr, owner } = await getOrDeployContractInstances(true, 1)
+      const { governor, B3trContract, b3tr, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        votingTreshold: 1,
+      })
       await catchRevert(createProposal(governor, b3tr, B3trContract, owner, description, functionToCall, [], true))
     })
 
     it("can create a proposal even if user did not manually self delegated (because of automatic self-delegation)", async function () {
-      const { governor, B3trContract, vot3, b3tr, owner, minterAccount } = await getOrDeployContractInstances(true)
+      const { governor, B3trContract, vot3, b3tr, owner, minterAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       // Before creating a proposal, we need to mint some VOT3 tokens to the owner
       await b3tr.connect(minterAccount).mint(owner, ethers.parseEther("1000"))
@@ -72,7 +79,10 @@ describe("Governor and TimeLock", function () {
     })
 
     it("can create a proposal if VOT3 holder that self-delegated", async function () {
-      const { governor, B3trContract, b3tr, owner } = await getOrDeployContractInstances(true, 1)
+      const { governor, B3trContract, b3tr, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        votingTreshold: 1,
+      })
 
       // Now we can create a proposal
       const tx = await createProposal(governor, b3tr, B3trContract, owner, description, functionToCall, [])
@@ -134,7 +144,7 @@ describe("Governor and TimeLock", function () {
     })
 
     it("can calculate the proposal id from the proposal parameters", async function () {
-      const { governor, B3trContract, b3tr } = await getOrDeployContractInstances(false)
+      const { governor, B3trContract, b3tr } = await getOrDeployContractInstances({ forceDeploy: false })
 
       const b3trAddress = await b3tr.getAddress()
       const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
@@ -152,7 +162,10 @@ describe("Governor and TimeLock", function () {
     })
 
     it("ANY user that holds VOT3 and DELEGATED can create a proposal", async function () {
-      const { governor, B3trContract, otherAccount, b3tr } = await getOrDeployContractInstances(true, 1)
+      const { governor, B3trContract, otherAccount, b3tr } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        votingTreshold: 1,
+      })
 
       // Now we can create a proposal
       await createProposal(governor, b3tr, B3trContract, otherAccount, description, functionToCall, [])
@@ -168,7 +181,10 @@ describe("Governor and TimeLock", function () {
 
     this.beforeAll(async function () {
       const { vot3, b3tr, otherAccounts, minterAccount, governor, B3trContract, otherAccount } =
-        await getOrDeployContractInstances(true, 1)
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          votingTreshold: 1,
+        })
       voter1 = otherAccounts[0] // with no VOT3
       voter2 = otherAccounts[1] // with VOT3 but no delegation
       voter3 = otherAccounts[2] // with VOT3 and delegation
@@ -189,7 +205,7 @@ describe("Governor and TimeLock", function () {
     })
 
     it("cannot vote if proposal is not in active state", async function () {
-      const { governor } = await getOrDeployContractInstances(false)
+      const { governor } = await getOrDeployContractInstances({ forceDeploy: false })
       // Now we can create a new proposal
 
       const proposalState = await governor.state(proposalId)
@@ -199,7 +215,7 @@ describe("Governor and TimeLock", function () {
     })
 
     it("user without VOT3 can vote with weight 0", async function () {
-      const { governor } = await getOrDeployContractInstances(false)
+      const { governor } = await getOrDeployContractInstances({ forceDeploy: false })
 
       const proposalState = await waitForProposalToBeActive(proposalId, governor) // proposal id of the proposal in the beforeAll step & block when the proposal was created
 
@@ -227,7 +243,7 @@ describe("Governor and TimeLock", function () {
     })
 
     it("can vote if self-delegated VOT3 holder before snapshot", async function () {
-      const { governor } = await getOrDeployContractInstances(false)
+      const { governor } = await getOrDeployContractInstances({ forceDeploy: false })
 
       const proposalState = await waitForProposalToBeActive(proposalId, governor) // proposal id of the proposal in the beforeAll step & block when the proposal was created
 
@@ -257,7 +273,7 @@ describe("Governor and TimeLock", function () {
     })
 
     it("vote has weight 0 if self-delegated VOT3 holder after the proposal snapshot", async function () {
-      const { governor, otherAccounts } = await getOrDeployContractInstances(false)
+      const { governor, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: false })
 
       const newVoter = otherAccounts[4]
       await getVot3Tokens(newVoter, "1000")
@@ -287,7 +303,7 @@ describe("Governor and TimeLock", function () {
     })
 
     it("can count votes correctly", async function () {
-      const { governor } = await getOrDeployContractInstances(false)
+      const { governor } = await getOrDeployContractInstances({ forceDeploy: false })
 
       const proposalState = await waitForProposalToBeActive(proposalId, governor) // proposal id of the proposal in the beforeAll step & block when the proposal was created
 
@@ -319,7 +335,7 @@ describe("Governor and TimeLock", function () {
     })
 
     it("cannot vote twice", async function () {
-      const { governor } = await getOrDeployContractInstances(false)
+      const { governor } = await getOrDeployContractInstances({ forceDeploy: false })
 
       const proposalState = await waitForProposalToBeActive(proposalId, governor) // proposal id of the proposal in the beforeAll step & block when the proposal was created
 
@@ -333,7 +349,7 @@ describe("Governor and TimeLock", function () {
     })
 
     it("cannot vote after voting period ends", async function () {
-      const { governor, otherAccounts } = await getOrDeployContractInstances(false)
+      const { governor, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: false })
 
       let proposalState = await waitForProposalToBeActive(proposalId, governor) // proposal id of the proposal in the beforeAll step & block when the proposal was created
 
@@ -358,7 +374,11 @@ describe("Governor and TimeLock", function () {
     let voter: HardhatEthersSigner
 
     this.beforeAll(async function () {
-      const { otherAccounts } = await getOrDeployContractInstances(true, 0, 3)
+      const { otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        votingTreshold: 0,
+        votingPeriod: 3,
+      })
 
       // load votes
       voter = otherAccounts[0]
@@ -367,7 +387,12 @@ describe("Governor and TimeLock", function () {
     })
 
     it("cannot queue a proposal if not in succeeded state", async function () {
-      const { governor, b3tr, B3trContract, otherAccount: proposer } = await getOrDeployContractInstances()
+      const {
+        governor,
+        b3tr,
+        B3trContract,
+        otherAccount: proposer,
+      } = await getOrDeployContractInstances({ forceDeploy: false })
 
       // create a new proposal
       const tx = await createProposal(
@@ -401,7 +426,12 @@ describe("Governor and TimeLock", function () {
     })
 
     it("cannot execute a proposal without queueing it to TimeLock first", async function () {
-      const { governor, b3tr, B3trContract, otherAccount: proposer } = await getOrDeployContractInstances()
+      const {
+        governor,
+        b3tr,
+        B3trContract,
+        otherAccount: proposer,
+      } = await getOrDeployContractInstances({ forceDeploy: false })
 
       // create a new proposal
       const tx = await createProposal(
@@ -435,7 +465,12 @@ describe("Governor and TimeLock", function () {
     })
 
     it("can correctly queue proposal if vote succeeded", async function () {
-      const { governor, b3tr, B3trContract, otherAccount: proposer } = await getOrDeployContractInstances()
+      const {
+        governor,
+        b3tr,
+        B3trContract,
+        otherAccount: proposer,
+      } = await getOrDeployContractInstances({ forceDeploy: false })
 
       // create a new proposal
       const tx = await createProposal(
@@ -475,7 +510,12 @@ describe("Governor and TimeLock", function () {
 
     // this test needs the previous one to be run first
     it("can correctly execute proposal after it was queued", async function () {
-      const { governor, b3tr, B3trContract, otherAccount: proposer } = await getOrDeployContractInstances()
+      const {
+        governor,
+        b3tr,
+        B3trContract,
+        otherAccount: proposer,
+      } = await getOrDeployContractInstances({ forceDeploy: false })
 
       // create a new proposal
       const tx = await createProposal(
@@ -520,7 +560,12 @@ describe("Governor and TimeLock", function () {
     })
 
     it("cannot execute proposal twice", async function () {
-      const { governor, b3tr, B3trContract, otherAccount: proposer } = await getOrDeployContractInstances(false)
+      const {
+        governor,
+        b3tr,
+        B3trContract,
+        otherAccount: proposer,
+      } = await getOrDeployContractInstances({ forceDeploy: false })
 
       // create a new proposal
       const tx = await createProposal(

@@ -4,6 +4,7 @@ import { B3TR, GovernorContract, TimeLock, VOT3 } from "../../typechain-types"
 const DEFAULT_MINTER = "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68" //2nd account from mnemonic of solo network
 const TIMELOCK_ADMIN = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa" //1st account from mnemonic of solo network
 const ADDRESS_ZERO = "0x0000000000000000000000000000000000000000"
+const NFT_BADGE_ADMIN = "0x0f872421dc479f3c11edd89512731814d0598db5" //3rd account from mnemonic of solo network
 
 // Governor Values
 const QUORUM_PERCENTAGE = 4 // 4 -> Need 4% of voters to pass
@@ -11,6 +12,10 @@ const MIN_DELAY = 3600 // blocks - after a vote passes, you have 1 hour before y
 const VOTING_PERIOD = 45818 // blocks - how long the vote lasts.
 const VOTING_DELAY = 1 // How many blocks till a proposal vote becomes active
 const PROPOSAL_THRESHOLD = 1 // How many votes are needed to create a proposal
+
+// NFT Badge Values
+const name = "B3TR Badge"
+const symbol = "B3TR"
 
 export async function deployAll() {
   console.log(`Deploying contracts on ${network.name}...`)
@@ -31,11 +36,15 @@ export async function deployAll() {
   await timelock.grantRole(EXECUTOR_ROLE, await governor.getAddress())
   await timelock.grantRole(CANCELLER_ROLE, await governor.getAddress())
 
+  // Deploy the NFT Badge contract with Max Mintable Level 1
+  const badge = await deployNFTBadge(1)
+
   return {
     governorAddress: await governor.getAddress(),
     timelockAddress: await timelock.getAddress(),
     b3trAddress: await b3tr.getAddress(),
     vot3Address: await vot3.getAddress(),
+    badgeAddress: await badge.getAddress(),
   }
 
   // close the script
@@ -92,6 +101,18 @@ async function deployGovernor(vot3Address: string, timelockAddress: string): Pro
   await contract.waitForDeployment()
 
   console.log(`Governor contract deployed at address ${await contract.getAddress()}`)
+
+  return contract
+}
+
+async function deployNFTBadge(mintableLevelFromDeploy: number) {
+  console.log(`Deploying B3TRBadge NFT contract`)
+  const NFTBadgeContract = await ethers.getContractFactory("B3TRBadge")
+  const contract = await NFTBadgeContract.deploy(name, symbol, NFT_BADGE_ADMIN, mintableLevelFromDeploy)
+
+  await contract.waitForDeployment()
+
+  console.log(`NFTBadge contract deployed at address ${await contract.getAddress()}`)
 
   return contract
 }
