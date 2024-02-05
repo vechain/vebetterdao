@@ -9,7 +9,7 @@ import {
 } from "./helpers"
 import { describe, it } from "mocha"
 
-describe.only("X-Allocation Pool", function () {
+describe("X-Allocation Pool", function () {
   describe("Add app", function () {
     it("Should be able to add an app successfully", async function () {
       const { xAllocationPool, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
