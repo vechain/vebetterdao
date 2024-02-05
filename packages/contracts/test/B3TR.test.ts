@@ -6,7 +6,7 @@ import { describe, it } from "mocha"
 describe("B3TR", function () {
   describe("Deployment", function () {
     it("should deploy the contract", async function () {
-      const { b3tr } = await getOrDeployContractInstances()
+      const { b3tr } = await getOrDeployContractInstances({ forceDeploy: false })
       await b3tr.waitForDeployment()
       const address = await b3tr.getAddress()
 
@@ -14,7 +14,7 @@ describe("B3TR", function () {
     })
 
     it("should have the correct name", async function () {
-      const { b3tr } = await getOrDeployContractInstances()
+      const { b3tr } = await getOrDeployContractInstances({ forceDeploy: false })
 
       const res = await b3tr.name()
       expect(res).to.eql("B3TR")
@@ -24,14 +24,14 @@ describe("B3TR", function () {
     })
 
     it("should have the correct max supply", async function () {
-      const { b3tr } = await getOrDeployContractInstances()
+      const { b3tr } = await getOrDeployContractInstances({ forceDeploy: false })
 
       const cap = await b3tr.cap()
       expect(String(cap)).to.eql("1000000000000000000000000000")
     })
 
     it("admin role is set correctly upon deploy", async function () {
-      const { b3tr, owner } = await getOrDeployContractInstances()
+      const { b3tr, owner } = await getOrDeployContractInstances({ forceDeploy: false })
 
       const defaultAdminRole = await b3tr.DEFAULT_ADMIN_ROLE()
 
@@ -40,7 +40,7 @@ describe("B3TR", function () {
     })
 
     it("minter role is set correctly upon deploy", async function () {
-      const { b3tr, otherAccount, minterAccount } = await getOrDeployContractInstances()
+      const { b3tr, otherAccount, minterAccount } = await getOrDeployContractInstances({ forceDeploy: false })
       const operatorRole = await b3tr.MINTER_ROLE()
 
       const res = await b3tr.hasRole(operatorRole, minterAccount)
@@ -53,7 +53,7 @@ describe("B3TR", function () {
 
   describe("Access Control", function () {
     it("only admin can grant minter role", async function () {
-      const { b3tr, owner, otherAccount } = await getOrDeployContractInstances(true)
+      const { b3tr, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
 
       const operatorRole = await b3tr.MINTER_ROLE()
 
@@ -66,7 +66,7 @@ describe("B3TR", function () {
     })
 
     it("only admin can revoke minter role", async function () {
-      const { b3tr, owner, otherAccount } = await getOrDeployContractInstances()
+      const { b3tr, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: false })
 
       const operatorRole = await b3tr.MINTER_ROLE()
 
@@ -80,7 +80,7 @@ describe("B3TR", function () {
     })
 
     it("only admin can grant admin role", async function () {
-      const { b3tr, owner, otherAccount } = await getOrDeployContractInstances()
+      const { b3tr, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: false })
 
       const adminRole = await b3tr.DEFAULT_ADMIN_ROLE()
 
@@ -98,7 +98,7 @@ describe("B3TR", function () {
     })
 
     it("only admin can revoke admin role", async function () {
-      const { b3tr, owner, otherAccount, minterAccount } = await getOrDeployContractInstances()
+      const { b3tr, owner, otherAccount, minterAccount } = await getOrDeployContractInstances({ forceDeploy: false })
 
       const adminRole = await b3tr.DEFAULT_ADMIN_ROLE()
 
@@ -120,7 +120,7 @@ describe("B3TR", function () {
 
   describe("Max supply", function () {
     it("cannot be minted more than max supply", async function () {
-      const { b3tr, otherAccount, owner } = await getOrDeployContractInstances(true)
+      const { b3tr, otherAccount, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const operatorRole = await b3tr.MINTER_ROLE()
 
       await b3tr.grantRole(operatorRole, owner)
@@ -128,7 +128,7 @@ describe("B3TR", function () {
     })
 
     it("can be minted up to max supply", async function () {
-      const { b3tr, otherAccount, owner } = await getOrDeployContractInstances()
+      const { b3tr, otherAccount, owner } = await getOrDeployContractInstances({ forceDeploy: false })
       const operatorRole = await b3tr.MINTER_ROLE()
 
       await b3tr.grantRole(operatorRole, owner)
@@ -141,7 +141,7 @@ describe("B3TR", function () {
 
   describe("Mint", function () {
     it("only accounts with minter role can mint", async function () {
-      const { b3tr, otherAccount, owner } = await getOrDeployContractInstances(true)
+      const { b3tr, otherAccount, owner } = await getOrDeployContractInstances({ forceDeploy: true })
 
       expect(b3tr.mint(otherAccount, ethers.parseEther("1"))).to.be.revertedWithoutReason
       const operatorRole = await b3tr.MINTER_ROLE()
@@ -156,7 +156,7 @@ describe("B3TR", function () {
 
   describe("Token details", function () {
     it("returns expected information", async function () {
-      const { b3tr } = await getOrDeployContractInstances()
+      const { b3tr } = await getOrDeployContractInstances({ forceDeploy: false })
 
       const name = await b3tr.name()
       const symbol = await b3tr.symbol()
