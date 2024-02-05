@@ -78,7 +78,7 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
     return _allocationRoundVotes[proposalId].votesReceived[app];
   }
 
-  function getAllocationRoundTotalVotes(uint256 proposalId) public view returns (uint256) {
+  function totalVotes(uint256 proposalId) public view returns (uint256) {
     return _allocationRoundVotes[proposalId].totalVotes;
   }
 
@@ -87,7 +87,7 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
   }
 
   function _quorumReached(uint256 proposalId) internal view virtual override returns (bool) {
-    return quorum(proposalSnapshot(proposalId)) <= getAllocationRoundTotalVotes(proposalId);
+    return quorum(proposalSnapshot(proposalId)) <= totalVotes(proposalId);
   }
 
   // vote is successful if quorum is reached

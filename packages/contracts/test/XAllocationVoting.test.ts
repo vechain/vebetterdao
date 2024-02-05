@@ -280,7 +280,7 @@ describe("X-Allocation Voting", function () {
       let appVotes = await xAllocationVoting.getAppVotes(proposalId, app1)
       expect(appVotes).to.eql(ethers.parseEther("500"))
 
-      let totalVotes = await xAllocationVoting.getAllocationRoundTotalVotes(proposalId)
+      let totalVotes = await xAllocationVoting.totalVotes(proposalId)
       expect(totalVotes).to.eql(ethers.parseEther("500"))
     })
 
@@ -392,7 +392,7 @@ describe("X-Allocation Voting", function () {
       appVotes = await xAllocationVoting.getAppVotes(proposalId, app2)
       expect(appVotes).to.eql(ethers.parseEther("200"))
 
-      let totalVotes = await xAllocationVoting.getAllocationRoundTotalVotes(proposalId)
+      let totalVotes = await xAllocationVoting.totalVotes(proposalId)
       expect(totalVotes).to.eql(ethers.parseEther("500"))
     })
 
@@ -447,7 +447,7 @@ describe("X-Allocation Voting", function () {
       appVotes = await xAllocationVoting.getAppVotes(proposalId, app2)
       expect(appVotes).to.eql(ethers.parseEther("800"))
 
-      let totalVotes = await xAllocationVoting.getAllocationRoundTotalVotes(proposalId)
+      let totalVotes = await xAllocationVoting.totalVotes(proposalId)
       expect(totalVotes).to.eql(ethers.parseEther("1400"))
 
       await waitForVotingPeriodToEnd(proposalId, xAllocationVoting)
@@ -458,7 +458,7 @@ describe("X-Allocation Voting", function () {
       appVotes = await xAllocationVoting.getAppVotes(proposalId, app2)
       expect(appVotes).to.eql(ethers.parseEther("800"))
 
-      totalVotes = await xAllocationVoting.getAllocationRoundTotalVotes(proposalId)
+      totalVotes = await xAllocationVoting.totalVotes(proposalId)
       expect(totalVotes).to.eql(ethers.parseEther("1400"))
     })
 
@@ -498,7 +498,7 @@ describe("X-Allocation Voting", function () {
       appVotes = await xAllocationVoting.getAppVotes(proposalId, app3)
       expect(appVotes).to.eql(ethers.parseEther("0"))
 
-      let totalVotes = await xAllocationVoting.getAllocationRoundTotalVotes(proposalId)
+      let totalVotes = await xAllocationVoting.totalVotes(proposalId)
       expect(totalVotes).to.eql(ethers.parseEther("0"))
     })
 
