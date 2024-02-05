@@ -44,7 +44,7 @@ describe.only("X-Allocation Pool", function () {
       )
     })
 
-    it.only("Should be possible to add a new app through the DAO", async function () {
+    it("Should be possible to add a new app through the DAO", async function () {
       const { xAllocationPool, otherAccounts, governor } = await getOrDeployContractInstances({ forceDeploy: true })
 
       const proposer = otherAccounts[0]
