@@ -246,34 +246,47 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   function setCycleDuration(uint256 _cycleDuration) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(_cycleDuration > 0, "Emissions: Cycle duration must be greater than 0");
     cycleDuration = _cycleDuration;
   }
 
   function setXAllocationsDecay(uint256 _decay) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(_decay >= 0 && _decay <= 100, "Emissions: xAllocations decay must be between 0 and 100");
     xAllocationsDecay = _decay;
   }
 
   function setVote2EarnDecay(uint256 _decay) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(_decay >= 0 && _decay <= 100, "Emissions: vote2Earn decay must be between 0 and 100");
     vote2EarnDecay = _decay;
   }
 
   function setXAllocationsDecayDelay(uint256 _delay) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(_delay > 0, "Emissions: xAllocations decay delay must be greater than 0");
     xAllocationsDecayDelay = _delay;
   }
 
   function setVote2EarnDecayDelay(uint256 _delay) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(_delay > 0, "Emissions: vote2Earn decay delay must be greater than 0");
     vote2EarnDecayDelay = _delay;
   }
 
   function setInitialEmissions(uint256 _emissions) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(_emissions > 0, "Emissions: Initial emissions must be greater than 0");
     initialEmissions = _emissions;
   }
 
   function setTreasuryPercentage(uint256 _percentage) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(_percentage >= 0 && _percentage <= 100, "Emissions: Treasury percentage must be between 0 and 100");
     treasuryPercentage = _percentage;
   }
 
   function setScalingFactor(uint256 _scalingFactor) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(_scalingFactor > 0, "Emissions: Scaling factor must be greater than 0");
     scalingFactor = _scalingFactor;
+  }
+
+  function setMaxVote2EarnDecay(uint256 _maxVote2EarnDecay) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(_maxVote2EarnDecay >= 0 && _maxVote2EarnDecay <= 100, "Emissions: Max vote2Earn decay must be between 0 and 100");
+    maxVote2EarnDecay = _maxVote2EarnDecay;
   }
 }
