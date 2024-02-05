@@ -19,8 +19,7 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
     mapping(bytes32 app => uint256) votesReceived;
     uint256 totalVotes;
     mapping(address user => bool) hasVoted;
-    // Save how much votes a user has casted so if we want to allow multiple votes we can scale
-    mapping(address user => uint256) totalVotesUserCasted;
+    uint256 totalVoters;
   }
 
   mapping(uint256 proposalId => AllocationRoundVote) internal _allocationRoundVotes;
@@ -63,13 +62,13 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
     }
 
     require(
-      totalWeight <=
-        getVotes(voter, proposal.voteStart) - _allocationRoundVotes[proposalId].totalVotesUserCasted[voter],
+      totalWeight <= getVotes(voter, proposal.voteStart),
       "Governor: account has insufficient voting power for this proposal"
     );
 
     _allocationRoundVotes[proposalId].totalVotes += totalWeight;
     _allocationRoundVotes[proposalId].hasVoted[voter] = true;
+    _allocationRoundVotes[proposalId].totalVoters++;
 
     emit AllocationVoteCast(voter, proposalId, apps, weights);
   }
@@ -80,6 +79,10 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
 
   function totalVotes(uint256 proposalId) public view returns (uint256) {
     return _allocationRoundVotes[proposalId].totalVotes;
+  }
+
+  function totalVoters(uint256 proposalId) public view returns (uint256) {
+    return _allocationRoundVotes[proposalId].totalVoters;
   }
 
   function hasVoted(uint256 proposalId, address user) public view returns (bool) {

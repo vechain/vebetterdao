@@ -453,6 +453,10 @@ describe("X-Allocation Voting", function () {
       let totalVotes = await xAllocationVoting.totalVotes(proposalId)
       expect(totalVotes).to.eql(ethers.parseEther("1400"))
 
+      // Total voters should be tracked correctly
+      let totalVoters = await xAllocationVoting.totalVoters(proposalId)
+      expect(totalVoters).to.eql(BigInt(3))
+
       await waitForVotingPeriodToEnd(proposalId, xAllocationVoting)
 
       // Votes should be the same after round ended
