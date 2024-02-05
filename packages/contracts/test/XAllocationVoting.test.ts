@@ -209,8 +209,6 @@ describe.only("X-Allocation Voting", function () {
 
       expect(proposalId).to.eql(BigInt(2))
     })
-
-    it("At least one app needed to propose a new allocation round", async function () {})
   })
 
   describe("Allocation Voting", function () {
