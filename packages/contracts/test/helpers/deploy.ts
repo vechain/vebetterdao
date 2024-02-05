@@ -1,7 +1,7 @@
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { ContractFactory, ContractTransactionResponse } from "ethers"
 import { ethers } from "hardhat"
-import { B3TR, GovernorContract, TimeLock, VOT3, B3TRBadge } from "../../typechain-types"
+import { B3TR, GovernorContract, TimeLock, VOT3, B3TRBadge, Emissions } from "../../typechain-types"
 
 interface DeployInstance {
   B3trContract: ContractFactory
@@ -10,6 +10,7 @@ interface DeployInstance {
   timeLock: TimeLock & { deploymentTransaction(): ContractTransactionResponse }
   governor: GovernorContract & { deploymentTransaction(): ContractTransactionResponse }
   b3trBadge: B3TRBadge & { deploymentTransaction(): ContractTransactionResponse }
+  emissions: Emissions & { deploymentTransaction(): ContractTransactionResponse }
   owner: HardhatEthersSigner
   otherAccount: HardhatEthersSigner
   minterAccount: HardhatEthersSigner
@@ -25,12 +26,22 @@ export const NFT_BADGE_NAME = "B3TRBadge"
 export const NFT_BADGE_SYMBOL = "B3TR"
 export const DEFAULT_MAX_MINTABLE_LEVEL = 1
 
+export const PRE_MINT_X_ALLOCATION = ethers.parseEther("1000000")
+export const PRE_MINT_VOTE_2_EARN_ALLOCATION = ethers.parseEther("1000000")
+export const PRE_MINT_TREASURY_ALLOCATION = ethers.parseEther("1750000")
+
+export const CYCLE_DURATION = 15 // 15 seconds. Should be 1 week on Testnet/Mainnet
+export const DECAY_SETTINGS = [4, 20, 12, 50] // 4% decay for X Allocations, 20% decay for Vote2Earn, every 12 cycles for X Allocations, Every 50 cycles for Vote2Earn
+export const INITIAL_EMISSIONS = ethers.parseEther("2000000")
+export const TREASURY_PERCENTAGE = 25 // 25%
+
 let cachedDeployInstance: DeployInstance | undefined = undefined
 export const getOrDeployContractInstances = async ({
   forceDeploy = false,
   votingTreshold = defaultVotingTreshold,
   votingPeriod = defaultVotingPeriod,
   maxMintableLevel = DEFAULT_MAX_MINTABLE_LEVEL,
+  cycleDuration = CYCLE_DURATION,
 }) => {
   if (!forceDeploy && cachedDeployInstance !== undefined) {
     return cachedDeployInstance
@@ -81,6 +92,25 @@ export const getOrDeployContractInstances = async ({
 
   await b3trBadge.waitForDeployment()
 
+  const X_ALLOCATIONS_ADDRESS = otherAccounts[0].address
+  const VOTE_2_EARN_ADDRESS = otherAccounts[1].address
+  const TREASURY_ADDRESS = otherAccounts[2].address
+
+  const EmissionsContract = await ethers.getContractFactory("Emissions")
+  const emissions = await EmissionsContract.deploy(
+    minterAccount,
+    owner,
+    await b3tr.getAddress(),
+    [X_ALLOCATIONS_ADDRESS, VOTE_2_EARN_ADDRESS, TREASURY_ADDRESS],
+    [PRE_MINT_X_ALLOCATION, PRE_MINT_VOTE_2_EARN_ALLOCATION, PRE_MINT_TREASURY_ALLOCATION],
+    cycleDuration,
+    DECAY_SETTINGS as [number, number, number, number],
+    INITIAL_EMISSIONS,
+    TREASURY_PERCENTAGE,
+  )
+
+  await emissions.waitForDeployment()
+
   cachedDeployInstance = {
     B3trContract,
     b3tr,
@@ -88,6 +118,7 @@ export const getOrDeployContractInstances = async ({
     timeLock,
     governor,
     b3trBadge,
+    emissions,
     owner,
     otherAccount,
     minterAccount,
