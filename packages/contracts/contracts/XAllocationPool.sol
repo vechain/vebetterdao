@@ -20,6 +20,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
   function addApp(
     address appAddress,
     string memory name,
+    string memory metadata,
     bool availableForAllocationVoting
   ) public override onlyRole(DEFAULT_ADMIN_ROLE) {
     bytes32 id = keccak256(abi.encodePacked(name));
@@ -27,10 +28,10 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
     require(apps[id].addr == address(0), "App with this ID already exists");
 
     // Store the new app
-    apps[id] = App(id, appAddress, availableForAllocationVoting);
+    apps[id] = App(id, appAddress, name, metadata, availableForAllocationVoting);
     appIds.push(id);
 
-    emit AppAdded(id, appAddress);
+    emit AppAdded(id, appAddress, name, metadata, availableForAllocationVoting);
   }
 
   function isAppAvailableForAllocationVoting(bytes32 appId) public view virtual override returns (bool) {

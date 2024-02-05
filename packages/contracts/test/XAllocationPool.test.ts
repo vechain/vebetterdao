@@ -15,7 +15,7 @@ describe.only("X-Allocation Pool", function () {
       const { xAllocationPool, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
-      let tx = await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, true)
+      let tx = await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "", true)
       let receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
 
@@ -29,16 +29,18 @@ describe.only("X-Allocation Pool", function () {
 
     it("Should not be able to add an app if it is already added", async function () {
       const { xAllocationPool, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
-      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, true)
+      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "", true)
 
-      await catchRevert(xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, true))
+      await catchRevert(
+        xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "", true),
+      )
     })
 
     it("Only admin address should be able to add an app", async function () {
       const { xAllocationPool, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
 
       await catchRevert(
-        xAllocationPool.connect(otherAccounts[0]).addApp(otherAccounts[0].address, otherAccounts[0].address, true),
+        xAllocationPool.connect(otherAccounts[0]).addApp(otherAccounts[0].address, otherAccounts[0].address, "", true),
       )
     })
 
@@ -60,14 +62,16 @@ describe.only("X-Allocation Pool", function () {
         await ethers.getContractFactory("XAllocationPool"),
         "Add app to the list",
         "addApp",
-        [otherAccounts[1].address, "Bike 4 Life", true],
+        [otherAccounts[1].address, "Bike 4 Life", "", true],
       )
 
       // check that app was added
       const app = await xAllocationPool.getApp(app1Id)
       expect(app[0]).to.eql(app1Id)
       expect(app[1]).to.eql(otherAccounts[1].address)
-      expect(app[2]).to.eql(true)
+      expect(app[2]).to.eql("Bike 4 Life")
+      expect(app[3]).to.eql("")
+      expect(app[4]).to.eql(true)
     })
   })
 })

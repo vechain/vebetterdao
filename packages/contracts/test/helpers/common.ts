@@ -163,6 +163,7 @@ export const addAppThroughGovernance = async (
   xAllocationPool: XAllocationPool,
   appName: string = "Bike 4 Life" + Math.random(),
   appAddress: string,
+  appMetadata: string = "",
   availableForAllocationVoting: boolean = true,
 ) => {
   await createProposalAndExecuteIt(
@@ -173,6 +174,6 @@ export const addAppThroughGovernance = async (
     await ethers.getContractFactory("XAllocationPool"),
     "Add app to the list",
     "addApp",
-    [appAddress, appName, availableForAllocationVoting],
+    [appAddress, appName, appMetadata, availableForAllocationVoting],
   )
 }

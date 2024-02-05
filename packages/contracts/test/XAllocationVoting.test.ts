@@ -85,16 +85,6 @@ describe.only("X-Allocation Voting", function () {
       expect(updatedAddress).to.eql(initialAddress)
     })
 
-    // B3TRGovernor should be able to change quorum
-
-    // only B3TRGovernor should be able to change quorum
-
-    // B3TRGovernor should be able to change voting period
-    // only B3TRGovernor should be able to change voting period
-
-    // B3TRGovernor should be able to change voting delay
-    // only B3TRGovernor should be able to change voting delay
-
     it("Should be able to change B3trGovernanceAddress with admin role", async function () {
       const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: false,
@@ -136,7 +126,7 @@ describe.only("X-Allocation Voting", function () {
         forceDeploy: true,
       })
 
-      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, true)
+      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "", true)
 
       let tx = await xAllocationVoting.proposeNewAllocationRound("First allocation round")
       let receipt = await tx.wait()
@@ -230,7 +220,7 @@ describe.only("X-Allocation Voting", function () {
           forceDeploy: true,
         })
 
-      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, true)
+      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "", true)
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
       await getVot3Tokens(otherAccount, "1000")
@@ -254,7 +244,7 @@ describe.only("X-Allocation Voting", function () {
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
-      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, true)
+      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "", true)
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
       await getVot3Tokens(otherAccount, "1000")
@@ -300,7 +290,7 @@ describe.only("X-Allocation Voting", function () {
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
-      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, true)
+      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "", true)
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
       await getVot3Tokens(otherAccount, "1000")
@@ -329,7 +319,7 @@ describe.only("X-Allocation Voting", function () {
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
-      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, true)
+      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "", true)
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
       await getVot3Tokens(otherAccount, "1000")
@@ -360,9 +350,9 @@ describe.only("X-Allocation Voting", function () {
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
-      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, true)
+      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "", true)
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationPool.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, true)
+      await xAllocationPool.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, "", true)
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
 
       await getVot3Tokens(otherAccount, "1000")
@@ -413,9 +403,9 @@ describe.only("X-Allocation Voting", function () {
           forceDeploy: true,
         })
 
-      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, true)
+      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "", true)
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationPool.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, true)
+      await xAllocationPool.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, "", true)
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       const voter2 = otherAccounts[3]
       const voter3 = otherAccounts[4]
@@ -479,9 +469,9 @@ describe.only("X-Allocation Voting", function () {
           forceDeploy: true,
         })
 
-      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, true)
+      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "", true)
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationPool.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, true)
+      await xAllocationPool.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, "", true)
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       const app3 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
 
@@ -519,9 +509,9 @@ describe.only("X-Allocation Voting", function () {
           forceDeploy: true,
         })
 
-      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, true)
+      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "", true)
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationPool.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, true)
+      await xAllocationPool.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, "", true)
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
 
       await getVot3Tokens(otherAccount, "1000")
@@ -563,9 +553,9 @@ describe.only("X-Allocation Voting", function () {
           forceDeploy: true,
         })
 
-      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, true)
+      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "", true)
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationPool.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, true)
+      await xAllocationPool.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, "", true)
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
 
       await getVot3Tokens(otherAccount, "1000")
