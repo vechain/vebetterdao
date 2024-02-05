@@ -4,6 +4,7 @@ import {
   buildStakeB3trTx,
   getVot3BalanceQueryKey,
   buildB3trApprovesVot3ContractTx,
+  getVotesQueryKey,
 } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
@@ -77,6 +78,13 @@ export const useStakeB3tr = ({
       })
       await queryClient.refetchQueries({
         queryKey: getVot3BalanceQueryKey(account ?? undefined),
+      })
+
+      await queryClient.cancelQueries({
+        queryKey: getVotesQueryKey(account ?? undefined),
+      })
+      await queryClient.refetchQueries({
+        queryKey: getVotesQueryKey(account ?? undefined),
       })
     }
 

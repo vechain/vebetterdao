@@ -11,7 +11,7 @@
     "contracts:compile": "turbo run compile --scope=contracts",
     "contracts:deploy": "turbo run deploy --scope=contracts",
     "contracts:test": "turbo run test --scope=contracts",
-    "contracts:test:hardhat": "turbo run test:hardhat --scope=contracts",
+    "contracts:test:thor-solo": "turbo run test:thor-solo --scope=contracts",
     "solo-up": "make solo-up"
   },
   "devDependencies": {
