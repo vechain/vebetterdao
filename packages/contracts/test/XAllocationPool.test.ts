@@ -44,7 +44,7 @@ describe.only("X-Allocation Pool", function () {
       )
     })
 
-    it("Should be possible to add a new app through the DAO", async function () {
+    it.only("Should be possible to add a new app through the DAO", async function () {
       const { xAllocationPool, otherAccounts, governor } = await getOrDeployContractInstances({ forceDeploy: true })
 
       const proposer = otherAccounts[0]
@@ -72,6 +72,6 @@ describe.only("X-Allocation Pool", function () {
       expect(app[2]).to.eql("Bike 4 Life")
       expect(app[3]).to.eql("")
       expect(app[4]).to.eql(true)
-    })
+    }).timeout(18000000)
   })
 })

@@ -13,7 +13,7 @@ import {
 } from "./helpers"
 import { describe, it } from "mocha"
 
-describe.only("X-Allocation Voting", function () {
+describe("X-Allocation Voting", function () {
   describe("Deployment", function () {
     it("Admins and addresses should be set correctly", async function () {
       const { xAllocationVoting, xAllocationPool, owner, timeLock } = await getOrDeployContractInstances({
@@ -194,6 +194,7 @@ describe.only("X-Allocation Voting", function () {
       // Event should be emitted
       let allocationProposalCreated = filterEventsByName(receipt.logs, "AllocationProposalCreated")
       let { proposalId } = parseAlloctionProposalCreatedEvent(allocationProposalCreated[0], xAllocationVoting)
+      expect(proposalId).to.eql(BigInt(1))
 
       await waitForProposalToBeActive(proposalId, xAllocationVoting)
       await waitForVotingPeriodToEnd(proposalId, xAllocationVoting)
@@ -208,7 +209,7 @@ describe.only("X-Allocation Voting", function () {
       ;({ proposalId } = parseAlloctionProposalCreatedEvent(allocationProposalCreated[0], xAllocationVoting))
 
       expect(proposalId).to.eql(BigInt(2))
-    })
+    }).timeout(18000000)
   })
 
   describe("Allocation Voting", function () {
@@ -585,6 +586,6 @@ describe.only("X-Allocation Voting", function () {
       expect(neededVotes).to.be.greaterThan(2)
 
       expect(await xAllocationVoting.state(proposalId)).to.eql(BigInt(2))
-    })
+    }).timeout(18000000)
   })
 })

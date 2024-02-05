@@ -52,7 +52,9 @@ export const createProposal = async (
   const address = await contractToCall.getAddress()
   const encodedFunctionCall = ContractFactory.interface.encodeFunctionData(functionTocall, values)
 
-  const tx = await governor.connect(proposer).propose([address], [0], [encodedFunctionCall], description)
+  const tx = await governor
+    .connect(proposer)
+    .propose([address], [0], [encodedFunctionCall], description, { gasLimit: 10_000_000 })
 
   return tx
 }
@@ -138,7 +140,7 @@ export const createProposalAndExecuteIt = async (
 
   // vote
   // console.log("Voting");
-  await governor.connect(voter).castVote(proposalId, 1) // vote for
+  await governor.connect(voter).castVote(proposalId, 1, { gasLimit: 10_000_000 }) // vote for
 
   // wait
   // console.log("Waiting for voting period to end");
@@ -148,12 +150,16 @@ export const createProposalAndExecuteIt = async (
   // console.log("Queueing");
   const encodedFunctionCall = Contract.interface.encodeFunctionData(functionToCall, args)
   const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
-  await governor.queue([await contractToCall.getAddress()], [0], [encodedFunctionCall], descriptionHash)
+  await governor.queue([await contractToCall.getAddress()], [0], [encodedFunctionCall], descriptionHash, {
+    gasLimit: 10_000_000,
+  })
   await waitForNextBlock()
 
   // execute it
   // console.log("Executing");
-  await governor.execute([await contractToCall.getAddress()], [0], [encodedFunctionCall], descriptionHash)
+  await governor.execute([await contractToCall.getAddress()], [0], [encodedFunctionCall], descriptionHash, {
+    gasLimit: 10_000_000,
+  })
 }
 
 export const addAppThroughGovernance = async (
