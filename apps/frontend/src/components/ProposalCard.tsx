@@ -43,18 +43,16 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
         let _decodedCallData
 
         if (decodedMethod) {
-          console.log({
-            decodedMethod,
-            calldata,
-          })
-          _decodedCallData = abi.decodeParameters(decodedMethod.inputs, calldata)
+          _decodedCallData = abi.decodeParameters(decodedMethod.inputs, `0x${calldata.slice(10)}`)
         }
         decoded.push({
           contract: { ...contract, address: contractAddress },
           method: decodedMethod,
           params: _decodedCallData,
         })
-      } catch (e) {}
+      } catch (e) {
+        console.error("Error decoding call data", e)
+      }
     }
     return decoded
   }, [proposal])
