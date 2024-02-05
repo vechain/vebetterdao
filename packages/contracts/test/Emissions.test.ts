@@ -14,7 +14,7 @@ import {
   waitUntilTimestamp,
 } from "./helpers"
 import { expect } from "chai"
-import { ethers } from "hardhat"
+import { ethers, network } from "hardhat"
 import path from "path"
 
 describe("Emissions", () => {
@@ -398,10 +398,10 @@ describe("Emissions", () => {
 
       // Log the cycle and amounts for debugging
       // Uncomment to view the emissions for each cycle
-      /* console.log(
+      console.log(
         `Cycle ${cycle}: XAllocations = ${ethers.formatEther(xAllocationsAmount)}, Vote2Earn = ${ethers.formatEther(vote2EarnAmount)}`,
         `Treasury = ${ethers.formatEther(treasuryAmount)}`,
-      ) */
+      )
 
       // Assert the calculated amounts match the expected amounts from the spreadsheet
       expect(Math.floor(Number(ethers.formatEther(xAllocationsAmount)))).to.equal(
@@ -422,5 +422,57 @@ describe("Emissions", () => {
     })
 
     await catchRevert(emissions.connect(minterAccount).preMint())
+  })
+
+  it("Should be able to perform all cycles till reaching B3TR supply cap", async function () {
+    if (network.name !== "hardhat") {
+      console.log(`\nThe test "${this?.test?.title}" is only supported on hardhat network. Skipping...\n`)
+      return
+    }
+    const { emissions, b3tr, minterAccount, owner } = await getOrDeployContractInstances({
+      forceDeploy: true,
+    })
+
+    // Grant minter role to emissions contract
+    await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+
+    // Pre-mint
+    await emissions.connect(minterAccount).preMint()
+
+    await waitUntilTimestamp(Number(await emissions.START_TIME()) + 1)
+
+    // Distribute emissions
+    await emissions.connect(minterAccount).distribute()
+
+    // Check supply
+    expect(await b3tr.totalSupply()).to.equal(
+      ethers.parseEther("5000000") +
+        PRE_MINT_X_ALLOCATION +
+        PRE_MINT_VOTE_2_EARN_ALLOCATION +
+        PRE_MINT_TREASURY_ALLOCATION,
+    )
+    expect(await b3tr.balanceOf(await emissions.xAllocations())).to.equal(
+      ethers.parseEther("2000000") + PRE_MINT_X_ALLOCATION,
+    )
+    expect(await b3tr.balanceOf(await emissions.vote2Earn())).to.equal(
+      ethers.parseEther("2000000") + PRE_MINT_VOTE_2_EARN_ALLOCATION,
+    )
+    expect(await b3tr.balanceOf(await emissions.treasury())).to.equal(
+      ethers.parseEther("1000000") + PRE_MINT_TREASURY_ALLOCATION,
+    )
+
+    // Move to the 633rd cycle
+    await moveToCycle(emissions, minterAccount, 633)
+
+    // Waiting for the 634th cycle (Last cycle)
+    await waitForNextCycle(emissions)
+
+    expect(await emissions.nextCycle()).to.equal(634)
+
+    // Distribute emissions
+    await emissions.connect(minterAccount).distribute()
+
+    // Check supply
+    expect(await b3tr.totalSupply()).to.equal(ethers.parseEther("1000000000"))
   })
 })
