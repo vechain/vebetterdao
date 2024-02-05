@@ -176,7 +176,7 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
     address proposer = _msgSender();
 
     // check that there isn't an already ongoing proposal
-    // but only do it after we have at least 1 proposal
+    // but only do it after we have at least 1 proposal otherwise it will fail with `GovernorNonexistentProposal`
     if (_proposalCount > 0) {
       AllocationProposalState currentState = state(_proposalCount);
       require(
