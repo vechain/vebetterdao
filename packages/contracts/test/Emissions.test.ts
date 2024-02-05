@@ -398,10 +398,10 @@ describe("Emissions", () => {
 
       // Log the cycle and amounts for debugging
       // Uncomment to view the emissions for each cycle
-      console.log(
+      /* console.log(
         `Cycle ${cycle}: XAllocations = ${ethers.formatEther(xAllocationsAmount)}, Vote2Earn = ${ethers.formatEther(vote2EarnAmount)}`,
         `Treasury = ${ethers.formatEther(treasuryAmount)}`,
-      )
+      ) */
 
       // Assert the calculated amounts match the expected amounts from the spreadsheet
       expect(Math.floor(Number(ethers.formatEther(xAllocationsAmount)))).to.equal(
