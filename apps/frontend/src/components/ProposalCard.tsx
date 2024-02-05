@@ -48,23 +48,28 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
         let _decodedCallData
 
         if (decodedMethod) {
-          console.log({
-            decodedMethod,
-            calldata,
-          })
-          _decodedCallData = abi.decodeParameters(decodedMethod.inputs, calldata)
+          _decodedCallData = abi.decodeParameters(decodedMethod.inputs, `0x${calldata.slice(10)}`)
         }
         decoded.push({
           contract: { ...contract, address: contractAddress },
           method: decodedMethod,
           params: _decodedCallData,
         })
-      } catch (e) {}
+      } catch (e) {
+        console.error("Error decoding call data", e)
+      }
     }
     return decoded
   }, [proposal])
 
   console.log({ decodedCallDatas })
+
+  const isStarted = useMemo(() => {
+    const startBlock = Number(proposal.voteStart)
+    if (!startBlock || !currentBlock) return null
+    const startBlockFromNow = startBlock - currentBlock.number
+    return startBlockFromNow <= 0
+  }, [proposal])
 
   const isEnded = useMemo(() => {
     const endBlock = Number(proposal.voteEnd)
@@ -87,6 +92,19 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
       const endDate = dayjs().subtract(durationLeftTimestamp, "milliseconds")
       return endDate.fromNow()
     }
+  }, [proposal])
+
+  const estimatedStartTime = useMemo(() => {
+    if (!proposal.voteStart) return null
+    const startBlock = Number(proposal.voteStart)
+    if (!startBlock || !currentBlock) return null
+    const startBlockFromNow = startBlock - currentBlock.number
+    //not started yet
+    if (startBlockFromNow > 0) {
+      const durationLeftTimestamp = startBlockFromNow * blockTime
+      const startDate = dayjs().add(durationLeftTimestamp, "milliseconds")
+      return startDate.fromNow()
+    } else return "Started"
   }, [proposal])
 
   return (
@@ -147,14 +165,25 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
       </CardBody>
       <CardFooter>
         <HStack justify={"space-between"} w="full">
-          <Box>
-            <Heading as="h4" size="sm" color="orange">
-              {isEnded ? "Ended" : "Ends"} {estimatedEndTime}
-            </Heading>
-            <Text fontWeight={"normal"} fontSize={"sm"}>
-              At block #{proposal.voteEnd}
-            </Text>
-          </Box>
+          {isStarted ? (
+            <Box>
+              <Heading as="h4" size="sm" color="orange">
+                {isEnded ? "Ended" : "Ends"} {estimatedEndTime}
+              </Heading>
+              <Text fontWeight={"normal"} fontSize={"sm"}>
+                At block #{proposal.voteEnd}
+              </Text>
+            </Box>
+          ) : (
+            <Box>
+              <Heading as="h4" size="sm" color="orange">
+                {"Starts"} {estimatedStartTime}
+              </Heading>
+              <Text fontWeight={"normal"} fontSize={"sm"}>
+                At block #{proposal.voteStart}
+              </Text>
+            </Box>
+          )}
         </HStack>
       </CardFooter>
     </Card>
