@@ -165,13 +165,8 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   /**
    * @dev See {IXAllocationVotingGovernor-proposeNewAllocationRound}. This function has opt-in frontrunning protection, described in {_isValidDescriptionForProposer}.
    */
-  function proposeNewAllocationRound(string memory description) public virtual returns (uint256) {
+  function proposeNewAllocationRound() public virtual returns (uint256) {
     address proposer = _msgSender();
-
-    // check description restriction
-    if (!_isValidDescriptionForProposer(proposer, description)) {
-      revert GovernorRestrictedProposer(proposer);
-    }
 
     // check that there isn't an already ongoing proposal
     // but only do it after we have at least 1 proposal
@@ -183,7 +178,7 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
       );
     }
 
-    return _propose(description, proposer);
+    return _propose(proposer);
   }
 
   /**
@@ -191,7 +186,7 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
    *
    * Emits a {IXAllocationVotingGovernor-ProposalCreated} event.
    */
-  function _propose(string memory description, address proposer) internal virtual returns (uint256 proposalId) {
+  function _propose(address proposer) internal virtual returns (uint256 proposalId) {
     ++_proposalCount;
     proposalId = _proposalCount;
 
@@ -207,7 +202,7 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
     proposal.voteStart = SafeCast.toUint48(snapshot);
     proposal.voteDuration = SafeCast.toUint32(duration);
 
-    emit AllocationProposalCreated(proposalId, proposer, snapshot, snapshot + duration, description);
+    emit AllocationProposalCreated(proposalId, proposer, snapshot, snapshot + duration);
 
     // Using a named return variable to avoid stack too deep errors
   }

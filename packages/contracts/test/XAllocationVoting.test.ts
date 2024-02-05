@@ -128,7 +128,7 @@ describe.only("X-Allocation Voting", function () {
 
       await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "", true)
 
-      let tx = await xAllocationVoting.proposeNewAllocationRound("First allocation round")
+      let tx = await xAllocationVoting.proposeNewAllocationRound()
       let receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
 
@@ -157,7 +157,7 @@ describe.only("X-Allocation Voting", function () {
 
       await getVot3Tokens(otherAccount, "1000")
 
-      let tx = await xAllocationVoting.proposeNewAllocationRound("First allocation round")
+      let tx = await xAllocationVoting.proposeNewAllocationRound()
       let receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
 
@@ -172,12 +172,12 @@ describe.only("X-Allocation Voting", function () {
       expect(proposalState).to.eql(BigInt(0))
 
       // should not be able to propose a new allocation round if there is an active one
-      await catchRevert(xAllocationVoting.proposeNewAllocationRound("First allocation round"))
+      await catchRevert(xAllocationVoting.proposeNewAllocationRound())
 
       await waitForProposalToBeActive(proposalId, xAllocationVoting)
 
       // should not be able to propose a new allocation round if there is an active one
-      await catchRevert(xAllocationVoting.proposeNewAllocationRound("First allocation round"))
+      await catchRevert(xAllocationVoting.proposeNewAllocationRound())
     })
 
     it("Should be able to propose a new allocation round if the previous one ended", async function () {
@@ -187,7 +187,7 @@ describe.only("X-Allocation Voting", function () {
 
       await getVot3Tokens(otherAccount, "1000")
 
-      let tx = await xAllocationVoting.proposeNewAllocationRound("First allocation round")
+      let tx = await xAllocationVoting.proposeNewAllocationRound()
       let receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
 
@@ -199,7 +199,7 @@ describe.only("X-Allocation Voting", function () {
       await waitForVotingPeriodToEnd(proposalId, xAllocationVoting)
 
       // should not be able to propose a new allocation round if there is an active one
-      tx = await xAllocationVoting.proposeNewAllocationRound("Second allocation round")
+      tx = await xAllocationVoting.proposeNewAllocationRound()
       receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
 
@@ -225,7 +225,7 @@ describe.only("X-Allocation Voting", function () {
 
       await getVot3Tokens(otherAccount, "1000")
 
-      let tx = await xAllocationVoting.proposeNewAllocationRound("First allocation round")
+      let tx = await xAllocationVoting.proposeNewAllocationRound()
       let receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
       // Event should be emitted
@@ -249,7 +249,7 @@ describe.only("X-Allocation Voting", function () {
 
       await getVot3Tokens(otherAccount, "1000")
 
-      let tx = await xAllocationVoting.proposeNewAllocationRound("First allocation round")
+      let tx = await xAllocationVoting.proposeNewAllocationRound()
       let receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
       // Event should be emitted
@@ -295,7 +295,7 @@ describe.only("X-Allocation Voting", function () {
 
       await getVot3Tokens(otherAccount, "1000")
 
-      let tx = await xAllocationVoting.proposeNewAllocationRound("First allocation round")
+      let tx = await xAllocationVoting.proposeNewAllocationRound()
       let receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
       // Event should be emitted
@@ -324,7 +324,7 @@ describe.only("X-Allocation Voting", function () {
 
       await getVot3Tokens(otherAccount, "1000")
 
-      let tx = await xAllocationVoting.proposeNewAllocationRound("First allocation round")
+      let tx = await xAllocationVoting.proposeNewAllocationRound()
       let receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
       // Event should be emitted
@@ -357,7 +357,7 @@ describe.only("X-Allocation Voting", function () {
 
       await getVot3Tokens(otherAccount, "1000")
 
-      let tx = await xAllocationVoting.proposeNewAllocationRound("Second allocation round")
+      let tx = await xAllocationVoting.proposeNewAllocationRound()
       let receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
 
@@ -414,7 +414,7 @@ describe.only("X-Allocation Voting", function () {
       await getVot3Tokens(voter2, "1000")
       await getVot3Tokens(voter3, "1000")
 
-      let tx = await xAllocationVoting.proposeNewAllocationRound("Second allocation round")
+      let tx = await xAllocationVoting.proposeNewAllocationRound()
       let receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
 
@@ -477,7 +477,7 @@ describe.only("X-Allocation Voting", function () {
 
       await getVot3Tokens(otherAccount, "1000")
 
-      let tx = await xAllocationVoting.proposeNewAllocationRound("Second allocation round")
+      let tx = await xAllocationVoting.proposeNewAllocationRound()
       let receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
 
@@ -516,7 +516,7 @@ describe.only("X-Allocation Voting", function () {
 
       await getVot3Tokens(otherAccount, "1000")
 
-      let tx = await xAllocationVoting.proposeNewAllocationRound("Allocation round")
+      let tx = await xAllocationVoting.proposeNewAllocationRound()
       let receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
 
@@ -560,7 +560,7 @@ describe.only("X-Allocation Voting", function () {
 
       await getVot3Tokens(otherAccount, "1000")
 
-      let tx = await xAllocationVoting.proposeNewAllocationRound("Allocation round")
+      let tx = await xAllocationVoting.proposeNewAllocationRound()
       let receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
       const timepoint = receipt.blockNumber

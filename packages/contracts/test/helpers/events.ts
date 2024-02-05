@@ -26,7 +26,6 @@ export const parseAlloctionProposalCreatedEvent = (event: any, xAllocationVoting
     proposer: decoded?.args[1],
     voteStart: decoded?.args[2],
     voteEnd: decoded?.args[3],
-    description: decoded?.args[4],
   }
 }
 

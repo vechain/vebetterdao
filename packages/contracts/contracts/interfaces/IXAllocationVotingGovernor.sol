@@ -88,13 +88,7 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   /**
    * @dev Emitted when a proposal is created.
    */
-  event AllocationProposalCreated(
-    uint256 proposalId,
-    address proposer,
-    uint256 voteStart,
-    uint256 voteEnd,
-    string description
-  );
+  event AllocationProposalCreated(uint256 proposalId, address proposer, uint256 voteStart, uint256 voteEnd);
 
   /**
    * @dev Emitted when votes are cast.
@@ -226,12 +220,12 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   function hasVoted(uint256 proposalId, address account) external view returns (bool);
 
   /**
-   * @dev Create a new proposal. Vote start after a delay specified by {IGovernor-votingDelay} and lasts for a
+   * @dev Create a new allocation proposal (round). Vote start after a delay specified by {IGovernor-votingDelay} and lasts for a
    * duration specified by {IGovernor-votingPeriod}.
    *
    * Emits a {AllocationProposalCreated} event.
    */
-  function proposeNewAllocationRound(string memory description) external returns (uint256 proposalId);
+  function proposeNewAllocationRound() external returns (uint256 proposalId);
 
   /**
    * @dev Cast multiple votes at once
