@@ -1,9 +1,10 @@
 import { ethers, network } from "hardhat"
-import { GovernorContract } from "../../typechain-types"
+import { Emissions, GovernorContract } from "../../typechain-types"
 import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { getOrDeployContractInstances } from "./deploy"
 import { mine } from "@nomicfoundation/hardhat-network-helpers"
+import { BLOCK_INTERVAL } from "./const"
 
 export const waitForNextBlock = async () => {
   if (network.name === "hardhat") {
@@ -22,7 +23,6 @@ export const waitForNextBlock = async () => {
 
 export const moveBlocks = async (blocks: number) => {
   for (let i = 0; i < blocks; i++) {
-    // console.log(`Moving to block +${i+1}`);
     await waitForNextBlock()
   }
 }
@@ -70,10 +70,8 @@ export const getProposalIdFromTx = async (tx: ContractTransactionResponse, gover
 
 export const waitForVotingPeriodToEnd = async (proposalId: number, governor: GovernorContract) => {
   const deadline = await governor.proposalDeadline(proposalId)
-  // console.log(`Waiting for proposal ${proposalId} to end at block ${deadline}`);
 
   const currentBlock = await governor.clock()
-  // console.log(`Current block is ${currentBlock}`);
 
   await moveBlocks(parseInt((deadline - currentBlock + BigInt(1)).toString()))
 }
@@ -97,7 +95,7 @@ export const waitForProposalToBeActive = async (proposalId: number, governor: Go
 
 // Mint some B3TR and swap for VOT3
 export const getVot3Tokens = async (receiver: HardhatEthersSigner, amount: string) => {
-  const { b3tr, vot3, minterAccount } = await getOrDeployContractInstances(false)
+  const { b3tr, vot3, minterAccount } = await getOrDeployContractInstances({ forceDeploy: false })
 
   // Mint some B3TR
   await b3tr.connect(minterAccount).mint(receiver, ethers.parseEther(amount))
@@ -107,4 +105,32 @@ export const getVot3Tokens = async (receiver: HardhatEthersSigner, amount: strin
 
   // Lock B3TR to get VOT3
   await vot3.connect(receiver).stake(ethers.parseEther(amount))
+}
+
+export const waitUntilTimestamp = async (timestamp: number) => {
+  const currentBlock = await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
+
+  if (!currentBlock?.timestamp) throw new Error("Could not get current block timestamp")
+
+  if (currentBlock?.timestamp < timestamp) {
+    // Get blocks required to wait
+    const blocksToWait = Math.floor((timestamp - currentBlock?.timestamp) / BLOCK_INTERVAL + 1)
+
+    if (blocksToWait > 0)
+      await moveBlocks(network.name === "hardhat" ? timestamp - currentBlock?.timestamp + 1 : blocksToWait)
+  }
+}
+
+export const waitForNextCycle = async (emissions: Emissions) => {
+  const nextCycle = await emissions.nextCycle()
+  const timestampNextCycle = await emissions.getTimestampCycleStart(nextCycle)
+
+  await waitUntilTimestamp(Number(timestampNextCycle))
+}
+
+export const moveToCycle = async (emissions: Emissions, minter: HardhatEthersSigner, cycles: number) => {
+  for (let i = 0; i < cycles; i++) {
+    await waitForNextCycle(emissions)
+    await emissions.connect(minter).distribute()
+  }
 }
