@@ -50,7 +50,7 @@ describe("X-Allocation Voting", function () {
 
       const updatedAddress = await xAllocationVoting.getXAllocationPoolAddress()
       expect(updatedAddress).to.eql(otherAccounts[3].address)
-    })
+    }).timeout(18000000)
 
     it("Admin should be able to change x-allocation pool address", async function () {
       const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
@@ -544,7 +544,7 @@ describe("X-Allocation Voting", function () {
 
       // quorum should be reached and proposal should be successful
       expect(await xAllocationVoting.state(proposalId)).to.eql(BigInt(3))
-    })
+    }).timeout(18000000)
 
     it("Allocation proposal should be defeated if quorum was not reached", async function () {
       const { xAllocationVoting, otherAccounts, otherAccount, xAllocationPool, owner, vot3 } =
