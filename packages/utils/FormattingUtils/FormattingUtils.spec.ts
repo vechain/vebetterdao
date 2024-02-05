@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+import { vi } from "vitest"
 import {
   convertToFiatBalance,
   formatAlias,
@@ -36,7 +37,7 @@ describe("scaleNumberUp - negative testing", () => {
   const originalError = console.error
   beforeAll(() => {
     // mute the errors in the console
-    console.error = jest.fn()
+    console.error = vi.fn()
   })
   afterAll(() => {
     // unmute the errors
@@ -74,7 +75,7 @@ describe("scaleNumberDown - negative testing", () => {
   const originalError = console.error
   beforeAll(() => {
     // mute the errors in the console
-    console.error = jest.fn()
+    console.error = vi.fn()
   })
   afterAll(() => {
     // unmute the errors
@@ -126,7 +127,7 @@ describe("humanAddress", () => {
 
 describe("humanUrl", () => {
   it("should return correctly", () => {
-    expect(humanUrl("https://jestjs.io/docs/mock-function-api#mockfnmockresolvedvaluevalue")).toBe("https://…evalue")
+    expect(humanUrl("https://vijs.io/docs/mock-function-api#mockfnmockresolvedvaluevalue")).toBe("https://…evalue")
   })
 })
 
@@ -139,8 +140,8 @@ describe("formatAlias", () => {
 
 describe("removeUrlProtocolAndPath", () => {
   it("should return correctly", () => {
-    expect(removeUrlProtocolAndPath("https://jestjs.io/docs/mock-function-api#mockfnmockresolvedvaluevalue")).toBe(
-      "jestjs.io",
+    expect(removeUrlProtocolAndPath("https://vijs.io/docs/mock-function-api#mockfnmockresolvedvaluevalue")).toBe(
+      "vijs.io",
     )
   })
 })
