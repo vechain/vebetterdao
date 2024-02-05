@@ -72,6 +72,8 @@ contract Emissions is AccessControl, ReentrancyGuard {
       "Emissions: xAllocations decay must be between 0 and 100"
     );
     require(_decaySettings[1] > 0 && _decaySettings[1] < 100, "Emissions: vote2Earn decay must be between 0 and 100");
+    require(_decaySettings[2] > 0, "Emissions: xAllocations decay delay must be greater than 0");
+    require(_decaySettings[3] > 0, "Emissions: vote2Earn decay delay must be greater than 0");
 
     // Set B3TR token contract
     b3tr = IB3TR(b3trAddress);
