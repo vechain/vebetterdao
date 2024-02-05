@@ -1,4 +1,4 @@
-import { ProposalCreatedEvent, ProposalState, useProposalState } from "@/api"
+import { ProposalCreatedEvent, ProposalState, useCurrentBlock, useProposalState } from "@/api"
 import {
   Box,
   Card,
@@ -19,12 +19,17 @@ import { governanceAvailableContracts } from "@/constants"
 import { abi } from "thor-devkit"
 import { AddressUtils, ContractUtils } from "@repo/utils"
 import { humanAddress } from "@repo/utils/FormattingUtils"
+import { getConfig } from "@repo/config"
+import dayjs from "dayjs"
 
+const config = getConfig()
+const blockTime = config.network.blockTime
 type Props = {
   proposal: ProposalCreatedEvent
 }
 export const ProposalCard: React.FC<Props> = ({ proposal }) => {
   const { data: state } = useProposalState(proposal.proposalId)
+  const { data: currentBlock } = useCurrentBlock()
 
   const decodedCallDatas = useMemo(() => {
     const decoded = []
@@ -60,6 +65,29 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
   }, [proposal])
 
   console.log({ decodedCallDatas })
+
+  const isEnded = useMemo(() => {
+    const endBlock = Number(proposal.voteEnd)
+    if (!endBlock || !currentBlock) return null
+    const endBlockFromNow = endBlock - currentBlock.number
+    return endBlockFromNow <= 0
+  }, [proposal])
+
+  const estimatedEndTime = useMemo(() => {
+    const endBlock = Number(proposal.voteEnd)
+    if (!endBlock || !currentBlock) return null
+    const endBlockFromNow = endBlock - currentBlock.number
+    //not ended yet
+    if (endBlockFromNow > 0) {
+      const durationLeftTimestamp = endBlockFromNow * blockTime
+      const endDate = dayjs().add(durationLeftTimestamp, "milliseconds")
+      return endDate.fromNow()
+    } else {
+      const durationLeftTimestamp = -endBlockFromNow * blockTime
+      const endDate = dayjs().subtract(durationLeftTimestamp, "milliseconds")
+      return endDate.fromNow()
+    }
+  }, [proposal])
 
   return (
     <Card flex={1}>
@@ -120,10 +148,12 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
       <CardFooter>
         <HStack justify={"space-between"} w="full">
           <Box>
-            <Text>Ends at block</Text>
-            <Heading as="h4" size="sm">
-              {proposal.voteEnd}
+            <Heading as="h4" size="sm" color="orange">
+              {isEnded ? "Ended" : "Ends"} {estimatedEndTime}
             </Heading>
+            <Text fontWeight={"normal"} fontSize={"sm"}>
+              At block #{proposal.voteEnd}
+            </Text>
           </Box>
         </HStack>
       </CardFooter>
