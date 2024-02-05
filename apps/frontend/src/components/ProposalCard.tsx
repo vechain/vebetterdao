@@ -17,7 +17,7 @@ import { AddressButton } from "./AddressButton"
 import { useMemo } from "react"
 import { governanceAvailableContracts } from "@/constants"
 import { abi } from "thor-devkit"
-import { AddressUtils, ContractUtils } from "@repo/utils"
+import { AddressUtils, ContractUtils, FormattingUtils } from "@repo/utils"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { getConfig } from "@repo/config"
 import dayjs from "dayjs"
@@ -34,7 +34,7 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
   const decodedCallDatas = useMemo(() => {
     const decoded = []
     for (const [index, contractAddress] of proposal.targets.entries()) {
-      console.log("Decoding call data for contract", contractAddress)
+      //   console.log("Decoding call data for contract", contractAddress)
       const contract = governanceAvailableContracts.find(c => AddressUtils.compareAddresses(c.address, contractAddress))
       if (!contract) continue
 
@@ -61,8 +61,6 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
     }
     return decoded
   }, [proposal])
-
-  console.log({ decodedCallDatas })
 
   const isStarted = useMemo(() => {
     const startBlock = Number(proposal.voteStart)
@@ -107,6 +105,17 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
     } else return "Started"
   }, [proposal])
 
+  const renderInputParameterValue = (input: abi.Function.Parameter, value: string) => {
+    if (input.type === "address")
+      return (
+        <Code>
+          <AddressButton address={value} buttonSize="sm" addressFontSize="sm" variant="ghost" showAddressIcon={false} />
+        </Code>
+      )
+
+    return <Code>{value}</Code>
+  }
+
   return (
     <Card flex={1}>
       <CardHeader>
@@ -147,7 +156,7 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
                     <VStack align="flex-start">
                       {target.method.inputs.map((input, i) => (
                         <HStack key={i} w="full" justify={"space-between"}>
-                          <Code>{target.params?.[input.name]}</Code>
+                          {renderInputParameterValue(input, target.params?.[input.name])}
                         </HStack>
                       ))}
                     </VStack>
