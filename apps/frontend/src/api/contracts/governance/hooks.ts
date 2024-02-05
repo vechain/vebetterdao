@@ -50,7 +50,7 @@ export const useActiveProposals = () => {
     const lastBlock = currentBlock?.number ?? thor.status.head.number
     return proposalsEvents.created.filter(
       proposal =>
-        Number(proposal.voteStart) < lastBlock &&
+        Number(proposal.voteStart) <= lastBlock &&
         Number(proposal.voteEnd) > lastBlock &&
         !proposalsEvents.canceled.some(canceledProposal => canceledProposal.proposalId === proposal.proposalId) &&
         !proposalsEvents.executed.some(executedProposal => executedProposal.proposalId === proposal.proposalId) &&
