@@ -121,11 +121,31 @@ contract Emissions is AccessControl, ReentrancyGuard {
     require(START_TIME > 0, "Emissions: Pre-mint not done");
     require(block.timestamp >= getTimestampCycleStart(nextCycle), "Emissions: Next cycle not started yet");
 
-    b3tr.mint(xAllocations, getCurrentXAllocationsAmount());
-    b3tr.mint(vote2Earn, getCurrentVote2EarnAmount());
-    b3tr.mint(treasury, getCurrentTreasuryAmount());
+    uint256 totalEmissions = getCurrentXAllocationsAmount() + getCurrentVote2EarnAmount() + getCurrentTreasuryAmount();
+
+    uint256 remainingEmissions = b3tr.cap() - b3tr.totalSupply();
+
+    if (totalEmissions <= remainingEmissions) {
+      b3tr.mint(xAllocations, getCurrentXAllocationsAmount());
+      b3tr.mint(vote2Earn, getCurrentVote2EarnAmount());
+      b3tr.mint(treasury, getCurrentTreasuryAmount());
+    }
+    else {
+      distributeLast();
+    }
 
     nextCycle++;
+  }
+
+  function distributeLast() internal {
+    uint256 remainingEmissions = b3tr.cap() - b3tr.totalSupply();
+
+    uint256 xAllocationAmount = getDecayedAmount(remainingEmissions, 66, 1); // 66% decay for xAllocations in the last cycle
+    uint256 vote2EarnAmount = getDecayedAmount(remainingEmissions - xAllocationAmount, 13, 1); // 13% decay for vote2Earn in the last cycle
+
+    b3tr.mint(xAllocations, xAllocationAmount); 
+    b3tr.mint(vote2Earn, vote2EarnAmount);
+    b3tr.mint(treasury, remainingEmissions - xAllocationAmount - vote2EarnAmount);
   }
 
   // ----------- Getters ----------- //
