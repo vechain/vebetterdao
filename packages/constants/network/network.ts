@@ -15,6 +15,7 @@ export type NEXT_PUBLIC_NETWORK_TYPE = "main" | "test" | "solo" | "custom"
  * @field `currentUrl` - The current URL that we are connected to
  * @field `explorerUrl` - The explorer URL for this network
  * @field `genesis` - The genesis block for the network
+ * @field `blockTime` - The time it takes to mine a block in milliseconds
  */
 export type Network = {
   id: string
@@ -24,6 +25,7 @@ export type Network = {
   urls: string[]
   explorerUrl?: string
   genesis: typeof genesises.main
+  blockTime: number
 }
 
 const THOR_MAIN_URLS = [
@@ -142,6 +144,7 @@ export const defaultMainNetwork: Network = {
   urls: THOR_MAIN_URLS,
   explorerUrl: MAIN_EXPLORER_URL,
   genesis: genesises.main,
+  blockTime: 1000 * 10,
 }
 
 export const defaultTestNetwork: Network = {
@@ -152,6 +155,7 @@ export const defaultTestNetwork: Network = {
   urls: THOR_TESTNET_URLS,
   explorerUrl: TEST_EXPLORER_URL,
   genesis: genesises.test,
+  blockTime: 1000 * 10,
 }
 
 export const defaultSoloNetwork: Network = {
@@ -162,6 +166,7 @@ export const defaultSoloNetwork: Network = {
   urls: THOR_SOLO_URLS,
   explorerUrl: TEST_EXPLORER_URL,
   genesis: genesises.solo,
+  blockTime: 1000 * 10,
 }
 
 export const defaultNetworks: Network[] = [defaultMainNetwork, defaultTestNetwork, defaultSoloNetwork]

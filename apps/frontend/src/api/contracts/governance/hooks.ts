@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { getProposalState, getProposalThreshold, getProposalsEvents } from "./endpoints"
 import { useConnex } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
+import { useCurrentBlock } from "@/api/blockchain"
 
 export const getProposalThresholdQueryKey = () => ["proposalThreshold"]
 /**
@@ -41,20 +42,21 @@ export const useProposalsEvents = () => {
 export const useActiveProposals = () => {
   const { thor } = useConnex()
   const proposalsEventsQuery = useProposalsEvents()
+  const { data: currentBlock } = useCurrentBlock()
 
   const activeProposals = useMemo(() => {
     const proposalsEvents = proposalsEventsQuery.data
     if (!thor || !proposalsEvents) return
-    const lastBlock = thor.status.head.number
+    const lastBlock = currentBlock?.number ?? thor.status.head.number
     return proposalsEvents.created.filter(
       proposal =>
-        Number(proposal.voteStart) < lastBlock &&
+        Number(proposal.voteStart) <= lastBlock &&
         Number(proposal.voteEnd) > lastBlock &&
         !proposalsEvents.canceled.some(canceledProposal => canceledProposal.proposalId === proposal.proposalId) &&
         !proposalsEvents.executed.some(executedProposal => executedProposal.proposalId === proposal.proposalId) &&
         !proposalsEvents.queued.some(queuedProposal => queuedProposal.proposalId === proposal.proposalId),
     )
-  }, [proposalsEventsQuery])
+  }, [proposalsEventsQuery, currentBlock, thor])
 
   return {
     ...proposalsEventsQuery,
@@ -68,17 +70,18 @@ export const useActiveProposals = () => {
  */
 export const useIncomingProposals = () => {
   const { thor } = useConnex()
+  const { data: currentBlock } = useCurrentBlock()
   const { data: proposalsEvents } = useProposalsEvents()
 
   const incomingProposals = useMemo(() => {
     if (!thor || !proposalsEvents) return
-    const lastBlock = thor.status.head.number
+    const lastBlock = currentBlock?.number ?? thor.status.head.number
     return proposalsEvents.created.filter(
       proposal =>
         Number(proposal.voteStart) > lastBlock &&
         !proposalsEvents.canceled.some(canceledProposal => canceledProposal.proposalId === proposal.proposalId),
     )
-  }, [proposalsEvents, thor])
+  }, [proposalsEvents, thor, currentBlock])
 
   return {
     ...proposalsEvents,
@@ -93,10 +96,11 @@ export const useIncomingProposals = () => {
 export const usePastProposals = () => {
   const { thor } = useConnex()
   const { data: proposalsEvents } = useProposalsEvents()
+  const { data: currentBlock } = useCurrentBlock()
 
   const pastProposals = useMemo(() => {
     if (!thor || !proposalsEvents) return
-    const lastBlock = thor.status.head.number
+    const lastBlock = currentBlock?.number ?? thor.status.head.number
     return proposalsEvents.created.filter(
       proposal =>
         Number(proposal.voteEnd) < lastBlock ||
@@ -104,7 +108,7 @@ export const usePastProposals = () => {
         proposalsEvents.executed.some(executedProposal => executedProposal.proposalId === proposal.proposalId) ||
         proposalsEvents.queued.some(queuedProposal => queuedProposal.proposalId === proposal.proposalId),
     )
-  }, [proposalsEvents, thor])
+  }, [proposalsEvents, thor, currentBlock])
 
   return {
     ...proposalsEvents,
