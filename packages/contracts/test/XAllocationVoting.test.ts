@@ -209,6 +209,9 @@ describe("X-Allocation Voting", function () {
       ;({ proposalId } = parseAlloctionProposalCreatedEvent(allocationProposalCreated[0], xAllocationVoting))
 
       expect(proposalId).to.eql(BigInt(2))
+
+      const currentRoundId = await xAllocationVoting.currentRoundId()
+      expect(currentRoundId).to.eql(BigInt(2))
     }).timeout(18000000)
   })
 

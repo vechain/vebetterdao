@@ -233,4 +233,9 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
    * Emits a {AllocationVoteCast} event.
    */
   function castVote(uint256 proposalId, bytes32[] memory appsIds, uint256[] memory voteWeights) external;
+
+  /**
+   * @dev Returns the current allocation proposal round.
+   */
+  function currentRoundId() external view returns (uint256);
 }

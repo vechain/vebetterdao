@@ -18,7 +18,7 @@ import { IXAllocationVotingGovernor, IERC6372 } from "../interfaces/IXAllocation
  */
 abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAllocationVotingGovernor {
   // counter to count the number of proposals and also used to create the id
-  uint256 public _proposalCount;
+  uint256 internal _proposalCount;
 
   struct ProposalCore {
     address proposer;
@@ -87,6 +87,13 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
    */
   function getB3trGovernorAddress() public view returns (address) {
     return _b3trGovernor;
+  }
+
+  /**
+   * Returns the current round id.
+   */
+  function currentRoundId() public view virtual override returns (uint256) {
+    return _proposalCount;
   }
 
   /**
