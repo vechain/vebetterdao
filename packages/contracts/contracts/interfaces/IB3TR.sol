@@ -3,19 +3,33 @@ pragma solidity ^0.8.19;
 
 interface IB3TR {
   error AccessControlBadConfirmation();
+
   error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
+
   error ERC20ExceededCap(uint256 increasedSupply, uint256 cap);
+
   error ERC20InsufficientAllowance(address spender, uint256 allowance, uint256 needed);
+
   error ERC20InsufficientBalance(address sender, uint256 balance, uint256 needed);
+
   error ERC20InvalidApprover(address approver);
+
   error ERC20InvalidCap(uint256 cap);
+
   error ERC20InvalidReceiver(address receiver);
+
   error ERC20InvalidSender(address sender);
+
   error ERC20InvalidSpender(address spender);
+
   event Approval(address indexed owner, address indexed spender, uint256 value);
+
   event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole);
+
   event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender);
+
   event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender);
+
   event Transfer(address indexed from, address indexed to, uint256 value);
 
   function DEFAULT_ADMIN_ROLE() external view returns (bytes32);
