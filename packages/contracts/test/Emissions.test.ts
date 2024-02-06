@@ -418,7 +418,7 @@ describe("Emissions", () => {
     }
   })
 
-  it("Should not be able to distribute emissions if not minter", async () => {
+  it("Should not be able to pre mint emissions if not minter", async () => {
     const { emissions, minterAccount } = await getOrDeployContractInstances({
       forceDeploy: true,
     })
