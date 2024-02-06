@@ -1,7 +1,8 @@
 import { useProposalVotes } from "@/api"
-import { HStack, Icon, Progress, Text, VStack } from "@chakra-ui/react"
+import { Box, HStack, Icon, Progress, Text, VStack } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { FaThumbsDown, FaThumbsUp } from "react-icons/fa6"
+import { CastVoteButton } from "./CastVoteButton"
 
 type Props = {
   proposalId: string
@@ -20,7 +21,7 @@ export const ProposalVotesProgressBar: React.FC<Props> = ({ proposalId }) => {
   console.log({ progress })
 
   return (
-    <VStack spacing={2} flex={1}>
+    <Box w="full">
       <HStack w="full">
         <HStack spacing={1}>
           <Icon as={FaThumbsUp} color="green.500" fontSize={"md"} />
@@ -37,9 +38,9 @@ export const ProposalVotesProgressBar: React.FC<Props> = ({ proposalId }) => {
           </Text>
         </HStack>
       </HStack>
-      <Text fontSize="sm" color="gray.500">
+      <Text fontSize="sm" color="gray.500" textAlign={"center"}>
         {proposalVotes?.abstainVotes} preferred to abastain
       </Text>
-    </VStack>
+    </Box>
   )
 }

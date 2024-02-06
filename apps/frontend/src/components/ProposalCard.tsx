@@ -23,6 +23,7 @@ import { getConfig } from "@repo/config"
 import dayjs from "dayjs"
 import { ethers } from "ethers"
 import { ProposalVotesProgressBar } from "./ProposalVotesProgressBar"
+import { CastVoteButton } from "./CastVoteButton"
 
 const config = getConfig()
 const blockTime = config.network.blockTime
@@ -127,6 +128,10 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
             <Tag colorScheme="blue">Governance</Tag>
             <Tag colorScheme="green">{!!state && ProposalState[state]}</Tag>
           </HStack>
+          <HStack justify={"space-between"} w="full">
+            <Heading size="sm"> Proposer</Heading>
+            <AddressButton address={proposal.proposer} buttonSize="xs" addressFontSize="xs" />
+          </HStack>
           <Heading as="h3" size="md">
             {proposal.description}
           </Heading>
@@ -169,35 +174,33 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
             ))}
           </CardBody>
         </Card>
-        <Spacer h={4} />
-        <HStack justify={"space-between"}>
-          <Heading size="sm"> Proposer</Heading>
-          <AddressButton address={proposal.proposer} buttonSize="sm" addressFontSize="sm" />
-        </HStack>
       </CardBody>
       <CardFooter>
-        <HStack justify={"space-between"} w="full">
-          {isStarted ? (
-            <Box flex={1}>
-              <Heading as="h4" size="sm" color="orange">
-                {isEnded ? "Ended" : "Ends"} {estimatedEndTime}
-              </Heading>
-              <Text fontWeight={"normal"} fontSize={"sm"}>
-                At block #{proposal.voteEnd}
-              </Text>
-            </Box>
-          ) : (
-            <Box flex={1}>
-              <Heading as="h4" size="sm" color="orange">
-                {"Starts"} {estimatedStartTime}
-              </Heading>
-              <Text fontWeight={"normal"} fontSize={"sm"}>
-                At block #{proposal.voteStart}
-              </Text>
-            </Box>
-          )}
+        <VStack spacing={4} align={"flex-start"} w="full">
           <ProposalVotesProgressBar proposalId={proposal.proposalId} />
-        </HStack>
+          <HStack justify={"space-between"} w="full">
+            {isStarted ? (
+              <Box>
+                <Heading as="h4" size="sm" color="orange">
+                  {isEnded ? "Ended" : "Ends"} {estimatedEndTime}
+                </Heading>
+                <Text fontWeight={"normal"} fontSize={"sm"}>
+                  At block #{proposal.voteEnd}
+                </Text>
+              </Box>
+            ) : (
+              <Box>
+                <Heading as="h4" size="sm" color="orange">
+                  {"Starts"} {estimatedStartTime}
+                </Heading>
+                <Text fontWeight={"normal"} fontSize={"sm"}>
+                  At block #{proposal.voteStart}
+                </Text>
+              </Box>
+            )}
+            <CastVoteButton proposalId={proposal.proposalId} />
+          </HStack>
+        </VStack>
       </CardFooter>
     </Card>
   )
