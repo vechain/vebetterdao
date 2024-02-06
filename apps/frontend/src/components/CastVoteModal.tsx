@@ -1,4 +1,4 @@
-import { VoteType, useGetVotes } from "@/api"
+import { ProposalCreatedEvent, VoteType, useGetVotesOnBlock } from "@/api"
 import { useCastVote } from "@/hooks"
 import {
   ModalOverlay,
@@ -25,38 +25,38 @@ import { FormEvent, useMemo, useState } from "react"
 import { ConfirmTransactionModalContent } from "./ConfirmTransactionModalContent"
 import { MdHowToVote } from "react-icons/md"
 import { FaThumbsDown, FaThumbsUp } from "react-icons/fa6"
+import { humanAddress } from "@repo/utils/FormattingUtils"
 
 type Props = {
   isOpen: boolean
   onClose: () => void
-  proposalId: string
+  proposal: ProposalCreatedEvent
 }
 
-export const CastVoteModal: React.FC<Props> = ({ isOpen, onClose, proposalId }) => {
-  const { account } = useWallet()
-
+export const CastVoteModal: React.FC<Props> = ({ isOpen, onClose, proposal }) => {
   const onSuccess = () => {
     onClose()
   }
 
   const { sendTransaction, status, sendTransactionError, resetStatus, txReceiptError } = useCastVote({
-    proposalId,
+    proposalId: proposal.proposalId,
     onSuccess,
   })
 
   const renderContent = useMemo(() => {
+    const formattedProposalId = humanAddress(proposal.proposalId)
     if (status !== "ready")
       return (
         <ConfirmTransactionModalContent
-          description={`Cast your vote for proposal ${proposalId}`}
+          description={`Cast your vote for proposal ${formattedProposalId}`}
           status={status}
           error={sendTransactionError?.message ?? txReceiptError?.message}
           onSuccess={onSuccess}
           onTryAgain={resetStatus}
         />
       )
-    return <CastVoteModalContent onVote={sendTransaction} />
-  }, [status, sendTransactionError, txReceiptError, resetStatus, onSuccess])
+    return <CastVoteModalContent onVote={sendTransaction} proposal={proposal} />
+  }, [status, sendTransactionError, txReceiptError, resetStatus, onSuccess, proposal])
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
@@ -66,13 +66,14 @@ export const CastVoteModal: React.FC<Props> = ({ isOpen, onClose, proposalId }) 
   )
 }
 
-type RedeemB3trModalFormContentProps = {
+type CastVoteModalFormContentProps = {
   onVote: (vote: VoteType, reason?: string) => void
+  proposal: ProposalCreatedEvent
 }
 
-const CastVoteModalContent: React.FC<RedeemB3trModalFormContentProps> = ({ onVote }) => {
+const CastVoteModalContent: React.FC<CastVoteModalFormContentProps> = ({ onVote, proposal }) => {
   const { account } = useWallet()
-  const { data: votes, error } = useGetVotes(account ?? undefined)
+  const { data: votes, error } = useGetVotesOnBlock(Number(proposal.voteStart), account ?? undefined)
   const [selectedVote, setSelectedVote] = useState<VoteType>(VoteType.VOTE_FOR)
   const [reason, setReason] = useState<string>("")
 

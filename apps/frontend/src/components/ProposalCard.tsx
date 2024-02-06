@@ -187,7 +187,7 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
                 </Text>
               </Box>
             )}
-            <CastVoteButton proposalId={proposal.proposalId} />
+            <CastVoteButton proposal={proposal} />
           </HStack>
         </VStack>
       </CardFooter>
