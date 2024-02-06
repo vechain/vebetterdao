@@ -1,6 +1,6 @@
 "use client"
 
-import { useActiveProposals, useIncomingProposals, usePastProposals, useProposalsEvents } from "@/api"
+import { useActiveProposals, useCurrentBlock, useIncomingProposals, usePastProposals, useProposalsEvents } from "@/api"
 import { CreateProposalButton, ProposalCard } from "@/components"
 import {
   Box,
@@ -17,7 +17,6 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { useConnex } from "@vechain/dapp-kit-react"
 import { useEffect } from "react"
 import { FaScroll } from "react-icons/fa"
 
@@ -27,15 +26,11 @@ export default function ProposalsPage() {
   const { data: incomingProposals } = useIncomingProposals()
   const { data: pastProposals } = usePastProposals()
 
-  const { thor } = useConnex()
-
-  useEffect(() => {
-    console.log("Latest block:", thor.status.head.number)
-  }, [thor])
-
   useEffect(() => {
     console.log({ proposalsEvents })
   }, [proposalsEvents])
+
+  const { data: currentBlock } = useCurrentBlock()
 
   return (
     <VStack w="full" spacing={8} alignItems={"flex-start"}>
@@ -49,7 +44,12 @@ export default function ProposalsPage() {
           </HStack>
           <Text fontSize="md">{proposalsEvents?.created.length} proposals created from the beginning</Text>
         </Box>
-        <CreateProposalButton />
+        <Box>
+          <CreateProposalButton />
+          <Text fontSize="md" textAlign={"center"}>
+            Current block: <b>{currentBlock?.number}</b>
+          </Text>
+        </Box>
       </HStack>
       <Tabs position="relative" variant="unstyled" w="full">
         <TabList>

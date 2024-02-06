@@ -3,6 +3,7 @@ import { useConnex } from "@vechain/dapp-kit-react"
 
 import Contract from "@repo/contracts/artifacts/contracts/VOT3.sol/VOT3.json"
 import { getConfig } from "@repo/config"
+import { FormattingUtils } from "@repo/utils"
 const vot3Abi = Contract.abi
 
 const config = getConfig()
@@ -13,7 +14,14 @@ const VOT3_CONTRACT = config.vot3ContractAddress
  * @param thor  the thor client
  * @returns the votes of the given address
  */
-export const getVotes = async (thor: Connex.Thor, address?: string) => {
+export const getVotes = async (
+  thor: Connex.Thor,
+  address?: string,
+): Promise<{
+  original: string
+  scaled: string
+  formatted: string
+}> => {
   if (!address) throw new Error("address is required")
 
   const getVotesAbi = vot3Abi.find(abi => abi.name === "getVotes")
@@ -22,7 +30,15 @@ export const getVotes = async (thor: Connex.Thor, address?: string) => {
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
-  return res.decoded[0]
+  const original = res.decoded[0]
+  const scaled = FormattingUtils.scaleNumberDown(original, 18)
+  const formatted = scaled === "0" ? "0" : FormattingUtils.humanNumber(scaled)
+
+  return {
+    original,
+    scaled,
+    formatted,
+  }
 }
 
 export const getVotesQueryKey = (address?: string) => ["votes", address]

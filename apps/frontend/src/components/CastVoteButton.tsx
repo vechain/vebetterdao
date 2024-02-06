@@ -1,5 +1,5 @@
 import { Button, useDisclosure } from "@chakra-ui/react"
-import { CreateProposalModal } from "./CreateProposalModal"
+import { CastVoteModal } from "./CastVoteModal"
 
 type Props = {
   proposalId: string
@@ -9,7 +9,7 @@ export const CastVoteButton: React.FC<Props> = ({ proposalId }) => {
 
   return (
     <>
-      {/* <CreateProposalModal isOpen={isOpen} onClose={onClose} /> */}
+      <CastVoteModal isOpen={isOpen} onClose={onClose} proposalId={proposalId} />
       <Button onClick={onOpen}>Cast your vote</Button>
     </>
   )
