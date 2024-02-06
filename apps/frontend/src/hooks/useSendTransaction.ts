@@ -1,4 +1,4 @@
-import { useGetTxReceipt } from "@/api"
+import { useTxReceipt } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { UseMutateFunction, useMutation } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
@@ -131,7 +131,7 @@ export const useSendTransaction = ({
     data: txReceipt,
     isFetching: isTxReceiptLoading,
     error: txReceiptError,
-  } = useGetTxReceipt(sendTransactionTx?.txid)
+  } = useTxReceipt(sendTransactionTx?.txid)
 
   const explainTxRevertReason = async (txReceipt: Connex.Thor.Transaction.Receipt) => {
     if (!txReceipt.reverted) return
