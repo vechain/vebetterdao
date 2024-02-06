@@ -393,21 +393,19 @@ describe("Emissions", () => {
 
     const START_BLOCK = Number(await emissions.START_BLOCK())
 
-    console.log(START_BLOCK)
-
     // Loop through 634 cycles as simulated in the b3tr emissions spreadsheet
     for (let cycle = 0; cycle <= 632; cycle++) {
       // Calculate decayed amounts
-      xAllocationsAmount = await emissions.getXAllocationsAmount(START_BLOCK + cycle * CYCLE_DURATION)
-      vote2EarnAmount = await emissions.getVote2EarnAmount(START_BLOCK + cycle * CYCLE_DURATION)
-      treasuryAmount = await emissions.getTreasuryAmount(START_BLOCK + cycle * CYCLE_DURATION)
+      xAllocationsAmount = await emissions.getXAllocationAmountForCycle(cycle)
+      vote2EarnAmount = await emissions.getVote2EarnAmountForCycle(cycle)
+      treasuryAmount = await emissions.getTreasuryAmountForCycle(cycle)
 
       // Log the cycle and amounts for debugging
       // Uncomment to view the emissions for each cycle
-      console.log(
+      /* console.log(
         `Cycle ${cycle}: XAllocations = ${ethers.formatEther(xAllocationsAmount)}, Vote2Earn = ${ethers.formatEther(vote2EarnAmount)}`,
         `Treasury = ${ethers.formatEther(treasuryAmount)}`,
-      )
+      ) */
 
       // Assert the calculated amounts match the expected amounts from the spreadsheet
       expect(Math.floor(Number(ethers.formatEther(xAllocationsAmount)))).to.equal(
