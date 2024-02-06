@@ -223,6 +223,18 @@ contract Emissions is AccessControl, ReentrancyGuard {
     return preMintAllocations;
   }
 
+  function getXAllocationAmountForCycle(uint256 cycle) public view returns (uint256) {
+    return getXAllocationsAmount(getCycleBlock(cycle));
+  }
+
+  function getVote2EarnAmountForCycle(uint256 cycle) public view returns (uint256) {
+    return getVote2EarnAmount(getCycleBlock(cycle));
+  }
+
+  function getTreasuryAmountForCycle(uint256 cycle) public view returns (uint256) {
+    return getTreasuryAmount(getCycleBlock(cycle));
+  }
+
   function getCycleBlock(uint256 cycle) public view returns (uint256) {
     require(cycle >= 0, "Emissions: Invalid cycle number");
 
