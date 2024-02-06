@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "./x-alloaction-voting-governance/XAllocationVotingGovernor.sol";
-import "./x-alloaction-voting-governance/modules/GovernorXAllocationVotesCounting.sol";
-import "./x-alloaction-voting-governance/modules/GovernorVotes.sol";
-import "./x-alloaction-voting-governance/modules/GovernorVotesQuorumFraction.sol";
-import "./x-alloaction-voting-governance/modules/GovernorSettings.sol";
+import "./x-allocation-voting-governance/XAllocationVotingGovernor.sol";
+import "./x-allocation-voting-governance/modules/GovernorXAllocationVotesCounting.sol";
+import "./x-allocation-voting-governance/modules/GovernorVotes.sol";
+import "./x-allocation-voting-governance/modules/GovernorVotesQuorumFraction.sol";
+import "./x-allocation-voting-governance/modules/GovernorSettings.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract XAllocationVoting is
