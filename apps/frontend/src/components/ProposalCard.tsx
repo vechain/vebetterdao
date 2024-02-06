@@ -178,7 +178,7 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
       <CardFooter>
         <HStack justify={"space-between"} w="full">
           {isStarted ? (
-            <Box>
+            <Box flex={1}>
               <Heading as="h4" size="sm" color="orange">
                 {isEnded ? "Ended" : "Ends"} {estimatedEndTime}
               </Heading>
@@ -187,7 +187,7 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
               </Text>
             </Box>
           ) : (
-            <Box>
+            <Box flex={1}>
               <Heading as="h4" size="sm" color="orange">
                 {"Starts"} {estimatedStartTime}
               </Heading>
