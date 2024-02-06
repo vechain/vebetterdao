@@ -5,6 +5,14 @@ import { IXAllocationPool } from "./interfaces/IXAllocationPool.sol";
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract XAllocationPool is IXAllocationPool, AccessControl {
+  struct App {
+    bytes32 id;
+    address addr;
+    string name;
+    string metadata; //ipfs hash
+    bool appAvailableForAllocationVoting;
+  }
+
   // Mapping from app ID to app
   mapping(bytes32 => App) private apps;
 
@@ -39,7 +47,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
   }
 
   // Function to retrieve an app by ID
-  function getApp(bytes32 id) public view override returns (App memory) {
+  function getApp(bytes32 id) public view virtual returns (App memory) {
     require(apps[id].addr != address(0), "App does not exist");
     return apps[id];
   }
