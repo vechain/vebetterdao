@@ -1,10 +1,10 @@
-import { Button, HStack, HTMLChakraProps, Text, useClipboard, Icon } from "@chakra-ui/react"
+import { Button, HStack, HTMLChakraProps, Text, useClipboard, Icon, ButtonProps } from "@chakra-ui/react"
 import React, { useEffect } from "react"
 import { AddressIcon } from "./AddressIcon"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { FaCheck, FaCopy } from "react-icons/fa6"
 
-interface IAddressButton extends HTMLChakraProps<"button"> {
+interface IAddressButton extends ButtonProps {
   address: string
   showAddressIcon?: boolean
   showCopyIcon?: boolean
