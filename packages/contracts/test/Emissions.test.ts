@@ -474,5 +474,5 @@ describe("Emissions", () => {
 
     // Check supply
     expect(await b3tr.totalSupply()).to.equal(ethers.parseEther("1000000000"))
-  })
+  }).timeout(1000 * 60 * 5) // 5 minutes
 })
