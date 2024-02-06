@@ -116,7 +116,6 @@ contract Emissions is AccessControl, ReentrancyGuard {
     b3tr.mint(treasury, preMintAllocations[2]);
 
     START_BLOCK = block.number;
-    nextCycle = 0;
   }
 
   function distribute() public nonReentrant {
