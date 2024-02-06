@@ -4,9 +4,8 @@ import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
 import { useConnex, useWallet } from "@vechain/dapp-kit-react"
-import { getConfig } from "@repo/config"
 import { governanceAvailableContracts } from "@/constants"
-
+import { ethers } from "ethers"
 type AvailableContractAbis = (typeof governanceAvailableContracts)[number]["abi"]["abi"][number]
 /**
  * Represent a single parameter of the function to call in the smart contract
@@ -91,7 +90,13 @@ export const useCreateProposal = ({
           if (!obj.contractAbi) throw new Error("contractAbi is required")
           result.contractsAbi.push(obj.contractAbi)
           result.contractsAddress.push(obj.contractAddress)
-          result.functionsParams.push(obj.functionParams.map(param => param.value))
+          // parse valeus if needed
+          result.functionsParams.push(
+            obj.functionParams.map(param => {
+              if (param.type === "bytes32") return ethers.encodeBytes32String(param.value)
+              return param.value
+            }),
+          )
           return result
         },
         { contractsAbi: [], contractsAddress: [], functionsParams: [] } as ReducedActions,
