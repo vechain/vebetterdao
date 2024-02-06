@@ -90,7 +90,7 @@ export const useCreateProposal = ({
           if (!obj.contractAbi) throw new Error("contractAbi is required")
           result.contractsAbi.push(obj.contractAbi)
           result.contractsAddress.push(obj.contractAddress)
-          // parse valeus if needed
+          // parse values if needed
           result.functionsParams.push(
             obj.functionParams.map(param => {
               if (param.type === "bytes32") return ethers.encodeBytes32String(param.value)
