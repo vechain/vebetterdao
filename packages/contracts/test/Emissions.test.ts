@@ -1,21 +1,18 @@
 import { describe, it } from "mocha"
 import {
-  CYCLE_DURATION,
   INITIAL_EMISSIONS,
   PRE_MINT_TREASURY_ALLOCATION,
   PRE_MINT_VOTE_2_EARN_ALLOCATION,
   PRE_MINT_X_ALLOCATION,
   catchRevert,
-  getCellsRange,
   getOrDeployContractInstances,
   moveToCycle,
-  readExcel,
   waitForNextCycle,
   waitForBlock,
 } from "./helpers"
 import { expect } from "chai"
 import { ethers, network } from "hardhat"
-import path from "path"
+import b3trAllocations from "./fixture/b3trAllocations.json"
 
 describe("Emissions", () => {
   describe("Contract parameters", () => {
@@ -387,11 +384,6 @@ describe("Emissions", () => {
     // Pre-mint
     await emissions.connect(minterAccount).preMint()
 
-    const sheet = await readExcel(path.resolve(__dirname, "fixture/Emissions.xlsx"))
-    const expectedXAllocationsAmounts = getCellsRange(sheet, "B18:B650")
-    const expectedVote2EarnAmounts = getCellsRange(sheet, "C18:C650")
-    const expectedTreasuryAmounts = getCellsRange(sheet, "E18:E650")
-
     // Variables to hold calculated amounts for assertions
     let xAllocationsAmount = INITIAL_EMISSIONS
     let vote2EarnAmount = INITIAL_EMISSIONS
@@ -413,13 +405,13 @@ describe("Emissions", () => {
 
       // Assert the calculated amounts match the expected amounts from the spreadsheet
       expect(Math.floor(Number(ethers.formatEther(xAllocationsAmount)))).to.equal(
-        Math.floor(Number(expectedXAllocationsAmounts[cycle][0])),
+        Math.floor(Number(b3trAllocations[cycle].xAllocation)),
       )
       expect(Math.floor(Number(ethers.formatEther(vote2EarnAmount)))).to.equal(
-        Math.floor(Number(expectedVote2EarnAmounts[cycle][0])),
+        Math.floor(Number(b3trAllocations[cycle].vote2EarnAllocation)),
       )
       expect(Math.floor(Number(ethers.formatEther(treasuryAmount)))).to.equal(
-        Math.floor(Number(expectedTreasuryAmounts[cycle][0])),
+        Math.floor(Number(b3trAllocations[cycle].treasuryAllocation)),
       )
     }
   })
@@ -472,15 +464,30 @@ describe("Emissions", () => {
     // Move to the 633rd cycle
     await moveToCycle(emissions, minterAccount, 633)
 
-    // Waiting for the 634th cycle (Last cycle)
-    await waitForNextCycle(emissions)
-
-    expect(await emissions.nextCycle()).to.equal(634)
+    expect(await emissions.nextCycle()).to.equal(633)
 
     // Distribute emissions
-    await emissions.connect(minterAccount).distribute()
+    await catchRevert(emissions.connect(minterAccount).distribute()) // Should revert as the supply cap is reached
+
+    // Should be able to call distributeLast()
+    await emissions.connect(minterAccount).distributeLast()
 
     // Check supply
     expect(await b3tr.totalSupply()).to.equal(ethers.parseEther("1000000000"))
   }).timeout(1000 * 60 * 5) // 5 minutes
+
+  it("Should not be able to call the last distribution round if b3tr supply cap is not exceeded by normal distribution", async () => {
+    const { emissions, b3tr, minterAccount, owner } = await getOrDeployContractInstances({
+      forceDeploy: true,
+    })
+
+    // Grant minter role to emissions contract
+    await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+
+    // Pre-mint
+    await emissions.connect(minterAccount).preMint()
+
+    // Distribute last emissions should revert as the b3tr supply cap is not reached
+    await catchRevert(emissions.connect(minterAccount).distributeLast())
+  })
 })
