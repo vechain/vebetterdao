@@ -545,7 +545,7 @@ describe("VOT3", function () {
       expect(await vot3.getVotes(minterAccount)).to.eql(ethers.parseEther("1000"))
     })
 
-    it.only("Self delegation is not happening for the VOT3 contract itself", async function () {
+    it("Self delegation is not happening for the VOT3 contract itself", async function () {
       const { vot3, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
       // enable transferability
       await vot3.connect(owner).setCanTransfer(true)
@@ -559,7 +559,7 @@ describe("VOT3", function () {
       expect(await vot3.getVotes(await vot3.getAddress())).to.eql(ethers.parseEther("0"))
     })
 
-    it.only("Self delegation is not happening if interacting with another contract", async function () {
+    it("Self delegation is not happening if interacting with another contract", async function () {
       const { vot3, owner, otherAccount, b3tr } = await getOrDeployContractInstances({ forceDeploy: true })
       // enable transferability
       await vot3.connect(owner).setCanTransfer(true)

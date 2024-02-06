@@ -344,13 +344,12 @@ describe("Emissions", () => {
         ethers.parseEther("1000000") + PRE_MINT_TREASURY_ALLOCATION,
       )
 
-      // Move to the 11th cycle
-      await moveToCycle(emissions, minterAccount, 11)
-
-      // Waiting for the 12th cycle
-      await waitForNextCycle(emissions)
+      // Move to the 13th cycle
+      await moveToCycle(emissions, minterAccount, 12)
 
       expect(await emissions.nextCycle()).to.equal(12)
+
+      await waitForNextCycle(emissions)
 
       const xAllocationsAmount = await emissions.getCurrentXAllocationsAmount()
       const vote2EarnAmount = await emissions.getCurrentVote2EarnAmount()
