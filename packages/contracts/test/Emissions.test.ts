@@ -391,8 +391,6 @@ describe("Emissions", () => {
     let vote2EarnAmount = INITIAL_EMISSIONS
     let treasuryAmount = (INITIAL_EMISSIONS * BigInt(2)) / BigInt(4)
 
-    const START_BLOCK = Number(await emissions.START_BLOCK())
-
     // Loop through 634 cycles as simulated in the b3tr emissions spreadsheet
     for (let cycle = 0; cycle <= 632; cycle++) {
       // Calculate decayed amounts
