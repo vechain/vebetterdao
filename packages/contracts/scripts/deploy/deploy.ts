@@ -30,6 +30,7 @@ const CYCLE_DURATION = 60480 // 1 Week in blocks
 const DECAY_SETTINGS = [4, 20, 12, 50] // 4% decay for X Allocations, 20% decay for Vote2Earn, every 12 cycles for X Allocations, Every 50 cycles for Vote2Earn
 const INITIAL_EMISSIONS = ethers.parseEther("2000000")
 const TREASURY_PERCENTAGE = 25 // 25%
+const LAST_EMISSIONS = [66, 13] // On the last cycle, 66% of the emissions will be sent to the x allocations address, 13% to the vote 2 earn address
 
 export async function deployAll() {
   console.log(`Deploying contracts on ${network.name}...`)
@@ -151,6 +152,7 @@ async function deployEmissions(b3trAddress: string, destinations: string[], allo
     DECAY_SETTINGS as [number, number, number, number],
     INITIAL_EMISSIONS,
     TREASURY_PERCENTAGE,
+    LAST_EMISSIONS as [number, number],
   )
 
   await contract.waitForDeployment()
