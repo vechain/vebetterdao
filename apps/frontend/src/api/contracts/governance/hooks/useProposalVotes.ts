@@ -3,6 +3,7 @@ import { useConnex } from "@vechain/dapp-kit-react"
 
 import GovernorContract from "@repo/contracts/artifacts/contracts/governance/GovernorContract.sol/GovernorContract.json"
 import { getConfig } from "@repo/config"
+import { FormattingUtils } from "@repo/utils"
 const GOVERNANCE_CONTRACT = getConfig().governorContractAddress
 const governorContractAbi = GovernorContract.abi
 
@@ -15,7 +16,7 @@ type ProposalVotes = {
  * Get the proposal votes from the governor contract (i.e the number of votes for, against and abstain)
  * @param thor  the thor client
  * @param proposalId  the proposal id to get the votes for
- * @returns  the current proposal threshold
+ * @returns  the proposal votes {@link ProposalVotes} with decimals scaled down
  */
 export const getProposalVotes = async (thor: Connex.Thor, proposalId: string): Promise<ProposalVotes> => {
   const proposalVotesAbi = governorContractAbi.find(abi => abi.name === "proposalVotes")
@@ -24,9 +25,9 @@ export const getProposalVotes = async (thor: Connex.Thor, proposalId: string): P
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
   return {
-    againstVotes: res.decoded[0],
-    forVotes: res.decoded[1],
-    abstainVotes: res.decoded[2],
+    againstVotes: FormattingUtils.scaleNumberDown(res.decoded[0], 18),
+    forVotes: FormattingUtils.scaleNumberDown(res.decoded[1], 18),
+    abstainVotes: FormattingUtils.scaleNumberDown(res.decoded[2], 18),
   }
 }
 
