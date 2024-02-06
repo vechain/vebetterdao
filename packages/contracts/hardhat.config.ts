@@ -32,24 +32,29 @@ module.exports = {
       accounts: {
         mnemonic: "denial kitchen pet squirrel other broom bar gas better priority spoil cross",
         count: 10,
+        path: "m/44'/818'/0'/0",
       },
       restful: true,
       gas: 10000000,
+      count: 10,
     },
     vechain_testnet: {
       url: VECHAIN_URL_TESTNET,
       accounts: {
         mnemonic: process.env.MNEMONIC || "",
         count: 10,
+        path: "m/44'/818'/0'/0",
       },
       restful: true,
       gas: 10000000,
+      count: 10,
     },
     vechain_mainnet: {
       url: VECHAIN_URL_MAINNET,
       accounts: {
         mnemonic: process.env.MNEMONIC || "",
         count: 1,
+        path: "m/44'/818'/0'/0",
       },
       restful: true,
       gas: 10000000,
