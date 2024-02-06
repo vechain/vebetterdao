@@ -22,6 +22,7 @@ import { humanAddress } from "@repo/utils/FormattingUtils"
 import { getConfig } from "@repo/config"
 import dayjs from "dayjs"
 import { ethers } from "ethers"
+import { ProposalVotesProgressBar } from "./ProposalVotesProgressBar"
 
 const config = getConfig()
 const blockTime = config.network.blockTime
@@ -195,6 +196,7 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
               </Text>
             </Box>
           )}
+          <ProposalVotesProgressBar proposalId={proposal.proposalId} />
         </HStack>
       </CardFooter>
     </Card>
