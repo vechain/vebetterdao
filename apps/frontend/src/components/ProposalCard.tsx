@@ -1,18 +1,5 @@
 import { ProposalCreatedEvent, ProposalState, useCurrentBlock, useProposalState } from "@/api"
-import {
-  Box,
-  Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
-  Code,
-  HStack,
-  Heading,
-  Spacer,
-  Tag,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Box, Card, CardBody, CardFooter, CardHeader, Code, HStack, Heading, Tag, Text, VStack } from "@chakra-ui/react"
 import { AddressButton } from "./AddressButton"
 import { useMemo } from "react"
 import { governanceAvailableContracts } from "@/constants"
@@ -119,6 +106,8 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
 
     return <Code>{value}</Code>
   }
+
+  console.log({ state })
 
   return (
     <Card flex={1}>
