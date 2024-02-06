@@ -4,7 +4,6 @@ import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethe
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { getOrDeployContractInstances } from "./deploy"
 import { mine } from "@nomicfoundation/hardhat-network-helpers"
-import { BLOCK_INTERVAL } from "./const"
 
 export const waitForNextBlock = async () => {
   if (network.name === "hardhat") {
@@ -107,25 +106,24 @@ export const getVot3Tokens = async (receiver: HardhatEthersSigner, amount: strin
   await vot3.connect(receiver).stake(ethers.parseEther(amount))
 }
 
-export const waitUntilTimestamp = async (timestamp: number) => {
+export const waitForBlock = async (blockNumber: number) => {
   const currentBlock = await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
 
-  if (!currentBlock?.timestamp) throw new Error("Could not get current block timestamp")
+  if (!currentBlock?.number) throw new Error("Could not get current block number")
 
-  if (currentBlock?.timestamp < timestamp) {
+  if (currentBlock?.number < blockNumber) {
     // Get blocks required to wait
-    const blocksToWait = Math.floor((timestamp - currentBlock?.timestamp) / BLOCK_INTERVAL + 1)
+    const blocksToWait = blockNumber - currentBlock?.number
 
-    if (blocksToWait > 0)
-      await moveBlocks(network.name === "hardhat" ? timestamp - currentBlock?.timestamp + 1 : blocksToWait)
+    if (blocksToWait > 0) await moveBlocks(blocksToWait)
   }
 }
 
 export const waitForNextCycle = async (emissions: Emissions) => {
   const nextCycle = await emissions.nextCycle()
-  const timestampNextCycle = await emissions.getTimestampCycleStart(nextCycle)
+  const blockNextCycle = await emissions.getCycleBlock(nextCycle)
 
-  await waitUntilTimestamp(Number(timestampNextCycle))
+  await waitForBlock(Number(blockNextCycle))
 }
 
 export const moveToCycle = async (emissions: Emissions, minter: HardhatEthersSigner, cycles: number) => {

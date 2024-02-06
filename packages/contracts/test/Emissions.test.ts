@@ -11,7 +11,7 @@ import {
   moveToCycle,
   readExcel,
   waitForNextCycle,
-  waitUntilTimestamp,
+  waitForBlock,
 } from "./helpers"
 import { expect } from "chai"
 import { ethers, network } from "hardhat"
@@ -168,12 +168,12 @@ describe("Emissions", () => {
       // Pre-mint
       await emissions.connect(minterAccount).preMint()
 
-      await waitUntilTimestamp(Number(await emissions.START_TIME()) + 1)
+      await waitForBlock(Number(await emissions.START_BLOCK()) + 1)
 
       const currentBlock = await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
 
-      // Expect START_TIME to be less than or equal to current time
-      expect(Number(await emissions.START_TIME())).to.be.lte(currentBlock?.timestamp)
+      // Expect START_BLOCK to be less than or equal to current time
+      expect(Number(await emissions.START_BLOCK())).to.be.lte(currentBlock?.number)
 
       // Expect current cycle to be 0
       expect(await emissions.nextCycle()).to.equal(0)
@@ -219,14 +219,12 @@ describe("Emissions", () => {
       // Pre-mint
       await emissions.connect(minterAccount).preMint()
 
-      await waitUntilTimestamp(Number(await emissions.START_TIME()) + 1)
-
       const currentBlock = await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
 
-      // Expect START_TIME to be less than or equal to current time
-      expect(Number(await emissions.START_TIME())).to.be.lte(currentBlock?.timestamp)
+      // Expect START_BLOCK to be less than or equal to current time
+      expect(Number(await emissions.START_BLOCK())).to.be.lte(currentBlock?.number)
 
-      // Expect current cycle to be 0
+      // Expect next cycle to be 0
       expect(await emissions.nextCycle()).to.equal(0)
 
       // Calculate emissions for first cycle
@@ -256,7 +254,7 @@ describe("Emissions", () => {
       // Pre-mint
       await emissions.connect(minterAccount).preMint()
 
-      await waitUntilTimestamp(Number(await emissions.START_TIME()) + 1)
+      await waitForBlock(Number(await emissions.START_BLOCK()) + 1)
 
       // Distribute emissions
       await emissions.connect(minterAccount).distribute()
@@ -321,7 +319,7 @@ describe("Emissions", () => {
       // Pre-mint
       await emissions.connect(minterAccount).preMint()
 
-      await waitUntilTimestamp(Number(await emissions.START_TIME()) + 1)
+      await waitForBlock(Number(await emissions.START_BLOCK()) + 1)
 
       // Distribute emissions
       await emissions.connect(minterAccount).distribute()
@@ -373,9 +371,15 @@ describe("Emissions", () => {
 
   // 634 cycles is the amount of cycles simulated in spreadsheet
   it("Should calculate decay amounts correctly over 634 cycles", async () => {
-    const { emissions } = await getOrDeployContractInstances({
+    const { emissions, owner, minterAccount, b3tr } = await getOrDeployContractInstances({
       forceDeploy: true,
     })
+
+    // Grant minter role to emissions contract
+    await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+
+    // Pre-mint
+    await emissions.connect(minterAccount).preMint()
 
     const sheet = await readExcel(path.resolve(__dirname, "fixture/Emissions.xlsx"))
     const expectedXAllocationsAmounts = getCellsRange(sheet, "B18:B650")
@@ -387,21 +391,23 @@ describe("Emissions", () => {
     let vote2EarnAmount = INITIAL_EMISSIONS
     let treasuryAmount = (INITIAL_EMISSIONS * BigInt(2)) / BigInt(4)
 
-    const START_TIME = Number(await emissions.START_TIME())
+    const START_BLOCK = Number(await emissions.START_BLOCK())
+
+    console.log(START_BLOCK)
 
     // Loop through 634 cycles as simulated in the b3tr emissions spreadsheet
     for (let cycle = 0; cycle <= 632; cycle++) {
       // Calculate decayed amounts
-      xAllocationsAmount = await emissions.getXAllocationsAmount(START_TIME + cycle * CYCLE_DURATION)
-      vote2EarnAmount = await emissions.getVote2EarnAmount(START_TIME + cycle * CYCLE_DURATION)
-      treasuryAmount = await emissions.getTreasuryAmount(START_TIME + cycle * CYCLE_DURATION)
+      xAllocationsAmount = await emissions.getXAllocationsAmount(START_BLOCK + cycle * CYCLE_DURATION)
+      vote2EarnAmount = await emissions.getVote2EarnAmount(START_BLOCK + cycle * CYCLE_DURATION)
+      treasuryAmount = await emissions.getTreasuryAmount(START_BLOCK + cycle * CYCLE_DURATION)
 
       // Log the cycle and amounts for debugging
       // Uncomment to view the emissions for each cycle
-      /* console.log(
+      console.log(
         `Cycle ${cycle}: XAllocations = ${ethers.formatEther(xAllocationsAmount)}, Vote2Earn = ${ethers.formatEther(vote2EarnAmount)}`,
         `Treasury = ${ethers.formatEther(treasuryAmount)}`,
-      ) */
+      )
 
       // Assert the calculated amounts match the expected amounts from the spreadsheet
       expect(Math.floor(Number(ethers.formatEther(xAllocationsAmount)))).to.equal(
@@ -439,7 +445,7 @@ describe("Emissions", () => {
     // Pre-mint
     await emissions.connect(minterAccount).preMint()
 
-    await waitUntilTimestamp(Number(await emissions.START_TIME()) + 1)
+    await waitForBlock(Number(await emissions.START_BLOCK()) + 1)
 
     // Distribute emissions
     await emissions.connect(minterAccount).distribute()
