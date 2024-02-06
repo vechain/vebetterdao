@@ -117,7 +117,7 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
     if (deadline >= currentTimepoint) {
       return AllocationProposalState.Active;
     } else if (!_voteSucceeded(proposalId)) {
-      return AllocationProposalState.Defeated;
+      return AllocationProposalState.Failed;
     } else {
       return AllocationProposalState.Succeeded;
     }
@@ -180,7 +180,7 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
     if (_proposalCount > 0) {
       AllocationProposalState currentState = state(_proposalCount);
       require(
-        currentState == AllocationProposalState.Succeeded || currentState == AllocationProposalState.Defeated,
+        currentState == AllocationProposalState.Succeeded || currentState == AllocationProposalState.Failed,
         "Governor: there can be only one proposal per time"
       );
     }
@@ -253,7 +253,7 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
    * 0x000...10000
    *   ^^^^^^------ ...
    *         ^----- Succeeded
-   *          ^---- Defeated
+   *          ^---- Failed
    *           ^--- Active
    *            ^-- Pending
    */

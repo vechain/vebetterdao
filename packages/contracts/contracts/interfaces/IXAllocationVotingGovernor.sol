@@ -24,7 +24,7 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   enum AllocationProposalState {
     Pending,
     Active,
-    Defeated,
+    Failed,
     Succeeded
   }
 
