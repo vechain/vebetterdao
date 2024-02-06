@@ -240,6 +240,10 @@ contract Emissions is AccessControl, ReentrancyGuard {
     return START_BLOCK + cycle * cycleDuration;
   }
 
+  function isCycleDistributed(uint256 cycle) public view returns (bool) {
+    return cycle < nextCycle;
+  }
+
   // ----------- Setters ----------- //
 
   function setPreMintAllocations(uint256[] memory _allocations) public onlyRole(DEFAULT_ADMIN_ROLE) {
