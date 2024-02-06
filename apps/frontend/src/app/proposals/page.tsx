@@ -60,20 +60,47 @@ export default function ProposalsPage() {
         <TabIndicator mt="-1.5px" height="2px" bg="blue.500" borderRadius="1px" />
         <TabPanels>
           <TabPanel>
-            <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6}>
-              {activeProposals?.map(proposal => <ProposalCard proposal={proposal} key={proposal.proposalId} />)}
-            </Grid>
+            {!activeProposals?.length ? (
+              <Box>
+                <Heading textAlign={"center"} mt={16}>
+                  No active proposals
+                </Heading>
+                <Text textAlign={"center"}>Create a proposal to get started</Text>
+              </Box>
+            ) : (
+              <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
+                {activeProposals?.map(proposal => <ProposalCard proposal={proposal} key={proposal.proposalId} />)}
+              </Grid>
+            )}
           </TabPanel>
           <TabPanel>
-            <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6}>
-              {incomingProposals?.map(proposal => <ProposalCard proposal={proposal} key={proposal.proposalId} />)}
-            </Grid>
+            {!incomingProposals?.length ? (
+              <Box>
+                <Heading textAlign={"center"} mt={16}>
+                  No incoming proposals
+                </Heading>
+                <Text textAlign={"center"}>Incoming proposals are proposals that are not yet active</Text>
+              </Box>
+            ) : (
+              <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
+                {incomingProposals?.map(proposal => <ProposalCard proposal={proposal} key={proposal.proposalId} />)}
+              </Grid>
+            )}
           </TabPanel>
 
           <TabPanel>
-            <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6}>
-              {pastProposals?.map(proposal => <ProposalCard proposal={proposal} key={proposal.proposalId} />)}
-            </Grid>
+            {!pastProposals?.length ? (
+              <Box>
+                <Heading textAlign={"center"} mt={16}>
+                  No past proposals
+                </Heading>
+                <Text textAlign={"center"}>Past proposals are proposals that have been completed</Text>
+              </Box>
+            ) : (
+              <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
+                {pastProposals?.map(proposal => <ProposalCard proposal={proposal} key={proposal.proposalId} />)}
+              </Grid>
+            )}
           </TabPanel>
         </TabPanels>
       </Tabs>
