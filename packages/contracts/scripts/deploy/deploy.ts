@@ -26,7 +26,7 @@ const PRE_MINT_X_ALLOCATION = ethers.parseEther("1000000")
 const PRE_MINT_VOTE_2_EARN_ALLOCATION = ethers.parseEther("1000000")
 const PRE_MINT_TREASURY_ALLOCATION = ethers.parseEther("1750000")
 
-const CYCLE_DURATION = 60 * 60 * 24 * 7 // 1 week
+const CYCLE_DURATION = 60480 // 1 Week in blocks
 const DECAY_SETTINGS = [4, 20, 12, 50] // 4% decay for X Allocations, 20% decay for Vote2Earn, every 12 cycles for X Allocations, Every 50 cycles for Vote2Earn
 const INITIAL_EMISSIONS = ethers.parseEther("2000000")
 const TREASURY_PERCENTAGE = 25 // 25%
