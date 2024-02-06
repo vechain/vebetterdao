@@ -1,7 +1,16 @@
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { ContractFactory, ContractTransactionResponse } from "ethers"
 import { ethers } from "hardhat"
-import { B3TR, GovernorContract, TimeLock, VOT3, B3TRBadge, Emissions } from "../../typechain-types"
+import {
+  B3TR,
+  GovernorContract,
+  TimeLock,
+  VOT3,
+  B3TRBadge,
+  Emissions,
+  XAllocationVoting,
+  XAllocationPool,
+} from "../../typechain-types"
 
 interface DeployInstance {
   B3trContract: ContractFactory
@@ -10,6 +19,8 @@ interface DeployInstance {
   timeLock: TimeLock & { deploymentTransaction(): ContractTransactionResponse }
   governor: GovernorContract & { deploymentTransaction(): ContractTransactionResponse }
   b3trBadge: B3TRBadge & { deploymentTransaction(): ContractTransactionResponse }
+  xAllocationVoting: XAllocationVoting & { deploymentTransaction(): ContractTransactionResponse }
+  xAllocationPool: XAllocationPool & { deploymentTransaction(): ContractTransactionResponse }
   emissions: Emissions & { deploymentTransaction(): ContractTransactionResponse }
   owner: HardhatEthersSigner
   otherAccount: HardhatEthersSigner
@@ -88,10 +99,28 @@ export const getOrDeployContractInstances = async ({
   await timeLock.connect(timelockAdmin).grantRole(EXECUTOR_ROLE, await governor.getAddress())
   await timeLock.connect(timelockAdmin).grantRole(CANCELLER_ROLE, await governor.getAddress())
 
+  // Deploy NFTBadge
   const NFTBadgeContract = await ethers.getContractFactory("B3TRBadge")
   const b3trBadge = await NFTBadgeContract.deploy(NFT_BADGE_NAME, NFT_BADGE_SYMBOL, owner, maxMintableLevel)
-
   await b3trBadge.waitForDeployment()
+
+  // Deploy XAllocationPool
+  const XAllocationPoolContract = await ethers.getContractFactory("XAllocationPool")
+  const xAllocationPool = await XAllocationPoolContract.deploy([await timeLock.getAddress(), owner.address])
+  await xAllocationPool.waitForDeployment()
+
+  // Deploy XAllocationVoting
+  const XAllocationVotingContract = await ethers.getContractFactory("XAllocationVoting")
+  const xAllocationVoting = await XAllocationVotingContract.deploy(
+    await vot3.getAddress(),
+    4, // quroum percentage
+    votingPeriod, // voting period
+    0, // voting delay
+    await timeLock.getAddress(),
+    await xAllocationPool.getAddress(),
+    [await timeLock.getAddress(), owner.address],
+  )
+  await xAllocationVoting.waitForDeployment()
 
   const X_ALLOCATIONS_ADDRESS = otherAccounts[0].address
   const VOTE_2_EARN_ADDRESS = otherAccounts[1].address
@@ -120,6 +149,8 @@ export const getOrDeployContractInstances = async ({
     timeLock,
     governor,
     b3trBadge,
+    xAllocationVoting,
+    xAllocationPool,
     emissions,
     owner,
     otherAccount,
