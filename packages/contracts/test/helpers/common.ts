@@ -1,5 +1,5 @@
 import { ethers, network } from "hardhat"
-import { Emissions, GovernorContract } from "../../typechain-types"
+import { B3TR, Emissions, GovernorContract } from "../../typechain-types"
 import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { getOrDeployContractInstances } from "./deploy"
@@ -126,8 +126,9 @@ export const waitForNextCycle = async (emissions: Emissions) => {
   await waitForBlock(Number(blockNextCycle))
 }
 
-export const moveToCycle = async (emissions: Emissions, minter: HardhatEthersSigner, cycles: number) => {
-  for (let i = 0; i < cycles; i++) {
+export const moveToCycle = async (emissions: Emissions, minter: HardhatEthersSigner, cycle: number) => {
+  const cycleToBeDistributed = await emissions.nextCycle()
+  for (let i = 0; i < BigInt(cycle) - cycleToBeDistributed; i++) {
     await waitForNextCycle(emissions)
     await emissions.connect(minter).distribute()
   }
