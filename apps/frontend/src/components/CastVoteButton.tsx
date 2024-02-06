@@ -14,8 +14,6 @@ export const CastVoteButton: React.FC<Props> = ({ proposalId }) => {
 
   const { data: hasVoted } = useHasVoted(proposalId, account ?? undefined)
 
-  console.log({ hasVoted })
-
   const isDisabled = state !== 1 || hasVoted
 
   return (

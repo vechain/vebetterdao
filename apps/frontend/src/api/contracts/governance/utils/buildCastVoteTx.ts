@@ -25,7 +25,7 @@ export const buildCastVoteTx = (
 ): Connex.Vendor.TxMessage[0] => {
   let functionAbi
   let clause
-  if (!reason) {
+  if (!reason || reason === "") {
     functionAbi = governorAbi.find(e => e.name === "castVote")
     if (!functionAbi) throw new Error("Function abi not found for castVote")
     clause = thor.account(GOVERNOR_CONTRACT).method(functionAbi).asClause(proposalId, vote)
