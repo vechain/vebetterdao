@@ -28,6 +28,7 @@ export const generateMockLocalConfig = () => {
         "http://localhost:8669"
       ],
       "explorerUrl": "https://explore-testnet.vechain.org",
+      "blockTime": 1000 * 10,
       "genesis": {
         "number": 0,
         "id": "0x00000000c05a20fbca2bf6ae3affba6af4a74b800b585bf7a4988aba7aea69f6",
