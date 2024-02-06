@@ -544,5 +544,33 @@ describe("VOT3", function () {
       expect(await vot3.balanceOf(minterAccount)).to.eql(ethers.parseEther("0"))
       expect(await vot3.getVotes(minterAccount)).to.eql(ethers.parseEther("1000"))
     })
+
+    it.only("Self delegation is not happening for the VOT3 contract itself", async function () {
+      const { vot3, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
+      // enable transferability
+      await vot3.connect(owner).setCanTransfer(true)
+
+      // Mint some B3TR and swap for VOT3
+      await getVot3Tokens(otherAccount, "1000")
+
+      // delegate to another user
+      await vot3.connect(otherAccount).unstake(ethers.parseEther("1000"), { gasLimit: 10_000_000 })
+
+      expect(await vot3.getVotes(await vot3.getAddress())).to.eql(ethers.parseEther("0"))
+    })
+
+    it.only("Self delegation is not happening if interacting with another contract", async function () {
+      const { vot3, owner, otherAccount, b3tr } = await getOrDeployContractInstances({ forceDeploy: true })
+      // enable transferability
+      await vot3.connect(owner).setCanTransfer(true)
+
+      // Mint some B3TR and swap for VOT3
+      await getVot3Tokens(otherAccount, "1000")
+
+      await vot3
+        .connect(otherAccount)
+        .transfer(await b3tr.getAddress(), ethers.parseEther("1"), { gasLimit: 10_000_000 })
+      expect(await vot3.getVotes(await b3tr.getAddress())).to.eql(ethers.parseEther("0"))
+    })
   })
 })

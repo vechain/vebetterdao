@@ -58,12 +58,24 @@ contract VOT3 is ERC20, ERC20Permit, ERC20Votes, AccessControl {
     return super.transferFrom(from, to, value);
   }
 
+  /**
+   * @param _addr The address to check
+   * @return isContract Whether the address is a contract
+   */
+  function isContract(address _addr) private view returns (bool) {
+    uint32 size;
+    assembly {
+      size := extcodesize(_addr)
+    }
+    return (size > 0);
+  }
+
   // Overrides required by Solidity
   function _update(address from, address to, uint256 amount) internal override(ERC20, ERC20Votes) {
     super._update(from, to, amount);
 
     // self-delegate if the user is neither unstaking nor has delegated previously nor burning tokens
-    if (to != address(0) && to != address(this) && delegates(to) == address(0)) {
+    if (to != address(0) && !isContract(to) && delegates(to) == address(0)) {
       _delegate(to, to);
     }
   }
