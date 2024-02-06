@@ -14,7 +14,7 @@ export const CastVoteButton: React.FC<Props> = ({ proposalId }) => {
 
   const { data: hasVoted } = useHasVoted(proposalId, account ?? undefined)
 
-  const isDisabled = state !== 1 || hasVoted
+  const isDisabled = !account || state !== 1 || hasVoted
 
   return (
     <>
