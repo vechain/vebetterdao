@@ -10,7 +10,7 @@
     "compile": "npx hardhat compile",
     "deploy": "npx hardhat run scripts/deploy",
     "check-contracts-deployment": "npx hardhat run scripts/checkContractsDeployment.ts",
-    "generate-b3tr-tokenomics": "npx hardhat run scripts/generateB3trTokenomics.ts",
+    "generate-b3tr-tokenomics": "npx hardhat run scripts/generateB3trAllocations.ts",
     "start-solo": "docker compose up -d",
     "stop-solo": "docker compose down",
     "clean": "rm -rf dist artifacts node_modules",
