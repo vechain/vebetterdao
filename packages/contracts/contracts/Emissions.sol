@@ -39,6 +39,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
   // ----------- Emissions ----------- //
   uint256 public initialEmissions; // Initial emissions for xAllocations & vote2Earn
   uint256 public treasuryPercentage; // Percentage of total allocation for treasury (in percentage)
+  uint256[] public lastEmissions; // Last emissions for xAllocations & vote2Earn
 
   // ----------- Scaling ----------- //
   uint256 public scalingFactor = 1e6;
@@ -52,7 +53,8 @@ contract Emissions is AccessControl, ReentrancyGuard {
     uint256 _cycleDuration,
     uint256[4] memory _decaySettings,
     uint256 _initialEmissions,
-    uint256 _treasuryPercentage
+    uint256 _treasuryPercentage,
+    uint256[2] memory _lastEmissions
   ) {
     // Assertions
     require(_destinations.length == 3, "Emissions: Invalid destinations input length. Expected 3.");
@@ -74,6 +76,10 @@ contract Emissions is AccessControl, ReentrancyGuard {
     require(_decaySettings[1] > 0 && _decaySettings[1] < 100, "Emissions: vote2Earn decay must be between 0 and 100");
     require(_decaySettings[2] > 0, "Emissions: xAllocations decay delay must be greater than 0");
     require(_decaySettings[3] > 0, "Emissions: vote2Earn decay delay must be greater than 0");
+    require(
+      _lastEmissions[0] + _lastEmissions[1] > 0 && _lastEmissions[0] + _lastEmissions[1] < 100,
+      "Emissions: Last emissions for x allocations and vote2Earn must be between 0 and 100"
+    );
 
     // Set B3TR token contract
     b3tr = IB3TR(b3trAddress);
@@ -101,6 +107,9 @@ contract Emissions is AccessControl, ReentrancyGuard {
     // Set treasury percentage
     treasuryPercentage = _treasuryPercentage;
 
+    // Set last emissions
+    lastEmissions = _lastEmissions;
+
     // Set roles
     _grantRole(DEFAULT_ADMIN_ROLE, admin);
     _grantRole(MINTER_ROLE, minter);
@@ -127,27 +136,31 @@ contract Emissions is AccessControl, ReentrancyGuard {
     uint256 vote2EarnAmount = getCurrentVote2EarnAmount();
     uint256 treasuryAmount = getCurrentTreasuryAmount();
 
+    // Check if emissions exceed B3TR cap. distributeLast should be used in this case
     uint256 remainingEmissions = b3tr.cap() - b3tr.totalSupply();
+    require(xAllocationsAmount + vote2EarnAmount + treasuryAmount <= remainingEmissions, "Emissions: Exceeds B3TR cap");
 
-    if (xAllocationsAmount + vote2EarnAmount + treasuryAmount <= remainingEmissions) {
-      b3tr.mint(xAllocations, xAllocationsAmount);
-      b3tr.mint(vote2Earn, vote2EarnAmount);
-      b3tr.mint(treasury, treasuryAmount);
-    }
-    else {
-      distributeLast();
-    }
+    b3tr.mint(xAllocations, xAllocationsAmount);
+    b3tr.mint(vote2Earn, vote2EarnAmount);
+    b3tr.mint(treasury, treasuryAmount);
 
     nextCycle++;
   }
 
-  function distributeLast() internal {
+  function distributeLast() public nonReentrant {
+    require(START_BLOCK > 0, "Emissions: Pre-mint not done");
+
     uint256 remainingEmissions = b3tr.cap() - b3tr.totalSupply();
 
-    uint256 xAllocationAmount = getDecayedAmount(remainingEmissions, 66, 1); // 66% decay for xAllocations in the last cycle
-    uint256 vote2EarnAmount = getDecayedAmount(remainingEmissions - xAllocationAmount, 13, 1); // 13% decay for vote2Earn in the last cycle
+    require(
+      getCurrentXAllocationsAmount() + getCurrentVote2EarnAmount() + getCurrentTreasuryAmount() > remainingEmissions,
+      "Emissions: Emissions don't exceed B3TR cap. You should use `distribute` instead."
+    );
 
-    b3tr.mint(xAllocations, xAllocationAmount); 
+    uint256 xAllocationAmount = getDecayedAmount(remainingEmissions, lastEmissions[0], 1); 
+    uint256 vote2EarnAmount = getDecayedAmount(remainingEmissions - xAllocationAmount, lastEmissions[1], 1); 
+
+    b3tr.mint(xAllocations, xAllocationAmount);
     b3tr.mint(vote2Earn, vote2EarnAmount);
     b3tr.mint(treasury, remainingEmissions - xAllocationAmount - vote2EarnAmount);
   }
@@ -306,7 +319,20 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   function setMaxVote2EarnDecay(uint256 _maxVote2EarnDecay) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(_maxVote2EarnDecay >= 0 && _maxVote2EarnDecay <= 100, "Emissions: Max vote2Earn decay must be between 0 and 100");
+    require(
+      _maxVote2EarnDecay >= 0 && _maxVote2EarnDecay <= 100,
+      "Emissions: Max vote2Earn decay must be between 0 and 100"
+    );
     maxVote2EarnDecay = _maxVote2EarnDecay;
+  }
+
+  function setLastEmissions(uint256[] memory _lastEmissions) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(_lastEmissions.length == 2, "Emissions: Invalid input length. Expected 2.");
+    require(
+      _lastEmissions[0] + _lastEmissions[1] > 0 && _lastEmissions[0] + _lastEmissions[1] < 100,
+      "Emissions: Last emissions for x allocations and vote2Earn must be between 0 and 100"
+    );
+
+    lastEmissions = _lastEmissions;
   }
 }
