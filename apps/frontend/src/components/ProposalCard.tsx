@@ -21,6 +21,7 @@ import { AddressUtils, ContractUtils, FormattingUtils } from "@repo/utils"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { getConfig } from "@repo/config"
 import dayjs from "dayjs"
+import { ethers } from "ethers"
 
 const config = getConfig()
 const blockTime = config.network.blockTime
@@ -112,6 +113,7 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
           <AddressButton address={value} buttonSize="sm" addressFontSize="sm" variant="ghost" showAddressIcon={false} />
         </Code>
       )
+    if (input.type === "bytes32") return <Code>{ethers.decodeBytes32String(value)}</Code>
 
     return <Code>{value}</Code>
   }
