@@ -259,6 +259,8 @@ describe("Emissions", () => {
       // Distribute emissions
       await emissions.connect(minterAccount).distribute()
 
+      expect(await emissions.isCycleDistributed(0)).to.equal(true)
+
       // Check supply
       expect(await b3tr.totalSupply()).to.equal(
         ethers.parseEther("5000000") +
@@ -290,6 +292,8 @@ describe("Emissions", () => {
       // Distribute emissions
       await emissions.connect(minterAccount).distribute()
 
+      expect(await emissions.isCycleDistributed(1)).to.equal(true)
+
       // Check supply
       expect(await b3tr.totalSupply()).to.equal(
         ethers.parseEther("10000000") +
@@ -306,6 +310,8 @@ describe("Emissions", () => {
       expect(await b3tr.balanceOf(await emissions.treasury())).to.equal(
         ethers.parseEther("2000000") + PRE_MINT_TREASURY_ALLOCATION,
       )
+
+      expect(await emissions.nextCycle()).to.equal(2)
     })
 
     it("Should calculate emissions properly after first decay period", async () => {
