@@ -1,10 +1,11 @@
 import { ethers, network } from "hardhat"
-import { B3TR, GovernorContract, TimeLock, VOT3 } from "../../typechain-types"
+import { B3TR, GovernorContract, TimeLock, VOT3, XAllocationPool } from "../../typechain-types"
 
 const DEFAULT_MINTER = "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68" //2nd account from mnemonic of solo network
 const TIMELOCK_ADMIN = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa" //1st account from mnemonic of solo network
 const ADDRESS_ZERO = "0x0000000000000000000000000000000000000000"
 const NFT_BADGE_ADMIN = "0x0f872421dc479f3c11edd89512731814d0598db5" //3rd account from mnemonic of solo network
+const XPOOL_ADMIN = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa" //1st account from mnemonic of solo network
 
 // Governor Values
 const QUORUM_PERCENTAGE = 4 // 4 -> Need 4% of voters to pass
@@ -36,6 +37,12 @@ export async function deployAll() {
   await timelock.grantRole(EXECUTOR_ROLE, await governor.getAddress())
   await timelock.grantRole(CANCELLER_ROLE, await governor.getAddress())
 
+  // Deploy XAllocationPool
+  const xAllocationPool = await deployXAllocationPool(timelock, XPOOL_ADMIN)
+
+  // Deploy XAllocationVoting
+  const xAllocationVoting = await deployXAllocationVoting(timelock, xAllocationPool, vot3, XPOOL_ADMIN)
+
   // Deploy the NFT Badge contract with Max Mintable Level 1
   const badge = await deployNFTBadge(1)
 
@@ -45,6 +52,8 @@ export async function deployAll() {
     b3trAddress: await b3tr.getAddress(),
     vot3Address: await vot3.getAddress(),
     badgeAddress: await badge.getAddress(),
+    xAllocationPoolAddress: await xAllocationPool.getAddress(),
+    xAllocationVotingAddress: await xAllocationVoting.getAddress(),
   }
 
   // close the script
@@ -113,6 +122,43 @@ async function deployNFTBadge(mintableLevelFromDeploy: number) {
   await contract.waitForDeployment()
 
   console.log(`NFTBadge contract deployed at address ${await contract.getAddress()}`)
+
+  return contract
+}
+
+async function deployXAllocationPool(timeLock: TimeLock, adminAddress: string) {
+  console.log(`Deploying XAllocationPool contract`)
+  const XAllocationPoolContract = await ethers.getContractFactory("XAllocationPool")
+  const contract = await XAllocationPoolContract.deploy([await timeLock.getAddress(), adminAddress])
+
+  await contract.waitForDeployment()
+
+  console.log(`XAllocationPool contract deployed at address ${await contract.getAddress()}`)
+
+  return contract
+}
+
+async function deployXAllocationVoting(
+  timeLock: TimeLock,
+  xAllocationPool: XAllocationPool,
+  vot3: VOT3,
+  adminAddress: string,
+) {
+  console.log(`Deploying XAllocationVoting contract`)
+  const XAllocationVotingContract = await ethers.getContractFactory("XAllocationVoting")
+  const contract = await XAllocationVotingContract.deploy(
+    await vot3.getAddress(),
+    QUORUM_PERCENTAGE,
+    VOTING_PERIOD,
+    0, // voting delay
+    await timeLock.getAddress(),
+    await xAllocationPool.getAddress(),
+    [await timeLock.getAddress(), adminAddress],
+  )
+
+  await contract.waitForDeployment()
+
+  console.log(`XAllocationVoting contract deployed at address ${await contract.getAddress()}`)
 
   return contract
 }

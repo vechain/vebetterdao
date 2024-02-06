@@ -1,5 +1,5 @@
 import { ethers, network } from "hardhat"
-import { GovernorContract } from "../../typechain-types"
+import { GovernorContract, XAllocationPool, XAllocationVoting } from "../../typechain-types"
 import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { getOrDeployContractInstances } from "./deploy"
@@ -52,7 +52,9 @@ export const createProposal = async (
   const address = await contractToCall.getAddress()
   const encodedFunctionCall = ContractFactory.interface.encodeFunctionData(functionTocall, values)
 
-  const tx = await governor.connect(proposer).propose([address], [0], [encodedFunctionCall], description)
+  const tx = await governor
+    .connect(proposer)
+    .propose([address], [0], [encodedFunctionCall], description, { gasLimit: 10_000_000 })
 
   return tx
 }
@@ -68,7 +70,7 @@ export const getProposalIdFromTx = async (tx: ContractTransactionResponse, gover
   return decodedLogs?.args[0]
 }
 
-export const waitForVotingPeriodToEnd = async (proposalId: number, governor: GovernorContract) => {
+export const waitForVotingPeriodToEnd = async (proposalId: number, governor: GovernorContract | XAllocationVoting) => {
   const deadline = await governor.proposalDeadline(proposalId)
   // console.log(`Waiting for proposal ${proposalId} to end at block ${deadline}`);
 
@@ -78,7 +80,10 @@ export const waitForVotingPeriodToEnd = async (proposalId: number, governor: Gov
   await moveBlocks(parseInt((deadline - currentBlock + BigInt(1)).toString()))
 }
 
-export const waitForProposalToBeActive = async (proposalId: number, governor: GovernorContract): Promise<bigint> => {
+export const waitForProposalToBeActive = async (
+  proposalId: number,
+  governor: GovernorContract | XAllocationVoting,
+): Promise<bigint> => {
   let proposalState = await governor.state(proposalId) // proposal id of the proposal in the beforeAll step
 
   if (proposalState.toString() !== "1") {
@@ -97,7 +102,7 @@ export const waitForProposalToBeActive = async (proposalId: number, governor: Go
 
 // Mint some B3TR and swap for VOT3
 export const getVot3Tokens = async (receiver: HardhatEthersSigner, amount: string) => {
-  const { b3tr, vot3, minterAccount } = await getOrDeployContractInstances(false)
+  const { b3tr, vot3, minterAccount } = await getOrDeployContractInstances({ forceDeploy: false })
 
   // Mint some B3TR
   await b3tr.connect(minterAccount).mint(receiver, ethers.parseEther(amount))
@@ -107,4 +112,74 @@ export const getVot3Tokens = async (receiver: HardhatEthersSigner, amount: strin
 
   // Lock B3TR to get VOT3
   await vot3.connect(receiver).stake(ethers.parseEther(amount))
+}
+
+export const createProposalAndExecuteIt = async (
+  proposer: HardhatEthersSigner,
+  voter: HardhatEthersSigner,
+  governor: GovernorContract,
+  contractToCall: BaseContract,
+  Contract: ContractFactory,
+  description: string,
+  functionToCall: string,
+  args: any[] = [],
+) => {
+  // load votes
+  // console.log("Loading votes");
+  await getVot3Tokens(voter, "1000")
+  await waitForNextBlock()
+
+  // create a new proposal
+  // console.log("Creating proposal");
+  const tx = await createProposal(governor, contractToCall, Contract, proposer, description, functionToCall, args)
+  const proposalId = await getProposalIdFromTx(tx, governor)
+
+  // wait
+  // console.log("Waiting for voting period to start");
+  await waitForProposalToBeActive(proposalId, governor)
+
+  // vote
+  // console.log("Voting");
+  await governor.connect(voter).castVote(proposalId, 1, { gasLimit: 10_000_000 }) // vote for
+
+  // wait
+  // console.log("Waiting for voting period to end");
+  await waitForVotingPeriodToEnd(proposalId, governor)
+
+  // queue it
+  // console.log("Queueing");
+  const encodedFunctionCall = Contract.interface.encodeFunctionData(functionToCall, args)
+  const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
+  await governor.queue([await contractToCall.getAddress()], [0], [encodedFunctionCall], descriptionHash, {
+    gasLimit: 10_000_000,
+  })
+  await waitForNextBlock()
+
+  // execute it
+  // console.log("Executing");
+  await governor.execute([await contractToCall.getAddress()], [0], [encodedFunctionCall], descriptionHash, {
+    gasLimit: 10_000_000,
+  })
+}
+
+export const addAppThroughGovernance = async (
+  proposer: HardhatEthersSigner,
+  voter: HardhatEthersSigner,
+  governor: GovernorContract,
+  xAllocationPool: XAllocationPool,
+  appName: string = "Bike 4 Life" + Math.random(),
+  appAddress: string,
+  appMetadata: string = "",
+  availableForAllocationVoting: boolean = true,
+) => {
+  await createProposalAndExecuteIt(
+    proposer,
+    voter,
+    governor,
+    xAllocationPool,
+    await ethers.getContractFactory("XAllocationPool"),
+    "Add app to the list",
+    "addApp",
+    [appAddress, appName, appMetadata, availableForAllocationVoting],
+  )
 }
