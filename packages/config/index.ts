@@ -6,6 +6,8 @@ export type Config = {
   vot3ContractAddress: string
   governorContractAddress: string
   timelockContractAddress: string
+  xAllocationPoolContractAddress: string
+  xAllocationVotingContractAddress: string
   nodeUrl: string
   network: Network
 }
