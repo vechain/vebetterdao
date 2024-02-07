@@ -18,6 +18,21 @@ const PROPOSAL_THRESHOLD = 1 // How many votes are needed to create a proposal
 const name = "B3TR Badge"
 const symbol = "B3TR"
 
+// Emissions Values
+const X_ALLOCATIONS_ADDRESS = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa" //1st account from mnemonic of solo network
+const VOTE_2_EARN_ADDRESS = "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68" //2nd account from mnemonic of solo network
+const TREASURY_ADDRESS = "0x0f872421dc479f3c11edd89512731814d0598db5" //3rd account from mnemonic of solo network
+
+const PRE_MINT_X_ALLOCATION = ethers.parseEther("1000000")
+const PRE_MINT_VOTE_2_EARN_ALLOCATION = ethers.parseEther("1000000")
+const PRE_MINT_TREASURY_ALLOCATION = ethers.parseEther("1750000")
+
+const CYCLE_DURATION = 60480 // 1 Week in blocks
+const DECAY_SETTINGS = [4, 20, 12, 50] // 4% decay for X Allocations, 20% decay for Vote2Earn, every 12 cycles for X Allocations, Every 50 cycles for Vote2Earn
+const INITIAL_EMISSIONS = ethers.parseEther("2000000")
+const TREASURY_PERCENTAGE = 25 // 25%
+const LAST_EMISSIONS = [66, 13] // On the last cycle, 66% of the emissions will be sent to the x allocations address, 13% to the vote 2 earn address
+
 export async function deployAll() {
   console.log(`Deploying contracts on ${network.name}...`)
 
@@ -46,6 +61,12 @@ export async function deployAll() {
   // Deploy the NFT Badge contract with Max Mintable Level 1
   const badge = await deployNFTBadge(1)
 
+  const emissions = await deployEmissions(
+    await b3tr.getAddress(),
+    [X_ALLOCATIONS_ADDRESS, VOTE_2_EARN_ADDRESS, TREASURY_ADDRESS],
+    [PRE_MINT_X_ALLOCATION, PRE_MINT_VOTE_2_EARN_ALLOCATION, PRE_MINT_TREASURY_ALLOCATION],
+  )
+
   if (network.name === "vechain_solo") {
     await seedLocalEnvironmnet(b3tr, xAllocationPool, xAllocationVoting)
   }
@@ -58,6 +79,7 @@ export async function deployAll() {
     badgeAddress: await badge.getAddress(),
     xAllocationPoolAddress: await xAllocationPool.getAddress(),
     xAllocationVotingAddress: await xAllocationVoting.getAddress(),
+    emissionsAddress: await emissions.getAddress(),
   }
 
   // close the script
@@ -163,6 +185,29 @@ async function deployXAllocationVoting(
   await contract.waitForDeployment()
 
   console.log(`XAllocationVoting contract deployed at address ${await contract.getAddress()}`)
+
+  return contract
+}
+
+async function deployEmissions(b3trAddress: string, destinations: string[], allocations: bigint[]) {
+  console.log(`Deploying Emissions contract`)
+  const EmissionsContract = await ethers.getContractFactory("Emissions")
+  const contract = await EmissionsContract.deploy(
+    DEFAULT_MINTER,
+    TIMELOCK_ADMIN,
+    b3trAddress,
+    destinations as [string, string, string],
+    allocations as [bigint, bigint, bigint],
+    CYCLE_DURATION,
+    DECAY_SETTINGS as [number, number, number, number],
+    INITIAL_EMISSIONS,
+    TREASURY_PERCENTAGE,
+    LAST_EMISSIONS as [number, number],
+  )
+
+  await contract.waitForDeployment()
+
+  console.log(`Emissions contract deployed at address ${await contract.getAddress()}`)
 
   return contract
 }
