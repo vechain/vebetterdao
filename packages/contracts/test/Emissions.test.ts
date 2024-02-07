@@ -17,12 +17,13 @@ import b3trAllocations from "./fixture/b3trAllocations.json"
 describe("Emissions", () => {
   describe("Contract parameters", () => {
     it("Should have correct parameters set on deployment", async () => {
-      const { emissions, owner, otherAccounts, b3tr, minterAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { emissions, owner, otherAccounts, b3tr, minterAccount, xAllocationPool } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       // Destination addresses should be set correctly
-      expect(await emissions.xAllocations()).to.equal(otherAccounts[0].address)
+      expect(await emissions.xAllocations()).to.equal(await xAllocationPool.getAddress())
       expect(await emissions.vote2Earn()).to.equal(otherAccounts[1].address)
       expect(await emissions.treasury()).to.equal(otherAccounts[2].address)
 
@@ -96,16 +97,17 @@ describe("Emissions", () => {
 
   describe("Pre-minting", () => {
     it("Should be able to pre-mint tokens", async () => {
-      const { emissions, b3tr, minterAccount, otherAccounts, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { emissions, b3tr, minterAccount, otherAccounts, owner, xAllocationPool } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       // Grant minter role to emissions contract
       await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
 
       await emissions.connect(minterAccount).preMint()
 
-      expect(await b3tr.balanceOf(otherAccounts[0].address)).to.equal(PRE_MINT_X_ALLOCATION)
+      expect(await b3tr.balanceOf(await xAllocationPool.getAddress())).to.equal(PRE_MINT_X_ALLOCATION)
       expect(await b3tr.balanceOf(otherAccounts[1].address)).to.equal(PRE_MINT_VOTE_2_EARN_ALLOCATION)
       expect(await b3tr.balanceOf(otherAccounts[2].address)).to.equal(PRE_MINT_TREASURY_ALLOCATION)
     })
@@ -126,9 +128,10 @@ describe("Emissions", () => {
     })
 
     it("Should be able to pre-mint different amounts than deployment", async () => {
-      const { emissions, b3tr, minterAccount, otherAccounts, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { emissions, b3tr, minterAccount, otherAccounts, owner, xAllocationPool } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       // Grant minter role to emissions contract
       await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
@@ -147,7 +150,7 @@ describe("Emissions", () => {
       // Pre-mint
       await emissions.connect(minterAccount).preMint()
 
-      expect(await b3tr.balanceOf(otherAccounts[0].address)).to.equal(ethers.parseEther("100"))
+      expect(await b3tr.balanceOf(await xAllocationPool.getAddress())).to.equal(ethers.parseEther("100"))
       expect(await b3tr.balanceOf(otherAccounts[1].address)).to.equal(ethers.parseEther("200"))
       expect(await b3tr.balanceOf(otherAccounts[2].address)).to.equal(ethers.parseEther("300"))
     })
