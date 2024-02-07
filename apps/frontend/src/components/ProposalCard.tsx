@@ -107,8 +107,6 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
     return <Code>{value}</Code>
   }
 
-  console.log({ state })
-
   return (
     <Card flex={1}>
       <CardHeader>
@@ -166,7 +164,7 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
       </CardBody>
       <CardFooter>
         <VStack spacing={4} align={"flex-start"} w="full">
-          <ProposalVotesProgressBar proposalId={proposal.proposalId} />
+          <ProposalVotesProgressBar proposal={proposal} />
           <HStack justify={"space-between"} w="full">
             {isStarted ? (
               <Box>
