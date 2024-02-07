@@ -22,6 +22,16 @@ import { humanAddress } from "@repo/utils/FormattingUtils"
 import { getConfig } from "@repo/config"
 import dayjs from "dayjs"
 import { ethers } from "ethers"
+import {
+  FacebookIcon,
+  FacebookShareButton,
+  LinkedinShareButton,
+  TelegramShareButton,
+  TwitterIcon,
+  TwitterShareButton,
+  WhatsappIcon,
+  WhatsappShareButton,
+} from "react-share"
 
 const config = getConfig()
 const blockTime = config.network.blockTime
@@ -195,6 +205,17 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
               </Text>
             </Box>
           )}
+          <HStack gap={2}>
+            <TwitterShareButton title={`B3tr proposal: ${proposal.description}`} url={window.location.href}>
+              <TwitterIcon size={32} round />
+            </TwitterShareButton>
+            <FacebookShareButton hashtag={`# ${proposal.description.split(" ").join("_")}`} url={window.location.href}>
+              <FacebookIcon size={32} round />
+            </FacebookShareButton>
+            <WhatsappShareButton title={`B3tr proposal: ${proposal.description}`} url={window.location.href}>
+              <WhatsappIcon size={32} round />
+            </WhatsappShareButton>
+          </HStack>
         </HStack>
       </CardFooter>
     </Card>
