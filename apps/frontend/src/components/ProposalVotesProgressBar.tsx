@@ -86,7 +86,7 @@ export const ProposalVotesProgressBar: React.FC<Props> = ({ proposal }) => {
   }, [proposalVotes, quorum, proposalVotesLoading, quorumLoading, isIncoming, estimatedStartTime])
 
   return (
-    <Box w="full">
+    <Box w="80%" alignSelf={"center"}>
       {quorumProgress}
       <HStack w="full">
         <HStack spacing={1}>

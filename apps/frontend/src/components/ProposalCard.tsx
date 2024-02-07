@@ -125,46 +125,48 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
         </VStack>
       </CardHeader>
       <CardBody>
-        <Card variant={"outline"}>
-          <CardBody>
-            {decodedCallDatas.map((target, index) => (
-              <VStack spacing={2} w="full" align="flex-start" key={`${index} - ${target.contract.address}`}>
-                <HStack w="full" justify={"space-between"}>
-                  <Text>Contract</Text>
-                  <Code>
-                    {humanAddress(target.contract.address, 6, 4)} ({target.contract.abi.contractName})
-                  </Code>
-                </HStack>
-                <HStack w="full" justify={"space-between"}>
-                  <Text>Method</Text>
-                  {target.method ? (
-                    <Code>
-                      {target.method.name}({target.method.inputs.map(i => `${i.type} ${i.name}`).join(", ")})
-                    </Code>
-                  ) : (
-                    <Code>Unknown</Code>
-                  )}
-                </HStack>
-                {target.method?.inputs.length && (
+        <VStack spacing={8} w="full" align="center">
+          <Card variant={"outline"} w="full">
+            <CardBody>
+              {decodedCallDatas.map((target, index) => (
+                <VStack spacing={2} w="full" align="flex-start" key={`${index} - ${target.contract.address}`}>
                   <HStack w="full" justify={"space-between"}>
-                    <Text>Params</Text>
-                    <VStack align="flex-start">
-                      {target.method.inputs.map((input, i) => (
-                        <HStack key={i} w="full" justify={"space-between"}>
-                          {renderInputParameterValue(input, target.params?.[input.name])}
-                        </HStack>
-                      ))}
-                    </VStack>
+                    <Text>Contract</Text>
+                    <Code>
+                      {humanAddress(target.contract.address, 6, 4)} ({target.contract.abi.contractName})
+                    </Code>
                   </HStack>
-                )}
-              </VStack>
-            ))}
-          </CardBody>
-        </Card>
+                  <HStack w="full" justify={"space-between"}>
+                    <Text>Method</Text>
+                    {target.method ? (
+                      <Code>
+                        {target.method.name}({target.method.inputs.map(i => `${i.type} ${i.name}`).join(", ")})
+                      </Code>
+                    ) : (
+                      <Code>Unknown</Code>
+                    )}
+                  </HStack>
+                  {target.method?.inputs.length && (
+                    <HStack w="full" justify={"space-between"}>
+                      <Text>Params</Text>
+                      <VStack align="flex-start">
+                        {target.method.inputs.map((input, i) => (
+                          <HStack key={i} w="full" justify={"space-between"}>
+                            {renderInputParameterValue(input, target.params?.[input.name])}
+                          </HStack>
+                        ))}
+                      </VStack>
+                    </HStack>
+                  )}
+                </VStack>
+              ))}
+            </CardBody>
+          </Card>
+          <ProposalVotesProgressBar proposal={proposal} />
+        </VStack>
       </CardBody>
       <CardFooter>
         <VStack spacing={4} align={"flex-start"} w="full">
-          <ProposalVotesProgressBar proposal={proposal} />
           <HStack justify={"space-between"} w="full">
             {isStarted ? (
               <Box>
