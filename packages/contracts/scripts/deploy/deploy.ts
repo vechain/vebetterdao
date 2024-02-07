@@ -19,7 +19,6 @@ const name = "B3TR Badge"
 const symbol = "B3TR"
 
 // Emissions Values
-const X_ALLOCATIONS_ADDRESS = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa" //1st account from mnemonic of solo network
 const VOTE_2_EARN_ADDRESS = "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68" //2nd account from mnemonic of solo network
 const TREASURY_ADDRESS = "0x0f872421dc479f3c11edd89512731814d0598db5" //3rd account from mnemonic of solo network
 
@@ -63,12 +62,12 @@ export async function deployAll() {
 
   const emissions = await deployEmissions(
     await b3tr.getAddress(),
-    [X_ALLOCATIONS_ADDRESS, VOTE_2_EARN_ADDRESS, TREASURY_ADDRESS],
+    [await xAllocationPool.getAddress(), VOTE_2_EARN_ADDRESS, TREASURY_ADDRESS],
     [PRE_MINT_X_ALLOCATION, PRE_MINT_VOTE_2_EARN_ALLOCATION, PRE_MINT_TREASURY_ALLOCATION],
   )
 
   if (network.name === "vechain_solo") {
-    await seedLocalEnvironmnet(b3tr, xAllocationPool, xAllocationVoting)
+    await seedLocalEnvironmnet(b3tr, xAllocationPool, xAllocationVoting, emissions)
   }
 
   return {

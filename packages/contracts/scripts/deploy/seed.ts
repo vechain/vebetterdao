@@ -1,10 +1,11 @@
 import { ethers } from "hardhat"
-import { B3TR, XAllocationPool, XAllocationVoting } from "../../typechain-types"
+import { B3TR, Emissions, XAllocationPool, XAllocationVoting } from "../../typechain-types"
 
 export const seedLocalEnvironmnet = async (
   b3tr: B3TR,
   xAllocationPool: XAllocationPool,
   xAllocationVoting: XAllocationVoting,
+  emissions: Emissions,
 ) => {
   console.log("Seeding local environment")
   const accounts = await ethers.getSigners()
@@ -20,6 +21,11 @@ export const seedLocalEnvironmnet = async (
   await xAllocationPool.addApp(accounts[6], "Test app 1", "https://test-app-1.com", true)
   await xAllocationPool.addApp(accounts[7], "Test app 2", "https://test-app-1.com", true)
   await xAllocationPool.addApp(accounts[8], "Test app 3", "https://test-app-1.com", true)
+
+  // Pre mint $B3TR
+  console.log("Pre minting $B3TR...")
+  await b3tr.grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+  await emissions.connect(accounts[1]).preMint()
 
   // Start new allocation round
   console.log("Starting new allocation round...")
