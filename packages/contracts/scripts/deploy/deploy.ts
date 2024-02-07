@@ -1,9 +1,9 @@
 import { ethers, network } from "hardhat"
 import { B3TR, GovernorContract, TimeLock, VOT3, XAllocationPool } from "../../typechain-types"
+import { seedLocalEnvironmnet } from "./seed"
 
 const DEFAULT_MINTER = "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68" //2nd account from mnemonic of solo network
 const TIMELOCK_ADMIN = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa" //1st account from mnemonic of solo network
-const ADDRESS_ZERO = "0x0000000000000000000000000000000000000000"
 const NFT_BADGE_ADMIN = "0x0f872421dc479f3c11edd89512731814d0598db5" //3rd account from mnemonic of solo network
 const XPOOL_ADMIN = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa" //1st account from mnemonic of solo network
 
@@ -19,7 +19,6 @@ const name = "B3TR Badge"
 const symbol = "B3TR"
 
 // Emissions Values
-const X_ALLOCATIONS_ADDRESS = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa" //1st account from mnemonic of solo network
 const VOTE_2_EARN_ADDRESS = "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68" //2nd account from mnemonic of solo network
 const TREASURY_ADDRESS = "0x0f872421dc479f3c11edd89512731814d0598db5" //3rd account from mnemonic of solo network
 
@@ -36,7 +35,7 @@ const LAST_EMISSIONS = [66, 13] // On the last cycle, 66% of the emissions will 
 export async function deployAll() {
   console.log(`Deploying contracts on ${network.name}...`)
 
-  // Deploy the contracts
+  // Deploy B3TR and VOT3 tokens
   const b3tr = await deployB3trToken()
   const vot3 = await deployVot3Token(await b3tr.getAddress())
 
@@ -63,9 +62,13 @@ export async function deployAll() {
 
   const emissions = await deployEmissions(
     await b3tr.getAddress(),
-    [X_ALLOCATIONS_ADDRESS, VOTE_2_EARN_ADDRESS, TREASURY_ADDRESS],
+    [await xAllocationPool.getAddress(), VOTE_2_EARN_ADDRESS, TREASURY_ADDRESS],
     [PRE_MINT_X_ALLOCATION, PRE_MINT_VOTE_2_EARN_ALLOCATION, PRE_MINT_TREASURY_ALLOCATION],
   )
+
+  if (network.name === "vechain_solo") {
+    await seedLocalEnvironmnet(b3tr, xAllocationPool, xAllocationVoting, emissions)
+  }
 
   return {
     governorAddress: await governor.getAddress(),
