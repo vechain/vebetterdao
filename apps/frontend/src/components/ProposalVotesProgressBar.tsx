@@ -19,8 +19,6 @@ export const ProposalVotesProgressBar: React.FC<Props> = ({ proposal }) => {
   } = useProposalVotes(proposal.proposalId)
   const { data: quorum, isLoading: quorumLoading } = useProposalQuorum(proposal.voteStart)
 
-  console.log({ quorum })
-
   const progress = useMemo(() => {
     if (!proposalVotes) return 0
     const totalVotes =

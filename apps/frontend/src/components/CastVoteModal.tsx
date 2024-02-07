@@ -19,6 +19,7 @@ import {
   VStack,
   HStack,
   Icon,
+  Box,
 } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { FormEvent, useMemo, useState } from "react"
@@ -104,13 +105,16 @@ const CastVoteModalContent: React.FC<CastVoteModalFormContentProps> = ({ onVote,
               <Heading as="h3" size="sm">
                 Your voting power
               </Heading>
-              <HStack spacing={2}>
-                <Icon as={MdHowToVote} fontSize={"2xl"} />
-                <Heading as="h1" size="lg">
-                  {votes?.formatted ?? "0"}
-                </Heading>
-              </HStack>
-              <Text fontSize="sm" fontWeight={"thin"} color="gray.500">
+              <Box>
+                <HStack spacing={2} justify={"center"}>
+                  <Icon as={MdHowToVote} fontSize={"2xl"} />
+                  <Heading as="h1" size="lg">
+                    {votes?.formatted ?? "0"}
+                  </Heading>
+                </HStack>
+                <Text fontSize="xs">Votes snapshotted at block #{proposal.voteStart}</Text>
+              </Box>
+              <Text fontSize="sm" fontWeight={"thin"}>
                 You can get more votes by staking more B3TR
               </Text>
             </VStack>
