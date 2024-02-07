@@ -1,7 +1,6 @@
 import { describe, it } from "mocha"
 import { ZERO_ADDRESS, catchRevert, getOrDeployContractInstances } from "./helpers"
 import { expect } from "chai"
-import { ethers } from "ethers"
 
 describe("B3TRBadge", () => {
   describe("Contract parameters", () => {
@@ -10,7 +9,7 @@ describe("B3TRBadge", () => {
 
       expect(await b3trBadge.name()).to.equal("B3TRBadge")
       expect(await b3trBadge.symbol()).to.equal("B3TR")
-      expect(await b3trBadge.hasRole(ethers.ZeroHash, await owner.getAddress())).to.equal(true) // 0x00 is the DEFAULT_ADMIN_ROLE of the AccessControl contract. We are checking if the owner has this role
+      expect(await b3trBadge.hasRole(await b3trBadge.DEFAULT_ADMIN_ROLE(), await owner.getAddress())).to.equal(true) // 0x00 is the DEFAULT_ADMIN_ROLE of the AccessControl contract. We are checking if the owner has this role
       expect(await b3trBadge.MAX_LEVEL()).to.equal(1)
     })
   })
