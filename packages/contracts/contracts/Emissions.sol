@@ -147,7 +147,6 @@ contract Emissions is AccessControl, ReentrancyGuard {
     nextCycle++;
   }
 
-  //TODO: isLastCycle & getAmounts for last cycle
   function distributeLast() public nonReentrant {
     require(START_BLOCK > 0, "Emissions: Pre-mint not done");
     require(isLastCycle(), "Emissions: Last cycle not reached");
