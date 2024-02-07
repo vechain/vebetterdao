@@ -59,7 +59,7 @@ export default function ProposalsPage() {
         </TabList>
         <TabIndicator mt="-1.5px" height="2px" bg="blue.500" borderRadius="1px" />
         <TabPanels>
-          <TabPanel>
+          <TabPanel px={0}>
             {!activeProposals?.length ? (
               <Box>
                 <Heading textAlign={"center"} mt={16}>
@@ -73,7 +73,7 @@ export default function ProposalsPage() {
               </Grid>
             )}
           </TabPanel>
-          <TabPanel>
+          <TabPanel px={0}>
             {!incomingProposals?.length ? (
               <Box>
                 <Heading textAlign={"center"} mt={16}>
@@ -88,7 +88,7 @@ export default function ProposalsPage() {
             )}
           </TabPanel>
 
-          <TabPanel>
+          <TabPanel px={0}>
             {!pastProposals?.length ? (
               <Box>
                 <Heading textAlign={"center"} mt={16}>
