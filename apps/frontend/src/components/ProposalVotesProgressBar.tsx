@@ -1,8 +1,10 @@
-import { ProposalCreatedEvent, useProposalQuorum, useProposalVotes } from "@/api"
+import { ProposalCreatedEvent, useCurrentBlock, useProposalQuorum, useProposalState, useProposalVotes } from "@/api"
 import { Box, HStack, Heading, Icon, Progress, Skeleton, Text } from "@chakra-ui/react"
+import { getConfig } from "@repo/config"
+import dayjs from "dayjs"
 import { useMemo } from "react"
 import { FaThumbsDown, FaThumbsUp } from "react-icons/fa6"
-
+const blockTime = getConfig().network.blockTime
 type Props = {
   proposal: ProposalCreatedEvent
 }
@@ -18,6 +20,27 @@ export const ProposalVotesProgressBar: React.FC<Props> = ({ proposal }) => {
     isLoading: proposalVotesLoading,
   } = useProposalVotes(proposal.proposalId)
   const { data: quorum, isLoading: quorumLoading } = useProposalQuorum(proposal.voteStart)
+  const { data: currentBlock } = useCurrentBlock()
+
+  const estimatedStartTime = useMemo(() => {
+    if (!proposal.voteStart) return null
+    const startBlock = Number(proposal.voteStart)
+    if (!startBlock || !currentBlock) return null
+    const startBlockFromNow = startBlock - currentBlock.number
+    //not started yet
+    if (startBlockFromNow > 0) {
+      const durationLeftTimestamp = startBlockFromNow * blockTime
+      const startDate = dayjs().add(durationLeftTimestamp, "milliseconds")
+      return startDate.fromNow()
+    } else return "Started"
+  }, [proposal])
+
+  const isIncoming = useMemo(() => {
+    const startBlock = Number(proposal.voteStart)
+    if (!startBlock || !currentBlock) return null
+    const startBlockFromNow = startBlock - currentBlock.number
+    return startBlockFromNow >= 0
+  }, [proposal, currentBlock])
 
   const progress = useMemo(() => {
     if (!proposalVotes) return 0
@@ -41,6 +64,13 @@ export const ProposalVotesProgressBar: React.FC<Props> = ({ proposal }) => {
           </Heading>
         </Skeleton>
       )
+
+    if (isIncoming)
+      return (
+        <Heading size="xs" color="gray.500" textAlign={"center"}>
+          Quorum available {estimatedStartTime}
+        </Heading>
+      )
     if (totalVotes > Number(quorum?.scaled)) {
       return (
         <Heading size="xs" color="green.500" textAlign={"center"}>
@@ -53,7 +83,7 @@ export const ProposalVotesProgressBar: React.FC<Props> = ({ proposal }) => {
         {compactQuorum} votes needed to reach quorum
       </Heading>
     )
-  }, [proposalVotes, quorum, proposalVotesLoading, quorumLoading])
+  }, [proposalVotes, quorum, proposalVotesLoading, quorumLoading, isIncoming, estimatedStartTime])
 
   return (
     <Box w="full">
