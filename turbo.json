@@ -65,6 +65,9 @@
       "dependsOn": [
         "@repo/contracts#check-contracts-deployment"
       ]
+    },
+    "test:hardhat": {
+      "cache": false
     }
   }
 }

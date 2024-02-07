@@ -1,5 +1,5 @@
 import { ethers, network } from "hardhat"
-import { GovernorContract, XAllocationPool, XAllocationVoting } from "../../typechain-types"
+import { B3TR, Emissions, GovernorContract, XAllocationPool, XAllocationVoting } from "../../typechain-types"
 import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { getOrDeployContractInstances } from "./deploy"
@@ -22,7 +22,6 @@ export const waitForNextBlock = async () => {
 
 export const moveBlocks = async (blocks: number) => {
   for (let i = 0; i < blocks; i++) {
-    // console.log(`Moving to block +${i+1}`);
     await waitForNextBlock()
   }
 }
@@ -72,10 +71,8 @@ export const getProposalIdFromTx = async (tx: ContractTransactionResponse, gover
 
 export const waitForVotingPeriodToEnd = async (proposalId: number, governor: GovernorContract | XAllocationVoting) => {
   const deadline = await governor.proposalDeadline(proposalId)
-  // console.log(`Waiting for proposal ${proposalId} to end at block ${deadline}`);
 
   const currentBlock = await governor.clock()
-  // console.log(`Current block is ${currentBlock}`);
 
   await moveBlocks(parseInt((deadline - currentBlock + BigInt(1)).toString()))
 }
@@ -182,4 +179,32 @@ export const addAppThroughGovernance = async (
     "addApp",
     [appAddress, appName, appMetadata, availableForAllocationVoting],
   )
+}
+
+export const waitForBlock = async (blockNumber: number) => {
+  const currentBlock = await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
+
+  if (!currentBlock?.number) throw new Error("Could not get current block number")
+
+  if (currentBlock?.number < blockNumber) {
+    // Get blocks required to wait
+    const blocksToWait = blockNumber - currentBlock?.number
+
+    if (blocksToWait > 0) await moveBlocks(blocksToWait)
+  }
+}
+
+export const waitForNextCycle = async (emissions: Emissions) => {
+  const nextCycle = await emissions.nextCycle()
+  const blockNextCycle = await emissions.getCycleBlock(nextCycle)
+
+  await waitForBlock(Number(blockNextCycle))
+}
+
+export const moveToCycle = async (emissions: Emissions, minter: HardhatEthersSigner, cycle: number) => {
+  const cycleToBeDistributed = await emissions.nextCycle()
+  for (let i = 0; i < BigInt(cycle) - cycleToBeDistributed; i++) {
+    await waitForNextCycle(emissions)
+    await emissions.connect(minter).distribute()
+  }
 }
