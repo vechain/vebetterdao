@@ -110,6 +110,9 @@ contract Emissions is AccessControl, ReentrancyGuard {
     // Set last emissions
     lastEmissions = _lastEmissions;
 
+    // Next cycle is pre-mint
+    nextCycle = 1;
+
     // Set roles
     _grantRole(DEFAULT_ADMIN_ROLE, admin);
     _grantRole(MINTER_ROLE, minter);
@@ -125,7 +128,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
     b3tr.mint(treasury, preMintAllocations[2]);
 
     START_BLOCK = block.number;
-    nextCycle = 1;
+    nextCycle = 2;
   }
 
   function distribute() public nonReentrant {
@@ -185,7 +188,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
   function getXAllocationDecayPeriods(uint256 blockNumber) public view returns (uint256) {
     require(blockNumber >= START_BLOCK, "Emissions: Invalid block number");
 
-    return (blockNumber - cycleDuration - START_BLOCK) / (xAllocationsDecayDelay * cycleDuration);
+    return (blockNumber - 2 * cycleDuration - START_BLOCK) / (xAllocationsDecayDelay * cycleDuration);
   }
 
   function getXAllocationsAmount(uint256 blockNumber) public view returns (uint256) {
@@ -195,7 +198,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
   function getVote2EarnDecayPeriods(uint256 blockNumber) public view returns (uint256) {
     require(blockNumber >= START_BLOCK, "Emissions: Invalid block number");
 
-    return (blockNumber - cycleDuration - START_BLOCK) / (vote2EarnDecayDelay * cycleDuration);
+    return (blockNumber - 2 * cycleDuration - START_BLOCK) / (vote2EarnDecayDelay * cycleDuration);
   }
 
   function getVote2EarnAmount(uint256 blockNumber) public view returns (uint256) {
@@ -232,14 +235,23 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   function getXAllocationAmountForCycle(uint256 cycle) public view returns (uint256) {
+    if (cycle == 1) {
+      return preMintAllocations[0];
+    }
     return getXAllocationsAmount(getCycleBlock(cycle));
   }
 
   function getVote2EarnAmountForCycle(uint256 cycle) public view returns (uint256) {
+    if (cycle == 1) {
+      return preMintAllocations[1];
+    }
     return getVote2EarnAmount(getCycleBlock(cycle));
   }
 
   function getTreasuryAmountForCycle(uint256 cycle) public view returns (uint256) {
+    if (cycle == 1) {
+      return preMintAllocations[2];
+    }
     return getTreasuryAmount(getCycleBlock(cycle));
   }
 
