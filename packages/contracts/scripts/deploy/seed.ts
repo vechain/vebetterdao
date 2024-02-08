@@ -40,8 +40,6 @@ export const seedLocalEnvironmnet = async (
     .preMint()
     .then(async tx => await tx.wait())
 
-  await xAllocationVoting.setVotingPeriod(1000 * 10).then(async tx => await tx.wait())
-
   //   Start new allocation round
   console.log("Starting new allocation round...")
   await xAllocationVoting.proposeNewAllocationRound().then(async tx => await tx.wait())
