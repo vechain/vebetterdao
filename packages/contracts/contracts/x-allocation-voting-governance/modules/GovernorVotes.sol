@@ -7,6 +7,10 @@ import "../XAllocationVotingGovernor.sol";
 import "@openzeppelin/contracts/interfaces/IERC5805.sol";
 
 /**
+ * Modified:
+ * added token() function
+ */
+/**
  * @dev Extension of {XAllocationVotingGovernor} for voting weight extraction from an {ERC20Votes} token, or since v4.5 an {ERC721Votes} token.
  * Forked from OpenZeppelin's GovernorVotes.sol.
  *
