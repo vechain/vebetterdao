@@ -22,22 +22,37 @@ describe("B3TRBadge", () => {
 
       const receipt = await tx.wait()
 
-      const events = receipt?.logs
-      expect(events?.length).to.equal(1)
+      if (!receipt?.blockNumber) throw new Error("No receipt block number")
 
-      const decodedEvent = b3trBadge.interface.parseLog({
-        topics: events?.[0].topics as string[],
-        data: events?.[0].data as string,
+      const events = receipt?.logs
+
+      const decodedEvents = events?.map(event => {
+        return b3trBadge.interface.parseLog({
+          topics: event?.topics as string[],
+          data: event?.data as string,
+        })
       })
 
-      expect(decodedEvent?.name).to.equal("Transfer")
-      expect(decodedEvent?.args?.[0]).to.equal(ZERO_ADDRESS)
-      expect(decodedEvent?.args?.[1]).to.equal(await otherAccount.getAddress())
+      expect(decodedEvents?.length).to.equal(2)
+
+      expect(decodedEvents?.[0]?.name).to.equal("LevelOwnedChanged")
+      expect(decodedEvents?.[0]?.args?.[0]).to.equal(await otherAccount.getAddress())
+      expect(decodedEvents?.[0]?.args?.[1]).to.equal(0)
+      expect(decodedEvents?.[0]?.args?.[2]).to.equal(1)
+
+      expect(decodedEvents?.[1]?.name).to.equal("Transfer")
+      expect(decodedEvents?.[1]?.args?.[0]).to.equal(ZERO_ADDRESS)
+      expect(decodedEvents?.[1]?.args?.[1]).to.equal(await otherAccount.getAddress())
+
+      expect(await b3trBadge.numCheckpoints(await otherAccount.getAddress())).to.equal(1) // Other account has 1 checkpoint
 
       expect(await b3trBadge.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 badge
       expect(await b3trBadge.ownerOf(0)).to.equal(await otherAccount.getAddress()) // Owner of the first badge is the otherAccount
       expect(await b3trBadge.totalSupply()).to.equal(1) // Total supply is 1
-      expect(await b3trBadge.levelOf(0)).to.equal(1) // Level 1
+
+      expect(await b3trBadge.getLevel(otherAccount)).to.equal(1) // Level 1
+      expect(await b3trBadge.getPastLevel(await otherAccount.getAddress(), receipt.blockNumber - 1)).to.equal(0) // Level 0 in the past
+
       expect(await b3trBadge.tokenByIndex(0)).to.equal(0) // Token ID of the first badge is 0
       expect(await b3trBadge.tokenOfOwnerByIndex(await otherAccount.getAddress(), 0)).to.equal(0) // Token ID of the first badge owned by otherAccount is 0
     })
@@ -178,6 +193,90 @@ describe("B3TRBadge", () => {
       await catchRevert(
         b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1),
       )
+    })
+
+    it("Should track ownership correctly after multiple transfers", async () => {
+      const { b3trBadge, otherAccount, owner, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      let tx = await b3trBadge.connect(owner).freeMint()
+
+      let receipt = await tx.wait()
+
+      if (!receipt?.blockNumber) throw new Error("No receipt block number")
+
+      let events = receipt?.logs
+
+      let decodedEvents = events?.map(event => {
+        return b3trBadge.interface.parseLog({
+          topics: event?.topics as string[],
+          data: event?.data as string,
+        })
+      })
+
+      expect(decodedEvents?.length).to.equal(2)
+
+      expect(decodedEvents?.[0]?.name).to.equal("LevelOwnedChanged")
+      expect(decodedEvents?.[0]?.args?.[0]).to.equal(await owner.getAddress())
+      expect(decodedEvents?.[0]?.args?.[1]).to.equal(0) // Previous level
+      expect(decodedEvents?.[0]?.args?.[2]).to.equal(1) // New level
+
+      tx = await b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 0)
+
+      receipt = await tx.wait()
+
+      if (!receipt?.blockNumber) throw new Error("No receipt block number")
+
+      events = receipt?.logs
+
+      decodedEvents = events?.map(event => {
+        return b3trBadge.interface.parseLog({
+          topics: event?.topics as string[],
+          data: event?.data as string,
+        })
+      })
+
+      expect(decodedEvents?.length).to.equal(3)
+
+      expect(decodedEvents?.[0]?.name).to.equal("LevelOwnedChanged")
+      expect(decodedEvents?.[0]?.args?.[0]).to.equal(await owner.getAddress())
+      expect(decodedEvents?.[0]?.args?.[1]).to.equal(1) // Previous level
+      expect(decodedEvents?.[0]?.args?.[2]).to.equal(0) // New level
+
+      expect(decodedEvents?.[1]?.name).to.equal("LevelOwnedChanged")
+      expect(decodedEvents?.[1]?.args?.[0]).to.equal(await otherAccount.getAddress())
+      expect(decodedEvents?.[1]?.args?.[1]).to.equal(0) // Previous level
+      expect(decodedEvents?.[1]?.args?.[2]).to.equal(1) // New level
+
+      expect(await b3trBadge.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 badge
+      expect(await b3trBadge.balanceOf(await owner.getAddress())).to.equal(0) // Owner has 0 badges
+
+      expect(await b3trBadge.getLevel(await otherAccount.getAddress())).to.equal(1) // Level 1
+      expect(await b3trBadge.getLevel(await owner.getAddress())).to.equal(0) // Level 0
+
+      expect(await b3trBadge.getPastLevel(await otherAccount.getAddress(), receipt.blockNumber - 1)).to.equal(0) // Level 0 in the past
+      expect(await b3trBadge.getPastLevel(await owner.getAddress(), receipt.blockNumber - 1)).to.equal(1) // Level 1 in the past
+
+      tx = await b3trBadge
+        .connect(otherAccount)
+        .transferFrom(await otherAccount.getAddress(), await otherAccounts[0].getAddress(), 0)
+
+      receipt = await tx.wait()
+
+      if (!receipt?.blockNumber) throw new Error("No receipt block number")
+
+      expect(await b3trBadge.balanceOf(await otherAccount.getAddress())).to.equal(0) // Other account has 0 badges
+      expect(await b3trBadge.balanceOf(await otherAccounts[0].getAddress())).to.equal(1) // Other account has 1 badge
+      expect(await b3trBadge.balanceOf(await owner.getAddress())).to.equal(0) // Owner has 0 badges
+
+      expect(await b3trBadge.getLevel(await otherAccount.getAddress())).to.equal(0) // Level 0
+      expect(await b3trBadge.getLevel(await otherAccounts[0].getAddress())).to.equal(1) // Level 1
+      expect(await b3trBadge.getLevel(await owner.getAddress())).to.equal(0) // Level 0
+
+      expect(await b3trBadge.getPastLevel(await otherAccount.getAddress(), receipt.blockNumber - 1)).to.equal(1) // Level 1 in the past
+      expect(await b3trBadge.getPastLevel(await otherAccounts[0].getAddress(), receipt.blockNumber - 1)).to.equal(0) // Level 0 in the past
+      expect(await b3trBadge.getPastLevel(await owner.getAddress(), receipt.blockNumber - 1)).to.equal(0) // Level 0 in the past
     })
   })
 })
