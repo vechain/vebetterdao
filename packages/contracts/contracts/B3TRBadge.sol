@@ -8,12 +8,11 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Pausable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/interfaces/IERC6372.sol";
-import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
-import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
+import { Checkpoints } from "@openzeppelin/contracts/utils/Checkpoints.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
-  using Checkpoints for Checkpoints.Trace208;
+  using Checkpoints for Checkpoints.Trace224;
 
   // Token ID counter
   uint256 private _nextTokenId;
@@ -28,7 +27,7 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
   mapping(uint8 => uint256) public xNodeTypeToMaxMintableLevel;
 
   // Mapping from owner to their level checkpoints
-  mapping(address owner => Checkpoints.Trace208) private _levelCheckpoints;
+  mapping(address owner => Checkpoints.Trace224) private _levelCheckpoints;
 
   /**
    * @dev The clock was incorrectly modified.
@@ -88,7 +87,7 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
    * checkpoints (and voting), in which case {CLOCK_MODE} should be overridden as well to match.
    */
   function clock() public view virtual returns (uint48) {
-    return Time.blockNumber();
+    return SafeCast.toUint48(block.number);
   }
 
   /**
@@ -97,7 +96,7 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
   // solhint-disable-next-line func-name-mixedcase
   function CLOCK_MODE() public view virtual returns (string memory) {
     // Check that the clock was not modified
-    if (clock() != Time.blockNumber()) {
+    if (clock() != SafeCast.toUint48(block.number)) {
       revert ERC6372InconsistentClock();
     }
     return "mode=blocknumber&from=default";
@@ -121,8 +120,8 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
     }
   }
 
-  function _push(Checkpoints.Trace208 storage store, uint208 delta) private returns (uint208, uint208) {
-    return store.push(clock(), delta);
+  function _push(Checkpoints.Trace224 storage store, uint208 delta) private returns (uint224, uint224) {
+    return store.push(SafeCast.toUint32(clock()), delta);
   }
 
   /**
@@ -149,7 +148,7 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
     if (timepoint >= currentTimepoint) {
       revert ERC5805FutureLookup(timepoint, currentTimepoint);
     }
-    return _levelCheckpoints[owner].upperLookupRecent(SafeCast.toUint48(timepoint));
+    return _levelCheckpoints[owner].upperLookupRecent(SafeCast.toUint32(timepoint));
   }
 
   function numCheckpoints(address account) public view returns (uint32) {
@@ -166,7 +165,7 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
   ) internal override(ERC721, ERC721Enumerable) {
     require(balanceOf(to) == 0, "Badge: Only 1 Badge allowed per address");
 
-    _moveOwnershipLevel(auth, to, levelOf[tokenId]);
+    _moveOwnershipLevel(from, to, levelOf[tokenId]);
 
     super._beforeTokenTransfer(from, to, tokenId, batchSize);
   }
