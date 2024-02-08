@@ -1,16 +1,17 @@
-import { AllocationRoundWithState, useCurrentBlock } from "@/api"
-import { Box, Button, HStack, Heading, Text } from "@chakra-ui/react"
+import { AllocationProposalCreated, AllocationRoundWithState, useCurrentBlock } from "@/api"
+import { Box, Button, Card, CardBody, HStack, Heading, Text } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import dayjs from "dayjs"
+import Head from "next/head"
 import { useMemo } from "react"
 
 type Props = {
-  round: AllocationRoundWithState
+  round: AllocationProposalCreated
 }
 
 const blockTime = getConfig().network.blockTime
 
-export const AllocationRoundDetails: React.FC<Props> = ({ round }) => {
+export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
   const { data: currentBlock } = useCurrentBlock()
   const estimatedEndTime = useMemo(() => {
     const endBlock = Number(round.voteEnd)
@@ -29,14 +30,15 @@ export const AllocationRoundDetails: React.FC<Props> = ({ round }) => {
   }, [currentBlock, round])
 
   return (
-    <HStack w="full" justify="space-between">
-      <Box>
-        <Heading size="lg">Current allocation's voting</Heading>
-        <Text fontSize="lg" fontWeight={"medium"}>
-          Ends {estimatedEndTime}
-        </Text>
-      </Box>
-      <Button>Vote now</Button>
-    </HStack>
+    <Card w="full">
+      <CardBody>
+        <Box>
+          <Heading as="h3" size="md">
+            Round #{round.proposalId}
+          </Heading>
+          <Text>{estimatedEndTime}</Text>
+        </Box>
+      </CardBody>
+    </Card>
   )
 }
