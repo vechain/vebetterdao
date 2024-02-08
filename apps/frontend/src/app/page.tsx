@@ -1,11 +1,12 @@
 "use client"
 
 import { Box, Stack, StackDivider, VStack } from "@chakra-ui/react"
-import { BalanceCard, TvlBreakdownPieChart, CirculatingSupplyPieChart } from "@/components"
+import { BalanceCard, TvlBreakdownPieChart, CirculatingSupplyPieChart, CurrentAllocationBanner } from "@/components"
 
 export default function Home() {
   return (
     <VStack spacing={4} divider={<StackDivider />} w="full">
+      <CurrentAllocationBanner />
       <Box w="full">
         <BalanceCard />
       </Box>

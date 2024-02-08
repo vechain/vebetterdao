@@ -36,3 +36,12 @@ export const buildMintB3trTx = (
     abi: functionAbi,
   }
 }
+
+// import {B3TR__factory} from "@repo/contracts/typechain-types"
+
+// const B3trInterface = B3TR__factory.createInterface()
+
+// const clauses = [{
+//   to: contractAdress,
+//   data: B3trInterface.encodeFunctionData("grantRole", ["0x00", "0x00"])
+// }]
