@@ -17,7 +17,7 @@ export default function Home() {
           </Box>
         </VStack>
         <VStack spacing={4} flex={2.5} position={"sticky"} top={100} right={0}>
-          <AllocationRoundsList />
+          <AllocationRoundsList maxRounds={3} />
         </VStack>
       </HStack>
     </VStack>

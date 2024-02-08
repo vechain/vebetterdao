@@ -1,7 +1,12 @@
 import { useProposeAllocationRound } from "@/hooks"
-import { Button } from "@chakra-ui/react"
+import { Button, ButtonProps } from "@chakra-ui/react"
 
-export const CreateNewAllocationRoundButton: React.FC = () => {
+type Props = ButtonProps
+export const CreateNewAllocationRoundButton: React.FC<Props> = ({ ...props }) => {
   const { sendTransaction } = useProposeAllocationRound({})
-  return <Button onClick={() => sendTransaction(undefined)}>Create new allocation round</Button>
+  return (
+    <Button onClick={() => sendTransaction(undefined)} {...props}>
+      Create new allocation round
+    </Button>
+  )
 }

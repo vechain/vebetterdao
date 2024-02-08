@@ -6,6 +6,12 @@ import { getConfig } from "@repo/config"
 const xAllocationsVotingContractAbi = XAllocationsVotingContract.abi
 const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
 
+export const AllocationProposalState = {
+  "0": "Pending",
+  "1": "Active",
+  "2": "Failed",
+  "3": "Succeeded",
+}
 /**
  *
  * Returns the state of a given proposalId
@@ -13,7 +19,10 @@ const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
  * @param proposalId  the proposalId the get state for
  * @returns the state of a given proposalId
  */
-export const getAllocationsRoundState = async (thor: Connex.Thor, proposalId?: string): Promise<string> => {
+export const getAllocationsRoundState = async (
+  thor: Connex.Thor,
+  proposalId?: string,
+): Promise<keyof typeof AllocationProposalState> => {
   if (!proposalId) return Promise.reject(new Error("proposalId is required"))
   const allocationRoundStateAbi = xAllocationsVotingContractAbi.find(abi => abi.name === "state")
   if (!allocationRoundStateAbi) throw new Error("state function not found")
