@@ -6,12 +6,12 @@ import "@vechain/hardhat-vechain"
 import "@vechain/hardhat-ethers"
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.20",
+  solidity: "0.8.19",
 }
 
 module.exports = {
   solidity: {
-    version: "0.8.20",
+    version: "0.8.19",
     settings: {
       optimizer: {
         enabled: true,
