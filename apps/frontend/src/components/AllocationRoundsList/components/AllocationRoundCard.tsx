@@ -5,11 +5,12 @@ import {
   useCurrentAllocationsRoundId,
   useCurrentBlock,
 } from "@/api"
-import { Box, Card, CardBody, HStack, Heading, Tag, Text } from "@chakra-ui/react"
+import { Box, Card, CardBody, HStack, Heading, Icon, Tag, Text, useColorModeValue } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import dayjs from "dayjs"
-import { round } from "lodash"
+import { useRouter } from "next/navigation"
 import { useMemo } from "react"
+import { FaAngleRight } from "react-icons/fa6"
 
 type Props = {
   round: AllocationProposalCreated
@@ -18,6 +19,8 @@ type Props = {
 const blockTime = getConfig().network.blockTime
 
 export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
+  const router = useRouter()
+
   const { data: currentBlock } = useCurrentBlock()
 
   const { data: state } = useAllocationsRoundState(round.proposalId)
@@ -41,18 +44,35 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
     }
   }, [currentBlock, round])
 
+  const onRoundClick = () => {
+    router.push(`/rounds/${round.proposalId}`)
+  }
+
+  const cardHoverColor = useColorModeValue("primary.500", "primary.300")
   return (
-    <Card w="full" variant="outline" borderWidth={isCurrentRound ? 3 : 1}>
+    <Card
+      w="full"
+      variant="outline"
+      borderWidth={isCurrentRound ? 3 : 1}
+      onClick={onRoundClick}
+      _hover={{
+        borderColor: cardHoverColor,
+        cursor: "pointer",
+        transition: "all 0.2s ease-in-out",
+      }}>
       <CardBody>
-        <Box>
-          <HStack spacing={2}>
-            <Heading as="h3" size="md">
-              Round #{round.proposalId}
-            </Heading>
-            <Tag colorScheme="green">{state && AllocationProposalState[state]}</Tag>
-          </HStack>
-          <Text>{estimatedEndTime}</Text>
-        </Box>
+        <HStack justify={"space-between"} w="full">
+          <Box>
+            <HStack spacing={2}>
+              <Heading as="h3" size="md">
+                Round #{round.proposalId}
+              </Heading>
+              <Tag colorScheme="green">{state && AllocationProposalState[state]}</Tag>
+            </HStack>
+            <Text>{estimatedEndTime}</Text>
+          </Box>
+          <Icon as={FaAngleRight} boxSize={6} />
+        </HStack>
       </CardBody>
     </Card>
   )
