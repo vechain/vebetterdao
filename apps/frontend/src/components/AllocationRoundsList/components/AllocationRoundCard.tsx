@@ -1,15 +1,7 @@
-import {
-  AllocationProposalCreated,
-  AllocationProposalState,
-  useAllocationsRoundState,
-  useCurrentAllocationsRoundId,
-  useCurrentBlock,
-} from "@/api"
+import { AllocationProposalCreated, AllocationProposalState, useAllocationsRound } from "@/api"
 import { Box, Card, CardBody, HStack, Heading, Icon, Tag, Text, useColorModeValue } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
-import dayjs from "dayjs"
 import { useRouter } from "next/navigation"
-import { useMemo } from "react"
 import { FaAngleRight } from "react-icons/fa6"
 
 type Props = {
@@ -21,28 +13,7 @@ const blockTime = getConfig().network.blockTime
 export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
   const router = useRouter()
 
-  const { data: currentBlock } = useCurrentBlock()
-
-  const { data: state } = useAllocationsRoundState(round.proposalId)
-  const { data: currentRoundId } = useCurrentAllocationsRoundId()
-
-  const isCurrentRound = round.proposalId === currentRoundId
-
-  const estimatedEndTime = useMemo(() => {
-    const endBlock = Number(round.voteEnd)
-    if (!endBlock || !currentBlock) return null
-    const endBlockFromNow = endBlock - currentBlock.number
-    //not ended yet
-    if (endBlockFromNow > 0) {
-      const durationLeftTimestamp = endBlockFromNow * blockTime
-      const endDate = dayjs().add(durationLeftTimestamp, "milliseconds")
-      return endDate.fromNow()
-    } else {
-      const durationLeftTimestamp = -endBlockFromNow * blockTime
-      const endDate = dayjs().subtract(durationLeftTimestamp, "milliseconds")
-      return endDate.fromNow()
-    }
-  }, [currentBlock, round])
+  const { data: allocationRound } = useAllocationsRound(round.proposalId)
 
   const onRoundClick = () => {
     router.push(`/rounds/${round.proposalId}`)
@@ -53,7 +24,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
     <Card
       w="full"
       variant="outline"
-      borderWidth={isCurrentRound ? 3 : 1}
+      borderWidth={allocationRound.isCurrent ? 3 : 1}
       onClick={onRoundClick}
       _hover={{
         borderColor: cardHoverColor,
@@ -67,9 +38,9 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
               <Heading as="h3" size="md">
                 Round #{round.proposalId}
               </Heading>
-              <Tag colorScheme="green">{state && AllocationProposalState[state]}</Tag>
+              <Tag colorScheme="green">{allocationRound.state && AllocationProposalState[allocationRound.state]}</Tag>
             </HStack>
-            <Text>{estimatedEndTime}</Text>
+            <Text>{allocationRound.voteEndTimestamp?.fromNow()}</Text>
           </Box>
           <Icon as={FaAngleRight} boxSize={6} />
         </HStack>

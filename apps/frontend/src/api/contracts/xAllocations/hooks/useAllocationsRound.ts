@@ -1,15 +1,16 @@
 import { useMemo } from "react"
 import { useCurrentAllocationsRoundId } from "./useCurrentAllocationsRoundId"
-import { useAllocationsRoundState } from "./useAllocationsRoundState"
+import { AllocationProposalState, useAllocationsRoundState } from "./useAllocationsRoundState"
 import { AllocationProposalCreated, useAllocationsRoundsEvents } from "./useAllocationsRoundsEvents"
 import dayjs from "dayjs"
 import { getConfig } from "@repo/config"
 import { useCurrentBlock } from "@/api/blockchain"
 
 export type AllocationRoundWithState = AllocationProposalCreated & {
-  state?: string
+  state?: keyof typeof AllocationProposalState
   voteStartTimestamp?: dayjs.Dayjs
   voteEndTimestamp?: dayjs.Dayjs
+  isCurrent: boolean
 }
 
 const blockTime = getConfig().network.blockTime
