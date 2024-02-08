@@ -1,4 +1,4 @@
-import { Box, Button, HStack, Heading, VStack } from "@chakra-ui/react"
+import { Box, Button, Heading, VStack } from "@chakra-ui/react"
 import { CreateNewAllocationRoundButton } from "./components/CreateNewAllocationRoundButton"
 import { useAllocationsRoundsEvents, useCurrentAllocationsRoundId } from "@/api"
 import { AllocationRoundCard } from "./components/AllocationRoundCard"
