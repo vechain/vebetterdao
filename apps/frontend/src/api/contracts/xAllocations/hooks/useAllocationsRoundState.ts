@@ -13,7 +13,8 @@ const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
  * @param proposalId  the proposalId the get state for
  * @returns the state of a given proposalId
  */
-export const getAllocationRoundState = async (thor: Connex.Thor, proposalId: string): Promise<string> => {
+export const getAllocationsRoundState = async (thor: Connex.Thor, proposalId?: string): Promise<string> => {
+  if (!proposalId) return Promise.reject(new Error("proposalId is required"))
   const allocationRoundStateAbi = xAllocationsVotingContractAbi.find(abi => abi.name === "state")
   if (!allocationRoundStateAbi) throw new Error("state function not found")
   const res = await thor.account(XALLOCATIONVOTING_CONTRACT).method(allocationRoundStateAbi).call(proposalId)
@@ -23,19 +24,19 @@ export const getAllocationRoundState = async (thor: Connex.Thor, proposalId: str
   return res.decoded[0]
 }
 
-export const getAllocationRoundStateQueryKey = (proposalId: string) => ["allocationRoundState", proposalId]
+export const getAllocationsRoundStateQueryKey = (proposalId?: string) => ["allocationsRoundState", proposalId]
 
 /**
  * Hook to get the state of a given proposalId
  * @param proposalId  the proposalId the get state for
  * @returns  the state of a given proposalId
  */
-export const useAllocationRoundState = (proposalId: string) => {
+export const useAllocationsRoundState = (proposalId?: string) => {
   const { thor } = useConnex()
 
   return useQuery({
-    queryKey: getAllocationRoundStateQueryKey(proposalId),
-    queryFn: async () => await getAllocationRoundState(thor, proposalId),
+    queryKey: getAllocationsRoundStateQueryKey(proposalId),
+    queryFn: async () => await getAllocationsRoundState(thor, proposalId),
     enabled: !!thor && !!proposalId,
   })
 }

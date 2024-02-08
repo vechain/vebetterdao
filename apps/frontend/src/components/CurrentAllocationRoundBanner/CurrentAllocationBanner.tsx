@@ -1,19 +1,17 @@
 import { useCurrentAllocationsRound } from "@/api"
-import { Card, CardBody, Heading } from "@chakra-ui/react"
-import error from "next/error"
+import { Card, CardBody } from "@chakra-ui/react"
 import { AllocationRoundDetails } from "./components/AllocationRoundDetails"
 import { CreateNewAllocationRound } from "./components/CreateNewAllocationRound"
 
 export const CurrentAllocationBanner = () => {
-  const { data: currentRoundId } = useCurrentAllocationsRound()
+  const { data: currentRound } = useCurrentAllocationsRound()
 
-  const roundExists = currentRoundId && currentRoundId !== "0"
-  console.log("currentRoundId", currentRoundId)
+  console.log("currentRound", currentRound)
 
   return (
     <Card w="full">
       <CardBody>
-        {roundExists ? <AllocationRoundDetails roundId={currentRoundId} /> : <CreateNewAllocationRound />}
+        {currentRound ? <AllocationRoundDetails round={currentRound} /> : <CreateNewAllocationRound />}
       </CardBody>
     </Card>
   )
