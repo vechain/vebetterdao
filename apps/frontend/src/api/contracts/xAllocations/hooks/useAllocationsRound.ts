@@ -15,8 +15,8 @@ export type AllocationRoundWithState = AllocationProposalCreated & {
 
 const blockTime = getConfig().network.blockTime
 /**
- *  Hook to get the current allocation round info and state using currentRoundId, state and onchain events
- * @returns the current allocation round info and state
+ *  Hook to get and merge info about the given allocation round (state, proposer, voreStart, voteEnd)
+ * @returns the allocation round info see {@link AllocationRoundWithState}
  */
 export const useAllocationsRound = (roundId: string) => {
   const { data: currentBlock } = useCurrentBlock()

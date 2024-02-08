@@ -33,8 +33,6 @@ export const getAllocationsRoundsEvents = async (thor: Connex.Thor) => {
 
   const events = await getEvents({ thor, filterCriteria })
 
-  console.log({ events })
-
   /**
    * Decode the events to get the data we are interested in (i.e the proposals)
    */
