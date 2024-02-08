@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "./utils/ReentrancyGuard.sol";
 import "./interfaces/IB3TR.sol";
 
 contract Emissions is AccessControl, ReentrancyGuard {
@@ -157,8 +157,8 @@ contract Emissions is AccessControl, ReentrancyGuard {
       "Emissions: Emissions don't exceed B3TR cap. You should use `distribute` instead."
     );
 
-    uint256 xAllocationAmount = getDecayedAmount(remainingEmissions, lastEmissions[0], 1); 
-    uint256 vote2EarnAmount = getDecayedAmount(remainingEmissions - xAllocationAmount, lastEmissions[1], 1); 
+    uint256 xAllocationAmount = getDecayedAmount(remainingEmissions, lastEmissions[0], 1);
+    uint256 vote2EarnAmount = getDecayedAmount(remainingEmissions - xAllocationAmount, lastEmissions[1], 1);
 
     b3tr.mint(xAllocations, xAllocationAmount);
     b3tr.mint(vote2Earn, vote2EarnAmount);

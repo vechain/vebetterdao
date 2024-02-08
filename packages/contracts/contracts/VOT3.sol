@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
-import "@openzeppelin/contracts/utils/Nonces.sol";
 
 // VOT3 contract
 contract VOT3 is ERC20, ERC20Permit, ERC20Votes, AccessControl {
@@ -71,8 +70,8 @@ contract VOT3 is ERC20, ERC20Permit, ERC20Votes, AccessControl {
   }
 
   // Overrides required by Solidity
-  function _update(address from, address to, uint256 amount) internal override(ERC20, ERC20Votes) {
-    super._update(from, to, amount);
+  function _afterTokenTransfer(address from, address to, uint256 amount) internal override(ERC20, ERC20Votes) {
+    super._afterTokenTransfer(from, to, amount);
 
     // self-delegate if the user is neither unstaking nor has delegated previously nor burning tokens
     if (to != address(0) && !isContract(to) && delegates(to) == address(0)) {
@@ -80,7 +79,11 @@ contract VOT3 is ERC20, ERC20Permit, ERC20Votes, AccessControl {
     }
   }
 
-  function nonces(address owner) public view virtual override(ERC20Permit, Nonces) returns (uint256) {
-    return super.nonces(owner);
+  function _mint(address account, uint256 amount) internal override(ERC20, ERC20Votes) {
+    super._mint(account, amount);
+  }
+
+  function _burn(address account, uint256 amount) internal override(ERC20, ERC20Votes) {
+    super._burn(account, amount);
   }
 }

@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 import { XAllocationVotingGovernor } from "../XAllocationVotingGovernor.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+import { Checkpoints } from "@openzeppelin/contracts/utils/Checkpoints.sol";
 import { IXAllocationPool } from "../../interfaces/IXAllocationPool.sol";
 
 /**

@@ -4,7 +4,6 @@ pragma solidity ^0.8.19;
 import { IERC165, ERC165 } from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Context } from "@openzeppelin/contracts/utils/Context.sol";
-import { Nonces } from "@openzeppelin/contracts/utils/Nonces.sol";
 import { IXAllocationVotingGovernor, IERC6372 } from "../interfaces/IXAllocationVotingGovernor.sol";
 
 /**
@@ -16,7 +15,7 @@ import { IXAllocationVotingGovernor, IERC6372 } from "../interfaces/IXAllocation
  * - A voting module must implement {_getVotes}
  * - Additionally, {votingPeriod} must also be implemented
  */
-abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAllocationVotingGovernor {
+abstract contract XAllocationVotingGovernor is Context, ERC165, IXAllocationVotingGovernor {
   // counter to count the number of proposals and also used to create the id
   uint256 internal _proposalCount;
 

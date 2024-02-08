@@ -65,18 +65,15 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl {
 
   // The following functions are overrides required by Solidity.
 
-  function _update(
+  function _beforeTokenTransfer(
+    address from,
     address to,
     uint256 tokenId,
-    address auth
-  ) internal override(ERC721, ERC721Enumerable) returns (address) {
+    uint256 batchSize
+  ) internal override(ERC721, ERC721Enumerable) {
     require(balanceOf(to) == 0, "Badge: Only 1 Badge allowed per address");
 
-    return super._update(to, tokenId, auth);
-  }
-
-  function _increaseBalance(address account, uint128 value) internal override(ERC721, ERC721Enumerable) {
-    super._increaseBalance(account, value);
+    super._beforeTokenTransfer(from, to, tokenId, batchSize);
   }
 
   function supportsInterface(
