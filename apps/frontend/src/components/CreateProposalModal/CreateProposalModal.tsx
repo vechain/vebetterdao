@@ -87,10 +87,10 @@ export const CreateProposalModalForm: React.FC<CreateProposalModalFormProps> = (
   const { account } = useWallet()
 
   const { data: proposalThreshold } = useProposalThreshold()
-  const { data: vot3Delegates, isLoading: isVot3DelegatesLoading } = useVot3Delegates(account ?? undefined)
 
   const { sendTransaction: delegate } = useDelegateVot3({ address: account ?? undefined })
-  const { data: votes, isLoading: votesLoading } = useGetVotes(account ?? undefined)
+  const { data: votesObject, isLoading: votesLoading } = useGetVotes(account ?? undefined)
+  const votes = votesObject?.scaled
 
   const { data: vot3Balance } = useVot3Balance(account ?? undefined)
 
@@ -200,6 +200,7 @@ export const CreateProposalModalForm: React.FC<CreateProposalModalFormProps> = (
     return <></>
   }, [votes, vot3Balance, proposalThreshold])
 
+  console.log({ votes, proposalThreshold })
   const canCreateProposal = useMemo(() => {
     if (!votes || !vot3Balance || !proposalThreshold) return false
 
