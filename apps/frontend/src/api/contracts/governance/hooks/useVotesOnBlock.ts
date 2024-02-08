@@ -1,21 +1,23 @@
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 
-import Contract from "@repo/contracts/artifacts/contracts/VOT3.sol/VOT3.json"
+import Contract from "@repo/contracts/artifacts/contracts/governance/GovernorContract.sol/GovernorContract.json"
 import { getConfig } from "@repo/config"
 import { FormattingUtils } from "@repo/utils"
-const vot3Abi = Contract.abi
+const governanaceAbi = Contract.abi
 
-const config = getConfig()
-const VOT3_CONTRACT = config.vot3ContractAddress
+const GOVERNOR_CONTRACT = getConfig().governorContractAddress
 
 /**
  * Get the number of votes of the given address (includes the delegated ones)
  * @param thor  the thor client
+ * @param block the block number to get the votes at
+ * @param address the address to get the votes of
  * @returns the votes of the given address
  */
-export const getVotes = async (
+export const getVotesOnBlock = async (
   thor: Connex.Thor,
+  block: number,
   address?: string,
 ): Promise<{
   original: string
@@ -24,9 +26,9 @@ export const getVotes = async (
 }> => {
   if (!address) throw new Error("address is required")
 
-  const getVotesAbi = vot3Abi.find(abi => abi.name === "getVotes")
+  const getVotesAbi = governanaceAbi.find(abi => abi.name === "getVotes")
   if (!getVotesAbi) throw new Error("getVotes function not found")
-  const res = await thor.account(VOT3_CONTRACT).method(getVotesAbi).call(address)
+  const res = await thor.account(GOVERNOR_CONTRACT).method(getVotesAbi).call(address, block)
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
@@ -41,17 +43,17 @@ export const getVotes = async (
   }
 }
 
-export const getVotesQueryKey = (address?: string) => ["votes", address]
+export const getVotesOnBlockQueryKey = (block: number, address?: string) => ["votesOnBlock", block, address]
 /**
  *  Hook to get the number of votes of the given address (includes the delegated ones)
  * @returns the number of votes of the given address (includes the delegated ones)
  */
-export const useGetVotes = (address?: string) => {
+export const useGetVotesOnBlock = (block: number, address?: string) => {
   const { thor } = useConnex()
 
   return useQuery({
-    queryKey: getVotesQueryKey(address),
-    queryFn: async () => await getVotes(thor, address),
+    queryKey: getVotesOnBlockQueryKey(block, address),
+    queryFn: async () => await getVotesOnBlock(thor, block, address),
     enabled: !!thor && !!address,
   })
 }
