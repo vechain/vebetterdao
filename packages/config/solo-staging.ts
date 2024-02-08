@@ -8,8 +8,8 @@ export const stagingConfig: Config = {
   xAllocationVotingContractAddress: "0x49209B92eB4b5dDd14Aa1aA2f6C825b1d4bbA612",
   nodeUrl: "https://thor-solo.dev.rewards.vechain.org",
   network: {
-    id: "solo",
-    name: "solo",
+    id: "solo-staging",
+    name: "solo-staging",
     type: "solo",
     defaultNet: true,
     urls: ["https://thor-solo.dev.rewards.vechain.org"],

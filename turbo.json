@@ -1,8 +1,7 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalDotEnv": [
-    ".env",
-    ".env.config"
+    ".env"
   ],
   "globalDependencies": [
     "**/.env.*local"
@@ -30,6 +29,13 @@
       "persistent": true,
       "dependsOn": [
         "@repo/contracts#check-contracts-deployment"
+      ]
+    },
+    "staging": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": [
+        "^compile"
       ]
     },
     "@repo/config#check-or-generate-local-config": {
