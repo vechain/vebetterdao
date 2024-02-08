@@ -110,6 +110,9 @@ contract Emissions is AccessControl, ReentrancyGuard {
     // Set last emissions
     lastEmissions = _lastEmissions;
 
+    // Next cycle is pre-mint
+    nextCycle = 1;
+
     // Set roles
     _grantRole(DEFAULT_ADMIN_ROLE, admin);
     _grantRole(MINTER_ROLE, minter);
@@ -125,6 +128,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
     b3tr.mint(treasury, preMintAllocations[2]);
 
     START_BLOCK = block.number;
+    nextCycle++;
   }
 
   function distribute() public nonReentrant {
@@ -137,8 +141,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
     uint256 treasuryAmount = getCurrentTreasuryAmount();
 
     // Check if emissions exceed B3TR cap. distributeLast should be used in this case
-    uint256 remainingEmissions = b3tr.cap() - b3tr.totalSupply();
-    require(xAllocationsAmount + vote2EarnAmount + treasuryAmount <= remainingEmissions, "Emissions: Exceeds B3TR cap");
+    require(!isLastCycle(), "Emissions: Emissions exceed B3TR cap. Use `distributeLast` instead.");
 
     b3tr.mint(xAllocations, xAllocationsAmount);
     b3tr.mint(vote2Earn, vote2EarnAmount);
@@ -149,16 +152,12 @@ contract Emissions is AccessControl, ReentrancyGuard {
 
   function distributeLast() public nonReentrant {
     require(START_BLOCK > 0, "Emissions: Pre-mint not done");
+    require(isLastCycle(), "Emissions: Last cycle not reached");
 
-    uint256 remainingEmissions = b3tr.cap() - b3tr.totalSupply();
+    uint256 remainingEmissions = getRemainingEmissions();
 
-    require(
-      getCurrentXAllocationsAmount() + getCurrentVote2EarnAmount() + getCurrentTreasuryAmount() > remainingEmissions,
-      "Emissions: Emissions don't exceed B3TR cap. You should use `distribute` instead."
-    );
-
-    uint256 xAllocationAmount = getDecayedAmount(remainingEmissions, lastEmissions[0], 1);
-    uint256 vote2EarnAmount = getDecayedAmount(remainingEmissions - xAllocationAmount, lastEmissions[1], 1);
+    uint256 xAllocationAmount = getDecayedAmount(remainingEmissions, 100 - lastEmissions[0], 1);
+    uint256 vote2EarnAmount = getDecayedAmount(remainingEmissions, 100 - lastEmissions[1], 1);
 
     b3tr.mint(xAllocations, xAllocationAmount);
     b3tr.mint(vote2Earn, vote2EarnAmount);
@@ -189,7 +188,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
   function getXAllocationDecayPeriods(uint256 blockNumber) public view returns (uint256) {
     require(blockNumber >= START_BLOCK, "Emissions: Invalid block number");
 
-    return (blockNumber - START_BLOCK) / (xAllocationsDecayDelay * cycleDuration);
+    return (blockNumber - 2 * cycleDuration - START_BLOCK) / (xAllocationsDecayDelay * cycleDuration);
   }
 
   function getXAllocationsAmount(uint256 blockNumber) public view returns (uint256) {
@@ -199,7 +198,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
   function getVote2EarnDecayPeriods(uint256 blockNumber) public view returns (uint256) {
     require(blockNumber >= START_BLOCK, "Emissions: Invalid block number");
 
-    return (blockNumber - START_BLOCK) / (vote2EarnDecayDelay * cycleDuration);
+    return (blockNumber - 2 * cycleDuration - START_BLOCK) / (vote2EarnDecayDelay * cycleDuration);
   }
 
   function getVote2EarnAmount(uint256 blockNumber) public view returns (uint256) {
@@ -236,14 +235,23 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   function getXAllocationAmountForCycle(uint256 cycle) public view returns (uint256) {
+    if (cycle == 1) {
+      return preMintAllocations[0];
+    }
     return getXAllocationsAmount(getCycleBlock(cycle));
   }
 
   function getVote2EarnAmountForCycle(uint256 cycle) public view returns (uint256) {
+    if (cycle == 1) {
+      return preMintAllocations[1];
+    }
     return getVote2EarnAmount(getCycleBlock(cycle));
   }
 
   function getTreasuryAmountForCycle(uint256 cycle) public view returns (uint256) {
+    if (cycle == 1) {
+      return preMintAllocations[2];
+    }
     return getTreasuryAmount(getCycleBlock(cycle));
   }
 
@@ -255,6 +263,43 @@ contract Emissions is AccessControl, ReentrancyGuard {
 
   function isCycleDistributed(uint256 cycle) public view returns (bool) {
     return cycle < nextCycle;
+  }
+
+  function isLastCycle() public view returns (bool) {
+    uint256 remainingEmissions = getRemainingEmissions();
+
+    return ((getCurrentXAllocationsAmount() + getCurrentVote2EarnAmount() + getCurrentTreasuryAmount()) >
+      remainingEmissions);
+  }
+
+  function getLastXAllocationsAmount() public view returns (uint256) {
+    require(isLastCycle(), "Emissions: Last cycle not reached");
+
+    uint256 remainingEmissions = getRemainingEmissions();
+
+    return getDecayedAmount(remainingEmissions, 100 - lastEmissions[0], 1);
+  }
+
+  function getLastVote2EarnAmount() public view returns (uint256) {
+    require(isLastCycle(), "Emissions: Last cycle not reached");
+
+    uint256 remainingEmissions = getRemainingEmissions();
+
+    return getDecayedAmount(remainingEmissions, 100 - lastEmissions[1], 1);
+  }
+
+  function getLastTreasuryAmount() public view returns (uint256) {
+    require(isLastCycle(), "Emissions: Last cycle not reached");
+
+    uint256 remainingEmissions = getRemainingEmissions();
+    uint256 xAllocationAmount = getLastXAllocationsAmount();
+    uint256 vote2EarnAmount = getLastVote2EarnAmount();
+
+    return remainingEmissions - xAllocationAmount - vote2EarnAmount;
+  }
+
+  function getRemainingEmissions() public view returns (uint256) {
+    return b3tr.cap() - b3tr.totalSupply();
   }
 
   // ----------- Setters ----------- //

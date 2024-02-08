@@ -7,8 +7,14 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Pausable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/interfaces/IERC6372.sol";
+import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
+import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
-contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl {
+contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
+  using Checkpoints for Checkpoints.Trace208;
+
   // Token ID counter
   uint256 private _nextTokenId;
 
@@ -20,6 +26,24 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl {
 
   // Mapping from X/Economic node type to maximum mintable level
   mapping(uint8 => uint256) public xNodeTypeToMaxMintableLevel;
+
+  // Mapping from owner to their level checkpoints
+  mapping(address owner => Checkpoints.Trace208) private _levelCheckpoints;
+
+  /**
+   * @dev The clock was incorrectly modified.
+   */
+  error ERC6372InconsistentClock();
+
+  /**
+   * @dev Lookup to future votes is not available.
+   */
+  error ERC5805FutureLookup(uint256 timepoint, uint48 clock);
+
+  /**
+   * @dev Emitted when an account changes their level.
+   */
+  event LevelOwnedChanged(address indexed owner, uint256 previousLevel, uint256 newLevel);
 
   constructor(string memory name, string memory symbol, address admin, uint256 maxLevel) ERC721(name, symbol) {
     _grantRole(DEFAULT_ADMIN_ROLE, admin);
@@ -33,9 +57,9 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl {
     // TODO: Check if that X/Economic node has not already been used to mint a Badge (e.g., MintedLevelOfXNode[xNodeId])
     uint256 mintableLevel = 1;
 
-    safeMint(msg.sender);
+    levelOf[_nextTokenId] = mintableLevel;
 
-    levelOf[_nextTokenId - 1] = mintableLevel;
+    safeMint(msg.sender);
   }
 
   function setMaxMintableLevels(uint256[] memory maxMintableLevels) public onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -56,14 +80,83 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl {
     _safeMint(to, tokenId);
   }
 
+  // TODO: Upgrading the Badge to the next level
+  // TODO: Setting baseURI & getting tokenURI based on level
+
+  /**
+   * @dev Clock used for flagging checkpoints. Can be overridden to implement timestamp based
+   * checkpoints (and voting), in which case {CLOCK_MODE} should be overridden as well to match.
+   */
+  function clock() public view virtual returns (uint48) {
+    return Time.blockNumber();
+  }
+
+  /**
+   * @dev Machine-readable description of the clock as specified in EIP-6372.
+   */
+  // solhint-disable-next-line func-name-mixedcase
+  function CLOCK_MODE() public view virtual returns (string memory) {
+    // Check that the clock was not modified
+    if (clock() != Time.blockNumber()) {
+      revert ERC6372InconsistentClock();
+    }
+    return "mode=blocknumber&from=default";
+  }
+
+  // ----------- Internal & Private ----------- //
+
+  /**
+   * @dev Moves delegated votes from one delegate to another.
+   */
+  function _moveOwnershipLevel(address from, address to, uint256 level) private {
+    if (from != to) {
+      if (from != address(0)) {
+        (uint256 oldValue, uint256 newValue) = _push(_levelCheckpoints[from], 0);
+        emit LevelOwnedChanged(from, oldValue, newValue);
+      }
+      if (to != address(0)) {
+        (uint256 oldValue, uint256 newValue) = _push(_levelCheckpoints[to], SafeCast.toUint208(level));
+        emit LevelOwnedChanged(to, oldValue, newValue);
+      }
+    }
+  }
+
+  function _push(Checkpoints.Trace208 storage store, uint208 delta) private returns (uint208, uint208) {
+    return store.push(clock(), delta);
+  }
+
+  /**
+   * @dev Get number of checkpoints for `account`.
+   */
+  function _numCheckpoints(address account) internal view virtual returns (uint32) {
+    return SafeCast.toUint32(_levelCheckpoints[account].length());
+  }
+
+  // ---------- Setters ---------- //
+
   function setMaxLevel(uint256 level) public onlyRole(DEFAULT_ADMIN_ROLE) {
     MAX_LEVEL = level;
   }
 
-  // TODO: Upgrading the Badge to the next level
-  // TODO: Setting baseURI & getting tokenURI based on level
+  // ---------- Getters ---------- //
 
-  // The following functions are overrides required by Solidity.
+  function getLevel(address owner) public view returns (uint256) {
+    return _levelCheckpoints[owner].latest();
+  }
+
+  function getPastLevel(address owner, uint256 timepoint) public view returns (uint256) {
+    uint48 currentTimepoint = clock();
+    if (timepoint >= currentTimepoint) {
+      revert ERC5805FutureLookup(timepoint, currentTimepoint);
+    }
+    return _levelCheckpoints[owner].upperLookupRecent(SafeCast.toUint48(timepoint));
+  }
+
+  function numCheckpoints(address account) public view returns (uint32) {
+    return _numCheckpoints(account);
+  }
+
+  // ---------- Overrides ---------- //
 
   function _beforeTokenTransfer(
     address from,
@@ -72,6 +165,8 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl {
     uint256 batchSize
   ) internal override(ERC721, ERC721Enumerable) {
     require(balanceOf(to) == 0, "Badge: Only 1 Badge allowed per address");
+
+    _moveOwnershipLevel(auth, to, levelOf[tokenId]);
 
     super._beforeTokenTransfer(from, to, tokenId, batchSize);
   }
