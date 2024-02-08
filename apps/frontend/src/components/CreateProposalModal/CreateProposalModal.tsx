@@ -200,7 +200,6 @@ export const CreateProposalModalForm: React.FC<CreateProposalModalFormProps> = (
     return <></>
   }, [votes, vot3Balance, proposalThreshold])
 
-  console.log({ votes, proposalThreshold })
   const canCreateProposal = useMemo(() => {
     if (!votes || !vot3Balance || !proposalThreshold) return false
 
