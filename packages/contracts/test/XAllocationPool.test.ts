@@ -5,7 +5,6 @@ import {
   createProposalAndExecuteIt,
   filterEventsByName,
   getOrDeployContractInstances,
-  parseAlloctionProposalCreatedEvent,
   parseAppAddedEvent,
   startNewAllocationRound,
   waitForVotingPeriodToEnd,
