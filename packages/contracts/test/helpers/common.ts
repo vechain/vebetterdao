@@ -4,6 +4,7 @@ import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethe
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { getOrDeployContractInstances } from "./deploy"
 import { mine } from "@nomicfoundation/hardhat-network-helpers"
+import { filterEventsByName, parseAlloctionProposalCreatedEvent } from "./events"
 
 export const waitForNextBlock = async () => {
   if (network.name === "hardhat") {
@@ -167,7 +168,6 @@ export const addAppThroughGovernance = async (
   appName: string = "Bike 4 Life" + Math.random(),
   appAddress: string,
   appMetadata: string = "",
-  availableForAllocationVoting: boolean = true,
 ) => {
   await createProposalAndExecuteIt(
     proposer,
@@ -177,7 +177,7 @@ export const addAppThroughGovernance = async (
     await ethers.getContractFactory("XAllocationPool"),
     "Add app to the list",
     "addApp",
-    [appAddress, appName, appMetadata, availableForAllocationVoting],
+    [appAddress, appName, appMetadata],
   )
 }
 
@@ -207,4 +207,17 @@ export const moveToCycle = async (emissions: Emissions, minter: HardhatEthersSig
     await waitForNextCycle(emissions)
     await emissions.connect(minter).distribute()
   }
+}
+
+export const startNewAllocationRound = async (xAllocationVoting: XAllocationVoting) => {
+  let tx = await xAllocationVoting.proposeNewAllocationRound()
+  let receipt = await tx.wait()
+  if (!receipt) throw new Error("No receipt")
+
+  let { proposalId: roundId } = parseAlloctionProposalCreatedEvent(
+    filterEventsByName(receipt.logs, "AllocationProposalCreated")[0],
+    xAllocationVoting,
+  )
+
+  return roundId
 }

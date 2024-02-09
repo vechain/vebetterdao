@@ -122,6 +122,9 @@ export const getOrDeployContractInstances = async ({
   )
   await xAllocationVoting.waitForDeployment()
 
+  // Setup XAllocationPool addresses
+  await xAllocationPool.connect(owner).setXAllocationVotingAddress(await xAllocationVoting.getAddress())
+
   const X_ALLOCATIONS_ADDRESS = await xAllocationPool.getAddress()
   const VOTE_2_EARN_ADDRESS = otherAccounts[1].address
   const TREASURY_ADDRESS = otherAccounts[2].address

@@ -26,7 +26,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
   bytes32[] private appIds;
 
   // Checkpoints for app availability for voting
-  mapping(bytes32 appId => Checkpoints.Trace208) private _appCanBeVotedForCheckpoints;
+  mapping(bytes32 appId => Checkpoints.Trace208) private _appElegibleForVoteCheckpoints;
 
   IXAllocationVotingGovernor public xAllocationVoting;
 
@@ -45,8 +45,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
   function addApp(
     address appAddress,
     string memory name,
-    string memory metadata,
-    bool availableForAllocationVoting
+    string memory metadata
   ) public override onlyRole(DEFAULT_ADMIN_ROLE) {
     bytes32 id = hashName(name);
 
@@ -55,16 +54,13 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
     // Store the new app
     apps[id] = App(id, appAddress, name, metadata, clock());
     appIds.push(id);
-    _updateAppCanBeVotedForChechkpoint(id, availableForAllocationVoting);
+    _updateAppVoteElegibilityCheckpoint(id, true);
 
-    emit AppAdded(id, appAddress, name, metadata, availableForAllocationVoting);
+    emit AppAdded(id, appAddress, name, metadata, true);
   }
 
-  function setAppAvailabilityForAllocationVoting(
-    bytes32 appId,
-    bool isAvailableForVoting
-  ) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    _updateAppCanBeVotedForChechkpoint(appId, isAvailableForVoting);
+  function setAppVoteElegibility(bytes32 appId, bool isElegible) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    _updateAppVoteElegibilityCheckpoint(appId, isElegible);
   }
 
   // ---------- Internal and private ---------- //
@@ -72,9 +68,9 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
   /**
    * @dev Update the app availability for voting checkpoint.
    */
-  function _updateAppCanBeVotedForChechkpoint(bytes32 appId, bool isAvailableForVoting) private {
-    _push(_appCanBeVotedForCheckpoints[appId], isAvailableForVoting ? 1 : 0);
-    emit AppAvailabilityForAllocationVotingChanged(appId, isAvailableForVoting);
+  function _updateAppVoteElegibilityCheckpoint(bytes32 appId, bool canBeVoted) private {
+    _push(_appElegibleForVoteCheckpoints[appId], canBeVoted ? 1 : 0);
+    emit AppAvailabilityForAllocationVotingChanged(appId, canBeVoted);
   }
 
   function _push(Checkpoints.Trace208 storage store, uint208 delta) private returns (uint208, uint208) {
@@ -83,30 +79,35 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
 
   // ---------- Getters ---------- //
 
-  function canBeVotedFor(bytes32 appId) public view virtual override returns (bool) {
+  /**
+   * @dev Returns true if an app is enabled to be voted and if it was created before the start of the requested round.
+   *
+   * @param appId the hashed name of the app
+   * @param roundId the proposal id from the XAllocationVoting contract which represents the allocation round
+   */
+  function isEligibleForVote(bytes32 appId, uint256 roundId) public view override returns (bool) {
     require(apps[appId].addr != address(0), "App does not exist");
     require(xAllocationVoting != IXAllocationVotingGovernor(address(0)), "XAllocationVoting address not set");
 
-    // if it was available for voting and it was created before the start of the current round
-    uint256 roundStartsAt = xAllocationVoting.getCurrentAllocationRoundSnapshot();
-    bool isAvailable = _appCanBeVotedForCheckpoints[appId].latest() == 1 && apps[appId].createdAt <= roundStartsAt;
+    uint256 roundStartsAt = xAllocationVoting.proposalSnapshot(roundId);
+
+    bool isAvailable = _appElegibleForVoteCheckpoints[appId].upperLookupRecent(SafeCast.toUint48(roundStartsAt)) == 1 &&
+      apps[appId].createdAt <= roundStartsAt;
 
     return isAvailable;
   }
 
-  function couldBeVotedFor(bytes32 appId, uint256 timepoint) public view virtual override returns (bool) {
-    require(apps[appId].addr != address(0), "App does not exist");
+  function isElegibleForVoteCurrentCheckpoint(bytes32 appId) public view returns (bool) {
+    return _appElegibleForVoteCheckpoints[appId].latest() == 1;
+  }
 
+  function isElegibleForVoteCheckpoint(bytes32 appId, uint256 timepoint) public view returns (bool) {
     uint48 currentTimepoint = clock();
     if (timepoint >= currentTimepoint) {
       revert ERC5805FutureLookup(timepoint, currentTimepoint);
     }
 
-    // if it was available for voting in that timepoint and it was created before that timepoint
-    bool isAvailable = _appCanBeVotedForCheckpoints[appId].upperLookupRecent(SafeCast.toUint48(timepoint)) == 1 &&
-      apps[appId].createdAt <= timepoint;
-
-    return isAvailable;
+    return _appElegibleForVoteCheckpoints[appId].upperLookupRecent(SafeCast.toUint48(timepoint)) == 1;
   }
 
   function hashName(string memory name) public pure returns (bytes32) {

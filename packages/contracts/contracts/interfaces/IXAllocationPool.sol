@@ -17,19 +17,9 @@ interface IXAllocationPool {
   event AppAvailabilityForAllocationVotingChanged(bytes32 indexed appId, bool isAvailable);
 
   /**
-   * @dev Returns true if the app is available for allocation voting in the latest checkpoint.
+   * @dev Returns true if the app is available for allocation voting in a specific allocation round.
    */
-  function canBeVotedFor(bytes32 appId) external view returns (bool);
+  function isEligibleForVote(bytes32 appId, uint256 roundId) external view returns (bool);
 
-  /**
-   * @dev Returns true if the app is available for allocation voting in a specific block number.
-   */
-  function couldBeVotedFor(bytes32 appId, uint256 timepoint) external view returns (bool);
-
-  function addApp(
-    address appAddress,
-    string memory name,
-    string memory metadata,
-    bool availableForAllocationVoting
-  ) external;
+  function addApp(address appAddress, string memory name, string memory metadata) external;
 }
