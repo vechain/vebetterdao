@@ -157,11 +157,6 @@ export const seedLocalEnvironment = async (
     .preMint()
     .then(async tx => await tx.wait())
 
-  const smallVotingPeriod = 1000 * 10
-
-  console.log("Setting small voting period...")
-  //   await xAllocationVoting.connect(Governor).setVotingPeriod(smallVotingPeriod).then(async tx => await tx.wait())
-
   //   Start new allocation round
   console.log("Starting new allocation round...")
   await xAllocationVoting.proposeNewAllocationRound().then(async tx => await tx.wait())
@@ -171,8 +166,7 @@ export const seedLocalEnvironment = async (
   console.log("Casting random votes to xDapps...")
   await castVotesToXDapps(xAllocationVoting, accountsToSeed, proposalId, amountToSwap, xDappsFromContract)
 
-  //TODO: import this from the contracts
-  //   await xAllocationVoting.setVotingPeriod(45818).then(async tx => await tx.wait())
+  //TODO: SEED multiple rounds and votes (we need to execute a proposal to change the votingPeriod to someseconds)
 
   const end = performance.now()
   console.log(`Seeding complete in ${end - start}ms`)
