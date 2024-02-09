@@ -71,7 +71,84 @@ describe("X-Allocation Pool", function () {
       expect(app[1]).to.eql(otherAccounts[1].address)
       expect(app[2]).to.eql("Bike 4 Life")
       expect(app[3]).to.eql("")
-      expect(app[4]).to.eql(true)
     }).timeout(18000000)
+  })
+
+  describe.only("App availability for allocation voting", function () {
+    it("Should be possible to add an app and make it available for allocation voting", async function () {
+      const { xAllocationPool, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      const app1Id = await xAllocationPool.hashName(otherAccounts[0].address)
+
+      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "", true)
+
+      const isAppAvailableForAllocationVoting = await xAllocationPool.isAppAvailableForAllocationVoting(app1Id)
+      expect(isAppAvailableForAllocationVoting).to.eql(true)
+    })
+
+    it("Admin can make an app available or unavailable for allocation voting", async function () {
+      const { xAllocationPool, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      const app1Id = await xAllocationPool.hashName(otherAccounts[0].address)
+
+      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "", true)
+
+      await xAllocationPool.connect(owner).setAppAvailabilityForAllocationVoting(app1Id, false)
+
+      let isAppAvailableForAllocationVoting = await xAllocationPool.isAppAvailableForAllocationVoting(app1Id)
+      expect(isAppAvailableForAllocationVoting).to.eql(false)
+
+      await xAllocationPool.connect(owner).setAppAvailabilityForAllocationVoting(app1Id, true)
+
+      isAppAvailableForAllocationVoting = await xAllocationPool.isAppAvailableForAllocationVoting(app1Id)
+      expect(isAppAvailableForAllocationVoting).to.eql(true)
+    })
+
+    it("DAO can make an app available or unavailable for allocation voting", async function () {
+      const { xAllocationPool, otherAccounts, governor } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      const app1Id = await xAllocationPool.hashName("Bike 4 Life")
+      const proposer = otherAccounts[0]
+      const voter1 = otherAccounts[1]
+
+      // check that app does not exists
+      await expect(xAllocationPool.getApp(app1Id)).to.be.reverted
+
+      await createProposalAndExecuteIt(
+        proposer,
+        voter1,
+        governor,
+        xAllocationPool,
+        await ethers.getContractFactory("XAllocationPool"),
+        "Add app to the list",
+        "addApp",
+        [otherAccounts[0].address, "Bike 4 Life", "", true],
+      )
+
+      let isAppAvailableForAllocationVoting = await xAllocationPool.isAppAvailableForAllocationVoting(app1Id)
+      expect(isAppAvailableForAllocationVoting).to.eql(true)
+
+      await createProposalAndExecuteIt(
+        proposer,
+        voter1,
+        governor,
+        xAllocationPool,
+        await ethers.getContractFactory("XAllocationPool"),
+        "Exclude app from the allocation voting rounds",
+        "setAppAvailabilityForAllocationVoting",
+        [app1Id, false],
+      )
+
+      isAppAvailableForAllocationVoting = await xAllocationPool.isAppAvailableForAllocationVoting(app1Id)
+      expect(isAppAvailableForAllocationVoting).to.eql(false)
+    })
+
+    it("Non-admin address cannot make an app available or unavailable for allocation voting", async function () {
+      const { xAllocationPool, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: false })
+
+      const app1Id = await xAllocationPool.hashName(otherAccounts[0].address)
+
+      await catchRevert(xAllocationPool.connect(otherAccounts[0]).setAppAvailabilityForAllocationVoting(app1Id, true))
+    })
   })
 })
