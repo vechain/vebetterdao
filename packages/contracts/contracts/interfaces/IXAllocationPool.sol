@@ -19,12 +19,12 @@ interface IXAllocationPool {
   /**
    * @dev Returns true if the app is available for allocation voting in the latest checkpoint.
    */
-  function isAppAvailableForAllocationVoting(bytes32 appId) external view returns (bool);
+  function canBeVotedFor(bytes32 appId) external view returns (bool);
 
   /**
    * @dev Returns true if the app is available for allocation voting in a specific block number.
    */
-  function wasAppAvailableForAllocationVoting(bytes32 appId, uint256 timepoint) external view returns (bool);
+  function couldBeVotedFor(bytes32 appId, uint256 timepoint) external view returns (bool);
 
   function addApp(
     address appAddress,

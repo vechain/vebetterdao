@@ -46,6 +46,7 @@ contract XAllocationVoting is
     }
   }
 
+  // ---------- Setters ---------- //
   function setXAllocationPoolAddress(address _xAllocationPool) public override onlyRole(DEFAULT_ADMIN_ROLE) {
     xAllocationPool = IXAllocationPool(_xAllocationPool);
   }
@@ -53,6 +54,15 @@ contract XAllocationVoting is
   function setB3trGovernanceAddress(address _newB3trGovernorAddress) public override onlyRole(DEFAULT_ADMIN_ROLE) {
     _b3trGovernor = _newB3trGovernorAddress;
   }
+
+  // ---------- Getters ---------- //
+
+  function getCurrentAllocationRoundSnapshot() public view returns (uint256) {
+    uint256 currentId = currentRoundId();
+    return proposalSnapshot(currentId);
+  }
+
+  // ---------- Required overrides ---------- //
 
   function votingDelay() public view override(XAllocationVotingGovernor, GovernorSettings) returns (uint256) {
     return super.votingDelay();

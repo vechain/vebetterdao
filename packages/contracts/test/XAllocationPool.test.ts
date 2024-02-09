@@ -82,8 +82,8 @@ describe("X-Allocation Pool", function () {
 
       await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "", true)
 
-      const isAppAvailableForAllocationVoting = await xAllocationPool.isAppAvailableForAllocationVoting(app1Id)
-      expect(isAppAvailableForAllocationVoting).to.eql(true)
+      const canBeVotedFor = await xAllocationPool.canBeVotedFor(app1Id)
+      expect(canBeVotedFor).to.eql(true)
     })
 
     it("Admin can make an app available or unavailable for allocation voting", async function () {
@@ -95,13 +95,13 @@ describe("X-Allocation Pool", function () {
 
       await xAllocationPool.connect(owner).setAppAvailabilityForAllocationVoting(app1Id, false)
 
-      let isAppAvailableForAllocationVoting = await xAllocationPool.isAppAvailableForAllocationVoting(app1Id)
-      expect(isAppAvailableForAllocationVoting).to.eql(false)
+      let canBeVotedFor = await xAllocationPool.canBeVotedFor(app1Id)
+      expect(canBeVotedFor).to.eql(false)
 
       await xAllocationPool.connect(owner).setAppAvailabilityForAllocationVoting(app1Id, true)
 
-      isAppAvailableForAllocationVoting = await xAllocationPool.isAppAvailableForAllocationVoting(app1Id)
-      expect(isAppAvailableForAllocationVoting).to.eql(true)
+      canBeVotedFor = await xAllocationPool.canBeVotedFor(app1Id)
+      expect(canBeVotedFor).to.eql(true)
     })
 
     it("DAO can make an app available or unavailable for allocation voting", async function () {
@@ -125,8 +125,8 @@ describe("X-Allocation Pool", function () {
         [otherAccounts[0].address, "Bike 4 Life", "", true],
       )
 
-      let isAppAvailableForAllocationVoting = await xAllocationPool.isAppAvailableForAllocationVoting(app1Id)
-      expect(isAppAvailableForAllocationVoting).to.eql(true)
+      let canBeVotedFor = await xAllocationPool.canBeVotedFor(app1Id)
+      expect(canBeVotedFor).to.eql(true)
 
       await createProposalAndExecuteIt(
         proposer,
@@ -139,8 +139,8 @@ describe("X-Allocation Pool", function () {
         [app1Id, false],
       )
 
-      isAppAvailableForAllocationVoting = await xAllocationPool.isAppAvailableForAllocationVoting(app1Id)
-      expect(isAppAvailableForAllocationVoting).to.eql(false)
+      canBeVotedFor = await xAllocationPool.canBeVotedFor(app1Id)
+      expect(canBeVotedFor).to.eql(false)
     })
 
     it("Non-admin address cannot make an app available or unavailable for allocation voting", async function () {

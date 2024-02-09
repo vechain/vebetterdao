@@ -6,6 +6,7 @@ import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol"
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
 
 contract XAllocationPool is IXAllocationPool, AccessControl {
   using Checkpoints for Checkpoints.Trace208;
@@ -15,6 +16,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
     address addr;
     string name;
     string metadata; //ipfs hash
+    uint48 createdAt; // block number when app was added
   }
 
   // Mapping from app ID to app
@@ -26,6 +28,8 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
   // Checkpoints for app availability for voting
   mapping(bytes32 appId => Checkpoints.Trace208) private _appAvailabilityForVotingCheckpoints;
 
+  IXAllocationVotingGovernor public xAllocationVoting;
+
   constructor(address[] memory admins) {
     for (uint i = 0; i < admins.length; i++) {
       _grantRole(DEFAULT_ADMIN_ROLE, admins[i]);
@@ -33,6 +37,10 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
   }
 
   // ---------- Setters ---------- //
+
+  function setXAllocationVotingAddress(address _xAllocationVoting) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    xAllocationVoting = IXAllocationVotingGovernor(_xAllocationVoting);
+  }
 
   function addApp(
     address appAddress,
@@ -45,7 +53,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
     require(apps[id].addr == address(0), "App with this ID already exists");
 
     // Store the new app
-    apps[id] = App(id, appAddress, name, metadata);
+    apps[id] = App(id, appAddress, name, metadata, clock());
     appIds.push(id);
     _updateAppAvailabilityForVotingChechkpoint(id, availableForAllocationVoting);
 
@@ -75,19 +83,32 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
 
   // ---------- Getters ---------- //
 
-  function isAppAvailableForAllocationVoting(bytes32 appId) public view virtual override returns (bool) {
-    return _appAvailabilityForVotingCheckpoints[appId].latest() == 1;
+  function canBeVotedFor(bytes32 appId) public view virtual override returns (bool) {
+    require(apps[appId].addr != address(0), "App does not exist");
+    require(xAllocationVoting != IXAllocationVotingGovernor(address(0)), "XAllocationVoting address not set");
+
+    // if it was available for voting and it was created before the start of the current round
+    uint256 roundStartsAt = xAllocationVoting.getCurrentAllocationRoundSnapshot();
+    bool isAvailable = _appAvailabilityForVotingCheckpoints[appId].latest() == 1 &&
+      apps[appId].createdAt <= roundStartsAt;
+
+    return isAvailable;
   }
 
-  function wasAppAvailableForAllocationVoting(
-    bytes32 appId,
-    uint256 timepoint
-  ) public view virtual override returns (bool) {
+  function couldBeVotedFor(bytes32 appId, uint256 timepoint) public view virtual override returns (bool) {
+    require(apps[appId].addr != address(0), "App does not exist");
+
     uint48 currentTimepoint = clock();
     if (timepoint >= currentTimepoint) {
       revert ERC5805FutureLookup(timepoint, currentTimepoint);
     }
-    return _appAvailabilityForVotingCheckpoints[appId].upperLookupRecent(SafeCast.toUint48(timepoint)) == 1;
+
+    // if it was available for voting in that timepoint and it was created before that timepoint
+    bool isAvailable = _appAvailabilityForVotingCheckpoints[appId].upperLookupRecent(SafeCast.toUint48(timepoint)) ==
+      1 &&
+      apps[appId].createdAt <= timepoint;
+
+    return isAvailable;
   }
 
   function hashName(string memory name) public pure returns (bytes32) {

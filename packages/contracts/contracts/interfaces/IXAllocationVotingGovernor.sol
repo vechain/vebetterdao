@@ -238,4 +238,9 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
    * @dev Returns the current allocation proposal round.
    */
   function currentRoundId() external view returns (uint256);
+
+  /**
+   * @dev Returns the current allocation proposal round snapshot (block).
+   */
+  function getCurrentAllocationRoundSnapshot() external view returns (uint256);
 }
