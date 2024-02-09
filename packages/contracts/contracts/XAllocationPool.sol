@@ -26,7 +26,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
   bytes32[] private appIds;
 
   // Checkpoints for app availability for voting
-  mapping(bytes32 appId => Checkpoints.Trace208) private _appAvailabilityForVotingCheckpoints;
+  mapping(bytes32 appId => Checkpoints.Trace208) private _appCanBeVotedForCheckpoints;
 
   IXAllocationVotingGovernor public xAllocationVoting;
 
@@ -55,7 +55,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
     // Store the new app
     apps[id] = App(id, appAddress, name, metadata, clock());
     appIds.push(id);
-    _updateAppAvailabilityForVotingChechkpoint(id, availableForAllocationVoting);
+    _updateAppCanBeVotedForChechkpoint(id, availableForAllocationVoting);
 
     emit AppAdded(id, appAddress, name, metadata, availableForAllocationVoting);
   }
@@ -64,7 +64,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
     bytes32 appId,
     bool isAvailableForVoting
   ) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    _updateAppAvailabilityForVotingChechkpoint(appId, isAvailableForVoting);
+    _updateAppCanBeVotedForChechkpoint(appId, isAvailableForVoting);
   }
 
   // ---------- Internal and private ---------- //
@@ -72,8 +72,8 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
   /**
    * @dev Update the app availability for voting checkpoint.
    */
-  function _updateAppAvailabilityForVotingChechkpoint(bytes32 appId, bool isAvailableForVoting) private {
-    _push(_appAvailabilityForVotingCheckpoints[appId], isAvailableForVoting ? 1 : 0);
+  function _updateAppCanBeVotedForChechkpoint(bytes32 appId, bool isAvailableForVoting) private {
+    _push(_appCanBeVotedForCheckpoints[appId], isAvailableForVoting ? 1 : 0);
     emit AppAvailabilityForAllocationVotingChanged(appId, isAvailableForVoting);
   }
 
@@ -89,8 +89,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
 
     // if it was available for voting and it was created before the start of the current round
     uint256 roundStartsAt = xAllocationVoting.getCurrentAllocationRoundSnapshot();
-    bool isAvailable = _appAvailabilityForVotingCheckpoints[appId].latest() == 1 &&
-      apps[appId].createdAt <= roundStartsAt;
+    bool isAvailable = _appCanBeVotedForCheckpoints[appId].latest() == 1 && apps[appId].createdAt <= roundStartsAt;
 
     return isAvailable;
   }
@@ -104,8 +103,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
     }
 
     // if it was available for voting in that timepoint and it was created before that timepoint
-    bool isAvailable = _appAvailabilityForVotingCheckpoints[appId].upperLookupRecent(SafeCast.toUint48(timepoint)) ==
-      1 &&
+    bool isAvailable = _appCanBeVotedForCheckpoints[appId].upperLookupRecent(SafeCast.toUint48(timepoint)) == 1 &&
       apps[appId].createdAt <= timepoint;
 
     return isAvailable;
