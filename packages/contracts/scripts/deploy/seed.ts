@@ -8,7 +8,6 @@ type App = {
   address: string
   name: string
   metadata: string
-  availableForAllocationVoting: boolean
 }
 /**
  *  Mint $B3TR tokens and swap for VOT3 tokens
@@ -58,7 +57,7 @@ const addXDapps = async (xAllocationPool: XAllocationPool, accounts: HardhatEthe
     apps.map(async app => {
       return await xAllocationPool
         .connect(accounts[0])
-        .addApp(app.address, app.name, app.metadata, app.availableForAllocationVoting)
+        .addApp(app.address, app.name, app.metadata)
         .then(async tx => await tx.wait())
     }),
   )
@@ -128,19 +127,16 @@ export const seedLocalEnvironment = async (
       address: accounts[6].address,
       name: "Test app 1",
       metadata: "https://test-app-1.com",
-      availableForAllocationVoting: true,
     },
     {
       address: accounts[7].address,
       name: "Test app 2",
       metadata: "https://test-app-2.com",
-      availableForAllocationVoting: true,
     },
     {
       address: accounts[8].address,
       name: "Test app 3",
       metadata: "https://test-app-3.com",
-      availableForAllocationVoting: true,
     },
   ]
 
