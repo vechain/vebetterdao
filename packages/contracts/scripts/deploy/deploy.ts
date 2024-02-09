@@ -1,6 +1,6 @@
 import { ethers, network } from "hardhat"
 import { B3TR, GovernorContract, TimeLock, VOT3, XAllocationPool } from "../../typechain-types"
-import { seedLocalEnvironmnet } from "./seed"
+import { seedLocalEnvironment } from "./seed"
 
 const DEFAULT_MINTER = "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68" //2nd account from mnemonic of solo network
 const TIMELOCK_ADMIN = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa" //1st account from mnemonic of solo network
@@ -67,7 +67,7 @@ export async function deployAll() {
   )
 
   if (network.name === "vechain_solo") {
-    await seedLocalEnvironmnet(b3tr, xAllocationPool, xAllocationVoting, emissions)
+    await seedLocalEnvironment(b3tr, vot3, xAllocationPool, xAllocationVoting, emissions)
   }
 
   return {
