@@ -185,6 +185,25 @@ describe("X-Allocation Pool", function () {
       await catchRevert(xAllocationPool.connect(otherAccounts[0]).setAppVoteElegibility(app1Id, true))
     })
 
-    it("App needs to wait next round if added during an ongoing round", async function () {})
+    it("App needs to wait next round if added during an ongoing round", async function () {
+      const { xAllocationPool, otherAccounts, owner, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const app1Id = await xAllocationPool.hashName(otherAccounts[0].address)
+
+      let round1 = await startNewAllocationRound(xAllocationVoting)
+
+      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "")
+      let isEligibleForVote = await xAllocationPool.isEligibleForVote(app1Id, round1)
+      expect(isEligibleForVote).to.eql(false)
+
+      await waitForVotingPeriodToEnd(round1, xAllocationVoting)
+      let round2 = await startNewAllocationRound(xAllocationVoting)
+
+      // app should not be elegible from this round
+      isEligibleForVote = await xAllocationPool.isEligibleForVote(app1Id, round2)
+      expect(isEligibleForVote).to.eql(true)
+    })
   })
 })
