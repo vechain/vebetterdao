@@ -97,7 +97,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
     return isAvailable;
   }
 
-  function isElegibleForVoteCurrentCheckpoint(bytes32 appId) public view returns (bool) {
+  function isElegibleForVoteLatestCheckpoint(bytes32 appId) public view returns (bool) {
     return _appElegibleForVoteCheckpoints[appId].latest() == 1;
   }
 

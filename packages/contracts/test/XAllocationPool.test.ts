@@ -98,14 +98,14 @@ describe("X-Allocation Pool", function () {
       const app1Id = await xAllocationPool.hashName(otherAccounts[0].address)
       await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "")
       // check that eligibility was set
-      expect(await xAllocationPool.isElegibleForVoteCurrentCheckpoint(app1Id)).to.eql(true)
+      expect(await xAllocationPool.isElegibleForVoteLatestCheckpoint(app1Id)).to.eql(true)
 
       let round1 = await startNewAllocationRound(xAllocationVoting)
 
       await xAllocationPool.connect(owner).setVotingElegibility(app1Id, false)
 
       // check that eligibility was set
-      expect(await xAllocationPool.isElegibleForVoteCurrentCheckpoint(app1Id)).to.eql(false)
+      expect(await xAllocationPool.isElegibleForVoteLatestCheckpoint(app1Id)).to.eql(false)
 
       // app should still be eligible for the current round
       let isEligibleForVote = await xAllocationPool.isEligibleForVote(app1Id, round1)
@@ -163,7 +163,7 @@ describe("X-Allocation Pool", function () {
       )
 
       // check that eligibility was set
-      expect(await xAllocationPool.isElegibleForVoteCurrentCheckpoint(app1Id)).to.eql(false)
+      expect(await xAllocationPool.isElegibleForVoteLatestCheckpoint(app1Id)).to.eql(false)
 
       // app should still be eligible for the current round
       isEligibleForVote = await xAllocationPool.isEligibleForVote(app1Id, round1)
