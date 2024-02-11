@@ -101,7 +101,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
     return _appElegibleForVoteCheckpoints[appId].latest() == 1;
   }
 
-  function isElegibleForVoteCheckpoint(bytes32 appId, uint256 timepoint) public view returns (bool) {
+  function isElegibleForVotePastCheckpoint(bytes32 appId, uint256 timepoint) public view returns (bool) {
     uint48 currentTimepoint = clock();
     if (timepoint >= currentTimepoint) {
       revert ERC5805FutureLookup(timepoint, currentTimepoint);
