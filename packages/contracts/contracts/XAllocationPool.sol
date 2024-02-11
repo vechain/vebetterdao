@@ -69,7 +69,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
     _updateVotingElegibilityCheckpoint(appId, isElegible);
   }
 
-  // ---------- Internal and private ---------- //\
+  // ---------- Internal and private ---------- //
 
   /**
    * @dev Update the app availability for voting checkpoint.
