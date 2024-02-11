@@ -170,7 +170,7 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   ) internal virtual;
 
   /**
-   * @dev See {IXAllocationVotingGovernor-proposeNewAllocationRound}. This function has opt-in frontrunning protection, described in {_isValidDescriptionForProposer}.
+   * @dev See {IXAllocationVotingGovernor-proposeNewAllocationRound}.
    */
   function proposeNewAllocationRound() public virtual returns (uint256) {
     address proposer = _msgSender();
