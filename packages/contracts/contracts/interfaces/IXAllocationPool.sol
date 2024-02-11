@@ -14,7 +14,7 @@ interface IXAllocationPool {
 
   event AppAdded(bytes32 indexed id, address addr, string name, string metadata, bool appAvailableForAllocationVoting);
 
-  event AppAvailabilityForAllocationVotingChanged(bytes32 indexed appId, bool isAvailable);
+  event VotingElegibilityChanged(bytes32 indexed appId, bool isAvailable);
 
   /**
    * @dev Returns true if the app is available for allocation voting in a specific allocation round.

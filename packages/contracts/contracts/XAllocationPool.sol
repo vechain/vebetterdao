@@ -54,23 +54,23 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
     // Store the new app
     apps[id] = App(id, appAddress, name, metadata, clock());
     appIds.push(id);
-    _updateAppVoteElegibilityCheckpoint(id, true);
+    _updateVotingElegibilityCheckpoint(id, true);
 
     emit AppAdded(id, appAddress, name, metadata, true);
   }
 
-  function setAppVoteElegibility(bytes32 appId, bool isElegible) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    _updateAppVoteElegibilityCheckpoint(appId, isElegible);
+  function setVotingElegibility(bytes32 appId, bool isElegible) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    _updateVotingElegibilityCheckpoint(appId, isElegible);
   }
 
-  // ---------- Internal and private ---------- //
+  // ---------- Internal and private ---------- //\
 
   /**
    * @dev Update the app availability for voting checkpoint.
    */
-  function _updateAppVoteElegibilityCheckpoint(bytes32 appId, bool canBeVoted) private {
+  function _updateVotingElegibilityCheckpoint(bytes32 appId, bool canBeVoted) private {
     _push(_appElegibleForVoteCheckpoints[appId], canBeVoted ? 1 : 0);
-    emit AppAvailabilityForAllocationVotingChanged(appId, canBeVoted);
+    emit VotingElegibilityChanged(appId, canBeVoted);
   }
 
   function _push(Checkpoints.Trace208 storage store, uint208 delta) private returns (uint208, uint208) {

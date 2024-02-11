@@ -102,7 +102,7 @@ describe("X-Allocation Pool", function () {
 
       let round1 = await startNewAllocationRound(xAllocationVoting)
 
-      await xAllocationPool.connect(owner).setAppVoteElegibility(app1Id, false)
+      await xAllocationPool.connect(owner).setVotingElegibility(app1Id, false)
 
       // check that eligibility was set
       expect(await xAllocationPool.isElegibleForVoteCurrentCheckpoint(app1Id)).to.eql(false)
@@ -158,7 +158,7 @@ describe("X-Allocation Pool", function () {
         xAllocationPool,
         await ethers.getContractFactory("XAllocationPool"),
         "Exclude app from the allocation voting rounds",
-        "setAppVoteElegibility",
+        "setVotingElegibility",
         [app1Id, false],
       )
 
@@ -182,7 +182,7 @@ describe("X-Allocation Pool", function () {
 
       const app1Id = await xAllocationPool.hashName(otherAccounts[0].address)
 
-      await catchRevert(xAllocationPool.connect(otherAccounts[0]).setAppVoteElegibility(app1Id, true))
+      await catchRevert(xAllocationPool.connect(otherAccounts[0]).setVotingElegibility(app1Id, true))
     })
 
     it("App needs to wait next round if added during an ongoing round", async function () {
