@@ -36,7 +36,6 @@ module.exports = {
       },
       restful: true,
       gas: 10000000,
-      count: 10,
     },
     vechain_testnet: {
       url: VECHAIN_URL_TESTNET,
@@ -47,7 +46,6 @@ module.exports = {
       },
       restful: true,
       gas: 10000000,
-      count: 10,
     },
     vechain_mainnet: {
       url: VECHAIN_URL_MAINNET,
