@@ -7,6 +7,7 @@ import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.s
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
+import { IEmissions } from "./interfaces/IEmissions.sol";
 
 contract XAllocationPool is IXAllocationPool, AccessControl {
   using Checkpoints for Checkpoints.Trace208;
@@ -20,15 +21,16 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
   }
 
   // Mapping from app ID to app
-  mapping(bytes32 => App) private apps;
+  mapping(bytes32 => App) private _apps;
 
-  // List of app IDs to enable retrieval of all apps
-  bytes32[] private appIds;
+  // List of app IDs to enable retrieval of all _apps
+  bytes32[] private _appIds;
 
   // Checkpoints for app availability for voting
   mapping(bytes32 appId => Checkpoints.Trace208) private _appElegibleForVoteCheckpoints;
 
-  IXAllocationVotingGovernor public xAllocationVoting;
+  IXAllocationVotingGovernor internal _xAllocationVoting;
+  IEmissions internal _emissions;
 
   constructor(address[] memory admins) {
     for (uint i = 0; i < admins.length; i++) {
@@ -38,8 +40,12 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
 
   // ---------- Setters ---------- //
 
-  function setXAllocationVotingAddress(address _xAllocationVoting) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    xAllocationVoting = IXAllocationVotingGovernor(_xAllocationVoting);
+  function setXAllocationVotingAddress(address xAllocationVoting_) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    _xAllocationVoting = IXAllocationVotingGovernor(xAllocationVoting_);
+  }
+
+  function setEmissionsAddress(address emissions_) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    _emissions = IEmissions(emissions_);
   }
 
   function addApp(
@@ -49,11 +55,11 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
   ) public override onlyRole(DEFAULT_ADMIN_ROLE) {
     bytes32 id = hashName(name);
 
-    require(apps[id].addr == address(0), "App with this ID already exists");
+    require(_apps[id].addr == address(0), "App with this ID already exists");
 
     // Store the new app
-    apps[id] = App(id, appAddress, name, metadata, clock());
-    appIds.push(id);
+    _apps[id] = App(id, appAddress, name, metadata, clock());
+    _appIds.push(id);
     _updateVotingElegibilityCheckpoint(id, true);
 
     emit AppAdded(id, appAddress, name, metadata, true);
@@ -86,13 +92,13 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
    * @param roundId the proposal id from the XAllocationVoting contract which represents the allocation round
    */
   function isEligibleForVote(bytes32 appId, uint256 roundId) public view override returns (bool) {
-    require(apps[appId].addr != address(0), "App does not exist");
-    require(xAllocationVoting != IXAllocationVotingGovernor(address(0)), "XAllocationVoting address not set");
+    require(_apps[appId].addr != address(0), "App does not exist");
+    require(xAllocationVoting() != IXAllocationVotingGovernor(address(0)), "XAllocationVoting address not set");
 
-    uint256 roundStartsAt = xAllocationVoting.proposalSnapshot(roundId);
+    uint256 roundStartsAt = xAllocationVoting().proposalSnapshot(roundId);
 
     bool isAvailable = _appElegibleForVoteCheckpoints[appId].upperLookupRecent(SafeCast.toUint48(roundStartsAt)) == 1 &&
-      apps[appId].createdAt <= roundStartsAt;
+      _apps[appId].createdAt <= roundStartsAt;
 
     return isAvailable;
   }
@@ -116,17 +122,25 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
 
   // Function to retrieve an app by ID
   function getApp(bytes32 id) public view virtual returns (App memory) {
-    require(apps[id].addr != address(0), "App does not exist");
-    return apps[id];
+    require(_apps[id].addr != address(0), "App does not exist");
+    return _apps[id];
   }
 
   // Function to retrieve all apps
   function getAllApps() public view returns (App[] memory) {
-    App[] memory allApps = new App[](appIds.length);
-    for (uint i = 0; i < appIds.length; i++) {
-      allApps[i] = apps[appIds[i]];
+    App[] memory allApps = new App[](_appIds.length);
+    for (uint i = 0; i < _appIds.length; i++) {
+      allApps[i] = _apps[_appIds[i]];
     }
     return allApps;
+  }
+
+  function xAllocationVoting() public view returns (IXAllocationVotingGovernor) {
+    return _xAllocationVoting;
+  }
+
+  function emissions() public view returns (IEmissions) {
+    return _emissions;
   }
 
   /**
