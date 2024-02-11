@@ -73,15 +73,15 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
     emit AllocationVoteCast(voter, proposalId, apps, weights);
   }
 
-  function getAppVotes(uint256 proposalId, bytes32 app) public view returns (uint256) {
+  function getAppVotes(uint256 proposalId, bytes32 app) public view override returns (uint256) {
     return _allocationRoundVotes[proposalId].votesReceived[app];
   }
 
-  function totalVotes(uint256 proposalId) public view returns (uint256) {
+  function totalVotes(uint256 proposalId) public view override returns (uint256) {
     return _allocationRoundVotes[proposalId].totalVotes;
   }
 
-  function totalVoters(uint256 proposalId) public view returns (uint256) {
+  function totalVoters(uint256 proposalId) public view override returns (uint256) {
     return _allocationRoundVotes[proposalId].totalVoters;
   }
 

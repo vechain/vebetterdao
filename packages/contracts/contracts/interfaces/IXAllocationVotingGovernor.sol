@@ -209,6 +209,24 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
 
   /**
    * @notice module:reputation
+   * @dev Total number of votes cast in an allocation round.
+   */
+  function totalVotes(uint256 proposalId) external view returns (uint256);
+
+  /**
+   * @notice module:reputation
+   * @dev Total number of voters in an allocation round.
+   */
+  function totalVoters(uint256 proposalId) external view returns (uint256);
+
+  /**
+   * @notice module:reputation
+   * @dev Number of votes cast for a specific app in an allocation round.
+   */
+  function getAppVotes(uint256 proposalId, bytes32 appId) external view returns (uint256);
+
+  /**
+   * @notice module:reputation
    * @dev Voting power of an `account` at a specific `timepoint` given additional encoded parameters.
    */
   function getVotesWithParams(address account, uint256 timepoint, bytes memory params) external view returns (uint256);
