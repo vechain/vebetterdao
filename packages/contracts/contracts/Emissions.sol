@@ -287,6 +287,10 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   function isLastCycleId(uint256 cycleId) public view returns (bool) {
+    if (cycleId == 0) {
+      return false;
+    }
+
     return cycleId == lastCycleId;
   }
 
