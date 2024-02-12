@@ -22,7 +22,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
 
   // Pre-mint allocations
   uint256[] public preMintAllocations;
-  // Last mint allcoations
+  // Last mint allocations
   uint256[] public lastMintAllocations;
 
   // ----------- Cycle attributes ----------- //
