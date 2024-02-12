@@ -22,10 +22,13 @@ contract Emissions is AccessControl, ReentrancyGuard {
 
   // Pre-mint allocations
   uint256[] public preMintAllocations;
+  // Last mint allcoations
+  uint256[] public lastMintAllocations;
 
   // ----------- Cycle attributes ----------- //
   uint256 public nextCycle; // Next cycle number
   uint256 public cycleDuration; // Duration of a cycle in blocks
+  uint256 public lastCycleId; // Last cycle number, only set after the last cycle is distributed
 
   // ----------- Decay rates ----------- //
   uint256 public xAllocationsDecay; // Decay rate for xAllocations in percentage
@@ -154,14 +157,21 @@ contract Emissions is AccessControl, ReentrancyGuard {
     require(START_BLOCK > 0, "Emissions: Pre-mint not done");
     require(isLastCycle(), "Emissions: Last cycle not reached");
 
+    lastCycleId = nextCycle;
+
     uint256 remainingEmissions = getRemainingEmissions();
 
     uint256 xAllocationAmount = getDecayedAmount(remainingEmissions, 100 - lastEmissions[0], 1);
     uint256 vote2EarnAmount = getDecayedAmount(remainingEmissions, 100 - lastEmissions[1], 1);
+    uint256 treasuryAmount = remainingEmissions - xAllocationAmount - vote2EarnAmount;
 
     b3tr.mint(xAllocations, xAllocationAmount);
     b3tr.mint(vote2Earn, vote2EarnAmount);
-    b3tr.mint(treasury, remainingEmissions - xAllocationAmount - vote2EarnAmount);
+    b3tr.mint(treasury, treasuryAmount);
+
+    lastMintAllocations.push(xAllocationAmount);
+    lastMintAllocations.push(vote2EarnAmount);
+    lastMintAllocations.push(treasuryAmount);
   }
 
   // ----------- Getters ----------- //
@@ -234,6 +244,10 @@ contract Emissions is AccessControl, ReentrancyGuard {
     return preMintAllocations;
   }
 
+  function getLastMintAllocations() public view returns (uint256[] memory) {
+    return lastMintAllocations;
+  }
+
   function getXAllocationAmountForCycle(uint256 cycle) public view returns (uint256) {
     if (cycle == 1) {
       return preMintAllocations[0];
@@ -270,6 +284,10 @@ contract Emissions is AccessControl, ReentrancyGuard {
 
     return ((getCurrentXAllocationsAmount() + getCurrentVote2EarnAmount() + getCurrentTreasuryAmount()) >
       remainingEmissions);
+  }
+
+  function isLastCycleId(uint256 cycleId) public view returns (bool) {
+    return cycleId == lastCycleId;
   }
 
   function getLastXAllocationsAmount() public view returns (uint256) {

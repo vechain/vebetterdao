@@ -44,6 +44,8 @@ interface IEmissions {
 
   function getPreMintAllocations() external view returns (uint256[] memory);
 
+  function getLastMintAllocations() external view returns (uint256[] memory);
+
   function getRemainingEmissions() external view returns (uint256);
 
   function getRoleAdmin(bytes32 role) external view returns (bytes32);
@@ -75,6 +77,8 @@ interface IEmissions {
   function isCycleDistributed(uint256 cycle) external view returns (bool);
 
   function isLastCycle() external view returns (bool);
+
+  function isLastCycleId(uint256 cycle) external view returns (bool);
 
   function lastEmissions(uint256) external view returns (uint256);
 
