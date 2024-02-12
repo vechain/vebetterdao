@@ -47,7 +47,7 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
     for (uint256 i = 0; i < apps.length; i++) {
       totalWeight += weights[i];
 
-      if (!xAllocationPool().isEligibleForVote(apps[i], proposalId)) {
+      if (!isEligibleForVote(apps[i], proposalId)) {
         revert GovernorAppNotAvailableForVoting(apps[i]);
       }
 

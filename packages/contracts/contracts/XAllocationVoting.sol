@@ -6,6 +6,7 @@ import "./x-allocation-voting-governance/modules/GovernorXAllocationVotesCountin
 import "./x-allocation-voting-governance/modules/GovernorVotes.sol";
 import "./x-allocation-voting-governance/modules/GovernorVotesQuorumFraction.sol";
 import "./x-allocation-voting-governance/modules/GovernorSettings.sol";
+import "./x-allocation-voting-governance/modules/XApps.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract XAllocationVoting is
@@ -14,7 +15,8 @@ contract XAllocationVoting is
   GovernorXAllocationVotesCounting,
   GovernorVotes,
   GovernorVotesQuorumFraction,
-  AccessControl
+  AccessControl,
+  XApps
 {
   /**
    * @notice Construct a XAllocationVotingGovernor contract
@@ -23,7 +25,6 @@ contract XAllocationVoting is
    * @param _initialVotingPeriod How long does a proposal remain open to votes
    * @param _initialVotingDelay How long after a proposal is created should become active
    * @param _b3trGovernor The address of the B3trGovernor DAO
-   * @param _xAllocationPool The address of the XAllocationPool
    * @param _admins The addresses of the admins (DAO + another address) that can update the XAllocationPool address, only DAO will remain in the final version
    */
   constructor(
@@ -32,13 +33,13 @@ contract XAllocationVoting is
     uint32 _initialVotingPeriod,
     uint48 _initialVotingDelay,
     address _b3trGovernor,
-    address _xAllocationPool,
     address[] memory _admins
   )
-    XAllocationVotingGovernor("XAllocationVoting", _b3trGovernor, _xAllocationPool)
+    XAllocationVotingGovernor("XAllocationVoting", _b3trGovernor)
     GovernorSettings(_initialVotingDelay, _initialVotingPeriod)
     GovernorVotes(_vot3Token)
     GovernorVotesQuorumFraction(_quorumPercentage)
+    XApps(_admins)
   {
     for (uint256 i = 0; i < _admins.length; i++) {
       _grantRole(DEFAULT_ADMIN_ROLE, _admins[i]);
@@ -46,12 +47,33 @@ contract XAllocationVoting is
   }
 
   // ---------- Setters ---------- //
-  function setXAllocationPoolAddress(address xAllocationPool_) public override onlyRole(DEFAULT_ADMIN_ROLE) {
-    _xAllocationPool = IXAllocationPool(xAllocationPool_);
-  }
-
   function setB3trGovernanceAddress(address b3trGovernor_) public override onlyRole(DEFAULT_ADMIN_ROLE) {
     _b3trGovernor = b3trGovernor_;
+  }
+
+  function _propose(address proposer) internal virtual override returns (uint256 proposalId) {
+    ++_proposalCount;
+    proposalId = _proposalCount;
+
+    if (_proposals[proposalId].voteStart != 0) {
+      revert GovernorUnexpectedProposalState(proposalId, state(proposalId), bytes32(0));
+    }
+
+    // save x-apps that users can vote for
+    bytes32[] memory apps = allElegibleApps();
+    _appsElegibleForVoting[proposalId] = apps;
+
+    uint256 snapshot = clock() + votingDelay();
+    uint256 duration = votingPeriod();
+
+    ProposalCore storage proposal = _proposals[proposalId];
+    proposal.proposer = proposer;
+    proposal.voteStart = SafeCast.toUint48(snapshot);
+    proposal.voteDuration = SafeCast.toUint32(duration);
+
+    emit AllocationProposalCreated(proposalId, proposer, snapshot, snapshot + duration);
+
+    // Using a named return variable to avoid stack too deep errors
   }
 
   // ---------- Getters ---------- //
@@ -83,7 +105,7 @@ contract XAllocationVoting is
 
   function supportsInterface(
     bytes4 interfaceId
-  ) public view override(AccessControl, XAllocationVotingGovernor) returns (bool) {
+  ) public view override(AccessControl, XAllocationVotingGovernor, XApps) returns (bool) {
     return super.supportsInterface(interfaceId);
   }
 }

@@ -33,7 +33,6 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   string private _name;
 
   address internal _b3trGovernor;
-  IXAllocationPool internal _xAllocationPool;
 
   mapping(uint256 proposalId => ProposalCore) internal _proposals;
   mapping(uint256 proposalId => bytes32[]) internal _appsElegibleForVoting;
@@ -52,10 +51,9 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   /**
    * @dev Sets the value for {name} and {version}
    */
-  constructor(string memory name_, address b3trGovernor_, address xAllocationPool_) {
+  constructor(string memory name_, address b3trGovernor_) {
     _name = name_;
     _b3trGovernor = b3trGovernor_;
-    _xAllocationPool = IXAllocationPool(xAllocationPool_);
   }
 
   /**
@@ -93,19 +91,9 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
     return _b3trGovernor;
   }
 
-  function xAllocationPool() public view returns (IXAllocationPool) {
-    return _xAllocationPool;
-  }
-
-  function getXAllocationPoolAddress() public view returns (address) {
-    return address(_xAllocationPool);
-  }
-
   function appsElegibleForVoting(uint256 roundId) public view override returns (bytes32[] memory) {
     return _appsElegibleForVoting[roundId];
   }
-
-  function setXAllocationPoolAddress(address xAllocationPool_) public virtual;
 
   /**
    * Returns the current round id.
@@ -211,30 +199,7 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
    *
    * Emits a {IXAllocationVotingGovernor-ProposalCreated} event.
    */
-  function _propose(address proposer) internal virtual returns (uint256 proposalId) {
-    ++_proposalCount;
-    proposalId = _proposalCount;
-
-    if (_proposals[proposalId].voteStart != 0) {
-      revert GovernorUnexpectedProposalState(proposalId, state(proposalId), bytes32(0));
-    }
-
-    // save x-apps that users can vote for
-    bytes32[] memory apps = xAllocationPool().allElegibleApps();
-    _appsElegibleForVoting[proposalId] = apps;
-
-    uint256 snapshot = clock() + votingDelay();
-    uint256 duration = votingPeriod();
-
-    ProposalCore storage proposal = _proposals[proposalId];
-    proposal.proposer = proposer;
-    proposal.voteStart = SafeCast.toUint48(snapshot);
-    proposal.voteDuration = SafeCast.toUint32(duration);
-
-    emit AllocationProposalCreated(proposalId, proposer, snapshot, snapshot + duration);
-
-    // Using a named return variable to avoid stack too deep errors
-  }
+  function _propose(address proposer) internal virtual returns (uint256 proposalId);
 
   /**
    * @dev See {IXAllocationVotingGovernor-getVotes}.
@@ -412,4 +377,6 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   function quorum(uint256 timepoint) public view virtual returns (uint256);
 
   function setB3trGovernanceAddress(address newB3trGovernance) public virtual;
+
+  function isEligibleForVote(bytes32 appId, uint256 proposalId) public view virtual returns (bool);
 }
