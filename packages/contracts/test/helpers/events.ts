@@ -40,7 +40,7 @@ export const parseAllocationVoteCastEvent = (event: any, xAllocationVoting: XAll
   }
 }
 
-export const parseAppAddedEvent = (event: any, xAllocationPool: XAllocationPool) => {
+export const parseAppAddedEvent = (event: any, xAllocationPool: XAllocationVoting) => {
   const decoded = decodeEvent(event, xAllocationPool)
 
   return {

@@ -6,6 +6,7 @@ import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Context } from "@openzeppelin/contracts/utils/Context.sol";
 import { Nonces } from "@openzeppelin/contracts/utils/Nonces.sol";
 import { IXAllocationVotingGovernor, IERC6372 } from "../interfaces/IXAllocationVotingGovernor.sol";
+import { IXAllocationPool } from "../interfaces/IXAllocationPool.sol";
 
 /**
  * @dev Core of the x-allocation votes governance system, designed to be extended through various modules.
@@ -34,13 +35,14 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   address internal _b3trGovernor;
 
   mapping(uint256 proposalId => ProposalCore) internal _proposals;
+  mapping(uint256 proposalId => bytes32[]) internal _appsElegibleForVoting;
 
   /**
    * @dev Restricts a function so it can only be executed through governance proposals. For example, governance
    * parameter setters in {GovernorSettings} are protected using this modifier.
    */
   modifier onlyGovernance() {
-    if (getB3trGovernorAddress() != _msgSender()) {
+    if (_b3trGovernor != _msgSender()) {
       revert GovernorOnlyExecutor(_msgSender());
     }
     _;
@@ -85,8 +87,12 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   /**
    * Returns the address of the B3trGovernor contract.
    */
-  function getB3trGovernorAddress() public view returns (address) {
+  function b3trGovernor() public view returns (address) {
     return _b3trGovernor;
+  }
+
+  function appsElegibleForVoting(uint256 roundId) public view override returns (bytes32[] memory) {
+    return _appsElegibleForVoting[roundId];
   }
 
   /**
@@ -170,7 +176,7 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   ) internal virtual;
 
   /**
-   * @dev See {IXAllocationVotingGovernor-proposeNewAllocationRound}. This function has opt-in frontrunning protection, described in {_isValidDescriptionForProposer}.
+   * @dev See {IXAllocationVotingGovernor-proposeNewAllocationRound}.
    */
   function proposeNewAllocationRound() public virtual returns (uint256) {
     address proposer = _msgSender();
@@ -193,26 +199,7 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
    *
    * Emits a {IXAllocationVotingGovernor-ProposalCreated} event.
    */
-  function _propose(address proposer) internal virtual returns (uint256 proposalId) {
-    ++_proposalCount;
-    proposalId = _proposalCount;
-
-    if (_proposals[proposalId].voteStart != 0) {
-      revert GovernorUnexpectedProposalState(proposalId, state(proposalId), bytes32(0));
-    }
-
-    uint256 snapshot = clock() + votingDelay();
-    uint256 duration = votingPeriod();
-
-    ProposalCore storage proposal = _proposals[proposalId];
-    proposal.proposer = proposer;
-    proposal.voteStart = SafeCast.toUint48(snapshot);
-    proposal.voteDuration = SafeCast.toUint32(duration);
-
-    emit AllocationProposalCreated(proposalId, proposer, snapshot, snapshot + duration);
-
-    // Using a named return variable to avoid stack too deep errors
-  }
+  function _propose(address proposer) internal virtual returns (uint256 proposalId);
 
   /**
    * @dev See {IXAllocationVotingGovernor-getVotes}.
@@ -390,4 +377,6 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   function quorum(uint256 timepoint) public view virtual returns (uint256);
 
   function setB3trGovernanceAddress(address newB3trGovernance) public virtual;
+
+  function isEligibleForVote(bytes32 appId, uint256 proposalId) public view virtual returns (bool);
 }

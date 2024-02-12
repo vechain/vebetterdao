@@ -4,7 +4,6 @@ pragma solidity ^0.8.19;
 import { XAllocationVotingGovernor } from "../XAllocationVotingGovernor.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
-import { IXAllocationPool } from "../../interfaces/IXAllocationPool.sol";
 
 /**
  * @title GovernorXAllocationVotesCounting
@@ -23,12 +22,6 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
   }
 
   mapping(uint256 proposalId => AllocationRoundVote) internal _allocationRoundVotes;
-
-  IXAllocationPool internal xAllocationPool;
-
-  constructor(address xAllocationPool_) {
-    xAllocationPool = IXAllocationPool(xAllocationPool_);
-  }
 
   /**
    * @dev See {IXAllocationVotingGovernor-COUNTING_MODE}.
@@ -54,7 +47,7 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
     for (uint256 i = 0; i < apps.length; i++) {
       totalWeight += weights[i];
 
-      if (!xAllocationPool.isEligibleForVote(apps[i], proposalId)) {
+      if (!isEligibleForVote(apps[i], proposalId)) {
         revert GovernorAppNotAvailableForVoting(apps[i]);
       }
 
@@ -73,15 +66,15 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
     emit AllocationVoteCast(voter, proposalId, apps, weights);
   }
 
-  function getAppVotes(uint256 proposalId, bytes32 app) public view returns (uint256) {
+  function getAppVotes(uint256 proposalId, bytes32 app) public view override returns (uint256) {
     return _allocationRoundVotes[proposalId].votesReceived[app];
   }
 
-  function totalVotes(uint256 proposalId) public view returns (uint256) {
+  function totalVotes(uint256 proposalId) public view override returns (uint256) {
     return _allocationRoundVotes[proposalId].totalVotes;
   }
 
-  function totalVoters(uint256 proposalId) public view returns (uint256) {
+  function totalVoters(uint256 proposalId) public view override returns (uint256) {
     return _allocationRoundVotes[proposalId].totalVoters;
   }
 
@@ -97,10 +90,4 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
   function _voteSucceeded(uint256 proposalId) internal view virtual override returns (bool) {
     return _quorumReached(proposalId);
   }
-
-  function getXAllocationPoolAddress() public view returns (address) {
-    return address(xAllocationPool);
-  }
-
-  function setXAllocationPoolAddress(address xAllocationPool_) public virtual;
 }
