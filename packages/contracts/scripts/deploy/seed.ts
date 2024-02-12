@@ -1,5 +1,5 @@
 import { ethers } from "hardhat"
-import { B3TR, Emissions, VOT3, XAllocationPool, XAllocationVoting } from "../../typechain-types"
+import { B3TR, Emissions, VOT3, XAllocationPool, XAllocationVoting, XApps } from "../../typechain-types"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { BytesLike } from "ethers"
 import { waitForProposalToBeActive } from "../../test/helpers"
@@ -50,12 +50,12 @@ const swapB3trForVot3 = async (vot3: VOT3, amount: string = "500", accounts: Har
   )
 }
 
-const addXDapps = async (xAllocationPool: XAllocationPool, accounts: HardhatEthersSigner[], apps: App[]) => {
+const addXDapps = async (xAllocationVoting: XAllocationVoting, accounts: HardhatEthersSigner[], apps: App[]) => {
   console.log("Adding x-apps...")
 
   return await Promise.all(
     apps.map(async app => {
-      return await xAllocationPool
+      return await xAllocationVoting
         .connect(accounts[0])
         .addApp(app.address, app.name, app.metadata)
         .then(async tx => await tx.wait())
@@ -68,7 +68,7 @@ const castVotesToXDapps = async (
   accounts: HardhatEthersSigner[],
   proposalId: string,
   vot3mount: string,
-  apps: XAllocationPool.AppStruct[],
+  apps: XApps.AppStruct[],
 ) => {
   return Promise.all(
     accounts.map(async account => {
@@ -141,9 +141,9 @@ export const seedLocalEnvironment = async (
   ]
 
   //   Add x-apps to the XAllocationPool
-  await addXDapps(xAllocationPool, accountsToSeed, APPS)
+  await addXDapps(xAllocationVoting, accountsToSeed, APPS)
 
-  const xDappsFromContract = await xAllocationPool.getAllApps()
+  const xDappsFromContract = await xAllocationVoting.getAllApps()
 
   //   Pre mint $B3TR
   console.log("Pre minting $B3TR...")

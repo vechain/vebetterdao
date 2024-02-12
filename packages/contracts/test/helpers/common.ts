@@ -1,5 +1,5 @@
 import { ethers, network } from "hardhat"
-import { Emissions, GovernorContract, XAllocationPool, XAllocationVoting } from "../../typechain-types"
+import { Emissions, GovernorContract, XAllocationVoting } from "../../typechain-types"
 import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { getOrDeployContractInstances } from "./deploy"

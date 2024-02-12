@@ -55,7 +55,7 @@ export async function deployAll() {
   const xAllocationPool = await deployXAllocationPool(timelock, XPOOL_ADMIN)
 
   // Deploy XAllocationVoting
-  const xAllocationVoting = await deployXAllocationVoting(timelock, xAllocationPool, vot3, XPOOL_ADMIN)
+  const xAllocationVoting = await deployXAllocationVoting(timelock, vot3, XPOOL_ADMIN)
 
   // Deploy the NFT Badge contract with Max Mintable Level 1
   const badge = await deployNFTBadge(1)
@@ -163,12 +163,7 @@ async function deployXAllocationPool(timeLock: TimeLock, adminAddress: string) {
   return contract
 }
 
-async function deployXAllocationVoting(
-  timeLock: TimeLock,
-  xAllocationPool: XAllocationPool,
-  vot3: VOT3,
-  adminAddress: string,
-) {
+async function deployXAllocationVoting(timeLock: TimeLock, vot3: VOT3, adminAddress: string) {
   console.log(`Deploying XAllocationVoting contract`)
   const XAllocationVotingContract = await ethers.getContractFactory("XAllocationVoting")
   const contract = await XAllocationVotingContract.deploy(
@@ -177,7 +172,6 @@ async function deployXAllocationVoting(
     VOTING_PERIOD,
     0, // voting delay
     await timeLock.getAddress(),
-    await xAllocationPool.getAddress(),
     [await timeLock.getAddress(), adminAddress],
   )
 
