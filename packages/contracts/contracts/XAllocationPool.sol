@@ -26,8 +26,10 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
   // List of app IDs to enable retrieval of all _apps
   bytes32[] private _appIds;
 
-  // Checkpoints for app availability for voting
-  mapping(bytes32 appId => Checkpoints.Trace208) private _appElegibleForVoteCheckpoints;
+  // Checpoints and mappings for x-allocation voting elegibility
+  bytes32[] private _elegibleApps;
+  mapping(bytes32 => uint256) _idToElegibleAppsIndex;
+  mapping(bytes32 appId => Checkpoints.Trace208) private _isAppElegibleCheckpoints;
 
   IXAllocationVotingGovernor internal _xAllocationVoting;
   IEmissions internal _emissions;
@@ -60,7 +62,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
     // Store the new app
     _apps[id] = App(id, appAddress, name, metadata, clock());
     _appIds.push(id);
-    _updateVotingElegibilityCheckpoint(id, true);
+    _pushAppToEligbleApps(id);
 
     emit AppAdded(id, appAddress, name, metadata, true);
   }
@@ -71,11 +73,35 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
 
   // ---------- Internal and private ---------- //
 
+  function _pushAppToEligbleApps(bytes32 appId) private {
+    _elegibleApps.push(appId);
+    _idToElegibleAppsIndex[appId] = _elegibleApps.length - 1;
+  }
+
   /**
    * @dev Update the app availability for voting checkpoint.
    */
   function _updateVotingElegibilityCheckpoint(bytes32 appId, bool canBeVoted) private {
-    _push(_appElegibleForVoteCheckpoints[appId], canBeVoted ? 1 : 0);
+    _push(_isAppElegibleCheckpoints[appId], canBeVoted ? 1 : 0);
+
+    if (!canBeVoted) {
+      // In order to remove an app from the elegibleArray correctly we need to move the element in the last position
+      // to the index we want to remove and pop() the last element of the array.
+      // We also need to update the `_idToElegibleAppsIndex` mapping accordingly.
+
+      // ID of the last item now points to the new index
+      _idToElegibleAppsIndex[_elegibleApps[_elegibleApps.length - 1]] = _idToElegibleAppsIndex[appId];
+
+      // Move last item at the index of the app we are removing and pop the last element of the array
+      _elegibleApps[_idToElegibleAppsIndex[appId]] = _elegibleApps[_elegibleApps.length - 1];
+      _elegibleApps.pop();
+
+      // delete the mapping that belongs to the app we removed
+      delete _idToElegibleAppsIndex[appId];
+    } else {
+      _pushAppToEligbleApps(appId);
+    }
+
     emit VotingElegibilityChanged(appId, canBeVoted);
   }
 
@@ -84,6 +110,13 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
   }
 
   // ---------- Getters ---------- //
+
+  /**
+   * All apps that are elegible for voting in x-allocation rounds
+   */
+  function allElegibleApps() public view returns (bytes32[] memory) {
+    return _elegibleApps;
+  }
 
   /**
    * @dev Returns true if an app is enabled to be voted and if it was created before the start of the requested round.
@@ -97,14 +130,14 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
 
     uint256 roundStartsAt = xAllocationVoting().proposalSnapshot(roundId);
 
-    bool isAvailable = _appElegibleForVoteCheckpoints[appId].upperLookupRecent(SafeCast.toUint48(roundStartsAt)) == 1 &&
+    bool isAvailable = _isAppElegibleCheckpoints[appId].upperLookupRecent(SafeCast.toUint48(roundStartsAt)) == 1 &&
       _apps[appId].createdAt <= roundStartsAt;
 
     return isAvailable;
   }
 
   function isElegibleForVoteLatestCheckpoint(bytes32 appId) public view returns (bool) {
-    return _appElegibleForVoteCheckpoints[appId].latest() == 1;
+    return _isAppElegibleCheckpoints[appId].latest() == 1;
   }
 
   function isElegibleForVotePastCheckpoint(bytes32 appId, uint256 timepoint) public view returns (bool) {
@@ -113,7 +146,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
       revert ERC5805FutureLookup(timepoint, currentTimepoint);
     }
 
-    return _appElegibleForVoteCheckpoints[appId].upperLookupRecent(SafeCast.toUint48(timepoint)) == 1;
+    return _isAppElegibleCheckpoints[appId].upperLookupRecent(SafeCast.toUint48(timepoint)) == 1;
   }
 
   function hashName(string memory name) public pure returns (bytes32) {
@@ -135,10 +168,16 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
     return allApps;
   }
 
+  /**
+   * @dev Returns the XAllocationVotingGovernor contract.
+   */
   function xAllocationVoting() public view returns (IXAllocationVotingGovernor) {
     return _xAllocationVoting;
   }
 
+  /**
+   * @dev Returns the emissions contract.
+   */
   function emissions() public view returns (IEmissions) {
     return _emissions;
   }

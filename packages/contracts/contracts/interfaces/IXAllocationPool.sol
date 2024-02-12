@@ -22,4 +22,6 @@ interface IXAllocationPool {
   function isEligibleForVote(bytes32 appId, uint256 roundId) external view returns (bool);
 
   function addApp(address appAddress, string memory name, string memory metadata) external;
+
+  function allElegibleApps() external view returns (bytes32[] memory);
 }

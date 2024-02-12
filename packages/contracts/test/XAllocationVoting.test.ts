@@ -8,6 +8,7 @@ import {
   getVot3Tokens,
   parseAllocationVoteCastEvent,
   parseAlloctionProposalCreatedEvent,
+  startNewAllocationRound,
   waitForProposalToBeActive,
   waitForVotingPeriodToEnd,
 } from "./helpers"
@@ -25,7 +26,7 @@ describe("X-Allocation Voting", function () {
       expect(await xAllocationVoting.hasRole(ADMIN_ROLE, owner.address)).to.eql(true)
 
       expect(await xAllocationVoting.getXAllocationPoolAddress()).to.eql(await xAllocationPool.getAddress())
-      expect(await xAllocationVoting.getB3trGovernorAddress()).to.eql(await timeLock.getAddress())
+      expect(await xAllocationVoting.b3trGovernor()).to.eql(await timeLock.getAddress())
     })
   })
   describe("Settings", function () {
@@ -91,14 +92,14 @@ describe("X-Allocation Voting", function () {
       })
       const ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000"
 
-      const initialAddress = await xAllocationVoting.getB3trGovernorAddress()
+      const initialAddress = await xAllocationVoting.b3trGovernor()
       expect(initialAddress).to.exist
 
       expect(await xAllocationVoting.hasRole(ADMIN_ROLE, owner.address)).to.eql(true)
 
       await xAllocationVoting.connect(owner).setB3trGovernanceAddress(otherAccounts[3].address)
 
-      const updatedAddress = await xAllocationVoting.getB3trGovernorAddress()
+      const updatedAddress = await xAllocationVoting.b3trGovernor()
       expect(updatedAddress).to.eql(otherAccounts[3].address)
     })
 
@@ -108,14 +109,14 @@ describe("X-Allocation Voting", function () {
       })
       const ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000"
 
-      const initialAddress = await xAllocationVoting.getB3trGovernorAddress()
+      const initialAddress = await xAllocationVoting.b3trGovernor()
       expect(initialAddress).to.exist
 
       expect(await xAllocationVoting.hasRole(ADMIN_ROLE, otherAccounts[0].address)).to.eql(false)
 
       await catchRevert(xAllocationVoting.connect(otherAccounts[0]).setB3trGovernanceAddress(otherAccounts[3].address))
 
-      const updatedAddress = await xAllocationVoting.getB3trGovernorAddress()
+      const updatedAddress = await xAllocationVoting.b3trGovernor()
       expect(updatedAddress).to.eql(initialAddress)
     })
   })
@@ -369,6 +370,22 @@ describe("X-Allocation Voting", function () {
 
       await waitForProposalToBeActive(proposalId, xAllocationVoting)
 
+      // both apps should be elegible for votes
+      const app1Available = await xAllocationPool.isEligibleForVote(app1, proposalId)
+      const app2Available = await xAllocationPool.isEligibleForVote(app1, proposalId)
+      expect(app1Available).to.equal(true)
+      expect(app2Available).to.equal(true)
+
+      const avaiableApps = await xAllocationPool.allElegibleApps()
+      expect(avaiableApps.length).to.equal(2)
+      expect(avaiableApps[0]).to.equal(app1)
+      expect(avaiableApps[1]).to.equal(app2)
+
+      let appsVotedInSpecificRound = await xAllocationVoting.appsElegibleForVoting(proposalId)
+      expect(appsVotedInSpecificRound.length).to.equal(2)
+      expect(appsVotedInSpecificRound[0]).to.equal(app1)
+      expect(appsVotedInSpecificRound[1]).to.equal(app2)
+
       // I should be able to vote for multiple apps
       tx = await xAllocationVoting
         .connect(otherAccount)
@@ -594,5 +611,57 @@ describe("X-Allocation Voting", function () {
 
       expect(await xAllocationVoting.state(proposalId)).to.eql(BigInt(2))
     }).timeout(18000000)
+
+    it.only("tracks apps available for voting on previous rounds correctly", async function () {
+      const { xAllocationVoting, otherAccounts, xAllocationPool, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // 2 apps in round1
+      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "")
+      const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await xAllocationPool.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, "")
+      const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+      let round1 = await startNewAllocationRound(xAllocationVoting)
+      let appsElegibleForVoting = await xAllocationVoting.appsElegibleForVoting(round1)
+      expect(appsElegibleForVoting.length).to.equal(2n)
+
+      // add new app before round ends
+      await xAllocationPool.connect(owner).addApp(otherAccounts[2].address, otherAccounts[2].address, "")
+      await xAllocationPool.connect(owner).addApp(otherAccounts[3].address, otherAccounts[3].address, "")
+      await waitForVotingPeriodToEnd(round1, xAllocationVoting)
+
+      // 4 apps in round2
+      let round2 = await startNewAllocationRound(xAllocationVoting)
+      appsElegibleForVoting = await xAllocationVoting.appsElegibleForVoting(round2)
+      expect(appsElegibleForVoting.length).to.equal(4n)
+
+      // remove apps before round ends
+      await xAllocationPool.setVotingElegibility(app1, false)
+      await xAllocationPool.setVotingElegibility(app2, false)
+      await waitForVotingPeriodToEnd(round2, xAllocationVoting)
+
+      // 2 app in round 3
+      let round3 = await startNewAllocationRound(xAllocationVoting)
+      appsElegibleForVoting = await xAllocationVoting.appsElegibleForVoting(round3)
+      expect(appsElegibleForVoting.length).to.equal(2n)
+
+      // add another app before round ends
+      await xAllocationPool.connect(owner).addApp(otherAccounts[4].address, otherAccounts[4].address, "")
+      await waitForVotingPeriodToEnd(round3, xAllocationVoting)
+
+      // 3 apps in round 4
+      let round4 = await startNewAllocationRound(xAllocationVoting)
+      appsElegibleForVoting = await xAllocationVoting.appsElegibleForVoting(round4)
+      expect(appsElegibleForVoting.length).to.equal(3n)
+
+      // I can still get old rounds
+      appsElegibleForVoting = await xAllocationVoting.appsElegibleForVoting(round1)
+      expect(appsElegibleForVoting.length).to.equal(2n)
+      appsElegibleForVoting = await xAllocationVoting.appsElegibleForVoting(round2)
+      expect(appsElegibleForVoting.length).to.equal(4n)
+      appsElegibleForVoting = await xAllocationVoting.appsElegibleForVoting(round3)
+      expect(appsElegibleForVoting.length).to.equal(2n)
+    })
   })
 })

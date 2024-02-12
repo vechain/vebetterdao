@@ -35,11 +35,10 @@ contract XAllocationVoting is
     address _xAllocationPool,
     address[] memory _admins
   )
-    XAllocationVotingGovernor("XAllocationVoting", _b3trGovernor)
+    XAllocationVotingGovernor("XAllocationVoting", _b3trGovernor, _xAllocationPool)
     GovernorSettings(_initialVotingDelay, _initialVotingPeriod)
     GovernorVotes(_vot3Token)
     GovernorVotesQuorumFraction(_quorumPercentage)
-    GovernorXAllocationVotesCounting(_xAllocationPool)
   {
     for (uint256 i = 0; i < _admins.length; i++) {
       _grantRole(DEFAULT_ADMIN_ROLE, _admins[i]);
@@ -47,12 +46,12 @@ contract XAllocationVoting is
   }
 
   // ---------- Setters ---------- //
-  function setXAllocationPoolAddress(address _xAllocationPool) public override onlyRole(DEFAULT_ADMIN_ROLE) {
-    xAllocationPool = IXAllocationPool(_xAllocationPool);
+  function setXAllocationPoolAddress(address xAllocationPool_) public override onlyRole(DEFAULT_ADMIN_ROLE) {
+    _xAllocationPool = IXAllocationPool(xAllocationPool_);
   }
 
-  function setB3trGovernanceAddress(address _newB3trGovernorAddress) public override onlyRole(DEFAULT_ADMIN_ROLE) {
-    _b3trGovernor = _newB3trGovernorAddress;
+  function setB3trGovernanceAddress(address b3trGovernor_) public override onlyRole(DEFAULT_ADMIN_ROLE) {
+    _b3trGovernor = b3trGovernor_;
   }
 
   // ---------- Getters ---------- //

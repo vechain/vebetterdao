@@ -6,6 +6,7 @@ import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Context } from "@openzeppelin/contracts/utils/Context.sol";
 import { Nonces } from "@openzeppelin/contracts/utils/Nonces.sol";
 import { IXAllocationVotingGovernor, IERC6372 } from "../interfaces/IXAllocationVotingGovernor.sol";
+import { IXAllocationPool } from "../interfaces/IXAllocationPool.sol";
 
 /**
  * @dev Core of the x-allocation votes governance system, designed to be extended through various modules.
@@ -32,15 +33,17 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   string private _name;
 
   address internal _b3trGovernor;
+  IXAllocationPool internal _xAllocationPool;
 
   mapping(uint256 proposalId => ProposalCore) internal _proposals;
+  mapping(uint256 proposalId => bytes32[]) internal _appsElegibleForVoting;
 
   /**
    * @dev Restricts a function so it can only be executed through governance proposals. For example, governance
    * parameter setters in {GovernorSettings} are protected using this modifier.
    */
   modifier onlyGovernance() {
-    if (getB3trGovernorAddress() != _msgSender()) {
+    if (_b3trGovernor != _msgSender()) {
       revert GovernorOnlyExecutor(_msgSender());
     }
     _;
@@ -49,9 +52,10 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   /**
    * @dev Sets the value for {name} and {version}
    */
-  constructor(string memory name_, address b3trGovernor_) {
+  constructor(string memory name_, address b3trGovernor_, address xAllocationPool_) {
     _name = name_;
     _b3trGovernor = b3trGovernor_;
+    _xAllocationPool = IXAllocationPool(xAllocationPool_);
   }
 
   /**
@@ -85,9 +89,23 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   /**
    * Returns the address of the B3trGovernor contract.
    */
-  function getB3trGovernorAddress() public view returns (address) {
+  function b3trGovernor() public view returns (address) {
     return _b3trGovernor;
   }
+
+  function xAllocationPool() public view returns (IXAllocationPool) {
+    return _xAllocationPool;
+  }
+
+  function getXAllocationPoolAddress() public view returns (address) {
+    return address(_xAllocationPool);
+  }
+
+  function appsElegibleForVoting(uint256 roundId) public view override returns (bytes32[] memory) {
+    return _appsElegibleForVoting[roundId];
+  }
+
+  function setXAllocationPoolAddress(address xAllocationPool_) public virtual;
 
   /**
    * Returns the current round id.
@@ -200,6 +218,10 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
     if (_proposals[proposalId].voteStart != 0) {
       revert GovernorUnexpectedProposalState(proposalId, state(proposalId), bytes32(0));
     }
+
+    // save x-apps that users can vote for
+    bytes32[] memory apps = xAllocationPool().allElegibleApps();
+    _appsElegibleForVoting[proposalId] = apps;
 
     uint256 snapshot = clock() + votingDelay();
     uint256 duration = votingPeriod();

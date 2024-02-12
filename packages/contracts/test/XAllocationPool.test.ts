@@ -5,6 +5,7 @@ import {
   createProposalAndExecuteIt,
   filterEventsByName,
   getOrDeployContractInstances,
+  getVot3Tokens,
   parseAppAddedEvent,
   startNewAllocationRound,
   waitForVotingPeriodToEnd,
@@ -111,12 +112,18 @@ describe("X-Allocation Pool", function () {
       let isEligibleForVote = await xAllocationPool.isEligibleForVote(app1Id, round1)
       expect(isEligibleForVote).to.eql(true)
 
+      let appsVotedInSpecificRound = await xAllocationVoting.appsElegibleForVoting(round1)
+      expect(appsVotedInSpecificRound.length).to.equal(1n)
+
       await waitForVotingPeriodToEnd(round1, xAllocationVoting)
       let round2 = await startNewAllocationRound(xAllocationVoting)
 
       // app should not be elegible from this round
       isEligibleForVote = await xAllocationPool.isEligibleForVote(app1Id, round2)
       expect(isEligibleForVote).to.eql(false)
+
+      appsVotedInSpecificRound = await xAllocationVoting.appsElegibleForVoting(round2)
+      expect(appsVotedInSpecificRound.length).to.equal(0)
 
       // if checking for the previous round, it should still be eligible
       isEligibleForVote = await xAllocationPool.isEligibleForVote(app1Id, round1)
@@ -190,6 +197,9 @@ describe("X-Allocation Pool", function () {
         forceDeploy: true,
       })
 
+      const voter = otherAccounts[0]
+      await getVot3Tokens(voter, "1000")
+
       const app1Id = await xAllocationPool.hashName(otherAccounts[0].address)
 
       let round1 = await startNewAllocationRound(xAllocationVoting)
@@ -198,12 +208,28 @@ describe("X-Allocation Pool", function () {
       let isEligibleForVote = await xAllocationPool.isEligibleForVote(app1Id, round1)
       expect(isEligibleForVote).to.eql(false)
 
+      //check that I cannot vote for this app in current round
+      await catchRevert(xAllocationVoting.connect(voter).castVote(round1, [app1Id], [ethers.parseEther("1")]))
+
+      let appVotes = await xAllocationVoting.getAppVotes(round1, app1Id)
+      expect(appVotes).to.equal(0n)
+
+      let appsVotedInSpecificRound = await xAllocationVoting.appsElegibleForVoting(round1)
+      expect(appsVotedInSpecificRound.length).to.equal(0)
+
       await waitForVotingPeriodToEnd(round1, xAllocationVoting)
       let round2 = await startNewAllocationRound(xAllocationVoting)
 
       // app should not be elegible from this round
       isEligibleForVote = await xAllocationPool.isEligibleForVote(app1Id, round2)
       expect(isEligibleForVote).to.eql(true)
+
+      // check that I can vote for this app
+      expect(await xAllocationVoting.connect(voter).castVote(round2, [app1Id], [ethers.parseEther("1")])).to.not.be
+        .reverted
+
+      appVotes = await xAllocationVoting.getAppVotes(round2, app1Id)
+      expect(appVotes).to.equal(ethers.parseEther("1"))
     })
   })
 })
