@@ -10,8 +10,6 @@ import {
   parseAlloctionProposalCreatedEvent,
   parseAppAddedEvent,
   startNewAllocationRound,
-  waitForBlock,
-  waitForNextBlock,
   waitForProposalToBeActive,
   waitForVotingPeriodToEnd,
 } from "./helpers"

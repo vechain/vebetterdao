@@ -1,5 +1,5 @@
 import { ethers } from "hardhat"
-import { B3TR, Emissions, VOT3, XAllocationPool, XAllocationVoting, XApps } from "../../typechain-types"
+import { B3TR, Emissions, VOT3, XAllocationVoting, XApps } from "../../typechain-types"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { BytesLike } from "ethers"
 import { waitForProposalToBeActive } from "../../test/helpers"
@@ -105,7 +105,6 @@ const castVotesToXDapps = async (
 export const seedLocalEnvironment = async (
   b3tr: B3TR,
   vot3: VOT3,
-  xAllocationPool: XAllocationPool,
   xAllocationVoting: XAllocationVoting,
   emissions: Emissions,
 ) => {

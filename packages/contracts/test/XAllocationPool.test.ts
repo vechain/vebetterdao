@@ -1,15 +1,10 @@
-import { ethers } from "hardhat"
-import { expect } from "chai"
-import {
-  catchRevert,
-  createProposalAndExecuteIt,
-  filterEventsByName,
-  getOrDeployContractInstances,
-  getVot3Tokens,
-  parseAppAddedEvent,
-  startNewAllocationRound,
-  waitForVotingPeriodToEnd,
-} from "./helpers"
+// import { ethers } from "hardhat"
+// import { expect } from "chai"
+// import {
+
+// } from "./helpers"
 import { describe, it } from "mocha"
 
-describe("X-Allocation Pool", function () {})
+describe("X-Allocation Pool", function () {
+  it("should work", async function () {})
+})
