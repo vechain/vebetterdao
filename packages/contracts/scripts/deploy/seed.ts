@@ -77,7 +77,8 @@ const castVotesToXDapps = async (
 
       let residual = BigInt(vot3mount)
       const splits: { app: BytesLike; weight: string }[] = []
-      const randomDappsToVote = apps.filter(_ => Math.floor(Math.random() * 2) == 0)
+      let randomDappsToVote = apps.filter(_ => Math.floor(Math.random() * 2) == 0)
+      if (!randomDappsToVote.length) randomDappsToVote = apps
 
       console.log(`Casting random votes to ${randomDappsToVote.length} xDapps...`)
       for (const [index, app] of randomDappsToVote.entries()) {

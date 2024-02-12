@@ -1,10 +1,27 @@
 import { useAllocationAmount, useAllocationVoters, useAllocationVotes, useAllocationsRound, useXApps } from "@/api"
-import { Card, CardBody, Grid, HStack, Heading, Skeleton, Stack, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Card,
+  CardBody,
+  HStack,
+  Heading,
+  Skeleton,
+  Stack,
+  Text,
+  VStack,
+  useColorModeValue,
+} from "@chakra-ui/react"
 import { useMemo } from "react"
 
 type Props = {
   roundId: string
 }
+
+const compactFormatter = new Intl.NumberFormat("en-US", {
+  notation: "compact",
+  compactDisplay: "short",
+})
+
 export const AllocationRoundDetails = ({ roundId }: Props) => {
   const { data, isLoading } = useAllocationsRound(roundId)
   const { data: xApps, isLoading: xAppsLoading } = useXApps()
@@ -17,15 +34,18 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
     return BigInt(roundAmount.treasury) + BigInt(roundAmount.voteX2Earn) + BigInt(roundAmount.voteXAllocations)
   }, [roundAmount])
 
+  const bgColor = useColorModeValue("primary.500", "primary.300")
+
   return (
     <Card w="full">
       <CardBody>
-        <Stack direction={["column", "row"]} justify="space-between">
+        <Stack direction={["column", "row"]} justify="space-between" spacing={[12, 12, 40]}>
           <VStack spacing={4} align="flex-start" flex={1}>
             <Skeleton isLoaded={!isLoading}>
               <HStack spacing={1} align={"center"}>
-                <Heading size="md">Remaining time to vote:</Heading>
-                <Text>{data?.voteEndTimestamp?.fromNow()}</Text>
+                <Heading size="md" color={bgColor}>
+                  {data?.voteEndTimestamp?.fromNow(true)} left
+                </Heading>
               </HStack>
             </Skeleton>
             <Skeleton isLoaded={!isLoading}>
@@ -39,37 +59,45 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
               </Text>
             </Skeleton>
           </VStack>
-          <VStack flex={1}>
-            <Grid templateColumns="repeat(2, 1fr)" gap={4}>
-              <VStack spacing={4}>
+          <VStack flex={0.8}>
+            <VStack
+              color={"white"}
+              bgColor={bgColor}
+              py={6}
+              px={6}
+              w="full"
+              h="full"
+              borderRadius={"2xl"}
+              align="flex-start"
+              spacing={12}>
+              <Box>
                 <Skeleton isLoaded={!roundAmountLoading}>
                   {roundAmountError ? (
                     <Text color="red.500">{roundAmountError.message}</Text>
                   ) : (
-                    <Heading size="md">{totalAmount.toString()}</Heading>
+                    <Heading size="2xl">{compactFormatter.format(totalAmount)}</Heading>
                   )}
-                  <Text fontWeight={"thin"}>Total allocation</Text>
                 </Skeleton>
-              </VStack>
-              <VStack spacing={4}>
+                <Text fontSize={"md"} textTransform={"uppercase"}>
+                  Total allocation
+                </Text>
+              </Box>
+
+              <HStack spacing={12}>
                 <Skeleton isLoaded={!xAppsLoading}>
-                  <Heading size="md">{xApps?.length}</Heading>
-                  <Text fontWeight={"thin"}>Participating dApps</Text>
+                  <Heading size="xl">{xApps?.length}</Heading>
+                  <Text fontSize={"md"} textTransform={"uppercase"}>
+                    Participating dApps
+                  </Text>
                 </Skeleton>
-              </VStack>
-              <VStack spacing={4}>
-                <Skeleton isLoaded={!totalVotesLoading}>
-                  <Heading size="md">{totalVotes}</Heading>
-                  <Text fontWeight={"thin"}>Total votes</Text>
-                </Skeleton>
-              </VStack>
-              <VStack spacing={4}>
                 <Skeleton isLoaded={!totalVotersLoading}>
-                  <Heading size="md">{totalVoters}</Heading>
-                  <Text fontWeight={"thin"}>Total voters</Text>
+                  <Heading size="xl">{totalVoters}</Heading>
+                  <Text fontSize={"md"} textTransform={"uppercase"}>
+                    Total voters
+                  </Text>
                 </Skeleton>
-              </VStack>
-            </Grid>
+              </HStack>
+            </VStack>
           </VStack>
         </Stack>
       </CardBody>
