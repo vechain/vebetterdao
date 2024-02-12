@@ -27,8 +27,8 @@ type XApp = {
  * @returns  all the available xApps (apps that can be voted on for allocation) capped to 256 see {@link XApp}
  */
 export const getXApps = async (thor: Connex.Thor): Promise<XApp[]> => {
-  const functionFragment = XAllocationPool.createInterface().getFunction("getAllApps")
-  const res = await thor.account(XALLOCATIONPOOL_CONTRACT).method(functionFragment).call()
+  const functionFragment = XAllocationPool.createInterface().getFunction("getAllApps").format("json")
+  const res = await thor.account(XALLOCATIONPOOL_CONTRACT).method(JSON.parse(functionFragment)).call()
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 

@@ -14,8 +14,8 @@ const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
  * @returns the state of a given proposalId
  */
 export const getAllocationVotes = async (thor: Connex.Thor, proposalId?: string): Promise<string> => {
-  const functionFragment = XAllocationVoting.createInterface().getFunction("totalVotes")
-  const res = await thor.account(XALLOCATIONVOTING_CONTRACT).method(functionFragment).call(proposalId)
+  const functionFragment = XAllocationVoting.createInterface().getFunction("totalVotes").format("json")
+  const res = await thor.account(XALLOCATIONVOTING_CONTRACT).method(JSON.parse(functionFragment)).call(proposalId)
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 

@@ -28,14 +28,20 @@ export const getAllocationAmount = async (
   voteX2Earn: string
   voteXAllocations: string
 }> => {
-  const functionFragmentTreasuryAmount = Emissions.createInterface().getFunction("getTreasuryAmountForCycle")
-  const functionFragmentVoteX2EarnAmount = Emissions.createInterface().getFunction("getVote2EarnAmountForCycle")
-  const functionFragmentXAllocationsAmount = Emissions.createInterface().getFunction("getXAllocationAmountForCycle")
+  const functionFragmentTreasuryAmount = Emissions.createInterface()
+    .getFunction("getTreasuryAmountForCycle")
+    .format("json")
+  const functionFragmentVoteX2EarnAmount = Emissions.createInterface()
+    .getFunction("getVote2EarnAmountForCycle")
+    .format("json")
+  const functionFragmentXAllocationsAmount = Emissions.createInterface()
+    .getFunction("getXAllocationAmountForCycle")
+    .format("json")
 
   const [resTreasury, resVoteX2Earn, voteXAllocations] = await Promise.all([
-    thor.account(EMISSION_CONTRACT).method(functionFragmentTreasuryAmount).call(proposalId),
-    thor.account(EMISSION_CONTRACT).method(functionFragmentVoteX2EarnAmount).call(proposalId),
-    thor.account(EMISSION_CONTRACT).method(functionFragmentXAllocationsAmount).call(proposalId),
+    thor.account(EMISSION_CONTRACT).method(JSON.parse(functionFragmentTreasuryAmount)).call(proposalId),
+    thor.account(EMISSION_CONTRACT).method(JSON.parse(functionFragmentVoteX2EarnAmount)).call(proposalId),
+    thor.account(EMISSION_CONTRACT).method(JSON.parse(functionFragmentXAllocationsAmount)).call(proposalId),
   ])
 
   if (resTreasury.vmError) return Promise.reject(new Error(resTreasury.vmError))
