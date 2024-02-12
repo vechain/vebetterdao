@@ -2,9 +2,10 @@
   "name": "b3tr-monorepo",
   "private": true,
   "scripts": {
-    "test": "dotenv -e .env.config -- turbo run test --",
+    "test": "dotenv -e .env.dev -- turbo run test --",
     "build": "dotenv -- turbo build",
-    "dev": "dotenv -e .env.config -- turbo dev --",
+    "dev": "dotenv -e .env.dev -- turbo dev --",
+    "staging": "dotenv -e .env.staging -- turbo staging --",
     "lint": "turbo lint",
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
