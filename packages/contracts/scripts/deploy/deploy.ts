@@ -154,7 +154,7 @@ async function deployNFTBadge(mintableLevelFromDeploy: number) {
 async function deployXAllocationPool(timeLock: TimeLock, adminAddress: string) {
   console.log(`Deploying XAllocationPool contract`)
   const XAllocationPoolContract = await ethers.getContractFactory("XAllocationPool")
-  const contract = await XAllocationPoolContract.deploy([await timeLock.getAddress(), adminAddress])
+  const contract = await XAllocationPoolContract.deploy(adminAddress)
 
   await contract.waitForDeployment()
 

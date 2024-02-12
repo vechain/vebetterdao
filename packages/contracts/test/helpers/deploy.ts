@@ -106,7 +106,7 @@ export const getOrDeployContractInstances = async ({
 
   // Deploy XAllocationPool
   const XAllocationPoolContract = await ethers.getContractFactory("XAllocationPool")
-  const xAllocationPool = await XAllocationPoolContract.deploy([await timeLock.getAddress(), owner.address])
+  const xAllocationPool = await XAllocationPoolContract.deploy(owner.address)
   await xAllocationPool.waitForDeployment()
 
   // Deploy XAllocationVoting
@@ -120,9 +120,6 @@ export const getOrDeployContractInstances = async ({
     [await timeLock.getAddress(), owner.address],
   )
   await xAllocationVoting.waitForDeployment()
-
-  // Setup XAllocationPool addresses
-  await xAllocationPool.connect(owner).setXAllocationVotingAddress(await xAllocationVoting.getAddress())
 
   const X_ALLOCATIONS_ADDRESS = await xAllocationPool.getAddress()
   const VOTE_2_EARN_ADDRESS = otherAccounts[1].address
@@ -143,6 +140,10 @@ export const getOrDeployContractInstances = async ({
   )
 
   await emissions.waitForDeployment()
+
+  // Setup XAllocationPool addresses
+  await xAllocationPool.connect(owner).setXAllocationVotingAddress(await xAllocationVoting.getAddress())
+  await xAllocationPool.connect(owner).setEmissionsAddress(await emissions.getAddress())
 
   cachedDeployInstance = {
     B3trContract,

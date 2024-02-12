@@ -1,5 +1,5 @@
 import { ethers, network } from "hardhat"
-import { Emissions, GovernorContract, XAllocationVoting } from "../../typechain-types"
+import { Emissions, GovernorContract, XAllocationPool, XAllocationVoting } from "../../typechain-types"
 import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { getOrDeployContractInstances } from "./deploy"
@@ -220,4 +220,59 @@ export const startNewAllocationRound = async (xAllocationVoting: XAllocationVoti
   )
 
   return roundId
+}
+
+export const calculateBaseAllocationOffChain = async (
+  roundId: number,
+  emissions: Emissions,
+  xAllocationVoting: XAllocationVoting,
+  xAllocationPool: XAllocationPool,
+) => {
+  let totalAmount
+  // if it's the first cycle then the amount available is the first custom allocation
+  if (roundId == 1) {
+    totalAmount = (await emissions.getPreMintAllocations())[0]
+  } else if (await emissions.isLastCycleId(roundId)) {
+    // if it's the last cycle then the amount available is the last custom allocation
+    totalAmount = (await emissions.getLastMintAllocations())[0]
+  } else {
+    // Amount available for this round (assuming the amount is already scaled by 1e18 for precision)
+    totalAmount = await emissions.getXAllocationAmountForCycle(roundId)
+  }
+
+  let elegibleApps = await xAllocationVoting.appsElegibleForVoting(roundId)
+
+  const baseAllcoationPercentage = await xAllocationPool.baseAllocationPercentage()
+
+  let remaining = (totalAmount * baseAllcoationPercentage) / BigInt(100)
+
+  let amountPerApp = remaining / BigInt(elegibleApps.length)
+
+  return amountPerApp
+}
+
+export const calculateVariableAppAllocationOffCahain = async (
+  roundId: number,
+  appId: string,
+  emissions: Emissions,
+  xAllocationPool: XAllocationPool,
+) => {
+  // uint256 allocationAmount = _allocatedAmount(roundId);
+  let totalAmount
+  // if it's the first cycle then the amount available is the first custom allocation
+  if (roundId == 1) {
+    totalAmount = (await emissions.getPreMintAllocations())[0]
+  } else if (await emissions.isLastCycleId(roundId)) {
+    // if it's the last cycle then the amount available is the last custom allocation
+    totalAmount = (await emissions.getLastMintAllocations())[0]
+  } else {
+    // Amount available for this round (assuming the amount is already scaled by 1e18 for precision)
+    totalAmount = await emissions.getXAllocationAmountForCycle(roundId)
+  }
+
+  let totalAvailable = (totalAmount * (await xAllocationPool.variableAllocationPercentage())) / BigInt(100)
+
+  let appShares = (await xAllocationPool.calculateAppShares(roundId, appId)) / BigInt(100)
+
+  return (totalAvailable * appShares) / BigInt(100)
 }
