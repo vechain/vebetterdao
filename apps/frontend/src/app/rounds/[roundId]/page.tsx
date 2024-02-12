@@ -1,26 +1,19 @@
 "use client"
 
-import { HStack, VStack } from "@chakra-ui/react"
+import { Box, HStack, Stack, VStack } from "@chakra-ui/react"
 import { AllocationRoundDetails } from "../components/AllocationRoundDetails"
 import { AllocationRoundNavbar } from "../components/AllocationRoundNavbar"
-import { HorizontalChartBar } from "@/components"
-import { useXApps, useXAppsVotes } from "@/api"
+import { AllocationXAppsVotesCard } from "@/components"
 
 export default function Round({ params }: { params: { roundId: string } }) {
-  const { data: xApps } = useXApps()
-  const xAppsVotes = useXAppsVotes(xApps?.map(app => app.id) ?? [], params.roundId)
-
-  const data = xAppsVotes.map(app => ({
-    votes: app.data?.votes,
-    app: app.data?.app,
-  }))
   return (
-    <VStack w="full" spacing={6}>
+    <VStack w="full" spacing={8}>
       <AllocationRoundNavbar roundId={params.roundId} />
       <AllocationRoundDetails roundId={params.roundId} />
-      <HStack w="full" justify="space-between">
-        <HorizontalChartBar data={data} xKey="votes" yKey="app" />
-      </HStack>
+      <Stack direction={["column", "column", "row"]} w="full" justify="space-between" spacing={8}>
+        <AllocationXAppsVotesCard roundId={params.roundId} />
+        <AllocationXAppsVotesCard roundId={params.roundId} />
+      </Stack>
     </VStack>
   )
 }

@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 import { XAllocationVoting__factory } from "@repo/contracts/typechain-types"
 import { getConfig } from "@repo/config"
+import { FormattingUtils } from "@repo/utils"
 
 const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
 
@@ -14,7 +15,7 @@ const XAllocationVoting = XAllocationVoting__factory.createInterface()
  * @param proposalId  the proposal id to get the votes for
  * @returns  the number of votes for the xApp in the proposal
  */
-export const getXAppVotes = async (thor: Connex.Thor, xAppId: string, proposalId: string) => {
+export const getXAppVotes = async (thor: Connex.Thor, xAppId: string, proposalId: string): Promise<string> => {
   const functionFragment = XAllocationVoting.getFunction("getAppVotes").format("json")
   const res = await thor
     .account(XALLOCATIONVOTING_CONTRACT)
@@ -23,7 +24,7 @@ export const getXAppVotes = async (thor: Connex.Thor, xAppId: string, proposalId
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
-  return res.decoded[0]
+  return FormattingUtils.scaleNumberDown(res.decoded[0], 18)
 }
 
 export const getXAppVotesQueryKey = (xAppId: string, proposalId: string) => ["xApp", xAppId, "votes", proposalId]
