@@ -4,13 +4,14 @@ pragma solidity ^0.8.19;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "./interfaces/IB3TR.sol";
+import "./interfaces/IXAllocationVotingGovernor.sol";
 
 contract Emissions is AccessControl, ReentrancyGuard {
   // Roles
   bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
-  // B3TR token contract
-  IB3TR public b3tr;
+  IB3TR public b3tr; // B3TR token contract
+  IXAllocationVotingGovernor public xAllocationsGovernor; // XAllocationVotingGovernor contract
 
   // Starting block for emissions
   uint256 public START_BLOCK;
@@ -121,6 +122,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
   function preMint() public onlyRole(MINTER_ROLE) nonReentrant {
     require(preMintAllocations[0] > 0, "Emissions: Pre-mint allocations not set");
     require(START_BLOCK == 0, "Emissions: Pre-mint already done");
+    require(xAllocationsGovernor != IXAllocationVotingGovernor(address(0)), "Emissions: XAllocationsGovernor not set");
 
     // Mint pre-mint allocations
     b3tr.mint(xAllocations, preMintAllocations[0]);
@@ -128,12 +130,15 @@ contract Emissions is AccessControl, ReentrancyGuard {
     b3tr.mint(treasury, preMintAllocations[2]);
 
     START_BLOCK = block.number;
+
+    xAllocationsGovernor.proposeNewAllocationRound();
+
     nextCycle++;
   }
 
   function distribute() public nonReentrant {
     require(START_BLOCK > 0, "Emissions: Pre-mint not done");
-    require(block.number >= getCycleBlock(nextCycle), "Emissions: Next cycle not started yet");
+    require(isCycleDistributable(nextCycle), "Emissions: Next cycle not started yet");
 
     // Mint emissions for current cycle
     uint256 xAllocationsAmount = getCurrentXAllocationsAmount();
@@ -146,6 +151,8 @@ contract Emissions is AccessControl, ReentrancyGuard {
     b3tr.mint(xAllocations, xAllocationsAmount);
     b3tr.mint(vote2Earn, vote2EarnAmount);
     b3tr.mint(treasury, treasuryAmount);
+
+    xAllocationsGovernor.proposeNewAllocationRound();
 
     nextCycle++;
   }
@@ -188,7 +195,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
   function getXAllocationDecayPeriods(uint256 blockNumber) public view returns (uint256) {
     require(blockNumber >= START_BLOCK, "Emissions: Invalid block number");
 
-    return (blockNumber - 2 * cycleDuration - START_BLOCK) / (xAllocationsDecayDelay * cycleDuration);
+    return (blockNumber - cycleDuration - START_BLOCK) / (xAllocationsDecayDelay * cycleDuration);
   }
 
   function getXAllocationsAmount(uint256 blockNumber) public view returns (uint256) {
@@ -198,7 +205,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
   function getVote2EarnDecayPeriods(uint256 blockNumber) public view returns (uint256) {
     require(blockNumber >= START_BLOCK, "Emissions: Invalid block number");
 
-    return (blockNumber - 2 * cycleDuration - START_BLOCK) / (vote2EarnDecayDelay * cycleDuration);
+    return (blockNumber - cycleDuration - START_BLOCK) / (vote2EarnDecayDelay * cycleDuration);
   }
 
   function getVote2EarnAmount(uint256 blockNumber) public view returns (uint256) {
@@ -256,13 +263,34 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   function getCycleBlock(uint256 cycle) public view returns (uint256) {
-    require(cycle >= 0, "Emissions: Invalid cycle number");
+    require(cycle >= 1, "Emissions: Invalid cycle number");
 
-    return START_BLOCK + cycle * cycleDuration;
+    return START_BLOCK + (cycle - 1) * cycleDuration;
+  }
+
+  function getCycleFromBlock(uint256 blockNumber) public view returns (uint256) {
+    require(blockNumber >= START_BLOCK, "Emissions: Invalid block number");
+
+    return ((blockNumber - START_BLOCK) / cycleDuration) + 1;
   }
 
   function isCycleDistributed(uint256 cycle) public view returns (bool) {
     return cycle < nextCycle;
+  }
+
+  function getCurrentCycle() public view returns (uint256) {
+    return nextCycle - 1;
+  }
+
+  function isCycleEnded(uint256 cycle) public view returns (bool) {
+    require(cycle >= 1, "Emissions: Invalid cycle number");
+    require(isCycleDistributed(cycle), "Emissions: Cycle not distributed");
+
+    return block.number >= getCycleBlock(nextCycle);
+  }
+
+  function isCycleDistributable(uint256 cycle) public view returns (bool) {
+    return block.number >= getCycleBlock(cycle);
   }
 
   function isLastCycle() public view returns (bool) {
@@ -379,5 +407,9 @@ contract Emissions is AccessControl, ReentrancyGuard {
     );
 
     lastEmissions = _lastEmissions;
+  }
+
+  function setXAllocationsGovernorAddress(address _xAllocationsGovernor) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    xAllocationsGovernor = IXAllocationVotingGovernor(_xAllocationsGovernor);
   }
 }

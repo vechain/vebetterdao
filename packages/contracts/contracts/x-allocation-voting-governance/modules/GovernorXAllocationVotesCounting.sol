@@ -5,6 +5,7 @@ import { XAllocationVotingGovernor } from "../XAllocationVotingGovernor.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { IXAllocationPool } from "../../interfaces/IXAllocationPool.sol";
+import { IVoterRewards } from "../../interfaces/IVoterRewards.sol";
 
 /**
  * @title GovernorXAllocationVotesCounting
@@ -25,9 +26,11 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
   mapping(uint256 proposalId => AllocationRoundVote) internal _allocationRoundVotes;
 
   IXAllocationPool internal xAllocationPool;
+  IVoterRewards public voterRewards;
 
-  constructor(address xAllocationPool_) {
-    xAllocationPool = IXAllocationPool(xAllocationPool_);
+  constructor(address _xAllocationPool, address _voterRewards) {
+    xAllocationPool = IXAllocationPool(_xAllocationPool);
+    voterRewards = IVoterRewards(_voterRewards);
   }
 
   /**
@@ -65,6 +68,8 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
       totalWeight <= getVotes(voter, proposal.voteStart),
       "Governor: account has insufficient voting power for this proposal"
     );
+
+    voterRewards.registerXallocationVote(proposal.voteStart, voter, totalWeight);
 
     _allocationRoundVotes[proposalId].totalVotes += totalWeight;
     _allocationRoundVotes[proposalId].hasVoted[voter] = true;

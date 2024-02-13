@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.19;
 
 interface IEmissions {
@@ -11,7 +12,7 @@ interface IEmissions {
   event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole);
 
   event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender);
-
+  
   event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender);
 
   function DEFAULT_ADMIN_ROLE() external view returns (bytes32);
@@ -28,6 +29,8 @@ interface IEmissions {
 
   function distributeLast() external;
 
+  function getCurrentCycle() external view returns (uint256);
+
   function getCurrentTreasuryAmount() external view returns (uint256);
 
   function getCurrentVote2EarnAmount() external view returns (uint256);
@@ -35,6 +38,8 @@ interface IEmissions {
   function getCurrentXAllocationsAmount() external view returns (uint256);
 
   function getCycleBlock(uint256 cycle) external view returns (uint256);
+
+  function getCycleFromBlock(uint256 blockNumber) external view returns (uint256);
 
   function getLastTreasuryAmount() external view returns (uint256);
 
@@ -72,7 +77,11 @@ interface IEmissions {
 
   function initialEmissions() external view returns (uint256);
 
+  function isCycleDistributable(uint256 cycle) external view returns (bool);
+
   function isCycleDistributed(uint256 cycle) external view returns (bool);
+
+  function isCycleEnded(uint256 cycle) external view returns (bool);
 
   function isLastCycle() external view returns (bool);
 
@@ -118,6 +127,8 @@ interface IEmissions {
 
   function setXAllocationsDecayDelay(uint256 _delay) external;
 
+  function setXAllocationsGovernorAddress(address _xAllocationsGovernor) external;
+
   function setXallocationsAddress(address xAllocationAddress) external;
 
   function supportsInterface(bytes4 interfaceId) external view returns (bool);
@@ -137,4 +148,6 @@ interface IEmissions {
   function xAllocationsDecay() external view returns (uint256);
 
   function xAllocationsDecayDelay() external view returns (uint256);
+
+  function xAllocationsGovernor() external view returns (address);
 }
