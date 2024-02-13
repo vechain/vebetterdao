@@ -12,7 +12,7 @@ interface IXAllocationPool {
 
   function realTimeAllocationRewards(uint256 roundId, bytes32 appId) external view returns (uint256);
 
-  function claimableAllocationRewards(uint256 roundId, bytes32 appId) external view returns (uint256);
+  function claimableAmount(uint256 roundId, bytes32 appId) external view returns (uint256);
 
   function baseAllocationAmount(uint256 roundId) external view returns (uint256);
 

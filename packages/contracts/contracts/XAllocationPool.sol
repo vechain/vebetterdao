@@ -54,11 +54,11 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
     appSharesCap = appSharesCap_;
   }
 
-  function claimAllocationRewards(bytes32 appId, uint256 roundId) public nonReentrant {
+  function claim(uint256 roundId, bytes32 appId) public nonReentrant {
     require(!claimedRewards[appId][roundId], "XAllocationPool: rewards already claimed for this app and round");
     require(!xAllocationVoting().isActive(roundId), "XAllocationPool: round not ended yet");
 
-    uint256 amountToClaim = claimableAllocationRewards(roundId, appId);
+    uint256 amountToClaim = claimableAmount(roundId, appId);
     require(amountToClaim > 0, "XAllocationPool: no rewards available for this app");
 
     //check that contract has enough funds to pay the reward
@@ -123,7 +123,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
    *
    * If round failed then it will use the shares from the last successful round.
    */
-  function claimableAllocationRewards(uint256 roundId, bytes32 appId) public view returns (uint256) {
+  function claimableAmount(uint256 roundId, bytes32 appId) public view returns (uint256) {
     require(!xAllocationVoting().isActive(roundId), "XAllocationPool: round not ended yet");
 
     if (claimedRewards[appId][roundId]) {

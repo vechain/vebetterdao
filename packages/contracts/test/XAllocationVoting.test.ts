@@ -66,7 +66,7 @@ describe("X-Allocation Voting", function () {
     })
   })
 
-  describe("Add X-Apps", function () {
+  describe("X-Apps", function () {
     it("Should be able to add an app successfully", async function () {
       const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
@@ -126,6 +126,22 @@ describe("X-Allocation Voting", function () {
       expect(app[2]).to.eql("Bike 4 Life")
       expect(app[3]).to.eql("")
     }).timeout(18000000)
+
+    it("Should be able to fetch app receiver address", async function () {
+      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+      //Add apps
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[2].address, "My app", "")
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[3].address, "My app #2", "")
+
+      const app1ReceiverAddress = xAllocationVoting.getAppReceiverAddress(app1Id)
+      const app2ReceiverAddress = xAllocationVoting.getAppReceiverAddress(app2Id)
+      expect(app1ReceiverAddress).to.eql(otherAccounts[2].address)
+      expect(app2ReceiverAddress).to.eql(otherAccounts[3].address)
+    })
   })
 
   describe("Allocation rounds", function () {
@@ -398,6 +414,7 @@ describe("X-Allocation Voting", function () {
         xAllocationVoting.connect(otherAccount).castVote(proposalId, [app1], [ethers.parseEther("1500")]),
       )
     })
+
     it("I should be able to cast a vote", async function () {
       const { xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
