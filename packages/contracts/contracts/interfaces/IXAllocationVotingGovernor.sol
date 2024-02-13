@@ -266,7 +266,11 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
 
   function isEligibleForVote(bytes32 appId, uint256 proposalId) external view returns (bool);
 
-  function isRoundSucceeded(uint256 roundId) external view returns (bool);
+  function isActive(uint256 proposalId) external view returns (bool);
 
-  function latestSucceededRoundId() external view returns (uint256);
+  function isFinalized(uint256 proposalId) external view returns (bool);
+
+  function latestSucceededRoundId(uint256 roundId) external view returns (uint256);
+
+  function getAppReceiverAddress(bytes32 appId) external view returns (address);
 }

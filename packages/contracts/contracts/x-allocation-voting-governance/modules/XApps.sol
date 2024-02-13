@@ -147,4 +147,8 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
     }
     return allApps;
   }
+
+  function getAppReceiverAddress(bytes32 appId) public view override returns (address) {
+    return _apps[appId].addr;
+  }
 }

@@ -106,7 +106,7 @@ export const getOrDeployContractInstances = async ({
 
   // Deploy XAllocationPool
   const XAllocationPoolContract = await ethers.getContractFactory("XAllocationPool")
-  const xAllocationPool = await XAllocationPoolContract.deploy(owner.address)
+  const xAllocationPool = await XAllocationPoolContract.deploy(owner.address, await b3tr.getAddress())
   await xAllocationPool.waitForDeployment()
 
   // Deploy XAllocationVoting

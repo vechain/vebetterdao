@@ -58,9 +58,9 @@ contract XAllocationVoting is
       revert GovernorUnexpectedProposalState(proposalId, state(proposalId), bytes32(0));
     }
 
-    // check if previous round succeeded and update latestSucceededRoundId
-    if (proposalId > 1 && state(proposalId - 1) == AllocationProposalState.Succeeded) {
-      _latestSucceededRoundId = proposalId - 1;
+    // If checkpoint for latest round was not already created, create it
+    if (proposalId > 1 && !isFinalized(proposalId - 1)) {
+      _finalizeRound(proposalId - 1);
     }
 
     // save x-apps that users can vote for

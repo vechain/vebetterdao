@@ -52,7 +52,7 @@ export async function deployAll() {
   await timelock.grantRole(CANCELLER_ROLE, await governor.getAddress())
 
   // Deploy XAllocationPool
-  const xAllocationPool = await deployXAllocationPool(timelock, XPOOL_ADMIN)
+  const xAllocationPool = await deployXAllocationPool(b3tr, XPOOL_ADMIN)
 
   // Deploy XAllocationVoting
   const xAllocationVoting = await deployXAllocationVoting(timelock, vot3, XPOOL_ADMIN)
@@ -151,10 +151,10 @@ async function deployNFTBadge(mintableLevelFromDeploy: number) {
   return contract
 }
 
-async function deployXAllocationPool(timeLock: TimeLock, adminAddress: string) {
+async function deployXAllocationPool(b3tr: B3TR, adminAddress: string) {
   console.log(`Deploying XAllocationPool contract`)
   const XAllocationPoolContract = await ethers.getContractFactory("XAllocationPool")
-  const contract = await XAllocationPoolContract.deploy(adminAddress)
+  const contract = await XAllocationPoolContract.deploy(adminAddress, await b3tr.getAddress())
 
   await contract.waitForDeployment()
 

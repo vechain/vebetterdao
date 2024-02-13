@@ -21,8 +21,9 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   // counter to count the number of proposals and also used to create the id
   uint256 internal _proposalCount;
 
-  // checkpoint to store the latest round id that has succeeded
-  uint256 internal _latestSucceededRoundId;
+  // for each round store a pointer to the latest succeeded round
+  mapping(uint256 => uint256) internal _latestSucceededRoundId;
+  mapping(uint256 => bool) internal _roundFinalized;
 
   struct ProposalCore {
     address proposer;
@@ -106,14 +107,14 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   }
 
   /**
-   * @dev See {IXAllocationVotingGovernor-isRoundSucceeded}.
+   * @dev See {IXAllocationVotingGovernor-isActive}.
    */
-  function isRoundSucceeded(uint256 roundId) public view virtual override returns (bool) {
-    return _voteSucceeded(roundId);
+  function isActive(uint256 roundId) public view virtual override returns (bool) {
+    return state(roundId) == AllocationProposalState.Active || state(roundId) == AllocationProposalState.Pending;
   }
 
-  function latestSucceededRoundId() public view override returns (uint256) {
-    return _latestSucceededRoundId;
+  function latestSucceededRoundId(uint256 roundId) public view override returns (uint256) {
+    return _latestSucceededRoundId[roundId];
   }
 
   /**
@@ -162,6 +163,30 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
    */
   function proposalProposer(uint256 proposalId) public view virtual returns (address) {
     return _proposals[proposalId].proposer;
+  }
+
+  function finalize(uint256 proposalId) public {
+    require(!isFinalized(proposalId), "Governor: proposal already finalized");
+    require(!isActive(proposalId), "Governor: proposal is not ended yet");
+
+    _finalizeRound(proposalId);
+  }
+
+  function isFinalized(uint256 proposalId) public view virtual returns (bool) {
+    return _roundFinalized[proposalId];
+  }
+
+  /**
+   * Store the checkpoints of last succeeded round for the proposal
+   */
+  function _finalizeRound(uint256 proposalId) internal virtual {
+    if (state(proposalId) == AllocationProposalState.Succeeded) {
+      _latestSucceededRoundId[proposalId] = proposalId;
+      _roundFinalized[proposalId] = true;
+    } else if (state(proposalId) == AllocationProposalState.Failed) {
+      _latestSucceededRoundId[proposalId] = _latestSucceededRoundId[proposalId - 1];
+      _roundFinalized[proposalId] = true;
+    }
   }
 
   /**

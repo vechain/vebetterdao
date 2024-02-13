@@ -65,11 +65,11 @@ describe("X-Allocation Pool", async function () {
         emissions,
         xAllocationPool,
       )
-      let variableAllocation = await xAllocationPool.variableAllocation(round1, app1Id)
+      let variableAllocation = await xAllocationPool.variableAllocation(round1, round1, app1Id)
       expect(variableAllocation).to.eql(expectedVariableAllcoation)
 
       // Calculate allocation rewards
-      let allocationRewards = await xAllocationPool.calculateAllocationRewards(round1, app1Id)
+      let allocationRewards = await xAllocationPool.calculateAllocationRewards(round1, round1, app1Id)
       expectedVariableAllcoation = await calculateVariableAppAllocationOffCahain(
         round1,
         app1Id,
@@ -78,7 +78,7 @@ describe("X-Allocation Pool", async function () {
       )
       expect(allocationRewards).to.eql(expectedBaseAllocation + expectedVariableAllcoation)
 
-      allocationRewards = await xAllocationPool.calculateAllocationRewards(round1, app2Id)
+      allocationRewards = await xAllocationPool.calculateAllocationRewards(round1, round1, app2Id)
       expectedVariableAllcoation = await calculateVariableAppAllocationOffCahain(
         round1,
         app2Id,
