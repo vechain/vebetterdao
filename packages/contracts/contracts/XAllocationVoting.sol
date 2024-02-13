@@ -15,8 +15,8 @@ contract XAllocationVoting is
   GovernorXAllocationVotesCounting,
   GovernorVotes,
   GovernorVotesQuorumFraction,
-  AccessControl,
-  XApps
+  XApps,
+  AccessControl
 {
   /**
    * @notice Construct a XAllocationVotingGovernor contract
