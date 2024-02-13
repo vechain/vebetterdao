@@ -15,7 +15,16 @@ export const SelectAppVotesInput = ({ register, index, xApp, field }: Props) => 
     <HStack w="full" justify={"space-between"} key={field.id}>
       <Heading size="sm">{xApp?.name}</Heading>
       <Box>
-        <Input type="number" {...register(`votes.${index}.value`)} defaultValue={0} min={0} max={100} w="full" />
+        <Input
+          type="number"
+          {...register(`votes.${index}.value`, {
+            valueAsNumber: true,
+          })}
+          defaultValue={0}
+          min={0}
+          max={100}
+          w="full"
+        />
       </Box>
     </HStack>
   )

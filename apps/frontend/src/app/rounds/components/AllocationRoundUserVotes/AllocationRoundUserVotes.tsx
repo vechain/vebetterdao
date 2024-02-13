@@ -18,7 +18,7 @@ export type FormData = {
 export const AllocationRoundUserVotes = ({ roundId }: Props) => {
   const { data: xApps } = useXApps()
 
-  const { control, register, watch, handleSubmit } = useForm<FormData>()
+  const { control, register, watch, handleSubmit } = useForm<FormData>({ defaultValues: { votes: [] } })
   const { fields, append, remove } = useFieldArray({
     control,
     name: "votes", // unique name for your Field Array

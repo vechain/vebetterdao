@@ -1,7 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
-
-import XAllocationPoolContract from "@repo/contracts/artifacts/contracts/XAllocationPool.sol/XAllocationPool.json"
 import { getConfig } from "@repo/config"
 const XALLOCATIONPOOL_CONTRACT = getConfig().xAllocationPoolContractAddress
 import { XAllocationPool__factory as XAllocationPool } from "@repo/contracts/typechain-types"
