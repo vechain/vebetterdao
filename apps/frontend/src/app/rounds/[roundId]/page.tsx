@@ -11,7 +11,7 @@ export default function Round({ params }: { params: { roundId: string } }) {
     <VStack w="full" spacing={8}>
       <AllocationRoundNavbar roundId={params.roundId} />
       <AllocationRoundDetails roundId={params.roundId} />
-      <Stack direction={["column", "column", "row"]} w="full" justify="space-between" spacing={8}>
+      <Stack direction={["column-reverse", "column-reverse", "row"]} w="full" justify="space-between" spacing={8}>
         <Box flex={0.7}>
           <AllocationXAppsVotesCard roundId={params.roundId} />
         </Box>
