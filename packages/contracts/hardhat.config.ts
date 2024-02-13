@@ -12,6 +12,7 @@ const config: HardhatUserConfig = {
 module.exports = {
   solidity: {
     version: "0.8.20",
+    evmVersion: "paris",
     settings: {
       optimizer: {
         enabled: true,
