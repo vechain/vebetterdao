@@ -272,7 +272,7 @@ export const calculateVariableAppAllocationOffCahain = async (
 
   let totalAvailable = (totalAmount * (await xAllocationPool.variableAllocationPercentage())) / BigInt(100)
 
-  let appShares = (await xAllocationPool.calculateAppShares(roundId, appId)) / BigInt(100)
+  let appShares = (await xAllocationPool.getAppShares(roundId, appId)) / BigInt(100)
 
   return (totalAvailable * appShares) / BigInt(100)
 }

@@ -58,15 +58,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
     require(!claimedRewards[appId][roundId], "XAllocationPool: rewards already claimed for this app and round");
     require(!xAllocationVoting().isActive(roundId), "XAllocationPool: round not ended yet");
 
-    //If round is not succeded then take shares from previous successful round
-    uint256 lastSucceededRoundId = roundId;
-    if (xAllocationVoting().state(roundId) != IXAllocationVotingGovernor.AllocationProposalState.Succeeded) {
-      require(xAllocationVoting().isFinalized(roundId), "XAllocationPool: failed round not finalized yet");
-
-      lastSucceededRoundId = xAllocationVoting().latestSucceededRoundId(roundId);
-    }
-
-    uint256 amountToClaim = calculateAllocationRewards(roundId, lastSucceededRoundId, appId);
+    uint256 amountToClaim = claimableAllocationRewards(roundId, appId);
     require(amountToClaim > 0, "XAllocationPool: no rewards available for this app");
 
     //check that contract has enough funds to pay the reward
@@ -110,29 +102,69 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
     }
   }
 
+  /**
+   * `variableAllocationPercentage`% of allocations will be distributed based on the % portion received from entire votes
+   */
+  function _appRewardAmount(uint256 roundId, uint256 appShare) internal view returns (uint256) {
+    uint256 total = _emissionAmount(roundId);
+
+    uint256 available = (total * variableAllocationPercentage) / 100;
+
+    uint256 rewardAmount = (available * appShare) / percentagePrecisionScalingFactor;
+    return rewardAmount;
+  }
+
   // ---------- Getters ---------- //
   /**
    * The allocations distribution from the X-Allocation Pool to X-Apps will be in two parts:
-   * - `baseAllocationPercentage` of allocations will be on average distributed to each qualified X Application as the base part of the allocation (so all the x-apps in the ecosystem will receive a minimum amount of $B3TR)
+   * - `baseAllocationPercentage` of allocations will be on average distributed to each qualified X Application
+   *    as the base part of the allocation (so all the x-apps in the ecosystem will receive a minimum amount of $B3TR)
    * - `variableAllocationPercentage` of allocations will be distributed based on the % portion received from entire votes
    *
-   * This function can calculate real time allocation rewards by having same roundId and lastSucceededRoundId of an ognoing round or
-   * can calculate rewards for a round that has failed by providing the lastSucceededRoundId of the round to calculate the shares.
+   * If round failed then it will use the shares from the last successful round.
    */
-  function calculateAllocationRewards(
-    uint256 roundId,
-    uint256 lastSucceededRoundId,
-    bytes32 appId
-  ) public view returns (uint256) {
+  function claimableAllocationRewards(uint256 roundId, bytes32 appId) public view returns (uint256) {
+    require(!xAllocationVoting().isActive(roundId), "XAllocationPool: round not ended yet");
+
+    if (claimedRewards[appId][roundId]) {
+      return 0;
+    }
+
+    //If round is not succeded then take shares from previous successful round
+    uint256 lastSucceededRoundId = roundId;
+    if (xAllocationVoting().state(roundId) == IXAllocationVotingGovernor.AllocationProposalState.Failed) {
+      require(xAllocationVoting().isFinalized(roundId), "XAllocationPool: failed round not finalized yet");
+
+      lastSucceededRoundId = xAllocationVoting().latestSucceededRoundId(roundId);
+    }
+
+    uint256 appShare = getAppShares(lastSucceededRoundId, appId);
     uint256 baseAllocationPerApp = baseAllocationAmount(roundId);
-    uint256 variableAllocationForApp = sharesAllocationAmount(roundId, lastSucceededRoundId, appId);
+    uint256 variableAllocationForApp = _appRewardAmount(roundId, appShare);
 
     return baseAllocationPerApp + variableAllocationForApp;
   }
 
   /**
-   * `baseAllocationPercentage`% of allocations will be on average distributed to each qualified X Application as the base part of the allocation
-   * (so all the x-apps in the ecosystem will receive a minimum amount of $B3TR)
+   * The allocations distribution from the X-Allocation Pool to X-Apps will be in two parts:
+   * - `baseAllocationPercentage` of allocations will be on average distributed to each qualified X Application as the base
+   *    part of the allocation (so all the x-apps in the ecosystem will receive a minimum amount of $B3TR)
+   * - `variableAllocationPercentage` of allocations will be distributed based on the % portion received from entire votes
+   *
+   * This function doesn't take care if the round is active or not, or if it was succeeded or not, so it should be used only
+   * to display hypothetical rewards while the round is active.
+   */
+  function realTimeAllocationRewards(uint256 roundId, bytes32 appId) public view returns (uint256) {
+    uint256 appShare = getAppShares(roundId, appId);
+    uint256 baseAllocationPerApp = baseAllocationAmount(roundId);
+    uint256 variableAllocationForApp = _appRewardAmount(roundId, appShare);
+
+    return baseAllocationPerApp + variableAllocationForApp;
+  }
+
+  /**
+   * `baseAllocationPercentage`% of allocations will be on average distributed to each qualified X Application as the base
+   * part of the allocation (so all the x-apps in the ecosystem will receive a minimum amount of $B3TR).
    */
   function baseAllocationAmount(uint256 roundId) public view returns (uint256) {
     require(
@@ -140,32 +172,13 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
       "XAllocationVotingGovernor contract not set"
     );
 
-    uint256 allocationAmount = _emissionAmount(roundId);
+    uint256 total = _emissionAmount(roundId);
     bytes32[] memory elegibleApps = xAllocationVoting().appsElegibleForVoting(roundId);
 
-    uint256 availableAmount = (allocationAmount * baseAllocationPercentage) / 100;
-    uint256 amountPerApp = availableAmount / elegibleApps.length;
+    uint256 available = (total * baseAllocationPercentage) / 100;
+
+    uint256 amountPerApp = available / elegibleApps.length;
     return amountPerApp;
-  }
-
-  /**
-   * `variableAllocationPercentage`% of allocations will be distributed based on the % portion received from entire votes
-   *
-   * This function can calculate real time variable allocation rewards by having same roundId and lastSucceededRoundId of an ognoing round or
-   * can calculate rewards for a round that has failed by providing the lastSucceededRoundId of the round to calculate the shares.
-   */
-  function sharesAllocationAmount(
-    uint256 roundId,
-    uint256 lastSucceededRoundId,
-    bytes32 appId
-  ) public view returns (uint256) {
-    uint256 allocationAmount = _emissionAmount(roundId);
-
-    uint256 remainingAllocation = (allocationAmount * variableAllocationPercentage) / 100;
-    uint256 appShare = calculateAppShares(lastSucceededRoundId, appId);
-
-    uint256 variableAllocationForApp = (remainingAllocation * appShare) / percentagePrecisionScalingFactor;
-    return variableAllocationForApp;
   }
 
   /**
@@ -177,7 +190,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
    * Any distribution left in this pool will be allocated by DAO voting (BD pool or marketing or tech reserve, etc.)
    *
    */
-  function calculateAppShares(uint256 roundId, bytes32 appId) public view returns (uint256) {
+  function getAppShares(uint256 roundId, bytes32 appId) public view returns (uint256) {
     require(
       xAllocationVoting() != IXAllocationVotingGovernor(address(0)),
       "XAllocationVotingGovernor contract not set"

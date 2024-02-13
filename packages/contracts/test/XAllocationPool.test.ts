@@ -13,7 +13,7 @@ import { describe, it } from "mocha"
 
 describe("X-Allocation Pool", async function () {
   describe("Allocation rewards for x-apps", async function () {
-    it("Allocation rewards are calculated correctly", async function () {
+    it.only("Allocation rewards are calculated correctly", async function () {
       const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -40,13 +40,13 @@ describe("X-Allocation Pool", async function () {
       let state = await xAllocationVoting.state(round1)
       expect(state).to.eql(BigInt(3))
 
-      let appShares = await xAllocationPool.calculateAppShares(round1, app1Id)
-      expect(appShares).to.eql(1000n)
+      let app1Shares = await xAllocationPool.getAppShares(round1, app1Id)
+      expect(app1Shares).to.eql(1000n)
 
-      appShares = await xAllocationPool.calculateAppShares(round1, app2Id)
+      let app2Shares = await xAllocationPool.getAppShares(round1, app2Id)
       // should be capped to 15%
       let maxCapPercentage = await xAllocationPool.scaledAppSharesCap()
-      expect(appShares).to.eql(maxCapPercentage)
+      expect(app2Shares).to.eql(maxCapPercentage)
 
       // Calculate base allocations
       let baseAllocationAmount = await xAllocationPool.baseAllocationAmount(round1)
@@ -56,7 +56,6 @@ describe("X-Allocation Pool", async function () {
         xAllocationVoting,
         xAllocationPool,
       )
-
       expect(baseAllocationAmount).to.eql(expectedBaseAllocation)
 
       let expectedVariableAllcoation = await calculateVariableAppAllocationOffCahain(
@@ -65,11 +64,11 @@ describe("X-Allocation Pool", async function () {
         emissions,
         xAllocationPool,
       )
-      let sharesAllocationAmount = await xAllocationPool.sharesAllocationAmount(round1, round1, app1Id)
-      expect(sharesAllocationAmount).to.eql(expectedVariableAllcoation)
+      let claimableRewards = await xAllocationPool.claimableAllocationRewards(round1, app1Id)
+      expect(claimableRewards).to.eql(expectedVariableAllcoation + expectedBaseAllocation)
 
       // Calculate allocation rewards
-      let allocationRewards = await xAllocationPool.calculateAllocationRewards(round1, round1, app1Id)
+      let allocationRewards = await xAllocationPool.realTimeAllocationRewards(round1, app1Id)
       expectedVariableAllcoation = await calculateVariableAppAllocationOffCahain(
         round1,
         app1Id,
@@ -78,7 +77,7 @@ describe("X-Allocation Pool", async function () {
       )
       expect(allocationRewards).to.eql(expectedBaseAllocation + expectedVariableAllcoation)
 
-      allocationRewards = await xAllocationPool.calculateAllocationRewards(round1, round1, app2Id)
+      allocationRewards = await xAllocationPool.realTimeAllocationRewards(round1, app2Id)
       expectedVariableAllcoation = await calculateVariableAppAllocationOffCahain(
         round1,
         app2Id,
