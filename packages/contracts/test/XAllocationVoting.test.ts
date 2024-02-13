@@ -260,7 +260,7 @@ describe("X-Allocation Voting", function () {
       let state = await xAllocationVoting.state(round)
       expect(state).to.eql(1n)
 
-      await moveToCycle(emissions, minterAccount, 2)
+      await moveToCycle(emissions, minterAccount, 3)
 
       // first round should be ended and failed
       state = await xAllocationVoting.state(round)

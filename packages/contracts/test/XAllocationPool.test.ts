@@ -486,7 +486,7 @@ describe("X-Allocation Pool", async function () {
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
       const app3ReceiverAddress = otherAccounts[4].address
       await xAllocationVoting.connect(owner).addApp(app3ReceiverAddress, "My app #3", "")
-      await moveToCycle(emissions, minterAccount, 2)
+      await moveToCycle(emissions, minterAccount, 3)
       const round2 = parseInt((await xAllocationVoting.currentRoundId()).toString())
       expect(round2).to.eql(2)
 

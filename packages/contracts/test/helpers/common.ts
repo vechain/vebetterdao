@@ -203,7 +203,7 @@ export const waitForNextCycle = async (emissions: Emissions) => {
 
 export const moveToCycle = async (emissions: Emissions, minter: HardhatEthersSigner, cycle: number) => {
   const cycleToBeDistributed = await emissions.nextCycle()
-  for (let i = 0; i <= BigInt(cycle) - cycleToBeDistributed; i++) {
+  for (let i = 0; i < BigInt(cycle) - cycleToBeDistributed; i++) {
     await waitForNextCycle(emissions)
     await emissions.connect(minter).distribute()
   }
