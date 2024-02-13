@@ -39,7 +39,6 @@ contract XAllocationVoting is
     GovernorSettings(_initialVotingDelay, _initialVotingPeriod)
     GovernorVotes(_vot3Token)
     GovernorVotesQuorumFraction(_quorumPercentage)
-    XApps(_admins)
   {
     for (uint256 i = 0; i < _admins.length; i++) {
       _grantRole(DEFAULT_ADMIN_ROLE, _admins[i]);
@@ -76,6 +75,18 @@ contract XAllocationVoting is
     // Using a named return variable to avoid stack too deep errors
   }
 
+  function setVotingElegibility(bytes32 appId, bool isElegible) public override onlyRole(DEFAULT_ADMIN_ROLE) {
+    super.setVotingElegibility(appId, isElegible);
+  }
+
+  function addApp(
+    address appAddress,
+    string memory name,
+    string memory metadata
+  ) public override onlyRole(DEFAULT_ADMIN_ROLE) {
+    super.addApp(appAddress, name, metadata);
+  }
+
   // ---------- Getters ---------- //
 
   function getCurrentAllocationRoundSnapshot() public view returns (uint256) {
@@ -105,7 +116,7 @@ contract XAllocationVoting is
 
   function supportsInterface(
     bytes4 interfaceId
-  ) public view override(AccessControl, XAllocationVotingGovernor, XApps) returns (bool) {
+  ) public view override(AccessControl, XAllocationVotingGovernor) returns (bool) {
     return super.supportsInterface(interfaceId);
   }
 }

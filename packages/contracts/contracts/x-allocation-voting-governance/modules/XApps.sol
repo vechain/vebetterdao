@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { XAllocationVotingGovernor } from "../XAllocationVotingGovernor.sol";
 import { IXApps } from "../../interfaces/IXApps.sol";
 
-abstract contract XApps is IXApps, XAllocationVotingGovernor, AccessControl {
+abstract contract XApps is IXApps, XAllocationVotingGovernor {
   using Checkpoints for Checkpoints.Trace208;
 
   struct App {
@@ -30,19 +29,9 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor, AccessControl {
   mapping(bytes32 => uint256) internal _idToElegibleAppsIndex;
   mapping(bytes32 appId => Checkpoints.Trace208) internal _isAppElegibleCheckpoints;
 
-  constructor(address[] memory admins) {
-    for (uint i = 0; i < admins.length; i++) {
-      _grantRole(DEFAULT_ADMIN_ROLE, admins[i]);
-    }
-  }
-
   // ---------- Setters ---------- //
 
-  function addApp(
-    address appAddress,
-    string memory name,
-    string memory metadata
-  ) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
+  function addApp(address appAddress, string memory name, string memory metadata) public virtual {
     bytes32 id = hashName(name);
 
     require(_apps[id].addr == address(0), "App with this ID already exists");
@@ -55,7 +44,7 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor, AccessControl {
     emit AppAdded(id, appAddress, name, metadata, true);
   }
 
-  function setVotingElegibility(bytes32 appId, bool isElegible) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setVotingElegibility(bytes32 appId, bool isElegible) public virtual {
     _updateVotingElegibilityCheckpoint(appId, isElegible);
   }
 
@@ -157,11 +146,5 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor, AccessControl {
       allApps[i] = _apps[_appIds[i]];
     }
     return allApps;
-  }
-
-  function supportsInterface(
-    bytes4 interfaceId
-  ) public view virtual override(AccessControl, XAllocationVotingGovernor) returns (bool) {
-    return super.supportsInterface(interfaceId);
   }
 }

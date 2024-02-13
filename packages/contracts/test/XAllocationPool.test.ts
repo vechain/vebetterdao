@@ -12,7 +12,7 @@ import {
 import { describe, it } from "mocha"
 
 describe("X-Allocation Pool", async function () {
-  describe.only("Allocation rewards for x-apps", async function () {
+  describe("Allocation rewards for x-apps", async function () {
     it("Allocation rewards are calculated correctly", async function () {
       const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions } =
         await getOrDeployContractInstances({
