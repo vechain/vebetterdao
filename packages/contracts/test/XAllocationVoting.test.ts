@@ -152,7 +152,7 @@ describe("X-Allocation Voting", function () {
 
       await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "")
 
-      let tx = await xAllocationVoting.proposeNewAllocationRound()
+      let tx = await xAllocationVoting.connect(owner).proposeNewAllocationRound()
       let receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
 
@@ -175,13 +175,13 @@ describe("X-Allocation Voting", function () {
     })
 
     it("Should not be able to propose a new allocation round if there is an active one", async function () {
-      const { xAllocationVoting, otherAccount } = await getOrDeployContractInstances({
+      const { xAllocationVoting, otherAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
       await getVot3Tokens(otherAccount, "1000")
 
-      let tx = await xAllocationVoting.proposeNewAllocationRound()
+      let tx = await xAllocationVoting.connect(owner).proposeNewAllocationRound()
       let receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
 
@@ -196,22 +196,22 @@ describe("X-Allocation Voting", function () {
       expect(proposalState).to.eql(BigInt(0))
 
       // should not be able to propose a new allocation round if there is an active one
-      await catchRevert(xAllocationVoting.proposeNewAllocationRound())
+      await catchRevert(xAllocationVoting.connect(owner).proposeNewAllocationRound())
 
       await waitForProposalToBeActive(proposalId, xAllocationVoting)
 
       // should not be able to propose a new allocation round if there is an active one
-      await catchRevert(xAllocationVoting.proposeNewAllocationRound())
+      await catchRevert(xAllocationVoting.connect(owner).proposeNewAllocationRound())
     })
 
     it("Should be able to propose a new allocation round if the previous one ended", async function () {
-      const { xAllocationVoting, otherAccount } = await getOrDeployContractInstances({
+      const { xAllocationVoting, otherAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
       await getVot3Tokens(otherAccount, "1000")
 
-      let tx = await xAllocationVoting.proposeNewAllocationRound()
+      let tx = await xAllocationVoting.connect(owner).proposeNewAllocationRound()
       let receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
 
@@ -224,7 +224,7 @@ describe("X-Allocation Voting", function () {
       await waitForVotingPeriodToEnd(proposalId, xAllocationVoting)
 
       // should not be able to propose a new allocation round if there is an active one
-      tx = await xAllocationVoting.proposeNewAllocationRound()
+      tx = await xAllocationVoting.connect(owner).proposeNewAllocationRound()
       receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
 

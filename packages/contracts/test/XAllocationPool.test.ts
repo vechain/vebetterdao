@@ -12,7 +12,7 @@ import {
 } from "./helpers"
 import { describe, it } from "mocha"
 
-describe("X-Allocation Pool", async function () {
+describe.only("X-Allocation Pool", async function () {
   describe("Allocation rewards for x-apps", async function () {
     it("Allocation rewards are calculated correctly", async function () {
       const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions } =
@@ -96,10 +96,6 @@ describe("X-Allocation Pool", async function () {
 
       // SEED DATA
 
-      // Grant minter role to emissions contract
-      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
-      await emissions.connect(minterAccount).preMint()
-
       const voter1 = otherAccounts[1]
       await getVot3Tokens(voter1, "1000")
 
@@ -111,8 +107,12 @@ describe("X-Allocation Pool", async function () {
       await xAllocationVoting.connect(owner).addApp(app1ReceiverAddress, "My app", "")
       await xAllocationVoting.connect(owner).addApp(app2ReceiverAddress, "My app #2", "")
 
+      // Grant minter role to emissions contract
+      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+      await emissions.connect(minterAccount).preMint()
+
       //Start allocation round
-      const round1 = await startNewAllocationRound(xAllocationVoting)
+      const round1 = parseInt((await xAllocationVoting.currentRoundId()).toString())
       // Vote
       await waitForProposalToBeActive(round1, xAllocationVoting)
       await xAllocationVoting
@@ -152,10 +152,6 @@ describe("X-Allocation Pool", async function () {
 
       // SEED DATA
 
-      // Grant minter role to emissions contract
-      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
-      await emissions.connect(minterAccount).preMint()
-
       const voter1 = otherAccounts[1]
       await getVot3Tokens(voter1, "1000")
 
@@ -167,8 +163,12 @@ describe("X-Allocation Pool", async function () {
       await xAllocationVoting.connect(owner).addApp(app1ReceiverAddress, "My app", "")
       await xAllocationVoting.connect(owner).addApp(app2ReceiverAddress, "My app #2", "")
 
+      // Grant minter role to emissions contract
+      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+      await emissions.connect(minterAccount).preMint()
+
       //Start allocation round
-      const round1 = await startNewAllocationRound(xAllocationVoting)
+      const round1 = parseInt((await xAllocationVoting.currentRoundId()).toString())
       // Vote
       await waitForProposalToBeActive(round1, xAllocationVoting)
       await xAllocationVoting
@@ -196,10 +196,6 @@ describe("X-Allocation Pool", async function () {
 
       // SEED DATA
 
-      // Grant minter role to emissions contract
-      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
-      await emissions.connect(minterAccount).preMint()
-
       const voter1 = otherAccounts[1]
       await getVot3Tokens(voter1, "1000")
 
@@ -211,8 +207,12 @@ describe("X-Allocation Pool", async function () {
       await xAllocationVoting.connect(owner).addApp(app1ReceiverAddress, "My app", "")
       await xAllocationVoting.connect(owner).addApp(app2ReceiverAddress, "My app #2", "")
 
+      // Grant minter role to emissions contract
+      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+      await emissions.connect(minterAccount).preMint()
+
       //Start allocation round
-      const round1 = await startNewAllocationRound(xAllocationVoting)
+      const round1 = parseInt((await xAllocationVoting.currentRoundId()).toString())
       // Vote
       await waitForProposalToBeActive(round1, xAllocationVoting)
       await xAllocationVoting
@@ -244,10 +244,6 @@ describe("X-Allocation Pool", async function () {
 
       // SEED DATA
 
-      // Grant minter role to emissions contract
-      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
-      await emissions.connect(minterAccount).preMint()
-
       const voter1 = otherAccounts[1]
       await getVot3Tokens(voter1, "1000")
 
@@ -258,8 +254,12 @@ describe("X-Allocation Pool", async function () {
       await xAllocationVoting.connect(owner).addApp(app1ReceiverAddress, "My app", "")
       await xAllocationVoting.connect(owner).addApp(app2ReceiverAddress, "My app #2", "")
 
+      // Grant minter role to emissions contract
+      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+      await emissions.connect(minterAccount).preMint()
+
       //Start allocation round
-      const round1 = await startNewAllocationRound(xAllocationVoting)
+      const round1 = parseInt((await xAllocationVoting.currentRoundId()).toString())
       // Vote
       await waitForProposalToBeActive(round1, xAllocationVoting)
       await xAllocationVoting.connect(voter1).castVote(round1, [app1Id], [ethers.parseEther("1")])
@@ -284,10 +284,6 @@ describe("X-Allocation Pool", async function () {
 
       // SEED DATA
 
-      // Grant minter role to emissions contract
-      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
-      await emissions.connect(minterAccount).preMint()
-
       const voter1 = otherAccounts[1]
       await getVot3Tokens(voter1, "1000")
 
@@ -298,8 +294,12 @@ describe("X-Allocation Pool", async function () {
       await xAllocationVoting.connect(owner).addApp(app1ReceiverAddress, "My app", "")
       await xAllocationVoting.connect(owner).addApp(app2ReceiverAddress, "My app #2", "")
 
+      // Grant minter role to emissions contract
+      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+      await emissions.connect(minterAccount).preMint()
+
       //Start allocation round
-      const round1 = await startNewAllocationRound(xAllocationVoting)
+      const round1 = parseInt((await xAllocationVoting.currentRoundId()).toString())
       // Vote
       await waitForProposalToBeActive(round1, xAllocationVoting)
       await xAllocationVoting.connect(voter1).castVote(round1, [app1Id], [ethers.parseEther("1")])
@@ -324,10 +324,6 @@ describe("X-Allocation Pool", async function () {
 
       // SEED DATA
 
-      // Grant minter role to emissions contract
-      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
-      await emissions.connect(minterAccount).preMint()
-
       const voter1 = otherAccounts[1]
       await getVot3Tokens(voter1, "1000")
 
@@ -338,8 +334,12 @@ describe("X-Allocation Pool", async function () {
       await xAllocationVoting.connect(owner).addApp(app1ReceiverAddress, "My app", "")
       await xAllocationVoting.connect(owner).addApp(app2ReceiverAddress, "My app #2", "")
 
+      // Grant minter role to emissions contract
+      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+      await emissions.connect(minterAccount).preMint()
+
       //Start allocation round
-      const round1 = await startNewAllocationRound(xAllocationVoting)
+      const round1 = parseInt((await xAllocationVoting.currentRoundId()).toString())
       // Vote
       await waitForProposalToBeActive(round1, xAllocationVoting)
 
@@ -394,10 +394,6 @@ describe("X-Allocation Pool", async function () {
 
       // SEED DATA
 
-      // Grant minter role to emissions contract
-      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
-      await emissions.connect(minterAccount).preMint()
-
       const voter1 = otherAccounts[1]
       await getVot3Tokens(voter1, "1000")
 
@@ -409,8 +405,12 @@ describe("X-Allocation Pool", async function () {
       await xAllocationVoting.connect(owner).addApp(app1ReceiverAddress, "My app", "")
       await xAllocationVoting.connect(owner).addApp(app2ReceiverAddress, "My app #2", "")
 
+      // Grant minter role to emissions contract
+      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+      await emissions.connect(minterAccount).preMint()
+
       //Start allocation round
-      const round1 = await startNewAllocationRound(xAllocationVoting)
+      const round1 = parseInt((await xAllocationVoting.currentRoundId()).toString())
       // Nobody votes
       await waitForProposalToBeActive(round1, xAllocationVoting)
       await waitForVotingPeriodToEnd(round1, xAllocationVoting)
