@@ -21,6 +21,9 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   // counter to count the number of proposals and also used to create the id
   uint256 internal _proposalCount;
 
+  // checkpoint to store the latest round id that has succeeded
+  uint256 internal _latestSucceededRoundId;
+
   struct ProposalCore {
     address proposer;
     uint48 voteStart;
@@ -100,6 +103,17 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
    */
   function currentRoundId() public view virtual override returns (uint256) {
     return _proposalCount;
+  }
+
+  /**
+   * @dev See {IXAllocationVotingGovernor-isRoundSucceeded}.
+   */
+  function isRoundSucceeded(uint256 roundId) public view virtual override returns (bool) {
+    return _voteSucceeded(roundId);
+  }
+
+  function latestSucceededRoundId() public view override returns (uint256) {
+    return _latestSucceededRoundId;
   }
 
   /**

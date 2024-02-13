@@ -95,10 +95,13 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
       "XAllocationVotingGovernor contract not set"
     );
 
+    //If round is not succeded then take previous successful round
+    if (!xAllocationVoting().isRoundSucceeded(roundId)) {
+      roundId = xAllocationVoting().latestSucceededRoundId();
+    }
+
     uint256 allocationAmount = _allocatedAmount(roundId);
     bytes32[] memory elegibleApps = xAllocationVoting().appsElegibleForVoting(roundId);
-
-    //TODO: if round is not succeded then take previous successful round-> add a variable in voting contract to keep track of last successful round
 
     uint256 availableAmount = (allocationAmount * baseAllocationPercentage) / 100;
     uint256 amountPerApp = availableAmount / elegibleApps.length;
