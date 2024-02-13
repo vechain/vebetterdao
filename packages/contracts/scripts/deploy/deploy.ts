@@ -1,6 +1,5 @@
 import { ethers, network } from "hardhat"
 import { B3TR, GovernorContract, TimeLock, VOT3, XAllocationPool } from "../../typechain-types"
-import { seedLocalEnvironmnet } from "./seed"
 
 const DEFAULT_MINTER = "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68" //2nd account from mnemonic of solo network
 const TIMELOCK_ADMIN = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa" //1st account from mnemonic of solo network
@@ -95,15 +94,15 @@ export async function deployAll() {
   }
 
   return {
-    governorAddress: await governor.getAddress(),
-    timelockAddress: await timelock.getAddress(),
-    b3trAddress: await b3tr.getAddress(),
-    vot3Address: await vot3.getAddress(),
-    badgeAddress: await badge.getAddress(),
-    xAllocationPoolAddress: await xAllocationPool.getAddress(),
-    xAllocationVotingAddress: await xAllocationVoting.getAddress(),
-    emissionsAddress: await emissions.getAddress(),
-    voterRewardsAddress: await voterRewards.getAddress(),
+    governor: governor,
+    timelock: timelock,
+    b3tr: b3tr,
+    vot3: vot3,
+    badge: badge,
+    xAllocationPool: xAllocationPool,
+    xAllocationVoting: xAllocationVoting,
+    emissions: emissions,
+    voterRewards: voterRewards,
   }
 
   // close the script

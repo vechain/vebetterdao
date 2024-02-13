@@ -10,22 +10,12 @@ import "@openzeppelin/contracts/utils/Nonces.sol";
 // VOT3 contract
 contract VOT3 is ERC20, ERC20Permit, ERC20Votes, AccessControl {
   IERC20 public b3tr;
-  bool public canTransfer = false;
   mapping(address account => uint256) private _stakedBalances;
-
-  modifier transferEnabled() {
-    require(canTransfer, "Transfers disabled");
-    _;
-  }
 
   constructor(address _b3tr) ERC20("VOT3", "VOT3") ERC20Permit("VOT3") {
     // Grant the contract deployer the default admin role
     _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     b3tr = IERC20(_b3tr);
-  }
-
-  function setCanTransfer(bool _canTransfer) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    canTransfer = _canTransfer;
   }
 
   function stakedBalanceOf(address account) public view returns (uint256) {
@@ -46,15 +36,15 @@ contract VOT3 is ERC20, ERC20Permit, ERC20Votes, AccessControl {
     require(b3tr.transfer(msg.sender, amount), "Transfer failed");
   }
 
-  function transfer(address to, uint256 value) public override(ERC20) transferEnabled returns (bool) {
+  function transfer(address to, uint256 value) public override(ERC20) returns (bool) {
     return super.transfer(to, value);
   }
 
-  function approve(address spender, uint256 value) public override(ERC20) transferEnabled returns (bool) {
+  function approve(address spender, uint256 value) public override(ERC20) returns (bool) {
     return super.approve(spender, value);
   }
 
-  function transferFrom(address from, address to, uint256 value) public override(ERC20) transferEnabled returns (bool) {
+  function transferFrom(address from, address to, uint256 value) public override(ERC20) returns (bool) {
     return super.transferFrom(from, to, value);
   }
 

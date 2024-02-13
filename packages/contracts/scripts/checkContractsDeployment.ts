@@ -3,6 +3,7 @@ import { deployAll } from "./deploy/deploy"
 import { getConfig, Config } from "@repo/config"
 import fs from "fs"
 import path from "path"
+import { seedLocalEnvironment } from "./deploy/seed"
 
 const config = getConfig()
 
@@ -23,6 +24,17 @@ async function checkContractsDeployment() {
       if (isSoloNetwork) {
         // deploy the contracts and override the config file
         const newAddresses = await deployAll()
+        try {
+          await seedLocalEnvironment(
+            newAddresses.b3tr,
+            newAddresses.vot3,
+            newAddresses.xAllocationPool,
+            newAddresses.xAllocationVoting,
+            newAddresses.emissions,
+          )
+        } catch (e) {
+          console.error(e)
+        }
         return await overrideLocalConfigWithNewContracts(newAddresses)
       } else console.log(`Skipping deployment on ${network.name}`)
     } else console.log(`B3tr contract already deployed`)
@@ -34,12 +46,13 @@ async function checkContractsDeployment() {
 async function overrideLocalConfigWithNewContracts(contracts: Awaited<ReturnType<typeof deployAll>>) {
   const newConfig: Config = {
     ...config,
-    b3trContractAddress: contracts.b3trAddress,
-    vot3ContractAddress: contracts.vot3Address,
-    governorContractAddress: contracts.governorAddress,
-    timelockContractAddress: contracts.timelockAddress,
-    xAllocationPoolContractAddress: contracts.xAllocationPoolAddress,
-    xAllocationVotingContractAddress: contracts.xAllocationVotingAddress,
+    b3trContractAddress: await contracts.b3tr.getAddress(),
+    vot3ContractAddress: await contracts.vot3.getAddress(),
+    governorContractAddress: await contracts.governor.getAddress(),
+    timelockContractAddress: await contracts.timelock.getAddress(),
+    xAllocationPoolContractAddress: await contracts.xAllocationPool.getAddress(),
+    xAllocationVotingContractAddress: await contracts.xAllocationVoting.getAddress(),
+    emissionsContractAddress: await contracts.emissions.getAddress(),
   }
 
   // eslint-disable-next-line
