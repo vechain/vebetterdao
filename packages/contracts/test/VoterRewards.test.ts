@@ -253,7 +253,6 @@ describe("VoterRewards", () => {
         xAllocationVoting,
         otherAccounts,
         otherAccount: voter1,
-        xAllocationPool,
         owner,
         voterRewards,
         emissions,
@@ -502,19 +501,10 @@ describe("VoterRewards", () => {
     })
 
     it("Should not be able to claim rewards twice", async () => {
-      const {
-        xAllocationVoting,
-        otherAccount,
-        voterRewards,
-        emissions,
-        b3tr,
-        owner,
-        minterAccount,
-        xAllocationPool,
-        otherAccounts,
-      } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, otherAccount, voterRewards, emissions, b3tr, owner, minterAccount, otherAccounts } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       const [app1] = await addAppsToAllocationVoting(xAllocationVoting, [otherAccount.address], owner)
 
