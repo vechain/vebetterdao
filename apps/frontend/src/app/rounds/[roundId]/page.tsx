@@ -1,10 +1,24 @@
 "use client"
 
 import { Box, Stack, VStack } from "@chakra-ui/react"
-import { AllocationRoundDetails } from "../components/AllocationRoundDetails"
-import { AllocationRoundNavbar } from "../components/AllocationRoundNavbar"
-import { AllocationXAppsVotesCard } from "@/components"
-import { AllocationRoundSessionInfoCard } from "../components/AllocationRoundSessionInfoCard"
+import dynamic from "next/dynamic"
+
+const AllocationRoundDetails = dynamic(
+  () => import("../components/AllocationRoundDetails").then(mod => mod.AllocationRoundDetails),
+  { ssr: false },
+)
+const AllocationRoundNavbar = dynamic(
+  () => import("../components/AllocationRoundNavbar").then(mod => mod.AllocationRoundNavbar),
+  { ssr: false },
+)
+const AllocationXAppsVotesCard = dynamic(
+  () => import("@/components/AllocationXAppsVotesCard").then(mod => mod.AllocationXAppsVotesCard),
+  { ssr: false },
+)
+const AllocationRoundSessionInfoCard = dynamic(
+  () => import("../components/AllocationRoundSessionInfoCard").then(mod => mod.AllocationRoundSessionInfoCard),
+  { ssr: false },
+)
 
 export default function Round({ params }: { params: { roundId: string } }) {
   return (

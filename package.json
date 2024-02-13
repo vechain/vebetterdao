@@ -3,7 +3,8 @@
   "private": true,
   "scripts": {
     "test": "dotenv -e .env.dev -- turbo run test --",
-    "build": "dotenv -- turbo build",
+    "build": "dotenv -e .env.dev -- turbo build",
+    "build:staging": "dotenv -e .env.staging -- turbo build",
     "dev": "dotenv -e .env.dev -- turbo dev --",
     "staging": "dotenv -e .env.staging -- turbo staging --",
     "lint": "turbo lint",

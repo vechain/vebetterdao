@@ -14,8 +14,8 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
   const data = useMemo(
     () =>
       xAppsVotes.map(app => ({
-        votes: app.data?.votes,
-        app: xApps?.find(xa => xa.id === app.data?.app)?.name,
+        votes: app.data?.votes ?? "0",
+        app: xApps?.find(xa => xa.id === app.data?.app)?.name ?? "",
       })),
     [xAppsVotes, xApps],
   )
