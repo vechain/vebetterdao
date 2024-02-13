@@ -33,7 +33,6 @@ contract XAllocationVoting is
     uint32 _initialVotingPeriod,
     uint48 _initialVotingDelay,
     address _b3trGovernor,
-    address _xAllocationPool,
     address _voterRewards,
     address[] memory _admins
   )
@@ -41,7 +40,7 @@ contract XAllocationVoting is
     GovernorSettings(_initialVotingDelay, _initialVotingPeriod)
     GovernorVotes(_vot3Token)
     GovernorVotesQuorumFraction(_quorumPercentage)
-    GovernorXAllocationVotesCounting(_xAllocationPool, _voterRewards)
+    GovernorXAllocationVotesCounting(_voterRewards)
   {
     for (uint256 i = 0; i < _admins.length; i++) {
       _grantRole(DEFAULT_ADMIN_ROLE, _admins[i]);

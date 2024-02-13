@@ -222,13 +222,13 @@ export const voteOnApps = async (
 }
 
 export const addAppsToAllocationVoting = async (
-  xAllocationPool: XAllocationPool,
+  xAllocationVoting: XAllocationVoting,
   apps: string[],
   owner: HardhatEthersSigner,
 ) => {
   let appIds: string[] = []
   for (const app of apps) {
-    await xAllocationPool.connect(owner).addApp(app, app, "", true)
+    await xAllocationVoting.connect(owner).addApp(app, app, "")
     appIds.push(ethers.keccak256(ethers.toUtf8Bytes(app)))
   }
 

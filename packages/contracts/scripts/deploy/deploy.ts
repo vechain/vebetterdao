@@ -59,9 +59,6 @@ export async function deployAll() {
   // Deploy XAllocationPool
   const xAllocationPool = await deployXAllocationPool(b3tr, XPOOL_ADMIN)
 
-  // Deploy XAllocationVoting
-  const xAllocationVoting = await deployXAllocationVoting(timelock, vot3, XPOOL_ADMIN)
-
   // Deploy the NFT Badge contract with Max Mintable Level 1
   const badge = await deployNFTBadge(1)
 
@@ -78,23 +75,16 @@ export async function deployAll() {
   )
 
   // Deploy XAllocationVoting
-  const xAllocationVoting = await deployXAllocationVoting(
-    timelock,
-    xAllocationPool,
-    vot3,
-    XPOOL_ADMIN,
-    await voterRewards.getAddress(),
-  )
+  const xAllocationVoting = await deployXAllocationVoting(timelock, vot3, XPOOL_ADMIN, await voterRewards.getAddress())
 
   // Grant Vote Registrar role to XAllocationVoting
   await voterRewards.connect(timelockAdminSigner).setXallocationVoteRegistrarRole(await xAllocationVoting.getAddress())
 
   // Set X allocations governor
   await emissions.connect(timelockAdminSigner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
-
-  if (network.name === "vechain_solo") {
-    await seedLocalEnvironmnet(b3tr, xAllocationPool, xAllocationVoting, emissions)
-  }
+  // Setup XAllocationPool addresses
+  await xAllocationPool.connect(timelockAdminSigner).setXAllocationVotingAddress(await xAllocationVoting.getAddress())
+  await xAllocationPool.connect(timelockAdminSigner).setEmissionsAddress(await emissions.getAddress())
 
   return {
     governor: governor,
@@ -192,7 +182,6 @@ async function deployXAllocationPool(b3tr: B3TR, adminAddress: string) {
 
 async function deployXAllocationVoting(
   timeLock: TimeLock,
-  xAllocationPool: XAllocationPool,
   vot3: VOT3,
   adminAddress: string,
   voterRewardsAddress: string,
@@ -205,7 +194,6 @@ async function deployXAllocationVoting(
     VOTING_PERIOD,
     0, // voting delay
     await timeLock.getAddress(),
-    await xAllocationPool.getAddress(),
     voterRewardsAddress,
     [await timeLock.getAddress(), adminAddress],
   )

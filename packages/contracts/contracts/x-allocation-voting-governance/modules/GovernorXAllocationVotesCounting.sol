@@ -25,11 +25,9 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
 
   mapping(uint256 proposalId => AllocationRoundVote) internal _allocationRoundVotes;
 
-  IXAllocationPool internal xAllocationPool;
   IVoterRewards public voterRewards;
 
-  constructor(address _xAllocationPool, address _voterRewards) {
-    xAllocationPool = IXAllocationPool(_xAllocationPool);
+  constructor(address _voterRewards) {
     voterRewards = IVoterRewards(_voterRewards);
   }
 

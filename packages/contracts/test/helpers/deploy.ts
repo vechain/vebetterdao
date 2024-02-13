@@ -115,18 +115,6 @@ export const getOrDeployContractInstances = async ({
   const xAllocationPool = await XAllocationPoolContract.deploy(owner.address, await b3tr.getAddress())
   await xAllocationPool.waitForDeployment()
 
-  // Deploy XAllocationVoting
-  const XAllocationVotingContract = await ethers.getContractFactory("XAllocationVoting")
-  const xAllocationVoting = await XAllocationVotingContract.deploy(
-    await vot3.getAddress(),
-    4, // quroum percentage
-    votingPeriod, // voting period
-    0, // voting delay
-    await timeLock.getAddress(),
-    [await timeLock.getAddress(), owner.address],
-  )
-  await xAllocationVoting.waitForDeployment()
-
   const X_ALLOCATIONS_ADDRESS = await xAllocationPool.getAddress()
   const VOTE_2_EARN_ADDRESS = otherAccounts[1].address
   const TREASURY_ADDRESS = otherAccounts[2].address
@@ -169,7 +157,6 @@ export const getOrDeployContractInstances = async ({
     votingPeriod, // voting period
     0, // voting delay
     await timeLock.getAddress(),
-    await xAllocationPool.getAddress(),
     await voterRewards.getAddress(),
     [await timeLock.getAddress(), owner.address],
   )
