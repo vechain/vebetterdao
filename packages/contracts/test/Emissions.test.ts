@@ -16,14 +16,14 @@ import b3trAllocations from "./fixture/b3trAllocations.json"
 describe("Emissions", () => {
   describe("Contract parameters", () => {
     it("Should have correct parameters set on deployment", async () => {
-      const { emissions, owner, otherAccounts, b3tr, minterAccount, xAllocationPool } =
+      const { emissions, owner, otherAccounts, b3tr, minterAccount, xAllocationPool, voterRewards } =
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
 
       // Destination addresses should be set correctly
       expect(await emissions.xAllocations()).to.equal(await xAllocationPool.getAddress())
-      expect(await emissions.vote2Earn()).to.equal(otherAccounts[1].address)
+      expect(await emissions.vote2Earn()).to.equal(await voterRewards.getAddress())
       expect(await emissions.treasury()).to.equal(otherAccounts[2].address)
 
       // Admin should be set correctly
@@ -96,7 +96,7 @@ describe("Emissions", () => {
 
   describe("Pre-minting", () => {
     it("Should be able to pre-mint tokens", async () => {
-      const { emissions, b3tr, minterAccount, otherAccounts, owner, xAllocationPool } =
+      const { emissions, b3tr, minterAccount, otherAccounts, owner, xAllocationPool, voterRewards } =
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
@@ -106,8 +106,10 @@ describe("Emissions", () => {
 
       await emissions.connect(minterAccount).preMint()
 
+      expect(await emissions.getCycleFromBlock(await ethers.provider.getBlockNumber())).to.equal(1)
+
       expect(await b3tr.balanceOf(await xAllocationPool.getAddress())).to.equal(PRE_MINT_X_ALLOCATION)
-      expect(await b3tr.balanceOf(otherAccounts[1].address)).to.equal(PRE_MINT_VOTE_2_EARN_ALLOCATION)
+      expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(PRE_MINT_VOTE_2_EARN_ALLOCATION)
       expect(await b3tr.balanceOf(otherAccounts[2].address)).to.equal(PRE_MINT_TREASURY_ALLOCATION)
 
       expect(await emissions.nextCycle()).to.equal(2)
@@ -129,7 +131,7 @@ describe("Emissions", () => {
     })
 
     it("Should be able to pre-mint different amounts than deployment", async () => {
-      const { emissions, b3tr, minterAccount, otherAccounts, owner, xAllocationPool } =
+      const { emissions, b3tr, minterAccount, otherAccounts, owner, xAllocationPool, voterRewards } =
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
@@ -152,7 +154,7 @@ describe("Emissions", () => {
       await emissions.connect(minterAccount).preMint()
 
       expect(await b3tr.balanceOf(await xAllocationPool.getAddress())).to.equal(ethers.parseEther("100"))
-      expect(await b3tr.balanceOf(otherAccounts[1].address)).to.equal(ethers.parseEther("200"))
+      expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(ethers.parseEther("200"))
       expect(await b3tr.balanceOf(otherAccounts[2].address)).to.equal(ethers.parseEther("300"))
     })
   })
@@ -174,10 +176,14 @@ describe("Emissions", () => {
       // Expect START_BLOCK to be less than or equal to current time
       expect(Number(await emissions.START_BLOCK())).to.be.lte(currentBlock?.number)
 
+      expect(await emissions.getCycleFromBlock(await ethers.provider.getBlockNumber())).to.equal(1)
+
       // Expect current cycle to be 0
       expect(await emissions.nextCycle()).to.equal(2)
 
       await waitForNextCycle(emissions)
+
+      expect(await emissions.getCycleFromBlock(await ethers.provider.getBlockNumber())).to.equal(2)
 
       // Calculate emissions for first cycle
       const xAllocationsAmount = await emissions.getCurrentXAllocationsAmount()
