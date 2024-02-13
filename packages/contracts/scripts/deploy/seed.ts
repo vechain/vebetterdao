@@ -76,6 +76,8 @@ const castVotesToXDapps = async (
 
       let residual = BigInt(vot3mount)
       const splits: { app: BytesLike; weight: string }[] = []
+
+      // eslint-disable-next-line no-unused-vars
       let randomDappsToVote = apps.filter(_ => Math.floor(Math.random() * 2) == 0)
       if (!randomDappsToVote.length) randomDappsToVote = apps
 
