@@ -28,7 +28,6 @@ async function checkContractsDeployment() {
           await seedLocalEnvironment(
             newAddresses.b3tr,
             newAddresses.vot3,
-            newAddresses.xAllocationPool,
             newAddresses.xAllocationVoting,
             newAddresses.emissions,
           )
