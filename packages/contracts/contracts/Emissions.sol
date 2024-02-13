@@ -26,7 +26,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
   // ----------- Cycle attributes ----------- //
   uint256 public nextCycle; // Next cycle number
   uint256 public cycleDuration; // Duration of a cycle in blocks
-  uint256 public lastCycleId; // Last cycle number, only set after the last cycle is distributed
+  uint256 private _lastCycleId; // Last cycle number, only set after the last cycle is distributed
 
   // ----------- Decay rates ----------- //
   uint256 public xAllocationsDecay; // Decay rate for xAllocations in percentage
@@ -155,7 +155,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
     require(START_BLOCK > 0, "Emissions: Pre-mint not done");
     require(isLastCycle(), "Emissions: Last cycle not reached");
 
-    lastCycleId = nextCycle;
+    _lastCycleId = nextCycle;
 
     uint256 remainingEmissions = getRemainingEmissions();
 
@@ -275,12 +275,12 @@ contract Emissions is AccessControl, ReentrancyGuard {
       remainingEmissions);
   }
 
-  function isLastCycleId(uint256 cycleId) public view returns (bool) {
-    if (cycleId == 0) {
+  function isLastCycleId(uint256 id) public view returns (bool) {
+    if (id == 0) {
       return false;
     }
 
-    return cycleId == lastCycleId;
+    return id == _lastCycleId;
   }
 
   function getLastXAllocationsAmount() public view returns (uint256) {
