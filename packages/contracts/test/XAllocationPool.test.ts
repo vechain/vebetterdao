@@ -12,7 +12,7 @@ import {
 } from "./helpers"
 import { describe, it } from "mocha"
 
-describe.only("X-Allocation Pool", async function () {
+describe("X-Allocation Pool", async function () {
   describe("Allocation rewards for x-apps", async function () {
     it("Allocation rewards are calculated correctly", async function () {
       const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions } =
