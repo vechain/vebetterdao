@@ -12,7 +12,7 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
 
   const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useVot3PastSupply(roundInfo.voteStart)
   return (
-    <Card>
+    <Card w="full">
       <CardHeader>
         <Heading size="md">Session Info</Heading>
       </CardHeader>

@@ -6,6 +6,7 @@ export const stagingConfig: Config = {
   timelockContractAddress: "0xC02b1A80f4fC3A2Fea3A00B01707fed38eDceD46",
   xAllocationPoolContractAddress: "0xf6C97c09DB24DFdc9556fda191a616f123D4410A",
   xAllocationVotingContractAddress: "0x49209B92eB4b5dDd14Aa1aA2f6C825b1d4bbA612",
+  emissionsContractAddress: "0x3",
   nodeUrl: "https://thor-solo.dev.rewards.vechain.org",
   network: {
     id: "solo-staging",
