@@ -8,8 +8,6 @@ type Props = {
   round: AllocationProposalCreated
 }
 
-const blockTime = getConfig().network.blockTime
-
 export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
   const router = useRouter()
 
