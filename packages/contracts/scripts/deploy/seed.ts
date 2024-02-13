@@ -66,7 +66,7 @@ const addXDapps = async (xAllocationVoting: XAllocationVoting, accounts: Hardhat
 const castVotesToXDapps = async (
   xAllocationVoting: XAllocationVoting,
   accounts: HardhatEthersSigner[],
-  proposalId: string,
+  roundId: number,
   vot3mount: string,
   apps: XApps.AppStruct[],
 ) => {
@@ -96,7 +96,7 @@ const castVotesToXDapps = async (
       return await xAllocationVoting
         .connect(account)
         .castVote(
-          proposalId,
+          roundId,
           splits.map(split => split.app),
           splits.map(split => ethers.parseEther(split.weight)),
         )
@@ -156,13 +156,11 @@ export const seedLocalEnvironment = async (
     .then(async tx => await tx.wait())
 
   //   Start new allocation round
-  console.log("Starting new allocation round...")
-  await xAllocationVoting.proposeNewAllocationRound().then(async tx => await tx.wait())
-  const proposalId = "1"
+  const roundId = parseInt((await xAllocationVoting.currentRoundId()).toString())
   console.log("Waiting for proposal to be active...")
-  await waitForProposalToBeActive(Number(proposalId), xAllocationVoting)
+  await waitForProposalToBeActive(roundId, xAllocationVoting)
   console.log("Casting random votes to xDapps...")
-  await castVotesToXDapps(xAllocationVoting, accountsToSeed, proposalId, amountToSwap, xDappsFromContract)
+  await castVotesToXDapps(xAllocationVoting, accountsToSeed, roundId, amountToSwap, xDappsFromContract)
 
   //TODO: SEED multiple rounds and votes (we need to execute a proposal to change the votingPeriod to someseconds)
 
