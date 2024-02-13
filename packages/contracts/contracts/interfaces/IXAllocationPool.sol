@@ -16,9 +16,9 @@ interface IXAllocationPool {
     bytes32 appId
   ) external view returns (uint256);
 
-  function baseAllocation(uint256 roundId) external view returns (uint256);
+  function baseAllocationAmount(uint256 roundId) external view returns (uint256);
 
-  function variableAllocation(
+  function sharesAllocationAmount(
     uint256 roundId,
     uint256 lastSucceededRoundId,
     bytes32 appId

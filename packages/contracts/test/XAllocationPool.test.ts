@@ -49,7 +49,7 @@ describe("X-Allocation Pool", async function () {
       expect(appShares).to.eql(maxCapPercentage)
 
       // Calculate base allocations
-      let baseAllocation = await xAllocationPool.baseAllocation(round1)
+      let baseAllocationAmount = await xAllocationPool.baseAllocationAmount(round1)
       const expectedBaseAllocation = await calculateBaseAllocationOffChain(
         round1,
         emissions,
@@ -57,7 +57,7 @@ describe("X-Allocation Pool", async function () {
         xAllocationPool,
       )
 
-      expect(baseAllocation).to.eql(expectedBaseAllocation)
+      expect(baseAllocationAmount).to.eql(expectedBaseAllocation)
 
       let expectedVariableAllcoation = await calculateVariableAppAllocationOffCahain(
         round1,
@@ -65,8 +65,8 @@ describe("X-Allocation Pool", async function () {
         emissions,
         xAllocationPool,
       )
-      let variableAllocation = await xAllocationPool.variableAllocation(round1, round1, app1Id)
-      expect(variableAllocation).to.eql(expectedVariableAllcoation)
+      let sharesAllocationAmount = await xAllocationPool.sharesAllocationAmount(round1, round1, app1Id)
+      expect(sharesAllocationAmount).to.eql(expectedVariableAllcoation)
 
       // Calculate allocation rewards
       let allocationRewards = await xAllocationPool.calculateAllocationRewards(round1, round1, app1Id)

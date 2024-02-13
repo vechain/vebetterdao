@@ -95,7 +95,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
    *
    * @param roundId The round ID for which to calculate the amount available for allocation.
    */
-  function _allocatedAmount(uint256 roundId) internal view returns (uint256) {
+  function _emissionAmount(uint256 roundId) internal view returns (uint256) {
     require(emissions() != IEmissions(address(0)), "Emissions contract not set");
 
     // if it's the first cycle then the amount available is the first custom allocation
@@ -124,8 +124,8 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
     uint256 lastSucceededRoundId,
     bytes32 appId
   ) public view returns (uint256) {
-    uint256 baseAllocationPerApp = baseAllocation(roundId);
-    uint256 variableAllocationForApp = variableAllocation(roundId, lastSucceededRoundId, appId);
+    uint256 baseAllocationPerApp = baseAllocationAmount(roundId);
+    uint256 variableAllocationForApp = sharesAllocationAmount(roundId, lastSucceededRoundId, appId);
 
     return baseAllocationPerApp + variableAllocationForApp;
   }
@@ -134,13 +134,13 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
    * `baseAllocationPercentage`% of allocations will be on average distributed to each qualified X Application as the base part of the allocation
    * (so all the x-apps in the ecosystem will receive a minimum amount of $B3TR)
    */
-  function baseAllocation(uint256 roundId) public view returns (uint256) {
+  function baseAllocationAmount(uint256 roundId) public view returns (uint256) {
     require(
       xAllocationVoting() != IXAllocationVotingGovernor(address(0)),
       "XAllocationVotingGovernor contract not set"
     );
 
-    uint256 allocationAmount = _allocatedAmount(roundId);
+    uint256 allocationAmount = _emissionAmount(roundId);
     bytes32[] memory elegibleApps = xAllocationVoting().appsElegibleForVoting(roundId);
 
     uint256 availableAmount = (allocationAmount * baseAllocationPercentage) / 100;
@@ -154,12 +154,12 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
    * This function can calculate real time variable allocation rewards by having same roundId and lastSucceededRoundId of an ognoing round or
    * can calculate rewards for a round that has failed by providing the lastSucceededRoundId of the round to calculate the shares.
    */
-  function variableAllocation(
+  function sharesAllocationAmount(
     uint256 roundId,
     uint256 lastSucceededRoundId,
     bytes32 appId
   ) public view returns (uint256) {
-    uint256 allocationAmount = _allocatedAmount(roundId);
+    uint256 allocationAmount = _emissionAmount(roundId);
 
     uint256 remainingAllocation = (allocationAmount * variableAllocationPercentage) / 100;
     uint256 appShare = calculateAppShares(lastSucceededRoundId, appId);

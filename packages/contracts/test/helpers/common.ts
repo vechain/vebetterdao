@@ -257,7 +257,7 @@ export const calculateVariableAppAllocationOffCahain = async (
   emissions: Emissions,
   xAllocationPool: XAllocationPool,
 ) => {
-  // uint256 allocationAmount = _allocatedAmount(roundId);
+  // uint256 allocationAmount = _emissionAmount(roundId);
   let totalAmount
   // if it's the first cycle then the amount available is the first custom allocation
   if (roundId == 1) {
