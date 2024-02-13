@@ -5,7 +5,6 @@ import { AllocationRoundDetails } from "../components/AllocationRoundDetails"
 import { AllocationRoundNavbar } from "../components/AllocationRoundNavbar"
 import { AllocationXAppsVotesCard } from "@/components"
 import { AllocationRoundSessionInfoCard } from "../components/AllocationRoundSessionInfoCard"
-import { AllocationRoundTimeline } from "../components/AllocationRoundTimeline"
 
 export default function Round({ params }: { params: { roundId: string } }) {
   return (
@@ -18,7 +17,6 @@ export default function Round({ params }: { params: { roundId: string } }) {
         </Box>
         <VStack flex={0.25} spacing={8}>
           <AllocationRoundSessionInfoCard roundId={params.roundId} />
-          <AllocationRoundTimeline roundId={params.roundId} />
         </VStack>
       </Stack>
     </VStack>
