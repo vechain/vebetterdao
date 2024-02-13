@@ -13,7 +13,7 @@ import { XAllocationPool__factory as XAllocationPool } from "@repo/contracts/typ
  * @property metadata  the xApp metadata (ipfs hash)
  * @property appAvailableForAllocationVoting  whether the xApp is available for allocation voting
  */
-type XApp = {
+export type XApp = {
   id: string
   addr: string
   name: string
