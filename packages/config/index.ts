@@ -9,6 +9,7 @@ export type Config = {
   timelockContractAddress: string
   xAllocationPoolContractAddress: string
   xAllocationVotingContractAddress: string
+  emissionsContractAddress: string
   nodeUrl: string
   network: Network
 }
