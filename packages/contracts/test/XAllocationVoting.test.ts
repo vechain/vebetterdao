@@ -137,8 +137,8 @@ describe("X-Allocation Voting", function () {
       await xAllocationVoting.connect(owner).addApp(otherAccounts[2].address, "My app", "")
       await xAllocationVoting.connect(owner).addApp(otherAccounts[3].address, "My app #2", "")
 
-      const app1ReceiverAddress = xAllocationVoting.getAppReceiverAddress(app1Id)
-      const app2ReceiverAddress = xAllocationVoting.getAppReceiverAddress(app2Id)
+      const app1ReceiverAddress = await xAllocationVoting.getAppReceiverAddress(app1Id)
+      const app2ReceiverAddress = await xAllocationVoting.getAppReceiverAddress(app2Id)
       expect(app1ReceiverAddress).to.eql(otherAccounts[2].address)
       expect(app2ReceiverAddress).to.eql(otherAccounts[3].address)
     })

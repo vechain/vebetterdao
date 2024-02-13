@@ -234,7 +234,7 @@ export const calculateBaseAllocationOffChain = async (
     totalAmount = (await emissions.getPreMintAllocations())[0]
   } else if (await emissions.isLastCycleId(roundId)) {
     // if it's the last cycle then the amount available is the last custom allocation
-    totalAmount = (await emissions.getLastMintAllocations())[0]
+    totalAmount = await emissions.getLastXAllocationsAmount()
   } else {
     // Amount available for this round (assuming the amount is already scaled by 1e18 for precision)
     totalAmount = await emissions.getXAllocationAmountForCycle(roundId)
@@ -264,7 +264,7 @@ export const calculateVariableAppAllocationOffCahain = async (
     totalAmount = (await emissions.getPreMintAllocations())[0]
   } else if (await emissions.isLastCycleId(roundId)) {
     // if it's the last cycle then the amount available is the last custom allocation
-    totalAmount = (await emissions.getLastMintAllocations())[0]
+    totalAmount = await emissions.getLastXAllocationsAmount()
   } else {
     // Amount available for this round (assuming the amount is already scaled by 1e18 for precision)
     totalAmount = await emissions.getXAllocationAmountForCycle(roundId)
