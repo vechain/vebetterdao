@@ -48,6 +48,7 @@ contract XAllocationVoting is
   }
 
   // ---------- Setters ---------- //
+
   function setB3trGovernanceAddress(address b3trGovernor_) public override onlyRole(DEFAULT_ADMIN_ROLE) {
     _b3trGovernor = b3trGovernor_;
   }
@@ -94,6 +95,16 @@ contract XAllocationVoting is
     super.addApp(appAddress, name, metadata);
   }
 
+  function proposeNewAllocationRound() public override onlyRole(DEFAULT_ADMIN_ROLE) returns (uint256) {
+    return super.proposeNewAllocationRound();
+  }
+
+  function setAdminRole(address _newAdmin) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(_newAdmin != address(0), "XAllocationVoting: new admin is the zero address");
+
+    _grantRole(DEFAULT_ADMIN_ROLE, _newAdmin);
+  }
+
   // ---------- Getters ---------- //
 
   function getCurrentAllocationRoundSnapshot() public view returns (uint256) {
@@ -125,17 +136,5 @@ contract XAllocationVoting is
     bytes4 interfaceId
   ) public view override(AccessControl, XAllocationVotingGovernor) returns (bool) {
     return super.supportsInterface(interfaceId);
-  }
-
-  function proposeNewAllocationRound() public override onlyRole(DEFAULT_ADMIN_ROLE) returns (uint256) {
-    return super.proposeNewAllocationRound();
-  }
-
-  // ------------------ SETTERS ------------------ //
-
-  function setAdminRole(address _newAdmin) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(_newAdmin != address(0), "XAllocationVoting: new admin is the zero address");
-
-    _grantRole(DEFAULT_ADMIN_ROLE, _newAdmin);
   }
 }
