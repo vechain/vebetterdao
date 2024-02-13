@@ -6,6 +6,7 @@ import {
   filterEventsByName,
   getOrDeployContractInstances,
   getVot3Tokens,
+  moveToCycle,
   parseAllocationVoteCastEvent,
   parseAlloctionProposalCreatedEvent,
   parseAppAddedEvent,
@@ -237,6 +238,38 @@ describe("X-Allocation Voting", function () {
       const currentRoundId = await xAllocationVoting.currentRoundId()
       expect(currentRoundId).to.eql(BigInt(2))
     }).timeout(18000000)
+
+    it("New round is started each time an emission occurs", async function () {
+      const { xAllocationVoting, owner, b3tr, emissions, minterAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      //no round at start
+      let round = parseInt((await xAllocationVoting.currentRoundId()).toString())
+      expect(round).to.eql(0)
+
+      // Grant minter role to emissions contract
+      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+      await emissions.connect(minterAccount).preMint()
+
+      // round should be created
+      round = parseInt((await xAllocationVoting.currentRoundId()).toString())
+      expect(round).to.eql(1)
+
+      await waitForProposalToBeActive(round, xAllocationVoting)
+      let state = await xAllocationVoting.state(round)
+      expect(state).to.eql(1n)
+
+      await moveToCycle(emissions, minterAccount, 2)
+
+      // first round should be ended and failed
+      state = await xAllocationVoting.state(round)
+      expect(state).to.eql(3n)
+
+      // round should be created
+      round = parseInt((await xAllocationVoting.currentRoundId()).toString())
+      expect(round).to.eql(2)
+    })
   })
 
   describe("App availability for allocation voting", function () {

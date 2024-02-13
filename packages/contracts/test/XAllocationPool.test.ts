@@ -6,6 +6,7 @@ import {
   catchRevert,
   getOrDeployContractInstances,
   getVot3Tokens,
+  moveToCycle,
   startNewAllocationRound,
   waitForProposalToBeActive,
   waitForVotingPeriodToEnd,
@@ -440,6 +441,81 @@ describe("X-Allocation Pool", async function () {
 
       expect(app1Balance).to.eql(baseAllocationAmount)
       expect(app2Balance).to.eql(baseAllocationAmount)
+    })
+
+    it("New app of failed round receives a base allocation even if it was not elegible in previous round", async function () {
+      const { xAllocationVoting, otherAccounts, owner, xAllocationPool, b3tr, emissions, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // SEED DATA
+
+      const voter1 = otherAccounts[1]
+      await getVot3Tokens(voter1, "1000")
+
+      //Add apps
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
+      const app1ReceiverAddress = otherAccounts[3].address
+      const app2ReceiverAddress = otherAccounts[4].address
+      await xAllocationVoting.connect(owner).addApp(app1ReceiverAddress, "My app", "")
+      await xAllocationVoting.connect(owner).addApp(app2ReceiverAddress, "My app #2", "")
+
+      // Grant minter role to emissions contract
+      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+      await emissions.connect(minterAccount).preMint()
+
+      //Start allocation round
+      const round1 = parseInt((await xAllocationVoting.currentRoundId()).toString())
+      // Nobody votes
+      await waitForProposalToBeActive(round1, xAllocationVoting)
+
+      await xAllocationVoting
+        .connect(voter1)
+        .castVote(round1, [app1Id, app2Id], [ethers.parseEther("100"), ethers.parseEther("900")])
+
+      await waitForVotingPeriodToEnd(round1, xAllocationVoting)
+      await xAllocationVoting.finalize(round1)
+
+      let state = await xAllocationVoting.state(round1)
+      // should be succeeded
+      expect(state).to.eql(3n)
+
+      // new emission, new round and new app
+      const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
+      const app3ReceiverAddress = otherAccounts[4].address
+      await xAllocationVoting.connect(owner).addApp(app3ReceiverAddress, "My app #3", "")
+      await moveToCycle(emissions, minterAccount, 2)
+      const round2 = parseInt((await xAllocationVoting.currentRoundId()).toString())
+      expect(round2).to.eql(2)
+
+      await waitForProposalToBeActive(round2, xAllocationVoting)
+      await xAllocationVoting.connect(voter1).castVote(round2, [app3Id], [ethers.parseEther("1")])
+      await waitForVotingPeriodToEnd(round2, xAllocationVoting)
+      await xAllocationVoting.finalize(round2)
+
+      state = await xAllocationVoting.state(round2)
+      // should be failed
+      expect(state).to.eql(2n)
+
+      const baseAllocationAmount = await xAllocationPool.baseAllocationAmount(round2)
+
+      let round1Votes = await xAllocationVoting.getAppVotes(round1, app3Id)
+      expect(round1Votes).to.eql(0n)
+      let round2Votes = await xAllocationVoting.getAppVotes(round2, app3Id)
+      expect(round2Votes).to.eql(ethers.parseEther("1"))
+
+      let app3Revenue = await xAllocationPool.claimableAmount(round2, app3Id)
+      expect(app3Revenue).to.eql(baseAllocationAmount)
+
+      let app3Balance = await b3tr.balanceOf(app3ReceiverAddress)
+      expect(app3Balance).to.eql(0n)
+
+      await xAllocationPool.claim(round2, app3Id)
+
+      app3Balance = await b3tr.balanceOf(app3ReceiverAddress)
+      expect(app3Balance).to.eql(baseAllocationAmount)
     })
   })
 })
