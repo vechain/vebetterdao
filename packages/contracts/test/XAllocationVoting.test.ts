@@ -777,7 +777,7 @@ describe("X-Allocation Voting", function () {
       expect(await xAllocationVoting.state(proposalId)).to.eql(BigInt(2))
     }).timeout(18000000)
 
-    it("tracks apps available for voting on previous rounds correctly", async function () {
+    it("Can track apps available for voting on current and previous rounds correctly", async function () {
       const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -827,6 +827,55 @@ describe("X-Allocation Voting", function () {
       expect(appsElegibleForVoting.length).to.equal(4n)
       appsElegibleForVoting = await xAllocationVoting.appsElegibleForVoting(round3)
       expect(appsElegibleForVoting.length).to.equal(2n)
+    })
+  })
+
+  describe("Allocation Voting finalization", function () {
+    it("Previous round is finalized correctly when a new one starts", async function () {
+      const { xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      let round1 = await startNewAllocationRound(xAllocationVoting)
+      await waitForVotingPeriodToEnd(round1, xAllocationVoting)
+
+      let isFinalized = await xAllocationVoting.isFinalized(round1)
+      expect(isFinalized).to.eql(false)
+
+      await startNewAllocationRound(xAllocationVoting)
+
+      isFinalized = await xAllocationVoting.isFinalized(round1)
+      expect(isFinalized).to.eql(true)
+    })
+
+    it("Anyone can manually trigger round finalization", async function () {
+      const { xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      let round1 = await startNewAllocationRound(xAllocationVoting)
+      await waitForVotingPeriodToEnd(round1, xAllocationVoting)
+
+      let isFinalized = await xAllocationVoting.isFinalized(round1)
+      expect(isFinalized).to.eql(false)
+
+      await xAllocationVoting.finalize(round1)
+
+      isFinalized = await xAllocationVoting.isFinalized(round1)
+      expect(isFinalized).to.eql(true)
+    })
+
+    it("Cannot finalize active round", async function () {
+      const { xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      let round1 = await startNewAllocationRound(xAllocationVoting)
+
+      await catchRevert(xAllocationVoting.finalize(round1))
+
+      let isFinalized = await xAllocationVoting.isFinalized(round1)
+      expect(isFinalized).to.eql(false)
     })
   })
 })

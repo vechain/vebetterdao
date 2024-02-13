@@ -333,7 +333,6 @@ describe("X-Allocation Pool", async function () {
 
       //Add apps
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
-      const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
       const app1ReceiverAddress = otherAccounts[3].address
       const app2ReceiverAddress = otherAccounts[4].address
       await xAllocationVoting.connect(owner).addApp(app1ReceiverAddress, "My app", "")
