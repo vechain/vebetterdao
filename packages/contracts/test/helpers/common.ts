@@ -209,6 +209,32 @@ export const moveToCycle = async (emissions: Emissions, minter: HardhatEthersSig
   }
 }
 
+export const voteOnApps = async (
+  xAllocationVoting: XAllocationVoting,
+  apps: string[],
+  voters: HardhatEthersSigner[],
+  votes: Array<Array<bigint>>,
+  proposalId: bigint,
+) => {
+  for (const voter of voters) {
+    await xAllocationVoting.connect(voter).castVote(proposalId, apps, votes[voters.indexOf(voter)])
+  }
+}
+
+export const addAppsToAllocationVoting = async (
+  xAllocationPool: XAllocationPool,
+  apps: string[],
+  owner: HardhatEthersSigner,
+) => {
+  let appIds: string[] = []
+  for (const app of apps) {
+    await xAllocationPool.connect(owner).addApp(app, app, "", true)
+    appIds.push(ethers.keccak256(ethers.toUtf8Bytes(app)))
+  }
+
+  return appIds
+}
+
 export const startNewAllocationRound = async (xAllocationVoting: XAllocationVoting) => {
   let tx = await xAllocationVoting.proposeNewAllocationRound()
   let receipt = await tx.wait()

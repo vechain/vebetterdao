@@ -33,12 +33,15 @@ contract XAllocationVoting is
     uint32 _initialVotingPeriod,
     uint48 _initialVotingDelay,
     address _b3trGovernor,
+    address _xAllocationPool,
+    address _voterRewards,
     address[] memory _admins
   )
     XAllocationVotingGovernor("XAllocationVoting", _b3trGovernor)
     GovernorSettings(_initialVotingDelay, _initialVotingPeriod)
     GovernorVotes(_vot3Token)
     GovernorVotesQuorumFraction(_quorumPercentage)
+    GovernorXAllocationVotesCounting(_xAllocationPool, _voterRewards)
   {
     for (uint256 i = 0; i < _admins.length; i++) {
       _grantRole(DEFAULT_ADMIN_ROLE, _admins[i]);
@@ -123,5 +126,17 @@ contract XAllocationVoting is
     bytes4 interfaceId
   ) public view override(AccessControl, XAllocationVotingGovernor) returns (bool) {
     return super.supportsInterface(interfaceId);
+  }
+
+  function proposeNewAllocationRound() public override onlyRole(DEFAULT_ADMIN_ROLE) returns (uint256) {
+    return super.proposeNewAllocationRound();
+  }
+
+  // ------------------ SETTERS ------------------ //
+
+  function setAdminRole(address _newAdmin) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(_newAdmin != address(0), "XAllocationVoting: new admin is the zero address");
+
+    _grantRole(DEFAULT_ADMIN_ROLE, _newAdmin);
   }
 }
