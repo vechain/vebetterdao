@@ -52,7 +52,7 @@ export const HorizontalChartBar: React.FC<Props> = ({ data, xKey, yKey }) => {
           tickLine={false}
           tickFormatter={value => compactFormatter.format(Number(value))}
           mirror
-          tick={{ stroke: textColor, strokeWidth: 1, fontSize: "1.5rem" }}
+          tick={{ stroke: textColor, strokeWidth: 1, fontSize: "1.5rem", color: textColor }}
         />
         <Bar isAnimationActive={false} dataKey={yKey} minPointSize={2} radius={[0, 20, 20, 0]}>
           {/* <LabelList

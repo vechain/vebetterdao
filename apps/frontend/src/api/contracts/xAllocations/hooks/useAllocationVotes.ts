@@ -3,6 +3,7 @@ import { useConnex } from "@vechain/dapp-kit-react"
 
 import { getConfig } from "@repo/config"
 import { XAllocationVoting__factory as XAllocationVoting } from "@repo/contracts/typechain-types"
+import { FormattingUtils } from "@repo/utils"
 
 const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
 
@@ -19,7 +20,7 @@ export const getAllocationVotes = async (thor: Connex.Thor, proposalId?: string)
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
-  return res.decoded[0]
+  return FormattingUtils.scaleNumberDown(res.decoded[0], 18)
 }
 
 export const getAllocationVotesQueryKey = (proposalId?: string) => ["allocationsRound", "votes", proposalId]
