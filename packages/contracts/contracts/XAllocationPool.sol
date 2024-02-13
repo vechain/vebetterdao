@@ -13,8 +13,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
   IXAllocationVotingGovernor internal _xAllocationVoting;
   IEmissions internal _emissions;
 
-  uint256 public constant appSharesAllocationScalingFactor = 1e4;
-  uint256 public constant maxVariableAllocationScalingFactor = 1e2;
+  uint256 public constant percentagePrecisionScalingFactor = 1e4;
 
   uint256 public baseAllocationPercentage = 30;
   uint256 public variableAllocationPercentage = 70;
@@ -48,6 +47,30 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
   }
 
   // ---------- Internal and private ---------- //
+
+  /**
+   * @dev Returns the amount of $B3TR available for allocation in a given cycle.
+   * Each cycle is linked to a x-allocation round and they share the same id.
+   *
+   * Since the Emissions contract handles the first and last cycles differently, this function
+   * handles all the possible cases.
+   *
+   * @param roundId The round ID for which to calculate the amount available for allocation.
+   */
+  function _allocatedAmount(uint256 roundId) internal view returns (uint256) {
+    require(emissions() != IEmissions(address(0)), "Emissions contract not set");
+
+    // if it's the first cycle then the amount available is the first custom allocation
+    if (roundId == 1) {
+      return emissions().getPreMintAllocations()[0];
+    } else if (emissions().isLastCycleId(roundId)) {
+      // if it's the last cycle then the amount available is the last custom allocation
+      return emissions().getLastMintAllocations()[0];
+    } else {
+      // Amount available for this round (assuming the amount is already scaled by 1e18 for precision)
+      return emissions().getXAllocationAmountForCycle(roundId);
+    }
+  }
 
   // ---------- Getters ---------- //
   /**
@@ -91,7 +114,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
     uint256 remainingAllocation = (allocationAmount * variableAllocationPercentage) / 100;
     uint256 appShare = calculateAppShares(roundId, appId);
 
-    uint256 variableAllocationForApp = (remainingAllocation * appShare) / appSharesAllocationScalingFactor;
+    uint256 variableAllocationForApp = (remainingAllocation * appShare) / percentagePrecisionScalingFactor;
     return variableAllocationForApp;
   }
 
@@ -115,11 +138,11 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
     // avoid division by zero
     if (totalVotes == 0) return 0;
 
-    uint256 appShare = (appVotes * appSharesAllocationScalingFactor) / totalVotes;
+    uint256 appShare = (appVotes * percentagePrecisionScalingFactor) / totalVotes;
 
     // Cap the app share to the maximum variable allocation percentage so even if an app has 80 votes out of 100,
     // it will still get a max of `appSharesCap` percentage of the avaialable funds
-    uint256 _allocationRewardMaxCap = appSharesCap * maxVariableAllocationScalingFactor;
+    uint256 _allocationRewardMaxCap = scaledAppSharesCap();
     if (appShare > _allocationRewardMaxCap) {
       appShare = _allocationRewardMaxCap;
     }
@@ -129,31 +152,11 @@ contract XAllocationPool is IXAllocationPool, AccessControl {
   }
 
   /**
-   * @dev Returns the amount of $B3TR available for allocation in a given cycle.
-   * Each cycle is linked to a x-allocation round and they share the same id.
-   *
-   * Since the Emissions contract handles the first and last cycles differently, this function
-   * handles all the possible cases.
-   *
-   * @param roundId The round ID for which to calculate the amount available for allocation.
+   * @dev Returns the maximum app shares cap scaled by 1e2 for precision since our
+   * shares calculation is scaled by 1e4.
    */
-  function _allocatedAmount(uint256 roundId) internal view returns (uint256) {
-    require(emissions() != IEmissions(address(0)), "Emissions contract not set");
-
-    // if it's the first cycle then the amount available is the first custom allocation
-    if (roundId == 1) {
-      return emissions().getPreMintAllocations()[0];
-    } else if (emissions().isLastCycleId(roundId)) {
-      // if it's the last cycle then the amount available is the last custom allocation
-      return emissions().getLastMintAllocations()[0];
-    } else {
-      // Amount available for this round (assuming the amount is already scaled by 1e18 for precision)
-      return emissions().getXAllocationAmountForCycle(roundId);
-    }
-  }
-
   function scaledAppSharesCap() public view returns (uint256) {
-    return appSharesCap * maxVariableAllocationScalingFactor;
+    return appSharesCap * 1e2;
   }
 
   /**
