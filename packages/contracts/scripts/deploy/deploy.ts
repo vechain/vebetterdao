@@ -93,8 +93,9 @@ export async function deployAll() {
   await xAllocationPool.connect(timelockAdminSigner).setXAllocationVotingAddress(await xAllocationVoting.getAddress())
   await xAllocationPool.connect(timelockAdminSigner).setEmissionsAddress(await emissions.getAddress())
 
-  // Set xAllocationVoting address in B3TRBedge
+  // Set xAllocationVoting and B3TRGovernor address in B3TRBedge
   await badge.connect(nftBadgeAdmin).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+  await badge.connect(nftBadgeAdmin).setB3trGovernorAddress(await governor.getAddress())
 
   return {
     governor: governor,

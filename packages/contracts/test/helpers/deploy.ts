@@ -171,8 +171,9 @@ export const getOrDeployContractInstances = async ({
   )
   await xAllocationVoting.waitForDeployment()
 
-  // Set xAllocationVoting address in B3TRBedge
+  // Set xAllocationVoting and Governor address in B3TRBedge
   await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+  await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
 
   // Grant Vote registrar role to XAllocationVoting
   await voterRewards.connect(owner).setXallocationVoteRegistrarRole(await xAllocationVoting.getAddress())
