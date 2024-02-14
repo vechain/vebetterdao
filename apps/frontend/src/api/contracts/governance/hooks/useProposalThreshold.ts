@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 
-import GovernorContract from "@repo/contracts/artifacts/contracts/governance/GovernorContract.sol/GovernorContract.json"
 import { getConfig } from "@repo/config"
 const GOVERNANCE_CONTRACT = getConfig().governorContractAddress
-const governorContractAbi = GovernorContract.abi
+import { GovernorContractJson } from "@repo/contracts"
+const governorContractAbi = GovernorContractJson.abi
 
 /**
  * Get the current proposal threshold from the governor contract (i.e the number of votes required to create a proposal)

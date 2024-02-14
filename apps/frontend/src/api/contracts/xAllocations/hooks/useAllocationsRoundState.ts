@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 
-import XAllocationsVotingContract from "@repo/contracts/artifacts/contracts/x-allocation-voting-governance/XAllocationVotingGovernor.sol/XAllocationVotingGovernor.json"
 import { getConfig } from "@repo/config"
-const xAllocationsVotingContractAbi = XAllocationsVotingContract.abi
+import { XAllocationVotingGovernorJson } from "@repo/contracts"
+
 const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
 
 export const AllocationProposalState = {
@@ -25,7 +25,7 @@ export const getAllocationsRoundState = async (
   proposalId?: string,
 ): Promise<keyof typeof AllocationProposalState> => {
   if (!proposalId) return Promise.reject(new Error("proposalId is required"))
-  const allocationRoundStateAbi = xAllocationsVotingContractAbi.find(abi => abi.name === "state")
+  const allocationRoundStateAbi = XAllocationVotingGovernorJson.abi.find(abi => abi.name === "state")
   if (!allocationRoundStateAbi) throw new Error("state function not found")
   const res = await thor.account(XALLOCATIONVOTING_CONTRACT).method(allocationRoundStateAbi).call(proposalId)
 

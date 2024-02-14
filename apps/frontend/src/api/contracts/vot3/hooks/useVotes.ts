@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 
-import Contract from "@repo/contracts/artifacts/contracts/VOT3.sol/VOT3.json"
 import { getConfig } from "@repo/config"
 import { FormattingUtils } from "@repo/utils"
-const vot3Abi = Contract.abi
+import { Vot3ContractJson } from "@repo/contracts"
+const vot3Abi = Vot3ContractJson.abi
 
 const config = getConfig()
 const VOT3_CONTRACT = config.vot3ContractAddress

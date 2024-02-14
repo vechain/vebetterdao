@@ -1,8 +1,8 @@
 import { getConfig } from "@repo/config"
-import Contract from "@repo/contracts/artifacts/contracts/VOT3.sol/VOT3.json"
 import { FormattingUtils } from "@repo/utils"
 
-const abi = Contract.abi
+import { Vot3ContractJson } from "@repo/contracts"
+const vot3Abi = Vot3ContractJson.abi
 
 const config = getConfig()
 const VOT3_CONTRACT = config.vot3ContractAddress
@@ -14,7 +14,7 @@ const VOT3_CONTRACT = config.vot3ContractAddress
  * @returns the clause to delegate votes
  */
 export const buildDelegateVot3Tx = (thor: Connex.Thor, address: string): Connex.Vendor.TxMessage[0] => {
-  const functionAbi = abi.find(e => e.name === "delegate")
+  const functionAbi = vot3Abi.find(e => e.name === "delegate")
   if (!functionAbi) throw new Error("Function abi not found for mint")
 
   const clause = thor.account(VOT3_CONTRACT).method(functionAbi).asClause(address)

@@ -2,8 +2,8 @@ import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 
 import { getConfig } from "@repo/config"
-import { Emissions__factory as Emissions } from "@repo/contracts/typechain-types"
 import { FormattingUtils } from "@repo/utils"
+import { Emissions__factory } from "@repo/contracts"
 
 const EMISSION_CONTRACT = getConfig().emissionsContractAddress
 
@@ -28,13 +28,10 @@ export const getAllocationAmount = async (
   voteX2Earn: string
   voteXAllocations: string
 }> => {
-  const functionFragmentTreasuryAmount = Emissions.createInterface()
-    .getFunction("getTreasuryAmountForCycle")
-    .format("json")
-  const functionFragmentVoteX2EarnAmount = Emissions.createInterface()
-    .getFunction("getVote2EarnAmountForCycle")
-    .format("json")
-  const functionFragmentXAllocationsAmount = Emissions.createInterface()
+  const emissionsInterface = Emissions__factory.createInterface()
+  const functionFragmentTreasuryAmount = emissionsInterface.getFunction("getTreasuryAmountForCycle").format("json")
+  const functionFragmentVoteX2EarnAmount = emissionsInterface.getFunction("getVote2EarnAmountForCycle").format("json")
+  const functionFragmentXAllocationsAmount = emissionsInterface
     .getFunction("getXAllocationAmountForCycle")
     .format("json")
 

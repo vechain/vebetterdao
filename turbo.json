@@ -1,25 +1,20 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDotEnv": [
-    ".env"
-  ],
-  "globalDependencies": [
-    "**/.env.*local"
-  ],
+  "globalDotEnv": [".env", ".env.staging"],
+  "globalDependencies": ["**/.env.*local"],
   "pipeline": {
+    "install": {
+      "dependsOn": ["@repo/contracts#install", "^compile"]
+    },
+    "@repo/contracts#install": {
+      "cache": false
+    },
     "build": {
-      "dependsOn": [
-        "@repo/contracts#compile"
-      ],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**"
-      ]
+      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"],
+      "outputs": [".next/**", "!.next/cache/**"]
     },
     "lint": {
-      "dependsOn": [
-        "^lint"
-      ]
+      "dependsOn": ["^lint"]
     },
     "//#solo-up": {
       "cache": false
@@ -27,27 +22,20 @@
     "dev": {
       "cache": false,
       "persistent": true,
-      "dependsOn": [
-        "@repo/contracts#check-contracts-deployment"
-      ]
+      "dependsOn": ["@repo/contracts#check-contracts-deployment"]
     },
     "staging": {
       "cache": false,
       "persistent": true,
-      "dependsOn": [
-        "^compile"
-      ]
+      "dependsOn": ["^compile"]
     },
     "@repo/config#check-or-generate-local-config": {
       "cache": false
     },
+
     "@repo/contracts#check-contracts-deployment": {
       "cache": false,
-      "dependsOn": [
-        "^compile",
-        "//#solo-up",
-        "@repo/config#check-or-generate-local-config"
-      ]
+      "dependsOn": ["^compile", "//#solo-up", "@repo/config#check-or-generate-local-config"]
     },
     "clean": {
       "cache": false
@@ -56,15 +44,11 @@
       "cache": false
     },
     "deploy": {
-      "dependsOn": [
-        "^deploy"
-      ]
+      "dependsOn": ["^deploy"]
     },
     "test": {
       "cache": false,
-      "dependsOn": [
-        "@repo/contracts#check-contracts-deployment"
-      ]
+      "dependsOn": ["@repo/contracts#check-contracts-deployment"]
     },
     "test:hardhat": {
       "cache": false

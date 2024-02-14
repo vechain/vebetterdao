@@ -1,11 +1,10 @@
 import { FormattingUtils } from "@repo/utils"
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
-
-import Contract from "@repo/contracts/artifacts/contracts/B3TR.sol/B3TR.json"
 import { getConfig } from "@repo/config"
 import { useB3trTokenDetails } from "./useB3trTokenDetails"
-const b3trAbi = Contract.abi
+import { B3trContractJson } from "@repo/contracts"
+const b3trAbi = B3trContractJson.abi
 
 const B3TR_CONTRACT = getConfig().b3trContractAddress
 

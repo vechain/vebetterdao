@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 
-import xAllocationVotingContract from "@repo/contracts/artifacts/contracts/XAllocationVoting.sol/XAllocationVoting.json"
 import { abi } from "thor-devkit"
 import { getEvents } from "@/api/blockchain"
 import { getConfig } from "@repo/config"
+import { XAllocationVotingJson } from "@repo/contracts"
 
 const XALLOCATION_CONTRACT = getConfig().xAllocationVotingContractAddress
 
@@ -16,7 +16,7 @@ export type AllocationProposalCreated = {
 }
 
 export const getAllocationsRoundsEvents = async (thor: Connex.Thor) => {
-  const allocationCreatedAbi = xAllocationVotingContract.abi.find(abi => abi.name === "AllocationProposalCreated")
+  const allocationCreatedAbi = XAllocationVotingJson.abi.find(abi => abi.name === "AllocationProposalCreated")
   if (!allocationCreatedAbi) throw new Error("AllocationProposalCreated event not found")
   const allocationCreatedEvent = new abi.Event(allocationCreatedAbi as abi.Event.Definition)
 
