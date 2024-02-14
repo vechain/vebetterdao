@@ -74,7 +74,8 @@ async function generateB3trAllocations(): Promise<Allocation[]> {
     cycle++
   }
 
-  return xAllocations
+  // Remove last element of xAllocations because it exceeds the max supply
+  return xAllocations.slice(0, -1)
 }
 
 /**
