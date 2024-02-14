@@ -1,7 +1,7 @@
 import { getConfig } from "@repo/config"
-import Contract from "@repo/contracts/artifacts/contracts/B3TR.sol/B3TR.json"
-const b3trAbi = Contract.abi
 import { FormattingUtils } from "@repo/utils"
+import { B3trContractJson } from "@repo/contracts"
+const b3trAbi = B3trContractJson.abi
 
 const config = getConfig()
 const B3TR_CONTRACT = config.b3trContractAddress

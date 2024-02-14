@@ -1,7 +1,7 @@
 import { getConfig } from "@repo/config"
-import GovernorContract from "@repo/contracts/artifacts/contracts/governance/GovernorContract.sol/GovernorContract.json"
 import { abi } from "thor-devkit"
-const governorContractAbi = GovernorContract.abi
+import { GovernorContractJson } from "@repo/contracts"
+const governorContractAbi = GovernorContractJson.abi
 
 const GOVERNANCE_CONTRACT = getConfig().governorContractAddress
 

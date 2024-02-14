@@ -1,8 +1,7 @@
 import { getConfig } from "@repo/config"
-import Contract from "@repo/contracts/artifacts/contracts/VOT3.sol/VOT3.json"
 import { FormattingUtils } from "@repo/utils"
 
-const abi = Contract.abi
+import { Vot3ContractJson } from "@repo/contracts"
 
 const config = getConfig()
 const VOT3_CONTRACT = config.vot3ContractAddress
@@ -19,7 +18,7 @@ export const buildUnstakeStakeB3trTx = (
   amount: string | number,
   decimals = 18,
 ): Connex.Vendor.TxMessage[0] => {
-  const functionAbi = abi.find(e => e.name === "unstake")
+  const functionAbi = Vot3ContractJson.abi.find(e => e.name === "unstake")
   if (!functionAbi) throw new Error("Function abi not found for mint")
 
   const formattedAmount = FormattingUtils.humanNumber(amount ?? 0, amount)

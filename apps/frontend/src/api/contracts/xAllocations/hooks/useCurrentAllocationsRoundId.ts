@@ -1,9 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 
-import XAllocationsVotingContract from "@repo/contracts/artifacts/contracts/XAllocationVoting.sol/XAllocationVoting.json"
 import { getConfig } from "@repo/config"
-const xAllocationsVotingContractAbi = XAllocationsVotingContract.abi
+import { XAllocationVotingJson } from "@repo/contracts"
 const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
 
 /**
@@ -13,7 +12,7 @@ const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
  * @returns the current roundId of allocations voting
  */
 export const getCurrentAllocationsRoundId = async (thor: Connex.Thor): Promise<string> => {
-  const currentRoundAbi = xAllocationsVotingContractAbi.find(abi => abi.name === "currentRoundId")
+  const currentRoundAbi = XAllocationVotingJson.abi.find(abi => abi.name === "currentRoundId")
   if (!currentRoundAbi) throw new Error("currentRoundId function not found")
   const res = await thor.account(XALLOCATIONVOTING_CONTRACT).method(currentRoundAbi).call()
 

@@ -1,6 +1,6 @@
 import { Network } from "@repo/constants"
-import { localConfig } from "./local"
-import { stagingConfig } from "./solo-staging"
+import localConfig from "./local"
+import stagingConfig from "./solo-staging"
 
 export type Config = {
   b3trContractAddress: string
@@ -10,6 +10,8 @@ export type Config = {
   xAllocationPoolContractAddress: string
   xAllocationVotingContractAddress: string
   emissionsContractAddress: string
+  voterRewardsContractAddress: string
+  nftBadgeContractAddress: string
   nodeUrl: string
   network: Network
 }
