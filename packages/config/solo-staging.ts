@@ -1,12 +1,12 @@
 import { Config } from "."
-export const stagingConfig: Config = {
-  b3trContractAddress: "0xa95265D42027109F4f8baab78B21D3E9Bbd43541",
-  vot3ContractAddress: "0x0eAC61006a9BcE17F6663ddd62F10ffBAdc5bbbd",
-  governorContractAddress: "0x7d3a3c084530C341B7a73f260b5E0DB8f347e472",
-  timelockContractAddress: "0x33F7ade4835f0b272B043d3d80c582A0A2cf9414",
-  xAllocationPoolContractAddress: "0xB959aE7dCF205F61Cfb56320B4157eac67C30e32",
-  xAllocationVotingContractAddress: "0x9C0A1b4D898CFA29651F9282bcb4A9C640269312",
-  emissionsContractAddress: "0x34F382D7700252051f84755ef3a44A107489FB53",
+const config: Config = {
+  b3trContractAddress: "0xB9Af56c93542183Dc1916d01027E558633463DB9",
+  vot3ContractAddress: "0xC6991AEa5aD73957D95CB7D28028FC9ad2Ec8919",
+  governorContractAddress: "0x6baD67c4Ab53240E5dCFD59434ffF93fa9E8128C",
+  timelockContractAddress: "0x6531ecE651037444947c0761c71b5851493752BD",
+  xAllocationPoolContractAddress: "0xBE75377324C658102c13Ea27c9B38FeCf933a386",
+  xAllocationVotingContractAddress: "0x8564d9d8aDf7F9Bd6C2dDf13e306a71f1876f8e6",
+  emissionsContractAddress: "0x2Cc2513ED148394F7B38fC5B5bb607a3A6Efb1ce",
   nodeUrl: "https://thor-solo.dev.rewards.vechain.org",
   network: {
     id: "solo-staging",
@@ -15,7 +15,7 @@ export const stagingConfig: Config = {
     defaultNet: true,
     urls: ["https://thor-solo.dev.rewards.vechain.org"],
     explorerUrl: "https://insights.dev.rewards.vechain.org/#/solo",
-    blockTime: 1000 * 10,
+    blockTime: 10000,
     genesis: {
       number: 0,
       id: "0x00000000c05a20fbca2bf6ae3affba6af4a74b800b585bf7a4988aba7aea69f6",
@@ -36,3 +36,5 @@ export const stagingConfig: Config = {
     },
   },
 }
+
+export default config
