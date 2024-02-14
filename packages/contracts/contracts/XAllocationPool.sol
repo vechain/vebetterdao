@@ -115,10 +115,6 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
   function claimableAmount(uint256 roundId, bytes32 appId) public view returns (uint256) {
     require(!xAllocationVoting().isActive(roundId), "XAllocationPool: round not ended yet");
 
-    if (claimedRewards[appId][roundId]) {
-      return 0;
-    }
-
     //If round is not succeded then take shares from previous successful round
     uint256 lastSucceededRoundId = roundId;
     if (
