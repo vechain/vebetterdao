@@ -138,6 +138,9 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
     if (deadline >= currentTimepoint) {
       return AllocationProposalState.Active;
     } else if (!_voteSucceeded(proposalId)) {
+      if (_roundFinalized[proposalId]) {
+        return AllocationProposalState.Finalized;
+      }
       return AllocationProposalState.Failed;
     } else {
       return AllocationProposalState.Succeeded;
@@ -177,17 +180,14 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   }
 
   function isFinalized(uint256 proposalId) public view virtual returns (bool) {
-    return _roundFinalized[proposalId];
+    return state(proposalId) == AllocationProposalState.Finalized;
   }
 
   /**
-   * Store the checkpoints of last succeeded round for the proposal
+   * We need to point a failed round to the latest succeeded round.
    */
   function _finalizeRound(uint256 proposalId) internal virtual {
-    if (state(proposalId) == AllocationProposalState.Succeeded) {
-      _latestSucceededRoundId[proposalId] = proposalId;
-      _roundFinalized[proposalId] = true;
-    } else if (state(proposalId) == AllocationProposalState.Failed) {
+    if (state(proposalId) == AllocationProposalState.Failed) {
       _latestSucceededRoundId[proposalId] = _latestSucceededRoundId[proposalId - 1];
       _roundFinalized[proposalId] = true;
     }
@@ -227,11 +227,7 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
     // check that there isn't an already ongoing proposal
     // but only do it after we have at least 1 proposal otherwise it will fail with `GovernorNonexistentProposal`
     if (_proposalCount > 0) {
-      AllocationProposalState currentState = state(_proposalCount);
-      require(
-        currentState == AllocationProposalState.Succeeded || currentState == AllocationProposalState.Failed,
-        "Governor: there can be only one proposal per time"
-      );
+      require(!isActive(_proposalCount), "Governor: there can be only one proposal per time");
     }
 
     return _propose(proposer);

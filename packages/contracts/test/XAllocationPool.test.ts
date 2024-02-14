@@ -497,7 +497,7 @@ describe("X-Allocation Pool", async function () {
 
       state = await xAllocationVoting.state(round2)
       // should be failed
-      expect(state).to.eql(2n)
+      expect(state).to.eql(4n)
 
       const baseAllocationAmount = await xAllocationPool.baseAllocationAmount(round2)
 

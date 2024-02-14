@@ -132,7 +132,10 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
 
     //If round is not succeded then take shares from previous successful round
     uint256 lastSucceededRoundId = roundId;
-    if (xAllocationVoting().state(roundId) == IXAllocationVotingGovernor.AllocationProposalState.Failed) {
+    if (
+      xAllocationVoting().state(roundId) == IXAllocationVotingGovernor.AllocationProposalState.Failed ||
+      xAllocationVoting().state(roundId) == IXAllocationVotingGovernor.AllocationProposalState.Finalized
+    ) {
       require(xAllocationVoting().isFinalized(roundId), "XAllocationPool: failed round not finalized yet");
 
       lastSucceededRoundId = xAllocationVoting().latestSucceededRoundId(roundId);
