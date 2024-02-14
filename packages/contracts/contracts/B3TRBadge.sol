@@ -12,12 +12,15 @@ import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.s
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
+import { IB3TRGovernor } from "./interfaces/IB3TRGovernor.sol";
 
 contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
   using Checkpoints for Checkpoints.Trace208;
 
   // XAllocationVotingGovernor contract
   IXAllocationVotingGovernor public xAllocationsGovernor;
+  // B3TRGovernor contract
+  IB3TRGovernor public b3trGovernor;
 
   // Token ID counter
   uint256 private _nextTokenId;
@@ -58,9 +61,10 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
   // Mints the highest level Badge the caller is allowed to mint
   function freeMint() public {
     require(xAllocationsGovernor != IXAllocationVotingGovernor(address(0)), "Badge: XAllocationVotingGovernor not set");
+    require(b3trGovernor != IB3TRGovernor(payable(address(0))), "Badge: B3TRGovernor not set");
     require(
-      xAllocationsGovernor.hasVotedOnce(msg.sender),
-      "Badge: User has not partecipated in X-Allocation Voting Governance"
+      xAllocationsGovernor.hasVotedOnce(msg.sender) || b3trGovernor.hasVotedOnce(msg.sender),
+      "Badge: User has not partecipated in X-Allocation Voting or B3TR Governance"
     );
 
     // TODO: Get User's X/Economic node type and check max mintable level
@@ -149,9 +153,15 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
   }
 
   function setXAllocationsGovernorAddress(address _xAllocationsGovernor) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(_xAllocationsGovernor != address(0), "Emissions: _xAllocationsGovernor cannot be the zero address");
+    require(_xAllocationsGovernor != address(0), "Badge: _xAllocationsGovernor cannot be the zero address");
 
     xAllocationsGovernor = IXAllocationVotingGovernor(_xAllocationsGovernor);
+  }
+
+  function setB3trGovernorAddress(address _b3trGovernor) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(_b3trGovernor != address(0), "Badge: _b3trGovernor cannot be the zero address");
+
+    b3trGovernor = IB3TRGovernor(payable(_b3trGovernor));
   }
 
   // ---------- Getters ---------- //
