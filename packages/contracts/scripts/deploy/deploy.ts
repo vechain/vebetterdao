@@ -31,8 +31,14 @@ const INITIAL_EMISSIONS = ethers.parseEther("2000000")
 const TREASURY_PERCENTAGE = 25 // 25%
 const LAST_EMISSIONS = [66, 13] // On the last cycle, 66% of the emissions will be sent to the x allocations address, 13% to the vote 2 earn address
 
+// Voter rewards
+const levels = [1]
+const multiplier = [0]
+
 export async function deployAll() {
   console.log(`Deploying contracts on ${network.name}...`)
+
+  const [timelockAdminSigner] = await ethers.getSigners()
 
   // Deploy B3TR and VOT3 tokens
   const b3tr = await deployB3trToken()
@@ -53,9 +59,6 @@ export async function deployAll() {
   // Deploy XAllocationPool
   const xAllocationPool = await deployXAllocationPool(timelock, XPOOL_ADMIN)
 
-  // Deploy XAllocationVoting
-  const xAllocationVoting = await deployXAllocationVoting(timelock, xAllocationPool, vot3, XPOOL_ADMIN)
-
   // Deploy the NFT Badge contract with Max Mintable Level 1
   const badge = await deployNFTBadge(1)
 
@@ -64,6 +67,30 @@ export async function deployAll() {
     [await xAllocationPool.getAddress(), VOTE_2_EARN_ADDRESS, TREASURY_ADDRESS],
     [PRE_MINT_X_ALLOCATION, PRE_MINT_VOTE_2_EARN_ALLOCATION, PRE_MINT_TREASURY_ALLOCATION],
   )
+
+  const voterRewards = await deployVoterRewards(
+    await badge.getAddress(),
+    await emissions.getAddress(),
+    await b3tr.getAddress(),
+  )
+
+  // Deploy XAllocationVoting
+  const xAllocationVoting = await deployXAllocationVoting(
+    timelock,
+    xAllocationPool,
+    vot3,
+    XPOOL_ADMIN,
+    await voterRewards.getAddress(),
+  )
+
+  // Grant Vote Registrar role to XAllocationVoting
+  await voterRewards.connect(timelockAdminSigner).setXallocationVoteRegistrarRole(await xAllocationVoting.getAddress())
+
+  // Grant admin role to voter rewards for registering x allocation voting
+  await xAllocationVoting.connect(timelockAdminSigner).setAdminRole(await emissions.getAddress())
+
+  // Set X allocations governor
+  await emissions.connect(timelockAdminSigner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
 
   return {
     governor: governor,
@@ -74,6 +101,7 @@ export async function deployAll() {
     xAllocationPool: xAllocationPool,
     xAllocationVoting: xAllocationVoting,
     emissions: emissions,
+    voterRewards: voterRewards,
   }
 
   // close the script
@@ -163,6 +191,7 @@ async function deployXAllocationVoting(
   xAllocationPool: XAllocationPool,
   vot3: VOT3,
   adminAddress: string,
+  voterRewardsAddress: string,
 ) {
   console.log(`Deploying XAllocationVoting contract`)
   const XAllocationVotingContract = await ethers.getContractFactory("XAllocationVoting")
@@ -173,6 +202,7 @@ async function deployXAllocationVoting(
     0, // voting delay
     await timeLock.getAddress(),
     await xAllocationPool.getAddress(),
+    voterRewardsAddress,
     [await timeLock.getAddress(), adminAddress],
   )
 
@@ -202,6 +232,25 @@ async function deployEmissions(b3trAddress: string, destinations: string[], allo
   await contract.waitForDeployment()
 
   console.log(`Emissions contract deployed at address ${await contract.getAddress()}`)
+
+  return contract
+}
+
+async function deployVoterRewards(badgeAddress: string, emissionsAddress: string, b3trAddress: string) {
+  console.log(`Deploying VoterRewards contract`)
+  const VoterRewardsContract = await ethers.getContractFactory("VoterRewards")
+  const contract = await VoterRewardsContract.deploy(
+    TIMELOCK_ADMIN,
+    emissionsAddress,
+    badgeAddress,
+    b3trAddress,
+    levels,
+    multiplier,
+  )
+
+  await contract.waitForDeployment()
+
+  console.log(`VoterRewards contract deployed at address ${await contract.getAddress()}`)
 
   return contract
 }

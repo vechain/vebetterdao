@@ -1,6 +1,5 @@
 import { getConfig } from "@repo/config"
-import XAllocationsVotingContract from "@repo/contracts/artifacts/contracts/XAllocationVoting.sol/XAllocationVoting.json"
-const xAllocationsVotingContractAbi = XAllocationsVotingContract.abi
+import { XAllocationVotingJson } from "@repo/contracts"
 const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
 
 /**
@@ -9,7 +8,7 @@ const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
  * @returns the clause to propose a new allocation round
  */
 export const buildProposeAllocationRoundTx = (thor: Connex.Thor): Connex.Vendor.TxMessage[0] => {
-  const functionAbi = xAllocationsVotingContractAbi.find(e => e.name === "proposeNewAllocationRound")
+  const functionAbi = XAllocationVotingJson.abi.find(e => e.name === "proposeNewAllocationRound")
   if (!functionAbi) throw new Error("Function abi not found for proposeNewAllocationRound")
 
   const clause = thor.account(XALLOCATIONVOTING_CONTRACT).method(functionAbi).asClause()

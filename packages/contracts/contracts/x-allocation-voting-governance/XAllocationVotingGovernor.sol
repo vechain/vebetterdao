@@ -123,6 +123,10 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
     }
   }
 
+  function quorumReached(uint256 proposalId) public view returns (bool) {
+    return _quorumReached(proposalId);
+  }
+
   /**
    * @dev See {IXAllocationVotingGovernor-proposalSnapshot}.
    */

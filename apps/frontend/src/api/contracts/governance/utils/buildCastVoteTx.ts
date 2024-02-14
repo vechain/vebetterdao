@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
-import Contract from "@repo/contracts/artifacts/contracts/governance/GovernorContract.sol/GovernorContract.json"
-const governorAbi = Contract.abi
+import { GovernorContractJson } from "@repo/contracts"
+const governorContractAbi = GovernorContractJson.abi
 
 const GOVERNOR_CONTRACT = getConfig().governorContractAddress
 
@@ -26,11 +26,11 @@ export const buildCastVoteTx = (
   let functionAbi
   let clause
   if (!reason || reason === "") {
-    functionAbi = governorAbi.find(e => e.name === "castVote")
+    functionAbi = governorContractAbi.find(e => e.name === "castVote")
     if (!functionAbi) throw new Error("Function abi not found for castVote")
     clause = thor.account(GOVERNOR_CONTRACT).method(functionAbi).asClause(proposalId, vote)
   } else {
-    functionAbi = governorAbi.find(e => e.name === "castVoteWithReason")
+    functionAbi = governorContractAbi.find(e => e.name === "castVoteWithReason")
     if (!functionAbi) throw new Error("Function abi not found for castVoteWithReason")
     clause = thor.account(GOVERNOR_CONTRACT).method(functionAbi).asClause(proposalId, vote, reason)
   }

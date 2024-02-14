@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
+
 import { getConfig } from "@repo/config"
+import { XAllocationPool__factory } from "@repo/contracts"
 const XALLOCATIONPOOL_CONTRACT = getConfig().xAllocationPoolContractAddress
-import { XAllocationPool__factory as XAllocationPool } from "@repo/contracts/typechain-types"
 /**
  * xApp type
  * @property id  the xApp id
@@ -25,7 +26,7 @@ export type XApp = {
  * @returns  all the available xApps (apps that can be voted on for allocation) capped to 256 see {@link XApp}
  */
 export const getXApps = async (thor: Connex.Thor): Promise<XApp[]> => {
-  const functionFragment = XAllocationPool.createInterface().getFunction("getAllApps").format("json")
+  const functionFragment = XAllocationPool__factory.createInterface().getFunction("getAllApps").format("json")
   const res = await thor.account(XALLOCATIONPOOL_CONTRACT).method(JSON.parse(functionFragment)).call()
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))

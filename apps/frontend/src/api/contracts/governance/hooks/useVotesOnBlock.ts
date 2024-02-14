@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 
-import Contract from "@repo/contracts/artifacts/contracts/governance/GovernorContract.sol/GovernorContract.json"
 import { getConfig } from "@repo/config"
 import { FormattingUtils } from "@repo/utils"
-const governanaceAbi = Contract.abi
+import { GovernorContractJson } from "@repo/contracts"
+const governorContractAbi = GovernorContractJson.abi
 
 const GOVERNOR_CONTRACT = getConfig().governorContractAddress
 
@@ -26,7 +26,7 @@ export const getVotesOnBlock = async (
 }> => {
   if (!address) throw new Error("address is required")
 
-  const getVotesAbi = governanaceAbi.find(abi => abi.name === "getVotes")
+  const getVotesAbi = governorContractAbi.find(abi => abi.name === "getVotes")
   if (!getVotesAbi) throw new Error("getVotes function not found")
   const res = await thor.account(GOVERNOR_CONTRACT).method(getVotesAbi).call(address, block)
 

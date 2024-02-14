@@ -1,10 +1,9 @@
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 
-import Contract from "@repo/contracts/artifacts/contracts/VOT3.sol/VOT3.json"
 import { getConfig } from "@repo/config"
-import { Votes__factory } from "@repo/contracts/typechain-types"
 import { FormattingUtils } from "@repo/utils"
+import { VOT3__factory } from "@repo/contracts"
 
 const config = getConfig()
 const VOT3_CONTRACT = config.vot3ContractAddress
@@ -17,7 +16,7 @@ const VOT3_CONTRACT = config.vot3ContractAddress
  */
 export const getVot3PastTotalSupply = async (thor: Connex.Thor, timepoint?: number | string): Promise<string> => {
   if (!timepoint) return Promise.reject(new Error("Timepoint is required"))
-  const functionFragment = Votes__factory.createInterface().getFunction("getPastTotalSupply").format("json")
+  const functionFragment = VOT3__factory.createInterface().getFunction("getPastTotalSupply").format("json")
   const res = await thor.account(VOT3_CONTRACT).method(JSON.parse(functionFragment)).call(timepoint)
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))

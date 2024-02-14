@@ -40,6 +40,10 @@ contract GovernorContract is
     GovernorTimelockControl(_timelock)
   {}
 
+  function quorumReached(uint256 proposalId) public view returns (bool) {
+    return _quorumReached(proposalId);
+  }
+
   // The following functions are overrides required by Solidity.
 
   function votingDelay() public view override(Governor, GovernorSettings) returns (uint256) {
