@@ -183,7 +183,12 @@ async function deployXAllocationPool(
 ) {
   console.log(`Deploying XAllocationPool contract`)
   const XAllocationPoolContract = await ethers.getContractFactory("XAllocationPool")
-  const contract = await XAllocationPoolContract.deploy(adminAddress, await b3tr.getAddress())
+  const contract = await XAllocationPoolContract.deploy(
+    adminAddress,
+    await b3tr.getAddress(),
+    baseAllocationPercentage,
+    appSharesCap,
+  )
 
   await contract.waitForDeployment()
 
