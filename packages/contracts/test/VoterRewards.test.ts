@@ -110,7 +110,7 @@ describe("VoterRewards", () => {
 
       expect(proposalEvent).to.not.equal(undefined)
 
-      expect(await emissions.getCycleFromBlock(await ethers.provider.getBlockNumber())).to.equal(1)
+      expect(await emissions.getCurrentCycle()).to.equal(1)
 
       expect(await b3tr.balanceOf(await xAllocationPool.getAddress())).to.equal(PRE_MINT_X_ALLOCATION)
       expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(PRE_MINT_VOTE_2_EARN_ALLOCATION)
@@ -122,9 +122,7 @@ describe("VoterRewards", () => {
 
       expect(proposalId).to.equal(1)
 
-      expect(await xAllocationVoting.proposalDeadline(proposalId)).to.lt(
-        await emissions.getCycleBlock(await emissions.nextCycle()),
-      )
+      expect(await xAllocationVoting.proposalDeadline(proposalId)).to.lt(await emissions.getNextCycleBlock())
 
       await waitForProposalToBeActive(Number(proposalId), xAllocationVoting)
 
@@ -206,10 +204,10 @@ describe("VoterRewards", () => {
       await waitForNextCycle(emissions)
 
       expect(await emissions.isCycleDistributed(await emissions.nextCycle())).to.equal(false)
-      expect(await emissions.isCycleDistributable(await emissions.nextCycle())).to.equal(true)
+      expect(await emissions.isNextCycleDistributable()).to.equal(true)
 
       // Reward claiming
-      expect(await emissions.isCycleEnded(1)).to.equal(true)
+      expect(await emissions.isCycleDistributed(1)).to.equal(true)
       expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(
         await emissions.getVote2EarnAmountForCycle(1),
       )
@@ -283,9 +281,7 @@ describe("VoterRewards", () => {
 
       expect(proposalId).to.equal(1)
 
-      expect(await xAllocationVoting.proposalDeadline(proposalId)).to.lt(
-        await emissions.getCycleBlock(await emissions.nextCycle()),
-      )
+      expect(await xAllocationVoting.proposalDeadline(proposalId)).to.lt(await emissions.getNextCycleBlock())
 
       await waitForProposalToBeActive(Number(proposalId), xAllocationVoting)
 
@@ -349,10 +345,10 @@ describe("VoterRewards", () => {
       await waitForNextCycle(emissions)
 
       expect(await emissions.isCycleDistributed(await emissions.nextCycle())).to.equal(false)
-      expect(await emissions.isCycleDistributable(await emissions.nextCycle())).to.equal(true)
+      expect(await emissions.isNextCycleDistributable()).to.equal(true)
 
       // Reward claiming
-      expect(await emissions.isCycleEnded(1)).to.equal(true)
+      expect(await emissions.isCycleDistributed(1)).to.equal(true)
       expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(
         await emissions.getVote2EarnAmountForCycle(1),
       )
@@ -376,9 +372,7 @@ describe("VoterRewards", () => {
 
       expect(proposalId2).to.equal(2)
 
-      expect(await xAllocationVoting.proposalDeadline(proposalId2)).to.lt(
-        await emissions.getCycleBlock(await emissions.nextCycle()),
-      )
+      expect(await xAllocationVoting.proposalDeadline(proposalId)).to.lt(await emissions.getNextCycleBlock())
 
       await waitForProposalToBeActive(Number(proposalId2), xAllocationVoting)
 
@@ -442,10 +436,10 @@ describe("VoterRewards", () => {
       await waitForNextCycle(emissions)
 
       expect(await emissions.isCycleDistributed(await emissions.nextCycle())).to.equal(false)
-      expect(await emissions.isCycleDistributable(await emissions.nextCycle())).to.equal(true)
+      expect(await emissions.isNextCycleDistributable()).to.equal(true)
 
       // Reward claiming
-      expect(await emissions.isCycleEnded(2)).to.equal(true)
+      expect(await emissions.isCycleDistributed(2)).to.equal(true)
       expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.gt(await emissions.getVote2EarnAmountForCycle(2)) // Voters of round 1 can still claim rewards of round 1 thus the balance of VoterRewards contract should be greater than the emission amount
 
       const voter1Rewards2 = await voterRewards.getReward(2, voter1.address)
