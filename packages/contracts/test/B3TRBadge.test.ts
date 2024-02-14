@@ -1,5 +1,14 @@
 import { describe, it } from "mocha"
-import { ZERO_ADDRESS, catchRevert, getOrDeployContractInstances, partecipateInAllocationVoting } from "./helpers"
+import {
+  ZERO_ADDRESS,
+  catchRevert,
+  createProposal,
+  getOrDeployContractInstances,
+  getProposalIdFromTx,
+  getVot3Tokens,
+  partecipateInAllocationVoting,
+  waitForProposalToBeActive,
+} from "./helpers"
 import { expect } from "chai"
 
 describe("B3TRBadge", () => {
@@ -35,7 +44,16 @@ describe("B3TRBadge", () => {
   })
 
   describe("Minting", () => {
-    it("Should not be able to mint if user did not participated in allocation voting", async () => {
+    it("User cannot free mint if he did not partecipate in x-allocation voting or b3tr governance", async () => {
+      const { b3trBadge, otherAccount, xAllocationVoting, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Should not be able to free mint
+      await catchRevert(b3trBadge.connect(otherAccount).freeMint())
+    })
+
+    it("User can free mint if it partecipated in x-allocation voting", async () => {
       const { b3trBadge, otherAccount, xAllocationVoting, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -51,6 +69,63 @@ describe("B3TRBadge", () => {
       expect(await b3trBadge.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 badge
       expect(await b3trBadge.ownerOf(0)).to.equal(await otherAccount.getAddress()) // Owner of the first badge is the otherAccount
       expect(await b3trBadge.totalSupply()).to.equal(1) // Total supply is 1
+    })
+
+    it("User can free mint if he partecipated in B3TR Governance", async () => {
+      const { b3trBadge, otherAccount, b3tr, otherAccounts, governor, B3trContract } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      const voter = otherAccounts[0]
+
+      // Should not be able to free mint
+      await catchRevert(b3trBadge.connect(voter).freeMint())
+
+      // we do it here but will use in the next test
+      await getVot3Tokens(voter, "1000")
+
+      // Now we can create a new proposal
+      const tx = await createProposal(governor, b3tr, B3trContract, otherAccount, "", "tokenDetails", [])
+      const proposalId = await getProposalIdFromTx(tx, governor)
+      await waitForProposalToBeActive(proposalId, governor)
+      // Now we can vote
+      await governor.connect(voter).castVote(proposalId, 1)
+
+      // I should be able to free mint
+      await b3trBadge.connect(voter).freeMint()
+
+      expect(await b3trBadge.balanceOf(await voter.getAddress())).to.equal(1) // Other account has 1 badge
+      expect(await b3trBadge.ownerOf(0)).to.equal(await voter.getAddress()) // Owner of the first badge is the otherAccount
+      expect(await b3trBadge.totalSupply()).to.equal(1) // Total supply is 1
+    })
+
+    it("User can free mint if he partecipated both in B3TR Governance and in x-allocation voting", async () => {
+      const { b3trBadge, otherAccount, b3tr, otherAccounts, governor, B3trContract, owner, xAllocationVoting } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      const voter = otherAccounts[0]
+
+      // Should not be able to free mint
+      await catchRevert(b3trBadge.connect(voter).freeMint())
+
+      // we do it here but will use in the next test
+      await getVot3Tokens(voter, "1000")
+
+      // Now we can create a new proposal
+      const tx = await createProposal(governor, b3tr, B3trContract, otherAccount, "", "tokenDetails", [])
+      const proposalId = await getProposalIdFromTx(tx, governor)
+      await waitForProposalToBeActive(proposalId, governor)
+      // Now we can vote
+      await governor.connect(voter).castVote(proposalId, 1)
+
+      // Should be able to free mint after participating in allocation voting
+      await partecipateInAllocationVoting(voter, owner, xAllocationVoting)
+
+      // I should be able to free mint
+      await b3trBadge.connect(voter).freeMint()
     })
 
     it("Should mint a level 1 badge", async () => {
