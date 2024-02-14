@@ -163,10 +163,11 @@ export const getOrDeployContractInstances = async ({
   )
   await xAllocationVoting.waitForDeployment()
 
-  await xAllocationVoting.connect(owner).setAdminRole(await emissions.getAddress())
-
   // Grant Vote registrar role to XAllocationVoting
   await voterRewards.connect(owner).setXallocationVoteRegistrarRole(await xAllocationVoting.getAddress())
+
+  // Grant admin role to voter rewards for registering x allocation voting
+  await xAllocationVoting.connect(owner).setAdminRole(await emissions.getAddress())
 
   // Set xAllocationGovernor in emissions
   await emissions.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())

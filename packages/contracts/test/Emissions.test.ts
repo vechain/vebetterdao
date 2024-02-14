@@ -530,6 +530,8 @@ describe("Emissions", () => {
     // Distribute emissions
     await catchRevert(emissions.connect(minterAccount).distribute()) // Should revert as the supply cap is reached
 
+    await waitForNextCycle(emissions)
+
     // Should be able to call distributeLast()
     await emissions.connect(minterAccount).distributeLast()
 
@@ -550,5 +552,24 @@ describe("Emissions", () => {
 
     // Distribute last emissions should revert as the b3tr supply cap is not reached
     await catchRevert(emissions.connect(minterAccount).distributeLast())
+  })
+
+  it("Should not be able to distribute if cycle is not ready", async () => {
+    const { emissions, minterAccount, b3tr, owner } = await getOrDeployContractInstances({
+      forceDeploy: true,
+    })
+
+    // Grant minter role to emissions contract
+    await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+
+    // Pre-mint
+    await emissions.connect(minterAccount).preMint()
+
+    await waitForNextCycle(emissions)
+
+    // Distribute emissions
+    await emissions.connect(minterAccount).distribute()
+
+    await catchRevert(emissions.connect(minterAccount).distribute())
   })
 })

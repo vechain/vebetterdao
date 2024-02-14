@@ -163,6 +163,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
   function distributeLast() public nonReentrant {
     require(START_BLOCK > 0, "Emissions: Pre-mint not done");
     require(isLastCycle(), "Emissions: Last cycle not reached");
+    require(isCycleDistributable(nextCycle), "Emissions: Last cycle not started yet");
 
     _lastCycleId = nextCycle;
 
@@ -179,6 +180,8 @@ contract Emissions is AccessControl, ReentrancyGuard {
     lastMintAllocations.push(xAllocationAmount);
     lastMintAllocations.push(vote2EarnAmount);
     lastMintAllocations.push(treasuryAmount);
+
+    nextCycle++;
   }
 
   // ----------- Getters ----------- //
@@ -432,6 +435,13 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   function setXAllocationsGovernorAddress(address _xAllocationsGovernor) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(_xAllocationsGovernor != address(0), "Emissions: _xAllocationsGovernor cannot be the zero address");
+    require(
+      IXAllocationVotingGovernor(_xAllocationsGovernor).votingPeriod() +
+        IXAllocationVotingGovernor(_xAllocationsGovernor).votingDelay() <
+        cycleDuration,
+      "Emissions: Voting period and delay must be less than cycle duration"
+    );
     xAllocationsGovernor = IXAllocationVotingGovernor(_xAllocationsGovernor);
   }
 }
