@@ -95,7 +95,7 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
     return _b3trGovernor;
   }
 
-  function appsElegibleForVoting(uint256 roundId) public view override returns (bytes32[] memory) {
+  function getRoundApps(uint256 roundId) public view override returns (bytes32[] memory) {
     return _appsElegibleForVoting[roundId];
   }
 

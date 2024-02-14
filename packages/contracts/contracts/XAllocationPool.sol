@@ -176,7 +176,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
     );
 
     uint256 total = _emissionAmount(roundId);
-    bytes32[] memory elegibleApps = xAllocationVoting().appsElegibleForVoting(roundId);
+    bytes32[] memory elegibleApps = xAllocationVoting().getRoundApps(roundId);
 
     uint256 available = (total * baseAllocationPercentage) / 100;
 

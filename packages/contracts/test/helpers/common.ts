@@ -271,7 +271,7 @@ export const calculateBaseAllocationOffChain = async (
     totalAmount = await emissions.getXAllocationAmountForCycle(roundId)
   }
 
-  let elegibleApps = await xAllocationVoting.appsElegibleForVoting(roundId)
+  let elegibleApps = await xAllocationVoting.getRoundApps(roundId)
 
   const baseAllcoationPercentage = await xAllocationPool.baseAllocationPercentage()
 

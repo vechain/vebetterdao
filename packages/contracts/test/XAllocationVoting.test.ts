@@ -304,7 +304,7 @@ describe("X-Allocation Voting", function () {
       let isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round1)
       expect(isEligibleForVote).to.eql(true)
 
-      let appsVotedInSpecificRound = await xAllocationVoting.appsElegibleForVoting(round1)
+      let appsVotedInSpecificRound = await xAllocationVoting.getRoundApps(round1)
       expect(appsVotedInSpecificRound.length).to.equal(1n)
 
       await waitForVotingPeriodToEnd(round1, xAllocationVoting)
@@ -314,7 +314,7 @@ describe("X-Allocation Voting", function () {
       isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round2)
       expect(isEligibleForVote).to.eql(false)
 
-      appsVotedInSpecificRound = await xAllocationVoting.appsElegibleForVoting(round2)
+      appsVotedInSpecificRound = await xAllocationVoting.getRoundApps(round2)
       expect(appsVotedInSpecificRound.length).to.equal(0)
 
       // if checking for the previous round, it should still be eligible
@@ -403,7 +403,7 @@ describe("X-Allocation Voting", function () {
       let appVotes = await xAllocationVoting.getAppVotes(round1, app1Id)
       expect(appVotes).to.equal(0n)
 
-      let appsVotedInSpecificRound = await xAllocationVoting.appsElegibleForVoting(round1)
+      let appsVotedInSpecificRound = await xAllocationVoting.getRoundApps(round1)
       expect(appsVotedInSpecificRound.length).to.equal(0)
 
       await waitForVotingPeriodToEnd(round1, xAllocationVoting)
@@ -583,7 +583,7 @@ describe("X-Allocation Voting", function () {
       expect(avaiableApps[0]).to.equal(app1)
       expect(avaiableApps[1]).to.equal(app2)
 
-      let appsVotedInSpecificRound = await xAllocationVoting.appsElegibleForVoting(proposalId)
+      let appsVotedInSpecificRound = await xAllocationVoting.getRoundApps(proposalId)
       expect(appsVotedInSpecificRound.length).to.equal(2)
       expect(appsVotedInSpecificRound[0]).to.equal(app1)
       expect(appsVotedInSpecificRound[1]).to.equal(app2)
@@ -821,8 +821,8 @@ describe("X-Allocation Voting", function () {
       await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, "")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       let round1 = await startNewAllocationRound(xAllocationVoting)
-      let appsElegibleForVoting = await xAllocationVoting.appsElegibleForVoting(round1)
-      expect(appsElegibleForVoting.length).to.equal(2n)
+      let getRoundApps = await xAllocationVoting.getRoundApps(round1)
+      expect(getRoundApps.length).to.equal(2n)
 
       // add new app before round ends
       await xAllocationVoting.connect(owner).addApp(otherAccounts[2].address, otherAccounts[2].address, "")
@@ -831,8 +831,8 @@ describe("X-Allocation Voting", function () {
 
       // 4 apps in round2
       let round2 = await startNewAllocationRound(xAllocationVoting)
-      appsElegibleForVoting = await xAllocationVoting.appsElegibleForVoting(round2)
-      expect(appsElegibleForVoting.length).to.equal(4n)
+      getRoundApps = await xAllocationVoting.getRoundApps(round2)
+      expect(getRoundApps.length).to.equal(4n)
 
       // remove apps before round ends
       await xAllocationVoting.setVotingElegibility(app1, false)
@@ -841,8 +841,8 @@ describe("X-Allocation Voting", function () {
 
       // 2 app in round 3
       let round3 = await startNewAllocationRound(xAllocationVoting)
-      appsElegibleForVoting = await xAllocationVoting.appsElegibleForVoting(round3)
-      expect(appsElegibleForVoting.length).to.equal(2n)
+      getRoundApps = await xAllocationVoting.getRoundApps(round3)
+      expect(getRoundApps.length).to.equal(2n)
 
       // add another app before round ends
       await xAllocationVoting.connect(owner).addApp(otherAccounts[4].address, otherAccounts[4].address, "")
@@ -850,16 +850,16 @@ describe("X-Allocation Voting", function () {
 
       // 3 apps in round 4
       let round4 = await startNewAllocationRound(xAllocationVoting)
-      appsElegibleForVoting = await xAllocationVoting.appsElegibleForVoting(round4)
-      expect(appsElegibleForVoting.length).to.equal(3n)
+      getRoundApps = await xAllocationVoting.getRoundApps(round4)
+      expect(getRoundApps.length).to.equal(3n)
 
       // I can still get old rounds
-      appsElegibleForVoting = await xAllocationVoting.appsElegibleForVoting(round1)
-      expect(appsElegibleForVoting.length).to.equal(2n)
-      appsElegibleForVoting = await xAllocationVoting.appsElegibleForVoting(round2)
-      expect(appsElegibleForVoting.length).to.equal(4n)
-      appsElegibleForVoting = await xAllocationVoting.appsElegibleForVoting(round3)
-      expect(appsElegibleForVoting.length).to.equal(2n)
+      getRoundApps = await xAllocationVoting.getRoundApps(round1)
+      expect(getRoundApps.length).to.equal(2n)
+      getRoundApps = await xAllocationVoting.getRoundApps(round2)
+      expect(getRoundApps.length).to.equal(4n)
+      getRoundApps = await xAllocationVoting.getRoundApps(round3)
+      expect(getRoundApps.length).to.equal(2n)
     })
   })
 
