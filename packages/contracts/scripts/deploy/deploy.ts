@@ -87,6 +87,9 @@ export async function deployAll() {
   // Grant Vote Registrar role to XAllocationVoting
   await voterRewards.connect(timelockAdminSigner).setXallocationVoteRegistrarRole(await xAllocationVoting.getAddress())
 
+  // Grant admin role to voter rewards for registering x allocation voting
+  await xAllocationVoting.connect(timelockAdminSigner).setAdminRole(await emissions.getAddress())
+
   // Set X allocations governor
   await emissions.connect(timelockAdminSigner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
 
