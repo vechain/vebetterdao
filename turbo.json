@@ -3,6 +3,12 @@
   "globalDotEnv": [".env", ".env.staging"],
   "globalDependencies": ["**/.env.*local"],
   "pipeline": {
+    "install": {
+      "dependsOn": ["@repo/contracts#install", "^compile"]
+    },
+    "@repo/contracts#install": {
+      "cache": false
+    },
     "build": {
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"],
       "outputs": [".next/**", "!.next/cache/**"]
@@ -26,6 +32,7 @@
     "@repo/config#check-or-generate-local-config": {
       "cache": false
     },
+
     "@repo/contracts#check-contracts-deployment": {
       "cache": false,
       "dependsOn": ["^compile", "//#solo-up", "@repo/config#check-or-generate-local-config"]
