@@ -22,7 +22,6 @@ import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
  */
 interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   enum AllocationProposalState {
-    Pending,
     Active,
     Failed,
     Succeeded
@@ -164,24 +163,9 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
 
   /**
    * @notice module:user-config
-   * @dev Delay, between the proposal is created and the vote starts. The unit this duration is expressed in depends
-   * on the clock (see EIP-6372) this contract uses.
-   *
-   * This can be increased to leave time for users to buy voting power, or delegate it, before the voting of a
-   * proposal starts.
-   *
-   * NOTE: While this interface returns a uint256, timepoints are stored as uint48 following the ERC-6372 clock type.
-   * Consequently this value must fit in a uint48 (when added to the current clock). See {IERC6372-clock}.
-   */
-  function votingDelay() external view returns (uint256);
-
-  /**
-   * @notice module:user-config
    * @dev Delay between the vote start and vote end. The unit this duration is expressed in depends on the clock
    * (see EIP-6372) this contract uses.
    *
-   * NOTE: The {votingDelay} can delay the start of the vote. This must be considered when setting the voting
-   * duration compared to the voting delay.
    *
    * NOTE: This value is stored when the proposal is submitted so that possible changes to the value do not affect
    * proposals that have already been submitted. The type used to save it is a uint32. Consequently, while this
@@ -238,7 +222,7 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   function hasVoted(uint256 proposalId, address account) external view returns (bool);
 
   /**
-   * @dev Create a new allocation proposal (round). Vote start after a delay specified by {IGovernor-votingDelay} and lasts for a
+   * @dev Create a new allocation proposal (round). Vote starts immediatly and lasts for a
    * duration specified by {IGovernor-votingPeriod}.
    *
    * Emits a {AllocationProposalCreated} event.

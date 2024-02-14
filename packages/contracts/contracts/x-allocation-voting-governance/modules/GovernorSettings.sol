@@ -11,8 +11,6 @@ import { XAllocationVotingGovernor } from "../XAllocationVotingGovernor.sol";
  * This module is forked from OpenZeppelin's GovernorSettings.sol and was modified to remove proposalThreshold.
  */
 abstract contract GovernorSettings is XAllocationVotingGovernor {
-  // timepoint: limited to uint48 in core (same as clock() type)
-  uint48 private _votingDelay;
   // duration: limited to uint32 in core
   uint32 private _votingPeriod;
 
@@ -22,16 +20,8 @@ abstract contract GovernorSettings is XAllocationVotingGovernor {
   /**
    * @dev Initialize the governance parameters.
    */
-  constructor(uint48 initialVotingDelay, uint32 initialVotingPeriod) {
-    _setVotingDelay(initialVotingDelay);
+  constructor(uint32 initialVotingPeriod) {
     _setVotingPeriod(initialVotingPeriod);
-  }
-
-  /**
-   * @dev See {IXAllocationVotingGovernor-votingDelay}.
-   */
-  function votingDelay() public view virtual override returns (uint256) {
-    return _votingDelay;
   }
 
   /**
@@ -42,31 +32,12 @@ abstract contract GovernorSettings is XAllocationVotingGovernor {
   }
 
   /**
-   * @dev Update the voting delay. This operation can only be performed through a governance proposal.
-   *
-   * Emits a {VotingDelaySet} event.
-   */
-  function setVotingDelay(uint48 newVotingDelay) public virtual onlyGovernance {
-    _setVotingDelay(newVotingDelay);
-  }
-
-  /**
    * @dev Update the voting period. This operation can only be performed through a governance proposal.
    *
    * Emits a {VotingPeriodSet} event.
    */
   function setVotingPeriod(uint32 newVotingPeriod) public virtual onlyGovernance {
     _setVotingPeriod(newVotingPeriod);
-  }
-
-  /**
-   * @dev Internal setter for the voting delay.
-   *
-   * Emits a {VotingDelaySet} event.
-   */
-  function _setVotingDelay(uint48 newVotingDelay) internal virtual {
-    emit VotingDelaySet(_votingDelay, newVotingDelay);
-    _votingDelay = newVotingDelay;
   }
 
   /**

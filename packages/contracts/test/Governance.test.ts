@@ -25,11 +25,9 @@ describe("Governor and TimeLock", function () {
       const { governor, vot3, owner, timeLock } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
-      const votingDelay = (await governor.votingDelay()).toString()
       const votesThreshold = (await governor.proposalThreshold()).toString()
       const votingPeriod = (await governor.votingPeriod()).toString()
 
-      expect(votingDelay).to.eql("1")
       expect(votesThreshold).to.eql(defaultVotingTreshold.toString())
       expect(votingPeriod).to.eql(defaultVotingPeriod.toString())
 
