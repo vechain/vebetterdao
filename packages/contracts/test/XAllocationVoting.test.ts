@@ -876,7 +876,7 @@ describe("X-Allocation Voting", function () {
       let getRoundApps = await xAllocationVoting.getRoundApps(round1)
       expect(getRoundApps.length).to.equal(2n)
 
-      let apps = await xAllocationVoting.getAllAppsOfRound(round1)
+      let apps = await xAllocationVoting.getRoundAppsWithDetails(round1)
       expect(apps.length).to.equal(2n)
       expect(apps[0].id).to.equal(app1)
       expect(apps[1].id).to.equal(app2)
