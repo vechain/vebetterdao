@@ -138,9 +138,6 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
     if (deadline >= currentTimepoint) {
       return AllocationProposalState.Active;
     } else if (!_voteSucceeded(proposalId)) {
-      if (_roundFinalized[proposalId]) {
-        return AllocationProposalState.Finalized;
-      }
       return AllocationProposalState.Failed;
     } else {
       return AllocationProposalState.Succeeded;
@@ -180,14 +177,17 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   }
 
   function isFinalized(uint256 proposalId) public view virtual returns (bool) {
-    return state(proposalId) == AllocationProposalState.Finalized;
+    return _roundFinalized[proposalId];
   }
 
   /**
-   * We need to point a failed round to the latest succeeded round.
+   * Store the checkpoints of last succeeded round for the proposal
    */
   function _finalizeRound(uint256 proposalId) internal virtual {
-    if (state(proposalId) == AllocationProposalState.Failed) {
+    if (state(proposalId) == AllocationProposalState.Succeeded) {
+      _latestSucceededRoundId[proposalId] = proposalId;
+      _roundFinalized[proposalId] = true;
+    } else if (state(proposalId) == AllocationProposalState.Failed) {
       _latestSucceededRoundId[proposalId] = _latestSucceededRoundId[proposalId - 1];
       _roundFinalized[proposalId] = true;
     }

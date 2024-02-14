@@ -889,17 +889,12 @@ describe("X-Allocation Voting", function () {
 
   describe("Allocation Voting finalization", function () {
     it("Previous round is finalized correctly when a new one starts", async function () {
-      const { xAllocationVoting, otherAccount } = await getOrDeployContractInstances({
+      const { xAllocationVoting } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
-      await getVot3Tokens(otherAccount, "1000")
       let round1 = await startNewAllocationRound(xAllocationVoting)
       await waitForVotingPeriodToEnd(round1, xAllocationVoting)
-
-      // should be failed since quorum is not reached
-      let state = await xAllocationVoting.state(round1)
-      expect(state).to.eql(2n)
 
       let isFinalized = await xAllocationVoting.isFinalized(round1)
       expect(isFinalized).to.eql(false)
@@ -908,27 +903,6 @@ describe("X-Allocation Voting", function () {
 
       isFinalized = await xAllocationVoting.isFinalized(round1)
       expect(isFinalized).to.eql(true)
-    })
-
-    it("Only failed rounds can be finalized", async function () {
-      const { xAllocationVoting } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      let round1 = await startNewAllocationRound(xAllocationVoting)
-      await waitForVotingPeriodToEnd(round1, xAllocationVoting)
-
-      // should be succeeded since quorum was reached
-      let state = await xAllocationVoting.state(round1)
-      expect(state).to.eql(3n)
-
-      let isFinalized = await xAllocationVoting.isFinalized(round1)
-      expect(isFinalized).to.eql(false)
-
-      await startNewAllocationRound(xAllocationVoting)
-
-      isFinalized = await xAllocationVoting.isFinalized(round1)
-      expect(isFinalized).to.eql(false)
     })
 
     it("Anyone can manually trigger round finalization", async function () {

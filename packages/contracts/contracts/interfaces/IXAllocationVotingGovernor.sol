@@ -25,8 +25,7 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
     Pending,
     Active,
     Failed,
-    Succeeded,
-    Finalized // this state can be reached only if the proposal is failed
+    Succeeded
   }
 
   /**
