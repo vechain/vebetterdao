@@ -5,7 +5,8 @@
   "types": "main.ts",
   "license": "MIT",
   "exports": {
-    ".": "./"
+    "./artifacts": "./artifacts",
+    "./typechain-types": "./typechain-types"
   },
   "scripts": {
     "test:thor-solo": "yarn generate-b3tr-tokenomics && npx hardhat test",
