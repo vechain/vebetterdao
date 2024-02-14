@@ -3508,7 +3508,7 @@
   dependencies:
     "@tanstack/query-core" "5.20.5"
 
-"@tanstack/query-sync-storage-persister@^5.17.9":
+"@tanstack/query-sync-storage-persister@^5.20.5":
   version "5.20.5"
   resolved "https://registry.yarnpkg.com/@tanstack/query-sync-storage-persister/-/query-sync-storage-persister-5.20.5.tgz#49799626adcab6092a0b42e40477f006b5095c75"
   integrity sha512-cvY11l39h+D5oQ2Ejb3VS2VgjxoaTK4RarzU/2csSHTVx7V337SVfXyJMZrLYJWllvm6S+f2pUwctIEhSWL3Mw==
@@ -3516,21 +3516,21 @@
     "@tanstack/query-core" "5.20.5"
     "@tanstack/query-persist-client-core" "5.20.5"
 
-"@tanstack/react-query-devtools@^5.17.15":
+"@tanstack/react-query-devtools@^5.20.5":
   version "5.20.5"
   resolved "https://registry.yarnpkg.com/@tanstack/react-query-devtools/-/react-query-devtools-5.20.5.tgz#1c60908835a346a86ca12035208a8a7fa624b660"
   integrity sha512-Wl7IzNuKCb4h41a5iH/YXNwalHItqJPCAr4r8+0iUYOLHNOf3E9P0G4kzZ9sqDoWKxY04qst6Vrij9bwPzLQRQ==
   dependencies:
     "@tanstack/query-devtools" "5.20.2"
 
-"@tanstack/react-query-persist-client@^5.17.15":
+"@tanstack/react-query-persist-client@^5.20.5":
   version "5.20.5"
   resolved "https://registry.yarnpkg.com/@tanstack/react-query-persist-client/-/react-query-persist-client-5.20.5.tgz#48a1d277673f39102bb0c83dd3ddd5fb377b8855"
   integrity sha512-Djjssuvog6DAq1+iyy9cq+vdqSQBuMKJ1hwf/4SzoeveL69x+BwxY1BY4XZ3v1AERtbH/gYfD9047EYwGkxHww==
   dependencies:
     "@tanstack/query-persist-client-core" "5.20.5"
 
-"@tanstack/react-query@^5.17.15":
+"@tanstack/react-query@^5.20.5":
   version "5.20.5"
   resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.20.5.tgz#ebf57b6d3344478d505ad8db09a8b29262a35dab"
   integrity sha512-6MHwJ8G9cnOC/XKrwt56QMc91vN7hLlAQNUA0ubP7h9Jj3a/CmkUwT6ALdFbnVP+PsYdhW3WONa8WQ4VcTaSLQ==
@@ -4405,7 +4405,7 @@
     randombytes "^2.1.0"
     thor-devkit "^2.0.5"
 
-"@vechain/dapp-kit-react@^1.0.3":
+"@vechain/dapp-kit-react@^1.0.7":
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/@vechain/dapp-kit-react/-/dapp-kit-react-1.0.7.tgz#4a71c8cb506e9da706e2c9b278bbeafe2bb674c3"
   integrity sha512-etGBm9k3+tNUGdNFu2MRnEkVOQ8Z4S9o2YZqp+vN1RIkPXYo8xxcUhDSSys7z/Q0ksZrcncEyhV91+aIjuNgWQ==
@@ -4418,7 +4418,7 @@
     thor-devkit "^2.0.9"
     valtio "1.11.2"
 
-"@vechain/dapp-kit-ui@1.0.7", "@vechain/dapp-kit-ui@^1.0.3":
+"@vechain/dapp-kit-ui@1.0.7", "@vechain/dapp-kit-ui@^1.0.7":
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/@vechain/dapp-kit-ui/-/dapp-kit-ui-1.0.7.tgz#57a0ddc322c28927b54eaeabfa61c4e2e2d61935"
   integrity sha512-yih8/tK/LERL9C8S9S6NVPfqosyrFpgyGmVL1YjvfTKiMZeS3KrxAIKOzO0coxrCN7edcEAo8gz3OpdJZJGYvQ==
@@ -4434,7 +4434,7 @@
     valtio "1.11.2"
     viem "^1.18.4"
 
-"@vechain/dapp-kit@1.0.7", "@vechain/dapp-kit@^1.0.3":
+"@vechain/dapp-kit@1.0.7", "@vechain/dapp-kit@^1.0.7":
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/@vechain/dapp-kit/-/dapp-kit-1.0.7.tgz#49e1e52c40f6fdc4ae180e2686cd8e631a5c4469"
   integrity sha512-JUCMT0UzCWLmU4vFrEbK2UayBxDt2C1TN2gzGT4+Pe80bj0iRs/Z1jhK9wM3ahBdwAmnRthZEMS/7JrLbCNyvg==
