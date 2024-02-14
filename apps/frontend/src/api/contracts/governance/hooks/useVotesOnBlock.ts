@@ -17,13 +17,14 @@ const GOVERNOR_CONTRACT = getConfig().governorContractAddress
  */
 export const getVotesOnBlock = async (
   thor: Connex.Thor,
-  block: number,
+  block?: number,
   address?: string,
 ): Promise<{
   original: string
   scaled: string
   formatted: string
 }> => {
+  if (!block) throw new Error("block is required")
   if (!address) throw new Error("address is required")
 
   const getVotesAbi = governorContractAbi.find(abi => abi.name === "getVotes")
@@ -43,17 +44,17 @@ export const getVotesOnBlock = async (
   }
 }
 
-export const getVotesOnBlockQueryKey = (block: number, address?: string) => ["votesOnBlock", block, address]
+export const getVotesOnBlockQueryKey = (block?: number, address?: string) => ["votesOnBlock", block, address]
 /**
  *  Hook to get the number of votes of the given address (includes the delegated ones)
  * @returns the number of votes of the given address (includes the delegated ones)
  */
-export const useGetVotesOnBlock = (block: number, address?: string) => {
+export const useGetVotesOnBlock = (block?: number, address?: string) => {
   const { thor } = useConnex()
 
   return useQuery({
     queryKey: getVotesOnBlockQueryKey(block, address),
     queryFn: async () => await getVotesOnBlock(thor, block, address),
-    enabled: !!thor && !!address,
+    enabled: !!thor && !!address && !!block,
   })
 }

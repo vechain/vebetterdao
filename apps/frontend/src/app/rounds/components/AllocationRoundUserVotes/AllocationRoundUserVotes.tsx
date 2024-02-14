@@ -1,5 +1,5 @@
 import { useXApps } from "@/api"
-import { Box, Button, Card, CardBody, CardHeader, Heading, Stack, VStack } from "@chakra-ui/react"
+import { Box, Button, Card, CardBody, CardHeader, Heading, Stack, Text, VStack } from "@chakra-ui/react"
 import { useEffect } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { SelectAppVotesInput } from "./components/SelectAppVotesInput"
@@ -37,14 +37,17 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
 
   return (
     <Card w="full">
-      <CardHeader>
-        <Heading size="md">Your Votes</Heading>
-      </CardHeader>
       <CardBody>
         <Stack direction={["column", "column", "row"]} w="full" align="center" justify="space-between" spacing={16}>
-          <Box flex={1} w="full">
-            <AppVotesBreakdown votes={watchVotes} />
-          </Box>
+          <VStack flex={1} w="full" spacing={8}>
+            <Box>
+              <Heading size="xl">Assign voting power to dApps</Heading>
+              <Text fontSize="md" color="gray.500" mt={4}>
+                Distribute your voting power among your selected dApps to help them receive more B3TR allocation.
+              </Text>
+            </Box>
+            <AppVotesBreakdown votes={watchVotes} roundId={roundId} />
+          </VStack>
           <Box flex={1} w="full">
             <form onSubmit={handleSubmit(onSubmit)}>
               <VStack spacing={4}>
