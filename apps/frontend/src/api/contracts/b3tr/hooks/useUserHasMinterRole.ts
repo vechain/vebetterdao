@@ -1,9 +1,9 @@
 import { getConfig } from "@repo/config"
-import Contract from "@repo/contracts/artifacts/contracts/B3TR.sol/B3TR.json"
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 import { useMinterRoleValue } from "./useB3trMinterRoleValue"
-const b3trAbi = Contract.abi
+import { B3trContractJson } from "@repo/contracts"
+const b3trAbi = B3trContractJson.abi
 
 const B3TR_CONTRACT = getConfig().b3trContractAddress
 
