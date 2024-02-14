@@ -8,7 +8,6 @@ import {
   getVot3Tokens,
   levels,
   multipliers,
-  waitForProposalToBeActive,
   waitForVotingPeriodToEnd,
   waitForNextCycle,
   voteOnApps,
@@ -125,8 +124,6 @@ describe("VoterRewards", () => {
       expect(await xAllocationVoting.proposalDeadline(proposalId)).to.lt(
         await emissions.getCycleBlock(await emissions.nextCycle()),
       )
-
-      await waitForProposalToBeActive(Number(proposalId), xAllocationVoting)
 
       tx = await xAllocationVoting
         .connect(otherAccount)
@@ -286,8 +283,6 @@ describe("VoterRewards", () => {
         await emissions.getCycleBlock(await emissions.nextCycle()),
       )
 
-      await waitForProposalToBeActive(Number(proposalId), xAllocationVoting)
-
       // Vote on apps for the first round
       await voteOnApps(
         xAllocationVoting,
@@ -379,8 +374,6 @@ describe("VoterRewards", () => {
       // expect(await xAllocationVoting.proposalDeadline(proposalId2)).to.lt(
       //   await emissions.getCycleBlock(await emissions.nextCycle()),
       // )
-
-      await waitForProposalToBeActive(Number(proposalId2), xAllocationVoting)
 
       // Vote on apps for the second round
       await voteOnApps(
@@ -481,8 +474,6 @@ describe("VoterRewards", () => {
 
       let proposalId = await xAllocationVoting.currentRoundId()
 
-      await waitForProposalToBeActive(Number(proposalId), xAllocationVoting)
-
       await waitForVotingPeriodToEnd(Number(proposalId), xAllocationVoting)
 
       await waitForNextCycle(emissions)
@@ -522,8 +513,6 @@ describe("VoterRewards", () => {
 
       const proposalId = await xAllocationVoting.currentRoundId()
 
-      await waitForProposalToBeActive(Number(proposalId), xAllocationVoting)
-
       await voteOnApps(xAllocationVoting, [app1], [voter1], [[ethers.parseEther("1000")]], proposalId)
 
       await waitForVotingPeriodToEnd(Number(proposalId), xAllocationVoting)
@@ -551,8 +540,6 @@ describe("VoterRewards", () => {
       const proposalId = await xAllocationVoting.currentRoundId()
 
       const proposalStart = await xAllocationVoting.proposalSnapshot(proposalId)
-
-      await waitForProposalToBeActive(Number(proposalId), xAllocationVoting)
 
       await catchRevert(
         voterRewards

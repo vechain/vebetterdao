@@ -8,7 +8,6 @@ import {
   getVot3Tokens,
   moveToCycle,
   startNewAllocationRound,
-  waitForProposalToBeActive,
   waitForVotingPeriodToEnd,
 } from "./helpers"
 import { describe, it } from "mocha"
@@ -33,7 +32,6 @@ describe("X-Allocation Pool", async function () {
       //Start allocation round
       const round1 = await startNewAllocationRound(xAllocationVoting)
       // Vote
-      await waitForProposalToBeActive(round1, xAllocationVoting)
       await xAllocationVoting
         .connect(voter1)
         .castVote(round1, [app1Id, app2Id], [ethers.parseEther("100"), ethers.parseEther("900")])
@@ -115,7 +113,6 @@ describe("X-Allocation Pool", async function () {
       //Start allocation round
       const round1 = parseInt((await xAllocationVoting.currentRoundId()).toString())
       // Vote
-      await waitForProposalToBeActive(round1, xAllocationVoting)
       await xAllocationVoting
         .connect(voter1)
         .castVote(round1, [app1Id, app2Id], [ethers.parseEther("100"), ethers.parseEther("900")])
@@ -171,7 +168,6 @@ describe("X-Allocation Pool", async function () {
       //Start allocation round
       const round1 = parseInt((await xAllocationVoting.currentRoundId()).toString())
       // Vote
-      await waitForProposalToBeActive(round1, xAllocationVoting)
       await xAllocationVoting
         .connect(voter1)
         .castVote(round1, [app1Id, app2Id], [ethers.parseEther("100"), ethers.parseEther("900")])
@@ -215,7 +211,6 @@ describe("X-Allocation Pool", async function () {
       //Start allocation round
       const round1 = parseInt((await xAllocationVoting.currentRoundId()).toString())
       // Vote
-      await waitForProposalToBeActive(round1, xAllocationVoting)
       await xAllocationVoting
         .connect(voter1)
         .castVote(round1, [app1Id, app2Id], [ethers.parseEther("100"), ethers.parseEther("900")])
@@ -262,7 +257,6 @@ describe("X-Allocation Pool", async function () {
       //Start allocation round
       const round1 = parseInt((await xAllocationVoting.currentRoundId()).toString())
       // Vote
-      await waitForProposalToBeActive(round1, xAllocationVoting)
       await xAllocationVoting.connect(voter1).castVote(round1, [app1Id], [ethers.parseEther("1")])
       await waitForVotingPeriodToEnd(round1, xAllocationVoting)
       let state = await xAllocationVoting.state(round1)
@@ -302,7 +296,6 @@ describe("X-Allocation Pool", async function () {
       //Start allocation round
       const round1 = parseInt((await xAllocationVoting.currentRoundId()).toString())
       // Vote
-      await waitForProposalToBeActive(round1, xAllocationVoting)
       await xAllocationVoting.connect(voter1).castVote(round1, [app1Id], [ethers.parseEther("1")])
       await waitForVotingPeriodToEnd(round1, xAllocationVoting)
       let state = await xAllocationVoting.state(round1)
@@ -341,8 +334,6 @@ describe("X-Allocation Pool", async function () {
 
       //Start allocation round
       const round1 = parseInt((await xAllocationVoting.currentRoundId()).toString())
-      // Vote
-      await waitForProposalToBeActive(round1, xAllocationVoting)
 
       // ROUND IS NOT FINALIZED
       // await xAllocationVoting.finalize(round1)
@@ -370,7 +361,6 @@ describe("X-Allocation Pool", async function () {
       //Start allocation round
       const round1 = await startNewAllocationRound(xAllocationVoting)
       // Vote
-      await waitForProposalToBeActive(round1, xAllocationVoting)
       await xAllocationVoting
         .connect(voter1)
         .castVote(round1, [app1Id, app2Id], [ethers.parseEther("100"), ethers.parseEther("900")])
@@ -413,7 +403,6 @@ describe("X-Allocation Pool", async function () {
       //Start allocation round
       const round1 = parseInt((await xAllocationVoting.currentRoundId()).toString())
       // Nobody votes
-      await waitForProposalToBeActive(round1, xAllocationVoting)
       await waitForVotingPeriodToEnd(round1, xAllocationVoting)
       await xAllocationVoting.finalize(round1)
 
@@ -468,8 +457,6 @@ describe("X-Allocation Pool", async function () {
 
       //Start allocation round
       const round1 = parseInt((await xAllocationVoting.currentRoundId()).toString())
-      // Nobody votes
-      await waitForProposalToBeActive(round1, xAllocationVoting)
 
       await xAllocationVoting
         .connect(voter1)
@@ -490,7 +477,6 @@ describe("X-Allocation Pool", async function () {
       const round2 = parseInt((await xAllocationVoting.currentRoundId()).toString())
       expect(round2).to.eql(2)
 
-      await waitForProposalToBeActive(round2, xAllocationVoting)
       await xAllocationVoting.connect(voter1).castVote(round2, [app3Id], [ethers.parseEther("1")])
       await waitForVotingPeriodToEnd(round2, xAllocationVoting)
       await xAllocationVoting.finalize(round2)
