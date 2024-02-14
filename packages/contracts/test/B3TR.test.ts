@@ -59,7 +59,7 @@ describe("B3TR", function () {
 
       expect(await b3tr.hasRole(operatorRole, otherAccount)).to.eql(false)
 
-      expect(b3tr.connect(otherAccount).grantRole(operatorRole, otherAccount)).to.be.revertedWithoutReason
+      expect(b3tr.connect(otherAccount).grantRole(operatorRole, otherAccount)).to.be.reverted
 
       await b3tr.connect(owner).grantRole(operatorRole, otherAccount)
       expect(await b3tr.hasRole(operatorRole, otherAccount)).to.eql(true)
@@ -73,7 +73,7 @@ describe("B3TR", function () {
       await b3tr.connect(owner).grantRole(operatorRole, otherAccount)
       expect(await b3tr.hasRole(operatorRole, otherAccount)).to.eql(true)
 
-      expect(b3tr.connect(otherAccount).revokeRole(operatorRole, otherAccount)).to.be.revertedWithoutReason
+      expect(b3tr.connect(otherAccount).revokeRole(operatorRole, otherAccount)).to.be.reverted
 
       await b3tr.connect(owner).revokeRole(operatorRole, otherAccount)
       expect(await b3tr.hasRole(operatorRole, otherAccount)).to.eql(false)
@@ -88,7 +88,7 @@ describe("B3TR", function () {
       expect(await b3tr.hasRole(adminRole, otherAccount)).to.eql(false)
       expect(await b3tr.hasRole(adminRole, owner)).to.eql(true)
 
-      expect(b3tr.connect(otherAccount).grantRole(adminRole, otherAccount)).to.be.revertedWithoutReason
+      expect(b3tr.connect(otherAccount).grantRole(adminRole, otherAccount)).to.be.reverted
 
       await b3tr.connect(owner).grantRole(adminRole, otherAccount)
       expect(await b3tr.hasRole(adminRole, otherAccount)).to.eql(true)
@@ -106,7 +106,7 @@ describe("B3TR", function () {
       expect(await b3tr.hasRole(adminRole, otherAccount)).to.eql(true)
       expect(await b3tr.hasRole(adminRole, owner)).to.eql(true)
 
-      expect(b3tr.connect(minterAccount).revokeRole(adminRole, owner)).to.be.revertedWithoutReason
+      expect(b3tr.connect(minterAccount).revokeRole(adminRole, owner)).to.be.reverted
 
       await b3tr.connect(otherAccount).revokeRole(adminRole, owner)
 
@@ -124,7 +124,7 @@ describe("B3TR", function () {
       const operatorRole = await b3tr.MINTER_ROLE()
 
       await b3tr.grantRole(operatorRole, owner)
-      expect(b3tr.mint(otherAccount, ethers.parseEther("1000000001"))).to.be.revertedWithoutReason
+      expect(b3tr.mint(otherAccount, ethers.parseEther("1000000001"))).to.be.reverted
     })
 
     it("can be minted up to max supply", async function () {
@@ -143,7 +143,7 @@ describe("B3TR", function () {
     it("only accounts with minter role can mint", async function () {
       const { b3tr, otherAccount, owner } = await getOrDeployContractInstances({ forceDeploy: true })
 
-      expect(b3tr.mint(otherAccount, ethers.parseEther("1"))).to.be.revertedWithoutReason
+      expect(b3tr.mint(otherAccount, ethers.parseEther("1"))).to.be.reverted
       const operatorRole = await b3tr.MINTER_ROLE()
 
       await b3tr.grantRole(operatorRole, owner)

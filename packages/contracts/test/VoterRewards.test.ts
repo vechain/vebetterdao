@@ -78,9 +78,9 @@ describe("VoterRewards", () => {
         forceDeploy: true,
       })
 
-      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "", true)
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationPool.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, "", true)
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, "")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       const voter2 = otherAccounts[3]
       const voter3 = otherAccounts[4]
@@ -251,7 +251,6 @@ describe("VoterRewards", () => {
         xAllocationVoting,
         otherAccounts,
         otherAccount: voter1,
-        xAllocationPool,
         owner,
         voterRewards,
         emissions,
@@ -261,9 +260,9 @@ describe("VoterRewards", () => {
         forceDeploy: true,
       })
 
-      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "", true)
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationPool.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, "", true)
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, "")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       const voter2 = otherAccounts[3]
       const voter3 = otherAccounts[4]
@@ -473,7 +472,7 @@ describe("VoterRewards", () => {
 
       await emissions.connect(minterAccount).preMint()
 
-      const proposalId = await xAllocationVoting.currentRoundId()
+      let proposalId = await xAllocationVoting.currentRoundId()
 
       await waitForProposalToBeActive(Number(proposalId), xAllocationVoting)
 
@@ -484,6 +483,8 @@ describe("VoterRewards", () => {
       await catchRevert(voterRewards.claimReward(1, otherAccount.address)) // Should not be able to claim rewards as not voted
 
       await emissions.connect(otherAccount).distribute()
+
+      proposalId = await xAllocationVoting.currentRoundId()
 
       await waitForVotingPeriodToEnd(Number(proposalId), xAllocationVoting)
 
@@ -496,21 +497,12 @@ describe("VoterRewards", () => {
     })
 
     it("Should not be able to claim rewards twice", async () => {
-      const {
-        xAllocationVoting,
-        otherAccount,
-        voterRewards,
-        emissions,
-        b3tr,
-        owner,
-        minterAccount,
-        xAllocationPool,
-        otherAccounts,
-      } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, otherAccount, voterRewards, emissions, b3tr, owner, minterAccount, otherAccounts } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
-      const [app1] = await addAppsToAllocationVoting(xAllocationPool, [otherAccount.address], owner)
+      const [app1] = await addAppsToAllocationVoting(xAllocationVoting, [otherAccount.address], owner)
 
       const voter1 = otherAccounts[0]
 

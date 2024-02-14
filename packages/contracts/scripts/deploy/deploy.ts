@@ -1,5 +1,5 @@
 import { ethers, network } from "hardhat"
-import { B3TR, GovernorContract, TimeLock, VOT3, XAllocationPool } from "../../typechain-types"
+import { B3TR, GovernorContract, TimeLock, VOT3 } from "../../typechain-types"
 
 const DEFAULT_MINTER = "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68" //2nd account from mnemonic of solo network
 const TIMELOCK_ADMIN = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa" //1st account from mnemonic of solo network
@@ -31,6 +31,10 @@ const INITIAL_EMISSIONS = ethers.parseEther("2000000")
 const TREASURY_PERCENTAGE = 25 // 25%
 const LAST_EMISSIONS = [66, 13] // On the last cycle, 66% of the emissions will be sent to the x allocations address, 13% to the vote 2 earn address
 
+// XAllocationPool Values
+const BASE_ALLOCATION_PERCENTAGE = 20
+const APP_SHARES_CAP = 15
+
 // Voter rewards
 const levels = [1]
 const multiplier = [0]
@@ -57,7 +61,7 @@ export async function deployAll() {
   await timelock.grantRole(CANCELLER_ROLE, await governor.getAddress())
 
   // Deploy XAllocationPool
-  const xAllocationPool = await deployXAllocationPool(timelock, XPOOL_ADMIN)
+  const xAllocationPool = await deployXAllocationPool(b3tr, XPOOL_ADMIN, BASE_ALLOCATION_PERCENTAGE, APP_SHARES_CAP)
 
   // Deploy the NFT Badge contract with Max Mintable Level 1
   const badge = await deployNFTBadge(1)
@@ -75,13 +79,7 @@ export async function deployAll() {
   )
 
   // Deploy XAllocationVoting
-  const xAllocationVoting = await deployXAllocationVoting(
-    timelock,
-    xAllocationPool,
-    vot3,
-    XPOOL_ADMIN,
-    await voterRewards.getAddress(),
-  )
+  const xAllocationVoting = await deployXAllocationVoting(timelock, vot3, XPOOL_ADMIN, await voterRewards.getAddress())
 
   // Grant Vote Registrar role to XAllocationVoting
   await voterRewards.connect(timelockAdminSigner).setXallocationVoteRegistrarRole(await xAllocationVoting.getAddress())
@@ -91,6 +89,9 @@ export async function deployAll() {
 
   // Set X allocations governor
   await emissions.connect(timelockAdminSigner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+  // Setup XAllocationPool addresses
+  await xAllocationPool.connect(timelockAdminSigner).setXAllocationVotingAddress(await xAllocationVoting.getAddress())
+  await xAllocationPool.connect(timelockAdminSigner).setEmissionsAddress(await emissions.getAddress())
 
   return {
     governor: governor,
@@ -174,10 +175,15 @@ async function deployNFTBadge(mintableLevelFromDeploy: number) {
   return contract
 }
 
-async function deployXAllocationPool(timeLock: TimeLock, adminAddress: string) {
+async function deployXAllocationPool(
+  b3tr: B3TR,
+  adminAddress: string,
+  baseAllocationPercentage: number = 20,
+  appSharesCap: number = 15,
+) {
   console.log(`Deploying XAllocationPool contract`)
   const XAllocationPoolContract = await ethers.getContractFactory("XAllocationPool")
-  const contract = await XAllocationPoolContract.deploy([await timeLock.getAddress(), adminAddress])
+  const contract = await XAllocationPoolContract.deploy(adminAddress, await b3tr.getAddress())
 
   await contract.waitForDeployment()
 
@@ -188,7 +194,6 @@ async function deployXAllocationPool(timeLock: TimeLock, adminAddress: string) {
 
 async function deployXAllocationVoting(
   timeLock: TimeLock,
-  xAllocationPool: XAllocationPool,
   vot3: VOT3,
   adminAddress: string,
   voterRewardsAddress: string,
@@ -201,7 +206,6 @@ async function deployXAllocationVoting(
     VOTING_PERIOD,
     0, // voting delay
     await timeLock.getAddress(),
-    await xAllocationPool.getAddress(),
     voterRewardsAddress,
     [await timeLock.getAddress(), adminAddress],
   )

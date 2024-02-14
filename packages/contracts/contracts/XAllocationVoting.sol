@@ -6,6 +6,7 @@ import "./x-allocation-voting-governance/modules/GovernorXAllocationVotesCountin
 import "./x-allocation-voting-governance/modules/GovernorVotes.sol";
 import "./x-allocation-voting-governance/modules/GovernorVotesQuorumFraction.sol";
 import "./x-allocation-voting-governance/modules/GovernorSettings.sol";
+import "./x-allocation-voting-governance/modules/XApps.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract XAllocationVoting is
@@ -14,6 +15,7 @@ contract XAllocationVoting is
   GovernorXAllocationVotesCounting,
   GovernorVotes,
   GovernorVotesQuorumFraction,
+  XApps,
   AccessControl
 {
   /**
@@ -23,7 +25,6 @@ contract XAllocationVoting is
    * @param _initialVotingPeriod How long does a proposal remain open to votes
    * @param _initialVotingDelay How long after a proposal is created should become active
    * @param _b3trGovernor The address of the B3trGovernor DAO
-   * @param _xAllocationPool The address of the XAllocationPool
    * @param _admins The addresses of the admins (DAO + another address) that can update the XAllocationPool address, only DAO will remain in the final version
    */
   constructor(
@@ -32,7 +33,6 @@ contract XAllocationVoting is
     uint32 _initialVotingPeriod,
     uint48 _initialVotingDelay,
     address _b3trGovernor,
-    address _xAllocationPool,
     address _voterRewards,
     address[] memory _admins
   )
@@ -40,20 +40,92 @@ contract XAllocationVoting is
     GovernorSettings(_initialVotingDelay, _initialVotingPeriod)
     GovernorVotes(_vot3Token)
     GovernorVotesQuorumFraction(_quorumPercentage)
-    GovernorXAllocationVotesCounting(_xAllocationPool, _voterRewards)
+    GovernorXAllocationVotesCounting(_voterRewards)
   {
     for (uint256 i = 0; i < _admins.length; i++) {
       _grantRole(DEFAULT_ADMIN_ROLE, _admins[i]);
     }
   }
 
-  function setXAllocationPoolAddress(address _xAllocationPool) public override onlyRole(DEFAULT_ADMIN_ROLE) {
-    xAllocationPool = IXAllocationPool(_xAllocationPool);
+  // ---------- Setters ---------- //
+
+  function setB3trGovernanceAddress(address b3trGovernor_) public override onlyRole(DEFAULT_ADMIN_ROLE) {
+    _b3trGovernor = b3trGovernor_;
   }
 
-  function setB3trGovernanceAddress(address _newB3trGovernorAddress) public override onlyRole(DEFAULT_ADMIN_ROLE) {
-    _b3trGovernor = _newB3trGovernorAddress;
+  function _propose(address proposer) internal virtual override returns (uint256 proposalId) {
+    ++_proposalCount;
+    proposalId = _proposalCount;
+
+    if (_proposals[proposalId].voteStart != 0) {
+      revert GovernorUnexpectedProposalState(proposalId, state(proposalId), bytes32(0));
+    }
+
+    // If checkpoint for latest round was not already created, create it
+    if (proposalId > 1 && !isFinalized(proposalId - 1)) {
+      _finalizeRound(proposalId - 1);
+    }
+
+    // save x-apps that users can vote for
+    bytes32[] memory apps = allElegibleApps();
+    _appsElegibleForVoting[proposalId] = apps;
+
+    uint256 snapshot = clock() + votingDelay();
+    uint256 duration = votingPeriod();
+
+    ProposalCore storage proposal = _proposals[proposalId];
+    proposal.proposer = proposer;
+    proposal.voteStart = SafeCast.toUint48(snapshot);
+    proposal.voteDuration = SafeCast.toUint32(duration);
+
+    emit AllocationProposalCreated(proposalId, proposer, snapshot, snapshot + duration);
+
+    // Using a named return variable to avoid stack too deep errors
   }
+
+  function setVotingElegibility(bytes32 appId, bool isElegible) public override onlyRole(DEFAULT_ADMIN_ROLE) {
+    super.setVotingElegibility(appId, isElegible);
+  }
+
+  function addApp(
+    address appAddress,
+    string memory name,
+    string memory metadata
+  ) public override onlyRole(DEFAULT_ADMIN_ROLE) {
+    super.addApp(appAddress, name, metadata);
+  }
+
+  function proposeNewAllocationRound() public override onlyRole(DEFAULT_ADMIN_ROLE) returns (uint256) {
+    return super.proposeNewAllocationRound();
+  }
+
+  function setAdminRole(address _newAdmin) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(_newAdmin != address(0), "XAllocationVoting: new admin is the zero address");
+
+    _grantRole(DEFAULT_ADMIN_ROLE, _newAdmin);
+  }
+
+  // ---------- Getters ---------- //
+
+  function getCurrentAllocationRoundSnapshot() public view returns (uint256) {
+    uint256 currentId = currentRoundId();
+    return proposalSnapshot(currentId);
+  }
+
+  /**
+   * This function could not be efficient with a large number of apps
+   */
+  function getRoundAppsWithDetails(uint256 roundId) public view returns (App[] memory) {
+    bytes32[] memory appsInRound = _appsElegibleForVoting[roundId];
+    App[] memory allApps = new App[](appsInRound.length);
+
+    for (uint i = 0; i < appsInRound.length; i++) {
+      allApps[i] = _apps[appsInRound[i]];
+    }
+    return allApps;
+  }
+
+  // ---------- Required overrides ---------- //
 
   function votingDelay() public view override(XAllocationVotingGovernor, GovernorSettings) returns (uint256) {
     return super.votingDelay();
@@ -77,17 +149,5 @@ contract XAllocationVoting is
     bytes4 interfaceId
   ) public view override(AccessControl, XAllocationVotingGovernor) returns (bool) {
     return super.supportsInterface(interfaceId);
-  }
-
-  function proposeNewAllocationRound() public override onlyRole(DEFAULT_ADMIN_ROLE) returns (uint256) {
-    return super.proposeNewAllocationRound();
-  }
-
-  // ------------------ SETTERS ------------------ //
-
-  function setAdminRole(address _newAdmin) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(_newAdmin != address(0), "XAllocationVoting: new admin is the zero address");
-
-    _grantRole(DEFAULT_ADMIN_ROLE, _newAdmin);
   }
 }
