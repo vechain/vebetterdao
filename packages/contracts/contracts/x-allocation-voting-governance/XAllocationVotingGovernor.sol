@@ -403,11 +403,6 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   /**
    * @inheritdoc IXAllocationVotingGovernor
    */
-  function votingDelay() public view virtual returns (uint256);
-
-  /**
-   * @inheritdoc IXAllocationVotingGovernor
-   */
   function votingPeriod() public view virtual returns (uint256);
 
   /**

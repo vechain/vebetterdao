@@ -415,9 +415,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
   function setXAllocationsGovernorAddress(address _xAllocationsGovernor) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(_xAllocationsGovernor != address(0), "Emissions: _xAllocationsGovernor cannot be the zero address");
     require(
-      IXAllocationVotingGovernor(_xAllocationsGovernor).votingPeriod() +
-        IXAllocationVotingGovernor(_xAllocationsGovernor).votingDelay() <
-        cycleDuration,
+      IXAllocationVotingGovernor(_xAllocationsGovernor).votingPeriod() < cycleDuration,
       "Emissions: Voting period and delay must be less than cycle duration"
     );
     xAllocationsGovernor = IXAllocationVotingGovernor(_xAllocationsGovernor);
