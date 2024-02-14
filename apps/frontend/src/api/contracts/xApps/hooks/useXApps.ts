@@ -21,9 +21,9 @@ type XApp = {
 }
 
 /**
- *  Returns all the available xApps (apps that can be voted on for allocation)
+ * Returns all the available xApps in the B3TR ecosystem
  * @param thor  the thor client
- * @returns  all the available xApps (apps that can be voted on for allocation) capped to 256 see {@link XApp}
+ * @returns  all the available xApps in the ecosystem capped to 256 see {@link XApp}
  */
 export const getXApps = async (thor: Connex.Thor): Promise<XApp[]> => {
   const functionFragment = XAllocationVoting.createInterface().getFunction("getAllApps").format("json")
@@ -37,8 +37,8 @@ export const getXApps = async (thor: Connex.Thor): Promise<XApp[]> => {
 export const getXAppsQueryKey = () => ["xApps"]
 
 /**
- *  Hook to get all the available xApps (apps that can be voted on for allocation)
- * @returns all the available xApps (apps that can be voted on for allocation) capped to 256
+ *  Hook to get all the available xApps in the B3TR ecosystem
+ * @returns all the available xApps in the B3TR ecosystem capped to 256
  */
 export const useXApps = () => {
   const { thor } = useConnex()
