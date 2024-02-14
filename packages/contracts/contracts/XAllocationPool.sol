@@ -145,7 +145,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
       "XAllocationVotingGovernor contract not set"
     );
 
-    uint256 roundId = xAllocationVoting().getCurrentRoundId();
+    uint256 roundId = xAllocationVoting().currentRoundId();
     uint256 appShare = getAppShares(roundId, appId);
     uint256 baseAllocationPerApp = baseAllocationAmount(roundId);
     uint256 variableAllocationForApp = _appRewardAmount(roundId, appShare);
