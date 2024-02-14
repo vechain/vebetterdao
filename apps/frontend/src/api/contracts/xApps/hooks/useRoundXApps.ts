@@ -3,7 +3,7 @@ import { useConnex } from "@vechain/dapp-kit-react"
 
 import { getConfig } from "@repo/config"
 const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
-import { XAllocationVoting__factory as XAllocationVoting } from "@repo/contracts/typechain-types"
+import { XAllocationVoting__factory as XAllocationVoting } from "@repo/contracts"
 
 /**
  * xApp type
@@ -36,7 +36,7 @@ export const getRoundXAppsWithDetails = async (thor: Connex.Thor, proposalId: st
   return res.decoded[0]
 }
 
-export const getRoundXAppsWithDetailsKey = () => ["roundXAppsWithDetails"]
+export const getRoundXAppsWithDetailsKey = (proposalId: string) => ["round", proposalId, "xApps"]
 
 /**
  *  Hook to get all the available xApps (apps that can be voted on for allocation)
@@ -49,7 +49,7 @@ export const useRoundXAppsWithDetails = (proposalId: string) => {
   const { thor } = useConnex()
 
   return useQuery({
-    queryKey: getRoundXAppsWithDetailsKey(),
+    queryKey: getRoundXAppsWithDetailsKey(proposalId),
     queryFn: async () => await getRoundXAppsWithDetails(thor, proposalId),
     enabled: !!thor,
   })
