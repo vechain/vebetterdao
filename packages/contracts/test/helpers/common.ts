@@ -4,6 +4,7 @@ import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethe
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { getOrDeployContractInstances } from "./deploy"
 import { mine } from "@nomicfoundation/hardhat-network-helpers"
+import { filterEventsByName, parseAlloctionProposalCreatedEvent } from "./events"
 
 export const waitForNextBlock = async () => {
   if (network.name === "hardhat") {
@@ -163,21 +164,20 @@ export const addAppThroughGovernance = async (
   proposer: HardhatEthersSigner,
   voter: HardhatEthersSigner,
   governor: GovernorContract,
-  xAllocationPool: XAllocationPool,
+  xAllocationVoting: XAllocationVoting,
   appName: string = "Bike 4 Life" + Math.random(),
   appAddress: string,
   appMetadata: string = "",
-  availableForAllocationVoting: boolean = true,
 ) => {
   await createProposalAndExecuteIt(
     proposer,
     voter,
     governor,
-    xAllocationPool,
-    await ethers.getContractFactory("XAllocationPool"),
+    xAllocationVoting,
+    await ethers.getContractFactory("XAllocationVoting"),
     "Add app to the list",
     "addApp",
-    [appAddress, appName, appMetadata, availableForAllocationVoting],
+    [appAddress, appName, appMetadata],
   )
 }
 
@@ -201,6 +201,11 @@ export const waitForNextCycle = async (emissions: Emissions) => {
   await waitForBlock(Number(blockNextCycle))
 }
 
+/**
+ * It will move to the desired cycle without actually distribute it.
+ * E.g: we are in cycle 1 (distributed) and want to move to cycle 3 (not distributed) then we call this funciton with cycle 3
+ * and it will distribute the cycle 2 and stop before distributing the cycle 3
+ */
 export const moveToCycle = async (emissions: Emissions, minter: HardhatEthersSigner, cycle: number) => {
   const cycleToBeDistributed = await emissions.nextCycle()
   for (let i = 0; i < BigInt(cycle) - cycleToBeDistributed; i++) {
@@ -222,15 +227,64 @@ export const voteOnApps = async (
 }
 
 export const addAppsToAllocationVoting = async (
-  xAllocationPool: XAllocationPool,
+  xAllocationVoting: XAllocationVoting,
   apps: string[],
   owner: HardhatEthersSigner,
 ) => {
   let appIds: string[] = []
   for (const app of apps) {
-    await xAllocationPool.connect(owner).addApp(app, app, "", true)
+    await xAllocationVoting.connect(owner).addApp(app, app, "")
     appIds.push(ethers.keccak256(ethers.toUtf8Bytes(app)))
   }
 
   return appIds
+}
+
+export const startNewAllocationRound = async (xAllocationVoting: XAllocationVoting) => {
+  let tx = await xAllocationVoting.proposeNewAllocationRound()
+  let receipt = await tx.wait()
+  if (!receipt) throw new Error("No receipt")
+
+  let { proposalId: roundId } = parseAlloctionProposalCreatedEvent(
+    filterEventsByName(receipt.logs, "AllocationProposalCreated")[0],
+    xAllocationVoting,
+  )
+
+  return roundId
+}
+
+export const calculateBaseAllocationOffChain = async (
+  roundId: number,
+  emissions: Emissions,
+  xAllocationVoting: XAllocationVoting,
+  xAllocationPool: XAllocationPool,
+) => {
+  // Amount available for this round (assuming the amount is already scaled by 1e18 for precision)
+  let totalAmount = await emissions.getXAllocationAmountForCycle(roundId)
+
+  let elegibleApps = await xAllocationVoting.getRoundApps(roundId)
+
+  const baseAllcoationPercentage = await xAllocationPool.baseAllocationPercentage()
+
+  let remaining = (totalAmount * baseAllcoationPercentage) / BigInt(100)
+
+  let amountPerApp = remaining / BigInt(elegibleApps.length)
+
+  return amountPerApp
+}
+
+export const calculateVariableAppAllocationOffChain = async (
+  roundId: number,
+  appId: string,
+  emissions: Emissions,
+  xAllocationPool: XAllocationPool,
+) => {
+  // Amount available for this round (assuming the amount is already scaled by 1e18 for precision)
+  let totalAmount = await emissions.getXAllocationAmountForCycle(roundId)
+
+  let totalAvailable = (totalAmount * (await xAllocationPool.variableAllocationPercentage())) / BigInt(100)
+
+  let appShares = (await xAllocationPool.getAppShares(roundId, appId)) / BigInt(100)
+
+  return (totalAvailable * appShares) / BigInt(100)
 }

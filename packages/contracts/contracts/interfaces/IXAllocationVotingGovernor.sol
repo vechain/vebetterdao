@@ -209,6 +209,24 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
 
   /**
    * @notice module:reputation
+   * @dev Total number of votes cast in an allocation round.
+   */
+  function totalVotes(uint256 proposalId) external view returns (uint256);
+
+  /**
+   * @notice module:reputation
+   * @dev Total number of voters in an allocation round.
+   */
+  function totalVoters(uint256 proposalId) external view returns (uint256);
+
+  /**
+   * @notice module:reputation
+   * @dev Number of votes cast for a specific app in an allocation round.
+   */
+  function getAppVotes(uint256 proposalId, bytes32 appId) external view returns (uint256);
+
+  /**
+   * @notice module:reputation
    * @dev Voting power of an `account` at a specific `timepoint` given additional encoded parameters.
    */
   function getVotesWithParams(address account, uint256 timepoint, bytes memory params) external view returns (uint256);
@@ -240,4 +258,21 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   function currentRoundId() external view returns (uint256);
 
   function quorumReached(uint256 proposalId) external view returns (bool);
+
+  /**
+   * @dev Returns the current allocation proposal round snapshot (block).
+   */
+  function getCurrentAllocationRoundSnapshot() external view returns (uint256);
+
+  function getRoundApps(uint256 proposalId) external view returns (bytes32[] memory);
+
+  function isEligibleForVote(bytes32 appId, uint256 proposalId) external view returns (bool);
+
+  function isActive(uint256 proposalId) external view returns (bool);
+
+  function isFinalized(uint256 proposalId) external view returns (bool);
+
+  function latestSucceededRoundId(uint256 roundId) external view returns (uint256);
+
+  function getAppReceiverAddress(bytes32 appId) external view returns (address);
 }

@@ -1,5 +1,5 @@
 import { ethers } from "hardhat"
-import { B3TR, Emissions, VOT3, XAllocationPool, XAllocationVoting } from "../../typechain-types"
+import { B3TR, Emissions, VOT3, XAllocationVoting, XApps } from "../../typechain-types"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { BytesLike } from "ethers"
 import { waitForProposalToBeActive } from "../../test/helpers"
@@ -8,7 +8,6 @@ type App = {
   address: string
   name: string
   metadata: string
-  availableForAllocationVoting: boolean
 }
 /**
  *  Mint $B3TR tokens and swap for VOT3 tokens
@@ -51,14 +50,14 @@ const swapB3trForVot3 = async (vot3: VOT3, amount: string = "500", accounts: Har
   )
 }
 
-const addXDapps = async (xAllocationPool: XAllocationPool, accounts: HardhatEthersSigner[], apps: App[]) => {
+const addXDapps = async (xAllocationVoting: XAllocationVoting, accounts: HardhatEthersSigner[], apps: App[]) => {
   console.log("Adding x-apps...")
 
   return await Promise.all(
     apps.map(async app => {
-      return await xAllocationPool
+      return await xAllocationVoting
         .connect(accounts[0])
-        .addApp(app.address, app.name, app.metadata, app.availableForAllocationVoting)
+        .addApp(app.address, app.name, app.metadata)
         .then(async tx => await tx.wait())
     }),
   )
@@ -67,9 +66,9 @@ const addXDapps = async (xAllocationPool: XAllocationPool, accounts: HardhatEthe
 const castVotesToXDapps = async (
   xAllocationVoting: XAllocationVoting,
   accounts: HardhatEthersSigner[],
-  proposalId: string,
+  roundId: number,
   vot3mount: string,
-  apps: XAllocationPool.AppStruct[],
+  apps: XApps.AppStruct[],
 ) => {
   return Promise.all(
     accounts.map(async account => {
@@ -77,6 +76,8 @@ const castVotesToXDapps = async (
 
       let residual = BigInt(vot3mount)
       const splits: { app: BytesLike; weight: string }[] = []
+
+      // eslint-disable-next-line no-unused-vars
       let randomDappsToVote = apps.filter(_ => Math.floor(Math.random() * 2) == 0)
       if (!randomDappsToVote.length) randomDappsToVote = apps
 
@@ -95,7 +96,7 @@ const castVotesToXDapps = async (
       return await xAllocationVoting
         .connect(account)
         .castVote(
-          proposalId,
+          roundId,
           splits.map(split => split.app),
           splits.map(split => ethers.parseEther(split.weight)),
         )
@@ -107,7 +108,6 @@ const castVotesToXDapps = async (
 export const seedLocalEnvironment = async (
   b3tr: B3TR,
   vot3: VOT3,
-  xAllocationPool: XAllocationPool,
   xAllocationVoting: XAllocationVoting,
   emissions: Emissions,
 ) => {
@@ -129,26 +129,23 @@ export const seedLocalEnvironment = async (
       address: accounts[6].address,
       name: "Test app 1",
       metadata: "https://test-app-1.com",
-      availableForAllocationVoting: true,
     },
     {
       address: accounts[7].address,
       name: "Test app 2",
       metadata: "https://test-app-2.com",
-      availableForAllocationVoting: true,
     },
     {
       address: accounts[8].address,
       name: "Test app 3",
       metadata: "https://test-app-3.com",
-      availableForAllocationVoting: true,
     },
   ]
 
   //   Add x-apps to the XAllocationPool
-  await addXDapps(xAllocationPool, accountsToSeed, APPS)
+  await addXDapps(xAllocationVoting, accountsToSeed, APPS)
 
-  const xDappsFromContract = await xAllocationPool.getAllApps()
+  const xDappsFromContract = await xAllocationVoting.getAllApps()
 
   //   Pre mint $B3TR
   console.log("Pre minting $B3TR...")
@@ -158,11 +155,12 @@ export const seedLocalEnvironment = async (
     .preMint()
     .then(async tx => await tx.wait())
 
-  const proposalId = "1"
+  //   Start new allocation round
+  const roundId = parseInt((await xAllocationVoting.currentRoundId()).toString())
   console.log("Waiting for proposal to be active...")
-  await waitForProposalToBeActive(Number(proposalId), xAllocationVoting)
+  await waitForProposalToBeActive(roundId, xAllocationVoting)
   console.log("Casting random votes to xDapps...")
-  await castVotesToXDapps(xAllocationVoting, accountsToSeed, proposalId, amountToSwap, xDappsFromContract)
+  await castVotesToXDapps(xAllocationVoting, accountsToSeed, roundId, amountToSwap, xDappsFromContract)
 
   //TODO: SEED multiple rounds and votes (we need to execute a proposal to change the votingPeriod to someseconds)
 
