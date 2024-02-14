@@ -11,6 +11,7 @@ export const AllocationProposalState = {
   "1": "Active",
   "2": "Failed",
   "3": "Succeeded",
+  "4": "Finalized",
 }
 /**
  *
