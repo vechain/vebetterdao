@@ -112,6 +112,19 @@ contract XAllocationVoting is
     return proposalSnapshot(currentId);
   }
 
+  /**
+   * This function could not be efficient with a large number of apps
+   */
+  function getRoundAppsWithDetails(uint256 roundId) public view returns (App[] memory) {
+    bytes32[] memory appsInRound = _appsElegibleForVoting[roundId];
+    App[] memory allApps = new App[](appsInRound.length);
+
+    for (uint i = 0; i < appsInRound.length; i++) {
+      allApps[i] = _apps[appsInRound[i]];
+    }
+    return allApps;
+  }
+
   // ---------- Required overrides ---------- //
 
   function votingDelay() public view override(XAllocationVotingGovernor, GovernorSettings) returns (uint256) {

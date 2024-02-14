@@ -861,6 +861,30 @@ describe("X-Allocation Voting", function () {
       getRoundApps = await xAllocationVoting.getRoundApps(round3)
       expect(getRoundApps.length).to.equal(2n)
     })
+
+    it("I can fetch all apps with details available for voting", async function () {
+      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // 2 apps in round1
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "")
+      const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, "")
+      const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+      let round1 = await startNewAllocationRound(xAllocationVoting)
+      let getRoundApps = await xAllocationVoting.getRoundApps(round1)
+      expect(getRoundApps.length).to.equal(2n)
+
+      let apps = await xAllocationVoting.getAllAppsOfRound(round1)
+      expect(apps.length).to.equal(2n)
+      expect(apps[0].id).to.equal(app1)
+      expect(apps[1].id).to.equal(app2)
+      expect(apps[0].name).to.equal(otherAccounts[0].address)
+      expect(apps[1].name).to.equal(otherAccounts[1].address)
+      expect(apps[0].metadata).to.equal("")
+      expect(apps[1].metadata).to.equal("")
+    })
   })
 
   describe("Allocation Voting finalization", function () {
