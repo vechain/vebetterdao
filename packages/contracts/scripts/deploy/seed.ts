@@ -158,9 +158,6 @@ export const seedLocalEnvironment = async (
     .preMint()
     .then(async tx => await tx.wait())
 
-  //   Start new allocation round
-  console.log("Starting new allocation round...")
-  await xAllocationVoting.proposeNewAllocationRound().then(async tx => await tx.wait())
   const proposalId = "1"
   console.log("Waiting for proposal to be active...")
   await waitForProposalToBeActive(Number(proposalId), xAllocationVoting)
