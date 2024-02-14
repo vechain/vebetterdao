@@ -23,7 +23,6 @@ import { BalancePieChart } from "./BalancePieChart"
 import { useMemo } from "react"
 import BigNumber from "bignumber.js"
 import { SwapB3trButton } from "./SwapB3trButton"
-import { RedeemB3trButton } from "./RedeemB3trButton"
 import { getConfig } from "@repo/config"
 
 const config = getConfig()
@@ -112,13 +111,7 @@ export const BalanceCard: React.FC<Props> = () => {
       <CardHeader>
         <HStack justify={"space-between"} align={"center"} w="full">
           <Heading size="sm">Your balance</Heading>
-          {isLoading ? (
-            <Spinner size="sm" />
-          ) : (
-            <HStack spacing={4}>
-              <SwapB3trButton /> <RedeemB3trButton />{" "}
-            </HStack>
-          )}
+          {isLoading ? <Spinner size="sm" /> : <SwapB3trButton />}
         </HStack>
       </CardHeader>
       <CardBody>

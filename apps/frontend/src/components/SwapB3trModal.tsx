@@ -1,5 +1,5 @@
-import { TokenBalance, useB3trBalance } from "@/api"
-import { useStakeB3tr } from "@/hooks"
+import { useB3trBalance, useVot3Balance } from "@/api"
+import { useStakeB3tr, useUnstakeB3tr } from "@/hooks"
 import {
   ModalOverlay,
   ModalContent,
@@ -14,13 +14,15 @@ import {
   Text,
   FormHelperText,
   HStack,
+  VStack,
 } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
-import { Control, Controller, useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { SliderWithTooltip } from "./SliderWithTooltip"
 import { ConfirmTransactionModalContent } from "./ConfirmTransactionModalContent"
+import { useTotalBalance } from "@/api/contracts/account"
 
 type Props = {
   isOpen: boolean
@@ -32,41 +34,82 @@ type FormData = {
 
 export const SwapB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
   const { account } = useWallet()
-  const { data: balance, isLoading: isBalanceLoading } = useB3trBalance(account ?? undefined)
+  const { data: b3trBalance } = useB3trBalance(account ?? undefined)
+  const totalBalance = useTotalBalance(account ?? undefined)
+  const initialB3trPercentageAmount = useMemo(() => {
+    if (!b3trBalance || !totalBalance) {
+      return "0"
+    }
+    return String((Number(b3trBalance.scaled) / Number(totalBalance.scaled)) * 100)
+  }, [b3trBalance])
 
-  const {
-    handleSubmit,
-    watch,
-    control,
-    formState: { errors },
-  } = useForm<FormData>({ defaultValues: { amount: "0" } })
+  const { handleSubmit, watch, control } = useForm<FormData>({ defaultValues: { amount: initialB3trPercentageAmount } })
 
-  const watchPercentageAmount = watch("amount", "0")
+  const watchB3trPercentageAmount = watch("amount", initialB3trPercentageAmount)
 
-  const { formattedAmount, scaledAmount } = useMemo(() => {
-    if (!balance) {
+  const { b3trFormattedAmount, b3trScaledAmount } = useMemo(() => {
+    if (!totalBalance) {
       return { formattedAmount: "0", scaledAmount: "0" }
     }
 
-    const parsedPercentageAmount = Number(watchPercentageAmount) / 100
-    const balanceToSwap = Number(balance.scaled) * parsedPercentageAmount
+    const parsedPercentageAmount = Number(watchB3trPercentageAmount) / 100
+    const b3trScaledAmount = Number(totalBalance.scaled) * parsedPercentageAmount
 
-    const formattedAmount = FormattingUtils.humanNumber(balanceToSwap)
-    return { formattedAmount, scaledAmount: balanceToSwap }
-  }, [balance, watchPercentageAmount])
+    const b3trFormattedAmount = FormattingUtils.humanNumber(b3trScaledAmount, b3trScaledAmount)
+    return { b3trFormattedAmount, b3trScaledAmount }
+  }, [totalBalance, watchB3trPercentageAmount])
 
-  const {
-    sendTransaction,
-    isTxReceiptLoading,
-    sendTransactionPending,
-    sendTransactionError,
-    txReceipt,
-    txReceiptError,
-    status,
-    resetStatus,
-  } = useStakeB3tr({
-    amount: scaledAmount,
+  const { vot3FormattedAmount, vot3ScaledAmount } = useMemo(() => {
+    if (!totalBalance) {
+      return { formattedAmount: "0", scaledAmount: "0" }
+    }
+
+    const parsedPercentageAmount = (100 - Number(watchB3trPercentageAmount)) / 100
+    const vot3ScaledAmount = Number(totalBalance.scaled) * parsedPercentageAmount
+
+    const vot3FormattedAmount = FormattingUtils.humanNumber(vot3ScaledAmount, vot3ScaledAmount)
+    return { vot3FormattedAmount, vot3ScaledAmount }
+  }, [totalBalance, watchB3trPercentageAmount])
+
+  const b3trToVot3Amount = useMemo(() => {
+    if (!b3trBalance) {
+      return "0"
+    }
+    return String(Number(b3trBalance.scaled) - Number(b3trScaledAmount))
+  }, [b3trBalance, b3trScaledAmount])
+
+  const normalizedB3trToVot3Amount = Number(b3trToVot3Amount) >= 0 ? b3trToVot3Amount : Number(b3trToVot3Amount) * -1
+
+  const formattedNormalizedB3trToVot3Amount = useMemo(() => {
+    return FormattingUtils.humanNumber(normalizedB3trToVot3Amount, normalizedB3trToVot3Amount)
+  }, [normalizedB3trToVot3Amount])
+
+  const swapText = useMemo(() => {
+    if (b3trToVot3Amount === "0") {
+      return ""
+    }
+    if (Number(b3trToVot3Amount) > 0) {
+      return `You are swapping ${formattedNormalizedB3trToVot3Amount} B3TR to VOT3`
+    } else {
+      return `You are swapping ${formattedNormalizedB3trToVot3Amount} VOT3 to B3TR`
+    }
+  }, [b3trToVot3Amount, formattedNormalizedB3trToVot3Amount])
+
+  const stakeMutation = useStakeB3tr({
+    amount: normalizedB3trToVot3Amount,
   })
+
+  const unstakeMutation = useUnstakeB3tr({
+    amount: normalizedB3trToVot3Amount,
+  })
+
+  const { resetStatus, status, sendTransactionError, txReceiptError, sendTransaction } = useMemo(() => {
+    if (Number(b3trToVot3Amount) >= 0) {
+      return stakeMutation
+    } else {
+      return unstakeMutation
+    }
+  }, [b3trToVot3Amount, stakeMutation, unstakeMutation])
 
   const onSuccess = () => {
     resetStatus()
@@ -77,15 +120,54 @@ export const SwapB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
     if (status !== "ready")
       return (
         <ConfirmTransactionModalContent
-          description={`Swap ${formattedAmount} B3TR`}
+          description={swapText}
           status={status}
           error={sendTransactionError?.message ?? txReceiptError?.message}
           onSuccess={onSuccess}
           onTryAgain={resetStatus}
         />
       )
-    return <SwapB3trModalFormContent balance={balance} formattedAmount={formattedAmount} control={control} />
-  }, [status, balance, formattedAmount, control])
+    return (
+      <>
+        <ModalCloseButton />
+        <ModalHeader>Swap</ModalHeader>
+        <ModalBody>
+          <VStack align={"flex-start"} gap={8}>
+            <Text as="b" fontSize={"sm"}>
+              Swap B3TR ↔️ VOT3 at a 1:1 ratio
+            </Text>
+            <FormControl>
+              <Controller
+                name="amount"
+                control={control}
+                rules={{
+                  maxLength: 100,
+                }}
+                render={({ field: { onChange, value } }) => (
+                  <SliderWithTooltip
+                    value={Number(value)}
+                    onChange={onChange}
+                    tooltipLabel={`${watchB3trPercentageAmount}% B3TR - ${100 - Number(watchB3trPercentageAmount)}% VOT3`}
+                  />
+                )}
+              />
+              <HStack justify="space-between">
+                <Text fontSize="sm">{b3trFormattedAmount} B3TR</Text>
+                <Text fontSize="sm">{vot3FormattedAmount} VOT3</Text>
+              </HStack>
+            </FormControl>
+            <Text color="teal">{swapText}</Text>
+          </VStack>
+        </ModalBody>
+
+        <ModalFooter>
+          <Button type="submit" isDisabled={Number(b3trToVot3Amount) === 0}>
+            Swap
+          </Button>
+        </ModalFooter>
+      </>
+    )
+  }, [b3trToVot3Amount, status, swapText, watchB3trPercentageAmount, b3trFormattedAmount, vot3FormattedAmount])
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
@@ -94,48 +176,5 @@ export const SwapB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
         <ModalContent h={320}>{renderContent}</ModalContent>
       </form>
     </Modal>
-  )
-}
-
-type RedeemB3trModalFormContentProps = {
-  balance?: TokenBalance
-  formattedAmount: string
-  control: Control<FormData, any>
-}
-
-const SwapB3trModalFormContent: React.FC<RedeemB3trModalFormContentProps> = ({ balance, formattedAmount, control }) => {
-  return (
-    <>
-      <ModalHeader>Swap B3TR</ModalHeader>
-
-      <ModalCloseButton />
-      <ModalBody>
-        <Text mb="4" fontSize={"sm"}>
-          Swap your B3TR for VOT3 at a 1:1 ratio. V0t3 is used to vote on proposals.
-        </Text>
-        <FormControl>
-          <FormLabel>Amount to swap</FormLabel>
-          <Controller
-            name="amount"
-            control={control}
-            rules={{
-              maxLength: 100,
-            }}
-            render={({ field: { onChange, value } }) => (
-              <SliderWithTooltip value={Number(value)} onChange={onChange} tooltipLabel={`${formattedAmount} B3TR`} />
-            )}
-          />
-          <HStack justify="space-between">
-            <Text fontSize="sm">0 B3TR</Text>
-            <Text fontSize="sm">{balance?.formatted} B3TR</Text>
-          </HStack>
-          <FormHelperText>{`You've selected ${formattedAmount} B3TR `}</FormHelperText>
-        </FormControl>
-      </ModalBody>
-
-      <ModalFooter>
-        <Button type="submit">Swap</Button>
-      </ModalFooter>
-    </>
   )
 }

@@ -1,6 +1,6 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Sector } from "recharts"
 import { TokenBalance } from "@/api"
-import { Alert, AlertDescription, AlertIcon, AlertTitle, Box, useColorModeValue, useToken } from "@chakra-ui/react"
+import { Box, useColorModeValue, useToken } from "@chakra-ui/react"
 import React, { useMemo, useState } from "react"
 import { FormattingUtils } from "@repo/utils"
 import { ActiveShape } from "recharts/types/util/types"
@@ -100,8 +100,8 @@ export const BalancePieChart: React.FC<Props> = ({ b3trBalance, vot3Balance }) =
   }, [b3trBalance, vot3Balance, primaryColor, secondaryColor])
 
   return (
-    <Box w="full" h="200">
-      <ResponsiveContainer width={"99%"} height={"100%"}>
+    <Box w="full" h="250">
+      <ResponsiveContainer width={"100%"} height={"100%"}>
         <PieChart title="TVL breakdown" desc={`Balances`}>
           <Pie
             activeIndex={selectedPieIndex}
@@ -113,8 +113,8 @@ export const BalancePieChart: React.FC<Props> = ({ b3trBalance, vot3Balance }) =
             // endAngle={0}
             // cx="50%"
             // cy="50%"
-            outerRadius={"80%"}
-            innerRadius={"60%"}
+            outerRadius={"50%"}
+            innerRadius={"30%"}
             fill="#8884d8">
             {data.map(entry => (
               <Cell key={`cell-${entry.name}`} fill={entry.color} />
