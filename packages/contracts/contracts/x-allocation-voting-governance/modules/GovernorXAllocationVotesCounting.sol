@@ -23,6 +23,9 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
     uint256 totalVoters;
   }
 
+  // mapping to store that a user has voted at least one time
+  mapping(address => bool) internal _hasVotedOnce;
+
   mapping(uint256 proposalId => AllocationRoundVote) internal _allocationRoundVotes;
 
   IVoterRewards public voterRewards;
@@ -73,6 +76,11 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
     _allocationRoundVotes[proposalId].hasVoted[voter] = true;
     _allocationRoundVotes[proposalId].totalVoters++;
 
+    // save that user cast vote only the first time
+    if (!_hasVotedOnce[voter]) {
+      _hasVotedOnce[voter] = true;
+    }
+
     emit AllocationVoteCast(voter, proposalId, apps, weights);
   }
 
@@ -99,5 +107,9 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
   // vote is successful if quorum is reached
   function _voteSucceeded(uint256 proposalId) internal view virtual override returns (bool) {
     return _quorumReached(proposalId);
+  }
+
+  function hasVotedOnce(address user) public view returns (bool) {
+    return _hasVotedOnce[user];
   }
 }

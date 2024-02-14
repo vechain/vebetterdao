@@ -858,6 +858,33 @@ describe("X-Allocation Voting", function () {
       expect(apps[0].metadata).to.equal("")
       expect(apps[1].metadata).to.equal("")
     })
+
+    it("Stores that a user voted at least once", async function () {
+      const { xAllocationVoting, otherAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Check if user voted
+      let voted = await xAllocationVoting.hasVotedOnce(otherAccount.address)
+      expect(voted).to.equal(false)
+
+      await getVot3Tokens(otherAccount, "1")
+      await getVot3Tokens(owner, "1000")
+
+      const appName = "App"
+
+      await xAllocationVoting.connect(owner).addApp(otherAccount.address, appName, "")
+      const roundId = await startNewAllocationRound(xAllocationVoting)
+
+      // Vote
+      await xAllocationVoting
+        .connect(otherAccount)
+        .castVote(roundId, [await xAllocationVoting.hashName(appName)], [ethers.parseEther("1")])
+
+      // Check if user voted
+      voted = await xAllocationVoting.hasVotedOnce(otherAccount.address)
+      expect(voted).to.equal(true)
+    })
   })
 
   describe("Allocation Voting finalization", function () {
