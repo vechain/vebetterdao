@@ -3,8 +3,7 @@ import { useConnex } from "@vechain/dapp-kit-react"
 
 import { getConfig } from "@repo/config"
 const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
-import { XAllocationVoting__factory as XAllocationVoting } from "@repo/contracts/typechain-types"
-
+import { XAllocationVoting__factory as XAllocationVoting } from "@repo/contracts"
 /**
  * xApp type
  * @property id  the xApp id
