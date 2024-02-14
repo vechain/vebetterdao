@@ -37,7 +37,7 @@ const levels = [1]
 const multiplier = [0]
 
 export async function deployAll() {
-  console.log(`Deploying contracts on ${network.name} ({network})...`)
+  console.log(`Deploying contracts on ${network.name}...`)
 
   const [timelockAdminSigner] = await ethers.getSigners()
 
@@ -92,10 +92,6 @@ export async function deployAll() {
 
   // Set X allocations governor
   await emissions.connect(timelockAdminSigner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
-
-  if (network.name === "vechain_solo") {
-    await seedLocalEnvironment(b3tr, vot3, xAllocationPool, xAllocationVoting, emissions)
-  }
 
   return {
     governor: governor,
