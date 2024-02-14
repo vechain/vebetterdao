@@ -2,7 +2,6 @@
 
 import { Box, Stack, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
-import { AllocationRoundUserVotes } from "../components/AllocationRoundUserVotes/AllocationRoundUserVotes"
 
 const AllocationRoundDetails = dynamic(
   () => import("../components/AllocationRoundDetails").then(mod => mod.AllocationRoundDetails),
