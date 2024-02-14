@@ -1,5 +1,5 @@
 import { ethers, network } from "hardhat"
-import { B3TR, GovernorContract, TimeLock, VOT3 } from "../../typechain-types"
+import { B3TR, B3TRGovernor, TimeLock, VOT3 } from "../../typechain-types"
 
 const DEFAULT_MINTER = "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68" //2nd account from mnemonic of solo network
 const TIMELOCK_ADMIN = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa" //1st account from mnemonic of solo network
@@ -147,10 +147,10 @@ async function deployTimeLock(): Promise<TimeLock> {
   return contract
 }
 
-async function deployGovernor(vot3Address: string, timelockAddress: string): Promise<GovernorContract> {
+async function deployGovernor(vot3Address: string, timelockAddress: string): Promise<B3TRGovernor> {
   console.log(`Deploying Governor contract`)
-  const GovernorContract = await ethers.getContractFactory("GovernorContract")
-  const contract = await GovernorContract.deploy(
+  const B3TRGovernor = await ethers.getContractFactory("B3TRGovernor")
+  const contract = await B3TRGovernor.deploy(
     vot3Address,
     timelockAddress,
     QUORUM_PERCENTAGE,

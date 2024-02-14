@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFractio
 import "@openzeppelin/contracts/governance/extensions/GovernorTimelockControl.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorSettings.sol";
 
-contract GovernorContract is
+contract B3TRGovernor is
   Governor,
   GovernorSettings,
   GovernorCountingSimple,
@@ -33,7 +33,7 @@ contract GovernorContract is
     uint48 _initialVotingDelay,
     uint256 _initialProposalThreshold
   )
-    Governor("GovernorContract")
+    Governor("B3TRGovernor")
     GovernorSettings(_initialVotingDelay, _initialVotingPeriod, _initialProposalThreshold)
     GovernorVotes(_vot3Token)
     GovernorVotesQuorumFraction(_quorumPercentage)

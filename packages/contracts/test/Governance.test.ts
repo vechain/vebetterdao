@@ -38,7 +38,7 @@ describe("Governor and TimeLock", function () {
 
       // check name of the governor contract
       const name = await governor.name()
-      expect(name).to.eql("GovernorContract")
+      expect(name).to.eql("B3TRGovernor")
 
       // check that the VOT3 address is correct
       const voteTokenAddress = await governor.token()

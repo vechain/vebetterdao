@@ -1,5 +1,5 @@
 import { ethers, network } from "hardhat"
-import { Emissions, GovernorContract, XAllocationPool, XAllocationVoting } from "../../typechain-types"
+import { Emissions, B3TRGovernor, XAllocationPool, XAllocationVoting } from "../../typechain-types"
 import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { getOrDeployContractInstances } from "./deploy"
@@ -28,7 +28,7 @@ export const moveBlocks = async (blocks: number) => {
 }
 
 export const createProposal = async (
-  governor: GovernorContract,
+  governor: B3TRGovernor,
   contractToCall: BaseContract,
   ContractFactory: ContractFactory,
   proposer: HardhatEthersSigner,
@@ -59,7 +59,7 @@ export const createProposal = async (
   return tx
 }
 
-export const getProposalIdFromTx = async (tx: ContractTransactionResponse, governor: GovernorContract) => {
+export const getProposalIdFromTx = async (tx: ContractTransactionResponse, governor: B3TRGovernor) => {
   const proposeReceipt = await tx.wait()
   const event = proposeReceipt?.logs[0]
   const decodedLogs = governor.interface.parseLog({
@@ -70,7 +70,7 @@ export const getProposalIdFromTx = async (tx: ContractTransactionResponse, gover
   return decodedLogs?.args[0]
 }
 
-export const waitForVotingPeriodToEnd = async (proposalId: number, governor: GovernorContract | XAllocationVoting) => {
+export const waitForVotingPeriodToEnd = async (proposalId: number, governor: B3TRGovernor | XAllocationVoting) => {
   const deadline = await governor.proposalDeadline(proposalId)
 
   const currentBlock = await governor.clock()
@@ -78,7 +78,7 @@ export const waitForVotingPeriodToEnd = async (proposalId: number, governor: Gov
   await moveBlocks(parseInt((deadline - currentBlock + BigInt(1)).toString()))
 }
 
-export const waitForProposalToBeActive = async (proposalId: number, governor: GovernorContract): Promise<bigint> => {
+export const waitForProposalToBeActive = async (proposalId: number, governor: B3TRGovernor): Promise<bigint> => {
   let proposalState = await governor.state(proposalId) // proposal id of the proposal in the beforeAll step
 
   if (proposalState.toString() !== "1") {
@@ -112,7 +112,7 @@ export const getVot3Tokens = async (receiver: HardhatEthersSigner, amount: strin
 export const createProposalAndExecuteIt = async (
   proposer: HardhatEthersSigner,
   voter: HardhatEthersSigner,
-  governor: GovernorContract,
+  governor: B3TRGovernor,
   contractToCall: BaseContract,
   Contract: ContractFactory,
   description: string,
@@ -160,7 +160,7 @@ export const createProposalAndExecuteIt = async (
 export const addAppThroughGovernance = async (
   proposer: HardhatEthersSigner,
   voter: HardhatEthersSigner,
-  governor: GovernorContract,
+  governor: B3TRGovernor,
   xAllocationVoting: XAllocationVoting,
   appName: string = "Bike 4 Life" + Math.random(),
   appAddress: string,
