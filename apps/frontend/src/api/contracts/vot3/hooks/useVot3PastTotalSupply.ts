@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 
-import Contract from "@repo/contracts/artifacts/contracts/VOT3.sol/VOT3.json"
 import { getConfig } from "@repo/config"
 import { Votes__factory } from "@repo/contracts/typechain-types"
 import { FormattingUtils } from "@repo/utils"

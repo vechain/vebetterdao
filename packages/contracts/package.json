@@ -1,13 +1,9 @@
 {
   "name": "@repo/contracts",
   "version": "0.0.1",
-  "main": "main.ts",
-  "types": "main.ts",
+  "main": "index.ts",
+  "types": "index.ts",
   "license": "MIT",
-  "exports": {
-    "./artifacts": "./artifacts",
-    "./typechain-types": "./typechain-types"
-  },
   "files": [
     "typechain-types",
     "artifacts/contracts/B3TR.sol/B3TR.json",
