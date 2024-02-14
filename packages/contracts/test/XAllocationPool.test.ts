@@ -2,7 +2,7 @@ import { ethers } from "hardhat"
 import { expect } from "chai"
 import {
   calculateBaseAllocationOffChain,
-  calculateVariableAppAllocationOffCahain,
+  calculateVariableAppAllocationOffChain,
   catchRevert,
   getOrDeployContractInstances,
   getVot3Tokens,
@@ -60,7 +60,7 @@ describe("X-Allocation Pool", async function () {
       )
       expect(baseAllocationAmount).to.eql(expectedBaseAllocation)
 
-      let expectedVariableAllcoation = await calculateVariableAppAllocationOffCahain(
+      let expectedVariableAllcoation = await calculateVariableAppAllocationOffChain(
         round1,
         app1Id,
         emissions,
@@ -71,7 +71,7 @@ describe("X-Allocation Pool", async function () {
 
       // Calculate allocation rewards
       let allocationRewards = await xAllocationPool.forecastClaimableAmountForActiveRound(app1Id)
-      expectedVariableAllcoation = await calculateVariableAppAllocationOffCahain(
+      expectedVariableAllcoation = await calculateVariableAppAllocationOffChain(
         round1,
         app1Id,
         emissions,
@@ -80,7 +80,7 @@ describe("X-Allocation Pool", async function () {
       expect(allocationRewards).to.eql(expectedBaseAllocation + expectedVariableAllcoation)
 
       allocationRewards = await xAllocationPool.forecastClaimableAmountForActiveRound(app2Id)
-      expectedVariableAllcoation = await calculateVariableAppAllocationOffCahain(
+      expectedVariableAllcoation = await calculateVariableAppAllocationOffChain(
         round1,
         app2Id,
         emissions,

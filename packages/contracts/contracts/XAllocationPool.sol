@@ -26,9 +26,12 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
 
   mapping(bytes32 => mapping(uint256 => bool)) public claimedRewards;
 
-  constructor(address _admin, address b3trAddress) {
+  constructor(address _admin, address b3trAddress, uint256 baseAllocationPercentage_, uint256 appSharesCap_) {
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     b3tr = IB3TR(b3trAddress);
+
+    setBaseAllocationPercentage(baseAllocationPercentage_);
+    setAppSharesCap(appSharesCap_);
   }
 
   // ---------- Setters ---------- //
@@ -64,7 +67,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
     //check that contract has enough funds to pay the reward
     require(b3tr.balanceOf(address(this)) >= amountToClaim, "Insufficient funds");
 
-    address payable receiverAddress = payable(xAllocationVoting().getAppReceiverAddress(appId));
+    address receiverAddress = xAllocationVoting().getAppReceiverAddress(appId);
 
     // Transfer the rewards to the caller
     require(b3tr.transfer(receiverAddress, amountToClaim), "Allocation transfer failed");
