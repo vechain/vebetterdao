@@ -165,7 +165,6 @@ export const getOrDeployContractInstances = async ({
     await vot3.getAddress(),
     4, // quroum percentage
     xAllocationVotingPeriod, // voting period
-    0, // voting delay
     await timeLock.getAddress(),
     await voterRewards.getAddress(),
     [await timeLock.getAddress(), owner.address],

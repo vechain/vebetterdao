@@ -204,7 +204,6 @@ async function deployXAllocationVoting(
     await vot3.getAddress(),
     QUORUM_PERCENTAGE,
     VOTING_PERIOD,
-    0, // voting delay
     await timeLock.getAddress(),
     voterRewardsAddress,
     [await timeLock.getAddress(), adminAddress],
