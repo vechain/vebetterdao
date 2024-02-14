@@ -95,7 +95,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
       return emissions().getPreMintAllocations()[0];
     } else if (emissions().isLastCycleId(roundId)) {
       // if it's the last cycle then the amount available is the last custom allocation
-      return emissions().getLastXAllocationsAmount();
+      return emissions().getLastMintAllocations()[0];
     } else {
       // Amount available for this round (assuming the amount is already scaled by 1e18 for precision)
       return emissions().getXAllocationAmountForCycle(roundId);

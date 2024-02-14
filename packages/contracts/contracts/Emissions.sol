@@ -23,6 +23,8 @@ contract Emissions is AccessControl, ReentrancyGuard {
 
   // Pre-mint allocations
   uint256[] public preMintAllocations;
+  // Last mint allocations
+  uint256[] public lastMintAllocations;
 
   // ----------- Cycle attributes ----------- //
   uint256 public nextCycle; // Next cycle number
@@ -168,10 +170,15 @@ contract Emissions is AccessControl, ReentrancyGuard {
 
     uint256 xAllocationAmount = getDecayedAmount(remainingEmissions, 100 - lastEmissions[0], 1);
     uint256 vote2EarnAmount = getDecayedAmount(remainingEmissions, 100 - lastEmissions[1], 1);
+    uint256 treasuryAmount = remainingEmissions - xAllocationAmount - vote2EarnAmount;
 
     b3tr.mint(xAllocations, xAllocationAmount);
     b3tr.mint(vote2Earn, vote2EarnAmount);
-    b3tr.mint(treasury, remainingEmissions - xAllocationAmount - vote2EarnAmount);
+    b3tr.mint(treasury, treasuryAmount);
+
+    lastMintAllocations.push(xAllocationAmount);
+    lastMintAllocations.push(vote2EarnAmount);
+    lastMintAllocations.push(treasuryAmount);
   }
 
   // ----------- Getters ----------- //
@@ -242,6 +249,10 @@ contract Emissions is AccessControl, ReentrancyGuard {
 
   function getPreMintAllocations() public view returns (uint256[] memory) {
     return preMintAllocations;
+  }
+
+  function getLastMintAllocations() public view returns (uint256[] memory) {
+    return lastMintAllocations;
   }
 
   function getXAllocationAmountForCycle(uint256 cycle) public view returns (uint256) {
