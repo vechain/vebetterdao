@@ -1,4 +1,10 @@
-import { useAllocationAmount, useAllocationVoters, useAllocationsRound, useXApps } from "@/api"
+import {
+  useAllocationAmount,
+  useAllocationVoters,
+  useAllocationsRound,
+  useRoundXAppsWithDetails,
+  useXApps,
+} from "@/api"
 import {
   Box,
   Card,
@@ -24,7 +30,7 @@ const compactFormatter = new Intl.NumberFormat("en-US", {
 
 export const AllocationRoundDetails = ({ roundId }: Props) => {
   const { data, isLoading } = useAllocationsRound(roundId)
-  const { data: xApps, isLoading: xAppsLoading } = useXApps()
+  const { data: xApps, isLoading: xAppsLoading } = useRoundXAppsWithDetails(roundId)
   const { data: totalVoters, isLoading: totalVotersLoading } = useAllocationVoters(roundId)
   const { data: roundAmount, isLoading: roundAmountLoading, error: roundAmountError } = useAllocationAmount(roundId)
 

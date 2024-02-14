@@ -270,7 +270,7 @@ export const calculateBaseAllocationOffChain = async (
   return amountPerApp
 }
 
-export const calculateVariableAppAllocationOffCahain = async (
+export const calculateVariableAppAllocationOffChain = async (
   roundId: number,
   appId: string,
   emissions: Emissions,

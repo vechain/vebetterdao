@@ -31,6 +31,10 @@ const INITIAL_EMISSIONS = ethers.parseEther("2000000")
 const TREASURY_PERCENTAGE = 25 // 25%
 const LAST_EMISSIONS = [66, 13] // On the last cycle, 66% of the emissions will be sent to the x allocations address, 13% to the vote 2 earn address
 
+// XAllocationPool Values
+const BASE_ALLOCATION_PERCENTAGE = 20
+const APP_SHARES_CAP = 15
+
 // Voter rewards
 const levels = [1]
 const multiplier = [0]
@@ -57,7 +61,7 @@ export async function deployAll() {
   await timelock.grantRole(CANCELLER_ROLE, await governor.getAddress())
 
   // Deploy XAllocationPool
-  const xAllocationPool = await deployXAllocationPool(b3tr, XPOOL_ADMIN)
+  const xAllocationPool = await deployXAllocationPool(b3tr, XPOOL_ADMIN, BASE_ALLOCATION_PERCENTAGE, APP_SHARES_CAP)
 
   // Deploy the NFT Badge contract with Max Mintable Level 1
   const badge = await deployNFTBadge(1)
@@ -171,7 +175,12 @@ async function deployNFTBadge(mintableLevelFromDeploy: number) {
   return contract
 }
 
-async function deployXAllocationPool(b3tr: B3TR, adminAddress: string) {
+async function deployXAllocationPool(
+  b3tr: B3TR,
+  adminAddress: string,
+  baseAllocationPercentage: number = 20,
+  appSharesCap: number = 15,
+) {
   console.log(`Deploying XAllocationPool contract`)
   const XAllocationPoolContract = await ethers.getContractFactory("XAllocationPool")
   const contract = await XAllocationPoolContract.deploy(adminAddress, await b3tr.getAddress())
