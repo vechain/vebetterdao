@@ -146,7 +146,13 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
    * This function doesn't take care if the round is active or not, or if it was succeeded or not, so it should be used only
    * to display hypothetical rewards while the round is active.
    */
-  function realTimeAllocationRewards(uint256 roundId, bytes32 appId) public view returns (uint256) {
+  function forecastClaimableAmountForActiveRound(bytes32 appId) public view returns (uint256) {
+    require(
+      xAllocationVoting() != IXAllocationVotingGovernor(address(0)),
+      "XAllocationVotingGovernor contract not set"
+    );
+
+    uint256 roundId = xAllocationVoting().getCurrentRoundId();
     uint256 appShare = getAppShares(roundId, appId);
     uint256 baseAllocationPerApp = baseAllocationAmount(roundId);
     uint256 variableAllocationForApp = _appRewardAmount(roundId, appShare);

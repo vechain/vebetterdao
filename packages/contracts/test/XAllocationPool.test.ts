@@ -70,7 +70,7 @@ describe("X-Allocation Pool", async function () {
       expect(claimableRewards).to.eql(expectedVariableAllcoation + expectedBaseAllocation)
 
       // Calculate allocation rewards
-      let allocationRewards = await xAllocationPool.realTimeAllocationRewards(round1, app1Id)
+      let allocationRewards = await xAllocationPool.forecastClaimableAmountForActiveRound(app1Id)
       expectedVariableAllcoation = await calculateVariableAppAllocationOffCahain(
         round1,
         app1Id,
@@ -79,7 +79,7 @@ describe("X-Allocation Pool", async function () {
       )
       expect(allocationRewards).to.eql(expectedBaseAllocation + expectedVariableAllcoation)
 
-      allocationRewards = await xAllocationPool.realTimeAllocationRewards(round1, app2Id)
+      allocationRewards = await xAllocationPool.forecastClaimableAmountForActiveRound(app2Id)
       expectedVariableAllcoation = await calculateVariableAppAllocationOffCahain(
         round1,
         app2Id,

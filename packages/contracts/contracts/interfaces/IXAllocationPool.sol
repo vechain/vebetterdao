@@ -10,7 +10,7 @@ interface IXAllocationPool {
     address caller
   );
 
-  function realTimeAllocationRewards(uint256 roundId, bytes32 appId) external view returns (uint256);
+  function forecastClaimableAmountForActiveRound(bytes32 appId) external view returns (uint256);
 
   function claimableAmount(uint256 roundId, bytes32 appId) external view returns (uint256);
 
