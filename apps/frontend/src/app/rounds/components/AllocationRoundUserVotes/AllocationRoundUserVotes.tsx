@@ -1,5 +1,5 @@
 import { useXApps } from "@/api"
-import { Box, Button, Card, CardBody, CardHeader, Heading, Stack, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Card, CardBody, CardHeader, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react"
 import { useEffect } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { SelectAppVotesInput } from "./components/SelectAppVotesInput"
@@ -19,10 +19,12 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
   const { data: xApps } = useXApps()
 
   const { control, register, watch, handleSubmit } = useForm<FormData>({ defaultValues: { votes: [] } })
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, update } = useFieldArray({
     control,
     name: "votes", // unique name for your Field Array
   })
+
+  console.log("fields", fields)
 
   const watchVotes = watch("votes")
 
@@ -38,7 +40,12 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
   return (
     <Card w="full">
       <CardBody>
-        <Stack direction={["column", "column", "row"]} w="full" align="center" justify="space-between" spacing={16}>
+        <Stack
+          direction={["column", "column", "row"]}
+          w="full"
+          align={["center", "center", "stretch"]}
+          justify="space-between"
+          spacing={16}>
           <VStack flex={1} w="full" spacing={8}>
             <Box>
               <Heading size="xl">Assign voting power to dApps</Heading>
@@ -48,9 +55,23 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
             </Box>
             <AppVotesBreakdown votes={watchVotes} roundId={roundId} />
           </VStack>
-          <Box flex={1} w="full">
-            <form onSubmit={handleSubmit(onSubmit)}>
-              <VStack spacing={4}>
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            style={{
+              flex: 1,
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+            }}>
+            <Box>
+              <HStack justify={"space-between"} align="center" w="full">
+                <Heading size="md">Available dApps</Heading>
+                <Text fontSize="sm" fontWeight={"thin"}>
+                  Voting power to distribute
+                </Text>
+              </HStack>
+              <VStack spacing={4} mt={8}>
                 {fields.map((field, index) => (
                   <SelectAppVotesInput
                     register={register}
@@ -61,9 +82,9 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
                   />
                 ))}
               </VStack>
-              <Button type="submit">Submit</Button>
-            </form>
-          </Box>
+            </Box>
+            <Button type="submit">Submit</Button>
+          </form>
         </Stack>
       </CardBody>
     </Card>

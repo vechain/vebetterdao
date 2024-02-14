@@ -1,7 +1,7 @@
 import { useAllocationsRound, useGetVotesOnBlock } from "@/api"
 import { Box, Card, CardBody, HStack, Heading, Icon, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { FaInfo } from "react-icons/fa6"
+import { FaInfo, FaRecycle } from "react-icons/fa6"
 
 type Props = {
   roundId: string
@@ -42,19 +42,34 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
               {totalVotes}% distributed
             </Text>
           </HStack>
-          <HStack w="full" borderRadius={"xl"} bg="gray" h={5} spacing={0}>
-            {votes.map((vote, index) => (
-              <HStack
-                {...(index === 0 && { borderLeftRadius: "xl" })}
-                {...((index === votes.length - 1 || vote.value === 100) &&
-                  isCompletedAllocated && { borderRightRadius: "xl" })}
-                key={vote.id}
-                w={`${vote.value}%`}
-                bg={`green.${index + 1}00`}
-                justify="space-between"
-                h="full"></HStack>
-            ))}
-          </HStack>
+          <VStack w="full" h={24} spacing={0}>
+            <HStack w="full" borderRadius={"xl"} bg="gray" h={5} spacing={0}>
+              {votes
+                .filter(vote => vote.value > 0)
+                .map((vote, index) => (
+                  <Box
+                    {...((index === 0 || totalVotes === vote.value) && { borderLeftRadius: "xl" })}
+                    {...((index === votes.length - 1 || vote.value === totalVotes) &&
+                      isCompletedAllocated && { borderRightRadius: "xl" })}
+                    key={`${vote.id}-track`}
+                    w={`${vote.value}%`}
+                    bg={`green.${index + 1}00`}
+                    h="full"
+                  />
+                ))}
+            </HStack>
+            <HStack w="full" h={"full"}>
+              {votes
+                .filter(vote => vote.value > 0)
+                .map((vote, index) => (
+                  <VStack key={`${vote.id}-line`} w={`${vote.value}%`} h={"full"} spacing={1} align="center">
+                    <Box w="3px" h={"full"} bg={`green.${index + 1}00`} />
+                    <Icon as={FaRecycle} color={`green.${index + 1}00`} boxSize={4} />
+                    <Heading size="xs">{vote.value}%</Heading>
+                  </VStack>
+                ))}
+            </HStack>
+          </VStack>
           <HStack w="full" spacing={4}>
             <Icon as={FaInfo} color="gray.500" />
             <Text fontSize="sm" color="gray.500">
