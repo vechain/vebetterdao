@@ -42,7 +42,7 @@ const multiplier = [0]
 export async function deployAll() {
   console.log(`Deploying contracts on ${network.name}...`)
 
-  const [timelockAdminSigner] = await ethers.getSigners()
+  const [timelockAdminSigner, defaultMinter, nftBadgeAdmin] = await ethers.getSigners()
 
   // Deploy B3TR and VOT3 tokens
   const b3tr = await deployB3trToken()
@@ -92,6 +92,9 @@ export async function deployAll() {
   // Setup XAllocationPool addresses
   await xAllocationPool.connect(timelockAdminSigner).setXAllocationVotingAddress(await xAllocationVoting.getAddress())
   await xAllocationPool.connect(timelockAdminSigner).setEmissionsAddress(await emissions.getAddress())
+
+  // Set xAllocationVoting address in B3TRBedge
+  await badge.connect(nftBadgeAdmin).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
 
   return {
     governor: governor,
