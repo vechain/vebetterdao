@@ -44,7 +44,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
   uint256 public initialEmissions; // Initial emissions for xAllocations & vote2Earn
   uint256 public treasuryPercentage; // Percentage of total allocation for treasury (in percentage)
   uint256[] public lastEmissions; // Last emissions for xAllocations & vote2Earn
-  
+
   uint256 public lastEmissionBlock; // Block number for last emissions
   mapping(uint256 => Emission) public emissions; // Past emissions for each distributed cycle
 
@@ -238,22 +238,21 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   function getXAllocationAmountForCycle(uint256 cycle) public view returns (uint256) {
-    require(isCycleDistributed(cycle), "Emissions: Cycle not distributed yet");
+    require(cycle <= getCurrentCycle(), "Emissions: Cycle not reached yet");
 
-    return emissions[cycle].xAllocations;
+    return isCycleDistributed(cycle) ? emissions[cycle].xAllocations : getCurrentXAllocationsAmount();
   }
 
-
   function getVote2EarnAmountForCycle(uint256 cycle) public view returns (uint256) {
-    require(isCycleDistributed(cycle), "Emissions: Cycle not distributed yet");
+    require(cycle <= getCurrentCycle(), "Emissions: Cycle not reached yet");
 
-    return emissions[cycle].vote2Earn;
+    return isCycleDistributed(cycle) ? emissions[cycle].vote2Earn : getCurrentVote2EarnAmount();
   }
 
   function getTreasuryAmountForCycle(uint256 cycle) public view returns (uint256) {
-    require(isCycleDistributed(cycle), "Emissions: Cycle not distributed yet");
+    require(cycle <= getCurrentCycle(), "Emissions: Cycle not reached yet");
 
-    return emissions[cycle].treasury;
+    return isCycleDistributed(cycle) ? emissions[cycle].treasury : getCurrentTreasuryAmount();
   }
 
   function isCycleDistributed(uint256 cycle) public view returns (bool) {

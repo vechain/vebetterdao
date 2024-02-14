@@ -16,7 +16,7 @@ import { describe, it } from "mocha"
 describe("X-Allocation Pool", async function () {
   describe("Allocation rewards for x-apps", async function () {
     it("Allocation rewards are calculated correctly", async function () {
-      const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions } =
+      const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, b3tr, minterAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
@@ -30,15 +30,20 @@ describe("X-Allocation Pool", async function () {
       await xAllocationVoting.connect(owner).addApp(otherAccounts[2].address, "My app", "")
       await xAllocationVoting.connect(owner).addApp(otherAccounts[3].address, "My app #2", "")
 
-      //Start allocation round
-      const round1 = await startNewAllocationRound(xAllocationVoting)
+      // Grant minter role to emissions contract
+      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+
+      await emissions.connect(minterAccount).preMint()
+
+      const round1 = await xAllocationVoting.currentRoundId()
+
       // Vote
-      await waitForProposalToBeActive(round1, xAllocationVoting)
+      await waitForProposalToBeActive(Number(round1), xAllocationVoting)
       await xAllocationVoting
         .connect(voter1)
         .castVote(round1, [app1Id, app2Id], [ethers.parseEther("100"), ethers.parseEther("900")])
 
-      await waitForVotingPeriodToEnd(round1, xAllocationVoting)
+      await waitForVotingPeriodToEnd(Number(round1), xAllocationVoting)
       let state = await xAllocationVoting.state(round1)
       expect(state).to.eql(BigInt(3))
 
@@ -53,7 +58,7 @@ describe("X-Allocation Pool", async function () {
       // Calculate base allocations
       let baseAllocationAmount = await xAllocationPool.baseAllocationAmount(round1)
       const expectedBaseAllocation = await calculateBaseAllocationOffChain(
-        round1,
+        Number(round1),
         emissions,
         xAllocationVoting,
         xAllocationPool,
@@ -61,7 +66,7 @@ describe("X-Allocation Pool", async function () {
       expect(baseAllocationAmount).to.eql(expectedBaseAllocation)
 
       let expectedVariableAllcoation = await calculateVariableAppAllocationOffChain(
-        round1,
+        Number(round1),
         app1Id,
         emissions,
         xAllocationPool,
@@ -72,7 +77,7 @@ describe("X-Allocation Pool", async function () {
       // Calculate allocation rewards
       let allocationRewards = await xAllocationPool.forecastClaimableAmountForActiveRound(app1Id)
       expectedVariableAllcoation = await calculateVariableAppAllocationOffChain(
-        round1,
+        Number(round1),
         app1Id,
         emissions,
         xAllocationPool,
@@ -81,7 +86,7 @@ describe("X-Allocation Pool", async function () {
 
       allocationRewards = await xAllocationPool.forecastClaimableAmountForActiveRound(app2Id)
       expectedVariableAllcoation = await calculateVariableAppAllocationOffChain(
-        round1,
+        Number(round1),
         app2Id,
         emissions,
         xAllocationPool,
