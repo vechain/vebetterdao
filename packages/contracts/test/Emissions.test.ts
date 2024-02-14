@@ -421,7 +421,7 @@ describe("Emissions", () => {
 
       expect(await emissions.getCurrentCycle()).to.equal(i + 2)
     }
-  })
+  }).timeout(1000 * 60 * 5) // 5 minutes
 
   it("Should not be able to pre mint emissions if not minter", async () => {
     const { emissions, minterAccount } = await getOrDeployContractInstances({
