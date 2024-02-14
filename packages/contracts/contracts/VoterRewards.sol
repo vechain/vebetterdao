@@ -68,8 +68,6 @@ contract VoterRewards is AccessControl, ReentrancyGuard {
 
     uint256 cycle = emissions.getCurrentCycle();
 
-    require(cycle > 0, "VoterRewards: cycle obtained from proposalDeadline must be greater than 0");
-
     uint256 badgeLevel = b3trBadge.getPastLevel(voter, proposalStart);
 
     uint256 multiplier = levelToMultiplier[badgeLevel]; // Percentage multiplier for the level of the badge
