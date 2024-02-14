@@ -201,6 +201,11 @@ export const waitForNextCycle = async (emissions: Emissions) => {
   await waitForBlock(Number(blockNextCycle))
 }
 
+/**
+ * It will move to the desired cycle without actually distribute it.
+ * E.g: we are in cycle 1 (distributed) and want to move to cycle 3 (not distributed) then we call this funciton with cycle 3
+ * and it will distribute the cycle 2 and stop before distributing the cycle 3
+ */
 export const moveToCycle = async (emissions: Emissions, minter: HardhatEthersSigner, cycle: number) => {
   const cycleToBeDistributed = await emissions.nextCycle()
   for (let i = 0; i < BigInt(cycle) - cycleToBeDistributed; i++) {
