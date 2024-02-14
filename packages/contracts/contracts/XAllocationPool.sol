@@ -82,24 +82,13 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
    * @dev Returns the amount of $B3TR available for allocation in a given cycle.
    * Each cycle is linked to a x-allocation round and they share the same id.
    *
-   * Since the Emissions contract handles the first and last cycles differently, this function
-   * handles all the possible cases.
-   *
    * @param roundId The round ID for which to calculate the amount available for allocation.
    */
   function _emissionAmount(uint256 roundId) internal view returns (uint256) {
     require(emissions() != IEmissions(address(0)), "Emissions contract not set");
 
-    // if it's the first cycle then the amount available is the first custom allocation
-    if (roundId == 1) {
-      return emissions().getPreMintAllocations()[0];
-    } else if (emissions().isLastCycleId(roundId)) {
-      // if it's the last cycle then the amount available is the last custom allocation
-      return emissions().getLastMintAllocations()[0];
-    } else {
-      // Amount available for this round (assuming the amount is already scaled by 1e18 for precision)
-      return emissions().getXAllocationAmountForCycle(roundId);
-    }
+    // Amount available for this round (assuming the amount is already scaled by 1e18 for precision)
+    return emissions().getXAllocationAmountForCycle(roundId);
   }
 
   /**

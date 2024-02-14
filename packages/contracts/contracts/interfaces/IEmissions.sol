@@ -71,8 +71,6 @@ interface IEmissions {
 
   function getXAllocationsAmount(uint256 blockNumber) external view returns (uint256);
 
-  function getLastMintAllocations() external view returns (uint256[] memory);
-
   function grantRole(bytes32 role, address account) external;
 
   function hasRole(bytes32 role, address account) external view returns (bool);
@@ -86,8 +84,6 @@ interface IEmissions {
   function isCycleEnded(uint256 cycle) external view returns (bool);
 
   function isLastCycle() external view returns (bool);
-
-  function isLastCycleId(uint256 cycle) external view returns (bool);
 
   function lastEmissions(uint256) external view returns (uint256);
 

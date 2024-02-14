@@ -377,42 +377,6 @@ describe("Emissions", () => {
     }).timeout(1000 * 60 * 10) // 10 minutes
   })
 
-  it("Should track the id of the last cycle correctly", async () => {
-    const { emissions, minterAccount, b3tr, owner } = await getOrDeployContractInstances({
-      forceDeploy: true,
-    })
-
-    // Grant minter role to emissions contract
-    await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
-
-    // Pre-mint
-    await emissions.connect(minterAccount).preMint()
-
-    let isLastCycle = await emissions.isLastCycleId(0)
-    expect(isLastCycle).to.equal(false)
-
-    isLastCycle = await emissions.isLastCycleId(1)
-    expect(isLastCycle).to.equal(false)
-
-    // Move to the 14th cycle
-    await moveToCycle(emissions, minterAccount, 14)
-
-    isLastCycle = await emissions.isLastCycleId(14)
-    expect(isLastCycle).to.equal(false)
-
-    // Move to last cycle
-    const lastCycle = b3trAllocations.length + 1
-    await moveToCycle(emissions, minterAccount, lastCycle)
-
-    expect(await emissions.nextCycle()).to.equal(lastCycle)
-    expect(await emissions.isLastCycle()).to.equal(true)
-
-    await emissions.distributeLast()
-
-    isLastCycle = await emissions.isLastCycleId(lastCycle)
-    expect(isLastCycle).to.equal(true)
-  })
-
   // 634 cycles is the amount of cycles simulated in spreadsheet
   it("Should calculate decay amounts correctly over 634 cycles", async () => {
     const { emissions, owner, minterAccount, b3tr } = await getOrDeployContractInstances({

@@ -259,17 +259,8 @@ export const calculateBaseAllocationOffChain = async (
   xAllocationVoting: XAllocationVoting,
   xAllocationPool: XAllocationPool,
 ) => {
-  let totalAmount
-  // if it's the first cycle then the amount available is the first custom allocation
-  if (roundId == 1) {
-    totalAmount = (await emissions.getPreMintAllocations())[0]
-  } else if (await emissions.isLastCycleId(roundId)) {
-    // if it's the last cycle then the amount available is the last custom allocation
-    totalAmount = (await emissions.getLastMintAllocations())[0]
-  } else {
-    // Amount available for this round (assuming the amount is already scaled by 1e18 for precision)
-    totalAmount = await emissions.getXAllocationAmountForCycle(roundId)
-  }
+  // Amount available for this round (assuming the amount is already scaled by 1e18 for precision)
+  let totalAmount = await emissions.getXAllocationAmountForCycle(roundId)
 
   let elegibleApps = await xAllocationVoting.getRoundApps(roundId)
 
@@ -288,18 +279,8 @@ export const calculateVariableAppAllocationOffCahain = async (
   emissions: Emissions,
   xAllocationPool: XAllocationPool,
 ) => {
-  // uint256 allocationAmount = _emissionAmount(roundId);
-  let totalAmount
-  // if it's the first cycle then the amount available is the first custom allocation
-  if (roundId == 1) {
-    totalAmount = (await emissions.getPreMintAllocations())[0]
-  } else if (await emissions.isLastCycleId(roundId)) {
-    // if it's the last cycle then the amount available is the last custom allocation
-    totalAmount = (await emissions.getLastMintAllocations())[0]
-  } else {
-    // Amount available for this round (assuming the amount is already scaled by 1e18 for precision)
-    totalAmount = await emissions.getXAllocationAmountForCycle(roundId)
-  }
+  // Amount available for this round (assuming the amount is already scaled by 1e18 for precision)
+  let totalAmount = await emissions.getXAllocationAmountForCycle(roundId)
 
   let totalAvailable = (totalAmount * (await xAllocationPool.variableAllocationPercentage())) / BigInt(100)
 
