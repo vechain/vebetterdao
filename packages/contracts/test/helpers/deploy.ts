@@ -58,7 +58,7 @@ export const getOrDeployContractInstances = async ({
   forceDeploy = false,
   votingTreshold = defaultVotingTreshold,
   votingPeriod = defaultVotingPeriod,
-  xAllocationVotingPeriod = CYCLE_DURATION,
+  xAllocationVotingPeriod = CYCLE_DURATION - 1,
   maxMintableLevel = DEFAULT_MAX_MINTABLE_LEVEL,
   cycleDuration = CYCLE_DURATION,
 }) => {
@@ -155,7 +155,7 @@ export const getOrDeployContractInstances = async ({
   const xAllocationVoting = await XAllocationVotingContract.deploy(
     await vot3.getAddress(),
     4, // quroum percentage
-    xAllocationVotingPeriod - 1, // voting period
+    xAllocationVotingPeriod, // voting period
     0, // voting delay
     await timeLock.getAddress(),
     await voterRewards.getAddress(),
