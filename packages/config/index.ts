@@ -10,6 +10,8 @@ export type Config = {
   xAllocationPoolContractAddress: string
   xAllocationVotingContractAddress: string
   emissionsContractAddress: string
+  voterRewardsContractAddress: string
+  nftBadgeContractAddress: string
   nodeUrl: string
   network: Network
 }
