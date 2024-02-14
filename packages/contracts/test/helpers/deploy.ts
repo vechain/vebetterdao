@@ -49,6 +49,10 @@ export const INITIAL_EMISSIONS = ethers.parseEther("2000000")
 export const TREASURY_PERCENTAGE = 25 // 25%
 export const LAST_EMISSIONS = [66, 13] // On the last cycle, 66% of the emissions will be sent to the x allocations address, 13% to the vote 2 earn address
 
+// XAllocationPool Values
+const BASE_ALLOCATION_PERCENTAGE = 20
+const APP_SHARES_CAP = 15
+
 // Voter Rewards
 export const levels = [1, 2, 3, 4] // NFT Badge levels
 export const multipliers = [0, 10, 20, 50] // NFT Badge percentage multipliers
@@ -113,7 +117,12 @@ export const getOrDeployContractInstances = async ({
 
   // Deploy XAllocationPool
   const XAllocationPoolContract = await ethers.getContractFactory("XAllocationPool")
-  const xAllocationPool = await XAllocationPoolContract.deploy(owner.address, await b3tr.getAddress())
+  const xAllocationPool = await XAllocationPoolContract.deploy(
+    owner.address,
+    await b3tr.getAddress(),
+    BASE_ALLOCATION_PERCENTAGE,
+    APP_SHARES_CAP,
+  )
   await xAllocationPool.waitForDeployment()
 
   const X_ALLOCATIONS_ADDRESS = await xAllocationPool.getAddress()
@@ -156,7 +165,6 @@ export const getOrDeployContractInstances = async ({
     await vot3.getAddress(),
     4, // quroum percentage
     xAllocationVotingPeriod, // voting period
-    0, // voting delay
     await timeLock.getAddress(),
     await voterRewards.getAddress(),
     [await timeLock.getAddress(), owner.address],

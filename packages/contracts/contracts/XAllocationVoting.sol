@@ -22,8 +22,7 @@ contract XAllocationVoting is
    * @notice Construct a XAllocationVotingGovernor contract
    * @param _vot3Token The address of the Vot3 token used for voting
    * @param _quorumPercentage quorum as a percentage of the total supply at the block a proposal’s voting power is retrieved
-   * @param _initialVotingPeriod How long does a proposal remain open to votes
-   * @param _initialVotingDelay How long after a proposal is created should become active
+   * @param _initialVotingPeriod How long does a proposal remain open to votese
    * @param _b3trGovernor The address of the B3trGovernor DAO
    * @param _admins The addresses of the admins (DAO + another address) that can update the XAllocationPool address, only DAO will remain in the final version
    */
@@ -31,13 +30,12 @@ contract XAllocationVoting is
     IVotes _vot3Token,
     uint256 _quorumPercentage,
     uint32 _initialVotingPeriod,
-    uint48 _initialVotingDelay,
     address _b3trGovernor,
     address _voterRewards,
     address[] memory _admins
   )
     XAllocationVotingGovernor("XAllocationVoting", _b3trGovernor)
-    GovernorSettings(_initialVotingDelay, _initialVotingPeriod)
+    GovernorSettings(_initialVotingPeriod)
     GovernorVotes(_vot3Token)
     GovernorVotesQuorumFraction(_quorumPercentage)
     GovernorXAllocationVotesCounting(_voterRewards)
@@ -70,7 +68,7 @@ contract XAllocationVoting is
     bytes32[] memory apps = allElegibleApps();
     _appsElegibleForVoting[proposalId] = apps;
 
-    uint256 snapshot = clock() + votingDelay();
+    uint256 snapshot = clock();
     uint256 duration = votingPeriod();
 
     ProposalCore storage proposal = _proposals[proposalId];
@@ -126,10 +124,6 @@ contract XAllocationVoting is
   }
 
   // ---------- Required overrides ---------- //
-
-  function votingDelay() public view override(XAllocationVotingGovernor, GovernorSettings) returns (uint256) {
-    return super.votingDelay();
-  }
 
   function votingPeriod() public view override(XAllocationVotingGovernor, GovernorSettings) returns (uint256) {
     return super.votingPeriod();

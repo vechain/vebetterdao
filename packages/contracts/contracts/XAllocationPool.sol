@@ -26,9 +26,12 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
 
   mapping(bytes32 => mapping(uint256 => bool)) public claimedRewards;
 
-  constructor(address _admin, address b3trAddress) {
+  constructor(address _admin, address b3trAddress, uint256 baseAllocationPercentage_, uint256 appSharesCap_) {
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     b3tr = IB3TR(b3trAddress);
+
+    setBaseAllocationPercentage(baseAllocationPercentage_);
+    setAppSharesCap(appSharesCap_);
   }
 
   // ---------- Setters ---------- //
@@ -64,7 +67,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
     //check that contract has enough funds to pay the reward
     require(b3tr.balanceOf(address(this)) >= amountToClaim, "Insufficient funds");
 
-    address payable receiverAddress = payable(xAllocationVoting().getAppReceiverAddress(appId));
+    address receiverAddress = xAllocationVoting().getAppReceiverAddress(appId);
 
     // Transfer the rewards to the caller
     require(b3tr.transfer(receiverAddress, amountToClaim), "Allocation transfer failed");
@@ -115,16 +118,9 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
   function claimableAmount(uint256 roundId, bytes32 appId) public view returns (uint256) {
     require(!xAllocationVoting().isActive(roundId), "XAllocationPool: round not ended yet");
 
-    if (claimedRewards[appId][roundId]) {
-      return 0;
-    }
-
     //If round is not succeded then take shares from previous successful round
     uint256 lastSucceededRoundId = roundId;
-    if (
-      xAllocationVoting().state(roundId) == IXAllocationVotingGovernor.AllocationProposalState.Failed ||
-      xAllocationVoting().state(roundId) == IXAllocationVotingGovernor.AllocationProposalState.Finalized
-    ) {
+    if (xAllocationVoting().state(roundId) == IXAllocationVotingGovernor.AllocationProposalState.Failed) {
       require(xAllocationVoting().isFinalized(roundId), "XAllocationPool: failed round not finalized yet");
 
       lastSucceededRoundId = xAllocationVoting().latestSucceededRoundId(roundId);
@@ -146,7 +142,13 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
    * This function doesn't take care if the round is active or not, or if it was succeeded or not, so it should be used only
    * to display hypothetical rewards while the round is active.
    */
-  function realTimeAllocationRewards(uint256 roundId, bytes32 appId) public view returns (uint256) {
+  function forecastClaimableAmountForActiveRound(bytes32 appId) public view returns (uint256) {
+    require(
+      xAllocationVoting() != IXAllocationVotingGovernor(address(0)),
+      "XAllocationVotingGovernor contract not set"
+    );
+
+    uint256 roundId = xAllocationVoting().currentRoundId();
     uint256 appShare = getAppShares(roundId, appId);
     uint256 baseAllocationPerApp = baseAllocationAmount(roundId);
     uint256 variableAllocationForApp = _appRewardAmount(roundId, appShare);

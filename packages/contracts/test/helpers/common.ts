@@ -78,10 +78,7 @@ export const waitForVotingPeriodToEnd = async (proposalId: number, governor: Gov
   await moveBlocks(parseInt((deadline - currentBlock + BigInt(1)).toString()))
 }
 
-export const waitForProposalToBeActive = async (
-  proposalId: number,
-  governor: GovernorContract | XAllocationVoting,
-): Promise<bigint> => {
+export const waitForProposalToBeActive = async (proposalId: number, governor: GovernorContract): Promise<bigint> => {
   let proposalState = await governor.state(proposalId) // proposal id of the proposal in the beforeAll step
 
   if (proposalState.toString() !== "1") {
@@ -273,7 +270,7 @@ export const calculateBaseAllocationOffChain = async (
   return amountPerApp
 }
 
-export const calculateVariableAppAllocationOffCahain = async (
+export const calculateVariableAppAllocationOffChain = async (
   roundId: number,
   appId: string,
   emissions: Emissions,

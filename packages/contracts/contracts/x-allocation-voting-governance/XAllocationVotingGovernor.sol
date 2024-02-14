@@ -110,7 +110,7 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
    * @dev See {IXAllocationVotingGovernor-isActive}.
    */
   function isActive(uint256 roundId) public view virtual override returns (bool) {
-    return state(roundId) == AllocationProposalState.Active || state(roundId) == AllocationProposalState.Pending;
+    return state(roundId) == AllocationProposalState.Active;
   }
 
   function latestSucceededRoundId(uint256 roundId) public view override returns (uint256) {
@@ -129,18 +129,11 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
 
     uint256 currentTimepoint = clock();
 
-    if (snapshot >= currentTimepoint) {
-      return AllocationProposalState.Pending;
-    }
-
     uint256 deadline = proposalDeadline(proposalId);
 
     if (deadline >= currentTimepoint) {
       return AllocationProposalState.Active;
     } else if (!_voteSucceeded(proposalId)) {
-      if (_roundFinalized[proposalId]) {
-        return AllocationProposalState.Finalized;
-      }
       return AllocationProposalState.Failed;
     } else {
       return AllocationProposalState.Succeeded;
@@ -180,14 +173,17 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   }
 
   function isFinalized(uint256 proposalId) public view virtual returns (bool) {
-    return state(proposalId) == AllocationProposalState.Finalized;
+    return _roundFinalized[proposalId];
   }
 
   /**
-   * We need to point a failed round to the latest succeeded round.
+   * Store the checkpoints of last succeeded round for the proposal
    */
   function _finalizeRound(uint256 proposalId) internal virtual {
-    if (state(proposalId) == AllocationProposalState.Failed) {
+    if (state(proposalId) == AllocationProposalState.Succeeded) {
+      _latestSucceededRoundId[proposalId] = proposalId;
+      _roundFinalized[proposalId] = true;
+    } else if (state(proposalId) == AllocationProposalState.Failed) {
       _latestSucceededRoundId[proposalId] = _latestSucceededRoundId[proposalId - 1];
       _roundFinalized[proposalId] = true;
     }
@@ -278,10 +274,9 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
    *
    * 0x000...10000
    *   ^^^^^^------ ...
-   *         ^----- Succeeded
-   *          ^---- Failed
-   *           ^--- Active
-   *            ^-- Pending
+   *          ^---- Succeeded
+   *           ^--- Failed
+   *            ^-- Active
    */
   function _encodeStateBitmap(AllocationProposalState proposalState) internal pure returns (bytes32) {
     return bytes32(1 << uint8(proposalState));
@@ -399,11 +394,6 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
    */
   // solhint-disable-next-line func-name-mixedcase
   function CLOCK_MODE() public view virtual returns (string memory);
-
-  /**
-   * @inheritdoc IXAllocationVotingGovernor
-   */
-  function votingDelay() public view virtual returns (uint256);
 
   /**
    * @inheritdoc IXAllocationVotingGovernor
