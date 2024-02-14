@@ -26,9 +26,12 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
 
   mapping(bytes32 => mapping(uint256 => bool)) public claimedRewards;
 
-  constructor(address _admin, address b3trAddress) {
+  constructor(address _admin, address b3trAddress, uint256 baseAllocationPercentage_, uint256 appSharesCap_) {
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     b3tr = IB3TR(b3trAddress);
+
+    setBaseAllocationPercentage(baseAllocationPercentage_);
+    setAppSharesCap(appSharesCap_);
   }
 
   // ---------- Setters ---------- //
