@@ -110,7 +110,7 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
    * @dev See {IXAllocationVotingGovernor-isActive}.
    */
   function isActive(uint256 roundId) public view virtual override returns (bool) {
-    return state(roundId) == AllocationProposalState.Active || state(roundId) == AllocationProposalState.Pending;
+    return state(roundId) == AllocationProposalState.Active;
   }
 
   function latestSucceededRoundId(uint256 roundId) public view override returns (uint256) {
@@ -128,10 +128,6 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
     }
 
     uint256 currentTimepoint = clock();
-
-    if (snapshot >= currentTimepoint) {
-      return AllocationProposalState.Pending;
-    }
 
     uint256 deadline = proposalDeadline(proposalId);
 
@@ -278,10 +274,9 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
    *
    * 0x000...10000
    *   ^^^^^^------ ...
-   *         ^----- Succeeded
-   *          ^---- Failed
-   *           ^--- Active
-   *            ^-- Pending
+   *          ^---- Succeeded
+   *           ^--- Failed
+   *            ^-- Active
    */
   function _encodeStateBitmap(AllocationProposalState proposalState) internal pure returns (bytes32) {
     return bytes32(1 << uint8(proposalState));

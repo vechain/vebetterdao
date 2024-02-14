@@ -7,10 +7,9 @@ import { XAllocationVotingGovernorJson } from "@repo/contracts"
 const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
 
 export const AllocationProposalState = {
-  "0": "Pending",
-  "1": "Active",
-  "2": "Failed",
-  "3": "Succeeded",
+  "0": "Active",
+  "1": "Failed",
+  "2": "Succeeded",
 }
 /**
  *

@@ -22,7 +22,6 @@ import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
  */
 interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   enum AllocationProposalState {
-    Pending,
     Active,
     Failed,
     Succeeded

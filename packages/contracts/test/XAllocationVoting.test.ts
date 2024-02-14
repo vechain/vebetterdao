@@ -163,13 +163,9 @@ describe("X-Allocation Voting", function () {
       let { proposalId } = parseAlloctionProposalCreatedEvent(allocationProposalCreated[0], xAllocationVoting)
       expect(proposalId).to.eql(BigInt(1))
 
-      //Prposal should be pending
+      //Prposal should be active
       let proposalState = await xAllocationVoting.state(proposalId)
       expect(proposalState).to.eql(BigInt(0))
-
-      // Prposal should be active
-      proposalState = await xAllocationVoting.state(proposalId)
-      expect(proposalState).to.eql(BigInt(1))
     })
 
     it("Should not be able to propose a new allocation round if there is an active one", async function () {
@@ -189,7 +185,7 @@ describe("X-Allocation Voting", function () {
 
       let { proposalId } = parseAlloctionProposalCreatedEvent(allocationProposalCreated[0], xAllocationVoting)
 
-      //Prposal should be pending
+      //Prposal should be active
       let proposalState = await xAllocationVoting.state(proposalId)
       expect(proposalState).to.eql(BigInt(0))
 
@@ -250,14 +246,16 @@ describe("X-Allocation Voting", function () {
       round = parseInt((await xAllocationVoting.currentRoundId()).toString())
       expect(round).to.eql(1)
 
+      // should be active
       let state = await xAllocationVoting.state(round)
-      expect(state).to.eql(1n)
+      expect(state).to.eql(0n)
 
+      // distribute second emission (should start also new round)
       await moveToCycle(emissions, minterAccount, 3)
 
-      // first round should be ended and failed
+      // first round should be ended and successfull (total supply is 0)
       state = await xAllocationVoting.state(round)
-      expect(state).to.eql(3n)
+      expect(state).to.eql(2n)
 
       // round should be created
       round = parseInt((await xAllocationVoting.currentRoundId()).toString())
@@ -743,7 +741,7 @@ describe("X-Allocation Voting", function () {
       expect(500).to.be.greaterThan(neededVotes)
 
       // quorum should be reached and proposal should be successful
-      expect(await xAllocationVoting.state(proposalId)).to.eql(BigInt(3))
+      expect(await xAllocationVoting.state(proposalId)).to.eql(BigInt(2))
     }).timeout(18000000)
 
     it("Allocation proposal should be failed if quorum was not reached", async function () {
@@ -782,7 +780,7 @@ describe("X-Allocation Voting", function () {
       const neededVotes = (Number(ethers.formatEther(quorum)) * Number(ethers.formatEther(totalSupply))) / 100
       expect(neededVotes).to.be.greaterThan(2)
 
-      expect(await xAllocationVoting.state(proposalId)).to.eql(BigInt(2))
+      expect(await xAllocationVoting.state(proposalId)).to.eql(BigInt(1))
     }).timeout(18000000)
 
     it("Can track apps available for voting on current and previous rounds correctly", async function () {
@@ -891,7 +889,7 @@ describe("X-Allocation Voting", function () {
 
       // should be failed since quorum is not reached
       let state = await xAllocationVoting.state(round1)
-      expect(state).to.eql(2n)
+      expect(state).to.eql(1n)
 
       let isFinalized = await xAllocationVoting.isFinalized(round1)
       expect(isFinalized).to.eql(false)
