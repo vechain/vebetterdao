@@ -37,10 +37,10 @@ export default function Round({ params }: { params: { roundId: string } }) {
         justify="space-between"
         align={["flex-start", "flex-start", "stretch"]}
         spacing={8}>
-        <Box flex={0.7}>
+        <Box flex={[1, 0.6, 0.6, 0.7]} w="full">
           <AllocationXAppsVotesCard roundId={params.roundId} />
         </Box>
-        <VStack flex={0.3} spacing={8}>
+        <VStack flex={[1, 0.4, 0.4, 0.3]} spacing={8} w="full">
           <AllocationRoundSessionInfoCard roundId={params.roundId} />
         </VStack>
       </Stack>

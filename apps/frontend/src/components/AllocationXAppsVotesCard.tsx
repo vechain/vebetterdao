@@ -23,7 +23,7 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
   console.log({ data, xAppsVotes })
 
   return (
-    <Card flex={1} h="full">
+    <Card flex={1} h="full" w="full">
       <CardHeader>
         <HStack justify={"space-between"} w="full">
           <Heading size="md">Real-Time votes</Heading>
