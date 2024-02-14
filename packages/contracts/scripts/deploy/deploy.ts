@@ -37,7 +37,7 @@ const levels = [1]
 const multiplier = [0]
 
 export async function deployAll() {
-  console.log(`Deploying contracts on ${network.name} ({network})...`)
+  console.log(`Deploying contracts on ${network.name}...`)
 
   const [timelockAdminSigner] = await ethers.getSigners()
 
