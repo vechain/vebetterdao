@@ -1,7 +1,8 @@
-// copilot, import every artifact and export it
-
 import Vot3ContractJson from "./artifacts/contracts/VOT3.sol/VOT3.json"
+import VoterRewardsContractJson from "./artifacts/contracts/VoterRewards.sol/VoterRewards.json"
 import B3trContractJson from "./artifacts/contracts/B3TR.sol/B3TR.json"
+import B3trBadgeContractJson from "./artifacts/contracts/B3TRBadge.sol/B3TRBadge.json"
+import EmissionsContractJson from "./artifacts/contracts/Emissions.sol/Emissions.json"
 import GovernorContractJson from "./artifacts/contracts/governance/GovernorContract.sol/GovernorContract.json"
 import TimeLockContractJson from "./artifacts/contracts/governance/TimeLock.sol/TimeLock.json"
 import XAllocationPoolJson from "./artifacts/contracts/XAllocationPool.sol/XAllocationPool.json"
@@ -9,8 +10,24 @@ import XAllocationVotingJson from "./artifacts/contracts/XAllocationVoting.sol/X
 import XAllocationVotingGovernorJson from "./artifacts/contracts/x-allocation-voting-governance/XAllocationVotingGovernor.sol/XAllocationVotingGovernor.json"
 
 export {
+  VOT3__factory,
+  VoterRewards__factory,
+  B3TR__factory,
+  B3TRBadge__factory,
+  Emissions__factory,
+  GovernorContract__factory,
+  TimeLock__factory,
+  XAllocationPool__factory,
+  XAllocationVoting__factory,
+  XAllocationVotingGovernor__factory,
+} from "./typechain-types"
+
+export {
   Vot3ContractJson,
+  VoterRewardsContractJson,
   B3trContractJson,
+  B3trBadgeContractJson,
+  EmissionsContractJson,
   GovernorContractJson,
   TimeLockContractJson,
   XAllocationPoolJson,

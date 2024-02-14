@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 
 import { getConfig } from "@repo/config"
-import { XAllocationVoting__factory as XAllocationVoting } from "@repo/contracts/typechain-types"
+import { XAllocationVoting__factory } from "@repo/contracts"
 
 const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
 
@@ -14,7 +14,7 @@ const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
  * @returns the number of voters for a given proposalId
  */
 export const getAllocationVoters = async (thor: Connex.Thor, proposalId?: string): Promise<string> => {
-  const functionFragment = XAllocationVoting.createInterface().getFunction("totalVoters").format("json")
+  const functionFragment = XAllocationVoting__factory.createInterface().getFunction("totalVoters").format("json")
   const res = await thor.account(XALLOCATIONVOTING_CONTRACT).method(JSON.parse(functionFragment)).call(proposalId)
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
