@@ -30,6 +30,24 @@ describe("B3TRBadge", () => {
       expect(await b3trBadge.xAllocationsGovernor()).to.equal(await xAllocationVoting.getAddress())
     })
 
+    it("Admin should be able to set B3TR Governor contract address", async () => {
+      const { b3trBadge, owner, xAllocationVoting } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      await b3trBadge.connect(owner).setB3trGovernorAddress(await xAllocationVoting.getAddress())
+
+      expect(await b3trBadge.b3trGovernor()).to.equal(await xAllocationVoting.getAddress())
+    })
+
+    it("Only admin should be able to set B3TR Governor contract address", async () => {
+      const { b3trBadge, otherAccount, xAllocationVoting } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      const initialAddress = await b3trBadge.b3trGovernor()
+
+      await catchRevert(b3trBadge.connect(otherAccount).setB3trGovernorAddress(await xAllocationVoting.getAddress()))
+
+      expect(await b3trBadge.b3trGovernor()).to.equal(initialAddress)
+    })
+
     it("Only admin should be able to set x-allocation voting contract address", async () => {
       const { b3trBadge, otherAccount, xAllocationVoting } = await getOrDeployContractInstances({ forceDeploy: true })
 
