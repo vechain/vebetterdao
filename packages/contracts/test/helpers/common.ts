@@ -285,3 +285,27 @@ export const calculateVariableAppAllocationOffChain = async (
 
   return (totalAvailable * appShares) / BigInt(100)
 }
+
+export const partecipateInAllocationVoting = async (
+  user: HardhatEthersSigner,
+  admin: HardhatEthersSigner,
+  xAllocationVoting: XAllocationVoting,
+  waitRoundToEnd: boolean = false,
+) => {
+  await getVot3Tokens(user, "1")
+  await getVot3Tokens(admin, "1000")
+
+  const appName = "App" + Math.random()
+
+  await xAllocationVoting.connect(admin).addApp(user.address, appName, "")
+  const roundId = await startNewAllocationRound(xAllocationVoting)
+
+  // Vote
+  await xAllocationVoting
+    .connect(user)
+    .castVote(roundId, [await xAllocationVoting.hashName(appName)], [ethers.parseEther("1")])
+
+  if (waitRoundToEnd) {
+    await waitForVotingPeriodToEnd(roundId, xAllocationVoting)
+  }
+}
