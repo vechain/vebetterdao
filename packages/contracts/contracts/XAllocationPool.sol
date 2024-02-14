@@ -218,6 +218,10 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
     return appShare;
   }
 
+  function claimed(uint256 roundId, bytes32 appId) public view returns (bool) {
+    return claimedRewards[appId][roundId];
+  }
+
   /**
    * @dev Returns the maximum app shares cap scaled by 1e2 for precision since our
    * shares calculation is scaled by 1e4.
