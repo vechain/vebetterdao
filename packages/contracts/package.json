@@ -4,6 +4,9 @@
   "main": "main.ts",
   "types": "main.ts",
   "license": "MIT",
+  "exports": {
+    ".": "./"
+  },
   "scripts": {
     "test:thor-solo": "yarn generate-b3tr-tokenomics && npx hardhat test",
     "test": "yarn generate-b3tr-tokenomics && hardhat test --network hardhat",
