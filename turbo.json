@@ -24,10 +24,10 @@
       "persistent": true,
       "dependsOn": ["@repo/contracts#check-contracts-deployment"]
     },
-    "staging": {
+    "dev:staging": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["^compile"]
+      "dependsOn": ["@repo/contracts#check-contracts-deployment"]
     },
     "@repo/config#check-or-generate-local-config": {
       "cache": false

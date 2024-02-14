@@ -6,7 +6,7 @@
     "build": "dotenv -e .env.dev -- turbo build",
     "build:staging": "dotenv -e .env.staging -- turbo build",
     "dev": "dotenv -e .env.dev -- turbo dev --",
-    "staging": "dotenv -e .env.staging -- turbo staging --",
+    "dev:staging": "dotenv -e .env.staging -- turbo dev --",
     "lint": "turbo lint",
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
