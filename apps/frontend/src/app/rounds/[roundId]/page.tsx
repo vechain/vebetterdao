@@ -23,9 +23,7 @@ const AllocationRoundSessionInfoCard = dynamic(
 
 const AllocationRoundUserVotes = dynamic(
   () =>
-    import("../components/AllocationRoundUserVotes/AllocationRoundUserVotes").then(
-      mod => mod.AllocationRoundSessionInfoCard,
-    ),
+    import("../components/AllocationRoundUserVotes/AllocationRoundUserVotes").then(mod => mod.AllocationRoundUserVotes),
   { ssr: false },
 )
 
