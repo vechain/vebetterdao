@@ -93,10 +93,6 @@ export async function deployAll() {
   // Set X allocations governor
   await emissions.connect(timelockAdminSigner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
 
-  if (network.name === "vechain_solo") {
-    await seedLocalEnvironment(b3tr, vot3, xAllocationPool, xAllocationVoting, emissions)
-  }
-
   return {
     governor: governor,
     timelock: timelock,
