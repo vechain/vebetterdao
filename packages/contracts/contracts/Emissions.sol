@@ -13,8 +13,11 @@ contract Emissions is AccessControl, ReentrancyGuard {
   IB3TR public b3tr; // B3TR token contract
   IXAllocationVotingGovernor public xAllocationsGovernor; // XAllocationVotingGovernor contract
 
-  // Starting block for emissions
-  uint256 public START_BLOCK;
+  struct Emission {
+    uint256 xAllocations;
+    uint256 vote2Earn;
+    uint256 treasury;
+  }
 
   // Destinations for emissions
   address public xAllocations;
@@ -41,6 +44,9 @@ contract Emissions is AccessControl, ReentrancyGuard {
   uint256 public initialEmissions; // Initial emissions for xAllocations & vote2Earn
   uint256 public treasuryPercentage; // Percentage of total allocation for treasury (in percentage)
   uint256[] public lastEmissions; // Last emissions for xAllocations & vote2Earn
+
+  uint256 public lastEmissionBlock; // Block number for last emissions
+  mapping(uint256 => Emission) public emissions; // Past emissions for each distributed cycle
 
   // ----------- Scaling ----------- //
   uint256 public scalingFactor = 1e6;
@@ -121,7 +127,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
 
   function preMint() public onlyRole(MINTER_ROLE) nonReentrant {
     require(preMintAllocations[0] > 0, "Emissions: Pre-mint allocations not set");
-    require(START_BLOCK == 0, "Emissions: Pre-mint already done");
+    require(nextCycle == 1, "Emissions: Pre-mint already done");
     require(xAllocationsGovernor != IXAllocationVotingGovernor(address(0)), "Emissions: XAllocationsGovernor not set");
 
     // Mint pre-mint allocations
@@ -129,7 +135,8 @@ contract Emissions is AccessControl, ReentrancyGuard {
     b3tr.mint(vote2Earn, preMintAllocations[1]);
     b3tr.mint(treasury, preMintAllocations[2]);
 
-    START_BLOCK = block.number;
+    lastEmissionBlock = block.number;
+    emissions[nextCycle] = Emission(preMintAllocations[0], preMintAllocations[1], preMintAllocations[2]);
 
     xAllocationsGovernor.proposeNewAllocationRound();
 
@@ -137,8 +144,8 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   function distribute() public nonReentrant {
-    require(START_BLOCK > 0, "Emissions: Pre-mint not done");
-    require(isCycleDistributable(nextCycle), "Emissions: Next cycle not started yet");
+    require(nextCycle > 1, "Emissions: Pre-mint not done");
+    require(isNextCycleDistributable(), "Emissions: Next cycle not started yet");
 
     // Mint emissions for current cycle
     uint256 xAllocationsAmount = getCurrentXAllocationsAmount();
@@ -152,15 +159,17 @@ contract Emissions is AccessControl, ReentrancyGuard {
     b3tr.mint(vote2Earn, vote2EarnAmount);
     b3tr.mint(treasury, treasuryAmount);
 
+    lastEmissionBlock = block.number;
+    emissions[nextCycle] = Emission(xAllocationsAmount, vote2EarnAmount, treasuryAmount);
+
     xAllocationsGovernor.proposeNewAllocationRound();
 
     nextCycle++;
   }
 
   function distributeLast() public nonReentrant {
-    require(START_BLOCK > 0, "Emissions: Pre-mint not done");
     require(isLastCycle(), "Emissions: Last cycle not reached");
-    require(isCycleDistributable(nextCycle), "Emissions: Last cycle not started yet");
+    require(isNextCycleDistributable(), "Emissions: Last cycle not started yet");
 
     uint256 remainingEmissions = getRemainingEmissions();
 
@@ -195,49 +204,33 @@ contract Emissions is AccessControl, ReentrancyGuard {
     return scaledAmount / scalingFactor;
   }
 
-  function getXAllocationDecayPeriods(uint256 blockNumber) public view returns (uint256) {
-    require(blockNumber >= START_BLOCK, "Emissions: Invalid block number");
-
-    return (blockNumber - cycleDuration - START_BLOCK) / (xAllocationsDecayDelay * cycleDuration);
+  function getXAllocationDecayPeriods() public view returns (uint256) {
+    return (getCurrentCycle() - 1) / xAllocationsDecayDelay;
   }
 
-  function getXAllocationsAmount(uint256 blockNumber) public view returns (uint256) {
-    return getDecayedAmount(initialEmissions, xAllocationsDecay, getXAllocationDecayPeriods(blockNumber));
+  function getCurrentXAllocationsAmount() public view returns (uint256) {
+    return getDecayedAmount(initialEmissions, xAllocationsDecay, getXAllocationDecayPeriods());
   }
 
-  function getVote2EarnDecayPeriods(uint256 blockNumber) public view returns (uint256) {
-    require(blockNumber >= START_BLOCK, "Emissions: Invalid block number");
-
-    return (blockNumber - cycleDuration - START_BLOCK) / (vote2EarnDecayDelay * cycleDuration);
+  function getVote2EarnDecayPeriods() public view returns (uint256) {
+    return (getCurrentCycle() - 1) / vote2EarnDecayDelay;
   }
 
-  function getVote2EarnAmount(uint256 blockNumber) public view returns (uint256) {
-    uint256 vote2earnDecayPeriods = getVote2EarnDecayPeriods(blockNumber);
+  function getCurrentVote2EarnAmount() public view returns (uint256) {
+    uint256 vote2earnDecayPeriods = getVote2EarnDecayPeriods();
 
     uint256 percentageToDecay = vote2EarnDecay * vote2earnDecayPeriods;
 
     return
       getDecayedAmount(
-        getXAllocationsAmount(blockNumber),
+        getCurrentXAllocationsAmount(),
         percentageToDecay > maxVote2EarnDecay ? maxVote2EarnDecay : percentageToDecay,
         1 // We are calculating the decay directly from the `decayPercentage, thus the period is always 1
       );
   }
 
-  function getTreasuryAmount(uint256 blockNumber) public view returns (uint256) {
-    return ((getXAllocationsAmount(blockNumber) + getVote2EarnAmount(blockNumber)) * treasuryPercentage) / 100;
-  }
-
-  function getCurrentXAllocationsAmount() public view returns (uint256) {
-    return getXAllocationsAmount(block.number);
-  }
-
-  function getCurrentVote2EarnAmount() public view returns (uint256) {
-    return getVote2EarnAmount(block.number);
-  }
-
   function getCurrentTreasuryAmount() public view returns (uint256) {
-    return getTreasuryAmount(block.number);
+    return ((getCurrentXAllocationsAmount() + getCurrentVote2EarnAmount()) * treasuryPercentage) / 100;
   }
 
   function getPreMintAllocations() public view returns (uint256[] memory) {
@@ -245,55 +238,43 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   function getXAllocationAmountForCycle(uint256 cycle) public view returns (uint256) {
-    if (cycle == 1) {
-      return preMintAllocations[0];
-    }
-    return getXAllocationsAmount(getCycleBlock(cycle));
+    require(cycle <= getCurrentCycle(), "Emissions: Cycle not reached yet");
+
+    return isCycleDistributed(cycle) ? emissions[cycle].xAllocations : getCurrentXAllocationsAmount();
   }
 
   function getVote2EarnAmountForCycle(uint256 cycle) public view returns (uint256) {
-    if (cycle == 1) {
-      return preMintAllocations[1];
-    }
-    return getVote2EarnAmount(getCycleBlock(cycle));
+    require(cycle <= getCurrentCycle(), "Emissions: Cycle not reached yet");
+
+    return isCycleDistributed(cycle) ? emissions[cycle].vote2Earn : getCurrentVote2EarnAmount();
   }
 
   function getTreasuryAmountForCycle(uint256 cycle) public view returns (uint256) {
-    if (cycle == 1) {
-      return preMintAllocations[2];
-    }
-    return getTreasuryAmount(getCycleBlock(cycle));
-  }
+    require(cycle <= getCurrentCycle(), "Emissions: Cycle not reached yet");
 
-  function getCycleBlock(uint256 cycle) public view returns (uint256) {
-    require(cycle >= 1, "Emissions: Invalid cycle number");
-
-    return START_BLOCK + (cycle - 1) * cycleDuration;
-  }
-
-  function getCycleFromBlock(uint256 blockNumber) public view returns (uint256) {
-    require(blockNumber >= START_BLOCK, "Emissions: Invalid block number");
-
-    return ((blockNumber - START_BLOCK) / cycleDuration) + 1;
+    return isCycleDistributed(cycle) ? emissions[cycle].treasury : getCurrentTreasuryAmount();
   }
 
   function isCycleDistributed(uint256 cycle) public view returns (bool) {
     return cycle < nextCycle;
   }
 
+  function isCycleEnded(uint256 cycle) public view returns (bool) {
+    require(isCycleDistributed(cycle), "Emissions: Cycle not distributed yet");
+
+    return block.number >= lastEmissionBlock + cycleDuration;
+  }
+
   function getCurrentCycle() public view returns (uint256) {
     return nextCycle - 1;
   }
 
-  function isCycleEnded(uint256 cycle) public view returns (bool) {
-    require(cycle >= 1, "Emissions: Invalid cycle number");
-    require(isCycleDistributed(cycle), "Emissions: Cycle not distributed");
-
-    return block.number >= getCycleBlock(nextCycle);
+  function getNextCycleBlock() public view returns (uint256) {
+    return lastEmissionBlock + cycleDuration;
   }
 
-  function isCycleDistributable(uint256 cycle) public view returns (bool) {
-    return block.number >= getCycleBlock(cycle);
+  function isNextCycleDistributable() public view returns (bool) {
+    return block.number >= lastEmissionBlock + cycleDuration;
   }
 
   function isLastCycle() public view returns (bool) {
@@ -336,7 +317,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
   // ----------- Setters ----------- //
 
   function setPreMintAllocations(uint256[] memory _allocations) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(START_BLOCK == 0, "Emissions: Pre-mint already done");
+    require(nextCycle == 1, "Emissions: Pre-mint already done");
     require(_allocations.length == 3, "Emissions: Invalid input length. Expected 3.");
 
     preMintAllocations = _allocations;
