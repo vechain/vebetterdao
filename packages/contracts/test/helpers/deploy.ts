@@ -95,10 +95,10 @@ export const getOrDeployContractInstances = async ({
   const governor = await B3TRGovernor.deploy(
     await vot3.getAddress(),
     await timeLock.getAddress(),
-    4, // quroum percentage
+    4, // quorum percentage
     votingPeriod, // voting period
     defaultVotingDelay, // voting delay
-    votingTreshold, // voting treshold
+    votingTreshold, // voting threshold
   )
   await governor.waitForDeployment()
 
