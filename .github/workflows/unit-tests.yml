@@ -43,4 +43,5 @@ jobs:
         id: slither
         with:
           ignore-compile: true
+          target: 'packages/contracts/contracts'
       
