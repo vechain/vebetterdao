@@ -46,8 +46,8 @@ describe("Emissions", () => {
       // Decay settings should be set correctly
       expect(await emissions.xAllocationsDecay()).to.equal(4)
       expect(await emissions.vote2EarnDecay()).to.equal(20)
-      expect(await emissions.xAllocationsDecayDelay()).to.equal(12)
-      expect(await emissions.vote2EarnDecayDelay()).to.equal(50)
+      expect(await emissions.xAllocationsDecayPeriod()).to.equal(12)
+      expect(await emissions.vote2EarnDecayPeriod()).to.equal(50)
 
       // Initial emissions should be set correctly
       expect(await emissions.initialEmissions()).to.equal(ethers.parseEther("2000000"))
@@ -115,7 +115,7 @@ describe("Emissions", () => {
       expect(await emissions.getVote2EarnAmountForCycle(1)).to.equal(INITIAL_VOTE_2_EARN_ALLOCATION)
       expect(await emissions.getTreasuryAmountForCycle(1)).to.equal(INITIAL_TREASURY_ALLOCATION)
 
-      expect(await emissions.nextCycle()).to.equal(2)
+      expect(await emissions.currentCycle()).to.equal(2)
     })
 
     it("Should not be able start emissions twice", async () => {
@@ -175,7 +175,7 @@ describe("Emissions", () => {
       await emissions.connect(minterAccount).start()
 
       // Expect current cycle to be 0
-      expect(await emissions.nextCycle()).to.equal(2)
+      expect(await emissions.currentCycle()).to.equal(2)
 
       await waitForNextCycle(emissions)
 
@@ -220,7 +220,7 @@ describe("Emissions", () => {
       // Start emissions
       await emissions.connect(minterAccount).start()
 
-      expect(await emissions.nextCycle()).to.equal(2)
+      expect(await emissions.currentCycle()).to.equal(2)
 
       // Calculate emissions for first cycle
       const xAllocationsAmount = await emissions.getCurrentXAllocationsAmount()
@@ -303,7 +303,7 @@ describe("Emissions", () => {
         ethers.parseEther("2000000") + INITIAL_TREASURY_ALLOCATION,
       )
 
-      expect(await emissions.nextCycle()).to.equal(4)
+      expect(await emissions.currentCycle()).to.equal(4)
     })
 
     it("Should calculate emissions properly after first decay period", async () => {
@@ -342,7 +342,7 @@ describe("Emissions", () => {
       // Move to the 14th cycle
       await moveToCycle(emissions, minterAccount, 14)
 
-      expect(await emissions.nextCycle()).to.equal(14)
+      expect(await emissions.currentCycle()).to.equal(14)
 
       await waitForNextCycle(emissions)
 
@@ -374,7 +374,7 @@ describe("Emissions", () => {
     // Grant minter role to emissions contract
     await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
 
-    expect(await emissions.nextCycle()).to.equal(1)
+    expect(await emissions.currentCycle()).to.equal(1)
 
     // Start emissions
     await emissions.connect(minterAccount).start()
@@ -384,7 +384,7 @@ describe("Emissions", () => {
     let vote2EarnAmount = INITIAL_EMISSIONS
     let treasuryAmount = (INITIAL_EMISSIONS * BigInt(2)) / BigInt(4)
 
-    expect(await emissions.nextCycle()).to.equal(2)
+    expect(await emissions.currentCycle()).to.equal(2)
 
     // Loop through 633 cycles as simulated in the b3tr emissions spreadsheet
     for (let i = 0; i < b3trAllocations.length; i++) {
@@ -419,7 +419,7 @@ describe("Emissions", () => {
       expect(await emissions.getVote2EarnAmountForCycle(i + 2)).to.equal(vote2EarnAmount)
       expect(await emissions.getTreasuryAmountForCycle(i + 2)).to.equal(treasuryAmount)
 
-      expect(await emissions.getCurrentCycle()).to.equal(i + 2)
+      expect(await emissions.getPreviousCycle()).to.equal(i + 2)
     }
   }).timeout(1000 * 60 * 10) // 10 minutes
 
@@ -473,7 +473,7 @@ describe("Emissions", () => {
     // Move to the last cycle (634 cycles in the allocations spreadsheet)
     await moveToCycle(emissions, minterAccount, lastCycle)
 
-    expect(await emissions.nextCycle()).to.equal(lastCycle)
+    expect(await emissions.currentCycle()).to.equal(lastCycle)
 
     await waitForNextCycle(emissions)
 
@@ -528,7 +528,7 @@ describe("Emissions", () => {
 
     await emissions.connect(minterAccount).distribute()
 
-    expect(await emissions.getCurrentCycle()).to.equal(3)
+    expect(await emissions.getPreviousCycle()).to.equal(3)
 
     await waitForNextCycle(emissions)
 

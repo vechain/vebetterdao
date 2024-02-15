@@ -109,13 +109,13 @@ describe("VoterRewards", () => {
 
       expect(proposalEvent).to.not.equal(undefined)
 
-      expect(await emissions.getCurrentCycle()).to.equal(1)
+      expect(await emissions.getPreviousCycle()).to.equal(1)
 
       expect(await b3tr.balanceOf(await xAllocationPool.getAddress())).to.equal(INITIAL_X_ALLOCATION)
       expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(INITIAL_VOTE_2_EARN_ALLOCATION)
       expect(await b3tr.balanceOf(otherAccounts[2].address)).to.equal(INITIAL_TREASURY_ALLOCATION)
 
-      expect(await emissions.nextCycle()).to.equal(2)
+      expect(await emissions.currentCycle()).to.equal(2)
 
       const roundId = await xAllocationVoting.currentRoundId()
 
@@ -200,7 +200,7 @@ describe("VoterRewards", () => {
 
       await waitForNextCycle(emissions)
 
-      expect(await emissions.isCycleDistributed(await emissions.nextCycle())).to.equal(false)
+      expect(await emissions.isCycleDistributed(await emissions.currentCycle())).to.equal(false)
       expect(await emissions.isNextCycleDistributable()).to.equal(true)
 
       // Reward claiming
@@ -338,7 +338,7 @@ describe("VoterRewards", () => {
 
       await waitForNextCycle(emissions)
 
-      expect(await emissions.isCycleDistributed(await emissions.nextCycle())).to.equal(false)
+      expect(await emissions.isCycleDistributed(await emissions.currentCycle())).to.equal(false)
       expect(await emissions.isNextCycleDistributable()).to.equal(true)
 
       // Reward claiming
@@ -427,7 +427,7 @@ describe("VoterRewards", () => {
 
       await waitForNextCycle(emissions)
 
-      expect(await emissions.isCycleDistributed(await emissions.nextCycle())).to.equal(false)
+      expect(await emissions.isCycleDistributed(await emissions.currentCycle())).to.equal(false)
       expect(await emissions.isNextCycleDistributable()).to.equal(true)
 
       // Reward claiming

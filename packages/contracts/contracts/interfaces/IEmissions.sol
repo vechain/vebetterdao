@@ -105,7 +105,9 @@ interface IEmissions {
 
     function maxVote2EarnDecay() external view returns (uint256);
 
-    function nextCycle() external view returns (uint256);
+    function getPreviousCycle() external view returns (uint256);
+
+    function currentCycle() external view returns (uint256);
 
     function start() external;
 

@@ -207,11 +207,11 @@ export const waitForNextCycle = async (emissions: Emissions) => {
 
 /**
  * It will move to the desired cycle without actually distribute it.
- * E.g: we are in cycle 1 (distributed) and want to move to cycle 3 (not distributed) then we call this funciton with cycle 3
+ * E.g: we are in cycle 1 (distributed) and want to move to cycle 3 (not distributed) then we call this function with cycle 3
  * and it will distribute the cycle 2 and stop before distributing the cycle 3
  */
 export const moveToCycle = async (emissions: Emissions, minter: HardhatEthersSigner, cycle: number) => {
-  const cycleToBeDistributed = await emissions.nextCycle()
+  const cycleToBeDistributed = await emissions.currentCycle()
   for (let i = 0; i < BigInt(cycle) - cycleToBeDistributed; i++) {
     await waitForNextCycle(emissions)
     await emissions.connect(minter).distribute()
@@ -290,7 +290,7 @@ export const calculateVariableAppAllocationOffChain = async (
   return (totalAvailable * appShares) / BigInt(100)
 }
 
-export const partecipateInAllocationVoting = async (
+export const participateInAllocationVoting = async (
   user: HardhatEthersSigner,
   admin: HardhatEthersSigner,
   xAllocationVoting: XAllocationVoting,
