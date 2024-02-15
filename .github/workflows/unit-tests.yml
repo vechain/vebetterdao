@@ -44,4 +44,5 @@ jobs:
         with:
           ignore-compile: true
           target: 'packages/contracts/contracts'
+          solc-version: '0.8.17'
       
