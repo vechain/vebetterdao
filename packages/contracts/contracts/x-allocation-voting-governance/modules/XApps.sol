@@ -106,7 +106,7 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
    * @dev Returns true if an app is enabled to be voted and if it was created before the start of the requested round.
    *
    * @param appId the hashed name of the app
-   * @param roundId the proposal id from the XAllocationVoting contract which represents the allocation round
+   * @param roundId the round id from the XAllocationVoting contract which represents the allocation round
    */
   function isEligibleForVote(bytes32 appId, uint256 roundId) public view override returns (bool) {
     // App does not exist
@@ -115,7 +115,7 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
     }
 
     // We need to check if the app was created before the start of the round
-    uint256 roundStartsAt = proposalSnapshot(roundId);
+    uint256 roundStartsAt = roundSnapshot(roundId);
     bool isAvailable = _isAppElegibleCheckpoints[appId].upperLookupRecent(SafeCast.toUint48(roundStartsAt)) == 1 &&
       _apps[appId].createdAt <= roundStartsAt;
 

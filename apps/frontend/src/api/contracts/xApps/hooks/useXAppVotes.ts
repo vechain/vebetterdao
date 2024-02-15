@@ -7,37 +7,34 @@ import { XAllocationVoting__factory } from "@repo/contracts"
 const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
 
 /**
- *  Get the number of votes for a xApp in a proposal (allocation round)
+ *  Get the number of votes for a xApp in an allocation round
  * @param thor  the connex instance
  * @param xAppId  the xApp id to get the votes for
- * @param proposalId  the proposal id to get the votes for
- * @returns  the number of votes for the xApp in the proposal
+ * @param roundId  the round id to get the votes for
+ * @returns  the number of votes for the xApp in the round
  */
-export const getXAppVotes = async (thor: Connex.Thor, xAppId: string, proposalId: string): Promise<string> => {
+export const getXAppVotes = async (thor: Connex.Thor, xAppId: string, roundId: string): Promise<string> => {
   const functionFragment = XAllocationVoting__factory.createInterface().getFunction("getAppVotes").format("json")
-  const res = await thor
-    .account(XALLOCATIONVOTING_CONTRACT)
-    .method(JSON.parse(functionFragment))
-    .call(proposalId, xAppId)
+  const res = await thor.account(XALLOCATIONVOTING_CONTRACT).method(JSON.parse(functionFragment)).call(roundId, xAppId)
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
   return FormattingUtils.scaleNumberDown(res.decoded[0], 18)
 }
 
-export const getXAppVotesQueryKey = (xAppId: string, proposalId: string) => ["xApp", xAppId, "votes", proposalId]
+export const getXAppVotesQueryKey = (xAppId: string, roundId: string) => ["xApp", xAppId, "votes", roundId]
 
 /**
- * Get the number of votes for a xApp in a proposal (allocation round)
+ * Get the number of votes for a xApp in a round (allocation round)
  * @param xAppId the xApp id to get the votes for
- * @param proposalId the proposal id to get the votes for
- * @returns the number of votes for the xApp in the proposal
+ * @param roundId the round id to get the votes for
+ * @returns the number of votes for the xApp in the round
  */
-export const useXAppVotes = (xAppId: string, proposalId: string) => {
+export const useXAppVotes = (xAppId: string, roundId: string) => {
   const { thor } = useConnex()
   return useQuery({
-    queryKey: getXAppVotesQueryKey(xAppId, proposalId),
-    queryFn: async () => await getXAppVotes(thor, xAppId, proposalId),
+    queryKey: getXAppVotesQueryKey(xAppId, roundId),
+    queryFn: async () => await getXAppVotes(thor, xAppId, roundId),
     enabled: !!thor,
   })
 }
