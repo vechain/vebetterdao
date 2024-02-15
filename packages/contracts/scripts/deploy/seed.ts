@@ -98,6 +98,7 @@ const castVotesToXDapps = async (
           roundId,
           splits.map(split => split.app),
           splits.map(split => ethers.parseEther(split.weight)),
+          { gasLimit: 10_000_000 },
         )
         .then(async tx => await tx.wait())
     }),
