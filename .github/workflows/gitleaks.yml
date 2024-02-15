@@ -4,7 +4,7 @@ on:
     push:
       branches:
         - 'main'
-        - 'gitleaks'
+
 permissions: 
   contents: read # This is required for actions/checkout
   pull-requests: write # This is required for pull request comments
