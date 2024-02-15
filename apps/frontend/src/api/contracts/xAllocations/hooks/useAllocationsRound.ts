@@ -18,7 +18,7 @@ const blockTime = getConfig().network.blockTime
  *  Hook to get and merge info about the given allocation round (state, proposer, voreStart, voteEnd)
  * @returns the allocation round info see {@link AllocationRoundWithState}
  */
-export const useAllocationsRound = (roundId: string) => {
+export const useAllocationsRound = (roundId?: string) => {
   const { data: currentBlock } = useCurrentBlock()
   const currentAllocationId = useCurrentAllocationsRoundId()
   const currentAllocationState = useAllocationsRoundState(roundId)
