@@ -1,6 +1,6 @@
 import { Box, Card, CardBody, CardHeader, HStack, Heading } from "@chakra-ui/react"
 import { HorizontalChartBar } from "./HorizontalBarChart"
-import { useRoundXAppsWithDetails, useXApps, useXAppsVotes } from "@/api"
+import { useRoundXAppsWithDetails, useXAppsVotes } from "@/api"
 import { useMemo } from "react"
 
 type Props = {

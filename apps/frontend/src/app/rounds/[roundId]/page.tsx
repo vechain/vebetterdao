@@ -26,7 +26,12 @@ const AllocationRoundUserVotes = dynamic(
   { ssr: false },
 )
 
-export default function Round({ params }: { params: { roundId: string } }) {
+type Props = {
+  params: {
+    roundId: string
+  }
+}
+export default function Round({ params }: Props) {
   return (
     <VStack w="full" spacing={8}>
       <AllocationRoundNavbar roundId={params.roundId} />
