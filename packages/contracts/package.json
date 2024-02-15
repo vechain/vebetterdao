@@ -11,6 +11,8 @@
     "deploy": "npx hardhat run scripts/deploy",
     "check-contracts-deployment": "npx hardhat run scripts/checkContractsDeployment.ts",
     "generate-b3tr-tokenomics": "npx hardhat run scripts/generateB3trAllocations.ts",
+    "generate-b3tr-badge-metadata": "npx hardhat run scripts/generateB3trBadgeMetadata.ts",
+    "upload-b3tr-badge-metadata": "yarn generate-b3tr-badge-metadata && npx hardhat run scripts/uploadB3trBadgeMetadata.ts",
     "start-solo": "docker compose up -d",
     "stop-solo": "docker compose down",
     "clean": "rm -rf dist artifacts node_modules",
@@ -51,6 +53,8 @@
     "eslint-plugin-prettier": "^5.1.3",
     "ethers": "^6.9.0",
     "hardhat": "^2.19.1",
+    "mime": "^4.0.1",
+    "nft.storage": "^7.1.1",
     "prettier": "^3.2.4"
   }
 }
