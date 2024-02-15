@@ -11,9 +11,13 @@ import "@openzeppelin/contracts/interfaces/IERC6372.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
   using Checkpoints for Checkpoints.Trace208;
+
+  // Base URI for the Badge
+  string private _baseTokenURI;
 
   // Token ID counter
   uint256 private _nextTokenId;
@@ -45,10 +49,20 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
    */
   event LevelOwnedChanged(address indexed owner, uint256 previousLevel, uint256 newLevel);
 
-  constructor(string memory name, string memory symbol, address admin, uint256 maxLevel) ERC721(name, symbol) {
-    _grantRole(DEFAULT_ADMIN_ROLE, admin);
+  constructor(
+    string memory name,
+    string memory symbol,
+    address admin,
+    uint256 maxLevel,
+    string memory baseTokenURI
+  ) ERC721(name, symbol) {
+    require(maxLevel > 0, "Badge: Max level must be greater than 0");
+    require(bytes(baseTokenURI).length > 0, "Badge: Base URI must be set");
 
     MAX_LEVEL = maxLevel;
+    _baseTokenURI = baseTokenURI;
+
+    _grantRole(DEFAULT_ADMIN_ROLE, admin);
   }
 
   // Mints the highest level Badge the caller is allowed to mint
@@ -103,6 +117,11 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
     return "mode=blocknumber&from=default";
   }
 
+  function tokenURI(uint256 tokenId) public view override(ERC721) returns (string memory) {    
+    uint256 levelOfToken = levelOf[tokenId];
+    return levelOfToken > 0 ? string.concat(baseURI(), Strings.toString(levelOfToken)) : "";
+  }
+
   // ----------- Internal & Private ----------- //
 
   /**
@@ -138,6 +157,12 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
     MAX_LEVEL = level;
   }
 
+  function setBaseURI(string memory baseTokenURI) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(bytes(baseTokenURI).length > 0, "Badge: Base URI must be set");
+    
+    _baseTokenURI = baseTokenURI;
+  }
+
   // ---------- Getters ---------- //
 
   function getLevel(address owner) public view returns (uint256) {
@@ -154,6 +179,10 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
 
   function numCheckpoints(address account) public view returns (uint32) {
     return _numCheckpoints(account);
+  }
+
+  function baseURI() public view returns (string memory) {
+    return _baseURI();
   }
 
   // ---------- Overrides ---------- //
@@ -178,5 +207,9 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
     bytes4 interfaceId
   ) public view override(ERC721, ERC721Enumerable, AccessControl) returns (bool) {
     return super.supportsInterface(interfaceId);
+  }
+
+  function _baseURI() internal view override returns (string memory) {
+    return _baseTokenURI;
   }
 }
