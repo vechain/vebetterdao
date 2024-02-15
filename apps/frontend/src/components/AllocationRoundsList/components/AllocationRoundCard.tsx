@@ -3,6 +3,7 @@ import { Box, Card, CardBody, HStack, Heading, Icon, Tag, Text, useColorModeValu
 import { getConfig } from "@repo/config"
 import { useRouter } from "next/navigation"
 import { FaAngleRight } from "react-icons/fa6"
+import { AllocationRoundStateTag } from "../AllocationRoundStateTag"
 
 type Props = {
   round: RoundCreated
@@ -31,12 +32,12 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
       }}>
       <CardBody>
         <HStack justify={"space-between"} w="full">
-          <Box>
-            <HStack spacing={2}>
+          <Box w="full">
+            <HStack spacing={2} w="full" justify="space-between">
               <Heading as="h3" size="md">
                 Round #{round.proposalId}
               </Heading>
-              <Tag colorScheme="green">{allocationRound.state && RoundState[allocationRound.state]}</Tag>
+              <RoundState state={allocationRound.state} size="md" />
             </HStack>
             <Text>{allocationRound.voteEndTimestamp?.fromNow()}</Text>
           </Box>
