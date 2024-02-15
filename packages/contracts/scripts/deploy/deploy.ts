@@ -21,9 +21,9 @@ const symbol = "B3TR"
 const VOTE_2_EARN_ADDRESS = "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68" //2nd account from mnemonic of solo network
 const TREASURY_ADDRESS = "0x0f872421dc479f3c11edd89512731814d0598db5" //3rd account from mnemonic of solo network
 
-const PRE_MINT_X_ALLOCATION = ethers.parseEther("1000000")
-const PRE_MINT_VOTE_2_EARN_ALLOCATION = ethers.parseEther("1000000")
-const PRE_MINT_TREASURY_ALLOCATION = ethers.parseEther("1750000")
+const INITIAL_X_ALLOCATION = ethers.parseEther("1000000")
+const INITIAL_VOTE_2_EARN_ALLOCATION = ethers.parseEther("1000000")
+const INITIAL_TREASURY_ALLOCATION = ethers.parseEther("1750000")
 
 const CYCLE_DURATION = 60480 // 1 Week in blocks
 const DECAY_SETTINGS = [4, 20, 12, 50] // 4% decay for X Allocations, 20% decay for Vote2Earn, every 12 cycles for X Allocations, Every 50 cycles for Vote2Earn
@@ -69,7 +69,7 @@ export async function deployAll() {
   const emissions = await deployEmissions(
     await b3tr.getAddress(),
     [await xAllocationPool.getAddress(), VOTE_2_EARN_ADDRESS, TREASURY_ADDRESS],
-    [PRE_MINT_X_ALLOCATION, PRE_MINT_VOTE_2_EARN_ALLOCATION, PRE_MINT_TREASURY_ALLOCATION],
+    [INITIAL_X_ALLOCATION, INITIAL_VOTE_2_EARN_ALLOCATION, INITIAL_TREASURY_ALLOCATION],
   )
 
   const voterRewards = await deployVoterRewards(

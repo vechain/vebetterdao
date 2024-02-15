@@ -240,7 +240,7 @@ describe("X-Allocation Voting", function () {
 
       // Grant minter role to emissions contract
       await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
-      await emissions.connect(minterAccount).preMint()
+      await emissions.connect(minterAccount).start()
 
       // round should be created
       round = parseInt((await xAllocationVoting.currentRoundId()).toString())
