@@ -4,7 +4,6 @@ on:
     push:
       branches:
         - 'main'
-        - 'slither-solidity-security-scan'
 jobs:
   analyze:
     runs-on: ubuntu-latest
