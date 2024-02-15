@@ -15,14 +15,14 @@ type AllocationAmount = {
 
 /**
  *
- * Returns the allocation amount for a given proposalId
+ * Returns the allocation amount for a given roundId
  * @param thor  the thor client
- * @param proposalId  the proposalId the get the amount for
- * @returns the allocation amount for a given proposalId see {@link AllocationAmount}
+ * @param roundId  the roundId the get the amount for
+ * @returns the allocation amount for a given roundId see {@link AllocationAmount}
  */
 export const getAllocationAmount = async (
   thor: Connex.Thor,
-  proposalId?: string,
+  roundId?: string,
 ): Promise<{
   treasury: string
   voteX2Earn: string
@@ -36,9 +36,9 @@ export const getAllocationAmount = async (
     .format("json")
 
   const [resTreasury, resVoteX2Earn, voteXAllocations] = await Promise.all([
-    thor.account(EMISSION_CONTRACT).method(JSON.parse(functionFragmentTreasuryAmount)).call(proposalId),
-    thor.account(EMISSION_CONTRACT).method(JSON.parse(functionFragmentVoteX2EarnAmount)).call(proposalId),
-    thor.account(EMISSION_CONTRACT).method(JSON.parse(functionFragmentXAllocationsAmount)).call(proposalId),
+    thor.account(EMISSION_CONTRACT).method(JSON.parse(functionFragmentTreasuryAmount)).call(roundId),
+    thor.account(EMISSION_CONTRACT).method(JSON.parse(functionFragmentVoteX2EarnAmount)).call(roundId),
+    thor.account(EMISSION_CONTRACT).method(JSON.parse(functionFragmentXAllocationsAmount)).call(roundId),
   ])
 
   if (resTreasury.vmError) return Promise.reject(new Error(resTreasury.vmError))
@@ -52,19 +52,19 @@ export const getAllocationAmount = async (
   }
 }
 
-export const getAllocationAmountQueryKey = (proposalId?: string) => ["allocationsRound", "amount", proposalId]
+export const getAllocationAmountQueryKey = (roundId?: string) => ["allocationsRound", "amount", roundId]
 
 /**
- *  Hook to get the allocation amount for a given proposalId
- * @param proposalId  the proposalId the get the amount for
- * @returns the allocation amount for a given proposalId see {@link AllocationAmount}
+ *  Hook to get the allocation amount for a given roundId
+ * @param roundId  the roundId the get the amount for
+ * @returns the allocation amount for a given roundId see {@link AllocationAmount}
  */
-export const useAllocationAmount = (proposalId?: string) => {
+export const useAllocationAmount = (roundId?: string) => {
   const { thor } = useConnex()
 
   return useQuery({
-    queryKey: getAllocationAmountQueryKey(proposalId),
-    queryFn: async () => await getAllocationAmount(thor, proposalId),
-    enabled: !!thor && !!proposalId,
+    queryKey: getAllocationAmountQueryKey(roundId),
+    queryFn: async () => await getAllocationAmount(thor, roundId),
+    enabled: !!thor && !!roundId,
   })
 }

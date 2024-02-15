@@ -8,16 +8,16 @@ import { XAllocationVotingJson } from "@repo/contracts"
 
 const XALLOCATION_CONTRACT = getConfig().xAllocationVotingContractAddress
 
-export type AllocationProposalCreated = {
-  proposalId: string
+export type RoundCreated = {
+  roundId: string
   proposer: string
   voteStart: string
   voteEnd: string
 }
 
 export const getAllocationsRoundsEvents = async (thor: Connex.Thor) => {
-  const allocationCreatedAbi = XAllocationVotingJson.abi.find(abi => abi.name === "AllocationProposalCreated")
-  if (!allocationCreatedAbi) throw new Error("AllocationProposalCreated event not found")
+  const allocationCreatedAbi = XAllocationVotingJson.abi.find(abi => abi.name === "RoundCreated")
+  if (!allocationCreatedAbi) throw new Error("RoundCreated event not found")
   const allocationCreatedEvent = new abi.Event(allocationCreatedAbi as abi.Event.Definition)
 
   /**
@@ -36,7 +36,7 @@ export const getAllocationsRoundsEvents = async (thor: Connex.Thor) => {
   /**
    * Decode the events to get the data we are interested in (i.e the proposals)
    */
-  const decodedCreatedAllocationEvents: AllocationProposalCreated[] = []
+  const decodedCreatedAllocationEvents: RoundCreated[] = []
 
   //   TODO: runtime validation with zod ?
   events.forEach(event => {
@@ -44,7 +44,7 @@ export const getAllocationsRoundsEvents = async (thor: Connex.Thor) => {
       case allocationCreatedEvent.signature: {
         const decoded = allocationCreatedEvent.decode(event.data, event.topics)
         decodedCreatedAllocationEvents.push({
-          proposalId: decoded[0],
+          roundId: decoded[0],
           proposer: decoded[1],
           voteStart: decoded[2],
           voteEnd: decoded[3],

@@ -12,11 +12,11 @@ import { IVoterRewards } from "../../interfaces/IVoterRewards.sol";
  *
  * @dev Extension of {XAllocationVotingGovernor} for counting votes for allocation rounds.
  *
- * Every round of allocation users can vote a fraction of their balance for the available apps for that round.
+ * In every round users can vote a fraction of their balance for the elegible apps in that round.
  */
 
 abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor {
-  struct AllocationRoundVote {
+  struct RoundVote {
     mapping(bytes32 app => uint256) votesReceived;
     uint256 totalVotes;
     mapping(address user => bool) hasVoted;
@@ -26,7 +26,7 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
   // mapping to store that a user has voted at least one time
   mapping(address => bool) internal _hasVotedOnce;
 
-  mapping(uint256 proposalId => AllocationRoundVote) internal _allocationRoundVotes;
+  mapping(uint256 roundId => RoundVote) internal _roundVotes;
 
   IVoterRewards public voterRewards;
 
@@ -43,70 +43,70 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
   }
 
   function _countVote(
-    uint256 proposalId,
+    uint256 roundId,
     address voter,
     bytes32[] memory apps,
     uint256[] memory weights
   ) internal virtual override {
-    if (hasVoted(proposalId, voter)) {
+    if (hasVoted(roundId, voter)) {
       revert GovernorAlreadyCastVote(voter);
     }
 
-    ProposalCore storage proposal = _proposals[proposalId];
+    RoundCore storage round = _rounds[roundId];
 
     uint256 totalWeight = 0;
     for (uint256 i = 0; i < apps.length; i++) {
       totalWeight += weights[i];
 
-      if (!isEligibleForVote(apps[i], proposalId)) {
+      if (!isEligibleForVote(apps[i], roundId)) {
         revert GovernorAppNotAvailableForVoting(apps[i]);
       }
 
-      _allocationRoundVotes[proposalId].votesReceived[apps[i]] += weights[i];
+      _roundVotes[roundId].votesReceived[apps[i]] += weights[i];
     }
 
     require(
-      totalWeight <= getVotes(voter, proposal.voteStart),
-      "Governor: account has insufficient voting power for this proposal"
+      totalWeight <= getVotes(voter, round.voteStart),
+      "Governor: account has insufficient voting power for this round"
     );
 
-    voterRewards.registerXallocationVote(proposal.voteStart, voter, totalWeight);
+    voterRewards.registerXallocationVote(round.voteStart, voter, totalWeight);
 
-    _allocationRoundVotes[proposalId].totalVotes += totalWeight;
-    _allocationRoundVotes[proposalId].hasVoted[voter] = true;
-    _allocationRoundVotes[proposalId].totalVoters++;
+    _roundVotes[roundId].totalVotes += totalWeight;
+    _roundVotes[roundId].hasVoted[voter] = true;
+    _roundVotes[roundId].totalVoters++;
 
     // save that user cast vote only the first time
     if (!_hasVotedOnce[voter]) {
       _hasVotedOnce[voter] = true;
     }
 
-    emit AllocationVoteCast(voter, proposalId, apps, weights);
+    emit AllocationVoteCast(voter, roundId, apps, weights);
   }
 
-  function getAppVotes(uint256 proposalId, bytes32 app) public view override returns (uint256) {
-    return _allocationRoundVotes[proposalId].votesReceived[app];
+  function getAppVotes(uint256 roundId, bytes32 app) public view override returns (uint256) {
+    return _roundVotes[roundId].votesReceived[app];
   }
 
-  function totalVotes(uint256 proposalId) public view override returns (uint256) {
-    return _allocationRoundVotes[proposalId].totalVotes;
+  function totalVotes(uint256 roundId) public view override returns (uint256) {
+    return _roundVotes[roundId].totalVotes;
   }
 
-  function totalVoters(uint256 proposalId) public view override returns (uint256) {
-    return _allocationRoundVotes[proposalId].totalVoters;
+  function totalVoters(uint256 roundId) public view override returns (uint256) {
+    return _roundVotes[roundId].totalVoters;
   }
 
-  function hasVoted(uint256 proposalId, address user) public view returns (bool) {
-    return _allocationRoundVotes[proposalId].hasVoted[user];
+  function hasVoted(uint256 roundId, address user) public view returns (bool) {
+    return _roundVotes[roundId].hasVoted[user];
   }
 
-  function _quorumReached(uint256 proposalId) internal view virtual override returns (bool) {
-    return quorum(proposalSnapshot(proposalId)) <= totalVotes(proposalId);
+  function _quorumReached(uint256 roundId) internal view virtual override returns (bool) {
+    return quorum(roundSnapshot(roundId)) <= totalVotes(roundId);
   }
 
   // vote is successful if quorum is reached
-  function _voteSucceeded(uint256 proposalId) internal view virtual override returns (bool) {
-    return _quorumReached(proposalId);
+  function _voteSucceeded(uint256 roundId) internal view virtual override returns (bool) {
+    return _quorumReached(roundId);
   }
 
   function hasVotedOnce(address user) public view returns (bool) {

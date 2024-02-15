@@ -80,7 +80,7 @@ abstract contract GovernorVotesQuorumFraction is GovernorVotes {
    *
    * Requirements:
    *
-   * - Must be called through a governance proposal.
+   * - Must be called through a governance round.
    * - New numerator must be smaller or equal to the denominator.
    */
   function updateQuorumNumerator(uint256 newQuorumNumerator) external virtual onlyGovernance {
