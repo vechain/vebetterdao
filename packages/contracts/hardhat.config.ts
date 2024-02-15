@@ -6,6 +6,8 @@ import "@vechain/hardhat-vechain"
 import "@vechain/hardhat-ethers"
 import { getConfig } from "@repo/config"
 
+require("dotenv").config()
+
 const soloUrl = getConfig().network.urls[0]
 
 const config: HardhatUserConfig = {
