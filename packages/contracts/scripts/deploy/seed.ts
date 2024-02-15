@@ -2,7 +2,6 @@ import { ethers } from "hardhat"
 import { B3TR, Emissions, VOT3, XAllocationVoting, XApps } from "../../typechain-types"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { BytesLike } from "ethers"
-import { waitForProposalToBeActive } from "../../test/helpers"
 
 type App = {
   address: string
