@@ -1,4 +1,4 @@
-import { RoundState, useAllocationsRound } from "@/api"
+import { useAllocationsRound } from "@/api"
 import { AllocationRoundStateTag } from "@/components/AllocationRoundsList/AllocationRoundStateTag"
 import {
   HStack,
@@ -7,7 +7,6 @@ import {
   Box,
   Text,
   Icon,
-  Tag,
   Stack,
   useMediaQuery,
   IconButton,

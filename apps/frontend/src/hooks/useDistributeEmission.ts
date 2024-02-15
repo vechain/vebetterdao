@@ -1,7 +1,7 @@
 import { getCurrentAllocationsRoundIdQueryKey, getAllocationsRoundsEventsQueryKey } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
-import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
+import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { Emissions__factory } from "@repo/contracts"
@@ -30,11 +30,13 @@ export const useDistributeEmission = ({
   const queryClient = useQueryClient()
 
   const buildClauses = useCallback(() => {
-    const clauses = [
+    const clauses: EnhancedClause[] = [
       {
         to: getConfig().emissionsContractAddress,
         value: 0,
-        data: EmissionsInterface.encodeFunctionData("distribute", []),
+        data: EmissionsInterface.encodeFunctionData("distribute"),
+        comment: "Distribute emissions",
+        abi: JSON.parse(JSON.stringify(EmissionsInterface.getFunction("distribute"))),
       },
     ]
 
