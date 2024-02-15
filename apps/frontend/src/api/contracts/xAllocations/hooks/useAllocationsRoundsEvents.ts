@@ -9,7 +9,7 @@ import { XAllocationVotingJson } from "@repo/contracts"
 const XALLOCATION_CONTRACT = getConfig().xAllocationVotingContractAddress
 
 export type RoundCreated = {
-  proposalId: string
+  roundId: string
   proposer: string
   voteStart: string
   voteEnd: string
@@ -44,7 +44,7 @@ export const getAllocationsRoundsEvents = async (thor: Connex.Thor) => {
       case allocationCreatedEvent.signature: {
         const decoded = allocationCreatedEvent.decode(event.data, event.topics)
         decodedCreatedAllocationEvents.push({
-          proposalId: decoded[0],
+          roundId: decoded[0],
           proposer: decoded[1],
           voteStart: decoded[2],
           voteEnd: decoded[3],

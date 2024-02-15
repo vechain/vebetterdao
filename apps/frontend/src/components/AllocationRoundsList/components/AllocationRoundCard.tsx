@@ -11,10 +11,10 @@ type Props = {
 export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
   const router = useRouter()
 
-  const { data: allocationRound } = useAllocationsRound(round.proposalId)
+  const { data: allocationRound } = useAllocationsRound(round.roundId)
 
   const onRoundClick = () => {
-    router.push(`/rounds/${round.proposalId}`)
+    router.push(`/rounds/${round.roundId}`)
   }
 
   const cardHoverColor = useColorModeValue("primary.500", "primary.300")
@@ -34,7 +34,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
           <Box w="full">
             <HStack spacing={2} w="full" justify="space-between">
               <Heading as="h3" size="md">
-                Round #{round.proposalId}
+                Round #{round.roundId}
               </Heading>
               <AllocationRoundStateTag state={allocationRound.state} size="md" />
             </HStack>
