@@ -37,8 +37,6 @@ interface IEmissions {
 
     function distribute() external;
 
-    function distributeLast() external;
-
     function emissions(uint256)
         external
         view
@@ -55,12 +53,6 @@ interface IEmissions {
     function getCurrentVote2EarnAmount() external view returns (uint256);
 
     function getCurrentXAllocationsAmount() external view returns (uint256);
-
-    function getLastTreasuryAmount() external view returns (uint256);
-
-    function getLastVote2EarnAmount() external view returns (uint256);
-
-    function getLastXAllocationsAmount() external view returns (uint256);
 
     function getNextCycleBlock() external view returns (uint256);
 
@@ -107,13 +99,9 @@ interface IEmissions {
 
     function isCycleEnded(uint256 cycle) external view returns (bool);
 
-    function isLastCycle() external view returns (bool);
-
     function isNextCycleDistributable() external view returns (bool);
 
     function lastEmissionBlock() external view returns (uint256);
-
-    function lastEmissions(uint256) external view returns (uint256);
 
     function maxVote2EarnDecay() external view returns (uint256);
 
@@ -132,8 +120,6 @@ interface IEmissions {
     function setCycleDuration(uint256 _cycleDuration) external;
 
     function setInitialEmissions(uint256 _emissions) external;
-
-    function setLastEmissions(uint256[] memory _lastEmissions) external;
 
     function setMaxVote2EarnDecay(uint256 _maxVote2EarnDecay) external;
 
@@ -161,6 +147,8 @@ interface IEmissions {
     function setXallocationsAddress(address xAllocationAddress) external;
 
     function supportsInterface(bytes4 interfaceId) external view returns (bool);
+
+    function totalEmissions() external view returns (uint256);
 
     function treasury() external view returns (address);
 
