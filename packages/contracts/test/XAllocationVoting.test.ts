@@ -463,10 +463,10 @@ describe("X-Allocation Voting", function () {
         voter,
         apps: votedApps,
         voteWeights,
-        roundId: votedProposalId,
+        roundId: votedRoundId,
       } = parseAllocationVoteCastEvent(allocationVoteCast[0], xAllocationVoting)
       expect(voter).to.eql(otherAccount.address)
-      expect(votedProposalId).to.eql(roundId)
+      expect(votedRoundId).to.eql(roundId)
       expect(votedApps).to.eql([app1])
       expect(voteWeights).to.eql([ethers.parseEther("500")])
 
@@ -576,10 +576,10 @@ describe("X-Allocation Voting", function () {
         voter,
         apps: votedApps,
         voteWeights,
-        roundId: votedProposalId,
+        roundId: votedRoundId,
       } = parseAllocationVoteCastEvent(allocationVoteCast[0], xAllocationVoting)
       expect(voter).to.eql(otherAccount.address)
-      expect(votedProposalId).to.eql(roundId)
+      expect(votedRoundId).to.eql(roundId)
       expect(votedApps).to.eql([app1, app2])
       expect(voteWeights).to.eql([ethers.parseEther("300"), ethers.parseEther("200")])
 

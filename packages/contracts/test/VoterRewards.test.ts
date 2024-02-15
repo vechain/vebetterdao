@@ -362,9 +362,9 @@ describe("VoterRewards", () => {
       // Second round
       await emissions.connect(voter1).distribute() // Anyone can distribute the cycle
 
-      const proposalId2 = await xAllocationVoting.currentRoundId()
+      const roundId2 = await xAllocationVoting.currentRoundId()
 
-      expect(proposalId2).to.equal(2)
+      expect(roundId2).to.equal(2)
 
       expect(await xAllocationVoting.roundDeadline(roundId)).to.lt(await emissions.getNextCycleBlock())
 
@@ -378,7 +378,7 @@ describe("VoterRewards", () => {
           [ethers.parseEther("100"), ethers.parseEther("500")], // Voter 2 votes 100 for app1 and 500 for app2
           [ethers.parseEther("500"), ethers.parseEther("500")], // Voter 3 votes 500 for app1 and 500 for app2
         ],
-        proposalId2, // Second round
+        roundId2, // Second round
       )
 
       expect(await emissions.isCycleEnded(2)).to.equal(false)
@@ -394,16 +394,16 @@ describe("VoterRewards", () => {
       expect(await voterRewards.cycleToVoterToTotal(2, voter3)).to.equal(ethers.parseEther("1000"))
 
       // Votes should be tracked correctly
-      appVotes = await xAllocationVoting.getAppVotes(proposalId2, app1)
+      appVotes = await xAllocationVoting.getAppVotes(roundId2, app1)
       expect(appVotes).to.eql(ethers.parseEther("600"))
-      appVotes = await xAllocationVoting.getAppVotes(proposalId2, app2)
+      appVotes = await xAllocationVoting.getAppVotes(roundId2, app2)
       expect(appVotes).to.eql(ethers.parseEther("2000"))
 
-      totalVotes = await xAllocationVoting.totalVotes(proposalId2)
+      totalVotes = await xAllocationVoting.totalVotes(roundId2)
       expect(totalVotes).to.eql(ethers.parseEther("2600"))
 
       // Total voters should be tracked correctly
-      totalVoters = await xAllocationVoting.totalVoters(proposalId2)
+      totalVoters = await xAllocationVoting.totalVoters(roundId2)
       expect(totalVoters).to.eql(BigInt(3))
 
       // Voter rewards checks
@@ -414,15 +414,15 @@ describe("VoterRewards", () => {
           (await voterRewards.cycleToVoterToTotal(2, voter3)),
       ) // Total votes
 
-      await waitForRoundToEnd(Number(proposalId2), xAllocationVoting)
+      await waitForRoundToEnd(Number(roundId2), xAllocationVoting)
 
       // Votes should be the same after round ended
-      appVotes = await xAllocationVoting.getAppVotes(proposalId2, app1)
+      appVotes = await xAllocationVoting.getAppVotes(roundId2, app1)
       expect(appVotes).to.eql(ethers.parseEther("600"))
-      appVotes = await xAllocationVoting.getAppVotes(proposalId2, app2)
+      appVotes = await xAllocationVoting.getAppVotes(roundId2, app2)
       expect(appVotes).to.eql(ethers.parseEther("2000"))
 
-      totalVotes = await xAllocationVoting.totalVotes(proposalId2)
+      totalVotes = await xAllocationVoting.totalVotes(roundId2)
       expect(totalVotes).to.eql(ethers.parseEther("2600"))
 
       await waitForNextCycle(emissions)

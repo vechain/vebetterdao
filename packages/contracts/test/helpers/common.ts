@@ -223,10 +223,10 @@ export const voteOnApps = async (
   apps: string[],
   voters: HardhatEthersSigner[],
   votes: Array<Array<bigint>>,
-  proposalId: bigint,
+  roundId: bigint,
 ) => {
   for (const voter of voters) {
-    await xAllocationVoting.connect(voter).castVote(proposalId, apps, votes[voters.indexOf(voter)])
+    await xAllocationVoting.connect(voter).castVote(roundId, apps, votes[voters.indexOf(voter)])
   }
 }
 
