@@ -145,7 +145,7 @@ describe("X-Allocation Voting", function () {
   })
 
   describe("Allocation rounds", function () {
-    it("Should be able to propose a new allocation round successfully", async function () {
+    it("Should be able to start a new allocation round successfully", async function () {
       const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -168,7 +168,7 @@ describe("X-Allocation Voting", function () {
       expect(proposalState).to.eql(BigInt(0))
     })
 
-    it("Should not be able to propose a new allocation round if there is an active one", async function () {
+    it("Should not be able to start a new allocation round if there is an active one", async function () {
       const { xAllocationVoting, otherAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -189,14 +189,14 @@ describe("X-Allocation Voting", function () {
       let proposalState = await xAllocationVoting.state(roundId)
       expect(proposalState).to.eql(BigInt(0))
 
-      // should not be able to propose a new allocation round if there is an active one
+      // should not be able to start a new allocation round if there is an active one
       await catchRevert(xAllocationVoting.connect(owner).startNewRound())
 
-      // should not be able to propose a new allocation round if there is an active one
+      // should not be able to start a new allocation round if there is an active one
       await catchRevert(xAllocationVoting.connect(owner).startNewRound())
     })
 
-    it("Should be able to propose a new allocation round if the previous one ended", async function () {
+    it("Should be able to start a new allocation round if the previous one ended", async function () {
       const { xAllocationVoting, otherAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -214,7 +214,7 @@ describe("X-Allocation Voting", function () {
 
       await waitForRoundToEnd(roundId, xAllocationVoting)
 
-      // should not be able to propose a new allocation round if there is an active one
+      // should not be able to start a new allocation round if there is an active one
       tx = await xAllocationVoting.connect(owner).startNewRound()
       receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
@@ -498,7 +498,7 @@ describe("X-Allocation Voting", function () {
       tx = await xAllocationVoting.connect(otherAccount).castVote(roundId, [app1], [ethers.parseEther("500")])
       receipt = await tx.wait()
 
-      // I cannot cast a vote twice for the same proposal
+      // I cannot cast a vote twice for the same round
       await catchRevert(xAllocationVoting.connect(otherAccount).castVote(roundId, [app1], [ethers.parseEther("500")]))
     })
 
@@ -524,7 +524,7 @@ describe("X-Allocation Voting", function () {
 
       await waitForRoundToEnd(roundId, xAllocationVoting)
 
-      // I cannot cast a vote if the proposal is not active
+      // I cannot cast a vote if the round is not active
       await catchRevert(xAllocationVoting.connect(otherAccount).castVote(roundId, [app1], [ethers.parseEther("500")]))
     })
 
@@ -695,7 +695,7 @@ describe("X-Allocation Voting", function () {
       expect(totalVotes).to.eql(ethers.parseEther("0"))
     })
 
-    it("Allocation proposal should be successfull if quorum was reached", async function () {
+    it("Allocation round should be successfull if quorum was reached", async function () {
       const { xAllocationVoting, otherAccounts, otherAccount, owner, vot3 } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -732,11 +732,11 @@ describe("X-Allocation Voting", function () {
       const neededVotes = (Number(ethers.formatEther(quorum)) * Number(ethers.formatEther(totalSupply))) / 100
       expect(500).to.be.greaterThan(neededVotes)
 
-      // quorum should be reached and proposal should be successful
+      // quorum should be reached and round should be successful
       expect(await xAllocationVoting.state(roundId)).to.eql(BigInt(2))
     }).timeout(18000000)
 
-    it("Allocation proposal should be failed if quorum was not reached", async function () {
+    it("Allocation round should be failed if quorum was not reached", async function () {
       const { xAllocationVoting, otherAccounts, otherAccount, owner, vot3 } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
