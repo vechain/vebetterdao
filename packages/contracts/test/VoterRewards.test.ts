@@ -1,8 +1,8 @@
 import { describe, it } from "mocha"
 import {
-  PRE_MINT_TREASURY_ALLOCATION,
-  PRE_MINT_VOTE_2_EARN_ALLOCATION,
-  PRE_MINT_X_ALLOCATION,
+  INITIAL_TREASURY_ALLOCATION,
+  INITIAL_VOTE_2_EARN_ALLOCATION,
+  INITIAL_X_ALLOCATION,
   catchRevert,
   getOrDeployContractInstances,
   getVot3Tokens,
@@ -91,7 +91,7 @@ describe("VoterRewards", () => {
       // Grant minter role to emissions contract
       await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
 
-      let tx = await emissions.connect(minterAccount).preMint()
+      let tx = await emissions.connect(minterAccount).start()
 
       let receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
@@ -111,9 +111,9 @@ describe("VoterRewards", () => {
 
       expect(await emissions.getCurrentCycle()).to.equal(1)
 
-      expect(await b3tr.balanceOf(await xAllocationPool.getAddress())).to.equal(PRE_MINT_X_ALLOCATION)
-      expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(PRE_MINT_VOTE_2_EARN_ALLOCATION)
-      expect(await b3tr.balanceOf(otherAccounts[2].address)).to.equal(PRE_MINT_TREASURY_ALLOCATION)
+      expect(await b3tr.balanceOf(await xAllocationPool.getAddress())).to.equal(INITIAL_X_ALLOCATION)
+      expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(INITIAL_VOTE_2_EARN_ALLOCATION)
+      expect(await b3tr.balanceOf(otherAccounts[2].address)).to.equal(INITIAL_TREASURY_ALLOCATION)
 
       expect(await emissions.nextCycle()).to.equal(2)
 
@@ -271,7 +271,7 @@ describe("VoterRewards", () => {
       // Grant minter role to emissions contract
       await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
 
-      await emissions.connect(minterAccount).preMint()
+      await emissions.connect(minterAccount).start()
 
       const roundId = await xAllocationVoting.currentRoundId()
 
@@ -463,7 +463,7 @@ describe("VoterRewards", () => {
       // Grant minter role to emissions contract
       await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
 
-      await emissions.connect(minterAccount).preMint()
+      await emissions.connect(minterAccount).start()
 
       let roundId = await xAllocationVoting.currentRoundId()
 
@@ -502,7 +502,7 @@ describe("VoterRewards", () => {
       // Grant minter role to emissions contract
       await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
 
-      await emissions.connect(minterAccount).preMint()
+      await emissions.connect(minterAccount).start()
 
       const roundId = await xAllocationVoting.currentRoundId()
 
@@ -528,7 +528,7 @@ describe("VoterRewards", () => {
       // Grant minter role to emissions contract
       await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
 
-      await emissions.connect(minterAccount).preMint()
+      await emissions.connect(minterAccount).start()
 
       const roundId = await xAllocationVoting.currentRoundId()
 
