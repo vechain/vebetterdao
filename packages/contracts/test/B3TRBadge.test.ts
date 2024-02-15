@@ -99,7 +99,7 @@ describe("B3TRBadge", () => {
       await catchRevert(b3trBadge.connect(otherAccount).freeMint())
     })
 
-    it("Cannot know if user participated in governance if XAllocation and B3TRGovernor addresses are set", async () => {
+    it("Can know if user participated in governance if XAllocation and B3TRGovernor addresses are set", async () => {
       const { otherAccount, xAllocationVoting, owner, governor } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
