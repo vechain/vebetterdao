@@ -1,11 +1,12 @@
 import { useB3trBalance } from "@/api"
-import { Button, useDisclosure } from "@chakra-ui/react"
+import { Button, Text, VStack, useDisclosure } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { SwapB3trModal } from "./SwapB3trModal"
+import { FaRepeat } from "react-icons/fa6"
 
-type Props = {}
+type Props = { isIconButton?: boolean }
 
-export const SwapB3trButton: React.FC<Props> = () => {
+export const SwapB3trButton: React.FC<Props> = ({ isIconButton = false }) => {
   const { account } = useWallet()
   const { data: balance, isLoading: isBalanceLoading } = useB3trBalance(account ?? undefined)
 
@@ -18,9 +19,15 @@ export const SwapB3trButton: React.FC<Props> = () => {
   return (
     <>
       <SwapB3trModal isOpen={isOpen} onClose={onClose} />
-      <Button size="sm" isDisabled={buttonDisabled} onClick={onOpen}>
-        Swap
-      </Button>
+      {isIconButton ? (
+        <Button isDisabled={buttonDisabled} onClick={onOpen}>
+          <FaRepeat />
+        </Button>
+      ) : (
+        <Button size="sm" isDisabled={buttonDisabled} onClick={onOpen} leftIcon={<FaRepeat />}>
+          Swap
+        </Button>
+      )}
     </>
   )
 }
