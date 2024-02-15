@@ -30,7 +30,7 @@ interface Allocation {
 /**
  * Saves the given allocations to a file in JSON format.
  * @param allocations Array of Allocation objects to save.
- * @param filename Name of the file to save the allocations to.
+ * @param path Name of the file to save the allocations to.
  */
 async function saveAllocationsToFile(allocations: Allocation[], path: string): Promise<void> {
   await fs.writeFile(path, JSON.stringify(allocations, null, 2))
