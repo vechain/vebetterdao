@@ -1,8 +1,8 @@
-import { AllocationProposalState } from "@/api"
+import { RoundState } from "@/api"
 import { Skeleton, Tag, TagProps } from "@chakra-ui/react"
 
 type Props = {
-  state?: keyof typeof AllocationProposalState
+  state?: keyof typeof RoundState
 } & TagProps
 export const AllocationRoundStateTag = ({ state, ...props }: Props) => {
   const colorScheme = {
@@ -15,7 +15,7 @@ export const AllocationRoundStateTag = ({ state, ...props }: Props) => {
   return (
     <Skeleton isLoaded={!!state}>
       <Tag colorScheme={colorScheme} size="sm" {...props}>
-        {state ? AllocationProposalState[state] : "Unknown"}
+        {state ? RoundState[state] : "Unknown"}
       </Tag>
     </Skeleton>
   )
