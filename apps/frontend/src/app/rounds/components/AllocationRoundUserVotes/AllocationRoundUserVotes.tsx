@@ -1,5 +1,5 @@
-import { useXApps } from "@/api"
-import { Box, Button, Card, CardBody, CardHeader, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react"
+import { useRoundXApps } from "@/api"
+import { Box, Button, Card, CardBody, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react"
 import { useEffect } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { SelectAppVotesInput } from "./components/SelectAppVotesInput"
@@ -16,7 +16,7 @@ export type FormData = {
   }[]
 }
 export const AllocationRoundUserVotes = ({ roundId }: Props) => {
-  const { data: xApps } = useXApps()
+  const { data: xApps } = useRoundXApps(roundId)
 
   const { control, register, watch, handleSubmit } = useForm<FormData>({ defaultValues: { votes: [] } })
   const { fields, append, remove, update } = useFieldArray({
