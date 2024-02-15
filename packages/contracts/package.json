@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "test:thor-solo": "yarn generate-b3tr-tokenomics && npx hardhat test",
-    "test": "yarn generate-b3tr-tokenomics && hardhat test --network hardhat",
+    "test:hardhat": "yarn generate-b3tr-tokenomics && hardhat test --network hardhat",
     "compile": "npx hardhat compile",
     "deploy": "npx hardhat run scripts/deploy",
     "check-contracts-deployment": "npx hardhat run scripts/checkContractsDeployment.ts",

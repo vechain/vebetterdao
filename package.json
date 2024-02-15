@@ -10,11 +10,11 @@
     "lint": "turbo lint",
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "contracts:compile": "turbo run compile --scope=contracts",
+    "contracts:compile": "dotenv -e .env.dev -- turbo run compile --scope=contracts",
     "contracts:deploy": "dotenv -e .env.dev turbo run deploy --scope=contracts",
     "contracts:deploy:staging": "dotenv -e .env.staging turbo run deploy --scope=contracts",
-    "contracts:test": "turbo run test --scope=contracts",
-    "contracts:test:thor-solo": "turbo run test:thor-solo --scope=contracts",
+    "contracts:test": "dotenv -e .env.dev -- turbo run test:hardhat --scope=contracts",
+    "contracts:test:thor-solo": "dotenv -e .env.dev -- turbo run test:thor-solo --scope=contracts",
     "solo-up": "make solo-up"
   },
   "devDependencies": {

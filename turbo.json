@@ -1,8 +1,9 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDotEnv": [".env", ".env.staging"],
+  "globalDotEnv": [".env.dev", ".env.staging"],
   "globalDependencies": ["**/.env.*local"],
   "globalEnv": [
+    "NEXT_PUBLIC_NETWORK_TYPE",
     "MNEMONIC", 
     "CONTRACTS_ADMIN_ADDRESS", 
     "B3TR_GOVERNOR_QUORUM_PERCENTAGE", 
