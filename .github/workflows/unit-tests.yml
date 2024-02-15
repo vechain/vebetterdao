@@ -43,6 +43,6 @@ jobs:
         id: slither
         with:
           ignore-compile: true
-          target: 'packages/contracts/contracts'
+          target: 'packages/contracts/'
           solc-version: '0.8.17'
       
