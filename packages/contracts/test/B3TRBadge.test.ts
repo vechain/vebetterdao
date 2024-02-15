@@ -6,7 +6,7 @@ import {
   getOrDeployContractInstances,
   getProposalIdFromTx,
   getVot3Tokens,
-  partecipateInAllocationVoting,
+  participateInAllocationVoting,
   waitForProposalToBeActive,
 } from "./helpers"
 import { expect } from "chai"
@@ -69,7 +69,7 @@ describe("B3TRBadge", () => {
       })
 
       // Should be able to free mint after participating in allocation voting
-      await partecipateInAllocationVoting(otherAccount, owner, xAllocationVoting)
+      await participateInAllocationVoting(otherAccount, owner, xAllocationVoting)
 
       // Deploy NFTBadge
       const NFTBadgeContract = await ethers.getContractFactory("B3TRBadge")
@@ -87,7 +87,7 @@ describe("B3TRBadge", () => {
       })
 
       // Should be able to free mint after participating in allocation voting
-      await partecipateInAllocationVoting(otherAccount, owner, xAllocationVoting)
+      await participateInAllocationVoting(otherAccount, owner, xAllocationVoting)
 
       // Deploy NFTBadge
       const NFTBadgeContract = await ethers.getContractFactory("B3TRBadge")
@@ -105,7 +105,7 @@ describe("B3TRBadge", () => {
       })
 
       // Should be able to free mint after participating in allocation voting
-      await partecipateInAllocationVoting(otherAccount, owner, xAllocationVoting)
+      await participateInAllocationVoting(otherAccount, owner, xAllocationVoting)
 
       // Deploy NFTBadge
       const NFTBadgeContract = await ethers.getContractFactory("B3TRBadge")
@@ -128,7 +128,7 @@ describe("B3TRBadge", () => {
       await catchRevert(b3trBadge.connect(otherAccount).freeMint())
     })
 
-    it("User can free mint if it partecipated in x-allocation voting", async () => {
+    it("User can free mint if it participated in x-allocation voting", async () => {
       const { b3trBadge, otherAccount, xAllocationVoting, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -137,7 +137,7 @@ describe("B3TRBadge", () => {
       await catchRevert(b3trBadge.connect(otherAccount).freeMint())
 
       // Should be able to free mint after participating in allocation voting
-      await partecipateInAllocationVoting(otherAccount, owner, xAllocationVoting)
+      await participateInAllocationVoting(otherAccount, owner, xAllocationVoting)
 
       expect(await b3trBadge.connect(otherAccount).freeMint()).not.to.be.reverted
 
@@ -146,7 +146,7 @@ describe("B3TRBadge", () => {
       expect(await b3trBadge.totalSupply()).to.equal(1) // Total supply is 1
     })
 
-    it("User can free mint if he partecipated in B3TR Governance", async () => {
+    it("User can free mint if he participated in B3TR Governance", async () => {
       const { b3trBadge, otherAccount, b3tr, otherAccounts, governor, B3trContract } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -175,7 +175,7 @@ describe("B3TRBadge", () => {
       expect(await b3trBadge.totalSupply()).to.equal(1) // Total supply is 1
     })
 
-    it("User can free mint if he partecipated both in B3TR Governance and in x-allocation voting", async () => {
+    it("User can free mint if he participated both in B3TR Governance and in x-allocation voting", async () => {
       const { b3trBadge, otherAccount, b3tr, otherAccounts, governor, B3trContract, owner, xAllocationVoting } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -197,7 +197,7 @@ describe("B3TRBadge", () => {
       await governor.connect(voter).castVote(proposalId, 1)
 
       // Should be able to free mint after participating in allocation voting
-      await partecipateInAllocationVoting(voter, owner, xAllocationVoting)
+      await participateInAllocationVoting(voter, owner, xAllocationVoting)
 
       // I should be able to free mint
       await b3trBadge.connect(voter).freeMint()
@@ -209,7 +209,7 @@ describe("B3TRBadge", () => {
       })
 
       // participation in governance is a requirement for minting
-      await partecipateInAllocationVoting(otherAccount, owner, xAllocationVoting)
+      await participateInAllocationVoting(otherAccount, owner, xAllocationVoting)
 
       const tx = await b3trBadge.connect(otherAccount).freeMint()
 
@@ -256,7 +256,7 @@ describe("B3TRBadge", () => {
       })
 
       // participation in governance is a requirement for minting
-      await partecipateInAllocationVoting(otherAccount, owner, xAllocationVoting)
+      await participateInAllocationVoting(otherAccount, owner, xAllocationVoting)
 
       await b3trBadge.connect(otherAccount).freeMint()
 
@@ -269,12 +269,12 @@ describe("B3TRBadge", () => {
       })
 
       // participation in governance is a requirement for minting
-      await partecipateInAllocationVoting(otherAccount, owner, xAllocationVoting, true)
+      await participateInAllocationVoting(otherAccount, owner, xAllocationVoting, true)
 
       await b3trBadge.connect(otherAccount).freeMint()
 
       // participation in governance is a requirement for minting
-      await partecipateInAllocationVoting(owner, owner, xAllocationVoting, false)
+      await participateInAllocationVoting(owner, owner, xAllocationVoting, false)
 
       await b3trBadge.connect(owner).freeMint()
 
@@ -302,7 +302,7 @@ describe("B3TRBadge", () => {
       })
 
       // participation in governance is a requirement for minting
-      await partecipateInAllocationVoting(otherAccount, owner, xAllocationVoting)
+      await participateInAllocationVoting(otherAccount, owner, xAllocationVoting)
 
       await b3trBadge.connect(owner).setMaxLevel(10)
 
@@ -348,7 +348,7 @@ describe("B3TRBadge", () => {
       })
 
       // participation in governance is a requirement for minting
-      await partecipateInAllocationVoting(owner, owner, xAllocationVoting)
+      await participateInAllocationVoting(owner, owner, xAllocationVoting)
 
       await b3trBadge.connect(owner).freeMint()
 
@@ -382,7 +382,7 @@ describe("B3TRBadge", () => {
       })
 
       // participation in governance is a requirement for minting
-      await partecipateInAllocationVoting(owner, owner, xAllocationVoting)
+      await participateInAllocationVoting(owner, owner, xAllocationVoting)
 
       await b3trBadge.connect(owner).freeMint()
 
@@ -408,8 +408,8 @@ describe("B3TRBadge", () => {
       })
 
       // participation in governance is a requirement for minting
-      await partecipateInAllocationVoting(otherAccount, owner, xAllocationVoting, true)
-      await partecipateInAllocationVoting(owner, owner, xAllocationVoting)
+      await participateInAllocationVoting(otherAccount, owner, xAllocationVoting, true)
+      await participateInAllocationVoting(owner, owner, xAllocationVoting)
 
       await b3trBadge.connect(otherAccount).freeMint()
 
@@ -426,7 +426,7 @@ describe("B3TRBadge", () => {
       })
 
       // participation in governance is a requirement for minting
-      await partecipateInAllocationVoting(owner, owner, xAllocationVoting, true)
+      await participateInAllocationVoting(owner, owner, xAllocationVoting, true)
 
       let tx = await b3trBadge.connect(owner).freeMint()
 
