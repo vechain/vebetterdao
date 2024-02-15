@@ -1,5 +1,5 @@
 import { useB3trBalance, useVot3Balance } from "@/api"
-import { useStakeB3tr, useUnstakeB3tr } from "@/hooks"
+import { useStakeB3tr, useTokenColors, useUnstakeB3tr } from "@/hooks"
 import {
   ModalOverlay,
   ModalContent,
@@ -23,6 +23,8 @@ import { Controller, useForm } from "react-hook-form"
 import { SliderWithTooltip } from "./SliderWithTooltip"
 import { ConfirmTransactionModalContent } from "./ConfirmTransactionModalContent"
 import { useTotalBalance } from "@/api/contracts/account"
+import { FaChevronRight } from "react-icons/fa"
+import { FaArrowRight, FaRepeat } from "react-icons/fa6"
 
 type Props = {
   isOpen: boolean
@@ -43,7 +45,9 @@ export const SwapB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
     return String((Number(b3trBalance.scaled) / Number(totalBalance.scaled)) * 100)
   }, [b3trBalance])
 
-  const { handleSubmit, watch, control } = useForm<FormData>({ defaultValues: { amount: initialB3trPercentageAmount } })
+  const { handleSubmit, watch, control, setValue } = useForm<FormData>({
+    defaultValues: { amount: initialB3trPercentageAmount },
+  })
 
   const watchB3trPercentageAmount = watch("amount", initialB3trPercentageAmount)
 
@@ -84,14 +88,45 @@ export const SwapB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
     return FormattingUtils.humanNumber(normalizedB3trToVot3Amount, normalizedB3trToVot3Amount)
   }, [normalizedB3trToVot3Amount])
 
+  const { b3trColor, vot3Color } = useTokenColors()
+
   const swapText = useMemo(() => {
-    if (b3trToVot3Amount === "0") {
-      return ""
-    }
-    if (Number(b3trToVot3Amount) > 0) {
-      return `You are swapping ${formattedNormalizedB3trToVot3Amount} B3TR to VOT3`
+    if (Number(b3trToVot3Amount) >= 0) {
+      return (
+        <HStack gap={2.5}>
+          <VStack gap={0}>
+            <Text color={b3trColor} fontSize={"12px"}>
+              B3TR
+            </Text>
+            <Text as={"b"}>{formattedNormalizedB3trToVot3Amount}</Text>
+          </VStack>
+          <FaArrowRight />
+          <VStack gap={0}>
+            <Text color={vot3Color} fontSize={"12px"}>
+              VOT3
+            </Text>
+            <Text as={"b"}>{formattedNormalizedB3trToVot3Amount}</Text>
+          </VStack>
+        </HStack>
+      )
     } else {
-      return `You are swapping ${formattedNormalizedB3trToVot3Amount} VOT3 to B3TR`
+      return (
+        <HStack gap={2.5}>
+          <VStack gap={0}>
+            <Text color={vot3Color} fontSize={"12px"}>
+              VOT3
+            </Text>
+            <Text as={"b"}>{formattedNormalizedB3trToVot3Amount}</Text>
+          </VStack>
+          <FaArrowRight />
+          <VStack gap={0}>
+            <Text color={b3trColor} fontSize={"12px"}>
+              B3TR
+            </Text>
+            <Text as={"b"}>{formattedNormalizedB3trToVot3Amount}</Text>
+          </VStack>
+        </HStack>
+      )
     }
   }, [b3trToVot3Amount, formattedNormalizedB3trToVot3Amount])
 
@@ -114,67 +149,75 @@ export const SwapB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
   const onSuccess = () => {
     resetStatus()
     onClose()
+    setValue("amount", initialB3trPercentageAmount)
   }
 
-  const renderContent = useMemo(() => {
-    if (status !== "ready")
-      return (
-        <ConfirmTransactionModalContent
-          description={swapText}
-          status={status}
-          error={sendTransactionError?.message ?? txReceiptError?.message}
-          onSuccess={onSuccess}
-          onTryAgain={resetStatus}
-        />
-      )
+  if (status !== "ready")
     return (
-      <>
-        <ModalCloseButton />
-        <ModalHeader>Swap</ModalHeader>
-        <ModalBody>
-          <VStack align={"flex-start"} gap={8}>
-            <Text as="b" fontSize={"sm"}>
-              Swap B3TR ↔️ VOT3 at a 1:1 ratio
-            </Text>
-            <FormControl>
-              <Controller
-                name="amount"
-                control={control}
-                rules={{
-                  maxLength: 100,
-                }}
-                render={({ field: { onChange, value } }) => (
-                  <SliderWithTooltip
-                    value={Number(value)}
-                    onChange={onChange}
-                    tooltipLabel={`${watchB3trPercentageAmount}% B3TR - ${100 - Number(watchB3trPercentageAmount)}% VOT3`}
-                  />
-                )}
-              />
-              <HStack justify="space-between">
-                <Text fontSize="sm">{b3trFormattedAmount} B3TR</Text>
-                <Text fontSize="sm">{vot3FormattedAmount} VOT3</Text>
-              </HStack>
-            </FormControl>
-            <Text color="teal">{swapText}</Text>
-          </VStack>
-        </ModalBody>
-
-        <ModalFooter>
-          <Button type="submit" isDisabled={Number(b3trToVot3Amount) === 0}>
-            Swap
-          </Button>
-        </ModalFooter>
-      </>
+      <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
+        <ModalOverlay />
+        <ModalContent>
+          <ConfirmTransactionModalContent
+            description={" "}
+            status={status}
+            error={sendTransactionError?.message ?? txReceiptError?.message}
+            onSuccess={onSuccess}
+            onTryAgain={resetStatus}
+          />
+        </ModalContent>
+      </Modal>
     )
-  }, [b3trToVot3Amount, status, swapText, watchB3trPercentageAmount, b3trFormattedAmount, vot3FormattedAmount])
-
   return (
-    <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
+    <Modal isCentered onClose={onClose} isOpen={isOpen} scrollBehavior="outside" motionPreset="slideInBottom">
       <ModalOverlay />
-      <form onSubmit={handleSubmit(() => sendTransaction(undefined))}>
-        <ModalContent h={320}>{renderContent}</ModalContent>
-      </form>
+      <ModalContent position="fixed" bottom="0px" mb="0" borderRadius="1.75rem 1.75rem 0px 0px" maxW="2xl">
+        <form onSubmit={handleSubmit(() => sendTransaction(undefined))}>
+          <ModalCloseButton />
+          <ModalHeader>
+            <Text>Swap</Text>
+            <Text fontSize={"xs"}>1 B3TR = 1 VOT3</Text>
+          </ModalHeader>
+          <ModalBody>
+            <VStack align={"flex-start"} gap={4}>
+              <FormControl>
+                <HStack justify="space-between">
+                  <HStack gap={1}>
+                    <Text as={"b"}>{b3trFormattedAmount}</Text>
+                    <Text color={b3trColor} fontSize={"12px"}>
+                      B3TR
+                    </Text>
+                  </HStack>
+                  <HStack gap={1}>
+                    <Text as={"b"}>{vot3FormattedAmount}</Text>
+                    <Text color={vot3Color} fontSize={"12px"}>
+                      VOT3
+                    </Text>
+                  </HStack>
+                </HStack>
+                <Controller
+                  name="amount"
+                  control={control}
+                  rules={{
+                    maxLength: 100,
+                  }}
+                  render={({ field: { onChange, value } }) => (
+                    <SliderWithTooltip value={Number(value)} onChange={onChange} />
+                  )}
+                />
+              </FormControl>
+            </VStack>
+          </ModalBody>
+
+          <ModalFooter>
+            <HStack w={"full"} justify={"space-between"}>
+              {swapText}
+              <Button type="submit" isDisabled={Number(b3trToVot3Amount) === 0} leftIcon={<FaRepeat />}>
+                Swap
+              </Button>
+            </HStack>
+          </ModalFooter>
+        </form>
+      </ModalContent>
     </Modal>
   )
 }
