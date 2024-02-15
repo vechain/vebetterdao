@@ -1,4 +1,4 @@
-import { VECHAIN_URL_SOLO, VECHAIN_URL_MAINNET, VECHAIN_URL_TESTNET } from "@vechain/hardhat-vechain"
+import { VECHAIN_URL_MAINNET, VECHAIN_URL_TESTNET } from "@vechain/hardhat-vechain"
 import { HardhatUserConfig } from "hardhat/config"
 import "@nomicfoundation/hardhat-toolbox"
 import "@nomiclabs/hardhat-truffle5"
@@ -34,7 +34,7 @@ module.exports = {
     vechain_solo: {
       url: soloUrl,
       accounts: {
-        mnemonic: "denial kitchen pet squirrel other broom bar gas better priority spoil cross",
+        mnemonic: process.env.MNEMONIC,
         count: 10,
         path: "m/44'/818'/0'/0",
       },
@@ -44,7 +44,7 @@ module.exports = {
     vechain_testnet: {
       url: VECHAIN_URL_TESTNET,
       accounts: {
-        mnemonic: process.env.MNEMONIC || "",
+        mnemonic: process.env.MNEMONIC,
         count: 10,
         path: "m/44'/818'/0'/0",
       },
@@ -54,7 +54,7 @@ module.exports = {
     vechain_mainnet: {
       url: VECHAIN_URL_MAINNET,
       accounts: {
-        mnemonic: process.env.MNEMONIC || "",
+        mnemonic: process.env.MNEMONIC,
         count: 1,
         path: "m/44'/818'/0'/0",
       },
