@@ -157,8 +157,6 @@ export const seedLocalEnvironment = async (
 
   //   Start new allocation round
   const roundId = parseInt((await xAllocationVoting.currentRoundId()).toString())
-  console.log("Waiting for proposal to be active...")
-  await waitForProposalToBeActive(roundId, xAllocationVoting)
   console.log("Casting random votes to xDapps...")
   await castVotesToXDapps(xAllocationVoting, accountsToSeed, roundId, amountToSwap, xDappsFromContract)
 
