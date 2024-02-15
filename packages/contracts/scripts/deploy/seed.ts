@@ -2,7 +2,6 @@ import { ethers } from "hardhat"
 import { B3TR, Emissions, VOT3, XAllocationVoting, XApps } from "../../typechain-types"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { BytesLike } from "ethers"
-import { waitForProposalToBeActive } from "../../test/helpers"
 
 type App = {
   address: string
@@ -99,6 +98,7 @@ const castVotesToXDapps = async (
           roundId,
           splits.map(split => split.app),
           splits.map(split => ethers.parseEther(split.weight)),
+          { gasLimit: 10_000_000 },
         )
         .then(async tx => await tx.wait())
     }),
@@ -147,18 +147,16 @@ export const seedLocalEnvironment = async (
 
   const xDappsFromContract = await xAllocationVoting.getAllApps()
 
-  //   Pre mint $B3TR
-  console.log("Pre minting $B3TR...")
+  //   Mint some $B3TR
+  console.log("Minting some $B3TR...")
   await b3tr.grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress()).then(async tx => await tx.wait())
   await emissions
     .connect(accounts[1])
-    .preMint()
+    .start()
     .then(async tx => await tx.wait())
 
   //   Start new allocation round
   const roundId = parseInt((await xAllocationVoting.currentRoundId()).toString())
-  console.log("Waiting for proposal to be active...")
-  await waitForProposalToBeActive(roundId, xAllocationVoting)
   console.log("Casting random votes to xDapps...")
   await castVotesToXDapps(xAllocationVoting, accountsToSeed, roundId, amountToSwap, xDappsFromContract)
 

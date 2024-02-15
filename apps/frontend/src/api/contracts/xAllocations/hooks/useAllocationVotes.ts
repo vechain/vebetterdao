@@ -9,33 +9,33 @@ const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
 
 /**
  *
- * Returns the number of votes for a given proposalId
+ * Returns the number of votes for a given roundId
  * @param thor  the thor client
- * @param proposalId  the proposalId the get state for
- * @returns the state of a given proposalId
+ * @param roundId  the roundId the get state for
+ * @returns the state of a given roundId
  */
-export const getAllocationVotes = async (thor: Connex.Thor, proposalId?: string): Promise<string> => {
+export const getAllocationVotes = async (thor: Connex.Thor, roundId?: string): Promise<string> => {
   const functionFragment = XAllocationVoting__factory.createInterface().getFunction("totalVotes").format("json")
-  const res = await thor.account(XALLOCATIONVOTING_CONTRACT).method(JSON.parse(functionFragment)).call(proposalId)
+  const res = await thor.account(XALLOCATIONVOTING_CONTRACT).method(JSON.parse(functionFragment)).call(roundId)
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
   return FormattingUtils.scaleNumberDown(res.decoded[0], 18)
 }
 
-export const getAllocationVotesQueryKey = (proposalId?: string) => ["allocationsRound", "votes", proposalId]
+export const getAllocationVotesQueryKey = (roundId?: string) => ["allocationsRound", "votes", roundId]
 
 /**
- *  Hook to get the number of votes for a given proposalId
- * @param proposalId  the proposalId the get the votes for
- * @returns  the number of votes for a given proposalId
+ *  Hook to get the number of votes for a given roundId
+ * @param roundId  the roundId the get the votes for
+ * @returns  the number of votes for a given roundId
  */
-export const useAllocationVotes = (proposalId?: string) => {
+export const useAllocationVotes = (roundId?: string) => {
   const { thor } = useConnex()
 
   return useQuery({
-    queryKey: getAllocationVotesQueryKey(proposalId),
-    queryFn: async () => await getAllocationVotes(thor, proposalId),
-    enabled: !!thor && !!proposalId,
+    queryKey: getAllocationVotesQueryKey(roundId),
+    queryFn: async () => await getAllocationVotes(thor, roundId),
+    enabled: !!thor && !!roundId,
   })
 }

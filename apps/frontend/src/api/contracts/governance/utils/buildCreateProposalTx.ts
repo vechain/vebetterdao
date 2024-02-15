@@ -1,9 +1,9 @@
 import { getConfig } from "@repo/config"
 import { abi } from "thor-devkit"
-import { GovernorContractJson } from "@repo/contracts"
-const governorContractAbi = GovernorContractJson.abi
+import { B3TRGovernorJson } from "@repo/contracts"
+const b3trGovernorAbi = B3TRGovernorJson.abi
 
-const GOVERNANCE_CONTRACT = getConfig().governorContractAddress
+const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
 
 // /**
 //  * Get the votes of the given address at the given timepoint
@@ -17,7 +17,7 @@ const GOVERNANCE_CONTRACT = getConfig().governorContractAddress
 
 //   console.log({ timepoint })
 
-//   const getVotesAbi = governorContractAbi.find(abi => abi.name === "getVotes")
+//   const getVotesAbi = b3trGovernorAbi.find(abi => abi.name === "getVotes")
 //   if (!getVotesAbi) throw new Error("getVotes function not found")
 //   const res = await thor.account(GOVERNANCE_CONTRACT).method(getVotesAbi).call(address, timepoint)
 
@@ -39,7 +39,7 @@ const GOVERNANCE_CONTRACT = getConfig().governorContractAddress
  */
 export const buildCreateProposalTx = (
   thor: Connex.Thor,
-  contractsAbi: (typeof governorContractAbi)[number][],
+  contractsAbi: (typeof b3trGovernorAbi)[number][],
   targets: string[],
   values: (string | number)[][],
   description: string,
@@ -61,7 +61,7 @@ export const buildCreateProposalTx = (
   }
 
   // build the clause to create the proposal with the given parameters
-  const proposalAbi = governorContractAbi.find(abi => abi.name === "propose")
+  const proposalAbi = b3trGovernorAbi.find(abi => abi.name === "propose")
   if (!proposalAbi) throw new Error("Proposal abi not found")
 
   const clause = thor.account(GOVERNANCE_CONTRACT).method(proposalAbi).asClause(targets, [0], callData, description)

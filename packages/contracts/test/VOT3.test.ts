@@ -126,7 +126,7 @@ describe("VOT3", function () {
     })
 
     it("should not unlock B3TR if not enough staked balance, even if there is enough VOT3 balance)", async function () {
-      const { b3tr, vot3, owner, minterAccount, otherAccount, otherAccounts } = await getOrDeployContractInstances({
+      const { b3tr, vot3, minterAccount, otherAccount, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -199,7 +199,7 @@ describe("VOT3", function () {
     })
 
     it("Self-delegation should be automatic upon receiving VOT3 from another user", async function () {
-      const { vot3, owner, minterAccount, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
+      const { vot3, minterAccount, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
 
       // Mint some B3TR and swap for VOT3
       await getVot3Tokens(minterAccount, "1000")
@@ -219,7 +219,7 @@ describe("VOT3", function () {
     })
 
     it("Vote power is being tracked correctly", async function () {
-      const { vot3, owner, minterAccount, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
+      const { vot3, minterAccount, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
 
       // Mint some B3TR and swap for VOT3
       await getVot3Tokens(otherAccount, "1000")
@@ -261,7 +261,7 @@ describe("VOT3", function () {
     })
 
     it("Automatic self-delegation should be triggered only once", async function () {
-      const { vot3, b3tr, owner, minterAccount, otherAccount } = await getOrDeployContractInstances({
+      const { vot3, b3tr, minterAccount, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -299,7 +299,7 @@ describe("VOT3", function () {
     })
 
     it("Delegation to another user should still be possible", async function () {
-      const { vot3, owner, minterAccount, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
+      const { vot3, minterAccount, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
 
       // Mint some B3TR and swap for VOT3
       await getVot3Tokens(otherAccount, "1000")
@@ -316,7 +316,7 @@ describe("VOT3", function () {
     })
 
     it("Self delegation is not happening for the VOT3 contract itself", async function () {
-      const { vot3, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
+      const { vot3, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
 
       // Mint some B3TR and swap for VOT3
       await getVot3Tokens(otherAccount, "1000")
@@ -328,7 +328,7 @@ describe("VOT3", function () {
     })
 
     it("Self delegation is not happening if interacting with another contract", async function () {
-      const { vot3, owner, otherAccount, b3tr } = await getOrDeployContractInstances({ forceDeploy: true })
+      const { vot3, otherAccount, b3tr } = await getOrDeployContractInstances({ forceDeploy: true })
 
       // Mint some B3TR and swap for VOT3
       await getVot3Tokens(otherAccount, "1000")

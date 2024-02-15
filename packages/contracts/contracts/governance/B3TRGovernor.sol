@@ -2,13 +2,13 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/governance/Governor.sol";
-import "@openzeppelin/contracts/governance/extensions/GovernorCountingSimple.sol";
+import "./modules/GovernorCountingSimple.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorVotes.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorTimelockControl.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorSettings.sol";
 
-contract GovernorContract is
+contract B3TRGovernor is
   Governor,
   GovernorSettings,
   GovernorCountingSimple,
@@ -33,7 +33,7 @@ contract GovernorContract is
     uint48 _initialVotingDelay,
     uint256 _initialProposalThreshold
   )
-    Governor("GovernorContract")
+    Governor("B3TRGovernor")
     GovernorSettings(_initialVotingDelay, _initialVotingPeriod, _initialProposalThreshold)
     GovernorVotes(_vot3Token)
     GovernorVotesQuorumFraction(_quorumPercentage)

@@ -1,20 +1,20 @@
-import { AllocationProposalCreated, AllocationProposalState, useAllocationsRound } from "@/api"
+import { RoundCreated, useAllocationsRound } from "@/api"
 import { Box, Card, CardBody, HStack, Heading, Icon, Tag, Text, useColorModeValue } from "@chakra-ui/react"
-import { getConfig } from "@repo/config"
 import { useRouter } from "next/navigation"
 import { FaAngleRight } from "react-icons/fa6"
+import { AllocationRoundStateTag } from "../AllocationRoundStateTag"
 
 type Props = {
-  round: AllocationProposalCreated
+  round: RoundCreated
 }
 
 export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
   const router = useRouter()
 
-  const { data: allocationRound } = useAllocationsRound(round.proposalId)
+  const { data: allocationRound } = useAllocationsRound(round.roundId)
 
   const onRoundClick = () => {
-    router.push(`/rounds/${round.proposalId}`)
+    router.push(`/rounds/${round.roundId}`)
   }
 
   const cardHoverColor = useColorModeValue("primary.500", "primary.300")
@@ -31,12 +31,12 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
       }}>
       <CardBody>
         <HStack justify={"space-between"} w="full">
-          <Box>
-            <HStack spacing={2}>
+          <Box w="full">
+            <HStack spacing={2} w="full" justify="space-between">
               <Heading as="h3" size="md">
-                Round #{round.proposalId}
+                Round #{round.roundId}
               </Heading>
-              <Tag colorScheme="green">{allocationRound.state && AllocationProposalState[allocationRound.state]}</Tag>
+              <AllocationRoundStateTag state={allocationRound.state} size="md" />
             </HStack>
             <Text>{allocationRound.voteEndTimestamp?.fromNow()}</Text>
           </Box>

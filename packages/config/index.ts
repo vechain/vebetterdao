@@ -5,7 +5,7 @@ import stagingConfig from "./solo-staging"
 export type Config = {
   b3trContractAddress: string
   vot3ContractAddress: string
-  governorContractAddress: string
+  b3trGovernorAddress: string
   timelockContractAddress: string
   xAllocationPoolContractAddress: string
   xAllocationVotingContractAddress: string

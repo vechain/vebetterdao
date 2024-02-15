@@ -29,7 +29,7 @@ export default function Home() {
           justify="space-between"
           align={["stretch", "stretch", "flex-start"]}
           spacing={18}>
-          <VStack flex={4} justifyContent="stretch" alignItems={"stretch"} divider={<StackDivider />} spacing={4}>
+          <VStack flex={4} justifyContent="stretch" alignItems={"stretch"} spacing={4}>
             <Box>
               <CirculatingSupplyPieChart />
             </Box>

@@ -10,7 +10,7 @@ export const AllocationRoundsList: React.FC<Props> = ({ maxRounds }) => {
   const invertedCreatedRounds = allocationRoundsEvents?.created.slice().reverse()
 
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  const isRoundActive = currentRoundId && currentRoundId !== "0"
+  const isActive = currentRoundId && currentRoundId !== "0"
 
   return (
     <VStack spacing={8} w="full" align={"flex-start"}>
@@ -21,7 +21,7 @@ export const AllocationRoundsList: React.FC<Props> = ({ maxRounds }) => {
       </Box>
       <VStack spacing={4} w="full">
         {invertedCreatedRounds?.slice(0, maxRounds).map((round, i) => {
-          return <AllocationRoundCard round={round} key={round.proposalId} />
+          return <AllocationRoundCard round={round} key={round.roundId} />
         })}
         {invertedCreatedRounds && maxRounds && invertedCreatedRounds.length > maxRounds && (
           <Button variant="link" colorScheme="blue">

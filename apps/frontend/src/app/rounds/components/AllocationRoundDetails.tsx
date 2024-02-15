@@ -1,10 +1,4 @@
-import {
-  useAllocationAmount,
-  useAllocationVoters,
-  useAllocationsRound,
-  useRoundXAppsWithDetails,
-  useXApps,
-} from "@/api"
+import { useAllocationAmount, useAllocationVoters, useAllocationsRound, useRoundXApps } from "@/api"
 import {
   Box,
   Card,
@@ -30,7 +24,7 @@ const compactFormatter = new Intl.NumberFormat("en-US", {
 
 export const AllocationRoundDetails = ({ roundId }: Props) => {
   const { data, isLoading } = useAllocationsRound(roundId)
-  const { data: xApps, isLoading: xAppsLoading } = useRoundXAppsWithDetails(roundId)
+  const { data: xApps, isLoading: xAppsLoading } = useRoundXApps(roundId)
   const { data: totalVoters, isLoading: totalVotersLoading } = useAllocationVoters(roundId)
   const { data: roundAmount, isLoading: roundAmountLoading, error: roundAmountError } = useAllocationAmount(roundId)
 
@@ -54,7 +48,7 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
               </HStack>
             </Skeleton>
             <Skeleton isLoaded={!isLoading}>
-              <Heading size="xl">Allocations | Round #{data?.proposalId}</Heading>
+              <Heading size="xl">Allocations | Round #{data?.roundId}</Heading>
             </Skeleton>
             <Skeleton isLoaded={!isLoading}>
               <Text color="gray.500">

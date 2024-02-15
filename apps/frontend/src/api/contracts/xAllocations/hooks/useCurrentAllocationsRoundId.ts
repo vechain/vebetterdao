@@ -34,6 +34,5 @@ export const useCurrentAllocationsRoundId = () => {
     queryKey: getCurrentAllocationsRoundIdQueryKey(),
     queryFn: async () => await getCurrentAllocationsRoundId(thor),
     enabled: !!thor,
-    staleTime: Infinity,
   })
 }

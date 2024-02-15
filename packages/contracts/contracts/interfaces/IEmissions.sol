@@ -37,8 +37,6 @@ interface IEmissions {
 
     function distribute() external;
 
-    function distributeLast() external;
-
     function emissions(uint256)
         external
         view
@@ -56,15 +54,9 @@ interface IEmissions {
 
     function getCurrentXAllocationsAmount() external view returns (uint256);
 
-    function getLastTreasuryAmount() external view returns (uint256);
-
-    function getLastVote2EarnAmount() external view returns (uint256);
-
-    function getLastXAllocationsAmount() external view returns (uint256);
-
     function getNextCycleBlock() external view returns (uint256);
 
-    function getPreMintAllocations() external view returns (uint256[] memory);
+    function getInitialAllocations() external view returns (uint256[] memory);
 
     function getRemainingEmissions() external view returns (uint256);
 
@@ -107,21 +99,17 @@ interface IEmissions {
 
     function isCycleEnded(uint256 cycle) external view returns (bool);
 
-    function isLastCycle() external view returns (bool);
-
     function isNextCycleDistributable() external view returns (bool);
 
     function lastEmissionBlock() external view returns (uint256);
-
-    function lastEmissions(uint256) external view returns (uint256);
 
     function maxVote2EarnDecay() external view returns (uint256);
 
     function nextCycle() external view returns (uint256);
 
-    function preMint() external;
+    function start() external;
 
-    function preMintAllocations(uint256) external view returns (uint256);
+    function initialAllocations(uint256) external view returns (uint256);
 
     function renounceRole(bytes32 role, address callerConfirmation) external;
 
@@ -133,11 +121,9 @@ interface IEmissions {
 
     function setInitialEmissions(uint256 _emissions) external;
 
-    function setLastEmissions(uint256[] memory _lastEmissions) external;
-
     function setMaxVote2EarnDecay(uint256 _maxVote2EarnDecay) external;
 
-    function setPreMintAllocations(uint256[] memory _allocations) external;
+    function setInitialAllocations(uint256[] memory _allocations) external;
 
     function setScalingFactor(uint256 _scalingFactor) external;
 
@@ -161,6 +147,8 @@ interface IEmissions {
     function setXallocationsAddress(address xAllocationAddress) external;
 
     function supportsInterface(bytes4 interfaceId) external view returns (bool);
+
+    function totalEmissions() external view returns (uint256);
 
     function treasury() external view returns (address);
 
