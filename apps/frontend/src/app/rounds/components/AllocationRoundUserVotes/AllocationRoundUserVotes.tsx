@@ -4,6 +4,7 @@ import { useEffect } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { SelectAppVotesInput } from "./components/SelectAppVotesInput"
 import { AppVotesBreakdown } from "./components/AppVotesBreakdown"
+import { MdHowToVote } from "react-icons/md"
 
 type Props = {
   roundId: string
@@ -83,7 +84,9 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
                 ))}
               </VStack>
             </Box>
-            <Button type="submit">Submit</Button>
+            <Button type="submit" leftIcon={<MdHowToVote />}>
+              Cast vote now
+            </Button>
           </form>
         </Stack>
       </CardBody>
