@@ -31,7 +31,14 @@ export const getXApps = async (thor: Connex.Thor): Promise<XApp[]> => {
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
-  return res.decoded[0]
+  const apps = res.decoded[0]
+  return apps.map((app: any) => ({
+    id: app[0],
+    addr: app[1],
+    name: app[2],
+    metadata: app[3],
+    createdAt: app[4],
+  }))
 }
 
 export const getXAppsQueryKey = () => ["xApps"]
