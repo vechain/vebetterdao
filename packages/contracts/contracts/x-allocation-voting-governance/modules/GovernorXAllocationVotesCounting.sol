@@ -26,7 +26,7 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
   // mapping to store that a user has voted at least one time
   mapping(address => bool) internal _hasVotedOnce;
 
-  mapping(uint256 roundId => RoundVote) internal _RoundVotes;
+  mapping(uint256 roundId => RoundVote) internal _roundVotes;
 
   IVoterRewards public voterRewards;
 
@@ -62,7 +62,7 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
         revert GovernorAppNotAvailableForVoting(apps[i]);
       }
 
-      _RoundVotes[roundId].votesReceived[apps[i]] += weights[i];
+      _roundVotes[roundId].votesReceived[apps[i]] += weights[i];
     }
 
     require(
@@ -72,9 +72,9 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
 
     voterRewards.registerXallocationVote(round.voteStart, voter, totalWeight);
 
-    _RoundVotes[roundId].totalVotes += totalWeight;
-    _RoundVotes[roundId].hasVoted[voter] = true;
-    _RoundVotes[roundId].totalVoters++;
+    _roundVotes[roundId].totalVotes += totalWeight;
+    _roundVotes[roundId].hasVoted[voter] = true;
+    _roundVotes[roundId].totalVoters++;
 
     // save that user cast vote only the first time
     if (!_hasVotedOnce[voter]) {
@@ -85,19 +85,19 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
   }
 
   function getAppVotes(uint256 roundId, bytes32 app) public view override returns (uint256) {
-    return _RoundVotes[roundId].votesReceived[app];
+    return _roundVotes[roundId].votesReceived[app];
   }
 
   function totalVotes(uint256 roundId) public view override returns (uint256) {
-    return _RoundVotes[roundId].totalVotes;
+    return _roundVotes[roundId].totalVotes;
   }
 
   function totalVoters(uint256 roundId) public view override returns (uint256) {
-    return _RoundVotes[roundId].totalVoters;
+    return _roundVotes[roundId].totalVoters;
   }
 
   function hasVoted(uint256 roundId, address user) public view returns (bool) {
-    return _RoundVotes[roundId].hasVoted[user];
+    return _roundVotes[roundId].hasVoted[user];
   }
 
   function _quorumReached(uint256 roundId) internal view virtual override returns (bool) {
