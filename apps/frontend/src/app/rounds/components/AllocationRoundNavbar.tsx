@@ -1,4 +1,5 @@
 import { RoundState, useAllocationsRound } from "@/api"
+import { AllocationRoundStateTag } from "@/components/AllocationRoundsList/AllocationRoundStateTag"
 import {
   HStack,
   Button,
@@ -60,11 +61,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
               <Text>{!isLoading ? data?.voteEndTimestamp?.format("D MMMM") : "8 Feb"}</Text>
             </Skeleton>
           </HStack>
-          <Skeleton isLoaded={!isLoading}>
-            <Tag colorScheme="primary" variant="solid">
-              {isLoading ? data?.state && RoundState[data.state] : "Loading"}
-            </Tag>
-          </Skeleton>
+          <AllocationRoundStateTag state={data?.state} size="md" />
         </Stack>
         <Button
           size="sm"
@@ -88,11 +85,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
       <VStack w="full">
         <HStack spacing={4}>
           <Heading size="md">{data?.roundId}° round</Heading>
-          <Skeleton isLoaded={!isLoading}>
-            <Tag colorScheme="primary" variant="solid">
-              {isLoading ? data?.state && RoundState[data.state] : "Loading"}
-            </Tag>
-          </Skeleton>
+          <AllocationRoundStateTag state={data?.state} size="md" />
         </HStack>
 
         <HStack spacing={2} align={"center"}>

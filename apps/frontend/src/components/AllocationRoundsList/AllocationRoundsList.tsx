@@ -15,7 +15,7 @@ export const AllocationRoundsList: React.FC<Props> = ({ maxRounds }) => {
   const { data: currentRound } = useAllocationsRound(currentRoundId)
 
   const isCurrentRoundActive = useMemo(() => {
-    return currentRound?.state !== RoundState[0]
+    return currentRound?.state === "0"
   }, [currentRound, allocationRoundsEvents])
 
   const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useDistributeEmission({})
