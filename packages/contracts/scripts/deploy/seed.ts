@@ -2,6 +2,7 @@ import { ethers } from "hardhat"
 import { B3TR, Emissions, VOT3, XAllocationVoting, XApps } from "../../typechain-types"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { BytesLike } from "ethers"
+import { waitForRoundToEnd } from "../../test/helpers"
 
 type App = {
   address: string
@@ -159,6 +160,25 @@ export const seedLocalEnvironment = async (
   const roundId = parseInt((await xAllocationVoting.currentRoundId()).toString())
   console.log("Casting random votes to xDapps...")
   await castVotesToXDapps(xAllocationVoting, accountsToSeed, roundId, amountToSwap, xDappsFromContract)
+
+  await waitForRoundToEnd(roundId, xAllocationVoting)
+
+  // simaluate other 3 rounds
+  for (let i = 0; i < 3; i++) {
+    await emissions
+      .connect(accounts[1])
+      .distribute()
+      .then(async tx => await tx.wait())
+    const roundId = parseInt((await xAllocationVoting.currentRoundId()).toString())
+    console.log(`Casting random votes to xDapps for round ${roundId}...`)
+    await castVotesToXDapps(xAllocationVoting, accountsToSeed, roundId, amountToSwap, xDappsFromContract)
+    await waitForRoundToEnd(roundId, xAllocationVoting)
+  }
+
+  await emissions
+    .connect(accounts[1])
+    .distribute()
+    .then(async tx => await tx.wait())
 
   //TODO: SEED multiple rounds and votes (we need to execute a proposal to change the votingPeriod to someseconds)
 
