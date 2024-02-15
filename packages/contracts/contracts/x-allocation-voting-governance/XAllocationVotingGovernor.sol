@@ -217,8 +217,8 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
    *           ^--- Failed
    *            ^-- Active
    */
-  function _encodeStateBitmap(RoundState proposalState) internal pure returns (bytes32) {
-    return bytes32(1 << uint8(proposalState));
+  function _encodeStateBitmap(RoundState roundState) internal pure returns (bytes32) {
+    return bytes32(1 << uint8(roundState));
   }
 
   // ---------- Virtual ---------- //

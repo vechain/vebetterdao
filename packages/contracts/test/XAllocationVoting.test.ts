@@ -164,8 +164,8 @@ describe("X-Allocation Voting", function () {
       expect(roundId).to.eql(BigInt(1))
 
       //Prposal should be active
-      let proposalState = await xAllocationVoting.state(roundId)
-      expect(proposalState).to.eql(BigInt(0))
+      let roundState = await xAllocationVoting.state(roundId)
+      expect(roundState).to.eql(BigInt(0))
     })
 
     it("Should not be able to start a new allocation round if there is an active one", async function () {
@@ -186,8 +186,8 @@ describe("X-Allocation Voting", function () {
       let { roundId } = parseRoundStartedEvent(roundCreated[0], xAllocationVoting)
 
       //Prposal should be active
-      let proposalState = await xAllocationVoting.state(roundId)
-      expect(proposalState).to.eql(BigInt(0))
+      let roundState = await xAllocationVoting.state(roundId)
+      expect(roundState).to.eql(BigInt(0))
 
       // should not be able to start a new allocation round if there is an active one
       await catchRevert(xAllocationVoting.connect(owner).startNewRound())
