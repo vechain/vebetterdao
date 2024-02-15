@@ -36,9 +36,9 @@ contract Emissions is AccessControl, ReentrancyGuard {
   uint256 public vote2EarnDecay; // Decay rate for vote2Earn in percentage
   uint256 public maxVote2EarnDecay; // Maximum decay rate for vote2Earn in percentage
 
-  // ----------- Decay Delays ----------- //
-  uint256 public xAllocationsDecayDelay; // Delay for xAllocations decay in seconds
-  uint256 public vote2EarnDecayDelay; // Delay for vote2Earn decay in seconds
+  // ----------- Decay periods ----------- //
+  uint256 public xAllocationsDecayPeriod; // Decay period for xAllocations in number of cycles
+  uint256 public vote2EarnDecayPeriod; // Decay period for vote2Earn in number of cycles
 
   // ----------- Emissions ----------- //
   uint256 public initialEmissions; // Initial emissions for xAllocations & vote2Earn
@@ -105,8 +105,8 @@ contract Emissions is AccessControl, ReentrancyGuard {
     // Set decay settings
     xAllocationsDecay = _decaySettings[0];
     vote2EarnDecay = _decaySettings[1];
-    xAllocationsDecayDelay = _decaySettings[2];
-    vote2EarnDecayDelay = _decaySettings[3];
+    xAllocationsDecayPeriod = _decaySettings[2];
+    vote2EarnDecayPeriod = _decaySettings[3];
 
     // Set initial emissions
     initialEmissions = _initialEmissions;
@@ -193,7 +193,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   function getXAllocationDecayPeriods() public view returns (uint256) {
-    return (getCurrentCycle() - 1) / xAllocationsDecayDelay;
+    return (getCurrentCycle() - 1) / xAllocationsDecayPeriod;
   }
 
   function getCurrentXAllocationsAmount() public view returns (uint256) {
@@ -201,7 +201,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   function getVote2EarnDecayPeriods() public view returns (uint256) {
-    return (getCurrentCycle() - 1) / vote2EarnDecayDelay;
+    return (getCurrentCycle() - 1) / vote2EarnDecayPeriod;
   }
 
   function getCurrentVote2EarnAmount() public view returns (uint256) {
@@ -307,12 +307,12 @@ contract Emissions is AccessControl, ReentrancyGuard {
 
   function setXAllocationsDecayDelay(uint256 _delay) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(_delay > 0, "Emissions: xAllocations decay delay must be greater than 0");
-    xAllocationsDecayDelay = _delay;
+    xAllocationsDecayPeriod = _delay;
   }
 
   function setVote2EarnDecayDelay(uint256 _delay) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(_delay > 0, "Emissions: vote2Earn decay delay must be greater than 0");
-    vote2EarnDecayDelay = _delay;
+    vote2EarnDecayPeriod = _delay;
   }
 
   function setInitialEmissions(uint256 _emissions) public onlyRole(DEFAULT_ADMIN_ROLE) {
