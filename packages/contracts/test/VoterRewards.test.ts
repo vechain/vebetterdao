@@ -8,7 +8,6 @@ import {
   getVot3Tokens,
   levels,
   multipliers,
-  waitForProposalToBeActive,
   waitForVotingPeriodToEnd,
   waitForNextCycle,
   voteOnApps,
@@ -78,9 +77,9 @@ describe("VoterRewards", () => {
         forceDeploy: true,
       })
 
-      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "", true)
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationPool.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, "", true)
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, "")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       const voter2 = otherAccounts[3]
       const voter3 = otherAccounts[4]
@@ -110,7 +109,7 @@ describe("VoterRewards", () => {
 
       expect(proposalEvent).to.not.equal(undefined)
 
-      expect(await emissions.getCycleFromBlock(await ethers.provider.getBlockNumber())).to.equal(1)
+      expect(await emissions.getCurrentCycle()).to.equal(1)
 
       expect(await b3tr.balanceOf(await xAllocationPool.getAddress())).to.equal(PRE_MINT_X_ALLOCATION)
       expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(PRE_MINT_VOTE_2_EARN_ALLOCATION)
@@ -122,11 +121,7 @@ describe("VoterRewards", () => {
 
       expect(proposalId).to.equal(1)
 
-      expect(await xAllocationVoting.proposalDeadline(proposalId)).to.lt(
-        await emissions.getCycleBlock(await emissions.nextCycle()),
-      )
-
-      await waitForProposalToBeActive(Number(proposalId), xAllocationVoting)
+      expect(await xAllocationVoting.proposalDeadline(proposalId)).to.lt(await emissions.getNextCycleBlock())
 
       tx = await xAllocationVoting
         .connect(otherAccount)
@@ -206,10 +201,10 @@ describe("VoterRewards", () => {
       await waitForNextCycle(emissions)
 
       expect(await emissions.isCycleDistributed(await emissions.nextCycle())).to.equal(false)
-      expect(await emissions.isCycleDistributable(await emissions.nextCycle())).to.equal(true)
+      expect(await emissions.isNextCycleDistributable()).to.equal(true)
 
       // Reward claiming
-      expect(await emissions.isCycleEnded(1)).to.equal(true)
+      expect(await emissions.isCycleDistributed(1)).to.equal(true)
       expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(
         await emissions.getVote2EarnAmountForCycle(1),
       )
@@ -253,7 +248,6 @@ describe("VoterRewards", () => {
         xAllocationVoting,
         otherAccounts,
         otherAccount: voter1,
-        xAllocationPool,
         owner,
         voterRewards,
         emissions,
@@ -263,9 +257,9 @@ describe("VoterRewards", () => {
         forceDeploy: true,
       })
 
-      await xAllocationPool.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "", true)
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationPool.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, "", true)
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, "")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       const voter2 = otherAccounts[3]
       const voter3 = otherAccounts[4]
@@ -283,11 +277,7 @@ describe("VoterRewards", () => {
 
       expect(proposalId).to.equal(1)
 
-      expect(await xAllocationVoting.proposalDeadline(proposalId)).to.lt(
-        await emissions.getCycleBlock(await emissions.nextCycle()),
-      )
-
-      await waitForProposalToBeActive(Number(proposalId), xAllocationVoting)
+      expect(await xAllocationVoting.proposalDeadline(proposalId)).to.lt(await emissions.getNextCycleBlock())
 
       // Vote on apps for the first round
       await voteOnApps(
@@ -349,10 +339,10 @@ describe("VoterRewards", () => {
       await waitForNextCycle(emissions)
 
       expect(await emissions.isCycleDistributed(await emissions.nextCycle())).to.equal(false)
-      expect(await emissions.isCycleDistributable(await emissions.nextCycle())).to.equal(true)
+      expect(await emissions.isNextCycleDistributable()).to.equal(true)
 
       // Reward claiming
-      expect(await emissions.isCycleEnded(1)).to.equal(true)
+      expect(await emissions.isCycleDistributed(1)).to.equal(true)
       expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(
         await emissions.getVote2EarnAmountForCycle(1),
       )
@@ -376,11 +366,7 @@ describe("VoterRewards", () => {
 
       expect(proposalId2).to.equal(2)
 
-      expect(await xAllocationVoting.proposalDeadline(proposalId2)).to.lt(
-        await emissions.getCycleBlock(await emissions.nextCycle()),
-      )
-
-      await waitForProposalToBeActive(Number(proposalId2), xAllocationVoting)
+      expect(await xAllocationVoting.proposalDeadline(proposalId)).to.lt(await emissions.getNextCycleBlock())
 
       // Vote on apps for the second round
       await voteOnApps(
@@ -442,10 +428,10 @@ describe("VoterRewards", () => {
       await waitForNextCycle(emissions)
 
       expect(await emissions.isCycleDistributed(await emissions.nextCycle())).to.equal(false)
-      expect(await emissions.isCycleDistributable(await emissions.nextCycle())).to.equal(true)
+      expect(await emissions.isNextCycleDistributable()).to.equal(true)
 
       // Reward claiming
-      expect(await emissions.isCycleEnded(2)).to.equal(true)
+      expect(await emissions.isCycleDistributed(2)).to.equal(true)
       expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.gt(await emissions.getVote2EarnAmountForCycle(2)) // Voters of round 1 can still claim rewards of round 1 thus the balance of VoterRewards contract should be greater than the emission amount
 
       const voter1Rewards2 = await voterRewards.getReward(2, voter1.address)
@@ -479,9 +465,7 @@ describe("VoterRewards", () => {
 
       await emissions.connect(minterAccount).preMint()
 
-      const proposalId = await xAllocationVoting.currentRoundId()
-
-      await waitForProposalToBeActive(Number(proposalId), xAllocationVoting)
+      let proposalId = await xAllocationVoting.currentRoundId()
 
       await waitForVotingPeriodToEnd(Number(proposalId), xAllocationVoting)
 
@@ -490,6 +474,8 @@ describe("VoterRewards", () => {
       await catchRevert(voterRewards.claimReward(1, otherAccount.address)) // Should not be able to claim rewards as not voted
 
       await emissions.connect(otherAccount).distribute()
+
+      proposalId = await xAllocationVoting.currentRoundId()
 
       await waitForVotingPeriodToEnd(Number(proposalId), xAllocationVoting)
 
@@ -502,21 +488,12 @@ describe("VoterRewards", () => {
     })
 
     it("Should not be able to claim rewards twice", async () => {
-      const {
-        xAllocationVoting,
-        otherAccount,
-        voterRewards,
-        emissions,
-        b3tr,
-        owner,
-        minterAccount,
-        xAllocationPool,
-        otherAccounts,
-      } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, otherAccount, voterRewards, emissions, b3tr, owner, minterAccount, otherAccounts } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
-      const [app1] = await addAppsToAllocationVoting(xAllocationPool, [otherAccount.address], owner)
+      const [app1] = await addAppsToAllocationVoting(xAllocationVoting, [otherAccount.address], owner)
 
       const voter1 = otherAccounts[0]
 
@@ -528,8 +505,6 @@ describe("VoterRewards", () => {
       await emissions.connect(minterAccount).preMint()
 
       const proposalId = await xAllocationVoting.currentRoundId()
-
-      await waitForProposalToBeActive(Number(proposalId), xAllocationVoting)
 
       await voteOnApps(xAllocationVoting, [app1], [voter1], [[ethers.parseEther("1000")]], proposalId)
 
@@ -558,8 +533,6 @@ describe("VoterRewards", () => {
       const proposalId = await xAllocationVoting.currentRoundId()
 
       const proposalStart = await xAllocationVoting.proposalSnapshot(proposalId)
-
-      await waitForProposalToBeActive(Number(proposalId), xAllocationVoting)
 
       await catchRevert(
         voterRewards

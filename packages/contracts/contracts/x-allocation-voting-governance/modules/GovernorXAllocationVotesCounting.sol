@@ -25,11 +25,9 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
 
   mapping(uint256 proposalId => AllocationRoundVote) internal _allocationRoundVotes;
 
-  IXAllocationPool internal xAllocationPool;
   IVoterRewards public voterRewards;
 
-  constructor(address _xAllocationPool, address _voterRewards) {
-    xAllocationPool = IXAllocationPool(_xAllocationPool);
+  constructor(address _voterRewards) {
     voterRewards = IVoterRewards(_voterRewards);
   }
 
@@ -57,7 +55,7 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
     for (uint256 i = 0; i < apps.length; i++) {
       totalWeight += weights[i];
 
-      if (!xAllocationPool.isAppAvailableForAllocationVoting(apps[i])) {
+      if (!isEligibleForVote(apps[i], proposalId)) {
         revert GovernorAppNotAvailableForVoting(apps[i]);
       }
 
@@ -78,15 +76,15 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
     emit AllocationVoteCast(voter, proposalId, apps, weights);
   }
 
-  function getAppVotes(uint256 proposalId, bytes32 app) public view returns (uint256) {
+  function getAppVotes(uint256 proposalId, bytes32 app) public view override returns (uint256) {
     return _allocationRoundVotes[proposalId].votesReceived[app];
   }
 
-  function totalVotes(uint256 proposalId) public view returns (uint256) {
+  function totalVotes(uint256 proposalId) public view override returns (uint256) {
     return _allocationRoundVotes[proposalId].totalVotes;
   }
 
-  function totalVoters(uint256 proposalId) public view returns (uint256) {
+  function totalVoters(uint256 proposalId) public view override returns (uint256) {
     return _allocationRoundVotes[proposalId].totalVoters;
   }
 
@@ -102,10 +100,4 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
   function _voteSucceeded(uint256 proposalId) internal view virtual override returns (bool) {
     return _quorumReached(proposalId);
   }
-
-  function getXAllocationPoolAddress() public view returns (address) {
-    return address(xAllocationPool);
-  }
-
-  function setXAllocationPoolAddress(address xAllocationPool_) public virtual;
 }

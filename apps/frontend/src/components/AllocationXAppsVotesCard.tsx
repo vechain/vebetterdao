@@ -1,13 +1,13 @@
 import { Box, Card, CardBody, CardHeader, HStack, Heading } from "@chakra-ui/react"
 import { HorizontalChartBar } from "./HorizontalBarChart"
-import { useXApps, useXAppsVotes } from "@/api"
+import { useRoundXAppsWithDetails, useXApps, useXAppsVotes } from "@/api"
 import { useMemo } from "react"
 
 type Props = {
   roundId: string
 }
 export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
-  const { data: xApps } = useXApps()
+  const { data: xApps } = useRoundXAppsWithDetails(roundId)
 
   const xAppsVotes = useXAppsVotes(xApps?.map(app => app.id) ?? [], roundId)
 

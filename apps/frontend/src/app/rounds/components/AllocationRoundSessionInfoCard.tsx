@@ -37,7 +37,7 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
     () => [
       { title: "Voting session started", description: roundInfo?.voteStartTimestamp?.format("MMMM D hh:mm A") },
       { title: "Voting session finished", description: roundInfo?.voteEndTimestamp?.format("MMMM D hh:mm A") },
-      { title: "Proposal executed" },
+      { title: "Allocations claimable" },
     ],
     [roundInfo],
   )
@@ -50,7 +50,6 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
   useEffect(() => {
     if (roundInfo) {
       const stateNumber = Number(roundInfo.state)
-      if (stateNumber > 1) setActiveStep(2)
       setActiveStep(stateNumber)
     }
   }, [roundInfo, setActiveStep])

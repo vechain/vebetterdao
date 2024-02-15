@@ -6,6 +6,7 @@ import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Context } from "@openzeppelin/contracts/utils/Context.sol";
 import { Nonces } from "@openzeppelin/contracts/utils/Nonces.sol";
 import { IXAllocationVotingGovernor, IERC6372 } from "../interfaces/IXAllocationVotingGovernor.sol";
+import { IXAllocationPool } from "../interfaces/IXAllocationPool.sol";
 
 /**
  * @dev Core of the x-allocation votes governance system, designed to be extended through various modules.
@@ -19,6 +20,10 @@ import { IXAllocationVotingGovernor, IERC6372 } from "../interfaces/IXAllocation
 abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAllocationVotingGovernor {
   // counter to count the number of proposals and also used to create the id
   uint256 internal _proposalCount;
+
+  // for each round store a pointer to the latest succeeded round
+  mapping(uint256 => uint256) internal _latestSucceededRoundId;
+  mapping(uint256 => bool) internal _roundFinalized;
 
   struct ProposalCore {
     address proposer;
@@ -34,13 +39,14 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   address internal _b3trGovernor;
 
   mapping(uint256 proposalId => ProposalCore) internal _proposals;
+  mapping(uint256 proposalId => bytes32[]) internal _appsElegibleForVoting;
 
   /**
    * @dev Restricts a function so it can only be executed through governance proposals. For example, governance
    * parameter setters in {GovernorSettings} are protected using this modifier.
    */
   modifier onlyGovernance() {
-    if (getB3trGovernorAddress() != _msgSender()) {
+    if (_b3trGovernor != _msgSender()) {
       revert GovernorOnlyExecutor(_msgSender());
     }
     _;
@@ -85,8 +91,12 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   /**
    * Returns the address of the B3trGovernor contract.
    */
-  function getB3trGovernorAddress() public view returns (address) {
+  function b3trGovernor() public view returns (address) {
     return _b3trGovernor;
+  }
+
+  function getRoundApps(uint256 roundId) public view override returns (bytes32[] memory) {
+    return _appsElegibleForVoting[roundId];
   }
 
   /**
@@ -94,6 +104,17 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
    */
   function currentRoundId() public view virtual override returns (uint256) {
     return _proposalCount;
+  }
+
+  /**
+   * @dev See {IXAllocationVotingGovernor-isActive}.
+   */
+  function isActive(uint256 roundId) public view virtual override returns (bool) {
+    return state(roundId) == AllocationProposalState.Active;
+  }
+
+  function latestSucceededRoundId(uint256 roundId) public view override returns (uint256) {
+    return _latestSucceededRoundId[roundId];
   }
 
   /**
@@ -107,10 +128,6 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
     }
 
     uint256 currentTimepoint = clock();
-
-    if (snapshot >= currentTimepoint) {
-      return AllocationProposalState.Pending;
-    }
 
     uint256 deadline = proposalDeadline(proposalId);
 
@@ -148,6 +165,30 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
     return _proposals[proposalId].proposer;
   }
 
+  function finalize(uint256 proposalId) public {
+    require(!isFinalized(proposalId), "Governor: proposal already finalized");
+    require(!isActive(proposalId), "Governor: proposal is not ended yet");
+
+    _finalizeRound(proposalId);
+  }
+
+  function isFinalized(uint256 proposalId) public view virtual returns (bool) {
+    return _roundFinalized[proposalId];
+  }
+
+  /**
+   * Store the checkpoints of last succeeded round for the proposal
+   */
+  function _finalizeRound(uint256 proposalId) internal virtual {
+    if (state(proposalId) == AllocationProposalState.Succeeded) {
+      _latestSucceededRoundId[proposalId] = proposalId;
+      _roundFinalized[proposalId] = true;
+    } else if (state(proposalId) == AllocationProposalState.Failed) {
+      _latestSucceededRoundId[proposalId] = _latestSucceededRoundId[proposalId - 1];
+      _roundFinalized[proposalId] = true;
+    }
+  }
+
   /**
    * @dev Amount of votes already cast passes the threshold limit.
    */
@@ -174,7 +215,7 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   ) internal virtual;
 
   /**
-   * @dev See {IXAllocationVotingGovernor-proposeNewAllocationRound}. This function has opt-in frontrunning protection, described in {_isValidDescriptionForProposer}.
+   * @dev See {IXAllocationVotingGovernor-proposeNewAllocationRound}.
    */
   function proposeNewAllocationRound() public virtual returns (uint256) {
     address proposer = _msgSender();
@@ -182,11 +223,7 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
     // check that there isn't an already ongoing proposal
     // but only do it after we have at least 1 proposal otherwise it will fail with `GovernorNonexistentProposal`
     if (_proposalCount > 0) {
-      AllocationProposalState currentState = state(_proposalCount);
-      require(
-        currentState == AllocationProposalState.Succeeded || currentState == AllocationProposalState.Failed,
-        "Governor: there can be only one proposal per time"
-      );
+      require(!isActive(_proposalCount), "Governor: there can be only one proposal per time");
     }
 
     return _propose(proposer);
@@ -197,26 +234,7 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
    *
    * Emits a {IXAllocationVotingGovernor-ProposalCreated} event.
    */
-  function _propose(address proposer) internal virtual returns (uint256 proposalId) {
-    ++_proposalCount;
-    proposalId = _proposalCount;
-
-    if (_proposals[proposalId].voteStart != 0) {
-      revert GovernorUnexpectedProposalState(proposalId, state(proposalId), bytes32(0));
-    }
-
-    uint256 snapshot = clock() + votingDelay();
-    uint256 duration = votingPeriod();
-
-    ProposalCore storage proposal = _proposals[proposalId];
-    proposal.proposer = proposer;
-    proposal.voteStart = SafeCast.toUint48(snapshot);
-    proposal.voteDuration = SafeCast.toUint32(duration);
-
-    emit AllocationProposalCreated(proposalId, proposer, snapshot, snapshot + duration);
-
-    // Using a named return variable to avoid stack too deep errors
-  }
+  function _propose(address proposer) internal virtual returns (uint256 proposalId);
 
   /**
    * @dev See {IXAllocationVotingGovernor-getVotes}.
@@ -256,10 +274,9 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
    *
    * 0x000...10000
    *   ^^^^^^------ ...
-   *         ^----- Succeeded
-   *          ^---- Failed
-   *           ^--- Active
-   *            ^-- Pending
+   *          ^---- Succeeded
+   *           ^--- Failed
+   *            ^-- Active
    */
   function _encodeStateBitmap(AllocationProposalState proposalState) internal pure returns (bytes32) {
     return bytes32(1 << uint8(proposalState));
@@ -381,11 +398,6 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   /**
    * @inheritdoc IXAllocationVotingGovernor
    */
-  function votingDelay() public view virtual returns (uint256);
-
-  /**
-   * @inheritdoc IXAllocationVotingGovernor
-   */
   function votingPeriod() public view virtual returns (uint256);
 
   /**
@@ -394,4 +406,6 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   function quorum(uint256 timepoint) public view virtual returns (uint256);
 
   function setB3trGovernanceAddress(address newB3trGovernance) public virtual;
+
+  function isEligibleForVote(bytes32 appId, uint256 proposalId) public view virtual returns (bool);
 }

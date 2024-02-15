@@ -106,7 +106,7 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
   // ----------- Internal & Private ----------- //
 
   /**
-   * @dev Moves delegated votes from one delegate to another.
+   * @dev Move ownership level from one address to another.
    */
   function _moveOwnershipLevel(address from, address to, uint256 level) private {
     if (from != to) {

@@ -1,5 +1,4 @@
 import { Box, Button, Heading, VStack } from "@chakra-ui/react"
-import { CreateNewAllocationRoundButton } from "./components/CreateNewAllocationRoundButton"
 import { useAllocationsRoundsEvents, useCurrentAllocationsRoundId } from "@/api"
 import { AllocationRoundCard } from "./components/AllocationRoundCard"
 
@@ -19,7 +18,6 @@ export const AllocationRoundsList: React.FC<Props> = ({ maxRounds }) => {
         <Heading as="h2" size="lg">
           Allocation Rounds
         </Heading>
-        {!isRoundActive && <CreateNewAllocationRoundButton size={"sm"} variant={"link"} />}
       </Box>
       <VStack spacing={4} w="full">
         {invertedCreatedRounds?.slice(0, maxRounds).map((round, i) => {
