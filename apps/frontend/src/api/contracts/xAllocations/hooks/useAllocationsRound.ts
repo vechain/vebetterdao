@@ -27,9 +27,7 @@ export const useAllocationsRound = (roundId: string) => {
 
   const currentAllocationRound: AllocationRoundWithState | undefined = useMemo(() => {
     if (!currentAllocationId.data || !allocationRoundsEvents.data) return
-    const roundInfo = allocationRoundsEvents.data.created.find(
-      allocationRound => allocationRound.proposalId === roundId,
-    )
+    const roundInfo = allocationRoundsEvents.data.created.find(allocationRound => allocationRound.roundId === roundId)
     if (!roundInfo) return
     return {
       ...roundInfo,

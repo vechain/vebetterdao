@@ -238,7 +238,7 @@ async function deployEmissions(b3trAddress: string, destinations: string[], allo
     DECAY_SETTINGS as [number, number, number, number],
     INITIAL_EMISSIONS,
     TREASURY_PERCENTAGE,
-    MAX_VOTE_2_EARN_DECAY_PERCENTAGE
+    MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
   )
 
   await contract.waitForDeployment()

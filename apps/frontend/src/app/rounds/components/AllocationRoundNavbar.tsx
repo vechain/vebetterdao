@@ -21,18 +21,18 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
   const { data, isLoading } = useAllocationsRound(roundId)
   const [isDesktop] = useMediaQuery("(min-width: 800px)")
 
-  const prevButtonDisabled = !data.proposalId || data.proposalId === "1"
+  const prevButtonDisabled = !data.roundId || data.roundId === "1"
   const goToPreviousRound = () => {
     if (prevButtonDisabled) return
-    const prevRoud = Number(data?.proposalId) - 1
+    const prevRoud = Number(data?.roundId) - 1
     router.push(`/rounds/${prevRoud}`)
   }
 
-  const nextButtonDisabled = !data.proposalId || data.isCurrent
+  const nextButtonDisabled = !data.roundId || data.isCurrent
 
   const goToNextRound = () => {
     if (!nextButtonDisabled) return
-    const nextRound = Number(data?.proposalId) + 1
+    const nextRound = Number(data?.roundId) + 1
     router.push(`/rounds/${nextRound}`)
   }
 
@@ -49,7 +49,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
         </Button>
 
         <Stack direction={["column", "column", "row"]} spacing={4} align={"center"}>
-          <Heading size="md">{data?.proposalId}° round</Heading>
+          <Heading size="md">{data?.roundId}° round</Heading>
           <Box w={1.5} h={1.5} borderRadius={"full"} bg="gray" />
           <HStack spacing={2} align={"center"}>
             <Text>{data?.voteStartTimestamp?.format("D MMMM")}</Text>
@@ -81,7 +81,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
       />
       <VStack w="full">
         <HStack spacing={4}>
-          <Heading size="md">{data?.proposalId}° round</Heading>
+          <Heading size="md">{data?.roundId}° round</Heading>
           <Tag colorScheme="primary" variant="solid">
             {data?.state && RoundState[data.state]}
           </Tag>
