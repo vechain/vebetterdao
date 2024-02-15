@@ -27,16 +27,23 @@ type XApp = {
  * @param proposalId  the id of the round the get state for
  * @returns  all the available xApps (apps that can be voted on for allocation) capped to 256 see {@link XApp}
  */
-export const getRoundXAppsWithDetails = async (thor: Connex.Thor, proposalId: string): Promise<XApp[]> => {
+export const getRoundXApps = async (thor: Connex.Thor, proposalId: string): Promise<XApp[]> => {
   const functionFragment = XAllocationVoting.createInterface().getFunction("getRoundAppsWithDetails").format("json")
   const res = await thor.account(XALLOCATIONVOTING_CONTRACT).method(JSON.parse(functionFragment)).call(proposalId)
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
-  return res.decoded[0]
+  const apps = res.decoded[0]
+  return apps.map((app: any) => ({
+    id: app[0],
+    addr: app[1],
+    name: app[2],
+    metadata: app[3],
+    createdAt: app[4],
+  }))
 }
 
-export const getRoundXAppsWithDetailsKey = (proposalId: string) => ["round", proposalId, "xApps"]
+export const getRoundXAppsQueryKey = (proposalId: string) => ["round", proposalId, "xApps"]
 
 /**
  *  Hook to get all the available xApps (apps that can be voted on for allocation)
@@ -45,12 +52,12 @@ export const getRoundXAppsWithDetailsKey = (proposalId: string) => ["round", pro
  *
  *  @returns all the available xApps (apps that can be voted on for allocation) capped to 256
  */
-export const useRoundXAppsWithDetails = (proposalId: string) => {
+export const useRoundXApps = (proposalId: string) => {
   const { thor } = useConnex()
 
   return useQuery({
-    queryKey: getRoundXAppsWithDetailsKey(proposalId),
-    queryFn: async () => await getRoundXAppsWithDetails(thor, proposalId),
+    queryKey: getRoundXAppsQueryKey(proposalId),
+    queryFn: async () => await getRoundXApps(thor, proposalId),
     enabled: !!thor,
   })
 }
