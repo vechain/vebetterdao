@@ -10,7 +10,7 @@ export const AllocationRoundsList: React.FC<Props> = ({ maxRounds }) => {
   const invertedCreatedRounds = allocationRoundsEvents?.created.slice().reverse()
 
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  const isRoundActive = currentRoundId && currentRoundId !== "0"
+  const isActive = currentRoundId && currentRoundId !== "0"
 
   return (
     <VStack spacing={8} w="full" align={"flex-start"}>

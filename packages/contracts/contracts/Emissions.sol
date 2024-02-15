@@ -138,7 +138,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
     lastEmissionBlock = block.number;
     emissions[nextCycle] = Emission(preMintAllocations[0], preMintAllocations[1], preMintAllocations[2]);
 
-    xAllocationsGovernor.proposeNewAllocationRound();
+    xAllocationsGovernor.startNewRound();
 
     nextCycle++;
   }
@@ -162,7 +162,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
     lastEmissionBlock = block.number;
     emissions[nextCycle] = Emission(xAllocationsAmount, vote2EarnAmount, treasuryAmount);
 
-    xAllocationsGovernor.proposeNewAllocationRound();
+    xAllocationsGovernor.startNewRound();
 
     nextCycle++;
   }

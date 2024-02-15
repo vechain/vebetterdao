@@ -8,10 +8,10 @@ import {
   getVot3Tokens,
   levels,
   multipliers,
-  waitForVotingPeriodToEnd,
   waitForNextCycle,
   voteOnApps,
   addAppsToAllocationVoting,
+  waitForRoundToEnd,
 } from "./helpers"
 import { expect } from "chai"
 import { ethers } from "hardhat"
@@ -105,7 +105,7 @@ describe("VoterRewards", () => {
         })
       })
 
-      const proposalEvent = decodedEvents.find(event => event?.name === "AllocationProposalCreated")
+      const proposalEvent = decodedEvents.find(event => event?.name === "RoundCreated")
 
       expect(proposalEvent).to.not.equal(undefined)
 
@@ -121,7 +121,7 @@ describe("VoterRewards", () => {
 
       expect(proposalId).to.equal(1)
 
-      expect(await xAllocationVoting.proposalDeadline(proposalId)).to.lt(await emissions.getNextCycleBlock())
+      expect(await xAllocationVoting.roundDeadline(proposalId)).to.lt(await emissions.getNextCycleBlock())
 
       tx = await xAllocationVoting
         .connect(otherAccount)
@@ -187,7 +187,7 @@ describe("VoterRewards", () => {
           (await voterRewards.cycleToVoterToTotal(1, voter3)),
       ) // Total votes
 
-      await waitForVotingPeriodToEnd(Number(proposalId), xAllocationVoting)
+      await waitForRoundToEnd(Number(proposalId), xAllocationVoting)
 
       // Votes should be the same after round ended
       appVotes = await xAllocationVoting.getAppVotes(proposalId, app1)
@@ -277,7 +277,7 @@ describe("VoterRewards", () => {
 
       expect(proposalId).to.equal(1)
 
-      expect(await xAllocationVoting.proposalDeadline(proposalId)).to.lt(await emissions.getNextCycleBlock())
+      expect(await xAllocationVoting.roundDeadline(proposalId)).to.lt(await emissions.getNextCycleBlock())
 
       // Vote on apps for the first round
       await voteOnApps(
@@ -325,7 +325,7 @@ describe("VoterRewards", () => {
           (await voterRewards.cycleToVoterToTotal(1, voter3)),
       ) // Total votes
 
-      await waitForVotingPeriodToEnd(Number(proposalId), xAllocationVoting)
+      await waitForRoundToEnd(Number(proposalId), xAllocationVoting)
 
       // Votes should be the same after round ended
       appVotes = await xAllocationVoting.getAppVotes(proposalId, app1)
@@ -366,7 +366,7 @@ describe("VoterRewards", () => {
 
       expect(proposalId2).to.equal(2)
 
-      expect(await xAllocationVoting.proposalDeadline(proposalId)).to.lt(await emissions.getNextCycleBlock())
+      expect(await xAllocationVoting.roundDeadline(proposalId)).to.lt(await emissions.getNextCycleBlock())
 
       // Vote on apps for the second round
       await voteOnApps(
@@ -414,7 +414,7 @@ describe("VoterRewards", () => {
           (await voterRewards.cycleToVoterToTotal(2, voter3)),
       ) // Total votes
 
-      await waitForVotingPeriodToEnd(Number(proposalId2), xAllocationVoting)
+      await waitForRoundToEnd(Number(proposalId2), xAllocationVoting)
 
       // Votes should be the same after round ended
       appVotes = await xAllocationVoting.getAppVotes(proposalId2, app1)
@@ -467,7 +467,7 @@ describe("VoterRewards", () => {
 
       let proposalId = await xAllocationVoting.currentRoundId()
 
-      await waitForVotingPeriodToEnd(Number(proposalId), xAllocationVoting)
+      await waitForRoundToEnd(Number(proposalId), xAllocationVoting)
 
       await waitForNextCycle(emissions)
 
@@ -477,7 +477,7 @@ describe("VoterRewards", () => {
 
       proposalId = await xAllocationVoting.currentRoundId()
 
-      await waitForVotingPeriodToEnd(Number(proposalId), xAllocationVoting)
+      await waitForRoundToEnd(Number(proposalId), xAllocationVoting)
 
       await waitForNextCycle(emissions)
 
@@ -508,7 +508,7 @@ describe("VoterRewards", () => {
 
       await voteOnApps(xAllocationVoting, [app1], [voter1], [[ethers.parseEther("1000")]], proposalId)
 
-      await waitForVotingPeriodToEnd(Number(proposalId), xAllocationVoting)
+      await waitForRoundToEnd(Number(proposalId), xAllocationVoting)
 
       await waitForNextCycle(emissions)
 
@@ -532,7 +532,7 @@ describe("VoterRewards", () => {
 
       const proposalId = await xAllocationVoting.currentRoundId()
 
-      const proposalStart = await xAllocationVoting.proposalSnapshot(proposalId)
+      const proposalStart = await xAllocationVoting.roundSnapshot(proposalId)
 
       await catchRevert(
         voterRewards

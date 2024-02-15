@@ -1,11 +1,11 @@
-import { AllocationProposalCreated, AllocationProposalState, useAllocationsRound } from "@/api"
+import { RoundCreated, RoundState, useAllocationsRound } from "@/api"
 import { Box, Card, CardBody, HStack, Heading, Icon, Tag, Text, useColorModeValue } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { useRouter } from "next/navigation"
 import { FaAngleRight } from "react-icons/fa6"
 
 type Props = {
-  round: AllocationProposalCreated
+  round: RoundCreated
 }
 
 export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
@@ -36,7 +36,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
               <Heading as="h3" size="md">
                 Round #{round.proposalId}
               </Heading>
-              <Tag colorScheme="green">{allocationRound.state && AllocationProposalState[allocationRound.state]}</Tag>
+              <Tag colorScheme="green">{allocationRound.state && RoundState[allocationRound.state]}</Tag>
             </HStack>
             <Text>{allocationRound.voteEndTimestamp?.fromNow()}</Text>
           </Box>

@@ -18,7 +18,7 @@ export const decodeEvent = (event: any, contract: BaseContract) => {
   })
 }
 
-export const parseAlloctionProposalCreatedEvent = (event: any, xAllocationVoting: XAllocationVoting) => {
+export const parseRoundStartedEvent = (event: any, xAllocationVoting: XAllocationVoting) => {
   const decoded = decodeEvent(event, xAllocationVoting)
 
   return {

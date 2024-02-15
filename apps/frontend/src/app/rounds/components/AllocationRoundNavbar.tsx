@@ -1,4 +1,4 @@
-import { AllocationProposalState, useAllocationsRound } from "@/api"
+import { RoundState, useAllocationsRound } from "@/api"
 import {
   HStack,
   Button,
@@ -57,7 +57,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
             <Text>{data?.voteEndTimestamp?.format("D MMMM")}</Text>
           </HStack>
           <Tag colorScheme="primary" variant="solid">
-            {data?.state && AllocationProposalState[data.state]}
+            {data?.state && RoundState[data.state]}
           </Tag>
         </Stack>
         <Button
@@ -83,7 +83,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
         <HStack spacing={4}>
           <Heading size="md">{data?.proposalId}° round</Heading>
           <Tag colorScheme="primary" variant="solid">
-            {data?.state && AllocationProposalState[data.state]}
+            {data?.state && RoundState[data.state]}
           </Tag>
         </HStack>
 

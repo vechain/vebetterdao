@@ -6,7 +6,7 @@ import { XAllocationVotingGovernorJson } from "@repo/contracts"
 
 const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
 
-export const AllocationProposalState = {
+export const RoundState = {
   "0": "Active",
   "1": "Failed",
   "2": "Succeeded",
@@ -21,7 +21,7 @@ export const AllocationProposalState = {
 export const getAllocationsRoundState = async (
   thor: Connex.Thor,
   proposalId?: string,
-): Promise<keyof typeof AllocationProposalState> => {
+): Promise<keyof typeof RoundState> => {
   if (!proposalId) return Promise.reject(new Error("proposalId is required"))
   const allocationRoundStateAbi = XAllocationVotingGovernorJson.abi.find(abi => abi.name === "state")
   if (!allocationRoundStateAbi) throw new Error("state function not found")

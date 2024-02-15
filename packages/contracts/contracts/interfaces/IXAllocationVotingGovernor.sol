@@ -5,23 +5,27 @@ import { IERC165 } from "@openzeppelin/contracts/interfaces/IERC165.sol";
 import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
 
 /**
- * @dev Interface of the distribution allocation voting for the x-allocation pool.
- * This interface was forked from OpenZeppelin's IGovernor.sol and modified to fit the needs of the x-allocation pool.
- * Some states were removed; canceling, queuing, executing proposals, vote with signature were removed. Some errors were removed.
- * Instead of hashProposal (to obtain id) we have an incremental id, and the propose process was simplified.
+ * @dev Interface of the distribution allocation voting for the x-allocation pool reward distributions.
+ * This interface was forked from OpenZeppelin's IGovernor.sol and modified to fit the needs of a voting mechanism
+ * where a user can vote on multpile x-apps belonging to the ecosystem and fractionalize their votes accross the x-apps.
  *
- * Proposals should be considered as voting rounds, and the proposalId is the round number.
- * There should be only one proposal per time.
+ * We consider each round as a round, that only the Emissions contract can start,
+ * with the only condition that there can be only one round per time.
+ * After the round is created the round is immediately active.
+ * There can be only two possible outcomes of a round: it succeeds or it fails.
+ * To succeed the only requirement is that the quorum is reached.
  *
- * Events were updated to fit the new governor.
+ * New allocation rounds can be started only by the Emissions contract, this way we can align the duration
+ * of emission cycles and allocation rounds.
  *
- * There is no proposalThreshold, anyone can propose a new round.
+ * If the round fails, we will need to “finalize” it, which means we will create a pointer to the last succeeded round
+ * where shares should be calculated. Anyone can finalize the failed round,
+ * but it will be automatically done when the emissions contract starts a new round.
  *
- * Votable applications are defined by the x-allocation pool and are identified by their code, this way we can change their
- * withdrawal address in case of a security breach. The governor only allows voting for these applications.
+ * There should be only one round per time.
  */
 interface IXAllocationVotingGovernor is IERC165, IERC6372 {
-  enum AllocationProposalState {
+  enum RoundState {
     Active,
     Failed,
     Succeeded
@@ -40,29 +44,24 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   /**
    * @dev The `account` is not the governance executor.
    */
-  error GovernorOnlyExecutor(address account);
+  error B3TRGovernorOnlyExecutor(address account);
 
   /**
-   * @dev The `account` is not a proposer.
+   * @dev The `roundId` doesn't exist.
    */
-  error GovernorOnlyProposer(address account);
+  error GovernorNonexistentRound(uint256 roundId);
 
   /**
-   * @dev The `proposalId` doesn't exist.
-   */
-  error GovernorNonexistentProposal(uint256 proposalId);
-
-  /**
-   * @dev The current state of a proposal is not the required for performing an operation.
-   * The `expectedStates` is a bitmap with the bits enabled for each ProposalState enum position
+   * @dev The current state of a round is not the required for performing an operation.
+   * The `expectedStates` is a bitmap with the bits enabled for each RoundState enum position
    * counting from right to left.
    *
-   * NOTE: If `expectedState` is `bytes32(0)`, the proposal is expected to not be in any state (i.e. not exist).
-   * This is the case when a proposal that is expected to be unset is already initiated (the proposal is duplicated).
+   * NOTE: If `expectedState` is `bytes32(0)`, the round is expected to not be in any state (i.e. not exist).
+   * This is the case when a round that is expected to be unset is already initiated (the round is duplicated).
    *
    * See {Governor-_encodeStateBitmap}.
    */
-  error GovernorUnexpectedProposalState(uint256 proposalId, AllocationProposalState current, bytes32 expectedStates);
+  error GovernorUnexpectedRoundState(uint256 roundId, RoundState current, bytes32 expectedStates);
 
   /**
    * @dev The voting period set is not a valid period.
@@ -70,30 +69,20 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   error GovernorInvalidVotingPeriod(uint256 votingPeriod);
 
   /**
-   * @dev The `proposer` is not allowed to create a proposal.
+   * @dev The `appId` is not present in the list with the available x-apps for voting in this round.
    */
-  error GovernorRestrictedProposer(address proposer);
+  error GovernorAppNotAvailableForVoting(bytes32 appId);
 
   /**
-   * @dev The vote type used is not valid for the corresponding counting module.
+   * @dev Emitted when a round is created.
    */
-  error GovernorInvalidVoteType();
-
-  /**
-   * @dev The `app` is not present in the list with the available apps for voting in this proposal.
-   */
-  error GovernorAppNotAvailableForVoting(bytes32 app);
-
-  /**
-   * @dev Emitted when a proposal is created.
-   */
-  event AllocationProposalCreated(uint256 proposalId, address proposer, uint256 voteStart, uint256 voteEnd);
+  event RoundCreated(uint256 roundId, address proposer, uint256 voteStart, uint256 voteEnd);
 
   /**
    * @dev Emitted when votes are cast.
    *
    */
-  event AllocationVoteCast(address indexed voter, uint256 indexed proposalId, bytes32[] appsIds, uint256[] voteWeights);
+  event AllocationVoteCast(address indexed voter, uint256 indexed roundId, bytes32[] appsIds, uint256[] voteWeights);
 
   /**
    * @notice module:core
@@ -136,30 +125,30 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
 
   /**
    * @notice module:core
-   * @dev Current state of a proposal
+   * @dev Current state of a round
    */
-  function state(uint256 proposalId) external view returns (AllocationProposalState);
+  function state(uint256 roundId) external view returns (RoundState);
 
   /**
    * @notice module:core
    * @dev Timepoint used to retrieve user's votes and quorum. If using block number (as per Compound's Comp), the
-   * snapshot is performed at the end of this block. Hence, voting for this proposal starts at the beginning of the
+   * snapshot is performed at the end of this block. Hence, voting for this round starts at the beginning of the
    * following block.
    */
-  function proposalSnapshot(uint256 proposalId) external view returns (uint256);
+  function roundSnapshot(uint256 roundId) external view returns (uint256);
 
   /**
    * @notice module:core
    * @dev Timepoint at which votes close. If using block number, votes close at the end of this block, so it is
    * possible to cast a vote during this block.
    */
-  function proposalDeadline(uint256 proposalId) external view returns (uint256);
+  function roundDeadline(uint256 roundId) external view returns (uint256);
 
   /**
    * @notice module:core
-   * @dev The account that created a proposal.
+   * @dev The account that created a round.
    */
-  function proposalProposer(uint256 proposalId) external view returns (address);
+  function roundProposer(uint256 roundId) external view returns (address);
 
   /**
    * @notice module:user-config
@@ -167,7 +156,7 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
    * (see EIP-6372) this contract uses.
    *
    *
-   * NOTE: This value is stored when the proposal is submitted so that possible changes to the value do not affect
+   * NOTE: This value is stored when the round is submitted so that possible changes to the value do not affect
    * proposals that have already been submitted. The type used to save it is a uint32. Consequently, while this
    * interface returns a uint256, the value it returns should fit in a uint32.
    */
@@ -175,7 +164,7 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
 
   /**
    * @notice module:user-config
-   * @dev Minimum number of cast voted required for a proposal to be successful.
+   * @dev Minimum number of cast voted required for a round to be successful.
    *
    * NOTE: The `timepoint` parameter corresponds to the snapshot used for counting vote. This allows to scale the
    * quorum depending on values such as the totalSupply of a token at this timepoint (see {ERC20Votes}).
@@ -195,66 +184,57 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
    * @notice module:reputation
    * @dev Total number of votes cast in an allocation round.
    */
-  function totalVotes(uint256 proposalId) external view returns (uint256);
+  function totalVotes(uint256 roundId) external view returns (uint256);
 
   /**
    * @notice module:reputation
    * @dev Total number of voters in an allocation round.
    */
-  function totalVoters(uint256 proposalId) external view returns (uint256);
+  function totalVoters(uint256 roundId) external view returns (uint256);
 
   /**
    * @notice module:reputation
    * @dev Number of votes cast for a specific app in an allocation round.
    */
-  function getAppVotes(uint256 proposalId, bytes32 appId) external view returns (uint256);
-
-  /**
-   * @notice module:reputation
-   * @dev Voting power of an `account` at a specific `timepoint` given additional encoded parameters.
-   */
-  function getVotesWithParams(address account, uint256 timepoint, bytes memory params) external view returns (uint256);
+  function getAppVotes(uint256 roundId, bytes32 appId) external view returns (uint256);
 
   /**
    * @notice module:voting
-   * @dev Returns whether `account` has cast a vote on `proposalId`.
+   * @dev Returns whether `account` has cast a vote on `roundId`.
    */
-  function hasVoted(uint256 proposalId, address account) external view returns (bool);
+  function hasVoted(uint256 roundId, address account) external view returns (bool);
 
   /**
-   * @dev Create a new allocation proposal (round). Vote starts immediatly and lasts for a
-   * duration specified by {IGovernor-votingPeriod}.
+   * @dev Create a new allocation round (round). Vote starts immediatly and lasts for a
+   * duration specified by {votingPeriod}.
    *
-   * Emits a {AllocationProposalCreated} event.
+   * Emits a {RoundCreated} event.
    */
-  function proposeNewAllocationRound() external returns (uint256 proposalId);
+  function startNewRound() external returns (uint256 roundId);
 
   /**
    * @dev Cast multiple votes at once
    *
    * Emits a {AllocationVoteCast} event.
    */
-  function castVote(uint256 proposalId, bytes32[] memory appsIds, uint256[] memory voteWeights) external;
+  function castVote(uint256 roundId, bytes32[] memory appsIds, uint256[] memory voteWeights) external;
 
   /**
-   * @dev Returns the current allocation proposal round.
+   * @dev Returns the current allocation round round.
    */
   function currentRoundId() external view returns (uint256);
 
-  function quorumReached(uint256 proposalId) external view returns (bool);
+  function quorumReached(uint256 roundId) external view returns (bool);
 
-  /**
-   * @dev Returns the current allocation proposal round snapshot (block).
-   */
   function getCurrentAllocationRoundSnapshot() external view returns (uint256);
 
-  function getRoundApps(uint256 proposalId) external view returns (bytes32[] memory);
+  function getRoundApps(uint256 roundId) external view returns (bytes32[] memory);
 
-  function isEligibleForVote(bytes32 appId, uint256 proposalId) external view returns (bool);
+  function isEligibleForVote(bytes32 appId, uint256 roundId) external view returns (bool);
 
-  function isActive(uint256 proposalId) external view returns (bool);
+  function isActive(uint256 roundId) external view returns (bool);
 
-  function isFinalized(uint256 proposalId) external view returns (bool);
+  function isFinalized(uint256 roundId) external view returns (bool);
 
   function latestSucceededRoundId(uint256 roundId) external view returns (uint256);
 
