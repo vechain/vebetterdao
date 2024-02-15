@@ -4,7 +4,7 @@ import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethe
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { getOrDeployContractInstances } from "./deploy"
 import { mine } from "@nomicfoundation/hardhat-network-helpers"
-import { filterEventsByName, parseAlloctionProposalCreatedEvent } from "./events"
+import { filterEventsByName, parseRoundStartedEvent } from "./events"
 
 export const waitForNextBlock = async () => {
   if (network.name === "hardhat") {
@@ -70,10 +70,18 @@ export const getProposalIdFromTx = async (tx: ContractTransactionResponse, gover
   return decodedLogs?.args[0]
 }
 
-export const waitForVotingPeriodToEnd = async (proposalId: number, governor: B3TRGovernor | XAllocationVoting) => {
+export const waitForVotingPeriodToEnd = async (proposalId: number, governor: B3TRGovernor) => {
   const deadline = await governor.proposalDeadline(proposalId)
 
   const currentBlock = await governor.clock()
+
+  await moveBlocks(parseInt((deadline - currentBlock + BigInt(1)).toString()))
+}
+
+export const waitForRoundToEnd = async (roundId: number, xAllocationVoting: XAllocationVoting) => {
+  const deadline = await xAllocationVoting.roundDeadline(roundId)
+
+  const currentBlock = await xAllocationVoting.clock()
 
   await moveBlocks(parseInt((deadline - currentBlock + BigInt(1)).toString()))
 }
@@ -215,10 +223,10 @@ export const voteOnApps = async (
   apps: string[],
   voters: HardhatEthersSigner[],
   votes: Array<Array<bigint>>,
-  proposalId: bigint,
+  roundId: bigint,
 ) => {
   for (const voter of voters) {
-    await xAllocationVoting.connect(voter).castVote(proposalId, apps, votes[voters.indexOf(voter)])
+    await xAllocationVoting.connect(voter).castVote(roundId, apps, votes[voters.indexOf(voter)])
   }
 }
 
@@ -237,14 +245,11 @@ export const addAppsToAllocationVoting = async (
 }
 
 export const startNewAllocationRound = async (xAllocationVoting: XAllocationVoting) => {
-  let tx = await xAllocationVoting.proposeNewAllocationRound()
+  let tx = await xAllocationVoting.startNewRound()
   let receipt = await tx.wait()
   if (!receipt) throw new Error("No receipt")
 
-  let { proposalId: roundId } = parseAlloctionProposalCreatedEvent(
-    filterEventsByName(receipt.logs, "AllocationProposalCreated")[0],
-    xAllocationVoting,
-  )
+  let { roundId } = parseRoundStartedEvent(filterEventsByName(receipt.logs, "RoundCreated")[0], xAllocationVoting)
 
   return roundId
 }
@@ -305,7 +310,7 @@ export const partecipateInAllocationVoting = async (
     .castVote(roundId, [await xAllocationVoting.hashName(appName)], [ethers.parseEther("1")])
 
   if (waitRoundToEnd) {
-    await waitForVotingPeriodToEnd(roundId, xAllocationVoting)
+    await waitForRoundToEnd(roundId, xAllocationVoting)
   }
 }
 

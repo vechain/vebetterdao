@@ -48,7 +48,7 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
               </HStack>
             </Skeleton>
             <Skeleton isLoaded={!isLoading}>
-              <Heading size="xl">Allocations | Round #{data?.proposalId}</Heading>
+              <Heading size="xl">Allocations | Round #{data?.roundId}</Heading>
             </Skeleton>
             <Skeleton isLoaded={!isLoading}>
               <Text color="gray.500">
