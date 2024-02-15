@@ -43,7 +43,7 @@ export const getRoundXApps = async (thor: Connex.Thor, roundId: string): Promise
   }))
 }
 
-export const getRoundXAppsQueryKey = (proposalId: string) => ["round", proposalId, "xApps"]
+export const getRoundXAppsQueryKey = (roundId: string) => ["round", roundId, "xApps"]
 
 /**
  *  Hook to get all the available xApps (apps that can be voted on for allocation)
@@ -52,12 +52,12 @@ export const getRoundXAppsQueryKey = (proposalId: string) => ["round", proposalI
  *
  *  @returns all the available xApps (apps that can be voted on for allocation) capped to 256
  */
-export const useRoundXApps = (proposalId: string) => {
+export const useRoundXApps = (roundId: string) => {
   const { thor } = useConnex()
 
   return useQuery({
-    queryKey: getRoundXAppsQueryKey(proposalId),
-    queryFn: async () => await getRoundXApps(thor, proposalId),
+    queryKey: getRoundXAppsQueryKey(roundId),
+    queryFn: async () => await getRoundXApps(thor, roundId),
     enabled: !!thor,
   })
 }
