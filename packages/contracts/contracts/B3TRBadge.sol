@@ -8,13 +8,21 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Pausable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/interfaces/IERC6372.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
+import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
+import { IB3TRGovernor } from "./interfaces/IB3TRGovernor.sol";
+
 
 contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
   using Checkpoints for Checkpoints.Trace208;
+
+  // XAllocationVotingGovernor contract
+  IXAllocationVotingGovernor public xAllocationsGovernor;
+  // B3TRGovernor contract
+  IB3TRGovernor public b3trGovernor;
 
   // Base URI for the Badge
   string private _baseTokenURI;
@@ -67,6 +75,8 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
 
   // Mints the highest level Badge the caller is allowed to mint
   function freeMint() public {
+    require(participatedInGovernance(msg.sender), "Badge: User has not participated in governance");
+
     // TODO: Get User's X/Economic node type and check max mintable level
     // TODO: Check if that X/Economic node has not already been used to mint a Badge (e.g., MintedLevelOfXNode[xNodeId])
     uint256 mintableLevel = 1;
@@ -125,7 +135,7 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
   // ----------- Internal & Private ----------- //
 
   /**
-   * @dev Moves delegated votes from one delegate to another.
+   * @dev Move ownership level from one address to another.
    */
   function _moveOwnershipLevel(address from, address to, uint256 level) private {
     if (from != to) {
@@ -157,6 +167,18 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
     MAX_LEVEL = level;
   }
 
+  function setXAllocationsGovernorAddress(address _xAllocationsGovernor) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(_xAllocationsGovernor != address(0), "Badge: _xAllocationsGovernor cannot be the zero address");
+
+    xAllocationsGovernor = IXAllocationVotingGovernor(_xAllocationsGovernor);
+  }
+
+  function setB3trGovernorAddress(address _b3trGovernor) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(_b3trGovernor != address(0), "Badge: _b3trGovernor cannot be the zero address");
+
+    b3trGovernor = IB3TRGovernor(payable(_b3trGovernor));
+  }
+
   function setBaseURI(string memory baseTokenURI) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(bytes(baseTokenURI).length > 0, "Badge: Base URI must be set");
     
@@ -179,6 +201,17 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
 
   function numCheckpoints(address account) public view returns (uint32) {
     return _numCheckpoints(account);
+  }
+
+  function participatedInGovernance(address user) public view returns (bool) {
+    require(xAllocationsGovernor != IXAllocationVotingGovernor(address(0)), "Badge: XAllocationVotingGovernor not set");
+    require(b3trGovernor != IB3TRGovernor(payable(address(0))), "Badge: B3TRGovernor not set");
+
+    if (xAllocationsGovernor.hasVotedOnce(user) || b3trGovernor.hasVotedOnce(user)) {
+      return true;
+    }
+
+    return false;
   }
 
   function baseURI() public view returns (string memory) {

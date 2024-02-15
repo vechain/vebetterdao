@@ -126,7 +126,7 @@ describe("VOT3", function () {
     })
 
     it("should not unlock B3TR if not enough staked balance, even if there is enough VOT3 balance)", async function () {
-      const { b3tr, vot3, owner, minterAccount, otherAccount, otherAccounts } = await getOrDeployContractInstances({
+      const { b3tr, vot3, minterAccount, otherAccount, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -156,8 +156,6 @@ describe("VOT3", function () {
       expect(await b3tr.balanceOf(otherAccounts[0])).to.eql(ethers.parseEther("992"))
       expect(await vot3.balanceOf(otherAccounts[0])).to.eql(ethers.parseEther("8"))
       expect(await vot3.stakedBalanceOf(otherAccounts[0])).to.eql(ethers.parseEther("8"))
-      // Enable canTransfer
-      await expect(vot3.connect(owner).setCanTransfer(true)).not.to.be.reverted
 
       // Transfer VOT3 from otherAccounts[0] to otherAccount
       await expect(
@@ -177,225 +175,6 @@ describe("VOT3", function () {
       // Finally unlock 7 VOT3 from otherAccount
       await expect(vot3.connect(otherAccount).unstake(ethers.parseEther("7"), { gasLimit: 10_000_000 })).not.to.be
         .reverted
-    })
-  })
-
-  describe("VOT3 should not be transferable by default", function () {
-    it("transfer", async function () {
-      const { b3tr, vot3, owner, minterAccount, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      // Mint some B3TR
-      await expect(b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))).not.to.be.reverted
-
-      // Approve VOT3 to spend B3TR on behalf of otherAccount. N.B. this is an important step and could be included in a multi clause transaction
-      await expect(b3tr.connect(otherAccount).approve(await vot3.getAddress(), ethers.parseEther("9"))).not.to.be
-        .reverted
-
-      // Lock B3TR to get VOT3
-      await expect(vot3.connect(otherAccount).stake(ethers.parseEther("9"))).not.to.be.reverted
-
-      await catchRevert(vot3.connect(otherAccount).transfer(owner, ethers.parseEther("1")))
-    })
-
-    it("transferFrom", async function () {
-      const { b3tr, vot3, owner, minterAccount, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      // Mint some B3TR
-      await expect(b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))).not.to.be.reverted
-
-      // Approve VOT3 to spend B3TR on behalf of otherAccount. N.B. this is an important step and could be included in a multi clause transaction
-      await expect(b3tr.connect(otherAccount).approve(await vot3.getAddress(), ethers.parseEther("9"))).not.to.be
-        .reverted
-
-      // Lock B3TR to get VOT3
-      await expect(vot3.connect(otherAccount).stake(ethers.parseEther("9"))).not.to.be.reverted
-
-      try {
-        // Approve myself to spend VOT3
-        await expect(vot3.connect(otherAccount).approve(otherAccount, ethers.parseEther("9"))).not.to.be.reverted
-
-        // N.B. It will actually fail on the previous line
-        // Transfer VOT3
-        await vot3.connect(otherAccount).transferFrom(otherAccount, owner, ethers.parseEther("1"))
-        assert.fail("The transaction should have failed")
-      } catch (err: any) {
-        /* empty */
-      }
-    })
-
-    it("approve", async function () {
-      const { b3tr, vot3, owner, minterAccount, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      // Mint some B3TR
-      await expect(b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))).not.to.be.reverted
-
-      // Approve VOT3 to spend B3TR on behalf of otherAccount. N.B. this is an important step and could be included in a multi clause transaction
-      await expect(b3tr.connect(otherAccount).approve(await vot3.getAddress(), ethers.parseEther("9"))).not.to.be
-        .reverted
-
-      // Lock B3TR to get VOT3
-      await expect(vot3.connect(otherAccount).stake(ethers.parseEther("9"))).not.to.be.reverted
-
-      await catchRevert(vot3.connect(otherAccount).approve(owner, ethers.parseEther("1")))
-    })
-  })
-
-  describe("VOT3 should be transferable after canTransfer is enabled", function () {
-    it("transfer", async function () {
-      const { b3tr, vot3, owner, minterAccount, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      // Mint some B3TR
-      await expect(b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))).not.to.be.reverted
-
-      // Approve VOT3 to spend B3TR on behalf of otherAccount. N.B. this is an important step and could be included in a multi clause transaction
-      await expect(b3tr.connect(otherAccount).approve(await vot3.getAddress(), ethers.parseEther("9"))).not.to.be
-        .reverted
-
-      // Lock B3TR to get VOT3
-      await expect(vot3.connect(otherAccount).stake(ethers.parseEther("9"))).not.to.be.reverted
-
-      // Enable canTransfer
-      await expect(vot3.connect(owner).setCanTransfer(true)).not.to.be.reverted
-
-      // Transfer VOT3
-      await expect(vot3.connect(otherAccount).transfer(owner, ethers.parseEther("1"))).not.to.be.reverted
-
-      // Check balances
-      expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("8"))
-      expect(await vot3.balanceOf(owner)).to.eql(ethers.parseEther("1"))
-    })
-
-    it("transferFrom", async function () {
-      const { b3tr, vot3, owner, minterAccount, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      // Mint some B3TR
-      await expect(b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))).not.to.be.reverted
-
-      // Approve VOT3 to spend B3TR on behalf of otherAccount. N.B. this is an important step and could be included in a multi clause transaction
-      await expect(b3tr.connect(otherAccount).approve(await vot3.getAddress(), ethers.parseEther("9"))).not.to.be
-        .reverted
-
-      // Lock B3TR to get VOT3
-      await expect(vot3.connect(otherAccount).stake(ethers.parseEther("9"))).not.to.be.reverted
-
-      // Enable canTransfer
-      await expect(vot3.connect(owner).setCanTransfer(true)).not.to.be.reverted
-
-      // Approve myself to spend VOT3
-      await expect(vot3.connect(otherAccount).approve(otherAccount, ethers.parseEther("9"))).not.to.be.reverted
-
-      // Transfer VOT3
-      await expect(vot3.connect(otherAccount).transferFrom(otherAccount, owner, ethers.parseEther("1"))).not.to.be
-        .reverted
-
-      // Check balances
-      expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("8"))
-      expect(await vot3.balanceOf(owner)).to.eql(ethers.parseEther("1"))
-    })
-
-    it("approve", async function () {
-      const { b3tr, vot3, owner, minterAccount, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      // Mint some B3TR
-      await expect(b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))).not.to.be.reverted
-
-      // Approve VOT3 to spend B3TR on behalf of otherAccount. N.B. this is an important step and could be included in a multi clause transaction
-      await expect(b3tr.connect(otherAccount).approve(await vot3.getAddress(), ethers.parseEther("9"))).not.to.be
-        .reverted
-
-      // Lock B3TR to get VOT3
-      await expect(vot3.connect(otherAccount).stake(ethers.parseEther("9"))).not.to.be.reverted
-
-      // Enable canTransfer
-      await expect(vot3.connect(owner).setCanTransfer(true)).not.to.be.reverted
-
-      // Transfer VOT3
-      await expect(vot3.connect(otherAccount).approve(owner, ethers.parseEther("1"))).not.to.be.reverted
-    })
-  })
-
-  describe("Toggle transferability", function () {
-    it("Only admin can change canTransfer (true)", async function () {
-      const { b3tr, vot3, owner, minterAccount, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      // Mint some B3TR
-      await expect(b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))).not.to.be.reverted
-
-      await catchRevert(vot3.connect(otherAccount).setCanTransfer(true))
-
-      // Check flag
-      expect(await vot3.canTransfer()).to.eql(false)
-
-      await expect(vot3.connect(owner).setCanTransfer(true)).not.to.be.reverted
-
-      // Check flag
-      expect(await vot3.canTransfer()).to.eql(true)
-    })
-
-    it("Only admin can change canTransfer (false)", async function () {
-      const { b3tr, vot3, owner, minterAccount, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      // Mint some B3TR
-      await expect(b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))).not.to.be.reverted
-
-      await catchRevert(vot3.connect(otherAccount).setCanTransfer(true))
-
-      // Check flag
-      expect(await vot3.canTransfer()).to.eql(false)
-
-      await expect(vot3.connect(owner).setCanTransfer(false)).not.to.be.reverted
-
-      // Check flag
-      expect(await vot3.canTransfer()).to.eql(false)
-    })
-
-    it("Only admin can change canTransfer (multiple)", async function () {
-      const { b3tr, vot3, owner, minterAccount, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      // Mint some B3TR
-      await expect(b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))).not.to.be.reverted
-
-      await catchRevert(vot3.connect(otherAccount).setCanTransfer(true))
-
-      // Check flag
-      expect(await vot3.canTransfer()).to.eql(false)
-
-      await expect(vot3.connect(owner).setCanTransfer(true)).not.to.be.reverted
-
-      // Check flag
-      expect(await vot3.canTransfer()).to.eql(true)
-
-      await expect(vot3.connect(owner).setCanTransfer(false)).not.to.be.reverted
-
-      // Check flag
-      expect(await vot3.canTransfer()).to.eql(false)
-    })
-
-    it("Non admin can't change canTransfer", async function () {
-      const { vot3, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
-
-      await catchRevert(vot3.connect(otherAccount).setCanTransfer(true))
-
-      // Check flag
-      expect(await vot3.canTransfer()).to.eql(false)
     })
   })
 
@@ -420,7 +199,7 @@ describe("VOT3", function () {
     })
 
     it("Self-delegation should be automatic upon receiving VOT3 from another user", async function () {
-      const { vot3, owner, minterAccount, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
+      const { vot3, minterAccount, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
 
       // Mint some B3TR and swap for VOT3
       await getVot3Tokens(minterAccount, "1000")
@@ -429,9 +208,6 @@ describe("VOT3", function () {
       expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("0"))
       expect(await vot3.getVotes(otherAccount)).to.eql(ethers.parseEther("0"))
       expect(await vot3.delegates(otherAccount)).to.eql("0x0000000000000000000000000000000000000000")
-
-      // enable transferability
-      await vot3.connect(owner).setCanTransfer(true)
 
       // transfer
       await vot3.connect(minterAccount).transfer(otherAccount, ethers.parseEther("1"))
@@ -443,9 +219,7 @@ describe("VOT3", function () {
     })
 
     it("Vote power is being tracked correctly", async function () {
-      const { vot3, owner, minterAccount, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
-      // enable transferability
-      await vot3.connect(owner).setCanTransfer(true)
+      const { vot3, minterAccount, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
 
       // Mint some B3TR and swap for VOT3
       await getVot3Tokens(otherAccount, "1000")
@@ -487,11 +261,9 @@ describe("VOT3", function () {
     })
 
     it("Automatic self-delegation should be triggered only once", async function () {
-      const { vot3, b3tr, owner, minterAccount, otherAccount } = await getOrDeployContractInstances({
+      const { vot3, b3tr, minterAccount, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
-      // enable transferability
-      await vot3.connect(owner).setCanTransfer(true)
 
       // Mint some B3TR
       await b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))
@@ -527,9 +299,7 @@ describe("VOT3", function () {
     })
 
     it("Delegation to another user should still be possible", async function () {
-      const { vot3, owner, minterAccount, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
-      // enable transferability
-      await vot3.connect(owner).setCanTransfer(true)
+      const { vot3, minterAccount, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
 
       // Mint some B3TR and swap for VOT3
       await getVot3Tokens(otherAccount, "1000")
@@ -546,9 +316,7 @@ describe("VOT3", function () {
     })
 
     it("Self delegation is not happening for the VOT3 contract itself", async function () {
-      const { vot3, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
-      // enable transferability
-      await vot3.connect(owner).setCanTransfer(true)
+      const { vot3, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
 
       // Mint some B3TR and swap for VOT3
       await getVot3Tokens(otherAccount, "1000")
@@ -560,9 +328,7 @@ describe("VOT3", function () {
     })
 
     it("Self delegation is not happening if interacting with another contract", async function () {
-      const { vot3, owner, otherAccount, b3tr } = await getOrDeployContractInstances({ forceDeploy: true })
-      // enable transferability
-      await vot3.connect(owner).setCanTransfer(true)
+      const { vot3, otherAccount, b3tr } = await getOrDeployContractInstances({ forceDeploy: true })
 
       // Mint some B3TR and swap for VOT3
       await getVot3Tokens(otherAccount, "1000")

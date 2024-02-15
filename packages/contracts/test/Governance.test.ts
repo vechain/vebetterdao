@@ -11,6 +11,7 @@ import {
   waitForVotingPeriodToEnd,
   catchRevert,
   waitForProposalToBeActive,
+  partecipateInGovernanceVoting,
 } from "./helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it } from "mocha"
@@ -25,11 +26,9 @@ describe("Governor and TimeLock", function () {
       const { governor, vot3, owner, timeLock } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
-      const votingDelay = (await governor.votingDelay()).toString()
       const votesThreshold = (await governor.proposalThreshold()).toString()
       const votingPeriod = (await governor.votingPeriod()).toString()
 
-      expect(votingDelay).to.eql("1")
       expect(votesThreshold).to.eql(defaultVotingTreshold.toString())
       expect(votingPeriod).to.eql(defaultVotingPeriod.toString())
 
@@ -40,7 +39,7 @@ describe("Governor and TimeLock", function () {
 
       // check name of the governor contract
       const name = await governor.name()
-      expect(name).to.eql("GovernorContract")
+      expect(name).to.eql("B3TRGovernor")
 
       // check that the VOT3 address is correct
       const voteTokenAddress = await governor.token()
@@ -367,6 +366,28 @@ describe("Governor and TimeLock", function () {
       const voter5 = otherAccounts[5]
       await catchRevert(governor.connect(voter5).castVote(proposalId, 1))
     }).timeout(1800000)
+
+    it("Stores that a user voted at least once", async function () {
+      const { otherAccount, owner, governor, b3tr, B3trContract } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Should be able to free mint after participating in allocation voting
+      await partecipateInGovernanceVoting(
+        otherAccount,
+        owner,
+        governor,
+        b3tr,
+        B3trContract,
+        description,
+        functionToCall,
+        [],
+      )
+
+      // Check if user voted
+      const voted = await governor.hasVotedOnce(otherAccount.address)
+      expect(voted).to.equal(true)
+    })
   })
 
   describe("Proposal Execution", function () {

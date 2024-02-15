@@ -1,12 +1,12 @@
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 
-import Contract from "@repo/contracts/artifacts/contracts/governance/GovernorContract.sol/GovernorContract.json"
 import { getConfig } from "@repo/config"
 import { FormattingUtils } from "@repo/utils"
-const governanaceAbi = Contract.abi
+import { B3TRGovernorJson } from "@repo/contracts"
+const b3trGovernorAbi = B3TRGovernorJson.abi
 
-const GOVERNOR_CONTRACT = getConfig().governorContractAddress
+const GOVERNOR_CONTRACT = getConfig().b3trGovernorAddress
 
 /**
  * Get the number of votes of the given address (includes the delegated ones)
@@ -26,7 +26,7 @@ export const getVotesOnBlock = async (
 }> => {
   if (!address) throw new Error("address is required")
 
-  const getVotesAbi = governanaceAbi.find(abi => abi.name === "getVotes")
+  const getVotesAbi = b3trGovernorAbi.find(abi => abi.name === "getVotes")
   if (!getVotesAbi) throw new Error("getVotes function not found")
   const res = await thor.account(GOVERNOR_CONTRACT).method(getVotesAbi).call(address, block)
 

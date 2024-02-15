@@ -41,12 +41,18 @@ nvm use
 yarn install
 ```
 
-#### Spin up the project
+#### Spin up the project for development
 
 > docker and the compose plugin (prev docker-compose) are required in order to run the project
 
 ```
 yarn dev
+```
+
+#### Spin up the project pointing to the staging environment
+
+```
+yarn staging
 ```
 
 This command relies on a turbo pipeline which:

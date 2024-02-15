@@ -1,13 +1,17 @@
 import { Network } from "@repo/constants"
-import { localConfig } from "./local"
+import localConfig from "./local"
+import stagingConfig from "./solo-staging"
 
 export type Config = {
   b3trContractAddress: string
   vot3ContractAddress: string
-  governorContractAddress: string
+  b3trGovernorAddress: string
   timelockContractAddress: string
   xAllocationPoolContractAddress: string
   xAllocationVotingContractAddress: string
+  emissionsContractAddress: string
+  voterRewardsContractAddress: string
+  nftBadgeContractAddress: string
   nodeUrl: string
   network: Network
 }
@@ -17,5 +21,6 @@ export const getConfig = (type?: string): Config => {
   if (!networkType)
     throw new Error("NEXT_PUBLIC_NETWORK_TYPE env variable must be set or a type must be passed to getConfig()")
   if (networkType === "solo") return localConfig
+  if (networkType === "solo-staging") return stagingConfig
   throw new Error(`Unsupported NEXT_PUBLIC_NETWORK_TYPE ${networkType}`)
 }

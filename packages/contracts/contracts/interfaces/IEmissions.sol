@@ -1,140 +1,170 @@
 // SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.19;
 
 interface IEmissions {
-  error AccessControlBadConfirmation();
+    error AccessControlBadConfirmation();
 
-  error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
+    error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
 
-  error ReentrancyGuardReentrantCall();
+    error ReentrancyGuardReentrantCall();
 
-  event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole);
+    event RoleAdminChanged(
+        bytes32 indexed role,
+        bytes32 indexed previousAdminRole,
+        bytes32 indexed newAdminRole
+    );
 
-  event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender);
+    event RoleGranted(
+        bytes32 indexed role,
+        address indexed account,
+        address indexed sender
+    );
+    
+    event RoleRevoked(
+        bytes32 indexed role,
+        address indexed account,
+        address indexed sender
+    );
 
-  event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender);
+    function DEFAULT_ADMIN_ROLE() external view returns (bytes32);
 
-  function DEFAULT_ADMIN_ROLE() external view returns (bytes32);
+    function MINTER_ROLE() external view returns (bytes32);
 
-  function MINTER_ROLE() external view returns (bytes32);
+    function b3tr() external view returns (address);
 
-  function START_BLOCK() external view returns (uint256);
+    function cycleDuration() external view returns (uint256);
 
-  function b3tr() external view returns (address);
+    function distribute() external;
 
-  function cycleDuration() external view returns (uint256);
+    function emissions(uint256)
+        external
+        view
+        returns (
+            uint256 xAllocations,
+            uint256 vote2Earn,
+            uint256 treasury
+        );
 
-  function distribute() external;
+    function getCurrentCycle() external view returns (uint256);
 
-  function distributeLast() external;
+    function getCurrentTreasuryAmount() external view returns (uint256);
 
-  function getCurrentTreasuryAmount() external view returns (uint256);
+    function getCurrentVote2EarnAmount() external view returns (uint256);
 
-  function getCurrentVote2EarnAmount() external view returns (uint256);
+    function getCurrentXAllocationsAmount() external view returns (uint256);
 
-  function getCurrentXAllocationsAmount() external view returns (uint256);
+    function getNextCycleBlock() external view returns (uint256);
 
-  function getCycleBlock(uint256 cycle) external view returns (uint256);
+    function getInitialAllocations() external view returns (uint256[] memory);
 
-  function getLastTreasuryAmount() external view returns (uint256);
+    function getRemainingEmissions() external view returns (uint256);
 
-  function getLastVote2EarnAmount() external view returns (uint256);
+    function getRoleAdmin(bytes32 role) external view returns (bytes32);
 
-  function getLastXAllocationsAmount() external view returns (uint256);
+    function getScaledDecayPercentage(uint256 decayPercentage)
+        external
+        view
+        returns (uint256);
 
-  function getPreMintAllocations() external view returns (uint256[] memory);
+    function getTreasuryAmountForCycle(uint256 cycle)
+        external
+        view
+        returns (uint256);
 
-  function getRemainingEmissions() external view returns (uint256);
+    function getVote2EarnAmountForCycle(uint256 cycle)
+        external
+        view
+        returns (uint256);
 
-  function getRoleAdmin(bytes32 role) external view returns (bytes32);
+    function getVote2EarnDecayPeriods() external view returns (uint256);
 
-  function getScaledDecayPercentage(uint256 decayPercentage) external view returns (uint256);
+    function getXAllocationAmountForCycle(uint256 cycle)
+        external
+        view
+        returns (uint256);
 
-  function getTreasuryAmount(uint256 blockNumber) external view returns (uint256);
+    function getXAllocationDecayPeriods() external view returns (uint256);
 
-  function getTreasuryAmountForCycle(uint256 cycle) external view returns (uint256);
+    function grantRole(bytes32 role, address account) external;
 
-  function getVote2EarnAmount(uint256 blockNumber) external view returns (uint256);
+    function hasRole(bytes32 role, address account)
+        external
+        view
+        returns (bool);
 
-  function getVote2EarnAmountForCycle(uint256 cycle) external view returns (uint256);
+    function initialEmissions() external view returns (uint256);
 
-  function getVote2EarnDecayPeriods(uint256 blockNumber) external view returns (uint256);
+    function isCycleDistributed(uint256 cycle) external view returns (bool);
 
-  function getXAllocationAmountForCycle(uint256 cycle) external view returns (uint256);
+    function isCycleEnded(uint256 cycle) external view returns (bool);
 
-  function getXAllocationDecayPeriods(uint256 blockNumber) external view returns (uint256);
+    function isNextCycleDistributable() external view returns (bool);
 
-  function getXAllocationsAmount(uint256 blockNumber) external view returns (uint256);
+    function lastEmissionBlock() external view returns (uint256);
 
-  function grantRole(bytes32 role, address account) external;
+    function maxVote2EarnDecay() external view returns (uint256);
 
-  function hasRole(bytes32 role, address account) external view returns (bool);
+    function nextCycle() external view returns (uint256);
 
-  function initialEmissions() external view returns (uint256);
+    function start() external;
 
-  function isCycleDistributed(uint256 cycle) external view returns (bool);
+    function initialAllocations(uint256) external view returns (uint256);
 
-  function isLastCycle() external view returns (bool);
+    function renounceRole(bytes32 role, address callerConfirmation) external;
 
-  function lastEmissions(uint256) external view returns (uint256);
+    function revokeRole(bytes32 role, address account) external;
 
-  function maxVote2EarnDecay() external view returns (uint256);
+    function scalingFactor() external view returns (uint256);
 
-  function nextCycle() external view returns (uint256);
+    function setCycleDuration(uint256 _cycleDuration) external;
 
-  function preMint() external;
+    function setInitialEmissions(uint256 _emissions) external;
 
-  function preMintAllocations(uint256) external view returns (uint256);
+    function setMaxVote2EarnDecay(uint256 _maxVote2EarnDecay) external;
 
-  function renounceRole(bytes32 role, address callerConfirmation) external;
+    function setInitialAllocations(uint256[] memory _allocations) external;
 
-  function revokeRole(bytes32 role, address account) external;
+    function setScalingFactor(uint256 _scalingFactor) external;
 
-  function scalingFactor() external view returns (uint256);
+    function setTreasuryAddress(address treasuryAddress) external;
 
-  function setCycleDuration(uint256 _cycleDuration) external;
+    function setTreasuryPercentage(uint256 _percentage) external;
 
-  function setInitialEmissions(uint256 _emissions) external;
+    function setVote2EarnAddress(address vote2EarnAddress) external;
 
-  function setLastEmissions(uint256[] memory _lastEmissions) external;
+    function setVote2EarnDecay(uint256 _decay) external;
 
-  function setMaxVote2EarnDecay(uint256 _maxVote2EarnDecay) external;
+    function setVote2EarnDecayDelay(uint256 _delay) external;
 
-  function setPreMintAllocations(uint256[] memory _allocations) external;
+    function setXAllocationsDecay(uint256 _decay) external;
 
-  function setScalingFactor(uint256 _scalingFactor) external;
+    function setXAllocationsDecayDelay(uint256 _delay) external;
 
-  function setTreasuryAddress(address treasuryAddress) external;
+    function setXAllocationsGovernorAddress(address _xAllocationsGovernor)
+        external;
 
-  function setTreasuryPercentage(uint256 _percentage) external;
+    function setXallocationsAddress(address xAllocationAddress) external;
 
-  function setVote2EarnAddress(address vote2EarnAddress) external;
+    function supportsInterface(bytes4 interfaceId) external view returns (bool);
 
-  function setVote2EarnDecay(uint256 _decay) external;
+    function totalEmissions() external view returns (uint256);
 
-  function setVote2EarnDecayDelay(uint256 _delay) external;
+    function treasury() external view returns (address);
 
-  function setXAllocationsDecay(uint256 _decay) external;
+    function treasuryPercentage() external view returns (uint256);
 
-  function setXAllocationsDecayDelay(uint256 _delay) external;
+    function vote2Earn() external view returns (address);
 
-  function setXallocationsAddress(address xAllocationAddress) external;
+    function vote2EarnDecay() external view returns (uint256);
 
-  function supportsInterface(bytes4 interfaceId) external view returns (bool);
+    function vote2EarnDecayDelay() external view returns (uint256);
 
-  function treasury() external view returns (address);
+    function xAllocations() external view returns (address);
 
-  function treasuryPercentage() external view returns (uint256);
+    function xAllocationsDecay() external view returns (uint256);
 
-  function vote2Earn() external view returns (address);
+    function xAllocationsDecayDelay() external view returns (uint256);
 
-  function vote2EarnDecay() external view returns (uint256);
-
-  function vote2EarnDecayDelay() external view returns (uint256);
-
-  function xAllocations() external view returns (address);
-
-  function xAllocationsDecay() external view returns (uint256);
-
-  function xAllocationsDecayDelay() external view returns (uint256);
+    function xAllocationsGovernor() external view returns (address);
 }

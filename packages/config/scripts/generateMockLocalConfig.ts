@@ -13,13 +13,16 @@ export const generateMockLocalConfig = () => {
   }
 
   console.log(`${localConfigPath} does not exist, generating mock...`)
-  const toWrite = `import { Config } from "." \n export const localConfig: Config = {
+  const toWrite = `import { Config } from "." \n const config: Config = {
     b3trContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     vot3ContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
-    governorContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
+    b3trGovernorAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     timelockContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     xAllocationPoolContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     xAllocationVotingContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
+    emissionsContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
+    voterRewardsContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
+    nftBadgeContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     "nodeUrl": "http://localhost:8669",
     "network": {
       "id": "solo",
@@ -50,7 +53,9 @@ export const generateMockLocalConfig = () => {
         "transactions": []
       }
     }
-    }`
+    }
+    export default config;
+    `
 
   console.log(`Writing mock config file to ${localConfigPath}`)
   fs.writeFileSync(localConfigPath, toWrite)

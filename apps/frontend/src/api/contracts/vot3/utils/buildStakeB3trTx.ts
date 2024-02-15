@@ -1,8 +1,8 @@
 import { getConfig } from "@repo/config"
-import Contract from "@repo/contracts/artifacts/contracts/VOT3.sol/VOT3.json"
 import { FormattingUtils } from "@repo/utils"
 
-const vot3Abi = Contract.abi
+import { Vot3ContractJson } from "@repo/contracts"
+const vot3Abi = Vot3ContractJson.abi
 
 const config = getConfig()
 const VOT3_CONTRACT = config.vot3ContractAddress

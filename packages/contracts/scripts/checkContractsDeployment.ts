@@ -3,13 +3,15 @@ import { deployAll } from "./deploy/deploy"
 import { getConfig, Config } from "@repo/config"
 import fs from "fs"
 import path from "path"
+import { seedLocalEnvironment } from "./deploy/seed"
+import { Network } from "@repo/constants"
 
 const config = getConfig()
 
-const isSoloNetwork = config.network.id === "solo"
+const isSoloNetwork = network.name === "vechain_solo"
 
 async function main() {
-  console.log(`Checking contracts deployment on ${network.name}...`)
+  console.log(`Checking contracts deployment on ${network.name} (${config.network.urls[0]})...`)
   await checkContractsDeployment()
   process.exit(0)
 }
@@ -23,7 +25,17 @@ async function checkContractsDeployment() {
       if (isSoloNetwork) {
         // deploy the contracts and override the config file
         const newAddresses = await deployAll()
-        return await overrideLocalConfigWithNewContracts(newAddresses)
+        try {
+          await seedLocalEnvironment(
+            newAddresses.b3tr,
+            newAddresses.vot3,
+            newAddresses.xAllocationVoting,
+            newAddresses.emissions,
+          )
+        } catch (e) {
+          console.error(e)
+        }
+        return await overrideLocalConfigWithNewContracts(newAddresses, config.network)
       } else console.log(`Skipping deployment on ${network.name}`)
     } else console.log(`B3tr contract already deployed`)
   } catch (e) {
@@ -31,25 +43,26 @@ async function checkContractsDeployment() {
   }
 }
 
-async function overrideLocalConfigWithNewContracts(contracts: Awaited<ReturnType<typeof deployAll>>) {
+async function overrideLocalConfigWithNewContracts(contracts: Awaited<ReturnType<typeof deployAll>>, network: Network) {
   const newConfig: Config = {
     ...config,
-    b3trContractAddress: contracts.b3trAddress,
-    vot3ContractAddress: contracts.vot3Address,
-    governorContractAddress: contracts.governorAddress,
-    timelockContractAddress: contracts.timelockAddress,
-    xAllocationPoolContractAddress: contracts.xAllocationPoolAddress,
-    xAllocationVotingContractAddress: contracts.xAllocationVotingAddress,
+    b3trContractAddress: await contracts.b3tr.getAddress(),
+    vot3ContractAddress: await contracts.vot3.getAddress(),
+    b3trGovernorAddress: await contracts.governor.getAddress(),
+    timelockContractAddress: await contracts.timelock.getAddress(),
+    xAllocationPoolContractAddress: await contracts.xAllocationPool.getAddress(),
+    xAllocationVotingContractAddress: await contracts.xAllocationVoting.getAddress(),
+    emissionsContractAddress: await contracts.emissions.getAddress(),
+    voterRewardsContractAddress: await contracts.voterRewards.getAddress(),
+    nftBadgeContractAddress: await contracts.badge.getAddress(),
   }
 
   // eslint-disable-next-line
-  const toWrite = `import { Config } from \".\" \n export const localConfig: Config = ${JSON.stringify(
-    newConfig,
-    null,
-    2,
-  )}`
+  const toWrite = `import { Config } from \".\" \n const config: Config = ${JSON.stringify(newConfig, null, 2)};
+  export default config;`
 
-  const localConfigPath = path.resolve("../config/local.ts")
+  const fileToWrite = network.name === "solo" ? "local.ts" : "solo-staging.ts"
+  const localConfigPath = path.resolve(`../config/${fileToWrite}`)
   console.log(`Writing new config file to ${localConfigPath}`)
   fs.writeFileSync(localConfigPath, toWrite)
 }

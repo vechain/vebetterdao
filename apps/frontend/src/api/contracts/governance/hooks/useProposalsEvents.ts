@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 
-import GovernorContract from "@repo/contracts/artifacts/contracts/governance/GovernorContract.sol/GovernorContract.json"
 import { abi } from "thor-devkit"
 import { getEvents } from "@/api/blockchain"
 import { getConfig } from "@repo/config"
-const governorContractAbi = GovernorContract.abi
+import { B3TRGovernorJson } from "@repo/contracts"
+const b3trGovernorAbi = B3TRGovernorJson.abi
 
-const GOVERNANCE_CONTRACT = getConfig().governorContractAddress
+const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
 
 export type ProposalCreatedEvent = {
   proposalId: string
@@ -35,19 +35,19 @@ export type ProposalQueuedEvent = {
 }
 
 export const getProposalsEvents = async (thor: Connex.Thor) => {
-  const proposalCreatedAbi = governorContractAbi.find(abi => abi.name === "ProposalCreated")
+  const proposalCreatedAbi = b3trGovernorAbi.find(abi => abi.name === "ProposalCreated")
   if (!proposalCreatedAbi) throw new Error("ProposalCreated event not found")
   const proposalCreatedEvent = new abi.Event(proposalCreatedAbi as abi.Event.Definition)
 
-  const proposalCanceledAbi = governorContractAbi.find(abi => abi.name === "ProposalCanceled")
+  const proposalCanceledAbi = b3trGovernorAbi.find(abi => abi.name === "ProposalCanceled")
   if (!proposalCanceledAbi) throw new Error("ProposalCanceled event not found")
   const proposalCanceledEvent = new abi.Event(proposalCanceledAbi as abi.Event.Definition)
 
-  const proposalExecutedAbi = governorContractAbi.find(abi => abi.name === "ProposalExecuted")
+  const proposalExecutedAbi = b3trGovernorAbi.find(abi => abi.name === "ProposalExecuted")
   if (!proposalExecutedAbi) throw new Error("ProposalExecuted event not found")
   const proposalExecutedEvent = new abi.Event(proposalExecutedAbi as abi.Event.Definition)
 
-  const proposalQueuedAbi = governorContractAbi.find(abi => abi.name === "ProposalQueued")
+  const proposalQueuedAbi = b3trGovernorAbi.find(abi => abi.name === "ProposalQueued")
   if (!proposalQueuedAbi) throw new Error("ProposalQueued event not found")
   const proposalQueuedEvent = new abi.Event(proposalQueuedAbi as abi.Event.Definition)
 

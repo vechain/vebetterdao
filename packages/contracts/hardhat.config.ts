@@ -4,6 +4,9 @@ import "@nomicfoundation/hardhat-toolbox"
 import "@nomiclabs/hardhat-truffle5"
 import "@vechain/hardhat-vechain"
 import "@vechain/hardhat-ethers"
+import { getConfig } from "@repo/config"
+
+const soloUrl = getConfig().network.urls[0]
 
 const config: HardhatUserConfig = {
   solidity: "0.8.20",
@@ -12,6 +15,7 @@ const config: HardhatUserConfig = {
 module.exports = {
   solidity: {
     version: "0.8.20",
+    evmVersion: "paris",
     settings: {
       optimizer: {
         enabled: true,
@@ -28,7 +32,7 @@ module.exports = {
       chainId: 1337,
     },
     vechain_solo: {
-      url: VECHAIN_URL_SOLO,
+      url: soloUrl,
       accounts: {
         mnemonic: "denial kitchen pet squirrel other broom bar gas better priority spoil cross",
         count: 10,
@@ -36,7 +40,6 @@ module.exports = {
       },
       restful: true,
       gas: 10000000,
-      count: 10,
     },
     vechain_testnet: {
       url: VECHAIN_URL_TESTNET,
@@ -47,7 +50,6 @@ module.exports = {
       },
       restful: true,
       gas: 10000000,
-      count: 10,
     },
     vechain_mainnet: {
       url: VECHAIN_URL_MAINNET,
