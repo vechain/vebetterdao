@@ -46,7 +46,7 @@
     "deploy": {
       "dependsOn": ["^deploy"]
     },
-    "test": {
+    "test:thor-solo": {
       "cache": false,
       "dependsOn": ["@repo/contracts#check-contracts-deployment"]
     },
