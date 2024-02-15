@@ -32,7 +32,7 @@ describe("X-Allocation Pool", async function () {
       // Grant minter role to emissions contract
       await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
 
-      await emissions.connect(minterAccount).preMint()
+      await emissions.connect(minterAccount).start()
 
       const round1 = await xAllocationVoting.currentRoundId()
 
@@ -113,7 +113,7 @@ describe("X-Allocation Pool", async function () {
 
       // Grant minter role to emissions contract
       await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
-      await emissions.connect(minterAccount).preMint()
+      await emissions.connect(minterAccount).start()
 
       //Start allocation round
       const round1 = parseInt((await xAllocationVoting.currentRoundId()).toString())
@@ -168,7 +168,7 @@ describe("X-Allocation Pool", async function () {
 
       // Grant minter role to emissions contract
       await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
-      await emissions.connect(minterAccount).preMint()
+      await emissions.connect(minterAccount).start()
 
       //Start allocation round
       const round1 = parseInt((await xAllocationVoting.currentRoundId()).toString())
@@ -211,7 +211,7 @@ describe("X-Allocation Pool", async function () {
 
       // Grant minter role to emissions contract
       await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
-      await emissions.connect(minterAccount).preMint()
+      await emissions.connect(minterAccount).start()
 
       //Start allocation round
       const round1 = parseInt((await xAllocationVoting.currentRoundId()).toString())
@@ -257,7 +257,7 @@ describe("X-Allocation Pool", async function () {
 
       // Grant minter role to emissions contract
       await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
-      await emissions.connect(minterAccount).preMint()
+      await emissions.connect(minterAccount).start()
 
       //Start allocation round
       const round1 = parseInt((await xAllocationVoting.currentRoundId()).toString())
@@ -298,7 +298,7 @@ describe("X-Allocation Pool", async function () {
 
       // Grant minter role to emissions contract
       await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
-      await emissions.connect(minterAccount).preMint()
+      await emissions.connect(minterAccount).start()
 
       //Start allocation round
       const round1 = parseInt((await xAllocationVoting.currentRoundId()).toString())
@@ -339,7 +339,7 @@ describe("X-Allocation Pool", async function () {
 
       // Grant minter role to emissions contract
       await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
-      await emissions.connect(minterAccount).preMint()
+      await emissions.connect(minterAccount).start()
 
       //Start allocation round
       const round1 = parseInt((await xAllocationVoting.currentRoundId()).toString())
@@ -407,7 +407,7 @@ describe("X-Allocation Pool", async function () {
 
       // Grant minter role to emissions contract
       await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
-      await emissions.connect(minterAccount).preMint()
+      await emissions.connect(minterAccount).start()
 
       //Start allocation round
       const round1 = parseInt((await xAllocationVoting.currentRoundId()).toString())
@@ -462,7 +462,7 @@ describe("X-Allocation Pool", async function () {
 
       // Grant minter role to emissions contract
       await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
-      await emissions.connect(minterAccount).preMint()
+      await emissions.connect(minterAccount).start()
 
       //Start allocation round
       const round1 = parseInt((await xAllocationVoting.currentRoundId()).toString())
