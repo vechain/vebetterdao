@@ -477,40 +477,15 @@ describe("Emissions", () => {
 
     await waitForNextCycle(emissions)
 
-    expect(await emissions.isLastCycle()).to.equal(true)
-
-    expect(await emissions.getRemainingEmissions()).to.equal(115954859940312834277586n) // 115954.85 B3TR
-
-    expect(await emissions.getLastXAllocationsAmount()).to.equal(76530207560606470623206n) // 76530.21 B3TR
-    expect(await emissions.getLastVote2EarnAmount()).to.equal(15074131792240668456086n) // 15074.13 B3TR
-    expect(await emissions.getLastTreasuryAmount()).to.equal(24350520587465695198294n) // 24350.52 B3TR
-
-    // Distribute emissions
-    await catchRevert(emissions.connect(minterAccount).distribute()) // Should revert as the supply cap is reached
+    emissions.connect(minterAccount).distribute()
 
     await waitForNextCycle(emissions)
 
-    // Should be able to call distributeLast()
-    await emissions.connect(minterAccount).distributeLast()
+    await catchRevert(emissions.connect(minterAccount).distribute()) // Should not be able to distribute more than the B3TR supply cap
 
     // Check supply
-    expect(await b3tr.totalSupply()).to.equal(ethers.parseEther("1000000000")) // 1 billion B3TR
+    expect(await b3tr.totalSupply()).to.equal(await emissions.totalEmissions()) // 999,884,045.14 B3TR
   }).timeout(1000 * 60 * 5) // 5 minutes
-
-  it("Should not be able to call the last distribution round if b3tr supply cap is not exceeded by normal distribution", async () => {
-    const { emissions, b3tr, minterAccount, owner } = await getOrDeployContractInstances({
-      forceDeploy: true,
-    })
-
-    // Grant minter role to emissions contract
-    await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
-
-    // Pre-mint
-    await emissions.connect(minterAccount).preMint()
-
-    // Distribute last emissions should revert as the b3tr supply cap is not reached
-    await catchRevert(emissions.connect(minterAccount).distributeLast())
-  })
 
   it("Should not be able to distribute if cycle is not ready", async () => {
     const { emissions, minterAccount, b3tr, owner } = await getOrDeployContractInstances({

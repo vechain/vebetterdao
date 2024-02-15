@@ -2,7 +2,6 @@ import { ethers } from "hardhat"
 import { B3TR, Emissions, VOT3, XAllocationVoting, XApps } from "../../typechain-types"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { BytesLike } from "ethers"
-import { waitForProposalToBeActive } from "../../test/helpers"
 
 type App = {
   address: string
@@ -157,8 +156,6 @@ export const seedLocalEnvironment = async (
 
   //   Start new allocation round
   const roundId = parseInt((await xAllocationVoting.currentRoundId()).toString())
-  console.log("Waiting for proposal to be active...")
-  await waitForProposalToBeActive(roundId, xAllocationVoting)
   console.log("Casting random votes to xDapps...")
   await castVotesToXDapps(xAllocationVoting, accountsToSeed, roundId, amountToSwap, xDappsFromContract)
 

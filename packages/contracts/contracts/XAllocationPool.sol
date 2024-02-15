@@ -17,9 +17,9 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
 
   uint256 public constant percentagePrecisionScalingFactor = 1e4;
 
-  uint256 public baseAllocationPercentage = 30;
-  uint256 public variableAllocationPercentage = 70;
-  uint256 public appSharesCap = 15;
+  uint256 public baseAllocationPercentage;
+  uint256 public variableAllocationPercentage;
+  uint256 public appSharesCap;
 
   // B3TR token contract
   IB3TR public b3tr;

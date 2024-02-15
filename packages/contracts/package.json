@@ -10,7 +10,7 @@
     "artifacts/contracts/B3TRBadge.sol/B3TRBadge.json",
     "artifacts/contracts/Distribution.sol/Distribution.json",
     "artifacts/contracts/Emissions.sol/Emissions.json",
-    "artifacts/contracts/governance/GovernorContract.sol/GovernorContract.json",
+    "artifacts/contracts/governance/B3TRGovernor.sol/B3TRGovernor.json",
     "artifacts/contracts/governance/Timelock.sol/Timelock.json",
     "artifacts/contracts/VOT3.sol/VOT3.json",
     "artifacts/contracts/VoterRewards.sol/VoterRewards.json",

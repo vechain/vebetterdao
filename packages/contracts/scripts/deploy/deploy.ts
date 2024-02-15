@@ -1,5 +1,5 @@
 import { ethers, network } from "hardhat"
-import { B3TR, GovernorContract, TimeLock, VOT3 } from "../../typechain-types"
+import { B3TR, B3TRGovernor, TimeLock, VOT3 } from "../../typechain-types"
 
 const DEFAULT_MINTER = "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68" //2nd account from mnemonic of solo network
 const TIMELOCK_ADMIN = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa" //1st account from mnemonic of solo network
@@ -29,7 +29,7 @@ const CYCLE_DURATION = 60480 // 1 Week in blocks
 const DECAY_SETTINGS = [4, 20, 12, 50] // 4% decay for X Allocations, 20% decay for Vote2Earn, every 12 cycles for X Allocations, Every 50 cycles for Vote2Earn
 const INITIAL_EMISSIONS = ethers.parseEther("2000000")
 const TREASURY_PERCENTAGE = 25 // 25%
-const LAST_EMISSIONS = [66, 13] // On the last cycle, 66% of the emissions will be sent to the x allocations address, 13% to the vote 2 earn address
+const MAX_VOTE_2_EARN_DECAY_PERCENTAGE = 80 // 80%
 
 // XAllocationPool Values
 const BASE_ALLOCATION_PERCENTAGE = 20
@@ -42,7 +42,7 @@ const multiplier = [0]
 export async function deployAll() {
   console.log(`Deploying contracts on ${network.name}...`)
 
-  const [timelockAdminSigner] = await ethers.getSigners()
+  const [timelockAdminSigner, defaultMinter, nftBadgeAdmin] = await ethers.getSigners()
 
   // Deploy B3TR and VOT3 tokens
   const b3tr = await deployB3trToken()
@@ -92,6 +92,10 @@ export async function deployAll() {
   // Setup XAllocationPool addresses
   await xAllocationPool.connect(timelockAdminSigner).setXAllocationVotingAddress(await xAllocationVoting.getAddress())
   await xAllocationPool.connect(timelockAdminSigner).setEmissionsAddress(await emissions.getAddress())
+
+  // Set xAllocationVoting and B3TRGovernor address in B3TRBedge
+  await badge.connect(nftBadgeAdmin).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+  await badge.connect(nftBadgeAdmin).setB3trGovernorAddress(await governor.getAddress())
 
   return {
     governor: governor,
@@ -144,10 +148,10 @@ async function deployTimeLock(): Promise<TimeLock> {
   return contract
 }
 
-async function deployGovernor(vot3Address: string, timelockAddress: string): Promise<GovernorContract> {
+async function deployGovernor(vot3Address: string, timelockAddress: string): Promise<B3TRGovernor> {
   console.log(`Deploying Governor contract`)
-  const GovernorContract = await ethers.getContractFactory("GovernorContract")
-  const contract = await GovernorContract.deploy(
+  const B3TRGovernor = await ethers.getContractFactory("B3TRGovernor")
+  const contract = await B3TRGovernor.deploy(
     vot3Address,
     timelockAddress,
     QUORUM_PERCENTAGE,
@@ -234,7 +238,7 @@ async function deployEmissions(b3trAddress: string, destinations: string[], allo
     DECAY_SETTINGS as [number, number, number, number],
     INITIAL_EMISSIONS,
     TREASURY_PERCENTAGE,
-    LAST_EMISSIONS as [number, number],
+    MAX_VOTE_2_EARN_DECAY_PERCENTAGE
   )
 
   await contract.waitForDeployment()
