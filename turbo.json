@@ -71,15 +71,16 @@
     "deploy": {
       "dependsOn": ["^deploy"]
     },
+    "test": {
+      "cache": false,
+      "dependsOn": ["@repo/contracts#check-contracts-deployment", "test:hardhat"]
+    },
     "test:thor-solo": {
       "cache": false,
       "dependsOn": ["@repo/contracts#check-contracts-deployment"]
     },
     "test:hardhat": {
       "cache": false
-    },
-    "test": {
-      "cache": false
-    }
+    } 
   }
 }
