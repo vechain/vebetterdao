@@ -31,7 +31,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
   const nextButtonDisabled = !data.roundId || data.isCurrent
 
   const goToNextRound = () => {
-    if (!nextButtonDisabled) return
+    if (nextButtonDisabled) return
     const nextRound = Number(data?.roundId) + 1
     router.push(`/rounds/${nextRound}`)
   }
