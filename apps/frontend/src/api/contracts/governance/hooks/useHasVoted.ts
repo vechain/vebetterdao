@@ -2,9 +2,9 @@ import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 
 import { getConfig } from "@repo/config"
-import { GovernorContractJson } from "@repo/contracts"
-const governorContractAbi = GovernorContractJson.abi
-const GOVERNANCE_CONTRACT = getConfig().governorContractAddress
+import { B3TRGovernorJson } from "@repo/contracts"
+const b3trGovernorAbi = B3TRGovernorJson.abi
+const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
 
 /**
  * Check if the given address has voted on the given proposal
@@ -16,7 +16,7 @@ const GOVERNANCE_CONTRACT = getConfig().governorContractAddress
 export const getHasVoted = async (thor: Connex.Thor, proposalId: string, address?: string): Promise<boolean> => {
   if (!address) throw new Error("address is required")
 
-  const getHasVotedAbi = governorContractAbi.find(abi => abi.name === "hasVoted")
+  const getHasVotedAbi = b3trGovernorAbi.find(abi => abi.name === "hasVoted")
   if (!getHasVotedAbi) throw new Error("hasVoted function not found")
   const res = await thor.account(GOVERNANCE_CONTRACT).method(getHasVotedAbi).call(proposalId, address)
 

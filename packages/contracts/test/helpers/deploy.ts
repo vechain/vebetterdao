@@ -3,7 +3,7 @@ import { ContractFactory, ContractTransactionResponse } from "ethers"
 import { ethers } from "hardhat"
 import {
   B3TR,
-  GovernorContract,
+  B3TRGovernor,
   TimeLock,
   VOT3,
   B3TRBadge,
@@ -18,7 +18,7 @@ interface DeployInstance {
   b3tr: B3TR & { deploymentTransaction(): ContractTransactionResponse }
   vot3: VOT3 & { deploymentTransaction(): ContractTransactionResponse }
   timeLock: TimeLock & { deploymentTransaction(): ContractTransactionResponse }
-  governor: GovernorContract & { deploymentTransaction(): ContractTransactionResponse }
+  governor: B3TRGovernor & { deploymentTransaction(): ContractTransactionResponse }
   b3trBadge: B3TRBadge & { deploymentTransaction(): ContractTransactionResponse }
   xAllocationVoting: XAllocationVoting & { deploymentTransaction(): ContractTransactionResponse }
   xAllocationPool: XAllocationPool & { deploymentTransaction(): ContractTransactionResponse }
@@ -91,8 +91,8 @@ export const getOrDeployContractInstances = async ({
   )
 
   // Deploy Governor
-  const GovernorContract = await ethers.getContractFactory("GovernorContract")
-  const governor = await GovernorContract.deploy(
+  const B3TRGovernor = await ethers.getContractFactory("B3TRGovernor")
+  const governor = await B3TRGovernor.deploy(
     await vot3.getAddress(),
     await timeLock.getAddress(),
     4, // quroum percentage
@@ -170,6 +170,10 @@ export const getOrDeployContractInstances = async ({
     [await timeLock.getAddress(), owner.address],
   )
   await xAllocationVoting.waitForDeployment()
+
+  // Set xAllocationVoting and Governor address in B3TRBedge
+  await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+  await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
 
   // Grant Vote registrar role to XAllocationVoting
   await voterRewards.connect(owner).setXallocationVoteRegistrarRole(await xAllocationVoting.getAddress())
