@@ -17,6 +17,7 @@ const PROPOSAL_THRESHOLD = 1 // How many votes are needed to create a proposal
 // NFT Badge Values
 const name = "B3TR Badge"
 const symbol = "B3TR"
+const BASE_URI = "ipfs://bafybeifdelb2rafhbwycwih3scvniwvu3lsmxue3rwg46sukj5p77qgqqe/"
 
 // Emissions Values
 const VOTE_2_EARN_ADDRESS = "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68" //2nd account from mnemonic of solo network
@@ -142,7 +143,7 @@ async function deployGovernor(vot3Address: string, timelockAddress: string): Pro
 async function deployNFTBadge(mintableLevelFromDeploy: number) {
   console.log(`Deploying B3TRBadge NFT contract`)
   const NFTBadgeContract = await ethers.getContractFactory("B3TRBadge")
-  const contract = await NFTBadgeContract.deploy(name, symbol, NFT_BADGE_ADMIN, mintableLevelFromDeploy)
+  const contract = await NFTBadgeContract.deploy(name, symbol, NFT_BADGE_ADMIN, mintableLevelFromDeploy, BASE_URI)
 
   await contract.waitForDeployment()
 
