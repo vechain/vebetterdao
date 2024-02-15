@@ -308,3 +308,30 @@ export const partecipateInAllocationVoting = async (
     await waitForVotingPeriodToEnd(roundId, xAllocationVoting)
   }
 }
+
+export const partecipateInGovernanceVoting = async (
+  user: HardhatEthersSigner,
+  admin: HardhatEthersSigner,
+  governor: B3TRGovernor,
+  contractToCall: BaseContract,
+  Contract: ContractFactory,
+  description: string,
+  functionToCall: string,
+  args: any[] = [],
+  waitProposalToEnd: boolean = false,
+) => {
+  await getVot3Tokens(user, "1")
+  await getVot3Tokens(admin, "1000")
+
+  const tx = await createProposal(governor, contractToCall, Contract, admin, description, functionToCall, args)
+  const proposalId = await getProposalIdFromTx(tx, governor)
+
+  await waitForProposalToBeActive(proposalId, governor)
+
+  // Vote
+  await governor.connect(user).castVote(proposalId, 1)
+
+  if (waitProposalToEnd) {
+    await waitForVotingPeriodToEnd(proposalId, governor)
+  }
+}
