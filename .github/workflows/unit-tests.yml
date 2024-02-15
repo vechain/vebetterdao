@@ -32,12 +32,13 @@ jobs:
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.GH_READ_PACKAGES_TOKEN }}" >> .npmrc
           echo "registry=https://registry.npmjs.org/" >> .npmrc
 
-      - name: Run Slither
-        uses: crytic/slither-action@v0.3.1
-        id: slither
-      
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
       - name: Unit Tests
         run: yarn test
+      
+      - name: Run Slither
+        uses: crytic/slither-action@v0.3.1
+        id: slither
+      
