@@ -1,6 +1,6 @@
 import { Config } from "."
 const config: Config = {
-  b3trContractAddress: "0x4EC2d469E5e8793ecA168296D7552d77A2f5DEb6",
+  b3trContractAddress: "0x4EC2d469E5e8793ecA168296D7552d77A2f5DEb5",
   vot3ContractAddress: "0x1911b2c133E07D84db20bD16c379Fb7Ed039bB1a",
   b3trGovernorAddress: "0x8A2a0bcC91c6d7e576348fb4358C723Ce91D50E6",
   timelockContractAddress: "0xa16490ec93208DE71a2DAa86AE753bdbFFb07b89",

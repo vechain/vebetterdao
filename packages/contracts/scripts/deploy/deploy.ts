@@ -25,11 +25,14 @@ const PRE_MINT_X_ALLOCATION = ethers.parseEther("1000000")
 const PRE_MINT_VOTE_2_EARN_ALLOCATION = ethers.parseEther("1000000")
 const PRE_MINT_TREASURY_ALLOCATION = ethers.parseEther("1750000")
 
-const CYCLE_DURATION = 60480 // 1 Week in blocks
+const CYCLE_DURATION = 180 // 30 minutes
 const DECAY_SETTINGS = [4, 20, 12, 50] // 4% decay for X Allocations, 20% decay for Vote2Earn, every 12 cycles for X Allocations, Every 50 cycles for Vote2Earn
 const INITIAL_EMISSIONS = ethers.parseEther("2000000")
 const TREASURY_PERCENTAGE = 25 // 25%
 const MAX_VOTE_2_EARN_DECAY_PERCENTAGE = 80 // 80%
+
+// XAllocationVoting Values
+const X_ALLOCATION_VOTING_PERIOD = CYCLE_DURATION - 1
 
 // XAllocationPool Values
 const BASE_ALLOCATION_PERCENTAGE = 20
@@ -212,7 +215,7 @@ async function deployXAllocationVoting(
   const contract = await XAllocationVotingContract.deploy(
     await vot3.getAddress(),
     QUORUM_PERCENTAGE,
-    VOTING_PERIOD,
+    X_ALLOCATION_VOTING_PERIOD,
     await timeLock.getAddress(),
     voterRewardsAddress,
     [await timeLock.getAddress(), adminAddress],
