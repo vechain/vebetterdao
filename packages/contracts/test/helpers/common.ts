@@ -249,10 +249,7 @@ export const startNewAllocationRound = async (xAllocationVoting: XAllocationVoti
   let receipt = await tx.wait()
   if (!receipt) throw new Error("No receipt")
 
-  let { proposalId: roundId } = parseRoundStartedEvent(
-    filterEventsByName(receipt.logs, "RoundCreated")[0],
-    xAllocationVoting,
-  )
+  let { roundId } = parseRoundStartedEvent(filterEventsByName(receipt.logs, "RoundCreated")[0], xAllocationVoting)
 
   return roundId
 }

@@ -22,7 +22,7 @@ export const parseRoundStartedEvent = (event: any, xAllocationVoting: XAllocatio
   const decoded = decodeEvent(event, xAllocationVoting)
 
   return {
-    proposalId: decoded?.args[0],
+    roundId: decoded?.args[0],
     proposer: decoded?.args[1],
     voteStart: decoded?.args[2],
     voteEnd: decoded?.args[3],
@@ -34,7 +34,7 @@ export const parseAllocationVoteCastEvent = (event: any, xAllocationVoting: XAll
 
   return {
     voter: decoded?.args[0],
-    proposalId: decoded?.args[1],
+    roundId: decoded?.args[1],
     apps: decoded?.args[2],
     voteWeights: decoded?.args[3],
   }
