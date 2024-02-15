@@ -3,9 +3,9 @@ import { useConnex } from "@vechain/dapp-kit-react"
 
 import { getConfig } from "@repo/config"
 import { FormattingUtils } from "@repo/utils"
-const GOVERNANCE_CONTRACT = getConfig().governorContractAddress
-import { GovernorContractJson } from "@repo/contracts"
-const governorContractAbi = GovernorContractJson.abi
+const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
+import { B3TRGovernorJson } from "@repo/contracts"
+const b3trGovernorAbi = B3TRGovernorJson.abi
 
 type ProposalVotes = {
   againstVotes: string
@@ -19,7 +19,7 @@ type ProposalVotes = {
  * @returns  the proposal votes {@link ProposalVotes} with decimals scaled down
  */
 export const getProposalVotes = async (thor: Connex.Thor, proposalId: string): Promise<ProposalVotes> => {
-  const proposalVotesAbi = governorContractAbi.find(abi => abi.name === "proposalVotes")
+  const proposalVotesAbi = b3trGovernorAbi.find(abi => abi.name === "proposalVotes")
   if (!proposalVotesAbi) throw new Error("proposalVotes function not found")
   const res = await thor.account(GOVERNANCE_CONTRACT).method(proposalVotesAbi).call(proposalId)
 

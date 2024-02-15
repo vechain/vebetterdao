@@ -56,7 +56,7 @@ interface IEmissions {
 
     function getNextCycleBlock() external view returns (uint256);
 
-    function getPreMintAllocations() external view returns (uint256[] memory);
+    function getInitialAllocations() external view returns (uint256[] memory);
 
     function getRemainingEmissions() external view returns (uint256);
 
@@ -107,9 +107,9 @@ interface IEmissions {
 
     function nextCycle() external view returns (uint256);
 
-    function preMint() external;
+    function start() external;
 
-    function preMintAllocations(uint256) external view returns (uint256);
+    function initialAllocations(uint256) external view returns (uint256);
 
     function renounceRole(bytes32 role, address callerConfirmation) external;
 
@@ -123,7 +123,7 @@ interface IEmissions {
 
     function setMaxVote2EarnDecay(uint256 _maxVote2EarnDecay) external;
 
-    function setPreMintAllocations(uint256[] memory _allocations) external;
+    function setInitialAllocations(uint256[] memory _allocations) external;
 
     function setScalingFactor(uint256 _scalingFactor) external;
 

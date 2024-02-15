@@ -22,7 +22,7 @@ contract XAllocationVoting is
    * @notice Construct a XAllocationVotingGovernor contract
    * @param _vot3Token The address of the Vot3 token used for voting
    * @param _quorumPercentage quorum as a percentage of the total supply at the block a proposal’s voting power is retrieved
-   * @param _initialVotingPeriod How long does a proposal remain open to votese
+   * @param _initialVotingPeriod How long does a round remain open to votese
    * @param _b3trGovernor The address of the B3trGovernor DAO
    * @param _admins The addresses of the admins (DAO + another address) that can update the XAllocationPool address, only DAO will remain in the final version
    */
@@ -51,32 +51,32 @@ contract XAllocationVoting is
     _b3trGovernor = b3trGovernor_;
   }
 
-  function _propose(address proposer) internal virtual override returns (uint256 proposalId) {
-    ++_proposalCount;
-    proposalId = _proposalCount;
+  function _startNewRound(address proposer) internal virtual override returns (uint256 roundId) {
+    ++_roundCount;
+    roundId = _roundCount;
 
-    if (_proposals[proposalId].voteStart != 0) {
-      revert GovernorUnexpectedProposalState(proposalId, state(proposalId), bytes32(0));
+    if (_rounds[roundId].voteStart != 0) {
+      revert GovernorUnexpectedRoundState(roundId, state(roundId), bytes32(0));
     }
 
     // If checkpoint for latest round was not already created, create it
-    if (proposalId > 1 && !isFinalized(proposalId - 1)) {
-      _finalizeRound(proposalId - 1);
+    if (roundId > 1 && !isFinalized(roundId - 1)) {
+      _finalizeRound(roundId - 1);
     }
 
     // save x-apps that users can vote for
     bytes32[] memory apps = allElegibleApps();
-    _appsElegibleForVoting[proposalId] = apps;
+    _appsElegibleForVoting[roundId] = apps;
 
     uint256 snapshot = clock();
     uint256 duration = votingPeriod();
 
-    ProposalCore storage proposal = _proposals[proposalId];
-    proposal.proposer = proposer;
-    proposal.voteStart = SafeCast.toUint48(snapshot);
-    proposal.voteDuration = SafeCast.toUint32(duration);
+    RoundCore storage round = _rounds[roundId];
+    round.proposer = proposer;
+    round.voteStart = SafeCast.toUint48(snapshot);
+    round.voteDuration = SafeCast.toUint32(duration);
 
-    emit AllocationProposalCreated(proposalId, proposer, snapshot, snapshot + duration);
+    emit RoundCreated(roundId, proposer, snapshot, snapshot + duration);
 
     // Using a named return variable to avoid stack too deep errors
   }
@@ -93,8 +93,8 @@ contract XAllocationVoting is
     super.addApp(appAddress, name, metadata);
   }
 
-  function proposeNewAllocationRound() public override onlyRole(DEFAULT_ADMIN_ROLE) returns (uint256) {
-    return super.proposeNewAllocationRound();
+  function startNewRound() public override onlyRole(DEFAULT_ADMIN_ROLE) returns (uint256) {
+    return super.startNewRound();
   }
 
   function setAdminRole(address _newAdmin) public onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -107,7 +107,7 @@ contract XAllocationVoting is
 
   function getCurrentAllocationRoundSnapshot() public view returns (uint256) {
     uint256 currentId = currentRoundId();
-    return proposalSnapshot(currentId);
+    return roundSnapshot(currentId);
   }
 
   /**
@@ -135,8 +135,8 @@ contract XAllocationVoting is
     return super.quorum(blockNumber);
   }
 
-  function state(uint256 proposalId) public view override(XAllocationVotingGovernor) returns (AllocationProposalState) {
-    return super.state(proposalId);
+  function state(uint256 roundId) public view override(XAllocationVotingGovernor) returns (RoundState) {
+    return super.state(roundId);
   }
 
   function supportsInterface(

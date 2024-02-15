@@ -3,9 +3,9 @@ import { useConnex } from "@vechain/dapp-kit-react"
 
 import { getConfig } from "@repo/config"
 import { FormattingUtils } from "@repo/utils"
-import { GovernorContractJson } from "@repo/contracts"
-const governorContractAbi = GovernorContractJson.abi
-const GOVERNANCE_CONTRACT = getConfig().governorContractAddress
+import { B3TRGovernorJson } from "@repo/contracts"
+const b3trGovernorAbi = B3TRGovernorJson.abi
+const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
 
 /**
  * Get the quorum at a given block number
@@ -21,7 +21,7 @@ export const getProposalQuorum = async (
   scaled: string
   formatted: string
 }> => {
-  const quorumAbi = governorContractAbi.find(abi => abi.name === "quorum")
+  const quorumAbi = b3trGovernorAbi.find(abi => abi.name === "quorum")
   if (!quorumAbi) throw new Error("quorum function not found")
   const res = await thor.account(GOVERNANCE_CONTRACT).method(quorumAbi).call(blockNumber)
 

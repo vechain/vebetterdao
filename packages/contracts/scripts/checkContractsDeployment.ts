@@ -48,7 +48,7 @@ async function overrideLocalConfigWithNewContracts(contracts: Awaited<ReturnType
     ...config,
     b3trContractAddress: await contracts.b3tr.getAddress(),
     vot3ContractAddress: await contracts.vot3.getAddress(),
-    governorContractAddress: await contracts.governor.getAddress(),
+    b3trGovernorAddress: await contracts.governor.getAddress(),
     timelockContractAddress: await contracts.timelock.getAddress(),
     xAllocationPoolContractAddress: await contracts.xAllocationPool.getAddress(),
     xAllocationVotingContractAddress: await contracts.xAllocationVoting.getAddress(),
