@@ -60,12 +60,7 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
 
   // Mints the highest level Badge the caller is allowed to mint
   function freeMint() public {
-    require(xAllocationsGovernor != IXAllocationVotingGovernor(address(0)), "Badge: XAllocationVotingGovernor not set");
-    require(b3trGovernor != IB3TRGovernor(payable(address(0))), "Badge: B3TRGovernor not set");
-    require(
-      xAllocationsGovernor.hasVotedOnce(msg.sender) || b3trGovernor.hasVotedOnce(msg.sender),
-      "Badge: User has not partecipated in X-Allocation Voting or B3TR Governance"
-    );
+    require(participatedInGovernance(msg.sender), "Badge: User has not participated in governance");
 
     // TODO: Get User's X/Economic node type and check max mintable level
     // TODO: Check if that X/Economic node has not already been used to mint a Badge (e.g., MintedLevelOfXNode[xNodeId])
@@ -180,6 +175,17 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
 
   function numCheckpoints(address account) public view returns (uint32) {
     return _numCheckpoints(account);
+  }
+
+  function participatedInGovernance(address user) public view returns (bool) {
+    require(xAllocationsGovernor != IXAllocationVotingGovernor(address(0)), "Badge: XAllocationVotingGovernor not set");
+    require(b3trGovernor != IB3TRGovernor(payable(address(0))), "Badge: B3TRGovernor not set");
+
+    if (xAllocationsGovernor.hasVotedOnce(user) || b3trGovernor.hasVotedOnce(user)) {
+      return true;
+    }
+
+    return false;
   }
 
   // ---------- Overrides ---------- //
