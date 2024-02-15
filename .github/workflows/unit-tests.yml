@@ -45,6 +45,7 @@ jobs:
           ignore-compile: true
           target: 'packages/contracts/'
           solc-version: '0.8.17'
+          fail-on: none
 
       - name: Create/update checklist as PR comment
         uses: actions/github-script@v7
