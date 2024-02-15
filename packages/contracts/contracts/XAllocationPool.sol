@@ -118,7 +118,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
   function claimableAmount(uint256 roundId, bytes32 appId) public view returns (uint256) {
     require(!xAllocationVoting().isActive(roundId), "XAllocationPool: round not ended yet");
 
-    //If round is not succeded then take shares from previous successful round
+    //If round is not succeeded then take shares from previous successful round
     uint256 lastSucceededRoundId = roundId;
     if (xAllocationVoting().state(roundId) == IXAllocationVotingGovernor.RoundState.Failed) {
       require(xAllocationVoting().isFinalized(roundId), "XAllocationPool: failed round not finalized yet");
@@ -167,11 +167,11 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
     );
 
     uint256 total = _emissionAmount(roundId);
-    bytes32[] memory elegibleApps = xAllocationVoting().getRoundApps(roundId);
+    bytes32[] memory eligibleApps = xAllocationVoting().getRoundApps(roundId);
 
     uint256 available = (total * baseAllocationPercentage) / 100;
 
-    uint256 amountPerApp = available / elegibleApps.length;
+    uint256 amountPerApp = available / eligibleApps.length;
     return amountPerApp;
   }
 
@@ -199,7 +199,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
     uint256 appShare = (appVotes * percentagePrecisionScalingFactor) / totalVotes;
 
     // Cap the app share to the maximum variable allocation percentage so even if an app has 80 votes out of 100,
-    // it will still get a max of `appSharesCap` percentage of the avaialable funds
+    // it will still get a max of `appSharesCap` percentage of the available funds
     uint256 _allocationRewardMaxCap = scaledAppSharesCap();
     if (appShare > _allocationRewardMaxCap) {
       appShare = _allocationRewardMaxCap;
