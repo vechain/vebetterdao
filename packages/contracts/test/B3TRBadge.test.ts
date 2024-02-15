@@ -63,7 +63,7 @@ describe("B3TRBadge", () => {
 
   describe("Minting", () => {
     it("User cannot free mint if he did not partecipate in x-allocation voting or b3tr governance", async () => {
-      const { b3trBadge, otherAccount, xAllocationVoting, owner } = await getOrDeployContractInstances({
+      const { b3trBadge, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
