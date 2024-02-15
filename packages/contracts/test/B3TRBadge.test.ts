@@ -10,6 +10,7 @@ import {
   waitForProposalToBeActive,
 } from "./helpers"
 import { expect } from "chai"
+import { ethers } from "hardhat"
 
 describe("B3TRBadge", () => {
   describe("Contract parameters", () => {
@@ -62,6 +63,62 @@ describe("B3TRBadge", () => {
   })
 
   describe("Minting", () => {
+    it("Cannot mint if B3TRGovernor address is not set", async () => {
+      const { otherAccount, xAllocationVoting, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Should be able to free mint after participating in allocation voting
+      await partecipateInAllocationVoting(otherAccount, owner, xAllocationVoting)
+
+      // Deploy NFTBadge
+      const NFTBadgeContract = await ethers.getContractFactory("B3TRBadge")
+      const b3trBadge = await NFTBadgeContract.deploy("b3trBadge", "BDG", owner, 1)
+      await b3trBadge.waitForDeployment()
+
+      await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+
+      await catchRevert(b3trBadge.connect(otherAccount).freeMint())
+    })
+
+    it("Cannot mint if XAllocation address is not set", async () => {
+      const { otherAccount, xAllocationVoting, owner, governor } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Should be able to free mint after participating in allocation voting
+      await partecipateInAllocationVoting(otherAccount, owner, xAllocationVoting)
+
+      // Deploy NFTBadge
+      const NFTBadgeContract = await ethers.getContractFactory("B3TRBadge")
+      const b3trBadge = await NFTBadgeContract.deploy("b3trBadge", "BDG", owner, 1)
+      await b3trBadge.waitForDeployment()
+
+      await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+
+      await catchRevert(b3trBadge.connect(otherAccount).freeMint())
+    })
+
+    it("Cannot know if user participated in governance if XAllocation and B3TRGovernor addresses are set", async () => {
+      const { otherAccount, xAllocationVoting, owner, governor } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Should be able to free mint after participating in allocation voting
+      await partecipateInAllocationVoting(otherAccount, owner, xAllocationVoting)
+
+      // Deploy NFTBadge
+      const NFTBadgeContract = await ethers.getContractFactory("B3TRBadge")
+      const b3trBadge = await NFTBadgeContract.deploy("b3trBadge", "BDG", owner, 1)
+      await b3trBadge.waitForDeployment()
+
+      await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+      await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+
+      const participated = await b3trBadge.connect(otherAccount).participatedInGovernance(otherAccount)
+      expect(participated).to.equal(true)
+    })
+
     it("User cannot free mint if he did not partecipate in x-allocation voting or b3tr governance", async () => {
       const { b3trBadge, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
