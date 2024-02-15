@@ -1,6 +1,6 @@
 import {
   B3trContractJson,
-  GovernorContractJson,
+  B3TRGovernorJson,
   TimeLockContractJson,
   Vot3ContractJson,
   XAllocationPoolJson,
@@ -15,14 +15,14 @@ import { getConfig } from "@repo/config"
 const config = getConfig()
 
 export type ExecutorAvailableContracts = {
-  abi: typeof B3trContractJson | typeof Vot3ContractJson | typeof GovernorContractJson | typeof TimeLockContractJson
+  abi: typeof B3trContractJson | typeof Vot3ContractJson | typeof B3TRGovernorJson | typeof TimeLockContractJson
   address: string
 }
 
 export const governanceAvailableContracts: ExecutorAvailableContracts[] = [
   { abi: B3trContractJson, address: config.b3trContractAddress },
   { abi: Vot3ContractJson, address: config.vot3ContractAddress },
-  { abi: GovernorContractJson, address: config.governorContractAddress },
+  { abi: B3TRGovernorJson, address: config.b3trGovernorAddress },
   { abi: TimeLockContractJson, address: config.timelockContractAddress },
   { abi: XAllocationPoolJson, address: config.xAllocationPoolContractAddress },
   { abi: XAllocationVotingJson, address: config.xAllocationVotingContractAddress },
