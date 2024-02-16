@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Spinner, Stack, StackDivider, VStack } from "@chakra-ui/react"
+import { Box, Spinner, Stack, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { Suspense } from "react"
 

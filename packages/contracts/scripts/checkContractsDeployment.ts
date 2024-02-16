@@ -1,6 +1,7 @@
 import { ethers, network } from "hardhat"
 import { deployAll } from "./deploy/deploy"
-import { getConfig, Config } from "@repo/config"
+import { getConfig } from "@repo/config"
+import { AppConfig } from "@repo/config"
 import fs from "fs"
 import path from "path"
 import { seedLocalEnvironment } from "./deploy/seed"
@@ -44,7 +45,7 @@ async function checkContractsDeployment() {
 }
 
 async function overrideLocalConfigWithNewContracts(contracts: Awaited<ReturnType<typeof deployAll>>, network: Network) {
-  const newConfig: Config = {
+  const newConfig: AppConfig = {
     ...config,
     b3trContractAddress: await contracts.b3tr.getAddress(),
     vot3ContractAddress: await contracts.vot3.getAddress(),
@@ -58,7 +59,7 @@ async function overrideLocalConfigWithNewContracts(contracts: Awaited<ReturnType
   }
 
   // eslint-disable-next-line
-  const toWrite = `import { Config } from \".\" \n const config: Config = ${JSON.stringify(newConfig, null, 2)};
+  const toWrite = `import { AppConfig } from \".\" \n const config: AppConfig = ${JSON.stringify(newConfig, null, 2)};
   export default config;`
 
   const fileToWrite = network.name === "solo" ? "local.ts" : "solo-staging.ts"

@@ -7,14 +7,11 @@ import { XAllocationVotingGovernor } from "../XAllocationVotingGovernor.sol";
 
 /**
  * @dev Extension of {XAllocationVotingGovernor} for settings updatable through governance.
- *
- * This module is forked from OpenZeppelin's GovernorSettings.sol and was modified to remove proposalThreshold.
  */
 abstract contract GovernorSettings is XAllocationVotingGovernor {
   // duration: limited to uint32 in core
   uint32 private _votingPeriod;
 
-  event VotingDelaySet(uint256 oldVotingDelay, uint256 newVotingDelay);
   event VotingPeriodSet(uint256 oldVotingPeriod, uint256 newVotingPeriod);
 
   /**
