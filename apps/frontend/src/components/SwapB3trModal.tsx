@@ -1,5 +1,5 @@
 import { useB3trBalance, useVot3Balance } from "@/api"
-import { useStakeB3tr, useTokenColors, useUnstakeB3tr } from "@/hooks"
+import { useResponsive, useStakeB3tr, useTokenColors, useUnstakeB3tr } from "@/hooks"
 import {
   ModalOverlay,
   ModalContent,
@@ -15,10 +15,11 @@ import {
   FormHelperText,
   HStack,
   VStack,
+  ModalContentProps,
 } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { useMemo } from "react"
+import { useCallback, useMemo } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { SliderWithTooltip } from "./SliderWithTooltip"
 import { ConfirmTransactionModalContent } from "./ConfirmTransactionModalContent"
@@ -36,6 +37,7 @@ type FormData = {
 
 export const SwapB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
   const { account } = useWallet()
+  const { isDesktop } = useResponsive()
   const { data: b3trBalance } = useB3trBalance(account ?? undefined)
   const totalBalance = useTotalBalance(account ?? undefined)
   const initialB3trPercentageAmount = useMemo(() => {
@@ -48,6 +50,13 @@ export const SwapB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
   const { handleSubmit, watch, control, setValue } = useForm<FormData>({
     defaultValues: { amount: initialB3trPercentageAmount },
   })
+
+  const resetAmount = () => setValue("amount", initialB3trPercentageAmount)
+
+  const handleClose = useCallback(() => {
+    resetAmount()
+    onClose()
+  }, [resetAmount, onClose])
 
   const watchB3trPercentageAmount = watch("amount", initialB3trPercentageAmount)
 
@@ -82,7 +91,10 @@ export const SwapB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
     return String(Number(b3trBalance.scaled) - Number(b3trScaledAmount))
   }, [b3trBalance, b3trScaledAmount])
 
-  const normalizedB3trToVot3Amount = Number(b3trToVot3Amount) >= 0 ? b3trToVot3Amount : Number(b3trToVot3Amount) * -1
+  const normalizedB3trToVot3Amount = useMemo(
+    () => (Number(b3trToVot3Amount) >= 0 ? b3trToVot3Amount : Number(b3trToVot3Amount) * -1),
+    [b3trToVot3Amount],
+  )
 
   const formattedNormalizedB3trToVot3Amount = useMemo(() => {
     return FormattingUtils.humanNumber(normalizedB3trToVot3Amount, normalizedB3trToVot3Amount)
@@ -148,17 +160,16 @@ export const SwapB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
   const onSuccess = () => {
     resetStatus()
-    onClose()
-    setValue("amount", initialB3trPercentageAmount)
+    handleClose()
   }
 
   if (status !== "ready")
     return (
-      <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
+      <Modal isOpen={isOpen} onClose={handleClose} trapFocus={true} isCentered={true}>
         <ModalOverlay />
         <ModalContent>
           <ConfirmTransactionModalContent
-            description={" "}
+            description={"Swap"}
             status={status}
             error={sendTransactionError?.message ?? txReceiptError?.message}
             onSuccess={onSuccess}
@@ -167,10 +178,14 @@ export const SwapB3trModal: React.FC<Props> = ({ isOpen, onClose }) => {
         </ModalContent>
       </Modal>
     )
+  const modalContentProps = isDesktop
+    ? {}
+    : { position: "fixed", bottom: "0px", mb: "0", borderRadius: "1.75rem 1.75rem 0px 0px", maxW: "2xl" }
+
   return (
-    <Modal isCentered onClose={onClose} isOpen={isOpen} scrollBehavior="outside" motionPreset="slideInBottom">
+    <Modal isCentered onClose={handleClose} isOpen={isOpen} scrollBehavior="outside" motionPreset="slideInBottom">
       <ModalOverlay />
-      <ModalContent position="fixed" bottom="0px" mb="0" borderRadius="1.75rem 1.75rem 0px 0px" maxW="2xl">
+      <ModalContent {...(modalContentProps as Partial<ModalContentProps>)}>
         <form onSubmit={handleSubmit(() => sendTransaction(undefined))}>
           <ModalCloseButton />
           <ModalHeader>
