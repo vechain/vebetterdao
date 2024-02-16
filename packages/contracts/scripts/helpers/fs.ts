@@ -18,9 +18,7 @@ async function readFilesFromDirectory(dirPath: string): Promise<File[]> {
       const filePath = path.join(dirPath, entry.name)
       const content = await fs.readFile(filePath)
       const mimeType = "image/png" // TODO: Get the MIME type from the file
-      const file = new File([content], entry.name, {
-        type: mimeType,
-      })
+      const file: File = new File([content], entry.name, { type: mimeType })
       files.push(file)
     }
   }
