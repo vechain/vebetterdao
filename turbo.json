@@ -52,7 +52,7 @@
     },
     "test": {
       "cache": false,
-      "dependsOn": ["test:hardhat"]
+      "dependsOn": ["@repo/config#check-or-generate-local-config", "test:hardhat"]
     },
     "test:thor-solo": {
       "cache": false
