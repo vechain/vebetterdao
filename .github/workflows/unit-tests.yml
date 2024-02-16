@@ -54,7 +54,7 @@ jobs:
           REPORT: ${{ steps.slither.outputs.stdout }}
         with:
           script: |
-            const script = require('.github/scripts/comment')
+            const script = require('.github/scripts/comment.js')
             const header = '# Slither report'
             const body = process.env.REPORT
             await script({ github, context, header, body })
