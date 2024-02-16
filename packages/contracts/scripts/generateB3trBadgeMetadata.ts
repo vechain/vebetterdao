@@ -1,5 +1,6 @@
 import fs from "fs/promises"
 import { toIPFSURL, uploadDirectoryToIPFS } from "./helpers"
+import path from "path"
 
 /**
  * Interface for an NFT attribute.
@@ -30,8 +31,8 @@ const levelAttributes: Record<string, string | number>[] = [
 const levelNames = ["Earth"]
 const description = "Your gateway to the Worse ecosystem"
 
-const METADATA_PATH = "./badge/metadata"
-const IMAGE_PATH = "./badge/images"
+const METADATA_PATH = path.join(__dirname, "../badge/metadata")
+const IMAGE_PATH = path.join(__dirname, "../badge/images")
 
 // NFT Storage
 const NFT_STORAGE_KEY = process.env.NFT_STORAGE_KEY ?? ""
