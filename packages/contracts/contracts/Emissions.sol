@@ -134,14 +134,14 @@ contract Emissions is AccessControl, ReentrancyGuard {
     emissions[nextCycle] = Emission(initialAllocations[0], initialAllocations[1], initialAllocations[2]);
     totalEmissions += initialAllocations[0] + initialAllocations[1] + initialAllocations[2];
 
-    xAllocationsGovernor.startNewRound();
-
     nextCycle++;
 
     // Mint initial allocations
     b3tr.mint(xAllocations, initialAllocations[0]);
     b3tr.mint(vote2Earn, initialAllocations[1]);
     b3tr.mint(treasury, initialAllocations[2]);
+
+    xAllocationsGovernor.startNewRound();
   }
 
   function distribute() public nonReentrant {
@@ -162,13 +162,13 @@ contract Emissions is AccessControl, ReentrancyGuard {
     emissions[nextCycle] = Emission(xAllocationsAmount, vote2EarnAmount, treasuryAmount);
     totalEmissions += xAllocationsAmount + vote2EarnAmount + treasuryAmount;
 
-    xAllocationsGovernor.startNewRound();
-
     nextCycle++;
 
     b3tr.mint(xAllocations, xAllocationsAmount);
     b3tr.mint(vote2Earn, vote2EarnAmount);
     b3tr.mint(treasury, treasuryAmount);
+
+    xAllocationsGovernor.startNewRound();
   }
 
   // ----------- Getters ----------- //
