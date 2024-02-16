@@ -1,40 +1,41 @@
 import { ethers, network } from "hardhat"
 import { B3TR, B3TRGovernor, TimeLock, VOT3 } from "../../typechain-types"
+import { contractsConfig } from "@repo/config"
 
-const ADMIN = process.env.CONTRACTS_ADMIN_ADDRESS || ""
+const ADMIN = contractsConfig.CONTRACTS_ADMIN_ADDRESS
 
 // Governor Values
-const QUORUM_PERCENTAGE = parseInt(process.env.B3TR_GOVERNOR_QUORUM_PERCENTAGE || "")
-const MIN_DELAY = parseInt(process.env.B3TR_GOVERNOR_MIN_DELAY || "")
-const VOTING_PERIOD = parseInt(process.env.B3TR_GOVERNOR_VOTING_PERIOD || "")
-const VOTING_DELAY = parseInt(process.env.B3TR_GOVERNOR_VOTING_DELAY || "")
-const PROPOSAL_THRESHOLD = parseInt(process.env.B3TR_GOVERNOR_PROPOSAL_THRESHOLD || "")
+const QUORUM_PERCENTAGE = contractsConfig.B3TR_GOVERNOR_QUORUM_PERCENTAGE
+const MIN_DELAY = contractsConfig.B3TR_GOVERNOR_MIN_DELAY
+const VOTING_PERIOD = contractsConfig.B3TR_GOVERNOR_VOTING_PERIOD
+const VOTING_DELAY = contractsConfig.B3TR_GOVERNOR_VOTING_DELAY
+const PROPOSAL_THRESHOLD = contractsConfig.B3TR_GOVERNOR_PROPOSAL_THRESHOLD
 
 // Emissions Values
-const VOTE_2_EARN_ADDRESS = process.env.VOTE_2_EARN_POOL_ADDRESS || ""
-const TREASURY_ADDRESS = process.env.TREASURY_POOL_ADDRESS || ""
+const VOTE_2_EARN_ADDRESS = contractsConfig.VOTE_2_EARN_POOL_ADDRESS
+const TREASURY_ADDRESS = contractsConfig.TREASURY_POOL_ADDRESS
 
-const INITIAL_X_ALLOCATION = ethers.parseEther(process.env.INITIAL_X_ALLOCATION || "1000000")
-const INITIAL_VOTE_2_EARN_ALLOCATION = ethers.parseEther(process.env.INITIAL_VOTE_2_EARN_ALLOCATION || "1000000")
-const INITIAL_TREASURY_ALLOCATION = ethers.parseEther(process.env.INITIAL_TREASURY_ALLOCATION || "1750000")
+const INITIAL_X_ALLOCATION = ethers.parseEther(contractsConfig.INITIAL_X_ALLOCATION.toString())
+const INITIAL_VOTE_2_EARN_ALLOCATION = ethers.parseEther(contractsConfig.INITIAL_VOTE_2_EARN_ALLOCATION.toString())
+const INITIAL_TREASURY_ALLOCATION = ethers.parseEther(contractsConfig.INITIAL_TREASURY_ALLOCATION.toString())
 
-const CYCLE_DURATION = parseInt(process.env.EMISSIONS_CYCLE_DURATION || "")
+const CYCLE_DURATION = contractsConfig.EMISSIONS_CYCLE_DURATION
 const DECAY_SETTINGS = [
-  parseInt(process.env.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE || ""),
-  parseInt(process.env.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE || ""),
-  parseInt(process.env.EMISSIONS_X_ALLOCATION_DECAY_PERIOD || ""),
-  parseInt(process.env.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD || ""),
+  contractsConfig.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE,
+  contractsConfig.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE,
+  contractsConfig.EMISSIONS_X_ALLOCATION_DECAY_PERIOD,
+  contractsConfig.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD,
 ]
-const INITIAL_EMISSIONS = ethers.parseEther(process.env.EMISSIONS_INITIAL_EMISSIONS || "")
-const TREASURY_PERCENTAGE = parseInt(process.env.EMISSIONS_TREASURY_PERCENTAGE || "")
-const MAX_VOTE_2_EARN_DECAY_PERCENTAGE = parseInt(process.env.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE || "")
+const INITIAL_EMISSIONS = ethers.parseEther(contractsConfig.EMISSIONS_INITIAL_EMISSIONS.toString())
+const TREASURY_PERCENTAGE = contractsConfig.EMISSIONS_TREASURY_PERCENTAGE
+const MAX_VOTE_2_EARN_DECAY_PERCENTAGE = contractsConfig.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE
 
 // XAllocationVoting Values
 const X_ALLOCATION_VOTING_PERIOD = CYCLE_DURATION - 1
 
 // XAllocationPool Values
-const BASE_ALLOCATION_PERCENTAGE = parseInt(process.env.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE || "")
-const APP_SHARES_CAP = parseInt(process.env.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP || "")
+const BASE_ALLOCATION_PERCENTAGE = contractsConfig.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE
+const APP_SHARES_CAP = contractsConfig.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP
 
 // NFT Badge Values
 const name = "B3TR Badge"
@@ -45,8 +46,6 @@ const levels = [1]
 const multiplier = [0]
 
 export async function deployAll() {
-  if (!environmentalVariablesAreSet()) throw new Error("Some environmental variables are not set")
-
   console.log(`Deploying contracts on ${network.name}...`)
 
   const [admin] = await ethers.getSigners()
@@ -333,30 +332,4 @@ async function deployVoterRewards(
   console.log(`VoterRewards contract deployed at address ${await contract.getAddress()}`)
 
   return contract
-}
-
-const environmentalVariablesAreSet = () => {
-  return (
-    process.env.CONTRACTS_ADMIN_ADDRESS &&
-    process.env.B3TR_GOVERNOR_QUORUM_PERCENTAGE &&
-    process.env.B3TR_GOVERNOR_MIN_DELAY &&
-    process.env.B3TR_GOVERNOR_VOTING_PERIOD &&
-    process.env.B3TR_GOVERNOR_VOTING_DELAY &&
-    process.env.B3TR_GOVERNOR_PROPOSAL_THRESHOLD &&
-    process.env.VOTE_2_EARN_POOL_ADDRESS &&
-    process.env.TREASURY_POOL_ADDRESS &&
-    process.env.INITIAL_X_ALLOCATION &&
-    process.env.INITIAL_VOTE_2_EARN_ALLOCATION &&
-    process.env.INITIAL_TREASURY_ALLOCATION &&
-    process.env.EMISSIONS_CYCLE_DURATION &&
-    process.env.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE &&
-    process.env.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE &&
-    process.env.EMISSIONS_X_ALLOCATION_DECAY_PERIOD &&
-    process.env.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD &&
-    process.env.EMISSIONS_INITIAL_EMISSIONS &&
-    process.env.EMISSIONS_TREASURY_PERCENTAGE &&
-    process.env.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE &&
-    process.env.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE &&
-    process.env.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP
-  )
 }
