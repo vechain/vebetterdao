@@ -17,9 +17,9 @@ export type AppConfig = {
 }
 
 export const getConfig = (env?: string): AppConfig => {
-  const appEnv = env || process.env.ENV
-  if (!appEnv) throw new Error("ENV env variable must be set or a type must be passed to getConfig()")
+  const appEnv = env || process.env.NEXT_PUBLIC_APP_ENV
+  if (!appEnv) throw new Error("NEXT_PUBLIC_APP_ENV env variable must be set or a type must be passed to getConfig()")
   if (appEnv === "local") return localConfig
   if (appEnv === "solo-staging") return stagingConfig
-  throw new Error(`Unsupported ENV ${appEnv}`)
+  throw new Error(`Unsupported NEXT_PUBLIC_APP_ENV ${appEnv}`)
 }

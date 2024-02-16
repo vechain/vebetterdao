@@ -3,7 +3,7 @@
   "globalDotEnv": [".env"],
   "globalDependencies": ["**/.env.*local"],
   "globalEnv": [
-    "ENV",
+    "NEXT_PUBLIC_APP_ENV",
     "MNEMONIC"
   ],
   "pipeline": {

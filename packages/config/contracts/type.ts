@@ -1,5 +1,5 @@
 export type ContractsConfig = {
-  ENV: "local" | "solo-staging" | "testnet" | "production"
+  NEXT_PUBLIC_APP_ENV: "local" | "solo-staging" | "testnet" | "production"
 
   B3TR_GOVERNOR_QUORUM_PERCENTAGE: number
   B3TR_GOVERNOR_MIN_DELAY: number

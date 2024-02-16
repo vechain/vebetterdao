@@ -60,7 +60,7 @@ docker-compose
 
    This command will automatically execute the `deploy.ts` script in the `scripts` folder. You can customize the script to deploy your contracts.
    By default it will deploy to the solo node.
-   `MNEMONIC` and `ENV`needs to be set in the `.env` file of the main root folder.
+   `MNEMONIC` and `NEXT_PUBLIC_APP_ENV`needs to be set in the `.env` file of the main root folder.
 
 ## Additional features
 

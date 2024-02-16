@@ -30,7 +30,9 @@ module.exports = {
       chainId: 1337,
     },
     vechain_solo: {
-      url: process.env.ENV ? getConfig(process.env.ENV).network.urls[0] : VECHAIN_URL_SOLO,
+      url: process.env.NEXT_PUBLIC_APP_ENV
+        ? getConfig(process.env.NEXT_PUBLIC_APP_ENV).network.urls[0]
+        : VECHAIN_URL_SOLO,
       accounts: {
         mnemonic: process.env.MNEMONIC || "",
         count: 10,
