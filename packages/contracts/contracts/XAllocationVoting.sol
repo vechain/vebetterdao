@@ -117,7 +117,8 @@ contract XAllocationVoting is
     bytes32[] memory appsInRound = _appsElegibleForVoting[roundId];
     App[] memory allApps = new App[](appsInRound.length);
 
-    for (uint i = 0; i < appsInRound.length; i++) {
+    uint256 length = appsInRound.length;
+    for (uint i = 0; i < length; i++) {
       allApps[i] = _apps[appsInRound[i]];
     }
     return allApps;

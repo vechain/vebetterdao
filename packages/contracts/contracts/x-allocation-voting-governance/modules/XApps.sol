@@ -148,7 +148,8 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
   // Function to retrieve all apps
   function getAllApps() public view returns (App[] memory) {
     App[] memory allApps = new App[](_appIds.length);
-    for (uint i = 0; i < _appIds.length; i++) {
+    uint256 length = _appIds.length;
+    for (uint i = 0; i < length; i++) {
       allApps[i] = _apps[_appIds[i]];
     }
     return allApps;
