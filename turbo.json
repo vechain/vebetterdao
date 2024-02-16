@@ -55,8 +55,7 @@
       "dependsOn": ["test:hardhat"]
     },
     "test:thor-solo": {
-      "cache": false,
-      "dependsOn": ["@repo/contracts#check-contracts-deployment"]
+      "cache": false
     },
     "test:hardhat": {
       "cache": false
