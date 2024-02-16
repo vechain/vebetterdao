@@ -35,6 +35,13 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
 
   const bgColor = useColorModeValue("primary.500", "primary.300")
 
+  const isVoltingConcluded = data?.voteEndTimestamp?.isBefore()
+
+  const remainingTime = useMemo(() => {
+    if (isVoltingConcluded) return `Voting ended ${data?.voteEndTimestamp?.fromNow()}`
+    return `Voting ends ${data?.voteEndTimestamp?.fromNow()}`
+  }, [isVoltingConcluded, data?.voteEndTimestamp])
+
   return (
     <Card w="full">
       <CardBody>
@@ -43,7 +50,7 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
             <Skeleton isLoaded={!isLoading}>
               <HStack spacing={1} align={"center"}>
                 <Heading size="md" color={bgColor}>
-                  {data?.voteEndTimestamp?.fromNow(true)} left
+                  {remainingTime}
                 </Heading>
               </HStack>
             </Skeleton>
