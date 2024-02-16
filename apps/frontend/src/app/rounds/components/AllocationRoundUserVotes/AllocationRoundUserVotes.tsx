@@ -97,17 +97,21 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
               justifyContent: "space-between",
             }}>
             <Box>
-              <HStack justify={"space-between"} align="center" w="full">
+              <Stack
+                direction={["column", "row", "row"]}
+                justify={["space-between"]}
+                align={["flex-start", "center", "center"]}
+                w="full">
                 <Box>
                   <Heading size="md">Available dApps</Heading>
                   <Button variant="link" onClick={splitEvenly}>
                     Split evenly
                   </Button>
                 </Box>
-                <Text fontSize="sm" fontWeight={"thin"}>
+                <Text fontSize="sm" fontWeight={"thin"} alignSelf={"flex-end"}>
                   Voting power to distribute
                 </Text>
-              </HStack>
+              </Stack>
               <VStack spacing={4} mt={8}>
                 {fields.map((field, index) => (
                   <SelectAppVotesInput
@@ -122,7 +126,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
                 ))}
               </VStack>
             </Box>
-            <Button type="submit" leftIcon={<MdHowToVote />}>
+            <Button type="submit" leftIcon={<MdHowToVote />} mt={[8, 8, 0]}>
               Cast vote now
             </Button>
           </form>

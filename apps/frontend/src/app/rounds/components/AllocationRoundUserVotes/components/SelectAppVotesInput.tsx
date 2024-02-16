@@ -35,11 +35,11 @@ export const SelectAppVotesInput = ({ register, getValues, index, xApp, field, e
       borderRadius={"lg"}
       py={2}
       px={4}>
-      <HStack spacing={2} align="center">
+      <HStack spacing={2} align="center" flex={1}>
         <Icon as={FaRecycle} />
         <Heading size="sm">{xApp?.name}</Heading>
       </HStack>
-      <Box>
+      <Box flex={[1, 1, 0.5]}>
         <FormControl isInvalid={!!errors.votes?.[index]}>
           <InputGroup>
             <Input
