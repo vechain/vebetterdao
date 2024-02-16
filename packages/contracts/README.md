@@ -18,6 +18,8 @@ docker-compose
 
 ### Local development setup
 
+## Since we are using a monorepo executing those commands from inside the `packages/contracts` folder will cause issues with the turbo plugin and the management of .env files. Instead, execute the commands from the root of the monorepo.
+
 1. Install dependencies
 
    ```
@@ -58,8 +60,7 @@ docker-compose
 
    This command will automatically execute the `deploy.ts` script in the `scripts` folder. You can customize the script to deploy your contracts.
    By default it will deploy to the solo node.
-   You can change the network by adding the `--network` flag. For example, to deploy to the testnet, run `yarn deploy --network vechain_testnet`.
-   If you are not deploying to the solo node, you will need to import the `MNEMONIC` environment variable which will be used to deploy the contracts. Just copy the `.env.example` file to `.env` and set the `MNEMONIC` variable.
+   `MNEMONIC` and `NEXT_PUBLIC_APP_ENV`needs to be set in the `.env` file of the main root folder.
 
 ## Additional features
 
