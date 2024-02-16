@@ -64,13 +64,13 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
     uint256 amountToClaim = claimableAmount(roundId, appId);
     require(amountToClaim > 0, "XAllocationPool: no rewards available for this app");
 
-    //check that contract has enough funds to pay the reward
-    require(b3tr.balanceOf(address(this)) >= amountToClaim, "Insufficient funds");
-
     // update the claimedRewards mapping
     claimedRewards[appId][roundId] = true;
 
     address receiverAddress = xAllocationVoting().getAppReceiverAddress(appId);
+
+    //check that contract has enough funds to pay the reward
+    require(b3tr.balanceOf(address(this)) >= amountToClaim, "Insufficient funds");
 
     // Transfer the rewards to the caller
     require(b3tr.transfer(receiverAddress, amountToClaim), "Allocation transfer failed");
