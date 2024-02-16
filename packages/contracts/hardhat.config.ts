@@ -12,10 +12,8 @@ const config: HardhatUserConfig = {
 
 const getEnvMnemonic = () => {
   const mnemonic = process.env.MNEMONIC
-  if (!mnemonic) {
-    throw new Error("MNEMONIC not found")
-  }
-  return mnemonic
+
+  return mnemonic ?? ""
 }
 
 const getSoloUrl = () => {
