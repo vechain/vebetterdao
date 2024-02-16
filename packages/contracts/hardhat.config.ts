@@ -10,6 +10,18 @@ const config: HardhatUserConfig = {
   solidity: "0.8.20",
 }
 
+const getEnvMnemonic = () => {
+  const mnemonic = process.env.MNEMONIC
+
+  return mnemonic ?? ""
+}
+
+const getSoloUrl = () => {
+  const url = process.env.NEXT_PUBLIC_APP_ENV
+    ? getConfig(process.env.NEXT_PUBLIC_APP_ENV).network.urls[0]
+    : VECHAIN_URL_SOLO
+  return url
+}
 module.exports = {
   solidity: {
     version: "0.8.20",
@@ -30,11 +42,9 @@ module.exports = {
       chainId: 1337,
     },
     vechain_solo: {
-      url: process.env.NEXT_PUBLIC_APP_ENV
-        ? getConfig(process.env.NEXT_PUBLIC_APP_ENV).network.urls[0]
-        : VECHAIN_URL_SOLO,
+      url: getSoloUrl(),
       accounts: {
-        mnemonic: process.env.MNEMONIC || "",
+        mnemonic: getEnvMnemonic(),
         count: 10,
         path: "m/44'/818'/0'/0",
       },
@@ -44,7 +54,7 @@ module.exports = {
     vechain_testnet: {
       url: VECHAIN_URL_TESTNET,
       accounts: {
-        mnemonic: process.env.MNEMONIC || "",
+        mnemonic: getEnvMnemonic(),
         count: 10,
         path: "m/44'/818'/0'/0",
       },
@@ -54,7 +64,7 @@ module.exports = {
     vechain_mainnet: {
       url: VECHAIN_URL_MAINNET,
       accounts: {
-        mnemonic: process.env.MNEMONIC || "",
+        mnemonic: getEnvMnemonic(),
         count: 1,
         path: "m/44'/818'/0'/0",
       },
