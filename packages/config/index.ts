@@ -12,5 +12,4 @@ export const getConfig = (type?: string): AppConfig => {
   throw new Error(`Unsupported NEXT_PUBLIC_NETWORK_TYPE ${networkType}`)
 }
 
-export { AppConfig } from "./types"
-export { contractsConfig } from "./contracts"
+export * from "./contracts"
