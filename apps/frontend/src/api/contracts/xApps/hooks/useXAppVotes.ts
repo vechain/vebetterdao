@@ -22,7 +22,12 @@ export const getXAppVotes = async (thor: Connex.Thor, xAppId: string, roundId: s
   return FormattingUtils.scaleNumberDown(res.decoded[0], 18)
 }
 
-export const getXAppVotesQueryKey = (xAppId: string, roundId: string) => ["xApp", xAppId, "votes", roundId]
+export const getXAppVotesQueryKey = (xAppId?: string, roundId?: string) => [
+  "allocationsRound",
+  roundId,
+  "votes",
+  xAppId,
+]
 
 /**
  * Get the number of votes for a xApp in a round (allocation round)

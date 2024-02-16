@@ -1,23 +1,31 @@
-import { useRoundXApps } from "@/api"
+import { useAllocationsRound, useGetVotesOnBlock, useRoundXApps } from "@/api"
 import { Box, Button, Card, CardBody, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react"
 import { useEffect } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { SelectAppVotesInput } from "./components/SelectAppVotesInput"
 import { AppVotesBreakdown } from "./components/AppVotesBreakdown"
 import { MdHowToVote } from "react-icons/md"
+import { CastAllocationVotesProps, useCastAllocationVotes } from "@/hooks"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 type Props = {
   roundId: string
 }
 
 export type FormData = {
-  votes: {
-    id: string
-    value: number
-  }[]
+  votes: CastAllocationVotesProps
 }
 export const AllocationRoundUserVotes = ({ roundId }: Props) => {
+  const { account } = useWallet()
   const { data: xApps } = useRoundXApps(roundId)
+
+  const castAllocationVotes = useCastAllocationVotes({ roundId })
+
+  const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(roundId)
+  const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
+    Number(roundInfo.voteStart),
+    account ?? undefined,
+  )
 
   const {
     control,
@@ -43,7 +51,15 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     })
   }, [xApps, append, remove])
 
-  const onSubmit = (data: FormData) => console.log("data", data)
+  const onSubmit = (data: FormData) => {
+    if (!votesAtSnapshot) throw new Error("Votes at snapshot not found")
+    const appVotesPercentagesToValue = data.votes.map(vote => ({
+      id: vote.id,
+      value: Math.floor((vote.value * Number(votesAtSnapshot.scaled)) / 100),
+    }))
+    console.log("data", data, "appVotesPercentagesToValue", appVotesPercentagesToValue)
+    castAllocationVotes.sendTransaction(appVotesPercentagesToValue)
+  }
 
   const splitEvenly = () => {
     const totalVotes = xApps?.length ?? 0
