@@ -1,7 +1,7 @@
 import { defineConfig } from "../defineConfig"
 export function createLocalConfig() {
   return defineConfig({
-    APP_ENV: "local",
+    ENV: "local",
 
     B3TR_GOVERNOR_QUORUM_PERCENTAGE: 4, // 4 -> Need 4% of voters to pass
     B3TR_GOVERNOR_MIN_DELAY: 30, //after a vote passes, you have 5 min before you can vote queue the proposal

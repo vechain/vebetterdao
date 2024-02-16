@@ -5,7 +5,7 @@ import { createSoloStagingConfig } from "./envs/soloStaging"
 
 export const contractsConfig = getContractsConfig()
 function getContractsConfig() {
-  switch (process.env.NEXT_PUBLIC_APP_ENV) {
+  switch (process.env.ENV) {
     case "local":
       return createLocalConfig()
     case "solo-staging":
@@ -16,6 +16,6 @@ function getContractsConfig() {
       throw "Production contracts config are not implemented yet"
 
     default:
-      throw new Error(`Invalid NEXT_PUBLIC_APP_ENV "${process.env.NEXT_PUBLIC_APP_ENV}"`)
+      throw new Error(`Invalid ENV "${process.env.ENV}"`)
   }
 }

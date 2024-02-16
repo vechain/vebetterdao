@@ -55,7 +55,7 @@ yarn dev
 
 #### Spin up the project pointing to the staging environment
 
-Set the `NEXT_PUBLIC_APP_ENV` variable to solo-staging in the `.env` file.
+Set the `ENV` variable to solo-staging in the `.env` file.
 
 ```
 yarn staging
@@ -69,7 +69,7 @@ This command relies on a turbo pipeline which:
 
 ### Manually deploy the contracts
 
-Choose what environment to deploy by setting the `NEXT_PUBLIC_APP_ENV` variable to solo-staging in the `.env` file.
+Choose what environment to deploy by setting the `ENV` variable to solo-staging in the `.env` file.
 Based on that env variable the deployment script will use the related configuration to deploy the contracts (`./packages/config/contracts/envs` folder).
 
 Set the `MNEMONIC` of the wallet you want to use as deployer in the `.env` file.
