@@ -59,6 +59,12 @@
     },
     "test:hardhat": {
       "cache": false
-    } 
+    },
+    "generate-b3tr-badge-metadata":{
+      "cache": false
+    },
+    "upload-b3tr-badge-metadata":{
+      "cache": false
+    }
   }
 }
