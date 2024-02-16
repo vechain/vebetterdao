@@ -2,7 +2,7 @@
   "name": "b3tr-monorepo",
   "private": true,
   "scripts": {
-    "test": "dotenv -e .env -- turbo run test --",
+    "test": "turbo run test --",
     "build": "dotenv -e .env -- turbo build",
     "build:staging": "dotenv -e .env -- turbo build",
     "dev": "dotenv -e .env -- turbo dev --",
