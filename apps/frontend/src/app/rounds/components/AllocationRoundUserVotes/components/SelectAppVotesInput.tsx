@@ -1,17 +1,20 @@
 import { XApp } from "@/api"
-import { UseFormRegister } from "react-hook-form"
+import { FieldErrors, UseFormGetValues, UseFormRegister } from "react-hook-form"
 import { FormData } from "../AllocationRoundUserVotes"
-import { Box, HStack, Heading, Icon, Input } from "@chakra-ui/react"
+import { Box, FormControl, FormErrorMessage, HStack, Heading, Icon, Input } from "@chakra-ui/react"
 import { FaRecycle } from "react-icons/fa6"
 
 type Props = {
   register: UseFormRegister<FormData>
+  getValues: UseFormGetValues<FormData>
   index: number
   xApp?: XApp
   field: FormData["votes"][number]
+  errors: FieldErrors<FormData>
 }
 
-export const SelectAppVotesInput = ({ register, index, xApp, field }: Props) => {
+export const SelectAppVotesInput = ({ register, getValues, index, xApp, field, errors }: Props) => {
+  console.log("errors", errors)
   return (
     <HStack
       w="full"
@@ -27,16 +30,24 @@ export const SelectAppVotesInput = ({ register, index, xApp, field }: Props) => 
         <Heading size="sm">{xApp?.name}</Heading>
       </HStack>
       <Box>
-        <Input
-          type="number"
-          {...register(`votes.${index}.value`, {
-            valueAsNumber: true,
-          })}
-          defaultValue={0}
-          min={0}
-          max={100}
-          w="full"
-        />
+        <FormControl isInvalid={!!errors.votes?.[index]}>
+          <Input
+            type="number"
+            {...register(`votes.${index}.value`, {
+              valueAsNumber: true,
+              min: 0,
+              max: 100,
+              validate: value => {
+                if (isNaN(value)) return "Please enter a valid number"
+                const allValuesTotal = getValues().votes.reduce((acc, vote) => acc + vote.value, 0)
+                if (allValuesTotal > 100) return "Total votes exceed 100"
+                return true
+              },
+            })}
+            w="full"
+          />
+          {errors.votes?.[index]?.value && <FormErrorMessage>{errors.votes?.[index]?.message}</FormErrorMessage>}
+        </FormControl>
       </Box>
     </HStack>
   )

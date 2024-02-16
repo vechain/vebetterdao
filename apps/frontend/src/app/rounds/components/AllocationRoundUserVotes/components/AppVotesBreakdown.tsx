@@ -23,7 +23,7 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
     account ?? undefined,
   )
   console.log("votes", votes)
-  const totalVotes = votes.reduce((acc, vote) => acc + vote.value, 0)
+  const totalVotes = votes.reduce((acc, vote) => acc + (isNaN(vote.value) ? 0 : vote.value), 0)
   const isCompletedAllocated = totalVotes >= 100
   return (
     <Card variant="outline" w="full">
