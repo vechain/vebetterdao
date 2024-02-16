@@ -1,16 +1,19 @@
-import { useAllocationAmount, useAllocationVoters, useAllocationsRound, useRoundXApps } from "@/api"
+import { useAllocationAmount, useAllocationVoters, useAllocationsRound, useHasVotedInRound, useRoundXApps } from "@/api"
 import {
   Box,
+  Button,
   Card,
   CardBody,
   HStack,
   Heading,
+  Link,
   Skeleton,
   Stack,
   Text,
   VStack,
   useColorModeValue,
 } from "@chakra-ui/react"
+import { useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
 
 type Props = {
@@ -23,24 +26,27 @@ const compactFormatter = new Intl.NumberFormat("en-US", {
 })
 
 export const AllocationRoundDetails = ({ roundId }: Props) => {
+  const { account } = useWallet()
   const { data, isLoading } = useAllocationsRound(roundId)
   const { data: xApps, isLoading: xAppsLoading } = useRoundXApps(roundId)
   const { data: totalVoters, isLoading: totalVotersLoading } = useAllocationVoters(roundId)
   const { data: roundAmount, isLoading: roundAmountLoading, error: roundAmountError } = useAllocationAmount(roundId)
+
+  const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
 
   const totalAmount = useMemo(() => {
     if (!roundAmount) return 0
     return BigInt(roundAmount.treasury) + BigInt(roundAmount.voteX2Earn) + BigInt(roundAmount.voteXAllocations)
   }, [roundAmount])
 
-  const bgColor = useColorModeValue("primary.500", "primary.300")
+  const isVotingConcluded = data?.voteEndTimestamp?.isBefore()
 
-  const isVoltingConcluded = data?.voteEndTimestamp?.isBefore()
+  const bgGradient = useColorModeValue("500", "300")
 
   const remainingTime = useMemo(() => {
-    if (isVoltingConcluded) return `Voting ended ${data?.voteEndTimestamp?.fromNow()}`
+    if (isVotingConcluded) return `Voting ended ${data?.voteEndTimestamp?.fromNow()}`
     return `Voting ends ${data?.voteEndTimestamp?.fromNow()}`
-  }, [isVoltingConcluded, data?.voteEndTimestamp])
+  }, [isVotingConcluded, data?.voteEndTimestamp])
 
   return (
     <Card w="full">
@@ -49,7 +55,7 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
           <VStack spacing={4} align="flex-start" flex={1}>
             <Skeleton isLoaded={!isLoading}>
               <HStack spacing={1} align={"center"}>
-                <Heading size="md" color={bgColor}>
+                <Heading size="md" color={isVotingConcluded ? `orange.${bgGradient}` : `primary.${bgGradient}`}>
                   {remainingTime}
                 </Heading>
               </HStack>
@@ -64,11 +70,22 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
                 }
               </Text>
             </Skeleton>
+            <Skeleton isLoaded={!hasVotedLoading}>
+              {hasVoted ? (
+                <Link href="#user-votes" color="green" fontSize={"lg"}>
+                  You have already voted in this round
+                </Link>
+              ) : (
+                <Link href="#user-votes" color="orange" fontSize={"lg"}>
+                  You have not voted in this round
+                </Link>
+              )}
+            </Skeleton>
           </VStack>
           <VStack flex={0.8}>
             <VStack
               color={"white"}
-              bgColor={bgColor}
+              bgColor={`primary.${bgGradient}`}
               py={6}
               px={6}
               w="full"

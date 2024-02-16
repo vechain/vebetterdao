@@ -1,4 +1,4 @@
-import { useAllocationsRound, useGetVotesOnBlock, useRoundXApps } from "@/api"
+import { useAllocationsRound, useGetVotesOnBlock, useHasVotedInRound, useRoundXApps, useUserVotesInRound } from "@/api"
 import { Box, Button, Card, CardBody, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react"
 import { useEffect } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
@@ -26,6 +26,11 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     Number(roundInfo.voteStart),
     account ?? undefined,
   )
+
+  const { data: castedVotesEvent } = useUserVotesInRound(roundId, account ?? undefined)
+  console.log("castedVotesEvent", castedVotesEvent)
+
+  const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
 
   const {
     control,
@@ -70,7 +75,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
   }
 
   return (
-    <Card w="full">
+    <Card w="full" id="user-votes">
       <CardBody>
         <Stack
           direction={["column", "column", "row"]}
