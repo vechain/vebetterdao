@@ -38,6 +38,14 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
 
   const onSubmit = (data: FormData) => console.log("data", data)
 
+  const splitEvenly = () => {
+    const totalVotes = xApps?.length ?? 0
+    const votesPerApp = 100 / totalVotes
+    xApps?.forEach((xApp, index) => {
+      update(index, { id: xApp.id, value: votesPerApp })
+    })
+  }
+
   return (
     <Card w="full">
       <CardBody>
@@ -67,7 +75,12 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
             }}>
             <Box>
               <HStack justify={"space-between"} align="center" w="full">
-                <Heading size="md">Available dApps</Heading>
+                <Box>
+                  <Heading size="md">Available dApps</Heading>
+                  <Button variant="link" onClick={splitEvenly}>
+                    Split evenly
+                  </Button>
+                </Box>
                 <Text fontSize="sm" fontWeight={"thin"}>
                   Voting power to distribute
                 </Text>

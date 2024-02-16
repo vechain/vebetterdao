@@ -48,6 +48,7 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
                 .filter(vote => vote.value > 0)
                 .map((vote, index) => (
                   <Box
+                    transition={"all 0.5s linear"}
                     {...((index === 0 || totalVotes === vote.value) && { borderLeftRadius: "xl" })}
                     {...((index === votes.length - 1 || vote.value === totalVotes) &&
                       isCompletedAllocated && { borderRightRadius: "xl" })}
