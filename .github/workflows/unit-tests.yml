@@ -44,7 +44,7 @@ jobs:
         with:
           ignore-compile: true
           target: 'packages/contracts/'
-          solc-version: '0.8.17'
+          solc-version: '0.8.20'
           fail-on: none
 
       - name: Create/update checklist as PR comment
