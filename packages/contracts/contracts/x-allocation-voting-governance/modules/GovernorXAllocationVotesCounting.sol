@@ -6,6 +6,7 @@ import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { IXAllocationPool } from "../../interfaces/IXAllocationPool.sol";
 import { IVoterRewards } from "../../interfaces/IVoterRewards.sol";
+import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
  * @title GovernorXAllocationVotesCounting
@@ -15,7 +16,7 @@ import { IVoterRewards } from "../../interfaces/IVoterRewards.sol";
  * In every round users can vote a fraction of their balance for the elegible apps in that round.
  */
 
-abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor {
+abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor, ReentrancyGuard {
   struct RoundVote {
     mapping(bytes32 app => uint256) votesReceived;
     uint256 totalVotes;
@@ -47,7 +48,7 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
     address voter,
     bytes32[] memory apps,
     uint256[] memory weights
-  ) internal virtual override {
+  ) internal virtual override nonReentrant {
     if (hasVoted(roundId, voter)) {
       revert GovernorAlreadyCastVote(voter);
     }
