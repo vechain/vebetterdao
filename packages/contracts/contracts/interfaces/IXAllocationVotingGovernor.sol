@@ -37,11 +37,6 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   error GovernorAlreadyCastVote(address voter);
 
   /**
-   * @dev Token deposits are disabled in this contract.
-   */
-  error GovernorDisabledDeposit();
-
-  /**
    * @dev The `account` is not the governance executor.
    */
   error B3TRGovernorOnlyExecutor(address account);
