@@ -43,6 +43,10 @@ yarn install
 
 #### Spin up the project for development
 
+```
+cp .env.example .env
+```
+
 > docker and the compose plugin (prev docker-compose) are required in order to run the project
 
 ```
@@ -50,6 +54,8 @@ yarn dev
 ```
 
 #### Spin up the project pointing to the staging environment
+
+Set the `ENV` variable to solo-staging in the `.env` file.
 
 ```
 yarn staging
@@ -63,12 +69,13 @@ This command relies on a turbo pipeline which:
 
 ### Manually deploy the contracts
 
-Contracts are automatically updated for local development, in case you need to deploy them in othwer networks, you can use
+Choose what environment to deploy by setting the `ENV` variable to solo-staging in the `.env` file.
+Based on that env variable the deployment script will use the related configuration to deploy the contracts (`./packages/config/contracts/envs` folder).
+
+Set the `MNEMONIC` of the wallet you want to use as deployer in the `.env` file.
+
+Run thi command to deploy contracts:
 
 ```
-yarn hardhat:deploy
+yarn contracts:deploy
 ```
-
-By default it will deploy to the solo node.
-You can change the network by adding the `--network` flag. For example, to deploy to the testnet, run `yarn hardhat:deploy --network vechain_testnet`.
-If you are not deploying to the solo node, you will need to import the `MNEMONIC` environment variable which will be used to deploy the contracts. Just copy the `.env.example` in file in `packages/contracts` to `.env` and set the `MNEMONIC` variable.
