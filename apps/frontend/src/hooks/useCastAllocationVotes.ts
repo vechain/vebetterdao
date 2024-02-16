@@ -1,10 +1,4 @@
-import {
-  currentBlockQueryKey,
-  getAllocationVotersQueryKey,
-  getAllocationVotesQueryKey,
-  getHasVotedQueryKey,
-  getProposalVotesQuerykey,
-} from "@/api"
+import { getAllocationVotersQueryKey, getAllocationVotesQueryKey } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
