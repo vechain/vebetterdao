@@ -25,6 +25,13 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
   console.log("votes", votes)
   const totalVotes = votes.reduce((acc, vote) => acc + (isNaN(vote.value) ? 0 : vote.value), 0)
   const isCompletedAllocated = totalVotes >= 100
+
+  const isOverDistributed = totalVotes > 100
+
+  const getLinesColor = (index: number) => {
+    if (isOverDistributed) return `orange.${index + 1}00`
+    return `green.${index + 1}00`
+  }
   return (
     <Card variant="outline" w="full">
       <CardBody>
@@ -38,7 +45,7 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
                 Your Voting Power
               </Text>
             </Box>
-            <Text fontSize="sm" color="gray.500">
+            <Text fontSize="sm" fontWeight="medium" color={isOverDistributed ? "orange" : "gray"}>
               {totalVotes}% distributed
             </Text>
           </HStack>
@@ -54,7 +61,7 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
                       isCompletedAllocated && { borderRightRadius: "xl" })}
                     key={`${vote.id}-track`}
                     w={`${vote.value}%`}
-                    bg={`green.${index + 1}00`}
+                    bg={getLinesColor(index)}
                     h="full"
                   />
                 ))}
@@ -64,8 +71,8 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
                 .filter(vote => vote.value > 0)
                 .map((vote, index) => (
                   <VStack key={`${vote.id}-line`} w={`${vote.value}%`} h={"full"} spacing={1} align="center">
-                    <Box w="3px" h={"full"} bg={`green.${index + 1}00`} />
-                    <Icon as={FaRecycle} color={`green.${index + 1}00`} boxSize={4} />
+                    <Box w="3px" h={"full"} bg={getLinesColor(index)} />
+                    <Icon as={FaRecycle} color={getLinesColor(index)} boxSize={4} />
                     <Heading size="xs">{vote.value}%</Heading>
                   </VStack>
                 ))}
