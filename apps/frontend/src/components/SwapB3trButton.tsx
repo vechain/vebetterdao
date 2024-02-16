@@ -1,4 +1,4 @@
-import { useB3trBalance } from "@/api"
+import { useB3trBalance, useVot3Balance } from "@/api"
 import { Button, Text, VStack, useDisclosure } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { SwapB3trModal } from "./SwapB3trModal"
@@ -9,10 +9,12 @@ type Props = { isIconButton?: boolean }
 export const SwapB3trButton: React.FC<Props> = ({ isIconButton = false }) => {
   const { account } = useWallet()
   const { data: balance, isLoading: isBalanceLoading } = useB3trBalance(account ?? undefined)
+  const { data: vot3Balance, isLoading: isVot3BalanceLoading } = useVot3Balance(account ?? undefined)
 
-  const isLoading = isBalanceLoading
+  const hasNoBalance = (!balance || balance.scaled === "0") && (!vot3Balance || vot3Balance.scaled === "0")
+  const isLoading = isBalanceLoading || isVot3BalanceLoading
 
-  const buttonDisabled = isLoading || !balance || balance.scaled === "0"
+  const buttonDisabled = isLoading || hasNoBalance
 
   const { isOpen, onClose, onOpen } = useDisclosure()
 
