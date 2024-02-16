@@ -63,13 +63,6 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
 
   // ---------- Setters ---------- //
 
-  /**
-   * @dev Function to receive ETH that will be handled by the governor id disabled.
-   */
-  receive() external payable virtual {
-    revert GovernorDisabledDeposit();
-  }
-
   function finalize(uint256 roundId) public {
     require(!isFinalized(roundId), "Governor: round already finalized");
     require(!isActive(roundId), "Governor: round is not ended yet");
