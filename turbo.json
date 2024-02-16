@@ -50,12 +50,9 @@
     "deploy": {
       "dependsOn": ["^deploy"]
     },
-    "deploy:staging": {
-      "dependsOn": ["@repo/contracts#deploy:vechain_solo_staging"]
-    },
     "test": {
       "cache": false,
-      "dependsOn": ["@repo/contracts#check-contracts-deployment", "test:hardhat"]
+      "dependsOn": ["test:hardhat"]
     },
     "test:thor-solo": {
       "cache": false,
