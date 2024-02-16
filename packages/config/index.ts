@@ -1,7 +1,21 @@
 import localConfig from "./local"
 import stagingConfig from "./solo-staging"
-import { AppConfig } from "./types"
+import { Network } from "@repo/constants"
 import { contractsConfig } from "./contracts"
+
+export type AppConfig = {
+  b3trContractAddress: string
+  vot3ContractAddress: string
+  b3trGovernorAddress: string
+  timelockContractAddress: string
+  xAllocationPoolContractAddress: string
+  xAllocationVotingContractAddress: string
+  emissionsContractAddress: string
+  voterRewardsContractAddress: string
+  nftBadgeContractAddress: string
+  nodeUrl: string
+  network: Network
+}
 
 export const getConfig = (type?: string): AppConfig => {
   const networkType = type ?? contractsConfig.NEXT_PUBLIC_NETWORK_TYPE
@@ -11,5 +25,3 @@ export const getConfig = (type?: string): AppConfig => {
   if (networkType === "solo-staging") return stagingConfig
   throw new Error(`Unsupported NEXT_PUBLIC_NETWORK_TYPE ${networkType}`)
 }
-
-export * from "./contracts"

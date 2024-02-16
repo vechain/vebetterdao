@@ -1,6 +1,6 @@
 import { ethers, network } from "hardhat"
 import { B3TR, B3TRGovernor, TimeLock, VOT3 } from "../../typechain-types"
-import { contractsConfig } from "@repo/config"
+import { contractsConfig } from "@repo/config/contracts"
 
 const ADMIN = contractsConfig.CONTRACTS_ADMIN_ADDRESS
 

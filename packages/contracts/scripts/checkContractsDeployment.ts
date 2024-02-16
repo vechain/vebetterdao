@@ -1,6 +1,7 @@
 import { ethers, network } from "hardhat"
 import { deployAll } from "./deploy/deploy"
-import { getConfig, AppConfig } from "@repo/config"
+import { getConfig } from "@repo/config"
+import { AppConfig } from "@repo/config"
 import fs from "fs"
 import path from "path"
 import { seedLocalEnvironment } from "./deploy/seed"
