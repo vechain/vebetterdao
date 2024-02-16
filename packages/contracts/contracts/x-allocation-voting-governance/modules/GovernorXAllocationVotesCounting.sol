@@ -71,8 +71,6 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor,
       "Governor: account has insufficient voting power for this round"
     );
 
-    voterRewards.registerXallocationVote(round.voteStart, voter, totalWeight);
-
     _roundVotes[roundId].totalVotes += totalWeight;
     _roundVotes[roundId].hasVoted[voter] = true;
     _roundVotes[roundId].totalVoters++;
@@ -81,6 +79,8 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor,
     if (!_hasVotedOnce[voter]) {
       _hasVotedOnce[voter] = true;
     }
+
+    voterRewards.registerXallocationVote(round.voteStart, voter, totalWeight);
 
     emit AllocationVoteCast(voter, roundId, apps, weights);
   }
