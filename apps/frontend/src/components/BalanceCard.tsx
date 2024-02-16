@@ -24,8 +24,13 @@ import {
   VStack,
   Show,
   Flex,
+  CardFooter,
+  ModalOverlay,
+  DrawerOverlay,
+  LinkOverlay,
+  Text,
 } from "@chakra-ui/react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { WalletButton, useWallet } from "@vechain/dapp-kit-react"
 import { BalancePieChart } from "./BalancePieChart"
 import { useMemo } from "react"
 import BigNumber from "bignumber.js"
@@ -85,8 +90,6 @@ export const BalanceCard: React.FC<Props> = () => {
     return b3trBalance?.scaled === "0" && vot3Balance?.scaled === "0"
   }, [b3trBalance, vot3Balance])
 
-  if (!account) return null
-
   if (b3trBalanceError || vot3BalanceError)
     return (
       <Alert status="error" borderRadius={"lg"}>
@@ -121,11 +124,11 @@ export const BalanceCard: React.FC<Props> = () => {
             <StatGroup flexDirection={"row"} alignItems="center" justifyContent="space-between" w="full">
               <Stat textAlign={"center"}>
                 <StatLabel color={b3trColor}>B3TR</StatLabel>
-                <StatNumber>{b3trBalance?.formatted}</StatNumber>
+                <StatNumber>{b3trBalance?.formatted || "0"}</StatNumber>
               </Stat>
               <Stat textAlign={"center"}>
                 <StatLabel color={vot3Color}>VOT3</StatLabel>
-                <StatNumber>{vot3Balance?.formatted}</StatNumber>
+                <StatNumber>{vot3Balance?.formatted || "0"}</StatNumber>
               </Stat>
             </StatGroup>
           </VStack>
@@ -139,17 +142,34 @@ export const BalanceCard: React.FC<Props> = () => {
             <StatGroup flexDirection={"row"} alignItems="center" justifyContent="center" flex={1} alignSelf={"center"}>
               <Stat textAlign={"center"}>
                 <StatLabel color={b3trColor}>B3TR</StatLabel>
-                <StatNumber>{b3trBalance?.formatted}</StatNumber>
+                <StatNumber>{b3trBalance?.formatted || "0"}</StatNumber>
               </Stat>
               <Stat textAlign={"center"}>
                 <StatLabel color={vot3Color}>VOT3</StatLabel>
-                <StatNumber>{vot3Balance?.formatted}</StatNumber>
+                <StatNumber>{vot3Balance?.formatted || "0"}</StatNumber>
               </Stat>
             </StatGroup>
             <Flex>{isLoading ? <Spinner size="sm" /> : <SwapB3trButton />}</Flex>
           </HStack>
         </Show>
       </CardBody>
+      {!account && (
+        <Flex backdropFilter="blur(10px)" position={"absolute"} h={"100%"} w={"100%"} align="center" justify="center">
+          <Card w={["90%", "50%", "30%"]} rounded="xl">
+            <CardBody>
+              <VStack gap={4}>
+                <Heading fontSize="20px" textAlign={"center"}>
+                  You are not connected
+                </Heading>
+                <Text textAlign={"center"} fontSize="14px">
+                  Connect your wallet to check your balance
+                </Text>
+                <WalletButton />
+              </VStack>
+            </CardBody>
+          </Card>
+        </Flex>
+      )}
     </Card>
   )
 }

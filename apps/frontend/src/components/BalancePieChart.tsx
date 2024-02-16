@@ -14,12 +14,11 @@ export const BalancePieChart: React.FC<Props> = ({ b3trBalance, vot3Balance }) =
   const grayColor = useColorModeValue(gray500, gray200)
 
   const data = useMemo(() => {
-    if (!b3trBalance || !vot3Balance) return []
+    if (!b3trBalance || !vot3Balance) return [{ name: "EMPTY", value: 1, color: grayColor }]
 
     return [
       { name: "B3TR", value: Number(b3trBalance.scaled), color: b3trColor },
       { name: "VOT3", value: Number(vot3Balance.scaled), color: vot3Color },
-      //{ name: "hide", value: 1, color: grayColor },
     ]
   }, [b3trBalance, vot3Balance, b3trColor, vot3Color])
 
