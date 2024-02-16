@@ -11,6 +11,9 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
 
   const xAppsVotes = useXAppsVotes(xApps?.map(app => app.id) ?? [], roundId)
 
+  const isLoading = xAppsVotes.some(query => query.isLoading)
+  const isError = xAppsVotes.some(query => query.isError)
+
   const data = useMemo(
     () =>
       xAppsVotes.map(app => ({

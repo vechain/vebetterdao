@@ -32,6 +32,13 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
     if (isOverDistributed) return `orange.${index + 1}00`
     return `green.${index + 1}00`
   }
+
+  const getLineWidth = (voteValue: number) => {
+    if (isOverDistributed) return (voteValue / totalVotes) * 100
+    return voteValue
+  }
+
+  const selectedVotes = votes.filter(vote => vote.value > 0)
   return (
     <Card variant="outline" w="full">
       <CardBody>
@@ -51,26 +58,29 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
           </HStack>
           <VStack w="full" h={24} spacing={0}>
             <HStack w="full" borderRadius={"xl"} bg="gray" h={5} spacing={0}>
-              {votes
-                .filter(vote => vote.value > 0)
-                .map((vote, index) => (
-                  <Box
-                    transition={"all 0.5s linear"}
-                    {...((index === 0 || totalVotes === vote.value) && { borderLeftRadius: "xl" })}
-                    {...((index === votes.length - 1 || vote.value === totalVotes) &&
-                      isCompletedAllocated && { borderRightRadius: "xl" })}
-                    key={`${vote.id}-track`}
-                    w={`${vote.value}%`}
-                    bg={getLinesColor(index)}
-                    h="full"
-                  />
-                ))}
+              {selectedVotes.map((vote, index) => (
+                <Box
+                  transition={"all 0.5s linear"}
+                  {...((index === 0 || totalVotes === vote.value) && { borderLeftRadius: "xl" })}
+                  {...((index === selectedVotes.length - 1 || vote.value === totalVotes) &&
+                    isCompletedAllocated && { borderRightRadius: "xl" })}
+                  key={`${vote.id}-track`}
+                  w={`${getLineWidth(vote.value)}%`}
+                  bg={getLinesColor(index)}
+                  h="full"
+                />
+              ))}
             </HStack>
             <HStack w="full" h={"full"}>
               {votes
                 .filter(vote => vote.value > 0)
                 .map((vote, index) => (
-                  <VStack key={`${vote.id}-line`} w={`${vote.value}%`} h={"full"} spacing={1} align="center">
+                  <VStack
+                    key={`${vote.id}-line`}
+                    w={`${getLineWidth(vote.value)}%`}
+                    h={"full"}
+                    spacing={1}
+                    align="center">
                     <Box w="3px" h={"full"} bg={getLinesColor(index)} />
                     <Icon as={FaRecycle} color={getLinesColor(index)} boxSize={4} />
                     <Heading size="xs">{vote.value}%</Heading>

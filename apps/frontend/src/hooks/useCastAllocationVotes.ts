@@ -1,4 +1,4 @@
-import { getAllocationVotesQueryKey, getHasVotedQueryKey, getProposalVotesQuerykey } from "@/api"
+import { currentBlockQueryKey, getAllocationVotesQueryKey, getHasVotedQueryKey, getProposalVotesQuerykey } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
@@ -82,6 +82,13 @@ export const useCastAllocationVotes = ({
       })
       await queryClient.refetchQueries({
         queryKey: appsVotesForRoundKey,
+      })
+
+      await queryClient.cancelQueries({
+        queryKey: currentBlockQueryKey(),
+      })
+      await queryClient.refetchQueries({
+        queryKey: currentBlockQueryKey(),
       })
     }
 

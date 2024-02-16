@@ -32,7 +32,6 @@ export const SelectAppVotesInput = ({ register, getValues, index, xApp, field, e
       <Box>
         <FormControl isInvalid={!!errors.votes?.[index]}>
           <Input
-            type="number"
             {...register(`votes.${index}.value`, {
               valueAsNumber: true,
               min: 0,
