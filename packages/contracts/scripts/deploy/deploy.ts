@@ -46,7 +46,7 @@ const levels = [1]
 const multiplier = [0]
 
 export async function deployAll() {
-  console.log(`Deploying contracts on ${network.name}...`)
+  console.log(`Deploying contracts on ${network.name} with ${contractsConfig.APP_ENV} configurations...`)
 
   const [admin] = await ethers.getSigners()
 

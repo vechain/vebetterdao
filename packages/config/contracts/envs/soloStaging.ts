@@ -2,7 +2,7 @@ import { defineConfig } from "../defineConfig"
 
 export function createSoloStagingConfig() {
   return defineConfig({
-    NEXT_PUBLIC_NETWORK_TYPE: "solo",
+    APP_ENV: "solo-staging",
 
     B3TR_GOVERNOR_QUORUM_PERCENTAGE: 4, // 4 -> Need 4% of voters to pass
     B3TR_GOVERNOR_MIN_DELAY: 30, //after a vote passes, you have 5 min before you can vote queue the proposal

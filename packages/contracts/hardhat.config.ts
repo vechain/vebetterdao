@@ -1,12 +1,10 @@
-import { VECHAIN_URL_MAINNET, VECHAIN_URL_TESTNET } from "@vechain/hardhat-vechain"
+import { VECHAIN_URL_SOLO, VECHAIN_URL_MAINNET, VECHAIN_URL_TESTNET } from "@vechain/hardhat-vechain"
 import { HardhatUserConfig } from "hardhat/config"
 import "@nomicfoundation/hardhat-toolbox"
 import "@nomiclabs/hardhat-truffle5"
 import "@vechain/hardhat-vechain"
 import "@vechain/hardhat-ethers"
 import { getConfig } from "@repo/config"
-
-const soloUrl = getConfig().network.urls[0]
 
 const config: HardhatUserConfig = {
   solidity: "0.8.20",
@@ -32,9 +30,11 @@ module.exports = {
       chainId: 1337,
     },
     vechain_solo: {
-      url: soloUrl,
+      url: process.env.NEXT_PUBLIC_APP_ENV
+        ? getConfig(process.env.NEXT_PUBLIC_APP_ENV).network.urls[0]
+        : VECHAIN_URL_SOLO,
       accounts: {
-        mnemonic: process.env.MNEMONIC,
+        mnemonic: process.env.MNEMONIC || "",
         count: 10,
         path: "m/44'/818'/0'/0",
       },
@@ -44,7 +44,7 @@ module.exports = {
     vechain_testnet: {
       url: VECHAIN_URL_TESTNET,
       accounts: {
-        mnemonic: process.env.MNEMONIC,
+        mnemonic: process.env.MNEMONIC || "",
         count: 10,
         path: "m/44'/818'/0'/0",
       },
@@ -54,7 +54,7 @@ module.exports = {
     vechain_mainnet: {
       url: VECHAIN_URL_MAINNET,
       accounts: {
-        mnemonic: process.env.MNEMONIC,
+        mnemonic: process.env.MNEMONIC || "",
         count: 1,
         path: "m/44'/818'/0'/0",
       },

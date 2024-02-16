@@ -1,7 +1,5 @@
-import { NEXT_PUBLIC_NETWORK_TYPE } from "@repo/constants"
-
 export type ContractsConfig = {
-  NEXT_PUBLIC_NETWORK_TYPE: NEXT_PUBLIC_NETWORK_TYPE
+  APP_ENV: "local" | "solo-staging" | "testnet" | "production"
 
   B3TR_GOVERNOR_QUORUM_PERCENTAGE: number
   B3TR_GOVERNOR_MIN_DELAY: number

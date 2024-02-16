@@ -12,7 +12,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "contracts:compile": "dotenv -e .env -- turbo run compile --scope=contracts",
     "contracts:deploy": "dotenv -e .env -- turbo run deploy --scope=contracts",
-    "contracts:test": "dotenv -e .env -- turbo run test:hardhat --scope=contracts",
+    "contracts:test": "turbo run test:hardhat --scope=contracts",
     "contracts:test:thor-solo": "dotenv -e .env -- turbo run test:thor-solo --scope=contracts",
     "solo-up": "make solo-up"
   },
