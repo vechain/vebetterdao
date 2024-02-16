@@ -6,8 +6,6 @@ import "@vechain/hardhat-vechain"
 import "@vechain/hardhat-ethers"
 import { getConfig } from "@repo/config"
 
-const soloUrl = getConfig().network.urls[0]
-
 const config: HardhatUserConfig = {
   solidity: "0.8.20",
 }
@@ -32,9 +30,11 @@ module.exports = {
       chainId: 1337,
     },
     vechain_solo: {
-      url: soloUrl,
+      url: process.env.NEXT_PUBLIC_APP_ENV
+        ? getConfig(process.env.NEXT_PUBLIC_APP_ENV).network.urls[0]
+        : VECHAIN_URL_SOLO,
       accounts: {
-        mnemonic: "denial kitchen pet squirrel other broom bar gas better priority spoil cross",
+        mnemonic: process.env.MNEMONIC || "",
         count: 10,
         path: "m/44'/818'/0'/0",
       },

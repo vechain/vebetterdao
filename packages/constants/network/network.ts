@@ -3,7 +3,7 @@
 /**
  * The type of network that we are connected to (indentified by the genesis block)
  * */
-export type NEXT_PUBLIC_NETWORK_TYPE = "main" | "test" | "solo" | "custom"
+export type NETWORK_TYPE = "main" | "test" | "solo" | "custom"
 
 /**
  * A model for the VechainThor network that we are connected to
@@ -21,7 +21,7 @@ export type Network = {
   id: string
   defaultNet: boolean
   name: string
-  type: NEXT_PUBLIC_NETWORK_TYPE
+  type: NETWORK_TYPE
   urls: string[]
   explorerUrl?: string
   genesis: typeof genesises.main
