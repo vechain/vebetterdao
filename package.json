@@ -15,6 +15,8 @@
     "contracts:deploy:solo-staging": "dotenv -v NEXT_PUBLIC_APP_ENV=solo-staging -- turbo run deploy --scope=contracts",
     "contracts:test": "turbo run test --scope=contracts",
     "contracts:test:thor-solo": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run test:thor-solo --scope=contracts",
+    "contracts:generate-b3tr-badge-metadata": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run generate-b3tr-badge-metadata --scope=contracts",
+    "contracts:upload-b3tr-badge-metadata": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run upload-b3tr-badge-metadata --scope=contracts",
     "solo-up": "make solo-up"
   },
   "devDependencies": {

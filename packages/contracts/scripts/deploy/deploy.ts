@@ -40,6 +40,7 @@ const APP_SHARES_CAP = contractsConfig.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP
 // NFT Badge Values
 const name = "B3TR Badge"
 const symbol = "B3TR"
+const BASE_URI = contractsConfig.BASE_URI
 
 // Voter rewards
 const levels = [1]
@@ -217,7 +218,7 @@ async function deployGovernor(
 async function deployNFTBadge(mintableLevelFromDeploy: number, name: string, symbol: string, admin: string) {
   console.log(`Deploying B3TRBadge NFT contract`)
   const NFTBadgeContract = await ethers.getContractFactory("B3TRBadge")
-  const contract = await NFTBadgeContract.deploy(name, symbol, admin, mintableLevelFromDeploy)
+  const contract = await NFTBadgeContract.deploy(name, symbol, admin, mintableLevelFromDeploy, BASE_URI)
 
   await contract.waitForDeployment()
 
