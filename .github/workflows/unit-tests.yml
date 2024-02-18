@@ -38,6 +38,16 @@ jobs:
       - name: Unit Tests
         run: yarn test
       
+      - name: Slither human summary
+        uses: crytic/slither-action@v0.3.1
+        id: slitherhumansummary
+        with:
+          ignore-compile: true
+          target: 'packages/contracts/'
+          solc-version: '0.8.20'
+          fail-on: none
+          slither-args: --print human-summary
+          
       - name: Run Slither
         uses: crytic/slither-action@v0.3.1
         id: slither
