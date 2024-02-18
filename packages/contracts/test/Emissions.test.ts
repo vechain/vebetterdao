@@ -105,7 +105,27 @@ describe("Emissions", () => {
       // Grant minter role to emissions contract
       await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
 
-      await emissions.connect(minterAccount).start()
+      const tx = await emissions.connect(minterAccount).start()
+
+      const receipt = await tx.wait()
+
+      if (!receipt?.logs) throw new Error("No logs in receipt")
+
+      const events = receipt?.logs
+
+      const decodedEvents = events?.map(event => {
+        return emissions.interface.parseLog({
+          topics: event?.topics as string[],
+          data: event?.data as string,
+        })
+      })
+
+      const emissionDistributedEvent = decodedEvents.find(event => event?.name === "EmissionDistributed")
+
+      expect(emissionDistributedEvent?.args?.cycle).to.equal(1)
+      expect(emissionDistributedEvent?.args.xAllocations).to.equal(INITIAL_X_ALLOCATION)
+      expect(emissionDistributedEvent?.args.vote2Earn).to.equal(INITIAL_VOTE_2_EARN_ALLOCATION)
+      expect(emissionDistributedEvent?.args.treasury).to.equal(INITIAL_TREASURY_ALLOCATION)
 
       expect(await b3tr.balanceOf(await xAllocationPool.getAddress())).to.equal(INITIAL_X_ALLOCATION)
       expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(INITIAL_VOTE_2_EARN_ALLOCATION)
@@ -189,7 +209,27 @@ describe("Emissions", () => {
       expect(treasuryAmount).to.equal(ethers.parseEther("1000000"))
 
       // Distribute emissions
-      await emissions.connect(minterAccount).distribute()
+      const tx = await emissions.connect(minterAccount).distribute()
+
+      const receipt = await tx.wait()
+
+      if (!receipt?.logs) throw new Error("No logs in receipt")
+
+      const events = receipt?.logs
+
+      const decodedEvents = events?.map(event => {
+        return emissions.interface.parseLog({
+          topics: event?.topics as string[],
+          data: event?.data as string,
+        })
+      })
+
+      const emissionDistributedEvent = decodedEvents.find(event => event?.name === "EmissionDistributed")
+
+      expect(emissionDistributedEvent?.args?.cycle).to.equal(2)
+      expect(emissionDistributedEvent?.args.xAllocations).to.equal(xAllocationsAmount)
+      expect(emissionDistributedEvent?.args.vote2Earn).to.equal(vote2EarnAmount)
+      expect(emissionDistributedEvent?.args.treasury).to.equal(treasuryAmount)
 
       // Check supply
       expect(await b3tr.totalSupply()).to.equal(

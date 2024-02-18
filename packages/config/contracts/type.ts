@@ -29,4 +29,6 @@ export type ContractsConfig = {
   INITIAL_X_ALLOCATION: number
   INITIAL_VOTE_2_EARN_ALLOCATION: number
   INITIAL_TREASURY_ALLOCATION: number
+
+  BASE_URI: string
 }

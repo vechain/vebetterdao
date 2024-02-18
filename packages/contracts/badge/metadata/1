@@ -1,0 +1,11 @@
+{
+  "name": "Earth",
+  "description": "Your gateway to the Worse ecosystem",
+  "image": "ipfs://bafybeiewvcufxobfdgffhbu7elfa6zubvj4qteplhvojub34hbecgivn24/1.png",
+  "attributes": [
+    {
+      "trait_type": "Level",
+      "value": 1
+    }
+  ]
+}
