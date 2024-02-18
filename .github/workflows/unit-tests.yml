@@ -48,16 +48,21 @@ jobs:
           fail-on: none
           slither-args: --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
       
+     # - uses: actions/upload-artifact@v4
+     #   with:
+     #     name: my-artifact
+     #     path: ${{ steps.slither.outputs.stdout }}
+    
       - name: Create/update checklist as PR comment
         uses: actions/github-script@v7
         if: github.event_name == 'pull_request'
         env:
-          #REPORT: ${{ steps.slither.outputs.stdout }}
-          REPORT: 'THis is a test report with some tags <h1>Hello</h1>'
+          REPORT: ${{ steps.slither.outputs.stdout }}
+          #REPORT: 'THis is a test report with some tags <h1>Hello</h1>'
         with:
           script: |
             const script = require('.github/scripts/comment')
             const header = '# Slither report'
-            const body = process.env.REPORT
+            const body = 'This is a test report with some tags <h1>Hello</h1>'
             await script({ github, context, header, body })
       
