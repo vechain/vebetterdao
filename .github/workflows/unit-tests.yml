@@ -35,8 +35,8 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-    #  - name: Unit Tests
-    #    run: yarn test
+      - name: Unit Tests
+        run: yarn test
       
       - name: Run Slither
         uses: crytic/slither-action@v0.3.1
