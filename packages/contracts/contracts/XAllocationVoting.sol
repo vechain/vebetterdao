@@ -87,10 +87,10 @@ contract XAllocationVoting is
 
   function addApp(
     address appAddress,
-    string memory name,
+    string memory appName,
     string memory metadata
   ) public override onlyRole(DEFAULT_ADMIN_ROLE) {
-    super.addApp(appAddress, name, metadata);
+    super.addApp(appAddress, appName, metadata);
   }
 
   function startNewRound() public override onlyRole(DEFAULT_ADMIN_ROLE) returns (uint256) {
