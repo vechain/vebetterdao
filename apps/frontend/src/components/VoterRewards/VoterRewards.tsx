@@ -6,9 +6,11 @@ import { FaGift } from "react-icons/fa6"
 import BigNumber from "bignumber.js"
 import { useClaimRewards } from "@/hooks/useClaimRewards"
 
+// Maximum precision of 4 decimals. Must also round down
 const compactFormatter = new Intl.NumberFormat("en-US", {
-  notation: "standard",
+  notation: "compact",
   compactDisplay: "short",
+  maximumFractionDigits: 4,
 })
 
 export const VoterRewards: React.FC = () => {
