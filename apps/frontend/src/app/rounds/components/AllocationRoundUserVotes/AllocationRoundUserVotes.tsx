@@ -48,7 +48,8 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
   const isVotingConcluded = roundInfo?.voteEndTimestamp?.isBefore()
 
-  const isFormDisabled = hasVoted || isVotingConcluded || roundInfoLoading || votesAtSnapshotLoading || hasVotedLoading
+  const isFormDisabled =
+    hasVoted || isVotingConcluded || roundInfoLoading || votesAtSnapshotLoading || hasVotedLoading || hasNoVotes
 
   const {
     control,
@@ -209,7 +210,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
               <Box w="full">
                 <Button
                   w="full"
-                  isDisabled={hasNoVotes || isFormDisabled}
+                  isDisabled={isFormDisabled}
                   type="submit"
                   leftIcon={<MdHowToVote />}
                   mt={[8, 8, 0]}
