@@ -254,7 +254,11 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   function isCycleEnded(uint256 cycle) public view returns (bool) {
-    require(isCycleDistributed(cycle), "Emissions: Cycle not distributed yet");
+    require(cycle <= getCurrentCycle(), "Emissions: Cycle not reached yet");
+
+    if(cycle < getCurrentCycle()) {
+      return true;
+    }
 
     return block.number >= lastEmissionBlock + cycleDuration;
   }
