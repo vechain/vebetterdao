@@ -155,13 +155,13 @@ export const BalanceCard: React.FC<Props> = () => {
       </CardBody>
       {!account && (
         <Flex backdropFilter="blur(10px)" position={"absolute"} h={"100%"} w={"100%"} align="center" justify="center">
-          <Card w={["90%", "50%", "30%"]} rounded="xl">
+          <Card w={["90%", "50%", "40%"]} rounded="xl" variant="outline">
             <CardBody>
               <VStack gap={4}>
-                <Heading fontSize="20px" textAlign={"center"}>
-                  You are not connected
+                <Heading fontSize="xl" textAlign={"center"}>
+                  No wallet connected
                 </Heading>
-                <Text textAlign={"center"} fontSize="14px">
+                <Text textAlign={"center"} fontSize="lg" fontWeight={"thin"}>
                   Connect your wallet to check your balance
                 </Text>
                 <WalletButton />
