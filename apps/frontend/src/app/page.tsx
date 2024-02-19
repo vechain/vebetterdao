@@ -1,5 +1,6 @@
 "use client"
 
+import { ClaimNFT } from "@/components/ClaimNFT"
 import { Box, Spinner, Stack, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { Suspense } from "react"
@@ -22,6 +23,7 @@ export default function Home() {
   return (
     <VStack w="full" spacing={12}>
       <Suspense fallback={<Spinner alignSelf={"center"} />}>
+        <ClaimNFT />
         <BalanceCard />
         <Stack
           direction={["column-reverse", "column-reverse", "row"]}

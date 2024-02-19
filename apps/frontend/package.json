@@ -26,6 +26,7 @@
     "@vechain/dapp-kit": "^1.0.8",
     "@vechain/dapp-kit-react": "^1.0.8",
     "@vechain/dapp-kit-ui": "^1.0.8",
+    "axios": "^1.6.7",
     "dayjs": "^1.11.10",
     "framer-motion": "^10.17.9",
     "lodash": "^4.17.21",
@@ -34,6 +35,7 @@
     "react-dom": "^18",
     "react-hook-form": "^7.49.3",
     "react-icons": "^5.0.1",
+    "react-share": "^5.1.0",
     "recharts": "^2.10.4",
     "thor-devkit": "^2.0.9"
   },
