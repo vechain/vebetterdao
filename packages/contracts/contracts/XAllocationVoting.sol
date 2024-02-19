@@ -49,7 +49,7 @@ contract XAllocationVoting is
 
   function setB3trGovernanceAddress(address b3trGovernor_) public override onlyRole(DEFAULT_ADMIN_ROLE) {
     require(b3trGovernor_ != address(0), "XAllocationVoting: new B3trGovernor is the zero address");
-    _b3trGovernor = b3trGovernor_;
+    _b3trGovernor = IGovernor(payable(b3trGovernor_));
   }
 
   function _startNewRound(address proposer) internal virtual override returns (uint256 roundId) {
