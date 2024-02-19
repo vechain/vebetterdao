@@ -96,10 +96,17 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
   useEffect(() => {
     remove()
     if (parsedCastedVotesPercetanges.length) {
-      append(parsedCastedVotesPercetanges)
+      append(parsedCastedVotesPercetanges, {
+        shouldFocus: false,
+      })
     } else {
       xApps?.forEach(xApp => {
-        append({ id: xApp.id, value: 0 })
+        append(
+          { id: xApp.id, value: 0 },
+          {
+            shouldFocus: false,
+          },
+        )
       })
     }
   }, [xApps, append, remove, parsedCastedVotesPercetanges])
