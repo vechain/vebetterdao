@@ -1,0 +1,32 @@
+{
+  "name": "RecycleRewards",
+  "description": "RecycleRewards is a cutting-edge app that revolutionizes the way we approach recycling by providing tangible incentives in the form of tokens. This innovative platform not only promotes eco-friendly behavior but also establishes a rewarding system for users committed to making a positive impact on the environment.",
+  "external_url": "https://openseacreatures.io/3",
+  "logo": "ipfs://bafybeihjpb6yldfqgcydcnqwzpwlsckb4ypiwayzy3y4yurpbipsauspby/logo.png",
+  "banner": "ipfs://bafybeihjpb6yldfqgcydcnqwzpwlsckb4ypiwayzy3y4yurpbipsauspby/banner.png",
+  "screenshots": [],
+  "social_urls": [
+    {
+      "name": "YouTube",
+      "url": "https://www.youtube.com/@DLoaw"
+    },
+    {
+      "name": "Instagram",
+      "url": "https://www.instagram.com/@DLoaw"
+    }
+  ],
+  "app_urls": [
+    {
+      "code": "play_store",
+      "url": "https://www.playstore.com/@DLoaw"
+    },
+    {
+      "code": "apple_store",
+      "url": "https://www.applestore.com/@DLoaw"
+    },
+    {
+      "code": "web_app",
+      "url": "https://www.myapp.com"
+    }
+  ]
+}
