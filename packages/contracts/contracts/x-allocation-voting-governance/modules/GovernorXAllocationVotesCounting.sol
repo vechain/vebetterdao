@@ -79,9 +79,9 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
       _hasVotedOnce[voter] = true;
     }
 
-    voterRewards.registerXallocationVote(round.voteStart, voter, totalWeight);
-
     emit AllocationVoteCast(voter, roundId, apps, weights);
+
+    voterRewards.registerXallocationVote(round.voteStart, voter, totalWeight);
   }
 
   function getAppVotes(uint256 roundId, bytes32 app) public view override returns (uint256) {
