@@ -46,7 +46,7 @@ jobs:
           target: 'packages/contracts/'
           solc-version: '0.8.20'
           fail-on: none
-          slither-args: --print human-summary --filter-paths "openzepellin"
+          slither-args: --print human-summary --filter-paths "openzeppelin"
           
       - name: Run Slither
         uses: crytic/slither-action@v0.3.1
@@ -56,7 +56,7 @@ jobs:
           target: 'packages/contracts/'
           solc-version: '0.8.20'
           fail-on: none
-          slither-args: --filter-paths "openzepellin" --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
+          slither-args: --filter-paths "openzeppelin" --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
       
      # - uses: actions/upload-artifact@v4
      #   with:
