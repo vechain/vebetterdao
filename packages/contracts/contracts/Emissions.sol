@@ -51,6 +51,8 @@ contract Emissions is AccessControl, ReentrancyGuard {
   // ----------- Scaling ----------- //
   uint256 public scalingFactor = 1e6;
 
+  event EmissionDistributed(uint256 indexed cycle, uint256 xAllocations, uint256 vote2Earn, uint256 treasury);
+
   constructor(
     address minter,
     address admin,
@@ -142,6 +144,8 @@ contract Emissions is AccessControl, ReentrancyGuard {
     b3tr.mint(treasury, initialAllocations[2]);
 
     xAllocationsGovernor.startNewRound();
+
+    emit EmissionDistributed(nextCycle - 1, initialAllocations[0], initialAllocations[1], initialAllocations[2]);
   }
 
   function distribute() public nonReentrant {
@@ -169,6 +173,8 @@ contract Emissions is AccessControl, ReentrancyGuard {
     b3tr.mint(treasury, treasuryAmount);
 
     xAllocationsGovernor.startNewRound();
+
+    emit EmissionDistributed(nextCycle - 1, xAllocationsAmount, vote2EarnAmount, treasuryAmount);
   }
 
   // ----------- Getters ----------- //
@@ -344,6 +350,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
       IXAllocationVotingGovernor(_xAllocationsGovernor).votingPeriod() < cycleDuration,
       "Emissions: Voting period must be less than cycle duration"
     );
+
     xAllocationsGovernor = IXAllocationVotingGovernor(_xAllocationsGovernor);
   }
 }
