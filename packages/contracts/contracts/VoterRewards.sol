@@ -89,7 +89,7 @@ contract VoterRewards is AccessControl, ReentrancyGuard {
     cycleToVoterToTotal[cycle][voter] = 0;
 
     // transfer reward to voter
-    b3tr.transfer(voter, reward);
+    require(b3tr.transfer(voter, reward), "VoterRewards: transfer failed");
 
     emit RewardClaimed(cycle, voter, reward);
   }
@@ -118,7 +118,7 @@ contract VoterRewards is AccessControl, ReentrancyGuard {
 
     // Scale down the reward to the original scale
     return reward / scalingFactor;
-}
+  }
 
   // ----------------- Setters ----------------- //
 
