@@ -14,7 +14,6 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
     bytes32 id;
     address addr;
     string name;
-    string metadata; //ipfs hash
     uint48 createdAt; // block number when app was added
   }
 
@@ -31,19 +30,25 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
   // Mapping from app ID to a checkpoint of the app's elegibility in a specific block
   mapping(bytes32 appId => Checkpoints.Trace208) internal _isAppElegibleCheckpoints;
 
+  string private _baseURI;
+
+  constructor(string memory baseURI_) {
+    _baseURI = baseURI_;
+  }
+
   // ---------- Setters ---------- //
 
-  function addApp(address appAddress, string memory name, string memory metadata) public virtual {
+  function addApp(address appAddress, string memory name) public virtual {
     bytes32 id = hashName(name);
 
     require(_apps[id].addr == address(0), "App with this ID already exists");
 
     // Store the new app
-    _apps[id] = App(id, appAddress, name, metadata, clock());
+    _apps[id] = App(id, appAddress, name, clock());
     _appIds.push(id);
     _pushAppToEligbleApps(id);
 
-    emit AppAdded(id, appAddress, name, metadata, true);
+    emit AppAdded(id, appAddress, name, true);
   }
 
   function setVotingElegibility(bytes32 appId, bool isElegible) public virtual {
@@ -93,6 +98,10 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
     return store.push(clock(), delta);
   }
 
+  function _setBaseURI(string memory baseURI_) internal {
+    _baseURI = baseURI_;
+  }
+
   // ---------- Getters ---------- //
 
   /**
@@ -123,10 +132,14 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
   }
 
   function isElegibleForVoteLatestCheckpoint(bytes32 appId) public view returns (bool) {
+    require(_apps[appId].addr != address(0), "App does not exist");
+
     return _isAppElegibleCheckpoints[appId].latest() == 1;
   }
 
   function isElegibleForVotePastCheckpoint(bytes32 appId, uint256 timepoint) public view returns (bool) {
+    require(_apps[appId].addr != address(0), "App does not exist");
+
     uint48 currentTimepoint = clock();
     if (timepoint >= currentTimepoint) {
       revert ERC5805FutureLookup(timepoint, currentTimepoint);
@@ -156,5 +169,15 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
 
   function getAppReceiverAddress(bytes32 appId) public view override returns (address) {
     return _apps[appId].addr;
+  }
+
+  function baseURI() public view returns (string memory) {
+    return _baseURI;
+  }
+
+  function appURI(bytes32 appId) public view returns (string memory) {
+    require(_apps[appId].addr != address(0), "App does not exist");
+
+    return string.concat(baseURI(), string(abi.encodePacked(appId)));
   }
 }
