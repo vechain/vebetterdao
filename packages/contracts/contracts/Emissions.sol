@@ -302,12 +302,12 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   function setXAllocationsDecay(uint256 _decay) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(_decay >= 0 && _decay <= 100, "Emissions: xAllocations decay must be between 0 and 100");
+    require(_decay <= 100, "Emissions: xAllocations decay must be between 0 and 100");
     xAllocationsDecay = _decay;
   }
 
   function setVote2EarnDecay(uint256 _decay) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(_decay >= 0 && _decay <= 100, "Emissions: vote2Earn decay must be between 0 and 100");
+    require(_decay <= 100, "Emissions: vote2Earn decay must be between 0 and 100");
     vote2EarnDecay = _decay;
   }
 
@@ -327,7 +327,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   function setTreasuryPercentage(uint256 _percentage) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(_percentage >= 0 && _percentage <= 100, "Emissions: Treasury percentage must be between 0 and 100");
+    require(_percentage <= 100, "Emissions: Treasury percentage must be between 0 and 100");
     treasuryPercentage = _percentage;
   }
 
@@ -337,10 +337,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   function setMaxVote2EarnDecay(uint256 _maxVote2EarnDecay) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(
-      _maxVote2EarnDecay >= 0 && _maxVote2EarnDecay <= 100,
-      "Emissions: Max vote2Earn decay must be between 0 and 100"
-    );
+    require(_maxVote2EarnDecay <= 100, "Emissions: Max vote2Earn decay must be between 0 and 100");
     maxVote2EarnDecay = _maxVote2EarnDecay;
   }
 

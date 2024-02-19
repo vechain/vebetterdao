@@ -10,7 +10,7 @@ import {
   waitForBlock,
   waitForNextCycle,
 } from "./helpers"
-import { expect } from "chai"
+import { assert, expect } from "chai"
 import { ethers, network } from "hardhat"
 import b3trAllocations from "./fixture/b3trAllocations.json"
 
@@ -92,6 +92,92 @@ describe("Emissions", () => {
       })
 
       await catchRevert(emissions.connect(otherAccounts[0]).setXallocationsAddress(otherAccounts[3].address))
+    })
+
+    it("Treasury percentage should be between 0 and 100", async () => {
+      const { emissions, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await catchRevert(emissions.connect(owner).setTreasuryPercentage(101))
+      try {
+        await emissions.connect(owner).setTreasuryPercentage(-1)
+        assert.fail("Should revert")
+      } catch (e) {
+        /* empty */
+      }
+      await emissions.connect(owner).setTreasuryPercentage(100)
+      await emissions.connect(owner).setTreasuryPercentage(0)
+      await emissions.connect(owner).setTreasuryPercentage(55)
+    })
+
+    it("MaxVote2EarnDecay percentage should be between 0 and 100", async () => {
+      const { emissions, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await catchRevert(emissions.connect(owner).setMaxVote2EarnDecay(101))
+      try {
+        await emissions.connect(owner).setMaxVote2EarnDecay(-1)
+        assert.fail("Should revert")
+      } catch (e) {
+        /* empty */
+      }
+      await emissions.connect(owner).setMaxVote2EarnDecay(100)
+      await emissions.connect(owner).setMaxVote2EarnDecay(0)
+      await emissions.connect(owner).setMaxVote2EarnDecay(55)
+    })
+
+    it("Vote2EarnDecay percentage should be between 0 and 100", async () => {
+      const { emissions, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await catchRevert(emissions.connect(owner).setVote2EarnDecay(101))
+      try {
+        await emissions.connect(owner).setVote2EarnDecay(-1)
+        assert.fail("Should revert")
+      } catch (e) {
+        /* empty */
+      }
+      await emissions.connect(owner).setVote2EarnDecay(100)
+      await emissions.connect(owner).setVote2EarnDecay(0)
+      await emissions.connect(owner).setVote2EarnDecay(55)
+    })
+
+    it("XAllocationsDecay percentage should be between 0 and 100", async () => {
+      const { emissions, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await catchRevert(emissions.connect(owner).setXAllocationsDecay(101))
+      try {
+        await emissions.connect(owner).setXAllocationsDecay(-1)
+        assert.fail("Should revert")
+      } catch (e) {
+        /* empty */
+      }
+      await emissions.connect(owner).setXAllocationsDecay(100)
+      await emissions.connect(owner).setXAllocationsDecay(0)
+      await emissions.connect(owner).setXAllocationsDecay(55)
+    })
+
+    it("getScaledDecayPercentage: decay percentage should be between 0 and 99", async () => {
+      const { emissions, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await expect(emissions.connect(owner).getScaledDecayPercentage(101)).to.be.reverted
+      try {
+        await emissions.connect(owner).getScaledDecayPercentage(-1)
+        assert.fail("Should revert")
+      } catch (e) {
+        /* empty */
+      }
+      await expect(emissions.connect(owner).getScaledDecayPercentage(100)).to.be.reverted
+
+      await expect(emissions.connect(owner).getScaledDecayPercentage(0)).not.to.be.reverted
+      await expect(emissions.connect(owner).getScaledDecayPercentage(55)).not.to.be.reverted
     })
   })
 
