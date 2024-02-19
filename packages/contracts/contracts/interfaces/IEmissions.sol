@@ -9,6 +9,13 @@ interface IEmissions {
 
     error ReentrancyGuardReentrantCall();
 
+    event EmissionDistributed(
+        uint256 indexed cycle,
+        uint256 xAllocations,
+        uint256 vote2Earn,
+        uint256 treasury
+    );
+
     event RoleAdminChanged(
         bytes32 indexed role,
         bytes32 indexed previousAdminRole,
@@ -20,7 +27,7 @@ interface IEmissions {
         address indexed account,
         address indexed sender
     );
-    
+
     event RoleRevoked(
         bytes32 indexed role,
         address indexed account,
@@ -54,9 +61,9 @@ interface IEmissions {
 
     function getCurrentXAllocationsAmount() external view returns (uint256);
 
-    function getNextCycleBlock() external view returns (uint256);
-
     function getInitialAllocations() external view returns (uint256[] memory);
+
+    function getNextCycleBlock() external view returns (uint256);
 
     function getRemainingEmissions() external view returns (uint256);
 
@@ -93,6 +100,8 @@ interface IEmissions {
         view
         returns (bool);
 
+    function initialAllocations(uint256) external view returns (uint256);
+
     function initialEmissions() external view returns (uint256);
 
     function isCycleDistributed(uint256 cycle) external view returns (bool);
@@ -107,10 +116,6 @@ interface IEmissions {
 
     function nextCycle() external view returns (uint256);
 
-    function start() external;
-
-    function initialAllocations(uint256) external view returns (uint256);
-
     function renounceRole(bytes32 role, address callerConfirmation) external;
 
     function revokeRole(bytes32 role, address account) external;
@@ -119,11 +124,11 @@ interface IEmissions {
 
     function setCycleDuration(uint256 _cycleDuration) external;
 
+    function setInitialAllocations(uint256[] memory _allocations) external;
+
     function setInitialEmissions(uint256 _emissions) external;
 
     function setMaxVote2EarnDecay(uint256 _maxVote2EarnDecay) external;
-
-    function setInitialAllocations(uint256[] memory _allocations) external;
 
     function setScalingFactor(uint256 _scalingFactor) external;
 
@@ -145,6 +150,8 @@ interface IEmissions {
         external;
 
     function setXallocationsAddress(address xAllocationAddress) external;
+
+    function start() external;
 
     function supportsInterface(bytes4 interfaceId) external view returns (bool);
 

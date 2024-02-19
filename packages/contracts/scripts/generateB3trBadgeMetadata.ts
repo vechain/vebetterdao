@@ -1,0 +1,116 @@
+import fs from "fs/promises"
+import { toIPFSURL, uploadDirectoryToIPFS } from "./helpers"
+import path from "path"
+
+/**
+ * Interface for an NFT attribute.
+ */
+interface Attribute {
+  trait_type: string
+  value: string | number
+}
+
+/**
+ * Interface for the NFT metadata.
+ * @see [NFT Metadata Standards](https://docs.opensea.io/docs/metadata-standards)
+ */
+interface Metadata {
+  name: string
+  description: string
+  image: string
+  attributes: Attribute[]
+}
+
+// Array of attributes for each level of the NFT
+const levelAttributes: Record<string, string | number>[] = [
+  {
+    Level: 1,
+  },
+]
+
+const levelNames = ["Earth"]
+const description = "Your gateway to the Worse ecosystem"
+
+const METADATA_PATH = path.join(__dirname, "../badge/metadata")
+const IMAGE_PATH = path.join(__dirname, "../badge/images")
+
+// NFT Storage
+const NFT_STORAGE_KEY = process.env.NFT_STORAGE_KEY ?? ""
+
+/**
+ * Converts a record of attributes into an array of `Attribute` objects.
+ *
+ * @param attributes - A record object containing the attributes to convert.
+ * @returns An array of `Attribute` objects.
+ */
+function convertAttributes(attributes: Record<string, string | number>): Attribute[] {
+  return Object.entries(attributes).map(([key, value]) => ({ trait_type: key, value }))
+}
+
+/**
+ * Generates the NFT metadata for a given level.
+ *
+ * @param name - The name of the level.
+ * @param description - The description of the level.
+ * @param imagesCID - The CID of the images directory on IPFS.
+ * @param attributes - The attributes of the level.
+ * @param image - The image file for the level.
+ *
+ * @returns The generated NFT metadata.
+ */
+function generateMetadata(
+  name: string,
+  description: string,
+  imagesCID: string,
+  attributes: Record<string, string | number>,
+  image: File,
+): Metadata {
+  return {
+    name,
+    description,
+    image: toIPFSURL(imagesCID, image.name),
+    attributes: convertAttributes(attributes),
+  }
+}
+
+/**
+ * Asynchronously saves the generated NFT metadata.
+ * @param metadata - The `Metadata` object to save.
+ */
+async function saveMetadataToFile(metadata: Metadata, fileName: string): Promise<void> {
+  await fs.writeFile(`${METADATA_PATH}/${fileName}`, JSON.stringify(metadata, null, 2))
+  console.log(`Metadata saved to ${METADATA_PATH}/${fileName}`)
+}
+
+/**
+ * Main function to generate and save NFT metadata.
+ */
+async function generateAndSaveMetadata(): Promise<void> {
+  try {
+    if (!NFT_STORAGE_KEY) {
+      throw new Error("NFT_STORAGE_KEY is not set")
+    }
+
+    // 1. Upload images to IPFS and get URL
+    const [imagesIpfsUrl, images] = await uploadDirectoryToIPFS(IMAGE_PATH, NFT_STORAGE_KEY, levelAttributes.length)
+
+    console.log("B3TR Badge Images IPFS URL:", toIPFSURL(imagesIpfsUrl))
+
+    // 2. Generate metadata for each level
+    for (let i = 0; i < levelAttributes.length; i++) {
+      const metadata = generateMetadata(levelNames[i], description, imagesIpfsUrl, levelAttributes[i], images[i])
+      await saveMetadataToFile(metadata, String(i + 1))
+    }
+  } catch (error) {
+    console.error("Error generating metadata:", error)
+    throw error // Rethrow the error after logging to handle it further up the call stack.
+  }
+}
+
+// Generate and save the NFT metadata
+generateAndSaveMetadata()
+  .then(() => process.exit(0))
+  .catch(error => {
+    console.error("Unhandled error:", error)
+    process.exit(1)
+  })
