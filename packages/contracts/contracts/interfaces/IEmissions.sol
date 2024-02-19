@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.19;
 
 interface IEmissions {
   error AccessControlBadConfirmation();
@@ -27,7 +27,7 @@ interface IEmissions {
 
   function distribute() external;
 
-  function emissions(uint256) external view returns (uint256 xAllocations_, uint256 vote2Earn_, uint256 treasury_);
+  function emissions(uint256) external view returns (uint256 xAllocations, uint256 vote2Earn, uint256 treasury);
 
   function getCurrentCycle() external view returns (uint256);
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
@@ -20,9 +20,9 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   // Destinations for emissions
-  address internal _xAllocations;
-  address internal _vote2Earn;
-  address internal _treasury;
+  address public xAllocations;
+  address public vote2Earn;
+  address public treasury;
 
   // Initial allocations
   uint256[] public initialAllocations;
@@ -94,9 +94,9 @@ contract Emissions is AccessControl, ReentrancyGuard {
     b3tr = IB3TR(b3trAddress);
 
     // Set destinations
-    _xAllocations = _destinations[0];
-    _vote2Earn = _destinations[1];
-    _treasury = _destinations[2];
+    xAllocations = _destinations[0];
+    vote2Earn = _destinations[1];
+    treasury = _destinations[2];
 
     // Set initial allocations
     initialAllocations = _initialAllocations;
@@ -136,14 +136,14 @@ contract Emissions is AccessControl, ReentrancyGuard {
     emissions[nextCycle] = Emission(initialAllocations[0], initialAllocations[1], initialAllocations[2]);
     totalEmissions += initialAllocations[0] + initialAllocations[1] + initialAllocations[2];
 
+    xAllocationsGovernor.startNewRound();
+
     nextCycle++;
 
     // Mint initial allocations
-    b3tr.mint(_xAllocations, initialAllocations[0]);
-    b3tr.mint(_vote2Earn, initialAllocations[1]);
-    b3tr.mint(_treasury, initialAllocations[2]);
-
-    xAllocationsGovernor.startNewRound();
+    b3tr.mint(xAllocations, initialAllocations[0]);
+    b3tr.mint(vote2Earn, initialAllocations[1]);
+    b3tr.mint(treasury, initialAllocations[2]);
 
     emit EmissionDistributed(nextCycle - 1, initialAllocations[0], initialAllocations[1], initialAllocations[2]);
   }
@@ -166,13 +166,13 @@ contract Emissions is AccessControl, ReentrancyGuard {
     emissions[nextCycle] = Emission(xAllocationsAmount, vote2EarnAmount, treasuryAmount);
     totalEmissions += xAllocationsAmount + vote2EarnAmount + treasuryAmount;
 
+    xAllocationsGovernor.startNewRound();
+
     nextCycle++;
 
-    b3tr.mint(_xAllocations, xAllocationsAmount);
-    b3tr.mint(_vote2Earn, vote2EarnAmount);
-    b3tr.mint(_treasury, treasuryAmount);
-
-    xAllocationsGovernor.startNewRound();
+    b3tr.mint(xAllocations, xAllocationsAmount);
+    b3tr.mint(vote2Earn, vote2EarnAmount);
+    b3tr.mint(treasury, treasuryAmount);
 
     emit EmissionDistributed(nextCycle - 1, xAllocationsAmount, vote2EarnAmount, treasuryAmount);
   }
@@ -180,7 +180,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
   // ----------- Getters ----------- //
 
   function getScaledDecayPercentage(uint256 decayPercentage) public view returns (uint256) {
-    require(decayPercentage < 100, "Decay percentage must be between 0 and 100");
+    require(decayPercentage >= 0 && decayPercentage < 100, "Decay percentage must be between 0 and 100");
     return (100 - decayPercentage) * (scalingFactor / 100);
   }
 
@@ -275,18 +275,6 @@ contract Emissions is AccessControl, ReentrancyGuard {
     return b3tr.cap() - totalEmissions;
   }
 
-  function treasury() public view returns (address) {
-    return _treasury;
-  }
-
-  function vote2Earn() public view returns (address) {
-    return _vote2Earn;
-  }
-
-  function xAllocations() public view returns (address) {
-    return _xAllocations;
-  }
-
   // ----------- Setters ----------- //
 
   function setInitialAllocations(uint256[] memory _allocations) public onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -297,18 +285,15 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   function setXallocationsAddress(address xAllocationAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(xAllocationAddress != address(0), "Emissions: xAllocationAddress cannot be the zero address");
-    _xAllocations = xAllocationAddress;
+    xAllocations = xAllocationAddress;
   }
 
   function setVote2EarnAddress(address vote2EarnAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(vote2EarnAddress != address(0), "Emissions: vote2EarnAddress cannot be the zero address");
-    _vote2Earn = vote2EarnAddress;
+    vote2Earn = vote2EarnAddress;
   }
 
   function setTreasuryAddress(address treasuryAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(treasuryAddress != address(0), "Emissions: treasuryAddress cannot be the zero address");
-    _treasury = treasuryAddress;
+    treasury = treasuryAddress;
   }
 
   function setCycleDuration(uint256 _cycleDuration) public onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -317,12 +302,12 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   function setXAllocationsDecay(uint256 _decay) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(_decay <= 100, "Emissions: xAllocations decay must be between 0 and 100");
+    require(_decay >= 0 && _decay <= 100, "Emissions: xAllocations decay must be between 0 and 100");
     xAllocationsDecay = _decay;
   }
 
   function setVote2EarnDecay(uint256 _decay) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(_decay <= 100, "Emissions: vote2Earn decay must be between 0 and 100");
+    require(_decay >= 0 && _decay <= 100, "Emissions: vote2Earn decay must be between 0 and 100");
     vote2EarnDecay = _decay;
   }
 
@@ -342,7 +327,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   function setTreasuryPercentage(uint256 _percentage) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(_percentage <= 100, "Emissions: Treasury percentage must be between 0 and 100");
+    require(_percentage >= 0 && _percentage <= 100, "Emissions: Treasury percentage must be between 0 and 100");
     treasuryPercentage = _percentage;
   }
 
@@ -352,7 +337,10 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   function setMaxVote2EarnDecay(uint256 _maxVote2EarnDecay) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(_maxVote2EarnDecay <= 100, "Emissions: Max vote2Earn decay must be between 0 and 100");
+    require(
+      _maxVote2EarnDecay >= 0 && _maxVote2EarnDecay <= 100,
+      "Emissions: Max vote2Earn decay must be between 0 and 100"
+    );
     maxVote2EarnDecay = _maxVote2EarnDecay;
   }
 
