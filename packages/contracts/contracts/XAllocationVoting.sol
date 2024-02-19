@@ -48,6 +48,7 @@ contract XAllocationVoting is
   // ---------- Setters ---------- //
 
   function setB3trGovernanceAddress(address b3trGovernor_) public override onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(b3trGovernor_ != address(0), "XAllocationVoting: new B3trGovernor is the zero address");
     _b3trGovernor = b3trGovernor_;
   }
 
