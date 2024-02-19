@@ -23,18 +23,18 @@ contract XAllocationVoting is
    * @param _vot3Token The address of the Vot3 token used for voting
    * @param _quorumPercentage quorum as a percentage of the total supply at the block a proposal’s voting power is retrieved
    * @param _initialVotingPeriod How long does a round remain open to votese
-   * @param _b3trGovernor The address of the B3trGovernor DAO
+   * @param b3trGovernor_ The address of the B3trGovernor DAO
    * @param _admins The addresses of the admins (DAO + another address) that can update the XAllocationPool address, only DAO will remain in the final version
    */
   constructor(
     IVotes _vot3Token,
     uint256 _quorumPercentage,
     uint32 _initialVotingPeriod,
-    address _b3trGovernor,
+    address b3trGovernor_,
     address _voterRewards,
     address[] memory _admins
   )
-    XAllocationVotingGovernor("XAllocationVoting", _b3trGovernor)
+    XAllocationVotingGovernor("XAllocationVoting", b3trGovernor_)
     GovernorSettings(_initialVotingPeriod)
     GovernorVotes(_vot3Token)
     GovernorVotesQuorumFraction(_quorumPercentage)
