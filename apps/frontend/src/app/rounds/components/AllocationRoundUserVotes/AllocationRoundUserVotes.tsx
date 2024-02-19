@@ -1,5 +1,18 @@
 import { useAllocationsRound, useGetVotesOnBlock, useHasVotedInRound, useRoundXApps, useUserVotesInRound } from "@/api"
-import { Box, Button, Card, CardBody, Heading, Skeleton, Stack, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Card,
+  CardBody,
+  Divider,
+  HStack,
+  Heading,
+  Skeleton,
+  Stack,
+  StackDivider,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { useEffect, useMemo } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { SelectAppVotesInput } from "./components/SelectAppVotesInput"
@@ -16,6 +29,12 @@ type Props = {
 export type FormData = {
   votes: CastAllocationVotesProps
 }
+
+const compactFormatter = new Intl.NumberFormat("en-US", {
+  notation: "compact",
+  compactDisplay: "short",
+})
+
 export const AllocationRoundUserVotes = ({ roundId }: Props) => {
   const { account } = useWallet()
   const { data: xApps } = useRoundXApps(roundId)
@@ -31,7 +50,15 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
   const { data: castedVotesEvent } = useUserVotesInRound(roundId, account ?? undefined)
   console.log("castedVotesEvent", castedVotesEvent)
 
+  const totalVotesCasted = useMemo(
+    () => castedVotesEvent?.voteWeights.reduce((acc, vote) => acc + Number(ethers.formatEther(vote)), 0),
+    [castedVotesEvent],
+  )
+
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
+  const isVotingConcluded = roundInfo?.voteEndTimestamp?.isBefore()
+
+  const isFormDisabled = hasVoted || isVotingConcluded || roundInfoLoading || votesAtSnapshotLoading || hasVotedLoading
 
   const {
     control,
@@ -94,6 +121,38 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     })
   }
 
+  const renderHeader = useMemo(() => {
+    if (isVotingConcluded)
+      return (
+        <HStack align="flex-end" justify={"space-between"} w="full">
+          <Heading size="xl">Voting concluded</Heading>
+          <Heading size="md" color={hasVoted ? "green" : "orange"}>
+            {compactFormatter.format(totalVotesCasted ?? 0)} votes casted
+          </Heading>
+        </HStack>
+      )
+
+    return <Heading size="xl">{hasVoted ? "Your voting distribution" : "Assign voting power to dApps"}</Heading>
+  }, [hasVoted, isVotingConcluded, totalVotesCasted])
+
+  const renderSubHeader = useMemo(() => {
+    if (isVotingConcluded)
+      return (
+        <Text fontSize="md" fontWeight="thin" mt={4}>
+          {hasVoted
+            ? "Voting is concluded. See below the distribution of your voting power among the dApps."
+            : "Voting is concluded. You can no longer cast your vote. No votes were casted."}
+        </Text>
+      )
+    return (
+      <Text fontSize="md" fontWeight="thin" mt={4}>
+        {hasVoted
+          ? "You have already cast your vote. See below the distribution of your voting power among the dApps."
+          : "Distribute your voting power among your selected dApps to help them receive more B3TR allocation."}
+      </Text>
+    )
+  }, [hasVoted, isVotingConcluded])
+
   return (
     <Card w="full" id="user-votes">
       <CardBody>
@@ -103,18 +162,10 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
           align={["center", "center", "stretch"]}
           justify="space-between"
           spacing={16}>
-          <VStack flex={1} w="full" spacing={8}>
+          <VStack flex={1} w="full" spacing={8} align={"flex-start"}>
             <Box>
-              <Skeleton isLoaded={!hasVotedLoading}>
-                <Heading size="xl">{hasVoted ? "Your voting distribution" : "Assign voting power to dApps"}</Heading>
-              </Skeleton>
-              <Skeleton isLoaded={!hasVotedLoading}>
-                <Text fontSize="md" color="gray.500" mt={4}>
-                  {hasVoted
-                    ? "You have already cast your vote. See below the distribution of your voting power among the dApps."
-                    : "Distribute your voting power among your selected dApps to help them receive more B3TR allocation."}
-                </Text>
-              </Skeleton>
+              <Skeleton isLoaded={!hasVotedLoading}>{renderHeader}</Skeleton>
+              <Skeleton isLoaded={!hasVotedLoading}>{renderSubHeader}</Skeleton>
             </Box>
             <AppVotesBreakdown votes={watchVotes} roundId={roundId} />
           </VStack>
@@ -135,20 +186,20 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
                 w="full">
                 <Box>
                   <Heading size="md">{hasVoted ? "Voted dApps" : "Available dApps"}</Heading>
-                  {!hasVoted && (
+                  {!hasVoted && !isVotingConcluded && (
                     <Button variant="link" onClick={splitEvenly}>
                       Split evenly
                     </Button>
                   )}
                 </Box>
                 <Text fontSize="sm" fontWeight={"thin"} alignSelf={"flex-end"}>
-                  {hasVoted ? "Distributed voting power" : "Voting power to distribute"}
+                  {hasVoted || isVotingConcluded ? "Distributed voting power" : "Voting power to distribute"}
                 </Text>
               </Stack>
               <VStack spacing={4} mt={8}>
                 {fields.map((field, index) => (
                   <SelectAppVotesInput
-                    isDisabled={hasVoted}
+                    isDisabled={isFormDisabled}
                     register={register}
                     getValues={getValues}
                     errors={errors}
@@ -160,7 +211,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
                 ))}
               </VStack>
             </Box>
-            {!hasVoted && (
+            {!hasVoted && !isVotingConcluded && (
               <Button type="submit" leftIcon={<MdHowToVote />} mt={[8, 8, 0]}>
                 Cast vote now
               </Button>
