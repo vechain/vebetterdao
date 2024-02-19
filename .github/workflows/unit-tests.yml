@@ -68,11 +68,10 @@ jobs:
         if: github.event_name == 'pull_request'
         env:
           REPORT: ${{ steps.slither.outputs.stdout }}
-          #REPORT: 'THis is a test report with some tags <h1>Hello</h1>'
         with:
           script: |
             const script = require('.github/scripts/comment')
             const header = '# Slither report'
-            const body = 'This is a test report with some tags <h1>Hello</h1>'
+            const body = process.env.REPORT
             await script({ github, context, header, body })
       
