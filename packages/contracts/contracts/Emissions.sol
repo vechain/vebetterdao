@@ -20,9 +20,9 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   // Destinations for emissions
-  address public xAllocations;
-  address public vote2Earn;
-  address public treasury;
+  address internal _xAllocations;
+  address internal _vote2Earn;
+  address internal _treasury;
 
   // Initial allocations
   uint256[] public initialAllocations;
@@ -94,9 +94,9 @@ contract Emissions is AccessControl, ReentrancyGuard {
     b3tr = IB3TR(b3trAddress);
 
     // Set destinations
-    xAllocations = _destinations[0];
-    vote2Earn = _destinations[1];
-    treasury = _destinations[2];
+    _xAllocations = _destinations[0];
+    _vote2Earn = _destinations[1];
+    _treasury = _destinations[2];
 
     // Set initial allocations
     initialAllocations = _initialAllocations;
@@ -139,9 +139,9 @@ contract Emissions is AccessControl, ReentrancyGuard {
     nextCycle++;
 
     // Mint initial allocations
-    b3tr.mint(xAllocations, initialAllocations[0]);
-    b3tr.mint(vote2Earn, initialAllocations[1]);
-    b3tr.mint(treasury, initialAllocations[2]);
+    b3tr.mint(_xAllocations, initialAllocations[0]);
+    b3tr.mint(_vote2Earn, initialAllocations[1]);
+    b3tr.mint(_treasury, initialAllocations[2]);
 
     xAllocationsGovernor.startNewRound();
 
@@ -168,9 +168,9 @@ contract Emissions is AccessControl, ReentrancyGuard {
 
     nextCycle++;
 
-    b3tr.mint(xAllocations, xAllocationsAmount);
-    b3tr.mint(vote2Earn, vote2EarnAmount);
-    b3tr.mint(treasury, treasuryAmount);
+    b3tr.mint(_xAllocations, xAllocationsAmount);
+    b3tr.mint(_vote2Earn, vote2EarnAmount);
+    b3tr.mint(_treasury, treasuryAmount);
 
     xAllocationsGovernor.startNewRound();
 
@@ -275,6 +275,18 @@ contract Emissions is AccessControl, ReentrancyGuard {
     return b3tr.cap() - totalEmissions;
   }
 
+  function treasury() public view returns (address) {
+    return _treasury;
+  }
+
+  function vote2Earn() public view returns (address) {
+    return _vote2Earn;
+  }
+
+  function xAllocations() public view returns (address) {
+    return _xAllocations;
+  }
+
   // ----------- Setters ----------- //
 
   function setInitialAllocations(uint256[] memory _allocations) public onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -285,15 +297,15 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   function setXallocationsAddress(address xAllocationAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    xAllocations = xAllocationAddress;
+    _xAllocations = xAllocationAddress;
   }
 
   function setVote2EarnAddress(address vote2EarnAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    vote2Earn = vote2EarnAddress;
+    _vote2Earn = vote2EarnAddress;
   }
 
   function setTreasuryAddress(address treasuryAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    treasury = treasuryAddress;
+    _treasury = treasuryAddress;
   }
 
   function setCycleDuration(uint256 _cycleDuration) public onlyRole(DEFAULT_ADMIN_ROLE) {
