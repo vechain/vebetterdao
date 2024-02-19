@@ -6,6 +6,7 @@ import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { XAllocationVotingGovernor } from "../XAllocationVotingGovernor.sol";
 import { IXApps } from "../../interfaces/IXApps.sol";
+import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
 abstract contract XApps is IXApps, XAllocationVotingGovernor {
   using Checkpoints for Checkpoints.Trace208;
@@ -178,6 +179,8 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
   function appURI(bytes32 appId) public view returns (string memory) {
     require(_apps[appId].addr != address(0), "App does not exist");
 
-    return string.concat(baseURI(), string(abi.encodePacked(appId)));
+    string memory appIdStr = Strings.toHexString(uint256(appId), 32);
+
+    return string(abi.encodePacked(_baseURI, appIdStr));
   }
 }
