@@ -29,10 +29,10 @@ export const getAllocationAmount = async (
   voteXAllocations: string
 }> => {
   const emissionsInterface = Emissions__factory.createInterface()
-  const functionFragmentTreasuryAmount = emissionsInterface.getFunction("getTreasuryAmountForCycle").format("json")
-  const functionFragmentVoteX2EarnAmount = emissionsInterface.getFunction("getVote2EarnAmountForCycle").format("json")
+  const functionFragmentTreasuryAmount = emissionsInterface.getFunction("getTreasuryAmount").format("json")
+  const functionFragmentVoteX2EarnAmount = emissionsInterface.getFunction("getVote2EarnAmount").format("json")
   const functionFragmentXAllocationsAmount = emissionsInterface
-    .getFunction("getXAllocationAmountForCycle")
+    .getFunction("getXAllocationAmount")
     .format("json")
 
   const [resTreasury, resVoteX2Earn, voteXAllocations] = await Promise.all([

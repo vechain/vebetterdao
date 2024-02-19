@@ -20,15 +20,15 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   // Destinations for emissions
-  address public xAllocations;
-  address public vote2Earn;
-  address public treasury;
+  address internal _xAllocations;
+  address internal _vote2Earn;
+  address internal _treasury;
 
   // Initial allocations
   uint256[] public initialAllocations;
 
   // ----------- Cycle attributes ----------- //
-  uint256 public currentCycle; // Current cycle number
+  uint256 public nextCycle; // Next cycle number
   uint256 public cycleDuration; // Duration of a cycle in blocks
 
   // ----------- Decay rates ----------- //
@@ -92,9 +92,9 @@ contract Emissions is AccessControl, ReentrancyGuard {
     b3tr = IB3TR(b3trAddress);
 
     // Set destinations
-    xAllocations = _destinations[0];
-    vote2Earn = _destinations[1];
-    treasury = _destinations[2];
+    _xAllocations = _destinations[0];
+    _vote2Earn = _destinations[1];
+    _treasury = _destinations[2];
 
     // Set initial allocations
     initialAllocations = _initialAllocations;
@@ -118,7 +118,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
     maxVote2EarnDecay = _maxVote2EarnDecay;
 
     // Initialise cycle
-    currentCycle = 1;
+    nextCycle = 1;
 
     // Set roles
     _grantRole(DEFAULT_ADMIN_ROLE, admin);
@@ -127,31 +127,31 @@ contract Emissions is AccessControl, ReentrancyGuard {
 
   function start() public onlyRole(MINTER_ROLE) nonReentrant {
     require(initialAllocations[0] > 0, "Emissions: Initial allocations not set");
-    require(currentCycle == 1, "Emissions: Already started");
+    require(nextCycle == 1, "Emissions: Already started");
     require(xAllocationsGovernor != IXAllocationVotingGovernor(address(0)), "Emissions: XAllocationsGovernor not set");
 
     lastEmissionBlock = block.number;
-    emissions[currentCycle] = Emission(initialAllocations[0], initialAllocations[1], initialAllocations[2]);
+    emissions[nextCycle] = Emission(initialAllocations[0], initialAllocations[1], initialAllocations[2]);
     totalEmissions += initialAllocations[0] + initialAllocations[1] + initialAllocations[2];
 
-    xAllocationsGovernor.startNewRound();
-
-    currentCycle++;
+    nextCycle++;
 
     // Mint initial allocations
-    b3tr.mint(xAllocations, initialAllocations[0]);
-    b3tr.mint(vote2Earn, initialAllocations[1]);
-    b3tr.mint(treasury, initialAllocations[2]);
+    b3tr.mint(_xAllocations, initialAllocations[0]);
+    b3tr.mint(_vote2Earn, initialAllocations[1]);
+    b3tr.mint(_treasury, initialAllocations[2]);
+
+    xAllocationsGovernor.startNewRound();
   }
 
   function distribute() public nonReentrant {
-    require(currentCycle > 1, "Emissions: Please start emissions first");
+    require(nextCycle > 1, "Emissions: Please start emissions first");
     require(isNextCycleDistributable(), "Emissions: Next cycle not started yet");
 
     // Mint emissions for current cycle
-    uint256 xAllocationsAmount = getCurrentXAllocationsAmount();
-    uint256 vote2EarnAmount = getCurrentVote2EarnAmount();
-    uint256 treasuryAmount = getCurrentTreasuryAmount();
+    uint256 xAllocationsAmount = _calculateNextXAllocation();
+    uint256 vote2EarnAmount = _calculateVote2EarnAmount();
+    uint256 treasuryAmount = _calculateTreasuryAmount();
 
     require(
       xAllocationsAmount + vote2EarnAmount + treasuryAmount <= getRemainingEmissions(),
@@ -159,96 +159,125 @@ contract Emissions is AccessControl, ReentrancyGuard {
     );
 
     lastEmissionBlock = block.number;
-    emissions[currentCycle] = Emission(xAllocationsAmount, vote2EarnAmount, treasuryAmount);
+    emissions[nextCycle] = Emission(xAllocationsAmount, vote2EarnAmount, treasuryAmount);
     totalEmissions += xAllocationsAmount + vote2EarnAmount + treasuryAmount;
 
     xAllocationsGovernor.startNewRound();
 
-    currentCycle++;
+    nextCycle++;
 
-    b3tr.mint(xAllocations, xAllocationsAmount);
-    b3tr.mint(vote2Earn, vote2EarnAmount);
-    b3tr.mint(treasury, treasuryAmount);
+    b3tr.mint(_xAllocations, xAllocationsAmount);
+    b3tr.mint(_vote2Earn, vote2EarnAmount);
+    b3tr.mint(_treasury, treasuryAmount);
   }
 
-  // ----------- Getters ----------- //
-
-  function getScaledDecayPercentage(uint256 decayPercentage) public view returns (uint256) {
-    require(decayPercentage >= 0 && decayPercentage < 100, "Decay percentage must be between 0 and 100");
-    return (100 - decayPercentage) * (scalingFactor / 100);
-  }
-
-  function getDecayedAmount(
-    uint256 initialAmount,
-    uint256 decayPercentage,
-    uint256 periods
-  ) internal view returns (uint256) {
-    uint256 scaledAmount = initialAmount * scalingFactor;
-
-    for (uint256 i = 0; i < periods; i++) {
-      scaledAmount = (scaledAmount * getScaledDecayPercentage(decayPercentage)) / scalingFactor;
+  // ------ Emissions calculations ------ //
+  /**
+   * Calculates the next XAllocation amount for the next cycle
+   * If the next cycle is the first cycle, the initial emissions are returned
+   * Values are calculated based on the value from the previous cycle with a
+   * decay rate applied at a set period based on the decay period
+   *
+   * @return uint256
+   */
+  function _calculateNextXAllocation() internal view returns (uint256) {
+    // If this is the first cycle, return the initial amount
+    if (nextCycle == 2) {
+      return initialEmissions;
     }
+    // Get emissions from the previous cycle
+    uint256 lastCycleEmissions = emissions[nextCycle - 1].xAllocations;
 
-    return scaledAmount / scalingFactor;
+    // Check if we need to decay again by getting the modulus
+    if ((nextCycle - 2) % xAllocationsDecayPeriod == 0) {
+      return (lastCycleEmissions * (100 - xAllocationsDecay)) / 100;
+    }
+    return lastCycleEmissions;
   }
 
-  function getXAllocationDecayPeriods() public view returns (uint256) {
-    require(xAllocationsDecayPeriod > 0, "Emissions: Invalid decay period for xAllocations");
-    require(currentCycle > 1, "Emissions: Invalid cycle number");
-    return (currentCycle - 2) / xAllocationsDecayPeriod;
-  }
-
-  function getCurrentXAllocationsAmount() public view returns (uint256) {
-    return getDecayedAmount(initialEmissions, xAllocationsDecay, getXAllocationDecayPeriods());
-  }
-
-  function getVote2EarnDecayPeriods() public view returns (uint256) {
+  /**
+   * Calculates the number of decay periods that have passed since the start of the emissions
+   * The number of decay periods is calculated by taking the current cycle number and subtracting 2
+   * and then dividing by the decay period
+   *
+   *    `number of decay periods = floor(number of periods / decay period)`
+   *
+   * @return uint256
+   */
+  function _calculateVote2EarnDecayPeriods() internal view returns (uint256) {
     require(vote2EarnDecayPeriod > 0, "Emissions: Invalid decay period for Vote2Earn");
-    require(currentCycle > 1, "Emissions: Invalid cycle number");
-    return (currentCycle - 2) / vote2EarnDecayPeriod;
+    require(nextCycle > 1, "Emissions: Invalid cycle number");
+    return (nextCycle - 2) / vote2EarnDecayPeriod;
   }
 
-  function getCurrentVote2EarnAmount() public view returns (uint256) {
-    uint256 vote2earnDecayPeriods = getVote2EarnDecayPeriods();
+  /**
+   * Calculates the Vot2Earn decay percentage for the next cycle
+   * The decay percentage is calculated based on the number of decay periods
+   * that have passed since the start of the emissions, multiplied by the decay rate
+   *
+   *
+   *    `decay percentage = decay rate * number of decay periods`
+   *
+   * In addition to this calculation, the decay percentage is capped at a maximum value `maxVote2EarnDecay`
+   *
+   * @return uint256
+   */
+  function _calculateVote2EarnDecayPercentage() internal view returns (uint256) {
+    uint256 vote2earnDecayPeriods = _calculateVote2EarnDecayPeriods();
 
     uint256 percentageToDecay = vote2EarnDecay * vote2earnDecayPeriods;
 
-    return
-      getDecayedAmount(
-        getCurrentXAllocationsAmount(),
-        percentageToDecay > maxVote2EarnDecay ? maxVote2EarnDecay : percentageToDecay,
-        1 // We are calculating the decay directly from the `decayPercentage, thus the period is always 1
-      );
+    return percentageToDecay > maxVote2EarnDecay ? maxVote2EarnDecay : percentageToDecay;
   }
 
-  function getCurrentTreasuryAmount() public view returns (uint256) {
-    return ((getCurrentXAllocationsAmount() + getCurrentVote2EarnAmount()) * treasuryPercentage) / 100;
+  /**
+   * Calculate the amount of B3TR to be minted for the Vote2Earn contract for the next cycle
+   *
+   * @return uint256
+   */
+  function _calculateVote2EarnAmount() internal view returns (uint256) {
+
+    uint256 percentageToDecay = _calculateVote2EarnDecayPercentage();
+
+    return (_calculateNextXAllocation() * (100 - percentageToDecay)) / 100;
   }
+
+  /**
+   * Calculate the amount of B3TR to be minted for the Treasury for the next cycle
+   *
+   * @return uint256
+   */
+  function _calculateTreasuryAmount() internal view returns (uint256) {
+    return ((_calculateNextXAllocation() + _calculateVote2EarnAmount()) * treasuryPercentage) / 100;
+  }
+
+
+  // ----------- Getters ----------- //
 
   function getInitialAllocations() public view returns (uint256[] memory) {
     return initialAllocations;
   }
 
-  function getXAllocationAmountForCycle(uint256 cycle) public view returns (uint256) {
-    require(cycle <= getPreviousCycle(), "Emissions: Cycle not reached yet");
+  function getXAllocationAmount(uint256 cycle) public view returns (uint256) {
+    require(cycle <= nextCycle, "Emissions: Cycle not reached yet");
 
-    return isCycleDistributed(cycle) ? emissions[cycle].xAllocations : getCurrentXAllocationsAmount();
+    return isCycleDistributed(cycle) ? emissions[cycle].xAllocations : _calculateNextXAllocation();
   }
 
-  function getVote2EarnAmountForCycle(uint256 cycle) public view returns (uint256) {
-    require(cycle <= getPreviousCycle(), "Emissions: Cycle not reached yet");
+  function getVote2EarnAmount(uint256 cycle) public view returns (uint256) {
+    require(cycle <= nextCycle, "Emissions: Cycle not reached yet");
 
-    return isCycleDistributed(cycle) ? emissions[cycle].vote2Earn : getCurrentVote2EarnAmount();
+    return isCycleDistributed(cycle) ? emissions[cycle].vote2Earn : _calculateVote2EarnAmount();
   }
 
-  function getTreasuryAmountForCycle(uint256 cycle) public view returns (uint256) {
-    require(cycle <= getPreviousCycle(), "Emissions: Cycle not reached yet");
+  function getTreasuryAmount(uint256 cycle) public view returns (uint256) {
+    require(cycle <= nextCycle, "Emissions: Cycle not reached yet");
 
-    return isCycleDistributed(cycle) ? emissions[cycle].treasury : getCurrentTreasuryAmount();
+    return isCycleDistributed(cycle) ? emissions[cycle].treasury : _calculateTreasuryAmount();
   }
 
   function isCycleDistributed(uint256 cycle) public view returns (bool) {
-    return cycle < currentCycle;
+    return cycle < nextCycle;
   }
 
   function isCycleEnded(uint256 cycle) public view returns (bool) {
@@ -257,8 +286,8 @@ contract Emissions is AccessControl, ReentrancyGuard {
     return block.number >= lastEmissionBlock + cycleDuration;
   }
 
-  function getPreviousCycle() public view returns (uint256) {
-    return currentCycle - 1;
+  function getCurrentCycle() public view returns (uint256) {
+    return nextCycle - 1;
   }
 
   function getNextCycleBlock() public view returns (uint256) {
@@ -273,25 +302,40 @@ contract Emissions is AccessControl, ReentrancyGuard {
     return b3tr.cap() - totalEmissions;
   }
 
+  function treasury() public view returns (address) {
+    return _treasury;
+  }
+
+  function vote2Earn() public view returns (address) {
+    return _vote2Earn;
+  }
+
+  function xAllocations() public view returns (address) {
+    return _xAllocations;
+  }
+
   // ----------- Setters ----------- //
 
   function setInitialAllocations(uint256[] memory _allocations) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(currentCycle == 1, "Emissions: already started");
+    require(nextCycle == 1, "Emissions: already started");
     require(_allocations.length == 3, "Emissions: Invalid input length. Expected 3.");
 
     initialAllocations = _allocations;
   }
 
   function setXallocationsAddress(address xAllocationAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    xAllocations = xAllocationAddress;
+    require(xAllocationAddress != address(0), "Emissions: xAllocationAddress cannot be the zero address");
+    _xAllocations = xAllocationAddress;
   }
 
   function setVote2EarnAddress(address vote2EarnAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    vote2Earn = vote2EarnAddress;
+    require(vote2EarnAddress != address(0), "Emissions: vote2EarnAddress cannot be the zero address");
+    _vote2Earn = vote2EarnAddress;
   }
 
   function setTreasuryAddress(address treasuryAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    treasury = treasuryAddress;
+    require(treasuryAddress != address(0), "Emissions: treasuryAddress cannot be the zero address");
+    _treasury = treasuryAddress;
   }
 
   function setCycleDuration(uint256 _cycleDuration) public onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -300,22 +344,22 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   function setXAllocationsDecay(uint256 _decay) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(_decay >= 0 && _decay <= 100, "Emissions: xAllocations decay must be between 0 and 100");
+    require(_decay <= 100, "Emissions: xAllocations decay must be between 0 and 100");
     xAllocationsDecay = _decay;
   }
 
   function setVote2EarnDecay(uint256 _decay) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(_decay >= 0 && _decay <= 100, "Emissions: vote2Earn decay must be between 0 and 100");
+    require(_decay <= 100, "Emissions: vote2Earn decay must be between 0 and 100");
     vote2EarnDecay = _decay;
   }
 
-  function setXAllocationsDecayDelay(uint256 _period) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(_period > 0, "Emissions: xAllocations decay delay must be greater than 0");
+  function setXAllocationsDecayPeriod(uint256 _period) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(_period > 0, "Emissions: xAllocations decay period must be greater than 0");
     xAllocationsDecayPeriod = _period;
   }
 
-  function setVote2EarnDecayDelay(uint256 _period) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(_period > 0, "Emissions: vote2Earn decay delay must be greater than 0");
+  function setVote2EarnDecayPeriod(uint256 _period) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(_period > 0, "Emissions: vote2Earn decay period must be greater than 0");
     vote2EarnDecayPeriod = _period;
   }
 
@@ -325,7 +369,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   function setTreasuryPercentage(uint256 _percentage) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(_percentage >= 0 && _percentage <= 100, "Emissions: Treasury percentage must be between 0 and 100");
+    require(_percentage <= 100, "Emissions: Treasury percentage must be between 0 and 100");
     treasuryPercentage = _percentage;
   }
 
@@ -335,10 +379,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   function setMaxVote2EarnDecay(uint256 _maxVote2EarnDecay) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(
-      _maxVote2EarnDecay >= 0 && _maxVote2EarnDecay <= 100,
-      "Emissions: Max vote2Earn decay must be between 0 and 100"
-    );
+    require(_maxVote2EarnDecay <= 100, "Emissions: Max vote2Earn decay must be between 0 and 100");
     maxVote2EarnDecay = _maxVote2EarnDecay;
   }
 

@@ -91,7 +91,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
     require(emissions() != IEmissions(address(0)), "Emissions contract not set");
 
     // Amount available for this round (assuming the amount is already scaled by 1e18 for precision)
-    return emissions().getXAllocationAmountForCycle(roundId);
+    return emissions().getXAllocationAmount(roundId);
   }
 
   /**

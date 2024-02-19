@@ -48,12 +48,6 @@ interface IEmissions {
 
     function getCurrentCycle() external view returns (uint256);
 
-    function getCurrentTreasuryAmount() external view returns (uint256);
-
-    function getCurrentVote2EarnAmount() external view returns (uint256);
-
-    function getCurrentXAllocationsAmount() external view returns (uint256);
-
     function getNextCycleBlock() external view returns (uint256);
 
     function getInitialAllocations() external view returns (uint256[] memory);
@@ -67,19 +61,19 @@ interface IEmissions {
         view
         returns (uint256);
 
-    function getTreasuryAmountForCycle(uint256 cycle)
+    function getTreasuryAmount(uint256 cycle)
         external
         view
         returns (uint256);
 
-    function getVote2EarnAmountForCycle(uint256 cycle)
+    function getVote2EarnAmount(uint256 cycle)
         external
         view
         returns (uint256);
 
-    function getVote2EarnDecayPeriods() external view returns (uint256);
+    function _calculateVote2EarnDecayPeriods() external view returns (uint256);
 
-    function getXAllocationAmountForCycle(uint256 cycle)
+    function getXAllocationAmount(uint256 cycle)
         external
         view
         returns (uint256);
@@ -105,9 +99,7 @@ interface IEmissions {
 
     function maxVote2EarnDecay() external view returns (uint256);
 
-    function getPreviousCycle() external view returns (uint256);
-
-    function currentCycle() external view returns (uint256);
+    function nextCycle() external view returns (uint256);
 
     function start() external;
 
@@ -137,11 +129,11 @@ interface IEmissions {
 
     function setVote2EarnDecay(uint256 _decay) external;
 
-    function setVote2EarnDecayDelay(uint256 _delay) external;
+    function setVote2EarnDecayPeriod(uint256 _delay) external;
 
     function setXAllocationsDecay(uint256 _decay) external;
 
-    function setXAllocationsDecayDelay(uint256 _delay) external;
+    function setXAllocationsDecayPeriod(uint256 _delay) external;
 
     function setXAllocationsGovernorAddress(address _xAllocationsGovernor)
         external;

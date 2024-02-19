@@ -111,11 +111,11 @@ describe("Emissions", () => {
       expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(INITIAL_VOTE_2_EARN_ALLOCATION)
       expect(await b3tr.balanceOf(otherAccounts[2].address)).to.equal(INITIAL_TREASURY_ALLOCATION)
 
-      expect(await emissions.getXAllocationAmountForCycle(1)).to.equal(INITIAL_X_ALLOCATION)
-      expect(await emissions.getVote2EarnAmountForCycle(1)).to.equal(INITIAL_VOTE_2_EARN_ALLOCATION)
-      expect(await emissions.getTreasuryAmountForCycle(1)).to.equal(INITIAL_TREASURY_ALLOCATION)
+      expect(await emissions.getXAllocationAmount(1)).to.equal(INITIAL_X_ALLOCATION)
+      expect(await emissions.getVote2EarnAmount(1)).to.equal(INITIAL_VOTE_2_EARN_ALLOCATION)
+      expect(await emissions.getTreasuryAmount(1)).to.equal(INITIAL_TREASURY_ALLOCATION)
 
-      expect(await emissions.currentCycle()).to.equal(2)
+      expect(await emissions.nextCycle()).to.equal(2)
     })
 
     it("Should not be able start emissions twice", async () => {
@@ -174,17 +174,17 @@ describe("Emissions", () => {
       // Start emissions
       await emissions.connect(minterAccount).start()
 
-      // Expect current cycle to be 0
-      expect(await emissions.currentCycle()).to.equal(2)
+      // Expect next cycle to be 2
+      expect(await emissions.nextCycle()).to.equal(2)
 
       await waitForNextCycle(emissions)
 
       // Calculate emissions for first cycle
-      const xAllocationsAmount = await emissions.getCurrentXAllocationsAmount()
-      const vote2EarnAmount = await emissions.getCurrentVote2EarnAmount()
-      const treasuryAmount = await emissions.getCurrentTreasuryAmount()
+      const xAllocationAmount = await emissions.getXAllocationAmount(2)
+      const vote2EarnAmount = await emissions.getVote2EarnAmount(2)
+      const treasuryAmount = await emissions.getTreasuryAmount(2)
 
-      expect(xAllocationsAmount).to.equal(ethers.parseEther("2000000"))
+      expect(xAllocationAmount).to.equal(ethers.parseEther("2000000"))
       expect(vote2EarnAmount).to.equal(ethers.parseEther("2000000"))
       expect(treasuryAmount).to.equal(ethers.parseEther("1000000"))
 
@@ -220,12 +220,12 @@ describe("Emissions", () => {
       // Start emissions
       await emissions.connect(minterAccount).start()
 
-      expect(await emissions.currentCycle()).to.equal(2)
+      expect(await emissions.nextCycle()).to.equal(2)
 
       // Calculate emissions for first cycle
-      const xAllocationsAmount = await emissions.getCurrentXAllocationsAmount()
-      const vote2EarnAmount = await emissions.getCurrentVote2EarnAmount()
-      const treasuryAmount = await emissions.getCurrentTreasuryAmount()
+      const xAllocationsAmount = await emissions.getXAllocationAmount(2)
+      const vote2EarnAmount = await emissions.getVote2EarnAmount(2)
+      const treasuryAmount = await emissions.getTreasuryAmount(2)
 
       expect(xAllocationsAmount).to.equal(ethers.parseEther("2000000"))
       expect(vote2EarnAmount).to.equal(ethers.parseEther("2000000"))
@@ -272,10 +272,12 @@ describe("Emissions", () => {
 
       await waitForNextCycle(emissions)
 
+      expect(await emissions.nextCycle()).to.equal(3)
+
       // Calculate emissions for second cycle
-      const xAllocationsAmount = await emissions.getCurrentXAllocationsAmount()
-      const vote2EarnAmount = await emissions.getCurrentVote2EarnAmount()
-      const treasuryAmount = await emissions.getCurrentTreasuryAmount()
+      const xAllocationsAmount = await emissions.getXAllocationAmount(3)
+      const vote2EarnAmount = await emissions.getVote2EarnAmount(3)
+      const treasuryAmount = await emissions.getTreasuryAmount(3)
 
       expect(xAllocationsAmount).to.equal(ethers.parseEther("2000000"))
       expect(vote2EarnAmount).to.equal(ethers.parseEther("2000000"))
@@ -303,7 +305,7 @@ describe("Emissions", () => {
         ethers.parseEther("2000000") + INITIAL_TREASURY_ALLOCATION,
       )
 
-      expect(await emissions.currentCycle()).to.equal(4)
+      expect(await emissions.nextCycle()).to.equal(4)
     })
 
     it("Should calculate emissions properly after first decay period", async () => {
@@ -342,13 +344,13 @@ describe("Emissions", () => {
       // Move to the 14th cycle
       await moveToCycle(emissions, minterAccount, 14)
 
-      expect(await emissions.currentCycle()).to.equal(14)
+      expect(await emissions.nextCycle()).to.equal(14)
 
       await waitForNextCycle(emissions)
 
-      const xAllocationsAmount = await emissions.getCurrentXAllocationsAmount()
-      const vote2EarnAmount = await emissions.getCurrentVote2EarnAmount()
-      const treasuryAmount = await emissions.getCurrentTreasuryAmount()
+      const xAllocationsAmount = await emissions.getXAllocationAmount(14)
+      const vote2EarnAmount = await emissions.getVote2EarnAmount(14)
+      const treasuryAmount = await emissions.getTreasuryAmount(14)
 
       // Expect X allocations to decay by 4%
       expect(xAllocationsAmount).to.equal(ethers.parseEther("1920000"))
@@ -374,7 +376,7 @@ describe("Emissions", () => {
     // Grant minter role to emissions contract
     await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
 
-    expect(await emissions.currentCycle()).to.equal(1)
+    expect(await emissions.nextCycle()).to.equal(1)
 
     // Start emissions
     await emissions.connect(minterAccount).start()
@@ -384,16 +386,16 @@ describe("Emissions", () => {
     let vote2EarnAmount = INITIAL_EMISSIONS
     let treasuryAmount = (INITIAL_EMISSIONS * BigInt(2)) / BigInt(4)
 
-    expect(await emissions.currentCycle()).to.equal(2)
+    expect(await emissions.nextCycle()).to.equal(2)
 
     // Loop through 633 cycles as simulated in the b3tr emissions spreadsheet
     for (let i = 0; i < b3trAllocations.length; i++) {
       await waitForNextCycle(emissions)
 
       // Calculate decayed amounts
-      xAllocationsAmount = await emissions.getCurrentXAllocationsAmount()
-      vote2EarnAmount = await emissions.getCurrentVote2EarnAmount()
-      treasuryAmount = await emissions.getCurrentTreasuryAmount()
+      xAllocationsAmount = await emissions.getXAllocationAmount(i + 2)
+      vote2EarnAmount = await emissions.getVote2EarnAmount(i + 2)
+      treasuryAmount = await emissions.getTreasuryAmount(i + 2)
 
       // Log the cycle and amounts for debugging
       // Uncomment to view the emissions for each cycle
@@ -415,11 +417,12 @@ describe("Emissions", () => {
 
       await emissions.distribute()
 
-      expect(await emissions.getXAllocationAmountForCycle(i + 2)).to.equal(xAllocationsAmount)
-      expect(await emissions.getVote2EarnAmountForCycle(i + 2)).to.equal(vote2EarnAmount)
-      expect(await emissions.getTreasuryAmountForCycle(i + 2)).to.equal(treasuryAmount)
+      // Check that the values are the same after distribution
+      expect(await emissions.getXAllocationAmount(i + 2)).to.equal(xAllocationsAmount)
+      expect(await emissions.getVote2EarnAmount(i + 2)).to.equal(vote2EarnAmount)
+      expect(await emissions.getTreasuryAmount(i + 2)).to.equal(treasuryAmount)
 
-      expect(await emissions.getPreviousCycle()).to.equal(i + 2)
+      expect(await emissions.getCurrentCycle()).to.equal(i + 2)
     }
   }).timeout(1000 * 60 * 10) // 10 minutes
 
@@ -473,7 +476,7 @@ describe("Emissions", () => {
     // Move to the last cycle (634 cycles in the allocations spreadsheet)
     await moveToCycle(emissions, minterAccount, lastCycle)
 
-    expect(await emissions.currentCycle()).to.equal(lastCycle)
+    expect(await emissions.nextCycle()).to.equal(lastCycle)
 
     await waitForNextCycle(emissions)
 
@@ -528,7 +531,7 @@ describe("Emissions", () => {
 
     await emissions.connect(minterAccount).distribute()
 
-    expect(await emissions.getPreviousCycle()).to.equal(3)
+    expect(await emissions.getCurrentCycle()).to.equal(3)
 
     await waitForNextCycle(emissions)
 

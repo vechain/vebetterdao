@@ -66,7 +66,7 @@ contract VoterRewards is AccessControl, ReentrancyGuard {
     require(proposalStart > 0, "VoterRewards: proposalStart must be greater than 0");
     require(voter != address(0), "VoterRewards: voter cannot be the zero address");
 
-    uint256 cycle = emissions.getPreviousCycle();
+    uint256 cycle = emissions.getCurrentCycle();
 
     uint256 badgeLevel = b3trBadge.getPastLevel(voter, proposalStart);
 
@@ -109,7 +109,7 @@ contract VoterRewards is AccessControl, ReentrancyGuard {
     uint256 totalCycle = cycleToTotal[cycle];
     require(totalCycle > 0, "VoterRewards: there are no votes in the cycle");
 
-    uint256 emissionsAmount = emissions.getVote2EarnAmountForCycle(cycle);
+    uint256 emissionsAmount = emissions.getVote2EarnAmount(cycle);
     require(emissionsAmount > 0, "VoterRewards: emissionsAmount must be greater than 0");
 
     // Scale up the numerator before division to improve precision
