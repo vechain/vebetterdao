@@ -180,7 +180,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
   // ----------- Getters ----------- //
 
   function getScaledDecayPercentage(uint256 decayPercentage) public view returns (uint256) {
-    require(decayPercentage >= 0 && decayPercentage < 100, "Decay percentage must be between 0 and 100");
+    require(decayPercentage < 100, "Decay percentage must be between 0 and 100");
     return (100 - decayPercentage) * (scalingFactor / 100);
   }
 
