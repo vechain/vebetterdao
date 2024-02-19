@@ -1,0 +1,127 @@
+import { getAllocationVotersQueryKey, getAllocationVotesQueryKey } from "@/api"
+import { useToast } from "@chakra-ui/react"
+import { useQueryClient } from "@tanstack/react-query"
+import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
+import { useCallback } from "react"
+import { useConnex, useWallet } from "@vechain/dapp-kit-react"
+import { XAllocationVoting__factory } from "@repo/contracts"
+import { getConfig } from "@repo/config"
+import { ethers } from "ethers"
+
+/**
+ * CastAllocationVotesProps is the type of the data to send to the castAllocationVotes hook
+ * id is the id of the app to vote
+ * value is the percentage of the vote (not scaled)
+ */
+export type CastAllocationVotesProps = {
+  id: string
+  value: number
+}[]
+
+type useCastAllocationVotesProps = {
+  roundId: string
+  onSuccess?: () => void
+  invalidateCache?: boolean
+  onSuccessMessageTitle?: string
+}
+
+const XAllocationVotingInterface = XAllocationVoting__factory.createInterface()
+
+type useCastAllocationVotesReturnValue = {
+  sendTransaction: (data: CastAllocationVotesProps) => Promise<void>
+} & Omit<UseSendTransactionReturnValue, "sendTransaction">
+/**
+ * Hook to cast votes to one or more apps in a round
+ * This hook will send a vote transaction to the blockchain and wait for the txConfirmation
+ * @param roundId the id of the round to cast the votes
+ * @param onSuccess callback to run when the upgrade is successful
+ * @param invalidateCache boolean to indicate if the related react-query cache should be updated (default: true)
+ * @returns see {@link useCastAllocationVotesReturnValue}
+ */
+export const useCastAllocationVotes = ({
+  roundId,
+  onSuccess,
+  invalidateCache = true,
+}: useCastAllocationVotesProps): useCastAllocationVotesReturnValue => {
+  const { thor } = useConnex()
+  const { account } = useWallet()
+  const toast = useToast()
+  const queryClient = useQueryClient()
+
+  const buildClauses = useCallback(
+    (data: CastAllocationVotesProps) => {
+      const apps = data.map(value => value.id)
+      const votes = data.map(value => ethers.parseEther(value.value.toString()))
+
+      const clause: EnhancedClause = {
+        to: getConfig().xAllocationVotingContractAddress,
+        value: 0,
+        data: XAllocationVotingInterface.encodeFunctionData("castVote", [roundId, apps, votes]),
+        comment: `Cast your vote on round ${roundId}`,
+        abi: JSON.parse(JSON.stringify(XAllocationVotingInterface.getFunction("castVote"))),
+      }
+
+      return [clause]
+    },
+    [thor, roundId],
+  )
+
+  //Refetch queries to update ui after the tx is confirmed
+  const handleOnSuccess = useCallback(async () => {
+    if (invalidateCache) {
+      await queryClient.cancelQueries({
+        queryKey: getAllocationVotesQueryKey(roundId),
+      })
+      await queryClient.refetchQueries({
+        queryKey: getAllocationVotesQueryKey(roundId),
+      })
+
+      await queryClient.cancelQueries({
+        queryKey: getAllocationVotersQueryKey(roundId),
+      })
+      await queryClient.refetchQueries({
+        queryKey: getAllocationVotersQueryKey(roundId),
+      })
+
+      //TODO: refetch the query key so we can use it directly
+      const appsVotesForRoundKey = ["allocationsRound", roundId, "votes"]
+      await queryClient.cancelQueries({
+        queryKey: appsVotesForRoundKey,
+      })
+      await queryClient.refetchQueries({
+        queryKey: appsVotesForRoundKey,
+      })
+    }
+
+    toast({
+      title: "Vote casted",
+      description: `You have successfully casted your vote on round ${roundId}`,
+      status: "success",
+      position: "bottom-left",
+      duration: 5000,
+      isClosable: true,
+    })
+    onSuccess?.()
+  }, [invalidateCache, queryClient, toast, onSuccess, account, roundId])
+
+  const result = useSendTransaction({
+    signerAccount: account,
+    onTxConfirmed: handleOnSuccess,
+  })
+
+  /**
+   * Send a transaction with the given clauses (in case you need to pass data to build the clauses to mutate directly)
+   * @param vote the vote to cast
+   * @param reason the reason for the vote
+   * @returns see x@xxxx UseSendTransactionReturnValue}
+   */
+  const onMutate = useCallback(
+    async (data: CastAllocationVotesProps) => {
+      const clauses = buildClauses(data)
+      return result.sendTransaction(clauses)
+    },
+    [buildClauses, result],
+  )
+
+  return { ...result, sendTransaction: onMutate }
+}

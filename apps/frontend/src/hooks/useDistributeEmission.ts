@@ -1,4 +1,4 @@
-import { getCurrentAllocationsRoundIdQueryKey, getAllocationsRoundsEventsQueryKey } from "@/api"
+import { getCurrentAllocationsRoundIdQueryKey, getAllocationsRoundsEventsQueryKey, currentBlockQueryKey } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
@@ -58,6 +58,13 @@ export const useDistributeEmission = ({
       })
       await queryClient.refetchQueries({
         queryKey: getAllocationsRoundsEventsQueryKey(),
+      })
+
+      await queryClient.cancelQueries({
+        queryKey: currentBlockQueryKey(),
+      })
+      await queryClient.refetchQueries({
+        queryKey: currentBlockQueryKey(),
       })
     }
 

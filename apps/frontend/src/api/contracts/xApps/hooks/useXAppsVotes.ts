@@ -17,7 +17,6 @@ export const useXAppsVotes = (apps: string[], roundId: string) => {
         const votes = await getXAppVotes(thor, app, roundId)
         return { votes, app }
       },
-      enabled: !!thor,
     })),
   })
 }
