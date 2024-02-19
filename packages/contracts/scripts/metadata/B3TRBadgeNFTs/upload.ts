@@ -1,4 +1,4 @@
-import { uploadMetadataToIpfs } from "../upload"
+import { uploadMetadataToIpfs } from "../../helpers/uploadFolderToIpfs"
 
 uploadMetadataToIpfs("./ipfs/badge/metadata")
   .then(() => process.exit(0))

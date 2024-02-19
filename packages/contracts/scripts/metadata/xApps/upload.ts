@@ -1,4 +1,4 @@
-import { uploadMetadataToIpfs } from "../upload"
+import { uploadMetadataToIpfs } from "../../helpers/uploadFolderToIpfs"
 
 // Upload the badge metadata to IPFS
 uploadMetadataToIpfs("./metadata/xApps/output")

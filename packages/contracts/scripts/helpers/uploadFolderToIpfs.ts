@@ -1,4 +1,4 @@
-import { toIPFSURL, uploadDirectoryToIPFS } from "../helpers"
+import { toIPFSURL, uploadDirectoryToIPFS } from "."
 
 // NFT Storage
 const NFT_STORAGE_KEY = process.env.NFT_STORAGE_KEY ?? ""
