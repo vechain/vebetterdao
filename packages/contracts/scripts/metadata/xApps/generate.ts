@@ -1,6 +1,7 @@
 import fs from "fs/promises"
 import { toIPFSURL, uploadDirectoryToIPFS } from "../../helpers"
 import path from "path"
+import { ethers } from "ethers"
 
 interface SocialUrl {
   name: string
@@ -45,7 +46,10 @@ async function generateAndSaveMetadata(): Promise<void> {
     // for each file, generate metadata and save to output folder
     for (const file of files) {
       const metadata: XAppMetadata = await generateMetadata(file)
-      await saveMetadataToFile(metadata, file)
+
+      // the output filename must be the hash of the name (which will also be the id of the x-app)
+      const id = ethers.keccak256(ethers.toUtf8Bytes(metadata.name))
+      await saveMetadataToFile(metadata, id)
     }
   } catch (error) {
     console.error("Error generating metadata:", error)
@@ -89,8 +93,8 @@ const validateMediaFiles = async (filename: string) => {
  * @param metadata - The `XAppMetadata` object to save.
  */
 async function saveMetadataToFile(metadata: XAppMetadata, fileName: string): Promise<void> {
-  await fs.writeFile(`${OUTPUT_PATH}/${fileName}`, JSON.stringify(metadata, null, 2))
-  console.log(`Metadata saved to ${OUTPUT_PATH}/${fileName}`)
+  await fs.writeFile(`${OUTPUT_PATH}/${fileName}.json`, JSON.stringify(metadata, null, 2))
+  console.log(`Metadata saved to ${OUTPUT_PATH}/${fileName}.json`)
 }
 
 // Generate and save the NFT metadata
