@@ -38,15 +38,15 @@ jobs:
       - name: Unit Tests
         run: yarn test
       
-      - name: Slither human summary
-        uses: crytic/slither-action@v0.3.1
-        id: slitherhumansummary
-        with:
-          ignore-compile: true
-          target: 'packages/contracts/'
-          solc-version: '0.8.20'
-          fail-on: none
-          slither-args: --print human-summary --filter-paths "openzeppelin"
+      #- name: Slither human summary
+      #  uses: crytic/slither-action@v0.3.1
+      #  id: slitherhumansummary
+      #  with:
+      #    ignore-compile: true
+      #    target: 'packages/contracts/'
+      #    solc-version: '0.8.20'
+      #    fail-on: none
+      #   slither-args: --print human-summary --filter-paths "openzeppelin"
           
       - name: Run Slither
         uses: crytic/slither-action@v0.3.1
@@ -56,13 +56,8 @@ jobs:
           target: 'packages/contracts/'
           solc-version: '0.8.20'
           fail-on: none
-          slither-args: --filter-paths "openzeppelin" --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
-      
-     # - uses: actions/upload-artifact@v4
-     #   with:
-     #     name: my-artifact
-     #     path: ${{ steps.slither.outputs.stdout }}
-    
+          slither-args: --print human-summary --filter-paths "openzeppelin" --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
+         
       - name: Create/update checklist as PR comment
         uses: actions/github-script@v7
         if: github.event_name == 'pull_request'
