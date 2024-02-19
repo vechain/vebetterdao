@@ -6,11 +6,13 @@ import { FaGift } from "react-icons/fa6"
 import BigNumber from "bignumber.js"
 import { useClaimRewards } from "@/hooks/useClaimRewards"
 
+const DECIMAL_PLACES = 4
+
 // Maximum precision of 4 decimals. Must also round down
 const compactFormatter = new Intl.NumberFormat("en-US", {
   notation: "compact",
   compactDisplay: "short",
-  maximumFractionDigits: 4,
+  maximumFractionDigits: DECIMAL_PLACES,
 })
 
 export const VoterRewards: React.FC = () => {
@@ -39,7 +41,7 @@ export const VoterRewards: React.FC = () => {
   const totalRewardsFormatted = useMemo(() => {
     if (!totalRewards) return "0"
 
-    return totalRewards.toFixed(4)
+    return totalRewards.decimalPlaces(DECIMAL_PLACES, BigNumber.ROUND_DOWN).toString();
   }, [totalRewards])
 
   const isRewardsLoading = rewardsPerRound?.some(reward => reward.isLoading) // Loading rewards to claim
