@@ -6,7 +6,6 @@ import { BytesLike } from "ethers"
 type App = {
   address: string
   name: string
-  metadata: string
 }
 
 export const seedLocalEnvironment = async (
@@ -32,17 +31,14 @@ export const seedLocalEnvironment = async (
     {
       address: accounts[6].address,
       name: "Test app 1",
-      metadata: "https://test-app-1.com",
     },
     {
       address: accounts[7].address,
       name: "Test app 2",
-      metadata: "https://test-app-2.com",
     },
     {
       address: accounts[8].address,
       name: "Test app 3",
-      metadata: "https://test-app-3.com",
     },
   ]
 
@@ -118,7 +114,7 @@ const addXDapps = async (xAllocationVoting: XAllocationVoting, accounts: Hardhat
     apps.map(async app => {
       return await xAllocationVoting
         .connect(accounts[0])
-        .addApp(app.address, app.name, app.metadata)
+        .addApp(app.address, app.name)
         .then(async tx => await tx.wait())
     }),
   )
