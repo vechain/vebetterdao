@@ -1,0 +1,91 @@
+import { RoundReward, buildClaimRewardsTx, getB3TrBalanceQueryKey, getRoundRewardQueryKey } from "@/api"
+import { useToast } from "@chakra-ui/react"
+import { useQueryClient } from "@tanstack/react-query"
+import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
+import { useCallback } from "react"
+import { useConnex, useWallet } from "@vechain/dapp-kit-react"
+import { address } from "thor-devkit"
+
+type useClaimRewardsProps = {
+  roundRewards: RoundReward[]
+  onSuccess?: () => void
+  invalidateCache?: boolean
+  onSuccessMessageTitle?: string
+}
+
+type useClaimRewardsReturnValue = {
+  sendTransaction: () => Promise<void>
+} & Omit<UseSendTransactionReturnValue, "sendTransaction">
+
+/**
+ * useClaimRewards is a custom hook that claims voting rewards for a given set of rounds.
+ * It uses the useSendTransaction hook to send the transaction and the useQueryClient hook to invalidate the queries after the transaction.
+ * 
+ * @param {useClaimRewardsProps} props - The properties for the hook.
+ * @returns {useClaimRewardsReturnValue} An object containing the sendTransaction function and the return value of the useSendTransaction hook.
+ */
+export const useClaimRewards = ({
+  roundRewards,
+  onSuccess,
+  invalidateCache = true,
+}: useClaimRewardsProps): useClaimRewardsReturnValue => {
+  const { thor } = useConnex()
+  const { account } = useWallet()
+  const toast = useToast()
+  const queryClient = useQueryClient()
+
+  const buildClauses = useCallback(
+    (roundRewards: RoundReward[]) => {
+      if (!address) throw new Error("address is required")
+
+      const clauses = buildClaimRewardsTx(thor, roundRewards, account ?? "")
+      return clauses
+    },
+    [account, thor],
+  )
+
+  // Refetch queries to update ui after the tx is confirmed
+  const handleOnSuccess = useCallback(async () => {
+    if (invalidateCache) {
+      for (const roundReward of roundRewards) {
+        await queryClient.cancelQueries({
+          queryKey: getRoundRewardQueryKey(roundReward.roundId, account ?? undefined),
+        })
+        await queryClient.refetchQueries({
+          queryKey: getRoundRewardQueryKey(roundReward.roundId, account ?? undefined),
+        })
+      }
+
+      await queryClient.cancelQueries({
+        queryKey: getB3TrBalanceQueryKey(account ?? ""),
+      })
+
+      await queryClient.refetchQueries({
+        queryKey: getB3TrBalanceQueryKey(account ?? ""),
+      })
+    }
+
+    toast({
+      title: "Rewards claimed",
+      description: `You have successfully claimed your rewards.`,
+      status: "success",
+      position: "bottom-left",
+      duration: 5000,
+      isClosable: true,
+    })
+    onSuccess?.()
+  }, [account, invalidateCache, onSuccess, queryClient, roundRewards, toast])
+
+  const result = useSendTransaction({
+    signerAccount: account,
+    onTxConfirmed: handleOnSuccess,
+  })
+
+
+  const onMutate = useCallback(async () => {
+    const clauses = buildClauses(roundRewards)
+    return result.sendTransaction(clauses)
+  }, [buildClauses, result])
+
+  return { ...result, sendTransaction: onMutate }
+}
