@@ -124,12 +124,17 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
   const renderHeader = useMemo(() => {
     if (isVotingConcluded)
       return (
-        <HStack align="flex-end" justify={"space-between"} w="full">
+        <Stack
+          direction={["column", "row"]}
+          align={["flex-start", "flex-end"]}
+          justify={["flex-start", "space-between"]}
+          w="full"
+          spacing={0}>
           <Heading size="xl">Voting concluded</Heading>
           <Heading size="md" color={hasVoted ? "green" : "orange"}>
             {compactFormatter.format(totalVotesCasted ?? 0)} votes casted
           </Heading>
-        </HStack>
+        </Stack>
       )
 
     return <Heading size="xl">{hasVoted ? "Your voting distribution" : "Assign voting power to dApps"}</Heading>
