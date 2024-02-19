@@ -5,6 +5,7 @@ import {
   Card,
   CardBody,
   Divider,
+  Fade,
   Flex,
   HStack,
   Heading,
@@ -22,6 +23,7 @@ import { MdHowToVote } from "react-icons/md"
 import { CastAllocationVotesProps, useCastAllocationVotes } from "@/hooks"
 import { WalletButton, useWallet } from "@vechain/dapp-kit-react"
 import { ethers } from "ethers"
+import { backdropBlurAnimation } from "@/app/theme"
 
 type Props = {
   roundId: string
@@ -226,7 +228,15 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
         </Stack>
       </CardBody>
       {!account && (
-        <Flex backdropFilter="blur(10px)" position={"absolute"} h={"100%"} w={"100%"} align="center" justify="center">
+        <Flex
+          backdropFilter="blur(10px)"
+          animation={backdropBlurAnimation("0px", "10px")}
+          position={"absolute"}
+          h={"100%"}
+          w={"100%"}
+          align="center"
+          justify="center"
+          borderRadius={"lg"}>
           <Card w={["90%", "50%", "40%"]} rounded="xl" variant="outline">
             <CardBody>
               <VStack gap={4}>

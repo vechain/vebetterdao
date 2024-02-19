@@ -1,4 +1,4 @@
-import { ThemeConfig, extendTheme } from "@chakra-ui/react"
+import { ThemeConfig, extendTheme, keyframes } from "@chakra-ui/react"
 
 const themeConfig: ThemeConfig = {
   // 2. Add your color mode config
@@ -51,4 +51,17 @@ const themeConfig: ThemeConfig = {
     },
   },
 }
+
+export const backdropBlurKeyframes = (startingBlur: string = "0px", endingBlur: string = "20px") => keyframes`
+    0% {
+        backdrop-filter: blur(${startingBlur});
+    }
+    100% {
+        backdrop-filter: blur(${endingBlur});
+    }
+`
+
+export const backdropBlurAnimation = (startingBlur?: string, endingBlur?: string) =>
+  `${backdropBlurKeyframes(startingBlur, endingBlur)} 1s ease-in-out`
+
 export const theme = extendTheme(themeConfig)

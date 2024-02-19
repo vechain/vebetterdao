@@ -38,6 +38,7 @@ import { SwapB3trButton } from "./SwapB3trButton"
 import { getConfig } from "@repo/config"
 import { FaRepeat } from "react-icons/fa6"
 import { useTokenColors } from "@/hooks/useTokenColors"
+import { backdropBlurAnimation } from "@/app/theme"
 
 const config = getConfig()
 
@@ -154,7 +155,14 @@ export const BalanceCard: React.FC<Props> = () => {
         </Show>
       </CardBody>
       {!account && (
-        <Flex backdropFilter="blur(10px)" position={"absolute"} h={"100%"} w={"100%"} align="center" justify="center">
+        <Flex
+          backdropFilter="blur(10px)"
+          animation={backdropBlurAnimation("0px", "10px")}
+          position={"absolute"}
+          h={"100%"}
+          w={"100%"}
+          align="center"
+          justify="center">
           <Card w={["90%", "50%", "40%"]} rounded="xl" variant="outline">
             <CardBody>
               <VStack gap={4}>
