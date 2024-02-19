@@ -27,7 +27,7 @@ interface IEmissions {
 
   function distribute() external;
 
-  function emissions(uint256) external view returns (uint256 xAllocations, uint256 vote2Earn, uint256 treasury);
+  function emissions(uint256) external view returns (uint256 xAllocations_, uint256 vote2Earn_, uint256 treasury_);
 
   function getCurrentCycle() external view returns (uint256);
 
