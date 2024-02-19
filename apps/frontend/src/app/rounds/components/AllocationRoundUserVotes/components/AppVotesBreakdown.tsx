@@ -53,7 +53,7 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
               </Text>
             </Box>
             <Text fontSize="sm" fontWeight="medium" color={isOverDistributed ? "orange" : "gray"}>
-              {totalVotes}% distributed
+              {totalVotes.toFixed(2)}% distributed
             </Text>
           </HStack>
           <VStack w="full" h={24} spacing={0}>
@@ -83,7 +83,7 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
                     align="center">
                     <Box w="3px" h={"full"} bg={getLinesColor(index)} />
                     <Icon as={FaRecycle} color={getLinesColor(index)} boxSize={4} />
-                    <Heading size="xs">{vote.value}%</Heading>
+                    <Heading size="xs">{vote.value.toFixed(2)}%</Heading>
                   </VStack>
                 ))}
             </HStack>
