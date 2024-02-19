@@ -71,7 +71,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     getValues,
     formState: { errors },
   } = useForm<FormData>({ defaultValues: { votes: [] } })
-  const { fields, append, remove, update } = useFieldArray({
+  const { fields, append, remove, update, replace } = useFieldArray({
     control,
     name: "votes", // unique name for your Field Array
   })
@@ -94,22 +94,13 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
 
   //TODO: this is causing issues as we're removing user choices when nex xApps data is fetched
   useEffect(() => {
-    remove()
     if (parsedCastedVotesPercetanges.length) {
-      append(parsedCastedVotesPercetanges, {
-        shouldFocus: false,
-      })
+      replace(parsedCastedVotesPercetanges)
     } else {
-      xApps?.forEach(xApp => {
-        append(
-          { id: xApp.id, value: 0 },
-          {
-            shouldFocus: false,
-          },
-        )
-      })
+      const values = xApps?.map(xApp => ({ id: xApp.id, value: 0 }))
+      replace(values ?? [])
     }
-  }, [xApps, append, remove, parsedCastedVotesPercetanges])
+  }, [xApps, replace, parsedCastedVotesPercetanges])
 
   const onSubmit = (data: FormData) => {
     if (!votesAtSnapshot) throw new Error("Votes at snapshot not found")
