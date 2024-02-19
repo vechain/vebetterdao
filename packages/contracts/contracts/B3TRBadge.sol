@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
@@ -14,7 +14,6 @@ import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
 import { IB3TRGovernor } from "./interfaces/IB3TRGovernor.sol";
-
 
 contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
   using Checkpoints for Checkpoints.Trace208;
@@ -127,7 +126,7 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
     return "mode=blocknumber&from=default";
   }
 
-  function tokenURI(uint256 tokenId) public view override(ERC721) returns (string memory) {    
+  function tokenURI(uint256 tokenId) public view override(ERC721) returns (string memory) {
     uint256 levelOfToken = levelOf[tokenId];
     return levelOfToken > 0 ? string.concat(baseURI(), Strings.toString(levelOfToken)) : "";
   }
@@ -181,7 +180,7 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
 
   function setBaseURI(string memory baseTokenURI) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(bytes(baseTokenURI).length > 0, "Badge: Base URI must be set");
-    
+
     _baseTokenURI = baseTokenURI;
   }
 

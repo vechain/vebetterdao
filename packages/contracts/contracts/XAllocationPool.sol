@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.18;
 
 import { IXAllocationPool } from "./interfaces/IXAllocationPool.sol";
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.18;
 
 import "./x-allocation-voting-governance/XAllocationVotingGovernor.sol";
 import "./x-allocation-voting-governance/modules/GovernorXAllocationVotesCounting.sol";

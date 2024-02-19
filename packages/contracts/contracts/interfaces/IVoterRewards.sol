@@ -1,100 +1,67 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.18;
 
 interface IVoterRewards {
-    error AccessControlBadConfirmation();
+  error AccessControlBadConfirmation();
 
-    error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
+  error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
 
-    error ReentrancyGuardReentrantCall();
+  error ReentrancyGuardReentrantCall();
 
-    event RewardClaimed(
-        uint256 indexed cycle,
-        address indexed voter,
-        uint256 reward
-    );
+  event RewardClaimed(uint256 indexed cycle, address indexed voter, uint256 reward);
 
-    event RoleAdminChanged(
-        bytes32 indexed role,
-        bytes32 indexed previousAdminRole,
-        bytes32 indexed newAdminRole
-    );
+  event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole);
 
-    event RoleGranted(
-        bytes32 indexed role,
-        address indexed account,
-        address indexed sender
-    );
+  event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender);
 
-    event RoleRevoked(
-        bytes32 indexed role,
-        address indexed account,
-        address indexed sender
-    );
-    
-    event VoteRegistered(
-        uint256 indexed cycle,
-        address indexed voter,
-        uint256 votes
-    );
+  event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender);
 
-    function DEFAULT_ADMIN_ROLE() external view returns (bytes32);
+  event VoteRegistered(uint256 indexed cycle, address indexed voter, uint256 votes);
 
-    function X_ALLOCATION_VOTE_REGISTRAR_ROLE() external view returns (bytes32);
+  function DEFAULT_ADMIN_ROLE() external view returns (bytes32);
 
-    function b3tr() external view returns (address);
+  function X_ALLOCATION_VOTE_REGISTRAR_ROLE() external view returns (bytes32);
 
-    function b3trBadge() external view returns (address);
+  function b3tr() external view returns (address);
 
-    function claimReward(uint256 cycle, address voter) external;
+  function b3trBadge() external view returns (address);
 
-    function cycleToTotal(uint256) external view returns (uint256);
+  function claimReward(uint256 cycle, address voter) external;
 
-    function cycleToVoterToTotal(uint256, address)
-        external
-        view
-        returns (uint256);
+  function cycleToTotal(uint256) external view returns (uint256);
 
-    function emissions() external view returns (address);
+  function cycleToVoterToTotal(uint256, address) external view returns (uint256);
 
-    function getReward(uint256 cycle, address voter)
-        external
-        view
-        returns (uint256);
+  function emissions() external view returns (address);
 
-    function getRoleAdmin(bytes32 role) external view returns (bytes32);
+  function getReward(uint256 cycle, address voter) external view returns (uint256);
 
-    function grantRole(bytes32 role, address account) external;
+  function getRoleAdmin(bytes32 role) external view returns (bytes32);
 
-    function hasRole(bytes32 role, address account)
-        external
-        view
-        returns (bool);
+  function grantRole(bytes32 role, address account) external;
 
-    function levelToMultiplier(uint256) external view returns (uint256);
+  function hasRole(bytes32 role, address account) external view returns (bool);
 
-    function registerXallocationVote(
-        uint256 proposalStart,
-        address voter,
-        uint256 votes
-    ) external;
+  function levelToMultiplier(uint256) external view returns (uint256);
 
-    function renounceRole(bytes32 role, address callerConfirmation) external;
+  function registerXallocationVote(uint256 proposalStart, address voter, uint256 votes) external;
 
-    function revokeRole(bytes32 role, address account) external;
+  function renounceRole(bytes32 role, address callerConfirmation) external;
 
-    function scalingFactor() external view returns (uint256);
+  function revokeRole(bytes32 role, address account) external;
 
-    function setB3TRBadge(address _b3trBadge) external;
+  function scalingFactor() external view returns (uint256);
 
-    function setEmissions(address _emissions) external;
+  function setB3TRBadge(address _b3trBadge) external;
 
-    function setLevelToMultiplier(uint256 level, uint256 multiplier) external;
+  function setEmissions(address _emissions) external;
 
-    function setScalingFactor(uint256 newScalingFactor) external;
+  function setLevelToMultiplier(uint256 level, uint256 multiplier) external;
 
-    function setXallocationVoteRegistrarRole(address _voteRegistrar) external;
+  function setScalingFactor(uint256 newScalingFactor) external;
 
-    function supportsInterface(bytes4 interfaceId) external view returns (bool);
+  function setXallocationVoteRegistrarRole(address _voteRegistrar) external;
+
+  function supportsInterface(bytes4 interfaceId) external view returns (bool);
 }
