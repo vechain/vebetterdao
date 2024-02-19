@@ -33,17 +33,17 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
 
   // ---------- Setters ---------- //
 
-  function addApp(address appAddress, string memory name, string memory metadata) public virtual {
-    bytes32 id = hashName(name);
+  function addApp(address appAddress, string memory appName, string memory metadata) public virtual {
+    bytes32 id = hashName(appName);
 
     require(_apps[id].addr == address(0), "App with this ID already exists");
 
     // Store the new app
-    _apps[id] = App(id, appAddress, name, metadata, clock());
+    _apps[id] = App(id, appAddress, appName, metadata, clock());
     _appIds.push(id);
     _pushAppToEligbleApps(id);
 
-    emit AppAdded(id, appAddress, name, metadata, true);
+    emit AppAdded(id, appAddress, appName, metadata, true);
   }
 
   function setVotingElegibility(bytes32 appId, bool isElegible) public virtual {

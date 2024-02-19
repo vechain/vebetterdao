@@ -55,11 +55,11 @@ yarn dev
 
 #### Spin up the project pointing to the staging environment
 
-Set the `ENV` variable to solo-staging in the `.env` file.
+```
+yarn dev:staging
+```
 
-```
-yarn staging
-```
+If contracts are not deployed, the script will deploy them automatically. In order to this to work, the `MNEMONIC` variable need to be set in the `.env` file.
 
 This command relies on a turbo pipeline which:
 
@@ -69,13 +69,18 @@ This command relies on a turbo pipeline which:
 
 ### Manually deploy the contracts
 
-Choose what environment to deploy by setting the `ENV` variable to solo-staging in the `.env` file.
-Based on that env variable the deployment script will use the related configuration to deploy the contracts (`./packages/config/contracts/envs` folder).
+Based on the environment variable the deployment script will use the related configuration to deploy the contracts (`./packages/config/contracts/envs` folder).
 
 Set the `MNEMONIC` of the wallet you want to use as deployer in the `.env` file.
 
-Run thi command to deploy contracts:
+Run this command to deploy contracts to deploy to local solo node:
 
 ```
 yarn contracts:deploy
+```
+
+Run this command to deploy contracts to deploy to solo-staging:
+
+```
+yarn contracts:deploy:solo-staging
 ```
