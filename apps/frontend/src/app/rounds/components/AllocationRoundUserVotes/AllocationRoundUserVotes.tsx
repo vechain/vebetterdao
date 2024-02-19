@@ -1,20 +1,5 @@
 import { useAllocationsRound, useGetVotesOnBlock, useHasVotedInRound, useRoundXApps, useUserVotesInRound } from "@/api"
-import {
-  Box,
-  Button,
-  Card,
-  CardBody,
-  Divider,
-  Fade,
-  Flex,
-  HStack,
-  Heading,
-  Skeleton,
-  Stack,
-  StackDivider,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Box, Button, Card, CardBody, Flex, Heading, Skeleton, Stack, Text, VStack } from "@chakra-ui/react"
 import { useEffect, useMemo } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { SelectAppVotesInput } from "./components/SelectAppVotesInput"
