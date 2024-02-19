@@ -15,6 +15,7 @@ import {
 import { FaRecycle } from "react-icons/fa6"
 
 type Props = {
+  isDisabled?: boolean
   register: UseFormRegister<FormData>
   getValues: UseFormGetValues<FormData>
   index: number
@@ -23,7 +24,7 @@ type Props = {
   errors: FieldErrors<FormData>
 }
 
-export const SelectAppVotesInput = ({ register, getValues, index, xApp, field, errors }: Props) => {
+export const SelectAppVotesInput = ({ register, getValues, index, xApp, field, errors, isDisabled = false }: Props) => {
   console.log("errors", errors)
   return (
     <HStack
@@ -40,7 +41,7 @@ export const SelectAppVotesInput = ({ register, getValues, index, xApp, field, e
         <Heading size="sm">{xApp?.name}</Heading>
       </HStack>
       <Box flex={[1, 1, 0.5]}>
-        <FormControl isInvalid={!!errors.votes?.[index]}>
+        <FormControl isInvalid={!!errors.votes?.[index]} isDisabled={isDisabled}>
           <InputGroup>
             <Input
               {...register(`votes.${index}.value`, {

@@ -1,12 +1,13 @@
 import { useAllocationsRound, useGetVotesOnBlock, useHasVotedInRound, useRoundXApps, useUserVotesInRound } from "@/api"
-import { Box, Button, Card, CardBody, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react"
-import { useEffect } from "react"
+import { Box, Button, Card, CardBody, Heading, Skeleton, Stack, Text, VStack } from "@chakra-ui/react"
+import { useEffect, useMemo } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { SelectAppVotesInput } from "./components/SelectAppVotesInput"
 import { AppVotesBreakdown } from "./components/AppVotesBreakdown"
 import { MdHowToVote } from "react-icons/md"
 import { CastAllocationVotesProps, useCastAllocationVotes } from "@/hooks"
 import { useWallet } from "@vechain/dapp-kit-react"
+import { ethers } from "ethers"
 
 type Props = {
   roundId: string
@@ -49,12 +50,29 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
 
   const watchVotes = watch("votes")
 
+  const parsedCastedVotesPercetanges = useMemo(() => {
+    if (castedVotesEvent?.appsIds && votesAtSnapshot?.scaled) {
+      return castedVotesEvent.appsIds.map((id, index) => ({
+        id,
+        value:
+          (Number(ethers.formatEther(castedVotesEvent.voteWeights[index] as string)) / Number(votesAtSnapshot.scaled)) *
+          100,
+      }))
+    }
+    return []
+  }, [castedVotesEvent, votesAtSnapshot])
+
+  //TODO: this is causing issues as we're removing user choices when nex xApps data is fetched
   useEffect(() => {
     remove()
-    xApps?.forEach(xApp => {
-      append({ id: xApp.id, value: 0 })
-    })
-  }, [xApps, append, remove])
+    if (parsedCastedVotesPercetanges.length) {
+      append(parsedCastedVotesPercetanges)
+    } else {
+      xApps?.forEach(xApp => {
+        append({ id: xApp.id, value: 0 })
+      })
+    }
+  }, [xApps, append, remove, parsedCastedVotesPercetanges])
 
   const onSubmit = (data: FormData) => {
     if (!votesAtSnapshot) throw new Error("Votes at snapshot not found")
@@ -85,10 +103,16 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
           spacing={16}>
           <VStack flex={1} w="full" spacing={8}>
             <Box>
-              <Heading size="xl">Assign voting power to dApps</Heading>
-              <Text fontSize="md" color="gray.500" mt={4}>
-                Distribute your voting power among your selected dApps to help them receive more B3TR allocation.
-              </Text>
+              <Skeleton isLoaded={!hasVotedLoading}>
+                <Heading size="xl">{hasVoted ? "Your voting distribution" : "Assign voting power to dApps"}</Heading>
+              </Skeleton>
+              <Skeleton isLoaded={!hasVotedLoading}>
+                <Text fontSize="md" color="gray.500" mt={4}>
+                  {hasVoted
+                    ? "You have already cast your vote. See below the distribution of your voting power among the dApps."
+                    : "Distribute your voting power among your selected dApps to help them receive more B3TR allocation."}
+                </Text>
+              </Skeleton>
             </Box>
             <AppVotesBreakdown votes={watchVotes} roundId={roundId} />
           </VStack>
@@ -108,18 +132,21 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
                 align={["flex-start", "center", "center"]}
                 w="full">
                 <Box>
-                  <Heading size="md">Available dApps</Heading>
-                  <Button variant="link" onClick={splitEvenly}>
-                    Split evenly
-                  </Button>
+                  <Heading size="md">{hasVoted ? "Voted dApps" : "Available dApps"}</Heading>
+                  {!hasVoted && (
+                    <Button variant="link" onClick={splitEvenly}>
+                      Split evenly
+                    </Button>
+                  )}
                 </Box>
                 <Text fontSize="sm" fontWeight={"thin"} alignSelf={"flex-end"}>
-                  Voting power to distribute
+                  {hasVoted ? "Distributed voting power" : "Voting power to distribute"}
                 </Text>
               </Stack>
               <VStack spacing={4} mt={8}>
                 {fields.map((field, index) => (
                   <SelectAppVotesInput
+                    isDisabled={hasVoted}
                     register={register}
                     getValues={getValues}
                     errors={errors}
@@ -131,9 +158,11 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
                 ))}
               </VStack>
             </Box>
-            <Button type="submit" leftIcon={<MdHowToVote />} mt={[8, 8, 0]}>
-              Cast vote now
-            </Button>
+            {!hasVoted && (
+              <Button type="submit" leftIcon={<MdHowToVote />} mt={[8, 8, 0]}>
+                Cast vote now
+              </Button>
+            )}
           </form>
         </Stack>
       </CardBody>

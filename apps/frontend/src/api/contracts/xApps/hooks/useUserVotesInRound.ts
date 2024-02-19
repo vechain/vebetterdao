@@ -12,15 +12,15 @@ const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
 export type AllocationVoteCastEvent = {
   voter: string
   roundId: string
-  appsIds: string
-  voteWeights: string
+  appsIds: string[]
+  voteWeights: string[]
 }
 
 export const getUserVotesInRound = async (
   thor: Connex.Thor,
   roundId?: string,
   address?: string,
-): Promise<AllocationVoteCastEvent[]> => {
+): Promise<AllocationVoteCastEvent | undefined> => {
   if (!roundId || !address) throw new Error("roundId and address are required")
   const eventFragment = XAllocationVotingInterface.getEvent("AllocationVoteCast").format("json")
   const allocationVoteCast = new abi.Event(JSON.parse(eventFragment) as abi.Event.Definition)
@@ -68,7 +68,9 @@ export const getUserVotesInRound = async (
     }
   })
 
-  return decodedAllocatedVoteEvents
+  if (decodedAllocatedVoteEvents.length > 1) throw new Error("More than one event found")
+
+  return decodedAllocatedVoteEvents[0]
 }
 
 export const getUserVotesInRoundQueryKey = (roundId?: string, address?: string) => [

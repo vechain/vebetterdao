@@ -1,7 +1,6 @@
 import { useAllocationAmount, useAllocationVoters, useAllocationsRound, useHasVotedInRound, useRoundXApps } from "@/api"
 import {
   Box,
-  Button,
   Card,
   CardBody,
   HStack,
@@ -48,6 +47,32 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
     return `Voting ends ${data?.voteEndTimestamp?.fromNow()}`
   }, [isVotingConcluded, data?.voteEndTimestamp])
 
+  const renderVoteStatusMessage = useMemo(() => {
+    if (!isVotingConcluded) {
+      if (hasVoted)
+        return (
+          <Link href="#user-votes" color="green" fontSize={"lg"}>
+            You have already voted in this round
+          </Link>
+        )
+      return (
+        <Link href="#user-votes" color="orange" fontSize={"lg"}>
+          You have not voted yet in this round
+        </Link>
+      )
+    }
+    if (hasVoted)
+      return (
+        <Link href="#user-votes" color="green" fontSize={"lg"}>
+          Voting concluded - You casted your vote successfully
+        </Link>
+      )
+    return (
+      <Link href="#user-votes" color="orange" fontSize={"lg"}>
+        Voting concluded - You did not cast your vote
+      </Link>
+    )
+  }, [hasVoted, isVotingConcluded])
   return (
     <Card w="full">
       <CardBody>
@@ -70,17 +95,7 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
                 }
               </Text>
             </Skeleton>
-            <Skeleton isLoaded={!hasVotedLoading}>
-              {hasVoted ? (
-                <Link href="#user-votes" color="green" fontSize={"lg"}>
-                  You have already voted in this round
-                </Link>
-              ) : (
-                <Link href="#user-votes" color="orange" fontSize={"lg"}>
-                  You have not voted in this round
-                </Link>
-              )}
-            </Skeleton>
+            <Skeleton isLoaded={!hasVotedLoading}>{renderVoteStatusMessage}</Skeleton>
           </VStack>
           <VStack flex={0.8}>
             <VStack
