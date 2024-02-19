@@ -1,7 +1,6 @@
 import { useB3trBalance, useB3trTokenDetails, useVot3Balance, useVot3TokenDetails } from "@/api"
 import {
   Card,
-  CardHeader,
   CardBody,
   Heading,
   HStack,
@@ -12,22 +11,13 @@ import {
   AlertDescription,
   Stat,
   StatGroup,
-  StatHelpText,
   StatLabel,
   StatNumber,
   Stack,
   Box,
-  Hide,
-  useColorModeValue,
-  useToken,
-  Button,
   VStack,
   Show,
   Flex,
-  CardFooter,
-  ModalOverlay,
-  DrawerOverlay,
-  LinkOverlay,
   Text,
 } from "@chakra-ui/react"
 import { WalletButton, useWallet } from "@vechain/dapp-kit-react"
@@ -36,7 +26,6 @@ import { useMemo } from "react"
 import BigNumber from "bignumber.js"
 import { SwapB3trButton } from "./SwapB3trButton"
 import { getConfig } from "@repo/config"
-import { FaRepeat } from "react-icons/fa6"
 import { useTokenColors } from "@/hooks/useTokenColors"
 import { backdropBlurAnimation } from "@/app/theme"
 

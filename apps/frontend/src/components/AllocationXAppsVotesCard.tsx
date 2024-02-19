@@ -1,4 +1,21 @@
-import { Box, Button, Card, CardBody, CardHeader, Flex, HStack, Heading, Link, Text, VStack } from "@chakra-ui/react"
+import {
+  Alert,
+  AlertDescription,
+  AlertIcon,
+  AlertTitle,
+  Box,
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  Flex,
+  HStack,
+  Heading,
+  Link,
+  Spinner,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { HorizontalChartBar } from "./HorizontalBarChart"
 import { useAllocationsRound, useRoundXApps, useXAppsVotes } from "@/api"
 import { useMemo } from "react"
@@ -16,10 +33,12 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
 
   const isConcluded = roundInfo.voteEndTimestamp?.isBefore() ?? false
 
-  const isLoading = xAppsVotes.some(query => query.isLoading)
-  const isError = xAppsVotes.some(query => query.isError)
+  const isVotesLoading = xAppsVotes.some(query => query.isLoading)
+  const error = xAppsVotes.find(query => query.error)?.error
 
   const isNoVotes = xAppsVotes.every(query => query.data?.votes === "0")
+
+  const isLoading = isVotesLoading || roundInfoLoading
 
   const data = useMemo(
     () =>
@@ -29,8 +48,6 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
       })),
     [xAppsVotes, xApps],
   )
-
-  console.log({ data, xAppsVotes })
 
   return (
     <Card flex={1} h="full" w="full">
@@ -44,7 +61,7 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
 
         <Box flex={1} />
       </CardBody>
-      {isNoVotes && (
+      {(isNoVotes || isLoading || error) && (
         <Flex
           backdropFilter="blur(10px)"
           animation={backdropBlurAnimation("0px", "10px")}
@@ -54,25 +71,53 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
           align="center"
           justify="center"
           borderRadius={"lg"}>
-          <Card w={["90%", "50%"]} rounded="xl" variant="outline">
-            <CardBody>
-              <VStack gap={4}>
-                <Heading size="xl" textAlign={"center"}>
-                  {isConcluded ? "No votes for this round " : "No votes yet"}
-                </Heading>
-                <Text textAlign={"center"} fontSize="lg" fontWeight={"thin"}>
-                  {isConcluded
-                    ? "The voting has concluded and noone has voted"
-                    : "Noone has voted yet, be the first to vote! You're going to see real-times vote here."}
-                </Text>
-                {!isConcluded && (
-                  <Link href="#user-votes" as={Button}>
-                    Vote now
-                  </Link>
-                )}
-              </VStack>
-            </CardBody>
-          </Card>
+          {isLoading || roundInfoLoading ? (
+            <Spinner size="lg" />
+          ) : !!error ? (
+            <Alert
+              w={["80%", "70%", "50%"]}
+              status="error"
+              variant="subtle"
+              flexDirection="column"
+              alignItems="center"
+              justifyContent="center"
+              textAlign="center"
+              height="200px"
+              borderRadius={"xl"}>
+              <AlertIcon boxSize="40px" mr={0} />
+              <AlertTitle mt={4} mb={1} fontSize="lg">
+                Error loading votes
+              </AlertTitle>
+              <AlertDescription maxWidth="sm">
+                {error.message || "An error occurred while loading the votes"}
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <Alert
+              w={["80%", "70%", "50%"]}
+              status="info"
+              variant="subtle"
+              flexDirection="column"
+              alignItems="center"
+              justifyContent="center"
+              textAlign="center"
+              borderRadius={"xl"}>
+              <AlertIcon boxSize="40px      " mr={0} />
+              <AlertTitle mt={4} mb={1} fontSize="lg">
+                {isConcluded ? "No votes for this round " : "No votes yet"}
+              </AlertTitle>
+              <AlertDescription maxWidth="sm">
+                {isConcluded
+                  ? "The voting has concluded and noone has voted"
+                  : "Noone has voted yet, be the first to vote! You're going to see real-times vote here."}
+              </AlertDescription>
+              {!isConcluded && (
+                <Button as={Link} href="#user-votes" mt={4}>
+                  Vote now
+                </Button>
+              )}
+            </Alert>
+          )}
         </Flex>
       )}
     </Card>
