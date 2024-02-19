@@ -205,6 +205,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
               <VStack spacing={4} mt={8}>
                 {fields.map((field, index) => (
                   <SelectAppVotesInput
+                    totalVotesAvailable={votesAtSnapshot?.scaled}
                     isDisabled={isFormDisabled}
                     register={register}
                     getValues={getValues}
