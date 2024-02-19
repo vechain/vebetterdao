@@ -135,8 +135,8 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
     return _isAppElegibleCheckpoints[appId].upperLookupRecent(SafeCast.toUint48(timepoint)) == 1;
   }
 
-  function hashName(string memory name) public pure returns (bytes32) {
-    return keccak256(abi.encodePacked(name));
+  function hashName(string memory appName) public pure returns (bytes32) {
+    return keccak256(abi.encodePacked(appName));
   }
 
   // Function to retrieve an app by ID
