@@ -297,14 +297,17 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   function setXallocationsAddress(address xAllocationAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(xAllocationAddress != address(0), "Emissions: xAllocationAddress cannot be the zero address");
     _xAllocations = xAllocationAddress;
   }
 
   function setVote2EarnAddress(address vote2EarnAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(vote2EarnAddress != address(0), "Emissions: vote2EarnAddress cannot be the zero address");
     _vote2Earn = vote2EarnAddress;
   }
 
   function setTreasuryAddress(address treasuryAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(treasuryAddress != address(0), "Emissions: treasuryAddress cannot be the zero address");
     _treasury = treasuryAddress;
   }
 
