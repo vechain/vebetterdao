@@ -86,9 +86,11 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
 
   const splitEvenly = () => {
     const totalVotes = xApps?.length ?? 0
-    const votesPerApp = 100 / totalVotes
+    const votesPerApp = Math.floor(100 / totalVotes) // Integer division to ensure sum equals 100
+    const remainder = 100 - votesPerApp * totalVotes // Calculate the remainder
+    const value = votesPerApp + remainder // Add the remainder to the first app
     xApps?.forEach((xApp, index) => {
-      update(index, { id: xApp.id, value: votesPerApp })
+      update(index, { id: xApp.id, value: index === 0 ? value : votesPerApp })
     })
   }
 
