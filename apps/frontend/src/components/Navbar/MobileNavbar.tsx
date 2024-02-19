@@ -48,7 +48,7 @@ export const MobileNavBar = () => {
     <>
       <NavbarLogo />
       <HStack gap={2}>
-        <WalletButton />
+        <WalletButton mobile={true} />
         <IconButton onClick={openMenu} icon={<Icon as={FaBars} />} aria-label="Open menu" />
       </HStack>
       <MobileMenuDrawer isOpen={isMenuOpen} onClose={closeMenu} />

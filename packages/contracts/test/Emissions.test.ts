@@ -1,9 +1,9 @@
 import { describe, it } from "mocha"
 import {
   INITIAL_EMISSIONS,
-  PRE_MINT_TREASURY_ALLOCATION,
-  PRE_MINT_VOTE_2_EARN_ALLOCATION,
-  PRE_MINT_X_ALLOCATION,
+  INITIAL_TREASURY_ALLOCATION,
+  INITIAL_VOTE_2_EARN_ALLOCATION,
+  INITIAL_X_ALLOCATION,
   catchRevert,
   getOrDeployContractInstances,
   moveToCycle,
@@ -33,12 +33,12 @@ describe("Emissions", () => {
       // Minter should be set correctly
       expect(await emissions.hasRole(await emissions.MINTER_ROLE(), await minterAccount.getAddress())).to.equal(true)
 
-      // Pre-mint allocation amounts should be set correctly
-      const allocations = await emissions.getPreMintAllocations()
+      // Initial allocation amounts should be set correctly
+      const allocations = await emissions.getInitialAllocations()
       expect(allocations.length).to.equal(3)
-      expect(allocations[0]).to.equal(PRE_MINT_X_ALLOCATION)
-      expect(allocations[1]).to.equal(PRE_MINT_VOTE_2_EARN_ALLOCATION)
-      expect(allocations[2]).to.equal(PRE_MINT_TREASURY_ALLOCATION)
+      expect(allocations[0]).to.equal(INITIAL_X_ALLOCATION)
+      expect(allocations[1]).to.equal(INITIAL_VOTE_2_EARN_ALLOCATION)
+      expect(allocations[2]).to.equal(INITIAL_TREASURY_ALLOCATION)
 
       // B3TR address should be set correctly
       expect(await emissions.b3tr()).to.equal(await b3tr.getAddress())
@@ -95,8 +95,8 @@ describe("Emissions", () => {
     })
   })
 
-  describe("Pre-minting", () => {
-    it("Should be able to pre-mint tokens", async () => {
+  describe("Start emissions", () => {
+    it("Should be able to start emissions", async () => {
       const { emissions, b3tr, minterAccount, otherAccounts, owner, xAllocationPool, voterRewards } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -105,20 +105,40 @@ describe("Emissions", () => {
       // Grant minter role to emissions contract
       await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
 
-      await emissions.connect(minterAccount).preMint()
+      const tx = await emissions.connect(minterAccount).start()
 
-      expect(await b3tr.balanceOf(await xAllocationPool.getAddress())).to.equal(PRE_MINT_X_ALLOCATION)
-      expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(PRE_MINT_VOTE_2_EARN_ALLOCATION)
-      expect(await b3tr.balanceOf(otherAccounts[2].address)).to.equal(PRE_MINT_TREASURY_ALLOCATION)
+      const receipt = await tx.wait()
 
-      expect(await emissions.getXAllocationAmountForCycle(1)).to.equal(PRE_MINT_X_ALLOCATION)
-      expect(await emissions.getVote2EarnAmountForCycle(1)).to.equal(PRE_MINT_VOTE_2_EARN_ALLOCATION)
-      expect(await emissions.getTreasuryAmountForCycle(1)).to.equal(PRE_MINT_TREASURY_ALLOCATION)
+      if (!receipt?.logs) throw new Error("No logs in receipt")
+
+      const events = receipt?.logs
+
+      const decodedEvents = events?.map(event => {
+        return emissions.interface.parseLog({
+          topics: event?.topics as string[],
+          data: event?.data as string,
+        })
+      })
+
+      const emissionDistributedEvent = decodedEvents.find(event => event?.name === "EmissionDistributed")
+
+      expect(emissionDistributedEvent?.args?.cycle).to.equal(1)
+      expect(emissionDistributedEvent?.args.xAllocations).to.equal(INITIAL_X_ALLOCATION)
+      expect(emissionDistributedEvent?.args.vote2Earn).to.equal(INITIAL_VOTE_2_EARN_ALLOCATION)
+      expect(emissionDistributedEvent?.args.treasury).to.equal(INITIAL_TREASURY_ALLOCATION)
+
+      expect(await b3tr.balanceOf(await xAllocationPool.getAddress())).to.equal(INITIAL_X_ALLOCATION)
+      expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(INITIAL_VOTE_2_EARN_ALLOCATION)
+      expect(await b3tr.balanceOf(otherAccounts[2].address)).to.equal(INITIAL_TREASURY_ALLOCATION)
+
+      expect(await emissions.getXAllocationAmountForCycle(1)).to.equal(INITIAL_X_ALLOCATION)
+      expect(await emissions.getVote2EarnAmountForCycle(1)).to.equal(INITIAL_VOTE_2_EARN_ALLOCATION)
+      expect(await emissions.getTreasuryAmountForCycle(1)).to.equal(INITIAL_TREASURY_ALLOCATION)
 
       expect(await emissions.nextCycle()).to.equal(2)
     })
 
-    it("Should not be able to pre-mint tokens twice", async () => {
+    it("Should not be able start emissions twice", async () => {
       const { emissions, b3tr, minterAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -126,14 +146,14 @@ describe("Emissions", () => {
       // Grant minter role to emissions contract
       await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
 
-      // Pre-mint
-      await emissions.connect(minterAccount).preMint()
+      // Start emissions
+      await emissions.connect(minterAccount).start()
 
-      // Try to pre-mint again - Should revert
-      await catchRevert(emissions.connect(minterAccount).preMint())
+      // Try to start emissions again - Should revert
+      await catchRevert(emissions.connect(minterAccount).start())
     })
 
-    it("Should be able to pre-mint different amounts than deployment", async () => {
+    it("Should be able to start emissions with different amounts than deployment", async () => {
       const { emissions, b3tr, minterAccount, otherAccounts, owner, xAllocationPool, voterRewards } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -142,19 +162,19 @@ describe("Emissions", () => {
       // Grant minter role to emissions contract
       await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
 
-      // Pre-mint allocation amounts should be set correctly
+      // Initial allocation amounts should be set correctly
       await emissions
         .connect(owner)
-        .setPreMintAllocations([ethers.parseEther("100"), ethers.parseEther("200"), ethers.parseEther("300")])
+        .setInitialAllocations([ethers.parseEther("100"), ethers.parseEther("200"), ethers.parseEther("300")])
 
-      expect(await emissions.getPreMintAllocations()).to.deep.equal([
+      expect(await emissions.getInitialAllocations()).to.deep.equal([
         ethers.parseEther("100"),
         ethers.parseEther("200"),
         ethers.parseEther("300"),
       ])
 
-      // Pre-mint
-      await emissions.connect(minterAccount).preMint()
+      // Start emissions
+      await emissions.connect(minterAccount).start()
 
       expect(await b3tr.balanceOf(await xAllocationPool.getAddress())).to.equal(ethers.parseEther("100"))
       expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(ethers.parseEther("200"))
@@ -171,8 +191,8 @@ describe("Emissions", () => {
       // Grant minter role to emissions contract
       await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
 
-      // Pre-mint
-      await emissions.connect(minterAccount).preMint()
+      // Start emissions
+      await emissions.connect(minterAccount).start()
 
       // Expect current cycle to be 0
       expect(await emissions.nextCycle()).to.equal(2)
@@ -189,23 +209,43 @@ describe("Emissions", () => {
       expect(treasuryAmount).to.equal(ethers.parseEther("1000000"))
 
       // Distribute emissions
-      await emissions.connect(minterAccount).distribute()
+      const tx = await emissions.connect(minterAccount).distribute()
+
+      const receipt = await tx.wait()
+
+      if (!receipt?.logs) throw new Error("No logs in receipt")
+
+      const events = receipt?.logs
+
+      const decodedEvents = events?.map(event => {
+        return emissions.interface.parseLog({
+          topics: event?.topics as string[],
+          data: event?.data as string,
+        })
+      })
+
+      const emissionDistributedEvent = decodedEvents.find(event => event?.name === "EmissionDistributed")
+
+      expect(emissionDistributedEvent?.args?.cycle).to.equal(2)
+      expect(emissionDistributedEvent?.args.xAllocations).to.equal(xAllocationsAmount)
+      expect(emissionDistributedEvent?.args.vote2Earn).to.equal(vote2EarnAmount)
+      expect(emissionDistributedEvent?.args.treasury).to.equal(treasuryAmount)
 
       // Check supply
       expect(await b3tr.totalSupply()).to.equal(
         ethers.parseEther("5000000") +
-          PRE_MINT_X_ALLOCATION +
-          PRE_MINT_VOTE_2_EARN_ALLOCATION +
-          PRE_MINT_TREASURY_ALLOCATION,
+          INITIAL_X_ALLOCATION +
+          INITIAL_VOTE_2_EARN_ALLOCATION +
+          INITIAL_TREASURY_ALLOCATION,
       )
       expect(await b3tr.balanceOf(await emissions.xAllocations())).to.equal(
-        ethers.parseEther("2000000") + PRE_MINT_X_ALLOCATION,
+        ethers.parseEther("2000000") + INITIAL_X_ALLOCATION,
       )
       expect(await b3tr.balanceOf(await emissions.vote2Earn())).to.equal(
-        ethers.parseEther("2000000") + PRE_MINT_VOTE_2_EARN_ALLOCATION,
+        ethers.parseEther("2000000") + INITIAL_VOTE_2_EARN_ALLOCATION,
       )
       expect(await b3tr.balanceOf(await emissions.treasury())).to.equal(
-        ethers.parseEther("1000000") + PRE_MINT_TREASURY_ALLOCATION,
+        ethers.parseEther("1000000") + INITIAL_TREASURY_ALLOCATION,
       )
     })
 
@@ -217,8 +257,8 @@ describe("Emissions", () => {
       // Grant minter role to emissions contract
       await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
 
-      // Pre-mint
-      await emissions.connect(minterAccount).preMint()
+      // Start emissions
+      await emissions.connect(minterAccount).start()
 
       expect(await emissions.nextCycle()).to.equal(2)
 
@@ -243,8 +283,8 @@ describe("Emissions", () => {
       // Grant minter role to emissions contract
       await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
 
-      // Pre-mint
-      await emissions.connect(minterAccount).preMint()
+      // Start emissions
+      await emissions.connect(minterAccount).start()
 
       await waitForNextCycle(emissions)
 
@@ -256,18 +296,18 @@ describe("Emissions", () => {
       // Check supply
       expect(await b3tr.totalSupply()).to.equal(
         ethers.parseEther("5000000") +
-          PRE_MINT_X_ALLOCATION +
-          PRE_MINT_VOTE_2_EARN_ALLOCATION +
-          PRE_MINT_TREASURY_ALLOCATION,
+          INITIAL_X_ALLOCATION +
+          INITIAL_VOTE_2_EARN_ALLOCATION +
+          INITIAL_TREASURY_ALLOCATION,
       )
       expect(await b3tr.balanceOf(await emissions.xAllocations())).to.equal(
-        ethers.parseEther("2000000") + PRE_MINT_X_ALLOCATION,
+        ethers.parseEther("2000000") + INITIAL_X_ALLOCATION,
       )
       expect(await b3tr.balanceOf(await emissions.vote2Earn())).to.equal(
-        ethers.parseEther("2000000") + PRE_MINT_VOTE_2_EARN_ALLOCATION,
+        ethers.parseEther("2000000") + INITIAL_VOTE_2_EARN_ALLOCATION,
       )
       expect(await b3tr.balanceOf(await emissions.treasury())).to.equal(
-        ethers.parseEther("1000000") + PRE_MINT_TREASURY_ALLOCATION,
+        ethers.parseEther("1000000") + INITIAL_TREASURY_ALLOCATION,
       )
 
       await waitForNextCycle(emissions)
@@ -289,18 +329,18 @@ describe("Emissions", () => {
       // Check supply
       expect(await b3tr.totalSupply()).to.equal(
         ethers.parseEther("10000000") +
-          PRE_MINT_X_ALLOCATION +
-          PRE_MINT_VOTE_2_EARN_ALLOCATION +
-          PRE_MINT_TREASURY_ALLOCATION,
+          INITIAL_X_ALLOCATION +
+          INITIAL_VOTE_2_EARN_ALLOCATION +
+          INITIAL_TREASURY_ALLOCATION,
       )
       expect(await b3tr.balanceOf(await emissions.xAllocations())).to.equal(
-        ethers.parseEther("4000000") + PRE_MINT_X_ALLOCATION,
+        ethers.parseEther("4000000") + INITIAL_X_ALLOCATION,
       )
       expect(await b3tr.balanceOf(await emissions.vote2Earn())).to.equal(
-        ethers.parseEther("4000000") + PRE_MINT_VOTE_2_EARN_ALLOCATION,
+        ethers.parseEther("4000000") + INITIAL_VOTE_2_EARN_ALLOCATION,
       )
       expect(await b3tr.balanceOf(await emissions.treasury())).to.equal(
-        ethers.parseEther("2000000") + PRE_MINT_TREASURY_ALLOCATION,
+        ethers.parseEther("2000000") + INITIAL_TREASURY_ALLOCATION,
       )
 
       expect(await emissions.nextCycle()).to.equal(4)
@@ -314,8 +354,8 @@ describe("Emissions", () => {
       // Grant minter role to emissions contract
       await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
 
-      // Pre-mint
-      await emissions.connect(minterAccount).preMint()
+      // Start emissions
+      await emissions.connect(minterAccount).start()
 
       await waitForNextCycle(emissions)
 
@@ -325,18 +365,18 @@ describe("Emissions", () => {
       // Check supply
       expect(await b3tr.totalSupply()).to.equal(
         ethers.parseEther("5000000") +
-          PRE_MINT_X_ALLOCATION +
-          PRE_MINT_VOTE_2_EARN_ALLOCATION +
-          PRE_MINT_TREASURY_ALLOCATION,
+          INITIAL_X_ALLOCATION +
+          INITIAL_VOTE_2_EARN_ALLOCATION +
+          INITIAL_TREASURY_ALLOCATION,
       )
       expect(await b3tr.balanceOf(await emissions.xAllocations())).to.equal(
-        ethers.parseEther("2000000") + PRE_MINT_X_ALLOCATION,
+        ethers.parseEther("2000000") + INITIAL_X_ALLOCATION,
       )
       expect(await b3tr.balanceOf(await emissions.vote2Earn())).to.equal(
-        ethers.parseEther("2000000") + PRE_MINT_VOTE_2_EARN_ALLOCATION,
+        ethers.parseEther("2000000") + INITIAL_VOTE_2_EARN_ALLOCATION,
       )
       expect(await b3tr.balanceOf(await emissions.treasury())).to.equal(
-        ethers.parseEther("1000000") + PRE_MINT_TREASURY_ALLOCATION,
+        ethers.parseEther("1000000") + INITIAL_TREASURY_ALLOCATION,
       )
 
       // Move to the 14th cycle
@@ -376,8 +416,8 @@ describe("Emissions", () => {
 
     expect(await emissions.nextCycle()).to.equal(1)
 
-    // Pre-mint
-    await emissions.connect(minterAccount).preMint()
+    // Start emissions
+    await emissions.connect(minterAccount).start()
 
     // Variables to hold calculated amounts for assertions
     let xAllocationsAmount = INITIAL_EMISSIONS
@@ -423,12 +463,12 @@ describe("Emissions", () => {
     }
   }).timeout(1000 * 60 * 10) // 10 minutes
 
-  it("Should not be able to pre mint emissions if not minter", async () => {
+  it("Should not be able to start emissions if not minter", async () => {
     const { emissions, minterAccount } = await getOrDeployContractInstances({
       forceDeploy: true,
     })
 
-    await catchRevert(emissions.connect(minterAccount).preMint())
+    await catchRevert(emissions.connect(minterAccount).start())
   })
 
   it("Should be able to perform all cycles till reaching B3TR supply cap", async function () {
@@ -443,8 +483,8 @@ describe("Emissions", () => {
     // Grant minter role to emissions contract
     await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
 
-    // Pre-mint
-    await emissions.connect(minterAccount).preMint()
+    // Start emissions
+    await emissions.connect(minterAccount).start()
 
     await waitForNextCycle(emissions)
 
@@ -454,18 +494,18 @@ describe("Emissions", () => {
     // Check supply
     expect(await b3tr.totalSupply()).to.equal(
       ethers.parseEther("5000000") +
-        PRE_MINT_X_ALLOCATION +
-        PRE_MINT_VOTE_2_EARN_ALLOCATION +
-        PRE_MINT_TREASURY_ALLOCATION,
+        INITIAL_X_ALLOCATION +
+        INITIAL_VOTE_2_EARN_ALLOCATION +
+        INITIAL_TREASURY_ALLOCATION,
     )
     expect(await b3tr.balanceOf(await emissions.xAllocations())).to.equal(
-      ethers.parseEther("2000000") + PRE_MINT_X_ALLOCATION,
+      ethers.parseEther("2000000") + INITIAL_X_ALLOCATION,
     )
     expect(await b3tr.balanceOf(await emissions.vote2Earn())).to.equal(
-      ethers.parseEther("2000000") + PRE_MINT_VOTE_2_EARN_ALLOCATION,
+      ethers.parseEther("2000000") + INITIAL_VOTE_2_EARN_ALLOCATION,
     )
     expect(await b3tr.balanceOf(await emissions.treasury())).to.equal(
-      ethers.parseEther("1000000") + PRE_MINT_TREASURY_ALLOCATION,
+      ethers.parseEther("1000000") + INITIAL_TREASURY_ALLOCATION,
     )
 
     const lastCycle = b3trAllocations.length + 2
@@ -495,8 +535,8 @@ describe("Emissions", () => {
     // Grant minter role to emissions contract
     await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
 
-    // Pre-mint
-    await emissions.connect(minterAccount).preMint()
+    // Start emissions
+    await emissions.connect(minterAccount).start()
 
     await waitForNextCycle(emissions)
 
@@ -514,8 +554,8 @@ describe("Emissions", () => {
     // Grant minter role to emissions contract
     await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
 
-    // Pre-mint
-    await emissions.connect(minterAccount).preMint()
+    // Start emissions
+    await emissions.connect(minterAccount).start()
 
     await waitForNextCycle(emissions)
 

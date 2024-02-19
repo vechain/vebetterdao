@@ -8,6 +8,68 @@ type App = {
   name: string
   metadata: string
 }
+
+export const seedLocalEnvironment = async (
+  b3tr: B3TR,
+  vot3: VOT3,
+  xAllocationVoting: XAllocationVoting,
+  emissions: Emissions,
+) => {
+  const start = performance.now()
+  console.log("Seeding local environment")
+  const accounts = await ethers.getSigners()
+
+  const amountToMint = "1000"
+  const amountToSwap = (Number(amountToMint) / 2).toString()
+
+  const accountsToSeed = accounts.slice(0, 5)
+  const admin = accounts[0]
+  // Mint $B3TR tokens to the first 5 accounts in the mnemonic
+  await mintAndApproveB3tr(b3tr, vot3, amountToMint, accountsToSeed, admin)
+  await swapB3trForVot3(vot3, amountToSwap, accountsToSeed)
+
+  const APPS: App[] = [
+    {
+      address: accounts[6].address,
+      name: "Test app 1",
+      metadata: "https://test-app-1.com",
+    },
+    {
+      address: accounts[7].address,
+      name: "Test app 2",
+      metadata: "https://test-app-2.com",
+    },
+    {
+      address: accounts[8].address,
+      name: "Test app 3",
+      metadata: "https://test-app-3.com",
+    },
+  ]
+
+  //   Add x-apps to the XAllocationPool
+  await addXDapps(xAllocationVoting, accountsToSeed, APPS)
+
+  const xDappsFromContract = await xAllocationVoting.getAllApps()
+
+  //   Mint some $B3TR
+  console.log("Minting some $B3TR...")
+  await b3tr.grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress()).then(async tx => await tx.wait())
+  await emissions
+    .connect(admin)
+    .start()
+    .then(async tx => await tx.wait())
+
+  //   Start new allocation round
+  const roundId = parseInt((await xAllocationVoting.currentRoundId()).toString())
+  console.log("Casting random votes to xDapps...")
+  await castVotesToXDapps(xAllocationVoting, accountsToSeed, roundId, amountToSwap, xDappsFromContract)
+
+  //TODO: SEED multiple rounds and votes (we need to execute a proposal to change the votingPeriod to someseconds)
+
+  const end = performance.now()
+  console.log(`Seeding complete in ${end - start}ms`)
+}
+
 /**
  *  Mint $B3TR tokens and swap for VOT3 tokens
  */
@@ -98,69 +160,9 @@ const castVotesToXDapps = async (
           roundId,
           splits.map(split => split.app),
           splits.map(split => ethers.parseEther(split.weight)),
+          { gasLimit: 10_000_000 },
         )
         .then(async tx => await tx.wait())
     }),
   )
-}
-
-export const seedLocalEnvironment = async (
-  b3tr: B3TR,
-  vot3: VOT3,
-  xAllocationVoting: XAllocationVoting,
-  emissions: Emissions,
-) => {
-  const start = performance.now()
-  console.log("Seeding local environment")
-  const accounts = await ethers.getSigners()
-
-  const amountToMint = "1000"
-  const amountToSwap = (Number(amountToMint) / 2).toString()
-
-  const accountsToSeed = accounts.slice(0, 5)
-  const minterAccount = accounts[1]
-  // Mint $B3TR tokens to the first 5 accounts in the mnemonic
-  await mintAndApproveB3tr(b3tr, vot3, amountToMint, accountsToSeed, minterAccount)
-  await swapB3trForVot3(vot3, amountToSwap, accountsToSeed)
-
-  const APPS: App[] = [
-    {
-      address: accounts[6].address,
-      name: "Test app 1",
-      metadata: "https://test-app-1.com",
-    },
-    {
-      address: accounts[7].address,
-      name: "Test app 2",
-      metadata: "https://test-app-2.com",
-    },
-    {
-      address: accounts[8].address,
-      name: "Test app 3",
-      metadata: "https://test-app-3.com",
-    },
-  ]
-
-  //   Add x-apps to the XAllocationPool
-  await addXDapps(xAllocationVoting, accountsToSeed, APPS)
-
-  const xDappsFromContract = await xAllocationVoting.getAllApps()
-
-  //   Pre mint $B3TR
-  console.log("Pre minting $B3TR...")
-  await b3tr.grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress()).then(async tx => await tx.wait())
-  await emissions
-    .connect(accounts[1])
-    .preMint()
-    .then(async tx => await tx.wait())
-
-  //   Start new allocation round
-  const roundId = parseInt((await xAllocationVoting.currentRoundId()).toString())
-  console.log("Casting random votes to xDapps...")
-  await castVotesToXDapps(xAllocationVoting, accountsToSeed, roundId, amountToSwap, xDappsFromContract)
-
-  //TODO: SEED multiple rounds and votes (we need to execute a proposal to change the votingPeriod to someseconds)
-
-  const end = performance.now()
-  console.log(`Seeding complete in ${end - start}ms`)
 }

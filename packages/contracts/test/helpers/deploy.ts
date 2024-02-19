@@ -38,10 +38,11 @@ export const defaultVotingDelay = 1
 export const NFT_BADGE_NAME = "B3TRBadge"
 export const NFT_BADGE_SYMBOL = "B3TR"
 export const DEFAULT_MAX_MINTABLE_LEVEL = 1
+export const BASE_URI = "ipfs://test/"
 
-export const PRE_MINT_X_ALLOCATION = ethers.parseEther("1000000")
-export const PRE_MINT_VOTE_2_EARN_ALLOCATION = ethers.parseEther("1000000")
-export const PRE_MINT_TREASURY_ALLOCATION = ethers.parseEther("1750000")
+export const INITIAL_X_ALLOCATION = ethers.parseEther("1000000")
+export const INITIAL_VOTE_2_EARN_ALLOCATION = ethers.parseEther("1000000")
+export const INITIAL_TREASURY_ALLOCATION = ethers.parseEther("1750000")
 
 export const CYCLE_DURATION = 20 // 20 blocks. For testing purposes
 export const DECAY_SETTINGS = [4, 20, 12, 50] // 4% decay for X Allocations, 20% decay for Vote2Earn, every 12 cycles for X Allocations, Every 50 cycles for Vote2Earn
@@ -112,7 +113,7 @@ export const getOrDeployContractInstances = async ({
 
   // Deploy NFTBadge
   const NFTBadgeContract = await ethers.getContractFactory("B3TRBadge")
-  const b3trBadge = await NFTBadgeContract.deploy(NFT_BADGE_NAME, NFT_BADGE_SYMBOL, owner, maxMintableLevel)
+  const b3trBadge = await NFTBadgeContract.deploy(NFT_BADGE_NAME, NFT_BADGE_SYMBOL, owner, maxMintableLevel, BASE_URI)
   await b3trBadge.waitForDeployment()
 
   // Deploy XAllocationPool
@@ -135,7 +136,7 @@ export const getOrDeployContractInstances = async ({
     owner,
     await b3tr.getAddress(),
     [X_ALLOCATIONS_ADDRESS, VOTE_2_EARN_ADDRESS, TREASURY_ADDRESS],
-    [PRE_MINT_X_ALLOCATION, PRE_MINT_VOTE_2_EARN_ALLOCATION, PRE_MINT_TREASURY_ALLOCATION],
+    [INITIAL_X_ALLOCATION, INITIAL_VOTE_2_EARN_ALLOCATION, INITIAL_TREASURY_ALLOCATION],
     cycleDuration,
     DECAY_SETTINGS as [number, number, number, number],
     INITIAL_EMISSIONS,

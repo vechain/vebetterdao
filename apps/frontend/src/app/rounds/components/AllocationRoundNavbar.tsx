@@ -1,4 +1,5 @@
-import { AllocationProposalState, useAllocationsRound } from "@/api"
+import { useAllocationsRound } from "@/api"
+import { AllocationRoundStateTag } from "@/components/AllocationRoundsList/AllocationRoundStateTag"
 import {
   HStack,
   Button,
@@ -6,12 +7,11 @@ import {
   Box,
   Text,
   Icon,
-  Tag,
   Stack,
-  useBreakpoint,
   useMediaQuery,
   IconButton,
   VStack,
+  Skeleton,
 } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa6"
@@ -21,18 +21,18 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
   const { data, isLoading } = useAllocationsRound(roundId)
   const [isDesktop] = useMediaQuery("(min-width: 800px)")
 
-  const prevButtonDisabled = !data.proposalId || data.proposalId === "1"
+  const prevButtonDisabled = !data.roundId || data.roundId === "1"
   const goToPreviousRound = () => {
     if (prevButtonDisabled) return
-    const prevRoud = Number(data?.proposalId) - 1
+    const prevRoud = Number(data?.roundId) - 1
     router.push(`/rounds/${prevRoud}`)
   }
 
-  const nextButtonDisabled = !data.proposalId || data.isCurrent
+  const nextButtonDisabled = !data.roundId || data.isCurrent
 
   const goToNextRound = () => {
-    if (!nextButtonDisabled) return
-    const nextRound = Number(data?.proposalId) + 1
+    if (nextButtonDisabled) return
+    const nextRound = Number(data?.roundId) + 1
     router.push(`/rounds/${nextRound}`)
   }
 
@@ -49,16 +49,18 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
         </Button>
 
         <Stack direction={["column", "column", "row"]} spacing={4} align={"center"}>
-          <Heading size="md">{data?.proposalId}° round</Heading>
+          <Heading size="md">{data?.roundId}° round</Heading>
           <Box w={1.5} h={1.5} borderRadius={"full"} bg="gray" />
           <HStack spacing={2} align={"center"}>
-            <Text>{data?.voteStartTimestamp?.format("D MMMM")}</Text>
+            <Skeleton isLoaded={!isLoading}>
+              <Text>{!isLoading ? data?.voteStartTimestamp?.format("D MMMM") : "8 Feb"}</Text>
+            </Skeleton>
             <Icon as={FaArrowRight} />
-            <Text>{data?.voteEndTimestamp?.format("D MMMM")}</Text>
+            <Skeleton isLoaded={!isLoading}>
+              <Text>{!isLoading ? data?.voteEndTimestamp?.format("D MMMM") : "8 Feb"}</Text>
+            </Skeleton>
           </HStack>
-          <Tag colorScheme="primary" variant="solid">
-            {data?.state && AllocationProposalState[data.state]}
-          </Tag>
+          <AllocationRoundStateTag state={data?.state} size="md" />
         </Stack>
         <Button
           size="sm"
@@ -81,16 +83,18 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
       />
       <VStack w="full">
         <HStack spacing={4}>
-          <Heading size="md">{data?.proposalId}° round</Heading>
-          <Tag colorScheme="primary" variant="solid">
-            {data?.state && AllocationProposalState[data.state]}
-          </Tag>
+          <Heading size="md">{data?.roundId}° round</Heading>
+          <AllocationRoundStateTag state={data?.state} size="md" />
         </HStack>
 
         <HStack spacing={2} align={"center"}>
-          <Text>{data?.voteStartTimestamp?.format("D MMMM")}</Text>
+          <Skeleton isLoaded={!isLoading}>
+            <Text>{!isLoading ? data?.voteStartTimestamp?.format("D MMMM") : "8 Feb"}</Text>
+          </Skeleton>
           <Icon as={FaArrowRight} />
-          <Text>{data?.voteEndTimestamp?.format("D MMMM")}</Text>
+          <Skeleton isLoaded={!isLoading}>
+            <Text>{!isLoading ? data?.voteEndTimestamp?.format("D MMMM") : "8 Feb"}</Text>
+          </Skeleton>
         </HStack>
       </VStack>
       <IconButton

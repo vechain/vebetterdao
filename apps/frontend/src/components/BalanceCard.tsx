@@ -17,14 +17,27 @@ import {
   StatNumber,
   Stack,
   Box,
+  Hide,
+  useColorModeValue,
+  useToken,
+  Button,
+  VStack,
+  Show,
+  Flex,
+  CardFooter,
+  ModalOverlay,
+  DrawerOverlay,
+  LinkOverlay,
+  Text,
 } from "@chakra-ui/react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { WalletButton, useWallet } from "@vechain/dapp-kit-react"
 import { BalancePieChart } from "./BalancePieChart"
 import { useMemo } from "react"
 import BigNumber from "bignumber.js"
 import { SwapB3trButton } from "./SwapB3trButton"
-import { RedeemB3trButton } from "./RedeemB3trButton"
 import { getConfig } from "@repo/config"
+import { FaRepeat } from "react-icons/fa6"
+import { useTokenColors } from "@/hooks/useTokenColors"
 
 const config = getConfig()
 
@@ -49,6 +62,7 @@ export const BalanceCard: React.FC<Props> = () => {
     isLoading: vot3BalanceLoading,
     error: vot3BalanceError,
   } = useVot3Balance(account ?? undefined)
+  const { b3trColor, vot3Color } = useTokenColors()
 
   const { data: vot3ContractB3trBalance } = useB3trBalance(config.vot3ContractAddress)
 
@@ -76,81 +90,86 @@ export const BalanceCard: React.FC<Props> = () => {
     return b3trBalance?.scaled === "0" && vot3Balance?.scaled === "0"
   }, [b3trBalance, vot3Balance])
 
-  if (!account)
-    return (
-      <Card w="full">
-        <CardHeader>
-          <Heading size="sm">Your balance</Heading>
-        </CardHeader>
-        <CardBody>
-          <Alert status="info" borderRadius={"lg"}>
-            <AlertIcon />
-            Connect your wallet first
-          </Alert>
-        </CardBody>
-      </Card>
-    )
-
   if (b3trBalanceError || vot3BalanceError)
     return (
-      <Card w="full">
-        <CardHeader>
-          <Heading size="sm">Your balance</Heading>
-        </CardHeader>
-        <CardBody>
-          <Alert status="error" borderRadius={"lg"}>
-            <AlertIcon />
-            <AlertTitle>Error fetching your balances</AlertTitle>
-            <AlertDescription>{b3trBalanceError?.message ?? vot3BalanceError?.message}</AlertDescription>
-          </Alert>
-        </CardBody>
-      </Card>
+      <Alert status="error" borderRadius={"lg"}>
+        <AlertIcon />
+        <AlertTitle>Error fetching your balances</AlertTitle>
+        <AlertDescription>{b3trBalanceError?.message ?? vot3BalanceError?.message}</AlertDescription>
+      </Alert>
     )
 
+  if (hasNoBalance)
+    return (
+      <Stack direction={["column", "column", "row"]} spacing={8} w="full">
+        <Alert status="warning" borderRadius={"lg"}>
+          <AlertIcon />
+          <Box>
+            <AlertTitle>You have no balance</AlertTitle>
+            <AlertDescription>Mint some tokens to get started.</AlertDescription>
+          </Box>
+        </Alert>
+      </Stack>
+    )
   return (
     <Card w="full">
-      <CardHeader>
-        <HStack justify={"space-between"} align={"center"} w="full">
-          <Heading size="sm">Your balance</Heading>
-          {isLoading ? (
-            <Spinner size="sm" />
-          ) : (
-            <HStack spacing={4}>
-              <SwapB3trButton /> <RedeemB3trButton />{" "}
-            </HStack>
-          )}
-        </HStack>
-      </CardHeader>
       <CardBody>
-        <Stack direction={["column", "column", "row"]} spacing={8} w="full">
-          {hasNoBalance ? (
-            <Alert status="warning" borderRadius={"lg"}>
-              <AlertIcon />
-              <Box>
-                <AlertTitle>You have no balance</AlertTitle>
-                <AlertDescription>Mint some tokens to get started.</AlertDescription>
-              </Box>
-            </Alert>
-          ) : (
-            <>
+        <Show below="sm">
+          <VStack>
+            <HStack justify={"space-between"} w="full">
+              <Heading size="sm">Balance</Heading>
+              {isLoading ? <Spinner size="sm" /> : <SwapB3trButton />}
+            </HStack>
+            <BalancePieChart b3trBalance={b3trBalance} vot3Balance={vot3Balance} />
+            <StatGroup flexDirection={"row"} alignItems="center" justifyContent="space-between" w="full">
+              <Stat textAlign={"center"}>
+                <StatLabel color={b3trColor}>B3TR</StatLabel>
+                <StatNumber>{b3trBalance?.formatted || "0"}</StatNumber>
+              </Stat>
+              <Stat textAlign={"center"}>
+                <StatLabel color={vot3Color}>VOT3</StatLabel>
+                <StatNumber>{vot3Balance?.formatted || "0"}</StatNumber>
+              </Stat>
+            </StatGroup>
+          </VStack>
+        </Show>
+        <Show above="sm">
+          <HStack spacing={8} w="full" align={"flex-start"}>
+            <Heading size="sm">Balance</Heading>
+            <Flex flex={1}>
               <BalancePieChart b3trBalance={b3trBalance} vot3Balance={vot3Balance} />
-              <StatGroup w="full" flexDirection={"column"}>
-                <Stat>
-                  <StatLabel>B3TR</StatLabel>
-                  <StatNumber>{b3trBalance?.formatted}</StatNumber>
-                  <StatHelpText>{percentageOfB3trSupply}% of the circulating supply</StatHelpText>
-                </Stat>
-
-                <Stat>
-                  <StatLabel>VOT3</StatLabel>
-                  <StatNumber>{vot3Balance?.formatted}</StatNumber>
-                  <StatHelpText>{percentageOfVot3Supply}% of the circulating supply</StatHelpText>
-                </Stat>
-              </StatGroup>
-            </>
-          )}
-        </Stack>
+            </Flex>
+            <StatGroup flexDirection={"row"} alignItems="center" justifyContent="center" flex={1} alignSelf={"center"}>
+              <Stat textAlign={"center"}>
+                <StatLabel color={b3trColor}>B3TR</StatLabel>
+                <StatNumber>{b3trBalance?.formatted || "0"}</StatNumber>
+              </Stat>
+              <Stat textAlign={"center"}>
+                <StatLabel color={vot3Color}>VOT3</StatLabel>
+                <StatNumber>{vot3Balance?.formatted || "0"}</StatNumber>
+              </Stat>
+            </StatGroup>
+            <Flex>{isLoading ? <Spinner size="sm" /> : <SwapB3trButton />}</Flex>
+          </HStack>
+        </Show>
       </CardBody>
+      {!account && (
+        <Flex backdropFilter="blur(10px)" position={"absolute"} h={"100%"} w={"100%"} align="center" justify="center">
+          <Card w={["90%", "50%", "30%"]} rounded="xl">
+            <CardBody>
+              <VStack gap={4}>
+                <Heading fontSize="20px" textAlign={"center"}>
+                  You are not connected
+                </Heading>
+                <Text textAlign={"center"} fontSize="14px">
+                  Connect your wallet to check your balance
+                </Text>
+                <WalletButton />
+              </VStack>
+            </CardBody>
+          </Card>
+        </Flex>
+      )}
     </Card>
   )
 }

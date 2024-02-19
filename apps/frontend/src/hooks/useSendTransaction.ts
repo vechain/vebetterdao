@@ -18,7 +18,7 @@ export type TransactionStatus = "ready" | "pending" | "waitingConfirmation" | "s
  * @param comment a comment to add to the clause
  * @param abi the abi of the contract to call
  */
-type EnhancedClause = Connex.VM.Clause & {
+export type EnhancedClause = Connex.VM.Clause & {
   comment?: string
   abi?: object
 }

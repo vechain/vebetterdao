@@ -1,7 +1,11 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDotEnv": [".env", ".env.staging"],
+  "globalDotEnv": [".env"],
   "globalDependencies": ["**/.env.*local"],
+  "globalEnv": [
+    "NEXT_PUBLIC_APP_ENV",
+    "MNEMONIC"
+  ],
   "pipeline": {
     "install": {
       "dependsOn": ["@repo/contracts#install", "^compile"]
@@ -48,9 +52,18 @@
     },
     "test": {
       "cache": false,
-      "dependsOn": ["@repo/contracts#check-contracts-deployment"]
+      "dependsOn": ["@repo/config#check-or-generate-local-config", "test:hardhat"]
+    },
+    "test:thor-solo": {
+      "cache": false
     },
     "test:hardhat": {
+      "cache": false
+    },
+    "generate-b3tr-badge-metadata":{
+      "cache": false
+    },
+    "upload-b3tr-badge-metadata":{
       "cache": false
     }
   }

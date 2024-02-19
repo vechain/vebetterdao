@@ -24,8 +24,8 @@ contract Emissions is AccessControl, ReentrancyGuard {
   address public vote2Earn;
   address public treasury;
 
-  // Pre-mint allocations
-  uint256[] public preMintAllocations;
+  // Initial allocations
+  uint256[] public initialAllocations;
 
   // ----------- Cycle attributes ----------- //
   uint256 public nextCycle; // Next cycle number
@@ -51,12 +51,14 @@ contract Emissions is AccessControl, ReentrancyGuard {
   // ----------- Scaling ----------- //
   uint256 public scalingFactor = 1e6;
 
+  event EmissionDistributed(uint256 indexed cycle, uint256 xAllocations, uint256 vote2Earn, uint256 treasury);
+
   constructor(
     address minter,
     address admin,
     address b3trAddress,
     address[3] memory _destinations,
-    uint256[3] memory _preMintAllocations,
+    uint256[3] memory _initialAllocations,
     uint256 _cycleDuration,
     uint256[4] memory _decaySettings,
     uint256 _initialEmissions,
@@ -66,8 +68,8 @@ contract Emissions is AccessControl, ReentrancyGuard {
     // Assertions
     require(_destinations.length == 3, "Emissions: Invalid destinations input length. Expected 3.");
     require(
-      _destinations.length == _preMintAllocations.length,
-      "Emissions: Expected destinations and pre-mint allocations to have the same length."
+      _destinations.length == _initialAllocations.length,
+      "Emissions: Expected destinations and initial allocations to have the same length."
     );
     require(_cycleDuration > 0, "Emissions: Cycle duration must be greater than 0");
     require(_decaySettings.length == 4, "Emissions: Invalid decay settings input length. Expected 4.");
@@ -96,8 +98,8 @@ contract Emissions is AccessControl, ReentrancyGuard {
     vote2Earn = _destinations[1];
     treasury = _destinations[2];
 
-    // Set pre-mint allocations
-    preMintAllocations = _preMintAllocations;
+    // Set initial allocations
+    initialAllocations = _initialAllocations;
 
     // Set cycle duration
     cycleDuration = _cycleDuration;
@@ -117,7 +119,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
     // Set max vote2Earn decay
     maxVote2EarnDecay = _maxVote2EarnDecay;
 
-    // Next cycle is pre-mint
+    // Initialise cycle
     nextCycle = 1;
 
     // Set roles
@@ -125,27 +127,29 @@ contract Emissions is AccessControl, ReentrancyGuard {
     _grantRole(MINTER_ROLE, minter);
   }
 
-  function preMint() public onlyRole(MINTER_ROLE) nonReentrant {
-    require(preMintAllocations[0] > 0, "Emissions: Pre-mint allocations not set");
-    require(nextCycle == 1, "Emissions: Pre-mint already done");
+  function start() public onlyRole(MINTER_ROLE) nonReentrant {
+    require(initialAllocations[0] > 0, "Emissions: Initial allocations not set");
+    require(nextCycle == 1, "Emissions: Already started");
     require(xAllocationsGovernor != IXAllocationVotingGovernor(address(0)), "Emissions: XAllocationsGovernor not set");
 
     lastEmissionBlock = block.number;
-    emissions[nextCycle] = Emission(preMintAllocations[0], preMintAllocations[1], preMintAllocations[2]);
-    totalEmissions += preMintAllocations[0] + preMintAllocations[1] + preMintAllocations[2];
+    emissions[nextCycle] = Emission(initialAllocations[0], initialAllocations[1], initialAllocations[2]);
+    totalEmissions += initialAllocations[0] + initialAllocations[1] + initialAllocations[2];
 
-    xAllocationsGovernor.proposeNewAllocationRound();
+    xAllocationsGovernor.startNewRound();
 
     nextCycle++;
 
-    // Mint pre-mint allocations
-    b3tr.mint(xAllocations, preMintAllocations[0]);
-    b3tr.mint(vote2Earn, preMintAllocations[1]);
-    b3tr.mint(treasury, preMintAllocations[2]);
+    // Mint initial allocations
+    b3tr.mint(xAllocations, initialAllocations[0]);
+    b3tr.mint(vote2Earn, initialAllocations[1]);
+    b3tr.mint(treasury, initialAllocations[2]);
+
+    emit EmissionDistributed(nextCycle - 1, initialAllocations[0], initialAllocations[1], initialAllocations[2]);
   }
 
   function distribute() public nonReentrant {
-    require(nextCycle > 1, "Emissions: Pre-mint not done");
+    require(nextCycle > 1, "Emissions: Please start emissions first");
     require(isNextCycleDistributable(), "Emissions: Next cycle not started yet");
 
     // Mint emissions for current cycle
@@ -162,13 +166,15 @@ contract Emissions is AccessControl, ReentrancyGuard {
     emissions[nextCycle] = Emission(xAllocationsAmount, vote2EarnAmount, treasuryAmount);
     totalEmissions += xAllocationsAmount + vote2EarnAmount + treasuryAmount;
 
-    xAllocationsGovernor.proposeNewAllocationRound();
+    xAllocationsGovernor.startNewRound();
 
     nextCycle++;
 
     b3tr.mint(xAllocations, xAllocationsAmount);
     b3tr.mint(vote2Earn, vote2EarnAmount);
     b3tr.mint(treasury, treasuryAmount);
+
+    emit EmissionDistributed(nextCycle - 1, xAllocationsAmount, vote2EarnAmount, treasuryAmount);
   }
 
   // ----------- Getters ----------- //
@@ -221,8 +227,8 @@ contract Emissions is AccessControl, ReentrancyGuard {
     return ((getCurrentXAllocationsAmount() + getCurrentVote2EarnAmount()) * treasuryPercentage) / 100;
   }
 
-  function getPreMintAllocations() public view returns (uint256[] memory) {
-    return preMintAllocations;
+  function getInitialAllocations() public view returns (uint256[] memory) {
+    return initialAllocations;
   }
 
   function getXAllocationAmountForCycle(uint256 cycle) public view returns (uint256) {
@@ -271,11 +277,11 @@ contract Emissions is AccessControl, ReentrancyGuard {
 
   // ----------- Setters ----------- //
 
-  function setPreMintAllocations(uint256[] memory _allocations) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(nextCycle == 1, "Emissions: Pre-mint already done");
+  function setInitialAllocations(uint256[] memory _allocations) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(nextCycle == 1, "Emissions: already started");
     require(_allocations.length == 3, "Emissions: Invalid input length. Expected 3.");
 
-    preMintAllocations = _allocations;
+    initialAllocations = _allocations;
   }
 
   function setXallocationsAddress(address xAllocationAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -344,6 +350,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
       IXAllocationVotingGovernor(_xAllocationsGovernor).votingPeriod() < cycleDuration,
       "Emissions: Voting period must be less than cycle duration"
     );
+
     xAllocationsGovernor = IXAllocationVotingGovernor(_xAllocationsGovernor);
   }
 }

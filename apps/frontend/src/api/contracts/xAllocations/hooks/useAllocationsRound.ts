@@ -1,13 +1,13 @@
 import { useMemo } from "react"
 import { useCurrentAllocationsRoundId } from "./useCurrentAllocationsRoundId"
-import { AllocationProposalState, useAllocationsRoundState } from "./useAllocationsRoundState"
-import { AllocationProposalCreated, useAllocationsRoundsEvents } from "./useAllocationsRoundsEvents"
+import { RoundState, useAllocationsRoundState } from "./useAllocationsRoundState"
+import { RoundCreated, useAllocationsRoundsEvents } from "./useAllocationsRoundsEvents"
 import dayjs from "dayjs"
 import { getConfig } from "@repo/config"
 import { useCurrentBlock } from "@/api/blockchain"
 
-export type AllocationRoundWithState = AllocationProposalCreated & {
-  state?: keyof typeof AllocationProposalState
+export type AllocationRoundWithState = RoundCreated & {
+  state?: keyof typeof RoundState
   voteStartTimestamp?: dayjs.Dayjs
   voteEndTimestamp?: dayjs.Dayjs
   isCurrent: boolean
@@ -18,7 +18,7 @@ const blockTime = getConfig().network.blockTime
  *  Hook to get and merge info about the given allocation round (state, proposer, voreStart, voteEnd)
  * @returns the allocation round info see {@link AllocationRoundWithState}
  */
-export const useAllocationsRound = (roundId: string) => {
+export const useAllocationsRound = (roundId?: string) => {
   const { data: currentBlock } = useCurrentBlock()
   const currentAllocationId = useCurrentAllocationsRoundId()
   const currentAllocationState = useAllocationsRoundState(roundId)
@@ -27,9 +27,7 @@ export const useAllocationsRound = (roundId: string) => {
 
   const currentAllocationRound: AllocationRoundWithState | undefined = useMemo(() => {
     if (!currentAllocationId.data || !allocationRoundsEvents.data) return
-    const roundInfo = allocationRoundsEvents.data.created.find(
-      allocationRound => allocationRound.proposalId === roundId,
-    )
+    const roundInfo = allocationRoundsEvents.data.created.find(allocationRound => allocationRound.roundId === roundId)
     if (!roundInfo) return
     return {
       ...roundInfo,

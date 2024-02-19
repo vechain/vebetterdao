@@ -1,10 +1,4 @@
-import {
-  useAllocationAmount,
-  useAllocationVoters,
-  useAllocationsRound,
-  useRoundXAppsWithDetails,
-  useXApps,
-} from "@/api"
+import { useAllocationAmount, useAllocationVoters, useAllocationsRound, useRoundXApps } from "@/api"
 import {
   Box,
   Card,
@@ -30,7 +24,7 @@ const compactFormatter = new Intl.NumberFormat("en-US", {
 
 export const AllocationRoundDetails = ({ roundId }: Props) => {
   const { data, isLoading } = useAllocationsRound(roundId)
-  const { data: xApps, isLoading: xAppsLoading } = useRoundXAppsWithDetails(roundId)
+  const { data: xApps, isLoading: xAppsLoading } = useRoundXApps(roundId)
   const { data: totalVoters, isLoading: totalVotersLoading } = useAllocationVoters(roundId)
   const { data: roundAmount, isLoading: roundAmountLoading, error: roundAmountError } = useAllocationAmount(roundId)
 
@@ -41,6 +35,13 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
 
   const bgColor = useColorModeValue("primary.500", "primary.300")
 
+  const isVoltingConcluded = data?.voteEndTimestamp?.isBefore()
+
+  const remainingTime = useMemo(() => {
+    if (isVoltingConcluded) return `Voting ended ${data?.voteEndTimestamp?.fromNow()}`
+    return `Voting ends ${data?.voteEndTimestamp?.fromNow()}`
+  }, [isVoltingConcluded, data?.voteEndTimestamp])
+
   return (
     <Card w="full">
       <CardBody>
@@ -49,12 +50,12 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
             <Skeleton isLoaded={!isLoading}>
               <HStack spacing={1} align={"center"}>
                 <Heading size="md" color={bgColor}>
-                  {data?.voteEndTimestamp?.fromNow(true)} left
+                  {remainingTime}
                 </Heading>
               </HStack>
             </Skeleton>
             <Skeleton isLoaded={!isLoading}>
-              <Heading size="xl">Allocations | Round #{data?.proposalId}</Heading>
+              <Heading size="xl">Allocations | Round #{data?.roundId}</Heading>
             </Skeleton>
             <Skeleton isLoaded={!isLoading}>
               <Text color="gray.500">

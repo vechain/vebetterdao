@@ -9,9 +9,9 @@ const X_ALLOCATIONS_DECAY_CYCLES: number = 12
 const VOTE_2_EARN_DECAY_CYCLES: number = 50
 const TREASURY_PERCENTAGE: number = 25
 const MAX_SUPPLY: number = 1_000_000_000
-const PRE_MINT_TREASURY_ALLOCATION: number = 1_750_000
-const PRE_MINT_X_ALLOCATION: number = 1_000_000
-const PRE_MINT_VOTE_2_EARN_ALLOCATION: number = 1_000_000
+const INITIAL_TREASURY_ALLOCATION: number = 1_750_000
+const INITIAL_X_ALLOCATION: number = 1_000_000
+const INITIAL_VOTE_2_EARN_ALLOCATION: number = 1_000_000
 
 // Path to save the generated tokenomics
 const PATH = "./test/fixture/b3trAllocations.json"
@@ -30,7 +30,7 @@ interface Allocation {
 /**
  * Saves the given allocations to a file in JSON format.
  * @param allocations Array of Allocation objects to save.
- * @param filename Name of the file to save the allocations to.
+ * @param path Name of the file to save the allocations to.
  */
 async function saveAllocationsToFile(allocations: Allocation[], path: string): Promise<void> {
   await fs.writeFile(path, JSON.stringify(allocations, null, 2))
@@ -58,7 +58,7 @@ async function generateAndSaveB3trAllocations(): Promise<void> {
 async function generateB3trAllocations(): Promise<Allocation[]> {
   const xAllocations: Allocation[] = []
 
-  let b3trSupply: number = PRE_MINT_TREASURY_ALLOCATION + PRE_MINT_X_ALLOCATION + PRE_MINT_VOTE_2_EARN_ALLOCATION
+  let b3trSupply: number = INITIAL_TREASURY_ALLOCATION + INITIAL_X_ALLOCATION + INITIAL_VOTE_2_EARN_ALLOCATION
   let cycle: number = 0
 
   while (b3trSupply <= MAX_SUPPLY) {
