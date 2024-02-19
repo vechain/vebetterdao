@@ -5,6 +5,7 @@ import {
   Card,
   CardBody,
   Divider,
+  Flex,
   HStack,
   Heading,
   Skeleton,
@@ -19,7 +20,7 @@ import { SelectAppVotesInput } from "./components/SelectAppVotesInput"
 import { AppVotesBreakdown } from "./components/AppVotesBreakdown"
 import { MdHowToVote } from "react-icons/md"
 import { CastAllocationVotesProps, useCastAllocationVotes } from "@/hooks"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { WalletButton, useWallet } from "@vechain/dapp-kit-react"
 import { ethers } from "ethers"
 
 type Props = {
@@ -224,6 +225,23 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
           </form>
         </Stack>
       </CardBody>
+      {!account && (
+        <Flex backdropFilter="blur(10px)" position={"absolute"} h={"100%"} w={"100%"} align="center" justify="center">
+          <Card w={["90%", "50%", "40%"]} rounded="xl" variant="outline">
+            <CardBody>
+              <VStack gap={4}>
+                <Heading size="xl" textAlign={"center"}>
+                  No wallet connected
+                </Heading>
+                <Text textAlign={"center"} fontSize="lg" fontWeight={"thin"}>
+                  Connect your wallet to cast votes and participate in the B3TR allocation process.
+                </Text>
+                <WalletButton />
+              </VStack>
+            </CardBody>
+          </Card>
+        </Flex>
+      )}
     </Card>
   )
 }
