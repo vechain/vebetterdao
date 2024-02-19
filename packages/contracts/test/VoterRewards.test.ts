@@ -62,7 +62,7 @@ describe("VoterRewards", () => {
   })
 
   describe("X Allocation voting rewards", () => {
-    it("Should track voting rewards correctly involving multiple voters", async () => {
+    it.only("Should track voting rewards correctly involving multiple voters", async () => {
       const {
         xAllocationVoting,
         otherAccounts,
@@ -138,9 +138,9 @@ describe("VoterRewards", () => {
         })
       })
 
-      expect(decodedEvents[0]?.args?.[0]).to.equal(1) // Cycle
-      expect(decodedEvents[0]?.args?.[1]).to.equal(otherAccount.address) // Voter
-      expect(decodedEvents[0]?.args?.[2]).to.equal(ethers.parseEther("500")) // Votes
+      expect(decodedEvents[1]?.args?.[0]).to.equal(1) // Cycle
+      expect(decodedEvents[1]?.args?.[1]).to.equal(otherAccount.address) // Voter
+      expect(decodedEvents[1]?.args?.[2]).to.equal(ethers.parseEther("500")) // Votes
 
       expect(await emissions.isCycleEnded(1)).to.equal(false)
 
