@@ -7,9 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
 contract B3TR is ERC20Capped, AccessControl {
   bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
-  uint256 private constant INITIAL_TOKEN_CAP = 1000000000 * 1e18;
-
-  constructor(address _defaultMinter) ERC20Capped(INITIAL_TOKEN_CAP) ERC20("B3TR", "B3TR") {
+  constructor(address _defaultMinter) ERC20Capped(1000000000 * 1e18) ERC20("B3TR", "B3TR") {
     // Grant the contract deployer the default admin role
     _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     _grantRole(MINTER_ROLE, _defaultMinter);
