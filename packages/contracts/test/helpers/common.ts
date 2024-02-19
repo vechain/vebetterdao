@@ -261,7 +261,7 @@ export const calculateBaseAllocationOffChain = async (
   xAllocationPool: XAllocationPool,
 ) => {
   // Amount available for this round (assuming the amount is already scaled by 1e18 for precision)
-  let totalAmount = await emissions.getXAllocationAmountForCycle(roundId)
+  let totalAmount = await emissions.getXAllocationAmount(roundId)
 
   let elegibleApps = await xAllocationVoting.getRoundApps(roundId)
 
@@ -281,7 +281,7 @@ export const calculateVariableAppAllocationOffChain = async (
   xAllocationPool: XAllocationPool,
 ) => {
   // Amount available for this round (assuming the amount is already scaled by 1e18 for precision)
-  let totalAmount = await emissions.getXAllocationAmountForCycle(roundId)
+  let totalAmount = await emissions.getXAllocationAmount(roundId)
 
   let totalAvailable = (totalAmount * (await xAllocationPool.variableAllocationPercentage())) / BigInt(100)
 

@@ -109,7 +109,7 @@ contract VoterRewards is AccessControl, ReentrancyGuard {
     uint256 totalCycle = cycleToTotal[cycle];
     require(totalCycle > 0, "VoterRewards: there are no votes in the cycle");
 
-    uint256 emissionsAmount = emissions.getVote2EarnAmountForCycle(cycle);
+    uint256 emissionsAmount = emissions.getVote2EarnAmount(cycle);
     require(emissionsAmount > 0, "VoterRewards: emissionsAmount must be greater than 0");
 
     // Scale up the numerator before division to improve precision
