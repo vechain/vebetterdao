@@ -56,6 +56,10 @@ export const seedLocalEnvironment = async (
   await b3tr.grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress()).then(async tx => await tx.wait())
   await emissions
     .connect(admin)
+    .bootstrap()
+    .then(async tx => await tx.wait())
+  await emissions
+    .connect(admin)
     .start()
     .then(async tx => await tx.wait())
 

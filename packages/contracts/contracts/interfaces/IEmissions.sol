@@ -40,6 +40,10 @@ interface IEmissions {
 
     function b3tr() external view returns (address);
 
+    function bootstrap() external;
+
+    function start() external;
+
     function cycleDuration() external view returns (uint256);
 
     function distribute() external;
@@ -105,8 +109,6 @@ interface IEmissions {
     function maxVote2EarnDecay() external view returns (uint256);
 
     function nextCycle() external view returns (uint256);
-
-    function start() external;
 
     function initialAllocations(uint256) external view returns (uint256);
 

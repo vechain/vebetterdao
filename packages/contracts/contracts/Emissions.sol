@@ -120,32 +120,35 @@ contract Emissions is AccessControl, ReentrancyGuard {
     maxVote2EarnDecay = _maxVote2EarnDecay;
 
     // Initialise cycle
-    nextCycle = 1;
+    nextCycle = 0;
 
     // Set roles
     _grantRole(DEFAULT_ADMIN_ROLE, admin);
     _grantRole(MINTER_ROLE, minter);
   }
 
-  function start() public onlyRole(MINTER_ROLE) nonReentrant {
-    require(initialAllocations[0] > 0, "Emissions: Initial allocations not set");
-    require(nextCycle == 1, "Emissions: Already started");
-    require(xAllocationsGovernor != IXAllocationVotingGovernor(address(0)), "Emissions: XAllocationsGovernor not set");
-
-    lastEmissionBlock = block.number;
-    emissions[nextCycle] = Emission(initialAllocations[0], initialAllocations[1], initialAllocations[2]);
-    totalEmissions += initialAllocations[0] + initialAllocations[1] + initialAllocations[2];
-
+  function bootstrap() public onlyRole(MINTER_ROLE) nonReentrant {
+    require(nextCycle == 0, "Emissions: Can only bootstrap emissions when next cycle = 0");
     nextCycle++;
 
     // Mint initial allocations
+    emissions[nextCycle] = Emission(initialAllocations[0], initialAllocations[1], initialAllocations[2]);
+    totalEmissions += initialAllocations[0] + initialAllocations[1] + initialAllocations[2];
     b3tr.mint(_xAllocations, initialAllocations[0]);
     b3tr.mint(_vote2Earn, initialAllocations[1]);
     b3tr.mint(_treasury, initialAllocations[2]);
+
+    emit EmissionDistributed(nextCycle, initialAllocations[0], initialAllocations[1], initialAllocations[2]);
+  }
+
+  function start() public onlyRole(MINTER_ROLE) nonReentrant {
+    require(nextCycle == 1, "Emissions: Can only start emissions when next cycle = 1");
+
+    lastEmissionBlock = block.number;
     
     xAllocationsGovernor.startNewRound();
 
-    emit EmissionDistributed(nextCycle - 1, initialAllocations[0], initialAllocations[1], initialAllocations[2]);
+    nextCycle++;
   }
 
   function distribute() public nonReentrant {
@@ -166,15 +169,14 @@ contract Emissions is AccessControl, ReentrancyGuard {
     emissions[nextCycle] = Emission(xAllocationsAmount, vote2EarnAmount, treasuryAmount);
     totalEmissions += xAllocationsAmount + vote2EarnAmount + treasuryAmount;
 
-    xAllocationsGovernor.startNewRound();
-
-    nextCycle++;
-
     b3tr.mint(_xAllocations, xAllocationsAmount);
     b3tr.mint(_vote2Earn, vote2EarnAmount);
     b3tr.mint(_treasury, treasuryAmount);
 
-    emit EmissionDistributed(nextCycle - 1, xAllocationsAmount, vote2EarnAmount, treasuryAmount);
+    xAllocationsGovernor.startNewRound();
+
+    emit EmissionDistributed(nextCycle, xAllocationsAmount, vote2EarnAmount, treasuryAmount);
+    nextCycle++;
   }
 
   // ------ Emissions calculations ------ //
@@ -188,7 +190,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
    */
   function _calculateNextXAllocation() internal view returns (uint256) {
     // If this is the first cycle, return the initial amount
-    if (nextCycle == 2) {
+    if (nextCycle <= 2) {
       return initialEmissions;
     }
     // Get emissions from the previous cycle
@@ -283,7 +285,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   function isCycleDistributed(uint256 cycle) public view returns (bool) {
-    return cycle < nextCycle;
+    return emissions[cycle].xAllocations != 0;
   }
 
   function isCycleEnded(uint256 cycle) public view returns (bool) {
@@ -293,6 +295,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   function getCurrentCycle() public view returns (uint256) {
+    require(nextCycle > 0, "Emissions: not bootstrapped yet");
     return nextCycle - 1;
   }
 
@@ -323,7 +326,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
   // ----------- Setters ----------- //
 
   function setInitialAllocations(uint256[] memory _allocations) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(nextCycle == 1, "Emissions: already started");
+    require(nextCycle == 0, "Emissions: already bootstrapped");
     require(_allocations.length == 3, "Emissions: Invalid input length. Expected 3.");
 
     initialAllocations = _allocations;

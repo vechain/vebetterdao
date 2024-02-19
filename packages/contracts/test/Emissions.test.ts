@@ -4,6 +4,7 @@ import {
   INITIAL_TREASURY_ALLOCATION,
   INITIAL_VOTE_2_EARN_ALLOCATION,
   INITIAL_X_ALLOCATION,
+  bootstrapEmissions,
   catchRevert,
   getOrDeployContractInstances,
   moveToCycle,
@@ -95,8 +96,8 @@ describe("Emissions", () => {
     })
   })
 
-  describe("Start emissions", () => {
-    it("Should be able to start emissions", async () => {
+  describe("Bootstrap emissions", () => {
+    it("Should be able to bootstrap emissions", async () => {
       const { emissions, b3tr, minterAccount, otherAccounts, owner, xAllocationPool, voterRewards } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -105,7 +106,7 @@ describe("Emissions", () => {
       // Grant minter role to emissions contract
       await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
 
-      const tx = await emissions.connect(minterAccount).start()
+      const tx = await emissions.connect(minterAccount).bootstrap()
 
       const receipt = await tx.wait()
 
@@ -135,6 +136,46 @@ describe("Emissions", () => {
       expect(await emissions.getVote2EarnAmount(1)).to.equal(INITIAL_VOTE_2_EARN_ALLOCATION)
       expect(await emissions.getTreasuryAmount(1)).to.equal(INITIAL_TREASURY_ALLOCATION)
 
+      expect(await emissions.nextCycle()).to.equal(1)
+    })
+
+    it("Should not be able to bootstrap emissions twice", async () => {
+      const { emissions, b3tr, minterAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      // Try to bootstrap emissions again - Should revert
+      await catchRevert(emissions.connect(minterAccount).bootstrap())
+    })
+  })
+
+  describe("Start emissions", () => {
+    it("Should be able to start emissions", async () => {
+      const { emissions, b3tr, minterAccount, otherAccounts, owner, xAllocationPool, voterRewards } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      const tx = await emissions.connect(minterAccount).start()
+
+      const receipt = await tx.wait()
+
+      if (!receipt?.logs) throw new Error("No logs in receipt")
+
+      expect(await b3tr.balanceOf(await xAllocationPool.getAddress())).to.equal(INITIAL_X_ALLOCATION)
+      expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(INITIAL_VOTE_2_EARN_ALLOCATION)
+      expect(await b3tr.balanceOf(otherAccounts[2].address)).to.equal(INITIAL_TREASURY_ALLOCATION)
+
+      expect(await emissions.getXAllocationAmount(1)).to.equal(INITIAL_X_ALLOCATION)
+      expect(await emissions.getVote2EarnAmount(1)).to.equal(INITIAL_VOTE_2_EARN_ALLOCATION)
+      expect(await emissions.getTreasuryAmount(1)).to.equal(INITIAL_TREASURY_ALLOCATION)
+
       expect(await emissions.nextCycle()).to.equal(2)
     })
 
@@ -143,13 +184,22 @@ describe("Emissions", () => {
         forceDeploy: true,
       })
 
-      // Grant minter role to emissions contract
-      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
       // Start emissions
       await emissions.connect(minterAccount).start()
 
       // Try to start emissions again - Should revert
+      await catchRevert(emissions.connect(minterAccount).start())
+    })
+
+    it("Should not be able to start emissions if not bootstapped", async () => {
+      const { emissions, minterAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Try to start emissions without bootstrapping - Should revert
       await catchRevert(emissions.connect(minterAccount).start())
     })
 
@@ -173,6 +223,9 @@ describe("Emissions", () => {
         ethers.parseEther("300"),
       ])
 
+      // Bootstrap emissions
+      await emissions.connect(minterAccount).bootstrap()
+
       // Start emissions
       await emissions.connect(minterAccount).start()
 
@@ -188,8 +241,8 @@ describe("Emissions", () => {
         forceDeploy: true,
       })
 
-      // Grant minter role to emissions contract
-      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
       // Start emissions
       await emissions.connect(minterAccount).start()
@@ -254,8 +307,8 @@ describe("Emissions", () => {
         forceDeploy: true,
       })
 
-      // Grant minter role to emissions contract
-      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
       // Start emissions
       await emissions.connect(minterAccount).start()
@@ -280,8 +333,8 @@ describe("Emissions", () => {
         forceDeploy: true,
       })
 
-      // Grant minter role to emissions contract
-      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
       // Start emissions
       await emissions.connect(minterAccount).start()
@@ -353,8 +406,8 @@ describe("Emissions", () => {
         forceDeploy: true,
       })
 
-      // Grant minter role to emissions contract
-      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
       // Start emissions
       await emissions.connect(minterAccount).start()
@@ -413,8 +466,8 @@ describe("Emissions", () => {
       forceDeploy: true,
     })
 
-    // Grant minter role to emissions contract
-    await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+    // Bootstrap emissions
+    await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
     expect(await emissions.nextCycle()).to.equal(1)
 
@@ -467,11 +520,14 @@ describe("Emissions", () => {
   }).timeout(1000 * 60 * 10) // 10 minutes
 
   it("Should not be able to start emissions if not minter", async () => {
-    const { emissions, minterAccount } = await getOrDeployContractInstances({
+    const { emissions, minterAccount, b3tr, owner, otherAccount } = await getOrDeployContractInstances({
       forceDeploy: true,
     })
 
-    await catchRevert(emissions.connect(minterAccount).start())
+    // Bootstrap emissions
+    await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+    await catchRevert(emissions.connect(otherAccount).start())
   })
 
   it("Should be able to perform all cycles till reaching B3TR supply cap", async function () {
@@ -483,8 +539,8 @@ describe("Emissions", () => {
       forceDeploy: true,
     })
 
-    // Grant minter role to emissions contract
-    await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+    // Bootstrap emissions
+    await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
     // Start emissions
     await emissions.connect(minterAccount).start()
@@ -535,8 +591,8 @@ describe("Emissions", () => {
       forceDeploy: true,
     })
 
-    // Grant minter role to emissions contract
-    await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+    // Bootstrap emissions
+    await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
     // Start emissions
     await emissions.connect(minterAccount).start()
@@ -554,8 +610,8 @@ describe("Emissions", () => {
       forceDeploy: true,
     })
 
-    // Grant minter role to emissions contract
-    await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+    // Bootstrap emissions
+    await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
     // Start emissions
     await emissions.connect(minterAccount).start()
