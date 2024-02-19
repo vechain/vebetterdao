@@ -30,15 +30,19 @@ export const seedLocalEnvironment = async (
   const APPS: App[] = [
     {
       address: accounts[6].address,
-      name: "Test app 1",
+      name: "Tree Lovers Association",
     },
     {
       address: accounts[7].address,
-      name: "Test app 2",
+      name: "GoGreen",
     },
     {
       address: accounts[8].address,
-      name: "Test app 3",
+      name: "Share4All",
+    },
+    {
+      address: accounts[9].address,
+      name: "RecycleRewards",
     },
   ]
 
@@ -59,6 +63,10 @@ export const seedLocalEnvironment = async (
   const roundId = parseInt((await xAllocationVoting.currentRoundId()).toString())
   console.log("Casting random votes to xDapps...")
   await castVotesToXDapps(xAllocationVoting, accountsToSeed, roundId, amountToSwap, xDappsFromContract)
+
+  // Set xApps baseURI
+  console.log("Set xApps baseURI...")
+  await xAllocationVoting.setBaseURI("ipfs://bafybeibml2s4crevhza5bx2x4fipxwlkgo7gqsd57pqtehfa7oikvmxlkq/")
 
   //TODO: SEED multiple rounds and votes (we need to execute a proposal to change the votingPeriod to someseconds)
 
