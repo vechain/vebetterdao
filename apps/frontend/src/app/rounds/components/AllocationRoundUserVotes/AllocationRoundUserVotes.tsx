@@ -35,6 +35,8 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     account ?? undefined,
   )
 
+  const hasNoVotes = !votesAtSnapshot?.scaled || votesAtSnapshot.scaled === "0"
+
   const { data: castedVotesEvent } = useUserVotesInRound(roundId, account ?? undefined)
   console.log("castedVotesEvent", castedVotesEvent)
 
@@ -204,9 +206,22 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
               </VStack>
             </Box>
             {!hasVoted && !isVotingConcluded && (
-              <Button type="submit" leftIcon={<MdHowToVote />} mt={[8, 8, 0]}>
-                Cast vote now
-              </Button>
+              <Box w="full">
+                <Button
+                  w="full"
+                  isDisabled={hasNoVotes || isFormDisabled}
+                  type="submit"
+                  leftIcon={<MdHowToVote />}
+                  mt={[8, 8, 0]}
+                  isLoading={castAllocationVotes.sendTransactionPending ?? castAllocationVotes.isTxReceiptLoading}>
+                  Cast vote now
+                </Button>
+                {hasNoVotes && (
+                  <Text size="sm" textAlign={"center"} mt={1} color="orange">
+                    You have no votes to cast
+                  </Text>
+                )}
+              </Box>
             )}
           </form>
         </Stack>
