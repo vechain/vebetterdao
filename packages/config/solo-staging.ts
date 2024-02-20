@@ -1,14 +1,14 @@
 import { AppConfig } from "." 
  const config: AppConfig = {
-  "b3trContractAddress": "0x8D2F2f52cF53E36460497aE59B5F11a1cB2a28eF",
-  "vot3ContractAddress": "0x9FFC0Ed8fe30422B63ff688A456c5779C89C7F1B",
-  "b3trGovernorAddress": "0xd4a3b51e50907AA2957DC9b0A66B7bb5162fC950",
-  "timelockContractAddress": "0x6ABfcb052F5805A7293B6D2f9dd9e1375E4D259F",
-  "xAllocationPoolContractAddress": "0xB56Ea441E12f95E35945Ca1c9e666F8952350b1C",
-  "xAllocationVotingContractAddress": "0xf15CCdFD9e7537a95a8FE536D2a98094193674B1",
-  "emissionsContractAddress": "0x84cFCb5D0653E956e900a9E920E0A1fA2808bEcC",
-  "voterRewardsContractAddress": "0x781F940CcB27c1bb6aCF719aD3c71b9ceb9E334d",
-  "nftBadgeContractAddress": "0x6c4cB7B6d5693e6F94c445f296C83F2fC28b8e35",
+  "b3trContractAddress": "0x84Ab00E011eF4C5919cC3E761D0821966C0cBb19",
+  "vot3ContractAddress": "0x9307119cb5F4033C05F64788829dE33b8015EC8f",
+  "b3trGovernorAddress": "0x1274fCAA280f4BeEaD6ee98A893Dd02B233D4a81",
+  "timelockContractAddress": "0x7d00f89fB3729Af5f0A0DbBB984e890a04c70D29",
+  "xAllocationPoolContractAddress": "0xAa4134Fb1Fa938FbFF1ebc8b231F0aAC53001923",
+  "xAllocationVotingContractAddress": "0xE6Ebebf3D0e0f5Be7e3675d910a3d6915A25abCa",
+  "emissionsContractAddress": "0xbaC101eBBC89114ECE622Bb01d17DB9671C669b7",
+  "voterRewardsContractAddress": "0xE598eF799d6425228774aaA252eD5ACb04A7A30E",
+  "nftBadgeContractAddress": "0x2ca20cAa2A46271DD9BD85Bfcb5BD1bfE609683f",
   "nodeUrl": "https://thor-solo.dev.rewards.vechain.org",
   "network": {
     "id": "solo-staging",
