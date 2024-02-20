@@ -108,7 +108,8 @@ contract VoterRewards is AccessControl, ReentrancyGuard {
 
     uint256 totalCycle = cycleToTotal[cycle];
 
-    uint256 emissionsAmount = emissions.getVote2EarnAmountForCycle(cycle);
+    uint256 emissionsAmount = emissions.getVote2EarnAmount(cycle);
+    require(emissionsAmount > 0, "VoterRewards: emissionsAmount must be greater than 0");
 
     // Scale up the numerator before division to improve precision
     uint256 scaledNumerator = total * emissionsAmount * scalingFactor; // Scale by a factor of scalingFactor for precision

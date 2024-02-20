@@ -12,6 +12,7 @@ import {
   voteOnApps,
   addAppsToAllocationVoting,
   waitForRoundToEnd,
+  bootstrapEmissions,
 } from "./helpers"
 import { expect } from "chai"
 import { ethers } from "hardhat"
@@ -88,8 +89,8 @@ describe("VoterRewards", () => {
       await getVot3Tokens(voter2, "1000")
       await getVot3Tokens(voter3, "1000")
 
-      // Grant minter role to emissions contract
-      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
       let tx = await emissions.connect(minterAccount).start()
 
@@ -205,9 +206,7 @@ describe("VoterRewards", () => {
 
       // Reward claiming
       expect(await emissions.isCycleDistributed(1)).to.equal(true)
-      expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(
-        await emissions.getVote2EarnAmountForCycle(1),
-      )
+      expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(await emissions.getVote2EarnAmount(1))
 
       const voter1Rewards = await voterRewards.getReward(1, otherAccount.address)
       const voter2Rewards = await voterRewards.getReward(1, voter2.address)
@@ -268,8 +267,8 @@ describe("VoterRewards", () => {
       await getVot3Tokens(voter2, "1000")
       await getVot3Tokens(voter3, "1000")
 
-      // Grant minter role to emissions contract
-      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
       await emissions.connect(minterAccount).start()
 
@@ -343,9 +342,7 @@ describe("VoterRewards", () => {
 
       // Reward claiming
       expect(await emissions.isCycleDistributed(1)).to.equal(true)
-      expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(
-        await emissions.getVote2EarnAmountForCycle(1),
-      )
+      expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(await emissions.getVote2EarnAmount(1))
 
       const voter1Rewards = await voterRewards.getReward(1, voter1.address)
       const voter2Rewards = await voterRewards.getReward(1, voter2.address)
@@ -356,7 +353,7 @@ describe("VoterRewards", () => {
       expect(await b3tr.balanceOf(voter1.address)).to.equal(voter1Rewards)
 
       expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(
-        (await emissions.getVote2EarnAmountForCycle(1)) - voter1Rewards,
+        (await emissions.getVote2EarnAmount(1)) - voter1Rewards,
       )
 
       // Second round
@@ -434,7 +431,7 @@ describe("VoterRewards", () => {
 
       // Reward claiming
       expect(await emissions.isCycleDistributed(2)).to.equal(true)
-      expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.gt(await emissions.getVote2EarnAmountForCycle(2)) // Voters of round 1 can still claim rewards of round 1 thus the balance of VoterRewards contract should be greater than the emission amount
+      expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.gt(await emissions.getVote2EarnAmount(2)) // Voters of round 1 can still claim rewards of round 1 thus the balance of VoterRewards contract should be greater than the emission amount
 
       const voter1Rewards2 = await voterRewards.getReward(2, voter1.address)
       const voter2Rewards2 = await voterRewards.getReward(2, voter2.address)
@@ -462,8 +459,8 @@ describe("VoterRewards", () => {
           forceDeploy: true,
         })
 
-      // Grant minter role to emissions contract
-      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
       await emissions.connect(minterAccount).start()
 
@@ -501,8 +498,8 @@ describe("VoterRewards", () => {
 
       await getVot3Tokens(voter1, "1000")
 
-      // Grant minter role to emissions contract
-      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
       await emissions.connect(minterAccount).start()
 
@@ -516,7 +513,7 @@ describe("VoterRewards", () => {
 
       await voterRewards.connect(voter1).claimReward(1, voter1.address)
 
-      expect(await b3tr.balanceOf(voter1.address)).to.equal(await emissions.getVote2EarnAmountForCycle(1)) // Only voter thus all rewards
+      expect(await b3tr.balanceOf(voter1.address)).to.equal(await emissions.getVote2EarnAmount(1)) // Only voter thus all rewards
 
       await catchRevert(voterRewards.claimReward(1, otherAccount.address)) // Should not be able to claim rewards twice
     })
@@ -527,8 +524,8 @@ describe("VoterRewards", () => {
           forceDeploy: true,
         })
 
-      // Grant minter role to emissions contract
-      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
       await emissions.connect(minterAccount).start()
 
