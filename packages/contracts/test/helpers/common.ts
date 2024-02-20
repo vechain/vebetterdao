@@ -172,7 +172,6 @@ export const addAppThroughGovernance = async (
   xAllocationVoting: XAllocationVoting,
   appName: string = "Bike 4 Life" + Math.random(),
   appAddress: string,
-  appMetadata: string = "",
 ) => {
   await createProposalAndExecuteIt(
     proposer,
@@ -182,7 +181,7 @@ export const addAppThroughGovernance = async (
     await ethers.getContractFactory("XAllocationVoting"),
     "Add app to the list",
     "addApp",
-    [appAddress, appName, appMetadata],
+    [appAddress, appName],
   )
 }
 
@@ -237,7 +236,7 @@ export const addAppsToAllocationVoting = async (
 ) => {
   let appIds: string[] = []
   for (const app of apps) {
-    await xAllocationVoting.connect(owner).addApp(app, app, "")
+    await xAllocationVoting.connect(owner).addApp(app, app)
     appIds.push(ethers.keccak256(ethers.toUtf8Bytes(app)))
   }
 
@@ -301,7 +300,7 @@ export const participateInAllocationVoting = async (
 
   const appName = "App" + Math.random()
 
-  await xAllocationVoting.connect(admin).addApp(user.address, appName, "")
+  await xAllocationVoting.connect(admin).addApp(user.address, appName)
   const roundId = await startNewAllocationRound(xAllocationVoting)
 
   // Vote

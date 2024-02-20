@@ -6,7 +6,6 @@ import { BytesLike } from "ethers"
 type App = {
   address: string
   name: string
-  metadata: string
 }
 
 export const seedLocalEnvironment = async (
@@ -31,18 +30,19 @@ export const seedLocalEnvironment = async (
   const APPS: App[] = [
     {
       address: accounts[6].address,
-      name: "Test app 1",
-      metadata: "https://test-app-1.com",
+      name: "Tree Lovers Association",
     },
     {
       address: accounts[7].address,
-      name: "Test app 2",
-      metadata: "https://test-app-2.com",
+      name: "GoGreen",
     },
     {
       address: accounts[8].address,
-      name: "Test app 3",
-      metadata: "https://test-app-3.com",
+      name: "Share4All",
+    },
+    {
+      address: accounts[9].address,
+      name: "RecycleRewards",
     },
   ]
 
@@ -67,6 +67,10 @@ export const seedLocalEnvironment = async (
   const roundId = parseInt((await xAllocationVoting.currentRoundId()).toString())
   console.log("Casting random votes to xDapps...")
   await castVotesToXDapps(xAllocationVoting, accountsToSeed, roundId, amountToSwap, xDappsFromContract)
+
+  // Set xApps baseURI
+  console.log("Set xApps baseURI...")
+  await xAllocationVoting.setBaseURI("ipfs://bafybeifwzkwplas7evdjlz2lwnmuu7v2mtxnqecfaoxpfbfwqvalxgjsru/")
 
   //TODO: SEED multiple rounds and votes (we need to execute a proposal to change the votingPeriod to someseconds)
 
@@ -122,7 +126,7 @@ const addXDapps = async (xAllocationVoting: XAllocationVoting, accounts: Hardhat
     apps.map(async app => {
       return await xAllocationVoting
         .connect(accounts[0])
-        .addApp(app.address, app.name, app.metadata)
+        .addApp(app.address, app.name)
         .then(async tx => await tx.wait())
     }),
   )
