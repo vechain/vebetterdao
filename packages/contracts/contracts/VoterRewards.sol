@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
@@ -94,7 +94,7 @@ contract VoterRewards is AccessControl, ReentrancyGuard {
     cycleToVoterToTotal[cycle][voter] = 0;
 
     // transfer reward to voter
-    b3tr.transfer(voter, reward);
+    require(b3tr.transfer(voter, reward), "VoterRewards: transfer failed");
 
     emit RewardClaimed(cycle, voter, reward);
   }

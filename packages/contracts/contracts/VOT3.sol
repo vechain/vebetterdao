@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
@@ -23,9 +23,10 @@ contract VOT3 is ERC20, ERC20Permit, ERC20Votes, AccessControl {
   }
 
   function stake(uint256 amount) external {
-    require(b3tr.transferFrom(msg.sender, address(this), amount), "Transfer failed");
     _mint(msg.sender, amount);
     _stakedBalances[msg.sender] += amount;
+
+    require(b3tr.transferFrom(msg.sender, address(this), amount), "Transfer failed");
   }
 
   function unstake(uint256 amount) external {

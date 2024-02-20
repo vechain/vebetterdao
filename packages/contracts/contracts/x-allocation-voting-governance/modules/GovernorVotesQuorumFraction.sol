@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v5.0.0) (governance/extensions/GovernorVotesQuorumFraction.sol)
 
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.18;
 
 import { GovernorVotes } from "./GovernorVotes.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
