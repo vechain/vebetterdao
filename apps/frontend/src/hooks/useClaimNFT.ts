@@ -1,10 +1,16 @@
-import { getB3trBadgeBalanceKey, getParticipatedInGovernanceKey } from "@/api"
+import { getB3trBadgeBalanceQueryKey, getParticipatedInGovernanceQueryKey } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
 import { useConnex, useWallet } from "@vechain/dapp-kit-react"
 import { buildClaimNFTTx } from "@/api/contracts/b3trBadge/utils"
+
+/**
+ * Hook to claim an NFT
+ * @param onSuccess callback to call when the NFT is successfully claimed
+ * @returns the result of the transaction
+ */
 
 export const useClaimNFT = ({ onSuccess }: { onSuccess: () => void }): UseSendTransactionReturnValue => {
   const { thor } = useConnex()
@@ -20,16 +26,16 @@ export const useClaimNFT = ({ onSuccess }: { onSuccess: () => void }): UseSendTr
   //Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {
     await queryClient.cancelQueries({
-      queryKey: getB3trBadgeBalanceKey(account),
+      queryKey: getB3trBadgeBalanceQueryKey(account),
     })
     await queryClient.refetchQueries({
-      queryKey: getB3trBadgeBalanceKey(account),
+      queryKey: getB3trBadgeBalanceQueryKey(account),
     })
     await queryClient.cancelQueries({
-      queryKey: getParticipatedInGovernanceKey(account),
+      queryKey: getParticipatedInGovernanceQueryKey(account),
     })
     await queryClient.refetchQueries({
-      queryKey: getParticipatedInGovernanceKey(account),
+      queryKey: getParticipatedInGovernanceQueryKey(account),
     })
 
     toast({

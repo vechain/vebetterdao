@@ -4,6 +4,12 @@ import { useNFTMetadataUri } from "./useNFTMetadataUri"
 import { useIpfsNftImage } from "@/hooks/useIpfsNftImage"
 import { useIpfsMetadata } from "@/hooks/useIpfsMetadata"
 
+/**
+ * Fetches NFT image from IPFS
+ * @param fetchNFT - Whether to fetch the NFT
+ * @returns The NFT image
+ */
+
 export const useNFTImage = (fetchNFT: boolean) => {
   const { account } = useWallet()
   const { data: tokenID, isLoading: isLoadingTokenID, isError: isErrorTokenID } = useTokenIdByAccount(account, fetchNFT)

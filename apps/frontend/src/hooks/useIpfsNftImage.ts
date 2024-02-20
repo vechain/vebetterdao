@@ -1,10 +1,72 @@
-import { getIpfsMedia } from "@/utils"
+import { convertUriToUrl, resolveMediaTypeFromMimeType } from "@/utils"
 import { useQuery } from "@tanstack/react-query"
 
-export const getIpfsNftImageKey = (imageIpfsUri: null | string) => ["ipfsNftImage", imageIpfsUri]
+import axios from "axios"
+import { NFTMediaType } from "@/types"
+
+export interface NFTMedia {
+  image: string
+  mime: string
+  mediaType: NFTMediaType
+}
+export const MAX_IMAGE_SIZE = 1024 * 1024 * 10 // 10MB
+
+/**
+ * Fetches NFT media from IPFS
+ * @param uri - The IPFS URI of the NFT media
+ * @returns The NFT media
+ */
+export const getIpfsMedia = async (uri: string): Promise<NFTMedia> => {
+  const response = await axios.get(convertUriToUrl(uri), {
+    responseType: "blob",
+    maxContentLength: MAX_IMAGE_SIZE,
+  })
+
+  // Check if the MIME type is allowed
+  const allowedMimeTypes = [
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/gif",
+    "image/bmp",
+    "image/tiff",
+    "image/webp",
+    "image/svg+xml",
+  ]
+  if (!allowedMimeTypes.includes(response.data.type)) {
+    throw new Error(`Unsupported MIME type: ${response.data.type}`)
+  }
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.readAsDataURL(response.data)
+    reader.onloadend = () => {
+      resolve({
+        image: reader.result as string,
+        mime: response.data.type,
+        mediaType: resolveMediaTypeFromMimeType(response.data.type),
+      })
+    }
+    reader.onerror = () => {
+      reject(Error("Error occurred while reading blob."))
+    }
+  })
+}
+
+/**
+ * @param imageIpfsUri - The IPFS URI of the NFT media
+ * @returns The NFT media
+ */
+export const getIpfsNftImageQueryKey = (imageIpfsUri: null | string) => ["ipfsNftImage", imageIpfsUri]
+
+/**
+ * Hook to fetch NFT media from IPFS
+ * @param imageIpfsUri - The IPFS URI of the NFT media
+ * @returns The NFT media
+ */
 export const useIpfsNftImage = (imageIpfsUri: null | string) => {
   return useQuery({
-    queryKey: getIpfsNftImageKey(imageIpfsUri),
+    queryKey: getIpfsNftImageQueryKey(imageIpfsUri),
     queryFn: () => getIpfsMedia(imageIpfsUri!),
     enabled: !!imageIpfsUri,
   })

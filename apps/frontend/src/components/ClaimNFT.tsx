@@ -74,7 +74,7 @@ export const ClaimNFT = () => {
         </ModalHeader>
         <ModalBody display={"flex"} alignContent={"center"} alignItems={"center"}>
           <Box rounded="3xl" position={"relative"}>
-            <Image src={imageData?.image} h={"300px"} w="300px" rounded="3xl" />
+            <Image src={imageData?.image} w={["full", "300px"]} aspectRatio="1/1" rounded="3xl" />
             <Box position={"absolute"} bottom={0} roundedBottom={"3xl"} bg={"#00000099"} w="full" py={2} px={4}>
               <Text color={"white"}>{imageMetadata?.name}</Text>
             </Box>

@@ -2,6 +2,11 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { useParticipatedInGovernance } from "./useParticipatedInGovernance"
 import { useB3trBadgeBalance } from "./useB3trBadgeBalance"
 
+/**
+ * Returns whether the user can claim an NFT
+ * @returns Whether the user can claim an NFT
+ */
+
 export const useIsNFTClaimable = () => {
   const { account } = useWallet()
   const {
