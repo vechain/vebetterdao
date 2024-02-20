@@ -93,8 +93,8 @@ const validateMediaFiles = async (filename: string) => {
  * @param metadata - The `XAppMetadata` object to save.
  */
 async function saveMetadataToFile(metadata: XAppMetadata, fileName: string): Promise<void> {
-  await fs.writeFile(`${OUTPUT_PATH}/${fileName}.json`, JSON.stringify(metadata, null, 2))
-  console.log(`Metadata saved to ${OUTPUT_PATH}/${fileName}.json`)
+  await fs.writeFile(`${OUTPUT_PATH}/${fileName}`, JSON.stringify(metadata, null, 2))
+  console.log(`Metadata saved to ${OUTPUT_PATH}/${fileName}`)
 }
 
 // Generate and save the NFT metadata
