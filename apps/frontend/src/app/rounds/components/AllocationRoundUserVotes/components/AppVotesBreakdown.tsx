@@ -92,7 +92,7 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
             <Icon as={FaInfo} color="gray.500" />
             <Text fontSize="sm" color="gray.500">
               This amount was snapshoted at the moment the proposal was created. If you got more VOT3 after that, you
-              will use it on the nexts proposals.
+              will use it on the next proposals.
             </Text>
           </HStack>
         </VStack>
