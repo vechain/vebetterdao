@@ -350,7 +350,7 @@ describe("X-Allocation Voting", function () {
       // Bootstrap emissions
       await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "")
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
       await getVot3Tokens(otherAccount, "1000")
@@ -375,7 +375,7 @@ describe("X-Allocation Voting", function () {
       // Bootstrap emissions
       await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "")
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
       await getVot3Tokens(otherAccount, "1000")
@@ -422,7 +422,7 @@ describe("X-Allocation Voting", function () {
       // Bootstrap emissions
       await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "")
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
       await getVot3Tokens(otherAccount, "1000")
@@ -451,7 +451,7 @@ describe("X-Allocation Voting", function () {
       // Bootstrap emissions
       await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "")
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
       await getVot3Tokens(otherAccount, "1000")
@@ -481,7 +481,7 @@ describe("X-Allocation Voting", function () {
       // Bootstrap emissions
       await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "")
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
       await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address)
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
@@ -551,7 +551,7 @@ describe("X-Allocation Voting", function () {
       // Bootstrap emissions
       await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "")
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
       await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address)
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
@@ -622,7 +622,7 @@ describe("X-Allocation Voting", function () {
       // Bootstrap emissions
       await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "")
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
       await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address)
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
@@ -661,7 +661,7 @@ describe("X-Allocation Voting", function () {
       // Bootstrap emissions
       await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "")
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
       await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address)
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
@@ -706,7 +706,7 @@ describe("X-Allocation Voting", function () {
       // Bootstrap emissions
       await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "")
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
       await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address)
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
