@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.18;
 
 import { IERC165, ERC165 } from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
@@ -7,6 +7,7 @@ import { Context } from "@openzeppelin/contracts/utils/Context.sol";
 import { Nonces } from "@openzeppelin/contracts/utils/Nonces.sol";
 import { IXAllocationVotingGovernor, IERC6372 } from "../interfaces/IXAllocationVotingGovernor.sol";
 import { IXAllocationPool } from "../interfaces/IXAllocationPool.sol";
+import { IGovernor } from "../interfaces/IGovernor.sol";
 
 /**
  * @dev Core of the x-allocation votes governance system, designed to be extended through various modules.
@@ -35,7 +36,7 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
 
   string private _name;
 
-  address internal _b3trGovernor;
+  IGovernor internal _b3trGovernor;
 
   mapping(uint256 roundId => RoundCore) internal _rounds;
   mapping(uint256 roundId => bytes32[]) internal _appsElegibleForVoting;
@@ -45,7 +46,7 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
    */
   constructor(string memory name_, address b3trGovernor_) {
     _name = name_;
-    _b3trGovernor = b3trGovernor_;
+    _b3trGovernor = IGovernor(payable(b3trGovernor_));
   }
 
   // ---------- Modifiers ---------- //
@@ -55,20 +56,13 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
    * parameter setters in {GovernorSettings} are protected using this modifier.
    */
   modifier onlyGovernance() {
-    if (_b3trGovernor != _msgSender()) {
+    if (address(_b3trGovernor) != _msgSender()) {
       revert B3TRGovernorOnlyExecutor(_msgSender());
     }
     _;
   }
 
   // ---------- Setters ---------- //
-
-  /**
-   * @dev Function to receive ETH that will be handled by the governor id disabled.
-   */
-  receive() external payable virtual {
-    revert GovernorDisabledDeposit();
-  }
 
   function finalize(uint256 roundId) public {
     require(!isFinalized(roundId), "Governor: round already finalized");
@@ -143,7 +137,7 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
     return "1";
   }
 
-  function b3trGovernor() public view returns (address) {
+  function b3trGovernor() public view returns (IGovernor) {
     return _b3trGovernor;
   }
 

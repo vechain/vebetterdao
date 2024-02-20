@@ -78,9 +78,9 @@ describe("VoterRewards", () => {
         forceDeploy: true,
       })
 
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "")
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, "")
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address)
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       const voter2 = otherAccounts[3]
       const voter3 = otherAccounts[4]
@@ -139,9 +139,9 @@ describe("VoterRewards", () => {
         })
       })
 
-      expect(decodedEvents[0]?.args?.[0]).to.equal(1) // Cycle
-      expect(decodedEvents[0]?.args?.[1]).to.equal(otherAccount.address) // Voter
-      expect(decodedEvents[0]?.args?.[2]).to.equal(ethers.parseEther("500")) // Votes
+      expect(decodedEvents[1]?.args?.[0]).to.equal(1) // Cycle
+      expect(decodedEvents[1]?.args?.[1]).to.equal(otherAccount.address) // Voter
+      expect(decodedEvents[1]?.args?.[2]).to.equal(ethers.parseEther("500")) // Votes
 
       expect(await emissions.isCycleEnded(1)).to.equal(false)
 
@@ -256,9 +256,9 @@ describe("VoterRewards", () => {
         forceDeploy: true,
       })
 
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "")
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, "")
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address)
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       const voter2 = otherAccounts[3]
       const voter3 = otherAccounts[4]

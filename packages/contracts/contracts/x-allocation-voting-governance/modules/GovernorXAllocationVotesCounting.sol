@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.18;
 
 import { XAllocationVotingGovernor } from "../XAllocationVotingGovernor.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
@@ -70,8 +70,6 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
       "Governor: account has insufficient voting power for this round"
     );
 
-    voterRewards.registerXallocationVote(round.voteStart, voter, totalWeight);
-
     _roundVotes[roundId].totalVotes += totalWeight;
     _roundVotes[roundId].hasVoted[voter] = true;
     _roundVotes[roundId].totalVoters++;
@@ -82,6 +80,8 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
     }
 
     emit AllocationVoteCast(voter, roundId, apps, weights);
+
+    voterRewards.registerXallocationVote(round.voteStart, voter, totalWeight);
   }
 
   function getAppVotes(uint256 roundId, bytes32 app) public view override returns (uint256) {
