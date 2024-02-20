@@ -44,7 +44,7 @@ export default function Home() {
           </VStack>
           <VStack spacing={4} flex={2.5} position={["static", "static", "sticky"]} top={100} right={0}>
             <VoterRewards />
-            <AllocationRoundsList maxRounds={3} />
+            <AllocationRoundsList roundsPerPage={3} showLoadMore={false} />
           </VStack>
         </Stack>
       </Suspense>

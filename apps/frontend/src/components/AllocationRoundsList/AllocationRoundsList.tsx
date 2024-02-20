@@ -2,12 +2,15 @@ import { Alert, AlertDescription, AlertIcon, AlertTitle, Box, Button, Heading, V
 import { useAllocationsRound, useAllocationsRoundsEvents, useCurrentAllocationsRoundId } from "@/api"
 import { AllocationRoundCard } from "./components/AllocationRoundCard"
 import { useDistributeEmission } from "@/hooks"
-import { useMemo } from "react"
+import { useCallback, useMemo, useState } from "react"
 
 type Props = {
-  maxRounds?: number
+  roundsPerPage?: number
+  showLoadMore?: boolean
 }
-export const AllocationRoundsList: React.FC<Props> = ({ maxRounds }) => {
+export const AllocationRoundsList: React.FC<Props> = ({ roundsPerPage = 3, showLoadMore = false }) => {
+  const [totalRoundsToShow, setTotalRoundsToShow] = useState<number>(roundsPerPage)
+
   const { data: allocationRoundsEvents, error: allocationRoundEventsError } = useAllocationsRoundsEvents()
   const invertedCreatedRounds = allocationRoundsEvents?.created.slice().reverse()
 
@@ -21,6 +24,16 @@ export const AllocationRoundsList: React.FC<Props> = ({ maxRounds }) => {
   const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useDistributeEmission({})
 
   const distributionLoading = isTxReceiptLoading || sendTransactionPending
+
+  const loadMore = useCallback(() => {
+    setTotalRoundsToShow(prev => prev + roundsPerPage)
+  }, [totalRoundsToShow])
+
+  const renderRounds = useCallback(() => {
+    return invertedCreatedRounds?.slice(0, totalRoundsToShow)?.map((round, i) => {
+      return <AllocationRoundCard round={round} key={round.roundId} />
+    })
+  }, [totalRoundsToShow])
 
   return (
     <VStack spacing={8} w="full" align={"flex-start"}>
@@ -48,12 +61,10 @@ export const AllocationRoundsList: React.FC<Props> = ({ maxRounds }) => {
             </Box>
           </Alert>
         )}
-        {invertedCreatedRounds?.slice(0, maxRounds).map((round, i) => {
-          return <AllocationRoundCard round={round} key={round.roundId} />
-        })}
-        {invertedCreatedRounds && maxRounds && invertedCreatedRounds.length > maxRounds && (
-          <Button variant="link" colorScheme="blue">
-            See previous rounds
+        {renderRounds()}
+        {invertedCreatedRounds && invertedCreatedRounds.length > totalRoundsToShow && showLoadMore && (
+          <Button variant="link" colorScheme="blue" onClick={loadMore}>
+            Load more
           </Button>
         )}
       </VStack>
