@@ -21,7 +21,6 @@ import {
 import { WalletButton, useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
 import { SwapB3trButton } from "./SwapB3trButton"
-import { getConfig } from "@repo/config"
 import { backdropBlurAnimation } from "@/app/theme"
 import { B3TRIcon, VOT3Icon } from "./Icons"
 
