@@ -23,11 +23,11 @@ interface IEmissions {
 
   function b3tr() external view returns (address);
 
-    function bootstrap() external;
+  function bootstrap() external;
 
-    function start() external;
+  function start() external;
 
-    function cycleDuration() external view returns (uint256);
+  function cycleDuration() external view returns (uint256);
 
   function distribute() external;
 
@@ -35,7 +35,7 @@ interface IEmissions {
 
   function getCurrentCycle() external view returns (uint256);
 
-    function getInitialAllocations() external view returns (uint256[] memory);
+  function getInitialAllocations() external view returns (uint256[] memory);
 
   function getNextCycleBlock() external view returns (uint256);
 
@@ -45,20 +45,11 @@ interface IEmissions {
 
   function getScaledDecayPercentage(uint256 decayPercentage) external view returns (uint256);
 
-    function getTreasuryAmount(uint256 cycle)
-        external
-        view
-        returns (uint256);
+  function getTreasuryAmount(uint256 cycle) external view returns (uint256);
 
-    function getVote2EarnAmount(uint256 cycle)
-        external
-        view
-        returns (uint256);
+  function getVote2EarnAmount(uint256 cycle) external view returns (uint256);
 
-    function getXAllocationAmount(uint256 cycle)
-        external
-        view
-        returns (uint256);
+  function getXAllocationAmount(uint256 cycle) external view returns (uint256);
 
   function getXAllocationDecayPeriods() external view returns (uint256);
 
@@ -66,7 +57,7 @@ interface IEmissions {
 
   function hasRole(bytes32 role, address account) external view returns (bool);
 
-    function initialEmissions() external view returns (uint256);
+  function initialEmissions() external view returns (uint256);
 
   function isCycleDistributed(uint256 cycle) external view returns (bool);
 
@@ -80,9 +71,9 @@ interface IEmissions {
 
   function nextCycle() external view returns (uint256);
 
-    function initialAllocations(uint256) external view returns (uint256);
+  function initialAllocations(uint256) external view returns (uint256);
 
-    function renounceRole(bytes32 role, address callerConfirmation) external;
+  function renounceRole(bytes32 role, address callerConfirmation) external;
 
   function revokeRole(bytes32 role, address account) external;
 
@@ -90,13 +81,13 @@ interface IEmissions {
 
   function setCycleDuration(uint256 _cycleDuration) external;
 
-    function setInitialEmissions(uint256 _emissions) external;
+  function setInitialEmissions(uint256 _emissions) external;
 
   function setMaxVote2EarnDecay(uint256 _maxVote2EarnDecay) external;
+  
+  function setInitialAllocations(uint256[] memory _allocations) external;
 
-    function setInitialAllocations(uint256[] memory _allocations) external;
-
-    function setScalingFactor(uint256 _scalingFactor) external;
+  function setScalingFactor(uint256 _scalingFactor) external;
 
   function setTreasuryAddress(address treasuryAddress) external;
 
@@ -106,17 +97,17 @@ interface IEmissions {
 
   function setVote2EarnDecay(uint256 _decay) external;
 
-    function setVote2EarnDecayPeriod(uint256 _delay) external;
+  function setVote2EarnDecayPeriod(uint256 _delay) external;
 
   function setXAllocationsDecay(uint256 _decay) external;
 
-    function setXAllocationsDecayPeriod(uint256 _delay) external;
+  function setXAllocationsDecayPeriod(uint256 _delay) external;
 
   function setXAllocationsGovernorAddress(address _xAllocationsGovernor) external;
 
   function setXallocationsAddress(address xAllocationAddress) external;
 
-    function supportsInterface(bytes4 interfaceId) external view returns (bool);
+  function supportsInterface(bytes4 interfaceId) external view returns (bool);
 
   function totalEmissions() external view returns (uint256);
 
