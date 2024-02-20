@@ -424,6 +424,8 @@ describe("VoterRewards", () => {
 
       await waitForNextCycle(emissions)
 
+      expect(await emissions.isCycleEnded(2)).to.equal(true)
+
       expect(await emissions.isCycleDistributed(await emissions.nextCycle())).to.equal(false)
       expect(await emissions.isNextCycleDistributable()).to.equal(true)
 
