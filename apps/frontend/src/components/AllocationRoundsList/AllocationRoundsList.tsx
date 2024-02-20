@@ -7,8 +7,13 @@ import { useCallback, useMemo, useState } from "react"
 type Props = {
   roundsPerPage?: number
   showLoadMore?: boolean
+  cardVariant?: "compact" | "full"
 }
-export const AllocationRoundsList: React.FC<Props> = ({ roundsPerPage = 3, showLoadMore = false }) => {
+export const AllocationRoundsList: React.FC<Props> = ({
+  roundsPerPage = 3,
+  showLoadMore = false,
+  cardVariant = "compact",
+}) => {
   const [totalRoundsToShow, setTotalRoundsToShow] = useState<number>(roundsPerPage)
 
   const { data: allocationRoundsEvents, error: allocationRoundEventsError } = useAllocationsRoundsEvents()
@@ -31,7 +36,7 @@ export const AllocationRoundsList: React.FC<Props> = ({ roundsPerPage = 3, showL
 
   const renderRounds = useCallback(() => {
     return invertedCreatedRounds?.slice(0, totalRoundsToShow)?.map((round, i) => {
-      return <AllocationRoundCard round={round} key={round.roundId} />
+      return <AllocationRoundCard round={round} key={round.roundId} variant={cardVariant} />
     })
   }, [totalRoundsToShow])
 
