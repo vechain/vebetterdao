@@ -169,6 +169,7 @@ export const getOrDeployContractInstances = async ({
     await timeLock.getAddress(),
     await voterRewards.getAddress(),
     [await timeLock.getAddress(), owner.address],
+    "ipfs://",
   )
   await xAllocationVoting.waitForDeployment()
 

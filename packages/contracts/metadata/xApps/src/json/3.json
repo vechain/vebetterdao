@@ -1,0 +1,15 @@
+{
+  "name": "Share4All",
+  "description": "Share4All is a groundbreaking app that transforms the way we commute by incentivizing users to share rides and reduce their carbon footprint. This innovative platform is designed to promote eco-friendly transportation solutions, fostering a sense of community and environmental responsibility.",
+  "external_url": "https://openseacreatures.io/3",
+  "logo": "",
+  "banner": "",
+  "screenshots": [],
+  "social_urls": [],
+  "app_urls": [
+    {
+      "code": "web_app",
+      "url": "https://www.myapp.com"
+    }
+  ]
+}

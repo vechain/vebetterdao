@@ -259,6 +259,7 @@ async function deployXAllocationVoting(
   voterRewardsAddress: string,
   quorumPercentage: number = 50,
   xAllocationVotingPeriod: number = 10,
+  baseURI: string = "ipfs://",
 ) {
   console.log(`Deploying XAllocationVoting contract`)
   const XAllocationVotingContract = await ethers.getContractFactory("XAllocationVoting")
@@ -269,6 +270,7 @@ async function deployXAllocationVoting(
     timeLockAddress,
     voterRewardsAddress,
     [timeLockAddress, adminAddress],
+    baseURI,
   )
 
   await contract.waitForDeployment()

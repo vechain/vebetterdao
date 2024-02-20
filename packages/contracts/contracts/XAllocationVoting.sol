@@ -32,13 +32,15 @@ contract XAllocationVoting is
     uint32 _initialVotingPeriod,
     address _b3trGovernor,
     address _voterRewards,
-    address[] memory _admins
+    address[] memory _admins,
+    string memory _xAppsBaseURI
   )
     XAllocationVotingGovernor("XAllocationVoting", _b3trGovernor)
     GovernorSettings(_initialVotingPeriod)
     GovernorVotes(_vot3Token)
     GovernorVotesQuorumFraction(_quorumPercentage)
     GovernorXAllocationVotesCounting(_voterRewards)
+    XApps(_xAppsBaseURI)
   {
     for (uint256 i = 0; i < _admins.length; i++) {
       _grantRole(DEFAULT_ADMIN_ROLE, _admins[i]);
@@ -85,12 +87,8 @@ contract XAllocationVoting is
     super.setVotingElegibility(appId, isElegible);
   }
 
-  function addApp(
-    address appAddress,
-    string memory name,
-    string memory metadata
-  ) public override onlyRole(DEFAULT_ADMIN_ROLE) {
-    super.addApp(appAddress, name, metadata);
+  function addApp(address appAddress, string memory name) public override onlyRole(DEFAULT_ADMIN_ROLE) {
+    super.addApp(appAddress, name);
   }
 
   function startNewRound() public override onlyRole(DEFAULT_ADMIN_ROLE) returns (uint256) {
@@ -101,6 +99,10 @@ contract XAllocationVoting is
     require(_newAdmin != address(0), "XAllocationVoting: new admin is the zero address");
 
     _grantRole(DEFAULT_ADMIN_ROLE, _newAdmin);
+  }
+
+  function setBaseURI(string memory baseURI_) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    _setBaseURI(baseURI_);
   }
 
   // ---------- Getters ---------- //
