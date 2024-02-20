@@ -11,7 +11,7 @@ export const AllocationRoundsContent = () => {
         justify="space-between"
         align={["stretch", "stretch", "flex-start"]}
         spacing={18}>
-        <HStack width="70%" flex={4} justifyContent="stretch" alignItems={"stretch"} spacing={4}>
+        <HStack width="full" flex={4} justifyContent="stretch" alignItems={"stretch"} spacing={4}>
           <AllocationRoundsList roundsPerPage={8} showLoadMore cardVariant="full" />
         </HStack>
         <VStack spacing={4} flex={2.5} position={["static", "static", "sticky"]} top={100} right={0}>
