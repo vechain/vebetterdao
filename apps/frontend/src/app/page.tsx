@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Spinner, Stack, VStack } from "@chakra-ui/react"
+import { Box, Show, Spinner, Stack, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { Suspense } from "react"
 
@@ -18,16 +18,14 @@ const AllocationRoundsList = dynamic(
   { ssr: false },
 )
 
-const VoterRewards = dynamic(
-  () => import("@/components/VoterRewards/VoterRewards").then(mod => mod.VoterRewards),
-  { ssr: false },
-)
+const VoterRewards = dynamic(() => import("@/components/VoterRewards/VoterRewards").then(mod => mod.VoterRewards), {
+  ssr: false,
+})
 
 export default function Home() {
   return (
     <VStack w="full" spacing={12}>
       <Suspense fallback={<Spinner alignSelf={"center"} />}>
-        <BalanceCard />
         <Stack
           direction={["column-reverse", "column-reverse", "row"]}
           w="full"
@@ -35,6 +33,9 @@ export default function Home() {
           align={["stretch", "stretch", "flex-start"]}
           spacing={18}>
           <VStack flex={4} justifyContent="stretch" alignItems={"stretch"} spacing={4}>
+            <Show above="sm">
+              <BalanceCard />
+            </Show>
             <Box>
               <CirculatingSupplyPieChart />
             </Box>
@@ -43,6 +44,9 @@ export default function Home() {
             </Box>
           </VStack>
           <VStack spacing={4} flex={2.5} position={["static", "static", "sticky"]} top={100} right={0}>
+            <Show below="sm">
+              <BalanceCard />
+            </Show>
             <VoterRewards />
             <AllocationRoundsList maxRounds={3} />
           </VStack>
