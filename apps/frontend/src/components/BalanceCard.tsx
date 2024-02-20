@@ -92,8 +92,8 @@ export const BalanceCard: React.FC<Props> = () => {
       </Stack>
     )
 
-  const mobileBalance = (
-    <VStack spacing={6} w="full" color={"black"}>
+  const balances = (
+    <>
       <VStack
         bgGradient={`linear(to-r, primary.${bgGradientFirst}, primary.${bgGradientSecond})`}
         py={6}
@@ -152,70 +152,7 @@ export const BalanceCard: React.FC<Props> = () => {
           </VStack>
         </HStack>
       </VStack>
-    </VStack>
-  )
-
-  const desktopBalance = (
-    <HStack justify={"space-between"} w="full" spacing={6} color={"black"}>
-      <VStack
-        bgGradient={`linear(to-r, primary.${bgGradientFirst}, primary.${bgGradientSecond})`}
-        py={6}
-        px={6}
-        h="full"
-        w="full"
-        borderRadius={"2xl"}
-        align="flex-start"
-        spacing={12}>
-        <HStack align={"stretch"} justify={"stretch"} spacing={4}>
-          <Divider
-            orientation="vertical"
-            variant="thick"
-            w="4px"
-            bgColor={`primary.${dividerColor}`}
-            h="auto"
-            borderRadius="7px"
-          />
-          <VStack align="self-start">
-            <B3TRIcon size={32} />
-            <Heading size="2xl" fontWeight={900}>
-              {compactFormatter.format(Number(b3trBalanceScaled))}
-            </Heading>
-            <Text fontSize="16px" fontWeight="500">
-              B3TR Tokens
-            </Text>
-          </VStack>
-        </HStack>
-      </VStack>
-      <VStack
-        bgGradient={`linear(to-r, secondary.${bgGradientFirst}, secondary.${bgGradientSecond})`}
-        py={6}
-        px={6}
-        h="full"
-        w="full"
-        borderRadius={"2xl"}
-        align="flex-start"
-        spacing={12}>
-        <HStack align={"stretch"} justify={"stretch"} spacing={4}>
-          <Divider
-            orientation="vertical"
-            variant="thick"
-            w="4px"
-            bgColor={`secondary.${dividerColor}`}
-            h="auto"
-            borderRadius="7px"
-          />
-          <VStack align="self-start">
-            <VOT3Icon size={32} />
-            <Heading size="2xl" fontWeight={900}>
-              {compactFormatter.format(Number(vot3BalanceScaled))}
-            </Heading>
-            <Text fontSize="16px" fontWeight="500">
-              VOT3 Tokens
-            </Text>
-          </VStack>
-        </HStack>
-      </VStack>
-    </HStack>
+    </>
   )
 
   return (
@@ -226,8 +163,18 @@ export const BalanceCard: React.FC<Props> = () => {
             <Heading size="md">Balance</Heading>
             <Flex>{isLoading ? <Spinner size="sm" /> : <SwapB3trButton />}</Flex>
           </HStack>
-          <Show below="sm">{mobileBalance}</Show>
-          <Show above="sm">{desktopBalance}</Show>
+          <Show below="sm">
+            {" "}
+            <VStack spacing={6} w="full" color={"black"}>
+              {balances}
+            </VStack>
+          </Show>
+          <Show above="sm">
+            {" "}
+            <HStack justify={"space-between"} w="full" spacing={6} color={"black"}>
+              {balances}
+            </HStack>
+          </Show>
         </VStack>
       </CardBody>
       {!account && (
