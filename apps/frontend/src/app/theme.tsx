@@ -1,6 +1,14 @@
 import { ThemeConfig, extendTheme, keyframes } from "@chakra-ui/react"
+import "@fontsource-variable/instrument-sans"
+import "@fontsource-variable/inter"
 
 const themeConfig: ThemeConfig = {
+  //@ts-ignore
+  fonts: {
+    heading: `"Instrument Sans Variable", sans-serif`,
+    body: `"Inter Variable", sans-serif`,
+  },
+
   // 2. Add your color mode config
   initialColorMode: "system",
   useSystemColorMode: true,
