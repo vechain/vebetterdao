@@ -113,7 +113,7 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
                   {roundAmountError ? (
                     <Text color="red.500">{roundAmountError.message}</Text>
                   ) : (
-                    <Heading size="2xl">{compactFormatter.format(totalAmount)}</Heading>
+                    <Heading size="2xl">{compactFormatter.format(Number(roundAmount?.voteX2Earn))}</Heading>
                   )}
                 </Skeleton>
                 <Text fontSize={"md"} textTransform={"uppercase"}>
@@ -122,18 +122,22 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
               </Box>
 
               <HStack spacing={12}>
-                <Skeleton isLoaded={!xAppsLoading}>
-                  <Heading size="xl">{xApps?.length}</Heading>
+                <Box>
+                  <Skeleton isLoaded={!xAppsLoading}>
+                    <Heading size="xl">{xApps?.length}</Heading>
+                  </Skeleton>
                   <Text fontSize={"md"} textTransform={"uppercase"}>
                     Participating dApps
                   </Text>
-                </Skeleton>
-                <Skeleton isLoaded={!totalVotersLoading}>
-                  <Heading size="xl">{totalVoters}</Heading>
+                </Box>
+                <Box>
+                  <Skeleton isLoaded={!totalVotersLoading}>
+                    <Heading size="xl">{totalVoters}</Heading>
+                  </Skeleton>
                   <Text fontSize={"md"} textTransform={"uppercase"}>
                     Total voters
                   </Text>
-                </Skeleton>
+                </Box>
               </HStack>
             </VStack>
           </VStack>
