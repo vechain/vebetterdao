@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { VechainLogo } from "../VechainLogo"
+import { VeBetterDaoLogo } from "../VeBetterDaoLogo"
 
 export const NavbarLogo = () => {
   const pathname = usePathname()
@@ -8,8 +8,8 @@ export const NavbarLogo = () => {
   if (pathname !== "/")
     return (
       <Link href={"/"}>
-        <VechainLogo />
+        <VeBetterDaoLogo />
       </Link>
     )
-  return <VechainLogo />
+  return <VeBetterDaoLogo />
 }
