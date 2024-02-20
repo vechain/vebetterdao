@@ -96,7 +96,7 @@ export const BalanceCard: React.FC<Props> = () => {
           <AlertIcon />
           <Box>
             <AlertTitle>You have no balance</AlertTitle>
-            <AlertDescription>Mint some tokens to get started.</AlertDescription>
+            <AlertDescription>Interact with x2Earn dapps to get started!</AlertDescription>
           </Box>
         </Alert>
       </Stack>

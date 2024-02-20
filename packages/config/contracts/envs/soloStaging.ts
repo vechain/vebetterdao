@@ -10,7 +10,7 @@ export function createSoloStagingConfig() {
     B3TR_GOVERNOR_VOTING_DELAY: 90, // How many blocks till a proposal vote becomes active
     B3TR_GOVERNOR_PROPOSAL_THRESHOLD: 1000, // How many votes are needed to create a proposal
 
-    EMISSIONS_CYCLE_DURATION: 180, // blocks - 180 blocks : 30 minutes
+    EMISSIONS_CYCLE_DURATION: 30, // blocks - 30 blocks - 5 minutes.
     EMISSIONS_INITIAL_EMISSIONS: 2000000,
     EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE: 4, // 4% decay every cycle
     EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE: 20,
