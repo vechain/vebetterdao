@@ -21,7 +21,6 @@ import { FormattingUtils } from "@repo/utils"
 import BigNumber from "bignumber.js"
 import { PieSectorDataItem } from "recharts/types/polar/Pie"
 import { ActiveShape } from "recharts/types/util/types"
-import { MintB3trButton } from "./MintB3trButton"
 
 const RenderActiveShape: ActiveShape<PieSectorDataItem> = ({ ...props }) => {
   const RADIAN = Math.PI / 180
@@ -145,7 +144,6 @@ export const CirculatingSupplyPieChart = () => {
             <Heading size="md">Supply breakdown</Heading>
             <Text fontSize="sm">How much B3TR is in circulation and how much is locked?</Text>
           </VStack>
-          <MintB3trButton />
         </HStack>
       </CardHeader>
       <CardBody w="full">
