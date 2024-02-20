@@ -82,8 +82,13 @@ contract VoterRewards is AccessControl, ReentrancyGuard {
   //TODO - registerGovernorVote (for the general purpose governor proposals)
 
   function claimReward(uint256 cycle, address voter) public nonReentrant {
+    require(cycle > 0, "VoterRewards: cycle must be greater than 0");
+    require(voter != address(0), "VoterRewards: voter cannot be the zero address");
+    require(emissions.isCycleEnded(cycle), "VoterRewards: cycle must be ended");
+
     uint256 reward = getReward(cycle, voter);
 
+    require(reward > 0, "VoterRewards: reward must be greater than 0");
     require(b3tr.balanceOf(address(this)) >= reward, "VoterRewards: not enough B3TR in the contract to pay reward");
 
     cycleToVoterToTotal[cycle][voter] = 0;
@@ -99,17 +104,11 @@ contract VoterRewards is AccessControl, ReentrancyGuard {
   // ----------------- Getters ----------------- //
 
   function getReward(uint256 cycle, address voter) public view returns (uint256) {
-    require(cycle > 0, "VoterRewards: cycle must be greater than 0");
-    require(voter != address(0), "VoterRewards: voter cannot be the zero address");
-    require(emissions.isCycleEnded(cycle), "VoterRewards: cycle must be ended");
-
     uint256 total = cycleToVoterToTotal[cycle][voter];
-    require(total > 0, "VoterRewards: voter has no votes or has already claimed in the cycle");
 
     uint256 totalCycle = cycleToTotal[cycle];
-    require(totalCycle > 0, "VoterRewards: there are no votes in the cycle");
 
-    uint256 emissionsAmount = emissions.getVote2EarnAmountForCycle(cycle);
+    uint256 emissionsAmount = emissions.getVote2EarnAmount(cycle);
     require(emissionsAmount > 0, "VoterRewards: emissionsAmount must be greater than 0");
 
     // Scale up the numerator before division to improve precision
@@ -118,7 +117,7 @@ contract VoterRewards is AccessControl, ReentrancyGuard {
 
     // Scale down the reward to the original scale
     return reward / scalingFactor;
-}
+  }
 
   // ----------------- Setters ----------------- //
 

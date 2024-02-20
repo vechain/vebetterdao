@@ -32,6 +32,6 @@ export function createSoloStagingConfig() {
     INITIAL_VOTE_2_EARN_ALLOCATION: 1000000,
     INITIAL_TREASURY_ALLOCATION: 1750000,
 
-    BASE_URI: "ipfs://bafybeifdelb2rafhbwycwih3scvniwvu3lsmxue3rwg46sukj5p77qgqqe/",
+    BASE_URI: "ipfs://bafybeifdelb2rafhbwycwih3scvniwvu3lsmxue3rwg46sukj5p77qgqqe/", // IPFS base URI for the NFT Badge
   })
 }

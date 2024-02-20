@@ -11,6 +11,7 @@ import {
   parseRoundStartedEvent,
   startNewAllocationRound,
   waitForRoundToEnd,
+  bootstrapEmissions,
 } from "./helpers"
 import { describe, it } from "mocha"
 
@@ -84,7 +85,7 @@ describe("X-Allocation Voting", function () {
       let { roundId } = parseRoundStartedEvent(roundCreated[0], xAllocationVoting)
       expect(roundId).to.eql(BigInt(1))
 
-      //Prposal should be active
+      //Proposal should be active
       let roundState = await xAllocationVoting.state(roundId)
       expect(roundState).to.eql(BigInt(0))
     })
@@ -106,7 +107,7 @@ describe("X-Allocation Voting", function () {
 
       let { roundId } = parseRoundStartedEvent(roundCreated[0], xAllocationVoting)
 
-      //Prposal should be active
+      // Proposal should be active
       let roundState = await xAllocationVoting.state(roundId)
       expect(roundState).to.eql(BigInt(0))
 
@@ -159,8 +160,9 @@ describe("X-Allocation Voting", function () {
       let round = parseInt((await xAllocationVoting.currentRoundId()).toString())
       expect(round).to.eql(0)
 
-      // Grant minter role to emissions contract
-      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
       await emissions.connect(minterAccount).start()
 
       // round should be created
@@ -294,9 +296,13 @@ describe("X-Allocation Voting", function () {
     })
 
     it("App needs to wait next round if added during an ongoing round", async function () {
-      const { otherAccounts, owner, xAllocationVoting } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { otherAccounts, owner, xAllocationVoting, b3tr, emissions, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
       const voter = otherAccounts[0]
       await getVot3Tokens(voter, "1000")
@@ -336,11 +342,15 @@ describe("X-Allocation Voting", function () {
 
   describe("Allocation Voting", function () {
     it("I cannot cast a vote with higher balance than I have", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, otherAccounts, otherAccount, owner, b3tr, emissions, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
       await getVot3Tokens(otherAccount, "1000")
@@ -357,10 +367,15 @@ describe("X-Allocation Voting", function () {
     })
 
     it("I should be able to cast a vote", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
+      const { xAllocationVoting, otherAccounts, otherAccount, owner, b3tr, emissions, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
       await getVot3Tokens(otherAccount, "1000")
@@ -400,10 +415,14 @@ describe("X-Allocation Voting", function () {
     })
 
     it("I should not be able to cast vote twice", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
+      const { xAllocationVoting, otherAccounts, otherAccount, owner, b3tr, emissions, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
       await getVot3Tokens(otherAccount, "1000")
@@ -424,10 +443,15 @@ describe("X-Allocation Voting", function () {
     })
 
     it("Cannot cast a vote if the allocation round ended", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
+      const { xAllocationVoting, otherAccounts, otherAccount, owner, b3tr, emissions, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
       await getVot3Tokens(otherAccount, "1000")
@@ -450,10 +474,14 @@ describe("X-Allocation Voting", function () {
     })
 
     it("I should be able to vote for multiple apps", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
+      const { xAllocationVoting, otherAccounts, otherAccount, owner, minterAccount, b3tr, emissions } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
       await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address)
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
@@ -515,11 +543,15 @@ describe("X-Allocation Voting", function () {
     })
 
     it("Votes should be tracked correctly", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, otherAccounts, otherAccount, owner, b3tr, emissions, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
       await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address)
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
@@ -582,11 +614,15 @@ describe("X-Allocation Voting", function () {
     })
 
     it("I should be able to vote only for apps available in the allocation round", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, otherAccounts, otherAccount, owner, b3tr, emissions, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
       await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address)
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
@@ -617,11 +653,15 @@ describe("X-Allocation Voting", function () {
     })
 
     it("Allocation round should be successfull if quorum was reached", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner, vot3 } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, otherAccounts, otherAccount, owner, vot3, b3tr, minterAccount, emissions } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
       await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address)
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
@@ -658,11 +698,15 @@ describe("X-Allocation Voting", function () {
     }).timeout(18000000)
 
     it("Allocation round should be failed if quorum was not reached", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner, vot3 } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, otherAccounts, otherAccount, owner, vot3, b3tr, emissions, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
       await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address)
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
@@ -697,9 +741,13 @@ describe("X-Allocation Voting", function () {
     }).timeout(18000000)
 
     it("Can track apps available for voting on current and previous rounds correctly", async function () {
-      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, otherAccounts, owner, b3tr, emissions, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
       // 2 apps in round1
       await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
@@ -771,9 +819,13 @@ describe("X-Allocation Voting", function () {
     })
 
     it("Stores that a user voted at least once", async function () {
-      const { xAllocationVoting, otherAccount, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, otherAccount, owner, b3tr, emissions, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
       // Check if user voted
       let voted = await xAllocationVoting.hasVotedOnce(otherAccount.address)
