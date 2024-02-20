@@ -1,7 +1,6 @@
 import { useB3trBalance, useB3trTokenDetails, useVot3Balance, useVot3TokenDetails } from "@/api"
 import {
   Card,
-  CardHeader,
   CardBody,
   Heading,
   HStack,
@@ -12,22 +11,13 @@ import {
   AlertDescription,
   Stat,
   StatGroup,
-  StatHelpText,
   StatLabel,
   StatNumber,
   Stack,
   Box,
-  Hide,
-  useColorModeValue,
-  useToken,
-  Button,
   VStack,
   Show,
   Flex,
-  CardFooter,
-  ModalOverlay,
-  DrawerOverlay,
-  LinkOverlay,
   Text,
 } from "@chakra-ui/react"
 import { WalletButton, useWallet } from "@vechain/dapp-kit-react"
@@ -36,8 +26,8 @@ import { useMemo } from "react"
 import BigNumber from "bignumber.js"
 import { SwapB3trButton } from "./SwapB3trButton"
 import { getConfig } from "@repo/config"
-import { FaRepeat } from "react-icons/fa6"
 import { useTokenColors } from "@/hooks/useTokenColors"
+import { backdropBlurAnimation } from "@/app/theme"
 
 const config = getConfig()
 
@@ -154,14 +144,21 @@ export const BalanceCard: React.FC<Props> = () => {
         </Show>
       </CardBody>
       {!account && (
-        <Flex backdropFilter="blur(10px)" position={"absolute"} h={"100%"} w={"100%"} align="center" justify="center">
-          <Card w={["90%", "50%", "30%"]} rounded="xl">
+        <Flex
+          backdropFilter="blur(10px)"
+          animation={backdropBlurAnimation("0px", "10px")}
+          position={"absolute"}
+          h={"100%"}
+          w={"100%"}
+          align="center"
+          justify="center">
+          <Card w={["90%", "50%", "40%"]} rounded="xl" variant="outline">
             <CardBody>
               <VStack gap={4}>
-                <Heading fontSize="20px" textAlign={"center"}>
-                  You are not connected
+                <Heading fontSize="xl" textAlign={"center"}>
+                  No wallet connected
                 </Heading>
-                <Text textAlign={"center"} fontSize="14px">
+                <Text textAlign={"center"} fontSize="lg" fontWeight={"thin"}>
                   Connect your wallet to check your balance
                 </Text>
                 <WalletButton />

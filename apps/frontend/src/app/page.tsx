@@ -18,6 +18,11 @@ const AllocationRoundsList = dynamic(
   { ssr: false },
 )
 
+const VoterRewards = dynamic(
+  () => import("@/components/VoterRewards/VoterRewards").then(mod => mod.VoterRewards),
+  { ssr: false },
+)
+
 export default function Home() {
   return (
     <VStack w="full" spacing={12}>
@@ -38,6 +43,7 @@ export default function Home() {
             </Box>
           </VStack>
           <VStack spacing={4} flex={2.5} position={["static", "static", "sticky"]} top={100} right={0}>
+            <VoterRewards />
             <AllocationRoundsList maxRounds={3} />
           </VStack>
         </Stack>

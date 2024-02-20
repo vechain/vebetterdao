@@ -1,5 +1,5 @@
 import { RoundCreated, useAllocationsRound } from "@/api"
-import { Box, Card, CardBody, HStack, Heading, Icon, Tag, Text, useColorModeValue } from "@chakra-ui/react"
+import { Box, Card, CardBody, HStack, Heading, Icon, Text, useColorModeValue } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { FaAngleRight } from "react-icons/fa6"
 import { AllocationRoundStateTag } from "../AllocationRoundStateTag"
