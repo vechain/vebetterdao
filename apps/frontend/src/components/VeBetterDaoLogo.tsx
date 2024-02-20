@@ -6,7 +6,7 @@ import React from "react"
 export const VeBetterDaoLogo: React.FC = () => {
   //TODO: Add dark mode logo
   const lightModeUrl = "/images/logo/vebetterdao.svg"
-  const darkModeUrl = "/images/logo/vebetterdao.svg"
+  const darkModeUrl = "/images/logo/vebetterdao_dark.svg"
   const logoUrl = useColorModeValue(lightModeUrl, darkModeUrl)
 
   //Priority is set to true to prevent the logo from being lazy loaded and FOC
