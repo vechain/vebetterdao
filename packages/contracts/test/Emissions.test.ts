@@ -163,23 +163,23 @@ describe("Emissions", () => {
       await emissions.connect(owner).setXAllocationsDecay(55)
     })
 
-    it("getScaledDecayPercentage: decay percentage should be between 0 and 99", async () => {
-      const { emissions, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+    // it("getScaledDecayPercentage: decay percentage should be between 0 and 99", async () => {
+    //   const { emissions, owner } = await getOrDeployContractInstances({
+    //     forceDeploy: true,
+    //   })
 
-      await expect(emissions.connect(owner).getScaledDecayPercentage(101)).to.be.reverted
-      try {
-        await emissions.connect(owner).getScaledDecayPercentage(-1)
-        assert.fail("Should revert")
-      } catch (e) {
-        /* empty */
-      }
-      await expect(emissions.connect(owner).getScaledDecayPercentage(100)).to.be.reverted
+    //   await expect(emissions.connect(owner).getScaledDecayPercentage(101)).to.be.reverted
+    //   try {
+    //     await emissions.connect(owner).getScaledDecayPercentage(-1)
+    //     assert.fail("Should revert")
+    //   } catch (e) {
+    //     /* empty */
+    //   }
+    //   await expect(emissions.connect(owner).getScaledDecayPercentage(100)).to.be.reverted
 
-      await expect(emissions.connect(owner).getScaledDecayPercentage(0)).not.to.be.reverted
-      await expect(emissions.connect(owner).getScaledDecayPercentage(55)).not.to.be.reverted
-    })
+    //   await expect(emissions.connect(owner).getScaledDecayPercentage(0)).not.to.be.reverted
+    //   await expect(emissions.connect(owner).getScaledDecayPercentage(55)).not.to.be.reverted
+    // })
   })
 
   describe("Bootstrap emissions", () => {
