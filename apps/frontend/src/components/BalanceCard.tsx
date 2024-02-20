@@ -1,4 +1,4 @@
-import { useB3trBalance, useB3trTokenDetails, useVot3Balance, useVot3TokenDetails } from "@/api"
+import { useB3trBalance, useVot3Balance } from "@/api"
 import {
   Card,
   CardBody,
@@ -9,27 +9,30 @@ import {
   AlertIcon,
   AlertTitle,
   AlertDescription,
-  Stat,
-  StatGroup,
-  StatLabel,
-  StatNumber,
   Stack,
   Box,
   VStack,
   Show,
   Flex,
   Text,
+  useColorModeValue,
+  Divider,
 } from "@chakra-ui/react"
 import { WalletButton, useWallet } from "@vechain/dapp-kit-react"
-import { BalancePieChart } from "./BalancePieChart"
 import { useMemo } from "react"
-import BigNumber from "bignumber.js"
 import { SwapB3trButton } from "./SwapB3trButton"
 import { getConfig } from "@repo/config"
-import { useTokenColors } from "@/hooks/useTokenColors"
 import { backdropBlurAnimation } from "@/app/theme"
+import { B3TRIcon, VOT3Icon } from "./Icons"
 
-const config = getConfig()
+const DECIMAL_PLACES = 4
+
+// Maximum precision of 4 decimals. Must also round down
+const compactFormatter = new Intl.NumberFormat("en-US", {
+  notation: "compact",
+  compactDisplay: "short",
+  maximumFractionDigits: DECIMAL_PLACES,
+})
 
 type Props = {}
 /**
@@ -39,8 +42,9 @@ type Props = {}
 export const BalanceCard: React.FC<Props> = () => {
   const { account } = useWallet()
 
-  const { data: b3trTokenDetails } = useB3trTokenDetails()
-  const { data: vot3TokenDetails } = useVot3TokenDetails()
+  const bgGradientFirst = useColorModeValue("100", "200")
+  const bgGradientSecond = useColorModeValue("50", "100")
+  const dividerColor = useColorModeValue("500", "600")
 
   const {
     data: b3trBalance,
@@ -52,29 +56,16 @@ export const BalanceCard: React.FC<Props> = () => {
     isLoading: vot3BalanceLoading,
     error: vot3BalanceError,
   } = useVot3Balance(account ?? undefined)
-  const { b3trColor, vot3Color } = useTokenColors()
 
-  const { data: vot3ContractB3trBalance } = useB3trBalance(config.vot3ContractAddress)
+  const b3trBalanceScaled = useMemo(() => {
+    return b3trBalance?.scaled ?? "0"
+  }, [b3trBalance])
+
+  const vot3BalanceScaled = useMemo(() => {
+    return vot3Balance?.scaled ?? "0"
+  }, [vot3Balance])
 
   const isLoading = b3trBalanceLoading || vot3BalanceLoading
-
-  const percentageOfB3trSupply = useMemo(() => {
-    if (!b3trTokenDetails || !b3trBalance) return undefined
-
-    const circulatingSupply = new BigNumber(b3trTokenDetails.circulatingSupply)
-    const balance = new BigNumber(b3trBalance.scaled)
-
-    return balance.dividedBy(circulatingSupply).multipliedBy(100).toFixed(2)
-  }, [b3trTokenDetails, b3trBalance])
-
-  const percentageOfVot3Supply = useMemo(() => {
-    if (!vot3ContractB3trBalance || !vot3Balance) return undefined
-
-    const circulatingSupply = new BigNumber(vot3ContractB3trBalance.scaled)
-    const balance = new BigNumber(vot3Balance.scaled)
-
-    return balance.dividedBy(circulatingSupply).multipliedBy(100).toFixed(2)
-  }, [vot3TokenDetails, vot3Balance])
 
   const hasNoBalance = useMemo(() => {
     return b3trBalance?.scaled === "0" && vot3Balance?.scaled === "0"
@@ -101,47 +92,144 @@ export const BalanceCard: React.FC<Props> = () => {
         </Alert>
       </Stack>
     )
+
+  const mobileBalance = (
+    <VStack spacing={6} w="full" color={"black"}>
+      <VStack
+        bgGradient={`linear(to-r, primary.${bgGradientFirst}, primary.${bgGradientSecond})`}
+        py={6}
+        px={6}
+        h="full"
+        w="full"
+        borderRadius={"2xl"}
+        align="flex-start"
+        spacing={12}>
+        <HStack align={"stretch"} justify={"stretch"} spacing={4}>
+          <Divider
+            orientation="vertical"
+            variant="thick"
+            w="4px"
+            bgColor={`primary.${dividerColor}`}
+            h="auto"
+            borderRadius="7px"
+          />
+          <VStack align="self-start">
+            <B3TRIcon size={32} />
+            <Heading size="2xl" fontWeight={900}>
+              {compactFormatter.format(Number(b3trBalanceScaled))}
+            </Heading>
+            <Text fontSize="16px" fontWeight="500">
+              B3TR Tokens
+            </Text>
+          </VStack>
+        </HStack>
+      </VStack>
+      <VStack
+        bgGradient={`linear(to-r, secondary.${bgGradientFirst}, secondary.${bgGradientSecond})`}
+        py={6}
+        px={6}
+        h="full"
+        w="full"
+        borderRadius={"2xl"}
+        align="flex-start"
+        spacing={12}>
+        <HStack align={"stretch"} justify={"stretch"} spacing={4}>
+          <Divider
+            orientation="vertical"
+            variant="thick"
+            w="4px"
+            bgColor={`secondary.${dividerColor}`}
+            h="auto"
+            borderRadius="7px"
+          />
+          <VStack align="self-start">
+            <VOT3Icon size={32} />
+            <Heading size="2xl" fontWeight={900}>
+              {compactFormatter.format(Number(vot3BalanceScaled))}
+            </Heading>
+            <Text fontSize="16px" fontWeight="500">
+              VOT3 Tokens
+            </Text>
+          </VStack>
+        </HStack>
+      </VStack>
+    </VStack>
+  )
+
+  const desktopBalance = (
+    <HStack justify={"space-between"} w="full" spacing={6} color={"black"}>
+      <VStack
+        bgGradient={`linear(to-r, primary.${bgGradientFirst}, primary.${bgGradientSecond})`}
+        py={6}
+        px={6}
+        h="full"
+        w="full"
+        borderRadius={"2xl"}
+        align="flex-start"
+        spacing={12}>
+        <HStack align={"stretch"} justify={"stretch"} spacing={4}>
+          <Divider
+            orientation="vertical"
+            variant="thick"
+            w="4px"
+            bgColor={`primary.${dividerColor}`}
+            h="auto"
+            borderRadius="7px"
+          />
+          <VStack align="self-start">
+            <B3TRIcon size={32} />
+            <Heading size="2xl" fontWeight={900}>
+              {compactFormatter.format(Number(b3trBalanceScaled))}
+            </Heading>
+            <Text fontSize="16px" fontWeight="500">
+              B3TR Tokens
+            </Text>
+          </VStack>
+        </HStack>
+      </VStack>
+      <VStack
+        bgGradient={`linear(to-r, secondary.${bgGradientFirst}, secondary.${bgGradientSecond})`}
+        py={6}
+        px={6}
+        h="full"
+        w="full"
+        borderRadius={"2xl"}
+        align="flex-start"
+        spacing={12}>
+        <HStack align={"stretch"} justify={"stretch"} spacing={4}>
+          <Divider
+            orientation="vertical"
+            variant="thick"
+            w="4px"
+            bgColor={`secondary.${dividerColor}`}
+            h="auto"
+            borderRadius="7px"
+          />
+          <VStack align="self-start">
+            <VOT3Icon size={32} />
+            <Heading size="2xl" fontWeight={900}>
+              {compactFormatter.format(Number(vot3BalanceScaled))}
+            </Heading>
+            <Text fontSize="16px" fontWeight="500">
+              VOT3 Tokens
+            </Text>
+          </VStack>
+        </HStack>
+      </VStack>
+    </HStack>
+  )
+
   return (
     <Card w="full">
       <CardBody>
-        <Show below="sm">
-          <VStack>
-            <HStack justify={"space-between"} w="full">
-              <Heading size="sm">Balance</Heading>
-              {isLoading ? <Spinner size="sm" /> : <SwapB3trButton />}
-            </HStack>
-            <BalancePieChart b3trBalance={b3trBalance} vot3Balance={vot3Balance} />
-            <StatGroup flexDirection={"row"} alignItems="center" justifyContent="space-between" w="full">
-              <Stat textAlign={"center"}>
-                <StatLabel color={b3trColor}>B3TR</StatLabel>
-                <StatNumber>{b3trBalance?.formatted || "0"}</StatNumber>
-              </Stat>
-              <Stat textAlign={"center"}>
-                <StatLabel color={vot3Color}>VOT3</StatLabel>
-                <StatNumber>{vot3Balance?.formatted || "0"}</StatNumber>
-              </Stat>
-            </StatGroup>
-          </VStack>
-        </Show>
-        <Show above="sm">
-          <HStack spacing={8} w="full" align={"flex-start"}>
-            <Heading size="sm">Balance</Heading>
-            <Flex flex={1}>
-              <BalancePieChart b3trBalance={b3trBalance} vot3Balance={vot3Balance} />
-            </Flex>
-            <StatGroup flexDirection={"row"} alignItems="center" justifyContent="center" flex={1} alignSelf={"center"}>
-              <Stat textAlign={"center"}>
-                <StatLabel color={b3trColor}>B3TR</StatLabel>
-                <StatNumber>{b3trBalance?.formatted || "0"}</StatNumber>
-              </Stat>
-              <Stat textAlign={"center"}>
-                <StatLabel color={vot3Color}>VOT3</StatLabel>
-                <StatNumber>{vot3Balance?.formatted || "0"}</StatNumber>
-              </Stat>
-            </StatGroup>
+        <VStack spacing={4} align="flex-start">
+          <HStack justify={"space-between"} w="full">
+            <Heading size="md">Balance</Heading>
             <Flex>{isLoading ? <Spinner size="sm" /> : <SwapB3trButton />}</Flex>
           </HStack>
-        </Show>
+          <Show below="sm">{mobileBalance}</Show>
+          <Show above="sm">{desktopBalance}</Show>
+        </VStack>
       </CardBody>
       {!account && (
         <Flex
