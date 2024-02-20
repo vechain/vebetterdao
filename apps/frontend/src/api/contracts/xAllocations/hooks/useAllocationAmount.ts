@@ -29,11 +29,9 @@ export const getAllocationAmount = async (
   voteXAllocations: string
 }> => {
   const emissionsInterface = Emissions__factory.createInterface()
-  const functionFragmentTreasuryAmount = emissionsInterface.getFunction("getTreasuryAmountForCycle").format("json")
-  const functionFragmentVoteX2EarnAmount = emissionsInterface.getFunction("getVote2EarnAmountForCycle").format("json")
-  const functionFragmentXAllocationsAmount = emissionsInterface
-    .getFunction("getXAllocationAmountForCycle")
-    .format("json")
+  const functionFragmentTreasuryAmount = emissionsInterface.getFunction("getTreasuryAmount").format("json")
+  const functionFragmentVoteX2EarnAmount = emissionsInterface.getFunction("getVote2EarnAmount").format("json")
+  const functionFragmentXAllocationsAmount = emissionsInterface.getFunction("getXAllocationAmount").format("json")
 
   const [resTreasury, resVoteX2Earn, voteXAllocations] = await Promise.all([
     thor.account(EMISSION_CONTRACT).method(JSON.parse(functionFragmentTreasuryAmount)).call(roundId),
