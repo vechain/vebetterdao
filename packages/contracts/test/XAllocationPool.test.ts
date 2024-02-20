@@ -1,6 +1,7 @@
 import { ethers } from "hardhat"
 import { expect } from "chai"
 import {
+  bootstrapEmissions,
   calculateBaseAllocationOffChain,
   calculateVariableAppAllocationOffChain,
   catchRevert,
@@ -29,8 +30,8 @@ describe("X-Allocation Pool", async function () {
       await xAllocationVoting.connect(owner).addApp(otherAccounts[2].address, "My app", "")
       await xAllocationVoting.connect(owner).addApp(otherAccounts[3].address, "My app #2", "")
 
-      // Grant minter role to emissions contract
-      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
       await emissions.connect(minterAccount).start()
 
@@ -111,8 +112,9 @@ describe("X-Allocation Pool", async function () {
       await xAllocationVoting.connect(owner).addApp(app1ReceiverAddress, "My app", "")
       await xAllocationVoting.connect(owner).addApp(app2ReceiverAddress, "My app #2", "")
 
-      // Grant minter role to emissions contract
-      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
       await emissions.connect(minterAccount).start()
 
       //Start allocation round
@@ -166,8 +168,9 @@ describe("X-Allocation Pool", async function () {
       await xAllocationVoting.connect(owner).addApp(app1ReceiverAddress, "My app", "")
       await xAllocationVoting.connect(owner).addApp(app2ReceiverAddress, "My app #2", "")
 
-      // Grant minter role to emissions contract
-      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
       await emissions.connect(minterAccount).start()
 
       //Start allocation round
@@ -209,8 +212,9 @@ describe("X-Allocation Pool", async function () {
       await xAllocationVoting.connect(owner).addApp(app1ReceiverAddress, "My app", "")
       await xAllocationVoting.connect(owner).addApp(app2ReceiverAddress, "My app #2", "")
 
-      // Grant minter role to emissions contract
-      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
       await emissions.connect(minterAccount).start()
 
       //Start allocation round
@@ -255,8 +259,9 @@ describe("X-Allocation Pool", async function () {
       await xAllocationVoting.connect(owner).addApp(app1ReceiverAddress, "My app", "")
       await xAllocationVoting.connect(owner).addApp(app2ReceiverAddress, "My app #2", "")
 
-      // Grant minter role to emissions contract
-      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
       await emissions.connect(minterAccount).start()
 
       //Start allocation round
@@ -296,8 +301,9 @@ describe("X-Allocation Pool", async function () {
       await xAllocationVoting.connect(owner).addApp(app1ReceiverAddress, "My app", "")
       await xAllocationVoting.connect(owner).addApp(app2ReceiverAddress, "My app #2", "")
 
-      // Grant minter role to emissions contract
-      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
       await emissions.connect(minterAccount).start()
 
       //Start allocation round
@@ -337,8 +343,9 @@ describe("X-Allocation Pool", async function () {
       await xAllocationVoting.connect(owner).addApp(app1ReceiverAddress, "My app", "")
       await xAllocationVoting.connect(owner).addApp(app2ReceiverAddress, "My app #2", "")
 
-      // Grant minter role to emissions contract
-      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
       await emissions.connect(minterAccount).start()
 
       //Start allocation round
@@ -354,9 +361,13 @@ describe("X-Allocation Pool", async function () {
     })
 
     it("App can receive a max amount of allocation share", async function () {
-      const { xAllocationVoting, otherAccounts, owner, xAllocationPool } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, otherAccounts, owner, xAllocationPool, b3tr, emissions, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
       const voter1 = otherAccounts[1]
       await getVot3Tokens(voter1, "1000")
@@ -405,8 +416,9 @@ describe("X-Allocation Pool", async function () {
       await xAllocationVoting.connect(owner).addApp(app1ReceiverAddress, "My app", "")
       await xAllocationVoting.connect(owner).addApp(app2ReceiverAddress, "My app #2", "")
 
-      // Grant minter role to emissions contract
-      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
       await emissions.connect(minterAccount).start()
 
       //Start allocation round
@@ -460,8 +472,9 @@ describe("X-Allocation Pool", async function () {
       await xAllocationVoting.connect(owner).addApp(app1ReceiverAddress, "My app", "")
       await xAllocationVoting.connect(owner).addApp(app2ReceiverAddress, "My app #2", "")
 
-      // Grant minter role to emissions contract
-      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
       await emissions.connect(minterAccount).start()
 
       //Start allocation round

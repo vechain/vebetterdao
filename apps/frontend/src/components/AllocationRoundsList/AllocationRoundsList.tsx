@@ -1,5 +1,5 @@
 import { Alert, AlertDescription, AlertIcon, AlertTitle, Box, Button, Heading, VStack } from "@chakra-ui/react"
-import { RoundState, useAllocationsRound, useAllocationsRoundsEvents, useCurrentAllocationsRoundId } from "@/api"
+import { useAllocationsRound, useAllocationsRoundsEvents, useCurrentAllocationsRoundId } from "@/api"
 import { AllocationRoundCard } from "./components/AllocationRoundCard"
 import { useDistributeEmission } from "@/hooks"
 import { useMemo } from "react"

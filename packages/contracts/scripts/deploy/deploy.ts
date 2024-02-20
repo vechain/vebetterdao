@@ -125,6 +125,9 @@ export async function deployAll() {
 
   // Set X allocations governor
   await emissions.connect(admin).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+  // Set voter rewards address in emissions
+  await emissions.connect(admin).setVote2EarnAddress(await voterRewards.getAddress())
+
   // Setup XAllocationPool addresses
   await xAllocationPool.connect(admin).setXAllocationVotingAddress(await xAllocationVoting.getAddress())
   await xAllocationPool.connect(admin).setEmissionsAddress(await emissions.getAddress())
