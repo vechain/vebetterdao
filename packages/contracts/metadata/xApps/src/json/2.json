@@ -9,21 +9,9 @@
     {
       "name": "YouTube",
       "url": "https://www.youtube.com/@DLoaw"
-    },
-    {
-      "name": "Instagram",
-      "url": "https://www.instagram.com/@DLoaw"
     }
   ],
   "app_urls": [
-    {
-      "code": "play_store",
-      "url": "https://www.playstore.com/@DLoaw"
-    },
-    {
-      "code": "apple_store",
-      "url": "https://www.applestore.com/@DLoaw"
-    },
     {
       "code": "web_app",
       "url": "https://www.myapp.com"
