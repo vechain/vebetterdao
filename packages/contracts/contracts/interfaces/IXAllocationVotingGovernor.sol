@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.18;
 
 import { IERC165 } from "@openzeppelin/contracts/interfaces/IERC165.sol";
 import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
@@ -35,11 +35,6 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
    * @dev The vote was already cast.
    */
   error GovernorAlreadyCastVote(address voter);
-
-  /**
-   * @dev Token deposits are disabled in this contract.
-   */
-  error GovernorDisabledDeposit();
 
   /**
    * @dev The `account` is not the governance executor.

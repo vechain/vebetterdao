@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.18;
 
 interface IB3TRBadge {
   error AccessControlBadConfirmation();
@@ -48,7 +48,6 @@ interface IB3TRBadge {
   event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender);
 
   event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
-
 
   function CLOCK_MODE() external view returns (string memory);
 

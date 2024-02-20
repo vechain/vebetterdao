@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.18;
 
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
@@ -39,17 +39,17 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
 
   // ---------- Setters ---------- //
 
-  function addApp(address appAddress, string memory name) public virtual {
-    bytes32 id = hashName(name);
+  function addApp(address appAddress, string memory appName) public virtual {
+    bytes32 id = hashName(appName);
 
     require(_apps[id].addr == address(0), "App with this ID already exists");
 
     // Store the new app
-    _apps[id] = App(id, appAddress, name, clock());
+    _apps[id] = App(id, appAddress, appName, clock());
     _appIds.push(id);
     _pushAppToEligbleApps(id);
 
-    emit AppAdded(id, appAddress, name, true);
+    emit AppAdded(id, appAddress, appName, true);
   }
 
   function setVotingElegibility(bytes32 appId, bool isElegible) public virtual {
@@ -149,8 +149,8 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
     return _isAppElegibleCheckpoints[appId].upperLookupRecent(SafeCast.toUint48(timepoint)) == 1;
   }
 
-  function hashName(string memory name) public pure returns (bytes32) {
-    return keccak256(abi.encodePacked(name));
+  function hashName(string memory appName) public pure returns (bytes32) {
+    return keccak256(abi.encodePacked(appName));
   }
 
   // Function to retrieve an app by ID
@@ -162,7 +162,8 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
   // Function to retrieve all apps
   function getAllApps() public view returns (App[] memory) {
     App[] memory allApps = new App[](_appIds.length);
-    for (uint i = 0; i < _appIds.length; i++) {
+    uint256 length = _appIds.length;
+    for (uint i = 0; i < length; i++) {
       allApps[i] = _apps[_appIds[i]];
     }
     return allApps;

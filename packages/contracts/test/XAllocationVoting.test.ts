@@ -64,6 +64,19 @@ describe("X-Allocation Voting", function () {
       const updatedAddress = await xAllocationVoting.b3trGovernor()
       expect(updatedAddress).to.eql(initialAddress)
     })
+
+    it("Contract should not be able to receive ether", async function () {
+      const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: false })
+
+      expect(
+        owner.sendTransaction({
+          to: await xAllocationVoting.getAddress(),
+          value: ethers.parseEther("1.0"), // Sends exactly 1.0 ether
+        }),
+      ).to.be.reverted
+
+      expect(await ethers.provider.getBalance(await xAllocationVoting.getAddress())).to.eql(0n)
+    })
   })
 
   describe("Allocation rounds", function () {
