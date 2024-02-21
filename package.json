@@ -24,6 +24,7 @@
   "devDependencies": {
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
+    "@vue/cli-plugin-typescript": "^4.5.15",
     "dotenv-cli": "latest",
     "prettier": "^3.2.4",
     "turbo": "^1.11.3"

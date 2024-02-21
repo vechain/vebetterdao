@@ -1,0 +1,32 @@
+name: Deploy to GH pages
+
+on:
+  push:
+    branches: [ github-pages ]
+  workflow_dispatch:
+
+jobs:
+  BuildAndDeploy:
+    runs-on: ubuntu-18.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        working-directory: ./inspector-app
+        run: yarn
+
+      - name: Build Website
+        working-directory: ./inspector-app
+        run: yarn build
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./inspector-app/dist
+          force_orphan: true
