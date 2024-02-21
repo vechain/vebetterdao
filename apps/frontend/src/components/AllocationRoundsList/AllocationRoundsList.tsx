@@ -23,14 +23,12 @@ type Props = {
   showLoadMore?: boolean
   headingSize?: "lg" | "md" | "sm" | "xs"
   showViewAll?: boolean
-  cardBorderColor?: string
 }
 export const AllocationRoundsList: React.FC<Props> = ({
   maxRoundsToShow = 3,
   showLoadMore = false,
   headingSize = "lg",
   showViewAll = true,
-  cardBorderColor,
 }) => {
   const router = useRouter()
 
@@ -46,7 +44,9 @@ export const AllocationRoundsList: React.FC<Props> = ({
     return currentRound?.state === "0"
   }, [currentRound, allocationRoundsEvents])
 
-  const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useDistributeEmission({})
+  const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useDistributeEmission({
+    invalidateCache: true,
+  })
 
   const distributionLoading = isTxReceiptLoading || sendTransactionPending
 
@@ -56,7 +56,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
 
   const renderRounds = useCallback(() => {
     return invertedCreatedRounds?.slice(0, totalRoundsToShow)?.map((round, i) => {
-      return <AllocationRoundCard round={round} key={round.roundId} cardBorderColor={cardBorderColor} />
+      return <AllocationRoundCard round={round} key={round.roundId} />
     })
   }, [totalRoundsToShow])
 
