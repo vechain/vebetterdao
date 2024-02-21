@@ -1,18 +1,16 @@
 import { EnhancedClause } from "@/hooks"
 import { getConfig } from "@repo/config"
 
-import { B3trBadgeContractJson } from "@repo/contracts"
-const b3trBadgeAbi = B3trBadgeContractJson.abi
+import { B3TRBadge__factory } from "@repo/contracts"
 
-const B3TR_BADGE_CONTRACT = getConfig().nftBadgeContractAddress
+const B3trBadgeInterface = B3TRBadge__factory.createInterface()
 
 export const buildClaimNftTx = (thor: Connex.Thor): EnhancedClause => {
-  const functionAbi = b3trBadgeAbi.find(e => e.name === "freeMint")
-  if (!functionAbi) throw new Error("Function abi not found for freeMint")
-
   return {
-    ...thor.account(B3TR_BADGE_CONTRACT).method(functionAbi).asClause(),
+    to: getConfig().b3trContractAddress,
+    value: 0,
+    data: B3trBadgeInterface.encodeFunctionData("freeMint"),
     comment: `Claim NFT`,
-    abi: functionAbi,
+    abi: JSON.parse(JSON.stringify(B3trBadgeInterface.getFunction("freeMint"))),
   }
 }
