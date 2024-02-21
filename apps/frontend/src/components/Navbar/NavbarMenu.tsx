@@ -2,7 +2,10 @@ import { Button, Icon } from "@chakra-ui/react"
 import { usePathname, useRouter } from "next/navigation"
 import { Routes } from "./Routes"
 
-export const NavbarMenu = () => {
+type Props = {
+  onMenuClick?: () => void
+}
+export const NavbarMenu = ({ onMenuClick }: Props) => {
   const router = useRouter()
   const pathname = usePathname()
 
@@ -16,6 +19,7 @@ export const NavbarMenu = () => {
           if (typeof route.onClick === "string") {
             router.push(route.onClick)
           } else route.onClick()
+          onMenuClick?.()
         }
 
         if (!route.isVisible) return null
