@@ -44,9 +44,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
     return currentRound?.state === "0"
   }, [currentRound, allocationRoundsEvents])
 
-  const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useDistributeEmission({
-    invalidateCache: true,
-  })
+  const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useDistributeEmission({})
 
   const distributionLoading = isTxReceiptLoading || sendTransactionPending
 
@@ -58,7 +56,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
     return invertedCreatedRounds?.slice(0, totalRoundsToShow)?.map((round, i) => {
       return <AllocationRoundCard round={round} key={round.roundId} />
     })
-  }, [totalRoundsToShow])
+  }, [totalRoundsToShow, invertedCreatedRounds])
 
   return (
     <VStack spacing={8} w="full" align={"flex-start"}>

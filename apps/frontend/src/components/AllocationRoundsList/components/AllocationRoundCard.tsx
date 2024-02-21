@@ -50,25 +50,17 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
 
   const isCurrentRoundActive = useMemo(() => {
     return currentRound?.state === "0"
-  }, [currentRound])
-
-  const cardHoverBorderColor = useMemo(() => {
-    return isCurrentRoundActive
-      ? useColorModeValue("secondary.400", "secondary.200")
-      : useColorModeValue("gray.400", "gray.200")
-  }, [isCurrentRoundActive])
+  }, [currentRound, currentRound?.state])
 
   const cardActiveBackroundColor = useColorModeValue("secondary.100", "secondary.200")
 
-  const cardTextColor = useMemo(() => {
-    return isCurrentRoundActive ? useColorModeValue("black", "black") : "inherit"
-  }, [isCurrentRoundActive])
+  const cardTextColor = isCurrentRoundActive ? "black" : "inherit"
 
-  const cardBorderColor = useMemo(() => {
-    return isCurrentRoundActive
-      ? useColorModeValue("secondary.100", "black")
-      : useColorModeValue("transparent", "gray.400")
-  }, [isCurrentRoundActive])
+  const activeBorderColor = useColorModeValue("secondary.500", "black")
+  const defaultBorderColor = useColorModeValue("transparent", "gray.500")
+
+  const activeHoverBorderColor = useColorModeValue("secondary.700", "secondary.700")
+  const defaultHoverBorderColor = useColorModeValue("gray.400", "gray.200")
 
   return (
     <Card
@@ -76,10 +68,10 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
       variant="elevated"
       borderWidth={1}
       backgroundColor={isCurrentRoundActive ? cardActiveBackroundColor : "transparent"}
-      borderColor={cardBorderColor}
+      borderColor={isCurrentRoundActive ? activeBorderColor : defaultBorderColor}
       onClick={onRoundClick}
       _hover={{
-        borderColor: cardHoverBorderColor,
+        borderColor: isCurrentRoundActive ? activeHoverBorderColor : defaultHoverBorderColor,
         cursor: "pointer",
         transition: "all 0.2s ease-in-out",
       }}>
@@ -90,7 +82,9 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
               <AllocationRoundStateTag state={allocationRound.state} size="md" />
               <DotSymbol color={cardTextColor} />
               <Text fontWeight={"200"} color={cardTextColor}>
-                {allocationRound.voteStartTimestamp?.fromNow()}
+                {isCurrentRoundActive
+                  ? `ends ${allocationRound.voteEndTimestamp?.fromNow()}`
+                  : `${allocationRound.voteStartTimestamp?.fromNow()}`}
               </Text>
             </HStack>
             <HStack w="full" justify="space-between" color={cardTextColor}>
