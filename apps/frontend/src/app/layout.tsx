@@ -4,7 +4,6 @@ import { Container } from "@chakra-ui/react"
 import { Providers } from "./providers"
 
 import { Navbar } from "@/components/Navbar/Navbar"
-import { Footer } from "@/components/Footer/Footer"
 import dayjs from "dayjs"
 
 import relativeTime from "dayjs/plugin/relativeTime"
@@ -26,7 +25,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             flexDirection={["column"]}>
             {children}
           </Container>
-          <Footer />
         </Providers>
       </body>
     </html>
