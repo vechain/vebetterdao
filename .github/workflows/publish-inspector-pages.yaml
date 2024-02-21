@@ -19,12 +19,14 @@ jobs:
       - name: Install Repo Deps
         run: yarn
 
+      - name: Generate Solo Config
+        run: cp ./packages/config/solo-staging.ts ./packages/config/local.ts
+
       - name: Generate Contract Artifacts
         working-directory: ./packages/contracts
         run: yarn hardhat compile
-
-      - name: Generate Solo Config
-        run: cp ./packages/config/solo-staging.ts ./packages/config/local.ts
+        env:
+          MNEMONIC: denial kitchen pet squirrel other broom bar gas better priority spoil cross
 
       - name: Install Inspector Deps
         working-directory: ./inspector-app
