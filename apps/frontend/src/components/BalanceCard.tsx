@@ -93,8 +93,8 @@ export const BalanceCard: React.FC<Props> = () => {
     )
 
   const balances = (
-    <>
-      <VStack
+    <VStack w={"full"}>
+      <HStack
         bgGradient={`linear(to-r, primary.${bgGradientFirst}, primary.${bgGradientSecond})`}
         py={6}
         px={6}
@@ -122,8 +122,8 @@ export const BalanceCard: React.FC<Props> = () => {
             </Text>
           </VStack>
         </HStack>
-      </VStack>
-      <VStack
+      </HStack>
+      <HStack
         bgGradient={`linear(to-r, secondary.${bgGradientFirst}, secondary.${bgGradientSecond})`}
         py={6}
         px={6}
@@ -151,27 +151,27 @@ export const BalanceCard: React.FC<Props> = () => {
             </Text>
           </VStack>
         </HStack>
-      </VStack>
-    </>
+      </HStack>
+    </VStack>
   )
 
   return (
     <Card w="full">
       <CardBody>
-        <VStack spacing={4} align="flex-start">
+        <VStack spacing={4} align="flex-start" w={"full"}>
           <HStack justify={"space-between"} w="full">
             <Heading size="md">Balance</Heading>
             <Flex>{isLoading ? <Spinner size="sm" /> : <SwapB3trButton />}</Flex>
           </HStack>
           <Show below="sm">
             {" "}
-            <VStack spacing={6} w="full" color={"black"}>
+            <VStack w={"full"} spacing={6} color={"black"}>
               {balances}
             </VStack>
           </Show>
           <Show above="sm">
             {" "}
-            <HStack justify={"space-between"} w="full" spacing={6} color={"black"}>
+            <HStack w={"full"} spacing={6} color={"black"}>
               {balances}
             </HStack>
           </Show>
