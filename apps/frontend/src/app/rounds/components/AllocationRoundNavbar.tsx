@@ -49,15 +49,17 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
         </Button>
 
         <Stack direction={["column", "column", "row"]} spacing={4} align={"center"}>
-          <Heading size="md">{data?.roundId}° round</Heading>
+          <Skeleton isLoaded={!isLoading}>
+            <Heading size="md">{data?.roundId}° round</Heading>
+          </Skeleton>
           <Box w={1.5} h={1.5} borderRadius={"full"} bg="gray" />
           <HStack spacing={2} align={"center"}>
             <Skeleton isLoaded={!isLoading}>
-              <Text>{!isLoading ? data?.voteStartTimestamp?.format("D MMMM") : "8 Feb"}</Text>
+              <Text>{!isLoading ? data?.voteStartTimestamp?.format("D MMMM") : "8 February"}</Text>
             </Skeleton>
             <Icon as={FaArrowRight} />
             <Skeleton isLoaded={!isLoading}>
-              <Text>{!isLoading ? data?.voteEndTimestamp?.format("D MMMM") : "8 Feb"}</Text>
+              <Text>{!isLoading ? data?.voteEndTimestamp?.format("D MMMM") : "8 February"}</Text>
             </Skeleton>
           </HStack>
           <AllocationRoundStateTag state={data?.state} size="md" />
@@ -83,17 +85,19 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
       />
       <VStack w="full">
         <HStack spacing={4}>
-          <Heading size="md">{data?.roundId}° round</Heading>
+          <Skeleton isLoaded={!isLoading}>
+            <Heading size="md">{data?.roundId}° round</Heading>
+          </Skeleton>
           <AllocationRoundStateTag state={data?.state} size="md" />
         </HStack>
 
         <HStack spacing={2} align={"center"}>
           <Skeleton isLoaded={!isLoading}>
-            <Text>{!isLoading ? data?.voteStartTimestamp?.format("D MMMM") : "8 Feb"}</Text>
+            <Text>{!isLoading ? data?.voteStartTimestamp?.format("D MMMM") : "8 February"}</Text>
           </Skeleton>
           <Icon as={FaArrowRight} />
           <Skeleton isLoaded={!isLoading}>
-            <Text>{!isLoading ? data?.voteEndTimestamp?.format("D MMMM") : "8 Feb"}</Text>
+            <Text>{!isLoading ? data?.voteEndTimestamp?.format("D MMMM") : "8 February"}</Text>
           </Skeleton>
         </HStack>
       </VStack>

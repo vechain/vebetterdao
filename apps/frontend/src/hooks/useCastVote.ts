@@ -1,4 +1,4 @@
-import { VoteType, buildCastVoteTx, getHasVoted, getHasVotedQueryKey, getProposalVotesQuerykey } from "@/api"
+import { VoteType, buildCastVoteTx, getHasVotedQueryKey, getProposalVotesQuerykey } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
