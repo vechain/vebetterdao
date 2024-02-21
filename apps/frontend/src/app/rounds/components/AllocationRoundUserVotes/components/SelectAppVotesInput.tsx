@@ -28,6 +28,7 @@ type Props = {
   totalVotesAvailable?: string
 }
 
+const notFoundImage = "/images/image-not-found.png"
 export const SelectAppVotesInput = ({
   register,
   getValues,
@@ -58,7 +59,7 @@ export const SelectAppVotesInput = ({
       px={4}>
       <HStack spacing={[2, 2, 4]} align="center" flex={1}>
         <Skeleton isLoaded={!isLogoLoading} borderRadius={"full"}>
-          <Image src={logo?.image} alt={appMetadata?.name} boxSize={[8, 8, 10]} borderRadius="full" />
+          <Image src={logo?.image ?? notFoundImage} alt={appMetadata?.name} boxSize={[8, 8, 10]} borderRadius="full" />
         </Skeleton>
         <Heading size={["md", "md", "sm"]}>{xApp?.name}</Heading>
       </HStack>
