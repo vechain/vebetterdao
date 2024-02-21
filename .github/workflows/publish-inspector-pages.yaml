@@ -19,6 +19,10 @@ jobs:
       - name: Install Repo Deps
         run: yarn
 
+      - name: Generate Contract Artifacts
+        working-directory: ./packages/contracts
+        run: yarn hardhat compile
+
       - name: Generate Solo Config
         run: cp ./packages/config/solo-staging.ts ./packages/config/local.ts
 
