@@ -23,12 +23,14 @@ type Props = {
   showLoadMore?: boolean
   headingSize?: "lg" | "md" | "sm" | "xs"
   showViewAll?: boolean
+  renderInsideCard?: boolean
 }
 export const AllocationRoundsList: React.FC<Props> = ({
   maxRoundsToShow = 3,
   showLoadMore = false,
   headingSize = "lg",
   showViewAll = true,
+  renderInsideCard = false,
 }) => {
   const router = useRouter()
 
@@ -58,48 +60,75 @@ export const AllocationRoundsList: React.FC<Props> = ({
     })
   }, [totalRoundsToShow, invertedCreatedRounds])
 
-  return (
-    <VStack spacing={8} w="full" align={"flex-start"}>
-      <Box w="full">
-        <HStack w="full" justify="space-between" alignItems={"baseline"}>
-          <Heading size={headingSize}>Allocation Rounds</Heading>
-          {invertedCreatedRounds && invertedCreatedRounds.length > maxRoundsToShow && showViewAll && (
+  const renderList = useMemo(() => {
+    return (
+      <VStack spacing={8} w="full" align={"flex-start"}>
+        <Box w="full">
+          <HStack w="full" justify="space-between" alignItems={"baseline"}>
+            <Heading size={headingSize}>Allocation Rounds</Heading>
+            {invertedCreatedRounds && invertedCreatedRounds.length > maxRoundsToShow && showViewAll && (
+              <Button
+                variant="link"
+                colorScheme="blue"
+                rightIcon={<FiArrowUpRight />}
+                onClick={() => router.push("/rounds")}>
+                See all rounds
+              </Button>
+            )}
+          </HStack>
+          {!isCurrentRoundActive && (
             <Button
               variant="link"
               colorScheme="blue"
-              rightIcon={<FiArrowUpRight />}
-              onClick={() => router.push("/rounds")}>
-              See all rounds
+              onClick={() => sendTransaction(undefined)}
+              isLoading={distributionLoading}>
+              Start new round
             </Button>
           )}
-        </HStack>
-        {!isCurrentRoundActive && (
-          <Button
-            variant="link"
-            colorScheme="blue"
-            onClick={() => sendTransaction(undefined)}
-            isLoading={distributionLoading}>
-            Start new round
-          </Button>
-        )}
-      </Box>
-      <VStack spacing={4} w="full">
-        {allocationRoundEventsError && (
-          <Alert status="error">
-            <AlertIcon />
-            <Box>
-              <AlertTitle>Error loading allocation rounds</AlertTitle>
-              <AlertDescription>{allocationRoundEventsError.message}</AlertDescription>
-            </Box>
-          </Alert>
-        )}
-        {renderRounds()}
-        {invertedCreatedRounds && invertedCreatedRounds.length > totalRoundsToShow && showLoadMore && (
-          <Button variant="link" colorScheme="blue" onClick={loadMore}>
-            Load more
-          </Button>
-        )}
+        </Box>
+        <VStack spacing={4} w="full">
+          {allocationRoundEventsError && (
+            <Alert status="error">
+              <AlertIcon />
+              <Box>
+                <AlertTitle>Error loading allocation rounds</AlertTitle>
+                <AlertDescription>{allocationRoundEventsError.message}</AlertDescription>
+              </Box>
+            </Alert>
+          )}
+          {renderRounds()}
+          {invertedCreatedRounds && invertedCreatedRounds.length > totalRoundsToShow && showLoadMore && (
+            <Button variant="link" colorScheme="blue" onClick={loadMore}>
+              Load more
+            </Button>
+          )}
+        </VStack>
       </VStack>
-    </VStack>
+    )
+  }, [
+    renderRounds,
+    allocationRoundEventsError,
+    distributionLoading,
+    isCurrentRoundActive,
+    showLoadMore,
+    showViewAll,
+    totalRoundsToShow,
+    invertedCreatedRounds,
+    maxRoundsToShow,
+    headingSize,
+    router,
+    sendTransaction,
+  ])
+
+  return (
+    <>
+      {renderInsideCard ? (
+        <Card>
+          <CardBody>{renderList}</CardBody>
+        </Card>
+      ) : (
+        renderList
+      )}
+    </>
   )
 }

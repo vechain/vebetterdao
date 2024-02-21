@@ -35,11 +35,7 @@ export default function Home() {
           spacing={18}>
           <VStack flex={4} justifyContent="stretch" alignItems={"stretch"} spacing={4}>
             <Box>
-              <Card>
-                <CardBody>
-                  <AllocationRoundsList maxRoundsToShow={3} headingSize="md" />
-                </CardBody>
-              </Card>
+              <AllocationRoundsList maxRoundsToShow={3} headingSize="md" renderInsideCard={true} />
             </Box>
             <Box>
               <CirculatingSupplyPieChart />
