@@ -8,7 +8,6 @@ import emissionsArtifact from "../../../packages/contracts/artifacts/contracts/E
 import voterRewardsArtifact from "../../../packages/contracts/artifacts/contracts/VoterRewards.sol/VoterRewards.json"
 import nftBadeArtifact from "../../../packages/contracts/artifacts/contracts/B3TRBadge.sol/B3TRBadge.json"
 
-
 export type Contract = {
   abi: object
   name: string

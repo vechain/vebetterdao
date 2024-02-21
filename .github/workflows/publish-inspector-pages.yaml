@@ -28,6 +28,9 @@ jobs:
         env:
           MNEMONIC: denial kitchen pet squirrel other broom bar gas better priority spoil cross
 
+      - name: Debug
+        run:  find packages/contracts/artifacts/contracts -type f -name '*.json'
+
       - name: Install Inspector Deps
         working-directory: ./inspector-app
         run: yarn
