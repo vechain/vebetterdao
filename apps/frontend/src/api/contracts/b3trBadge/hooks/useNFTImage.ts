@@ -1,8 +1,8 @@
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useTokenIdByAccount } from "./useTokenIdByAccount"
 import { useNFTMetadataUri } from "./useNFTMetadataUri"
-import { useIpfsNftImage } from "@/hooks/useIpfsNftImage"
-import { useIpfsMetadata } from "@/hooks/useIpfsMetadata"
+import { useIpfsNftImage } from "@/api/ipfs/hooks/useIpfsNftImage"
+import { useIpfsMetadata } from "@/api/ipfs/hooks/useIpfsMetadata"
 
 /**
  * Fetches NFT image from IPFS
