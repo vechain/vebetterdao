@@ -247,9 +247,11 @@ export const SwapCard = () => {
               <Button
                 color="white"
                 bgColor={`primary.${buttonPrimaryAlpha}`}
-                rounded="full"
+                w={"full"}
+                rounded={"xl"}
                 isDisabled={Number(amount) === 0}
-                onClick={handleStake}>
+                onClick={handleStake}
+                size="lg">
                 Swap
               </Button>
             </Flex>
