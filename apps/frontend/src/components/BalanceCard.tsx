@@ -4,7 +4,6 @@ import {
   CardBody,
   Heading,
   HStack,
-  Spinner,
   Alert,
   AlertIcon,
   AlertTitle,
@@ -20,7 +19,6 @@ import {
 } from "@chakra-ui/react"
 import { WalletButton, useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
-import { SwapB3trButton } from "./SwapB3trButton"
 import { backdropBlurAnimation } from "@/app/theme"
 import { B3TRIcon, VOT3Icon } from "./Icons"
 
@@ -45,16 +43,8 @@ export const BalanceCard: React.FC<Props> = () => {
   const bgGradientSecond = useColorModeValue("50", "100")
   const dividerColor = useColorModeValue("500", "600")
 
-  const {
-    data: b3trBalance,
-    isLoading: b3trBalanceLoading,
-    error: b3trBalanceError,
-  } = useB3trBalance(account ?? undefined)
-  const {
-    data: vot3Balance,
-    isLoading: vot3BalanceLoading,
-    error: vot3BalanceError,
-  } = useVot3Balance(account ?? undefined)
+  const { data: b3trBalance, error: b3trBalanceError } = useB3trBalance(account ?? undefined)
+  const { data: vot3Balance, error: vot3BalanceError } = useVot3Balance(account ?? undefined)
 
   const b3trBalanceScaled = useMemo(() => {
     return b3trBalance?.scaled ?? "0"
@@ -63,8 +53,6 @@ export const BalanceCard: React.FC<Props> = () => {
   const vot3BalanceScaled = useMemo(() => {
     return vot3Balance?.scaled ?? "0"
   }, [vot3Balance])
-
-  const isLoading = b3trBalanceLoading || vot3BalanceLoading
 
   const hasNoBalance = useMemo(() => {
     return b3trBalance?.scaled === "0" && vot3Balance?.scaled === "0"
@@ -161,7 +149,6 @@ export const BalanceCard: React.FC<Props> = () => {
         <VStack spacing={4} align="flex-start">
           <HStack justify={"space-between"} w="full">
             <Heading size="md">Balance</Heading>
-            <Flex>{isLoading ? <Spinner size="sm" /> : <SwapB3trButton />}</Flex>
           </HStack>
           <Show below="sm">
             {" "}
