@@ -90,6 +90,6 @@ export const useUserVotesInRound = (roundId?: string, address?: string) => {
   return useQuery({
     queryKey: getUserVotesInRoundQueryKey(roundId, address),
     queryFn: async () => await getUserVotesInRound(thor, roundId, address),
-    enabled: !!thor && !!roundId && !!address,
+    enabled: !!thor && !!thor.status.head.number && !!roundId && !!address,
   })
 }
