@@ -1,2 +1,2 @@
 export * from "./useIpfsMetadata"
-export * from "./useIpfsNftImage"
+export * from "./useIpfsImage"

@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query"
 import axios from "axios"
 import { NFTMediaType } from "@/types"
 
-export interface NFTMedia {
+export interface IpfsImage {
   image: string
   mime: string
   mediaType: NFTMediaType
@@ -16,7 +16,7 @@ export const MAX_IMAGE_SIZE = 1024 * 1024 * 10 // 10MB
  * @param uri - The IPFS URI of the NFT media
  * @returns The NFT media
  */
-export const getIpfsMedia = async (uri: string): Promise<NFTMedia> => {
+export const getIpfsImage = async (uri: string): Promise<IpfsImage> => {
   const response = await axios.get(convertUriToUrl(uri), {
     responseType: "blob",
     maxContentLength: MAX_IMAGE_SIZE,
@@ -57,17 +57,17 @@ export const getIpfsMedia = async (uri: string): Promise<NFTMedia> => {
  * @param imageIpfsUri - The IPFS URI of the NFT media
  * @returns The NFT media
  */
-export const getIpfsNftImageQueryKey = (imageIpfsUri: null | string) => ["ipfsNftImage", imageIpfsUri]
+export const getIpfsImageQueryKey = (imageIpfsUri?: null | string) => ["ipfsImage", imageIpfsUri]
 
 /**
  * Hook to fetch NFT media from IPFS
  * @param imageIpfsUri - The IPFS URI of the NFT media
  * @returns The NFT media
  */
-export const useIpfsNftImage = (imageIpfsUri: null | string) => {
+export const useIpfsImage = (imageIpfsUri?: null | string) => {
   return useQuery({
-    queryKey: getIpfsNftImageQueryKey(imageIpfsUri),
-    queryFn: () => getIpfsMedia(imageIpfsUri!),
+    queryKey: getIpfsImageQueryKey(imageIpfsUri),
+    queryFn: () => getIpfsImage(imageIpfsUri!),
     enabled: !!imageIpfsUri,
   })
 }
