@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Show, Spinner, Stack, VStack } from "@chakra-ui/react"
+import { Box, Card, CardBody, Show, Spinner, Stack, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { Suspense } from "react"
 
@@ -34,10 +34,13 @@ export default function Home() {
           align={["stretch", "stretch", "flex-start"]}
           spacing={18}>
           <VStack flex={4} justifyContent="stretch" alignItems={"stretch"} spacing={4}>
-            <Show above="sm">
-              <ClaimNFT />
-              <BalanceCard />
-            </Show>
+            <Box>
+              <Card>
+                <CardBody>
+                  <AllocationRoundsList maxRoundsToShow={3} headingSize="md" />
+                </CardBody>
+              </Card>
+            </Box>
             <Box>
               <CirculatingSupplyPieChart />
             </Box>
@@ -46,12 +49,9 @@ export default function Home() {
             </Box>
           </VStack>
           <VStack spacing={4} flex={2.5} position={["static", "static", "sticky"]} top={100} right={0}>
-            <Show below="sm">
-              <ClaimNFT />
-              <BalanceCard />
-            </Show>
+            <ClaimNFT />
+            <BalanceCard />
             <VoterRewards />
-            <AllocationRoundsList roundsPerPage={3} showLoadMore={false} />
           </VStack>
         </Stack>
       </Suspense>

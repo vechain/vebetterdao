@@ -1,20 +1,38 @@
-import { Alert, AlertDescription, AlertIcon, AlertTitle, Box, Button, Heading, VStack } from "@chakra-ui/react"
+import {
+  Alert,
+  AlertDescription,
+  AlertIcon,
+  AlertTitle,
+  Box,
+  Button,
+  Card,
+  CardBody,
+  HStack,
+  Heading,
+  VStack,
+} from "@chakra-ui/react"
 import { useAllocationsRound, useAllocationsRoundsEvents, useCurrentAllocationsRoundId } from "@/api"
 import { AllocationRoundCard } from "./components/AllocationRoundCard"
 import { useDistributeEmission } from "@/hooks"
 import { useCallback, useMemo, useState } from "react"
+import { FiArrowUpRight } from "react-icons/fi"
+import { useRouter } from "next/navigation"
 
 type Props = {
-  roundsPerPage?: number
+  maxRoundsToShow?: number
   showLoadMore?: boolean
-  cardVariant?: "compact" | "full"
+  headingSize?: "lg" | "md" | "sm" | "xs"
+  showViewAll?: boolean
 }
 export const AllocationRoundsList: React.FC<Props> = ({
-  roundsPerPage = 3,
+  maxRoundsToShow = 3,
   showLoadMore = false,
-  cardVariant = "compact",
+  headingSize = "lg",
+  showViewAll = true,
 }) => {
-  const [totalRoundsToShow, setTotalRoundsToShow] = useState<number>(roundsPerPage)
+  const router = useRouter()
+
+  const [totalRoundsToShow, setTotalRoundsToShow] = useState<number>(maxRoundsToShow)
 
   const { data: allocationRoundsEvents, error: allocationRoundEventsError } = useAllocationsRoundsEvents()
   const invertedCreatedRounds = allocationRoundsEvents?.created.slice().reverse()
@@ -31,28 +49,37 @@ export const AllocationRoundsList: React.FC<Props> = ({
   const distributionLoading = isTxReceiptLoading || sendTransactionPending
 
   const loadMore = useCallback(() => {
-    setTotalRoundsToShow(prev => prev + roundsPerPage)
+    setTotalRoundsToShow(prev => prev + maxRoundsToShow)
   }, [totalRoundsToShow])
 
   const renderRounds = useCallback(() => {
     return invertedCreatedRounds?.slice(0, totalRoundsToShow)?.map((round, i) => {
-      return <AllocationRoundCard round={round} key={round.roundId} variant={cardVariant} />
+      return <AllocationRoundCard round={round} key={round.roundId} />
     })
   }, [totalRoundsToShow])
 
   return (
     <VStack spacing={8} w="full" align={"flex-start"}>
       <Box w="full">
-        <Heading as="h2" size="lg">
-          Allocation Rounds
-        </Heading>
+        <HStack w="full" justify="space-between" alignItems={"baseline"}>
+          <Heading size={headingSize}>Allocation Rounds</Heading>
+          {invertedCreatedRounds && invertedCreatedRounds.length > maxRoundsToShow && showViewAll && (
+            <Button
+              variant="link"
+              colorScheme="blue"
+              rightIcon={<FiArrowUpRight />}
+              onClick={() => router.push("/rounds")}>
+              See all rounds
+            </Button>
+          )}
+        </HStack>
         {!isCurrentRoundActive && (
           <Button
             variant="link"
             colorScheme="blue"
             onClick={() => sendTransaction(undefined)}
             isLoading={distributionLoading}>
-            Distribute emissions and create new round
+            Start new round
           </Button>
         )}
       </Box>
