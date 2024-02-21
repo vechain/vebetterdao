@@ -31,6 +31,9 @@ jobs:
       - name: Debug
         run:  find packages/contracts/artifacts/contracts -type f -name '*.json'
 
+      - name: Cleane Dependency FILE
+        run: sed -i '1d' packages/constants/network/network.ts
+
       - name: Install Inspector Deps
         working-directory: ./inspector-app
         run: yarn

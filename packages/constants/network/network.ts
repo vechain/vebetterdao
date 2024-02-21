@@ -1,4 +1,3 @@
-// @ts-nocheck
 /// <reference types="@vechain/connex-types" />
 
 /**
