@@ -75,6 +75,6 @@ export const useAllocationsRoundsEvents = () => {
   return useQuery({
     queryKey: getAllocationsRoundsEventsQueryKey(),
     queryFn: async () => await getAllocationsRoundsEvents(thor),
-    enabled: !!thor,
+    enabled: !!thor && !!thor.status.head.number,
   })
 }
