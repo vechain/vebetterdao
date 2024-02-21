@@ -16,7 +16,13 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install Dependencies
+      - name: Install Repo Deps
+        run: yarn
+
+      - name: Generate Solo Config
+        run: cp ./packages/config/solo-staging.ts ./packages/config/local.ts
+
+      - name: Install Inspector Deps
         working-directory: ./inspector-app
         run: yarn
 
