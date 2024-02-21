@@ -186,7 +186,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
                     </Button>
                   )}
                 </Box>
-                <Text fontSize="sm" fontWeight={"thin"} alignSelf={"flex-end"}>
+                <Text fontSize="sm" fontWeight={"thin"}>
                   {hasVoted || isVotingConcluded ? "Distributed voting power" : "Voting power to distribute"}
                 </Text>
               </Stack>

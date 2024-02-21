@@ -16,7 +16,9 @@ export const MAX_IMAGE_SIZE = 1024 * 1024 * 10 // 10MB
  * @param uri - The IPFS URI of the NFT media
  * @returns The NFT media
  */
-export const getIpfsImage = async (uri: string): Promise<IpfsImage> => {
+export const getIpfsImage = async (uri?: string): Promise<IpfsImage> => {
+  if (!uri) throw new Error("IPFS URI is required")
+
   const response = await axios.get(convertUriToUrl(uri), {
     responseType: "blob",
     maxContentLength: MAX_IMAGE_SIZE,
