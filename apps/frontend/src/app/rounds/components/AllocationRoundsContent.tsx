@@ -1,8 +1,23 @@
-import { useProposalsEvents, useActiveProposals, useIncomingProposals, usePastProposals, useCurrentBlock } from "@/api"
-import { AllocationRoundsList, CreateProposalButton, ProposalCard, VoterRewards } from "@/components"
+import {
+  useProposalsEvents,
+  useActiveProposals,
+  useIncomingProposals,
+  usePastProposals,
+  useCurrentBlock,
+  useCurrentAllocationsRoundId,
+} from "@/api"
+import {
+  AllocationRoundsList,
+  CreateProposalButton,
+  XAppsForecastedAmounts,
+  ProposalCard,
+  VoterRewards,
+} from "@/components"
 import { VStack, HStack, Stack } from "@chakra-ui/react"
 
 export const AllocationRoundsContent = () => {
+  const { data: currentRoundId } = useCurrentAllocationsRoundId()
+
   return (
     <VStack w="full" spacing={12}>
       <Stack
@@ -15,7 +30,7 @@ export const AllocationRoundsContent = () => {
           <AllocationRoundsList maxRoundsToShow={8} showLoadMore showViewAll={false} />
         </HStack>
         <VStack spacing={4} flex={2.5} position={["static", "static", "sticky"]} top={100} right={0}>
-          <VoterRewards />
+          {currentRoundId && <XAppsForecastedAmounts key={currentRoundId} roundId={currentRoundId} />}
         </VStack>
       </Stack>
     </VStack>

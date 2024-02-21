@@ -7,7 +7,7 @@ type Props = {
 export const AllocationRoundStateTag = ({ state, ...props }: Props) => {
   const colorScheme = {
     "0": "secondary.600",
-    "1": "red",
+    "1": "red.600",
     "2": "gray.600",
     "-1": "gray",
   }[state ?? "-1"]

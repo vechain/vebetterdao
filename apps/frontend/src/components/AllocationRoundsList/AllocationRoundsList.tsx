@@ -21,14 +21,14 @@ import { useRouter } from "next/navigation"
 type Props = {
   maxRoundsToShow?: number
   showLoadMore?: boolean
-  headingSize?: "lg" | "md" | "sm" | "xs"
+  headingSize?: "xl" | "lg" | "md" | "sm" | "xs"
   showViewAll?: boolean
   renderInsideCard?: boolean
 }
 export const AllocationRoundsList: React.FC<Props> = ({
   maxRoundsToShow = 3,
   showLoadMore = false,
-  headingSize = "lg",
+  headingSize = "xl",
   showViewAll = true,
   renderInsideCard = false,
 }) => {
