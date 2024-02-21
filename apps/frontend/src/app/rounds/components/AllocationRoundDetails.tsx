@@ -1,4 +1,5 @@
 import { useAllocationAmount, useAllocationVoters, useAllocationsRound, useHasVotedInRound, useRoundXApps } from "@/api"
+import { B3TRIcon } from "@/components"
 import {
   Box,
   Card,
@@ -113,7 +114,10 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
                   {roundAmountError ? (
                     <Text color="red.500">{roundAmountError.message}</Text>
                   ) : (
-                    <Heading size="2xl">{compactFormatter.format(Number(roundAmount?.voteX2Earn))}</Heading>
+                    <HStack spacing={4}>
+                      <Heading size="2xl">{compactFormatter.format(Number(roundAmount?.voteX2Earn))}</Heading>
+                      <B3TRIcon size={40} />
+                    </HStack>
                   )}
                 </Skeleton>
                 <Text fontSize={"md"} textTransform={"uppercase"}>
