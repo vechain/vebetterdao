@@ -6,6 +6,7 @@ import {
   HStack,
   Heading,
   Icon,
+  Show,
   Skeleton,
   Stack,
   Text,
@@ -77,13 +78,16 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
           <Stack w="full" spacing={1}>
             <HStack spacing={2} w="fit-content" justify="space-between">
               <AllocationRoundStateTag state={allocationRound.state} size="md" />
-              <DotSymbol color={cardTextColor} />
-              <Text fontWeight={"200"} color={cardTextColor}>
-                {isActive
-                  ? `ends ${allocationRound.voteEndTimestamp?.fromNow()}`
-                  : `${allocationRound.voteStartTimestamp?.fromNow()}`}
-              </Text>
+              <Show above="sm">
+                <DotSymbol color={cardTextColor} />
+                <Text fontWeight={"200"} color={cardTextColor}>
+                  {isActive
+                    ? `ends ${allocationRound.voteEndTimestamp?.fromNow()}`
+                    : `${allocationRound.voteStartTimestamp?.fromNow()}`}
+                </Text>
+              </Show>
             </HStack>
+
             <HStack w="full" justify="space-between" color={cardTextColor}>
               <Heading as="h3" size="md">
                 Round #{round.roundId}
