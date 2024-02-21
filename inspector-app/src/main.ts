@@ -52,7 +52,7 @@ localStorage.setItem('custom-network', JSON.stringify(solo.network.genesis))
 if (window.location.href.includes("localhost")) {
   localStorage.setItem('custom-node', 'http://localhost:8669')
 } else {
-  localStorage.setItem('custom-node', 'https://thor.solo.dev.rewards.vechain.org')
+  localStorage.setItem('custom-node', 'https://thor-solo.dev.rewards.vechain.org')
 }
 
 
