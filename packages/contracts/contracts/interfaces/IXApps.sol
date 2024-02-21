@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.18;
 
 interface IXApps {
   /**
@@ -12,7 +12,7 @@ interface IXApps {
    */
   error ERC5805FutureLookup(uint256 timepoint, uint48 clock);
 
-  event AppAdded(bytes32 indexed id, address addr, string name, string metadata, bool appAvailableForAllocationVoting);
+  event AppAdded(bytes32 indexed id, address addr, string name, bool appAvailableForAllocationVoting);
 
   event VotingElegibilityChanged(bytes32 indexed appId, bool isAvailable);
 

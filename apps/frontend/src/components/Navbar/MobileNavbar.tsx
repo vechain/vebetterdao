@@ -30,7 +30,7 @@ const MobileMenuDrawer: React.FC<Omit<DrawerProps, "children">> = props => {
         <DrawerHeader>{"Menu"}</DrawerHeader>
         <DrawerBody display={"flex"} flexDirection={"column"} justifyContent={"space-between"}>
           <VStack spacing={4} w="full">
-            <NavbarMenu />
+            <NavbarMenu onMenuClick={props.onClose} />
           </VStack>
           <Box w="full" alignSelf="flex-end">
             <ThemeSwitcher w={"full"} withText={true} />

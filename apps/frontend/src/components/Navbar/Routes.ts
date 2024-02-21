@@ -11,5 +11,5 @@ export interface Route {
 
 export const Routes: Route[] = [
   { name: "Dashboard", onClick: "/", isVisible: true, icon: FaHome },
-  { name: "Proposals", onClick: "/proposals", isVisible: true, icon: FaScaleBalanced },
+  //   { name: "Proposals", onClick: "/proposals", isVisible: true, icon: FaScaleBalanced },
 ]

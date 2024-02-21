@@ -125,6 +125,9 @@ export async function deployAll() {
 
   // Set X allocations governor
   await emissions.connect(admin).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+  // Set voter rewards address in emissions
+  await emissions.connect(admin).setVote2EarnAddress(await voterRewards.getAddress())
+
   // Setup XAllocationPool addresses
   await xAllocationPool.connect(admin).setXAllocationVotingAddress(await xAllocationVoting.getAddress())
   await xAllocationPool.connect(admin).setEmissionsAddress(await emissions.getAddress())
@@ -256,6 +259,7 @@ async function deployXAllocationVoting(
   voterRewardsAddress: string,
   quorumPercentage: number = 50,
   xAllocationVotingPeriod: number = 10,
+  baseURI: string = "ipfs://",
 ) {
   console.log(`Deploying XAllocationVoting contract`)
   const XAllocationVotingContract = await ethers.getContractFactory("XAllocationVoting")
@@ -266,6 +270,7 @@ async function deployXAllocationVoting(
     timeLockAddress,
     voterRewardsAddress,
     [timeLockAddress, adminAddress],
+    baseURI,
   )
 
   await contract.waitForDeployment()

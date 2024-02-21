@@ -144,3 +144,5 @@ contracts/package-lock.json
 .vscode/
 
 packages/config/local.ts
+
+packages/contracts/metadata/xApps/output/

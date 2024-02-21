@@ -5,6 +5,7 @@ import {
   Box,
   FormControl,
   FormErrorMessage,
+  FormHelperText,
   HStack,
   Heading,
   Icon,
@@ -21,10 +22,23 @@ type Props = {
   xApp?: XApp
   field: FormData["votes"][number]
   errors: FieldErrors<FormData>
+  isDisabled?: boolean
+  totalVotesAvailable?: string
 }
 
-export const SelectAppVotesInput = ({ register, getValues, index, xApp, field, errors }: Props) => {
-  console.log("errors", errors)
+export const SelectAppVotesInput = ({
+  register,
+  getValues,
+  index,
+  xApp,
+  field,
+  errors,
+  isDisabled = false,
+  totalVotesAvailable,
+}: Props) => {
+  console.log("errors", errors, "totalVotes", totalVotesAvailable)
+
+  const value = getValues().votes[index]?.value
   return (
     <HStack
       w="full"
@@ -40,15 +54,14 @@ export const SelectAppVotesInput = ({ register, getValues, index, xApp, field, e
         <Heading size="sm">{xApp?.name}</Heading>
       </HStack>
       <Box flex={[1, 1, 0.5]}>
-        <FormControl isInvalid={!!errors.votes?.[index]}>
+        <FormControl isInvalid={!!errors.votes?.[index]} isDisabled={isDisabled}>
           <InputGroup>
             <Input
               {...register(`votes.${index}.value`, {
                 valueAsNumber: true,
-                min: 0,
-                max: 100,
                 validate: value => {
                   if (isNaN(value)) return "Please enter a valid number"
+                  if (value < 0) return "Votes cannot be negative"
                   const allValuesTotal = getValues().votes.reduce((acc, vote) => acc + vote.value, 0)
                   if (allValuesTotal > 100) return "Total votes exceed 100"
                   return true
@@ -58,7 +71,11 @@ export const SelectAppVotesInput = ({ register, getValues, index, xApp, field, e
             />
             <InputRightElement children="%" />
           </InputGroup>
-          {errors.votes?.[index]?.value && <FormErrorMessage>{errors.votes?.[index]?.message}</FormErrorMessage>}
+          {!errors.votes?.[index]?.value ? (
+            <FormHelperText>=~ {(Number(value) * Number(totalVotesAvailable)) / 100} votes</FormHelperText>
+          ) : (
+            <FormErrorMessage>{errors.votes?.[index]?.value?.message}</FormErrorMessage>
+          )}
         </FormControl>
       </Box>
     </HStack>

@@ -4,22 +4,7 @@ import { useConnex } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
 const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
 import { XAllocationVoting__factory as XAllocationVoting } from "@repo/contracts"
-
-/**
- * xApp type
- * @property id  the xApp id
- * @property addr  the xApp address
- * @property name  the xApp name
- * @property metadata  the xApp metadata (ipfs hash)
- * @property createdAt block when xApp was addded
- */
-type XApp = {
-  id: string
-  addr: string
-  name: string
-  metadata: string //ipfs hash
-  createdAt: number
-}
+import { XApp } from "./useXApps"
 
 /**
  * Returns all the available xApps (apps that can be voted on for allocation)
@@ -38,7 +23,6 @@ export const getRoundXApps = async (thor: Connex.Thor, roundId: string): Promise
     id: app[0],
     addr: app[1],
     name: app[2],
-    metadata: app[3],
     createdAt: app[4],
   }))
 }

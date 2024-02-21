@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
 import { useConnex, useWallet } from "@vechain/dapp-kit-react"
-import { buildClaimNFTTx } from "@/api/contracts/b3trBadge/utils"
+import { buildClaimNftTx } from "@/api/contracts/b3trBadge/utils"
 
 /**
  * Hook to claim an NFT
@@ -19,7 +19,7 @@ export const useClaimNFT = ({ onSuccess }: { onSuccess: () => void }): UseSendTr
   const queryClient = useQueryClient()
 
   const buildClauses = useCallback(() => {
-    const mintClause = buildClaimNFTTx(thor)
+    const mintClause = buildClaimNftTx(thor)
     return [mintClause]
   }, [thor])
 

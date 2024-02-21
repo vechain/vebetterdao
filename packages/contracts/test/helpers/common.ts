@@ -1,5 +1,5 @@
 import { ethers, network } from "hardhat"
-import { Emissions, B3TRGovernor, XAllocationPool, XAllocationVoting } from "../../typechain-types"
+import { Emissions, B3TRGovernor, XAllocationPool, XAllocationVoting, B3TR } from "../../typechain-types"
 import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { getOrDeployContractInstances } from "./deploy"
@@ -172,7 +172,6 @@ export const addAppThroughGovernance = async (
   xAllocationVoting: XAllocationVoting,
   appName: string = "Bike 4 Life" + Math.random(),
   appAddress: string,
-  appMetadata: string = "",
 ) => {
   await createProposalAndExecuteIt(
     proposer,
@@ -182,7 +181,7 @@ export const addAppThroughGovernance = async (
     await ethers.getContractFactory("XAllocationVoting"),
     "Add app to the list",
     "addApp",
-    [appAddress, appName, appMetadata],
+    [appAddress, appName],
   )
 }
 
@@ -237,7 +236,7 @@ export const addAppsToAllocationVoting = async (
 ) => {
   let appIds: string[] = []
   for (const app of apps) {
-    await xAllocationVoting.connect(owner).addApp(app, app, "")
+    await xAllocationVoting.connect(owner).addApp(app, app)
     appIds.push(ethers.keccak256(ethers.toUtf8Bytes(app)))
   }
 
@@ -261,7 +260,7 @@ export const calculateBaseAllocationOffChain = async (
   xAllocationPool: XAllocationPool,
 ) => {
   // Amount available for this round (assuming the amount is already scaled by 1e18 for precision)
-  let totalAmount = await emissions.getXAllocationAmountForCycle(roundId)
+  let totalAmount = await emissions.getXAllocationAmount(roundId)
 
   let elegibleApps = await xAllocationVoting.getRoundApps(roundId)
 
@@ -281,7 +280,7 @@ export const calculateVariableAppAllocationOffChain = async (
   xAllocationPool: XAllocationPool,
 ) => {
   // Amount available for this round (assuming the amount is already scaled by 1e18 for precision)
-  let totalAmount = await emissions.getXAllocationAmountForCycle(roundId)
+  let totalAmount = await emissions.getXAllocationAmount(roundId)
 
   let totalAvailable = (totalAmount * (await xAllocationPool.variableAllocationPercentage())) / BigInt(100)
 
@@ -290,7 +289,7 @@ export const calculateVariableAppAllocationOffChain = async (
   return (totalAvailable * appShares) / BigInt(100)
 }
 
-export const partecipateInAllocationVoting = async (
+export const participateInAllocationVoting = async (
   user: HardhatEthersSigner,
   admin: HardhatEthersSigner,
   xAllocationVoting: XAllocationVoting,
@@ -301,7 +300,7 @@ export const partecipateInAllocationVoting = async (
 
   const appName = "App" + Math.random()
 
-  await xAllocationVoting.connect(admin).addApp(user.address, appName, "")
+  await xAllocationVoting.connect(admin).addApp(user.address, appName)
   const roundId = await startNewAllocationRound(xAllocationVoting)
 
   // Vote
@@ -314,7 +313,7 @@ export const partecipateInAllocationVoting = async (
   }
 }
 
-export const partecipateInGovernanceVoting = async (
+export const participateInGovernanceVoting = async (
   user: HardhatEthersSigner,
   admin: HardhatEthersSigner,
   governor: B3TRGovernor,
@@ -339,4 +338,17 @@ export const partecipateInGovernanceVoting = async (
   if (waitProposalToEnd) {
     await waitForVotingPeriodToEnd(proposalId, governor)
   }
+}
+
+export const bootstrapEmissions = async (
+  b3tr: B3TR,
+  emissions: Emissions,
+  owner: HardhatEthersSigner,
+  minter: HardhatEthersSigner,
+) => {
+  // Grant minter role to emissions contract
+  await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+
+  // Bootstrap emissions
+  await emissions.connect(minter).bootstrap()
 }

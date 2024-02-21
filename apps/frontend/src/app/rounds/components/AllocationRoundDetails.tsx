@@ -1,16 +1,18 @@
-import { useAllocationAmount, useAllocationVoters, useAllocationsRound, useRoundXApps } from "@/api"
+import { useAllocationAmount, useAllocationVoters, useAllocationsRound, useHasVotedInRound, useRoundXApps } from "@/api"
 import {
   Box,
   Card,
   CardBody,
   HStack,
   Heading,
+  Link,
   Skeleton,
   Stack,
   Text,
   VStack,
   useColorModeValue,
 } from "@chakra-ui/react"
+import { useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
 
 type Props = {
@@ -23,25 +25,54 @@ const compactFormatter = new Intl.NumberFormat("en-US", {
 })
 
 export const AllocationRoundDetails = ({ roundId }: Props) => {
+  const { account } = useWallet()
   const { data, isLoading } = useAllocationsRound(roundId)
   const { data: xApps, isLoading: xAppsLoading } = useRoundXApps(roundId)
   const { data: totalVoters, isLoading: totalVotersLoading } = useAllocationVoters(roundId)
   const { data: roundAmount, isLoading: roundAmountLoading, error: roundAmountError } = useAllocationAmount(roundId)
+
+  const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
 
   const totalAmount = useMemo(() => {
     if (!roundAmount) return 0
     return BigInt(roundAmount.treasury) + BigInt(roundAmount.voteX2Earn) + BigInt(roundAmount.voteXAllocations)
   }, [roundAmount])
 
-  const bgColor = useColorModeValue("primary.500", "primary.300")
+  const isVotingConcluded = data?.voteEndTimestamp?.isBefore()
 
-  const isVoltingConcluded = data?.voteEndTimestamp?.isBefore()
+  const bgGradient = useColorModeValue("500", "300")
 
   const remainingTime = useMemo(() => {
-    if (isVoltingConcluded) return `Voting ended ${data?.voteEndTimestamp?.fromNow()}`
+    if (isVotingConcluded) return `Voting ended ${data?.voteEndTimestamp?.fromNow()}`
     return `Voting ends ${data?.voteEndTimestamp?.fromNow()}`
-  }, [isVoltingConcluded, data?.voteEndTimestamp])
+  }, [isVotingConcluded, data?.voteEndTimestamp])
 
+  const renderVoteStatusMessage = useMemo(() => {
+    if (!isVotingConcluded) {
+      if (hasVoted)
+        return (
+          <Link href="#user-votes" color="green" fontSize={"lg"}>
+            You have already voted in this round
+          </Link>
+        )
+      return (
+        <Link href="#user-votes" color="orange" fontSize={"lg"}>
+          You have not voted yet in this round
+        </Link>
+      )
+    }
+    if (hasVoted)
+      return (
+        <Link href="#user-votes" color="green" fontSize={"lg"}>
+          Voting concluded - You casted your vote successfully
+        </Link>
+      )
+    return (
+      <Link href="#user-votes" color="orange" fontSize={"lg"}>
+        Voting concluded - You did not cast your vote
+      </Link>
+    )
+  }, [hasVoted, isVotingConcluded])
   return (
     <Card w="full">
       <CardBody>
@@ -49,7 +80,7 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
           <VStack spacing={4} align="flex-start" flex={1}>
             <Skeleton isLoaded={!isLoading}>
               <HStack spacing={1} align={"center"}>
-                <Heading size="md" color={bgColor}>
+                <Heading size="md" color={isVotingConcluded ? `orange.${bgGradient}` : `primary.${bgGradient}`}>
                   {remainingTime}
                 </Heading>
               </HStack>
@@ -64,11 +95,12 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
                 }
               </Text>
             </Skeleton>
+            <Skeleton isLoaded={!hasVotedLoading}>{renderVoteStatusMessage}</Skeleton>
           </VStack>
           <VStack flex={0.8}>
             <VStack
               color={"white"}
-              bgColor={bgColor}
+              bgColor={`primary.${bgGradient}`}
               py={6}
               px={6}
               w="full"
@@ -81,7 +113,7 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
                   {roundAmountError ? (
                     <Text color="red.500">{roundAmountError.message}</Text>
                   ) : (
-                    <Heading size="2xl">{compactFormatter.format(totalAmount)}</Heading>
+                    <Heading size="2xl">{compactFormatter.format(Number(roundAmount?.voteX2Earn))}</Heading>
                   )}
                 </Skeleton>
                 <Text fontSize={"md"} textTransform={"uppercase"}>
@@ -90,18 +122,22 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
               </Box>
 
               <HStack spacing={12}>
-                <Skeleton isLoaded={!xAppsLoading}>
-                  <Heading size="xl">{xApps?.length}</Heading>
+                <Box>
+                  <Skeleton isLoaded={!xAppsLoading}>
+                    <Heading size="xl">{xApps?.length}</Heading>
+                  </Skeleton>
                   <Text fontSize={"md"} textTransform={"uppercase"}>
                     Participating dApps
                   </Text>
-                </Skeleton>
-                <Skeleton isLoaded={!totalVotersLoading}>
-                  <Heading size="xl">{totalVoters}</Heading>
+                </Box>
+                <Box>
+                  <Skeleton isLoaded={!totalVotersLoading}>
+                    <Heading size="xl">{totalVoters}</Heading>
+                  </Skeleton>
                   <Text fontSize={"md"} textTransform={"uppercase"}>
                     Total voters
                   </Text>
-                </Skeleton>
+                </Box>
               </HStack>
             </VStack>
           </VStack>

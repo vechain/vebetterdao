@@ -1,0 +1,20 @@
+{
+  "name": "GoGreen",
+  "description": "GoGreen is a revolutionary sustainable app designed to empower users to make eco-friendly choices effortlessly, fostering a greener and healthier planet. This user-friendly application serves as a comprehensive guide, seamlessly integrating sustainable living into daily routines.",
+  "external_url": "https://openseacreatures.io/3",
+  "logo": "",
+  "banner": "",
+  "screenshots": [],
+  "social_urls": [
+    {
+      "name": "YouTube",
+      "url": "https://www.youtube.com/@DLoaw"
+    }
+  ],
+  "app_urls": [
+    {
+      "code": "web_app",
+      "url": "https://www.myapp.com"
+    }
+  ]
+}

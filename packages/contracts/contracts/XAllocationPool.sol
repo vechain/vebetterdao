@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.18;
 
 import { IXAllocationPool } from "./interfaces/IXAllocationPool.sol";
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
@@ -64,16 +64,16 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
     uint256 amountToClaim = claimableAmount(roundId, appId);
     require(amountToClaim > 0, "XAllocationPool: no rewards available for this app");
 
-    //check that contract has enough funds to pay the reward
-    require(b3tr.balanceOf(address(this)) >= amountToClaim, "Insufficient funds");
+    // update the claimedRewards mapping
+    claimedRewards[appId][roundId] = true;
 
     address receiverAddress = xAllocationVoting().getAppReceiverAddress(appId);
 
+    //check that contract has enough funds to pay the reward
+    require(b3tr.balanceOf(address(this)) >= amountToClaim, "Insufficient funds");
+
     // Transfer the rewards to the caller
     require(b3tr.transfer(receiverAddress, amountToClaim), "Allocation transfer failed");
-
-    // update the claimedRewards mapping
-    claimedRewards[appId][roundId] = true;
 
     // emit event
     emit AllocationRewardsClaimed(appId, roundId, amountToClaim, receiverAddress, msg.sender);
@@ -91,7 +91,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
     require(emissions() != IEmissions(address(0)), "Emissions contract not set");
 
     // Amount available for this round (assuming the amount is already scaled by 1e18 for precision)
-    return emissions().getXAllocationAmountForCycle(roundId);
+    return emissions().getXAllocationAmount(roundId);
   }
 
   /**
@@ -118,7 +118,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
   function claimableAmount(uint256 roundId, bytes32 appId) public view returns (uint256) {
     require(!xAllocationVoting().isActive(roundId), "XAllocationPool: round not ended yet");
 
-    //If round is not succeded then take shares from previous successful round
+    //If round is not succeeded then take shares from previous successful round
     uint256 lastSucceededRoundId = roundId;
     if (xAllocationVoting().state(roundId) == IXAllocationVotingGovernor.RoundState.Failed) {
       require(xAllocationVoting().isFinalized(roundId), "XAllocationPool: failed round not finalized yet");
@@ -167,11 +167,11 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
     );
 
     uint256 total = _emissionAmount(roundId);
-    bytes32[] memory elegibleApps = xAllocationVoting().getRoundApps(roundId);
+    bytes32[] memory eligibleApps = xAllocationVoting().getRoundApps(roundId);
 
     uint256 available = (total * baseAllocationPercentage) / 100;
 
-    uint256 amountPerApp = available / elegibleApps.length;
+    uint256 amountPerApp = available / eligibleApps.length;
     return amountPerApp;
   }
 
@@ -199,7 +199,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
     uint256 appShare = (appVotes * percentagePrecisionScalingFactor) / totalVotes;
 
     // Cap the app share to the maximum variable allocation percentage so even if an app has 80 votes out of 100,
-    // it will still get a max of `appSharesCap` percentage of the avaialable funds
+    // it will still get a max of `appSharesCap` percentage of the available funds
     uint256 _allocationRewardMaxCap = scaledAppSharesCap();
     if (appShare > _allocationRewardMaxCap) {
       appShare = _allocationRewardMaxCap;

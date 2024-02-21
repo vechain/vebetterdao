@@ -11,7 +11,7 @@ import {
   waitForVotingPeriodToEnd,
   catchRevert,
   waitForProposalToBeActive,
-  partecipateInGovernanceVoting,
+  participateInGovernanceVoting,
 } from "./helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it } from "mocha"
@@ -373,7 +373,7 @@ describe("Governor and TimeLock", function () {
       })
 
       // Should be able to free mint after participating in allocation voting
-      await partecipateInGovernanceVoting(
+      await participateInGovernanceVoting(
         otherAccount,
         owner,
         governor,

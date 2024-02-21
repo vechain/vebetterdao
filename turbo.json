@@ -2,10 +2,7 @@
   "$schema": "https://turbo.build/schema.json",
   "globalDotEnv": [".env"],
   "globalDependencies": ["**/.env.*local"],
-  "globalEnv": [
-    "NEXT_PUBLIC_APP_ENV",
-    "MNEMONIC"
-  ],
+  "globalEnv": ["NEXT_PUBLIC_APP_ENV", "MNEMONIC", "NFT_STORAGE_KEY"],
   "pipeline": {
     "install": {
       "dependsOn": ["@repo/contracts#install", "^compile"]
@@ -60,10 +57,16 @@
     "test:hardhat": {
       "cache": false
     },
-    "generate-b3tr-badge-metadata":{
+    "generate-b3tr-badge-metadata": {
       "cache": false
     },
-    "upload-b3tr-badge-metadata":{
+    "upload-b3tr-badge-metadata": {
+      "cache": false
+    },
+    "generate-xapp-metadata": {
+      "cache": false
+    },
+    "upload-xapp-metadata": {
       "cache": false
     }
   }

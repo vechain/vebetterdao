@@ -1,1 +1,1 @@
-export * from "./buildClaimNFTTx"
+export * from "./buildClaimNftTx"
