@@ -1,5 +1,13 @@
 import { Text } from "@chakra-ui/react"
 
-export const DotSymbol: React.FC = () => {
-  return <Text>&#8226;</Text>
+type Props = {
+  color?: string
+}
+
+export const DotSymbol: React.FC<Props> = ({ color = "inherit" }) => {
+  return (
+    <Text color={color} fontSize={"small"}>
+      &#8226;
+    </Text>
+  )
 }
