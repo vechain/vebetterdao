@@ -24,7 +24,7 @@ export const useClaimNFT = ({ onSuccess }: { onSuccess: () => void }): UseSendTr
   const buildClauses = useCallback((): EnhancedClause[] => {
     return [
       {
-        to: getConfig().b3trContractAddress,
+        to: getConfig().nftBadgeContractAddress,
         value: 0,
         data: B3trBadgeInterface.encodeFunctionData("freeMint"),
         comment: `Claim NFT`,
