@@ -2,8 +2,6 @@ import { ethers } from "hardhat"
 import { expect } from "chai"
 import {
   createProposal,
-  defaultVotingPeriod,
-  defaultVotingTreshold,
   getOrDeployContractInstances,
   getProposalIdFromTx,
   getVot3Tokens,
@@ -15,6 +13,7 @@ import {
 } from "./helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it } from "mocha"
+import { createLocalConfig } from "@repo/config/contracts/envs/local"
 
 describe("Governor and TimeLock", function () {
   const description = "Test Proposal: testing propsal with random description!"
@@ -23,14 +22,15 @@ describe("Governor and TimeLock", function () {
 
   describe("Governor deployment", function () {
     it("should set constructors correctly", async function () {
+      const config = createLocalConfig()
       const { governor, vot3, owner, timeLock } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
       const votesThreshold = (await governor.proposalThreshold()).toString()
       const votingPeriod = (await governor.votingPeriod()).toString()
 
-      expect(votesThreshold).to.eql(defaultVotingTreshold.toString())
-      expect(votingPeriod).to.eql(defaultVotingPeriod.toString())
+      expect(votesThreshold).to.eql(config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD.toString())
+      expect(votingPeriod).to.eql(config.B3TR_GOVERNOR_VOTING_PERIOD.toString())
 
       // proposers votes should be 0
       const clock = await governor.clock()
@@ -57,9 +57,11 @@ describe("Governor and TimeLock", function () {
 
   describe("Proposal Creation", function () {
     it("cannot create a proposal if NOT a VOT3 holder", async function () {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
       const { governor, B3trContract, b3tr, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
-        votingTreshold: 1,
+        config,
       })
       await catchRevert(createProposal(governor, b3tr, B3trContract, owner, description, functionToCall, [], true))
     })
@@ -78,9 +80,11 @@ describe("Governor and TimeLock", function () {
     })
 
     it("can create a proposal if VOT3 holder that self-delegated", async function () {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
       const { governor, B3trContract, b3tr, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
-        votingTreshold: 1,
+        config,
       })
 
       // Now we can create a proposal
@@ -120,7 +124,7 @@ describe("Governor and TimeLock", function () {
       // block when proposal will end
       const voteEnd = decodedLogs?.args[7]
       expect(voteEnd).not.to.be.null
-      expect(voteEnd).to.eql(voteStart + BigInt(defaultVotingPeriod))
+      expect(voteEnd).to.eql(voteStart + BigInt(config.B3TR_GOVERNOR_VOTING_PERIOD))
 
       // proposal should be in pending state
       const proposalState = await governor.state(proposalId)
@@ -161,9 +165,11 @@ describe("Governor and TimeLock", function () {
     })
 
     it("ANY user that holds VOT3 and DELEGATED can create a proposal", async function () {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
       const { governor, B3trContract, otherAccount, b3tr } = await getOrDeployContractInstances({
         forceDeploy: true,
-        votingTreshold: 1,
+        config,
       })
 
       // Now we can create a proposal
@@ -171,7 +177,7 @@ describe("Governor and TimeLock", function () {
     })
   })
 
-  // the tests descibed in this section cannot be run in isolation, but need to run in cascade
+  // the tests described in this section cannot be run in isolation, but need to run in cascade
   describe("Proposal Voting", function () {
     let voter1: HardhatEthersSigner
     let voter2: HardhatEthersSigner
@@ -179,10 +185,12 @@ describe("Governor and TimeLock", function () {
     let voter4: HardhatEthersSigner
 
     this.beforeAll(async function () {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
       const { vot3, b3tr, otherAccounts, minterAccount, governor, B3trContract, otherAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
-          votingTreshold: 1,
+          config,
         })
       voter1 = otherAccounts[0] // with no VOT3
       voter2 = otherAccounts[1] // with VOT3 but no delegation
@@ -395,10 +403,12 @@ describe("Governor and TimeLock", function () {
     let voter: HardhatEthersSigner
 
     this.beforeAll(async function () {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.B3TR_GOVERNOR_VOTING_PERIOD = 3
       const { otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
-        votingTreshold: 0,
-        votingPeriod: 3,
+        config,
       })
 
       // load votes

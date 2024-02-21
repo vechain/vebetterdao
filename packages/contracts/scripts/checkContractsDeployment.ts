@@ -1,6 +1,6 @@
 import { ethers, network } from "hardhat"
 import { deployAll } from "./deploy/deploy"
-import { getConfig } from "@repo/config"
+import { getConfig, getContractsConfig } from "@repo/config"
 import { AppConfig } from "@repo/config"
 import fs from "fs"
 import path from "path"
@@ -25,7 +25,7 @@ async function checkContractsDeployment() {
       console.log(`B3tr contract not deployed at address ${config.b3trContractAddress}`)
       if (isSoloNetwork) {
         // deploy the contracts and override the config file
-        const newAddresses = await deployAll()
+        const newAddresses = await deployAll(getContractsConfig())
         try {
           await seedLocalEnvironment(
             newAddresses.b3tr,

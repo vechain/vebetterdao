@@ -1,6 +1,5 @@
 import { describe, it } from "mocha"
 import {
-  BASE_URI,
   ZERO_ADDRESS,
   bootstrapEmissions,
   catchRevert,
@@ -13,6 +12,7 @@ import {
 } from "./helpers"
 import { expect } from "chai"
 import { ethers } from "hardhat"
+import { createLocalConfig } from "@repo/config/contracts/envs/local"
 
 describe("B3TRBadge", () => {
   describe("Contract parameters", () => {
@@ -64,17 +64,20 @@ describe("B3TRBadge", () => {
     })
 
     it("Should have base URI set correctly", async () => {
-      const { b3trBadge } = await getOrDeployContractInstances({ forceDeploy: true })
+      const config = createLocalConfig()
+      const { b3trBadge } = await getOrDeployContractInstances({ forceDeploy: true, config })
 
-      expect(await b3trBadge.baseURI()).to.equal(BASE_URI)
+      expect(await b3trBadge.baseURI()).to.equal(config.BASE_URI)
     })
   })
 
   describe("Minting", () => {
     it("Cannot mint if B3TRGovernor address is not set", async () => {
+      const config = createLocalConfig()
       const { otherAccount, b3tr, xAllocationVoting, owner, emissions, minterAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
+          config,
         })
 
       // Grant minter role to emissions contract
@@ -88,7 +91,7 @@ describe("B3TRBadge", () => {
 
       // Deploy NFTBadge
       const NFTBadgeContract = await ethers.getContractFactory("B3TRBadge")
-      const b3trBadge = await NFTBadgeContract.deploy("b3trBadge", "BDG", owner, 1, BASE_URI)
+      const b3trBadge = await NFTBadgeContract.deploy("b3trBadge", "BDG", owner, 1, config.BASE_URI)
       await b3trBadge.waitForDeployment()
 
       await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
@@ -97,9 +100,11 @@ describe("B3TRBadge", () => {
     })
 
     it("Cannot mint if XAllocation address is not set", async () => {
+      const config = createLocalConfig()
       const { otherAccount, xAllocationVoting, b3tr, owner, governor, emissions, minterAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
+          config,
         })
 
       // Grant minter role to emissions contract
@@ -113,7 +118,7 @@ describe("B3TRBadge", () => {
 
       // Deploy NFTBadge
       const NFTBadgeContract = await ethers.getContractFactory("B3TRBadge")
-      const b3trBadge = await NFTBadgeContract.deploy("b3trBadge", "BDG", owner, 1, BASE_URI)
+      const b3trBadge = await NFTBadgeContract.deploy("b3trBadge", "BDG", owner, 1, config.BASE_URI)
       await b3trBadge.waitForDeployment()
 
       await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
@@ -122,9 +127,11 @@ describe("B3TRBadge", () => {
     })
 
     it("Can know if user participated in governance if XAllocation and B3TRGovernor addresses are set", async () => {
+      const config = createLocalConfig()
       const { otherAccount, xAllocationVoting, owner, governor, b3tr, emissions, minterAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
+          config,
         })
 
       // Bootstrap emissions
@@ -135,7 +142,7 @@ describe("B3TRBadge", () => {
 
       // Deploy NFTBadge
       const NFTBadgeContract = await ethers.getContractFactory("B3TRBadge")
-      const b3trBadge = await NFTBadgeContract.deploy("b3trBadge", "BDG", owner, 1, BASE_URI)
+      const b3trBadge = await NFTBadgeContract.deploy("b3trBadge", "BDG", owner, 1, config.BASE_URI)
       await b3trBadge.waitForDeployment()
 
       await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
@@ -250,9 +257,11 @@ describe("B3TRBadge", () => {
     })
 
     it("Should mint a level 1 badge", async () => {
+      const config = createLocalConfig()
       const { b3trBadge, otherAccount, owner, xAllocationVoting, b3tr, emissions, minterAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
+          config,
         })
 
       // Bootstrap emissions
@@ -299,7 +308,7 @@ describe("B3TRBadge", () => {
       expect(await b3trBadge.tokenByIndex(0)).to.equal(0) // Token ID of the first badge is 0
       expect(await b3trBadge.tokenOfOwnerByIndex(await otherAccount.getAddress(), 0)).to.equal(0) // Token ID of the first badge owned by otherAccount is 0
 
-      expect(await b3trBadge.tokenURI(0)).to.equal(`${BASE_URI}1`) // Token URI of the first badge is the "base URI/level"
+      expect(await b3trBadge.tokenURI(0)).to.equal(`${config.BASE_URI}1`) // Token URI of the first badge is the "base URI/level"
     })
 
     it("Should not be able to mint a badge when already holding one", async () => {

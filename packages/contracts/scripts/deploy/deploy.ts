@@ -1,69 +1,33 @@
 import { ethers, network } from "hardhat"
 import { B3TR, B3TRGovernor, TimeLock, VOT3 } from "../../typechain-types"
-import { contractsConfig } from "@repo/config/contracts"
-
-const ADMIN = contractsConfig.CONTRACTS_ADMIN_ADDRESS
-
-// Governor Values
-const QUORUM_PERCENTAGE = contractsConfig.B3TR_GOVERNOR_QUORUM_PERCENTAGE
-const MIN_DELAY = contractsConfig.B3TR_GOVERNOR_MIN_DELAY
-const VOTING_PERIOD = contractsConfig.B3TR_GOVERNOR_VOTING_PERIOD
-const VOTING_DELAY = contractsConfig.B3TR_GOVERNOR_VOTING_DELAY
-const PROPOSAL_THRESHOLD = contractsConfig.B3TR_GOVERNOR_PROPOSAL_THRESHOLD
-
-// Emissions Values
-const VOTE_2_EARN_ADDRESS = contractsConfig.VOTE_2_EARN_POOL_ADDRESS
-const TREASURY_ADDRESS = contractsConfig.TREASURY_POOL_ADDRESS
-
-const INITIAL_X_ALLOCATION = ethers.parseEther(contractsConfig.INITIAL_X_ALLOCATION.toString())
-const INITIAL_VOTE_2_EARN_ALLOCATION = ethers.parseEther(contractsConfig.INITIAL_VOTE_2_EARN_ALLOCATION.toString())
-const INITIAL_TREASURY_ALLOCATION = ethers.parseEther(contractsConfig.INITIAL_TREASURY_ALLOCATION.toString())
-
-const CYCLE_DURATION = contractsConfig.EMISSIONS_CYCLE_DURATION
-const DECAY_SETTINGS = [
-  contractsConfig.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE,
-  contractsConfig.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE,
-  contractsConfig.EMISSIONS_X_ALLOCATION_DECAY_PERIOD,
-  contractsConfig.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD,
-]
-const INITIAL_EMISSIONS = ethers.parseEther(contractsConfig.EMISSIONS_INITIAL_EMISSIONS.toString())
-const TREASURY_PERCENTAGE = contractsConfig.EMISSIONS_TREASURY_PERCENTAGE
-const MAX_VOTE_2_EARN_DECAY_PERCENTAGE = contractsConfig.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE
-
-// XAllocationVoting Values
-const X_ALLOCATION_VOTING_PERIOD = CYCLE_DURATION - 1
-
-// XAllocationPool Values
-const BASE_ALLOCATION_PERCENTAGE = contractsConfig.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE
-const APP_SHARES_CAP = contractsConfig.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP
+import { ContractsConfig } from "@repo/config/contracts/type"
 
 // NFT Badge Values
 const name = "B3TR Badge"
 const symbol = "B3TR"
-const BASE_URI = contractsConfig.BASE_URI
 
 // Voter rewards
 const levels = [1]
 const multiplier = [0]
 
-export async function deployAll() {
-  console.log(`Deploying contracts on ${network.name} with ${contractsConfig.NEXT_PUBLIC_APP_ENV} configurations...`)
+export async function deployAll(config: ContractsConfig) {
+  console.log(`Deploying contracts on ${network.name} with ${config.NEXT_PUBLIC_APP_ENV} configurations...`)
 
   const [admin] = await ethers.getSigners()
 
   // Deploy B3TR and VOT3 tokens
-  const b3tr = await deployB3trToken(ADMIN)
+  const b3tr = await deployB3trToken(config.CONTRACTS_ADMIN_ADDRESS, config.B3TR_CAP)
   const vot3 = await deployVot3Token(await b3tr.getAddress())
 
   // Deploy the governance contract
-  const timelock = await deployTimeLock(MIN_DELAY, ADMIN)
+  const timelock = await deployTimeLock(config.B3TR_GOVERNOR_MIN_DELAY, config.CONTRACTS_ADMIN_ADDRESS)
   const governor = await deployGovernor(
     await vot3.getAddress(),
     await timelock.getAddress(),
-    QUORUM_PERCENTAGE,
-    VOTING_PERIOD,
-    VOTING_DELAY,
-    PROPOSAL_THRESHOLD,
+    config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
+    config.B3TR_GOVERNOR_VOTING_PERIOD,
+    config.B3TR_GOVERNOR_VOTING_DELAY,
+    config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD,
   )
 
   // Set proposer, canceller and executor role to timelock
@@ -77,32 +41,36 @@ export async function deployAll() {
   // Deploy XAllocationPool
   const xAllocationPool = await deployXAllocationPool(
     await b3tr.getAddress(),
-    ADMIN,
-    BASE_ALLOCATION_PERCENTAGE,
-    APP_SHARES_CAP,
+    config.CONTRACTS_ADMIN_ADDRESS,
+    config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
+    config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
   )
 
   // Deploy the NFT Badge contract with Max Mintable Level 1
-  const badge = await deployNFTBadge(1, name, symbol, ADMIN)
+  const badge = await deployNFTBadge(1, name, symbol, config.CONTRACTS_ADMIN_ADDRESS, config.BASE_URI)
 
   const emissions = await deployEmissions(
     await b3tr.getAddress(),
-    [await xAllocationPool.getAddress(), VOTE_2_EARN_ADDRESS, TREASURY_ADDRESS],
-    [INITIAL_X_ALLOCATION, INITIAL_VOTE_2_EARN_ALLOCATION, INITIAL_TREASURY_ALLOCATION],
-    ADMIN,
-    ADMIN,
-    CYCLE_DURATION,
-    DECAY_SETTINGS as [number, number, number, number],
-    INITIAL_EMISSIONS,
-    TREASURY_PERCENTAGE,
-    MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
+    [await xAllocationPool.getAddress(), config.VOTE_2_EARN_POOL_ADDRESS, config.TREASURY_POOL_ADDRESS],
+    config.INITIAL_X_ALLOCATION,
+    config.CONTRACTS_ADMIN_ADDRESS,
+    config.CONTRACTS_ADMIN_ADDRESS,
+    config.EMISSIONS_CYCLE_DURATION,
+    [
+      config.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE,
+      config.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE,
+      config.EMISSIONS_X_ALLOCATION_DECAY_PERIOD,
+      config.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD,
+    ],
+    config.EMISSIONS_TREASURY_PERCENTAGE,
+    config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
   )
 
   const voterRewards = await deployVoterRewards(
     await badge.getAddress(),
     await emissions.getAddress(),
     await b3tr.getAddress(),
-    ADMIN,
+    config.CONTRACTS_ADMIN_ADDRESS,
     levels,
     multiplier,
   )
@@ -111,10 +79,10 @@ export async function deployAll() {
   const xAllocationVoting = await deployXAllocationVoting(
     await timelock.getAddress(),
     await vot3.getAddress(),
-    ADMIN,
+    config.CONTRACTS_ADMIN_ADDRESS,
     await voterRewards.getAddress(),
-    QUORUM_PERCENTAGE,
-    X_ALLOCATION_VOTING_PERIOD,
+    config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
+    config.EMISSIONS_CYCLE_DURATION - 1,
   )
 
   // Grant Vote Registrar role to XAllocationVoting
@@ -132,7 +100,7 @@ export async function deployAll() {
   await xAllocationPool.connect(admin).setXAllocationVotingAddress(await xAllocationVoting.getAddress())
   await xAllocationPool.connect(admin).setEmissionsAddress(await emissions.getAddress())
 
-  // Set xAllocationVoting and B3TRGovernor address in B3TRBedge
+  // Set xAllocationVoting and B3TRGovernor address in B3TRBadge
   await badge.connect(admin).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
   await badge.connect(admin).setB3trGovernorAddress(await governor.getAddress())
 
@@ -151,10 +119,10 @@ export async function deployAll() {
   // close the script
 }
 
-async function deployB3trToken(admin: string): Promise<B3TR> {
+async function deployB3trToken(admin: string, cap: number): Promise<B3TR> {
   console.log(`Deploying B3tr contract`)
   const B3trContract = await ethers.getContractFactory("B3TR") // Use the global variable
-  const contract = await B3trContract.deploy(admin)
+  const contract = await B3trContract.deploy(admin, cap)
 
   await contract.waitForDeployment()
 
@@ -218,10 +186,16 @@ async function deployGovernor(
   return contract
 }
 
-async function deployNFTBadge(mintableLevelFromDeploy: number, name: string, symbol: string, admin: string) {
+async function deployNFTBadge(
+  mintableLevelFromDeploy: number,
+  name: string,
+  symbol: string,
+  admin: string,
+  baseUri: string,
+) {
   console.log(`Deploying B3TRBadge NFT contract`)
   const NFTBadgeContract = await ethers.getContractFactory("B3TRBadge")
-  const contract = await NFTBadgeContract.deploy(name, symbol, admin, mintableLevelFromDeploy, BASE_URI)
+  const contract = await NFTBadgeContract.deploy(name, symbol, admin, mintableLevelFromDeploy, baseUri)
 
   await contract.waitForDeployment()
 
@@ -283,12 +257,11 @@ async function deployXAllocationVoting(
 async function deployEmissions(
   b3trAddress: string,
   destinations: string[],
-  allocations: bigint[],
+  allocations: bigint,
   minterAddress: string,
   adminAddress: string,
   cycleDuration: number,
   decaySettings: [number, number, number, number],
-  initialEmissions: bigint,
   treasuryPercentage: number,
   maxVote2EarnDecayPercentage: number,
 ) {
@@ -299,10 +272,9 @@ async function deployEmissions(
     adminAddress,
     b3trAddress,
     destinations as [string, string, string],
-    allocations as [bigint, bigint, bigint],
+    allocations,
     cycleDuration,
     decaySettings as [number, number, number, number],
-    initialEmissions,
     treasuryPercentage,
     maxVote2EarnDecayPercentage,
   )
