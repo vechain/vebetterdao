@@ -6,7 +6,7 @@ const b3trBadgeAbi = B3trBadgeContractJson.abi
 
 const B3TR_BADGE_CONTRACT = getConfig().nftBadgeContractAddress
 
-export const buildClaimNftTx = (thor: Connex.Thor): Connex.Vendor.TxMessage[0] => {
+export const buildClaimNftTx = (thor: Connex.Thor): EnhancedClause => {
   const functionAbi = b3trBadgeAbi.find(e => e.name === "freeMint")
   if (!functionAbi) throw new Error("Function abi not found for freeMint")
 
@@ -14,5 +14,5 @@ export const buildClaimNftTx = (thor: Connex.Thor): Connex.Vendor.TxMessage[0] =
     ...thor.account(B3TR_BADGE_CONTRACT).method(functionAbi).asClause(),
     comment: `Claim NFT`,
     abi: functionAbi,
-  } as EnhancedClause
+  }
 }
