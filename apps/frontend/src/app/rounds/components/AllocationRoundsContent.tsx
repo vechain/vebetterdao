@@ -1,18 +1,5 @@
-import {
-  useProposalsEvents,
-  useActiveProposals,
-  useIncomingProposals,
-  usePastProposals,
-  useCurrentBlock,
-  useCurrentAllocationsRoundId,
-} from "@/api"
-import {
-  AllocationRoundsList,
-  CreateProposalButton,
-  XAppsForecastedAmounts,
-  ProposalCard,
-  VoterRewards,
-} from "@/components"
+import { useCurrentAllocationsRoundId } from "@/api"
+import { AllocationRoundsList, XAppsForecastedAmounts } from "@/components"
 import { VStack, HStack, Stack } from "@chakra-ui/react"
 
 export const AllocationRoundsContent = () => {

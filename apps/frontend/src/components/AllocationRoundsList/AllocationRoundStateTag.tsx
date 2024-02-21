@@ -1,5 +1,5 @@
 import { RoundState } from "@/api"
-import { Skeleton, Tag, TagProps, Text } from "@chakra-ui/react"
+import { Skeleton, TagProps, Text } from "@chakra-ui/react"
 
 type Props = {
   state?: keyof typeof RoundState

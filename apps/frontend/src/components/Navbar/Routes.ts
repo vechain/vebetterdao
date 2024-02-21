@@ -1,6 +1,4 @@
-import { FaHome } from "react-icons/fa"
-import { FaChartPie } from "react-icons/fa"
-import { FaScaleBalanced } from "react-icons/fa6"
+import { FaHome, FaChartPie } from "react-icons/fa"
 
 export interface Route {
   name: string

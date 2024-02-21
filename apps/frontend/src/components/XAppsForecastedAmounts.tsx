@@ -12,7 +12,6 @@ import {
   Flex,
   HStack,
   Heading,
-  Link,
   Spinner,
   Stack,
   Text,
@@ -68,9 +67,9 @@ export const XAppsForecastedAmounts = ({ roundId }: Props) => {
       <CardBody>
         <Box flex={1} />
         <Stack spacing={5} w={"full"}>
-          {data?.map(app => {
+          {data?.map((app, index) => {
             return (
-              <HStack justify={"space-between"} alignItems={"center"}>
+              <HStack key={index} justify={"space-between"} alignItems={"center"}>
                 <Text fontWeight={"500"} size={"xs"}>
                   {app.app}
                 </Text>

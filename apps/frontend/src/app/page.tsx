@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Card, CardBody, Show, Spinner, Stack, VStack } from "@chakra-ui/react"
+import { Box, Spinner, Stack, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { Suspense } from "react"
 

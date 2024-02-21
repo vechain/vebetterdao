@@ -1,4 +1,4 @@
-import { RoundCreated, useAllocationAmount, useAllocationsRound, useCurrentAllocationsRoundId } from "@/api"
+import { RoundCreated, useAllocationAmount, useAllocationsRound } from "@/api"
 import {
   Box,
   Card,
@@ -10,7 +10,6 @@ import {
   Skeleton,
   Stack,
   Text,
-  VStack,
   useColorModeValue,
 } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
