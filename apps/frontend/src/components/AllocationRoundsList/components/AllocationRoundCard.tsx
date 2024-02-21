@@ -45,16 +45,13 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
   const onRoundClick = () => {
     router.push(`/rounds/${round.roundId}`)
   }
-
-  const { data: currentRound } = useAllocationsRound(round.roundId)
-
-  const isCurrentRoundActive = useMemo(() => {
-    return currentRound?.state === "0"
-  }, [currentRound, currentRound?.state])
+  const isActive = useMemo(() => {
+    return allocationRound?.state === "0" && allocationRound?.voteEndTimestamp?.isAfter()
+  }, [allocationRound, allocationRound?.state])
 
   const cardActiveBackroundColor = useColorModeValue("secondary.100", "secondary.200")
 
-  const cardTextColor = isCurrentRoundActive ? "black" : "inherit"
+  const cardTextColor = isActive ? "black" : "inherit"
 
   const activeBorderColor = useColorModeValue("secondary.500", "black")
   const defaultBorderColor = useColorModeValue("transparent", "gray.500")
@@ -67,11 +64,11 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
       w="full"
       variant="elevated"
       borderWidth={1}
-      backgroundColor={isCurrentRoundActive ? cardActiveBackroundColor : "transparent"}
-      borderColor={isCurrentRoundActive ? activeBorderColor : defaultBorderColor}
+      backgroundColor={isActive ? cardActiveBackroundColor : "transparent"}
+      borderColor={isActive ? activeBorderColor : defaultBorderColor}
       onClick={onRoundClick}
       _hover={{
-        borderColor: isCurrentRoundActive ? activeHoverBorderColor : defaultHoverBorderColor,
+        borderColor: isActive ? activeHoverBorderColor : defaultHoverBorderColor,
         cursor: "pointer",
         transition: "all 0.2s ease-in-out",
       }}>
@@ -82,7 +79,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
               <AllocationRoundStateTag state={allocationRound.state} size="md" />
               <DotSymbol color={cardTextColor} />
               <Text fontWeight={"200"} color={cardTextColor}>
-                {isCurrentRoundActive
+                {isActive
                   ? `ends ${allocationRound.voteEndTimestamp?.fromNow()}`
                   : `${allocationRound.voteStartTimestamp?.fromNow()}`}
               </Text>
