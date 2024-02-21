@@ -36,7 +36,10 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
     () => [
       { title: "Voting session started", description: roundInfo?.voteStartTimestamp?.format("MMMM D hh:mm A") },
       { title: "Voting session finished", description: roundInfo?.voteEndTimestamp?.format("MMMM D hh:mm A") },
-      { title: "Allocations claimable" },
+      {
+        title: "Allocations distributed to xApps",
+        description: "Voting rewards are claimable",
+      },
     ],
     [roundInfo],
   )
@@ -48,8 +51,22 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
 
   useEffect(() => {
     if (roundInfo) {
+      if (!roundInfo.isCurrent) {
+        setActiveStep(3)
+        return
+      }
       const stateNumber = Number(roundInfo.state)
-      setActiveStep(stateNumber)
+      switch (stateNumber) {
+        case 0:
+          setActiveStep(1)
+          break
+        case 1:
+          setActiveStep(2)
+          break
+        case 2:
+          setActiveStep(2)
+          break
+      }
     }
   }, [roundInfo, setActiveStep])
 
