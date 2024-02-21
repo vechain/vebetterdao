@@ -5,9 +5,9 @@ import axios from "axios"
 import { useXAppsMetadataBaseUri } from "./useXAppsMetadataBaseUri"
 
 /**
- *  Returns the baseUri of the xApps metadata
- * @param thor  the thor client
- * @returns  the baseUri of the xApps metadata
+ *
+ * @param uri  - The uri of the xApps metadata
+ * @returns  The metadata of the xApp
  */
 export const getXAppMetadata = async (uri: string): Promise<any> => {
   console.log("uri", uri)
@@ -21,8 +21,9 @@ export const getXAppMetadata = async (uri: string): Promise<any> => {
 export const getXAppMetadataQueryKey = (xAppId?: string) => ["xApps", xAppId, "metadata"]
 
 /**
- *  Hook to get the baseUri of the xApps metadata
- * @returns the baseUri of the xApps metadata
+ * Hook to fetch the metadata of an xApp from the xApps metadata base uri
+ * @param xAppId - The id of the xApp
+ * @returns  The metadata of the xApp
  */
 export const useXAppMetadata = (xAppId?: string) => {
   const { thor } = useConnex()
