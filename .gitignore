@@ -143,6 +143,6 @@ contracts/package-lock.json
 .idea/
 .vscode/
 
-packages/config/local.ts
+# packages/config/local.ts
 
 packages/contracts/metadata/xApps/output/
