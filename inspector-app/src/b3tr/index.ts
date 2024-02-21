@@ -3,11 +3,15 @@ import soloStaging from "../../../packages/config/solo-staging"
 import solo from "../../../packages/config/local"
 import {
   b3trContract,
-  Contract, emissionsContract,
-  governorContract, nftBadgeContract,
+  Contract,
+  emissionsContract,
+  governorContract,
+  nftBadgeContract,
   timeLockContract,
-  vot3Contract, voterRewardsContract,
-  xAllocationPoolContract, xAllocationVotingContract,
+  vot3Contract,
+  voterRewardsContract,
+  xAllocationPoolContract,
+  xAllocationVotingContract,
 } from "@/b3tr/contracts"
 
 const importContract = async (contract: Contract, address: string, network: typeof soloStaging) => {
