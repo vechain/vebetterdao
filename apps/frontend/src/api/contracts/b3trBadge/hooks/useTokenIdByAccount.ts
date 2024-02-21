@@ -15,7 +15,7 @@ const B3TR_BADGE_CONTRACT = getConfig().nftBadgeContractAddress
 export const getTokenIdByAccount = async (thor: Connex.Thor, address: null | string) => {
   if (!address) return Promise.reject(new Error("Address not provided"))
 
-  const functionFragment = B3TRBadge__factory.createInterface().getFunction("balanceOf").format("json")
+  const functionFragment = B3TRBadge__factory.createInterface().getFunction("tokenOfOwnerByIndex").format("json")
   const res = await thor.account(B3TR_BADGE_CONTRACT).method(JSON.parse(functionFragment)).call(address, 0)
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))

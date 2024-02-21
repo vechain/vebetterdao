@@ -12,24 +12,48 @@ import { useIpfsMetadata } from "@/hooks/useIpfsMetadata"
 
 export const useNFTImage = (fetchNFT: boolean) => {
   const { account } = useWallet()
-  const { data: tokenID, isLoading: isLoadingTokenID, isError: isErrorTokenID } = useTokenIdByAccount(account, fetchNFT)
-  const { data: metadataURI, isLoading: isLoadingMetadataUri, isError: isErrorMetadataUri } = useNFTMetadataUri(tokenID)
+  const {
+    data: tokenID,
+    isLoading: isLoadingTokenID,
+    isError: isErrorTokenID,
+    error: errorTokenID,
+  } = useTokenIdByAccount(account, fetchNFT)
+  if (errorTokenID) {
+    console.error("errorTokenID", errorTokenID)
+  }
+  const {
+    data: metadataURI,
+    isLoading: isLoadingMetadataUri,
+    isError: isErrorMetadataUri,
+    error: errorMetadataURI,
+  } = useNFTMetadataUri(tokenID)
+  if (errorMetadataURI) {
+    console.error("errorMetadataURI", errorMetadataURI)
+  }
   const {
     data: imageMetadata,
     isLoading: isLoadingMetadata,
     isError: isErrorMetadata,
     error: errorMetadata,
-  } = useIpfsMetadata(metadataURI || null)
+  } = useIpfsMetadata(metadataURI ?? null)
+  if (errorMetadata) {
+    console.error("errorMetadata", errorMetadata)
+  }
   const {
     data: imageData,
     isLoading: isLoadingImageData,
     isError: isErrorImageData,
-  } = useIpfsNftImage(imageMetadata?.image || null)
+    error: errorImageData,
+  } = useIpfsNftImage(imageMetadata?.image ?? null)
+  if (errorImageData) {
+    console.error("errorImageData", errorImageData)
+  }
 
   return {
     imageData,
     imageMetadata,
-    isLoading: isLoadingTokenID || isLoadingMetadataUri || isLoadingMetadata || isLoadingImageData,
-    isError: isErrorTokenID || isErrorMetadataUri || isErrorMetadata || isErrorImageData,
+    isLoading: isLoadingTokenID ?? isLoadingMetadataUri ?? isLoadingMetadata ?? isLoadingImageData,
+    isError: isErrorTokenID ?? isErrorMetadataUri ?? isErrorMetadata ?? isErrorImageData,
+    error: errorTokenID ?? errorMetadataURI ?? errorMetadata ?? errorImageData,
   }
 }
