@@ -49,9 +49,9 @@ export default function Home() {
             </Box>
           </VStack>
           <VStack spacing={4} flex={2.5} position={["static", "static", "sticky"]} top={100} right={0}>
-            <ClaimNFT />
             <BalanceCard />
             <VoterRewards />
+            <ClaimNFT />
           </VStack>
         </Stack>
       </Suspense>
