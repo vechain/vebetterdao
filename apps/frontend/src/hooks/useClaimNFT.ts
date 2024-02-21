@@ -3,25 +3,35 @@ import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
-import { useConnex, useWallet } from "@vechain/dapp-kit-react"
-import { buildClaimNftTx } from "@/api/contracts/b3trBadge/utils"
+import { useWallet } from "@vechain/dapp-kit-react"
+import { EnhancedClause } from "@/hooks"
+import { getConfig } from "@repo/config"
 
+import { B3TRBadge__factory } from "@repo/contracts"
+
+const B3trBadgeInterface = B3TRBadge__factory.createInterface()
 /**
  * Hook to claim an NFT
  * @param onSuccess callback to call when the NFT is successfully claimed
  * @returns the result of the transaction
  */
-
+console.log("B3trBadgeInterface", B3trBadgeInterface)
 export const useClaimNFT = ({ onSuccess }: { onSuccess: () => void }): UseSendTransactionReturnValue => {
-  const { thor } = useConnex()
   const { account } = useWallet()
   const toast = useToast()
   const queryClient = useQueryClient()
 
-  const buildClauses = useCallback(() => {
-    const mintClause = buildClaimNftTx(thor)
-    return [mintClause]
-  }, [thor])
+  const buildClauses = useCallback((): EnhancedClause[] => {
+    return [
+      {
+        to: getConfig().b3trContractAddress,
+        value: 0,
+        data: B3trBadgeInterface.encodeFunctionData("freeMint"),
+        comment: `Claim NFT`,
+        abi: JSON.parse(JSON.stringify(B3trBadgeInterface.getFunction("freeMint"))),
+      },
+    ]
+  }, [])
 
   //Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {

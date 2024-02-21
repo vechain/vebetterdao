@@ -40,13 +40,7 @@ export const ClaimNFT = () => {
     sendTransaction(undefined)
   }, [sendTransaction])
 
-  const {
-    imageData,
-    imageMetadata,
-    isLoading: isLoadingImage,
-    isError: isErrorImage,
-    error: errorImage,
-  } = useNFTImage(fetchNFT)
+  const { imageData, imageMetadata, isLoading: isLoadingImage, isError: isErrorImage } = useNFTImage(fetchNFT)
 
   const modalContent = useMemo(() => {
     if (isLoadingImage) {
