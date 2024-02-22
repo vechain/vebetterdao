@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - main
+      - Comment-only-solidity-changes
 
 jobs:
   run-unit-tests:
@@ -48,14 +49,21 @@ jobs:
           fail-on: none
           slither-args: --filter-paths "openzeppelin" --exclude-informational --exclude-optimization --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
 
-      # - name: Create/update checklist as PR comment
-      #   uses: actions/github-script@v7
-      #   if: github.event_name == 'pull_request'
-      #   env:
-      #     REPORT: ${{ steps.slither.outputs.stdout }}
-      #   with:
-      #     script: |
-      #       const script = require('.github/scripts/comment')
-      #       const header = '# Slither report'
-      #       const body = process.env.REPORT
-      #       await script({ github, context, header, body })
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            src:
+              - "packages/contracts/**'
+      
+      - name: Create/update checklist as PR comment
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request' && steps.changes.outputs.src == 'true'
+        env:
+           REPORT: ${{ steps.slither.outputs.stdout }}
+        with:
+           script: |
+             const script = require('.github/scripts/comment')
+             const header = '# Slither report'
+             const body = process.env.REPORT
+             await script({ github, context, header, body })
