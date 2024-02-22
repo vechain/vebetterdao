@@ -1,7 +1,6 @@
 export * from "./useCreateProposal"
 export * from "./useMintB3tr"
 export * from "./useClaimNFT"
-export * from "./useIpfsNftImage"
 export * from "./useSendTransaction"
 export * from "./useStakeB3tr"
 export * from "./useUnstakeB3tr"
