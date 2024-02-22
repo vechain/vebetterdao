@@ -1,10 +1,10 @@
 import { ethers } from "hardhat"
 import { expect } from "chai"
-import { getOrDeployContractInstances } from "./helpers"
+import { catchRevert, getOrDeployContractInstances } from "./helpers"
 import { describe, it } from "mocha"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 
-describe("B3TR", function () {
+describe("B3TR Token", function () {
   describe("Deployment", function () {
     it("should deploy the contract", async function () {
       const { b3tr } = await getOrDeployContractInstances({ forceDeploy: false })
@@ -118,6 +118,19 @@ describe("B3TR", function () {
       // otherAccount is still admin until
       expect(await b3tr.hasRole(adminRole, otherAccount)).to.eql(true)
     })
+
+    it("Only admin can toggle pause of b3tr transfers", async function () {
+      const { b3tr, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      await catchRevert(b3tr.connect(otherAccount).pause())
+      await catchRevert(b3tr.connect(otherAccount).unpause())
+
+      await b3tr.connect(owner).pause()
+      expect(await b3tr.paused()).to.eql(true)
+
+      await b3tr.connect(owner).unpause()
+      expect(await b3tr.paused()).to.eql(false)
+    })
   })
 
   describe("Max supply", function () {
@@ -154,6 +167,21 @@ describe("B3TR", function () {
 
       const balance = await b3tr.balanceOf(otherAccount)
       expect(String(balance)).to.eql(ethers.parseEther("1").toString())
+    })
+
+    it("Should not be able to mint if transfers are paused", async function () {
+      const { b3tr, otherAccount, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      const operatorRole = await b3tr.MINTER_ROLE()
+
+      await b3tr.grantRole(operatorRole, owner)
+      await b3tr.pause()
+
+      await catchRevert(b3tr.mint(otherAccount, ethers.parseEther("1")))
+
+      await b3tr.connect(owner).unpause()
+
+      await expect(b3tr.mint(otherAccount, ethers.parseEther("1"))).not.to.be.reverted
     })
   })
 
