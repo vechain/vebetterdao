@@ -9,22 +9,21 @@ import { getConfig } from "@repo/config"
 
 const EmissionsInterface = Emissions__factory.createInterface()
 
-type useDistributeEmissionsProps = {
+type useStartEmissionsProps = {
   onSuccess?: () => void
   invalidateCache?: boolean
   onSuccessMessageTitle?: string
 }
 /**
- * Hook to mint a certain amount of B3TR tokens
- * This hook will send a mint transaction to the blockchain and wait for the txConfirmation
+ * Hook to start the emissions
  * @param onSuccess callback to run when the upgrade is successful
  * @param invalidateCache boolean to indicate if the related react-query cache should be updated (default: true)
  * @returns see {@link UseSendTransactionReturnValue}
  */
-export const useDistributeEmission = ({
+export const useStartEmission = ({
   onSuccess,
   invalidateCache = true,
-}: useDistributeEmissionsProps): UseSendTransactionReturnValue => {
+}: useStartEmissionsProps): UseSendTransactionReturnValue => {
   const { account } = useWallet()
   const toast = useToast()
   const queryClient = useQueryClient()
@@ -34,9 +33,9 @@ export const useDistributeEmission = ({
       {
         to: getConfig().emissionsContractAddress,
         value: 0,
-        data: EmissionsInterface.encodeFunctionData("distribute"),
-        comment: "Distribute emissions",
-        abi: JSON.parse(JSON.stringify(EmissionsInterface.getFunction("distribute"))),
+        data: EmissionsInterface.encodeFunctionData("start"),
+        comment: "Start emissions",
+        abi: JSON.parse(JSON.stringify(EmissionsInterface.getFunction("start"))),
       },
     ]
 
@@ -69,8 +68,8 @@ export const useDistributeEmission = ({
     }
 
     toast({
-      title: "Round started successfully",
-      description: `Emissions has been distributed and round started successfully.`,
+      title: "Emissions started successfully",
+      description: `Emissions distributed and first round started.`,
       status: "success",
       position: "bottom-left",
       duration: 5000,

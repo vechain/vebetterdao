@@ -2,6 +2,7 @@ import { ethers } from "hardhat"
 import { B3TR, Emissions, VOT3, XAllocationVoting, XApps } from "../../typechain-types"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { BytesLike } from "ethers"
+import { waitForRoundToEnd } from "../../test/helpers"
 
 type App = {
   address: string
@@ -73,6 +74,15 @@ export const seedLocalEnvironment = async (
   await xAllocationVoting.setBaseURI("ipfs://bafybeifwzkwplas7evdjlz2lwnmuu7v2mtxnqecfaoxpfbfwqvalxgjsru/")
 
   //TODO: SEED multiple rounds and votes (we need to execute a proposal to change the votingPeriod to someseconds)
+  // await waitForRoundToEnd(roundId, xAllocationVoting)
+
+  // for (let i = 0; i < 15; i++) {
+  //   await emissions.distribute()
+  //   const roundId = parseInt((await xAllocationVoting.currentRoundId()).toString())
+  //   console.log(`Casting random votes to xDapps for round ${roundId}...`)
+  //   await castVotesToXDapps(xAllocationVoting, accountsToSeed, roundId, amountToSwap, xDappsFromContract)
+  //   await waitForRoundToEnd(roundId, xAllocationVoting)
+  // }
 
   const end = performance.now()
   console.log(`Seeding complete in ${end - start}ms`)
