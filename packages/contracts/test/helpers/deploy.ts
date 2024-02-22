@@ -55,11 +55,11 @@ export const getOrDeployContractInstances = async ({
 
   // Deploy B3TR
   const B3trContract = await ethers.getContractFactory("B3TR")
-  const b3tr = await B3trContract.deploy(minterAccount, config.B3TR_CAP)
+  const b3tr = await B3trContract.deploy(owner, minterAccount, config.B3TR_CAP)
 
   // Deploy VOT3
   const Vot3Contract = await ethers.getContractFactory("VOT3")
-  const vot3 = await Vot3Contract.deploy(await b3tr.getAddress())
+  const vot3 = await Vot3Contract.deploy(owner, await b3tr.getAddress())
 
   // Deploy TimeLock
   const TimeLockContract = await ethers.getContractFactory("TimeLock")
