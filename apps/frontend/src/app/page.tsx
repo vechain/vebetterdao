@@ -22,9 +22,6 @@ const AllocationRoundsList = dynamic(
 const VoterRewards = dynamic(() => import("@/components/VoterRewards/VoterRewards").then(mod => mod.VoterRewards), {
   ssr: false,
 })
-const SwapCard = dynamic(() => import("@/components/SwapCard").then(mod => mod.SwapCard), {
-  ssr: false,
-})
 
 export default function Home() {
   return (
@@ -53,7 +50,6 @@ export default function Home() {
               <ClaimNFT />
               <BalanceCard />
             </Show>
-            <SwapCard />
             <VoterRewards />
             <AllocationRoundsList maxRounds={3} />
           </VStack>
