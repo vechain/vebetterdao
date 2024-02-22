@@ -69,8 +69,8 @@ export const useDistributeEmission = ({
     }
 
     toast({
-      title: "Round distributed successfully",
-      description: `The round has been distributed successfully.`,
+      title: "Round started successfully",
+      description: `Emissions has been distributed and round started successfully.`,
       status: "success",
       position: "bottom-left",
       duration: 5000,

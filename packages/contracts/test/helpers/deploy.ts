@@ -12,6 +12,7 @@ import {
   XAllocationPool,
   VoterRewards,
 } from "../../typechain-types"
+import { createLocalConfig } from "@repo/config/contracts/envs/local"
 
 interface DeployInstance {
   B3trContract: ContractFactory
@@ -31,41 +32,19 @@ interface DeployInstance {
   otherAccounts: HardhatEthersSigner[]
 }
 
-export const defaultVotingPeriod = 15
-export const defaultVotingTreshold = 0
-export const defaultVotingDelay = 1
-
 export const NFT_BADGE_NAME = "B3TRBadge"
 export const NFT_BADGE_SYMBOL = "B3TR"
 export const DEFAULT_MAX_MINTABLE_LEVEL = 1
-export const BASE_URI = "ipfs://test/"
 
-export const INITIAL_X_ALLOCATION = ethers.parseEther("1000000")
-export const INITIAL_VOTE_2_EARN_ALLOCATION = ethers.parseEther("1000000")
-export const INITIAL_TREASURY_ALLOCATION = ethers.parseEther("1750000")
-
-export const CYCLE_DURATION = 20 // 20 blocks. For testing purposes
-export const DECAY_SETTINGS = [4, 20, 12, 50] // 4% decay for X Allocations, 20% decay for Vote2Earn, every 12 cycles for X Allocations, Every 50 cycles for Vote2Earn
-export const INITIAL_EMISSIONS = ethers.parseEther("2000000")
-export const TREASURY_PERCENTAGE = 25 // 25%
-export const MAX_VOTE_2_EARN_DECAY_PERCENTAGE = 80 // 80%
-
-// XAllocationPool Values
-const BASE_ALLOCATION_PERCENTAGE = 20
-const APP_SHARES_CAP = 15
-
-// Voter Rewards
+// // Voter Rewards
 export const levels = [1, 2, 3, 4] // NFT Badge levels
 export const multipliers = [0, 10, 20, 50] // NFT Badge percentage multipliers
 
 let cachedDeployInstance: DeployInstance | undefined = undefined
 export const getOrDeployContractInstances = async ({
   forceDeploy = false,
-  votingTreshold = defaultVotingTreshold,
-  votingPeriod = defaultVotingPeriod,
-  xAllocationVotingPeriod = CYCLE_DURATION - 1,
+  config = createLocalConfig(),
   maxMintableLevel = DEFAULT_MAX_MINTABLE_LEVEL,
-  cycleDuration = CYCLE_DURATION,
 }) => {
   if (!forceDeploy && cachedDeployInstance !== undefined) {
     return cachedDeployInstance
@@ -76,7 +55,7 @@ export const getOrDeployContractInstances = async ({
 
   // Deploy B3TR
   const B3trContract = await ethers.getContractFactory("B3TR")
-  const b3tr = await B3trContract.deploy(minterAccount)
+  const b3tr = await B3trContract.deploy(minterAccount, config.B3TR_CAP)
 
   // Deploy VOT3
   const Vot3Contract = await ethers.getContractFactory("VOT3")
@@ -96,10 +75,10 @@ export const getOrDeployContractInstances = async ({
   const governor = await B3TRGovernor.deploy(
     await vot3.getAddress(),
     await timeLock.getAddress(),
-    4, // quroum percentage
-    votingPeriod, // voting period
-    defaultVotingDelay, // voting delay
-    votingTreshold, // voting treshold
+    config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
+    config.B3TR_GOVERNOR_VOTING_PERIOD, // voting period
+    config.B3TR_GOVERNOR_VOTING_DELAY, // voting delay
+    config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD, // voting threshold
   )
   await governor.waitForDeployment()
 
@@ -113,7 +92,13 @@ export const getOrDeployContractInstances = async ({
 
   // Deploy NFTBadge
   const NFTBadgeContract = await ethers.getContractFactory("B3TRBadge")
-  const b3trBadge = await NFTBadgeContract.deploy(NFT_BADGE_NAME, NFT_BADGE_SYMBOL, owner, maxMintableLevel, BASE_URI)
+  const b3trBadge = await NFTBadgeContract.deploy(
+    NFT_BADGE_NAME,
+    NFT_BADGE_SYMBOL,
+    owner,
+    maxMintableLevel,
+    config.NFT_BADGE_BASE_URI,
+  )
   await b3trBadge.waitForDeployment()
 
   // Deploy XAllocationPool
@@ -121,8 +106,8 @@ export const getOrDeployContractInstances = async ({
   const xAllocationPool = await XAllocationPoolContract.deploy(
     owner.address,
     await b3tr.getAddress(),
-    BASE_ALLOCATION_PERCENTAGE,
-    APP_SHARES_CAP,
+    config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
+    config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
   )
   await xAllocationPool.waitForDeployment()
 
@@ -136,12 +121,16 @@ export const getOrDeployContractInstances = async ({
     owner,
     await b3tr.getAddress(),
     [X_ALLOCATIONS_ADDRESS, VOTE_2_EARN_ADDRESS, TREASURY_ADDRESS],
-    [INITIAL_X_ALLOCATION, INITIAL_VOTE_2_EARN_ALLOCATION, INITIAL_TREASURY_ALLOCATION],
-    cycleDuration,
-    DECAY_SETTINGS as [number, number, number, number],
-    INITIAL_EMISSIONS,
-    TREASURY_PERCENTAGE,
-    MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
+    config.INITIAL_X_ALLOCATION,
+    config.EMISSIONS_CYCLE_DURATION,
+    [
+      config.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE,
+      config.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE,
+      config.EMISSIONS_X_ALLOCATION_DECAY_PERIOD,
+      config.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD,
+    ],
+    config.EMISSIONS_TREASURY_PERCENTAGE,
+    config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
   )
 
   await emissions.waitForDeployment()
@@ -164,8 +153,8 @@ export const getOrDeployContractInstances = async ({
   const XAllocationVotingContract = await ethers.getContractFactory("XAllocationVoting")
   const xAllocationVoting = await XAllocationVotingContract.deploy(
     await vot3.getAddress(),
-    4, // quroum percentage
-    xAllocationVotingPeriod, // voting period
+    config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE, // quorum percentage
+    config.EMISSIONS_CYCLE_DURATION - 1, // X Alloc voting period
     await timeLock.getAddress(),
     await voterRewards.getAddress(),
     [await timeLock.getAddress(), owner.address],
@@ -173,7 +162,7 @@ export const getOrDeployContractInstances = async ({
   )
   await xAllocationVoting.waitForDeployment()
 
-  // Set xAllocationVoting and Governor address in B3TRBedge
+  // Set xAllocationVoting and Governor address in B3TRBadge
   await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
   await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
 

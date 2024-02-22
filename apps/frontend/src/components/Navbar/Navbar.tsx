@@ -23,6 +23,7 @@ export const Navbar: React.FC = () => {
       py={4}
       h={"auto"}
       w={"full"}
+      mb={10}
       borderBottomWidth={"1px"}>
       <Container
         w="full"

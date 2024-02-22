@@ -2,6 +2,7 @@ import { ethers } from "hardhat"
 import { B3TR, Emissions, VOT3, XAllocationVoting, XApps } from "../../typechain-types"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { BytesLike } from "ethers"
+import { waitForRoundToEnd } from "../../test/helpers"
 
 type App = {
   address: string
@@ -49,7 +50,7 @@ export const seedLocalEnvironment = async (
   //   Add x-apps to the XAllocationPool
   await addXDapps(xAllocationVoting, accountsToSeed, APPS)
 
-  const xDappsFromContract = await xAllocationVoting.getAllApps()
+  // const xDappsFromContract = await xAllocationVoting.getAllApps()
 
   //   Mint some $B3TR
   console.log("Minting some $B3TR...")
@@ -58,21 +59,30 @@ export const seedLocalEnvironment = async (
     .connect(admin)
     .bootstrap()
     .then(async tx => await tx.wait())
-  await emissions
-    .connect(admin)
-    .start()
-    .then(async tx => await tx.wait())
+  // await emissions
+  //   .connect(admin)
+  //   .start()
+  //   .then(async tx => await tx.wait())
 
   //   Start new allocation round
-  const roundId = parseInt((await xAllocationVoting.currentRoundId()).toString())
-  console.log("Casting random votes to xDapps...")
-  await castVotesToXDapps(xAllocationVoting, accountsToSeed, roundId, amountToSwap, xDappsFromContract)
+  // const roundId = parseInt((await xAllocationVoting.currentRoundId()).toString())
+  // console.log("Casting random votes to xDapps...")
+  // await castVotesToXDapps(xAllocationVoting, accountsToSeed, roundId, amountToSwap, xDappsFromContract)
 
   // Set xApps baseURI
   console.log("Set xApps baseURI...")
   await xAllocationVoting.setBaseURI("ipfs://bafybeifwzkwplas7evdjlz2lwnmuu7v2mtxnqecfaoxpfbfwqvalxgjsru/")
 
   //TODO: SEED multiple rounds and votes (we need to execute a proposal to change the votingPeriod to someseconds)
+  // await waitForRoundToEnd(roundId, xAllocationVoting)
+
+  // for (let i = 0; i < 15; i++) {
+  //   await emissions.distribute()
+  //   const roundId = parseInt((await xAllocationVoting.currentRoundId()).toString())
+  //   console.log(`Casting random votes to xDapps for round ${roundId}...`)
+  //   await castVotesToXDapps(xAllocationVoting, accountsToSeed, roundId, amountToSwap, xDappsFromContract)
+  //   await waitForRoundToEnd(roundId, xAllocationVoting)
+  // }
 
   const end = performance.now()
   console.log(`Seeding complete in ${end - start}ms`)

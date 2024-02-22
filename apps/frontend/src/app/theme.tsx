@@ -26,6 +26,7 @@ const themeConfig: ThemeConfig = {
       800: "#1B1741",
     },
     primary: {
+      10: "#e9eaea", // Lightest shade
       50: "#e9eafb", // Lightest shade
       100: "#bdbff4",
       200: "#9195ed",

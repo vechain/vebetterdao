@@ -1,8 +1,5 @@
 import { describe, it } from "mocha"
 import {
-  INITIAL_TREASURY_ALLOCATION,
-  INITIAL_VOTE_2_EARN_ALLOCATION,
-  INITIAL_X_ALLOCATION,
   catchRevert,
   getOrDeployContractInstances,
   getVot3Tokens,
@@ -16,6 +13,7 @@ import {
 } from "./helpers"
 import { expect } from "chai"
 import { ethers } from "hardhat"
+import { createLocalConfig } from "@repo/config/contracts/envs/local"
 
 describe("VoterRewards", () => {
   describe("Contract parameters", () => {
@@ -64,6 +62,7 @@ describe("VoterRewards", () => {
 
   describe("X Allocation voting rewards", () => {
     it("Should track voting rewards correctly involving multiple voters", async () => {
+      const config = createLocalConfig()
       const {
         xAllocationVoting,
         otherAccounts,
@@ -76,6 +75,7 @@ describe("VoterRewards", () => {
         minterAccount,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
+        config,
       })
 
       await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
@@ -112,9 +112,7 @@ describe("VoterRewards", () => {
 
       expect(await emissions.getCurrentCycle()).to.equal(1)
 
-      expect(await b3tr.balanceOf(await xAllocationPool.getAddress())).to.equal(INITIAL_X_ALLOCATION)
-      expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(INITIAL_VOTE_2_EARN_ALLOCATION)
-      expect(await b3tr.balanceOf(otherAccounts[2].address)).to.equal(INITIAL_TREASURY_ALLOCATION)
+      expect(await b3tr.balanceOf(await xAllocationPool.getAddress())).to.equal(config.INITIAL_X_ALLOCATION)
 
       expect(await emissions.nextCycle()).to.equal(2)
 
@@ -231,7 +229,7 @@ describe("VoterRewards", () => {
 
       expect(rewardClaimedEvent?.args?.[0]).to.equal(1) // Cycle
       expect(rewardClaimedEvent?.args?.[1]).to.equal(otherAccount.address) // Voter
-      expect(rewardClaimedEvent?.args?.[2]).to.equal(357142857142857142857142n) // Reward
+      expect(rewardClaimedEvent?.args?.[2]).to.equal(23809523809523809523809n) // Reward
 
       await voterRewards.connect(voter2).claimReward(1, voter2.address)
       await voterRewards.connect(voter3).claimReward(1, voter3.address)

@@ -2,6 +2,7 @@ import { ethers } from "hardhat"
 import { expect } from "chai"
 import { getOrDeployContractInstances } from "./helpers"
 import { describe, it } from "mocha"
+import { createLocalConfig } from "@repo/config/contracts/envs/local"
 
 describe("B3TR", function () {
   describe("Deployment", function () {
@@ -24,10 +25,11 @@ describe("B3TR", function () {
     })
 
     it("should have the correct max supply", async function () {
-      const { b3tr } = await getOrDeployContractInstances({ forceDeploy: false })
+      const config = createLocalConfig()
+      const { b3tr } = await getOrDeployContractInstances({ forceDeploy: false, config })
 
       const cap = await b3tr.cap()
-      expect(String(cap)).to.eql("1000000000000000000000000000")
+      expect(cap).to.eql(ethers.parseEther(config.B3TR_CAP.toString()))
     })
 
     it("admin role is set correctly upon deploy", async function () {
@@ -128,14 +130,15 @@ describe("B3TR", function () {
     })
 
     it("can be minted up to max supply", async function () {
-      const { b3tr, otherAccount, owner } = await getOrDeployContractInstances({ forceDeploy: false })
+      const config = createLocalConfig()
+      const { b3tr, otherAccount, owner } = await getOrDeployContractInstances({ forceDeploy: false, config })
       const operatorRole = await b3tr.MINTER_ROLE()
 
       await b3tr.grantRole(operatorRole, owner)
-      await expect(b3tr.mint(otherAccount, ethers.parseEther("1000000000"))).not.to.be.reverted
+      await expect(b3tr.mint(otherAccount, ethers.parseEther(config.B3TR_CAP.toString()))).not.to.be.reverted
 
       const balance = await b3tr.balanceOf(otherAccount)
-      expect(String(balance)).to.eql(ethers.parseEther("1000000000").toString())
+      expect(String(balance)).to.eql(ethers.parseEther(config.B3TR_CAP.toString()).toString())
     })
   })
 
