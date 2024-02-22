@@ -103,6 +103,12 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
     _baseURI = baseURI_;
   }
 
+  function _updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) internal {
+    require(_apps[appId].receiverAddress != address(0), "App does not exist");
+
+    _apps[appId].receiverAddress = newReceiverAddress;
+  }
+
   // ---------- Getters ---------- //
 
   /**
