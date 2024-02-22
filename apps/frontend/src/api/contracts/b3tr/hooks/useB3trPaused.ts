@@ -35,7 +35,6 @@ export const getIsB3trPausedQueryKey = () => ["b3tr", "paused"]
 /**
  * useB3trPaused is a custom hook that uses the useQuery hook from react-query to fetch the paused status of the B3tr contract.
  *
- * @param {string} [address] - An optional string representing the address of the account.
  * @returns {UseQueryResult} The result object from the useQuery hook. Refer to the react-query documentation for more details.
  */
 export const useB3trPaused = () => {
