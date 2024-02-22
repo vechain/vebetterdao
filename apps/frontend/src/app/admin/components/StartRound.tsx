@@ -15,6 +15,8 @@ export const StartRound = () => {
 
   const distributionLoading = isTxReceiptLoading || sendTransactionPending
 
+  if (parseInt(currentRoundId ?? "0") < 1) return null
+
   return (
     <HStack w="full" spacing={12}>
       <Button
