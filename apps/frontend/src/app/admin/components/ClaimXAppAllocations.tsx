@@ -33,9 +33,9 @@ export const ClaimXAppAllocations = () => {
 
   const { data: xApps } = useXApps()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  const { data: claimableAmount } = useXAppClaimableAmount(appId ?? "", roundId?.toString() ?? "")
+  const { data: claimableAmount } = useXAppClaimableAmount(roundId?.toString() ?? "", appId ?? "")
   const { data: isLastRoundFinalized } = useIsRoundFinalized(currentRoundId)
-  const { data: claimed } = useHasXAppClaimed(appId ?? "", roundId?.toString() ?? "")
+  const { data: claimed } = useHasXAppClaimed(roundId?.toString() ?? "", appId ?? "")
 
   const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useClaimXAppAllocation({
     roundId: roundId?.toString() ?? "",

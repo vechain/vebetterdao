@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
-import { FormattingUtils } from "@repo/utils"
 import { XAllocationPool__factory } from "@repo/contracts"
 
 const XALLOCATIONPOOL_CONTRACT = getConfig().xAllocationPoolContractAddress
@@ -10,11 +9,11 @@ const XALLOCATIONPOOL_CONTRACT = getConfig().xAllocationPoolContractAddress
  *  Check if user has already claimed allocation rewards for a specific round and xApp
  *
  * @param thor  the connex instance
- * @param xAppId  the xApp id
  * @param roundId  the round id
+ * @param xAppId  the xApp id
  * @returns if user has already claimed allocation rewards for a specific round and xApp
  */
-export const getHasXAppClaimed = async (thor: Connex.Thor, xAppId: string, roundId: string): Promise<boolean> => {
+export const getHasXAppClaimed = async (thor: Connex.Thor, roundId: string, xAppId: string): Promise<boolean> => {
   const functionFragment = XAllocationPool__factory.createInterface().getFunction("claimed").format("json")
   const res = await thor.account(XALLOCATIONPOOL_CONTRACT).method(JSON.parse(functionFragment)).call(roundId, xAppId)
 
@@ -23,21 +22,21 @@ export const getHasXAppClaimed = async (thor: Connex.Thor, xAppId: string, round
   return res.decoded[0]
 }
 
-export const getHasXAppClaimedQueryKey = (xAppId: string, roundId: string) => ["claimed", roundId, "appId", xAppId]
+export const getHasXAppClaimedQueryKey = (roundId: string, xAppId: string) => ["claimed", roundId, "appId", xAppId]
 
 /**
  *  Check if user has already claimed allocation rewards for a specific round and xApp
  *
  * @param thor  the connex instance
- * @param xAppId  the xApp id
  * @param roundId  the round id
+ * @param xAppId  the xApp id
  * @returns if user has already claimed allocation rewards for a specific round and xApp
  */
-export const useHasXAppClaimed = (xAppId: string, roundId: string) => {
+export const useHasXAppClaimed = (roundId: string, xAppId: string) => {
   const { thor } = useConnex()
   return useQuery({
-    queryKey: getHasXAppClaimedQueryKey(xAppId, roundId),
-    queryFn: async () => await getHasXAppClaimed(thor, xAppId, roundId),
+    queryKey: getHasXAppClaimedQueryKey(roundId, xAppId),
+    queryFn: async () => await getHasXAppClaimed(thor, roundId, xAppId),
     enabled: !!thor,
   })
 }

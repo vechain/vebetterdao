@@ -82,7 +82,7 @@ export const useClaimXAppAllocation = ({
       isClosable: true,
     })
     onSuccess?.()
-  }, [invalidateCache, queryClient, toast, onSuccess])
+  }, [invalidateCache, queryClient, toast, onSuccess, appId, roundId])
 
   const result = useSendTransaction({
     signerAccount: account,

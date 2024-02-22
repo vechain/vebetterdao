@@ -14,7 +14,7 @@ const XALLOCATIONPOOL_CONTRACT = getConfig().xAllocationPoolContractAddress
  * @param roundId  the round id
  * @returns  amount of $B3TR an xApp can claim from an allocation round
  */
-export const getXAppClaimableAmount = async (thor: Connex.Thor, xAppId: string, roundId: string): Promise<string> => {
+export const getXAppClaimableAmount = async (thor: Connex.Thor, roundId: string, xAppId: string): Promise<string> => {
   const functionFragment = XAllocationPool__factory.createInterface().getFunction("claimableAmount").format("json")
   const res = await thor.account(XALLOCATIONPOOL_CONTRACT).method(JSON.parse(functionFragment)).call(roundId, xAppId)
 
@@ -23,7 +23,7 @@ export const getXAppClaimableAmount = async (thor: Connex.Thor, xAppId: string, 
   return FormattingUtils.scaleNumberDown(res.decoded[0], 18)
 }
 
-export const getXAppClaimableAmountQueryKey = (xAppId: string, roundId: string) => [
+export const getXAppClaimableAmountQueryKey = (roundId: string, xAppId: string) => [
   "claimableAmount",
   roundId,
   "appId",
@@ -33,15 +33,15 @@ export const getXAppClaimableAmountQueryKey = (xAppId: string, roundId: string) 
 /**
  * Get the amount of $B3TR an xApp can claim from an allocation round
  *
- * @param xAppId the xApp id
  * @param roundId the round id
+ * @param xAppId the xApp id
  * @returns amount of $B3TR an xApp can claim from an allocation round
  */
-export const useXAppClaimableAmount = (xAppId: string, roundId: string) => {
+export const useXAppClaimableAmount = (roundId: string, xAppId: string) => {
   const { thor } = useConnex()
   return useQuery({
-    queryKey: getXAppClaimableAmountQueryKey(xAppId, roundId),
-    queryFn: async () => await getXAppClaimableAmount(thor, xAppId, roundId),
+    queryKey: getXAppClaimableAmountQueryKey(roundId, xAppId),
+    queryFn: async () => await getXAppClaimableAmount(thor, roundId, xAppId),
     enabled: !!thor,
   })
 }
