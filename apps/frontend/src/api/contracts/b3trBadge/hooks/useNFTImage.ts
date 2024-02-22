@@ -1,8 +1,8 @@
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useTokenIdByAccount } from "./useTokenIdByAccount"
 import { useNFTMetadataUri } from "./useNFTMetadataUri"
-import { useIpfsNftImage } from "@/hooks/useIpfsNftImage"
-import { useIpfsMetadata } from "@/hooks/useIpfsMetadata"
+import { useIpfsImage } from "@/api/ipfs/hooks/useIpfsImage"
+import { useIpfsMetadata } from "@/api/ipfs/hooks/useIpfsMetadata"
 
 /**
  * Fetches NFT image from IPFS
@@ -44,7 +44,7 @@ export const useNFTImage = (fetchNFT: boolean) => {
     isLoading: isLoadingImageData,
     isError: isErrorImageData,
     error: errorImageData,
-  } = useIpfsNftImage(imageMetadata?.image ?? null)
+  } = useIpfsImage(imageMetadata?.image ?? null)
   if (errorImageData) {
     console.error("errorImageData", errorImageData)
   }
