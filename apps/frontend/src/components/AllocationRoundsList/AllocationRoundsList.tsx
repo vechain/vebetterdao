@@ -13,11 +13,9 @@ import {
 } from "@chakra-ui/react"
 import { useAllocationsRound, useAllocationsRoundsEvents, useCurrentAllocationsRoundId } from "@/api"
 import { AllocationRoundCard } from "./components/AllocationRoundCard"
-import { useDistributeEmission } from "@/hooks"
 import { useCallback, useMemo, useState } from "react"
 import { FiArrowUpRight } from "react-icons/fi"
 import { useRouter } from "next/navigation"
-import { backdropBlurAnimation } from "@/app/theme"
 
 type Props = {
   maxRoundsToShow?: number
@@ -45,11 +43,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
 
   const isCurrentRoundActive = useMemo(() => {
     return currentRound?.state === "0"
-  }, [currentRound, allocationRoundsEvents])
-
-  const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useDistributeEmission({})
-
-  const distributionLoading = isTxReceiptLoading || sendTransactionPending
+  }, [currentRound])
 
   const loadMore = useCallback(() => {
     setTotalRoundsToShow(prev => prev + maxRoundsToShow)
@@ -77,15 +71,6 @@ export const AllocationRoundsList: React.FC<Props> = ({
               </Button>
             )}
           </HStack>
-          {!isCurrentRoundActive && (
-            <Button
-              variant="link"
-              colorScheme="blue"
-              onClick={() => sendTransaction(undefined)}
-              isLoading={distributionLoading}>
-              Start new round
-            </Button>
-          )}
         </Box>
         <VStack spacing={4} w="full">
           {allocationRoundEventsError && (
@@ -106,7 +91,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
         </VStack>
       </VStack>
     )
-  }, [allocationRoundEventsError, distributionLoading, isCurrentRoundActive, totalRoundsToShow, invertedCreatedRounds])
+  }, [allocationRoundEventsError, isCurrentRoundActive, totalRoundsToShow, invertedCreatedRounds])
 
   return (
     <>
