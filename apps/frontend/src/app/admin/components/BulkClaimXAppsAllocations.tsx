@@ -4,8 +4,10 @@ import {
   useIsRoundFinalized,
   useXAppClaimableAmount,
   useXApps,
+  useHaveXAppsClaimed,
+  useXAppsClaimableAmounts,
 } from "@/api"
-import { useClaimXAppAllocation } from "@/hooks"
+import { useBulkClaimXAppsAllocations, useClaimXAppAllocation } from "@/hooks"
 import {
   VStack,
   Button,
@@ -28,40 +30,41 @@ import {
   NumberIncrementStepper,
   NumberDecrementStepper,
 } from "@chakra-ui/react"
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 
-export const ClaimXAppAllocations = () => {
-  const [appId, setAppId] = useState<string | undefined>()
+export const BulkClaimXAppsAllocations = () => {
   const [roundId, setRoundId] = useState<number>(1)
   const [roundFieldIsDirty, setRoundFieldIsDirty] = useState(false)
-  const [amountToClaim, setAmountToClaim] = useState<number>(0)
 
   const { data: xApps } = useXApps()
-  const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  const { data: claimableAmount } = useXAppClaimableAmount(roundId?.toString() ?? "", appId ?? "")
-  const { data: isLastRoundFinalized } = useIsRoundFinalized(currentRoundId)
-  const { data: claimed } = useHasXAppClaimed(roundId?.toString() ?? "", appId ?? "")
 
-  const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useClaimXAppAllocation({
+  const { data: currentRoundId } = useCurrentAllocationsRoundId()
+  const { data: isLastRoundFinalized } = useIsRoundFinalized(currentRoundId)
+
+  const claims = useHaveXAppsClaimed(roundId?.toString() ?? "", xApps?.map(app => app.id) ?? [])
+  const allAppsClaimed = useMemo(() => {
+    return !claims.some(claim => !claim.data?.claimed)
+  }, [claims])
+  const xAppsToClaim = useMemo(() => {
+    return xApps?.filter(app => !claims.find(claim => claim.data?.id === app.id)?.data?.claimed)
+  }, [claims, xApps])
+
+  const totalClaimableAmoount = useXAppsClaimableAmounts(roundId?.toString() ?? "", xApps?.map(app => app.id) ?? [])
+  const totalAmountToClaim = useMemo(() => {
+    return totalClaimableAmoount?.reduce((acc, cur) => acc + parseInt(cur.data?.amount ?? "0"), 0)
+  }, [totalClaimableAmoount])
+
+  const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useBulkClaimXAppsAllocations({
     roundId: roundId?.toString() ?? "",
-    appId: appId ?? "",
+    appIds: xAppsToClaim?.map(app => app.id) ?? [],
     invalidateCache: true,
   })
   const isLoading = isTxReceiptLoading || sendTransactionPending
 
   const handleSubmit = (event: { preventDefault: () => void }) => {
     event.preventDefault()
-    sendTransaction(undefined)
+    sendTransaction()
   }
-
-  useEffect(() => {
-    // if there is a claimable amount and it hasn't been claimed yet, set the amount to claim
-    if (claimableAmount !== undefined && claimed !== undefined && !claimed) {
-      setAmountToClaim(parseInt(claimableAmount))
-    } else {
-      setAmountToClaim(0)
-    }
-  }, [claimableAmount, appId, claimed])
 
   const isRoundValid = useMemo(() => {
     if (currentRoundId === undefined) return false
@@ -74,17 +77,19 @@ export const ClaimXAppAllocations = () => {
     return false
   }, [roundId, currentRoundId])
 
-  const isFormValid = useMemo(() => isRoundValid && appId !== undefined && appId !== "", [appId, isRoundValid])
-
   return (
     <Card w={"full"}>
       <CardHeader>
         <HStack justify={"space-between"} align={"start"}>
           <VStack align={"start"}>
-            <Heading size="md">Allocation claiming</Heading>
-            <Text>
-              Last round id: {currentRoundId} {`(${isLastRoundFinalized ? "finalized" : "not finalized"})`}
-            </Text>
+            <Heading size="md">Bulk allocation claiming</Heading>
+            <VStack spacing={0} align={"start"}>
+              <Text>
+                Last round id: {currentRoundId} {`(${isLastRoundFinalized ? "finalized" : "not finalized"})`}
+              </Text>
+              <Text> Total apps: {xApps?.length}</Text>
+              <Text> Apps that needs to claim: {xAppsToClaim?.length}</Text>
+            </VStack>
           </VStack>
         </HStack>
       </CardHeader>
@@ -92,25 +97,6 @@ export const ClaimXAppAllocations = () => {
         <form onSubmit={handleSubmit}>
           <VStack spacing={4} alignItems={"start"}>
             <HStack w={"full"}>
-              <FormControl isRequired>
-                <FormLabel>
-                  <strong>{"App"}</strong>
-                </FormLabel>
-                <Select
-                  placeholder="Select app"
-                  isDisabled={isLoading}
-                  onChange={e => setAppId(e.target.value)}
-                  value={appId}>
-                  {xApps?.map(item => {
-                    return (
-                      <option key={"Select" + item.name} value={item.id}>
-                        {item.name}
-                      </option>
-                    )
-                  })}
-                </Select>
-              </FormControl>
-
               <FormControl isRequired isInvalid={!isRoundValid && roundFieldIsDirty}>
                 <FormLabel>
                   <strong>{"Round #"}</strong>
@@ -135,10 +121,10 @@ export const ClaimXAppAllocations = () => {
 
             <FormControl>
               <FormLabel>
-                <strong>{"Claimable amount"}</strong>
+                <strong>{"Total amount"}</strong>
               </FormLabel>
               <InputGroup>
-                <Input placeholder="Amount to claim" type="number" value={amountToClaim} disabled={true} />
+                <Input value={totalAmountToClaim ?? 0} disabled={true} />
                 <InputRightAddon
                   pointerEvents="none"
                   pl={1}
@@ -152,8 +138,8 @@ export const ClaimXAppAllocations = () => {
               </InputGroup>
             </FormControl>
 
-            <Button isDisabled={!isFormValid || claimed} colorScheme="blue" type="submit" isLoading={isLoading}>
-              {claimed ? "Already claimed" : "Claim"}
+            <Button isDisabled={allAppsClaimed} colorScheme="blue" type="submit" isLoading={isLoading}>
+              {allAppsClaimed ? "Already claimed" : "Claim for all"}
             </Button>
           </VStack>
         </form>

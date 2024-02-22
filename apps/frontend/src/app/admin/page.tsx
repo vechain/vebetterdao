@@ -24,6 +24,11 @@ const ClaimXAppAllocations = dynamic(
   { ssr: false },
 )
 
+const BulkClaimXAppsAllocations = dynamic(
+  () => import("./components/BulkClaimXAppsAllocations").then(mod => mod.BulkClaimXAppsAllocations),
+  { ssr: false },
+)
+
 export default function AdminPage() {
   return (
     <Suspense fallback={<Spinner alignSelf={"center"} />}>
@@ -53,14 +58,16 @@ export default function AdminPage() {
             <Heading size="lg">X-2-Earn Apps</Heading>
           </CardHeader>
           <CardBody>
-            <HStack w={"full"} spacing={12} alignItems={"start"} height={"max-content"}>
+            <VStack w={"full"} spacing={12} alignItems={"start"} height={"max-content"}>
               <HStack w={"full"} spacing={12} alignItems={"start"} height={"max-content"}>
                 <UpdateReceiverAddress />
               </HStack>
+
               <HStack w={"full"} spacing={12} alignItems={"start"} height={"max-content"}>
                 <ClaimXAppAllocations />
+                <BulkClaimXAppsAllocations />
               </HStack>
-            </HStack>
+            </VStack>
           </CardBody>
         </Card>
       </Stack>

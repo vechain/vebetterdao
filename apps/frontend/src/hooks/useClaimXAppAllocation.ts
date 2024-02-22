@@ -5,7 +5,7 @@ import { useCallback } from "react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
 import { XAllocationPool__factory } from "@repo/contracts"
-import { getHasXAppClaimedQueryKey, getXAppClaimableAmountQueryKey } from "@/api"
+import { getB3TrBalanceQueryKey, getHasXAppClaimedQueryKey, getXAppClaimableAmountQueryKey } from "@/api"
 
 const XAllocationPoolInterface = XAllocationPool__factory.createInterface()
 
@@ -66,6 +66,14 @@ export const useClaimXAppAllocation = ({
         queryKey: getHasXAppClaimedQueryKey(roundId, appId),
       })
     }
+
+    await queryClient.cancelQueries({
+      queryKey: getB3TrBalanceQueryKey(account ?? ""),
+    })
+
+    await queryClient.refetchQueries({
+      queryKey: getB3TrBalanceQueryKey(account ?? ""),
+    })
 
     toast({
       title: "Allocation claimed successfully",
