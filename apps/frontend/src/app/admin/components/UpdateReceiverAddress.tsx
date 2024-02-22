@@ -37,6 +37,13 @@ export const UpdateReceiverAddress = () => {
     sendTransaction(undefined)
   }
 
+  const currentAddress = useMemo(() => {
+    if (appId === undefined) return ""
+
+    const app = xApps?.find(item => item.id === appId)
+    return app?.receiverAddress
+  }, [appId])
+
   const isValidAddress = useMemo(() => {
     return AddressUtils.isValid(newAddress)
   }, [newAddress])
@@ -68,6 +75,15 @@ export const UpdateReceiverAddress = () => {
                   )
                 })}
               </Select>
+            </FormControl>
+
+            <FormControl>
+              <FormLabel>
+                <strong>{"Current Address"}</strong>
+              </FormLabel>
+              <InputGroup>
+                <Input value={currentAddress} disabled />
+              </InputGroup>
             </FormControl>
 
             <FormControl isRequired isInvalid={!isValidAddress && newAddressFieldIsDirty}>
