@@ -50,7 +50,7 @@ export const seedLocalEnvironment = async (
   //   Add x-apps to the XAllocationPool
   await addXDapps(xAllocationVoting, accountsToSeed, APPS)
 
-  const xDappsFromContract = await xAllocationVoting.getAllApps()
+  // const xDappsFromContract = await xAllocationVoting.getAllApps()
 
   //   Mint some $B3TR
   console.log("Minting some $B3TR...")
@@ -59,15 +59,15 @@ export const seedLocalEnvironment = async (
     .connect(admin)
     .bootstrap()
     .then(async tx => await tx.wait())
-  await emissions
-    .connect(admin)
-    .start()
-    .then(async tx => await tx.wait())
+  // await emissions
+  //   .connect(admin)
+  //   .start()
+  //   .then(async tx => await tx.wait())
 
   //   Start new allocation round
-  const roundId = parseInt((await xAllocationVoting.currentRoundId()).toString())
-  console.log("Casting random votes to xDapps...")
-  await castVotesToXDapps(xAllocationVoting, accountsToSeed, roundId, amountToSwap, xDappsFromContract)
+  // const roundId = parseInt((await xAllocationVoting.currentRoundId()).toString())
+  // console.log("Casting random votes to xDapps...")
+  // await castVotesToXDapps(xAllocationVoting, accountsToSeed, roundId, amountToSwap, xDappsFromContract)
 
   // Set xApps baseURI
   console.log("Set xApps baseURI...")
