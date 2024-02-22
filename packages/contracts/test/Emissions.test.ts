@@ -589,8 +589,8 @@ describe("Emissions", () => {
 
       expect(await emissions.nextCycle()).to.equal(2)
 
-      // const b3trAllocations = await generateB3trAllocations(config, "./test/fixture/pilot-show-allocations.json") // Use this if you want to persist the values
-      const b3trAllocations = await generateB3trAllocations(config)
+      const b3trAllocations = await generateB3trAllocations(config, "./test/fixture/pilot-show-allocations.json")
+      // const b3trAllocations = await generateB3trAllocations(config)
 
       // Loop through all cycles as simulated in the b3tr emissions spreadsheet
       for (let i = 0; i < b3trAllocations.length; i++) {
@@ -669,8 +669,8 @@ describe("Emissions", () => {
       let _totalEmissions = BigInt(0)
       const cap = await b3tr.cap()
 
-      // const b3trAllocations = await generateB3trAllocations(config, "./test/fixture/full-allocations.json") // Use this if you want to persist the values
-      const b3trAllocations = await generateB3trAllocations(config)
+      const b3trAllocations = await generateB3trAllocations(config, "./test/fixture/full-allocations.json")
+      // const b3trAllocations = await generateB3trAllocations(config)
 
       // Loop through all cycles as simulated in the b3tr emissions spreadsheet
       for (let i = 0; i < b3trAllocations.length; i++) {
