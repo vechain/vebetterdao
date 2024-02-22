@@ -116,7 +116,7 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
                   ) : (
                     <HStack spacing={4}>
                       <Heading size="2xl">{compactFormatter.format(Number(roundAmount?.voteX2Earn))}</Heading>
-                      <B3TRIcon size={40} />
+                      <B3TRIcon boxSize="40px" />
                     </HStack>
                   )}
                 </Skeleton>

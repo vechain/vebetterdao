@@ -7,6 +7,8 @@ import { Navbar } from "@/components/Navbar/Navbar"
 import dayjs from "dayjs"
 
 import relativeTime from "dayjs/plugin/relativeTime"
+import { Footer } from "@/components"
+
 dayjs.extend(relativeTime)
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -16,7 +18,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <Navbar />
           <Container
-            mt={6}
+            mt={10}
+            mb={[20, 20, 40]}
             maxW={"container.xl"}
             minH="100vh"
             display={["flex"]}
@@ -25,6 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             flexDirection={["column"]}>
             {children}
           </Container>
+          <Footer />
         </Providers>
       </body>
     </html>
