@@ -1,6 +1,6 @@
 FROM mongo:6.0.6
 
-# Create a new user 'mongodb' and switch to it
+# Use the the `mongodb` of the `mongo` image
 USER mongodb
 
 COPY ./scripts /scripts
