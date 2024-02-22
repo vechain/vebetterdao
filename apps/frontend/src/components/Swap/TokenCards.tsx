@@ -157,12 +157,12 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
             <HStack justify={"space-between"} w="full">
               <Text>{isB3trToVot3 ? "You Get" : "You Send"}</Text>
               <Text fontSize="14px" fontWeight={500}>
-                Balance: {compactFormatter.format(Number(b3trBalanceScaled))} V3
+                Balance: {compactFormatter.format(Number(vot3BalanceScaled))} V3
               </Text>
             </HStack>
             <HStack w="full">
               <HStack flex={1}>
-                <B3TRIcon size={32} />
+                <VOT3Icon size={32} />
                 {amountInput}
               </HStack>
               {!isB3trToVot3 && Number(maxBalance) !== Number(amount) && maxButton}
