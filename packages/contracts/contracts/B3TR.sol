@@ -12,7 +12,7 @@ contract B3TR is ERC20Capped, AccessControl {
     _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     _grantRole(MINTER_ROLE, _defaultMinter);
   }
-
+//Test Comment
   /**
    * @dev See {ERC20-_mint}.
    *
