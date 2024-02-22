@@ -13,13 +13,11 @@ import {
   Heading,
   Link,
   Spinner,
-  Text,
-  VStack,
 } from "@chakra-ui/react"
-import { HorizontalChartBar } from "./HorizontalBarChart"
 import { useAllocationsRound, useRoundXApps, useXAppsVotes } from "@/api"
 import { useMemo } from "react"
 import { backdropBlurAnimation } from "@/app/theme"
+import { AllocationXAppsVotesRankingChart } from "./AllocationXAppsVotesRankingChart"
 
 type Props = {
   roundId: string
@@ -57,7 +55,7 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
         </HStack>
       </CardHeader>
       <CardBody>
-        <HorizontalChartBar data={data} xKey="app" yKey="votes" />
+        <AllocationXAppsVotesRankingChart roundId={roundId} />
 
         <Box flex={1} />
       </CardBody>
