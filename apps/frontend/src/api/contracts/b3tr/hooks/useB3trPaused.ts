@@ -38,7 +38,7 @@ export const getIsB3trPausedQueryKey = () => ["b3tr", "paused"]
  * @param {string} [address] - An optional string representing the address of the account.
  * @returns {UseQueryResult} The result object from the useQuery hook. Refer to the react-query documentation for more details.
  */
-export const useB3trPaused = (address?: string) => {
+export const useB3trPaused = () => {
   const { thor } = useConnex()
 
   return useQuery({
