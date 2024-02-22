@@ -17,6 +17,7 @@ import { useDistributeEmission } from "@/hooks"
 import { useCallback, useMemo, useState } from "react"
 import { FiArrowUpRight } from "react-icons/fi"
 import { useRouter } from "next/navigation"
+import { backdropBlurAnimation } from "@/app/theme"
 
 type Props = {
   maxRoundsToShow?: number
@@ -54,7 +55,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
     setTotalRoundsToShow(prev => prev + maxRoundsToShow)
   }, [totalRoundsToShow])
 
-  const renderRounds = useCallback(() => {
+  const renderRounds = useMemo(() => {
     return invertedCreatedRounds?.slice(0, totalRoundsToShow)?.map((round, i) => {
       return <AllocationRoundCard round={round} key={round.roundId} />
     })
@@ -96,7 +97,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
               </Box>
             </Alert>
           )}
-          {renderRounds()}
+          {renderRounds}
           {invertedCreatedRounds && invertedCreatedRounds.length > totalRoundsToShow && showLoadMore && (
             <Button variant="link" colorScheme="blue" onClick={loadMore}>
               Load more
@@ -105,29 +106,20 @@ export const AllocationRoundsList: React.FC<Props> = ({
         </VStack>
       </VStack>
     )
-  }, [
-    renderRounds,
-    allocationRoundEventsError,
-    distributionLoading,
-    isCurrentRoundActive,
-    showLoadMore,
-    showViewAll,
-    totalRoundsToShow,
-    invertedCreatedRounds,
-    maxRoundsToShow,
-    headingSize,
-    router,
-    sendTransaction,
-  ])
+  }, [allocationRoundEventsError, distributionLoading, isCurrentRoundActive, totalRoundsToShow, invertedCreatedRounds])
 
   return (
     <>
-      {renderInsideCard ? (
-        <Card>
-          <CardBody>{renderList}</CardBody>
-        </Card>
+      {invertedCreatedRounds && invertedCreatedRounds.length > 0 ? (
+        renderInsideCard ? (
+          <Card>
+            <CardBody>{renderList}</CardBody>
+          </Card>
+        ) : (
+          renderList
+        )
       ) : (
-        renderList
+        <></>
       )}
     </>
   )
