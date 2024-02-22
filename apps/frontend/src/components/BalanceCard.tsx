@@ -113,7 +113,7 @@ export const BalanceCard: React.FC<Props> = () => {
             borderRadius="7px"
           />
           <VStack align="self-start">
-            <B3TRIcon size={32} />
+            <B3TRIcon boxSize="32px" />
             <Heading size="2xl" fontWeight={900}>
               {compactFormatter.format(Number(b3trBalanceScaled))}
             </Heading>
@@ -142,7 +142,7 @@ export const BalanceCard: React.FC<Props> = () => {
             borderRadius="7px"
           />
           <VStack align="self-start">
-            <VOT3Icon size={32} />
+            <VOT3Icon boxSize={"32px"} />
             <Heading size="2xl" fontWeight={900}>
               {compactFormatter.format(Number(vot3BalanceScaled))}
             </Heading>
