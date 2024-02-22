@@ -3,15 +3,17 @@
 import { Container } from "@chakra-ui/react"
 import { Providers } from "./providers"
 
-import { Navbar } from "@/components/Navbar/Navbar"
 import dayjs from "dayjs"
 
 import relativeTime from "dayjs/plugin/relativeTime"
 import { Footer } from "@/components"
+import dynamic from "next/dynamic"
 
 dayjs.extend(relativeTime)
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+const Navbar = dynamic(() => import("@/components/Navbar").then(mod => mod.Navbar), { ssr: false })
+
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
       <body>
