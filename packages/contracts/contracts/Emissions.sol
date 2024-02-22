@@ -183,7 +183,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
    */
   function _calculateNextXAllocation() internal view returns (uint256) {
     // If this is the first cycle, return the initial amount
-    if (nextCycle <= 2) {
+    if (nextCycle < 2) {
       return initialXAppAllocation;
     }
     // Get emissions from the previous cycle
