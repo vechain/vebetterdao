@@ -81,7 +81,7 @@ export async function deployAll(config: ContractsConfig) {
     await vot3.getAddress(),
     config.CONTRACTS_ADMIN_ADDRESS,
     await voterRewards.getAddress(),
-    config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
+    config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE,
     config.EMISSIONS_CYCLE_DURATION - 1,
   )
 

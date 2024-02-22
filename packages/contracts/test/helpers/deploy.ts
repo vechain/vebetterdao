@@ -153,7 +153,7 @@ export const getOrDeployContractInstances = async ({
   const XAllocationVotingContract = await ethers.getContractFactory("XAllocationVoting")
   const xAllocationVoting = await XAllocationVotingContract.deploy(
     await vot3.getAddress(),
-    config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
+    config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE, // quorum percentage
     config.EMISSIONS_CYCLE_DURATION - 1, // X Alloc voting period
     await timeLock.getAddress(),
     await voterRewards.getAddress(),

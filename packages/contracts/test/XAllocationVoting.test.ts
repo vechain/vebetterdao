@@ -704,7 +704,7 @@ describe("X-Allocation Voting", function () {
       const quorum = await xAllocationVoting.quorum(timepoint)
       // calculate how much is needed to reach quorum from total supply
       const neededVotes = (Number(ethers.formatEther(quorum)) * Number(ethers.formatEther(totalSupply))) / 100
-      expect(500).to.be.greaterThan(neededVotes)
+      expect(5000).to.be.greaterThan(neededVotes)
 
       // quorum should be reached and round should be successful
       expect(await xAllocationVoting.state(roundId)).to.eql(BigInt(2))
