@@ -28,5 +28,5 @@ export type ContractsConfig = {
 
   INITIAL_X_ALLOCATION: bigint
 
-  BASE_URI: string
+  NFT_BADGE_BASE_URI: string
 }

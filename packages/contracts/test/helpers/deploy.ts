@@ -97,7 +97,7 @@ export const getOrDeployContractInstances = async ({
     NFT_BADGE_SYMBOL,
     owner,
     maxMintableLevel,
-    config.BASE_URI,
+    config.NFT_BADGE_BASE_URI,
   )
   await b3trBadge.waitForDeployment()
 

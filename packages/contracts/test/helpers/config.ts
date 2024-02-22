@@ -30,6 +30,6 @@ export function createTestConfig() {
 
     INITIAL_X_ALLOCATION: BigInt("2000000000000000000000000"), // 2M
 
-    BASE_URI: "ipfs://test/", // IPFS base URI for the NFT Badge
+    NFT_BADGE_BASE_URI: "ipfs://test/", // IPFS base URI for the NFT Badge
   })
 }

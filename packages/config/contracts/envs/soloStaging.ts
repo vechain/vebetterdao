@@ -30,6 +30,6 @@ export function createSoloStagingConfig() {
 
     INITIAL_X_ALLOCATION: BigInt("66666666666666666666666"), // 1M/15 rounded down -> 1/15th of the total supply for pilot show
 
-    BASE_URI: "ipfs://bafybeifdelb2rafhbwycwih3scvniwvu3lsmxue3rwg46sukj5p77qgqqe/", // IPFS base URI for the NFT Badge
+    NFT_BADGE_BASE_URI: "ipfs://bafybeifdelb2rafhbwycwih3scvniwvu3lsmxue3rwg46sukj5p77qgqqe/", // IPFS base URI for the NFT Badge
   })
 }

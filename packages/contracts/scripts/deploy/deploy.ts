@@ -47,7 +47,7 @@ export async function deployAll(config: ContractsConfig) {
   )
 
   // Deploy the NFT Badge contract with Max Mintable Level 1
-  const badge = await deployNFTBadge(1, name, symbol, config.CONTRACTS_ADMIN_ADDRESS, config.BASE_URI)
+  const badge = await deployNFTBadge(1, name, symbol, config.CONTRACTS_ADMIN_ADDRESS, config.NFT_BADGE_BASE_URI)
 
   const emissions = await deployEmissions(
     await b3tr.getAddress(),
