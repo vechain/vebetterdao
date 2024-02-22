@@ -11,7 +11,14 @@ export const Footer: React.FC = () => {
     <VStack w="container.xl">
       <HStack justifyContent={"space-between"} w="full" spacing={4} my={4}>
         <Box my={14}>
-          <BeBetterVeBetterIcon />
+          <BeBetterVeBetterIcon
+            beBetterProps={{
+              width: "80%",
+            }}
+            veBetterProps={{
+              width: "100%",
+            }}
+          />
         </Box>
         <VStack spacing={4} alignItems={"flex-end"}>
           <DiscordButton />
@@ -43,7 +50,14 @@ export const Footer: React.FC = () => {
     <VStack>
       <VStack spacing={4} my={4}>
         <Box my={8}>
-          <BeBetterVeBetterIcon />
+          <BeBetterVeBetterIcon
+            beBetterProps={{
+              width: "80%",
+            }}
+            veBetterProps={{
+              width: "100%",
+            }}
+          />
         </Box>
         <VStack spacing={4} alignItems={"center"}>
           <DiscordButton />
