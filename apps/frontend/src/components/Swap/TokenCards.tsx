@@ -120,20 +120,20 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
           />
           <VStack justify="stretch" flex={1} gap={1}>
             <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
-              <Text>{isB3trToVot3 ? "You Send" : "You Get"}</Text>
+              <Text>{isB3trToVot3 ? "You Pay" : "You Receive"}</Text>
               <VStack gap={0} alignItems={"flex-end"}>
                 <Text fontSize="10px">Balance</Text>
                 <HStack gap={1}>
                   <Text fontSize="14px" fontWeight={500}>
                     {compactFormatter.format(Number(b3trBalanceScaled))}
                   </Text>
-                  <B3TRIcon size={14} />
+                  <B3TRIcon h={"15px"} w={"15px"} />
                 </HStack>
               </VStack>
             </HStack>
             <HStack w="full">
               <HStack flex={1}>
-                <B3TRIcon size={32} />
+                <B3TRIcon h={"32px"} w={"32px"} />
                 {amountInput}
               </HStack>
               {isB3trToVot3 && Number(maxBalance) !== Number(amount) && maxButton}
@@ -161,20 +161,20 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
           />
           <VStack justify="stretch" flex={1} gap={1}>
             <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
-              <Text>{isB3trToVot3 ? "You Get" : "You Send"}</Text>
+              <Text>{isB3trToVot3 ? "You Receive" : "You Pay"}</Text>
               <VStack gap={0} alignItems={"flex-end"}>
                 <Text fontSize="10px">Balance</Text>
                 <HStack gap={1}>
                   <Text fontSize="14px" fontWeight={500}>
                     {compactFormatter.format(Number(vot3BalanceScaled))}
                   </Text>
-                  <VOT3Icon size={14} />
+                  <VOT3Icon h={"15px"} w={"15px"} />
                 </HStack>
               </VStack>
             </HStack>
             <HStack w="full">
               <HStack flex={1}>
-                <VOT3Icon size={32} />
+                <VOT3Icon h={"32px"} w={"32px"} />
                 {amountInput}
               </HStack>
               {!isB3trToVot3 && Number(maxBalance) !== Number(amount) && maxButton}
