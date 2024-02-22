@@ -118,12 +118,18 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
             h="auto"
             borderRadius="7px"
           />
-          <VStack justify="stretch" flex={1}>
-            <HStack justify={"space-between"} w="full">
+          <VStack justify="stretch" flex={1} gap={1}>
+            <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
               <Text>{isB3trToVot3 ? "You Send" : "You Get"}</Text>
-              <Text fontSize="14px" fontWeight={500}>
-                Balance: {compactFormatter.format(Number(b3trBalanceScaled))} B3
-              </Text>
+              <VStack gap={0} alignItems={"flex-end"}>
+                <Text fontSize="10px">Balance</Text>
+                <HStack gap={1}>
+                  <Text fontSize="14px" fontWeight={500}>
+                    {compactFormatter.format(Number(b3trBalanceScaled))}
+                  </Text>
+                  <B3TRIcon size={14} />
+                </HStack>
+              </VStack>
             </HStack>
             <HStack w="full">
               <HStack flex={1}>
@@ -153,12 +159,18 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
             h="auto"
             borderRadius="7px"
           />
-          <VStack justify="stretch" flex={1}>
-            <HStack justify={"space-between"} w="full">
+          <VStack justify="stretch" flex={1} gap={1}>
+            <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
               <Text>{isB3trToVot3 ? "You Get" : "You Send"}</Text>
-              <Text fontSize="14px" fontWeight={500}>
-                Balance: {compactFormatter.format(Number(vot3BalanceScaled))} V3
-              </Text>
+              <VStack gap={0} alignItems={"flex-end"}>
+                <Text fontSize="10px">Balance</Text>
+                <HStack gap={1}>
+                  <Text fontSize="14px" fontWeight={500}>
+                    {compactFormatter.format(Number(vot3BalanceScaled))}
+                  </Text>
+                  <VOT3Icon size={14} />
+                </HStack>
+              </VStack>
             </HStack>
             <HStack w="full">
               <HStack flex={1}>
