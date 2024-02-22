@@ -5,7 +5,12 @@ import { useCallback } from "react"
 import { useConnex, useWallet } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
 import { XAllocationPool__factory } from "@repo/contracts"
-import { getXAppClaimableAmount, getXAppClaimableAmountQueryKey } from "@/api"
+import {
+  getHasXAppClaimed,
+  getHasXAppClaimedQueryKey,
+  getXAppClaimableAmount,
+  getXAppClaimableAmountQueryKey,
+} from "@/api"
 
 const XAllocationPoolInterface = XAllocationPool__factory.createInterface()
 
@@ -59,6 +64,12 @@ export const useClaimXAppAllocation = ({
       })
       await queryClient.refetchQueries({
         queryKey: getXAppClaimableAmountQueryKey(roundId, appId),
+      })
+      await queryClient.cancelQueries({
+        queryKey: getHasXAppClaimedQueryKey(roundId, appId),
+      })
+      await queryClient.refetchQueries({
+        queryKey: getHasXAppClaimedQueryKey(roundId, appId),
       })
     }
 

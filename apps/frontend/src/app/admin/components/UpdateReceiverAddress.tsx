@@ -28,6 +28,7 @@ export const UpdateReceiverAddress = () => {
   const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useUpdateXAppReceiverAddress({
     appId: appId ?? "",
     newAddress,
+    invalidateCache: true,
   })
   const isLoading = isTxReceiptLoading || sendTransactionPending
 

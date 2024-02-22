@@ -40,6 +40,7 @@ export const ClaimXAppAllocations = () => {
   const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useClaimXAppAllocation({
     roundId: roundId?.toString() ?? "",
     appId: appId ?? "",
+    invalidateCache: true,
   })
   const isLoading = isTxReceiptLoading || sendTransactionPending
 
