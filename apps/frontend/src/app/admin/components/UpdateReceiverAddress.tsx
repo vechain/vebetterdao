@@ -42,7 +42,7 @@ export const UpdateReceiverAddress = () => {
 
     const app = xApps?.find(item => item.id === appId)
     return app?.receiverAddress
-  }, [appId])
+  }, [appId, xApps])
 
   const isValidAddress = useMemo(() => {
     return AddressUtils.isValid(newAddress)

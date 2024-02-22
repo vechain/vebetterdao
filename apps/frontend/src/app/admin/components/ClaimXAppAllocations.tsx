@@ -55,12 +55,13 @@ export const ClaimXAppAllocations = () => {
   }
 
   useEffect(() => {
-    if (claimableAmount !== undefined && !claimed) {
+    // if there is a claimable amount and it hasn't been claimed yet, set the amount to claim
+    if (claimableAmount !== undefined && claimed !== undefined && !claimed) {
       setAmountToClaim(parseInt(claimableAmount))
     } else {
       setAmountToClaim(0)
     }
-  }, [claimableAmount, appId])
+  }, [claimableAmount, appId, claimed])
 
   const isRoundValid = useMemo(() => {
     if (currentRoundId === undefined) return false
