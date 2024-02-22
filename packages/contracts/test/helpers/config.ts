@@ -1,9 +1,10 @@
-import { defineConfig } from "../defineConfig"
-export function createLocalConfig() {
+import { defineConfig } from "@repo/config/contracts/defineConfig"
+
+export function createTestConfig() {
   return defineConfig({
     NEXT_PUBLIC_APP_ENV: "local",
 
-    B3TR_CAP: 3_750_000, // 3_750_000 -> 3.75 million B3TR tokens for pilot show
+    B3TR_CAP: 1_000_000_000, // 1B
     B3TR_GOVERNOR_QUORUM_PERCENTAGE: 4, // 4 -> Need 4% of voters to pass
     B3TR_GOVERNOR_MIN_DELAY: 30, //after a vote passes, you have 5 min before you can vote queue the proposal
     B3TR_GOVERNOR_VOTING_PERIOD: 180, // blocks - how long the vote lasts.
@@ -12,10 +13,10 @@ export function createLocalConfig() {
 
     EMISSIONS_CYCLE_DURATION: 12, // 12 blocks - 2 minutes.
     EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE: 4, // 4% decay every cycle
-    EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE: 20, // 20% decay every cycle
-    EMISSIONS_X_ALLOCATION_DECAY_PERIOD: 999999, // should never decay in pilot show
-    EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD: 999999, // should never decay in pilot show
-    EMISSIONS_TREASURY_PERCENTAGE: 8750, // 87.5% of the emissions go to the treasury during pilot show
+    EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE: 20,
+    EMISSIONS_X_ALLOCATION_DECAY_PERIOD: 12,
+    EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD: 50,
+    EMISSIONS_TREASURY_PERCENTAGE: 2500, // 25%
     EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE: 80,
 
     X_ALLOCATION_VOTING_QUORUM_PERCENTAGE: 40, // 40 -> Need 40% of total supply to succeed
@@ -27,8 +28,8 @@ export function createLocalConfig() {
     VOTE_2_EARN_POOL_ADDRESS: "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68", //2nd account from mnemonic of solo network
     TREASURY_POOL_ADDRESS: "0x0f872421dc479f3c11edd89512731814d0598db5", //3rd account from mnemonic of solo network
 
-    INITIAL_X_ALLOCATION: BigInt("66666666666666666666666"), // 1M/15 rounded down -> 1/15th of the total supply for pilot show
+    INITIAL_X_ALLOCATION: BigInt("2000000000000000000000000"), // 2M
 
-    NFT_BADGE_BASE_URI: "ipfs://bafybeifdelb2rafhbwycwih3scvniwvu3lsmxue3rwg46sukj5p77qgqqe/", // IPFS base URI for the NFT Badge
+    NFT_BADGE_BASE_URI: "ipfs://test/", // IPFS base URI for the NFT Badge
   })
 }
