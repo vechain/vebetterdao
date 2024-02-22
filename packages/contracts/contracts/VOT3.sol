@@ -5,17 +5,26 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
 import "@openzeppelin/contracts/utils/Nonces.sol";
 
 // VOT3 contract
-contract VOT3 is ERC20, ERC20Permit, ERC20Votes, AccessControl {
+contract VOT3 is ERC20, ERC20Permit, ERC20Votes, ERC20Pausable, AccessControl {
   IERC20 public b3tr;
   mapping(address account => uint256) private _stakedBalances;
 
-  constructor(address _b3tr) ERC20("VOT3", "VOT3") ERC20Permit("VOT3") {
+  constructor(address _admin, address _b3tr) ERC20("VOT3", "VOT3") ERC20Permit("VOT3") {
     // Grant the contract deployer the default admin role
-    _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     b3tr = IERC20(_b3tr);
+  }
+
+  function pause() public onlyRole(DEFAULT_ADMIN_ROLE) {
+    _pause();
+  }
+
+  function unpause() public onlyRole(DEFAULT_ADMIN_ROLE) {
+    _unpause();
   }
 
   function stakedBalanceOf(address account) public view returns (uint256) {
@@ -62,7 +71,7 @@ contract VOT3 is ERC20, ERC20Permit, ERC20Votes, AccessControl {
   }
 
   // Overrides required by Solidity
-  function _update(address from, address to, uint256 amount) internal override(ERC20, ERC20Votes) {
+  function _update(address from, address to, uint256 amount) internal override(ERC20, ERC20Votes, ERC20Pausable) {
     super._update(from, to, amount);
 
     // self-delegate if the user is neither unstaking nor has delegated previously nor burning tokens
@@ -73,5 +82,11 @@ contract VOT3 is ERC20, ERC20Permit, ERC20Votes, AccessControl {
 
   function nonces(address owner) public view virtual override(ERC20Permit, Nonces) returns (uint256) {
     return super.nonces(owner);
+  }
+
+  function delegate(address delegatee) public override {
+    require(paused() == false, "VOT3: contract is paused");
+    
+    _delegate(msg.sender, delegatee);
   }
 }
