@@ -1,23 +1,38 @@
 "use client"
 
 import dynamic from "next/dynamic"
-import { StartRound } from "./components/StartRound"
-import { StartEmissions } from "./components/StartEmissions"
-import { Card, CardBody, CardHeader, HStack, Heading, VStack } from "@chakra-ui/react"
+import { Card, CardBody, CardHeader, Heading, Stack, VStack } from "@chakra-ui/react"
 
-const AdminContent = dynamic(() => import("./components/AdminContent").then(mod => mod.AdminContent), { ssr: false })
+const StartEmissions = dynamic(() => import("./components/StartEmissions").then(mod => mod.StartEmissions), {
+  ssr: false,
+})
+const StartRound = dynamic(() => import("./components/StartRound").then(mod => mod.StartRound), { ssr: false })
+const AdminPermissions = dynamic(() => import("./components/AdminPermissions").then(mod => mod.AdminPermissions), {
+  ssr: false,
+})
+
 export default function AdminPage() {
   return (
-    <Card w={"full"}>
-      <CardHeader>
-        <Heading size="lg">Emissions and Rounds</Heading>
-      </CardHeader>
-      <CardBody>
-        <VStack w={"full"} spacing={4} alignItems={"start"}>
-          <StartEmissions />
-          <StartRound />
-        </VStack>
-      </CardBody>
-    </Card>
+    <Stack spacing={12} w={"full"}>
+      <Card w={"full"}>
+        <CardHeader>
+          <Heading size="lg">Permissions</Heading>
+        </CardHeader>
+        <CardBody>
+          <AdminPermissions />
+        </CardBody>
+      </Card>
+      <Card w={"full"}>
+        <CardHeader>
+          <Heading size="lg">Emissions and Rounds</Heading>
+        </CardHeader>
+        <CardBody>
+          <VStack w={"full"} spacing={4} alignItems={"start"}>
+            <StartEmissions />
+            <StartRound />
+          </VStack>
+        </CardBody>
+      </Card>
+    </Stack>
   )
 }

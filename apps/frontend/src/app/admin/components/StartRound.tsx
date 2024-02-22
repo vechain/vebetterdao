@@ -26,7 +26,7 @@ export const StartRound = () => {
       </Button>
       <Text>
         {currentRound.voteEndTimestamp?.isBefore()
-          ? `Current round ended ${currentRound.voteEndTimestamp?.fromNow()}`
+          ? `Last round ended ${currentRound.voteEndTimestamp?.fromNow()}`
           : `Current round will end in ${currentRound.voteEndTimestamp?.fromNow()}`}
       </Text>
     </HStack>
