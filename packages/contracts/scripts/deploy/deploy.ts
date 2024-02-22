@@ -17,7 +17,7 @@ export async function deployAll(config: ContractsConfig) {
 
   // Deploy B3TR and VOT3 tokens
   const b3tr = await deployB3trToken(config.CONTRACTS_ADMIN_ADDRESS, config.B3TR_CAP)
-  const vot3 = await deployVot3Token(await b3tr.getAddress())
+  const vot3 = await deployVot3Token(config.CONTRACTS_ADMIN_ADDRESS, await b3tr.getAddress())
 
   // Deploy the governance contract
   const timelock = await deployTimeLock(config.B3TR_GOVERNOR_MIN_DELAY, config.CONTRACTS_ADMIN_ADDRESS)
@@ -122,7 +122,7 @@ export async function deployAll(config: ContractsConfig) {
 async function deployB3trToken(admin: string, cap: number): Promise<B3TR> {
   console.log(`Deploying B3tr contract`)
   const B3trContract = await ethers.getContractFactory("B3TR") // Use the global variable
-  const contract = await B3trContract.deploy(admin, cap)
+  const contract = await B3trContract.deploy(admin, admin, cap)
 
   await contract.waitForDeployment()
 
@@ -131,10 +131,10 @@ async function deployB3trToken(admin: string, cap: number): Promise<B3TR> {
   return contract
 }
 
-async function deployVot3Token(b3trAddress: string): Promise<VOT3> {
+async function deployVot3Token(admin: string, b3trAddress: string): Promise<VOT3> {
   console.log(`Deploying Vot3 contract`)
   const Vot3Contract = await ethers.getContractFactory("VOT3") // Use the global variable
-  const contract = await Vot3Contract.deploy(b3trAddress)
+  const contract = await Vot3Contract.deploy(admin, b3trAddress)
 
   await contract.waitForDeployment()
 
