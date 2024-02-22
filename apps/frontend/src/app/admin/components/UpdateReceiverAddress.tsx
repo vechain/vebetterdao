@@ -88,11 +88,7 @@ export const UpdateReceiverAddress = () => {
               <FormErrorMessage>{"Address not valid"}</FormErrorMessage>
             </FormControl>
 
-            <Button
-              isDisabled={!isFormValid}
-              colorScheme="blue"
-              type="submit"
-              isLoading={isLoading || !isFormValid || isTxReceiptLoading}>
+            <Button isDisabled={!isFormValid} colorScheme="blue" type="submit" isLoading={isLoading}>
               Save
             </Button>
           </VStack>
