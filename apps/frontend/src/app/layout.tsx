@@ -18,7 +18,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <Navbar />
           <Container
-            mt={6}
+            mt={10}
+            mb={[20, 20, 40]}
             maxW={"container.xl"}
             minH="100vh"
             display={["flex"]}
