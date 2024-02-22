@@ -23,7 +23,7 @@ export const getXAppClaimableAmount = async (thor: Connex.Thor, xAppId: string, 
   return FormattingUtils.scaleNumberDown(res.decoded[0], 18)
 }
 
-export const getXAppClaimableAmountQueryKey = (xAppId?: string, roundId?: string) => [
+export const getXAppClaimableAmountQueryKey = (xAppId: string, roundId: string) => [
   "claimableAmount",
   roundId,
   "appId",

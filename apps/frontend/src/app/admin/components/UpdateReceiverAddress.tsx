@@ -50,7 +50,7 @@ export const UpdateReceiverAddress = () => {
       </CardHeader>
       <CardBody>
         <form onSubmit={handleSubmit}>
-          <VStack spacing={12} alignItems={"start"}>
+          <VStack spacing={4} alignItems={"start"}>
             <FormControl isRequired>
               <FormLabel>
                 <strong>{"App"}</strong>

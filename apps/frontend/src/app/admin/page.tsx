@@ -19,6 +19,11 @@ const UpdateReceiverAddress = dynamic(
   { ssr: false },
 )
 
+const ClaimXAppAllocations = dynamic(
+  () => import("./components/ClaimXAppAllocations").then(mod => mod.ClaimXAppAllocations),
+  { ssr: false },
+)
+
 export default function AdminPage() {
   return (
     <Suspense fallback={<Spinner alignSelf={"center"} />}>
@@ -49,7 +54,12 @@ export default function AdminPage() {
           </CardHeader>
           <CardBody>
             <HStack w={"full"} spacing={12} alignItems={"start"} height={"max-content"}>
-              <UpdateReceiverAddress />
+              <HStack w={"full"} spacing={12} alignItems={"start"} height={"max-content"}>
+                <UpdateReceiverAddress />
+              </HStack>
+              <HStack w={"full"} spacing={12} alignItems={"start"} height={"max-content"}>
+                <ClaimXAppAllocations />
+              </HStack>
             </HStack>
           </CardBody>
         </Card>
