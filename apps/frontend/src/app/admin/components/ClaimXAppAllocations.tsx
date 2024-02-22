@@ -59,7 +59,11 @@ export const ClaimXAppAllocations = () => {
 
   const isRoundValid = useMemo(() => {
     if (currentRoundId === undefined) return false
-    return roundId && roundId > 0 && roundId <= parseInt(currentRoundId)
+    if (roundId === parseInt(currentRoundId) && !isLastRoundFinalized) return false
+
+    if (roundId && roundId > 0 && roundId <= parseInt(currentRoundId)) {
+      return true
+    }
   }, [roundId, currentRoundId])
 
   const isFormValid = useMemo(() => isRoundValid && appId !== undefined && appId !== "", [appId, isRoundValid])
@@ -67,10 +71,14 @@ export const ClaimXAppAllocations = () => {
   return (
     <Card w={"full"}>
       <CardHeader>
-        <Heading size="md">Allocation claiming</Heading>
-        <Text>
-          Last round id: {currentRoundId} {`(${isLastRoundFinalized ? "finalized" : "not finalized"})`}
-        </Text>
+        <HStack justify={"space-between"} align={"start"}>
+          <VStack align={"start"}>
+            <Heading size="md">Allocation claiming</Heading>
+            <Text>
+              Last round id: {currentRoundId} {`(${isLastRoundFinalized ? "finalized" : "not finalized"})`}
+            </Text>
+          </VStack>
+        </HStack>
       </CardHeader>
       <CardBody>
         <form onSubmit={handleSubmit}>

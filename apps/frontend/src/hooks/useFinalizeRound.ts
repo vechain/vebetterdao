@@ -1,4 +1,3 @@
-import { getXAppsQueryKey } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
@@ -6,26 +5,26 @@ import { useCallback } from "react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
 import { XAllocationVoting__factory } from "@repo/contracts"
+import { getIsRoundFinalizedQueryKey } from "@/api"
 
 const XAllocationVotingInterface = XAllocationVoting__factory.createInterface()
 
 type Props = {
-  appId: string
-  newAddress: string
+  roundId: string
   onSuccess?: () => void
   invalidateCache?: boolean
-  onSuccessMessageTitle?: string
 }
+
 /**
- * Admin can update the receiver address for a specific xApp
+ * Allow xApp to claim allocation rewards for a specific round
  *
- * @param onSuccess callback to run when the upgrade is successful
- * @param invalidateCache boolean to indicate if the related react-query cache should be updated (default: true)
- * @returns see {@link UseSendTransactionReturnValue}
+ * @param roundId
+ * @param onSuccess
+ * @param invalidateCache
+ * @returns
  */
-export const useUpdateXAppReceiverAddress = ({
-  appId,
-  newAddress,
+export const useFinalizeRound = ({
+  roundId,
   onSuccess,
   invalidateCache = true,
 }: Props): UseSendTransactionReturnValue => {
@@ -38,33 +37,36 @@ export const useUpdateXAppReceiverAddress = ({
       {
         to: getConfig().xAllocationVotingContractAddress,
         value: 0,
-        data: XAllocationVotingInterface.encodeFunctionData("updateAppReceiverAddress", [appId, newAddress]),
-        comment: "Update xApp receiver address to " + newAddress,
-        abi: JSON.parse(JSON.stringify(XAllocationVotingInterface.getFunction("updateAppReceiverAddress"))),
+        data: XAllocationVotingInterface.encodeFunctionData("finalize", [roundId]),
+        comment: "Finalize round " + roundId,
+        abi: JSON.parse(JSON.stringify(XAllocationVotingInterface.getFunction("finalize"))),
       },
     ]
 
     return clauses
-  }, [appId, newAddress])
+  }, [roundId])
 
   //Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {
     if (invalidateCache) {
+      await queryClient.cancelQueries({
+        queryKey: getIsRoundFinalizedQueryKey(roundId),
+      })
       await queryClient.refetchQueries({
-        queryKey: getXAppsQueryKey(),
+        queryKey: getIsRoundFinalizedQueryKey(roundId),
       })
     }
 
     toast({
-      title: "XApp receiver address updated successfully",
-      description: `A new address ${newAddress} has been set as receiver for the selected xApp.`,
+      title: "Operation completed successfully",
+      description: `Round finalized, users xapps can now claim their allocations`,
       status: "success",
       position: "bottom-left",
       duration: 5000,
       isClosable: true,
     })
     onSuccess?.()
-  }, [invalidateCache, queryClient, toast, onSuccess])
+  }, [invalidateCache, queryClient, toast, onSuccess, roundId])
 
   const result = useSendTransaction({
     signerAccount: account,

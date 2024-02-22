@@ -19,7 +19,6 @@ import { useMemo, useState } from "react"
 
 export const UpdateReceiverAddress = () => {
   const [appId, setAppId] = useState<string | undefined>()
-
   const [newAddress, setNewAddress] = useState("")
   const [newAddressFieldIsDirty, setNewAddressFieldIsDirty] = useState(false)
 

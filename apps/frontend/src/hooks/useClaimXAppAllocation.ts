@@ -2,7 +2,7 @@ import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
-import { useConnex, useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
 import { XAllocationPool__factory } from "@repo/contracts"
 import { getHasXAppClaimedQueryKey, getXAppClaimableAmountQueryKey } from "@/api"
@@ -32,7 +32,6 @@ export const useClaimXAppAllocation = ({
   onSuccess,
   invalidateCache = true,
 }: Props): UseSendTransactionReturnValue => {
-  const { thor } = useConnex()
   const { account } = useWallet()
   const toast = useToast()
   const queryClient = useQueryClient()
