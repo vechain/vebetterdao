@@ -4,7 +4,6 @@ import Image from "next/image"
 import React from "react"
 
 export const VeBetterDaoLogo: React.FC = () => {
-  //TODO: Add dark mode logo
   const lightModeUrl = "/images/logo/vebetter_light.svg"
   const darkModeUrl = "/images/logo/vebetter_dark.svg"
   const logoUrl = useColorModeValue(lightModeUrl, darkModeUrl)
