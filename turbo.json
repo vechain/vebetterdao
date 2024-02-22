@@ -36,7 +36,7 @@
 
     "@repo/contracts#check-contracts-deployment": {
       "cache": false,
-      "dependsOn": ["^compile", "//#solo-up", "@repo/config#check-or-generate-local-config"]
+      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
     "clean": {
       "cache": false
