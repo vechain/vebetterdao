@@ -14,6 +14,8 @@ const AdminPermissions = dynamic(() => import("./components/AdminPermissions").t
   ssr: false,
 })
 
+const Pause = dynamic(() => import("./components/Pause").then(mod => mod.Pause), { ssr: false })
+
 export default function AdminPage() {
   return (
     <Suspense fallback={<Spinner alignSelf={"center"} />}>
@@ -35,6 +37,14 @@ export default function AdminPage() {
               <StartEmissions />
               <StartRound />
             </VStack>
+          </CardBody>
+        </Card>
+        <Card w={"full"}>
+          <CardHeader>
+            <Heading size="lg">Pausing</Heading>
+          </CardHeader>
+          <CardBody>
+            <Pause />
           </CardBody>
         </Card>
       </Stack>
