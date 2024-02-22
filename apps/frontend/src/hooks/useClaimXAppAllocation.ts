@@ -5,12 +5,7 @@ import { useCallback } from "react"
 import { useConnex, useWallet } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
 import { XAllocationPool__factory } from "@repo/contracts"
-import {
-  getHasXAppClaimed,
-  getHasXAppClaimedQueryKey,
-  getXAppClaimableAmount,
-  getXAppClaimableAmountQueryKey,
-} from "@/api"
+import { getHasXAppClaimedQueryKey, getXAppClaimableAmountQueryKey } from "@/api"
 
 const XAllocationPoolInterface = XAllocationPool__factory.createInterface()
 
