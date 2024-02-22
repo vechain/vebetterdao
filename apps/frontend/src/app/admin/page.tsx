@@ -1,7 +1,7 @@
 "use client"
 
 import dynamic from "next/dynamic"
-import { Spinner, Card, CardBody, CardHeader, Heading, Stack, VStack } from "@chakra-ui/react"
+import { Spinner, Card, CardBody, CardHeader, Heading, Stack, VStack, HStack } from "@chakra-ui/react"
 import { Suspense } from "react"
 
 const StartEmissions = dynamic(() => import("./components/StartEmissions").then(mod => mod.StartEmissions), {
@@ -13,6 +13,11 @@ const StartRound = dynamic(() => import("./components/StartRound").then(mod => m
 const AdminPermissions = dynamic(() => import("./components/AdminPermissions").then(mod => mod.AdminPermissions), {
   ssr: false,
 })
+
+const UpdateReceiverAddress = dynamic(
+  () => import("./components/UpdateReceiverAddress").then(mod => mod.UpdateReceiverAddress),
+  { ssr: false },
+)
 
 export default function AdminPage() {
   return (
@@ -26,6 +31,7 @@ export default function AdminPage() {
             <AdminPermissions />
           </CardBody>
         </Card>
+
         <Card w={"full"}>
           <CardHeader>
             <Heading size="lg">Emissions and Rounds</Heading>
@@ -35,6 +41,16 @@ export default function AdminPage() {
               <StartEmissions />
               <StartRound />
             </VStack>
+          </CardBody>
+        </Card>
+        <Card w={"full"}>
+          <CardHeader>
+            <Heading size="lg">X-2-Earn Apps</Heading>
+          </CardHeader>
+          <CardBody>
+            <HStack w={"full"} spacing={12} alignItems={"start"} height={"max-content"}>
+              <UpdateReceiverAddress />
+            </HStack>
           </CardBody>
         </Card>
       </Stack>
