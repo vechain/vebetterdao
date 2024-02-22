@@ -1,18 +1,9 @@
+import { Image, ImageProps } from "@chakra-ui/react"
 import React from "react"
 
-type Props = {
-  size: number
-}
+type Props = ImageProps
 
 /**
- * VOT3Icon displays the VOT3 icon
+ * B3TRIcon is the icon for the B3TR token
  */
-export const VOT3Icon: React.FC<Props> = ({ size }) => (
-  <svg width={size} height={size} viewBox={`0 0 33 33`} fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="33" height="33" rx="16.5" fill="#373EDF" />
-    <path
-      d="M24.6142 9.36365C24.118 8.90037 23.197 8.85766 22.7065 9.36365C19.7065 12.4609 17.0409 15.8331 14.7695 19.4276C13.8074 17.224 12.1895 15.3128 10.0284 13.9088C9.43002 13.52 8.53014 13.8058 8.18286 14.3611C7.78982 14.9887 8.06671 15.6951 8.66741 16.0839C10.9951 17.5953 12.6494 20.1099 12.9885 22.7439C13.0612 23.3035 13.3581 23.7986 13.9787 23.9585C14.5348 24.1008 15.2271 23.8698 15.5028 23.3791C17.9807 18.9588 21.0311 14.8452 24.6166 11.1445C25.1047 10.6407 25.1504 9.86088 24.6166 9.36365H24.6142Z"
-      fill="#B3F36C"
-    />
-  </svg>
-)
+export const VOT3Icon: React.FC<Props> = props => <Image src="/images/logo/vot3_logo.svg" {...props} />

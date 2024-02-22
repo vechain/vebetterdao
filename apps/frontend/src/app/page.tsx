@@ -1,6 +1,7 @@
 "use client"
 
-import { Box, Show, Spinner, Stack, VStack } from "@chakra-ui/react"
+import { useAllocationsRoundsEvents } from "@/api"
+import { Box, Spinner, Stack, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { Suspense } from "react"
 
@@ -13,6 +14,7 @@ const CirculatingSupplyPieChart = dynamic(
   { ssr: false },
 )
 const BalanceCard = dynamic(() => import("@/components/BalanceCard").then(mod => mod.BalanceCard), { ssr: false })
+const ClaimNFT = dynamic(() => import("@/components/ClaimNFT").then(mod => mod.ClaimNFT), { ssr: false })
 const AllocationRoundsList = dynamic(
   () => import("@/components/AllocationRoundsList/AllocationRoundsList").then(mod => mod.AllocationRoundsList),
   { ssr: false },
@@ -23,6 +25,8 @@ const VoterRewards = dynamic(() => import("@/components/VoterRewards/VoterReward
 })
 
 export default function Home() {
+  const { data: allocationRoundsEvents } = useAllocationsRoundsEvents()
+
   return (
     <VStack w="full" spacing={12}>
       <Suspense fallback={<Spinner alignSelf={"center"} />}>
@@ -33,9 +37,12 @@ export default function Home() {
           align={["stretch", "stretch", "flex-start"]}
           spacing={18}>
           <VStack flex={4} justifyContent="stretch" alignItems={"stretch"} spacing={4}>
-            <Show above="sm">
-              <BalanceCard />
-            </Show>
+            {allocationRoundsEvents && allocationRoundsEvents?.created.length > 0 && (
+              <Box>
+                <AllocationRoundsList maxRoundsToShow={3} headingSize="md" renderInsideCard={true} />
+              </Box>
+            )}
+
             <Box>
               <CirculatingSupplyPieChart />
             </Box>
@@ -44,11 +51,9 @@ export default function Home() {
             </Box>
           </VStack>
           <VStack spacing={4} flex={2.5} position={["static", "static", "sticky"]} top={100} right={0}>
-            <Show below="sm">
-              <BalanceCard />
-            </Show>
+            <BalanceCard />
             <VoterRewards />
-            <AllocationRoundsList maxRounds={3} />
+            <ClaimNFT />
           </VStack>
         </Stack>
       </Suspense>
