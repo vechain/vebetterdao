@@ -22,6 +22,11 @@ import {
   HStack,
   Text,
   InputRightAddon,
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
+  NumberIncrementStepper,
+  NumberDecrementStepper,
 } from "@chakra-ui/react"
 import { useEffect, useMemo, useState } from "react"
 
@@ -107,18 +112,20 @@ export const ClaimXAppAllocations = () => {
                 <FormLabel>
                   <strong>{"Round #"}</strong>
                 </FormLabel>
-                <InputGroup>
-                  <Input
-                    placeholder="The number of the round"
-                    type="number"
-                    value={roundId}
-                    onChange={e => {
-                      setRoundId(parseInt(e.target.value || "0"))
-                      setRoundFieldIsDirty(true)
-                    }}
-                    disabled={isLoading}
-                  />
-                </InputGroup>
+                <NumberInput
+                  min={0}
+                  value={roundId}
+                  isDisabled={isLoading}
+                  onChange={value => {
+                    setRoundId(parseInt(value))
+                    setRoundFieldIsDirty(true)
+                  }}>
+                  <NumberInputField />
+                  <NumberInputStepper>
+                    <NumberIncrementStepper />
+                    <NumberDecrementStepper />
+                  </NumberInputStepper>
+                </NumberInput>
                 <FormErrorMessage>{"Round invalid or not finalized"}</FormErrorMessage>
               </FormControl>
             </HStack>
