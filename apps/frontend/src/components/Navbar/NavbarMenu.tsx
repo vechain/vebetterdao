@@ -1,6 +1,7 @@
 import { Button, Icon } from "@chakra-ui/react"
 import { usePathname, useRouter } from "next/navigation"
 import { Routes } from "./Routes"
+import { useAllocationsRoundsEvents } from "@/api"
 
 type Props = {
   onMenuClick?: () => void
@@ -8,6 +9,7 @@ type Props = {
 export const NavbarMenu = ({ onMenuClick }: Props) => {
   const router = useRouter()
   const pathname = usePathname()
+  const { data: allocationRoundsEvents } = useAllocationsRoundsEvents()
 
   return (
     <>
@@ -23,6 +25,8 @@ export const NavbarMenu = ({ onMenuClick }: Props) => {
         }
 
         if (!route.isVisible) return null
+
+        if (route.name === "Allocations" && allocationRoundsEvents?.created.length === 0) return null
 
         return (
           <Button
