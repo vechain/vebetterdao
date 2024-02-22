@@ -110,16 +110,12 @@ export const AllocationRoundsList: React.FC<Props> = ({
 
   return (
     <>
-      {invertedCreatedRounds && invertedCreatedRounds.length > 0 ? (
-        renderInsideCard ? (
-          <Card>
-            <CardBody>{renderList}</CardBody>
-          </Card>
-        ) : (
-          renderList
-        )
+      {renderInsideCard ? (
+        <Card>
+          <CardBody>{renderList}</CardBody>
+        </Card>
       ) : (
-        <></>
+        renderList
       )}
     </>
   )

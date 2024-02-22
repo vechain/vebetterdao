@@ -1,5 +1,6 @@
 "use client"
 
+import { useAllocationsRoundsEvents } from "@/api"
 import { Box, Spinner, Stack, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { Suspense } from "react"
@@ -24,6 +25,8 @@ const VoterRewards = dynamic(() => import("@/components/VoterRewards/VoterReward
 })
 
 export default function Home() {
+  const { data: allocationRoundsEvents } = useAllocationsRoundsEvents()
+
   return (
     <VStack w="full" spacing={12}>
       <Suspense fallback={<Spinner alignSelf={"center"} />}>
@@ -34,9 +37,12 @@ export default function Home() {
           align={["stretch", "stretch", "flex-start"]}
           spacing={18}>
           <VStack flex={4} justifyContent="stretch" alignItems={"stretch"} spacing={4}>
-            <Box>
-              <AllocationRoundsList maxRoundsToShow={3} headingSize="md" renderInsideCard={true} />
-            </Box>
+            {allocationRoundsEvents && allocationRoundsEvents?.created.length > 0 && (
+              <Box>
+                <AllocationRoundsList maxRoundsToShow={3} headingSize="md" renderInsideCard={true} />
+              </Box>
+            )}
+
             <Box>
               <CirculatingSupplyPieChart />
             </Box>
