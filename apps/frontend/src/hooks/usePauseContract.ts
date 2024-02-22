@@ -1,0 +1,180 @@
+import { useWallet } from "@vechain/dapp-kit-react"
+import { EnhancedClause, useSendTransaction } from "./useSendTransaction"
+import { useToast } from "@chakra-ui/react"
+import { useQueryClient } from "@tanstack/react-query"
+import { useCallback, useMemo } from "react"
+import { getConfig } from "@repo/config"
+import { B3TRBadge__factory, B3TR__factory, VOT3__factory } from "@repo/contracts"
+import {
+  currentBlockQueryKey,
+  getIsB3trBadgePausedQueryKey,
+  getIsB3trPausedQueryKey,
+  getIsVot3PausedQueryKey,
+} from "@/api"
+
+type Props = {
+  contract: string
+  contractName: string
+  onSuccess?: () => void
+  invalidateCache?: boolean
+}
+
+const B3TRInterface = B3TR__factory.createInterface()
+
+const VOT3Interface = VOT3__factory.createInterface()
+
+const B3TRBadgeInterface = B3TRBadge__factory.createInterface()
+
+/**
+ * getInterface is a function that returns the contract interface based on the contract address.
+ * @param contract - The contract address
+ * @returns The contract interface based on the contract address
+ */
+const getInterface = (contract: string) => {
+  switch (contract) {
+    case getConfig().b3trContractAddress:
+      return B3TRInterface
+    case getConfig().vot3ContractAddress:
+      return VOT3Interface
+    case getConfig().nftBadgeContractAddress:
+      return B3TRBadgeInterface
+    default:
+      throw new Error("Invalid contract address")
+  }
+}
+
+/**
+ * getQueryToInvalidate is a function that returns the query key to invalidate based on the contract address.
+ * @param contract - The contract address
+ * @returns The query key to invalidate based on the contract address
+ */
+const getQueryToInvalidate = (contract: string) => {
+  switch (contract) {
+    case getConfig().b3trContractAddress:
+      return getIsB3trPausedQueryKey()
+    case getConfig().vot3ContractAddress:
+      return getIsVot3PausedQueryKey()
+    case getConfig().nftBadgeContractAddress:
+      return getIsB3trBadgePausedQueryKey()
+    default:
+      return ""
+  }
+}
+
+/**
+ * usePauseContract is a custom hook that pauses and unpauses a contract.
+ * It uses the useSendTransaction hook to send the transaction and the useQueryClient hook to invalidate the queries after the transaction.
+ */
+export const usePauseContract = ({ contract, contractName, onSuccess, invalidateCache = true }: Props) => {
+  const { account } = useWallet()
+  const toast = useToast()
+  const queryClient = useQueryClient()
+
+  const contractInterface = useMemo(() => getInterface(contract), [contract])
+
+  console.log(JSON.stringify(contractInterface.getFunction("pause")))
+
+  const buildPauseClause = useCallback(() => {
+    const clauses: EnhancedClause[] = [
+      {
+        to: contract,
+        value: 0,
+        data: contractInterface.encodeFunctionData("pause"),
+        comment: `Pause contract: ${contractName}`,
+        abi: JSON.parse(JSON.stringify(contractInterface.getFunction("pause"))),
+      },
+    ]
+
+    return clauses
+  }, [])
+
+  const buildUnpauseClause = useCallback(() => {
+    const clauses: EnhancedClause[] = [
+      {
+        to: contract,
+        value: 0,
+        data: contractInterface.encodeFunctionData("unpause"),
+        comment: `Unpause contract: ${contractName}`,
+        abi: JSON.parse(JSON.stringify(contractInterface.getFunction("unpause"))),
+      },
+    ]
+
+    return clauses
+  }, [])
+
+  const performCacheInvalidation = useCallback(async () => {
+    if (invalidateCache) {
+      await queryClient.cancelQueries({
+        queryKey: currentBlockQueryKey(),
+      })
+      await queryClient.refetchQueries({
+        queryKey: currentBlockQueryKey(),
+      })
+
+      const queryToInvalidate = getQueryToInvalidate(contract)
+
+      if (queryToInvalidate) {
+        await queryClient.cancelQueries({
+          queryKey: queryToInvalidate,
+        })
+        await queryClient.refetchQueries({
+          queryKey: queryToInvalidate,
+        })
+      }
+    }
+  }, [invalidateCache, queryClient])
+
+  //Refetch queries to update ui after the tx is confirmed
+  const handleOnSuccessPause = useCallback(async () => {
+    await performCacheInvalidation()
+
+    toast({
+      title: "Contract successfully paused",
+      description: `The contract ${contractName} has been paused.`,
+      status: "success",
+      position: "bottom-left",
+      duration: 5000,
+      isClosable: true,
+    })
+    onSuccess?.()
+  }, [invalidateCache, queryClient, toast, onSuccess])
+
+  const handleOnSuccessUnpause = useCallback(async () => {
+    await performCacheInvalidation()
+
+    toast({
+      title: "Contract successfully unpaused",
+      description: `The contract ${contractName} has been unpaused.`,
+      status: "success",
+      position: "bottom-left",
+      duration: 5000,
+      isClosable: true,
+    })
+    onSuccess?.()
+  }, [invalidateCache, queryClient, toast, onSuccess])
+
+  const pauseTxResult = useSendTransaction({
+    signerAccount: account,
+    onTxConfirmed: handleOnSuccessPause,
+  })
+
+  const unpauseTxResult = useSendTransaction({
+    signerAccount: account,
+    onTxConfirmed: handleOnSuccessUnpause,
+  })
+
+  const onMutatePause = useCallback(async () => {
+    const clauses = buildPauseClause()
+    return pauseTxResult.sendTransaction(clauses)
+  }, [buildPauseClause, pauseTxResult])
+
+  const onMutateUnpause = useCallback(async () => {
+    const clauses = buildUnpauseClause()
+    return unpauseTxResult.sendTransaction(clauses)
+  }, [buildUnpauseClause, unpauseTxResult])
+
+  return {
+    pauseTxResult: { ...pauseTxResult, sendTransaction: onMutatePause },
+    unpauseTxResult: { ...unpauseTxResult, sendTransaction: onMutateUnpause },
+  }
+}
