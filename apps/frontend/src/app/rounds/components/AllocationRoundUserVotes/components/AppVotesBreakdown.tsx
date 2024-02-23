@@ -111,7 +111,7 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
                         src={logos[index]?.data?.image ?? notFoundImage}
                         alt={appsMetadata[index]?.data?.name}
                         boxSize={[6, 6, 8]}
-                        borderRadius="2xl"
+                        borderRadius="9px"
                       />
                     </Skeleton>
                     <Text fontSize="sm" mt={1}>
