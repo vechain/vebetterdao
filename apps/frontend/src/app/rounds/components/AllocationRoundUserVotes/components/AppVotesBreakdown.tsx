@@ -4,6 +4,7 @@ import { notFoundImage } from "@/constants"
 import { Box, Card, CardBody, HStack, Heading, Icon, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useQueries } from "@tanstack/react-query"
 import { useWallet } from "@vechain/dapp-kit-react"
+import { FaInfoCircle } from "react-icons/fa"
 import { FaInfo } from "react-icons/fa6"
 
 type Props = {
@@ -120,10 +121,10 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
                 ))}
             </HStack>
           </VStack>
-          <HStack w="full" spacing={4}>
-            <Icon as={FaInfo} color="gray.500" />
-            <Text fontSize="sm" color="gray.500">
-              This amount was snapshoted at the moment the proposal was created. If you got more VOT3 after that, you
+          <HStack w="full" spacing={2}>
+            <Icon as={FaInfoCircle} color="gray" />
+            <Text fontSize="sm" color="gray">
+              This amount was snapshotted at the moment the proposal was created. If you got more VOT3 after that, you
               will use it on the next proposals.
             </Text>
           </HStack>
