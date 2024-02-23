@@ -59,6 +59,7 @@ export const useClaimXAppAllocation = ({
       await queryClient.refetchQueries({
         queryKey: getXAppClaimableAmountQueryKey(roundId, appId),
       })
+
       await queryClient.cancelQueries({
         queryKey: getHasXAppClaimedQueryKey(roundId, appId),
       })

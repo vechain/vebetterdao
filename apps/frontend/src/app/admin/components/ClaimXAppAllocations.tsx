@@ -27,24 +27,24 @@ import {
   NumberInputStepper,
   NumberIncrementStepper,
   NumberDecrementStepper,
+  Skeleton,
 } from "@chakra-ui/react"
 import { useEffect, useMemo, useState } from "react"
 
 export const ClaimXAppAllocations = () => {
   const [appId, setAppId] = useState<string | undefined>()
   const [roundId, setRoundId] = useState<number>(1)
-  const [roundFieldIsDirty, setRoundFieldIsDirty] = useState(false)
 
   const { data: xApps } = useXApps()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  const { data: claimableAmount } = useXAppClaimableAmount(roundId?.toString() ?? "", appId ?? "")
+  const { data: claimableAmountResponse } = useXAppClaimableAmount(roundId?.toString() || "", appId || "")
+
   const { data: isLastRoundFinalized } = useIsRoundFinalized(currentRoundId)
-  const { data: claimed } = useHasXAppClaimed(roundId?.toString() ?? "", appId ?? "")
+  const { data: claimedResponse } = useHasXAppClaimed(roundId?.toString() ?? "", appId ?? "")
 
   const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useClaimXAppAllocation({
     roundId: roundId?.toString() ?? "",
     appId: appId ?? "",
-    invalidateCache: true,
   })
   const isLoading = isTxReceiptLoading || sendTransactionPending
 
@@ -62,13 +62,7 @@ export const ClaimXAppAllocations = () => {
     }
 
     return false
-  }, [roundId, currentRoundId])
-
-  const amountToClaim = useMemo(() => {
-    if (appId === undefined || appId === "") return "0"
-
-    return claimableAmount ?? "0"
-  }, [claimableAmount, appId])
+  }, [roundId, currentRoundId, isLastRoundFinalized])
 
   const isFormValid = useMemo(() => isRoundValid && appId !== undefined && appId !== "", [appId, isRoundValid])
 
@@ -99,15 +93,15 @@ export const ClaimXAppAllocations = () => {
                   value={appId}>
                   {xApps?.map(item => {
                     return (
-                      <option key={"Select" + item.name} value={item.id}>
-                        {item.name}
+                      <option key={item.id} value={item.id}>
+                        {item.name + " - " + item.id}
                       </option>
                     )
                   })}
                 </Select>
               </FormControl>
 
-              <FormControl isRequired isInvalid={!isRoundValid && roundFieldIsDirty}>
+              <FormControl isRequired isInvalid={!isRoundValid}>
                 <FormLabel>
                   <strong>{"Round #"}</strong>
                 </FormLabel>
@@ -115,10 +109,7 @@ export const ClaimXAppAllocations = () => {
                   min={0}
                   value={roundId}
                   isDisabled={isLoading}
-                  onChange={value => {
-                    setRoundId(parseInt(value))
-                    setRoundFieldIsDirty(true)
-                  }}>
+                  onChange={value => setRoundId(parseInt(value))}>
                   <NumberInputField />
                   <NumberInputStepper>
                     <NumberIncrementStepper />
@@ -133,8 +124,14 @@ export const ClaimXAppAllocations = () => {
               <FormLabel>
                 <strong>{"Reserved amount"}</strong>
               </FormLabel>
+
               <InputGroup>
-                <Input placeholder="Amount to claim" type="number" value={amountToClaim} disabled={true} />
+                <Input
+                  placeholder="Reserved allocation"
+                  type="number"
+                  value={claimableAmountResponse?.amount ?? ""}
+                  disabled={true}
+                />
                 <InputRightAddon
                   pointerEvents="none"
                   pl={1}
@@ -148,8 +145,12 @@ export const ClaimXAppAllocations = () => {
               </InputGroup>
             </FormControl>
 
-            <Button isDisabled={!isFormValid || claimed} colorScheme="blue" type="submit" isLoading={isLoading}>
-              {claimed ? "Already claimed" : "Claim"}
+            <Button
+              isDisabled={!isFormValid || claimedResponse?.claimed}
+              colorScheme="blue"
+              type="submit"
+              isLoading={isLoading}>
+              {claimedResponse?.claimed ? "Already claimed" : "Claim"}
             </Button>
           </VStack>
         </form>

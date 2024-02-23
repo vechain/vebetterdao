@@ -1,10 +1,7 @@
 import {
-  RoundReward,
-  buildClaimRewardsTx,
   buildClaimXAppAllocationTx,
   getB3TrBalanceQueryKey,
   getHasXAppClaimedQueryKey,
-  getRoundRewardQueryKey,
   getXAppClaimableAmountQueryKey,
 } from "@/api"
 import { useToast } from "@chakra-ui/react"
@@ -61,6 +58,7 @@ export const useBulkClaimXAppsAllocations = ({
         await queryClient.refetchQueries({
           queryKey: getXAppClaimableAmountQueryKey(roundId, appId),
         })
+
         await queryClient.cancelQueries({
           queryKey: getHasXAppClaimedQueryKey(roundId, appId),
         })

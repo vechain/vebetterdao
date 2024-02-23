@@ -37,6 +37,6 @@ export const useXAppForecastedAmount = (xAppId: string) => {
   return useQuery({
     queryKey: getXAppForecastAmountQueryKey(xAppId),
     queryFn: async () => await getXAppForecastedAmount(thor, xAppId),
-    enabled: !!thor,
+    enabled: !!thor && !!xAppId,
   })
 }
