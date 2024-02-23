@@ -20,20 +20,12 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
-import {
-  getXAppMetadata,
-  getXAppMetadataQueryKey,
-  useAllocationAmount,
-  useRoundXApps,
-  useXAppMetadata,
-  useXAppsForecastedAmounts,
-} from "@/api"
+import { useAllocationAmount, useRoundXApps, useXAppMetadata, useXAppsForecastedAmounts } from "@/api"
 import { useMemo } from "react"
 import { backdropBlurAnimation } from "@/app/theme"
 import { useRouter } from "next/navigation"
-import { getIpfsImage, getIpfsImageQueryKey, useIpfsImage } from "@/api/ipfs"
+import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
-import { useQueries } from "@tanstack/react-query"
 
 type Props = {
   roundId: string
@@ -90,8 +82,8 @@ export const XAppsForecastedAmounts = ({ roundId }: Props) => {
       <CardBody>
         <Box flex={1} />
         <Stack spacing={5} w={"full"}>
-          {data?.map((appAmount, index) => (
-            <XAppForecastedAmount key={index} xAppId={appAmount.app} amount={appAmount.amount} />
+          {data?.map(appAmount => (
+            <XAppForecastedAmount key={appAmount.app} xAppId={appAmount.app} amount={appAmount.amount} />
           ))}
           <Divider />
           <HStack justify={"space-between"} alignItems={"center"}>

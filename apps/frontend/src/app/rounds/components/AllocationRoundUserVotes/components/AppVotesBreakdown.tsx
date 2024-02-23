@@ -5,7 +5,6 @@ import { Box, Card, CardBody, HStack, Heading, Icon, Image, Skeleton, Text, VSta
 import { useQueries } from "@tanstack/react-query"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { FaInfoCircle } from "react-icons/fa"
-import { FaInfo } from "react-icons/fa6"
 
 type Props = {
   roundId: string
