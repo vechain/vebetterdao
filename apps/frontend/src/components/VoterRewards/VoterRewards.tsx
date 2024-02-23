@@ -81,7 +81,7 @@ export const VoterRewards: React.FC = () => {
               isDisabled={totalRewards?.eq(0)}
               isLoading={isRewardsLoading || isClaimRewardsLoading}
               onClick={sendTransaction}>
-              Claim
+              Claim all
             </Button>
           </HStack>
         </VStack>
@@ -103,7 +103,7 @@ export const VoterRewards: React.FC = () => {
         </Flex>
       )}
 
-      {allocationRoundsEvents && allocationRoundsEvents?.created.length > 0 && (
+      {allocationRoundsEvents && allocationRoundsEvents?.created.length === 0 && (
         <Flex
           backdropFilter="blur(10px)"
           animation={backdropBlurAnimation("0px", "10px")}
