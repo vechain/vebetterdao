@@ -7,23 +7,23 @@ import {
   Button,
   Card,
   CardBody,
+  CardFooter,
   CardHeader,
   Flex,
   HStack,
   Heading,
   Link,
   Spinner,
-  Text,
-  VStack,
 } from "@chakra-ui/react"
-import { HorizontalChartBar } from "./HorizontalBarChart"
 import { useAllocationsRound, useRoundXApps, useXAppsVotes } from "@/api"
-import { useMemo } from "react"
 import { backdropBlurAnimation } from "@/app/theme"
+import { AllocationXAppsVotesRankingChart } from "./AllocationXAppsVotesRankingChart"
 
 type Props = {
   roundId: string
 }
+
+const maxRanks = 3
 export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
   const { data: xApps } = useRoundXApps(roundId)
 
@@ -40,14 +40,7 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
 
   const isLoading = isVotesLoading || roundInfoLoading
 
-  const data = useMemo(
-    () =>
-      xAppsVotes.map(app => ({
-        votes: app.data?.votes ?? "0",
-        app: xApps?.find(xa => xa.id === app.data?.app)?.name ?? "",
-      })),
-    [xAppsVotes, xApps],
-  )
+  const isMoreThanMaxRanks = xAppsVotes.length > maxRanks
 
   return (
     <Card flex={1} h="full" w="full">
@@ -57,7 +50,7 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
         </HStack>
       </CardHeader>
       <CardBody>
-        <HorizontalChartBar data={data} xKey="app" yKey="votes" />
+        <AllocationXAppsVotesRankingChart roundId={roundId} maxRanks={maxRanks} />
 
         <Box flex={1} />
       </CardBody>
@@ -120,6 +113,14 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
           )}
         </Flex>
       )}
+      <CardFooter>
+        {/* TODO: Implement this */}
+        {isMoreThanMaxRanks && (
+          <Button variant={"link"} colorScheme="primary" size="lg">
+            View all
+          </Button>
+        )}
+      </CardFooter>
     </Card>
   )
 }

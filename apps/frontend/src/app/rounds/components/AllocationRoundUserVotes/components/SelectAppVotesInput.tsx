@@ -58,8 +58,8 @@ export const SelectAppVotesInput = ({
       py={2}
       px={4}>
       <HStack spacing={[2, 2, 4]} align="center" flex={1}>
-        <Skeleton isLoaded={!isLogoLoading} borderRadius={"full"}>
-          <Image src={logo?.image ?? notFoundImage} alt={appMetadata?.name} boxSize={[8, 8, 10]} borderRadius="full" />
+        <Skeleton isLoaded={!isLogoLoading}>
+          <Image src={logo?.image ?? notFoundImage} alt={appMetadata?.name} boxSize={[8, 8, 10]} borderRadius="2xl" />
         </Skeleton>
         <Heading size={["md", "md", "sm"]}>{xApp?.name}</Heading>
       </HStack>
