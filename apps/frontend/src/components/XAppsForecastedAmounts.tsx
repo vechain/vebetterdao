@@ -19,7 +19,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { XApp, useRoundXApps, useXAppMetadata, useXAppsForecastedAmounts } from "@/api"
+import { useRoundXApps, useXAppMetadata, useXAppsForecastedAmounts } from "@/api"
 import { useMemo } from "react"
 import { backdropBlurAnimation } from "@/app/theme"
 import { useRouter } from "next/navigation"
@@ -62,7 +62,7 @@ export const XAppsForecastedAmounts = ({ roundId }: Props) => {
   }
 
   return (
-    <Card flex={1} h="full" w="full">
+    <Card flex={1} h="full" w="full" variant="outline">
       <CardHeader>
         <HStack justify={"space-between"} w="full">
           <Heading size="lg">Most voted xApps</Heading>
