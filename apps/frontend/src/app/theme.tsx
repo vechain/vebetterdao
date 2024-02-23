@@ -13,7 +13,6 @@ const themeConfig: ThemeConfig = {
     Card: {
       // 6. We can overwrite defaultProps
       defaultProps: {
-        backgroundColor: "red",
         variant: "outline", // default is solid
       },
     },

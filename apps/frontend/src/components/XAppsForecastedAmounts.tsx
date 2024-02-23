@@ -9,6 +9,7 @@ import {
   CardBody,
   CardFooter,
   CardHeader,
+  Divider,
   Flex,
   HStack,
   Heading,
@@ -90,18 +91,19 @@ export const XAppsForecastedAmounts = ({ roundId }: Props) => {
           {data?.map((appAmount, index) => (
             <XAppForecastedAmount key={index} xAppId={appAmount.app} amount={appAmount.amount} />
           ))}
+          <Divider />
           <HStack justify={"space-between"} alignItems={"center"}>
-            <Text fontWeight={"500"} size={"xs"}>
+            <Text fontWeight={"600"} size={"xs"}>
               Unallocated
             </Text>
-            <VStack spacing={0} alignItems={"end"}>
-              <HStack alignItems={"baseline"}>
-                <Heading size="md">{compactFormatter.format(Number(unallocatedAmount))}</Heading>
-                <Text fontSize={"xs"} fontWeight={"bold"}>
-                  B3TR
-                </Text>
-              </HStack>
-            </VStack>
+            <HStack alignItems={"flex-end"} spacing={1}>
+              <Text size="md" fontWeight={"600"} lineHeight={"16px"}>
+                {compactFormatter.format(Number(unallocatedAmount))}
+              </Text>
+              <Text fontSize={"2xs"} fontWeight={"700"} lineHeight={"16x"}>
+                B3TR
+              </Text>
+            </HStack>
           </HStack>
         </Stack>
       </CardBody>
