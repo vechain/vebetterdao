@@ -17,7 +17,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { useRoundXApps, useXAppsForecastedAmounts } from "@/api"
+import { useAllocationAmount, useRoundXApps, useXAppsForecastedAmounts } from "@/api"
 import { useMemo } from "react"
 import { backdropBlurAnimation } from "@/app/theme"
 import { useRouter } from "next/navigation"
@@ -37,7 +37,7 @@ export const XAppsForecastedAmounts = ({ roundId }: Props) => {
   const { data: xApps } = useRoundXApps(roundId)
 
   const xAppsClaimableAmounts = useXAppsForecastedAmounts(xApps?.map(app => app.id) ?? [])
-  console.log("xAppsClaimableAmounts", xAppsClaimableAmounts)
+  const { data: roundAmount, isLoading: roundAmountLoading, error: roundAmountError } = useAllocationAmount(roundId)
 
   const isAmountsLoading = xAppsClaimableAmounts.some(query => query.isLoading)
   const error = xAppsClaimableAmounts.find(query => query.error)?.error
@@ -48,10 +48,18 @@ export const XAppsForecastedAmounts = ({ roundId }: Props) => {
     () =>
       xAppsClaimableAmounts.map(app => ({
         amount: app.data?.amount ?? "0",
-        app: xApps?.find(xa => xa.id === app.data?.app)?.name ?? "",
+        name: xApps?.find(xa => xa.id === app.data?.app)?.name ?? "",
       })),
     [xAppsClaimableAmounts, xApps],
   )
+
+  const unallocatedAmount = useMemo(() => {
+    if (!roundAmount) return 0
+
+    const totalAmount = data.reduce((acc, app) => acc + Number(app.amount), 0)
+
+    return BigInt(roundAmount.voteXAllocations) - BigInt(totalAmount)
+  }, [roundAmount, data])
 
   const onRoundClick = () => {
     router.push(`/rounds/${roundId}`)
@@ -61,7 +69,7 @@ export const XAppsForecastedAmounts = ({ roundId }: Props) => {
     <Card flex={1} h="full" w="full">
       <CardHeader>
         <HStack justify={"space-between"} w="full">
-          <Heading size="lg">Most voted xApps</Heading>
+          <Heading size="md">Next allocations to xApps</Heading>
         </HStack>
       </CardHeader>
       <CardBody>
@@ -71,7 +79,7 @@ export const XAppsForecastedAmounts = ({ roundId }: Props) => {
             return (
               <HStack key={index} justify={"space-between"} alignItems={"center"}>
                 <Text fontWeight={"500"} size={"xs"}>
-                  {app.app}
+                  {app.name}
                 </Text>
                 <VStack spacing={0} alignItems={"end"}>
                   <HStack alignItems={"baseline"}>
@@ -87,6 +95,20 @@ export const XAppsForecastedAmounts = ({ roundId }: Props) => {
               </HStack>
             )
           })}
+
+          <HStack justify={"space-between"} alignItems={"center"}>
+            <Text fontWeight={"500"} size={"xs"}>
+              Unallocated
+            </Text>
+            <VStack spacing={0} alignItems={"end"}>
+              <HStack alignItems={"baseline"}>
+                <Heading size="md">{compactFormatter.format(Number(unallocatedAmount))}</Heading>
+                <Text fontSize={"xs"} fontWeight={"bold"}>
+                  B3TR
+                </Text>
+              </HStack>
+            </VStack>
+          </HStack>
         </Stack>
       </CardBody>
       {(isAmountsLoading || error) && (
