@@ -34,7 +34,6 @@ export const ClaimXAppAllocations = () => {
   const [appId, setAppId] = useState<string | undefined>()
   const [roundId, setRoundId] = useState<number>(1)
   const [roundFieldIsDirty, setRoundFieldIsDirty] = useState(false)
-  const [amountToClaim, setAmountToClaim] = useState<number>(0)
 
   const { data: xApps } = useXApps()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
@@ -54,15 +53,6 @@ export const ClaimXAppAllocations = () => {
     sendTransaction(undefined)
   }
 
-  useEffect(() => {
-    // if there is a claimable amount and it hasn't been claimed yet, set the amount to claim
-    if (claimableAmount !== undefined && claimed !== undefined && !claimed) {
-      setAmountToClaim(parseInt(claimableAmount))
-    } else {
-      setAmountToClaim(0)
-    }
-  }, [claimableAmount, appId, claimed])
-
   const isRoundValid = useMemo(() => {
     if (currentRoundId === undefined) return false
     if (roundId === parseInt(currentRoundId) && !isLastRoundFinalized) return false
@@ -73,6 +63,12 @@ export const ClaimXAppAllocations = () => {
 
     return false
   }, [roundId, currentRoundId])
+
+  const amountToClaim = useMemo(() => {
+    if (appId === undefined || appId === "") return "0"
+
+    return claimableAmount ?? "0"
+  }, [claimableAmount, appId])
 
   const isFormValid = useMemo(() => isRoundValid && appId !== undefined && appId !== "", [appId, isRoundValid])
 
@@ -135,7 +131,7 @@ export const ClaimXAppAllocations = () => {
 
             <FormControl>
               <FormLabel>
-                <strong>{"Claimable amount"}</strong>
+                <strong>{"Reserved amount"}</strong>
               </FormLabel>
               <InputGroup>
                 <Input placeholder="Amount to claim" type="number" value={amountToClaim} disabled={true} />
