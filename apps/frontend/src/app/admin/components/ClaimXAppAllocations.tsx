@@ -49,7 +49,7 @@ export const ClaimXAppAllocations = () => {
 
   const handleSubmit = (event: { preventDefault: () => void }) => {
     event.preventDefault()
-    sendTransaction(undefined)
+    sendTransaction()
   }
 
   const isRoundValid = useMemo(() => {

@@ -18,6 +18,10 @@ type useClaimAllocationsProps = {
   onSuccessMessageTitle?: string
 }
 
+type useBClaimXAppsAllocationsReturnValue = {
+  sendTransaction: () => Promise<void>
+} & Omit<UseSendTransactionReturnValue, "sendTransaction">
+
 /**
  * Claim allocation rewards for a specific round for multiple xApps
  *
@@ -30,7 +34,7 @@ export const useClaimXAppsAllocations = ({
   appIds,
   onSuccess,
   invalidateCache = true,
-}: useClaimAllocationsProps): UseSendTransactionReturnValue => {
+}: useClaimAllocationsProps): useBClaimXAppsAllocationsReturnValue => {
   const { thor } = useConnex()
   const { account } = useWallet()
   const toast = useToast()
@@ -88,5 +92,10 @@ export const useClaimXAppsAllocations = ({
     onTxConfirmed: handleOnSuccess,
   })
 
-  return result
+  const onMutate = useCallback(async () => {
+    const clauses = buildClauses(roundId, appIds)
+    return result.sendTransaction(clauses)
+  }, [buildClauses, result])
+
+  return { ...result, sendTransaction: onMutate }
 }

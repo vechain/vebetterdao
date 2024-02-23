@@ -66,7 +66,7 @@ export const BulkClaimXAppsAllocations = () => {
 
   const handleSubmit = (event: { preventDefault: () => void }) => {
     event.preventDefault()
-    sendTransaction(undefined)
+    sendTransaction()
   }
 
   // Validate roundId input
