@@ -1,9 +1,21 @@
 import { getXAppMetadata, getXAppMetadataQueryKey, useAllocationsRound, useGetVotesOnBlock } from "@/api"
 import { getIpfsImage, getIpfsImageQueryKey } from "@/api/ipfs"
-import { Box, Card, CardBody, HStack, Heading, Icon, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
+import {
+  Alert,
+  AlertDescription,
+  AlertIcon,
+  Box,
+  Card,
+  CardBody,
+  HStack,
+  Heading,
+  Image,
+  Skeleton,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { useQueries } from "@tanstack/react-query"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { FaInfo } from "react-icons/fa6"
 
 type Props = {
   roundId: string
@@ -122,11 +134,24 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
             </HStack>
           </VStack>
           <HStack w="full" spacing={4}>
-            <Icon as={FaInfo} color="gray.500" />
-            <Text fontSize="sm" color="gray.500">
-              This amount was snapshoted at the moment the proposal was created. If you got more VOT3 after that, you
-              will use it on the next proposals.
-            </Text>
+            <Alert
+              w={"full"}
+              status="info"
+              variant="subtle"
+              flexDirection="column"
+              alignItems="center"
+              justifyContent="center"
+              textAlign="center"
+              borderRadius={"xl"}>
+              <HStack w="full" spacing={2}>
+                <AlertIcon boxSize="20px" mr={0} />
+
+                <AlertDescription w={"fit-content"} textAlign={"start"}>
+                  This sum was captured at the time the round started. If you got more VOT3 after that, you will use it
+                  on the next proposals.
+                </AlertDescription>
+              </HStack>
+            </Alert>
           </HStack>
         </VStack>
       </CardBody>
