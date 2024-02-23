@@ -111,4 +111,52 @@ describe("X-Apps", function () {
       expect(appURI).to.eql(baseURI + app1Id)
     })
   })
+
+  describe("Receiver address", function () {
+    it("Should be able to fetch app receiver address", async function () {
+      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, "My app")
+
+      const appReceiverAddress = await xAllocationVoting.getAppReceiverAddress(app1Id)
+      expect(appReceiverAddress).to.eql(otherAccounts[0].address)
+    })
+
+    it("Admin can update the receiver address of an app", async function () {
+      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, "My app")
+
+      const appReceiverAddress1 = await xAllocationVoting.getAppReceiverAddress(app1Id)
+
+      const adminRole = await xAllocationVoting.DEFAULT_ADMIN_ROLE()
+      const isAdmin = await xAllocationVoting.hasRole(adminRole, owner.address)
+      expect(isAdmin).to.be.true
+
+      await xAllocationVoting.connect(owner).updateAppReceiverAddress(app1Id, otherAccounts[1].address)
+
+      const appReceiverAddress2 = await xAllocationVoting.getAppReceiverAddress(app1Id)
+      expect(appReceiverAddress2).to.eql(otherAccounts[1].address)
+      expect(appReceiverAddress1).to.not.eql(appReceiverAddress2)
+    })
+
+    it("Non-admin cannot update the receiver address of an app", async function () {
+      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, "My app")
+
+      const appReceiverAddress1 = await xAllocationVoting.getAppReceiverAddress(app1Id)
+
+      const adminRole = await xAllocationVoting.DEFAULT_ADMIN_ROLE()
+      const isAdmin = await xAllocationVoting.hasRole(adminRole, otherAccounts[1].address)
+      expect(isAdmin).to.be.false
+
+      await expect(
+        xAllocationVoting.connect(otherAccounts[1]).updateAppReceiverAddress(app1Id, otherAccounts[1].address),
+      ).to.be.rejected
+
+      const appReceiverAddress2 = await xAllocationVoting.getAppReceiverAddress(app1Id)
+      expect(appReceiverAddress2).to.eql(appReceiverAddress1)
+    })
+  })
 })

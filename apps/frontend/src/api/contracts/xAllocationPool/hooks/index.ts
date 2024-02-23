@@ -1,3 +1,6 @@
 export * from "./useXAppForecastedAmount"
 export * from "./useXAppClaimableAmount"
 export * from "./useXAppsForecastedAmounts"
+export * from "./useHasXAppClaimed"
+export * from "./useHaveXAppsClaimed"
+export * from "./useXAppsClaimableAmounts"
