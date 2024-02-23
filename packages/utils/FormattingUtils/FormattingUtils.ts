@@ -241,58 +241,31 @@ export const validateStringPercentages = (percentages: string[]): boolean => {
   return true
 }
 
-export function formatToHumanNumber(amount: string, decimals: number, foramtToCurrency = true): string {
+export function formatToHumanNumber(
+  amount: string,
+  decimals: number,
+  formatToCurrency = true,
+  locale = "en-US",
+): string {
   // Convert the amount to a floating point number
   const numberAmount = parseFloat(amount)
-  const scale = 100
 
   if (isNaN(numberAmount)) {
     return "Invalid amount"
   }
 
+  const scale = 100
+
   // Round the number to the specified decimal places
   const roundedAmount = Math.floor(numberAmount * scale) / scale
 
-  let amountString = ""
+  const options = formatToCurrency
+    ? { style: "currency", currency: "USD", minimumFractionDigits: decimals, maximumFractionDigits: decimals }
+    : { minimumFractionDigits: decimals, maximumFractionDigits: decimals }
 
-  if (foramtToCurrency) {
-    amountString = roundedAmount.toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-  } else {
-    amountString = roundedAmount.toFixed(decimals)
-  }
+  const formatter = new Intl.NumberFormat(locale, options)
 
-  // switch (locale) {
-  //     // Euro locales with comma for decimal and period for thousands
-  //     case "AT": // Austria
-  //     case "BE": // Belgium
-  //     case "CY": // Cyprus
-  //     case "FI": // Finland
-  //     case "FR": // France
-  //     case "DE": // Germany
-  //     case "GR": // Greece
-  //     case "IT": // Italy
-  //     case "LV": // Latvia
-  //     case "LT": // Lithuania
-  //     case "LU": // Luxembourg
-  //     case "MT": // Malta
-  //     case "NL": // the Netherlands
-  //     case "PT": // Portugal
-  //     case "SK": // Slovakia
-  //     case "SI": // Slovenia
-  //     case "ES": // Spain
-  //         amountString = amountString
-  //             .replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-  //             .replace(/\.(\d+)$/, ",$1")
-  //         break
-
-  //     // Euro locales with dot for decimal and comma for thousands
-  //     case "IE": // English (Ireland)
-  //     case "EE": // Estonian
-  //     case "US":
-  //     default:
-  //         amountString = amountString.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-  //         break
-  // }
+  let amountString = formatter.format(numberAmount)
 
   if (!isZero(numberAmount) && isZero(roundedAmount)) {
     amountString = "< 0.01"
