@@ -1,10 +1,11 @@
 import { useAllocationVotes, useRoundXApps, useXAppMetadata, useXAppsVotes } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
-import { Box, HStack, Heading, Image, Skeleton, VStack, useColorModeValue } from "@chakra-ui/react"
+import { Box, HStack, Heading, Image, Skeleton, Text, VStack, useColorModeValue } from "@chakra-ui/react"
 import { useMemo } from "react"
 
 type Props = {
   roundId: string
+  maxRanks: number
 }
 
 type AppVotesData = {
@@ -27,7 +28,7 @@ const compactFormatter = new Intl.NumberFormat("en-US", {
 
 const notFoundImage = "/images/image-not-found.png"
 
-export const AllocationXAppsVotesRankingChart = ({ roundId }: Props) => {
+export const AllocationXAppsVotesRankingChart = ({ roundId, maxRanks }: Props) => {
   const { data: xApps } = useRoundXApps(roundId)
 
   const xAppsVotes = useXAppsVotes(xApps?.map(app => app.id) ?? [], roundId)
@@ -41,8 +42,9 @@ export const AllocationXAppsVotesRankingChart = ({ roundId }: Props) => {
           votes: app.data?.votes ?? "0",
           app: xApps?.find(xa => xa.id === app.data?.app)?.id ?? "",
         }))
-        .sort((a, b) => Number(b.votes) - Number(a.votes)),
-    [xAppsVotes, xApps],
+        .sort((a, b) => Number(b.votes) - Number(a.votes))
+        .slice(0, maxRanks),
+    [xAppsVotes, xApps, maxRanks],
   )
 
   return (
@@ -78,39 +80,37 @@ const VotesHorizontalBar = ({
   const bgColor = `green`
 
   return (
-    <HStack align="stretch" w="full">
-      <HStack
-        w={`${votesPercentage}%`}
-        bg={`${bgColor}.${bgShade}`}
-        borderRadius={"xl"}
-        justify="space-between"
-        align="center">
-        <Heading size="4xl" fontSize={"80px"} color={`${bgColor}.${rankingPositionShade}`}>
+    <HStack
+      py={2}
+      w={`${votesPercentage}%`}
+      bg={`${bgColor}.${bgShade}`}
+      borderRadius={"xl"}
+      justify="space-between"
+      align="center">
+      <Box ml={2}>
+        <Heading size="md" fontSize={"20px"} color={`${bgColor}.${rankingPositionShade}`}>
           {rankingPositionLabel}
         </Heading>
-
-        <VStack spacing={0} align={"flex-start"} justify={"space-between"} mr={4}>
+        <VStack spacing={0} align={"flex-start"} justify={"flex-end"} mr={4}>
           <Heading size="xl" color={`${bgColor}.${votesCountShade}`} lineHeight={"100%"}>
             {compactFormatter.format(Number(data.votes))}
           </Heading>
           <HStack spacing={2} align={"center"}>
-            <Heading size="xs" color={`${bgColor}.${nameShade}`} fontWeight={"medium"}>
+            <Skeleton isLoaded={!isLogoLoading} boxSize={6}>
+              <Image
+                src={logo?.image ?? notFoundImage}
+                boxSize={6}
+                alt={appMetadata?.name}
+                borderRadius="xl"
+                objectFit={"cover"}
+              />
+            </Skeleton>
+            <Heading size="md" color={`${bgColor}.${nameShade}`} fontWeight={"medium"}>
               {appMetadata?.name}
             </Heading>
           </HStack>
         </VStack>
-      </HStack>
-
-      <Skeleton isLoaded={!isLogoLoading} maxW={20}>
-        <Image
-          src={logo?.image ?? notFoundImage}
-          alt={appMetadata?.name}
-          w="full"
-          h="full"
-          borderRadius="lg"
-          objectFit={"cover"}
-        />
-      </Skeleton>
+      </Box>
     </HStack>
   )
 }
