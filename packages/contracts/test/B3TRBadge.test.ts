@@ -69,6 +69,47 @@ describe("B3TRBadge", () => {
 
       expect(await b3trBadge.baseURI()).to.equal(config.NFT_BADGE_BASE_URI)
     })
+
+    it("Only admin should be able to pause and unpause the contract", async () => {
+      const { b3trBadge, otherAccount, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      await catchRevert(b3trBadge.connect(otherAccount).pause())
+
+      await b3trBadge.connect(owner).pause()
+
+      expect(await b3trBadge.paused()).to.equal(true)
+
+      await b3trBadge.connect(owner).unpause()
+
+      expect(await b3trBadge.paused()).to.equal(false)
+    })
+
+    it("Should not be able to update max mintable levels if not admin", async () => {
+      const { b3trBadge, otherAccount } = await getOrDeployContractInstances({ forceDeploy: false })
+
+      await catchRevert(b3trBadge.connect(otherAccount).setMaxMintableLevels(Array(7).fill(1)))
+    })
+
+    it("Should not be able to update max mintable levels if not enough levels", async () => {
+      const { b3trBadge, owner } = await getOrDeployContractInstances({ forceDeploy: false })
+
+      await catchRevert(b3trBadge.connect(owner).setMaxMintableLevels(Array(6).fill(1))) // 6 levels instead of 7. This is because there are 7 X/Economic node NFTs.
+    })
+
+    it("Should be able to update max mintable levels if admin", async () => {
+      const { b3trBadge, owner } = await getOrDeployContractInstances({ forceDeploy: false })
+
+      await b3trBadge.connect(owner).setMaxMintableLevels([1, 2, 3, 4, 5, 6, 7])
+
+      // Check if the max mintable levels are set correctly
+      expect(await b3trBadge.xNodeTypeToMaxMintableLevel(0)).to.equal(1)
+      expect(await b3trBadge.xNodeTypeToMaxMintableLevel(1)).to.equal(2)
+      expect(await b3trBadge.xNodeTypeToMaxMintableLevel(2)).to.equal(3)
+      expect(await b3trBadge.xNodeTypeToMaxMintableLevel(3)).to.equal(4)
+      expect(await b3trBadge.xNodeTypeToMaxMintableLevel(4)).to.equal(5)
+      expect(await b3trBadge.xNodeTypeToMaxMintableLevel(5)).to.equal(6)
+      expect(await b3trBadge.xNodeTypeToMaxMintableLevel(6)).to.equal(7)
+    })
   })
 
   describe("Minting", () => {
@@ -388,31 +429,25 @@ describe("B3TRBadge", () => {
       expect(await b3trBadge.levelOf(0)).to.equal(1) // Level 1 even though max level is 10
     })
 
-    it("Should not be able to update max mintable levels if not admin", async () => {
-      const { b3trBadge, otherAccount } = await getOrDeployContractInstances({ forceDeploy: false })
+    it("Cannot mint if badge is paused", async () => {
+      const { b3trBadge, otherAccount, owner, xAllocationVoting, b3tr, emissions, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
-      await catchRevert(b3trBadge.connect(otherAccount).setMaxMintableLevels(Array(7).fill(1)))
-    })
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
-    it("Should not be able to update max mintable levels if not enough levels", async () => {
-      const { b3trBadge, owner } = await getOrDeployContractInstances({ forceDeploy: false })
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(otherAccount, owner, xAllocationVoting)
 
-      await catchRevert(b3trBadge.connect(owner).setMaxMintableLevels(Array(6).fill(1))) // 6 levels instead of 7. This is because there are 7 X/Economic node NFTs.
-    })
+      await b3trBadge.connect(owner).pause()
 
-    it("Should be able to update max mintable levels if admin", async () => {
-      const { b3trBadge, owner } = await getOrDeployContractInstances({ forceDeploy: false })
+      await catchRevert(b3trBadge.connect(otherAccount).freeMint())
 
-      await b3trBadge.connect(owner).setMaxMintableLevels([1, 2, 3, 4, 5, 6, 7])
+      await b3trBadge.connect(owner).unpause()
 
-      // Check if the max mintable levels are set correctly
-      expect(await b3trBadge.xNodeTypeToMaxMintableLevel(0)).to.equal(1)
-      expect(await b3trBadge.xNodeTypeToMaxMintableLevel(1)).to.equal(2)
-      expect(await b3trBadge.xNodeTypeToMaxMintableLevel(2)).to.equal(3)
-      expect(await b3trBadge.xNodeTypeToMaxMintableLevel(3)).to.equal(4)
-      expect(await b3trBadge.xNodeTypeToMaxMintableLevel(4)).to.equal(5)
-      expect(await b3trBadge.xNodeTypeToMaxMintableLevel(5)).to.equal(6)
-      expect(await b3trBadge.xNodeTypeToMaxMintableLevel(6)).to.equal(7)
+      await b3trBadge.connect(otherAccount).freeMint()
     })
 
     it("Should be able to mint again after transferring a badge", async () => {
@@ -487,6 +522,31 @@ describe("B3TRBadge", () => {
       expect(await b3trBadge.tokenByIndex(0)).to.equal(0) // Token ID of the first badge is 0
 
       expect(await b3trBadge.tokenOfOwnerByIndex(await otherAccount.getAddress(), 0)).to.equal(0) // Token ID of the first badge owned by otherAccount is 0
+    })
+
+    it("Should not be able to transfer a badge if transfers are paused", async () => {
+      const { b3trBadge, otherAccount, owner, xAllocationVoting, b3tr, emissions, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(owner, owner, xAllocationVoting)
+
+      await b3trBadge.connect(owner).freeMint()
+
+      await b3trBadge.connect(owner).pause()
+
+      await catchRevert(
+        b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 0),
+      )
+
+      await b3trBadge.connect(owner).unpause()
+
+      await b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 0)
     })
 
     it("Should not be able to receive a badge from another account if you already have one", async () => {

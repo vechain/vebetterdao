@@ -15,7 +15,7 @@ import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
 import { IB3TRGovernor } from "./interfaces/IB3TRGovernor.sol";
 
-contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
+contract B3TRBadge is ERC721, ERC721Enumerable, ERC721Pausable, AccessControl, IERC6372 {
   using Checkpoints for Checkpoints.Trace208;
 
   // XAllocationVotingGovernor contract
@@ -70,6 +70,14 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
     _baseTokenURI = baseTokenURI;
 
     _grantRole(DEFAULT_ADMIN_ROLE, admin);
+  }
+
+  function pause() public onlyRole(DEFAULT_ADMIN_ROLE) {
+    _pause();
+  }
+
+  function unpause() public onlyRole(DEFAULT_ADMIN_ROLE) {
+    _unpause();
   }
 
   // Mints the highest level Badge the caller is allowed to mint
@@ -223,7 +231,7 @@ contract B3TRBadge is ERC721, ERC721Enumerable, AccessControl, IERC6372 {
     address to,
     uint256 tokenId,
     address auth
-  ) internal override(ERC721, ERC721Enumerable) returns (address) {
+  ) internal override(ERC721, ERC721Enumerable, ERC721Pausable) returns (address) {
     require(balanceOf(to) == 0, "Badge: Only 1 Badge allowed per address");
 
     _moveOwnershipLevel(auth, to, levelOf[tokenId]);

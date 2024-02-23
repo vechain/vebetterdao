@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.19;
 
 interface IB3TRBadge {
   error AccessControlBadConfirmation();
@@ -33,6 +33,10 @@ interface IB3TRBadge {
 
   error ERC721OutOfBoundsIndex(address owner, uint256 index);
 
+  error EnforcedPause();
+
+  error ExpectedPause();
+
   error SafeCastOverflowedUintDowncast(uint8 bits, uint256 value);
 
   event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);
@@ -40,6 +44,8 @@ interface IB3TRBadge {
   event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
 
   event LevelOwnedChanged(address indexed owner, uint256 previousLevel, uint256 newLevel);
+
+  event Paused(address account);
 
   event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole);
 
@@ -49,6 +55,8 @@ interface IB3TRBadge {
 
   event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
 
+  event Unpaused(address account);
+
   function CLOCK_MODE() external view returns (string memory);
 
   function DEFAULT_ADMIN_ROLE() external view returns (bytes32);
@@ -57,7 +65,11 @@ interface IB3TRBadge {
 
   function approve(address to, uint256 tokenId) external;
 
+  function b3trGovernor() external view returns (address);
+
   function balanceOf(address owner) external view returns (uint256);
+
+  function baseURI() external view returns (string memory);
 
   function clock() external view returns (uint48);
 
@@ -85,6 +97,12 @@ interface IB3TRBadge {
 
   function ownerOf(uint256 tokenId) external view returns (address);
 
+  function participatedInGovernance(address user) external view returns (bool);
+
+  function pause() external;
+
+  function paused() external view returns (bool);
+
   function renounceRole(bytes32 role, address callerConfirmation) external;
 
   function revokeRole(bytes32 role, address account) external;
@@ -95,9 +113,15 @@ interface IB3TRBadge {
 
   function setApprovalForAll(address operator, bool approved) external;
 
+  function setB3trGovernorAddress(address _b3trGovernor) external;
+
+  function setBaseURI(string memory baseTokenURI) external;
+
   function setMaxLevel(uint256 level) external;
 
   function setMaxMintableLevels(uint256[] memory maxMintableLevels) external;
+
+  function setXAllocationsGovernorAddress(address _xAllocationsGovernor) external;
 
   function supportsInterface(bytes4 interfaceId) external view returns (bool);
 
@@ -112,6 +136,10 @@ interface IB3TRBadge {
   function totalSupply() external view returns (uint256);
 
   function transferFrom(address from, address to, uint256 tokenId) external;
+
+  function unpause() external;
+
+  function xAllocationsGovernor() external view returns (address);
 
   function xNodeTypeToMaxMintableLevel(uint8) external view returns (uint256);
 }
