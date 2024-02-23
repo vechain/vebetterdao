@@ -5,6 +5,7 @@ import { Controller, UseFormReturn } from "react-hook-form"
 import { B3TRIcon, VOT3Icon } from "../Icons"
 import { useB3trBalance, useVot3Balance } from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"
+import { motion } from "framer-motion"
 
 const DECIMAL_PLACES = 2
 
@@ -39,6 +40,27 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
     () => (isB3trToVot3 ? b3trBalanceScaled : vot3BalanceScaled),
     [isB3trToVot3, b3trBalanceScaled, vot3BalanceScaled],
   )
+
+  const containerVariants = {
+    initial: {
+      opacity: 0,
+      y: 20,
+    },
+    animate: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        delayChildren: 0.3,
+        staggerChildren: 0.2,
+      },
+    },
+  }
+
+  const layoutTransition = {
+    type: "spring",
+    stiffness: 300,
+    damping: 24,
+  }
 
   const filterAmount = useCallback(
     (text: string) => {
@@ -99,89 +121,95 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
   )
 
   return (
-    <Stack direction={isB3trToVot3 ? "column" : "column-reverse"}>
-      <VStack
-        bgGradient={b3trBgGradient}
-        py={6}
-        px={6}
-        h="full"
-        w="full"
-        borderRadius={"2xl"}
-        align="flex-start"
-        spacing={12}>
-        <HStack align={"stretch"} justify={"stretch"} spacing={4} w="full">
-          <Divider
-            orientation="vertical"
-            variant="thick"
-            w="4px"
-            bgColor={b3trDividerColor}
-            h="auto"
-            borderRadius="7px"
-          />
-          <VStack justify="stretch" flex={1} gap={1}>
-            <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
-              <Text>{isB3trToVot3 ? "You Pay" : "You Receive"}</Text>
-              <VStack gap={0} alignItems={"flex-end"}>
-                <Text fontSize="10px">Balance</Text>
-                <HStack gap={1}>
-                  <Text fontSize="14px" fontWeight={500}>
-                    {compactFormatter.format(Number(b3trBalanceScaled))}
-                  </Text>
-                  <B3TRIcon h={"15px"} w={"15px"} />
+    <motion.div initial="initial" animate="animate" variants={containerVariants}>
+      <Stack direction={isB3trToVot3 ? "column" : "column-reverse"}>
+        <motion.div layout transition={layoutTransition}>
+          <VStack
+            bgGradient={b3trBgGradient}
+            py={6}
+            px={6}
+            h="full"
+            w="full"
+            borderRadius={"2xl"}
+            align="flex-start"
+            spacing={12}>
+            <HStack align={"stretch"} justify={"stretch"} spacing={4} w="full">
+              <Divider
+                orientation="vertical"
+                variant="thick"
+                w="4px"
+                bgColor={b3trDividerColor}
+                h="auto"
+                borderRadius="7px"
+              />
+              <VStack justify="stretch" flex={1} gap={1}>
+                <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
+                  <Text>{isB3trToVot3 ? "You Pay" : "You Receive"}</Text>
+                  <VStack gap={0} alignItems={"flex-end"}>
+                    <Text fontSize="10px">Balance</Text>
+                    <HStack gap={1}>
+                      <Text fontSize="14px" fontWeight={500}>
+                        {compactFormatter.format(Number(b3trBalanceScaled))}
+                      </Text>
+                      <B3TRIcon h={"15px"} w={"15px"} />
+                    </HStack>
+                  </VStack>
+                </HStack>
+                <HStack w="full">
+                  <HStack flex={1}>
+                    <B3TRIcon h={"32px"} w={"32px"} />
+                    {amountInput}
+                  </HStack>
+                  {isB3trToVot3 && Number(maxBalance) !== Number(amount) && maxButton}
                 </HStack>
               </VStack>
             </HStack>
-            <HStack w="full">
-              <HStack flex={1}>
-                <B3TRIcon h={"32px"} w={"32px"} />
-                {amountInput}
-              </HStack>
-              {isB3trToVot3 && Number(maxBalance) !== Number(amount) && maxButton}
-            </HStack>
           </VStack>
-        </HStack>
-      </VStack>
-      <VStack
-        bgGradient={vot3BgGradient}
-        py={6}
-        px={6}
-        h="full"
-        w="full"
-        borderRadius={"2xl"}
-        align="flex-start"
-        spacing={12}>
-        <HStack align={"stretch"} justify={"stretch"} spacing={4} w="full">
-          <Divider
-            orientation="vertical"
-            variant="thick"
-            w="4px"
-            bgColor={vot3dividerAlpha}
-            h="auto"
-            borderRadius="7px"
-          />
-          <VStack justify="stretch" flex={1} gap={1}>
-            <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
-              <Text>{isB3trToVot3 ? "You Receive" : "You Pay"}</Text>
-              <VStack gap={0} alignItems={"flex-end"}>
-                <Text fontSize="10px">Balance</Text>
-                <HStack gap={1}>
-                  <Text fontSize="14px" fontWeight={500}>
-                    {compactFormatter.format(Number(vot3BalanceScaled))}
-                  </Text>
-                  <VOT3Icon h={"15px"} w={"15px"} />
+        </motion.div>
+        <motion.div layout transition={layoutTransition}>
+          <VStack
+            bgGradient={vot3BgGradient}
+            py={6}
+            px={6}
+            h="full"
+            w="full"
+            borderRadius={"2xl"}
+            align="flex-start"
+            spacing={12}>
+            <HStack align={"stretch"} justify={"stretch"} spacing={4} w="full">
+              <Divider
+                orientation="vertical"
+                variant="thick"
+                w="4px"
+                bgColor={vot3dividerAlpha}
+                h="auto"
+                borderRadius="7px"
+              />
+              <VStack justify="stretch" flex={1} gap={1}>
+                <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
+                  <Text>{isB3trToVot3 ? "You Receive" : "You Pay"}</Text>
+                  <VStack gap={0} alignItems={"flex-end"}>
+                    <Text fontSize="10px">Balance</Text>
+                    <HStack gap={1}>
+                      <Text fontSize="14px" fontWeight={500}>
+                        {compactFormatter.format(Number(vot3BalanceScaled))}
+                      </Text>
+                      <VOT3Icon h={"15px"} w={"15px"} />
+                    </HStack>
+                  </VStack>
+                </HStack>
+                <HStack w="full">
+                  <HStack flex={1}>
+                    <VOT3Icon h={"32px"} w={"32px"} />
+                    {amountInput}
+                  </HStack>
+                  {!isB3trToVot3 && Number(maxBalance) !== Number(amount) && maxButton}
                 </HStack>
               </VStack>
             </HStack>
-            <HStack w="full">
-              <HStack flex={1}>
-                <VOT3Icon h={"32px"} w={"32px"} />
-                {amountInput}
-              </HStack>
-              {!isB3trToVot3 && Number(maxBalance) !== Number(amount) && maxButton}
-            </HStack>
           </VStack>
-        </HStack>
-      </VStack>
-    </Stack>
+        </motion.div>
+      </Stack>
+    </motion.div>
   )
 }
