@@ -12,15 +12,19 @@ import {
   Flex,
   HStack,
   Heading,
+  Image,
+  Skeleton,
   Spinner,
   Stack,
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { useRoundXApps, useXAppsForecastedAmounts } from "@/api"
+import { XApp, useRoundXApps, useXAppMetadata, useXAppsForecastedAmounts } from "@/api"
 import { useMemo } from "react"
 import { backdropBlurAnimation } from "@/app/theme"
 import { useRouter } from "next/navigation"
+import { useIpfsImage } from "@/api/ipfs"
+import { notFoundImage } from "@/constants"
 
 type Props = {
   roundId: string
@@ -48,7 +52,7 @@ export const XAppsForecastedAmounts = ({ roundId }: Props) => {
     () =>
       xAppsClaimableAmounts.map(app => ({
         amount: app.data?.amount ?? "0",
-        app: xApps?.find(xa => xa.id === app.data?.app)?.name ?? "",
+        app: xApps?.find(xa => xa.id === app.data?.app)?.id as string,
       })),
     [xAppsClaimableAmounts, xApps],
   )
@@ -67,26 +71,9 @@ export const XAppsForecastedAmounts = ({ roundId }: Props) => {
       <CardBody>
         <Box flex={1} />
         <Stack spacing={5} w={"full"}>
-          {data?.map((app, index) => {
-            return (
-              <HStack key={index} justify={"space-between"} alignItems={"center"}>
-                <Text fontWeight={"500"} size={"xs"}>
-                  {app.app}
-                </Text>
-                <VStack spacing={0} alignItems={"end"}>
-                  <HStack alignItems={"baseline"}>
-                    <Heading size="md">{compactFormatter.format(Number(app.amount))}</Heading>
-                    <Text fontSize={"xs"} fontWeight={"bold"}>
-                      B3TR
-                    </Text>
-                  </HStack>
-                  <HStack>
-                    <Text fontSize={"xs"}>assigned</Text>
-                  </HStack>
-                </VStack>
-              </HStack>
-            )
-          })}
+          {data?.map((appAmount, index) => (
+            <XAppForecastedAmount key={index} xAppId={appAmount.app} amount={appAmount.amount} />
+          ))}
         </Stack>
       </CardBody>
       {(isAmountsLoading || error) && (
@@ -133,5 +120,40 @@ export const XAppsForecastedAmounts = ({ roundId }: Props) => {
         </HStack>
       </CardFooter>
     </Card>
+  )
+}
+
+const XAppForecastedAmount = ({ xAppId, amount }: { xAppId: string; amount: string }) => {
+  const { data: appMetadata, error: appMetadatError, isLoading: appMetadataLoading } = useXAppMetadata(xAppId)
+  const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
+
+  return (
+    <HStack justify={"space-between"} alignItems={"center"}>
+      <HStack spacing={3}>
+        <Skeleton isLoaded={!isLogoLoading}>
+          <Image src={logo?.image ?? notFoundImage} alt={appMetadata?.name} boxSize={8} borderRadius="9px" />
+        </Skeleton>
+        <Skeleton isLoaded={!appMetadataLoading}>
+          <Text fontWeight={"600"} size={"xs"}>
+            {appMetadata?.name}
+          </Text>
+        </Skeleton>
+      </HStack>
+      <VStack spacing={0} alignItems={"flex-end"}>
+        <HStack alignItems={"flex-end"} spacing={1}>
+          <Text size="md" fontWeight={"600"} lineHeight={"16px"}>
+            {compactFormatter.format(Number(amount))}
+          </Text>
+          <Text fontSize={"2xs"} fontWeight={"700"} lineHeight={"16x"}>
+            B3TR
+          </Text>
+        </HStack>
+        <HStack>
+          <Text fontSize={"xs"} fontWeight={"400"}>
+            assigned
+          </Text>
+        </HStack>
+      </VStack>
+    </HStack>
   )
 }
