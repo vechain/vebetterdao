@@ -1,5 +1,6 @@
 import { useAllocationVotes, useRoundXApps, useXAppMetadata, useXAppsVotes } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
+import { notFoundImage } from "@/constants"
 import { Box, HStack, Heading, Image, Skeleton, Text, VStack, useColorModeValue } from "@chakra-ui/react"
 import { useMemo } from "react"
 
@@ -25,8 +26,6 @@ const compactFormatter = new Intl.NumberFormat("en-US", {
   notation: "compact",
   compactDisplay: "short",
 })
-
-const notFoundImage = "/images/image-not-found.png"
 
 export const AllocationXAppsVotesRankingChart = ({ roundId, maxRanks }: Props) => {
   const { data: xApps } = useRoundXApps(roundId)
@@ -91,19 +90,13 @@ const VotesHorizontalBar = ({
         <Heading size="md" fontSize={"20px"} color={`${bgColor}.${rankingPositionShade}`}>
           {rankingPositionLabel}
         </Heading>
-        <VStack spacing={0} align={"flex-start"} justify={"flex-end"} mr={4}>
+        <VStack spacing={0} align={"flex-start"} justify={"flex-end"} w="full">
           <Heading size="xl" color={`${bgColor}.${votesCountShade}`} lineHeight={"100%"}>
             {compactFormatter.format(Number(data.votes))}
           </Heading>
-          <HStack spacing={2} align={"center"}>
+          <HStack spacing={2} align={"center"} justify={"flex-start"} w="full">
             <Skeleton isLoaded={!isLogoLoading} boxSize={6}>
-              <Image
-                src={logo?.image ?? notFoundImage}
-                boxSize={6}
-                alt={appMetadata?.name}
-                borderRadius="xl"
-                objectFit={"cover"}
-              />
+              <Image src={logo?.image ?? notFoundImage} w="full" borderRadius="9px" alt={appMetadata?.name} />
             </Skeleton>
             <Heading size="md" color={`${bgColor}.${nameShade}`} fontWeight={"medium"}>
               {appMetadata?.name}

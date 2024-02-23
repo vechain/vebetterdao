@@ -58,20 +58,18 @@ export const AllocationRoundsList: React.FC<Props> = ({
   const renderList = useMemo(() => {
     return (
       <VStack spacing={8} w="full" align={"flex-start"}>
-        <Box w="full">
-          <HStack w="full" justify="space-between" alignItems={"baseline"}>
-            <Heading size={headingSize}>Allocation Rounds</Heading>
-            {invertedCreatedRounds && invertedCreatedRounds.length > maxRoundsToShow && showViewAll && (
-              <Button
-                variant="link"
-                colorScheme="blue"
-                rightIcon={<FiArrowUpRight />}
-                onClick={() => router.push("/rounds")}>
-                See all rounds
-              </Button>
-            )}
-          </HStack>
-        </Box>
+        <HStack w="full" justify="space-between" alignItems={"baseline"}>
+          <Heading size={headingSize}>Allocation Rounds</Heading>
+          {invertedCreatedRounds && invertedCreatedRounds.length > maxRoundsToShow && showViewAll && (
+            <Button
+              variant="link"
+              colorScheme="blue"
+              rightIcon={<FiArrowUpRight />}
+              onClick={() => router.push("/rounds")}>
+              See all rounds
+            </Button>
+          )}
+        </HStack>
         <VStack spacing={4} w="full">
           {allocationRoundEventsError && (
             <Alert status="error">
@@ -96,7 +94,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
   return (
     <>
       {renderInsideCard ? (
-        <Card>
+        <Card w="full" variant="outline">
           <CardBody>{renderList}</CardBody>
         </Card>
       ) : (

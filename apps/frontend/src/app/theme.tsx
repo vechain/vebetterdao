@@ -9,6 +9,15 @@ const themeConfig: ThemeConfig = {
     body: `"Inter Variable", sans-serif`,
   },
 
+  components: {
+    Card: {
+      // 6. We can overwrite defaultProps
+      defaultProps: {
+        variant: "outline", // default is solid
+      },
+    },
+  },
+
   // 2. Add your color mode config
   initialColorMode: "system",
   useSystemColorMode: true,
@@ -86,4 +95,4 @@ export const backdropBlurKeyframes = (startingBlur: string = "0px", endingBlur: 
 export const backdropBlurAnimation = (startingBlur?: string, endingBlur?: string) =>
   `${backdropBlurKeyframes(startingBlur, endingBlur)} 1s ease-in-out`
 
-export const theme = extendTheme(themeConfig)
+export const theme = extendTheme({ ...themeConfig })

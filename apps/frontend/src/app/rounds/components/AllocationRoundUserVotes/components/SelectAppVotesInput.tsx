@@ -16,6 +16,7 @@ import {
   Stack,
 } from "@chakra-ui/react"
 import { useIpfsImage } from "@/api/ipfs"
+import { notFoundImage } from "@/constants"
 
 type Props = {
   register: UseFormRegister<FormData>
@@ -28,7 +29,6 @@ type Props = {
   totalVotesAvailable?: string
 }
 
-const notFoundImage = "/images/image-not-found.png"
 export const SelectAppVotesInput = ({
   register,
   getValues,
@@ -57,9 +57,9 @@ export const SelectAppVotesInput = ({
       borderRadius={"lg"}
       py={2}
       px={4}>
-      <HStack spacing={[2, 2, 4]} align="center" flex={1}>
+      <HStack spacing={[2, 2, 3]} align="center" flex={1}>
         <Skeleton isLoaded={!isLogoLoading}>
-          <Image src={logo?.image ?? notFoundImage} alt={appMetadata?.name} boxSize={[8, 8, 10]} borderRadius="2xl" />
+          <Image src={logo?.image ?? notFoundImage} alt={appMetadata?.name} boxSize={8} borderRadius="9px" />
         </Skeleton>
         <Heading size={["md", "md", "sm"]}>{xApp?.name}</Heading>
       </HStack>

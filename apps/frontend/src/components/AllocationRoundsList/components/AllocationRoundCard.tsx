@@ -49,23 +49,22 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
     return allocationRound?.state === "0" && allocationRound?.voteEndTimestamp?.isAfter()
   }, [allocationRound, allocationRound?.state])
 
-  const cardActiveBackroundColor = useColorModeValue("secondary.100", "secondary.200")
+  const cardActiveBackgroundColor = useColorModeValue("secondary.50", "secondary.100")
+  const cardActiveBorderColor = useColorModeValue("secondary.400", "secondary.700")
 
   const cardTextColor = isActive ? "black" : "inherit"
 
-  const activeBorderColor = useColorModeValue("secondary.500", "black")
-  const defaultBorderColor = useColorModeValue("transparent", "gray.500")
-
-  const activeHoverBorderColor = useColorModeValue("secondary.700", "secondary.700")
+  const activeHoverBorderColor = useColorModeValue("secondary.500", "secondary.200")
   const defaultHoverBorderColor = useColorModeValue("gray.400", "gray.200")
 
   return (
     <Card
+      borderRadius={"3xl"}
       w="full"
-      variant="elevated"
-      borderWidth={1}
-      backgroundColor={isActive ? cardActiveBackroundColor : "transparent"}
-      borderColor={isActive ? activeBorderColor : defaultBorderColor}
+      {...(isActive && {
+        bg: cardActiveBackgroundColor,
+        borderColor: cardActiveBorderColor,
+      })}
       onClick={onRoundClick}
       _hover={{
         borderColor: isActive ? activeHoverBorderColor : defaultHoverBorderColor,
@@ -78,8 +77,8 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
             <HStack spacing={2} w="fit-content" justify="space-between">
               <AllocationRoundStateTag state={allocationRound.state} size="md" />
               <Show above="sm">
-                <DotSymbol color={cardTextColor} size={1} />
-                <Text fontWeight={"200"} color={cardTextColor}>
+                <DotSymbol color={"gray"} size={1} />
+                <Text fontWeight={"400"} color={"gray"}>
                   {isActive
                     ? `ends ${allocationRound.voteEndTimestamp?.fromNow()}`
                     : `${allocationRound.voteStartTimestamp?.fromNow()}`}
@@ -87,7 +86,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
               </Show>
             </HStack>
 
-            <HStack w="full" justify="space-between" color={cardTextColor}>
+            <HStack mt={0.5} w="full" justify="space-between" color={cardTextColor}>
               <Heading as="h3" size="md">
                 Round #{round.roundId}
               </Heading>

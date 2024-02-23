@@ -55,7 +55,8 @@
       "cache": false
     },
     "test:hardhat": {
-      "cache": false
+      "cache": false,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
     },
     "generate-b3tr-badge-metadata": {
       "cache": false

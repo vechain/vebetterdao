@@ -1,21 +1,10 @@
 import { getXAppMetadata, getXAppMetadataQueryKey, useAllocationsRound, useGetVotesOnBlock } from "@/api"
 import { getIpfsImage, getIpfsImageQueryKey } from "@/api/ipfs"
-import {
-  Alert,
-  AlertDescription,
-  AlertIcon,
-  Box,
-  Card,
-  CardBody,
-  HStack,
-  Heading,
-  Image,
-  Skeleton,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { notFoundImage } from "@/constants"
+import { Box, Card, CardBody, HStack, Heading, Icon, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useQueries } from "@tanstack/react-query"
 import { useWallet } from "@vechain/dapp-kit-react"
+import { FaInfoCircle } from "react-icons/fa"
 
 type Props = {
   roundId: string
@@ -29,8 +18,6 @@ const compactFormatter = new Intl.NumberFormat("en-US", {
   notation: "compact",
   compactDisplay: "short",
 })
-
-const notFoundImage = "/images/image-not-found.png"
 
 export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
   const { account } = useWallet()
@@ -123,7 +110,7 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
                         src={logos[index]?.data?.image ?? notFoundImage}
                         alt={appsMetadata[index]?.data?.name}
                         boxSize={[6, 6, 8]}
-                        borderRadius="2xl"
+                        borderRadius="9px"
                       />
                     </Skeleton>
                     <Text fontSize="sm" mt={1}>
@@ -133,25 +120,12 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
                 ))}
             </HStack>
           </VStack>
-          <HStack w="full" spacing={4}>
-            <Alert
-              w={"full"}
-              status="info"
-              variant="subtle"
-              flexDirection="column"
-              alignItems="center"
-              justifyContent="center"
-              textAlign="center"
-              borderRadius={"xl"}>
-              <HStack w="full" spacing={2}>
-                <AlertIcon boxSize="20px" mr={0} />
-
-                <AlertDescription w={"fit-content"} textAlign={"start"}>
-                  This sum was captured at the time the round started. If you got more VOT3 after that, you will use it
-                  on the next proposals.
-                </AlertDescription>
-              </HStack>
-            </Alert>
+          <HStack w="full" spacing={2}>
+            <Icon as={FaInfoCircle} color="gray" />
+            <Text fontSize="sm" color="gray">
+              This amount was snapshotted at the moment the proposal was created. If you got more VOT3 after that, you
+              will use it on the next proposals.
+            </Text>
           </HStack>
         </VStack>
       </CardBody>
