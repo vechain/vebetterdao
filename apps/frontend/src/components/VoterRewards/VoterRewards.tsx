@@ -105,6 +105,7 @@ export const VoterRewards: React.FC = () => {
 
       {allocationRoundsEvents && allocationRoundsEvents?.created.length === 0 && (
         <Flex
+          borderRadius={"lg"}
           backdropFilter="blur(10px)"
           animation={backdropBlurAnimation("0px", "10px")}
           position={"absolute"}
