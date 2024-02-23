@@ -1,7 +1,7 @@
 import { useB3trPaused, useVot3Paused } from "@/api"
 import { useB3trBadgePaused } from "@/api/contracts/b3trBadge"
 import { usePauseContract } from "@/hooks"
-import { Button, VStack } from "@chakra-ui/react"
+import { Button, HStack, VStack, Text } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import React, { useCallback } from "react"
 
@@ -74,24 +74,33 @@ export const Pause: React.FC = () => {
 
   return (
     <VStack spacing={4} align={"flex-start"}>
-      <Button
-        colorScheme={`${isB3trPaused ? "blue" : "red"}`}
-        onClick={handleToggleB3trPause}
-        isLoading={isToggleB3trPausedLoading}>
-        {isB3trPaused ? "Unpause B3TR" : "Pause B3TR"}
-      </Button>
-      <Button
-        colorScheme={`${isVot3Paused ? "blue" : "red"}`}
-        onClick={handleToggleVot3Pause}
-        isLoading={isToggleVot3PausedLoading}>
-        {isVot3Paused ? "Unpause VOT3" : "Pause VOT3"}
-      </Button>
-      <Button
-        colorScheme={`${isB3trBadgePaused ? "blue" : "red"}`}
-        onClick={handleToggleB3trBadgePause}
-        isLoading={isToggleB3trBadgePausedLoading}>
-        {isB3trBadgePaused ? "Unpause B3TR Badge" : "Pause B3TR Badge"}
-      </Button>
+      <HStack>
+        <Button
+          colorScheme={`${isB3trPaused ? "blue" : "red"}`}
+          onClick={handleToggleB3trPause}
+          isLoading={isToggleB3trPausedLoading}>
+          {isB3trPaused ? "Unpause B3TR" : "Pause B3TR"}
+        </Button>
+        <Text>Pausing disables: Transfers, Minting, New Emissions, Swaps</Text>
+      </HStack>
+      <HStack>
+        <Button
+          colorScheme={`${isVot3Paused ? "blue" : "red"}`}
+          onClick={handleToggleVot3Pause}
+          isLoading={isToggleVot3PausedLoading}>
+          {isVot3Paused ? "Unpause VOT3" : "Pause VOT3"}
+        </Button>
+        <Text>Pausing disables: Transfers, Minting, Swaps, Delegation of voting power</Text>
+      </HStack>
+      <HStack>
+        <Button
+          colorScheme={`${isB3trBadgePaused ? "blue" : "red"}`}
+          onClick={handleToggleB3trBadgePause}
+          isLoading={isToggleB3trBadgePausedLoading}>
+          {isB3trBadgePaused ? "Unpause B3TR Badge" : "Pause B3TR Badge"}
+        </Button>
+        <Text>Pausing disables: Transfers, Minting</Text>
+      </HStack>
     </VStack>
   )
 }
