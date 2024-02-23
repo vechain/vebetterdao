@@ -1,14 +1,14 @@
 import { AppConfig } from "." 
  const config: AppConfig = {
-  "b3trContractAddress": "0xf3475E3702a67c89c7b3bf51E215461cFED209da",
-  "vot3ContractAddress": "0x5b41CE1444f3a913C05ab283E6E37eF3e7b03078",
-  "b3trGovernorAddress": "0x43b89a2b359cC3E096f30AB13B9ECAa583f12DAb",
-  "timelockContractAddress": "0x7A582B82f28C9b889CA89e57cA64DC79384980E9",
-  "xAllocationPoolContractAddress": "0x0baf9b0526616ba6D2e676B05E0288E9a48E0356",
-  "xAllocationVotingContractAddress": "0x57FaAA5611e04dAf7c791Dc80D6eaC0D21E36A58",
-  "emissionsContractAddress": "0x3934b6d8326d1d705E7aBEa8834B0Fe4fdA2cdBA",
-  "voterRewardsContractAddress": "0x1F9D50adcF43200b40489087b804cB68E0088EEA",
-  "nftBadgeContractAddress": "0xf2cB28D9c9e7F8B589C2BB8849953090d91c9784",
+  "b3trContractAddress": "0x19feFcBe65e61E5F2dB040892853c2d3B5a18dC3",
+  "vot3ContractAddress": "0xA3AfE7C89Da7224ecD315FEDb07B229Bee54B7F3",
+  "b3trGovernorAddress": "0x229aF4df12C2863Fa65431434ddF9deFc50694fF",
+  "timelockContractAddress": "0x3eD5bb1e56cdB0946abf48F542daB81b4b109867",
+  "xAllocationPoolContractAddress": "0xfB96556fE67735b757Bacdcfb582956DF80d996E",
+  "xAllocationVotingContractAddress": "0x4e401F7b83f25c87bE926B3Ac0395EE481D53Ef3",
+  "emissionsContractAddress": "0x263e941f9DE82106ef9a34934dAECEB19D97380f",
+  "voterRewardsContractAddress": "0x232638Bc5A78a894B75976DebA94b204Cd697c43",
+  "nftBadgeContractAddress": "0x7eFda727C73619c87ECdFdE769FB7a7178A7dA52",
   "nodeUrl": "http://localhost:8669",
   "network": {
     "id": "solo",
