@@ -23,6 +23,10 @@ export const RoundInfo = () => {
   })
   const isFinalizeLoading = isFinalizeTxLoading || isFinalizeTxPending
 
+  const roundNeedsToBeFinalized = useMemo(() => {
+    return !isLastRoundFinalized && currentRound?.state === "1"
+  }, [isLastRoundFinalized, currentRound])
+
   if (parseInt(currentRoundId ?? "0") < 1) return null
 
   return (
@@ -45,7 +49,7 @@ export const RoundInfo = () => {
           </Button>
         </VStack>
       </VStack>
-      {!isLastRoundFinalized && (
+      {roundNeedsToBeFinalized && (
         <>
           <Divider />
 
