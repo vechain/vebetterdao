@@ -23,7 +23,7 @@
     "dev": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["@repo/contracts#check-contracts-deployment"]
+      "dependsOn": ["//#solo-up", "@repo/contracts#check-contracts-deployment"]
     },
     "dev:staging": {
       "cache": false,
@@ -36,7 +36,7 @@
 
     "@repo/contracts#check-contracts-deployment": {
       "cache": false,
-      "dependsOn": ["^compile", "//#solo-up", "@repo/config#check-or-generate-local-config"]
+      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
     "clean": {
       "cache": false
