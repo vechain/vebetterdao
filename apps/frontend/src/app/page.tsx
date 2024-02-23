@@ -14,10 +14,6 @@ const CirculatingSupplyPieChart = dynamic(
 )
 const BalanceCard = dynamic(() => import("@/components/BalanceCard").then(mod => mod.BalanceCard), { ssr: false })
 const ClaimNFT = dynamic(() => import("@/components/ClaimNFT").then(mod => mod.ClaimNFT), { ssr: false })
-const AllocationRoundsList = dynamic(
-  () => import("@/components/AllocationRoundsList/AllocationRoundsList").then(mod => mod.AllocationRoundsList),
-  { ssr: false },
-)
 
 const VoterRewards = dynamic(() => import("@/components/VoterRewards/VoterRewards").then(mod => mod.VoterRewards), {
   ssr: false,
