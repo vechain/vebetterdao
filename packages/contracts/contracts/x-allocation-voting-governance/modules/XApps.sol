@@ -13,7 +13,7 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
 
   struct App {
     bytes32 id;
-    address addr;
+    address receiverAddress;
     string name;
     uint48 createdAt; // block number when app was added
   }
@@ -39,17 +39,17 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
 
   // ---------- Setters ---------- //
 
-  function addApp(address appAddress, string memory appName) public virtual {
+  function addApp(address appReceiverAddress, string memory appName) public virtual {
     bytes32 id = hashName(appName);
 
-    require(_apps[id].addr == address(0), "App with this ID already exists");
+    require(_apps[id].receiverAddress == address(0), "App with this ID already exists");
 
     // Store the new app
-    _apps[id] = App(id, appAddress, appName, clock());
+    _apps[id] = App(id, appReceiverAddress, appName, clock());
     _appIds.push(id);
     _pushAppToEligbleApps(id);
 
-    emit AppAdded(id, appAddress, appName, true);
+    emit AppAdded(id, appReceiverAddress, appName, true);
   }
 
   function setVotingElegibility(bytes32 appId, bool isElegible) public virtual {
@@ -103,6 +103,12 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
     _baseURI = baseURI_;
   }
 
+  function _updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) internal {
+    require(_apps[appId].receiverAddress != address(0), "App does not exist");
+
+    _apps[appId].receiverAddress = newReceiverAddress;
+  }
+
   // ---------- Getters ---------- //
 
   /**
@@ -120,7 +126,7 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
    */
   function isEligibleForVote(bytes32 appId, uint256 roundId) public view override returns (bool) {
     // App does not exist
-    if (_apps[appId].addr == address(0)) {
+    if (_apps[appId].receiverAddress == address(0)) {
       return false;
     }
 
@@ -133,13 +139,13 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
   }
 
   function isElegibleForVoteLatestCheckpoint(bytes32 appId) public view returns (bool) {
-    require(_apps[appId].addr != address(0), "App does not exist");
+    require(_apps[appId].receiverAddress != address(0), "App does not exist");
 
     return _isAppElegibleCheckpoints[appId].latest() == 1;
   }
 
   function isElegibleForVotePastCheckpoint(bytes32 appId, uint256 timepoint) public view returns (bool) {
-    require(_apps[appId].addr != address(0), "App does not exist");
+    require(_apps[appId].receiverAddress != address(0), "App does not exist");
 
     uint48 currentTimepoint = clock();
     if (timepoint >= currentTimepoint) {
@@ -155,7 +161,7 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
 
   // Function to retrieve an app by ID
   function getApp(bytes32 id) public view virtual returns (App memory) {
-    require(_apps[id].addr != address(0), "App does not exist");
+    require(_apps[id].receiverAddress != address(0), "App does not exist");
     return _apps[id];
   }
 
@@ -170,7 +176,7 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
   }
 
   function getAppReceiverAddress(bytes32 appId) public view override returns (address) {
-    return _apps[appId].addr;
+    return _apps[appId].receiverAddress;
   }
 
   function baseURI() public view returns (string memory) {
@@ -178,7 +184,7 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
   }
 
   function appURI(bytes32 appId) public view returns (string memory) {
-    require(_apps[appId].addr != address(0), "App does not exist");
+    require(_apps[appId].receiverAddress != address(0), "App does not exist");
 
     string memory appIdStr = Strings.toHexString(uint256(appId), 32);
 
