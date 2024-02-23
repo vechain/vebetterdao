@@ -78,6 +78,8 @@ export const XAppsForecastedAmounts = ({ roundId }: Props) => {
     router.push(`/rounds/${roundId}`)
   }
 
+  const isUnallocatedLoading = roundAmountLoading || xAppsClaimableAmounts.some(query => query.isLoading)
+
   return (
     <Card flex={1} h="full" w="full" variant="outline">
       <CardHeader>
@@ -97,9 +99,11 @@ export const XAppsForecastedAmounts = ({ roundId }: Props) => {
               Unallocated
             </Text>
             <HStack alignItems={"flex-end"} spacing={1}>
-              <Text size="md" fontWeight={"600"} lineHeight={"16px"}>
-                {compactFormatter.format(Number(unallocatedAmount))}
-              </Text>
+              <Skeleton isLoaded={!isUnallocatedLoading}>
+                <Text size="md" fontWeight={"600"} lineHeight={"16px"}>
+                  {compactFormatter.format(Number(unallocatedAmount))}
+                </Text>
+              </Skeleton>
               <Text fontSize={"2xs"} fontWeight={"700"} lineHeight={"16x"}>
                 B3TR
               </Text>
