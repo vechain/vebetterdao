@@ -92,7 +92,7 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
             <Skeleton isLoaded={!isLoading}>
               <Text color="gray.500">
                 {
-                  "Vote for your preferred dApps to get more B3TR distribution. This allocation process will repeat every two weeks."
+                  "Vote for your preferred dApps to get more B3TR distribution and receive rewards. This allocation process reapeats every week."
                 }
               </Text>
             </Skeleton>
