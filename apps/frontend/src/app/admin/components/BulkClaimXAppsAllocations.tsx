@@ -1,9 +1,6 @@
 import {
   useCurrentAllocationsRoundId,
-  useHasXAppClaimed,
   useIsRoundFinalized,
-  useXAppClaimableAmount,
-  useXApps,
   useHaveXAppsClaimed,
   useXAppsClaimableAmounts,
   useRoundXApps,
@@ -21,7 +18,6 @@ import {
   CardHeader,
   CardBody,
   FormErrorMessage,
-  Select,
   HStack,
   Text,
   InputRightAddon,
@@ -31,7 +27,7 @@ import {
   NumberIncrementStepper,
   NumberDecrementStepper,
 } from "@chakra-ui/react"
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 
 export const BulkClaimXAppsAllocations = () => {
   const [roundId, setRoundId] = useState<number>(1)

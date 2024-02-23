@@ -27,9 +27,8 @@ import {
   NumberInputStepper,
   NumberIncrementStepper,
   NumberDecrementStepper,
-  Skeleton,
 } from "@chakra-ui/react"
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 
 export const ClaimXAppAllocations = () => {
   const [appId, setAppId] = useState<string | undefined>()
