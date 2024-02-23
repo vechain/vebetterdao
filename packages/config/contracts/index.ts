@@ -3,8 +3,7 @@ export * from "./type"
 import { createLocalConfig } from "./envs/local"
 import { createSoloStagingConfig } from "./envs/soloStaging"
 
-export const contractsConfig = getContractsConfig()
-function getContractsConfig() {
+export function getContractsConfig() {
   switch (process.env.NEXT_PUBLIC_APP_ENV) {
     case "local":
       return createLocalConfig()

@@ -50,7 +50,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
 
         <Stack direction={["column", "column", "row"]} spacing={4} align={"center"}>
           <Skeleton isLoaded={!isLoading}>
-            <Heading size="md">{data?.roundId}° round</Heading>
+            <Heading size="md">Round #{data?.roundId}</Heading>
           </Skeleton>
           <Box w={1.5} h={1.5} borderRadius={"full"} bg="gray" />
           <HStack spacing={2} align={"center"}>
