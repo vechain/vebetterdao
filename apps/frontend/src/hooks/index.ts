@@ -13,3 +13,5 @@ export * from "./useUpdateXAppReceiverAddress"
 export * from "./useClaimXAppAllocation"
 export * from "./useFinalizeRound"
 export * from "./useBulkClaimXAppsAllocations"
+
+export * from "./usePauseContract"
