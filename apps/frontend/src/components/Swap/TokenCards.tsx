@@ -155,6 +155,7 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
                     </HStack>
                   </VStack>
                 </HStack>
+
                 <HStack w="full">
                   <HStack flex={1}>
                     <B3TRIcon h={"32px"} w={"32px"} />
