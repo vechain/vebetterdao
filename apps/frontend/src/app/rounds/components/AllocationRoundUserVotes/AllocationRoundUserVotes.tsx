@@ -229,14 +229,14 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
       </CardBody>
       {!account && (
         <Flex
+          borderRadius={"lg"}
           backdropFilter="blur(10px)"
           animation={backdropBlurAnimation("0px", "10px")}
           position={"absolute"}
           h={"100%"}
           w={"100%"}
           align="center"
-          justify="center"
-          borderRadius={"lg"}>
+          justify="center">
           <Card w={["90%", "50%", "40%"]} rounded="xl" variant="outline">
             <CardBody>
               <VStack gap={4}>

@@ -166,6 +166,7 @@ export const BalanceCard: React.FC<Props> = () => {
       </CardBody>
       {!account && (
         <Flex
+          borderRadius={"lg"}
           backdropFilter="blur(10px)"
           animation={backdropBlurAnimation("0px", "10px")}
           position={"absolute"}

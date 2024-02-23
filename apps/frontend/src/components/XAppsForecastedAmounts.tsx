@@ -105,14 +105,14 @@ export const XAppsForecastedAmounts = ({ roundId }: Props) => {
       </CardBody>
       {(isAmountsLoading || error) && (
         <Flex
+          borderRadius={"lg"}
           backdropFilter="blur(10px)"
           animation={backdropBlurAnimation("0px", "10px")}
           position={"absolute"}
           h={"100%"}
           w={"100%"}
           align="center"
-          justify="center"
-          borderRadius={"lg"}>
+          justify="center">
           {isLoading ? (
             <Spinner size="lg" />
           ) : (
