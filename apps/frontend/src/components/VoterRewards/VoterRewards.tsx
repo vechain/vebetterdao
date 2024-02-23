@@ -113,7 +113,7 @@ export const VoterRewards: React.FC = () => {
           w={"100%"}
           align="center"
           justify="center">
-          <Card w={["90%", "50%", "40%"]} rounded="xl" variant="outline">
+          <Card w={["90%", "50%", "40%"]}>
             <CardBody>
               <VStack gap={4}>
                 <Heading fontSize="md" textAlign={"center"}>
