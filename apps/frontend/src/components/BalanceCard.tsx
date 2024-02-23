@@ -79,19 +79,6 @@ export const BalanceCard: React.FC<Props> = () => {
       </Alert>
     )
 
-  if (hasNoBalance)
-    return (
-      <Stack direction={["column", "column", "row"]} spacing={8} w="full">
-        <Alert status="warning" borderRadius={"lg"}>
-          <AlertIcon />
-          <Box>
-            <AlertTitle>You have no balance</AlertTitle>
-            <AlertDescription>Interact with x2Earn dapps to get started!</AlertDescription>
-          </Box>
-        </Alert>
-      </Stack>
-    )
-
   const balances = (
     <VStack w={"full"}>
       <HStack
