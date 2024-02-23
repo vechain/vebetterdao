@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react"
+import { ReactNode, useEffect, useMemo } from "react"
 import {
   Alert,
   AlertDescription,
@@ -12,11 +12,12 @@ import {
 import { TransactionStatus } from "@/hooks"
 
 type Props = {
-  description: string
+  description: ReactNode
   status: TransactionStatus
   error?: string
   onTryAgain?: () => void
   onSuccess?: () => void
+  onSuccessTimeout?: number
 }
 
 export const ConfirmTransactionModalContent: React.FC<Props> = ({
@@ -25,6 +26,7 @@ export const ConfirmTransactionModalContent: React.FC<Props> = ({
   error,
   onTryAgain,
   onSuccess,
+  onSuccessTimeout = 1500,
 }) => {
   const statusComponent = useMemo(() => {
     switch (status) {
@@ -122,7 +124,7 @@ export const ConfirmTransactionModalContent: React.FC<Props> = ({
     if (status === "success") {
       timeout = setTimeout(() => {
         onSuccess?.()
-      }, 1500)
+      }, onSuccessTimeout)
     }
     return () => {
       clearTimeout(timeout)
