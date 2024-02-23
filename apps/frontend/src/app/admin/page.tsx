@@ -33,14 +33,7 @@ export default function AdminPage() {
   return (
     <Suspense fallback={<Spinner alignSelf={"center"} />}>
       <Stack spacing={12} w={"full"}>
-        <Card w={"full"}>
-          <CardHeader>
-            <Heading size="lg">Permissions</Heading>
-          </CardHeader>
-          <CardBody>
-            <AdminPermissions />
-          </CardBody>
-        </Card>
+        <AdminPermissions />
 
         <Card w={"full"}>
           <CardHeader>
