@@ -11,6 +11,8 @@ export const StartEmissions = () => {
 
   const loading = isTxReceiptLoading || sendTransactionPending
 
+  if (parseInt(currentRoundId ?? "0") > 0) return null
+
   return (
     <HStack spacing={12}>
       <Button

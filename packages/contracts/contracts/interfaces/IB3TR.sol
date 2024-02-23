@@ -1,74 +1,132 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.18;
+
+pragma solidity ^0.8.19;
 
 interface IB3TR {
-  error AccessControlBadConfirmation();
+    error AccessControlBadConfirmation();
 
-  error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
+    error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
 
-  error ERC20ExceededCap(uint256 increasedSupply, uint256 cap);
+    error ERC20ExceededCap(uint256 increasedSupply, uint256 cap);
 
-  error ERC20InsufficientAllowance(address spender, uint256 allowance, uint256 needed);
+    error ERC20InsufficientAllowance(
+        address spender,
+        uint256 allowance,
+        uint256 needed
+    );
 
-  error ERC20InsufficientBalance(address sender, uint256 balance, uint256 needed);
+    error ERC20InsufficientBalance(
+        address sender,
+        uint256 balance,
+        uint256 needed
+    );
 
-  error ERC20InvalidApprover(address approver);
+    error ERC20InvalidApprover(address approver);
 
-  error ERC20InvalidCap(uint256 cap);
+    error ERC20InvalidCap(uint256 cap);
 
-  error ERC20InvalidReceiver(address receiver);
+    error ERC20InvalidReceiver(address receiver);
 
-  error ERC20InvalidSender(address sender);
+    error ERC20InvalidSender(address sender);
 
-  error ERC20InvalidSpender(address spender);
+    error ERC20InvalidSpender(address spender);
 
-  event Approval(address indexed owner, address indexed spender, uint256 value);
+    error EnforcedPause();
 
-  event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole);
+    error ExpectedPause();
 
-  event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender);
+    event Approval(
+        address indexed owner,
+        address indexed spender,
+        uint256 value
+    );
 
-  event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender);
+    event Paused(address account);
 
-  event Transfer(address indexed from, address indexed to, uint256 value);
+    event RoleAdminChanged(
+        bytes32 indexed role,
+        bytes32 indexed previousAdminRole,
+        bytes32 indexed newAdminRole
+    );
 
-  function DEFAULT_ADMIN_ROLE() external view returns (bytes32);
+    event RoleGranted(
+        bytes32 indexed role,
+        address indexed account,
+        address indexed sender
+    );
 
-  function MINTER_ROLE() external view returns (bytes32);
+    event RoleRevoked(
+        bytes32 indexed role,
+        address indexed account,
+        address indexed sender
+    );
 
-  function allowance(address owner, address spender) external view returns (uint256);
+    event Transfer(address indexed from, address indexed to, uint256 value);
 
-  function approve(address spender, uint256 value) external returns (bool);
+    event Unpaused(address account);
 
-  function balanceOf(address account) external view returns (uint256);
+    function DEFAULT_ADMIN_ROLE() external view returns (bytes32);
 
-  function cap() external view returns (uint256);
+    function MINTER_ROLE() external view returns (bytes32);
 
-  function decimals() external view returns (uint8);
+    function allowance(address owner, address spender)
+        external
+        view
+        returns (uint256);
 
-  function getRoleAdmin(bytes32 role) external view returns (bytes32);
+    function approve(address spender, uint256 value) external returns (bool);
 
-  function grantRole(bytes32 role, address account) external;
+    function balanceOf(address account) external view returns (uint256);
 
-  function hasRole(bytes32 role, address account) external view returns (bool);
+    function cap() external view returns (uint256);
 
-  function mint(address to, uint256 amount) external;
+    function decimals() external view returns (uint8);
 
-  function name() external view returns (string memory);
+    function getRoleAdmin(bytes32 role) external view returns (bytes32);
 
-  function renounceRole(bytes32 role, address callerConfirmation) external;
+    function grantRole(bytes32 role, address account) external;
 
-  function revokeRole(bytes32 role, address account) external;
+    function hasRole(bytes32 role, address account)
+        external
+        view
+        returns (bool);
 
-  function supportsInterface(bytes4 interfaceId) external view returns (bool);
+    function mint(address to, uint256 amount) external;
 
-  function symbol() external view returns (string memory);
+    function name() external view returns (string memory);
 
-  function tokenDetails() external view returns (string memory, string memory, uint8, uint256, uint256);
+    function pause() external;
 
-  function totalSupply() external view returns (uint256);
+    function paused() external view returns (bool);
 
-  function transfer(address to, uint256 value) external returns (bool);
+    function renounceRole(bytes32 role, address callerConfirmation) external;
 
-  function transferFrom(address from, address to, uint256 value) external returns (bool);
+    function revokeRole(bytes32 role, address account) external;
+
+    function supportsInterface(bytes4 interfaceId) external view returns (bool);
+
+    function symbol() external view returns (string memory);
+
+    function tokenDetails()
+        external
+        view
+        returns (
+            string memory,
+            string memory,
+            uint8,
+            uint256,
+            uint256
+        );
+
+    function totalSupply() external view returns (uint256);
+
+    function transfer(address to, uint256 value) external returns (bool);
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 value
+    ) external returns (bool);
+
+    function unpause() external;
 }

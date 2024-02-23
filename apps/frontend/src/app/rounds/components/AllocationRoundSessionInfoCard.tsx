@@ -37,8 +37,8 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
       { title: "Voting session started", description: roundInfo?.voteStartTimestamp?.format("MMMM D hh:mm A") },
       { title: "Voting session finished", description: roundInfo?.voteEndTimestamp?.format("MMMM D hh:mm A") },
       {
-        title: "Allocations distributed to xApps",
-        description: "Voting rewards are claimable",
+        title: "Voting rewards are claimable",
+        description: "",
       },
     ],
     [roundInfo],

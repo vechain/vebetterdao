@@ -135,6 +135,7 @@ contract Emissions is AccessControl, ReentrancyGuard {
   }
 
   function start() public onlyRole(MINTER_ROLE) nonReentrant {
+    require(b3tr.paused() == false, "Emissions: B3TR token is paused");
     require(nextCycle == 1, "Emissions: Can only start emissions when next cycle = 1");
 
     lastEmissionBlock = block.number;

@@ -229,6 +229,23 @@ describe("Emissions", () => {
       expect(await emissions.nextCycle()).to.equal(1)
     })
 
+    it("Should not be able to bootstrap emissions if B3TR transfers are paused", async () => {
+      const { emissions, b3tr, minterAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Grant minter role to emissions contract
+      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+
+      await b3tr.connect(owner).pause()
+
+      await catchRevert(emissions.connect(minterAccount).bootstrap())
+
+      await b3tr.connect(owner).unpause()
+
+      await emissions.connect(minterAccount).bootstrap() // Now we should be able to bootstrap due to unpausing
+    })
+
     it("Should not be able to bootstrap emissions twice", async () => {
       const { emissions, b3tr, minterAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -276,6 +293,23 @@ describe("Emissions", () => {
       expect(await emissions.getTreasuryAmount(1)).to.equal(initialTreasuryAlloc)
 
       expect(await emissions.nextCycle()).to.equal(2)
+    })
+
+    it("Should not be able to start emissions if B3TR transfers are paused", async () => {
+      const { emissions, b3tr, minterAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      await b3tr.connect(owner).pause()
+
+      await catchRevert(emissions.connect(minterAccount).start())
+
+      await b3tr.connect(owner).unpause()
+
+      await emissions.connect(minterAccount).start() // Now we should be able to start emissions due to unpausing
     })
 
     it("Should not be able start emissions twice", async () => {
@@ -368,6 +402,34 @@ describe("Emissions", () => {
       expect(await b3tr.balanceOf(await emissions.xAllocations())).to.equal(config.INITIAL_X_ALLOCATION * 2n)
       expect(await b3tr.balanceOf(await emissions.vote2Earn())).to.equal(initialVoteAllocation * 2n)
       expect(await b3tr.balanceOf(await emissions.treasury())).to.equal(initialTreasuryAlloc * 2n)
+    })
+
+    it("Should not be able to distribute emissions if B3TR transfers are paused", async () => {
+      const config = createLocalConfig()
+      const { emissions, b3tr, minterAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      // Start emissions
+      await emissions.connect(minterAccount).start()
+
+      await waitForNextCycle(emissions)
+
+      // Pause B3TR transfers
+      await b3tr.connect(owner).pause()
+
+      // Try to distribute emissions - Should revert
+      await catchRevert(emissions.connect(minterAccount).distribute())
+
+      // Unpause B3TR transfers
+      await b3tr.connect(owner).unpause()
+
+      // Distribute emissions
+      await emissions.connect(minterAccount).distribute()
     })
 
     it("Should not be able to distribute emissions before next cycle starts", async () => {

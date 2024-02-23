@@ -31,6 +31,16 @@ describe("VOT3", function () {
       const res = await vot3.hasRole(defaultAdminRole, owner)
       expect(res).to.eql(true)
     })
+
+    it("Only admin should be able to pause and unpause VOT3 contract", async function () {
+      const { vot3, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      await vot3.connect(owner).pause()
+      await vot3.connect(owner).unpause()
+
+      await catchRevert(vot3.connect(otherAccount).pause())
+      await catchRevert(vot3.connect(otherAccount).unpause())
+    })
   })
 
   describe("Lock B3TR", function () {
@@ -66,6 +76,31 @@ describe("VOT3", function () {
 
       // Lock B3TR to get VOT3
       await catchRevert(vot3.stake(ethers.parseEther("10")))
+    })
+
+    it("Should not be able to lock B3TR if VOT3 contract is paused", async function () {
+      const { b3tr, vot3, minterAccount, otherAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Mint some B3TR
+      await expect(b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))).not.to.be.reverted
+
+      // Approve VOT3 to spend B3TR on behalf of otherAccount. N.B. this is an important step and could be included in a multi clause transaction
+      await expect(b3tr.connect(otherAccount).approve(await vot3.getAddress(), ethers.parseEther("9"))).not.to.be
+        .reverted
+
+      // Pause VOT3
+      await vot3.connect(owner).pause()
+
+      // Lock B3TR to get VOT3
+      await catchRevert(vot3.connect(otherAccount).stake(ethers.parseEther("9")))
+
+      // Unpause VOT3
+      await vot3.connect(owner).unpause()
+
+      // Lock B3TR to get VOT3
+      await expect(vot3.connect(otherAccount).stake(ethers.parseEther("9"))).not.to.be.reverted
     })
   })
 
@@ -174,6 +209,36 @@ describe("VOT3", function () {
 
       // Finally unlock 7 VOT3 from otherAccount
       await expect(vot3.connect(otherAccount).unstake(ethers.parseEther("7"), { gasLimit: 10_000_000 })).not.to.be
+        .reverted
+    })
+
+    it("Should not be able to unlock B3TR if VOT3 transfers are paused", async function () {
+      const { b3tr, vot3, minterAccount, otherAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Mint some B3TR
+      await expect(b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))).not.to.be.reverted
+
+      // Approve VOT3 to spend B3TR on behalf of otherAccount. N.B. this is an important step and could be included in a multi clause transaction
+      await expect(b3tr.connect(otherAccount).approve(await vot3.getAddress(), ethers.parseEther("9"))).not.to.be
+        .reverted
+
+      // Lock B3TR to get VOT3
+      await expect(vot3.connect(otherAccount).stake(ethers.parseEther("9"), { gasLimit: 10_000_000 })).not.to.be
+        .reverted
+
+      // Pause VOT3
+      await vot3.connect(owner).pause()
+
+      // Unlock B3TR to burn VOT3
+      await catchRevert(vot3.connect(otherAccount).unstake(ethers.parseEther("9"), { gasLimit: 10_000_000 }))
+
+      // Unpause VOT3
+      await vot3.connect(owner).unpause()
+
+      // Unlock B3TR to burn VOT3
+      await expect(vot3.connect(otherAccount).unstake(ethers.parseEther("9"), { gasLimit: 10_000_000 })).not.to.be
         .reverted
     })
   })
@@ -337,6 +402,58 @@ describe("VOT3", function () {
         .connect(otherAccount)
         .transfer(await b3tr.getAddress(), ethers.parseEther("1"), { gasLimit: 10_000_000 })
       expect(await vot3.getVotes(await b3tr.getAddress())).to.eql(ethers.parseEther("0"))
+    })
+
+    it("Should not trigger self-delegation if VOT3 transfers are paused", async function () {
+      const { vot3, otherAccount, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      // Pause VOT3
+      await vot3.connect(owner).pause()
+
+      // Mint some B3TR and swap for VOT3
+      await expect(vot3.connect(otherAccount).stake(ethers.parseEther("1000"))).to.be.reverted
+
+      // Unpause VOT3
+      await vot3.connect(owner).unpause()
+
+      // Mint some B3TR and swap for VOT3
+      await getVot3Tokens(otherAccount, "1000")
+
+      // delegate to another user
+      await vot3.connect(otherAccount).delegate(owner.address, { gasLimit: 10_000_000 })
+
+      expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("1000"))
+      expect(await vot3.getVotes(otherAccount)).to.eql(ethers.parseEther("0"))
+      expect(await vot3.delegates(otherAccount)).to.eql(owner.address)
+
+      expect(await vot3.balanceOf(owner)).to.eql(ethers.parseEther("0"))
+      expect(await vot3.getVotes(owner)).to.eql(ethers.parseEther("1000"))
+    })
+
+    it("Should not be able to delegate voting power if VOT3 transfers are paused", async function () {
+      const { vot3, otherAccount, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      // Mint some B3TR and swap for VOT3
+      await getVot3Tokens(otherAccount, "1000")
+
+      // Pause VOT3
+      await vot3.connect(owner).pause()
+
+      // delegate to another user
+      await catchRevert(vot3.connect(otherAccount).delegate(owner.address, { gasLimit: 10_000_000 }))
+
+      // Unpause VOT3
+      await vot3.connect(owner).unpause()
+
+      // delegate to another user
+      await vot3.connect(otherAccount).delegate(owner.address, { gasLimit: 10_000_000 })
+
+      expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("1000"))
+      expect(await vot3.getVotes(otherAccount)).to.eql(ethers.parseEther("0"))
+      expect(await vot3.delegates(otherAccount)).to.eql(owner.address)
+
+      expect(await vot3.balanceOf(owner)).to.eql(ethers.parseEther("0"))
+      expect(await vot3.getVotes(owner)).to.eql(ethers.parseEther("1000"))
     })
   })
 })
