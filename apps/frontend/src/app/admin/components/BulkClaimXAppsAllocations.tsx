@@ -5,7 +5,7 @@ import {
   useXAppsClaimableAmounts,
   useRoundXApps,
 } from "@/api"
-import { useBulkClaimXAppsAllocations, useClaimXAppAllocation } from "@/hooks"
+import { useClaimXAppsAllocations } from "@/hooks"
 import {
   VStack,
   Button,
@@ -58,16 +58,15 @@ export const BulkClaimXAppsAllocations = () => {
   }, [remainingAmounts])
 
   // Handle submitting the transaction
-  const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useBulkClaimXAppsAllocations({
+  const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useClaimXAppsAllocations({
     roundId: roundId?.toString() ?? "",
     appIds: xAppsLeft?.map(app => app.id) ?? [],
-    invalidateCache: true,
   })
   const isLoading = isTxReceiptLoading || sendTransactionPending
 
   const handleSubmit = (event: { preventDefault: () => void }) => {
     event.preventDefault()
-    sendTransaction()
+    sendTransaction(undefined)
   }
 
   // Validate roundId input

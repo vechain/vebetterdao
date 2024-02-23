@@ -5,7 +5,7 @@ import {
   useXAppClaimableAmount,
   useXApps,
 } from "@/api"
-import { useClaimXAppAllocation } from "@/hooks"
+import { useClaimXAppsAllocations } from "@/hooks"
 import {
   VStack,
   Button,
@@ -41,9 +41,9 @@ export const ClaimXAppAllocations = () => {
   const { data: isLastRoundFinalized } = useIsRoundFinalized(currentRoundId)
   const { data: claimedResponse } = useHasXAppClaimed(roundId?.toString() ?? "", appId ?? "")
 
-  const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useClaimXAppAllocation({
+  const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useClaimXAppsAllocations({
     roundId: roundId?.toString() ?? "",
-    appId: appId ?? "",
+    appIds: appId ? [appId] : [],
   })
   const isLoading = isTxReceiptLoading || sendTransactionPending
 

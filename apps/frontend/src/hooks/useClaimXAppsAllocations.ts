@@ -10,7 +10,7 @@ import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTran
 import { useCallback } from "react"
 import { useConnex, useWallet } from "@vechain/dapp-kit-react"
 
-type useBulkClaimXAppsAllocationsProps = {
+type useClaimAllocationsProps = {
   roundId: string
   appIds: string[]
   onSuccess?: () => void
@@ -18,23 +18,19 @@ type useBulkClaimXAppsAllocationsProps = {
   onSuccessMessageTitle?: string
 }
 
-type useBulkClaimXAppsAllocationsReturnValue = {
-  sendTransaction: () => Promise<void>
-} & Omit<UseSendTransactionReturnValue, "sendTransaction">
-
 /**
  * Claim allocation rewards for a specific round for multiple xApps
  *
  * @param roundId Id of the round to claim the allocations
  * @param appIds Ids of the xApps to claim the allocations
- * @returns {useBulkClaimXAppsAllocationsReturnValue}
+ * @returns {ClaimAllocationsReturnValue}
  */
-export const useBulkClaimXAppsAllocations = ({
+export const useClaimXAppsAllocations = ({
   roundId,
   appIds,
   onSuccess,
   invalidateCache = true,
-}: useBulkClaimXAppsAllocationsProps): useBulkClaimXAppsAllocationsReturnValue => {
+}: useClaimAllocationsProps): UseSendTransactionReturnValue => {
   const { thor } = useConnex()
   const { account } = useWallet()
   const toast = useToast()
@@ -92,10 +88,5 @@ export const useBulkClaimXAppsAllocations = ({
     onTxConfirmed: handleOnSuccess,
   })
 
-  const onMutate = useCallback(async () => {
-    const clauses = buildClauses(roundId, appIds)
-    return result.sendTransaction(clauses)
-  }, [buildClauses, result])
-
-  return { ...result, sendTransaction: onMutate }
+  return result
 }
