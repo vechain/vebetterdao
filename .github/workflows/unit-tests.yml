@@ -54,7 +54,7 @@ jobs:
         with:
           filters: |
             src:
-              - 'packages/contracts/**'
+              - 'packages/contracts/contracts/**'
       
       - name: Create/update checklist as PR comment
         uses: actions/github-script@v7
