@@ -87,8 +87,15 @@ export const VoterRewards: React.FC = () => {
         </VStack>
       </CardBody>
       {!account && (
-        <Flex backdropFilter="blur(10px)" position={"absolute"} h={"100%"} w={"100%"} align="center" justify="center">
-          <Card rounded="xl">
+        <Flex
+          borderRadius={"lg"}
+          backdropFilter="blur(10px)"
+          position={"absolute"}
+          h={"100%"}
+          w={"100%"}
+          align="center"
+          justify="center">
+          <Card>
             <CardBody>
               <VStack gap={4}>
                 <Heading size="md" textAlign={"center"}>
