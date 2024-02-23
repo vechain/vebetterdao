@@ -16,6 +16,7 @@ import {
   Stack,
 } from "@chakra-ui/react"
 import { useIpfsImage } from "@/api/ipfs"
+import { notFoundImage } from "@/constants"
 
 type Props = {
   register: UseFormRegister<FormData>
@@ -28,7 +29,6 @@ type Props = {
   totalVotesAvailable?: string
 }
 
-const notFoundImage = "/images/image-not-found.png"
 export const SelectAppVotesInput = ({
   register,
   getValues,

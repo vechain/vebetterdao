@@ -1,5 +1,6 @@
 import { useAllocationVotes, useRoundXApps, useXAppMetadata, useXAppsVotes } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
+import { notFoundImage } from "@/constants"
 import { Box, HStack, Heading, Image, Skeleton, Text, VStack, useColorModeValue } from "@chakra-ui/react"
 import { useMemo } from "react"
 
@@ -25,8 +26,6 @@ const compactFormatter = new Intl.NumberFormat("en-US", {
   notation: "compact",
   compactDisplay: "short",
 })
-
-const notFoundImage = "/images/image-not-found.png"
 
 export const AllocationXAppsVotesRankingChart = ({ roundId, maxRanks }: Props) => {
   const { data: xApps } = useRoundXApps(roundId)

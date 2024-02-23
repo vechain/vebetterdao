@@ -1,5 +1,6 @@
 import { getXAppMetadata, getXAppMetadataQueryKey, useAllocationsRound, useGetVotesOnBlock } from "@/api"
 import { getIpfsImage, getIpfsImageQueryKey } from "@/api/ipfs"
+import { notFoundImage } from "@/constants"
 import { Box, Card, CardBody, HStack, Heading, Icon, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useQueries } from "@tanstack/react-query"
 import { useWallet } from "@vechain/dapp-kit-react"
@@ -17,8 +18,6 @@ const compactFormatter = new Intl.NumberFormat("en-US", {
   notation: "compact",
   compactDisplay: "short",
 })
-
-const notFoundImage = "/images/image-not-found.png"
 
 export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
   const { account } = useWallet()
