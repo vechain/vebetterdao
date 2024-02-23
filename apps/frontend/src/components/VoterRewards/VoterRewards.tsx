@@ -87,8 +87,15 @@ export const VoterRewards: React.FC = () => {
         </VStack>
       </CardBody>
       {!account && (
-        <Flex backdropFilter="blur(10px)" position={"absolute"} h={"100%"} w={"100%"} align="center" justify="center">
-          <Card rounded="xl">
+        <Flex
+          borderRadius={"lg"}
+          backdropFilter="blur(10px)"
+          position={"absolute"}
+          h={"100%"}
+          w={"100%"}
+          align="center"
+          justify="center">
+          <Card>
             <CardBody>
               <VStack gap={4}>
                 <Heading size="md" textAlign={"center"}>
@@ -113,7 +120,7 @@ export const VoterRewards: React.FC = () => {
           w={"100%"}
           align="center"
           justify="center">
-          <Card w={["90%", "50%", "40%"]} rounded="xl" variant="outline">
+          <Card w={["90%", "50%", "40%"]}>
             <CardBody>
               <VStack gap={4}>
                 <Heading fontSize="md" textAlign={"center"}>
