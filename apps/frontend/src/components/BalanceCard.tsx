@@ -4,7 +4,6 @@ import {
   CardBody,
   Heading,
   HStack,
-  Spinner,
   Alert,
   AlertIcon,
   AlertTitle,
@@ -17,12 +16,13 @@ import {
   Text,
   useColorModeValue,
   Divider,
+  Spinner,
 } from "@chakra-ui/react"
 import { WalletButton, useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
-import { SwapB3trButton } from "./SwapB3trButton"
 import { backdropBlurAnimation } from "@/app/theme"
 import { B3TRIcon, VOT3Icon } from "./Icons"
+import { SwapButton } from "./Swap/SwapButton"
 
 const DECIMAL_PLACES = 4
 
@@ -161,7 +161,7 @@ export const BalanceCard: React.FC<Props> = () => {
         <VStack spacing={4} align="flex-start" w={"full"}>
           <HStack justify={"space-between"} w="full">
             <Heading size="md">Balance</Heading>
-            <Flex>{isLoading ? <Spinner size="sm" /> : <SwapB3trButton />}</Flex>
+            <Flex>{isLoading ? <Spinner size="sm" /> : <SwapButton />}</Flex>
           </HStack>
           <Show below="sm">
             {" "}
