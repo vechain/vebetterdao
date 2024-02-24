@@ -1,7 +1,7 @@
 "use client"
 
 import dynamic from "next/dynamic"
-import { Spinner, Card, CardBody, CardHeader, Heading, Stack, VStack, HStack } from "@chakra-ui/react"
+import { Spinner, Card, CardBody, CardHeader, Heading, Stack, VStack, HStack, Text } from "@chakra-ui/react"
 import { Suspense, useEffect } from "react"
 import { AnalyticsUtils } from "@/utils"
 
@@ -32,6 +32,8 @@ const BulkClaimXAppsAllocations = dynamic(
 
 const Pause = dynamic(() => import("./components/Pause").then(mod => mod.Pause), { ssr: false })
 
+const B3trAllowance = dynamic(() => import("./components/B3trAllowance").then(mod => mod.B3trAllowance), { ssr: false })
+
 export default function AdminPage() {
   useEffect(() => {
     AnalyticsUtils.trackPage("Admin")
@@ -42,17 +44,29 @@ export default function AdminPage() {
       <Stack spacing={12} w={"full"}>
         <AdminPermissions />
 
-        <Card w={"full"}>
-          <CardHeader>
-            <Heading size="lg">Emissions and Rounds</Heading>
-          </CardHeader>
-          <CardBody>
-            <VStack w={"full"} spacing={4} alignItems={"start"}>
-              <StartEmissions />
-              <RoundInfo />
-            </VStack>
-          </CardBody>
-        </Card>
+        <HStack w={"full"} spacing={12} alignItems={"start"} height={"max-content"}>
+          <Card w={"full"}>
+            <CardHeader>
+              <Heading size="lg">Emissions and Rounds</Heading>
+            </CardHeader>
+            <CardBody>
+              <VStack w={"full"} spacing={4} alignItems={"start"}>
+                <StartEmissions />
+                <RoundInfo />
+              </VStack>
+            </CardBody>
+          </Card>
+          <Card w={"full"}>
+            <CardHeader>
+              <Heading size="lg">B3TR Token Allowance</Heading>
+              <Text fontSize="sm">Allow an external address to spend your B3TR tokens.</Text>
+            </CardHeader>
+            <CardBody>
+              <B3trAllowance />
+            </CardBody>
+          </Card>
+        </HStack>
+
         <Card w={"full"}>
           <CardHeader>
             <Heading size="lg">X-2-Earn Apps</Heading>
