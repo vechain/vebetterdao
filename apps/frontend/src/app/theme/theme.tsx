@@ -1,4 +1,4 @@
-import { StyleFunctionProps, ThemeConfig, extendTheme, keyframes } from "@chakra-ui/react"
+import { ThemeConfig, extendTheme, keyframes } from "@chakra-ui/react"
 import "@fontsource-variable/instrument-sans"
 import "@fontsource-variable/inter"
 import { lighSecondary, lightPrimary, lightTertiary } from "./colors"
