@@ -1,7 +1,8 @@
 import { ThemeConfig, extendTheme, keyframes } from "@chakra-ui/react"
 import "@fontsource-variable/instrument-sans"
 import "@fontsource-variable/inter"
-
+import { lighSecondary, lightPrimary, lightTertiary } from "./colors"
+import { cardTheme } from "./card"
 const themeConfig: ThemeConfig = {
   //@ts-ignore
   fonts: {
@@ -10,12 +11,7 @@ const themeConfig: ThemeConfig = {
   },
 
   components: {
-    Card: {
-      // 6. We can overwrite defaultProps
-      defaultProps: {
-        variant: "outline", // default is solid
-      },
-    },
+    Card: cardTheme,
     Button: {
       // 6. We can overwrite defaultProps
       defaultProps: {
@@ -30,51 +26,22 @@ const themeConfig: ThemeConfig = {
   useSystemColorMode: true,
   /* eslint-disable  @typescript-eslint/ban-ts-comment */
   //@ts-ignore
+  semanticTokens: {
+    colors: {
+      "chakra-body-text": {
+        _light: "#1E1E1E",
+        _dark: "#E4E4E4",
+      },
+      "chakra-body-bg": {
+        _light: "#F7F7F7",
+        _dark: "#131313",
+      },
+    },
+  },
   colors: {
-    darkerPrimary: {
-      100: "#726BBA",
-      200: "#5C58AA",
-      300: "#504D9E",
-      400: "#453D8E",
-      500: "#30265F",
-      600: "#2B2356",
-      700: "#241F4B",
-      800: "#1B1741",
-    },
-    primary: {
-      10: "#e9eaea", // Lightest shade
-      50: "#e9eafb", // Lightest shade
-      100: "#bdbff4",
-      200: "#9195ed",
-      300: "#656be6",
-      400: "#3940df",
-      500: "#2027c6", // Primary color
-      600: "#191e9a",
-      700: "#12156e",
-      800: "#0b0d42",
-      900: "#040416", // Darkest shade
-    },
-    secondary: {
-      50: "#f3fde8", // Lightest shade
-      100: "#dbf9b9", // Lighter shade
-      200: "#c3f58a",
-      300: "#aaf15b",
-      400: "#92ed2c", // Primary color
-      500: "#79d312",
-      600: "#5ea40e",
-      700: "#43750a",
-      800: "#284606", // Darker shade
-    },
-    tertiary: {
-      100: "#c0d98c", // Lighter shade
-      200: "#a6cf75",
-      300: "#8cc65d",
-      400: "#72bc46", // Primary color
-      500: "#58b22f",
-      600: "#3ea917",
-      700: "#249e00",
-      800: "#0a9400", // Darker shade
-    },
+    primary: lightPrimary,
+    secondary: lighSecondary,
+    tertiary: lightTertiary,
     green: {
       "50": "#f3f9f3",
       "100": "#cfe6d0",

@@ -126,7 +126,7 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
       </CardHeader>
       <CardBody>
         <VStack spacing={8} w="full" align="center">
-          <Card variant={"outline"} w="full">
+          <Card w="full">
             <CardBody>
               {decodedCallDatas.map((target, index) => (
                 <VStack spacing={2} w="full" align="flex-start" key={`${index} - ${target.contract.address}`}>
