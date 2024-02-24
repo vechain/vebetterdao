@@ -55,7 +55,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
   const cardTextColor = isActive ? "black" : "inherit"
 
   const activeHoverBorderColor = useColorModeValue("secondary.500", "secondary.200")
-  const defaultHoverBorderColor = useColorModeValue("gray.400", "gray.200")
+  const nonActiveBackgroundColor = useColorModeValue("gray.50", "gray.700")
 
   return (
     <Card
@@ -64,10 +64,16 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
       {...(isActive && {
         bg: cardActiveBackgroundColor,
         borderColor: cardActiveBorderColor,
+        borderWidth: "1px",
       })}
       onClick={onRoundClick}
       _hover={{
-        borderColor: isActive ? activeHoverBorderColor : defaultHoverBorderColor,
+        ...(isActive && {
+          borderColor: activeHoverBorderColor,
+        }),
+        ...(!isActive && {
+          bg: nonActiveBackgroundColor,
+        }),
         cursor: "pointer",
         transition: "all 0.2s ease-in-out",
       }}>

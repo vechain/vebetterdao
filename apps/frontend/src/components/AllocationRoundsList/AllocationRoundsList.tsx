@@ -97,7 +97,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
   return (
     <>
       {renderInsideCard ? (
-        <Card w="full" variant="outline">
+        <Card w="full">
           <CardHeader>
             <HStack w="full" justify="space-between" alignItems={"baseline"}>
               <Heading size={headingSize}>Allocation Rounds</Heading>
