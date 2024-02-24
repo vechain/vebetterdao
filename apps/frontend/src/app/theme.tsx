@@ -21,13 +21,17 @@ const themeConfig: ThemeConfig = {
     Card: {
       // 6. We can overwrite defaultProps
       defaultProps: {
-        variant: "outline", // default is solid
+        variant: "base", // default is solid
       },
 
       variants: (props: StyleFunctionProps) => ({
-        b3tr: {
+        base: {
           color: "default",
           bg: props.colorMode === "dark" ? "#1A1A1A" : "#FFF",
+        },
+        filled: {
+          color: "default",
+          bg: props.colorMode === "dark" ? "#C7C7C7" : "#FAFAFA",
         },
       }),
     },

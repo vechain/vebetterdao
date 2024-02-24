@@ -63,7 +63,7 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
 
   const selectedVotes = votes.filter(vote => vote.value > 0)
   return (
-    <Card variant="outline" w="full">
+    <Card variant="filled" w="full">
       <CardBody>
         <VStack w="full" spacing={8}>
           <HStack justify={"space-between"} align="flex-end" w="full">

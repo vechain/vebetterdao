@@ -55,7 +55,6 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
   const cardTextColor = isActive ? "black" : "inherit"
 
   const activeHoverBorderColor = useColorModeValue("secondary.500", "secondary.200")
-  const defaultHoverBorderColor = useColorModeValue("gray.400", "gray.200")
   const nonActiveBackgroundColor = useColorModeValue("gray.50", "gray.700")
 
   return (
