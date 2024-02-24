@@ -64,7 +64,7 @@ export const CurrentRoundAllocations = ({ roundId }: Props) => {
   const isUnallocatedLoading = roundAmountLoading || xAppsClaimableAmounts.some(query => query.isLoading)
 
   return (
-    <Card flex={1} h="full" w="full" variant="outline">
+    <Card flex={1} h="full" w="full">
       <CardHeader>
         <HStack justify={"space-between"} w="full">
           <Heading size="md">Round #{roundId} allocations </Heading>

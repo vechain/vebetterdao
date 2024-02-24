@@ -34,7 +34,7 @@ export default function Home() {
           w="full"
           justify="space-between"
           align={["stretch", "stretch", "flex-start"]}
-          spacing={18}>
+          spacing={12}>
           <VStack flex={4} justifyContent="stretch" alignItems={"stretch"} spacing={4}>
             <SupplyBreakdownCard />
             <DashboardAllocationRounds />
