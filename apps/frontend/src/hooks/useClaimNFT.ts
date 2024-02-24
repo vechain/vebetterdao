@@ -1,4 +1,4 @@
-import { getB3trBadgeBalanceQueryKey, getParticipatedInGovernanceQueryKey } from "@/api"
+import { getB3trBadgeBalanceQueryKey, getTokenIdByAccountQueryKey } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
@@ -10,13 +10,27 @@ import { getConfig } from "@repo/config"
 import { B3TRBadge__factory } from "@repo/contracts"
 
 const B3trBadgeInterface = B3TRBadge__factory.createInterface()
+
+type useClaimNFTProps = {
+  onSuccess?: () => void
+  onFailure?: () => void
+  invalidateCache?: boolean
+}
+
+type useClaimNFTReturnValue = {
+  sendTransaction: () => Promise<void>
+} & Omit<UseSendTransactionReturnValue, "sendTransaction">
+
 /**
  * Hook to claim an NFT
  * @param onSuccess callback to call when the NFT is successfully claimed
  * @returns the result of the transaction
  */
-console.log("B3trBadgeInterface", B3trBadgeInterface)
-export const useClaimNFT = ({ onSuccess }: { onSuccess: () => void }): UseSendTransactionReturnValue => {
+export const useClaimNFT = ({
+  onSuccess,
+  onFailure,
+  invalidateCache = true,
+}: useClaimNFTProps): useClaimNFTReturnValue => {
   const { account } = useWallet()
   const toast = useToast()
   const queryClient = useQueryClient()
@@ -35,22 +49,18 @@ export const useClaimNFT = ({ onSuccess }: { onSuccess: () => void }): UseSendTr
 
   //Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {
-    await queryClient.cancelQueries({
-      queryKey: getB3trBadgeBalanceQueryKey(account),
-    })
-    await queryClient.refetchQueries({
-      queryKey: getB3trBadgeBalanceQueryKey(account),
-    })
-    await queryClient.cancelQueries({
-      queryKey: getParticipatedInGovernanceQueryKey(account),
-    })
-    await queryClient.refetchQueries({
-      queryKey: getParticipatedInGovernanceQueryKey(account),
-    })
+    if (invalidateCache) {
+      await queryClient.refetchQueries({
+        queryKey: getTokenIdByAccountQueryKey(account),
+      })
+      await queryClient.refetchQueries({
+        queryKey: getB3trBadgeBalanceQueryKey(account),
+      })
+    }
 
     toast({
-      title: "NFT Claimed",
-      description: `You have correctly claimed your NFT!`,
+      title: "Galaxy Member Badge Claimed",
+      description: `You have correctly claimed your GM Badge!`,
       status: "success",
       position: "bottom-left",
       duration: 5000,
@@ -60,11 +70,21 @@ export const useClaimNFT = ({ onSuccess }: { onSuccess: () => void }): UseSendTr
     onSuccess?.()
   }, [queryClient, toast, account])
 
+  const handleOnFailure = useCallback(() => {
+    onFailure?.()
+  }, [toast, onFailure])
+
   const result = useSendTransaction({
     signerAccount: account,
     clauses: buildClauses,
     onTxConfirmed: handleOnSuccess,
+    onTxFailedOrCancelled: handleOnFailure,
   })
 
-  return result
+  const onMutate = useCallback(async () => {
+    const clauses = buildClauses()
+    return result.sendTransaction(clauses)
+  }, [buildClauses, result])
+
+  return { ...result, sendTransaction: onMutate }
 }
