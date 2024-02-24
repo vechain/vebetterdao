@@ -1,8 +1,9 @@
 "use client"
 
+import { AnalyticsUtils } from "@/utils"
 import { Box, Spinner, Stack, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
-import { Suspense } from "react"
+import { Suspense, useEffect } from "react"
 
 const TvlBreakdownPieChart = dynamic(
   () => import("@/components/TvlBreakdownPieChart").then(mod => mod.TvlBreakdownPieChart),
@@ -20,11 +21,14 @@ const VoterRewards = dynamic(() => import("@/components/VoterRewards/VoterReward
 })
 
 const DashboardAllocationRounds = dynamic(
-  () => import("./components/DashboardAllocationRounds").then(mod => mod.DashboardAllocationRounds),
+  () => import("./rounds/components/DashboardAllocationRounds").then(mod => mod.DashboardAllocationRounds),
   { ssr: false },
 )
 
 export default function Home() {
+  useEffect(() => {
+    AnalyticsUtils.trackPage("Home")
+  }, [])
   return (
     <VStack w="full" spacing={12}>
       <Suspense fallback={<Spinner alignSelf={"center"} />}>
