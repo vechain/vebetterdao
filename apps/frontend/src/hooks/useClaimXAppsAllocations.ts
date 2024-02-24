@@ -78,7 +78,7 @@ export const useClaimXAppsAllocations = ({
 
     toast({
       title: "Allocations claimed",
-      description: `You have successfully claimed allocation for the xApps of round #${roundId}.`,
+      description: `You have successfully claimed allocation for the xApps of round #${roundId}`,
       status: "success",
       position: "bottom-left",
       duration: 5000,
