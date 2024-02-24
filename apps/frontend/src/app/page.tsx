@@ -22,6 +22,10 @@ const DashboardAllocationRounds = dynamic(
   { ssr: false },
 )
 
+const DashboardXApps = dynamic(() => import("@/components/DashboardXApps").then(mod => mod.DashboardXApps), {
+  ssr: false,
+})
+
 export default function Home() {
   useEffect(() => {
     AnalyticsUtils.trackPage("Home")
@@ -38,6 +42,7 @@ export default function Home() {
           <VStack flex={4} justifyContent="stretch" alignItems={"stretch"} spacing={4}>
             <SupplyBreakdownCard />
             <DashboardAllocationRounds />
+            <DashboardXApps />
           </VStack>
           <VStack spacing={4} flex={2.5} position={["static", "static", "sticky"]} top={100} right={0}>
             <BalanceCard />
