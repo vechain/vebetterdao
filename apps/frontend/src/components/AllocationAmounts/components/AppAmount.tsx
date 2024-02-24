@@ -6,6 +6,7 @@ import { notFoundImage } from "@/constants"
 type Props = {
   xAppId: string
   amount: string
+  isCurrent?: boolean
 }
 
 const compactFormatter = new Intl.NumberFormat("en-US", {
@@ -13,7 +14,7 @@ const compactFormatter = new Intl.NumberFormat("en-US", {
   compactDisplay: "short",
 })
 
-export const AppAmount = ({ xAppId, amount }: Props) => {
+export const AppAmount = ({ xAppId, amount, isCurrent = false }: Props) => {
   const { data: appMetadata, isLoading: appMetadataLoading } = useXAppMetadata(xAppId)
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
 
@@ -40,7 +41,7 @@ export const AppAmount = ({ xAppId, amount }: Props) => {
         </HStack>
         <HStack>
           <Text fontSize={"xs"} fontWeight={"400"}>
-            assigned
+            {isCurrent ? "will be assigned" : "assigned"}
           </Text>
         </HStack>
       </VStack>

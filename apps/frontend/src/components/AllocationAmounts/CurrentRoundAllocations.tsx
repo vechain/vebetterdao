@@ -87,7 +87,9 @@ export const CurrentRoundAllocations = ({ roundId }: Props) => {
       <CardBody>
         <Box flex={1} />
         <Stack spacing={5} w={"full"}>
-          {data?.map(appAmount => <AppAmount key={appAmount.app} xAppId={appAmount.app} amount={appAmount.amount} />)}
+          {data?.map(appAmount => (
+            <AppAmount key={appAmount.app} xAppId={appAmount.app} amount={appAmount.amount} isCurrent />
+          ))}
           <Divider />
           <HStack justify={"space-between"} alignItems={"center"}>
             <Text fontWeight={"600"} size={"xs"}>
