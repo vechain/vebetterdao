@@ -1,3 +1,4 @@
+"use-client"
 import {
   Button,
   Card,
@@ -21,7 +22,10 @@ import { ConfirmTransactionModalContent } from "../ConfirmTransactionModalConten
 import { CustomModalContent } from "../CustomModalContent"
 import { SwitchTokenButton } from "./SwitchTokenButton"
 import { TokenCards } from "./TokenCards"
-
+import { ConfirmationModal } from "../Modals/ConfirmationModal"
+import { LoadingModal } from "../Modals/LoadingModal"
+import { SuccessModal } from "../Modals/SuccessModal"
+import { ErrorModal } from "../Modals/ErrorModal"
 export type Props = {
   isOpen: boolean
   onClose: () => void
@@ -88,6 +92,23 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
       )
     }
   }, [isB3trToVot3, amount])
+
+  if (mutationData.status === "pending") return <ConfirmationModal isOpen={isOpen} onClose={handleClose} />
+
+  if (mutationData.status === "error") return <ErrorModal isOpen={isOpen} onClose={handleClose} />
+
+  if (mutationData.status === "waitingConfirmation") return <LoadingModal isOpen={isOpen} onClose={handleClose} />
+
+  if (mutationData.status === "success")
+    return (
+      <SuccessModal
+        isOpen={isOpen}
+        onClose={handleClose}
+        title={"Swap Completed! 🎉"}
+        showSocialButtons
+        socialDescription="I just swapped B3TR for VOT3 on B3tr Finance! 🎉 #B3tr #VOT3"
+      />
+    )
 
   if (mutationData.status !== "ready")
     return (
