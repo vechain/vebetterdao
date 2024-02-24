@@ -11,12 +11,11 @@ import {
   Skeleton,
   Text,
   VStack,
-  Button,
-  Stack,
-  Box,
   Grid,
   useColorModeValue,
+  IconButton,
 } from "@chakra-ui/react"
+import { GoArrowUpRight } from "react-icons/go"
 
 export const DashboardXApps = () => {
   const { data: xApps, isLoading, isError } = useXApps()
@@ -47,23 +46,38 @@ const XApp = ({ xApp }: { xApp: XApp }) => {
     return description
   }
 
+  const buttonIconColor = useColorModeValue("primary.500", "white")
+
   return (
     <Card variant={"baseWithBorder"}>
       <CardBody>
         <VStack alignItems={"start"} justify={"flex-start"}>
-          <HStack spacing={1}>
-            <Skeleton isLoaded={!isLogoLoading} w={"full"} alignContent={"start"}>
-              <Image
-                src={logo?.image ?? notFoundImage}
-                alt={appMetadata?.name}
-                boxSize={10}
-                borderRadius="9px"
-                w={"fit-content"}
-              />
-            </Skeleton>
-            <Button variant={"link"} alignContent={"end"}>
-              Open
-            </Button>
+          <HStack spacing={1} justifyContent={"space-between"} w={"full"}>
+            <HStack align={"start"}>
+              <Skeleton isLoaded={!isLogoLoading} w={"full"} alignContent={"start"}>
+                <Image
+                  src={logo?.image ?? notFoundImage}
+                  alt={appMetadata?.name}
+                  boxSize={10}
+                  borderRadius="9px"
+                  w={"fit-content"}
+                />
+              </Skeleton>
+            </HStack>
+
+            <HStack align={"end"}>
+              <Skeleton isLoaded={!isLogoLoading} w={"full"} alignContent={"start"}>
+                <IconButton
+                  isRound={true}
+                  variant="solid"
+                  aria-label="View dApp"
+                  fontSize="20px"
+                  onClick={() => window.open(appMetadata?.external_url, "_blank")}
+                  color={buttonIconColor}
+                  icon={<GoArrowUpRight />}
+                />
+              </Skeleton>
+            </HStack>
           </HStack>
 
           <VStack spacing={1} align="flex-start">
