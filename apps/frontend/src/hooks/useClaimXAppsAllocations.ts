@@ -1,9 +1,4 @@
-import {
-  buildClaimXAppAllocationTx,
-  getB3TrBalanceQueryKey,
-  getHasXAppClaimedQueryKey,
-  getXAppRoundEarningsQueryKey,
-} from "@/api"
+import { buildClaimXAppAllocationTx, getB3TrBalanceQueryKey, getHasXAppClaimedQueryKey } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
@@ -53,13 +48,6 @@ export const useClaimXAppsAllocations = ({
     if (invalidateCache) {
       for (const appId of appIds) {
         await queryClient.cancelQueries({
-          queryKey: getXAppRoundEarningsQueryKey(roundId, appId),
-        })
-        await queryClient.refetchQueries({
-          queryKey: getXAppRoundEarningsQueryKey(roundId, appId),
-        })
-
-        await queryClient.cancelQueries({
           queryKey: getHasXAppClaimedQueryKey(roundId, appId),
         })
         await queryClient.refetchQueries({
@@ -78,7 +66,7 @@ export const useClaimXAppsAllocations = ({
 
     toast({
       title: "Allocations claimed",
-      description: `You have successfully claimed allocation for the xApps of round #${roundId}`,
+      description: `You have successfully claimed allocation for the xApps of round #${roundId}.`,
       status: "success",
       position: "bottom-left",
       duration: 5000,

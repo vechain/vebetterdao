@@ -11,20 +11,23 @@ import {
   Flex,
   HStack,
   Heading,
+  Icon,
   Image,
   Skeleton,
   Spinner,
   Stack,
+  Tag,
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { useAllocationAmount, useRoundXApps, useXAppMetadata, useXAppRoundEarnings } from "@/api"
+import { useAllocationAmount, useAllocationsRound, useRoundXApps, useXAppMetadata, useXAppRoundEarnings } from "@/api"
 import { useMemo } from "react"
 import { backdropBlurAnimation } from "@/app/theme"
-import { useRouter } from "next/navigation"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
 import { useMultipleXAppsRoundEarnings } from "@/api/contracts/xAllocationPool/hooks/useMultipleXAppsRoundEarnings"
+import { BaseTooltip } from "./BaseTooltip"
+import { DotSymbol } from "./DotSymbol"
 
 type Props = {
   roundId: string
@@ -36,14 +39,10 @@ const compactFormatter = new Intl.NumberFormat("en-US", {
 })
 
 export const CurrentRoundAllocations = ({ roundId }: Props) => {
-  const router = useRouter()
-
   const { data: xApps } = useRoundXApps(roundId)
-
   const xAppsClaimableAmounts = useMultipleXAppsRoundEarnings(roundId, xApps?.map(app => app.id) ?? [])
-  console.log("xAppsClaimableAmounts", xAppsClaimableAmounts)
-
   const { data: roundAmount, isLoading: roundAmountLoading } = useAllocationAmount(roundId)
+  const { data: round } = useAllocationsRound(roundId)
 
   const isAmountsLoading = xAppsClaimableAmounts.some(query => query.isLoading)
   const error = xAppsClaimableAmounts.find(query => query.error)?.error
@@ -73,15 +72,26 @@ export const CurrentRoundAllocations = ({ roundId }: Props) => {
     <Card flex={1} h="full" w="full" variant="outline">
       <CardHeader>
         <HStack justify={"space-between"} w="full">
-          <Heading size="md">Round #{roundId} allocations</Heading>
+          <Heading size="md">Round #{roundId} allocations </Heading>
+          {round?.state === "0" && (
+            <BaseTooltip
+              text={"Round is still active, final results could change if quorum is not reached"}
+              children={
+                <Tag colorScheme="gray" size={"lg"} style={{ cursor: "default" }}>
+                  <HStack spacing={1} align={"center"}>
+                    <DotSymbol color="green" />
+                    <Text fontSize={"sm"}>ongoing</Text>
+                  </HStack>
+                </Tag>
+              }
+            />
+          )}
         </HStack>
       </CardHeader>
       <CardBody>
         <Box flex={1} />
         <Stack spacing={5} w={"full"}>
-          {data?.map(appAmount => (
-            <XAppForecastedAmount key={"App" + appAmount.app} xAppId={appAmount.app} amount={appAmount.amount} />
-          ))}
+          {data?.map(appAmount => <AppAmount key={appAmount.app} xAppId={appAmount.app} amount={appAmount.amount} />)}
           <Divider />
           <HStack justify={"space-between"} alignItems={"center"}>
             <Text fontWeight={"600"} size={"xs"}>
@@ -138,8 +148,8 @@ export const CurrentRoundAllocations = ({ roundId }: Props) => {
   )
 }
 
-const XAppForecastedAmount = ({ xAppId, amount }: { xAppId: string; amount: string }) => {
-  const { data: appMetadata, error: appMetadatError, isLoading: appMetadataLoading } = useXAppMetadata(xAppId)
+const AppAmount = ({ xAppId, amount }: { xAppId: string; amount: string }) => {
+  const { data: appMetadata, isLoading: appMetadataLoading } = useXAppMetadata(xAppId)
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
 
   return (
