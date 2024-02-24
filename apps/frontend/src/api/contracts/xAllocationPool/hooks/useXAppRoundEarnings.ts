@@ -15,9 +15,9 @@ type UseXAppRoundEarningsQueryResponse = {
  *  Get the amount of $B3TR an xApp earned from an allocation round
  *
  * @param thor  the connex instance
- * @param xAppId  the xApp id
  * @param roundId  the round id
- * @returns  amount of $B3TR an xApp earned from an allocation round
+ * @param xAppId  the xApp id
+ * @returns (amount, appId) amount of $B3TR an xApp earned from an allocation round and the xApp id
  */
 export const getXAppRoundEarnings = async (
   thor: Connex.Thor,

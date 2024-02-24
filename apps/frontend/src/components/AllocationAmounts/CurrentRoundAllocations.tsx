@@ -11,23 +11,19 @@ import {
   Flex,
   HStack,
   Heading,
-  Icon,
-  Image,
   Skeleton,
   Spinner,
   Stack,
   Tag,
   Text,
-  VStack,
 } from "@chakra-ui/react"
 import { useAllocationAmount, useAllocationsRound, useRoundXApps, useXAppMetadata, useXAppRoundEarnings } from "@/api"
 import { useMemo } from "react"
 import { backdropBlurAnimation } from "@/app/theme"
-import { useIpfsImage } from "@/api/ipfs"
-import { notFoundImage } from "@/constants"
 import { useMultipleXAppsRoundEarnings } from "@/api/contracts/xAllocationPool/hooks/useMultipleXAppsRoundEarnings"
-import { BaseTooltip } from "./BaseTooltip"
-import { DotSymbol } from "./DotSymbol"
+import { BaseTooltip } from "../BaseTooltip"
+import { DotSymbol } from "../DotSymbol"
+import { AppAmount } from "./components/AppAmount"
 
 type Props = {
   roundId: string
@@ -77,10 +73,10 @@ export const CurrentRoundAllocations = ({ roundId }: Props) => {
             <BaseTooltip
               text={"Round is still active, final results could change if quorum is not reached"}
               children={
-                <Tag colorScheme="gray" size={"lg"} style={{ cursor: "default" }}>
+                <Tag colorScheme="inherit" size={"lg"} style={{ cursor: "default" }}>
                   <HStack spacing={1} align={"center"}>
-                    <DotSymbol color="green" />
-                    <Text fontSize={"sm"}>ongoing</Text>
+                    <DotSymbol color="secondary.500" />
+                    <Text fontSize={"sm"}>Active</Text>
                   </HStack>
                 </Tag>
               }
@@ -145,40 +141,5 @@ export const CurrentRoundAllocations = ({ roundId }: Props) => {
         </Flex>
       )}
     </Card>
-  )
-}
-
-const AppAmount = ({ xAppId, amount }: { xAppId: string; amount: string }) => {
-  const { data: appMetadata, isLoading: appMetadataLoading } = useXAppMetadata(xAppId)
-  const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
-
-  return (
-    <HStack justify={"space-between"} alignItems={"center"}>
-      <HStack spacing={3}>
-        <Skeleton isLoaded={!isLogoLoading}>
-          <Image src={logo?.image ?? notFoundImage} alt={appMetadata?.name} boxSize={8} borderRadius="9px" />
-        </Skeleton>
-        <Skeleton isLoaded={!appMetadataLoading}>
-          <Text fontWeight={"600"} size={"xs"}>
-            {appMetadata?.name}
-          </Text>
-        </Skeleton>
-      </HStack>
-      <VStack spacing={0} alignItems={"flex-end"}>
-        <HStack alignItems={"flex-end"} spacing={1}>
-          <Text size="md" fontWeight={"600"} lineHeight={"16px"}>
-            {compactFormatter.format(Number(amount))}
-          </Text>
-          <Text fontSize={"2xs"} fontWeight={"700"} lineHeight={"16x"}>
-            B3TR
-          </Text>
-        </HStack>
-        <HStack>
-          <Text fontSize={"xs"} fontWeight={"400"}>
-            will be assigned
-          </Text>
-        </HStack>
-      </VStack>
-    </HStack>
   )
 }

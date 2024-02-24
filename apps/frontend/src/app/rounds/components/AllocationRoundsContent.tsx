@@ -1,5 +1,5 @@
 import { useCurrentAllocationsRoundId } from "@/api"
-import { AllocationRoundsList, CurrentRoundAllocations } from "@/components"
+import { AllocationRoundsList, CurrentRoundAllocations, TotalAllocations } from "@/components"
 import { VStack, HStack, Stack } from "@chakra-ui/react"
 
 export const AllocationRoundsContent = () => {
@@ -18,6 +18,7 @@ export const AllocationRoundsContent = () => {
         </HStack>
         <VStack spacing={4} flex={2.5} position={["static", "static", "sticky"]} top={100} right={0}>
           {currentRoundId && <CurrentRoundAllocations key={currentRoundId} roundId={currentRoundId} />}
+          <TotalAllocations />
         </VStack>
       </Stack>
     </VStack>

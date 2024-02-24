@@ -55,7 +55,7 @@ export const ClaimXAppAllocations = () => {
   const isRoundValid = useMemo(() => {
     if (currentRoundId === undefined || !currentRound) return false
     if (roundId === parseInt(currentRoundId) && currentRound.state === "0") return false
-    if (roundId === 0) return false
+    if (roundId > parseInt(currentRoundId) || roundId === 0) return false
 
     return true
   }, [roundId, currentRoundId, currentRound])
@@ -110,7 +110,7 @@ export const ClaimXAppAllocations = () => {
                     <NumberDecrementStepper />
                   </NumberInputStepper>
                 </NumberInput>
-                <FormErrorMessage>{"Round invalid"}</FormErrorMessage>
+                <FormErrorMessage>{"Invalid round"}</FormErrorMessage>
               </FormControl>
             </HStack>
 

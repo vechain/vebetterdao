@@ -68,7 +68,7 @@ export const BulkClaimXAppsAllocations = () => {
   const isRoundValid = useMemo(() => {
     if (currentRoundId === undefined || !currentRound) return false
     if (roundId === parseInt(currentRoundId) && currentRound.state === "0") return false
-    if (roundId === 0) return false
+    if (roundId > parseInt(currentRoundId) || roundId === 0) return false
 
     return true
   }, [roundId, currentRoundId, currentRound])
@@ -81,7 +81,7 @@ export const BulkClaimXAppsAllocations = () => {
             <Heading size="md">Bulk allocation claiming</Heading>
             <VStack spacing={0} align={"start"}>
               <Text> Total apps: {xApps?.length}</Text>
-              <Text> Remaing apps that need claiming: {xAppsLeft?.length}</Text>
+              <Text> Remaing apps that needs claiming: {xAppsLeft?.length}</Text>
             </VStack>
           </VStack>
         </HStack>
@@ -105,7 +105,7 @@ export const BulkClaimXAppsAllocations = () => {
                     <NumberDecrementStepper />
                   </NumberInputStepper>
                 </NumberInput>
-                <FormErrorMessage>{"Round invalid"}</FormErrorMessage>
+                <FormErrorMessage>{"Invalid round"}</FormErrorMessage>
               </FormControl>
             </HStack>
 
