@@ -10,14 +10,14 @@ const themeConfig: ThemeConfig = {
     body: `"Inter Variable", sans-serif`,
   },
 
-  styles: {
-    global: (props: StyleFunctionProps) => ({
-      "html, body": {
-        color: "default",
-        bg: props.colorMode === "dark" ? "#131313" : "#F7F7F7",
-      },
-    }),
-  },
+  //   styles: {
+  //     global: (props: StyleFunctionProps) => ({
+  //       "html, body": {
+  //         color: "default",
+  //         bg: props.colorMode === "dark" ? "#131313" : "#F7F7F7",
+  //       },
+  //     }),
+  //   },
 
   components: {
     Card: cardTheme,
@@ -35,6 +35,18 @@ const themeConfig: ThemeConfig = {
   useSystemColorMode: true,
   /* eslint-disable  @typescript-eslint/ban-ts-comment */
   //@ts-ignore
+  semanticTokens: {
+    colors: {
+      "chakra-body-text": {
+        _light: "#1E1E1E",
+        _dark: "#E4E4E4",
+      },
+      "chakra-body-bg": {
+        _light: "#F7F7F7",
+        _dark: "#131313",
+      },
+    },
+  },
   colors: {
     primary: lightPrimary,
     secondary: lighSecondary,
