@@ -16,6 +16,11 @@ const Navbar = dynamic(() => import("@/components/Navbar").then(mod => mod.Navba
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
+      <head>
+        <title>VeBetterDao governance app</title>
+        <meta name="description" content="Vote for your favourite sustainability dApps in vebetterdao’s governance." />
+        <link rel="icon" href="/images/favicon.png" />
+      </head>
       <body>
         <Providers>
           <Navbar />
