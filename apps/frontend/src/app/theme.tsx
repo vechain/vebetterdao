@@ -16,6 +16,13 @@ const themeConfig: ThemeConfig = {
         variant: "outline", // default is solid
       },
     },
+    Button: {
+      // 6. We can overwrite defaultProps
+      defaultProps: {
+        size: "md",
+        borderRadius: "full",
+      },
+    },
   },
 
   // 2. Add your color mode config
