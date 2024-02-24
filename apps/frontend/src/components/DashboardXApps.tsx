@@ -48,7 +48,7 @@ export const DashboardXApps = () => {
 }
 
 const XApp = ({ xApp }: { xApp: XApp }) => {
-  const { data: appMetadata, error: appMetadatError, isLoading: appMetadataLoading } = useXAppMetadata(xApp.id)
+  const { data: appMetadata, isLoading: appMetadataLoading } = useXAppMetadata(xApp.id)
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
 
   const formatDescription = (description: string) => {
