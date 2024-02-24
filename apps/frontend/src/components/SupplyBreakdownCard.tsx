@@ -15,6 +15,7 @@ import { FormattingUtils } from "@repo/utils"
 import { useMemo } from "react"
 import BigNumber from "bignumber.js"
 import { getConfig } from "@repo/config"
+import { motion } from "framer-motion"
 
 export const SupplyBreakdownCard = () => {
   const { data: b3trTokenDetails } = useB3trTokenDetails()
@@ -33,16 +34,24 @@ export const SupplyBreakdownCard = () => {
 
     const circulatingSupplyPercentage = new BigNumber(circulatingSupply)
       .dividedBy(b3trTokenDetails.totalSupply)
+      .multipliedBy(100)
       .toNumber()
     const notInCirculationSupplyPercentage = new BigNumber(notInCirculationSupply)
       .dividedBy(b3trTokenDetails.totalSupply)
+      .multipliedBy(100)
       .toNumber()
 
     const lockedB3tr = new BigNumber(vot3ContractB3trBalance?.scaled ?? 0).toNumber()
-    const lockedB3trPercentage = new BigNumber(lockedB3tr).dividedBy(b3trTokenDetails.totalSupply).toNumber()
+    const lockedB3trPercentage = new BigNumber(lockedB3tr)
+      .dividedBy(b3trTokenDetails.totalSupply)
+      .multipliedBy(100)
+      .toNumber()
 
     const notLockedB3tr = new BigNumber(b3trTokenDetails.circulatingSupply).minus(lockedB3tr).toNumber()
-    const notLockedB3trPercentage = new BigNumber(notLockedB3tr).dividedBy(b3trTokenDetails.totalSupply).toNumber()
+    const notLockedB3trPercentage = new BigNumber(notLockedB3tr)
+      .dividedBy(b3trTokenDetails.totalSupply)
+      .multipliedBy(100)
+      .toNumber()
 
     return {
       free: { name: "Free", value: notLockedB3tr, percentage: notLockedB3trPercentage, color: primaryColor },
@@ -96,9 +105,60 @@ export const SupplyBreakdownCard = () => {
             <Skeleton h={10} w="full" />
           ) : (
             <HStack spacing={1} w="full" h={5}>
-              <Box w={data.free.percentage} h={"full"} bg={primaryColor} borderRadius={"lg"} />
-              <Box w={data.locked.percentage} h={"full"} bg={greenColor} borderRadius={"lg"} />
-              <Box w={data.notInCirculation.percentage} h={"full"} bg={grayColor} borderRadius={"lg"} />
+              <Box
+                as={motion.div}
+                initial={{
+                  width: 0,
+                  opacity: 0,
+                }}
+                animate={{
+                  opacity: 1,
+                  width: `${data.free.percentage}%`,
+                  transition: {
+                    duration: 0.25,
+                  },
+                }}
+                w={data.free.percentage}
+                h={"full"}
+                bg={primaryColor}
+                borderRadius={"lg"}
+              />
+              <Box
+                as={motion.div}
+                initial={{
+                  width: 0,
+                  opacity: 0,
+                }}
+                animate={{
+                  opacity: 1,
+                  width: `${data.locked.percentage}%`,
+                  transition: {
+                    duration: 0.25,
+                  },
+                }}
+                w={data.locked.percentage}
+                h={"full"}
+                bg={greenColor}
+                borderRadius={"lg"}
+              />
+              <Box
+                as={motion.div}
+                initial={{
+                  width: 0,
+                  opacity: 0,
+                }}
+                animate={{
+                  opacity: 1,
+                  width: `${data.notInCirculation.percentage}%`,
+                  transition: {
+                    duration: 0.25,
+                  },
+                }}
+                w={data.notInCirculation.percentage}
+                h={"full"}
+                bg={grayColor}
+                borderRadius={"lg"}
+              />
             </HStack>
           )}
 
