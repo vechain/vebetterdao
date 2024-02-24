@@ -103,7 +103,7 @@ export const SupplyBreakdownCard = () => {
         <VStack spacing={4} align="flex-start">
           <VStack spacing={1} align="flex-start">
             <Text size="sm" fontWeight="400">
-              B3TR is circulation
+              B3TR in circulation
             </Text>
             <Skeleton isLoaded={!!data}>
               <Heading size="xl" color={primaryColor}>
