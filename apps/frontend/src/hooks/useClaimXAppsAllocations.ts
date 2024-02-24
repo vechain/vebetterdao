@@ -1,10 +1,7 @@
 import {
-  RoundReward,
-  buildClaimRewardsTx,
   buildClaimXAppAllocationTx,
   getB3TrBalanceQueryKey,
   getHasXAppClaimedQueryKey,
-  getRoundRewardQueryKey,
   getXAppClaimableAmountQueryKey,
 } from "@/api"
 import { useToast } from "@chakra-ui/react"
@@ -13,7 +10,7 @@ import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTran
 import { useCallback } from "react"
 import { useConnex, useWallet } from "@vechain/dapp-kit-react"
 
-type useBulkClaimXAppsAllocationsProps = {
+type useClaimAllocationsProps = {
   roundId: string
   appIds: string[]
   onSuccess?: () => void
@@ -21,7 +18,7 @@ type useBulkClaimXAppsAllocationsProps = {
   onSuccessMessageTitle?: string
 }
 
-type useBulkClaimXAppsAllocationsReturnValue = {
+type useBClaimXAppsAllocationsReturnValue = {
   sendTransaction: () => Promise<void>
 } & Omit<UseSendTransactionReturnValue, "sendTransaction">
 
@@ -30,14 +27,14 @@ type useBulkClaimXAppsAllocationsReturnValue = {
  *
  * @param roundId Id of the round to claim the allocations
  * @param appIds Ids of the xApps to claim the allocations
- * @returns {useBulkClaimXAppsAllocationsReturnValue}
+ * @returns {ClaimAllocationsReturnValue}
  */
-export const useBulkClaimXAppsAllocations = ({
+export const useClaimXAppsAllocations = ({
   roundId,
   appIds,
   onSuccess,
   invalidateCache = true,
-}: useBulkClaimXAppsAllocationsProps): useBulkClaimXAppsAllocationsReturnValue => {
+}: useClaimAllocationsProps): useBClaimXAppsAllocationsReturnValue => {
   const { thor } = useConnex()
   const { account } = useWallet()
   const toast = useToast()
@@ -61,6 +58,7 @@ export const useBulkClaimXAppsAllocations = ({
         await queryClient.refetchQueries({
           queryKey: getXAppClaimableAmountQueryKey(roundId, appId),
         })
+
         await queryClient.cancelQueries({
           queryKey: getHasXAppClaimedQueryKey(roundId, appId),
         })

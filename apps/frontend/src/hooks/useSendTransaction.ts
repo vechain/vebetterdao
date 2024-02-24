@@ -141,25 +141,30 @@ export const useSendTransaction = ({
     if (!txReceipt.reverted) return
     const transactionData = await thor.transaction(txReceipt.meta.txID).get()
     if (!transactionData) return
-    console.log({ transactionData })
 
     const explained = await thor.explain(transactionData.clauses).caller(transactionData.origin).execute()
-    console.log({ explained })
+    console.log("explained", explained)
     return explained
   }
 
   useEffect(() => {
-    console.log({ txReceipt })
     if (!txReceipt) return
     if (txReceipt.reverted) {
-      ;(async () => explainTxRevertReason(txReceipt))()
-      toast({
-        title: "Transaction reverted.",
-        status: "error",
-        position: "bottom-left",
-        duration: 5000,
-        isClosable: true,
-      })
+      ;(async () => {
+        const revertReason = await explainTxRevertReason(txReceipt)
+        const moreThanOneReverted = (revertReason?.filter(receipt => receipt.reverted) ?? []).length > 0
+        toast({
+          title: "Transaction reverted.",
+          description: moreThanOneReverted
+            ? "More than one tx reverted"
+            : revertReason?.[0]?.revertReason ?? "No revert reason available",
+          status: "error",
+          position: "bottom-left",
+          duration: 5000,
+          isClosable: true,
+        })
+      })()
+
       return
     }
     onTxConfirmed?.()

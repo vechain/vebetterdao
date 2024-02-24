@@ -1,7 +1,9 @@
 "use client"
 
+import { AnalyticsUtils } from "@/utils"
 import { Box, Stack, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
+import { useEffect } from "react"
 
 const AllocationRoundDetails = dynamic(
   () => import("../components/AllocationRoundDetails").then(mod => mod.AllocationRoundDetails),
@@ -32,6 +34,9 @@ type Props = {
   }
 }
 export default function Round({ params }: Props) {
+  useEffect(() => {
+    AnalyticsUtils.trackPage(`Round/${params.roundId}`)
+  }, [])
   return (
     <VStack w="full" spacing={8}>
       <AllocationRoundNavbar roundId={params.roundId} />
