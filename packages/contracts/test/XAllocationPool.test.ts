@@ -13,7 +13,7 @@ import {
 } from "./helpers"
 import { describe, it } from "mocha"
 
-describe.only("X-Allocation Pool", async function () {
+describe("X-Allocation Pool", async function () {
   describe("Allocation rewards for x-apps", async function () {
     it("Allocation rewards are calculated correctly", async function () {
       const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, b3tr, minterAccount } =
@@ -575,63 +575,114 @@ describe.only("X-Allocation Pool", async function () {
     })
   })
 
-  describe("Live vote counting", async function () {
-    it("Should correctly count live earnings when current round failed (round > 1 )", async function () {
-      const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, b3tr, minterAccount } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+  it("Should correctly count live earnings when current round failed (round > 1 )", async function () {
+    const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, b3tr, minterAccount } =
+      await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
-      const voter1 = otherAccounts[1]
-      await getVot3Tokens(voter1, "1000")
+    const voter1 = otherAccounts[1]
+    await getVot3Tokens(voter1, "1000")
 
-      //Add apps
-      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
-      const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[2].address, "My app")
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[3].address, "My app #2")
+    //Add apps
+    const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+    const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
+    await xAllocationVoting.connect(owner).addApp(otherAccounts[2].address, "My app")
+    await xAllocationVoting.connect(owner).addApp(otherAccounts[3].address, "My app #2")
 
-      // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+    // Bootstrap emissions
+    await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
-      await emissions.connect(minterAccount).start()
+    await emissions.connect(minterAccount).start()
 
-      const round1 = await xAllocationVoting.currentRoundId()
+    const round1 = await xAllocationVoting.currentRoundId()
 
-      // Vote
-      await xAllocationVoting
-        .connect(voter1)
-        .castVote(round1, [app1Id, app2Id], [ethers.parseEther("100"), ethers.parseEther("900")])
+    // Vote
+    await xAllocationVoting
+      .connect(voter1)
+      .castVote(round1, [app1Id, app2Id], [ethers.parseEther("100"), ethers.parseEther("900")])
 
-      await waitForRoundToEnd(Number(round1), xAllocationVoting)
-      let state = await xAllocationVoting.state(round1)
-      expect(state).to.eql(2n)
+    await waitForRoundToEnd(Number(round1), xAllocationVoting)
+    let state = await xAllocationVoting.state(round1)
+    expect(state).to.eql(2n)
 
-      // Now we can go to round 2 and test our scenario
-      await emissions.connect(minterAccount).distribute()
-      const baseAllocationAmount = await xAllocationPool.baseAllocationAmount(round1)
+    // Now we can go to round 2 and test our scenario
+    await emissions.connect(minterAccount).distribute()
+    const baseAllocationAmount = await xAllocationPool.baseAllocationAmount(round1)
 
-      const round2 = await xAllocationVoting.currentRoundId()
-      expect(round2).to.eql(2n)
+    const round2 = await xAllocationVoting.currentRoundId()
+    expect(round2).to.eql(2n)
 
-      let realTimeApp1 = await xAllocationPool.currentRoundEarnings(app1Id)
-      expect(realTimeApp1).to.eql(baseAllocationAmount)
+    let realTimeApp1 = await xAllocationPool.currentRoundEarnings(app1Id)
+    expect(realTimeApp1).to.eql(baseAllocationAmount)
 
-      let realTimeApp2 = await xAllocationPool.currentRoundEarnings(app2Id)
-      expect(realTimeApp2).to.eql(baseAllocationAmount)
+    let realTimeApp2 = await xAllocationPool.currentRoundEarnings(app2Id)
+    expect(realTimeApp2).to.eql(baseAllocationAmount)
 
-      await waitForRoundToEnd(Number(round2), xAllocationVoting)
+    await waitForRoundToEnd(Number(round2), xAllocationVoting)
 
-      // Now round ended but a new one did not started so this should happen:
-      // 1 - real time earnings should use shares from previous round -> earnings should be the same as previous round
-      const round1App1Earnings = await xAllocationPool.roundEarnings(round1, app1Id)
-      const round1App2Earnings = await xAllocationPool.roundEarnings(round1, app2Id)
+    // Now round ended but a new one did not started so this should happen:
+    // 1 - real time earnings should use shares from previous round -> earnings should be the same as previous round
+    const round1App1Earnings = await xAllocationPool.roundEarnings(round1, app1Id)
+    const round1App2Earnings = await xAllocationPool.roundEarnings(round1, app2Id)
 
-      realTimeApp1 = await xAllocationPool.currentRoundEarnings(app1Id)
-      expect(realTimeApp1).to.eql(round1App1Earnings)
+    realTimeApp1 = await xAllocationPool.currentRoundEarnings(app1Id)
+    expect(realTimeApp1).to.eql(round1App1Earnings)
 
-      realTimeApp2 = await xAllocationPool.currentRoundEarnings(app2Id)
-      expect(realTimeApp2).to.eql(round1App2Earnings)
-    })
+    realTimeApp2 = await xAllocationPool.currentRoundEarnings(app2Id)
+    expect(realTimeApp2).to.eql(round1App2Earnings)
+  })
+
+  it.only("User should be able to check his available earnings to claim", async function () {
+    const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, b3tr, minterAccount } =
+      await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+    const voter1 = otherAccounts[1]
+    await getVot3Tokens(voter1, "1000")
+
+    //Add apps
+    const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+    const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
+    await xAllocationVoting.connect(owner).addApp(otherAccounts[6].address, "My app")
+    await xAllocationVoting.connect(owner).addApp(otherAccounts[7].address, "My app #2")
+
+    // Bootstrap emissions
+    await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+    await emissions.connect(minterAccount).start()
+
+    const round1 = await xAllocationVoting.currentRoundId()
+
+    // Vote
+    await xAllocationVoting
+      .connect(voter1)
+      .castVote(round1, [app1Id, app2Id], [ethers.parseEther("100"), ethers.parseEther("900")])
+
+    await waitForRoundToEnd(Number(round1), xAllocationVoting)
+    let state = await xAllocationVoting.state(round1)
+    expect(state).to.eql(2n)
+
+    let app1Shares = await xAllocationPool.getAppShares(round1, app1Id)
+    expect(app1Shares).to.eql(1000n)
+
+    const claimableAmount = await xAllocationPool.claimableAmount(round1, app1Id)
+    const expectedEarnings = await xAllocationPool.roundEarnings(round1, app1Id)
+    expect(claimableAmount).to.eql(expectedEarnings)
+
+    let userBalance = await b3tr.balanceOf(otherAccounts[6].address)
+
+    expect(userBalance).to.eql(0n)
+
+    await xAllocationPool.connect(otherAccounts[6]).claim(round1, app1Id)
+
+    // balance of user should be equal to expected earnings
+    userBalance = await b3tr.balanceOf(otherAccounts[6].address)
+    expect(userBalance).to.eql(claimableAmount)
+
+    // claimable amount should be 0
+    const claimableAmountAfterClaim = await xAllocationPool.claimableAmount(round1, app1Id)
+    expect(claimableAmountAfterClaim).to.eql(0n)
   })
 })
