@@ -1,4 +1,4 @@
-import { StyleFunctionProps, ThemeConfig, extendTheme, keyframes } from "@chakra-ui/react"
+import { ThemeConfig, extendTheme, keyframes } from "@chakra-ui/react"
 import "@fontsource-variable/instrument-sans"
 import "@fontsource-variable/inter"
 import { lighSecondary, lightPrimary, lightTertiary } from "./colors"
@@ -8,15 +8,6 @@ const themeConfig: ThemeConfig = {
   fonts: {
     heading: `"Instrument Sans Variable", sans-serif`,
     body: `"Inter Variable", sans-serif`,
-  },
-
-  styles: {
-    global: (props: StyleFunctionProps) => ({
-      "html, body": {
-        color: "default",
-        bg: props.colorMode === "dark" ? "#131313" : "#F7F7F7",
-      },
-    }),
   },
 
   components: {
@@ -35,6 +26,18 @@ const themeConfig: ThemeConfig = {
   useSystemColorMode: true,
   /* eslint-disable  @typescript-eslint/ban-ts-comment */
   //@ts-ignore
+  semanticTokens: {
+    colors: {
+      "chakra-body-text": {
+        _light: "#1E1E1E",
+        _dark: "#E4E4E4",
+      },
+      "chakra-body-bg": {
+        _light: "#F7F7F7",
+        _dark: "#131313",
+      },
+    },
+  },
   colors: {
     primary: lightPrimary,
     secondary: lighSecondary,

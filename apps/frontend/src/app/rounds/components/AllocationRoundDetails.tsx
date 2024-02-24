@@ -70,7 +70,7 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
     )
   }, [hasVoted, isVotingConcluded])
   return (
-    <Card w="full">
+    <Card w="full" borderRadius={"3xl"}>
       <CardBody>
         <Stack direction={["column", "row"]} justify="space-between" spacing={[12, 12, 40]}>
           <VStack spacing={4} align="flex-start" flex={1}>
