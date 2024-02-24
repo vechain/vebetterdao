@@ -34,11 +34,6 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
 
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
 
-  const totalAmount = useMemo(() => {
-    if (!roundAmount) return 0
-    return BigInt(roundAmount.treasury) + BigInt(roundAmount.voteX2Earn) + BigInt(roundAmount.voteXAllocations)
-  }, [roundAmount])
-
   const isVotingConcluded = data?.voteEndTimestamp?.isBefore()
 
   const bgGradient = useColorModeValue("500", "300")
@@ -96,7 +91,7 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
                 }
               </Text>
             </Skeleton>
-            <Skeleton isLoaded={!hasVotedLoading}>{renderVoteStatusMessage}</Skeleton>
+            {!!account && <Skeleton isLoaded={!hasVotedLoading}>{renderVoteStatusMessage}</Skeleton>}
           </VStack>
           <VStack flex={0.8}>
             <VStack
