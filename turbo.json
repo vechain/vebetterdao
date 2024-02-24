@@ -23,9 +23,9 @@
     "dev": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["//#solo-up", "@repo/contracts#check-contracts-deployment"]
+      "dependsOn": ["@repo/contracts#check-contracts-deployment"]
     },
-    "dev:staging": {
+    "//#dev:staging": {
       "cache": false,
       "persistent": true,
       "dependsOn": ["@repo/contracts#check-contracts-deployment"]

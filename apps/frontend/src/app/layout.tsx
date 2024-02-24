@@ -8,9 +8,14 @@ import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
 import { Footer } from "@/components"
 import dynamic from "next/dynamic"
+import Script from "next/script"
+import { AnalyticsUtils } from "@/utils"
+import { getConfig } from "@repo/config"
 
 dayjs.extend(relativeTime)
 
+const mixpanelToken = getConfig().mixPanelProjectToken
+typeof window != "undefined" && mixpanelToken && AnalyticsUtils.initialise()
 const Navbar = dynamic(() => import("@/components/Navbar").then(mod => mod.Navbar), { ssr: false })
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
