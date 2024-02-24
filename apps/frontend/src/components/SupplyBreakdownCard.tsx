@@ -79,8 +79,8 @@ export const SupplyBreakdownCard = () => {
     return new BigNumber(data.locked.value).dividedBy(data.circulating.value).toNumber() * 100
   }, [data])
 
-  const formattedTotalSupply = useMemo(() => {
-    return FormattingUtils.humanNumber(b3trTokenDetails?.totalSupply ?? 0)
+  const formattedCirculatingSupply = useMemo(() => {
+    return FormattingUtils.humanNumber(data?.circulating.value ?? 0)
   }, [b3trTokenDetails])
 
   const formattedTotalValueLocked = useMemo(() => {
@@ -103,11 +103,11 @@ export const SupplyBreakdownCard = () => {
         <VStack spacing={4} align="flex-start">
           <VStack spacing={1} align="flex-start">
             <Text size="sm" fontWeight="400">
-              Total supply
+              B3TR is circulation
             </Text>
-            <Skeleton isLoaded={!!b3trTokenDetails}>
+            <Skeleton isLoaded={!!data}>
               <Heading size="xl" color={primaryColor}>
-                {formattedTotalSupply}
+                {formattedCirculatingSupply}
               </Heading>
             </Skeleton>
           </VStack>
@@ -131,7 +131,7 @@ export const SupplyBreakdownCard = () => {
                 w={data.free.percentage}
                 h={"full"}
                 bg={primaryColor}
-                borderRadius={"lg"}
+                borderRadius={"md"}
               />
               <Box
                 as={motion.div}
@@ -149,7 +149,7 @@ export const SupplyBreakdownCard = () => {
                 w={data.locked.percentage}
                 h={"full"}
                 bg={greenColor}
-                borderRadius={"lg"}
+                borderRadius={"md"}
               />
               <Box
                 as={motion.div}
@@ -167,7 +167,7 @@ export const SupplyBreakdownCard = () => {
                 w={data.notInCirculation.percentage}
                 h={"full"}
                 bg={grayColor}
-                borderRadius={"lg"}
+                borderRadius={"md"}
               />
             </HStack>
           )}
