@@ -60,12 +60,11 @@ export default function AdminPage() {
           <CardBody>
             <VStack w={"full"} spacing={12} alignItems={"start"} height={"max-content"}>
               <HStack w={"full"} spacing={12} alignItems={"start"} height={"max-content"}>
-                <UpdateReceiverAddress />
-              </HStack>
-
-              <HStack w={"full"} spacing={12} alignItems={"start"} height={"max-content"}>
                 <ClaimXAppAllocations />
                 <BulkClaimXAppsAllocations />
+              </HStack>
+              <HStack w={"full"} spacing={12} alignItems={"start"} height={"max-content"}>
+                <UpdateReceiverAddress />
               </HStack>
             </VStack>
           </CardBody>

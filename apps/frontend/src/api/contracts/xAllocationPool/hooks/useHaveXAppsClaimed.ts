@@ -6,7 +6,7 @@ import { getHasXAppClaimed, getHasXAppClaimedQueryKey } from "./useHasXAppClaime
  * Fetch if allocation was claimed of multiple xApps in an allocation round
  * @param appIds  the xApps to get the votes for
  * @param roundId  the round id to get the votes for
- * @returns bool if the xApps have been claimed in the round
+ * @returns (bool, appId)
  */
 export const useHaveXAppsClaimed = (roundId: string, appIds: string[]) => {
   const { thor } = useConnex()
@@ -14,8 +14,7 @@ export const useHaveXAppsClaimed = (roundId: string, appIds: string[]) => {
     queries: appIds.map(id => ({
       queryKey: getHasXAppClaimedQueryKey(roundId, id),
       queryFn: async () => {
-        const claimed = await getHasXAppClaimed(thor, roundId, id)
-        return { claimed, id }
+        return getHasXAppClaimed(thor, roundId, id)
       },
     })),
   })

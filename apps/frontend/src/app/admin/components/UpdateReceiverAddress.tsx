@@ -92,7 +92,7 @@ export const UpdateReceiverAddress = () => {
               </FormLabel>
               <InputGroup>
                 <Input
-                  placeholder="Where should the X-2-Earn tokens be sent?"
+                  placeholder="Where should the allocation tokens be sent?"
                   value={newAddress}
                   onChange={e => {
                     setNewAddress(e.target.value)

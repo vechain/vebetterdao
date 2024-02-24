@@ -6,7 +6,7 @@ import { getXAppClaimableAmount, getXAppClaimableAmountQueryKey } from "./useXAp
  * Fetch the claimable amount of multiple xApps in an allocation round
  * @param appIds  the xApps to get the votes for
  * @param roundId  the round id to get the votes for
- * @returns the claimable amount of the xApps in the round
+ * @returns the claimable amount of the xApps in the round and the xApp id
  */
 export const useXAppsClaimableAmounts = (roundId: string, appIds: string[]) => {
   const { thor } = useConnex()
@@ -14,8 +14,7 @@ export const useXAppsClaimableAmounts = (roundId: string, appIds: string[]) => {
     queries: appIds.map(id => ({
       queryKey: getXAppClaimableAmountQueryKey(roundId, id),
       queryFn: async () => {
-        const amount = await getXAppClaimableAmount(thor, roundId, id)
-        return { amount, id }
+        return getXAppClaimableAmount(thor, roundId, id)
       },
     })),
   })
