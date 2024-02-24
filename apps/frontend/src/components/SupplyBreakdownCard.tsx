@@ -9,7 +9,6 @@ import {
   Skeleton,
   Text,
   VStack,
-  color,
   useColorModeValue,
 } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
@@ -19,13 +18,12 @@ import { getConfig } from "@repo/config"
 
 export const SupplyBreakdownCard = () => {
   const { data: b3trTokenDetails } = useB3trTokenDetails()
+  const { data: vot3ContractB3trBalance } = useB3trBalance(getConfig().vot3ContractAddress)
 
   const greenColor = useColorModeValue("green.500", "green.200")
   const primaryColor = useColorModeValue("primary.500", "primary.200")
 
   const grayColor = useColorModeValue("gray.500", "gray.200")
-
-  const { data: vot3ContractB3trBalance } = useB3trBalance(getConfig().vot3ContractAddress)
 
   const data = useMemo(() => {
     if (!b3trTokenDetails) return undefined
@@ -70,15 +68,11 @@ export const SupplyBreakdownCard = () => {
   }, [data])
 
   const formattedTotalSupply = useMemo(() => {
-    if (!b3trTokenDetails) return 0
-
-    return FormattingUtils.humanNumber(b3trTokenDetails.totalSupply)
+    return FormattingUtils.humanNumber(b3trTokenDetails?.totalSupply ?? 0)
   }, [b3trTokenDetails])
 
   const formattedTotalValueLocked = useMemo(() => {
-    if (!data) return 0
-
-    return FormattingUtils.humanNumber(data.locked.value)
+    return FormattingUtils.humanNumber(data?.locked.value ?? 0)
   }, [data])
 
   return (
@@ -89,10 +83,14 @@ export const SupplyBreakdownCard = () => {
       <CardBody>
         <VStack spacing={4} align="flex-start">
           <VStack spacing={1} align="flex-start">
-            <Text size="sm">Total supply</Text>
-            <Heading size="xl" color={primaryColor}>
-              {formattedTotalSupply}
-            </Heading>
+            <Text size="sm" fontWeight="400">
+              Total supply
+            </Text>
+            <Skeleton isLoaded={!!b3trTokenDetails}>
+              <Heading size="xl" color={primaryColor}>
+                {formattedTotalSupply}
+              </Heading>
+            </Skeleton>
           </VStack>
           {!data ? (
             <Skeleton h={10} w="full" />
@@ -106,16 +104,24 @@ export const SupplyBreakdownCard = () => {
 
           <HStack spacing={16}>
             <VStack spacing={1} align="flex-start">
-              <Text size="sm">Total Value Locked</Text>
-              <Heading size="lg" color={greenColor}>
-                {formattedTotalValueLocked}
-              </Heading>
+              <Text size="sm" fontWeight="400">
+                Total Value Locked
+              </Text>
+              <Skeleton isLoaded={!!data}>
+                <Heading size="lg" color={greenColor}>
+                  {formattedTotalValueLocked}
+                </Heading>
+              </Skeleton>
             </VStack>
             <VStack spacing={1} align="flex-start">
-              <Text size="sm">TVL Ratio</Text>
-              <Heading size="lg" color={greenColor}>
-                {tvlRatioPercentage.toFixed(2)}%
-              </Heading>
+              <Text size="sm" fontWeight="400">
+                TVL Ratio
+              </Text>
+              <Skeleton isLoaded={!!data}>
+                <Heading size="lg" color={greenColor}>
+                  {tvlRatioPercentage.toFixed(2)}%
+                </Heading>
+              </Skeleton>
             </VStack>
           </HStack>
         </VStack>
