@@ -4,6 +4,7 @@ import { getContractsConfig } from "./contracts"
 import { Network } from "@repo/constants"
 
 export type AppConfig = {
+  mixPanelProjectToken?: string
   b3trContractAddress: string
   vot3ContractAddress: string
   b3trGovernorAddress: string
