@@ -16,7 +16,7 @@ const variants = {
   filled: (props: StyleFunctionProps) =>
     definePartsStyle({
       container: {
-        bg: props.colorMode === "dark" ? "#C7C7C7" : "#FAFAFA",
+        bg: props.colorMode === "dark" ? "#2D2D2F" : "#FAFAFA",
       },
     }),
   baseWithBorder: (props: StyleFunctionProps) =>

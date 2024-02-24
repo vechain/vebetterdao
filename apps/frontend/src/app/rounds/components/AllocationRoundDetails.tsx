@@ -47,24 +47,24 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
     if (!isVotingConcluded) {
       if (hasVoted)
         return (
-          <Button as="a" href="#user-votes" colorScheme="green" fontSize={"lg"}>
+          <Button as="a" href="#user-votes" colorScheme="green" size={["sm", "sm", "md"]}>
             You have already voted in this round
           </Button>
         )
       return (
-        <Button as="a" href="#user-votes" colorScheme="orange" fontSize={"lg"}>
+        <Button as="a" href="#user-votes" colorScheme="orange" size={["sm", "sm", "md"]}>
           You have not voted yet in this round
         </Button>
       )
     }
     if (hasVoted)
       return (
-        <Button as="a" href="#user-votes" colorScheme="green" fontSize={"lg"}>
+        <Button as="a" href="#user-votes" colorScheme="green" size={["sm", "sm", "md"]}>
           Voting concluded - You casted your vote successfully
         </Button>
       )
     return (
-      <Button as="a" href="#user-votes" colorScheme="orange" fontSize={"lg"}>
+      <Button as="a" href="#user-votes" colorScheme="orange" size={["sm", "sm", "md"]}>
         Voting concluded - You did not cast your vote
       </Button>
     )
