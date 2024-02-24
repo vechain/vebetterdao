@@ -1,5 +1,6 @@
 "use client"
 
+import { SupplyBreakdownCard } from "@/components"
 import { Box, Spinner, Stack, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { Suspense } from "react"
@@ -35,11 +36,11 @@ export default function Home() {
           align={["stretch", "stretch", "flex-start"]}
           spacing={18}>
           <VStack flex={4} justifyContent="stretch" alignItems={"stretch"} spacing={4}>
+            <Box>
+              <SupplyBreakdownCard />
+            </Box>
             <DashboardAllocationRounds />
 
-            <Box>
-              <CirculatingSupplyPieChart />
-            </Box>
             <Box>
               <TvlBreakdownPieChart />
             </Box>
