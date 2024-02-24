@@ -23,6 +23,9 @@ export const DashboardXApps = () => {
   const { data: xApps } = useXApps()
 
   const slicedXApps = useMemo(() => xApps?.slice(0, 4), [xApps])
+
+  if (slicedXApps && slicedXApps.length === 0) return null
+
   return (
     <Card>
       <CardHeader>
