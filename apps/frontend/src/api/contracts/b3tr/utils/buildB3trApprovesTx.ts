@@ -5,7 +5,6 @@ const b3trAbi = B3trContractJson.abi
 
 const config = getConfig()
 const B3TR_CONTRACT = config.b3trContractAddress
-const VOT3_CONTRACT = config.vot3ContractAddress
 
 /**
  * Build the clause to mint B3TR tokens for the given address and amount
@@ -13,6 +12,7 @@ const VOT3_CONTRACT = config.vot3ContractAddress
  * @param address the address to mint the tokens to
  * @param amount the amount of tokens to mint. Should not already include decimals
  * @param decimals the decimals of the token
+ * @param spender the address to approve to spend the tokens
  * @returns the clause to mint B3TR tokens
  */
 export const buildB3trApprovesTx = (

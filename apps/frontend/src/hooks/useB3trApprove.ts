@@ -4,6 +4,8 @@ import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTran
 import { useCallback } from "react"
 import { useConnex, useWallet } from "@vechain/dapp-kit-react"
 import { FormattingUtils } from "@repo/utils"
+import { getB3TrAllowanceQueryKey } from "@/api/contracts/b3tr/hooks/useB3trAllowance"
+import { useQueryClient } from "@tanstack/react-query"
 
 type useB3trApproveProps = {
   spender: string
@@ -22,11 +24,11 @@ export const useB3trApprove = ({
   const { thor } = useConnex()
   const { account } = useWallet()
   const toast = useToast()
-
+  const queryClient = useQueryClient()
   const { data: tokenDetails } = useB3trTokenDetails()
 
   const buildClauses = useCallback(() => {
-    if (!amount) throw new Error("amount is required")
+    if (amount === undefined) throw new Error("amount is required")
     if (!tokenDetails) throw new Error("tokenDetails is required")
 
     const approveClause = buildB3trApprovesTx(thor, amount, tokenDetails.decimals, spender)
@@ -36,6 +38,16 @@ export const useB3trApprove = ({
   //Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {
     const formattedAmount = FormattingUtils.humanNumber(amount ?? 0, amount)
+
+    if (invalidateCache) {
+      await queryClient.cancelQueries({
+        queryKey: getB3TrAllowanceQueryKey(account ?? undefined, spender),
+      })
+
+      await queryClient.refetchQueries({
+        queryKey: getB3TrAllowanceQueryKey(account ?? undefined, spender),
+      })
+    }
 
     toast({
       title: "B3TR tokens approved succesfully",

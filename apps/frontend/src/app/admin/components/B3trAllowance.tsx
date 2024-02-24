@@ -1,4 +1,4 @@
-import { useAllocationsRound, useB3trBalance, useCurrentAllocationsRoundId } from "@/api"
+import { useAllocationsRound, useB3trAllowance, useB3trBalance, useCurrentAllocationsRoundId } from "@/api"
 import { AllocationRoundsList, XAppsForecastedAmounts } from "@/components"
 import { useB3trApprove, useDistributeEmission, useStartEmission } from "@/hooks"
 import {
@@ -32,6 +32,11 @@ export const B3trAllowance = () => {
   const [spenderFieldIsDirty, setSpenderFieldIsDirty] = useState<boolean>(false)
   const [amountFieldIsDirty, setAmountFieldIsDirty] = useState<boolean>(false)
 
+  const { data: allowedAmount, isLoading: allowedAmountLoading } = useB3trAllowance(account ?? undefined, spender)
+  const allowedAmountScaled = useMemo(() => {
+    return allowedAmount?.scaled ?? "0"
+  }, [allowedAmount])
+
   const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useB3trApprove({
     spender: spender ?? "",
     amount: amount ?? 0,
@@ -59,65 +64,92 @@ export const B3trAllowance = () => {
   return (
     <form onSubmit={handleSubmit}>
       <VStack spacing={4} alignItems={"start"}>
-        <FormControl>
-          <FormLabel>
-            <strong>{"Balance"}</strong>
-          </FormLabel>
-          <InputGroup>
-            <Input value={b3trBalance?.scaled} disabled={true} />
-            <InputRightAddon
-              pointerEvents="none"
-              pl={1}
-              pr={1}
-              ml={0}
-              backgroundColor={"transparent"}
-              borderColor={"inherit"}
-              borderLeft={"none"}>
-              B3TR
-            </InputRightAddon>
-          </InputGroup>
-        </FormControl>
-      </VStack>
-      <VStack spacing={4} alignItems={"start"}>
-        <FormControl isRequired isInvalid={!isValidAddress && spenderFieldIsDirty}>
-          <FormLabel>
-            <strong>{"Spender"}</strong>
-          </FormLabel>
-          <InputGroup>
-            <Input
-              placeholder="Who should be able to use the tokens?"
-              value={spender}
-              onChange={e => {
-                setSpender(e.target.value)
-                setSpenderFieldIsDirty(true)
-              }}
-              disabled={isLoading}
-            />
-          </InputGroup>
-          <FormErrorMessage>{"Address not valid"}</FormErrorMessage>
-        </FormControl>
+        <HStack spacing={4} alignItems={"start"}>
+          <FormControl>
+            <FormLabel>
+              <strong>{"Balance"}</strong>
+            </FormLabel>
+            <InputGroup>
+              <Input value={b3trBalance?.scaled} disabled={true} />
+              <InputRightAddon
+                pointerEvents="none"
+                pl={1}
+                pr={1}
+                ml={0}
+                backgroundColor={"transparent"}
+                borderColor={"inherit"}
+                borderLeft={"none"}>
+                B3TR
+              </InputRightAddon>
+            </InputGroup>
+          </FormControl>
+        </HStack>
 
-        <FormControl isRequired isInvalid={!isAmountValid && amountFieldIsDirty}>
-          <FormLabel>
-            <strong>{"Amount"}</strong>
-          </FormLabel>
-          <NumberInput
-            min={0}
-            value={amount}
-            isDisabled={isLoading}
-            onChange={value => {
-              setAmount(parseInt(value))
-              setAmountFieldIsDirty(true)
-            }}>
-            <NumberInputField />
-            <NumberInputStepper>
-              <NumberIncrementStepper />
-              <NumberDecrementStepper />
-            </NumberInputStepper>
-          </NumberInput>
-          <FormErrorMessage>{"Invalid amount"}</FormErrorMessage>
-        </FormControl>
+        <HStack spacing={4} alignItems={"start"} w={"full"}>
+          <FormControl isRequired isInvalid={!isValidAddress && spenderFieldIsDirty}>
+            <FormLabel>
+              <strong>{"Spender"}</strong>
+            </FormLabel>
+            <InputGroup>
+              <Input
+                placeholder="Who should be able to use the tokens?"
+                value={spender}
+                onChange={e => {
+                  setSpender(e.target.value)
+                  setSpenderFieldIsDirty(true)
+                }}
+                disabled={isLoading}
+              />
+            </InputGroup>
+            <FormErrorMessage>{"Address not valid"}</FormErrorMessage>
+          </FormControl>
+        </HStack>
 
+        <HStack spacing={4} w={"full"} justify={"space-between"} align={"start"}>
+          <FormControl isRequired isInvalid={!isAmountValid && amountFieldIsDirty} w={"full"}>
+            <FormLabel>
+              <strong>{"Amount to allow"}</strong>
+            </FormLabel>
+            <NumberInput
+              min={0}
+              value={allowedAmountLoading ? "Loading..." : amount}
+              isDisabled={isLoading}
+              onChange={value => {
+                setAmount(parseInt(value))
+                setAmountFieldIsDirty(true)
+              }}>
+              <NumberInputField />
+              <NumberInputStepper>
+                <NumberIncrementStepper />
+                <NumberDecrementStepper />
+              </NumberInputStepper>
+            </NumberInput>
+            <FormErrorMessage>{"Invalid amount"}</FormErrorMessage>
+          </FormControl>
+
+          <FormControl w={"full"}>
+            <FormLabel>
+              <strong>{"Current allowance"}</strong>
+            </FormLabel>
+            <InputGroup>
+              <Input
+                placeholder="Amount of tokens the inserted address is already allowed to spend"
+                value={allowedAmountScaled}
+                disabled={true}
+              />
+              <InputRightAddon
+                pointerEvents="none"
+                pl={1}
+                pr={1}
+                ml={0}
+                backgroundColor={"transparent"}
+                borderColor={"inherit"}
+                borderLeft={"none"}>
+                B3TR
+              </InputRightAddon>
+            </InputGroup>
+          </FormControl>
+        </HStack>
         <Button isDisabled={!isFormValid} colorScheme="blue" type="submit" isLoading={isLoading}>
           Allow
         </Button>
