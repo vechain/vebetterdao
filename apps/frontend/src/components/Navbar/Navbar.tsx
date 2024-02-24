@@ -1,11 +1,10 @@
 "use client"
-import { Box, Container, useColorModeValue, useMediaQuery } from "@chakra-ui/react"
+import { Box, Container, useMediaQuery } from "@chakra-ui/react"
 
 import { MobileNavBar } from "./MobileNavbar"
 import { DesktopNavBar } from "./DesktopNavbar"
 
 export const Navbar: React.FC = () => {
-  const bg = useColorModeValue("gray.50", "gray.900")
   // ssr-friendly media query with fallback
   const [isDesktop] = useMediaQuery("(min-width: 992px)", {
     ssr: true,
@@ -13,18 +12,7 @@ export const Navbar: React.FC = () => {
   })
 
   return (
-    <Box
-      bg={bg}
-      px={0}
-      position={"sticky"}
-      top={0}
-      zIndex={10}
-      shadow="md"
-      py={4}
-      h={"auto"}
-      w={"full"}
-      mb={10}
-      borderBottomWidth={"1px"}>
+    <Box px={0} position={"sticky"} top={0} zIndex={10} py={4} h={"auto"} w={"full"} mb={10}>
       <Container
         w="full"
         display="flex"
