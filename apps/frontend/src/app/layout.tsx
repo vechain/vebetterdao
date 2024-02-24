@@ -22,6 +22,24 @@ typeof window != "undefined" && mixpanelToken && AnalyticsUtils.initialise()
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
+      <head>
+        <title>VeBetterDao governance app</title>
+        <meta name="description" content="Vote for your favourite sustainability dApps in vebetterdao’s governance." />
+        <link rel="icon" href="/images/favicon.png" />
+
+        <meta property="og:title" content="VeBetterDao governance app" />
+        <meta property="og:type" content="article" />
+        <meta property="og:image" content="https://governance.vebetterdao.org/images/governance_banner.png" />
+        <meta property="og:url" content="https://governance.vebetterdao.org" />
+        <meta name="twitter:card" content="summary_large_image" />
+
+        <meta
+          property="og:description"
+          content="Vote for your favourite sustainability dApps in vebetterdao’s governance."
+        />
+        <meta property="og:site_name" content="VeBetterDao" />
+        <meta name="twitter:image:alt" content="VeBetterDao governance app" />
+      </head>
       <body>
         <Providers>
           <Navbar />
