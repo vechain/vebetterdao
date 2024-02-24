@@ -10,15 +10,6 @@ const themeConfig: ThemeConfig = {
     body: `"Inter Variable", sans-serif`,
   },
 
-  //   styles: {
-  //     global: (props: StyleFunctionProps) => ({
-  //       "html, body": {
-  //         color: "default",
-  //         bg: props.colorMode === "dark" ? "#131313" : "#F7F7F7",
-  //       },
-  //     }),
-  //   },
-
   components: {
     Card: cardTheme,
     Button: {
