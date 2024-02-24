@@ -53,7 +53,7 @@ export const XAppsForecastedAmounts = ({ roundId }: Props) => {
     () =>
       xAppsClaimableAmounts.map(app => ({
         amount: app.data?.amount ?? "0",
-        app: xApps?.find(xa => xa.id === app.data?.app)?.id as string,
+        app: xApps?.find(xa => xa.id === app.data?.appId)?.id as string,
       })),
     [xAppsClaimableAmounts, xApps],
   )

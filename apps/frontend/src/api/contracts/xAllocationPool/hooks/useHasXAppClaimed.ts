@@ -5,6 +5,11 @@ import { XAllocationPool__factory } from "@repo/contracts"
 
 const XALLOCATIONPOOL_CONTRACT = getConfig().xAllocationPoolContractAddress
 
+type HasXAppClaimedQueryResponse = {
+  claimed: boolean
+  appId: string
+}
+
 /**
  *  Check if user has already claimed allocation rewards for a specific round and xApp
  *
@@ -13,16 +18,26 @@ const XALLOCATIONPOOL_CONTRACT = getConfig().xAllocationPoolContractAddress
  * @param xAppId  the xApp id
  * @returns if user has already claimed allocation rewards for a specific round and xApp
  */
-export const getHasXAppClaimed = async (thor: Connex.Thor, roundId: string, xAppId: string): Promise<boolean> => {
+export const getHasXAppClaimed = async (
+  thor: Connex.Thor,
+  roundId: string,
+  xAppId: string,
+): Promise<HasXAppClaimedQueryResponse> => {
   const functionFragment = XAllocationPool__factory.createInterface().getFunction("claimed").format("json")
   const res = await thor.account(XALLOCATIONPOOL_CONTRACT).method(JSON.parse(functionFragment)).call(roundId, xAppId)
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
-  return res.decoded[0]
+  return { claimed: res.decoded[0], appId: xAppId }
 }
 
-export const getHasXAppClaimedQueryKey = (roundId: string, xAppId: string) => ["claimed", roundId, "appId", xAppId]
+export const getHasXAppClaimedQueryKey = (roundId: string, xAppId: string) => [
+  "xAppClaimed",
+  "roundId",
+  roundId,
+  "appId",
+  xAppId,
+]
 
 /**
  *  Check if user has already claimed allocation rewards for a specific round and xApp
@@ -37,6 +52,6 @@ export const useHasXAppClaimed = (roundId: string, xAppId: string) => {
   return useQuery({
     queryKey: getHasXAppClaimedQueryKey(roundId, xAppId),
     queryFn: async () => await getHasXAppClaimed(thor, roundId, xAppId),
-    enabled: !!thor,
+    enabled: !!thor && !!roundId && !!xAppId,
   })
 }
