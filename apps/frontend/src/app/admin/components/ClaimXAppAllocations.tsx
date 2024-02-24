@@ -88,7 +88,7 @@ export const ClaimXAppAllocations = () => {
                   {xApps?.map(item => {
                     return (
                       <option key={item.id} value={item.id}>
-                        {item.name + " - " + item.id}
+                        {item.name + " - id: " + item.id}
                       </option>
                     )
                   })}
