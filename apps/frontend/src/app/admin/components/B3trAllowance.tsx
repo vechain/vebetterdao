@@ -3,11 +3,9 @@ import { useB3trApprove } from "@/hooks"
 import {
   VStack,
   HStack,
-  Stack,
   Button,
   FormControl,
   FormLabel,
-  Select,
   InputGroup,
   Input,
   FormErrorMessage,
