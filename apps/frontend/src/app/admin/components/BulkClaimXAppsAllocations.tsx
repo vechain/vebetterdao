@@ -1,5 +1,10 @@
-import { useAllocationsRound, useCurrentAllocationsRoundId, useHaveXAppsClaimed, useRoundXApps } from "@/api"
-import { useMultipleXAppsRoundEarnings } from "@/api/contracts/xAllocationPool/hooks/useMultipleXAppsRoundEarnings"
+import {
+  useAllocationsRound,
+  useCurrentAllocationsRoundId,
+  useHaveXAppsClaimed,
+  useRoundXApps,
+  useMultipleXAppsRoundEarnings,
+} from "@/api"
 import { useClaimXAppsAllocations } from "@/hooks"
 import {
   VStack,

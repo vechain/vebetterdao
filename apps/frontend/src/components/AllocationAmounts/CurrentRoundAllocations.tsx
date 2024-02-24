@@ -17,10 +17,9 @@ import {
   Tag,
   Text,
 } from "@chakra-ui/react"
-import { useAllocationAmount, useAllocationsRound, useRoundXApps, useXAppMetadata, useXAppRoundEarnings } from "@/api"
+import { useAllocationAmount, useAllocationsRound, useRoundXApps, useMultipleXAppsRoundEarnings } from "@/api"
 import { useMemo } from "react"
 import { backdropBlurAnimation } from "@/app/theme"
-import { useMultipleXAppsRoundEarnings } from "@/api/contracts/xAllocationPool/hooks/useMultipleXAppsRoundEarnings"
 import { BaseTooltip } from "../BaseTooltip"
 import { DotSymbol } from "../DotSymbol"
 import { AppAmount } from "./components/AppAmount"
