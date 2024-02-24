@@ -94,7 +94,7 @@ export const CurrentRoundAllocations = ({ roundId }: Props) => {
             <Text fontWeight={"600"} size={"xs"}>
               Unallocated
             </Text>
-            <HStack alignItems={"flex-end"} spacing={1}>
+            <HStack alignItems={"baseline"} spacing={1}>
               <Skeleton isLoaded={!isUnallocatedLoading}>
                 <Text size="md" fontWeight={"600"} lineHeight={"16px"}>
                   {compactFormatter.format(Number(unallocatedAmount))}
