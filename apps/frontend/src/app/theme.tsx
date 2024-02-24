@@ -28,6 +28,10 @@ const themeConfig: ThemeConfig = {
         base: {
           color: "default",
           bg: props.colorMode === "dark" ? "#1A1A1A" : "#FFF",
+          ...(props.colorMode === "dark" && {
+            borderWidth: "1px",
+            borderColor: "#1A1A1A",
+          }),
         },
         filled: {
           color: "default",
