@@ -5,7 +5,6 @@ import {
   getHasVotedQueryKey,
   getParticipatedInGovernanceQueryKey,
   getProposalVotesQuerykey,
-  useB3trBadgeBalance,
 } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
