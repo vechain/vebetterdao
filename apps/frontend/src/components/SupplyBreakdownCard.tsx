@@ -6,8 +6,10 @@ import {
   CardHeader,
   HStack,
   Heading,
+  Icon,
   Skeleton,
   Text,
+  Tooltip,
   VStack,
   useColorModeValue,
 } from "@chakra-ui/react"
@@ -16,6 +18,7 @@ import { useMemo } from "react"
 import BigNumber from "bignumber.js"
 import { getConfig } from "@repo/config"
 import { motion } from "framer-motion"
+import { FaCircleInfo } from "react-icons/fa6"
 
 export const SupplyBreakdownCard = () => {
   const { data: b3trTokenDetails } = useB3trTokenDetails()
@@ -87,7 +90,14 @@ export const SupplyBreakdownCard = () => {
   return (
     <Card>
       <CardHeader>
-        <Heading size="md">Supply breakdown</Heading>
+        <HStack w="full" justify={"space-between"}>
+          <Heading size="md">Supply breakdown</Heading>
+          <Tooltip label="B3TR Total Value Locked (TVL) equals the amount of VOT3 circulating." placement="top">
+            <span>
+              <Icon as={FaCircleInfo} position={"relative"} />
+            </span>
+          </Tooltip>
+        </HStack>
       </CardHeader>
       <CardBody>
         <VStack spacing={4} align="flex-start">
