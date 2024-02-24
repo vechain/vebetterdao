@@ -148,11 +148,11 @@ export const useSendTransaction = ({
     if (txReceipt.reverted) {
       ;(async () => {
         const revertReason = await explainTxRevertReason(txReceipt)
-        const moreThanOneReverted = revertReason?.filter(receipt => receipt.reverted) ?? 0 > 0
+        const moreThanOneReverted = (revertReason?.filter(receipt => receipt.reverted) ?? []).length > 0
         toast({
           title: "Transaction reverted.",
           description: moreThanOneReverted
-            ? "More than one tx reverted "
+            ? "More than one tx reverted"
             : revertReason?.[0]?.revertReason ?? "No revert reason available",
           status: "error",
           position: "bottom-left",
