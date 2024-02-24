@@ -107,23 +107,45 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
   }
 
   // ---------- Getters ---------- //
+
+  /**
+   * How much an app can claim for a given round.
+   *
+   * @param roundId The round ID for which to calculate the amount available for allocation.
+   * @param appId The ID of the app for which to calculate the amount available for allocation.
+   */
+  function claimableAmount(uint256 roundId, bytes32 appId) public view returns (uint256) {
+    if (claimedRewards[appId][roundId] || xAllocationVoting().isActive(roundId)) {
+      return 0;
+    }
+
+    return roundEarnings(roundId, appId);
+  }
+
   /**
    * The allocations distribution from the X-Allocation Pool to X-Apps will be in two parts:
    * - `baseAllocationPercentage` of allocations will be on average distributed to each qualified X Application
    *    as the base part of the allocation (so all the x-apps in the ecosystem will receive a minimum amount of $B3TR)
    * - `variableAllocationPercentage` of allocations will be distributed based on the % portion received from entire votes
    *
-   * If round failed then it will use the shares from the last successful round.
+   * If a round failed then it will calculate the shares against the last successful round.
+   * If a round is active then results should be treated as real time estimation and not final.
    */
-  function claimableAmount(uint256 roundId, bytes32 appId) public view returns (uint256) {
-    require(!xAllocationVoting().isActive(roundId), "XAllocationPool: round not ended yet");
+  function roundEarnings(uint256 roundId, bytes32 appId) public view returns (uint256) {
+    require(
+      xAllocationVoting() != IXAllocationVotingGovernor(address(0)),
+      "XAllocationVotingGovernor contract not set"
+    );
 
-    //If round is not succeeded then take shares from previous successful round
-    uint256 lastSucceededRoundId = roundId;
-    if (xAllocationVoting().state(roundId) == IXAllocationVotingGovernor.RoundState.Failed) {
-      require(xAllocationVoting().isFinalized(roundId), "XAllocationPool: failed round not finalized yet");
-
-      lastSucceededRoundId = xAllocationVoting().latestSucceededRoundId(roundId);
+    uint256 lastSucceededRoundId;
+    IXAllocationVotingGovernor.RoundState state = xAllocationVoting().state(roundId);
+    if (
+      state == IXAllocationVotingGovernor.RoundState.Active || state == IXAllocationVotingGovernor.RoundState.Succeeded
+    ) {
+      lastSucceededRoundId = roundId;
+    } else if (state == IXAllocationVotingGovernor.RoundState.Failed) {
+      // The first round is always considered as the last succeeded round
+      lastSucceededRoundId = roundId == 1 ? roundId : xAllocationVoting().latestSucceededRoundId(roundId - 1);
     }
 
     uint256 appShare = getAppShares(lastSucceededRoundId, appId);
@@ -134,26 +156,17 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
   }
 
   /**
-   * The allocations distribution from the X-Allocation Pool to X-Apps will be in two parts:
-   * - `baseAllocationPercentage` of allocations will be on average distributed to each qualified X Application as the base
-   *    part of the allocation (so all the x-apps in the ecosystem will receive a minimum amount of $B3TR)
-   * - `variableAllocationPercentage` of allocations will be distributed based on the % portion received from entire votes
-   *
-   * This function doesn't take care if the round is active or not, or if it was succeeded or not, so it should be used only
-   * to display hypothetical rewards while the round is active.
+   * Fetches the id of the current round and calculates the earnings.
    */
-  function forecastClaimableAmountForActiveRound(bytes32 appId) public view returns (uint256) {
+  function currentRoundEarnings(bytes32 appId) public view returns (uint256) {
     require(
       xAllocationVoting() != IXAllocationVotingGovernor(address(0)),
       "XAllocationVotingGovernor contract not set"
     );
 
     uint256 roundId = xAllocationVoting().currentRoundId();
-    uint256 appShare = getAppShares(roundId, appId);
-    uint256 baseAllocationPerApp = baseAllocationAmount(roundId);
-    uint256 variableAllocationForApp = _appRewardAmount(roundId, appShare);
 
-    return baseAllocationPerApp + variableAllocationForApp;
+    return roundEarnings(roundId, appId);
   }
 
   /**

@@ -1,10 +1,5 @@
-import {
-  useCurrentAllocationsRoundId,
-  useIsRoundFinalized,
-  useHaveXAppsClaimed,
-  useXAppsClaimableAmounts,
-  useRoundXApps,
-} from "@/api"
+import { useAllocationsRound, useCurrentAllocationsRoundId, useHaveXAppsClaimed, useRoundXApps } from "@/api"
+import { useMultipleXAppsRoundEarnings } from "@/api/contracts/xAllocationPool/hooks/useMultipleXAppsRoundEarnings"
 import { useClaimXAppsAllocations } from "@/hooks"
 import {
   VStack,
@@ -34,7 +29,13 @@ export const BulkClaimXAppsAllocations = () => {
 
   const { data: xApps } = useRoundXApps(roundId?.toString() ?? "")
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  const { data: isLastRoundFinalized } = useIsRoundFinalized(currentRoundId)
+  const { data: currentRound } = useAllocationsRound(currentRoundId?.toString() ?? "")
+
+  // Calculate total amount that is avaialble to claim in this round
+  const totalAmounts = useMultipleXAppsRoundEarnings(roundId?.toString() ?? "", xApps?.map(app => app.id) ?? [])
+  const total = useMemo(() => {
+    return totalAmounts.reduce((acc, cur) => acc + parseInt(cur.data?.amount ?? "0"), 0)
+  }, [totalAmounts])
 
   // Retrieve all apps that have claimed for the round and the ones that still needs to claim
   const claims = useHaveXAppsClaimed(roundId?.toString() ?? "", xApps?.map(app => app.id) ?? [])
@@ -45,14 +46,8 @@ export const BulkClaimXAppsAllocations = () => {
     return xApps?.filter(app => !claims.find(claim => claim.data?.appId === app.id)?.data?.claimed)
   }, [claims, xApps])
 
-  // Calculate total amount to claim
-  const totalAmounts = useXAppsClaimableAmounts(roundId?.toString() ?? "", xApps?.map(app => app.id) ?? [])
-  const total = useMemo(() => {
-    return totalAmounts.reduce((acc, cur) => acc + parseInt(cur.data?.amount ?? "0"), 0)
-  }, [totalAmounts])
-
   // Calculate remaining amount to claim excluding already claimed
-  const remainingAmounts = useXAppsClaimableAmounts(roundId?.toString() ?? "", xAppsLeft?.map(app => app.id) ?? [])
+  const remainingAmounts = useMultipleXAppsRoundEarnings(roundId?.toString() ?? "", xAppsLeft?.map(app => app.id) ?? [])
   const amountToClaim = useMemo(() => {
     return remainingAmounts?.reduce((acc, cur) => acc + parseInt(cur.data?.amount ?? "0"), 0)
   }, [remainingAmounts])
@@ -71,15 +66,12 @@ export const BulkClaimXAppsAllocations = () => {
 
   // Validate roundId input
   const isRoundValid = useMemo(() => {
-    if (currentRoundId === undefined) return false
-    if (roundId === parseInt(currentRoundId) && !isLastRoundFinalized) return false
+    if (currentRoundId === undefined || !currentRound) return false
+    if (roundId === parseInt(currentRoundId) && currentRound.state === "0") return false
+    if (roundId === 0) return false
 
-    if (roundId && roundId > 0 && roundId <= parseInt(currentRoundId)) {
-      return true
-    }
-
-    return false
-  }, [roundId, currentRoundId, isLastRoundFinalized])
+    return true
+  }, [roundId, currentRoundId, currentRound])
 
   return (
     <Card w={"full"}>
@@ -113,7 +105,7 @@ export const BulkClaimXAppsAllocations = () => {
                     <NumberDecrementStepper />
                   </NumberInputStepper>
                 </NumberInput>
-                <FormErrorMessage>{"Round invalid or not finalized"}</FormErrorMessage>
+                <FormErrorMessage>{"Round invalid"}</FormErrorMessage>
               </FormControl>
             </HStack>
 
@@ -155,7 +147,7 @@ export const BulkClaimXAppsAllocations = () => {
               </InputGroup>
             </FormControl>
 
-            <Button isDisabled={allClaimed || !isRoundValid} colorScheme="blue" type="submit" isLoading={isLoading}>
+            <Button isDisabled={allClaimed} colorScheme="blue" type="submit" isLoading={isLoading}>
               {allClaimed ? "Already claimed" : "Claim for all"}
             </Button>
           </VStack>

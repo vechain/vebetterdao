@@ -4,10 +4,8 @@ import {
   AlertIcon,
   AlertTitle,
   Box,
-  Button,
   Card,
   CardBody,
-  CardFooter,
   CardHeader,
   Divider,
   Flex,
@@ -20,12 +18,13 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { useAllocationAmount, useRoundXApps, useXAppMetadata, useXAppsForecastedAmounts } from "@/api"
+import { useAllocationAmount, useRoundXApps, useXAppMetadata, useXAppRoundEarnings } from "@/api"
 import { useMemo } from "react"
 import { backdropBlurAnimation } from "@/app/theme"
 import { useRouter } from "next/navigation"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
+import { useMultipleXAppsRoundEarnings } from "@/api/contracts/xAllocationPool/hooks/useMultipleXAppsRoundEarnings"
 
 type Props = {
   roundId: string
@@ -36,12 +35,14 @@ const compactFormatter = new Intl.NumberFormat("en-US", {
   compactDisplay: "short",
 })
 
-export const XAppsForecastedAmounts = ({ roundId }: Props) => {
+export const CurrentRoundAllocations = ({ roundId }: Props) => {
   const router = useRouter()
 
   const { data: xApps } = useRoundXApps(roundId)
 
-  const xAppsClaimableAmounts = useXAppsForecastedAmounts(xApps?.map(app => app.id) ?? [])
+  const xAppsClaimableAmounts = useMultipleXAppsRoundEarnings(roundId, xApps?.map(app => app.id) ?? [])
+  console.log("xAppsClaimableAmounts", xAppsClaimableAmounts)
+
   const { data: roundAmount, isLoading: roundAmountLoading } = useAllocationAmount(roundId)
 
   const isAmountsLoading = xAppsClaimableAmounts.some(query => query.isLoading)
@@ -66,24 +67,20 @@ export const XAppsForecastedAmounts = ({ roundId }: Props) => {
     return BigInt(roundAmount.voteXAllocations) - BigInt(totalAmount)
   }, [roundAmount, data])
 
-  const onRoundClick = () => {
-    router.push(`/rounds/${roundId}`)
-  }
-
   const isUnallocatedLoading = roundAmountLoading || xAppsClaimableAmounts.some(query => query.isLoading)
 
   return (
     <Card flex={1} h="full" w="full" variant="outline">
       <CardHeader>
         <HStack justify={"space-between"} w="full">
-          <Heading size="md">Next allocations to xApps</Heading>
+          <Heading size="md">Round #{roundId} allocations</Heading>
         </HStack>
       </CardHeader>
       <CardBody>
         <Box flex={1} />
         <Stack spacing={5} w={"full"}>
           {data?.map(appAmount => (
-            <XAppForecastedAmount key={appAmount.app} xAppId={appAmount.app} amount={appAmount.amount} />
+            <XAppForecastedAmount key={"App" + appAmount.app} xAppId={appAmount.app} amount={appAmount.amount} />
           ))}
           <Divider />
           <HStack justify={"space-between"} alignItems={"center"}>
@@ -137,15 +134,6 @@ export const XAppsForecastedAmounts = ({ roundId }: Props) => {
           )}
         </Flex>
       )}
-
-      <CardFooter>
-        <HStack justify={"start"} w="full">
-          <Text fontSize={"xs"}>Live data from </Text>
-          <Button variant="link" colorScheme="blue" size="xs" onClick={onRoundClick}>
-            Round #{roundId}
-          </Button>
-        </HStack>
-      </CardFooter>
     </Card>
   )
 }
@@ -177,7 +165,7 @@ const XAppForecastedAmount = ({ xAppId, amount }: { xAppId: string; amount: stri
         </HStack>
         <HStack>
           <Text fontSize={"xs"} fontWeight={"400"}>
-            assigned
+            will be assigned
           </Text>
         </HStack>
       </VStack>
