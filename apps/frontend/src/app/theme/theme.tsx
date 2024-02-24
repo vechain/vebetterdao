@@ -12,7 +12,7 @@ const themeConfig: ThemeConfig = {
 
   styles: {
     global: (props: StyleFunctionProps) => ({
-      body: {
+      "html, body": {
         color: "default",
         bg: props.colorMode === "dark" ? "#131313" : "#F7F7F7",
       },
