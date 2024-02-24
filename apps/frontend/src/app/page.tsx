@@ -13,7 +13,7 @@ const CirculatingSupplyPieChart = dynamic(
   { ssr: false },
 )
 const BalanceCard = dynamic(() => import("@/components/BalanceCard").then(mod => mod.BalanceCard), { ssr: false })
-const ClaimNFT = dynamic(() => import("@/components/ClaimNFT").then(mod => mod.ClaimNFT), { ssr: false })
+const GmNFT = dynamic(() => import("@/components/GmNFT/GmNFT").then(mod => mod.GmNFT), { ssr: false })
 
 const VoterRewards = dynamic(() => import("@/components/VoterRewards/VoterRewards").then(mod => mod.VoterRewards), {
   ssr: false,
@@ -44,10 +44,10 @@ export default function Home() {
               <TvlBreakdownPieChart />
             </Box>
           </VStack>
-          <VStack spacing={4} flex={2.5} position={["static", "static", "sticky"]} top={100} right={0}>
+          <VStack spacing={4} flex={2.5}  top={100} right={0}>
             <BalanceCard />
             <VoterRewards />
-            <ClaimNFT />
+            <GmNFT />
           </VStack>
         </Stack>
       </Suspense>
