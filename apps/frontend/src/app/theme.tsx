@@ -1,12 +1,20 @@
-import { ThemeConfig, extendTheme, keyframes } from "@chakra-ui/react"
+import { StyleFunctionProps, ThemeConfig, extendTheme, keyframes } from "@chakra-ui/react"
 import "@fontsource-variable/instrument-sans"
 import "@fontsource-variable/inter"
-
 const themeConfig: ThemeConfig = {
   //@ts-ignore
   fonts: {
     heading: `"Instrument Sans Variable", sans-serif`,
     body: `"Inter Variable", sans-serif`,
+  },
+
+  styles: {
+    global: (props: StyleFunctionProps) => ({
+      body: {
+        color: "default",
+        bg: props.colorMode === "dark" ? "#131313" : "#F7F7F7",
+      },
+    }),
   },
 
   components: {
@@ -15,6 +23,13 @@ const themeConfig: ThemeConfig = {
       defaultProps: {
         variant: "outline", // default is solid
       },
+
+      variants: (props: StyleFunctionProps) => ({
+        b3tr: {
+          color: "default",
+          bg: props.colorMode === "dark" ? "#1A1A1A" : "#FFF",
+        },
+      }),
     },
     Button: {
       // 6. We can overwrite defaultProps
