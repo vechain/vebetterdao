@@ -1,4 +1,11 @@
-import { VoteType, buildCastVoteTx, getHasVotedQueryKey, getProposalVotesQuerykey } from "@/api"
+import {
+  VoteType,
+  buildCastVoteTx,
+  getB3trBadgeBalanceQueryKey,
+  getHasVotedQueryKey,
+  getParticipatedInGovernanceQueryKey,
+  getProposalVotesQuerykey,
+} from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
@@ -57,6 +64,19 @@ export const useCastVote = ({
       })
       await queryClient.refetchQueries({
         queryKey: getHasVotedQueryKey(proposalId, account ?? undefined),
+      })
+
+      await queryClient.cancelQueries({
+        queryKey: getB3trBadgeBalanceQueryKey(account),
+      })
+      await queryClient.refetchQueries({
+        queryKey: getB3trBadgeBalanceQueryKey(account),
+      })
+      await queryClient.cancelQueries({
+        queryKey: getParticipatedInGovernanceQueryKey(account),
+      })
+      await queryClient.refetchQueries({
+        queryKey: getParticipatedInGovernanceQueryKey(account),
       })
     }
 

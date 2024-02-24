@@ -33,6 +33,7 @@ type UseSendTransactionProps = {
   signerAccount?: string | null
   clauses?: EnhancedClause[] | (() => EnhancedClause[]) | (() => Promise<EnhancedClause[]>)
   onTxConfirmed?: () => void | Promise<void>
+  onTxFailedOrCancelled?: () => void | Promise<void>
 }
 
 /**
@@ -68,6 +69,7 @@ export const useSendTransaction = ({
   signerAccount,
   clauses,
   onTxConfirmed,
+  onTxFailedOrCancelled,
 }: UseSendTransactionProps): UseSendTransactionReturnValue => {
   const toast = useToast()
   const { vendor, thor } = useConnex()
@@ -124,6 +126,8 @@ export const useSendTransaction = ({
         duration: 5000,
         isClosable: true,
       })
+
+      onTxFailedOrCancelled?.()
     },
   })
 

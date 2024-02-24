@@ -10,49 +10,43 @@ import { useIpfsMetadata } from "@/api/ipfs/hooks/useIpfsMetadata"
  * @returns The NFT image
  */
 
-export const useNFTImage = (fetchNFT: boolean) => {
+export const useNFTImage = () => {
   const { account } = useWallet()
   const {
     data: tokenID,
     isLoading: isLoadingTokenID,
     isError: isErrorTokenID,
     error: errorTokenID,
-  } = useTokenIdByAccount(account, fetchNFT)
-  if (errorTokenID) {
-    console.error("errorTokenID", errorTokenID)
-  }
+  } = useTokenIdByAccount(account)
+
+  console.log({ isLoadingTokenID })
+
   const {
     data: metadataURI,
     isLoading: isLoadingMetadataUri,
     isError: isErrorMetadataUri,
     error: errorMetadataURI,
-  } = useNFTMetadataUri(tokenID)
-  if (errorMetadataURI) {
-    console.error("errorMetadataURI", errorMetadataURI)
-  }
+  } = useNFTMetadataUri(tokenID ?? null)
+
   const {
     data: imageMetadata,
     isLoading: isLoadingMetadata,
     isError: isErrorMetadata,
     error: errorMetadata,
   } = useIpfsMetadata(metadataURI ?? null)
-  if (errorMetadata) {
-    console.error("errorMetadata", errorMetadata)
-  }
+
   const {
     data: imageData,
     isLoading: isLoadingImageData,
     isError: isErrorImageData,
     error: errorImageData,
   } = useIpfsImage(imageMetadata?.image ?? null)
-  if (errorImageData) {
-    console.error("errorImageData", errorImageData)
-  }
 
   return {
     imageData,
     imageMetadata,
-    isLoading: isLoadingTokenID ?? isLoadingMetadataUri ?? isLoadingMetadata ?? isLoadingImageData,
+    tokenID,
+    isLoading: isLoadingTokenID || isLoadingMetadataUri || isLoadingMetadata || isLoadingImageData,
     isError: isErrorTokenID ?? isErrorMetadataUri ?? isErrorMetadata ?? isErrorImageData,
     error: errorTokenID ?? errorMetadataURI ?? errorMetadata ?? errorImageData,
   }

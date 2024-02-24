@@ -12,7 +12,7 @@ const B3TR_BADGE_CONTRACT = getConfig().nftBadgeContractAddress
  * @returns the token ID for the address
  */
 
-export const getTokenIdByAccount = async (thor: Connex.Thor, address: null | string) => {
+export const getTokenIdByAccount = async (thor: Connex.Thor, address: null | string): Promise<string> => {
   if (!address) return Promise.reject(new Error("Address not provided"))
 
   const functionFragment = B3TRBadge__factory.createInterface().getFunction("tokenOfOwnerByIndex").format("json")
@@ -29,11 +29,11 @@ export const getTokenIdByAccountQueryKey = (address: null | string) => ["TokenId
  * @param address the address to get the number of b3tr badges for
  * @returns the number of b3tr badges for the address
  */
-export const useTokenIdByAccount = (address: null | string, fetchNFT: boolean) => {
+export const useTokenIdByAccount = (address: null | string) => {
   const { thor } = useConnex()
   return useQuery({
     queryKey: getTokenIdByAccountQueryKey(address),
     queryFn: () => getTokenIdByAccount(thor, address),
-    enabled: !!address && !!fetchNFT,
+    enabled: !!address,
   })
 }
