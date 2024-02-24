@@ -24,7 +24,7 @@ export const DashboardXApps = () => {
 
   const slicedXApps = useMemo(() => xApps?.slice(0, 4), [xApps])
 
-  if (slicedXApps && slicedXApps.length === 0) return null
+  if (!slicedXApps?.length) return null
 
   return (
     <Card>
@@ -65,31 +65,27 @@ const XApp = ({ xApp }: { xApp: XApp }) => {
       <CardBody>
         <VStack alignItems={"start"} justify={"flex-start"}>
           <HStack spacing={1} justifyContent={"space-between"} w={"full"}>
-            <HStack align={"start"}>
-              <Skeleton isLoaded={!isLogoLoading} w={"full"} alignContent={"start"}>
-                <Image
-                  src={logo?.image ?? notFoundImage}
-                  alt={appMetadata?.name}
-                  boxSize={10}
-                  borderRadius="9px"
-                  w={"fit-content"}
-                />
-              </Skeleton>
-            </HStack>
+            <Skeleton isLoaded={!isLogoLoading} width={"fit-content"} alignContent={"start"}>
+              <Image
+                src={logo?.image ?? notFoundImage}
+                alt={appMetadata?.name}
+                boxSize={10}
+                borderRadius="9px"
+                w={"fit-content"}
+              />
+            </Skeleton>
 
-            <HStack align={"end"}>
-              <Skeleton isLoaded={!isLogoLoading} w={"full"} alignContent={"start"}>
-                <IconButton
-                  isRound={true}
-                  variant="solid"
-                  aria-label="View dApp"
-                  fontSize="20px"
-                  onClick={() => window.open(appMetadata?.external_url, "_blank")}
-                  color={buttonIconColor}
-                  icon={<FiArrowUpRight />}
-                />
-              </Skeleton>
-            </HStack>
+            <Skeleton isLoaded={!isLogoLoading} width={"fit-content"} justifyContent={"end"}>
+              <IconButton
+                isRound={true}
+                variant="solid"
+                aria-label="View dApp"
+                fontSize="20px"
+                onClick={() => window.open(appMetadata?.external_url, "_blank")}
+                color={buttonIconColor}
+                icon={<FiArrowUpRight />}
+              />
+            </Skeleton>
           </HStack>
 
           <VStack spacing={1} align="flex-start">
@@ -105,7 +101,6 @@ const XApp = ({ xApp }: { xApp: XApp }) => {
             </Skeleton>
           </VStack>
         </VStack>
-        <VStack spacing={0} alignItems={"flex-end"}></VStack>
       </CardBody>
     </Card>
   )
