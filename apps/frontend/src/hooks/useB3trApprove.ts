@@ -31,7 +31,7 @@ export const useB3trApprove = ({
     if (amount === undefined) throw new Error("amount is required")
     if (!tokenDetails) throw new Error("tokenDetails is required")
 
-    const approveClause = buildB3trApprovesTx(thor, amount, tokenDetails.decimals, spender)
+    const approveClause = buildB3trApprovesTx(thor, amount, spender, tokenDetails.decimals)
     return [approveClause]
   }, [thor, amount, tokenDetails])
 

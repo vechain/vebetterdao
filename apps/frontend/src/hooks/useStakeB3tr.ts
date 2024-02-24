@@ -45,7 +45,7 @@ export const useStakeB3tr = ({
   const buildClauses = useCallback(() => {
     if (!amount) throw new Error("amount is required")
     if (!tokenDetails) throw new Error("tokenDetails is required")
-    const approveClause = buildB3trApprovesTx(thor, amount, tokenDetails.decimals, config.vot3ContractAddress)
+    const approveClause = buildB3trApprovesTx(thor, amount, config.vot3ContractAddress, tokenDetails.decimals)
     const stakeClause = buildStakeB3trTx(thor, amount, tokenDetails.decimals)
     return [approveClause, stakeClause]
   }, [thor, amount, tokenDetails])

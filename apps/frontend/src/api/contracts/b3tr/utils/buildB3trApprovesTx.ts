@@ -11,15 +11,15 @@ const B3TR_CONTRACT = config.b3trContractAddress
  * @param thor thor instance
  * @param address the address to mint the tokens to
  * @param amount the amount of tokens to mint. Should not already include decimals
- * @param decimals the decimals of the token
  * @param spender the address to approve to spend the tokens
+ * @param decimals the decimals of the token
  * @returns the clause to mint B3TR tokens
  */
 export const buildB3trApprovesTx = (
   thor: Connex.Thor,
   amount: string | number,
-  decimals = 18,
   spender: string,
+  decimals = 18,
 ): Connex.Vendor.TxMessage[0] => {
   const functionAbi = b3trAbi.find(e => e.name === "approve")
   if (!functionAbi) throw new Error("Function abi not found for mint")
