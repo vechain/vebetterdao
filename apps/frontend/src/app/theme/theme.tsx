@@ -2,6 +2,7 @@ import { StyleFunctionProps, ThemeConfig, extendTheme, keyframes } from "@chakra
 import "@fontsource-variable/instrument-sans"
 import "@fontsource-variable/inter"
 import { lighSecondary, lightPrimary, lightTertiary } from "./colors"
+import { cardTheme } from "./card"
 const themeConfig: ThemeConfig = {
   //@ts-ignore
   fonts: {
@@ -19,27 +20,7 @@ const themeConfig: ThemeConfig = {
   },
 
   components: {
-    Card: {
-      // 6. We can overwrite defaultProps
-      defaultProps: {
-        variant: "base", // default is solid
-      },
-
-      variants: (props: StyleFunctionProps) => ({
-        base: {
-          color: "default",
-          bg: props.colorMode === "dark" ? "#1A1A1A" : "#FFF",
-          ...(props.colorMode === "dark" && {
-            borderWidth: "1px",
-            borderColor: "#1A1A1A",
-          }),
-        },
-        filled: {
-          color: "default",
-          bg: props.colorMode === "dark" ? "#C7C7C7" : "#FAFAFA",
-        },
-      }),
-    },
+    Card: cardTheme,
     Button: {
       // 6. We can overwrite defaultProps
       defaultProps: {
