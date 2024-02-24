@@ -6,10 +6,10 @@ import { AppAmount } from "./components/AppAmount"
 export const TotalAllocations = () => {
   const { data: xApps } = useXApps()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  console.log("currentRoundId", currentRoundId)
 
+  // Generate roundIds from 1 to currentRoundId - 1 (do not consider current round), and convert them to string
   const roundIds = useMemo(() => {
-    return Array.from({ length: Number(currentRoundId) }, (_, i) => (i + 1).toString())
+    return Array.from({ length: Number(currentRoundId) - 1 }, (_, i) => (i + 1).toString())
   }, [currentRoundId])
 
   return (
