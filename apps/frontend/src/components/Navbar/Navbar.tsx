@@ -1,5 +1,5 @@
 "use client"
-import { Box, Container, useMediaQuery } from "@chakra-ui/react"
+import { Box, Container, useColorModeValue, useMediaQuery } from "@chakra-ui/react"
 
 import { MobileNavBar } from "./MobileNavbar"
 import { DesktopNavBar } from "./DesktopNavbar"
@@ -11,8 +11,9 @@ export const Navbar: React.FC = () => {
     fallback: false, // return false on the server, and re-evaluate on the client side
   })
 
+  const bg = useColorModeValue("#F7F7F7", "#131313")
   return (
-    <Box px={0} position={"sticky"} top={0} zIndex={10} py={4} h={"auto"} w={"full"} mb={10}>
+    <Box bg={bg} px={0} position={"sticky"} top={0} zIndex={10} py={4} h={"auto"} w={"full"} mb={10}>
       <Container
         w="full"
         display="flex"
