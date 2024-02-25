@@ -3,7 +3,7 @@ import {
   useCurrentAllocationsRoundId,
   useHaveXAppsClaimed,
   useRoundXApps,
-  useMultipleXAppsRoundEarnings,
+  useRoundEarnings,
 } from "@/api"
 import { useClaimXAppsAllocations } from "@/hooks"
 import {
@@ -37,7 +37,7 @@ export const BulkClaimXAppsAllocations = () => {
   const { data: currentRound } = useAllocationsRound(currentRoundId?.toString() ?? "")
 
   // Calculate total amount that is avaialble to claim in this round
-  const totalAmounts = useMultipleXAppsRoundEarnings(roundId?.toString() ?? "", xApps?.map(app => app.id) ?? [])
+  const totalAmounts = useRoundEarnings(roundId?.toString() ?? "", xApps?.map(app => app.id) ?? [])
   const total = useMemo(() => {
     return totalAmounts.reduce((acc, cur) => acc + parseInt(cur.data?.amount ?? "0"), 0)
   }, [totalAmounts])
@@ -52,7 +52,7 @@ export const BulkClaimXAppsAllocations = () => {
   }, [claims, xApps])
 
   // Calculate remaining amount to claim excluding already claimed
-  const remainingAmounts = useMultipleXAppsRoundEarnings(roundId?.toString() ?? "", xAppsLeft?.map(app => app.id) ?? [])
+  const remainingAmounts = useRoundEarnings(roundId?.toString() ?? "", xAppsLeft?.map(app => app.id) ?? [])
   const amountToClaim = useMemo(() => {
     return remainingAmounts?.reduce((acc, cur) => acc + parseInt(cur.data?.amount ?? "0"), 0)
   }, [remainingAmounts])

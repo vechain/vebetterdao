@@ -8,7 +8,7 @@ import { getXAppRoundEarnings, getXAppRoundEarningsQueryKey } from "./useXAppRou
  * @param roundId  the round id to get the votes for
  * @returns the earned amount of the xApps in the round and the xApp id
  */
-export const useMultipleXAppsRoundEarnings = (roundId: string, appIds: string[]) => {
+export const useRoundEarnings = (roundId: string, appIds: string[]) => {
   const { thor } = useConnex()
   return useQueries({
     queries: appIds.map(id => ({

@@ -17,7 +17,7 @@ import {
   Tag,
   Text,
 } from "@chakra-ui/react"
-import { useAllocationAmount, useAllocationsRound, useRoundXApps, useMultipleXAppsRoundEarnings } from "@/api"
+import { useAllocationAmount, useAllocationsRound, useRoundXApps, useRoundEarnings } from "@/api"
 import { useMemo } from "react"
 import { backdropBlurAnimation } from "@/app/theme"
 import { BaseTooltip } from "../BaseTooltip"
@@ -35,7 +35,7 @@ const compactFormatter = new Intl.NumberFormat("en-US", {
 
 export const CurrentRoundAllocations = ({ roundId }: Props) => {
   const { data: xApps } = useRoundXApps(roundId)
-  const xAppsClaimableAmounts = useMultipleXAppsRoundEarnings(roundId, xApps?.map(app => app.id) ?? [])
+  const xAppsClaimableAmounts = useRoundEarnings(roundId, xApps?.map(app => app.id) ?? [])
   const { data: roundAmount, isLoading: roundAmountLoading } = useAllocationAmount(roundId)
   const { data: round } = useAllocationsRound(roundId)
 
