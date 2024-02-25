@@ -1,42 +1,44 @@
-import { AppConfig } from "."
-const config: AppConfig = {
-  mixPanelProjectToken: "e03f4f5f6a753dae2dac30a69dfe21f7",
-  b3trContractAddress: "0xdA87cE5034C4Dfcd898864B4Bd0EEC2A38479535",
-  vot3ContractAddress: "0xFCdAd229eF71b6C99731f06Ab3c7Fa835c4b6Eaa",
-  b3trGovernorAddress: "0xCF14135dBaD7C159c195d9A8458473E1fe37D7a1",
-  timelockContractAddress: "0xEe496A08257edB7Ec4421a661304F15538233613",
-  xAllocationPoolContractAddress: "0x883f3579F50701816cdf87829aF0480056E803f0",
-  xAllocationVotingContractAddress: "0x8dCC5A19A2D365B2641bac41E63E9b6B26726ddB",
-  emissionsContractAddress: "0xAF8921156823147c7bc1096F1357c3Dc547DfAAe",
-  voterRewardsContractAddress: "0xEcbC0e8bE767fe6ffa5fc8e3B9303E66BCD11e5E",
-  nftBadgeContractAddress: "0x845cDbfe150339C0b7AAEc7661b964C49fFd7328",
-  nodeUrl: "https://thor-solo.dev.rewards.vechain.org",
-  network: {
-    id: "solo-staging",
-    name: "solo-staging",
-    type: "solo",
-    defaultNet: true,
-    urls: ["https://thor-solo.dev.rewards.vechain.org"],
-    explorerUrl: "https://insights.dev.rewards.vechain.org/#/solo",
-    blockTime: 10000,
-    genesis: {
-      number: 0,
-      id: "0x00000000c05a20fbca2bf6ae3affba6af4a74b800b585bf7a4988aba7aea69f6",
-      size: 170,
-      parentID: "0xffffffff53616c757465202620526573706563742c20457468657265756d2100",
-      timestamp: 1530316800,
-      gasLimit: 10000000,
-      beneficiary: "0x0000000000000000000000000000000000000000",
-      gasUsed: 0,
-      totalScore: 0,
-      txsRoot: "0x45b0cfc220ceec5b7c1c62c4d4193d38e4eba48e8815729ce75f9c0ab0e4c1c0",
-      txsFeatures: 0,
-      stateRoot: "0x93de0ffb1f33bc0af053abc2a87c4af44594f5dcb1cb879dd823686a15d68550",
-      receiptsRoot: "0x45b0cfc220ceec5b7c1c62c4d4193d38e4eba48e8815729ce75f9c0ab0e4c1c0",
-      signer: "0x0000000000000000000000000000000000000000",
-      isTrunk: true,
-      transactions: [],
-    },
-  },
-}
-export default config
+import { AppConfig } from "." 
+ const config: AppConfig = {
+  "mixPanelProjectToken": "e03f4f5f6a753dae2dac30a69dfe21f7",
+  "b3trContractAddress": "0xCD4FFccfa7F12f3C8f2fa3714c981A8F4A47E0E7",
+  "vot3ContractAddress": "0x85e0306b9027bd746169ED640344A7b818a42d0E",
+  "b3trGovernorAddress": "0xFf94507280a045fdDbc25988Cd3EdF768a23e722",
+  "timelockContractAddress": "0xbf5282532285c6Cc435766Dd70008F794309781e",
+  "xAllocationPoolContractAddress": "0xAFd0AC9ac0Ce20dFF120a796B50D771aaA5c33de",
+  "xAllocationVotingContractAddress": "0x52c35723757583AdD747937d3c550163F7C5Ac5F",
+  "emissionsContractAddress": "0xE9e67E36ccdEE91dAf6a314ECA77Fb609a340646",
+  "voterRewardsContractAddress": "0x47399F8e8436d4b38b8E947ca67fD8A041d14933",
+  "nftBadgeContractAddress": "0x73cE81B121AB37A0D5Ca0fdA7b863B1774C70B27",
+  "nodeUrl": "https://thor-solo.dev.rewards.vechain.org",
+  "network": {
+    "id": "solo-staging",
+    "name": "solo-staging",
+    "type": "solo",
+    "defaultNet": true,
+    "urls": [
+      "https://thor-solo.dev.rewards.vechain.org"
+    ],
+    "explorerUrl": "https://insights.dev.rewards.vechain.org/#/solo",
+    "blockTime": 10000,
+    "genesis": {
+      "number": 0,
+      "id": "0x00000000c05a20fbca2bf6ae3affba6af4a74b800b585bf7a4988aba7aea69f6",
+      "size": 170,
+      "parentID": "0xffffffff53616c757465202620526573706563742c20457468657265756d2100",
+      "timestamp": 1530316800,
+      "gasLimit": 10000000,
+      "beneficiary": "0x0000000000000000000000000000000000000000",
+      "gasUsed": 0,
+      "totalScore": 0,
+      "txsRoot": "0x45b0cfc220ceec5b7c1c62c4d4193d38e4eba48e8815729ce75f9c0ab0e4c1c0",
+      "txsFeatures": 0,
+      "stateRoot": "0x93de0ffb1f33bc0af053abc2a87c4af44594f5dcb1cb879dd823686a15d68550",
+      "receiptsRoot": "0x45b0cfc220ceec5b7c1c62c4d4193d38e4eba48e8815729ce75f9c0ab0e4c1c0",
+      "signer": "0x0000000000000000000000000000000000000000",
+      "isTrunk": true,
+      "transactions": []
+    }
+  }
+};
+  export default config;
