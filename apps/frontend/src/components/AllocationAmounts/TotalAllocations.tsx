@@ -16,7 +16,7 @@ export const TotalAllocations = () => {
   }, [currentRoundId, currentRound])
 
   return (
-    <Card flex={1} h="full" w="full" variant="outline">
+    <Card flex={1} h="full" w="full">
       <CardHeader>
         <Heading size="md">Total Allocations</Heading>
       </CardHeader>
