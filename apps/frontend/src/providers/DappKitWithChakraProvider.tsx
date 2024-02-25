@@ -1,10 +1,6 @@
-import { darkTheme, lightTheme } from "@/app/theme"
-import { useSelectedTheme } from "@/store"
-import { useColorMode } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { WalletConnectOptions } from "@vechain/dapp-kit-react"
 import dynamic from "next/dynamic"
-import { useEffect } from "react"
 
 const appConfig = getConfig()
 
@@ -29,19 +25,21 @@ const walletConnectOptions: WalletConnectOptions = {
 }
 
 export const DappKitWithChakraProvider = ({ children }: { children: React.ReactNode }) => {
-  const { colorMode } = useColorMode()
-  const isDark = colorMode === "dark"
+  //TODO: Reenable this to enable dark mode
+  //   const { colorMode } = useColorMode()
+  //   const isDark = colorMode === "dark"
 
-  const { setSelectedTheme } = useSelectedTheme()
+  //   const { setSelectedTheme } = useSelectedTheme()
 
-  useEffect(() => {
-    setSelectedTheme(isDark ? darkTheme : lightTheme)
-  }, [isDark])
+  //   useEffect(() => {
+  //     setSelectedTheme(isDark ? darkTheme : lightTheme)
+  //   }, [isDark])
 
   return (
     <DAppKitProvider
       usePersistence
-      themeMode={isDark ? "DARK" : "LIGHT"}
+      //   themeMode={isDark ? "DARK" : "LIGHT"}
+      themeMode="LIGHT"
       requireCertificate={false}
       genesis={appConfig.network.genesis}
       nodeUrl={appConfig.nodeUrl}
