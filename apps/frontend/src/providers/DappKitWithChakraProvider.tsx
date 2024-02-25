@@ -36,14 +36,11 @@ export const DappKitWithChakraProvider = ({ children }: { children: React.ReactN
   //     setSelectedTheme(isDark ? darkTheme : lightTheme)
   //   }, [isDark])
 
-  const [primary50] = useToken("colors", ["primary.50"])
+  const [primary500] = useToken("colors", ["primary.500"])
   //   TODO: dark mode support
   return (
     <DAppKitProvider
       usePersistence
-      themeVariables={{
-        "--vdk-color-light-primary": primary50,
-      }}
       //   themeMode={isDark ? "DARK" : "LIGHT"}
       themeMode="LIGHT"
       requireCertificate={false}
