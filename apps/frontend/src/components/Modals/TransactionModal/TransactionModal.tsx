@@ -1,18 +1,18 @@
-import { useMemo } from "react"
-import { ConfirmationModal } from "../ConfirmationModal"
-import { ErrorModal } from "../ErrorModal"
-import { LoadingModal } from "../LoadingModal"
-import { SuccessModal } from "../SuccessModal"
+import { ReactNode, useMemo } from "react"
+import { ConfirmationModalContent } from "../ConfirmationModalContent"
+import { ErrorModalContent } from "../ErrorModalContent"
+import { LoadingModalContent } from "../LoadingModalContent"
+import { SuccessModalContent } from "../SuccessModalContent"
 import { Modal } from "@chakra-ui/react"
 
 export type TransactionModalProps = {
   isOpen: boolean
   onClose: () => void
   status: string
-  pendingTitle?: string
-  confirmationTitle?: string
-  errorTitle?: string
-  successTitle?: string
+  pendingTitle?: ReactNode
+  confirmationTitle?: ReactNode
+  errorTitle?: ReactNode
+  successTitle?: ReactNode
   showSocialButtons?: boolean
   socialDescription?: string
 }
@@ -29,12 +29,12 @@ export const TransactionModal = ({
   socialDescription,
 }: TransactionModalProps) => {
   const modalContent = useMemo(() => {
-    if (status === "pending") return <ConfirmationModal title={pendingTitle} />
-    if (status === "waitingConfirmation") return <LoadingModal title={confirmationTitle} />
-    if (status === "error") return <ErrorModal title={errorTitle} />
+    if (status === "pending") return <ConfirmationModalContent title={confirmationTitle} />
+    if (status === "waitingConfirmation") return <LoadingModalContent title={pendingTitle} />
+    if (status === "error") return <ErrorModalContent title={errorTitle} />
     if (status === "success")
       return (
-        <SuccessModal
+        <SuccessModalContent
           title={successTitle}
           showSocialButtons={showSocialButtons}
           socialDescription={socialDescription}

@@ -2,12 +2,13 @@ import { Heading, VStack, Modal, ModalOverlay } from "@chakra-ui/react"
 import Lottie from "react-lottie"
 import loadingAnimation from "./loading.json"
 import { CustomModalContent } from "../../CustomModalContent"
+import { ReactNode } from "react"
 
-export type LoadingModalProps = {
-  title?: string
+export type LoadingModalContentProps = {
+  title?: ReactNode
 }
 
-export const LoadingModal = ({ title = "Sending Transaction..." }: LoadingModalProps) => {
+export const LoadingModalContent = ({ title = "Sending Transaction..." }: LoadingModalContentProps) => {
   return (
     <>
       <ModalOverlay />

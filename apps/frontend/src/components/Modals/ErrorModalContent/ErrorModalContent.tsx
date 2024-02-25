@@ -3,15 +3,15 @@ import Lottie from "react-lottie"
 import errorAnimation from "./error.json"
 import { CustomModalContent } from "../../CustomModalContent"
 
-export type ErrorModalProps = {
-  title?: string
+export type ErrorModalContentProps = {
+  title?: ReactNode
   description?: string
 }
 
-export const ErrorModal = ({
+export const ErrorModalContent = ({
   title = "Error",
   description = "Something went wrong. Please try again.",
-}: ErrorModalProps) => {
+}: ErrorModalContentProps) => {
   return (
     <>
       <ModalOverlay />

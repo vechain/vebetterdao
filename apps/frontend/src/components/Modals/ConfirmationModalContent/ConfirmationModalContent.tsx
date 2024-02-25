@@ -2,16 +2,17 @@ import { Heading, VStack, ModalOverlay, Text } from "@chakra-ui/react"
 import Lottie from "react-lottie"
 import confirmationAnimation from "./confirmation.json"
 import { CustomModalContent } from "../../CustomModalContent"
+import { ReactNode } from "react"
 
-export type ConfirmationModalProps = {
-  title?: string
+export type ConfirmationModalContentProps = {
+  title?: ReactNode
   description?: string
 }
 
-export const ConfirmationModal = ({
+export const ConfirmationModalContent = ({
   title = "Waiting for confirmation",
   description = "Please confirm the transaction in your wallet.",
-}: ConfirmationModalProps) => {
+}: ConfirmationModalContentProps) => {
   return (
     <>
       <ModalOverlay />
