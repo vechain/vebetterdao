@@ -14,8 +14,8 @@ export const useTokenColors = () => {
 
   const strongAlpha = useColorModeValue("100", "200")
   const weakAlpha = useColorModeValue("50", "100")
-  const b3trBgGradient = `linear(to-r, primary.${strongAlpha}, primary.${weakAlpha})`
-  const vot3BgGradient = `linear(to-r, secondary.${strongAlpha}, secondary.${weakAlpha})`
+  const b3trBgGradient = `linear(90deg, primary.${strongAlpha}, primary.${weakAlpha})`
+  const vot3BgGradient = `linear(90deg, secondary.${strongAlpha}, secondary.${weakAlpha})`
 
   const dividerAlpha = useColorModeValue("500", "600")
   const b3trDividerColor = `primary.${dividerAlpha}`
