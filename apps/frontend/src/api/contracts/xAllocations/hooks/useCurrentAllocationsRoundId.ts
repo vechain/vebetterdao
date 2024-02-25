@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
-
 import { getConfig } from "@repo/config"
 import { XAllocationVotingJson } from "@repo/contracts"
 const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
