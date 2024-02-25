@@ -48,7 +48,7 @@ export const DashboardXApps = () => {
 }
 
 const XApp = ({ xApp }: { xApp: XApp }) => {
-  const { data: appMetadata, isLoading: appMetadataLoading } = useXAppMetadata(xApp.id)
+  const { data: appMetadata, isLoading: appMetadataLoading, isError: isMetadataError } = useXAppMetadata(xApp.id)
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
 
   const formatDescription = (description: string) => {
@@ -68,19 +68,20 @@ const XApp = ({ xApp }: { xApp: XApp }) => {
             <Skeleton isLoaded={!isLogoLoading} width={"fit-content"} alignContent={"start"}>
               <Image
                 src={logo?.image ?? notFoundImage}
-                alt={appMetadata?.name}
+                alt={"logo"}
                 boxSize={10}
                 borderRadius="9px"
                 w={"fit-content"}
               />
             </Skeleton>
 
-            <Skeleton isLoaded={!isLogoLoading} width={"fit-content"} justifyContent={"end"}>
+            <Skeleton isLoaded={!appMetadataLoading} width={"fit-content"} justifyContent={"end"}>
               <IconButton
                 isRound={true}
                 variant="solid"
                 aria-label="View dApp"
                 fontSize="20px"
+                disabled={isMetadataError}
                 onClick={() => window.open(appMetadata?.external_url, "_blank")}
                 color={buttonIconColor}
                 icon={<FiArrowUpRight />}
@@ -96,7 +97,7 @@ const XApp = ({ xApp }: { xApp: XApp }) => {
             </Skeleton>
             <Skeleton isLoaded={!appMetadataLoading}>
               <Text size={"xs"} color={"gray.500"}>
-                {formatDescription(appMetadata?.description ?? "No description for this app")}
+                {formatDescription(appMetadata?.description ?? "Error loading description")}
               </Text>
             </Skeleton>
           </VStack>

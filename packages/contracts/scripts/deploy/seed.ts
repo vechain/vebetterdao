@@ -22,19 +22,15 @@ export const seedLocalEnvironment = async (
   const APPS: App[] = [
     {
       address: accounts[6].address,
-      name: "Tree Lovers Association",
+      name: "Vyvo",
     },
     {
       address: accounts[7].address,
-      name: "GoGreen",
+      name: "Mugshot",
     },
-    // {
-    //   address: accounts[8].address,
-    //   name: "Share4All",
-    // },
     {
       address: accounts[9].address,
-      name: "RecycleRewards",
+      name: "Cleanify",
     },
   ]
 
@@ -73,7 +69,7 @@ export const seedLocalEnvironment = async (
 
   // Set xApps baseURI
   console.log("Set xApps baseURI...")
-  await xAllocationVoting.setBaseURI("ipfs://bafybeiegeinotohmaxxyrierd2b5lr3o7i7batqxo2omprjl62fnq4mpci/")
+  await xAllocationVoting.setBaseURI("ipfs://bafybeigsqjh4m3fmy7f7ahpt7uxzfsmcoctjrbxt6kxnejhtnmcn55t2c4/")
 
   //TODO: SEED multiple rounds and votes (we need to execute a proposal to change the votingPeriod to someseconds)
   // await waitForRoundToEnd(roundId, xAllocationVoting)
@@ -134,14 +130,13 @@ const swapB3trForVot3 = async (vot3: VOT3, amount: string = "500", accounts: Har
 const addXDapps = async (xAllocationVoting: XAllocationVoting, accounts: HardhatEthersSigner[], apps: App[]) => {
   console.log("Adding x-apps...")
 
-  return await Promise.all(
-    apps.map(async app => {
-      return await xAllocationVoting
-        .connect(accounts[0])
-        .addApp(app.address, app.name)
-        .then(async tx => await tx.wait())
-    }),
-  )
+  // Avoid promise.all so we can decide the order of the apps
+  for (const app of apps) {
+    await xAllocationVoting
+      .connect(accounts[0])
+      .addApp(app.address, app.name)
+      .then(async tx => await tx.wait())
+  }
 }
 
 const castVotesToXDapps = async (
