@@ -17,7 +17,7 @@ import dynamic from "next/dynamic"
 import { FaBars } from "react-icons/fa"
 import { NavbarMenu } from "./NavbarMenu"
 import { NavbarLogo } from "./NavbarLogo"
-import { Route, Route } from "./Routes"
+import { Route } from "./Routes"
 
 const WalletButton = dynamic(() => import("@vechain/dapp-kit-react").then(mod => mod.WalletButton), { ssr: false })
 
