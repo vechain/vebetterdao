@@ -20,8 +20,8 @@ export function createLocalConfig() {
 
     X_ALLOCATION_VOTING_QUORUM_PERCENTAGE: 40, // 40 -> Need 40% of total supply to succeed
 
-    X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE: 20, // min amount of X tokens that a project will get each round
-    X_ALLOCATION_POOL_APP_SHARES_MAX_CAP: 15, // an app can get max % in allocation round
+    X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE: 30, // min amount of X tokens that a project will get each round
+    X_ALLOCATION_POOL_APP_SHARES_MAX_CAP: 20, // an app can get max % in allocation round
 
     CONTRACTS_ADMIN_ADDRESS: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa", //1st account from mnemonic of solo network
     VOTE_2_EARN_POOL_ADDRESS: "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68", //2nd account from mnemonic of solo network
