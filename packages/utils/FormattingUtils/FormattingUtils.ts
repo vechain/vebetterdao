@@ -116,6 +116,7 @@ export const humanNumber = (
 ) => {
   const suffix = symbol ? " " + symbol : ""
 
+  originalValue = originalValue || formattedValue
   let formatter = new Intl.NumberFormat("en", {
     style: "decimal",
     minimumFractionDigits: Number.parseFloat(formattedValue.toString()) % 1 === 0 ? 0 : 2,

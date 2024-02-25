@@ -108,27 +108,28 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
       <CustomModalContent>
         <Card w="full" rounded={20}>
           <CardBody>
-            <ModalCloseButton top={4} right={4} />
-            <VStack align={"flex-start"}>
-              <Heading size="md" mb={4}>
-                Swap
-              </Heading>
-              <Flex color={"black"} position={"relative"}>
-                <TokenCards amount={amount} formData={formData} isB3trToVot3={isB3trToVot3} />
-                <SwitchTokenButton setIsB3trToVot3={setIsB3trToVot3} />
-              </Flex>
-              <Flex justify={"flex-end"} w="full" mt={2}>
+            <form onSubmit={formData.handleSubmit(handleStake)}>
+              <ModalCloseButton top={4} right={4} />
+              <VStack align={"flex-start"}>
+                <Heading size="md" mb={4}>
+                  Swap
+                </Heading>
+                <Flex color={"black"} position={"relative"}>
+                  <TokenCards amount={amount} formData={formData} isB3trToVot3={isB3trToVot3} />
+                  <SwitchTokenButton setIsB3trToVot3={setIsB3trToVot3} />
+                </Flex>
                 <Button
+                  mt={2}
+                  type="submit"
                   colorScheme="primary"
                   w={"full"}
                   rounded={"full"}
                   isDisabled={Number(amount) === 0}
-                  onClick={handleStake}
                   size="lg">
                   Swap
                 </Button>
-              </Flex>
-            </VStack>
+              </VStack>
+            </form>
           </CardBody>
         </Card>
       </CustomModalContent>

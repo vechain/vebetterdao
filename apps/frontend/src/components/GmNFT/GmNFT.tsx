@@ -185,9 +185,9 @@ export const GmNFT = () => {
                 <HStack
                   w="full"
                   color={"#1e1e1e"}
-                  bg={`primary.${nftCardColor}`}
+                  bg={`secondary.${nftCardColor}`}
                   borderRadius="8px"
-                  borderColor={`primary.${nftCardBorderColor}`}
+                  borderColor={`secondary.${nftCardBorderColor}`}
                   borderWidth={1}
                   spacing={4}
                   pr={4}
@@ -195,7 +195,7 @@ export const GmNFT = () => {
                   onClick={onOpen}
                   cursor={"pointer"}
                   _hover={{
-                    bgColor: `primary.${nftOwnedColorCard}`,
+                    bgColor: `secondary.${nftOwnedColorCard}`,
                     transition: "all 0.3s ease-in-out",
                   }}>
                   <HStack w="full" justifyContent={"start"}>
