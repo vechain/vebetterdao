@@ -6,25 +6,25 @@ import { XAllocationPool__factory } from "@repo/contracts"
 
 const XALLOCATIONPOOL_CONTRACT = getConfig().xAllocationPoolContractAddress
 
-type HasXAppClaimableAmountQueryResponse = {
+type UseXAppRoundEarningsQueryResponse = {
   amount: string
   appId: string
 }
 
 /**
- *  Get the amount of $B3TR an xApp can claim from an allocation round
+ *  Get the amount of $B3TR an xApp earned from an allocation round
  *
  * @param thor  the connex instance
- * @param xAppId  the xApp id
  * @param roundId  the round id
- * @returns  amount of $B3TR an xApp can claim from an allocation round
+ * @param xAppId  the xApp id
+ * @returns (amount, appId) amount of $B3TR an xApp earned from an allocation round and the xApp id
  */
-export const getXAppClaimableAmount = async (
+export const getXAppRoundEarnings = async (
   thor: Connex.Thor,
   roundId: string,
   xAppId: string,
-): Promise<HasXAppClaimableAmountQueryResponse> => {
-  const functionFragment = XAllocationPool__factory.createInterface().getFunction("claimableAmount").format("json")
+): Promise<UseXAppRoundEarningsQueryResponse> => {
+  const functionFragment = XAllocationPool__factory.createInterface().getFunction("roundEarnings").format("json")
   const res = await thor.account(XALLOCATIONPOOL_CONTRACT).method(JSON.parse(functionFragment)).call(roundId, xAppId)
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
@@ -32,8 +32,8 @@ export const getXAppClaimableAmount = async (
   return { amount: FormattingUtils.scaleNumberDown(res.decoded[0], 18), appId: xAppId }
 }
 
-export const getXAppClaimableAmountQueryKey = (roundId: string, xAppId: string) => [
-  "claimableAmount",
+export const getXAppRoundEarningsQueryKey = (roundId: string, xAppId: string) => [
+  "roundEarnings",
   "roundId",
   roundId,
   "appId",
@@ -47,11 +47,11 @@ export const getXAppClaimableAmountQueryKey = (roundId: string, xAppId: string) 
  * @param xAppId the xApp id
  * @returns amount of $B3TR an xApp can claim from an allocation round
  */
-export const useXAppClaimableAmount = (roundId: string, xAppId: string) => {
+export const useXAppRoundEarnings = (roundId: string, xAppId: string) => {
   const { thor } = useConnex()
   return useQuery({
-    queryKey: getXAppClaimableAmountQueryKey(roundId, xAppId),
-    queryFn: async () => await getXAppClaimableAmount(thor, roundId, xAppId),
+    queryKey: getXAppRoundEarningsQueryKey(roundId, xAppId),
+    queryFn: async () => await getXAppRoundEarnings(thor, roundId, xAppId),
     enabled: !!thor && !!roundId && !!xAppId,
   })
 }

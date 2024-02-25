@@ -69,4 +69,8 @@ export const backdropBlurKeyframes = (startingBlur: string = "0px", endingBlur: 
 export const backdropBlurAnimation = (startingBlur?: string, endingBlur?: string) =>
   `${backdropBlurKeyframes(startingBlur, endingBlur)} 1s ease-in-out`
 
+export const TooltipBackgroundColor = (isDark = false) => (isDark ? "#CBD5E0" : "#26303E")
+
+export const TooltipTextColor = (isDark = false) => (isDark ? "#171923" : "white")
+
 export const theme = extendTheme({ ...themeConfig })

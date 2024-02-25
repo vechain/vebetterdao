@@ -4,28 +4,25 @@ import {
   AlertIcon,
   AlertTitle,
   Box,
-  Button,
   Card,
   CardBody,
-  CardFooter,
   CardHeader,
   Divider,
   Flex,
   HStack,
   Heading,
-  Image,
   Skeleton,
   Spinner,
   Stack,
+  Tag,
   Text,
-  VStack,
 } from "@chakra-ui/react"
-import { useAllocationAmount, useRoundXApps, useXAppMetadata, useXAppsForecastedAmounts } from "@/api"
+import { useAllocationAmount, useAllocationsRound, useRoundXApps, useRoundEarnings } from "@/api"
 import { useMemo } from "react"
 import { backdropBlurAnimation } from "@/app/theme"
-import { useRouter } from "next/navigation"
-import { useIpfsImage } from "@/api/ipfs"
-import { notFoundImage } from "@/constants"
+import { BaseTooltip } from "../BaseTooltip"
+import { DotSymbol } from "../DotSymbol"
+import { AppAmount } from "./components/AppAmount"
 
 type Props = {
   roundId: string
@@ -36,13 +33,11 @@ const compactFormatter = new Intl.NumberFormat("en-US", {
   compactDisplay: "short",
 })
 
-export const XAppsForecastedAmounts = ({ roundId }: Props) => {
-  const router = useRouter()
-
+export const CurrentRoundAllocations = ({ roundId }: Props) => {
   const { data: xApps } = useRoundXApps(roundId)
-
-  const xAppsClaimableAmounts = useXAppsForecastedAmounts(xApps?.map(app => app.id) ?? [])
+  const xAppsClaimableAmounts = useRoundEarnings(roundId, xApps?.map(app => app.id) ?? [])
   const { data: roundAmount, isLoading: roundAmountLoading } = useAllocationAmount(roundId)
+  const { data: round } = useAllocationsRound(roundId)
 
   const isAmountsLoading = xAppsClaimableAmounts.some(query => query.isLoading)
   const error = xAppsClaimableAmounts.find(query => query.error)?.error
@@ -66,31 +61,40 @@ export const XAppsForecastedAmounts = ({ roundId }: Props) => {
     return BigInt(roundAmount.voteXAllocations) - BigInt(totalAmount)
   }, [roundAmount, data])
 
-  const onRoundClick = () => {
-    router.push(`/rounds/${roundId}`)
-  }
-
   const isUnallocatedLoading = roundAmountLoading || xAppsClaimableAmounts.some(query => query.isLoading)
 
   return (
     <Card flex={1} h="full" w="full">
       <CardHeader>
         <HStack justify={"space-between"} w="full">
-          <Heading size="md">Next allocations to xApps</Heading>
+          <Heading size="md">Round #{roundId} allocations </Heading>
+          {round?.state === "0" && (
+            <BaseTooltip
+              text={"Round is still active, final results could change if quorum is not reached"}
+              children={
+                <Tag colorScheme="inherit" size={"lg"} style={{ cursor: "default" }}>
+                  <HStack spacing={1} align={"center"}>
+                    <DotSymbol color="secondary.500" />
+                    <Text fontSize={"sm"}>Active</Text>
+                  </HStack>
+                </Tag>
+              }
+            />
+          )}
         </HStack>
       </CardHeader>
       <CardBody>
         <Box flex={1} />
         <Stack spacing={5} w={"full"}>
           {data?.map(appAmount => (
-            <XAppForecastedAmount key={appAmount.app} xAppId={appAmount.app} amount={appAmount.amount} />
+            <AppAmount key={appAmount.app} xAppId={appAmount.app} amount={appAmount.amount} isCurrent />
           ))}
           <Divider />
           <HStack justify={"space-between"} alignItems={"center"}>
             <Text fontWeight={"600"} size={"xs"}>
               Unallocated
             </Text>
-            <HStack alignItems={"flex-end"} spacing={1}>
+            <HStack alignItems={"baseline"} spacing={1}>
               <Skeleton isLoaded={!isUnallocatedLoading}>
                 <Text size="md" fontWeight={"600"} lineHeight={"16px"}>
                   {compactFormatter.format(Number(unallocatedAmount))}
@@ -137,50 +141,6 @@ export const XAppsForecastedAmounts = ({ roundId }: Props) => {
           )}
         </Flex>
       )}
-
-      <CardFooter>
-        <HStack justify={"start"} w="full">
-          <Text fontSize={"xs"}>Live data from </Text>
-          <Button variant="link" colorScheme="blue" size="xs" onClick={onRoundClick}>
-            Round #{roundId}
-          </Button>
-        </HStack>
-      </CardFooter>
     </Card>
-  )
-}
-
-const XAppForecastedAmount = ({ xAppId, amount }: { xAppId: string; amount: string }) => {
-  const { data: appMetadata, error: appMetadatError, isLoading: appMetadataLoading } = useXAppMetadata(xAppId)
-  const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
-
-  return (
-    <HStack justify={"space-between"} alignItems={"center"}>
-      <HStack spacing={3}>
-        <Skeleton isLoaded={!isLogoLoading}>
-          <Image src={logo?.image ?? notFoundImage} alt={appMetadata?.name} boxSize={8} borderRadius="9px" />
-        </Skeleton>
-        <Skeleton isLoaded={!appMetadataLoading}>
-          <Text fontWeight={"600"} size={"xs"}>
-            {appMetadata?.name}
-          </Text>
-        </Skeleton>
-      </HStack>
-      <VStack spacing={0} alignItems={"flex-end"}>
-        <HStack alignItems={"flex-end"} spacing={1}>
-          <Text size="md" fontWeight={"600"} lineHeight={"16px"}>
-            {compactFormatter.format(Number(amount))}
-          </Text>
-          <Text fontSize={"2xs"} fontWeight={"700"} lineHeight={"16x"}>
-            B3TR
-          </Text>
-        </HStack>
-        <HStack>
-          <Text fontSize={"xs"} fontWeight={"400"}>
-            assigned
-          </Text>
-        </HStack>
-      </VStack>
-    </HStack>
   )
 }
