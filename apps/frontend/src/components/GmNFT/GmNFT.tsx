@@ -25,7 +25,7 @@ import { ShareButtons } from "../ShareButtons"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { motion } from "framer-motion"
 import { RiArrowRightSLine } from "react-icons/ri"
-import { coinFlipAnimation, flipAnimation, pulseAnimation } from "@/constants"
+import { coinFlipAnimation, pulseAnimation } from "@/constants"
 
 // Convert Button to a motion component
 const MotionImage = motion(Image)
