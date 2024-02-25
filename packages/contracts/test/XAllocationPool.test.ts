@@ -633,7 +633,7 @@ describe("X-Allocation Pool", async function () {
     expect(realTimeApp2).to.eql(round1App2Earnings)
   })
 
-  it.only("User should be able to check his available earnings to claim", async function () {
+  it("User should be able to check his available earnings to claim", async function () {
     const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, b3tr, minterAccount } =
       await getOrDeployContractInstances({
         forceDeploy: true,
