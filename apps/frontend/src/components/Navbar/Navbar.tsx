@@ -38,6 +38,11 @@ export const Navbar: React.FC = () => {
     [allocationRoundsEvents, account, isAdminOfEmissions],
   )
 
+  const parsedRoutesToRender = useMemo(() => {
+    if (routesToRender.length === 1 && routesToRender[0]?.name === "Dashboard") return []
+    return routesToRender
+  }, [routesToRender])
+
   console.log("routesToRender", routesToRender)
   const bg = useColorModeValue("#F7F7F7", "#131313")
   return (
@@ -50,9 +55,9 @@ export const Navbar: React.FC = () => {
         alignItems={"center"}
         maxW="container.xl">
         {isDesktop ? (
-          <DesktopNavBar routesToRender={routesToRender} />
+          <DesktopNavBar routesToRender={parsedRoutesToRender} />
         ) : (
-          <MobileNavBar routesToRender={routesToRender} />
+          <MobileNavBar routesToRender={parsedRoutesToRender} />
         )}
       </Container>
     </Box>
