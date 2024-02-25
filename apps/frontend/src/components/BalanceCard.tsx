@@ -23,6 +23,7 @@ import { useMemo } from "react"
 import { backdropBlurAnimation } from "@/app/theme"
 import { B3TRIcon, VOT3Icon } from "./Icons"
 import { SwapButton } from "./Swap/SwapButton"
+import { useTokenColors } from "@/hooks"
 
 const DECIMAL_PLACES = 4
 
@@ -41,8 +42,7 @@ type Props = {}
 export const BalanceCard: React.FC<Props> = () => {
   const { account } = useWallet()
 
-  const bgGradientFirst = useColorModeValue("100", "200")
-  const bgGradientSecond = useColorModeValue("50", "100")
+  const { b3trBgGradient, vot3BgGradient } = useTokenColors()
   const dividerColor = useColorModeValue("500", "600")
 
   const {
@@ -82,7 +82,7 @@ export const BalanceCard: React.FC<Props> = () => {
   const balances = (
     <VStack w={"full"}>
       <HStack
-        bgGradient={`linear(to-r, primary.${bgGradientFirst}, primary.${bgGradientSecond})`}
+        bgGradient={b3trBgGradient}
         py={6}
         px={6}
         h="full"
@@ -111,7 +111,7 @@ export const BalanceCard: React.FC<Props> = () => {
         </HStack>
       </HStack>
       <HStack
-        bgGradient={`linear(to-r, secondary.${bgGradientFirst}, secondary.${bgGradientSecond})`}
+        bgGradient={vot3BgGradient}
         py={6}
         px={6}
         h="full"
