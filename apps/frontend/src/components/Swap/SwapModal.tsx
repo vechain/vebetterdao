@@ -8,7 +8,6 @@ import {
   Heading,
   Text,
   VStack,
-  useColorModeValue,
   Modal,
   ModalContent,
   ModalOverlay,
@@ -33,8 +32,6 @@ export type Props = {
 
 export const SwapModal = ({ isOpen, onClose }: Props) => {
   const [isB3trToVot3, setIsB3trToVot3] = useState(true)
-
-  const buttonPrimaryAlpha = useColorModeValue("400", "300")
 
   const formData = useForm<{ amount: string }>()
   const { watch, setValue } = formData
@@ -143,10 +140,9 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
               </Flex>
               <Flex justify={"flex-end"} w="full" mt={2}>
                 <Button
-                  color="white"
-                  bgColor={`primary.${buttonPrimaryAlpha}`}
+                  colorScheme="primary"
                   w={"full"}
-                  rounded={"xl"}
+                  rounded={"full"}
                   isDisabled={Number(amount) === 0}
                   onClick={handleStake}
                   size="lg">

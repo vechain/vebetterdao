@@ -100,7 +100,7 @@ const CastVoteModalContent: React.FC<CastVoteModalFormContentProps> = ({ onVote,
       <ModalCloseButton />
       <ModalBody>
         <VStack spacing={4} alignItems="stretch">
-          <Card variant="outline" px={2} py={4}>
+          <Card px={2} py={4}>
             <VStack spacing={4} alignItems="center" justify="center">
               <Heading as="h3" size="sm">
                 Your voting power

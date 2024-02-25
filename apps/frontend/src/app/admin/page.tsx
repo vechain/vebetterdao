@@ -2,7 +2,8 @@
 
 import dynamic from "next/dynamic"
 import { Spinner, Card, CardBody, CardHeader, Heading, Stack, VStack, HStack } from "@chakra-ui/react"
-import { Suspense } from "react"
+import { Suspense, useEffect } from "react"
+import { AnalyticsUtils } from "@/utils"
 
 const StartEmissions = dynamic(() => import("./components/StartEmissions").then(mod => mod.StartEmissions), {
   ssr: false,
@@ -32,6 +33,10 @@ const BulkClaimXAppsAllocations = dynamic(
 const Pause = dynamic(() => import("./components/Pause").then(mod => mod.Pause), { ssr: false })
 
 export default function AdminPage() {
+  useEffect(() => {
+    AnalyticsUtils.trackPage("Admin")
+  }, [])
+
   return (
     <Suspense fallback={<Spinner alignSelf={"center"} />}>
       <Stack spacing={12} w={"full"}>
@@ -55,12 +60,11 @@ export default function AdminPage() {
           <CardBody>
             <VStack w={"full"} spacing={12} alignItems={"start"} height={"max-content"}>
               <HStack w={"full"} spacing={12} alignItems={"start"} height={"max-content"}>
-                <UpdateReceiverAddress />
-              </HStack>
-
-              <HStack w={"full"} spacing={12} alignItems={"start"} height={"max-content"}>
                 <ClaimXAppAllocations />
                 <BulkClaimXAppsAllocations />
+              </HStack>
+              <HStack w={"full"} spacing={12} alignItems={"start"} height={"max-content"}>
+                <UpdateReceiverAddress />
               </HStack>
             </VStack>
           </CardBody>

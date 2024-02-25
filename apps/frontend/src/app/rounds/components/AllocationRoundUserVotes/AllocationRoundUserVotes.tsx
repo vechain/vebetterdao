@@ -1,5 +1,17 @@
 import { useAllocationsRound, useGetVotesOnBlock, useHasVotedInRound, useRoundXApps, useUserVotesInRound } from "@/api"
-import { Box, Button, Card, CardBody, Flex, Heading, Skeleton, Stack, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Card,
+  CardBody,
+  Flex,
+  Heading,
+  Skeleton,
+  Stack,
+  Text,
+  VStack,
+  useColorModeValue,
+} from "@chakra-ui/react"
 import { useEffect, useMemo } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { SelectAppVotesInput } from "./components/SelectAppVotesInput"
@@ -147,6 +159,8 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     )
   }, [hasVoted, isVotingConcluded])
 
+  const buttonColor = useColorModeValue("primary.400", "primary.300")
+
   return (
     <Card w="full" id="user-votes">
       <CardBody>
@@ -207,13 +221,15 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
               </VStack>
             </Box>
             {!hasVoted && !isVotingConcluded && (
-              <Box w="full">
+              <Box w="full" mt={8}>
                 <Button
                   w="full"
                   isDisabled={isFormDisabled}
                   type="submit"
+                  size="lg"
+                  colorScheme="primary"
+                  borderRadius={"full"}
                   leftIcon={<MdHowToVote />}
-                  mt={[8, 8, 0]}
                   isLoading={castAllocationVotes.sendTransactionPending ?? castAllocationVotes.isTxReceiptLoading}>
                   Cast vote now
                 </Button>
@@ -237,7 +253,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
           w={"100%"}
           align="center"
           justify="center">
-          <Card w={["90%", "50%", "40%"]} rounded="xl" variant="outline">
+          <Card w={["90%", "50%", "40%"]}>
             <CardBody>
               <VStack gap={4}>
                 <Heading size="xl" textAlign={"center"}>

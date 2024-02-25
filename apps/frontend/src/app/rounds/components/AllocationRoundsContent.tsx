@@ -12,7 +12,7 @@ export const AllocationRoundsContent = () => {
         w="full"
         justify="space-between"
         align={["stretch", "stretch", "flex-start"]}
-        spacing={18}>
+        spacing={12}>
         <HStack width="full" flex={4} justifyContent="stretch" alignItems={"stretch"} spacing={4}>
           <AllocationRoundsList maxRoundsToShow={8} showLoadMore showViewAll={false} />
         </HStack>

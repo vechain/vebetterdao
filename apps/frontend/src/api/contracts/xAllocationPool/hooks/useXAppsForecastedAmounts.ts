@@ -5,7 +5,7 @@ import { getXAppForecastAmountQueryKey, getXAppForecastedAmount } from "./useXAp
 /**
  * Fetch the forcasted claimable amoount for ongoing round of multiple xApps
  * @param apps  the xApps
- * @returns  the claimable amoounts
+ * @returns  the claimable amoounts and the id
  */
 export const useXAppsForecastedAmounts = (apps: string[]) => {
   const { thor } = useConnex()
@@ -13,8 +13,7 @@ export const useXAppsForecastedAmounts = (apps: string[]) => {
     queries: apps.map(app => ({
       queryKey: getXAppForecastAmountQueryKey(app),
       queryFn: async () => {
-        const amount = await getXAppForecastedAmount(thor, app)
-        return { amount, app }
+        return await getXAppForecastedAmount(thor, app)
       },
     })),
   })

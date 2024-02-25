@@ -6,6 +6,11 @@ import { XAllocationPool__factory } from "@repo/contracts"
 
 const XALLOCATIONPOOL_CONTRACT = getConfig().xAllocationPoolContractAddress
 
+type HasXAppForecastedAmountQueryResponse = {
+  amount: string
+  appId: string
+}
+
 /**
  *  Get the amount of $B3TR an xApp can claim for an ongoing allocation round
  *
@@ -13,7 +18,10 @@ const XALLOCATIONPOOL_CONTRACT = getConfig().xAllocationPoolContractAddress
  * @param xAppId  the xApp id
  * @returns  amount of $B3TR an xApp can claim for an ongoing allocation round
  */
-export const getXAppForecastedAmount = async (thor: Connex.Thor, xAppId: string): Promise<string> => {
+export const getXAppForecastedAmount = async (
+  thor: Connex.Thor,
+  xAppId: string,
+): Promise<HasXAppForecastedAmountQueryResponse> => {
   const functionFragment = XAllocationPool__factory.createInterface()
     .getFunction("forecastClaimableAmountForActiveRound")
     .format("json")
@@ -21,7 +29,7 @@ export const getXAppForecastedAmount = async (thor: Connex.Thor, xAppId: string)
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
-  return FormattingUtils.scaleNumberDown(res.decoded[0], 18)
+  return { amount: FormattingUtils.scaleNumberDown(res.decoded[0], 18), appId: xAppId }
 }
 
 export const getXAppForecastAmountQueryKey = (xAppId?: string) => ["forecastAmountForActiveRound", xAppId]
@@ -37,6 +45,6 @@ export const useXAppForecastedAmount = (xAppId: string) => {
   return useQuery({
     queryKey: getXAppForecastAmountQueryKey(xAppId),
     queryFn: async () => await getXAppForecastedAmount(thor, xAppId),
-    enabled: !!thor,
+    enabled: !!thor && !!xAppId,
   })
 }

@@ -16,8 +16,8 @@ export const useIsNFTClaimable = () => {
   } = useParticipatedInGovernance(account)
 
   const { data: nftBalance, isLoading: isLoadingNftBalance, isError: isErrorNftBalance } = useB3trBadgeBalance(account)
-  if (isLoadingHasVoted || isErrorHasVoted || !hasVoted) return false
-  if (isLoadingNftBalance || isErrorNftBalance || nftBalance) return false
+  if (isLoadingHasVoted || isErrorHasVoted || !hasVoted) return { isClaimable: false, isOwned: false }
+  if (isLoadingNftBalance || isErrorNftBalance || nftBalance) return { isClaimable: false, isOwned: true }
 
-  return true
+  return { isClaimable: true, isOwned: false }
 }

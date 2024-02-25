@@ -5,7 +5,7 @@ import {
   useXAppClaimableAmount,
   useXApps,
 } from "@/api"
-import { useClaimXAppAllocation } from "@/hooks"
+import { useClaimXAppsAllocations } from "@/hooks"
 import {
   VStack,
   Button,
@@ -28,40 +28,29 @@ import {
   NumberIncrementStepper,
   NumberDecrementStepper,
 } from "@chakra-ui/react"
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 
 export const ClaimXAppAllocations = () => {
   const [appId, setAppId] = useState<string | undefined>()
   const [roundId, setRoundId] = useState<number>(1)
-  const [roundFieldIsDirty, setRoundFieldIsDirty] = useState(false)
-  const [amountToClaim, setAmountToClaim] = useState<number>(0)
 
   const { data: xApps } = useXApps()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  const { data: claimableAmount } = useXAppClaimableAmount(roundId?.toString() ?? "", appId ?? "")
-  const { data: isLastRoundFinalized } = useIsRoundFinalized(currentRoundId)
-  const { data: claimed } = useHasXAppClaimed(roundId?.toString() ?? "", appId ?? "")
+  const { data: claimableAmountResponse } = useXAppClaimableAmount(roundId?.toString() || "", appId || "")
 
-  const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useClaimXAppAllocation({
+  const { data: isLastRoundFinalized } = useIsRoundFinalized(currentRoundId)
+  const { data: claimedResponse } = useHasXAppClaimed(roundId?.toString() ?? "", appId ?? "")
+
+  const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useClaimXAppsAllocations({
     roundId: roundId?.toString() ?? "",
-    appId: appId ?? "",
-    invalidateCache: true,
+    appIds: appId ? [appId] : [],
   })
   const isLoading = isTxReceiptLoading || sendTransactionPending
 
   const handleSubmit = (event: { preventDefault: () => void }) => {
     event.preventDefault()
-    sendTransaction(undefined)
+    sendTransaction()
   }
-
-  useEffect(() => {
-    // if there is a claimable amount and it hasn't been claimed yet, set the amount to claim
-    if (claimableAmount !== undefined && claimed !== undefined && !claimed) {
-      setAmountToClaim(parseInt(claimableAmount))
-    } else {
-      setAmountToClaim(0)
-    }
-  }, [claimableAmount, appId, claimed])
 
   const isRoundValid = useMemo(() => {
     if (currentRoundId === undefined) return false
@@ -72,7 +61,7 @@ export const ClaimXAppAllocations = () => {
     }
 
     return false
-  }, [roundId, currentRoundId])
+  }, [roundId, currentRoundId, isLastRoundFinalized])
 
   const isFormValid = useMemo(() => isRoundValid && appId !== undefined && appId !== "", [appId, isRoundValid])
 
@@ -103,15 +92,15 @@ export const ClaimXAppAllocations = () => {
                   value={appId}>
                   {xApps?.map(item => {
                     return (
-                      <option key={"Select" + item.name} value={item.id}>
-                        {item.name}
+                      <option key={item.id} value={item.id}>
+                        {item.name + " - " + item.id}
                       </option>
                     )
                   })}
                 </Select>
               </FormControl>
 
-              <FormControl isRequired isInvalid={!isRoundValid && roundFieldIsDirty}>
+              <FormControl isRequired isInvalid={!isRoundValid}>
                 <FormLabel>
                   <strong>{"Round #"}</strong>
                 </FormLabel>
@@ -119,10 +108,7 @@ export const ClaimXAppAllocations = () => {
                   min={0}
                   value={roundId}
                   isDisabled={isLoading}
-                  onChange={value => {
-                    setRoundId(parseInt(value))
-                    setRoundFieldIsDirty(true)
-                  }}>
+                  onChange={value => setRoundId(parseInt(value))}>
                   <NumberInputField />
                   <NumberInputStepper>
                     <NumberIncrementStepper />
@@ -135,10 +121,16 @@ export const ClaimXAppAllocations = () => {
 
             <FormControl>
               <FormLabel>
-                <strong>{"Claimable amount"}</strong>
+                <strong>{"Reserved amount"}</strong>
               </FormLabel>
+
               <InputGroup>
-                <Input placeholder="Amount to claim" type="number" value={amountToClaim} disabled={true} />
+                <Input
+                  placeholder="Reserved allocation"
+                  type="number"
+                  value={claimableAmountResponse?.amount ?? ""}
+                  disabled={true}
+                />
                 <InputRightAddon
                   pointerEvents="none"
                   pl={1}
@@ -152,8 +144,12 @@ export const ClaimXAppAllocations = () => {
               </InputGroup>
             </FormControl>
 
-            <Button isDisabled={!isFormValid || claimed} colorScheme="blue" type="submit" isLoading={isLoading}>
-              {claimed ? "Already claimed" : "Claim"}
+            <Button
+              isDisabled={!isFormValid || claimedResponse?.claimed}
+              colorScheme="blue"
+              type="submit"
+              isLoading={isLoading}>
+              {claimedResponse?.claimed ? "Already claimed" : "Claim"}
             </Button>
           </VStack>
         </form>

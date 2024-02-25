@@ -2,11 +2,11 @@ import { useAllocationAmount, useAllocationVoters, useAllocationsRound, useHasVo
 import { B3TRIcon } from "@/components"
 import {
   Box,
+  Button,
   Card,
   CardBody,
   HStack,
   Heading,
-  Link,
   Skeleton,
   Stack,
   Text,
@@ -34,11 +34,6 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
 
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
 
-  const totalAmount = useMemo(() => {
-    if (!roundAmount) return 0
-    return BigInt(roundAmount.treasury) + BigInt(roundAmount.voteX2Earn) + BigInt(roundAmount.voteXAllocations)
-  }, [roundAmount])
-
   const isVotingConcluded = data?.voteEndTimestamp?.isBefore()
 
   const bgGradient = useColorModeValue("500", "300")
@@ -52,30 +47,30 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
     if (!isVotingConcluded) {
       if (hasVoted)
         return (
-          <Link href="#user-votes" color="green" fontSize={"lg"}>
+          <Button as="a" href="#user-votes" colorScheme="green" size={["sm", "sm", "md"]}>
             You have already voted in this round
-          </Link>
+          </Button>
         )
       return (
-        <Link href="#user-votes" color="orange" fontSize={"lg"}>
+        <Button as="a" href="#user-votes" colorScheme="orange" size={["sm", "sm", "md"]}>
           You have not voted yet in this round
-        </Link>
+        </Button>
       )
     }
     if (hasVoted)
       return (
-        <Link href="#user-votes" color="green" fontSize={"lg"}>
+        <Button as="a" href="#user-votes" colorScheme="green" size={["sm", "sm", "md"]}>
           Voting concluded - You casted your vote successfully
-        </Link>
+        </Button>
       )
     return (
-      <Link href="#user-votes" color="orange" fontSize={"lg"}>
+      <Button as="a" href="#user-votes" colorScheme="orange" size={["sm", "sm", "md"]}>
         Voting concluded - You did not cast your vote
-      </Link>
+      </Button>
     )
   }, [hasVoted, isVotingConcluded])
   return (
-    <Card w="full">
+    <Card w="full" borderRadius={"3xl"}>
       <CardBody>
         <Stack direction={["column", "row"]} justify="space-between" spacing={[12, 12, 40]}>
           <VStack spacing={4} align="flex-start" flex={1}>
@@ -96,7 +91,7 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
                 }
               </Text>
             </Skeleton>
-            <Skeleton isLoaded={!hasVotedLoading}>{renderVoteStatusMessage}</Skeleton>
+            {!!account && <Skeleton isLoaded={!hasVotedLoading}>{renderVoteStatusMessage}</Skeleton>}
           </VStack>
           <VStack flex={0.8}>
             <VStack

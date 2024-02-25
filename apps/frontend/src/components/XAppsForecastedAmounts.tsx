@@ -53,7 +53,7 @@ export const XAppsForecastedAmounts = ({ roundId }: Props) => {
     () =>
       xAppsClaimableAmounts.map(app => ({
         amount: app.data?.amount ?? "0",
-        app: xApps?.find(xa => xa.id === app.data?.app)?.id as string,
+        app: xApps?.find(xa => xa.id === app.data?.appId)?.id as string,
       })),
     [xAppsClaimableAmounts, xApps],
   )
@@ -73,7 +73,7 @@ export const XAppsForecastedAmounts = ({ roundId }: Props) => {
   const isUnallocatedLoading = roundAmountLoading || xAppsClaimableAmounts.some(query => query.isLoading)
 
   return (
-    <Card flex={1} h="full" w="full" variant="outline">
+    <Card flex={1} h="full" w="full">
       <CardHeader>
         <HStack justify={"space-between"} w="full">
           <Heading size="md">Next allocations to xApps</Heading>
