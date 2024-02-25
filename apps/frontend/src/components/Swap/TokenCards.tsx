@@ -144,7 +144,7 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
               />
               <VStack justify="stretch" flex={1} gap={1}>
                 <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
-                  <Text>{isB3trToVot3 ? "You Pay" : "You Receive"}</Text>
+                  <Text>{isB3trToVot3 ? "Send" : "Receive"}</Text>
                   <VStack gap={0} alignItems={"flex-end"}>
                     <Text fontSize="10px">Balance</Text>
                     <HStack gap={1}>
@@ -187,7 +187,7 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
               />
               <VStack justify="stretch" flex={1} gap={1}>
                 <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
-                  <Text>{isB3trToVot3 ? "You Receive" : "You Pay"}</Text>
+                  <Text>{isB3trToVot3 ? "Receive" : "Send"}</Text>
                   <VStack gap={0} alignItems={"flex-end"}>
                     <Text fontSize="10px">Balance</Text>
                     <HStack gap={1}>
