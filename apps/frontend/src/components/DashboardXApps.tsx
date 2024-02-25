@@ -48,7 +48,7 @@ export const DashboardXApps = () => {
 }
 
 const XApp = ({ xApp }: { xApp: XApp }) => {
-  const { data: appMetadata, isLoading: appMetadataLoading, isError: isMetadataError } = useXAppMetadata(xApp.id)
+  const { data: appMetadata, isLoading: appMetadataLoading, isError: isAppMetadataError } = useXAppMetadata(xApp.id)
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
 
   const buttonIconColor = useColorModeValue("primary.500", "white")
@@ -72,9 +72,9 @@ const XApp = ({ xApp }: { xApp: XApp }) => {
               <IconButton
                 isRound={true}
                 variant="solid"
-                aria-label="View dApp"
+                aria-label="Go to dApp"
                 fontSize="20px"
-                disabled={isMetadataError}
+                disabled={isAppMetadataError}
                 onClick={() => window.open(appMetadata?.external_url, "_blank")}
                 color={buttonIconColor}
                 icon={<FiArrowUpRight />}
@@ -85,7 +85,7 @@ const XApp = ({ xApp }: { xApp: XApp }) => {
           <VStack spacing={1} align="flex-start">
             <Skeleton isLoaded={!appMetadataLoading}>
               <Text fontWeight={"600"} size={"xs"}>
-                {appMetadata?.name}
+                {appMetadata?.name ?? "Error loading name"}
               </Text>
             </Skeleton>
             <Skeleton isLoaded={!appMetadataLoading}>
