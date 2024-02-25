@@ -113,6 +113,8 @@ export const VoterRewards: React.FC = () => {
       )
   }, [isClaimRewardsLoading, sendTransactionPending, isTxReceiptLoading])
 
+  if (allocationRoundsEvents?.created.length === 0 || !account) return null
+
   return (
     <>
       <Card w="full">
@@ -152,30 +154,6 @@ export const VoterRewards: React.FC = () => {
             </Button>
           </VStack>
         </CardBody>
-        {!account && (
-          <Flex
-            borderRadius={"lg"}
-            backdropFilter="blur(10px)"
-            position={"absolute"}
-            h={"100%"}
-            w={"100%"}
-            align="center"
-            justify="center"
-            zIndex={2}>
-            <Card>
-              <CardBody>
-                <VStack gap={4}>
-                  <Heading size="md" textAlign={"center"}>
-                    You are not connected
-                  </Heading>
-                  <Text textAlign={"center"} fontSize="14px">
-                    Connect your wallet to check your rewards
-                  </Text>
-                </VStack>
-              </CardBody>
-            </Card>
-          </Flex>
-        )}
 
         {allocationRoundsEvents && allocationRoundsEvents?.created.length === 0 && (
           <Flex
