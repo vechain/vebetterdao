@@ -1,10 +1,11 @@
 // We recommend this pattern to be able to use async/await everywhere
 
+import { getContractsConfig } from "@repo/config"
 import { deployAll } from "./deploy"
 
 // and properly handle errors.
 const execute = async () => {
-  await deployAll()
+  await deployAll(getContractsConfig())
 }
 
 execute()
