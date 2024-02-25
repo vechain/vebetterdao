@@ -13,7 +13,7 @@ export const Navbar: React.FC = () => {
 
   const bg = useColorModeValue("#F7F7F7", "#131313")
   return (
-    <Box bg={bg} px={0} position={"sticky"} top={0} zIndex={10} py={4} h={"auto"} w={"full"} mb={10}>
+    <Box bg={bg} px={0} position={"sticky"} top={0} zIndex={10} py={4} h={"auto"} w={"full"}>
       <Container
         w="full"
         display="flex"

@@ -1,6 +1,6 @@
 "use client"
 // app/layout.tsx
-import { Container } from "@chakra-ui/react"
+import { Container, Flex, VStack } from "@chakra-ui/react"
 import { Providers } from "./providers"
 
 import dayjs from "dayjs"
@@ -42,19 +42,23 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body>
         <Providers>
-          <Navbar />
-          <Container
-            mt={10}
-            mb={[20, 20, 40]}
-            maxW={"container.xl"}
-            minH="100vh"
-            display={["flex"]}
-            alignItems={["center"]}
-            justifyContent={["flex-start"]}
-            flexDirection={["column"]}>
-            {children}
-          </Container>
-          <Footer />
+          <VStack h="100vh" gap={0} align="stretch">
+            <Navbar />
+            <Flex>
+              <Container
+                mt={10}
+                mb={[20, 20, 40]}
+                maxW={"container.xl"}
+                display={"flex"}
+                flex={1}
+                alignItems={"center"}
+                justifyContent={"flex-start"}
+                flexDirection={"column"}>
+                {children}
+              </Container>
+            </Flex>
+            <Footer />
+          </VStack>
         </Providers>
       </body>
     </html>
