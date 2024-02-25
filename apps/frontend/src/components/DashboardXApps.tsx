@@ -51,13 +51,6 @@ const XApp = ({ xApp }: { xApp: XApp }) => {
   const { data: appMetadata, isLoading: appMetadataLoading, isError: isMetadataError } = useXAppMetadata(xApp.id)
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
 
-  const formatDescription = (description: string) => {
-    if (description.length > 100) {
-      return `${description.slice(0, 110)}…`
-    }
-    return description
-  }
-
   const buttonIconColor = useColorModeValue("primary.500", "white")
 
   return (
@@ -96,8 +89,8 @@ const XApp = ({ xApp }: { xApp: XApp }) => {
               </Text>
             </Skeleton>
             <Skeleton isLoaded={!appMetadataLoading}>
-              <Text size={"xs"} color={"gray.500"}>
-                {formatDescription(appMetadata?.description ?? "Error loading description")}
+              <Text fontSize={"sm"} color={"gray.500"}>
+                {appMetadata?.description ?? "Error loading description"}
               </Text>
             </Skeleton>
           </VStack>
