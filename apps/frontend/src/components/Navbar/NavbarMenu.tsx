@@ -41,6 +41,8 @@ export const NavbarMenu = ({ onMenuClick }: Props) => {
 
         return (
           <Button
+            colorScheme={isSelected ? "primary" : "gray"}
+            rounded={"full"}
             w={["full", "full", "auto"]}
             leftIcon={<Icon as={route.icon} />}
             key={route.name}

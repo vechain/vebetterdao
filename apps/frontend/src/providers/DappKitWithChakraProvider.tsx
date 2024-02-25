@@ -1,4 +1,5 @@
-import { useColorMode } from "@chakra-ui/react"
+import { useTokenColors } from "@/hooks"
+import { useColorMode, useToken } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { WalletConnectOptions } from "@vechain/dapp-kit-react"
 import dynamic from "next/dynamic"
@@ -29,9 +30,14 @@ export const DappKitWithChakraProvider = ({ children }: { children: React.ReactN
   const { colorMode } = useColorMode()
   const isDark = colorMode === "dark"
 
+  const [primary50] = useToken("colors", ["primary.50"])
+  //   TODO: dark mode support
   return (
     <DAppKitProvider
       usePersistence
+      themeVariables={{
+        "--vdk-color-light-primary": primary50,
+      }}
       themeMode={isDark ? "DARK" : "LIGHT"}
       requireCertificate={false}
       genesis={appConfig.network.genesis}

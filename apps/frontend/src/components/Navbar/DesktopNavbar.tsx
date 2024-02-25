@@ -13,7 +13,16 @@ export const DesktopNavBar = () => {
         <NavbarLogo />
       </HStack>
 
-      <HStack flex={1.5} spacing={4} justifyContent={"center"}>
+      {/* {TODO: dark mode support} */}
+      <HStack
+        spacing={4}
+        justifyContent={"center"}
+        borderRadius={"full"}
+        borderWidth={1}
+        borderColor={"rgba(0,0,0, 0.06)"}
+        bg={"rgba(255, 255, 255, 0.50)"}
+        py={2}
+        px={4}>
         <NavbarMenu />
       </HStack>
       <HStack flex={1} spacing={4} justifyContent={"end"}>
