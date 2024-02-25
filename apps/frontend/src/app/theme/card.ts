@@ -19,6 +19,14 @@ const variants = {
         bg: props.colorMode === "dark" ? "#2D2D2F" : "#FAFAFA",
       },
     }),
+  baseWithBorder: (props: StyleFunctionProps) =>
+    definePartsStyle({
+      container: {
+        bg: props.colorMode === "dark" ? "#1A1A1A" : "#FFF",
+        borderWidth: "1px",
+        borderColor: props.colorMode === "dark" ? "#2D2D2F" : "gray.100",
+      },
+    }),
 }
 
 // export variants in the component theme
