@@ -15,13 +15,7 @@ import {
 } from "@/b3tr/contracts"
 
 const importContract = async (contract: Contract, address: string, network: typeof soloStaging) => {
-  const existingContracts = await DB.contracts
-    .filter((c) => c.address === address)
-    .toArray()
-
-  if (existingContracts.length > 0) {
-    return
-  }
+  await DB.contracts.clear()
 
   const entity: Entities.Contract = {
     abi: contract.abi,
