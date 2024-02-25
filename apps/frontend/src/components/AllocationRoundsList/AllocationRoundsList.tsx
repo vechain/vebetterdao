@@ -65,7 +65,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
             {invertedCreatedRounds && invertedCreatedRounds.length > maxRoundsToShow && showViewAll && (
               <Button
                 variant="link"
-                colorScheme="blue"
+                colorScheme="primary"
                 rightIcon={<FiArrowUpRight />}
                 onClick={() => router.push("/rounds")}>
                 See all rounds
@@ -104,7 +104,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
               {invertedCreatedRounds && invertedCreatedRounds.length > maxRoundsToShow && showViewAll && (
                 <Button
                   variant="link"
-                  colorScheme="blue"
+                  colorScheme="primary"
                   rightIcon={<FiArrowUpRight />}
                   onClick={() => router.push("/rounds")}>
                   See all rounds

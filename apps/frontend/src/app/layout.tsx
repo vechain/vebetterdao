@@ -44,7 +44,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <Providers>
           <VStack h="100vh" gap={0} align="stretch">
             <Navbar />
-            <Flex>
+            <Flex flex={1}>
               <Container
                 mt={10}
                 mb={[20, 20, 40]}

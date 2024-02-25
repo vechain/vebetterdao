@@ -26,8 +26,15 @@ const walletConnectOptions: WalletConnectOptions = {
 }
 
 export const DappKitWithChakraProvider = ({ children }: { children: React.ReactNode }) => {
-  const { colorMode } = useColorMode()
-  const isDark = colorMode === "dark"
+  //TODO: Reenable this to enable dark mode
+  //   const { colorMode } = useColorMode()
+  //   const isDark = colorMode === "dark"
+
+  //   const { setSelectedTheme } = useSelectedTheme()
+
+  //   useEffect(() => {
+  //     setSelectedTheme(isDark ? darkTheme : lightTheme)
+  //   }, [isDark])
 
   const [primary50] = useToken("colors", ["primary.50"])
   //   TODO: dark mode support
@@ -37,7 +44,8 @@ export const DappKitWithChakraProvider = ({ children }: { children: React.ReactN
       themeVariables={{
         "--vdk-color-light-primary": primary50,
       }}
-      themeMode={isDark ? "DARK" : "LIGHT"}
+      //   themeMode={isDark ? "DARK" : "LIGHT"}
+      themeMode="LIGHT"
       requireCertificate={false}
       genesis={appConfig.network.genesis}
       nodeUrl={appConfig.nodeUrl}

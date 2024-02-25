@@ -1,7 +1,6 @@
 import { HStack } from "@chakra-ui/react"
 import { NavbarLogo } from "./NavbarLogo"
 import { NavbarMenu } from "./NavbarMenu"
-import { ThemeSwitcher } from "../ThemeSwitcher"
 import dynamic from "next/dynamic"
 import { getConfig } from "@repo/config"
 import { Route } from "./Routes"
@@ -34,7 +33,7 @@ export const DesktopNavBar: React.FC<Props> = ({ routesToRender }) => {
         </HStack>
       )}
       <HStack flex={1} spacing={4} justifyContent={"end"}>
-        <ThemeSwitcher />
+        {/* <ThemeSwitcher /> */}
         <WalletButton />
       </HStack>
     </>

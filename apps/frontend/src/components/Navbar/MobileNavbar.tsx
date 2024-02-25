@@ -17,8 +17,7 @@ import dynamic from "next/dynamic"
 import { FaBars } from "react-icons/fa"
 import { NavbarMenu } from "./NavbarMenu"
 import { NavbarLogo } from "./NavbarLogo"
-import { ThemeSwitcher } from "../ThemeSwitcher"
-import { Route } from "./Routes"
+import { Route, Route } from "./Routes"
 
 const WalletButton = dynamic(() => import("@vechain/dapp-kit-react").then(mod => mod.WalletButton), { ssr: false })
 
@@ -33,9 +32,9 @@ const MobileMenuDrawer: React.FC<Omit<DrawerProps & Props, "children">> = ({ rou
           <VStack spacing={4} w="full">
             <NavbarMenu routesToRender={routesToRender} onMenuClick={props.onClose} />
           </VStack>
-          <Box w="full" alignSelf="flex-end">
+          {/* <Box w="full" alignSelf="flex-end">
             <ThemeSwitcher w={"full"} withText={true} />
-          </Box>
+          </Box> */}
         </DrawerBody>
       </DrawerContent>
     </Drawer>
