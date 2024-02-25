@@ -4,7 +4,6 @@ import {
   CardBody,
   Heading,
   HStack,
-  Spinner,
   Alert,
   AlertIcon,
   AlertTitle,
@@ -17,12 +16,14 @@ import {
   Text,
   useColorModeValue,
   Divider,
+  Spinner,
+  Image,
 } from "@chakra-ui/react"
 import { WalletButton, useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
-import { SwapB3trButton } from "./SwapB3trButton"
-import { backdropBlurAnimation } from "@/app/theme"
-import { B3TRIcon, VOT3Icon } from "./Icons"
+import { B3TRIcon, TwoFingersIcon, VOT3Icon } from "./Icons"
+import { SwapButton } from "./Swap/SwapButton"
+import { useTokenColors } from "@/hooks"
 
 const DECIMAL_PLACES = 4
 
@@ -41,8 +42,7 @@ type Props = {}
 export const BalanceCard: React.FC<Props> = () => {
   const { account } = useWallet()
 
-  const bgGradientFirst = useColorModeValue("100", "200")
-  const bgGradientSecond = useColorModeValue("50", "100")
+  const { b3trBgGradient, vot3BgGradient } = useTokenColors()
   const dividerColor = useColorModeValue("500", "600")
 
   const {
@@ -79,23 +79,10 @@ export const BalanceCard: React.FC<Props> = () => {
       </Alert>
     )
 
-  if (hasNoBalance)
-    return (
-      <Stack direction={["column", "column", "row"]} spacing={8} w="full">
-        <Alert status="warning" borderRadius={"lg"}>
-          <AlertIcon />
-          <Box>
-            <AlertTitle>You have no balance</AlertTitle>
-            <AlertDescription>Interact with x2Earn dapps to get started!</AlertDescription>
-          </Box>
-        </Alert>
-      </Stack>
-    )
-
   const balances = (
-    <>
-      <VStack
-        bgGradient={`linear(to-r, primary.${bgGradientFirst}, primary.${bgGradientSecond})`}
+    <VStack w={"full"}>
+      <HStack
+        bgGradient={b3trBgGradient}
         py={6}
         px={6}
         h="full"
@@ -113,7 +100,7 @@ export const BalanceCard: React.FC<Props> = () => {
             borderRadius="7px"
           />
           <VStack align="self-start">
-            <B3TRIcon size={32} />
+            <B3TRIcon boxSize="32px" />
             <Heading size="2xl" fontWeight={900}>
               {compactFormatter.format(Number(b3trBalanceScaled))}
             </Heading>
@@ -122,9 +109,9 @@ export const BalanceCard: React.FC<Props> = () => {
             </Text>
           </VStack>
         </HStack>
-      </VStack>
-      <VStack
-        bgGradient={`linear(to-r, secondary.${bgGradientFirst}, secondary.${bgGradientSecond})`}
+      </HStack>
+      <HStack
+        bgGradient={vot3BgGradient}
         py={6}
         px={6}
         h="full"
@@ -142,7 +129,7 @@ export const BalanceCard: React.FC<Props> = () => {
             borderRadius="7px"
           />
           <VStack align="self-start">
-            <VOT3Icon size={32} />
+            <VOT3Icon boxSize={"32px"} />
             <Heading size="2xl" fontWeight={900}>
               {compactFormatter.format(Number(vot3BalanceScaled))}
             </Heading>
@@ -151,55 +138,75 @@ export const BalanceCard: React.FC<Props> = () => {
             </Text>
           </VStack>
         </HStack>
-      </VStack>
-    </>
+      </HStack>
+    </VStack>
   )
 
   return (
     <Card w="full">
       <CardBody>
-        <VStack spacing={4} align="flex-start">
+        <VStack spacing={4} align="flex-start" w={"full"}>
           <HStack justify={"space-between"} w="full">
             <Heading size="md">Balance</Heading>
-            <Flex>{isLoading ? <Spinner size="sm" /> : <SwapB3trButton />}</Flex>
+            <Flex>{isLoading ? <Spinner size="sm" /> : <SwapButton />}</Flex>
           </HStack>
           <Show below="sm">
             {" "}
-            <VStack spacing={6} w="full" color={"black"}>
+            <VStack w={"full"} spacing={6} color={"black"}>
               {balances}
             </VStack>
           </Show>
           <Show above="sm">
             {" "}
-            <HStack justify={"space-between"} w="full" spacing={6} color={"black"}>
+            <HStack w={"full"} spacing={6} color={"black"}>
               {balances}
             </HStack>
           </Show>
         </VStack>
       </CardBody>
       {!account && (
-        <Flex
-          backdropFilter="blur(10px)"
-          animation={backdropBlurAnimation("0px", "10px")}
-          position={"absolute"}
-          h={"100%"}
-          w={"100%"}
-          align="center"
-          justify="center">
-          <Card w={["90%", "50%", "40%"]} rounded="xl" variant="outline">
-            <CardBody>
-              <VStack gap={4}>
-                <Heading fontSize="xl" textAlign={"center"}>
-                  No wallet connected
+        <>
+          <Image
+            src="/images/not_connected_wallet_bottom_layer.png"
+            pos={"absolute"}
+            bottom={0}
+            borderRadius={"lg"}
+            left={0}
+            zIndex={1}
+            boxSize={"full"}
+            w="full"
+          />
+          <Image
+            src="/images/not_connected_wallet_top_layer.png"
+            pos={"absolute"}
+            top={0}
+            borderRadius={"lg"}
+            right={0}
+            zIndex={1}
+            h="50%"
+          />
+          <Flex
+            borderRadius={"lg"}
+            bg="primary.400"
+            position={"absolute"}
+            h={"100%"}
+            w={"100%"}
+            align="center"
+            justify="center">
+            <VStack gap={6} zIndex={2}>
+              <TwoFingersIcon boxSize={20} />
+              <Box>
+                <Heading fontSize="xl" textAlign={"center"} color="white">
+                  Wallet not connected
                 </Heading>
-                <Text textAlign={"center"} fontSize="lg" fontWeight={"thin"}>
+                <Text mt={2} textAlign={"center"} fontSize="md" fontWeight={"400"} color="white">
                   Connect your wallet to check your balance
                 </Text>
-                <WalletButton />
-              </VStack>
-            </CardBody>
-          </Card>
-        </Flex>
+              </Box>
+              <WalletButton />
+            </VStack>
+          </Flex>
+        </>
       )}
     </Card>
   )

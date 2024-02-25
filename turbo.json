@@ -36,7 +36,7 @@
 
     "@repo/contracts#check-contracts-deployment": {
       "cache": false,
-      "dependsOn": ["^compile", "//#solo-up", "@repo/config#check-or-generate-local-config"]
+      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
     "clean": {
       "cache": false
@@ -55,19 +55,24 @@
       "cache": false
     },
     "test:hardhat": {
-      "cache": false
+      "cache": false,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
     },
     "generate-b3tr-badge-metadata": {
-      "cache": false
+      "cache": false,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
     },
     "upload-b3tr-badge-metadata": {
-      "cache": false
+      "cache": false,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
     },
     "generate-xapp-metadata": {
-      "cache": false
+      "cache": false,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
     },
     "upload-xapp-metadata": {
-      "cache": false
+      "cache": false,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
     }
   }
 }

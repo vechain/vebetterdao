@@ -1,8 +1,10 @@
 import localConfig from "./local"
 import stagingConfig from "./solo-staging"
+import { getContractsConfig } from "./contracts"
 import { Network } from "@repo/constants"
 
 export type AppConfig = {
+  mixPanelProjectToken?: string
   b3trContractAddress: string
   vot3ContractAddress: string
   b3trGovernorAddress: string
@@ -23,3 +25,5 @@ export const getConfig = (env?: string): AppConfig => {
   if (appEnv === "solo-staging") return stagingConfig
   throw new Error(`Unsupported NEXT_PUBLIC_APP_ENV ${appEnv}`)
 }
+
+export { getContractsConfig }

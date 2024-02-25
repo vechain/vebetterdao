@@ -1,7 +1,10 @@
-import { useAllocationsRound, useGetVotesOnBlock } from "@/api"
-import { Box, Card, CardBody, HStack, Heading, Icon, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { getXAppMetadata, getXAppMetadataQueryKey, useAllocationsRound, useGetVotesOnBlock } from "@/api"
+import { getIpfsImage, getIpfsImageQueryKey } from "@/api/ipfs"
+import { notFoundImage } from "@/constants"
+import { Box, Card, CardBody, HStack, Heading, Icon, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { useQueries } from "@tanstack/react-query"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { FaInfo, FaRecycle } from "react-icons/fa6"
+import { FaInfoCircle } from "react-icons/fa"
 
 type Props = {
   roundId: string
@@ -15,6 +18,7 @@ const compactFormatter = new Intl.NumberFormat("en-US", {
   notation: "compact",
   compactDisplay: "short",
 })
+
 export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
   const { account } = useWallet()
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(roundId)
@@ -38,9 +42,28 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
     return voteValue
   }
 
+  const appsMetadata = useQueries({
+    queries: votes.map(vote => ({
+      queryKey: getXAppMetadataQueryKey(vote.id),
+      queryFn: async () => {
+        return await getXAppMetadata(vote.id)
+      },
+    })),
+  })
+
+  const logos = useQueries({
+    queries: appsMetadata.map(metadata => ({
+      queryKey: getIpfsImageQueryKey(metadata.data?.logo),
+      queryFn: async () => {
+        return await getIpfsImage(metadata.data?.logo)
+      },
+      enabled: !!metadata.data?.logo,
+    })),
+  })
+
   const selectedVotes = votes.filter(vote => vote.value > 0)
   return (
-    <Card variant="outline" w="full">
+    <Card variant="filled" w="full">
       <CardBody>
         <VStack w="full" spacing={8}>
           <HStack justify={"space-between"} align="flex-end" w="full">
@@ -79,19 +102,28 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
                     key={`${vote.id}-line`}
                     w={`${getLineWidth(vote.value)}%`}
                     h={"full"}
-                    spacing={1}
+                    spacing={0}
                     align="center">
                     <Box w="3px" h={"full"} bg={getLinesColor(index)} />
-                    <Icon as={FaRecycle} color={getLinesColor(index)} boxSize={4} />
-                    <Heading size="xs">{vote.value.toFixed(2)}%</Heading>
+                    <Skeleton isLoaded={!logos[index]?.isLoading}>
+                      <Image
+                        src={logos[index]?.data?.image ?? notFoundImage}
+                        alt={appsMetadata[index]?.data?.name}
+                        boxSize={[6, 6, 8]}
+                        borderRadius="9px"
+                      />
+                    </Skeleton>
+                    <Text fontSize="sm" mt={1}>
+                      {vote.value.toFixed(2)}%
+                    </Text>
                   </VStack>
                 ))}
             </HStack>
           </VStack>
-          <HStack w="full" spacing={4}>
-            <Icon as={FaInfo} color="gray.500" />
-            <Text fontSize="sm" color="gray.500">
-              This amount was snapshoted at the moment the proposal was created. If you got more VOT3 after that, you
+          <HStack w="full" spacing={2}>
+            <Icon as={FaInfoCircle} color="gray" />
+            <Text fontSize="sm" color="gray">
+              This amount was snapshotted at the moment the proposal was created. If you got more VOT3 after that, you
               will use it on the next proposals.
             </Text>
           </HStack>

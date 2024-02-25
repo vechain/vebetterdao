@@ -1,29 +1,35 @@
 "use client"
 
-import { Box, Show, Spinner, Stack, VStack } from "@chakra-ui/react"
+import { AnalyticsUtils } from "@/utils"
+import { Spinner, Stack, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
-import { Suspense } from "react"
+import { Suspense, useEffect } from "react"
 
-const TvlBreakdownPieChart = dynamic(
-  () => import("@/components/TvlBreakdownPieChart").then(mod => mod.TvlBreakdownPieChart),
-  { ssr: false },
-)
-const CirculatingSupplyPieChart = dynamic(
-  () => import("@/components/CirculatingSupplyPieChart").then(mod => mod.CirculatingSupplyPieChart),
-  { ssr: false },
-)
 const BalanceCard = dynamic(() => import("@/components/BalanceCard").then(mod => mod.BalanceCard), { ssr: false })
-const ClaimNFT = dynamic(() => import("@/components/ClaimNFT").then(mod => mod.ClaimNFT), { ssr: false })
-const AllocationRoundsList = dynamic(
-  () => import("@/components/AllocationRoundsList/AllocationRoundsList").then(mod => mod.AllocationRoundsList),
-  { ssr: false },
-)
+const GmNFT = dynamic(() => import("@/components/GmNFT/GmNFT").then(mod => mod.GmNFT), { ssr: false })
 
 const VoterRewards = dynamic(() => import("@/components/VoterRewards/VoterRewards").then(mod => mod.VoterRewards), {
   ssr: false,
 })
 
+const SupplyBreakdownCard = dynamic(
+  () => import("@/components/SupplyBreakdownCard").then(mod => mod.SupplyBreakdownCard),
+  { ssr: false },
+)
+
+const DashboardAllocationRounds = dynamic(
+  () => import("./rounds/components/DashboardAllocationRounds").then(mod => mod.DashboardAllocationRounds),
+  { ssr: false },
+)
+
+const DashboardXApps = dynamic(() => import("@/components/DashboardXApps").then(mod => mod.DashboardXApps), {
+  ssr: false,
+})
+
 export default function Home() {
+  useEffect(() => {
+    AnalyticsUtils.trackPage("Home")
+  }, [])
   return (
     <VStack w="full" spacing={12}>
       <Suspense fallback={<Spinner alignSelf={"center"} />}>
@@ -32,26 +38,16 @@ export default function Home() {
           w="full"
           justify="space-between"
           align={["stretch", "stretch", "flex-start"]}
-          spacing={18}>
+          spacing={12}>
           <VStack flex={4} justifyContent="stretch" alignItems={"stretch"} spacing={4}>
-            <Show above="sm">
-              <ClaimNFT />
-              <BalanceCard />
-            </Show>
-            <Box>
-              <CirculatingSupplyPieChart />
-            </Box>
-            <Box>
-              <TvlBreakdownPieChart />
-            </Box>
+            <SupplyBreakdownCard />
+            <DashboardAllocationRounds />
+            <DashboardXApps />
           </VStack>
-          <VStack spacing={4} flex={2.5} position={["static", "static", "sticky"]} top={100} right={0}>
-            <Show below="sm">
-              <ClaimNFT />
-              <BalanceCard />
-            </Show>
+          <VStack spacing={4} flex={2.5}  top={100} right={0}>
+            <BalanceCard />
             <VoterRewards />
-            <AllocationRoundsList maxRounds={3} />
+            <GmNFT />
           </VStack>
         </Stack>
       </Suspense>

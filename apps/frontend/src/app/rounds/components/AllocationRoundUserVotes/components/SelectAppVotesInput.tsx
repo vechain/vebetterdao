@@ -1,4 +1,4 @@
-import { XApp } from "@/api"
+import { XApp, useXAppMetadata } from "@/api"
 import { FieldErrors, UseFormGetValues, UseFormRegister } from "react-hook-form"
 import { FormData } from "../AllocationRoundUserVotes"
 import {
@@ -8,12 +8,15 @@ import {
   FormHelperText,
   HStack,
   Heading,
-  Icon,
+  Image,
   Input,
   InputGroup,
   InputRightElement,
+  Skeleton,
+  Stack,
 } from "@chakra-ui/react"
-import { FaRecycle } from "react-icons/fa6"
+import { useIpfsImage } from "@/api/ipfs"
+import { notFoundImage } from "@/constants"
 
 type Props = {
   register: UseFormRegister<FormData>
@@ -38,9 +41,14 @@ export const SelectAppVotesInput = ({
 }: Props) => {
   console.log("errors", errors, "totalVotes", totalVotesAvailable)
 
+  const { data: appMetadata, error: appMetadatError } = useXAppMetadata(xApp?.id)
+  const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
+
   const value = getValues().votes[index]?.value
   return (
-    <HStack
+    <Stack
+      direction={["column", "column", "row"]}
+      spacing={4}
       w="full"
       justify={"space-between"}
       key={field.id}
@@ -49,9 +57,11 @@ export const SelectAppVotesInput = ({
       borderRadius={"lg"}
       py={2}
       px={4}>
-      <HStack spacing={2} align="center" flex={1}>
-        <Icon as={FaRecycle} />
-        <Heading size="sm">{xApp?.name}</Heading>
+      <HStack spacing={[2, 2, 3]} align="center" flex={1}>
+        <Skeleton isLoaded={!isLogoLoading}>
+          <Image src={logo?.image ?? notFoundImage} alt={appMetadata?.name} boxSize={8} borderRadius="9px" />
+        </Skeleton>
+        <Heading size={["md", "md", "sm"]}>{xApp?.name}</Heading>
       </HStack>
       <Box flex={[1, 1, 0.5]}>
         <FormControl isInvalid={!!errors.votes?.[index]} isDisabled={isDisabled}>
@@ -78,6 +88,6 @@ export const SelectAppVotesInput = ({
           )}
         </FormControl>
       </Box>
-    </HStack>
+    </Stack>
   )
 }

@@ -8,15 +8,17 @@ import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client
 
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 
-import { theme } from "./theme"
 import { DappKitWithChakraProvider } from "@/providers/DappKitWithChakraProvider"
+import { lightTheme } from "./theme"
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  //TODO: Reenable this to enable dark mode
+  //   const { selectedTheme } = useSelectedTheme()
   return (
     <CacheProvider>
       <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
         <ReactQueryDevtools initialIsOpen={false} />
-        <ChakraProvider theme={theme}>
+        <ChakraProvider theme={lightTheme}>
           <DappKitWithChakraProvider>{children}</DappKitWithChakraProvider>
         </ChakraProvider>
       </PersistQueryClientProvider>

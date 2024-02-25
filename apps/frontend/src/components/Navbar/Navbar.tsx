@@ -3,27 +3,50 @@ import { Box, Container, useColorModeValue, useMediaQuery } from "@chakra-ui/rea
 
 import { MobileNavBar } from "./MobileNavbar"
 import { DesktopNavBar } from "./DesktopNavbar"
+import { useAllocationsRoundsEvents } from "@/api"
+import { useHasRole, ADMIN_ROLE } from "@/api/contracts/account"
+import { useWallet } from "@vechain/dapp-kit-react"
+import { useMemo } from "react"
+import { Routes } from "./Routes"
+import { getConfig } from "@repo/config"
 
 export const Navbar: React.FC = () => {
-  const bg = useColorModeValue("gray.50", "gray.900")
   // ssr-friendly media query with fallback
   const [isDesktop] = useMediaQuery("(min-width: 992px)", {
     ssr: true,
     fallback: false, // return false on the server, and re-evaluate on the client side
   })
 
+  const { account } = useWallet()
+  const { data: allocationRoundsEvents } = useAllocationsRoundsEvents()
+  const { data: isAdminOfEmissions } = useHasRole(
+    ADMIN_ROLE,
+    getConfig().emissionsContractAddress,
+    account ?? undefined,
+  )
+
+  // Filter routes based on user's role and if there are any allocation rounds
+  const routesToRender = useMemo(
+    () =>
+      Routes.filter(route => {
+        return (
+          route.isVisible &&
+          (route.name === "Allocations" ? (allocationRoundsEvents?.created.length ?? 0) > 0 : true) &&
+          (route.name === "Admin" ? isAdminOfEmissions : true)
+        )
+      }),
+    [allocationRoundsEvents, account, isAdminOfEmissions],
+  )
+
+  const parsedRoutesToRender = useMemo(() => {
+    if (routesToRender.length === 1 && routesToRender[0]?.name === "Dashboard") return []
+    return routesToRender
+  }, [routesToRender])
+
+  console.log("routesToRender", routesToRender)
+  const bg = useColorModeValue("#F7F7F7", "#131313")
   return (
-    <Box
-      bg={bg}
-      px={0}
-      position={"sticky"}
-      top={0}
-      zIndex={10}
-      shadow="md"
-      py={4}
-      h={"auto"}
-      w={"full"}
-      borderBottomWidth={"1px"}>
+    <Box bg={bg} px={0} position={"sticky"} top={0} zIndex={10} py={4} h={"auto"} w={"full"}>
       <Container
         w="full"
         display="flex"
@@ -31,7 +54,11 @@ export const Navbar: React.FC = () => {
         justifyContent="space-between"
         alignItems={"center"}
         maxW="container.xl">
-        {isDesktop ? <DesktopNavBar /> : <MobileNavBar />}
+        {isDesktop ? (
+          <DesktopNavBar routesToRender={parsedRoutesToRender} />
+        ) : (
+          <MobileNavBar routesToRender={parsedRoutesToRender} />
+        )}
       </Container>
     </Box>
   )

@@ -1,17 +1,19 @@
 import { Button, Icon } from "@chakra-ui/react"
 import { usePathname, useRouter } from "next/navigation"
-import { Routes } from "./Routes"
+import { Route } from "./Routes"
 
 type Props = {
   onMenuClick?: () => void
+  routesToRender: Route[]
 }
-export const NavbarMenu = ({ onMenuClick }: Props) => {
+
+export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
   const router = useRouter()
   const pathname = usePathname()
 
   return (
     <>
-      {Routes.map(route => {
+      {routesToRender.map(route => {
         if (route.component) return route.component
         const isSelected = pathname === route.onClick
         const onClick = () => {
@@ -22,10 +24,10 @@ export const NavbarMenu = ({ onMenuClick }: Props) => {
           onMenuClick?.()
         }
 
-        if (!route.isVisible) return null
-
         return (
           <Button
+            colorScheme={isSelected ? "primary" : "gray"}
+            rounded={"full"}
             w={["full", "full", "auto"]}
             leftIcon={<Icon as={route.icon} />}
             key={route.name}

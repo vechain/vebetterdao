@@ -1,4 +1,4 @@
-import { useCurrentAllocationsRoundId, useVotingRewards } from "@/api"
+import { useAllocationsRoundsEvents, useCurrentAllocationsRoundId, useVotingRewards } from "@/api"
 import { Card, CardBody, HStack, Heading, Icon, VStack, Text, Button, Flex, Show } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import React, { useMemo } from "react"
@@ -20,6 +20,7 @@ export const VoterRewards: React.FC = () => {
   const { account } = useWallet()
 
   const rewardsPerRound = useVotingRewards(currentRoundId, account ?? undefined)
+  const { data: allocationRoundsEvents } = useAllocationsRoundsEvents()
 
   const roundRewards = useMemo(() => {
     if (!rewardsPerRound) return []
@@ -41,7 +42,7 @@ export const VoterRewards: React.FC = () => {
   const totalRewardsFormatted = useMemo(() => {
     if (!totalRewards) return "0"
 
-    return totalRewards.decimalPlaces(DECIMAL_PLACES, BigNumber.ROUND_DOWN).toString();
+    return totalRewards.decimalPlaces(DECIMAL_PLACES, BigNumber.ROUND_DOWN).toString()
   }, [totalRewards])
 
   const isRewardsLoading = rewardsPerRound?.some(reward => reward.isLoading) // Loading rewards to claim
@@ -52,6 +53,7 @@ export const VoterRewards: React.FC = () => {
 
   const isClaimRewardsLoading = isTxReceiptLoading || sendTransactionPending
 
+  if (allocationRoundsEvents?.created.length === 0) return null
   return (
     <Card w="full">
       <CardBody>
@@ -79,14 +81,21 @@ export const VoterRewards: React.FC = () => {
               isDisabled={totalRewards?.eq(0)}
               isLoading={isRewardsLoading || isClaimRewardsLoading}
               onClick={sendTransaction}>
-              Claim
+              Claim all
             </Button>
           </HStack>
         </VStack>
       </CardBody>
       {!account && (
-        <Flex backdropFilter="blur(10px)" position={"absolute"} h={"100%"} w={"100%"} align="center" justify="center">
-          <Card rounded="xl">
+        <Flex
+          borderRadius={"lg"}
+          backdropFilter="blur(10px)"
+          position={"absolute"}
+          h={"100%"}
+          w={"100%"}
+          align="center"
+          justify="center">
+          <Card>
             <CardBody>
               <VStack gap={4}>
                 <Heading size="md" textAlign={"center"}>

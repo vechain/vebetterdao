@@ -1,46 +1,126 @@
-import { RoundCreated, useAllocationsRound } from "@/api"
-import { Box, Card, CardBody, HStack, Heading, Icon, Text, useColorModeValue } from "@chakra-ui/react"
+import { RoundCreated, useAllocationAmount, useAllocationsRound } from "@/api"
+import {
+  Box,
+  Card,
+  CardBody,
+  HStack,
+  Heading,
+  Icon,
+  Show,
+  Skeleton,
+  Stack,
+  Text,
+  useColorModeValue,
+} from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { FaAngleRight } from "react-icons/fa6"
 import { AllocationRoundStateTag } from "../AllocationRoundStateTag"
+import { DotSymbol } from "@/components/DotSymbol"
+import { useMemo } from "react"
 
 type Props = {
   round: RoundCreated
 }
 
+const compactFormatter = new Intl.NumberFormat("en-US", {
+  notation: "compact",
+  compactDisplay: "short",
+})
+
 export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
   const router = useRouter()
 
   const { data: allocationRound } = useAllocationsRound(round.roundId)
+  const {
+    data: roundAmount,
+    isLoading: roundAmountLoading,
+    error: roundAmountError,
+  } = useAllocationAmount(round.roundId)
+
+  const totalAmount = useMemo(() => {
+    if (!roundAmount) return 0
+    return BigInt(roundAmount.voteXAllocations)
+  }, [roundAmount])
 
   const onRoundClick = () => {
     router.push(`/rounds/${round.roundId}`)
   }
+  const isActive = useMemo(() => {
+    return allocationRound?.state === "0" && allocationRound?.voteEndTimestamp?.isAfter()
+  }, [allocationRound, allocationRound?.state])
 
-  const cardHoverColor = useColorModeValue("primary.500", "primary.300")
+  const cardActiveBackgroundColor = useColorModeValue("secondary.50", "secondary.100")
+  const cardActiveBorderColor = useColorModeValue("secondary.400", "secondary.700")
+
+  const cardTextColor = isActive ? "black" : "inherit"
+
+  const activeHoverBorderColor = useColorModeValue("secondary.500", "secondary.200")
+  const nonActiveBackgroundColor = useColorModeValue("gray.50", "gray.700")
+
   return (
     <Card
+      borderRadius={"3xl"}
       w="full"
-      variant="outline"
-      borderWidth={allocationRound.isCurrent ? 3 : 1}
+      {...(isActive && {
+        bg: cardActiveBackgroundColor,
+        borderColor: cardActiveBorderColor,
+        borderWidth: "1px",
+      })}
       onClick={onRoundClick}
       _hover={{
-        borderColor: cardHoverColor,
+        ...(isActive && {
+          borderColor: activeHoverBorderColor,
+        }),
+        ...(!isActive && {
+          bg: nonActiveBackgroundColor,
+        }),
         cursor: "pointer",
         transition: "all 0.2s ease-in-out",
       }}>
       <CardBody>
         <HStack justify={"space-between"} w="full">
-          <Box w="full">
-            <HStack spacing={2} w="full" justify="space-between">
+          <Stack w="full" spacing={1}>
+            <HStack spacing={2} w="fit-content" justify="space-between">
+              <AllocationRoundStateTag state={allocationRound.state} size="md" />
+              <Show above="sm">
+                <DotSymbol color={"gray"} size={1} />
+                <Text fontWeight={"400"} color={"gray"}>
+                  {isActive
+                    ? `ends ${allocationRound.voteEndTimestamp?.fromNow()}`
+                    : `${allocationRound.voteStartTimestamp?.fromNow()}`}
+                </Text>
+              </Show>
+            </HStack>
+
+            <HStack mt={0.5} w="full" justify="space-between" color={cardTextColor}>
               <Heading as="h3" size="md">
                 Round #{round.roundId}
               </Heading>
-              <AllocationRoundStateTag state={allocationRound.state} size="md" />
             </HStack>
-            <Text>{allocationRound.voteEndTimestamp?.fromNow()}</Text>
-          </Box>
-          <Icon as={FaAngleRight} boxSize={6} />
+            <HStack w="fit-content" justify="space-between" fontSize={"sm"} color={cardTextColor}>
+              <Text>
+                {allocationRound.voteStartTimestamp?.format("MMM D")} {" - "}
+                {allocationRound.voteEndTimestamp?.format("MMM D")}
+              </Text>
+            </HStack>
+          </Stack>
+          <Stack w={"auto"}>
+            <HStack spacing={2} justify="space-between">
+              <Box width={"max-content"} justifyContent={"end"}>
+                <Skeleton isLoaded={!roundAmountLoading}>
+                  {roundAmountError ? (
+                    <Text color="red.500">{roundAmountError.message}</Text>
+                  ) : (
+                    <Box textAlign={"end"} color={cardTextColor}>
+                      <Heading size="lg">{compactFormatter.format(totalAmount)}</Heading>
+                      <Text fontSize={"md"}>total allocation</Text>
+                    </Box>
+                  )}
+                </Skeleton>
+              </Box>
+              <Icon as={FaAngleRight} boxSize={6} color={cardTextColor} />
+            </HStack>
+          </Stack>
         </HStack>
       </CardBody>
     </Card>

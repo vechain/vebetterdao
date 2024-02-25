@@ -35,8 +35,6 @@ interface IEmissions {
 
   function getCurrentCycle() external view returns (uint256);
 
-  function getInitialAllocations() external view returns (uint256[] memory);
-
   function getNextCycleBlock() external view returns (uint256);
 
   function getRemainingEmissions() external view returns (uint256);
@@ -56,8 +54,6 @@ interface IEmissions {
   function grantRole(bytes32 role, address account) external;
 
   function hasRole(bytes32 role, address account) external view returns (bool);
-
-  function initialEmissions() external view returns (uint256);
 
   function isCycleDistributed(uint256 cycle) external view returns (bool);
 
@@ -80,8 +76,6 @@ interface IEmissions {
   function scalingFactor() external view returns (uint256);
 
   function setCycleDuration(uint256 _cycleDuration) external;
-
-  function setInitialEmissions(uint256 _emissions) external;
 
   function setMaxVote2EarnDecay(uint256 _maxVote2EarnDecay) external;
   

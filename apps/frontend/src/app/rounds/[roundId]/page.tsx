@@ -1,7 +1,9 @@
 "use client"
 
+import { AnalyticsUtils } from "@/utils"
 import { Box, Stack, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
+import { useEffect } from "react"
 
 const AllocationRoundDetails = dynamic(
   () => import("../components/AllocationRoundDetails").then(mod => mod.AllocationRoundDetails),
@@ -31,7 +33,10 @@ type Props = {
     roundId: string
   }
 }
-export default function Round({ params }: Props) {
+export default function Round({ params }: Readonly<Props>) {
+  useEffect(() => {
+    AnalyticsUtils.trackPage(`Round/${params.roundId}`)
+  }, [])
   return (
     <VStack w="full" spacing={8}>
       <AllocationRoundNavbar roundId={params.roundId} />
@@ -41,7 +46,7 @@ export default function Round({ params }: Props) {
         w="full"
         justify="space-between"
         align={["flex-start", "flex-start", "stretch"]}
-        spacing={8}>
+        spacing={12}>
         <Box flex={[1, 0.6, 0.6, 0.7]} w="full">
           <AllocationXAppsVotesCard roundId={params.roundId} />
         </Box>
