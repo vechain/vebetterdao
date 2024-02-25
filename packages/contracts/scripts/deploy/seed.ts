@@ -19,15 +19,6 @@ export const seedLocalEnvironment = async (
   console.log("Seeding local environment")
   const accounts = await ethers.getSigners()
 
-  const amountToMint = "1000"
-  const amountToSwap = (Number(amountToMint) / 2).toString()
-
-  const accountsToSeed = accounts.slice(0, 5)
-  const admin = accounts[0]
-  // Mint $B3TR tokens to the first 5 accounts in the mnemonic
-  await mintAndApproveB3tr(b3tr, vot3, amountToMint, accountsToSeed, admin)
-  await swapB3trForVot3(vot3, amountToSwap, accountsToSeed)
-
   const APPS: App[] = [
     {
       address: accounts[6].address,
@@ -47,18 +38,29 @@ export const seedLocalEnvironment = async (
     },
   ]
 
-  //   Add x-apps to the XAllocationPool
-  await addXDapps(xAllocationVoting, accountsToSeed, APPS)
-
-  // const xDappsFromContract = await xAllocationVoting.getAllApps()
-
-  //   Mint some $B3TR
-  console.log("Minting some $B3TR...")
+  // Bootstrap emissions
+  console.log("Bootstrapping emissions...")
+  const admin = accounts[0]
   await b3tr.grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress()).then(async tx => await tx.wait())
   await emissions
     .connect(admin)
     .bootstrap()
     .then(async tx => await tx.wait())
+
+  //Airdrop B3TR from Treasury to the first 5 accounts
+  console.log("Airdropping B3TR from Treasury...")
+  const accountsToSeed = accounts.slice(0, 5)
+  const treasury = accounts[2]
+  for (const account of accountsToSeed) {
+    const tx = await b3tr.connect(treasury).transfer(account.address, ethers.parseEther("500"))
+    await tx.wait()
+  }
+
+  //   Add x-apps to the XAllocationPool
+  await addXDapps(xAllocationVoting, accountsToSeed, APPS)
+
+  // const xDappsFromContract = await xAllocationVoting.getAllApps()
+
   // await emissions
   //   .connect(admin)
   //   .start()
