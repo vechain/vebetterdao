@@ -1,6 +1,6 @@
 import { useColorMode } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
-import { WalletConnectOptions } from "@vechain/dapp-kit"
+import { WalletConnectOptions } from "@vechain/dapp-kit-react"
 import dynamic from "next/dynamic"
 
 const appConfig = getConfig()

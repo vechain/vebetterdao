@@ -4550,26 +4550,26 @@
     randombytes "^2.1.0"
     thor-devkit "^2.0.5"
 
-"@vechain/dapp-kit-react@^1.0.9":
-  version "1.0.9"
-  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit-react/-/dapp-kit-react-1.0.9.tgz#7dc0d55f826d3d5b2ea5ccdc24675623897f83c9"
-  integrity sha512-fRQCwq/1H1iwMYPI06nPqdLOmDmfrwI1EtuWktz5EmTm0LBUnnoXx+2hxFWrMgu21HnR6182BEM18MTim26Qqg==
+"@vechain/dapp-kit-react@^1.0.11":
+  version "1.0.11"
+  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit-react/-/dapp-kit-react-1.0.11.tgz#6c5fca8f00518a79a3822155beb2b8a2d57d7488"
+  integrity sha512-FAwrVtBJhHrsjlzHWnz5pVfxBNZ90gcWHHyR/72o244Je3wPdcX6nuoHIZx4fKM3e+/sWAn6hIfBjQ2dKJXxXQ==
   dependencies:
     "@lit/react" "^1.0.1"
     "@vechain/connex" "2.1.0"
     "@vechain/connex-framework" "2.1.0"
-    "@vechain/dapp-kit" "1.0.9"
-    "@vechain/dapp-kit-ui" "1.0.9"
-    thor-devkit "^2.0.9"
+    "@vechain/dapp-kit" "1.0.11"
+    "@vechain/dapp-kit-ui" "1.0.11"
+    thor-devkit "2.0.5"
     valtio "1.11.2"
 
-"@vechain/dapp-kit-ui@1.0.9", "@vechain/dapp-kit-ui@^1.0.9":
-  version "1.0.9"
-  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit-ui/-/dapp-kit-ui-1.0.9.tgz#7655423362fbb6ceb44a4ce3b27c605a138d82f9"
-  integrity sha512-WYgrv41bAfBJJwOXxT86Xtr0wf9eTD229EdzHlBmKWu79EhFyu2c3J8dCUBlhKx3WASzyYcPVhbqDBVhIW3YJw==
+"@vechain/dapp-kit-ui@1.0.11":
+  version "1.0.11"
+  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit-ui/-/dapp-kit-ui-1.0.11.tgz#11dc5ce6815d78a6d9819126fff5f33e13872728"
+  integrity sha512-Xy2vCwjMBBOPUIF49Oyrlo6N5K8znwNX2d7rVTmr0nJxua7VGXVstWH5jYlNJoj45TLgXfSqCtPsB5zb7/cSJA==
   dependencies:
     "@vechain/connex" "2.1.0"
-    "@vechain/dapp-kit" "1.0.9"
+    "@vechain/dapp-kit" "1.0.11"
     "@vechain/picasso" "2.1.1"
     "@wagmi/core" "^1.4.5"
     "@web3modal/ethereum" "^2.7.1"
@@ -4579,10 +4579,10 @@
     valtio "1.11.2"
     viem "^1.18.4"
 
-"@vechain/dapp-kit@1.0.9", "@vechain/dapp-kit@^1.0.9":
-  version "1.0.9"
-  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit/-/dapp-kit-1.0.9.tgz#7663a1dd76a2452c5f2f13a77e4aae5ba37c849f"
-  integrity sha512-8Y8AjNg9y3HNzNY9k7/68hSKA7zGCVv4ddb6+TBVycptpHF+QUBeQgZeyOIUfBn1vK6KX5OFNlgis4BG0dxFJQ==
+"@vechain/dapp-kit@1.0.11":
+  version "1.0.11"
+  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit/-/dapp-kit-1.0.11.tgz#338e0aee25d70b6a06779581688ba75e23484ead"
+  integrity sha512-vqxCj62rAOiB8lbn3o/q9mXy7Uf0Qv+G9cReiybuMPOMCb3DXuUDTP0i16fcUy4Mkvb+oss9oLNuVTm7BGnnxg==
   dependencies:
     "@vechain/connex" "2.1.0"
     "@vechain/connex-driver" "2.1.0"
@@ -4592,7 +4592,7 @@
     "@walletconnect/sign-client" "2.10.2"
     "@walletconnect/utils" "2.10.2"
     events "^3.3.0"
-    thor-devkit "^2.0.9"
+    thor-devkit "2.0.5"
     valtio "1.11.2"
 
 "@vechain/ethers@^4.0.27-5":
@@ -15511,6 +15511,19 @@ then-request@^6.0.0:
     http-response-object "^3.0.1"
     promise "^8.0.0"
     qs "^6.4.0"
+
+thor-devkit@2.0.5:
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/thor-devkit/-/thor-devkit-2.0.5.tgz#1cdd6d623f755e82aacf27290624372bfe6d1b90"
+  integrity sha512-82Z0/sY0+S54bhmg57r7iqoK7sJB1F5md3zWXjXXGPin3ejsR0Whw1O9wzWvE0DkTp1EiPHWFMTPtOejxaiXeA==
+  dependencies:
+    "@vechain/ethers" "^4.0.27-5"
+    bignumber.js "^7.2.1"
+    blakejs "^1.1.0"
+    elliptic "6.5.4"
+    fast-json-stable-stringify "^2.0.0"
+    js-sha3 "0.5.7"
+    rlp "^2.0.0"
 
 thor-devkit@^2.0.4, thor-devkit@^2.0.5, thor-devkit@^2.0.6, thor-devkit@^2.0.9:
   version "2.0.9"
