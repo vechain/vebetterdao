@@ -17,11 +17,11 @@ import {
   useColorModeValue,
   Divider,
   Spinner,
+  Image,
 } from "@chakra-ui/react"
 import { WalletButton, useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
-import { backdropBlurAnimation } from "@/app/theme"
-import { B3TRIcon, VOT3Icon } from "./Icons"
+import { B3TRIcon, TwoFingersIcon, VOT3Icon } from "./Icons"
 import { SwapButton } from "./Swap/SwapButton"
 
 const DECIMAL_PLACES = 4
@@ -165,29 +165,48 @@ export const BalanceCard: React.FC<Props> = () => {
         </VStack>
       </CardBody>
       {!account && (
-        <Flex
-          borderRadius={"lg"}
-          backdropFilter="blur(10px)"
-          animation={backdropBlurAnimation("0px", "10px")}
-          position={"absolute"}
-          h={"100%"}
-          w={"100%"}
-          align="center"
-          justify="center">
-          <Card w={["90%", "50%", "40%"]}>
-            <CardBody>
-              <VStack gap={4}>
-                <Heading fontSize="xl" textAlign={"center"}>
-                  No wallet connected
+        <>
+          <Image
+            src="/images/not_connected_wallet_bottom_layer.png"
+            pos={"absolute"}
+            bottom={0}
+            borderRadius={"lg"}
+            left={0}
+            zIndex={1}
+            boxSize={"full"}
+            w="full"
+          />
+          <Image
+            src="/images/not_connected_wallet_top_layer.png"
+            pos={"absolute"}
+            top={0}
+            borderRadius={"lg"}
+            right={0}
+            zIndex={1}
+            h="50%"
+          />
+          <Flex
+            borderRadius={"lg"}
+            bg="primary.400"
+            position={"absolute"}
+            h={"100%"}
+            w={"100%"}
+            align="center"
+            justify="center">
+            <VStack gap={6} zIndex={2}>
+              <TwoFingersIcon boxSize={20} />
+              <Box>
+                <Heading fontSize="xl" textAlign={"center"} color="white">
+                  Wallet not connected
                 </Heading>
-                <Text textAlign={"center"} fontSize="lg" fontWeight={"thin"}>
+                <Text mt={2} textAlign={"center"} fontSize="md" fontWeight={"400"} color="white">
                   Connect your wallet to check your balance
                 </Text>
-                <WalletButton />
-              </VStack>
-            </CardBody>
-          </Card>
-        </Flex>
+              </Box>
+              <WalletButton />
+            </VStack>
+          </Flex>
+        </>
       )}
     </Card>
   )
