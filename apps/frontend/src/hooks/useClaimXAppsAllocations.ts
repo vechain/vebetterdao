@@ -1,9 +1,4 @@
-import {
-  buildClaimXAppAllocationTx,
-  getB3TrBalanceQueryKey,
-  getHasXAppClaimedQueryKey,
-  getXAppClaimableAmountQueryKey,
-} from "@/api"
+import { buildClaimXAppAllocationTx, getB3TrBalanceQueryKey, getHasXAppClaimedQueryKey } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
@@ -52,13 +47,6 @@ export const useClaimXAppsAllocations = ({
   const handleOnSuccess = useCallback(async () => {
     if (invalidateCache) {
       for (const appId of appIds) {
-        await queryClient.cancelQueries({
-          queryKey: getXAppClaimableAmountQueryKey(roundId, appId),
-        })
-        await queryClient.refetchQueries({
-          queryKey: getXAppClaimableAmountQueryKey(roundId, appId),
-        })
-
         await queryClient.cancelQueries({
           queryKey: getHasXAppClaimedQueryKey(roundId, appId),
         })

@@ -10,9 +10,11 @@ interface IXAllocationPool {
     address caller
   );
 
-  function forecastClaimableAmountForActiveRound(bytes32 appId) external view returns (uint256);
+  function currentRoundEarnings(bytes32 appId) external view returns (uint256);
 
   function claimableAmount(uint256 roundId, bytes32 appId) external view returns (uint256);
+
+  function roundEarnings(uint256 roundId, bytes32 appId) external view returns (uint256);
 
   function baseAllocationAmount(uint256 roundId) external view returns (uint256);
 

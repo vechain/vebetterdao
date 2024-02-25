@@ -1,8 +1,8 @@
 import {
+  useAllocationsRound,
   useCurrentAllocationsRoundId,
   useHasXAppClaimed,
-  useIsRoundFinalized,
-  useXAppClaimableAmount,
+  useXAppRoundEarnings,
   useXApps,
 } from "@/api"
 import { useClaimXAppsAllocations } from "@/hooks"
@@ -36,9 +36,9 @@ export const ClaimXAppAllocations = () => {
 
   const { data: xApps } = useXApps()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  const { data: claimableAmountResponse } = useXAppClaimableAmount(roundId?.toString() || "", appId || "")
+  const { data: currentRound } = useAllocationsRound(currentRoundId?.toString() ?? "")
+  const { data: claimableAmountResponse } = useXAppRoundEarnings(roundId?.toString() || "", appId || "")
 
-  const { data: isLastRoundFinalized } = useIsRoundFinalized(currentRoundId)
   const { data: claimedResponse } = useHasXAppClaimed(roundId?.toString() ?? "", appId ?? "")
 
   const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useClaimXAppsAllocations({
@@ -53,15 +53,12 @@ export const ClaimXAppAllocations = () => {
   }
 
   const isRoundValid = useMemo(() => {
-    if (currentRoundId === undefined) return false
-    if (roundId === parseInt(currentRoundId) && !isLastRoundFinalized) return false
+    if (currentRoundId === undefined || !currentRound) return false
+    if (roundId === parseInt(currentRoundId) && currentRound.state === "0") return false
+    if (roundId > parseInt(currentRoundId) || roundId === 0) return false
 
-    if (roundId && roundId > 0 && roundId <= parseInt(currentRoundId)) {
-      return true
-    }
-
-    return false
-  }, [roundId, currentRoundId, isLastRoundFinalized])
+    return true
+  }, [roundId, currentRoundId, currentRound])
 
   const isFormValid = useMemo(() => isRoundValid && appId !== undefined && appId !== "", [appId, isRoundValid])
 
@@ -71,9 +68,7 @@ export const ClaimXAppAllocations = () => {
         <HStack justify={"space-between"} align={"start"}>
           <VStack align={"start"}>
             <Heading size="md">Allocation claiming</Heading>
-            <Text>
-              Last round id: {currentRoundId} {`(${isLastRoundFinalized ? "finalized" : "not finalized"})`}
-            </Text>
+            <Text>Last round id: {currentRoundId}</Text>
           </VStack>
         </HStack>
       </CardHeader>
@@ -93,7 +88,7 @@ export const ClaimXAppAllocations = () => {
                   {xApps?.map(item => {
                     return (
                       <option key={item.id} value={item.id}>
-                        {item.name + " - " + item.id}
+                        {item.name + " - id: " + item.id}
                       </option>
                     )
                   })}
@@ -115,7 +110,7 @@ export const ClaimXAppAllocations = () => {
                     <NumberDecrementStepper />
                   </NumberInputStepper>
                 </NumberInput>
-                <FormErrorMessage>{"Round invalid or not finalized"}</FormErrorMessage>
+                <FormErrorMessage>{"Invalid round"}</FormErrorMessage>
               </FormControl>
             </HStack>
 
