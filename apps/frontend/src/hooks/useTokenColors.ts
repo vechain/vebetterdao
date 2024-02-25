@@ -20,5 +20,13 @@ export const useTokenColors = () => {
   const dividerAlpha = useColorModeValue("500", "600")
   const b3trDividerColor = `primary.${dividerAlpha}`
   const vot3dividerAlpha = `secondary.${dividerAlpha}`
-  return { b3trColor, vot3Color, b3trBgGradient, vot3BgGradient, b3trDividerColor, vot3dividerAlpha }
+
+  return {
+    b3trColor,
+    vot3Color,
+    b3trBgGradient,
+    vot3BgGradient,
+    b3trDividerColor,
+    vot3dividerAlpha,
+  }
 }

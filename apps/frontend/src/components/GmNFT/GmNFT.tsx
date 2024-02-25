@@ -25,35 +25,10 @@ import { ShareButtons } from "../ShareButtons"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { motion } from "framer-motion"
 import { RiArrowRightSLine } from "react-icons/ri"
+import { coinFlipAnimation, pulseAnimation } from "@/constants"
 
 // Convert Button to a motion component
 const MotionImage = motion(Image)
-
-const pulseAnimation = {
-  animate: {
-    scale: [1, 1.05, 1],
-    transition: {
-      duration: 1.5,
-      ease: "easeInOut",
-      repeat: Infinity,
-      repeatType: "loop",
-    },
-  },
-}
-
-const flipAnimation = {
-  animate: {
-    rotateY: [0, 360],
-    scale: [1, 0.7, 1],
-    borderRadius: ["20%", "50%", "20%"],
-    transition: {
-      duration: 2,
-      ease: "easeInOut",
-      repeat: Infinity,
-      repeatType: "loop",
-    },
-  },
-}
 
 export const GmNFT = () => {
   const { isClaimable: isNFTClaimable, isOwned } = useIsNFTClaimable()
@@ -98,14 +73,14 @@ export const GmNFT = () => {
         <ModalContent rounded="2xl" w="auto">
           <ModalBody py={6} px={12}>
             <VStack alignItems={"center"}>
-              <MotionImage {...flipAnimation} src="/images/b3trvot3-tokens.png" maxH="250px" />
+              <MotionImage {...coinFlipAnimation} src="/images/gm-nft-placeholder.png" maxH="250px" />
               {isClaimLoading /* isClaimLoading */ && (
-                <Text fontWeight={600} lineHeight="22px" fontSize={{ base: "18px", md: "20px" }}>
-                  Waiting for confirmation
+                <Text fontWeight={400} lineHeight="22px" fontSize={{ base: "16px", md: "16px" }} align={"center"}>
+                  Please confirm the transaction in your wallet
                 </Text>
               )}
               {(isLoadingNFT || isTxReceiptLoading) && (
-                <Text fontWeight={600} lineHeight="22px" fontSize={{ base: "18px", md: "20px" }} align={"center"}>
+                <Text fontWeight={400} lineHeight="22px" fontSize={{ base: "16px", md: "16px" }}>
                   Almost there...
                 </Text>
               )}
@@ -139,7 +114,7 @@ export const GmNFT = () => {
           <CardBody>
             <VStack spacing={4} align="flex-start" w={"full"}>
               <Heading size="md">Galaxy Member</Heading>
-              <VStack spacing={8} w="full">
+              <VStack spacing={4} w="full">
                 <HStack
                   color={"black"}
                   w="full"
@@ -155,19 +130,19 @@ export const GmNFT = () => {
                     <Text fontWeight={600} lineHeight="22px" fontSize={{ base: "18px", md: "20px" }}>
                       You have a new badge
                     </Text>
-                    <Button
-                      size="sm"
-                      isDisabled={isClaimDisabled}
-                      isLoading={isClaimLoading}
-                      onClick={handleFreeMint}
-                      color="white"
-                      bgColor={`primary.${buttonColor}`}
-                      borderRadius={8}
-                      _hover={{ bgColor: `primary.${nftToClaimColorCard}` }}>
-                      Mint now
-                    </Button>
                   </VStack>
                 </HStack>
+                <Button
+                  isDisabled={isClaimDisabled}
+                  isLoading={isClaimLoading}
+                  onClick={handleFreeMint}
+                  color="white"
+                  bgColor={`primary.${buttonColor}`}
+                  borderRadius={"full"}
+                  w={"full"}
+                  _hover={{ bgColor: `primary.${nftToClaimColorCard}` }}>
+                  Mint now
+                </Button>
               </VStack>
             </VStack>
           </CardBody>
