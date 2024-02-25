@@ -1,7 +1,10 @@
+import { darkTheme, lightTheme } from "@/app/theme"
+import { useSelectedTheme } from "@/store"
 import { useColorMode } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { WalletConnectOptions } from "@vechain/dapp-kit-react"
 import dynamic from "next/dynamic"
+import { useEffect } from "react"
 
 const appConfig = getConfig()
 
@@ -28,6 +31,12 @@ const walletConnectOptions: WalletConnectOptions = {
 export const DappKitWithChakraProvider = ({ children }: { children: React.ReactNode }) => {
   const { colorMode } = useColorMode()
   const isDark = colorMode === "dark"
+
+  const { setSelectedTheme } = useSelectedTheme()
+
+  useEffect(() => {
+    setSelectedTheme(isDark ? darkTheme : lightTheme)
+  }, [isDark])
 
   return (
     <DAppKitProvider
