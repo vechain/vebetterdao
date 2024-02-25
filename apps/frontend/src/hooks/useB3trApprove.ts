@@ -33,7 +33,7 @@ export const useB3trApprove = ({
 
     const approveClause = buildB3trApprovesTx(thor, amount, spender, tokenDetails.decimals)
     return [approveClause]
-  }, [thor, amount, tokenDetails])
+  }, [thor, amount, tokenDetails, spender])
 
   //Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {

@@ -69,17 +69,6 @@ export default function AdminPage() {
 
         <Card w={"full"}>
           <CardHeader>
-            <Heading size="lg">Emissions and Rounds</Heading>
-          </CardHeader>
-          <CardBody>
-            <VStack w={"full"} spacing={4} alignItems={"start"}>
-              <StartEmissions />
-              <RoundInfo />
-            </VStack>
-          </CardBody>
-        </Card>
-        <Card w={"full"}>
-          <CardHeader>
             <Heading size="lg">X-2-Earn Apps</Heading>
           </CardHeader>
           <CardBody>
