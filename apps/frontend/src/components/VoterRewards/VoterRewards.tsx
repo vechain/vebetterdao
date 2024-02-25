@@ -5,7 +5,6 @@ import React, { useMemo } from "react"
 import { FaGift } from "react-icons/fa6"
 import BigNumber from "bignumber.js"
 import { useClaimRewards } from "@/hooks/useClaimRewards"
-import { backdropBlurAnimation } from "@/app/theme"
 
 const DECIMAL_PLACES = 4
 
@@ -54,6 +53,7 @@ export const VoterRewards: React.FC = () => {
 
   const isClaimRewardsLoading = isTxReceiptLoading || sendTransactionPending
 
+  if (allocationRoundsEvents?.created.length === 0) return null
   return (
     <Card w="full">
       <CardBody>
@@ -104,28 +104,6 @@ export const VoterRewards: React.FC = () => {
                 <Text textAlign={"center"} fontSize="14px">
                   Connect your wallet to check your rewards
                 </Text>
-              </VStack>
-            </CardBody>
-          </Card>
-        </Flex>
-      )}
-
-      {allocationRoundsEvents && allocationRoundsEvents?.created.length === 0 && (
-        <Flex
-          borderRadius={"lg"}
-          backdropFilter="blur(10px)"
-          animation={backdropBlurAnimation("0px", "10px")}
-          position={"absolute"}
-          h={"100%"}
-          w={"100%"}
-          align="center"
-          justify="center">
-          <Card w={["90%", "50%", "40%"]}>
-            <CardBody>
-              <VStack gap={4}>
-                <Heading fontSize="md" textAlign={"center"}>
-                  Coming soon
-                </Heading>
               </VStack>
             </CardBody>
           </Card>
