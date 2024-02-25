@@ -9,7 +9,6 @@ import {
   Text,
   VStack,
   Modal,
-  ModalContent,
   ModalOverlay,
   ModalCloseButton,
 } from "@chakra-ui/react"
@@ -20,7 +19,7 @@ import { useForm } from "react-hook-form"
 import { CustomModalContent } from "../CustomModalContent"
 import { SwitchTokenButton } from "./SwitchTokenButton"
 import { TokenCards } from "./TokenCards"
-import { TransactionModal } from "../Modals/TransactionModal"
+import { TransactionModal } from "../TransactionModal"
 export type Props = {
   isOpen: boolean
   onClose: () => void
