@@ -1,4 +1,3 @@
-import { useTokenColors } from "@/hooks"
 import { useColorMode, useToken } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { WalletConnectOptions } from "@vechain/dapp-kit-react"
