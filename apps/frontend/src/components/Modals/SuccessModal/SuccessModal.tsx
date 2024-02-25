@@ -5,9 +5,7 @@ import { ShareButtons } from "../../ShareButtons"
 import { CustomModalContent } from "../../CustomModalContent"
 
 export type SuccessModalProps = {
-  isOpen: boolean
-  onClose: () => void
-  title: string
+  title?: string
   showSocialButtons?: boolean
   socialDescription?: string
 }
@@ -22,14 +20,12 @@ export type SuccessModalProps = {
  * @returns {React.ReactElement} The SuccessModal component
  */
 export const SuccessModal = ({
-  isOpen,
-  onClose,
-  title,
+  title = "Transaction completed!",
   showSocialButtons = false,
   socialDescription = "I've just completed a transaction on B3tr. Check it out!",
 }: SuccessModalProps) => {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
+    <>
       <ModalOverlay />
       <CustomModalContent>
         <ModalCloseButton top={4} right={4} />
@@ -55,6 +51,6 @@ export const SuccessModal = ({
           )}
         </VStack>
       </CustomModalContent>
-    </Modal>
+    </>
   )
 }

@@ -4,14 +4,12 @@ import loadingAnimation from "./loading.json"
 import { CustomModalContent } from "../../CustomModalContent"
 
 export type LoadingModalProps = {
-  isOpen: boolean
-  onClose?: () => void
   title?: string
 }
 
-export const LoadingModal = ({ isOpen, title = "Sending Transaction...", onClose = () => {} }: LoadingModalProps) => {
+export const LoadingModal = ({ title = "Sending Transaction..." }: LoadingModalProps) => {
   return (
-    <Modal isOpen={isOpen} trapFocus={true} isCentered={true} closeOnOverlayClick={false} onClose={onClose}>
+    <>
       <ModalOverlay />
       <CustomModalContent>
         <VStack align={"center"} p={6}>
@@ -27,6 +25,6 @@ export const LoadingModal = ({ isOpen, title = "Sending Transaction...", onClose
           />
         </VStack>
       </CustomModalContent>
-    </Modal>
+    </>
   )
 }

@@ -17,14 +17,10 @@ import { useCallback, useMemo, useState } from "react"
 import { useStakeB3tr, useTokenColors, useUnstakeB3tr } from "@/hooks"
 import { FaArrowRight } from "react-icons/fa6"
 import { useForm } from "react-hook-form"
-import { ConfirmTransactionModalContent } from "../ConfirmTransactionModalContent"
 import { CustomModalContent } from "../CustomModalContent"
 import { SwitchTokenButton } from "./SwitchTokenButton"
 import { TokenCards } from "./TokenCards"
-import { ConfirmationModal } from "../Modals/ConfirmationModal"
-import { LoadingModal } from "../Modals/LoadingModal"
-import { SuccessModal } from "../Modals/SuccessModal"
-import { ErrorModal } from "../Modals/ErrorModal"
+import { TransactionModal } from "../Modals/TransactionModal"
 export type Props = {
   isOpen: boolean
   onClose: () => void
@@ -54,6 +50,7 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
   }, [isB3trToVot3, stakeMutation, unstakeMutation])
 
   const handleStake = useCallback(() => {
+    mutationData.resetStatus()
     mutationData.sendTransaction(undefined)
   }, [mutationData.sendTransaction])
 
@@ -90,37 +87,16 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
     }
   }, [isB3trToVot3, amount])
 
-  if (mutationData.status === "pending") return <ConfirmationModal isOpen={isOpen} onClose={handleClose} />
-
-  if (mutationData.status === "error") return <ErrorModal isOpen={isOpen} onClose={handleClose} />
-
-  if (mutationData.status === "waitingConfirmation") return <LoadingModal isOpen={isOpen} onClose={handleClose} />
-
-  if (mutationData.status === "success")
+  if (mutationData.status !== "ready")
     return (
-      <SuccessModal
+      <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        title={"Swap Completed! 🎉"}
+        status={mutationData.status}
+        successTitle={"Swap Completed!"}
         showSocialButtons
         socialDescription="I just swapped B3TR for VOT3 on B3tr Finance! 🎉 #B3tr #VOT3"
       />
-    )
-
-  if (mutationData.status !== "ready")
-    return (
-      <Modal isOpen={isOpen} onClose={handleClose} trapFocus={true} isCentered={true}>
-        <ModalOverlay />
-        <ModalContent>
-          <ConfirmTransactionModalContent
-            description={swapText}
-            status={mutationData.status}
-            error={mutationData.sendTransactionError?.message ?? mutationData.txReceiptError?.message}
-            onSuccess={handleClose}
-            onTryAgain={mutationData.resetStatus}
-          />
-        </ModalContent>
-      </Modal>
     )
 
   return (

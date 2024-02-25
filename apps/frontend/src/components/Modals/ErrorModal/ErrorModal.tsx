@@ -1,23 +1,19 @@
-import { Heading, VStack, Modal, ModalOverlay, Text, ModalCloseButton } from "@chakra-ui/react"
+import { Heading, VStack, ModalOverlay, Text, ModalCloseButton } from "@chakra-ui/react"
 import Lottie from "react-lottie"
 import errorAnimation from "./error.json"
 import { CustomModalContent } from "../../CustomModalContent"
 
 export type ErrorModalProps = {
-  isOpen: boolean
-  onClose?: () => void
   title?: string
   description?: string
 }
 
 export const ErrorModal = ({
-  isOpen,
   title = "Error",
   description = "Something went wrong. Please try again.",
-  onClose = () => {},
 }: ErrorModalProps) => {
   return (
-    <Modal isOpen={isOpen} trapFocus={true} isCentered={true} onClose={onClose}>
+    <>
       <ModalOverlay />
       <CustomModalContent>
         <ModalCloseButton top={4} right={4} />
@@ -35,6 +31,6 @@ export const ErrorModal = ({
           {description && <Text size="sm">{description}</Text>}
         </VStack>
       </CustomModalContent>
-    </Modal>
+    </>
   )
 }
