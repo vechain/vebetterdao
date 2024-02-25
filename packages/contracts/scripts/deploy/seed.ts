@@ -28,10 +28,10 @@ export const seedLocalEnvironment = async (
       address: accounts[7].address,
       name: "GoGreen",
     },
-    {
-      address: accounts[8].address,
-      name: "Share4All",
-    },
+    // {
+    //   address: accounts[8].address,
+    //   name: "Share4All",
+    // },
     {
       address: accounts[9].address,
       name: "RecycleRewards",
