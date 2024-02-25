@@ -49,7 +49,8 @@ export const TransactionModal = ({
       isOpen={isOpen}
       onClose={onClose}
       trapFocus={false}
-      closeOnOverlayClick={status !== "waitingConfirmation" && status !== "pending"}>
+      closeOnOverlayClick={status !== "waitingConfirmation" && status !== "pending"}
+      isCentered={true}>
       {modalContent}
     </Modal>
   )
