@@ -71,7 +71,7 @@ export const seedLocalEnvironment = async (
 
   // Set xApps baseURI
   console.log("Set xApps baseURI...")
-  await xAllocationVoting.setBaseURI("ipfs://bafybeifwzkwplas7evdjlz2lwnmuu7v2mtxnqecfaoxpfbfwqvalxgjsru/")
+  await xAllocationVoting.setBaseURI("ipfs://bafybeiegeinotohmaxxyrierd2b5lr3o7i7batqxo2omprjl62fnq4mpci/")
 
   //TODO: SEED multiple rounds and votes (we need to execute a proposal to change the votingPeriod to someseconds)
   // await waitForRoundToEnd(roundId, xAllocationVoting)

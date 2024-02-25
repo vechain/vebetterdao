@@ -9,7 +9,7 @@ const StartEmissions = dynamic(() => import("./components/StartEmissions").then(
   ssr: false,
 })
 
-const RoundInfo = dynamic(() => import("./components/RoundInfo").then(mod => mod.RoundInfo), { ssr: false })
+const StartRound = dynamic(() => import("./components/StartRound").then(mod => mod.StartRound), { ssr: false })
 
 const AdminPermissions = dynamic(() => import("./components/AdminPermissions").then(mod => mod.AdminPermissions), {
   ssr: false,
@@ -52,7 +52,7 @@ export default function AdminPage() {
             <CardBody>
               <VStack w={"full"} spacing={4} alignItems={"start"}>
                 <StartEmissions />
-                <RoundInfo />
+                <StartRound />
               </VStack>
             </CardBody>
           </Card>
@@ -67,6 +67,17 @@ export default function AdminPage() {
           </Card>
         </HStack>
 
+        <Card w={"full"}>
+          <CardHeader>
+            <Heading size="lg">Emissions and Rounds</Heading>
+          </CardHeader>
+          <CardBody>
+            <VStack w={"full"} spacing={4} alignItems={"start"}>
+              <StartEmissions />
+              <RoundInfo />
+            </VStack>
+          </CardBody>
+        </Card>
         <Card w={"full"}>
           <CardHeader>
             <Heading size="lg">X-2-Earn Apps</Heading>

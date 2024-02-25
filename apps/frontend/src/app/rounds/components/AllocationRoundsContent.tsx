@@ -1,9 +1,10 @@
-import { useCurrentAllocationsRoundId } from "@/api"
-import { AllocationRoundsList, XAppsForecastedAmounts } from "@/components"
+import { useAllocationsRound, useCurrentAllocationsRoundId } from "@/api"
+import { AllocationRoundsList, CurrentRoundAllocations, TotalAllocations } from "@/components"
 import { VStack, HStack, Stack } from "@chakra-ui/react"
 
 export const AllocationRoundsContent = () => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
+  const { data: currentRound } = useAllocationsRound(currentRoundId?.toString() ?? "")
 
   return (
     <VStack w="full" spacing={12}>
@@ -17,7 +18,10 @@ export const AllocationRoundsContent = () => {
           <AllocationRoundsList maxRoundsToShow={8} showLoadMore showViewAll={false} />
         </HStack>
         <VStack spacing={4} flex={2.5} position={["static", "static", "sticky"]} top={100} right={0}>
-          {currentRoundId && <XAppsForecastedAmounts key={currentRoundId} roundId={currentRoundId} />}
+          {currentRoundId && currentRound && currentRound.state === "0" && (
+            <CurrentRoundAllocations key={currentRoundId} roundId={currentRoundId} />
+          )}
+          <TotalAllocations />
         </VStack>
       </Stack>
     </VStack>
