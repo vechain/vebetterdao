@@ -1,28 +1,19 @@
 import { Button, Icon } from "@chakra-ui/react"
 import { usePathname, useRouter } from "next/navigation"
-import { Routes } from "./Routes"
-import { useAllocationsRoundsEvents } from "@/api"
-import { useWallet } from "@vechain/dapp-kit-react"
-import { getConfig } from "@repo/config"
-import { useHasRole, ADMIN_ROLE } from "@/api/contracts/account"
-import { useMemo } from "react"
+import { Route } from "./Routes"
 
 type Props = {
   onMenuClick?: () => void
+  routesToRender: Route[]
 }
 
-const config = getConfig()
-
-export const NavbarMenu = ({ onMenuClick }: Props) => {
+export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
   const router = useRouter()
   const pathname = usePathname()
-  const { data: allocationRoundsEvents } = useAllocationsRoundsEvents()
-  const { account } = useWallet()
-  const { data: isAdminOfEmissions } = useHasRole(ADMIN_ROLE, config.emissionsContractAddress, account ?? undefined)
 
   return (
     <>
-      {Routes.map(route => {
+      {routesToRender.map(route => {
         if (route.component) return route.component
         const isSelected = pathname === route.onClick
         const onClick = () => {
@@ -33,14 +24,10 @@ export const NavbarMenu = ({ onMenuClick }: Props) => {
           onMenuClick?.()
         }
 
-        if (!route.isVisible) return null
-
-        if (route.name === "Allocations" && allocationRoundsEvents?.created.length === 0) return null
-
-        if (route.name === "Admin" && (!account || !isAdminOfEmissions)) return null
-
         return (
           <Button
+            colorScheme={isSelected ? "primary" : "gray"}
+            rounded={"full"}
             w={["full", "full", "auto"]}
             leftIcon={<Icon as={route.icon} />}
             key={route.name}
