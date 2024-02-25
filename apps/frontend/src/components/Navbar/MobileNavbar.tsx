@@ -17,10 +17,11 @@ import dynamic from "next/dynamic"
 import { FaBars } from "react-icons/fa"
 import { NavbarMenu } from "./NavbarMenu"
 import { NavbarLogo } from "./NavbarLogo"
+import { Route } from "./Routes"
 
 const WalletButton = dynamic(() => import("@vechain/dapp-kit-react").then(mod => mod.WalletButton), { ssr: false })
 
-const MobileMenuDrawer: React.FC<Omit<DrawerProps, "children">> = props => {
+const MobileMenuDrawer: React.FC<Omit<DrawerProps & Props, "children">> = ({ routesToRender, ...props }) => {
   return (
     <Drawer size={"xs"} placement="right" {...props}>
       <DrawerOverlay />
@@ -29,7 +30,7 @@ const MobileMenuDrawer: React.FC<Omit<DrawerProps, "children">> = props => {
         <DrawerHeader>{"Menu"}</DrawerHeader>
         <DrawerBody display={"flex"} flexDirection={"column"} justifyContent={"space-between"}>
           <VStack spacing={4} w="full">
-            <NavbarMenu onMenuClick={props.onClose} />
+            <NavbarMenu routesToRender={routesToRender} onMenuClick={props.onClose} />
           </VStack>
           {/* <Box w="full" alignSelf="flex-end">
             <ThemeSwitcher w={"full"} withText={true} />
@@ -40,7 +41,10 @@ const MobileMenuDrawer: React.FC<Omit<DrawerProps, "children">> = props => {
   )
 }
 
-export const MobileNavBar = () => {
+type Props = {
+  routesToRender: Route[]
+}
+export const MobileNavBar: React.FC<Props> = ({ routesToRender }) => {
   const { isOpen: isMenuOpen, onClose: closeMenu, onOpen: openMenu } = useDisclosure()
 
   return (
@@ -48,9 +52,13 @@ export const MobileNavBar = () => {
       <NavbarLogo />
       <HStack gap={2}>
         <WalletButton mobile={true} />
-        <IconButton onClick={openMenu} icon={<Icon as={FaBars} />} aria-label="Open menu" />
+        {!!routesToRender.length && (
+          <IconButton onClick={openMenu} icon={<Icon as={FaBars} />} aria-label="Open menu" />
+        )}
       </HStack>
-      <MobileMenuDrawer isOpen={isMenuOpen} onClose={closeMenu} />
+      {!!routesToRender.length && (
+        <MobileMenuDrawer isOpen={isMenuOpen} onClose={closeMenu} routesToRender={routesToRender} />
+      )}
     </>
   )
 }
