@@ -1,31 +1,49 @@
-import { Heading, VStack, Modal, ModalOverlay } from "@chakra-ui/react"
+import { Button, Heading, VStack } from "@chakra-ui/react"
 import Lottie from "react-lottie"
 import loadingAnimation from "./loading.json"
-import { CustomModalContent } from "../../CustomModalContent"
 import { ReactNode } from "react"
+import { ModalAnimation } from "../ModalAnimation"
+import { getConfig } from "@repo/config"
 
 export type LoadingModalContentProps = {
   title?: ReactNode
+  showExplorerButton?: boolean
+  txId?: string
 }
 
-export const LoadingModalContent = ({ title = "Sending Transaction..." }: LoadingModalContentProps) => {
+export const LoadingModalContent = ({
+  title = "Sending Transaction...",
+  showExplorerButton,
+  txId,
+}: LoadingModalContentProps) => {
   return (
-    <>
-      <ModalOverlay />
-      <CustomModalContent>
-        <VStack align={"center"} p={6}>
-          <Heading size="md">{title}</Heading>
-          <Lottie
-            options={{
-              loop: true,
-              autoplay: true,
-              animationData: loadingAnimation,
+    <ModalAnimation>
+      <VStack align={"center"} p={6}>
+        <Heading size="md">{title}</Heading>
+        <Lottie
+          style={{
+            pointerEvents: "none",
+          }}
+          options={{
+            loop: true,
+            autoplay: true,
+            animationData: loadingAnimation,
+          }}
+          height={200}
+          width={200}
+        />
+        {showExplorerButton && txId && (
+          <Button
+            variant={"link"}
+            onClick={() => {
+              window.open(`${getConfig().network.explorerUrl}/txs/${txId}`, "_blank")
             }}
-            height={200}
-            width={200}
-          />
-        </VStack>
-      </CustomModalContent>
-    </>
+            size="sm"
+            textDecoration={"underline"}>
+            View on the explorer
+          </Button>
+        )}
+      </VStack>
+    </ModalAnimation>
   )
 }

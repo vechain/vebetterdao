@@ -96,6 +96,10 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
         successTitle={"Swap Completed!"}
         showSocialButtons
         socialDescription="I just swapped B3TR for VOT3 on B3tr Finance! 🎉 #B3tr #VOT3"
+        onTryAgain={handleStake}
+        showTryAgainButton
+        showExplorerButton
+        txId={mutationData.txReceipt?.meta.txID || mutationData.sendTransactionTx?.txid}
       />
     )
 

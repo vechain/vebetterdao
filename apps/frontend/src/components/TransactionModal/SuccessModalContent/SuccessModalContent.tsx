@@ -1,14 +1,18 @@
-import { Heading, Text, VStack, Modal, ModalOverlay, ModalCloseButton } from "@chakra-ui/react"
+import { Heading, Text, VStack, ModalCloseButton, Button } from "@chakra-ui/react"
 import Lottie from "react-lottie"
 import successAnimation from "./success.json"
 import { ShareButtons } from "../../ShareButtons"
-import { CustomModalContent } from "../../CustomModalContent"
 import { ReactNode } from "react"
+import { ModalAnimation } from "../ModalAnimation"
+import { motion } from "framer-motion"
+import { getConfig } from "@repo/config"
 
 export type SuccessModalContentProps = {
   title?: ReactNode
   showSocialButtons?: boolean
   socialDescription?: string
+  showExplorerButton?: boolean
+  txId?: string
 }
 
 /**
@@ -24,34 +28,54 @@ export const SuccessModalContent = ({
   title = "Transaction completed!",
   showSocialButtons = false,
   socialDescription = "I've just completed a transaction on B3tr. Check it out!",
+  showExplorerButton = false,
+  txId,
 }: SuccessModalContentProps) => {
   return (
-    <>
-      <ModalOverlay />
-      <CustomModalContent>
-        <ModalCloseButton top={4} right={4} />
-        <VStack align={"center"} p={6}>
-          <Heading size="md">{title}</Heading>
+    <ModalAnimation>
+      <ModalCloseButton top={4} right={4} />
+      <VStack align={"center"} p={6}>
+        <Heading size="md">{title}</Heading>
+        <motion.div
+          transition={{
+            duration: 4,
+            ease: "easeInOut",
+            repeat: Infinity,
+          }}
+          animate={{
+            scale: [1, 1.1, 1],
+          }}>
           <Lottie
             style={{
               pointerEvents: "none",
             }}
             options={{
-              loop: true,
+              loop: false,
               autoplay: true,
               animationData: successAnimation,
             }}
             height={200}
             width={200}
           />
-          {showSocialButtons && (
-            <VStack>
-              <Text fontSize="sm">Share your success on social media</Text>
-              <ShareButtons description={socialDescription} />
-            </VStack>
-          )}
-        </VStack>
-      </CustomModalContent>
-    </>
+        </motion.div>
+        {showExplorerButton && txId && (
+          <Button
+            variant={"link"}
+            onClick={() => {
+              window.open(`${getConfig().network.explorerUrl}/txs/${txId}`, "_blank")
+            }}
+            size="sm"
+            textDecoration={"underline"}>
+            View on the explorer
+          </Button>
+        )}
+        {showSocialButtons && (
+          <VStack>
+            <Text fontSize="sm">Share your success on social media</Text>
+            <ShareButtons description={socialDescription} />
+          </VStack>
+        )}
+      </VStack>
+    </ModalAnimation>
   )
 }
