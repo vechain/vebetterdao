@@ -1,4 +1,11 @@
-import { getCurrentAllocationsRoundIdQueryKey, getAllocationsRoundsEventsQueryKey, currentBlockQueryKey } from "@/api"
+import {
+  getCurrentAllocationsRoundIdQueryKey,
+  getAllocationsRoundsEventsQueryKey,
+  currentBlockQueryKey,
+  useCurrentAllocationsRoundId,
+  getRoundXAppsQueryKey,
+  getAllocationAmountQueryKey,
+} from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
@@ -26,6 +33,7 @@ export const useDistributeEmission = ({
   invalidateCache = true,
 }: useDistributeEmissionsProps): UseSendTransactionReturnValue => {
   const { account } = useWallet()
+  const { data: currendRoundId } = useCurrentAllocationsRoundId()
   const toast = useToast()
   const queryClient = useQueryClient()
 
@@ -66,6 +74,20 @@ export const useDistributeEmission = ({
       await queryClient.refetchQueries({
         queryKey: currentBlockQueryKey(),
       })
+
+      await queryClient.cancelQueries({
+        queryKey: getRoundXAppsQueryKey(currendRoundId ?? "0"),
+      })
+      await queryClient.refetchQueries({
+        queryKey: getRoundXAppsQueryKey(currendRoundId ?? "0"),
+      })
+
+      await queryClient.cancelQueries({
+        queryKey: getAllocationAmountQueryKey(currendRoundId ?? "0"),
+      })
+      await queryClient.refetchQueries({
+        queryKey: getAllocationAmountQueryKey(currendRoundId ?? "0"),
+      })
     }
 
     toast({
@@ -77,7 +99,7 @@ export const useDistributeEmission = ({
       isClosable: true,
     })
     onSuccess?.()
-  }, [invalidateCache, queryClient, toast, onSuccess])
+  }, [invalidateCache, queryClient, toast, onSuccess, currendRoundId])
 
   const result = useSendTransaction({
     signerAccount: account,
