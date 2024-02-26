@@ -6,6 +6,7 @@ import {
   useAllocationsRound,
   useCurrentAllocationsRoundId,
   getRoundXAppsQueryKey,
+  getAllocationAmountQueryKey,
 } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
@@ -81,6 +82,13 @@ export const useDistributeEmission = ({
       })
       await queryClient.refetchQueries({
         queryKey: getRoundXAppsQueryKey(currendRoundId ?? "0"),
+      })
+
+      await queryClient.cancelQueries({
+        queryKey: getAllocationAmountQueryKey(currendRoundId ?? "0"),
+      })
+      await queryClient.refetchQueries({
+        queryKey: getAllocationAmountQueryKey(currendRoundId ?? "0"),
       })
     }
 
