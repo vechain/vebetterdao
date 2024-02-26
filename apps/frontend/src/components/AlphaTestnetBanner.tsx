@@ -1,4 +1,4 @@
-import { HStack, Slide, Text } from "@chakra-ui/react"
+import { HStack, Text } from "@chakra-ui/react"
 import { motion } from "framer-motion"
 import { getConfig } from "@repo/config"
 import { useEffect, useRef, useState } from "react"
