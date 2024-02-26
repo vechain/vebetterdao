@@ -29,7 +29,7 @@ export function createLocalConfig() {
 
     INITIAL_X_ALLOCATION: BigInt("66666666666666666666666"), // 1M/15 rounded down -> 1/15th of the total supply for pilot show
 
-    NFT_BADGE_BASE_URI: "ipfs://bafybeifdelb2rafhbwycwih3scvniwvu3lsmxue3rwg46sukj5p77qgqqe/", // IPFS base URI for the NFT Badge
+    NFT_BADGE_BASE_URI: "ipfs://bafybeiahr3qobzujfkxi64o6wrigkmdagrvgfa566rqqth6jm5nq7vf24y/", // IPFS base URI for the NFT Badge
 
     XAPP_BASE_URI: "ipfs://bafybeigsqjh4m3fmy7f7ahpt7uxzfsmcoctjrbxt6kxnejhtnmcn55t2c4/",
   })
