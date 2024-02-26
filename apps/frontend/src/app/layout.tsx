@@ -6,7 +6,7 @@ import { Providers } from "./providers"
 import dayjs from "dayjs"
 
 import relativeTime from "dayjs/plugin/relativeTime"
-import { Footer } from "@/components"
+import { AlphaTestnetBanner, Footer } from "@/components"
 import dynamic from "next/dynamic"
 import { AnalyticsUtils } from "@/utils"
 import { getConfig } from "@repo/config"
@@ -46,7 +46,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body>
         <Providers>
-          <VStack h="100vh" gap={0} align="stretch">
+          <VStack minH="100vh" gap={0} align="stretch">
+            <AlphaTestnetBanner />
             <Navbar />
             <Flex flex={1}>
               <Container
