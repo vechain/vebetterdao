@@ -85,12 +85,12 @@ const XApp = ({ xApp }: { xApp: XApp }) => {
           <VStack spacing={1} align="flex-start">
             <Skeleton isLoaded={!appMetadataLoading}>
               <Text fontWeight={"600"} size={"xs"}>
-                {appMetadata?.name ?? "Error loading name"}
+                {appMetadata?.name ?? isAppMetadataError ?? "Error loading name"}
               </Text>
             </Skeleton>
             <Skeleton isLoaded={!appMetadataLoading}>
               <Text fontSize={"sm"} color={"gray.500"}>
-                {appMetadata?.description ?? "Error loading description"}
+                {appMetadata?.description ?? isAppMetadataError ?? "Error loading description"}
               </Text>
             </Skeleton>
           </VStack>
