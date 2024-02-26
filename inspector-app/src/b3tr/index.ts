@@ -15,7 +15,6 @@ import {
 } from "@/b3tr/contracts"
 
 const importContract = async (contract: Contract, address: string, network: typeof soloStaging) => {
-  await DB.contracts.clear()
 
   const entity: Entities.Contract = {
     abi: contract.abi,
@@ -29,6 +28,7 @@ const importContract = async (contract: Contract, address: string, network: type
 }
 
 const insertForNetwork = async (network: typeof soloStaging) => {
+  await DB.contracts.clear()
   await importContract(b3trContract, network.b3trContractAddress, network)
   await importContract(vot3Contract, network.vot3ContractAddress, network)
   await importContract(governorContract, network.b3trGovernorAddress, network)
