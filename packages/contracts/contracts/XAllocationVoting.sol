@@ -24,7 +24,9 @@ contract XAllocationVoting is
    * @param _quorumPercentage quorum as a percentage of the total supply at the block a proposal’s voting power is retrieved
    * @param _initialVotingPeriod How long does a round remain open to votese
    * @param b3trGovernor_ The address of the B3trGovernor DAO
+   * @param _voterRewards The address of the VoterRewards contract
    * @param _admins The addresses of the admins (DAO + another address) that can update the XAllocationPool address, only DAO will remain in the final version
+   * @param _xAppsBaseURI The base URI for the xApps
    */
   constructor(
     IVotes _vot3Token,

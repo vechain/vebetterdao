@@ -29,4 +29,6 @@ export type ContractsConfig = {
   INITIAL_X_ALLOCATION: bigint
 
   NFT_BADGE_BASE_URI: string
+
+  XAPP_BASE_URI: string
 }

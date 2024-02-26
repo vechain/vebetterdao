@@ -37,7 +37,6 @@ export const seedLocalEnvironment = async (
   // Bootstrap emissions
   console.log("Bootstrapping emissions...")
   const admin = accounts[0]
-  await b3tr.grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress()).then(async tx => await tx.wait())
   await emissions
     .connect(admin)
     .bootstrap()
@@ -67,10 +66,6 @@ export const seedLocalEnvironment = async (
   // console.log("Casting random votes to xDapps...")
   // await castVotesToXDapps(xAllocationVoting, accountsToSeed, roundId, amountToSwap, xDappsFromContract)
 
-  // Set xApps baseURI
-  console.log("Set xApps baseURI...")
-  await xAllocationVoting.setBaseURI("ipfs://bafybeigsqjh4m3fmy7f7ahpt7uxzfsmcoctjrbxt6kxnejhtnmcn55t2c4/")
-
   //TODO: SEED multiple rounds and votes (we need to execute a proposal to change the votingPeriod to someseconds)
   // await waitForRoundToEnd(roundId, xAllocationVoting)
 
@@ -81,6 +76,49 @@ export const seedLocalEnvironment = async (
   //   await castVotesToXDapps(xAllocationVoting, accountsToSeed, roundId, amountToSwap, xDappsFromContract)
   //   await waitForRoundToEnd(roundId, xAllocationVoting)
   // }
+
+  const end = performance.now()
+  console.log(`Seeding complete in ${end - start}ms`)
+}
+
+export const seedTestEnvironment = async (b3tr: B3TR, xAllocationVoting: XAllocationVoting, emissions: Emissions) => {
+  console.log("Seeding Testnet environment:")
+  const start = performance.now()
+
+  const accounts = await ethers.getSigners()
+  const admin = accounts[0]
+
+  // Bootstrap emissions
+  console.log("Bootstrapping emissions...")
+
+  await emissions
+    .connect(admin)
+    .bootstrap()
+    .then(async tx => await tx.wait())
+
+  //   Add x-apps to the XAllocationPool
+  console.log("Adding x-apps...")
+  const APPS: App[] = [
+    {
+      address: "0x61fFC950b04090f5CE857ebF056852a6D27b0c3c",
+      name: "Vyvo",
+    },
+    {
+      address: "0xbfE2122a82C0AEa091514f57C7713C3118101eDa",
+      name: "Mugshot",
+    },
+    {
+      address: "0x6B020E5C8E8574388a275cC498B27E3EB91ec3f2",
+      name: "Cleanify",
+    },
+  ]
+
+  for (const app of APPS) {
+    await xAllocationVoting
+      .connect(admin)
+      .addApp(app.address, app.name)
+      .then(async tx => await tx.wait())
+  }
 
   const end = performance.now()
   console.log(`Seeding complete in ${end - start}ms`)

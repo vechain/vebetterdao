@@ -22,19 +22,31 @@
     },
     "dev": {
       "cache": false,
-      "persistent": true,
-      "dependsOn": ["@repo/contracts#check-contracts-deployment"]
+      "dependsOn": ["^setup-contracts"]
     },
-    "dev:staging": {
+    "dev:testnet": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["@repo/contracts#check-contracts-deployment"]
+      "dependsOn": ["^setup-contracts:testnet"]
+    },
+    "setup-contracts": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^compile", "@repo/contracts#check-contracts-deployment"]
+    },
+    "setup-contracts:testnet": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^compile", "@repo/contracts#check-contracts-deployment:testnet"]
     },
     "@repo/config#check-or-generate-local-config": {
       "cache": false
     },
-
     "@repo/contracts#check-contracts-deployment": {
+      "cache": false,
+      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
+    },
+    "@repo/contracts#check-contracts-deployment:testnet": {
       "cache": false,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
@@ -46,6 +58,9 @@
     },
     "deploy": {
       "dependsOn": ["^deploy"]
+    },
+    "deploy:testnet": {
+      "dependsOn": ["^deploy:testnet"]
     },
     "test": {
       "cache": false,
