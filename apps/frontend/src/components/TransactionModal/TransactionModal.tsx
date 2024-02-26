@@ -1,0 +1,72 @@
+import { ReactNode, useMemo } from "react"
+import { ConfirmationModalContent } from "./ConfirmationModalContent"
+import { ErrorModalContent } from "./ErrorModalContent"
+import { LoadingModalContent } from "./LoadingModalContent"
+import { SuccessModalContent } from "./SuccessModalContent"
+import { Modal, ModalOverlay } from "@chakra-ui/react"
+import { CustomModalContent } from "@/components/CustomModalContent"
+
+export type TransactionModalProps = {
+  isOpen: boolean
+  onClose: () => void
+  status: string
+  pendingTitle?: ReactNode
+  confirmationTitle?: ReactNode
+  errorTitle?: ReactNode
+  successTitle?: ReactNode
+  showSocialButtons?: boolean
+  socialDescription?: string
+  showTryAgainButton?: boolean
+  onTryAgain?: () => void
+  showExplorerButton?: boolean
+  txId?: string
+}
+
+export const TransactionModal = ({
+  isOpen,
+  onClose,
+  status,
+  pendingTitle,
+  confirmationTitle,
+  errorTitle,
+  successTitle,
+  showSocialButtons = false,
+  socialDescription,
+  showTryAgainButton,
+  onTryAgain,
+  showExplorerButton,
+  txId,
+}: TransactionModalProps) => {
+  console.log("txId", txId)
+  const modalContent = useMemo(() => {
+    if (status === "pending") return <ConfirmationModalContent title={confirmationTitle} />
+    if (status === "waitingConfirmation")
+      return <LoadingModalContent title={pendingTitle} showExplorerButton={showExplorerButton} txId={txId} />
+    if (status === "error")
+      return <ErrorModalContent title={errorTitle} showTryAgainButton={showTryAgainButton} onTryAgain={onTryAgain} />
+    if (status === "success")
+      return (
+        <SuccessModalContent
+          title={successTitle}
+          showSocialButtons={showSocialButtons}
+          socialDescription={socialDescription}
+          showExplorerButton={showExplorerButton}
+          txId={txId}
+        />
+      )
+    return null
+  }, [status, pendingTitle, confirmationTitle, errorTitle, successTitle, showSocialButtons, socialDescription])
+  if (!modalContent) return null
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      trapFocus={false}
+      closeOnOverlayClick={status !== "waitingConfirmation" && status !== "pending"}
+      isCentered={true}>
+      <ModalOverlay />
+      <CustomModalContent>{modalContent}</CustomModalContent>
+    </Modal>
+  )
+}

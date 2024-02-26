@@ -7,7 +7,6 @@ import {
   VStack,
   Text,
   Button,
-  Flex,
   useColorModeValue,
   Box,
   Image,
@@ -21,7 +20,6 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import React, { useCallback, useMemo } from "react"
 import BigNumber from "bignumber.js"
 import { useClaimRewards } from "@/hooks/useClaimRewards"
-import { backdropBlurAnimation } from "@/app/theme"
 import { TbGift } from "react-icons/tb"
 import { coinFlipAnimation } from "@/constants"
 import { motion } from "framer-motion"
@@ -113,14 +111,13 @@ export const VoterRewards: React.FC = () => {
       )
   }, [isClaimRewardsLoading, sendTransactionPending, isTxReceiptLoading])
 
-  if (allocationRoundsEvents?.created.length === 0 || !account) return null
+  if (allocationRoundsEvents?.created.length === 0) return null
 
   return (
     <>
       <Card w="full">
         <Image src="/images/voter-rewards-bg.svg" position={"absolute"} zIndex={0} />
-
-        <CardBody p={6} zIndex={1}>
+        <CardBody p={6}>
           <VStack spacing={4} w="full" align={"flex-start"}>
             <HStack w="full" justify={"space-between"}>
               <Box bgColor={`secondary.${iconBgColor}`} p={4} borderRadius={32} color={`secondary.${iconColor}`}>
@@ -154,28 +151,6 @@ export const VoterRewards: React.FC = () => {
             </Button>
           </VStack>
         </CardBody>
-
-        {allocationRoundsEvents && allocationRoundsEvents?.created.length === 0 && (
-          <Flex
-            borderRadius={"lg"}
-            backdropFilter="blur(10px)"
-            animation={backdropBlurAnimation("0px", "10px")}
-            position={"absolute"}
-            h={"100%"}
-            w={"100%"}
-            align="center"
-            justify="center">
-            <Card w={["90%", "50%", "40%"]}>
-              <CardBody>
-                <VStack gap={4}>
-                  <Heading fontSize="md" textAlign={"center"}>
-                    Coming soon
-                  </Heading>
-                </VStack>
-              </CardBody>
-            </Card>
-          </Flex>
-        )}
       </Card>
 
       <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
