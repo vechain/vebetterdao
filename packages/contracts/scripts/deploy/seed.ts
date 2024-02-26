@@ -19,59 +19,57 @@ export const seedLocalEnvironment = async (
   console.log("Seeding local environment")
   const accounts = await ethers.getSigners()
 
-  const amountToMint = "1000"
-  const amountToSwap = (Number(amountToMint) / 2).toString()
-
-  const accountsToSeed = accounts.slice(0, 5)
-  const admin = accounts[0]
-  // Mint $B3TR tokens to the first 5 accounts in the mnemonic
-  await mintAndApproveB3tr(b3tr, vot3, amountToMint, accountsToSeed, admin)
-  await swapB3trForVot3(vot3, amountToSwap, accountsToSeed)
-
   const APPS: App[] = [
     {
       address: accounts[6].address,
-      name: "Tree Lovers Association",
+      name: "Vyvo",
     },
     {
       address: accounts[7].address,
-      name: "GoGreen",
-    },
-    {
-      address: accounts[8].address,
-      name: "Share4All",
+      name: "Mugshot",
     },
     {
       address: accounts[9].address,
-      name: "RecycleRewards",
+      name: "Cleanify",
     },
   ]
+
+  // Bootstrap emissions
+  console.log("Bootstrapping emissions...")
+  const admin = accounts[0]
+  await b3tr.grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress()).then(async tx => await tx.wait())
+  await emissions
+    .connect(admin)
+    .bootstrap()
+    .then(async tx => await tx.wait())
+
+  //Airdrop B3TR from Treasury to the first 5 accounts
+  console.log("Airdropping B3TR from Treasury...")
+  const accountsToSeed = accounts.slice(0, 5)
+  const treasury = accounts[2]
+  for (const account of accountsToSeed) {
+    const tx = await b3tr.connect(treasury).transfer(account.address, ethers.parseEther("500"))
+    await tx.wait()
+  }
 
   //   Add x-apps to the XAllocationPool
   await addXDapps(xAllocationVoting, accountsToSeed, APPS)
 
   // const xDappsFromContract = await xAllocationVoting.getAllApps()
 
-  //   Mint some $B3TR
-  console.log("Minting some $B3TR...")
-  await b3tr.grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress()).then(async tx => await tx.wait())
-  await emissions
-    .connect(admin)
-    .bootstrap()
-    .then(async tx => await tx.wait())
   // await emissions
   //   .connect(admin)
   //   .start()
   //   .then(async tx => await tx.wait())
 
-  //   Start new allocation round
+  // Start new allocation round
   // const roundId = parseInt((await xAllocationVoting.currentRoundId()).toString())
   // console.log("Casting random votes to xDapps...")
   // await castVotesToXDapps(xAllocationVoting, accountsToSeed, roundId, amountToSwap, xDappsFromContract)
 
   // Set xApps baseURI
   console.log("Set xApps baseURI...")
-  await xAllocationVoting.setBaseURI("ipfs://bafybeifwzkwplas7evdjlz2lwnmuu7v2mtxnqecfaoxpfbfwqvalxgjsru/")
+  await xAllocationVoting.setBaseURI("ipfs://bafybeigsqjh4m3fmy7f7ahpt7uxzfsmcoctjrbxt6kxnejhtnmcn55t2c4/")
 
   //TODO: SEED multiple rounds and votes (we need to execute a proposal to change the votingPeriod to someseconds)
   // await waitForRoundToEnd(roundId, xAllocationVoting)
@@ -132,14 +130,13 @@ const swapB3trForVot3 = async (vot3: VOT3, amount: string = "500", accounts: Har
 const addXDapps = async (xAllocationVoting: XAllocationVoting, accounts: HardhatEthersSigner[], apps: App[]) => {
   console.log("Adding x-apps...")
 
-  return await Promise.all(
-    apps.map(async app => {
-      return await xAllocationVoting
-        .connect(accounts[0])
-        .addApp(app.address, app.name)
-        .then(async tx => await tx.wait())
-    }),
-  )
+  // Avoid promise.all so we can decide the order of the apps
+  for (const app of apps) {
+    await xAllocationVoting
+      .connect(accounts[0])
+      .addApp(app.address, app.name)
+      .then(async tx => await tx.wait())
+  }
 }
 
 const castVotesToXDapps = async (

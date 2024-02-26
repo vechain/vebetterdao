@@ -1,9 +1,10 @@
-import { ThemeConfig, extendTheme, keyframes } from "@chakra-ui/react"
+import { extendTheme, keyframes } from "@chakra-ui/react"
+import { darkThemeColors, lightThemeColors } from "./colors"
+import { cardTheme } from "./card"
 import "@fontsource-variable/instrument-sans"
 import "@fontsource-variable/inter"
-import { lighSecondary, lightPrimary, lightTertiary } from "./colors"
-import { cardTheme } from "./card"
-const themeConfig: ThemeConfig = {
+
+const themeConfig = {
   //@ts-ignore
   fonts: {
     heading: `"Instrument Sans Variable", sans-serif`,
@@ -39,9 +40,8 @@ const themeConfig: ThemeConfig = {
     },
   },
   colors: {
-    primary: lightPrimary,
-    secondary: lighSecondary,
-    tertiary: lightTertiary,
+    //dynamic primary coor based on the light/dark
+
     green: {
       "50": "#f3f9f3",
       "100": "#cfe6d0",
@@ -69,4 +69,15 @@ export const backdropBlurKeyframes = (startingBlur: string = "0px", endingBlur: 
 export const backdropBlurAnimation = (startingBlur?: string, endingBlur?: string) =>
   `${backdropBlurKeyframes(startingBlur, endingBlur)} 1s ease-in-out`
 
-export const theme = extendTheme({ ...themeConfig })
+export const TooltipBackgroundColor = (isDark = false) => (isDark ? "#CBD5E0" : "#26303E")
+
+export const TooltipTextColor = (isDark = false) => (isDark ? "#171923" : "white")
+
+export const lightTheme = extendTheme({
+  ...themeConfig,
+  colors: lightThemeColors,
+})
+export const darkTheme = extendTheme({
+  ...themeConfig,
+  colors: darkThemeColors,
+})

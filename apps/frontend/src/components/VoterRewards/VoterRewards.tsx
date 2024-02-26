@@ -1,11 +1,29 @@
 import { useAllocationsRoundsEvents, useCurrentAllocationsRoundId, useVotingRewards } from "@/api"
-import { Card, CardBody, HStack, Heading, Icon, VStack, Text, Button, Flex, Show } from "@chakra-ui/react"
+import {
+  Card,
+  CardBody,
+  HStack,
+  Heading,
+  VStack,
+  Text,
+  Button,
+  useColorModeValue,
+  Box,
+  Image,
+  useDisclosure,
+  ModalOverlay,
+  ModalContent,
+  ModalBody,
+  Modal,
+} from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
-import React, { useMemo } from "react"
-import { FaGift } from "react-icons/fa6"
+import React, { useCallback, useMemo } from "react"
 import BigNumber from "bignumber.js"
 import { useClaimRewards } from "@/hooks/useClaimRewards"
-import { backdropBlurAnimation } from "@/app/theme"
+import { TbGift } from "react-icons/tb"
+import { coinFlipAnimation } from "@/constants"
+import { motion } from "framer-motion"
+import { B3TRIcon } from "../Icons"
 
 const DECIMAL_PLACES = 4
 
@@ -16,12 +34,21 @@ const compactFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: DECIMAL_PLACES,
 })
 
+// Convert Button to a motion component
+const MotionImage = motion(Image)
+
 export const VoterRewards: React.FC = () => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { account } = useWallet()
 
   const rewardsPerRound = useVotingRewards(currentRoundId, account ?? undefined)
   const { data: allocationRoundsEvents } = useAllocationsRoundsEvents()
+
+  const { isOpen, onClose, onOpen } = useDisclosure()
+
+  const iconColor = useColorModeValue("800", "900")
+
+  const iconBgColor = useColorModeValue("200", "300")
 
   const roundRewards = useMemo(() => {
     if (!rewardsPerRound) return []
@@ -50,87 +77,86 @@ export const VoterRewards: React.FC = () => {
 
   const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useClaimRewards({
     roundRewards,
+    onSuccess: onClose,
+    onFailure: onClose,
   })
+
+  const handleClaim = useCallback(() => {
+    sendTransaction()
+    onOpen()
+  }, [sendTransaction, onOpen])
 
   const isClaimRewardsLoading = isTxReceiptLoading || sendTransactionPending
 
+  const modalContent = useMemo(() => {
+    if (isClaimRewardsLoading)
+      return (
+        <ModalContent rounded="2xl" w="auto">
+          <ModalBody py={6} px={12}>
+            <VStack alignItems={"center"}>
+              <MotionImage {...coinFlipAnimation} src="/images/b3tr-token-3d.png" maxH="250px" />
+              {sendTransactionPending /* sendTransactionPending */ && (
+                <Text fontWeight={400} lineHeight="22px" fontSize={{ base: "16px", md: "16px" }} align={"center"}>
+                  Please confirm the transaction in your wallet
+                </Text>
+              )}
+              {isTxReceiptLoading && (
+                <Text fontWeight={400} lineHeight="22px" fontSize={{ base: "16px", md: "16px" }}>
+                  Almost there...
+                </Text>
+              )}
+            </VStack>{" "}
+          </ModalBody>
+        </ModalContent>
+      )
+  }, [isClaimRewardsLoading, sendTransactionPending, isTxReceiptLoading])
+
+  if (allocationRoundsEvents?.created.length === 0) return null
+
   return (
-    <Card w="full">
-      <CardBody>
-        <VStack spacing={2} w="full" align={"flex-start"}>
-          <HStack spacing={8} w="full" align={"flex-start"}>
-            <HStack spacing={2}>
-              <Icon as={FaGift} />
-              <Heading size="md">Claimable rewards</Heading>
+    <>
+      <Card w="full">
+        <Image src="/images/voter-rewards-bg.svg" position={"absolute"} zIndex={0} />
+        <CardBody p={6}>
+          <VStack spacing={4} w="full" align={"flex-start"}>
+            <HStack w="full" justify={"space-between"}>
+              <Box bgColor={`secondary.${iconBgColor}`} p={4} borderRadius={32} color={`secondary.${iconColor}`}>
+                <TbGift size={22} />
+              </Box>
             </HStack>
-          </HStack>
-          <Text fontSize="sm">Participate for a better future and get rewarded.</Text>
-          <HStack spacing={2} w="full" pt={2}>
-            <HStack spacing={2} w="full" align={"flex-start"}>
-              <Show below="sm">
-                <Heading size="3xl">{compactFormatter.format(Number(totalRewardsFormatted))}</Heading>
-              </Show>
-              <Show above="sm">
-                <Heading size="2xl">{compactFormatter.format(Number(totalRewardsFormatted))}</Heading>
-              </Show>
-              <Text fontSize={"md"} textTransform={"uppercase"} alignSelf={"end"}>
-                B3TR
+
+            <Box>
+              <Heading size="md">Voting Rewards</Heading>
+              <Text fontSize={14} mt={1}>
+                Participate for a better future and get rewarded.
               </Text>
+            </Box>
+
+            <HStack w="full" spacing={4}>
+              <Heading size={{ base: "2xl", md: "xl" }}>
+                {compactFormatter.format(Number(totalRewardsFormatted))}
+              </Heading>
+              <B3TRIcon boxSize="auto" />
             </HStack>
+
             <Button
+              mt={2}
               isDisabled={totalRewards?.eq(0)}
               isLoading={isRewardsLoading || isClaimRewardsLoading}
-              onClick={sendTransaction}>
-              Claim all
+              onClick={handleClaim}
+              colorScheme="primary"
+              borderRadius={"full"}
+              w={"full"}>
+              Claim
             </Button>
-          </HStack>
-        </VStack>
-      </CardBody>
-      {!account && (
-        <Flex
-          borderRadius={"lg"}
-          backdropFilter="blur(10px)"
-          position={"absolute"}
-          h={"100%"}
-          w={"100%"}
-          align="center"
-          justify="center">
-          <Card>
-            <CardBody>
-              <VStack gap={4}>
-                <Heading size="md" textAlign={"center"}>
-                  You are not connected
-                </Heading>
-                <Text textAlign={"center"} fontSize="14px">
-                  Connect your wallet to check your rewards
-                </Text>
-              </VStack>
-            </CardBody>
-          </Card>
-        </Flex>
-      )}
+          </VStack>
+        </CardBody>
+      </Card>
 
-      {allocationRoundsEvents && allocationRoundsEvents?.created.length === 0 && (
-        <Flex
-          borderRadius={"lg"}
-          backdropFilter="blur(10px)"
-          animation={backdropBlurAnimation("0px", "10px")}
-          position={"absolute"}
-          h={"100%"}
-          w={"100%"}
-          align="center"
-          justify="center">
-          <Card w={["90%", "50%", "40%"]}>
-            <CardBody>
-              <VStack gap={4}>
-                <Heading fontSize="md" textAlign={"center"}>
-                  Coming soon
-                </Heading>
-              </VStack>
-            </CardBody>
-          </Card>
-        </Flex>
-      )}
-    </Card>
+      <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
+        <ModalOverlay />
+        {modalContent}
+      </Modal>
+    </>
   )
 }

@@ -8,7 +8,7 @@ const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
 
 export const RoundState = {
   "0": "Active",
-  "1": "Failed",
+  "1": "Quorum failed",
   "2": "Succeeded",
 }
 /**

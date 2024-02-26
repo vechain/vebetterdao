@@ -3,8 +3,8 @@ import {
   useB3trTokenDetails,
   buildStakeB3trTx,
   getVot3BalanceQueryKey,
-  buildB3trApprovesVot3ContractTx,
   getVotesQueryKey,
+  buildB3trApprovesTx,
 } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
@@ -45,7 +45,7 @@ export const useStakeB3tr = ({
   const buildClauses = useCallback(() => {
     if (!amount) throw new Error("amount is required")
     if (!tokenDetails) throw new Error("tokenDetails is required")
-    const approveClause = buildB3trApprovesVot3ContractTx(thor, amount, tokenDetails.decimals)
+    const approveClause = buildB3trApprovesTx(thor, amount, config.vot3ContractAddress, tokenDetails.decimals)
     const stakeClause = buildStakeB3trTx(thor, amount, tokenDetails.decimals)
     return [approveClause, stakeClause]
   }, [thor, amount, tokenDetails])

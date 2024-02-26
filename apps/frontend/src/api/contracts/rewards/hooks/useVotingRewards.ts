@@ -3,6 +3,7 @@ import { useConnex } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
 import { getRoundReward, getRoundRewardQueryKey } from "./useVotingRoundReward"
 import { RoundReward } from "../utils"
+import { useAllocationsRoundState } from "../../xAllocations"
 
 /**
  * useVotingRewards is a custom hook that fetches the voting rewards for a given round and voter.
@@ -14,15 +15,14 @@ import { RoundReward } from "../utils"
  */
 export const useVotingRewards = (currentRoundId?: string, voter?: string) => {
   const { thor } = useConnex()
+  const { data: state } = useAllocationsRoundState(currentRoundId ?? "")
 
-  // Get array from 1 to currentRoundId - 1
+  // Get array from 1 to currentRoundId - 1 (if currentRoundId is still active)
   const rounds = useMemo(() => {
-    const rounds = []
-    for (let i = 1; i < parseInt(currentRoundId ?? "0"); i++) {
-      rounds.push(i.toString())
-    }
-    return rounds
-  }, [currentRoundId])
+    return Array.from({ length: parseInt(currentRoundId ?? "0") - (state === "0" ? 1 : 0) }, (_, i) =>
+      (i + 1).toString(),
+    )
+  }, [currentRoundId, state])
 
   return useQueries({
     queries: rounds.map(roundId => ({

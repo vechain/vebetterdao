@@ -1,26 +1,28 @@
+import { defineStyle } from "@chakra-ui/react"
+
 export const lightPrimary = {
-  10: "#e9eaea", // Lightest shade
-  50: "#e9eafb", // Lightest shade
-  100: "#bdbff4",
-  200: "#9195ed",
-  300: "#656be6",
-  400: "#3940df",
-  500: "#2027c6", // Primary color
-  600: "#191e9a",
-  700: "#12156e",
-  800: "#0b0d42",
-  900: "#040416", // Darkest shade
+  "50": "#98A3FF",
+  "100": "#7F8CFF",
+  "200": "#6575FF",
+  "300": "#4C5EFF",
+  "400": "#3237FF",
+  "500": "#373EDF", // Provided color
+  "600": "#2428B6",
+  "700": "#111F8D",
+  "800": "#001665",
+  "900": "#000B3C",
 }
 export const lighSecondary = {
-  50: "#f3fde8", // Lightest shade
-  100: "#dbf9b9", // Lighter shade
-  200: "#c3f58a",
-  300: "#aaf15b",
-  400: "#92ed2c", // Primary color
-  500: "#79d312",
-  600: "#5ea40e",
-  700: "#43750a",
-  800: "#284606", // Darker shade
+  "50": "#F7FFD7",
+  "100": "#ECFFB0",
+  "200": "#E0FF89",
+  "300": "#D5FF62",
+  "400": "#CAFF3B",
+  "500": "#B3F36C",
+  "600": "#9ED25E",
+  "700": "#8AAF50",
+  "800": "#758D42",
+  "900": "#606B34",
 }
 
 export const lightTertiary = {
@@ -45,4 +47,15 @@ export const darkPrimary = {
   "700": "#425c26",
   "800": "#384e20",
   "900": "#283817",
+}
+
+export const lightThemeColors = {
+  primary: lightPrimary,
+  secondary: lighSecondary,
+  tertiary: lightTertiary,
+}
+export const darkThemeColors = {
+  primary: darkPrimary,
+  secondary: lighSecondary,
+  tertiary: lightTertiary,
 }

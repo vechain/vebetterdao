@@ -1,5 +1,5 @@
 "use client"
-import { VStack, Text, Container, HStack, Box, Show, Link } from "@chakra-ui/react"
+import { VStack, Text, Container, HStack, Box, Show, Link, Flex } from "@chakra-ui/react"
 import { BeBetterVeBetterIcon } from "../Icons"
 import { DiscordButton } from "./components/DiscordButton"
 import { TelegramButton } from "./components/TelegramButton"
@@ -8,7 +8,7 @@ import { PRIVACY_POLICY_LINK, TERMS_AND_CONDITIONS_LINK } from "@/constants"
 
 export const Footer: React.FC = () => {
   const desktopContent = (
-    <VStack w="container.xl">
+    <VStack>
       <HStack justifyContent={"space-between"} w="full" spacing={4} my={4}>
         <Box my={14}>
           <BeBetterVeBetterIcon
@@ -86,16 +86,16 @@ export const Footer: React.FC = () => {
   )
 
   return (
-    <Container
-      mt={6}
-      maxW={"container"}
-      display={["flex"]}
-      alignItems={["center"]}
-      justifyContent={["flex-start"]}
-      flexDirection={["column"]}
-      bgColor={"#191714"}>
-      <Show above="sm">{desktopContent}</Show>
-      <Show below="sm">{mobileContent}</Show>
-    </Container>
+    <Flex bgColor={"#191714"}>
+      <Container
+        maxW={"container.xl"}
+        display={"flex"}
+        alignItems={"stretch"}
+        justifyContent={"flex-start"}
+        flexDirection={"column"}>
+        <Show above="md">{desktopContent}</Show>
+        <Show below="md">{mobileContent}</Show>
+      </Container>
+    </Flex>
   )
 }
