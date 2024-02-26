@@ -48,7 +48,12 @@ export const DashboardXApps = () => {
 }
 
 const XApp = ({ xApp }: { xApp: XApp }) => {
-  const { data: appMetadata, isLoading: appMetadataLoading, isError: isAppMetadataError } = useXAppMetadata(xApp.id)
+  const {
+    data: appMetadata,
+    isLoading: appMetadataLoading,
+    isError: isAppMetadataError,
+    error: appMetadataError,
+  } = useXAppMetadata(xApp.id)
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
 
   const buttonIconColor = useColorModeValue("primary.500", "white")
@@ -85,12 +90,12 @@ const XApp = ({ xApp }: { xApp: XApp }) => {
           <VStack spacing={1} align="flex-start">
             <Skeleton isLoaded={!appMetadataLoading}>
               <Text fontWeight={"600"} size={"xs"}>
-                {appMetadata?.name ?? isAppMetadataError ?? "Error loading name"}
+                {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
               </Text>
             </Skeleton>
             <Skeleton isLoaded={!appMetadataLoading}>
               <Text fontSize={"sm"} color={"gray.500"}>
-                {appMetadata?.description ?? isAppMetadataError ?? "Error loading description"}
+                {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
               </Text>
             </Skeleton>
           </VStack>
