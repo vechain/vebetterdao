@@ -20,7 +20,6 @@ const Navbar = dynamic(() => import("@/components/Navbar").then(mod => mod.Navba
 typeof window != "undefined" && mixpanelToken && AnalyticsUtils.initialise()
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const baseUrl = typeof window != "undefined" ? window.location.origin : "https://governance.vebetterdao.org"
   return (
     <html lang="en">
       <head>
@@ -29,17 +28,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <link rel="icon" href="/images/favicon.png" />
 
         <meta property="og:title" content="VeBetterDao governance app" />
-        <meta property="og:type" content="article" />
-        <meta property="og:image" content={`${baseUrl}/images/governance_banner.png`} />
-        <meta property="og:url" content={baseUrl} />
+        <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
-
         <meta
           property="og:description"
           content="Vote for your favourite sustainability dApps in vebetterdao’s governance."
         />
         <meta property="og:site_name" content="VeBetterDao" />
-        <meta name="twitter:image:alt" content="VeBetterDao governance app" />
       </head>
       <body>
         <Providers>
