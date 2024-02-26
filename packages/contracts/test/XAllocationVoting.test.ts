@@ -916,4 +916,28 @@ describe("X-Allocation Voting", function () {
       expect(isFinalized).to.eql(false)
     })
   })
+
+  describe("Quorum", function () {
+    it("Can get quorum of round successfully", async function () {
+      const { xAllocationVoting, owner, b3tr, emissions, minterAccount, otherAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      await getVot3Tokens(otherAccount, "1000")
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      let round1 = await startNewAllocationRound(xAllocationVoting)
+      await waitForRoundToEnd(round1, xAllocationVoting)
+
+      let quorum = await xAllocationVoting.roundQuorum(round1)
+
+      let snapshot = await xAllocationVoting.roundSnapshot(round1)
+      let quorumAtSnapshot = await xAllocationVoting.quorum(snapshot)
+
+      expect(quorum).to.eql(quorumAtSnapshot)
+    })
+  })
 })

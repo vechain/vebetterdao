@@ -131,6 +131,13 @@ contract XAllocationVoting is
     return allApps;
   }
 
+  /**
+   * Returns the quorum for a given round
+   */
+  function roundQuorum(uint256 roundId) public view returns (uint256) {
+    return quorum(roundSnapshot(roundId));
+  }
+
   // ---------- Required overrides ---------- //
 
   function votingPeriod() public view override(XAllocationVotingGovernor, GovernorSettings) returns (uint256) {
