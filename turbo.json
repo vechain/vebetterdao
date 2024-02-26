@@ -32,31 +32,23 @@
     "setup-contracts": {
       "cache": false,
       "persistent": true,
-      "dependsOn": [
-        "^compile",
-        "@repo/config#check-or-generate-local-config",
-        "@repo/contracts#check-contracts-deployment"
-      ]
+      "dependsOn": ["^compile", "@repo/contracts#check-contracts-deployment"]
     },
     "setup-contracts:testnet": {
       "cache": false,
       "persistent": true,
-      "dependsOn": [
-        "^compile",
-        "@repo/config#check-or-generate-local-config",
-        "@repo/contracts#check-contracts-deployment:testnet"
-      ]
+      "dependsOn": ["^compile", "@repo/contracts#check-contracts-deployment:testnet"]
     },
     "@repo/config#check-or-generate-local-config": {
       "cache": false
     },
     "@repo/contracts#check-contracts-deployment": {
       "cache": false,
-      "dependsOn": ["^compile"]
+      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
     "@repo/contracts#check-contracts-deployment:testnet": {
       "cache": false,
-      "dependsOn": ["^compile"]
+      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
     "clean": {
       "cache": false
@@ -66,6 +58,9 @@
     },
     "deploy": {
       "dependsOn": ["^deploy"]
+    },
+    "deploy:testnet": {
+      "dependsOn": ["^deploy:testnet"]
     },
     "test": {
       "cache": false,

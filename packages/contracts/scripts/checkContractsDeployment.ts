@@ -4,7 +4,6 @@ import { getConfig, getContractsConfig } from "@repo/config"
 import { AppConfig } from "@repo/config"
 import fs from "fs"
 import path from "path"
-import { seedLocalEnvironment } from "./deploy/seed"
 import { Network } from "@repo/constants"
 
 const config = getConfig()
@@ -26,16 +25,7 @@ async function checkContractsDeployment() {
       if (isSoloNetwork) {
         // deploy the contracts and override the config file
         const newAddresses = await deployAll(getContractsConfig())
-        try {
-          await seedLocalEnvironment(
-            newAddresses.b3tr,
-            newAddresses.vot3,
-            newAddresses.xAllocationVoting,
-            newAddresses.emissions,
-          )
-        } catch (e) {
-          console.error(e)
-        }
+
         return await overrideLocalConfigWithNewContracts(newAddresses, config.network)
       } else console.log(`Skipping deployment on ${network.name}`)
     } else console.log(`B3tr contract already deployed`)
