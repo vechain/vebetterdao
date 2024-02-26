@@ -5,10 +5,7 @@ import { Spinner, Stack, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { Suspense, useEffect } from "react"
 
-const BalanceCard = dynamic(() => import("@/components/BalanceCard").then(mod => mod.BalanceCard), { ssr: false })
-const GmNFT = dynamic(() => import("@/components/GmNFT/GmNFT").then(mod => mod.GmNFT), { ssr: false })
-
-const VoterRewards = dynamic(() => import("@/components/VoterRewards/VoterRewards").then(mod => mod.VoterRewards), {
+const DashboardSideBar = dynamic(() => import("@/components/DashboardSideBar").then(mod => mod.DashboardSideBar), {
   ssr: false,
 })
 
@@ -44,11 +41,7 @@ export default function Home() {
             <DashboardAllocationRounds />
             <DashboardXApps />
           </VStack>
-          <VStack spacing={4} flex={2.5}  top={100} right={0}>
-            <BalanceCard />
-            <VoterRewards />
-            <GmNFT />
-          </VStack>
+          <DashboardSideBar />
         </Stack>
       </Suspense>
     </VStack>
