@@ -1,5 +1,5 @@
 import { useAllocationRoundQuorum, useAllocationVotes, useAllocationsRound, useVot3PastSupply } from "@/api"
-import { VOT3Icon } from "@/components"
+import { DotSymbol, VOT3Icon } from "@/components"
 import {
   Box,
   Card,
@@ -14,7 +14,6 @@ import {
   StepDescription,
   StepIcon,
   StepIndicator,
-  StepNumber,
   StepSeparator,
   StepStatus,
   StepTitle,
@@ -126,11 +125,22 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
             </Skeleton>
           </HStack>
 
-          <Stepper index={activeStep} orientation="vertical" gap="0" height="200px" mt={4}>
+          <Stepper
+            size="sm"
+            index={activeStep}
+            orientation="vertical"
+            colorScheme="primary"
+            gap="0"
+            height="200px"
+            mt={4}>
             {steps.map((step, index) => (
               <Step key={index}>
                 <StepIndicator>
-                  <StepStatus complete={<StepIcon />} incomplete={<StepNumber />} active={<StepNumber />} />
+                  <StepStatus
+                    complete={<StepIcon />}
+                    incomplete={<></>}
+                    active={<DotSymbol color="primary.500" size={3} />}
+                  />
                 </StepIndicator>
 
                 <Box flexShrink="0">
