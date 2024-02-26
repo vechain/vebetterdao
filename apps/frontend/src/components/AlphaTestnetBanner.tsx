@@ -1,7 +1,9 @@
-import { HStack, Text } from "@chakra-ui/react"
+import { HStack, Slide, Text } from "@chakra-ui/react"
 import { motion } from "framer-motion"
+import { getConfig } from "@repo/config"
 import { useEffect, useRef, useState } from "react"
 
+const isTestnetPhase = ["test", "solo", "custom"].includes(getConfig().network.type)
 const text = "Alpha Testnet Phase"
 const MotionHStack = motion(HStack)
 export const AlphaTestnetBanner = () => {
@@ -20,9 +22,11 @@ export const AlphaTestnetBanner = () => {
     }
   }, [containerRef])
 
+  if (!isTestnetPhase) return null
+
   return (
     <HStack
-      py={3}
+      py={[4, 3]}
       ref={containerRef}
       w="full"
       justify="center"
@@ -37,7 +41,7 @@ export const AlphaTestnetBanner = () => {
         left: 0,
         right: 0,
         bottom: 0,
-        bg: "linear-gradient(90deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 8%)",
+        bg: "linear-gradient(90deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 15%)",
         zIndex: 1,
       }}
       _after={{
@@ -47,7 +51,7 @@ export const AlphaTestnetBanner = () => {
         left: 0,
         right: 0,
         bottom: 0,
-        bg: "linear-gradient(90deg, rgba(0,0,0,0) 92%, rgba(0,0,0,1) 100%)",
+        bg: "linear-gradient(90deg, rgba(0,0,0,0) 85%, rgba(0,0,0,1) 100%)",
         zIndex: 1,
       }}>
       <MotionHStack
@@ -63,11 +67,11 @@ export const AlphaTestnetBanner = () => {
         {texts.map((text, index) => (
           <Text
             key={index}
-            fontSize="md"
+            fontSize={["sm", "md"]}
             color="secondary.500"
             whiteSpace="nowrap"
             textTransform={"uppercase"}
-            fontWeight={"300"}>
+            fontWeight={"400"}>
             {text}
           </Text>
         ))}
