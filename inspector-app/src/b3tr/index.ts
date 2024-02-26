@@ -1,6 +1,7 @@
 import DB, { Entities } from "@/database"
 import soloStaging from "../../../packages/config/solo-staging"
 import solo from "../../../packages/config/local"
+import testnet from "../../../packages/config/testnet"
 import {
   b3trContract,
   Contract,
@@ -13,6 +14,7 @@ import {
   xAllocationPoolContract,
   xAllocationVotingContract,
 } from "@/b3tr/contracts"
+
 
 const importContract = async (contract: Contract, address: string, network: typeof soloStaging) => {
 
@@ -49,5 +51,7 @@ export const insertB3trContracts = async () => {
   } else {
     await insertForNetwork(soloStaging)
   }
+
+  await insertForNetwork(testnet)
 }
 
