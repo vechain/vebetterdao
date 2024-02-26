@@ -69,7 +69,6 @@ const XApp = ({ xApp }: { xApp: XApp }) => {
                 alt={"logo"}
                 boxSize={10}
                 borderRadius="9px"
-                w={"fit-content"}
               />
             </Skeleton>
 
