@@ -9,6 +9,7 @@ import { address } from "thor-devkit"
 type useClaimRewardsProps = {
   roundRewards: RoundReward[]
   onSuccess?: () => void
+  onFailure?: () => void
   invalidateCache?: boolean
   onSuccessMessageTitle?: string
 }
@@ -27,6 +28,7 @@ type useClaimRewardsReturnValue = {
 export const useClaimRewards = ({
   roundRewards,
   onSuccess,
+  onFailure,
   invalidateCache = true,
 }: useClaimRewardsProps): useClaimRewardsReturnValue => {
   const { thor } = useConnex()
@@ -79,6 +81,7 @@ export const useClaimRewards = ({
   const result = useSendTransaction({
     signerAccount: account,
     onTxConfirmed: handleOnSuccess,
+    onTxFailedOrCancelled: onFailure,
   })
 
 

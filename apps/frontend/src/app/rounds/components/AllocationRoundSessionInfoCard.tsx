@@ -51,20 +51,16 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
 
   useEffect(() => {
     if (roundInfo) {
-      if (!roundInfo.isCurrent) {
-        setActiveStep(3)
-        return
-      }
       const stateNumber = Number(roundInfo.state)
       switch (stateNumber) {
         case 0:
           setActiveStep(1)
           break
         case 1:
-          setActiveStep(2)
+          setActiveStep(3)
           break
         case 2:
-          setActiveStep(2)
+          setActiveStep(3)
           break
       }
     }

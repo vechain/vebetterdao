@@ -10,7 +10,6 @@ import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
 import { useConnex, useWallet } from "@vechain/dapp-kit-react"
-import { FormattingUtils } from "@repo/utils"
 import { getConfig } from "@repo/config"
 
 const config = getConfig()
@@ -82,16 +81,6 @@ export const useUnstakeB3tr = ({
       })
     }
 
-    const formattedAmount = FormattingUtils.humanNumber(amount ?? 0, amount)
-
-    toast({
-      title: "Tokens unstaked succesfully",
-      description: `You have unstaked ${formattedAmount} B3TR`,
-      status: "success",
-      position: "bottom-left",
-      duration: 5000,
-      isClosable: true,
-    })
     onSuccess?.()
   }, [invalidateCache, queryClient, toast, onSuccess, account, amount])
 

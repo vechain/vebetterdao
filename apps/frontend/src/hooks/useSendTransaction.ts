@@ -51,6 +51,7 @@ export type UseSendTransactionReturnValue = {
   sendTransaction: UseMutateFunction<Connex.Vendor.TxResponse, Error, EnhancedClause[] | undefined, unknown>
   sendTransactionPending: boolean
   sendTransactionError: Error | null
+  sendTransactionTx: Connex.Vendor.TxResponse | null | undefined
   isTxReceiptLoading: boolean
   txReceiptError: Error | null
   txReceipt: Connex.Thor.Transaction.Receipt | null | undefined
@@ -197,6 +198,7 @@ export const useSendTransaction = ({
     sendTransaction: runSendTransaction,
     sendTransactionPending,
     sendTransactionError,
+    sendTransactionTx,
     isTxReceiptLoading,
     txReceiptError,
     txReceipt,

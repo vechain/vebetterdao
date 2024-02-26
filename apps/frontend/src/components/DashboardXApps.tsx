@@ -48,7 +48,12 @@ export const DashboardXApps = () => {
 }
 
 const XApp = ({ xApp }: { xApp: XApp }) => {
-  const { data: appMetadata, isLoading: appMetadataLoading, isError: isAppMetadataError } = useXAppMetadata(xApp.id)
+  const {
+    data: appMetadata,
+    isLoading: appMetadataLoading,
+    isError: isAppMetadataError,
+    error: appMetadataError,
+  } = useXAppMetadata(xApp.id)
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
 
   const buttonIconColor = useColorModeValue("primary.500", "white")
@@ -58,17 +63,16 @@ const XApp = ({ xApp }: { xApp: XApp }) => {
       <CardBody>
         <VStack alignItems={"start"} justify={"flex-start"}>
           <HStack spacing={1} justifyContent={"space-between"} w={"full"}>
-            <Skeleton isLoaded={!isLogoLoading} width={"fit-content"} alignContent={"start"}>
+            <Skeleton isLoaded={!isLogoLoading} alignContent={"start"}>
               <Image
                 src={logo?.image ?? notFoundImage}
                 alt={"logo"}
                 boxSize={10}
                 borderRadius="9px"
-                w={"fit-content"}
               />
             </Skeleton>
 
-            <Skeleton isLoaded={!appMetadataLoading} width={"fit-content"} justifyContent={"end"}>
+            <Skeleton isLoaded={!appMetadataLoading} justifyContent={"end"}>
               <IconButton
                 isRound={true}
                 variant="solid"
@@ -85,12 +89,12 @@ const XApp = ({ xApp }: { xApp: XApp }) => {
           <VStack spacing={1} align="flex-start">
             <Skeleton isLoaded={!appMetadataLoading}>
               <Text fontWeight={"600"} size={"xs"}>
-                {appMetadata?.name ?? "Error loading name"}
+                {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
               </Text>
             </Skeleton>
             <Skeleton isLoaded={!appMetadataLoading}>
               <Text fontSize={"sm"} color={"gray.500"}>
-                {appMetadata?.description ?? "Error loading description"}
+                {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
               </Text>
             </Skeleton>
           </VStack>
