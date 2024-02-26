@@ -1,3 +1,4 @@
+"use-client"
 import {
   Button,
   Card,
@@ -8,7 +9,6 @@ import {
   Text,
   VStack,
   Modal,
-  ModalContent,
   ModalOverlay,
   ModalCloseButton,
 } from "@chakra-ui/react"
@@ -16,11 +16,10 @@ import { useCallback, useMemo, useState } from "react"
 import { useStakeB3tr, useTokenColors, useUnstakeB3tr } from "@/hooks"
 import { FaArrowRight } from "react-icons/fa6"
 import { useForm } from "react-hook-form"
-import { ConfirmTransactionModalContent } from "../ConfirmTransactionModalContent"
 import { CustomModalContent } from "../CustomModalContent"
 import { SwitchTokenButton } from "./SwitchTokenButton"
 import { TokenCards } from "./TokenCards"
-
+import { TransactionModal } from "../TransactionModal"
 export type Props = {
   isOpen: boolean
   onClose: () => void
@@ -50,6 +49,7 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
   }, [isB3trToVot3, stakeMutation, unstakeMutation])
 
   const handleStake = useCallback(() => {
+    mutationData.resetStatus()
     mutationData.sendTransaction(undefined)
   }, [mutationData.sendTransaction])
 
@@ -88,18 +88,19 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
 
   if (mutationData.status !== "ready")
     return (
-      <Modal isOpen={isOpen} onClose={handleClose} trapFocus={true} isCentered={true}>
-        <ModalOverlay />
-        <ModalContent>
-          <ConfirmTransactionModalContent
-            description={swapText}
-            status={mutationData.status}
-            error={mutationData.sendTransactionError?.message ?? mutationData.txReceiptError?.message}
-            onSuccess={handleClose}
-            onTryAgain={mutationData.resetStatus}
-          />
-        </ModalContent>
-      </Modal>
+      <TransactionModal
+        isOpen={isOpen}
+        onClose={handleClose}
+        status={mutationData.status}
+        confirmationTitle={swapText}
+        successTitle={"Swap Completed!"}
+        showSocialButtons
+        socialDescription="I just swapped B3TR for VOT3 on B3tr Finance! 🎉 #B3tr #VOT3"
+        onTryAgain={handleStake}
+        showTryAgainButton
+        showExplorerButton
+        txId={mutationData.txReceipt?.meta.txID || mutationData.sendTransactionTx?.txid}
+      />
     )
 
   return (
