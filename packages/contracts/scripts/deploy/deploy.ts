@@ -230,7 +230,7 @@ const transferAdminRole = async (
 
   const newAdminSet = await contract.hasRole(adminRole, newAdminAddress)
   const oldAdminRemoved = !(await contract.hasRole(adminRole, oldAdmin.address))
-  if (!newAdminSet && !oldAdminRemoved)
+  if (!newAdminSet || !oldAdminRemoved)
     throw new Error("Admin role not set correctly on " + (await contract.getAddress()))
 }
 
@@ -256,7 +256,7 @@ const transferMinterRole = async (
 
     const newMinterSet = await contract.hasRole(minterRole, newMinterAddress)
     const oldMinterRemoved = !(await contract.hasRole(minterRole, oldMinterAddress))
-    if (!newMinterSet && !oldMinterRemoved)
+    if (!newMinterSet || !oldMinterRemoved)
       throw new Error("Minter role not set correctly on " + (await contract.getAddress()))
   } else {
     await contract
