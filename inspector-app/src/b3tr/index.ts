@@ -28,7 +28,7 @@ const importContract = async (contract: Contract, address: string, network: type
 }
 
 const insertForNetwork = async (network: typeof soloStaging) => {
-  await DB.contracts.clear()
+
   await importContract(b3trContract, network.b3trContractAddress, network)
   await importContract(vot3Contract, network.vot3ContractAddress, network)
   await importContract(governorContract, network.b3trGovernorAddress, network)
@@ -41,6 +41,9 @@ const insertForNetwork = async (network: typeof soloStaging) => {
 }
 
 export const insertB3trContracts = async () => {
+
+  await DB.contracts.clear()
+
   if (window.location.hostname === "localhost") {
     await insertForNetwork(solo)
   } else {
