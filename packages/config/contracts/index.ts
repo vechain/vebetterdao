@@ -2,6 +2,7 @@ export * from "./type"
 
 import { createLocalConfig } from "./envs/local"
 import { createSoloStagingConfig } from "./envs/soloStaging"
+import { createTestnetConfig } from "./envs/testnet"
 
 export function getContractsConfig() {
   switch (process.env.NEXT_PUBLIC_APP_ENV) {
@@ -10,7 +11,7 @@ export function getContractsConfig() {
     case "solo-staging":
       return createSoloStagingConfig()
     case "testnet":
-      throw "Testnet contracts config are not implemented yet"
+      return createTestnetConfig()
     case "production":
       throw "Production contracts config are not implemented yet"
 

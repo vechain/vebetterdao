@@ -1,26 +1,47 @@
 import { ethers, network } from "hardhat"
-import { B3TR, B3TRGovernor, TimeLock, VOT3 } from "../../typechain-types"
+import {
+  B3TR,
+  Emissions,
+  VOT3,
+  XAllocationVoting,
+  TimeLock,
+  B3TRGovernor,
+  B3TRBadge,
+  VoterRewards,
+  XAllocationPool,
+} from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
+import { HttpNetworkConfig } from "hardhat/types"
+import { seedLocalEnvironment, seedTestEnvironment } from "./seed"
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 
 // NFT Badge Values
-const name = "B3TR Badge"
-const symbol = "B3TR"
+const name = "VeBetterDAO Galaxy Member"
+const symbol = "GM"
 
 // Voter rewards
 const levels = [1]
 const multiplier = [0]
 
 export async function deployAll(config: ContractsConfig) {
-  console.log(`Deploying contracts on ${network.name} with ${config.NEXT_PUBLIC_APP_ENV} configurations...`)
-
+  const networkConfig = network.config as HttpNetworkConfig
+  console.log(
+    `Deploying contracts on ${network.name} (${networkConfig.url}) with ${config.NEXT_PUBLIC_APP_ENV} configurations...`,
+  )
   const [admin] = await ethers.getSigners()
 
+  // We use a temporary admin to deploy and initialize contracts then transfer role to the real admin
+  const TEMP_ADMIN = network.name === "vechain_solo" ? config.CONTRACTS_ADMIN_ADDRESS : admin.address
+  console.log("Temporary admin set to ", TEMP_ADMIN)
+
+  // ---------- Contracts Deployment ---------- //
+
   // Deploy B3TR and VOT3 tokens
-  const b3tr = await deployB3trToken(config.CONTRACTS_ADMIN_ADDRESS, config.B3TR_CAP)
-  const vot3 = await deployVot3Token(config.CONTRACTS_ADMIN_ADDRESS, await b3tr.getAddress())
+  const b3tr = await deployB3trToken(TEMP_ADMIN, config.B3TR_CAP)
+  const vot3 = await deployVot3Token(TEMP_ADMIN, await b3tr.getAddress())
 
   // Deploy the governance contract
-  const timelock = await deployTimeLock(config.B3TR_GOVERNOR_MIN_DELAY, config.CONTRACTS_ADMIN_ADDRESS)
+  const timelock = await deployTimeLock(config.B3TR_GOVERNOR_MIN_DELAY, TEMP_ADMIN)
   const governor = await deployGovernor(
     await vot3.getAddress(),
     await timelock.getAddress(),
@@ -30,31 +51,23 @@ export async function deployAll(config: ContractsConfig) {
     config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD,
   )
 
-  // Set proposer, canceller and executor role to timelock
-  const PROPOSER_ROLE = await timelock.PROPOSER_ROLE()
-  const EXECUTOR_ROLE = await timelock.EXECUTOR_ROLE()
-  const CANCELLER_ROLE = await timelock.CANCELLER_ROLE()
-  await timelock.grantRole(PROPOSER_ROLE, await governor.getAddress())
-  await timelock.grantRole(EXECUTOR_ROLE, await governor.getAddress())
-  await timelock.grantRole(CANCELLER_ROLE, await governor.getAddress())
-
   // Deploy XAllocationPool
   const xAllocationPool = await deployXAllocationPool(
     await b3tr.getAddress(),
-    config.CONTRACTS_ADMIN_ADDRESS,
+    TEMP_ADMIN,
     config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
     config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
   )
 
   // Deploy the NFT Badge contract with Max Mintable Level 1
-  const badge = await deployNFTBadge(1, name, symbol, config.CONTRACTS_ADMIN_ADDRESS, config.NFT_BADGE_BASE_URI)
+  const badge = await deployNFTBadge(1, name, symbol, TEMP_ADMIN, config.NFT_BADGE_BASE_URI)
 
   const emissions = await deployEmissions(
     await b3tr.getAddress(),
     [await xAllocationPool.getAddress(), config.VOTE_2_EARN_POOL_ADDRESS, config.TREASURY_POOL_ADDRESS],
     config.INITIAL_X_ALLOCATION,
-    config.CONTRACTS_ADMIN_ADDRESS,
-    config.CONTRACTS_ADMIN_ADDRESS,
+    TEMP_ADMIN,
+    TEMP_ADMIN,
     config.EMISSIONS_CYCLE_DURATION,
     [
       config.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE,
@@ -70,7 +83,7 @@ export async function deployAll(config: ContractsConfig) {
     await badge.getAddress(),
     await emissions.getAddress(),
     await b3tr.getAddress(),
-    config.CONTRACTS_ADMIN_ADDRESS,
+    TEMP_ADMIN,
     levels,
     multiplier,
   )
@@ -79,30 +92,112 @@ export async function deployAll(config: ContractsConfig) {
   const xAllocationVoting = await deployXAllocationVoting(
     await timelock.getAddress(),
     await vot3.getAddress(),
-    config.CONTRACTS_ADMIN_ADDRESS,
+    TEMP_ADMIN,
     await voterRewards.getAddress(),
     config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE,
     config.EMISSIONS_CYCLE_DURATION - 1,
+    config.XAPP_BASE_URI,
   )
 
-  // Grant Vote Registrar role to XAllocationVoting
-  await voterRewards.connect(admin).setXallocationVoteRegistrarRole(await xAllocationVoting.getAddress())
+  console.log("Contracts deployed")
 
-  // Grant admin role to voter rewards for registering x allocation voting
-  await xAllocationVoting.connect(admin).setAdminRole(await emissions.getAddress())
+  // ---------- Contracts set up ---------- //
+
+  console.log("Setting up contracts...")
+  // Grant MINTER_ROLE on B3TR to emissions contract so it can bootstrap and distribute
+  await b3tr.grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress()).then(async tx => await tx.wait())
+
+  // Set proposer, canceller and executor role to timelock
+  const PROPOSER_ROLE = await timelock.PROPOSER_ROLE()
+  const EXECUTOR_ROLE = await timelock.EXECUTOR_ROLE()
+  const CANCELLER_ROLE = await timelock.CANCELLER_ROLE()
+  await timelock.grantRole(PROPOSER_ROLE, await governor.getAddress())
+  await timelock.grantRole(EXECUTOR_ROLE, await governor.getAddress())
+  await timelock.grantRole(CANCELLER_ROLE, await governor.getAddress())
+
+  // Grant Vote Registrar role to XAllocationVoting
+  await voterRewards
+    .connect(admin)
+    .setXallocationVoteRegistrarRole(await xAllocationVoting.getAddress())
+    .then(async tx => await tx.wait())
+
+  // Emissions contract should be able to start new rounds
+  await xAllocationVoting
+    .connect(admin)
+    .setAdminRole(await emissions.getAddress())
+    .then(async tx => await tx.wait())
 
   // Set X allocations governor
-  await emissions.connect(admin).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+  await emissions
+    .connect(admin)
+    .setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+    .then(async tx => await tx.wait())
   // Set voter rewards address in emissions
-  await emissions.connect(admin).setVote2EarnAddress(await voterRewards.getAddress())
+  await emissions
+    .connect(admin)
+    .setVote2EarnAddress(await voterRewards.getAddress())
+    .then(async tx => await tx.wait())
 
   // Setup XAllocationPool addresses
-  await xAllocationPool.connect(admin).setXAllocationVotingAddress(await xAllocationVoting.getAddress())
-  await xAllocationPool.connect(admin).setEmissionsAddress(await emissions.getAddress())
+  await xAllocationPool
+    .connect(admin)
+    .setXAllocationVotingAddress(await xAllocationVoting.getAddress())
+    .then(async tx => await tx.wait())
+  await xAllocationPool
+    .connect(admin)
+    .setEmissionsAddress(await emissions.getAddress())
+    .then(async tx => await tx.wait())
 
   // Set xAllocationVoting and B3TRGovernor address in B3TRBadge
-  await badge.connect(admin).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
-  await badge.connect(admin).setB3trGovernorAddress(await governor.getAddress())
+  await badge
+    .connect(admin)
+    .setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+    .then(async tx => await tx.wait())
+  await badge
+    .connect(admin)
+    .setB3trGovernorAddress(await governor.getAddress())
+    .then(async tx => await tx.wait())
+
+  // ---------- Seeding ---------- //
+  if (network.name === "vechain_testnet") {
+    await seedTestEnvironment(b3tr, xAllocationVoting, emissions)
+  } else if (network.name === "vechain_solo") {
+    await seedLocalEnvironment(b3tr, vot3, xAllocationVoting, emissions)
+  }
+
+  // ---------- Role updates ---------- //
+  // Do not update roles on solo network since it would just increase dev time
+  if (network.name === "vechain_testnet") {
+    console.log("Updating roles...")
+    console.log("New admin address", config.CONTRACTS_ADMIN_ADDRESS)
+
+    await transferMinterRole(b3tr, admin, TEMP_ADMIN, await emissions.getAddress())
+    await transferAdminRole(b3tr, admin, config.CONTRACTS_ADMIN_ADDRESS)
+
+    await transferAdminRole(badge, admin, config.CONTRACTS_ADMIN_ADDRESS)
+
+    await transferMinterRole(emissions, admin, admin.address, config.CONTRACTS_ADMIN_ADDRESS)
+    await transferAdminRole(emissions, admin, config.CONTRACTS_ADMIN_ADDRESS)
+
+    await transferAdminRole(vot3, admin, config.CONTRACTS_ADMIN_ADDRESS)
+    await transferAdminRole(voterRewards, admin, config.CONTRACTS_ADMIN_ADDRESS)
+    await transferAdminRole(xAllocationPool, admin, config.CONTRACTS_ADMIN_ADDRESS)
+    await transferAdminRole(xAllocationVoting, admin, config.CONTRACTS_ADMIN_ADDRESS)
+
+    console.log("Roles updated successfully!")
+  }
+
+  console.log("contracts", {
+    b3trContractAddress: await b3tr.getAddress(),
+    vot3ContractAddress: await vot3.getAddress(),
+    b3trGovernorAddress: await governor.getAddress(),
+    timelockContractAddress: await timelock.getAddress(),
+    xAllocationPoolContractAddress: await xAllocationPool.getAddress(),
+    xAllocationVotingContractAddress: await xAllocationVoting.getAddress(),
+    emissionsContractAddress: await emissions.getAddress(),
+    voterRewardsContractAddress: await voterRewards.getAddress(),
+    nftBadgeContractAddress: await badge.getAddress(),
+  })
 
   return {
     governor: governor,
@@ -115,8 +210,63 @@ export async function deployAll(config: ContractsConfig) {
     emissions: emissions,
     voterRewards: voterRewards,
   }
-
   // close the script
+}
+
+const transferAdminRole = async (
+  contract: B3TR | VOT3 | B3TRBadge | Emissions | VoterRewards | XAllocationPool | XAllocationVoting,
+  oldAdmin: HardhatEthersSigner,
+  newAdminAddress: string,
+) => {
+  const adminRole = await contract.DEFAULT_ADMIN_ROLE()
+  await contract
+    .connect(oldAdmin)
+    .grantRole(adminRole, newAdminAddress)
+    .then(async tx => await tx.wait())
+  await contract
+    .connect(oldAdmin)
+    .renounceRole(adminRole, oldAdmin.address)
+    .then(async tx => await tx.wait())
+
+  const newAdminSet = await contract.hasRole(adminRole, newAdminAddress)
+  const oldAdminRemoved = !(await contract.hasRole(adminRole, oldAdmin.address))
+  if (!newAdminSet || !oldAdminRemoved)
+    throw new Error("Admin role not set correctly on " + (await contract.getAddress()))
+}
+
+const transferMinterRole = async (
+  contract: Emissions | B3TR,
+  admin: HardhatEthersSigner,
+  oldMinterAddress: string,
+  newMinterAddress?: string,
+) => {
+  const minterRole = await contract.MINTER_ROLE()
+
+  // If newMinterAddress is provided, set a new minter before revoking the old one
+  // otherwise just revoke the old one
+  if (newMinterAddress) {
+    await contract
+      .connect(admin)
+      .grantRole(minterRole, newMinterAddress)
+      .then(async tx => await tx.wait())
+    await contract
+      .connect(admin)
+      .revokeRole(minterRole, oldMinterAddress)
+      .then(async tx => await tx.wait())
+
+    const newMinterSet = await contract.hasRole(minterRole, newMinterAddress)
+    const oldMinterRemoved = !(await contract.hasRole(minterRole, oldMinterAddress))
+    if (!newMinterSet || !oldMinterRemoved)
+      throw new Error("Minter role not set correctly on " + (await contract.getAddress()))
+  } else {
+    await contract
+      .connect(admin)
+      .revokeRole(minterRole, oldMinterAddress)
+      .then(async tx => await tx.wait())
+
+    const oldMinterRemoved = !(await contract.hasRole(minterRole, oldMinterAddress))
+    if (!oldMinterRemoved) throw new Error("Minter role not removed correctly on " + (await contract.getAddress()))
+  }
 }
 
 async function deployB3trToken(admin: string, cap: number): Promise<B3TR> {

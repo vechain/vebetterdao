@@ -55,7 +55,9 @@ describe("B3TR Token", function () {
 
   describe("Access Control", function () {
     it("only admin can grant minter role", async function () {
-      const { b3tr, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
+      const { b3tr, owner, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       const operatorRole = await b3tr.MINTER_ROLE()
 
@@ -117,6 +119,32 @@ describe("B3TR Token", function () {
 
       // otherAccount is still admin until
       expect(await b3tr.hasRole(adminRole, otherAccount)).to.eql(true)
+    })
+
+    it("admin transfer admin permissions to another account", async function () {
+      const { b3tr, owner, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const adminRole = await b3tr.DEFAULT_ADMIN_ROLE()
+      const minterRole = await b3tr.MINTER_ROLE()
+
+      const newAdmin = otherAccounts[5]
+
+      expect(await b3tr.hasRole(adminRole, owner)).to.eql(true)
+      expect(await b3tr.hasRole(adminRole, newAdmin)).to.eql(false)
+
+      await b3tr.connect(owner).grantRole(adminRole, newAdmin)
+      expect(await b3tr.hasRole(adminRole, newAdmin)).to.eql(true)
+
+      await b3tr.connect(owner).renounceRole(adminRole, owner)
+
+      expect(await b3tr.hasRole(adminRole, owner)).to.eql(false)
+      expect(await b3tr.hasRole(adminRole, newAdmin)).to.eql(true)
+
+      //can do same stuff as previous owner
+      await b3tr.connect(newAdmin).grantRole(minterRole, otherAccounts[5])
+      await b3tr.connect(newAdmin).grantRole(adminRole, otherAccounts[5])
     })
 
     it("Only admin can toggle pause of b3tr transfers", async function () {
