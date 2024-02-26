@@ -37,7 +37,6 @@ export const TransactionModal = ({
   showExplorerButton,
   txId,
 }: TransactionModalProps) => {
-  console.log("txId", txId)
   const modalContent = useMemo(() => {
     if (status === "pending") return <ConfirmationModalContent title={confirmationTitle} />
     if (status === "waitingConfirmation")

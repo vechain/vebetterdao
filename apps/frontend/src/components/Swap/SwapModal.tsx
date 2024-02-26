@@ -28,7 +28,11 @@ export type Props = {
 export const SwapModal = ({ isOpen, onClose }: Props) => {
   const [isB3trToVot3, setIsB3trToVot3] = useState(true)
 
-  const formData = useForm<{ amount: string }>()
+  const formData = useForm<{ amount: string }>({
+    defaultValues: {
+      amount: "",
+    },
+  })
   const { watch, setValue } = formData
   const amount = String(Number(watch("amount")) || "")
 
