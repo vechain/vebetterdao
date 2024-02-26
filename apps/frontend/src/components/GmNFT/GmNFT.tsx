@@ -73,7 +73,7 @@ export const GmNFT = () => {
         <ModalContent rounded="2xl" w="auto">
           <ModalBody py={6} px={12}>
             <VStack alignItems={"center"}>
-              <MotionImage {...coinFlipAnimation} src="/images/gm-nft-placeholder.png" maxH="250px" />
+              <MotionImage {...coinFlipAnimation} src="/images/gm-nft-placeholder.png" maxW="250px" />
               {isClaimLoading /* isClaimLoading */ && (
                 <Text fontWeight={400} lineHeight="22px" fontSize={{ base: "16px", md: "16px" }} align={"center"}>
                   Please confirm the transaction in your wallet
@@ -92,15 +92,15 @@ export const GmNFT = () => {
     return (
       <ModalContent w={"auto"} rounded="2xl">
         <ModalCloseButton />
-        <ModalBody display={"flex"} alignContent={"center"} alignItems={"center"} pt={12} px={12}>
+        <ModalBody display={"flex"} alignContent={"center"} alignItems={"center"} pt={12} px={6}>
           <VStack alignItems={"center"}>
-            <Image src={imageData?.image} w={["full", "300px"]} aspectRatio="1/1" rounded="3xl" />
+            <Image src={imageData?.image} maxW={"auto"} rounded="3xl" />
             <Heading alignSelf={"center"} size={"lg"} mt={4} textAlign={"center"}>
-              GM Earth #{tokenID}
+              #{tokenID}
             </Heading>
           </VStack>
         </ModalBody>
-        <ModalFooter>
+        <ModalFooter justifyContent={"center"}>
           <ShareButtons description="I just claimed an nft as voter in the B3tr DAO!" />
         </ModalFooter>
       </ModalContent>
@@ -175,7 +175,7 @@ export const GmNFT = () => {
                   }}>
                   <HStack w="full" justifyContent={"start"}>
                     <Box p={4}>
-                      <Image {...pulseAnimation} src={imageData?.image} maxH="90px" borderRadius={16} />
+                      <Image {...pulseAnimation} src={imageData?.image} maxH="120px" borderRadius={16} />
                     </Box>
 
                     <Text fontWeight={600} lineHeight="22px" fontSize={{ base: "18px", md: "20px" }}>

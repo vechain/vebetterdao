@@ -1,6 +1,9 @@
 import { uploadMetadataToIpfs } from "../../helpers/uploadFolderToIpfs"
+import path from "path"
 
-uploadMetadataToIpfs("./ipfs/badge/metadata")
+const METADATA_PATH = path.join(__dirname, "../../../metadata/badge/metadata")
+
+uploadMetadataToIpfs(METADATA_PATH)
   .then(() => process.exit(0))
   .catch(error => {
     console.error("Unhandled error:", error)
