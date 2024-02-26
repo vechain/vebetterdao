@@ -58,7 +58,7 @@ const XApp = ({ xApp }: { xApp: XApp }) => {
       <CardBody>
         <VStack alignItems={"start"} justify={"flex-start"}>
           <HStack spacing={1} justifyContent={"space-between"} w={"full"}>
-            <Skeleton isLoaded={!isLogoLoading} width={"fit-content"} alignContent={"start"}>
+            <Skeleton isLoaded={!isLogoLoading} alignContent={"start"}>
               <Image
                 src={logo?.image ?? notFoundImage}
                 alt={"logo"}
@@ -68,7 +68,7 @@ const XApp = ({ xApp }: { xApp: XApp }) => {
               />
             </Skeleton>
 
-            <Skeleton isLoaded={!appMetadataLoading} width={"fit-content"} justifyContent={"end"}>
+            <Skeleton isLoaded={!appMetadataLoading} justifyContent={"end"}>
               <IconButton
                 isRound={true}
                 variant="solid"
