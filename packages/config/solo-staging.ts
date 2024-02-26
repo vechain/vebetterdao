@@ -1,5 +1,6 @@
 import { AppConfig } from "." 
  const config: AppConfig = {
+  "basePath": 'https://b3tr-frontend.vercel.app',
   "b3trContractAddress": "0x31c28b5fc81961c7e74496E16C618d5c023906dF",
   "vot3ContractAddress": "0x776386c22fBedc38664e90F1fB50d612B43B3841",
   "b3trGovernorAddress": "0x110Cb8e02337328635E7408F430D36190b16c756",

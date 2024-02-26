@@ -29,12 +29,20 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 
         <meta property="og:title" content="VeBetterDao" />
         <meta property="og:type" content="website" />
-        <meta name="twitter:card" content="summary_large_image" />
         <meta
           property="og:description"
           content="Vote for your favourite sustainability dApps in vebetterdao’s governance."
         />
         <meta property="og:site_name" content="VeBetterDao" />
+        <meta name="og:image:type" content="image/png" />
+        <meta name="og:image:width" content="1200" />
+        <meta name="og:image:height" content="630" />
+        <meta name="og:image" content={`${getConfig().basePath}/images/social_image.png`} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image:type" content="image/png" />
+        <meta name="twitter:image:width" content="1200" />
+        <meta name="twitter:image:height" content="630" />
+        <meta name="twitter:image" content={`${getConfig().basePath}/images/social_image.png`} />
       </head>
       <body>
         <Providers>
