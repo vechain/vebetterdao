@@ -7,7 +7,6 @@ import {
   VStack,
   Text,
   Button,
-  Flex,
   useColorModeValue,
   Box,
   Image,
@@ -111,6 +110,8 @@ export const VoterRewards: React.FC = () => {
         </ModalContent>
       )
   }, [isClaimRewardsLoading, sendTransactionPending, isTxReceiptLoading])
+
+  if (allocationRoundsEvents?.created.length === 0) return null
 
   return (
     <>

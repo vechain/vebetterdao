@@ -8,8 +8,6 @@ import {
   AlertIcon,
   AlertTitle,
   AlertDescription,
-  Stack,
-  Box,
   VStack,
   Show,
   Flex,
@@ -17,7 +15,6 @@ import {
   useColorModeValue,
   Divider,
   Spinner,
-  Image,
 } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
