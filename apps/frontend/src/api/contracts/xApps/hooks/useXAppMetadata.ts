@@ -1,8 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/dapp-kit-react"
 import { convertUriToUrl } from "@/utils"
 import axios from "axios"
-import { useXAppsMetadataBaseUri } from "./useXAppsMetadataBaseUri"
 
 /**
  * The metadata of an xApp from the xApps metadata base uri
@@ -44,6 +42,17 @@ export const getXAppMetadata = async (uri: string): Promise<XAppMetadata> => {
   return metadata.data
 }
 
+/**
+ * Fetch metadata from local json file
+ * @param xAppId - The id of the xApp
+ * @returns  The metadata of the xApp
+ */
+export const getXAppMetadataFromLocal = async (xAppId: string): Promise<XAppMetadata> => {
+  const response = await fetch(`/metadata/xApp/${xAppId}.json`)
+  const metadata = await response.json()
+  return metadata
+}
+
 export const getXAppMetadataQueryKey = (xAppId?: string) => ["xApps", xAppId, "metadata"]
 
 /**
@@ -52,12 +61,9 @@ export const getXAppMetadataQueryKey = (xAppId?: string) => ["xApps", xAppId, "m
  * @returns  The metadata of the xApp
  */
 export const useXAppMetadata = (xAppId?: string) => {
-  const { thor } = useConnex()
-  const { data: baseUri } = useXAppsMetadataBaseUri()
-
   return useQuery({
     queryKey: getXAppMetadataQueryKey(xAppId),
-    queryFn: async () => (!(!baseUri && xAppId) ? await getXAppMetadata(`${baseUri}${xAppId}`) : null),
-    enabled: !!thor && !!baseUri && !!xAppId,
+    queryFn: async () => (xAppId ? await getXAppMetadataFromLocal(xAppId) : null),
+    enabled: !!xAppId,
   })
 }
