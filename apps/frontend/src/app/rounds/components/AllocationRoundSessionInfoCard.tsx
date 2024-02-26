@@ -74,7 +74,6 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
     return (Number(votes) / Number(roundQuorum)) * 100
   }, [votes, roundQuorum])
 
-  console.log("quorumPercentage", quorumPercentage)
   return (
     <Card w="full">
       <CardHeader>
