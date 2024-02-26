@@ -167,6 +167,14 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   function quorum(uint256 timepoint) external view returns (uint256);
 
   /**
+   * @notice module:user-config
+   * @dev Minimum number of cast voted required for a round to be successful.
+   *
+   * NOTE: The `roundId` parameter corresponds to the round for which the quorum is calculated.
+   */
+  function roundQuorum(uint256 roundId) external view returns (uint256);
+
+  /**
    * @notice module:reputation
    * @dev Voting power of an `account` at a specific `timepoint`.
    *
