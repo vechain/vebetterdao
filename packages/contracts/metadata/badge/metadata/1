@@ -1,7 +1,7 @@
 {
-  "name": "Earth",
-  "description": "Your gateway to the Worse ecosystem",
-  "image": "ipfs://bafybeiewvcufxobfdgffhbu7elfa6zubvj4qteplhvojub34hbecgivn24/1.png",
+  "name": "VeBetterDAO Galaxy Member",
+  "description": "GM Earth is a community of people who participated in voting for the governance of VeBetter DAO.",
+  "image": "ipfs://bafybeiccwhv6x57oxedqos6xruudgbgtkszzquyxjv73ux7zs2w7w3d42q/1.png",
   "attributes": [
     {
       "trait_type": "Level",
