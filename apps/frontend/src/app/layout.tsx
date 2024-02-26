@@ -29,8 +29,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 
         <meta property="og:title" content="VeBetterDao governance app" />
         <meta property="og:type" content="article" />
-        <meta property="og:image" content="https://governance.vebetterdao.org/images/governance_banner.png" />
-        <meta property="og:url" content="https://governance.vebetterdao.org" />
+        <meta property="og:image" content={`${window.location.origin}/images/governance_banner.png`} />
+        <meta property="og:url" content={`${window.location.origin}`} />
         <meta name="twitter:card" content="summary_large_image" />
 
         <meta
