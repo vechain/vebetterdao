@@ -28,8 +28,8 @@ const levelAttributes: Record<string, string | number>[] = [
   },
 ]
 
-const levelNames = ["Earth"]
-const description = "Your gateway to the Worse ecosystem"
+const levelNames = ["VeBetterDAO Galaxy Member"]
+const description = "GM Earth is a community of people who participated in voting for the governance of VeBetter DAO."
 
 const METADATA_PATH = path.join(__dirname, "../../../metadata/badge/metadata")
 const IMAGE_PATH = path.join(__dirname, "../../../metadata/badge/images")
