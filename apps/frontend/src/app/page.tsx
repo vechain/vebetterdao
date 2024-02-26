@@ -38,8 +38,8 @@ export default function Home() {
           spacing={12}>
           <VStack flex={4} justifyContent="stretch" alignItems={"stretch"} spacing={4}>
             <SupplyBreakdownCard />
-            <DashboardAllocationRounds />
             <DashboardXApps />
+            <DashboardAllocationRounds />
           </VStack>
           <DashboardSideBar />
         </Stack>
