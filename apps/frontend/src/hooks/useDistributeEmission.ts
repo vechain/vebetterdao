@@ -2,8 +2,6 @@ import {
   getCurrentAllocationsRoundIdQueryKey,
   getAllocationsRoundsEventsQueryKey,
   currentBlockQueryKey,
-  useRoundXApps,
-  useAllocationsRound,
   useCurrentAllocationsRoundId,
   getRoundXAppsQueryKey,
   getAllocationAmountQueryKey,

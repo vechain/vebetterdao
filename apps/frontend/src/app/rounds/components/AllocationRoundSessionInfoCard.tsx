@@ -92,24 +92,28 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
                 <VOT3Icon boxSize={6} />
               </HStack>
             </Skeleton>
-            <Progress
-              mt={3}
-              h={2.5}
-              hasStripe={true}
-              value={quorumPercentage}
-              colorScheme="primary"
-              size="sm"
-              borderRadius={"full"}
-            />
+            <Skeleton isLoaded={!quorumLoading}>
+              <Progress
+                mt={3}
+                h={2.5}
+                hasStripe={true}
+                value={quorumPercentage}
+                colorScheme="primary"
+                size="sm"
+                borderRadius={"full"}
+              />
+            </Skeleton>
             <HStack justify="space-between" w="full" mt={1}>
               <Text fontSize={"sm"} fontWeight="400">
                 Quorum needed
               </Text>
               <HStack spacing={2}>
                 <Icon as={FaClock} fontSize={"sm"} fontWeight={"thin"} />
-                <Text fontSize={"sm"} fontWeight={"600"}>
-                  {humanNumber(roundQuorum ?? "0", roundQuorum)}
-                </Text>
+                <Skeleton isLoaded={!quorumLoading}>
+                  <Text fontSize={"sm"} fontWeight={"600"}>
+                    {humanNumber(roundQuorum ?? "0", roundQuorum)}
+                  </Text>
+                </Skeleton>
               </HStack>
             </HStack>
           </Box>
