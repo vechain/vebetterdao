@@ -1,4 +1,4 @@
-import { useAllocationVotes, useAllocationsRound, useVot3PastSupply } from "@/api"
+import { useAllocationRoundQuorum, useAllocationVotes, useAllocationsRound, useVot3PastSupply } from "@/api"
 import {
   Box,
   Card,
@@ -29,7 +29,7 @@ type Props = {
 export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
   const { data: roundInfo } = useAllocationsRound(roundId)
   const { data: votes, isLoading: votesLoading } = useAllocationVotes(roundId)
-
+  const { data: roundQuorum, isLoading: quorumLoading } = useAllocationRoundQuorum(roundId)
   const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useVot3PastSupply(roundInfo.voteStart)
 
   const steps = useMemo(
@@ -92,6 +92,15 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
             </Skeleton>
             <Text fontSize={"sm"} textTransform={"uppercase"}>
               Votes at snapshot
+            </Text>
+          </Box>
+
+          <Box>
+            <Skeleton isLoaded={!quorumLoading}>
+              <Heading size="lg">{humanNumber(roundQuorum ?? "0", roundQuorum)}</Heading>
+            </Skeleton>
+            <Text fontSize={"sm"} textTransform={"uppercase"}>
+              Quorum needed
             </Text>
           </Box>
 
