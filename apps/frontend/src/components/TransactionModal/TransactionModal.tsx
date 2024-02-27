@@ -42,7 +42,15 @@ export const TransactionModal = ({
     if (status === "waitingConfirmation")
       return <LoadingModalContent title={pendingTitle} showExplorerButton={showExplorerButton} txId={txId} />
     if (status === "error")
-      return <ErrorModalContent title={errorTitle} showTryAgainButton={showTryAgainButton} onTryAgain={onTryAgain} />
+      return (
+        <ErrorModalContent
+          title={errorTitle}
+          showTryAgainButton={showTryAgainButton}
+          onTryAgain={onTryAgain}
+          showExplorerButton={showExplorerButton}
+          txId={txId}
+        />
+      )
     if (status === "success")
       return (
         <SuccessModalContent

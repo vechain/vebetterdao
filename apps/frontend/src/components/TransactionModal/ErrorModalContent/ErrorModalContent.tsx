@@ -1,15 +1,19 @@
-import { Heading, VStack, Text, ModalCloseButton, Button } from "@chakra-ui/react"
+import { Heading, VStack, Text, ModalCloseButton, Button, Link } from "@chakra-ui/react"
 import Lottie from "react-lottie"
 import errorAnimation from "./error.json"
 import { ReactNode } from "react"
 import { ModalAnimation } from "../ModalAnimation"
 import { motion } from "framer-motion"
+import { getConfig } from "@repo/config"
+import { FaLink } from "react-icons/fa6"
 
 export type ErrorModalContentProps = {
   title?: ReactNode
   description?: string
   showTryAgainButton?: boolean
   onTryAgain?: () => void
+  showExplorerButton?: boolean
+  txId?: string
 }
 
 export const ErrorModalContent = ({
@@ -17,6 +21,8 @@ export const ErrorModalContent = ({
   description = "Something went wrong 😕",
   showTryAgainButton = false,
   onTryAgain = () => {},
+  showExplorerButton,
+  txId,
 }: ErrorModalContentProps) => {
   return (
     <ModalAnimation>
@@ -45,8 +51,18 @@ export const ErrorModalContent = ({
             width={260}
           />
         </motion.div>
-        <VStack>
+        <VStack gap={4}>
           {description && <Text size="sm">{description}</Text>}
+          {showExplorerButton && txId && (
+            <Link
+              href={`${getConfig().network.explorerUrl}/txs/${txId}`}
+              isExternal
+              color="gray.500"
+              fontSize={"14px"}
+              textDecoration={"underline"}>
+              View it on the explorer
+            </Link>
+          )}
           {showTryAgainButton && (
             <Button variant={"outline"} onClick={onTryAgain}>
               Try again

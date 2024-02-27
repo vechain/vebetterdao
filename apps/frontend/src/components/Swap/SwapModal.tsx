@@ -99,7 +99,7 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
         confirmationTitle={swapText}
         successTitle={"Swap Completed!"}
         showSocialButtons
-        socialDescription="I just swapped B3TR for VOT3 on B3tr Finance! 🎉 #B3tr #VOT3"
+        socialDescription="I just swapped my B3TR tokens into VOT3 tokens. From sustainable actions rewards to sustainable decisions, for a better world! 🎉 #B3tr #VOT3"
         onTryAgain={handleStake}
         showTryAgainButton
         showExplorerButton
