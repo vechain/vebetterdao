@@ -26,23 +26,35 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <title>VeBetterDAO</title>
         <meta name="description" content="Vote for your favourite sustainability dApps in vebetterdao’s governance." />
         <link rel="icon" href="/images/favicon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="/images/favicon.png" />
+        <meta name="msapplication-TileImage" content="/images/favicon.png" />
 
-        <meta property="og:title" content="VeBetterDAO" />
-        <meta property="og:type" content="website" />
+        {/* Open Graph Metadata */}
+        <meta name="title" property="og:title" content="VeBetterDAO" />
+        <meta name="type" property="og:type" content="website" />
+        <meta name="url" property="og:url" content="%VITE_BASE_URL%" />
         <meta
+          name="description"
           property="og:description"
           content="Vote for your favourite sustainability dApps in vebetterdao’s governance."
         />
         <meta property="og:site_name" content="VeBetterDAO" />
-        <meta name="og:image:type" content="image/png" />
-        <meta name="og:image:width" content="1200" />
-        <meta name="og:image:height" content="630" />
-        <meta name="og:image" content={`${getConfig().basePath}/images/social_image.png`} />
+        <meta name="image" property="og:image" content={`${getConfig().basePath}/images/social_image.png`} />
+        <meta property="og:image:type" content="image/png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="VeBetterDAO" />
+
+        {/* Twitter Metadata */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image:type" content="image/png" />
-        <meta name="twitter:image:width" content="1200" />
-        <meta name="twitter:image:height" content="630" />
+        <meta property="twitter:url" content="%VITE_BASE_URL%" />
+        <meta name="twitter:title" content="VeBetterDAO" />
+        <meta
+          name="twitter:description"
+          content="Vote for your favourite sustainability dApps in vebetterdao’s governance."
+        />
         <meta name="twitter:image" content={`${getConfig().basePath}/images/social_image.png`} />
+        <meta name="twitter:image:alt" content="VeBetterDAO" />
       </head>
       <body>
         <Providers>
