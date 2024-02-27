@@ -23,17 +23,17 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <head>
-        <title>VeBetterDao</title>
+        <title>VeBetterDAO</title>
         <meta name="description" content="Vote for your favourite sustainability dApps in vebetterdao’s governance." />
         <link rel="icon" href="/images/favicon.png" />
 
-        <meta property="og:title" content="VeBetterDao" />
+        <meta property="og:title" content="VeBetterDAO" />
         <meta property="og:type" content="website" />
         <meta
           property="og:description"
           content="Vote for your favourite sustainability dApps in vebetterdao’s governance."
         />
-        <meta property="og:site_name" content="VeBetterDao" />
+        <meta property="og:site_name" content="VeBetterDAO" />
         <meta name="og:image:type" content="image/png" />
         <meta name="og:image:width" content="1200" />
         <meta name="og:image:height" content="630" />
