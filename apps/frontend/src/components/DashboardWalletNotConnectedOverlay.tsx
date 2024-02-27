@@ -1,6 +1,6 @@
 import { Flex, VStack, Heading, Image, Text, Box } from "@chakra-ui/react"
-import { WalletButton } from "@vechain/dapp-kit-react"
 import { TwoFingersIcon } from "./Icons"
+import { ConnectWalletButton } from "./ConnectWalletButton"
 
 export const DashboardWalletNotConnectedOverlay = () => {
   return (
@@ -40,7 +40,7 @@ export const DashboardWalletNotConnectedOverlay = () => {
             Connect your wallet to check your balance
           </Text>
         </Box>
-        <WalletButton />
+        <ConnectWalletButton />
       </VStack>
     </Flex>
   )
