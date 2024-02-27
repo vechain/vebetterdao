@@ -1,5 +1,4 @@
 import {
-  Box,
   Drawer,
   DrawerBody,
   DrawerCloseButton,
@@ -19,7 +18,10 @@ import { NavbarMenu } from "./NavbarMenu"
 import { NavbarLogo } from "./NavbarLogo"
 import { Route } from "./Routes"
 
-const WalletButton = dynamic(() => import("@vechain/dapp-kit-react").then(mod => mod.WalletButton), { ssr: false })
+const ConnectWalletButton = dynamic(
+  () => import("@/components/ConnectWalletButton").then(mod => mod.ConnectWalletButton),
+  { ssr: false },
+)
 
 const MobileMenuDrawer: React.FC<Omit<DrawerProps & Props, "children">> = ({ routesToRender, ...props }) => {
   return (
@@ -51,7 +53,7 @@ export const MobileNavBar: React.FC<Props> = ({ routesToRender }) => {
     <>
       <NavbarLogo />
       <HStack gap={2}>
-        <WalletButton mobile={true} />
+        <ConnectWalletButton />
         {!!routesToRender.length && (
           <IconButton onClick={openMenu} icon={<Icon as={FaBars} />} aria-label="Open menu" />
         )}
