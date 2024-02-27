@@ -4,13 +4,18 @@ import { FaWallet } from "react-icons/fa6"
 import { AddressIcon } from "./AddressIcon"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 
-export const ConnectWalletButton = () => {
+type Props = {
+  responsiveVariant?: "desktop" | "mobile"
+}
+export const ConnectWalletButton = ({ responsiveVariant }: Props) => {
   const { account } = useWallet()
   const { open } = useWalletModal()
   const [isDesktop] = useMediaQuery("(min-width: 800px)")
 
+  const shouldRenderDesktop = responsiveVariant === "desktop" || (!responsiveVariant && isDesktop)
+
   if (!account)
-    if (isDesktop)
+    if (shouldRenderDesktop)
       return (
         <Fade in={true}>
           <Button onClick={open} colorScheme="primary" size="md" leftIcon={<FaWallet />}>
@@ -25,7 +30,7 @@ export const ConnectWalletButton = () => {
         </Fade>
       )
 
-  if (isDesktop)
+  if (shouldRenderDesktop)
     return (
       <Fade in={true}>
         <Button onClick={open} rounded={"full"} color="black" size="md" bg="rgba(235, 236, 252, 1)">

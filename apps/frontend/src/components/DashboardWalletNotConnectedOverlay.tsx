@@ -40,7 +40,7 @@ export const DashboardWalletNotConnectedOverlay = () => {
             Connect your wallet to check your balance
           </Text>
         </Box>
-        <ConnectWalletButton />
+        <ConnectWalletButton responsiveVariant="desktop" />
       </VStack>
     </Flex>
   )
