@@ -171,7 +171,7 @@ export const useSendTransaction = ({
       return
     }
     onTxConfirmed?.()
-  }, [txReceipt, onTxConfirmed, toast])
+  }, [txReceipt, onTxConfirmed])
   // do not add onTxConfirmed to the dependencies array, it will cause toast notifications
 
   /**

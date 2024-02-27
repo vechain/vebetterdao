@@ -1,4 +1,4 @@
-import { Heading, Text, VStack, ModalCloseButton, Button } from "@chakra-ui/react"
+import { Heading, Text, VStack, ModalCloseButton, Link } from "@chakra-ui/react"
 import Lottie from "react-lottie"
 import successAnimation from "./success.json"
 import { ShareButtons } from "../../ShareButtons"
@@ -59,15 +59,14 @@ export const SuccessModalContent = ({
           />
         </motion.div>
         {showExplorerButton && txId && (
-          <Button
-            variant={"link"}
-            onClick={() => {
-              window.open(`${getConfig().network.explorerUrl}/txs/${txId}`, "_blank")
-            }}
-            size="sm"
+          <Link
+            href={`${getConfig().network.explorerUrl}/txs/${txId}`}
+            isExternal
+            color="gray.500"
+            fontSize={"14px"}
             textDecoration={"underline"}>
             View it on the explorer
-          </Button>
+          </Link>
         )}
         {showSocialButtons && (
           <VStack>

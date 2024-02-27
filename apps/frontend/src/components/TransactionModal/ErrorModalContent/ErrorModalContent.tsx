@@ -1,10 +1,11 @@
-import { Heading, VStack, Text, ModalCloseButton, Button } from "@chakra-ui/react"
+import { Heading, VStack, Text, ModalCloseButton, Button, Link } from "@chakra-ui/react"
 import Lottie from "react-lottie"
 import errorAnimation from "./error.json"
 import { ReactNode } from "react"
 import { ModalAnimation } from "../ModalAnimation"
 import { motion } from "framer-motion"
 import { getConfig } from "@repo/config"
+import { FaLink } from "react-icons/fa6"
 
 export type ErrorModalContentProps = {
   title?: ReactNode
@@ -53,15 +54,14 @@ export const ErrorModalContent = ({
         <VStack gap={4}>
           {description && <Text size="sm">{description}</Text>}
           {showExplorerButton && txId && (
-            <Button
-              variant={"link"}
-              onClick={() => {
-                window.open(`${getConfig().network.explorerUrl}/txs/${txId}`, "_blank")
-              }}
-              size="sm"
+            <Link
+              href={`${getConfig().network.explorerUrl}/txs/${txId}`}
+              isExternal
+              color="gray.500"
+              fontSize={"14px"}
               textDecoration={"underline"}>
               View it on the explorer
-            </Button>
+            </Link>
           )}
           {showTryAgainButton && (
             <Button variant={"outline"} onClick={onTryAgain}>
