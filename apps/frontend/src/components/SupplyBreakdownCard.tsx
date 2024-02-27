@@ -9,7 +9,6 @@ import {
   Icon,
   Skeleton,
   Text,
-  Tooltip,
   VStack,
   useColorModeValue,
 } from "@chakra-ui/react"
@@ -19,6 +18,7 @@ import BigNumber from "bignumber.js"
 import { getConfig } from "@repo/config"
 import { motion } from "framer-motion"
 import { FaCircleInfo } from "react-icons/fa6"
+import { BaseTooltip } from "./BaseTooltip"
 
 export const SupplyBreakdownCard = () => {
   const { data: b3trTokenDetails } = useB3trTokenDetails()
@@ -92,11 +92,14 @@ export const SupplyBreakdownCard = () => {
       <CardHeader>
         <HStack w="full" justify={"space-between"}>
           <Heading size="md">Supply breakdown</Heading>
-          <Tooltip label="B3TR Total Value Locked (TVL) equals the amount of VOT3 circulating." placement="top">
-            <span>
-              <Icon as={FaCircleInfo} position={"relative"} />
-            </span>
-          </Tooltip>
+          <BaseTooltip
+            text={"B3TR Total Value Locked (TVL) equals the amount of VOT3 circulating."}
+            children={
+              <span>
+                <Icon as={FaCircleInfo} position={"relative"} />
+              </span>
+            }
+          />
         </HStack>
       </CardHeader>
       <CardBody>
