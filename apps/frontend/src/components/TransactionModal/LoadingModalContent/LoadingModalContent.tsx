@@ -40,7 +40,7 @@ export const LoadingModalContent = ({
             }}
             size="sm"
             textDecoration={"underline"}>
-            View on the explorer
+            View it on the explorer
           </Button>
         )}
       </VStack>

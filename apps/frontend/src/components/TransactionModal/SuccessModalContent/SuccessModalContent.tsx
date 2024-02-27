@@ -66,7 +66,7 @@ export const SuccessModalContent = ({
             }}
             size="sm"
             textDecoration={"underline"}>
-            View on the explorer
+            View it on the explorer
           </Button>
         )}
         {showSocialButtons && (

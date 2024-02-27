@@ -119,14 +119,14 @@ export const useSendTransaction = ({
     mutationFn: sendTransactionAdapter,
     onError: error => {
       console.error(error)
-      toast({
-        title: "Error while signing the transaction.",
-        description: `${error.message}`,
-        status: "error",
-        position: "bottom-left",
-        duration: 5000,
-        isClosable: true,
-      })
+      // toast({
+      //   title: "Error while signing the transaction.",
+      //   description: `${error.message}`,
+      //   status: "error",
+      //   position: "bottom-left",
+      //   duration: 5000,
+      //   isClosable: true,
+      // })
 
       onTxFailedOrCancelled?.()
     },
@@ -149,27 +149,29 @@ export const useSendTransaction = ({
   }
 
   useEffect(() => {
+    console.log("txReceipt", txReceipt)
     if (!txReceipt) return
     if (txReceipt.reverted) {
       ;(async () => {
         const revertReason = await explainTxRevertReason(txReceipt)
-        const moreThanOneReverted = (revertReason?.filter(receipt => receipt.reverted) ?? []).length > 0
-        toast({
-          title: "Transaction reverted.",
-          description: moreThanOneReverted
-            ? "More than one tx reverted"
-            : revertReason?.[0]?.revertReason ?? "No revert reason available",
-          status: "error",
-          position: "bottom-left",
-          duration: 5000,
-          isClosable: true,
-        })
+        console.error("revertReason", revertReason)
+        // const moreThanOneReverted = (revertReason?.filter(receipt => receipt.reverted) ?? []).length > 0
+        // toast({
+        //   title: "Transaction reverted.",
+        //   description: moreThanOneReverted
+        //     ? "More than one tx reverted"
+        //     : revertReason?.[0]?.revertReason ?? "No revert reason available",
+        //   status: "error",
+        //   position: "bottom-left",
+        //   duration: 5000,
+        //   isClosable: true,
+        // })
       })()
 
       return
     }
     onTxConfirmed?.()
-  }, [txReceipt])
+  }, [txReceipt, onTxConfirmed, toast])
   // do not add onTxConfirmed to the dependencies array, it will cause toast notifications
 
   /**
@@ -185,12 +187,12 @@ export const useSendTransaction = ({
 
     if (isTxReceiptLoading) return setStatus("waitingConfirmation")
 
-    if (sendTransactionError || txReceiptError) return setStatus("error")
+    if (sendTransactionError || txReceiptError || txReceipt?.reverted) return setStatus("error")
 
     if (txReceipt) return setStatus("success")
 
     return setStatus("ready")
-  }, [isTxReceiptLoading, sendTransactionPending, sendTransactionError, txReceipt, txReceiptError])
+  }, [sendTransactionPending, isTxReceiptLoading, sendTransactionError, txReceiptError, txReceipt])
 
   const resetStatus = useCallback(() => setStatus("ready"), [])
 

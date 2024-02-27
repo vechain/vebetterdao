@@ -4,12 +4,15 @@ import errorAnimation from "./error.json"
 import { ReactNode } from "react"
 import { ModalAnimation } from "../ModalAnimation"
 import { motion } from "framer-motion"
+import { getConfig } from "@repo/config"
 
 export type ErrorModalContentProps = {
   title?: ReactNode
   description?: string
   showTryAgainButton?: boolean
   onTryAgain?: () => void
+  showExplorerButton?: boolean
+  txId?: string
 }
 
 export const ErrorModalContent = ({
@@ -17,6 +20,8 @@ export const ErrorModalContent = ({
   description = "Something went wrong 😕",
   showTryAgainButton = false,
   onTryAgain = () => {},
+  showExplorerButton,
+  txId,
 }: ErrorModalContentProps) => {
   return (
     <ModalAnimation>
@@ -45,8 +50,19 @@ export const ErrorModalContent = ({
             width={260}
           />
         </motion.div>
-        <VStack>
+        <VStack gap={4}>
           {description && <Text size="sm">{description}</Text>}
+          {showExplorerButton && txId && (
+            <Button
+              variant={"link"}
+              onClick={() => {
+                window.open(`${getConfig().network.explorerUrl}/txs/${txId}`, "_blank")
+              }}
+              size="sm"
+              textDecoration={"underline"}>
+              View it on the explorer
+            </Button>
+          )}
           {showTryAgainButton && (
             <Button variant={"outline"} onClick={onTryAgain}>
               Try again
