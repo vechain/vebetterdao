@@ -27,7 +27,7 @@ export const Footer: React.FC = () => {
       </HStack>
       <HStack justifyContent={"space-between"} w="full" borderTopColor={"#3e3c3a"} borderTopWidth={1} py={8}>
         <Text fontWeight={400} fontSize="14px" lineHeight="17px" color="#8c8c8c">
-          2024 VeBetterDao. All rights reserved.
+          2024 VeBetterDAO. All rights reserved.
         </Text>
         <HStack spacing={4}>
           <Link href={PRIVACY_POLICY_LINK} isExternal>
@@ -79,7 +79,7 @@ export const Footer: React.FC = () => {
           </Text>
         </Link>
         <Text fontWeight={400} fontSize="14px" lineHeight="17px" color="#8c8c8c" mt={6}>
-          2024 VeBetterDao. All rights reserved.
+          2024 VeBetterDAO. All rights reserved.
         </Text>
       </VStack>
     </VStack>
