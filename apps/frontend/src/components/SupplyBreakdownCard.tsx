@@ -81,7 +81,7 @@ export const SupplyBreakdownCard = () => {
 
   const formattedCirculatingSupply = useMemo(() => {
     return FormattingUtils.humanNumber(data?.circulating.value ?? 0)
-  }, [b3trTokenDetails])
+  }, [data])
 
   const formattedTotalValueLocked = useMemo(() => {
     return FormattingUtils.humanNumber(data?.locked.value ?? 0)

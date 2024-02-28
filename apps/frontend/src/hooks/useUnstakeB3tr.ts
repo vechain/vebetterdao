@@ -51,19 +51,20 @@ export const useUnstakeB3tr = ({
   //Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {
     if (invalidateCache) {
-      //user balance
+      //b3tr user balance
       await queryClient.cancelQueries({
         queryKey: getB3TrBalanceQueryKey(account ?? undefined),
       })
 
-      await queryClient.cancelQueries({
-        queryKey: getB3TrBalanceQueryKey(config.vot3ContractAddress),
+      await queryClient.refetchQueries({
+        queryKey: getB3TrBalanceQueryKey(account ?? undefined),
       })
 
       // vot3 balance
       await queryClient.cancelQueries({
         queryKey: getVot3BalanceQueryKey(account ?? undefined),
       })
+
       await queryClient.refetchQueries({
         queryKey: getVot3BalanceQueryKey(account ?? undefined),
       })
@@ -78,7 +79,7 @@ export const useUnstakeB3tr = ({
 
       //global locked b3tr => vot3
       await queryClient.refetchQueries({
-        queryKey: getB3TrBalanceQueryKey(account ?? undefined),
+        queryKey: getB3TrBalanceQueryKey(config.vot3ContractAddress),
       })
 
       await queryClient.cancelQueries({
