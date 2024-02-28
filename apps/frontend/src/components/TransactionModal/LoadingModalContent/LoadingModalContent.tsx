@@ -1,4 +1,4 @@
-import { Button, Heading, VStack } from "@chakra-ui/react"
+import { Heading, Link, VStack } from "@chakra-ui/react"
 import Lottie from "react-lottie"
 import loadingAnimation from "./loading.json"
 import { ReactNode } from "react"
@@ -33,15 +33,14 @@ export const LoadingModalContent = ({
           width={200}
         />
         {showExplorerButton && txId && (
-          <Button
-            variant={"link"}
-            onClick={() => {
-              window.open(`${getConfig().network.explorerUrl}/txs/${txId}`, "_blank")
-            }}
-            size="sm"
+          <Link
+            href={`${getConfig().network.explorerUrl}/txs/${txId}`}
+            isExternal
+            color="gray.500"
+            fontSize={"14px"}
             textDecoration={"underline"}>
-            View on the explorer
-          </Button>
+            View it on the explorer
+          </Link>
         )}
       </VStack>
     </ModalAnimation>

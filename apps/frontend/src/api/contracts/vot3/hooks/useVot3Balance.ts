@@ -31,7 +31,7 @@ export const getVot3Balance = async (
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
   const original = res.decoded[0]
-  const scaled = FormattingUtils.scaleNumberDown(original, tokenDecimals)
+  const scaled = FormattingUtils.scaleNumberDown(original, tokenDecimals, tokenDecimals)
   const formatted = scaled === "0" ? "0" : FormattingUtils.humanNumber(scaled)
 
   return {

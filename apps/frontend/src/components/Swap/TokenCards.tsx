@@ -7,9 +7,9 @@ import { useB3trBalance, useVot3Balance } from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { motion } from "framer-motion"
 
-const DECIMAL_PLACES = 2
+const DECIMAL_PLACES = 4
 
-// Maximum precision of 2 decimals. Must also round down
+// Maximum precision of 4 decimals. Must also round down
 const compactFormatter = new Intl.NumberFormat("en-US", {
   notation: "compact",
   compactDisplay: "short",

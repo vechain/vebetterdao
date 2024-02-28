@@ -1,5 +1,6 @@
 import { AppConfig } from "."
 const config: AppConfig = {
+  basePath: "https://governance.vebetterdao.org",
   mixPanelProjectToken: "949d49f83d7168260973a1c170f1f28d",
   b3trContractAddress: "0xaC0CA2a5148E15EF913F9f5Cf8Eb3cf763f5a43f",
   vot3ContractAddress: "0x9dF69AD8fF89063869E04164A11579c0a8532e84",
@@ -22,7 +23,7 @@ const config: AppConfig = {
       "https://sync-testnet.veblocks.net",
       "https://testnet.vecha.in",
     ],
-    explorerUrl: "https://insight.vecha.in/#/test/",
+    explorerUrl: "https://insight.vecha.in/#/test",
     blockTime: 10000,
     genesis: {
       number: 0,

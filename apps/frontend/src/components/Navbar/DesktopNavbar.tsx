@@ -2,11 +2,12 @@ import { HStack } from "@chakra-ui/react"
 import { NavbarLogo } from "./NavbarLogo"
 import { NavbarMenu } from "./NavbarMenu"
 import dynamic from "next/dynamic"
-import { getConfig } from "@repo/config"
 import { Route } from "./Routes"
 
-const config = getConfig()
-const WalletButton = dynamic(() => import("@vechain/dapp-kit-react").then(mod => mod.WalletButton), { ssr: false })
+const ConnectWalletButton = dynamic(
+  () => import("@/components/ConnectWalletButton").then(mod => mod.ConnectWalletButton),
+  { ssr: false },
+)
 
 type Props = {
   routesToRender: Route[]
@@ -34,7 +35,7 @@ export const DesktopNavBar: React.FC<Props> = ({ routesToRender }) => {
       )}
       <HStack flex={1} spacing={4} justifyContent={"end"}>
         {/* <ThemeSwitcher /> */}
-        <WalletButton />
+        <ConnectWalletButton />
       </HStack>
     </>
   )

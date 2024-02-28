@@ -34,7 +34,7 @@ export const getB3trBalance = async (
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
   const original = res.decoded[0]
-  const scaled = FormattingUtils.scaleNumberDown(original, scaleDecimals)
+  const scaled = FormattingUtils.scaleNumberDown(original, scaleDecimals, scaleDecimals)
   const formatted = scaled === "0" ? "0" : FormattingUtils.humanNumber(scaled)
 
   return {
