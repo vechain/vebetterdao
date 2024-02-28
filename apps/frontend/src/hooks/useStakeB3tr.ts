@@ -5,6 +5,7 @@ import {
   getVot3BalanceQueryKey,
   getVotesQueryKey,
   buildB3trApprovesTx,
+  getB3TrTokenDetailsQueryKey,
 } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
@@ -52,38 +53,47 @@ export const useStakeB3tr = ({
   //Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {
     if (invalidateCache) {
+      //b3tr user balance
       await queryClient.cancelQueries({
         queryKey: getB3TrBalanceQueryKey(account ?? undefined),
       })
 
-      await queryClient.cancelQueries({
-        queryKey: getB3TrBalanceQueryKey(config.vot3ContractAddress),
-      })
-
       await queryClient.refetchQueries({
         queryKey: getB3TrBalanceQueryKey(account ?? undefined),
       })
 
-      await queryClient.cancelQueries({
-        queryKey: getB3TrBalanceQueryKey(config.vot3ContractAddress),
-      })
-
-      await queryClient.refetchQueries({
-        queryKey: getB3TrBalanceQueryKey(config.vot3ContractAddress),
-      })
-
+      // vot3 balance
       await queryClient.cancelQueries({
         queryKey: getVot3BalanceQueryKey(account ?? undefined),
       })
+
       await queryClient.refetchQueries({
         queryKey: getVot3BalanceQueryKey(account ?? undefined),
       })
 
+      //user votes
       await queryClient.cancelQueries({
         queryKey: getVotesQueryKey(account ?? undefined),
       })
       await queryClient.refetchQueries({
         queryKey: getVotesQueryKey(account ?? undefined),
+      })
+
+      //global locked b3tr => vot3
+      await queryClient.refetchQueries({
+        queryKey: getB3TrBalanceQueryKey(config.vot3ContractAddress),
+      })
+
+      await queryClient.cancelQueries({
+        queryKey: getB3TrBalanceQueryKey(config.vot3ContractAddress),
+      })
+
+      // b3tr balance and details
+      await queryClient.cancelQueries({
+        queryKey: getB3TrTokenDetailsQueryKey(),
+      })
+      await queryClient.refetchQueries({
+        queryKey: getB3TrTokenDetailsQueryKey(),
       })
     }
 
