@@ -2,6 +2,7 @@
 
 import { AnalyticsUtils } from "@/utils"
 import { Skeleton, Spinner, Stack, VStack } from "@chakra-ui/react"
+import { motion } from "framer-motion"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
@@ -13,12 +14,24 @@ const HomePageContent = dynamic(() => import("@/components/HomepageContent").the
     </VStack>
   ),
 })
+
+const MotionVStack = motion(VStack)
+
 export default function Home() {
   useEffect(() => {
     AnalyticsUtils.trackPage("Home")
   }, [])
   return (
-    <VStack w="full" spacing={12}>
+    <MotionVStack
+      w="full"
+      spacing={12}
+      initial={{ opacity: 0, scale: 0.5 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{
+        duration: 2,
+        delay: 0.5,
+        ease: [0, 0.71, 0.2, 1.01],
+      }}>
       <Stack
         direction={["column-reverse", "column-reverse", "row"]}
         w="full"
@@ -27,6 +40,6 @@ export default function Home() {
         spacing={12}>
         <HomePageContent />
       </Stack>
-    </VStack>
+    </MotionVStack>
   )
 }
