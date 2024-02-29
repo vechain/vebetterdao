@@ -61,16 +61,6 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
     })),
   })
 
-  console.log(
-    "appsMetadata",
-    appsMetadata.map(({ data }) => data),
-  )
-  console.log(
-    "logos",
-    logos.map(({ data }) => data),
-  )
-  console.log("votes", votes)
-
   const selectedVotes = votes.filter(vote => vote.value > 0)
   return (
     <Card variant="filled" w="full">
