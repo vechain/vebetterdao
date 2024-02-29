@@ -24,6 +24,8 @@ import { TbGift } from "react-icons/tb"
 import { coinFlipAnimation } from "@/constants"
 import { motion } from "framer-motion"
 import { B3TRIcon } from "../Icons"
+import { SuccessModalContent } from "../TransactionModal/SuccessModalContent"
+import { CustomModalContent } from "../CustomModalContent"
 
 const DECIMAL_PLACES = 4
 
@@ -75,10 +77,16 @@ export const VoterRewards: React.FC = () => {
 
   const isRewardsLoading = rewardsPerRound?.some(reward => reward.isLoading) // Loading rewards to claim
 
-  const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useClaimRewards({
+  const {
+    sendTransaction,
+    resetStatus,
+    isTxReceiptLoading,
+    sendTransactionPending,
+    status,
+    txReceipt,
+    sendTransactionTx,
+  } = useClaimRewards({
     roundRewards,
-    onSuccess: onClose,
-    onFailure: onClose,
   })
 
   const handleClaim = useCallback(() => {
@@ -88,28 +96,43 @@ export const VoterRewards: React.FC = () => {
 
   const isClaimRewardsLoading = isTxReceiptLoading || sendTransactionPending
 
+  const handleClose = useCallback(() => {
+    resetStatus()
+    onClose()
+  }, [resetStatus, onClose])
+
   const modalContent = useMemo(() => {
+    if (status === "success") {
+      return (
+        <SuccessModalContent
+          title={"Rewards Claimed!"}
+          showSocialButtons
+          socialDescription="I’ve just claimed my rewards for making sustainable actions on VeBetterDAO, check out how you can do the same! 🎉 #B3tr #VOT3"
+          showExplorerButton
+          txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        />
+      )
+    }
+
     if (isClaimRewardsLoading)
       return (
-        <ModalContent rounded="2xl" w="auto">
-          <ModalBody py={6} px={12}>
-            <VStack alignItems={"center"}>
-              <MotionImage {...coinFlipAnimation} src="/images/b3tr-token-3d.png" maxH="250px" />
-              {sendTransactionPending /* sendTransactionPending */ && (
-                <Text fontWeight={400} lineHeight="22px" fontSize={{ base: "16px", md: "16px" }} align={"center"}>
-                  Please confirm the transaction in your wallet
-                </Text>
-              )}
-              {isTxReceiptLoading && (
-                <Text fontWeight={400} lineHeight="22px" fontSize={{ base: "16px", md: "16px" }}>
-                  Almost there...
-                </Text>
-              )}
-            </VStack>{" "}
-          </ModalBody>
-        </ModalContent>
+        <ModalBody py={6} px={12}>
+          <VStack alignItems={"center"}>
+            <MotionImage {...coinFlipAnimation} src="/images/b3tr-token-3d.png" maxH="250px" />
+            {sendTransactionPending /* sendTransactionPending */ && (
+              <Text fontWeight={400} lineHeight="22px" fontSize={{ base: "16px", md: "16px" }} align={"center"}>
+                Please confirm the transaction in your wallet
+              </Text>
+            )}
+            {isTxReceiptLoading && (
+              <Text fontWeight={400} lineHeight="22px" fontSize={{ base: "16px", md: "16px" }}>
+                Almost there...
+              </Text>
+            )}
+          </VStack>{" "}
+        </ModalBody>
       )
-  }, [isClaimRewardsLoading, sendTransactionPending, isTxReceiptLoading])
+  }, [status, isClaimRewardsLoading, isTxReceiptLoading, sendTransactionPending, txReceipt, sendTransactionTx])
 
   if (allocationRoundsEvents?.created.length === 0) return null
 
@@ -153,9 +176,14 @@ export const VoterRewards: React.FC = () => {
         </CardBody>
       </Card>
 
-      <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
+      <Modal
+        isOpen={isOpen}
+        onClose={handleClose}
+        trapFocus={true}
+        isCentered={true}
+        closeOnOverlayClick={status !== "waitingConfirmation" && status !== "pending"}>
         <ModalOverlay />
-        {modalContent}
+        <CustomModalContent>{modalContent}</CustomModalContent>
       </Modal>
     </>
   )
