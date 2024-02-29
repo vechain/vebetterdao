@@ -84,8 +84,6 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     onClose()
   }, [castAllocationVotes.resetStatus, onClose])
 
-  console.log("fields", fields)
-
   const watchVotes = watch("votes")
 
   const parsedCastedVotesPercetanges = useMemo(() => {
