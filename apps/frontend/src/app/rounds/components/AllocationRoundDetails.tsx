@@ -116,7 +116,7 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
                   )}
                 </Skeleton>
                 <Text fontSize={"md"} textTransform={"uppercase"}>
-                  Total allocation
+                  dAPPS votes allocation
                 </Text>
               </Box>
 
