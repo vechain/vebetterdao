@@ -15,12 +15,15 @@ import {
   useColorModeValue,
   Divider,
   Spinner,
+  Icon,
 } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
 import { B3TRIcon, VOT3Icon } from "./Icons"
 import { SwapButton } from "./Swap/SwapButton"
 import { useTokenColors } from "@/hooks"
+import { BaseTooltip } from "./BaseTooltip"
+import { FaCircleInfo } from "react-icons/fa6"
 
 const DECIMAL_PLACES = 4
 
@@ -144,7 +147,18 @@ export const BalanceCard: React.FC<Props> = () => {
       <CardBody>
         <VStack spacing={4} align="flex-start" w={"full"}>
           <HStack justify={"space-between"} w="full">
-            <Heading size="md">Balance</Heading>
+            <HStack align={"baseline"}>
+              <Heading size="md">Balance</Heading>
+              <BaseTooltip
+                text={"B3TR and VOT3 tokens will be migrated 1:1 from testnet to mainnet."}
+                children={
+                  <span>
+                    <Icon as={FaCircleInfo} position={"relative"} />
+                  </span>
+                }
+              />
+            </HStack>
+
             <Flex>{isLoading ? <Spinner size="sm" /> : <SwapButton />}</Flex>
           </HStack>
           <Show below="sm">
