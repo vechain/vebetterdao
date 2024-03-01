@@ -24,7 +24,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en">
       <head>
         <title>VeBetterDAO</title>
-        <meta name="description" content="Vote for your favourite sustainability dApps in vebetterdao’s governance." />
+        <meta name="description" content="Vote for your favourite sustainability dApps in VeBetterDAO’s governance." />
         <link rel="icon" href="/images/favicon.png" />
         <link rel="apple-touch-icon" sizes="57x57" href="/images/favicon.png" />
         <meta name="msapplication-TileImage" content="/images/favicon.png" />
@@ -36,7 +36,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <meta
           name="description"
           property="og:description"
-          content="Vote for your favourite sustainability dApps in vebetterdao’s governance."
+          content="Vote for your favourite sustainability dApps in VeBetterDAO’s governance."
         />
         <meta property="og:site_name" content="VeBetterDAO" />
         <meta name="image" property="og:image" content={`${getConfig().basePath}/images/social_image.png`} />
@@ -51,7 +51,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <meta name="twitter:title" content="VeBetterDAO" />
         <meta
           name="twitter:description"
-          content="Vote for your favourite sustainability dApps in vebetterdao’s governance."
+          content="Vote for your favourite sustainability dApps in VeBetterDAO’s governance."
         />
         <meta name="twitter:image" content={`${getConfig().basePath}/images/social_image.png`} />
         <meta name="twitter:image:alt" content="VeBetterDAO" />
