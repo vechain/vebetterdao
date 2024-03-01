@@ -95,9 +95,8 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
               ))}
             </HStack>
             <HStack w="full" h={"full"}>
-              {votes
-                .filter(vote => vote.value > 0)
-                .map((vote, index) => (
+              {votes.map((vote, index) =>
+                vote.value > 0 ? (
                   <VStack
                     key={`${vote.id}-line`}
                     w={`${getLineWidth(vote.value)}%`}
@@ -117,7 +116,8 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
                       {vote.value.toFixed(2)}%
                     </Text>
                   </VStack>
-                ))}
+                ) : null,
+              )}
             </HStack>
           </VStack>
           <HStack w="full" spacing={2}>
