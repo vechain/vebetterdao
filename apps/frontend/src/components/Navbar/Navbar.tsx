@@ -1,14 +1,12 @@
 "use client"
 import { Box, Container, useColorModeValue, useMediaQuery } from "@chakra-ui/react"
-
 import { MobileNavBar } from "./MobileNavbar"
 import { DesktopNavBar } from "./DesktopNavbar"
 import { useAllocationsRoundsEvents } from "@/api"
-import { useHasRole, ADMIN_ROLE } from "@/api/contracts/account"
+import { useAccountPermissions } from "@/api/contracts/account"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
 import { Routes } from "./Routes"
-import { getConfig } from "@repo/config"
 
 export const Navbar: React.FC = () => {
   // ssr-friendly media query with fallback
@@ -19,11 +17,7 @@ export const Navbar: React.FC = () => {
 
   const { account } = useWallet()
   const { data: allocationRoundsEvents } = useAllocationsRoundsEvents()
-  const { data: isAdminOfEmissions } = useHasRole(
-    ADMIN_ROLE,
-    getConfig().emissionsContractAddress,
-    account ?? undefined,
-  )
+  const { isAdmin } = useAccountPermissions(account ?? "")
 
   // Filter routes based on user's role and if there are any allocation rounds
   const routesToRender = useMemo(
@@ -32,10 +26,10 @@ export const Navbar: React.FC = () => {
         return (
           route.isVisible &&
           (route.name === "Allocations" ? (allocationRoundsEvents?.created.length ?? 0) > 0 : true) &&
-          (route.name === "Admin" ? isAdminOfEmissions : true)
+          (route.name === "Admin" ? isAdmin : true)
         )
       }),
-    [allocationRoundsEvents, account, isAdminOfEmissions],
+    [allocationRoundsEvents, account, isAdmin],
   )
 
   const parsedRoutesToRender = useMemo(() => {
