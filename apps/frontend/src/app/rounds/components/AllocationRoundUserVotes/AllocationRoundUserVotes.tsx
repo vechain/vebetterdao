@@ -10,9 +10,9 @@ import {
   Stack,
   Text,
   VStack,
-  useColorModeValue,
+  useDisclosure,
 } from "@chakra-ui/react"
-import { useEffect, useMemo } from "react"
+import { useCallback, useEffect, useMemo } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { SelectAppVotesInput } from "./components/SelectAppVotesInput"
 import { AppVotesBreakdown } from "./components/AppVotesBreakdown"
@@ -21,6 +21,7 @@ import { CastAllocationVotesProps, useCastAllocationVotes } from "@/hooks"
 import { WalletButton, useWallet } from "@vechain/dapp-kit-react"
 import { ethers } from "ethers"
 import { backdropBlurAnimation } from "@/app/theme"
+import { TransactionModal } from "@/components/TransactionModal"
 
 type Props = {
   roundId: string
@@ -76,7 +77,12 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     name: "votes", // unique name for your Field Array
   })
 
-  console.log("fields", fields)
+  const { isOpen, onClose, onOpen } = useDisclosure()
+
+  const handleClose = useCallback(() => {
+    castAllocationVotes.resetStatus()
+    onClose()
+  }, [castAllocationVotes.resetStatus, onClose])
 
   const watchVotes = watch("votes")
 
@@ -109,6 +115,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
       value: Math.floor((vote.value * Number(votesAtSnapshot.scaled)) / 100),
     }))
     console.log("data", data, "appVotesPercentagesToValue", appVotesPercentagesToValue)
+    onOpen()
     castAllocationVotes.sendTransaction(appVotesPercentagesToValue)
   }
 
@@ -158,8 +165,6 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
       </Text>
     )
   }, [hasVoted, isVotingConcluded])
-
-  const buttonColor = useColorModeValue("primary.400", "primary.300")
 
   return (
     <Card w="full" id="user-votes">
@@ -268,6 +273,19 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
           </Card>
         </Flex>
       )}
+      <TransactionModal
+        isOpen={isOpen}
+        onClose={handleClose}
+        status={castAllocationVotes.status}
+        confirmationTitle={"Confirm Vote"}
+        successTitle={"Vote Casted!"}
+        showSocialButtons
+        socialDescription="I’ve recently cast my vote on VeBetterDAO. Join me in fostering sustainability by checking it out and contributing to the ecosystem! 🎉 #B3tr #VOT3"
+        onTryAgain={handleSubmit(onSubmit)}
+        showTryAgainButton
+        showExplorerButton
+        txId={castAllocationVotes.txReceipt?.meta.txID ?? castAllocationVotes.sendTransactionTx?.txid}
+      />
     </Card>
   )
 }

@@ -103,7 +103,7 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
         onTryAgain={handleStake}
         showTryAgainButton
         showExplorerButton
-        txId={mutationData.txReceipt?.meta.txID || mutationData.sendTransactionTx?.txid}
+        txId={mutationData.txReceipt?.meta.txID ?? mutationData.sendTransactionTx?.txid}
       />
     )
 

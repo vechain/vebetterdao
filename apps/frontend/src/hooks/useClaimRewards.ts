@@ -21,7 +21,7 @@ type useClaimRewardsReturnValue = {
 /**
  * useClaimRewards is a custom hook that claims voting rewards for a given set of rounds.
  * It uses the useSendTransaction hook to send the transaction and the useQueryClient hook to invalidate the queries after the transaction.
- * 
+ *
  * @param {useClaimRewardsProps} props - The properties for the hook.
  * @returns {useClaimRewardsReturnValue} An object containing the sendTransaction function and the return value of the useSendTransaction hook.
  */
@@ -33,7 +33,6 @@ export const useClaimRewards = ({
 }: useClaimRewardsProps): useClaimRewardsReturnValue => {
   const { thor } = useConnex()
   const { account } = useWallet()
-  const toast = useToast()
   const queryClient = useQueryClient()
 
   const buildClauses = useCallback(
@@ -67,23 +66,14 @@ export const useClaimRewards = ({
       })
     }
 
-    toast({
-      title: "Rewards claimed",
-      description: `You have successfully claimed your rewards.`,
-      status: "success",
-      position: "bottom-left",
-      duration: 5000,
-      isClosable: true,
-    })
     onSuccess?.()
-  }, [account, invalidateCache, onSuccess, queryClient, roundRewards, toast])
+  }, [account, invalidateCache, onSuccess, queryClient, roundRewards])
 
   const result = useSendTransaction({
     signerAccount: account,
     onTxConfirmed: handleOnSuccess,
     onTxFailedOrCancelled: onFailure,
   })
-
 
   const onMutate = useCallback(async () => {
     const clauses = buildClauses(roundRewards)
