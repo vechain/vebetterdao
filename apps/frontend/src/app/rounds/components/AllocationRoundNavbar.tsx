@@ -12,6 +12,7 @@ import {
   IconButton,
   VStack,
   Skeleton,
+  Container,
 } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa6"
@@ -38,46 +39,58 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
 
   if (isDesktop)
     return (
-      <HStack w="full" justify={"space-between"} align="center">
-        <Button
-          size="sm"
-          aria-label="Go to previous round"
-          isDisabled={prevButtonDisabled}
-          onClick={goToPreviousRound}
-          leftIcon={<FaArrowLeft />}>
-          Previous round
-        </Button>
+      <HStack w="100vw" align="center" bgColor={"#B2F26C"} mt={-10} py={1}>
+        <Container
+          maxW={"container.xl"}
+          display={"flex"}
+          flex={1}
+          alignItems={"center"}
+          justifyContent={"space-between"}
+          flexDirection={"row"}
+          px={20}>
+          <Button
+            size="sm"
+            variant={"ghost"}
+            aria-label="Go to previous round"
+            isDisabled={prevButtonDisabled}
+            onClick={goToPreviousRound}
+            leftIcon={<FaArrowLeft />}>
+            Previous round
+          </Button>
 
-        <Stack direction={["column", "column", "row"]} spacing={4} align={"center"}>
-          <Skeleton isLoaded={!isLoading}>
-            <Heading size="md">Round #{data?.roundId}</Heading>
-          </Skeleton>
-          <Box w={1.5} h={1.5} borderRadius={"full"} bg="gray" />
-          <HStack spacing={2} align={"center"}>
+          <Stack direction={["column", "column", "row"]} spacing={4} align={"center"}>
             <Skeleton isLoaded={!isLoading}>
-              <Text>{!isLoading ? data?.voteStartTimestamp?.format("D MMMM") : "8 February"}</Text>
+              <Heading size="md">Round #{data?.roundId}</Heading>
             </Skeleton>
-            <Icon as={FaArrowRight} />
-            <Skeleton isLoaded={!isLoading}>
-              <Text>{!isLoading ? data?.voteEndTimestamp?.format("D MMMM") : "8 February"}</Text>
-            </Skeleton>
-          </HStack>
-          <AllocationRoundStateTag state={data?.state} size="md" />
-        </Stack>
-        <Button
-          size="sm"
-          aria-label="Go to next round"
-          isDisabled={nextButtonDisabled}
-          onClick={goToNextRound}
-          rightIcon={<FaArrowRight />}>
-          Next round
-        </Button>
+            <Box w={1.5} h={1.5} borderRadius={"full"} bg="gray" />
+            <HStack spacing={2} align={"center"}>
+              <Skeleton isLoaded={!isLoading}>
+                <Text>{!isLoading ? data?.voteStartTimestamp?.format("D MMMM") : "8 February"}</Text>
+              </Skeleton>
+              <Icon as={FaArrowRight} />
+              <Skeleton isLoaded={!isLoading}>
+                <Text>{!isLoading ? data?.voteEndTimestamp?.format("D MMMM") : "8 February"}</Text>
+              </Skeleton>
+            </HStack>
+            <AllocationRoundStateTag state={data?.state} size="md" />
+          </Stack>
+          <Button
+            variant={"ghost"}
+            size="sm"
+            aria-label="Go to next round"
+            isDisabled={nextButtonDisabled}
+            onClick={goToNextRound}
+            rightIcon={<FaArrowRight />}>
+            Next round
+          </Button>
+        </Container>
       </HStack>
     )
 
   return (
-    <HStack w="full" justify={"space-between"} align="center">
+    <HStack w="100vw" justify={"space-between"} align="center" bgColor={"#B2F26C"} px={4} py={2}>
       <IconButton
+        variant={"ghost"}
         icon={<FaArrowLeft />}
         isDisabled={prevButtonDisabled}
         onClick={goToPreviousRound}
@@ -102,6 +115,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
         </HStack>
       </VStack>
       <IconButton
+        variant={"ghost"}
         icon={<FaArrowRight />}
         aria-label="Go to next round"
         onClick={goToNextRound}
