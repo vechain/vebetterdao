@@ -2,7 +2,7 @@ import { Flex, VStack, Heading, Image, Text, Box } from "@chakra-ui/react"
 import { TwoFingersIcon } from "./Icons"
 import { ConnectWalletButton } from "./ConnectWalletButton"
 
-export const DashboardWalletNotConnectedOverlay = () => {
+export const WalletNotConnectedOverlay = ({ description = "Connect you wallet" }: { description?: string }) => {
   return (
     <Flex
       borderRadius={"lg"}
@@ -37,7 +37,7 @@ export const DashboardWalletNotConnectedOverlay = () => {
             Wallet not connected
           </Heading>
           <Text mt={2} textAlign={"center"} fontSize="md" fontWeight={"400"} color="white">
-            Connect your wallet to check your balance
+            {description}
           </Text>
         </Box>
         <ConnectWalletButton responsiveVariant="desktop" />
