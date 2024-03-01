@@ -2,7 +2,7 @@
 
 import { MotionVStack } from "@/components"
 import { AnalyticsUtils } from "@/utils"
-import { Spinner, Stack, VStack } from "@chakra-ui/react"
+import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
