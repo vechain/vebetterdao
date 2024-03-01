@@ -2,8 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 
 import { getConfig } from "@repo/config"
-import { XAllocationPool__factory, XAllocationVotingGovernorJson } from "@repo/contracts"
-import { getAllocationsRoundState } from "./useAllocationsRoundState"
+import { XAllocationPool__factory } from "@repo/contracts"
 import { FormattingUtils } from "@repo/utils"
 
 const XALLOCATIONPOOLCONTRACT = getConfig().xAllocationPoolContractAddress
