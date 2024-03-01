@@ -22,6 +22,7 @@ import { WalletButton, useWallet } from "@vechain/dapp-kit-react"
 import { ethers } from "ethers"
 import { backdropBlurAnimation } from "@/app/theme"
 import { TransactionModal } from "@/components/TransactionModal"
+import BigNumber from "bignumber.js"
 
 type Props = {
   roundId: string
@@ -66,7 +67,6 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
 
   const {
     control,
-    register,
     watch,
     handleSubmit,
     getValues,
@@ -90,9 +90,10 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     if (castedVotesEvent?.appsIds && votesAtSnapshot?.scaled) {
       return castedVotesEvent.appsIds.map((id, index) => ({
         id,
-        value:
+        value: new BigNumber(
           (Number(ethers.formatEther(castedVotesEvent.voteWeights[index] as string)) / Number(votesAtSnapshot.scaled)) *
-          100,
+            100,
+        ).toFixed(2, BigNumber.ROUND_HALF_DOWN),
       }))
     }
     return []
@@ -103,7 +104,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     if (parsedCastedVotesPercetanges.length) {
       replace(parsedCastedVotesPercetanges)
     } else {
-      const values = xApps?.map(xApp => ({ id: xApp.id, value: 0 }))
+      const values = xApps?.map(xApp => ({ id: xApp.id, value: "" }))
       replace(values ?? [])
     }
   }, [xApps, replace, parsedCastedVotesPercetanges])
@@ -112,7 +113,10 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     if (!votesAtSnapshot) throw new Error("Votes at snapshot not found")
     const appVotesPercentagesToValue = data.votes.map(vote => ({
       id: vote.id,
-      value: Math.floor((vote.value * Number(votesAtSnapshot.scaled)) / 100),
+      value: new BigNumber((Number(vote.value) * Number(votesAtSnapshot.scaled)) / 100).toFixed(
+        2,
+        BigNumber.ROUND_HALF_DOWN,
+      ),
     }))
     console.log("data", data, "appVotesPercentagesToValue", appVotesPercentagesToValue)
     onOpen()
@@ -121,11 +125,9 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
 
   const splitEvenly = () => {
     const totalVotes = xApps?.length ?? 0
-    const votesPerApp = Math.floor(100 / totalVotes) // Integer division to ensure sum equals 100
-    const remainder = 100 - votesPerApp * totalVotes // Calculate the remainder
-    const value = votesPerApp + remainder // Add the remainder to the first app
+    const votesPerApp = new BigNumber(100).dividedBy(totalVotes).toFixed(2, BigNumber.ROUND_HALF_DOWN)
     xApps?.forEach((xApp, index) => {
-      update(index, { id: xApp.id, value: index === 0 ? value : votesPerApp })
+      update(index, { id: xApp.id, value: votesPerApp })
     })
   }
 
@@ -214,7 +216,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
                   <SelectAppVotesInput
                     totalVotesAvailable={votesAtSnapshot?.scaled}
                     isDisabled={isFormDisabled}
-                    register={register}
+                    control={control}
                     getValues={getValues}
                     errors={errors}
                     field={field}
