@@ -11,7 +11,7 @@ export const VeBetterDaoLogo: React.FC = () => {
   //Priority is set to true to prevent the logo from being lazy loaded and FOC
   return (
     <HStack spacing={1} align={"flex-start"}>
-      <Image height={"100"} width={"100"} alt="VebetterDao logo" src={logoUrl} priority={true} />
+      <Image height={"100"} width={"100"} alt="VeBetterDAO logo" src={logoUrl} priority={true} />
       <Text fontSize="2xs" fontWeight="bold" color="primary.500">
         DAO
       </Text>
