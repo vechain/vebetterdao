@@ -1,60 +1,32 @@
 "use client"
 
+import { MotionVStack } from "@/components"
 import { AnalyticsUtils } from "@/utils"
-import { Box, Stack, VStack } from "@chakra-ui/react"
+import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
-const AllocationRoundDetails = dynamic(
-  () => import("../components/AllocationRoundDetails").then(mod => mod.AllocationRoundDetails),
-  { ssr: false },
+const AllocationRoundContent = dynamic(
+  () => import("./AllocationRoundContent").then(mod => mod.AllocationRoundContent),
+  {
+    ssr: false,
+    loading: () => (
+      <VStack w="full" spacing={12} h="80vh" justify="center">
+        <Spinner size={"lg"} />
+      </VStack>
+    ),
+  },
 )
-const AllocationRoundNavbar = dynamic(
-  () => import("../components/AllocationRoundNavbar").then(mod => mod.AllocationRoundNavbar),
-  { ssr: false },
-)
-const AllocationXAppsVotesCard = dynamic(
-  () => import("@/components/AllocationXAppsVotesCard").then(mod => mod.AllocationXAppsVotesCard),
-  { ssr: false },
-)
-const AllocationRoundSessionInfoCard = dynamic(
-  () => import("../components/AllocationRoundSessionInfoCard").then(mod => mod.AllocationRoundSessionInfoCard),
-  { ssr: false },
-)
-
-const AllocationRoundUserVotes = dynamic(
-  () =>
-    import("../components/AllocationRoundUserVotes/AllocationRoundUserVotes").then(mod => mod.AllocationRoundUserVotes),
-  { ssr: false },
-)
-
 type Props = {
   params: {
     roundId: string
   }
 }
+
 export default function Round({ params }: Readonly<Props>) {
   useEffect(() => {
     AnalyticsUtils.trackPage(`Round/${params.roundId}`)
   }, [])
-  return (
-    <VStack w="full" spacing={8}>
-      <AllocationRoundNavbar roundId={params.roundId} />
-      <AllocationRoundDetails roundId={params.roundId} />
-      <Stack
-        direction={["column-reverse", "column-reverse", "row"]}
-        w="full"
-        justify="space-between"
-        align={["flex-start", "flex-start", "stretch"]}
-        spacing={12}>
-        <Box flex={[1, 0.6, 0.6, 0.7]} w="full">
-          <AllocationXAppsVotesCard roundId={params.roundId} />
-        </Box>
-        <VStack flex={[1, 0.4, 0.4, 0.3]} spacing={8} w="full">
-          <AllocationRoundSessionInfoCard roundId={params.roundId} />
-        </VStack>
-      </Stack>
-      <AllocationRoundUserVotes roundId={params.roundId} />
-    </VStack>
-  )
+
+  return <MotionVStack children={<AllocationRoundContent params={params} />} />
 }
