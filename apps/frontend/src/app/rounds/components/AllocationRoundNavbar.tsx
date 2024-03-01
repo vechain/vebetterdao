@@ -99,7 +99,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
       <VStack w="full">
         <HStack spacing={4}>
           <Skeleton isLoaded={!isLoading}>
-            <Heading size="md">{data?.roundId}° round</Heading>
+            <Heading size="md">#{data?.roundId} round</Heading>
           </Skeleton>
           <AllocationRoundStateTag state={data?.state} size="md" />
         </HStack>
