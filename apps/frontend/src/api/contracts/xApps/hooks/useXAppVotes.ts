@@ -26,7 +26,7 @@ export const getXAppVotesQueryKey = (xAppId?: string, roundId?: string) => [
   "allocationsRound",
   roundId,
   "votes",
-  xAppId,
+  ...(xAppId ? [xAppId] : []),
 ]
 
 /**

@@ -74,6 +74,8 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
     return (Number(votes) / Number(roundQuorum)) * 100
   }, [votes, roundQuorum])
 
+  const isQuorumFailed = roundInfo?.state === "1"
+
   return (
     <Card w="full">
       <CardHeader>
@@ -97,7 +99,7 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
                 h={2.5}
                 hasStripe={true}
                 value={quorumPercentage}
-                colorScheme="primary"
+                colorScheme={isQuorumFailed ? "red" : "primary"}
                 size="sm"
                 borderRadius={"full"}
               />
@@ -107,9 +109,9 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
                 Quorum needed
               </Text>
               <HStack spacing={2}>
-                <Icon as={FaClock} fontSize={"sm"} fontWeight={"thin"} />
+                <Icon as={FaClock} fontSize={"sm"} fontWeight={"thin"} color={isQuorumFailed ? "red" : "inherit"} />
                 <Skeleton isLoaded={!quorumLoading}>
-                  <Text fontSize={"sm"} fontWeight={"600"}>
+                  <Text fontSize={"sm"} fontWeight={"600"} color={isQuorumFailed ? "red" : "inherit"}>
                     {humanNumber(roundQuorum ?? "0", roundQuorum)}
                   </Text>
                 </Skeleton>
