@@ -23,7 +23,7 @@ type Props = {
   }
 }
 
-export default function round({ params }: Readonly<Props>) {
+export default function Round({ params }: Readonly<Props>) {
   useEffect(() => {
     AnalyticsUtils.trackPage(`Round/${params.roundId}`)
   }, [])
