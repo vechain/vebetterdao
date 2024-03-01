@@ -13,11 +13,18 @@ import {
   HStack,
   Heading,
   Link,
+  Skeleton,
   Spinner,
+  Text,
 } from "@chakra-ui/react"
-import { useAllocationsRound, useRoundXApps, useXAppsVotes } from "@/api"
+import { useAllocationVoters, useAllocationsRound, useRoundXApps, useXAppsVotes } from "@/api"
 import { backdropBlurAnimation } from "@/app/theme"
 import { AllocationXAppsVotesRankingChart } from "./AllocationXAppsVotesRankingChart"
+
+const compactFormatter = new Intl.NumberFormat("en-US", {
+  notation: "compact",
+  compactDisplay: "short",
+})
 
 type Props = {
   roundId: string
@@ -25,9 +32,10 @@ type Props = {
 
 const maxRanks = 3
 export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
-  const { data: xApps } = useRoundXApps(roundId)
+  const { data: xApps, isLoading: xAppsLoading } = useRoundXApps(roundId)
 
   const xAppsVotes = useXAppsVotes(xApps?.map(app => app.id) ?? [], roundId)
+  const { data: voters, isLoading: votersLoading } = useAllocationVoters(roundId)
 
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(roundId)
 
@@ -114,12 +122,36 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
         </Flex>
       )}
       <CardFooter>
-        {/* TODO: Implement this */}
-        {isMoreThanMaxRanks && (
-          <Button variant={"link"} colorScheme="primary" size="lg">
-            View all
-          </Button>
-        )}
+        <HStack justify={"space-between"} w="full" align="center">
+          <HStack spacing={20} align={"center"} justify={"flex-start"} w="full">
+            <Box>
+              <Skeleton isLoaded={!xAppsLoading}>
+                <Heading size="xl" color={"primary.500"}>
+                  {xApps?.length}
+                </Heading>
+              </Skeleton>
+              <Text fontSize="lg" fontWeight={400}>
+                Participating dApps
+              </Text>
+            </Box>
+            <Box>
+              <Skeleton isLoaded={!votersLoading}>
+                <Heading size="xl" color={"primary.500"}>
+                  {compactFormatter.format(Number(voters))}
+                </Heading>
+              </Skeleton>
+              <Text fontSize="lg" fontWeight={400}>
+                Addresses voting
+              </Text>
+            </Box>
+          </HStack>
+          {/* TODO: Implement this */}
+          {isMoreThanMaxRanks && (
+            <Button variant={"link"} colorScheme="primary" size="lg">
+              View all
+            </Button>
+          )}
+        </HStack>
       </CardFooter>
     </Card>
   )
