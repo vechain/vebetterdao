@@ -146,7 +146,7 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
                 <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
                   <Text>{isB3trToVot3 ? "Send" : "Receive"}</Text>
                   <VStack gap={0} alignItems={"flex-end"}>
-                    <Text fontSize="10px">Balance</Text>
+                    <Text fontSize="10px">B3TR Balance</Text>
                     <HStack gap={1}>
                       <Text fontSize="14px" fontWeight={500}>
                         {compactFormatter.format(Number(b3trBalanceScaled))}
@@ -189,7 +189,7 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
                 <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
                   <Text>{isB3trToVot3 ? "Receive" : "Send"}</Text>
                   <VStack gap={0} alignItems={"flex-end"}>
-                    <Text fontSize="10px">Balance</Text>
+                    <Text fontSize="10px">VOT3 Balance</Text>
                     <HStack gap={1}>
                       <Text fontSize="14px" fontWeight={500}>
                         {compactFormatter.format(Number(vot3BalanceScaled))}
