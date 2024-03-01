@@ -1,4 +1,4 @@
-import { useAllocationAmount, useAllocationVoters, useAllocationsRound, useHasVotedInRound, useRoundXApps } from "@/api"
+import { useAllocationAmount, useAllocationBaseAmount, useAllocationsRound, useHasVotedInRound } from "@/api"
 import { B3TRIcon } from "@/components"
 import {
   Box,
@@ -28,11 +28,11 @@ const compactFormatter = new Intl.NumberFormat("en-US", {
 export const AllocationRoundDetails = ({ roundId }: Props) => {
   const { account } = useWallet()
   const { data, isLoading } = useAllocationsRound(roundId)
-  const { data: xApps, isLoading: xAppsLoading } = useRoundXApps(roundId)
-  const { data: totalVoters, isLoading: totalVotersLoading } = useAllocationVoters(roundId)
-  const { data: roundAmount, isLoading: roundAmountLoading, error: roundAmountError } = useAllocationAmount(roundId)
 
+  const { data: roundAmount, isLoading: roundAmountLoading, error: roundAmountError } = useAllocationAmount(roundId)
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
+
+  const { data: baseAmount, isLoading: baseAmountLoading, error: baseAmountError } = useAllocationBaseAmount(roundId)
 
   const isVotingConcluded = data?.voteEndTimestamp?.isBefore()
 
@@ -109,9 +109,9 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
                   {roundAmountError ? (
                     <Text color="red.500">{roundAmountError.message}</Text>
                   ) : (
-                    <HStack spacing={4}>
+                    <HStack spacing={2}>
                       <Heading size="2xl">{compactFormatter.format(Number(roundAmount?.voteX2Earn))}</Heading>
-                      <B3TRIcon boxSize="40px" />
+                      <B3TRIcon boxSize="40px" colorVariant="dark" />
                     </HStack>
                   )}
                 </Skeleton>
@@ -122,19 +122,33 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
 
               <HStack spacing={12}>
                 <Box>
-                  <Skeleton isLoaded={!xAppsLoading}>
-                    <Heading size="xl">{xApps?.length}</Heading>
+                  <Skeleton isLoaded={!roundAmountLoading}>
+                    {roundAmountError ? (
+                      <Text color="red.500">{roundAmountError.message}</Text>
+                    ) : (
+                      <HStack spacing={2}>
+                        <Heading size="xl">{compactFormatter.format(Number(roundAmount?.voteXAllocations))}</Heading>
+                        <B3TRIcon boxSize="30px" colorVariant="dark" />
+                      </HStack>
+                    )}
                   </Skeleton>
                   <Text fontSize={"md"} textTransform={"uppercase"}>
-                    Participating dApps
+                    Voting rewards
                   </Text>
                 </Box>
                 <Box>
-                  <Skeleton isLoaded={!totalVotersLoading}>
-                    <Heading size="xl">{totalVoters}</Heading>
+                  <Skeleton isLoaded={!baseAmountLoading}>
+                    {baseAmountError ? (
+                      <Text color="red.500">{baseAmountError.message}</Text>
+                    ) : (
+                      <HStack spacing={2}>
+                        <Heading size="xl">{compactFormatter.format(Number(baseAmount))}</Heading>
+                        <B3TRIcon boxSize="30px" colorVariant="dark" />
+                      </HStack>
+                    )}
                   </Skeleton>
                   <Text fontSize={"md"} textTransform={"uppercase"}>
-                    Total voters
+                    Base allocation
                   </Text>
                 </Box>
               </HStack>
