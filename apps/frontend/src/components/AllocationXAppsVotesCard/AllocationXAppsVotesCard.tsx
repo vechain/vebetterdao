@@ -67,7 +67,7 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
               <Box>
                 <AlertTitle>Quorum was not reached for this round</AlertTitle>
                 <AlertDescription>
-                  B3TR allocation will be distrivuted according to the votes of the previous allocation
+                  B3TR allocation will be distributed according to the votes of the previous allocation
                 </AlertDescription>
               </Box>
             </Alert>
