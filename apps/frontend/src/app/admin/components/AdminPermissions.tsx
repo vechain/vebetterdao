@@ -14,7 +14,6 @@ import {
   Heading,
   CardHeader,
 } from "@chakra-ui/react"
-import { getConfig } from "@repo/config"
 
 export const AdminPermissions = () => {
   const { account } = useWallet()
