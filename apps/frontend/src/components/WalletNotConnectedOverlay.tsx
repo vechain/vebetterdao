@@ -2,7 +2,7 @@ import { Flex, VStack, Heading, Image, Text, Box } from "@chakra-ui/react"
 import { TwoFingersIcon } from "./Icons"
 import { ConnectWalletButton } from "./ConnectWalletButton"
 
-export const WalletNotConnectedOverlay = ({ description = "Connect you wallet" }: { description?: string }) => {
+export const WalletNotConnectedOverlay = ({ description = "Connect your wallet" }: { description?: string }) => {
   return (
     <Flex
       borderRadius={"lg"}
