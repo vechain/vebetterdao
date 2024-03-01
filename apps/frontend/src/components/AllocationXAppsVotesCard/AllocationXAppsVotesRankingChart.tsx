@@ -98,7 +98,7 @@ const VotesHorizontalBar = ({
                 <Heading size="md" fontWeight={"medium"}>
                   {compactFormatter.format(Number(forecastedEarnings?.amount))}
                 </Heading>
-                <B3TRIcon boxSize="20px" />
+                <B3TRIcon boxSize="20px" colorVariant="dark" />
               </HStack>
             </Skeleton>
             <Text fontSize={"md"} fontWeight={"300"}>
@@ -108,9 +108,9 @@ const VotesHorizontalBar = ({
           <VStack spacing={0} align="flex-end">
             <HStack spacing={1} align={"center"} justify={"flex-start"} w="full">
               <Heading size="md" fontWeight={"medium"}>
-                {data.votes}
+                {compactFormatter.format(Number(data.votes))}
               </Heading>
-              <B3TRIcon boxSize="20px" />
+              <B3TRIcon boxSize="20px" colorVariant="dark" />
             </HStack>
 
             <Text fontSize={"md"} fontWeight={"300"}>
