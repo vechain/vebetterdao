@@ -1,22 +1,27 @@
 "use client"
 
+import { MotionVStack } from "@/components"
 import { AnalyticsUtils } from "@/utils"
-import { Spinner } from "@chakra-ui/react"
+import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
-import { Suspense, useEffect } from "react"
+import { useEffect } from "react"
 
 const AllocationRoundsContent = dynamic(
   () => import("./components/AllocationRoundsContent").then(mod => mod.AllocationRoundsContent),
-  { ssr: false },
+  {
+    ssr: false,
+    loading: () => (
+      <VStack w="full" spacing={12} h="80vh" justify="center">
+        <Spinner size={"lg"} />
+      </VStack>
+    ),
+  },
 )
 
 export default function AllocationsRoundPage() {
   useEffect(() => {
     AnalyticsUtils.trackPage("Rounds")
   }, [])
-  return (
-    <Suspense fallback={<Spinner alignSelf={"center"} />}>
-      <AllocationRoundsContent />
-    </Suspense>
-  )
+
+  return <MotionVStack children={<AllocationRoundsContent />} />
 }
