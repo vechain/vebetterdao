@@ -74,7 +74,7 @@ const VotesHorizontalBar = ({
 
   const indexLabel = index + 1
 
-  const votesPercentage = (Number(data.votes) / Number(totalVotes)) * 100
+  const votesPercentage = Number(totalVotes) === 0 ? 0 : (Number(data.votes) / Number(totalVotes)) * 100
 
   const bgShade = useColorModeValue("100", "200")
 
@@ -119,7 +119,7 @@ const VotesHorizontalBar = ({
           </VStack>
         </HStack>
       </HStack>
-      <Box w="full" h={2} bg={`${bgColor}.${bgShade}`} borderRadius={"xl"}>
+      <Box w="full" h={2} bg={`${bgColor}.100`} borderRadius={"xl"}>
         <Box w={`${votesPercentage}%`} h={2} bg={`${bgColor}.300`} borderRadius={"xl"} />
       </Box>
     </VStack>

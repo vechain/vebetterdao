@@ -9,6 +9,7 @@ import {
   CardBody,
   CardFooter,
   CardHeader,
+  CloseButton,
   Flex,
   HStack,
   Heading,
@@ -16,8 +17,9 @@ import {
   Skeleton,
   Spinner,
   Text,
+  VStack,
 } from "@chakra-ui/react"
-import { useAllocationVoters, useAllocationsRound, useRoundXApps, useXAppsVotes } from "@/api"
+import { RoundState, useAllocationVoters, useAllocationsRound, useRoundXApps, useXAppsVotes } from "@/api"
 import { backdropBlurAnimation } from "@/app/theme"
 import { AllocationXAppsVotesRankingChart } from "./AllocationXAppsVotesRankingChart"
 
@@ -58,11 +60,22 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
         </HStack>
       </CardHeader>
       <CardBody>
-        <AllocationXAppsVotesRankingChart roundId={roundId} maxRanks={maxRanks} />
-
-        <Box flex={1} />
+        <VStack spacing={8} align={"flex-start"} w="full">
+          {roundInfo.state === "1" && (
+            <Alert status="error" borderRadius={"2xl"}>
+              <AlertIcon />
+              <Box>
+                <AlertTitle>Quorum was not reached for this round</AlertTitle>
+                <AlertDescription>
+                  B3TR allocation will be distrivuted according to the votes of the previous allocation
+                </AlertDescription>
+              </Box>
+            </Alert>
+          )}
+          <AllocationXAppsVotesRankingChart roundId={roundId} maxRanks={maxRanks} />
+        </VStack>
       </CardBody>
-      {(isNoVotes || isLoading || error) && (
+      {(isLoading || error) && (
         <Flex
           backdropFilter="blur(10px)"
           animation={backdropBlurAnimation("0px", "10px")}
@@ -74,7 +87,7 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
           borderRadius={"lg"}>
           {isLoading || roundInfoLoading ? (
             <Spinner size="lg" />
-          ) : !!error ? (
+          ) : error ? (
             <Alert
               w={["80%", "70%", "50%"]}
               status="error"
@@ -93,32 +106,7 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
                 {error.message || "An error occurred while loading the votes"}
               </AlertDescription>
             </Alert>
-          ) : (
-            <Alert
-              w={["80%", "70%", "50%"]}
-              status="info"
-              variant="subtle"
-              flexDirection="column"
-              alignItems="center"
-              justifyContent="center"
-              textAlign="center"
-              borderRadius={"xl"}>
-              <AlertIcon boxSize="40px      " mr={0} />
-              <AlertTitle mt={4} mb={1} fontSize="lg">
-                {isConcluded ? "No votes for this round " : "No votes yet"}
-              </AlertTitle>
-              <AlertDescription maxWidth="sm">
-                {isConcluded
-                  ? "The voting has concluded and noone has voted"
-                  : "Noone has voted yet, be the first to vote! You're going to see real-times vote here."}
-              </AlertDescription>
-              {!isConcluded && (
-                <Button as={Link} href="#user-votes" mt={4}>
-                  Vote now
-                </Button>
-              )}
-            </Alert>
-          )}
+          ) : null}
         </Flex>
       )}
       <CardFooter>
