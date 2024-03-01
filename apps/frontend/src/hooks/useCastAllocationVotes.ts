@@ -4,7 +4,6 @@ import {
   getHasVotedInRoundQueryKey,
   getUserVotesInRoundQueryKey,
 } from "@/api"
-import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
@@ -50,7 +49,6 @@ export const useCastAllocationVotes = ({
 }: useCastAllocationVotesProps): useCastAllocationVotesReturnValue => {
   const { thor } = useConnex()
   const { account } = useWallet()
-  const toast = useToast()
   const queryClient = useQueryClient()
 
   const buildClauses = useCallback(
@@ -112,16 +110,8 @@ export const useCastAllocationVotes = ({
       })
     }
 
-    toast({
-      title: "Vote casted",
-      description: `You have successfully casted your vote on round ${roundId}`,
-      status: "success",
-      position: "bottom-left",
-      duration: 5000,
-      isClosable: true,
-    })
     onSuccess?.()
-  }, [invalidateCache, queryClient, toast, onSuccess, account, roundId])
+  }, [invalidateCache, queryClient, onSuccess, account, roundId])
 
   const result = useSendTransaction({
     signerAccount: account,
