@@ -68,7 +68,7 @@ export const SelectAppVotesInput = ({
         <Heading size={["md", "md", "sm"]}>{xApp?.name}</Heading>
       </HStack>
       <Box flex={[1, 1, 0.5]}>
-        <FormControl isInvalid={!!errors.votes?.[index]} isDisabled={false}>
+        <FormControl isInvalid={!!errors.votes?.[index]} isDisabled={isDisabled}>
           <InputGroup>
             <Controller
               control={control}
