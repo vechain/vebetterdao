@@ -25,7 +25,6 @@ import { B3TRIcon, VOT3Icon } from "./Icons"
 import { SwapButton } from "./Swap/SwapButton"
 import { useTokenColors } from "@/hooks"
 import { FaCircleInfo } from "react-icons/fa6"
-import { CiWarning } from "react-icons/ci"
 
 const DECIMAL_PLACES = 4
 
@@ -168,9 +167,9 @@ export const BalanceCard: React.FC<Props> = () => {
       </CardBody>
 
       <CardFooter>
-        <Tag w={"full"} p={2} colorScheme="orange">
+        <Tag w={"full"} p={2} colorScheme="blue">
           <HStack spacing={1} align={"center"}>
-            <Icon as={CiWarning} position={"relative"} />
+            <Icon as={FaCircleInfo} position={"relative"} />
             <Text fontSize={"xs"}>B3TR and VOT3 tokens will be migrated 1:1 from testnet to mainnet</Text>
           </HStack>
         </Tag>
