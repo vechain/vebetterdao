@@ -88,29 +88,29 @@ const VotesHorizontalBar = ({
             {appMetadata?.name}
           </Heading>
         </HStack>
-        <HStack spacing={8} align={"center"} justify={"flex-start"} alignSelf={"flex-end"}>
-          <Box>
+        <HStack spacing={[4, 8]} align={"center"} justify={"flex-start"} alignSelf={"flex-end"}>
+          <VStack spacing={0} align="flex-end">
             <Skeleton isLoaded={!forecastedEarningsLoading}>
               <HStack spacing={1} align={"center"} justify={"flex-start"} w="full">
                 <Heading size={["sm", "md"]} fontWeight={"medium"}>
                   {compactFormatter.format(Number(forecastedEarnings?.amount))}
                 </Heading>
-                <B3TRIcon boxSize="20px" colorVariant="dark" />
+                <B3TRIcon boxSize={["16px", "20px"]} colorVariant="dark" />
               </HStack>
             </Skeleton>
-            <Skeleton isLoaded={!roundStateLoading}>
-              <Text fontSize={["sm", "md"]} fontWeight={"300"}>
-                {roundState === "0" ? " Real time b3tr distribution" : "Distributed"}
+            <Skeleton isLoaded={!roundStateLoading} textAlign={"right"}>
+              <Text fontSize={["xs", "sm"]} fontWeight={"300"}>
+                {roundState === "0" ? " Real time B3TR distribution" : "Distributed"}
               </Text>
             </Skeleton>
-          </Box>
+          </VStack>
           <VStack spacing={0} align="flex-end">
             <Heading size={["sm", "md"]} fontWeight={"700"} color="green">
               {compactFormatter.format(Number(data.votes))}
             </Heading>
 
-            <Skeleton isLoaded={!roundStateLoading}>
-              <Text fontSize={["sm", "md"]} fontWeight={"300"}>
+            <Skeleton isLoaded={!roundStateLoading} textAlign={"right"}>
+              <Text fontSize={["xs", "sm"]} fontWeight={"300"}>
                 {roundState === "0" ? " Real time votes" : "Votes"}
               </Text>
             </Skeleton>
