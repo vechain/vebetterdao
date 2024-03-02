@@ -32,12 +32,12 @@ export const getXAppRoundEarnings = async (
   return { amount: FormattingUtils.scaleNumberDown(res.decoded[0], 18), appId: xAppId }
 }
 
-export const getXAppRoundEarningsQueryKey = (roundId: string, xAppId: string) => [
+export const getXAppRoundEarningsQueryKey = (roundId: string, xAppId?: string) => [
   "roundEarnings",
   "roundId",
   roundId,
   "appId",
-  xAppId,
+  ...(xAppId ? [xAppId] : []),
 ]
 
 /**

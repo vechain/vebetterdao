@@ -3,6 +3,8 @@ import {
   getAllocationVotesQueryKey,
   getHasVotedInRoundQueryKey,
   getUserVotesInRoundQueryKey,
+  getXAppRoundEarningsQueryKey,
+  getXAppVotesQueryKey,
 } from "@/api"
 import { useQueryClient } from "@tanstack/react-query"
 import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
@@ -86,13 +88,11 @@ export const useCastAllocationVotes = ({
         queryKey: getAllocationVotersQueryKey(roundId),
       })
 
-      //TODO: refetch the query key so we can use it directly
-      const appsVotesForRoundKey = ["allocationsRound", roundId, "votes"]
       await queryClient.cancelQueries({
-        queryKey: appsVotesForRoundKey,
+        queryKey: getXAppVotesQueryKey(undefined, roundId),
       })
       await queryClient.refetchQueries({
-        queryKey: appsVotesForRoundKey,
+        queryKey: getXAppVotesQueryKey(undefined, roundId),
       })
 
       await queryClient.cancelQueries({
@@ -107,6 +107,13 @@ export const useCastAllocationVotes = ({
       })
       await queryClient.refetchQueries({
         queryKey: getHasVotedInRoundQueryKey(roundId, account ?? undefined),
+      })
+
+      await queryClient.cancelQueries({
+        queryKey: getXAppRoundEarningsQueryKey(roundId),
+      })
+      await queryClient.refetchQueries({
+        queryKey: getXAppRoundEarningsQueryKey(roundId),
       })
     }
 
