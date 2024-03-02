@@ -238,7 +238,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
           </form>
         </Stack>
       </CardBody>
-      {!account && <WalletNotConnectedOverlay description="Connect your wallet to check votes" />}
+      {!account && <WalletNotConnectedOverlay description="Connect your wallet to cast your vote!" />}
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}

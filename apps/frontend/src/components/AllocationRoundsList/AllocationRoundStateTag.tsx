@@ -1,11 +1,12 @@
 import { RoundState } from "@/api"
-import { Box, HStack, Skeleton, TagProps, Text, useColorModeValue } from "@chakra-ui/react"
+import { Box, HStack, Skeleton, Tag, TagProps, Text, useColorModeValue } from "@chakra-ui/react"
 import { DotSymbol } from "../DotSymbol"
 
 type Props = {
   state?: keyof typeof RoundState
+  renderInTag?: boolean
 } & TagProps
-export const AllocationRoundStateTag = ({ state, ...props }: Props) => {
+export const AllocationRoundStateTag = ({ state, renderInTag, ...props }: Props) => {
   const colorShade = useColorModeValue("600", "300")
   const colorScheme = {
     "0": "primary",
@@ -14,6 +15,19 @@ export const AllocationRoundStateTag = ({ state, ...props }: Props) => {
     "-1": "gray",
   }[state ?? "-1"]
 
+  if (renderInTag)
+    return (
+      <Skeleton isLoaded={!!state}>
+        <Tag colorScheme={"gray"} {...props}>
+          <HStack spacing={1} align={"center"}>
+            {state === "0" && <DotSymbol color={`${colorScheme}.${colorShade}`} />}
+            <Text color={`${colorScheme}.${colorShade}`} fontWeight={"500"} fontSize="medium" {...props}>
+              {state ? RoundState[state] : "Unknown"}
+            </Text>
+          </HStack>
+        </Tag>
+      </Skeleton>
+    )
   return (
     <Skeleton isLoaded={!!state}>
       <HStack spacing={1} align={"center"}>
