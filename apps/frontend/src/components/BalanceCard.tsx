@@ -15,6 +15,8 @@ import {
   useColorModeValue,
   Divider,
   Spinner,
+  CardFooter,
+  Tag,
   Icon,
 } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
@@ -22,8 +24,8 @@ import { useMemo } from "react"
 import { B3TRIcon, VOT3Icon } from "./Icons"
 import { SwapButton } from "./Swap/SwapButton"
 import { useTokenColors } from "@/hooks"
-import { BaseTooltip } from "./BaseTooltip"
 import { FaCircleInfo } from "react-icons/fa6"
+import { CiWarning } from "react-icons/ci"
 
 const DECIMAL_PLACES = 4
 
@@ -147,18 +149,7 @@ export const BalanceCard: React.FC<Props> = () => {
       <CardBody>
         <VStack spacing={4} align="flex-start" w={"full"}>
           <HStack justify={"space-between"} w="full">
-            <HStack align={"baseline"}>
-              <Heading size="md">Balance</Heading>
-              <BaseTooltip
-                text={"B3TR and VOT3 tokens will be migrated 1:1 from testnet to mainnet."}
-                children={
-                  <span>
-                    <Icon as={FaCircleInfo} position={"relative"} />
-                  </span>
-                }
-              />
-            </HStack>
-
+            <Heading size="md">Balance</Heading>
             <Flex>{isLoading ? <Spinner size="sm" /> : <SwapButton />}</Flex>
           </HStack>
           <Show below="sm">
@@ -175,6 +166,15 @@ export const BalanceCard: React.FC<Props> = () => {
           </Show>
         </VStack>
       </CardBody>
+
+      <CardFooter>
+        <Tag w={"full"} p={2} colorScheme="orange">
+          <HStack spacing={1} align={"center"}>
+            <Icon as={CiWarning} position={"relative"} />
+            <Text fontSize={"xs"}>B3TR and VOT3 tokens will be migrated 1:1 from testnet to mainnet</Text>
+          </HStack>
+        </Tag>
+      </CardFooter>
     </Card>
   )
 }
