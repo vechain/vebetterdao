@@ -81,10 +81,10 @@ const VotesHorizontalBar = ({
     <VStack spacing={4} align={"flex-start"} w="full">
       <HStack justify={"space-between"} w="full">
         <HStack spacing={3} align={"center"} justify={"flex-start"}>
-          <Skeleton isLoaded={!isLogoLoading} boxSize={12}>
+          <Skeleton isLoaded={!isLogoLoading} boxSize={[8, 12]}>
             <Image src={logo?.image ?? notFoundImage} w="full" borderRadius="9px" alt={appMetadata?.name} />
           </Skeleton>
-          <Heading size="md" fontWeight={"medium"}>
+          <Heading size={["sm", "md"]} fontWeight={"medium"}>
             {appMetadata?.name}
           </Heading>
         </HStack>
@@ -92,25 +92,25 @@ const VotesHorizontalBar = ({
           <Box>
             <Skeleton isLoaded={!forecastedEarningsLoading}>
               <HStack spacing={1} align={"center"} justify={"flex-start"} w="full">
-                <Heading size="md" fontWeight={"medium"}>
+                <Heading size={["sm", "md"]} fontWeight={"medium"}>
                   {compactFormatter.format(Number(forecastedEarnings?.amount))}
                 </Heading>
                 <B3TRIcon boxSize="20px" colorVariant="dark" />
               </HStack>
             </Skeleton>
             <Skeleton isLoaded={!roundStateLoading}>
-              <Text fontSize={"md"} fontWeight={"300"}>
+              <Text fontSize={["sm", "md"]} fontWeight={"300"}>
                 {roundState === "0" ? " Real time b3tr distribution" : "Distributed"}
               </Text>
             </Skeleton>
           </Box>
           <VStack spacing={0} align="flex-end">
-            <Heading size="md" fontWeight={"700"} color="green">
+            <Heading size={["sm", "md"]} fontWeight={"700"} color="green">
               {compactFormatter.format(Number(data.votes))}
             </Heading>
 
             <Skeleton isLoaded={!roundStateLoading}>
-              <Text fontSize={"md"} fontWeight={"300"}>
+              <Text fontSize={["sm", "md"]} fontWeight={"300"}>
                 {roundState === "0" ? " Real time votes" : "Votes"}
               </Text>
             </Skeleton>

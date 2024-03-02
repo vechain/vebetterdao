@@ -9,19 +9,20 @@ import {
   CardBody,
   CardFooter,
   CardHeader,
-  CloseButton,
   Flex,
   HStack,
   Heading,
-  Link,
+  Icon,
   Skeleton,
   Spinner,
+  Stack,
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { RoundState, useAllocationVoters, useAllocationsRound, useRoundXApps, useXAppsVotes } from "@/api"
+import { useAllocationVoters, useAllocationsRound, useRoundXApps, useXAppsVotes } from "@/api"
 import { backdropBlurAnimation } from "@/app/theme"
 import { AllocationXAppsVotesRankingChart } from "./AllocationXAppsVotesRankingChart"
+import { FaArrowRight } from "react-icons/fa6"
 
 const compactFormatter = new Intl.NumberFormat("en-US", {
   notation: "compact",
@@ -110,36 +111,58 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
         </Flex>
       )}
       <CardFooter>
-        <HStack justify={"space-between"} w="full" align="center">
-          <HStack spacing={20} align={"center"} justify={"flex-start"} w="full">
-            <Box>
+        <Stack
+          direction={["column", "row"]}
+          spacing={8}
+          justify={"space-between"}
+          w="full"
+          align={["flex-start", "center"]}>
+          <Stack
+            direction={["column", "row"]}
+            spacing={[8, 20]}
+            align={["flex-start", "center"]}
+            justify={"flex-start"}
+            w="full">
+            <VStack align={["flex-start"]} spacing={0}>
               <Skeleton isLoaded={!xAppsLoading}>
-                <Heading size="xl" color={"primary.500"}>
+                <Heading size={["xl"]} color={"primary.500"}>
                   {xApps?.length}
                 </Heading>
               </Skeleton>
               <Text fontSize="lg" fontWeight={400}>
                 Participating dApps
               </Text>
-            </Box>
-            <Box>
+            </VStack>
+            <VStack align={["flex-start"]} spacing={0}>
               <Skeleton isLoaded={!votersLoading}>
-                <Heading size="xl" color={"primary.500"}>
+                <Heading size={["xl"]} color={"primary.500"}>
                   {compactFormatter.format(Number(voters))}
                 </Heading>
               </Skeleton>
               <Text fontSize="lg" fontWeight={400}>
                 Addresses voting
               </Text>
-            </Box>
-          </HStack>
+            </VStack>
+          </Stack>
           {/* TODO: Implement this */}
           {isMoreThanMaxRanks && (
-            <Button variant={"link"} colorScheme="primary" size="lg">
+            <Button
+              variant={"link"}
+              colorScheme="primary"
+              size="lg"
+              rightIcon={
+                <Icon
+                  as={FaArrowRight}
+                  style={{
+                    transition: "all 0.2s ease-in-out",
+                    transform: "rotate(-45deg)",
+                  }}
+                />
+              }>
               View all
             </Button>
           )}
-        </HStack>
+        </Stack>
       </CardFooter>
     </Card>
   )
