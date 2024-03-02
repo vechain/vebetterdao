@@ -47,26 +47,46 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
     if (!isVotingConcluded) {
       if (hasVoted)
         return (
-          <Button as="a" href="#user-votes" colorScheme="green" size={["sm", "sm", "md"]}>
-            You have already voted in this round
-          </Button>
+          <VStack spacing={1} align="flex-start" flex={1}>
+            <Button as="a" href="#user-votes" colorScheme="primary" size={["md"]}>
+              Round is active
+            </Button>
+            <Text fontSize={"md"} color={`primary.${bgGradient}`} fontWeight={600}>
+              You have voted successfully!
+            </Text>
+          </VStack>
         )
       return (
-        <Button as="a" href="#user-votes" colorScheme="orange" size={["sm", "sm", "md"]}>
-          You have not voted yet in this round
-        </Button>
+        <VStack spacing={1} align="flex-start" flex={1}>
+          <Button as="a" href="#user-votes" colorScheme="primary" size={["md"]}>
+            Round is active
+          </Button>
+          <Text fontSize={"md"} color={`primary.${bgGradient}`} fontWeight={600}>
+            You have not cast your vote yet.
+          </Text>
+        </VStack>
       )
     }
     if (hasVoted)
       return (
-        <Button as="a" href="#user-votes" colorScheme="green" size={["sm", "sm", "md"]}>
-          Voting concluded - You casted your vote successfully
-        </Button>
+        <VStack spacing={1} align="flex-start" flex={1}>
+          <Button as="a" href="#user-votes" colorScheme="green" size={["md"]}>
+            Voting concluded
+          </Button>
+          <Text fontSize={"md"} color="green" fontWeight={600}>
+            You casted your vote successfully!
+          </Text>
+        </VStack>
       )
     return (
-      <Button as="a" href="#user-votes" colorScheme="orange" size={["sm", "sm", "md"]}>
-        Voting concluded - You did not cast your vote
-      </Button>
+      <VStack spacing={1} align="flex-start" flex={1}>
+        <Button as="a" href="#user-votes" colorScheme="orange" size={["md"]}>
+          Voting concluded
+        </Button>
+        <Text fontSize={"md"} color={`orange.${bgGradient}`} fontWeight={600}>
+          You did not cast your vote.
+        </Text>
+      </VStack>
     )
   }, [hasVoted, isVotingConcluded])
   return (
@@ -76,22 +96,28 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
           <VStack spacing={4} align="flex-start" flex={1}>
             <Skeleton isLoaded={!isLoading}>
               <HStack spacing={1} align={"center"}>
-                <Heading size="md" color={isVotingConcluded ? `orange.${bgGradient}` : `primary.${bgGradient}`}>
+                <Heading
+                  size={["sm", "md"]}
+                  color={isVotingConcluded ? `orange.${bgGradient}` : `primary.${bgGradient}`}>
                   {remainingTime}
                 </Heading>
               </HStack>
             </Skeleton>
             <Skeleton isLoaded={!isLoading}>
-              <Heading size="xl">Allocations | Round #{data?.roundId}</Heading>
+              <Heading size={["lg", "xl"]}>Allocations | Round #{data?.roundId}</Heading>
             </Skeleton>
             <Skeleton isLoaded={!isLoading}>
-              <Text color="gray.500">
+              <Text color="gray.500" fontSize={["sm", "md"]}>
                 {
                   "Vote for your preferred dApps to get more B3TR distribution and receive rewards. This allocation process reapeats every week."
                 }
               </Text>
             </Skeleton>
-            {!!account && <Skeleton isLoaded={!hasVotedLoading}>{renderVoteStatusMessage}</Skeleton>}
+            {!!account && (
+              <Skeleton isLoaded={!hasVotedLoading} mt={2}>
+                {renderVoteStatusMessage}
+              </Skeleton>
+            )}
           </VStack>
           <VStack flex={0.8}>
             <VStack
