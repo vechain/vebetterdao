@@ -42,12 +42,8 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
 
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(roundId)
 
-  const isConcluded = roundInfo.voteEndTimestamp?.isBefore() ?? false
-
   const isVotesLoading = xAppsVotes.some(query => query.isLoading)
   const error = xAppsVotes.find(query => query.error)?.error
-
-  const isNoVotes = xAppsVotes.every(query => query.data?.votes === "0")
 
   const isLoading = isVotesLoading || roundInfoLoading
 
