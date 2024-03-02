@@ -1,17 +1,16 @@
 import { getXAppMetadata, getXAppMetadataQueryKey, useAllocationsRound, useGetVotesOnBlock } from "@/api"
 import { getIpfsImage, getIpfsImageQueryKey } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
+import { CastAllocationVotesProps } from "@/hooks"
 import { Box, Card, CardBody, HStack, Heading, Icon, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useQueries } from "@tanstack/react-query"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { FaInfoCircle } from "react-icons/fa"
+import BigNumber from "bignumber.js"
 
 type Props = {
   roundId: string
-  votes: {
-    id: string
-    value: number
-  }[]
+  votes: CastAllocationVotesProps
 }
 
 const compactFormatter = new Intl.NumberFormat("en-US", {
@@ -26,8 +25,7 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
     Number(roundInfo.voteStart),
     account ?? undefined,
   )
-  console.log("votes", votes)
-  const totalVotes = votes.reduce((acc, vote) => acc + (isNaN(vote.value) ? 0 : vote.value), 0)
+  const totalVotes = votes.reduce((acc, vote) => acc + (Number(vote.value) || 0), 0)
   const isCompletedAllocated = totalVotes >= 100
 
   const isOverDistributed = totalVotes > 100
@@ -61,7 +59,7 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
     })),
   })
 
-  const selectedVotes = votes.filter(vote => vote.value > 0)
+  const selectedVotes = votes.filter(vote => Number(vote.value) > 0)
   return (
     <Card variant="filled" w="full">
       <CardBody>
@@ -76,7 +74,7 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
               </Text>
             </Box>
             <Text fontSize="sm" fontWeight="medium" color={isOverDistributed ? "orange" : "gray"}>
-              {totalVotes.toFixed(2)}% distributed
+              {new BigNumber(totalVotes).toFixed(2, BigNumber.ROUND_HALF_DOWN)}% distributed
             </Text>
           </HStack>
           <VStack w="full" h={24} spacing={0}>
@@ -84,11 +82,11 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
               {selectedVotes.map((vote, index) => (
                 <Box
                   transition={"all 0.5s linear"}
-                  {...((index === 0 || totalVotes === vote.value) && { borderLeftRadius: "xl" })}
-                  {...((index === selectedVotes.length - 1 || vote.value === totalVotes) &&
+                  {...((index === 0 || totalVotes === Number(vote.value)) && { borderLeftRadius: "xl" })}
+                  {...((index === selectedVotes.length - 1 || Number(vote.value) === totalVotes) &&
                     isCompletedAllocated && { borderRightRadius: "xl" })}
                   key={`${vote.id}-track`}
-                  w={`${getLineWidth(vote.value)}%`}
+                  w={`${getLineWidth(Number(vote.value))}%`}
                   bg={getLinesColor(index)}
                   h="full"
                 />
@@ -96,10 +94,10 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
             </HStack>
             <HStack w="full" h={"full"}>
               {votes.map((vote, index) =>
-                vote.value > 0 ? (
+                Number(vote.value) > 0 ? (
                   <VStack
                     key={`${vote.id}-line`}
-                    w={`${getLineWidth(vote.value)}%`}
+                    w={`${getLineWidth(Number(vote.value))}%`}
                     h={"full"}
                     spacing={0}
                     align="center">
@@ -113,7 +111,7 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
                       />
                     </Skeleton>
                     <Text fontSize="sm" mt={1}>
-                      {vote.value.toFixed(2)}%
+                      {vote.value}%
                     </Text>
                   </VStack>
                 ) : null,

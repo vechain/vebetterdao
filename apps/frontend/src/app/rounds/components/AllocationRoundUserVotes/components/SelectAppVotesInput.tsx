@@ -1,5 +1,5 @@
 import { XApp, useXAppMetadata } from "@/api"
-import { FieldErrors, UseFormGetValues, UseFormRegister } from "react-hook-form"
+import { Control, Controller, FieldErrors, UseFormGetValues, UseFormRegister } from "react-hook-form"
 import { FormData } from "../AllocationRoundUserVotes"
 import {
   Box,
@@ -17,9 +17,13 @@ import {
 } from "@chakra-ui/react"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
+import { CastAllocationVotesProps } from "@/hooks"
+import BigNumber from "bignumber.js"
 
 type Props = {
-  register: UseFormRegister<FormData>
+  control: Control<{
+    votes: CastAllocationVotesProps
+  }>
   getValues: UseFormGetValues<FormData>
   index: number
   xApp?: XApp
@@ -30,7 +34,7 @@ type Props = {
 }
 
 export const SelectAppVotesInput = ({
-  register,
+  control,
   getValues,
   index,
   xApp,
@@ -45,6 +49,7 @@ export const SelectAppVotesInput = ({
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
 
   const value = getValues().votes[index]?.value
+
   return (
     <Stack
       direction={["column", "column", "row"]}
@@ -66,23 +71,50 @@ export const SelectAppVotesInput = ({
       <Box flex={[1, 1, 0.5]}>
         <FormControl isInvalid={!!errors.votes?.[index]} isDisabled={isDisabled}>
           <InputGroup>
-            <Input
-              {...register(`votes.${index}.value`, {
-                valueAsNumber: true,
-                validate: value => {
-                  if (isNaN(value)) return "Please enter a valid number"
-                  if (value < 0) return "Votes cannot be negative"
-                  const allValuesTotal = getValues().votes.reduce((acc, vote) => acc + vote.value, 0)
-                  if (allValuesTotal > 100) return "Total votes exceed 100"
-                  return true
+            <Controller
+              control={control}
+              name={`votes.${index}.value`}
+              rules={{
+                validate: {
+                  lessThanHundred: () => {
+                    const allValuesTotal = getValues().votes.reduce((acc, vote) => acc + Number(vote.value) || 0, 0)
+                    if (allValuesTotal > 100) return "Total votes exceed 100"
+                    return true
+                  },
                 },
-              })}
-              w="full"
+              }}
+              render={({ field: { onChange, value } }) => {
+                return (
+                  <Input
+                    w="full"
+                    placeholder="0"
+                    value={value}
+                    onChange={e => {
+                      const newValue = e.target.value
+                        .replace(",", ".") // Replace comma with dot
+                        .replace(/[^\d\\.]/g, "") // Filter out non-numeric characters except for decimal separator
+                        .replace(/\.(?=.*\.)/g, "") // Filter out duplicate decimal separators
+                        .replace(/(\.\d\d)\d+/g, "$1") // Remove decimal digits after the second one
+
+                      if (Number(newValue) > Number("100")) {
+                        onChange("100")
+                      } else {
+                        onChange(newValue)
+                      }
+                    }}
+                    isDisabled={isDisabled}
+                  />
+                )
+              }}
             />
             <InputRightElement children="%" />
           </InputGroup>
           {!errors.votes?.[index]?.value ? (
-            <FormHelperText>=~ {(Number(value) * Number(totalVotesAvailable)) / 100} votes</FormHelperText>
+            <FormHelperText>
+              =~{" "}
+              {new BigNumber((Number(value) * Number(totalVotesAvailable)) / 100).toFixed(2, BigNumber.ROUND_HALF_DOWN)}{" "}
+              votes
+            </FormHelperText>
           ) : (
             <FormErrorMessage>{errors.votes?.[index]?.value?.message}</FormErrorMessage>
           )}
