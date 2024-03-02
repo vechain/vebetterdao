@@ -88,8 +88,9 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
     )
 
   return (
-    <HStack w="full" justify={"space-between"} align="center">
+    <HStack w="100vw" justify={"space-between"} align="center" bgColor={"#B2F26C"} px={4} py={2}>
       <IconButton
+        variant={"ghost"}
         icon={<FaArrowLeft />}
         isDisabled={prevButtonDisabled}
         onClick={goToPreviousRound}
@@ -98,7 +99,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
       <VStack w="full">
         <HStack spacing={4}>
           <Skeleton isLoaded={!isLoading}>
-            <Heading size="md">{data?.roundId}° round</Heading>
+            <Heading size="md">#{data?.roundId} round</Heading>
           </Skeleton>
           <AllocationRoundStateTag state={data?.state} size="md" />
         </HStack>
@@ -114,6 +115,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
         </HStack>
       </VStack>
       <IconButton
+        variant={"ghost"}
         icon={<FaArrowRight />}
         aria-label="Go to next round"
         onClick={goToNextRound}
