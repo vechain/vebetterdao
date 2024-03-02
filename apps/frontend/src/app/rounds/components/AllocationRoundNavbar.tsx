@@ -37,9 +37,11 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
     router.push(`/rounds/${nextRound}`)
   }
 
+  const bgColor = data.isCurrent ? "#B2F26C" : "rgba(233, 233, 233, 1)"
+
   if (isDesktop)
     return (
-      <HStack w="100vw" align="center" bgColor={"#B2F26C"} mt={-10} py={3}>
+      <HStack w="100vw" align="center" bgColor={bgColor} mt={-10} py={3}>
         <Container
           maxW={"container.xl"}
           display={"flex"}
@@ -88,7 +90,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
     )
 
   return (
-    <HStack w="100vw" justify={"space-between"} align="center" bgColor={"#B2F26C"} px={4} py={2}>
+    <HStack w="100vw" justify={"space-between"} align="center" bgColor={bgColor} px={4} py={2}>
       <IconButton
         variant={"ghost"}
         icon={<FaArrowLeft />}
@@ -101,7 +103,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
           <Skeleton isLoaded={!isLoading}>
             <Heading size="md">#{data?.roundId} round</Heading>
           </Skeleton>
-          <AllocationRoundStateTag state={data?.state} size="md" />
+          <AllocationRoundStateTag state={data?.state} size="md" renderInTag={true} variant={"subtle"} />
         </HStack>
 
         <HStack spacing={2} align={"center"}>
