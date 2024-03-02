@@ -1,27 +1,15 @@
 import { useAllocationsRound, useGetVotesOnBlock, useHasVotedInRound, useRoundXApps, useUserVotesInRound } from "@/api"
-import {
-  Box,
-  Button,
-  Card,
-  CardBody,
-  Flex,
-  Heading,
-  Skeleton,
-  Stack,
-  Text,
-  VStack,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Box, Button, Card, CardBody, Heading, Skeleton, Stack, Text, VStack, useDisclosure } from "@chakra-ui/react"
 import { useCallback, useEffect, useMemo } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { SelectAppVotesInput } from "./components/SelectAppVotesInput"
 import { AppVotesBreakdown } from "./components/AppVotesBreakdown"
 import { MdHowToVote } from "react-icons/md"
 import { CastAllocationVotesProps, useCastAllocationVotes } from "@/hooks"
-import { WalletButton, useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/dapp-kit-react"
 import { ethers } from "ethers"
-import { backdropBlurAnimation } from "@/app/theme"
 import { TransactionModal } from "@/components/TransactionModal"
+import { WalletNotConnectedOverlay } from "@/components"
 
 type Props = {
   roundId: string
@@ -167,7 +155,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
   }, [hasVoted, isVotingConcluded])
 
   return (
-    <Card w="full" id="user-votes">
+    <Card w="full" id="user-votes" maxH={[!account ? "600px" : "auto", "auto"]} overflowY={"hidden"}>
       <CardBody>
         <Stack
           direction={["column", "column", "row"]}
@@ -248,31 +236,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
           </form>
         </Stack>
       </CardBody>
-      {!account && (
-        <Flex
-          borderRadius={"lg"}
-          backdropFilter="blur(10px)"
-          animation={backdropBlurAnimation("0px", "10px")}
-          position={"absolute"}
-          h={"100%"}
-          w={"100%"}
-          align="center"
-          justify="center">
-          <Card w={["90%", "50%", "40%"]}>
-            <CardBody>
-              <VStack gap={4}>
-                <Heading size="xl" textAlign={"center"}>
-                  No wallet connected
-                </Heading>
-                <Text textAlign={"center"} fontSize="lg" fontWeight={"thin"}>
-                  Connect your wallet to cast votes and participate in the B3TR allocation process.
-                </Text>
-                <WalletButton />
-              </VStack>
-            </CardBody>
-          </Card>
-        </Flex>
-      )}
+      {!account && <WalletNotConnectedOverlay description="Connect your wallet to check votes" />}
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
