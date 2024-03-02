@@ -18,7 +18,7 @@ export const AllocationRoundStateTag = ({ state, renderInTag, ...props }: Props)
   if (renderInTag)
     return (
       <Skeleton isLoaded={!!state}>
-        <Tag colorScheme={colorScheme} {...props}>
+        <Tag colorScheme={"gray"} {...props}>
           <HStack spacing={1} align={"center"}>
             {state === "0" && <DotSymbol color={`${colorScheme}.${colorShade}`} />}
             <Text color={`${colorScheme}.${colorShade}`} fontWeight={"500"} fontSize="medium" {...props}>
