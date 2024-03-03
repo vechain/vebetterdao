@@ -75,7 +75,8 @@ const VotesHorizontalBar = ({
 
   const votesPercentage = Number(totalVotes) === 0 ? 0 : (Number(data.votes) / Number(totalVotes)) * 100
 
-  const bgColor = `green`
+  const baseProgressColor = "rgba(208, 248, 164, 1)"
+  const trackProgressColor = "rgba(154, 222, 78, 1)"
 
   return (
     <VStack spacing={4} align={"flex-start"} w="full">
@@ -105,7 +106,7 @@ const VotesHorizontalBar = ({
             </Skeleton>
           </VStack>
           <VStack spacing={0} align="flex-end">
-            <Heading size={["sm", "md"]} fontWeight={"700"} color="green">
+            <Heading size={["sm", "md"]} fontWeight={"700"} color="green.500">
               {compactFormatter.format(Number(data.votes))}
             </Heading>
 
@@ -117,8 +118,8 @@ const VotesHorizontalBar = ({
           </VStack>
         </HStack>
       </HStack>
-      <Box w="full" h={2} bg={`${bgColor}.100`} borderRadius={"xl"}>
-        <Box w={`${votesPercentage}%`} h={2} bg={`${bgColor}.300`} borderRadius={"xl"} />
+      <Box w="full" h={2} bg={baseProgressColor} borderRadius={"xl"}>
+        <Box w={`${votesPercentage}%`} h={2} bg={trackProgressColor} borderRadius={"xl"} />
       </Box>
     </VStack>
   )
