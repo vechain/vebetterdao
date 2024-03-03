@@ -129,7 +129,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
           w="full"
           spacing={0}>
           <Heading size="xl">Voting concluded</Heading>
-          <Heading size="md" color={hasVoted ? "green" : "orange"}>
+          <Heading size="md" color={hasVoted ? "green.500" : "orange.500"}>
             {compactFormatter.format(totalVotesCasted ?? 0)} votes casted
           </Heading>
         </Stack>
@@ -141,14 +141,14 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
   const renderSubHeader = useMemo(() => {
     if (isVotingConcluded)
       return (
-        <Text fontSize="md" fontWeight="thin" mt={4}>
+        <Text fontSize="md" fontWeight="400" mt={4}>
           {hasVoted
             ? "Voting is concluded. See below the distribution of your voting power among the dApps."
             : "Voting is concluded. You can no longer cast your vote. No votes were casted."}
         </Text>
       )
     return (
-      <Text fontSize="md" fontWeight="thin" mt={4}>
+      <Text fontSize="md" fontWeight="400" mt={4}>
         {hasVoted
           ? "You have already cast your vote. See below the distribution of your voting power among the dApps."
           : "Distribute your voting power among your selected dApps to help them receive more B3TR allocation."}
@@ -195,7 +195,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
                     </Button>
                   )}
                 </Box>
-                <Text fontSize="sm" fontWeight={"thin"}>
+                <Text fontSize="sm" fontWeight={400}>
                   {hasVoted || isVotingConcluded ? "Distributed voting power" : "Voting power to distribute"}
                 </Text>
               </Stack>

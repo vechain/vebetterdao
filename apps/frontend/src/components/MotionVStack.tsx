@@ -15,8 +15,8 @@ export const MotionVStack = ({ children }: Props) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{
-        duration: 1,
-        delay: 0.1,
+        duration: 0.5,
+        delay: 0.2,
         ease: [0, 0.71, 0.2, 1.01],
       }}>
       <Stack

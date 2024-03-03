@@ -3,6 +3,7 @@ import { Control, Controller, FieldErrors, UseFormGetValues, UseFormRegister } f
 import { FormData } from "../AllocationRoundUserVotes"
 import {
   Box,
+  Card,
   FormControl,
   FormErrorMessage,
   FormHelperText,
@@ -51,75 +52,70 @@ export const SelectAppVotesInput = ({
   const value = getValues().votes[index]?.value
 
   return (
-    <Stack
-      direction={["column", "column", "row"]}
-      spacing={4}
-      w="full"
-      justify={"space-between"}
-      key={field.id}
-      borderWidth={1}
-      borderColor={"gray"}
-      borderRadius={"lg"}
-      py={2}
-      px={4}>
-      <HStack spacing={[2, 2, 3]} align="center" flex={1}>
-        <Skeleton isLoaded={!isLogoLoading}>
-          <Image src={logo?.image ?? notFoundImage} alt={appMetadata?.name} boxSize={8} borderRadius="9px" />
-        </Skeleton>
-        <Heading size={["md", "md", "sm"]}>{xApp?.name}</Heading>
-      </HStack>
-      <Box flex={[1, 1, 0.5]}>
-        <FormControl isInvalid={!!errors.votes?.[index]} isDisabled={isDisabled}>
-          <InputGroup>
-            <Controller
-              control={control}
-              name={`votes.${index}.value`}
-              rules={{
-                validate: {
-                  lessThanHundred: () => {
-                    const allValuesTotal = getValues().votes.reduce((acc, vote) => acc + Number(vote.value) || 0, 0)
-                    if (allValuesTotal > 100) return "Total votes exceed 100"
-                    return true
+    <Card variant={"baseWithBorder"} key={field.id} w="full">
+      <Stack direction={["column", "column", "row"]} spacing={4} justify={"space-between"} py={2} px={4}>
+        <HStack spacing={[2, 2, 3]} align="center" flex={1}>
+          <Skeleton isLoaded={!isLogoLoading}>
+            <Image src={logo?.image ?? notFoundImage} alt={appMetadata?.name} boxSize={12} borderRadius="9px" />
+          </Skeleton>
+          <Heading size={["md", "md", "sm"]}>{xApp?.name}</Heading>
+        </HStack>
+        <Box flex={[1, 1, 0.5]}>
+          <FormControl isInvalid={!!errors.votes?.[index]} isDisabled={isDisabled}>
+            <InputGroup>
+              <Controller
+                control={control}
+                name={`votes.${index}.value`}
+                rules={{
+                  validate: {
+                    lessThanHundred: () => {
+                      const allValuesTotal = getValues().votes.reduce((acc, vote) => acc + Number(vote.value) || 0, 0)
+                      if (allValuesTotal > 100) return "Total votes exceed 100"
+                      return true
+                    },
                   },
-                },
-              }}
-              render={({ field: { onChange, value } }) => {
-                return (
-                  <Input
-                    w="full"
-                    placeholder="0"
-                    value={value}
-                    onChange={e => {
-                      const newValue = e.target.value
-                        .replace(",", ".") // Replace comma with dot
-                        .replace(/[^\d\\.]/g, "") // Filter out non-numeric characters except for decimal separator
-                        .replace(/\.(?=.*\.)/g, "") // Filter out duplicate decimal separators
-                        .replace(/(\.\d\d)\d+/g, "$1") // Remove decimal digits after the second one
+                }}
+                render={({ field: { onChange, value } }) => {
+                  return (
+                    <Input
+                      w="full"
+                      placeholder="0"
+                      value={value}
+                      onChange={e => {
+                        const newValue = e.target.value
+                          .replace(",", ".") // Replace comma with dot
+                          .replace(/[^\d\\.]/g, "") // Filter out non-numeric characters except for decimal separator
+                          .replace(/\.(?=.*\.)/g, "") // Filter out duplicate decimal separators
+                          .replace(/(\.\d\d)\d+/g, "$1") // Remove decimal digits after the second one
 
-                      if (Number(newValue) > Number("100")) {
-                        onChange("100")
-                      } else {
-                        onChange(newValue)
-                      }
-                    }}
-                    isDisabled={isDisabled}
-                  />
-                )
-              }}
-            />
-            <InputRightElement children="%" />
-          </InputGroup>
-          {!errors.votes?.[index]?.value ? (
-            <FormHelperText>
-              =~{" "}
-              {new BigNumber((Number(value) * Number(totalVotesAvailable)) / 100).toFixed(2, BigNumber.ROUND_HALF_DOWN)}{" "}
-              votes
-            </FormHelperText>
-          ) : (
-            <FormErrorMessage>{errors.votes?.[index]?.value?.message}</FormErrorMessage>
-          )}
-        </FormControl>
-      </Box>
-    </Stack>
+                        if (Number(newValue) > Number("100")) {
+                          onChange("100")
+                        } else {
+                          onChange(newValue)
+                        }
+                      }}
+                      isDisabled={isDisabled}
+                    />
+                  )
+                }}
+              />
+              <InputRightElement children="%" />
+            </InputGroup>
+            {!errors.votes?.[index]?.value ? (
+              <FormHelperText>
+                =~{" "}
+                {new BigNumber((Number(value) * Number(totalVotesAvailable)) / 100).toFixed(
+                  2,
+                  BigNumber.ROUND_HALF_DOWN,
+                )}{" "}
+                votes
+              </FormHelperText>
+            ) : (
+              <FormErrorMessage>{errors.votes?.[index]?.value?.message}</FormErrorMessage>
+            )}
+          </FormControl>
+        </Box>
+      </Stack>
+    </Card>
   )
 }
