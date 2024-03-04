@@ -137,7 +137,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
           spacing={0}>
           <Heading size="xl">Voting concluded</Heading>
           <Heading size="md" color={hasVoted ? "green.500" : "orange.500"}>
-            {compactFormatter.format(totalVotesCast ?? 0)} votes casted
+            {compactFormatter.format(totalVotesCast ?? 0)} votes cast
           </Heading>
         </Stack>
       )
@@ -151,7 +151,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
         <Text fontSize="md" fontWeight="400" mt={4}>
           {hasVoted
             ? "Voting is concluded. See below the distribution of your voting power among the dApps."
-            : "Voting is concluded. You can no longer cast your vote. No votes were casted."}
+            : "Voting is concluded. You can no longer cast your vote. No votes were cast."}
         </Text>
       )
     return (
