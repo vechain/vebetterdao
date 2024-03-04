@@ -246,7 +246,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
         confirmationTitle={"Confirm Vote"}
         successTitle={"Vote Casted!"}
         showSocialButtons
-        socialDescription="I’ve recently cast my vote on VeBetterDAO. Join me in fostering sustainability by checking it out and contributing to the ecosystem! 🎉 #B3tr #VOT3"
+        socialDescriptionEncoded="%E2%9C%85%20Just%20cast%20my%20vote%20in%20the%20%23VeBetterDAO%20X%20allocation%20round%21%20%0A%0A%F0%9F%8C%B1%20Excited%20to%20be%20part%20of%20the%20decision-making%20process%20for%20sustainable%20projects.%0A%0AJoin%20us%20in%20shaping%20a%20greener%20future%20at%20https%3A%2F%2Fvebetterdao.org.%20%0A%0A%23VeBetterDAO%20%23Vechain"
         onTryAgain={handleSubmit(onSubmit)}
         showTryAgainButton
         showExplorerButton
