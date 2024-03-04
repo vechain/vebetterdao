@@ -60,7 +60,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     getValues,
     formState: { errors },
   } = useForm<FormData>({ defaultValues: { votes: [] } })
-  const { fields, append, remove, update, replace } = useFieldArray({
+  const { fields, update, replace } = useFieldArray({
     control,
     name: "votes", // unique name for your Field Array
   })
