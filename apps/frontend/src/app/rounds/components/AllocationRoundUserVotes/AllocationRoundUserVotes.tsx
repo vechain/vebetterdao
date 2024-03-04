@@ -40,12 +40,12 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
 
   const hasNoVotes = !votesAtSnapshot?.scaled || votesAtSnapshot.scaled === "0"
 
-  const { data: castedVotesEvent } = useUserVotesInRound(roundId, account ?? undefined)
-  console.log("castedVotesEvent", castedVotesEvent)
+  const { data: castVotesEvent } = useUserVotesInRound(roundId, account ?? undefined)
+  console.log("castVotesEvent", castVotesEvent)
 
-  const totalVotesCasted = useMemo(
-    () => castedVotesEvent?.voteWeights.reduce((acc, vote) => acc + Number(ethers.formatEther(vote)), 0),
-    [castedVotesEvent],
+  const totalVotesCast = useMemo(
+    () => castVotesEvent?.voteWeights.reduce((acc, vote) => acc + Number(ethers.formatEther(vote)), 0),
+    [castVotesEvent],
   )
 
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
@@ -75,30 +75,30 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
 
   const watchVotes = watch("votes")
 
-  const parsedCastedVotesPercetanges = useMemo(() => {
-    if (castedVotesEvent?.appsIds && votesAtSnapshot?.scaled) {
-      return castedVotesEvent.appsIds.map((id, index) => ({
+  const parsedCastVotesPercentages = useMemo(() => {
+    if (castVotesEvent?.appsIds && votesAtSnapshot?.scaled) {
+      return castVotesEvent.appsIds.map((id, index) => ({
         id,
         value: new BigNumber(
           scaledDivision(
-            Number(ethers.formatEther(castedVotesEvent.voteWeights[index] as string)),
+            Number(ethers.formatEther(castVotesEvent.voteWeights[index] as string)),
             Number(votesAtSnapshot.scaled),
           ) * 100,
         ).toFixed(6, BigNumber.ROUND_DOWN),
       }))
     }
     return []
-  }, [castedVotesEvent, votesAtSnapshot])
+  }, [castVotesEvent, votesAtSnapshot])
 
   //TODO: this is causing issues as we're removing user choices when nex xApps data is fetched
   useEffect(() => {
-    if (parsedCastedVotesPercetanges.length) {
-      replace(parsedCastedVotesPercetanges)
+    if (parsedCastVotesPercentages.length) {
+      replace(parsedCastVotesPercentages)
     } else {
       const values = xApps?.map(xApp => ({ id: xApp.id, value: "" }))
       replace(values ?? [])
     }
-  }, [xApps, replace, parsedCastedVotesPercetanges])
+  }, [xApps, replace, parsedCastVotesPercentages])
 
   const onSubmit = (data: FormData) => {
     if (!votesAtSnapshot) throw new Error("Votes at snapshot not found")
@@ -133,13 +133,13 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
           spacing={0}>
           <Heading size="xl">Voting concluded</Heading>
           <Heading size="md" color={hasVoted ? "green.500" : "orange.500"}>
-            {compactFormatter.format(totalVotesCasted ?? 0)} votes casted
+            {compactFormatter.format(totalVotesCast ?? 0)} votes casted
           </Heading>
         </Stack>
       )
 
     return <Heading size="xl">{hasVoted ? "Your voting distribution" : "Assign voting power to dApps"}</Heading>
-  }, [hasVoted, isVotingConcluded, totalVotesCasted])
+  }, [hasVoted, isVotingConcluded, totalVotesCast])
 
   const renderSubHeader = useMemo(() => {
     if (isVotingConcluded)
