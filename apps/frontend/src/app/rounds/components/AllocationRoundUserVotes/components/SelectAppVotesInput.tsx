@@ -1,5 +1,5 @@
 import { XApp, useXAppMetadata } from "@/api"
-import { Control, Controller, FieldErrors, UseFormGetValues, UseFormRegister } from "react-hook-form"
+import { Control, Controller, FieldErrors, UseFormGetValues } from "react-hook-form"
 import { FormData } from "../AllocationRoundUserVotes"
 import {
   Box,
@@ -47,7 +47,7 @@ export const SelectAppVotesInput = ({
 }: Props) => {
   console.log("errors", errors, "totalVotes", totalVotesAvailable)
 
-  const { data: appMetadata, error: appMetadatError } = useXAppMetadata(xApp?.id)
+  const { data: appMetadata } = useXAppMetadata(xApp?.id)
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
 
   const value = getValues().votes[index]?.value
@@ -102,7 +102,7 @@ export const SelectAppVotesInput = ({
               />
               <InputRightElement children="%" />
             </InputGroup>
-            {!errors.votes?.[index]?.value ? (
+            {value && totalVotesAvailable && !errors.votes?.[index]?.value ? (
               <FormHelperText>
                 =~{" "}
                 {new BigNumber(scaledDivision(Number(value) * Number(totalVotesAvailable), 100)).toFixed(
