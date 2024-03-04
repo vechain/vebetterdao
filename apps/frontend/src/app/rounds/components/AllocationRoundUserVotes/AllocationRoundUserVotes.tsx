@@ -84,7 +84,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
         )
         return {
           id,
-          value: new BigNumber(rawValue).toFixed(2, BigNumber.ROUND_DOWN),
+          value: new BigNumber(rawValue).toFixed(2, BigNumber.ROUND_HALF_DOWN),
           rawValue,
         }
       })
@@ -108,7 +108,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
       const rawValue = scaledDivision(Number(vote.value) * Number(votesAtSnapshot.scaled), 100)
       return {
         id: vote.id,
-        value: new BigNumber(rawValue).toFixed(2, BigNumber.ROUND_DOWN),
+        value: new BigNumber(rawValue).toFixed(2, BigNumber.ROUND_HALF_DOWN),
         rawValue,
       }
     })
@@ -120,7 +120,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
   const splitEvenly = () => {
     const totalVotes = xApps?.length ?? 0
     const rawValue = scaledDivision(100, totalVotes)
-    const votesPerApp = new BigNumber(rawValue).toFixed(2, BigNumber.ROUND_DOWN)
+    const votesPerApp = new BigNumber(rawValue).toFixed(2, BigNumber.ROUND_HALF_DOWN)
     xApps?.forEach((xApp, index) => {
       update(index, { id: xApp.id, value: votesPerApp, rawValue })
     })
