@@ -77,15 +77,17 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
 
   const parsedCastVotesPercentages = useMemo(() => {
     if (castVotesEvent?.appsIds && votesAtSnapshot?.scaled) {
-      return castVotesEvent.appsIds.map((id, index) => ({
-        id,
-        value: new BigNumber(
-          scaledDivision(
-            Number(ethers.formatEther(castVotesEvent.voteWeights[index] as string)),
-            Number(votesAtSnapshot.scaled),
-          ) * 100,
-        ).toFixed(6, BigNumber.ROUND_DOWN),
-      }))
+      return castVotesEvent.appsIds.map((id, index) => {
+        const rawValue = scaledDivision(
+          Number(ethers.formatEther(castVotesEvent.voteWeights[index] as string)) * 100,
+          Number(votesAtSnapshot.scaled),
+        )
+        return {
+          id,
+          value: new BigNumber(rawValue).toFixed(2, BigNumber.ROUND_DOWN),
+          rawValue,
+        }
+      })
     }
     return []
   }, [castVotesEvent, votesAtSnapshot])
@@ -95,20 +97,21 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     if (parsedCastVotesPercentages.length) {
       replace(parsedCastVotesPercentages)
     } else {
-      const values = xApps?.map(xApp => ({ id: xApp.id, value: "" }))
+      const values = xApps?.map(xApp => ({ id: xApp.id, value: "", rawValue: 0 }))
       replace(values ?? [])
     }
   }, [xApps, replace, parsedCastVotesPercentages])
 
   const onSubmit = (data: FormData) => {
     if (!votesAtSnapshot) throw new Error("Votes at snapshot not found")
-    const appVotesPercentagesToValue = data.votes.map(vote => ({
-      id: vote.id,
-      value: new BigNumber(scaledDivision(Number(vote.value) * Number(votesAtSnapshot.scaled), 100)).toFixed(
-        6,
-        BigNumber.ROUND_DOWN,
-      ),
-    }))
+    const appVotesPercentagesToValue = data.votes.map(vote => {
+      const rawValue = scaledDivision(Number(vote.value) * Number(votesAtSnapshot.scaled), 100)
+      return {
+        id: vote.id,
+        value: new BigNumber(rawValue).toFixed(2, BigNumber.ROUND_DOWN),
+        rawValue,
+      }
+    })
     console.log("data", data, "appVotesPercentagesToValue", appVotesPercentagesToValue)
     onOpen()
     castAllocationVotes.sendTransaction(appVotesPercentagesToValue)
@@ -116,9 +119,10 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
 
   const splitEvenly = () => {
     const totalVotes = xApps?.length ?? 0
-    const votesPerApp = new BigNumber(scaledDivision(100, totalVotes)).toFixed(6, BigNumber.ROUND_DOWN)
+    const rawValue = scaledDivision(100, totalVotes)
+    const votesPerApp = new BigNumber(rawValue).toFixed(2, BigNumber.ROUND_DOWN)
     xApps?.forEach((xApp, index) => {
-      update(index, { id: xApp.id, value: votesPerApp })
+      update(index, { id: xApp.id, value: votesPerApp, rawValue })
     })
   }
 
