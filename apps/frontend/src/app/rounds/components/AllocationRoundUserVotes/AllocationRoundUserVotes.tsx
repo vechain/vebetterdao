@@ -11,6 +11,7 @@ import { ethers } from "ethers"
 import { TransactionModal } from "@/components/TransactionModal"
 import BigNumber from "bignumber.js"
 import { WalletNotConnectedOverlay } from "@/components"
+import { scaledDivision } from "@/utils/MathUtils"
 
 type Props = {
   roundId: string
@@ -79,9 +80,11 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
       return castedVotesEvent.appsIds.map((id, index) => ({
         id,
         value: new BigNumber(
-          (Number(ethers.formatEther(castedVotesEvent.voteWeights[index] as string)) / Number(votesAtSnapshot.scaled)) *
-            100,
-        ).toFixed(2, BigNumber.ROUND_HALF_DOWN),
+          scaledDivision(
+            Number(ethers.formatEther(castedVotesEvent.voteWeights[index] as string)),
+            Number(votesAtSnapshot.scaled),
+          ) * 100,
+        ).toFixed(2, BigNumber.ROUND_DOWN),
       }))
     }
     return []
@@ -101,9 +104,9 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     if (!votesAtSnapshot) throw new Error("Votes at snapshot not found")
     const appVotesPercentagesToValue = data.votes.map(vote => ({
       id: vote.id,
-      value: new BigNumber((Number(vote.value) * Number(votesAtSnapshot.scaled)) / 100).toFixed(
+      value: new BigNumber(scaledDivision(Number(vote.value) * Number(votesAtSnapshot.scaled), 100)).toFixed(
         2,
-        BigNumber.ROUND_HALF_DOWN,
+        BigNumber.ROUND_DOWN,
       ),
     }))
     console.log("data", data, "appVotesPercentagesToValue", appVotesPercentagesToValue)
@@ -113,7 +116,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
 
   const splitEvenly = () => {
     const totalVotes = xApps?.length ?? 0
-    const votesPerApp = new BigNumber(100).dividedBy(totalVotes).toFixed(2, BigNumber.ROUND_HALF_DOWN)
+    const votesPerApp = new BigNumber(scaledDivision(100, totalVotes)).toFixed(2, BigNumber.ROUND_DOWN)
     xApps?.forEach((xApp, index) => {
       update(index, { id: xApp.id, value: votesPerApp })
     })
@@ -244,7 +247,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
         onClose={handleClose}
         status={castAllocationVotes.status}
         confirmationTitle={"Confirm Vote"}
-        successTitle={"Vote Casted!"}
+        successTitle={"Vote Cast!"}
         showSocialButtons
         socialDescription="I’ve recently cast my vote on VeBetterDAO. Join me in fostering sustainability by checking it out and contributing to the ecosystem! 🎉 #B3tr #VOT3"
         onTryAgain={handleSubmit(onSubmit)}

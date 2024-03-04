@@ -20,6 +20,7 @@ import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
 import { CastAllocationVotesProps } from "@/hooks"
 import BigNumber from "bignumber.js"
+import { scaledDivision } from "@/utils/MathUtils"
 
 type Props = {
   control: Control<{
@@ -104,9 +105,9 @@ export const SelectAppVotesInput = ({
             {!errors.votes?.[index]?.value ? (
               <FormHelperText>
                 =~{" "}
-                {new BigNumber((Number(value) * Number(totalVotesAvailable)) / 100).toFixed(
+                {new BigNumber(scaledDivision(Number(value) * Number(totalVotesAvailable), 100)).toFixed(
                   2,
-                  BigNumber.ROUND_HALF_DOWN,
+                  BigNumber.ROUND_DOWN,
                 )}{" "}
                 votes
               </FormHelperText>
