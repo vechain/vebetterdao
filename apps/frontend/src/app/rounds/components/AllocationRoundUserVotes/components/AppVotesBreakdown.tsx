@@ -74,7 +74,7 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
               </Text>
             </Box>
             <Text fontSize="sm" fontWeight="medium" color={isOverDistributed ? "orange" : "gray"}>
-              {new BigNumber(totalVotes).toFixed(2, BigNumber.ROUND_HALF_DOWN)}% distributed
+              {new BigNumber(totalVotes).toFixed(2, BigNumber.ROUND_DOWN)}% distributed
             </Text>
           </HStack>
           <VStack w="full" h={24} spacing={0}>

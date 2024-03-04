@@ -22,6 +22,7 @@ import { ethers } from "ethers"
 export type CastAllocationVotesProps = {
   id: string
   value: string
+  rawValue: number
 }[]
 
 type useCastAllocationVotesProps = {
@@ -56,7 +57,7 @@ export const useCastAllocationVotes = ({
   const buildClauses = useCallback(
     (data: CastAllocationVotesProps) => {
       const apps = data.map(value => value.id)
-      const votes = data.map(value => ethers.parseEther(Number(value.value).toString()))
+      const votes = data.map(value => ethers.parseEther(Number(value.rawValue).toString()))
 
       const clause: EnhancedClause = {
         to: getConfig().xAllocationVotingContractAddress,
