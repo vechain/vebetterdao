@@ -116,7 +116,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
 
   const splitEvenly = () => {
     const totalVotes = xApps?.length ?? 0
-    const votesPerApp = new BigNumber(scaledDivision(100, totalVotes)).toFixed(2, BigNumber.ROUND_DOWN)
+    const votesPerApp = new BigNumber(scaledDivision(100, totalVotes)).toFixed(6, BigNumber.ROUND_DOWN)
     xApps?.forEach((xApp, index) => {
       update(index, { id: xApp.id, value: votesPerApp })
     })
