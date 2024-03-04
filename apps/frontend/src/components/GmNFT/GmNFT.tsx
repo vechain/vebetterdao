@@ -101,7 +101,7 @@ export const GmNFT = () => {
           </VStack>
         </ModalBody>
         <ModalFooter justifyContent={"center"}>
-          <ShareButtons description="As a Voter in VeBetterDAO, I’ve just minted my GM Earth NFT badge. Check it out! #NFT #VeBetterDAO" />
+          <ShareButtons descriptionEncoded="As%20a%20Voter%20in%20VeBetterDAO%2C%20I%E2%80%99ve%20just%20minted%20my%20GM%20Earth%20NFT.%20%F0%9F%8C%8D%0A%0AGet%20yours%20here%20%F0%9F%91%89%20%20https%3A%2F%2Fgovernance.vebetterdao.org%2F%0A%0A%23GalaxyMember%20%23VeBetterDAO" />
         </ModalFooter>
       </ModalContent>
     )
