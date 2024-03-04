@@ -84,7 +84,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
             Number(ethers.formatEther(castedVotesEvent.voteWeights[index] as string)),
             Number(votesAtSnapshot.scaled),
           ) * 100,
-        ).toFixed(2, BigNumber.ROUND_DOWN),
+        ).toFixed(6, BigNumber.ROUND_DOWN),
       }))
     }
     return []
@@ -105,7 +105,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     const appVotesPercentagesToValue = data.votes.map(vote => ({
       id: vote.id,
       value: new BigNumber(scaledDivision(Number(vote.value) * Number(votesAtSnapshot.scaled), 100)).toFixed(
-        2,
+        6,
         BigNumber.ROUND_DOWN,
       ),
     }))
