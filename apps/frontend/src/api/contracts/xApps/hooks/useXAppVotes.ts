@@ -19,7 +19,7 @@ export const getXAppVotes = async (thor: Connex.Thor, xAppId: string, roundId: s
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
-  return FormattingUtils.scaleNumberDown(res.decoded[0], 18)
+  return FormattingUtils.scaleNumberDown(res.decoded[0], 18, 18)
 }
 
 export const getXAppVotesQueryKey = (xAppId?: string, roundId?: string) => [

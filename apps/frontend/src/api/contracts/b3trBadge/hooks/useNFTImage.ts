@@ -19,8 +19,6 @@ export const useNFTImage = () => {
     error: errorTokenID,
   } = useTokenIdByAccount(account)
 
-  console.log({ isLoadingTokenID })
-
   const {
     data: metadataURI,
     isLoading: isLoadingMetadataUri,

@@ -21,9 +21,13 @@ export type FormData = {
   votes: CastAllocationVotesProps
 }
 
+const DECIMAL_PLACES = 2
+
+// Maximum precision of 4 decimals. Must also round down
 const compactFormatter = new Intl.NumberFormat("en-US", {
   notation: "compact",
   compactDisplay: "short",
+  maximumFractionDigits: DECIMAL_PLACES,
 })
 
 export const AllocationRoundUserVotes = ({ roundId }: Props) => {
@@ -41,7 +45,6 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
   const hasNoVotes = !votesAtSnapshot?.scaled || votesAtSnapshot.scaled === "0"
 
   const { data: castVotesEvent } = useUserVotesInRound(roundId, account ?? undefined)
-  console.log("castVotesEvent", castVotesEvent)
 
   const totalVotesCast = useMemo(
     () => castVotesEvent?.voteWeights.reduce((acc, vote) => acc + Number(ethers.formatEther(vote)), 0),
@@ -102,7 +105,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     }
   }, [xApps, replace, parsedCastVotesPercentages])
 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = (data: FormData) => { 
     if (!votesAtSnapshot) throw new Error("Votes at snapshot not found")
     const appVotesPercentagesToValue = data.votes.map(vote => {
       const rawValue = scaledDivision(Number(vote.value) * Number(votesAtSnapshot.scaled), 100)
@@ -112,7 +115,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
         rawValue,
       }
     })
-    console.log("data", data, "appVotesPercentagesToValue", appVotesPercentagesToValue)
+
     onOpen()
     castAllocationVotes.sendTransaction(appVotesPercentagesToValue)
   }

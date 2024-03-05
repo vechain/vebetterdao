@@ -22,9 +22,13 @@ type AppVotesData = {
   app: string
 }
 
+const DECIMAL_PLACES = 2
+
+// Maximum precision of 4 decimals. Must also round down
 const compactFormatter = new Intl.NumberFormat("en-US", {
   notation: "compact",
   compactDisplay: "short",
+  maximumFractionDigits: DECIMAL_PLACES,
 })
 
 export const AllocationXAppsVotesRankingChart = ({ roundId, maxRanks }: Props) => {
@@ -45,7 +49,7 @@ export const AllocationXAppsVotesRankingChart = ({ roundId, maxRanks }: Props) =
         .slice(0, maxRanks),
     [xAppsVotes, xApps, maxRanks],
   )
-
+  
   return (
     <VStack spacing={8} align={"flex-start"} w="full">
       {sortedData.map((app, index) => (

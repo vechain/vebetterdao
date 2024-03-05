@@ -20,6 +20,7 @@ import {
   Stepper,
   Text,
   VStack,
+  useColorModeValue,
   useSteps,
 } from "@chakra-ui/react"
 import { humanNumber } from "@repo/utils/FormattingUtils"
@@ -29,6 +30,15 @@ import { FaClock } from "react-icons/fa6"
 type Props = {
   roundId: string
 }
+
+const DECIMAL_PLACES = 2
+
+// Maximum precision of 4 decimals. Must also round down
+const compactFormatter = new Intl.NumberFormat("en-US", {
+  notation: "compact",
+  compactDisplay: "short",
+  maximumFractionDigits: DECIMAL_PLACES,
+})
 
 export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
   const { data: roundInfo } = useAllocationsRound(roundId)
@@ -53,6 +63,8 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
     count: steps.length,
   })
 
+  const quorumReachedTextInfoColor = useColorModeValue("secondary.800", "secondary.700")
+
   useEffect(() => {
     if (roundInfo) {
       const stateNumber = Number(roundInfo.state)
@@ -74,7 +86,39 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
     return (Number(votes) / Number(roundQuorum)) * 100
   }, [votes, roundQuorum])
 
-  const isQuorumFailed = roundInfo?.state === "1"
+  const isQuorumFailed = useMemo(() => {
+    return roundInfo?.state === "1"
+  }, [roundInfo?.state])
+
+  const isQuorumReached = useMemo(() => {
+    return roundInfo?.state === "2" || Number(votes) >= Number(roundQuorum)
+  }, [roundInfo?.state, votes, roundQuorum])
+
+  const isRoundActive = useMemo(() => {
+    return roundInfo?.state === "0"
+  }, [roundInfo?.state])
+
+  const quorumProgressColor = useMemo(() => {
+    // Quorum Failed
+    if (isQuorumFailed) return "red"
+
+    // Quorum Met
+    if (isQuorumReached) return "secondary"
+
+    return "primary"
+  }, [isQuorumFailed, isQuorumReached])
+
+  const quorumInfoText = useMemo(() => {
+    if (isQuorumFailed) return "Quorum failed"
+    if (isQuorumReached) return "Quorum reached"
+    return "Quorum needed"
+  }, [isQuorumFailed, isQuorumReached])
+
+  const quorumInfoTextColor = useMemo(() => {
+    if (isQuorumFailed) return "red"
+    if (isQuorumReached) return quorumReachedTextInfoColor
+    return "primary"
+  }, [isQuorumFailed, isQuorumReached, quorumReachedTextInfoColor])
 
   return (
     <Card w="full">
@@ -85,11 +129,11 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
         <VStack w="full" justify={"space-between"} spacing={4} align="flex-start">
           <Box w="full">
             <Text fontSize={"sm"} fontWeight="400">
-              Real-time votes
+              {isRoundActive ? "Real-time" : "Total"} votes
             </Text>
             <Skeleton isLoaded={!votesLoading}>
               <HStack spacing={2}>
-                <Heading size="lg">{humanNumber(votes ?? "0", votes)}</Heading>
+                <Heading size="lg">{compactFormatter.format(Number(votes))}</Heading>
                 <VOT3Icon boxSize={6} />
               </HStack>
             </Skeleton>
@@ -97,25 +141,28 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
               <Progress
                 mt={3}
                 h={2.5}
-                hasStripe={true}
+                hasStripe={isRoundActive}
                 value={quorumPercentage}
-                colorScheme={isQuorumFailed ? "red" : "primary"}
+                colorScheme={quorumProgressColor}
                 size="sm"
                 borderRadius={"full"}
               />
             </Skeleton>
             <HStack justify="space-between" w="full" mt={1}>
-              <Text fontSize={"sm"} fontWeight="400">
-                Quorum needed
+              <Text fontSize={"sm"} fontWeight="400" color={quorumInfoTextColor}>
+                {quorumInfoText}
               </Text>
-              <HStack spacing={2}>
-                <Icon as={FaClock} fontSize={"sm"} fontWeight={"thin"} color={isQuorumFailed ? "red" : "inherit"} />
-                <Skeleton isLoaded={!quorumLoading}>
-                  <Text fontSize={"sm"} fontWeight={"600"} color={isQuorumFailed ? "red" : "inherit"}>
-                    {humanNumber(roundQuorum ?? "0", roundQuorum)}
-                  </Text>
-                </Skeleton>
-              </HStack>
+
+              {!isQuorumReached && (
+                <HStack spacing={2}>
+                  <Icon as={FaClock} fontSize={"sm"} fontWeight={"thin"} color={isQuorumFailed ? "red" : "inherit"} />
+                  <Skeleton isLoaded={!quorumLoading}>
+                    <Text fontSize={"sm"} fontWeight={"600"} color={isQuorumFailed ? "red" : "inherit"}>
+                      {humanNumber(roundQuorum ?? "0", roundQuorum)}
+                    </Text>
+                  </Skeleton>
+                </HStack>
+              )}
             </HStack>
           </Box>
 
