@@ -74,7 +74,7 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
             Voting concluded
           </Button>
           <Text fontSize={"md"} color="green" fontWeight={600}>
-            You casted your vote successfully!
+            Your vote has been cast successfully!
           </Text>
         </VStack>
       )
