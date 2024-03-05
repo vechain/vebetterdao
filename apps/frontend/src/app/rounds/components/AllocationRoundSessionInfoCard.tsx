@@ -31,6 +31,15 @@ type Props = {
   roundId: string
 }
 
+const DECIMAL_PLACES = 2
+
+// Maximum precision of 4 decimals. Must also round down
+const compactFormatter = new Intl.NumberFormat("en-US", {
+  notation: "compact",
+  compactDisplay: "short",
+  maximumFractionDigits: DECIMAL_PLACES,
+})
+
 export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
   const { data: roundInfo } = useAllocationsRound(roundId)
   const { data: votes, isLoading: votesLoading } = useAllocationVotes(roundId)
@@ -124,7 +133,7 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
             </Text>
             <Skeleton isLoaded={!votesLoading}>
               <HStack spacing={2}>
-                <Heading size="lg">{humanNumber(votes ?? "0", votes)}</Heading>
+                <Heading size="lg">{compactFormatter.format(Number(votes))}</Heading>
                 <VOT3Icon boxSize={6} />
               </HStack>
             </Skeleton>
