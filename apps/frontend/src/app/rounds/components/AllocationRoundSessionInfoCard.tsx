@@ -82,10 +82,10 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
   }, [roundInfo?.state])
 
   const isQuorumReached = useMemo(() => {
-    return roundInfo?.state === "2"
-  }, [roundInfo?.state])
+    return roundInfo?.state === "2" || Number(votes) >= Number(roundQuorum)
+  }, [roundInfo?.state, votes, roundQuorum])
 
-  const isQuorumNeeded = useMemo(() => {
+  const isRoundActive = useMemo(() => {
     return roundInfo?.state === "0"
   }, [roundInfo?.state])
 
@@ -97,19 +97,19 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
     if (isQuorumReached) return "secondary"
 
     return "primary"
-  }, [roundInfo?.state])
+  }, [isQuorumFailed, isQuorumReached])
 
   const quorumInfoText = useMemo(() => {
     if (isQuorumFailed) return "Quorum failed"
     if (isQuorumReached) return "Quorum reached"
     return "Quorum needed"
-  }, [roundInfo?.state])
+  }, [isQuorumFailed, isQuorumReached])
 
   const quorumInfoTextColor = useMemo(() => {
     if (isQuorumFailed) return "red"
     if (isQuorumReached) return quorumReachedTextInfoColor
     return "primary"
-  }, [roundInfo?.state])
+  }, [isQuorumFailed, isQuorumReached, quorumReachedTextInfoColor])
 
   return (
     <Card w="full">
@@ -120,7 +120,7 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
         <VStack w="full" justify={"space-between"} spacing={4} align="flex-start">
           <Box w="full">
             <Text fontSize={"sm"} fontWeight="400">
-              {isQuorumNeeded ? "Real-time" : "Total"} votes
+              {isRoundActive ? "Real-time" : "Total"} votes
             </Text>
             <Skeleton isLoaded={!votesLoading}>
               <HStack spacing={2}>
