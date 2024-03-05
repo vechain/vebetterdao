@@ -141,7 +141,7 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
               <Progress
                 mt={3}
                 h={2.5}
-                hasStripe={true}
+                hasStripe={isRoundActive}
                 value={quorumPercentage}
                 colorScheme={quorumProgressColor}
                 size="sm"
