@@ -10,7 +10,7 @@ import { getConfig } from "@repo/config"
 export type SuccessModalContentProps = {
   title?: ReactNode
   showSocialButtons?: boolean
-  socialDescription?: string
+  socialDescriptionEncoded?: string
   showExplorerButton?: boolean
   txId?: string
 }
@@ -27,7 +27,7 @@ export type SuccessModalContentProps = {
 export const SuccessModalContent = ({
   title = "Transaction completed!",
   showSocialButtons = false,
-  socialDescription = "I've just completed a transaction on B3tr. Check it out!",
+  socialDescriptionEncoded = "%F0%9F%8C%B1%20Excited%20to%20contribute%20to%20a%20%23Better%20future%20with%20my%20latest%20activity%20on%20%23VeBetterDAO%21%0A%0AVisit%20https%3A%2F%2Fvebetterdao.org%20and%20start%20making%20a%20difference%20today%21%20%F0%9F%92%AB%0A%0A%23VeBetterDAO%20%23Vechain",
   showExplorerButton = false,
   txId,
 }: SuccessModalContentProps) => {
@@ -71,7 +71,7 @@ export const SuccessModalContent = ({
         {showSocialButtons && (
           <VStack>
             <Text fontSize="sm">Share your success on social media</Text>
-            <ShareButtons description={socialDescription} />
+            <ShareButtons descriptionEncoded={socialDescriptionEncoded} />
           </VStack>
         )}
       </VStack>
