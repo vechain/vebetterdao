@@ -34,7 +34,6 @@ export const useDistributeEmission = ({
 }: useDistributeEmissionsProps): UseSendTransactionReturnValue => {
   const { account } = useWallet()
   const { data: currendRoundId } = useCurrentAllocationsRoundId()
-  const toast = useToast()
   const queryClient = useQueryClient()
 
   const buildClauses = useCallback(() => {
@@ -90,16 +89,8 @@ export const useDistributeEmission = ({
       })
     }
 
-    toast({
-      title: "Round started successfully",
-      description: `Emissions has been distributed and round started successfully.`,
-      status: "success",
-      position: "bottom-left",
-      duration: 5000,
-      isClosable: true,
-    })
     onSuccess?.()
-  }, [invalidateCache, queryClient, toast, onSuccess, currendRoundId])
+  }, [invalidateCache, queryClient, onSuccess, currendRoundId])
 
   const result = useSendTransaction({
     signerAccount: account,

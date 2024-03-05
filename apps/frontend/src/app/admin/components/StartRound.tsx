@@ -1,7 +1,8 @@
 import { useAllocationsRound, useCurrentAllocationsRoundId } from "@/api"
+import { TransactionModal } from "@/components/TransactionModal"
 import { useDistributeEmission } from "@/hooks"
-import { VStack, Button, Text } from "@chakra-ui/react"
-import { useMemo } from "react"
+import { VStack, Button, Text, useDisclosure } from "@chakra-ui/react"
+import { useCallback, useMemo } from "react"
 
 export const StartRound = () => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
@@ -9,9 +10,27 @@ export const StartRound = () => {
   const isCurrentRoundActive = useMemo(() => {
     return currentRound?.state === "0"
   }, [currentRound])
-
-  const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useDistributeEmission({})
+  const { isOpen, onClose, onOpen } = useDisclosure()
+  const {
+    sendTransaction,
+    isTxReceiptLoading,
+    sendTransactionPending,
+    resetStatus,
+    status,
+    txReceipt,
+    sendTransactionTx,
+  } = useDistributeEmission({})
   const distributionLoading = isTxReceiptLoading || sendTransactionPending
+
+  const handleClose = useCallback(() => {
+    resetStatus()
+    onClose()
+  }, [resetStatus, onClose])
+
+  const handleSubmit = useCallback(() => {
+    onOpen()
+    sendTransaction(undefined)
+  }, [sendTransaction])
 
   if (parseInt(currentRoundId ?? "0") < 1) return null
 
@@ -29,12 +48,22 @@ export const StartRound = () => {
           <Button
             colorScheme="blue"
             isDisabled={isCurrentRoundActive}
-            onClick={() => sendTransaction(undefined)}
+            onClick={handleSubmit}
             isLoading={distributionLoading}>
             Start new round
           </Button>
         </VStack>
       </VStack>
+      <TransactionModal
+        isOpen={isOpen}
+        onClose={handleClose}
+        status={status}
+        successTitle={"Round started!"}
+        onTryAgain={handleSubmit}
+        showTryAgainButton
+        showExplorerButton
+        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+      />
     </VStack>
   )
 }
