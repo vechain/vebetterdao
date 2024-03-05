@@ -49,8 +49,6 @@ export const AllocationXAppsVotesRankingChart = ({ roundId, maxRanks }: Props) =
         .slice(0, maxRanks),
     [xAppsVotes, xApps, maxRanks],
   )
-
-  console.log("VOTES", sortedData.map(app => app.votes))
   
   return (
     <VStack spacing={8} align={"flex-start"} w="full">

@@ -163,7 +163,6 @@ export const CreateProposalModalForm: React.FC<CreateProposalModalFormProps> = (
   }, [selectedContractFunctionInputs, remove, append])
 
   const handleOnSubmit = (data: FormData) => {
-    console.log({ data })
     onSubmit(data.description, [
       {
         contractAddress: data.contractAddress,

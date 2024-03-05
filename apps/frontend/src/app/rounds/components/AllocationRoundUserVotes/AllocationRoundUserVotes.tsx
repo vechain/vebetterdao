@@ -45,7 +45,6 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
   const hasNoVotes = !votesAtSnapshot?.scaled || votesAtSnapshot.scaled === "0"
 
   const { data: castVotesEvent } = useUserVotesInRound(roundId, account ?? undefined)
-  console.log("castVotesEvent", castVotesEvent)
 
   const totalVotesCast = useMemo(
     () => castVotesEvent?.voteWeights.reduce((acc, vote) => acc + Number(ethers.formatEther(vote)), 0),
@@ -116,7 +115,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
         rawValue,
       }
     })
-    console.log("data", data, "appVotesPercentagesToValue", appVotesPercentagesToValue)
+
     onOpen()
     castAllocationVotes.sendTransaction(appVotesPercentagesToValue)
   }

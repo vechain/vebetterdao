@@ -86,8 +86,6 @@ const CastVoteModalContent: React.FC<CastVoteModalFormContentProps> = ({ onVote,
     onVote(selectedVote, reason)
   }
 
-  console.log("votes", votes, error)
-
   const suggestedOptions = [
     { label: "Yes", value: VoteType.VOTE_FOR, icon: FaThumbsUp },
     { label: "No", value: VoteType.VOTE_AGAINST, icon: FaThumbsDown },
