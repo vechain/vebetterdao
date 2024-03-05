@@ -20,7 +20,7 @@ export const getAllocationVotes = async (thor: Connex.Thor, roundId?: string): P
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
-  return FormattingUtils.scaleNumberDown(res.decoded[0], 18)
+  return FormattingUtils.scaleNumberDown(res.decoded[0], 18, 18)
 }
 
 export const getAllocationVotesQueryKey = (roundId?: string) => ["allocationsRound", "votes", roundId]
