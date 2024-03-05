@@ -74,7 +74,7 @@ type CastVoteModalFormContentProps = {
 
 const CastVoteModalContent: React.FC<CastVoteModalFormContentProps> = ({ onVote, proposal }) => {
   const { account } = useWallet()
-  const { data: votes, error } = useGetVotesOnBlock(Number(proposal.voteStart), account ?? undefined)
+  const { data: votes } = useGetVotesOnBlock(Number(proposal.voteStart), account ?? undefined)
   const [selectedVote, setSelectedVote] = useState<VoteType>(VoteType.VOTE_FOR)
   const [reason, setReason] = useState<string>("")
 
