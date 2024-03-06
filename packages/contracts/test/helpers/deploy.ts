@@ -154,11 +154,11 @@ export const getOrDeployContractInstances = async ({
   const xAllocationVoting = await XAllocationVotingContract.deploy(
     await vot3.getAddress(),
     config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE, // quorum percentage
-    config.EMISSIONS_CYCLE_DURATION - 1, // X Alloc voting period
     await timeLock.getAddress(),
     await voterRewards.getAddress(),
     [await timeLock.getAddress(), owner.address],
     "ipfs://",
+    await emissions.getAddress(),
   )
   await xAllocationVoting.waitForDeployment()
 

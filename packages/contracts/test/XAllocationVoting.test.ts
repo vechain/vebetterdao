@@ -12,6 +12,7 @@ import {
   startNewAllocationRound,
   waitForRoundToEnd,
   bootstrapEmissions,
+  ZERO_ADDRESS,
 } from "./helpers"
 import { describe, it } from "mocha"
 
@@ -27,6 +28,14 @@ describe("X-Allocation Voting", function () {
       expect(await xAllocationVoting.hasRole(ADMIN_ROLE, owner.address)).to.eql(true)
 
       expect(await xAllocationVoting.b3trGovernor()).to.eql(await timeLock.getAddress())
+    })
+
+    it("Emissions contract should be set correctly", async function () {
+      const { xAllocationVoting, emissions } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await xAllocationVoting.emissions()).to.eql(await emissions.getAddress())
     })
   })
 
@@ -76,6 +85,18 @@ describe("X-Allocation Voting", function () {
       ).to.be.reverted
 
       expect(await ethers.provider.getBalance(await xAllocationVoting.getAddress())).to.eql(0n)
+    })
+
+    it("Can set emissions contract address", async function () {
+      const { xAllocationVoting, owner, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await xAllocationVoting.connect(owner).setEmissionsAddress(otherAccounts[7].address)
+
+      expect(await xAllocationVoting.emissions()).to.eql(otherAccounts[7].address)
+
+      await expect(xAllocationVoting.connect(owner).setEmissionsAddress(ZERO_ADDRESS)).to.be.reverted
     })
   })
 

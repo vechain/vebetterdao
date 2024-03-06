@@ -5,46 +5,50 @@ import "./x-allocation-voting-governance/XAllocationVotingGovernor.sol";
 import "./x-allocation-voting-governance/modules/GovernorXAllocationVotesCounting.sol";
 import "./x-allocation-voting-governance/modules/GovernorVotes.sol";
 import "./x-allocation-voting-governance/modules/GovernorVotesQuorumFraction.sol";
-import "./x-allocation-voting-governance/modules/GovernorSettings.sol";
 import "./x-allocation-voting-governance/modules/XApps.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "./interfaces/IEmissions.sol";
 
 contract XAllocationVoting is
   XAllocationVotingGovernor,
-  GovernorSettings,
   GovernorXAllocationVotesCounting,
   GovernorVotes,
   GovernorVotesQuorumFraction,
   XApps,
   AccessControl
 {
+  IEmissions public emissions;
+
   /**
    * @notice Construct a XAllocationVotingGovernor contract
    * @param _vot3Token The address of the Vot3 token used for voting
    * @param _quorumPercentage quorum as a percentage of the total supply at the block a proposal’s voting power is retrieved
-   * @param _initialVotingPeriod How long does a round remain open to votese
    * @param b3trGovernor_ The address of the B3trGovernor DAO
    * @param _voterRewards The address of the VoterRewards contract
    * @param _admins The addresses of the admins (DAO + another address) that can update the XAllocationPool address, only DAO will remain in the final version
    * @param _xAppsBaseURI The base URI for the xApps
+   * @param _emissions The address of the emissions contract
    */
   constructor(
     IVotes _vot3Token,
     uint256 _quorumPercentage,
-    uint32 _initialVotingPeriod,
     address b3trGovernor_,
     address _voterRewards,
     address[] memory _admins,
-    string memory _xAppsBaseURI
+    string memory _xAppsBaseURI,
+    address _emissions
   )
     XAllocationVotingGovernor("XAllocationVoting", b3trGovernor_)
-    GovernorSettings(_initialVotingPeriod)
     GovernorVotes(_vot3Token)
     GovernorVotesQuorumFraction(_quorumPercentage)
     GovernorXAllocationVotesCounting(_voterRewards)
     XApps(_xAppsBaseURI)
   {
+    require(_emissions != address(0), "XAllocationVoting: emission contract cannot be the zero address");
+    emissions = IEmissions(_emissions);
+
     for (uint256 i = 0; i < _admins.length; i++) {
+      require(_admins[i] != address(0), "XAllocationVoting: admin cannot be the zero address");
       _grantRole(DEFAULT_ADMIN_ROLE, _admins[i]);
     }
   }
@@ -112,7 +116,20 @@ contract XAllocationVoting is
     super._updateAppReceiverAddress(appId, newReceiverAddress);
   }
 
+  function setEmissionsAddress(address emissions_) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(emissions_ != address(0), "XAllocationVoting: emission contract cannot be the zero address");
+    emissions = IEmissions(emissions_);
+  }
+
   // ---------- Getters ---------- //
+
+  /**
+   * Cycle emissions are tied to the rounds (each round is made to allocate the funds of an emission cycle),
+   * so we are setting the voting period to always equal the duration of the cycle (minus a block)
+   */
+  function votingPeriod() public view virtual override returns (uint256) {
+    return emissions.cycleDuration() - 1;
+  }
 
   function getCurrentAllocationRoundSnapshot() public view returns (uint256) {
     uint256 currentId = currentRoundId();
@@ -141,10 +158,6 @@ contract XAllocationVoting is
   }
 
   // ---------- Required overrides ---------- //
-
-  function votingPeriod() public view override(XAllocationVotingGovernor, GovernorSettings) returns (uint256) {
-    return super.votingPeriod();
-  }
 
   function quorum(
     uint256 blockNumber

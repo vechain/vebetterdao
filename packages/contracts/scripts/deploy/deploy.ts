@@ -95,8 +95,8 @@ export async function deployAll(config: ContractsConfig) {
     TEMP_ADMIN,
     await voterRewards.getAddress(),
     config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE,
-    config.EMISSIONS_CYCLE_DURATION - 1,
     config.XAPP_BASE_URI,
+    await emissions.getAddress(),
   )
 
   console.log("Contracts deployed")
@@ -382,19 +382,19 @@ async function deployXAllocationVoting(
   adminAddress: string,
   voterRewardsAddress: string,
   quorumPercentage: number = 50,
-  xAllocationVotingPeriod: number = 10,
   baseURI: string = "ipfs://",
+  emissionsAddress: string,
 ) {
   console.log(`Deploying XAllocationVoting contract`)
   const XAllocationVotingContract = await ethers.getContractFactory("XAllocationVoting")
   const contract = await XAllocationVotingContract.deploy(
     vot3Address,
     quorumPercentage,
-    xAllocationVotingPeriod,
     timeLockAddress,
     voterRewardsAddress,
     [timeLockAddress, adminAddress],
     baseURI,
+    emissionsAddress,
   )
 
   await contract.waitForDeployment()
