@@ -199,7 +199,7 @@ describe("X-Allocation Voting", function () {
     })
 
     it("Only user with role should be able to start a new allocation round", async function () {
-      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: false })
+      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const roundStarterRole = await xAllocationVoting.ROUND_STARTER_ROLE()
       expect(await xAllocationVoting.hasRole(roundStarterRole, otherAccounts[7].address)).to.eql(false)
       await expect(xAllocationVoting.connect(otherAccounts[7]).startNewRound()).to.be.reverted
