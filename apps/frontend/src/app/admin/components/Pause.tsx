@@ -1,11 +1,16 @@
 import { useB3trPaused, useVot3Paused } from "@/api"
+import { useAccountPermissions } from "@/api/contracts/account"
 import { useB3trBadgePaused } from "@/api/contracts/b3trBadge"
 import { usePauseContract } from "@/hooks"
 import { Button, HStack, VStack, Text, Show } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
+import { useWallet } from "@vechain/dapp-kit-react"
 import React, { useCallback } from "react"
 
 export const Pause: React.FC = () => {
+  const { account } = useWallet()
+  const { isAdminOfB3tr, isAdminOfB3trBadge, isAdminOfVot3 } = useAccountPermissions(account ?? "")
+
   const { data: isB3trBadgePaused, isLoading: isB3trBadgePausedLoading } = useB3trBadgePaused()
 
   const { data: isVot3Paused, isLoading: isVot3PausedLoading } = useVot3Paused()
@@ -110,26 +115,38 @@ export const Pause: React.FC = () => {
 
   return (
     <VStack spacing={6} align={"flex-start"}>
-      <Show above="sm">
-        <HStack>{pauseB3TR}</HStack>
-      </Show>
-      <Show below="sm">
-        <VStack align={"flex-start"}>{pauseB3TR}</VStack>
-      </Show>
+      {isAdminOfVot3 && (
+        <>
+          <Show above="sm">
+            <HStack>{pauseB3TR}</HStack>
+          </Show>
+          <Show below="sm">
+            <VStack align={"flex-start"}>{pauseB3TR}</VStack>
+          </Show>
+        </>
+      )}
 
-      <Show above="sm">
-        <HStack>{pauseVOT3}</HStack>
-      </Show>
-      <Show below="sm">
-        <VStack align={"flex-start"}>{pauseVOT3}</VStack>
-      </Show>
+      {isAdminOfB3tr && (
+        <>
+          <Show above="sm">
+            <HStack>{pauseVOT3}</HStack>
+          </Show>
+          <Show below="sm">
+            <VStack align={"flex-start"}>{pauseVOT3}</VStack>
+          </Show>
+        </>
+      )}
 
-      <Show above="sm">
-        <HStack>{pauseB3trBadge}</HStack>
-      </Show>
-      <Show below="sm">
-        <VStack align={"flex-start"}>{pauseB3trBadge}</VStack>
-      </Show>
+      {isAdminOfB3trBadge && (
+        <>
+          <Show above="sm">
+            <HStack>{pauseB3trBadge}</HStack>
+          </Show>
+          <Show below="sm">
+            <VStack align={"flex-start"}>{pauseB3trBadge}</VStack>
+          </Show>
+        </>
+      )}
     </VStack>
   )
 }
