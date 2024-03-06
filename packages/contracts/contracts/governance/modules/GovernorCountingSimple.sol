@@ -65,7 +65,9 @@ abstract contract GovernorCountingSimple is Governor {
   function _quorumReached(uint256 proposalId) internal view virtual override returns (bool) {
     ProposalVote storage proposalVote = _proposalVotes[proposalId];
 
-    return quorum(proposalSnapshot(proposalId)) <= proposalVote.forVotes + proposalVote.abstainVotes;
+    return
+      quorum(proposalSnapshot(proposalId)) <=
+      proposalVote.forVotes + proposalVote.abstainVotes + proposalVote.againstVotes;
   }
 
   /**
