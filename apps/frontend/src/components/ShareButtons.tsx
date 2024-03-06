@@ -1,13 +1,14 @@
-import { HStack } from "@chakra-ui/react"
+import { Box, HStack, Link } from "@chakra-ui/react"
 import { motion } from "framer-motion"
-import {
-  FacebookIcon,
-  FacebookShareButton,
-  TwitterIcon,
-  TwitterShareButton,
-  WhatsappIcon,
-  WhatsappShareButton,
-} from "react-share"
+import { FaTelegramPlane } from "react-icons/fa"
+import { FaWhatsapp } from "react-icons/fa6"
+import { RiTwitterXFill } from "react-icons/ri"
+
+const TWITTER_INJECT = "https://twitter.com/intent/tweet?text="
+
+const WHATSAPP_INJECT = "https://wa.me/?text="
+
+const TELEGRAM_INJECT = "https://telegram.me/share/url?url=https://governance.vebetterdao.org&text="
 
 // bouncing circle button animation provider
 const BouncingAnimation = ({ children }: { children: React.ReactNode }) => (
@@ -28,30 +29,36 @@ const BouncingAnimation = ({ children }: { children: React.ReactNode }) => (
 )
 
 export const ShareButtons = ({
-  description,
+  descriptionEncoded,
   url = window.location.href,
   facebookHashtag,
 }: {
-  description: string
+  descriptionEncoded: string
   url?: string
   facebookHashtag?: string
 }) => {
   return (
     <HStack gap={2}>
       <BouncingAnimation>
-        <TwitterShareButton title={description} url={url}>
-          <TwitterIcon size={32} round />
-        </TwitterShareButton>
+        <Link href={`${TWITTER_INJECT}${descriptionEncoded}`} isExternal>
+          <Box bg={"lightgrey"} p={2} borderRadius={"full"}>
+            <RiTwitterXFill size={22} />
+          </Box>
+        </Link>
       </BouncingAnimation>
       <BouncingAnimation>
-        <FacebookShareButton hashtag={facebookHashtag ?? `#${description.split(" ").join("_")}`} url={url}>
-          <FacebookIcon size={32} round />
-        </FacebookShareButton>
+        <Link href={`${TELEGRAM_INJECT}${descriptionEncoded}`} isExternal>
+          <Box bg={"#30abec"} p={2} borderRadius={"full"}>
+            <FaTelegramPlane color="white" size={22} />
+          </Box>
+        </Link>
       </BouncingAnimation>
       <BouncingAnimation>
-        <WhatsappShareButton title={description} url={url}>
-          <WhatsappIcon size={32} round />
-        </WhatsappShareButton>
+        <Link href={`${WHATSAPP_INJECT}${descriptionEncoded}`} isExternal>
+          <Box bg={"#01cb37"} p={2} borderRadius={"full"}>
+            <FaWhatsapp size={22} color="white" />
+          </Box>
+        </Link>
       </BouncingAnimation>
     </HStack>
   )

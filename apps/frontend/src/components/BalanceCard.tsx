@@ -143,10 +143,15 @@ export const BalanceCard: React.FC<Props> = () => {
     <Card w="full">
       <CardBody>
         <VStack spacing={4} align="flex-start" w={"full"}>
-          <HStack justify={"space-between"} w="full">
-            <Heading size="md">Balance</Heading>
+          <HStack justify={"space-between"} w="full" alignItems={"flex-start"}>
+            <VStack justify={"start"} alignItems={"flex-start"} spacing={0}>
+              <Heading size="md">Balance</Heading>
+              <Text fontSize={"xs"}>Tokens will be migrated 1:1 from testnet to mainnet</Text>
+            </VStack>
+
             <Flex>{isLoading ? <Spinner size="sm" /> : <SwapButton />}</Flex>
           </HStack>
+
           <Show below="sm">
             {" "}
             <VStack w={"full"} spacing={6} color={"black"}>

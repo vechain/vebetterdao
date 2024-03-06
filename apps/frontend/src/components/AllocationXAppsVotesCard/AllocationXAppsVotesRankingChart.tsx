@@ -22,9 +22,13 @@ type AppVotesData = {
   app: string
 }
 
+const DECIMAL_PLACES = 2
+
+// Maximum precision of 4 decimals. Must also round down
 const compactFormatter = new Intl.NumberFormat("en-US", {
   notation: "compact",
   compactDisplay: "short",
+  maximumFractionDigits: DECIMAL_PLACES,
 })
 
 export const AllocationXAppsVotesRankingChart = ({ roundId, maxRanks }: Props) => {
@@ -45,7 +49,7 @@ export const AllocationXAppsVotesRankingChart = ({ roundId, maxRanks }: Props) =
         .slice(0, maxRanks),
     [xAppsVotes, xApps, maxRanks],
   )
-
+  
   return (
     <VStack spacing={8} align={"flex-start"} w="full">
       {sortedData.map((app, index) => (
@@ -75,7 +79,8 @@ const VotesHorizontalBar = ({
 
   const votesPercentage = Number(totalVotes) === 0 ? 0 : (Number(data.votes) / Number(totalVotes)) * 100
 
-  const bgColor = `green`
+  const baseProgressColor = "rgba(208, 248, 164, 1)"
+  const trackProgressColor = "rgba(154, 222, 78, 1)"
 
   return (
     <VStack spacing={4} align={"flex-start"} w="full">
@@ -105,7 +110,7 @@ const VotesHorizontalBar = ({
             </Skeleton>
           </VStack>
           <VStack spacing={0} align="flex-end">
-            <Heading size={["sm", "md"]} fontWeight={"700"} color="green">
+            <Heading size={["sm", "md"]} fontWeight={"700"} color="green.500">
               {compactFormatter.format(Number(data.votes))}
             </Heading>
 
@@ -117,8 +122,8 @@ const VotesHorizontalBar = ({
           </VStack>
         </HStack>
       </HStack>
-      <Box w="full" h={2} bg={`${bgColor}.100`} borderRadius={"xl"}>
-        <Box w={`${votesPercentage}%`} h={2} bg={`${bgColor}.300`} borderRadius={"xl"} />
+      <Box w="full" h={2} bg={baseProgressColor} borderRadius={"xl"}>
+        <Box w={`${votesPercentage}%`} h={2} bg={trackProgressColor} borderRadius={"xl"} />
       </Box>
     </VStack>
   )

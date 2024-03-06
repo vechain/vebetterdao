@@ -11,6 +11,7 @@ import { ethers } from "ethers"
 import { TransactionModal } from "@/components/TransactionModal"
 import BigNumber from "bignumber.js"
 import { WalletNotConnectedOverlay } from "@/components"
+import { scaledDivision } from "@/utils/MathUtils"
 
 type Props = {
   roundId: string
@@ -20,9 +21,13 @@ export type FormData = {
   votes: CastAllocationVotesProps
 }
 
+const DECIMAL_PLACES = 2
+
+// Maximum precision of 4 decimals. Must also round down
 const compactFormatter = new Intl.NumberFormat("en-US", {
   notation: "compact",
   compactDisplay: "short",
+  maximumFractionDigits: DECIMAL_PLACES,
 })
 
 export const AllocationRoundUserVotes = ({ roundId }: Props) => {
@@ -39,12 +44,11 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
 
   const hasNoVotes = !votesAtSnapshot?.scaled || votesAtSnapshot.scaled === "0"
 
-  const { data: castedVotesEvent } = useUserVotesInRound(roundId, account ?? undefined)
-  console.log("castedVotesEvent", castedVotesEvent)
+  const { data: castVotesEvent } = useUserVotesInRound(roundId, account ?? undefined)
 
-  const totalVotesCasted = useMemo(
-    () => castedVotesEvent?.voteWeights.reduce((acc, vote) => acc + Number(ethers.formatEther(vote)), 0),
-    [castedVotesEvent],
+  const totalVotesCast = useMemo(
+    () => castVotesEvent?.voteWeights.reduce((acc, vote) => acc + Number(ethers.formatEther(vote)), 0),
+    [castVotesEvent],
   )
 
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
@@ -60,7 +64,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     getValues,
     formState: { errors },
   } = useForm<FormData>({ defaultValues: { votes: [] } })
-  const { fields, append, remove, update, replace } = useFieldArray({
+  const { fields, update, replace } = useFieldArray({
     control,
     name: "votes", // unique name for your Field Array
   })
@@ -74,48 +78,54 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
 
   const watchVotes = watch("votes")
 
-  const parsedCastedVotesPercetanges = useMemo(() => {
-    if (castedVotesEvent?.appsIds && votesAtSnapshot?.scaled) {
-      return castedVotesEvent.appsIds.map((id, index) => ({
-        id,
-        value: new BigNumber(
-          (Number(ethers.formatEther(castedVotesEvent.voteWeights[index] as string)) / Number(votesAtSnapshot.scaled)) *
-            100,
-        ).toFixed(2, BigNumber.ROUND_HALF_DOWN),
-      }))
+  const parsedCastVotesPercentages = useMemo(() => {
+    if (castVotesEvent?.appsIds && votesAtSnapshot?.scaled) {
+      return castVotesEvent.appsIds.map((id, index) => {
+        const rawValue = scaledDivision(
+          Number(ethers.formatEther(castVotesEvent.voteWeights[index] as string)) * 100,
+          Number(votesAtSnapshot.scaled),
+        )
+        return {
+          id,
+          value: new BigNumber(rawValue).toFixed(2, BigNumber.ROUND_HALF_DOWN),
+          rawValue,
+        }
+      })
     }
     return []
-  }, [castedVotesEvent, votesAtSnapshot])
+  }, [castVotesEvent, votesAtSnapshot])
 
   //TODO: this is causing issues as we're removing user choices when nex xApps data is fetched
   useEffect(() => {
-    if (parsedCastedVotesPercetanges.length) {
-      replace(parsedCastedVotesPercetanges)
+    if (parsedCastVotesPercentages.length) {
+      replace(parsedCastVotesPercentages)
     } else {
-      const values = xApps?.map(xApp => ({ id: xApp.id, value: "" }))
+      const values = xApps?.map(xApp => ({ id: xApp.id, value: "", rawValue: 0 }))
       replace(values ?? [])
     }
-  }, [xApps, replace, parsedCastedVotesPercetanges])
+  }, [xApps, replace, parsedCastVotesPercentages])
 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = (data: FormData) => { 
     if (!votesAtSnapshot) throw new Error("Votes at snapshot not found")
-    const appVotesPercentagesToValue = data.votes.map(vote => ({
-      id: vote.id,
-      value: new BigNumber((Number(vote.value) * Number(votesAtSnapshot.scaled)) / 100).toFixed(
-        2,
-        BigNumber.ROUND_HALF_DOWN,
-      ),
-    }))
-    console.log("data", data, "appVotesPercentagesToValue", appVotesPercentagesToValue)
+    const appVotesPercentagesToValue = data.votes.map(vote => {
+      const rawValue = scaledDivision(Number(vote.value) * Number(votesAtSnapshot.scaled), 100)
+      return {
+        id: vote.id,
+        value: new BigNumber(rawValue).toFixed(2, BigNumber.ROUND_HALF_DOWN),
+        rawValue,
+      }
+    })
+
     onOpen()
     castAllocationVotes.sendTransaction(appVotesPercentagesToValue)
   }
 
   const splitEvenly = () => {
     const totalVotes = xApps?.length ?? 0
-    const votesPerApp = new BigNumber(100).dividedBy(totalVotes).toFixed(2, BigNumber.ROUND_HALF_DOWN)
+    const rawValue = scaledDivision(100, totalVotes)
+    const votesPerApp = new BigNumber(rawValue).toFixed(2, BigNumber.ROUND_HALF_DOWN)
     xApps?.forEach((xApp, index) => {
-      update(index, { id: xApp.id, value: votesPerApp })
+      update(index, { id: xApp.id, value: votesPerApp, rawValue })
     })
   }
 
@@ -129,26 +139,26 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
           w="full"
           spacing={0}>
           <Heading size="xl">Voting concluded</Heading>
-          <Heading size="md" color={hasVoted ? "green" : "orange"}>
-            {compactFormatter.format(totalVotesCasted ?? 0)} votes casted
+          <Heading size="md" color={hasVoted ? "green.500" : "orange.500"}>
+            {compactFormatter.format(totalVotesCast ?? 0)} votes cast
           </Heading>
         </Stack>
       )
 
     return <Heading size="xl">{hasVoted ? "Your voting distribution" : "Assign voting power to dApps"}</Heading>
-  }, [hasVoted, isVotingConcluded, totalVotesCasted])
+  }, [hasVoted, isVotingConcluded, totalVotesCast])
 
   const renderSubHeader = useMemo(() => {
     if (isVotingConcluded)
       return (
-        <Text fontSize="md" fontWeight="thin" mt={4}>
+        <Text fontSize="md" fontWeight="400" mt={4}>
           {hasVoted
             ? "Voting is concluded. See below the distribution of your voting power among the dApps."
-            : "Voting is concluded. You can no longer cast your vote. No votes were casted."}
+            : "Voting is concluded. You can no longer cast your vote. No votes were cast."}
         </Text>
       )
     return (
-      <Text fontSize="md" fontWeight="thin" mt={4}>
+      <Text fontSize="md" fontWeight="400" mt={4}>
         {hasVoted
           ? "You have already cast your vote. See below the distribution of your voting power among the dApps."
           : "Distribute your voting power among your selected dApps to help them receive more B3TR allocation."}
@@ -195,7 +205,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
                     </Button>
                   )}
                 </Box>
-                <Text fontSize="sm" fontWeight={"thin"}>
+                <Text fontSize="sm" fontWeight={400}>
                   {hasVoted || isVotingConcluded ? "Distributed voting power" : "Voting power to distribute"}
                 </Text>
               </Stack>
@@ -244,9 +254,9 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
         onClose={handleClose}
         status={castAllocationVotes.status}
         confirmationTitle={"Confirm Vote"}
-        successTitle={"Vote Casted!"}
+        successTitle={"Vote Cast!"}
         showSocialButtons
-        socialDescription="I’ve recently cast my vote on VeBetterDAO. Join me in fostering sustainability by checking it out and contributing to the ecosystem! 🎉 #B3tr #VOT3"
+        socialDescriptionEncoded="%E2%9C%85%20Just%20cast%20my%20vote%20in%20the%20%23VeBetterDAO%20X%20allocation%20round%21%20%0A%0A%F0%9F%8C%B1%20Excited%20to%20be%20part%20of%20the%20decision-making%20process%20for%20sustainable%20projects.%0A%0AJoin%20us%20in%20shaping%20a%20greener%20future%20at%20https%3A%2F%2Fvebetterdao.org.%20%0A%0A%23VeBetterDAO%20%23Vechain"
         onTryAgain={handleSubmit(onSubmit)}
         showTryAgainButton
         showExplorerButton
