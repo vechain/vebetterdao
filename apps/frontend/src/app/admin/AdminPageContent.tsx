@@ -42,21 +42,13 @@ export const AdminPageContent = () => {
   }, [])
 
   const { account } = useWallet()
-  const { isAdmin } = useAccountPermissions(account ?? "")
-
-  if (!isAdmin)
-    return (
-      <VStack w={"full"} spacing={12} h="80vh" justify="center">
-        <Text fontSize="lg" textAlign="center">
-          You do not have permission to access this page.
-        </Text>
-      </VStack>
-    )
+  const { isAdminOfB3tr, isAdminOfEmissions, isAdminOfXAllocationVoting, isAdminOfVot3, isAdminOfB3trBadge, isAdmin } =
+    useAccountPermissions(account ?? "")
 
   return (
     <Suspense fallback={<Spinner alignSelf={"center"} />}>
       <Stack spacing={12} w={"full"}>
-        <AdminPermissions />
+        {isAdmin && <AdminPermissions />}
 
         <HStack w={"full"} spacing={12} alignItems={"start"} height={"max-content"}>
           <Card w={"full"}>
@@ -65,7 +57,7 @@ export const AdminPageContent = () => {
             </CardHeader>
             <CardBody>
               <VStack w={"full"} spacing={4} alignItems={"start"}>
-                <StartEmissions />
+                {isAdminOfEmissions && <StartEmissions />}
                 <StartRound />
               </VStack>
             </CardBody>
@@ -91,20 +83,25 @@ export const AdminPageContent = () => {
                 <ClaimXAppAllocations />
                 <BulkClaimXAppsAllocations />
               </HStack>
-              <HStack w={"full"} spacing={12} alignItems={"start"} height={"max-content"}>
-                <UpdateReceiverAddress />
-              </HStack>
+              {isAdminOfXAllocationVoting && (
+                <HStack w={"full"} spacing={12} alignItems={"start"} height={"max-content"}>
+                  <UpdateReceiverAddress />
+                </HStack>
+              )}
             </VStack>
           </CardBody>
         </Card>
-        <Card w={"full"}>
-          <CardHeader>
-            <Heading size="lg">Pausing</Heading>
-          </CardHeader>
-          <CardBody>
-            <Pause />
-          </CardBody>
-        </Card>
+
+        {(isAdminOfB3trBadge || isAdminOfB3tr || isAdminOfVot3) && (
+          <Card w={"full"}>
+            <CardHeader>
+              <Heading size="lg">Pausing</Heading>
+            </CardHeader>
+            <CardBody>
+              <Pause />
+            </CardBody>
+          </Card>
+        )}
       </Stack>
     </Suspense>
   )
