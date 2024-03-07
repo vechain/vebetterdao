@@ -41,7 +41,7 @@ export const AppAmount = ({ xAppId, amount, isCurrent = false }: Props) => {
         </HStack>
         <HStack>
           <Text fontSize={"xs"} fontWeight={"400"}>
-            {isCurrent ? "will receive" : "received"}
+            {isCurrent ? "to receive" : "received"}
           </Text>
         </HStack>
       </VStack>

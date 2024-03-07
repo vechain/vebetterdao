@@ -105,7 +105,7 @@ const VotesHorizontalBar = ({
             </Skeleton>
             <Skeleton isLoaded={!roundStateLoading} textAlign={"right"}>
               <Text fontSize={["xs", "sm"]} fontWeight={"300"}>
-                {roundState === "0" ? "Will receive" : "Received"}
+                {roundState === "0" ? "To receive" : "Received"}
               </Text>
             </Skeleton>
           </VStack>
