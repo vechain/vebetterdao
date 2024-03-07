@@ -129,7 +129,7 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
             <Skeleton isLoaded={!isLoading}>
               <Text color="gray.500" fontSize={["sm", "md"]}>
                 {
-                  "Vote for your preferred dApp to determine funding from the dApps allocation budget. More votes mean more funding. Plus, earn rewards from the Voting Rewards allocation by voting in this round. This allocation process repeats every week."
+                  "Vote for your preferred app to determine funding from the Apps allocation budget. More votes mean more funding. Plus, earn rewards from the Voting Rewards allocation by voting in this round. This allocation process repeats every week."
                 }
               </Text>
             </Skeleton>
@@ -163,7 +163,7 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
                     )}
                   </Skeleton>
                   <Text fontSize={"md"} textTransform={"uppercase"}>
-                    dApps allocation
+                    Apps allocation
                   </Text>
                 </Box>
                 <Box>
