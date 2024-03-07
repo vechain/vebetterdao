@@ -4,6 +4,7 @@ on:
     push:
       branches:
         - 'main'
+        - 'testnet'
 
 permissions: 
   contents: read # This is required for actions/checkout
