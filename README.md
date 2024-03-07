@@ -84,3 +84,5 @@ Run this command to deploy contracts to deploy to solo-staging:
 ```
 yarn contracts:deploy:solo-staging
 ```
+
+test
