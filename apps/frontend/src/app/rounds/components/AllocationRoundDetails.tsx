@@ -146,7 +146,7 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
               py={6}
               px={6}
               w="full"
-              h="full"
+              h="fit-content"
               borderRadius={"2xl"}
               align="flex-start"
               spacing={12}>
@@ -182,7 +182,7 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
                   </Text>
                 </Box>
               </Grid>
-              <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
+              <Grid templateColumns={["repeat(2, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
                 <Box>
                   <Skeleton isLoaded={!baseAmountLoading}>
                     {baseAmountError ? (
