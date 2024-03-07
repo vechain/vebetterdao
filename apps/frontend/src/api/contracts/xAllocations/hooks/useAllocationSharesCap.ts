@@ -7,7 +7,7 @@ import { FormattingUtils } from "@repo/utils"
 const XALLOCATIONPOOLCONTRACT = getConfig().xAllocationPoolContractAddress
 
 /**
- * What is the max amount of shares that an xDapp can have in a given round?
+ * Get the max percentage of shares that an xDapp can have in a given round
  *
  * @param thor  the thor client
  * @returns  the percentage of the total shares that an xDapp can have
@@ -24,7 +24,7 @@ export const getAllocationSharesCap = async (thor: Connex.Thor): Promise<string>
 export const getAllocationSharesCapQueryKey = () => ["allocationRound", "appSharesCap"]
 
 /**
- * What is the max amount of shares that an xDapp can have in a given round?
+ * Get the max percetnage of shares that an xDapp can have in a given round
  *
  * @returns the percentage of the total shares that an xDapp can have
  */
