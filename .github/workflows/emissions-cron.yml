@@ -7,8 +7,8 @@ on:
     - cron: '59 23 * * 0'
 
 jobs:
-  run-unit-tests:
-    name: Unit Testing
+  start-next-round:
+    name: Start next Round Testnet
     runs-on: ubuntu-latest
 
     steps:
