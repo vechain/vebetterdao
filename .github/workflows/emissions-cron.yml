@@ -29,5 +29,6 @@ jobs:
 
       - name: Start round Testnet
         run: yarn contracts:start-round:testnet     
+        timeout-minutes: 5
 
    
