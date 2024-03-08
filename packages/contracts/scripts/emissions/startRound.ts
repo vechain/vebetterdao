@@ -1,6 +1,7 @@
 import { getConfig } from "@repo/config"
 import { Emissions__factory } from "../../typechain-types"
 import { ethers } from "hardhat"
+import { waitForNextCycle } from "../../test/helpers"
 
 /**
  * Starts a new round of emissions.
@@ -13,6 +14,10 @@ const startRound = async () => {
   const emissions = Emissions__factory.connect(getConfig().emissionsContractAddress, signer)
 
   const nextRound = await emissions.nextCycle()
+
+  console.log("Waiting for the current round to end...")
+
+  await waitForNextCycle(emissions)
 
   await Emissions__factory.connect(getConfig().emissionsContractAddress, signer).distribute()
 
