@@ -10,7 +10,13 @@ import { ethers } from "hardhat"
 const startRound = async () => {
   const [signer] = await ethers.getSigners()
 
+  const emissions = Emissions__factory.connect(getConfig().emissionsContractAddress, signer)
+
+  const nextRound = await emissions.nextCycle()
+
   await Emissions__factory.connect(getConfig().emissionsContractAddress, signer).distribute()
+
+  console.log(`Successfully started round ${nextRound}`)
 }
 
 startRound()
