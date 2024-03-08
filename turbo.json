@@ -62,6 +62,12 @@
     "deploy:testnet": {
       "dependsOn": ["^deploy:testnet"]
     },
+    "start-round:testnet": {
+      "cache": false
+    },
+    "start-round": {
+      "cache": false
+    },
     "test": {
       "cache": false,
       "dependsOn": ["@repo/config#check-or-generate-local-config", "test:hardhat"]
