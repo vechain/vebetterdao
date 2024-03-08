@@ -5,9 +5,6 @@ on:
   schedule:
     # Runs at 23:59 GMT every Sunday
     - cron: '59 23 * * 0'
-  pull_request:
-    branches:
-      - main
 
 jobs:
   start-next-round:
