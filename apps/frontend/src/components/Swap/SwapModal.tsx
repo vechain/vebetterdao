@@ -34,7 +34,8 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
     },
   })
   const { watch, setValue } = formData
-  const amount = String(Number(watch("amount")) || "")
+  const amount = watch("amount")
+  const invalidAmount = useMemo(() => Number(amount) === 0 || isNaN(Number(amount)), [amount])
 
   const stakeMutation = useStakeB3tr({
     amount,
@@ -129,7 +130,7 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
                   colorScheme="primary"
                   w={"full"}
                   rounded={"full"}
-                  isDisabled={Number(amount) === 0}
+                  isDisabled={invalidAmount}
                   size="lg">
                   Swap
                 </Button>

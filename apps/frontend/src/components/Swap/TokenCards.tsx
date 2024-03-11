@@ -41,6 +41,8 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
     [isB3trToVot3, b3trBalanceScaled, vot3BalanceScaled],
   )
 
+  console.log("maxBalance", maxBalance)
+
   const containerVariants = {
     initial: {
       opacity: 0,
@@ -74,7 +76,7 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
       }
       return filteredAmount
     },
-    [b3trBalanceScaled, isB3trToVot3, vot3BalanceScaled, maxBalance],
+    [maxBalance],
   )
 
   const { control, setValue } = formData
