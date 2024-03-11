@@ -1,5 +1,4 @@
 import { useTxReceipt } from "@/api"
-import { useToast } from "@chakra-ui/react"
 import { UseMutateFunction, useMutation } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 import { useCallback, useEffect, useState } from "react"
@@ -11,7 +10,7 @@ import { useCallback, useEffect, useState } from "react"
  * success: the transaction has been confirmed by the chain
  * error: the transaction has failed
  */
-export type TransactionStatus = "ready" | "pending" | "waitingConfirmation" | "success" | "error"
+export type TransactionStatus = "ready" | "pending" | "waitingConfirmation" | "success" | "error" | "unknown"
 
 /**
  * An enhanced clause with a comment and an abi
@@ -72,7 +71,6 @@ export const useSendTransaction = ({
   onTxConfirmed,
   onTxFailedOrCancelled,
 }: UseSendTransactionProps): UseSendTransactionReturnValue => {
-  const toast = useToast()
   const { vendor, thor } = useConnex()
 
   async function convertClauses(
@@ -119,15 +117,6 @@ export const useSendTransaction = ({
     mutationFn: sendTransactionAdapter,
     onError: error => {
       console.error(error)
-      // toast({
-      //   title: "Error while signing the transaction.",
-      //   description: `${error.message}`,
-      //   status: "error",
-      //   position: "bottom-left",
-      //   duration: 5000,
-      //   isClosable: true,
-      // })
-
       onTxFailedOrCancelled?.()
     },
   })
@@ -155,17 +144,6 @@ export const useSendTransaction = ({
       ;(async () => {
         const revertReason = await explainTxRevertReason(txReceipt)
         console.error("revertReason", revertReason)
-        // const moreThanOneReverted = (revertReason?.filter(receipt => receipt.reverted) ?? []).length > 0
-        // toast({
-        //   title: "Transaction reverted.",
-        //   description: moreThanOneReverted
-        //     ? "More than one tx reverted"
-        //     : revertReason?.[0]?.revertReason ?? "No revert reason available",
-        //   status: "error",
-        //   position: "bottom-left",
-        //   duration: 5000,
-        //   isClosable: true,
-        // })
       })()
 
       return
@@ -187,7 +165,9 @@ export const useSendTransaction = ({
 
     if (isTxReceiptLoading) return setStatus("waitingConfirmation")
 
-    if (sendTransactionError || txReceiptError || txReceipt?.reverted) return setStatus("error")
+    if (sendTransactionError || txReceipt?.reverted) return setStatus("error")
+
+    if (txReceiptError) return setStatus("unknown")
 
     if (txReceipt) return setStatus("success")
 
