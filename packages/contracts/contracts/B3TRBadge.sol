@@ -180,7 +180,7 @@ contract B3TRBadge is ERC721, ERC721Enumerable, ERC721Pausable, AccessControl, I
     _select(msg.sender, tokenId);
   }
 
-  function upgradeAndSelect(uint256 tokenId) public {
+  function upgradeAndSelect(uint256 tokenId) public nonReentrant whenNotPaused {
     require(
       selectedTokenId[msg.sender] != tokenId,
       "Galaxy Member: Token already selected, consider upgrading it instead"
