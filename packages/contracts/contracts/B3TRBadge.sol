@@ -105,6 +105,8 @@ contract B3TRBadge is ERC721, ERC721Enumerable, ERC721Pausable, AccessControl, I
       xNodeMaxMintableLevels.length == 7,
       "Galaxy Member: Invalid number of max mintable levels. There should be 7 levels, one for each X/Economic node type"
     );
+    require(_b3tr != address(0), "Galaxy Member: B3TR token address cannot be the zero address");
+    require(_treasury != address(0), "Galaxy Member: Treasury address cannot be the zero address");
 
     MAX_LEVEL = maxLevel;
     _baseTokenURI = baseTokenURI;
