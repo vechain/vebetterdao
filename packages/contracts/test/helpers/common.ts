@@ -377,8 +377,6 @@ export const upgradeNFTtoNextLevel = async (
 ) => {
   const b3trToUpgrade = await nft.getB3TRtoUpgrade(tokenId)
 
-  console.log("B3TR to upgrade to level", await nft.getNextLevel(tokenId), ":", b3trToUpgrade.toString())
-
   await b3tr.connect(minter).mint(owner.address, b3trToUpgrade)
 
   await b3tr.connect(owner).approve(await nft.getAddress(), b3trToUpgrade)
