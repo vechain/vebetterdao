@@ -1,3 +1,5 @@
+import BigNumber from "bignumber.js"
+
 const SCALING_FACTOR = 1_000_000
 
 /**
@@ -12,4 +14,17 @@ export const scaledDivision = (numerator: number, denominator: number, scalingFa
   if (denominator === 0) return 0
   const scaledNumerator = numerator * scalingFactor
   return Math.floor(scaledNumerator / denominator) / scalingFactor
+}
+
+/**
+ * removingExcessDecimals
+ * @param amount
+ * @param decimals
+ * @returns
+ */
+export const removingExcessDecimals = (amount: string | number | undefined | null, decimals: number | string = 18) => {
+  if (!amount || isNaN(Number(amount)) || Number(amount) === 0) return "0"
+  console.log("amount: ", amount, typeof amount)
+  console.log("decimals: ", decimals, typeof decimals)
+  return new BigNumber(amount).toFixed(Number(decimals), BigNumber.ROUND_DOWN).toString()
 }
