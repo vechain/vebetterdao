@@ -166,7 +166,7 @@ contract B3TRBadge is ERC721, ERC721Enumerable, ERC721Pausable, AccessControl, I
       _updateLevelSelected(msg.sender, levelOf[tokenId]);
     }
 
-    b3tr.transferFrom(msg.sender, treasury, b3trRequired);
+    require(b3tr.transferFrom(msg.sender, treasury, b3trRequired), "B3TRBadge: Transfer failed");
 
     emit Upgraded(tokenId, currentLevel, levelOf[tokenId]);
   }
