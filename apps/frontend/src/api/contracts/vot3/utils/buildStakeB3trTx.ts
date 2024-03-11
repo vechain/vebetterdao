@@ -23,7 +23,7 @@ export const buildStakeB3trTx = (
   if (!functionAbi) throw new Error("Function abi not found for mint")
 
   const formattedAmount = FormattingUtils.humanNumber(amount ?? 0, amount)
-  const amountWithDecimals = FormattingUtils.scaleNumberUp(amount, decimals)
+  const amountWithDecimals = FormattingUtils.scaleNumberUp(amount, decimals, decimals)
 
   const clause = thor.account(VOT3_CONTRACT).method(functionAbi).asClause(amountWithDecimals)
 

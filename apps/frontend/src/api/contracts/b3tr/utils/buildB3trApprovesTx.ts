@@ -28,7 +28,7 @@ export const buildB3trApprovesTx = (
 
   const formattedAmount = FormattingUtils.humanNumber(amount ?? 0, amount)
   const formattedAddress = FormattingUtils.humanAddress(spender)
-  const amountWithDecimals = FormattingUtils.scaleNumberUp(amount, decimals)
+  const amountWithDecimals = FormattingUtils.scaleNumberUp(amount, decimals, decimals)
 
   const clause = thor.account(B3TR_CONTRACT).method(functionAbi).asClause(spender, amountWithDecimals)
 
