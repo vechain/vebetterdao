@@ -30,7 +30,7 @@ export const DashboardXApps = () => {
     <Card>
       <CardHeader>
         <HStack w="full" justify={"space-between"}>
-          <Heading size="md">Explore dApps</Heading>
+          <Heading size="md">Explore apps</Heading>
           {slicedXApps && slicedXApps.length > 4 && (
             <Button variant="link" colorScheme="blue" rightIcon={<FiArrowUpRight />}>
               See all
@@ -64,12 +64,7 @@ const XApp = ({ xApp }: { xApp: XApp }) => {
         <VStack alignItems={"start"} justify={"flex-start"}>
           <HStack spacing={1} justifyContent={"space-between"} w={"full"}>
             <Skeleton isLoaded={!isLogoLoading} alignContent={"start"}>
-              <Image
-                src={logo?.image ?? notFoundImage}
-                alt={"logo"}
-                boxSize={10}
-                borderRadius="9px"
-              />
+              <Image src={logo?.image ?? notFoundImage} alt={"logo"} boxSize={10} borderRadius="9px" />
             </Skeleton>
 
             <Skeleton isLoaded={!appMetadataLoading} justifyContent={"end"}>

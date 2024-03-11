@@ -1,5 +1,5 @@
 import { useWallet } from "@vechain/dapp-kit-react"
-import { ADMIN_ROLE, MINTER_ROLE, useHasRole } from "@/api/contracts/account"
+import { useAccountPermissions } from "@/api/contracts/account"
 import {
   HStack,
   TableContainer,
@@ -14,36 +14,22 @@ import {
   Heading,
   CardHeader,
 } from "@chakra-ui/react"
-import { getConfig } from "@repo/config"
-
-const config = getConfig()
 
 export const AdminPermissions = () => {
   const { account } = useWallet()
 
-  const { data: isAdminOfB3tr } = useHasRole(ADMIN_ROLE, config.b3trContractAddress, account ?? undefined)
-  const { data: isAdminOfEmissions } = useHasRole(ADMIN_ROLE, config.emissionsContractAddress, account ?? undefined)
-  const { data: isAdminOfXAllocationVoting } = useHasRole(
-    ADMIN_ROLE,
-    config.xAllocationVotingContractAddress,
-    account ?? undefined,
-  )
-  const { data: isAdminOfXAllocationPool } = useHasRole(
-    ADMIN_ROLE,
-    config.xAllocationPoolContractAddress,
-    account ?? undefined,
-  )
-  const { data: isAdminOfDAO } = useHasRole(ADMIN_ROLE, config.b3trGovernorAddress, account ?? undefined)
-  const { data: isAdminOfB3trBadge } = useHasRole(ADMIN_ROLE, config.nftBadgeContractAddress, account ?? undefined)
-  const { data: isAdminOfVot3 } = useHasRole(ADMIN_ROLE, config.vot3ContractAddress, account ?? undefined)
-  const { data: isAdminOfVoterRewards } = useHasRole(
-    ADMIN_ROLE,
-    config.voterRewardsContractAddress,
-    account ?? undefined,
-  )
-
-  const { data: isMinterOfB3tr } = useHasRole(MINTER_ROLE, config.b3trContractAddress, account ?? undefined)
-  const { data: isMinterOfEmissions } = useHasRole(MINTER_ROLE, config.emissionsContractAddress, account ?? undefined)
+  const {
+    isAdminOfB3tr,
+    isAdminOfEmissions,
+    isAdminOfXAllocationVoting,
+    isAdminOfXAllocationPool,
+    isAdminOfDAO,
+    isAdminOfB3trBadge,
+    isAdminOfVot3,
+    isAdminOfVoterRewards,
+    isMinterOfB3tr,
+    isMinterOfEmissions,
+  } = useAccountPermissions(account ?? "")
 
   return (
     <Card w={"full"}>

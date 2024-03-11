@@ -105,7 +105,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     }
   }, [xApps, replace, parsedCastVotesPercentages])
 
-  const onSubmit = (data: FormData) => { 
+  const onSubmit = (data: FormData) => {
     if (!votesAtSnapshot) throw new Error("Votes at snapshot not found")
     const appVotesPercentagesToValue = data.votes.map(vote => {
       const rawValue = scaledDivision(Number(vote.value) * Number(votesAtSnapshot.scaled), 100)
@@ -145,7 +145,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
         </Stack>
       )
 
-    return <Heading size="xl">{hasVoted ? "Your voting distribution" : "Assign voting power to dApps"}</Heading>
+    return <Heading size="xl">{hasVoted ? "Your voting distribution" : "Assign voting power to apps"}</Heading>
   }, [hasVoted, isVotingConcluded, totalVotesCast])
 
   const renderSubHeader = useMemo(() => {
@@ -153,15 +153,15 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
       return (
         <Text fontSize="md" fontWeight="400" mt={4}>
           {hasVoted
-            ? "Voting is concluded. See below the distribution of your voting power among the dApps."
+            ? "Voting is concluded. See below the distribution of your voting power among the apps."
             : "Voting is concluded. You can no longer cast your vote. No votes were cast."}
         </Text>
       )
     return (
       <Text fontSize="md" fontWeight="400" mt={4}>
         {hasVoted
-          ? "You have already cast your vote. See below the distribution of your voting power among the dApps."
-          : "Distribute your voting power among your selected dApps to help them receive more B3TR allocation."}
+          ? "You have already cast your vote. See below the distribution of your voting power among the apps."
+          : "Distribute your voting power among your selected apps to help them receive more B3TR allocation."}
       </Text>
     )
   }, [hasVoted, isVotingConcluded])
@@ -198,7 +198,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
                 align={["flex-start", "center", "center"]}
                 w="full">
                 <Box>
-                  <Heading size="md">{hasVoted ? "Voted dApps" : "Available dApps"}</Heading>
+                  <Heading size="md">{hasVoted ? "Voted apps" : "Available apps"}</Heading>
                   {!hasVoted && !isVotingConcluded && (
                     <Button variant="link" onClick={splitEvenly}>
                       Split evenly
