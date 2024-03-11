@@ -74,7 +74,7 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
       }
       return filteredAmount
     },
-    [b3trBalanceScaled, isB3trToVot3, vot3BalanceScaled, maxBalance],
+    [maxBalance],
   )
 
   const { control, setValue } = formData

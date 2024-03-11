@@ -25,6 +25,15 @@ export type Props = {
   onClose: () => void
 }
 
+const DECIMAL_PLACES = 4
+
+// Maximum precision of 4 decimals. Must also round down
+const compactFormatter = new Intl.NumberFormat("en-US", {
+  notation: "compact",
+  compactDisplay: "short",
+  maximumFractionDigits: DECIMAL_PLACES,
+})
+
 export const SwapModal = ({ isOpen, onClose }: Props) => {
   const [isB3trToVot3, setIsB3trToVot3] = useState(true)
 
@@ -34,7 +43,8 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
     },
   })
   const { watch, setValue } = formData
-  const amount = String(Number(watch("amount")) || "")
+  const amount = watch("amount")
+  const invalidAmount = useMemo(() => Number(amount) === 0 || isNaN(Number(amount)), [amount])
 
   const stakeMutation = useStakeB3tr({
     amount,
@@ -70,20 +80,20 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
     if (isB3trToVot3) {
       return (
         <HStack>
-          <Text as="b">{amount}</Text>
+          <Text as="b">{compactFormatter.format(Number(amount))}</Text>
           <Text color={b3trColor}>B3TR</Text>
           <FaArrowRight />
-          <Text as="b">{amount}</Text>
+          <Text as="b">{compactFormatter.format(Number(amount))}</Text>
           <Text color={vot3Color}>VOT3</Text>
         </HStack>
       )
     } else {
       return (
         <HStack>
-          <Text as="b">{amount}</Text>
+          <Text as="b">{compactFormatter.format(Number(amount))}</Text>
           <Text color={vot3Color}>VOT3</Text>
           <FaArrowRight />
-          <Text as="b">{amount}</Text>
+          <Text as="b">{compactFormatter.format(Number(amount))}</Text>
           <Text color={b3trColor}>B3TR</Text>
         </HStack>
       )
@@ -129,7 +139,7 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
                   colorScheme="primary"
                   w={"full"}
                   rounded={"full"}
-                  isDisabled={Number(amount) === 0}
+                  isDisabled={invalidAmount}
                   size="lg">
                   Swap
                 </Button>
