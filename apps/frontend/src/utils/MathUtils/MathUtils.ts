@@ -24,7 +24,5 @@ export const scaledDivision = (numerator: number, denominator: number, scalingFa
  */
 export const removingExcessDecimals = (amount: string | number | undefined | null, decimals: number | string = 18) => {
   if (!amount || isNaN(Number(amount)) || Number(amount) === 0) return "0"
-  console.log("amount: ", amount, typeof amount)
-  console.log("decimals: ", decimals, typeof decimals)
   return new BigNumber(amount).toFixed(Number(decimals), BigNumber.ROUND_DOWN).toString()
 }
