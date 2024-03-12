@@ -5,6 +5,7 @@ import { LoadingModalContent } from "./LoadingModalContent"
 import { SuccessModalContent } from "./SuccessModalContent"
 import { Modal, ModalOverlay } from "@chakra-ui/react"
 import { CustomModalContent } from "@/components/CustomModalContent"
+import { UnknownModalContent } from "./UnknownModalContent"
 
 export type TransactionModalProps = {
   isOpen: boolean
@@ -14,6 +15,8 @@ export type TransactionModalProps = {
   confirmationTitle?: ReactNode
   errorTitle?: ReactNode
   successTitle?: ReactNode
+  unknownTitle?: ReactNode
+  unknownDescription?: ReactNode
   showSocialButtons?: boolean
   socialDescriptionEncoded?: string
   showTryAgainButton?: boolean
@@ -36,8 +39,19 @@ export const TransactionModal = ({
   onTryAgain,
   showExplorerButton,
   txId,
+  unknownTitle,
+  unknownDescription,
 }: TransactionModalProps) => {
   const modalContent = useMemo(() => {
+    if (status === "unknown")
+      return (
+        <UnknownModalContent
+          title={unknownTitle}
+          description={unknownDescription}
+          txId={txId}
+          showExplorerButton={showExplorerButton}
+        />
+      )
     if (status === "pending") return <ConfirmationModalContent title={confirmationTitle} />
     if (status === "waitingConfirmation")
       return <LoadingModalContent title={pendingTitle} showExplorerButton={showExplorerButton} txId={txId} />
