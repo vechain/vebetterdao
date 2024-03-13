@@ -254,7 +254,7 @@ contract B3TRBadge is ERC721, ERC721Enumerable, ERC721Pausable, AccessControl, I
     MAX_LEVEL = level;
   }
 
-  function setMaxMintableLevels(uint256[] memory maxMintableLevels) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setMaxMintableLevels(uint8[] memory maxMintableLevels) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(
       maxMintableLevels.length == 7,
       "Galaxy Member: Invalid number of max mintable levels. There should be 7 levels, one for each X/Economic node type"
