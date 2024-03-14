@@ -1,43 +1,23 @@
 import { BaseContract, Interface } from "ethers"
 import { ethers } from "hardhat"
-import TransparentUpgradableProxy from "@openzeppelin/upgrades-core/artifacts/@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol/TransparentUpgradeableProxy.json"
+import ERC1967Proxy from "@openzeppelin/upgrades-core/artifacts/@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol/ERC1967Proxy.json"
 
-type DeployProxyResponse = {
-  implementationAddress: string
-  proxyAddress: string
-  contractInstance: BaseContract
-}
-
-export const deployProxy = async (
-  contractName: string,
-  proxyOwnerAddress: string,
-  args: any[],
-): Promise<DeployProxyResponse> => {
+export const deployProxy = async (contractName: string, args: any[]): Promise<BaseContract> => {
   // Deploy the implementation contract
   const Contract = await ethers.getContractFactory(contractName)
   const implementation = await Contract.deploy()
   await implementation.waitForDeployment()
 
   // Deploy the proxy contract, link it to the implementation and call the initializer
-  const proxyFactory = await ethers.getContractFactory(
-    TransparentUpgradableProxy.abi,
-    TransparentUpgradableProxy.bytecode,
-  )
+  const proxyFactory = await ethers.getContractFactory(ERC1967Proxy.abi, ERC1967Proxy.bytecode)
   const proxy = await proxyFactory.deploy(
     await implementation.getAddress(),
-    proxyOwnerAddress,
     getInitializerData(Contract.interface, args),
   )
   await proxy.waitForDeployment()
 
-  // Create an instance of the contract using the proxy address
-  const inst = Contract.attach(await proxy.getAddress())
-
-  return {
-    implementationAddress: await implementation.getAddress(),
-    proxyAddress: await proxy.getAddress(),
-    contractInstance: inst,
-  }
+  // Return an instance of the contract using the proxy address
+  return Contract.attach(await proxy.getAddress())
 }
 
 function getInitializerData(contractInterface: Interface, args: any[]) {
