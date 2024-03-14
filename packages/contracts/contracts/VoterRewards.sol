@@ -84,7 +84,7 @@ contract VoterRewards is AccessControl, ReentrancyGuard {
   function claimReward(uint256 cycle, address voter) public nonReentrant {
     require(cycle > 0, "VoterRewards: cycle must be greater than 0");
     require(voter != address(0), "VoterRewards: voter cannot be the zero address");
-    require(emissions.isCycleEnded(cycle), "VoterRewards: cycle must be ended");
+    require(emissions.getCurrentCycle() > cycle, "VoterRewards: cycle must be in the past");
 
     uint256 reward = getReward(cycle, voter);
 
