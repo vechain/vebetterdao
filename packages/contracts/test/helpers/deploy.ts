@@ -179,6 +179,17 @@ export const getOrDeployContractInstances = async ({
   await xAllocationPool.connect(owner).setXAllocationVotingAddress(await xAllocationVoting.getAddress())
   await xAllocationPool.connect(owner).setEmissionsAddress(await emissions.getAddress())
 
+  //Set the emissions address and the admin as the ROUND_STARTER_ROLE in XAllocationVoting
+  const roundStarterRole = await xAllocationVoting.ROUND_STARTER_ROLE()
+  await xAllocationVoting
+    .connect(owner)
+    .grantRole(roundStarterRole, await emissions.getAddress())
+    .then(async tx => await tx.wait())
+  await xAllocationVoting
+    .connect(owner)
+    .grantRole(roundStarterRole, owner.address)
+    .then(async tx => await tx.wait())
+
   cachedDeployInstance = {
     B3trContract,
     b3tr,
