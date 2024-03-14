@@ -197,6 +197,18 @@ describe("X-Allocation Voting", function () {
       round = parseInt((await xAllocationVoting.currentRoundId()).toString())
       expect(round).to.eql(2)
     })
+
+    it("Only user with role should be able to start a new allocation round", async function () {
+      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const roundStarterRole = await xAllocationVoting.ROUND_STARTER_ROLE()
+      expect(await xAllocationVoting.hasRole(roundStarterRole, otherAccounts[7].address)).to.eql(false)
+      await expect(xAllocationVoting.connect(otherAccounts[7]).startNewRound()).to.be.reverted
+
+      // grant role
+      await xAllocationVoting.connect(owner).grantRole(roundStarterRole, otherAccounts[7].address)
+      expect(await xAllocationVoting.hasRole(roundStarterRole, otherAccounts[7].address)).to.eql(true)
+      await expect(xAllocationVoting.connect(otherAccounts[7]).startNewRound()).to.not.be.reverted
+    })
   })
 
   describe("App availability for allocation voting", function () {
