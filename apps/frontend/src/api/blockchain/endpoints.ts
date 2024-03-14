@@ -9,6 +9,9 @@ export const pollForReceipt = async (
   id?: string,
   blocksTimeout = 3,
 ): Promise<Connex.Thor.Transaction.Receipt> => {
+  // uncomment to debug unknown status modal
+  // throw new Error("debug unknown modal")
+
   if (!id) throw new Error("No transaction id provided")
 
   const transaction = thor.transaction(id)

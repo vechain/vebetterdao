@@ -72,7 +72,7 @@
     },
     "test": {
       "cache": false,
-      "dependsOn": ["@repo/config#check-or-generate-local-config", "test:hardhat"]
+      "dependsOn": ["^@repo/config#check-or-generate-local-config", "test:hardhat"]
     },
     "test:thor-solo": {
       "cache": false

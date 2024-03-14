@@ -168,6 +168,13 @@ export async function deployAll(config: ContractsConfig) {
     .setB3trGovernorAddress(await governor.getAddress())
     .then(async tx => await tx.wait())
 
+  //Set the emissions address as the ROUND_STARTER_ROLE in XAllocationVoting
+  const roundStarterRole = await xAllocationVoting.ROUND_STARTER_ROLE()
+  await xAllocationVoting
+    .connect(admin)
+    .grantRole(roundStarterRole, await emissions.getAddress())
+    .then(async tx => await tx.wait())
+
   // ---------- Seeding ---------- //
   if (network.name === "vechain_testnet") {
     await seedTestEnvironment(b3tr, xAllocationVoting, emissions)
