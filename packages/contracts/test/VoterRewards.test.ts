@@ -199,12 +199,18 @@ describe("VoterRewards", () => {
 
       await waitForNextCycle(emissions)
 
-      expect(await emissions.isCycleDistributed(await emissions.nextCycle())).to.equal(false)
       expect(await emissions.isNextCycleDistributable()).to.equal(true)
+
+      // Start next cycle
+      await emissions.connect(otherAccount).distribute()
+
+      expect(await emissions.isCycleDistributed(await emissions.getCurrentCycle())).to.equal(true)
 
       // Reward claiming
       expect(await emissions.isCycleDistributed(1)).to.equal(true)
-      expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(await emissions.getVote2EarnAmount(1))
+      expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(
+        (await emissions.getVote2EarnAmount(1)) + (await emissions.getVote2EarnAmount(2)),
+      )
 
       const voter1Rewards = await voterRewards.getReward(1, otherAccount.address)
       const voter2Rewards = await voterRewards.getReward(1, voter2.address)
@@ -237,7 +243,9 @@ describe("VoterRewards", () => {
       expect(await b3tr.balanceOf(voter2.address)).to.equal(voter2Rewards)
       expect(await b3tr.balanceOf(voter3.address)).to.equal(voter3Rewards)
 
-      expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.lt(ethers.parseEther("1"))
+      expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.lte(
+        (await emissions.getVote2EarnAmount(2)) + BigInt(1),
+      )
     })
 
     it("Should track voting rewards correctly involving multiple voters and multiple rounds", async () => {
@@ -335,12 +343,14 @@ describe("VoterRewards", () => {
 
       await waitForNextCycle(emissions)
 
-      expect(await emissions.isCycleDistributed(await emissions.nextCycle())).to.equal(false)
-      expect(await emissions.isNextCycleDistributable()).to.equal(true)
+      // Start next cycle
+      await emissions.distribute()
 
       // Reward claiming
       expect(await emissions.isCycleDistributed(1)).to.equal(true)
-      expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(await emissions.getVote2EarnAmount(1))
+      expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(
+        (await emissions.getVote2EarnAmount(1)) + (await emissions.getVote2EarnAmount(2)),
+      )
 
       const voter1Rewards = await voterRewards.getReward(1, voter1.address)
       const voter2Rewards = await voterRewards.getReward(1, voter2.address)
@@ -351,11 +361,8 @@ describe("VoterRewards", () => {
       expect(await b3tr.balanceOf(voter1.address)).to.equal(voter1Rewards)
 
       expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(
-        (await emissions.getVote2EarnAmount(1)) - voter1Rewards,
+        (await emissions.getVote2EarnAmount(1)) + (await emissions.getVote2EarnAmount(2)) - voter1Rewards,
       )
-
-      // Second round
-      await emissions.connect(voter1).distribute() // Anyone can distribute the cycle
 
       const roundId2 = await xAllocationVoting.currentRoundId()
 
@@ -422,10 +429,10 @@ describe("VoterRewards", () => {
 
       await waitForNextCycle(emissions)
 
-      expect(await emissions.isCycleEnded(2)).to.equal(true)
+      // Start next cycle
+      await emissions.connect(voter1).distribute()
 
-      expect(await emissions.isCycleDistributed(await emissions.nextCycle())).to.equal(false)
-      expect(await emissions.isNextCycleDistributable()).to.equal(true)
+      expect(await emissions.isCycleEnded(2)).to.equal(true)
 
       // Reward claiming
       expect(await emissions.isCycleDistributed(2)).to.equal(true)
@@ -509,6 +516,9 @@ describe("VoterRewards", () => {
 
       await waitForNextCycle(emissions)
 
+      // Start next cycle
+      await emissions.connect(voter1).distribute()
+
       await voterRewards.connect(voter1).claimReward(1, voter1.address)
 
       expect(await b3tr.balanceOf(voter1.address)).to.equal(await emissions.getVote2EarnAmount(1)) // Only voter thus all rewards
@@ -536,6 +546,26 @@ describe("VoterRewards", () => {
           .connect(otherAccount)
           .registerXallocationVote(proposalStart, otherAccount.address, ethers.parseEther("1000")),
       )
+    })
+
+    it("Should not be able to claim rewards of round N if round N+1 hasn't started", async () => {
+      const { voterRewards, otherAccount, xAllocationVoting, emissions, b3tr, owner, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      await emissions.connect(minterAccount).start()
+
+      const roundId = await xAllocationVoting.currentRoundId()
+
+      await waitForRoundToEnd(Number(roundId), xAllocationVoting)
+
+      await waitForNextCycle(emissions)
+
+      await catchRevert(voterRewards.claimReward(1, otherAccount.address)) // Should not be able to claim rewards of round 1 because round 2 hasn't started
     })
   })
 })
