@@ -1,44 +1,56 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/governance/Governor.sol";
-import "./modules/GovernorCountingSimple.sol";
-import "@openzeppelin/contracts/governance/extensions/GovernorVotes.sol";
-import "@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
-import "@openzeppelin/contracts/governance/extensions/GovernorTimelockControl.sol";
-import "@openzeppelin/contracts/governance/extensions/GovernorSettings.sol";
+import "@openzeppelin/contracts-upgradeable/governance/GovernorUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/governance/extensions/GovernorSettingsUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/governance/extensions/GovernorVotesUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/governance/extensions/GovernorVotesQuorumFractionUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/governance/extensions/GovernorTimelockControlUpgradeable.sol";
+import "./modules/GovernorCountingSimpleUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract B3TRGovernor is
-  Governor,
-  GovernorSettings,
-  GovernorCountingSimple,
-  GovernorVotes,
-  GovernorVotesQuorumFraction,
-  GovernorTimelockControl
+  GovernorUpgradeable,
+  GovernorSettingsUpgradeable,
+  GovernorCountingSimpleUpgradeable,
+  GovernorVotesUpgradeable,
+  GovernorVotesQuorumFractionUpgradeable,
+  GovernorTimelockControlUpgradeable,
+  UUPSUpgradeable
 {
+  /// @custom:oz-upgrades-unsafe-allow constructor
+  constructor() {
+    _disableInitializers();
+  }
+
   /**
-   * @notice Construct a Governor contract
-   * @param _timelock The address of the Timelock
+   * @dev Initializes the contract with the initial parameters
    * @param _vot3Token The address of the Vot3 token used for voting
+   * @param _timelock The address of the Timelock
    * @param _quorumPercentage quorum as a percentage of the total supply at the block a proposal’s voting power is retrieved
    * @param _initialVotingPeriod How long does a proposal remain open to votes
    * @param _initialVotingDelay How long after a proposal is created should become active
    * @param _initialProposalThreshold The Proposal Threshold is the amount of voting power that an account needs to make a proposal
    */
-  constructor(
+  function initialize(
     IVotes _vot3Token,
-    TimelockController _timelock,
+    TimelockControllerUpgradeable _timelock,
     uint256 _quorumPercentage,
     uint32 _initialVotingPeriod,
     uint48 _initialVotingDelay,
     uint256 _initialProposalThreshold
-  )
-    Governor("B3TRGovernor")
-    GovernorSettings(_initialVotingDelay, _initialVotingPeriod, _initialProposalThreshold)
-    GovernorVotes(_vot3Token)
-    GovernorVotesQuorumFraction(_quorumPercentage)
-    GovernorTimelockControl(_timelock)
-  {}
+  ) public initializer {
+    __Governor_init("B3TRGovernor");
+    __GovernorSettings_init(_initialVotingDelay, _initialVotingPeriod, _initialProposalThreshold);
+    __GovernorCountingSimple_init();
+    __GovernorVotes_init(_vot3Token);
+    __GovernorVotesQuorumFraction_init(_quorumPercentage);
+    __GovernorTimelockControl_init(_timelock);
+    __UUPSUpgradeable_init();
+  }
+
+  function _authorizeUpgrade(address newImplementation) internal override onlyGovernance {}
 
   function quorumReached(uint256 proposalId) public view returns (bool) {
     return _quorumReached(proposalId);
@@ -46,29 +58,38 @@ contract B3TRGovernor is
 
   // The following functions are overrides required by Solidity.
 
-  function votingDelay() public view override(Governor, GovernorSettings) returns (uint256) {
+  function votingDelay() public view override(GovernorUpgradeable, GovernorSettingsUpgradeable) returns (uint256) {
     return super.votingDelay();
   }
 
-  function votingPeriod() public view override(Governor, GovernorSettings) returns (uint256) {
+  function votingPeriod() public view override(GovernorUpgradeable, GovernorSettingsUpgradeable) returns (uint256) {
     return super.votingPeriod();
   }
 
-  function quorum(uint256 blockNumber) public view override(Governor, GovernorVotesQuorumFraction) returns (uint256) {
+  function quorum(
+    uint256 blockNumber
+  ) public view override(GovernorUpgradeable, GovernorVotesQuorumFractionUpgradeable) returns (uint256) {
     return super.quorum(blockNumber);
   }
 
-  function state(uint256 proposalId) public view override(Governor, GovernorTimelockControl) returns (ProposalState) {
+  function state(
+    uint256 proposalId
+  ) public view override(GovernorUpgradeable, GovernorTimelockControlUpgradeable) returns (ProposalState) {
     return super.state(proposalId);
   }
 
   function proposalNeedsQueuing(
     uint256 proposalId
-  ) public view override(Governor, GovernorTimelockControl) returns (bool) {
+  ) public view override(GovernorUpgradeable, GovernorTimelockControlUpgradeable) returns (bool) {
     return super.proposalNeedsQueuing(proposalId);
   }
 
-  function proposalThreshold() public view override(Governor, GovernorSettings) returns (uint256) {
+  function proposalThreshold()
+    public
+    view
+    override(GovernorUpgradeable, GovernorSettingsUpgradeable)
+    returns (uint256)
+  {
     return super.proposalThreshold();
   }
 
@@ -78,7 +99,7 @@ contract B3TRGovernor is
     uint256[] memory values,
     bytes[] memory calldatas,
     bytes32 descriptionHash
-  ) internal override(Governor, GovernorTimelockControl) returns (uint48) {
+  ) internal override(GovernorUpgradeable, GovernorTimelockControlUpgradeable) returns (uint48) {
     return super._queueOperations(proposalId, targets, values, calldatas, descriptionHash);
   }
 
@@ -88,7 +109,7 @@ contract B3TRGovernor is
     uint256[] memory values,
     bytes[] memory calldatas,
     bytes32 descriptionHash
-  ) internal override(Governor, GovernorTimelockControl) {
+  ) internal override(GovernorUpgradeable, GovernorTimelockControlUpgradeable) {
     super._executeOperations(proposalId, targets, values, calldatas, descriptionHash);
   }
 
@@ -97,11 +118,16 @@ contract B3TRGovernor is
     uint256[] memory values,
     bytes[] memory calldatas,
     bytes32 descriptionHash
-  ) internal override(Governor, GovernorTimelockControl) returns (uint256) {
+  ) internal override(GovernorUpgradeable, GovernorTimelockControlUpgradeable) returns (uint256) {
     return super._cancel(targets, values, calldatas, descriptionHash);
   }
 
-  function _executor() internal view override(Governor, GovernorTimelockControl) returns (address) {
+  function _executor()
+    internal
+    view
+    override(GovernorUpgradeable, GovernorTimelockControlUpgradeable)
+    returns (address)
+  {
     return super._executor();
   }
 }
