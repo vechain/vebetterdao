@@ -39,7 +39,7 @@ abstract contract GovernorCountingSimple is Governor {
    */
   // solhint-disable-next-line func-name-mixedcase
   function COUNTING_MODE() public pure virtual override returns (string memory) {
-    return "support=bravo&quorum=for,abstain";
+    return "support=bravo&quorum=for,abstain,against";
   }
 
   /**
@@ -65,7 +65,9 @@ abstract contract GovernorCountingSimple is Governor {
   function _quorumReached(uint256 proposalId) internal view virtual override returns (bool) {
     ProposalVote storage proposalVote = _proposalVotes[proposalId];
 
-    return quorum(proposalSnapshot(proposalId)) <= proposalVote.forVotes + proposalVote.abstainVotes;
+    return
+      quorum(proposalSnapshot(proposalId)) <=
+      proposalVote.forVotes + proposalVote.abstainVotes + proposalVote.againstVotes;
   }
 
   /**
