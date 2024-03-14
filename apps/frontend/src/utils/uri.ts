@@ -21,7 +21,7 @@ export const convertUriToUrl = (uri: string) => {
 
       // Check cache for IPFS document
 
-      return `https://api.vorj.app/ipfs/${uriWithoutProtocol}`
+      return `https://be.new-dev.vorj.app/ipfs/${uriWithoutProtocol}`
     case "ar":
       return `https://arweave.net/${uriWithoutProtocol}`
     default:
