@@ -1,5 +1,4 @@
 import { RoundReward, buildClaimRewardsTx, getB3TrBalanceQueryKey, getRoundRewardQueryKey } from "@/api"
-import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
@@ -39,7 +38,7 @@ export const useClaimRewards = ({
     (roundRewards: RoundReward[]) => {
       if (!address) throw new Error("address is required")
 
-      const clauses = buildClaimRewardsTx(thor, roundRewards, account ?? "")
+      const clauses = buildClaimRewardsTx(roundRewards, account ?? "")
       return clauses
     },
     [account, thor],
