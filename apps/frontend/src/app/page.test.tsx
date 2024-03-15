@@ -1,8 +1,8 @@
 import { expect, test } from "vitest"
-import { render, screen } from "@testing-library/react"
 import Home from "./page"
+import { render, screen } from "../../test"
 
-test("Page", () => {
+test("Homepage", async () => {
   render(<Home />)
-  expect(screen.getByTestId("homepage")).toBeDefined()
+  expect(await screen.findByTestId("homepage")).toBeInTheDocument()
 })
