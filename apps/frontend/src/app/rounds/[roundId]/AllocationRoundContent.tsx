@@ -1,11 +1,14 @@
 "use client"
 
-import { Box, Stack, VStack } from "@chakra-ui/react"
+import { Box, Spinner, Stack, VStack } from "@chakra-ui/react"
 import { AllocationRoundNavbar } from "../components/AllocationRoundNavbar"
 import { AllocationRoundDetails } from "../components/AllocationRoundDetails"
 import { AllocationXAppsVotesCard } from "@/components"
 import { AllocationRoundSessionInfoCard } from "../components/AllocationRoundSessionInfoCard"
 import { AllocationRoundUserVotes } from "../components/AllocationRoundUserVotes/AllocationRoundUserVotes"
+import { useAllocationsRoundState } from "@/api"
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 
 type Props = {
   params: {
@@ -13,6 +16,20 @@ type Props = {
   }
 }
 export const AllocationRoundContent = ({ params }: Readonly<Props>) => {
+  const router = useRouter()
+  const currentAllocationState = useAllocationsRoundState(params.roundId)
+
+  useEffect(() => {
+    if (currentAllocationState.error) router.push("/")
+  }, [currentAllocationState.error, router])
+
+  if (currentAllocationState.isLoading)
+    return (
+      <VStack w="full" spacing={12} h="80vh" justify="center">
+        <Spinner size={"lg"} />
+      </VStack>
+    )
+  if (currentAllocationState.error) return null
   return (
     <VStack w="full" spacing={8}>
       <AllocationRoundNavbar roundId={params.roundId} />
