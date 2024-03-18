@@ -30,7 +30,7 @@ export const AllocationRoundContent = ({ params }: Readonly<Props>) => {
     )
   if (currentAllocationState.error) return null
   return (
-    <VStack w="full" spacing={8}>
+    <VStack w="full" spacing={8} data-testid={`allocation-${params.roundId}-page`}>
       <AllocationRoundNavbar roundId={params.roundId} />
       <AllocationRoundDetails roundId={params.roundId} />
       <Stack
