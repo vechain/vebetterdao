@@ -8,7 +8,7 @@ import { AllocationRoundSessionInfoCard } from "../components/AllocationRoundSes
 import { AllocationRoundUserVotes } from "../components/AllocationRoundUserVotes/AllocationRoundUserVotes"
 import { useAllocationsRoundState } from "@/api"
 import { useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { redirect } from "next/navigation"
 
 type Props = {
   params: {
@@ -16,12 +16,11 @@ type Props = {
   }
 }
 export const AllocationRoundContent = ({ params }: Readonly<Props>) => {
-  const router = useRouter()
   const currentAllocationState = useAllocationsRoundState(params.roundId)
 
   useEffect(() => {
-    if (currentAllocationState.error) router.push("/")
-  }, [currentAllocationState.error, router])
+    if (currentAllocationState.error) redirect("/")
+  }, [currentAllocationState.error])
 
   if (currentAllocationState.isLoading)
     return (
