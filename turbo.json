@@ -40,7 +40,8 @@
       "dependsOn": ["^compile", "@repo/contracts#check-contracts-deployment:testnet"]
     },
     "@repo/config#check-or-generate-local-config": {
-      "cache": false
+      "cache": false,
+      "dependsOn": ["^compile"]
     },
     "@repo/contracts#check-contracts-deployment": {
       "cache": false,
