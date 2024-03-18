@@ -7,7 +7,7 @@ import { AllocationXAppsVotesCard } from "@/components"
 import { AllocationRoundSessionInfoCard } from "../components/AllocationRoundSessionInfoCard"
 import { AllocationRoundUserVotes } from "../components/AllocationRoundUserVotes/AllocationRoundUserVotes"
 import { useAllocationsRoundState } from "@/api"
-import { useEffect } from "react"
+import { useLayoutEffect } from "react"
 import { redirect } from "next/navigation"
 
 type Props = {
@@ -18,7 +18,7 @@ type Props = {
 export const AllocationRoundContent = ({ params }: Readonly<Props>) => {
   const currentAllocationState = useAllocationsRoundState(params.roundId)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (currentAllocationState.error) redirect("/")
   }, [currentAllocationState.error])
 
