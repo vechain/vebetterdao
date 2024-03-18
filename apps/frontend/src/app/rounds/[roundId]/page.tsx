@@ -28,5 +28,9 @@ export default function Round({ params }: Readonly<Props>) {
     AnalyticsUtils.trackPage(`Round/${params.roundId}`)
   }, [])
 
-  return <MotionVStack children={<AllocationRoundContent params={params} />} />
+  return (
+    <MotionVStack>
+      <AllocationRoundContent params={params} />
+    </MotionVStack>
+  )
 }
