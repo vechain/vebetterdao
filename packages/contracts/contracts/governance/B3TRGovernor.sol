@@ -11,6 +11,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract B3TRGovernor is
+  Initializable,
   GovernorUpgradeable,
   GovernorSettingsUpgradeable,
   GovernorCountingSimpleUpgradeable,
