@@ -19,7 +19,7 @@ interface DeployInstance {
   B3trContract: ContractFactory
   b3tr: B3TR & { deploymentTransaction(): ContractTransactionResponse }
   vot3: VOT3 & { deploymentTransaction(): ContractTransactionResponse }
-  timeLock: TimeLock & { deploymentTransaction(): ContractTransactionResponse }
+  timeLock: TimeLock
   governor: B3TRGovernor
   b3trBadge: B3TRBadge & { deploymentTransaction(): ContractTransactionResponse }
   xAllocationVoting: XAllocationVoting & { deploymentTransaction(): ContractTransactionResponse }
@@ -63,13 +63,12 @@ export const getOrDeployContractInstances = async ({
   const vot3 = await Vot3Contract.deploy(owner, await b3tr.getAddress())
 
   // Deploy TimeLock
-  const TimeLockContract = await ethers.getContractFactory("TimeLock")
-  const timeLock = await TimeLockContract.deploy(
+  const timeLock = (await deployProxy("TimeLock", [
     0, //0 seconds delay for immediate execution
     [],
     [],
-    timelockAdmin,
-  )
+    timelockAdmin.address,
+  ])) as TimeLock
 
   // Deploy Governor
   const governor = (await deployProxy("B3TRGovernor", [

@@ -308,11 +308,7 @@ async function deployTimeLock(
   executors: string[] = [],
 ): Promise<TimeLock> {
   console.log(`Deploying TimeLock contract`)
-  const TimeLockContract = await ethers.getContractFactory("TimeLock")
-  const contract = await TimeLockContract.deploy(minDelay, proposers, executors, admin)
-
-  await contract.waitForDeployment()
-
+  const contract = (await deployProxy("TimeLock", [minDelay, proposers, executors, admin])) as TimeLock
   console.log(`TimeLock contract deployed at address ${await contract.getAddress()}`)
 
   return contract
