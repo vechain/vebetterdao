@@ -14,6 +14,8 @@ import {
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it } from "mocha"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
+import { getImplementationAddress } from "@openzeppelin/upgrades-core"
+import { B3TRGovernor } from "../typechain-types"
 
 describe("Governor and TimeLock", function () {
   const description = "Test Proposal: testing propsal with random description!"
@@ -53,8 +55,62 @@ describe("Governor and TimeLock", function () {
       const clockMode = await governor.CLOCK_MODE()
       expect(clockMode.toString()).to.eql("mode=blocknumber&from=default")
     })
-  })
 
+    it("should be able to upgrade the governor contract through governance", async function () {
+      const { governor, owner, b3tr, B3trContract } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+      const votesThreshold = await governor.proposalThreshold()
+      await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
+
+      // Deploy the implementation contract
+      const Contract = await ethers.getContractFactory("B3TRGovernor")
+      const implementation = await Contract.deploy()
+      await implementation.waitForDeployment()
+
+      // V1 Contract
+      const V1Contract = await ethers.getContractAt("B3TRGovernor", await governor.getAddress())
+
+      // Now we can create a proposal
+      const encodedFunctionCall = V1Contract.interface.encodeFunctionData("upgradeToAndCall", [
+        await implementation.getAddress(),
+        "0x",
+      ])
+      const description = "Upgrading Governance contracts"
+      const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
+
+      const tx = await governor
+        .connect(owner)
+        .propose([await governor.getAddress()], [0], [encodedFunctionCall], description, {
+          gasLimit: 10_000_000,
+        })
+
+      const proposalId = await getProposalIdFromTx(tx, governor)
+      await waitForProposalToBeActive(proposalId, governor)
+      await governor.connect(owner).castVote(proposalId, 1)
+      await waitForVotingPeriodToEnd(proposalId, governor)
+      expect(await governor.state(proposalId)).to.eql(4n) // succeded
+
+      await governor.queue([await governor.getAddress()], [0], [encodedFunctionCall], descriptionHash)
+      expect(await governor.state(proposalId)).to.eql(5n)
+
+      await governor.execute([await governor.getAddress()], [0], [encodedFunctionCall], descriptionHash)
+      expect(await governor.state(proposalId)).to.eql(7n)
+
+      const newImplAddress = await getImplementationAddress(ethers.provider, await governor.getAddress())
+      expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
+
+      // Check that the new implementation works
+      const newGovernor = Contract.attach(await governor.getAddress()) as B3TRGovernor
+      const newTx = await createProposal(newGovernor, b3tr, B3trContract, owner, description, functionToCall, [])
+      const newProposalId = await getProposalIdFromTx(newTx, newGovernor)
+
+      expect(newProposalId).to.exist
+      // expect data of previous contract to be untouched
+      expect(await governor.state(proposalId)).to.eql(7n)
+      expect(await governor.quorumReached(proposalId)).to.eql(true)
+    })
+  })
   describe("Proposal Creation", function () {
     it("cannot create a proposal if NOT a VOT3 holder", async function () {
       const config = createLocalConfig()

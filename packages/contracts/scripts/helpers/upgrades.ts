@@ -25,8 +25,6 @@ export const upgradeProxy = async (
   proxyAddress: string,
   args: any[] = [],
 ): Promise<BaseContract> => {
-  console.log("Upgrading proxy at address: ", proxyAddress)
-
   // Deploy the implementation contract
   const Contract = await ethers.getContractFactory(newVersionContractName)
   const implementation = await Contract.deploy()
