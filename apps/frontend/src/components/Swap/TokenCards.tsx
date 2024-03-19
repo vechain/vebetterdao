@@ -86,6 +86,7 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
         .replace(",", ".") // Replace comma with dot
         .replace(/[^\d\\.]/g, "") // Filter out non-numeric characters except for decimal separator
         .replace(/\.(?=.*\.)/g, "") // Filter out duplicate decimal separators
+        .replace(/(\.\d{18})\d+/, "$1") // remove digits after 18th decimal
 
       if (Number(filteredAmount) > Number(maxBalance)) {
         return maxBalance
