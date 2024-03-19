@@ -7,7 +7,7 @@ import { SupplyBreakdownCard } from "./SupplyBreakdownCard"
 export const HomePageContent = () => {
   return (
     <>
-      <VStack flex={4} justifyContent="stretch" alignItems={"stretch"} spacing={4}>
+      <VStack flex={4} justifyContent="stretch" alignItems={"stretch"} spacing={4} data-testid="homepage">
         <SupplyBreakdownCard />
         <DashboardAllocationRounds />
         <DashboardXApps />
