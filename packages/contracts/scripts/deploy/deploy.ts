@@ -14,6 +14,7 @@ import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
 import { seedLocalEnvironment, seedTestEnvironment } from "./seed"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
+import { deployProxy } from "../helpers"
 
 // NFT Badge Values
 const name = "VeBetterDAO Galaxy Member"
@@ -326,17 +327,15 @@ async function deployGovernor(
   proposalThreshold: number,
 ): Promise<B3TRGovernor> {
   console.log(`Deploying Governor contract`)
-  const B3TRGovernor = await ethers.getContractFactory("B3TRGovernor")
-  const contract = await B3TRGovernor.deploy(
+
+  const contract = (await deployProxy("B3TRGovernor", [
     vot3Address,
     timelockAddress,
     quorum,
     votingPeriod,
     votingDelay,
     proposalThreshold,
-  )
-
-  await contract.waitForDeployment()
+  ])) as B3TRGovernor
 
   console.log(`Governor contract deployed at address ${await contract.getAddress()}`)
 

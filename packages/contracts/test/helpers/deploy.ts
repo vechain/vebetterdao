@@ -81,8 +81,6 @@ export const getOrDeployContractInstances = async ({
     config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD, // voting threshold
   ])) as B3TRGovernor
 
-  // console.log("Governor deployed", governor)
-
   // Set up roles
   const PROPOSER_ROLE = await timeLock.PROPOSER_ROLE()
   const EXECUTOR_ROLE = await timeLock.EXECUTOR_ROLE()
