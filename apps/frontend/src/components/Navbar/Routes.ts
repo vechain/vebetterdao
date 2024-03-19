@@ -1,5 +1,5 @@
 import { FaHome, FaChartPie } from "react-icons/fa"
-import { FaGear } from "react-icons/fa6"
+import { FaAppStore, FaGear } from "react-icons/fa6"
 
 export interface Route {
   name: string
@@ -11,7 +11,8 @@ export interface Route {
 
 export const Routes: Route[] = [
   { name: "Dashboard", onClick: "/", isVisible: true, icon: FaHome },
-  // { name: "Proposals", onClick: "/proposals", isVisible: true, icon: FaScaleBalanced },
+  { name: "Apps", onClick: "/apps", isVisible: true, icon: FaAppStore },
   { name: "Allocations", onClick: "/rounds", isVisible: true, icon: FaChartPie },
+  // { name: "Proposals", onClick: "/proposals", isVisible: true, icon: FaScaleBalanced },
   { name: "Admin", onClick: "/admin", isVisible: true, icon: FaGear },
 ]
