@@ -466,17 +466,14 @@ async function deployVoterRewards(
   multiplier: number[],
 ) {
   console.log(`Deploying VoterRewards contract`)
-  const VoterRewardsContract = await ethers.getContractFactory("VoterRewards")
-  const contract = await VoterRewardsContract.deploy(
+  const contract = (await deployProxy("VoterRewards", [
     adminAddress,
     emissionsAddress,
     badgeAddress,
     b3trAddress,
     levels,
     multiplier,
-  )
-
-  await contract.waitForDeployment()
+  ])) as VoterRewards
 
   console.log(`VoterRewards contract deployed at address ${await contract.getAddress()}`)
 

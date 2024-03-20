@@ -1,15 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import "./interfaces/IB3TRBadge.sol";
 import "./interfaces/IGovernor.sol";
 import "./interfaces/IXAllocationVotingGovernor.sol";
 import "./interfaces/IEmissions.sol";
 import "./interfaces/IB3TR.sol";
+import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract VoterRewards is AccessControl, ReentrancyGuard {
+contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
   bytes32 public constant X_ALLOCATION_VOTE_REGISTRAR_ROLE = keccak256("X_ALLOCATION_VOTE_REGISTRAR_ROLE");
 
   /// @custom:storage-location erc7201:b3tr.storage.VoterRewards
@@ -40,20 +42,29 @@ contract VoterRewards is AccessControl, ReentrancyGuard {
 
   event RewardClaimed(uint256 indexed cycle, address indexed voter, uint256 reward);
 
-  constructor(
+  /// @custom:oz-upgrades-unsafe-allow constructor
+  constructor() {
+    _disableInitializers();
+  }
+
+  function initialize(
     address admin,
     address _emissions,
     address _b3trBadge,
     address _b3tr,
     uint256[] memory levels,
     uint256[] memory multipliers
-  ) {
+  ) public initializer {
     require(_b3trBadge != address(0), "VoterRewards: _b3trBadge cannot be the zero address");
     require(_emissions != address(0), "VoterRewards: emissions cannot be the zero address");
     require(_b3tr != address(0), "VoterRewards: _b3tr cannot be the zero address");
 
     require(levels.length > 0, "VoterRewards: levels must have at least one element");
     require(levels.length == multipliers.length, "VoterRewards: levels and multipliers must have the same length");
+
+    __AccessControl_init();
+    __ReentrancyGuard_init();
+    __UUPSUpgradeable_init();
 
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
 
@@ -68,6 +79,8 @@ contract VoterRewards is AccessControl, ReentrancyGuard {
 
     _grantRole(DEFAULT_ADMIN_ROLE, admin);
   }
+
+  function _authorizeUpgrade(address newImplementation) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
 
   function registerXallocationVote(
     uint256 proposalStart,
@@ -135,6 +148,41 @@ contract VoterRewards is AccessControl, ReentrancyGuard {
 
     // Scale down the reward to the original scale
     return reward / $.scalingFactor;
+  }
+
+  function cycleToVoterToTotal(uint256 cycle, address voter) public view returns (uint256) {
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+    return $.cycleToVoterToTotal[cycle][voter];
+  }
+
+  function cycleToTotal(uint256 cycle) public view returns (uint256) {
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+    return $.cycleToTotal[cycle];
+  }
+
+  function levelToMultiplier(uint256 level) public view returns (uint256) {
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+    return $.levelToMultiplier[level];
+  }
+
+  function b3trBadge() public view returns (IB3TRBadge) {
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+    return $.b3trBadge;
+  }
+
+  function emissions() public view returns (IEmissions) {
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+    return $.emissions;
+  }
+
+  function scalingFactor() public view returns (uint256) {
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+    return $.scalingFactor;
+  }
+
+  function b3tr() public view returns (IB3TR) {
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+    return $.b3tr;
   }
 
   // ----------------- Setters ----------------- //

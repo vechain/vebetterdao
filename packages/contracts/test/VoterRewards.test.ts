@@ -14,6 +14,7 @@ import {
 import { expect } from "chai"
 import { ethers } from "hardhat"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
+import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 
 describe("VoterRewards", () => {
   describe("Contract parameters", () => {
@@ -57,6 +58,56 @@ describe("VoterRewards", () => {
       const { voterRewards, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
 
       await catchRevert(voterRewards.connect(otherAccount).setB3TRBadge(otherAccount.address))
+    })
+  })
+
+  describe("Contract upgradeablity", () => {
+    it("Admin should be able to upgrade the contract", async function () {
+      const { voterRewards, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Deploy the implementation contract
+      const Contract = await ethers.getContractFactory("VoterRewards")
+      const implementation = await Contract.deploy()
+      await implementation.waitForDeployment()
+
+      const currentImplAddress = await getImplementationAddress(ethers.provider, await voterRewards.getAddress())
+
+      const DEFAULT_ADMIN_ROLE = await voterRewards.DEFAULT_ADMIN_ROLE()
+      expect(await voterRewards.hasRole(DEFAULT_ADMIN_ROLE, owner.address)).to.eql(true)
+
+      await expect(voterRewards.connect(owner).upgradeToAndCall(await implementation.getAddress(), "0x")).to.not.be
+        .reverted
+
+      const newImplAddress = await getImplementationAddress(ethers.provider, await voterRewards.getAddress())
+
+      expect(newImplAddress.toUpperCase()).to.not.eql(currentImplAddress.toUpperCase())
+      expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
+    })
+
+    it("Only admin should be able to upgrade the contract", async function () {
+      const { voterRewards, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Deploy the implementation contract
+      const Contract = await ethers.getContractFactory("VoterRewards")
+      const implementation = await Contract.deploy()
+      await implementation.waitForDeployment()
+
+      const currentImplAddress = await getImplementationAddress(ethers.provider, await voterRewards.getAddress())
+
+      const DEFAULT_ADMIN_ROLE = await voterRewards.DEFAULT_ADMIN_ROLE()
+      expect(await voterRewards.hasRole(DEFAULT_ADMIN_ROLE, otherAccount.address)).to.eql(false)
+
+      await expect(voterRewards.connect(otherAccount).upgradeToAndCall(await implementation.getAddress(), "0x")).to.be
+        .reverted
+
+      const newImplAddress = await getImplementationAddress(ethers.provider, await voterRewards.getAddress())
+
+      expect(newImplAddress.toUpperCase()).to.eql(currentImplAddress.toUpperCase())
+      expect(newImplAddress.toUpperCase()).to.not.eql((await implementation.getAddress()).toUpperCase())
     })
   })
 

@@ -25,7 +25,7 @@ interface DeployInstance {
   xAllocationVoting: XAllocationVoting
   xAllocationPool: XAllocationPool
   emissions: Emissions & { deploymentTransaction(): ContractTransactionResponse }
-  voterRewards: VoterRewards & { deploymentTransaction(): ContractTransactionResponse }
+  voterRewards: VoterRewards
   owner: HardhatEthersSigner
   otherAccount: HardhatEthersSigner
   minterAccount: HardhatEthersSigner
@@ -135,16 +135,14 @@ export const getOrDeployContractInstances = async ({
 
   await emissions.waitForDeployment()
 
-  const VoterRewardsContract = await ethers.getContractFactory("VoterRewards")
-  const voterRewards = await VoterRewardsContract.deploy(
-    owner,
+  const voterRewards = (await deployProxy("VoterRewards", [
+    owner.address,
     await emissions.getAddress(),
     await b3trBadge.getAddress(),
     await b3tr.getAddress(),
     levels,
     multipliers,
-  )
-  await voterRewards.waitForDeployment()
+  ])) as VoterRewards
 
   // Set vote 2 earn (VoterRewards deployed contract) address in emissions
   await emissions.connect(owner).setVote2EarnAddress(await voterRewards.getAddress())
