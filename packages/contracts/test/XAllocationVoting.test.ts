@@ -15,7 +15,6 @@ import {
   getProposalIdFromTx,
   waitForProposalToBeActive,
   waitForVotingPeriodToEnd,
-  createProposal,
 } from "./helpers"
 import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
