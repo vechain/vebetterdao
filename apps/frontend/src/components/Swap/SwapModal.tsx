@@ -20,6 +20,7 @@ import { CustomModalContent } from "../CustomModalContent"
 import { SwitchTokenButton } from "./SwitchTokenButton"
 import { TokenCards } from "./TokenCards"
 import { TransactionModal } from "../TransactionModal"
+
 export type Props = {
   isOpen: boolean
   onClose: () => void
@@ -73,24 +74,32 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
 
   const { b3trColor, vot3Color } = useTokenColors()
 
+  const amountText = useMemo(() => {
+    const amountNumber = Number(amount)
+
+    if (amountNumber < 0.0001) return `< 0.${"0".repeat(DECIMAL_PLACES - 1)}1`
+
+    return compactFormatter.format(amountNumber)
+  }, [amount])
+
   const swapText = useMemo(() => {
     if (isB3trToVot3) {
       return (
         <HStack>
-          <Text as="b">{compactFormatter.format(Number(amount))}</Text>
+          <Text as="b">{amountText}</Text>
           <Text color={b3trColor}>B3TR</Text>
           <FaArrowRight />
-          <Text as="b">{compactFormatter.format(Number(amount))}</Text>
+          <Text as="b">{amountText}</Text>
           <Text color={vot3Color}>VOT3</Text>
         </HStack>
       )
     } else {
       return (
         <HStack>
-          <Text as="b">{compactFormatter.format(Number(amount))}</Text>
+          <Text as="b">{amountText}</Text>
           <Text color={vot3Color}>VOT3</Text>
           <FaArrowRight />
-          <Text as="b">{compactFormatter.format(Number(amount))}</Text>
+          <Text as="b">{amountText}</Text>
           <Text color={b3trColor}>B3TR</Text>
         </HStack>
       )
