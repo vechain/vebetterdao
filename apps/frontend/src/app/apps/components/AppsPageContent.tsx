@@ -7,7 +7,7 @@ export const AppsPageContent = () => {
 
   if (isLoading)
     return (
-      <VStack w="full" spacing={12} h="80vh" justify="center">
+      <VStack w="full" spacing={12} h="80vh" justify="center" data-testid="apps-page-loading">
         <Spinner size={"lg"} />
       </VStack>
     )
@@ -16,7 +16,7 @@ export const AppsPageContent = () => {
 
   //TODO: Pagination, search, filters
   return (
-    <VStack spacing={8}>
+    <VStack spacing={8} data-testid="apps-page">
       <HStack w="full" justify={"space-between"}>
         <Heading size="md">Explore Apps</Heading>
       </HStack>
