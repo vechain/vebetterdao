@@ -44,7 +44,7 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
   bytes32 private constant XAllocationVotingGovernorStorageLocation =
     0x7fb63bcd433c69110ad961bfbe38aef51814cbb9e11af6fe21011ae43fb4be00;
 
-  function _getXAllocationVotingGovernorStorage() private pure returns (XAllocationVotingGovernorStorage storage $) {
+  function _getXAllocationVotingGovernorStorage() internal pure returns (XAllocationVotingGovernorStorage storage $) {
     assembly {
       $.slot := XAllocationVotingGovernorStorageLocation
     }
