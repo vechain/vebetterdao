@@ -13,13 +13,14 @@ import {
   VoterRewards,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
+import { deployProxy } from "../../scripts/helpers"
 
 interface DeployInstance {
   B3trContract: ContractFactory
   b3tr: B3TR & { deploymentTransaction(): ContractTransactionResponse }
   vot3: VOT3 & { deploymentTransaction(): ContractTransactionResponse }
-  timeLock: TimeLock & { deploymentTransaction(): ContractTransactionResponse }
-  governor: B3TRGovernor & { deploymentTransaction(): ContractTransactionResponse }
+  timeLock: TimeLock
+  governor: B3TRGovernor
   b3trBadge: B3TRBadge & { deploymentTransaction(): ContractTransactionResponse }
   xAllocationVoting: XAllocationVoting & { deploymentTransaction(): ContractTransactionResponse }
   xAllocationPool: XAllocationPool & { deploymentTransaction(): ContractTransactionResponse }
@@ -62,25 +63,22 @@ export const getOrDeployContractInstances = async ({
   const vot3 = await Vot3Contract.deploy(owner, await b3tr.getAddress())
 
   // Deploy TimeLock
-  const TimeLockContract = await ethers.getContractFactory("TimeLock")
-  const timeLock = await TimeLockContract.deploy(
+  const timeLock = (await deployProxy("TimeLock", [
     0, //0 seconds delay for immediate execution
     [],
     [],
-    timelockAdmin,
-  )
+    timelockAdmin.address,
+  ])) as TimeLock
 
   // Deploy Governor
-  const B3TRGovernor = await ethers.getContractFactory("B3TRGovernor")
-  const governor = await B3TRGovernor.deploy(
+  const governor = (await deployProxy("B3TRGovernor", [
     await vot3.getAddress(),
     await timeLock.getAddress(),
     config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
     config.B3TR_GOVERNOR_VOTING_PERIOD, // voting period
     config.B3TR_GOVERNOR_VOTING_DELAY, // voting delay
     config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD, // voting threshold
-  )
-  await governor.waitForDeployment()
+  ])) as B3TRGovernor
 
   // Set up roles
   const PROPOSER_ROLE = await timeLock.PROPOSER_ROLE()
