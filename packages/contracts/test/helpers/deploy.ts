@@ -1,5 +1,6 @@
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
-import { ContractFactory, ContractTransactionResponse } from "ethers"
+import { BaseContract, ContractFactory, ContractTransactionResponse, FunctionFragment } from "ethers"
+import ERC1967Proxy from "@openzeppelin/contracts/build/contracts/ERC1967Proxy.json"
 import { ethers } from "hardhat"
 import {
   B3TR,
@@ -11,11 +12,13 @@ import {
   XAllocationVoting,
   XAllocationPool,
   VoterRewards,
+  Treasury,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 
 interface DeployInstance {
   B3trContract: ContractFactory
+  Treasury: ContractFactory
   b3tr: B3TR & { deploymentTransaction(): ContractTransactionResponse }
   vot3: VOT3 & { deploymentTransaction(): ContractTransactionResponse }
   timeLock: TimeLock & { deploymentTransaction(): ContractTransactionResponse }
@@ -25,6 +28,8 @@ interface DeployInstance {
   xAllocationPool: XAllocationPool & { deploymentTransaction(): ContractTransactionResponse }
   emissions: Emissions & { deploymentTransaction(): ContractTransactionResponse }
   voterRewards: VoterRewards & { deploymentTransaction(): ContractTransactionResponse }
+  treasury: Treasury & { deploymentTransaction(): ContractTransactionResponse }
+  treasuryProxy: any
   owner: HardhatEthersSigner
   otherAccount: HardhatEthersSigner
   minterAccount: HardhatEthersSigner
@@ -162,6 +167,27 @@ export const getOrDeployContractInstances = async ({
   )
   await xAllocationVoting.waitForDeployment()
 
+  // Deploy Treasury
+  const Treasury = await ethers.getContractFactory("Treasury")
+  const treasury = await Treasury.deploy()
+
+  await treasury.waitForDeployment()
+
+  const TreasuryProxy = await ethers.getContractFactory(ERC1967Proxy.abi, ERC1967Proxy.bytecode)
+  const functionFragment = Treasury.interface.getFunction("initialize")
+  const callInitialize = TreasuryProxy.interface.encodeFunctionData(functionFragment as FunctionFragment, [
+    await b3tr.getAddress(),
+    await vot3.getAddress(),
+    owner.address,
+    owner.address,
+  ])
+
+  const proxy = await TreasuryProxy.deploy(await treasury.getAddress(), callInitialize)
+
+  await proxy.waitForDeployment();
+
+  const treasuryProxy = await ethers.getContractAt("Treasury", await proxy.getAddress());
+
   // Set xAllocationVoting and Governor address in B3TRBadge
   await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
   await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
@@ -195,6 +221,9 @@ export const getOrDeployContractInstances = async ({
     minterAccount,
     timelockAdmin,
     otherAccounts,
+    treasury,
+    Treasury,
+    treasuryProxy,
   }
   return cachedDeployInstance
 }

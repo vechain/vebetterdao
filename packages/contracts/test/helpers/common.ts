@@ -34,7 +34,7 @@ export const createProposal = async (
   proposer: HardhatEthersSigner,
   description: string = "",
   functionTocall: string = "tokenDetails",
-  values: number[] = [],
+  values: (number | string | bigint)[] = [],
   avoidMintingAndDelegating: boolean = false, // in some scenarios we want the operation to fail if the proposer does not have enough VOT3
 ): Promise<ContractTransactionResponse> => {
   // the proposer needs to have some delegated VOT3 to be able to create a proposal
