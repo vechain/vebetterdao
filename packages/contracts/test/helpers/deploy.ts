@@ -180,6 +180,7 @@ export const getOrDeployContractInstances = async ({
     await vot3.getAddress(),
     owner.address,
     owner.address,
+    owner.address,
   ])
 
   const proxy = await TreasuryProxy.deploy(await treasury.getAddress(), callInitialize)
