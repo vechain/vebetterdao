@@ -1,12 +1,12 @@
 import { ethers } from "hardhat"
 import { expect } from "chai"
 import { getOrDeployContractInstances, catchRevert, createProposalAndExecuteIt } from "./helpers"
-import ERC1967Proxy from "@openzeppelin/contracts/build/contracts/ERC1967Proxy.json"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it, before } from "mocha"
 import { fundTreasuryVET, fundTreasuryVTHO } from "./helpers/fundTreasury"
-import { FunctionFragment } from "ethers"
+import { Treasury } from "../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
+import { deployProxy } from "../scripts/helpers"
 
 describe("Treasury", () => {
   let treasuryProxy: any
@@ -25,7 +25,7 @@ describe("Treasury", () => {
       forceDeploy: true,
       config,
     })
-    treasuryProxy = info.treasuryProxy
+    treasuryProxy = info.treasury
     owner = info.owner
     otherAccount = info.otherAccount
     b3tr = info.b3tr
@@ -138,25 +138,14 @@ describe("Treasury", () => {
     let tProxy: any
     let Treasury: any
     before(async () => {
-      Treasury = await ethers.getContractFactory("Treasury")
-      const treasury = await Treasury.deploy()
-
-      await treasury.waitForDeployment()
-
-      const TreasuryProxy = await ethers.getContractFactory(ERC1967Proxy.abi, ERC1967Proxy.bytecode)
-      const functionFragment = Treasury.interface.getFunction("initialize")
-
-      const callInitialize = TreasuryProxy.interface.encodeFunctionData(functionFragment as FunctionFragment, [
+      tProxy = (await deployProxy("Treasury", [
         await b3tr.getAddress(),
         await vot3.getAddress(),
         await timeLock.getAddress(),
         owner.address,
         owner.address,
-      ])
+      ])) as Treasury
 
-      const proxy = await TreasuryProxy.deploy(await treasury.getAddress(), callInitialize)
-      await proxy.waitForDeployment()
-      tProxy = await ethers.getContractAt("Treasury", await proxy.getAddress())
       await fundTreasuryVET(await tProxy.getAddress(), 10)
     })
     it("should execute transfer TX from proposal", async () => {
