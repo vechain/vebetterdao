@@ -6,6 +6,7 @@ import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { IXAllocationPool } from "../../interfaces/IXAllocationPool.sol";
 import { IVoterRewards } from "../../interfaces/IVoterRewards.sol";
+import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /**
  * @title GovernorXAllocationVotesCounting
@@ -15,7 +16,7 @@ import { IVoterRewards } from "../../interfaces/IVoterRewards.sol";
  * In every round users can vote a fraction of their balance for the elegible apps in that round.
  */
 
-abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor {
+abstract contract GovernorXAllocationVotesCounting is Initializable, XAllocationVotingGovernor {
   struct RoundVote {
     mapping(bytes32 app => uint256) votesReceived;
     uint256 totalVotes;
@@ -45,7 +46,11 @@ abstract contract GovernorXAllocationVotesCounting is XAllocationVotingGovernor 
     }
   }
 
-  constructor(address _voterRewards) {
+  function __GovernorXAllocationVotesCounting_init(address _voterRewards) internal onlyInitializing {
+    __GovernorXAllocationVotesCounting_init_unchained(_voterRewards);
+  }
+
+  function __GovernorXAllocationVotesCounting_init_unchained(address _voterRewards) internal onlyInitializing {
     GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
 
     $.voterRewards = IVoterRewards(_voterRewards);
