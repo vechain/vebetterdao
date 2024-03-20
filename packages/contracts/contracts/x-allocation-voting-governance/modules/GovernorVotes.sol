@@ -14,17 +14,32 @@ import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
  * token.
  */
 abstract contract GovernorVotes is XAllocationVotingGovernor {
-  IERC5805 private immutable _token;
+  /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.GovernorVotes
+  struct GovernorVotesStorage {
+    IERC5805 _token;
+  }
+
+  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.GovernorVotes")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 private constant GovernorVotesStorageLocation =
+    0x1fd39a1a04c688cfdfe2fc0db51d4f96629f1828304800fbba14f96e8ddf4c00;
+
+  function _getGovernorVotesStorage() private pure returns (GovernorVotesStorage storage $) {
+    assembly {
+      $.slot := GovernorVotesStorageLocation
+    }
+  }
 
   constructor(IVotes tokenAddress) {
-    _token = IERC5805(address(tokenAddress));
+    GovernorVotesStorage storage $ = _getGovernorVotesStorage();
+    $._token = IERC5805(address(tokenAddress));
   }
 
   /**
    * @dev The token that voting power is sourced from.
    */
   function token() public view virtual returns (IERC5805) {
-    return _token;
+    GovernorVotesStorage storage $ = _getGovernorVotesStorage();
+    return $._token;
   }
 
   /**
