@@ -11,8 +11,9 @@ import "./interfaces/IERC20.sol";
 import "./interfaces/IERC721.sol";
 import  "./interfaces/IVOT3.sol";
 
-contract Treasury is IERC721Receiver, Initializable, AccessControlUpgradeable, PausableUpgradeable, OwnableUpgradeable, UUPSUpgradeable {
+contract Treasury is IERC721Receiver, Initializable, AccessControlUpgradeable, PausableUpgradeable, UUPSUpgradeable {
     bytes32 public constant TIMELOCK_ROLE = keccak256("TIMELOCK_ROLE");
+    bytes32 public constant PROXY_ADMIN_ROLE = keccak256("PROXY_ADMIN_ROLE");
     address public constant VTHO = 0x0000000000000000000000000000456E65726779;
     address public B3TR;
     address public VOT3;
@@ -31,6 +32,11 @@ contract Treasury is IERC721Receiver, Initializable, AccessControlUpgradeable, P
         _;
     }
 
+    modifier onlyProxyAdmin() {
+        require(hasRole(PROXY_ADMIN_ROLE, msg.sender), "Treasury: caller is not the proxy admin");
+        _;
+    }
+
     /**
      * @notice Initialize the contract
      * @param _b3tr the address of the B3TR token
@@ -38,17 +44,17 @@ contract Treasury is IERC721Receiver, Initializable, AccessControlUpgradeable, P
      * @param _timeLock the address of the timelock contract
      * @param _admin the address of the proxy admin
      */
-    function initialize(address _b3tr, address _vot3, address _timeLock, address _admin) public initializer {
+    function initialize(address _b3tr, address _vot3, address _timeLock, address _admin, address _proxyAdmin) public initializer {
         B3TR = _b3tr;
         VOT3 = _vot3;
 
         __UUPSUpgradeable_init();
-        __Ownable_init(msg.sender);
         __AccessControl_init();
         __Pausable_init();
 
         _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(TIMELOCK_ROLE, _timeLock);
+        _grantRole(PROXY_ADMIN_ROLE, _proxyAdmin);
     }
 
     receive() external payable {}
@@ -58,14 +64,14 @@ contract Treasury is IERC721Receiver, Initializable, AccessControlUpgradeable, P
     /**
      * @notice Pause the contract
      */
-    function pause() public onlyOwner() {
+    function pause() public onlyAdmin {
         _pause();
     }
 
     /**
      * @notice Unpause the contract
      */
-    function unpause() public onlyOwner() {
+    function unpause() public onlyAdmin {
         _unpause();
     }
 
@@ -222,5 +228,5 @@ contract Treasury is IERC721Receiver, Initializable, AccessControlUpgradeable, P
     }
 
     // @dev See {UUPSUpgradeable-_authorizeUpgrade}.
-    function _authorizeUpgrade(address newImplementation) internal virtual override onlyAdmin {}
+    function _authorizeUpgrade(address newImplementation) internal virtual override onlyProxyAdmin {}
 }
