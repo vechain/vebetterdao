@@ -36,7 +36,7 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.XApps")) - 1)) & ~bytes32(uint256(0xff))
   bytes32 private constant XAppsStorageLocation = 0xd0d069a754be3c8727b213bc00d418e344adac8f83a7b6d5e0e426a9ddbe0700;
 
-  function _getXAppsStorageStorage() private pure returns (XAppsStorage storage $) {
+  function _getXAppsStorageStorage() internal pure returns (XAppsStorage storage $) {
     assembly {
       $.slot := XAppsStorageLocation
     }

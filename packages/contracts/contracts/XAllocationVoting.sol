@@ -55,7 +55,9 @@ contract XAllocationVoting is
 
   function setB3trGovernanceAddress(address b3trGovernor_) public override onlyRole(DEFAULT_ADMIN_ROLE) {
     require(b3trGovernor_ != address(0), "XAllocationVoting: new B3trGovernor is the zero address");
-    _b3trGovernor = IGovernor(payable(b3trGovernor_));
+
+    XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
+    $._b3trGovernor = IGovernor(payable(b3trGovernor_));
   }
 
   function startNewRound() public override onlyRole(ROUND_STARTER_ROLE) returns (uint256) {
@@ -63,10 +65,12 @@ contract XAllocationVoting is
   }
 
   function _startNewRound(address proposer) internal virtual override returns (uint256 roundId) {
-    ++_roundCount;
-    roundId = _roundCount;
+    XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
 
-    if (_rounds[roundId].voteStart != 0) {
+    ++$._roundCount;
+    roundId = $._roundCount;
+
+    if ($._rounds[roundId].voteStart != 0) {
       revert GovernorUnexpectedRoundState(roundId, state(roundId), bytes32(0));
     }
 
@@ -77,12 +81,12 @@ contract XAllocationVoting is
 
     // save x-apps that users can vote for
     bytes32[] memory apps = allElegibleApps();
-    _appsElegibleForVoting[roundId] = apps;
+    $._appsElegibleForVoting[roundId] = apps;
 
     uint256 snapshot = clock();
     uint256 duration = votingPeriod();
 
-    RoundCore storage round = _rounds[roundId];
+    RoundCore storage round = $._rounds[roundId];
     round.proposer = proposer;
     round.voteStart = SafeCast.toUint48(snapshot);
     round.voteDuration = SafeCast.toUint32(duration);
@@ -125,12 +129,15 @@ contract XAllocationVoting is
    * This function could not be efficient with a large number of apps
    */
   function getRoundAppsWithDetails(uint256 roundId) public view returns (App[] memory) {
-    bytes32[] memory appsInRound = _appsElegibleForVoting[roundId];
+    XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
+    XAppsStorage storage $xAppsStorage = _getXAppsStorageStorage();
+
+    bytes32[] memory appsInRound = $._appsElegibleForVoting[roundId];
     App[] memory allApps = new App[](appsInRound.length);
 
     uint256 length = appsInRound.length;
     for (uint i = 0; i < length; i++) {
-      allApps[i] = _apps[appsInRound[i]];
+      allApps[i] = $xAppsStorage._apps[appsInRound[i]];
     }
     return allApps;
   }
