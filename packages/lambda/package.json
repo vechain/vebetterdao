@@ -12,7 +12,6 @@
   },
   "dependencies": {
     "@repo/contracts": "*",
-    "dotenv": "^16.4.5",
     "lambda-local": "^2.1.2"
   },
   "devDependencies": {
