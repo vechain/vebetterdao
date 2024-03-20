@@ -6,12 +6,13 @@ pragma solidity ^0.8.18;
 import { GovernorVotes } from "./GovernorVotes.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /**
  * @dev Extension of {XAllocationVotingGovernor} for voting weight extraction from an {ERC20Votes} token and a quorum expressed as a
  * fraction of the total supply.
  */
-abstract contract GovernorVotesQuorumFraction is GovernorVotes {
+abstract contract GovernorVotesQuorumFraction is Initializable, GovernorVotes {
   using Checkpoints for Checkpoints.Trace208;
 
   /// @custom:storage-location erc7201:b3tr.storage.GovernorVotesQuorumFraction
@@ -47,7 +48,11 @@ abstract contract GovernorVotesQuorumFraction is GovernorVotes {
    * specified as a percent: a numerator of 10 corresponds to quorum being 10% of total supply. The denominator can be
    * customized by overriding {quorumDenominator}.
    */
-  constructor(uint256 quorumNumeratorValue) {
+  function __GovernorVotesQuorumFraction_init(uint256 quorumNumeratorValue) internal onlyInitializing {
+    __GovernorVotesQuorumFraction_init_unchained(quorumNumeratorValue);
+  }
+
+  function __GovernorVotesQuorumFraction_init_unchained(uint256 quorumNumeratorValue) internal onlyInitializing {
     _updateQuorumNumerator(quorumNumeratorValue);
   }
 
