@@ -23,5 +23,9 @@ export default function AllocationsRoundPage() {
     AnalyticsUtils.trackPage("Rounds")
   }, [])
 
-  return <MotionVStack children={<AllocationRoundsContent />} />
+  return (
+    <MotionVStack>
+      <AllocationRoundsContent />
+    </MotionVStack>
+  )
 }

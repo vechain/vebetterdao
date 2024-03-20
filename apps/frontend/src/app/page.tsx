@@ -19,5 +19,9 @@ export default function Home() {
   useEffect(() => {
     AnalyticsUtils.trackPage("Home")
   }, [])
-  return <MotionVStack children={<HomePageContent />} />
+  return (
+    <MotionVStack>
+      <HomePageContent />
+    </MotionVStack>
+  )
 }
