@@ -301,10 +301,7 @@ async function deployB3trToken(admin: string, cap: number): Promise<B3TR> {
 
 async function deployVot3Token(admin: string, b3trAddress: string): Promise<VOT3> {
   console.log(`Deploying Vot3 contract`)
-  const Vot3Contract = await ethers.getContractFactory("VOT3") // Use the global variable
-  const contract = await Vot3Contract.deploy(admin, b3trAddress)
-
-  await contract.waitForDeployment()
+  const contract = (await deployProxy("VOT3", [admin, b3trAddress])) as VOT3
 
   console.log(`Vot3 contract deployed at address ${await contract.getAddress()}`)
 

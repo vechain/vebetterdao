@@ -18,7 +18,7 @@ import { deployProxy } from "../../scripts/helpers"
 interface DeployInstance {
   B3trContract: ContractFactory
   b3tr: B3TR & { deploymentTransaction(): ContractTransactionResponse }
-  vot3: VOT3 & { deploymentTransaction(): ContractTransactionResponse }
+  vot3: VOT3
   timeLock: TimeLock
   governor: B3TRGovernor
   b3trBadge: B3TRBadge & { deploymentTransaction(): ContractTransactionResponse }
@@ -59,8 +59,7 @@ export const getOrDeployContractInstances = async ({
   const b3tr = await B3trContract.deploy(owner, minterAccount, config.B3TR_CAP)
 
   // Deploy VOT3
-  const Vot3Contract = await ethers.getContractFactory("VOT3")
-  const vot3 = await Vot3Contract.deploy(owner, await b3tr.getAddress())
+  const vot3 = (await deployProxy("VOT3", [owner.address, await b3tr.getAddress()])) as VOT3
 
   // Deploy TimeLock
   const timeLock = (await deployProxy("TimeLock", [
