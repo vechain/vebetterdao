@@ -2,7 +2,6 @@ import { XApp, useXAppMetadata } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
 import {
-  useColorModeValue,
   Card,
   CardBody,
   VStack,
@@ -18,13 +17,18 @@ import {
   MenuList,
   useClipboard,
   useToast,
+  useDisclosure,
 } from "@chakra-ui/react"
 import { FaExternalLinkAlt } from "react-icons/fa"
 import { FaCheck, FaCopy, FaEllipsisVertical } from "react-icons/fa6"
 import { AppCardInnerDetails } from "./AppCardInnerDetails"
+import { useBreakpoints } from "@/hooks"
+import { AppCardOptionsMobileModal } from "./AppCardOptionsMobileModal"
 
 type Props = { xApp: XApp }
 export const AppCard = ({ xApp }: Props) => {
+  const { isMobile } = useBreakpoints()
+
   const {
     data: appMetadata,
     isLoading: appMetadataLoading,
@@ -47,6 +51,8 @@ export const AppCard = ({ xApp }: Props) => {
     })
   }
 
+  const { isOpen: isMobileOptionsOpen, onClose: closeMobileOptions, onOpen: openMobileOptions } = useDisclosure()
+
   return (
     <Card variant={"baseWithBorder"} w="full">
       <Box w="full" position={"relative"} h={100}>
@@ -66,21 +72,33 @@ export const AppCard = ({ xApp }: Props) => {
                   {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
                 </Text>
               </Skeleton>
-              <Menu>
-                <MenuButton as={IconButton} isRound={true} icon={<FaEllipsisVertical />} />
-                <MenuList>
-                  <MenuItem
-                    disabled={isAppMetadataError}
-                    icon={<FaExternalLinkAlt />}
-                    onClick={() => window.open(appMetadata?.external_url, "_blank")}>
-                    Go to the dapp
-                  </MenuItem>
-                  <MenuItem onClick={handleOnCopy} icon={hasCopied ? <FaCheck /> : <FaCopy />}>
-                    {" "}
-                    Copy receiver address
-                  </MenuItem>
-                </MenuList>
-              </Menu>
+              {isMobile ? (
+                <>
+                  <IconButton
+                    isRound={true}
+                    icon={<FaEllipsisVertical />}
+                    onClick={openMobileOptions}
+                    aria-label="Open app options"
+                  />
+                  <AppCardOptionsMobileModal xApp={xApp} isOpen={isMobileOptionsOpen} onClose={closeMobileOptions} />
+                </>
+              ) : (
+                <Menu>
+                  <MenuButton as={IconButton} isRound={true} icon={<FaEllipsisVertical />} />
+                  <MenuList>
+                    <MenuItem
+                      disabled={isAppMetadataError}
+                      icon={<FaExternalLinkAlt />}
+                      onClick={() => window.open(appMetadata?.external_url, "_blank")}>
+                      Go to the dapp
+                    </MenuItem>
+                    <MenuItem onClick={handleOnCopy} icon={hasCopied ? <FaCheck /> : <FaCopy />}>
+                      {" "}
+                      Copy receiver address
+                    </MenuItem>
+                  </MenuList>
+                </Menu>
+              )}
             </HStack>
             <Skeleton isLoaded={!appMetadataLoading}>
               <Text fontSize={"sm"} color={"gray.500"}>

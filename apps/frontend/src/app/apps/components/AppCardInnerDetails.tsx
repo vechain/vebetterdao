@@ -34,7 +34,7 @@ export const AppCardInnerDetails = ({ xApp }: Props) => {
   const totalAmount = amounts.reduce((acc, amount) => acc + Number(amount.data?.amount), 0)
 
   return (
-    <Card variant={"inner"} w="full">
+    <Card variant={"filled"} w="full" rounded={"xl"}>
       <CardBody>
         <Stack w="full" spacing={4} direction={["column", "row"]} justify={"space-between"}>
           <Box fontWeight={500}>
