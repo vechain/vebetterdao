@@ -12,7 +12,6 @@ import {
   Image,
   Text,
   Box,
-  Button,
   Menu,
   MenuButton,
   MenuItem,
@@ -21,8 +20,8 @@ import {
   useToast,
 } from "@chakra-ui/react"
 import { FaExternalLinkAlt } from "react-icons/fa"
-import { FaCheck, FaCopy, FaEllipsisVertical, FaHandDots } from "react-icons/fa6"
-import { FiArrowUpRight } from "react-icons/fi"
+import { FaCheck, FaCopy, FaEllipsisVertical } from "react-icons/fa6"
+import { AppCardInnerDetails } from "./AppCardInnerDetails"
 
 type Props = { xApp: XApp }
 export const AppCard = ({ xApp }: Props) => {
@@ -91,6 +90,7 @@ export const AppCard = ({ xApp }: Props) => {
               </Text>
             </Skeleton>
           </VStack>
+          <AppCardInnerDetails xApp={xApp} />
         </VStack>
       </CardBody>
     </Card>
