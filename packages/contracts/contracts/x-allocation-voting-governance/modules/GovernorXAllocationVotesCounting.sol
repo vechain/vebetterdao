@@ -142,4 +142,9 @@ abstract contract GovernorXAllocationVotesCounting is Initializable, XAllocation
     GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
     return $._hasVotedOnce[user];
   }
+
+  function voterRewards() public view returns (IVoterRewards) {
+    GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
+    return $.voterRewards;
+  }
 }
