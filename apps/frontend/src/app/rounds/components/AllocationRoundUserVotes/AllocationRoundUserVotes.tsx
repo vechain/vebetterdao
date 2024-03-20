@@ -12,6 +12,7 @@ import { TransactionModal } from "@/components/TransactionModal"
 import BigNumber from "bignumber.js"
 import { WalletNotConnectedOverlay } from "@/components"
 import { scaledDivision } from "@/utils/MathUtils"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
 type Props = {
   roundId: string
@@ -21,14 +22,7 @@ export type FormData = {
   votes: CastAllocationVotesProps
 }
 
-const DECIMAL_PLACES = 2
-
-// Maximum precision of 4 decimals. Must also round down
-const compactFormatter = new Intl.NumberFormat("en-US", {
-  notation: "compact",
-  compactDisplay: "short",
-  maximumFractionDigits: DECIMAL_PLACES,
-})
+const compactFormatter = getCompactFormatter(2)
 
 export const AllocationRoundUserVotes = ({ roundId }: Props) => {
   const { account } = useWallet()
