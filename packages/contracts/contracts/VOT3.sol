@@ -10,13 +10,26 @@ import "@openzeppelin/contracts/utils/Nonces.sol";
 
 // VOT3 contract
 contract VOT3 is ERC20, ERC20Permit, ERC20Votes, ERC20Pausable, AccessControl {
-  IERC20 public b3tr;
-  mapping(address account => uint256) private _stakedBalances;
+  /// @custom:storage-location erc7201:b3tr.storage.VOT3
+  struct VOT3Storage {
+    IERC20 b3tr;
+    mapping(address account => uint256) _stakedBalances;
+  }
+
+  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.VOT3")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 private constant VOT3StorageLocation = 0x8af7882bba84ab51775aa801e199e7d1dfd5f5ff08dcfbb73c614b3313e4cb00;
+
+  function _getVOT3Storage() private pure returns (VOT3Storage storage $) {
+    assembly {
+      $.slot := VOT3StorageLocation
+    }
+  }
 
   constructor(address _admin, address _b3tr) ERC20("VOT3", "VOT3") ERC20Permit("VOT3") {
+    VOT3Storage storage $ = _getVOT3Storage();
     // Grant the contract deployer the default admin role
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
-    b3tr = IERC20(_b3tr);
+    $.b3tr = IERC20(_b3tr);
   }
 
   function pause() public onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -28,22 +41,26 @@ contract VOT3 is ERC20, ERC20Permit, ERC20Votes, ERC20Pausable, AccessControl {
   }
 
   function stakedBalanceOf(address account) public view returns (uint256) {
-    return _stakedBalances[account];
+    VOT3Storage storage $ = _getVOT3Storage();
+    return $._stakedBalances[account];
   }
 
   function stake(uint256 amount) external {
+    VOT3Storage storage $ = _getVOT3Storage();
     _mint(msg.sender, amount);
-    _stakedBalances[msg.sender] += amount;
+    $._stakedBalances[msg.sender] += amount;
 
-    require(b3tr.transferFrom(msg.sender, address(this), amount), "Transfer failed");
+    require($.b3tr.transferFrom(msg.sender, address(this), amount), "Transfer failed");
   }
 
   function unstake(uint256 amount) external {
+    VOT3Storage storage $ = _getVOT3Storage();
+
     require(balanceOf(msg.sender) >= amount, "Insufficient Vot3 Tokens");
-    require(_stakedBalances[msg.sender] >= amount, "Insufficient staked Vot3 Tokens");
+    require($._stakedBalances[msg.sender] >= amount, "Insufficient staked Vot3 Tokens");
     _burn(msg.sender, amount);
-    _stakedBalances[msg.sender] -= amount;
-    require(b3tr.transfer(msg.sender, amount), "Transfer failed");
+    $._stakedBalances[msg.sender] -= amount;
+    require($.b3tr.transfer(msg.sender, amount), "Transfer failed");
   }
 
   function transfer(address to, uint256 value) public override(ERC20) returns (bool) {
@@ -86,7 +103,12 @@ contract VOT3 is ERC20, ERC20Permit, ERC20Votes, ERC20Pausable, AccessControl {
 
   function delegate(address delegatee) public override {
     require(paused() == false, "VOT3: contract is paused");
-    
+
     _delegate(msg.sender, delegatee);
+  }
+
+  function b3tr() public view returns (IERC20) {
+    VOT3Storage storage $ = _getVOT3Storage();
+    return $.b3tr;
   }
 }
