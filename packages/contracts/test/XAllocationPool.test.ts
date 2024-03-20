@@ -16,7 +16,7 @@ import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 
 describe("X-Allocation Pool", async function () {
   describe("Deploy", async function () {
-    it.only("Admin should be able to upgrade the contract", async function () {
+    it("Admin should be able to upgrade the contract", async function () {
       const { xAllocationPool, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -40,7 +40,7 @@ describe("X-Allocation Pool", async function () {
       expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
     })
 
-    it.only("Only admin should be able to upgrade the contract", async function () {
+    it("Only admin should be able to upgrade the contract", async function () {
       const { xAllocationPool, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })

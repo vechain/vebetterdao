@@ -81,7 +81,6 @@ describe("X-Allocation Voting", function () {
       const { xAllocationVoting, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
-
       // Deploy the implementation contract
       const Contract = await ethers.getContractFactory("XAllocationVoting")
       const implementation = await Contract.deploy()
