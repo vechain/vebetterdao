@@ -6,7 +6,7 @@ import { useCallback } from "react"
 import { useConnex, useWallet } from "@vechain/dapp-kit-react"
 import { governanceAvailableContracts } from "@/constants"
 import { ethers } from "ethers"
-type AvailableContractAbis = (typeof governanceAvailableContracts)[number]["abi"]["abi"][number]
+export type AvailableContractAbis = (typeof governanceAvailableContracts)[number]["abi"]["abi"][number]
 /**
  * Represent a single parameter of the function to call in the smart contract
  * This is used to typing the inputs of the abi definition
