@@ -24,6 +24,8 @@
     "contracts:upload-b3tr-badge-metadata": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run upload-b3tr-badge-metadata --scope=contracts",
     "contracts:generate-xapp-metadata": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run generate-xapp-metadata --scope=contracts",
     "contracts:upload-xapp-metadata": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run upload-xapp-metadata --scope=contracts",
+    "lambda:build": "turbo run build --scope=lambda",
+    "lambda:test": "turbo run test --scope=lambda",
     "solo-up": "make solo-up"
   },
   "devDependencies": {
