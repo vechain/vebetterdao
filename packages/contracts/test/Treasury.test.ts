@@ -136,7 +136,6 @@ describe("Treasury", () => {
   })
   describe("Timelock", () => {
     let tProxy: any
-    let Treasury: any
     before(async () => {
       tProxy = (await deployProxy("Treasury", [
         await b3tr.getAddress(),
@@ -150,11 +149,17 @@ describe("Treasury", () => {
     })
     it("should execute transfer TX from proposal", async () => {
       const description = "Test Proposal: testing propsal for Transfer VET from tresausry"
-
-      await createProposalAndExecuteIt(owner, otherAccount, governor, tProxy, Treasury, description, "transferVET", [
-        owner.address,
-        ethers.parseEther("5"),
-      ])
+      const treasuryContractFactory = await ethers.getContractFactory("Treasury")
+      await createProposalAndExecuteIt(
+        owner,
+        otherAccount,
+        governor,
+        tProxy,
+        treasuryContractFactory,
+        description,
+        "transferVET",
+        [owner.address, ethers.parseEther("5")],
+      )
 
       expect(await tProxy.getVETBalance()).to.eql(ethers.parseEther("5"))
     })
