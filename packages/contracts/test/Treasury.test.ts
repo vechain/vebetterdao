@@ -32,7 +32,7 @@ describe("Treasury", () => {
         expect(treasuryProxy.transferVTHO(otherAccount.address, ethers.parseEther("1"))).not.to.be.reverted
       })
       it("should revert if not enough balance", async () => {
-        await catchRevert(treasuryProxy.transferVTHO(otherAccount.address, ethers.parseEther("11")))
+        await catchRevert(treasuryProxy.transferVTHO(otherAccount.address, ethers.parseEther("10000")))
       })
       it("should revert if not called by TIMELOCK_ROLE", async () => {
         await catchRevert(
