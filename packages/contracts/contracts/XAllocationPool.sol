@@ -17,21 +17,14 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
 
   uint256 public constant percentagePrecisionScalingFactor = 1e4;
 
-  uint256 public baseAllocationPercentage;
-  uint256 public variableAllocationPercentage;
-  uint256 public appSharesCap;
-
   // B3TR token contract
   IB3TR public b3tr;
 
   mapping(bytes32 => mapping(uint256 => bool)) public claimedRewards;
 
-  constructor(address _admin, address b3trAddress, uint256 baseAllocationPercentage_, uint256 appSharesCap_) {
+  constructor(address _admin, address b3trAddress) {
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     b3tr = IB3TR(b3trAddress);
-
-    setBaseAllocationPercentage(baseAllocationPercentage_);
-    setAppSharesCap(appSharesCap_);
   }
 
   // ---------- Setters ---------- //
@@ -42,19 +35,6 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
 
   function setEmissionsAddress(address emissions_) public onlyRole(DEFAULT_ADMIN_ROLE) {
     _emissions = IEmissions(emissions_);
-  }
-
-  function setBaseAllocationPercentage(uint256 baseAllocationPercentage_) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(baseAllocationPercentage_ <= 100, "Base allocation percentage must be less than or equal to 100");
-
-    baseAllocationPercentage = baseAllocationPercentage_;
-    variableAllocationPercentage = 100 - baseAllocationPercentage;
-  }
-
-  function setAppSharesCap(uint256 appSharesCap_) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(appSharesCap_ <= 100, "App shares cap must be less than or equal to 100");
-
-    appSharesCap = appSharesCap_;
   }
 
   function claim(uint256 roundId, bytes32 appId) public nonReentrant {
@@ -100,6 +80,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
   function _appRewardAmount(uint256 roundId, uint256 appShare) internal view returns (uint256) {
     uint256 total = _emissionAmount(roundId);
 
+    uint256 variableAllocationPercentage = 1 - xAllocationVoting().getRoundBaseAllocationPercentage(roundId);
     uint256 available = (total * variableAllocationPercentage) / 100;
 
     uint256 rewardAmount = (available * appShare) / percentagePrecisionScalingFactor;
@@ -182,7 +163,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
     uint256 total = _emissionAmount(roundId);
     bytes32[] memory eligibleApps = xAllocationVoting().getRoundApps(roundId);
 
-    uint256 available = (total * baseAllocationPercentage) / 100;
+    uint256 available = (total * xAllocationVoting().getRoundBaseAllocationPercentage(roundId)) / 100;
 
     uint256 amountPerApp = available / eligibleApps.length;
     return amountPerApp;
@@ -213,7 +194,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
 
     // Cap the app share to the maximum variable allocation percentage so even if an app has 80 votes out of 100,
     // it will still get a max of `appSharesCap` percentage of the available funds
-    uint256 _allocationRewardMaxCap = scaledAppSharesCap();
+    uint256 _allocationRewardMaxCap = scaledAppSharesCap(roundId);
     if (appShare > _allocationRewardMaxCap) {
       appShare = _allocationRewardMaxCap;
     }
@@ -230,8 +211,8 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
    * @dev Returns the maximum app shares cap scaled by 1e2 for precision since our
    * shares calculation is scaled by 1e4.
    */
-  function scaledAppSharesCap() public view returns (uint256) {
-    return appSharesCap * 1e2;
+  function scaledAppSharesCap(uint256 roundId) public view returns (uint256) {
+    return xAllocationVoting().getRoundAppSharesCap(roundId) * 1e2;
   }
 
   /**
