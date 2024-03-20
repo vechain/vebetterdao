@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import { IERC165, ERC165 } from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import { ERC165Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import { Context } from "@openzeppelin/contracts/utils/Context.sol";
-import { Nonces } from "@openzeppelin/contracts/utils/Nonces.sol";
+import { ContextUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import { NoncesUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/NoncesUpgradeable.sol";
 import { IXAllocationVotingGovernor, IERC6372 } from "../interfaces/IXAllocationVotingGovernor.sol";
 import { IXAllocationPool } from "../interfaces/IXAllocationPool.sol";
 import { IGovernor } from "../interfaces/IGovernor.sol";
+import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /**
  * @dev Core of the x-allocation votes governance system, designed to be extended through various modules.
@@ -18,7 +20,13 @@ import { IGovernor } from "../interfaces/IGovernor.sol";
  * - A voting module must implement {_getVotes}
  * - Additionally, {votingPeriod} must also be implemented
  */
-abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAllocationVotingGovernor {
+abstract contract XAllocationVotingGovernorUpgradeable is
+  Initializable,
+  ContextUpgradeable,
+  ERC165Upgradeable,
+  NoncesUpgradeable,
+  IXAllocationVotingGovernor
+{
   struct RoundCore {
     address proposer;
     uint48 voteStart;
@@ -50,10 +58,22 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
     }
   }
 
+  /// @custom:oz-upgrades-unsafe-allow constructor
+  constructor() {
+    _disableInitializers();
+  }
+
   /**
-   * @dev Sets the value for {name} and {version}
+   * @dev Sets the value for {name} and {b3trGovernor} address
    */
-  constructor(string memory name_, address b3trGovernor_) {
+  function __XAllocationVotingGovernor_init(string memory name_, address b3trGovernor_) internal onlyInitializing {
+    __XAllocationVotingGovernor_init_unchained(name_, b3trGovernor_);
+  }
+
+  function __XAllocationVotingGovernor_init_unchained(
+    string memory name_,
+    address b3trGovernor_
+  ) internal onlyInitializing {
     XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
     $._name = name_;
     $._b3trGovernor = IGovernor(payable(b3trGovernor_));
@@ -139,7 +159,9 @@ abstract contract XAllocationVotingGovernor is Context, ERC165, Nonces, IXAlloca
 
   // ---------- Getters ---------- //
 
-  function supportsInterface(bytes4 interfaceId) public view virtual override(IERC165, ERC165) returns (bool) {
+  function supportsInterface(
+    bytes4 interfaceId
+  ) public view virtual override(IERC165, ERC165Upgradeable) returns (bool) {
     return interfaceId == type(IXAllocationVotingGovernor).interfaceId || super.supportsInterface(interfaceId);
   }
 
