@@ -22,7 +22,7 @@ interface DeployInstance {
   timeLock: TimeLock
   governor: B3TRGovernor
   b3trBadge: B3TRBadge & { deploymentTransaction(): ContractTransactionResponse }
-  xAllocationVoting: XAllocationVoting & { deploymentTransaction(): ContractTransactionResponse }
+  xAllocationVoting: XAllocationVoting
   xAllocationPool: XAllocationPool & { deploymentTransaction(): ContractTransactionResponse }
   emissions: Emissions & { deploymentTransaction(): ContractTransactionResponse }
   voterRewards: VoterRewards & { deploymentTransaction(): ContractTransactionResponse }
@@ -152,8 +152,7 @@ export const getOrDeployContractInstances = async ({
   await emissions.connect(owner).setVote2EarnAddress(await voterRewards.getAddress())
 
   // Deploy XAllocationVoting
-  const XAllocationVotingContract = await ethers.getContractFactory("XAllocationVoting")
-  const xAllocationVoting = await XAllocationVotingContract.deploy(
+  const xAllocationVoting = (await deployProxy("XAllocationVoting", [
     await vot3.getAddress(),
     config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE, // quorum percentage
     config.EMISSIONS_CYCLE_DURATION - 1, // X Alloc voting period
@@ -161,8 +160,7 @@ export const getOrDeployContractInstances = async ({
     await voterRewards.getAddress(),
     [await timeLock.getAddress(), owner.address],
     "ipfs://",
-  )
-  await xAllocationVoting.waitForDeployment()
+  ])) as XAllocationVoting
 
   // Set xAllocationVoting and Governor address in B3TRBadge
   await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())

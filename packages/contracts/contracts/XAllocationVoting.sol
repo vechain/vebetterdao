@@ -7,21 +7,30 @@ import "./x-allocation-voting-governance/modules/GovernorVotes.sol";
 import "./x-allocation-voting-governance/modules/GovernorVotesQuorumFraction.sol";
 import "./x-allocation-voting-governance/modules/GovernorSettings.sol";
 import "./x-allocation-voting-governance/modules/XApps.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract XAllocationVoting is
+  Initializable,
   XAllocationVotingGovernor,
   GovernorSettings,
   GovernorXAllocationVotesCounting,
   GovernorVotes,
   GovernorVotesQuorumFraction,
   XApps,
-  AccessControl
+  AccessControlUpgradeable,
+  UUPSUpgradeable
 {
   bytes32 public constant ROUND_STARTER_ROLE = keccak256("ROUND_STARTER_ROLE");
 
+  /// @custom:oz-upgrades-unsafe-allow constructor
+  constructor() {
+    _disableInitializers();
+  }
+
   /**
-   * @notice Construct a XAllocationVotingGovernor contract
+   * @notice initialize XAllocationVotingGovernor contract
    * @param _vot3Token The address of the Vot3 token used for voting
    * @param _quorumPercentage quorum as a percentage of the total supply at the block a proposal’s voting power is retrieved
    * @param _initialVotingPeriod How long does a round remain open to votese
@@ -30,7 +39,7 @@ contract XAllocationVoting is
    * @param _admins The addresses of the admins (DAO + another address) that can update the XAllocationPool address, only DAO will remain in the final version
    * @param _xAppsBaseURI The base URI for the xApps
    */
-  constructor(
+  function initialize(
     IVotes _vot3Token,
     uint256 _quorumPercentage,
     uint32 _initialVotingPeriod,
@@ -38,18 +47,22 @@ contract XAllocationVoting is
     address _voterRewards,
     address[] memory _admins,
     string memory _xAppsBaseURI
-  )
-    XAllocationVotingGovernor("XAllocationVoting", b3trGovernor_)
-    GovernorSettings(_initialVotingPeriod)
-    GovernorVotes(_vot3Token)
-    GovernorVotesQuorumFraction(_quorumPercentage)
-    GovernorXAllocationVotesCounting(_voterRewards)
-    XApps(_xAppsBaseURI)
-  {
+  ) public initializer {
+    __XAllocationVotingGovernor_init("XAllocationVoting", b3trGovernor_);
+    __GovernorSettings_init(_initialVotingPeriod);
+    __GovernorXAllocationVotesCounting_init(_voterRewards);
+    __GovernorVotes_init(_vot3Token);
+    __GovernorVotesQuorumFraction_init(_quorumPercentage);
+    __XApps_init(_xAppsBaseURI);
+    __AccessControl_init();
+    __UUPSUpgradeable_init();
+
     for (uint256 i = 0; i < _admins.length; i++) {
       _grantRole(DEFAULT_ADMIN_ROLE, _admins[i]);
     }
   }
+
+  function _authorizeUpgrade(address newImplementation) internal override onlyGovernance {}
 
   // ---------- Setters ---------- //
 
@@ -167,7 +180,7 @@ contract XAllocationVoting is
 
   function supportsInterface(
     bytes4 interfaceId
-  ) public view override(AccessControl, XAllocationVotingGovernor) returns (bool) {
+  ) public view override(AccessControlUpgradeable, XAllocationVotingGovernor) returns (bool) {
     return super.supportsInterface(interfaceId);
   }
 }
