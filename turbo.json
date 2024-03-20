@@ -97,15 +97,6 @@
     "upload-xapp-metadata": {
       "cache": false,
       "dependsOn": ["@repo/config#check-or-generate-local-config"]
-    },
-    "lambda:build": {
-      "cache": false
-    },
-    "lambda:test": {
-      "cache": false
-    },
-    "lambda:testrun": {
-      "cache": false
     }
   }
 }
