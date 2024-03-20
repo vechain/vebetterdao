@@ -297,4 +297,29 @@ contract XAllocationPool is
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     return $._emissions;
   }
+
+  function baseAllocationPercentage() public view returns (uint256) {
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    return $.baseAllocationPercentage;
+  }
+
+  function variableAllocationPercentage() public view returns (uint256) {
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    return $.variableAllocationPercentage;
+  }
+
+  function appSharesCap() public view returns (uint256) {
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    return $.appSharesCap;
+  }
+
+  function b3tr() public view returns (IB3TR) {
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    return $.b3tr;
+  }
+
+  function claimedRewards(bytes32 appId, uint256 roundId) public view returns (bool) {
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    return $.claimedRewards[appId][roundId];
+  }
 }
