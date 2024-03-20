@@ -380,20 +380,10 @@ async function deployNFTBadge(
   return contract
 }
 
-async function deployXAllocationPool(
-  b3trAddress: string,
-  adminAddress: string,
-  baseAllocationPercentage: number = 20,
-  appSharesCap: number = 15,
-) {
+async function deployXAllocationPool(b3trAddress: string, adminAddress: string) {
   console.log(`Deploying XAllocationPool contract`)
   const XAllocationPoolContract = await ethers.getContractFactory("XAllocationPool")
-  const contract = await XAllocationPoolContract.deploy(
-    adminAddress,
-    b3trAddress,
-    baseAllocationPercentage,
-    appSharesCap,
-  )
+  const contract = await XAllocationPoolContract.deploy(adminAddress, b3trAddress)
 
   await contract.waitForDeployment()
 
@@ -410,6 +400,8 @@ async function deployXAllocationVoting(
   quorumPercentage: number = 50,
   xAllocationVotingPeriod: number = 10,
   baseURI: string = "ipfs://",
+  baseAllocationPercentage: number = 20,
+  appSharesCap: number = 15,
 ) {
   console.log(`Deploying XAllocationVoting contract`)
   const XAllocationVotingContract = await ethers.getContractFactory("XAllocationVoting")
@@ -421,6 +413,8 @@ async function deployXAllocationVoting(
     voterRewardsAddress,
     [timeLockAddress, adminAddress],
     baseURI,
+    baseAllocationPercentage,
+    appSharesCap,
   )
 
   await contract.waitForDeployment()
