@@ -434,20 +434,20 @@ async function deployEmissions(
   maxVote2EarnDecayPercentage: number,
 ) {
   console.log(`Deploying Emissions contract`)
-  const EmissionsContract = await ethers.getContractFactory("Emissions")
-  const contract = await EmissionsContract.deploy(
-    minterAddress,
-    adminAddress,
-    b3trAddress,
-    destinations as [string, string, string],
-    allocations,
-    cycleDuration,
-    decaySettings as [number, number, number, number],
-    treasuryPercentage,
-    maxVote2EarnDecayPercentage,
-  )
-
-  await contract.waitForDeployment()
+  const contract = (await deployProxy("Emissions", [
+    {
+      minter: minterAddress,
+      admin: adminAddress,
+      upgrader: adminAddress,
+      b3trAddress: b3trAddress,
+      destinations: destinations,
+      initialXAppAllocation: allocations,
+      cycleDuration: cycleDuration,
+      decaySettings: decaySettings,
+      treasuryPercentage: treasuryPercentage,
+      maxVote2EarnDecay: maxVote2EarnDecayPercentage,
+    },
+  ])) as Emissions
 
   console.log(`Emissions contract deployed at address ${await contract.getAddress()}`)
 

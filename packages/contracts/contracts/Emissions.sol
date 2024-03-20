@@ -1,14 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import "./interfaces/IB3TR.sol";
 import "./interfaces/IXAllocationVotingGovernor.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract Emissions is AccessControl, ReentrancyGuard {
+contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
   // Roles
   bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+  bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
   struct Emission {
     uint256 xAllocations;
@@ -44,6 +47,19 @@ contract Emissions is AccessControl, ReentrancyGuard {
     uint256 scalingFactor;
   }
 
+  struct InitializationData {
+    address minter;
+    address admin;
+    address upgrader;
+    address b3trAddress;
+    address[3] destinations;
+    uint256 initialXAppAllocation;
+    uint256 cycleDuration;
+    uint256[4] decaySettings;
+    uint256 treasuryPercentage;
+    uint256 maxVote2EarnDecay;
+  }
+
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.Emissions")) - 1)) & ~bytes32(uint256(0xff))
   bytes32 private constant EmissionsStorageLocation =
     0xa3a4dbdafa3539d2a7f76379fff3516428de5d09ad2bbe195434cac5e7193900;
@@ -56,76 +72,78 @@ contract Emissions is AccessControl, ReentrancyGuard {
 
   event EmissionDistributed(uint256 indexed cycle, uint256 xAllocations, uint256 vote2Earn, uint256 treasury);
 
-  constructor(
-    address minter,
-    address admin,
-    address b3trAddress,
-    address[3] memory _destinations,
-    uint256 _initialXAppAllocation,
-    uint256 _cycleDuration,
-    uint256[4] memory _decaySettings,
-    uint256 _treasuryPercentage,
-    uint256 _maxVote2EarnDecay
-  ) {
+  /// @custom:oz-upgrades-unsafe-allow constructor
+  constructor() {
+    _disableInitializers();
+  }
+
+  function initialize(InitializationData memory data) public initializer {
     // Assertions
-    require(_destinations.length == 3, "Emissions: Invalid destinations input length. Expected 3.");
-    require(_initialXAppAllocation > 0, "Emissions: Initial xApp allocation must be greater than 0");
-    require(_cycleDuration > 0, "Emissions: Cycle duration must be greater than 0");
-    require(_decaySettings.length == 4, "Emissions: Invalid decay settings input length. Expected 4.");
+    require(data.destinations.length == 3, "Emissions: Invalid destinations input length. Expected 3.");
+    require(data.initialXAppAllocation > 0, "Emissions: Initial xApp allocation must be greater than 0");
+    require(data.cycleDuration > 0, "Emissions: Cycle duration must be greater than 0");
+    require(data.decaySettings.length == 4, "Emissions: Invalid decay settings input length. Expected 4.");
     require(
-      _treasuryPercentage > 0 && _treasuryPercentage < 10000,
+      data.treasuryPercentage > 0 && data.treasuryPercentage < 10000,
       "Emissions: Treasury percentage must be between 0 and 10000"
     );
     require(
-      _decaySettings[0] > 0 && _decaySettings[0] < 100,
+      data.decaySettings[0] > 0 && data.decaySettings[0] < 100,
       "Emissions: xAllocations decay must be between 0 and 100"
     );
-    require(_decaySettings[1] > 0 && _decaySettings[1] < 100, "Emissions: vote2Earn decay must be between 0 and 100");
-    require(_decaySettings[2] > 0, "Emissions: xAllocations decay delay must be greater than 0");
-    require(_decaySettings[3] > 0, "Emissions: vote2Earn decay delay must be greater than 0");
     require(
-      _maxVote2EarnDecay > 0 && _maxVote2EarnDecay < 100,
+      data.decaySettings[1] > 0 && data.decaySettings[1] < 100,
+      "Emissions: vote2Earn decay must be between 0 and 100"
+    );
+    require(data.decaySettings[2] > 0, "Emissions: xAllocations decay delay must be greater than 0");
+    require(data.decaySettings[3] > 0, "Emissions: vote2Earn decay delay must be greater than 0");
+    require(
+      data.maxVote2EarnDecay > 0 && data.maxVote2EarnDecay < 100,
       "Emissions: Max vote2Earn decay must be between 0 and 100"
     );
+
+    __AccessControl_init();
+    __ReentrancyGuard_init();
+    __UUPSUpgradeable_init();
 
     EmissionsStorage storage $ = _getEmissionsStorage();
 
     // Set B3TR token contract
-    $.b3tr = IB3TR(b3trAddress);
+    $.b3tr = IB3TR(data.b3trAddress);
 
     // Set destinations
-    $._xAllocations = _destinations[0];
-    $._vote2Earn = _destinations[1];
-    $._treasury = _destinations[2];
+    $._xAllocations = data.destinations[0];
+    $._vote2Earn = data.destinations[1];
+    $._treasury = data.destinations[2];
 
     // Set cycle duration
-    $.cycleDuration = _cycleDuration;
+    $.cycleDuration = data.cycleDuration;
 
     // Set decay settings
-    $.xAllocationsDecay = _decaySettings[0];
-    $.vote2EarnDecay = _decaySettings[1];
-    $.xAllocationsDecayPeriod = _decaySettings[2];
-    $.vote2EarnDecayPeriod = _decaySettings[3];
+    $.xAllocationsDecay = data.decaySettings[0];
+    $.vote2EarnDecay = data.decaySettings[1];
+    $.xAllocationsDecayPeriod = data.decaySettings[2];
+    $.vote2EarnDecayPeriod = data.decaySettings[3];
 
     // Set initial emissions
-    $.initialXAppAllocation = _initialXAppAllocation;
+    $.initialXAppAllocation = data.initialXAppAllocation;
 
     // Set treasury percentage
-    $.treasuryPercentage = _treasuryPercentage;
+    $.treasuryPercentage = data.treasuryPercentage;
 
     // Set max vote2Earn decay
-    $.maxVote2EarnDecay = _maxVote2EarnDecay;
-
-    // Initialise cycle
-    $.nextCycle = 0;
+    $.maxVote2EarnDecay = data.maxVote2EarnDecay;
 
     // Set scaling factor
     $.scalingFactor = 1e6;
 
     // Set roles
-    _grantRole(DEFAULT_ADMIN_ROLE, admin);
-    _grantRole(MINTER_ROLE, minter);
+    _grantRole(DEFAULT_ADMIN_ROLE, data.admin);
+    _grantRole(MINTER_ROLE, data.minter);
+    _grantRole(UPGRADER_ROLE, data.upgrader);
   }
+
+  function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
   function bootstrap() public onlyRole(MINTER_ROLE) nonReentrant {
     EmissionsStorage storage $ = _getEmissionsStorage();

@@ -8,8 +8,8 @@ import "./interfaces/IGovernor.sol";
 import "./interfaces/IXAllocationVotingGovernor.sol";
 import "./interfaces/IEmissions.sol";
 import "./interfaces/IB3TR.sol";
-import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
   bytes32 public constant X_ALLOCATION_VOTE_REGISTRAR_ROLE = keccak256("X_ALLOCATION_VOTE_REGISTRAR_ROLE");

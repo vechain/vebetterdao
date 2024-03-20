@@ -24,7 +24,7 @@ interface DeployInstance {
   b3trBadge: B3TRBadge & { deploymentTransaction(): ContractTransactionResponse }
   xAllocationVoting: XAllocationVoting
   xAllocationPool: XAllocationPool
-  emissions: Emissions & { deploymentTransaction(): ContractTransactionResponse }
+  emissions: Emissions
   voterRewards: VoterRewards
   owner: HardhatEthersSigner
   otherAccount: HardhatEthersSigner
@@ -114,25 +114,25 @@ export const getOrDeployContractInstances = async ({
   const VOTE_2_EARN_ADDRESS = otherAccounts[1].address
   const TREASURY_ADDRESS = otherAccounts[2].address
 
-  const EmissionsContract = await ethers.getContractFactory("Emissions")
-  const emissions = await EmissionsContract.deploy(
-    minterAccount,
-    owner,
-    await b3tr.getAddress(),
-    [X_ALLOCATIONS_ADDRESS, VOTE_2_EARN_ADDRESS, TREASURY_ADDRESS],
-    config.INITIAL_X_ALLOCATION,
-    config.EMISSIONS_CYCLE_DURATION,
-    [
-      config.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE,
-      config.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE,
-      config.EMISSIONS_X_ALLOCATION_DECAY_PERIOD,
-      config.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD,
-    ],
-    config.EMISSIONS_TREASURY_PERCENTAGE,
-    config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
-  )
-
-  await emissions.waitForDeployment()
+  const emissions = (await deployProxy("Emissions", [
+    {
+      minter: minterAccount.address,
+      admin: owner.address,
+      upgrader: owner.address,
+      b3trAddress: await b3tr.getAddress(),
+      destinations: [X_ALLOCATIONS_ADDRESS, VOTE_2_EARN_ADDRESS, TREASURY_ADDRESS],
+      initialXAppAllocation: config.INITIAL_X_ALLOCATION,
+      cycleDuration: config.EMISSIONS_CYCLE_DURATION,
+      decaySettings: [
+        config.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE,
+        config.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE,
+        config.EMISSIONS_X_ALLOCATION_DECAY_PERIOD,
+        config.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD,
+      ],
+      treasuryPercentage: config.EMISSIONS_TREASURY_PERCENTAGE,
+      maxVote2EarnDecay: config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
+    },
+  ])) as Emissions
 
   const voterRewards = (await deployProxy("VoterRewards", [
     owner.address,
