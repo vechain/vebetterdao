@@ -12,20 +12,29 @@ import "./interfaces/IB3TR.sol";
 contract VoterRewards is AccessControl, ReentrancyGuard {
   bytes32 public constant X_ALLOCATION_VOTE_REGISTRAR_ROLE = keccak256("X_ALLOCATION_VOTE_REGISTRAR_ROLE");
 
-  IB3TRBadge public b3trBadge;
-  IB3TR public b3tr;
-  IEmissions public emissions;
+  /// @custom:storage-location erc7201:b3tr.storage.VoterRewards
+  struct VoterRewardsStorage {
+    IB3TRBadge b3trBadge;
+    IB3TR b3tr;
+    IEmissions emissions;
+    // level => percentage multiplier for the level of the badge
+    mapping(uint256 => uint256) levelToMultiplier;
+    // cycle => total weighted votes in the cycle
+    mapping(uint256 => uint256) cycleToTotal;
+    // cycle => voter => total weighted votes for the voter in the cycle
+    mapping(uint256 => mapping(address => uint256)) cycleToVoterToTotal;
+    uint256 scalingFactor;
+  }
 
-  // level => percentage multiplier for the level of the badge
-  mapping(uint256 => uint256) public levelToMultiplier;
+  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.VoterRewards")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 private constant VoterRewardsStorageLocation =
+    0x114e7ffaaf205d38cd05b17b56f3357806ef2ce889cb4748445ae91cdfc37c00;
 
-  // cycle => total weighted votes in the cycle
-  mapping(uint256 => uint256) public cycleToTotal;
-
-  // cycle => voter => total weighted votes for the voter in the cycle
-  mapping(uint256 => mapping(address => uint256)) public cycleToVoterToTotal;
-
-  uint256 public scalingFactor = 1e6;
+  function _getVoterRewardsStorage() internal pure returns (VoterRewardsStorage storage $) {
+    assembly {
+      $.slot := VoterRewardsStorageLocation
+    }
+  }
 
   event VoteRegistered(uint256 indexed cycle, address indexed voter, uint256 votes);
 
@@ -46,12 +55,15 @@ contract VoterRewards is AccessControl, ReentrancyGuard {
     require(levels.length > 0, "VoterRewards: levels must have at least one element");
     require(levels.length == multipliers.length, "VoterRewards: levels and multipliers must have the same length");
 
-    b3trBadge = IB3TRBadge(_b3trBadge);
-    b3tr = IB3TR(_b3tr);
-    emissions = IEmissions(_emissions);
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+
+    $.b3trBadge = IB3TRBadge(_b3trBadge);
+    $.b3tr = IB3TR(_b3tr);
+    $.emissions = IEmissions(_emissions);
+    $.scalingFactor = 1e6;
 
     for (uint256 i = 0; i < levels.length; i++) {
-      levelToMultiplier[levels[i]] = multipliers[i];
+      $.levelToMultiplier[levels[i]] = multipliers[i];
     }
 
     _grantRole(DEFAULT_ADMIN_ROLE, admin);
@@ -66,15 +78,17 @@ contract VoterRewards is AccessControl, ReentrancyGuard {
     require(proposalStart > 0, "VoterRewards: proposalStart must be greater than 0");
     require(voter != address(0), "VoterRewards: voter cannot be the zero address");
 
-    uint256 cycle = emissions.getCurrentCycle();
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
 
-    uint256 badgeLevel = b3trBadge.getPastLevel(voter, proposalStart);
+    uint256 cycle = $.emissions.getCurrentCycle();
 
-    uint256 multiplier = levelToMultiplier[badgeLevel]; // Percentage multiplier for the level of the badge
+    uint256 badgeLevel = $.b3trBadge.getPastLevel(voter, proposalStart);
+
+    uint256 multiplier = $.levelToMultiplier[badgeLevel]; // Percentage multiplier for the level of the badge
     uint256 total = votes; //TODO - multiply votes by percentage multiplier
 
-    cycleToTotal[cycle] += total; // Add total to the cycle
-    cycleToVoterToTotal[cycle][voter] += total; // Add total to the voter in the cycle
+    $.cycleToTotal[cycle] += total; // Add total to the cycle
+    $.cycleToVoterToTotal[cycle][voter] += total; // Add total to the voter in the cycle
 
     emit VoteRegistered(cycle, voter, total);
   }
@@ -84,17 +98,19 @@ contract VoterRewards is AccessControl, ReentrancyGuard {
   function claimReward(uint256 cycle, address voter) public nonReentrant {
     require(cycle > 0, "VoterRewards: cycle must be greater than 0");
     require(voter != address(0), "VoterRewards: voter cannot be the zero address");
-    require(emissions.isCycleEnded(cycle), "VoterRewards: cycle must be ended");
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+
+    require($.emissions.isCycleEnded(cycle), "VoterRewards: cycle must be ended");
 
     uint256 reward = getReward(cycle, voter);
 
     require(reward > 0, "VoterRewards: reward must be greater than 0");
-    require(b3tr.balanceOf(address(this)) >= reward, "VoterRewards: not enough B3TR in the contract to pay reward");
+    require($.b3tr.balanceOf(address(this)) >= reward, "VoterRewards: not enough B3TR in the contract to pay reward");
 
-    cycleToVoterToTotal[cycle][voter] = 0;
+    $.cycleToVoterToTotal[cycle][voter] = 0;
 
     // transfer reward to voter
-    require(b3tr.transfer(voter, reward), "VoterRewards: transfer failed");
+    require($.b3tr.transfer(voter, reward), "VoterRewards: transfer failed");
 
     emit RewardClaimed(cycle, voter, reward);
   }
@@ -104,38 +120,45 @@ contract VoterRewards is AccessControl, ReentrancyGuard {
   // ----------------- Getters ----------------- //
 
   function getReward(uint256 cycle, address voter) public view returns (uint256) {
-    uint256 total = cycleToVoterToTotal[cycle][voter];
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
 
-    uint256 totalCycle = cycleToTotal[cycle];
+    uint256 total = $.cycleToVoterToTotal[cycle][voter];
 
-    uint256 emissionsAmount = emissions.getVote2EarnAmount(cycle);
+    uint256 totalCycle = $.cycleToTotal[cycle];
+
+    uint256 emissionsAmount = $.emissions.getVote2EarnAmount(cycle);
     require(emissionsAmount > 0, "VoterRewards: emissionsAmount must be greater than 0");
 
     // Scale up the numerator before division to improve precision
-    uint256 scaledNumerator = total * emissionsAmount * scalingFactor; // Scale by a factor of scalingFactor for precision
+    uint256 scaledNumerator = total * emissionsAmount * $.scalingFactor; // Scale by a factor of scalingFactor for precision
     uint256 reward = scaledNumerator / totalCycle;
 
     // Scale down the reward to the original scale
-    return reward / scalingFactor;
+    return reward / $.scalingFactor;
   }
 
   // ----------------- Setters ----------------- //
 
   function setB3TRBadge(address _b3trBadge) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(_b3trBadge != address(0), "VoterRewards: _b3trBadge cannot be the zero address");
-    b3trBadge = IB3TRBadge(_b3trBadge);
+
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+    $.b3trBadge = IB3TRBadge(_b3trBadge);
   }
 
   function setLevelToMultiplier(uint256 level, uint256 multiplier) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(level > 0, "VoterRewards: level must be greater than 0");
     require(multiplier > 0, "VoterRewards: multiplier must be greater than 0");
 
-    levelToMultiplier[level] = multiplier;
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+    $.levelToMultiplier[level] = multiplier;
   }
 
   function setEmissions(address _emissions) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(_emissions != address(0), "VoterRewards: emissions cannot be the zero address");
-    emissions = IEmissions(_emissions);
+
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+    $.emissions = IEmissions(_emissions);
   }
 
   function setXallocationVoteRegistrarRole(address _voteRegistrar) public onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -146,6 +169,7 @@ contract VoterRewards is AccessControl, ReentrancyGuard {
   function setScalingFactor(uint256 newScalingFactor) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(newScalingFactor > 0, "VoterRewards: Scaling factor must be greater than 0");
 
-    scalingFactor = newScalingFactor;
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+    $.scalingFactor = newScalingFactor;
   }
 }
