@@ -1,29 +1,12 @@
 import { XApp, useXAppMetadata } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
-import {
-  Card,
-  CardBody,
-  VStack,
-  HStack,
-  Skeleton,
-  IconButton,
-  Image,
-  Text,
-  Box,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  useClipboard,
-  useToast,
-  useDisclosure,
-} from "@chakra-ui/react"
-import { FaExternalLinkAlt } from "react-icons/fa"
-import { FaCheck, FaCopy, FaEllipsisVertical } from "react-icons/fa6"
+import { Card, CardBody, VStack, HStack, Skeleton, IconButton, Image, Text, Box, useDisclosure } from "@chakra-ui/react"
+import { FaEllipsisVertical } from "react-icons/fa6"
 import { AppCardInnerDetails } from "./AppCardInnerDetails"
 import { useBreakpoints } from "@/hooks"
 import { AppCardOptionsMobileModal } from "./AppCardOptionsMobileModal"
+import { AppCardOptionsDesktopMenu } from "./AppCardOptionsDesktopMenu"
 
 type Props = { xApp: XApp }
 export const AppCard = ({ xApp }: Props) => {
@@ -35,21 +18,9 @@ export const AppCard = ({ xApp }: Props) => {
     isError: isAppMetadataError,
     error: appMetadataError,
   } = useXAppMetadata(xApp.id)
+
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
   const { data: banner, isLoading: isBannerLoading } = useIpfsImage(appMetadata?.banner)
-
-  const { onCopy, hasCopied } = useClipboard(xApp.receiverAddress)
-
-  const toast = useToast()
-  const handleOnCopy = () => {
-    onCopy()
-    toast({
-      title: "dApp receiver address copied",
-      status: "success",
-      duration: 3000,
-      isClosable: true,
-    })
-  }
 
   const { isOpen: isMobileOptionsOpen, onClose: closeMobileOptions, onOpen: openMobileOptions } = useDisclosure()
 
@@ -83,21 +54,7 @@ export const AppCard = ({ xApp }: Props) => {
                   <AppCardOptionsMobileModal xApp={xApp} isOpen={isMobileOptionsOpen} onClose={closeMobileOptions} />
                 </>
               ) : (
-                <Menu>
-                  <MenuButton as={IconButton} isRound={true} icon={<FaEllipsisVertical />} />
-                  <MenuList>
-                    <MenuItem
-                      disabled={isAppMetadataError}
-                      icon={<FaExternalLinkAlt />}
-                      onClick={() => window.open(appMetadata?.external_url, "_blank")}>
-                      Go to the dapp
-                    </MenuItem>
-                    <MenuItem onClick={handleOnCopy} icon={hasCopied ? <FaCheck /> : <FaCopy />}>
-                      {" "}
-                      Copy receiver address
-                    </MenuItem>
-                  </MenuList>
-                </Menu>
+                <AppCardOptionsDesktopMenu xApp={xApp} />
               )}
             </HStack>
             <Skeleton isLoaded={!appMetadataLoading}>
