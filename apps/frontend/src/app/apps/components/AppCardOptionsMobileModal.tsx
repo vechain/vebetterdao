@@ -32,7 +32,7 @@ export const AppCardOptionsMobileModal = ({ isOpen, onClose, xApp }: Props) => {
     onCopy()
     onClose()
     toast({
-      title: "dApp receiver address copied",
+      title: "App receiver address copied",
       status: "success",
       duration: 3000,
       isClosable: true,
@@ -69,7 +69,7 @@ export const AppCardOptionsMobileModal = ({ isOpen, onClose, xApp }: Props) => {
                 leftIcon={<FaExternalLinkAlt />}
                 colorScheme="gray"
                 w="full">
-                {appMetadata?.external_url ? "Go to the dApp" : "No dApp link available"}
+                {appMetadata?.external_url ? "Go to the App" : "No App link available"}
               </Button>
             </Skeleton>
           </VStack>

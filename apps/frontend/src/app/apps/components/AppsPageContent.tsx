@@ -18,7 +18,7 @@ export const AppsPageContent = () => {
   return (
     <VStack spacing={8}>
       <HStack w="full" justify={"space-between"}>
-        <Heading size="md">Explore dApps</Heading>
+        <Heading size="md">Explore Apps</Heading>
       </HStack>
       <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
         {data?.map(xApp => <AppCard key={xApp.id} xApp={xApp} />)}

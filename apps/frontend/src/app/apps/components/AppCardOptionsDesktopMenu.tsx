@@ -25,7 +25,7 @@ export const AppCardOptionsDesktopMenu = ({ xApp }: Props) => {
   const handleOnCopy = () => {
     onCopy()
     toast({
-      title: "dApp receiver address copied",
+      title: "App receiver address copied",
       status: "success",
       duration: 3000,
       isClosable: true,
@@ -44,7 +44,7 @@ export const AppCardOptionsDesktopMenu = ({ xApp }: Props) => {
             isExternal
             disabled={!appMetadata?.external_url}
             icon={<FaExternalLinkAlt />}>
-            {appMetadata?.external_url ? "Go to the dApp" : "No dApp link available"}
+            {appMetadata?.external_url ? "Go to the App" : "No App link available"}
           </MenuItem>
         </Skeleton>
         <MenuItem onClick={handleOnCopy} icon={hasCopied ? <FaCheck /> : <FaCopy />}>
