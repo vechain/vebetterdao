@@ -41,7 +41,7 @@ describe("X-Allocation Pool", async function () {
     })
 
     it.only("Only admin should be able to upgrade the contract", async function () {
-      const { xAllocationPool, owner, otherAccount } = await getOrDeployContractInstances({
+      const { xAllocationPool, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
