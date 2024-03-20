@@ -1,6 +1,7 @@
 import { getConfig } from "@repo/config"
 import { abi } from "thor-devkit"
 import { B3TRGovernorJson } from "@repo/contracts"
+import { AvailableContractAbis } from "@/hooks"
 const b3trGovernorAbi = B3TRGovernorJson.abi
 
 const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
@@ -39,7 +40,7 @@ const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
  */
 export const buildCreateProposalTx = (
   thor: Connex.Thor,
-  contractsAbi: (typeof b3trGovernorAbi)[number][],
+  contractsAbi: AvailableContractAbis[],
   targets: string[],
   values: (string | number)[][],
   description: string,
