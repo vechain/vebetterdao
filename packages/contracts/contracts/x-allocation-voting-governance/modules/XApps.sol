@@ -43,11 +43,6 @@ abstract contract XApps is Initializable, IXApps, XAllocationVotingGovernor {
     }
   }
 
-  /// @custom:oz-upgrades-unsafe-allow constructor
-  constructor() {
-    _disableInitializers();
-  }
-
   /**
    * @dev Sets the value for {baseURI}
    */

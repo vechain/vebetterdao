@@ -58,11 +58,6 @@ abstract contract XAllocationVotingGovernor is
     }
   }
 
-  /// @custom:oz-upgrades-unsafe-allow constructor
-  constructor() {
-    _disableInitializers();
-  }
-
   /**
    * @dev Sets the value for {name} and {b3trGovernor} address
    */

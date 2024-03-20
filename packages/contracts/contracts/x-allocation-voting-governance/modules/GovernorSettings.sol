@@ -4,11 +4,12 @@
 pragma solidity ^0.8.18;
 
 import { XAllocationVotingGovernor } from "../XAllocationVotingGovernor.sol";
+import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /**
  * @dev Extension of {XAllocationVotingGovernor} for settings updatable through governance.
  */
-abstract contract GovernorSettings is XAllocationVotingGovernor {
+abstract contract GovernorSettings is Initializable, XAllocationVotingGovernor {
   /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.GovernorSettings
   struct GovernorSettingsStorage {
     // duration: limited to uint32 in core
@@ -30,7 +31,11 @@ abstract contract GovernorSettings is XAllocationVotingGovernor {
   /**
    * @dev Initialize the governance parameters.
    */
-  constructor(uint32 initialVotingPeriod) {
+  function __GovernorSettings_init(uint32 initialVotingPeriod) internal onlyInitializing {
+    __GovernorSettings_init_unchained(initialVotingPeriod);
+  }
+
+  function __GovernorSettings_init_unchained(uint32 initialVotingPeriod) internal onlyInitializing {
     _setVotingPeriod(initialVotingPeriod);
   }
 
