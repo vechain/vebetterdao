@@ -10,9 +10,11 @@ import {
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 import { useConnex, useWallet } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
+import BigNumber from "bignumber.js"
+import { removingExcessDecimals } from "@/utils/MathUtils"
 
 const config = getConfig()
 
@@ -41,14 +43,15 @@ export const useStakeB3tr = ({
   const queryClient = useQueryClient()
 
   const { data: tokenDetails } = useB3trTokenDetails()
+  const contractAmount = useMemo(() => removingExcessDecimals(amount, tokenDetails?.decimals), [amount, tokenDetails])
 
   const buildClauses = useCallback(() => {
-    if (!amount) throw new Error("amount is required")
+    if (!contractAmount) throw new Error("amount is required")
     if (!tokenDetails) throw new Error("tokenDetails is required")
-    const approveClause = buildB3trApprovesTx(thor, amount, config.vot3ContractAddress, tokenDetails.decimals)
-    const stakeClause = buildStakeB3trTx(thor, amount, tokenDetails.decimals)
+    const approveClause = buildB3trApprovesTx(thor, contractAmount, config.vot3ContractAddress, tokenDetails.decimals)
+    const stakeClause = buildStakeB3trTx(thor, contractAmount, tokenDetails.decimals)
     return [approveClause, stakeClause]
-  }, [thor, amount, tokenDetails])
+  }, [thor, tokenDetails, contractAmount])
 
   //Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {

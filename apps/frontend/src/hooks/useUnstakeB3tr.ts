@@ -9,9 +9,10 @@ import {
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 import { useConnex, useWallet } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
+import { removingExcessDecimals } from "@/utils/MathUtils"
 
 const config = getConfig()
 
@@ -40,13 +41,14 @@ export const useUnstakeB3tr = ({
   const queryClient = useQueryClient()
 
   const { data: tokenDetails } = useB3trTokenDetails()
+  const contractAmount = useMemo(() => removingExcessDecimals(amount, tokenDetails?.decimals), [amount, tokenDetails])
 
   const buildClauses = useCallback(() => {
-    if (!amount) throw new Error("amount is required")
+    if (!contractAmount) throw new Error("amount is required")
     if (!tokenDetails) throw new Error("tokenDetails is required")
-    const unstakeClause = buildUnstakeStakeB3trTx(thor, amount, tokenDetails.decimals)
+    const unstakeClause = buildUnstakeStakeB3trTx(thor, contractAmount, tokenDetails.decimals)
     return [unstakeClause]
-  }, [thor, amount, tokenDetails])
+  }, [thor, contractAmount, tokenDetails])
 
   //Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {
