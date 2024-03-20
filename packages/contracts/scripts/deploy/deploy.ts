@@ -13,10 +13,9 @@ import {
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
-import ERC1967Proxy from "@openzeppelin/contracts/build/contracts/ERC1967Proxy.json"
 import { seedLocalEnvironment, seedTestEnvironment } from "./seed"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
-import { FunctionFragment } from "ethers"
+import { deployProxy } from "../helpers"
 
 // NFT Badge Values
 const name = "VeBetterDAO Galaxy Member"
@@ -63,7 +62,17 @@ export async function deployAll(config: ContractsConfig) {
   )
 
   // Deploy the NFT Badge contract with Max Mintable Level 1
-  const badge = await deployNFTBadge(1, name, symbol, TEMP_ADMIN, config.NFT_BADGE_BASE_URI)
+  const badge = await deployNFTBadge(
+    1,
+    name,
+    symbol,
+    TEMP_ADMIN,
+    config.NFT_BADGE_BASE_URI,
+    config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
+    config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+    await b3tr.getAddress(),
+    config.TREASURY_POOL_ADDRESS,
+  )
 
   const emissions = await deployEmissions(
     await b3tr.getAddress(),
@@ -167,6 +176,13 @@ export async function deployAll(config: ContractsConfig) {
   await badge
     .connect(admin)
     .setB3trGovernorAddress(await governor.getAddress())
+    .then(async tx => await tx.wait())
+
+  //Set the emissions address as the ROUND_STARTER_ROLE in XAllocationVoting
+  const roundStarterRole = await xAllocationVoting.ROUND_STARTER_ROLE()
+  await xAllocationVoting
+    .connect(admin)
+    .grantRole(roundStarterRole, await emissions.getAddress())
     .then(async tx => await tx.wait())
 
   // ---------- Seeding ---------- //
@@ -351,11 +367,7 @@ async function deployTimeLock(
   executors: string[] = [],
 ): Promise<TimeLock> {
   console.log(`Deploying TimeLock contract`)
-  const TimeLockContract = await ethers.getContractFactory("TimeLock")
-  const contract = await TimeLockContract.deploy(minDelay, proposers, executors, admin)
-
-  await contract.waitForDeployment()
-
+  const contract = (await deployProxy("TimeLock", [minDelay, proposers, executors, admin])) as TimeLock
   console.log(`TimeLock contract deployed at address ${await contract.getAddress()}`)
 
   return contract
@@ -370,17 +382,15 @@ async function deployGovernor(
   proposalThreshold: number,
 ): Promise<B3TRGovernor> {
   console.log(`Deploying Governor contract`)
-  const B3TRGovernor = await ethers.getContractFactory("B3TRGovernor")
-  const contract = await B3TRGovernor.deploy(
+
+  const contract = (await deployProxy("B3TRGovernor", [
     vot3Address,
     timelockAddress,
     quorum,
     votingPeriod,
     votingDelay,
     proposalThreshold,
-  )
-
-  await contract.waitForDeployment()
+  ])) as B3TRGovernor
 
   console.log(`Governor contract deployed at address ${await contract.getAddress()}`)
 
@@ -393,10 +403,24 @@ async function deployNFTBadge(
   symbol: string,
   admin: string,
   baseUri: string,
+  xNodeMaxFreeLevels: number[],
+  b3trRequiredToUpgradeToLevel: bigint[],
+  b3trAddress: string,
+  treasuryAddress: string,
 ) {
   console.log(`Deploying B3TRBadge NFT contract`)
   const NFTBadgeContract = await ethers.getContractFactory("B3TRBadge")
-  const contract = await NFTBadgeContract.deploy(name, symbol, admin, mintableLevelFromDeploy, baseUri)
+  const contract = await NFTBadgeContract.deploy(
+    name,
+    symbol,
+    admin,
+    mintableLevelFromDeploy,
+    baseUri,
+    xNodeMaxFreeLevels,
+    b3trRequiredToUpgradeToLevel,
+    b3trAddress,
+    treasuryAddress,
+  )
 
   await contract.waitForDeployment()
 
@@ -520,27 +544,16 @@ async function deployTreasury(
   adminAddress: string,
   proxyAdminAddress: string,
 ) {
-  console.log(`Deploying Treasury implementation contract`)
-  const Treasury = await ethers.getContractFactory("Treasury")
-  const treasury = await Treasury.deploy()
 
-  await treasury.waitForDeployment()
-
-  console.log("Deploying Treasury proxy contract")
-  const TreasuryProxy = await ethers.getContractFactory(ERC1967Proxy.abi, ERC1967Proxy.bytecode)
-  const functionFragment = Treasury.interface.getFunction("initialize")
-  const callInitialize = TreasuryProxy.interface.encodeFunctionData(functionFragment as FunctionFragment, [
+  const contract = (await deployProxy("Treasury", [
     b3trAddress,
     vot3Address,
     timelockAddress,
     adminAddress,
     proxyAdminAddress,
-  ])
-  const proxy = await TreasuryProxy.deploy(await treasury.getAddress(), callInitialize)
-  await proxy.waitForDeployment()
+  ])) as Treasury
 
-  console.log(`Treasury proxy contract deployed at address ${await proxy.getAddress()}`)
+  console.log(`Treasury contract deployed at address ${await contract.getAddress()}`)
 
-  const treasuryProxy = await ethers.getContractAt("Treasury", await proxy.getAddress())
-  return treasuryProxy
+  return contract
 }

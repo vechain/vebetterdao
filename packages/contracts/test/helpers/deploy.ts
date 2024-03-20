@@ -15,14 +15,15 @@ import {
   Treasury,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
+import { deployProxy } from "../../scripts/helpers"
 
 interface DeployInstance {
   B3trContract: ContractFactory
   Treasury: ContractFactory
   b3tr: B3TR & { deploymentTransaction(): ContractTransactionResponse }
   vot3: VOT3 & { deploymentTransaction(): ContractTransactionResponse }
-  timeLock: TimeLock & { deploymentTransaction(): ContractTransactionResponse }
-  governor: B3TRGovernor & { deploymentTransaction(): ContractTransactionResponse }
+  timeLock: TimeLock
+  governor: B3TRGovernor
   b3trBadge: B3TRBadge & { deploymentTransaction(): ContractTransactionResponse }
   xAllocationVoting: XAllocationVoting & { deploymentTransaction(): ContractTransactionResponse }
   xAllocationPool: XAllocationPool & { deploymentTransaction(): ContractTransactionResponse }
@@ -42,8 +43,8 @@ export const NFT_BADGE_SYMBOL = "B3TR"
 export const DEFAULT_MAX_MINTABLE_LEVEL = 1
 
 // // Voter Rewards
-export const levels = [1, 2, 3, 4] // NFT Badge levels
-export const multipliers = [0, 10, 20, 50] // NFT Badge percentage multipliers
+export const levels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] // NFT Badge levels
+export const multipliers = [0, 10, 20, 50, 100, 150, 200, 400, 900, 2400] // NFT Badge percentage multipliers (in basis points)
 
 let cachedDeployInstance: DeployInstance | undefined = undefined
 export const getOrDeployContractInstances = async ({
@@ -67,25 +68,22 @@ export const getOrDeployContractInstances = async ({
   const vot3 = await Vot3Contract.deploy(owner, await b3tr.getAddress())
 
   // Deploy TimeLock
-  const TimeLockContract = await ethers.getContractFactory("TimeLock")
-  const timeLock = await TimeLockContract.deploy(
+  const timeLock = (await deployProxy("TimeLock", [
     0, //0 seconds delay for immediate execution
     [],
     [],
-    timelockAdmin,
-  )
+    timelockAdmin.address,
+  ])) as TimeLock
 
   // Deploy Governor
-  const B3TRGovernor = await ethers.getContractFactory("B3TRGovernor")
-  const governor = await B3TRGovernor.deploy(
+  const governor = (await deployProxy("B3TRGovernor", [
     await vot3.getAddress(),
     await timeLock.getAddress(),
     config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
     config.B3TR_GOVERNOR_VOTING_PERIOD, // voting period
     config.B3TR_GOVERNOR_VOTING_DELAY, // voting delay
     config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD, // voting threshold
-  )
-  await governor.waitForDeployment()
+  ])) as B3TRGovernor
 
   // Set up roles
   const PROPOSER_ROLE = await timeLock.PROPOSER_ROLE()
@@ -103,6 +101,10 @@ export const getOrDeployContractInstances = async ({
     owner,
     maxMintableLevel,
     config.NFT_BADGE_BASE_URI,
+    config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
+    config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+    await b3tr.getAddress(),
+    config.TREASURY_POOL_ADDRESS,
   )
   await b3trBadge.waitForDeployment()
 
@@ -205,6 +207,17 @@ export const getOrDeployContractInstances = async ({
   // Setup XAllocationPool addresses
   await xAllocationPool.connect(owner).setXAllocationVotingAddress(await xAllocationVoting.getAddress())
   await xAllocationPool.connect(owner).setEmissionsAddress(await emissions.getAddress())
+
+  //Set the emissions address and the admin as the ROUND_STARTER_ROLE in XAllocationVoting
+  const roundStarterRole = await xAllocationVoting.ROUND_STARTER_ROLE()
+  await xAllocationVoting
+    .connect(owner)
+    .grantRole(roundStarterRole, await emissions.getAddress())
+    .then(async tx => await tx.wait())
+  await xAllocationVoting
+    .connect(owner)
+    .grantRole(roundStarterRole, owner.address)
+    .then(async tx => await tx.wait())
 
   cachedDeployInstance = {
     B3trContract,

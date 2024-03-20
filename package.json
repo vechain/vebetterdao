@@ -2,7 +2,7 @@
   "name": "b3tr-monorepo",
   "private": true,
   "scripts": {
-    "test": "turbo run test --",
+    "test": "dotenv -v NEXT_PUBLIC_APP_ENV=solo-staging -e .env turbo run test --",
     "build": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo build",
     "build:staging": "dotenv -v NEXT_PUBLIC_APP_ENV=solo-staging -- turbo build",
     "build:testnet": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- turbo build",
@@ -16,6 +16,8 @@
     "contracts:deploy": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run deploy --scope=contracts",
     "contracts:deploy:solo-staging": "dotenv -v NEXT_PUBLIC_APP_ENV=solo-staging -- turbo run deploy --scope=contracts",
     "contracts:deploy:testnet": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- turbo run deploy:testnet --scope=contracts",
+    "contracts:start-round:testnet": "dotenv -e .env.example -v NEXT_PUBLIC_APP_ENV=testnet -- turbo run start-round:testnet --scope=contracts",
+    "contracts:start-round:solo-staging": "dotenv -e .env.example -v NEXT_PUBLIC_APP_ENV=solo-staging -- turbo run start-round --scope=contracts",
     "contracts:test": "turbo run test --scope=contracts",
     "contracts:test:thor-solo": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run test:thor-solo --scope=contracts",
     "contracts:generate-b3tr-badge-metadata": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run generate-b3tr-badge-metadata --scope=contracts",

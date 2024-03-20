@@ -5,10 +5,12 @@ on:
   pull_request:
     branches:
       - main
+      - testnet
   push:
     branches:
       - main
       - Comment-only-solidity-changes
+      - testnet
 
 jobs:
   run-unit-tests:

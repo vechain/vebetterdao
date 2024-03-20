@@ -14,6 +14,8 @@ import {
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it } from "mocha"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
+import { getImplementationAddress } from "@openzeppelin/upgrades-core"
+import { B3TRGovernor } from "../typechain-types"
 
 describe("Governor and TimeLock", function () {
   const description = "Test Proposal: testing propsal with random description!"
@@ -53,8 +55,82 @@ describe("Governor and TimeLock", function () {
       const clockMode = await governor.CLOCK_MODE()
       expect(clockMode.toString()).to.eql("mode=blocknumber&from=default")
     })
-  })
 
+    it("should be able to upgrade the governor contract through governance", async function () {
+      const { governor, owner, b3tr, B3trContract } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+      const votesThreshold = await governor.proposalThreshold()
+      await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
+
+      // Deploy the implementation contract
+      const Contract = await ethers.getContractFactory("B3TRGovernor")
+      const implementation = await Contract.deploy()
+      await implementation.waitForDeployment()
+
+      // V1 Contract
+      const V1Contract = await ethers.getContractAt("B3TRGovernor", await governor.getAddress())
+
+      // Now we can create a proposal
+      const encodedFunctionCall = V1Contract.interface.encodeFunctionData("upgradeToAndCall", [
+        await implementation.getAddress(),
+        "0x",
+      ])
+      const description = "Upgrading Governance contracts"
+      const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
+
+      const tx = await governor
+        .connect(owner)
+        .propose([await governor.getAddress()], [0], [encodedFunctionCall], description, {
+          gasLimit: 10_000_000,
+        })
+
+      const proposalId = await getProposalIdFromTx(tx, governor)
+      await waitForProposalToBeActive(proposalId, governor)
+      await governor.connect(owner).castVote(proposalId, 1)
+      await waitForVotingPeriodToEnd(proposalId, governor)
+      expect(await governor.state(proposalId)).to.eql(4n) // succeded
+
+      await governor.queue([await governor.getAddress()], [0], [encodedFunctionCall], descriptionHash)
+      expect(await governor.state(proposalId)).to.eql(5n)
+
+      await governor.execute([await governor.getAddress()], [0], [encodedFunctionCall], descriptionHash)
+      expect(await governor.state(proposalId)).to.eql(7n)
+
+      const newImplAddress = await getImplementationAddress(ethers.provider, await governor.getAddress())
+      expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
+
+      // Check that the new implementation works
+      const newGovernor = Contract.attach(await governor.getAddress()) as B3TRGovernor
+      const newTx = await createProposal(newGovernor, b3tr, B3trContract, owner, description, functionToCall, [])
+      const newProposalId = await getProposalIdFromTx(newTx, newGovernor)
+
+      expect(newProposalId).to.exist
+      // expect data of previous contract to be untouched
+      expect(await governor.state(proposalId)).to.eql(7n)
+      expect(await governor.quorumReached(proposalId)).to.eql(true)
+    })
+
+    it("should be able to upgrade the TimeLock", async function () {
+      const { timeLock, timelockAdmin, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+      // Deploy the implementation contract
+      const Contract = await ethers.getContractFactory("TimeLock")
+      const implementation = await Contract.deploy()
+      await implementation.waitForDeployment()
+
+      // Upgrade
+      await expect(timeLock.connect(otherAccount).upgradeToAndCall(await implementation.getAddress(), "0x")).to.be
+        .reverted
+
+      await expect(timeLock.connect(timelockAdmin).upgradeToAndCall(await implementation.getAddress(), "0x")).to.not.be
+        .reverted
+
+      const newImplAddress = await getImplementationAddress(ethers.provider, await timeLock.getAddress())
+      expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
+    })
+  })
   describe("Proposal Creation", function () {
     it("cannot create a proposal if NOT a VOT3 holder", async function () {
       const config = createLocalConfig()
@@ -395,6 +471,180 @@ describe("Governor and TimeLock", function () {
       // Check if user voted
       const voted = await governor.hasVotedOnce(otherAccount.address)
       expect(voted).to.equal(true)
+    })
+
+    it("Quorum is calculated correctly", async function () {
+      const { governor, otherAccounts, b3tr, B3trContract } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const voter = otherAccounts[0]
+      const voter2 = otherAccounts[1]
+      const voter3 = otherAccounts[2]
+      await getVot3Tokens(voter, "1000")
+      await getVot3Tokens(voter2, "1000")
+      await getVot3Tokens(voter3, "1000")
+      await waitForNextBlock()
+
+      // Create a proposal
+      const tx = await createProposal(
+        governor,
+        b3tr,
+        B3trContract,
+        voter,
+        description + ` ${this.test?.title}`,
+        functionToCall,
+        [],
+      ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
+      const proposalId = await getProposalIdFromTx(tx, governor)
+
+      // wait
+      await waitForProposalToBeActive(proposalId, governor)
+
+      // vote
+      await governor.connect(voter).castVote(proposalId, 0) // vote agains
+      await governor.connect(voter2).castVote(proposalId, 1) // vote for
+      await governor.connect(voter3).castVote(proposalId, 2) // vote abastain
+
+      // wait
+      await waitForVotingPeriodToEnd(proposalId, governor)
+
+      const proposalSnapshot = await governor.proposalSnapshot(proposalId)
+
+      const quorumNeeded = await governor.quorum(proposalSnapshot)
+
+      const proposalVotes = await governor.proposalVotes(proposalId)
+      //sum of votes
+      const totalVotes = proposalVotes.reduce((a, b) => a + b, 0n)
+      expect(totalVotes).to.eql(ethers.parseEther("3000"))
+      expect(totalVotes).to.be.greaterThan(quorumNeeded)
+
+      const isQuorumReached = await governor.quorumReached(proposalId)
+      expect(isQuorumReached).to.equal(true)
+    })
+
+    it("Agaist votes are counted correctly for quorum", async function () {
+      const { governor, otherAccounts, b3tr, B3trContract } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const voter = otherAccounts[0]
+      const voter2 = otherAccounts[1]
+      const voter3 = otherAccounts[2]
+      await getVot3Tokens(voter, "1000")
+      await getVot3Tokens(voter2, "1000")
+      await getVot3Tokens(voter3, "1000")
+      await waitForNextBlock()
+
+      // Create a proposal
+      const tx = await createProposal(
+        governor,
+        b3tr,
+        B3trContract,
+        voter,
+        description + ` ${this.test?.title}`,
+        functionToCall,
+        [],
+      ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
+      const proposalId = await getProposalIdFromTx(tx, governor)
+
+      // wait
+      await waitForProposalToBeActive(proposalId, governor)
+
+      // vote
+      await governor.connect(voter).castVote(proposalId, 0) // vote against
+      await governor.connect(voter2).castVote(proposalId, 0) // vote against
+
+      // wait
+      await waitForVotingPeriodToEnd(proposalId, governor)
+
+      // Check if quorum is calculated correctly
+      const isQuorumReached = await governor.quorumReached(proposalId)
+      expect(isQuorumReached).to.equal(true)
+    })
+
+    it("Abstain votes are counted correctly for quorum", async function () {
+      const { governor, otherAccounts, b3tr, B3trContract } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const voter = otherAccounts[0]
+      const voter2 = otherAccounts[1]
+      const voter3 = otherAccounts[2]
+      await getVot3Tokens(voter, "1000")
+      await getVot3Tokens(voter2, "1000")
+      await getVot3Tokens(voter3, "1000")
+      await waitForNextBlock()
+
+      // Create a proposal
+      const tx = await createProposal(
+        governor,
+        b3tr,
+        B3trContract,
+        voter,
+        description + ` ${this.test?.title}`,
+        functionToCall,
+        [],
+      ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
+      const proposalId = await getProposalIdFromTx(tx, governor)
+
+      // wait
+      await waitForProposalToBeActive(proposalId, governor)
+
+      // vote
+      await governor.connect(voter).castVote(proposalId, 2) // vote abstain
+      await governor.connect(voter2).castVote(proposalId, 2) // vote abstain
+
+      // wait
+      await waitForVotingPeriodToEnd(proposalId, governor)
+
+      // Check if quorum is calculated correctly
+      const isQuorumReached = await governor.quorumReached(proposalId)
+      expect(isQuorumReached).to.equal(true)
+    })
+
+    it("Yes votes are counted correctly for quorum", async function () {
+      const { governor, otherAccounts, b3tr, B3trContract } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const voter = otherAccounts[0]
+      const voter2 = otherAccounts[1]
+      const voter3 = otherAccounts[2]
+      await getVot3Tokens(voter, "1000")
+      await getVot3Tokens(voter2, "1000")
+      await getVot3Tokens(voter3, "1000")
+      await waitForNextBlock()
+
+      // Create a proposal
+      const tx = await createProposal(
+        governor,
+        b3tr,
+        B3trContract,
+        voter,
+        description + ` ${this.test?.title}`,
+        functionToCall,
+        [],
+      ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
+      const proposalId = await getProposalIdFromTx(tx, governor)
+
+      // wait
+      await waitForProposalToBeActive(proposalId, governor)
+
+      // vote
+      await governor.connect(voter).castVote(proposalId, 1) // vote yes
+      await governor.connect(voter2).castVote(proposalId, 1) // vote yes
+
+      // wait
+      await waitForVotingPeriodToEnd(proposalId, governor)
+
+      // Check if quorum is calculated correctly
+      const isQuorumReached = await governor.quorumReached(proposalId)
+      expect(isQuorumReached).to.equal(true)
     })
   })
 

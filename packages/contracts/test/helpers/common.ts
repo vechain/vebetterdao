@@ -1,5 +1,5 @@
 import { ethers, network } from "hardhat"
-import { Emissions, B3TRGovernor, XAllocationPool, XAllocationVoting, B3TR } from "../../typechain-types"
+import { Emissions, B3TRGovernor, XAllocationPool, XAllocationVoting, B3TR, B3TRBadge } from "../../typechain-types"
 import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { getOrDeployContractInstances } from "./deploy"
@@ -34,7 +34,7 @@ export const createProposal = async (
   proposer: HardhatEthersSigner,
   description: string = "",
   functionTocall: string = "tokenDetails",
-  values: (number | string | bigint)[] = [],
+  values: any[] = [],
   avoidMintingAndDelegating: boolean = false, // in some scenarios we want the operation to fail if the proposer does not have enough VOT3
 ): Promise<ContractTransactionResponse> => {
   // the proposer needs to have some delegated VOT3 to be able to create a proposal
@@ -351,4 +351,51 @@ export const bootstrapEmissions = async (
 
   // Bootstrap emissions
   await emissions.connect(minter).bootstrap()
+}
+
+export const upgradeNFTtoLevel = async (
+  tokenId: number,
+  level: number,
+  nft: B3TRBadge,
+  b3tr: B3TR,
+  owner: HardhatEthersSigner,
+  minter: HardhatEthersSigner,
+) => {
+  const currentLevel = await nft.levelOf(tokenId)
+
+  for (let i = currentLevel; i < level; i++) {
+    await upgradeNFTtoNextLevel(tokenId, nft, b3tr, owner, minter)
+  }
+}
+
+export const upgradeNFTtoNextLevel = async (
+  tokenId: number,
+  nft: B3TRBadge,
+  b3tr: B3TR,
+  owner: HardhatEthersSigner,
+  minter: HardhatEthersSigner,
+) => {
+  const b3trToUpgrade = await nft.getB3TRtoUpgrade(tokenId)
+
+  await b3tr.connect(minter).mint(owner.address, b3trToUpgrade)
+
+  await b3tr.connect(owner).approve(await nft.getAddress(), b3trToUpgrade)
+
+  await nft.connect(owner).upgrade(tokenId)
+}
+
+export const upgradeAndSelectNFTtoNextLevel = async (
+  tokenId: number,
+  nft: B3TRBadge,
+  b3tr: B3TR,
+  owner: HardhatEthersSigner,
+  minter: HardhatEthersSigner,
+) => {
+  const b3trToUpgrade = await nft.getB3TRtoUpgrade(tokenId)
+
+  await b3tr.connect(minter).mint(owner.address, b3trToUpgrade)
+
+  await b3tr.connect(owner).approve(await nft.getAddress(), b3trToUpgrade)
+
+  await nft.connect(owner).upgradeAndSelect(tokenId)
 }

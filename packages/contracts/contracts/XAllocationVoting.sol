@@ -18,6 +18,8 @@ contract XAllocationVoting is
   XApps,
   AccessControl
 {
+  bytes32 public constant ROUND_STARTER_ROLE = keccak256("ROUND_STARTER_ROLE");
+
   /**
    * @notice Construct a XAllocationVotingGovernor contract
    * @param _vot3Token The address of the Vot3 token used for voting
@@ -56,6 +58,10 @@ contract XAllocationVoting is
     _b3trGovernor = IGovernor(payable(b3trGovernor_));
   }
 
+  function startNewRound() public override onlyRole(ROUND_STARTER_ROLE) returns (uint256) {
+    return super.startNewRound();
+  }
+
   function _startNewRound(address proposer) internal virtual override returns (uint256 roundId) {
     ++_roundCount;
     roundId = _roundCount;
@@ -92,10 +98,6 @@ contract XAllocationVoting is
 
   function addApp(address appAddress, string memory appName) public override onlyRole(DEFAULT_ADMIN_ROLE) {
     super.addApp(appAddress, appName);
-  }
-
-  function startNewRound() public override onlyRole(DEFAULT_ADMIN_ROLE) returns (uint256) {
-    return super.startNewRound();
   }
 
   function setAdminRole(address _newAdmin) public onlyRole(DEFAULT_ADMIN_ROLE) {

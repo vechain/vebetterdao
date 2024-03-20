@@ -14,14 +14,22 @@ import { getConfig } from "@repo/config"
 dayjs.extend(relativeTime)
 
 const mixpanelToken = getConfig().mixPanelProjectToken
+const isProduction = process.env.NODE_ENV === "production"
 const Navbar = dynamic(() => import("@/components/Navbar").then(mod => mod.Navbar), { ssr: false })
+const FreshDeskWidget = dynamic(() => import("@/components/FreshDeskWidget").then(mod => mod.FreshDeskWidget), {
+  ssr: false,
+})
 
 //TODO: Is there a better place to initialise mixpanel? next/script?
 typeof window != "undefined" && mixpanelToken && AnalyticsUtils.initialise()
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      style={{
+        scrollBehavior: "smooth",
+      }}>
       <head>
         <title>VeBetterDAO</title>
         <meta name="description" content="Vote for your favourite sustainability dApps in VeBetterDAO’s governance." />
@@ -58,6 +66,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body>
         <Providers>
+          {isProduction && <FreshDeskWidget widgetId={103000007852} />}
           <VStack minH="100vh" gap={0} align="stretch">
             <AlphaTestnetBanner />
             <Navbar />

@@ -49,7 +49,7 @@ export const AllocationXAppsVotesRankingChart = ({ roundId, maxRanks }: Props) =
         .slice(0, maxRanks),
     [xAppsVotes, xApps, maxRanks],
   )
-  
+
   return (
     <VStack spacing={8} align={"flex-start"} w="full">
       {sortedData.map((app, index) => (
@@ -105,7 +105,7 @@ const VotesHorizontalBar = ({
             </Skeleton>
             <Skeleton isLoaded={!roundStateLoading} textAlign={"right"}>
               <Text fontSize={["xs", "sm"]} fontWeight={"300"}>
-                {roundState === "0" ? " Real time B3TR distribution" : "Distributed"}
+                {roundState === "0" ? "To receive" : "Received"}
               </Text>
             </Skeleton>
           </VStack>
@@ -116,7 +116,7 @@ const VotesHorizontalBar = ({
 
             <Skeleton isLoaded={!roundStateLoading} textAlign={"right"}>
               <Text fontSize={["xs", "sm"]} fontWeight={"300"}>
-                {roundState === "0" ? " Real time votes" : "Votes"}
+                {"Votes"}
               </Text>
             </Skeleton>
           </VStack>

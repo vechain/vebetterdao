@@ -1,0 +1,31 @@
+name: Start next Round Testnet
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Runs at 23:59 GMT every Sunday
+    - cron: '59 23 * * 0'
+
+jobs:
+  start-next-round:
+    name: Start next Round Testnet
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node v20
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: "yarn"
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Start round Testnet
+        run: yarn contracts:start-round:testnet     
+        timeout-minutes: 30
+
+   
