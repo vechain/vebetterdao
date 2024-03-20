@@ -7,8 +7,9 @@ import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { XAllocationVotingGovernor } from "../XAllocationVotingGovernor.sol";
 import { IXApps } from "../../interfaces/IXApps.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-abstract contract XApps is IXApps, XAllocationVotingGovernor {
+abstract contract XApps is Initializable, IXApps, XAllocationVotingGovernor {
   using Checkpoints for Checkpoints.Trace208;
 
   struct App {
@@ -42,7 +43,19 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
     }
   }
 
-  constructor(string memory baseURI_) {
+  /// @custom:oz-upgrades-unsafe-allow constructor
+  constructor() {
+    _disableInitializers();
+  }
+
+  /**
+   * @dev Sets the value for {baseURI}
+   */
+  function __XApps_init(string memory baseURI_) internal onlyInitializing {
+    __XApps_init_unchained(baseURI_);
+  }
+
+  function __XApps_init_unchained(string memory baseURI_) internal onlyInitializing {
     XAppsStorage storage $ = _getXAppsStorageStorage();
     $._baseURI = baseURI_;
   }

@@ -20,7 +20,7 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
  * - A voting module must implement {_getVotes}
  * - Additionally, {votingPeriod} must also be implemented
  */
-abstract contract XAllocationVotingGovernorUpgradeable is
+abstract contract XAllocationVotingGovernor is
   Initializable,
   ContextUpgradeable,
   ERC165Upgradeable,
