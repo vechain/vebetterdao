@@ -12,12 +12,7 @@ type Props = { xApp: XApp }
 export const AppCard = ({ xApp }: Props) => {
   const { isMobile } = useBreakpoints()
 
-  const {
-    data: appMetadata,
-    isLoading: appMetadataLoading,
-    isError: isAppMetadataError,
-    error: appMetadataError,
-  } = useXAppMetadata(xApp.id)
+  const { data: appMetadata, isLoading: appMetadataLoading, error: appMetadataError } = useXAppMetadata(xApp.id)
 
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
   const { data: banner, isLoading: isBannerLoading } = useIpfsImage(appMetadata?.banner)

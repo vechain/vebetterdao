@@ -46,7 +46,7 @@ export const AppCardInnerDetails = ({ xApp }: Props) => {
 
           <Box>
             <Text fontSize="md" color="gray.500">
-              Last allocation
+              Previous allocation
             </Text>
             <HStack spacing={1} fontWeight={500} align={"flex-end"}>
               <Skeleton isLoaded={!currentRoundIdLoading && !prevRoundEarningLoading}>
