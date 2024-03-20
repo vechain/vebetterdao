@@ -9,11 +9,14 @@ import {
   B3TRBadge,
   VoterRewards,
   XAllocationPool,
+  Treasury,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
+import ERC1967Proxy from "@openzeppelin/contracts/build/contracts/ERC1967Proxy.json"
 import { seedLocalEnvironment, seedTestEnvironment } from "./seed"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
+import { FunctionFragment } from "ethers"
 
 // NFT Badge Values
 const name = "VeBetterDAO Galaxy Member"
@@ -97,6 +100,13 @@ export async function deployAll(config: ContractsConfig) {
     config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE,
     config.EMISSIONS_CYCLE_DURATION - 1,
     config.XAPP_BASE_URI,
+  )
+
+  const treasury = await deployTreasury(
+    await b3tr.getAddress(),
+    await vot3.getAddress(),
+    await timelock.getAddress(),
+    TEMP_ADMIN,
   )
 
   console.log("Contracts deployed")
@@ -183,6 +193,7 @@ export async function deployAll(config: ContractsConfig) {
     await transferAdminRole(voterRewards, admin, config.CONTRACTS_ADMIN_ADDRESS)
     await transferAdminRole(xAllocationPool, admin, config.CONTRACTS_ADMIN_ADDRESS)
     await transferAdminRole(xAllocationVoting, admin, config.CONTRACTS_ADMIN_ADDRESS)
+    await transferAdminRole(treasury, admin, config.CONTRACTS_ADMIN_ADDRESS)
 
     console.log("Roles updated successfully!")
   }
@@ -197,6 +208,7 @@ export async function deployAll(config: ContractsConfig) {
     emissionsContractAddress: await emissions.getAddress(),
     voterRewardsContractAddress: await voterRewards.getAddress(),
     nftBadgeContractAddress: await badge.getAddress(),
+    treasuryContractAddress: await treasury.getAddress(),
   })
 
   return {
@@ -209,12 +221,13 @@ export async function deployAll(config: ContractsConfig) {
     xAllocationVoting: xAllocationVoting,
     emissions: emissions,
     voterRewards: voterRewards,
+    treasury: treasury,
   }
   // close the script
 }
 
 const transferAdminRole = async (
-  contract: B3TR | VOT3 | B3TRBadge | Emissions | VoterRewards | XAllocationPool | XAllocationVoting,
+  contract: B3TR | VOT3 | B3TRBadge | Emissions | VoterRewards | XAllocationPool | XAllocationVoting | Treasury,
   oldAdmin: HardhatEthersSigner,
   newAdminAddress: string,
 ) => {
@@ -460,4 +473,29 @@ async function deployVoterRewards(
   console.log(`VoterRewards contract deployed at address ${await contract.getAddress()}`)
 
   return contract
+}
+
+async function deployTreasury(b3trAddress: string, vot3Address: string, timelockAddress: string, adminAddress: string) {
+  console.log(`Deploying Treasury implementation contract`)
+  const Treasury = await ethers.getContractFactory("Treasury")
+  const treasury = await Treasury.deploy()
+
+  await treasury.waitForDeployment()
+
+  console.log("Deploying Treasury proxy contract")
+  const TreasuryProxy = await ethers.getContractFactory(ERC1967Proxy.abi, ERC1967Proxy.bytecode)
+  const functionFragment = Treasury.interface.getFunction("initialize")
+  const callInitialize = TreasuryProxy.interface.encodeFunctionData(functionFragment as FunctionFragment, [
+    b3trAddress,
+    vot3Address,
+    timelockAddress,
+    adminAddress,
+  ])
+  const proxy = await TreasuryProxy.deploy(await treasury.getAddress(), callInitialize)
+  await proxy.waitForDeployment()
+
+  console.log(`Treasury proxy contract deployed at address ${await proxy.getAddress()}`)
+
+  const treasuryProxy = await ethers.getContractAt("Treasury", await proxy.getAddress())
+  return treasuryProxy
 }
