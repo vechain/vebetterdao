@@ -83,7 +83,7 @@ contract Treasury is IERC721Receiver, Initializable, AccessControlUpgradeable, P
     function transferVTHO(address _to, uint256 _value) public onlyTimelockWhenNotPaused{
         IERC20 vtho = _getERC20Contract(VTHO);
         require(vtho.balanceOf(address(this)) >= _value, "Treasury: insufficient VTHO balance");
-        vtho.transfer(_to, _value);
+        require(vtho.transfer(_to, _value), "Treasury: transfer failed");
     }
 
     /**
@@ -94,7 +94,7 @@ contract Treasury is IERC721Receiver, Initializable, AccessControlUpgradeable, P
     function transferB3TR(address _to, uint256 _value) public onlyTimelockWhenNotPaused {
         IERC20 b3tr = _getERC20Contract(B3TR);
         require(b3tr.balanceOf(address(this)) >= _value, "Treasury: insufficient B3TR balance");
-        b3tr.transfer(_to, _value);
+        require(b3tr.transfer(_to, _value), "Treasury: transfer failed");
     }
 
     /**
@@ -105,7 +105,7 @@ contract Treasury is IERC721Receiver, Initializable, AccessControlUpgradeable, P
     function transferVOT3(address _to, uint256 _value) public onlyTimelockWhenNotPaused{
         IERC20 vot3 = _getERC20Contract(VOT3);
         require(vot3.balanceOf(address(this)) >= _value, "Treasury: insufficient VOT3 balance");
-        vot3.transfer(_to, _value);
+        require(vot3.transfer(_to, _value), "Treasury: transfer failed");
     }
 
     /**
@@ -127,7 +127,7 @@ contract Treasury is IERC721Receiver, Initializable, AccessControlUpgradeable, P
     function transferTokens(address _token, address _to, uint256 _value) public onlyTimelockWhenNotPaused {
         IERC20 token = _getERC20Contract(_token);
         require(token.balanceOf(address(this)) >= _value, "Treasury: insufficient balance");
-        token.transfer(_to, _value);
+        require(token.transfer(_to, _value), "Treasury: transfer failed");
     }
 
     /**
