@@ -5,7 +5,7 @@ import {
   useXAppRoundEarnings,
   useXAppTotalEarnings,
 } from "@/api"
-import { Card, CardBody, Box, Stack, Text, HStack } from "@chakra-ui/react"
+import { Card, CardBody, Box, Stack, Text, HStack, Skeleton } from "@chakra-ui/react"
 import { compactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import { useMemo } from "react"
@@ -13,7 +13,7 @@ import { useMemo } from "react"
 type Props = { xApp: XApp }
 
 export const AppCardInnerDetails = ({ xApp }: Props) => {
-  const { data: currentRoundId } = useCurrentAllocationsRoundId()
+  const { data: currentRoundId, isLoading: currentRoundIdLoading } = useCurrentAllocationsRoundId()
   const { data: currentRound } = useAllocationsRound(currentRoundId?.toString() ?? "")
 
   // Generate roundIds from 1 to currentRoundId or previous round if current round is not active
@@ -27,9 +27,10 @@ export const AppCardInnerDetails = ({ xApp }: Props) => {
     return (Number(currentRoundId) - 1).toString()
   }, [currentRoundId])
 
-  const { data: prevRoundEarning } = useXAppRoundEarnings(previousRoundId, xApp.id)
+  const { data: prevRoundEarning, isLoading: prevRoundEarningLoading } = useXAppRoundEarnings(previousRoundId, xApp.id)
 
   const amounts = useXAppTotalEarnings(roundIds, xApp.id)
+  const isAmountsLoading = amounts.some(amount => amount.isLoading)
   const totalAmount = amounts.reduce((acc, amount) => acc + Number(amount.data?.amount), 0)
 
   return (
@@ -48,7 +49,9 @@ export const AppCardInnerDetails = ({ xApp }: Props) => {
               Last allocation
             </Text>
             <HStack spacing={1} fontWeight={500} align={"flex-end"}>
-              <Text fontSize="xl">{compactFormatter.format(Number(prevRoundEarning?.amount))}</Text>
+              <Skeleton isLoaded={!currentRoundIdLoading && !prevRoundEarningLoading}>
+                <Text fontSize="xl">{compactFormatter.format(Number(prevRoundEarning?.amount))}</Text>
+              </Skeleton>
               <Text fontSize="md" fontWeight={400}>
                 B3TR
               </Text>
@@ -59,7 +62,9 @@ export const AppCardInnerDetails = ({ xApp }: Props) => {
               Accumulated
             </Text>
             <HStack spacing={1} fontWeight={500} align={"flex-end"}>
-              <Text fontSize="xl">{compactFormatter.format(totalAmount)}</Text>
+              <Skeleton isLoaded={!isAmountsLoading}>
+                <Text fontSize="xl">{compactFormatter.format(totalAmount)}</Text>
+              </Skeleton>
               <Text fontSize="md" fontWeight={400}>
                 B3TR
               </Text>

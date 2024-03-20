@@ -7,6 +7,7 @@ export const AppsPageContent = () => {
 
   if (!xApps?.length) return null
 
+  //TODO: Pagination, search, filters
   return (
     <VStack spacing={8}>
       <HStack w="full" justify={"space-between"}>

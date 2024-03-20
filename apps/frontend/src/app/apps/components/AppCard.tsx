@@ -34,8 +34,6 @@ export const AppCard = ({ xApp }: Props) => {
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
   const { data: banner, isLoading: isBannerLoading } = useIpfsImage(appMetadata?.banner)
 
-  const buttonIconColor = useColorModeValue("primary.500", "white")
-
   const { onCopy, hasCopied } = useClipboard(xApp.receiverAddress)
 
   const toast = useToast()
