@@ -387,15 +387,12 @@ async function deployXAllocationPool(
   appSharesCap: number = 15,
 ) {
   console.log(`Deploying XAllocationPool contract`)
-  const XAllocationPoolContract = await ethers.getContractFactory("XAllocationPool")
-  const contract = await XAllocationPoolContract.deploy(
+  const contract = (await deployProxy("XAllocationPool", [
     adminAddress,
     b3trAddress,
     baseAllocationPercentage,
     appSharesCap,
-  )
-
-  await contract.waitForDeployment()
+  ])) as XAllocationPool
 
   console.log(`XAllocationPool contract deployed at address ${await contract.getAddress()}`)
 

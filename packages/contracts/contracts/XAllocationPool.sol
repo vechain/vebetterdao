@@ -2,16 +2,24 @@
 pragma solidity ^0.8.18;
 
 import { IXAllocationPool } from "./interfaces/IXAllocationPool.sol";
-import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
+import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
 import { IEmissions } from "./interfaces/IEmissions.sol";
-import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { IB3TR } from "./interfaces/IB3TR.sol";
+import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
+contract XAllocationPool is
+  Initializable,
+  IXAllocationPool,
+  AccessControlUpgradeable,
+  ReentrancyGuardUpgradeable,
+  UUPSUpgradeable
+{
   uint256 public constant percentagePrecisionScalingFactor = 1e4;
 
   /// @custom:storage-location erc7201:b3tr.storage.XAllocationPool
@@ -35,7 +43,21 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
     }
   }
 
-  constructor(address _admin, address b3trAddress, uint256 baseAllocationPercentage_, uint256 appSharesCap_) {
+  /// @custom:oz-upgrades-unsafe-allow constructor
+  constructor() {
+    _disableInitializers();
+  }
+
+  function initialize(
+    address _admin,
+    address b3trAddress,
+    uint256 baseAllocationPercentage_,
+    uint256 appSharesCap_
+  ) public initializer {
+    __AccessControl_init();
+    __ReentrancyGuard_init();
+    __UUPSUpgradeable_init();
+
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     $.b3tr = IB3TR(b3trAddress);
@@ -43,6 +65,8 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
     setBaseAllocationPercentage(baseAllocationPercentage_);
     setAppSharesCap(appSharesCap_);
   }
+
+  function _authorizeUpgrade(address newImplementation) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
 
   // ---------- Setters ---------- //
 

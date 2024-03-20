@@ -23,7 +23,7 @@ interface DeployInstance {
   governor: B3TRGovernor
   b3trBadge: B3TRBadge & { deploymentTransaction(): ContractTransactionResponse }
   xAllocationVoting: XAllocationVoting
-  xAllocationPool: XAllocationPool & { deploymentTransaction(): ContractTransactionResponse }
+  xAllocationPool: XAllocationPool
   emissions: Emissions & { deploymentTransaction(): ContractTransactionResponse }
   voterRewards: VoterRewards & { deploymentTransaction(): ContractTransactionResponse }
   owner: HardhatEthersSigner
@@ -104,14 +104,12 @@ export const getOrDeployContractInstances = async ({
   await b3trBadge.waitForDeployment()
 
   // Deploy XAllocationPool
-  const XAllocationPoolContract = await ethers.getContractFactory("XAllocationPool")
-  const xAllocationPool = await XAllocationPoolContract.deploy(
+  const xAllocationPool = (await deployProxy("XAllocationPool", [
     owner.address,
     await b3tr.getAddress(),
     config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
     config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
-  )
-  await xAllocationPool.waitForDeployment()
+  ])) as XAllocationPool
 
   const X_ALLOCATIONS_ADDRESS = await xAllocationPool.getAddress()
   const VOTE_2_EARN_ADDRESS = otherAccounts[1].address
