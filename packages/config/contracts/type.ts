@@ -29,6 +29,8 @@ export type ContractsConfig = {
   INITIAL_X_ALLOCATION: bigint
 
   NFT_BADGE_BASE_URI: string
+  NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS: number[]
+  NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL: bigint[]
 
   XAPP_BASE_URI: string
 }

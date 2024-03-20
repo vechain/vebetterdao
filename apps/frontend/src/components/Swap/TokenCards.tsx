@@ -32,9 +32,27 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
     return b3trBalance?.scaled ?? "0"
   }, [b3trBalance?.scaled])
 
+  const b3trBalanceText = useMemo(() => {
+    const b3trBalance = Number(b3trBalanceScaled)
+
+    if (b3trBalance === 0) return "0"
+
+    if (b3trBalance < 0.0001) return `< 0.${"0".repeat(DECIMAL_PLACES - 1)}1`
+    return compactFormatter.format(b3trBalance)
+  }, [b3trBalanceScaled])
+
   const vot3BalanceScaled = useMemo(() => {
     return vot3Balance?.scaled ?? "0"
   }, [vot3Balance?.scaled])
+
+  const vot3BalanceText = useMemo(() => {
+    const vot3Balance = Number(vot3BalanceScaled)
+
+    if (vot3Balance === 0) return "0"
+
+    if (vot3Balance < 0.0001) return `< 0.${"0".repeat(DECIMAL_PLACES - 1)}1`
+    return compactFormatter.format(vot3Balance)
+  }, [vot3BalanceScaled])
 
   const maxBalance = useMemo(
     () => (isB3trToVot3 ? b3trBalanceScaled : vot3BalanceScaled),
@@ -68,6 +86,7 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
         .replace(",", ".") // Replace comma with dot
         .replace(/[^\d\\.]/g, "") // Filter out non-numeric characters except for decimal separator
         .replace(/\.(?=.*\.)/g, "") // Filter out duplicate decimal separators
+        .replace(/(\.\d{18})\d+/, "$1") // remove digits after 18th decimal
 
       if (Number(filteredAmount) > Number(maxBalance)) {
         return maxBalance
@@ -149,7 +168,7 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
                     <Text fontSize="10px">B3TR Balance</Text>
                     <HStack gap={1}>
                       <Text fontSize="14px" fontWeight={500}>
-                        {compactFormatter.format(Number(b3trBalanceScaled))}
+                        {b3trBalanceText}
                       </Text>
                       <B3TRIcon h={"15px"} w={"15px"} />
                     </HStack>
@@ -192,7 +211,7 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
                     <Text fontSize="10px">VOT3 Balance</Text>
                     <HStack gap={1}>
                       <Text fontSize="14px" fontWeight={500}>
-                        {compactFormatter.format(Number(vot3BalanceScaled))}
+                        {vot3BalanceText}
                       </Text>
                       <VOT3Icon h={"15px"} w={"15px"} />
                     </HStack>
