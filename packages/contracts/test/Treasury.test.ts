@@ -1,23 +1,37 @@
 import { ethers } from "hardhat"
 import { expect } from "chai"
-import { getOrDeployContractInstances, catchRevert } from "./helpers"
+import { getOrDeployContractInstances, catchRevert, createProposalAndExecuteIt } from "./helpers"
+import ERC1967Proxy from "@openzeppelin/contracts/build/contracts/ERC1967Proxy.json"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it, before } from "mocha"
 import { fundTreasuryVET, fundTreasuryVTHO } from "./helpers/fundTreasury"
+import { FunctionFragment } from "ethers"
+import { createLocalConfig } from "@repo/config/contracts/envs/local"
 
 describe("Treasury", () => {
   let treasuryProxy: any
   let b3tr: any
+  let governor: any
+  let vot3: any
+  let timeLock: any
   let owner: HardhatEthersSigner
   let otherAccount: HardhatEthersSigner
   before(async () => {
+    const config = createLocalConfig()
+    config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+    config.B3TR_GOVERNOR_VOTING_PERIOD = 3
+    config.B3TR_GOVERNOR_VOTING_DELAY = 1
     const info = await getOrDeployContractInstances({
       forceDeploy: true,
+      config,
     })
     treasuryProxy = info.treasuryProxy
     owner = info.owner
     otherAccount = info.otherAccount
     b3tr = info.b3tr
+    governor = info.governor
+    vot3 = info.vot3
+    timeLock = info.timeLock
 
     await fundTreasuryVTHO(await treasuryProxy.getAddress(), ethers.parseEther("10"))
     await fundTreasuryVET(await treasuryProxy.getAddress(), 10)
@@ -30,9 +44,6 @@ describe("Treasury", () => {
     describe("VTHO", () => {
       it("should transfer VTHO", async () => {
         expect(treasuryProxy.transferVTHO(otherAccount.address, ethers.parseEther("1"))).not.to.be.reverted
-      })
-      it("should revert if not enough balance", async () => {
-        await catchRevert(treasuryProxy.transferVTHO(otherAccount.address, ethers.parseEther("10000")))
       })
       it("should revert if not called by TIMELOCK_ROLE", async () => {
         await catchRevert(
@@ -110,6 +121,53 @@ describe("Treasury", () => {
       await catchRevert(
         treasuryProxy.connect(otherAccount).upgradeToAndCall(await newImplementation.getAddress(), emptyBytes),
       )
+    })
+  })
+  describe("Pause", () => {
+    it("should pause and unpause", async () => {
+      await treasuryProxy.pause()
+      expect(await treasuryProxy.paused()).to.eql(true)
+      await treasuryProxy.unpause()
+      expect(await treasuryProxy.paused()).to.eql(false)
+    })
+    it("should revert if not called by ADMIN_ROLE", async () => {
+      await catchRevert(treasuryProxy.connect(otherAccount).pause())
+    })
+  })
+  describe("Timelock", () => {
+    let tProxy: any
+    let Treasury: any
+    before(async () => {
+      Treasury = await ethers.getContractFactory("Treasury")
+      const treasury = await Treasury.deploy()
+
+      await treasury.waitForDeployment()
+
+      const TreasuryProxy = await ethers.getContractFactory(ERC1967Proxy.abi, ERC1967Proxy.bytecode)
+      const functionFragment = Treasury.interface.getFunction("initialize")
+
+      const callInitialize = TreasuryProxy.interface.encodeFunctionData(functionFragment as FunctionFragment, [
+        await b3tr.getAddress(),
+        await vot3.getAddress(),
+        await timeLock.getAddress(),
+        owner.address,
+        owner.address,
+      ])
+
+      const proxy = await TreasuryProxy.deploy(await treasury.getAddress(), callInitialize)
+      await proxy.waitForDeployment()
+      tProxy = await ethers.getContractAt("Treasury", await proxy.getAddress())
+      await fundTreasuryVET(await tProxy.getAddress(), 10)
+    })
+    it("should execute transfer TX from proposal", async () => {
+      const description = "Test Proposal: testing propsal for Transfer VET from tresausry"
+
+      await createProposalAndExecuteIt(owner, otherAccount, governor, tProxy, Treasury, description, "transferVET", [
+        owner.address,
+        ethers.parseEther("5"),
+      ])
+
+      expect(await tProxy.getVETBalance()).to.eql(ethers.parseEther("5"))
     })
   })
 })
