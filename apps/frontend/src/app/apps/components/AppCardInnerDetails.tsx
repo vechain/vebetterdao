@@ -5,8 +5,7 @@ import {
   useXAppRoundEarnings,
   useXAppTotalEarnings,
 } from "@/api"
-import { B3TRIcon } from "@/components"
-import { Card, CardBody, Box, Stack, Text, HStack, Heading } from "@chakra-ui/react"
+import { Card, CardBody, Box, Stack, Text, HStack } from "@chakra-ui/react"
 import { compactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import { useMemo } from "react"
@@ -41,25 +40,29 @@ export const AppCardInnerDetails = ({ xApp }: Props) => {
             <Text fontSize="md" color="gray.500">
               Member since
             </Text>
-            <Text fontSize="lg">{dayjs(xApp.createdAt).format("MMMM D, YYYY")}</Text>
+            <Text fontSize="xl">{dayjs(xApp.createdAt).format("MMMM D, YYYY")}</Text>
           </Box>
 
           <Box>
             <Text fontSize="md" color="gray.500">
               Last allocation
             </Text>
-            <HStack spacing={1} fontWeight={500}>
-              <Text fontSize="lg">{compactFormatter.format(Number(prevRoundEarning?.amount))}</Text>
-              <B3TRIcon boxSize={5} />
+            <HStack spacing={1} fontWeight={500} align={"flex-end"}>
+              <Text fontSize="xl">{compactFormatter.format(Number(prevRoundEarning?.amount))}</Text>
+              <Text fontSize="md" fontWeight={400}>
+                B3TR
+              </Text>
             </HStack>
           </Box>
           <Box>
             <Text fontSize="md" color="gray.500">
               Accumulated
             </Text>
-            <HStack spacing={1} fontWeight={500}>
-              <Text fontSize="lg">{compactFormatter.format(totalAmount)}</Text>
-              <B3TRIcon boxSize={5} />
+            <HStack spacing={1} fontWeight={500} align={"flex-end"}>
+              <Text fontSize="xl">{compactFormatter.format(totalAmount)}</Text>
+              <Text fontSize="md" fontWeight={400}>
+                B3TR
+              </Text>
             </HStack>
           </Box>
         </Stack>
