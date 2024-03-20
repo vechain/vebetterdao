@@ -7,7 +7,7 @@ export const AllocationRoundsContent = () => {
   const { data: currentRound } = useAllocationsRound(currentRoundId?.toString() ?? "")
 
   return (
-    <VStack w="full" spacing={12}>
+    <VStack w="full" spacing={12} data-testid="allocations-page">
       <Stack
         direction={["column-reverse", "column-reverse", "row"]}
         w="full"
