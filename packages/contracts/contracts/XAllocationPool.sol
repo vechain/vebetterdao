@@ -12,23 +12,33 @@ import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.s
 import { IB3TR } from "./interfaces/IB3TR.sol";
 
 contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
-  IXAllocationVotingGovernor internal _xAllocationVoting;
-  IEmissions internal _emissions;
-
   uint256 public constant percentagePrecisionScalingFactor = 1e4;
 
-  uint256 public baseAllocationPercentage;
-  uint256 public variableAllocationPercentage;
-  uint256 public appSharesCap;
+  /// @custom:storage-location erc7201:b3tr.storage.XAllocationPool
+  struct XAllocationPoolStorage {
+    IXAllocationVotingGovernor _xAllocationVoting;
+    IEmissions _emissions;
+    IB3TR b3tr;
+    uint256 baseAllocationPercentage;
+    uint256 variableAllocationPercentage;
+    uint256 appSharesCap;
+    mapping(bytes32 => mapping(uint256 => bool)) claimedRewards;
+  }
 
-  // B3TR token contract
-  IB3TR public b3tr;
+  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationPool")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 private constant XAllocationPoolStorageLocation =
+    0xba46220259871765522240056f76631a28aa19c5092d6dd51d6b858b4ebcb300;
 
-  mapping(bytes32 => mapping(uint256 => bool)) public claimedRewards;
+  function _getXAllocationPoolStorage() private pure returns (XAllocationPoolStorage storage $) {
+    assembly {
+      $.slot := XAllocationPoolStorageLocation
+    }
+  }
 
   constructor(address _admin, address b3trAddress, uint256 baseAllocationPercentage_, uint256 appSharesCap_) {
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
-    b3tr = IB3TR(b3trAddress);
+    $.b3tr = IB3TR(b3trAddress);
 
     setBaseAllocationPercentage(baseAllocationPercentage_);
     setAppSharesCap(appSharesCap_);
@@ -37,43 +47,51 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
   // ---------- Setters ---------- //
 
   function setXAllocationVotingAddress(address xAllocationVoting_) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    _xAllocationVoting = IXAllocationVotingGovernor(xAllocationVoting_);
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    $._xAllocationVoting = IXAllocationVotingGovernor(xAllocationVoting_);
   }
 
   function setEmissionsAddress(address emissions_) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    _emissions = IEmissions(emissions_);
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    $._emissions = IEmissions(emissions_);
   }
 
   function setBaseAllocationPercentage(uint256 baseAllocationPercentage_) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(baseAllocationPercentage_ <= 100, "Base allocation percentage must be less than or equal to 100");
 
-    baseAllocationPercentage = baseAllocationPercentage_;
-    variableAllocationPercentage = 100 - baseAllocationPercentage;
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+
+    $.baseAllocationPercentage = baseAllocationPercentage_;
+    $.variableAllocationPercentage = 100 - $.baseAllocationPercentage;
   }
 
   function setAppSharesCap(uint256 appSharesCap_) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(appSharesCap_ <= 100, "App shares cap must be less than or equal to 100");
 
-    appSharesCap = appSharesCap_;
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+
+    $.appSharesCap = appSharesCap_;
   }
 
   function claim(uint256 roundId, bytes32 appId) public nonReentrant {
-    require(!claimedRewards[appId][roundId], "XAllocationPool: rewards already claimed for this app and round");
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+
+    require(!$.claimedRewards[appId][roundId], "XAllocationPool: rewards already claimed for this app and round");
     require(!xAllocationVoting().isActive(roundId), "XAllocationPool: round not ended yet");
 
     uint256 amountToClaim = claimableAmount(roundId, appId);
     require(amountToClaim > 0, "XAllocationPool: no rewards available for this app");
 
     // update the claimedRewards mapping
-    claimedRewards[appId][roundId] = true;
+    $.claimedRewards[appId][roundId] = true;
 
     address receiverAddress = xAllocationVoting().getAppReceiverAddress(appId);
 
     //check that contract has enough funds to pay the reward
-    require(b3tr.balanceOf(address(this)) >= amountToClaim, "Insufficient funds");
+    require($.b3tr.balanceOf(address(this)) >= amountToClaim, "Insufficient funds");
 
     // Transfer the rewards to the caller
-    require(b3tr.transfer(receiverAddress, amountToClaim), "Allocation transfer failed");
+    require($.b3tr.transfer(receiverAddress, amountToClaim), "Allocation transfer failed");
 
     // emit event
     emit AllocationRewardsClaimed(appId, roundId, amountToClaim, receiverAddress, msg.sender);
@@ -98,9 +116,11 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
    * `variableAllocationPercentage`% of allocations will be distributed based on the % portion received from entire votes
    */
   function _appRewardAmount(uint256 roundId, uint256 appShare) internal view returns (uint256) {
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+
     uint256 total = _emissionAmount(roundId);
 
-    uint256 available = (total * variableAllocationPercentage) / 100;
+    uint256 available = (total * $.variableAllocationPercentage) / 100;
 
     uint256 rewardAmount = (available * appShare) / percentagePrecisionScalingFactor;
     return rewardAmount;
@@ -115,7 +135,8 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
    * @param appId The ID of the app for which to calculate the amount available for allocation.
    */
   function claimableAmount(uint256 roundId, bytes32 appId) public view returns (uint256) {
-    if (claimedRewards[appId][roundId] || xAllocationVoting().isActive(roundId)) {
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    if ($.claimedRewards[appId][roundId] || xAllocationVoting().isActive(roundId)) {
       return 0;
     }
 
@@ -178,11 +199,12 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
       xAllocationVoting() != IXAllocationVotingGovernor(address(0)),
       "XAllocationVotingGovernor contract not set"
     );
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
 
     uint256 total = _emissionAmount(roundId);
     bytes32[] memory eligibleApps = xAllocationVoting().getRoundApps(roundId);
 
-    uint256 available = (total * baseAllocationPercentage) / 100;
+    uint256 available = (total * $.baseAllocationPercentage) / 100;
 
     uint256 amountPerApp = available / eligibleApps.length;
     return amountPerApp;
@@ -223,7 +245,8 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
   }
 
   function claimed(uint256 roundId, bytes32 appId) public view returns (bool) {
-    return claimedRewards[appId][roundId];
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    return $.claimedRewards[appId][roundId];
   }
 
   /**
@@ -231,20 +254,23 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
    * shares calculation is scaled by 1e4.
    */
   function scaledAppSharesCap() public view returns (uint256) {
-    return appSharesCap * 1e2;
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    return $.appSharesCap * 1e2;
   }
 
   /**
    * @dev Returns the XAllocationVotingGovernor contract.
    */
   function xAllocationVoting() public view returns (IXAllocationVotingGovernor) {
-    return _xAllocationVoting;
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    return $._xAllocationVoting;
   }
 
   /**
    * @dev Returns the emissions contract.
    */
   function emissions() public view returns (IEmissions) {
-    return _emissions;
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    return $._emissions;
   }
 }
