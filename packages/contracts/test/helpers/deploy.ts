@@ -105,12 +105,7 @@ export const getOrDeployContractInstances = async ({
 
   // Deploy XAllocationPool
   const XAllocationPoolContract = await ethers.getContractFactory("XAllocationPool")
-  const xAllocationPool = await XAllocationPoolContract.deploy(
-    owner.address,
-    await b3tr.getAddress(),
-    config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
-    config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
-  )
+  const xAllocationPool = await XAllocationPoolContract.deploy(owner.address, await b3tr.getAddress())
   await xAllocationPool.waitForDeployment()
 
   const X_ALLOCATIONS_ADDRESS = await xAllocationPool.getAddress()
@@ -161,6 +156,8 @@ export const getOrDeployContractInstances = async ({
     await voterRewards.getAddress(),
     [await timeLock.getAddress(), owner.address],
     "ipfs://",
+    config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
+    config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
   )
   await xAllocationVoting.waitForDeployment()
 

@@ -51,7 +51,7 @@ describe("X-Allocation Pool", async function () {
 
       let app2Shares = await xAllocationPool.getAppShares(round1, app2Id)
       // should be capped to 15%
-      let maxCapPercentage = await xAllocationPool.scaledAppSharesCap()
+      let maxCapPercentage = await xAllocationPool.scaledAppSharesCap(round1)
       expect(app2Shares).to.eql(maxCapPercentage)
 
       // Calculate base allocations
@@ -441,7 +441,7 @@ describe("X-Allocation Pool", async function () {
 
       let app2Shares = await xAllocationPool.getAppShares(round1, app2Id)
       // should be capped to 15%
-      let maxCapPercentage = await xAllocationPool.scaledAppSharesCap()
+      let maxCapPercentage = await xAllocationPool.scaledAppSharesCap(round1)
       expect(app2Shares).to.eql(maxCapPercentage)
     })
 
