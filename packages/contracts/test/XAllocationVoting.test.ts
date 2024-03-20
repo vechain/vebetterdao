@@ -78,11 +78,9 @@ describe("X-Allocation Voting", function () {
     })
 
     it("only governance should be able to upgrade the xAllocationVoting contract", async function () {
-      const { xAllocationVoting, governor, owner } = await getOrDeployContractInstances({
+      const { xAllocationVoting, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
-      const votesThreshold = await governor.proposalThreshold()
-      await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
 
       // Deploy the implementation contract
       const Contract = await ethers.getContractFactory("XAllocationVoting")
