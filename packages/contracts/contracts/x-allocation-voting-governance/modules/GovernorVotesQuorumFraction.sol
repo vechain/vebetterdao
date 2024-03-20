@@ -14,7 +14,24 @@ import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.s
 abstract contract GovernorVotesQuorumFraction is GovernorVotes {
   using Checkpoints for Checkpoints.Trace208;
 
-  Checkpoints.Trace208 private _quorumNumeratorHistory;
+  /// @custom:storage-location erc7201:b3tr.storage.GovernorVotesQuorumFraction
+  struct GovernorVotesQuorumFractionStorage {
+    Checkpoints.Trace208 _quorumNumeratorHistory;
+  }
+
+  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.GovernorVotesQuorumFraction")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 private constant GovernorVotesQuorumFractionStorageLocation =
+    0x80591ec4ff6d1506223368471cadc2b4568b450b05eb374eb7d48c87f1fbc500;
+
+  function _getGovernorVotesQuorumFractionStorage()
+    private
+    pure
+    returns (GovernorVotesQuorumFractionStorage storage $)
+  {
+    assembly {
+      $.slot := GovernorVotesQuorumFractionStorageLocation
+    }
+  }
 
   event QuorumNumeratorUpdated(uint256 oldQuorumNumerator, uint256 newQuorumNumerator);
 
@@ -38,17 +55,20 @@ abstract contract GovernorVotesQuorumFraction is GovernorVotes {
    * @dev Returns the current quorum numerator. See {quorumDenominator}.
    */
   function quorumNumerator() public view virtual returns (uint256) {
-    return _quorumNumeratorHistory.latest();
+    GovernorVotesQuorumFractionStorage storage $ = _getGovernorVotesQuorumFractionStorage();
+    return $._quorumNumeratorHistory.latest();
   }
 
   /**
    * @dev Returns the quorum numerator at a specific timepoint. See {quorumDenominator}.
    */
   function quorumNumerator(uint256 timepoint) public view virtual returns (uint256) {
-    uint256 length = _quorumNumeratorHistory._checkpoints.length;
+    GovernorVotesQuorumFractionStorage storage $ = _getGovernorVotesQuorumFractionStorage();
+
+    uint256 length = $._quorumNumeratorHistory._checkpoints.length;
 
     // Optimistic search, check the latest checkpoint
-    Checkpoints.Checkpoint208 storage latest = _quorumNumeratorHistory._checkpoints[length - 1];
+    Checkpoints.Checkpoint208 storage latest = $._quorumNumeratorHistory._checkpoints[length - 1];
     uint48 latestKey = latest._key;
     uint208 latestValue = latest._value;
     if (latestKey <= timepoint) {
@@ -56,7 +76,7 @@ abstract contract GovernorVotesQuorumFraction is GovernorVotes {
     }
 
     // Otherwise, do the binary search
-    return _quorumNumeratorHistory.upperLookupRecent(SafeCast.toUint48(timepoint));
+    return $._quorumNumeratorHistory.upperLookupRecent(SafeCast.toUint48(timepoint));
   }
 
   /**
@@ -103,7 +123,9 @@ abstract contract GovernorVotesQuorumFraction is GovernorVotes {
     }
 
     uint256 oldQuorumNumerator = quorumNumerator();
-    _quorumNumeratorHistory.push(clock(), SafeCast.toUint208(newQuorumNumerator));
+
+    GovernorVotesQuorumFractionStorage storage $ = _getGovernorVotesQuorumFractionStorage();
+    $._quorumNumeratorHistory.push(clock(), SafeCast.toUint208(newQuorumNumerator));
 
     emit QuorumNumeratorUpdated(oldQuorumNumerator, newQuorumNumerator);
   }
