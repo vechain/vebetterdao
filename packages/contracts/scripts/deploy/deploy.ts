@@ -42,7 +42,7 @@ export async function deployAll(config: ContractsConfig) {
   const vot3 = await deployVot3Token(TEMP_ADMIN, await b3tr.getAddress())
 
   // Deploy the governance contract
-  const timelock = await deployTimeLock(config.B3TR_GOVERNOR_MIN_DELAY, TEMP_ADMIN)
+  const timelock = await deployTimeLock(config.B3TR_GOVERNOR_MIN_DELAY, TEMP_ADMIN, TEMP_ADMIN)
   const governor = await deployGovernor(
     await vot3.getAddress(),
     await timelock.getAddress(),
@@ -314,11 +314,12 @@ async function deployVot3Token(admin: string, b3trAddress: string): Promise<VOT3
 async function deployTimeLock(
   minDelay: number,
   admin: string,
+  upgrader: string,
   proposers: string[] = [],
   executors: string[] = [],
 ): Promise<TimeLock> {
   console.log(`Deploying TimeLock contract`)
-  const contract = (await deployProxy("TimeLock", [minDelay, proposers, executors, admin])) as TimeLock
+  const contract = (await deployProxy("TimeLock", [minDelay, proposers, executors, admin, upgrader])) as TimeLock
   console.log(`TimeLock contract deployed at address ${await contract.getAddress()}`)
 
   return contract

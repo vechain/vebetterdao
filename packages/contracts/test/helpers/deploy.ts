@@ -67,6 +67,7 @@ export const getOrDeployContractInstances = async ({
     [],
     [],
     timelockAdmin.address,
+    timelockAdmin.address,
   ])) as TimeLock
 
   // Deploy Governor
