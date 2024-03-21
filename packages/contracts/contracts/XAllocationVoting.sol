@@ -23,6 +23,7 @@ contract XAllocationVoting is
   UUPSUpgradeable
 {
   bytes32 public constant ROUND_STARTER_ROLE = keccak256("ROUND_STARTER_ROLE");
+  bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
@@ -46,6 +47,7 @@ contract XAllocationVoting is
     address b3trGovernor_,
     address _voterRewards,
     address[] memory _admins,
+    address upgrader,
     string memory _xAppsBaseURI
   ) public initializer {
     __XAllocationVotingGovernor_init("XAllocationVoting", b3trGovernor_);
@@ -60,9 +62,11 @@ contract XAllocationVoting is
     for (uint256 i = 0; i < _admins.length; i++) {
       _grantRole(DEFAULT_ADMIN_ROLE, _admins[i]);
     }
+
+    _grantRole(UPGRADER_ROLE, upgrader);
   }
 
-  function _authorizeUpgrade(address newImplementation) internal override onlyGovernance {}
+  function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
   // ---------- Setters ---------- //
 

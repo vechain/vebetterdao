@@ -107,6 +107,7 @@ export async function deployAll(config: ContractsConfig) {
     await timelock.getAddress(),
     await vot3.getAddress(),
     TEMP_ADMIN,
+    TEMP_ADMIN,
     await voterRewards.getAddress(),
     config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE,
     config.EMISSIONS_CYCLE_DURATION - 1,
@@ -405,6 +406,7 @@ async function deployXAllocationVoting(
   timeLockAddress: string,
   vot3Address: string,
   adminAddress: string,
+  upgraderAddress: string,
   voterRewardsAddress: string,
   quorumPercentage: number = 50,
   xAllocationVotingPeriod: number = 10,
@@ -419,6 +421,7 @@ async function deployXAllocationVoting(
     timeLockAddress,
     voterRewardsAddress,
     [timeLockAddress, adminAddress],
+    upgraderAddress,
     baseURI,
   ])) as XAllocationVoting
 
