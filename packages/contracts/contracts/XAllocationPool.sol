@@ -70,7 +70,7 @@ contract XAllocationPool is
     setAppSharesCap(appSharesCap_);
   }
 
-  function _authorizeUpgrade(address newImplementation) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
+  function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
   // ---------- Setters ---------- //
 
