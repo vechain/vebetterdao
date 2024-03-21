@@ -23,7 +23,7 @@ import {
   useColorModeValue,
   useSteps,
 } from "@chakra-ui/react"
-import { humanNumber } from "@repo/utils/FormattingUtils"
+import { getCompactFormatter, humanNumber } from "@repo/utils/FormattingUtils"
 import { useEffect, useMemo } from "react"
 import { FaClock } from "react-icons/fa6"
 
@@ -31,14 +31,7 @@ type Props = {
   roundId: string
 }
 
-const DECIMAL_PLACES = 2
-
-// Maximum precision of 4 decimals. Must also round down
-const compactFormatter = new Intl.NumberFormat("en-US", {
-  notation: "compact",
-  compactDisplay: "short",
-  maximumFractionDigits: DECIMAL_PLACES,
-})
+const compactFormatter = getCompactFormatter(2)
 
 export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
   const { data: roundInfo } = useAllocationsRound(roundId)

@@ -23,15 +23,13 @@ import { backdropBlurAnimation } from "@/app/theme"
 import { BaseTooltip } from "../BaseTooltip"
 import { DotSymbol } from "../DotSymbol"
 import { AppAmount } from "./components/AppAmount"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
 type Props = {
   roundId: string
 }
 
-const compactFormatter = new Intl.NumberFormat("en-US", {
-  notation: "compact",
-  compactDisplay: "short",
-})
+const compactFormatter = getCompactFormatter()
 
 export const CurrentRoundAllocations = ({ roundId }: Props) => {
   const { data: xApps } = useRoundXApps(roundId)
@@ -69,17 +67,14 @@ export const CurrentRoundAllocations = ({ roundId }: Props) => {
         <HStack justify={"space-between"} w="full">
           <Heading size="md">Round #{roundId} allocations </Heading>
           {round?.state === "0" && (
-            <BaseTooltip
-              text={"Round is still active, final results could change if quorum is not reached"}
-              children={
-                <Tag colorScheme="inherit" size={"lg"} style={{ cursor: "default" }}>
-                  <HStack spacing={1} align={"center"}>
-                    <DotSymbol color="secondary.500" />
-                    <Text fontSize={"sm"}>Active</Text>
-                  </HStack>
-                </Tag>
-              }
-            />
+            <BaseTooltip text={"Round is still active, final results could change if quorum is not reached"}>
+              <Tag colorScheme="inherit" size={"lg"} style={{ cursor: "default" }}>
+                <HStack spacing={1} align={"center"}>
+                  <DotSymbol color="secondary.500" />
+                  <Text fontSize={"sm"}>Active</Text>
+                </HStack>
+              </Tag>
+            </BaseTooltip>
           )}
         </HStack>
       </CardHeader>
@@ -135,7 +130,7 @@ export const CurrentRoundAllocations = ({ roundId }: Props) => {
                 Error loading votes
               </AlertTitle>
               <AlertDescription maxWidth="sm">
-                {error?.message || "An error occurred while loading allocation amounts"}
+                {error?.message ?? "An error occurred while loading allocation amounts"}
               </AlertDescription>
             </Alert>
           )}

@@ -14,5 +14,9 @@ const AdminPageContent = dynamic(() => import("./AdminPageContent").then(mod => 
 })
 
 export default function AdminPage() {
-  return <MotionVStack children={<AdminPageContent />} />
+  return (
+    <MotionVStack>
+      <AdminPageContent />
+    </MotionVStack>
+  )
 }

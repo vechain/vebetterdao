@@ -17,18 +17,22 @@ const mixpanelToken = getConfig().mixPanelProjectToken
 const isProduction = process.env.NODE_ENV === "production"
 const Navbar = dynamic(() => import("@/components/Navbar").then(mod => mod.Navbar), { ssr: false })
 const FreshDeskWidget = dynamic(() => import("@/components/FreshDeskWidget").then(mod => mod.FreshDeskWidget), {
-    ssr: false,
-    })
+  ssr: false,
+})
 
 //TODO: Is there a better place to initialise mixpanel? next/script?
 typeof window != "undefined" && mixpanelToken && AnalyticsUtils.initialise()
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      style={{
+        scrollBehavior: "smooth",
+      }}>
       <head>
         <title>VeBetterDAO</title>
-        <meta name="description" content="Vote for your favourite sustainability dApps in VeBetterDAO’s governance." />
+        <meta name="description" content="Vote for your favourite sustainability Apps in VeBetterDAO’s governance." />
         <link rel="icon" href="/images/favicon.png" />
         <link rel="apple-touch-icon" sizes="57x57" href="/images/favicon.png" />
         <meta name="msapplication-TileImage" content="/images/favicon.png" />
@@ -40,7 +44,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <meta
           name="description"
           property="og:description"
-          content="Vote for your favourite sustainability dApps in VeBetterDAO’s governance."
+          content="Vote for your favourite sustainability Apps in VeBetterDAO’s governance."
         />
         <meta property="og:site_name" content="VeBetterDAO" />
         <meta name="image" property="og:image" content={`${getConfig().basePath}/images/social_image.png`} />
@@ -55,14 +59,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <meta name="twitter:title" content="VeBetterDAO" />
         <meta
           name="twitter:description"
-          content="Vote for your favourite sustainability dApps in VeBetterDAO’s governance."
+          content="Vote for your favourite sustainability Apps in VeBetterDAO’s governance."
         />
         <meta name="twitter:image" content={`${getConfig().basePath}/images/social_image.png`} />
         <meta name="twitter:image:alt" content="VeBetterDAO" />
       </head>
       <body>
         <Providers>
-            {isProduction && <FreshDeskWidget widgetId={103000007852} />}
+          {isProduction && <FreshDeskWidget widgetId={103000007852} />}
           <VStack minH="100vh" gap={0} align="stretch">
             <AlphaTestnetBanner />
             <Navbar />

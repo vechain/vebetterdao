@@ -20,6 +20,8 @@ import { CustomModalContent } from "../CustomModalContent"
 import { SwitchTokenButton } from "./SwitchTokenButton"
 import { TokenCards } from "./TokenCards"
 import { TransactionModal } from "../TransactionModal"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+
 export type Props = {
   isOpen: boolean
   onClose: () => void
@@ -28,11 +30,7 @@ export type Props = {
 const DECIMAL_PLACES = 4
 
 // Maximum precision of 4 decimals. Must also round down
-const compactFormatter = new Intl.NumberFormat("en-US", {
-  notation: "compact",
-  compactDisplay: "short",
-  maximumFractionDigits: DECIMAL_PLACES,
-})
+const compactFormatter = getCompactFormatter(DECIMAL_PLACES)
 
 export const SwapModal = ({ isOpen, onClose }: Props) => {
   const [isB3trToVot3, setIsB3trToVot3] = useState(true)
@@ -55,17 +53,14 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
   })
 
   const mutationData = useMemo(() => {
-    if (isB3trToVot3) {
-      return stakeMutation
-    } else {
-      return unstakeMutation
-    }
+    if (isB3trToVot3) return stakeMutation
+    return unstakeMutation
   }, [isB3trToVot3, stakeMutation, unstakeMutation])
 
   const handleStake = useCallback(() => {
     mutationData.resetStatus()
     mutationData.sendTransaction(undefined)
-  }, [mutationData.sendTransaction])
+  }, [mutationData.resetStatus, mutationData.sendTransaction])
 
   const handleClose = useCallback(() => {
     mutationData.resetStatus()
@@ -76,24 +71,32 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
 
   const { b3trColor, vot3Color } = useTokenColors()
 
+  const amountText = useMemo(() => {
+    const amountNumber = Number(amount)
+
+    if (amountNumber < 0.0001) return `< 0.${"0".repeat(DECIMAL_PLACES - 1)}1`
+
+    return compactFormatter.format(amountNumber)
+  }, [amount])
+
   const swapText = useMemo(() => {
     if (isB3trToVot3) {
       return (
         <HStack>
-          <Text as="b">{compactFormatter.format(Number(amount))}</Text>
+          <Text as="b">{amountText}</Text>
           <Text color={b3trColor}>B3TR</Text>
           <FaArrowRight />
-          <Text as="b">{compactFormatter.format(Number(amount))}</Text>
+          <Text as="b">{amountText}</Text>
           <Text color={vot3Color}>VOT3</Text>
         </HStack>
       )
     } else {
       return (
         <HStack>
-          <Text as="b">{compactFormatter.format(Number(amount))}</Text>
+          <Text as="b">{amountText}</Text>
           <Text color={vot3Color}>VOT3</Text>
           <FaArrowRight />
-          <Text as="b">{compactFormatter.format(Number(amount))}</Text>
+          <Text as="b">{amountText}</Text>
           <Text color={b3trColor}>B3TR</Text>
         </HStack>
       )
