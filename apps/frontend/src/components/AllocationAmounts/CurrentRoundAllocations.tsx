@@ -23,15 +23,13 @@ import { backdropBlurAnimation } from "@/app/theme"
 import { BaseTooltip } from "../BaseTooltip"
 import { DotSymbol } from "../DotSymbol"
 import { AppAmount } from "./components/AppAmount"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
 type Props = {
   roundId: string
 }
 
-const compactFormatter = new Intl.NumberFormat("en-US", {
-  notation: "compact",
-  compactDisplay: "short",
-})
+const compactFormatter = getCompactFormatter()
 
 export const CurrentRoundAllocations = ({ roundId }: Props) => {
   const { data: xApps } = useRoundXApps(roundId)

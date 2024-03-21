@@ -6,9 +6,11 @@ import {
   useXAppTotalEarnings,
 } from "@/api"
 import { Card, CardBody, Box, Stack, Text, HStack, Skeleton } from "@chakra-ui/react"
-import { compactFormatter } from "@repo/utils/FormattingUtils"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import { useMemo } from "react"
+
+const compactFormatter = getCompactFormatter()
 
 type Props = { xApp: XApp }
 

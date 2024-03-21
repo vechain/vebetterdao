@@ -11,6 +11,7 @@ import { notFoundImage } from "@/constants"
 import { Box, HStack, Heading, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { B3TRIcon } from "../Icons"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
 type Props = {
   roundId: string
@@ -22,14 +23,8 @@ type AppVotesData = {
   app: string
 }
 
-const DECIMAL_PLACES = 2
-
-// Maximum precision of 4 decimals. Must also round down
-const compactFormatter = new Intl.NumberFormat("en-US", {
-  notation: "compact",
-  compactDisplay: "short",
-  maximumFractionDigits: DECIMAL_PLACES,
-})
+// Maximum precision of 2 decimals. Must also round down
+const compactFormatter = getCompactFormatter(2)
 
 export const AllocationXAppsVotesRankingChart = ({ roundId, maxRanks }: Props) => {
   const { data: xApps } = useRoundXApps(roundId)
