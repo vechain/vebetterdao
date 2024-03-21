@@ -74,8 +74,8 @@ describe("VoterRewards", () => {
 
       const currentImplAddress = await getImplementationAddress(ethers.provider, await voterRewards.getAddress())
 
-      const DEFAULT_ADMIN_ROLE = await voterRewards.DEFAULT_ADMIN_ROLE()
-      expect(await voterRewards.hasRole(DEFAULT_ADMIN_ROLE, owner.address)).to.eql(true)
+      const UPGRADER_ROLE = await voterRewards.UPGRADER_ROLE()
+      expect(await voterRewards.hasRole(UPGRADER_ROLE, owner.address)).to.eql(true)
 
       await expect(voterRewards.connect(owner).upgradeToAndCall(await implementation.getAddress(), "0x")).to.not.be
         .reverted
@@ -98,8 +98,8 @@ describe("VoterRewards", () => {
 
       const currentImplAddress = await getImplementationAddress(ethers.provider, await voterRewards.getAddress())
 
-      const DEFAULT_ADMIN_ROLE = await voterRewards.DEFAULT_ADMIN_ROLE()
-      expect(await voterRewards.hasRole(DEFAULT_ADMIN_ROLE, otherAccount.address)).to.eql(false)
+      const UPGRADER_ROLE = await voterRewards.UPGRADER_ROLE()
+      expect(await voterRewards.hasRole(UPGRADER_ROLE, otherAccount.address)).to.eql(false)
 
       await expect(voterRewards.connect(otherAccount).upgradeToAndCall(await implementation.getAddress(), "0x")).to.be
         .reverted
@@ -108,6 +108,33 @@ describe("VoterRewards", () => {
 
       expect(newImplAddress.toUpperCase()).to.eql(currentImplAddress.toUpperCase())
       expect(newImplAddress.toUpperCase()).to.not.eql((await implementation.getAddress()).toUpperCase())
+    })
+
+    it("Admin can change UPGRADER_ROLE", async function () {
+      const { voterRewards, owner, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Deploy the implementation contract
+      const Contract = await ethers.getContractFactory("VoterRewards")
+      const implementation = await Contract.deploy()
+      await implementation.waitForDeployment()
+
+      const currentImplAddress = await getImplementationAddress(ethers.provider, await voterRewards.getAddress())
+
+      const UPGRADER_ROLE = await voterRewards.UPGRADER_ROLE()
+      expect(await voterRewards.hasRole(UPGRADER_ROLE, otherAccount.address)).to.eql(false)
+
+      await expect(voterRewards.connect(owner).grantRole(UPGRADER_ROLE, otherAccount.address)).to.not.be.reverted
+      await expect(voterRewards.connect(owner).revokeRole(UPGRADER_ROLE, owner.address)).to.not.be.reverted
+
+      await expect(voterRewards.connect(otherAccount).upgradeToAndCall(await implementation.getAddress(), "0x")).to.not
+        .be.reverted
+
+      const newImplAddress = await getImplementationAddress(ethers.provider, await voterRewards.getAddress())
+
+      expect(newImplAddress.toUpperCase()).to.not.eql(currentImplAddress.toUpperCase())
+      expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
     })
   })
 

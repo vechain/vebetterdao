@@ -13,6 +13,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
   bytes32 public constant X_ALLOCATION_VOTE_REGISTRAR_ROLE = keccak256("X_ALLOCATION_VOTE_REGISTRAR_ROLE");
+  bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
   /// @custom:storage-location erc7201:b3tr.storage.VoterRewards
   struct VoterRewardsStorage {
@@ -49,6 +50,7 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
 
   function initialize(
     address admin,
+    address upgrader,
     address _emissions,
     address _b3trBadge,
     address _b3tr,
@@ -78,9 +80,10 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
     }
 
     _grantRole(DEFAULT_ADMIN_ROLE, admin);
+    _grantRole(UPGRADER_ROLE, upgrader);
   }
 
-  function _authorizeUpgrade(address newImplementation) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
+  function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
   function registerXallocationVote(
     uint256 proposalStart,

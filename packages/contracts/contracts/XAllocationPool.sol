@@ -21,6 +21,7 @@ contract XAllocationPool is
   UUPSUpgradeable
 {
   uint256 public constant percentagePrecisionScalingFactor = 1e4;
+  bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
   /// @custom:storage-location erc7201:b3tr.storage.XAllocationPool
   struct XAllocationPoolStorage {
@@ -50,6 +51,7 @@ contract XAllocationPool is
 
   function initialize(
     address _admin,
+    address upgrader,
     address b3trAddress,
     uint256 baseAllocationPercentage_,
     uint256 appSharesCap_
@@ -59,8 +61,10 @@ contract XAllocationPool is
     __UUPSUpgradeable_init();
 
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
-    _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     $.b3tr = IB3TR(b3trAddress);
+
+    _grantRole(DEFAULT_ADMIN_ROLE, _admin);
+    _grantRole(UPGRADER_ROLE, upgrader);
 
     setBaseAllocationPercentage(baseAllocationPercentage_);
     setAppSharesCap(appSharesCap_);

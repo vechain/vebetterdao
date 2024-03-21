@@ -104,6 +104,7 @@ export const getOrDeployContractInstances = async ({
   // Deploy XAllocationPool
   const xAllocationPool = (await deployProxy("XAllocationPool", [
     owner.address,
+    owner.address,
     await b3tr.getAddress(),
     config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
     config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
@@ -134,6 +135,7 @@ export const getOrDeployContractInstances = async ({
   ])) as Emissions
 
   const voterRewards = (await deployProxy("VoterRewards", [
+    owner.address,
     owner.address,
     await emissions.getAddress(),
     await b3trBadge.getAddress(),

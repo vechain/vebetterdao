@@ -56,6 +56,7 @@ export async function deployAll(config: ContractsConfig) {
   const xAllocationPool = await deployXAllocationPool(
     await b3tr.getAddress(),
     TEMP_ADMIN,
+    TEMP_ADMIN,
     config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
     config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
   )
@@ -95,6 +96,7 @@ export async function deployAll(config: ContractsConfig) {
     await badge.getAddress(),
     await emissions.getAddress(),
     await b3tr.getAddress(),
+    TEMP_ADMIN,
     TEMP_ADMIN,
     levels,
     multiplier,
@@ -380,12 +382,14 @@ async function deployNFTBadge(
 async function deployXAllocationPool(
   b3trAddress: string,
   adminAddress: string,
+  upgraderAddress: string,
   baseAllocationPercentage: number = 20,
   appSharesCap: number = 15,
 ) {
   console.log(`Deploying XAllocationPool contract`)
   const contract = (await deployProxy("XAllocationPool", [
     adminAddress,
+    upgraderAddress,
     b3trAddress,
     baseAllocationPercentage,
     appSharesCap,
@@ -459,12 +463,14 @@ async function deployVoterRewards(
   emissionsAddress: string,
   b3trAddress: string,
   adminAddress: string,
+  upgraderAddress: string,
   levels: number[],
   multiplier: number[],
 ) {
   console.log(`Deploying VoterRewards contract`)
   const contract = (await deployProxy("VoterRewards", [
     adminAddress,
+    upgraderAddress,
     emissionsAddress,
     badgeAddress,
     b3trAddress,
