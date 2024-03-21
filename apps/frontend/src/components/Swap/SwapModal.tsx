@@ -56,17 +56,14 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
   })
 
   const mutationData = useMemo(() => {
-    if (isB3trToVot3) {
-      return stakeMutation
-    } else {
-      return unstakeMutation
-    }
+    if (isB3trToVot3) return stakeMutation
+    return unstakeMutation
   }, [isB3trToVot3, stakeMutation, unstakeMutation])
 
   const handleStake = useCallback(() => {
     mutationData.resetStatus()
     mutationData.sendTransaction(undefined)
-  }, [mutationData.sendTransaction])
+  }, [mutationData.resetStatus, mutationData.sendTransaction])
 
   const handleClose = useCallback(() => {
     mutationData.resetStatus()
