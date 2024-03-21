@@ -53,12 +53,7 @@ export async function deployAll(config: ContractsConfig) {
   )
 
   // Deploy XAllocationPool
-  const xAllocationPool = await deployXAllocationPool(
-    await b3tr.getAddress(),
-    TEMP_ADMIN,
-    config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
-    config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
-  )
+  const xAllocationPool = await deployXAllocationPool(await b3tr.getAddress(), TEMP_ADMIN)
 
   // Deploy the NFT Badge contract with Max Mintable Level 1
   const badge = await deployNFTBadge(
@@ -108,6 +103,8 @@ export async function deployAll(config: ContractsConfig) {
     config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE,
     config.EMISSIONS_CYCLE_DURATION - 1,
     config.XAPP_BASE_URI,
+    config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
+    config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
   )
 
   console.log("Contracts deployed")
