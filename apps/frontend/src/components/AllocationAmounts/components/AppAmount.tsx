@@ -2,6 +2,7 @@ import { HStack, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useXAppMetadata } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
 type Props = {
   xAppId: string
@@ -9,10 +10,7 @@ type Props = {
   isCurrent?: boolean
 }
 
-const compactFormatter = new Intl.NumberFormat("en-US", {
-  notation: "compact",
-  compactDisplay: "short",
-})
+const compactFormatter = getCompactFormatter()
 
 export const AppAmount = ({ xAppId, amount, isCurrent = false }: Props) => {
   const { data: appMetadata, isLoading: appMetadataLoading } = useXAppMetadata(xAppId)

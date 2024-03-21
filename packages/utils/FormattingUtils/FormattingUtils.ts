@@ -6,10 +6,12 @@ export const ROUND_DECIMAL_ZERO = 0
 export const ROUND_DECIMAL_DEFAULT = 2
 export const ROUND_DECIMAL_PRECISE = 6
 
-export const compactFormatter = new Intl.NumberFormat("en-US", {
-  notation: "compact",
-  compactDisplay: "short",
-})
+export const getCompactFormatter = (decimalPlaces?: number) =>
+  new Intl.NumberFormat("en-US", {
+    notation: "compact",
+    compactDisplay: "short",
+    maximumFractionDigits: decimalPlaces,
+  })
 
 // const locale = detectLocale()
 

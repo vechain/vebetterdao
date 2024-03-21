@@ -1,17 +1,16 @@
 import { ProposalCreatedEvent, useCurrentBlock, useProposalQuorum, useProposalState, useProposalVotes } from "@/api"
 import { Box, HStack, Heading, Icon, Progress, Skeleton, Text } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import { useMemo } from "react"
 import { FaThumbsDown, FaThumbsUp } from "react-icons/fa6"
 const blockTime = getConfig().network.blockTime
+const compactFormatter = getCompactFormatter()
+
 type Props = {
   proposal: ProposalCreatedEvent
 }
-const compactFormatter = new Intl.NumberFormat("en-US", {
-  notation: "compact",
-  compactDisplay: "short",
-})
 
 export const ProposalVotesProgressBar: React.FC<Props> = ({ proposal }) => {
   const {
