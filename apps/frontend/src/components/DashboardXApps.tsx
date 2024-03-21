@@ -30,7 +30,7 @@ export const DashboardXApps = () => {
     <Card>
       <CardHeader>
         <HStack w="full" justify={"space-between"}>
-          <Heading size="md">Explore apps</Heading>
+          <Heading size="md">Explore Apps</Heading>
           {slicedXApps && slicedXApps.length > 4 && (
             <Button variant="link" colorScheme="blue" rightIcon={<FiArrowUpRight />}>
               See all
@@ -71,7 +71,7 @@ const XApp = ({ xApp }: { xApp: XApp }) => {
               <IconButton
                 isRound={true}
                 variant="solid"
-                aria-label="Go to dApp"
+                aria-label="Go to App"
                 fontSize="20px"
                 disabled={isAppMetadataError}
                 onClick={() => window.open(appMetadata?.external_url, "_blank")}

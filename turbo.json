@@ -75,6 +75,10 @@
       "cache": false,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config", "test:hardhat"]
     },
+    "test:coverage": {
+      "cache": false,
+      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config", "test:hardhat"]
+    },
     "test:thor-solo": {
       "cache": false
     },

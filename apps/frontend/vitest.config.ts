@@ -7,6 +7,9 @@ import { resolve } from "path"
 export default defineConfig({
   plugins: [react(), tsconfigPaths()],
   test: {
+    coverage: {
+      provider: "istanbul", // or 'v8'
+    },
     environment: "jsdom",
     globals: true,
     setupFiles: [resolve(__dirname, "test/vite.setup.ts")],
