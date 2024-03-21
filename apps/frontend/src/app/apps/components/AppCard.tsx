@@ -60,7 +60,13 @@ export const AppCard = ({ xApp }: Props) => {
           <VStack spacing={1} align="flex-start">
             <HStack spacing={1} justifyContent={"space-between"} align="center" w={"full"}>
               <Skeleton isLoaded={!appMetadataLoading}>
-                <Text fontWeight={"600"} size={"xs"}>
+                <Text
+                  fontWeight={"600"}
+                  size={"xs"}
+                  onClick={navigateToAppDetail}
+                  _hover={{
+                    cursor: "pointer",
+                  }}>
                   {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
                 </Text>
               </Skeleton>
@@ -79,7 +85,13 @@ export const AppCard = ({ xApp }: Props) => {
               )}
             </HStack>
             <Skeleton isLoaded={!appMetadataLoading}>
-              <Text fontSize={"sm"} color={"gray.500"}>
+              <Text
+                fontSize={"sm"}
+                color={"gray.500"}
+                onClick={navigateToAppDetail}
+                _hover={{
+                  cursor: "pointer",
+                }}>
                 {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
               </Text>
             </Skeleton>
