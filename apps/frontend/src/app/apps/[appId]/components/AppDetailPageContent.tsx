@@ -1,3 +1,4 @@
+import { VStack } from "@chakra-ui/react"
 import { AppDetailCard } from "./AppDetailCard"
 
 type Props = {
@@ -5,5 +6,9 @@ type Props = {
 }
 
 export const AppDetailPageContent = ({ appId }: Props) => {
-  return <AppDetailCard appId={appId} />
+  return (
+    <VStack w="full" spacing={8} align="flex-start" data-testid={`app-${appId}-detail`}>
+      <AppDetailCard appId={appId} />
+    </VStack>
+  )
 }
