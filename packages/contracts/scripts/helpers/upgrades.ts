@@ -1,6 +1,6 @@
 import { BaseContract, Interface } from "ethers"
 import { ethers } from "hardhat"
-import ERC1967Proxy from "@openzeppelin/upgrades-core/artifacts/@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol/ERC1967Proxy.json"
+import ERC1967Proxy from "@openzeppelin/upgrades-core/artifacts/@openzeppelin/contracts-v5/proxy/ERC1967/ERC1967Proxy.sol/ERC1967Proxy.json"
 
 export const deployProxy = async (contractName: string, args: any[]): Promise<BaseContract> => {
   // Deploy the implementation contract
