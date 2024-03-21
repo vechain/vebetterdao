@@ -19,6 +19,19 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
     uint256 treasury;
   }
 
+  struct InitializationData {
+    address minter;
+    address admin;
+    address upgrader;
+    address b3trAddress;
+    address[3] destinations;
+    uint256 initialXAppAllocation;
+    uint256 cycleDuration;
+    uint256[4] decaySettings;
+    uint256 treasuryPercentage;
+    uint256 maxVote2EarnDecay;
+  }
+
   /// @custom:storage-location erc7201:b3tr.storage.Emissions
   struct EmissionsStorage {
     IB3TR b3tr; // B3TR token contract
@@ -45,19 +58,6 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
     uint256 totalEmissions; // Total emissions distributed
     // ----------- Scaling ----------- //
     uint256 scalingFactor;
-  }
-
-  struct InitializationData {
-    address minter;
-    address admin;
-    address upgrader;
-    address b3trAddress;
-    address[3] destinations;
-    uint256 initialXAppAllocation;
-    uint256 cycleDuration;
-    uint256[4] decaySettings;
-    uint256 treasuryPercentage;
-    uint256 maxVote2EarnDecay;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.Emissions")) - 1)) & ~bytes32(uint256(0xff))
