@@ -80,7 +80,7 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
   function _appRewardAmount(uint256 roundId, uint256 appShare) internal view returns (uint256) {
     uint256 total = _emissionAmount(roundId);
 
-    uint256 variableAllocationPercentage = 1 - xAllocationVoting().getRoundBaseAllocationPercentage(roundId);
+    uint256 variableAllocationPercentage = 100 - xAllocationVoting().getRoundBaseAllocationPercentage(roundId);
     uint256 available = (total * variableAllocationPercentage) / 100;
 
     uint256 rewardAmount = (available * appShare) / percentagePrecisionScalingFactor;
