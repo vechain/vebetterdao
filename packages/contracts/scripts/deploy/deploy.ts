@@ -66,6 +66,7 @@ export async function deployAll(config: ContractsConfig) {
     name,
     symbol,
     TEMP_ADMIN,
+    TEMP_ADMIN,
     config.NFT_BADGE_BASE_URI,
     config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
     config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
@@ -350,6 +351,7 @@ async function deployNFTBadge(
   name: string,
   symbol: string,
   admin: string,
+  upgrader: string,
   baseUri: string,
   xNodeMaxFreeLevels: number[],
   b3trRequiredToUpgradeToLevel: bigint[],
@@ -357,20 +359,18 @@ async function deployNFTBadge(
   treasuryAddress: string,
 ) {
   console.log(`Deploying B3TRBadge NFT contract`)
-  const NFTBadgeContract = await ethers.getContractFactory("B3TRBadge")
-  const contract = await NFTBadgeContract.deploy(
+  const contract = (await deployProxy("B3TRBadge", [
     name,
     symbol,
     admin,
+    upgrader,
     mintableLevelFromDeploy,
     baseUri,
     xNodeMaxFreeLevels,
     b3trRequiredToUpgradeToLevel,
     b3trAddress,
     treasuryAddress,
-  )
-
-  await contract.waitForDeployment()
+  ])) as B3TRBadge
 
   console.log(`NFTBadge contract deployed at address ${await contract.getAddress()}`)
 

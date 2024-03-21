@@ -21,7 +21,7 @@ interface DeployInstance {
   vot3: VOT3
   timeLock: TimeLock
   governor: B3TRGovernor
-  b3trBadge: B3TRBadge & { deploymentTransaction(): ContractTransactionResponse }
+  b3trBadge: B3TRBadge
   xAllocationVoting: XAllocationVoting
   xAllocationPool: XAllocationPool
   emissions: Emissions
@@ -88,19 +88,18 @@ export const getOrDeployContractInstances = async ({
   await timeLock.connect(timelockAdmin).grantRole(CANCELLER_ROLE, await governor.getAddress())
 
   // Deploy NFTBadge
-  const NFTBadgeContract = await ethers.getContractFactory("B3TRBadge")
-  const b3trBadge = await NFTBadgeContract.deploy(
+  const b3trBadge = (await deployProxy("B3TRBadge", [
     NFT_BADGE_NAME,
     NFT_BADGE_SYMBOL,
-    owner,
+    owner.address,
+    owner.address,
     maxMintableLevel,
     config.NFT_BADGE_BASE_URI,
     config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
     config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
     await b3tr.getAddress(),
     config.TREASURY_POOL_ADDRESS,
-  )
-  await b3trBadge.waitForDeployment()
+  ])) as B3TRBadge
 
   // Deploy XAllocationPool
   const xAllocationPool = (await deployProxy("XAllocationPool", [

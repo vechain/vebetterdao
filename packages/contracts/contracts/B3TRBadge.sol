@@ -1,24 +1,36 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Pausable.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721BurnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts/interfaces/IERC6372.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
 import { IB3TRGovernor } from "./interfaces/IB3TRGovernor.sol";
 import { IB3TR } from "./interfaces/IB3TR.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract B3TRBadge is ERC721, ERC721Enumerable, ERC721Pausable, AccessControl, IERC6372, ReentrancyGuard {
+contract B3TRBadge is
+  Initializable,
+  ERC721Upgradeable,
+  ERC721EnumerableUpgradeable,
+  ERC721PausableUpgradeable,
+  AccessControlUpgradeable,
+  IERC6372,
+  ReentrancyGuardUpgradeable,
+  UUPSUpgradeable
+{
   using Checkpoints for Checkpoints.Trace208;
+  bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
   /// @custom:storage-location erc7201:b3tr.storage.B3TRBadge
   struct B3TRBadgeStorage {
@@ -85,17 +97,23 @@ contract B3TRBadge is ERC721, ERC721Enumerable, ERC721Pausable, AccessControl, I
    */
   event Upgraded(uint256 indexed tokenId, uint256 oldLevel, uint256 newLevel);
 
-  constructor(
+  /// @custom:oz-upgrades-unsafe-allow constructor
+  constructor() {
+    _disableInitializers();
+  }
+
+  function initialize(
     string memory name,
     string memory symbol,
     address admin,
+    address upgrader,
     uint256 maxLevel,
     string memory baseTokenURI,
     uint256[] memory xNodeMaxMintableLevels,
     uint256[] memory b3trToUpgradeToLevel,
     address _b3tr,
     address _treasury
-  ) ERC721(name, symbol) {
+  ) public initializer {
     require(maxLevel > 0, "Galaxy Member: Max level must be greater than 0");
     require(bytes(baseTokenURI).length > 0, "Galaxy Member: Base URI must be set");
     require(
@@ -104,6 +122,13 @@ contract B3TRBadge is ERC721, ERC721Enumerable, ERC721Pausable, AccessControl, I
     );
     require(_b3tr != address(0), "Galaxy Member: B3TR token address cannot be the zero address");
     require(_treasury != address(0), "Galaxy Member: Treasury address cannot be the zero address");
+
+    __ERC721_init(name, symbol);
+    __ERC721Enumerable_init();
+    __ERC721Pausable_init();
+    __AccessControl_init();
+    __ReentrancyGuard_init();
+    __UUPSUpgradeable_init();
 
     B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
 
@@ -124,7 +149,10 @@ contract B3TRBadge is ERC721, ERC721Enumerable, ERC721Pausable, AccessControl, I
     $._nextTokenId = 1; // First token ID starts from 1
 
     _grantRole(DEFAULT_ADMIN_ROLE, admin);
+    _grantRole(UPGRADER_ROLE, upgrader);
   }
+
+  function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
   function pause() public onlyRole(DEFAULT_ADMIN_ROLE) {
     _pause();
@@ -380,7 +408,7 @@ contract B3TRBadge is ERC721, ERC721Enumerable, ERC721Pausable, AccessControl, I
     return "mode=blocknumber&from=default";
   }
 
-  function tokenURI(uint256 tokenId) public view override(ERC721) returns (string memory) {
+  function tokenURI(uint256 tokenId) public view override(ERC721Upgradeable) returns (string memory) {
     B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
     uint256 levelOfToken = $.levelOf[tokenId];
     return levelOfToken > 0 ? string.concat(baseURI(), Strings.toString(levelOfToken)) : "";
@@ -427,20 +455,23 @@ contract B3TRBadge is ERC721, ERC721Enumerable, ERC721Pausable, AccessControl, I
     address to,
     uint256 tokenId,
     address auth
-  ) internal override(ERC721, ERC721Enumerable, ERC721Pausable) returns (address) {
+  ) internal override(ERC721Upgradeable, ERC721EnumerableUpgradeable, ERC721PausableUpgradeable) returns (address) {
     B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
     _moveOwnershipLevel(auth, to, $.levelOf[tokenId], tokenId);
 
     return super._update(to, tokenId, auth);
   }
 
-  function _increaseBalance(address account, uint128 value) internal override(ERC721, ERC721Enumerable) {
+  function _increaseBalance(
+    address account,
+    uint128 value
+  ) internal override(ERC721Upgradeable, ERC721EnumerableUpgradeable) {
     super._increaseBalance(account, value);
   }
 
   function supportsInterface(
     bytes4 interfaceId
-  ) public view override(ERC721, ERC721Enumerable, AccessControl) returns (bool) {
+  ) public view override(ERC721Upgradeable, ERC721EnumerableUpgradeable, AccessControlUpgradeable) returns (bool) {
     return super.supportsInterface(interfaceId);
   }
 
