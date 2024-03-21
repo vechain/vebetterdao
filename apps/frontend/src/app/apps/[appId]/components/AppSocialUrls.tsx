@@ -1,5 +1,5 @@
 import { useXAppMetadata } from "@/api"
-import { Button, HStack, Icon, Link } from "@chakra-ui/react"
+import { Button, HStack, Icon, Link, Stack } from "@chakra-ui/react"
 import { FaDiscord, FaTelegram, FaXTwitter } from "react-icons/fa6"
 
 type Props = {
@@ -35,11 +35,11 @@ export const AppSocialUrls = ({ appId }: Props) => {
     }
   }
   return (
-    <HStack spacing={4} w="full">
+    <Stack direction={["column", "row"]} spacing={4} w="full">
       {appMetadata?.social_urls.map(socialUrl => {
         const socialIcon = getSocialIcon(socialUrl.name)
         const socialUsername = getSocialUrlUsername(socialUrl)
-        const icon = !!socialIcon && <Icon as={socialIcon} />
+        const icon = !!socialIcon && <Icon as={socialIcon} boxSize={5} />
         return (
           <Button
             key={socialUrl.url}
@@ -54,6 +54,6 @@ export const AppSocialUrls = ({ appId }: Props) => {
           </Button>
         )
       })}
-    </HStack>
+    </Stack>
   )
 }
