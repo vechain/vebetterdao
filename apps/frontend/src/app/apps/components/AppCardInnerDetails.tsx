@@ -52,7 +52,7 @@ export const AppCardInnerDetails = ({ xApp }: Props) => {
             </Text>
             <HStack spacing={1} fontWeight={500} align={"flex-end"}>
               <Skeleton isLoaded={!currentRoundIdLoading && !prevRoundEarningLoading}>
-                <Text fontSize="xl">{compactFormatter.format(Number(prevRoundEarning?.amount))}</Text>
+                <Text fontSize="xl">{compactFormatter.format(Number(prevRoundEarning?.amount ?? 0))}</Text>
               </Skeleton>
               <Text fontSize="md" fontWeight={400}>
                 B3TR
@@ -65,7 +65,7 @@ export const AppCardInnerDetails = ({ xApp }: Props) => {
             </Text>
             <HStack spacing={1} fontWeight={500} align={"flex-end"}>
               <Skeleton isLoaded={!isAmountsLoading}>
-                <Text fontSize="xl">{compactFormatter.format(totalAmount)}</Text>
+                <Text fontSize="xl">{compactFormatter.format(totalAmount ?? 0)}</Text>
               </Skeleton>
               <Text fontSize="md" fontWeight={400}>
                 B3TR
