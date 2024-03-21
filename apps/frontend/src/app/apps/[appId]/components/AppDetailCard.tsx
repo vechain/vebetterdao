@@ -18,6 +18,7 @@ import { FaEllipsisVertical } from "react-icons/fa6"
 import { AppCardOptionsDesktopMenu } from "../../components/AppCardOptionsDesktopMenu"
 import { AppCardOptionsMobileModal } from "../../components/AppCardOptionsMobileModal"
 import { useCallback } from "react"
+import { AppSocialUrls } from "./AppSocialUrls"
 
 type Props = { appId: string }
 export const AppDetailCard = ({ appId }: Props) => {
@@ -73,6 +74,7 @@ export const AppDetailCard = ({ appId }: Props) => {
               {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
             </Text>
           </Skeleton>
+          <AppSocialUrls appId={appId} />
         </VStack>
       </CardBody>
     </Card>
