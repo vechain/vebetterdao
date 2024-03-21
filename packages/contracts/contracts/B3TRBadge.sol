@@ -52,7 +52,7 @@ contract B3TRBadge is ERC721, ERC721Enumerable, ERC721Pausable, AccessControl, I
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.B3TRBadge")) - 1)) & ~bytes32(uint256(0xff))
   bytes32 private constant B3TRBadgeStorageLocation =
-    0xa3a4dbdafa3539d2a7f76379fff3516428de5d09ad2bbe195434cac5e7193900;
+    0x150e16fa8ec3868c60e68a743142094d7e1a46630e5f53ea9f65c39ff4b11000;
 
   function _getB3TRBadgeStorage() private pure returns (B3TRBadgeStorage storage $) {
     assembly {
