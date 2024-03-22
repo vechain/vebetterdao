@@ -27,8 +27,16 @@ export const AdminPermissions = () => {
     isAdminOfB3trBadge,
     isAdminOfVot3,
     isAdminOfVoterRewards,
+    isAdminOfTimeLock,
     isMinterOfB3tr,
     isMinterOfEmissions,
+    isUpgraderOfEmissions,
+    isUpgraderOfXAllocationVoting,
+    isUpgraderOfXAllocationPool,
+    isUpgraderOfB3trBadge,
+    isUpgraderOfVot3,
+    isUpgraderOfVoterRewards,
+    isUpgraderOfTimelock,
   } = useAccountPermissions(account ?? "")
 
   return (
@@ -47,6 +55,7 @@ export const AdminPermissions = () => {
                   <Th>VOT3</Th>
                   <Th>Emissions</Th>
                   <Th>DAO</Th>
+                  <Th>TimeLock</Th>
                   <Th>B3TR Badge</Th>
                   <Th>Voter Rewards</Th>
                   <Th>XAllocation Voting</Th>
@@ -56,25 +65,39 @@ export const AdminPermissions = () => {
               <Tbody>
                 <Tr>
                   <Td fontWeight={"bold"}>ADMIN</Td>
-                  <Td>{isAdminOfB3tr ? "Yes" : "-"}</Td>
-                  <Td>{isAdminOfVot3 ? "Yes" : "-"}</Td>
-                  <Td>{isAdminOfEmissions ? "Yes" : "-"}</Td>
-                  <Td>{isAdminOfDAO ? "Yes" : "-"}</Td>
-                  <Td>{isAdminOfB3trBadge ? "Yes" : "-"}</Td>
-                  <Td>{isAdminOfVoterRewards ? "Yes" : "-"}</Td>
-                  <Td>{isAdminOfXAllocationVoting ? "Yes" : "-"}</Td>
-                  <Td>{isAdminOfXAllocationPool ? "Yes" : "-"}</Td>
+                  <Td>{isAdminOfB3tr ? "Yes" : "No"}</Td>
+                  <Td>{isAdminOfVot3 ? "Yes" : "No"}</Td>
+                  <Td>{isAdminOfEmissions ? "Yes" : "No"}</Td>
+                  <Td>{isAdminOfDAO ? "Yes" : "No"}</Td>
+                  <Td>{isAdminOfTimeLock ? "Yes" : "No"}</Td>
+                  <Td>{isAdminOfB3trBadge ? "Yes" : "No"}</Td>
+                  <Td>{isAdminOfVoterRewards ? "Yes" : "No"}</Td>
+                  <Td>{isAdminOfXAllocationVoting ? "Yes" : "No"}</Td>
+                  <Td>{isAdminOfXAllocationPool ? "Yes" : "No"}</Td>
                 </Tr>
                 <Tr>
                   <Td fontWeight={"bold"}>MINTER</Td>
-                  <Td>{isMinterOfB3tr ? "Yes" : "-"}</Td>
+                  <Td>{isMinterOfB3tr ? "Yes" : "No"}</Td>
                   <Td></Td>
-                  <Td>{isMinterOfEmissions ? "Yes" : "-"}</Td>
-                  <Td></Td>
-                  <Td></Td>
+                  <Td>{isMinterOfEmissions ? "Yes" : "No"}</Td>
                   <Td></Td>
                   <Td></Td>
                   <Td></Td>
+                  <Td></Td>
+                  <Td></Td>
+                  <Td></Td>
+                </Tr>
+                <Tr>
+                  <Td fontWeight={"bold"}>UPGRADER</Td>
+                  <Td></Td>
+                  <Td>{isUpgraderOfVot3 ? "Yes" : "No"}</Td>
+                  <Td>{isUpgraderOfEmissions ? "Yes" : "No"}</Td>
+                  <Td></Td>
+                  <Td>{isUpgraderOfTimelock ? "Yes" : "No"}</Td>
+                  <Td>{isUpgraderOfB3trBadge ? "Yes" : "No"}</Td>
+                  <Td>{isUpgraderOfVoterRewards ? "Yes" : "No"}</Td>
+                  <Td>{isUpgraderOfXAllocationVoting ? "Yes" : "No"}</Td>
+                  <Td>{isUpgraderOfXAllocationPool ? "Yes" : "No"}</Td>
                 </Tr>
               </Tbody>
             </Table>

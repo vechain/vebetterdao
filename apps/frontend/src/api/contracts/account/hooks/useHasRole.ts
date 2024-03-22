@@ -4,6 +4,7 @@ import { ethers } from "ethers"
 import { AccessControl__factory } from "@repo/contracts/typechain-types"
 
 export const MINTER_ROLE = ethers.solidityPackedKeccak256(["string"], ["MINTER_ROLE"])
+export const UPGRADER_ROLE = ethers.solidityPackedKeccak256(["string"], ["UPGRADER_ROLE"])
 export const ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000"
 
 /**
