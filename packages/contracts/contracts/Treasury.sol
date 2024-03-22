@@ -7,11 +7,12 @@ import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import "./interfaces/IERC20.sol";
 import "./interfaces/IERC721.sol";
 import  "./interfaces/IVOT3.sol";
 
-contract Treasury is IERC721Receiver, Initializable, AccessControlUpgradeable, PausableUpgradeable, UUPSUpgradeable {
+contract Treasury is IERC721Receiver, Initializable, AccessControlUpgradeable, PausableUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
     bytes32 public constant TIMELOCK_ROLE = keccak256("TIMELOCK_ROLE");
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     address public constant VTHO = 0x0000000000000000000000000000456E65726779;
@@ -124,7 +125,7 @@ contract Treasury is IERC721Receiver, Initializable, AccessControlUpgradeable, P
      * @param _to the address to transfer VOT3 to
      * @param _value the amount of VOT3 to transfer
      */
-    function transferVOT3(address _to, uint256 _value) public onlyTimelockWhenNotPaused{
+    function transferVOT3(address _to, uint256 _value) public onlyTimelockWhenNotPaused {
         IERC20 vot3 = _getERC20Contract(vot3Address());
         require(vot3.balanceOf(address(this)) >= _value, "Treasury: insufficient VOT3 balance");
         require(vot3.transfer(_to, _value), "Treasury: transfer failed");
@@ -135,7 +136,7 @@ contract Treasury is IERC721Receiver, Initializable, AccessControlUpgradeable, P
      * @param _to the address to transfer VET to
      * @param _value the amount of VET to transfer
      */
-    function transferVET(address _to, uint256 _value) public onlyTimelockWhenNotPaused{
+    function transferVET(address _to, uint256 _value) public onlyTimelockWhenNotPaused nonReentrant {
         require(address(this).balance >= _value, "Treasury: insufficient VET balance");
         payable(_to).transfer(_value);
     }
