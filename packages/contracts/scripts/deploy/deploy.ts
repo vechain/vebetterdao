@@ -212,8 +212,6 @@ export async function deployAll(config: ContractsConfig) {
     await transferAdminRole(xAllocationVoting, admin, config.CONTRACTS_ADMIN_ADDRESS)
     await transferAdminRole(treasury, admin, config.CONTRACTS_ADMIN_ADDRESS)
 
-    await transferProxyAdminRole(treasury, admin, admin.address, config.CONTRACTS_ADMIN_ADDRESS)
-
     console.log("Roles updated successfully!")
   }
 
@@ -298,41 +296,6 @@ const transferMinterRole = async (
 
     const oldMinterRemoved = !(await contract.hasRole(minterRole, oldMinterAddress))
     if (!oldMinterRemoved) throw new Error("Minter role not removed correctly on " + (await contract.getAddress()))
-  }
-}
-
-const transferProxyAdminRole = async (
-  contract: Treasury,
-  admin: HardhatEthersSigner,
-  oldProxyAdminAddress: string,
-  newProxyAdminAddress?: string,
-) => {
-  const proxyAdminRole = await contract.PROXY_ADMIN_ROLE()
-
-  // If newProxyAdminAddress is provided, set a new minter before revoking the old one
-  // otherwise just revoke the old one
-  if (newProxyAdminAddress) {
-    await contract
-      .connect(admin)
-      .grantRole(proxyAdminRole, newProxyAdminAddress)
-      .then(async tx => await tx.wait())
-    await contract
-      .connect(admin)
-      .revokeRole(proxyAdminRole, oldProxyAdminAddress)
-      .then(async tx => await tx.wait())
-
-    const newMinterSet = await contract.hasRole(proxyAdminRole, newProxyAdminAddress)
-    const oldMinterRemoved = !(await contract.hasRole(proxyAdminRole, oldProxyAdminAddress))
-    if (!newMinterSet || !oldMinterRemoved)
-      throw new Error("Minter role not set correctly on " + (await contract.getAddress()))
-  } else {
-    await contract
-      .connect(admin)
-      .revokeRole(proxyAdminRole, oldProxyAdminAddress)
-      .then(async tx => await tx.wait())
-
-    const oldMinterRemoved = !(await contract.hasRole(proxyAdminRole, oldProxyAdminAddress))
-    if (!oldMinterRemoved) throw new Error("Proxy Admin role not removed correctly on " + (await contract.getAddress()))
   }
 }
 
