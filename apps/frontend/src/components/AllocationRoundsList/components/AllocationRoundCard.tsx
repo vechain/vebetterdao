@@ -17,15 +17,13 @@ import { FaAngleRight } from "react-icons/fa6"
 import { AllocationRoundStateTag } from "../AllocationRoundStateTag"
 import { DotSymbol } from "@/components/DotSymbol"
 import { useMemo } from "react"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
 type Props = {
   round: RoundCreated
 }
 
-const compactFormatter = new Intl.NumberFormat("en-US", {
-  notation: "compact",
-  compactDisplay: "short",
-})
+const compactFormatter = getCompactFormatter()
 
 export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
   const router = useRouter()
