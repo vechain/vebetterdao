@@ -90,6 +90,15 @@ export const getOrDeployContractInstances = async ({
   await timeLock.connect(timelockAdmin).grantRole(EXECUTOR_ROLE, await governor.getAddress())
   await timeLock.connect(timelockAdmin).grantRole(CANCELLER_ROLE, await governor.getAddress())
 
+  // Deploy Treasury
+  const treasury = (await deployProxy("Treasury", [
+    await b3tr.getAddress(),
+    await vot3.getAddress(),
+    owner.address,
+    owner.address,
+    owner.address,
+  ])) as Treasury
+
   // Deploy NFTBadge
   const NFTBadgeContract = await ethers.getContractFactory("B3TRBadge")
   const b3trBadge = await NFTBadgeContract.deploy(
@@ -101,7 +110,7 @@ export const getOrDeployContractInstances = async ({
     config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
     config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
     await b3tr.getAddress(),
-    config.TREASURY_POOL_ADDRESS,
+    await treasury.getAddress(),
   )
   await b3trBadge.waitForDeployment()
 
@@ -117,15 +126,6 @@ export const getOrDeployContractInstances = async ({
 
   const X_ALLOCATIONS_ADDRESS = await xAllocationPool.getAddress()
   const VOTE_2_EARN_ADDRESS = otherAccounts[1].address
-
-  // Deploy Treasury
-  const treasury = (await deployProxy("Treasury", [
-    await b3tr.getAddress(),
-    await vot3.getAddress(),
-    owner.address,
-    owner.address,
-    owner.address,
-  ])) as Treasury
 
   const EmissionsContract = await ethers.getContractFactory("Emissions")
   const emissions = await EmissionsContract.deploy(

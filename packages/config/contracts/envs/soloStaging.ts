@@ -26,7 +26,6 @@ export function createSoloStagingConfig() {
 
     CONTRACTS_ADMIN_ADDRESS: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa", //1st account from mnemonic of solo network
     VOTE_2_EARN_POOL_ADDRESS: "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68", //2nd account from mnemonic of solo network
-    TREASURY_POOL_ADDRESS: "0x0f872421dc479f3c11edd89512731814d0598db5", //3rd account from mnemonic of solo network
 
     INITIAL_X_ALLOCATION: BigInt("66666666666666666666666"), // 1M/15 rounded down -> 1/15th of the total supply for pilot show
 

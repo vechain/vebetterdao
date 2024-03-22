@@ -178,7 +178,7 @@ describe("B3TRBadge", () => {
   describe("Minting", () => {
     it("Cannot mint if B3TRGovernor address is not set", async () => {
       const config = createLocalConfig()
-      const { otherAccount, b3tr, xAllocationVoting, owner, emissions, minterAccount } =
+      const { otherAccount, b3tr, xAllocationVoting, owner, emissions, minterAccount, treasury } =
         await getOrDeployContractInstances({
           forceDeploy: true,
           config,
@@ -204,7 +204,7 @@ describe("B3TRBadge", () => {
         [1, 2, 3, 4, 5, 6, 7],
         [0],
         await b3tr.getAddress(),
-        config.TREASURY_POOL_ADDRESS,
+        await treasury.getAddress(),
       )
 
       await b3trBadge.waitForDeployment()
@@ -242,7 +242,7 @@ describe("B3TRBadge", () => {
         [1, 2, 3, 4, 5, 6, 7],
         [0],
         await b3tr.getAddress(),
-        config.TREASURY_POOL_ADDRESS,
+        await treasury.getAddress(),
       )
 
       await b3trBadge.waitForDeployment()
@@ -278,7 +278,7 @@ describe("B3TRBadge", () => {
         [1, 2, 3, 4, 5, 6, 7],
         [0],
         await b3tr.getAddress(),
-        config.TREASURY_POOL_ADDRESS,
+        await treasury.getAddress(),
       )
 
       await b3trBadge.waitForDeployment()
@@ -1049,7 +1049,7 @@ describe("B3TRBadge", () => {
         config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
         config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
         await b3tr.getAddress(),
-        config.TREASURY_POOL_ADDRESS,
+        await treasury.getAddress(),
       )
 
       await b3trBadge.waitForDeployment()
@@ -1065,11 +1065,11 @@ describe("B3TRBadge", () => {
 
       await b3tr.connect(owner).approve(await b3trBadge.getAddress(), ethers.parseEther("10000")) // We need to approve the B3TRBadge contract to transfer the B3TR required to upgrade from the owner's account
 
-      const balanceOfTreasuryBefore = await b3tr.balanceOf(config.TREASURY_POOL_ADDRESS)
+      const balanceOfTreasuryBefore = await b3tr.balanceOf(await treasury.getAddress())
 
       await b3trBadge.connect(owner).upgrade(1) // Upgrade token id 1 to level 2
 
-      const balanceOfTreasuryAfter = await b3tr.balanceOf(config.TREASURY_POOL_ADDRESS)
+      const balanceOfTreasuryAfter = await b3tr.balanceOf(await treasury.getAddress())
 
       expect(balanceOfTreasuryAfter - balanceOfTreasuryBefore).to.equal(ethers.parseEther("10000")) // 10,000 B3TR should be transferred to the treasury pool
 
@@ -1099,7 +1099,7 @@ describe("B3TRBadge", () => {
         config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
         config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
         await b3tr.getAddress(),
-        config.TREASURY_POOL_ADDRESS,
+        await treasury.getAddress(),
       )
 
       await b3trBadge.waitForDeployment()
@@ -1182,7 +1182,7 @@ describe("B3TRBadge", () => {
       config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
       config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
       await b3tr.getAddress(),
-      config.TREASURY_POOL_ADDRESS,
+      await treasury.getAddress(),
     )
 
     await b3trBadge.waitForDeployment()
@@ -1237,7 +1237,7 @@ describe("B3TRBadge", () => {
       config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
       config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
       await b3tr.getAddress(),
-      config.TREASURY_POOL_ADDRESS,
+      await treasury.getAddress(),
     )
 
     await b3trBadge.waitForDeployment()
@@ -1277,7 +1277,7 @@ describe("B3TRBadge", () => {
       config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
       config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
       await b3tr.getAddress(),
-      config.TREASURY_POOL_ADDRESS,
+      await treasury.getAddress(),
     )
 
     await b3trBadge.waitForDeployment()
@@ -1316,7 +1316,7 @@ describe("B3TRBadge", () => {
       config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
       config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
       await b3tr.getAddress(),
-      config.TREASURY_POOL_ADDRESS,
+      await treasury.getAddress(),
     )
 
     await b3trBadge.waitForDeployment()

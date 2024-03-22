@@ -61,6 +61,14 @@ export async function deployAll(config: ContractsConfig) {
     config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
   )
 
+  const treasury = await deployTreasury(
+    await b3tr.getAddress(),
+    await vot3.getAddress(),
+    await timelock.getAddress(),
+    TEMP_ADMIN,
+    TEMP_ADMIN,
+  )
+
   // Deploy the NFT Badge contract with Max Mintable Level 1
   const badge = await deployNFTBadge(
     1,
@@ -71,15 +79,7 @@ export async function deployAll(config: ContractsConfig) {
     config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
     config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
     await b3tr.getAddress(),
-    config.TREASURY_POOL_ADDRESS,
-  )
-
-  const treasury = await deployTreasury(
-    await b3tr.getAddress(),
-    await vot3.getAddress(),
-    await timelock.getAddress(),
-    TEMP_ADMIN,
-    TEMP_ADMIN,
+    await treasury.getAddress(),
   )
 
   const emissions = await deployEmissions(
