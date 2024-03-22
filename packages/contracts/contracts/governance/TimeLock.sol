@@ -6,24 +6,25 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract TimeLock is Initializable, TimelockControllerUpgradeable, UUPSUpgradeable {
+  bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
-  }
-
-  modifier onlyAdmin() {
-    require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "TimeLock: caller is not an executor");
-    _;
   }
 
   function initialize(
     uint256 minDelay,
     address[] memory proposers,
     address[] memory executors,
-    address admin
+    address admin,
+    address upgrader
   ) public initializer {
     __TimelockController_init(minDelay, proposers, executors, admin);
+    __UUPSUpgradeable_init();
+
+    _grantRole(UPGRADER_ROLE, upgrader);
   }
 
-  function _authorizeUpgrade(address newImplementation) internal virtual override onlyAdmin {}
+  function _authorizeUpgrade(address newImplementation) internal virtual override onlyRole(UPGRADER_ROLE) {}
 }
