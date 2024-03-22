@@ -12,8 +12,12 @@ import {
   startNewAllocationRound,
   waitForRoundToEnd,
   bootstrapEmissions,
+  getProposalIdFromTx,
+  waitForProposalToBeActive,
+  waitForVotingPeriodToEnd,
 } from "./helpers"
 import { describe, it } from "mocha"
+import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 
 describe("X-Allocation Voting", function () {
   describe("Deployment", function () {
@@ -27,6 +31,132 @@ describe("X-Allocation Voting", function () {
       expect(await xAllocationVoting.hasRole(ADMIN_ROLE, owner.address)).to.eql(true)
 
       expect(await xAllocationVoting.b3trGovernor()).to.eql(await timeLock.getAddress())
+    })
+  })
+
+  describe("Contract upgradeablity", () => {
+    it("Admin should be able to upgrade the contract", async function () {
+      const { xAllocationVoting, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Deploy the implementation contract
+      const Contract = await ethers.getContractFactory("XAllocationVoting")
+      const implementation = await Contract.deploy()
+      await implementation.waitForDeployment()
+
+      const currentImplAddress = await getImplementationAddress(ethers.provider, await xAllocationVoting.getAddress())
+
+      const UPGRADER_ROLE = await xAllocationVoting.UPGRADER_ROLE()
+      expect(await xAllocationVoting.hasRole(UPGRADER_ROLE, owner.address)).to.eql(true)
+
+      await expect(xAllocationVoting.connect(owner).upgradeToAndCall(await implementation.getAddress(), "0x")).to.not.be
+        .reverted
+
+      const newImplAddress = await getImplementationAddress(ethers.provider, await xAllocationVoting.getAddress())
+
+      expect(newImplAddress.toUpperCase()).to.not.eql(currentImplAddress.toUpperCase())
+      expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
+    })
+
+    it("Only admin should be able to upgrade the contract", async function () {
+      const { xAllocationVoting, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Deploy the implementation contract
+      const Contract = await ethers.getContractFactory("TimeLock")
+      const implementation = await Contract.deploy()
+      await implementation.waitForDeployment()
+
+      const currentImplAddress = await getImplementationAddress(ethers.provider, await xAllocationVoting.getAddress())
+
+      const UPGRADER_ROLE = await xAllocationVoting.UPGRADER_ROLE()
+      expect(await xAllocationVoting.hasRole(UPGRADER_ROLE, otherAccount.address)).to.eql(false)
+
+      await expect(xAllocationVoting.connect(otherAccount).upgradeToAndCall(await implementation.getAddress(), "0x")).to
+        .be.reverted
+
+      const newImplAddress = await getImplementationAddress(ethers.provider, await xAllocationVoting.getAddress())
+
+      expect(newImplAddress.toUpperCase()).to.eql(currentImplAddress.toUpperCase())
+      expect(newImplAddress.toUpperCase()).to.not.eql((await implementation.getAddress()).toUpperCase())
+    })
+
+    it("Admin can change UPGRADER_ROLE", async function () {
+      const { xAllocationVoting, owner, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Deploy the implementation contract
+      const Contract = await ethers.getContractFactory("TimeLock")
+      const implementation = await Contract.deploy()
+      await implementation.waitForDeployment()
+
+      const currentImplAddress = await getImplementationAddress(ethers.provider, await xAllocationVoting.getAddress())
+
+      const UPGRADER_ROLE = await xAllocationVoting.UPGRADER_ROLE()
+      expect(await xAllocationVoting.hasRole(UPGRADER_ROLE, otherAccount.address)).to.eql(false)
+
+      await expect(xAllocationVoting.connect(owner).grantRole(UPGRADER_ROLE, otherAccount.address)).to.not.be.reverted
+      await expect(xAllocationVoting.connect(owner).revokeRole(UPGRADER_ROLE, owner.address)).to.not.be.reverted
+
+      await expect(xAllocationVoting.connect(otherAccount).upgradeToAndCall(await implementation.getAddress(), "0x")).to
+        .not.be.reverted
+
+      const newImplAddress = await getImplementationAddress(ethers.provider, await xAllocationVoting.getAddress())
+
+      expect(newImplAddress.toUpperCase()).to.not.eql(currentImplAddress.toUpperCase())
+      expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
+    })
+
+    it("should be able to upgrade the xAllocationVoting contract through governance", async function () {
+      const { xAllocationVoting, timeLock, governor, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+      const votesThreshold = await governor.proposalThreshold()
+      await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
+
+      const UPGRADER_ROLE = await xAllocationVoting.UPGRADER_ROLE()
+      await expect(xAllocationVoting.connect(owner).grantRole(UPGRADER_ROLE, await timeLock.getAddress())).to.not.be
+        .reverted
+
+      // Deploy the implementation contract
+      const Contract = await ethers.getContractFactory("XAllocationVoting")
+      const implementation = await Contract.deploy()
+      await implementation.waitForDeployment()
+
+      // V1 Contract
+      const V1Contract = await ethers.getContractAt("XAllocationVoting", await xAllocationVoting.getAddress())
+
+      // Now we can create a proposal
+      const encodedFunctionCall = V1Contract.interface.encodeFunctionData("upgradeToAndCall", [
+        await implementation.getAddress(),
+        "0x",
+      ])
+      const description = "Upgrading XAllocationVoting contracts"
+      const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
+
+      const tx = await governor
+        .connect(owner)
+        .propose([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], description, {
+          gasLimit: 10_000_000,
+        })
+
+      const proposalId = await getProposalIdFromTx(tx, governor)
+      await waitForProposalToBeActive(proposalId, governor)
+      await governor.connect(owner).castVote(proposalId, 1)
+      await waitForVotingPeriodToEnd(proposalId, governor)
+      expect(await governor.state(proposalId)).to.eql(4n) // succeded
+
+      await governor.queue([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash)
+      expect(await governor.state(proposalId)).to.eql(5n)
+
+      await governor.execute([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash)
+      expect(await governor.state(proposalId)).to.eql(7n)
+
+      const newImplAddress = await getImplementationAddress(ethers.provider, await xAllocationVoting.getAddress())
+      expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
     })
   })
 

@@ -2,6 +2,7 @@ import { assert, ethers } from "hardhat"
 import { expect } from "chai"
 import { catchRevert, getOrDeployContractInstances, getVot3Tokens } from "./helpers"
 import { describe, it } from "mocha"
+import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 
 describe("VOT3", function () {
   describe("Deployment", function () {
@@ -40,6 +41,81 @@ describe("VOT3", function () {
 
       await catchRevert(vot3.connect(otherAccount).pause())
       await catchRevert(vot3.connect(otherAccount).unpause())
+    })
+  })
+
+  describe("Contract upgradeablity", () => {
+    it("Admin should be able to upgrade the contract", async function () {
+      const { vot3, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Deploy the implementation contract
+      const Contract = await ethers.getContractFactory("VOT3")
+      const implementation = await Contract.deploy()
+      await implementation.waitForDeployment()
+
+      const currentImplAddress = await getImplementationAddress(ethers.provider, await vot3.getAddress())
+
+      const UPGRADER_ROLE = await vot3.UPGRADER_ROLE()
+      expect(await vot3.hasRole(UPGRADER_ROLE, owner.address)).to.eql(true)
+
+      await expect(vot3.connect(owner).upgradeToAndCall(await implementation.getAddress(), "0x")).to.not.be.reverted
+
+      const newImplAddress = await getImplementationAddress(ethers.provider, await vot3.getAddress())
+
+      expect(newImplAddress.toUpperCase()).to.not.eql(currentImplAddress.toUpperCase())
+      expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
+    })
+
+    it("Only admin should be able to upgrade the contract", async function () {
+      const { vot3, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Deploy the implementation contract
+      const Contract = await ethers.getContractFactory("VOT3")
+      const implementation = await Contract.deploy()
+      await implementation.waitForDeployment()
+
+      const currentImplAddress = await getImplementationAddress(ethers.provider, await vot3.getAddress())
+
+      const UPGRADER_ROLE = await vot3.UPGRADER_ROLE()
+      expect(await vot3.hasRole(UPGRADER_ROLE, otherAccount.address)).to.eql(false)
+
+      await expect(vot3.connect(otherAccount).upgradeToAndCall(await implementation.getAddress(), "0x")).to.be.reverted
+
+      const newImplAddress = await getImplementationAddress(ethers.provider, await vot3.getAddress())
+
+      expect(newImplAddress.toUpperCase()).to.eql(currentImplAddress.toUpperCase())
+      expect(newImplAddress.toUpperCase()).to.not.eql((await implementation.getAddress()).toUpperCase())
+    })
+
+    it("Admin can change UPGRADER_ROLE", async function () {
+      const { vot3, owner, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Deploy the implementation contract
+      const Contract = await ethers.getContractFactory("VOT3")
+      const implementation = await Contract.deploy()
+      await implementation.waitForDeployment()
+
+      const currentImplAddress = await getImplementationAddress(ethers.provider, await vot3.getAddress())
+
+      const UPGRADER_ROLE = await vot3.UPGRADER_ROLE()
+      expect(await vot3.hasRole(UPGRADER_ROLE, otherAccount.address)).to.eql(false)
+
+      await expect(vot3.connect(owner).grantRole(UPGRADER_ROLE, otherAccount.address)).to.not.be.reverted
+      await expect(vot3.connect(owner).revokeRole(UPGRADER_ROLE, owner.address)).to.not.be.reverted
+
+      await expect(vot3.connect(otherAccount).upgradeToAndCall(await implementation.getAddress(), "0x")).to.not.be
+        .reverted
+
+      const newImplAddress = await getImplementationAddress(ethers.provider, await vot3.getAddress())
+
+      expect(newImplAddress.toUpperCase()).to.not.eql(currentImplAddress.toUpperCase())
+      expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
     })
   })
 
