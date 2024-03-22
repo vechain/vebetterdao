@@ -12,8 +12,86 @@ import {
   waitForRoundToEnd,
 } from "./helpers"
 import { describe, it } from "mocha"
+import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 
 describe("X-Allocation Pool", async function () {
+  describe("Contract upgradeablity", () => {
+    it("Admin should be able to upgrade the contract", async function () {
+      const { xAllocationPool, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Deploy the implementation contract
+      const Contract = await ethers.getContractFactory("XAllocationPool")
+      const implementation = await Contract.deploy()
+      await implementation.waitForDeployment()
+
+      const currentImplAddress = await getImplementationAddress(ethers.provider, await xAllocationPool.getAddress())
+
+      const UPGRADER_ROLE = await xAllocationPool.UPGRADER_ROLE()
+      expect(await xAllocationPool.hasRole(UPGRADER_ROLE, owner.address)).to.eql(true)
+
+      await expect(xAllocationPool.connect(owner).upgradeToAndCall(await implementation.getAddress(), "0x")).to.not.be
+        .reverted
+
+      const newImplAddress = await getImplementationAddress(ethers.provider, await xAllocationPool.getAddress())
+
+      expect(newImplAddress.toUpperCase()).to.not.eql(currentImplAddress.toUpperCase())
+      expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
+    })
+
+    it("Only admin should be able to upgrade the contract", async function () {
+      const { xAllocationPool, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Deploy the implementation contract
+      const Contract = await ethers.getContractFactory("XAllocationPool")
+      const implementation = await Contract.deploy()
+      await implementation.waitForDeployment()
+
+      const currentImplAddress = await getImplementationAddress(ethers.provider, await xAllocationPool.getAddress())
+
+      const UPGRADER_ROLE = await xAllocationPool.UPGRADER_ROLE()
+      expect(await xAllocationPool.hasRole(UPGRADER_ROLE, otherAccount.address)).to.eql(false)
+
+      await expect(xAllocationPool.connect(otherAccount).upgradeToAndCall(await implementation.getAddress(), "0x")).to
+        .be.reverted
+
+      const newImplAddress = await getImplementationAddress(ethers.provider, await xAllocationPool.getAddress())
+
+      expect(newImplAddress.toUpperCase()).to.eql(currentImplAddress.toUpperCase())
+      expect(newImplAddress.toUpperCase()).to.not.eql((await implementation.getAddress()).toUpperCase())
+    })
+
+    it("Admin can change UPGRADER_ROLE", async function () {
+      const { xAllocationPool, owner, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Deploy the implementation contract
+      const Contract = await ethers.getContractFactory("XAllocationPool")
+      const implementation = await Contract.deploy()
+      await implementation.waitForDeployment()
+
+      const currentImplAddress = await getImplementationAddress(ethers.provider, await xAllocationPool.getAddress())
+
+      const UPGRADER_ROLE = await xAllocationPool.UPGRADER_ROLE()
+      expect(await xAllocationPool.hasRole(UPGRADER_ROLE, otherAccount.address)).to.eql(false)
+
+      await expect(xAllocationPool.connect(owner).grantRole(UPGRADER_ROLE, otherAccount.address)).to.not.be.reverted
+      await expect(xAllocationPool.connect(owner).revokeRole(UPGRADER_ROLE, owner.address)).to.not.be.reverted
+
+      await expect(xAllocationPool.connect(otherAccount).upgradeToAndCall(await implementation.getAddress(), "0x")).to
+        .not.be.reverted
+
+      const newImplAddress = await getImplementationAddress(ethers.provider, await xAllocationPool.getAddress())
+
+      expect(newImplAddress.toUpperCase()).to.not.eql(currentImplAddress.toUpperCase())
+      expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
+    })
+  })
+
   describe("Allocation rewards for x-apps", async function () {
     it("Allocation rewards are calculated correctly", async function () {
       const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, b3tr, minterAccount } =
