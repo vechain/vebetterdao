@@ -47,11 +47,6 @@ contract Treasury is IERC721Receiver, Initializable, AccessControlUpgradeable, P
         _;
     }
 
-    modifier onlyProxyAdmin() {
-        require(hasRole(UPGRADER_ROLE, msg.sender), "Treasury: caller is not the proxy admin");
-        _;
-    }
-
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
@@ -267,5 +262,5 @@ contract Treasury is IERC721Receiver, Initializable, AccessControlUpgradeable, P
     }
 
     // @dev See {UUPSUpgradeable-_authorizeUpgrade}.
-    function _authorizeUpgrade(address newImplementation) internal virtual override onlyProxyAdmin {}
+    function _authorizeUpgrade(address newImplementation) internal virtual override onlyRole(UPGRADER_ROLE) {}
 }
