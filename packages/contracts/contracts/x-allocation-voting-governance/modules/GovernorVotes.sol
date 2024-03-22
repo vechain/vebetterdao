@@ -8,23 +8,43 @@ import { IVotes } from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 import { IERC5805 } from "@openzeppelin/contracts/interfaces/IERC5805.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
+import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /**
  * @dev Extension of {XAllocationVotingGovernor} for voting weight extraction from an {ERC20Votes} token, or since v4.5 an {ERC721Votes}
  * token.
  */
-abstract contract GovernorVotes is XAllocationVotingGovernor {
-  IERC5805 private immutable _token;
+abstract contract GovernorVotes is Initializable, XAllocationVotingGovernor {
+  /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.GovernorVotes
+  struct GovernorVotesStorage {
+    IERC5805 _token;
+  }
 
-  constructor(IVotes tokenAddress) {
-    _token = IERC5805(address(tokenAddress));
+  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.GovernorVotes")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 private constant GovernorVotesStorageLocation =
+    0x1fd39a1a04c688cfdfe2fc0db51d4f96629f1828304800fbba14f96e8ddf4c00;
+
+  function _getGovernorVotesStorage() private pure returns (GovernorVotesStorage storage $) {
+    assembly {
+      $.slot := GovernorVotesStorageLocation
+    }
+  }
+
+  function __GovernorVotes_init(IVotes tokenAddress) internal onlyInitializing {
+    __GovernorVotes_init_unchained(tokenAddress);
+  }
+
+  function __GovernorVotes_init_unchained(IVotes tokenAddress) internal onlyInitializing {
+    GovernorVotesStorage storage $ = _getGovernorVotesStorage();
+    $._token = IERC5805(address(tokenAddress));
   }
 
   /**
    * @dev The token that voting power is sourced from.
    */
   function token() public view virtual returns (IERC5805) {
-    return _token;
+    GovernorVotesStorage storage $ = _getGovernorVotesStorage();
+    return $._token;
   }
 
   /**

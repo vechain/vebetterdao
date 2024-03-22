@@ -1,6 +1,7 @@
 import { BaseContract, Interface } from "ethers"
 import { ethers } from "hardhat"
-import ERC1967Proxy from "@openzeppelin/upgrades-core/artifacts/@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol/ERC1967Proxy.json"
+import ERC1967Proxy from "@openzeppelin/upgrades-core/artifacts/@openzeppelin/contracts-v5/proxy/ERC1967/ERC1967Proxy.sol/ERC1967Proxy.json"
+import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 
 export const deployProxy = async (contractName: string, args: any[]): Promise<BaseContract> => {
   // Deploy the implementation contract
@@ -15,6 +16,13 @@ export const deployProxy = async (contractName: string, args: any[]): Promise<Ba
     getInitializerData(Contract.interface, args),
   )
   await proxy.waitForDeployment()
+
+  const newImplementationAddress = await getImplementationAddress(ethers.provider, await proxy.getAddress())
+  if (newImplementationAddress !== (await implementation.getAddress())) {
+    throw new Error(
+      `The implementation address is not the one expected: ${newImplementationAddress} !== ${await implementation.getAddress()}`,
+    )
+  }
 
   // Return an instance of the contract using the proxy address
   return Contract.attach(await proxy.getAddress())
@@ -38,6 +46,13 @@ export const upgradeProxy = async (
     args.length > 0 ? getInitializerData(Contract.interface, args) : "0x",
   )
   await tx.wait()
+
+  const newImplementationAddress = await getImplementationAddress(ethers.provider, proxyAddress)
+  if (newImplementationAddress !== (await implementation.getAddress())) {
+    throw new Error(
+      `The implementation address is not the one expected: ${newImplementationAddress} !== ${await implementation.getAddress()}`,
+    )
+  }
 
   return Contract.attach(proxyAddress)
 }
