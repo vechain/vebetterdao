@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
-import { XAllocationPool__factory } from "@repo/contracts"
+import { XAllocationVoting__factory } from "@repo/contracts"
 
 const XALLOCATIONPOOLCONTRACT = getConfig().xAllocationPoolContractAddress
 
@@ -12,7 +12,7 @@ const XALLOCATIONPOOLCONTRACT = getConfig().xAllocationPoolContractAddress
  * @returns  the percentage of the total shares that an xDapp can have
  */
 export const getAllocationSharesCap = async (thor: Connex.Thor): Promise<string> => {
-  const functionFragment = XAllocationPool__factory.createInterface().getFunction("appSharesCap").format("json")
+  const functionFragment = XAllocationVoting__factory.createInterface().getFunction("appSharesCap").format("json")
   const res = await thor.account(XALLOCATIONPOOLCONTRACT).method(JSON.parse(functionFragment)).call()
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
