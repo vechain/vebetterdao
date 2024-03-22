@@ -13,13 +13,27 @@ import  "./interfaces/IVOT3.sol";
 
 contract Treasury is IERC721Receiver, Initializable, AccessControlUpgradeable, PausableUpgradeable, UUPSUpgradeable {
     bytes32 public constant TIMELOCK_ROLE = keccak256("TIMELOCK_ROLE");
-    bytes32 public constant PROXY_ADMIN_ROLE = keccak256("PROXY_ADMIN_ROLE");
+    bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     address public constant VTHO = 0x0000000000000000000000000000456E65726779;
-    address public B3TR;
-    address public VOT3;
 
-    /// @notice The address of the proxy admin
-    address private admin;
+    /// @custom:storage-location erc7201:b3tr.storage.Treasury
+    struct TreasuryStorage {
+        address B3TR;
+        address VOT3;
+    }
+
+  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.Treasury")) - 1)) & ~bytes32(uint256(0xff))
+    bytes32 private constant TreasuryStorageLocation =
+    0xe0cc5742fa27b7db7d28941bcd9e29ed370469b1c96f6a96a9544ba871b50f00;
+
+    /**
+     * @dev Get the Treasury storage stored in namespace
+     */
+    function _getTreasuryStorage() internal pure returns (TreasuryStorage storage $) {
+        assembly {
+            $.slot := TreasuryStorageLocation
+        }
+    }
 
     modifier onlyAdmin() {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Treasury: caller is not an executor");
@@ -33,8 +47,13 @@ contract Treasury is IERC721Receiver, Initializable, AccessControlUpgradeable, P
     }
 
     modifier onlyProxyAdmin() {
-        require(hasRole(PROXY_ADMIN_ROLE, msg.sender), "Treasury: caller is not the proxy admin");
+        require(hasRole(UPGRADER_ROLE, msg.sender), "Treasury: caller is not the proxy admin");
         _;
+    }
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
     }
 
     /**
@@ -45,8 +64,11 @@ contract Treasury is IERC721Receiver, Initializable, AccessControlUpgradeable, P
      * @param _admin the address of the proxy admin
      */
     function initialize(address _b3tr, address _vot3, address _timeLock, address _admin, address _proxyAdmin) public initializer {
-        B3TR = _b3tr;
-        VOT3 = _vot3;
+
+        TreasuryStorage storage $ = _getTreasuryStorage();
+        
+        $.B3TR = _b3tr;
+        $.VOT3 = _vot3;
 
         __UUPSUpgradeable_init();
         __AccessControl_init();
@@ -54,7 +76,7 @@ contract Treasury is IERC721Receiver, Initializable, AccessControlUpgradeable, P
 
         _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(TIMELOCK_ROLE, _timeLock);
-        _grantRole(PROXY_ADMIN_ROLE, _proxyAdmin);
+        _grantRole(UPGRADER_ROLE, _proxyAdmin);
     }
 
     receive() external payable {}
@@ -92,7 +114,7 @@ contract Treasury is IERC721Receiver, Initializable, AccessControlUpgradeable, P
      * @param _value the amount of B3TR to transfer
      */
     function transferB3TR(address _to, uint256 _value) public onlyTimelockWhenNotPaused {
-        IERC20 b3tr = _getERC20Contract(B3TR);
+        IERC20 b3tr = _getERC20Contract(b3trAddress());
         require(b3tr.balanceOf(address(this)) >= _value, "Treasury: insufficient B3TR balance");
         require(b3tr.transfer(_to, _value), "Treasury: transfer failed");
     }
@@ -103,7 +125,7 @@ contract Treasury is IERC721Receiver, Initializable, AccessControlUpgradeable, P
      * @param _value the amount of VOT3 to transfer
      */
     function transferVOT3(address _to, uint256 _value) public onlyTimelockWhenNotPaused{
-        IERC20 vot3 = _getERC20Contract(VOT3);
+        IERC20 vot3 = _getERC20Contract(vot3Address());
         require(vot3.balanceOf(address(this)) >= _value, "Treasury: insufficient VOT3 balance");
         require(vot3.transfer(_to, _value), "Treasury: transfer failed");
     }
@@ -147,10 +169,10 @@ contract Treasury is IERC721Receiver, Initializable, AccessControlUpgradeable, P
      * @param _b3trAmount the amount of B3TR to stake
      */
     function stakeB3TR(uint256 _b3trAmount) public onlyTimelockWhenNotPaused {
-        IERC20 b3tr = _getERC20Contract(B3TR);
-        IVOT3 vot3 = IVOT3(VOT3);
+        IERC20 b3tr = _getERC20Contract(b3trAddress());
+        IVOT3 vot3 = IVOT3(vot3Address());
         require(b3tr.balanceOf(address(this)) >= _b3trAmount, "Treasury: insufficient B3TR balance");
-        require(b3tr.approve(VOT3, _b3trAmount), "Treasury: approval for VOT3 failed");
+        require(b3tr.approve(vot3Address(), _b3trAmount), "Treasury: approval for VOT3 failed");
         vot3.stake(_b3trAmount);
     }
 
@@ -159,7 +181,7 @@ contract Treasury is IERC721Receiver, Initializable, AccessControlUpgradeable, P
      * @param __vot3Amount the amount of VOT3 to unstake
      */
     function unstakeB3TR(uint256 __vot3Amount) public onlyTimelockWhenNotPaused {
-        IVOT3 vot3 = IVOT3(VOT3);
+        IVOT3 vot3 = IVOT3(vot3Address());
         require(vot3.stakedBalanceOf(address(this)) >= __vot3Amount, "Treasury: insufficient B3TR staked");
         vot3.unstake(__vot3Amount);
     }
@@ -171,12 +193,12 @@ contract Treasury is IERC721Receiver, Initializable, AccessControlUpgradeable, P
     }
 
     function getB3TRBalance() public view returns (uint256) {
-        IERC20 b3tr = _getERC20Contract(B3TR);
+        IERC20 b3tr = _getERC20Contract(b3trAddress());
         return b3tr.balanceOf(address(this));
     }
 
     function getVOT3Balance() public view returns (uint256) {
-        IERC20 vot3 = _getERC20Contract(VOT3);
+        IERC20 vot3 = _getERC20Contract(vot3Address());
         return vot3.balanceOf(address(this));
     }
 
@@ -207,6 +229,22 @@ contract Treasury is IERC721Receiver, Initializable, AccessControlUpgradeable, P
     */
     function getVersion() public pure virtual returns (string memory) {
         return "V1";
+    }
+
+    /**
+     * @notice get the address of the B3TR token
+     */
+    function b3trAddress() public view returns (address) {
+        TreasuryStorage storage $ = _getTreasuryStorage();
+        return $.B3TR;
+    }
+
+    /**
+     * @notice get the address of the VOT3 token
+     */
+    function vot3Address() public view returns (address) {
+        TreasuryStorage storage $ = _getTreasuryStorage();
+        return $.VOT3;
     }
 
     // ----------- Internal & Private ----------- //
