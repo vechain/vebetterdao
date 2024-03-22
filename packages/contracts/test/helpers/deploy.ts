@@ -117,14 +117,22 @@ export const getOrDeployContractInstances = async ({
 
   const X_ALLOCATIONS_ADDRESS = await xAllocationPool.getAddress()
   const VOTE_2_EARN_ADDRESS = otherAccounts[1].address
-  const TREASURY_ADDRESS = otherAccounts[2].address
+
+  // Deploy Treasury
+  const treasury = (await deployProxy("Treasury", [
+    await b3tr.getAddress(),
+    await vot3.getAddress(),
+    owner.address,
+    owner.address,
+    owner.address,
+  ])) as Treasury
 
   const EmissionsContract = await ethers.getContractFactory("Emissions")
   const emissions = await EmissionsContract.deploy(
     minterAccount,
     owner,
     await b3tr.getAddress(),
-    [X_ALLOCATIONS_ADDRESS, VOTE_2_EARN_ADDRESS, TREASURY_ADDRESS],
+    [X_ALLOCATIONS_ADDRESS, VOTE_2_EARN_ADDRESS, await treasury.getAddress()],
     config.INITIAL_X_ALLOCATION,
     config.EMISSIONS_CYCLE_DURATION,
     [
@@ -165,15 +173,6 @@ export const getOrDeployContractInstances = async ({
     "ipfs://",
   )
   await xAllocationVoting.waitForDeployment()
-
-  // Deploy Treasury
-  const treasury = (await deployProxy("Treasury", [
-    await b3tr.getAddress(),
-    await vot3.getAddress(),
-    owner.address,
-    owner.address,
-    owner.address,
-  ])) as Treasury
 
   // Set xAllocationVoting and Governor address in B3TRBadge
   await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
@@ -219,7 +218,7 @@ export const getOrDeployContractInstances = async ({
     minterAccount,
     timelockAdmin,
     otherAccounts,
-    treasury
+    treasury,
   }
   return cachedDeployInstance
 }

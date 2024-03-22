@@ -74,9 +74,17 @@ export async function deployAll(config: ContractsConfig) {
     config.TREASURY_POOL_ADDRESS,
   )
 
+  const treasury = await deployTreasury(
+    await b3tr.getAddress(),
+    await vot3.getAddress(),
+    await timelock.getAddress(),
+    TEMP_ADMIN,
+    TEMP_ADMIN,
+  )
+
   const emissions = await deployEmissions(
     await b3tr.getAddress(),
-    [await xAllocationPool.getAddress(), config.VOTE_2_EARN_POOL_ADDRESS, config.TREASURY_POOL_ADDRESS],
+    [await xAllocationPool.getAddress(), config.VOTE_2_EARN_POOL_ADDRESS, await treasury.getAddress()],
     config.INITIAL_X_ALLOCATION,
     TEMP_ADMIN,
     TEMP_ADMIN,
@@ -109,14 +117,6 @@ export async function deployAll(config: ContractsConfig) {
     config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE,
     config.EMISSIONS_CYCLE_DURATION - 1,
     config.XAPP_BASE_URI,
-  )
-
-  const treasury = await deployTreasury(
-    await b3tr.getAddress(),
-    await vot3.getAddress(),
-    await timelock.getAddress(),
-    TEMP_ADMIN,
-    TEMP_ADMIN,
   )
 
   console.log("Contracts deployed")
