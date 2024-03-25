@@ -24,7 +24,7 @@ contract B3TRProxy is Proxy {
    *
    * Requirements:
    *
-   * - If `data` is empty, `msg.value` must be zero.
+   * - If `_data` is empty, `msg.value` must be zero.
    */
   constructor(address implementation, bytes memory _data) payable {
     ERC1967Utils.upgradeToAndCall(implementation, _data);
