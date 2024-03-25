@@ -1,3 +1,4 @@
+import { XApp } from "@/api"
 import {
   Card,
   CardBody,
@@ -7,11 +8,14 @@ import {
   FormLabel,
   Heading,
   Input,
+  InputGroup,
+  InputLeftElement,
   Textarea,
   VStack,
 } from "@chakra-ui/react"
 import { isValid } from "@repo/utils/AddressUtils"
-import { FieldErrors, UseFormRegister } from "react-hook-form"
+import { FieldErrors, UseFormGetValues, UseFormRegister, UseFormWatch } from "react-hook-form"
+import { AddressIcon } from "../AddressIcon"
 
 export type CreateEditAppFormData = {
   name: string
@@ -26,12 +30,14 @@ type Props = {
   register: UseFormRegister<CreateEditAppFormData>
   errors: FieldErrors<CreateEditAppFormData>
   isEdit?: boolean
+  editedApp?: XApp
+  watch: UseFormWatch<CreateEditAppFormData>
 }
-export const CreateEditAppForm = ({ register, errors, isEdit = false }: Props) => {
+export const CreateEditAppForm = ({ register, errors, isEdit = false, editedApp, watch }: Props) => {
   return (
     <Card>
       <CardHeader>
-        <Heading size="lg">{isEdit ? "Edit App" : "Create a new App"}</Heading>
+        <Heading size="lg">{isEdit ? `Edit App ${editedApp?.name}` : "Create a new App"}</Heading>
       </CardHeader>
       <CardBody>
         <VStack spacing={4} w="full">
@@ -65,11 +71,16 @@ export const CreateEditAppForm = ({ register, errors, isEdit = false }: Props) =
           </FormControl>
           <FormControl isInvalid={!!errors.receiverAddress}>
             <FormLabel>Wallet address</FormLabel>
-            <Input
-              {...register("receiverAddress", {
-                validate: value => isValid(value) || "Invalid address",
-              })}
-            />
+            <InputGroup>
+              <InputLeftElement pointerEvents="none">
+                <AddressIcon borderRadius={"full"} boxSize={6} address={watch("receiverAddress")} />
+              </InputLeftElement>
+              <Input
+                {...register("receiverAddress", {
+                  validate: value => isValid(value) || "Invalid address",
+                })}
+              />
+            </InputGroup>
             {errors.receiverAddress && <FormErrorMessage>{errors.receiverAddress.message}</FormErrorMessage>}
           </FormControl>
         </VStack>

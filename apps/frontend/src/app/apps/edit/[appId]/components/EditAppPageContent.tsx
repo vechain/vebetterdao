@@ -18,7 +18,7 @@ export const EditAppPageContent = ({ appId }: Props) => {
     router.push(`/apps/${appId}`)
   }
 
-  const { register, formState } = useForm<CreateEditAppFormData>({
+  const { register, formState, getValues, watch } = useForm<CreateEditAppFormData>({
     defaultValues: {
       name: data?.name,
       description: metadata?.description,
@@ -39,7 +39,7 @@ export const EditAppPageContent = ({ appId }: Props) => {
         </Button>
         <Grid templateColumns="repeat(3, 1fr)" gap={[4, 4, 8]} w="full">
           <GridItem colSpan={[3, 3, 2]}>
-            <CreateEditAppForm register={register} errors={errors} />
+            <CreateEditAppForm register={register} errors={errors} isEdit={true} editedApp={data} watch={watch} />
           </GridItem>
           <GridItem colSpan={[3, 3, 1]}>
             <AppDetailCard appId={appId} />
