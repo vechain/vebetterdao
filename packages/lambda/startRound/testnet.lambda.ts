@@ -88,7 +88,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
     const tx = await thorClient.transactions.sendTransaction(signedTx)
 
     // Wait for the transaction to be processed and get the receipt
-    const receipt = await tx.wait()
+    const receipt = await thorClient.transactions.waitForTransaction(tx.id)
 
     // Log the transaction receipt for debugging and verification
     console.log("Receipt:", receipt)
