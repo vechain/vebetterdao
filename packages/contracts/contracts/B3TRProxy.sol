@@ -7,13 +7,12 @@ import { Proxy } from "@openzeppelin/contracts/proxy/Proxy.sol";
 import { ERC1967Utils } from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Utils.sol";
 
 /**
- * @dev This contract implements an upgradeable proxy. Forked from OZ.
+ * Forked from OZ.
+ *
+ * @dev This contract implements an upgradeable proxy.
  * It is upgradeable because calls are delegated to an implementation address that can be changed. This address is stored in storage
  * in the location specified by https://eips.ethereum.org/EIPS/eip-1967[EIP1967],
  * so that it doesn't conflict with the storage layout of the implementation behind the proxy.
- *
- * Added:
- * - public function to get implementation address
  */
 // solc-ignore-next-line missing-receive
 contract B3TRProxy is Proxy {
@@ -40,12 +39,5 @@ contract B3TRProxy is Proxy {
    */
   function _implementation() internal view virtual override returns (address) {
     return ERC1967Utils.getImplementation();
-  }
-
-  /**
-   * @dev Returns the current implementation address.
-   */
-  function implementationAddress() public view returns (address) {
-    return _implementation();
   }
 }
