@@ -9,7 +9,7 @@ import { IXApps } from "../../interfaces/IXApps.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-abstract contract XApps is Initializable, IXApps, XAllocationVotingGovernor {
+abstract contract XAppsUpgradeable is Initializable, IXApps, XAllocationVotingGovernor {
   using Checkpoints for Checkpoints.Trace208;
 
   struct App {
