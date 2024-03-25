@@ -5,6 +5,7 @@ import "@nomiclabs/hardhat-truffle5"
 import "@vechain/hardhat-vechain"
 import "@vechain/hardhat-ethers"
 import "hardhat-contract-sizer"
+import "hardhat-ignore-warnings"
 import { getConfig } from "@repo/config"
 
 const config: HardhatUserConfig = {

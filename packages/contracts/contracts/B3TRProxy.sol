@@ -15,6 +15,7 @@ import { ERC1967Utils } from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Utils
  * Added:
  * - public function to get implementation address
  */
+// solc-ignore-next-line missing-receive
 contract B3TRProxy is Proxy {
   /**
    * @dev Initializes the upgradeable proxy with an initial implementation specified by `implementation`.
