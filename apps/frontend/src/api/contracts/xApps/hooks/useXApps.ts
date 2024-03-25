@@ -9,6 +9,7 @@ import { XAllocationVoting__factory as XAllocationVoting } from "@repo/contracts
  * @property id  the xApp id
  * @property receiverAddress  the xApp address
  * @property name  the xApp name
+ * @property metadataURI  the xApp metadata URI
  * @property createdAt block when xApp was addded
  */
 export type XApp = {
