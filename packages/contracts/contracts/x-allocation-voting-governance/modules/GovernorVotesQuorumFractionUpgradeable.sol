@@ -3,7 +3,7 @@
 
 pragma solidity ^0.8.18;
 
-import { GovernorVotes } from "./GovernorVotes.sol";
+import { GovernorVotesUpgradeable } from "./GovernorVotesUpgradeable.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -12,7 +12,7 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
  * @dev Extension of {XAllocationVotingGovernor} for voting weight extraction from an {ERC20Votes} token and a quorum expressed as a
  * fraction of the total supply.
  */
-abstract contract GovernorVotesQuorumFraction is Initializable, GovernorVotes {
+abstract contract GovernorVotesQuorumFractionUpgradeable is Initializable, GovernorVotesUpgradeable {
   using Checkpoints for Checkpoints.Trace208;
 
   /// @custom:storage-location erc7201:b3tr.storage.GovernorVotesQuorumFraction
