@@ -15,6 +15,7 @@ export type XApp = {
   id: string
   receiverAddress: string
   name: string
+  metadataURI: string
   createdAt: number
 }
 
@@ -34,6 +35,7 @@ export const getXApps = async (thor: Connex.Thor): Promise<XApp[]> => {
     id: app[0],
     receiverAddress: app[1],
     name: app[2],
+    metadataURI: app[3],
     createdAt: app[4],
   }))
 }
