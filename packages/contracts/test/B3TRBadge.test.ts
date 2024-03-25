@@ -258,7 +258,7 @@ describe("B3TRBadge", () => {
   describe("Minting", () => {
     it("Cannot mint if B3TRGovernor address is not set", async () => {
       const config = createLocalConfig()
-      const { otherAccount, b3tr, xAllocationVoting, owner, emissions, minterAccount } =
+      const { otherAccount, b3tr, xAllocationVoting, owner, emissions, minterAccount, treasury } =
         await getOrDeployContractInstances({
           forceDeploy: true,
           config,
@@ -284,7 +284,7 @@ describe("B3TRBadge", () => {
         [1, 2, 3, 4, 5, 6, 7],
         [0],
         await b3tr.getAddress(),
-        config.TREASURY_POOL_ADDRESS,
+        await treasury.getAddress(),
       ])) as B3TRBadge
 
       await b3trBadge.waitForDeployment()
@@ -296,7 +296,7 @@ describe("B3TRBadge", () => {
 
     it("Cannot mint if XAllocation address is not set", async () => {
       const config = createLocalConfig()
-      const { otherAccount, xAllocationVoting, b3tr, owner, governor, emissions, minterAccount } =
+      const { otherAccount, xAllocationVoting, b3tr, owner, governor, emissions, minterAccount, treasury } =
         await getOrDeployContractInstances({
           forceDeploy: true,
           config,
@@ -322,7 +322,7 @@ describe("B3TRBadge", () => {
         [1, 2, 3, 4, 5, 6, 7],
         [0],
         await b3tr.getAddress(),
-        config.TREASURY_POOL_ADDRESS,
+        await treasury.getAddress(),
       ])) as B3TRBadge
 
       await b3trBadge.waitForDeployment()
@@ -334,7 +334,7 @@ describe("B3TRBadge", () => {
 
     it("Can know if user participated in governance if XAllocation and B3TRGovernor addresses are set", async () => {
       const config = createLocalConfig()
-      const { otherAccount, xAllocationVoting, owner, governor, b3tr, emissions, minterAccount } =
+      const { otherAccount, xAllocationVoting, owner, governor, b3tr, emissions, minterAccount, treasury } =
         await getOrDeployContractInstances({
           forceDeploy: true,
           config,
@@ -357,7 +357,7 @@ describe("B3TRBadge", () => {
         [1, 2, 3, 4, 5, 6, 7],
         [0],
         await b3tr.getAddress(),
-        config.TREASURY_POOL_ADDRESS,
+        await treasury.getAddress(),
       ])) as B3TRBadge
 
       await b3trBadge.waitForDeployment()
@@ -1106,58 +1106,7 @@ describe("B3TRBadge", () => {
   describe("Upgrading", () => {
     it("Should be able to upgrade a level 1 token to a level 2 token", async () => {
       const config = createLocalConfig()
-      const { owner, xAllocationVoting, b3tr, emissions, minterAccount, governor } = await getOrDeployContractInstances(
-        {
-          forceDeploy: true,
-        },
-      )
-
-      // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
-
-      // participation in governance is a requirement for minting
-      await participateInAllocationVoting(owner, owner, xAllocationVoting, true)
-
-      const b3trBadge = (await deployProxy("B3TRBadge", [
-        "b3trBadge",
-        "BDG",
-        owner.address,
-        owner.address,
-        2,
-        config.NFT_BADGE_BASE_URI,
-        config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
-        config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
-        await b3tr.getAddress(),
-        config.TREASURY_POOL_ADDRESS,
-      ])) as B3TRBadge
-
-      await b3trBadge.waitForDeployment()
-
-      await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
-      await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
-
-      await b3trBadge.connect(owner).freeMint() // Token id 1
-
-      await catchRevert(b3trBadge.connect(owner).upgrade(1)) // Insufficient B3TR to upgrade
-
-      await b3tr.connect(minterAccount).mint(owner, ethers.parseEther("10000")) // Get some 10,000 B3TR required to upgrade to level 2
-
-      await b3tr.connect(owner).approve(await b3trBadge.getAddress(), ethers.parseEther("10000")) // We need to approve the B3TRBadge contract to transfer the B3TR required to upgrade from the owner's account
-
-      const balanceOfTreasuryBefore = await b3tr.balanceOf(config.TREASURY_POOL_ADDRESS)
-
-      await b3trBadge.connect(owner).upgrade(1) // Upgrade token id 1 to level 2
-
-      const balanceOfTreasuryAfter = await b3tr.balanceOf(config.TREASURY_POOL_ADDRESS)
-
-      expect(balanceOfTreasuryAfter - balanceOfTreasuryBefore).to.equal(ethers.parseEther("10000")) // 10,000 B3TR should be transferred to the treasury pool
-
-      expect(await b3trBadge.levelOf(1)).to.equal(2) // Level 2
-    })
-
-    it("Should be able to transfer a token with level greater than 1", async () => {
-      const config = createLocalConfig()
-      const { owner, xAllocationVoting, b3tr, emissions, minterAccount, governor, otherAccount } =
+      const { owner, xAllocationVoting, b3tr, emissions, minterAccount, governor, treasury } =
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
@@ -1178,7 +1127,57 @@ describe("B3TRBadge", () => {
         config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
         config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
         await b3tr.getAddress(),
-        config.TREASURY_POOL_ADDRESS,
+        await treasury.getAddress(),
+      ])) as B3TRBadge
+
+      await b3trBadge.waitForDeployment()
+
+      await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+      await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+
+      await b3trBadge.connect(owner).freeMint() // Token id 1
+
+      await catchRevert(b3trBadge.connect(owner).upgrade(1)) // Insufficient B3TR to upgrade
+
+      await b3tr.connect(minterAccount).mint(owner, ethers.parseEther("10000")) // Get some 10,000 B3TR required to upgrade to level 2
+
+      await b3tr.connect(owner).approve(await b3trBadge.getAddress(), ethers.parseEther("10000")) // We need to approve the B3TRBadge contract to transfer the B3TR required to upgrade from the owner's account
+
+      const balanceOfTreasuryBefore = await b3tr.balanceOf(await treasury.getAddress())
+
+      await b3trBadge.connect(owner).upgrade(1) // Upgrade token id 1 to level 2
+
+      const balanceOfTreasuryAfter = await b3tr.balanceOf(await treasury.getAddress())
+
+      expect(balanceOfTreasuryAfter - balanceOfTreasuryBefore).to.equal(ethers.parseEther("10000")) // 10,000 B3TR should be transferred to the treasury pool
+
+      expect(await b3trBadge.levelOf(1)).to.equal(2) // Level 2
+    })
+
+    it("Should be able to transfer a token with level greater than 1", async () => {
+      const config = createLocalConfig()
+      const { owner, xAllocationVoting, b3tr, emissions, minterAccount, governor, otherAccount, treasury } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(owner, owner, xAllocationVoting, true)
+
+      const b3trBadge = (await deployProxy("B3TRBadge", [
+        "b3trBadge",
+        "BDG",
+        owner.address,
+        owner.address,
+        2,
+        config.NFT_BADGE_BASE_URI,
+        config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
+        config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+        await b3tr.getAddress(),
+        await treasury.getAddress(),
       ])) as B3TRBadge
 
       await b3trBadge.waitForDeployment()
@@ -1239,7 +1238,7 @@ describe("B3TRBadge", () => {
 
   it("Should be able to upgrade to level 10", async () => {
     const config = createTestConfig()
-    const { owner, xAllocationVoting, emissions, minterAccount, governor, b3tr, otherAccount } =
+    const { owner, xAllocationVoting, emissions, minterAccount, governor, b3tr, otherAccount, treasury } =
       await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -1261,7 +1260,7 @@ describe("B3TRBadge", () => {
       config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
       config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
       await b3tr.getAddress(),
-      config.TREASURY_POOL_ADDRESS,
+      await treasury.getAddress(),
     ])) as B3TRBadge
 
     await b3trBadge.waitForDeployment()
@@ -1294,7 +1293,7 @@ describe("B3TRBadge", () => {
 
   it("Should not be able to upgrade token not owned", async () => {
     const config = createTestConfig()
-    const { owner, xAllocationVoting, emissions, minterAccount, governor, b3tr, otherAccount } =
+    const { owner, xAllocationVoting, emissions, minterAccount, governor, b3tr, otherAccount, treasury } =
       await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -1316,7 +1315,7 @@ describe("B3TRBadge", () => {
       config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
       config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
       await b3tr.getAddress(),
-      config.TREASURY_POOL_ADDRESS,
+      await treasury.getAddress(),
     ])) as B3TRBadge
 
     await b3trBadge.waitForDeployment()
@@ -1335,10 +1334,11 @@ describe("B3TRBadge", () => {
 
   it("Should not be able to upgrade above max level", async () => {
     const config = createTestConfig()
-    const { owner, xAllocationVoting, emissions, minterAccount, governor, b3tr } = await getOrDeployContractInstances({
-      forceDeploy: true,
-      config,
-    })
+    const { owner, xAllocationVoting, emissions, minterAccount, governor, b3tr, treasury } =
+      await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
 
     // Bootstrap emissions
     await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
@@ -1356,7 +1356,7 @@ describe("B3TRBadge", () => {
       config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
       config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
       await b3tr.getAddress(),
-      config.TREASURY_POOL_ADDRESS,
+      await treasury.getAddress(),
     ])) as B3TRBadge
 
     await b3trBadge.waitForDeployment()
@@ -1374,10 +1374,11 @@ describe("B3TRBadge", () => {
 
   it("Should be able to upgrade and select a different token than the selected one", async () => {
     const config = createTestConfig()
-    const { owner, xAllocationVoting, emissions, minterAccount, governor, b3tr } = await getOrDeployContractInstances({
-      forceDeploy: true,
-      config,
-    })
+    const { owner, xAllocationVoting, emissions, minterAccount, governor, b3tr, treasury } =
+      await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
 
     // Bootstrap emissions
     await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
@@ -1395,7 +1396,7 @@ describe("B3TRBadge", () => {
       config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
       config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
       await b3tr.getAddress(),
-      config.TREASURY_POOL_ADDRESS,
+      await treasury.getAddress(),
     ])) as B3TRBadge
 
     await b3trBadge.waitForDeployment()

@@ -19,7 +19,7 @@ describe("Emissions", () => {
   describe("Contract parameters", () => {
     it("Should have correct parameters set on deployment", async () => {
       const config = createLocalConfig()
-      const { emissions, owner, otherAccounts, b3tr, minterAccount, xAllocationPool, voterRewards } =
+      const { emissions, owner, b3tr, minterAccount, xAllocationPool, voterRewards, treasury } =
         await getOrDeployContractInstances({
           forceDeploy: true,
           config,
@@ -28,7 +28,7 @@ describe("Emissions", () => {
       // Destination addresses should be set correctly
       expect(await emissions.xAllocations()).to.equal(await xAllocationPool.getAddress())
       expect(await emissions.vote2Earn()).to.equal(await voterRewards.getAddress())
-      expect(await emissions.treasury()).to.equal(otherAccounts[2].address)
+      expect(await emissions.treasury()).to.equal(await treasury.getAddress())
 
       // Admin should be set correctly
       expect(await emissions.hasRole(await emissions.DEFAULT_ADMIN_ROLE(), await owner.getAddress())).to.equal(true)
@@ -258,7 +258,7 @@ describe("Emissions", () => {
   describe("Bootstrap emissions", () => {
     it("Should be able to bootstrap emissions", async () => {
       const config = createLocalConfig()
-      const { emissions, b3tr, minterAccount, otherAccounts, owner, xAllocationPool, voterRewards } =
+      const { emissions, b3tr, minterAccount, treasury, owner, xAllocationPool, voterRewards } =
         await getOrDeployContractInstances({
           forceDeploy: true,
           config,
@@ -298,7 +298,7 @@ describe("Emissions", () => {
 
       expect(await b3tr.balanceOf(await xAllocationPool.getAddress())).to.equal(config.INITIAL_X_ALLOCATION)
       expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(initialVoteAllocation)
-      expect(await b3tr.balanceOf(otherAccounts[2].address)).to.equal(initialTreasuryAlloc)
+      expect(await b3tr.balanceOf(await treasury.getAddress())).to.equal(initialTreasuryAlloc)
 
       expect(await emissions.getXAllocationAmount(1)).to.equal(config.INITIAL_X_ALLOCATION)
       expect(await emissions.getVote2EarnAmount(1)).to.equal(initialVoteAllocation)
@@ -340,7 +340,7 @@ describe("Emissions", () => {
   describe("Start emissions", () => {
     it("Should be able to start emissions", async () => {
       const config = createLocalConfig()
-      const { emissions, b3tr, minterAccount, otherAccounts, owner, xAllocationPool, voterRewards } =
+      const { emissions, b3tr, minterAccount, treasury, owner, xAllocationPool, voterRewards } =
         await getOrDeployContractInstances({
           forceDeploy: true,
           config,
@@ -364,7 +364,7 @@ describe("Emissions", () => {
 
       expect(await b3tr.balanceOf(await xAllocationPool.getAddress())).to.equal(config.INITIAL_X_ALLOCATION)
       expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(initialVoteAllocation)
-      expect(await b3tr.balanceOf(otherAccounts[2].address)).to.equal(initialTreasuryAlloc)
+      expect(await b3tr.balanceOf(await treasury.getAddress())).to.equal(initialTreasuryAlloc)
 
       expect(await emissions.getXAllocationAmount(1)).to.equal(config.INITIAL_X_ALLOCATION)
       expect(await emissions.getVote2EarnAmount(1)).to.equal(initialVoteAllocation)
