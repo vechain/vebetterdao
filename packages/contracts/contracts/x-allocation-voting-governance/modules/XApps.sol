@@ -16,6 +16,7 @@ abstract contract XApps is Initializable, IXApps, XAllocationVotingGovernor {
     bytes32 id;
     address receiverAddress;
     string name;
+    string metadataURI;
     uint48 createdAt; // block number when app was added
   }
 
@@ -43,6 +44,12 @@ abstract contract XApps is Initializable, IXApps, XAllocationVotingGovernor {
     }
   }
 
+  modifier appExists(bytes32 appId) {
+    XAppsStorage storage $ = _getXAppsStorageStorage();
+    require($._apps[appId].receiverAddress != address(0), "App does not exist");
+    _;
+  }
+
   /**
    * @dev Sets the value for {baseURI}
    */
@@ -57,14 +64,14 @@ abstract contract XApps is Initializable, IXApps, XAllocationVotingGovernor {
 
   // ---------- Setters ---------- //
 
-  function addApp(address appReceiverAddress, string memory appName) public virtual {
+  function addApp(address appReceiverAddress, string memory appName, string memory metadataURI) public virtual {
     XAppsStorage storage $ = _getXAppsStorageStorage();
     bytes32 id = hashName(appName);
 
     require($._apps[id].receiverAddress == address(0), "App with this ID already exists");
 
     // Store the new app
-    $._apps[id] = App(id, appReceiverAddress, appName, clock());
+    $._apps[id] = App(id, appReceiverAddress, appName, metadataURI, clock());
     $._appIds.push(id);
     _pushAppToEligbleApps(id);
 
@@ -127,10 +134,8 @@ abstract contract XApps is Initializable, IXApps, XAllocationVotingGovernor {
     $._baseURI = baseURI_;
   }
 
-  function _updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) internal {
+  function _updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) internal appExists(appId) {
     XAppsStorage storage $ = _getXAppsStorageStorage();
-
-    require($._apps[appId].receiverAddress != address(0), "App does not exist");
 
     $._apps[appId].receiverAddress = newReceiverAddress;
   }
@@ -168,18 +173,17 @@ abstract contract XApps is Initializable, IXApps, XAllocationVotingGovernor {
     return isAvailable;
   }
 
-  function isElegibleForVoteLatestCheckpoint(bytes32 appId) public view returns (bool) {
+  function isElegibleForVoteLatestCheckpoint(bytes32 appId) public view appExists(appId) returns (bool) {
     XAppsStorage storage $ = _getXAppsStorageStorage();
-
-    require($._apps[appId].receiverAddress != address(0), "App does not exist");
 
     return $._isAppElegibleCheckpoints[appId].latest() == 1;
   }
 
-  function isElegibleForVotePastCheckpoint(bytes32 appId, uint256 timepoint) public view returns (bool) {
+  function isElegibleForVotePastCheckpoint(
+    bytes32 appId,
+    uint256 timepoint
+  ) public view appExists(appId) returns (bool) {
     XAppsStorage storage $ = _getXAppsStorageStorage();
-
-    require($._apps[appId].receiverAddress != address(0), "App does not exist");
 
     uint48 currentTimepoint = clock();
     if (timepoint >= currentTimepoint) {
@@ -194,11 +198,9 @@ abstract contract XApps is Initializable, IXApps, XAllocationVotingGovernor {
   }
 
   // Function to retrieve an app by ID
-  function getApp(bytes32 id) public view virtual returns (App memory) {
+  function getApp(bytes32 appId) public view virtual appExists(appId) returns (App memory) {
     XAppsStorage storage $ = _getXAppsStorageStorage();
-
-    require($._apps[id].receiverAddress != address(0), "App does not exist");
-    return $._apps[id];
+    return $._apps[appId];
   }
 
   // Function to retrieve all apps
@@ -225,13 +227,9 @@ abstract contract XApps is Initializable, IXApps, XAllocationVotingGovernor {
     return $._baseURI;
   }
 
-  function appURI(bytes32 appId) public view returns (string memory) {
+  function appURI(bytes32 appId) public view appExists(appId) returns (string memory) {
     XAppsStorage storage $ = _getXAppsStorageStorage();
 
-    require($._apps[appId].receiverAddress != address(0), "App does not exist");
-
-    string memory appIdStr = Strings.toHexString(uint256(appId), 32);
-
-    return string(abi.encodePacked($._baseURI, appIdStr));
+    return string(abi.encodePacked($._baseURI, $._apps[appId].metadataURI));
   }
 }
