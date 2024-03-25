@@ -18,6 +18,8 @@ import { ethers } from "hardhat"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { createTestConfig } from "./helpers/config"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
+import { deployProxy } from "../scripts/helpers"
+import { B3TRBadge } from "../typechain-types"
 
 describe("VoterRewards", () => {
   describe("Contract parameters", () => {
@@ -548,18 +550,18 @@ describe("VoterRewards", () => {
         forceDeploy: true,
       })
 
-      const NFTBadgeContract = await ethers.getContractFactory("B3TRBadge")
-      const b3trBadge = await NFTBadgeContract.deploy(
+      const b3trBadge = (await deployProxy("B3TRBadge", [
         "b3trBadge",
         "BDG",
-        owner,
+        await owner.getAddress(),
+        await owner.getAddress(),
         10,
         config.NFT_BADGE_BASE_URI,
         config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
         config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
         await b3tr.getAddress(),
         config.TREASURY_POOL_ADDRESS,
-      )
+      ])) as B3TRBadge
 
       await b3trBadge.waitForDeployment()
 
@@ -618,8 +620,6 @@ describe("VoterRewards", () => {
 
       expect(await b3trBadge.getLevel(voter1.address)).to.equal(5)
 
-      console.log(await b3trBadge.checkpoints(voter1.address, 4))
-
       // Second round
       await emissions.connect(voter1).distribute() // Anyone can distribute the cycle
 
@@ -668,18 +668,18 @@ describe("VoterRewards", () => {
         forceDeploy: true,
       })
 
-      const NFTBadgeContract = await ethers.getContractFactory("B3TRBadge")
-      const b3trBadge = await NFTBadgeContract.deploy(
+      const b3trBadge = (await deployProxy("B3TRBadge", [
         "b3trBadge",
         "BDG",
-        owner,
+        await owner.getAddress(),
+        await owner.getAddress(),
         10,
         config.NFT_BADGE_BASE_URI,
         config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
         config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
         await b3tr.getAddress(),
         config.TREASURY_POOL_ADDRESS,
-      )
+      ])) as B3TRBadge
 
       await b3trBadge.waitForDeployment()
 
@@ -785,18 +785,18 @@ describe("VoterRewards", () => {
         config,
       })
 
-      const NFTBadgeContract = await ethers.getContractFactory("B3TRBadge")
-      const b3trBadge = await NFTBadgeContract.deploy(
+      const b3trBadge = (await deployProxy("B3TRBadge", [
         "b3trBadge",
         "BDG",
-        owner,
+        await owner.getAddress(),
+        await owner.getAddress(),
         10,
         config.NFT_BADGE_BASE_URI,
         config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
         config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
         await b3tr.getAddress(),
         config.TREASURY_POOL_ADDRESS,
-      )
+      ])) as B3TRBadge
 
       await b3trBadge.waitForDeployment()
 
@@ -928,18 +928,18 @@ describe("VoterRewards", () => {
         config,
       })
 
-      const NFTBadgeContract = await ethers.getContractFactory("B3TRBadge")
-      const b3trBadge = await NFTBadgeContract.deploy(
+      const b3trBadge = (await deployProxy("B3TRBadge", [
         "b3trBadge",
         "BDG",
-        owner,
+        await owner.getAddress(),
+        await owner.getAddress(),
         10,
         config.NFT_BADGE_BASE_URI,
         config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
         config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
         await b3tr.getAddress(),
         config.TREASURY_POOL_ADDRESS,
-      )
+      ])) as B3TRBadge
 
       await b3trBadge.waitForDeployment()
 
@@ -1049,18 +1049,18 @@ describe("VoterRewards", () => {
         config,
       })
 
-      const NFTBadgeContract = await ethers.getContractFactory("B3TRBadge")
-      const b3trBadge = await NFTBadgeContract.deploy(
+      const b3trBadge = (await deployProxy("B3TRBadge", [
         "b3trBadge",
         "BDG",
-        owner,
+        await owner.getAddress(),
+        await owner.getAddress(),
         10,
         config.NFT_BADGE_BASE_URI,
         config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
         config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
         await b3tr.getAddress(),
         config.TREASURY_POOL_ADDRESS,
-      )
+      ])) as B3TRBadge
 
       await b3trBadge.waitForDeployment()
 
