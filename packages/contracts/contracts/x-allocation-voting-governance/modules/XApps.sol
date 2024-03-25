@@ -7,8 +7,9 @@ import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { XAllocationVotingGovernor } from "../XAllocationVotingGovernor.sol";
 import { IXApps } from "../../interfaces/IXApps.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-abstract contract XApps is IXApps, XAllocationVotingGovernor {
+abstract contract XApps is Initializable, IXApps, XAllocationVotingGovernor {
   using Checkpoints for Checkpoints.Trace208;
 
   struct App {
@@ -18,35 +19,53 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
     uint48 createdAt; // block number when app was added
   }
 
-  // Mapping from app ID to app
-  mapping(bytes32 => App) internal _apps;
+  /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.XApps
+  struct XAppsStorage {
+    // Mapping from app ID to app
+    mapping(bytes32 => App) _apps;
+    // List of app IDs to enable retrieval of all _apps
+    bytes32[] _appIds;
+    // Array containing an up to date list of apps that are elegible for voting
+    bytes32[] _elegibleAppsForNextRound;
+    // Mapping from app ID to index in the _elegibleAppsForNextRound array
+    mapping(bytes32 => uint256) _idToElegibleAppsIndex;
+    // Mapping from app ID to a checkpoint of the app's elegibility in a specific block
+    mapping(bytes32 appId => Checkpoints.Trace208) _isAppElegibleCheckpoints;
+    string _baseURI;
+  }
 
-  // List of app IDs to enable retrieval of all _apps
-  bytes32[] internal _appIds;
+  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.XApps")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 private constant XAppsStorageLocation = 0xd0d069a754be3c8727b213bc00d418e344adac8f83a7b6d5e0e426a9ddbe0700;
 
-  // Array containing an up to date list of apps that are elegible for voting
-  bytes32[] internal _elegibleAppsForNextRound;
-  // Mapping from app ID to index in the _elegibleAppsForNextRound array
-  mapping(bytes32 => uint256) internal _idToElegibleAppsIndex;
-  // Mapping from app ID to a checkpoint of the app's elegibility in a specific block
-  mapping(bytes32 appId => Checkpoints.Trace208) internal _isAppElegibleCheckpoints;
+  function _getXAppsStorageStorage() internal pure returns (XAppsStorage storage $) {
+    assembly {
+      $.slot := XAppsStorageLocation
+    }
+  }
 
-  string private _baseURI;
+  /**
+   * @dev Sets the value for {baseURI}
+   */
+  function __XApps_init(string memory baseURI_) internal onlyInitializing {
+    __XApps_init_unchained(baseURI_);
+  }
 
-  constructor(string memory baseURI_) {
-    _baseURI = baseURI_;
+  function __XApps_init_unchained(string memory baseURI_) internal onlyInitializing {
+    XAppsStorage storage $ = _getXAppsStorageStorage();
+    $._baseURI = baseURI_;
   }
 
   // ---------- Setters ---------- //
 
   function addApp(address appReceiverAddress, string memory appName) public virtual {
+    XAppsStorage storage $ = _getXAppsStorageStorage();
     bytes32 id = hashName(appName);
 
-    require(_apps[id].receiverAddress == address(0), "App with this ID already exists");
+    require($._apps[id].receiverAddress == address(0), "App with this ID already exists");
 
     // Store the new app
-    _apps[id] = App(id, appReceiverAddress, appName, clock());
-    _appIds.push(id);
+    $._apps[id] = App(id, appReceiverAddress, appName, clock());
+    $._appIds.push(id);
     _pushAppToEligbleApps(id);
 
     emit AppAdded(id, appReceiverAddress, appName, true);
@@ -59,16 +78,20 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
   // ---------- Internal and private ---------- //
 
   function _pushAppToEligbleApps(bytes32 appId) private {
-    _elegibleAppsForNextRound.push(appId);
-    _idToElegibleAppsIndex[appId] = _elegibleAppsForNextRound.length - 1;
-    _push(_isAppElegibleCheckpoints[appId], 1);
+    XAppsStorage storage $ = _getXAppsStorageStorage();
+
+    $._elegibleAppsForNextRound.push(appId);
+    $._idToElegibleAppsIndex[appId] = $._elegibleAppsForNextRound.length - 1;
+    _push($._isAppElegibleCheckpoints[appId], 1);
   }
 
   /**
    * @dev Update the app availability for voting checkpoint.
    */
   function _updateVotingElegibilityCheckpoint(bytes32 appId, bool canBeVoted) private {
-    _push(_isAppElegibleCheckpoints[appId], canBeVoted ? 1 : 0);
+    XAppsStorage storage $ = _getXAppsStorageStorage();
+
+    _push($._isAppElegibleCheckpoints[appId], canBeVoted ? 1 : 0);
 
     if (!canBeVoted) {
       // In order to remove an app from the _elegibleAppsForNextRound array correctly we need to move the element in the last position
@@ -76,18 +99,17 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
       // We also need to update the `_idToElegibleAppsIndex` mapping accordingly.
 
       // ID of the last item now points to the new index
-      _idToElegibleAppsIndex[_elegibleAppsForNextRound[_elegibleAppsForNextRound.length - 1]] = _idToElegibleAppsIndex[
-        appId
-      ];
+      $._idToElegibleAppsIndex[$._elegibleAppsForNextRound[$._elegibleAppsForNextRound.length - 1]] = $
+        ._idToElegibleAppsIndex[appId];
 
       // Move last item at the index of the app we are removing and pop the last element of the array
-      _elegibleAppsForNextRound[_idToElegibleAppsIndex[appId]] = _elegibleAppsForNextRound[
-        _elegibleAppsForNextRound.length - 1
+      $._elegibleAppsForNextRound[$._idToElegibleAppsIndex[appId]] = $._elegibleAppsForNextRound[
+        $._elegibleAppsForNextRound.length - 1
       ];
-      _elegibleAppsForNextRound.pop();
+      $._elegibleAppsForNextRound.pop();
 
       // delete the mapping that belongs to the app we removed
-      delete _idToElegibleAppsIndex[appId];
+      delete $._idToElegibleAppsIndex[appId];
     } else {
       _pushAppToEligbleApps(appId);
     }
@@ -100,13 +122,17 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
   }
 
   function _setBaseURI(string memory baseURI_) internal {
-    _baseURI = baseURI_;
+    XAppsStorage storage $ = _getXAppsStorageStorage();
+
+    $._baseURI = baseURI_;
   }
 
   function _updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) internal {
-    require(_apps[appId].receiverAddress != address(0), "App does not exist");
+    XAppsStorage storage $ = _getXAppsStorageStorage();
 
-    _apps[appId].receiverAddress = newReceiverAddress;
+    require($._apps[appId].receiverAddress != address(0), "App does not exist");
+
+    $._apps[appId].receiverAddress = newReceiverAddress;
   }
 
   // ---------- Getters ---------- //
@@ -115,7 +141,9 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
    * All apps that are elegible for voting in x-allocation rounds
    */
   function allElegibleApps() public view returns (bytes32[] memory) {
-    return _elegibleAppsForNextRound;
+    XAppsStorage storage $ = _getXAppsStorageStorage();
+
+    return $._elegibleAppsForNextRound;
   }
 
   /**
@@ -125,34 +153,40 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
    * @param roundId the round id from the XAllocationVoting contract which represents the allocation round
    */
   function isEligibleForVote(bytes32 appId, uint256 roundId) public view override returns (bool) {
+    XAppsStorage storage $ = _getXAppsStorageStorage();
+
     // App does not exist
-    if (_apps[appId].receiverAddress == address(0)) {
+    if ($._apps[appId].receiverAddress == address(0)) {
       return false;
     }
 
     // We need to check if the app was created before the start of the round
     uint256 roundStartsAt = roundSnapshot(roundId);
-    bool isAvailable = _isAppElegibleCheckpoints[appId].upperLookupRecent(SafeCast.toUint48(roundStartsAt)) == 1 &&
-      _apps[appId].createdAt <= roundStartsAt;
+    bool isAvailable = $._isAppElegibleCheckpoints[appId].upperLookupRecent(SafeCast.toUint48(roundStartsAt)) == 1 &&
+      $._apps[appId].createdAt <= roundStartsAt;
 
     return isAvailable;
   }
 
   function isElegibleForVoteLatestCheckpoint(bytes32 appId) public view returns (bool) {
-    require(_apps[appId].receiverAddress != address(0), "App does not exist");
+    XAppsStorage storage $ = _getXAppsStorageStorage();
 
-    return _isAppElegibleCheckpoints[appId].latest() == 1;
+    require($._apps[appId].receiverAddress != address(0), "App does not exist");
+
+    return $._isAppElegibleCheckpoints[appId].latest() == 1;
   }
 
   function isElegibleForVotePastCheckpoint(bytes32 appId, uint256 timepoint) public view returns (bool) {
-    require(_apps[appId].receiverAddress != address(0), "App does not exist");
+    XAppsStorage storage $ = _getXAppsStorageStorage();
+
+    require($._apps[appId].receiverAddress != address(0), "App does not exist");
 
     uint48 currentTimepoint = clock();
     if (timepoint >= currentTimepoint) {
       revert ERC5805FutureLookup(timepoint, currentTimepoint);
     }
 
-    return _isAppElegibleCheckpoints[appId].upperLookupRecent(SafeCast.toUint48(timepoint)) == 1;
+    return $._isAppElegibleCheckpoints[appId].upperLookupRecent(SafeCast.toUint48(timepoint)) == 1;
   }
 
   function hashName(string memory appName) public pure returns (bytes32) {
@@ -161,33 +195,43 @@ abstract contract XApps is IXApps, XAllocationVotingGovernor {
 
   // Function to retrieve an app by ID
   function getApp(bytes32 id) public view virtual returns (App memory) {
-    require(_apps[id].receiverAddress != address(0), "App does not exist");
-    return _apps[id];
+    XAppsStorage storage $ = _getXAppsStorageStorage();
+
+    require($._apps[id].receiverAddress != address(0), "App does not exist");
+    return $._apps[id];
   }
 
   // Function to retrieve all apps
   function getAllApps() public view returns (App[] memory) {
-    App[] memory allApps = new App[](_appIds.length);
-    uint256 length = _appIds.length;
+    XAppsStorage storage $ = _getXAppsStorageStorage();
+
+    App[] memory allApps = new App[]($._appIds.length);
+    uint256 length = $._appIds.length;
     for (uint i = 0; i < length; i++) {
-      allApps[i] = _apps[_appIds[i]];
+      allApps[i] = $._apps[$._appIds[i]];
     }
     return allApps;
   }
 
   function getAppReceiverAddress(bytes32 appId) public view override returns (address) {
-    return _apps[appId].receiverAddress;
+    XAppsStorage storage $ = _getXAppsStorageStorage();
+
+    return $._apps[appId].receiverAddress;
   }
 
   function baseURI() public view returns (string memory) {
-    return _baseURI;
+    XAppsStorage storage $ = _getXAppsStorageStorage();
+
+    return $._baseURI;
   }
 
   function appURI(bytes32 appId) public view returns (string memory) {
-    require(_apps[appId].receiverAddress != address(0), "App does not exist");
+    XAppsStorage storage $ = _getXAppsStorageStorage();
+
+    require($._apps[appId].receiverAddress != address(0), "App does not exist");
 
     string memory appIdStr = Strings.toHexString(uint256(appId), 32);
 
-    return string(abi.encodePacked(_baseURI, appIdStr));
+    return string(abi.encodePacked($._baseURI, appIdStr));
   }
 }

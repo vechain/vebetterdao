@@ -7,6 +7,7 @@ import { AppCardInnerDetails } from "./AppCardInnerDetails"
 import { useBreakpoints } from "@/hooks"
 import { AppCardOptionsMobileModal } from "./AppCardOptionsMobileModal"
 import { AppCardOptionsDesktopMenu } from "./AppCardOptionsDesktopMenu"
+import { useRouter } from "next/navigation"
 
 type Props = { xApp: XApp }
 export const AppCard = ({ xApp }: Props) => {
@@ -19,14 +20,39 @@ export const AppCard = ({ xApp }: Props) => {
 
   const { isOpen: isMobileOptionsOpen, onClose: closeMobileOptions, onOpen: openMobileOptions } = useDisclosure()
 
+  const router = useRouter()
+
+  const navigateToAppDetail = () => {
+    router.push(`/apps/${xApp.id}`)
+  }
+
   return (
     <Card variant={"baseWithBorder"} w="full">
       <Box w="full" position={"relative"} h={100}>
         <Skeleton w="full" h="full" isLoaded={!isBannerLoading}>
-          <Image w="full" src={banner?.image} h={"full"} objectFit={"cover"} borderTopRadius={"md"} />
+          <Image
+            w="full"
+            src={banner?.image}
+            h={"full"}
+            objectFit={"cover"}
+            borderTopRadius={"md"}
+            onClick={navigateToAppDetail}
+            _hover={{
+              cursor: "pointer",
+            }}
+          />
         </Skeleton>
         <Skeleton isLoaded={!isLogoLoading} alignContent={"start"} pos={"absolute"} bottom={-7} left={5}>
-          <Image src={logo?.image ?? notFoundImage} alt={"logo"} boxSize={14} borderRadius="9px" />
+          <Image
+            src={logo?.image ?? notFoundImage}
+            alt={"logo"}
+            boxSize={14}
+            borderRadius="9px"
+            onClick={navigateToAppDetail}
+            _hover={{
+              cursor: "pointer",
+            }}
+          />
         </Skeleton>
       </Box>
       <CardBody mt={5}>
@@ -34,7 +60,13 @@ export const AppCard = ({ xApp }: Props) => {
           <VStack spacing={1} align="flex-start">
             <HStack spacing={1} justifyContent={"space-between"} align="center" w={"full"}>
               <Skeleton isLoaded={!appMetadataLoading}>
-                <Text fontWeight={"600"} size={"xs"}>
+                <Text
+                  fontWeight={"600"}
+                  size={"xs"}
+                  onClick={navigateToAppDetail}
+                  _hover={{
+                    cursor: "pointer",
+                  }}>
                   {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
                 </Text>
               </Skeleton>
@@ -53,7 +85,13 @@ export const AppCard = ({ xApp }: Props) => {
               )}
             </HStack>
             <Skeleton isLoaded={!appMetadataLoading}>
-              <Text fontSize={"sm"} color={"gray.500"}>
+              <Text
+                fontSize={"sm"}
+                color={"gray.500"}
+                onClick={navigateToAppDetail}
+                _hover={{
+                  cursor: "pointer",
+                }}>
                 {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
               </Text>
             </Skeleton>
