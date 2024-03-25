@@ -288,7 +288,9 @@ contract B3TRBadge is
    * @dev Get the `pos`-th checkpoint for `account`.
    */
   function _checkpoints(address account, uint32 pos) internal view virtual returns (Checkpoints.Checkpoint208 memory) {
-    return _selectedLevelCheckpoints[account].at(pos);
+    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
+    
+    return $._selectedLevelCheckpoints[account].at(pos);
   }
 
   // ---------- Setters ---------- //
