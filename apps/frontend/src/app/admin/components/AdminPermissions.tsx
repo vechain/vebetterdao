@@ -37,6 +37,8 @@ export const AdminPermissions = () => {
     isUpgraderOfVot3,
     isUpgraderOfVoterRewards,
     isUpgraderOfTimelock,
+    isUpgraderOfTreasury,
+    isAdminOfTreasury,
   } = useAccountPermissions(account ?? "")
 
   return (
@@ -60,6 +62,7 @@ export const AdminPermissions = () => {
                   <Th>Voter Rewards</Th>
                   <Th>XAllocation Voting</Th>
                   <Th>XAllocation Pool</Th>
+                  <Th>Treasury</Th>
                 </Tr>
               </Thead>
               <Tbody>
@@ -74,12 +77,14 @@ export const AdminPermissions = () => {
                   <Td>{isAdminOfVoterRewards ? "Yes" : "No"}</Td>
                   <Td>{isAdminOfXAllocationVoting ? "Yes" : "No"}</Td>
                   <Td>{isAdminOfXAllocationPool ? "Yes" : "No"}</Td>
+                  <Td>{isAdminOfTreasury ? "Yes" : "No"}</Td>
                 </Tr>
                 <Tr>
                   <Td fontWeight={"bold"}>MINTER</Td>
                   <Td>{isMinterOfB3tr ? "Yes" : "No"}</Td>
                   <Td></Td>
                   <Td>{isMinterOfEmissions ? "Yes" : "No"}</Td>
+                  <Td></Td>
                   <Td></Td>
                   <Td></Td>
                   <Td></Td>
@@ -98,6 +103,7 @@ export const AdminPermissions = () => {
                   <Td>{isUpgraderOfVoterRewards ? "Yes" : "No"}</Td>
                   <Td>{isUpgraderOfXAllocationVoting ? "Yes" : "No"}</Td>
                   <Td>{isUpgraderOfXAllocationPool ? "Yes" : "No"}</Td>
+                  <Td>{isUpgraderOfTreasury ? "Yes" : "No"}</Td>
                 </Tr>
               </Tbody>
             </Table>
