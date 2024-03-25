@@ -15,6 +15,7 @@ import {
   Container,
 } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa6"
 
 export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
@@ -39,9 +40,28 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
 
   const bgColor = data.isCurrent ? "#B2F26C" : "rgba(233, 233, 233, 1)"
 
+  // State to store the client width
+  const [clientWidth, setClientWidth] = useState(document.body.clientWidth);
+
+  // Effect to update the clientWidth state on window resize
+  useEffect(() => {
+    const updateWidth = () => {
+      setClientWidth(document.body.clientWidth);
+    };
+
+    // Set initial width
+    updateWidth();
+
+    // Add window resize event listener
+    window.addEventListener('resize', updateWidth);
+
+    // Clean up listener on component unmount
+    return () => window.removeEventListener('resize', updateWidth);
+  }, []);
+
   if (isDesktop)
     return (
-      <HStack w="100vw" align="center" bgColor={bgColor} mt={-10} py={3}>
+      <HStack w={clientWidth} align="center" bgColor={bgColor} mt={-10} py={3}>
         <Container
           maxW={"container.xl"}
           display={"flex"}
