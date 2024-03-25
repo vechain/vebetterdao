@@ -43,7 +43,7 @@ contract Treasury is
   }
 
   modifier onlyAdmin() {
-    require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Treasury: caller is not an executor");
+    require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "Treasury: caller is not an executor");
     _;
   }
 
@@ -80,6 +80,7 @@ contract Treasury is
     __UUPSUpgradeable_init();
     __AccessControl_init();
     __Pausable_init();
+    __ReentrancyGuard_init();
 
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     _grantRole(TIMELOCK_ROLE, _timeLock);
