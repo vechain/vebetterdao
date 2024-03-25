@@ -71,7 +71,7 @@ contract VoterRewards is AccessControl, ReentrancyGuard {
     uint256 badgeLevel = b3trBadge.getPastLevel(voter, proposalStart);
 
     uint256 multiplier = levelToMultiplier[badgeLevel]; // Percentage multiplier for the level of the badge
-    uint256 total = votes; //TODO - multiply votes by percentage multiplier
+    uint256 total = votes + (votes * multiplier) / 100; // Total weighted votes
 
     cycleToTotal[cycle] += total; // Add total to the cycle
     cycleToVoterToTotal[cycle][voter] += total; // Add total to the voter in the cycle
@@ -98,8 +98,6 @@ contract VoterRewards is AccessControl, ReentrancyGuard {
 
     emit RewardClaimed(cycle, voter, reward);
   }
-
-  // TODO - do we want a withdrawal logic for the contract owner?
 
   // ----------------- Getters ----------------- //
 
