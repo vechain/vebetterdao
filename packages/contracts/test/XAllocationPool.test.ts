@@ -684,7 +684,7 @@ describe("X-Allocation Pool", async function () {
       // Update cap
       await xAllocationVoting.connect(owner).setAppSharesCap(50)
 
-      await emissions.connect(minterAccount).start()
+      await xAllocationVoting.connect(owner).startNewRound()
 
       const round2 = await xAllocationVoting.currentRoundId()
 
@@ -714,7 +714,7 @@ describe("X-Allocation Pool", async function () {
 
       // should be capped to 50%
       let maxCapPercentageR2 = await xAllocationPool.scaledAppSharesCap(round2)
-      expect(await xAllocationPool.getAppShares(round1, app1Id)).to.eql(maxCapPercentageR2)
+      expect(await xAllocationPool.getAppShares(round2, app1Id)).to.eql(maxCapPercentageR2)
 
       let claimableRewardsR1App1 = await xAllocationPool.roundEarnings(round1, app1Id)
       expect(claimableRewardsR1App1).to.eql(expectedVariableAllocationR1App1 + expectedBaseAllocationR1)
@@ -731,7 +731,7 @@ describe("X-Allocation Pool", async function () {
         xAllocationPool,
         xAllocationVoting,
       )
-      let claimableRewardsR2App1 = await xAllocationPool.roundEarnings(round1, app1Id)
+      let claimableRewardsR2App1 = await xAllocationPool.roundEarnings(round2, app1Id)
       expect(claimableRewardsR2App1).to.eql(expectedVariableAllocationR2App1 + expectedBaseAllocationR2)
     })
 
@@ -769,7 +769,7 @@ describe("X-Allocation Pool", async function () {
       // Update BaseAllocationPercentage
       await xAllocationVoting.connect(owner).setBaseAllocationPercentage(50)
 
-      await emissions.connect(minterAccount).start()
+      await xAllocationVoting.connect(owner).startNewRound()
 
       const round2 = await xAllocationVoting.currentRoundId()
 
