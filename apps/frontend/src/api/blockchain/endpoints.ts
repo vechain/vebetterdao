@@ -1,3 +1,5 @@
+import events from "events"
+
 /**
  * Poll the chain for a transaction receipt until it is found (or timeout after 3 blocks)
  * @param id Transaction id
@@ -85,8 +87,11 @@ export const getEvents = async ({
 
 /**
  *  call getEvents iteratively to get all the events
- * @param param0
- * @returns
+ * @param thor the thor client
+ * @param order the order of the events (asc or desc)
+ * @param from the block number to start from
+ * @param filterCriteria the filter criteria for the events
+ * @returns all the events from the blockchain
  */
 export const getAllEvents = async ({
   thor,
@@ -94,31 +99,11 @@ export const getAllEvents = async ({
   from = 0,
   filterCriteria,
 }: Omit<GetEventsProps, "offset" | "limit">) => {
-  const events = await getEvents({
-    thor,
-    filterCriteria,
-    from,
-    limit: 256,
-    order,
-    offset: 0,
-  })
-  if (events.length < 256) {
-    return events
-  }
-  const allEvents = [...events]
-  let offset = 256
-  let newEvents = await getEvents({
-    thor,
-    filterCriteria,
-    from,
-    limit: 256,
-    order,
-    offset,
-  })
-  while (newEvents.length >= offset) {
-    allEvents.push(...newEvents)
-    offset += 256
-    newEvents = await getEvents({
+  const allEvents: Connex.Thor.Filter.Row<"event", {}>[] = []
+  let offset = 0
+  //return from the function only when we get all the events
+  while (true) {
+    const events = await getEvents({
       thor,
       filterCriteria,
       from,
@@ -126,6 +111,10 @@ export const getAllEvents = async ({
       order,
       offset,
     })
+    allEvents.push(...events)
+    if (events.length < 256) {
+      return allEvents
+    }
+    offset += 256
   }
-  return allEvents
 }
