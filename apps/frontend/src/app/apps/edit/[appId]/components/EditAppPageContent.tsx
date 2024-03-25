@@ -1,7 +1,7 @@
 import { useXApp, useXAppMetadata } from "@/api"
 import { AppDetailCard } from "@/app/apps/[appId]/components/AppDetailCard"
 import { CreateEditAppForm, CreateEditAppFormData } from "@/components/CreateEditAppForm"
-import { VStack, Button, Grid, GridItem } from "@chakra-ui/react"
+import { VStack, Button, Grid, GridItem, Heading } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { FaArrowLeft } from "react-icons/fa6"
@@ -47,7 +47,10 @@ export const EditAppPageContent = ({ appId }: Props) => {
             </form>
           </GridItem>
           <GridItem colSpan={[3, 3, 1]}>
-            <AppDetailCard appId={appId} />
+            <VStack spacing={4} w="full" align={"flex-start"}>
+              <Heading size="md">App preview</Heading>
+              <AppDetailCard appId={appId} />
+            </VStack>
           </GridItem>
         </Grid>
       </VStack>
