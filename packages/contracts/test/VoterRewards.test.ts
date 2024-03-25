@@ -49,7 +49,7 @@ describe("VoterRewards", () => {
     it("Should not be able to set new emissions contract if not admin", async () => {
       const { voterRewards, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
 
-      await catchRevert(voterRewards.connect(otherAccount).setEmissions(otherAccount.address))
+      await expect(voterRewards.connect(otherAccount).setEmissions(otherAccount.address)).to.be.reverted
     })
 
     it("Should be able to set new badge contract", async () => {
@@ -62,7 +62,7 @@ describe("VoterRewards", () => {
     it("Should not be able to set new badge contract if not admin", async () => {
       const { voterRewards, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
 
-      await catchRevert(voterRewards.connect(otherAccount).setB3TRBadge(otherAccount.address))
+      await expect(voterRewards.connect(otherAccount).setB3TRBadge(otherAccount.address)).to.be.reverted
     })
   })
 
@@ -1182,8 +1182,8 @@ describe("VoterRewards", () => {
 
       await emissions.connect(otherAccount).distribute()
 
-      await catchRevert(voterRewards.claimReward(1, otherAccount.address)) // Should not be able to claim rewards as not voted
-      await catchRevert(voterRewards.claimReward(2, otherAccount.address)) // Should not be able to claim rewards as not voted
+      await expect(voterRewards.claimReward(1, otherAccount.address)).to.be.reverted
+      await expect(voterRewards.claimReward(2, otherAccount.address)).to.be.reverted
     })
 
     it("Should not be able to claim rewards twice", async () => {
@@ -1233,11 +1233,11 @@ describe("VoterRewards", () => {
 
       const proposalStart = await xAllocationVoting.roundSnapshot(roundId)
 
-      await catchRevert(
+      await expect(
         voterRewards
           .connect(otherAccount)
           .registerXallocationVote(proposalStart, otherAccount.address, ethers.parseEther("1000")),
-      )
+      ).to.be.reverted
     })
   })
 })
