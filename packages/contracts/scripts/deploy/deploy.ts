@@ -20,10 +20,6 @@ import { deployProxy } from "../helpers"
 const name = "VeBetterDAO Galaxy Member"
 const symbol = "GM"
 
-// Voter rewards
-const levels = [1]
-const multiplier = [0]
-
 export async function deployAll(config: ContractsConfig) {
   const networkConfig = network.config as HttpNetworkConfig
   console.log(
@@ -95,8 +91,8 @@ export async function deployAll(config: ContractsConfig) {
     await emissions.getAddress(),
     await b3tr.getAddress(),
     TEMP_ADMIN,
-    levels,
-    multiplier,
+    config.VOTER_REWARDS_LEVELS,
+    config.VOTER_REWARDS_MULTIPLIER,
   )
 
   // Deploy XAllocationVoting
