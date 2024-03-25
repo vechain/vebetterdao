@@ -4,6 +4,8 @@ import "@nomicfoundation/hardhat-toolbox"
 import "@nomiclabs/hardhat-truffle5"
 import "@vechain/hardhat-vechain"
 import "@vechain/hardhat-ethers"
+import "hardhat-contract-sizer"
+import "hardhat-ignore-warnings"
 import { getConfig } from "@repo/config"
 
 const config: HardhatUserConfig = {
@@ -32,6 +34,12 @@ module.exports = {
         runs: 200,
       },
     },
+  },
+  contractSizer: {
+    alphaSort: true,
+    disambiguatePaths: false,
+    runOnCompile: true,
+    strict: true,
   },
   mocha: {
     timeout: 180000,
