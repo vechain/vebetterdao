@@ -37,6 +37,7 @@ contract XAllocationVoting is
    * @param _initialVotingPeriod How long does a round remain open to votese
    * @param b3trGovernor_ The address of the B3trGovernor DAO
    * @param _voterRewards The address of the VoterRewards contract
+   * @param _emissions The address of the emissions contract
    * @param _admins The addresses of the admins (DAO + another address) that can update the XAllocationPool address, only DAO will remain in the final version
    * @param _xAppsBaseURI The base URI for the xApps
    */
@@ -46,12 +47,13 @@ contract XAllocationVoting is
     uint32 _initialVotingPeriod,
     address b3trGovernor_,
     address _voterRewards,
+    address _emissions,
     address[] memory _admins,
     address upgrader,
     string memory _xAppsBaseURI
   ) public initializer {
     __XAllocationVotingGovernor_init("XAllocationVoting", b3trGovernor_);
-    __GovernorSettings_init(_initialVotingPeriod);
+    __GovernorSettings_init(_initialVotingPeriod, _emissions);
     __GovernorXAllocationVotesCounting_init(_voterRewards);
     __GovernorVotes_init(_vot3Token);
     __GovernorVotesQuorumFraction_init(_quorumPercentage);

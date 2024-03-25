@@ -165,6 +165,7 @@ export const getOrDeployContractInstances = async ({
     config.EMISSIONS_CYCLE_DURATION - 1, // X Alloc voting period
     await timeLock.getAddress(),
     await voterRewards.getAddress(),
+    await emissions.getAddress(),
     [await timeLock.getAddress(), owner.address],
     owner.address,
     "ipfs://",

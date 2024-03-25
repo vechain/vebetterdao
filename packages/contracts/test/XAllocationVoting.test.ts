@@ -22,7 +22,7 @@ import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 describe("X-Allocation Voting", function () {
   describe("Deployment", function () {
     it("Admins and addresses should be set correctly", async function () {
-      const { xAllocationVoting, owner, timeLock } = await getOrDeployContractInstances({
+      const { xAllocationVoting, owner, timeLock, emissions } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
       const ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000"
@@ -31,6 +31,7 @@ describe("X-Allocation Voting", function () {
       expect(await xAllocationVoting.hasRole(ADMIN_ROLE, owner.address)).to.eql(true)
 
       expect(await xAllocationVoting.b3trGovernor()).to.eql(await timeLock.getAddress())
+      expect(await xAllocationVoting.emissions()).to.eql(await emissions.getAddress())
     })
   })
 
@@ -206,6 +207,85 @@ describe("X-Allocation Voting", function () {
       ).to.be.reverted
 
       expect(await ethers.provider.getBalance(await xAllocationVoting.getAddress())).to.eql(0n)
+    })
+
+    it("Can set voting period only through governance", async function () {
+      const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: false })
+      await expect(xAllocationVoting.connect(owner).setVotingPeriod(10)).to.be.reverted
+    })
+
+    it("Can set voting period if less than emissions cycle duration", async function () {
+      const { xAllocationVoting, owner, emissions, governor } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+      const votesThreshold = await governor.proposalThreshold()
+      await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
+      const cycleDuration = await emissions.cycleDuration()
+
+      // Now we can create a proposal
+      const encodedFunctionCall = xAllocationVoting.interface.encodeFunctionData("setVotingPeriod", [
+        cycleDuration - 1n,
+      ])
+      const description = "Updating voting period"
+      const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
+
+      const tx = await governor
+        .connect(owner)
+        .propose([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], description, {
+          gasLimit: 10_000_000,
+        })
+
+      const proposalId = await getProposalIdFromTx(tx, governor)
+      await waitForProposalToBeActive(proposalId, governor)
+      await governor.connect(owner).castVote(proposalId, 1)
+      await waitForVotingPeriodToEnd(proposalId, governor)
+      expect(await governor.state(proposalId)).to.eql(4n) // succeded
+
+      await governor.queue([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash)
+      expect(await governor.state(proposalId)).to.eql(5n)
+
+      await governor.execute([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash)
+      expect(await governor.state(proposalId)).to.eql(7n)
+
+      const votingPeriod = await xAllocationVoting.votingPeriod()
+      expect(votingPeriod).to.eql(cycleDuration - 1n)
+    })
+
+    it("Cannot set voting period if not less than emissions cycle duration", async function () {
+      const { xAllocationVoting, owner, emissions, governor } = await getOrDeployContractInstances({
+        forceDeploy: false,
+      })
+      const votesThreshold = await governor.proposalThreshold()
+      await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
+      const cycleDuration = await emissions.cycleDuration()
+      const beforeVotingPeriod = await xAllocationVoting.votingPeriod()
+
+      // Now we can create a proposal
+      const encodedFunctionCall = xAllocationVoting.interface.encodeFunctionData("setVotingPeriod", [cycleDuration])
+      const description = "Updating voting period"
+      const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
+
+      const tx = await governor
+        .connect(owner)
+        .propose([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], description, {
+          gasLimit: 10_000_000,
+        })
+
+      const proposalId = await getProposalIdFromTx(tx, governor)
+      await waitForProposalToBeActive(proposalId, governor)
+      await governor.connect(owner).castVote(proposalId, 1)
+      await waitForVotingPeriodToEnd(proposalId, governor)
+      expect(await governor.state(proposalId)).to.eql(4n) // succeded
+
+      await governor.queue([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash)
+      expect(await governor.state(proposalId)).to.eql(5n)
+
+      await expect(
+        governor.execute([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash),
+      ).to.be.reverted
+
+      const afterVotingPeriod = await xAllocationVoting.votingPeriod()
+      expect(afterVotingPeriod).to.eql(beforeVotingPeriod)
     })
   })
 
