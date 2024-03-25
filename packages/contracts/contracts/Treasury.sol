@@ -20,7 +20,7 @@ contract Treasury is
   ReentrancyGuardUpgradeable,
   UUPSUpgradeable
 {
-  bytes32 public constant TIMELOCK_ROLE = keccak256("TIMELOCK_ROLE");
+  bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   address public constant VTHO = 0x0000000000000000000000000000456E65726779;
 
@@ -47,8 +47,8 @@ contract Treasury is
     _;
   }
 
-  modifier onlyTimelockWhenNotPaused() {
-    require(hasRole(TIMELOCK_ROLE, _msgSender()), "Treasury: caller is not timelock executor");
+  modifier onlyGovernanceWhenNotPaused() {
+    require(hasRole(GOVERNANCE_ROLE, _msgSender()), "Treasury: caller is not timelock executor");
     require(!paused(), "Treasury: contract is paused");
     _;
   }
@@ -83,7 +83,7 @@ contract Treasury is
     __ReentrancyGuard_init();
 
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
-    _grantRole(TIMELOCK_ROLE, _timeLock);
+    _grantRole(GOVERNANCE_ROLE, _timeLock);
     _grantRole(UPGRADER_ROLE, _proxyAdmin);
   }
 
@@ -110,7 +110,7 @@ contract Treasury is
    * @param _to the address to transfer VTHO to
    * @param _value the amount of VTHO to transfer
    */
-  function transferVTHO(address _to, uint256 _value) public onlyTimelockWhenNotPaused {
+  function transferVTHO(address _to, uint256 _value) public onlyGovernanceWhenNotPaused {
     IERC20 vtho = _getERC20Contract(VTHO);
     require(vtho.balanceOf(address(this)) >= _value, "Treasury: insufficient VTHO balance");
     require(vtho.transfer(_to, _value), "Treasury: transfer failed");
@@ -121,7 +121,7 @@ contract Treasury is
    * @param _to the address to transfer B3TR to
    * @param _value the amount of B3TR to transfer
    */
-  function transferB3TR(address _to, uint256 _value) public onlyTimelockWhenNotPaused {
+  function transferB3TR(address _to, uint256 _value) public onlyGovernanceWhenNotPaused {
     IERC20 b3tr = _getERC20Contract(b3trAddress());
     require(b3tr.balanceOf(address(this)) >= _value, "Treasury: insufficient B3TR balance");
     require(b3tr.transfer(_to, _value), "Treasury: transfer failed");
@@ -132,7 +132,7 @@ contract Treasury is
    * @param _to the address to transfer VOT3 to
    * @param _value the amount of VOT3 to transfer
    */
-  function transferVOT3(address _to, uint256 _value) public onlyTimelockWhenNotPaused {
+  function transferVOT3(address _to, uint256 _value) public onlyGovernanceWhenNotPaused {
     IERC20 vot3 = _getERC20Contract(vot3Address());
     require(vot3.balanceOf(address(this)) >= _value, "Treasury: insufficient VOT3 balance");
     require(vot3.transfer(_to, _value), "Treasury: transfer failed");
@@ -143,9 +143,9 @@ contract Treasury is
    * @param _to the address to transfer VET to
    * @param _value the amount of VET to transfer
    */
-  function transferVET(address _to, uint256 _value) public onlyTimelockWhenNotPaused nonReentrant {
+  function transferVET(address _to, uint256 _value) public onlyGovernanceWhenNotPaused nonReentrant {
     require(address(this).balance >= _value, "Treasury: insufficient VET balance");
-    (bool sent, bytes memory data) = _to.call{value: _value}("");
+    (bool sent,) = _to.call{value: _value}("");
     require(sent, "Failed to send VET");
     }
 
@@ -155,7 +155,7 @@ contract Treasury is
    * @param _to the address to transfer the ERC20 token to
    * @param _value the amount of ERC20 token to transfer
    */
-  function transferTokens(address _token, address _to, uint256 _value) public onlyTimelockWhenNotPaused {
+  function transferTokens(address _token, address _to, uint256 _value) public onlyGovernanceWhenNotPaused {
     IERC20 token = _getERC20Contract(_token);
     require(token.balanceOf(address(this)) >= _value, "Treasury: insufficient balance");
     require(token.transfer(_to, _value), "Treasury: transfer failed");
@@ -167,7 +167,7 @@ contract Treasury is
    * @param _to the address to transfer the ERC721 token to
    * @param _tokenId the id of the ERC721 token to transfer
    */
-  function transferNFT(address _nft, address _to, uint256 _tokenId) public onlyTimelockWhenNotPaused {
+  function transferNFT(address _nft, address _to, uint256 _tokenId) public onlyGovernanceWhenNotPaused {
     IERC721 nft = IERC721(_nft);
     require(nft.ownerOf(_tokenId) == address(this), "Treasury: dao does not own the NFT");
     nft.safeTransferFrom(address(this), _to, _tokenId);
@@ -177,7 +177,7 @@ contract Treasury is
    * @notice stake B3TR to VOT3
    * @param _b3trAmount the amount of B3TR to stake
    */
-  function stakeB3TR(uint256 _b3trAmount) public onlyTimelockWhenNotPaused {
+  function stakeB3TR(uint256 _b3trAmount) public onlyGovernanceWhenNotPaused {
     IERC20 b3tr = _getERC20Contract(b3trAddress());
     IVOT3 vot3 = IVOT3(vot3Address());
     require(b3tr.balanceOf(address(this)) >= _b3trAmount, "Treasury: insufficient B3TR balance");
@@ -189,7 +189,7 @@ contract Treasury is
    * @notice unstake B3TR from VOT3
    * @param __vot3Amount the amount of VOT3 to unstake
    */
-  function unstakeB3TR(uint256 __vot3Amount) public onlyTimelockWhenNotPaused {
+  function unstakeB3TR(uint256 __vot3Amount) public onlyGovernanceWhenNotPaused {
     IVOT3 vot3 = IVOT3(vot3Address());
     require(vot3.stakedBalanceOf(address(this)) >= __vot3Amount, "Treasury: insufficient B3TR staked");
     vot3.unstake(__vot3Amount);
