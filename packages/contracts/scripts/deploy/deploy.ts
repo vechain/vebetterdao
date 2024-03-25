@@ -139,6 +139,10 @@ export async function deployAll(config: ContractsConfig) {
   await timelock.grantRole(EXECUTOR_ROLE, await governor.getAddress())
   await timelock.grantRole(CANCELLER_ROLE, await governor.getAddress())
 
+  // Grant treasury GOVERNANCE_ROLE to treasury contract admin for intial phases of project
+  const GOVERNANCE_ROLE = await treasury.GOVERNANCE_ROLE()
+  await treasury.grantRole(GOVERNANCE_ROLE, TEMP_ADMIN)
+
   // Grant Vote Registrar role to XAllocationVoting
   await voterRewards
     .connect(admin)
@@ -193,7 +197,7 @@ export async function deployAll(config: ContractsConfig) {
   if (network.name === "vechain_testnet") {
     await seedTestEnvironment(b3tr, xAllocationVoting, emissions)
   } else if (network.name === "vechain_solo") {
-    await seedLocalEnvironment(b3tr, vot3, xAllocationVoting, emissions)
+    await seedLocalEnvironment(treasury, vot3, xAllocationVoting, emissions)
   }
 
   // ---------- Role updates ---------- //

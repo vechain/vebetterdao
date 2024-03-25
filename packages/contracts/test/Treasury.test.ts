@@ -45,7 +45,7 @@ describe("Treasury", () => {
       it("should transfer VTHO", async () => {
         expect(treasuryProxy.transferVTHO(otherAccount.address, ethers.parseEther("1"))).not.to.be.reverted
       })
-      it("should revert if not called by TIMELOCK_ROLE", async () => {
+      it("should revert if not called by GOVERNANCE_ROLE", async () => {
         await catchRevert(
           treasuryProxy.connect(otherAccount).transferVTHO(otherAccount.address, ethers.parseEther("1")),
         )
@@ -60,7 +60,7 @@ describe("Treasury", () => {
       it("should revert if not enough balance", async () => {
         await catchRevert(treasuryProxy.transferVET(otherAccount.address, ethers.parseEther("11")))
       })
-      it("should revert if not called by TIMELOCK_ROLE", async () => {
+      it("should revert if not called by GOVERNANCE_ROLE", async () => {
         await catchRevert(treasuryProxy.connect(otherAccount).transferVET(otherAccount.address, ethers.parseEther("1")))
       })
     })
@@ -78,7 +78,7 @@ describe("Treasury", () => {
       it("should revert if not enough balance", async () => {
         await catchRevert(treasuryProxy.transferB3TR(otherAccount.address, ethers.parseEther("11")))
       })
-      it("should revert if not called by TIMELOCK_ROLE", async () => {
+      it("should revert if not called by GOVERNANCE_ROLE", async () => {
         await catchRevert(
           treasuryProxy.connect(otherAccount).transferB3TR(otherAccount.address, ethers.parseEther("1")),
         )
@@ -98,7 +98,7 @@ describe("Treasury", () => {
       it("should revert if not enough staked to unstake", async () => {
         await catchRevert(treasuryProxy.unstakeB3TR(ethers.parseEther("11")))
       })
-      it("should revert if not called by TIMELOCK_ROLE", async () => {
+      it("should revert if not called by GOVERNANCE_ROLE", async () => {
         await catchRevert(
           treasuryProxy.connect(otherAccount).transferVOT3(otherAccount.address, ethers.parseEther("1")),
         )
