@@ -1,7 +1,9 @@
 import { XApp } from "@/api"
 import {
+  Button,
   Card,
   CardBody,
+  CardFooter,
   CardHeader,
   FormControl,
   FormErrorMessage,
@@ -64,7 +66,17 @@ export const CreateEditAppForm = ({ register, errors, isEdit = false, editedApp,
             <FormLabel>Project URL</FormLabel>
             <Input
               {...register("projectUrl", {
-                validate: value => !!new URL(value) || "Invalid URL",
+                validate: value => {
+                  if (!value) {
+                    return "Project URL is required"
+                  }
+                  try {
+                    new URL(value)
+                    return true
+                  } catch (e) {
+                    return "Invalid URL"
+                  }
+                },
               })}
             />
             {errors.projectUrl && <FormErrorMessage>{errors.projectUrl.message}</FormErrorMessage>}
@@ -85,6 +97,11 @@ export const CreateEditAppForm = ({ register, errors, isEdit = false, editedApp,
           </FormControl>
         </VStack>
       </CardBody>
+      <CardFooter display={"flex"} flexDir={"column"} w="full">
+        <Button colorScheme="blue" type="submit" size="lg" alignSelf={"flex-end"} borderRadius={"full"}>
+          {isEdit ? "Save" : "Submit"}
+        </Button>
+      </CardFooter>
     </Card>
   )
 }

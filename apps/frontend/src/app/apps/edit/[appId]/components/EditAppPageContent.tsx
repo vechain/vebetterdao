@@ -5,7 +5,6 @@ import { VStack, Button, Grid, GridItem } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { FaArrowLeft } from "react-icons/fa6"
-import { w } from "vitest/dist/reporters-P7C2ytIv"
 
 type Props = {
   appId: string
@@ -18,7 +17,7 @@ export const EditAppPageContent = ({ appId }: Props) => {
     router.push(`/apps/${appId}`)
   }
 
-  const { register, formState, getValues, watch } = useForm<CreateEditAppFormData>({
+  const { register, formState, watch, handleSubmit } = useForm<CreateEditAppFormData>({
     defaultValues: {
       name: data?.name,
       description: metadata?.description,
@@ -31,6 +30,10 @@ export const EditAppPageContent = ({ appId }: Props) => {
 
   const { errors } = formState
 
+  const onSubmit = (data: CreateEditAppFormData) => {
+    console.log(data)
+  }
+
   return (
     <VStack w="full" spacing={8} align="flex-start" data-testid={`app-${appId}-detail`}>
       <VStack spacing={4} alignItems={"flex-start"}>
@@ -39,7 +42,9 @@ export const EditAppPageContent = ({ appId }: Props) => {
         </Button>
         <Grid templateColumns="repeat(3, 1fr)" gap={[4, 4, 8]} w="full">
           <GridItem colSpan={[3, 3, 2]}>
-            <CreateEditAppForm register={register} errors={errors} isEdit={true} editedApp={data} watch={watch} />
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <CreateEditAppForm register={register} errors={errors} isEdit={true} editedApp={data} watch={watch} />
+            </form>
           </GridItem>
           <GridItem colSpan={[3, 3, 1]}>
             <AppDetailCard appId={appId} />
