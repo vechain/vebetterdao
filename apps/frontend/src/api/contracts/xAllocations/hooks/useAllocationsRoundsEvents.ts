@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 
 import { abi } from "thor-devkit"
-import { getEvents } from "@/api/blockchain"
+import { getAllEvents } from "@/api/blockchain"
 import { getConfig } from "@repo/config"
 import { XAllocationVotingJson } from "@repo/contracts"
 
@@ -31,7 +31,7 @@ export const getAllocationsRoundsEvents = async (thor: Connex.Thor) => {
     },
   ]
 
-  const events = await getEvents({ thor, filterCriteria })
+  const events = await getAllEvents({ thor, filterCriteria })
 
   /**
    * Decode the events to get the data we are interested in (i.e the proposals)
