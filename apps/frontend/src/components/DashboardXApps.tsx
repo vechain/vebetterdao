@@ -40,14 +40,14 @@ export const DashboardXApps = () => {
       </CardHeader>
       <CardBody>
         <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
-          {slicedXApps?.map(xApp => <XApp key={xApp.id} xApp={xApp} />)}
+          {slicedXApps?.map(xApp => <DashboardXAppCard key={xApp.id} xApp={xApp} />)}
         </Grid>
       </CardBody>
     </Card>
   )
 }
 
-const XApp = ({ xApp }: { xApp: XApp }) => {
+const DashboardXAppCard = ({ xApp }: { xApp: XApp }) => {
   const {
     data: appMetadata,
     isLoading: appMetadataLoading,

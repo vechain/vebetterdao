@@ -2,58 +2,99 @@
 pragma solidity ^0.8.18;
 
 import { IXAllocationPool } from "./interfaces/IXAllocationPool.sol";
-import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
+import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
 import { IEmissions } from "./interfaces/IEmissions.sol";
-import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { IB3TR } from "./interfaces/IB3TR.sol";
+import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
-  IXAllocationVotingGovernor internal _xAllocationVoting;
-  IEmissions internal _emissions;
-
+contract XAllocationPool is
+  Initializable,
+  IXAllocationPool,
+  AccessControlUpgradeable,
+  ReentrancyGuardUpgradeable,
+  UUPSUpgradeable
+{
   uint256 public constant percentagePrecisionScalingFactor = 1e4;
+  bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
-  // B3TR token contract
-  IB3TR public b3tr;
-
-  mapping(bytes32 => mapping(uint256 => bool)) public claimedRewards;
-
-  constructor(address _admin, address b3trAddress) {
-    _grantRole(DEFAULT_ADMIN_ROLE, _admin);
-    b3tr = IB3TR(b3trAddress);
+  /// @custom:storage-location erc7201:b3tr.storage.XAllocationPool
+  struct XAllocationPoolStorage {
+    IXAllocationVotingGovernor _xAllocationVoting;
+    IEmissions _emissions;
+    IB3TR b3tr;
+    mapping(bytes32 => mapping(uint256 => bool)) claimedRewards;
   }
+
+  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationPool")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 private constant XAllocationPoolStorageLocation =
+    0xba46220259871765522240056f76631a28aa19c5092d6dd51d6b858b4ebcb300;
+
+  function _getXAllocationPoolStorage() private pure returns (XAllocationPoolStorage storage $) {
+    assembly {
+      $.slot := XAllocationPoolStorageLocation
+    }
+  }
+
+  /// @custom:oz-upgrades-unsafe-allow constructor
+  constructor() {
+    _disableInitializers();
+  }
+
+  function initialize(
+    address _admin,
+    address upgrader,
+    address b3trAddress
+  ) public initializer {
+    __AccessControl_init();
+    __ReentrancyGuard_init();
+    __UUPSUpgradeable_init();
+
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    $.b3tr = IB3TR(b3trAddress);
+
+    _grantRole(DEFAULT_ADMIN_ROLE, _admin);
+    _grantRole(UPGRADER_ROLE, upgrader);
+  }
+
+  function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
   // ---------- Setters ---------- //
 
   function setXAllocationVotingAddress(address xAllocationVoting_) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    _xAllocationVoting = IXAllocationVotingGovernor(xAllocationVoting_);
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    $._xAllocationVoting = IXAllocationVotingGovernor(xAllocationVoting_);
   }
 
   function setEmissionsAddress(address emissions_) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    _emissions = IEmissions(emissions_);
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    $._emissions = IEmissions(emissions_);
   }
 
   function claim(uint256 roundId, bytes32 appId) public nonReentrant {
-    require(!claimedRewards[appId][roundId], "XAllocationPool: rewards already claimed for this app and round");
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+
+    require(!$.claimedRewards[appId][roundId], "XAllocationPool: rewards already claimed for this app and round");
     require(!xAllocationVoting().isActive(roundId), "XAllocationPool: round not ended yet");
 
     uint256 amountToClaim = claimableAmount(roundId, appId);
     require(amountToClaim > 0, "XAllocationPool: no rewards available for this app");
 
     // update the claimedRewards mapping
-    claimedRewards[appId][roundId] = true;
+    $.claimedRewards[appId][roundId] = true;
 
     address receiverAddress = xAllocationVoting().getAppReceiverAddress(appId);
 
     //check that contract has enough funds to pay the reward
-    require(b3tr.balanceOf(address(this)) >= amountToClaim, "Insufficient funds");
+    require($.b3tr.balanceOf(address(this)) >= amountToClaim, "Insufficient funds");
 
     // Transfer the rewards to the caller
-    require(b3tr.transfer(receiverAddress, amountToClaim), "Allocation transfer failed");
+    require($.b3tr.transfer(receiverAddress, amountToClaim), "Allocation transfer failed");
 
     // emit event
     emit AllocationRewardsClaimed(appId, roundId, amountToClaim, receiverAddress, msg.sender);
@@ -96,7 +137,8 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
    * @param appId The ID of the app for which to calculate the amount available for allocation.
    */
   function claimableAmount(uint256 roundId, bytes32 appId) public view returns (uint256) {
-    if (claimedRewards[appId][roundId] || xAllocationVoting().isActive(roundId)) {
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    if ($.claimedRewards[appId][roundId] || xAllocationVoting().isActive(roundId)) {
       return 0;
     }
 
@@ -204,7 +246,8 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
   }
 
   function claimed(uint256 roundId, bytes32 appId) public view returns (bool) {
-    return claimedRewards[appId][roundId];
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    return $.claimedRewards[appId][roundId];
   }
 
   /**
@@ -219,13 +262,25 @@ contract XAllocationPool is IXAllocationPool, AccessControl, ReentrancyGuard {
    * @dev Returns the XAllocationVotingGovernor contract.
    */
   function xAllocationVoting() public view returns (IXAllocationVotingGovernor) {
-    return _xAllocationVoting;
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    return $._xAllocationVoting;
   }
 
   /**
    * @dev Returns the emissions contract.
    */
   function emissions() public view returns (IEmissions) {
-    return _emissions;
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    return $._emissions;
+  }
+
+  function b3tr() public view returns (IB3TR) {
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    return $.b3tr;
+  }
+
+  function claimedRewards(bytes32 appId, uint256 roundId) public view returns (bool) {
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    return $.claimedRewards[appId][roundId];
   }
 }

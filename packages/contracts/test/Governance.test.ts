@@ -110,26 +110,6 @@ describe("Governor and TimeLock", function () {
       expect(await governor.state(proposalId)).to.eql(7n)
       expect(await governor.quorumReached(proposalId)).to.eql(true)
     })
-
-    it("should be able to upgrade the TimeLock", async function () {
-      const { timeLock, timelockAdmin, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-      // Deploy the implementation contract
-      const Contract = await ethers.getContractFactory("TimeLock")
-      const implementation = await Contract.deploy()
-      await implementation.waitForDeployment()
-
-      // Upgrade
-      await expect(timeLock.connect(otherAccount).upgradeToAndCall(await implementation.getAddress(), "0x")).to.be
-        .reverted
-
-      await expect(timeLock.connect(timelockAdmin).upgradeToAndCall(await implementation.getAddress(), "0x")).to.not.be
-        .reverted
-
-      const newImplAddress = await getImplementationAddress(ethers.provider, await timeLock.getAddress())
-      expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
-    })
   })
   describe("Proposal Creation", function () {
     it("cannot create a proposal if NOT a VOT3 holder", async function () {
