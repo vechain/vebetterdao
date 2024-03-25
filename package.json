@@ -14,7 +14,7 @@
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "contracts:compile": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run compile --filter=contracts",
-    "contracts:deploy": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run deploy ---filter=contracts",
+    "contracts:deploy": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run deploy --filter=contracts",
     "contracts:deploy:solo-staging": "dotenv -v NEXT_PUBLIC_APP_ENV=solo-staging -- turbo run deploy --filter=contracts",
     "contracts:deploy:testnet": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- turbo run deploy:testnet --filter=contracts",
     "contracts:start-round:testnet": "dotenv -e .env.example -v NEXT_PUBLIC_APP_ENV=testnet -- turbo run start-round:testnet --filter=contracts",

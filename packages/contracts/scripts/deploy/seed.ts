@@ -1,5 +1,5 @@
 import { ethers } from "hardhat"
-import { B3TR, Emissions, VOT3, XAllocationVoting, XApps } from "../../typechain-types"
+import { B3TR, Emissions, Treasury, VOT3, XAllocationVoting, XApps } from "../../typechain-types"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { BytesLike } from "ethers"
 import { waitForRoundToEnd } from "../../test/helpers"
@@ -10,7 +10,7 @@ type App = {
 }
 
 export const seedLocalEnvironment = async (
-  b3tr: B3TR,
+  treasury: Treasury,
   vot3: VOT3,
   xAllocationVoting: XAllocationVoting,
   emissions: Emissions,
@@ -45,9 +45,8 @@ export const seedLocalEnvironment = async (
   //Airdrop B3TR from Treasury to the first 5 accounts
   console.log("Airdropping B3TR from Treasury...")
   const accountsToSeed = accounts.slice(0, 5)
-  const treasury = accounts[2]
   for (const account of accountsToSeed) {
-    const tx = await b3tr.connect(treasury).transfer(account.address, ethers.parseEther("500"))
+    const tx = await treasury.connect(admin).transferB3TR(account.address, ethers.parseEther("500"))
     await tx.wait()
   }
 
