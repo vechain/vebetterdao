@@ -82,3 +82,50 @@ export const getEvents = async ({
     .order(order)
     .apply(offset, limit)
 }
+
+/**
+ *  call getEvents iteratively to get all the events
+ * @param param0
+ * @returns
+ */
+export const getAllEvents = async ({
+  thor,
+  order = "asc",
+  from = 0,
+  filterCriteria,
+}: Omit<GetEventsProps, "offset" | "limit">) => {
+  const events = await getEvents({
+    thor,
+    filterCriteria,
+    from,
+    limit: 256,
+    order,
+    offset: 0,
+  })
+  if (events.length < 256) {
+    return events
+  }
+  const allEvents = [...events]
+  let offset = 256
+  let newEvents = await getEvents({
+    thor,
+    filterCriteria,
+    from,
+    limit: 256,
+    order,
+    offset,
+  })
+  while (newEvents.length >= offset) {
+    allEvents.push(...newEvents)
+    offset += 256
+    newEvents = await getEvents({
+      thor,
+      filterCriteria,
+      from,
+      limit: 256,
+      order,
+      offset,
+    })
+  }
+  return allEvents
+}
