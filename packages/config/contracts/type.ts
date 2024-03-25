@@ -24,7 +24,7 @@ export type ContractsConfig = {
   CONTRACTS_ADMIN_ADDRESS: string
 
   VOTE_2_EARN_POOL_ADDRESS: string
-  TREASURY_POOL_ADDRESS: string
+  TREASURY_POOL_ADDRESS?: string
 
   INITIAL_X_ALLOCATION: bigint
 

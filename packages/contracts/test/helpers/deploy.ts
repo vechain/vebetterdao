@@ -11,6 +11,7 @@ import {
   XAllocationVoting,
   XAllocationPool,
   VoterRewards,
+  Treasury,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy } from "../../scripts/helpers"
@@ -26,6 +27,7 @@ interface DeployInstance {
   xAllocationPool: XAllocationPool
   emissions: Emissions
   voterRewards: VoterRewards
+  treasury: Treasury
   owner: HardhatEthersSigner
   otherAccount: HardhatEthersSigner
   minterAccount: HardhatEthersSigner
@@ -88,6 +90,15 @@ export const getOrDeployContractInstances = async ({
   await timeLock.connect(timelockAdmin).grantRole(EXECUTOR_ROLE, await governor.getAddress())
   await timeLock.connect(timelockAdmin).grantRole(CANCELLER_ROLE, await governor.getAddress())
 
+  // Deploy Treasury
+  const treasury = (await deployProxy("Treasury", [
+    await b3tr.getAddress(),
+    await vot3.getAddress(),
+    owner.address,
+    owner.address,
+    owner.address,
+  ])) as Treasury
+
   // Deploy NFTBadge
   const b3trBadge = (await deployProxy("B3TRBadge", [
     NFT_BADGE_NAME,
@@ -99,7 +110,7 @@ export const getOrDeployContractInstances = async ({
     config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
     config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
     await b3tr.getAddress(),
-    config.TREASURY_POOL_ADDRESS,
+    await treasury.getAddress(),
   ])) as B3TRBadge
 
   // Deploy XAllocationPool
@@ -111,7 +122,6 @@ export const getOrDeployContractInstances = async ({
 
   const X_ALLOCATIONS_ADDRESS = await xAllocationPool.getAddress()
   const VOTE_2_EARN_ADDRESS = otherAccounts[1].address
-  const TREASURY_ADDRESS = otherAccounts[2].address
 
   const emissions = (await deployProxy("Emissions", [
     {
@@ -119,7 +129,7 @@ export const getOrDeployContractInstances = async ({
       admin: owner.address,
       upgrader: owner.address,
       b3trAddress: await b3tr.getAddress(),
-      destinations: [X_ALLOCATIONS_ADDRESS, VOTE_2_EARN_ADDRESS, TREASURY_ADDRESS],
+      destinations: [X_ALLOCATIONS_ADDRESS, VOTE_2_EARN_ADDRESS, await treasury.getAddress()],
       initialXAppAllocation: config.INITIAL_X_ALLOCATION,
       cycleDuration: config.EMISSIONS_CYCLE_DURATION,
       decaySettings: [
@@ -204,6 +214,7 @@ export const getOrDeployContractInstances = async ({
     minterAccount,
     timelockAdmin,
     otherAccounts,
+    treasury,
   }
   return cachedDeployInstance
 }
