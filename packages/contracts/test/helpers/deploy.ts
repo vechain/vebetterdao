@@ -120,6 +120,7 @@ export const getOrDeployContractInstances = async ({
     await b3tr.getAddress(),
     config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
     config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
+    await treasury.getAddress(),
   ])) as XAllocationPool
 
   const X_ALLOCATIONS_ADDRESS = await xAllocationPool.getAddress()
