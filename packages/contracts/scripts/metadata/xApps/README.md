@@ -37,15 +37,15 @@ Metadata for xApps is a json file with the following structure:
 }
 ```
 
-The `metadata` folder contains a `xApps` folder with inside: a `src` folder and an `output` folder.
-To generate metadata for an xApp it's necessary to provide a template file in the `src` folder for that specific xApp, which will contain the name, description, social urls, app urls, etc.
-The `generate.ts` script will then read the template file and search for the logo and banner in the `src/media` folder. It will upload the media files to IPFS and then generate a new json metadata file in the `output` folder. The name of the file will be the hash of the name of the xApp, since it's the unique identifier saved on-chain.
+The `metadata/xApps` folder contains: a `src` folder and an `output` folder.
+Each xApp should have a template file in the `src` folder containing the name, description, social urls, app urls, etc.
+The `generate.ts` script will read the template file and search for the logo and banner in the `src/media` folder. It will upload the media files to IPFS and then generate a new json metadata file in the `output` folder. The name of the file will be the hash of the name of the xApp, since it's the unique identifier saved on-chain.
 
-The `upload.ts` script will upload the whole output folder with metadata of each x-app to IPFS and print the CID of the folder on the console.
+The `upload.ts` script will iterate through all files in the ouptut folder and upload each file to ipfs. Each CID will be printed on the console.
 
-The CID will need to be set as the baseURI in the contract.
+The CID will need to be set as the metadataURI of the app.
 
-The contract will return the baseURI/appId to the frontend, which will then use it to fetch the metadata from IPFS and display the xApp information.
+The contract will return the baseURI/metadataURI to the frontend, which will then use it to fetch the metadata from IPFS and display the xApp information.
 
 ## Important notes
 
