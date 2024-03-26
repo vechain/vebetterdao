@@ -176,8 +176,12 @@ contract XAllocationVoting is
     return $.appSharesCap;
   }
 
-  function addApp(address appAddress, string memory appName) public override onlyRole(DEFAULT_ADMIN_ROLE) {
-    super.addApp(appAddress, appName);
+ function addApp(
+    address appAddress,
+    string memory appName,
+    string memory metadataURI
+  ) public override onlyRole(DEFAULT_ADMIN_ROLE) {
+    super.addApp(appAddress, appName, metadataURI);
   }
 
   function setAdminRole(address _newAdmin) public onlyRole(DEFAULT_ADMIN_ROLE) {

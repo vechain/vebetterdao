@@ -26,7 +26,6 @@ export function createSoloStagingConfig() {
 
     CONTRACTS_ADMIN_ADDRESS: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa", //1st account from mnemonic of solo network
     VOTE_2_EARN_POOL_ADDRESS: "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68", //2nd account from mnemonic of solo network
-    TREASURY_POOL_ADDRESS: "0x1a4026EB21F50DcEbDe94AbF619c54ACf94043B7", // Treasury SC address
 
     INITIAL_X_ALLOCATION: BigInt("66666666666666666666666"), // 1M/15 rounded down -> 1/15th of the total supply for pilot show
 
@@ -70,6 +69,6 @@ export function createSoloStagingConfig() {
       25000000000000000000000000n,
     ],
 
-    XAPP_BASE_URI: "ipfs://bafybeigsqjh4m3fmy7f7ahpt7uxzfsmcoctjrbxt6kxnejhtnmcn55t2c4/",
+    XAPP_BASE_URI: "ipfs://",
   })
 }

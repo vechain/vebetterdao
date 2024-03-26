@@ -9,12 +9,14 @@ import { XAllocationVoting__factory as XAllocationVoting } from "@repo/contracts
  * @property id  the xApp id
  * @property receiverAddress  the xApp address
  * @property name  the xApp name
+ * @property metadataURI  the xApp metadata URI
  * @property createdAt block when xApp was addded
  */
 export type XApp = {
   id: string
   receiverAddress: string
   name: string
+  metadataURI: string
   createdAt: number
 }
 
@@ -34,6 +36,7 @@ export const getXApps = async (thor: Connex.Thor): Promise<XApp[]> => {
     id: app[0],
     receiverAddress: app[1],
     name: app[2],
+    metadataURI: app[3],
     createdAt: app[4],
   }))
 }

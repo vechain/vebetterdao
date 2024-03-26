@@ -538,6 +538,7 @@ async function deployTreasury(
   adminAddress: string,
   proxyAdminAddress: string,
 ) {
+  console.log(`Deploying Treasury contract`)
 
   const contract = (await deployProxy("Treasury", [
     b3trAddress,
