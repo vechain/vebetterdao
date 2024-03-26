@@ -25,6 +25,34 @@ contract XAllocationVoting is
   bytes32 public constant ROUND_STARTER_ROLE = keccak256("ROUND_STARTER_ROLE");
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
+  /**
+   * @notice Data for initializing the contract
+   * @param vot3Token The address of the Vot3 token used for voting
+   * @param quorumPercentage quorum as a percentage of the total supply at the block a proposal’s voting power is retrieved
+   * @param initialVotingPeriod How long does a proposal remain open to votes
+   * @param b3trGovernor The address of the B3trGovernor contract
+   * @param voterRewards The address of the VoterRewards contract
+   * @param emissions The address of the Emissions contract
+   * @param admins The addresses of the admins
+   * @param upgrader The address of the upgrader
+   * @param xAppsBaseURI The base URI for the xApps
+   * @param baseAllocationPercentage The base allocation percentage
+   * @param appSharesCap The app shares cap
+   */
+  struct InitializationData {
+    IVotes vot3Token;
+    uint256 quorumPercentage;
+    uint32 initialVotingPeriod;
+    address b3trGovernor;
+    address voterRewards;
+    address emissions;
+    address[] admins;
+    address upgrader;
+    string xAppsBaseURI;
+    uint256 baseAllocationPercentage;
+    uint256 appSharesCap;
+  }
+
   /// @custom:storage-location erc7201:b3tr.storage.XAllocationVoting
   struct XAllocationVotingStorage {
     uint256 baseAllocationPercentage;
@@ -49,45 +77,26 @@ contract XAllocationVoting is
   }
 
   /**
-   * @notice initialize XAllocationVotingGovernor contract
-   * @param _vot3Token The address of the Vot3 token used for voting
-   * @param _quorumPercentage quorum as a percentage of the total supply at the block a proposal’s voting power is retrieved
-   * @param _initialVotingPeriod How long does a round remain open to votese
-   * @param b3trGovernor_ The address of the B3trGovernor DAO
-   * @param _voterRewards The address of the VoterRewards contract
-   * @param _emissions The address of the emissions contract
-   * @param _admins The addresses of the admins (DAO + another address) that can update the XAllocationPool address, only DAO will remain in the final version
-   * @param _xAppsBaseURI The base URI for the xApps
+   * @notice Initialize the contract
+   * @param data The initialization data
    */
-  function initialize(
-    IVotes _vot3Token,
-    uint256 _quorumPercentage,
-    uint32 _initialVotingPeriod,
-    address b3trGovernor_,
-    address _voterRewards,
-    address _emissions,
-    address[] memory _admins,
-    address upgrader,
-    string memory _xAppsBaseURI,
-    uint256 baseAllocationPercentage_,
-    uint256 appSharesCap_
-  ) public initializer {
-    __XAllocationVotingGovernor_init("XAllocationVoting", b3trGovernor_);
-    __GovernorSettings_init(_initialVotingPeriod, _emissions);
-    __GovernorXAllocationVotesCounting_init(_voterRewards);
-    __GovernorVotes_init(_vot3Token);
-    __GovernorVotesQuorumFraction_init(_quorumPercentage);
-    __XApps_init(_xAppsBaseURI);
+  function initialize(InitializationData memory data) public initializer {
+    __XAllocationVotingGovernor_init("XAllocationVoting", data.b3trGovernor);
+    __GovernorSettings_init(data.initialVotingPeriod, data.emissions);
+    __GovernorXAllocationVotesCounting_init(data.voterRewards);
+    __GovernorVotes_init(data.vot3Token);
+    __GovernorVotesQuorumFraction_init(data.quorumPercentage);
+    __XApps_init(data.xAppsBaseURI);
     __AccessControl_init();
     __UUPSUpgradeable_init();
 
-    for (uint256 i = 0; i < _admins.length; i++) {
-      _grantRole(DEFAULT_ADMIN_ROLE, _admins[i]);
+    for (uint256 i = 0; i < data.admins.length; i++) {
+      _grantRole(DEFAULT_ADMIN_ROLE, data.admins[i]);
     }
 
-    setBaseAllocationPercentage(baseAllocationPercentage_);
-    setAppSharesCap(appSharesCap_);
-    _grantRole(UPGRADER_ROLE, upgrader);
+    setBaseAllocationPercentage(data.baseAllocationPercentage);
+    setAppSharesCap(data.appSharesCap);
+    _grantRole(UPGRADER_ROLE, data.upgrader);
   }
 
   function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
@@ -167,7 +176,7 @@ contract XAllocationVoting is
   }
 
   function baseAllocationPercentage() public view returns (uint256) {
-     XAllocationVotingStorage storage $ = _getXAllocationVotingStorage();
+    XAllocationVotingStorage storage $ = _getXAllocationVotingStorage();
     return $.baseAllocationPercentage;
   }
 
@@ -176,7 +185,7 @@ contract XAllocationVoting is
     return $.appSharesCap;
   }
 
- function addApp(
+  function addApp(
     address appAddress,
     string memory appName,
     string memory metadataURI
