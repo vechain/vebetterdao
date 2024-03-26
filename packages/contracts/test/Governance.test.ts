@@ -873,4 +873,160 @@ describe("Governor and TimeLock", function () {
       await catchRevert(governor.execute([b3trAddress], [0], [encodedFunctionCall], descriptionHash))
     })
   })
+
+  describe("Proposal Cancellation", function () {
+    it("cannot cancel a proposal if not in pending state", async function () {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.B3TR_GOVERNOR_VOTING_PERIOD = 3
+      const {
+        governor,
+        b3tr,
+        B3trContract,
+        otherAccount: proposer,
+      } = await getOrDeployContractInstances({ forceDeploy: false, config })
+
+      // create a new proposal
+      const tx = await createProposal(
+        governor,
+        b3tr,
+        B3trContract,
+        proposer,
+        description + ` ${this.test?.title}`,
+        functionToCall,
+        [],
+      ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
+      proposalId = await getProposalIdFromTx(tx, governor)
+
+      // wait
+      await waitForProposalToBeActive(proposalId, governor)
+
+      const proposalState = await governor.state(proposalId)
+      expect(proposalState.toString()).to.eql("1") // active
+
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+      // try to cancel
+      await catchRevert(
+        governor.cancel(
+          [await b3tr.getAddress()],
+          [0],
+          [encodedFunctionCall],
+          ethers.keccak256(ethers.toUtf8Bytes(`${description} ${this.test?.title}`)),
+        ),
+      )
+    })
+    it("cannot cancel a proposal if not admin or proposer", async function () {
+      const {
+        governor,
+        b3tr,
+        B3trContract,
+        otherAccount: proposer,
+        otherAccounts,
+      } = await getOrDeployContractInstances({ forceDeploy: false })
+
+      // create a new proposal
+      const tx = await createProposal(
+        governor,
+        b3tr,
+        B3trContract,
+        proposer,
+        description + ` ${this.test?.title}`,
+        functionToCall,
+        [],
+      ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
+      proposalId = await getProposalIdFromTx(tx, governor)
+
+      const proposalState = await governor.state(proposalId)
+      expect(proposalState.toString()).to.eql("0") // pending
+
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+      // try to cancel
+      await catchRevert(
+        governor
+          .connect(otherAccounts[3])
+          .cancel(
+            [await b3tr.getAddress()],
+            [0],
+            [encodedFunctionCall],
+            ethers.keccak256(ethers.toUtf8Bytes(`${description} ${this.test?.title}`)),
+          ),
+      )
+    })
+    it("can cancel a proposal if admin", async function () {
+      const {
+        governor,
+        b3tr,
+        B3trContract,
+        owner,
+        otherAccount: proposer,
+      } = await getOrDeployContractInstances({ forceDeploy: false })
+
+      const tx = await createProposal(
+        governor,
+        b3tr,
+        B3trContract,
+        proposer,
+        description + ` ${this.test?.title}`,
+        functionToCall,
+        [],
+      )
+
+      proposalId = await getProposalIdFromTx(tx, governor)
+
+      const proposalState1 = await governor.state(proposalId)
+      expect(proposalState1.toString()).to.eql("0") // pending
+
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
+
+      // try to cancel
+      await governor
+        .connect(owner)
+        .cancel(
+          [await b3tr.getAddress()],
+          [0],
+          [encodedFunctionCall],
+          ethers.keccak256(ethers.toUtf8Bytes(`${description} ${this.test?.title}`)),
+        )
+      const proposalState2 = await governor.state(proposalId)
+      expect(proposalState2.toString()).to.eql("2") // cancelled
+    })
+    it("can cancel a proposal if proposer", async function () {
+      const {
+        governor,
+        b3tr,
+        B3trContract,
+        otherAccount: proposer,
+      } = await getOrDeployContractInstances({ forceDeploy: false })
+
+      const tx = await createProposal(
+        governor,
+        b3tr,
+        B3trContract,
+        proposer,
+        description + ` ${this.test?.title}`,
+        functionToCall,
+        [],
+      )
+
+      proposalId = await getProposalIdFromTx(tx, governor)
+
+      const proposalState1 = await governor.state(proposalId)
+      expect(proposalState1.toString()).to.eql("0") // pending
+
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+      // try to cancel
+      await governor
+        .connect(proposer)
+        .cancel(
+          [await b3tr.getAddress()],
+          [0],
+          [encodedFunctionCall],
+          ethers.keccak256(ethers.toUtf8Bytes(`${description} ${this.test?.title}`)),
+        )
+      const proposalState2 = await governor.state(proposalId)
+      expect(proposalState2.toString()).to.eql("2") // cancelled
+    })
+  })
 })
