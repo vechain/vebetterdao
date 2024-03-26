@@ -51,6 +51,7 @@ export async function deployAll(config: ContractsConfig) {
     config.B3TR_GOVERNOR_VOTING_PERIOD,
     config.B3TR_GOVERNOR_VOTING_DELAY,
     config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD,
+    TEMP_ADMIN,
   )
 
   // Deploy XAllocationPool
@@ -218,7 +219,11 @@ export async function deployAll(config: ContractsConfig) {
     await transferAdminRole(voterRewards, admin, config.CONTRACTS_ADMIN_ADDRESS)
     await transferAdminRole(xAllocationPool, admin, config.CONTRACTS_ADMIN_ADDRESS)
     await transferAdminRole(xAllocationVoting, admin, config.CONTRACTS_ADMIN_ADDRESS)
+
+    await transferGovernanceRole(treasury, admin, admin.address, config.CONTRACTS_ADMIN_ADDRESS)
     await transferAdminRole(treasury, admin, config.CONTRACTS_ADMIN_ADDRESS)
+
+    await transferAdminRole(governor, admin, config.CONTRACTS_ADMIN_ADDRESS)
 
     console.log("Roles updated successfully!")
   }
@@ -252,7 +257,16 @@ export async function deployAll(config: ContractsConfig) {
 }
 
 const transferAdminRole = async (
-  contract: B3TR | VOT3 | B3TRBadge | Emissions | VoterRewards | XAllocationPool | XAllocationVoting | Treasury,
+  contract:
+    | B3TR
+    | VOT3
+    | B3TRBadge
+    | Emissions
+    | VoterRewards
+    | XAllocationPool
+    | XAllocationVoting
+    | Treasury
+    | B3TRGovernor,
   oldAdmin: HardhatEthersSigner,
   newAdminAddress: string,
 ) => {
@@ -307,6 +321,43 @@ const transferMinterRole = async (
   }
 }
 
+// Transfer governance role to treasury contract admin for intial phases of project
+const transferGovernanceRole = async (
+  contract: Treasury,
+  admin: HardhatEthersSigner,
+  oldAddress: string,
+  newAddress?: string,
+) => {
+  const governanceRole = await contract.GOVERNANCE_ROLE()
+
+  // If newMinterAddress is provided, set a new minter before revoking the old one
+  // otherwise just revoke the old one
+  if (newAddress) {
+    await contract
+      .connect(admin)
+      .grantRole(governanceRole, newAddress)
+      .then(async tx => await tx.wait())
+    await contract
+      .connect(admin)
+      .revokeRole(governanceRole, oldAddress)
+      .then(async tx => await tx.wait())
+
+    const newGovernanceSet = await contract.hasRole(governanceRole, newAddress)
+    const oldGovernanceRemoved = !(await contract.hasRole(governanceRole, oldAddress))
+    if (!newGovernanceSet || !oldGovernanceRemoved)
+      throw new Error("Minter role not set correctly on " + (await contract.getAddress()))
+  } else {
+    await contract
+      .connect(admin)
+      .revokeRole(governanceRole, oldAddress)
+      .then(async tx => await tx.wait())
+
+    const oldGovernanceRemoved = !(await contract.hasRole(governanceRole, oldAddress))
+    if (!oldGovernanceRemoved)
+      throw new Error("Governance role not removed correctly on " + (await contract.getAddress()))
+  }
+}
+
 async function deployB3trToken(admin: string, cap: number): Promise<B3TR> {
   console.log(`Deploying B3tr contract`)
   const B3trContract = await ethers.getContractFactory("B3TR") // Use the global variable
@@ -349,6 +400,7 @@ async function deployGovernor(
   votingPeriod: number,
   votingDelay: number,
   proposalThreshold: number,
+  admin: string,
 ): Promise<B3TRGovernor> {
   console.log(`Deploying Governor contract`)
 
@@ -359,6 +411,7 @@ async function deployGovernor(
     votingPeriod,
     votingDelay,
     proposalThreshold,
+    admin,
   ])) as B3TRGovernor
 
   console.log(`Governor contract deployed at address ${await contract.getAddress()}`)
@@ -510,7 +563,6 @@ async function deployTreasury(
   adminAddress: string,
   proxyAdminAddress: string,
 ) {
-
   const contract = (await deployProxy("Treasury", [
     b3trAddress,
     vot3Address,

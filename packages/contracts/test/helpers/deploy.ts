@@ -80,6 +80,7 @@ export const getOrDeployContractInstances = async ({
     config.B3TR_GOVERNOR_VOTING_PERIOD, // voting period
     config.B3TR_GOVERNOR_VOTING_DELAY, // voting delay
     config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD, // voting threshold
+    owner.address,
   ])) as B3TRGovernor
 
   // Set up roles
