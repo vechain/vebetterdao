@@ -9,3 +9,15 @@ output "thor-solo-cluster" {
 output "thor-solo-domain" {
   value = module.thor-solo_domain.route53_name
 }
+
+output "ecr_name" {
+  value = module.ecr.registry_id
+}
+
+output "insights_domain" {
+  value = module.insights_app.domain_alias
+}
+
+output "inspector_domain" {
+  value = module.inspector.domain_alias
+}
