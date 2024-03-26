@@ -51,13 +51,7 @@ export async function deployAll(config: ContractsConfig) {
   )
 
   // Deploy XAllocationPool
-  const xAllocationPool = await deployXAllocationPool(
-    await b3tr.getAddress(),
-    TEMP_ADMIN,
-    TEMP_ADMIN,
-    config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
-    config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
-  )
+  const xAllocationPool = await deployXAllocationPool(await b3tr.getAddress(), TEMP_ADMIN, TEMP_ADMIN)
 
   const treasury = await deployTreasury(
     await b3tr.getAddress(),
@@ -119,6 +113,8 @@ export async function deployAll(config: ContractsConfig) {
     config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE,
     config.EMISSIONS_CYCLE_DURATION - 1,
     config.XAPP_BASE_URI,
+    config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
+    config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
   )
 
   console.log("Contracts deployed")
@@ -447,20 +443,12 @@ async function deployNFTBadge(
   return contract
 }
 
-async function deployXAllocationPool(
-  b3trAddress: string,
-  adminAddress: string,
-  upgraderAddress: string,
-  baseAllocationPercentage: number = 20,
-  appSharesCap: number = 15,
-) {
+async function deployXAllocationPool(b3trAddress: string, adminAddress: string, upgraderAddress: string) {
   console.log(`Deploying XAllocationPool contract`)
   const contract = (await deployProxy("XAllocationPool", [
     adminAddress,
     upgraderAddress,
     b3trAddress,
-    baseAllocationPercentage,
-    appSharesCap,
   ])) as XAllocationPool
 
   console.log(`XAllocationPool contract deployed at address ${await contract.getAddress()}`)
@@ -478,19 +466,25 @@ async function deployXAllocationVoting(
   quorumPercentage: number = 50,
   xAllocationVotingPeriod: number = 10,
   baseURI: string = "ipfs://",
+  baseAllocationPercentage: number = 20,
+  appSharesCap: number = 15,
 ) {
   console.log(`Deploying XAllocationVoting contract`)
 
   const contract = (await deployProxy("XAllocationVoting", [
-    vot3Address,
-    quorumPercentage,
-    xAllocationVotingPeriod,
-    timeLockAddress,
-    voterRewardsAddress,
-    emissionsAddress,
-    [timeLockAddress, adminAddress],
-    upgraderAddress,
-    baseURI,
+    {
+      vot3Token: vot3Address,
+      quorumPercentage,
+      initialVotingPeriod: xAllocationVotingPeriod,
+      b3trGovernor: timeLockAddress,
+      voterRewards: voterRewardsAddress,
+      emissions: emissionsAddress,
+      admins: [timeLockAddress, adminAddress],
+      upgrader: upgraderAddress,
+      xAppsBaseURI: baseURI,
+      baseAllocationPercentage,
+      appSharesCap,
+    },
   ])) as XAllocationVoting
 
   console.log(`XAllocationVoting contract deployed at address ${await contract.getAddress()}`)
