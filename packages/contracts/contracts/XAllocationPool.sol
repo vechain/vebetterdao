@@ -7,6 +7,7 @@ import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.s
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
+import { ITreasury } from "./interfaces/ITreasury.sol";
 import { IEmissions } from "./interfaces/IEmissions.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { IB3TR } from "./interfaces/IB3TR.sol";
@@ -28,8 +29,8 @@ contract XAllocationPool is
     IXAllocationVotingGovernor _xAllocationVoting;
     IEmissions _emissions;
     IB3TR b3tr;
+    ITreasury treasury;
     mapping(bytes32 => mapping(uint256 => bool)) claimedRewards;
-    address treasury;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationPool")) - 1)) & ~bytes32(uint256(0xff))
@@ -59,7 +60,7 @@ contract XAllocationPool is
 
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     $.b3tr = IB3TR(b3trAddress);
-    $.treasury = treasury;
+    $.treasury = ITreasury(treasury);
 
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     _grantRole(UPGRADER_ROLE, upgrader);
@@ -77,6 +78,11 @@ contract XAllocationPool is
   function setEmissionsAddress(address emissions_) public onlyRole(DEFAULT_ADMIN_ROLE) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     $._emissions = IEmissions(emissions_);
+  }
+
+  function setTreasury(address treasury_) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    $.treasury = ITreasury(treasury_);
   }
 
   function claim(uint256 roundId, bytes32 appId) public nonReentrant {
@@ -101,7 +107,7 @@ contract XAllocationPool is
 
     // Transfer the unallocated rewards to the treasury
     if (unallocatedAmount > 0) {
-      require($.b3tr.transfer($.treasury, unallocatedAmount), "Transfer of unallocated rewards to treasury failed");
+      require($.b3tr.transfer(address($.treasury), unallocatedAmount), "Transfer of unallocated rewards to treasury failed");
     }
 
     // emit event
