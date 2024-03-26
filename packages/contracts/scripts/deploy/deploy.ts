@@ -53,6 +53,14 @@ export async function deployAll(config: ContractsConfig) {
     config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD,
   )
 
+  const treasury = await deployTreasury(
+    await b3tr.getAddress(),
+    await vot3.getAddress(),
+    await timelock.getAddress(),
+    TEMP_ADMIN,
+    TEMP_ADMIN,
+  )
+
   // Deploy XAllocationPool
   const xAllocationPool = await deployXAllocationPool(
     await b3tr.getAddress(),
@@ -60,14 +68,7 @@ export async function deployAll(config: ContractsConfig) {
     TEMP_ADMIN,
     config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
     config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
-  )
-
-  const treasury = await deployTreasury(
-    await b3tr.getAddress(),
-    await vot3.getAddress(),
-    await timelock.getAddress(),
-    TEMP_ADMIN,
-    TEMP_ADMIN,
+    await treasury.getAddress(),
   )
 
   // Deploy the NFT Badge contract with Max Mintable Level 1
@@ -404,6 +405,7 @@ async function deployXAllocationPool(
   upgraderAddress: string,
   baseAllocationPercentage: number = 20,
   appSharesCap: number = 15,
+  treasuryAddress: string,
 ) {
   console.log(`Deploying XAllocationPool contract`)
   const contract = (await deployProxy("XAllocationPool", [
@@ -412,6 +414,7 @@ async function deployXAllocationPool(
     b3trAddress,
     baseAllocationPercentage,
     appSharesCap,
+    treasuryAddress,
   ])) as XAllocationPool
 
   console.log(`XAllocationPool contract deployed at address ${await contract.getAddress()}`)
