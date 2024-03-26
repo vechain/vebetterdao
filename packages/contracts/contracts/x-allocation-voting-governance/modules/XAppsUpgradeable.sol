@@ -18,6 +18,7 @@ abstract contract XAppsUpgradeable is Initializable, IXApps, XAllocationVotingGo
     string name;
     string metadataURI;
     uint48 createdAt; // block number when app was added
+    uint256 createdAtTimestamp;
   }
 
   /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.XApps
@@ -71,7 +72,7 @@ abstract contract XAppsUpgradeable is Initializable, IXApps, XAllocationVotingGo
     require($._apps[id].receiverAddress == address(0), "App with this ID already exists");
 
     // Store the new app
-    $._apps[id] = App(id, appReceiverAddress, appName, metadataURI, clock());
+    $._apps[id] = App(id, appReceiverAddress, appName, metadataURI, clock(), block.timestamp);
     $._appIds.push(id);
     _pushAppToEligbleApps(id);
 
