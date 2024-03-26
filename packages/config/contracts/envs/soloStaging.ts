@@ -69,6 +69,6 @@ export function createSoloStagingConfig() {
       25000000000000000000000000n,
     ],
 
-    XAPP_BASE_URI: "ipfs://bafybeigsqjh4m3fmy7f7ahpt7uxzfsmcoctjrbxt6kxnejhtnmcn55t2c4/",
+    XAPP_BASE_URI: "ipfs://",
   })
 }
