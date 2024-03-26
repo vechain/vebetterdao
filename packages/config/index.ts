@@ -16,6 +16,7 @@ export type AppConfig = {
   emissionsContractAddress: string
   voterRewardsContractAddress: string
   nftBadgeContractAddress: string
+  treasuryContractAddress: string
   nodeUrl: string
   network: Network
 }

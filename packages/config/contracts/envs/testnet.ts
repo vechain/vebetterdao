@@ -26,7 +26,6 @@ export function createTestnetConfig() {
 
     CONTRACTS_ADMIN_ADDRESS: "0xE3D511ce183D3C53813BEA223Fe1E51BB9fF14a4",
     VOTE_2_EARN_POOL_ADDRESS: "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68", //temporarily pointing to trasury, then updated in the deploy script to point to the voterReward contract
-    TREASURY_POOL_ADDRESS: "0xee9c67d01C630BF62b82F3Ae81fdC63F261B52A0",
 
     INITIAL_X_ALLOCATION: BigInt("66666666666666666666666"), // 1M/15 rounded down -> 1/15th of the total supply for pilot show
 
@@ -88,6 +87,6 @@ export function createTestnetConfig() {
     */
     VOTER_REWARDS_MULTIPLIER : [0, 10, 20, 50, 100, 150, 200, 400, 900, 2400],
 
-    XAPP_BASE_URI: "ipfs://bafybeigsqjh4m3fmy7f7ahpt7uxzfsmcoctjrbxt6kxnejhtnmcn55t2c4/",
+    XAPP_BASE_URI: "ipfs://",
   })
 }

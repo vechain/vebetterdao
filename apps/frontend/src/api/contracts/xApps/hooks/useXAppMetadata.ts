@@ -3,6 +3,7 @@ import { useConnex } from "@vechain/dapp-kit-react"
 import { convertUriToUrl } from "@/utils"
 import axios from "axios"
 import { useXAppsMetadataBaseUri } from "./useXAppsMetadataBaseUri"
+import { useXApp } from "./useXApp"
 
 /**
  * The metadata of an xApp from the xApps metadata base uri
@@ -54,10 +55,11 @@ export const getXAppMetadataQueryKey = (xAppId?: string) => ["xApps", xAppId, "m
 export const useXAppMetadata = (xAppId?: string) => {
   const { thor } = useConnex()
   const { data: baseUri } = useXAppsMetadataBaseUri()
+  const { data: xApp } = useXApp(xAppId ?? "")
 
   return useQuery({
     queryKey: getXAppMetadataQueryKey(xAppId),
-    queryFn: async () => (!(!baseUri && xAppId) ? await getXAppMetadata(`${baseUri}${xAppId}`) : null),
-    enabled: !!thor && !!baseUri && !!xAppId,
+    queryFn: async () => (!(!baseUri && xApp) ? await getXAppMetadata(`${baseUri}${xApp?.metadataURI}`) : null),
+    enabled: !!thor && !!baseUri && !!xApp,
   })
 }

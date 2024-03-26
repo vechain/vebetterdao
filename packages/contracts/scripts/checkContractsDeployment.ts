@@ -46,6 +46,7 @@ async function overrideLocalConfigWithNewContracts(contracts: Awaited<ReturnType
     emissionsContractAddress: await contracts.emissions.getAddress(),
     voterRewardsContractAddress: await contracts.voterRewards.getAddress(),
     nftBadgeContractAddress: await contracts.badge.getAddress(),
+    treasuryContractAddress: await contracts.treasury.getAddress(),
   }
 
   // eslint-disable-next-line

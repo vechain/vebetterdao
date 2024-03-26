@@ -2,11 +2,11 @@
 pragma solidity ^0.8.18;
 
 import "./x-allocation-voting-governance/XAllocationVotingGovernor.sol";
-import "./x-allocation-voting-governance/modules/GovernorXAllocationVotesCounting.sol";
-import "./x-allocation-voting-governance/modules/GovernorVotes.sol";
-import "./x-allocation-voting-governance/modules/GovernorVotesQuorumFraction.sol";
-import "./x-allocation-voting-governance/modules/GovernorSettings.sol";
-import "./x-allocation-voting-governance/modules/XApps.sol";
+import "./x-allocation-voting-governance/modules/GovernorXAllocationVotesCountingUpgradeable.sol";
+import "./x-allocation-voting-governance/modules/GovernorVotesUpgradeable.sol";
+import "./x-allocation-voting-governance/modules/GovernorVotesQuorumFractionUpgradeable.sol";
+import "./x-allocation-voting-governance/modules/GovernorSettingsUpgradeable.sol";
+import "./x-allocation-voting-governance/modules/XAppsUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -14,11 +14,11 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 contract XAllocationVoting is
   Initializable,
   XAllocationVotingGovernor,
-  GovernorSettings,
-  GovernorXAllocationVotesCounting,
-  GovernorVotes,
-  GovernorVotesQuorumFraction,
-  XApps,
+  GovernorSettingsUpgradeable,
+  GovernorXAllocationVotesCountingUpgradeable,
+  GovernorVotesUpgradeable,
+  GovernorVotesQuorumFractionUpgradeable,
+  XAppsUpgradeable,
   AccessControlUpgradeable,
   UUPSUpgradeable
 {
@@ -37,6 +37,7 @@ contract XAllocationVoting is
    * @param _initialVotingPeriod How long does a round remain open to votese
    * @param b3trGovernor_ The address of the B3trGovernor DAO
    * @param _voterRewards The address of the VoterRewards contract
+   * @param _emissions The address of the emissions contract
    * @param _admins The addresses of the admins (DAO + another address) that can update the XAllocationPool address, only DAO will remain in the final version
    * @param _xAppsBaseURI The base URI for the xApps
    */
@@ -46,12 +47,13 @@ contract XAllocationVoting is
     uint32 _initialVotingPeriod,
     address b3trGovernor_,
     address _voterRewards,
+    address _emissions,
     address[] memory _admins,
     address upgrader,
     string memory _xAppsBaseURI
   ) public initializer {
     __XAllocationVotingGovernor_init("XAllocationVoting", b3trGovernor_);
-    __GovernorSettings_init(_initialVotingPeriod);
+    __GovernorSettings_init(_initialVotingPeriod, _emissions);
     __GovernorXAllocationVotesCounting_init(_voterRewards);
     __GovernorVotes_init(_vot3Token);
     __GovernorVotesQuorumFraction_init(_quorumPercentage);
@@ -117,8 +119,12 @@ contract XAllocationVoting is
     super.setVotingElegibility(appId, isElegible);
   }
 
-  function addApp(address appAddress, string memory appName) public override onlyRole(DEFAULT_ADMIN_ROLE) {
-    super.addApp(appAddress, appName);
+  function addApp(
+    address appAddress,
+    string memory appName,
+    string memory metadataURI
+  ) public override onlyRole(DEFAULT_ADMIN_ROLE) {
+    super.addApp(appAddress, appName, metadataURI);
   }
 
   function setAdminRole(address _newAdmin) public onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -168,13 +174,18 @@ contract XAllocationVoting is
 
   // ---------- Required overrides ---------- //
 
-  function votingPeriod() public view override(XAllocationVotingGovernor, GovernorSettings) returns (uint256) {
+  function votingPeriod()
+    public
+    view
+    override(XAllocationVotingGovernor, GovernorSettingsUpgradeable)
+    returns (uint256)
+  {
     return super.votingPeriod();
   }
 
   function quorum(
     uint256 blockNumber
-  ) public view override(XAllocationVotingGovernor, GovernorVotesQuorumFraction) returns (uint256) {
+  ) public view override(XAllocationVotingGovernor, GovernorVotesQuorumFractionUpgradeable) returns (uint256) {
     return super.quorum(blockNumber);
   }
 
