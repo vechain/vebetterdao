@@ -546,6 +546,7 @@ describe("VoterRewards", () => {
         b3tr,
         minterAccount,
         governor,
+        treasury,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -560,7 +561,7 @@ describe("VoterRewards", () => {
         config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
         config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
         await b3tr.getAddress(),
-        config.TREASURY_POOL_ADDRESS,
+        await treasury.getAddress(),
       ])) as B3TRBadge
 
       await b3trBadge.waitForDeployment()
@@ -569,9 +570,9 @@ describe("VoterRewards", () => {
       await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
       await voterRewards.setB3TRBadge(await b3trBadge.getAddress())
 
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address)
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       const voter2 = otherAccounts[3]
       const voter3 = otherAccounts[4]
@@ -664,6 +665,7 @@ describe("VoterRewards", () => {
         b3tr,
         minterAccount,
         governor,
+        treasury,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -678,7 +680,7 @@ describe("VoterRewards", () => {
         config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
         config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
         await b3tr.getAddress(),
-        config.TREASURY_POOL_ADDRESS,
+        await treasury.getAddress(),
       ])) as B3TRBadge
 
       await b3trBadge.waitForDeployment()
@@ -687,9 +689,9 @@ describe("VoterRewards", () => {
       await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
       await voterRewards.setB3TRBadge(await b3trBadge.getAddress())
 
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address)
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       const voter2 = otherAccounts[3]
       const voter3 = otherAccounts[4]
@@ -780,6 +782,7 @@ describe("VoterRewards", () => {
         b3tr,
         minterAccount,
         governor,
+        treasury,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -795,7 +798,7 @@ describe("VoterRewards", () => {
         config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
         config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
         await b3tr.getAddress(),
-        config.TREASURY_POOL_ADDRESS,
+        await treasury.getAddress(),
       ])) as B3TRBadge
 
       await b3trBadge.waitForDeployment()
@@ -804,9 +807,9 @@ describe("VoterRewards", () => {
       await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
       await voterRewards.setB3TRBadge(await b3trBadge.getAddress())
 
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address)
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       const voter2 = otherAccounts[3]
       const voter3 = otherAccounts[4]
@@ -923,6 +926,7 @@ describe("VoterRewards", () => {
         b3tr,
         minterAccount,
         governor,
+        treasury,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -938,7 +942,7 @@ describe("VoterRewards", () => {
         config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
         config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
         await b3tr.getAddress(),
-        config.TREASURY_POOL_ADDRESS,
+        await treasury.getAddress(),
       ])) as B3TRBadge
 
       await b3trBadge.waitForDeployment()
@@ -947,9 +951,9 @@ describe("VoterRewards", () => {
       await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
       await voterRewards.setB3TRBadge(await b3trBadge.getAddress())
 
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address)
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       const voter2 = otherAccounts[3]
       const voter3 = otherAccounts[4]
@@ -1044,6 +1048,7 @@ describe("VoterRewards", () => {
         b3tr,
         minterAccount,
         governor,
+        treasury
       } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -1059,7 +1064,7 @@ describe("VoterRewards", () => {
         config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
         config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
         await b3tr.getAddress(),
-        config.TREASURY_POOL_ADDRESS,
+        await treasury.getAddress(),
       ])) as B3TRBadge
 
       await b3trBadge.waitForDeployment()
@@ -1068,9 +1073,9 @@ describe("VoterRewards", () => {
       await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
       await voterRewards.setB3TRBadge(await b3trBadge.getAddress())
 
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address)
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       const voter2 = otherAccounts[3]
       const voter3 = otherAccounts[4]
