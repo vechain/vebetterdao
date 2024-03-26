@@ -121,7 +121,7 @@ export const seedTestEnvironment = async (b3tr: B3TR, xAllocationVoting: XAlloca
   for (const app of APPS) {
     await xAllocationVoting
       .connect(admin)
-      .addApp(app.address, app.name, app.metadataURI)
+      .addApp(app.address, app.address, app.name, app.metadataURI)
       .then(async tx => await tx.wait())
   }
 
@@ -179,7 +179,7 @@ const addXDapps = async (xAllocationVoting: XAllocationVoting, accounts: Hardhat
   for (const app of apps) {
     await xAllocationVoting
       .connect(accounts[0])
-      .addApp(app.address, app.name, app.metadataURI)
+      .addApp(app.address, app.address, app.name, app.metadataURI)
       .then(async tx => await tx.wait())
   }
 }
