@@ -3,7 +3,7 @@ import { useConnex } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
 import { XAllocationVoting__factory } from "@repo/contracts"
 
-const XALLOCATIONPOOLCONTRACT = getConfig().xAllocationPoolContractAddress
+const XALLOCATIONVOTINGCONTRACT = getConfig().xAllocationVotingContractAddress
 
 /**
  * Get the max percentage of shares that an xDapp can have in a given round
@@ -13,7 +13,7 @@ const XALLOCATIONPOOLCONTRACT = getConfig().xAllocationPoolContractAddress
  */
 export const getAllocationSharesCap = async (thor: Connex.Thor): Promise<string> => {
   const functionFragment = XAllocationVoting__factory.createInterface().getFunction("appSharesCap").format("json")
-  const res = await thor.account(XALLOCATIONPOOLCONTRACT).method(JSON.parse(functionFragment)).call()
+  const res = await thor.account(XALLOCATIONVOTINGCONTRACT).method(JSON.parse(functionFragment)).call()
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
