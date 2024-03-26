@@ -284,6 +284,15 @@ contract B3TRBadge is
     return SafeCast.toUint32($._selectedLevelCheckpoints[account].length());
   }
 
+  /**
+   * @dev Get the `pos`-th checkpoint for `account`.
+   */
+  function _checkpoints(address account, uint32 pos) internal view virtual returns (Checkpoints.Checkpoint208 memory) {
+    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
+    
+    return $._selectedLevelCheckpoints[account].at(pos);
+  }
+
   // ---------- Setters ---------- //
 
   function setMaxLevel(uint256 level) public onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -347,6 +356,13 @@ contract B3TRBadge is
 
   function numCheckpoints(address account) public view returns (uint32) {
     return _numCheckpoints(account);
+  }
+
+  /**
+   * @dev Get the `pos`-th checkpoint for `account`.
+   */
+  function checkpoints(address account, uint32 pos) public view virtual returns (Checkpoints.Checkpoint208 memory) {
+    return _checkpoints(account, pos);
   }
 
   function participatedInGovernance(address user) public view returns (bool) {
