@@ -37,7 +37,7 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
   const { data: roundAmount, isLoading: roundAmountLoading, error: roundAmountError } = useAllocationAmount(roundId)
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
   const { data: baseAmount, isLoading: baseAmountLoading, error: baseAmountError } = useAllocationBaseAmount(roundId)
-  const { data: appSharesCap } = useAllocationSharesCap()
+  const { data: appSharesCap } = useAllocationSharesCap(roundId)
   const { data: xApps } = useRoundXApps(roundId)
 
   const isVotingConcluded = data?.voteEndTimestamp?.isBefore()

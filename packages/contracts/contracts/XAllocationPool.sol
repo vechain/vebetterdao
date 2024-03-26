@@ -28,9 +28,6 @@ contract XAllocationPool is
     IXAllocationVotingGovernor _xAllocationVoting;
     IEmissions _emissions;
     IB3TR b3tr;
-    uint256 baseAllocationPercentage;
-    uint256 variableAllocationPercentage;
-    uint256 appSharesCap;
     mapping(bytes32 => mapping(uint256 => bool)) claimedRewards;
   }
 
@@ -52,9 +49,7 @@ contract XAllocationPool is
   function initialize(
     address _admin,
     address upgrader,
-    address b3trAddress,
-    uint256 baseAllocationPercentage_,
-    uint256 appSharesCap_
+    address b3trAddress
   ) public initializer {
     __AccessControl_init();
     __ReentrancyGuard_init();
@@ -65,9 +60,6 @@ contract XAllocationPool is
 
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     _grantRole(UPGRADER_ROLE, upgrader);
-
-    setBaseAllocationPercentage(baseAllocationPercentage_);
-    setAppSharesCap(appSharesCap_);
   }
 
   function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
@@ -82,23 +74,6 @@ contract XAllocationPool is
   function setEmissionsAddress(address emissions_) public onlyRole(DEFAULT_ADMIN_ROLE) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     $._emissions = IEmissions(emissions_);
-  }
-
-  function setBaseAllocationPercentage(uint256 baseAllocationPercentage_) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(baseAllocationPercentage_ <= 100, "Base allocation percentage must be less than or equal to 100");
-
-    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
-
-    $.baseAllocationPercentage = baseAllocationPercentage_;
-    $.variableAllocationPercentage = 100 - $.baseAllocationPercentage;
-  }
-
-  function setAppSharesCap(uint256 appSharesCap_) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(appSharesCap_ <= 100, "App shares cap must be less than or equal to 100");
-
-    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
-
-    $.appSharesCap = appSharesCap_;
   }
 
   function claim(uint256 roundId, bytes32 appId) public nonReentrant {
@@ -144,11 +119,10 @@ contract XAllocationPool is
    * `variableAllocationPercentage`% of allocations will be distributed based on the % portion received from entire votes
    */
   function _appRewardAmount(uint256 roundId, uint256 appShare) internal view returns (uint256) {
-    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
-
     uint256 total = _emissionAmount(roundId);
 
-    uint256 available = (total * $.variableAllocationPercentage) / 100;
+    uint256 variableAllocationPercentage = 100 - xAllocationVoting().getRoundBaseAllocationPercentage(roundId);
+    uint256 available = (total * variableAllocationPercentage) / 100;
 
     uint256 rewardAmount = (available * appShare) / percentagePrecisionScalingFactor;
     return rewardAmount;
@@ -227,12 +201,11 @@ contract XAllocationPool is
       xAllocationVoting() != IXAllocationVotingGovernor(address(0)),
       "XAllocationVotingGovernor contract not set"
     );
-    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
 
     uint256 total = _emissionAmount(roundId);
     bytes32[] memory eligibleApps = xAllocationVoting().getRoundApps(roundId);
 
-    uint256 available = (total * $.baseAllocationPercentage) / 100;
+    uint256 available = (total * xAllocationVoting().getRoundBaseAllocationPercentage(roundId)) / 100;
 
     uint256 amountPerApp = available / eligibleApps.length;
     return amountPerApp;
@@ -263,7 +236,7 @@ contract XAllocationPool is
 
     // Cap the app share to the maximum variable allocation percentage so even if an app has 80 votes out of 100,
     // it will still get a max of `appSharesCap` percentage of the available funds
-    uint256 _allocationRewardMaxCap = scaledAppSharesCap();
+    uint256 _allocationRewardMaxCap = scaledAppSharesCap(roundId);
     if (appShare > _allocationRewardMaxCap) {
       appShare = _allocationRewardMaxCap;
     }
@@ -281,9 +254,8 @@ contract XAllocationPool is
    * @dev Returns the maximum app shares cap scaled by 1e2 for precision since our
    * shares calculation is scaled by 1e4.
    */
-  function scaledAppSharesCap() public view returns (uint256) {
-    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
-    return $.appSharesCap * 1e2;
+  function scaledAppSharesCap(uint256 roundId) public view returns (uint256) {
+    return xAllocationVoting().getRoundAppSharesCap(roundId) * 1e2;
   }
 
   /**
@@ -300,21 +272,6 @@ contract XAllocationPool is
   function emissions() public view returns (IEmissions) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     return $._emissions;
-  }
-
-  function baseAllocationPercentage() public view returns (uint256) {
-    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
-    return $.baseAllocationPercentage;
-  }
-
-  function variableAllocationPercentage() public view returns (uint256) {
-    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
-    return $.variableAllocationPercentage;
-  }
-
-  function appSharesCap() public view returns (uint256) {
-    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
-    return $.appSharesCap;
   }
 
   function b3tr() public view returns (IB3TR) {
