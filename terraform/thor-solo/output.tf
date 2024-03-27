@@ -14,8 +14,8 @@ output "ecr_name" {
   value = module.ecr.registry_id
 }
 
-output "insights_domain" {
-  value = module.insights_app.domain_alias
+output "insight_domain" {
+  value = module.insight.domain_alias
 }
 
 output "inspector_domain" {
