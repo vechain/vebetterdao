@@ -7,6 +7,7 @@ import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.s
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
+import { ITreasury } from "./interfaces/ITreasury.sol";
 import { IEmissions } from "./interfaces/IEmissions.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { IB3TR } from "./interfaces/IB3TR.sol";
@@ -28,6 +29,7 @@ contract XAllocationPool is
     IXAllocationVotingGovernor _xAllocationVoting;
     IEmissions _emissions;
     IB3TR b3tr;
+    ITreasury treasury;
     mapping(bytes32 => mapping(uint256 => bool)) claimedRewards;
   }
 
@@ -49,7 +51,8 @@ contract XAllocationPool is
   function initialize(
     address _admin,
     address upgrader,
-    address b3trAddress
+    address b3trAddress,
+    address treasury
   ) public initializer {
     __AccessControl_init();
     __ReentrancyGuard_init();
@@ -57,6 +60,7 @@ contract XAllocationPool is
 
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     $.b3tr = IB3TR(b3trAddress);
+    $.treasury = ITreasury(treasury);
 
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     _grantRole(UPGRADER_ROLE, upgrader);
@@ -76,13 +80,18 @@ contract XAllocationPool is
     $._emissions = IEmissions(emissions_);
   }
 
+  function setTreasuryAddress(address treasury_) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    $.treasury = ITreasury(treasury_);
+  }
+
   function claim(uint256 roundId, bytes32 appId) public nonReentrant {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
 
     require(!$.claimedRewards[appId][roundId], "XAllocationPool: rewards already claimed for this app and round");
     require(!xAllocationVoting().isActive(roundId), "XAllocationPool: round not ended yet");
 
-    uint256 amountToClaim = claimableAmount(roundId, appId);
+    (uint256 amountToClaim, uint256 unallocatedAmount) = claimableAmount(roundId, appId);
     require(amountToClaim > 0, "XAllocationPool: no rewards available for this app");
 
     // update the claimedRewards mapping
@@ -91,13 +100,18 @@ contract XAllocationPool is
     address receiverAddress = xAllocationVoting().getAppReceiverAddress(appId);
 
     //check that contract has enough funds to pay the reward
-    require($.b3tr.balanceOf(address(this)) >= amountToClaim, "Insufficient funds");
+    require($.b3tr.balanceOf(address(this)) >= (amountToClaim + unallocatedAmount), "Insufficient funds");
 
     // Transfer the rewards to the caller
     require($.b3tr.transfer(receiverAddress, amountToClaim), "Allocation transfer failed");
 
+    // Transfer the unallocated rewards to the treasury
+    if (unallocatedAmount > 0) {
+      require($.b3tr.transfer(address($.treasury), unallocatedAmount), "Transfer of unallocated rewards to treasury failed");
+    }
+
     // emit event
-    emit AllocationRewardsClaimed(appId, roundId, amountToClaim, receiverAddress, msg.sender);
+    emit AllocationRewardsClaimed(appId, roundId, amountToClaim, receiverAddress, msg.sender, unallocatedAmount);
   }
 
   // ---------- Internal and private ---------- //
@@ -116,15 +130,15 @@ contract XAllocationPool is
   }
 
   /**
-   * `variableAllocationPercentage`% of allocations will be distributed based on the % portion received from entire votes
+   * @dev Returns the amount of $B3TR to be distrubuted to either the app or the treasury.
    */
-  function _appRewardAmount(uint256 roundId, uint256 appShare) internal view returns (uint256) {
+  function _rewardAmount(uint256 roundId, uint256 share) internal view returns (uint256) {
     uint256 total = _emissionAmount(roundId);
 
     uint256 variableAllocationPercentage = 100 - xAllocationVoting().getRoundBaseAllocationPercentage(roundId);
     uint256 available = (total * variableAllocationPercentage) / 100;
 
-    uint256 rewardAmount = (available * appShare) / percentagePrecisionScalingFactor;
+    uint256 rewardAmount = (available * share) / percentagePrecisionScalingFactor;
     return rewardAmount;
   }
 
@@ -136,10 +150,10 @@ contract XAllocationPool is
    * @param roundId The round ID for which to calculate the amount available for allocation.
    * @param appId The ID of the app for which to calculate the amount available for allocation.
    */
-  function claimableAmount(uint256 roundId, bytes32 appId) public view returns (uint256) {
+  function claimableAmount(uint256 roundId, bytes32 appId) public view returns (uint256, uint256) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     if ($.claimedRewards[appId][roundId] || xAllocationVoting().isActive(roundId)) {
-      return 0;
+      return (0, 0);
     }
 
     return roundEarnings(roundId, appId);
@@ -153,8 +167,12 @@ contract XAllocationPool is
    *
    * If a round failed then it will calculate the shares against the last successful round.
    * If a round is active then results should be treated as real time estimation and not final.
+   * @param roundId The round ID for which to calculate the amount available for allocation.
+   * @param appId The ID of the app for which to calculate the amount available for allocation.
+   * @return appShare The percentage of the total votes the app received.
+   * @return unallocatedShare The percentage of the total votes that were not allocated to the app.
    */
-  function roundEarnings(uint256 roundId, bytes32 appId) public view returns (uint256) {
+  function roundEarnings(uint256 roundId, bytes32 appId) public view returns (uint256, uint256) {
     require(
       xAllocationVoting() != IXAllocationVotingGovernor(address(0)),
       "XAllocationVotingGovernor contract not set"
@@ -171,11 +189,15 @@ contract XAllocationPool is
       lastSucceededRoundId = roundId == 1 ? roundId : xAllocationVoting().latestSucceededRoundId(roundId - 1);
     }
 
-    uint256 appShare = getAppShares(lastSucceededRoundId, appId);
+    (uint256 appShare, uint256 unallocatedShare) = getAppShares(lastSucceededRoundId, appId);
     uint256 baseAllocationPerApp = baseAllocationAmount(roundId);
-    uint256 variableAllocationForApp = _appRewardAmount(roundId, appShare);
+    uint256 variableAllocationForApp = _rewardAmount(roundId, appShare);
+    uint256 unallocatedAmount = 0;
+    if (unallocatedShare > 0) {
+      unallocatedAmount = _rewardAmount(roundId, unallocatedShare);
+    }
 
-    return baseAllocationPerApp + variableAllocationForApp;
+    return (baseAllocationPerApp + variableAllocationForApp, unallocatedAmount);
   }
 
   /**
@@ -189,7 +211,8 @@ contract XAllocationPool is
 
     uint256 roundId = xAllocationVoting().currentRoundId();
 
-    return roundEarnings(roundId, appId);
+    (uint256 earnings, ) = roundEarnings(roundId, appId);
+    return earnings;
   }
 
   /**
@@ -220,7 +243,7 @@ contract XAllocationPool is
    * Any distribution left in this pool will be allocated by DAO voting (BD pool or marketing or tech reserve, etc.)
    *
    */
-  function getAppShares(uint256 roundId, bytes32 appId) public view returns (uint256) {
+  function getAppShares(uint256 roundId, bytes32 appId) public view returns (uint256, uint256) {
     require(
       xAllocationVoting() != IXAllocationVotingGovernor(address(0)),
       "XAllocationVotingGovernor contract not set"
@@ -230,19 +253,23 @@ contract XAllocationPool is
     uint256 appVotes = xAllocationVoting().getAppVotes(roundId, appId);
 
     // avoid division by zero
-    if (totalVotes == 0) return 0;
+    if (totalVotes == 0) return (0, 0);
 
     uint256 appShare = (appVotes * percentagePrecisionScalingFactor) / totalVotes;
+
+    // This is the amount unallocated if appShare is greater than max cap, this will be sent to treasury
+    uint256 unallocatedShare = 0;
 
     // Cap the app share to the maximum variable allocation percentage so even if an app has 80 votes out of 100,
     // it will still get a max of `appSharesCap` percentage of the available funds
     uint256 _allocationRewardMaxCap = scaledAppSharesCap(roundId);
     if (appShare > _allocationRewardMaxCap) {
+      unallocatedShare = appShare - _allocationRewardMaxCap;
       appShare = _allocationRewardMaxCap;
     }
 
     // This number is scaled and should be divided by 100 to get the actual percentage on the FE
-    return appShare;
+    return (appShare, unallocatedShare);
   }
 
   function claimed(uint256 roundId, bytes32 appId) public view returns (bool) {
