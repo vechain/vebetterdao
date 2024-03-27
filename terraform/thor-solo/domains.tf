@@ -2,14 +2,14 @@
 locals {
   domains = [
     { name : "thor-solo.${var.domain_name_data[terraform.workspace].suffix}", zone : var.domain_name_data[terraform.workspace].zone_id },
-    { name : "insights.${var.domain_name_data[terraform.workspace].suffix}", zone : var.domain_name_data[terraform.workspace].zone_id },
+    { name : "insight.${var.domain_name_data[terraform.workspace].suffix}", zone : var.domain_name_data[terraform.workspace].zone_id },
     { name : "inspector.${var.domain_name_data[terraform.workspace].suffix}", zone : var.domain_name_data[terraform.workspace].zone_id },
   ]
   base_registry_url = "${module.ecr.registry_id[0]}.dkr.ecr.eu-west-1.amazonaws.com"
 }
 module "thor-solo_domain" {
   depends_on = [module.ecr]
-  source     = "git@github.com:vechainfoundation/terraform_infrastructure_modules.git//domains?ref=main"
+  source     = "git@github.com:vechain/terraform_infrastructure_modules.git//domains?ref=main"
 
   domain_name = local.domains[0].name
   zone_id     = local.domains[0].zone
