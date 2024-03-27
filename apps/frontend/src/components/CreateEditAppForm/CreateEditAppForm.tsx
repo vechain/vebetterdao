@@ -23,6 +23,10 @@ import { FieldErrors, UseFormGetValues, UseFormRegister, UseFormWatch } from "re
 import { AddressIcon } from "../AddressIcon"
 import { useIpfsImage } from "@/api/ipfs"
 import { UploadFileButton } from "../UploadFileButton"
+import { UploadedImage, useSingleImageUpload, useUploadImages } from "@/hooks"
+import { useState, useEffect, useCallback } from "react"
+import { base64UrlToFile } from "@/utils/BlobUtils"
+import image from "next/image"
 
 export type CreateEditAppFormData = {
   name: string
@@ -43,6 +47,46 @@ type Props = {
 export const CreateEditAppForm = ({ register, errors, isEdit = false, editedApp, watch }: Props) => {
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(watch("logo"))
   const { data: banner, isLoading: isBannerLoading } = useIpfsImage(watch("banner"))
+
+  const [defaultLogo, setDefaultLogo] = useState<UploadedImage>()
+  const [defaultBanner, setDefaultBanner] = useState<UploadedImage>()
+
+  useEffect(() => {
+    const parseDefaultImages = async () => {
+      if (logo?.image) {
+        const file = await base64UrlToFile(logo?.image, `${editedApp?.name}_logo}.jpeg`, "image/jpeg")
+        setDefaultLogo({
+          file,
+          image: logo?.image,
+        })
+      }
+      if (banner?.image) {
+        const file = await base64UrlToFile(banner?.image, `${editedApp?.name}_banner.jpeg`, "image/jpeg")
+        setDefaultBanner({
+          file,
+          image: banner?.image,
+        })
+      }
+    }
+    parseDefaultImages()
+  }, [logo, banner])
+
+  const { onUpload: uploadLogo, uploadedImage: uploadedLogo } = useSingleImageUpload({
+    defaultImage: defaultLogo,
+  })
+  const { onUpload: uploadBanner, uploadedImage: uploadedBanner } = useSingleImageUpload({
+    defaultImage: defaultBanner,
+  })
+
+  const onDrop = useCallback(
+    (image: "logo" | "banner") => (acceptedFiles: File[]) => {
+      const file = acceptedFiles[0]
+      if (file?.type.includes("image")) {
+        image === "logo" ? uploadLogo(file) : uploadBanner(file)
+      }
+    },
+    [uploadLogo, uploadBanner],
+  )
 
   return (
     <Card>
@@ -107,16 +151,16 @@ export const CreateEditAppForm = ({ register, errors, isEdit = false, editedApp,
             <FormControl isInvalid={!!errors.logo}>
               <FormLabel>Logo</FormLabel>
               <VStack w="full">
-                <Image src={logo?.image} alt="logo" h={200} objectFit="cover" borderRadius="9px" />
-                <UploadFileButton mt={4} alignSelf={"flex-end"} />
+                <Image src={uploadedLogo?.image} alt="logo" h={200} objectFit="cover" borderRadius="9px" />
+                <UploadFileButton mt={4} alignSelf={"flex-end"} onDrop={onDrop("logo")} />
                 {errors.logo && <FormErrorMessage>{errors.logo.message}</FormErrorMessage>}
               </VStack>
             </FormControl>
             <FormControl isInvalid={!!errors.banner}>
               <FormLabel>Banner</FormLabel>
               <VStack w="full">
-                <Image src={banner?.image} alt="banner" h={200} w="full" rounded={"3xl"} objectFit="cover" />
-                <UploadFileButton mt={4} alignSelf={"flex-end"} />
+                <Image src={uploadedBanner?.image} alt="banner" h={200} w="full" rounded={"3xl"} objectFit="cover" />
+                <UploadFileButton mt={4} alignSelf={"flex-end"} onDrop={onDrop("banner")} />
                 {errors.banner && <FormErrorMessage>{errors.banner.message}</FormErrorMessage>}
               </VStack>
             </FormControl>
