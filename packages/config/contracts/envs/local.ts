@@ -25,7 +25,6 @@ export function createLocalConfig() {
 
     CONTRACTS_ADMIN_ADDRESS: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa", //1st account from mnemonic of solo network
     VOTE_2_EARN_POOL_ADDRESS: "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68", //2nd account from mnemonic of solo network
-    TREASURY_POOL_ADDRESS: "0x1f80A24a72A65B335c3Edbdbdd0DeCdcdF84D578", // Treasury SC address
 
     INITIAL_X_ALLOCATION: BigInt("66666666666666666666666"), // 1M/15 rounded down -> 1/15th of the total supply for pilot show
 
@@ -69,7 +68,24 @@ export function createLocalConfig() {
       25000000000000000000000000n,
     ],
 
+    VOTER_REWARDS_LEVELS : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
 
-    XAPP_BASE_URI: "ipfs://bafybeigsqjh4m3fmy7f7ahpt7uxzfsmcoctjrbxt6kxnejhtnmcn55t2c4/",
+    /*
+      Level => Percentage Multiplier
+  
+      2 (Moon) => 10% (1.1x)
+      3 (Mercury) => 20% (1.2x)
+      4 (Venus) => 50% (1.5x)
+      5 (Mars) => 100% (2x)
+      6 (Jupiter) => 150% (2.5x)
+      7 (Saturn) => 200% (3x)
+      8 (Uranus) => 400% (5x)
+      9 (Neptune) => 900% (10x)
+      10 (Galaxy) => 2400% (25x)
+    */
+    VOTER_REWARDS_MULTIPLIER : [0, 10, 20, 50, 100, 150, 200, 400, 900, 2400],
+
+
+    XAPP_BASE_URI: "ipfs://",
   })
 }

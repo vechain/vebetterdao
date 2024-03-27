@@ -7,16 +7,17 @@ interface IXAllocationPool {
     uint256 roundId,
     uint256 amount,
     address indexed recipient,
-    address caller
+    address caller,
+    uint256 unallocatedAmount
   );
 
   function currentRoundEarnings(bytes32 appId) external view returns (uint256);
 
-  function claimableAmount(uint256 roundId, bytes32 appId) external view returns (uint256);
+  function claimableAmount(uint256 roundId, bytes32 appId) external view returns (uint256, uint256);
 
-  function roundEarnings(uint256 roundId, bytes32 appId) external view returns (uint256);
+  function roundEarnings(uint256 roundId, bytes32 appId) external view returns (uint256, uint256);
 
   function baseAllocationAmount(uint256 roundId) external view returns (uint256);
 
-  function getAppShares(uint256 roundId, bytes32 appId) external view returns (uint256);
+  function getAppShares(uint256 roundId, bytes32 appId) external view returns (uint256, uint256);
 }

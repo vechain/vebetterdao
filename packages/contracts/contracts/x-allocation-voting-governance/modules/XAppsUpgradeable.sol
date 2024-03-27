@@ -15,8 +15,11 @@ abstract contract XAppsUpgradeable is Initializable, IXApps, XAllocationVotingGo
   struct App {
     bytes32 id;
     address receiverAddress;
+    address admin; // can add/remove moderators, can change receiverAddress, can change admin address, can do everything the moderators can do
     string name;
+    string metadataURI;
     uint48 createdAt; // block number when app was added
+    uint256 createdAtTimestamp;
   }
 
   /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.XApps
@@ -32,6 +35,7 @@ abstract contract XAppsUpgradeable is Initializable, IXApps, XAllocationVotingGo
     // Mapping from app ID to a checkpoint of the app's elegibility in a specific block
     mapping(bytes32 appId => Checkpoints.Trace208) _isAppElegibleCheckpoints;
     string _baseURI;
+    mapping(bytes32 => address[]) _appModerators;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.XApps")) - 1)) & ~bytes32(uint256(0xff))
@@ -41,6 +45,12 @@ abstract contract XAppsUpgradeable is Initializable, IXApps, XAllocationVotingGo
     assembly {
       $.slot := XAppsStorageLocation
     }
+  }
+
+  modifier appExists(bytes32 appId) {
+    XAppsStorage storage $ = _getXAppsStorageStorage();
+    require($._apps[appId].receiverAddress != address(0), "App does not exist");
+    _;
   }
 
   /**
@@ -57,22 +67,78 @@ abstract contract XAppsUpgradeable is Initializable, IXApps, XAllocationVotingGo
 
   // ---------- Setters ---------- //
 
-  function addApp(address appReceiverAddress, string memory appName) public virtual {
+  function addApp(
+    address receiverAddress,
+    address admin,
+    string memory appName,
+    string memory metadataURI
+  ) public virtual {
+    _authorizeAddApp();
+
+    require(receiverAddress != address(0), "XApps: receiverAddress is the zero address");
+    require(admin != address(0), "XApps: admin is the zero address");
+
     XAppsStorage storage $ = _getXAppsStorageStorage();
     bytes32 id = hashName(appName);
 
     require($._apps[id].receiverAddress == address(0), "App with this ID already exists");
 
     // Store the new app
-    $._apps[id] = App(id, appReceiverAddress, appName, clock());
+    $._apps[id] = App(id, receiverAddress, admin, appName, metadataURI, clock(), block.timestamp);
     $._appIds.push(id);
     _pushAppToEligbleApps(id);
 
-    emit AppAdded(id, appReceiverAddress, appName, true);
+    emit AppAdded(id, receiverAddress, appName, true);
   }
 
   function setVotingElegibility(bytes32 appId, bool isElegible) public virtual {
     _updateVotingElegibilityCheckpoint(appId, isElegible);
+  }
+
+  function updateAppMetadata(bytes32 appId, string memory metadataURI) external appExists(appId) {
+    _authorizeAppMetadataUpdate(appId);
+    XAppsStorage storage $ = _getXAppsStorageStorage();
+
+    $._apps[appId].metadataURI = metadataURI;
+  }
+
+  function updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) external appExists(appId) {
+    _authorizeAppManagement(appId);
+
+    XAppsStorage storage $ = _getXAppsStorageStorage();
+
+    $._apps[appId].receiverAddress = newReceiverAddress;
+  }
+
+  function addAppModerator(bytes32 appId, address moderator) external appExists(appId) {
+    _authorizeAppManagement(appId);
+
+    XAppsStorage storage $ = _getXAppsStorageStorage();
+
+    $._appModerators[appId].push(moderator);
+  }
+
+  function removeAppModerator(bytes32 appId, address moderator) external appExists(appId) {
+    _authorizeAppManagement(appId);
+
+    XAppsStorage storage $ = _getXAppsStorageStorage();
+
+    address[] storage moderators = $._appModerators[appId];
+    for (uint256 i = 0; i < moderators.length; i++) {
+      if (moderators[i] == moderator) {
+        moderators[i] = moderators[moderators.length - 1];
+        moderators.pop();
+        break;
+      }
+    }
+  }
+
+  function updateAppAdminAddress(bytes32 appId, address newAdmin) external appExists(appId) {
+    _authorizeAppManagement(appId);
+
+    XAppsStorage storage $ = _getXAppsStorageStorage();
+
+    $._apps[appId].admin = newAdmin;
   }
 
   // ---------- Internal and private ---------- //
@@ -127,14 +193,6 @@ abstract contract XAppsUpgradeable is Initializable, IXApps, XAllocationVotingGo
     $._baseURI = baseURI_;
   }
 
-  function _updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) internal {
-    XAppsStorage storage $ = _getXAppsStorageStorage();
-
-    require($._apps[appId].receiverAddress != address(0), "App does not exist");
-
-    $._apps[appId].receiverAddress = newReceiverAddress;
-  }
-
   // ---------- Getters ---------- //
 
   /**
@@ -168,18 +226,17 @@ abstract contract XAppsUpgradeable is Initializable, IXApps, XAllocationVotingGo
     return isAvailable;
   }
 
-  function isElegibleForVoteLatestCheckpoint(bytes32 appId) public view returns (bool) {
+  function isElegibleForVoteLatestCheckpoint(bytes32 appId) public view appExists(appId) returns (bool) {
     XAppsStorage storage $ = _getXAppsStorageStorage();
-
-    require($._apps[appId].receiverAddress != address(0), "App does not exist");
 
     return $._isAppElegibleCheckpoints[appId].latest() == 1;
   }
 
-  function isElegibleForVotePastCheckpoint(bytes32 appId, uint256 timepoint) public view returns (bool) {
+  function isElegibleForVotePastCheckpoint(
+    bytes32 appId,
+    uint256 timepoint
+  ) public view appExists(appId) returns (bool) {
     XAppsStorage storage $ = _getXAppsStorageStorage();
-
-    require($._apps[appId].receiverAddress != address(0), "App does not exist");
 
     uint48 currentTimepoint = clock();
     if (timepoint >= currentTimepoint) {
@@ -194,11 +251,9 @@ abstract contract XAppsUpgradeable is Initializable, IXApps, XAllocationVotingGo
   }
 
   // Function to retrieve an app by ID
-  function getApp(bytes32 id) public view virtual returns (App memory) {
+  function getApp(bytes32 appId) public view virtual appExists(appId) returns (App memory) {
     XAppsStorage storage $ = _getXAppsStorageStorage();
-
-    require($._apps[id].receiverAddress != address(0), "App does not exist");
-    return $._apps[id];
+    return $._apps[appId];
   }
 
   // Function to retrieve all apps
@@ -225,13 +280,59 @@ abstract contract XAppsUpgradeable is Initializable, IXApps, XAllocationVotingGo
     return $._baseURI;
   }
 
-  function appURI(bytes32 appId) public view returns (string memory) {
+  function appURI(bytes32 appId) public view appExists(appId) returns (string memory) {
     XAppsStorage storage $ = _getXAppsStorageStorage();
 
-    require($._apps[appId].receiverAddress != address(0), "App does not exist");
-
-    string memory appIdStr = Strings.toHexString(uint256(appId), 32);
-
-    return string(abi.encodePacked($._baseURI, appIdStr));
+    return string(abi.encodePacked($._baseURI, $._apps[appId].metadataURI));
   }
+
+  function appModerators(bytes32 appId) public view returns (address[] memory) {
+    XAppsStorage storage $ = _getXAppsStorageStorage();
+
+    return $._appModerators[appId];
+  }
+
+  function isAppModerator(bytes32 appId, address account) public view returns (bool) {
+    XAppsStorage storage $ = _getXAppsStorageStorage();
+
+    address[] memory moderators = $._appModerators[appId];
+    for (uint256 i = 0; i < moderators.length; i++) {
+      if (moderators[i] == account) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  function isAppAdmin(bytes32 appId, address account) public view returns (bool) {
+    XAppsStorage storage $ = _getXAppsStorageStorage();
+
+    return $._apps[appId].admin == account;
+  }
+
+  // --- To be implemented by the inheriting contract --- //
+  /**
+   * @dev Function that should revert when `msg.sender` is not authorized to add an app. Called by
+   * {addApp}.
+   *
+   * Normally, this function will use an xref:access.adoc[access control] modifier such as {Ownable-onlyOwner}.
+   *
+   * ```solidity
+   * function _authorizeAddApp(address) internal onlyOwner {}
+   * ```
+   */
+  function _authorizeAddApp() internal virtual;
+
+  /**
+   * @dev Function that should revert when `msg.sender` is not authorized to update the app. Called by
+   * {updateAppMetadata}.
+   */
+  function _authorizeAppMetadataUpdate(bytes32 appId) internal virtual;
+
+  /**
+   * @dev Function that should revert when `msg.sender` is not authorized to sensible updates to an app. Called by
+   * {addAppModerator}, {removeAppModerator}, {updateAppAdminAddress}, {updateAppReceiverAddress}.
+   */
+  function _authorizeAppManagement(bytes32 appId) internal virtual;
 }

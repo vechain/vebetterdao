@@ -1,12 +1,12 @@
 import { ethers } from "hardhat"
-import { B3TR, Emissions, Treasury, VOT3, XAllocationVoting, XApps } from "../../typechain-types"
+import { B3TR, Emissions, Treasury, VOT3, XAllocationVoting, XAppsUpgradeable } from "../../typechain-types"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { BytesLike } from "ethers"
-import { waitForRoundToEnd } from "../../test/helpers"
 
 type App = {
   address: string
   name: string
+  metadataURI: string
 }
 
 export const seedLocalEnvironment = async (
@@ -23,14 +23,17 @@ export const seedLocalEnvironment = async (
     {
       address: accounts[6].address,
       name: "Vyvo",
+      metadataURI: "bafkreigk7faih4jmdee4ritah6564jqpfn5s2gl4dcsvii7woijy5ls7ca",
     },
     {
       address: accounts[7].address,
       name: "Mugshot",
+      metadataURI: "bafkreicglvjxjy2yxruwpmu6czm5th76bauu5phfhnlf2oxbyc66fdrzkm",
     },
     {
       address: accounts[9].address,
       name: "Cleanify",
+      metadataURI: "bafkreicw6g34t3th63z7hq3o4xkay6dkrei5ny5evyrlclw53gfz6o6lgu",
     },
   ]
 
@@ -101,21 +104,24 @@ export const seedTestEnvironment = async (b3tr: B3TR, xAllocationVoting: XAlloca
     {
       address: "0x61fFC950b04090f5CE857ebF056852a6D27b0c3c",
       name: "Vyvo",
+      metadataURI: "bafkreigk7faih4jmdee4ritah6564jqpfn5s2gl4dcsvii7woijy5ls7ca",
     },
     {
       address: "0xbfE2122a82C0AEa091514f57C7713C3118101eDa",
       name: "Mugshot",
+      metadataURI: "bafkreicw6g34t3th63z7hq3o4xkay6dkrei5ny5evyrlclw53gfz6o6lgu",
     },
     {
       address: "0x6B020E5C8E8574388a275cC498B27E3EB91ec3f2",
       name: "Cleanify",
+      metadataURI: "bafkreicglvjxjy2yxruwpmu6czm5th76bauu5phfhnlf2oxbyc66fdrzkm",
     },
   ]
 
   for (const app of APPS) {
     await xAllocationVoting
       .connect(admin)
-      .addApp(app.address, app.name)
+      .addApp(app.address, app.address, app.name, app.metadataURI)
       .then(async tx => await tx.wait())
   }
 
@@ -126,6 +132,7 @@ export const seedTestEnvironment = async (b3tr: B3TR, xAllocationVoting: XAlloca
 /**
  *  Mint $B3TR tokens and swap for VOT3 tokens
  */
+// eslint-disable-next-line no-unused-vars
 const mintAndApproveB3tr = async (
   b3tr: B3TR,
   vot3: VOT3,
@@ -151,6 +158,7 @@ const mintAndApproveB3tr = async (
   return await Promise.all([...mintPromises, ...approvePromises])
 }
 
+// eslint-disable-next-line no-unused-vars
 const swapB3trForVot3 = async (vot3: VOT3, amount: string = "500", accounts: HardhatEthersSigner[]) => {
   console.log(`Swapping ${amount} $B3TR for VOT3...`)
 
@@ -171,17 +179,18 @@ const addXDapps = async (xAllocationVoting: XAllocationVoting, accounts: Hardhat
   for (const app of apps) {
     await xAllocationVoting
       .connect(accounts[0])
-      .addApp(app.address, app.name)
+      .addApp(app.address, app.address, app.name, app.metadataURI)
       .then(async tx => await tx.wait())
   }
 }
 
+// eslint-disable-next-line no-unused-vars
 const castVotesToXDapps = async (
   xAllocationVoting: XAllocationVoting,
   accounts: HardhatEthersSigner[],
   roundId: number,
   vot3mount: string,
-  apps: XApps.AppStruct[],
+  apps: XAppsUpgradeable.AppStruct[],
 ) => {
   return Promise.all(
     accounts.map(async account => {

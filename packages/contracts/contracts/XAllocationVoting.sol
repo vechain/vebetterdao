@@ -25,48 +25,79 @@ contract XAllocationVoting is
   bytes32 public constant ROUND_STARTER_ROLE = keccak256("ROUND_STARTER_ROLE");
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
+  /**
+   * @notice Data for initializing the contract
+   * @param vot3Token The address of the Vot3 token used for voting
+   * @param quorumPercentage quorum as a percentage of the total supply at the block a proposal’s voting power is retrieved
+   * @param initialVotingPeriod How long does a proposal remain open to votes
+   * @param b3trGovernor The address of the B3trGovernor contract
+   * @param voterRewards The address of the VoterRewards contract
+   * @param emissions The address of the Emissions contract
+   * @param admins The addresses of the admins
+   * @param upgrader The address of the upgrader
+   * @param xAppsBaseURI The base URI for the xApps
+   * @param baseAllocationPercentage The base allocation percentage
+   * @param appSharesCap The app shares cap
+   */
+  struct InitializationData {
+    IVotes vot3Token;
+    uint256 quorumPercentage;
+    uint32 initialVotingPeriod;
+    address b3trGovernor;
+    address voterRewards;
+    address emissions;
+    address[] admins;
+    address upgrader;
+    string xAppsBaseURI;
+    uint256 baseAllocationPercentage;
+    uint256 appSharesCap;
+  }
+
+  /// @custom:storage-location erc7201:b3tr.storage.XAllocationVoting
+  struct XAllocationVotingStorage {
+    uint256 baseAllocationPercentage;
+    uint256 appSharesCap;
+    mapping(uint256 => uint256) _roundBaseAllocationPercentage;
+    mapping(uint256 => uint256) _roundAppSharesCap;
+  }
+
+  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVoting")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 private constant XAllocationVotingStorageLocation =
+    0x5b9ce609d9b570ff2fee5cd5fe0d8c801dcc65fb3338b719bf34ef6a513e8800;
+
+  function _getXAllocationVotingStorage() private pure returns (XAllocationVotingStorage storage $) {
+    assembly {
+      $.slot := XAllocationVotingStorageLocation
+    }
+  }
+
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
   }
 
   /**
-   * @notice initialize XAllocationVotingGovernor contract
-   * @param _vot3Token The address of the Vot3 token used for voting
-   * @param _quorumPercentage quorum as a percentage of the total supply at the block a proposal’s voting power is retrieved
-   * @param _initialVotingPeriod How long does a round remain open to votese
-   * @param b3trGovernor_ The address of the B3trGovernor DAO
-   * @param _voterRewards The address of the VoterRewards contract
-   * @param _admins The addresses of the admins (DAO + another address) that can update the XAllocationPool address, only DAO will remain in the final version
-   * @param _xAppsBaseURI The base URI for the xApps
+   * @notice Initialize the contract
+   * @param data The initialization data
    */
-  function initialize(
-    IVotes _vot3Token,
-    uint256 _quorumPercentage,
-    uint32 _initialVotingPeriod,
-    address b3trGovernor_,
-    address _voterRewards,
-    address[] memory _admins,
-    address upgrader,
-    string memory _xAppsBaseURI
-  ) public initializer {
-    __XAllocationVotingGovernor_init("XAllocationVoting", b3trGovernor_);
-    __GovernorSettings_init(_initialVotingPeriod);
-    __GovernorXAllocationVotesCounting_init(_voterRewards);
-    __GovernorVotes_init(_vot3Token);
-    __GovernorVotesQuorumFraction_init(_quorumPercentage);
-    __XApps_init(_xAppsBaseURI);
+  function initialize(InitializationData memory data) public initializer {
+    __XAllocationVotingGovernor_init("XAllocationVoting", data.b3trGovernor);
+    __GovernorSettings_init(data.initialVotingPeriod, data.emissions);
+    __GovernorXAllocationVotesCounting_init(data.voterRewards);
+    __GovernorVotes_init(data.vot3Token);
+    __GovernorVotesQuorumFraction_init(data.quorumPercentage);
+    __XApps_init(data.xAppsBaseURI);
     __AccessControl_init();
     __UUPSUpgradeable_init();
 
-    for (uint256 i = 0; i < _admins.length; i++) {
-      _grantRole(DEFAULT_ADMIN_ROLE, _admins[i]);
+    for (uint256 i = 0; i < data.admins.length; i++) {
+      _grantRole(DEFAULT_ADMIN_ROLE, data.admins[i]);
     }
 
-    _grantRole(UPGRADER_ROLE, upgrader);
+    setBaseAllocationPercentage(data.baseAllocationPercentage);
+    setAppSharesCap(data.appSharesCap);
+    _grantRole(UPGRADER_ROLE, data.upgrader);
   }
-
-  function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
   // ---------- Setters ---------- //
 
@@ -82,12 +113,13 @@ contract XAllocationVoting is
   }
 
   function _startNewRound(address proposer) internal virtual override returns (uint256 roundId) {
-    XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
+    XAllocationVotingStorage storage $ = _getXAllocationVotingStorage();
+    XAllocationVotingGovernorStorage storage xAllocationVotingGovernorStorage = _getXAllocationVotingGovernorStorage();
 
-    ++$._roundCount;
-    roundId = $._roundCount;
+    ++xAllocationVotingGovernorStorage._roundCount;
+    roundId = xAllocationVotingGovernorStorage._roundCount;
 
-    if ($._rounds[roundId].voteStart != 0) {
+    if (xAllocationVotingGovernorStorage._rounds[roundId].voteStart != 0) {
       revert GovernorUnexpectedRoundState(roundId, state(roundId), bytes32(0));
     }
 
@@ -98,12 +130,16 @@ contract XAllocationVoting is
 
     // save x-apps that users can vote for
     bytes32[] memory apps = allElegibleApps();
-    $._appsElegibleForVoting[roundId] = apps;
+    xAllocationVotingGovernorStorage._appsElegibleForVoting[roundId] = apps;
+
+    // save the base allocation percentage and app shares cap for this round
+    $._roundBaseAllocationPercentage[roundId] = $.baseAllocationPercentage;
+    $._roundAppSharesCap[roundId] = $.appSharesCap;
 
     uint256 snapshot = clock();
     uint256 duration = votingPeriod();
 
-    RoundCore storage round = $._rounds[roundId];
+    RoundCore storage round = xAllocationVotingGovernorStorage._rounds[roundId];
     round.proposer = proposer;
     round.voteStart = SafeCast.toUint48(snapshot);
     round.voteDuration = SafeCast.toUint32(duration);
@@ -117,8 +153,34 @@ contract XAllocationVoting is
     super.setVotingElegibility(appId, isElegible);
   }
 
-  function addApp(address appAddress, string memory appName) public override onlyRole(DEFAULT_ADMIN_ROLE) {
-    super.addApp(appAddress, appName);
+  /**
+   * @notice Set the base allocation percentage
+   * @param baseAllocationPercentage_ The new base allocation percentage
+   */
+  function setBaseAllocationPercentage(uint256 baseAllocationPercentage_) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(baseAllocationPercentage_ <= 100, "Base allocation percentage must be less than or equal to 100");
+    XAllocationVotingStorage storage $ = _getXAllocationVotingStorage();
+    $.baseAllocationPercentage = baseAllocationPercentage_;
+  }
+
+  /**
+   * @notice Set the app shares cap
+   * @param appSharesCap_ The new app shares cap
+   */
+  function setAppSharesCap(uint256 appSharesCap_) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(appSharesCap_ <= 100, "App shares cap must be less than or equal to 100");
+    XAllocationVotingStorage storage $ = _getXAllocationVotingStorage();
+    $.appSharesCap = appSharesCap_;
+  }
+
+  function baseAllocationPercentage() public view returns (uint256) {
+    XAllocationVotingStorage storage $ = _getXAllocationVotingStorage();
+    return $.baseAllocationPercentage;
+  }
+
+  function appSharesCap() public view returns (uint256) {
+    XAllocationVotingStorage storage $ = _getXAllocationVotingStorage();
+    return $.appSharesCap;
   }
 
   function setAdminRole(address _newAdmin) public onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -129,10 +191,6 @@ contract XAllocationVoting is
 
   function setBaseURI(string memory baseURI_) public onlyRole(DEFAULT_ADMIN_ROLE) {
     _setBaseURI(baseURI_);
-  }
-
-  function updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    super._updateAppReceiverAddress(appId, newReceiverAddress);
   }
 
   // ---------- Getters ---------- //
@@ -166,6 +224,22 @@ contract XAllocationVoting is
     return quorum(roundSnapshot(roundId));
   }
 
+  /**
+   * Returns the base allocation percentage for a given round
+   */
+  function getRoundBaseAllocationPercentage(uint256 roundId) public view returns (uint256) {
+    XAllocationVotingStorage storage $ = _getXAllocationVotingStorage();
+    return $._roundBaseAllocationPercentage[roundId];
+  }
+
+  /**
+   * Returns the app shares cap for a given round
+   */
+  function getRoundAppSharesCap(uint256 roundId) public view returns (uint256) {
+    XAllocationVotingStorage storage $ = _getXAllocationVotingStorage();
+    return $._roundAppSharesCap[roundId];
+  }
+
   // ---------- Required overrides ---------- //
 
   function votingPeriod()
@@ -192,4 +266,24 @@ contract XAllocationVoting is
   ) public view override(AccessControlUpgradeable, XAllocationVotingGovernor) returns (bool) {
     return super.supportsInterface(interfaceId);
   }
+
+  // ---------- Authorizations ------------ //
+
+  function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
+
+  function _authorizeAppMetadataUpdate(bytes32 appId) internal view override {
+    require(
+      hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || isAppModerator(appId, msg.sender) || isAppAdmin(appId, msg.sender),
+      "XAllocationVoting: sender must be an admin or app moderator"
+    );
+  }
+
+  function _authorizeAppManagement(bytes32 appId) internal view override {
+    require(
+      hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || isAppAdmin(appId, msg.sender),
+      "XAllocationVoting: sender must be an admin"
+    );
+  }
+
+  function _authorizeAddApp() internal view override onlyRole(DEFAULT_ADMIN_ROLE) {}
 }
