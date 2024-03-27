@@ -28,6 +28,7 @@ export const AdminPermissions = () => {
     isAdminOfVot3,
     isAdminOfVoterRewards,
     isAdminOfTimeLock,
+    isAdminOfGovernance,
     isMinterOfB3tr,
     isMinterOfEmissions,
     isUpgraderOfEmissions,
@@ -63,6 +64,7 @@ export const AdminPermissions = () => {
                   <Th>XAllocation Voting</Th>
                   <Th>XAllocation Pool</Th>
                   <Th>Treasury</Th>
+                  <Th>Governance</Th>
                 </Tr>
               </Thead>
               <Tbody>
@@ -78,12 +80,14 @@ export const AdminPermissions = () => {
                   <Td>{isAdminOfXAllocationVoting ? "Yes" : "No"}</Td>
                   <Td>{isAdminOfXAllocationPool ? "Yes" : "No"}</Td>
                   <Td>{isAdminOfTreasury ? "Yes" : "No"}</Td>
+                  <Td>{isAdminOfGovernance ? "Yes" : "No"}</Td>
                 </Tr>
                 <Tr>
                   <Td fontWeight={"bold"}>MINTER</Td>
                   <Td>{isMinterOfB3tr ? "Yes" : "No"}</Td>
                   <Td></Td>
                   <Td>{isMinterOfEmissions ? "Yes" : "No"}</Td>
+                  <Td></Td>
                   <Td></Td>
                   <Td></Td>
                   <Td></Td>
@@ -104,6 +108,7 @@ export const AdminPermissions = () => {
                   <Td>{isUpgraderOfXAllocationVoting ? "Yes" : "No"}</Td>
                   <Td>{isUpgraderOfXAllocationPool ? "Yes" : "No"}</Td>
                   <Td>{isUpgraderOfTreasury ? "Yes" : "No"}</Td>
+                  <Td></Td>
                 </Tr>
               </Tbody>
             </Table>

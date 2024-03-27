@@ -14,6 +14,7 @@ type useAccountPermissionsResponse = {
   isAdminOfVoterRewards: boolean
   isAdminOfTimeLock: boolean
   isAdminOfTreasury: boolean
+  isAdminOfGovernance: boolean
   isMinterOfB3tr: boolean
   isMinterOfEmissions: boolean
   isUpgraderOfEmissions: boolean
@@ -45,6 +46,7 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
   const { data: isAdminOfVoterRewards } = useHasRole(ADMIN_ROLE, config.voterRewardsContractAddress, address)
   const { data: isAdminOfTimeLock } = useHasRole(ADMIN_ROLE, config.timelockContractAddress, address)
   const { data: isAdminOfTreasury } = useHasRole(ADMIN_ROLE, config.treasuryContractAddress, address)
+  const { data: isAdminOfGovernance } = useHasRole(ADMIN_ROLE, config.b3trGovernorAddress, address)
 
   const { data: isMinterOfB3tr } = useHasRole(MINTER_ROLE, config.b3trContractAddress, address)
   const { data: isMinterOfEmissions } = useHasRole(MINTER_ROLE, config.emissionsContractAddress, address)
@@ -87,6 +89,7 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
       isAdminOfVoterRewards: isAdminOfVoterRewards ?? false,
       isAdminOfTimeLock: isAdminOfTimeLock ?? false,
       isAdminOfTreasury: isAdminOfTreasury ?? false,
+      isAdminOfGovernance: isAdminOfGovernance ?? false,
       isMinterOfB3tr: isMinterOfB3tr ?? false,
       isMinterOfEmissions: isMinterOfEmissions ?? false,
       isUpgraderOfEmissions: isUpgraderOfEmissions ?? false,
