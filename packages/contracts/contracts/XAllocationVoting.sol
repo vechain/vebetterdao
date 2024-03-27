@@ -99,8 +99,6 @@ contract XAllocationVoting is
     _grantRole(UPGRADER_ROLE, data.upgrader);
   }
 
-  function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
-
   // ---------- Setters ---------- //
 
   function setB3trGovernanceAddress(address b3trGovernor_) public override onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -185,14 +183,6 @@ contract XAllocationVoting is
     return $.appSharesCap;
   }
 
-  function addApp(
-    address appAddress,
-    string memory appName,
-    string memory metadataURI
-  ) public override onlyRole(DEFAULT_ADMIN_ROLE) {
-    super.addApp(appAddress, appName, metadataURI);
-  }
-
   function setAdminRole(address _newAdmin) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(_newAdmin != address(0), "XAllocationVoting: new admin is the zero address");
 
@@ -201,10 +191,6 @@ contract XAllocationVoting is
 
   function setBaseURI(string memory baseURI_) public onlyRole(DEFAULT_ADMIN_ROLE) {
     _setBaseURI(baseURI_);
-  }
-
-  function updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    super._updateAppReceiverAddress(appId, newReceiverAddress);
   }
 
   // ---------- Getters ---------- //
@@ -280,4 +266,24 @@ contract XAllocationVoting is
   ) public view override(AccessControlUpgradeable, XAllocationVotingGovernor) returns (bool) {
     return super.supportsInterface(interfaceId);
   }
+
+  // ---------- Authorizations ------------ //
+
+  function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
+
+  function _authorizeAppMetadataUpdate(bytes32 appId) internal view override {
+    require(
+      hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || isAppModerator(appId, msg.sender) || isAppAdmin(appId, msg.sender),
+      "XAllocationVoting: sender must be an admin or app moderator"
+    );
+  }
+
+  function _authorizeAppManagement(bytes32 appId) internal view override {
+    require(
+      hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || isAppAdmin(appId, msg.sender),
+      "XAllocationVoting: sender must be an admin"
+    );
+  }
+
+  function _authorizeAddApp() internal view override onlyRole(DEFAULT_ADMIN_ROLE) {}
 }

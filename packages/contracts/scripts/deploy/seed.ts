@@ -1,5 +1,5 @@
 import { ethers } from "hardhat"
-import { B3TR, Emissions, Treasury, VOT3, XAllocationVoting, XApps } from "../../typechain-types"
+import { B3TR, Emissions, Treasury, VOT3, XAllocationVoting, XAppsUpgradeable } from "../../typechain-types"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { BytesLike } from "ethers"
 
@@ -121,7 +121,7 @@ export const seedTestEnvironment = async (b3tr: B3TR, xAllocationVoting: XAlloca
   for (const app of APPS) {
     await xAllocationVoting
       .connect(admin)
-      .addApp(app.address, app.name, app.metadataURI)
+      .addApp(app.address, app.address, app.name, app.metadataURI)
       .then(async tx => await tx.wait())
   }
 
@@ -179,7 +179,7 @@ const addXDapps = async (xAllocationVoting: XAllocationVoting, accounts: Hardhat
   for (const app of apps) {
     await xAllocationVoting
       .connect(accounts[0])
-      .addApp(app.address, app.name, app.metadataURI)
+      .addApp(app.address, app.address, app.name, app.metadataURI)
       .then(async tx => await tx.wait())
   }
 }
@@ -190,7 +190,7 @@ const castVotesToXDapps = async (
   accounts: HardhatEthersSigner[],
   roundId: number,
   vot3mount: string,
-  apps: XApps.AppStruct[],
+  apps: XAppsUpgradeable.AppStruct[],
 ) => {
   return Promise.all(
     accounts.map(async account => {
