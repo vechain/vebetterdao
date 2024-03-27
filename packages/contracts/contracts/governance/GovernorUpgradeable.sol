@@ -26,6 +26,9 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
  * - A counting module must implement {quorum}, {_quorumReached}, {_voteSucceeded} and {_countVote}
  * - A voting module must implement {_getVotes}
  * - Additionally, {votingPeriod} must also be implemented
+ *
+ * Modifications:
+ * - _getGovernorStorage is internal
  */
 abstract contract GovernorUpgradeable is
   Initializable,
