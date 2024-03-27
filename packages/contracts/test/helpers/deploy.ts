@@ -119,6 +119,7 @@ export const getOrDeployContractInstances = async ({
     owner.address,
     owner.address,
     await b3tr.getAddress(),
+    await treasury.getAddress(),
   ])) as XAllocationPool
 
   const X_ALLOCATIONS_ADDRESS = await xAllocationPool.getAddress()

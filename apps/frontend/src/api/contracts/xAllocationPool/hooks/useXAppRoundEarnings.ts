@@ -29,7 +29,7 @@ export const getXAppRoundEarnings = async (
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
-  return { amount: FormattingUtils.scaleNumberDown(res.decoded[0], 18), appId: xAppId }
+  return { amount: FormattingUtils.scaleNumberDown(res.decoded[0][0], 18), appId: xAppId }
 }
 
 export const getXAppRoundEarningsQueryKey = (roundId: string, xAppId?: string) => [
