@@ -155,6 +155,23 @@ describe("X-Apps", function () {
       expect(appURI).to.eql((await xAllocationVoting.baseURI()) + newMetadataURI)
     })
 
+    it("Moderator can update app metadata", async function () {
+      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      const appAdmin = otherAccounts[9]
+      const appModerator = otherAccounts[10]
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, appAdmin.address, "My app", "metadataURI")
+
+      await xAllocationVoting.connect(appAdmin).addAppModerator(app1Id, appModerator.address)
+      expect(await xAllocationVoting.isAppModerator(app1Id, appModerator.address)).to.be.true
+
+      const newMetadataURI = "metadataURI2"
+      await xAllocationVoting.connect(appModerator).updateAppMetadata(app1Id, newMetadataURI)
+
+      const appURI = await xAllocationVoting.appURI(app1Id)
+      expect(appURI).to.eql((await xAllocationVoting.baseURI()) + newMetadataURI)
+    })
+
     it("Unatuhtorized users cannot update app metadata", async function () {
       const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))

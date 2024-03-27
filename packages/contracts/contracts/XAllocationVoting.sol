@@ -193,10 +193,6 @@ contract XAllocationVoting is
     _setBaseURI(baseURI_);
   }
 
-  function updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    super._updateAppReceiverAddress(appId, newReceiverAddress);
-  }
-
   // ---------- Getters ---------- //
 
   function getCurrentAllocationRoundSnapshot() public view returns (uint256) {
@@ -279,6 +275,13 @@ contract XAllocationVoting is
     require(
       hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || isAppModerator(appId, msg.sender) || isAppAdmin(appId, msg.sender),
       "XAllocationVoting: sender must be an admin or app moderator"
+    );
+  }
+
+  function _authorizeAppManagement(bytes32 appId) internal view override {
+    require(
+      hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || isAppAdmin(appId, msg.sender),
+      "XAllocationVoting: sender must be an admin"
     );
   }
 

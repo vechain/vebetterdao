@@ -1,5 +1,5 @@
 import { ethers } from "hardhat"
-import { B3TR, Emissions, Treasury, VOT3, XAllocationVoting, XApps } from "../../typechain-types"
+import { B3TR, Emissions, Treasury, VOT3, XAllocationVoting, XAppsUpgradeable } from "../../typechain-types"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { BytesLike } from "ethers"
 
@@ -190,7 +190,7 @@ const castVotesToXDapps = async (
   accounts: HardhatEthersSigner[],
   roundId: number,
   vot3mount: string,
-  apps: XApps.AppStruct[],
+  apps: XAppsUpgradeable.AppStruct[],
 ) => {
   return Promise.all(
     accounts.map(async account => {

@@ -85,7 +85,6 @@ abstract contract XAppsUpgradeable is Initializable, IXApps, XAllocationVotingGo
 
     // Store the new app
     $._apps[id] = App(id, receiverAddress, admin, appName, metadataURI, clock(), block.timestamp);
-    $._appModerators[id].push(admin); // admin is also moderator by default
     $._appIds.push(id);
     _pushAppToEligbleApps(id);
 
@@ -101,6 +100,45 @@ abstract contract XAppsUpgradeable is Initializable, IXApps, XAllocationVotingGo
     XAppsStorage storage $ = _getXAppsStorageStorage();
 
     $._apps[appId].metadataURI = metadataURI;
+  }
+
+  function updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) external appExists(appId) {
+    _authorizeAppManagement(appId);
+
+    XAppsStorage storage $ = _getXAppsStorageStorage();
+
+    $._apps[appId].receiverAddress = newReceiverAddress;
+  }
+
+  function addAppModerator(bytes32 appId, address moderator) external appExists(appId) {
+    _authorizeAppManagement(appId);
+
+    XAppsStorage storage $ = _getXAppsStorageStorage();
+
+    $._appModerators[appId].push(moderator);
+  }
+
+  function removeAppModerator(bytes32 appId, address moderator) external appExists(appId) {
+    _authorizeAppManagement(appId);
+
+    XAppsStorage storage $ = _getXAppsStorageStorage();
+
+    address[] storage moderators = $._appModerators[appId];
+    for (uint256 i = 0; i < moderators.length; i++) {
+      if (moderators[i] == moderator) {
+        moderators[i] = moderators[moderators.length - 1];
+        moderators.pop();
+        break;
+      }
+    }
+  }
+
+  function updateAppAdminAddress(bytes32 appId, address newAdmin) external appExists(appId) {
+    _authorizeAppManagement(appId);
+
+    XAppsStorage storage $ = _getXAppsStorageStorage();
+
+    $._apps[appId].admin = newAdmin;
   }
 
   // ---------- Internal and private ---------- //
@@ -153,12 +191,6 @@ abstract contract XAppsUpgradeable is Initializable, IXApps, XAllocationVotingGo
     XAppsStorage storage $ = _getXAppsStorageStorage();
 
     $._baseURI = baseURI_;
-  }
-
-  function _updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) internal appExists(appId) {
-    XAppsStorage storage $ = _getXAppsStorageStorage();
-
-    $._apps[appId].receiverAddress = newReceiverAddress;
   }
 
   // ---------- Getters ---------- //
@@ -281,26 +313,26 @@ abstract contract XAppsUpgradeable is Initializable, IXApps, XAllocationVotingGo
 
   // --- To be implemented by the inheriting contract --- //
   /**
-   * @dev Function that should revert when `msg.sender` is not authorized to update the app. Called by
-   * {updateAppMetadata}.
-   *
-   * Normally, this function will use an xref:access.adoc[access control] modifier such as {Ownable-onlyOwner}.
-   *
-   * ```solidity
-   * function _authorizeAppMetadataUpdate(address) internal onlyOwner {}
-   * ```
-   */
-  function _authorizeAppMetadataUpdate(bytes32 appId) internal virtual;
-
-  /**
    * @dev Function that should revert when `msg.sender` is not authorized to add an app. Called by
    * {addApp}.
    *
    * Normally, this function will use an xref:access.adoc[access control] modifier such as {Ownable-onlyOwner}.
    *
    * ```solidity
-   * function _authorizeAppMetadataUpdate(address) internal onlyOwner {}
+   * function _authorizeAddApp(address) internal onlyOwner {}
    * ```
    */
   function _authorizeAddApp() internal virtual;
+
+  /**
+   * @dev Function that should revert when `msg.sender` is not authorized to update the app. Called by
+   * {updateAppMetadata}.
+   */
+  function _authorizeAppMetadataUpdate(bytes32 appId) internal virtual;
+
+  /**
+   * @dev Function that should revert when `msg.sender` is not authorized to sensible updates to an app. Called by
+   * {addAppModerator}, {removeAppModerator}, {updateAppAdminAddress}, {updateAppReceiverAddress}.
+   */
+  function _authorizeAppManagement(bytes32 appId) internal virtual;
 }
