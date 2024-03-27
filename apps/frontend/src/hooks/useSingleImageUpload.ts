@@ -41,6 +41,7 @@ export const useSingleImageUpload = ({ compressImage, defaultImage }: Props) => 
       }
 
       setUploadedImage(image)
+      return image
     },
     [compressImage],
   )
