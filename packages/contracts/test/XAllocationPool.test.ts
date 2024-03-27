@@ -251,8 +251,10 @@ describe("X-Allocation Pool", async function () {
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
       const app1ReceiverAddress = otherAccounts[3].address
       const app2ReceiverAddress = otherAccounts[4].address
-      await xAllocationVoting.connect(owner).addApp(app1ReceiverAddress, "My app", "metadataURI")
-      await xAllocationVoting.connect(owner).addApp(app2ReceiverAddress, "My app #2", "metadataURI")
+      await xAllocationVoting.connect(owner).addApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
 
       // Bootstrap emissions
       await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
