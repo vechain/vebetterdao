@@ -202,7 +202,7 @@ describe("X-Apps", function () {
       expect(appReceiverAddress).to.eql(otherAccounts[0].address)
     })
 
-    it("Admin can update the receiver address of an app", async function () {
+    it("Governance admin role can update the receiver address of an app", async function () {
       const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await xAllocationVoting
@@ -220,6 +220,79 @@ describe("X-Apps", function () {
       const appReceiverAddress2 = await xAllocationVoting.getAppReceiverAddress(app1Id)
       expect(appReceiverAddress2).to.eql(otherAccounts[1].address)
       expect(appReceiverAddress1).to.not.eql(appReceiverAddress2)
+    })
+
+    it("App admin can update the receiver address of an app", async function () {
+      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      const appAdmin = otherAccounts[9]
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, appAdmin.address, "My app", "metadataURI")
+
+      const appReceiverAddress1 = await xAllocationVoting.getAppReceiverAddress(app1Id)
+
+      const adminRole = await xAllocationVoting.DEFAULT_ADMIN_ROLE()
+      const isAdmin = await xAllocationVoting.hasRole(adminRole, appAdmin.address)
+      expect(isAdmin).to.be.false
+
+      expect(await xAllocationVoting.isAppAdmin(app1Id, appAdmin.address)).to.be.true
+
+      await xAllocationVoting.connect(appAdmin).updateAppReceiverAddress(app1Id, otherAccounts[1].address)
+
+      const appReceiverAddress2 = await xAllocationVoting.getAppReceiverAddress(app1Id)
+      expect(appReceiverAddress2).to.eql(otherAccounts[1].address)
+      expect(appReceiverAddress1).to.not.eql(appReceiverAddress2)
+    })
+
+    it("Moderators cannot update the receiver address of an app", async function () {
+      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+
+      const appReceiverAddress1 = await xAllocationVoting.getAppReceiverAddress(app1Id)
+
+      const adminRole = await xAllocationVoting.DEFAULT_ADMIN_ROLE()
+      const isAdmin = await xAllocationVoting.hasRole(adminRole, owner.address)
+      expect(isAdmin).to.be.true
+
+      await xAllocationVoting.connect(owner).addAppModerator(app1Id, otherAccounts[1].address)
+
+      const isModerator = await xAllocationVoting.isAppModerator(app1Id, otherAccounts[1].address)
+      expect(isModerator).to.be.true
+
+      await expect(
+        xAllocationVoting.connect(otherAccounts[1]).updateAppReceiverAddress(app1Id, otherAccounts[1].address),
+      ).to.be.rejected
+
+      const appReceiverAddress2 = await xAllocationVoting.getAppReceiverAddress(app1Id)
+      expect(appReceiverAddress2).to.eql(appReceiverAddress1)
+    })
+
+    it("Moderators cannot update the receiver address of an app", async function () {
+      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+
+      const appReceiverAddress1 = await xAllocationVoting.getAppReceiverAddress(app1Id)
+
+      const adminRole = await xAllocationVoting.DEFAULT_ADMIN_ROLE()
+      const isAdmin = await xAllocationVoting.hasRole(adminRole, owner.address)
+      expect(isAdmin).to.be.true
+
+      await xAllocationVoting.connect(owner).addAppModerator(app1Id, otherAccounts[1].address)
+
+      const isModerator = await xAllocationVoting.isAppModerator(app1Id, otherAccounts[1].address)
+      expect(isModerator).to.be.true
+
+      await expect(
+        xAllocationVoting.connect(otherAccounts[1]).updateAppReceiverAddress(app1Id, otherAccounts[1].address),
+      ).to.be.rejected
+
+      const appReceiverAddress2 = await xAllocationVoting.getAppReceiverAddress(app1Id)
+      expect(appReceiverAddress2).to.eql(appReceiverAddress1)
     })
 
     it("Non-admin cannot update the receiver address of an app", async function () {
@@ -241,6 +314,128 @@ describe("X-Apps", function () {
 
       const appReceiverAddress2 = await xAllocationVoting.getAppReceiverAddress(app1Id)
       expect(appReceiverAddress2).to.eql(appReceiverAddress1)
+    })
+  })
+
+  describe("App Moderators", function () {
+    it("By default there is no moderator for an app", async function () {
+      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+
+      const isModerator = await xAllocationVoting.isAppModerator(app1Id, otherAccounts[0].address)
+      expect(isModerator).to.be.false
+
+      const moderators = await xAllocationVoting.appModerators(app1Id)
+      expect(moderators).to.eql([])
+    })
+
+    it("Governance admin role can add a moderator to an app", async function () {
+      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+
+      const adminRole = await xAllocationVoting.DEFAULT_ADMIN_ROLE()
+      const isAdmin = await xAllocationVoting.hasRole(adminRole, owner.address)
+      expect(isAdmin).to.be.true
+
+      await xAllocationVoting.connect(owner).addAppModerator(app1Id, otherAccounts[1].address)
+
+      const isModerator = await xAllocationVoting.isAppModerator(app1Id, otherAccounts[1].address)
+      expect(isModerator).to.be.true
+    })
+
+    it("Governance admin role can remove a moderator from an app", async function () {
+      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+      await xAllocationVoting.connect(owner).addAppModerator(app1Id, otherAccounts[1].address)
+
+      const adminRole = await xAllocationVoting.DEFAULT_ADMIN_ROLE()
+      const isAdmin = await xAllocationVoting.hasRole(adminRole, owner.address)
+      expect(isAdmin).to.be.true
+
+      let isModerator = await xAllocationVoting.isAppModerator(app1Id, otherAccounts[1].address)
+      expect(isModerator).to.be.true
+
+      await xAllocationVoting.connect(owner).removeAppModerator(app1Id, otherAccounts[1].address)
+
+      isModerator = await xAllocationVoting.isAppModerator(app1Id, otherAccounts[1].address)
+      expect(isModerator).to.be.false
+    })
+
+    it("App admin can add a moderator to an app", async function () {
+      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      const appAdmin = otherAccounts[9]
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, appAdmin.address, "My app", "metadataURI")
+
+      const adminRole = await xAllocationVoting.DEFAULT_ADMIN_ROLE()
+      const isAdmin = await xAllocationVoting.hasRole(adminRole, appAdmin.address)
+      expect(isAdmin).to.be.false
+
+      expect(await xAllocationVoting.isAppAdmin(app1Id, appAdmin.address)).to.be.true
+
+      await xAllocationVoting.connect(appAdmin).addAppModerator(app1Id, otherAccounts[1].address)
+
+      const isModerator = await xAllocationVoting.isAppModerator(app1Id, otherAccounts[1].address)
+      expect(isModerator).to.be.true
+    })
+
+    it("App admin can remove a moderator from an app", async function () {
+      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      const appAdmin = otherAccounts[9]
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, appAdmin.address, "My app", "metadataURI")
+      await xAllocationVoting.connect(appAdmin).addAppModerator(app1Id, otherAccounts[1].address)
+
+      const adminRole = await xAllocationVoting.DEFAULT_ADMIN_ROLE()
+      const isAdmin = await xAllocationVoting.hasRole(adminRole, appAdmin.address)
+      expect(isAdmin).to.be.false
+
+      expect(await xAllocationVoting.isAppAdmin(app1Id, appAdmin.address)).to.be.true
+
+      let isModerator = await xAllocationVoting.isAppModerator(app1Id, otherAccounts[1].address)
+      expect(isModerator).to.be.true
+
+      await xAllocationVoting.connect(appAdmin).removeAppModerator(app1Id, otherAccounts[1].address)
+
+      isModerator = await xAllocationVoting.isAppModerator(app1Id, otherAccounts[1].address)
+      expect(isModerator).to.be.false
+    })
+
+    it("Can correctly fetch all moderators of an app", async function () {
+      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+      await xAllocationVoting.connect(owner).addAppModerator(app1Id, otherAccounts[1].address)
+      await xAllocationVoting.connect(owner).addAppModerator(app1Id, otherAccounts[2].address)
+
+      const moderators = await xAllocationVoting.appModerators(app1Id)
+      expect(moderators).to.eql([otherAccounts[1].address, otherAccounts[2].address])
+    })
+
+    it("Can know if an address is a moderator of an app", async function () {
+      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+      await xAllocationVoting.connect(owner).addAppModerator(app1Id, otherAccounts[1].address)
+
+      let isModerator = await xAllocationVoting.isAppModerator(app1Id, otherAccounts[1].address)
+      expect(isModerator).to.be.true
+
+      isModerator = await xAllocationVoting.isAppModerator(app1Id, otherAccounts[2].address)
+      expect(isModerator).to.be.false
     })
   })
 })
