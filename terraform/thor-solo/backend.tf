@@ -1,4 +1,9 @@
 terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+    }
+  }
   backend "s3" {
     key    = "b3tr-thor-solo/terraform.tfstate"
     region = "eu-west-1"
