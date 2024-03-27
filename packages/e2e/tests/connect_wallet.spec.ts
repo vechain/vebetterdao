@@ -1,10 +1,9 @@
-import { expect, test } from '@playwright/test';
+import { test } from '@playwright/test';
 import { FIXED_ACCOUNT1, HOMEPAGE, THOR_URL } from '../utils/constants';
 import { screenshotOnFailure } from '../utils/screenshot';
 import veWorldMockClient from '../utils/veworld-mock-client';
 import { DashboardPage } from '../model/dashboardPage';
 import blockchainUtils from '../utils/blockchain';
-import BigNumber from 'bignumber.js';
 
 test.describe('Connect Wallet', () => {
 
@@ -42,18 +41,6 @@ test.describe('Connect Wallet', () => {
     const address = await dashboardPage.connectWallet()
     const expectedBalance = await blockchainUtils.getVOT3Balance(address)
     await dashboardPage.expectVOT3Balance(expectedBalance)
-  })
-
-
-
-  test('Test blockchain', async ({ page }) => {
-    test.slow()
-    const address = blockchainUtils.getAccountAddress(FIXED_ACCOUNT1)
-    const privateKey = blockchainUtils.getAccountPrivateKey(FIXED_ACCOUNT1)
-    await blockchainUtils.fundVTHO(address, BigNumber(1000))
-    await blockchainUtils.fundB3TR(address, BigNumber(1))
-    await blockchainUtils.swapB3TRForVOT3(privateKey, address, BigNumber(1))
-
   })
 
 });

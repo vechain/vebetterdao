@@ -174,7 +174,9 @@ const getVOT3Balance = async (address: string): Promise<BigNumber> => {
  * @returns Balance of VTHO tokens (this is a decimal value)
  */
 const getVTHOBalance = async (address: string): Promise<BigNumber> => {
-    return getERC20Balance(address, VTHO_CONTRACT_ADDRESS)
+    const balance = getERC20Balance(address, VTHO_CONTRACT_ADDRESS)
+    console.log(`VTHO balance of address ${address}: ${balance}`)
+    return balance
 }
 
 /**
@@ -258,7 +260,9 @@ const fundAccount = async (account_index: number) => {
         // transfer B3TR to account
         await blockchainUtils.fundB3TR(address, b3trNeeded)
         // swap B3TR for VOT3
-        await blockchainUtils.swapB3TRForVOT3(privateKey, address, vot3Needed)
+        if (vot3Needed.isGreaterThan(0)) {
+            await blockchainUtils.swapB3TRForVOT3(privateKey, address, vot3Needed)
+        }
     }
     if (vthoBalance.isLessThan(FUNDING_MIN_VTHO)) {
         const vthoDiff = vthoBalance.minus(FUNDING_MIN_VTHO).multipliedBy(-1)

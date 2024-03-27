@@ -14,7 +14,7 @@ export const TX_RECEIPT_TIMEOUT = 10000
 export const TX_RECEIPT_INTERVAL = 500
 
 // account funding
-export const FUNDING_ACCOUNT_INDEX = 20
+export const FUNDING_ACCOUNT_INDEX = 1  // index of the account to fund from
 export const FUNDING_MIN_B3TR = 10
 export const FUNDING_MIN_VTHO = 1000
 export const FUNDING_MIN_VOT3 = 5

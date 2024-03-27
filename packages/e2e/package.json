@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "test:e2e": "playwright test",
-    "test:e2e:debug": "playwright test --debug",
+    "playwright:e2e": "playwright test",
+    "playwright:e2e:debug": "playwright test --debug",
     "build": "webpack --config webpack.config.js"
   },
   "keywords": [],
