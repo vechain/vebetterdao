@@ -101,6 +101,9 @@
     "upload-xapp-metadata": {
       "cache": false,
       "dependsOn": ["@repo/config#check-or-generate-local-config"]
+    },
+    "test:e2e": {
+      "cache": false
     }
   }
 }

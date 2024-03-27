@@ -1,0 +1,64 @@
+import { expect, test } from '@playwright/test';
+import { FIXED_ACCOUNT1, HOMEPAGE, THOR_URL } from '../utils/constants';
+import { screenshotOnFailure } from '../utils/screenshot';
+import veWorldMockClient from '../utils/veworld-mock-client';
+import { DashboardPage } from '../model/dashboardPage';
+import blockchainUtils from '../utils/blockchain';
+import BigNumber from 'bignumber.js';
+
+test.describe('Connect Wallet', () => {
+
+  test.beforeEach(async ({ page }) => {
+    await veWorldMockClient.load(page);
+    await page.goto(HOMEPAGE);
+    await veWorldMockClient.install(page)
+    await veWorldMockClient.setThorUrl(page, THOR_URL)
+    await veWorldMockClient.setSignerAccIndex(page, FIXED_ACCOUNT1)
+  })
+
+  test.afterEach(screenshotOnFailure);
+
+  test('User can connect wallet', async ({ page }) => {
+    const dashboardPage = new DashboardPage(page);
+    await dashboardPage.connectWallet()
+  });
+
+  test('User can disconnect wallet', async ({ page }) => {
+    const dashboardPage = new DashboardPage(page);
+    const address = await dashboardPage.connectWallet()
+    await dashboardPage.disconnectWallet(address)
+  });
+
+  test('User can see B3TR balance after connecting wallet', async ({ page }) => {
+    const dashboardPage = new DashboardPage(page);
+    const address = await dashboardPage.connectWallet()
+    const expectedBalance = await blockchainUtils.getB3TRBalance(address)
+    await dashboardPage.expectB3TRBalance(expectedBalance)
+  })
+
+  test('User can see VOT3 balance after connecting wallet', async ({ page }) => {
+    //TODO : Account will need some VOT3 tokens to test this
+    const dashboardPage = new DashboardPage(page);
+    const address = await dashboardPage.connectWallet()
+    const expectedBalance = await blockchainUtils.getVOT3Balance(address)
+    await dashboardPage.expectVOT3Balance(expectedBalance)
+  })
+
+
+
+  test('Test blockchain', async ({ page }) => {
+    test.slow()
+    const address = blockchainUtils.getAccountAddress(FIXED_ACCOUNT1)
+    const privateKey = blockchainUtils.getAccountPrivateKey(FIXED_ACCOUNT1)
+    await blockchainUtils.fundVTHO(address, BigNumber(1000))
+    await blockchainUtils.fundB3TR(address, BigNumber(1))
+    await blockchainUtils.swapB3TRForVOT3(privateKey, address, BigNumber(1))
+
+  })
+
+});
+
+
+
+
+

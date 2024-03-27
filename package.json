@@ -25,7 +25,8 @@
     "contracts:upload-b3tr-badge-metadata": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run upload-b3tr-badge-metadata --filter=contracts",
     "contracts:generate-xapp-metadata": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run generate-xapp-metadata --filter=contracts",
     "contracts:upload-xapp-metadata": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run upload-xapp-metadata --filter=contracts",
-    "solo-up": "make solo-up"
+    "solo-up": "make solo-up",
+    "test:e2e": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run test:e2e"
   },
   "devDependencies": {
     "@repo/eslint-config": "*",
