@@ -15,6 +15,7 @@ import { XAllocationVoting__factory as XAllocationVoting } from "@repo/contracts
 export type XApp = {
   id: string
   receiverAddress: string
+  adminAddress: string
   name: string
   metadataURI: string
   createdAt: number
@@ -36,10 +37,11 @@ export const getXApps = async (thor: Connex.Thor): Promise<XApp[]> => {
   return apps.map((app: any) => ({
     id: app[0],
     receiverAddress: app[1],
-    name: app[2],
-    metadataURI: app[3],
-    createdAt: app[4],
-    createdAtTimestamp: app[5],
+    adminAddress: app[2],
+    name: app[3],
+    metadataURI: app[4],
+    createdAt: app[5],
+    createdAtTimestamp: app[6],
   }))
 }
 
