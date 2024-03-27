@@ -80,7 +80,7 @@ contract XAllocationPool is
     $._emissions = IEmissions(emissions_);
   }
 
-  function setTreasury(address treasury_) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setTreasuryAddress(address treasury_) public onlyRole(DEFAULT_ADMIN_ROLE) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     $.treasury = ITreasury(treasury_);
   }
@@ -111,7 +111,7 @@ contract XAllocationPool is
     }
 
     // emit event
-    emit AllocationRewardsClaimed(appId, roundId, amountToClaim, receiverAddress, msg.sender);
+    emit AllocationRewardsClaimed(appId, roundId, amountToClaim, receiverAddress, msg.sender, unallocatedAmount);
   }
 
   // ---------- Internal and private ---------- //

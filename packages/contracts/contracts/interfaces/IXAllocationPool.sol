@@ -7,7 +7,8 @@ interface IXAllocationPool {
     uint256 roundId,
     uint256 amount,
     address indexed recipient,
-    address caller
+    address caller,
+    uint256 unallocatedAmount
   );
 
   function currentRoundEarnings(bytes32 appId) external view returns (uint256);
