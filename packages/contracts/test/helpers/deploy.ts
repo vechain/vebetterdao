@@ -11,6 +11,7 @@ import {
   XAllocationVoting,
   XAllocationPool,
   VoterRewards,
+  Treasury,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy } from "../../scripts/helpers"
@@ -26,6 +27,7 @@ interface DeployInstance {
   xAllocationPool: XAllocationPool
   emissions: Emissions
   voterRewards: VoterRewards
+  treasury: Treasury
   owner: HardhatEthersSigner
   otherAccount: HardhatEthersSigner
   minterAccount: HardhatEthersSigner
@@ -78,6 +80,7 @@ export const getOrDeployContractInstances = async ({
     config.B3TR_GOVERNOR_VOTING_PERIOD, // voting period
     config.B3TR_GOVERNOR_VOTING_DELAY, // voting delay
     config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD, // voting threshold
+    owner.address,
   ])) as B3TRGovernor
 
   // Set up roles
@@ -87,6 +90,15 @@ export const getOrDeployContractInstances = async ({
   await timeLock.connect(timelockAdmin).grantRole(PROPOSER_ROLE, await governor.getAddress())
   await timeLock.connect(timelockAdmin).grantRole(EXECUTOR_ROLE, await governor.getAddress())
   await timeLock.connect(timelockAdmin).grantRole(CANCELLER_ROLE, await governor.getAddress())
+
+  // Deploy Treasury
+  const treasury = (await deployProxy("Treasury", [
+    await b3tr.getAddress(),
+    await vot3.getAddress(),
+    owner.address,
+    owner.address,
+    owner.address,
+  ])) as Treasury
 
   // Deploy NFTBadge
   const b3trBadge = (await deployProxy("B3TRBadge", [
@@ -99,7 +111,7 @@ export const getOrDeployContractInstances = async ({
     config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
     config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
     await b3tr.getAddress(),
-    config.TREASURY_POOL_ADDRESS,
+    await treasury.getAddress(),
   ])) as B3TRBadge
 
   // Deploy XAllocationPool
@@ -107,13 +119,11 @@ export const getOrDeployContractInstances = async ({
     owner.address,
     owner.address,
     await b3tr.getAddress(),
-    config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
-    config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
+    await treasury.getAddress(),
   ])) as XAllocationPool
 
   const X_ALLOCATIONS_ADDRESS = await xAllocationPool.getAddress()
   const VOTE_2_EARN_ADDRESS = otherAccounts[1].address
-  const TREASURY_ADDRESS = otherAccounts[2].address
 
   const emissions = (await deployProxy("Emissions", [
     {
@@ -121,7 +131,7 @@ export const getOrDeployContractInstances = async ({
       admin: owner.address,
       upgrader: owner.address,
       b3trAddress: await b3tr.getAddress(),
-      destinations: [X_ALLOCATIONS_ADDRESS, VOTE_2_EARN_ADDRESS, TREASURY_ADDRESS],
+      destinations: [X_ALLOCATIONS_ADDRESS, VOTE_2_EARN_ADDRESS, await treasury.getAddress()],
       initialXAppAllocation: config.INITIAL_X_ALLOCATION,
       cycleDuration: config.EMISSIONS_CYCLE_DURATION,
       decaySettings: [
@@ -150,14 +160,19 @@ export const getOrDeployContractInstances = async ({
 
   // Deploy XAllocationVoting
   const xAllocationVoting = (await deployProxy("XAllocationVoting", [
-    await vot3.getAddress(),
-    config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE, // quorum percentage
-    config.EMISSIONS_CYCLE_DURATION - 1, // X Alloc voting period
-    await timeLock.getAddress(),
-    await voterRewards.getAddress(),
-    [await timeLock.getAddress(), owner.address],
-    owner.address,
-    "ipfs://",
+    {
+      vot3Token: await vot3.getAddress(),
+      quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE, // quorum percentage
+      initialVotingPeriod: config.EMISSIONS_CYCLE_DURATION - 1, // X Alloc voting period
+      b3trGovernor: await timeLock.getAddress(),
+      voterRewards: await voterRewards.getAddress(),
+      emissions: await emissions.getAddress(),
+      admins: [await timeLock.getAddress(), owner.address],
+      upgrader: owner.address,
+      xAppsBaseURI: "ipfs://",
+      baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
+      appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
+    },
   ])) as XAllocationVoting
 
   // Set xAllocationVoting and Governor address in B3TRBadge
@@ -204,6 +219,7 @@ export const getOrDeployContractInstances = async ({
     minterAccount,
     timelockAdmin,
     otherAccounts,
+    treasury,
   }
   return cachedDeployInstance
 }

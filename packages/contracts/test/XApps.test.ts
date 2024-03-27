@@ -15,7 +15,9 @@ describe("X-Apps", function () {
       const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
-      let tx = await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
+      let tx = await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       let receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
 
@@ -29,16 +31,20 @@ describe("X-Apps", function () {
 
     it("Should not be able to add an app if it is already added", async function () {
       const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address)
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
 
-      await catchRevert(xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address))
+      await catchRevert(
+        xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "metadataURI"),
+      )
     })
 
     it("Only admin address should be able to add an app", async function () {
       const { xAllocationVoting, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
 
       await catchRevert(
-        xAllocationVoting.connect(otherAccounts[0]).addApp(otherAccounts[0].address, otherAccounts[0].address),
+        xAllocationVoting
+          .connect(otherAccounts[0])
+          .addApp(otherAccounts[0].address, otherAccounts[0].address, "metadataURI"),
       )
     })
 
@@ -60,7 +66,7 @@ describe("X-Apps", function () {
         await ethers.getContractFactory("XAllocationVoting"),
         "Add app to the list",
         "addApp",
-        [otherAccounts[1].address, "Bike 4 Life"],
+        [otherAccounts[1].address, "Bike 4 Life", "metadataURI"],
       )
 
       // check that app was added
@@ -77,8 +83,8 @@ describe("X-Apps", function () {
       //Add apps
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[2].address, "My app")
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[3].address, "My app #2")
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[2].address, "My app", "metadataURI")
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[3].address, "My app #2", "metadataURI")
 
       const app1ReceiverAddress = await xAllocationVoting.getAppReceiverAddress(app1Id)
       const app2ReceiverAddress = await xAllocationVoting.getAppReceiverAddress(app2Id)
@@ -103,12 +109,12 @@ describe("X-Apps", function () {
     it("Should be able to fetch app metadata", async function () {
       const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = await xAllocationVoting.hashName("My app")
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, "My app")
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, "My app", "metadataURI")
 
       const baseURI = await xAllocationVoting.baseURI()
       const appURI = await xAllocationVoting.appURI(app1Id)
 
-      expect(appURI).to.eql(baseURI + app1Id)
+      expect(appURI).to.eql(baseURI + "metadataURI")
     })
   })
 
@@ -116,7 +122,7 @@ describe("X-Apps", function () {
     it("Should be able to fetch app receiver address", async function () {
       const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, "My app")
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, "My app", "metadataURI")
 
       const appReceiverAddress = await xAllocationVoting.getAppReceiverAddress(app1Id)
       expect(appReceiverAddress).to.eql(otherAccounts[0].address)
@@ -125,7 +131,7 @@ describe("X-Apps", function () {
     it("Admin can update the receiver address of an app", async function () {
       const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, "My app")
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, "My app", "metadataURI")
 
       const appReceiverAddress1 = await xAllocationVoting.getAppReceiverAddress(app1Id)
 
@@ -143,7 +149,7 @@ describe("X-Apps", function () {
     it("Non-admin cannot update the receiver address of an app", async function () {
       const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, "My app")
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, "My app", "metadataURI")
 
       const appReceiverAddress1 = await xAllocationVoting.getAppReceiverAddress(app1Id)
 

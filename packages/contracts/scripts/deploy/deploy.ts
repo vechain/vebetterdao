@@ -9,6 +9,7 @@ import {
   B3TRBadge,
   VoterRewards,
   XAllocationPool,
+  Treasury,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -19,10 +20,6 @@ import { deployProxy } from "../helpers"
 // NFT Badge Values
 const name = "VeBetterDAO Galaxy Member"
 const symbol = "GM"
-
-// Voter rewards
-const levels = [1]
-const multiplier = [0]
 
 export async function deployAll(config: ContractsConfig) {
   const networkConfig = network.config as HttpNetworkConfig
@@ -50,6 +47,15 @@ export async function deployAll(config: ContractsConfig) {
     config.B3TR_GOVERNOR_VOTING_PERIOD,
     config.B3TR_GOVERNOR_VOTING_DELAY,
     config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD,
+    TEMP_ADMIN,
+  )
+
+  const treasury = await deployTreasury(
+    await b3tr.getAddress(),
+    await vot3.getAddress(),
+    await timelock.getAddress(),
+    TEMP_ADMIN,
+    TEMP_ADMIN,
   )
 
   // Deploy XAllocationPool
@@ -57,8 +63,7 @@ export async function deployAll(config: ContractsConfig) {
     await b3tr.getAddress(),
     TEMP_ADMIN,
     TEMP_ADMIN,
-    config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
-    config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
+    await treasury.getAddress(),
   )
 
   // Deploy the NFT Badge contract with Max Mintable Level 1
@@ -72,12 +77,12 @@ export async function deployAll(config: ContractsConfig) {
     config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
     config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
     await b3tr.getAddress(),
-    config.TREASURY_POOL_ADDRESS,
+    await treasury.getAddress(),
   )
 
   const emissions = await deployEmissions(
     await b3tr.getAddress(),
-    [await xAllocationPool.getAddress(), config.VOTE_2_EARN_POOL_ADDRESS, config.TREASURY_POOL_ADDRESS],
+    [await xAllocationPool.getAddress(), config.VOTE_2_EARN_POOL_ADDRESS, await treasury.getAddress()],
     config.INITIAL_X_ALLOCATION,
     TEMP_ADMIN,
     TEMP_ADMIN,
@@ -98,8 +103,8 @@ export async function deployAll(config: ContractsConfig) {
     await b3tr.getAddress(),
     TEMP_ADMIN,
     TEMP_ADMIN,
-    levels,
-    multiplier,
+    config.VOTER_REWARDS_LEVELS,
+    config.VOTER_REWARDS_MULTIPLIER,
   )
 
   // Deploy XAllocationVoting
@@ -109,9 +114,12 @@ export async function deployAll(config: ContractsConfig) {
     TEMP_ADMIN,
     TEMP_ADMIN,
     await voterRewards.getAddress(),
+    await emissions.getAddress(),
     config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE,
     config.EMISSIONS_CYCLE_DURATION - 1,
     config.XAPP_BASE_URI,
+    config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
+    config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
   )
 
   console.log("Contracts deployed")
@@ -129,6 +137,10 @@ export async function deployAll(config: ContractsConfig) {
   await timelock.grantRole(PROPOSER_ROLE, await governor.getAddress())
   await timelock.grantRole(EXECUTOR_ROLE, await governor.getAddress())
   await timelock.grantRole(CANCELLER_ROLE, await governor.getAddress())
+
+  // Grant treasury GOVERNANCE_ROLE to treasury contract admin for intial phases of project
+  const GOVERNANCE_ROLE = await treasury.GOVERNANCE_ROLE()
+  await treasury.grantRole(GOVERNANCE_ROLE, TEMP_ADMIN)
 
   // Grant Vote Registrar role to XAllocationVoting
   await voterRewards
@@ -184,7 +196,7 @@ export async function deployAll(config: ContractsConfig) {
   if (network.name === "vechain_testnet") {
     await seedTestEnvironment(b3tr, xAllocationVoting, emissions)
   } else if (network.name === "vechain_solo") {
-    await seedLocalEnvironment(b3tr, vot3, xAllocationVoting, emissions)
+    await seedLocalEnvironment(treasury, vot3, xAllocationVoting, emissions)
   }
 
   // ---------- Role updates ---------- //
@@ -206,6 +218,11 @@ export async function deployAll(config: ContractsConfig) {
     await transferAdminRole(xAllocationPool, admin, config.CONTRACTS_ADMIN_ADDRESS)
     await transferAdminRole(xAllocationVoting, admin, config.CONTRACTS_ADMIN_ADDRESS)
 
+    await transferGovernanceRole(treasury, admin, admin.address, config.CONTRACTS_ADMIN_ADDRESS)
+    await transferAdminRole(treasury, admin, config.CONTRACTS_ADMIN_ADDRESS)
+
+    await transferAdminRole(governor, admin, config.CONTRACTS_ADMIN_ADDRESS)
+
     console.log("Roles updated successfully!")
   }
 
@@ -219,6 +236,7 @@ export async function deployAll(config: ContractsConfig) {
     emissionsContractAddress: await emissions.getAddress(),
     voterRewardsContractAddress: await voterRewards.getAddress(),
     nftBadgeContractAddress: await badge.getAddress(),
+    treasuryContractAddress: await treasury.getAddress(),
   })
 
   return {
@@ -231,12 +249,22 @@ export async function deployAll(config: ContractsConfig) {
     xAllocationVoting: xAllocationVoting,
     emissions: emissions,
     voterRewards: voterRewards,
+    treasury: treasury,
   }
   // close the script
 }
 
 const transferAdminRole = async (
-  contract: B3TR | VOT3 | B3TRBadge | Emissions | VoterRewards | XAllocationPool | XAllocationVoting,
+  contract:
+    | B3TR
+    | VOT3
+    | B3TRBadge
+    | Emissions
+    | VoterRewards
+    | XAllocationPool
+    | XAllocationVoting
+    | Treasury
+    | B3TRGovernor,
   oldAdmin: HardhatEthersSigner,
   newAdminAddress: string,
 ) => {
@@ -291,6 +319,43 @@ const transferMinterRole = async (
   }
 }
 
+// Transfer governance role to treasury contract admin for intial phases of project
+const transferGovernanceRole = async (
+  contract: Treasury,
+  admin: HardhatEthersSigner,
+  oldAddress: string,
+  newAddress?: string,
+) => {
+  const governanceRole = await contract.GOVERNANCE_ROLE()
+
+  // If newMinterAddress is provided, set a new minter before revoking the old one
+  // otherwise just revoke the old one
+  if (newAddress) {
+    await contract
+      .connect(admin)
+      .grantRole(governanceRole, newAddress)
+      .then(async tx => await tx.wait())
+    await contract
+      .connect(admin)
+      .revokeRole(governanceRole, oldAddress)
+      .then(async tx => await tx.wait())
+
+    const newGovernanceSet = await contract.hasRole(governanceRole, newAddress)
+    const oldGovernanceRemoved = !(await contract.hasRole(governanceRole, oldAddress))
+    if (!newGovernanceSet || !oldGovernanceRemoved)
+      throw new Error("Minter role not set correctly on " + (await contract.getAddress()))
+  } else {
+    await contract
+      .connect(admin)
+      .revokeRole(governanceRole, oldAddress)
+      .then(async tx => await tx.wait())
+
+    const oldGovernanceRemoved = !(await contract.hasRole(governanceRole, oldAddress))
+    if (!oldGovernanceRemoved)
+      throw new Error("Governance role not removed correctly on " + (await contract.getAddress()))
+  }
+}
+
 async function deployB3trToken(admin: string, cap: number): Promise<B3TR> {
   console.log(`Deploying B3tr contract`)
   const B3trContract = await ethers.getContractFactory("B3TR") // Use the global variable
@@ -333,6 +398,7 @@ async function deployGovernor(
   votingPeriod: number,
   votingDelay: number,
   proposalThreshold: number,
+  admin: string,
 ): Promise<B3TRGovernor> {
   console.log(`Deploying Governor contract`)
 
@@ -343,6 +409,7 @@ async function deployGovernor(
     votingPeriod,
     votingDelay,
     proposalThreshold,
+    admin,
   ])) as B3TRGovernor
 
   console.log(`Governor contract deployed at address ${await contract.getAddress()}`)
@@ -385,16 +452,14 @@ async function deployXAllocationPool(
   b3trAddress: string,
   adminAddress: string,
   upgraderAddress: string,
-  baseAllocationPercentage: number = 20,
-  appSharesCap: number = 15,
+  treasuryAddress: string,
 ) {
   console.log(`Deploying XAllocationPool contract`)
   const contract = (await deployProxy("XAllocationPool", [
     adminAddress,
     upgraderAddress,
     b3trAddress,
-    baseAllocationPercentage,
-    appSharesCap,
+    treasuryAddress,
   ])) as XAllocationPool
 
   console.log(`XAllocationPool contract deployed at address ${await contract.getAddress()}`)
@@ -408,21 +473,29 @@ async function deployXAllocationVoting(
   adminAddress: string,
   upgraderAddress: string,
   voterRewardsAddress: string,
+  emissionsAddress: string,
   quorumPercentage: number = 50,
   xAllocationVotingPeriod: number = 10,
   baseURI: string = "ipfs://",
+  baseAllocationPercentage: number = 20,
+  appSharesCap: number = 15,
 ) {
   console.log(`Deploying XAllocationVoting contract`)
 
   const contract = (await deployProxy("XAllocationVoting", [
-    vot3Address,
-    quorumPercentage,
-    xAllocationVotingPeriod,
-    timeLockAddress,
-    voterRewardsAddress,
-    [timeLockAddress, adminAddress],
-    upgraderAddress,
-    baseURI,
+    {
+      vot3Token: vot3Address,
+      quorumPercentage,
+      initialVotingPeriod: xAllocationVotingPeriod,
+      b3trGovernor: timeLockAddress,
+      voterRewards: voterRewardsAddress,
+      emissions: emissionsAddress,
+      admins: [timeLockAddress, adminAddress],
+      upgrader: upgraderAddress,
+      xAppsBaseURI: baseURI,
+      baseAllocationPercentage,
+      appSharesCap,
+    },
   ])) as XAllocationVoting
 
   console.log(`XAllocationVoting contract deployed at address ${await contract.getAddress()}`)
@@ -483,6 +556,28 @@ async function deployVoterRewards(
   ])) as VoterRewards
 
   console.log(`VoterRewards contract deployed at address ${await contract.getAddress()}`)
+
+  return contract
+}
+
+async function deployTreasury(
+  b3trAddress: string,
+  vot3Address: string,
+  timelockAddress: string,
+  adminAddress: string,
+  proxyAdminAddress: string,
+) {
+  console.log(`Deploying Treasury contract`)
+
+  const contract = (await deployProxy("Treasury", [
+    b3trAddress,
+    vot3Address,
+    timelockAddress,
+    adminAddress,
+    proxyAdminAddress,
+  ])) as Treasury
+
+  console.log(`Treasury contract deployed at address ${await contract.getAddress()}`)
 
   return contract
 }
