@@ -8,16 +8,21 @@ import {
   FormControl,
   FormErrorMessage,
   FormLabel,
+  HStack,
   Heading,
+  Image,
   Input,
   InputGroup,
   InputLeftElement,
+  Stack,
   Textarea,
   VStack,
 } from "@chakra-ui/react"
 import { isValid } from "@repo/utils/AddressUtils"
 import { FieldErrors, UseFormGetValues, UseFormRegister, UseFormWatch } from "react-hook-form"
 import { AddressIcon } from "../AddressIcon"
+import { useIpfsImage } from "@/api/ipfs"
+import { UploadFileButton } from "../UploadFileButton"
 
 export type CreateEditAppFormData = {
   name: string
@@ -36,6 +41,9 @@ type Props = {
   watch: UseFormWatch<CreateEditAppFormData>
 }
 export const CreateEditAppForm = ({ register, errors, isEdit = false, editedApp, watch }: Props) => {
+  const { data: logo, isLoading: isLogoLoading } = useIpfsImage(watch("logo"))
+  const { data: banner, isLoading: isBannerLoading } = useIpfsImage(watch("banner"))
+
   return (
     <Card>
       <CardHeader>
@@ -95,6 +103,24 @@ export const CreateEditAppForm = ({ register, errors, isEdit = false, editedApp,
             </InputGroup>
             {errors.receiverAddress && <FormErrorMessage>{errors.receiverAddress.message}</FormErrorMessage>}
           </FormControl>
+          <Stack direction={["column", "row"]} w="full" justify={"space-between"} align={"flex-start"}>
+            <FormControl isInvalid={!!errors.logo}>
+              <FormLabel>Logo</FormLabel>
+              <VStack w="full">
+                <Image src={logo?.image} alt="logo" h={200} objectFit="cover" borderRadius="9px" />
+                <UploadFileButton mt={4} alignSelf={"flex-end"} />
+                {errors.logo && <FormErrorMessage>{errors.logo.message}</FormErrorMessage>}
+              </VStack>
+            </FormControl>
+            <FormControl isInvalid={!!errors.banner}>
+              <FormLabel>Banner</FormLabel>
+              <VStack w="full">
+                <Image src={banner?.image} alt="banner" h={200} w="full" rounded={"3xl"} objectFit="cover" />
+                <UploadFileButton mt={4} alignSelf={"flex-end"} />
+                {errors.banner && <FormErrorMessage>{errors.banner.message}</FormErrorMessage>}
+              </VStack>
+            </FormControl>
+          </Stack>
         </VStack>
       </CardBody>
       <CardFooter display={"flex"} flexDir={"column"} w="full">
