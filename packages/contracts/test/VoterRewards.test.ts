@@ -1508,9 +1508,13 @@ describe("VoterRewards", () => {
       await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
       await voterRewards.setB3TRBadge(await b3trBadge.getAddress())
 
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
 
       const voter2 = otherAccounts[1]

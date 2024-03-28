@@ -1,6 +1,6 @@
 import { ethers } from "hardhat"
 import { expect } from "chai"
-import { getOrDeployContractInstances, catchRevert, createProposalAndExecuteIt } from "./helpers"
+import { getOrDeployContractInstances, catchRevert, createProposalAndExecuteIt, bootstrapEmissions } from "./helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it, before } from "mocha"
 import { fundTreasuryVET, fundTreasuryVTHO } from "./helpers/fundTreasury"
@@ -16,6 +16,8 @@ describe("Treasury", () => {
   let timeLock: any
   let owner: HardhatEthersSigner
   let otherAccount: HardhatEthersSigner
+  let emissions: any
+  let minterAccount: any
   before(async () => {
     const config = createLocalConfig()
     config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
@@ -32,6 +34,8 @@ describe("Treasury", () => {
     governor = info.governor
     vot3 = info.vot3
     timeLock = info.timeLock
+    emissions = info.emissions
+    minterAccount = info.minterAccount
 
     await fundTreasuryVTHO(await treasuryProxy.getAddress(), ethers.parseEther("10"))
     await fundTreasuryVET(await treasuryProxy.getAddress(), 10)
@@ -150,6 +154,10 @@ describe("Treasury", () => {
     it("should execute transfer TX from proposal", async () => {
       const description = "Test Proposal: testing propsal for Transfer VET from tresausry"
       const treasuryContractFactory = await ethers.getContractFactory("Treasury")
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
       await createProposalAndExecuteIt(
         owner,
         otherAccount,
