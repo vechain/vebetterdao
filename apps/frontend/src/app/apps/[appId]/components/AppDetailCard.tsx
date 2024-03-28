@@ -24,8 +24,8 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useRouter } from "next/navigation"
 
-type Props = { appId: string }
-export const AppDetailCard = ({ appId }: Props) => {
+type Props = { appId: string; showEditButton?: boolean }
+export const AppDetailCard = ({ appId, showEditButton = true }: Props) => {
   const router = useRouter()
   const { account } = useWallet()
   const { isMobile } = useBreakpoints()
@@ -55,11 +55,23 @@ export const AppDetailCard = ({ appId }: Props) => {
             onClick={openMobileOptions}
             aria-label="Open app options"
           />
-          <AppCardOptionsMobileModal isOpen={isMobileOptionsOpen} onClose={closeMobileOptions} xApp={xApp} />
+          <AppCardOptionsMobileModal
+            isOpen={isMobileOptionsOpen}
+            onClose={closeMobileOptions}
+            receiverAddress={xApp.receiverAddress}
+            externalUrl={appMetadata?.external_url}
+            isLoading={appMetadataLoading}
+          />
         </>
       )
     }
-    return <AppCardOptionsDesktopMenu xApp={xApp} />
+    return (
+      <AppCardOptionsDesktopMenu
+        receiverAddress={xApp.receiverAddress}
+        externalUrl={appMetadata?.external_url}
+        isLoading={appMetadataLoading}
+      />
+    )
   }, [isMobile, openMobileOptions, xApp, isMobileOptionsOpen, closeMobileOptions])
 
   return (
@@ -79,7 +91,7 @@ export const AppDetailCard = ({ appId }: Props) => {
               </Skeleton>
             </HStack>
             <HStack spacing={4}>
-              {isReceiverAddress && (
+              {isReceiverAddress && showEditButton && (
                 <Button colorScheme="blue" size="sm" variant="outline" leftIcon={<FaPencil />} onClick={navigateToEdit}>
                   Edit App page
                 </Button>
@@ -93,7 +105,7 @@ export const AppDetailCard = ({ appId }: Props) => {
               {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
             </Text>
           </Skeleton>
-          <AppSocialUrls appId={appId} />
+          <AppSocialUrls socialUrls={appMetadata?.social_urls ?? []} />
         </VStack>
       </CardBody>
     </Card>

@@ -1,6 +1,5 @@
 import { useXApp, useXAppMetadata } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
-import { AppDetailCard } from "@/app/apps/[appId]/components/AppDetailCard"
 import { CreateEditAppForm, CreateEditAppFormData } from "@/components/CreateEditAppForm"
 import { TransactionModal } from "@/components/TransactionModal"
 import { useUpdateAppDetails } from "@/hooks"
@@ -11,13 +10,14 @@ import { useRouter } from "next/navigation"
 import { useCallback, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { FaArrowLeft } from "react-icons/fa6"
+import { AppPreviewDetailCard } from "./AppPreviewDetailCard"
 
 type Props = {
   appId: string
 }
 export const EditAppPageContent = ({ appId }: Props) => {
   const { data: appData } = useXApp(appId)
-  const { data: metadata } = useXAppMetadata(appId)
+  const { data: metadata, isLoading: appMetadataLoading, error: appMetadataError } = useXAppMetadata(appId)
   const router = useRouter()
 
   const { register, setValue, setError, formState, watch, handleSubmit, clearErrors, control } =
@@ -34,8 +34,8 @@ export const EditAppPageContent = ({ appId }: Props) => {
 
   const { errors } = formState
 
-  const { data: logo } = useIpfsImage(metadata?.logo)
-  const { data: banner } = useIpfsImage(metadata?.banner)
+  const { data: logo, isLoading: logoLoading } = useIpfsImage(metadata?.logo)
+  const { data: banner, isLoading: bannerLoading } = useIpfsImage(metadata?.banner)
 
   useEffect(() => {
     if (logo) setValue("logo", logo?.image)
@@ -136,7 +136,13 @@ export const EditAppPageContent = ({ appId }: Props) => {
             <GridItem colSpan={[3, 3, 1]}>
               <VStack spacing={4} w="full" align={"flex-start"} position="sticky" top={100} right={0}>
                 <Heading size="md">App preview</Heading>
-                <AppDetailCard appId={appId} />
+                <AppPreviewDetailCard
+                  app={watch()}
+                  appMetadataLoading={appMetadataLoading}
+                  appMetadataError={appMetadataError}
+                  isLogoLoading={logoLoading}
+                  isBannerLoading={bannerLoading}
+                />
               </VStack>
             </GridItem>
           </Grid>
