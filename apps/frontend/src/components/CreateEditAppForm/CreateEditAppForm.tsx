@@ -9,13 +9,11 @@ import {
   FormErrorMessage,
   FormHelperText,
   FormLabel,
-  HStack,
   Heading,
   Image,
   Input,
   InputGroup,
   InputLeftElement,
-  Skeleton,
   Stack,
   Textarea,
   VStack,
@@ -125,7 +123,7 @@ export const CreateEditAppForm = ({
         <Heading size="lg">{isEdit ? `Edit App ${editedApp?.name}` : "Create a new App"}</Heading>
       </CardHeader>
       <CardBody>
-        <VStack spacing={4} w="full">
+        <VStack spacing={8} w="full">
           <FormControl isInvalid={!!errors.name}>
             <FormLabel>Name</FormLabel>
             <Input
