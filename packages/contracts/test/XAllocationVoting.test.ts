@@ -1204,12 +1204,19 @@ describe("X-Allocation Voting", function () {
       })
 
       //Add apps
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
+
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
 
       //Start allocation round
       const round1 = await startNewAllocationRound(xAllocationVoting)
