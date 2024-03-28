@@ -29,7 +29,7 @@ const MEDIA_PATH = path.join(__dirname, "../../../metadata/xApps/src/media")
 const OUTPUT_PATH = path.join(__dirname, `../../../metadata/xApps/output`)
 
 // NFT Storage
-const NFT_STORAGE_KEY = process.env.NFT_STORAGE_KEY ?? ""
+const NFT_STORAGE_KEY = process.env.NEXT_PUBLIC_NFT_STORAGE_KEY ?? ""
 
 /**
  * Main function to generate and save x-apps metadata.

@@ -16,7 +16,7 @@ import { useXApp } from "./useXApp"
  * @property social_urls - The social urls of the xApp
  * @property app_urls - The app urls of the xApp
  */
-type XAppMetadata = {
+export type XAppMetadata = {
   name: string
   description: string
   external_url: string
