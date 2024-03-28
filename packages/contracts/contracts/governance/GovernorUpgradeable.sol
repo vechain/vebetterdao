@@ -14,7 +14,7 @@ import { DoubleEndedQueue } from "@openzeppelin/contracts/utils/structs/DoubleEn
 import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import { ContextUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import { NoncesUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/NoncesUpgradeable.sol";
-import { IGovernor } from "@openzeppelin/contracts/governance/IGovernor.sol";
+import { IGovernor } from "../interfaces/IGovernor.sol";
 import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
