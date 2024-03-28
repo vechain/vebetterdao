@@ -1,0 +1,36 @@
+project               : b3tr
+domain_name           : dev.b3tr.vechain.org
+origin_id             : dev.b3tr.vechain.org
+bucket_prefix         : dev.b3tr.vechain.org
+domain_zone           : Z09214252JN9OW8DF7KO4
+
+cloudwatch_alarms     : true
+slack_alert_channel   : C06M2KBPGSY
+slack_alert_workspace : T03L3PQD8GK
+
+#thor solo settings
+image_tag:                       latest
+cpu: 256
+memory: 512
+region : "eu-west-1"
+
+# vpc settings
+vpc_id : vpc-0b473e90a18441794
+vpc_cidr : 172.31.0.0/16
+azs:
+- "eu-west-1a"
+- "eu-west-1b"
+- "eu-west-1c"
+private_subnets:
+- "subnet-0e1ac61412fb3bc75"
+- "subnet-07aa0f4c4231aa7b4"
+- "subnet-0010ab4848f9b9512"
+public_subnets:
+- "subnet-02c024bfd9aea6f5f"
+- "subnet-071e0519f34c1d9b9"
+- "subnet-04245f89f78dd7d64"
+
+database_subnets:
+- "172.31.48.0/20"
+- "172.31.16.0/20"
+- "172.31.128.0/20"

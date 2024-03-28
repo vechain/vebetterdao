@@ -7,16 +7,14 @@ import { useQueries } from "@tanstack/react-query"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { FaInfoCircle } from "react-icons/fa"
 import BigNumber from "bignumber.js"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
 type Props = {
   roundId: string
   votes: CastAllocationVotesProps
 }
 
-const compactFormatter = new Intl.NumberFormat("en-US", {
-  notation: "compact",
-  compactDisplay: "short",
-})
+const compactFormatter = getCompactFormatter()
 
 export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
   const { account } = useWallet()

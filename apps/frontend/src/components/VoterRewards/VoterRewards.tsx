@@ -26,15 +26,12 @@ import { motion } from "framer-motion"
 import { B3TRIcon } from "../Icons"
 import { SuccessModalContent } from "../TransactionModal/SuccessModalContent"
 import { CustomModalContent } from "../CustomModalContent"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
 const DECIMAL_PLACES = 4
 
 // Maximum precision of 4 decimals. Must also round down
-const compactFormatter = new Intl.NumberFormat("en-US", {
-  notation: "compact",
-  compactDisplay: "short",
-  maximumFractionDigits: DECIMAL_PLACES,
-})
+const compactFormatter = getCompactFormatter(DECIMAL_PLACES)
 
 // Convert Button to a motion component
 const MotionImage = motion(Image)

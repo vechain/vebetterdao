@@ -20,6 +20,7 @@ import { CustomModalContent } from "../CustomModalContent"
 import { SwitchTokenButton } from "./SwitchTokenButton"
 import { TokenCards } from "./TokenCards"
 import { TransactionModal } from "../TransactionModal"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
 export type Props = {
   isOpen: boolean
@@ -29,11 +30,7 @@ export type Props = {
 const DECIMAL_PLACES = 4
 
 // Maximum precision of 4 decimals. Must also round down
-const compactFormatter = new Intl.NumberFormat("en-US", {
-  notation: "compact",
-  compactDisplay: "short",
-  maximumFractionDigits: DECIMAL_PLACES,
-})
+const compactFormatter = getCompactFormatter(DECIMAL_PLACES)
 
 export const SwapModal = ({ isOpen, onClose }: Props) => {
   const [isB3trToVot3, setIsB3trToVot3] = useState(true)
@@ -56,17 +53,14 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
   })
 
   const mutationData = useMemo(() => {
-    if (isB3trToVot3) {
-      return stakeMutation
-    } else {
-      return unstakeMutation
-    }
+    if (isB3trToVot3) return stakeMutation
+    return unstakeMutation
   }, [isB3trToVot3, stakeMutation, unstakeMutation])
 
   const handleStake = useCallback(() => {
     mutationData.resetStatus()
     mutationData.sendTransaction(undefined)
-  }, [mutationData.sendTransaction])
+  }, [mutationData.resetStatus, mutationData.sendTransaction])
 
   const handleClose = useCallback(() => {
     mutationData.resetStatus()

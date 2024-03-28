@@ -8,11 +8,17 @@ import {
   getProposalIdFromTx,
   getVot3Tokens,
   participateInAllocationVoting,
+  upgradeAndSelectNFTtoNextLevel,
+  upgradeNFTtoLevel,
   waitForProposalToBeActive,
 } from "./helpers"
 import { expect } from "chai"
 import { ethers } from "hardhat"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
+import { createTestConfig } from "./helpers/config"
+import { getImplementationAddress } from "@openzeppelin/upgrades-core"
+import { deployProxy } from "../scripts/helpers"
+import { B3TRBadge } from "../typechain-types"
 
 describe("B3TRBadge", () => {
   describe("Contract parameters", () => {
@@ -102,20 +108,157 @@ describe("B3TRBadge", () => {
       await b3trBadge.connect(owner).setMaxMintableLevels([1, 2, 3, 4, 5, 6, 7])
 
       // Check if the max mintable levels are set correctly
-      expect(await b3trBadge.xNodeTypeToMaxMintableLevel(0)).to.equal(1)
-      expect(await b3trBadge.xNodeTypeToMaxMintableLevel(1)).to.equal(2)
-      expect(await b3trBadge.xNodeTypeToMaxMintableLevel(2)).to.equal(3)
-      expect(await b3trBadge.xNodeTypeToMaxMintableLevel(3)).to.equal(4)
-      expect(await b3trBadge.xNodeTypeToMaxMintableLevel(4)).to.equal(5)
-      expect(await b3trBadge.xNodeTypeToMaxMintableLevel(5)).to.equal(6)
-      expect(await b3trBadge.xNodeTypeToMaxMintableLevel(6)).to.equal(7)
+      expect(await b3trBadge.getMaxMintableLevelOfXNode(0)).to.equal(1)
+      expect(await b3trBadge.getMaxMintableLevelOfXNode(1)).to.equal(2)
+      expect(await b3trBadge.getMaxMintableLevelOfXNode(2)).to.equal(3)
+      expect(await b3trBadge.getMaxMintableLevelOfXNode(3)).to.equal(4)
+      expect(await b3trBadge.getMaxMintableLevelOfXNode(4)).to.equal(5)
+      expect(await b3trBadge.getMaxMintableLevelOfXNode(5)).to.equal(6)
+      expect(await b3trBadge.getMaxMintableLevelOfXNode(6)).to.equal(7)
+    })
+
+    it("Should have correct max mintable levels set on deployment", async () => {
+      const { b3trBadge } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      expect(await b3trBadge.getMaxMintableLevelOfXNode(0)).to.equal(2)
+      expect(await b3trBadge.getMaxMintableLevelOfXNode(1)).to.equal(4)
+      expect(await b3trBadge.getMaxMintableLevelOfXNode(2)).to.equal(6)
+      expect(await b3trBadge.getMaxMintableLevelOfXNode(3)).to.equal(2)
+      expect(await b3trBadge.getMaxMintableLevelOfXNode(4)).to.equal(4)
+      expect(await b3trBadge.getMaxMintableLevelOfXNode(5)).to.equal(6)
+      expect(await b3trBadge.getMaxMintableLevelOfXNode(6)).to.equal(7)
+    })
+
+    it("Should not be able to update max mintable levels if not admin", async () => {
+      const { b3trBadge, otherAccount } = await getOrDeployContractInstances({ forceDeploy: false })
+
+      await catchRevert(b3trBadge.connect(otherAccount).setMaxMintableLevels(Array(7).fill(1)))
+    })
+
+    it("Should have b3tr required to upgrade set on deployment", async () => {
+      const { b3trBadge } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      expect(await b3trBadge.getB3TRtoUpgradeToLevel(2)).to.equal(10000000000000000000000n)
+      expect(await b3trBadge.getB3TRtoUpgradeToLevel(3)).to.equal(25000000000000000000000n)
+      expect(await b3trBadge.getB3TRtoUpgradeToLevel(4)).to.equal(50000000000000000000000n)
+      expect(await b3trBadge.getB3TRtoUpgradeToLevel(5)).to.equal(100000000000000000000000n)
+      expect(await b3trBadge.getB3TRtoUpgradeToLevel(6)).to.equal(250000000000000000000000n)
+      expect(await b3trBadge.getB3TRtoUpgradeToLevel(7)).to.equal(500000000000000000000000n)
+      expect(await b3trBadge.getB3TRtoUpgradeToLevel(8)).to.equal(2500000000000000000000000n)
+      expect(await b3trBadge.getB3TRtoUpgradeToLevel(9)).to.equal(5000000000000000000000000n)
+      expect(await b3trBadge.getB3TRtoUpgradeToLevel(10)).to.equal(25000000000000000000000000n)
+    })
+
+    it("Should be able to update b3tr required to upgrade if admin", async () => {
+      const { b3trBadge, owner } = await getOrDeployContractInstances({ forceDeploy: false })
+
+      await b3trBadge
+        .connect(owner)
+        .setB3TRtoUpgradeToLevel([
+          10000000000000000000001n,
+          25000000000000000000001n,
+          50000000000000000000001n,
+          100000000000000000000001n,
+          250000000000000000000001n,
+          500000000000000000000001n,
+          2500000000000000000000001n,
+          5000000000000000000000001n,
+          25000000000000000000000001n,
+        ])
+
+      expect(await b3trBadge.getB3TRtoUpgradeToLevel(2)).to.equal(10000000000000000000001n)
+      expect(await b3trBadge.getB3TRtoUpgradeToLevel(3)).to.equal(25000000000000000000001n)
+      expect(await b3trBadge.getB3TRtoUpgradeToLevel(4)).to.equal(50000000000000000000001n)
+      expect(await b3trBadge.getB3TRtoUpgradeToLevel(5)).to.equal(100000000000000000000001n)
+      expect(await b3trBadge.getB3TRtoUpgradeToLevel(6)).to.equal(250000000000000000000001n)
+      expect(await b3trBadge.getB3TRtoUpgradeToLevel(7)).to.equal(500000000000000000000001n)
+      expect(await b3trBadge.getB3TRtoUpgradeToLevel(8)).to.equal(2500000000000000000000001n)
+      expect(await b3trBadge.getB3TRtoUpgradeToLevel(9)).to.equal(5000000000000000000000001n)
+      expect(await b3trBadge.getB3TRtoUpgradeToLevel(10)).to.equal(25000000000000000000000001n)
+    })
+  })
+
+  describe("Contract upgradeablity", () => {
+    it("Admin should be able to upgrade the contract", async function () {
+      const { b3trBadge, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Deploy the implementation contract
+      const Contract = await ethers.getContractFactory("B3TRBadge")
+      const implementation = await Contract.deploy()
+      await implementation.waitForDeployment()
+
+      const currentImplAddress = await getImplementationAddress(ethers.provider, await b3trBadge.getAddress())
+
+      const UPGRADER_ROLE = await b3trBadge.UPGRADER_ROLE()
+      expect(await b3trBadge.hasRole(UPGRADER_ROLE, owner.address)).to.eql(true)
+
+      await expect(b3trBadge.connect(owner).upgradeToAndCall(await implementation.getAddress(), "0x")).to.not.be
+        .reverted
+
+      const newImplAddress = await getImplementationAddress(ethers.provider, await b3trBadge.getAddress())
+
+      expect(newImplAddress.toUpperCase()).to.not.eql(currentImplAddress.toUpperCase())
+      expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
+    })
+
+    it("Only admin should be able to upgrade the contract", async function () {
+      const { b3trBadge, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Deploy the implementation contract
+      const Contract = await ethers.getContractFactory("B3TRBadge")
+      const implementation = await Contract.deploy()
+      await implementation.waitForDeployment()
+
+      const currentImplAddress = await getImplementationAddress(ethers.provider, await b3trBadge.getAddress())
+
+      const UPGRADER_ROLE = await b3trBadge.UPGRADER_ROLE()
+      expect(await b3trBadge.hasRole(UPGRADER_ROLE, otherAccount.address)).to.eql(false)
+
+      await expect(b3trBadge.connect(otherAccount).upgradeToAndCall(await implementation.getAddress(), "0x")).to.be
+        .reverted
+
+      const newImplAddress = await getImplementationAddress(ethers.provider, await b3trBadge.getAddress())
+
+      expect(newImplAddress.toUpperCase()).to.eql(currentImplAddress.toUpperCase())
+      expect(newImplAddress.toUpperCase()).to.not.eql((await implementation.getAddress()).toUpperCase())
+    })
+
+    it("Admin can change UPGRADER_ROLE", async function () {
+      const { b3trBadge, owner, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Deploy the implementation contract
+      const Contract = await ethers.getContractFactory("B3TRBadge")
+      const implementation = await Contract.deploy()
+      await implementation.waitForDeployment()
+
+      const currentImplAddress = await getImplementationAddress(ethers.provider, await b3trBadge.getAddress())
+
+      const UPGRADER_ROLE = await b3trBadge.UPGRADER_ROLE()
+      expect(await b3trBadge.hasRole(UPGRADER_ROLE, otherAccount.address)).to.eql(false)
+
+      await expect(b3trBadge.connect(owner).grantRole(UPGRADER_ROLE, otherAccount.address)).to.not.be.reverted
+      await expect(b3trBadge.connect(owner).revokeRole(UPGRADER_ROLE, owner.address)).to.not.be.reverted
+
+      await expect(b3trBadge.connect(otherAccount).upgradeToAndCall(await implementation.getAddress(), "0x")).to.not.be
+        .reverted
+
+      const newImplAddress = await getImplementationAddress(ethers.provider, await b3trBadge.getAddress())
+
+      expect(newImplAddress.toUpperCase()).to.not.eql(currentImplAddress.toUpperCase())
+      expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
     })
   })
 
   describe("Minting", () => {
     it("Cannot mint if B3TRGovernor address is not set", async () => {
       const config = createLocalConfig()
-      const { otherAccount, b3tr, xAllocationVoting, owner, emissions, minterAccount } =
+      const { otherAccount, b3tr, xAllocationVoting, owner, emissions, minterAccount, treasury } =
         await getOrDeployContractInstances({
           forceDeploy: true,
           config,
@@ -131,8 +274,19 @@ describe("B3TRBadge", () => {
       await participateInAllocationVoting(otherAccount, owner, xAllocationVoting)
 
       // Deploy NFTBadge
-      const NFTBadgeContract = await ethers.getContractFactory("B3TRBadge")
-      const b3trBadge = await NFTBadgeContract.deploy("b3trBadge", "BDG", owner, 1, config.NFT_BADGE_BASE_URI)
+      const b3trBadge = (await deployProxy("B3TRBadge", [
+        "b3trBadge",
+        "BDG",
+        owner.address,
+        owner.address,
+        1,
+        config.NFT_BADGE_BASE_URI,
+        [1, 2, 3, 4, 5, 6, 7],
+        [0],
+        await b3tr.getAddress(),
+        await treasury.getAddress(),
+      ])) as B3TRBadge
+
       await b3trBadge.waitForDeployment()
 
       await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
@@ -142,7 +296,7 @@ describe("B3TRBadge", () => {
 
     it("Cannot mint if XAllocation address is not set", async () => {
       const config = createLocalConfig()
-      const { otherAccount, xAllocationVoting, b3tr, owner, governor, emissions, minterAccount } =
+      const { otherAccount, xAllocationVoting, b3tr, owner, governor, emissions, minterAccount, treasury } =
         await getOrDeployContractInstances({
           forceDeploy: true,
           config,
@@ -158,8 +312,19 @@ describe("B3TRBadge", () => {
       await participateInAllocationVoting(otherAccount, owner, xAllocationVoting)
 
       // Deploy NFTBadge
-      const NFTBadgeContract = await ethers.getContractFactory("B3TRBadge")
-      const b3trBadge = await NFTBadgeContract.deploy("b3trBadge", "BDG", owner, 1, config.NFT_BADGE_BASE_URI)
+      const b3trBadge = (await deployProxy("B3TRBadge", [
+        "b3trBadge",
+        "BDG",
+        owner.address,
+        owner.address,
+        1,
+        config.NFT_BADGE_BASE_URI,
+        [1, 2, 3, 4, 5, 6, 7],
+        [0],
+        await b3tr.getAddress(),
+        await treasury.getAddress(),
+      ])) as B3TRBadge
+
       await b3trBadge.waitForDeployment()
 
       await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
@@ -169,7 +334,7 @@ describe("B3TRBadge", () => {
 
     it("Can know if user participated in governance if XAllocation and B3TRGovernor addresses are set", async () => {
       const config = createLocalConfig()
-      const { otherAccount, xAllocationVoting, owner, governor, b3tr, emissions, minterAccount } =
+      const { otherAccount, xAllocationVoting, owner, governor, b3tr, emissions, minterAccount, treasury } =
         await getOrDeployContractInstances({
           forceDeploy: true,
           config,
@@ -182,8 +347,19 @@ describe("B3TRBadge", () => {
       await participateInAllocationVoting(otherAccount, owner, xAllocationVoting)
 
       // Deploy NFTBadge
-      const NFTBadgeContract = await ethers.getContractFactory("B3TRBadge")
-      const b3trBadge = await NFTBadgeContract.deploy("b3trBadge", "BDG", owner, 1, config.NFT_BADGE_BASE_URI)
+      const b3trBadge = (await deployProxy("B3TRBadge", [
+        "b3trBadge",
+        "BDG",
+        owner.address,
+        owner.address,
+        1,
+        config.NFT_BADGE_BASE_URI,
+        [1, 2, 3, 4, 5, 6, 7],
+        [0],
+        await b3tr.getAddress(),
+        await treasury.getAddress(),
+      ])) as B3TRBadge
+
       await b3trBadge.waitForDeployment()
 
       await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
@@ -202,7 +378,7 @@ describe("B3TRBadge", () => {
       await catchRevert(b3trBadge.connect(otherAccount).freeMint())
     })
 
-    it("User can free mint if it participated in x-allocation voting", async () => {
+    it("User can free mint if participated in x-allocation voting", async () => {
       const { b3trBadge, otherAccount, xAllocationVoting, owner, b3tr, emissions, minterAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -220,7 +396,7 @@ describe("B3TRBadge", () => {
       expect(await b3trBadge.connect(otherAccount).freeMint()).not.to.be.reverted
 
       expect(await b3trBadge.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 badge
-      expect(await b3trBadge.ownerOf(0)).to.equal(await otherAccount.getAddress()) // Owner of the first badge is the otherAccount
+      expect(await b3trBadge.ownerOf(1)).to.equal(await otherAccount.getAddress()) // Owner of the first badge is the otherAccount
       expect(await b3trBadge.totalSupply()).to.equal(1) // Total supply is 1
     })
 
@@ -252,8 +428,9 @@ describe("B3TRBadge", () => {
       await b3trBadge.connect(voter).freeMint()
 
       expect(await b3trBadge.balanceOf(await voter.getAddress())).to.equal(1) // Other account has 1 badge
-      expect(await b3trBadge.ownerOf(0)).to.equal(await voter.getAddress()) // Owner of the first badge is the otherAccount
+      expect(await b3trBadge.ownerOf(1)).to.equal(await voter.getAddress()) // Owner of the first badge is the otherAccount
       expect(await b3trBadge.totalSupply()).to.equal(1) // Total supply is 1
+      expect(await b3trBadge.selectedTokenId(await voter.getAddress())).to.equal(1) // Selected token id is 0
     })
 
     it("User can free mint if he participated both in B3TR Governance and in x-allocation voting", async () => {
@@ -297,7 +474,7 @@ describe("B3TRBadge", () => {
       await b3trBadge.connect(voter).freeMint()
     })
 
-    it("Should mint a level 1 badge", async () => {
+    it("Should mint a level 1 token", async () => {
       const config = createLocalConfig()
       const { b3trBadge, otherAccount, owner, xAllocationVoting, b3tr, emissions, minterAccount } =
         await getOrDeployContractInstances({
@@ -326,33 +503,37 @@ describe("B3TRBadge", () => {
         })
       })
 
-      expect(decodedEvents?.length).to.equal(2)
+      expect(decodedEvents?.length).to.equal(3)
 
-      expect(decodedEvents?.[0]?.name).to.equal("LevelOwnedChanged")
+      expect(decodedEvents?.[0]?.name).to.equal("SelectedLevel")
       expect(decodedEvents?.[0]?.args?.[0]).to.equal(await otherAccount.getAddress())
       expect(decodedEvents?.[0]?.args?.[1]).to.equal(0)
       expect(decodedEvents?.[0]?.args?.[2]).to.equal(1)
 
-      expect(decodedEvents?.[1]?.name).to.equal("Transfer")
-      expect(decodedEvents?.[1]?.args?.[0]).to.equal(ZERO_ADDRESS)
-      expect(decodedEvents?.[1]?.args?.[1]).to.equal(await otherAccount.getAddress())
+      expect(decodedEvents?.[1]?.name).to.equal("Selected")
+      expect(decodedEvents?.[1]?.args?.[0]).to.equal(await otherAccount.getAddress())
+      expect(decodedEvents?.[1]?.args?.[1]).to.equal(1)
+
+      expect(decodedEvents?.[2]?.name).to.equal("Transfer")
+      expect(decodedEvents?.[2]?.args?.[0]).to.equal(ZERO_ADDRESS)
+      expect(decodedEvents?.[2]?.args?.[1]).to.equal(await otherAccount.getAddress())
 
       expect(await b3trBadge.numCheckpoints(await otherAccount.getAddress())).to.equal(1) // Other account has 1 checkpoint
 
       expect(await b3trBadge.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 badge
-      expect(await b3trBadge.ownerOf(0)).to.equal(await otherAccount.getAddress()) // Owner of the first badge is the otherAccount
+      expect(await b3trBadge.ownerOf(1)).to.equal(await otherAccount.getAddress()) // Owner of the first badge is the otherAccount
       expect(await b3trBadge.totalSupply()).to.equal(1) // Total supply is 1
 
       expect(await b3trBadge.getLevel(otherAccount)).to.equal(1) // Level 1
       expect(await b3trBadge.getPastLevel(await otherAccount.getAddress(), receipt.blockNumber - 1)).to.equal(0) // Level 0 in the past
 
-      expect(await b3trBadge.tokenByIndex(0)).to.equal(0) // Token ID of the first badge is 0
-      expect(await b3trBadge.tokenOfOwnerByIndex(await otherAccount.getAddress(), 0)).to.equal(0) // Token ID of the first badge owned by otherAccount is 0
+      expect(await b3trBadge.tokenByIndex(0)).to.equal(1) // Token ID of the first badge is 1
+      expect(await b3trBadge.tokenOfOwnerByIndex(await otherAccount.getAddress(), 0)).to.equal(1) // Token ID of the first badge owned by otherAccount is 1
 
-      expect(await b3trBadge.tokenURI(0)).to.equal(`${config.NFT_BADGE_BASE_URI}1`) // Token URI of the first badge is the "base URI/level"
+      expect(await b3trBadge.tokenURI(1)).to.equal(`${config.NFT_BADGE_BASE_URI}1`) // Token URI of the first badge is the "base URI/level"
     })
 
-    it("Should not be able to mint a badge when already holding one", async () => {
+    it("Should be able to free mint multiple badges", async () => {
       const { b3trBadge, otherAccount, owner, xAllocationVoting, b3tr, emissions, minterAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -366,10 +547,12 @@ describe("B3TRBadge", () => {
 
       await b3trBadge.connect(otherAccount).freeMint()
 
-      await catchRevert(b3trBadge.connect(otherAccount).freeMint())
+      await b3trBadge.connect(otherAccount).freeMint()
+
+      expect(await b3trBadge.balanceOf(await otherAccount.getAddress())).to.equal(2) // Other account has 2 badges
     })
 
-    it("Should handle multiple mints correctly", async () => {
+    it("Should handle multiple mints from different accounts correctly", async () => {
       const { b3trBadge, otherAccount, owner, xAllocationVoting, b3tr, emissions, minterAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -391,42 +574,19 @@ describe("B3TRBadge", () => {
       expect(await b3trBadge.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 badge
       expect(await b3trBadge.balanceOf(await owner.getAddress())).to.equal(1) // Owner has 1 badge
 
-      expect(await b3trBadge.ownerOf(0)).to.equal(await otherAccount.getAddress()) // Owner of the first badge is the otherAccount
-      expect(await b3trBadge.ownerOf(1)).to.equal(await owner.getAddress()) // Owner of the second badge is the owner
+      expect(await b3trBadge.ownerOf(1)).to.equal(await otherAccount.getAddress()) // Owner of the first badge is the otherAccount
+      expect(await b3trBadge.ownerOf(2)).to.equal(await owner.getAddress()) // Owner of the second badge is the owner
 
       expect(await b3trBadge.totalSupply()).to.equal(2) // Total supply is 2
 
-      expect(await b3trBadge.levelOf(0)).to.equal(1) // Level 1
       expect(await b3trBadge.levelOf(1)).to.equal(1) // Level 1
+      expect(await b3trBadge.levelOf(2)).to.equal(1) // Level 1
 
-      expect(await b3trBadge.tokenByIndex(0)).to.equal(0) // Token ID of the first badge is 0
-      expect(await b3trBadge.tokenByIndex(1)).to.equal(1) // Token ID of the second badge is 1
+      expect(await b3trBadge.tokenByIndex(0)).to.equal(1) // Token ID of the first badge is 1
+      expect(await b3trBadge.tokenByIndex(1)).to.equal(2) // Token ID of the second badge is 2
 
-      expect(await b3trBadge.tokenOfOwnerByIndex(await otherAccount.getAddress(), 0)).to.equal(0) // Token ID of the first badge owned by otherAccount is 0
-      expect(await b3trBadge.tokenOfOwnerByIndex(await owner.getAddress(), 0)).to.equal(1) // Token ID of the first badge owned by owner is 1
-    })
-
-    it("Should not mint a level higher than 1 if user does not own a X/Economic node NFT", async () => {
-      const { b3trBadge, otherAccount, owner, xAllocationVoting, b3tr, emissions, minterAccount } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
-
-      // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
-
-      // participation in governance is a requirement for minting
-      await participateInAllocationVoting(otherAccount, owner, xAllocationVoting)
-
-      await b3trBadge.connect(owner).setMaxLevel(10)
-
-      expect(await b3trBadge.MAX_LEVEL()).to.equal(10)
-
-      await b3trBadge.connect(otherAccount).freeMint()
-
-      expect(await b3trBadge.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 badge
-
-      expect(await b3trBadge.levelOf(0)).to.equal(1) // Level 1 even though max level is 10
+      expect(await b3trBadge.tokenOfOwnerByIndex(await otherAccount.getAddress(), 0)).to.equal(1) // Token ID of the first badge owned by otherAccount is 1
+      expect(await b3trBadge.tokenOfOwnerByIndex(await owner.getAddress(), 0)).to.equal(2) // Token ID of the first badge owned by owner is 1
     })
 
     it("Cannot mint if badge is paused", async () => {
@@ -464,26 +624,26 @@ describe("B3TRBadge", () => {
 
       await b3trBadge.connect(owner).freeMint()
 
-      await b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 0)
+      await b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1)
 
       await b3trBadge.connect(owner).freeMint()
 
       expect(await b3trBadge.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 badge
       expect(await b3trBadge.balanceOf(await owner.getAddress())).to.equal(1) // Owner has 1 badge
 
-      expect(await b3trBadge.ownerOf(0)).to.equal(await otherAccount.getAddress()) // Owner of the first badge is the otherAccount
-      expect(await b3trBadge.ownerOf(1)).to.equal(await owner.getAddress()) // Owner of the second badge is the owner
+      expect(await b3trBadge.ownerOf(1)).to.equal(await otherAccount.getAddress()) // Owner of the first badge is the otherAccount
+      expect(await b3trBadge.ownerOf(2)).to.equal(await owner.getAddress()) // Owner of the second badge is the owner
 
       expect(await b3trBadge.totalSupply()).to.equal(2) // Total supply is 2
 
-      expect(await b3trBadge.levelOf(0)).to.equal(1) // Level 1
       expect(await b3trBadge.levelOf(1)).to.equal(1) // Level 1
+      expect(await b3trBadge.levelOf(2)).to.equal(1) // Level 1
 
-      expect(await b3trBadge.tokenByIndex(0)).to.equal(0) // Token ID of the first badge is 0
-      expect(await b3trBadge.tokenByIndex(1)).to.equal(1) // Token ID of the second badge is 1
+      expect(await b3trBadge.tokenByIndex(0)).to.equal(1) // Token ID of the first badge is 1
+      expect(await b3trBadge.tokenByIndex(1)).to.equal(2) // Token ID of the second badge is 2
 
-      expect(await b3trBadge.tokenOfOwnerByIndex(await otherAccount.getAddress(), 0)).to.equal(0) // Token ID of the first badge owned by otherAccount is 0
-      expect(await b3trBadge.tokenOfOwnerByIndex(await owner.getAddress(), 0)).to.equal(1) // Token ID of the first badge owned by owner is 1
+      expect(await b3trBadge.tokenOfOwnerByIndex(await otherAccount.getAddress(), 0)).to.equal(1) // Token ID of the first badge owned by otherAccount is 1
+      expect(await b3trBadge.tokenOfOwnerByIndex(await owner.getAddress(), 0)).to.equal(2) // Token ID of the first badge owned by owner is 1
     })
 
     it("Should return empty string for tokenURI of token that doesn't exist", async () => {
@@ -508,20 +668,20 @@ describe("B3TRBadge", () => {
 
       await b3trBadge.connect(owner).freeMint()
 
-      await b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 0)
+      await b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1)
 
       expect(await b3trBadge.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 badge
       expect(await b3trBadge.balanceOf(await owner.getAddress())).to.equal(0) // Owner has 0 badges
 
-      expect(await b3trBadge.ownerOf(0)).to.equal(await otherAccount.getAddress()) // Owner of the first badge is the otherAccount
+      expect(await b3trBadge.ownerOf(1)).to.equal(await otherAccount.getAddress()) // Owner of the first badge is the otherAccount
 
       expect(await b3trBadge.totalSupply()).to.equal(1) // Total supply is 1
 
-      expect(await b3trBadge.levelOf(0)).to.equal(1) // Level 1
+      expect(await b3trBadge.levelOf(1)).to.equal(1) // Level 1
 
-      expect(await b3trBadge.tokenByIndex(0)).to.equal(0) // Token ID of the first badge is 0
+      expect(await b3trBadge.tokenByIndex(0)).to.equal(1) // Token ID of the first badge is 1
 
-      expect(await b3trBadge.tokenOfOwnerByIndex(await otherAccount.getAddress(), 0)).to.equal(0) // Token ID of the first badge owned by otherAccount is 0
+      expect(await b3trBadge.tokenOfOwnerByIndex(await otherAccount.getAddress(), 0)).to.equal(1) // Token ID of the first badge owned by otherAccount is 1
     })
 
     it("Should not be able to transfer a badge if transfers are paused", async () => {
@@ -541,15 +701,15 @@ describe("B3TRBadge", () => {
       await b3trBadge.connect(owner).pause()
 
       await catchRevert(
-        b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 0),
+        b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1),
       )
 
       await b3trBadge.connect(owner).unpause()
 
-      await b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 0)
+      await b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1)
     })
 
-    it("Should not be able to receive a badge from another account if you already have one", async () => {
+    it("Should be able to receive a badge from another account if you already have one", async () => {
       const { b3trBadge, otherAccount, owner, xAllocationVoting, b3tr, emissions, minterAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -566,9 +726,9 @@ describe("B3TRBadge", () => {
 
       await b3trBadge.connect(owner).freeMint()
 
-      await catchRevert(
-        b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1),
-      )
+      await b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 2)
+
+      expect(await b3trBadge.balanceOf(await otherAccount.getAddress())).to.equal(2) // Other account has 2 tokens
     })
 
     it("Should track ownership correctly after multiple transfers", async () => {
@@ -598,14 +758,14 @@ describe("B3TRBadge", () => {
         })
       })
 
-      expect(decodedEvents?.length).to.equal(2)
+      expect(decodedEvents?.length).to.equal(3)
 
-      expect(decodedEvents?.[0]?.name).to.equal("LevelOwnedChanged")
+      expect(decodedEvents?.[0]?.name).to.equal("SelectedLevel")
       expect(decodedEvents?.[0]?.args?.[0]).to.equal(await owner.getAddress())
       expect(decodedEvents?.[0]?.args?.[1]).to.equal(0) // Previous level
       expect(decodedEvents?.[0]?.args?.[2]).to.equal(1) // New level
 
-      tx = await b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 0)
+      tx = await b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1)
 
       receipt = await tx.wait()
 
@@ -620,17 +780,25 @@ describe("B3TRBadge", () => {
         })
       })
 
-      expect(decodedEvents?.length).to.equal(3)
+      expect(decodedEvents?.length).to.equal(5)
 
-      expect(decodedEvents?.[0]?.name).to.equal("LevelOwnedChanged")
+      expect(decodedEvents?.[0]?.name).to.equal("SelectedLevel")
       expect(decodedEvents?.[0]?.args?.[0]).to.equal(await owner.getAddress())
       expect(decodedEvents?.[0]?.args?.[1]).to.equal(1) // Previous level
       expect(decodedEvents?.[0]?.args?.[2]).to.equal(0) // New level
 
-      expect(decodedEvents?.[1]?.name).to.equal("LevelOwnedChanged")
-      expect(decodedEvents?.[1]?.args?.[0]).to.equal(await otherAccount.getAddress())
-      expect(decodedEvents?.[1]?.args?.[1]).to.equal(0) // Previous level
-      expect(decodedEvents?.[1]?.args?.[2]).to.equal(1) // New level
+      expect(decodedEvents?.[1]?.name).to.equal("Selected")
+      expect(decodedEvents?.[1]?.args?.[0]).to.equal(await owner.getAddress())
+      expect(decodedEvents?.[1]?.args?.[1]).to.equal(0) // Selected token id
+
+      expect(decodedEvents?.[2]?.name).to.equal("SelectedLevel")
+      expect(decodedEvents?.[2]?.args?.[0]).to.equal(await otherAccount.getAddress())
+      expect(decodedEvents?.[2]?.args?.[1]).to.equal(0) // Previous level
+      expect(decodedEvents?.[2]?.args?.[2]).to.equal(1) // New level
+
+      expect(decodedEvents?.[3]?.name).to.equal("Selected")
+      expect(decodedEvents?.[3]?.args?.[0]).to.equal(await otherAccount.getAddress())
+      expect(decodedEvents?.[3]?.args?.[1]).to.equal(1) // Selected token id
 
       expect(await b3trBadge.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 badge
       expect(await b3trBadge.balanceOf(await owner.getAddress())).to.equal(0) // Owner has 0 badges
@@ -643,7 +811,7 @@ describe("B3TRBadge", () => {
 
       tx = await b3trBadge
         .connect(otherAccount)
-        .transferFrom(await otherAccount.getAddress(), await otherAccounts[0].getAddress(), 0)
+        .transferFrom(await otherAccount.getAddress(), await otherAccounts[0].getAddress(), 1)
 
       receipt = await tx.wait()
 
@@ -661,5 +829,593 @@ describe("B3TRBadge", () => {
       expect(await b3trBadge.getPastLevel(await otherAccounts[0].getAddress(), receipt.blockNumber - 1)).to.equal(0) // Level 0 in the past
       expect(await b3trBadge.getPastLevel(await owner.getAddress(), receipt.blockNumber - 1)).to.equal(0) // Level 0 in the past
     })
+  })
+
+  describe("Selecting", () => {
+    it("Should not select new minted token if another one is already selected", async () => {
+      const { b3trBadge, otherAccount, b3tr, otherAccounts, governor, B3trContract, owner, emissions, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      const voter = otherAccounts[0]
+
+      // Should not be able to free mint
+      await catchRevert(b3trBadge.connect(voter).freeMint())
+
+      // we do it here but will use in the next test
+      await getVot3Tokens(voter, "1000")
+
+      // Now we can create a new proposal
+      const tx = await createProposal(governor, b3tr, B3trContract, otherAccount, "", "tokenDetails", [])
+      const proposalId = await getProposalIdFromTx(tx, governor)
+      await waitForProposalToBeActive(proposalId, governor)
+      // Now we can vote
+      await governor.connect(voter).castVote(proposalId, 1)
+
+      // I should be able to free mint
+      await b3trBadge.connect(voter).freeMint()
+
+      expect(await b3trBadge.selectedTokenId(await voter.getAddress())).to.equal(1) // Selected token id is 1
+
+      // Should not be able to free mint
+      await b3trBadge.connect(voter).freeMint()
+
+      expect(await b3trBadge.balanceOf(await voter.getAddress())).to.equal(2) // Other account has 2 badges
+
+      expect(await b3trBadge.selectedTokenId(await voter.getAddress())).to.equal(1) // Selected token id is still 1
+    })
+
+    it("Should not select level 0 if I still have a token when transferring out", async () => {
+      const { b3trBadge, otherAccount, owner, xAllocationVoting, b3tr, emissions, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(owner, owner, xAllocationVoting, true)
+
+      let tx = await b3trBadge.connect(owner).freeMint()
+
+      let receipt = await tx.wait()
+
+      if (!receipt?.blockNumber) throw new Error("No receipt block number")
+
+      expect(await b3trBadge.getLevel(await owner.getAddress())).to.equal(1) // Level 1
+      expect(await b3trBadge.getPastLevel(await owner.getAddress(), receipt.blockNumber - 1)).to.equal(0) // Level 0 in the past
+
+      await b3trBadge.connect(owner).freeMint()
+
+      tx = await b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1)
+
+      receipt = await tx.wait()
+
+      if (!receipt?.blockNumber) throw new Error("No receipt block number")
+
+      expect(await b3trBadge.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 badge
+      expect(await b3trBadge.balanceOf(await owner.getAddress())).to.equal(1) // Owner has 1 badge
+
+      expect(await b3trBadge.getLevel(await otherAccount.getAddress())).to.equal(1) // Level 1
+      expect(await b3trBadge.getLevel(await owner.getAddress())).to.equal(1) // Level 1 (because owner still has a token)
+
+      expect(await b3trBadge.getPastLevel(await otherAccount.getAddress(), receipt?.blockNumber - 1)).to.equal(0) // Level 0 in the past
+
+      await b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 2)
+
+      expect(await b3trBadge.balanceOf(await otherAccount.getAddress())).to.equal(2) // Other account has 2 badges
+
+      expect(await b3trBadge.getLevel(await otherAccount.getAddress())).to.equal(1) // Level 1
+
+      expect(await b3trBadge.getLevel(await owner.getAddress())).to.equal(0) // Level 0 (because owner doesn't have any tokens now)
+    })
+
+    it("Should not select token received from another account if I already have a token", async () => {
+      const { b3trBadge, otherAccount, owner, xAllocationVoting, b3tr, emissions, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(owner, owner, xAllocationVoting, true)
+
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(otherAccount, owner, xAllocationVoting, true)
+
+      await b3trBadge.connect(owner).freeMint() // Token id 1
+
+      await b3trBadge.connect(owner).freeMint() // Token id 2
+
+      await b3trBadge.connect(otherAccount).freeMint() // Token id 3
+
+      await b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1)
+
+      expect(await b3trBadge.balanceOf(await otherAccount.getAddress())).to.equal(2) // Other account has 2 tokens
+      expect(await b3trBadge.balanceOf(await owner.getAddress())).to.equal(1) // Owner has 1 token
+
+      expect(await b3trBadge.getLevel(await otherAccount.getAddress())).to.equal(1) // Level 1
+      expect(await b3trBadge.getLevel(await owner.getAddress())).to.equal(1) // Level 1
+
+      expect(await b3trBadge.selectedTokenId(await otherAccount.getAddress())).to.equal(3) // Selected token id is 3 and not 1 (1 is the token received from owner)
+    })
+
+    it("Should select token received from another account if I don't have any tokens", async () => {
+      const { b3trBadge, otherAccount, owner, xAllocationVoting, b3tr, emissions, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(otherAccount, owner, xAllocationVoting, true)
+
+      let tx = await b3trBadge.connect(otherAccount).freeMint() // Token id 1
+
+      let receipt = await tx.wait()
+
+      if (!receipt?.blockNumber) throw new Error("No receipt block number")
+
+      // Check for Selected and SelectedLevel events
+      let events = receipt?.logs
+
+      let decodedEvents = events?.map(event => {
+        return b3trBadge.interface.parseLog({
+          topics: event?.topics as string[],
+          data: event?.data as string,
+        })
+      })
+
+      expect(decodedEvents?.[0]?.name).to.equal("SelectedLevel")
+      expect(decodedEvents?.[0]?.args?.[0]).to.equal(await otherAccount.getAddress())
+      expect(decodedEvents?.[0]?.args?.[1]).to.equal(0) // Previous level
+      expect(decodedEvents?.[0]?.args?.[2]).to.equal(1) // New level
+
+      expect(decodedEvents?.[1]?.name).to.equal("Selected")
+      expect(decodedEvents?.[1]?.args?.[0]).to.equal(await otherAccount.getAddress())
+      expect(decodedEvents?.[1]?.args?.[1]).to.equal(1) // Selected token id
+
+      tx = await b3trBadge
+        .connect(otherAccount)
+        .transferFrom(await otherAccount.getAddress(), await owner.getAddress(), 1)
+
+      receipt = await tx.wait()
+
+      if (!receipt?.blockNumber) throw new Error("No receipt block number")
+
+      // Check for Selected and SelectedLevel events
+      events = receipt?.logs
+
+      decodedEvents = events?.map(event => {
+        return b3trBadge.interface.parseLog({
+          topics: event?.topics as string[],
+          data: event?.data as string,
+        })
+      })
+
+      expect(decodedEvents?.[0]?.name).to.equal("SelectedLevel")
+      expect(decodedEvents?.[0]?.args?.[0]).to.equal(await otherAccount.getAddress())
+      expect(decodedEvents?.[0]?.args?.[1]).to.equal(1) // Previous level
+      expect(decodedEvents?.[0]?.args?.[2]).to.equal(0) // New level
+
+      expect(decodedEvents?.[1]?.name).to.equal("Selected")
+      expect(decodedEvents?.[1]?.args?.[0]).to.equal(await otherAccount.getAddress())
+      expect(decodedEvents?.[1]?.args?.[1]).to.equal(0) // Selected token id
+
+      expect(decodedEvents?.[2]?.name).to.equal("SelectedLevel")
+      expect(decodedEvents?.[2]?.args?.[0]).to.equal(await owner.getAddress())
+      expect(decodedEvents?.[2]?.args?.[1]).to.equal(0) // Previous level
+      expect(decodedEvents?.[2]?.args?.[2]).to.equal(1) // New level
+
+      expect(decodedEvents?.[3]?.name).to.equal("Selected")
+      expect(decodedEvents?.[3]?.args?.[0]).to.equal(await owner.getAddress())
+      expect(decodedEvents?.[3]?.args?.[1]).to.equal(1) // Selected token id
+
+      expect(await b3trBadge.balanceOf(await otherAccount.getAddress())).to.equal(0) // Other account has 0 tokens
+      expect(await b3trBadge.balanceOf(await owner.getAddress())).to.equal(1) // Owner has 1 token
+
+      expect(await b3trBadge.getLevel(await otherAccount.getAddress())).to.equal(0) // Level 0
+      expect(await b3trBadge.getLevel(await owner.getAddress())).to.equal(1) // Level 1
+
+      expect(await b3trBadge.selectedTokenId(await otherAccount.getAddress())).to.equal(0) // Selected token id is now 0 (i.e., no token selected)
+      expect(await b3trBadge.selectedTokenId(await owner.getAddress())).to.equal(1) // Selected token id is 1 (the token received from otherAccount)
+    })
+
+    it("Should be able to select an owned token", async () => {
+      const { b3trBadge, owner, xAllocationVoting, b3tr, emissions, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(owner, owner, xAllocationVoting, true)
+
+      await b3trBadge.connect(owner).freeMint() // Token id 1
+
+      await b3trBadge.connect(owner).freeMint() // Token id 2
+
+      await b3trBadge.connect(owner).select(2)
+
+      expect(await b3trBadge.selectedTokenId(await owner.getAddress())).to.equal(2) // Selected token id is 2
+    })
+
+    it("Should not be able to select a token that is not owned", async () => {
+      const { b3trBadge, otherAccount, owner, xAllocationVoting, b3tr, emissions, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(owner, owner, xAllocationVoting, true)
+
+      await b3trBadge.connect(owner).freeMint() // Token id 1
+
+      await catchRevert(b3trBadge.connect(otherAccount).select(1))
+    })
+
+    it("Should not be able to select the same token again", async () => {
+      const { b3trBadge, owner, xAllocationVoting, b3tr, emissions, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(owner, owner, xAllocationVoting, true)
+
+      await b3trBadge.connect(owner).freeMint() // Token id 1
+
+      await catchRevert(b3trBadge.connect(owner).select(1))
+    })
+
+    it("Should not be able to select a non-existent token", async () => {
+      const { b3trBadge, owner, b3tr, emissions, xAllocationVoting, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(owner, owner, xAllocationVoting, true)
+
+      await b3trBadge.connect(owner).freeMint() // Token id 1
+
+      await catchRevert(b3trBadge.connect(owner).select(2))
+    })
+  })
+
+  describe("Upgrading", () => {
+    it("Should be able to upgrade a level 1 token to a level 2 token", async () => {
+      const config = createLocalConfig()
+      const { owner, xAllocationVoting, b3tr, emissions, minterAccount, governor, treasury } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(owner, owner, xAllocationVoting, true)
+
+      const b3trBadge = (await deployProxy("B3TRBadge", [
+        "b3trBadge",
+        "BDG",
+        owner.address,
+        owner.address,
+        2,
+        config.NFT_BADGE_BASE_URI,
+        config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
+        config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+        await b3tr.getAddress(),
+        await treasury.getAddress(),
+      ])) as B3TRBadge
+
+      await b3trBadge.waitForDeployment()
+
+      await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+      await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+
+      await b3trBadge.connect(owner).freeMint() // Token id 1
+
+      await catchRevert(b3trBadge.connect(owner).upgrade(1)) // Insufficient B3TR to upgrade
+
+      await b3tr.connect(minterAccount).mint(owner, ethers.parseEther("10000")) // Get some 10,000 B3TR required to upgrade to level 2
+
+      await b3tr.connect(owner).approve(await b3trBadge.getAddress(), ethers.parseEther("10000")) // We need to approve the B3TRBadge contract to transfer the B3TR required to upgrade from the owner's account
+
+      const balanceOfTreasuryBefore = await b3tr.balanceOf(await treasury.getAddress())
+
+      await b3trBadge.connect(owner).upgrade(1) // Upgrade token id 1 to level 2
+
+      const balanceOfTreasuryAfter = await b3tr.balanceOf(await treasury.getAddress())
+
+      expect(balanceOfTreasuryAfter - balanceOfTreasuryBefore).to.equal(ethers.parseEther("10000")) // 10,000 B3TR should be transferred to the treasury pool
+
+      expect(await b3trBadge.levelOf(1)).to.equal(2) // Level 2
+    })
+
+    it("Should be able to transfer a token with level greater than 1", async () => {
+      const config = createLocalConfig()
+      const { owner, xAllocationVoting, b3tr, emissions, minterAccount, governor, otherAccount, treasury } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(owner, owner, xAllocationVoting, true)
+
+      const b3trBadge = (await deployProxy("B3TRBadge", [
+        "b3trBadge",
+        "BDG",
+        owner.address,
+        owner.address,
+        2,
+        config.NFT_BADGE_BASE_URI,
+        config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
+        config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+        await b3tr.getAddress(),
+        await treasury.getAddress(),
+      ])) as B3TRBadge
+
+      await b3trBadge.waitForDeployment()
+
+      await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+      await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+
+      await b3trBadge.connect(owner).freeMint() // Token id 1
+
+      await b3tr.connect(minterAccount).mint(owner, ethers.parseEther("10000")) // Get some 10,000 B3TR required to upgrade to level 2
+
+      await b3tr.connect(owner).approve(await b3trBadge.getAddress(), ethers.parseEther("10000")) // We need to approve the B3TRBadge contract to transfer the B3TR required to upgrade from the owner's account
+
+      await b3trBadge.connect(owner).upgrade(1) // Upgrade token id 1 to level 2
+
+      let tx = await b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1)
+
+      let receipt = await tx.wait()
+
+      if (!receipt?.blockNumber) throw new Error("No receipt block number")
+
+      let events = receipt?.logs
+
+      let decodedEvents = events?.map(event => {
+        return b3trBadge.interface.parseLog({
+          topics: event?.topics as string[],
+          data: event?.data as string,
+        })
+      })
+
+      expect(decodedEvents?.[0]?.name).to.equal("SelectedLevel")
+      expect(decodedEvents?.[0]?.args?.[0]).to.equal(await owner.getAddress())
+      expect(decodedEvents?.[0]?.args?.[1]).to.equal(2) // Previous level
+      expect(decodedEvents?.[0]?.args?.[2]).to.equal(0) // New level
+
+      expect(decodedEvents?.[1]?.name).to.equal("Selected")
+      expect(decodedEvents?.[1]?.args?.[0]).to.equal(await owner.getAddress())
+      expect(decodedEvents?.[1]?.args?.[1]).to.equal(0) // Selected token id (i.e, no token selected)
+
+      expect(decodedEvents?.[2]?.name).to.equal("SelectedLevel")
+      expect(decodedEvents?.[2]?.args?.[0]).to.equal(await otherAccount.getAddress())
+      expect(decodedEvents?.[2]?.args?.[1]).to.equal(0) // Previous level
+      expect(decodedEvents?.[2]?.args?.[2]).to.equal(2) // New level
+
+      expect(decodedEvents?.[3]?.name).to.equal("Selected")
+      expect(decodedEvents?.[3]?.args?.[0]).to.equal(await otherAccount.getAddress())
+      expect(decodedEvents?.[3]?.args?.[1]).to.equal(1) // Selected token id
+
+      expect(await b3trBadge.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 token
+      expect(await b3trBadge.balanceOf(await owner.getAddress())).to.equal(0) // Owner has 0 tokens
+
+      expect(await b3trBadge.levelOf(1)).to.equal(2) // Level 2
+
+      expect(await b3trBadge.getLevel(await otherAccount.getAddress())).to.equal(2) // Level 2
+      expect(await b3trBadge.getLevel(await owner.getAddress())).to.equal(0) // Level 0
+    })
+  })
+
+  it("Should be able to upgrade to level 10", async () => {
+    const config = createTestConfig()
+    const { owner, xAllocationVoting, emissions, minterAccount, governor, b3tr, otherAccount, treasury } =
+      await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+    // Bootstrap emissions
+    await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+    // participation in governance is a requirement for minting
+    await participateInAllocationVoting(owner, owner, xAllocationVoting, true)
+
+    const b3trBadge = (await deployProxy("B3TRBadge", [
+      "b3trBadge",
+      "BDG",
+      owner.address,
+      owner.address,
+      10,
+      config.NFT_BADGE_BASE_URI,
+      config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
+      config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+      await b3tr.getAddress(),
+      await treasury.getAddress(),
+    ])) as B3TRBadge
+
+    await b3trBadge.waitForDeployment()
+
+    await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+    await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+
+    await b3trBadge.connect(owner).freeMint() // Token id 1
+
+    expect(await b3trBadge.levelOf(1)).to.equal(1) // Level 1
+    expect(await b3trBadge.ownerOf(1)).to.equal(await owner.getAddress()) // Owner of the first badge is the owner
+
+    await upgradeNFTtoLevel(1, 10, b3trBadge, b3tr, owner, minterAccount)
+
+    expect(await b3trBadge.levelOf(1)).to.equal(10) // Level 10
+
+    expect(await b3trBadge.selectedTokenId(await owner.getAddress())).to.equal(1) // Selected token id is 1
+    expect(await b3trBadge.getLevel(await owner.getAddress())).to.equal(10) // Level 10
+
+    // Transfer the token to another account
+    await b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1)
+
+    expect(await b3trBadge.levelOf(1)).to.equal(10) // Level 10
+    expect(await b3trBadge.selectedTokenId(await owner.getAddress())).to.equal(0) // Selected token id is 0
+    expect(await b3trBadge.getLevel(await owner.getAddress())).to.equal(0) // Level 0
+
+    expect(await b3trBadge.selectedTokenId(await otherAccount.getAddress())).to.equal(1) // Selected token id is 1
+    expect(await b3trBadge.getLevel(await otherAccount.getAddress())).to.equal(10) // Level 10
+  })
+
+  it("Should not be able to upgrade token not owned", async () => {
+    const config = createTestConfig()
+    const { owner, xAllocationVoting, emissions, minterAccount, governor, b3tr, otherAccount, treasury } =
+      await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+    // Bootstrap emissions
+    await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+    // participation in governance is a requirement for minting
+    await participateInAllocationVoting(owner, owner, xAllocationVoting, true)
+
+    const b3trBadge = (await deployProxy("B3TRBadge", [
+      "b3trBadge",
+      "BDG",
+      owner.address,
+      owner.address,
+      10,
+      config.NFT_BADGE_BASE_URI,
+      config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
+      config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+      await b3tr.getAddress(),
+      await treasury.getAddress(),
+    ])) as B3TRBadge
+
+    await b3trBadge.waitForDeployment()
+
+    await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+    await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+
+    await b3trBadge.connect(owner).freeMint() // Token id 1
+
+    await b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("10000")) // Get some 10,000 B3TR required to upgrade to level 2
+
+    await b3tr.connect(otherAccount).approve(await b3trBadge.getAddress(), ethers.parseEther("10000")) // We need to approve the B3TRBadge contract to transfer the B3TR required to upgrade from the owner's account
+
+    await catchRevert(b3trBadge.connect(otherAccount).upgrade(1)) // Should not be able to upgrade token not owned
+  })
+
+  it("Should not be able to upgrade above max level", async () => {
+    const config = createTestConfig()
+    const { owner, xAllocationVoting, emissions, minterAccount, governor, b3tr, treasury } =
+      await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+    // Bootstrap emissions
+    await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+    // participation in governance is a requirement for minting
+    await participateInAllocationVoting(owner, owner, xAllocationVoting, true)
+
+    const b3trBadge = (await deployProxy("B3TRBadge", [
+      "b3trBadge",
+      "BDG",
+      owner.address,
+      owner.address,
+      10,
+      config.NFT_BADGE_BASE_URI,
+      config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
+      config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+      await b3tr.getAddress(),
+      await treasury.getAddress(),
+    ])) as B3TRBadge
+
+    await b3trBadge.waitForDeployment()
+
+    await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+    await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+
+    await b3trBadge.connect(owner).freeMint() // Token id 1
+
+    await upgradeNFTtoLevel(1, 10, b3trBadge, b3tr, owner, minterAccount)
+
+    // Should not be able to upgrade above max level
+    await catchRevert(b3trBadge.connect(owner).upgrade(1))
+  })
+
+  it("Should be able to upgrade and select a different token than the selected one", async () => {
+    const config = createTestConfig()
+    const { owner, xAllocationVoting, emissions, minterAccount, governor, b3tr, treasury } =
+      await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+    // Bootstrap emissions
+    await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+    // participation in governance is a requirement for minting
+    await participateInAllocationVoting(owner, owner, xAllocationVoting, true)
+
+    const b3trBadge = (await deployProxy("B3TRBadge", [
+      "b3trBadge",
+      "BDG",
+      owner.address,
+      owner.address,
+      10,
+      config.NFT_BADGE_BASE_URI,
+      config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
+      config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+      await b3tr.getAddress(),
+      await treasury.getAddress(),
+    ])) as B3TRBadge
+
+    await b3trBadge.waitForDeployment()
+
+    await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+    await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+
+    await b3trBadge.connect(owner).freeMint() // Token id 1
+
+    await b3trBadge.connect(owner).freeMint() // Token id 2
+
+    await b3trBadge.connect(owner).select(2)
+
+    expect(await b3trBadge.selectedTokenId(await owner.getAddress())).to.equal(2) // Selected token id is 2
+
+    await upgradeAndSelectNFTtoNextLevel(1, b3trBadge, b3tr, owner, minterAccount)
+
+    expect(await b3trBadge.selectedTokenId(await owner.getAddress())).to.equal(1) // Selected token id is 1
+    expect(await b3trBadge.getLevel(await owner.getAddress())).to.equal(2) // Level 2
+    expect(await b3trBadge.levelOf(1)).to.equal(2) // Level 2
   })
 })

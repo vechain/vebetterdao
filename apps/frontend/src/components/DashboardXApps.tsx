@@ -30,7 +30,7 @@ export const DashboardXApps = () => {
     <Card>
       <CardHeader>
         <HStack w="full" justify={"space-between"}>
-          <Heading size="md">Explore apps</Heading>
+          <Heading size="md">Explore Apps</Heading>
           {slicedXApps && slicedXApps.length > 4 && (
             <Button variant="link" colorScheme="blue" rightIcon={<FiArrowUpRight />}>
               See all
@@ -40,14 +40,14 @@ export const DashboardXApps = () => {
       </CardHeader>
       <CardBody>
         <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
-          {slicedXApps?.map(xApp => <XApp key={xApp.id} xApp={xApp} />)}
+          {slicedXApps?.map(xApp => <DashboardXAppCard key={xApp.id} xApp={xApp} />)}
         </Grid>
       </CardBody>
     </Card>
   )
 }
 
-const XApp = ({ xApp }: { xApp: XApp }) => {
+const DashboardXAppCard = ({ xApp }: { xApp: XApp }) => {
   const {
     data: appMetadata,
     isLoading: appMetadataLoading,
@@ -71,7 +71,7 @@ const XApp = ({ xApp }: { xApp: XApp }) => {
               <IconButton
                 isRound={true}
                 variant="solid"
-                aria-label="Go to dApp"
+                aria-label="Go to App"
                 fontSize="20px"
                 disabled={isAppMetadataError}
                 onClick={() => window.open(appMetadata?.external_url, "_blank")}
