@@ -38,17 +38,6 @@ export async function deployAll(config: ContractsConfig) {
   const b3tr = await deployB3trToken(TEMP_ADMIN, config.B3TR_CAP)
   const vot3 = await deployVot3Token(TEMP_ADMIN, await b3tr.getAddress())
 
-  // Deploy the governance contract
-  const timelock = await deployTimeLock(config.B3TR_GOVERNOR_MIN_DELAY, TEMP_ADMIN, TEMP_ADMIN)
-  const governor = await deployGovernor(
-    await vot3.getAddress(),
-    await timelock.getAddress(),
-    config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
-    config.B3TR_GOVERNOR_VOTING_PERIOD,
-    config.B3TR_GOVERNOR_VOTING_DELAY,
-    config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD,
-  )
-
   // Deploy XAllocationPool
   const xAllocationPool = await deployXAllocationPool(
     await b3tr.getAddress(),
@@ -57,6 +46,9 @@ export async function deployAll(config: ContractsConfig) {
     config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
     config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
   )
+
+  // Deploy the governance contract
+  const timelock = await deployTimeLock(config.B3TR_GOVERNOR_MIN_DELAY, TEMP_ADMIN, TEMP_ADMIN)
 
   const treasury = await deployTreasury(
     await b3tr.getAddress(),
@@ -107,6 +99,16 @@ export async function deployAll(config: ContractsConfig) {
     config.VOTER_REWARDS_MULTIPLIER,
   )
 
+  const governor = await deployGovernor(
+    await vot3.getAddress(),
+    await timelock.getAddress(),
+    config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
+    config.B3TR_GOVERNOR_VOTING_PERIOD,
+    config.B3TR_GOVERNOR_VOTING_DELAY,
+    config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD,
+    await voterRewards.getAddress(),
+  )
+
   // Deploy XAllocationVoting
   const xAllocationVoting = await deployXAllocationVoting(
     await timelock.getAddress(),
@@ -143,7 +145,7 @@ export async function deployAll(config: ContractsConfig) {
   // Grant Vote Registrar role to XAllocationVoting
   await voterRewards
     .connect(admin)
-    .setXallocationVoteRegistrarRole(await xAllocationVoting.getAddress())
+    .setVoteRegistrarRole(await xAllocationVoting.getAddress())
     .then(async tx => await tx.wait())
 
   // Emissions contract should be able to start new rounds
@@ -346,6 +348,7 @@ async function deployGovernor(
   votingPeriod: number,
   votingDelay: number,
   proposalThreshold: number,
+  voterRewardsAddress: string,
 ): Promise<B3TRGovernor> {
   console.log(`Deploying Governor contract`)
 
@@ -356,6 +359,7 @@ async function deployGovernor(
     votingPeriod,
     votingDelay,
     proposalThreshold,
+    voterRewardsAddress,
   ])) as B3TRGovernor
 
   console.log(`Governor contract deployed at address ${await contract.getAddress()}`)
