@@ -1139,30 +1139,6 @@ describe("X-Allocation Voting", function () {
     })
   })
 
-  describe("Quorum", function () {
-    it("Can get quorum of round successfully", async function () {
-      const { xAllocationVoting, owner, b3tr, emissions, minterAccount, otherAccount } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
-
-      await getVot3Tokens(otherAccount, "1000")
-
-      // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
-
-      let round1 = await startNewAllocationRound(xAllocationVoting)
-      await waitForRoundToEnd(round1, xAllocationVoting)
-
-      let quorum = await xAllocationVoting.roundQuorum(round1)
-
-      let snapshot = await xAllocationVoting.roundSnapshot(round1)
-      let quorumAtSnapshot = await xAllocationVoting.quorum(snapshot)
-
-      expect(quorum).to.eql(quorumAtSnapshot)
-    })
-  })
-
   describe("Quadratic Funding", function () {
     it("Can get the correct QF app votes", async function () {
       const { xAllocationVoting, otherAccounts, owner, b3tr, emissions, minterAccount } =
@@ -1178,12 +1154,12 @@ describe("X-Allocation Voting", function () {
       })
 
       //Add apps
-      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
-      const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
-      const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[3].address, "My app", "metadataURI")
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[4].address, "My app #2", "metadataURI")
-      await xAllocationVoting.connect(owner).addApp(otherAccounts[5].address, "My app #3", "metadataURI")
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
+      await xAllocationVoting.connect(owner).addApp(otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
+      const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))
 
       //Start allocation round
       const round1 = await startNewAllocationRound(xAllocationVoting)
@@ -1262,6 +1238,30 @@ describe("X-Allocation Voting", function () {
       const appShare3 = Number(app3VotesQF) ** 2 / Number(totalVotes)
       expect(appShare3.toFixed(6)).to.equal(expectedAppShare3.toFixed(6))
       expect(appShare3.toFixed(4)).to.equal("0.2862") // 28.61% of the total votes
+    })
+  })
+
+  describe("Quorum", function () {
+    it("Can get quorum of round successfully", async function () {
+      const { xAllocationVoting, owner, b3tr, emissions, minterAccount, otherAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      await getVot3Tokens(otherAccount, "1000")
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      let round1 = await startNewAllocationRound(xAllocationVoting)
+      await waitForRoundToEnd(round1, xAllocationVoting)
+
+      let quorum = await xAllocationVoting.roundQuorum(round1)
+
+      let snapshot = await xAllocationVoting.roundSnapshot(round1)
+      let quorumAtSnapshot = await xAllocationVoting.quorum(snapshot)
+
+      expect(quorum).to.eql(quorumAtSnapshot)
     })
   })
 })
