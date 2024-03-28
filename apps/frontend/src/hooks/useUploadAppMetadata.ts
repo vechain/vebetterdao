@@ -2,6 +2,7 @@ import { useCallback, useState } from "react"
 import { XAppMetadata } from "@/api"
 import { base64UrlToFile } from "@/utils/BlobUtils"
 import { NFTStorageUtils } from "@repo/utils"
+import { toIPFSURL } from "@/utils"
 
 export const useUploadAppMetadata = () => {
   const [metadataUploading, setMetadataUploading] = useState(false)
@@ -20,9 +21,18 @@ export const useUploadAppMetadata = () => {
         await base64UrlToFile(banner, "banner.jpeg", "image/jpeg"),
       )
 
-      const data = new Blob([JSON.stringify({ ...metadata, banner: ipfsBannerUri, logo: ipfsLogoUri })], {
-        type: "application/json",
-      })
+      const data = new Blob(
+        [
+          JSON.stringify({
+            ...metadata,
+            logo: toIPFSURL(ipfsLogoUri),
+            banner: toIPFSURL(ipfsBannerUri),
+          }),
+        ],
+        {
+          type: "application/json",
+        },
+      )
       const metadataUri = await NFTStorageUtils.nftStorageClient.storeBlob(data)
       setMetadataUploading(false)
       return metadataUri
