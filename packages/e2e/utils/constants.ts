@@ -20,7 +20,7 @@ export const TX_RECEIPT_INTERVAL = 500
 // account funding
 export const FUNDING_ACCOUNT_INDEX = 1  // index of the account to fund from
 export const FUNDING_MIN_B3TR = 10
-export const FUNDING_MIN_VTHO = 1000
+export const FUNDING_MIN_VTHO = 5000
 export const FUNDING_MIN_VOT3 = 5
 export const DYNAMIC_ACCOUNT_MAX = 200
 export const DYNAMIC_ACCOUNT_MIN = 20

@@ -20,7 +20,8 @@ window['veworld-mock-config'] = {
     controller: () => mockController,
     address: soloAddress,
     thorUrl: soloUrl,
-    chainTag: soloChainTag
+    chainTag: soloChainTag,
+    txId: ''
 }
 console.log('veworld-mock-config: controller installed');
 
@@ -58,6 +59,10 @@ const mockController = {
         window['veworld-mock-config'].accountIndex = index;
     },
 
+    getAccAddress() {
+        return window['veworld-mock-config'].address;
+    },
+
     /**
      * Set the thor url
      */
@@ -65,8 +70,18 @@ const mockController = {
         window['veworld-mock-config'].thorUrl = url;
     },
 
+    /**
+     * Set the chain tag for the mock
+     */
     setChainTag(chainTag) {
         window['veworld-mock-config'].chainTag = chainTag;
+    },
+
+    /**
+     * Get the last signed tx id
+     */
+    getTxId() {
+        return window['veworld-mock-config'].txId;
     }
 
 }
@@ -99,6 +114,7 @@ const signAndSendTx = async (txMessage, txOptions) => {
     const rawNormalSigned = TransactionHandler.sign(txBody, privateKey).encoded
     const send = await thorClient.transactions.sendRawTransaction(`0x${rawNormalSigned.toString('hex')}`)
     const txId = send.id
+    window['veworld-mock-config'].txId = txId
     return txId
 }
 

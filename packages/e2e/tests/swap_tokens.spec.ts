@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, TestInfo } from '@playwright/test';
 import { HOMEPAGE, THOR_URL } from '../utils/constants';
 import { screenshotOnFailure } from '../utils/screenshot';
 import veWorldMockClient from '../utils/veworld-mock-client';
@@ -16,7 +16,11 @@ test.describe('Swap Tokens', () => {
     await veWorldMockClient.setThorUrl(page, THOR_URL)
   })
 
-  test.afterEach(screenshotOnFailure);
+  test.afterEach(async ({ page }, testInfo: TestInfo) => {
+    const lastTxId = await veWorldMockClient.getTxId(page)
+    console.log(`Last tx id: ${lastTxId}`)
+    await screenshotOnFailure({ page }, testInfo)
+  })
 
   test('User can swap B3TR to VOT3', async ({ page }) => {
     // setup rnd account
@@ -40,6 +44,34 @@ test.describe('Swap Tokens', () => {
     await confirm.closeDialog()
     const expectedB3TRBalance = bt3rBalanceBefore.minus(amountToSwap)
     const expectedVOT3Balance = vot3BalanceBefore.plus(amountToSwap)
+    // check balances in ui
+    await dashboardPage.expectB3TRBalance(expectedB3TRBalance)
+    await dashboardPage.expectVOT3Balance(expectedVOT3Balance)
+  });
+
+  test('User can swap VOT3 to B3TR', async ({ page }) => {
+    // setup rnd account
+    const accountIndex = blockchainUtils.getRndAccountIndex()
+    const accAddress = blockchainUtils.getAccountAddress(accountIndex)
+    await veWorldMockClient.setSignerAccIndex(page, accountIndex)
+    await blockchainUtils.fundAccount(accountIndex)
+    // connect walled
+    const dashboardPage = new DashboardPage(page);
+    await dashboardPage.connectWallet()
+    // get before swap balances from contract
+    const bt3rBalanceBefore = await blockchainUtils.getB3TRBalance(accAddress)
+    const vot3BalanceBefore = await blockchainUtils.getVOT3Balance(accAddress)
+    const amountToSwap = 1
+    // do the swap via ui
+    const swapDialog = await dashboardPage.clickSwapButton()
+    await swapDialog.clickSwitchTokens()
+    await swapDialog.enterFirstAmount(new BigNumber(amountToSwap))
+    await swapDialog.clickSwap()
+    const confirm = new SwapConfirmationDialog(page)
+    await confirm.expectSwapCompleted()
+    await confirm.closeDialog()
+    const expectedB3TRBalance = bt3rBalanceBefore.plus(amountToSwap)
+    const expectedVOT3Balance = vot3BalanceBefore.minus(amountToSwap)
     // check balances in ui
     await dashboardPage.expectB3TRBalance(expectedB3TRBalance)
     await dashboardPage.expectVOT3Balance(expectedVOT3Balance)
