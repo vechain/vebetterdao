@@ -110,7 +110,6 @@ export const EditAppPageContent = ({ appId }: Props) => {
         pendingTitle="Updating app details..."
         txId={updateAppMetadataMutation.txReceipt?.meta.txID}
         showExplorerButton={true}
-        showFeedbackButton={true}
       />
 
       <VStack w="full" spacing={8} align="flex-start" data-testid={`app-${appId}-detail`}>
