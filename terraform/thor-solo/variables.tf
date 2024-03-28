@@ -20,5 +20,6 @@ variable "domain_name_data" {
 }
 
 variable "ecr_names" {
+  type    = list(string)
   default = ["thor-solo"]
 }

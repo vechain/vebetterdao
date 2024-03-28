@@ -63,6 +63,34 @@ export const getOrDeployContractInstances = async ({
   // Deploy VOT3
   const vot3 = (await deployProxy("VOT3", [owner.address, await b3tr.getAddress()])) as VOT3
 
+  // Deploy TimeLock
+  const timeLock = (await deployProxy("TimeLock", [
+    0, //0 seconds delay for immediate execution
+    [],
+    [],
+    timelockAdmin.address,
+    timelockAdmin.address,
+  ])) as TimeLock
+
+  // Deploy Governor
+  const governor = (await deployProxy("B3TRGovernor", [
+    await vot3.getAddress(),
+    await timeLock.getAddress(),
+    config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
+    config.B3TR_GOVERNOR_VOTING_PERIOD, // voting period
+    config.B3TR_GOVERNOR_VOTING_DELAY, // voting delay
+    config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD, // voting threshold
+    owner.address,
+  ])) as B3TRGovernor
+
+  // Set up roles
+  const PROPOSER_ROLE = await timeLock.PROPOSER_ROLE()
+  const EXECUTOR_ROLE = await timeLock.EXECUTOR_ROLE()
+  const CANCELLER_ROLE = await timeLock.CANCELLER_ROLE()
+  await timeLock.connect(timelockAdmin).grantRole(PROPOSER_ROLE, await governor.getAddress())
+  await timeLock.connect(timelockAdmin).grantRole(EXECUTOR_ROLE, await governor.getAddress())
+  await timeLock.connect(timelockAdmin).grantRole(CANCELLER_ROLE, await governor.getAddress())
+
   // Deploy Treasury
   const treasury = (await deployProxy("Treasury", [
     await b3tr.getAddress(),
@@ -91,8 +119,7 @@ export const getOrDeployContractInstances = async ({
     owner.address,
     owner.address,
     await b3tr.getAddress(),
-    config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
-    config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
+    await treasury.getAddress(),
   ])) as XAllocationPool
 
   const X_ALLOCATIONS_ADDRESS = await xAllocationPool.getAddress()
@@ -161,15 +188,19 @@ export const getOrDeployContractInstances = async ({
 
   // Deploy XAllocationVoting
   const xAllocationVoting = (await deployProxy("XAllocationVoting", [
-    await vot3.getAddress(),
-    config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE, // quorum percentage
-    config.EMISSIONS_CYCLE_DURATION - 1, // X Alloc voting period
-    await timeLock.getAddress(),
-    await voterRewards.getAddress(),
-    await emissions.getAddress(),
-    [await timeLock.getAddress(), owner.address],
-    owner.address,
-    "ipfs://",
+    {
+      vot3Token: await vot3.getAddress(),
+      quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE, // quorum percentage
+      initialVotingPeriod: config.EMISSIONS_CYCLE_DURATION - 1, // X Alloc voting period
+      b3trGovernor: await timeLock.getAddress(),
+      voterRewards: await voterRewards.getAddress(),
+      emissions: await emissions.getAddress(),
+      admins: [await timeLock.getAddress(), owner.address],
+      upgrader: owner.address,
+      xAppsBaseURI: "ipfs://",
+      baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
+      appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
+    },
   ])) as XAllocationVoting
 
   // Set xAllocationVoting and Governor address in B3TRBadge

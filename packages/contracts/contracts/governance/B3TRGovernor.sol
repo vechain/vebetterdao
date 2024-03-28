@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts-upgradeable/governance/GovernorUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/governance/extensions/GovernorSettingsUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/governance/extensions/GovernorVotesUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/governance/extensions/GovernorVotesQuorumFractionUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/governance/extensions/GovernorTimelockControlUpgradeable.sol";
 import "./modules/GovernorCountingSimpleUpgradeable.sol";
@@ -13,6 +14,7 @@ import { IVoterRewards } from "../interfaces/IVoterRewards.sol";
 
 contract B3TRGovernor is
   Initializable,
+  AccessControlUpgradeable,
   GovernorUpgradeable,
   GovernorSettingsUpgradeable,
   GovernorCountingSimpleUpgradeable,
@@ -21,6 +23,8 @@ contract B3TRGovernor is
   GovernorTimelockControlUpgradeable,
   UUPSUpgradeable
 {
+  error UnauthorizedAccess(address user);
+
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
@@ -57,6 +61,7 @@ contract B3TRGovernor is
     uint32 _initialVotingPeriod,
     uint48 _initialVotingDelay,
     uint256 _initialProposalThreshold,
+    address governorAdmin,
     address _voterRewards
   ) public initializer {
     __Governor_init("B3TRGovernor");
@@ -65,11 +70,34 @@ contract B3TRGovernor is
     __GovernorVotes_init(_vot3Token);
     __GovernorVotesQuorumFraction_init(_quorumPercentage);
     __GovernorTimelockControl_init(_timelock);
+    __AccessControl_init();
     __UUPSUpgradeable_init();
 
     B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
 
     $.voterRewards = IVoterRewards(_voterRewards);
+
+    _grantRole(DEFAULT_ADMIN_ROLE, governorAdmin);
+  }
+
+  /**
+   * @dev See {Governor-cancel}.
+   */
+  function cancel(
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    bytes32 descriptionHash
+  ) public virtual override returns (uint256) {
+    uint256 proposalId = hashProposal(targets, values, calldatas, descriptionHash);
+
+    if (_msgSender() != proposalProposer(proposalId) && !hasRole(DEFAULT_ADMIN_ROLE, _msgSender())) {
+      revert UnauthorizedAccess(_msgSender());
+    }
+
+    require(state(proposalId) == ProposalState.Pending, "Governor: proposal not pending");
+
+    return _cancel(targets, values, calldatas, descriptionHash);
   }
 
   // ------------------ GETTERS ------------------ //
@@ -175,5 +203,11 @@ contract B3TRGovernor is
     returns (address)
   {
     return super._executor();
+  }
+
+  function supportsInterface(
+    bytes4 interfaceId
+  ) public view override(GovernorUpgradeable, AccessControlUpgradeable) returns (bool) {
+    return super.supportsInterface(interfaceId);
   }
 }

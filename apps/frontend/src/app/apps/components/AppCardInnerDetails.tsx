@@ -43,7 +43,7 @@ export const AppCardInnerDetails = ({ xApp }: Props) => {
             <Text fontSize="md" color="gray.500">
               Member since
             </Text>
-            <Text fontSize="xl">{dayjs(xApp.createdAt).format("MMMM D, YYYY")}</Text>
+            <Text fontSize="xl">{dayjs.unix(xApp.createdAtTimestamp).format("MMMM D, YYYY")}</Text>
           </Box>
 
           <Box>
