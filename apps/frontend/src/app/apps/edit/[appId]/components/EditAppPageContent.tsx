@@ -16,19 +16,19 @@ type Props = {
   appId: string
 }
 export const EditAppPageContent = ({ appId }: Props) => {
-  const { data } = useXApp(appId)
+  const { data: appData } = useXApp(appId)
   const { data: metadata } = useXAppMetadata(appId)
   const router = useRouter()
 
   const { register, setValue, setError, formState, watch, handleSubmit, clearErrors, control } =
     useForm<CreateEditAppFormData>({
       defaultValues: {
-        name: data?.name,
+        name: appData?.name,
         description: metadata?.description,
         logo: metadata?.logo,
         banner: metadata?.banner,
         projectUrl: metadata?.external_url,
-        receiverAddress: data?.receiverAddress,
+        receiverAddress: appData?.receiverAddress,
       },
     })
 
@@ -71,7 +71,7 @@ export const EditAppPageContent = ({ appId }: Props) => {
 
     updateAppMetadataMutation.sendTransaction({
       metadataUri,
-      ...(compareAddresses(data.receiverAddress, data.receiverAddress)
+      ...(compareAddresses(data.receiverAddress, appData?.receiverAddress)
         ? {}
         : { receiverAddress: data.receiverAddress }),
     })
@@ -124,7 +124,7 @@ export const EditAppPageContent = ({ appId }: Props) => {
                   register={register}
                   errors={errors}
                   isEdit={true}
-                  editedApp={data}
+                  editedApp={appData}
                   watch={watch}
                   control={control}
                   setError={setError}

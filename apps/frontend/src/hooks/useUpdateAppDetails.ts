@@ -1,4 +1,4 @@
-import { getXAppsQueryKey } from "@/api"
+import { getXAppMetadataQueryKey, getXAppsQueryKey } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
@@ -78,6 +78,12 @@ export const useUpdateAppDetails = ({
       })
       await queryClient.refetchQueries({
         queryKey: getXAppsQueryKey(),
+      })
+      await queryClient.cancelQueries({
+        queryKey: getXAppMetadataQueryKey(appId),
+      })
+      await queryClient.refetchQueries({
+        queryKey: getXAppMetadataQueryKey(appId),
       })
     }
 
