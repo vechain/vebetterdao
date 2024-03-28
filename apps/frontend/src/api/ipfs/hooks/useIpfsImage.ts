@@ -71,5 +71,6 @@ export const useIpfsImage = (imageIpfsUri?: null | string) => {
     queryKey: getIpfsImageQueryKey(imageIpfsUri),
     queryFn: () => getIpfsImage(imageIpfsUri!),
     enabled: !!imageIpfsUri,
+    staleTime: Infinity,
   })
 }
