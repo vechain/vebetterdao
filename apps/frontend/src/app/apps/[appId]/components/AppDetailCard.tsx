@@ -38,7 +38,7 @@ export const AppDetailCard = ({ appId }: Props) => {
 
   const { isOpen: isMobileOptionsOpen, onClose: closeMobileOptions, onOpen: openMobileOptions } = useDisclosure()
 
-  const isReceiverAddress = compareAddresses(account ?? undefined, xApp?.receiverAddress)
+  const isReceiverAddress = compareAddresses(xApp?.adminAddress, account ?? "")
 
   const navigateToEdit = () => {
     router.push(`/apps/edit/${appId}`)
