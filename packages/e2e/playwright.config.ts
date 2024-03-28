@@ -30,7 +30,10 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   globalSetup: require.resolve('./tests/global_setup.spec.ts'),
-
+  timeout: 30000,
+  expect: {
+    timeout: 10000,
+  },
   /* Configure projects for major browsers */
   projects: [
     {

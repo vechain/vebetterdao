@@ -1,7 +1,5 @@
 import { Page } from 'playwright';
-import { HOMEPAGE } from '../utils/constants';
 import { expect } from '@playwright/test';
-import veWorldMockClient from '../utils/veworld-mock-client';
 import BigNumber from 'bignumber.js';
 
 /**

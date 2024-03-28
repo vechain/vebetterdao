@@ -1,10 +1,13 @@
 import { HttpClient, ThorClient, TransactionsModule } from '@vechain/sdk-network';
 import { clauseBuilder, coder, FunctionFragment, HDNode, TransactionHandler } from '@vechain/sdk-core';
-import { B3TR_CONTRACT_ADDRESS, TOKEN_DECIMALS, FUNDING_ACCOUNT_INDEX, SOLO_MNEMONIC, THOR_CHAIN_TAG, THOR_URL, VOT3_CONTRACT_ADDRESS, VTHO_CONTRACT_ADDRESS, TX_RECEIPT_TIMEOUT, FUNDING_MIN_B3TR, FUNDING_MIN_VTHO, TX_RECEIPT_INTERVAL, FUNDING_MIN_VOT3 } from './constants';
+import { B3TR_CONTRACT_ADDRESS, TOKEN_DECIMALS, FUNDING_ACCOUNT_INDEX, SOLO_MNEMONIC, THOR_CHAIN_TAG, THOR_URL, VOT3_CONTRACT_ADDRESS, VTHO_CONTRACT_ADDRESS, TX_RECEIPT_TIMEOUT, FUNDING_MIN_B3TR, FUNDING_MIN_VTHO, TX_RECEIPT_INTERVAL, FUNDING_MIN_VOT3, DYNAMIC_ACCOUNT_MIN, DYNAMIC_ACCOUNT_MAX } from './constants';
 import { BigNumber } from 'bignumber.js';
+import uniqueRandom from './unique-random';
 
 // When toString will return an exponential value
 BigNumber.config({ EXPONENTIAL_AT: 100 })
+// Random number generator for accounts
+const random = uniqueRandom(DYNAMIC_ACCOUNT_MIN, DYNAMIC_ACCOUNT_MAX)
 
 // ERC20 balanceOf function ABI
 const ERC20_balance_abi = JSON.stringify([{
@@ -174,7 +177,7 @@ const getVOT3Balance = async (address: string): Promise<BigNumber> => {
  * @returns Balance of VTHO tokens (this is a decimal value)
  */
 const getVTHOBalance = async (address: string): Promise<BigNumber> => {
-    const balance = getERC20Balance(address, VTHO_CONTRACT_ADDRESS)
+    const balance = await getERC20Balance(address, VTHO_CONTRACT_ADDRESS)
     console.log(`VTHO balance of address ${address}: ${balance}`)
     return balance
 }
@@ -256,6 +259,10 @@ const fundAccount = async (account_index: number) => {
     const vot3Needed = BigNumber(FUNDING_MIN_VOT3).minus(vot3Balance)
     const b3trNeeded = BigNumber(FUNDING_MIN_B3TR).minus(bt3rBalance)
     let totalNeeded = vot3Needed.isGreaterThan(0) ? b3trNeeded.plus(vot3Needed)  : b3trNeeded
+    if (vthoBalance.isLessThan(FUNDING_MIN_VTHO)) {
+        const vthoDiff = vthoBalance.minus(FUNDING_MIN_VTHO).multipliedBy(-1)
+        await blockchainUtils.fundVTHO(address, vthoDiff)
+    }
     if (totalNeeded.isGreaterThan(0)) {
         // transfer B3TR to account
         await blockchainUtils.fundB3TR(address, b3trNeeded)
@@ -264,11 +271,15 @@ const fundAccount = async (account_index: number) => {
             await blockchainUtils.swapB3TRForVOT3(privateKey, address, vot3Needed)
         }
     }
-    if (vthoBalance.isLessThan(FUNDING_MIN_VTHO)) {
-        const vthoDiff = vthoBalance.minus(FUNDING_MIN_VTHO).multipliedBy(-1)
-        await blockchainUtils.fundVTHO(address, vthoDiff)
-    }
     console.log(`Account ${address} seeded`)
+}
+
+/**
+ * Get a random account index
+ * @returns The random account index
+ */
+const getRndAccountIndex = () => {
+    return random()
 }
 
 
@@ -283,5 +294,6 @@ const blockchainUtils = {
     fundB3TR,
     fundAccount,
     swapB3TRForVOT3,
+    getRndAccountIndex
 }
 export default blockchainUtils

@@ -2,23 +2,34 @@ import {
     certificate,
     secp256k1,
     blake2b256,
+    TransactionHandler,
+    HDNode
 } from '@vechain/sdk-core';
-import { HDNode } from '@vechain/sdk-core';
+import { HttpClient, ThorClient } from '@vechain/sdk-network';
 
+// default solo settings
 const soloMnemonic = 'denial kitchen pet squirrel other broom bar gas better priority spoil cross'.split(' ');
 const soloUrl = "https://localhost:8669"
+const soloAddress = "0xf077b491b355e64048ce21e3a6fc4751eeea77fa"
+const soloChainTag = 0xf6
 
-window['veworld-mock'] = {
+// Setup the veworld-mock-config object
+window['veworld-mock-config'] = {
     mnemonicWords : soloMnemonic,
     accountIndex: 0,
     controller: () => mockController,
-    address: "0xf077b491b355e64048ce21e3a6fc4751eeea77fa",
-    thorUrl: soloUrl
+    address: soloAddress,
+    thorUrl: soloUrl,
+    chainTag: soloChainTag
 }
-console.log('veworld-mock: controller installed');
+console.log('veworld-mock-config: controller installed');
 
 
 const mockController = {
+
+    /**
+     * Install the veworld mock on to the window object
+     */
     installMock() {
         window['vechain'] = {
             isVeWorld: true,
@@ -26,35 +37,92 @@ const mockController = {
           }
     },
     
+    /**
+     * Uninstall the veworld mock from the window object
+     */
     uninstallMock() {
         delete window['vechain'];
     },
 
-    setMockSignerMnemonic(mnemonicWords) {
-        window['veworld-mock'].mnemonicWords = mnemonicWords;
+    /**
+     * Set the cert & tx signer mnemonic words
+     */
+    setMnemonic(mnemonicWords) {
+        window['veworld-mock-config'].mnemonicWords = mnemonicWords;
     },
 
-    setMockSignerAccIndex(index) {
-        window['veworld-mock'].accountIndex = index;
+    /**
+     * Set the cert & tx signer account index
+     */
+    setAccIndex(index) {
+        window['veworld-mock-config'].accountIndex = index;
     },
 
-    setMockThorUrl(url) {
-        window['veworld-mock'].thorUrl = url;
+    /**
+     * Set the thor url
+     */
+    setThorUrl(url) {
+        window['veworld-mock-config'].thorUrl = url;
+    },
+
+    setChainTag(chainTag) {
+        window['veworld-mock-config'].chainTag = chainTag;
     }
 
 }
 
+const signAndSendTx = async (txMessage, txOptions) => {
+    // build tx object - ignore tx options for now
+    const httpClient = new HttpClient(window['veworld-mock-config'].thorUrl)
+    const thorClient = new ThorClient(httpClient)
+    const clauses = txMessage.map(clause => ({
+        to: clause.to,
+        value: clause.value,
+        data: clause.data || '0x',
+    }))
+    const hdNode = HDNode.fromMnemonic(window['veworld-mock-config'].mnemonicWords);
+    const childNode = hdNode.derive(window['veworld-mock-config'].accountIndex);
+    const privateKey = childNode.privateKey;
+    const senderAddress = childNode.address;
+    const latestBlock = await thorClient.blocks.getBestBlockCompressed()
+    const gasResult = await thorClient.gas.estimateGas(clauses, senderAddress, {gasPadding: 0.2})
+    const txBody = {
+        chainTag: window['veworld-mock-config'].chainTag,
+        blockRef: latestBlock !== null ? latestBlock.id.slice(0, 18) : '0x0',
+        expiration: 18,
+        clauses: clauses,
+        gasPriceCoef: 0,
+        gas: Math.ceil(gasResult.totalGas),
+        dependsOn: null,
+        nonce: 0
+    }
+    const rawNormalSigned = TransactionHandler.sign(txBody, privateKey).encoded
+    const send = await thorClient.transactions.sendRawTransaction(`0x${rawNormalSigned.toString('hex')}`)
+    const txId = send.id
+    return txId
+}
+
+/**
+ * Mock of ConnexSigner
+ */
 const mockedConnexSigner = {
-    signTx() {
-        return Promise.resolve({ txid: '0x1234', signer: address });
+    async signTx(txMessage, txOptions) {
+        console.log('VeWorld Mock - Signing tx')
+        const txId = await signAndSendTx(txMessage, txOptions)
+        console.log(`VeWorld Mock - Tx signed with id: ${txId}`)
+        return Promise.resolve({
+            txid: txId,
+            signer: window['veworld-mock-config'].address
+        })
+
     },
 
     signCert(msg) {
-        const hdNode = HDNode.fromMnemonic(window['veworld-mock'].mnemonicWords);
-        const childNode = hdNode.derive(window['veworld-mock'].accountIndex);
+        const hdNode = HDNode.fromMnemonic(window['veworld-mock-config'].mnemonicWords);
+        const childNode = hdNode.derive(window['veworld-mock-config'].accountIndex);
         const privateKey = childNode.privateKey;
         const address = childNode.address;
-        window['veworld-mock'].address = address;
+        window['veworld-mock-config'].address = address;
         console.log(`Singing certificate with address: ${address}`);
         const cert = {
             domain: ' localhost:3000',
@@ -81,3 +149,4 @@ const mockedConnexSigner = {
         return response;
     },
 };
+

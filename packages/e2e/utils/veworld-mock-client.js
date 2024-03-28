@@ -1,8 +1,9 @@
 import { readFileSync } from 'fs'
 
+
 const install = async (page) => {
     await page.evaluate(() => { 
-        window['veworld-mock']['controller']().installMock()
+        window['veworld-mock-config']['controller']().installMock()
       })
 }
 const load = async (page) => {
@@ -13,19 +14,19 @@ const load = async (page) => {
 
 const getMockAddress = async (page) => {
     return await page.evaluate(() => { 
-        return window['veworld-mock']['address']
+        return window['veworld-mock-config']['address']
       })
 }
 
 const setSignerAccIndex = async (page, index) => {
     await page.evaluate((index) => { 
-        window['veworld-mock']['accountIndex'] = index - 1
+        window['veworld-mock-config']['accountIndex'] = index - 1
       }, index)
 }
 
 const setThorUrl = async (page, url) => {
     await page.evaluate((url) => { 
-        window['veworld-mock']['thorUrl'] = url
+        window['veworld-mock-config']['thorUrl'] = url
       }, url)
 }
 

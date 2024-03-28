@@ -3,6 +3,7 @@ import { HOMEPAGE } from '../utils/constants';
 import { expect } from '@playwright/test';
 import veWorldMockClient from '../utils/veworld-mock-client';
 import BigNumber from 'bignumber.js';
+import { SwapDialog } from './swapDialog';
 
 /**
  * Dashboard page model
@@ -95,6 +96,7 @@ export class DashboardPage {
     async clickSwapButton() {
         await this.page.locator('xpath=//button[contains(text(), "Swap")]').first().click();
         await expect(this.page.locator('section[role="dialog"]').first()).toBeVisible();
+        return new SwapDialog(this.page)
     }
 
 
