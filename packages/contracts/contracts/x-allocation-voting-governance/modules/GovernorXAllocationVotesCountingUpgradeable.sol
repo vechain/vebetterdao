@@ -7,6 +7,7 @@ import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.s
 import { IXAllocationPool } from "../../interfaces/IXAllocationPool.sol";
 import { IVoterRewards } from "../../interfaces/IVoterRewards.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 
 /**
  * @title GovernorXAllocationVotesCountingUpgradeable
@@ -19,7 +20,9 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 abstract contract GovernorXAllocationVotesCountingUpgradeable is Initializable, XAllocationVotingGovernor {
   struct RoundVote {
     mapping(bytes32 app => uint256) votesReceived;
+    mapping(bytes32 app => uint256) votesReceivedQF;
     uint256 totalVotes;
+    uint256 totalVotesQF;
     mapping(address user => bool) hasVoted;
     uint256 totalVoters;
   }
@@ -80,6 +83,7 @@ abstract contract GovernorXAllocationVotesCountingUpgradeable is Initializable, 
     RoundCore storage round = $governorStorage._rounds[roundId];
 
     uint256 totalWeight = 0;
+    uint256 qfVariable = 0;
     for (uint256 i = 0; i < apps.length; i++) {
       totalWeight += weights[i];
 
@@ -87,8 +91,16 @@ abstract contract GovernorXAllocationVotesCountingUpgradeable is Initializable, 
         revert GovernorAppNotAvailableForVoting(apps[i]);
       }
 
+      // QF votes are the square root of the votes
+      $._roundVotes[roundId].votesReceivedQF[apps[i]] += Math.sqrt(weights[i]);
       $._roundVotes[roundId].votesReceived[apps[i]] += weights[i];
+
+      uint256 qfAppVotes = $._roundVotes[roundId].votesReceivedQF[apps[i]];
+
+      // QF total votes are the sum of the square of the QF votes for each app
+      qfVariable = qfVariable + qfAppVotes * qfAppVotes;
     }
+    $._roundVotes[roundId].totalVotesQF = qfVariable;
 
     require(
       totalWeight <= getVotes(voter, round.voteStart),
@@ -112,6 +124,16 @@ abstract contract GovernorXAllocationVotesCountingUpgradeable is Initializable, 
   function getAppVotes(uint256 roundId, bytes32 app) public view override returns (uint256) {
     GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
     return $._roundVotes[roundId].votesReceived[app];
+  }
+
+  function getUnsquaredQFAppVotes(uint256 roundId, bytes32 app) public view override returns (uint256) {
+    GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
+    return $._roundVotes[roundId].votesReceivedQF[app];
+  }
+
+  function totalVotesQF(uint256 roundId) public view override returns (uint256) {
+    GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
+    return $._roundVotes[roundId].totalVotesQF;
   }
 
   function totalVotes(uint256 roundId) public view override returns (uint256) {

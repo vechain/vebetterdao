@@ -9,6 +9,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20Pausable
 import "@openzeppelin/contracts-upgradeable/utils/NoncesUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 
 // VOT3 contract
 contract VOT3 is
@@ -89,6 +90,14 @@ contract VOT3 is
     _burn(msg.sender, amount);
     $._stakedBalances[msg.sender] -= amount;
     require($.b3tr.transfer(msg.sender, amount), "Transfer failed");
+  }
+
+  /**
+   * @dev Returns the voting power of `msg.sender` at the current block.
+   * Using on Quadratic Voting formula: sqrt(balanceOf(msg.sender))
+   */
+  function votingPower(address account) public view returns (uint256) {
+    return Math.sqrt(balanceOf(account));
   }
 
   function transfer(address to, uint256 value) public override(ERC20Upgradeable) returns (bool) {
