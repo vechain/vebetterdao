@@ -40,18 +40,6 @@ export async function deployAll(config: ContractsConfig) {
 
   // Deploy the governance contract
   const timelock = await deployTimeLock(config.B3TR_GOVERNOR_MIN_DELAY, TEMP_ADMIN, TEMP_ADMIN)
-  const governor = await deployGovernor(
-    await vot3.getAddress(),
-    await timelock.getAddress(),
-    config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
-    config.B3TR_GOVERNOR_VOTING_PERIOD,
-    config.B3TR_GOVERNOR_VOTING_DELAY,
-    config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD,
-    TEMP_ADMIN,
-  )
-
-  // Deploy the governance contract
-  const timelock = await deployTimeLock(config.B3TR_GOVERNOR_MIN_DELAY, TEMP_ADMIN, TEMP_ADMIN)
 
   const treasury = await deployTreasury(
     await b3tr.getAddress(),
@@ -117,6 +105,7 @@ export async function deployAll(config: ContractsConfig) {
     config.B3TR_GOVERNOR_VOTING_PERIOD,
     config.B3TR_GOVERNOR_VOTING_DELAY,
     config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD,
+    TEMP_ADMIN,
     await voterRewards.getAddress(),
   )
 
@@ -412,6 +401,7 @@ async function deployGovernor(
   votingDelay: number,
   proposalThreshold: number,
   admin: string,
+  voterAddress: string,
 ): Promise<B3TRGovernor> {
   console.log(`Deploying Governor contract`)
 
@@ -423,6 +413,7 @@ async function deployGovernor(
     votingDelay,
     proposalThreshold,
     admin,
+    voterAddress,
   ])) as B3TRGovernor
 
   console.log(`Governor contract deployed at address ${await contract.getAddress()}`)

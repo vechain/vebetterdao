@@ -61,7 +61,7 @@ contract B3TRGovernor is
     uint32 _initialVotingPeriod,
     uint48 _initialVotingDelay,
     uint256 _initialProposalThreshold,
-    address governorAdmin,
+    address _governorAdmin,
     address _voterRewards
   ) public initializer {
     __Governor_init("B3TRGovernor");
@@ -77,7 +77,7 @@ contract B3TRGovernor is
 
     $.voterRewards = IVoterRewards(_voterRewards);
 
-    _grantRole(DEFAULT_ADMIN_ROLE, governorAdmin);
+    _grantRole(DEFAULT_ADMIN_ROLE, _governorAdmin);
   }
 
   /**

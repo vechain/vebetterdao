@@ -63,34 +63,6 @@ export const getOrDeployContractInstances = async ({
   // Deploy VOT3
   const vot3 = (await deployProxy("VOT3", [owner.address, await b3tr.getAddress()])) as VOT3
 
-  // Deploy TimeLock
-  const timeLock = (await deployProxy("TimeLock", [
-    0, //0 seconds delay for immediate execution
-    [],
-    [],
-    timelockAdmin.address,
-    timelockAdmin.address,
-  ])) as TimeLock
-
-  // Deploy Governor
-  const governor = (await deployProxy("B3TRGovernor", [
-    await vot3.getAddress(),
-    await timeLock.getAddress(),
-    config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
-    config.B3TR_GOVERNOR_VOTING_PERIOD, // voting period
-    config.B3TR_GOVERNOR_VOTING_DELAY, // voting delay
-    config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD, // voting threshold
-    owner.address,
-  ])) as B3TRGovernor
-
-  // Set up roles
-  const PROPOSER_ROLE = await timeLock.PROPOSER_ROLE()
-  const EXECUTOR_ROLE = await timeLock.EXECUTOR_ROLE()
-  const CANCELLER_ROLE = await timeLock.CANCELLER_ROLE()
-  await timeLock.connect(timelockAdmin).grantRole(PROPOSER_ROLE, await governor.getAddress())
-  await timeLock.connect(timelockAdmin).grantRole(EXECUTOR_ROLE, await governor.getAddress())
-  await timeLock.connect(timelockAdmin).grantRole(CANCELLER_ROLE, await governor.getAddress())
-
   // Deploy Treasury
   const treasury = (await deployProxy("Treasury", [
     await b3tr.getAddress(),
@@ -172,6 +144,7 @@ export const getOrDeployContractInstances = async ({
     config.B3TR_GOVERNOR_VOTING_PERIOD, // voting period
     config.B3TR_GOVERNOR_VOTING_DELAY, // voting delay
     config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD, // voting threshold
+    owner.address,
     await voterRewards.getAddress(),
   ])) as B3TRGovernor
 
