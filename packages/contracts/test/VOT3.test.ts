@@ -532,4 +532,17 @@ describe("VOT3", function () {
       expect(await vot3.getVotes(owner)).to.eql(ethers.parseEther("1000"))
     })
   })
+
+  describe("Voting power", function () {
+    it("Voting power should be the square root of the amount of vote", async function () {
+      const { vot3, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      // Mint some B3TR and swap for VOT3
+      await getVot3Tokens(otherAccount, "1000")
+
+      // Initial state: 1000 VOT3, 1000 voting power, self-delegated
+      expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("1000"))
+      expect(await vot3.votingPower(otherAccount)).to.eql(ethers.parseEther("31.622776601") / 1000000000n)
+    })
+  })
 })
