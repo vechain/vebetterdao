@@ -11,11 +11,13 @@ import { useCallback, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { FaArrowLeft } from "react-icons/fa6"
 import { AppPreviewDetailCard } from "./AppPreviewDetailCard"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 type Props = {
   appId: string
 }
 export const EditAppPageContent = ({ appId }: Props) => {
+  const { account } = useWallet()
   const { data: appData } = useXApp(appId)
   const { data: metadata, isLoading: appMetadataLoading, error: appMetadataError } = useXAppMetadata(appId)
   const router = useRouter()
@@ -83,6 +85,8 @@ export const EditAppPageContent = ({ appId }: Props) => {
     onConfirmationOpen()
   }, [onConfirmationClose, onConfirmationOpen, updateAppMetadataMutation])
 
+  const isAllowedToEditAddress = compareAddresses(appData?.adminAddress, account ?? "")
+
   return (
     <>
       <TransactionModal
@@ -130,6 +134,7 @@ export const EditAppPageContent = ({ appId }: Props) => {
                   setError={setError}
                   setValue={setValue}
                   clearErrors={clearErrors}
+                  isReceiverAddressDisabled={!isAllowedToEditAddress}
                 />
               </form>
             </GridItem>

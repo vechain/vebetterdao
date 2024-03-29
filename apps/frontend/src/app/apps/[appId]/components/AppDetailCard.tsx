@@ -1,4 +1,4 @@
-import { useXApp, useXAppMetadata } from "@/api"
+import { useAppModerators, useXApp, useXAppMetadata } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
 import {
@@ -18,11 +18,12 @@ import { useBreakpoints } from "@/hooks"
 import { FaEllipsisVertical, FaPencil } from "react-icons/fa6"
 import { AppCardOptionsDesktopMenu } from "../../components/AppCardOptionsDesktopMenu"
 import { AppCardOptionsMobileModal } from "../../components/AppCardOptionsMobileModal"
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 import { AppSocialUrls } from "./AppSocialUrls"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useRouter } from "next/navigation"
+import { compare } from "@repo/utils/HexUtils"
 
 type Props = { appId: string; showEditButton?: boolean }
 export const AppDetailCard = ({ appId, showEditButton = true }: Props) => {
@@ -37,8 +38,12 @@ export const AppDetailCard = ({ appId, showEditButton = true }: Props) => {
   const { data: banner, isLoading: isBannerLoading } = useIpfsImage(appMetadata?.banner)
 
   const { isOpen: isMobileOptionsOpen, onClose: closeMobileOptions, onOpen: openMobileOptions } = useDisclosure()
-
-  const isReceiverAddress = compareAddresses(xApp?.adminAddress, account ?? "")
+  const { data: appModerators } = useAppModerators(appId)
+  const isAllowedToEdit = useMemo(() => {
+    if (!account || !appModerators) return false
+    if (compareAddresses(xApp?.adminAddress, account)) return true
+    return appModerators.some(mod => compareAddresses(mod, account))
+  }, [account, appModerators, xApp?.receiverAddress])
 
   const navigateToEdit = () => {
     router.push(`/apps/edit/${appId}`)
@@ -91,7 +96,7 @@ export const AppDetailCard = ({ appId, showEditButton = true }: Props) => {
               </Skeleton>
             </HStack>
             <HStack spacing={4}>
-              {isReceiverAddress && showEditButton && (
+              {isAllowedToEdit && showEditButton && (
                 <Button colorScheme="blue" size="sm" variant="outline" leftIcon={<FaPencil />} onClick={navigateToEdit}>
                   Edit App page
                 </Button>

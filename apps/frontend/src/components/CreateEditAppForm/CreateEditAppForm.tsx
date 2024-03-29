@@ -79,6 +79,7 @@ type Props = {
   setError: UseFormSetError<CreateEditAppFormData>
   setValue: UseFormSetValue<CreateEditAppFormData>
   clearErrors: UseFormClearErrors<CreateEditAppFormData>
+  isReceiverAddressDisabled?: boolean
 }
 
 export const CreateEditAppForm = ({
@@ -91,6 +92,7 @@ export const CreateEditAppForm = ({
   setError,
   setValue,
   clearErrors,
+  isReceiverAddressDisabled = false,
 }: Props) => {
   // handle image uploads with validation
   const onDrop = useCallback(
@@ -172,6 +174,7 @@ export const CreateEditAppForm = ({
                 <AddressIcon borderRadius={"full"} boxSize={6} address={watch("receiverAddress")} />
               </InputLeftElement>
               <Input
+                isDisabled={isReceiverAddressDisabled}
                 rounded={"xl"}
                 {...register("receiverAddress", {
                   validate: value => isValid(value) || "Invalid address",

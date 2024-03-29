@@ -1,4 +1,4 @@
-import { Box, Button, VStack } from "@chakra-ui/react"
+import { Button, VStack } from "@chakra-ui/react"
 import { AppDetailCard } from "./AppDetailCard"
 import { FaArrowLeft } from "react-icons/fa6"
 import { useRouter } from "next/navigation"
