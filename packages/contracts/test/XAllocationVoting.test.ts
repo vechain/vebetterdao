@@ -112,9 +112,14 @@ describe("X-Allocation Voting", function () {
     })
 
     it("should be able to upgrade the xAllocationVoting contract through governance", async function () {
-      const { xAllocationVoting, timeLock, governor, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, timeLock, governor, owner, b3tr, emissions, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
       const votesThreshold = await governor.proposalThreshold()
       await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
 
@@ -215,9 +220,17 @@ describe("X-Allocation Voting", function () {
     })
 
     it("Can set voting period if less than emissions cycle duration", async function () {
-      const { xAllocationVoting, owner, emissions, governor } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, owner, emissions, governor, b3tr, minterAccount } = await getOrDeployContractInstances(
+        {
+          forceDeploy: true,
+        },
+      )
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      await emissions.connect(minterAccount).start()
+
       const votesThreshold = await governor.proposalThreshold()
       await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
       const cycleDuration = await emissions.cycleDuration()
@@ -478,9 +491,13 @@ describe("X-Allocation Voting", function () {
     })
 
     it("DAO can make an app unavailable for allocation voting starting from next round", async function () {
-      const { otherAccounts, governor, xAllocationVoting } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { otherAccounts, governor, xAllocationVoting, b3tr, emissions, owner, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
 
       const app1Id = await xAllocationVoting.hashName("Bike 4 Life")
       const proposer = otherAccounts[0]
@@ -948,7 +965,6 @@ describe("X-Allocation Voting", function () {
       tx = await xAllocationVoting
         .connect(otherAccount)
         .castVote(roundId, [app1, app2], [ethers.parseEther("300"), ethers.parseEther("200")])
-      receipt = await tx.wait()
 
       await waitForRoundToEnd(roundId, xAllocationVoting)
 
@@ -996,7 +1012,6 @@ describe("X-Allocation Voting", function () {
       tx = await xAllocationVoting
         .connect(otherAccount)
         .castVote(roundId, [app1, app2], [ethers.parseEther("1"), ethers.parseEther("1")])
-      receipt = await tx.wait()
 
       await waitForRoundToEnd(roundId, xAllocationVoting)
 
