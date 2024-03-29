@@ -23,7 +23,7 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
         })()
 
         const onClick = () => {
-          if (!route.onClick || isSelected) return
+          if (!route.onClick) return
           if (typeof route.onClick === "string") {
             router.push(route.onClick)
           } else route.onClick()

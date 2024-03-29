@@ -10,3 +10,15 @@ export const validateIpfsUri = (uri: string): boolean => {
   const trimmedUri = uri.trim()
   return /^ipfs:\/\/[a-zA-Z0-9]+(\/[^/]+)*\/?$/.test(trimmedUri)
 }
+
+/**
+ * Converts a CID to an IPFS native URL.
+ *
+ * @param cid - The CID to convert.
+ * @param fileName - The name of the file to append to the URL.
+ *
+ * @returns The IPFS URL in the format `ipfs://${cid}/${fileName}`.
+ */
+export function toIPFSURL(cid: string, fileName?: string): string {
+  return `ipfs://${cid}/${fileName ?? ""}`
+}
