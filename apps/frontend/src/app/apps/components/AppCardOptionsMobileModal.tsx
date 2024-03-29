@@ -12,18 +12,29 @@ import {
   ModalHeader,
   Skeleton,
 } from "@chakra-ui/react"
-import { FaCopy } from "react-icons/fa6"
+import { FaCopy, FaFileImage } from "react-icons/fa6"
 import { CustomModalContent } from "@/components/CustomModalContent"
 import { FaExternalLinkAlt } from "react-icons/fa"
+import { useRouter } from "next/navigation"
 export type Props = {
   isOpen: boolean
   onClose: () => void
   receiverAddress: string
+  xAppId: string
   externalUrl?: string
   isLoading?: boolean
+  showViewDetails?: boolean
 }
 
-export const AppCardOptionsMobileModal = ({ isOpen, onClose, receiverAddress, externalUrl, isLoading }: Props) => {
+export const AppCardOptionsMobileModal = ({
+  isOpen,
+  onClose,
+  receiverAddress,
+  externalUrl,
+  isLoading,
+  xAppId,
+  showViewDetails = false,
+}: Props) => {
   const { onCopy } = useClipboard(receiverAddress)
 
   const toast = useToast()
@@ -38,6 +49,11 @@ export const AppCardOptionsMobileModal = ({ isOpen, onClose, receiverAddress, ex
     })
   }
 
+  const router = useRouter()
+  const navigateToAppDetail = () => {
+    router.push(`/apps/${xAppId}`)
+  }
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
       <ModalOverlay />
@@ -48,6 +64,17 @@ export const AppCardOptionsMobileModal = ({ isOpen, onClose, receiverAddress, ex
         </ModalHeader>
         <ModalBody>
           <VStack spacing={4} w="full">
+            {showViewDetails && (
+              <Button
+                w="full"
+                size="lg"
+                colorScheme="gray"
+                variant={"solid"}
+                onClick={navigateToAppDetail}
+                leftIcon={<FaFileImage />}>
+                View details
+              </Button>
+            )}
             <Button
               w="full"
               size="lg"

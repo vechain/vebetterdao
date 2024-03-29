@@ -78,6 +78,8 @@ export const AppCard = ({ xApp }: Props) => {
                     isLoading={appMetadataLoading}
                     isOpen={isMobileOptionsOpen}
                     onClose={closeMobileOptions}
+                    xAppId={xApp.id}
+                    showViewDetails={true}
                   />
                 </>
               ) : (
