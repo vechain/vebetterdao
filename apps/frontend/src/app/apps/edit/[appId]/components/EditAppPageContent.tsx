@@ -112,7 +112,7 @@ export const EditAppPageContent = ({ appId }: Props) => {
         showExplorerButton={true}
       />
 
-      <VStack w="full" spacing={8} align="flex-start" data-testid={`app-${appId}-detail`}>
+      <VStack w="full" spacing={8} align="flex-start" data-testid={`edit-app-${appId}-detail`}>
         <VStack spacing={4} alignItems={"flex-start"}>
           <Button colorScheme="gray" size="md" variant="outline" leftIcon={<FaArrowLeft />} onClick={goToAppDetail}>
             App detail
