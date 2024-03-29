@@ -1,4 +1,4 @@
-import { useXApp, useXAppMetadata } from "@/api"
+import { useAppModerators, useXApp, useXAppMetadata } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { CreateEditAppForm, CreateEditAppFormData } from "@/components/CreateEditAppForm"
 import { TransactionModal } from "@/components/TransactionModal"
@@ -7,7 +7,7 @@ import { useUploadAppMetadata } from "@/hooks/useUploadAppMetadata"
 import { VStack, Button, Grid, GridItem, Heading, useDisclosure } from "@chakra-ui/react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useRouter } from "next/navigation"
-import { useCallback, useEffect } from "react"
+import { useCallback, useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { FaArrowLeft } from "react-icons/fa6"
 import { AppPreviewDetailCard } from "./AppPreviewDetailCard"
@@ -86,6 +86,20 @@ export const EditAppPageContent = ({ appId }: Props) => {
   }, [onConfirmationClose, onConfirmationOpen, updateAppMetadataMutation])
 
   const isAllowedToEditAddress = compareAddresses(appData?.adminAddress, account ?? "")
+  const { data: appModerators } = useAppModerators(appId)
+  const isAllowedToEdit = useMemo(() => {
+    if (!account || !appModerators) return false
+    if (compareAddresses(appData?.adminAddress, account)) return true
+    return appModerators.some(mod => compareAddresses(mod, account))
+  }, [account, appModerators, appData?.receiverAddress])
+
+  useEffect(() => {
+    if (!isAllowedToEditAddress) {
+      goToAppDetail()
+    }
+  }, [isAllowedToEditAddress, goToAppDetail])
+
+  if (!isAllowedToEdit) return null
 
   return (
     <>
