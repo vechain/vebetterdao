@@ -127,6 +127,7 @@ export const CreateEditAppForm = ({
           <FormControl isInvalid={!!errors.name}>
             <FormLabel>Name</FormLabel>
             <Input
+              rounded={"xl"}
               {...register("name", {
                 required: "Name is required",
               })}
@@ -136,6 +137,7 @@ export const CreateEditAppForm = ({
           <FormControl isInvalid={!!errors.description}>
             <FormLabel>Description</FormLabel>
             <Textarea
+              rounded={"xl"}
               {...register("description", {
                 required: "Description is required",
                 min: { value: 100, message: "Description is too short" },
@@ -146,6 +148,7 @@ export const CreateEditAppForm = ({
           <FormControl isInvalid={!!errors.projectUrl}>
             <FormLabel>Project URL</FormLabel>
             <Input
+              rounded={"xl"}
               {...register("projectUrl", {
                 validate: value => {
                   if (!value) {
@@ -169,6 +172,7 @@ export const CreateEditAppForm = ({
                 <AddressIcon borderRadius={"full"} boxSize={6} address={watch("receiverAddress")} />
               </InputLeftElement>
               <Input
+                rounded={"xl"}
                 {...register("receiverAddress", {
                   validate: value => isValid(value) || "Invalid address",
                 })}
