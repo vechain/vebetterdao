@@ -21,15 +21,10 @@ import { useMemo } from "react"
 import { B3TRIcon, VOT3Icon } from "./Icons"
 import { SwapButton } from "./Swap/SwapButton"
 import { useTokenColors } from "@/hooks"
-
-const DECIMAL_PLACES = 4
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
 // Maximum precision of 4 decimals. Must also round down
-const compactFormatter = new Intl.NumberFormat("en-US", {
-  notation: "compact",
-  compactDisplay: "short",
-  maximumFractionDigits: DECIMAL_PLACES,
-})
+const compactFormatter = getCompactFormatter(4)
 
 type Props = {}
 /**

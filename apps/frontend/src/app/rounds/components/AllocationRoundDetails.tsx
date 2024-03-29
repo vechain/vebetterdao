@@ -21,17 +21,14 @@ import {
   VStack,
   useColorModeValue,
 } from "@chakra-ui/react"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
 
+const compactFormatter = getCompactFormatter()
 type Props = {
   roundId: string
 }
-
-const compactFormatter = new Intl.NumberFormat("en-US", {
-  notation: "compact",
-  compactDisplay: "short",
-})
 
 export const AllocationRoundDetails = ({ roundId }: Props) => {
   const { account } = useWallet()
@@ -40,7 +37,7 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
   const { data: roundAmount, isLoading: roundAmountLoading, error: roundAmountError } = useAllocationAmount(roundId)
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
   const { data: baseAmount, isLoading: baseAmountLoading, error: baseAmountError } = useAllocationBaseAmount(roundId)
-  const { data: appSharesCap } = useAllocationSharesCap()
+  const { data: appSharesCap } = useAllocationSharesCap(roundId)
   const { data: xApps } = useRoundXApps(roundId)
 
   const isVotingConcluded = data?.voteEndTimestamp?.isBefore()

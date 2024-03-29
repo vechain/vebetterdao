@@ -13,12 +13,13 @@ import { calculateTreasuryAllocation } from "./helpers/allocations"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { createTestConfig } from "./helpers/config"
 import { generateB3trAllocations } from "./helpers/generateB3trAllocations"
+import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 
 describe("Emissions", () => {
   describe("Contract parameters", () => {
     it("Should have correct parameters set on deployment", async () => {
       const config = createLocalConfig()
-      const { emissions, owner, otherAccounts, b3tr, minterAccount, xAllocationPool, voterRewards } =
+      const { emissions, owner, b3tr, minterAccount, xAllocationPool, voterRewards, treasury } =
         await getOrDeployContractInstances({
           forceDeploy: true,
           config,
@@ -27,7 +28,7 @@ describe("Emissions", () => {
       // Destination addresses should be set correctly
       expect(await emissions.xAllocations()).to.equal(await xAllocationPool.getAddress())
       expect(await emissions.vote2Earn()).to.equal(await voterRewards.getAddress())
-      expect(await emissions.treasury()).to.equal(otherAccounts[2].address)
+      expect(await emissions.treasury()).to.equal(await treasury.getAddress())
 
       // Admin should be set correctly
       expect(await emissions.hasRole(await emissions.DEFAULT_ADMIN_ROLE(), await owner.getAddress())).to.equal(true)
@@ -177,10 +178,87 @@ describe("Emissions", () => {
     // })
   })
 
+  describe("Contract upgradeablity", () => {
+    it("Admin should be able to upgrade the contract", async function () {
+      const { emissions, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Deploy the implementation contract
+      const Contract = await ethers.getContractFactory("Emissions")
+      const implementation = await Contract.deploy()
+      await implementation.waitForDeployment()
+
+      const currentImplAddress = await getImplementationAddress(ethers.provider, await emissions.getAddress())
+
+      const UPGRADER_ROLE = await emissions.UPGRADER_ROLE()
+      expect(await emissions.hasRole(UPGRADER_ROLE, owner.address)).to.eql(true)
+
+      await expect(emissions.connect(owner).upgradeToAndCall(await implementation.getAddress(), "0x")).to.not.be
+        .reverted
+
+      const newImplAddress = await getImplementationAddress(ethers.provider, await emissions.getAddress())
+
+      expect(newImplAddress.toUpperCase()).to.not.eql(currentImplAddress.toUpperCase())
+      expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
+    })
+
+    it("Only admin should be able to upgrade the contract", async function () {
+      const { emissions, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Deploy the implementation contract
+      const Contract = await ethers.getContractFactory("Emissions")
+      const implementation = await Contract.deploy()
+      await implementation.waitForDeployment()
+
+      const currentImplAddress = await getImplementationAddress(ethers.provider, await emissions.getAddress())
+
+      const UPGRADER_ROLE = await emissions.UPGRADER_ROLE()
+      expect(await emissions.hasRole(UPGRADER_ROLE, otherAccount.address)).to.eql(false)
+
+      await expect(emissions.connect(otherAccount).upgradeToAndCall(await implementation.getAddress(), "0x")).to.be
+        .reverted
+
+      const newImplAddress = await getImplementationAddress(ethers.provider, await emissions.getAddress())
+
+      expect(newImplAddress.toUpperCase()).to.eql(currentImplAddress.toUpperCase())
+      expect(newImplAddress.toUpperCase()).to.not.eql((await implementation.getAddress()).toUpperCase())
+    })
+
+    it("Admin can change UPGRADER_ROLE", async function () {
+      const { emissions, owner, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Deploy the implementation contract
+      const Contract = await ethers.getContractFactory("Emissions")
+      const implementation = await Contract.deploy()
+      await implementation.waitForDeployment()
+
+      const currentImplAddress = await getImplementationAddress(ethers.provider, await emissions.getAddress())
+
+      const UPGRADER_ROLE = await emissions.UPGRADER_ROLE()
+      expect(await emissions.hasRole(UPGRADER_ROLE, otherAccount.address)).to.eql(false)
+
+      await expect(emissions.connect(owner).grantRole(UPGRADER_ROLE, otherAccount.address)).to.not.be.reverted
+      await expect(emissions.connect(owner).revokeRole(UPGRADER_ROLE, owner.address)).to.not.be.reverted
+
+      await expect(emissions.connect(otherAccount).upgradeToAndCall(await implementation.getAddress(), "0x")).to.not.be
+        .reverted
+
+      const newImplAddress = await getImplementationAddress(ethers.provider, await emissions.getAddress())
+
+      expect(newImplAddress.toUpperCase()).to.not.eql(currentImplAddress.toUpperCase())
+      expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
+    })
+  })
+
   describe("Bootstrap emissions", () => {
     it("Should be able to bootstrap emissions", async () => {
       const config = createLocalConfig()
-      const { emissions, b3tr, minterAccount, otherAccounts, owner, xAllocationPool, voterRewards } =
+      const { emissions, b3tr, minterAccount, treasury, owner, xAllocationPool, voterRewards } =
         await getOrDeployContractInstances({
           forceDeploy: true,
           config,
@@ -220,7 +298,7 @@ describe("Emissions", () => {
 
       expect(await b3tr.balanceOf(await xAllocationPool.getAddress())).to.equal(config.INITIAL_X_ALLOCATION)
       expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(initialVoteAllocation)
-      expect(await b3tr.balanceOf(otherAccounts[2].address)).to.equal(initialTreasuryAlloc)
+      expect(await b3tr.balanceOf(await treasury.getAddress())).to.equal(initialTreasuryAlloc)
 
       expect(await emissions.getXAllocationAmount(1)).to.equal(config.INITIAL_X_ALLOCATION)
       expect(await emissions.getVote2EarnAmount(1)).to.equal(initialVoteAllocation)
@@ -262,7 +340,7 @@ describe("Emissions", () => {
   describe("Start emissions", () => {
     it("Should be able to start emissions", async () => {
       const config = createLocalConfig()
-      const { emissions, b3tr, minterAccount, otherAccounts, owner, xAllocationPool, voterRewards } =
+      const { emissions, b3tr, minterAccount, treasury, owner, xAllocationPool, voterRewards } =
         await getOrDeployContractInstances({
           forceDeploy: true,
           config,
@@ -286,7 +364,7 @@ describe("Emissions", () => {
 
       expect(await b3tr.balanceOf(await xAllocationPool.getAddress())).to.equal(config.INITIAL_X_ALLOCATION)
       expect(await b3tr.balanceOf(await voterRewards.getAddress())).to.equal(initialVoteAllocation)
-      expect(await b3tr.balanceOf(otherAccounts[2].address)).to.equal(initialTreasuryAlloc)
+      expect(await b3tr.balanceOf(await treasury.getAddress())).to.equal(initialTreasuryAlloc)
 
       expect(await emissions.getXAllocationAmount(1)).to.equal(config.INITIAL_X_ALLOCATION)
       expect(await emissions.getVote2EarnAmount(1)).to.equal(initialVoteAllocation)

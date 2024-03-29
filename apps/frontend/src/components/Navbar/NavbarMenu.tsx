@@ -15,9 +15,15 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
     <>
       {routesToRender.map(route => {
         if (route.component) return route.component
-        const isSelected = pathname === route.onClick
+        //check also subpaths
+        const isSelected = (() => {
+          if (route.onClick === "/") return pathname === "/"
+          if (typeof route.onClick === "string") return pathname.startsWith(route.onClick)
+          return false
+        })()
+
         const onClick = () => {
-          if (!route.onClick || isSelected) return
+          if (!route.onClick) return
           if (typeof route.onClick === "string") {
             router.push(route.onClick)
           } else route.onClick()

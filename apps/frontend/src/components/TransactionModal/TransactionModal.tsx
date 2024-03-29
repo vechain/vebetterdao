@@ -5,7 +5,7 @@ import { LoadingModalContent } from "./LoadingModalContent"
 import { SuccessModalContent } from "./SuccessModalContent"
 import { Modal, ModalOverlay } from "@chakra-ui/react"
 import { CustomModalContent } from "@/components/CustomModalContent"
-import { UnknownModalContent } from "./UnknownModalContent"
+import { UploadingMetadataModalContent } from ".//UploadingMetadataModalContent"
 
 export type TransactionModalProps = {
   isOpen: boolean
@@ -14,9 +14,8 @@ export type TransactionModalProps = {
   pendingTitle?: ReactNode
   confirmationTitle?: ReactNode
   errorTitle?: ReactNode
+  errorDescription?: string
   successTitle?: ReactNode
-  unknownTitle?: ReactNode
-  unknownDescription?: ReactNode
   showSocialButtons?: boolean
   socialDescriptionEncoded?: string
   showTryAgainButton?: boolean
@@ -32,6 +31,7 @@ export const TransactionModal = ({
   pendingTitle,
   confirmationTitle,
   errorTitle,
+  errorDescription,
   successTitle,
   showSocialButtons = false,
   socialDescriptionEncoded,
@@ -39,19 +39,10 @@ export const TransactionModal = ({
   onTryAgain,
   showExplorerButton,
   txId,
-  unknownTitle,
-  unknownDescription,
 }: TransactionModalProps) => {
   const modalContent = useMemo(() => {
-    if (status === "unknown")
-      return (
-        <UnknownModalContent
-          title={unknownTitle}
-          description={unknownDescription}
-          txId={txId}
-          showExplorerButton={showExplorerButton}
-        />
-      )
+    if (status === "uploadingMetadata") return <UploadingMetadataModalContent />
+
     if (status === "pending") return <ConfirmationModalContent title={confirmationTitle} />
     if (status === "waitingConfirmation")
       return <LoadingModalContent title={pendingTitle} showExplorerButton={showExplorerButton} txId={txId} />
@@ -59,6 +50,7 @@ export const TransactionModal = ({
       return (
         <ErrorModalContent
           title={errorTitle}
+          description={errorDescription}
           showTryAgainButton={showTryAgainButton}
           onTryAgain={onTryAgain}
           showExplorerButton={showExplorerButton}
@@ -76,7 +68,20 @@ export const TransactionModal = ({
         />
       )
     return null
-  }, [status, pendingTitle, confirmationTitle, errorTitle, successTitle, showSocialButtons, socialDescriptionEncoded])
+  }, [
+    status,
+    confirmationTitle,
+    pendingTitle,
+    showExplorerButton,
+    txId,
+    errorTitle,
+    errorDescription,
+    showTryAgainButton,
+    onTryAgain,
+    successTitle,
+    showSocialButtons,
+    socialDescriptionEncoded,
+  ])
   if (!modalContent) return null
 
   return (

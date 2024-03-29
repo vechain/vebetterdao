@@ -16,7 +16,8 @@ import {
   IconButton,
   Button,
 } from "@chakra-ui/react"
-import { useMemo } from "react"
+import { useRouter } from "next/navigation"
+import { useCallback, useMemo } from "react"
 import { FiArrowUpRight } from "react-icons/fi"
 
 export const DashboardXApps = () => {
@@ -30,7 +31,7 @@ export const DashboardXApps = () => {
     <Card>
       <CardHeader>
         <HStack w="full" justify={"space-between"}>
-          <Heading size="md">Explore apps</Heading>
+          <Heading size="md">Explore Apps</Heading>
           {slicedXApps && slicedXApps.length > 4 && (
             <Button variant="link" colorScheme="blue" rightIcon={<FiArrowUpRight />}>
               See all
@@ -40,38 +41,51 @@ export const DashboardXApps = () => {
       </CardHeader>
       <CardBody>
         <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
-          {slicedXApps?.map(xApp => <XApp key={xApp.id} xApp={xApp} />)}
+          {slicedXApps?.map(xApp => <DashboardXAppCard key={xApp.id} xApp={xApp} />)}
         </Grid>
       </CardBody>
     </Card>
   )
 }
 
-const XApp = ({ xApp }: { xApp: XApp }) => {
+const DashboardXAppCard = ({ xApp }: { xApp: XApp }) => {
   const {
     data: appMetadata,
     isLoading: appMetadataLoading,
     isError: isAppMetadataError,
     error: appMetadataError,
   } = useXAppMetadata(xApp.id)
+  const router = useRouter()
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
 
   const buttonIconColor = useColorModeValue("primary.500", "white")
 
+  const navigateToAppDetail = useCallback(() => {
+    router.push(`/apps/${xApp.id}`)
+  }, [router, xApp.id])
   return (
     <Card variant={"baseWithBorder"}>
       <CardBody>
         <VStack alignItems={"start"} justify={"flex-start"}>
           <HStack spacing={1} justifyContent={"space-between"} w={"full"}>
             <Skeleton isLoaded={!isLogoLoading} alignContent={"start"}>
-              <Image src={logo?.image ?? notFoundImage} alt={"logo"} boxSize={10} borderRadius="9px" />
+              <Image
+                src={logo?.image ?? notFoundImage}
+                alt={"logo"}
+                boxSize={10}
+                borderRadius="9px"
+                _hover={{
+                  cursor: "pointer",
+                }}
+                onClick={navigateToAppDetail}
+              />
             </Skeleton>
 
             <Skeleton isLoaded={!appMetadataLoading} justifyContent={"end"}>
               <IconButton
                 isRound={true}
                 variant="solid"
-                aria-label="Go to dApp"
+                aria-label="Go to App"
                 fontSize="20px"
                 disabled={isAppMetadataError}
                 onClick={() => window.open(appMetadata?.external_url, "_blank")}
@@ -83,12 +97,24 @@ const XApp = ({ xApp }: { xApp: XApp }) => {
 
           <VStack spacing={1} align="flex-start">
             <Skeleton isLoaded={!appMetadataLoading}>
-              <Text fontWeight={"600"} size={"xs"}>
+              <Text
+                fontWeight={"600"}
+                size={"xs"}
+                _hover={{
+                  cursor: "pointer",
+                }}
+                onClick={navigateToAppDetail}>
                 {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
               </Text>
             </Skeleton>
             <Skeleton isLoaded={!appMetadataLoading}>
-              <Text fontSize={"sm"} color={"gray.500"}>
+              <Text
+                fontSize={"sm"}
+                color={"gray.500"}
+                _hover={{
+                  cursor: "pointer",
+                }}
+                onClick={navigateToAppDetail}>
                 {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
               </Text>
             </Skeleton>

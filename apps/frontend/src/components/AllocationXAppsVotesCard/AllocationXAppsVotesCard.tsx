@@ -23,11 +23,9 @@ import { useAllocationVoters, useAllocationsRound, useRoundXApps, useXAppsVotes 
 import { backdropBlurAnimation } from "@/app/theme"
 import { AllocationXAppsVotesRankingChart } from "./AllocationXAppsVotesRankingChart"
 import { FaArrowRight } from "react-icons/fa6"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
-const compactFormatter = new Intl.NumberFormat("en-US", {
-  notation: "compact",
-  compactDisplay: "short",
-})
+const compactFormatter = getCompactFormatter()
 
 type Props = {
   roundId: string
