@@ -3,7 +3,7 @@ import { readFilesFromDirectory } from "../../helpers"
 import { NFTStorage } from "nft.storage"
 import path from "path"
 
-const NFT_STORAGE_KEY = process.env.NFT_STORAGE_KEY ?? ""
+const NFT_STORAGE_KEY = process.env.NEXT_PUBLIC_NFT_STORAGE_KEY ?? ""
 const OUTPUT_PATH = path.join(__dirname, `../../../metadata/xApps/output`)
 
 const uploadToIpfs = async () => {

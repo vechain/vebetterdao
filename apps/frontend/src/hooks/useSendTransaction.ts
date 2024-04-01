@@ -9,8 +9,15 @@ import { useCallback, useEffect, useState } from "react"
  * waitingConfirmation: the transaction has been sent and we're waiting for the transaction to be confirmed by the chain
  * success: the transaction has been confirmed by the chain
  * error: the transaction has failed
+ * unknown: the transaction receipt has failed to load
  */
+
 export type TransactionStatus = "ready" | "pending" | "waitingConfirmation" | "success" | "error" | "unknown"
+
+export type TransactionStatusErrorType = {
+  type: "SendTransactionError" | "TxReceiptError" | "RevertReasonError"
+  reason?: string
+}
 
 /**
  * An enhanced clause with a comment and an abi
@@ -56,6 +63,7 @@ export type UseSendTransactionReturnValue = {
   txReceipt: Connex.Thor.Transaction.Receipt | null | undefined
   status: TransactionStatus
   resetStatus: () => void
+  error?: TransactionStatusErrorType
 }
 
 /**
@@ -137,12 +145,24 @@ export const useSendTransaction = ({
     return explained
   }
 
+  /**
+   * General error that is set when
+   * - unable to send the tx
+   * - unable to fetch the receipt
+   * - the transaction is reverted
+   */
+  const [error, setError] = useState<TransactionStatusErrorType>()
+
   useEffect(() => {
     console.log("txReceipt", txReceipt)
     if (!txReceipt) return
     if (txReceipt.reverted) {
       ;(async () => {
         const revertReason = await explainTxRevertReason(txReceipt)
+        setError({
+          type: "RevertReasonError",
+          reason: revertReason?.[0]?.revertReason,
+        })
         console.error("revertReason", revertReason)
       })()
 
@@ -165,16 +185,32 @@ export const useSendTransaction = ({
 
     if (isTxReceiptLoading) return setStatus("waitingConfirmation")
 
-    if (sendTransactionError || txReceipt?.reverted) return setStatus("error")
+    if (sendTransactionError) {
+      setError({
+        type: "SendTransactionError",
+        reason: sendTransactionError.message,
+      })
+      return setStatus("error")
+    }
 
-    if (txReceiptError) return setStatus("unknown")
+    if (txReceiptError) {
+      setStatus("error")
+      setError({
+        type: "TxReceiptError",
+        reason: txReceiptError.message,
+      })
+      return
+    }
 
     if (txReceipt) return setStatus("success")
 
     return setStatus("ready")
   }, [sendTransactionPending, isTxReceiptLoading, sendTransactionError, txReceiptError, txReceipt])
 
-  const resetStatus = useCallback(() => setStatus("ready"), [])
+  const resetStatus = useCallback(() => {
+    setStatus("ready")
+    setError(undefined)
+  }, [])
 
   return {
     sendTransaction: runSendTransaction,
@@ -186,5 +222,6 @@ export const useSendTransaction = ({
     txReceipt,
     status,
     resetStatus,
+    error,
   }
 }

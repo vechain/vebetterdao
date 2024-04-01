@@ -118,7 +118,7 @@ abstract contract GovernorXAllocationVotesCountingUpgradeable is Initializable, 
 
     emit AllocationVoteCast(voter, roundId, apps, weights);
 
-    $.voterRewards.registerXallocationVote(round.voteStart, voter, totalWeight);
+    $.voterRewards.registerVote(round.voteStart, voter, totalWeight);
   }
 
   function getAppVotes(uint256 roundId, bytes32 app) public view override returns (uint256) {

@@ -35,7 +35,7 @@ const METADATA_PATH = path.join(__dirname, "../../../metadata/badge/metadata")
 const IMAGE_PATH = path.join(__dirname, "../../../metadata/badge/images")
 
 // NFT Storage
-const NFT_STORAGE_KEY = process.env.NFT_STORAGE_KEY ?? ""
+const NFT_STORAGE_KEY = process.env.NEXT_PUBLIC_NFT_STORAGE_KEY ?? ""
 
 /**
  * Converts a record of attributes into an array of `Attribute` objects.

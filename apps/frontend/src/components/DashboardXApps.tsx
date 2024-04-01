@@ -16,7 +16,8 @@ import {
   IconButton,
   Button,
 } from "@chakra-ui/react"
-import { useMemo } from "react"
+import { useRouter } from "next/navigation"
+import { useCallback, useMemo } from "react"
 import { FiArrowUpRight } from "react-icons/fi"
 
 export const DashboardXApps = () => {
@@ -54,17 +55,30 @@ const DashboardXAppCard = ({ xApp }: { xApp: XApp }) => {
     isError: isAppMetadataError,
     error: appMetadataError,
   } = useXAppMetadata(xApp.id)
+  const router = useRouter()
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
 
   const buttonIconColor = useColorModeValue("primary.500", "white")
 
+  const navigateToAppDetail = useCallback(() => {
+    router.push(`/apps/${xApp.id}`)
+  }, [router, xApp.id])
   return (
     <Card variant={"baseWithBorder"}>
       <CardBody>
         <VStack alignItems={"start"} justify={"flex-start"}>
           <HStack spacing={1} justifyContent={"space-between"} w={"full"}>
             <Skeleton isLoaded={!isLogoLoading} alignContent={"start"}>
-              <Image src={logo?.image ?? notFoundImage} alt={"logo"} boxSize={10} borderRadius="9px" />
+              <Image
+                src={logo?.image ?? notFoundImage}
+                alt={"logo"}
+                boxSize={10}
+                borderRadius="9px"
+                _hover={{
+                  cursor: "pointer",
+                }}
+                onClick={navigateToAppDetail}
+              />
             </Skeleton>
 
             <Skeleton isLoaded={!appMetadataLoading} justifyContent={"end"}>
@@ -83,12 +97,24 @@ const DashboardXAppCard = ({ xApp }: { xApp: XApp }) => {
 
           <VStack spacing={1} align="flex-start">
             <Skeleton isLoaded={!appMetadataLoading}>
-              <Text fontWeight={"600"} size={"xs"}>
+              <Text
+                fontWeight={"600"}
+                size={"xs"}
+                _hover={{
+                  cursor: "pointer",
+                }}
+                onClick={navigateToAppDetail}>
                 {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
               </Text>
             </Skeleton>
             <Skeleton isLoaded={!appMetadataLoading}>
-              <Text fontSize={"sm"} color={"gray.500"}>
+              <Text
+                fontSize={"sm"}
+                color={"gray.500"}
+                _hover={{
+                  cursor: "pointer",
+                }}
+                onClick={navigateToAppDetail}>
                 {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
               </Text>
             </Skeleton>

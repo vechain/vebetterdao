@@ -78,10 +78,20 @@ export const AppCard = ({ xApp }: Props) => {
                     onClick={openMobileOptions}
                     aria-label="Open app options"
                   />
-                  <AppCardOptionsMobileModal xApp={xApp} isOpen={isMobileOptionsOpen} onClose={closeMobileOptions} />
+                  <AppCardOptionsMobileModal
+                    receiverAddress={xApp.receiverAddress}
+                    externalUrl={appMetadata?.external_url}
+                    isLoading={appMetadataLoading}
+                    isOpen={isMobileOptionsOpen}
+                    onClose={closeMobileOptions}
+                  />
                 </>
               ) : (
-                <AppCardOptionsDesktopMenu xApp={xApp} />
+                <AppCardOptionsDesktopMenu
+                  receiverAddress={xApp.receiverAddress}
+                  externalUrl={appMetadata?.external_url}
+                  isLoading={appMetadataLoading}
+                />
               )}
             </HStack>
             <Skeleton isLoaded={!appMetadataLoading}>
