@@ -249,15 +249,15 @@ const swapB3TRForVOT3 = async (privateKey: Buffer, address: string, amount: BigN
  * Seed an account to have a minimum balance of B3TR and VTHO
  * @param address Account address
  */
-const fundAccount = async (account_index: number) => {
+const fundAccount = async (account_index: number, min_b3tr=FUNDING_MIN_B3TR, min_vot3=FUNDING_MIN_VOT3) => {
     const privateKey = getAccountPrivateKey(account_index)
     const address = getAccountAddress(account_index)
     console.log(`Seeding account ${address}`)
     const bt3rBalance = await blockchainUtils.getB3TRBalance(address)
     const vthoBalance = await blockchainUtils.getVTHOBalance(address)
     const vot3Balance = await blockchainUtils.getVOT3Balance(address)
-    const vot3Needed = BigNumber(FUNDING_MIN_VOT3).minus(vot3Balance)
-    const b3trNeeded = BigNumber(FUNDING_MIN_B3TR).minus(bt3rBalance)
+    const vot3Needed = min_vot3.minus(vot3Balance)
+    const b3trNeeded = min_b3tr.minus(bt3rBalance)
     let totalNeeded = vot3Needed.isGreaterThan(0) ? b3trNeeded.plus(vot3Needed)  : b3trNeeded
     if (vthoBalance.isLessThan(FUNDING_MIN_VTHO)) {
         const vthoDiff = vthoBalance.minus(FUNDING_MIN_VTHO).multipliedBy(-1)

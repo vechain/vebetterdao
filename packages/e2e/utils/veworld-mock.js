@@ -100,7 +100,8 @@ const signAndSendTx = async (txMessage, txOptions) => {
     const privateKey = childNode.privateKey;
     const senderAddress = childNode.address;
     const latestBlock = await thorClient.blocks.getBestBlockCompressed()
-    const gasResult = await thorClient.gas.estimateGas(clauses, senderAddress, {gasPadding: 0.2})
+    // add 50% padding to the gas estimate
+    const gasResult = await thorClient.gas.estimateGas(clauses, senderAddress, {gasPadding: 0.5})
     const txBody = {
         chainTag: window['veworld-mock-config'].chainTag,
         blockRef: latestBlock !== null ? latestBlock.id.slice(0, 18) : '0x0',
