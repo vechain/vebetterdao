@@ -9,15 +9,24 @@ import {
   Skeleton,
   Link,
 } from "@chakra-ui/react"
+import { useRouter } from "next/navigation"
 import { FaExternalLinkAlt } from "react-icons/fa"
-import { FaEllipsisVertical, FaCheck, FaCopy } from "react-icons/fa6"
+import { FaEllipsisVertical, FaCheck, FaCopy, FaFileImage, FaRegImage } from "react-icons/fa6"
 
 type Props = {
   receiverAddress: string
   externalUrl?: string
   isLoading?: boolean
+  showViewDetails?: boolean
+  xAppId?: string
 }
-export const AppCardOptionsDesktopMenu = ({ receiverAddress, externalUrl, isLoading = false }: Props) => {
+export const AppCardOptionsDesktopMenu = ({
+  receiverAddress,
+  externalUrl,
+  isLoading = false,
+  xAppId,
+  showViewDetails = false,
+}: Props) => {
   const { onCopy, hasCopied } = useClipboard(receiverAddress)
 
   const toast = useToast()
@@ -31,11 +40,21 @@ export const AppCardOptionsDesktopMenu = ({ receiverAddress, externalUrl, isLoad
     })
   }
 
+  const router = useRouter()
+  const navigateToAppDetail = () => {
+    router.push(`/apps/${xAppId}`)
+  }
+
   return (
     <Menu>
       <MenuButton as={IconButton} isRound={true} icon={<FaEllipsisVertical />} />
       <MenuList>
         <Skeleton isLoaded={!isLoading}>
+          {showViewDetails && (
+            <MenuItem onClick={navigateToAppDetail} icon={<FaRegImage />}>
+              View details
+            </MenuItem>
+          )}
           <MenuItem
             as={Link}
             _hover={{ textDecoration: "none" }}
