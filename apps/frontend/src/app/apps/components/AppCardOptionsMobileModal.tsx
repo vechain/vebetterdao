@@ -12,10 +12,11 @@ import {
   ModalHeader,
   Skeleton,
 } from "@chakra-ui/react"
-import { FaCopy, FaFileImage } from "react-icons/fa6"
+import { FaCopy, FaRegImage } from "react-icons/fa6"
 import { CustomModalContent } from "@/components/CustomModalContent"
 import { FaExternalLinkAlt } from "react-icons/fa"
 import { useRouter } from "next/navigation"
+
 export type Props = {
   isOpen: boolean
   onClose: () => void
@@ -71,7 +72,7 @@ export const AppCardOptionsMobileModal = ({
                 colorScheme="gray"
                 variant={"solid"}
                 onClick={navigateToAppDetail}
-                leftIcon={<FaFileImage />}>
+                leftIcon={<FaRegImage />}>
                 View details
               </Button>
             )}

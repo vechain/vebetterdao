@@ -9,9 +9,9 @@ import {
   Skeleton,
   Link,
 } from "@chakra-ui/react"
-import { usePathname, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { FaExternalLinkAlt } from "react-icons/fa"
-import { FaEllipsisVertical, FaCheck, FaCopy, FaFileImage } from "react-icons/fa6"
+import { FaEllipsisVertical, FaCheck, FaCopy, FaFileImage, FaRegImage } from "react-icons/fa6"
 
 type Props = {
   receiverAddress: string
@@ -51,7 +51,7 @@ export const AppCardOptionsDesktopMenu = ({
       <MenuList>
         <Skeleton isLoaded={!isLoading}>
           {showViewDetails && (
-            <MenuItem onClick={navigateToAppDetail} icon={<FaFileImage />}>
+            <MenuItem onClick={navigateToAppDetail} icon={<FaRegImage />}>
               View details
             </MenuItem>
           )}
