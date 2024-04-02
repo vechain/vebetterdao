@@ -32,8 +32,8 @@ jobs:
           - name: Health check
             run: |
                 cd packages/e2e
-                chmod +x health-check.sh
-                yarn dev:health-check
+                chmod +x healthcheck.sh
+                yarn dev:healthcheck
 
           - name: Run tests
             run: |
