@@ -18,7 +18,7 @@ type Props = {
   externalUrl?: string
   isLoading?: boolean
   showViewDetails?: boolean
-  xAppId: string
+  xAppId?: string
 }
 export const AppCardOptionsDesktopMenu = ({
   receiverAddress,

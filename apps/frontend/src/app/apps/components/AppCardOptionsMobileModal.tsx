@@ -21,7 +21,7 @@ export type Props = {
   isOpen: boolean
   onClose: () => void
   receiverAddress: string
-  xAppId: string
+  xAppId?: string
   externalUrl?: string
   isLoading?: boolean
   showViewDetails?: boolean
