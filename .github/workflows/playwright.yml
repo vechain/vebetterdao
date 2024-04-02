@@ -27,7 +27,9 @@ jobs:
             run: yarn solo-up
         
           - name: Launch app
-            run: yarn dev &
+            run:  |
+              cp .env.example .env
+              yarn dev &
         
           - name: Health check
             run: |
