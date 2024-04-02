@@ -5,7 +5,8 @@
   "scripts": {
     "playwright:e2e": "playwright test",
     "playwright:e2e:debug": "playwright test --debug",
-    "build": "webpack --config webpack.config.js"
+    "build": "webpack --config webpack.config.js",
+    "dev:healthcheck": "./healthcheck.sh http://localhost:8669 && ./healthcheck.sh http://localhost:3000"
   },
   "keywords": [],
   "author": "vechain",
