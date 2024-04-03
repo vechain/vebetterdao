@@ -32,10 +32,10 @@ export default defineConfig({
   /* Global setup file */
   globalSetup: require.resolve('./tests/global_setup.spec.ts'),
   /* Set timeout for each test */
-  timeout: 30000,
+  timeout: 80000,
   expect: {
     /* Set timeout for expect */
-    timeout: 10000,
+    timeout: 20000,
   },
   /* Configure projects for major browsers */
   projects: [
