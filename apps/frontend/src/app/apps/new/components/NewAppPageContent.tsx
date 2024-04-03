@@ -1,5 +1,6 @@
 import { Button, Card, CardBody, Grid, GridItem, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react"
 import { CreateNewAppStepCard, Props as StepProps } from "."
+import { useRouter } from "next/navigation"
 
 const Steps: StepProps[] = [
   {
@@ -25,6 +26,10 @@ const Steps: StepProps[] = [
   },
 ]
 export const NewAppPageContent = () => {
+  const router = useRouter()
+  const onContinueClick = () => {
+    router.push("/apps/new/form")
+  }
   return (
     <Grid templateColumns={["repeat(1, 1fr)", "repeat(4, 1fr)"]} gap={6} w="full">
       <GridItem colSpan={3}>
@@ -45,7 +50,7 @@ export const NewAppPageContent = () => {
                 <Button rounded="full" variant={"outline"} colorScheme="primary" size="lg">
                   More info
                 </Button>
-                <Button rounded="full" colorScheme="primary" size="lg">
+                <Button rounded="full" colorScheme="primary" size="lg" onClick={onContinueClick}>
                   Continue
                 </Button>
               </HStack>

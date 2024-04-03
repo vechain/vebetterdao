@@ -21,10 +21,10 @@ import { FaEllipsisVertical } from "react-icons/fa6"
 
 type Props = {
   app: CreateEditAppFormData
-  appMetadataLoading: boolean
-  appMetadataError: any
-  isLogoLoading: boolean
-  isBannerLoading: boolean
+  appMetadataLoading?: boolean
+  appMetadataError?: any
+  isLogoLoading?: boolean
+  isBannerLoading?: boolean
 }
 export const AppPreviewDetailCard = ({
   app,
