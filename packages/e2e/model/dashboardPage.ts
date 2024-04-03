@@ -54,7 +54,8 @@ export class DashboardPage {
      */
     async getB3TRBalance(): Promise<BigNumber> {
         const text = await this.page.locator('xpath=//p[contains(text(),"B3TR Tokens")]/preceding-sibling::h2').first().textContent()
-        const balance = new BigNumber(text)
+        const textBalance = text ?? (() => { throw new Error('B3TR balance not found') })()
+        const balance = new BigNumber(textBalance)
         return balance
     }
 
@@ -75,7 +76,8 @@ export class DashboardPage {
      */
     async getVOT3Balance(): Promise<BigNumber> {
         const text = await this.page.locator('xpath=//p[contains(text(),"VOT3 Tokens")]/preceding-sibling::h2').first().textContent()
-        const balance = new BigNumber(text)
+        const textBalance = text ?? (() => { throw new Error('VOT3 balance not found') })()
+        const balance = new BigNumber(textBalance)
         return balance
     }
 

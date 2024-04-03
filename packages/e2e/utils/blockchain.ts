@@ -90,7 +90,8 @@ const getAccountAddress = (index: number): string => {
 const getAccountPrivateKey = (index: number): Buffer => {
     const hdNode = HDNode.fromMnemonic(SOLO_MNEMONIC)
     const childNode = hdNode.derive(index - 1);
-    return childNode.privateKey
+    const privateKey = childNode.privateKey ?? (() => { throw new Error('Unable to derive private key') })()
+    return privateKey
 }
 
 /**
@@ -142,7 +143,8 @@ const doERC20Transfer = async (contract: string, address: string, amount: BigNum
     const txId = send.id
     console.log(`ERC20 transfer transaction ID: ${txId}`)
     const txModule = new TransactionsModule(thorClient)
-    const txReceipt = await txModule.waitForTransaction(txId, {intervalMs: TX_RECEIPT_INTERVAL, timeoutMs: TX_RECEIPT_TIMEOUT})
+    const waitTx = await txModule.waitForTransaction(txId, {intervalMs: TX_RECEIPT_INTERVAL, timeoutMs: TX_RECEIPT_TIMEOUT})
+    const txReceipt = waitTx ?? (() => { throw new Error('Unable to get transaction receipt') })()
     console.log(`ERC20 transfer transaction reverted: ${txReceipt.reverted}`)
     if (txReceipt.reverted) {
         throw new Error(`ERC20 transfer transaction reverted: ${txId}`)
@@ -238,7 +240,8 @@ const swapB3TRForVOT3 = async (privateKey: Buffer, address: string, amount: BigN
     const txId = send.id
     console.log(`Swap transfer transaction ID: ${txId}`)
     const txModule = new TransactionsModule(thorClient)
-    const txReceipt = await txModule.waitForTransaction(txId, {intervalMs: TX_RECEIPT_INTERVAL, timeoutMs: TX_RECEIPT_TIMEOUT})
+    const waitTx = await txModule.waitForTransaction(txId, {intervalMs: TX_RECEIPT_INTERVAL, timeoutMs: TX_RECEIPT_TIMEOUT})
+    const txReceipt = waitTx ?? (() => { throw new Error('Unable to get transaction receipt') })()
     console.log(`Swap transfer transaction reverted: ${txReceipt.reverted}`)
     if (txReceipt.reverted) {
         throw new Error(`Swap transfer transaction reverted: ${txId}`)

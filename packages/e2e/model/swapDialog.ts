@@ -34,7 +34,8 @@ export class SwapDialog {
      * @returns Decimal amount
      */
     async getSecondAmount(): Promise<BigNumber> {
-        const amount = await this.page.locator('section[role="dialog"] input').last().textContent()
+        const text = await this.page.locator('section[role="dialog"] input').last().textContent()
+        const amount = text ?? (() => { throw new Error('Second amount not found') })()
         return new BigNumber(amount)
     }
 

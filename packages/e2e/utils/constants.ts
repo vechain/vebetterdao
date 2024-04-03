@@ -26,4 +26,5 @@ export const DYNAMIC_ACCOUNT_MAX = 200
 export const DYNAMIC_ACCOUNT_MIN = 20
 
 // fixed user accounts
+export const DAO_ADMIN_ACCOUNT = 1
 export const FIXED_ACCOUNT1 = 10
