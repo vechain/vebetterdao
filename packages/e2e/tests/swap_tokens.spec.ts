@@ -28,7 +28,7 @@ test.describe('Swap Tokens', () => {
     const accAddress = blockchainUtils.getAccountAddress(accountIndex)
     await veWorldMockClient.setSignerAccIndex(page, accountIndex)
     await blockchainUtils.fundAccount(accountIndex)
-    // connect walled
+    // connect wallet
     const dashboardPage = new DashboardPage(page);
     await dashboardPage.connectWallet()
     // get before swap balances from contract
@@ -55,7 +55,7 @@ test.describe('Swap Tokens', () => {
     const accAddress = blockchainUtils.getAccountAddress(accountIndex)
     await veWorldMockClient.setSignerAccIndex(page, accountIndex)
     await blockchainUtils.fundAccount(accountIndex)
-    // connect walled
+    // connect wallet
     const dashboardPage = new DashboardPage(page);
     await dashboardPage.connectWallet()
     // get before swap balances from contract
