@@ -23,6 +23,11 @@ jobs:
           - name: Install dependencies
             run: yarn install --frozen-lockfile
 
+          - name: Install browsers
+            run:  |
+              cd packages/e2e
+              yarn install-browsers
+
           - name: Launch solo
             run: yarn solo-up
         
