@@ -45,4 +45,5 @@ jobs:
           - name: Run tests
             run: |
                 cd packages/e2e
+                yarn build
                 yarn playwright:e2e
