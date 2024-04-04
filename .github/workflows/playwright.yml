@@ -1,9 +1,10 @@
 name: Playwright E2E
 
 on:
-  push:
-    branches:
-      - feat/e2e
+  workflow_dispatch:
+  schedule:
+      # Runs at 00:00 UTC every Monday to Friday
+      - cron: '0 0 * * 1-5'
 
 jobs:
     run-e2e-tests:
