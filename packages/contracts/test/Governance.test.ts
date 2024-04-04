@@ -62,7 +62,7 @@ describe("Governor and TimeLock", function () {
       await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
 
       // Start emissions
-      await bootstrapAndStartEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapAndStartEmissions()
 
       // Deploy the implementation contract
       const Contract = await ethers.getContractFactory("B3TRGovernor")
@@ -126,7 +126,7 @@ describe("Governor and TimeLock", function () {
       await getVot3Tokens(proposer, "1000")
 
       // Start emissions
-      await bootstrapAndStartEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapAndStartEmissions()
 
       const currentRoundsEndsAt = await xAllocationVoting.currentRoundDeadline()
 
@@ -180,7 +180,7 @@ describe("Governor and TimeLock", function () {
       await getVot3Tokens(proposer, "1000")
 
       // Start emissions
-      await bootstrapAndStartEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapAndStartEmissions()
 
       // Now we can create a new proposal
       const address = await b3tr.getAddress()
@@ -227,7 +227,7 @@ describe("Governor and TimeLock", function () {
       await getVot3Tokens(proposer, "1000")
 
       // Start emissions
-      await bootstrapAndStartEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapAndStartEmissions()
 
       // Now we can create a new proposal
       const address = await b3tr.getAddress()
@@ -274,7 +274,7 @@ describe("Governor and TimeLock", function () {
       await getVot3Tokens(proposer, "1000")
 
       // Start emissions
-      await bootstrapAndStartEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapAndStartEmissions()
 
       // Now we can create a new proposal
       const address = await b3tr.getAddress()
@@ -306,7 +306,7 @@ describe("Governor and TimeLock", function () {
         config,
       })
       // Start emissions
-      await bootstrapAndStartEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapAndStartEmissions()
 
       const functionToCall = "tokenDetails"
       const description = "Get token details"
@@ -320,7 +320,7 @@ describe("Governor and TimeLock", function () {
         })
 
       // Start emissions
-      await bootstrapAndStartEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapAndStartEmissions()
 
       // Before creating a proposal, we need to mint some VOT3 tokens to the owner
       await b3tr.connect(minterAccount).mint(owner, ethers.parseEther("1000"))
@@ -343,7 +343,7 @@ describe("Governor and TimeLock", function () {
         })
 
       // Start emissions
-      await bootstrapAndStartEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapAndStartEmissions()
 
       const functionToCall = "tokenDetails"
       const description = "Get token details"
@@ -399,7 +399,7 @@ describe("Governor and TimeLock", function () {
       const description = "Get token details"
 
       // Start emissions
-      await bootstrapAndStartEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapAndStartEmissions()
 
       // Now we can create a proposal
       const tx = await createProposal(b3tr, B3trContract, owner, description, functionToCall, [], false)
@@ -431,7 +431,7 @@ describe("Governor and TimeLock", function () {
         })
 
       // Start emissions
-      await bootstrapAndStartEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapAndStartEmissions()
 
       const functionToCall = "tokenDetails"
       const description = "Get token details"
@@ -463,7 +463,7 @@ describe("Governor and TimeLock", function () {
         })
 
       // Start emissions
-      await bootstrapAndStartEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapAndStartEmissions()
 
       voter1 = otherAccounts[0] // with no VOT3
       voter2 = otherAccounts[1] // with VOT3 but no delegation
@@ -655,7 +655,7 @@ describe("Governor and TimeLock", function () {
         })
 
       // Start emissions
-      await bootstrapAndStartEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapAndStartEmissions()
 
       // Should be able to free mint after participating in allocation voting
       await participateInGovernanceVoting(
@@ -681,7 +681,7 @@ describe("Governor and TimeLock", function () {
         })
 
       // Start emissions
-      await bootstrapAndStartEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapAndStartEmissions()
 
       const voter = otherAccounts[0]
       const voter2 = otherAccounts[1]
@@ -736,7 +736,7 @@ describe("Governor and TimeLock", function () {
         })
 
       // Start emissions
-      await bootstrapAndStartEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapAndStartEmissions()
 
       const voter = otherAccounts[0]
       const voter2 = otherAccounts[1]
@@ -781,7 +781,7 @@ describe("Governor and TimeLock", function () {
         })
 
       // Start emissions
-      await bootstrapAndStartEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapAndStartEmissions()
 
       const voter = otherAccounts[0]
       const voter2 = otherAccounts[1]
@@ -826,7 +826,7 @@ describe("Governor and TimeLock", function () {
         })
 
       // Start emissions
-      await bootstrapAndStartEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapAndStartEmissions()
 
       const voter = otherAccounts[0]
       const voter2 = otherAccounts[1]
@@ -882,7 +882,7 @@ describe("Governor and TimeLock", function () {
       })
 
       // Start emissions
-      await bootstrapAndStartEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapAndStartEmissions()
 
       // load votes
       voter = otherAccounts[0]

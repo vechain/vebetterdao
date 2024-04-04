@@ -373,29 +373,21 @@ export const participateInGovernanceVoting = async (
   }
 }
 
-export const bootstrapEmissions = async (
-  b3tr: B3TR,
-  emissions: Emissions,
-  owner: HardhatEthersSigner,
-  minter: HardhatEthersSigner,
-) => {
+export const bootstrapEmissions = async () => {
+  const { b3tr, owner, emissions, minterAccount } = await getOrDeployContractInstances({})
   // Grant minter role to emissions contract
   await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
 
   // Bootstrap emissions
-  await emissions.connect(minter).bootstrap()
+  await emissions.connect(minterAccount).bootstrap()
 }
 
-export const bootstrapAndStartEmissions = async (
-  b3tr: B3TR,
-  emissions: Emissions,
-  owner: HardhatEthersSigner,
-  minter: HardhatEthersSigner,
-) => {
-  await bootstrapEmissions(b3tr, emissions, owner, minter)
+export const bootstrapAndStartEmissions = async () => {
+  const { emissions, minterAccount } = await getOrDeployContractInstances({})
+  await bootstrapEmissions()
 
   // Start emissions
-  await emissions.connect(minter).start()
+  await emissions.connect(minterAccount).start()
 }
 
 export const upgradeNFTtoLevel = async (

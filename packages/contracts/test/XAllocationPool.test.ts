@@ -114,7 +114,7 @@ describe("X-Allocation Pool", async function () {
         .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app #2", "metadataURI")
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await emissions.connect(minterAccount).start()
 
@@ -199,7 +199,7 @@ describe("X-Allocation Pool", async function () {
         .addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await emissions.connect(minterAccount).start()
 
@@ -257,7 +257,7 @@ describe("X-Allocation Pool", async function () {
         .addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await emissions.connect(minterAccount).start()
 
@@ -310,7 +310,7 @@ describe("X-Allocation Pool", async function () {
         .addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await emissions.connect(minterAccount).start()
 
@@ -355,7 +355,7 @@ describe("X-Allocation Pool", async function () {
         .addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await emissions.connect(minterAccount).start()
 
@@ -404,7 +404,7 @@ describe("X-Allocation Pool", async function () {
         .addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await emissions.connect(minterAccount).start()
 
@@ -447,7 +447,7 @@ describe("X-Allocation Pool", async function () {
         .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app #2", "metadataURI")
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await emissions.connect(minterAccount).start()
 
@@ -503,7 +503,7 @@ describe("X-Allocation Pool", async function () {
         .addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await emissions.connect(minterAccount).start()
 
@@ -547,7 +547,7 @@ describe("X-Allocation Pool", async function () {
         .addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await emissions.connect(minterAccount).start()
 
@@ -568,7 +568,7 @@ describe("X-Allocation Pool", async function () {
         })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       const voter1 = otherAccounts[1]
       await getVot3Tokens(voter1, "1000")
@@ -626,7 +626,7 @@ describe("X-Allocation Pool", async function () {
         .addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await emissions.connect(minterAccount).start()
 
@@ -684,7 +684,7 @@ describe("X-Allocation Pool", async function () {
         .addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await emissions.connect(minterAccount).start()
 
@@ -759,7 +759,7 @@ describe("X-Allocation Pool", async function () {
         .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app #2", "metadataURI")
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await emissions.connect(minterAccount).start()
 
@@ -871,7 +871,7 @@ describe("X-Allocation Pool", async function () {
         .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app #2", "metadataURI")
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await emissions.connect(minterAccount).start()
 
@@ -953,7 +953,7 @@ describe("X-Allocation Pool", async function () {
       .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app #2", "metadataURI")
 
     // Bootstrap emissions
-    await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+    await bootstrapEmissions()
 
     await emissions.connect(minterAccount).start()
 
@@ -1015,7 +1015,7 @@ describe("X-Allocation Pool", async function () {
       .addApp(otherAccounts[7].address, otherAccounts[7].address, "My app #2", "metadataURI")
 
     // Bootstrap emissions
-    await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+    await bootstrapEmissions()
 
     await emissions.connect(minterAccount).start()
 

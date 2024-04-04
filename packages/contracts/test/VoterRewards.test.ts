@@ -177,7 +177,7 @@ describe("VoterRewards", () => {
       await getVot3Tokens(voter3, "1000")
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       let tx = await emissions.connect(minterAccount).start()
 
@@ -357,7 +357,7 @@ describe("VoterRewards", () => {
       await getVot3Tokens(voter3, "1000")
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await emissions.connect(minterAccount).start()
 
@@ -594,7 +594,7 @@ describe("VoterRewards", () => {
       await getVot3Tokens(voter3, "1000")
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await emissions.connect(minterAccount).start()
 
@@ -717,7 +717,7 @@ describe("VoterRewards", () => {
       await getVot3Tokens(voter3, "1000")
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await emissions.connect(minterAccount).start()
 
@@ -839,7 +839,7 @@ describe("VoterRewards", () => {
       await getVot3Tokens(voter3, "1000")
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await emissions.connect(minterAccount).start()
 
@@ -987,7 +987,7 @@ describe("VoterRewards", () => {
       await getVot3Tokens(voter3, "1000")
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await emissions.connect(minterAccount).start()
 
@@ -1113,7 +1113,7 @@ describe("VoterRewards", () => {
       await getVot3Tokens(voter3, "1000")
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await emissions.connect(minterAccount).start()
 
@@ -1193,7 +1193,7 @@ describe("VoterRewards", () => {
         })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await emissions.connect(minterAccount).start()
 
@@ -1232,7 +1232,7 @@ describe("VoterRewards", () => {
       await getVot3Tokens(voter1, "1000")
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await emissions.connect(minterAccount).start()
 
@@ -1258,7 +1258,7 @@ describe("VoterRewards", () => {
         })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await emissions.connect(minterAccount).start()
 

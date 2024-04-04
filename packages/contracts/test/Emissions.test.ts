@@ -330,7 +330,7 @@ describe("Emissions", () => {
       })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       // Try to bootstrap emissions again - Should revert
       await catchRevert(emissions.connect(minterAccount).bootstrap())
@@ -347,7 +347,7 @@ describe("Emissions", () => {
         })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       const tx = await emissions.connect(minterAccount).start()
 
@@ -379,7 +379,7 @@ describe("Emissions", () => {
       })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await b3tr.connect(owner).pause()
 
@@ -396,7 +396,7 @@ describe("Emissions", () => {
       })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       // Start emissions
       await emissions.connect(minterAccount).start()
@@ -424,7 +424,7 @@ describe("Emissions", () => {
       })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       // Start emissions
       await emissions.connect(minterAccount).start()
@@ -490,7 +490,7 @@ describe("Emissions", () => {
       })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       // Start emissions
       await emissions.connect(minterAccount).start()
@@ -518,7 +518,7 @@ describe("Emissions", () => {
       })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       // Start emissions
       await emissions.connect(minterAccount).start()
@@ -553,7 +553,7 @@ describe("Emissions", () => {
       })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       // Start emissions
       await emissions.connect(minterAccount).start()
@@ -617,7 +617,7 @@ describe("Emissions", () => {
       })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       // Start emissions
       await emissions.connect(minterAccount).start()
@@ -665,7 +665,7 @@ describe("Emissions", () => {
       })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       // Start emissions
       await emissions.connect(minterAccount).start()
@@ -713,7 +713,7 @@ describe("Emissions", () => {
       })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       expect(await emissions.nextCycle()).to.equal(1)
 
@@ -780,7 +780,7 @@ describe("Emissions", () => {
       })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await catchRevert(emissions.connect(otherAccount).start())
     })
@@ -797,7 +797,7 @@ describe("Emissions", () => {
       })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       // Start emissions
       await emissions.connect(minterAccount).start()
@@ -864,7 +864,7 @@ describe("Emissions", () => {
       })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       // Start emissions
       await emissions.connect(minterAccount).start()
@@ -883,7 +883,7 @@ describe("Emissions", () => {
       })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       // Start emissions
       await emissions.connect(minterAccount).start()

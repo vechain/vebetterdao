@@ -15,6 +15,7 @@ import {
   getProposalIdFromTx,
   waitForProposalToBeActive,
   waitForVotingPeriodToEnd,
+  bootstrapAndStartEmissions,
 } from "./helpers"
 import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
@@ -115,6 +116,8 @@ describe("X-Allocation Voting", function () {
       const { xAllocationVoting, timeLock, governor, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
+
+      await bootstrapAndStartEmissions()
       const votesThreshold = await governor.proposalThreshold()
       await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
 
@@ -139,7 +142,7 @@ describe("X-Allocation Voting", function () {
       const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
 
       const tx = await governor
-        .connect(owner)
+        .connect(owner) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
         .propose([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], description, {
           gasLimit: 10_000_000,
         })
@@ -218,6 +221,7 @@ describe("X-Allocation Voting", function () {
       const { xAllocationVoting, owner, emissions, governor } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
+      await bootstrapAndStartEmissions()
       const votesThreshold = await governor.proposalThreshold()
       await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
       const cycleDuration = await emissions.cycleDuration()
@@ -230,7 +234,7 @@ describe("X-Allocation Voting", function () {
       const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
 
       const tx = await governor
-        .connect(owner)
+        .connect(owner) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
         .propose([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], description, {
           gasLimit: 10_000_000,
         })
@@ -255,6 +259,7 @@ describe("X-Allocation Voting", function () {
       const { xAllocationVoting, owner, emissions, governor } = await getOrDeployContractInstances({
         forceDeploy: false,
       })
+      await bootstrapAndStartEmissions()
       const votesThreshold = await governor.proposalThreshold()
       await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
       const cycleDuration = await emissions.cycleDuration()
@@ -386,7 +391,7 @@ describe("X-Allocation Voting", function () {
       expect(round).to.eql(0)
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await emissions.connect(minterAccount).start()
 
@@ -478,9 +483,11 @@ describe("X-Allocation Voting", function () {
     })
 
     it("DAO can make an app unavailable for allocation voting starting from next round", async function () {
-      const { otherAccounts, governor, xAllocationVoting } = await getOrDeployContractInstances({
+      const { otherAccounts, xAllocationVoting } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
+
+      await bootstrapAndStartEmissions()
 
       const app1Id = await xAllocationVoting.hashName("Bike 4 Life")
       const proposer = otherAccounts[0]
@@ -541,7 +548,7 @@ describe("X-Allocation Voting", function () {
         })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       const voter = otherAccounts[0]
       await getVot3Tokens(voter, "1000")
@@ -589,7 +596,7 @@ describe("X-Allocation Voting", function () {
         })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await xAllocationVoting
         .connect(owner)
@@ -616,7 +623,7 @@ describe("X-Allocation Voting", function () {
         })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await xAllocationVoting
         .connect(owner)
@@ -665,7 +672,7 @@ describe("X-Allocation Voting", function () {
           forceDeploy: true,
         })
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await xAllocationVoting
         .connect(owner)
@@ -696,7 +703,7 @@ describe("X-Allocation Voting", function () {
         })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await xAllocationVoting
         .connect(owner)
@@ -728,7 +735,7 @@ describe("X-Allocation Voting", function () {
           forceDeploy: true,
         })
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await xAllocationVoting
         .connect(owner)
@@ -802,7 +809,7 @@ describe("X-Allocation Voting", function () {
         })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await xAllocationVoting
         .connect(owner)
@@ -877,7 +884,7 @@ describe("X-Allocation Voting", function () {
         })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await xAllocationVoting
         .connect(owner)
@@ -920,7 +927,7 @@ describe("X-Allocation Voting", function () {
         })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await xAllocationVoting
         .connect(owner)
@@ -969,7 +976,7 @@ describe("X-Allocation Voting", function () {
         })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await xAllocationVoting
         .connect(owner)
@@ -1016,7 +1023,7 @@ describe("X-Allocation Voting", function () {
         })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       // 2 apps in round1
       await xAllocationVoting
@@ -1108,7 +1115,7 @@ describe("X-Allocation Voting", function () {
         })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       // Check if user voted
       let voted = await xAllocationVoting.hasVotedOnce(otherAccount.address)
@@ -1197,7 +1204,7 @@ describe("X-Allocation Voting", function () {
       await getVot3Tokens(otherAccount, "1000")
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       let round1 = await startNewAllocationRound(xAllocationVoting)
       await waitForRoundToEnd(round1, xAllocationVoting)

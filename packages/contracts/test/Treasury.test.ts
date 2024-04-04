@@ -1,6 +1,11 @@
 import { ethers } from "hardhat"
 import { expect } from "chai"
-import { getOrDeployContractInstances, catchRevert, createProposalAndExecuteIt } from "./helpers"
+import {
+  getOrDeployContractInstances,
+  catchRevert,
+  createProposalAndExecuteIt,
+  bootstrapAndStartEmissions,
+} from "./helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it, before } from "mocha"
 import { fundTreasuryVET, fundTreasuryVTHO } from "./helpers/fundTreasury"
@@ -148,6 +153,7 @@ describe("Treasury", () => {
     it("should execute transfer TX from proposal", async () => {
       const description = "Test Proposal: testing propsal for Transfer VET from tresausry"
       const treasuryContractFactory = await ethers.getContractFactory("Treasury")
+      await bootstrapAndStartEmissions()
       await createProposalAndExecuteIt(
         owner,
         otherAccount,
