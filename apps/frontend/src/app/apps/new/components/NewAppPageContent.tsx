@@ -31,7 +31,7 @@ export const NewAppPageContent = () => {
     router.push("/apps/new/form")
   }
   return (
-    <Grid templateColumns={["repeat(1, 1fr)", "repeat(4, 1fr)"]} gap={6} w="full">
+    <Grid templateColumns={["repeat(1, 1fr)", "repeat(4, 1fr)"]} gap={6} w="full" data-testid="new-app">
       <GridItem colSpan={3}>
         <Card>
           <CardBody>
@@ -43,7 +43,7 @@ export const NewAppPageContent = () => {
               </Text>
               <Stack direction={["column", "row"]} w="full" spacing={4}>
                 {Steps.map(step => (
-                  <CreateNewAppStepCard {...step} />
+                  <CreateNewAppStepCard {...step} key={step.stepNumber} />
                 ))}
               </Stack>
               <HStack alignSelf={"flex-end"} spacing={4}>
