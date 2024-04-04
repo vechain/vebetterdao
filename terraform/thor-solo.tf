@@ -1,6 +1,6 @@
 locals {
   env    = terraform.workspace
-  config = yamldecode(file("../thor-solo/../config/${local.env}.yaml"))
+  config = yamldecode(file("${path.module}/config/${local.env}.yaml"))
 }
 
 data "aws_lb_hosted_zone_id" "current" {}
