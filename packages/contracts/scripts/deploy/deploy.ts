@@ -44,8 +44,6 @@ export async function deployAll(config: ContractsConfig) {
     await vot3.getAddress(),
     await timelock.getAddress(),
     config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
-    config.B3TR_GOVERNOR_VOTING_PERIOD,
-    config.B3TR_GOVERNOR_VOTING_DELAY,
     config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD,
     TEMP_ADMIN,
   )

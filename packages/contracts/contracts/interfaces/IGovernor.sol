@@ -8,6 +8,9 @@ import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
 
 /**
  * @dev Interface of the {Governor} core.
+ *
+ * Modifications:
+ * - removed votingDelay()
  */
 interface IGovernor is IERC165, IERC6372 {
   enum ProposalState {
@@ -250,19 +253,6 @@ interface IGovernor is IERC165, IERC6372 {
    * @dev Whether a proposal needs to be queued before execution.
    */
   function proposalNeedsQueuing(uint256 proposalId) external view returns (bool);
-
-  /**
-   * @notice module:user-config
-   * @dev Delay, between the proposal is created and the vote starts. The unit this duration is expressed in depends
-   * on the clock (see EIP-6372) this contract uses.
-   *
-   * This can be increased to leave time for users to buy voting power, or delegate it, before the voting of a
-   * proposal starts.
-   *
-   * NOTE: While this interface returns a uint256, timepoints are stored as uint48 following the ERC-6372 clock type.
-   * Consequently this value must fit in a uint48 (when added to the current clock). See {IERC6372-clock}.
-   */
-  function votingDelay() external view returns (uint256);
 
   /**
    * @notice module:user-config

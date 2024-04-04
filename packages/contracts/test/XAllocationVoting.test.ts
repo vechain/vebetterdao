@@ -145,7 +145,7 @@ describe("X-Allocation Voting", function () {
         })
 
       const proposalId = await getProposalIdFromTx(tx, governor)
-      await waitForProposalToBeActive(proposalId, governor)
+      await waitForProposalToBeActive(proposalId)
       await governor.connect(owner).castVote(proposalId, 1)
       await waitForVotingPeriodToEnd(proposalId, governor)
       expect(await governor.state(proposalId)).to.eql(4n) // succeded
@@ -236,7 +236,7 @@ describe("X-Allocation Voting", function () {
         })
 
       const proposalId = await getProposalIdFromTx(tx, governor)
-      await waitForProposalToBeActive(proposalId, governor)
+      await waitForProposalToBeActive(proposalId)
       await governor.connect(owner).castVote(proposalId, 1)
       await waitForVotingPeriodToEnd(proposalId, governor)
       expect(await governor.state(proposalId)).to.eql(4n) // succeded
@@ -266,13 +266,13 @@ describe("X-Allocation Voting", function () {
       const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
 
       const tx = await governor
-        .connect(owner)
+        .connect(owner) //@ts-ignore
         .propose([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], description, {
           gasLimit: 10_000_000,
         })
 
       const proposalId = await getProposalIdFromTx(tx, governor)
-      await waitForProposalToBeActive(proposalId, governor)
+      await waitForProposalToBeActive(proposalId)
       await governor.connect(owner).castVote(proposalId, 1)
       await waitForVotingPeriodToEnd(proposalId, governor)
       expect(await governor.state(proposalId)).to.eql(4n) // succeded
@@ -492,7 +492,6 @@ describe("X-Allocation Voting", function () {
       await createProposalAndExecuteIt(
         proposer,
         voter1,
-        governor,
         xAllocationVoting,
         await ethers.getContractFactory("XAllocationVoting"),
         "Add app to the list",
@@ -508,7 +507,6 @@ describe("X-Allocation Voting", function () {
       await createProposalAndExecuteIt(
         proposer,
         voter1,
-        governor,
         xAllocationVoting,
         await ethers.getContractFactory("XAllocationVoting"),
         "Exclude app from the allocation voting rounds",

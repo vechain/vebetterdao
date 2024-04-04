@@ -65,7 +65,6 @@ describe("X-Apps", function () {
       await createProposalAndExecuteIt(
         proposer,
         voter1,
-        governor,
         xAllocationVoting,
         await ethers.getContractFactory("XAllocationVoting"),
         "Add app to the list",

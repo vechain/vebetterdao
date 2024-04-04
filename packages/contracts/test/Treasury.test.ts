@@ -19,8 +19,6 @@ describe("Treasury", () => {
   before(async () => {
     const config = createLocalConfig()
     config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
-    config.B3TR_GOVERNOR_VOTING_PERIOD = 3
-    config.B3TR_GOVERNOR_VOTING_DELAY = 1
     const info = await getOrDeployContractInstances({
       forceDeploy: true,
       config,
@@ -153,7 +151,6 @@ describe("Treasury", () => {
       await createProposalAndExecuteIt(
         owner,
         otherAccount,
-        governor,
         tProxy,
         treasuryContractFactory,
         description,

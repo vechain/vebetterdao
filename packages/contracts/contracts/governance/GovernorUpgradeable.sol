@@ -17,6 +17,7 @@ import { NoncesUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/Non
 import { IGovernor } from "../interfaces/IGovernor.sol";
 import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGovernor.sol";
 
 /**
  * @dev Core of the governance system, designed to be extended through various modules.
@@ -29,6 +30,11 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
  *
  * Modifications:
  * - _getGovernorStorage is internal
+ * - store _xAllocationVotingGovernor address
+ * - Added voteStartsInRound to ProposalCore
+ * - removed voteStart block from ProposalCore
+ * - changed proposalSnapshot and proposalDeadline to use _xAllocationVotingGovernor
+ * - removed propose() and _propose()
  */
 abstract contract GovernorUpgradeable is
   Initializable,
@@ -51,7 +57,7 @@ abstract contract GovernorUpgradeable is
 
   struct ProposalCore {
     address proposer;
-    uint48 voteStart;
+    uint256 voteStartsInRound;
     uint32 voteDuration;
     bool executed;
     bool canceled;
@@ -68,6 +74,7 @@ abstract contract GovernorUpgradeable is
     // {onlyGovernance} modifier and eventually reset after {_executeOperations} completes. This ensures that the
     // execution of {onlyGovernance} protected calls can only be achieved through successful proposals.
     DoubleEndedQueue.Bytes32Deque _governanceCall;
+    IXAllocationVotingGovernor _xAllocationVotingGovernor;
   }
 
   // keccak256(abi.encode(uint256(keccak256("openzeppelin.storage.Governor")) - 1)) & ~bytes32(uint256(0xff))
@@ -95,16 +102,23 @@ abstract contract GovernorUpgradeable is
   }
 
   /**
-   * @dev Sets the value for {name} and {version}
+   * @dev Sets the value for {name}, {version} and {_xAllocationVotingGovernor} in the storage.
    */
-  function __Governor_init(string memory name_) internal onlyInitializing {
+  function __Governor_init(
+    string memory name_,
+    IXAllocationVotingGovernor _xAllocationVotingGovernor
+  ) internal onlyInitializing {
     __EIP712_init_unchained(name_, version());
-    __Governor_init_unchained(name_);
+    __Governor_init_unchained(name_, _xAllocationVotingGovernor);
   }
 
-  function __Governor_init_unchained(string memory name_) internal onlyInitializing {
+  function __Governor_init_unchained(
+    string memory name_,
+    IXAllocationVotingGovernor _xAllocationVotingGovernor
+  ) internal onlyInitializing {
     GovernorStorage storage $ = _getGovernorStorage();
     $._name = name_;
+    $._xAllocationVotingGovernor = _xAllocationVotingGovernor;
   }
 
   /**
@@ -218,17 +232,34 @@ abstract contract GovernorUpgradeable is
   /**
    * @dev See {IGovernor-proposalSnapshot}.
    */
-  function proposalSnapshot(uint256 proposalId) public view virtual returns (uint256) {
+  function proposalSnapshot(uint256 proposalId) public view virtual override returns (uint256) {
     GovernorStorage storage $ = _getGovernorStorage();
-    return $._proposals[proposalId].voteStart;
+
+    // if round is active or already occured proposal start block is the block when round started
+    if ($._xAllocationVotingGovernor.currentRoundId() >= $._proposals[proposalId].voteStartsInRound) {
+      return $._xAllocationVotingGovernor.roundSnapshot($._proposals[proposalId].voteStartsInRound);
+    }
+
+    // if we call this function before the round starts, it will return 0, so we need to estimate the start block
+    uint256 blocksLeftUntilCurrentRoundEnds = $._xAllocationVotingGovernor.currentRoundDeadline() - clock();
+    uint256 otherRoundsDurationIfTargetRoundIsNotNext = $._xAllocationVotingGovernor.votingPeriod() *
+      ($._proposals[proposalId].voteStartsInRound - $._xAllocationVotingGovernor.currentRoundId() - 1);
+
+    return clock() + blocksLeftUntilCurrentRoundEnds + otherRoundsDurationIfTargetRoundIsNotNext + 1;
   }
 
   /**
    * @dev See {IGovernor-proposalDeadline}.
    */
-  function proposalDeadline(uint256 proposalId) public view virtual returns (uint256) {
+  function proposalDeadline(uint256 proposalId) public view virtual override returns (uint256) {
     GovernorStorage storage $ = _getGovernorStorage();
-    return $._proposals[proposalId].voteStart + $._proposals[proposalId].voteDuration;
+    // if round is active or already occured proposal end block is the block when round ends
+    if ($._xAllocationVotingGovernor.currentRoundId() >= $._proposals[proposalId].voteStartsInRound) {
+      return $._xAllocationVotingGovernor.roundDeadline($._proposals[proposalId].voteStartsInRound);
+    }
+
+    // if we call this function before the round starts, it will return 0, so we need to estimate the end block
+    return proposalSnapshot(proposalId) + $._xAllocationVotingGovernor.votingPeriod();
   }
 
   /**
@@ -286,6 +317,11 @@ abstract contract GovernorUpgradeable is
    */
   function _getVotes(address account, uint256 timepoint, bytes memory params) internal view virtual returns (uint256);
 
+  function _setXAllocationVotingGovernor(IXAllocationVotingGovernor _xAllocationVotingGovernor) internal {
+    GovernorStorage storage $ = _getGovernorStorage();
+    $._xAllocationVotingGovernor = _xAllocationVotingGovernor;
+  }
+
   /**
    * @dev Register a vote for `proposalId` by `account` with a given `support`, voting `weight` and voting `params`.
    *
@@ -307,77 +343,6 @@ abstract contract GovernorUpgradeable is
    */
   function _defaultParams() internal view virtual returns (bytes memory) {
     return "";
-  }
-
-  /**
-   * @dev See {IGovernor-propose}. This function has opt-in frontrunning protection, described in {_isValidDescriptionForProposer}.
-   */
-  function propose(
-    address[] memory targets,
-    uint256[] memory values,
-    bytes[] memory calldatas,
-    string memory description
-  ) public virtual returns (uint256) {
-    address proposer = _msgSender();
-
-    // check description restriction
-    if (!_isValidDescriptionForProposer(proposer, description)) {
-      revert GovernorRestrictedProposer(proposer);
-    }
-
-    // check proposal threshold
-    uint256 proposerVotes = getVotes(proposer, clock() - 1);
-    uint256 votesThreshold = proposalThreshold();
-    if (proposerVotes < votesThreshold) {
-      revert GovernorInsufficientProposerVotes(proposer, proposerVotes, votesThreshold);
-    }
-
-    return _propose(targets, values, calldatas, description, proposer);
-  }
-
-  /**
-   * @dev Internal propose mechanism. Can be overridden to add more logic on proposal creation.
-   *
-   * Emits a {IGovernor-ProposalCreated} event.
-   */
-  function _propose(
-    address[] memory targets,
-    uint256[] memory values,
-    bytes[] memory calldatas,
-    string memory description,
-    address proposer
-  ) internal virtual returns (uint256 proposalId) {
-    GovernorStorage storage $ = _getGovernorStorage();
-    proposalId = hashProposal(targets, values, calldatas, keccak256(bytes(description)));
-
-    if (targets.length != values.length || targets.length != calldatas.length || targets.length == 0) {
-      revert GovernorInvalidProposalLength(targets.length, calldatas.length, values.length);
-    }
-    if ($._proposals[proposalId].voteStart != 0) {
-      revert GovernorUnexpectedProposalState(proposalId, state(proposalId), bytes32(0));
-    }
-
-    uint256 snapshot = clock() + votingDelay();
-    uint256 duration = votingPeriod();
-
-    ProposalCore storage proposal = $._proposals[proposalId];
-    proposal.proposer = proposer;
-    proposal.voteStart = SafeCast.toUint48(snapshot);
-    proposal.voteDuration = SafeCast.toUint32(duration);
-
-    emit ProposalCreated(
-      proposalId,
-      proposer,
-      targets,
-      values,
-      new string[](targets.length),
-      calldatas,
-      snapshot,
-      snapshot + duration,
-      description
-    );
-
-    // Using a named return variable to avoid stack too deep errors
   }
 
   /**
@@ -876,11 +841,6 @@ abstract contract GovernorUpgradeable is
    */
   // solhint-disable-next-line func-name-mixedcase
   function CLOCK_MODE() public view virtual returns (string memory);
-
-  /**
-   * @inheritdoc IGovernor
-   */
-  function votingDelay() public view virtual returns (uint256);
 
   /**
    * @inheritdoc IGovernor

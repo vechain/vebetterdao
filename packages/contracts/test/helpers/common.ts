@@ -1,5 +1,5 @@
 import { ethers, network } from "hardhat"
-import { Emissions, B3TRGovernor, XAllocationPool, XAllocationVoting, B3TR, B3TRBadge } from "../../typechain-types"
+import { Emissions, XAllocationPool, XAllocationVoting, B3TR, B3TRBadge, B3TRGovernor } from "../../typechain-types"
 import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { getOrDeployContractInstances } from "./deploy"
@@ -28,7 +28,6 @@ export const moveBlocks = async (blocks: number) => {
 }
 
 export const createProposal = async (
-  governor: B3TRGovernor,
   contractToCall: BaseContract,
   ContractFactory: ContractFactory,
   proposer: HardhatEthersSigner,
@@ -36,7 +35,10 @@ export const createProposal = async (
   functionTocall: string = "tokenDetails",
   values: any[] = [],
   avoidMintingAndDelegating: boolean = false, // in some scenarios we want the operation to fail if the proposer does not have enough VOT3
+  roundId?: string,
 ): Promise<ContractTransactionResponse> => {
+  const { xAllocationVoting, governor } = await getOrDeployContractInstances({})
+
   // the proposer needs to have some delegated VOT3 to be able to create a proposal
   const clock = await governor.clock()
   const proposerVotes = await governor.getVotes(proposer, clock - BigInt(1))
@@ -52,9 +54,13 @@ export const createProposal = async (
   const address = await contractToCall.getAddress()
   const encodedFunctionCall = ContractFactory.interface.encodeFunctionData(functionTocall, values)
 
+  const voteStartsInRoundId = roundId ?? ((await xAllocationVoting.currentRoundId()) + 1n).toString()
+
   const tx = await governor
-    .connect(proposer)
-    .propose([address], [0], [encodedFunctionCall], description, { gasLimit: 10_000_000 })
+    .connect(proposer) //@ts-ignore
+    .propose([address], [0], [encodedFunctionCall], description, parseInt(voteStartsInRoundId), {
+      gasLimit: 10_000_000,
+    })
 
   return tx
 }
@@ -86,15 +92,17 @@ export const waitForRoundToEnd = async (roundId: number, xAllocationVoting: XAll
   await moveBlocks(parseInt((deadline - currentBlock + BigInt(1)).toString()))
 }
 
-export const waitForProposalToBeActive = async (proposalId: number, governor: B3TRGovernor): Promise<bigint> => {
+export const waitForCurrentRoundToEnd = async (xAllocationVoting: XAllocationVoting) => {
+  const currentRoundId = await xAllocationVoting.currentRoundId()
+  await waitForRoundToEnd(Number(currentRoundId), xAllocationVoting)
+}
+
+export const waitForProposalToBeActive = async (proposalId: number): Promise<bigint> => {
+  const { governor, emissions, minterAccount } = await getOrDeployContractInstances({})
   let proposalState = await governor.state(proposalId) // proposal id of the proposal in the beforeAll step
 
   if (proposalState.toString() !== "1") {
-    const currentBlock = await governor.clock() // Or ethers.provider.getBlockNumber()
-    const proposalSnapshot = await governor.proposalSnapshot(proposalId) // Block of when the proposal is active for voting. The next block is when the proposal is active
-
-    const blocksToMove = parseInt((proposalSnapshot - currentBlock + BigInt(1)).toString()) // Blocks to wait until the proposal is active
-    await moveBlocks(blocksToMove)
+    await moveToCycle(emissions, minterAccount, parseInt((await governor.proposalRound(proposalId)).toString()) + 1)
 
     // Update the proposal state
     proposalState = await governor.state(proposalId)
@@ -120,13 +128,14 @@ export const getVot3Tokens = async (receiver: HardhatEthersSigner, amount: strin
 export const createProposalAndExecuteIt = async (
   proposer: HardhatEthersSigner,
   voter: HardhatEthersSigner,
-  governor: B3TRGovernor,
   contractToCall: BaseContract,
   Contract: ContractFactory,
   description: string,
   functionToCall: string,
   args: any[] = [],
 ) => {
+  const { governor } = await getOrDeployContractInstances({})
+
   // load votes
   // console.log("Loading votes");
   await getVot3Tokens(voter, "1000")
@@ -134,12 +143,12 @@ export const createProposalAndExecuteIt = async (
 
   // create a new proposal
   // console.log("Creating proposal");
-  const tx = await createProposal(governor, contractToCall, Contract, proposer, description, functionToCall, args)
+  const tx = await createProposal(contractToCall, Contract, proposer, description, functionToCall, args)
   const proposalId = await getProposalIdFromTx(tx, governor)
 
   // wait
   // console.log("Waiting for voting period to start");
-  await waitForProposalToBeActive(proposalId, governor)
+  await waitForProposalToBeActive(proposalId)
 
   // vote
   // console.log("Voting");
@@ -168,7 +177,6 @@ export const createProposalAndExecuteIt = async (
 export const addAppThroughGovernance = async (
   proposer: HardhatEthersSigner,
   voter: HardhatEthersSigner,
-  governor: B3TRGovernor,
   xAllocationVoting: XAllocationVoting,
   appName: string = "Bike 4 Life" + Math.random(),
   appAddress: string,
@@ -177,7 +185,6 @@ export const addAppThroughGovernance = async (
   await createProposalAndExecuteIt(
     proposer,
     voter,
-    governor,
     xAllocationVoting,
     await ethers.getContractFactory("XAllocationVoting"),
     "Add app to the list",
@@ -212,6 +219,7 @@ export const waitForNextCycle = async (emissions: Emissions) => {
  */
 export const moveToCycle = async (emissions: Emissions, minter: HardhatEthersSigner, cycle: number) => {
   const cycleToBeDistributed = await emissions.nextCycle()
+
   for (let i = 0; i < BigInt(cycle) - cycleToBeDistributed; i++) {
     await waitForNextCycle(emissions)
     await emissions.connect(minter).distribute()
@@ -340,7 +348,6 @@ export const participateInAllocationVoting = async (
 export const participateInGovernanceVoting = async (
   user: HardhatEthersSigner,
   admin: HardhatEthersSigner,
-  governor: B3TRGovernor,
   contractToCall: BaseContract,
   Contract: ContractFactory,
   description: string,
@@ -348,13 +355,15 @@ export const participateInGovernanceVoting = async (
   args: any[] = [],
   waitProposalToEnd: boolean = false,
 ) => {
+  const { governor } = await getOrDeployContractInstances({})
+
   await getVot3Tokens(user, "1")
   await getVot3Tokens(admin, "1000")
 
-  const tx = await createProposal(governor, contractToCall, Contract, admin, description, functionToCall, args)
+  const tx = await createProposal(contractToCall, Contract, admin, description, functionToCall, args, false)
   const proposalId = await getProposalIdFromTx(tx, governor)
 
-  await waitForProposalToBeActive(proposalId, governor)
+  await waitForProposalToBeActive(proposalId)
 
   // Vote
   await governor.connect(user).castVote(proposalId, 1)
@@ -375,6 +384,18 @@ export const bootstrapEmissions = async (
 
   // Bootstrap emissions
   await emissions.connect(minter).bootstrap()
+}
+
+export const bootstrapAndStartEmissions = async (
+  b3tr: B3TR,
+  emissions: Emissions,
+  owner: HardhatEthersSigner,
+  minter: HardhatEthersSigner,
+) => {
+  await bootstrapEmissions(b3tr, emissions, owner, minter)
+
+  // Start emissions
+  await emissions.connect(minter).start()
 }
 
 export const upgradeNFTtoLevel = async (
