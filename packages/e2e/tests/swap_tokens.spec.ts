@@ -74,5 +74,23 @@ test.describe('Swap Tokens', () => {
     await dashboardPage.expectVOT3Balance(expectedVOT3Balance)
   });
 
+  test('User gets error if swap tx is reverted', async ({ page }) => {
+    // setup rnd account
+    const accountIndex = blockchainUtils.getRndAccountIndex()
+    await veWorldMockClient.setSignerAccIndex(page, accountIndex)
+    await blockchainUtils.fundAccount(accountIndex)
+    // connect wallet
+    const dashboardPage = new DashboardPage(page);
+    await dashboardPage.connectWallet()
+    // set tx to revert
+    await veWorldMockClient.setTxError(page, true)
+    // do the swap via ui
+    const swapDialog = await dashboardPage.clickSwapButton()
+    await swapDialog.enterFirstAmount(new BigNumber(1))
+    await swapDialog.clickSwap()
+    const confirm = new SwapConfirmationDialog(page)
+    await confirm.expectSwapFailed()
+  });
+
 
 })

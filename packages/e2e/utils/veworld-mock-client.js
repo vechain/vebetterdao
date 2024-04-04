@@ -58,6 +58,20 @@ const getMockAddress = async (page) => {
     })
 }
 
+// Set if cert signing should fail
+const setCertError = async (page, errorFlag) => {
+  await page.evaluate((errorFlag) => { 
+    window['veworld-mock-config']['controller']().setCertError(errorFlag)
+  }, errorFlag)
+}
+
+// Set if Tx should fail
+const setTxError = async (page, errorFlag) => {
+  await page.evaluate((errorFlag) => { 
+    window['veworld-mock-config']['controller']().setTxError(errorFlag)
+  }, errorFlag)
+}
+
 
 // Loads mock for solo
 const installForSolo = async (page, homepage) => {
@@ -80,6 +94,8 @@ const veworldMockClient = {
     getTxId: getTxId,
     setChainTag: setChainTag,
     setMnemonic: setMnemonic,
-    installForSolo: installForSolo
+    installForSolo: installForSolo,
+    setCertError: setCertError,
+    setTxError: setTxError
 }
 export default veworldMockClient

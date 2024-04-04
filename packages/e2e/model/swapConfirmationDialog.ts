@@ -17,6 +17,13 @@ export class SwapConfirmationDialog {
         await expect(this.page.locator('section[role="dialog"] h2').first()).toContainText('Swap Completed')
     }
 
+    /** 
+     * Expect text "Error" in the dialog
+     */
+    async expectSwapFailed() {
+        await expect(this.page.locator('section[role="dialog"] h2').first()).toContainText('Error')
+    }
+
     /**
      * Click the X button to close the dialog
      */
