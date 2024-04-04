@@ -32,11 +32,14 @@ export const NewAppPageFormContent = () => {
 
   const { errors } = formState
 
-  const { onMetadataUpload, metadataUploadError, metadataUploading } = useUploadAppMetadata()
+  //   const { onMetadataUpload, metadataUploadError, metadataUploading } = useUploadAppMetadata()
 
-  const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
+  //   const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
   const onSubmit = async (data: CreateEditAppFormData) => {
-    onConfirmationOpen()
+    // onConfirmationOpen()
+
+    //TODO: integrate dapp creation contract logic
+    alert(`form submitted \n ${JSON.stringify(data)}`)
 
     // const metadataUri = await onMetadataUpload({
     //   name: data.name,
