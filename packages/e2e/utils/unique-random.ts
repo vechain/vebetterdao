@@ -1,13 +1,10 @@
-export default function uniqueRandom(minimum, maximum) {
-	let previousValue;
-
-	return function random() {
-		const number = Math.floor(
-			(Math.random() * (maximum - minimum + 1)) + minimum
-		);
-
-		previousValue = number === previousValue && minimum !== maximum ? random() : number;
-
-		return previousValue;
-	};
+export default function* uniqueRandom(minimum: number, maximum: number): Generator<number> {
+	const length = maximum - minimum + 1;
+	const values = Array.from({ length }, (_, index) => index + minimum);
+	while (values.length > 0) {
+		const randomIndex = Math.floor(Math.random() * values.length);
+		const value = values[randomIndex];
+		delete values[randomIndex];
+		yield value;
+	}
 }

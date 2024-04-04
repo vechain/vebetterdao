@@ -7,7 +7,7 @@ import uniqueRandom from './unique-random';
 // When toString will return an exponential value
 BigNumber.config({ EXPONENTIAL_AT: 100 })
 // Random number generator for accounts
-const random = uniqueRandom(DYNAMIC_ACCOUNT_MIN, DYNAMIC_ACCOUNT_MAX)
+const randomAccGenerator = uniqueRandom(DYNAMIC_ACCOUNT_MIN, DYNAMIC_ACCOUNT_MAX)
 
 // ERC20 balanceOf function ABI
 const ERC20_balance_abi = JSON.stringify([{
@@ -282,7 +282,9 @@ const fundAccount = async (account_index: number, min_b3tr=FUNDING_MIN_B3TR, min
  * @returns The random account index
  */
 const getRndAccountIndex = () => {
-    return random()
+    const rndIndex = randomAccGenerator.next().value
+    console.log(`Random account index: ${rndIndex}`)
+    return rndIndex
 }
 
 

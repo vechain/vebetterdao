@@ -1,5 +1,5 @@
-import { test, expect, TestInfo } from '@playwright/test';
-import { HOMEPAGE, THOR_URL } from '../utils/constants';
+import { test, TestInfo } from '@playwright/test';
+import { HOMEPAGE } from '../utils/constants';
 import { screenshotOnFailure } from '../utils/screenshot';
 import veWorldMockClient from '../utils/veworld-mock-client';
 import { DashboardPage } from '../model/dashboardPage';
@@ -10,10 +10,7 @@ import { SwapConfirmationDialog } from '../model/swapConfirmationDialog';
 test.describe('Swap Tokens', () => {
 
   test.beforeEach(async ({ page }) => {
-    await veWorldMockClient.load(page);
-    await page.goto(HOMEPAGE);
-    await veWorldMockClient.install(page)
-    await veWorldMockClient.setThorUrl(page, THOR_URL)
+    await veWorldMockClient.installForSolo(page, HOMEPAGE)
   })
 
   test.afterEach(async ({ page }, testInfo: TestInfo) => {
