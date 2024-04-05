@@ -1,26 +1,26 @@
 import { AppConfig } from "." 
  const config: AppConfig = {
   "basePath": "https://b3tr-frontend.vercel.app",
-  "b3trContractAddress": "0xad5EC4C3AdEa4CE884B115FbCAc7c070228662e1",
-  "vot3ContractAddress": "0xA4f730596c41BBC34f84f62bf2B48F8C8d8d7724",
-  "b3trGovernorAddress": "0xA841460eAc035cA5DF152aDba9445bd0755f4b93",
-  "timelockContractAddress": "0x6446D87dBAb3EE7DA5F6e9e6c4e59Fa178D730e3",
-  "xAllocationPoolContractAddress": "0x0B2a2cBAc8A7782F208DcA4f84b195746EA4cb24",
-  "xAllocationVotingContractAddress": "0x0Eb250B063309767429b8EF64E8180c1C646A0E1",
-  "emissionsContractAddress": "0xAE39f804206A99271F066dC3bd3401C9f72c74E0",
-  "voterRewardsContractAddress": "0xaF16b84704d36eA164cd6A93caEC29ebF9b08E9A",
-  "nftBadgeContractAddress": "0xC343f15a19495122E890efEb02F8d3f82C42feec",
+  "b3trContractAddress": "0x1D97373F17D1Bfc33398fec4E5dFD4f743683b4C",
+  "vot3ContractAddress": "0x5B67a27DC047833c342d81b75e1bA1988b9b70aC",
+  "b3trGovernorAddress": "0x4E635Dab176847f147A1B2EA45C0299E2947E695",
+  "timelockContractAddress": "0x0303fcF842d4E768D50813e72530A78527B6610b",
+  "xAllocationPoolContractAddress": "0xC67e1f7f7c95332e3aF24B732C7d6926301a5d50",
+  "xAllocationVotingContractAddress": "0x7f39E9E8573a9DC6092bD2E4bB844E769549D21E",
+  "emissionsContractAddress": "0x673329362e3679E137b7162C5fd09128c966e18e",
+  "voterRewardsContractAddress": "0x5cc1B2406D129953a7FfaEE6A5AD3d0e952ceDAa",
+  "nftBadgeContractAddress": "0x2f1573B153E1d8B7ac87DC384ab015e2c9d6fd79",
   "mixPanelProjectToken": "e03f4f5f6a753dae2dac30a69dfe21f7",
-  "nodeUrl": "https://thor-solo.dev.rewards.vechain.org",
+  "nodeUrl": "https://thor-solo.dev.b3tr.vechain.org/",
   "network": {
     "id": "solo-staging",
     "name": "solo-staging",
     "type": "solo",
     "defaultNet": true,
     "urls": [
-      "https://thor-solo.dev.rewards.vechain.org"
+      "https://thor-solo.dev.b3tr.vechain.org/"
     ],
-    "explorerUrl": "https://insights.dev.rewards.vechain.org/#/solo",
+    "explorerUrl": "https://insight.dev.b3tr.vechain.org/#/solo/",
     "blockTime": 10000,
     "genesis": {
       "number": 0,
