@@ -3,9 +3,8 @@ import { useConnex } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
 import { FormattingUtils } from "@repo/utils"
 import { XAllocationPool__factory } from "@repo/contracts"
-import { queryClient } from "@/api/QueryProvider"
+import { queryClient } from "../../../QueryProvider"
 import { getRoundXApps, getRoundXAppsQueryKey } from "../../xApps"
-import Round from "@/app/rounds/[roundId]/page"
 
 const XALLOCATIONPOOL_CONTRACT = getConfig().xAllocationPoolContractAddress
 

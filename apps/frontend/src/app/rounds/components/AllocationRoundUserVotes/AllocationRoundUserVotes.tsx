@@ -12,7 +12,6 @@ import { TransactionModal } from "@/components/TransactionModal"
 import BigNumber from "bignumber.js"
 import { WalletNotConnectedOverlay } from "@/components"
 import { scaledDivision } from "@/utils/MathUtils"
-import { compareAddresses } from "@repo/utils/AddressUtils"
 
 type Props = {
   roundId: string
