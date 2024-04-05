@@ -4,7 +4,6 @@ import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethe
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { getOrDeployContractInstances } from "./deploy"
 import { mine } from "@nomicfoundation/hardhat-network-helpers"
-import { filterEventsByName, parseRoundStartedEvent } from "./events"
 
 export const waitForNextBlock = async () => {
   if (network.name === "hardhat") {
@@ -84,7 +83,8 @@ export const waitForVotingPeriodToEnd = async (proposalId: number, governor: B3T
   await moveBlocks(parseInt((deadline - currentBlock + BigInt(1)).toString()))
 }
 
-export const waitForRoundToEnd = async (roundId: number, xAllocationVoting: XAllocationVoting) => {
+export const waitForRoundToEnd = async (roundId: number) => {
+  const { xAllocationVoting } = await getOrDeployContractInstances({})
   const deadline = await xAllocationVoting.roundDeadline(roundId)
 
   const currentBlock = await xAllocationVoting.clock()
@@ -92,9 +92,12 @@ export const waitForRoundToEnd = async (roundId: number, xAllocationVoting: XAll
   await moveBlocks(parseInt((deadline - currentBlock + BigInt(1)).toString()))
 }
 
-export const waitForCurrentRoundToEnd = async (xAllocationVoting: XAllocationVoting) => {
+export const waitForCurrentRoundToEnd = async () => {
+  const { xAllocationVoting } = await getOrDeployContractInstances({})
+
   const currentRoundId = await xAllocationVoting.currentRoundId()
-  await waitForRoundToEnd(Number(currentRoundId), xAllocationVoting)
+  await waitForRoundToEnd(Number(currentRoundId))
+  await waitForNextBlock()
 }
 
 export const waitForProposalToBeActive = async (proposalId: number): Promise<bigint> => {
@@ -252,14 +255,19 @@ export const addAppsToAllocationVoting = async (
   return appIds
 }
 
-export const startNewAllocationRound = async (xAllocationVoting: XAllocationVoting) => {
-  let tx = await xAllocationVoting.startNewRound()
-  let receipt = await tx.wait()
-  if (!receipt) throw new Error("No receipt")
+export const startNewAllocationRound = async () => {
+  const { emissions, xAllocationVoting, minterAccount } = await getOrDeployContractInstances({})
+  const nextCycle = await emissions.nextCycle()
 
-  let { roundId } = parseRoundStartedEvent(filterEventsByName(receipt.logs, "RoundCreated")[0], xAllocationVoting)
+  if (nextCycle === 0n) {
+    await bootstrapAndStartEmissions()
+  } else if (nextCycle === 1n) {
+    await emissions.connect(minterAccount).start()
+  } else {
+    await emissions.distribute()
+  }
 
-  return roundId
+  return Number(await xAllocationVoting.currentRoundId())
 }
 
 export const calculateBaseAllocationOffChain = async (
@@ -333,7 +341,7 @@ export const participateInAllocationVoting = async (
   const appName = "App" + Math.random()
 
   await xAllocationVoting.connect(admin).addApp(user.address, user.address, appName, "metadataURI")
-  const roundId = await startNewAllocationRound(xAllocationVoting)
+  const roundId = await startNewAllocationRound()
 
   // Vote
   await xAllocationVoting
@@ -341,7 +349,7 @@ export const participateInAllocationVoting = async (
     .castVote(roundId, [await xAllocationVoting.hashName(appName)], [ethers.parseEther("1")])
 
   if (waitRoundToEnd) {
-    await waitForRoundToEnd(roundId, xAllocationVoting)
+    await waitForRoundToEnd(roundId)
   }
 }
 

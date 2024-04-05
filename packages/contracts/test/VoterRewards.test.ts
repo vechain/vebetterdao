@@ -273,7 +273,7 @@ describe("VoterRewards", () => {
           (await voterRewards.cycleToVoterToTotal(1, voter3)),
       ) // Total votes
 
-      await waitForRoundToEnd(Number(roundId), xAllocationVoting)
+      await waitForRoundToEnd(Number(roundId))
 
       // Votes should be the same after round ended
       appVotes = await xAllocationVoting.getAppVotes(roundId, app1)
@@ -413,7 +413,7 @@ describe("VoterRewards", () => {
           (await voterRewards.cycleToVoterToTotal(1, voter3)),
       ) // Total votes
 
-      await waitForRoundToEnd(Number(roundId), xAllocationVoting)
+      await waitForRoundToEnd(Number(roundId))
 
       // Votes should be the same after round ended
       appVotes = await xAllocationVoting.getAppVotes(roundId, app1)
@@ -500,7 +500,7 @@ describe("VoterRewards", () => {
           (await voterRewards.cycleToVoterToTotal(2, voter3)),
       ) // Total votes
 
-      await waitForRoundToEnd(Number(roundId2), xAllocationVoting)
+      await waitForRoundToEnd(Number(roundId2))
 
       // Votes should be the same after round ended
       appVotes = await xAllocationVoting.getAppVotes(roundId2, app1)
@@ -622,7 +622,7 @@ describe("VoterRewards", () => {
       expect(await voterRewards.getReward(1, voter2.address)).to.equal(22222222222222222222222n)
       expect(await voterRewards.getReward(1, voter3.address)).to.equal(22222222222222222222222n)
 
-      await waitForRoundToEnd(Number(roundId), xAllocationVoting)
+      await waitForRoundToEnd(Number(roundId))
 
       await waitForNextCycle(emissions)
 
@@ -745,7 +745,7 @@ describe("VoterRewards", () => {
       expect(await voterRewards.getReward(1, voter2.address)).to.equal(22222222222222222222222n)
       expect(await voterRewards.getReward(1, voter3.address)).to.equal(22222222222222222222222n)
 
-      await waitForRoundToEnd(Number(roundId), xAllocationVoting)
+      await waitForRoundToEnd(Number(roundId))
 
       await waitForNextCycle(emissions)
 
@@ -867,7 +867,7 @@ describe("VoterRewards", () => {
       expect(await voterRewards.getReward(1, voter2.address)).to.equal(666666666666666666666666n)
       expect(await voterRewards.getReward(1, voter3.address)).to.equal(666666666666666666666666n)
 
-      await waitForRoundToEnd(Number(roundId), xAllocationVoting)
+      await waitForRoundToEnd(Number(roundId))
 
       await waitForNextCycle(emissions)
 
@@ -1015,7 +1015,7 @@ describe("VoterRewards", () => {
       expect(await voterRewards.getReward(1, voter2.address)).to.equal(666666666666666666666666n)
       expect(await voterRewards.getReward(1, voter3.address)).to.equal(666666666666666666666666n)
 
-      await waitForRoundToEnd(Number(roundId), xAllocationVoting)
+      await waitForRoundToEnd(Number(roundId))
 
       await waitForNextCycle(emissions)
 
@@ -1141,7 +1141,7 @@ describe("VoterRewards", () => {
       expect(await voterRewards.getReward(1, voter2.address)).to.equal(666666666666666666666666n)
       expect(await voterRewards.getReward(1, voter3.address)).to.equal(666666666666666666666666n)
 
-      await waitForRoundToEnd(Number(roundId), xAllocationVoting)
+      await waitForRoundToEnd(Number(roundId))
 
       await waitForNextCycle(emissions)
 
@@ -1187,7 +1187,7 @@ describe("VoterRewards", () => {
     })
 
     it("Should not be able to claim rewards if not voted", async () => {
-      const { xAllocationVoting, otherAccount, voterRewards, emissions, b3tr, owner, minterAccount } =
+      const { xAllocationVoting, otherAccount, voterRewards, emissions, minterAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
@@ -1199,7 +1199,7 @@ describe("VoterRewards", () => {
 
       let roundId = await xAllocationVoting.currentRoundId()
 
-      await waitForRoundToEnd(Number(roundId), xAllocationVoting)
+      await waitForRoundToEnd(Number(roundId))
 
       await waitForNextCycle(emissions)
 
@@ -1209,7 +1209,7 @@ describe("VoterRewards", () => {
 
       roundId = await xAllocationVoting.currentRoundId()
 
-      await waitForRoundToEnd(Number(roundId), xAllocationVoting)
+      await waitForRoundToEnd(Number(roundId))
 
       await waitForNextCycle(emissions)
 
@@ -1240,7 +1240,7 @@ describe("VoterRewards", () => {
 
       await voteOnApps(xAllocationVoting, [app1], [voter1], [[ethers.parseEther("1000")]], roundId)
 
-      await waitForRoundToEnd(Number(roundId), xAllocationVoting)
+      await waitForRoundToEnd(Number(roundId))
 
       await waitForNextCycle(emissions)
 
@@ -1252,7 +1252,7 @@ describe("VoterRewards", () => {
     })
 
     it("Should revert if vote is registered by non vote registrar", async () => {
-      const { voterRewards, otherAccount, xAllocationVoting, emissions, b3tr, owner, minterAccount } =
+      const { voterRewards, otherAccount, xAllocationVoting, emissions, minterAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
         })

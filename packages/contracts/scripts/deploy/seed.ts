@@ -69,14 +69,14 @@ export const seedLocalEnvironment = async (
   // await castVotesToXDapps(xAllocationVoting, accountsToSeed, roundId, amountToSwap, xDappsFromContract)
 
   //TODO: SEED multiple rounds and votes (we need to execute a proposal to change the votingPeriod to someseconds)
-  // await waitForRoundToEnd(roundId, xAllocationVoting)
+  // await waitForRoundToEnd(roundId)
 
   // for (let i = 0; i < 15; i++) {
   //   await emissions.distribute()
   //   const roundId = parseInt((await xAllocationVoting.currentRoundId()).toString())
   //   console.log(`Casting random votes to xDapps for round ${roundId}...`)
   //   await castVotesToXDapps(xAllocationVoting, accountsToSeed, roundId, amountToSwap, xDappsFromContract)
-  //   await waitForRoundToEnd(roundId, xAllocationVoting)
+  //   await waitForRoundToEnd(roundId)
   // }
 
   const end = performance.now()

@@ -55,7 +55,7 @@ describe("Governor and TimeLock", function () {
     })
 
     it("should be able to upgrade the governor contract through governance", async function () {
-      const { governor, owner, b3tr, B3trContract, emissions, minterAccount } = await getOrDeployContractInstances({
+      const { governor, owner, b3tr, B3trContract } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
       const votesThreshold = await governor.proposalThreshold()
@@ -116,11 +116,10 @@ describe("Governor and TimeLock", function () {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 5
-      const { b3tr, otherAccounts, governor, B3trContract, owner, minterAccount, emissions, xAllocationVoting } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-          config,
-        })
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
 
       const proposer = otherAccounts[0]
       await getVot3Tokens(proposer, "1000")
@@ -170,7 +169,7 @@ describe("Governor and TimeLock", function () {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 5
-      const { b3tr, otherAccounts, governor, B3trContract, owner, minterAccount, emissions, xAllocationVoting } =
+      const { b3tr, otherAccounts, governor, B3trContract, emissions, xAllocationVoting } =
         await getOrDeployContractInstances({
           forceDeploy: true,
           config,
@@ -201,7 +200,7 @@ describe("Governor and TimeLock", function () {
       expect(await governor.state(proposalId)).to.eql(0n) // pending
 
       // Move to the next round + 1 extra block
-      await waitForCurrentRoundToEnd(xAllocationVoting)
+      await waitForCurrentRoundToEnd()
       await waitForNextBlock()
 
       // Round ended but proposal should still be pending
@@ -217,7 +216,7 @@ describe("Governor and TimeLock", function () {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 5
-      const { b3tr, otherAccounts, governor, B3trContract, owner, minterAccount, emissions, xAllocationVoting } =
+      const { b3tr, otherAccounts, governor, B3trContract, emissions, xAllocationVoting } =
         await getOrDeployContractInstances({
           forceDeploy: true,
           config,
@@ -248,13 +247,13 @@ describe("Governor and TimeLock", function () {
       expect(await governor.state(proposalId)).to.eql(0n) // pending
 
       // Move to the next round + 1 extra block
-      await waitForCurrentRoundToEnd(xAllocationVoting)
+      await waitForCurrentRoundToEnd()
       // We start the new round
       await emissions.distribute()
 
       expect(await governor.state(proposalId)).to.eql(1n) // active
 
-      await waitForCurrentRoundToEnd(xAllocationVoting)
+      await waitForCurrentRoundToEnd()
 
       expect(await governor.state(proposalId)).to.not.eql(1n) // active
       expect(await governor.state(proposalId)).to.not.eql(0n) // pending
@@ -264,11 +263,10 @@ describe("Governor and TimeLock", function () {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 5
-      const { b3tr, otherAccounts, governor, B3trContract, owner, minterAccount, emissions, xAllocationVoting } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-          config,
-        })
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
 
       const proposer = otherAccounts[0]
       await getVot3Tokens(proposer, "1000")
@@ -301,7 +299,7 @@ describe("Governor and TimeLock", function () {
     it("cannot create a proposal if NOT a VOT3 holder", async function () {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
-      const { B3trContract, b3tr, owner, emissions, minterAccount } = await getOrDeployContractInstances({
+      const { B3trContract, b3tr, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
@@ -314,10 +312,9 @@ describe("Governor and TimeLock", function () {
     })
 
     it("can create a proposal even if user did not manually self delegated (because of automatic self-delegation)", async function () {
-      const { governor, B3trContract, vot3, b3tr, owner, minterAccount, emissions } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const { B3trContract, vot3, b3tr, owner, minterAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       // Start emissions
       await bootstrapAndStartEmissions()
@@ -336,11 +333,10 @@ describe("Governor and TimeLock", function () {
     it("can create a proposal if VOT3 holder that self-delegated", async function () {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
-      const { governor, B3trContract, b3tr, owner, emissions, minterAccount, xAllocationVoting } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-          config,
-        })
+      const { governor, B3trContract, b3tr, owner, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
 
       // Start emissions
       await bootstrapAndStartEmissions()
@@ -392,7 +388,7 @@ describe("Governor and TimeLock", function () {
     })
 
     it("can calculate the proposal id from the proposal parameters", async function () {
-      const { governor, B3trContract, b3tr, emissions, owner, minterAccount } = await getOrDeployContractInstances({
+      const { governor, B3trContract, b3tr, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
       const functionToCall = "tokenDetails"
@@ -424,11 +420,10 @@ describe("Governor and TimeLock", function () {
     it("ANY user that holds VOT3 and DELEGATED can create a proposal", async function () {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
-      const { governor, B3trContract, otherAccount, b3tr, emissions, owner, minterAccount, xAllocationVoting } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-          config,
-        })
+      const { B3trContract, otherAccount, b3tr } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
 
       // Start emissions
       await bootstrapAndStartEmissions()
@@ -456,7 +451,7 @@ describe("Governor and TimeLock", function () {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 10
-      const { vot3, b3tr, otherAccounts, minterAccount, governor, B3trContract, otherAccount, emissions, owner } =
+      const { vot3, b3tr, otherAccounts, minterAccount, governor, B3trContract, otherAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
           config,
@@ -649,10 +644,9 @@ describe("Governor and TimeLock", function () {
     }).timeout(1800000)
 
     it("Stores that a user voted at least once", async function () {
-      const { otherAccount, owner, governor, b3tr, B3trContract, emissions, minterAccount } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const { otherAccount, owner, governor, b3tr, B3trContract } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       // Start emissions
       await bootstrapAndStartEmissions()
@@ -675,10 +669,9 @@ describe("Governor and TimeLock", function () {
     })
 
     it("Quorum is calculated correctly", async function () {
-      const { governor, otherAccounts, b3tr, B3trContract, emissions, owner, minterAccount } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const { governor, otherAccounts, b3tr, B3trContract } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       // Start emissions
       await bootstrapAndStartEmissions()
@@ -730,10 +723,9 @@ describe("Governor and TimeLock", function () {
     })
 
     it("Agaist votes are counted correctly for quorum", async function () {
-      const { governor, otherAccounts, b3tr, B3trContract, emissions, owner, minterAccount } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const { governor, otherAccounts, b3tr, B3trContract } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       // Start emissions
       await bootstrapAndStartEmissions()
@@ -775,10 +767,9 @@ describe("Governor and TimeLock", function () {
     })
 
     it("Abstain votes are counted correctly for quorum", async function () {
-      const { governor, otherAccounts, b3tr, B3trContract, emissions, owner, minterAccount } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const { governor, otherAccounts, b3tr, B3trContract } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       // Start emissions
       await bootstrapAndStartEmissions()
@@ -820,10 +811,9 @@ describe("Governor and TimeLock", function () {
     })
 
     it("Yes votes are counted correctly for quorum", async function () {
-      const { governor, otherAccounts, b3tr, B3trContract, emissions, owner, minterAccount } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const { governor, otherAccounts, b3tr, B3trContract } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       // Start emissions
       await bootstrapAndStartEmissions()
@@ -876,7 +866,7 @@ describe("Governor and TimeLock", function () {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 10
-      const { otherAccounts, b3tr, emissions, owner, minterAccount } = await getOrDeployContractInstances({
+      const { otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
@@ -1069,7 +1059,6 @@ describe("Governor and TimeLock", function () {
         b3tr,
         B3trContract,
         otherAccount: proposer,
-        xAllocationVoting,
       } = await getOrDeployContractInstances({ forceDeploy: false })
 
       // create a new proposal
@@ -1171,7 +1160,6 @@ describe("Governor and TimeLock", function () {
         B3trContract,
         otherAccount: proposer,
         otherAccounts,
-        xAllocationVoting,
       } = await getOrDeployContractInstances({ forceDeploy: false })
 
       // create a new proposal
@@ -1210,7 +1198,6 @@ describe("Governor and TimeLock", function () {
         B3trContract,
         owner,
         otherAccount: proposer,
-        xAllocationVoting,
       } = await getOrDeployContractInstances({ forceDeploy: false })
 
       const tx = await createProposal(

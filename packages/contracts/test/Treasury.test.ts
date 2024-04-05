@@ -16,7 +16,6 @@ import { deployProxy } from "../scripts/helpers"
 describe("Treasury", () => {
   let treasuryProxy: any
   let b3tr: any
-  let governor: any
   let vot3: any
   let timeLock: any
   let owner: HardhatEthersSigner
@@ -32,7 +31,6 @@ describe("Treasury", () => {
     owner = info.owner
     otherAccount = info.otherAccount
     b3tr = info.b3tr
-    governor = info.governor
     vot3 = info.vot3
     timeLock = info.timeLock
 

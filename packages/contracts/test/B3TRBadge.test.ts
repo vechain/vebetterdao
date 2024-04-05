@@ -11,6 +11,7 @@ import {
   participateInAllocationVoting,
   upgradeAndSelectNFTtoNextLevel,
   upgradeNFTtoLevel,
+  waitForCurrentRoundToEnd,
   waitForProposalToBeActive,
 } from "./helpers"
 import { expect } from "chai"
@@ -335,11 +336,10 @@ describe("B3TRBadge", () => {
 
     it("Can know if user participated in governance if XAllocation and B3TRGovernor addresses are set", async () => {
       const config = createLocalConfig()
-      const { otherAccount, xAllocationVoting, owner, governor, b3tr, emissions, minterAccount, treasury } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-          config,
-        })
+      const { otherAccount, xAllocationVoting, owner, governor, b3tr, treasury } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -380,10 +380,9 @@ describe("B3TRBadge", () => {
     })
 
     it("User can free mint if participated in x-allocation voting", async () => {
-      const { b3trBadge, otherAccount, xAllocationVoting, owner, b3tr, emissions, minterAccount } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const { b3trBadge, otherAccount, xAllocationVoting, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -402,7 +401,7 @@ describe("B3TRBadge", () => {
     })
 
     it("User can free mint if he participated in B3TR Governance", async () => {
-      const { b3trBadge, otherAccount, b3tr, otherAccounts, governor, B3trContract, owner, minterAccount, emissions } =
+      const { b3trBadge, otherAccount, b3tr, otherAccounts, governor, B3trContract } =
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
@@ -457,6 +456,8 @@ describe("B3TRBadge", () => {
       await waitForProposalToBeActive(proposalId)
       // Now we can vote
       await governor.connect(voter).castVote(proposalId, 1)
+
+      await waitForCurrentRoundToEnd()
 
       // Should be able to free mint after participating in allocation voting
       await participateInAllocationVoting(voter, owner, xAllocationVoting)

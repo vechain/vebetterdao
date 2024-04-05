@@ -16,6 +16,7 @@ import {
   waitForProposalToBeActive,
   waitForVotingPeriodToEnd,
   bootstrapAndStartEmissions,
+  waitForCurrentRoundToEnd,
 } from "./helpers"
 import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
@@ -143,9 +144,7 @@ describe("X-Allocation Voting", function () {
 
       const tx = await governor
         .connect(owner) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
-        .propose([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], description, {
-          gasLimit: 10_000_000,
-        })
+        .propose([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], description)
 
       const proposalId = await getProposalIdFromTx(tx, governor)
       await waitForProposalToBeActive(proposalId)
@@ -235,9 +234,7 @@ describe("X-Allocation Voting", function () {
 
       const tx = await governor
         .connect(owner) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
-        .propose([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], description, {
-          gasLimit: 10_000_000,
-        })
+        .propose([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], description)
 
       const proposalId = await getProposalIdFromTx(tx, governor)
       await waitForProposalToBeActive(proposalId)
@@ -257,7 +254,7 @@ describe("X-Allocation Voting", function () {
 
     it("Cannot set voting period if not less than emissions cycle duration", async function () {
       const { xAllocationVoting, owner, emissions, governor } = await getOrDeployContractInstances({
-        forceDeploy: false,
+        forceDeploy: true,
       })
       await bootstrapAndStartEmissions()
       const votesThreshold = await governor.proposalThreshold()
@@ -272,9 +269,7 @@ describe("X-Allocation Voting", function () {
 
       const tx = await governor
         .connect(owner) //@ts-ignore
-        .propose([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], description, {
-          gasLimit: 10_000_000,
-        })
+        .propose([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], description)
 
       const proposalId = await getProposalIdFromTx(tx, governor)
       await waitForProposalToBeActive(proposalId)
@@ -364,7 +359,7 @@ describe("X-Allocation Voting", function () {
       let { roundId } = parseRoundStartedEvent(roundCreated[0], xAllocationVoting)
       expect(roundId).to.eql(BigInt(1))
 
-      await waitForRoundToEnd(roundId, xAllocationVoting)
+      await waitForRoundToEnd(roundId)
 
       // should not be able to start a new allocation round if there is an active one
       tx = await xAllocationVoting.connect(owner).startNewRound()
@@ -382,7 +377,7 @@ describe("X-Allocation Voting", function () {
     }).timeout(18000000)
 
     it("New round is started each time an emission occurs", async function () {
-      const { xAllocationVoting, owner, b3tr, emissions, minterAccount } = await getOrDeployContractInstances({
+      const { xAllocationVoting, emissions, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -440,7 +435,7 @@ describe("X-Allocation Voting", function () {
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
 
-      let roundId = await startNewAllocationRound(xAllocationVoting)
+      let roundId = await startNewAllocationRound()
 
       const isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, roundId)
       expect(isEligibleForVote).to.eql(true)
@@ -456,7 +451,7 @@ describe("X-Allocation Voting", function () {
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
 
-      let round1 = await startNewAllocationRound(xAllocationVoting)
+      let round1 = await startNewAllocationRound()
 
       await xAllocationVoting.connect(owner).setVotingElegibility(app1Id, false)
 
@@ -467,8 +462,8 @@ describe("X-Allocation Voting", function () {
       let appsVotedInSpecificRound = await xAllocationVoting.getRoundApps(round1)
       expect(appsVotedInSpecificRound.length).to.equal(1n)
 
-      await waitForRoundToEnd(round1, xAllocationVoting)
-      let round2 = await startNewAllocationRound(xAllocationVoting)
+      await waitForRoundToEnd(round1)
+      let round2 = await startNewAllocationRound()
 
       // app should not be elegible from this round
       isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round2)
@@ -483,7 +478,7 @@ describe("X-Allocation Voting", function () {
     })
 
     it("DAO can make an app unavailable for allocation voting starting from next round", async function () {
-      const { otherAccounts, xAllocationVoting } = await getOrDeployContractInstances({
+      const { otherAccounts, xAllocationVoting, emissions } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -506,10 +501,13 @@ describe("X-Allocation Voting", function () {
         [otherAccounts[0].address, otherAccounts[0].address, "Bike 4 Life", "metadataURI"],
       )
 
-      let round1 = await startNewAllocationRound(xAllocationVoting)
-
+      // start new round
+      await emissions.distribute()
+      let round1 = await xAllocationVoting.currentRoundId()
       let isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round1)
       expect(isEligibleForVote).to.eql(true)
+
+      await waitForCurrentRoundToEnd()
 
       await createProposalAndExecuteIt(
         proposer,
@@ -525,8 +523,10 @@ describe("X-Allocation Voting", function () {
       isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round1)
       expect(isEligibleForVote).to.eql(true)
 
-      await waitForRoundToEnd(round1, xAllocationVoting)
-      let round2 = await startNewAllocationRound(xAllocationVoting)
+      await waitForCurrentRoundToEnd()
+
+      await emissions.distribute()
+      let round2 = await xAllocationVoting.currentRoundId()
 
       // app should not be elegible from this round
       isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round2)
@@ -542,10 +542,9 @@ describe("X-Allocation Voting", function () {
     })
 
     it("App needs to wait next round if added during an ongoing round", async function () {
-      const { otherAccounts, owner, xAllocationVoting, b3tr, emissions, minterAccount } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const { otherAccounts, owner, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -555,7 +554,7 @@ describe("X-Allocation Voting", function () {
 
       const app1Id = await xAllocationVoting.hashName(otherAccounts[0].address)
 
-      let round1 = await startNewAllocationRound(xAllocationVoting)
+      let round1 = await startNewAllocationRound()
 
       await xAllocationVoting
         .connect(owner)
@@ -572,8 +571,8 @@ describe("X-Allocation Voting", function () {
       let appsVotedInSpecificRound = await xAllocationVoting.getRoundApps(round1)
       expect(appsVotedInSpecificRound.length).to.equal(0)
 
-      await waitForRoundToEnd(round1, xAllocationVoting)
-      let round2 = await startNewAllocationRound(xAllocationVoting)
+      await waitForRoundToEnd(round1)
+      let round2 = await startNewAllocationRound()
 
       // app should not be elegible from this round
       isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round2)
@@ -590,10 +589,9 @@ describe("X-Allocation Voting", function () {
 
   describe("Allocation Voting", function () {
     it("I cannot cast a vote with higher balance than I have", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner, b3tr, emissions, minterAccount } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const { xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -617,10 +615,9 @@ describe("X-Allocation Voting", function () {
     })
 
     it("I should be able to cast a vote", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner, b3tr, emissions, minterAccount } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const { xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -667,10 +664,9 @@ describe("X-Allocation Voting", function () {
     })
 
     it("I should not be able to cast vote twice", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner, b3tr, emissions, minterAccount } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const { xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
       // Bootstrap emissions
       await bootstrapEmissions()
 
@@ -697,10 +693,9 @@ describe("X-Allocation Voting", function () {
     })
 
     it("Cannot cast a vote if the allocation round ended", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner, b3tr, emissions, minterAccount } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const { xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -723,17 +718,16 @@ describe("X-Allocation Voting", function () {
       tx = await xAllocationVoting.connect(otherAccount).castVote(roundId, [app1], [ethers.parseEther("500")])
       receipt = await tx.wait()
 
-      await waitForRoundToEnd(roundId, xAllocationVoting)
+      await waitForRoundToEnd(roundId)
 
       // I cannot cast a vote if the round is not active
       await catchRevert(xAllocationVoting.connect(otherAccount).castVote(roundId, [app1], [ethers.parseEther("500")]))
     })
 
     it("I should be able to vote for multiple apps", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner, minterAccount, b3tr, emissions } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const { xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
       // Bootstrap emissions
       await bootstrapEmissions()
 
@@ -803,10 +797,9 @@ describe("X-Allocation Voting", function () {
     })
 
     it("Votes should be tracked correctly", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner, b3tr, emissions, minterAccount } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const { xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -865,7 +858,7 @@ describe("X-Allocation Voting", function () {
       let totalVoters = await xAllocationVoting.totalVoters(roundId)
       expect(totalVoters).to.eql(BigInt(3))
 
-      await waitForRoundToEnd(roundId, xAllocationVoting)
+      await waitForRoundToEnd(roundId)
 
       // Votes should be the same after round ended
       appVotes = await xAllocationVoting.getAppVotes(roundId, app1)
@@ -878,10 +871,9 @@ describe("X-Allocation Voting", function () {
     })
 
     it("I should be able to vote only for apps available in the allocation round", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner, b3tr, emissions, minterAccount } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const { xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -921,10 +913,9 @@ describe("X-Allocation Voting", function () {
     })
 
     it("Allocation round should be successfull if quorum was reached", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner, vot3, b3tr, minterAccount, emissions } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const { xAllocationVoting, otherAccounts, otherAccount, owner, vot3 } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -955,7 +946,7 @@ describe("X-Allocation Voting", function () {
         .castVote(roundId, [app1, app2], [ethers.parseEther("300"), ethers.parseEther("200")])
       receipt = await tx.wait()
 
-      await waitForRoundToEnd(roundId, xAllocationVoting)
+      await waitForRoundToEnd(roundId)
 
       // Check totalSupply
       const totalSupply = await vot3.getPastTotalSupply(timepoint)
@@ -970,10 +961,9 @@ describe("X-Allocation Voting", function () {
     }).timeout(18000000)
 
     it("Allocation round should be failed if quorum was not reached", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner, vot3, b3tr, emissions, minterAccount } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const { xAllocationVoting, otherAccounts, otherAccount, owner, vot3 } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -1003,7 +993,7 @@ describe("X-Allocation Voting", function () {
         .castVote(roundId, [app1, app2], [ethers.parseEther("1"), ethers.parseEther("1")])
       receipt = await tx.wait()
 
-      await waitForRoundToEnd(roundId, xAllocationVoting)
+      await waitForRoundToEnd(roundId)
 
       // Check totalSupply
       const totalSupply = await vot3.getPastTotalSupply(timepoint)
@@ -1017,10 +1007,9 @@ describe("X-Allocation Voting", function () {
     }).timeout(18000000)
 
     it("Can track apps available for voting on current and previous rounds correctly", async function () {
-      const { xAllocationVoting, otherAccounts, owner, b3tr, emissions, minterAccount } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -1034,7 +1023,7 @@ describe("X-Allocation Voting", function () {
         .connect(owner)
         .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
-      let round1 = await startNewAllocationRound(xAllocationVoting)
+      let round1 = await startNewAllocationRound()
       let getRoundApps = await xAllocationVoting.getRoundApps(round1)
       expect(getRoundApps.length).to.equal(2n)
 
@@ -1045,20 +1034,20 @@ describe("X-Allocation Voting", function () {
       await xAllocationVoting
         .connect(owner)
         .addApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
-      await waitForRoundToEnd(round1, xAllocationVoting)
+      await waitForRoundToEnd(round1)
 
       // 4 apps in round2
-      let round2 = await startNewAllocationRound(xAllocationVoting)
+      let round2 = await startNewAllocationRound()
       getRoundApps = await xAllocationVoting.getRoundApps(round2)
       expect(getRoundApps.length).to.equal(4n)
 
       // remove apps before round ends
       await xAllocationVoting.setVotingElegibility(app1, false)
       await xAllocationVoting.setVotingElegibility(app2, false)
-      await waitForRoundToEnd(round2, xAllocationVoting)
+      await waitForRoundToEnd(round2)
 
       // 2 app in round 3
-      let round3 = await startNewAllocationRound(xAllocationVoting)
+      let round3 = await startNewAllocationRound()
       getRoundApps = await xAllocationVoting.getRoundApps(round3)
       expect(getRoundApps.length).to.equal(2n)
 
@@ -1066,10 +1055,10 @@ describe("X-Allocation Voting", function () {
       await xAllocationVoting
         .connect(owner)
         .addApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
-      await waitForRoundToEnd(round3, xAllocationVoting)
+      await waitForRoundToEnd(round3)
 
       // 3 apps in round 4
-      let round4 = await startNewAllocationRound(xAllocationVoting)
+      let round4 = await startNewAllocationRound()
       getRoundApps = await xAllocationVoting.getRoundApps(round4)
       expect(getRoundApps.length).to.equal(3n)
 
@@ -1096,7 +1085,7 @@ describe("X-Allocation Voting", function () {
         .connect(owner)
         .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
-      let round1 = await startNewAllocationRound(xAllocationVoting)
+      let round1 = await startNewAllocationRound()
       let getRoundApps = await xAllocationVoting.getRoundApps(round1)
       expect(getRoundApps.length).to.equal(2n)
 
@@ -1109,10 +1098,9 @@ describe("X-Allocation Voting", function () {
     })
 
     it("Stores that a user voted at least once", async function () {
-      const { xAllocationVoting, otherAccount, owner, b3tr, emissions, minterAccount } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const { xAllocationVoting, otherAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -1127,7 +1115,7 @@ describe("X-Allocation Voting", function () {
       const appName = "App"
 
       await xAllocationVoting.connect(owner).addApp(otherAccount.address, otherAccount.address, appName, "metadataURI")
-      const roundId = await startNewAllocationRound(xAllocationVoting)
+      const roundId = await startNewAllocationRound()
 
       // Vote
       await xAllocationVoting
@@ -1146,13 +1134,13 @@ describe("X-Allocation Voting", function () {
         forceDeploy: true,
       })
 
-      let round1 = await startNewAllocationRound(xAllocationVoting)
-      await waitForRoundToEnd(round1, xAllocationVoting)
+      let round1 = await startNewAllocationRound()
+      await waitForRoundToEnd(round1)
 
       let isFinalized = await xAllocationVoting.isFinalized(round1)
       expect(isFinalized).to.eql(false)
 
-      await startNewAllocationRound(xAllocationVoting)
+      await startNewAllocationRound()
 
       isFinalized = await xAllocationVoting.isFinalized(round1)
       expect(isFinalized).to.eql(true)
@@ -1164,8 +1152,8 @@ describe("X-Allocation Voting", function () {
       })
       await getVot3Tokens(otherAccount, "1000")
 
-      let round1 = await startNewAllocationRound(xAllocationVoting)
-      await waitForRoundToEnd(round1, xAllocationVoting)
+      let round1 = await startNewAllocationRound()
+      await waitForRoundToEnd(round1)
 
       // should be failed since quorum is not reached
       let state = await xAllocationVoting.state(round1)
@@ -1185,7 +1173,7 @@ describe("X-Allocation Voting", function () {
         forceDeploy: true,
       })
 
-      let round1 = await startNewAllocationRound(xAllocationVoting)
+      let round1 = await startNewAllocationRound()
 
       await catchRevert(xAllocationVoting.finalize(round1))
 
@@ -1196,18 +1184,17 @@ describe("X-Allocation Voting", function () {
 
   describe("Quorum", function () {
     it("Can get quorum of round successfully", async function () {
-      const { xAllocationVoting, owner, b3tr, emissions, minterAccount, otherAccount } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const { xAllocationVoting, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       await getVot3Tokens(otherAccount, "1000")
 
       // Bootstrap emissions
       await bootstrapEmissions()
 
-      let round1 = await startNewAllocationRound(xAllocationVoting)
-      await waitForRoundToEnd(round1, xAllocationVoting)
+      let round1 = await startNewAllocationRound()
+      await waitForRoundToEnd(round1)
 
       let quorum = await xAllocationVoting.roundQuorum(round1)
 

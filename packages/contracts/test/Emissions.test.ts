@@ -325,7 +325,7 @@ describe("Emissions", () => {
     })
 
     it("Should not be able to bootstrap emissions twice", async () => {
-      const { emissions, b3tr, minterAccount, owner } = await getOrDeployContractInstances({
+      const { emissions, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -340,7 +340,7 @@ describe("Emissions", () => {
   describe("Start emissions", () => {
     it("Should be able to start emissions", async () => {
       const config = createLocalConfig()
-      const { emissions, b3tr, minterAccount, treasury, owner, xAllocationPool, voterRewards } =
+      const { emissions, b3tr, minterAccount, treasury, xAllocationPool, voterRewards } =
         await getOrDeployContractInstances({
           forceDeploy: true,
           config,
@@ -391,7 +391,7 @@ describe("Emissions", () => {
     })
 
     it("Should not be able start emissions twice", async () => {
-      const { emissions, b3tr, minterAccount, owner } = await getOrDeployContractInstances({
+      const { emissions, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -418,7 +418,7 @@ describe("Emissions", () => {
   describe("Emissions distribution", () => {
     it("Should be able to calculate emissions correctly for first cycle", async () => {
       const config = createLocalConfig()
-      const { emissions, b3tr, minterAccount, owner } = await getOrDeployContractInstances({
+      const { emissions, b3tr, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
@@ -512,7 +512,7 @@ describe("Emissions", () => {
 
     it("Should not be able to distribute emissions before next cycle starts", async () => {
       const config = createLocalConfig()
-      const { emissions, b3tr, minterAccount, owner } = await getOrDeployContractInstances({
+      const { emissions, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
@@ -547,7 +547,7 @@ describe("Emissions", () => {
 
     it("Should be able to calculate emissions correctly for second cycle", async () => {
       const config = createLocalConfig()
-      const { emissions, b3tr, minterAccount, owner } = await getOrDeployContractInstances({
+      const { emissions, b3tr, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
@@ -611,7 +611,7 @@ describe("Emissions", () => {
 
     it("Should calculate emissions properly after first X-Alloc decay period", async () => {
       const config = createTestConfig()
-      const { emissions, b3tr, minterAccount, owner } = await getOrDeployContractInstances({
+      const { emissions, b3tr, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
@@ -659,7 +659,7 @@ describe("Emissions", () => {
 
     it("Should calculate emissions properly after first Rewards decay period", async () => {
       const config = createTestConfig()
-      const { emissions, b3tr, minterAccount, owner } = await getOrDeployContractInstances({
+      const { emissions, b3tr, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
@@ -707,7 +707,7 @@ describe("Emissions", () => {
 
     it("Should calculate decay amounts correctly for pilot show parameters", async () => {
       const config = createLocalConfig()
-      const { emissions, owner, minterAccount, b3tr } = await getOrDeployContractInstances({
+      const { emissions, minterAccount, b3tr } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
@@ -775,7 +775,7 @@ describe("Emissions", () => {
     }).timeout(1000 * 60 * 10) // 10 minutes
 
     it("Should not be able to start emissions if not minter", async () => {
-      const { emissions, minterAccount, b3tr, owner, otherAccount } = await getOrDeployContractInstances({
+      const { emissions, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -791,7 +791,7 @@ describe("Emissions", () => {
         return
       }
       const config = createTestConfig()
-      const { emissions, b3tr, minterAccount, owner } = await getOrDeployContractInstances({
+      const { emissions, b3tr, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
@@ -859,7 +859,7 @@ describe("Emissions", () => {
     }).timeout(1000 * 60 * 5) // 5 minutes
 
     it("Should not be able to distribute if cycle is not ready", async () => {
-      const { emissions, minterAccount, b3tr, owner } = await getOrDeployContractInstances({
+      const { emissions, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -878,7 +878,7 @@ describe("Emissions", () => {
     })
 
     it("Should be able to perform emissions also after the next cycle block", async () => {
-      const { emissions, minterAccount, b3tr, owner } = await getOrDeployContractInstances({
+      const { emissions, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
