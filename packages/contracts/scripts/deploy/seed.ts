@@ -35,6 +35,16 @@ export const seedLocalEnvironment = async (
       name: "Cleanify",
       metadataURI: "bafkreicw6g34t3th63z7hq3o4xkay6dkrei5ny5evyrlclw53gfz6o6lgu",
     },
+    {
+      address: accounts[10].address,
+      name: "Non Fungible Book Club (NFBC)",
+      metadataURI: "bafkreicdcol6afcsfb4efxmjzqsuonukn54jixmfqmfsirhw4wujvxfpxy",
+    },
+    {
+      address: accounts[11].address,
+      name: "Green Ambassador Challenge",
+      metadataURI: "bafkreigrwjowwwcmdd7bdm3yqsquu77ufeqcao6mjbd2fednwo5qfmtldi",
+    },
   ]
 
   // Bootstrap emissions
