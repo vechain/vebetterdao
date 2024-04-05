@@ -12,6 +12,7 @@ import { TransactionModal } from "@/components/TransactionModal"
 import BigNumber from "bignumber.js"
 import { WalletNotConnectedOverlay } from "@/components"
 import { scaledDivision } from "@/utils/MathUtils"
+import { compareAddresses } from "@repo/utils/AddressUtils"
 
 type Props = {
   roundId: string
@@ -78,7 +79,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
 
   const watchVotes = watch("votes")
 
-  const parsedCastVotesPercentages = useMemo(() => {
+  const parsedCastVotesPercentages: FormData["votes"] = useMemo(() => {
     if (castVotesEvent?.appsIds && votesAtSnapshot?.scaled) {
       return castVotesEvent.appsIds.map((id, index) => {
         const rawValue = scaledDivision(
@@ -86,7 +87,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
           Number(votesAtSnapshot.scaled),
         )
         return {
-          id,
+          appId: id,
           value: new BigNumber(rawValue).toFixed(2, BigNumber.ROUND_HALF_DOWN),
           rawValue,
         }
@@ -100,7 +101,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     if (parsedCastVotesPercentages.length) {
       replace(parsedCastVotesPercentages)
     } else {
-      const values = xApps?.map(xApp => ({ id: xApp.id, value: "", rawValue: 0 }))
+      const values = xApps?.map(xApp => ({ appId: xApp.id, value: "", rawValue: 0 }))
       replace(values ?? [])
     }
   }, [xApps, replace, parsedCastVotesPercentages])
@@ -110,7 +111,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     const appVotesPercentagesToValue = data.votes.map(vote => {
       const rawValue = scaledDivision(Number(vote.value) * Number(votesAtSnapshot.scaled), 100)
       return {
-        id: vote.id,
+        appId: vote.appId,
         value: new BigNumber(rawValue).toFixed(2, BigNumber.ROUND_HALF_DOWN),
         rawValue,
       }
@@ -125,7 +126,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     const rawValue = scaledDivision(100, totalVotes)
     const votesPerApp = new BigNumber(rawValue).toFixed(2, BigNumber.ROUND_HALF_DOWN)
     xApps?.forEach((xApp, index) => {
-      update(index, { id: xApp.id, value: votesPerApp, rawValue })
+      update(index, { appId: xApp.id, value: votesPerApp, rawValue })
     })
   }
 
@@ -210,19 +211,22 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
                 </Text>
               </Stack>
               <VStack spacing={4} mt={8}>
-                {fields.map((field, index) => (
-                  <SelectAppVotesInput
-                    totalVotesAvailable={votesAtSnapshot?.scaled}
-                    isDisabled={isFormDisabled}
-                    control={control}
-                    getValues={getValues}
-                    errors={errors}
-                    field={field}
-                    key={field.id}
-                    index={index}
-                    xApp={xApps?.[index]}
-                  />
-                ))}
+                {fields.map((field, index) => {
+                  const xApp = xApps?.find(xApp => xApp.id === field.appId)
+                  return (
+                    <SelectAppVotesInput
+                      totalVotesAvailable={votesAtSnapshot?.scaled}
+                      isDisabled={isFormDisabled}
+                      control={control}
+                      getValues={getValues}
+                      errors={errors}
+                      field={field}
+                      key={field.id}
+                      index={index}
+                      xApp={xApp}
+                    />
+                  )
+                })}
               </VStack>
             </Box>
             {!hasVoted && !isVotingConcluded && (

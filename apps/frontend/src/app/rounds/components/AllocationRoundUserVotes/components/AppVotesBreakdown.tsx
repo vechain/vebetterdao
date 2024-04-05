@@ -42,9 +42,9 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
 
   const appsMetadata = useQueries({
     queries: votes.map(vote => ({
-      queryKey: getXAppMetadataQueryKey(vote.id),
+      queryKey: getXAppMetadataQueryKey(vote.appId),
       queryFn: async () => {
-        return await getXAppMetadata(vote.id)
+        return await getXAppMetadata(vote.appId)
       },
     })),
   })
@@ -85,7 +85,7 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
                   {...((index === 0 || totalVotes === Number(vote.value)) && { borderLeftRadius: "xl" })}
                   {...((index === selectedVotes.length - 1 || Number(vote.value) === totalVotes) &&
                     isCompletedAllocated && { borderRightRadius: "xl" })}
-                  key={`${vote.id}-track`}
+                  key={`${vote.appId}-track`}
                   w={`${getLineWidth(Number(vote.value))}%`}
                   bg={getLinesColor(index)}
                   h="full"
@@ -96,7 +96,7 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
               {votes.map((vote, index) =>
                 Number(vote.value) > 0 ? (
                   <VStack
-                    key={`${vote.id}-line`}
+                    key={`${vote.appId}-line`}
                     w={`${getLineWidth(Number(vote.value))}%`}
                     h={"full"}
                     spacing={0}
