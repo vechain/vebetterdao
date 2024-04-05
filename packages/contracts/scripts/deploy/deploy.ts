@@ -13,7 +13,7 @@ import {
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
-import { seedLocalEnvironment, seedTestEnvironment } from "./seed"
+import { seedLocalEnvironment, seedTestnetEnvironment } from "./seed"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { deployProxy } from "../helpers"
 
@@ -203,7 +203,7 @@ export async function deployAll(config: ContractsConfig) {
 
   // ---------- Seeding ---------- //
   if (network.name === "vechain_testnet") {
-    await seedTestEnvironment(b3tr, xAllocationVoting, emissions)
+    await seedTestnetEnvironment(b3tr, xAllocationVoting, emissions)
   } else if (network.name === "vechain_solo") {
     await seedLocalEnvironment(treasury, vot3, xAllocationVoting, emissions)
   }

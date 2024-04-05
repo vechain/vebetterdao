@@ -53,7 +53,7 @@ module.exports = {
       url: getSoloUrl(),
       accounts: {
         mnemonic: getEnvMnemonic(),
-        count: 10,
+        count: 20,
         path: "m/44'/818'/0'/0",
       },
       restful: true,
@@ -63,7 +63,7 @@ module.exports = {
       url: VECHAIN_URL_TESTNET,
       accounts: {
         mnemonic: getEnvMnemonic(),
-        count: 10,
+        count: 20,
         path: "m/44'/818'/0'/0",
       },
       restful: true,

@@ -35,6 +35,16 @@ export const seedLocalEnvironment = async (
       name: "Cleanify",
       metadataURI: "bafkreicw6g34t3th63z7hq3o4xkay6dkrei5ny5evyrlclw53gfz6o6lgu",
     },
+    {
+      address: accounts[10].address,
+      name: "Non Fungible Book Club (NFBC)",
+      metadataURI: "bafkreicdcol6afcsfb4efxmjzqsuonukn54jixmfqmfsirhw4wujvxfpxy",
+    },
+    {
+      address: accounts[11].address,
+      name: "Green Ambassador Challenge",
+      metadataURI: "bafkreigrwjowwwcmdd7bdm3yqsquu77ufeqcao6mjbd2fednwo5qfmtldi",
+    },
   ]
 
   // Bootstrap emissions
@@ -83,7 +93,11 @@ export const seedLocalEnvironment = async (
   console.log(`Seeding complete in ${end - start}ms`)
 }
 
-export const seedTestEnvironment = async (b3tr: B3TR, xAllocationVoting: XAllocationVoting, emissions: Emissions) => {
+export const seedTestnetEnvironment = async (
+  b3tr: B3TR,
+  xAllocationVoting: XAllocationVoting,
+  emissions: Emissions,
+) => {
   console.log("Seeding Testnet environment:")
   const start = performance.now()
 

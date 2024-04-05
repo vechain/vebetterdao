@@ -1,0 +1,32 @@
+name: Checkov
+on: 
+  pull_request:
+    branches:
+      - 'main'
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+      - name: Test with Checkov
+        id: checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
+          framework: terraform
+          external_checks_dirs: ./checkov-external-checks
+          soft_fail: true
+          enable_secrets_scan_all_files: true
+          output_format: cli,json
+          output_file_path: console,results.json
+      - name: Upload json file
+        uses: actions/upload-artifact@v4
+        with:
+          name: scan-results
+          path: results.json
+          
