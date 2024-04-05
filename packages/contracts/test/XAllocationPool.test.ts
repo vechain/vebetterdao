@@ -1052,7 +1052,7 @@ describe("X-Allocation Pool", async function () {
   })
 
   it("When adding new app previous allocations should remain the same", async function () {
-    const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, b3tr, minterAccount } =
+    const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount } =
       await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -1072,7 +1072,7 @@ describe("X-Allocation Pool", async function () {
       .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app #2", "metadataURI")
 
     // Bootstrap emissions
-    await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+    await bootstrapEmissions()
     await emissions.connect(minterAccount).start()
 
     const round1 = await xAllocationVoting.currentRoundId()
@@ -1082,7 +1082,7 @@ describe("X-Allocation Pool", async function () {
       .connect(voter1)
       .castVote(round1, [app1Id, app2Id], [ethers.parseEther("100"), ethers.parseEther("900")])
 
-    await waitForRoundToEnd(Number(round1), xAllocationVoting)
+    await waitForRoundToEnd(Number(round1))
     let state = await xAllocationVoting.state(round1)
     expect(state).to.eql(BigInt(2))
 
@@ -1108,7 +1108,7 @@ describe("X-Allocation Pool", async function () {
 
     expect(baseAllocationAmountBeforeAddingApp3).to.eql(await xAllocationPool.baseAllocationAmount(round1))
 
-    await waitForRoundToEnd(Number(await xAllocationVoting.currentRoundId()), xAllocationVoting)
+    await waitForRoundToEnd(Number(await xAllocationVoting.currentRoundId()))
 
     // remove app
     await xAllocationVoting.connect(owner).setVotingElegibility(app3Id, false)
@@ -1123,7 +1123,7 @@ describe("X-Allocation Pool", async function () {
       .connect(voter1)
       .castVote(round3, [app1Id, app2Id], [ethers.parseEther("100"), ethers.parseEther("900")])
 
-    await waitForRoundToEnd(Number(round3), xAllocationVoting)
+    await waitForRoundToEnd(Number(round3))
     state = await xAllocationVoting.state(round3)
     expect(state).to.eql(BigInt(2))
 
