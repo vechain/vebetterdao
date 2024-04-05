@@ -176,7 +176,7 @@ contract XAllocationPool is
       "XAllocationVotingGovernor contract not set"
     );
 
-    // if app did not participated in the round, return 0
+    // if app did not participate in the round, return 0
     if (!xAllocationVoting().isEligibleForVote(appId, roundId)) {
       return (0, 0);
     }
@@ -252,7 +252,7 @@ contract XAllocationPool is
       "XAllocationVotingGovernor contract not set"
     );
 
-    // if app did not participated in the round, return 0
+    // if app did not participate in the round, return 0
     if (!xAllocationVoting().isEligibleForVote(appId, roundId)) {
       return (0, 0);
     }
