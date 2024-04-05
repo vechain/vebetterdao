@@ -31,10 +31,10 @@ const compactFormatter = new Intl.NumberFormat("en-US", {
 
 type Props = {
   roundId: string
+  maxRanks?: number
 }
 
-const maxRanks = 3
-export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
+export const AllocationXAppsVotesCard = ({ roundId, maxRanks = 5 }: Props) => {
   const { data: xApps, isLoading: xAppsLoading } = useRoundXApps(roundId)
 
   const xAppsVotes = useXAppsVotes(xApps?.map(app => app.id) ?? [], roundId)
