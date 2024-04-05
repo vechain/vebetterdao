@@ -3,6 +3,9 @@ import { useConnex } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
 import { FormattingUtils } from "@repo/utils"
 import { XAllocationPool__factory } from "@repo/contracts"
+import { queryClient } from "@/api/QueryProvider"
+import { getRoundXApps, getRoundXAppsQueryKey } from "../../xApps"
+import Round from "@/app/rounds/[roundId]/page"
 
 const XALLOCATIONPOOL_CONTRACT = getConfig().xAllocationPoolContractAddress
 
@@ -51,7 +54,16 @@ export const useXAppRoundEarnings = (roundId: string, xAppId: string) => {
   const { thor } = useConnex()
   return useQuery({
     queryKey: getXAppRoundEarningsQueryKey(roundId, xAppId),
-    queryFn: async () => await getXAppRoundEarnings(thor, roundId, xAppId),
+    queryFn: async () => {
+      const data = await queryClient.ensureQueryData({
+        queryFn: () => getRoundXApps(thor, roundId),
+        queryKey: getRoundXAppsQueryKey(roundId),
+      })
+      const isXAppInRound = data.some(app => app.id === xAppId)
+      if (!isXAppInRound) return { amount: "0", xAppId }
+
+      return await getXAppRoundEarnings(thor, roundId, xAppId)
+    },
     enabled: !!thor && !!roundId && !!xAppId,
   })
 }
