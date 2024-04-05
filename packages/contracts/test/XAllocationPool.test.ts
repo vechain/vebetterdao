@@ -1052,7 +1052,7 @@ describe("X-Allocation Pool", async function () {
     expect(claimableAmountAfterClaim[0]).to.eql(0n)
   })
 
-  it.only("When adding new app previous allocations should remain the same", async function () {
+  it("When adding new app previous allocations should remain the same", async function () {
     const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, b3tr, minterAccount } =
       await getOrDeployContractInstances({
         forceDeploy: true,
