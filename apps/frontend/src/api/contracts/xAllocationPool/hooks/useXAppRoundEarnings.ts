@@ -5,7 +5,6 @@ import { FormattingUtils } from "@repo/utils"
 import { XAllocationPool__factory } from "@repo/contracts"
 import { queryClient } from "@/api/QueryProvider"
 import { getRoundXApps, getRoundXAppsQueryKey } from "../../xApps"
-import Round from "@/app/rounds/[roundId]/page"
 
 const XALLOCATIONPOOL_CONTRACT = getConfig().xAllocationPoolContractAddress
 
@@ -32,7 +31,7 @@ export const getXAppRoundEarnings = async (
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
-  return { amount: FormattingUtils.scaleNumberDown(res.decoded['0'], 18), appId: xAppId }
+  return { amount: FormattingUtils.scaleNumberDown(res.decoded["0"], 18), appId: xAppId }
 }
 
 export const getXAppRoundEarningsQueryKey = (roundId: string, xAppId?: string) => [
