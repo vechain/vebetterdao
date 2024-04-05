@@ -20,10 +20,13 @@ import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { FiArrowUpRight } from "react-icons/fi"
 
-export const DashboardXApps = () => {
+type Props = {
+  maxApps?: number
+}
+export const DashboardXApps = ({ maxApps = 5 }: Props) => {
   const { data: xApps } = useXApps()
 
-  const slicedXApps = useMemo(() => xApps?.slice(0, 4), [xApps])
+  const slicedXApps = useMemo(() => xApps?.slice(0, maxApps), [xApps, maxApps])
 
   if (!slicedXApps?.length) return null
 
@@ -32,7 +35,7 @@ export const DashboardXApps = () => {
       <CardHeader>
         <HStack w="full" justify={"space-between"}>
           <Heading size="md">Explore Apps</Heading>
-          {slicedXApps && slicedXApps.length > 4 && (
+          {slicedXApps && slicedXApps.length > maxApps && (
             <Button variant="link" colorScheme="blue" rightIcon={<FiArrowUpRight />}>
               See all
             </Button>
