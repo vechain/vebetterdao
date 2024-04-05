@@ -12,7 +12,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
-  bytes32 public constant X_ALLOCATION_VOTE_REGISTRAR_ROLE = keccak256("X_ALLOCATION_VOTE_REGISTRAR_ROLE");
+  bytes32 public constant VOTE_REGISTRAR_ROLE = keccak256("VOTE_REGISTRAR_ROLE");
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
   /// @custom:storage-location erc7201:b3tr.storage.VoterRewards
@@ -85,11 +85,11 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
 
   function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
-  function registerXallocationVote(
+  function registerVote(
     uint256 proposalStart,
     address voter,
     uint256 votes
-  ) public onlyRole(X_ALLOCATION_VOTE_REGISTRAR_ROLE) {
+  ) public onlyRole(VOTE_REGISTRAR_ROLE) {
     require(votes > 0, "VoterRewards: votes must be greater than 0");
     require(proposalStart > 0, "VoterRewards: proposalStart must be greater than 0");
     require(voter != address(0), "VoterRewards: voter cannot be the zero address");
@@ -108,8 +108,6 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
 
     emit VoteRegistered(cycle, voter, total);
   }
-
-  //TODO - registerGovernorVote (for the general purpose governor proposals)
 
   function claimReward(uint256 cycle, address voter) public nonReentrant {
     require(cycle > 0, "VoterRewards: cycle must be greater than 0");
@@ -210,9 +208,9 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
     $.emissions = IEmissions(_emissions);
   }
 
-  function setXallocationVoteRegistrarRole(address _voteRegistrar) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setVoteRegistrarRole(address _voteRegistrar) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(_voteRegistrar != address(0), "VoterRewards: _voteRegistrar cannot be the zero address");
-    _grantRole(X_ALLOCATION_VOTE_REGISTRAR_ROLE, _voteRegistrar);
+    _grantRole(VOTE_REGISTRAR_ROLE, _voteRegistrar);
   }
 
   function setScalingFactor(uint256 newScalingFactor) public onlyRole(DEFAULT_ADMIN_ROLE) {

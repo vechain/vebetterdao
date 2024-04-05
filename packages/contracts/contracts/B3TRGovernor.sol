@@ -10,6 +10,7 @@ import "./governance/modules/GovernorCountingSimpleUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import { IVoterRewards } from "./interfaces/IVoterRewards.sol";
 
 contract B3TRGovernor is
   Initializable,
@@ -44,6 +45,21 @@ contract B3TRGovernor is
     _disableInitializers();
   }
 
+  /// @custom:storage-location erc7201:b3tr.storage.B3TRGovernor
+  struct B3TRGovernorStorage {
+    IVoterRewards voterRewards;
+  }
+
+  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.B3TRGovernor")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 private constant B3TRGovernorStorageLocation =
+    0x25dff2c77042a04dd0be920205965690a1ebd1f0dd565f4fe04be0006d94d400;
+
+  function _getB3TRGovernorStorage() private pure returns (B3TRGovernorStorage storage $) {
+    assembly {
+      $.slot := B3TRGovernorStorageLocation
+    }
+  }
+
   /**
    * @dev Initializes the contract with the initial parameters
    * @param _vot3Token The address of the Vot3 token used for voting
@@ -51,6 +67,8 @@ contract B3TRGovernor is
    * @param _xAllocationVotingGovernor The address of the xAllocationVotingGovernor
    * @param _quorumPercentage quorum as a percentage of the total supply at the block a proposal’s voting power is retrieved
    * @param _initialProposalThreshold The Proposal Threshold is the amount of voting power that an account needs to make a proposal
+   * @param governorAdmin The address of the governor admin
+   * @param _voterRewards The address of the voter rewards contract
    */
   function initialize(
     IVotes _vot3Token,
@@ -58,7 +76,8 @@ contract B3TRGovernor is
     IXAllocationVotingGovernor _xAllocationVotingGovernor,
     uint256 _quorumPercentage,
     uint256 _initialProposalThreshold,
-    address governorAdmin
+    address governorAdmin,
+    address _voterRewards
   ) public initializer {
     __Governor_init("B3TRGovernor", _xAllocationVotingGovernor);
     __GovernorSettings_init(_initialProposalThreshold);
@@ -69,114 +88,34 @@ contract B3TRGovernor is
     __AccessControl_init();
     __UUPSUpgradeable_init();
 
+    B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
+    $.voterRewards = IVoterRewards(_voterRewards);
+
     _grantRole(DEFAULT_ADMIN_ROLE, governorAdmin);
   }
 
-  function _authorizeUpgrade(address newImplementation) internal override onlyGovernance {}
-
-  /**
-   * @dev See {Governor-cancel}.
-   */
-  function cancel(
-    address[] memory targets,
-    uint256[] memory values,
-    bytes[] memory calldatas,
-    bytes32 descriptionHash
-  ) public virtual override returns (uint256) {
-    uint256 proposalId = hashProposal(targets, values, calldatas, descriptionHash);
-
-    if (_msgSender() != proposalProposer(proposalId) && !hasRole(DEFAULT_ADMIN_ROLE, _msgSender())) {
-      revert UnauthorizedAccess(_msgSender());
-    }
-
-    require(state(proposalId) == ProposalState.Pending, "Governor: proposal not pending");
-
-    return _cancel(targets, values, calldatas, descriptionHash);
-  }
-
-  function setXAllocationVotingGovernor(
-    IXAllocationVotingGovernor _xAllocationVotingGovernor
-  ) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    _setXAllocationVotingGovernor(_xAllocationVotingGovernor);
-  }
+  // ------------------ GETTERS ------------------ //
 
   function quorumReached(uint256 proposalId) public view returns (bool) {
     return _quorumReached(proposalId);
-  }
-
-  // The following functions are overrides required by Solidity.
-
-  function votingPeriod() public view override(GovernorUpgradeable, GovernorSettingsUpgradeable) returns (uint256) {
-    return super.votingPeriod();
-  }
-
-  function quorum(
-    uint256 blockNumber
-  ) public view override(GovernorUpgradeable, GovernorVotesQuorumFractionUpgradeable) returns (uint256) {
-    return super.quorum(blockNumber);
-  }
-
-  /**
-   * @dev See {IGovernor-state}.
-   */
-  function state(
-    uint256 proposalId
-  ) public view virtual override(GovernorUpgradeable, GovernorTimelockControlUpgradeable) returns (ProposalState) {
-    GovernorStorage storage $ = _getGovernorStorage();
-    // We read the struct fields into the stack at once so Solidity emits a single SLOAD
-    ProposalCore storage proposal = $._proposals[proposalId];
-    bool proposalExecuted = proposal.executed;
-    bool proposalCanceled = proposal.canceled;
-
-    if (proposalExecuted) {
-      return ProposalState.Executed;
-    }
-
-    if (proposalCanceled) {
-      return ProposalState.Canceled;
-    }
-
-    if (proposal.voteStartsInRound == 0) {
-      revert GovernorNonexistentProposal(proposalId);
-    }
-
-    // If the round where the proposal should be active is not started yet, the proposal is pending
-    if ($._xAllocationVotingGovernor.currentRoundId() < proposal.voteStartsInRound) {
-      return ProposalState.Pending;
-    }
-
-    uint256 currentTimepoint = clock();
-
-    uint256 deadline = proposalDeadline(proposalId);
-
-    if (deadline >= currentTimepoint) {
-      return ProposalState.Active;
-    } else if (!_quorumReached(proposalId) || !_voteSucceeded(proposalId)) {
-      return ProposalState.Defeated;
-    } else if (proposalEta(proposalId) == 0) {
-      return ProposalState.Succeeded;
-    } else {
-      return ProposalState.Queued;
-    }
   }
 
   function proposalRound(uint256 proposalId) public view returns (uint256) {
     return _getGovernorStorage()._proposals[proposalId].voteStartsInRound;
   }
 
-  function proposalNeedsQueuing(
-    uint256 proposalId
-  ) public view override(GovernorUpgradeable, GovernorTimelockControlUpgradeable) returns (bool) {
-    return super.proposalNeedsQueuing(proposalId);
+  // ------------------ SETTERS ------------------ //
+
+  function setVoterRewards(address _voterRewards) public onlyGovernance {
+    B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
+
+    $.voterRewards = IVoterRewards(_voterRewards);
   }
 
-  function proposalThreshold()
-    public
-    view
-    override(GovernorUpgradeable, GovernorSettingsUpgradeable)
-    returns (uint256)
-  {
-    return super.proposalThreshold();
+  function setXAllocationVotingGovernor(
+    IXAllocationVotingGovernor _xAllocationVotingGovernor
+  ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    _setXAllocationVotingGovernor(_xAllocationVotingGovernor);
   }
 
   /**
@@ -262,6 +201,101 @@ contract B3TRGovernor is
     // Using a named return variable to avoid stack too deep errors
   }
 
+  // ------------------ OVERRIDES ------------------ //
+
+  function _authorizeUpgrade(address newImplementation) internal override onlyGovernance {}
+
+  /**
+   * @dev See {Governor-cancel}.
+   */
+  function cancel(
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    bytes32 descriptionHash
+  ) public virtual override returns (uint256) {
+    uint256 proposalId = hashProposal(targets, values, calldatas, descriptionHash);
+
+    if (_msgSender() != proposalProposer(proposalId) && !hasRole(DEFAULT_ADMIN_ROLE, _msgSender())) {
+      revert UnauthorizedAccess(_msgSender());
+    }
+
+    require(state(proposalId) == ProposalState.Pending, "Governor: proposal not pending");
+
+    return _cancel(targets, values, calldatas, descriptionHash);
+  }
+
+  // The following functions are overrides required by Solidity.
+
+  function votingPeriod() public view override(GovernorUpgradeable, GovernorSettingsUpgradeable) returns (uint256) {
+    return super.votingPeriod();
+  }
+
+  function quorum(
+    uint256 blockNumber
+  ) public view override(GovernorUpgradeable, GovernorVotesQuorumFractionUpgradeable) returns (uint256) {
+    return super.quorum(blockNumber);
+  }
+
+  /**
+   * @dev See {IGovernor-state}.
+   */
+  function state(
+    uint256 proposalId
+  ) public view virtual override(GovernorUpgradeable, GovernorTimelockControlUpgradeable) returns (ProposalState) {
+    GovernorStorage storage $ = _getGovernorStorage();
+    // We read the struct fields into the stack at once so Solidity emits a single SLOAD
+    ProposalCore storage proposal = $._proposals[proposalId];
+    bool proposalExecuted = proposal.executed;
+    bool proposalCanceled = proposal.canceled;
+
+    if (proposalExecuted) {
+      return ProposalState.Executed;
+    }
+
+    if (proposalCanceled) {
+      return ProposalState.Canceled;
+    }
+
+    if (proposal.voteStartsInRound == 0) {
+      revert GovernorNonexistentProposal(proposalId);
+    }
+
+    // If the round where the proposal should be active is not started yet, the proposal is pending
+    if ($._xAllocationVotingGovernor.currentRoundId() < proposal.voteStartsInRound) {
+      return ProposalState.Pending;
+    }
+
+    uint256 currentTimepoint = clock();
+
+    uint256 deadline = proposalDeadline(proposalId);
+
+    if (deadline >= currentTimepoint) {
+      return ProposalState.Active;
+    } else if (!_quorumReached(proposalId) || !_voteSucceeded(proposalId)) {
+      return ProposalState.Defeated;
+    } else if (proposalEta(proposalId) == 0) {
+      return ProposalState.Succeeded;
+    } else {
+      return ProposalState.Queued;
+    }
+  }
+
+  function proposalNeedsQueuing(
+    uint256 proposalId
+  ) public view override(GovernorUpgradeable, GovernorTimelockControlUpgradeable) returns (bool) {
+    return super.proposalNeedsQueuing(proposalId);
+  }
+
+  function proposalThreshold()
+    public
+    view
+    override(GovernorUpgradeable, GovernorSettingsUpgradeable)
+    returns (uint256)
+  {
+    return super.proposalThreshold();
+  }
+
   // To maintain compatibility with the previous version of the Governor, we need to override the propose function
   // to call the new propose function with a default value for roundId (currentRoundId + 1)
   function propose(
@@ -275,6 +309,20 @@ contract B3TRGovernor is
 
     // call the new propose function with the next round id as default value
     return propose(targets, values, calldatas, description, currentRoundId + 1);
+  }
+
+  function castVote(uint256 proposalId, uint8 support) public override(GovernorUpgradeable) returns (uint256) {
+    uint256 weight = super.castVote(proposalId, support);
+
+    if (weight > 0) {
+      B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
+
+      uint256 proposalSnapshot = proposalSnapshot(proposalId);
+
+      $.voterRewards.registerVote(proposalSnapshot, msg.sender, weight);
+    }
+
+    return weight;
   }
 
   function _queueOperations(

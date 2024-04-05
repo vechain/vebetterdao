@@ -26,6 +26,9 @@ describe("Governor and TimeLock", function () {
       const { governor, vot3, owner, timeLock, xAllocationVoting } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
+
+      await bootstrapAndStartEmissions()
+
       const votesThreshold = (await governor.proposalThreshold()).toString()
       const votingPeriod = await governor.votingPeriod()
 
@@ -58,6 +61,7 @@ describe("Governor and TimeLock", function () {
       const { governor, owner, b3tr, B3trContract } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
+
       const votesThreshold = await governor.proposalThreshold()
       await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
 

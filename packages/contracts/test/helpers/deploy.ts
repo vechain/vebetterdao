@@ -164,6 +164,7 @@ export const getOrDeployContractInstances = async ({
     config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
     config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD, // voting threshold
     owner.address,
+    await voterRewards.getAddress(),
   ])) as B3TRGovernor
 
   // Set up roles
@@ -179,7 +180,9 @@ export const getOrDeployContractInstances = async ({
   await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
 
   // Grant Vote registrar role to XAllocationVoting
-  await voterRewards.connect(owner).setXallocationVoteRegistrarRole(await xAllocationVoting.getAddress())
+  await voterRewards.connect(owner).setVoteRegistrarRole(await xAllocationVoting.getAddress())
+  // Grant Vote registrar role to Governor
+  await voterRewards.connect(owner).setVoteRegistrarRole(await governor.getAddress())
 
   // Grant admin role to voter rewards for registering x allocation voting
   await xAllocationVoting.connect(owner).setAdminRole(await emissions.getAddress())

@@ -944,7 +944,6 @@ describe("X-Allocation Voting", function () {
       tx = await xAllocationVoting
         .connect(otherAccount)
         .castVote(roundId, [app1, app2], [ethers.parseEther("300"), ethers.parseEther("200")])
-      receipt = await tx.wait()
 
       await waitForRoundToEnd(roundId)
 
@@ -991,7 +990,6 @@ describe("X-Allocation Voting", function () {
       tx = await xAllocationVoting
         .connect(otherAccount)
         .castVote(roundId, [app1, app2], [ethers.parseEther("1"), ethers.parseEther("1")])
-      receipt = await tx.wait()
 
       await waitForRoundToEnd(roundId)
 

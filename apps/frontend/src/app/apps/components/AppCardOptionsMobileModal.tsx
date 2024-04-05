@@ -12,20 +12,31 @@ import {
   ModalHeader,
   Skeleton,
 } from "@chakra-ui/react"
-import { FaCopy } from "react-icons/fa6"
-import { XApp, useXAppMetadata } from "@/api"
+import { FaCopy, FaRegImage } from "react-icons/fa6"
 import { CustomModalContent } from "@/components/CustomModalContent"
 import { FaExternalLinkAlt } from "react-icons/fa"
+import { useRouter } from "next/navigation"
+
 export type Props = {
   isOpen: boolean
   onClose: () => void
-  xApp: XApp
+  receiverAddress: string
+  xAppId?: string
+  externalUrl?: string
+  isLoading?: boolean
+  showViewDetails?: boolean
 }
 
-export const AppCardOptionsMobileModal = ({ isOpen, onClose, xApp }: Props) => {
-  const { data: appMetadata, isLoading: appMetadataLoading } = useXAppMetadata(xApp.id)
-
-  const { onCopy } = useClipboard(xApp.receiverAddress)
+export const AppCardOptionsMobileModal = ({
+  isOpen,
+  onClose,
+  receiverAddress,
+  externalUrl,
+  isLoading,
+  xAppId,
+  showViewDetails = false,
+}: Props) => {
+  const { onCopy } = useClipboard(receiverAddress)
 
   const toast = useToast()
   const handleOnCopy = () => {
@@ -39,6 +50,11 @@ export const AppCardOptionsMobileModal = ({ isOpen, onClose, xApp }: Props) => {
     })
   }
 
+  const router = useRouter()
+  const navigateToAppDetail = () => {
+    router.push(`/apps/${xAppId}`)
+  }
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
       <ModalOverlay />
@@ -49,6 +65,17 @@ export const AppCardOptionsMobileModal = ({ isOpen, onClose, xApp }: Props) => {
         </ModalHeader>
         <ModalBody>
           <VStack spacing={4} w="full">
+            {showViewDetails && (
+              <Button
+                w="full"
+                size="lg"
+                colorScheme="gray"
+                variant={"solid"}
+                onClick={navigateToAppDetail}
+                leftIcon={<FaRegImage />}>
+                View details
+              </Button>
+            )}
             <Button
               w="full"
               size="lg"
@@ -58,18 +85,18 @@ export const AppCardOptionsMobileModal = ({ isOpen, onClose, xApp }: Props) => {
               leftIcon={<FaCopy />}>
               Copy receiver address
             </Button>
-            <Skeleton isLoaded={!appMetadataLoading} w="full">
+            <Skeleton isLoaded={!isLoading} w="full">
               <Button
                 as={Link}
-                href={appMetadata?.external_url ?? ""}
+                href={externalUrl ?? ""}
                 isExternal
                 variant={"solid"}
                 size="lg"
-                disabled={!appMetadata?.external_url}
+                disabled={!externalUrl}
                 leftIcon={<FaExternalLinkAlt />}
                 colorScheme="gray"
                 w="full">
-                {appMetadata?.external_url ? "Go to the App" : "No App link available"}
+                {externalUrl ? "Go to the App" : "No App link available"}
               </Button>
             </Skeleton>
           </VStack>

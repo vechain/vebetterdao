@@ -1,13 +1,10 @@
-import { useXAppMetadata } from "@/api"
-import { Button, HStack, Icon, Link, Stack } from "@chakra-ui/react"
+import { Button, Icon, Link, Stack } from "@chakra-ui/react"
 import { FaDiscord, FaTelegram, FaXTwitter } from "react-icons/fa6"
 
 type Props = {
-  appId: string
+  socialUrls: { name: string; url: string }[]
 }
-export const AppSocialUrls = ({ appId }: Props) => {
-  const { data: appMetadata } = useXAppMetadata(appId)
-
+export const AppSocialUrls = ({ socialUrls }: Props) => {
   const getSocialIcon = (name: string) => {
     switch (name.toLowerCase()) {
       case "twitter":
@@ -36,7 +33,7 @@ export const AppSocialUrls = ({ appId }: Props) => {
   }
   return (
     <Stack direction={["column", "row"]} spacing={4} w="full">
-      {appMetadata?.social_urls.map(socialUrl => {
+      {socialUrls.map(socialUrl => {
         const socialIcon = getSocialIcon(socialUrl.name)
         const socialUsername = getSocialUrlUsername(socialUrl)
         const icon = !!socialIcon && <Icon as={socialIcon} boxSize={5} />

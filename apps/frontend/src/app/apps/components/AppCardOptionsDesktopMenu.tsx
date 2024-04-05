@@ -1,4 +1,3 @@
-import { XApp, useXAppMetadata } from "@/api"
 import {
   Menu,
   MenuButton,
@@ -10,16 +9,25 @@ import {
   Skeleton,
   Link,
 } from "@chakra-ui/react"
+import { useRouter } from "next/navigation"
 import { FaExternalLinkAlt } from "react-icons/fa"
-import { FaEllipsisVertical, FaCheck, FaCopy } from "react-icons/fa6"
+import { FaEllipsisVertical, FaCheck, FaCopy, FaFileImage, FaRegImage } from "react-icons/fa6"
 
 type Props = {
-  xApp: XApp
+  receiverAddress: string
+  externalUrl?: string
+  isLoading?: boolean
+  showViewDetails?: boolean
+  xAppId?: string
 }
-export const AppCardOptionsDesktopMenu = ({ xApp }: Props) => {
-  const { data: appMetadata, isLoading: appMetadataLoading } = useXAppMetadata(xApp.id)
-
-  const { onCopy, hasCopied } = useClipboard(xApp.receiverAddress)
+export const AppCardOptionsDesktopMenu = ({
+  receiverAddress,
+  externalUrl,
+  isLoading = false,
+  xAppId,
+  showViewDetails = false,
+}: Props) => {
+  const { onCopy, hasCopied } = useClipboard(receiverAddress)
 
   const toast = useToast()
   const handleOnCopy = () => {
@@ -32,19 +40,29 @@ export const AppCardOptionsDesktopMenu = ({ xApp }: Props) => {
     })
   }
 
+  const router = useRouter()
+  const navigateToAppDetail = () => {
+    router.push(`/apps/${xAppId}`)
+  }
+
   return (
     <Menu>
       <MenuButton as={IconButton} isRound={true} icon={<FaEllipsisVertical />} />
       <MenuList>
-        <Skeleton isLoaded={!appMetadataLoading}>
+        <Skeleton isLoaded={!isLoading}>
+          {showViewDetails && (
+            <MenuItem onClick={navigateToAppDetail} icon={<FaRegImage />}>
+              View details
+            </MenuItem>
+          )}
           <MenuItem
             as={Link}
             _hover={{ textDecoration: "none" }}
-            href={appMetadata?.external_url ?? ""}
+            href={externalUrl ?? ""}
             isExternal
-            disabled={!appMetadata?.external_url}
+            disabled={!externalUrl}
             icon={<FaExternalLinkAlt />}>
-            {appMetadata?.external_url ? "Go to the App" : "No App link available"}
+            {externalUrl ? "Go to the App" : "No App link available"}
           </MenuItem>
         </Skeleton>
         <MenuItem onClick={handleOnCopy} icon={hasCopied ? <FaCheck /> : <FaCopy />}>

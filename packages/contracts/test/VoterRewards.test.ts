@@ -12,6 +12,10 @@ import {
   bootstrapEmissions,
   upgradeNFTtoLevel,
   waitForNextBlock,
+  createProposal,
+  getProposalIdFromTx,
+  waitForProposalToBeActive,
+  bootstrapAndStartEmissions,
 } from "./helpers"
 import { expect } from "chai"
 import { ethers } from "hardhat"
@@ -1267,10 +1271,337 @@ describe("VoterRewards", () => {
       const proposalStart = await xAllocationVoting.roundSnapshot(roundId)
 
       await expect(
-        voterRewards
-          .connect(otherAccount)
-          .registerXallocationVote(proposalStart, otherAccount.address, ethers.parseEther("1000")),
+        voterRewards.connect(otherAccount).registerVote(proposalStart, otherAccount.address, ethers.parseEther("1000")),
       ).to.be.reverted
+    })
+  })
+
+  describe("Governance voting rewards", () => {
+    const description = "Test Proposal: testing propsal with random description!"
+    const functionToCall = "tokenDetails"
+
+    it("Should calculate rewards correctly for governance voting", async () => {
+      const {
+        otherAccounts,
+        otherAccount: voter1,
+        b3tr,
+        governor,
+        B3trContract,
+        emissions,
+        voterRewards,
+        minterAccount,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      await emissions.connect(minterAccount).start()
+
+      const voter2 = otherAccounts[1]
+
+      // we do it here but will use in the next test
+      await getVot3Tokens(voter1, "1000")
+      await getVot3Tokens(voter2, "1000")
+
+      // Now we can create a new proposal
+      const tx = await createProposal(b3tr, B3trContract, voter1, description, functionToCall, [])
+      const proposalId = await getProposalIdFromTx(tx, governor)
+      const cycle = await governor.proposalRound(proposalId)
+
+      const proposalState = await waitForProposalToBeActive(proposalId)
+
+      expect(proposalState).to.equal("1") // Active
+
+      // Vote on the proposal
+      await governor.connect(voter1).castVote(proposalId, 1) // For
+      await governor.connect(voter2).castVote(proposalId, 1) // For
+
+      await waitForNextCycle(emissions)
+
+      expect(await voterRewards.getReward(cycle, voter1.address)).to.equal(33333333333333333333333n) // 50% of the rewards
+      expect(await voterRewards.getReward(cycle, voter2.address)).to.equal(33333333333333333333333n) // 50% of the rewards
+    })
+
+    it("Should be able to vote with 0 VOT3 tokens and not receive rewards", async () => {
+      const {
+        otherAccounts,
+        otherAccount: voter1,
+        b3tr,
+        governor,
+        B3trContract,
+        emissions,
+        voterRewards,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await bootstrapAndStartEmissions()
+
+      const voter2 = otherAccounts[1]
+
+      await getVot3Tokens(voter1, "1000")
+
+      // Now we can create a new proposal
+      const tx = await createProposal(b3tr, B3trContract, voter1, description, functionToCall, [])
+      const proposalId = await getProposalIdFromTx(tx, governor)
+      const cycle = await governor.proposalRound(proposalId)
+
+      const proposalState = await waitForProposalToBeActive(proposalId)
+
+      expect(proposalState).to.equal("1") // Active
+
+      // Vote on the proposal
+      await governor.connect(voter1).castVote(proposalId, 1) // For
+      await governor.connect(voter2).castVote(proposalId, 1) // For
+
+      await waitForNextCycle(emissions)
+
+      expect(await voterRewards.getReward(cycle, voter1.address)).to.equal(66666666666666666666666n) // 100% of the rewards
+      expect(await voterRewards.getReward(cycle, voter2.address)).to.equal(0) // Even if voter2 voted, he has 0 VOT3 tokens so he should not receive any rewards
+    })
+
+    it("Should be able to increase voting rewards by upgrading GM NFT", async () => {
+      const config = createTestConfig()
+      const {
+        otherAccounts,
+        otherAccount: voter1,
+        b3tr,
+        governor,
+        B3trContract,
+        emissions,
+        minterAccount,
+        owner,
+        voterRewards,
+        treasury,
+        xAllocationVoting,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config: {
+          ...config,
+          EMISSIONS_CYCLE_DURATION: 200,
+        },
+      })
+
+      const b3trBadge = (await deployProxy("B3TRBadge", [
+        "b3trBadge",
+        "BDG",
+        await owner.getAddress(),
+        await owner.getAddress(),
+        10,
+        config.NFT_BADGE_BASE_URI,
+        config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
+        config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+        await b3tr.getAddress(),
+        await treasury.getAddress(),
+      ])) as B3TRBadge
+
+      await b3trBadge.waitForDeployment()
+
+      await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+      await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+      await voterRewards.setB3TRBadge(await b3trBadge.getAddress())
+
+      const voter2 = otherAccounts[1]
+
+      await getVot3Tokens(voter1, "1000")
+      await getVot3Tokens(voter2, "1000")
+
+      await bootstrapAndStartEmissions()
+
+      // Now we can create a new proposal
+      let tx = await createProposal(b3tr, B3trContract, voter1, description, functionToCall, [])
+      let proposalId = await getProposalIdFromTx(tx, governor)
+      let cycle = await governor.proposalRound(proposalId)
+
+      const proposalState = await waitForProposalToBeActive(proposalId)
+
+      expect(proposalState).to.equal("1") // Active
+
+      // Vote on the proposal
+      await governor.connect(voter1).castVote(proposalId, 1) // For
+      await governor.connect(voter2).castVote(proposalId, 1) // For
+
+      await waitForNextCycle(emissions)
+
+      expect(await voterRewards.getReward(cycle, voter1.address)).to.equal(1000000000000000000000000n) // 50% of the rewards
+      expect(await voterRewards.getReward(cycle, voter2.address)).to.equal(1000000000000000000000000n) // 50% of the rewards
+
+      await emissions.connect(voter1).distribute() // Anyone can distribute the cycle
+
+      // GM NFT token mint and upgrade
+      await b3trBadge.connect(voter1).freeMint()
+
+      await upgradeNFTtoLevel(1, 5, b3trBadge, b3tr, voter1, minterAccount) // Upgrading to level 5
+
+      tx = await createProposal(b3tr, B3trContract, voter1, description + "1", functionToCall, [])
+      proposalId = await getProposalIdFromTx(tx, governor)
+      cycle = await governor.proposalRound(proposalId)
+
+      await waitForProposalToBeActive(proposalId)
+
+      await governor.connect(voter1).castVote(proposalId, 1) // For
+      await governor.connect(voter2).castVote(proposalId, 1) // For
+
+      await waitForNextCycle(emissions)
+
+      /*
+        voter1 = 1000 votes for governance voting * 100% multiplier = 2000 votes
+        voter2 = 1000 votes for governance voting without NFT upgrade = 1000 votes
+
+        Total votes = 3000 votes
+        voter1 allocation = 2000 / 3000 * 100 = 66.67% (1333333333333333333333333 B3TR)
+        voter2 allocation = 1000 / 3000 * 100 = 33.33% (666666666666666666666666 B3TR)
+      */
+      expect(await voterRewards.getReward(cycle, voter1.address)).to.equal(1333333333333333333333333n)
+      expect(await voterRewards.getReward(cycle, voter2.address)).to.equal(666666666666666666666666n)
+    })
+  })
+
+  describe("X allocation & governance voting rewards", () => {
+    const description = "Test Proposal: testing propsal with random description!"
+    const functionToCall = "tokenDetails"
+
+    it("Should calculate rewards correctly for governance voting and x allocation voting", async () => {
+      const config = createTestConfig()
+      const {
+        otherAccounts,
+        otherAccount: voter1,
+        b3tr,
+        governor,
+        B3trContract,
+        emissions,
+        minterAccount,
+        owner,
+        voterRewards,
+        xAllocationVoting,
+        treasury,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config: {
+          ...config,
+          EMISSIONS_CYCLE_DURATION: 200,
+        },
+      })
+
+      const b3trBadge = (await deployProxy("B3TRBadge", [
+        "b3trBadge",
+        "BDG",
+        await owner.getAddress(),
+        await owner.getAddress(),
+        10,
+        config.NFT_BADGE_BASE_URI,
+        config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
+        config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+        await b3tr.getAddress(),
+        await treasury.getAddress(),
+      ])) as B3TRBadge
+
+      await b3trBadge.waitForDeployment()
+
+      await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+      await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+      await voterRewards.setB3TRBadge(await b3trBadge.getAddress())
+
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+      const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+      const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+
+      const voter2 = otherAccounts[1]
+      const voter3 = otherAccounts[2]
+
+      await getVot3Tokens(voter1, "1000")
+      await getVot3Tokens(voter2, "1000")
+      await getVot3Tokens(voter3, "1000")
+
+      await bootstrapAndStartEmissions()
+
+      // Now we can create a new proposal
+      let tx = await createProposal(b3tr, B3trContract, voter1, description, functionToCall, [])
+      let proposalId = await getProposalIdFromTx(tx, governor)
+      let cycle = await governor.proposalRound(proposalId)
+
+      const proposalState = await waitForProposalToBeActive(proposalId)
+
+      expect(proposalState).to.equal("1") // Active
+
+      // Vote on the proposal (voter3 does not vote)
+      await governor.connect(voter1).castVote(proposalId, 1) // For
+      await governor.connect(voter2).castVote(proposalId, 1) // For
+
+      const xAllocationsRoundID = await xAllocationVoting.currentRoundId()
+
+      expect(xAllocationsRoundID).to.equal(cycle)
+
+      expect(await xAllocationVoting.roundDeadline(xAllocationsRoundID)).to.lt(await emissions.getNextCycleBlock())
+
+      // Upgrading GM NFT
+      await b3trBadge.connect(voter1).freeMint()
+
+      await upgradeNFTtoLevel(1, 5, b3trBadge, b3tr, voter1, minterAccount) // Upgrading to level 5
+
+      expect(await b3trBadge.getLevel(voter1.address)).to.equal(5)
+
+      // Vote on apps for the first round
+      await voteOnApps(
+        xAllocationVoting,
+        [app1, app2],
+        [voter1, voter2, voter3],
+        [
+          [ethers.parseEther("1000"), ethers.parseEther("0")], // Voter 1 votes 1000 for app1
+          [ethers.parseEther("500"), ethers.parseEther("500")], // Voter 2 votes 500 for app1 and 500 for app2
+          [ethers.parseEther("500"), ethers.parseEther("500")], // Voter 3 votes 500 for app1 and 500 for app2
+        ],
+        xAllocationsRoundID, // First round
+      )
+
+      /*
+        voter1 = 1000 votes for governance voting and 1000 votes for x allocation voting = 2000 votes
+        voter2 = 1000 votes for governance voting and 1000 votes for x allocation voting = 2000 votes
+        voter3 = 0 votes for governance voting and 1000 votes for x allocation voting = 1000 votes
+
+        Total votes = 5000 votes
+        voter1 allocation = 2000 / 5000 * 100 = 40% (800000 B3TR)
+        voter2 allocation = 2000 / 5000 * 100 = 40% (800000 B3TR)
+        voter3 allocation = 1000 / 5000 * 100 = 20% (400000 B3TR) 
+      */
+      expect(await voterRewards.getReward(cycle, voter1.address)).to.equal(800000000000000000000000n) // 40% (Notice that voter1 has a level 5 NFT but didn't increase the rewards, this is because the snapshot of the proposal was taken before the NFT upgrade)
+      expect(await voterRewards.getReward(cycle, voter2.address)).to.equal(800000000000000000000000n) // 40%
+      expect(await voterRewards.getReward(cycle, voter3.address)).to.equal(400000000000000000000000n) // 20%
+
+      // Now we can create a new proposal and the GM NFT upgrade will be taken into account
+      tx = await createProposal(b3tr, B3trContract, voter1, description + "1", functionToCall, [])
+      proposalId = await getProposalIdFromTx(tx, governor)
+      cycle = await governor.proposalRound(proposalId)
+
+      await waitForProposalToBeActive(proposalId)
+
+      // Vote on the proposal
+      await governor.connect(voter1).castVote(proposalId, 1) // For
+      await governor.connect(voter2).castVote(proposalId, 1) // For
+
+      await waitForNextCycle(emissions)
+      expect(await governor.state(proposalId)).to.not.equal(1n)
+
+      /*
+        voter 1 votes = 1000 votes for governance proposal 1 voting and 1000 votes for x allocation voting = 2000 votes + (1000 votes for governance voting proposal 2 * 100% multiplier ) = 4000 total votes 
+        voter 2 votes = 1000 votes for governance proposal 1 voting and 1000 votes for x allocation voting = 2000 votes + (1000 votes for governance voting proposal 2 without NFT upgrade) = 3000 total votes
+        voter 3 votes = 0 votes for governance proposal 1 voting and 1000 votes for x allocation voting = 1000 votes
+
+        Total votes = 8000 votes
+        voter 1 allocation = 4000 / 8000 * 100 = 50% (1000000 B3TR)
+        voter 2 allocation = 3000 / 8000 * 100 = 37.5% (750000 B3TR)
+        voter 3 allocation = 1000 / 8000 * 100 = 12.5% (250000 B3TR)
+      */
+      expect(await voterRewards.getReward(cycle, voter1.address)).to.equal(1000000000000000000000000n)
+      expect(await voterRewards.getReward(cycle, voter2.address)).to.equal(750000000000000000000000n)
+      expect(await voterRewards.getReward(cycle, voter3.address)).to.equal(250000000000000000000000n)
     })
   })
 })

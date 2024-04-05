@@ -105,6 +105,17 @@ export async function deployAll(config: ContractsConfig) {
     config.VOTER_REWARDS_MULTIPLIER,
   )
 
+  const governor = await deployGovernor(
+    await vot3.getAddress(),
+    await timelock.getAddress(),
+    config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
+    config.B3TR_GOVERNOR_VOTING_PERIOD,
+    config.B3TR_GOVERNOR_VOTING_DELAY,
+    config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD,
+    TEMP_ADMIN,
+    await voterRewards.getAddress(),
+  )
+
   // Deploy XAllocationVoting
   const xAllocationVoting = await deployXAllocationVoting(
     await timelock.getAddress(),
@@ -143,7 +154,7 @@ export async function deployAll(config: ContractsConfig) {
   // Grant Vote Registrar role to XAllocationVoting
   await voterRewards
     .connect(admin)
-    .setXallocationVoteRegistrarRole(await xAllocationVoting.getAddress())
+    .setVoteRegistrarRole(await xAllocationVoting.getAddress())
     .then(async tx => await tx.wait())
 
   // Emissions contract should be able to start new rounds
@@ -397,6 +408,7 @@ async function deployGovernor(
   votingDelay: number,
   proposalThreshold: number,
   admin: string,
+  voterAddress: string,
 ): Promise<B3TRGovernor> {
   console.log(`Deploying Governor contract`)
 
@@ -408,6 +420,7 @@ async function deployGovernor(
     votingDelay,
     proposalThreshold,
     admin,
+    voterAddress,
   ])) as B3TRGovernor
 
   console.log(`Governor contract deployed at address ${await contract.getAddress()}`)
