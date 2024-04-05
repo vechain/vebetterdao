@@ -93,7 +93,11 @@ export const seedLocalEnvironment = async (
   console.log(`Seeding complete in ${end - start}ms`)
 }
 
-export const seedTestEnvironment = async (b3tr: B3TR, xAllocationVoting: XAllocationVoting, emissions: Emissions) => {
+export const seedTestnetEnvironment = async (
+  b3tr: B3TR,
+  xAllocationVoting: XAllocationVoting,
+  emissions: Emissions,
+) => {
   console.log("Seeding Testnet environment:")
   const start = performance.now()
 
