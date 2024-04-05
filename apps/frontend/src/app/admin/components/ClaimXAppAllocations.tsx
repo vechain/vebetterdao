@@ -2,8 +2,8 @@ import {
   useAllocationsRound,
   useCurrentAllocationsRoundId,
   useHasXAppClaimed,
+  useRoundXApps,
   useXAppRoundEarnings,
-  useXApps,
 } from "@/api"
 import { useClaimXAppsAllocations } from "@/hooks"
 import {
@@ -34,7 +34,7 @@ export const ClaimXAppAllocations = () => {
   const [appId, setAppId] = useState<string | undefined>()
   const [roundId, setRoundId] = useState<number>(1)
 
-  const { data: xApps } = useXApps()
+  const { data: xApps } = useRoundXApps(roundId?.toString() ?? "")
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: currentRound } = useAllocationsRound(currentRoundId?.toString() ?? "")
   const { data: claimableAmountResponse } = useXAppRoundEarnings(roundId?.toString() || "", appId || "")
