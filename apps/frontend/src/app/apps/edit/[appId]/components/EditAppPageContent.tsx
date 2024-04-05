@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { FaArrowLeft } from "react-icons/fa6"
-import { AppPreviewDetailCard } from "./AppPreviewDetailCard"
+import { AppPreviewDetailCard } from "@/components/AppPreviewDetailCard"
 import { useWallet } from "@vechain/dapp-kit-react"
 
 type Props = {
@@ -130,42 +130,40 @@ export const EditAppPageContent = ({ appId }: Props) => {
         showExplorerButton={true}
       />
 
-      <VStack w="full" spacing={8} align="flex-start" data-testid={`edit-app-${appId}-detail`}>
-        <VStack spacing={4} alignItems={"flex-start"}>
-          <Button colorScheme="gray" size="md" variant="outline" leftIcon={<FaArrowLeft />} onClick={goToAppDetail}>
-            App detail
-          </Button>
-          <Grid templateColumns="repeat(3, 1fr)" gap={[4, 4, 8]} w="full">
-            <GridItem colSpan={[3, 3, 2]}>
-              <form onSubmit={handleSubmit(onSubmit)}>
-                <CreateEditAppForm
-                  register={register}
-                  errors={errors}
-                  isEdit={true}
-                  editedApp={appData}
-                  watch={watch}
-                  control={control}
-                  setError={setError}
-                  setValue={setValue}
-                  clearErrors={clearErrors}
-                  isReceiverAddressDisabled={!isAllowedToEditAddress}
-                />
-              </form>
-            </GridItem>
-            <GridItem colSpan={[3, 3, 1]}>
-              <VStack spacing={4} w="full" align={"flex-start"} position="sticky" top={100} right={0}>
-                <Heading size="md">App preview</Heading>
-                <AppPreviewDetailCard
-                  app={watch()}
-                  appMetadataLoading={appMetadataLoading}
-                  appMetadataError={appMetadataError}
-                  isLogoLoading={logoLoading}
-                  isBannerLoading={bannerLoading}
-                />
-              </VStack>
-            </GridItem>
-          </Grid>
-        </VStack>
+      <VStack w="full" spacing={4} align="stretch" data-testid={`edit-app-${appId}-detail`}>
+        <Button colorScheme="gray" size="md" variant="outline" leftIcon={<FaArrowLeft />} onClick={goToAppDetail}>
+          App detail
+        </Button>
+        <Grid templateColumns="repeat(3, 1fr)" gap={[4, 4, 8]} w="full">
+          <GridItem colSpan={[3, 3, 2]}>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <CreateEditAppForm
+                register={register}
+                errors={errors}
+                isEdit={true}
+                editedApp={appData}
+                watch={watch}
+                control={control}
+                setError={setError}
+                setValue={setValue}
+                clearErrors={clearErrors}
+                isReceiverAddressDisabled={!isAllowedToEditAddress}
+              />
+            </form>
+          </GridItem>
+          <GridItem colSpan={[3, 3, 1]} minH={0} minW={0}>
+            <VStack spacing={4} w="full" align={"flex-start"} position="sticky" top={100} right={0}>
+              <Heading size="md">App preview</Heading>
+              <AppPreviewDetailCard
+                app={watch()}
+                appMetadataLoading={appMetadataLoading}
+                appMetadataError={appMetadataError}
+                isLogoLoading={logoLoading}
+                isBannerLoading={bannerLoading}
+              />
+            </VStack>
+          </GridItem>
+        </Grid>
       </VStack>
     </>
   )
