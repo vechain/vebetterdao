@@ -44,15 +44,6 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
   }
 
   /**
-   * @dev See {IGovernor-votingPeriod}.
-   */
-  function votingPeriod() public view virtual override returns (uint256) {
-    GovernorStorage storage $ = _getGovernorStorage();
-
-    return $._xAllocationVotingGovernor.votingPeriod();
-  }
-
-  /**
    * @dev See {Governor-proposalThreshold}.
    */
   function proposalThreshold() public view virtual override returns (uint256) {

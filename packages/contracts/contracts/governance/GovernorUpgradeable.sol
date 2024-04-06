@@ -30,10 +30,9 @@ import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGove
  *
  * Modifications:
  * - _getGovernorStorage is internal
- * - store _xAllocationVotingGovernor address
  * - Added voteStartsInRound to ProposalCore
  * - removed voteStart block from ProposalCore
- * - changed proposalSnapshot and proposalDeadline to use _xAllocationVotingGovernor
+ * - abstract proposalSnapshot and proposalDeadline
  * - removed propose() and _propose()
  */
 abstract contract GovernorUpgradeable is
@@ -74,7 +73,6 @@ abstract contract GovernorUpgradeable is
     // {onlyGovernance} modifier and eventually reset after {_executeOperations} completes. This ensures that the
     // execution of {onlyGovernance} protected calls can only be achieved through successful proposals.
     DoubleEndedQueue.Bytes32Deque _governanceCall;
-    IXAllocationVotingGovernor _xAllocationVotingGovernor;
   }
 
   // keccak256(abi.encode(uint256(keccak256("openzeppelin.storage.Governor")) - 1)) & ~bytes32(uint256(0xff))
@@ -102,23 +100,16 @@ abstract contract GovernorUpgradeable is
   }
 
   /**
-   * @dev Sets the value for {name}, {version} and {_xAllocationVotingGovernor} in the storage.
+   * @dev Sets the value for {name}, {version} in the storage.
    */
-  function __Governor_init(
-    string memory name_,
-    IXAllocationVotingGovernor _xAllocationVotingGovernor
-  ) internal onlyInitializing {
+  function __Governor_init(string memory name_) internal onlyInitializing {
     __EIP712_init_unchained(name_, version());
-    __Governor_init_unchained(name_, _xAllocationVotingGovernor);
+    __Governor_init_unchained(name_);
   }
 
-  function __Governor_init_unchained(
-    string memory name_,
-    IXAllocationVotingGovernor _xAllocationVotingGovernor
-  ) internal onlyInitializing {
+  function __Governor_init_unchained(string memory name_) internal onlyInitializing {
     GovernorStorage storage $ = _getGovernorStorage();
     $._name = name_;
-    $._xAllocationVotingGovernor = _xAllocationVotingGovernor;
   }
 
   /**
@@ -230,39 +221,6 @@ abstract contract GovernorUpgradeable is
   }
 
   /**
-   * @dev See {IGovernor-proposalSnapshot}.
-   */
-  function proposalSnapshot(uint256 proposalId) public view virtual override returns (uint256) {
-    GovernorStorage storage $ = _getGovernorStorage();
-
-    // if round is active or already occured proposal start block is the block when round started
-    if ($._xAllocationVotingGovernor.currentRoundId() >= $._proposals[proposalId].voteStartsInRound) {
-      return $._xAllocationVotingGovernor.roundSnapshot($._proposals[proposalId].voteStartsInRound);
-    }
-
-    // if we call this function before the round starts, it will return 0, so we need to estimate the start block
-    uint256 blocksLeftUntilCurrentRoundEnds = $._xAllocationVotingGovernor.currentRoundDeadline() - clock();
-    uint256 otherRoundsDurationIfTargetRoundIsNotNext = $._xAllocationVotingGovernor.votingPeriod() *
-      ($._proposals[proposalId].voteStartsInRound - $._xAllocationVotingGovernor.currentRoundId() - 1);
-
-    return clock() + blocksLeftUntilCurrentRoundEnds + otherRoundsDurationIfTargetRoundIsNotNext + 1;
-  }
-
-  /**
-   * @dev See {IGovernor-proposalDeadline}.
-   */
-  function proposalDeadline(uint256 proposalId) public view virtual override returns (uint256) {
-    GovernorStorage storage $ = _getGovernorStorage();
-    // if round is active or already occured proposal end block is the block when round ends
-    if ($._xAllocationVotingGovernor.currentRoundId() >= $._proposals[proposalId].voteStartsInRound) {
-      return $._xAllocationVotingGovernor.roundDeadline($._proposals[proposalId].voteStartsInRound);
-    }
-
-    // if we call this function before the round starts, it will return 0, so we need to estimate the end block
-    return proposalSnapshot(proposalId) + $._xAllocationVotingGovernor.votingPeriod();
-  }
-
-  /**
    * @dev See {IGovernor-proposalProposer}.
    */
   function proposalProposer(uint256 proposalId) public view virtual returns (address) {
@@ -316,11 +274,6 @@ abstract contract GovernorUpgradeable is
    * @dev Get the voting weight of `account` at a specific `timepoint`, for a vote as described by `params`.
    */
   function _getVotes(address account, uint256 timepoint, bytes memory params) internal view virtual returns (uint256);
-
-  function _setXAllocationVotingGovernor(IXAllocationVotingGovernor _xAllocationVotingGovernor) internal {
-    GovernorStorage storage $ = _getGovernorStorage();
-    $._xAllocationVotingGovernor = _xAllocationVotingGovernor;
-  }
 
   /**
    * @dev Register a vote for `proposalId` by `account` with a given `support`, voting `weight` and voting `params`.
@@ -851,4 +804,14 @@ abstract contract GovernorUpgradeable is
    * @inheritdoc IGovernor
    */
   function quorum(uint256 timepoint) public view virtual returns (uint256);
+
+  /**
+   * @dev See {IGovernor-proposalSnapshot}.
+   */
+  function proposalSnapshot(uint256 proposalId) public view virtual override returns (uint256);
+
+  /**
+   * @dev See {IGovernor-proposalDeadline}.
+   */
+  function proposalDeadline(uint256 proposalId) public view virtual override returns (uint256);
 }

@@ -48,6 +48,7 @@ contract B3TRGovernor is
   /// @custom:storage-location erc7201:b3tr.storage.B3TRGovernor
   struct B3TRGovernorStorage {
     IVoterRewards voterRewards;
+    IXAllocationVotingGovernor xAllocationVotingGovernor;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.B3TRGovernor")) - 1)) & ~bytes32(uint256(0xff))
@@ -79,7 +80,7 @@ contract B3TRGovernor is
     address governorAdmin,
     address _voterRewards
   ) public initializer {
-    __Governor_init("B3TRGovernor", _xAllocationVotingGovernor);
+    __Governor_init("B3TRGovernor");
     __GovernorSettings_init(_initialProposalThreshold);
     __GovernorCountingSimple_init();
     __GovernorVotes_init(_vot3Token);
@@ -90,6 +91,7 @@ contract B3TRGovernor is
 
     B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
     $.voterRewards = IVoterRewards(_voterRewards);
+    $.xAllocationVotingGovernor = _xAllocationVotingGovernor;
 
     _grantRole(DEFAULT_ADMIN_ROLE, governorAdmin);
   }
@@ -104,6 +106,14 @@ contract B3TRGovernor is
     return _getGovernorStorage()._proposals[proposalId].voteStartsInRound;
   }
 
+  function xAllocationVotingAddress() public view returns (IXAllocationVotingGovernor) {
+    return _getB3TRGovernorStorage().xAllocationVotingGovernor;
+  }
+
+  function voterRewardsAddress() public view returns (IVoterRewards) {
+    return _getB3TRGovernorStorage().voterRewards;
+  }
+
   // ------------------ SETTERS ------------------ //
 
   function setVoterRewards(address _voterRewards) public onlyGovernance {
@@ -115,7 +125,8 @@ contract B3TRGovernor is
   function setXAllocationVotingGovernor(
     IXAllocationVotingGovernor _xAllocationVotingGovernor
   ) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    _setXAllocationVotingGovernor(_xAllocationVotingGovernor);
+    B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
+    $.xAllocationVotingGovernor = _xAllocationVotingGovernor;
   }
 
   /**
@@ -144,12 +155,9 @@ contract B3TRGovernor is
       revert GovernorInsufficientProposerVotes(proposer, proposerVotes, votesThreshold);
     }
 
-    // round must be in the future
-    uint256 currentRoundId = _getGovernorStorage()._xAllocationVotingGovernor.currentRoundId();
-    if (currentRoundId == 0) {
-      revert("Governor: emissions not started yet");
-    }
-    if (targetRoundId <= currentRoundId) {
+    // round must be in the future and emissions should be started
+    uint256 currentRoundId = _getB3TRGovernorStorage().xAllocationVotingGovernor.currentRoundId();
+    if (currentRoundId == 0 || targetRoundId <= currentRoundId) {
       revert GovernorInvalidRound(targetRoundId);
     }
 
@@ -206,6 +214,42 @@ contract B3TRGovernor is
   function _authorizeUpgrade(address newImplementation) internal override onlyGovernance {}
 
   /**
+   * @dev See {IGovernor-proposalSnapshot}.
+   */
+  function proposalSnapshot(uint256 proposalId) public view virtual override returns (uint256) {
+    B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
+    GovernorStorage storage $$ = _getGovernorStorage();
+
+    // if round is active or already occured proposal start block is the block when round started
+    if ($.xAllocationVotingGovernor.currentRoundId() >= $$._proposals[proposalId].voteStartsInRound) {
+      return $.xAllocationVotingGovernor.roundSnapshot($$._proposals[proposalId].voteStartsInRound);
+    }
+
+    // if we call this function before the round starts, it will return 0, so we need to estimate the start block
+    uint256 blocksLeftUntilCurrentRoundEnds = $.xAllocationVotingGovernor.currentRoundDeadline() - clock();
+    uint256 otherRoundsDurationIfTargetRoundIsNotNext = $.xAllocationVotingGovernor.votingPeriod() *
+      ($$._proposals[proposalId].voteStartsInRound - $.xAllocationVotingGovernor.currentRoundId() - 1);
+
+    return clock() + blocksLeftUntilCurrentRoundEnds + otherRoundsDurationIfTargetRoundIsNotNext + 1;
+  }
+
+  /**
+   * @dev See {IGovernor-proposalDeadline}.
+   */
+  function proposalDeadline(uint256 proposalId) public view virtual override returns (uint256) {
+    B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
+    GovernorStorage storage $$ = _getGovernorStorage();
+
+    // if round is active or already occured proposal end block is the block when round ends
+    if ($.xAllocationVotingGovernor.currentRoundId() >= $$._proposals[proposalId].voteStartsInRound) {
+      return $.xAllocationVotingGovernor.roundDeadline($$._proposals[proposalId].voteStartsInRound);
+    }
+
+    // if we call this function before the round starts, it will return 0, so we need to estimate the end block
+    return proposalSnapshot(proposalId) + $.xAllocationVotingGovernor.votingPeriod();
+  }
+
+  /**
    * @dev See {Governor-cancel}.
    */
   function cancel(
@@ -227,8 +271,13 @@ contract B3TRGovernor is
 
   // The following functions are overrides required by Solidity.
 
-  function votingPeriod() public view override(GovernorUpgradeable, GovernorSettingsUpgradeable) returns (uint256) {
-    return super.votingPeriod();
+  /**
+   * @dev See {IGovernor-votingPeriod}.
+   */
+  function votingPeriod() public view virtual override returns (uint256) {
+    B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
+
+    return $.xAllocationVotingGovernor.votingPeriod();
   }
 
   function quorum(
@@ -262,7 +311,7 @@ contract B3TRGovernor is
     }
 
     // If the round where the proposal should be active is not started yet, the proposal is pending
-    if ($._xAllocationVotingGovernor.currentRoundId() < proposal.voteStartsInRound) {
+    if (_getB3TRGovernorStorage().xAllocationVotingGovernor.currentRoundId() < proposal.voteStartsInRound) {
       return ProposalState.Pending;
     }
 
@@ -304,8 +353,8 @@ contract B3TRGovernor is
     bytes[] memory calldatas,
     string memory description
   ) public virtual override returns (uint256) {
-    GovernorStorage storage $ = _getGovernorStorage();
-    uint256 currentRoundId = $._xAllocationVotingGovernor.currentRoundId();
+    B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
+    uint256 currentRoundId = $.xAllocationVotingGovernor.currentRoundId();
 
     // call the new propose function with the next round id as default value
     return propose(targets, values, calldatas, description, currentRoundId + 1);
@@ -317,9 +366,7 @@ contract B3TRGovernor is
     if (weight > 0) {
       B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
 
-      uint256 proposalSnapshot = proposalSnapshot(proposalId);
-
-      $.voterRewards.registerVote(proposalSnapshot, msg.sender, weight);
+      $.voterRewards.registerVote(proposalSnapshot(proposalId), msg.sender, weight);
     }
 
     return weight;
