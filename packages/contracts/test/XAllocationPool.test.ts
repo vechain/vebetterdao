@@ -771,13 +771,7 @@ describe("X-Allocation Pool", async function () {
 
       const expectedBaseAllocationR1 = await calculateBaseAllocationOffChain(Number(round1))
       let expectedVariableAllocationR1App1 = await calculateVariableAppAllocationOffChain(Number(round1), app1Id)
-      const expecteUnallocatedAllocationR1App1 = await calculateUnallocatedAppAllocationOffChain(
-        Number(round1),
-        app1Id,
-        emissions,
-        xAllocationPool,
-        xAllocationVoting,
-      )
+      const expecteUnallocatedAllocationR1App1 = await calculateUnallocatedAppAllocationOffChain(Number(round1), app1Id)
 
       // should be capped to 20%
       let maxCapPercentageR1 = await xAllocationPool.scaledAppSharesCap(round1)
@@ -799,13 +793,7 @@ describe("X-Allocation Pool", async function () {
 
       const expectedBaseAllocationR2 = await calculateBaseAllocationOffChain(Number(round2))
       let expectedVariableAllocationR2App1 = await calculateVariableAppAllocationOffChain(Number(round2), app1Id)
-      const expecteUnallocatedAllocationR2App1 = await calculateUnallocatedAppAllocationOffChain(
-        Number(round2),
-        app1Id,
-        emissions,
-        xAllocationPool,
-        xAllocationVoting,
-      )
+      const expecteUnallocatedAllocationR2App1 = await calculateUnallocatedAppAllocationOffChain(Number(round2), app1Id)
 
       let claimableRewardsR2App1 = await xAllocationPool.roundEarnings(round2, app1Id)
       expect(claimableRewardsR2App1[0]).to.eql(expectedVariableAllocationR2App1 + expectedBaseAllocationR2)
