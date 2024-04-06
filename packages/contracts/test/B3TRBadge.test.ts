@@ -419,7 +419,7 @@ describe("B3TRBadge", () => {
 
       // Now we can create a new proposal
       const tx = await createProposal(b3tr, B3trContract, otherAccount, "", "tokenDetails", [])
-      const proposalId = await getProposalIdFromTx(tx, governor)
+      const proposalId = await getProposalIdFromTx(tx)
       await waitForProposalToBeActive(proposalId)
       // Now we can vote
       await governor.connect(voter).castVote(proposalId, 1)
@@ -452,7 +452,7 @@ describe("B3TRBadge", () => {
 
       // Now we can create a new proposal
       const tx = await createProposal(b3tr, B3trContract, otherAccount, "", "tokenDetails", [])
-      const proposalId = await getProposalIdFromTx(tx, governor)
+      const proposalId = await getProposalIdFromTx(tx)
       await waitForProposalToBeActive(proposalId)
       // Now we can vote
       await governor.connect(voter).castVote(proposalId, 1)
@@ -834,7 +834,7 @@ describe("B3TRBadge", () => {
 
       // Now we can create a new proposal
       const tx = await createProposal(b3tr, B3trContract, otherAccount, "", "tokenDetails", [])
-      const proposalId = await getProposalIdFromTx(tx, governor)
+      const proposalId = await getProposalIdFromTx(tx)
       await waitForProposalToBeActive(proposalId)
       // Now we can vote
       await governor.connect(voter).castVote(proposalId, 1)

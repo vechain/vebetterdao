@@ -88,7 +88,7 @@ describe("Governor and TimeLock", function () {
         .connect(owner) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
         .propose([await governor.getAddress()], [0], [encodedFunctionCall], description)
 
-      const proposalId = await getProposalIdFromTx(tx, governor)
+      const proposalId = await getProposalIdFromTx(tx)
       await waitForProposalToBeActive(proposalId)
 
       await governor.connect(owner).castVote(proposalId, 1)
@@ -107,7 +107,13 @@ describe("Governor and TimeLock", function () {
       // Check that the new implementation works
       const newGovernor = Contract.attach(await governor.getAddress()) as B3TRGovernor
       const newTx = await createProposal(b3tr, B3trContract, owner, description, "tokenDetails", [], false)
-      const newProposalId = await getProposalIdFromTx(newTx, newGovernor)
+      const proposeReceipt = await newTx.wait()
+      const event = proposeReceipt?.logs[0]
+      const decodedLogs = newGovernor.interface.parseLog({
+        topics: [...(event?.topics as string[])],
+        data: event ? event.data : "",
+      })
+      const newProposalId = decodedLogs?.args[0]
 
       expect(newProposalId).to.exist
       // expect data of previous contract to be untouched
@@ -158,7 +164,7 @@ describe("Governor and TimeLock", function () {
       // roundId when proposal will start
       expect(decodedLogs?.args[7]).to.eql(2n)
 
-      const proposalId = await getProposalIdFromTx(tx, governor)
+      const proposalId = await getProposalIdFromTx(tx)
       expect(proposalId).not.to.be.null
 
       expect(await governor.state(proposalId)).to.eql(0n) // pending
@@ -198,7 +204,7 @@ describe("Governor and TimeLock", function () {
       const proposeReceipt = await tx.wait()
       expect(proposeReceipt).not.to.be.null
 
-      const proposalId = await getProposalIdFromTx(tx, governor)
+      const proposalId = await getProposalIdFromTx(tx)
       expect(proposalId).not.to.be.null
 
       expect(await governor.state(proposalId)).to.eql(0n) // pending
@@ -245,7 +251,7 @@ describe("Governor and TimeLock", function () {
       const proposeReceipt = await tx.wait()
       expect(proposeReceipt).not.to.be.null
 
-      const proposalId = await getProposalIdFromTx(tx, governor)
+      const proposalId = await getProposalIdFromTx(tx)
       expect(proposalId).not.to.be.null
 
       expect(await governor.state(proposalId)).to.eql(0n) // pending
@@ -404,7 +410,7 @@ describe("Governor and TimeLock", function () {
       // Now we can create a proposal
       const tx = await createProposal(b3tr, B3trContract, owner, description, functionToCall, [], false)
 
-      const proposalId = await getProposalIdFromTx(tx, governor)
+      const proposalId = await getProposalIdFromTx(tx)
 
       const b3trAddress = await b3tr.getAddress()
       const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
@@ -455,7 +461,7 @@ describe("Governor and TimeLock", function () {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 10
-      const { vot3, b3tr, otherAccounts, minterAccount, governor, B3trContract, otherAccount } =
+      const { vot3, b3tr, otherAccounts, minterAccount, B3trContract, otherAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
           config,
@@ -480,7 +486,7 @@ describe("Governor and TimeLock", function () {
 
       // Now we can create a new proposal
       const tx = await createProposal(b3tr, B3trContract, otherAccount, description, functionToCall, [], false)
-      proposalId = await getProposalIdFromTx(tx, governor)
+      proposalId = await getProposalIdFromTx(tx)
     })
 
     it("cannot vote if proposal is not in active state", async function () {
@@ -699,7 +705,7 @@ describe("Governor and TimeLock", function () {
         false,
       ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
 
-      const proposalId = await getProposalIdFromTx(tx, governor)
+      const proposalId = await getProposalIdFromTx(tx)
 
       // wait
       await waitForProposalToBeActive(proposalId)
@@ -753,7 +759,7 @@ describe("Governor and TimeLock", function () {
         false,
       ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
 
-      const proposalId = await getProposalIdFromTx(tx, governor)
+      const proposalId = await getProposalIdFromTx(tx)
 
       // wait
       await waitForProposalToBeActive(proposalId)
@@ -797,7 +803,7 @@ describe("Governor and TimeLock", function () {
         false,
       ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
 
-      const proposalId = await getProposalIdFromTx(tx, governor)
+      const proposalId = await getProposalIdFromTx(tx)
 
       // wait
       await waitForProposalToBeActive(proposalId)
@@ -841,7 +847,7 @@ describe("Governor and TimeLock", function () {
         false,
       ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
 
-      const proposalId = await getProposalIdFromTx(tx, governor)
+      const proposalId = await getProposalIdFromTx(tx)
 
       // wait
       await waitForProposalToBeActive(proposalId)
@@ -903,7 +909,7 @@ describe("Governor and TimeLock", function () {
         false,
       ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
 
-      proposalId = await getProposalIdFromTx(tx, governor)
+      proposalId = await getProposalIdFromTx(tx)
 
       // wait
       await waitForProposalToBeActive(proposalId)
@@ -942,7 +948,7 @@ describe("Governor and TimeLock", function () {
         false,
       ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
 
-      proposalId = await getProposalIdFromTx(tx, governor)
+      proposalId = await getProposalIdFromTx(tx)
 
       // wait
       await waitForProposalToBeActive(proposalId)
@@ -981,7 +987,7 @@ describe("Governor and TimeLock", function () {
         false,
       ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
 
-      proposalId = await getProposalIdFromTx(tx, governor)
+      proposalId = await getProposalIdFromTx(tx)
 
       // wait
       await waitForProposalToBeActive(proposalId)
@@ -1026,7 +1032,7 @@ describe("Governor and TimeLock", function () {
         false,
       ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
 
-      proposalId = await getProposalIdFromTx(tx, governor)
+      proposalId = await getProposalIdFromTx(tx)
 
       // wait
       await waitForProposalToBeActive(proposalId)
@@ -1076,7 +1082,7 @@ describe("Governor and TimeLock", function () {
         false,
       ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
 
-      proposalId = await getProposalIdFromTx(tx, governor)
+      proposalId = await getProposalIdFromTx(tx)
 
       // wait
       await waitForProposalToBeActive(proposalId)
@@ -1138,7 +1144,7 @@ describe("Governor and TimeLock", function () {
         false,
       ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
 
-      proposalId = await getProposalIdFromTx(tx, governor)
+      proposalId = await getProposalIdFromTx(tx)
 
       // wait
       await waitForProposalToBeActive(proposalId)
@@ -1177,7 +1183,7 @@ describe("Governor and TimeLock", function () {
         false,
       ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
 
-      proposalId = await getProposalIdFromTx(tx, governor)
+      proposalId = await getProposalIdFromTx(tx)
 
       const proposalState = await governor.state(proposalId)
       expect(proposalState.toString()).to.eql("0") // pending
@@ -1214,7 +1220,7 @@ describe("Governor and TimeLock", function () {
         false,
       )
 
-      proposalId = await getProposalIdFromTx(tx, governor)
+      proposalId = await getProposalIdFromTx(tx)
 
       const proposalState1 = await governor.state(proposalId)
       expect(proposalState1.toString()).to.eql("0") // pending
@@ -1251,7 +1257,7 @@ describe("Governor and TimeLock", function () {
         false,
       )
 
-      proposalId = await getProposalIdFromTx(tx, governor)
+      proposalId = await getProposalIdFromTx(tx)
 
       const proposalState1 = await governor.state(proposalId)
       expect(proposalState1.toString()).to.eql("0") // pending

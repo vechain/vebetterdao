@@ -1308,7 +1308,7 @@ describe("VoterRewards", () => {
 
       // Now we can create a new proposal
       const tx = await createProposal(b3tr, B3trContract, voter1, description, functionToCall, [])
-      const proposalId = await getProposalIdFromTx(tx, governor)
+      const proposalId = await getProposalIdFromTx(tx)
       const cycle = await governor.proposalStartRound(proposalId)
 
       const proposalState = await waitForProposalToBeActive(proposalId)
@@ -1346,7 +1346,7 @@ describe("VoterRewards", () => {
 
       // Now we can create a new proposal
       const tx = await createProposal(b3tr, B3trContract, voter1, description, functionToCall, [])
-      const proposalId = await getProposalIdFromTx(tx, governor)
+      const proposalId = await getProposalIdFromTx(tx)
       const cycle = await governor.proposalStartRound(proposalId)
 
       const proposalState = await waitForProposalToBeActive(proposalId)
@@ -1413,7 +1413,7 @@ describe("VoterRewards", () => {
 
       // Now we can create a new proposal
       let tx = await createProposal(b3tr, B3trContract, voter1, description, functionToCall, [])
-      let proposalId = await getProposalIdFromTx(tx, governor)
+      let proposalId = await getProposalIdFromTx(tx)
       let cycle = await governor.proposalStartRound(proposalId)
 
       const proposalState = await waitForProposalToBeActive(proposalId)
@@ -1437,7 +1437,7 @@ describe("VoterRewards", () => {
       await upgradeNFTtoLevel(1, 5, b3trBadge, b3tr, voter1, minterAccount) // Upgrading to level 5
 
       tx = await createProposal(b3tr, B3trContract, voter1, description + "1", functionToCall, [])
-      proposalId = await getProposalIdFromTx(tx, governor)
+      proposalId = await getProposalIdFromTx(tx)
       cycle = await governor.proposalStartRound(proposalId)
 
       await waitForProposalToBeActive(proposalId)
@@ -1525,7 +1525,7 @@ describe("VoterRewards", () => {
 
       // Now we can create a new proposal
       let tx = await createProposal(b3tr, B3trContract, voter1, description, functionToCall, []) // Starts in round 2
-      let proposalId = await getProposalIdFromTx(tx, governor)
+      let proposalId = await getProposalIdFromTx(tx)
       let cycle = await governor.proposalStartRound(proposalId)
 
       const proposalState = await waitForProposalToBeActive(proposalId) // we are now in round 2
@@ -1580,7 +1580,7 @@ describe("VoterRewards", () => {
 
       // Now we can create a new proposal and the GM NFT upgrade will be taken into account
       tx = await createProposal(b3tr, B3trContract, voter1, description + "1", functionToCall, []) // will start in round 4
-      proposalId = await getProposalIdFromTx(tx, governor)
+      proposalId = await getProposalIdFromTx(tx)
       cycle = await governor.proposalStartRound(proposalId)
       console.log("will start in round 3", cycle)
 

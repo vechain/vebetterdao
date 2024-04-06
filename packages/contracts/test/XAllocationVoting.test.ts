@@ -146,7 +146,7 @@ describe("X-Allocation Voting", function () {
         .connect(owner) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
         .propose([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], description)
 
-      const proposalId = await getProposalIdFromTx(tx, governor)
+      const proposalId = await getProposalIdFromTx(tx)
       await waitForProposalToBeActive(proposalId)
       await governor.connect(owner).castVote(proposalId, 1)
       await waitForVotingPeriodToEnd(proposalId, governor)
@@ -236,7 +236,7 @@ describe("X-Allocation Voting", function () {
         .connect(owner) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
         .propose([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], description)
 
-      const proposalId = await getProposalIdFromTx(tx, governor)
+      const proposalId = await getProposalIdFromTx(tx)
       await waitForProposalToBeActive(proposalId)
       await governor.connect(owner).castVote(proposalId, 1)
       await waitForVotingPeriodToEnd(proposalId, governor)
@@ -271,7 +271,7 @@ describe("X-Allocation Voting", function () {
         .connect(owner) //@ts-ignore
         .propose([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], description)
 
-      const proposalId = await getProposalIdFromTx(tx, governor)
+      const proposalId = await getProposalIdFromTx(tx)
       await waitForProposalToBeActive(proposalId)
       await governor.connect(owner).castVote(proposalId, 1)
       await waitForVotingPeriodToEnd(proposalId, governor)

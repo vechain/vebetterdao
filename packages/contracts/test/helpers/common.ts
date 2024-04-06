@@ -64,7 +64,8 @@ export const createProposal = async (
   return tx
 }
 
-export const getProposalIdFromTx = async (tx: ContractTransactionResponse, governor: B3TRGovernor) => {
+export const getProposalIdFromTx = async (tx: ContractTransactionResponse) => {
+  const { governor } = await getOrDeployContractInstances({})
   const proposeReceipt = await tx.wait()
   const event = proposeReceipt?.logs[0]
   const decodedLogs = governor.interface.parseLog({
@@ -151,7 +152,7 @@ export const createProposalAndExecuteIt = async (
   // create a new proposal
   // console.log("Creating proposal");
   const tx = await createProposal(contractToCall, Contract, proposer, description, functionToCall, args)
-  const proposalId = await getProposalIdFromTx(tx, governor)
+  const proposalId = await getProposalIdFromTx(tx)
 
   // wait
   // console.log("Waiting for voting period to start");
@@ -373,7 +374,7 @@ export const participateInGovernanceVoting = async (
   await getVot3Tokens(admin, "1000")
 
   const tx = await createProposal(contractToCall, Contract, admin, description, functionToCall, args, false)
-  const proposalId = await getProposalIdFromTx(tx, governor)
+  const proposalId = await getProposalIdFromTx(tx)
 
   await waitForProposalToBeActive(proposalId)
 
