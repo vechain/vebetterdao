@@ -1,6 +1,5 @@
 import { test, TestInfo } from '@playwright/test';
 import { HOMEPAGE } from '../utils/constants';
-import { screenshotOnFailure } from '../utils/screenshot';
 import veWorldMockClient from '../utils/veworld-mock-client';
 import { DashboardPage } from '../model/dashboardPage';
 import blockchainUtils from '../utils/blockchain';
@@ -16,7 +15,6 @@ test.describe('Swap Tokens', () => {
   test.afterEach(async ({ page }, testInfo: TestInfo) => {
     const lastTxId = await veWorldMockClient.getTxId(page)
     console.log(`Last tx id: ${lastTxId}`)
-    await screenshotOnFailure({ page }, testInfo)
   })
 
   test('User can swap B3TR to VOT3', async ({ page }) => {

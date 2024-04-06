@@ -1,6 +1,5 @@
 import { test } from '@playwright/test';
 import { FIXED_ACCOUNT1, HOMEPAGE } from '../utils/constants';
-import { screenshotOnFailure } from '../utils/screenshot';
 import veWorldMockClient from '../utils/veworld-mock-client';
 import { DashboardPage } from '../model/dashboardPage';
 import blockchainUtils from '../utils/blockchain';
@@ -11,8 +10,6 @@ test.describe('Connect Wallet', () => {
     await veWorldMockClient.installForSolo(page, HOMEPAGE)
     await veWorldMockClient.setSignerAccIndex(page, FIXED_ACCOUNT1)
   })
-
-  test.afterEach(screenshotOnFailure);
 
   test('User can connect wallet', async ({ page }) => {
     const dashboardPage = new DashboardPage(page);
