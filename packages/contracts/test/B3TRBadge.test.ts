@@ -273,7 +273,7 @@ describe("B3TRBadge", () => {
       await emissions.connect(minterAccount).bootstrap()
 
       // Should be able to free mint after participating in allocation voting
-      await participateInAllocationVoting(otherAccount, owner, xAllocationVoting)
+      await participateInAllocationVoting(otherAccount)
 
       // Deploy NFTBadge
       const b3trBadge = (await deployProxy("B3TRBadge", [
@@ -298,7 +298,7 @@ describe("B3TRBadge", () => {
 
     it("Cannot mint if XAllocation address is not set", async () => {
       const config = createLocalConfig()
-      const { otherAccount, xAllocationVoting, b3tr, owner, governor, emissions, minterAccount, treasury } =
+      const { otherAccount, b3tr, owner, governor, emissions, minterAccount, treasury } =
         await getOrDeployContractInstances({
           forceDeploy: true,
           config,
@@ -311,7 +311,7 @@ describe("B3TRBadge", () => {
       await emissions.connect(minterAccount).bootstrap()
 
       // Should be able to free mint after participating in allocation voting
-      await participateInAllocationVoting(otherAccount, owner, xAllocationVoting)
+      await participateInAllocationVoting(otherAccount)
 
       // Deploy NFTBadge
       const b3trBadge = (await deployProxy("B3TRBadge", [
@@ -345,7 +345,7 @@ describe("B3TRBadge", () => {
       await bootstrapEmissions()
 
       // Should be able to free mint after participating in allocation voting
-      await participateInAllocationVoting(otherAccount, owner, xAllocationVoting)
+      await participateInAllocationVoting(otherAccount)
 
       // Deploy NFTBadge
       const b3trBadge = (await deployProxy("B3TRBadge", [
@@ -380,7 +380,7 @@ describe("B3TRBadge", () => {
     })
 
     it("User can free mint if participated in x-allocation voting", async () => {
-      const { b3trBadge, otherAccount, xAllocationVoting, owner } = await getOrDeployContractInstances({
+      const { b3trBadge, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -391,7 +391,7 @@ describe("B3TRBadge", () => {
       await catchRevert(b3trBadge.connect(otherAccount).freeMint())
 
       // Should be able to free mint after participating in allocation voting
-      await participateInAllocationVoting(otherAccount, owner, xAllocationVoting)
+      await participateInAllocationVoting(otherAccount)
 
       expect(await b3trBadge.connect(otherAccount).freeMint()).not.to.be.reverted
 
@@ -434,7 +434,7 @@ describe("B3TRBadge", () => {
     })
 
     it("User can free mint if he participated both in B3TR Governance and in x-allocation voting", async () => {
-      const { b3trBadge, otherAccount, b3tr, otherAccounts, governor, B3trContract, owner, xAllocationVoting } =
+      const { b3trBadge, otherAccount, b3tr, otherAccounts, governor, B3trContract } =
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
@@ -460,7 +460,7 @@ describe("B3TRBadge", () => {
       await waitForCurrentRoundToEnd()
 
       // Should be able to free mint after participating in allocation voting
-      await participateInAllocationVoting(voter, owner, xAllocationVoting)
+      await participateInAllocationVoting(voter)
 
       // I should be able to free mint
       await b3trBadge.connect(voter).freeMint()
@@ -468,7 +468,7 @@ describe("B3TRBadge", () => {
 
     it("Should mint a level 1 token", async () => {
       const config = createLocalConfig()
-      const { b3trBadge, otherAccount, owner, xAllocationVoting } = await getOrDeployContractInstances({
+      const { b3trBadge, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
@@ -477,7 +477,7 @@ describe("B3TRBadge", () => {
       await bootstrapEmissions()
 
       // participation in governance is a requirement for minting
-      await participateInAllocationVoting(otherAccount, owner, xAllocationVoting)
+      await participateInAllocationVoting(otherAccount)
 
       const tx = await b3trBadge.connect(otherAccount).freeMint()
 
@@ -525,7 +525,7 @@ describe("B3TRBadge", () => {
     })
 
     it("Should be able to free mint multiple badges", async () => {
-      const { b3trBadge, otherAccount, owner, xAllocationVoting } = await getOrDeployContractInstances({
+      const { b3trBadge, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -533,7 +533,7 @@ describe("B3TRBadge", () => {
       await bootstrapEmissions()
 
       // participation in governance is a requirement for minting
-      await participateInAllocationVoting(otherAccount, owner, xAllocationVoting)
+      await participateInAllocationVoting(otherAccount)
 
       await b3trBadge.connect(otherAccount).freeMint()
 
@@ -543,7 +543,7 @@ describe("B3TRBadge", () => {
     })
 
     it("Should handle multiple mints from different accounts correctly", async () => {
-      const { b3trBadge, otherAccount, owner, xAllocationVoting } = await getOrDeployContractInstances({
+      const { b3trBadge, otherAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -551,12 +551,12 @@ describe("B3TRBadge", () => {
       await bootstrapEmissions()
 
       // participation in governance is a requirement for minting
-      await participateInAllocationVoting(otherAccount, owner, xAllocationVoting, true)
+      await participateInAllocationVoting(otherAccount, true)
 
       await b3trBadge.connect(otherAccount).freeMint()
 
       // participation in governance is a requirement for minting
-      await participateInAllocationVoting(owner, owner, xAllocationVoting, false)
+      await participateInAllocationVoting(owner, false)
 
       await b3trBadge.connect(owner).freeMint()
 
@@ -579,7 +579,7 @@ describe("B3TRBadge", () => {
     })
 
     it("Cannot mint if badge is paused", async () => {
-      const { b3trBadge, otherAccount, owner, xAllocationVoting } = await getOrDeployContractInstances({
+      const { b3trBadge, otherAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -587,7 +587,7 @@ describe("B3TRBadge", () => {
       await bootstrapEmissions()
 
       // participation in governance is a requirement for minting
-      await participateInAllocationVoting(otherAccount, owner, xAllocationVoting)
+      await participateInAllocationVoting(otherAccount)
 
       await b3trBadge.connect(owner).pause()
 
@@ -599,7 +599,7 @@ describe("B3TRBadge", () => {
     })
 
     it("Should be able to mint again after transferring a badge", async () => {
-      const { b3trBadge, otherAccount, owner, xAllocationVoting } = await getOrDeployContractInstances({
+      const { b3trBadge, otherAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -607,7 +607,7 @@ describe("B3TRBadge", () => {
       await bootstrapEmissions()
 
       // participation in governance is a requirement for minting
-      await participateInAllocationVoting(owner, owner, xAllocationVoting)
+      await participateInAllocationVoting(owner)
 
       await b3trBadge.connect(owner).freeMint()
 
@@ -642,7 +642,7 @@ describe("B3TRBadge", () => {
 
   describe("Transferring", () => {
     it("Should be able to receive a badge from another account", async () => {
-      const { b3trBadge, otherAccount, owner, xAllocationVoting } = await getOrDeployContractInstances({
+      const { b3trBadge, otherAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -650,7 +650,7 @@ describe("B3TRBadge", () => {
       await bootstrapEmissions()
 
       // participation in governance is a requirement for minting
-      await participateInAllocationVoting(owner, owner, xAllocationVoting)
+      await participateInAllocationVoting(owner)
 
       await b3trBadge.connect(owner).freeMint()
 
@@ -671,7 +671,7 @@ describe("B3TRBadge", () => {
     })
 
     it("Should not be able to transfer a badge if transfers are paused", async () => {
-      const { b3trBadge, otherAccount, owner, xAllocationVoting } = await getOrDeployContractInstances({
+      const { b3trBadge, otherAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -679,7 +679,7 @@ describe("B3TRBadge", () => {
       await bootstrapEmissions()
 
       // participation in governance is a requirement for minting
-      await participateInAllocationVoting(owner, owner, xAllocationVoting)
+      await participateInAllocationVoting(owner)
 
       await b3trBadge.connect(owner).freeMint()
 
@@ -695,7 +695,7 @@ describe("B3TRBadge", () => {
     })
 
     it("Should be able to receive a badge from another account if you already have one", async () => {
-      const { b3trBadge, otherAccount, owner, xAllocationVoting } = await getOrDeployContractInstances({
+      const { b3trBadge, otherAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -703,8 +703,8 @@ describe("B3TRBadge", () => {
       await bootstrapEmissions()
 
       // participation in governance is a requirement for minting
-      await participateInAllocationVoting(otherAccount, owner, xAllocationVoting, true)
-      await participateInAllocationVoting(owner, owner, xAllocationVoting)
+      await participateInAllocationVoting(otherAccount, true)
+      await participateInAllocationVoting(owner)
 
       await b3trBadge.connect(otherAccount).freeMint()
 
@@ -716,7 +716,7 @@ describe("B3TRBadge", () => {
     })
 
     it("Should track ownership correctly after multiple transfers", async () => {
-      const { b3trBadge, otherAccount, owner, otherAccounts, xAllocationVoting } = await getOrDeployContractInstances({
+      const { b3trBadge, otherAccount, owner, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -724,7 +724,7 @@ describe("B3TRBadge", () => {
       await bootstrapEmissions()
 
       // participation in governance is a requirement for minting
-      await participateInAllocationVoting(owner, owner, xAllocationVoting, true)
+      await participateInAllocationVoting(owner, true)
 
       let tx = await b3trBadge.connect(owner).freeMint()
 
@@ -853,7 +853,7 @@ describe("B3TRBadge", () => {
     })
 
     it("Should not select level 0 if I still have a token when transferring out", async () => {
-      const { b3trBadge, otherAccount, owner, xAllocationVoting } = await getOrDeployContractInstances({
+      const { b3trBadge, otherAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -861,7 +861,7 @@ describe("B3TRBadge", () => {
       await bootstrapEmissions()
 
       // participation in governance is a requirement for minting
-      await participateInAllocationVoting(owner, owner, xAllocationVoting, true)
+      await participateInAllocationVoting(owner, true)
 
       let tx = await b3trBadge.connect(owner).freeMint()
 
@@ -898,7 +898,7 @@ describe("B3TRBadge", () => {
     })
 
     it("Should not select token received from another account if I already have a token", async () => {
-      const { b3trBadge, otherAccount, owner, xAllocationVoting } = await getOrDeployContractInstances({
+      const { b3trBadge, otherAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -906,10 +906,10 @@ describe("B3TRBadge", () => {
       await bootstrapEmissions()
 
       // participation in governance is a requirement for minting
-      await participateInAllocationVoting(owner, owner, xAllocationVoting, true)
+      await participateInAllocationVoting(owner, true)
 
       // participation in governance is a requirement for minting
-      await participateInAllocationVoting(otherAccount, owner, xAllocationVoting, true)
+      await participateInAllocationVoting(otherAccount, true)
 
       await b3trBadge.connect(owner).freeMint() // Token id 1
 
@@ -929,7 +929,7 @@ describe("B3TRBadge", () => {
     })
 
     it("Should select token received from another account if I don't have any tokens", async () => {
-      const { b3trBadge, otherAccount, owner, xAllocationVoting } = await getOrDeployContractInstances({
+      const { b3trBadge, otherAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -937,7 +937,7 @@ describe("B3TRBadge", () => {
       await bootstrapEmissions()
 
       // participation in governance is a requirement for minting
-      await participateInAllocationVoting(otherAccount, owner, xAllocationVoting, true)
+      await participateInAllocationVoting(otherAccount, true)
 
       let tx = await b3trBadge.connect(otherAccount).freeMint() // Token id 1
 
@@ -1011,7 +1011,7 @@ describe("B3TRBadge", () => {
     })
 
     it("Should be able to select an owned token", async () => {
-      const { b3trBadge, owner, xAllocationVoting } = await getOrDeployContractInstances({
+      const { b3trBadge, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -1019,7 +1019,7 @@ describe("B3TRBadge", () => {
       await bootstrapEmissions()
 
       // participation in governance is a requirement for minting
-      await participateInAllocationVoting(owner, owner, xAllocationVoting, true)
+      await participateInAllocationVoting(owner, true)
 
       await b3trBadge.connect(owner).freeMint() // Token id 1
 
@@ -1031,7 +1031,7 @@ describe("B3TRBadge", () => {
     })
 
     it("Should not be able to select a token that is not owned", async () => {
-      const { b3trBadge, otherAccount, owner, xAllocationVoting } = await getOrDeployContractInstances({
+      const { b3trBadge, otherAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -1039,7 +1039,7 @@ describe("B3TRBadge", () => {
       await bootstrapEmissions()
 
       // participation in governance is a requirement for minting
-      await participateInAllocationVoting(owner, owner, xAllocationVoting, true)
+      await participateInAllocationVoting(owner, true)
 
       await b3trBadge.connect(owner).freeMint() // Token id 1
 
@@ -1047,7 +1047,7 @@ describe("B3TRBadge", () => {
     })
 
     it("Should not be able to select the same token again", async () => {
-      const { b3trBadge, owner, xAllocationVoting } = await getOrDeployContractInstances({
+      const { b3trBadge, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -1055,7 +1055,7 @@ describe("B3TRBadge", () => {
       await bootstrapEmissions()
 
       // participation in governance is a requirement for minting
-      await participateInAllocationVoting(owner, owner, xAllocationVoting, true)
+      await participateInAllocationVoting(owner, true)
 
       await b3trBadge.connect(owner).freeMint() // Token id 1
 
@@ -1063,7 +1063,7 @@ describe("B3TRBadge", () => {
     })
 
     it("Should not be able to select a non-existent token", async () => {
-      const { b3trBadge, owner, xAllocationVoting } = await getOrDeployContractInstances({
+      const { b3trBadge, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -1071,7 +1071,7 @@ describe("B3TRBadge", () => {
       await bootstrapEmissions()
 
       // participation in governance is a requirement for minting
-      await participateInAllocationVoting(owner, owner, xAllocationVoting, true)
+      await participateInAllocationVoting(owner, true)
 
       await b3trBadge.connect(owner).freeMint() // Token id 1
 
@@ -1090,7 +1090,7 @@ describe("B3TRBadge", () => {
       await bootstrapEmissions()
 
       // participation in governance is a requirement for minting
-      await participateInAllocationVoting(owner, owner, xAllocationVoting, true)
+      await participateInAllocationVoting(owner, true)
 
       const b3trBadge = (await deployProxy("B3TRBadge", [
         "b3trBadge",
@@ -1140,7 +1140,7 @@ describe("B3TRBadge", () => {
       await bootstrapEmissions()
 
       // participation in governance is a requirement for minting
-      await participateInAllocationVoting(owner, owner, xAllocationVoting, true)
+      await participateInAllocationVoting(owner, true)
 
       const b3trBadge = (await deployProxy("B3TRBadge", [
         "b3trBadge",
@@ -1223,7 +1223,7 @@ describe("B3TRBadge", () => {
     await bootstrapEmissions()
 
     // participation in governance is a requirement for minting
-    await participateInAllocationVoting(owner, owner, xAllocationVoting, true)
+    await participateInAllocationVoting(owner, true)
 
     const b3trBadge = (await deployProxy("B3TRBadge", [
       "b3trBadge",
@@ -1278,7 +1278,7 @@ describe("B3TRBadge", () => {
     await bootstrapEmissions()
 
     // participation in governance is a requirement for minting
-    await participateInAllocationVoting(owner, owner, xAllocationVoting, true)
+    await participateInAllocationVoting(owner, true)
 
     const b3trBadge = (await deployProxy("B3TRBadge", [
       "b3trBadge",
@@ -1318,7 +1318,7 @@ describe("B3TRBadge", () => {
     await bootstrapEmissions()
 
     // participation in governance is a requirement for minting
-    await participateInAllocationVoting(owner, owner, xAllocationVoting, true)
+    await participateInAllocationVoting(owner, true)
 
     const b3trBadge = (await deployProxy("B3TRBadge", [
       "b3trBadge",
@@ -1357,7 +1357,7 @@ describe("B3TRBadge", () => {
     await bootstrapEmissions()
 
     // participation in governance is a requirement for minting
-    await participateInAllocationVoting(owner, owner, xAllocationVoting, true)
+    await participateInAllocationVoting(owner, true)
 
     const b3trBadge = (await deployProxy("B3TRBadge", [
       "b3trBadge",
