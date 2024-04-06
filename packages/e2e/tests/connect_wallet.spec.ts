@@ -38,8 +38,3 @@ test.describe('Connect Wallet', () => {
   })
 
 });
-
-
-
-
-
