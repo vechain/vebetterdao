@@ -1,5 +1,5 @@
 import { ethers, network } from "hardhat"
-import { Emissions, XAllocationPool, XAllocationVoting, B3TR, B3TRBadge } from "../../typechain-types"
+import { B3TR, B3TRBadge } from "../../typechain-types"
 import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { getOrDeployContractInstances } from "./deploy"
