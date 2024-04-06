@@ -399,7 +399,7 @@ describe("X-Allocation Voting", function () {
       expect(state).to.eql(0n)
 
       // distribute second emission (should start also new round)
-      await moveToCycle(emissions, minterAccount, 3)
+      await moveToCycle(3)
 
       // first round should be ended and successfull (total supply is 0)
       state = await xAllocationVoting.state(round)

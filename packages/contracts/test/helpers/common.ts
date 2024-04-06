@@ -104,15 +104,11 @@ export const waitForCurrentRoundToEnd = async () => {
 }
 
 export const waitForProposalToBeActive = async (proposalId: number): Promise<bigint> => {
-  const { governor, emissions, minterAccount } = await getOrDeployContractInstances({})
+  const { governor } = await getOrDeployContractInstances({})
   let proposalState = await governor.state(proposalId) // proposal id of the proposal in the beforeAll step
 
   if (proposalState.toString() !== "1") {
-    await moveToCycle(
-      emissions,
-      minterAccount,
-      parseInt((await governor.proposalStartRound(proposalId)).toString()) + 1,
-    )
+    await moveToCycle(parseInt((await governor.proposalStartRound(proposalId)).toString()) + 1)
 
     // Update the proposal state
     proposalState = await governor.state(proposalId)
@@ -230,12 +226,14 @@ export const waitForNextCycle = async () => {
  * E.g: we are in cycle 1 (distributed) and want to move to cycle 3 (not distributed) then we call this funciton with cycle 3
  * and it will distribute the cycle 2 and stop before distributing the cycle 3
  */
-export const moveToCycle = async (emissions: Emissions, minter: HardhatEthersSigner, cycle: number) => {
+export const moveToCycle = async (cycle: number) => {
+  const { emissions, minterAccount } = await getOrDeployContractInstances({})
+
   const cycleToBeDistributed = await emissions.nextCycle()
 
   for (let i = 0; i < BigInt(cycle) - cycleToBeDistributed; i++) {
     await waitForNextCycle()
-    await emissions.connect(minter).distribute()
+    await emissions.connect(minterAccount).distribute()
   }
 }
 

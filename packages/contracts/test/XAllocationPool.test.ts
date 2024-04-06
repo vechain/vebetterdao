@@ -707,7 +707,7 @@ describe("X-Allocation Pool", async function () {
       await xAllocationVoting
         .connect(owner)
         .addApp(app3ReceiverAddress, app3ReceiverAddress, "My app #3", "metadataURI")
-      await moveToCycle(emissions, minterAccount, 3)
+      await moveToCycle(3)
       const round2 = parseInt((await xAllocationVoting.currentRoundId()).toString())
       expect(round2).to.eql(2)
 

@@ -635,7 +635,7 @@ describe("Emissions", () => {
 
       // Move to after first decay period
       const cycle = config.EMISSIONS_X_ALLOCATION_DECAY_PERIOD + 2
-      await moveToCycle(emissions, minterAccount, cycle)
+      await moveToCycle(cycle)
 
       expect(await emissions.nextCycle()).to.equal(cycle)
 
@@ -683,7 +683,7 @@ describe("Emissions", () => {
 
       // Move to after first Rewards decay period
       const cycle = config.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD + 2
-      await moveToCycle(emissions, minterAccount, cycle)
+      await moveToCycle(cycle)
 
       expect(await emissions.nextCycle()).to.equal(cycle)
 
