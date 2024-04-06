@@ -17,7 +17,7 @@ const startRound = async () => {
 
   console.log("Waiting for the current round to end...")
 
-  await waitForNextCycle(emissions)
+  await waitForNextCycle()
 
   await Emissions__factory.connect(getConfig().emissionsContractAddress, signer).distribute()
 

@@ -432,7 +432,7 @@ describe("Emissions", () => {
       // Expect next cycle to be 2
       expect(await emissions.nextCycle()).to.equal(2)
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       // Calculate emissions for first cycle
       const xAllocationAmount = await emissions.getXAllocationAmount(2)
@@ -495,7 +495,7 @@ describe("Emissions", () => {
       // Start emissions
       await emissions.connect(minterAccount).start()
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       // Pause B3TR transfers
       await b3tr.connect(owner).pause()
@@ -558,7 +558,7 @@ describe("Emissions", () => {
       // Start emissions
       await emissions.connect(minterAccount).start()
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       // Distribute emissions
       await emissions.connect(minterAccount).distribute()
@@ -580,7 +580,7 @@ describe("Emissions", () => {
       expect(await b3tr.balanceOf(await emissions.vote2Earn())).to.equal(initialVoteAllocation * 2n)
       expect(await b3tr.balanceOf(await emissions.treasury())).to.equal(initialTreasuryAlloc * 2n)
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       expect(await emissions.nextCycle()).to.equal(3)
 
@@ -622,7 +622,7 @@ describe("Emissions", () => {
       // Start emissions
       await emissions.connect(minterAccount).start()
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       // Distribute emissions
       await emissions.connect(minterAccount).distribute()
@@ -639,7 +639,7 @@ describe("Emissions", () => {
 
       expect(await emissions.nextCycle()).to.equal(cycle)
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       const xAllocationsAmount = await emissions.getXAllocationAmount(cycle)
       const vote2EarnAmount = await emissions.getVote2EarnAmount(cycle)
@@ -670,7 +670,7 @@ describe("Emissions", () => {
       // Start emissions
       await emissions.connect(minterAccount).start()
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       // Distribute emissions
       await emissions.connect(minterAccount).distribute()
@@ -687,7 +687,7 @@ describe("Emissions", () => {
 
       expect(await emissions.nextCycle()).to.equal(cycle)
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       const xAllocationsAmount = await emissions.getXAllocationAmount(cycle)
       const vote2EarnAmount = await emissions.getVote2EarnAmount(cycle)
@@ -734,7 +734,7 @@ describe("Emissions", () => {
 
       // Loop through all cycles as simulated in the b3tr emissions spreadsheet
       for (let i = 0; i < b3trAllocations.length; i++) {
-        await waitForNextCycle(emissions)
+        await waitForNextCycle()
 
         const allocations = b3trAllocations[i]
 
@@ -814,7 +814,7 @@ describe("Emissions", () => {
 
       // Loop through all cycles as simulated in the b3tr emissions spreadsheet
       for (let i = 0; i < b3trAllocations.length; i++) {
-        await waitForNextCycle(emissions)
+        await waitForNextCycle()
 
         const allocations = b3trAllocations[i]
 
@@ -869,7 +869,7 @@ describe("Emissions", () => {
       // Start emissions
       await emissions.connect(minterAccount).start()
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       // Distribute emissions
       await emissions.connect(minterAccount).distribute()
@@ -888,12 +888,12 @@ describe("Emissions", () => {
       // Start emissions
       await emissions.connect(minterAccount).start()
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       // Distribute emissions
       await emissions.connect(minterAccount).distribute()
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       await waitForBlock(10) // Simulate a delay of 10 blocks before distributing the next cycle
 
@@ -901,7 +901,7 @@ describe("Emissions", () => {
 
       expect(await emissions.getCurrentCycle()).to.equal(3)
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       await emissions.connect(minterAccount).distribute()
     })

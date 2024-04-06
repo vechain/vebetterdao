@@ -289,7 +289,7 @@ describe("VoterRewards", () => {
       totalVotes = await xAllocationVoting.totalVotes(roundId)
       expect(totalVotes).to.eql(ethers.parseEther("1400"))
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       expect(await emissions.isCycleDistributed(await emissions.nextCycle())).to.equal(false)
       expect(await emissions.isNextCycleDistributable()).to.equal(true)
@@ -429,7 +429,7 @@ describe("VoterRewards", () => {
       totalVotes = await xAllocationVoting.totalVotes(roundId)
       expect(totalVotes).to.eql(ethers.parseEther("2300"))
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       expect(await emissions.isCycleDistributed(await emissions.nextCycle())).to.equal(false)
       expect(await emissions.isNextCycleDistributable()).to.equal(true)
@@ -516,7 +516,7 @@ describe("VoterRewards", () => {
       totalVotes = await xAllocationVoting.totalVotes(roundId2)
       expect(totalVotes).to.eql(ethers.parseEther("2600"))
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       expect(await emissions.isCycleEnded(2)).to.equal(true)
 
@@ -629,7 +629,7 @@ describe("VoterRewards", () => {
 
       await waitForRoundToEnd(Number(roundId))
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       // GM NFT token mint and upgrade
       await b3trBadge.connect(voter1).freeMint()
@@ -752,7 +752,7 @@ describe("VoterRewards", () => {
 
       await waitForRoundToEnd(Number(roundId))
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       // Second round
       await emissions.connect(voter1).distribute() // Anyone can distribute the cycle
@@ -874,7 +874,7 @@ describe("VoterRewards", () => {
 
       await waitForRoundToEnd(Number(roundId))
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       // GM NFT token mint and upgrade
       await b3trBadge.connect(voter1).freeMint()
@@ -1022,7 +1022,7 @@ describe("VoterRewards", () => {
 
       await waitForRoundToEnd(Number(roundId))
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       // GM NFT token mint and upgrade
       await b3trBadge.connect(voter1).freeMint()
@@ -1148,7 +1148,7 @@ describe("VoterRewards", () => {
 
       await waitForRoundToEnd(Number(roundId))
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       // GM NFT token mint and upgrade
       await b3trBadge.connect(voter1).freeMint()
@@ -1206,7 +1206,7 @@ describe("VoterRewards", () => {
 
       await waitForRoundToEnd(Number(roundId))
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       await catchRevert(voterRewards.claimReward(1, otherAccount.address)) // Should not be able to claim rewards as not voted
 
@@ -1216,7 +1216,7 @@ describe("VoterRewards", () => {
 
       await waitForRoundToEnd(Number(roundId))
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       await emissions.connect(otherAccount).distribute()
 
@@ -1247,7 +1247,7 @@ describe("VoterRewards", () => {
 
       await waitForRoundToEnd(Number(roundId))
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       await voterRewards.connect(voter1).claimReward(1, voter1.address)
 
@@ -1319,7 +1319,7 @@ describe("VoterRewards", () => {
       await governor.connect(voter1).castVote(proposalId, 1) // For
       await governor.connect(voter2).castVote(proposalId, 1) // For
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       expect(await voterRewards.getReward(cycle, voter1.address)).to.equal(33333333333333333333333n) // 50% of the rewards
       expect(await voterRewards.getReward(cycle, voter2.address)).to.equal(33333333333333333333333n) // 50% of the rewards
@@ -1357,7 +1357,7 @@ describe("VoterRewards", () => {
       await governor.connect(voter1).castVote(proposalId, 1) // For
       await governor.connect(voter2).castVote(proposalId, 1) // For
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       expect(await voterRewards.getReward(cycle, voter1.address)).to.equal(66666666666666666666666n) // 100% of the rewards
       expect(await voterRewards.getReward(cycle, voter2.address)).to.equal(0) // Even if voter2 voted, he has 0 VOT3 tokens so he should not receive any rewards
@@ -1424,7 +1424,7 @@ describe("VoterRewards", () => {
       await governor.connect(voter1).castVote(proposalId, 1) // For
       await governor.connect(voter2).castVote(proposalId, 1) // For
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       expect(await voterRewards.getReward(cycle, voter1.address)).to.equal(1000000000000000000000000n) // 50% of the rewards
       expect(await voterRewards.getReward(cycle, voter2.address)).to.equal(1000000000000000000000000n) // 50% of the rewards
@@ -1445,7 +1445,7 @@ describe("VoterRewards", () => {
       await governor.connect(voter1).castVote(proposalId, 1) // For
       await governor.connect(voter2).castVote(proposalId, 1) // For
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       /*
         voter1 = 1000 votes for governance voting * 100% multiplier = 2000 votes
@@ -1604,7 +1604,7 @@ describe("VoterRewards", () => {
       await governor.connect(voter2).castVote(proposalId, 1) // For
 
       await waitForCurrentRoundToEnd() // still round 4, but ended
-      // await waitForNextCycle(emissions)
+      // await waitForNextCycle()
       // expect(await governor.state(proposalId)).to.not.equal(1n)
 
       /*

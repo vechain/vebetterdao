@@ -1,5 +1,5 @@
 import { ethers, network } from "hardhat"
-import { Emissions, XAllocationPool, XAllocationVoting, B3TR, B3TRBadge, B3TRGovernor } from "../../typechain-types"
+import { Emissions, XAllocationPool, XAllocationVoting, B3TR, B3TRBadge } from "../../typechain-types"
 import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { getOrDeployContractInstances } from "./deploy"
@@ -187,11 +187,12 @@ export const createProposalAndExecuteIt = async (
 export const addAppThroughGovernance = async (
   proposer: HardhatEthersSigner,
   voter: HardhatEthersSigner,
-  xAllocationVoting: XAllocationVoting,
   appName: string = "Bike 4 Life" + Math.random(),
   appAddress: string,
   metadataURI: string = "metadataURI",
 ) => {
+  const { xAllocationVoting } = await getOrDeployContractInstances({})
+
   await createProposalAndExecuteIt(
     proposer,
     voter,
@@ -216,7 +217,9 @@ export const waitForBlock = async (blockNumber: number) => {
   }
 }
 
-export const waitForNextCycle = async (emissions: Emissions) => {
+export const waitForNextCycle = async () => {
+  const { emissions } = await getOrDeployContractInstances({})
+
   const blockNextCycle = await emissions.getNextCycleBlock()
 
   await waitForBlock(Number(blockNextCycle))
@@ -231,7 +234,7 @@ export const moveToCycle = async (emissions: Emissions, minter: HardhatEthersSig
   const cycleToBeDistributed = await emissions.nextCycle()
 
   for (let i = 0; i < BigInt(cycle) - cycleToBeDistributed; i++) {
-    await waitForNextCycle(emissions)
+    await waitForNextCycle()
     await emissions.connect(minter).distribute()
   }
 }
