@@ -1,16 +1,7 @@
-name: Unit Testing
+name: Unit Test Coverage
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches:
-      - main
-      - testnet
-  push:
-    branches:
-      - main
-      - Comment-only-solidity-changes
-      - testnet
 
 jobs:
   run-unit-tests:
@@ -39,4 +30,20 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Unit Tests
-        run: yarn test
+        run: yarn test:coverage
+
+      - name: Archive FE coverage
+        uses: actions/upload-artifact@v4
+        with:
+            name: fe-coverage
+            path: apps/frontend/coverage
+            retention-days: 10
+    
+      - name: Archive Contract coverage
+        uses: actions/upload-artifact@v4
+        with:
+            name: contract-coverage
+            path: packages/contracts/coverage
+            retention-days: 10
+
+      

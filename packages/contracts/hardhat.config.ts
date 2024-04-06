@@ -7,6 +7,7 @@ import "@vechain/hardhat-ethers"
 import "hardhat-contract-sizer"
 import "hardhat-ignore-warnings"
 import { getConfig } from "@repo/config"
+import "solidity-coverage"
 
 const config: HardhatUserConfig = {
   solidity: "0.8.20",
@@ -24,6 +25,7 @@ const getSoloUrl = () => {
     : VECHAIN_URL_SOLO
   return url
 }
+
 module.exports = {
   solidity: {
     version: "0.8.20",
@@ -44,7 +46,7 @@ module.exports = {
   mocha: {
     timeout: 180000,
   },
-  defaultNetwork: "vechain_solo",
+  defaultNetwork: "hardhat",
   networks: {
     hardhat: {
       chainId: 1337,

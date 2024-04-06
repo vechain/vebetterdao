@@ -77,7 +77,7 @@
     },
     "test:coverage": {
       "cache": false,
-      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config", "test:hardhat"]
+      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
     "test:thor-solo": {
       "cache": false
