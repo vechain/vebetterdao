@@ -145,35 +145,17 @@ describe("X-Allocation Pool", async function () {
       const expectedBaseAllocation = await calculateBaseAllocationOffChain(Number(round1))
       expect(baseAllocationAmount).to.eql(expectedBaseAllocation)
 
-      let expectedVariableAllcoation = await calculateVariableAppAllocationOffChain(
-        Number(round1),
-        app1Id,
-        emissions,
-        xAllocationPool,
-        xAllocationVoting,
-      )
+      let expectedVariableAllcoation = await calculateVariableAppAllocationOffChain(Number(round1), app1Id)
       let claimableRewards = await xAllocationPool.roundEarnings(round1, app1Id)
       expect(claimableRewards[0]).to.eql(expectedVariableAllcoation + expectedBaseAllocation)
 
       // Calculate allocation rewards
       let allocationRewards = await xAllocationPool.currentRoundEarnings(app1Id)
-      expectedVariableAllcoation = await calculateVariableAppAllocationOffChain(
-        Number(round1),
-        app1Id,
-        emissions,
-        xAllocationPool,
-        xAllocationVoting,
-      )
+      expectedVariableAllcoation = await calculateVariableAppAllocationOffChain(Number(round1), app1Id)
       expect(allocationRewards).to.eql(expectedBaseAllocation + expectedVariableAllcoation)
 
       allocationRewards = await xAllocationPool.currentRoundEarnings(app2Id)
-      expectedVariableAllcoation = await calculateVariableAppAllocationOffChain(
-        Number(round1),
-        app2Id,
-        emissions,
-        xAllocationPool,
-        xAllocationVoting,
-      )
+      expectedVariableAllcoation = await calculateVariableAppAllocationOffChain(Number(round1), app2Id)
       expect(allocationRewards).to.eql(expectedBaseAllocation + expectedVariableAllcoation)
     })
 
@@ -788,13 +770,7 @@ describe("X-Allocation Pool", async function () {
       await waitForRoundToEnd(Number(round2))
 
       const expectedBaseAllocationR1 = await calculateBaseAllocationOffChain(Number(round1))
-      let expectedVariableAllocationR1App1 = await calculateVariableAppAllocationOffChain(
-        Number(round1),
-        app1Id,
-        emissions,
-        xAllocationPool,
-        xAllocationVoting,
-      )
+      let expectedVariableAllocationR1App1 = await calculateVariableAppAllocationOffChain(Number(round1), app1Id)
       const expecteUnallocatedAllocationR1App1 = await calculateUnallocatedAppAllocationOffChain(
         Number(round1),
         app1Id,
@@ -822,13 +798,7 @@ describe("X-Allocation Pool", async function () {
       expect(claimableRewardsR1App1[1]).to.eql(expecteUnallocatedAllocationR1App1)
 
       const expectedBaseAllocationR2 = await calculateBaseAllocationOffChain(Number(round2))
-      let expectedVariableAllocationR2App1 = await calculateVariableAppAllocationOffChain(
-        Number(round2),
-        app1Id,
-        emissions,
-        xAllocationPool,
-        xAllocationVoting,
-      )
+      let expectedVariableAllocationR2App1 = await calculateVariableAppAllocationOffChain(Number(round2), app1Id)
       const expecteUnallocatedAllocationR2App1 = await calculateUnallocatedAppAllocationOffChain(
         Number(round2),
         app1Id,
@@ -892,25 +862,13 @@ describe("X-Allocation Pool", async function () {
       await waitForRoundToEnd(Number(round2))
 
       const expectedBaseAllocationR1 = await calculateBaseAllocationOffChain(Number(round1))
-      let expectedVariableAllocationR1App1 = await calculateVariableAppAllocationOffChain(
-        Number(round1),
-        app1Id,
-        emissions,
-        xAllocationPool,
-        xAllocationVoting,
-      )
+      let expectedVariableAllocationR1App1 = await calculateVariableAppAllocationOffChain(Number(round1), app1Id)
 
       let claimableRewardsR1App1 = await xAllocationPool.roundEarnings(round1, app1Id)
       expect(claimableRewardsR1App1[0]).to.eql(expectedVariableAllocationR1App1 + expectedBaseAllocationR1)
 
       const expectedBaseAllocationR2 = await calculateBaseAllocationOffChain(Number(round2))
-      let expectedVariableAllocationR2App1 = await calculateVariableAppAllocationOffChain(
-        Number(round2),
-        app1Id,
-        emissions,
-        xAllocationPool,
-        xAllocationVoting,
-      )
+      let expectedVariableAllocationR2App1 = await calculateVariableAppAllocationOffChain(Number(round2), app1Id)
       let claimableRewardsR2App1 = await xAllocationPool.roundEarnings(round2, app1Id)
       expect(claimableRewardsR2App1[0]).to.eql(expectedVariableAllocationR2App1 + expectedBaseAllocationR2)
     })

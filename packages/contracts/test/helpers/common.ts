@@ -294,13 +294,9 @@ export const calculateBaseAllocationOffChain = async (roundId: number) => {
   return amountPerApp
 }
 
-export const calculateVariableAppAllocationOffChain = async (
-  roundId: number,
-  appId: string,
-  emissions: Emissions,
-  xAllocationPool: XAllocationPool,
-  xAllocationVoting: XAllocationVoting,
-) => {
+export const calculateVariableAppAllocationOffChain = async (roundId: number, appId: string) => {
+  const { emissions, xAllocationVoting, xAllocationPool } = await getOrDeployContractInstances({})
+
   // Amount available for this round (assuming the amount is already scaled by 1e18 for precision)
   let totalAmount = await emissions.getXAllocationAmount(roundId)
 
