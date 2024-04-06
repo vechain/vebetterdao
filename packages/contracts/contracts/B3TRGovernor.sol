@@ -102,7 +102,7 @@ contract B3TRGovernor is
     return _quorumReached(proposalId);
   }
 
-  function proposalRound(uint256 proposalId) public view returns (uint256) {
+  function proposalStartRound(uint256 proposalId) public view returns (uint256) {
     return _getGovernorStorage()._proposals[proposalId].voteStartsInRound;
   }
 

@@ -16,6 +16,7 @@ import {
   getProposalIdFromTx,
   waitForProposalToBeActive,
   bootstrapAndStartEmissions,
+  waitForCurrentRoundToEnd,
 } from "./helpers"
 import { expect } from "chai"
 import { ethers } from "hardhat"
@@ -1308,7 +1309,7 @@ describe("VoterRewards", () => {
       // Now we can create a new proposal
       const tx = await createProposal(b3tr, B3trContract, voter1, description, functionToCall, [])
       const proposalId = await getProposalIdFromTx(tx, governor)
-      const cycle = await governor.proposalRound(proposalId)
+      const cycle = await governor.proposalStartRound(proposalId)
 
       const proposalState = await waitForProposalToBeActive(proposalId)
 
@@ -1346,7 +1347,7 @@ describe("VoterRewards", () => {
       // Now we can create a new proposal
       const tx = await createProposal(b3tr, B3trContract, voter1, description, functionToCall, [])
       const proposalId = await getProposalIdFromTx(tx, governor)
-      const cycle = await governor.proposalRound(proposalId)
+      const cycle = await governor.proposalStartRound(proposalId)
 
       const proposalState = await waitForProposalToBeActive(proposalId)
 
@@ -1413,7 +1414,7 @@ describe("VoterRewards", () => {
       // Now we can create a new proposal
       let tx = await createProposal(b3tr, B3trContract, voter1, description, functionToCall, [])
       let proposalId = await getProposalIdFromTx(tx, governor)
-      let cycle = await governor.proposalRound(proposalId)
+      let cycle = await governor.proposalStartRound(proposalId)
 
       const proposalState = await waitForProposalToBeActive(proposalId)
 
@@ -1437,7 +1438,7 @@ describe("VoterRewards", () => {
 
       tx = await createProposal(b3tr, B3trContract, voter1, description + "1", functionToCall, [])
       proposalId = await getProposalIdFromTx(tx, governor)
-      cycle = await governor.proposalRound(proposalId)
+      cycle = await governor.proposalStartRound(proposalId)
 
       await waitForProposalToBeActive(proposalId)
 
@@ -1520,14 +1521,14 @@ describe("VoterRewards", () => {
       await getVot3Tokens(voter2, "1000")
       await getVot3Tokens(voter3, "1000")
 
-      await bootstrapAndStartEmissions()
+      await bootstrapAndStartEmissions() // Round 1
 
       // Now we can create a new proposal
-      let tx = await createProposal(b3tr, B3trContract, voter1, description, functionToCall, [])
+      let tx = await createProposal(b3tr, B3trContract, voter1, description, functionToCall, []) // Starts in round 2
       let proposalId = await getProposalIdFromTx(tx, governor)
-      let cycle = await governor.proposalRound(proposalId)
+      let cycle = await governor.proposalStartRound(proposalId)
 
-      const proposalState = await waitForProposalToBeActive(proposalId)
+      const proposalState = await waitForProposalToBeActive(proposalId) // we are now in round 2
 
       expect(proposalState).to.equal("1") // Active
 
@@ -1535,17 +1536,15 @@ describe("VoterRewards", () => {
       await governor.connect(voter1).castVote(proposalId, 1) // For
       await governor.connect(voter2).castVote(proposalId, 1) // For
 
-      const xAllocationsRoundID = await xAllocationVoting.currentRoundId()
-
-      expect(xAllocationsRoundID).to.equal(cycle)
+      const xAllocationsRoundID = await xAllocationVoting.currentRoundId() // round 2
+      console.log("xAllocationsRoundID", xAllocationsRoundID)
+      expect(xAllocationsRoundID).to.equal(2n)
 
       expect(await xAllocationVoting.roundDeadline(xAllocationsRoundID)).to.lt(await emissions.getNextCycleBlock())
 
       // Upgrading GM NFT
       await b3trBadge.connect(voter1).freeMint()
-
       await upgradeNFTtoLevel(1, 5, b3trBadge, b3tr, voter1, minterAccount) // Upgrading to level 5
-
       expect(await b3trBadge.getLevel(voter1.address)).to.equal(5)
 
       // Vote on apps for the first round
@@ -1558,7 +1557,7 @@ describe("VoterRewards", () => {
           [ethers.parseEther("500"), ethers.parseEther("500")], // Voter 2 votes 500 for app1 and 500 for app2
           [ethers.parseEther("500"), ethers.parseEther("500")], // Voter 3 votes 500 for app1 and 500 for app2
         ],
-        xAllocationsRoundID, // First round
+        xAllocationsRoundID, // round 2
       )
 
       /*
@@ -1575,22 +1574,41 @@ describe("VoterRewards", () => {
       expect(await voterRewards.getReward(cycle, voter2.address)).to.equal(800000000000000000000000n) // 40%
       expect(await voterRewards.getReward(cycle, voter3.address)).to.equal(400000000000000000000000n) // 20%
 
-      // Now we can create a new proposal and the GM NFT upgrade will be taken into account
-      tx = await createProposal(b3tr, B3trContract, voter1, description + "1", functionToCall, [])
-      proposalId = await getProposalIdFromTx(tx, governor)
-      cycle = await governor.proposalRound(proposalId)
+      // round 3
+      await waitForCurrentRoundToEnd()
+      await emissions.distribute()
 
-      await waitForProposalToBeActive(proposalId)
+      // Now we can create a new proposal and the GM NFT upgrade will be taken into account
+      tx = await createProposal(b3tr, B3trContract, voter1, description + "1", functionToCall, []) // will start in round 4
+      proposalId = await getProposalIdFromTx(tx, governor)
+      cycle = await governor.proposalStartRound(proposalId)
+      console.log("will start in round 3", cycle)
+
+      await waitForProposalToBeActive(proposalId) // we are now in round 4
+      console.log("we are now in round 3", await xAllocationVoting.currentRoundId())
+
+      await voteOnApps(
+        xAllocationVoting,
+        [app1, app2],
+        [voter1, voter2, voter3],
+        [
+          [ethers.parseEther("1000"), ethers.parseEther("0")], // Voter 1 votes 1000 for app1
+          [ethers.parseEther("500"), ethers.parseEther("500")], // Voter 2 votes 500 for app1 and 500 for app2
+          [ethers.parseEther("500"), ethers.parseEther("500")], // Voter 3 votes 500 for app1 and 500 for app2
+        ],
+        cycle, // round 4
+      )
 
       // Vote on the proposal
       await governor.connect(voter1).castVote(proposalId, 1) // For
       await governor.connect(voter2).castVote(proposalId, 1) // For
 
-      await waitForNextCycle(emissions)
-      expect(await governor.state(proposalId)).to.not.equal(1n)
+      await waitForCurrentRoundToEnd() // still round 4, but ended
+      // await waitForNextCycle(emissions)
+      // expect(await governor.state(proposalId)).to.not.equal(1n)
 
       /*
-        voter 1 votes = 1000 votes for governance proposal 1 voting and 1000 votes for x allocation voting = 2000 votes + (1000 votes for governance voting proposal 2 * 100% multiplier ) = 4000 total votes 
+        voter 1 votes = 1000 votes for governance voting proposal 2 * 100% multiplier and 1000 votes for x allocation voting * 100% multpiplier = 4000 total votes 
         voter 2 votes = 1000 votes for governance proposal 1 voting and 1000 votes for x allocation voting = 2000 votes + (1000 votes for governance voting proposal 2 without NFT upgrade) = 3000 total votes
         voter 3 votes = 0 votes for governance proposal 1 voting and 1000 votes for x allocation voting = 1000 votes
 

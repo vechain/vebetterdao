@@ -105,7 +105,11 @@ export const waitForProposalToBeActive = async (proposalId: number): Promise<big
   let proposalState = await governor.state(proposalId) // proposal id of the proposal in the beforeAll step
 
   if (proposalState.toString() !== "1") {
-    await moveToCycle(emissions, minterAccount, parseInt((await governor.proposalRound(proposalId)).toString()) + 1)
+    await moveToCycle(
+      emissions,
+      minterAccount,
+      parseInt((await governor.proposalStartRound(proposalId)).toString()) + 1,
+    )
 
     // Update the proposal state
     proposalState = await governor.state(proposalId)

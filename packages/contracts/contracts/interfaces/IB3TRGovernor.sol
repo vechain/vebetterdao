@@ -27,5 +27,5 @@ interface IB3TRGovernor is IGovernor {
     uint256 roundId
   ) external returns (uint256 proposalId);
 
-  function proposalRound(uint256 proposalId) external view returns (uint256);
+  function proposalStartRound(uint256 proposalId) external view returns (uint256);
 }
