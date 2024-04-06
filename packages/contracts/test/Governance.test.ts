@@ -92,7 +92,7 @@ describe("Governor and TimeLock", function () {
       await waitForProposalToBeActive(proposalId)
 
       await governor.connect(owner).castVote(proposalId, 1)
-      await waitForVotingPeriodToEnd(proposalId, governor)
+      await waitForVotingPeriodToEnd(proposalId)
       expect(await governor.state(proposalId)).to.eql(4n) // succeded
 
       await governor.queue([await governor.getAddress()], [0], [encodedFunctionCall], descriptionHash)
@@ -644,7 +644,7 @@ describe("Governor and TimeLock", function () {
 
       if (!hasVoted) await governor.connect(voter3).castVote(proposalId, 1)
 
-      await waitForVotingPeriodToEnd(proposalId, governor)
+      await waitForVotingPeriodToEnd(proposalId)
 
       proposalState = await governor.state(proposalId)
       expect(proposalState.toString()).to.eql("4") // succeeded
@@ -716,7 +716,7 @@ describe("Governor and TimeLock", function () {
       await governor.connect(voter3).castVote(proposalId, 2) // vote abastain
 
       // wait
-      await waitForVotingPeriodToEnd(proposalId, governor)
+      await waitForVotingPeriodToEnd(proposalId)
 
       const proposalSnapshot = await governor.proposalSnapshot(proposalId)
 
@@ -769,7 +769,7 @@ describe("Governor and TimeLock", function () {
       await governor.connect(voter2).castVote(proposalId, 0) // vote against
 
       // wait
-      await waitForVotingPeriodToEnd(proposalId, governor)
+      await waitForVotingPeriodToEnd(proposalId)
 
       // Check if quorum is calculated correctly
       const isQuorumReached = await governor.quorumReached(proposalId)
@@ -813,7 +813,7 @@ describe("Governor and TimeLock", function () {
       await governor.connect(voter2).castVote(proposalId, 2) // vote abstain
 
       // wait
-      await waitForVotingPeriodToEnd(proposalId, governor)
+      await waitForVotingPeriodToEnd(proposalId)
 
       // Check if quorum is calculated correctly
       const isQuorumReached = await governor.quorumReached(proposalId)
@@ -857,7 +857,7 @@ describe("Governor and TimeLock", function () {
       await governor.connect(voter2).castVote(proposalId, 1) // vote yes
 
       // wait
-      await waitForVotingPeriodToEnd(proposalId, governor)
+      await waitForVotingPeriodToEnd(proposalId)
 
       // Check if quorum is calculated correctly
       const isQuorumReached = await governor.quorumReached(proposalId)
@@ -918,7 +918,7 @@ describe("Governor and TimeLock", function () {
       await governor.connect(voter).castVote(proposalId, 0) // vote against
 
       // wait
-      await waitForVotingPeriodToEnd(proposalId, governor)
+      await waitForVotingPeriodToEnd(proposalId)
       const proposalState = await governor.state(proposalId)
       expect(proposalState.toString()).to.eql("3") // defeated
 
@@ -957,7 +957,7 @@ describe("Governor and TimeLock", function () {
       await governor.connect(voter).castVote(proposalId, 1) // vote for
 
       // wait
-      await waitForVotingPeriodToEnd(proposalId, governor)
+      await waitForVotingPeriodToEnd(proposalId)
       const proposalState = await governor.state(proposalId)
       expect(proposalState.toString()).to.eql("4") // succeded
 
@@ -996,7 +996,7 @@ describe("Governor and TimeLock", function () {
       await governor.connect(voter).castVote(proposalId, 1) // vote for
 
       // wait
-      await waitForVotingPeriodToEnd(proposalId, governor)
+      await waitForVotingPeriodToEnd(proposalId)
       let proposalState = await governor.state(proposalId)
       expect(proposalState.toString()).to.eql("4") // succeded
 
@@ -1041,7 +1041,7 @@ describe("Governor and TimeLock", function () {
       await governor.connect(voter).castVote(proposalId, 1) // vote for
 
       // wait
-      await waitForVotingPeriodToEnd(proposalId, governor)
+      await waitForVotingPeriodToEnd(proposalId)
       let proposalState = await governor.state(proposalId)
       expect(proposalState.toString()).to.eql("4") // succeded
 
@@ -1091,7 +1091,7 @@ describe("Governor and TimeLock", function () {
       await governor.connect(voter).castVote(proposalId, 1) // vote for
 
       // wait
-      await waitForVotingPeriodToEnd(proposalId, governor)
+      await waitForVotingPeriodToEnd(proposalId)
       let proposalState = await governor.state(proposalId)
       expect(proposalState.toString()).to.eql("4") // succeded
 

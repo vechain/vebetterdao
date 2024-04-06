@@ -149,7 +149,7 @@ describe("X-Allocation Voting", function () {
       const proposalId = await getProposalIdFromTx(tx)
       await waitForProposalToBeActive(proposalId)
       await governor.connect(owner).castVote(proposalId, 1)
-      await waitForVotingPeriodToEnd(proposalId, governor)
+      await waitForVotingPeriodToEnd(proposalId)
       expect(await governor.state(proposalId)).to.eql(4n) // succeded
 
       await governor.queue([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash)
@@ -239,7 +239,7 @@ describe("X-Allocation Voting", function () {
       const proposalId = await getProposalIdFromTx(tx)
       await waitForProposalToBeActive(proposalId)
       await governor.connect(owner).castVote(proposalId, 1)
-      await waitForVotingPeriodToEnd(proposalId, governor)
+      await waitForVotingPeriodToEnd(proposalId)
       expect(await governor.state(proposalId)).to.eql(4n) // succeded
 
       await governor.queue([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash)
@@ -274,7 +274,7 @@ describe("X-Allocation Voting", function () {
       const proposalId = await getProposalIdFromTx(tx)
       await waitForProposalToBeActive(proposalId)
       await governor.connect(owner).castVote(proposalId, 1)
-      await waitForVotingPeriodToEnd(proposalId, governor)
+      await waitForVotingPeriodToEnd(proposalId)
       expect(await governor.state(proposalId)).to.eql(4n) // succeded
 
       await governor.queue([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash)

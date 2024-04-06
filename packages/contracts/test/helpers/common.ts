@@ -76,7 +76,9 @@ export const getProposalIdFromTx = async (tx: ContractTransactionResponse) => {
   return decodedLogs?.args[0]
 }
 
-export const waitForVotingPeriodToEnd = async (proposalId: number, governor: B3TRGovernor) => {
+export const waitForVotingPeriodToEnd = async (proposalId: number) => {
+  const { governor } = await getOrDeployContractInstances({})
+
   const deadline = await governor.proposalDeadline(proposalId)
 
   const currentBlock = await governor.clock()
@@ -164,7 +166,7 @@ export const createProposalAndExecuteIt = async (
 
   // wait
   // console.log("Waiting for voting period to end");
-  await waitForVotingPeriodToEnd(proposalId, governor)
+  await waitForVotingPeriodToEnd(proposalId)
 
   // queue it
   // console.log("Queueing");
@@ -382,7 +384,7 @@ export const participateInGovernanceVoting = async (
   await governor.connect(user).castVote(proposalId, 1)
 
   if (waitProposalToEnd) {
-    await waitForVotingPeriodToEnd(proposalId, governor)
+    await waitForVotingPeriodToEnd(proposalId)
   }
 }
 
