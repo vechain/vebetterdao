@@ -250,11 +250,9 @@ export const voteOnApps = async (
   }
 }
 
-export const addAppsToAllocationVoting = async (
-  xAllocationVoting: XAllocationVoting,
-  apps: string[],
-  owner: HardhatEthersSigner,
-) => {
+export const addAppsToAllocationVoting = async (apps: string[], owner: HardhatEthersSigner) => {
+  const { xAllocationVoting } = await getOrDeployContractInstances({})
+
   let appIds: string[] = []
   for (const app of apps) {
     await xAllocationVoting.connect(owner).addApp(app, app, app, "metadataURI")

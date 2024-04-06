@@ -1218,7 +1218,7 @@ describe("VoterRewards", () => {
           forceDeploy: true,
         })
 
-      const [app1] = await addAppsToAllocationVoting(xAllocationVoting, [otherAccount.address], owner)
+      const [app1] = await addAppsToAllocationVoting([otherAccount.address], owner)
 
       const voter1 = otherAccounts[0]
 
