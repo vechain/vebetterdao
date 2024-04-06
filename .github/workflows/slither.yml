@@ -35,6 +35,9 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Compile
+        run: yarn compile
+
       - name: Run Slither
         uses: crytic/slither-action@v0.3.2
         id: slither
