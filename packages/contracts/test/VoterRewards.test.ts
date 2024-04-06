@@ -374,7 +374,6 @@ describe("VoterRewards", () => {
 
       // Vote on apps for the first round
       await voteOnApps(
-        xAllocationVoting,
         [app1, app2],
         [voter1, voter2, voter3],
         [
@@ -461,7 +460,6 @@ describe("VoterRewards", () => {
 
       // Vote on apps for the second round
       await voteOnApps(
-        xAllocationVoting,
         [app1, app2],
         [voter1, voter2, voter3],
         [
@@ -611,7 +609,6 @@ describe("VoterRewards", () => {
 
       // Vote on apps for the first round
       await voteOnApps(
-        xAllocationVoting,
         [app1, app2],
         [voter1, voter2, voter3],
         [
@@ -653,7 +650,6 @@ describe("VoterRewards", () => {
 
       // Vote on apps for the second round
       await voteOnApps(
-        xAllocationVoting,
         [app1, app2],
         [voter1, voter2, voter3],
         [
@@ -734,7 +730,6 @@ describe("VoterRewards", () => {
 
       // Vote on apps for the first round
       await voteOnApps(
-        xAllocationVoting,
         [app1, app2],
         [voter1, voter2, voter3],
         [
@@ -774,7 +769,6 @@ describe("VoterRewards", () => {
 
       // Vote on apps for the second round
       await voteOnApps(
-        xAllocationVoting,
         [app1, app2],
         [voter1, voter2, voter3],
         [
@@ -856,7 +850,6 @@ describe("VoterRewards", () => {
 
       // Vote on apps for the first round
       await voteOnApps(
-        xAllocationVoting,
         [app1, app2],
         [voter1, voter2, voter3],
         [
@@ -907,7 +900,6 @@ describe("VoterRewards", () => {
 
       // Vote on apps for the second round
       await voteOnApps(
-        xAllocationVoting,
         [app1, app2],
         [voter1, voter2, voter3],
         [
@@ -1004,7 +996,6 @@ describe("VoterRewards", () => {
 
       // Vote on apps for the first round
       await voteOnApps(
-        xAllocationVoting,
         [app1, app2],
         [voter1, voter2, voter3],
         [
@@ -1048,7 +1039,6 @@ describe("VoterRewards", () => {
 
       // Vote on apps for the second round
       await voteOnApps(
-        xAllocationVoting,
         [app1, app2],
         [voter1, voter2, voter3],
         [
@@ -1130,7 +1120,6 @@ describe("VoterRewards", () => {
 
       // Vote on apps for the first round
       await voteOnApps(
-        xAllocationVoting,
         [app1, app2],
         [voter1, voter2, voter3],
         [
@@ -1174,7 +1163,6 @@ describe("VoterRewards", () => {
 
       // Vote on apps for the second round
       await voteOnApps(
-        xAllocationVoting,
         [app1, app2],
         [voter1, voter2, voter3],
         [
@@ -1243,7 +1231,7 @@ describe("VoterRewards", () => {
 
       const roundId = await xAllocationVoting.currentRoundId()
 
-      await voteOnApps(xAllocationVoting, [app1], [voter1], [[ethers.parseEther("1000")]], roundId)
+      await voteOnApps([app1], [voter1], [[ethers.parseEther("1000")]], roundId)
 
       await waitForRoundToEnd(Number(roundId))
 
@@ -1332,7 +1320,6 @@ describe("VoterRewards", () => {
         b3tr,
         governor,
         B3trContract,
-        emissions,
         voterRewards,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -1549,7 +1536,6 @@ describe("VoterRewards", () => {
 
       // Vote on apps for the first round
       await voteOnApps(
-        xAllocationVoting,
         [app1, app2],
         [voter1, voter2, voter3],
         [
@@ -1588,7 +1574,6 @@ describe("VoterRewards", () => {
       console.log("we are now in round 3", await xAllocationVoting.currentRoundId())
 
       await voteOnApps(
-        xAllocationVoting,
         [app1, app2],
         [voter1, voter2, voter3],
         [

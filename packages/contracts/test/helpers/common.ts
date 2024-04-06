@@ -238,12 +238,13 @@ export const moveToCycle = async (cycle: number) => {
 }
 
 export const voteOnApps = async (
-  xAllocationVoting: XAllocationVoting,
   apps: string[],
   voters: HardhatEthersSigner[],
   votes: Array<Array<bigint>>,
   roundId: bigint,
 ) => {
+  const { xAllocationVoting } = await getOrDeployContractInstances({})
+
   for (const voter of voters) {
     await xAllocationVoting.connect(voter).castVote(roundId, apps, votes[voters.indexOf(voter)])
   }
