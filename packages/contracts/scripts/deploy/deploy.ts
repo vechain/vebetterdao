@@ -144,7 +144,7 @@ export async function deployAll(config: ContractsConfig) {
     await xAllocationVoting.getAddress(),
     config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
     config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD,
-    config.B3TR_GOVERNOR_MIN_DELAY_BEFORE_VOTE_START,
+    config.B3TR_GOVERNOR_MIN_VOTING_DELAY,
     TEMP_ADMIN,
     await voterRewards.getAddress(),
   ])) as B3TRGovernor

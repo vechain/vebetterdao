@@ -163,7 +163,7 @@ export const getOrDeployContractInstances = async ({
     await xAllocationVoting.getAddress(),
     config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
     config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD, // voting threshold
-    config.B3TR_GOVERNOR_MIN_DELAY_BEFORE_VOTE_START, // delay before vote starts
+    config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
     owner.address,
     await voterRewards.getAddress(),
   ])) as B3TRGovernor

@@ -12,15 +12,15 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
  * Modifications:
  * - removed _votingPeriod
  * - removed _votingDelay (now it depends on the x-allocation roundId)
- * - added _minDelayBeforeVoteStart
+ * - added _minVotingDelay
  */
 abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradeable {
   /// @custom:storage-location erc7201:openzeppelin.storage.GovernorSettings
   struct GovernorSettingsStorage {
     // amount of token
     uint256 _proposalThreshold;
-    // min delay before voting starts
-    uint256 _minDelayBeforeVoteStart;
+    // min delay before voting can start
+    uint256 _minVotingDelay;
   }
 
   // keccak256(abi.encode(uint256(keccak256("openzeppelin.storage.GovernorSettings")) - 1)) & ~bytes32(uint256(0xff))
@@ -34,24 +34,24 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
   }
 
   event ProposalThresholdSet(uint256 oldProposalThreshold, uint256 newProposalThreshold);
-  event MinDelayBeforeVoteStartSet(uint256 oldMinMinDelayBeforeVoteStart, uint256 newMinDelayBeforeVoteStart);
+  event MinVotingDelaySet(uint256 oldMinMinVotingDelay, uint256 newMinVotingDelay);
 
   /**
    * @dev Initialize the governance parameters.
    */
   function __GovernorSettings_init(
     uint256 initialProposalThreshold,
-    uint256 initialMinDelayBeforeVoteStart
+    uint256 initialMinVotingDelay
   ) internal onlyInitializing {
-    __GovernorSettings_init_unchained(initialProposalThreshold, initialMinDelayBeforeVoteStart);
+    __GovernorSettings_init_unchained(initialProposalThreshold, initialMinVotingDelay);
   }
 
   function __GovernorSettings_init_unchained(
     uint256 initialProposalThreshold,
-    uint256 initialMinDelayBeforeVoteStart
+    uint256 initialMinVotingDelay
   ) internal onlyInitializing {
     _setProposalThreshold(initialProposalThreshold);
-    _setMinDelayBeforeVoteStart(initialMinDelayBeforeVoteStart);
+    _setMinVotingDelay(initialMinVotingDelay);
   }
 
   /**
@@ -63,11 +63,11 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
   }
 
   /**
-   * @dev See {B3TRGovernor-minDelayBeforeVoteStart}.
+   * @dev See {B3TRGovernor-minVotingDelay}.
    */
-  function minDelayBeforeVoteStart() public view virtual returns (uint256) {
+  function minVotingDelay() public view virtual returns (uint256) {
     GovernorSettingsStorage storage $ = _getGovernorSettingsStorage();
-    return $._minDelayBeforeVoteStart;
+    return $._minVotingDelay;
   }
 
   /**
@@ -83,10 +83,10 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
    * @dev Update the min voting delay before vote can start.
    * This operation can only be performed through a governance proposal.
    *
-   * Emits a {MinDelayBeforeVoteStartSet} event.
+   * Emits a {MinVotingDelaySet} event.
    */
-  function setMinDelayBeforeVoteStart(uint256 newMinDealyBeforeVoteStart) public virtual onlyGovernance {
-    _setMinDelayBeforeVoteStart(newMinDealyBeforeVoteStart);
+  function setMinVotingDelay(uint256 newMinVotingDelay) public virtual onlyGovernance {
+    _setMinVotingDelay(newMinVotingDelay);
   }
 
   /**
@@ -103,11 +103,11 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
   /**
    * @dev Internal setter for the min delay before vote starts.
    *
-   * Emits a {MinDelayBeforeVoteStartSet} event.
+   * Emits a {MinVotingDelaySet} event.
    */
-  function _setMinDelayBeforeVoteStart(uint256 newMinDealyBeforeVoteStart) internal virtual {
+  function _setMinVotingDelay(uint256 newMinVotingDelay) internal virtual {
     GovernorSettingsStorage storage $ = _getGovernorSettingsStorage();
-    emit MinDelayBeforeVoteStartSet($._minDelayBeforeVoteStart, newMinDealyBeforeVoteStart);
-    $._minDelayBeforeVoteStart = newMinDealyBeforeVoteStart;
+    emit MinVotingDelaySet($._minVotingDelay, newMinVotingDelay);
+    $._minVotingDelay = newMinVotingDelay;
   }
 }

@@ -196,7 +196,7 @@ describe("Governor and TimeLock", function () {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 5
-      config.B3TR_GOVERNOR_MIN_DELAY_BEFORE_VOTE_START = 3
+      config.B3TR_GOVERNOR_MIN_VOTING_DELAY = 3
       const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, emissions } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -215,8 +215,8 @@ describe("Governor and TimeLock", function () {
       // we should be in the following situation
       let currentBlock = await governor.clock()
       let currentRoundsEndsAt = await xAllocationVoting.currentRoundDeadline()
-      let minDelayBeforeVoteStart = await governor.minDelayBeforeVoteStart()
-      expect(minDelayBeforeVoteStart).to.be.greaterThan(currentRoundsEndsAt - currentBlock)
+      let minVotingDelay = await governor.minVotingDelay()
+      expect(minVotingDelay).to.be.greaterThan(currentRoundsEndsAt - currentBlock)
 
       // Now if we create a proposal it should revert because the start of the next round is too close
       let voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
@@ -242,8 +242,8 @@ describe("Governor and TimeLock", function () {
       // we should be in the following situation
       currentBlock = await governor.clock()
       currentRoundsEndsAt = await xAllocationVoting.currentRoundDeadline()
-      minDelayBeforeVoteStart = await governor.minDelayBeforeVoteStart()
-      expect(minDelayBeforeVoteStart).to.not.be.greaterThan(currentRoundsEndsAt - currentBlock)
+      minVotingDelay = await governor.minVotingDelay()
+      expect(minVotingDelay).to.not.be.greaterThan(currentRoundsEndsAt - currentBlock)
 
       // Now if we create a proposal it should not revert
       voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round

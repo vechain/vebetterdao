@@ -6,9 +6,9 @@ export function createTestnetConfig() {
 
     B3TR_CAP: 3_750_000, // 3_750_000 -> 3.75 million B3TR tokens for pilot show
     B3TR_GOVERNOR_QUORUM_PERCENTAGE: 4, // 4 -> Need 4% of voters to pass
-    B3TR_GOVERNOR_MIN_DELAY: 30, //after a vote passes, you have 5 min before you can vote queue the proposal
+    B3TR_GOVERNOR_MIN_DELAY: 30, //after a vote passes, you have 5 min before you can queue the proposal
     B3TR_GOVERNOR_PROPOSAL_THRESHOLD: 1000, // How many votes are needed to create a proposal
-    B3TR_GOVERNOR_MIN_DELAY_BEFORE_VOTE_START: 25920, // 3 days
+    B3TR_GOVERNOR_MIN_VOTING_DELAY: 25920, // 3 days
 
     EMISSIONS_CYCLE_DURATION: 60480, // blocks - 60480 blocks - 1 week.
     EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE: 4, // 4% decay every cycle

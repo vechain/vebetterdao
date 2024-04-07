@@ -68,7 +68,7 @@ contract B3TRGovernor is
    * @param _xAllocationVotingGovernor The address of the xAllocationVotingGovernor
    * @param _quorumPercentage quorum as a percentage of the total supply at the block a proposal’s voting power is retrieved
    * @param _initialProposalThreshold The Proposal Threshold is the amount of voting power that an account needs to make a proposal
-   * @param _initialMinDelayBeforeVoteStart The minimum delay before a proposal can start, used when creating proposals
+   * @param _initialMinVotingDelay The minimum delay before a proposal can start
    * @param governorAdmin The address of the governor admin
    * @param _voterRewards The address of the voter rewards contract
    */
@@ -78,12 +78,12 @@ contract B3TRGovernor is
     IXAllocationVotingGovernor _xAllocationVotingGovernor,
     uint256 _quorumPercentage,
     uint256 _initialProposalThreshold,
-    uint256 _initialMinDelayBeforeVoteStart,
+    uint256 _initialMinVotingDelay,
     address governorAdmin,
     address _voterRewards
   ) public initializer {
     __Governor_init("B3TRGovernor");
-    __GovernorSettings_init(_initialProposalThreshold, _initialMinDelayBeforeVoteStart);
+    __GovernorSettings_init(_initialProposalThreshold, _initialMinVotingDelay);
     __GovernorCountingSimple_init();
     __GovernorVotes_init(_vot3Token);
     __GovernorVotesQuorumFraction_init(_quorumPercentage);
@@ -166,7 +166,7 @@ contract B3TRGovernor is
     // if between now and the start of the round is less then the min delay, revert
     // only do this check if user wants to start proposal in the next round
     if (startRoundId == currentRoundId + 1) {
-      uint256 minDelay = minDelayBeforeVoteStart();
+      uint256 minDelay = minVotingDelay();
       uint256 currentRoundDeadline = _getB3TRGovernorStorage().xAllocationVotingGovernor.roundDeadline(currentRoundId);
       uint48 currentBlock = clock();
 
