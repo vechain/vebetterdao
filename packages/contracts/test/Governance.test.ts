@@ -12,6 +12,7 @@ import {
   participateInGovernanceVoting,
   bootstrapAndStartEmissions,
   waitForCurrentRoundToEnd,
+  moveBlocks,
 } from "./helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it } from "mocha"
@@ -173,6 +174,78 @@ describe("Governor and TimeLock", function () {
       expect(await governor.proposalDeadline(proposalId)).to.eql(
         currentRoundsEndsAt + 1n + (await xAllocationVoting.votingPeriod()),
       ) // proposal should end at the end of the current round + 1 block + voting period
+    })
+
+    it("Period between proposal creation and round start must be higher than min delay set in the contract", async () => {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.EMISSIONS_CYCLE_DURATION = 5
+      config.B3TR_GOVERNOR_MIN_DELAY_BEFORE_VOTE_START = 3
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, emissions } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // simulate 2 blocks passed
+      await moveBlocks(2)
+
+      // we should be in the following situation
+      let currentBlock = await governor.clock()
+      let currentRoundsEndsAt = await xAllocationVoting.currentRoundDeadline()
+      let minDelayBeforeVoteStart = await governor.minDelayBeforeVoteStart()
+      expect(minDelayBeforeVoteStart).to.be.greaterThan(currentRoundsEndsAt - currentBlock)
+
+      // Now if we create a proposal it should revert because the start of the next round is too close
+      let voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
+      await expect(
+        governor
+          .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+          .propose(
+            [await b3tr.getAddress()],
+            [0],
+            [B3trContract.interface.encodeFunctionData("tokenDetails", [])],
+            "",
+            voteStartsInRoundId.toString(),
+            {
+              gasLimit: 10_000_000,
+            },
+          ),
+      ).to.be.reverted
+
+      // simulate start of new round with enough voting delay
+      await waitForCurrentRoundToEnd()
+      await emissions.distribute()
+
+      // we should be in the following situation
+      currentBlock = await governor.clock()
+      currentRoundsEndsAt = await xAllocationVoting.currentRoundDeadline()
+      minDelayBeforeVoteStart = await governor.minDelayBeforeVoteStart()
+      expect(minDelayBeforeVoteStart).to.not.be.greaterThan(currentRoundsEndsAt - currentBlock)
+
+      // Now if we create a proposal it should not revert
+      voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
+
+      await expect(
+        governor
+          .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+          .propose(
+            [await b3tr.getAddress()],
+            [0],
+            [B3trContract.interface.encodeFunctionData("tokenDetails", [])],
+            "",
+            voteStartsInRoundId.toString(),
+            {
+              gasLimit: 10_000_000,
+            },
+          ),
+      ).to.not.be.reverted
     })
 
     it("Proposal is not active until the target round starts", async () => {

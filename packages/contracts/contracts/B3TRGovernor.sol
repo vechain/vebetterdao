@@ -38,7 +38,7 @@ contract B3TRGovernor is
   );
 
   error UnauthorizedAccess(address user);
-  error GovernorInvalidRound(uint256 roundId);
+  error GovernorInvalidStartRound(uint256 roundId);
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
@@ -68,6 +68,7 @@ contract B3TRGovernor is
    * @param _xAllocationVotingGovernor The address of the xAllocationVotingGovernor
    * @param _quorumPercentage quorum as a percentage of the total supply at the block a proposal’s voting power is retrieved
    * @param _initialProposalThreshold The Proposal Threshold is the amount of voting power that an account needs to make a proposal
+   * @param _initialMinDelayBeforeVoteStart The minimum delay before a proposal can start, used when creating proposals
    * @param governorAdmin The address of the governor admin
    * @param _voterRewards The address of the voter rewards contract
    */
@@ -77,11 +78,12 @@ contract B3TRGovernor is
     IXAllocationVotingGovernor _xAllocationVotingGovernor,
     uint256 _quorumPercentage,
     uint256 _initialProposalThreshold,
+    uint256 _initialMinDelayBeforeVoteStart,
     address governorAdmin,
     address _voterRewards
   ) public initializer {
     __Governor_init("B3TRGovernor");
-    __GovernorSettings_init(_initialProposalThreshold);
+    __GovernorSettings_init(_initialProposalThreshold, _initialMinDelayBeforeVoteStart);
     __GovernorCountingSimple_init();
     __GovernorVotes_init(_vot3Token);
     __GovernorVotesQuorumFraction_init(_quorumPercentage);
@@ -132,14 +134,14 @@ contract B3TRGovernor is
   /**
    * @dev See {IB3TRGovernor-propose}. This function has opt-in frontrunning protection, described in {_isValidDescriptionForProposer}.
    *
-   * The {targetRoundId} parameter is used to specify the round in which the proposal should be active. The round must be in the future.
+   * The {startRoundId} parameter is used to specify the round in which the proposal should be active. The round must be in the future.
    */
   function propose(
     address[] memory targets,
     uint256[] memory values,
     bytes[] memory calldatas,
     string memory description,
-    uint256 targetRoundId
+    uint256 startRoundId
   ) public virtual returns (uint256) {
     address proposer = _msgSender();
 
@@ -157,13 +159,29 @@ contract B3TRGovernor is
 
     // round must be in the future and emissions should be started
     uint256 currentRoundId = _getB3TRGovernorStorage().xAllocationVotingGovernor.currentRoundId();
-    if (currentRoundId == 0 || targetRoundId <= currentRoundId) {
-      revert GovernorInvalidRound(targetRoundId);
+    if (currentRoundId == 0 || startRoundId <= currentRoundId) {
+      revert GovernorInvalidStartRound(startRoundId);
     }
 
-    // TODO: if between now and the start of the round is less then 3 days then revert
+    // if between now and the start of the round is less then the min delay, revert
+    // only do this check if user wants to start proposal in the next round
+    if (startRoundId == currentRoundId + 1) {
+      uint256 minDelay = minDelayBeforeVoteStart();
+      uint256 currentRoundDeadline = _getB3TRGovernorStorage().xAllocationVotingGovernor.roundDeadline(currentRoundId);
+      uint48 currentBlock = clock();
 
-    return _propose(targets, values, calldatas, description, proposer, targetRoundId);
+      // this could happen if the round ended and the next one not started yet
+      if (currentRoundDeadline <= currentBlock) {
+        revert GovernorInvalidStartRound(startRoundId);
+      }
+
+      // if between now and the start of the new round is less then the min delay, revert
+      if (minDelay > currentRoundDeadline - currentBlock) {
+        revert GovernorInvalidStartRound(startRoundId);
+      }
+    }
+
+    return _propose(targets, values, calldatas, description, proposer, startRoundId);
   }
 
   /**
@@ -177,7 +195,7 @@ contract B3TRGovernor is
     bytes[] memory calldatas,
     string memory description,
     address proposer,
-    uint256 roundId
+    uint256 startRoundId
   ) internal virtual returns (uint256 proposalId) {
     GovernorStorage storage $ = _getGovernorStorage();
     proposalId = hashProposal(targets, values, calldatas, keccak256(bytes(description)));
@@ -192,7 +210,7 @@ contract B3TRGovernor is
 
     ProposalCore storage proposal = $._proposals[proposalId];
     proposal.proposer = proposer;
-    proposal.voteStartsInRound = roundId;
+    proposal.voteStartsInRound = startRoundId;
     proposal.voteDuration = SafeCast.toUint32(votingPeriod());
 
     emit ProposalCreated(
@@ -203,7 +221,7 @@ contract B3TRGovernor is
       new string[](targets.length),
       calldatas,
       description,
-      roundId
+      startRoundId
     );
 
     // Using a named return variable to avoid stack too deep errors

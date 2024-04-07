@@ -14,8 +14,9 @@ interface IB3TRGovernor is IGovernor {
     string description,
     uint256 voteStartsInRound
   );
+  event MinDelayBeforeVoteStartSet(uint256 oldMinMinDelayBeforeVoteStart, uint256 newMinDelayBeforeVoteStart);
 
-  error GovernorInvalidRound(uint256 roundId);
+  error GovernorInvalidStartRound(uint256 roundId);
 
   function hasVotedOnce(address user) external view returns (bool);
 
@@ -24,7 +25,7 @@ interface IB3TRGovernor is IGovernor {
     uint256[] memory values,
     bytes[] memory calldatas,
     string memory description,
-    uint256 roundId
+    uint256 startRoundId
   ) external returns (uint256 proposalId);
 
   function proposalStartRound(uint256 proposalId) external view returns (uint256);
