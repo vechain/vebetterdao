@@ -8,6 +8,7 @@ export function createTestConfig() {
     B3TR_GOVERNOR_QUORUM_PERCENTAGE: 4, // 4 -> Need 4% of voters to pass
     B3TR_GOVERNOR_MIN_DELAY: 30, //after a vote passes, you have 5 min before you can vote queue the proposal
     B3TR_GOVERNOR_PROPOSAL_THRESHOLD: 1000, // How many votes are needed to create a proposal
+    B3TR_GOVERNOR_MIN_DELAY_BEFORE_VOTE_START: 1, // 1 -> 1 block before the vote starts
 
     EMISSIONS_CYCLE_DURATION: 12, // 12 blocks - 2 minutes.
     EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE: 4, // 4% decay every cycle

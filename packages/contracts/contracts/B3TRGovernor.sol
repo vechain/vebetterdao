@@ -34,7 +34,7 @@ contract B3TRGovernor is
     string[] signatures,
     bytes[] calldatas,
     string description,
-    uint256 voteStartsInRound
+    uint256 roundIdVoteStart
   );
 
   error UnauthorizedAccess(address user);
@@ -105,7 +105,7 @@ contract B3TRGovernor is
   }
 
   function proposalStartRound(uint256 proposalId) public view returns (uint256) {
-    return _getGovernorStorage()._proposals[proposalId].voteStartsInRound;
+    return _getGovernorStorage()._proposals[proposalId].roundIdVoteStart;
   }
 
   function xAllocationVotingAddress() public view returns (IXAllocationVotingGovernor) {
@@ -203,14 +203,14 @@ contract B3TRGovernor is
     if (targets.length != values.length || targets.length != calldatas.length || targets.length == 0) {
       revert GovernorInvalidProposalLength(targets.length, calldatas.length, values.length);
     }
-    if ($._proposals[proposalId].voteStartsInRound != 0) {
+    if ($._proposals[proposalId].roundIdVoteStart != 0) {
       // Proposal already exists
       revert GovernorUnexpectedProposalState(proposalId, state(proposalId), bytes32(0));
     }
 
     ProposalCore storage proposal = $._proposals[proposalId];
     proposal.proposer = proposer;
-    proposal.voteStartsInRound = startRoundId;
+    proposal.roundIdVoteStart = startRoundId;
     proposal.voteDuration = SafeCast.toUint32(votingPeriod());
 
     emit ProposalCreated(
@@ -239,14 +239,14 @@ contract B3TRGovernor is
     GovernorStorage storage $$ = _getGovernorStorage();
 
     // if round is active or already occured proposal start block is the block when round started
-    if ($.xAllocationVotingGovernor.currentRoundId() >= $$._proposals[proposalId].voteStartsInRound) {
-      return $.xAllocationVotingGovernor.roundSnapshot($$._proposals[proposalId].voteStartsInRound);
+    if ($.xAllocationVotingGovernor.currentRoundId() >= $$._proposals[proposalId].roundIdVoteStart) {
+      return $.xAllocationVotingGovernor.roundSnapshot($$._proposals[proposalId].roundIdVoteStart);
     }
 
     // if we call this function before the round starts, it will return 0, so we need to estimate the start block
     uint256 blocksLeftUntilCurrentRoundEnds = $.xAllocationVotingGovernor.currentRoundDeadline() - clock();
     uint256 otherRoundsDurationIfTargetRoundIsNotNext = $.xAllocationVotingGovernor.votingPeriod() *
-      ($$._proposals[proposalId].voteStartsInRound - $.xAllocationVotingGovernor.currentRoundId() - 1);
+      ($$._proposals[proposalId].roundIdVoteStart - $.xAllocationVotingGovernor.currentRoundId() - 1);
 
     return clock() + blocksLeftUntilCurrentRoundEnds + otherRoundsDurationIfTargetRoundIsNotNext + 1;
   }
@@ -259,8 +259,8 @@ contract B3TRGovernor is
     GovernorStorage storage $$ = _getGovernorStorage();
 
     // if round is active or already occured proposal end block is the block when round ends
-    if ($.xAllocationVotingGovernor.currentRoundId() >= $$._proposals[proposalId].voteStartsInRound) {
-      return $.xAllocationVotingGovernor.roundDeadline($$._proposals[proposalId].voteStartsInRound);
+    if ($.xAllocationVotingGovernor.currentRoundId() >= $$._proposals[proposalId].roundIdVoteStart) {
+      return $.xAllocationVotingGovernor.roundDeadline($$._proposals[proposalId].roundIdVoteStart);
     }
 
     // if we call this function before the round starts, it will return 0, so we need to estimate the end block
@@ -324,12 +324,12 @@ contract B3TRGovernor is
       return ProposalState.Canceled;
     }
 
-    if (proposal.voteStartsInRound == 0) {
+    if (proposal.roundIdVoteStart == 0) {
       revert GovernorNonexistentProposal(proposalId);
     }
 
     // If the round where the proposal should be active is not started yet, the proposal is pending
-    if (_getB3TRGovernorStorage().xAllocationVotingGovernor.currentRoundId() < proposal.voteStartsInRound) {
+    if (_getB3TRGovernorStorage().xAllocationVotingGovernor.currentRoundId() < proposal.roundIdVoteStart) {
       return ProposalState.Pending;
     }
 

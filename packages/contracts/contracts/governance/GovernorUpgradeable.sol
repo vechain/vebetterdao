@@ -30,7 +30,7 @@ import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGove
  *
  * Modifications:
  * - _getGovernorStorage is internal
- * - Added voteStartsInRound to ProposalCore
+ * - Added roundIdVoteStart to ProposalCore
  * - removed voteStart block from ProposalCore
  * - abstract proposalSnapshot and proposalDeadline
  * - removed propose() and _propose()
@@ -56,7 +56,7 @@ abstract contract GovernorUpgradeable is
 
   struct ProposalCore {
     address proposer;
-    uint256 voteStartsInRound;
+    uint256 roundIdVoteStart;
     uint32 voteDuration;
     bool executed;
     bool canceled;

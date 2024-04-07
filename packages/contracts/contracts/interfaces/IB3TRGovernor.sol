@@ -12,7 +12,7 @@ interface IB3TRGovernor is IGovernor {
     string[] signatures,
     bytes[] calldatas,
     string description,
-    uint256 voteStartsInRound
+    uint256 roundIdVoteStart
   );
   event MinDelayBeforeVoteStartSet(uint256 oldMinMinDelayBeforeVoteStart, uint256 newMinDelayBeforeVoteStart);
 

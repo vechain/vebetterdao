@@ -36,7 +36,15 @@ export const createProposal = async (
   avoidMintingAndDelegating: boolean = false, // in some scenarios we want the operation to fail if the proposer does not have enough VOT3
   roundId?: string,
 ): Promise<ContractTransactionResponse> => {
-  const { xAllocationVoting, governor } = await getOrDeployContractInstances({})
+  const { xAllocationVoting, governor, emissions } = await getOrDeployContractInstances({})
+
+  if (!roundId) {
+    // to ensure that test will work correctly before creating a proposal we wait for current round to end
+    // and start a new one
+    await waitForCurrentRoundToEnd()
+    await emissions.distribute()
+    roundId = ((await xAllocationVoting.currentRoundId()) + 1n).toString()
+  }
 
   // the proposer needs to have some delegated VOT3 to be able to create a proposal
   const clock = await governor.clock()
@@ -53,11 +61,9 @@ export const createProposal = async (
   const address = await contractToCall.getAddress()
   const encodedFunctionCall = ContractFactory.interface.encodeFunctionData(functionTocall, values)
 
-  const voteStartsInRoundId = roundId ?? ((await xAllocationVoting.currentRoundId()) + 1n).toString()
-
   const tx = await governor
     .connect(proposer) //@ts-ignore
-    .propose([address], [0], [encodedFunctionCall], description, parseInt(voteStartsInRoundId), {
+    .propose([address], [0], [encodedFunctionCall], description, parseInt(roundId), {
       gasLimit: 10_000_000,
     })
 

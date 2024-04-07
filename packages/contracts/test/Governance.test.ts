@@ -59,7 +59,7 @@ describe("Governor and TimeLock", function () {
     })
 
     it("should be able to upgrade the governor contract through governance", async function () {
-      const { governor, owner, b3tr, B3trContract } = await getOrDeployContractInstances({
+      const { governor, owner, b3tr, emissions, xAllocationVoting } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -107,7 +107,23 @@ describe("Governor and TimeLock", function () {
 
       // Check that the new implementation works
       const newGovernor = Contract.attach(await governor.getAddress()) as B3TRGovernor
-      const newTx = await createProposal(b3tr, B3trContract, owner, description, "tokenDetails", [], false)
+
+      // start new round
+      await emissions.distribute()
+
+      // create a new proposal
+      const newTx = await newGovernor
+        .connect(owner) //@ts-ignore
+        .propose(
+          [await b3tr.getAddress()],
+          [0],
+          [encodedFunctionCall],
+          description,
+          (await xAllocationVoting.currentRoundId()) + 1n,
+          {
+            gasLimit: 10_000_000,
+          },
+        )
       const proposeReceipt = await newTx.wait()
       const event = proposeReceipt?.logs[0]
       const decodedLogs = newGovernor.interface.parseLog({
@@ -540,9 +556,6 @@ describe("Governor and TimeLock", function () {
           config,
         })
 
-      // Start emissions
-      await bootstrapAndStartEmissions()
-
       voter1 = otherAccounts[0] // with no VOT3
       voter2 = otherAccounts[1] // with VOT3 but no delegation
       voter3 = otherAccounts[2] // with VOT3 and delegation
@@ -556,6 +569,9 @@ describe("Governor and TimeLock", function () {
       // we do it here but will use in the next test
       await getVot3Tokens(voter3, "1000")
       await getVot3Tokens(voter4, "9")
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
 
       // Now we can create a new proposal
       const tx = await createProposal(b3tr, B3trContract, otherAccount, description, functionToCall, [], false)
@@ -1281,7 +1297,9 @@ describe("Governor and TimeLock", function () {
         B3trContract,
         owner,
         otherAccount: proposer,
-      } = await getOrDeployContractInstances({ forceDeploy: false })
+      } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      await bootstrapAndStartEmissions()
 
       const tx = await createProposal(
         b3tr,
@@ -1318,7 +1336,9 @@ describe("Governor and TimeLock", function () {
         b3tr,
         B3trContract,
         otherAccount: proposer,
-      } = await getOrDeployContractInstances({ forceDeploy: false })
+      } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      await bootstrapAndStartEmissions()
 
       const tx = await createProposal(
         b3tr,
