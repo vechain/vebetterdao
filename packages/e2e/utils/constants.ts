@@ -28,3 +28,13 @@ export const DYNAMIC_ACCOUNT_MIN = 20
 // fixed user accounts
 export const DAO_ADMIN_ACCOUNT = 1
 export const FIXED_ACCOUNT1 = 10
+export const APP_ADMIN_ACCOUNTS = {
+  "Vyvo": 7,
+  "Mugshot": 8,
+  "Cleanify": 10,
+}
+export const APPS = <const>[
+  'Vyvo',
+  'Mugshot',
+  'Cleanify',
+]
