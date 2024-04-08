@@ -30,6 +30,8 @@ interface IB3TRGovernor is IGovernor {
 
   function proposalStartRound(uint256 proposalId) external view returns (uint256);
 
+  function canProposalStartInNextRound() external view returns (bool);
+
   function minVotingDelay() external view returns (uint256);
 
   function setMinVotingDelay(uint256 newMinVotingDelay) external;

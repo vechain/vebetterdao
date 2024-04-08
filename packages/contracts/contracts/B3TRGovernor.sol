@@ -116,6 +116,26 @@ contract B3TRGovernor is
     return _getB3TRGovernorStorage().voterRewards;
   }
 
+  function canProposalStartInNextRound() public view returns (bool) {
+    B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
+    uint256 currentRoundId = $.xAllocationVotingGovernor.currentRoundId();
+    uint256 minVotingDelay = minVotingDelay();
+    uint256 currentRoundDeadline = $.xAllocationVotingGovernor.roundDeadline(currentRoundId);
+    uint48 currentBlock = clock();
+
+    // this could happen if the round ended and the next one not started yet
+    if (currentRoundDeadline <= currentBlock) {
+      return false;
+    }
+
+    // if between now and the start of the new round is less then the min delay, revert
+    if (minVotingDelay > currentRoundDeadline - currentBlock) {
+      return false;
+    }
+
+    return true;
+  }
+
   // ------------------ SETTERS ------------------ //
 
   function setVoterRewards(address _voterRewards) public onlyGovernance {
@@ -169,20 +189,9 @@ contract B3TRGovernor is
       revert GovernorInvalidStartRound(startRoundId);
     }
 
-    // if between now and the start of the round is less then the min delay, revert
     // only do this check if user wants to start proposal in the next round
     if (startRoundId == currentRoundId + 1) {
-      uint256 minDelay = minVotingDelay();
-      uint256 currentRoundDeadline = _getB3TRGovernorStorage().xAllocationVotingGovernor.roundDeadline(currentRoundId);
-      uint48 currentBlock = clock();
-
-      // this could happen if the round ended and the next one not started yet
-      if (currentRoundDeadline <= currentBlock) {
-        revert GovernorInvalidStartRound(startRoundId);
-      }
-
-      // if between now and the start of the new round is less then the min delay, revert
-      if (minDelay > currentRoundDeadline - currentBlock) {
+      if (!canProposalStartInNextRound()) {
         revert GovernorInvalidStartRound(startRoundId);
       }
     }

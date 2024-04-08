@@ -1,5 +1,5 @@
 import { XApp, useXAppMetadata } from "@/api"
-import { Control, Controller, FieldErrors, UseFormGetValues } from "react-hook-form"
+import { Control, Controller, FieldArrayWithId, FieldErrors, UseFormGetValues } from "react-hook-form"
 import { FormData } from "../AllocationRoundUserVotes"
 import {
   Box,
@@ -29,7 +29,7 @@ type Props = {
   getValues: UseFormGetValues<FormData>
   index: number
   xApp?: XApp
-  field: FormData["votes"][number]
+  field: FieldArrayWithId<FormData, "votes", "id">
   errors: FieldErrors<FormData>
   isDisabled?: boolean
   totalVotesAvailable?: string
