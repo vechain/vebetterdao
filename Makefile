@@ -48,3 +48,22 @@ build: install #@ Build the app.
 test: #@ Test the app.
 	yarn test
 .PHONY:build
+
+# E2E
+update-local: #@ Update local repo
+	make solo-down
+	docker images -af reference='vechain/thor' -q  2> docker rmi
+	yarn clean
+	make solo-up
+	yarn install
+	cp .env.example .env
+	cd packages/e2e && \
+	yarn clean && \
+	yarn install && \
+	yarn build
+	yarn dev
+run-all: #@ Spin-up local env
+	make solo-up
+	cd packages/e2e && yarn build
+	yarn build
+	yarn dev
