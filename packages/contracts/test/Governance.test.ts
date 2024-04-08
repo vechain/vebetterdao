@@ -334,6 +334,76 @@ describe("Governor and TimeLock", function () {
       expect(await governor.proposalDeadline(proposalId)).to.eql(
         currentRoundsEndsAt + 1n + (await xAllocationVoting.votingPeriod()),
       ) // proposal should end at the end of the current round + 1 block + voting period
+
+      expect(await governor.proposalStartRound(proposalId)).to.eql(2n) // proposal should start in round 2
+    })
+
+    it("Proposal snapshot and deadline behaves correctly", async () => {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.EMISSIONS_CYCLE_DURATION = 5
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, emissions } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      const tx = await governor
+        .connect(proposer) //@ts-ignore
+        .propose(
+          [await b3tr.getAddress()],
+          [0],
+          [B3trContract.interface.encodeFunctionData("tokenDetails", [])],
+          "Creating some random proposal",
+          (await xAllocationVoting.currentRoundId()) + 1n,
+          {
+            gasLimit: 10_000_000,
+          },
+        )
+
+      const proposalId = await getProposalIdFromTx(tx)
+
+      // since round 2 did not start yet the proposal snapshot should be an estimation
+      const snapshot = await governor.proposalSnapshot(proposalId)
+      const currentRoundEndsAt = await xAllocationVoting.currentRoundDeadline()
+      expect(snapshot).to.eql(currentRoundEndsAt + 1n)
+
+      // same for the deadline
+      const deadline = await governor.proposalDeadline(proposalId)
+      expect(deadline).to.eql(currentRoundEndsAt + 1n + (await xAllocationVoting.votingPeriod()))
+
+      // now we can simulate that the round starts with a few blocks of delay
+      await waitForCurrentRoundToEnd()
+      await moveBlocks(2)
+      await emissions.distribute()
+
+      // proposal should be active
+      expect(await governor.state(proposalId)).to.eql(1n)
+
+      // snapshot should be the start of the round and should be different from the estimated one
+      const newSnapshot = await governor.proposalSnapshot(proposalId)
+      expect(newSnapshot).to.eql(await xAllocationVoting.currentRoundSnapshot())
+      expect(newSnapshot).to.not.eql(snapshot)
+
+      // same for deadline
+      const newDeadline = await governor.proposalDeadline(proposalId)
+      expect(newDeadline).to.eql(await xAllocationVoting.currentRoundDeadline())
+      expect(newDeadline).to.not.eql(deadline)
+
+      // once the round ends the snapshot and deadline should be the same
+      await waitForCurrentRoundToEnd()
+      expect(await governor.state(proposalId)).to.not.eql(1n)
+
+      const finalSnapshot = await governor.proposalSnapshot(proposalId)
+      const finalDeadline = await governor.proposalDeadline(proposalId)
+      expect(finalSnapshot).to.eql(newSnapshot)
+      expect(finalDeadline).to.eql(newDeadline)
     })
 
     it("Period between proposal creation and round start must be higher than min delay set in the contract", async () => {
