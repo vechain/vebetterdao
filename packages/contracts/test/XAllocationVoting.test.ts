@@ -421,6 +421,24 @@ describe("X-Allocation Voting", function () {
       expect(await xAllocationVoting.hasRole(roundStarterRole, otherAccounts[7].address)).to.eql(true)
       await expect(xAllocationVoting.connect(otherAccounts[7]).startNewRound()).to.not.be.reverted
     })
+
+    it("Current round snapshot and deadline are correctly returned", async function () {
+      const { xAllocationVoting, emissions, minterAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      await emissions.connect(minterAccount).start()
+
+      let roundId = await xAllocationVoting.currentRoundId()
+      let roundSnapshot = await xAllocationVoting.currentRoundSnapshot()
+      let deadline = await xAllocationVoting.currentRoundDeadline()
+
+      expect(roundSnapshot).to.eql(await xAllocationVoting.roundSnapshot(roundId))
+      expect(deadline).to.eql(await xAllocationVoting.roundDeadline(roundId))
+    })
   })
 
   describe("App availability for allocation voting", function () {
