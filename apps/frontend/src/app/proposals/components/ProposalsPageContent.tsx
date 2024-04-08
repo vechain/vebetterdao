@@ -17,7 +17,7 @@ import {
 } from "@chakra-ui/react"
 import { FaScroll } from "react-icons/fa6"
 
-export const ProposalPageContent = () => {
+export const ProposalsPageContent = () => {
   const { data: proposalsEvents } = useProposalsEvents()
   const { data: activeProposals } = useActiveProposals()
   const { data: incomingProposals } = useIncomingProposals()
