@@ -148,7 +148,7 @@ describe("Governor and TimeLock", function () {
     })
   })
 
-  describe.only("Governor settings", function () {
+  describe("Governor settings", function () {
     it("should be able to update the xAllocationVoting address through governance", async function () {
       const { governor, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
