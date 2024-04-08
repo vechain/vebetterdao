@@ -15,12 +15,15 @@ import {
   useColorModeValue,
   Divider,
   Spinner,
+  Icon,
 } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
 import { B3TRIcon, VOT3Icon } from "./Icons"
 import { SwapButton } from "./Swap/SwapButton"
 import { useTokenColors } from "@/hooks"
+import { BaseTooltip } from "./BaseTooltip"
+import { FaCircleInfo } from "react-icons/fa6"
 
 const DECIMAL_PLACES = 4
 
@@ -116,7 +119,7 @@ export const BalanceCard: React.FC<Props> = () => {
         borderRadius={"2xl"}
         align="flex-start"
         spacing={12}>
-        <HStack align={"stretch"} justify={"stretch"} spacing={4}>
+        <HStack align={"stretch"} justify={"stretch"} spacing={4} w={"full"}>
           <Divider
             orientation="vertical"
             variant="thick"
@@ -125,8 +128,18 @@ export const BalanceCard: React.FC<Props> = () => {
             h="auto"
             borderRadius="7px"
           />
-          <VStack align="self-start">
-            <VOT3Icon boxSize={"32px"} />
+          <VStack align="self-start" w="full">
+            <HStack w={"full"} justifyContent={"space-between"}>
+              <VOT3Icon boxSize={"32px"} />
+              <BaseTooltip
+                text={
+                  "Your VOT3 swap limit is determined by your previous B3TR conversions, ensuring fairness in token swaps."
+                }>
+                <span>
+                  <Icon as={FaCircleInfo} position={"relative"} />
+                </span>
+              </BaseTooltip>
+            </HStack>
             <Heading size="2xl" fontWeight={900}>
               {compactFormatter.format(Number(vot3BalanceScaled))}
             </Heading>
