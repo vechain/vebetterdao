@@ -14,7 +14,7 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
  * @dev Extension of {XAllocationVotingGovernor} for voting weight extraction from an {ERC20Votes} token, or since v4.5 an {ERC721Votes}
  * token.
  */
-abstract contract GovernorVotesUpgradeable is Initializable, XAllocationVotingGovernor {
+abstract contract XAllocationGovernorVotesUpgradeable is Initializable, XAllocationVotingGovernor {
   /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.GovernorVotes
   struct GovernorVotesStorage {
     IERC5805 _token;
