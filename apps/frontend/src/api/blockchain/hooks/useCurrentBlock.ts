@@ -12,7 +12,7 @@ export const useCurrentBlock = () => {
   return useQuery({
     queryKey: currentBlockQueryKey(),
     queryFn: () => thor.status.head,
-    enabled: !!thor,
+    enabled: !!thor && !!thor.status.head,
     staleTime: 1000 * 60,
     refetchInterval: 1000 * 10,
   })
