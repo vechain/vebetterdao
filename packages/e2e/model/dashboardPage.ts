@@ -1,5 +1,5 @@
 import { Page } from 'playwright';
-import { HOMEPAGE } from '../utils/constants';
+import { APPS, HOMEPAGE } from "../utils/constants"
 import { expect } from '@playwright/test';
 import veWorldMockClient from '../utils/veworld-mock-client';
 import BigNumber from 'bignumber.js';
@@ -10,13 +10,16 @@ import { test, Locator } from '@playwright/test';
  * Dashboard page model
  */
 export class DashboardPage {
-    private page: Page
+    private readonly page: Page
     readonly connectWalletButton: Locator
     readonly veWorldOption: Locator
     readonly disconnectOption: Locator
     readonly b3trBalanceText: Locator
     readonly vot3BalanceText: Locator
     readonly swapButton: Locator
+    readonly openAppBtn: (appName: AppName) => Locator
+    readonly appDescription: (appName: AppName) => Locator
+    readonly appTitle: (appName: AppName) => Locator
 
     constructor(page: Page) {
         this.page = page
@@ -27,6 +30,9 @@ export class DashboardPage {
         this.b3trBalanceText = this.page.locator('xpath=//p[contains(text(),"B3TR Tokens")]/preceding-sibling::h2')
         this.vot3BalanceText = this.page.locator('xpath=//p[contains(text(),"VOT3 Tokens")]/preceding-sibling::h2')
         this.swapButton = this.page.locator('xpath=//button[contains(text(), "Swap")]')
+        this.openAppBtn = (appName: AppName) => this.page.locator(`(//*[contains(text(), '${appName}')])[1]`)
+        this.appDescription = (appName: AppName) => this.page.locator(`(//p[contains(text(), '${appName}')])[2]`)
+        this.appTitle = (appName: AppName) => this.page.locator(`(//p[contains(text(), '${appName}')])[1]`)
     }
 
     /**
@@ -126,4 +132,17 @@ export class DashboardPage {
         })
     }
 
+    async openAppDetails(appName: AppName) {
+        return test.step(`Open the "${appName}" app details page`, async () => {
+            await this.appTitle(appName).click()
+        })
+    }
+
+    async getAppDescription(appName: AppName) {
+        return test.step(`Get "${appName}" description text`, async () => {
+            await this.appTitle(appName).click()
+        })
+    }
 }
+
+export type AppName = typeof APPS[number]
