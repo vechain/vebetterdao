@@ -20,7 +20,7 @@ import { ethers } from "ethers"
  * value is the percentage of the vote (not scaled)
  */
 export type CastAllocationVotesProps = {
-  id: string
+  appId: string
   value: string
   rawValue: number
 }[]
@@ -56,8 +56,10 @@ export const useCastAllocationVotes = ({
 
   const buildClauses = useCallback(
     (data: CastAllocationVotesProps) => {
-      const apps = data.map(value => value.id)
-      const votes = data.map(value => ethers.parseEther(Number(value.rawValue).toString()))
+      const filteredData = data.filter(value => value.rawValue > 0)
+
+      const apps = filteredData.map(value => value.appId)
+      const votes = filteredData.map(value => ethers.parseEther(value.rawValue.toString()))
 
       const clause: EnhancedClause = {
         to: getConfig().xAllocationVotingContractAddress,

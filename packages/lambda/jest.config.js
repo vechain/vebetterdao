@@ -1,0 +1,8 @@
+/** @type {import('ts-jest').JestConfigWithTsJest} */
+module.exports = {
+  preset: "ts-jest",
+  testEnvironment: "node",
+  coverageReporters: ["html", "lcov", "json"],
+  workerThreads: true,
+  testTimeout: 10000,
+}

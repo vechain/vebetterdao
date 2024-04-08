@@ -1292,4 +1292,97 @@ describe("X-Allocation Pool", async function () {
     const claimableAmountAfterClaim = await xAllocationPool.claimableAmount(round1, app1Id)
     expect(claimableAmountAfterClaim[0]).to.eql(0n)
   })
+
+  it("When adding new app previous allocations should remain the same", async function () {
+    const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, b3tr, minterAccount } =
+      await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+    const voter1 = otherAccounts[1]
+    await getVot3Tokens(voter1, "1000")
+
+    //Add apps
+    const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+    const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
+    const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3")) // to add later
+    await xAllocationVoting
+      .connect(owner)
+      .addApp(otherAccounts[2].address, otherAccounts[2].address, "My app", "metadataURI")
+    await xAllocationVoting
+      .connect(owner)
+      .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app #2", "metadataURI")
+
+    // Bootstrap emissions
+    await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+    await emissions.connect(minterAccount).start()
+
+    const round1 = await xAllocationVoting.currentRoundId()
+
+    // Vote
+    await xAllocationVoting
+      .connect(voter1)
+      .castVote(round1, [app1Id, app2Id], [ethers.parseEther("100"), ethers.parseEther("900")])
+
+    await waitForRoundToEnd(Number(round1), xAllocationVoting)
+    let state = await xAllocationVoting.state(round1)
+    expect(state).to.eql(BigInt(2))
+
+    const app1Earnings = await xAllocationPool.roundEarnings(round1, app1Id)
+    const app2Earnings = await xAllocationPool.roundEarnings(round1, app2Id)
+    const app3Earnings = await xAllocationPool.roundEarnings(round1, app3Id)
+    expect(app3Earnings[0]).to.eql(0n)
+
+    const baseAllocationAmountBeforeAddingApp3 = await xAllocationPool.baseAllocationAmount(round1)
+
+    // Add new app
+    await xAllocationVoting
+      .connect(owner)
+      .addApp(otherAccounts[4].address, otherAccounts[4].address, "My app #3", "metadataURI")
+
+    // Start new round
+    await emissions.distribute()
+
+    expect(app1Earnings).to.eql(await xAllocationPool.roundEarnings(round1, app1Id))
+    expect(app2Earnings).to.eql(await xAllocationPool.roundEarnings(round1, app2Id))
+    expect(app3Earnings).to.eql(await xAllocationPool.roundEarnings(round1, app3Id))
+    expect((await xAllocationPool.roundEarnings(round1, app3Id))[0]).to.eql(0n)
+
+    expect(baseAllocationAmountBeforeAddingApp3).to.eql(await xAllocationPool.baseAllocationAmount(round1))
+
+    await waitForRoundToEnd(Number(await xAllocationVoting.currentRoundId()), xAllocationVoting)
+
+    // remove app
+    await xAllocationVoting.connect(owner).setVotingElegibility(app3Id, false)
+
+    // Start new round
+    await emissions.distribute()
+
+    const round3 = await xAllocationVoting.currentRoundId()
+
+    // Vote
+    await xAllocationVoting
+      .connect(voter1)
+      .castVote(round3, [app1Id, app2Id], [ethers.parseEther("100"), ethers.parseEther("900")])
+
+    await waitForRoundToEnd(Number(round3), xAllocationVoting)
+    state = await xAllocationVoting.state(round3)
+    expect(state).to.eql(BigInt(2))
+
+    const app1EarningsInRound3 = await xAllocationPool.roundEarnings(round3, app1Id)
+    const app2EarningsInRound3 = await xAllocationPool.roundEarnings(round3, app2Id)
+    const app3EarningsInRound3 = await xAllocationPool.roundEarnings(round3, app3Id)
+    expect(app3EarningsInRound3[0]).to.eql(0n)
+
+    // add again
+    await xAllocationVoting.connect(owner).setVotingElegibility(app3Id, true)
+
+    // Start new round
+    await emissions.distribute()
+
+    expect(app1EarningsInRound3).to.eql(await xAllocationPool.roundEarnings(round3, app1Id))
+    expect(app2EarningsInRound3).to.eql(await xAllocationPool.roundEarnings(round3, app2Id))
+    expect(app3EarningsInRound3).to.eql(await xAllocationPool.roundEarnings(round3, app3Id))
+    expect((await xAllocationPool.roundEarnings(round3, app3Id))[0]).to.eql(0n)
+  })
 })
