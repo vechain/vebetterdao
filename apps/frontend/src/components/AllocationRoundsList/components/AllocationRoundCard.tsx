@@ -89,7 +89,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
                 <Text fontWeight={"400"} color={"gray"}>
                   {isActive
                     ? `ends ${allocationRound.voteEndTimestamp?.fromNow()}`
-                    : `${allocationRound.voteStartTimestamp?.fromNow()}`}
+                    : `${allocationRound.voteEndTimestamp?.fromNow()}`}
                 </Text>
               </Show>
             </HStack>
