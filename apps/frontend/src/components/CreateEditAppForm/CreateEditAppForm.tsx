@@ -187,6 +187,15 @@ export const CreateEditAppForm = ({
             <Controller
               name="logo"
               control={control}
+              rules={{
+                required: "Logo is required",
+                validate: value => {
+                  if (!value) {
+                    return "Logo is required"
+                  }
+                  if (value === "/images/dapp_icon_placeholder.svg") return "Please upload a logo"
+                },
+              }}
               render={({ field: { value } }) => (
                 <FormControl isInvalid={!!errors.logo}>
                   <FormLabel>Logo</FormLabel>
@@ -215,6 +224,15 @@ export const CreateEditAppForm = ({
             <Controller
               name="banner"
               control={control}
+              rules={{
+                required: "Banner is required",
+                validate: value => {
+                  if (!value) {
+                    return "Logo is required"
+                  }
+                  if (value === "/images/dapp_banner_placeholder.svg") return "Please upload a banner"
+                },
+              }}
               render={({ field: { value } }) => (
                 <FormControl isInvalid={!!errors.banner}>
                   <FormLabel>Banner</FormLabel>

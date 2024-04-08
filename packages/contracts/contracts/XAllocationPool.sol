@@ -48,12 +48,7 @@ contract XAllocationPool is
     _disableInitializers();
   }
 
-  function initialize(
-    address _admin,
-    address upgrader,
-    address b3trAddress,
-    address treasury
-  ) public initializer {
+  function initialize(address _admin, address upgrader, address b3trAddress, address treasury) public initializer {
     __AccessControl_init();
     __ReentrancyGuard_init();
     __UUPSUpgradeable_init();
@@ -107,7 +102,10 @@ contract XAllocationPool is
 
     // Transfer the unallocated rewards to the treasury
     if (unallocatedAmount > 0) {
-      require($.b3tr.transfer(address($.treasury), unallocatedAmount), "Transfer of unallocated rewards to treasury failed");
+      require(
+        $.b3tr.transfer(address($.treasury), unallocatedAmount),
+        "Transfer of unallocated rewards to treasury failed"
+      );
     }
 
     // emit event
@@ -177,6 +175,11 @@ contract XAllocationPool is
       xAllocationVoting() != IXAllocationVotingGovernor(address(0)),
       "XAllocationVotingGovernor contract not set"
     );
+
+    // if app did not participate in the round, return 0
+    if (!xAllocationVoting().isEligibleForVote(appId, roundId)) {
+      return (0, 0);
+    }
 
     uint256 lastSucceededRoundId;
     IXAllocationVotingGovernor.RoundState state = xAllocationVoting().state(roundId);
@@ -248,6 +251,11 @@ contract XAllocationPool is
       xAllocationVoting() != IXAllocationVotingGovernor(address(0)),
       "XAllocationVotingGovernor contract not set"
     );
+
+    // if app did not participate in the round, return 0
+    if (!xAllocationVoting().isEligibleForVote(appId, roundId)) {
+      return (0, 0);
+    }
 
     uint256 totalVotes = xAllocationVoting().totalVotes(roundId);
     uint256 appVotes = xAllocationVoting().getAppVotes(roundId, appId);

@@ -60,13 +60,7 @@ export const AppCard = ({ xApp }: Props) => {
           <VStack spacing={1} align="flex-start">
             <HStack spacing={1} justifyContent={"space-between"} align="center" w={"full"}>
               <Skeleton isLoaded={!appMetadataLoading}>
-                <Text
-                  fontWeight={"600"}
-                  size={"xs"}
-                  onClick={navigateToAppDetail}
-                  _hover={{
-                    cursor: "pointer",
-                  }}>
+                <Text fontWeight={"600"} size={"xs"}>
                   {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
                 </Text>
               </Skeleton>
@@ -84,6 +78,8 @@ export const AppCard = ({ xApp }: Props) => {
                     isLoading={appMetadataLoading}
                     isOpen={isMobileOptionsOpen}
                     onClose={closeMobileOptions}
+                    xAppId={xApp.id}
+                    showViewDetails={true}
                   />
                 </>
               ) : (
@@ -91,17 +87,13 @@ export const AppCard = ({ xApp }: Props) => {
                   receiverAddress={xApp.receiverAddress}
                   externalUrl={appMetadata?.external_url}
                   isLoading={appMetadataLoading}
+                  xAppId={xApp.id}
+                  showViewDetails={true}
                 />
               )}
             </HStack>
             <Skeleton isLoaded={!appMetadataLoading}>
-              <Text
-                fontSize={"sm"}
-                color={"gray.500"}
-                onClick={navigateToAppDetail}
-                _hover={{
-                  cursor: "pointer",
-                }}>
+              <Text fontSize={"sm"} color={"gray.500"}>
                 {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
               </Text>
             </Skeleton>

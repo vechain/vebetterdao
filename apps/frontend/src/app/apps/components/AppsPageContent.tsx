@@ -1,6 +1,7 @@
 import { useXApps } from "@/api"
 import { HStack, Heading, VStack, Grid, Spinner } from "@chakra-ui/react"
 import { AppCard } from "./AppCard"
+import { AddNewAppCard } from "./AddNewAppCard"
 
 export const AppsPageContent = () => {
   const { data, isLoading } = useXApps()
@@ -21,6 +22,7 @@ export const AppsPageContent = () => {
         <Heading size="md">Explore Apps</Heading>
       </HStack>
       <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
+        <AddNewAppCard />
         {data?.map(xApp => <AppCard key={xApp.id} xApp={xApp} />)}
       </Grid>
     </VStack>

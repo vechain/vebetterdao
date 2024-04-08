@@ -66,6 +66,7 @@ export const AppDetailCard = ({ appId, showEditButton = true }: Props) => {
             receiverAddress={xApp.receiverAddress}
             externalUrl={appMetadata?.external_url}
             isLoading={appMetadataLoading}
+            xAppId={xApp.id}
           />
         </>
       )
@@ -75,6 +76,7 @@ export const AppDetailCard = ({ appId, showEditButton = true }: Props) => {
         receiverAddress={xApp.receiverAddress}
         externalUrl={appMetadata?.external_url}
         isLoading={appMetadataLoading}
+        xAppId={xApp.id}
       />
     )
   }, [isMobile, openMobileOptions, xApp, isMobileOptionsOpen, closeMobileOptions])
