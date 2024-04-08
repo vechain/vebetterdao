@@ -69,17 +69,14 @@ export const CurrentRoundAllocations = ({ roundId }: Props) => {
         <HStack justify={"space-between"} w="full">
           <Heading size="md">Round #{roundId} allocations </Heading>
           {round?.state === "0" && (
-            <BaseTooltip
-              text={"Round is still active, final results could change if quorum is not reached"}
-              children={
-                <Tag colorScheme="inherit" size={"lg"} style={{ cursor: "default" }}>
-                  <HStack spacing={1} align={"center"}>
-                    <DotSymbol color="secondary.500" />
-                    <Text fontSize={"sm"}>Active</Text>
-                  </HStack>
-                </Tag>
-              }
-            />
+            <BaseTooltip text={"Round is still active, final results could change if quorum is not reached"}>
+              <Tag colorScheme="inherit" size={"lg"} style={{ cursor: "default" }}>
+                <HStack spacing={1} align={"center"}>
+                  <DotSymbol color="secondary.500" />
+                  <Text fontSize={"sm"}>Active</Text>
+                </HStack>
+              </Tag>
+            </BaseTooltip>
           )}
         </HStack>
       </CardHeader>

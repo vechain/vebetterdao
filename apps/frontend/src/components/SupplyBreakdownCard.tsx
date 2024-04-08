@@ -92,14 +92,11 @@ export const SupplyBreakdownCard = () => {
       <CardHeader>
         <HStack w="full" justify={"space-between"}>
           <Heading size="md">Supply breakdown</Heading>
-          <BaseTooltip
-            text={"B3TR Total Value Locked (TVL) equals the amount of VOT3 circulating."}
-            children={
-              <span>
-                <Icon as={FaCircleInfo} position={"relative"} />
-              </span>
-            }
-          />
+          <BaseTooltip text={"B3TR Total Value Locked (TVL) equals the amount of VOT3 circulating."}>
+            <span>
+              <Icon as={FaCircleInfo} position={"relative"} />
+            </span>
+          </BaseTooltip>
         </HStack>
       </CardHeader>
       <CardBody>
