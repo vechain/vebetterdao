@@ -13,6 +13,7 @@ import {
   bootstrapAndStartEmissions,
   waitForCurrentRoundToEnd,
   moveBlocks,
+  createProposalAndExecuteIt,
 } from "./helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it } from "mocha"
@@ -24,7 +25,7 @@ describe("Governor and TimeLock", function () {
   describe("Governor deployment", function () {
     it("should set constructors correctly", async function () {
       const config = createLocalConfig()
-      const { governor, vot3, owner, timeLock, xAllocationVoting } = await getOrDeployContractInstances({
+      const { governor, vot3, owner, timeLock, xAllocationVoting, voterRewards } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -32,9 +33,17 @@ describe("Governor and TimeLock", function () {
 
       const votesThreshold = (await governor.proposalThreshold()).toString()
       const votingPeriod = await governor.votingPeriod()
+      const minVotingDelay = await governor.minVotingDelay()
 
       expect(votesThreshold).to.eql(config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD.toString())
       expect(votingPeriod).to.eql(await xAllocationVoting.votingPeriod())
+      expect(minVotingDelay.toString()).to.eql(config.B3TR_GOVERNOR_MIN_VOTING_DELAY.toString())
+
+      const xAllocationVotingAddress = await governor.xAllocationVotingAddress()
+      const voterRewardsAddress = await governor.voterRewardsAddress()
+
+      expect(xAllocationVotingAddress).to.eql(await xAllocationVoting.getAddress())
+      expect(voterRewardsAddress).to.eql(await voterRewards.getAddress())
 
       // proposers votes should be 0
       const clock = await governor.clock()
@@ -138,6 +147,141 @@ describe("Governor and TimeLock", function () {
       expect(await governor.quorumReached(proposalId)).to.eql(true)
     })
   })
+
+  describe.only("Governor settings", function () {
+    it("should be able to update the xAllocationVoting address through governance", async function () {
+      const { governor, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const newAddress = ethers.Wallet.createRandom().address
+      await createProposalAndExecuteIt(
+        owner,
+        owner,
+        governor,
+        await ethers.getContractFactory("B3TRGovernor"),
+        "Update xAllocationVoting address",
+        "setXAllocationVoting",
+        [newAddress],
+      )
+
+      const updatedAddress = await governor.xAllocationVotingAddress()
+      expect(updatedAddress).to.eql(newAddress)
+    })
+
+    it("only governance can update xAllocationVoting address", async function () {
+      const { governor, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const newAddress = ethers.Wallet.createRandom().address
+
+      await catchRevert(governor.connect(owner).setXAllocationVoting(newAddress))
+
+      const updatedAddress = await governor.xAllocationVotingAddress()
+      expect(updatedAddress).to.not.eql(newAddress)
+    })
+
+    it("can update voterRewards address through governance", async function () {
+      const { governor, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const newAddress = ethers.Wallet.createRandom().address
+      await createProposalAndExecuteIt(
+        owner,
+        owner,
+        governor,
+        await ethers.getContractFactory("B3TRGovernor"),
+        "Update Voter Rewards address",
+        "setVoterRewards",
+        [newAddress],
+      )
+
+      const updatedAddress = await governor.voterRewardsAddress()
+      expect(updatedAddress).to.eql(newAddress)
+    })
+
+    it("only governance can update voterRewards address", async function () {
+      const { governor, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const newAddress = ethers.Wallet.createRandom().address
+
+      await catchRevert(governor.connect(owner).setVoterRewards(newAddress))
+
+      const updatedAddress = await governor.voterRewardsAddress()
+      expect(updatedAddress).to.not.eql(newAddress)
+    })
+
+    it("can update proposal threshold through governance", async function () {
+      const { governor, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const newThreshold = 10n
+      await createProposalAndExecuteIt(
+        owner,
+        owner,
+        governor,
+        await ethers.getContractFactory("B3TRGovernor"),
+        "Update Proposal Threshold",
+        "setProposalThreshold",
+        [newThreshold],
+      )
+
+      const updatedThreshold = await governor.proposalThreshold()
+      expect(updatedThreshold).to.eql(newThreshold)
+    })
+
+    it("only governance can update proposal threshold", async function () {
+      const { governor, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const newThreshold = 10n
+
+      await catchRevert(governor.connect(owner).setProposalThreshold(newThreshold))
+
+      const updatedThreshold = await governor.proposalThreshold()
+      expect(updatedThreshold).to.not.eql(newThreshold)
+    })
+
+    it("can update min voting delay through governance", async function () {
+      const { governor, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const newDelay = 10n
+      await createProposalAndExecuteIt(
+        owner,
+        owner,
+        governor,
+        await ethers.getContractFactory("B3TRGovernor"),
+        "Update Min Voting Delay",
+        "setMinVotingDelay",
+        [newDelay],
+      )
+
+      const updatedDelay = await governor.minVotingDelay()
+      expect(updatedDelay).to.eql(newDelay)
+    })
+
+    it("only governance can update min voting delay", async function () {
+      const { governor, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const newDelay = 10n
+
+      await catchRevert(governor.connect(owner).setMinVotingDelay(newDelay))
+
+      const updatedDelay = await governor.minVotingDelay()
+      expect(updatedDelay).to.not.eql(newDelay)
+    })
+  })
+
   describe("Proposal Creation", function () {
     it("When creating a proposal we should specify the round when it should become active", async () => {
       const config = createLocalConfig()

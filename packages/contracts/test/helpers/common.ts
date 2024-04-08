@@ -41,8 +41,14 @@ export const createProposal = async (
   if (!roundId) {
     // to ensure that test will work correctly before creating a proposal we wait for current round to end
     // and start a new one
-    await waitForCurrentRoundToEnd()
-    await emissions.distribute()
+    if ((await emissions.nextCycle()) === 0n) {
+      // if emissions are not started yet, we need to bootstrap and start them
+      await bootstrapAndStartEmissions()
+    } else {
+      // otherwise we need to wait for the current round to end and start the next one
+      await waitForCurrentRoundToEnd()
+      await emissions.distribute()
+    }
     roundId = ((await xAllocationVoting.currentRoundId()) + 1n).toString()
   }
 
