@@ -6,6 +6,7 @@ import {
   getVotesQueryKey,
   buildB3trApprovesTx,
   getB3TrTokenDetailsQueryKey,
+  getStakedB3TRQueryKey,
 } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
@@ -13,7 +14,6 @@ import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTran
 import { useCallback, useMemo } from "react"
 import { useConnex, useWallet } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
-import BigNumber from "bignumber.js"
 import { removingExcessDecimals } from "@/utils/MathUtils"
 
 const config = getConfig()
@@ -97,6 +97,15 @@ export const useStakeB3tr = ({
       })
       await queryClient.refetchQueries({
         queryKey: getB3TrTokenDetailsQueryKey(),
+      })
+
+      // staked b3tr
+      await queryClient.refetchQueries({
+        queryKey: getStakedB3TRQueryKey(account ?? undefined),
+      })
+
+      await queryClient.cancelQueries({
+        queryKey: getStakedB3TRQueryKey(account ?? undefined),
       })
     }
 
