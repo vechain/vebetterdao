@@ -157,9 +157,15 @@ contract B3TRGovernor is
       revert GovernorInsufficientProposerVotes(proposer, proposerVotes, votesThreshold);
     }
 
-    // round must be in the future and emissions should be started
     uint256 currentRoundId = _getB3TRGovernorStorage().xAllocationVotingGovernor.currentRoundId();
-    if (currentRoundId == 0 || startRoundId <= currentRoundId) {
+
+    // if allocation rounds did not start yet, revert, otherwise we will have issues with roundSnapshot and roundDeadline
+    if (currentRoundId == 0) {
+      revert GovernorInvalidStartRound(startRoundId);
+    }
+
+    // round must be in the future
+    if (startRoundId <= currentRoundId) {
       revert GovernorInvalidStartRound(startRoundId);
     }
 

@@ -358,6 +358,33 @@ describe("Governor and TimeLock", function () {
       expect(await governor.state(proposalId)).to.not.eql(0n) // pending
     })
 
+    it("Cannot create a proposal if emissions did not start", async () => {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.EMISSIONS_CYCLE_DURATION = 5
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+
+      // Now we can create a new proposal
+      const address = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+      const currentRoundId = await xAllocationVoting.currentRoundId() // starts in current round
+      expect(currentRoundId).to.eql(0n)
+
+      await expect(
+        governor
+          .connect(proposer) //@ts-ignore
+          .propose([address], [0], [encodedFunctionCall], "", 1n, {
+            gasLimit: 10_000_000,
+          }),
+      ).to.be.reverted
+    })
+
     it("Should not be able to create a proposal starting in a round that has already passed", async () => {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
