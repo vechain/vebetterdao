@@ -5,6 +5,7 @@
   "scripts": {
     "playwright:e2e": "playwright test",
     "playwright:e2e:debug": "playwright test --debug",
+    "clean": "rm -rf node_modules dist playwright-report test-results",
     "build": "webpack --config webpack.config.js",
     "install-browsers": "npx playwright install",
     "dev:healthcheck": "./healthcheck.sh http://localhost:8669 && ./healthcheck.sh http://localhost:3000/_next/static/chunks/main-app.js"
