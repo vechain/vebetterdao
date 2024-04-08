@@ -406,6 +406,36 @@ describe("Governor and TimeLock", function () {
       expect(finalDeadline).to.eql(newDeadline)
     })
 
+    it("Creating proposal through deprecated propose() function will create a proposal starting next round", async () => {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.EMISSIONS_CYCLE_DURATION = 5
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // old propose() function without the voteStartInRound parameter
+      const tx = await governor
+        .connect(proposer) //@ts-ignore
+        .propose(
+          [await b3tr.getAddress()],
+          [0],
+          [B3trContract.interface.encodeFunctionData("tokenDetails", [])],
+          "Creating some random proposal",
+        )
+
+      const proposalId = await getProposalIdFromTx(tx)
+      const voteStartsInRound = await governor.proposalStartRound(proposalId)
+      expect(voteStartsInRound).to.eql((await xAllocationVoting.currentRoundId()) + 1n)
+    })
+
     it("Period between proposal creation and round start must be higher than min delay set in the contract", async () => {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
