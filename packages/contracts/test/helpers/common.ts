@@ -34,7 +34,7 @@ export const createProposal = async (
   functionTocall: string = "tokenDetails",
   values: any[] = [],
   avoidMintingAndDelegating: boolean = false, // in some scenarios we want the operation to fail if the proposer does not have enough VOT3
-  roundId?: string,
+  roundId?: string | BigInt | number,
 ): Promise<ContractTransactionResponse> => {
   const { xAllocationVoting, governor, emissions } = await getOrDeployContractInstances({})
 

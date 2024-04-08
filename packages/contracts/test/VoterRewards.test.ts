@@ -1508,25 +1508,23 @@ describe("VoterRewards", () => {
       await getVot3Tokens(voter3, "1000")
 
       // Bootstrap emissions
-      await bootstrapEmissions()
+      await bootstrapAndStartEmissions() // round 1
 
-      await emissions.connect(minterAccount).start()
+      let nextCycle = await emissions.nextCycle() // next cycle round 2
 
       // Now we can create a new proposal
-      let tx = await createProposal(b3tr, B3trContract, voter1, description, functionToCall, [])
+      let tx = await createProposal(b3tr, B3trContract, voter1, description, functionToCall, [], false, nextCycle)
       let proposalId = await getProposalIdFromTx(tx)
 
-      const proposalState = await waitForProposalToBeActive(proposalId)
+      const proposalState = await waitForProposalToBeActive(proposalId) // we are now in round 2
+      let xAllocationsRoundID = await xAllocationVoting.currentRoundId()
 
+      expect(xAllocationsRoundID).to.equal(nextCycle)
       expect(proposalState).to.equal("1") // Active
 
       // Vote on the proposal (voter3 does not vote)
       await governor.connect(voter1).castVote(proposalId, 1) // For
       await governor.connect(voter2).castVote(proposalId, 1) // For
-
-      const xAllocationsRoundID = await xAllocationVoting.currentRoundId()
-
-      expect(xAllocationsRoundID).to.equal(1)
 
       expect(await xAllocationVoting.roundDeadline(xAllocationsRoundID)).to.lt(await emissions.getNextCycleBlock())
 
@@ -1537,7 +1535,7 @@ describe("VoterRewards", () => {
 
       expect(await b3trBadge.getLevel(voter1.address)).to.equal(5)
 
-      // Vote on apps for the first round
+      // Vote on apps for the second round
       await voteOnApps(
         [app1, app2],
         [voter1, voter2, voter3],
@@ -1546,7 +1544,7 @@ describe("VoterRewards", () => {
           [ethers.parseEther("500"), ethers.parseEther("500")], // Voter 2 votes 500 for app1 and 500 for app2
           [ethers.parseEther("500"), ethers.parseEther("500")], // Voter 3 votes 500 for app1 and 500 for app2
         ],
-        xAllocationsRoundID, // First round
+        xAllocationsRoundID, // second round
       )
 
       /*
@@ -1559,36 +1557,48 @@ describe("VoterRewards", () => {
         voter2 allocation = 2000 / 5000 * 100 = 40% (800000 B3TR)
         voter3 allocation = 1000 / 5000 * 100 = 20% (400000 B3TR) 
       */
-      expect(await voterRewards.getReward(1, voter1.address)).to.equal(800000000000000000000000n) // 40% (Notice that voter1 has a level 5 NFT but didn't increase the rewards, this is because the snapshot of the proposal was taken before the NFT upgrade)
-      expect(await voterRewards.getReward(1, voter2.address)).to.equal(800000000000000000000000n) // 40%
-      expect(await voterRewards.getReward(1, voter3.address)).to.equal(400000000000000000000000n) // 20%
+      expect(await voterRewards.getReward(xAllocationsRoundID, voter1.address)).to.equal(800000000000000000000000n) // 40% (Notice that voter1 has a level 5 NFT but didn't increase the rewards, this is because the snapshot of the proposal was taken before the NFT upgrade)
+      expect(await voterRewards.getReward(xAllocationsRoundID, voter2.address)).to.equal(800000000000000000000000n) // 40%
+      expect(await voterRewards.getReward(xAllocationsRoundID, voter3.address)).to.equal(400000000000000000000000n) // 20%
+
+      nextCycle = await emissions.nextCycle() // next cycle round 3
 
       // Now we can create a new proposal and the GM NFT upgrade will be taken into account
-      tx = await createProposal(b3tr, B3trContract, voter1, description + "1", functionToCall, [])
-
+      tx = await createProposal(b3tr, B3trContract, voter1, description + "1", functionToCall, [], false, nextCycle)
       proposalId = await getProposalIdFromTx(tx)
 
-      await waitForProposalToBeActive(proposalId)
+      await waitForProposalToBeActive(proposalId) // we are in round 3 now
 
       // Vote on the proposal
       await governor.connect(voter1).castVote(proposalId, 1) // For
       await governor.connect(voter2).castVote(proposalId, 1) // For
 
-      await waitForNextCycle()
+      xAllocationsRoundID = await xAllocationVoting.currentRoundId()
+      // Vote on apps for the second round
+      await voteOnApps(
+        [app1, app2],
+        [voter1, voter2, voter3],
+        [
+          [ethers.parseEther("1000"), ethers.parseEther("0")], // Voter 1 votes 1000 for app1
+          [ethers.parseEther("500"), ethers.parseEther("500")], // Voter 2 votes 500 for app1 and 500 for app2
+          [ethers.parseEther("500"), ethers.parseEther("500")], // Voter 3 votes 500 for app1 and 500 for app2
+        ],
+        xAllocationsRoundID, // second round
+      )
 
       /*
-        voter 1 votes = 1000 votes for governance proposal 1 voting and 1000 votes for x allocation voting = 2000 votes + (1000 votes for governance voting proposal 2 * 100% multiplier ) = 4000 total votes 
-        voter 2 votes = 1000 votes for governance proposal 1 voting and 1000 votes for x allocation voting = 2000 votes + (1000 votes for governance voting proposal 2 without NFT upgrade) = 3000 total votes
+        voter 1 votes = 1000 votes for governance proposal 1 voting and 1000 votes for x allocation voting = 2000 votes * 100% multiplier = 4000 total votes 
+        voter 2 votes = 1000 votes for governance proposal 1 voting and 1000 votes for x allocation voting = 2000 votes (without multiplier) = 2000 total votes
         voter 3 votes = 0 votes for governance proposal 1 voting and 1000 votes for x allocation voting = 1000 votes
 
-        Total votes = 8000 votes
-        voter 1 allocation = 4000 / 8000 * 100 = 50% (1000000 B3TR)
-        voter 2 allocation = 3000 / 8000 * 100 = 37.5% (750000 B3TR)
-        voter 3 allocation = 1000 / 8000 * 100 = 12.5% (250000 B3TR)
+        Total votes = 7000 votes | Total rewards = 2000000000000000000000000
+        voter 1 allocation = 4000 / 7000 * 100 = 57.14% (1142857142857142857142857 B3TR)
+        voter 2 allocation = 2000 / 7000 * 100 = 28.57% (571428571428571428571428 B3TR)
+        voter 3 allocation = 1000 / 7000 * 100 = 14.29% (285714285714285714285714 B3TR)
       */
-      expect(await voterRewards.getReward(1, voter1.address)).to.equal(1000000000000000000000000n)
-      expect(await voterRewards.getReward(1, voter2.address)).to.equal(750000000000000000000000n)
-      expect(await voterRewards.getReward(1, voter3.address)).to.equal(250000000000000000000000n)
+      expect(await voterRewards.getReward(xAllocationsRoundID, voter1.address)).to.equal(1142857142857142857142857n)
+      expect(await voterRewards.getReward(xAllocationsRoundID, voter2.address)).to.equal(571428571428571428571428n)
+      expect(await voterRewards.getReward(xAllocationsRoundID, voter3.address)).to.equal(285714285714285714285714n)
     })
   })
 })
