@@ -534,15 +534,40 @@ describe("VOT3", function () {
   })
 
   describe("Voting power", function () {
+    let vot3Contract: any
+    let minter: any
+    let other: any
+    let accounts: any
+    this.beforeAll(async function () {
+      const { vot3, minterAccount, otherAccount, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
+      vot3Contract = vot3
+      minter = minterAccount
+      other = otherAccount
+      accounts = otherAccounts
+    })
     it("Voting power should be the square root of the amount of vote", async function () {
-      const { vot3, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
-
       // Mint some B3TR and swap for VOT3
-      await getVot3Tokens(otherAccount, "1000")
+      await getVot3Tokens(other, "1000")
 
       // Initial state: 1000 VOT3, 1000 voting power, self-delegated
-      expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("1000"))
-      expect(await vot3.votingPower(otherAccount)).to.eql(ethers.parseEther("31.622776601") / 1000000000n)
+      expect(await vot3Contract.balanceOf(other)).to.eql(ethers.parseEther("1000"))
+      //scale down by 1e9 as sqrt of 10^18 is 10^9
+      expect(await vot3Contract.votingPower(other)).to.eql(ethers.parseEther("31.622776601") / 1000000000n)
+    })
+    it("Voting power should be the square root of the amount of vote", async function () {
+      await getVot3Tokens(minter, "9")
+      expect(await vot3Contract.balanceOf(minter)).to.eql(ethers.parseEther("9"))
+      expect(await vot3Contract.votingPower(minter)).to.eql(ethers.parseEther("3") / 1000000000n)
+    })
+    it("Voting power should be the square root of the amount of vote", async function () {
+      await getVot3Tokens(accounts[1], "50000")
+      expect(await vot3Contract.balanceOf(accounts[1])).to.eql(ethers.parseEther("50000"))
+      expect(await vot3Contract.votingPower(accounts[1])).to.eql(ethers.parseEther("223.606797749") / 1000000000n)
+    })
+    it("Voting power should be the square root of the amount of vote", async function () {
+      await getVot3Tokens(accounts[2], "1")
+      expect(await vot3Contract.balanceOf(accounts[2])).to.eql(ethers.parseEther("1"))
+      expect(await vot3Contract.votingPower(accounts[2])).to.eql(ethers.parseEther("1") / 1000000000n)
     })
   })
 })

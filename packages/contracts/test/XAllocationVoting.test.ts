@@ -166,7 +166,7 @@ describe("X-Allocation Voting", function () {
     })
   })
 
-  describe("Settings", function () {
+   describe("Settings", function () {
     it("Should be able to change B3trGovernanceAddress with admin role", async function () {
       const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: false,
@@ -1259,11 +1259,8 @@ describe("X-Allocation Voting", function () {
         )
       await xAllocationVoting
         .connect(otherAccounts[4])
-        .castVote(
-          round1,
-          [app1Id, app2Id, app3Id],
-          [ethers.parseEther("0"), ethers.parseEther("100"), ethers.parseEther("100")],
-        )
+        .castVote(round1, [app2Id, app3Id], [ethers.parseEther("100"), ethers.parseEther("100")])
+
       await xAllocationVoting
         .connect(otherAccounts[5])
         .castVote(
@@ -1275,19 +1272,18 @@ describe("X-Allocation Voting", function () {
       await waitForRoundToEnd(round1, xAllocationVoting)
 
       const expectedUnsquaredVotesApp1 = Math.sqrt(0) + Math.sqrt(0) + Math.sqrt(0) + Math.sqrt(0) + Math.sqrt(1000)
-      const app1VotesQF = await xAllocationVoting.getUnsquaredQFAppVotes(round1, app1Id)
-      //sqrt in solidity uses fixed point precision so we to scale the expected value
+      const app1VotesQF = await xAllocationVoting.getAppVotesQF(round1, app1Id)
+      // sqrt of 10^18 is 10^9 hence we need to divide by 10^9
       expect(app1VotesQF).to.equal(ethers.parseEther(expectedUnsquaredVotesApp1.toString()) / 1000000000n)
 
       const expectedUnsquaredVotesApp2 =
         Math.sqrt(900) + Math.sqrt(500) + Math.sqrt(100) + Math.sqrt(100) + Math.sqrt(0)
-      const app2VotesQF = await xAllocationVoting.getUnsquaredQFAppVotes(round1, app2Id)
-      //sqrt in solidity uses fixed point precision so we to scale the expected value
+      const app2VotesQF = await xAllocationVoting.getAppVotesQF(round1, app2Id)
       expect(app2VotesQF).to.equal(ethers.parseEther(expectedUnsquaredVotesApp2.toString()) / 1000000000n)
 
       const expectedUnsquaredVotesApp3 =
         Math.sqrt(100) + Math.sqrt(100) + Math.sqrt(100) + Math.sqrt(100) + Math.sqrt(100)
-      const app3VotesQF = await xAllocationVoting.getUnsquaredQFAppVotes(round1, app3Id)
+      const app3VotesQF = await xAllocationVoting.getAppVotesQF(round1, app3Id)
       expect(app3VotesQF).to.equal(ethers.parseEther(expectedUnsquaredVotesApp3.toString()) / 1000000000n)
 
       const expectedTotalVotesQF =
