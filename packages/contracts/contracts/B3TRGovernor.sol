@@ -11,6 +11,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { IVoterRewards } from "./interfaces/IVoterRewards.sol";
+import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
 
 contract B3TRGovernor is
   Initializable,
