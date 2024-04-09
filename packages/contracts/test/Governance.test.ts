@@ -338,6 +338,69 @@ describe("Governor and TimeLock", function () {
       expect(await governor.proposalStartRound(proposalId)).to.eql(2n) // proposal should start in round 2
     })
 
+    it("Can create a proposal that starts after 2 rounds", async () => {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.EMISSIONS_CYCLE_DURATION = 5
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, emissions } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // Now we can create a new proposal
+      const address = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+      const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 2n // starts 2 rounds from now
+      const tx = await governor
+        .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
+          gasLimit: 10_000_000,
+        })
+
+      const proposeReceipt = await tx.wait()
+      expect(proposeReceipt).not.to.be.null
+
+      // Check that the ProposalCreated event was emitted with the correct parameters
+      const event = proposeReceipt?.logs[0]
+      expect(event).not.to.be.undefined
+
+      const decodedLogs = governor.interface.parseLog({
+        topics: [...(event?.topics as string[])],
+        data: event ? event.data : "",
+      })
+
+      // roundId when proposal will start
+      expect(decodedLogs?.args[7]).to.eql(3n)
+
+      const proposalId = await getProposalIdFromTx(tx)
+      expect(proposalId).not.to.be.null
+
+      expect(await governor.state(proposalId)).to.eql(0n) // pending
+
+      await waitForCurrentRoundToEnd()
+      expect(await xAllocationVoting.currentRoundId()).to.eql(1n)
+      expect(await governor.state(proposalId)).to.eql(0n) // pending
+
+      await emissions.distribute()
+      expect(await xAllocationVoting.currentRoundId()).to.eql(2n)
+      expect(await governor.state(proposalId)).to.eql(0n) // pending
+
+      await waitForCurrentRoundToEnd()
+      expect(await xAllocationVoting.currentRoundId()).to.eql(2n)
+      expect(await governor.state(proposalId)).to.eql(0n) // pending
+
+      await emissions.distribute()
+      expect(await xAllocationVoting.currentRoundId()).to.eql(3n)
+      expect(await governor.state(proposalId)).to.eql(1n) // active
+    })
+
     it("Proposal snapshot and deadline behaves correctly", async () => {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
