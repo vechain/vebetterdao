@@ -9,6 +9,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20Pausable
 import "@openzeppelin/contracts-upgradeable/utils/NoncesUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 
 // VOT3 contract
 contract VOT3 is
@@ -144,5 +145,19 @@ contract VOT3 is
   function b3tr() public view returns (IERC20) {
     VOT3Storage storage $ = _getVOT3Storage();
     return $.b3tr;
+  }
+
+  /**
+   * @dev Returns the current voting power that `account` has.
+   **/
+  function getVotingPower(address account) public view returns (uint256) {
+    return Math.sqrt(getVotes(account));
+  }
+
+  /**
+   * @dev Returns the voting power of an `account`.
+   **/
+  function getPastVotingPower(address account, uint256 timepoint) public view returns (uint256) {
+    return Math.sqrt(getPastVotes(account, timepoint));
   }
 }
