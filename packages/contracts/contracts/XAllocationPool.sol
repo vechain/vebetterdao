@@ -258,14 +258,14 @@ contract XAllocationPool is
     }
 
     uint256 totalVotesQF = xAllocationVoting().totalVotesQF(roundId);
-    uint256 appVotesQFUnsquared = xAllocationVoting().getUnsquaredQFAppVotes(roundId, appId);
+    uint256 appVotesQF = xAllocationVoting().getAppVotesQF(roundId, appId);
     
-    uint256 appVotesQF = appVotesQFUnsquared * appVotesQFUnsquared;
+    uint256 appVotesQFValue = appVotesQF * appVotesQF;
 
     // avoid division by zero
-    if (totalVotesQF == 0) return (0, 0);
+    if (appVotesQFValue == 0) return (0, 0);
 
-    uint256 appShare = (appVotesQF * percentagePrecisionScalingFactor) / totalVotesQF;
+    uint256 appShare = (appVotesQFValue * percentagePrecisionScalingFactor) / totalVotesQF;
 
     // This is the amount unallocated if appShare is greater than max cap, this will be sent to treasury
     uint256 unallocatedShare = 0;

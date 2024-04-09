@@ -67,6 +67,17 @@ abstract contract GovernorXAllocationVotesCountingUpgradeable is Initializable, 
     return "support=x-allocations&quorum=auto";
   }
 
+/**
+ * @dev Counts votes for a given round of voting, applying quadratic funding principles.
+ * This function allows a voter to allocate weights (votes) to various applications (apps) for a specific voting round.
+ * It checks if the voter has already voted in the round to prevent double voting.
+ * Each vote's weight is applied to the specified applications, and the total and quadratic votes for each application
+ * are updated accordingly.
+ * 
+ * Quadratic Funding (QF) is implemented here to calculate the impact of each vote. In QF, the value of each vote is squared,
+ * emphasizing the number of participants over the size of individual contributions. This method aims to democratize the voting
+ * process by amplifying the influence of a larger number of smaller votes.
+ */
   function _countVote(
     uint256 roundId,
     address voter,
@@ -83,7 +94,7 @@ abstract contract GovernorXAllocationVotesCountingUpgradeable is Initializable, 
     RoundCore storage round = $governorStorage._rounds[roundId];
 
     uint256 totalWeight = 0;
-    uint256 qfVariable = 0;
+    uint256 totalQFVotesAdjustment = 0;
     for (uint256 i = 0; i < apps.length; i++) {
       totalWeight += weights[i];
 
@@ -91,21 +102,28 @@ abstract contract GovernorXAllocationVotesCountingUpgradeable is Initializable, 
         revert GovernorAppNotAvailableForVoting(apps[i]);
       }
 
-      // QF votes are the square root of the votes
-      $._roundVotes[roundId].votesReceivedQF[apps[i]] += Math.sqrt(weights[i]);
+      // Get the current sum of the square roots of individual votes for the given project
+      uint256 qfAppVotesPreVote = $._roundVotes[roundId].votesReceivedQF[apps[i]];
+
+      // Calculate the new sum of the square roots of individual votes for the given project
+      uint256 newQFVotes = Math.sqrt(weights[i]);
+      uint256 qfAppVotesPostVote = qfAppVotesPreVote + newQFVotes;
+
+      // Calculate the adjustment to the quadratic funding value for the given app
+      totalQFVotesAdjustment += (qfAppVotesPostVote * qfAppVotesPostVote) - (qfAppVotesPreVote * qfAppVotesPreVote);
+
+      // Update the quadratic funding votes received for the given app - sum of the square roots of individual votes
+      $._roundVotes[roundId].votesReceivedQF[apps[i]] = qfAppVotesPostVote;
       $._roundVotes[roundId].votesReceived[apps[i]] += weights[i];
-
-      uint256 qfAppVotes = $._roundVotes[roundId].votesReceivedQF[apps[i]];
-
-      // QF total votes are the sum of the square of the QF votes for each app
-      qfVariable = qfVariable + qfAppVotes * qfAppVotes;
     }
-    $._roundVotes[roundId].totalVotesQF = qfVariable;
 
     require(
       totalWeight <= getVotes(voter, round.voteStart),
       "Governor: account has insufficient voting power for this round"
     );
+
+    // Apply the total adjustment to storage
+    $._roundVotes[roundId].totalVotesQF += totalQFVotesAdjustment;
 
     $._roundVotes[roundId].totalVotes += totalWeight;
     $._roundVotes[roundId].hasVoted[voter] = true;
@@ -126,7 +144,7 @@ abstract contract GovernorXAllocationVotesCountingUpgradeable is Initializable, 
     return $._roundVotes[roundId].votesReceived[app];
   }
 
-  function getUnsquaredQFAppVotes(uint256 roundId, bytes32 app) public view override returns (uint256) {
+  function getAppVotesQF(uint256 roundId, bytes32 app) public view override returns (uint256) {
     GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
     return $._roundVotes[roundId].votesReceivedQF[app];
   }

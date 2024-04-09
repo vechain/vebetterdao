@@ -205,7 +205,7 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
    * @notice module:reputation
    * @dev Sum of the square roots of the votes cast for a specific app in an allocation round used for Quadatic Funding.
    */
-  function getUnsquaredQFAppVotes(uint256 roundId, bytes32 app) external view returns (uint256);
+  function getAppVotesQF(uint256 roundId, bytes32 app) external view returns (uint256);
 
   /**
    * @notice module:reputation
