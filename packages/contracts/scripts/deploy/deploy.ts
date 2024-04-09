@@ -34,95 +34,121 @@ export async function deployAll(config: ContractsConfig) {
 
   // ---------- Contracts Deployment ---------- //
 
-  // Deploy B3TR and VOT3 tokens
   const b3tr = await deployB3trToken(TEMP_ADMIN, config.B3TR_CAP)
-  const vot3 = await deployVot3Token(TEMP_ADMIN, await b3tr.getAddress())
 
-  // Deploy the governance contract
-  const timelock = await deployTimeLock(config.B3TR_GOVERNOR_MIN_DELAY, TEMP_ADMIN, TEMP_ADMIN)
+  console.log(`Deploying Vot3 contract`)
+  const vot3 = (await deployProxy("VOT3", [TEMP_ADMIN, await b3tr.getAddress()])) as VOT3
+  console.log(`Vot3 contract deployed at address ${await vot3.getAddress()}`)
 
-  const treasury = await deployTreasury(
+  console.log(`Deploying TimeLock contract`)
+  const timelock = (await deployProxy("TimeLock", [
+    config.B3TR_GOVERNOR_MIN_DELAY,
+    [],
+    [],
+    TEMP_ADMIN,
+    TEMP_ADMIN,
+  ])) as TimeLock
+  console.log(`TimeLock contract deployed at address ${await timelock.getAddress()}`)
+
+  console.log(`Deploying Treasury contract`)
+  const treasury = (await deployProxy("Treasury", [
     await b3tr.getAddress(),
     await vot3.getAddress(),
     await timelock.getAddress(),
     TEMP_ADMIN,
     TEMP_ADMIN,
-  )
+  ])) as Treasury
+  console.log(`Treasury contract deployed at address ${await treasury.getAddress()}`)
 
-  // Deploy XAllocationPool
-  const xAllocationPool = await deployXAllocationPool(
+  console.log(`Deploying XAllocationPool contract`)
+  const xAllocationPool = (await deployProxy("XAllocationPool", [
+    TEMP_ADMIN,
+    TEMP_ADMIN,
     await b3tr.getAddress(),
-    TEMP_ADMIN,
-    TEMP_ADMIN,
     await treasury.getAddress(),
-  )
+  ])) as XAllocationPool
+  console.log(`XAllocationPool contract deployed at address ${await xAllocationPool.getAddress()}`)
 
   // Deploy the NFT Badge contract with Max Mintable Level 1
-  const badge = await deployNFTBadge(
-    1,
+  console.log(`Deploying B3TRBadge NFT contract`)
+  const badge = (await deployProxy("B3TRBadge", [
     name,
     symbol,
     TEMP_ADMIN,
     TEMP_ADMIN,
+    1,
     config.NFT_BADGE_BASE_URI,
     config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
     config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
     await b3tr.getAddress(),
     await treasury.getAddress(),
-  )
+  ])) as B3TRBadge
+  console.log(`NFTBadge contract deployed at address ${await badge.getAddress()}`)
 
-  const emissions = await deployEmissions(
-    await b3tr.getAddress(),
-    [await xAllocationPool.getAddress(), config.VOTE_2_EARN_POOL_ADDRESS, await treasury.getAddress()],
-    config.INITIAL_X_ALLOCATION,
+  console.log(`Deploying Emissions contract`)
+  const emissions = (await deployProxy("Emissions", [
+    {
+      minter: TEMP_ADMIN,
+      admin: TEMP_ADMIN,
+      upgrader: TEMP_ADMIN,
+      b3trAddress: await b3tr.getAddress(),
+      destinations: [await xAllocationPool.getAddress(), config.VOTE_2_EARN_POOL_ADDRESS, await treasury.getAddress()],
+      initialXAppAllocation: config.INITIAL_X_ALLOCATION,
+      cycleDuration: config.EMISSIONS_CYCLE_DURATION,
+      decaySettings: [
+        config.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE,
+        config.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE,
+        config.EMISSIONS_X_ALLOCATION_DECAY_PERIOD,
+        config.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD,
+      ],
+      treasuryPercentage: config.EMISSIONS_TREASURY_PERCENTAGE,
+      maxVote2EarnDecay: config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
+    },
+  ])) as Emissions
+  console.log(`Emissions contract deployed at address ${await emissions.getAddress()}`)
+
+  console.log(`Deploying VoterRewards contract`)
+  const voterRewards = (await deployProxy("VoterRewards", [
     TEMP_ADMIN,
     TEMP_ADMIN,
-    config.EMISSIONS_CYCLE_DURATION,
-    [
-      config.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE,
-      config.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE,
-      config.EMISSIONS_X_ALLOCATION_DECAY_PERIOD,
-      config.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD,
-    ],
-    config.EMISSIONS_TREASURY_PERCENTAGE,
-    config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
-  )
-
-  const voterRewards = await deployVoterRewards(
-    await badge.getAddress(),
     await emissions.getAddress(),
+    await badge.getAddress(),
     await b3tr.getAddress(),
-    TEMP_ADMIN,
-    TEMP_ADMIN,
     config.VOTER_REWARDS_LEVELS,
     config.VOTER_REWARDS_MULTIPLIER,
-  )
+  ])) as VoterRewards
+  console.log(`VoterRewards contract deployed at address ${await voterRewards.getAddress()}`)
 
-  const governor = await deployGovernor(
+  console.log(`Deploying XAllocationVoting contract`)
+  const xAllocationVoting = (await deployProxy("XAllocationVoting", [
+    {
+      vot3Token: await timelock.getAddress(),
+      quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE,
+      initialVotingPeriod: config.EMISSIONS_CYCLE_DURATION - 1,
+      b3trGovernor: await timelock.getAddress(),
+      voterRewards: await voterRewards.getAddress(),
+      emissions: await emissions.getAddress(),
+      admins: [await timelock.getAddress(), TEMP_ADMIN],
+      upgrader: TEMP_ADMIN,
+      xAppsBaseURI: config.XAPP_BASE_URI,
+      baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
+      appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
+    },
+  ])) as XAllocationVoting
+  console.log(`XAllocationVoting contract deployed at address ${await xAllocationVoting.getAddress()}`)
+
+  console.log(`Deploying Governor contract`)
+  const governor = (await deployProxy("B3TRGovernor", [
     await vot3.getAddress(),
     await timelock.getAddress(),
+    await xAllocationVoting.getAddress(),
     config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
-    config.B3TR_GOVERNOR_VOTING_PERIOD,
-    config.B3TR_GOVERNOR_VOTING_DELAY,
     config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD,
+    config.B3TR_GOVERNOR_MIN_VOTING_DELAY,
     TEMP_ADMIN,
     await voterRewards.getAddress(),
-  )
-
-  // Deploy XAllocationVoting
-  const xAllocationVoting = await deployXAllocationVoting(
-    await timelock.getAddress(),
-    await vot3.getAddress(),
-    TEMP_ADMIN,
-    TEMP_ADMIN,
-    await voterRewards.getAddress(),
-    await emissions.getAddress(),
-    config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE,
-    config.EMISSIONS_CYCLE_DURATION - 1,
-    config.XAPP_BASE_URI,
-    config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
-    config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
-  )
+  ])) as B3TRGovernor
+  console.log(`Governor contract deployed at address ${await governor.getAddress()}`)
 
   console.log("Contracts deployed")
 
@@ -366,222 +392,6 @@ async function deployB3trToken(admin: string, cap: number): Promise<B3TR> {
   await contract.waitForDeployment()
 
   console.log(`B3tr contract deployed at address ${await contract.getAddress()}`)
-
-  return contract
-}
-
-async function deployVot3Token(admin: string, b3trAddress: string): Promise<VOT3> {
-  console.log(`Deploying Vot3 contract`)
-  const contract = (await deployProxy("VOT3", [admin, b3trAddress])) as VOT3
-
-  console.log(`Vot3 contract deployed at address ${await contract.getAddress()}`)
-
-  return contract
-}
-
-async function deployTimeLock(
-  minDelay: number,
-  admin: string,
-  upgrader: string,
-  proposers: string[] = [],
-  executors: string[] = [],
-): Promise<TimeLock> {
-  console.log(`Deploying TimeLock contract`)
-  const contract = (await deployProxy("TimeLock", [minDelay, proposers, executors, admin, upgrader])) as TimeLock
-  console.log(`TimeLock contract deployed at address ${await contract.getAddress()}`)
-
-  return contract
-}
-
-async function deployGovernor(
-  vot3Address: string,
-  timelockAddress: string,
-  quorum: number,
-  votingPeriod: number,
-  votingDelay: number,
-  proposalThreshold: number,
-  admin: string,
-  voterAddress: string,
-): Promise<B3TRGovernor> {
-  console.log(`Deploying Governor contract`)
-
-  const contract = (await deployProxy("B3TRGovernor", [
-    vot3Address,
-    timelockAddress,
-    quorum,
-    votingPeriod,
-    votingDelay,
-    proposalThreshold,
-    admin,
-    voterAddress,
-  ])) as B3TRGovernor
-
-  console.log(`Governor contract deployed at address ${await contract.getAddress()}`)
-
-  return contract
-}
-
-async function deployNFTBadge(
-  mintableLevelFromDeploy: number,
-  name: string,
-  symbol: string,
-  admin: string,
-  upgrader: string,
-  baseUri: string,
-  xNodeMaxFreeLevels: number[],
-  b3trRequiredToUpgradeToLevel: bigint[],
-  b3trAddress: string,
-  treasuryAddress: string,
-) {
-  console.log(`Deploying B3TRBadge NFT contract`)
-  const contract = (await deployProxy("B3TRBadge", [
-    name,
-    symbol,
-    admin,
-    upgrader,
-    mintableLevelFromDeploy,
-    baseUri,
-    xNodeMaxFreeLevels,
-    b3trRequiredToUpgradeToLevel,
-    b3trAddress,
-    treasuryAddress,
-  ])) as B3TRBadge
-
-  console.log(`NFTBadge contract deployed at address ${await contract.getAddress()}`)
-
-  return contract
-}
-
-async function deployXAllocationPool(
-  b3trAddress: string,
-  adminAddress: string,
-  upgraderAddress: string,
-  treasuryAddress: string,
-) {
-  console.log(`Deploying XAllocationPool contract`)
-  const contract = (await deployProxy("XAllocationPool", [
-    adminAddress,
-    upgraderAddress,
-    b3trAddress,
-    treasuryAddress,
-  ])) as XAllocationPool
-
-  console.log(`XAllocationPool contract deployed at address ${await contract.getAddress()}`)
-
-  return contract
-}
-
-async function deployXAllocationVoting(
-  timeLockAddress: string,
-  vot3Address: string,
-  adminAddress: string,
-  upgraderAddress: string,
-  voterRewardsAddress: string,
-  emissionsAddress: string,
-  quorumPercentage: number = 50,
-  xAllocationVotingPeriod: number = 10,
-  baseURI: string = "ipfs://",
-  baseAllocationPercentage: number = 20,
-  appSharesCap: number = 15,
-) {
-  console.log(`Deploying XAllocationVoting contract`)
-
-  const contract = (await deployProxy("XAllocationVoting", [
-    {
-      vot3Token: vot3Address,
-      quorumPercentage,
-      initialVotingPeriod: xAllocationVotingPeriod,
-      b3trGovernor: timeLockAddress,
-      voterRewards: voterRewardsAddress,
-      emissions: emissionsAddress,
-      admins: [timeLockAddress, adminAddress],
-      upgrader: upgraderAddress,
-      xAppsBaseURI: baseURI,
-      baseAllocationPercentage,
-      appSharesCap,
-    },
-  ])) as XAllocationVoting
-
-  console.log(`XAllocationVoting contract deployed at address ${await contract.getAddress()}`)
-
-  return contract
-}
-
-async function deployEmissions(
-  b3trAddress: string,
-  destinations: string[],
-  allocations: bigint,
-  minterAddress: string,
-  adminAddress: string,
-  cycleDuration: number,
-  decaySettings: [number, number, number, number],
-  treasuryPercentage: number,
-  maxVote2EarnDecayPercentage: number,
-) {
-  console.log(`Deploying Emissions contract`)
-  const contract = (await deployProxy("Emissions", [
-    {
-      minter: minterAddress,
-      admin: adminAddress,
-      upgrader: adminAddress,
-      b3trAddress: b3trAddress,
-      destinations: destinations,
-      initialXAppAllocation: allocations,
-      cycleDuration: cycleDuration,
-      decaySettings: decaySettings,
-      treasuryPercentage: treasuryPercentage,
-      maxVote2EarnDecay: maxVote2EarnDecayPercentage,
-    },
-  ])) as Emissions
-
-  console.log(`Emissions contract deployed at address ${await contract.getAddress()}`)
-
-  return contract
-}
-
-async function deployVoterRewards(
-  badgeAddress: string,
-  emissionsAddress: string,
-  b3trAddress: string,
-  adminAddress: string,
-  upgraderAddress: string,
-  levels: number[],
-  multiplier: number[],
-) {
-  console.log(`Deploying VoterRewards contract`)
-  const contract = (await deployProxy("VoterRewards", [
-    adminAddress,
-    upgraderAddress,
-    emissionsAddress,
-    badgeAddress,
-    b3trAddress,
-    levels,
-    multiplier,
-  ])) as VoterRewards
-
-  console.log(`VoterRewards contract deployed at address ${await contract.getAddress()}`)
-
-  return contract
-}
-
-async function deployTreasury(
-  b3trAddress: string,
-  vot3Address: string,
-  timelockAddress: string,
-  adminAddress: string,
-  proxyAdminAddress: string,
-) {
-  console.log(`Deploying Treasury contract`)
-
-  const contract = (await deployProxy("Treasury", [
-    b3trAddress,
-    vot3Address,
-    timelockAddress,
-    adminAddress,
-    proxyAdminAddress,
-  ])) as Treasury
-
-  console.log(`Treasury contract deployed at address ${await contract.getAddress()}`)
 
   return contract
 }

@@ -1,7 +1,7 @@
 import { ethers } from "hardhat"
 import { expect } from "chai"
 import {
-  bootstrapEmissions,
+  bootstrapAndStartEmissions,
   catchRevert,
   createProposalAndExecuteIt,
   filterEventsByName,
@@ -54,11 +54,9 @@ describe("X-Apps", function () {
     })
 
     it("Should be possible to add a new app through the DAO", async function () {
-      const { xAllocationVoting, otherAccounts, governor, b3tr, emissions, owner, minterAccount } =
-        await getOrDeployContractInstances({ forceDeploy: true })
+      const { xAllocationVoting, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
 
-      // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapAndStartEmissions()
 
       const proposer = otherAccounts[0]
       const voter1 = otherAccounts[1]
@@ -70,7 +68,6 @@ describe("X-Apps", function () {
       await createProposalAndExecuteIt(
         proposer,
         voter1,
-        governor,
         xAllocationVoting,
         await ethers.getContractFactory("XAllocationVoting"),
         "Add app to the list",

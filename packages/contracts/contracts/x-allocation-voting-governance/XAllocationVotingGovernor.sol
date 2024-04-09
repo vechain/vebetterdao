@@ -184,6 +184,14 @@ abstract contract XAllocationVotingGovernor is
     return $._roundCount;
   }
 
+  function currentRoundSnapshot() public view virtual returns (uint256) {
+    return roundSnapshot(currentRoundId());
+  }
+
+  function currentRoundDeadline() public view virtual returns (uint256) {
+    return roundDeadline(currentRoundId());
+  }
+
   function isActive(uint256 roundId) public view virtual override returns (bool) {
     return state(roundId) == RoundState.Active;
   }
