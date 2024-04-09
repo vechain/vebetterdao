@@ -92,14 +92,6 @@ contract VOT3 is
     require($.b3tr.transfer(msg.sender, amount), "Transfer failed");
   }
 
-  /**
-   * @dev Returns the voting power of `msg.sender` at the current block.
-   * Using on Quadratic Voting formula: sqrt(balanceOf(msg.sender))
-   */
-  function votingPower(address account) public view returns (uint256) {
-    return Math.sqrt(balanceOf(account));
-  }
-
   function transfer(address to, uint256 value) public override(ERC20Upgradeable) returns (bool) {
     return super.transfer(to, value);
   }
