@@ -3,7 +3,7 @@ import { Button, Divider, HStack, Input, Stack, Text, VStack } from "@chakra-ui/
 import { useCallback, useEffect, useMemo } from "react"
 import { Controller, UseFormReturn } from "react-hook-form"
 import { B3TRIcon, VOT3Icon } from "../Icons"
-import { useB3trBalance, useB3trStaked, useVot3Balance } from "@/api"
+import { TokenBalance, useB3trBalance, useB3trStaked, useVot3Balance } from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { motion } from "framer-motion"
 
@@ -20,15 +20,22 @@ type Props = {
   amount: string
   isB3trToVot3: boolean
   formData: UseFormReturn<{ amount: string }>
+  isVOT3BalanceMoreThanStakedB3TR: boolean
+  vot3Balance?: TokenBalance
+  b3trBalance?: TokenBalance
+  swappableVot3Balance?: TokenBalance
 }
 
-export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
+export const TokenCards = ({
+  isB3trToVot3,
+  formData,
+  amount,
+  isVOT3BalanceMoreThanStakedB3TR,
+  vot3Balance,
+  b3trBalance,
+  swappableVot3Balance,
+}: Props) => {
   const { b3trBgGradient, vot3BgGradient, b3trDividerColor, vot3dividerAlpha } = useTokenColors()
-  const { account } = useWallet()
-
-  const { data: b3trBalance } = useB3trBalance(account ?? undefined)
-  const { data: vot3Balance } = useVot3Balance(account ?? undefined)
-  const { data: swappableVot3Balance } = useB3trStaked(account ?? undefined)
 
   const b3trBalanceScaled = useMemo(() => {
     return b3trBalance?.scaled ?? "0"
@@ -46,7 +53,7 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
   const vot3SwappableBalanceScaled = useMemo(() => {
     if (!swappableVot3Balance || !vot3Balance) return "0"
 
-    return vot3Balance.original < swappableVot3Balance.original ? vot3Balance.scaled : swappableVot3Balance.scaled
+    return isVOT3BalanceMoreThanStakedB3TR ? swappableVot3Balance.scaled : vot3Balance.scaled
   }, [swappableVot3Balance?.scaled])
 
   const vot3BalanceText = useMemo(() => {
@@ -212,7 +219,7 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
                 <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
                   <Text>{isB3trToVot3 ? "Receive" : "Send"}</Text>
                   <VStack gap={0} alignItems={"flex-end"}>
-                    <Text fontSize="10px">VOT3 Swappable</Text>
+                    <Text fontSize="10px">{isVOT3BalanceMoreThanStakedB3TR ? " VOT3 Swappable " : "VOT3 Balance"}</Text>
                     <HStack gap={1}>
                       <Text fontSize="14px" fontWeight={500}>
                         {vot3BalanceText}
