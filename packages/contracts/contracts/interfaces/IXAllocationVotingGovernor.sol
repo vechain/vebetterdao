@@ -227,6 +227,10 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
    */
   function currentRoundId() external view returns (uint256);
 
+  function currentRoundSnapshot() external view returns (uint256);
+
+  function currentRoundDeadline() external view returns (uint256);
+
   function quorumReached(uint256 roundId) external view returns (bool);
 
   function getCurrentAllocationRoundSnapshot() external view returns (uint256);

@@ -9,14 +9,14 @@ import { IVoterRewards } from "../../interfaces/IVoterRewards.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /**
- * @title GovernorXAllocationVotesCountingUpgradeable
+ * @title XAllocationGovernorVotesCountingUpgradeable
  *
  * @dev Extension of {XAllocationVotingGovernor} for counting votes for allocation rounds.
  *
  * In every round users can vote a fraction of their balance for the elegible apps in that round.
  */
 
-abstract contract GovernorXAllocationVotesCountingUpgradeable is Initializable, XAllocationVotingGovernor {
+abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, XAllocationVotingGovernor {
   struct RoundVote {
     mapping(bytes32 app => uint256) votesReceived;
     uint256 totalVotes;
