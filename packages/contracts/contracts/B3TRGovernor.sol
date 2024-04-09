@@ -162,19 +162,6 @@ contract B3TRGovernor is
     uint256 startRoundId
   ) public virtual returns (uint256) {
     address proposer = _msgSender();
-
-    // check description restriction
-    if (!_isValidDescriptionForProposer(proposer, description)) {
-      revert GovernorRestrictedProposer(proposer);
-    }
-
-    // check proposal threshold
-    uint256 proposerVotes = getVotes(proposer, clock() - 1);
-    uint256 votesThreshold = proposalThreshold();
-    if (proposerVotes < votesThreshold) {
-      revert GovernorInsufficientProposerVotes(proposer, proposerVotes, votesThreshold);
-    }
-
     uint256 currentRoundId = _getB3TRGovernorStorage().xAllocationVoting.currentRoundId();
 
     // if allocation rounds did not start yet, revert, otherwise we will have issues with roundSnapshot and roundDeadline
@@ -192,6 +179,18 @@ contract B3TRGovernor is
       if (!canProposalStartInNextRound()) {
         revert GovernorInvalidStartRound(startRoundId);
       }
+    }
+
+    // check description restriction
+    if (!_isValidDescriptionForProposer(proposer, description)) {
+      revert GovernorRestrictedProposer(proposer);
+    }
+
+    // check proposal threshold
+    uint256 proposerVotes = getVotes(proposer, clock() - 1);
+    uint256 votesThreshold = proposalThreshold();
+    if (proposerVotes < votesThreshold) {
+      revert GovernorInsufficientProposerVotes(proposer, proposerVotes, votesThreshold);
     }
 
     return _propose(targets, values, calldatas, description, proposer, startRoundId);
