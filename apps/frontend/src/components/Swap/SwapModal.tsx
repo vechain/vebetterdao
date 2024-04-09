@@ -142,6 +142,10 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
                   <TokenCards amount={amount} formData={formData} isB3trToVot3={isB3trToVot3} />
                   <SwitchTokenButton setIsB3trToVot3={setIsB3trToVot3} />
                 </Flex>
+                <Text fontSize={"xs"} mt={2} px={2}>
+                  Your VOT3 swap limit is determined by your previous B3TR conversions, ensuring fairness in token
+                  swaps.
+                </Text>
                 <Button
                   mt={2}
                   type="submit"

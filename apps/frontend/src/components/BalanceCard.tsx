@@ -131,14 +131,6 @@ export const BalanceCard: React.FC<Props> = () => {
           <VStack align="self-start" w="full">
             <HStack w={"full"} justifyContent={"space-between"}>
               <VOT3Icon boxSize={"32px"} />
-              <BaseTooltip
-                text={
-                  "Your VOT3 swap limit is determined by your previous B3TR conversions, ensuring fairness in token swaps."
-                }>
-                <span>
-                  <Icon as={FaCircleInfo} position={"relative"} />
-                </span>
-              </BaseTooltip>
             </HStack>
             <Heading size="2xl" fontWeight={900}>
               {compactFormatter.format(Number(vot3BalanceScaled))}
