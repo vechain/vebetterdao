@@ -387,18 +387,22 @@ describe("Governor and TimeLock", function () {
       await waitForCurrentRoundToEnd()
       expect(await xAllocationVoting.currentRoundId()).to.eql(1n)
       expect(await governor.state(proposalId)).to.eql(0n) // pending
+      await expect(governor.connect(proposer).castVote(proposalId, 0)).to.be.reverted
 
       await emissions.distribute()
       expect(await xAllocationVoting.currentRoundId()).to.eql(2n)
       expect(await governor.state(proposalId)).to.eql(0n) // pending
+      await expect(governor.connect(proposer).castVote(proposalId, 0)).to.be.reverted
 
       await waitForCurrentRoundToEnd()
       expect(await xAllocationVoting.currentRoundId()).to.eql(2n)
       expect(await governor.state(proposalId)).to.eql(0n) // pending
+      await expect(governor.connect(proposer).castVote(proposalId, 0)).to.be.reverted
 
       await emissions.distribute()
       expect(await xAllocationVoting.currentRoundId()).to.eql(3n)
       expect(await governor.state(proposalId)).to.eql(1n) // active
+      await expect(governor.connect(proposer).castVote(proposalId, 0)).to.not.be.reverted
     })
 
     it("Proposal snapshot and deadline behaves correctly", async () => {
