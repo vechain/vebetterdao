@@ -3,7 +3,6 @@ import { ContractFactory, ContractTransactionResponse } from "ethers"
 import { ethers } from "hardhat"
 import {
   B3TR,
-  B3TRGovernor,
   TimeLock,
   VOT3,
   B3TRBadge,
@@ -12,6 +11,7 @@ import {
   XAllocationPool,
   VoterRewards,
   Treasury,
+  B3TRGovernor,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy } from "../../scripts/helpers"
@@ -62,6 +62,15 @@ export const getOrDeployContractInstances = async ({
 
   // Deploy VOT3
   const vot3 = (await deployProxy("VOT3", [owner.address, await b3tr.getAddress()])) as VOT3
+
+  // Deploy TimeLock
+  const timeLock = (await deployProxy("TimeLock", [
+    0, //0 seconds delay for immediate execution
+    [],
+    [],
+    timelockAdmin.address,
+    timelockAdmin.address,
+  ])) as TimeLock
 
   // Deploy Treasury
   const treasury = (await deployProxy("Treasury", [
@@ -127,35 +136,6 @@ export const getOrDeployContractInstances = async ({
     multipliers,
   ])) as VoterRewards
 
-  // Deploy TimeLock
-  const timeLock = (await deployProxy("TimeLock", [
-    0, //0 seconds delay for immediate execution
-    [],
-    [],
-    timelockAdmin.address,
-    timelockAdmin.address,
-  ])) as TimeLock
-
-  // Deploy Governor
-  const governor = (await deployProxy("B3TRGovernor", [
-    await vot3.getAddress(),
-    await timeLock.getAddress(),
-    config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
-    config.B3TR_GOVERNOR_VOTING_PERIOD, // voting period
-    config.B3TR_GOVERNOR_VOTING_DELAY, // voting delay
-    config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD, // voting threshold
-    owner.address,
-    await voterRewards.getAddress(),
-  ])) as B3TRGovernor
-
-  // Set up roles
-  const PROPOSER_ROLE = await timeLock.PROPOSER_ROLE()
-  const EXECUTOR_ROLE = await timeLock.EXECUTOR_ROLE()
-  const CANCELLER_ROLE = await timeLock.CANCELLER_ROLE()
-  await timeLock.connect(timelockAdmin).grantRole(PROPOSER_ROLE, await governor.getAddress())
-  await timeLock.connect(timelockAdmin).grantRole(EXECUTOR_ROLE, await governor.getAddress())
-  await timeLock.connect(timelockAdmin).grantRole(CANCELLER_ROLE, await governor.getAddress())
-
   // Set vote 2 earn (VoterRewards deployed contract) address in emissions
   await emissions.connect(owner).setVote2EarnAddress(await voterRewards.getAddress())
 
@@ -175,6 +155,26 @@ export const getOrDeployContractInstances = async ({
       appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
     },
   ])) as XAllocationVoting
+
+  // Deploy Governor
+  const governor = (await deployProxy("B3TRGovernor", [
+    await vot3.getAddress(),
+    await timeLock.getAddress(),
+    await xAllocationVoting.getAddress(),
+    config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
+    config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD, // voting threshold
+    config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
+    owner.address,
+    await voterRewards.getAddress(),
+  ])) as B3TRGovernor
+
+  // Set up roles
+  const PROPOSER_ROLE = await timeLock.PROPOSER_ROLE()
+  const EXECUTOR_ROLE = await timeLock.EXECUTOR_ROLE()
+  const CANCELLER_ROLE = await timeLock.CANCELLER_ROLE()
+  await timeLock.connect(timelockAdmin).grantRole(PROPOSER_ROLE, await governor.getAddress())
+  await timeLock.connect(timelockAdmin).grantRole(EXECUTOR_ROLE, await governor.getAddress())
+  await timeLock.connect(timelockAdmin).grantRole(CANCELLER_ROLE, await governor.getAddress())
 
   // Set xAllocationVoting and Governor address in B3TRBadge
   await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())

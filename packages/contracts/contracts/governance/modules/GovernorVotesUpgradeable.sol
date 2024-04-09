@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v5.0.0) (governance/extensions/GovernorVotes.sol)
 
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.20;
 
-import { XAllocationVotingGovernor } from "../XAllocationVotingGovernor.sol";
+import { GovernorUpgradeable } from "../GovernorUpgradeable.sol";
 import { IVotes } from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 import { IERC5805 } from "@openzeppelin/contracts/interfaces/IERC5805.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
@@ -11,18 +11,18 @@ import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /**
- * @dev Extension of {XAllocationVotingGovernor} for voting weight extraction from an {ERC20Votes} token, or since v4.5 an {ERC721Votes}
+ * @dev Extension of {Governor} for voting weight extraction from an {ERC20Votes} token, or since v4.5 an {ERC721Votes}
  * token.
  */
-abstract contract GovernorVotesUpgradeable is Initializable, XAllocationVotingGovernor {
-  /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.GovernorVotes
+abstract contract GovernorVotesUpgradeable is Initializable, GovernorUpgradeable {
+  /// @custom:storage-location erc7201:openzeppelin.storage.GovernorVotes
   struct GovernorVotesStorage {
     IERC5805 _token;
   }
 
-  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.GovernorVotes")) - 1)) & ~bytes32(uint256(0xff))
+  // keccak256(abi.encode(uint256(keccak256("openzeppelin.storage.GovernorVotes")) - 1)) & ~bytes32(uint256(0xff))
   bytes32 private constant GovernorVotesStorageLocation =
-    0x1fd39a1a04c688cfdfe2fc0db51d4f96629f1828304800fbba14f96e8ddf4c00;
+    0x3ba4977254e415696610a40ebf2258dbfa0ec6a2ff64e84bfe715ff16977cc00;
 
   function _getGovernorVotesStorage() private pure returns (GovernorVotesStorage storage $) {
     assembly {
