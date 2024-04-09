@@ -17,7 +17,6 @@ import { NoncesUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/Non
 import { IGovernor } from "../interfaces/IGovernor.sol";
 import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGovernor.sol";
 
 /**
  * @dev Core of the governance system, designed to be extended through various modules.
