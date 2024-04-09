@@ -146,3 +146,8 @@ contracts/package-lock.json
 packages/config/local.ts
 
 packages/contracts/metadata/xApps/output/
+
+# e2e package
+packages/e2e/test-results/
+packages/e2e/playwright-report/
+packages/e2e/dist/
