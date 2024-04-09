@@ -163,6 +163,10 @@ interface IVOT3 {
   function unpause() external;
 
   function unstake(uint256 amount) external;
+
+  function getVotingPower(address account) external view returns (uint256);
+
+  function getPastVotingPower(address account, uint256 timepoint) external view returns (uint256);
 }
 
 interface Checkpoints {
