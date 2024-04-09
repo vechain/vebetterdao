@@ -469,7 +469,7 @@ abstract contract GovernorUpgradeable is
   }
 
   /**
-   * @dev See {IGovernor-getVotes}.
+   * @dev returns the voting power of an `account`.
    */
   function getVotingPower(address account, uint256 timepoint) public view virtual returns (uint256) {
     return Math.sqrt(_getVotes(account, timepoint, _defaultParams()));
