@@ -13,6 +13,7 @@ import { Pause } from "./components/Pause"
 import { StartEmissions } from "./components/StartEmissions"
 import { StartRound } from "./components/StartRound"
 import { UpdateReceiverAddress } from "./components/UpdateReceiverAddress"
+import { ProposalsAdmin } from "./components/ProposalsAdmin/ProposalsAdmin"
 
 export const AdminPageContent = () => {
   useEffect(() => {
@@ -27,7 +28,7 @@ export const AdminPageContent = () => {
     <Stack spacing={12} w={"full"} data-testid="admin-page">
       {isAdmin && <AdminPermissions />}
 
-      <HStack w={"full"} spacing={12} alignItems={"start"} height={"max-content"}>
+      <Stack direction={["column", "row"]} w={"full"} spacing={12} alignItems={"start"}>
         <Card w={"full"}>
           <CardHeader>
             <Heading size="lg">Emissions and Rounds</Heading>
@@ -39,6 +40,7 @@ export const AdminPageContent = () => {
             </VStack>
           </CardBody>
         </Card>
+
         <Card w={"full"}>
           <CardHeader>
             <Heading size="lg">B3TR Token Allowance</Heading>
@@ -48,20 +50,21 @@ export const AdminPageContent = () => {
             <B3trAllowance />
           </CardBody>
         </Card>
-      </HStack>
+      </Stack>
+      <ProposalsAdmin />
 
       <Card w={"full"}>
         <CardHeader>
           <Heading size="lg">X-2-Earn Apps</Heading>
         </CardHeader>
         <CardBody>
-          <VStack w={"full"} spacing={12} alignItems={"start"} height={"max-content"}>
-            <HStack w={"full"} spacing={12} alignItems={"start"} height={"max-content"}>
+          <VStack w={"full"} spacing={12} alignItems={"start"}>
+            <Stack direction={["column", "row"]} w={"full"} spacing={12} alignItems={"start"}>
               <ClaimXAppAllocations />
               <BulkClaimXAppsAllocations />
-            </HStack>
+            </Stack>
             {isAdminOfXAllocationVoting && (
-              <HStack w={"full"} spacing={12} alignItems={"start"} height={"max-content"}>
+              <HStack w={"full"} spacing={12} alignItems={"start"}>
                 <UpdateReceiverAddress />
               </HStack>
             )}
