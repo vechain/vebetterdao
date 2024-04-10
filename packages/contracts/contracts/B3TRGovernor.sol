@@ -12,6 +12,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { IVoterRewards } from "./interfaces/IVoterRewards.sol";
 import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
+import { IProposalTypesConfigurator } from "./interfaces/IProposalTypesConfigurator.sol";
 
 contract B3TRGovernor is
   Initializable,
@@ -35,21 +36,32 @@ contract B3TRGovernor is
     string[] signatures,
     bytes[] calldatas,
     string description,
-    uint256 roundIdVoteStart
+    uint256 roundIdVoteStart,
+    uint8 proposalType
   );
+  event ProposalTypeUpdated(uint256 indexed proposalId, uint8 proposalType);
 
   error UnauthorizedAccess(address user);
   error GovernorInvalidStartRound(uint256 roundId);
+  error InvalidProposalType(uint8 proposalType);
+  error InvalidProposalId();
+  error NotAdmin();
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
   }
 
+  modifier onlyAdmin() {
+    if (!hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) revert NotAdmin();
+    _;
+  }
+
   /// @custom:storage-location erc7201:b3tr.storage.B3TRGovernor
   struct B3TRGovernorStorage {
     IVoterRewards voterRewards;
     IXAllocationVotingGovernor xAllocationVoting;
+    IProposalTypesConfigurator proposalTypesConfigurator;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.B3TRGovernor")) - 1)) & ~bytes32(uint256(0xff))
@@ -96,6 +108,8 @@ contract B3TRGovernor is
     $.voterRewards = IVoterRewards(_voterRewards);
     $.xAllocationVoting = _xAllocationVoting;
 
+    //TODO: set proposalTypesConfigurator
+
     _grantRole(DEFAULT_ADMIN_ROLE, governorAdmin);
   }
 
@@ -137,6 +151,10 @@ contract B3TRGovernor is
     return true;
   }
 
+  function getProposalType(uint256 proposalId) external view returns (uint8) {
+    return _getGovernorStorage()._proposals[proposalId].proposalType;
+  }
+
   // ------------------ SETTERS ------------------ //
 
   function setVoterRewards(address _voterRewards) public onlyGovernance {
@@ -160,7 +178,8 @@ contract B3TRGovernor is
     uint256[] memory values,
     bytes[] memory calldatas,
     string memory description,
-    uint256 startRoundId
+    uint256 startRoundId,
+    uint8 proposalType
   ) public virtual returns (uint256) {
     address proposer = _msgSender();
     uint256 currentRoundId = _getB3TRGovernorStorage().xAllocationVoting.currentRoundId();
@@ -182,6 +201,11 @@ contract B3TRGovernor is
       }
     }
 
+    // Revert if `proposalType` is unset
+    if (bytes(_getB3TRGovernorStorage().proposalTypesConfigurator.proposalTypes(proposalType).name).length == 0) {
+      revert InvalidProposalType(proposalType);
+    }
+
     // check description restriction
     if (!_isValidDescriptionForProposer(proposer, description)) {
       revert GovernorRestrictedProposer(proposer);
@@ -194,7 +218,7 @@ contract B3TRGovernor is
       revert GovernorInsufficientProposerVotes(proposer, proposerVotes, votesThreshold);
     }
 
-    return _propose(targets, values, calldatas, description, proposer, startRoundId);
+    return _propose(targets, values, calldatas, description, proposer, startRoundId, proposalType);
   }
 
   /**
@@ -208,7 +232,8 @@ contract B3TRGovernor is
     bytes[] memory calldatas,
     string memory description,
     address proposer,
-    uint256 startRoundId
+    uint256 startRoundId,
+    uint8 proposalType
   ) internal virtual returns (uint256 proposalId) {
     GovernorStorage storage $ = _getGovernorStorage();
     proposalId = hashProposal(targets, values, calldatas, keccak256(bytes(description)));
@@ -225,6 +250,7 @@ contract B3TRGovernor is
     proposal.proposer = proposer;
     proposal.roundIdVoteStart = startRoundId;
     proposal.voteDuration = SafeCast.toUint32(votingPeriod());
+    proposal.proposalType = proposalType;
 
     emit ProposalCreated(
       proposalId,
@@ -234,10 +260,27 @@ contract B3TRGovernor is
       new string[](targets.length),
       calldatas,
       description,
-      startRoundId
+      startRoundId,
+      proposalType
     );
 
     // Using a named return variable to avoid stack too deep errors
+  }
+
+  /**
+   * @dev Allows manager to modify the proposalType of a proposal, in case it was set incorrectly.
+   */
+  function editProposalType(uint256 proposalId, uint8 proposalType) external onlyAdmin {
+    if (proposalSnapshot(proposalId) == 0) revert InvalidProposalId();
+
+    // Revert if `proposalType` is unset
+    if (bytes(_getB3TRGovernorStorage().proposalTypesConfigurator.proposalTypes(proposalType).name).length == 0) {
+      revert InvalidProposalType(proposalType);
+    }
+
+    _getGovernorStorage()._proposals[proposalId].proposalType = proposalType;
+
+    emit ProposalTypeUpdated(proposalId, proposalType);
   }
 
   // ------------------ OVERRIDES ------------------ //
@@ -311,10 +354,22 @@ contract B3TRGovernor is
     return $.xAllocationVoting.votingPeriod();
   }
 
+  /**
+   * Returns the quorum in a specific block number, in terms of number of votes: `supply * numerator / denominator`.
+   *
+   * @dev Supply is calculated at the proposal snapshot block
+   * @dev Quorum value is derived from `PROPOSAL_TYPES_CONFIGURATOR`
+   */
   function quorum(
-    uint256 blockNumber
-  ) public view override(GovernorUpgradeable, GovernorVotesQuorumFractionUpgradeable) returns (uint256) {
-    return super.quorum(blockNumber);
+    uint256 timepoint // -> this needs to become proposalId, and we need to update quorum() accordingly in all the places
+  ) public view virtual override(GovernorUpgradeable, GovernorVotesQuorumFractionUpgradeable) returns (uint256) {
+    uint256 proposalTypeId = 0; //_getGovernorStorage()._proposals[proposalId].proposalType;
+
+    // TODO: quorumNumerator had checkpoints in place, do we want to implement that?
+    // return (token().getPastTotalSupply(timepoint) * quorumNumerator(timepoint)) / quorumDenominator();
+    return
+      (token().getPastTotalSupply(timepoint) *
+        _getB3TRGovernorStorage().proposalTypesConfigurator.proposalTypes(proposalTypeId).quorum) / quorumDenominator();
   }
 
   /**
@@ -377,7 +432,7 @@ contract B3TRGovernor is
   }
 
   // To maintain compatibility with the previous version of the Governor, we need to override the propose function
-  // to call the new propose function with a default value for roundId (currentRoundId + 1)
+  // to call the new propose function with a default value for roundId (currentRoundId + 1) and default proposal type (0)
   function propose(
     address[] memory targets,
     uint256[] memory values,
@@ -387,8 +442,8 @@ contract B3TRGovernor is
     B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
     uint256 currentRoundId = $.xAllocationVoting.currentRoundId();
 
-    // call the new propose function with the next round id as default value
-    return propose(targets, values, calldatas, description, currentRoundId + 1);
+    // call the new propose function with the next round id as default value and defualt proposal type
+    return propose(targets, values, calldatas, description, currentRoundId + 1, 0);
   }
 
   function castVote(uint256 proposalId, uint8 support) public override(GovernorUpgradeable) returns (uint256) {

@@ -12,11 +12,16 @@ interface IB3TRGovernor is IGovernor {
     string[] signatures,
     bytes[] calldatas,
     string description,
-    uint256 roundIdVoteStart
+    uint256 roundIdVoteStart,
+    uint8 proposalType
   );
   event MinVotingDelaySet(uint256 oldMinMinVotingDelay, uint256 newMinVotingDelay);
+  event ProposalTypeUpdated(uint256 indexed proposalId, uint8 proposalType);
 
+  error InvalidProposalType(uint8 proposalType);
   error GovernorInvalidStartRound(uint256 roundId);
+  error InvalidProposalId(uint256 proposalId);
+  error NotAdmin();
 
   function hasVotedOnce(address user) external view returns (bool);
 
@@ -25,7 +30,8 @@ interface IB3TRGovernor is IGovernor {
     uint256[] memory values,
     bytes[] memory calldatas,
     string memory description,
-    uint256 startRoundId
+    uint256 startRoundId,
+    uint8 proposalType
   ) external returns (uint256 proposalId);
 
   function proposalStartRound(uint256 proposalId) external view returns (uint256);
@@ -35,4 +41,6 @@ interface IB3TRGovernor is IGovernor {
   function minVotingDelay() external view returns (uint256);
 
   function setMinVotingDelay(uint256 newMinVotingDelay) external;
+
+  function hasRole(bytes32 role, address account) external view returns (bool);
 }

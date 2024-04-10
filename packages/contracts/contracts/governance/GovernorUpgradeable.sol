@@ -33,6 +33,7 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
  * - removed voteStart block from ProposalCore
  * - abstract proposalSnapshot and proposalDeadline
  * - removed propose() and _propose()
+ * - added proposalType to ProposalCore
  */
 abstract contract GovernorUpgradeable is
   Initializable,
@@ -60,6 +61,7 @@ abstract contract GovernorUpgradeable is
     bool executed;
     bool canceled;
     uint48 etaSeconds;
+    uint8 proposalType;
   }
 
   bytes32 private constant ALL_PROPOSAL_STATES_BITMAP = bytes32((2 ** (uint8(type(ProposalState).max) + 1)) - 1);
