@@ -9,9 +9,7 @@ export const ProposalsAdmin = () => {
         <Heading size="lg">Proposals and Governance</Heading>
       </CardHeader>
       <CardBody>
-        <VStack w={"full"} spacing={4} alignItems={"start"}>
-          <UpdateProposalThreshold />
-        </VStack>
+        <VStack w={"full"} spacing={4} alignItems={"start"}></VStack>
       </CardBody>
     </Card>
   )

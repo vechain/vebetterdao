@@ -51,7 +51,6 @@ export const AdminPageContent = () => {
           </CardBody>
         </Card>
       </Stack>
-      <ProposalsAdmin />
 
       <Card w={"full"}>
         <CardHeader>
