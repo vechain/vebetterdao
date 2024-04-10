@@ -46,7 +46,7 @@ module.exports = {
   mocha: {
     timeout: 180000,
   },
-  defaultNetwork: "hardhat",
+  defaultNetwork: process.env.IS_TEST_COVERAGE ? "hardhat" : "vechain_solo",
   networks: {
     hardhat: {
       chainId: 1337,
