@@ -407,19 +407,3 @@ export const upgradeNFTtoNextLevel = async (
 
   await nft.connect(owner).upgrade(tokenId)
 }
-
-export const upgradeAndSelectNFTtoNextLevel = async (
-  tokenId: number,
-  nft: B3TRBadge,
-  b3tr: B3TR,
-  owner: HardhatEthersSigner,
-  minter: HardhatEthersSigner,
-) => {
-  const b3trToUpgrade = await nft.getB3TRtoUpgrade(tokenId)
-
-  await b3tr.connect(minter).mint(owner.address, b3trToUpgrade)
-
-  await b3tr.connect(owner).approve(await nft.getAddress(), b3trToUpgrade)
-
-  await nft.connect(owner).upgradeAndSelect(tokenId)
-}
