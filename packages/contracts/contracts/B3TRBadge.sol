@@ -44,8 +44,6 @@ contract B3TRBadge is
     uint256 MAX_LEVEL; // Set to 0 by allowing only the free minting of the Earth Token
     // Mapping from token ID to level
     mapping(uint256 => uint256) levelOf;
-    // Mapping from owner to tokenId selected for voting rewards
-    mapping(address => uint256) selectedTokenId;
     // Mapping from X/Economic node type to maximum mintable level
     /*
     0 => Strength
@@ -60,6 +58,8 @@ contract B3TRBadge is
     mapping(uint256 => uint256) _b3trToUpgradeToLevel;
     // Mapping from owner to their selected GM NFT level to be used for voter rewards
     mapping(address owner => Checkpoints.Trace208) _selectedLevelCheckpoints;
+    // Value-Frequency map tracking levels owned by users
+    mapping(address => mapping(uint256 => uint256)) _ownedLevels;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.B3TRBadge")) - 1)) & ~bytes32(uint256(0xff))
@@ -167,10 +167,6 @@ contract B3TRBadge is
     require(participatedInGovernance(msg.sender), "Galaxy Member: User has not participated in governance");
     B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
 
-    // TODO: Get User's X/Economic node type and check max mintable level
-    // TODO: Check if that X/Economic node has not already been used to mint a Token (e.g., MintedLevelOfXNode[xNodeId])
-    /* uint256 mintableLevel = 1; */
-
     uint256 tokenId = $._nextTokenId;
 
     $.levelOf[tokenId] = 1;
@@ -178,7 +174,6 @@ contract B3TRBadge is
     safeMint(msg.sender);
   }
 
-  // TODO: Mock X/Economic nodes NFT Contract, add to constructor and use it to check the X/Economic node type of the caller
   function upgrade(uint256 tokenId) public nonReentrant whenNotPaused {
     require(ownerOf(tokenId) == msg.sender, "Galaxy Member: you must own the Token to upgrade it");
     B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
@@ -191,9 +186,19 @@ contract B3TRBadge is
 
     require($.b3tr.balanceOf(msg.sender) >= b3trRequired, "Galaxy Member: Insufficient balance to upgrade");
 
+    require(
+      $.b3tr.allowance(msg.sender, address(this)) >= b3trRequired,
+      "Galaxy Member: Insufficient allowance to upgrade"
+    );
+
     $.levelOf[tokenId] = currentLevel + 1;
 
-    if ($.selectedTokenId[msg.sender] == tokenId) {
+    $._ownedLevels[msg.sender][currentLevel]--;
+    $._ownedLevels[msg.sender][currentLevel + 1]++;
+
+    uint256 currentHighestLevel = getLevel(msg.sender);
+
+    if ($.levelOf[tokenId] > currentHighestLevel) {
       _updateLevelSelected(msg.sender, $.levelOf[tokenId]);
     }
 
@@ -202,27 +207,8 @@ contract B3TRBadge is
     emit Upgraded(tokenId, currentLevel, $.levelOf[tokenId]);
   }
 
-  function select(uint256 tokenId) public {
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
-
-    require(ownerOf(tokenId) == msg.sender, "Galaxy Member: Caller is not the owner of the Token");
-    require($.selectedTokenId[msg.sender] != tokenId, "Galaxy Member: Token already selected");
-
-    _updateLevelSelected(msg.sender, $.levelOf[tokenId]);
-
-    _select(msg.sender, tokenId);
-  }
-
-  function upgradeAndSelect(uint256 tokenId) public {
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
-
-    require(
-      $.selectedTokenId[msg.sender] != tokenId,
-      "Galaxy Member: Token already selected, consider upgrading it instead"
-    );
-
-    upgrade(tokenId);
-    select(tokenId);
+  function selectHighestLevel() public {
+    _selectHighestLevel(msg.sender);
   }
 
   // Mints the Token for the given address
@@ -236,30 +222,48 @@ contract B3TRBadge is
   // ----------- Internal & Private ----------- //
 
   /**
-   * @dev Move ownership level from one address to another.
+   * @dev Selects the highest level owned by the owner
    */
-  function _moveOwnershipLevel(address from, address to, uint256 level, uint256 tokenId) internal {
-    if (from != to) {
-      // If the owner is transferring the last token then we checkpoint that the selected level is 0 because they no longer have a token
-      if (from != address(0) && balanceOf(from) == 1) {
-        _updateLevelSelected(from, 0); // Set the selected level to 0, i.e., no level selected
+  function _selectHighestLevel(address owner) internal {
+    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
 
-        _select(from, 0); // Set the selected token to 0, i.e., no token selected
-      }
-      // If the owner is receiving their first token then we checkpoint the selected level to the token's level
-      if (to != address(0) && balanceOf(to) == 0) {
-        _updateLevelSelected(to, level);
-
-        _select(to, tokenId);
+    /**
+     * @dev Loop through the levels owned by the user and select the highest level
+     * Out-of-gas safe as the loop will break as soon as the highest level is found and the MAX_LEVEL should not be too high
+     */
+    for (uint256 level = $.MAX_LEVEL; level > 0; level--) {
+      if ($._ownedLevels[owner][level] > 0) {
+        _updateLevelSelected(owner, level);
+        break;
       }
     }
   }
 
-  function _select(address owner, uint256 tokenId) internal whenNotPaused {
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
-    $.selectedTokenId[owner] = tokenId;
+  /**
+   * @dev Updates the highest level owned by the user
+   */
+  function _updateHighestLevelOwned(address from, address to, uint256 tokenId) internal {
+    if (from != to) {
+      B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
 
-    emit Selected(owner, tokenId);
+      if (from != address(0)) {
+        // If the owner is transferring their only token then we checkpoint the selected level to 0
+        if (balanceOf(from) == 1) _updateLevelSelected(from, 0);
+
+        $._ownedLevels[from][$.levelOf[tokenId]]--;
+
+        // If the user is transferring a token of the highest level they own then we select the next highest level
+        // note that it might be the same level if they own multiple tokens of the same level
+        if ($.levelOf[tokenId] == getLevel(from) && balanceOf(from) > 1) _selectHighestLevel(from);
+      }
+      if (to != address(0)) {
+        $._ownedLevels[to][$.levelOf[tokenId]]++;
+
+        if ($.levelOf[tokenId] > getLevel(to)) {
+          _updateLevelSelected(to, $.levelOf[tokenId]);
+        }
+      }
+    }
   }
 
   function _updateLevelSelected(address owner, uint256 level) internal whenNotPaused {
@@ -289,7 +293,7 @@ contract B3TRBadge is
    */
   function _checkpoints(address account, uint32 pos) internal view virtual returns (Checkpoints.Checkpoint208 memory) {
     B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
-    
+
     return $._selectedLevelCheckpoints[account].at(pos);
   }
 
@@ -460,11 +464,6 @@ contract B3TRBadge is
     return $.levelOf[tokenId];
   }
 
-  function selectedTokenId(address owner) public view returns (uint256) {
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
-    return $.selectedTokenId[owner];
-  }
-
   // ---------- Overrides ---------- //
 
   function _update(
@@ -472,8 +471,7 @@ contract B3TRBadge is
     uint256 tokenId,
     address auth
   ) internal override(ERC721Upgradeable, ERC721EnumerableUpgradeable, ERC721PausableUpgradeable) returns (address) {
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
-    _moveOwnershipLevel(auth, to, $.levelOf[tokenId], tokenId);
+    _updateHighestLevelOwned(auth, to, tokenId);
 
     return super._update(to, tokenId, auth);
   }
