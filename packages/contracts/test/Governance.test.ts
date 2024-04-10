@@ -1307,6 +1307,60 @@ describe("Governor and TimeLock", function () {
       // sqrt(1000) * 2 = 63.245553202 - scaled to 9 decimals
       expect(votes[1]).to.eql(ethers.parseEther("63.245553202") / 1000000000n)
     })
+
+    it("Can get correct quadratic voting power", async function () {
+      const { governor, otherAccounts, b3tr, B3trContract } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      const voter = otherAccounts[0]
+      const voter2 = otherAccounts[1]
+      const voter3 = otherAccounts[2]
+      await getVot3Tokens(voter, "1000")
+      await getVot3Tokens(voter2, "1000")
+      await getVot3Tokens(voter3, "1000")
+      await waitForNextBlock()
+
+      // Create a proposal
+      const tx = await createProposal(
+        b3tr,
+        B3trContract,
+        voter,
+        description + ` ${this.test?.title}`,
+        functionToCall,
+        [],
+        false,
+      ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
+      const proposalId = await getProposalIdFromTx(tx)
+      const receipt = (await tx.wait()) as any
+      // wait
+      await waitForProposalToBeActive(proposalId)
+
+      const power1 = await governor.getQuadraticVotingPower(voter.address, receipt.blockNumber)
+      const power2 = await governor.getQuadraticVotingPower(voter2.address, receipt.blockNumber)
+      const power3 = await governor.getQuadraticVotingPower(voter3.address, receipt.blockNumber)
+
+      // vote
+      await governor.connect(voter).castVote(proposalId, 1) // vote yes
+      await governor.connect(voter2).castVote(proposalId, 1) // vote yes
+      await governor.connect(voter3).castVote(proposalId, 1) // vote yes
+
+      // wait
+      await waitForVotingPeriodToEnd(proposalId)
+
+      // Check if quorum is calculated correctly
+      const isQuorumReached = await governor.quorumReached(proposalId)
+      expect(isQuorumReached).to.equal(true)
+
+      // check yes votes are counted correctly
+      const votes = await governor.proposalVotes(proposalId)
+      // sqrt(1000) * 3 = 94.868329937 - scaled to 9 decimals
+      expect(votes[1]).to.eql(power1 + power2 + power3)
+    })
   })
 
   describe("Proposal Execution", function () {
