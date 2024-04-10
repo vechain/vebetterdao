@@ -59,15 +59,11 @@ export const AdminPageContent = () => {
         </CardHeader>
         <CardBody>
           <VStack w={"full"} spacing={12} alignItems={"start"}>
-            <Stack direction={["column", "row"]} w={"full"} spacing={12} alignItems={"start"}>
+            <Stack direction={["column", "row"]} w={"full"} spacing={12} justify={"space-between"}>
               <ClaimXAppAllocations />
               <BulkClaimXAppsAllocations />
             </Stack>
-            {isAdminOfXAllocationVoting && (
-              <HStack w={"full"} spacing={12} alignItems={"start"}>
-                <UpdateReceiverAddress />
-              </HStack>
-            )}
+            {isAdminOfXAllocationVoting && <UpdateReceiverAddress />}
           </VStack>
         </CardBody>
       </Card>
