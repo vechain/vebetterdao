@@ -20,6 +20,8 @@ import { CustomModalContent } from "../CustomModalContent"
 import { SwitchTokenButton } from "./SwitchTokenButton"
 import { TokenCards } from "./TokenCards"
 import { TransactionModal } from "../TransactionModal"
+import { useB3trBalance, useB3trStaked, useVot3Balance } from "@/api"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 export type Props = {
   isOpen: boolean
@@ -38,6 +40,12 @@ const compactFormatter = new Intl.NumberFormat("en-US", {
 export const SwapModal = ({ isOpen, onClose }: Props) => {
   const [isB3trToVot3, setIsB3trToVot3] = useState(true)
 
+  const { account } = useWallet()
+
+  const { data: b3trBalance } = useB3trBalance(account ?? undefined)
+  const { data: vot3Balance } = useVot3Balance(account ?? undefined)
+  const { data: swappableVot3Balance } = useB3trStaked(account ?? undefined)
+
   const formData = useForm<{ amount: string }>({
     defaultValues: {
       amount: "",
@@ -54,6 +62,12 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
   const unstakeMutation = useUnstakeB3tr({
     amount,
   })
+
+  const isVOT3BalanceMoreThanStakedB3TR = useMemo(() => {
+    if (!swappableVot3Balance || !vot3Balance) return true
+
+    return vot3Balance.original > swappableVot3Balance.original
+  }, [vot3Balance?.original, swappableVot3Balance?.original])
 
   const mutationData = useMemo(() => {
     if (isB3trToVot3) {
@@ -139,9 +153,23 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
                   Swap
                 </Heading>
                 <Flex color={"black"} position={"relative"}>
-                  <TokenCards amount={amount} formData={formData} isB3trToVot3={isB3trToVot3} />
+                  <TokenCards
+                    amount={amount}
+                    formData={formData}
+                    isB3trToVot3={isB3trToVot3}
+                    isVOT3BalanceMoreThanStakedB3TR={isVOT3BalanceMoreThanStakedB3TR}
+                    b3trBalance={b3trBalance}
+                    vot3Balance={vot3Balance}
+                    swappableVot3Balance={swappableVot3Balance}
+                  />
                   <SwitchTokenButton setIsB3trToVot3={setIsB3trToVot3} />
                 </Flex>
+                {isVOT3BalanceMoreThanStakedB3TR && (
+                  <Text fontSize={"xs"} mt={2} px={2}>
+                    The amount of VOT3 tokens you can swap back to B3TR is based on the total B3TR you have converted
+                    into VOT3.
+                  </Text>
+                )}
                 <Button
                   mt={2}
                   type="submit"
