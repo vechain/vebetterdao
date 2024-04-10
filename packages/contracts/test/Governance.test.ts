@@ -681,11 +681,10 @@ describe("Governor and TimeLock", function () {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 5
-      const { b3tr, otherAccounts, governor, B3trContract, emissions, xAllocationVoting } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-          config,
-        })
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
 
       const proposer = otherAccounts[0]
       await getVot3Tokens(proposer, "1000")
