@@ -11,6 +11,7 @@ import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
  *
  * Modifications:
  * - removed votingDelay()
+ * - updated event VoteCast and VoteCastWithParams to include `power` parameter
  */
 interface IGovernor is IERC165, IERC6372 {
   enum ProposalState {

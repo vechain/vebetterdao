@@ -34,6 +34,8 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
  * - removed voteStart block from ProposalCore
  * - abstract proposalSnapshot and proposalDeadline
  * - removed propose() and _propose()
+ * - updated _countVote() function signature to include power
+ * - updated _castVote() to calculate power as Math.sqrt(weight)
  */
 abstract contract GovernorUpgradeable is
   Initializable,
