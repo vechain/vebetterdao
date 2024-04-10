@@ -19,7 +19,7 @@ const blockTime = getConfig().network.blockTime
  * @returns the allocation round info see {@link AllocationRoundWithState}
  */
 export const useAllocationsRound = (roundId?: string) => {
-  const { data: currentBlock } = useCurrentBlock()
+  const { data: currentBlock, isLoading: currentBlockLoading, isPaused: currentBlockPaused } = useCurrentBlock()
   const currentAllocationId = useCurrentAllocationsRoundId()
   const currentAllocationState = useAllocationsRoundState(roundId)
 
@@ -37,7 +37,11 @@ export const useAllocationsRound = (roundId?: string) => {
   }, [currentAllocationId, allocationRoundsEvents, currentAllocationState, roundId])
 
   const isLoading =
-    currentAllocationId.isLoading || allocationRoundsEvents.isLoading || currentAllocationState.isLoading
+    currentAllocationId.isLoading ||
+    allocationRoundsEvents.isLoading ||
+    currentAllocationState.isLoading ||
+    currentBlockLoading ||
+    currentBlockPaused
   const isError = currentAllocationId.isError || allocationRoundsEvents.isError || currentAllocationState.isError
   const error = currentAllocationId.error || allocationRoundsEvents.error || currentAllocationState.error
 
