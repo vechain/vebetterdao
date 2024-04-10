@@ -148,16 +148,16 @@ contract VOT3 is
   }
 
   /**
-   * @dev Returns the current voting power that `account` has.
+   * @dev Returns the current quadratic voting power that `account` has.
    **/
-  function getVotingPower(address account) public view returns (uint256) {
+  function getQuadraticVotingPower(address account) public view returns (uint256) {
     return Math.sqrt(getVotes(account));
   }
 
   /**
-   * @dev Returns the voting power of an `account`.
+   * @dev Returns the quadratic voting power that `account` had at a specific `timepoint`.
    **/
-  function getPastVotingPower(address account, uint256 timepoint) public view returns (uint256) {
+  function getPastQuadraticVotingPower(address account, uint256 timepoint) public view returns (uint256) {
     return Math.sqrt(getPastVotes(account, timepoint));
   }
 }

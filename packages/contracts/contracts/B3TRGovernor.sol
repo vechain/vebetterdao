@@ -117,6 +117,13 @@ contract B3TRGovernor is
     return _getB3TRGovernorStorage().voterRewards;
   }
 
+  /**
+   * @dev returns the quadratic voting power that `account` has.
+   */
+  function getQuadraticVotingPower(address account, uint256 timepoint) public view virtual returns (uint256) {
+    return Math.sqrt(_getVotes(account, timepoint, _defaultParams()));
+  }
+
   function canProposalStartInNextRound() public view returns (bool) {
     B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
     uint256 currentRoundId = $.xAllocationVoting.currentRoundId();
