@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v5.0.0) (governance/extensions/GovernorVotesQuorumFraction.sol)
 
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.20;
 
 import { GovernorVotesUpgradeable } from "./GovernorVotesUpgradeable.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
@@ -9,20 +9,20 @@ import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.s
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /**
- * @dev Extension of {XAllocationVotingGovernor} for voting weight extraction from an {ERC20Votes} token and a quorum expressed as a
+ * @dev Extension of {Governor} for voting weight extraction from an {ERC20Votes} token and a quorum expressed as a
  * fraction of the total supply.
  */
 abstract contract GovernorVotesQuorumFractionUpgradeable is Initializable, GovernorVotesUpgradeable {
   using Checkpoints for Checkpoints.Trace208;
 
-  /// @custom:storage-location erc7201:b3tr.storage.GovernorVotesQuorumFraction
+  /// @custom:storage-location erc7201:openzeppelin.storage.GovernorVotesQuorumFraction
   struct GovernorVotesQuorumFractionStorage {
     Checkpoints.Trace208 _quorumNumeratorHistory;
   }
 
-  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.GovernorVotesQuorumFraction")) - 1)) & ~bytes32(uint256(0xff))
+  // keccak256(abi.encode(uint256(keccak256("openzeppelin.storage.GovernorVotesQuorumFraction")) - 1)) & ~bytes32(uint256(0xff))
   bytes32 private constant GovernorVotesQuorumFractionStorageLocation =
-    0x80591ec4ff6d1506223368471cadc2b4568b450b05eb374eb7d48c87f1fbc500;
+    0xe770710421fd2cad75ad828c61aa98f2d77d423a440b67872d0f65554148e000;
 
   function _getGovernorVotesQuorumFractionStorage()
     private
@@ -69,7 +69,6 @@ abstract contract GovernorVotesQuorumFractionUpgradeable is Initializable, Gover
    */
   function quorumNumerator(uint256 timepoint) public view virtual returns (uint256) {
     GovernorVotesQuorumFractionStorage storage $ = _getGovernorVotesQuorumFractionStorage();
-
     uint256 length = $._quorumNumeratorHistory._checkpoints.length;
 
     // Optimistic search, check the latest checkpoint
@@ -105,7 +104,7 @@ abstract contract GovernorVotesQuorumFractionUpgradeable is Initializable, Gover
    *
    * Requirements:
    *
-   * - Must be called through a governance round.
+   * - Must be called through a governance proposal.
    * - New numerator must be smaller or equal to the denominator.
    */
   function updateQuorumNumerator(uint256 newQuorumNumerator) external virtual onlyGovernance {
@@ -122,14 +121,13 @@ abstract contract GovernorVotesQuorumFractionUpgradeable is Initializable, Gover
    * - New numerator must be smaller or equal to the denominator.
    */
   function _updateQuorumNumerator(uint256 newQuorumNumerator) internal virtual {
+    GovernorVotesQuorumFractionStorage storage $ = _getGovernorVotesQuorumFractionStorage();
     uint256 denominator = quorumDenominator();
     if (newQuorumNumerator > denominator) {
       revert GovernorInvalidQuorumFraction(newQuorumNumerator, denominator);
     }
 
     uint256 oldQuorumNumerator = quorumNumerator();
-
-    GovernorVotesQuorumFractionStorage storage $ = _getGovernorVotesQuorumFractionStorage();
     $._quorumNumeratorHistory.push(clock(), SafeCast.toUint208(newQuorumNumerator));
 
     emit QuorumNumeratorUpdated(oldQuorumNumerator, newQuorumNumerator);

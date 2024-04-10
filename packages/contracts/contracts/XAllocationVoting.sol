@@ -2,10 +2,10 @@
 pragma solidity ^0.8.18;
 
 import "./x-allocation-voting-governance/XAllocationVotingGovernor.sol";
-import "./x-allocation-voting-governance/modules/GovernorXAllocationVotesCountingUpgradeable.sol";
-import "./x-allocation-voting-governance/modules/GovernorVotesUpgradeable.sol";
-import "./x-allocation-voting-governance/modules/GovernorVotesQuorumFractionUpgradeable.sol";
-import "./x-allocation-voting-governance/modules/GovernorSettingsUpgradeable.sol";
+import "./x-allocation-voting-governance/modules/XAllocationGovernorVotesCountingUpgradeable.sol";
+import "./x-allocation-voting-governance/modules/XAllocationGovernorVotesUpgradeable.sol";
+import "./x-allocation-voting-governance/modules/XAllocationGovernorVotesQuorumFractionUpgradeable.sol";
+import "./x-allocation-voting-governance/modules/XAllocationGovernorSettingsUpgradeable.sol";
 import "./x-allocation-voting-governance/modules/XAppsUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -14,10 +14,10 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 contract XAllocationVoting is
   Initializable,
   XAllocationVotingGovernor,
-  GovernorSettingsUpgradeable,
-  GovernorXAllocationVotesCountingUpgradeable,
-  GovernorVotesUpgradeable,
-  GovernorVotesQuorumFractionUpgradeable,
+  XAllocationGovernorSettingsUpgradeable,
+  XAllocationGovernorVotesCountingUpgradeable,
+  XAllocationGovernorVotesUpgradeable,
+  XAllocationGovernorVotesQuorumFractionUpgradeable,
   XAppsUpgradeable,
   AccessControlUpgradeable,
   UUPSUpgradeable
@@ -245,7 +245,7 @@ contract XAllocationVoting is
   function votingPeriod()
     public
     view
-    override(XAllocationVotingGovernor, GovernorSettingsUpgradeable)
+    override(XAllocationVotingGovernor, XAllocationGovernorSettingsUpgradeable)
     returns (uint256)
   {
     return super.votingPeriod();
@@ -253,7 +253,12 @@ contract XAllocationVoting is
 
   function quorum(
     uint256 blockNumber
-  ) public view override(XAllocationVotingGovernor, GovernorVotesQuorumFractionUpgradeable) returns (uint256) {
+  )
+    public
+    view
+    override(XAllocationVotingGovernor, XAllocationGovernorVotesQuorumFractionUpgradeable)
+    returns (uint256)
+  {
     return super.quorum(blockNumber);
   }
 
