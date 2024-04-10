@@ -18,6 +18,7 @@ import {
   Heading,
   ModalFooter,
   Box,
+  useDisclosure,
 } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { useFieldArray, useForm } from "react-hook-form"
@@ -30,13 +31,14 @@ import { useGetVotes, useProposalThreshold, useVot3Balance, useVot3Delegates } f
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useDelegateVot3 } from "@/hooks/useDelegateVot3"
 import { governanceAvailableContracts } from "@/constants"
-import { ConfirmTransactionModalContent } from "../ConfirmTransactionModalContent"
+import { TransactionModal } from "../TransactionModal"
 
 const AvailableContracts = governanceAvailableContracts
 
 type Props = {
   isOpen: boolean
   onClose: () => void
+  onOpen: () => void
 }
 export type FunctionParamsField = { id: string; name: string; type: string; internalType: string; value: any }
 
@@ -45,36 +47,43 @@ export type FormData = {
   functionToCall?: string
 } & Omit<ProposalAction, "contractAbi">
 
-export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
-  const { sendTransaction, status, sendTransactionError, txReceiptError, resetStatus } = useCreateProposal({})
-
-  const onSuccess = () => {
-    resetStatus()
-    onClose()
-  }
+export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose, onOpen }) => {
+  const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
+  const createProposalMutation = useCreateProposal({})
 
   const onSubmit = (description?: string, actions?: ProposalAction[]) => {
-    sendTransaction(description, actions)
+    onConfirmationOpen()
+    createProposalMutation.sendTransaction(description, actions)
   }
 
-  const renderContent = useMemo(() => {
-    if (status !== "ready")
-      return (
-        <ConfirmTransactionModalContent
-          description={`Create a proposal`}
-          status={status}
-          error={sendTransactionError?.message ?? txReceiptError?.message}
-          onSuccess={onSuccess}
-          onTryAgain={resetStatus}
-        />
-      )
-    return <CreateProposalModalForm onSubmit={onSubmit} />
-  }, [status])
+  const onTryAgain = () => {
+    onConfirmationClose()
+    onOpen()
+  }
+  if (createProposalMutation.status !== "ready")
+    return (
+      <TransactionModal
+        isOpen={isConfirmationOpen}
+        onClose={onConfirmationClose}
+        confirmationTitle="Create new proposal"
+        successTitle="proposal created!"
+        status={createProposalMutation.error ? "error" : createProposalMutation.status}
+        errorDescription={createProposalMutation.error?.reason}
+        errorTitle={createProposalMutation.error ? "Error creating proposal" : undefined}
+        showTryAgainButton={true}
+        onTryAgain={onTryAgain}
+        pendingTitle="Creating proposal..."
+        txId={createProposalMutation.txReceipt?.meta.txID}
+        showExplorerButton={true}
+      />
+    )
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
       <ModalOverlay />
-      <ModalContent>{renderContent}</ModalContent>
+      <ModalContent>
+        <CreateProposalModalForm onSubmit={onSubmit} />
+      </ModalContent>
     </Modal>
   )
 }
