@@ -649,8 +649,6 @@ describe("Governor and TimeLock", function () {
       expect(proposeReceipt).not.to.be.null
 
       const proposalId = await getProposalIdFromTx(tx)
-      console.log(proposalId)
-      console.log(await governor.hashProposal([], [], [], ethers.keccak256(ethers.toUtf8Bytes(""))))
 
       expect(proposalId).not.to.be.null
 
