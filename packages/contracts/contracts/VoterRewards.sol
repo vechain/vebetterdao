@@ -94,7 +94,7 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
 
     uint256 cycle = $.emissions.getCurrentCycle();
 
-    uint256 badgeLevel = $.b3trBadge.getPastLevel(voter, proposalStart);
+    uint256 badgeLevel = $.b3trBadge.getPastHighestLevel(voter, proposalStart);
 
     uint256 multiplier = $.levelToMultiplier[badgeLevel]; // Percentage multiplier for the level of the badge
     uint256 total = votes + (votes * multiplier) / 100; // Total weighted votes
