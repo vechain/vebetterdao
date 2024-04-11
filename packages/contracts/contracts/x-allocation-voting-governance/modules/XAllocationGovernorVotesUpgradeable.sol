@@ -16,17 +16,17 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
  */
 abstract contract XAllocationGovernorVotesUpgradeable is Initializable, XAllocationVotingGovernor {
   /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.GovernorVotes
-  struct XAllocationGovernorVotesStorage {
+  struct GovernorVotesStorage {
     IERC5805 _token;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.GovernorVotes")) - 1)) & ~bytes32(uint256(0xff))
-  bytes32 private constant XAllocationGovernorVotesStorageLocation =
+  bytes32 private constant GovernorVotesStorageLocation =
     0x1fd39a1a04c688cfdfe2fc0db51d4f96629f1828304800fbba14f96e8ddf4c00;
 
-  function _getXAllocationGovernorVotesStorage() private pure returns (XAllocationGovernorVotesStorage storage $) {
+  function _getGovernorVotesStorage() private pure returns (GovernorVotesStorage storage $) {
     assembly {
-      $.slot := XAllocationGovernorVotesStorageLocation
+      $.slot := GovernorVotesStorageLocation
     }
   }
 
@@ -35,7 +35,7 @@ abstract contract XAllocationGovernorVotesUpgradeable is Initializable, XAllocat
   }
 
   function __GovernorVotes_init_unchained(IVotes tokenAddress) internal onlyInitializing {
-    XAllocationGovernorVotesStorage storage $ = _getXAllocationGovernorVotesStorage();
+    GovernorVotesStorage storage $ = _getGovernorVotesStorage();
     $._token = IERC5805(address(tokenAddress));
   }
 
@@ -43,7 +43,7 @@ abstract contract XAllocationGovernorVotesUpgradeable is Initializable, XAllocat
    * @dev The token that voting power is sourced from.
    */
   function token() public view virtual returns (IERC5805) {
-    XAllocationGovernorVotesStorage storage $ = _getXAllocationGovernorVotesStorage();
+    GovernorVotesStorage storage $ = _getGovernorVotesStorage();
     return $._token;
   }
 

@@ -25,7 +25,7 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
   }
 
   /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.GovernorXAllocationVotesCounting
-  struct XAllocationGovernorVotesCountingStorage {
+  struct GovernorXAllocationVotesCountingStorage {
     // mapping to store that a user has voted at least one time
     mapping(address => bool) _hasVotedOnce;
     mapping(uint256 roundId => RoundVote) _roundVotes;
@@ -33,16 +33,16 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.GovernorXAllocationVotesCounting")) - 1)) & ~bytes32(uint256(0xff))
-  bytes32 private constant XAllocationGovernorVotesCountingStorageLocation =
+  bytes32 private constant GovernorXAllocationVotesCountingStorageLocation =
     0x5c00912e49838455c1e1b04f95a9c09c8d40dfdf1d79671a7f8ad0273f827300;
 
-  function _getXAllocationGovernorVotesCountingStorage()
+  function _getGovernorXAllocationVotesCountingStorage()
     private
     pure
-    returns (XAllocationGovernorVotesCountingStorage storage $)
+    returns (GovernorXAllocationVotesCountingStorage storage $)
   {
     assembly {
-      $.slot := XAllocationGovernorVotesCountingStorageLocation
+      $.slot := GovernorXAllocationVotesCountingStorageLocation
     }
   }
 
@@ -51,7 +51,7 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
   }
 
   function __GovernorXAllocationVotesCounting_init_unchained(address _voterRewards) internal onlyInitializing {
-    XAllocationGovernorVotesCountingStorage storage $ = _getXAllocationGovernorVotesCountingStorage();
+    GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
 
     $.voterRewards = IVoterRewards(_voterRewards);
   }
@@ -73,7 +73,8 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
     if (hasVoted(roundId, voter)) {
       revert GovernorAlreadyCastVote(voter);
     }
-    XAllocationGovernorVotesCountingStorage storage $ = _getXAllocationGovernorVotesCountingStorage();
+
+    GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
     XAllocationVotingGovernorStorage storage $governorStorage = _getXAllocationVotingGovernorStorage();
 
     RoundCore storage round = $governorStorage._rounds[roundId];
@@ -109,22 +110,22 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
   }
 
   function getAppVotes(uint256 roundId, bytes32 app) public view override returns (uint256) {
-    XAllocationGovernorVotesCountingStorage storage $ = _getXAllocationGovernorVotesCountingStorage();
+    GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
     return $._roundVotes[roundId].votesReceived[app];
   }
 
   function totalVotes(uint256 roundId) public view override returns (uint256) {
-    XAllocationGovernorVotesCountingStorage storage $ = _getXAllocationGovernorVotesCountingStorage();
+    GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
     return $._roundVotes[roundId].totalVotes;
   }
 
   function totalVoters(uint256 roundId) public view override returns (uint256) {
-    XAllocationGovernorVotesCountingStorage storage $ = _getXAllocationGovernorVotesCountingStorage();
+    GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
     return $._roundVotes[roundId].totalVoters;
   }
 
   function hasVoted(uint256 roundId, address user) public view returns (bool) {
-    XAllocationGovernorVotesCountingStorage storage $ = _getXAllocationGovernorVotesCountingStorage();
+    GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
     return $._roundVotes[roundId].hasVoted[user];
   }
 
@@ -138,12 +139,12 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
   }
 
   function hasVotedOnce(address user) public view returns (bool) {
-    XAllocationGovernorVotesCountingStorage storage $ = _getXAllocationGovernorVotesCountingStorage();
+    GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
     return $._hasVotedOnce[user];
   }
 
   function voterRewards() public view returns (IVoterRewards) {
-    XAllocationGovernorVotesCountingStorage storage $ = _getXAllocationGovernorVotesCountingStorage();
+    GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
     return $.voterRewards;
   }
 }
