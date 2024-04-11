@@ -696,6 +696,48 @@ describe("Governor and TimeLock", function () {
       ).to.be.reverted
     })
 
+    it("Can use markdown in proposal description", async () => {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      const { governor, otherAccounts, b3tr, B3trContract, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      const description =
+        "# Proposal: Tree Lovers Association wants to join!\n\n## Summary\nLorem ipsum **dolor** _sit_ amet consectetur. Malesuada purus posuere sed lacus eu nibh odio vestibulum ipsum. Elit a congue fringilla ultricies placerat laoreet nam. Et quisque leo ante nulla volutpat nascetur dignissim morbi. Facilisis tristique morbi gravida adipiscing at scelerisque suscipit id. Arcu lorem sit magna. For more information, visit [TLA Website](http://www.tlawebsite.com).\n\n## Description\n**TLA App** emerges as an application with a singular motivation: to inspire and incentivize individuals to actively contribute to afforestation efforts. Rooted in the belief that collective action can drive positive environmental change, TLA App aims to harness the power of technology to mobilize users toward a shared goal. By providing a user-friendly interface and seamless interactions, _TLA App_ empowers users to make a tangible impact on the environment, one tree at a time. Some inline code: `async function helloWorld()` Rooted in the belief that collective action can drive positive environmental change, TLA App aims to harness the power of technology to mobilize users toward a shared goal. - Write the press release - Update the website - Contact the media\n\n## Motivation\nTechnologically, _TLA App_ streamlines user engagement through an intuitive interface. Users seamlessly register and participate, eliminating barriers to entry. The application employs a secure and efficient data management system to process and verify user-submitted evidence of tree planting activities. This ensures the authenticity of contributions and builds trust among users. While not operating on a DAO structure, TLA App focuses on providing a straightforward and effective platform for individuals to engage with environmental causes.\n\n## Additional Information\nTechnologically, TLA App streamlines user engagement through an intuitive interface. Users seamlessly register and participate, eliminating barriers to entry. The application employs a secure and efficient data management system to process and verify user-submitted evidence of tree planting activities. This ensures the authenticity of contributions and builds trust among users. While not operating on a DAO structure, TLA App focuses on providing a straightforward and effective platform for individuals to engage with environmental causes."
+
+      // Now we can create a new proposal
+      const address = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+      const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
+      const tx = await governor
+        .connect(proposer) //@ts-ignore
+        .propose([address], [0], [encodedFunctionCall], description, voteStartsInRoundId.toString(), {
+          gasLimit: 10_000_000,
+        })
+
+      const proposeReceipt = await tx.wait()
+      expect(proposeReceipt).not.to.be.null
+
+      // Check that the ProposalCreated event was emitted with the correct parameters
+      const event = proposeReceipt?.logs[0]
+      expect(event).not.to.be.undefined
+
+      const decodedLogs = governor.interface.parseLog({
+        topics: [...(event?.topics as string[])],
+        data: event ? event.data : "",
+      })
+
+      expect(decodedLogs?.args[6]).to.eql(description)
+    })
+
     it("Should not be able to create a proposal starting in a round that has already passed", async () => {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
