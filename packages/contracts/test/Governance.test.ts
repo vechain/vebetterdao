@@ -622,6 +622,107 @@ describe("Governor and TimeLock", function () {
       expect(await governor.state(proposalId)).to.eql(1n) // active
     })
 
+    it("Can create a non executable proposal", async () => {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.EMISSIONS_CYCLE_DURATION = 5
+      const { otherAccounts, governor, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // Now we can create a new proposal
+      const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
+      const tx = await governor
+        .connect(proposer) //@ts-ignore
+        .propose([], [], [], "", voteStartsInRoundId.toString(), {
+          gasLimit: 10_000_000,
+        })
+
+      const proposeReceipt = await tx.wait()
+      expect(proposeReceipt).not.to.be.null
+
+      const proposalId = await getProposalIdFromTx(tx)
+
+      expect(proposalId).not.to.be.null
+
+      expect(await governor.state(proposalId)).to.eql(0n) // pending
+
+      expect(await governor.proposalIsExecutable(proposalId)).to.eql(false)
+
+      // Let's make this proposal succeed
+      await waitForProposalToBeActive(proposalId)
+      expect(await governor.state(proposalId)).to.eql(1n) // active
+      await governor.connect(proposer).castVote(proposalId, 1)
+
+      // Move to the next round + 1 extra block
+      await waitForCurrentRoundToEnd()
+
+      expect(await governor.state(proposalId)).to.eql(4n) // succeeded
+
+      const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(""))
+
+      // Can still queue even if there is nothing to execute
+      await governor.queue([], [], [], descriptionHash)
+      expect(await governor.state(proposalId)).to.eql(5n) // queued
+
+      // Can still execute even if there is nothing to execute
+      await governor.execute([], [], [], descriptionHash)
+      expect(await governor.state(proposalId)).to.eql(7n)
+    })
+
+    it("Parameters must have the same length", async () => {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.EMISSIONS_CYCLE_DURATION = 5
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // Now we can create a new proposal
+      const address = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+      const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
+
+      // Parameters must have the same length
+      await catchRevert(
+        governor
+          .connect(proposer) //@ts-ignore
+          .propose([address], [0, 1], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
+            gasLimit: 10_000_000,
+          }),
+      )
+
+      await catchRevert(
+        governor
+          .connect(proposer) //@ts-ignore
+          .propose([address, address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
+            gasLimit: 10_000_000,
+          }),
+      )
+
+      await catchRevert(
+        governor
+          .connect(proposer) //@ts-ignore
+          .propose([address], [0], [encodedFunctionCall, encodedFunctionCall], "", voteStartsInRoundId.toString(), {
+            gasLimit: 10_000_000,
+          }),
+      )
+    })
+
     it("Proposal concludes when round ends", async () => {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
