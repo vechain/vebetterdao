@@ -12,6 +12,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { IVoterRewards } from "./interfaces/IVoterRewards.sol";
 import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
+import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 
 contract B3TRGovernor is
   Initializable,
@@ -121,7 +122,8 @@ contract B3TRGovernor is
    * @dev returns the quadratic voting power that `account` has.
    */
   function getQuadraticVotingPower(address account, uint256 timepoint) public view virtual returns (uint256) {
-    return Math.sqrt(_getVotes(account, timepoint, _defaultParams()));
+    // scale the votes by 1e9 so that number returned is 1e18
+    return Math.sqrt(_getVotes(account, timepoint, _defaultParams())) * 1e9;
   }
 
   function canProposalStartInNextRound() public view returns (bool) {

@@ -1039,12 +1039,11 @@ describe("Governor and TimeLock", function () {
       const votes = await governor.proposalVotes(proposalId)
 
       // against votes
-      expect(votes[0]).to.eql(ethers.parseEther("3") / 1000000000n)
+      expect(votes[0]).to.eql(ethers.parseEther("3"))
 
       // Note that if this test is ran in isolation, the following votes will be 0
       expect(votes[1]).to.satisfy((votes: bigint) => {
-        // sqrt of 10^18 is 10^9 hence we need to divide by 10^9
-        return votes === ethers.parseEther("31.622776601") / 1000000000n || votes === BigInt(0)
+        return votes === ethers.parseEther("31.622776601") || votes === BigInt(0)
       })
 
       // abstain
@@ -1208,7 +1207,7 @@ describe("Governor and TimeLock", function () {
 
       // check against votes are counted correctly
       const votes = await governor.proposalVotes(proposalId)
-      expect(votes[0]).to.eql(ethers.parseEther("63.245553202") / 1000000000n)
+      expect(votes[0]).to.eql(ethers.parseEther("63.245553202"))
     })
 
     it("Abstain votes are counted correctly for quorum", async function () {
@@ -1256,7 +1255,7 @@ describe("Governor and TimeLock", function () {
 
       // check abstain votes are counted correctly
       const votes = await governor.proposalVotes(proposalId)
-      expect(votes[2]).to.eql(ethers.parseEther("63.245553202") / 1000000000n)
+      expect(votes[2]).to.eql(ethers.parseEther("63.245553202"))
     })
 
     it("Yes votes are counted correctly for quorum", async function () {
@@ -1305,7 +1304,7 @@ describe("Governor and TimeLock", function () {
       // check yes votes are counted correctly
       const votes = await governor.proposalVotes(proposalId)
       // sqrt(1000) * 2 = 63.245553202 - scaled to 9 decimals
-      expect(votes[1]).to.eql(ethers.parseEther("63.245553202") / 1000000000n)
+      expect(votes[1]).to.eql(ethers.parseEther("63.245553202"))
     })
 
     it("Can get correct quadratic voting power", async function () {

@@ -603,7 +603,7 @@ abstract contract GovernorUpgradeable is
     _validateStateBitmap(proposalId, _encodeStateBitmap(ProposalState.Active));
 
     uint256 weight = _getVotes(account, proposalSnapshot(proposalId), params);
-    uint256 power = Math.sqrt(weight);
+    uint256 power = Math.sqrt(weight) * 1e9;
     _countVote(proposalId, account, support, weight, power, params);
 
     if (params.length == 0) {
