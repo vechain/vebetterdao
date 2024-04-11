@@ -146,6 +146,16 @@ contract B3TRGovernor is
     return true;
   }
 
+  function proposalIsExecutable(uint256 proposalId) public view returns (bool) {
+    GovernorStorage storage $ = _getGovernorStorage();
+    ProposalCore storage proposal = $._proposals[proposalId];
+    if (proposal.roundIdVoteStart == 0) {
+      revert GovernorNonexistentProposal(proposalId);
+    }
+
+    return proposal.isExecutable;
+  }
+
   // ------------------ SETTERS ------------------ //
 
   function setVoterRewards(address _voterRewards) public onlyGovernance {
@@ -222,7 +232,7 @@ contract B3TRGovernor is
     GovernorStorage storage $ = _getGovernorStorage();
     proposalId = hashProposal(targets, values, calldatas, keccak256(bytes(description)));
 
-    if (targets.length != values.length || targets.length != calldatas.length || targets.length == 0) {
+    if (targets.length != values.length || targets.length != calldatas.length) {
       revert GovernorInvalidProposalLength(targets.length, calldatas.length, values.length);
     }
     if ($._proposals[proposalId].roundIdVoteStart != 0) {
@@ -234,6 +244,7 @@ contract B3TRGovernor is
     proposal.proposer = proposer;
     proposal.roundIdVoteStart = startRoundId;
     proposal.voteDuration = SafeCast.toUint32(votingPeriod());
+    proposal.isExecutable = targets.length > 0;
 
     emit ProposalCreated(
       proposalId,
