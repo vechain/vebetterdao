@@ -13,7 +13,7 @@ import {
 
 const ACCT_OFFSET = 15
 // Number of users to seed. If you increase this number you will need to increase the EMISSIONS_CYCLE_DURATION to make sure there is enough time to vote
-const NUM_USERS_TO_SEED = 10
+const NUM_USERS_TO_SEED = 300
 const SEED_STRATEGY = SeedStrategy.RANDOM
 
 export const simulateRounds = async (
