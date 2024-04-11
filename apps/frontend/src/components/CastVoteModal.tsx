@@ -1,4 +1,4 @@
-import { ProposalCreatedEvent, VoteType, useGetVotesOnBlock } from "@/api"
+import { ProposalCreatedEvent, VoteType, useGetVotesOnBlock, useProposalSnapshot } from "@/api"
 import { useCastVote } from "@/hooks"
 import {
   ModalOverlay,
@@ -20,6 +20,7 @@ import {
   HStack,
   Icon,
   Box,
+  Skeleton,
 } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { FormEvent, useMemo, useState } from "react"
@@ -74,7 +75,10 @@ type CastVoteModalFormContentProps = {
 
 const CastVoteModalContent: React.FC<CastVoteModalFormContentProps> = ({ onVote, proposal }) => {
   const { account } = useWallet()
-  const { data: votes } = useGetVotesOnBlock(Number(proposal.voteStart), account ?? undefined)
+  const { data: proposalSnapshotBlock, isLoading: proposalSnapshotBlockLoading } = useProposalSnapshot(
+    proposal.proposalId,
+  )
+  const { data: votes } = useGetVotesOnBlock(Number(proposalSnapshotBlock), account ?? undefined)
   const [selectedVote, setSelectedVote] = useState<VoteType>(VoteType.VOTE_FOR)
   const [reason, setReason] = useState<string>("")
 
@@ -110,7 +114,9 @@ const CastVoteModalContent: React.FC<CastVoteModalFormContentProps> = ({ onVote,
                     {votes?.formatted ?? "0"}
                   </Heading>
                 </HStack>
-                <Text fontSize="xs">Votes snapshotted at block #{proposal.voteStart}</Text>
+                <Skeleton isLoaded={!proposalSnapshotBlockLoading}>
+                  <Text fontSize="xs">Votes snapshotted at block #{proposalSnapshotBlock}</Text>
+                </Skeleton>
               </Box>
               <Text fontSize="sm" fontWeight={"thin"}>
                 You can get more votes by staking more B3TR

@@ -19,6 +19,7 @@ import {
   ModalFooter,
   Box,
   useDisclosure,
+  Text,
 } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { useFieldArray, useForm } from "react-hook-form"
@@ -27,7 +28,13 @@ import { useEffect, useMemo } from "react"
 import { GenerateFunctionToCallParamsInput } from "./GenerateFunctionToCallParamsInput"
 import { FaPlus } from "react-icons/fa6"
 import { ProposalAction, useCreateProposal } from "@/hooks/useCreateProposal"
-import { useCurrentAllocationsRoundId, useGetVotes, useProposalThreshold, useVot3Balance } from "@/api"
+import {
+  useCanProposalStartInNextRound,
+  useCurrentAllocationsRoundId,
+  useGetVotes,
+  useProposalThreshold,
+  useVot3Balance,
+} from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useDelegateVot3 } from "@/hooks/useDelegateVot3"
 import { governanceAvailableContracts } from "@/constants"
@@ -50,11 +57,12 @@ export type FormData = {
 export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose, onOpen }) => {
   const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
+  const { data: canProposalStartInNextRound } = useCanProposalStartInNextRound()
   const createProposalMutation = useCreateProposal({})
 
   const onSubmit = (description: string, actions: ProposalAction[]) => {
     if (!currentRoundId) throw new Error("Current round id is not available")
-    const startRoundId = Number(currentRoundId) + 2
+    const startRoundId = Number(currentRoundId) + (canProposalStartInNextRound ? 1 : 2)
     onConfirmationOpen()
     createProposalMutation.sendTransaction({ description, actions, startRoundId })
   }
@@ -105,6 +113,7 @@ export const CreateProposalModalForm: React.FC<CreateProposalModalFormProps> = (
   const votes = votesObject?.scaled
 
   const { data: vot3Balance } = useVot3Balance(account ?? undefined)
+  const { data: canProposalStartInNextRound } = useCanProposalStartInNextRound()
 
   const {
     handleSubmit,
@@ -304,6 +313,11 @@ export const CreateProposalModalForm: React.FC<CreateProposalModalFormProps> = (
           <Box alignSelf={"flex-start"} mt={2}>
             {delegationMessage}
           </Box>
+          <Text alignSelf={"flex-start"} mt={2} fontSize={"xs"}>
+            {canProposalStartInNextRound
+              ? "Proposal is going to be votable in the next round"
+              : "Not enough time before the next round. Proposal is going to be votable in the round after the next one"}
+          </Text>
         </VStack>
       </ModalBody>
       <ModalFooter>
