@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "test": "dotenv -v NEXT_PUBLIC_APP_ENV=solo-staging -e .env.example turbo run test --",
-    "test:coverage": "dotenv -v NEXT_PUBLIC_APP_ENV=solo-staging -e .env.example turbo run test:coverage --",
+    "test:coverage": "dotenv -v NEXT_PUBLIC_APP_ENV=solo-staging -v IS_TEST_COVERAGE=true -e .env.example turbo run test:coverage --",
     "build": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo build",
     "build:staging": "dotenv -v NEXT_PUBLIC_APP_ENV=solo-staging -- turbo build",
     "build:testnet": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- turbo build",
@@ -25,7 +25,8 @@
     "contracts:upload-b3tr-badge-metadata": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run upload-b3tr-badge-metadata --filter=contracts",
     "contracts:generate-xapp-metadata": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run generate-xapp-metadata --filter=contracts",
     "contracts:upload-xapp-metadata": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run upload-xapp-metadata --filter=contracts",
-    "solo-up": "make solo-up"
+    "solo-up": "make solo-up",
+    "playwright:e2e": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run playwright:e2e"
   },
   "devDependencies": {
     "@repo/eslint-config": "*",

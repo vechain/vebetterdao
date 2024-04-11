@@ -10,7 +10,7 @@ import { IEmissions } from "../../interfaces/IEmissions.sol";
 /**
  * @dev Extension of {XAllocationVotingGovernor} for settings updatable through governance.
  */
-abstract contract GovernorSettingsUpgradeable is Initializable, XAllocationVotingGovernor {
+abstract contract XAllocationGovernorSettingsUpgradeable is Initializable, XAllocationVotingGovernor {
   /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.GovernorSettings
   struct GovernorSettingsStorage {
     // duration: limited to uint32 in core

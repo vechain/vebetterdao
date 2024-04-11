@@ -17,7 +17,6 @@ import { NoncesUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/Non
 import { IGovernor } from "../interfaces/IGovernor.sol";
 import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGovernor.sol";
 
 /**
  * @dev Core of the governance system, designed to be extended through various modules.
@@ -34,6 +33,7 @@ import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGove
  * - removed voteStart block from ProposalCore
  * - abstract proposalSnapshot and proposalDeadline
  * - removed propose() and _propose()
+ * - added isExecutable to ProposalCore
  */
 abstract contract GovernorUpgradeable is
   Initializable,
@@ -58,6 +58,7 @@ abstract contract GovernorUpgradeable is
     address proposer;
     uint256 roundIdVoteStart;
     uint32 voteDuration;
+    bool isExecutable;
     bool executed;
     bool canceled;
     uint48 etaSeconds;
