@@ -229,7 +229,7 @@ export async function deployAll(config: ContractsConfig) {
   }
 
   // ---------- Run Simulation ---------- //
-  if (config.RUN_SIMULATION) {
+  if (network.name === "vechain_solo" && config.RUN_SIMULATION) {
     await simulateRounds(b3tr, vot3, xAllocationVoting, emissions, voterRewards, treasury)
   }
 
