@@ -1,5 +1,25 @@
-import { ProposalCreatedEvent, ProposalState, useCurrentBlock, useProposalState } from "@/api"
-import { Box, Card, CardBody, CardFooter, CardHeader, Code, HStack, Heading, Tag, Text, VStack } from "@chakra-ui/react"
+import {
+  ProposalCreatedEvent,
+  ProposalState,
+  useCurrentBlock,
+  useProposalDeadline,
+  useProposalSnapshot,
+  useProposalState,
+} from "@/api"
+import {
+  Box,
+  Card,
+  CardBody,
+  CardFooter,
+  CardHeader,
+  Code,
+  HStack,
+  Heading,
+  Skeleton,
+  Tag,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { AddressButton } from "./AddressButton"
 import { useMemo } from "react"
 import { governanceAvailableContracts } from "@/constants"
@@ -20,6 +40,12 @@ type Props = {
 export const ProposalCard: React.FC<Props> = ({ proposal }) => {
   const { data: state } = useProposalState(proposal.proposalId)
   const { data: currentBlock } = useCurrentBlock()
+  const { data: proposalSnapshotBlock, isLoading: proposalSnapshotBlockLoading } = useProposalSnapshot(
+    proposal.proposalId,
+  )
+  const { data: proposalDeadlineBlock, isLoading: proposalDeadlineBlockLoading } = useProposalDeadline(
+    proposal.proposalId,
+  )
 
   const decodedCallDatas = useMemo(() => {
     const decoded = []
@@ -53,21 +79,21 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
   }, [proposal])
 
   const isStarted = useMemo(() => {
-    const startBlock = Number(proposal.voteStart)
+    const startBlock = Number(proposalSnapshotBlock)
     if (!startBlock || !currentBlock) return null
     const startBlockFromNow = startBlock - currentBlock.number
     return startBlockFromNow <= 0
   }, [proposal])
 
   const isEnded = useMemo(() => {
-    const endBlock = Number(proposal.voteEnd)
+    const endBlock = Number(proposalDeadlineBlock)
     if (!endBlock || !currentBlock) return null
     const endBlockFromNow = endBlock - currentBlock.number
     return endBlockFromNow <= 0
   }, [proposal])
 
   const estimatedEndTime = useMemo(() => {
-    const endBlock = Number(proposal.voteEnd)
+    const endBlock = Number(proposalDeadlineBlock)
     if (!endBlock || !currentBlock) return null
     const endBlockFromNow = endBlock - currentBlock.number
     //not ended yet
@@ -80,11 +106,11 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
       const endDate = dayjs().subtract(durationLeftTimestamp, "milliseconds")
       return endDate.fromNow()
     }
-  }, [proposal])
+  }, [proposalSnapshotBlock, proposalDeadlineBlock, currentBlock])
 
   const estimatedStartTime = useMemo(() => {
-    if (!proposal.voteStart) return null
-    const startBlock = Number(proposal.voteStart)
+    if (!proposalSnapshotBlock) return null
+    const startBlock = Number(proposalSnapshotBlock)
     if (!startBlock || !currentBlock) return null
     const startBlockFromNow = startBlock - currentBlock.number
     //not started yet
@@ -93,7 +119,7 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
       const startDate = dayjs().add(durationLeftTimestamp, "milliseconds")
       return startDate.fromNow()
     } else return "Started"
-  }, [proposal])
+  }, [proposalSnapshotBlock, currentBlock])
 
   const renderInputParameterValue = (input: abi.Function.Parameter, value: string) => {
     if (input.type === "address")
@@ -170,21 +196,29 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
           <HStack justify={"space-between"} w="full">
             {isStarted ? (
               <Box>
-                <Heading as="h4" size="sm" color="orange">
-                  {isEnded ? "Ended" : "Ends"} {estimatedEndTime}
-                </Heading>
-                <Text fontWeight={"normal"} fontSize={"sm"}>
-                  At block #{proposal.voteEnd}
-                </Text>
+                <Skeleton isLoaded={!!estimatedEndTime}>
+                  <Heading as="h4" size="sm" color="orange">
+                    {isEnded ? "Ended" : "Ends"} {estimatedEndTime}
+                  </Heading>
+                </Skeleton>
+                <Skeleton isLoaded={!proposalDeadlineBlockLoading}>
+                  <Text fontWeight={"normal"} fontSize={"sm"}>
+                    At block #{proposalDeadlineBlock}
+                  </Text>
+                </Skeleton>
               </Box>
             ) : (
               <Box>
-                <Heading as="h4" size="sm" color="orange">
-                  {"Starts"} {estimatedStartTime}
-                </Heading>
-                <Text fontWeight={"normal"} fontSize={"sm"}>
-                  At block #{proposal.voteStart}
-                </Text>
+                <Skeleton isLoaded={!!estimatedStartTime}>
+                  <Heading as="h4" size="sm" color="orange">
+                    {"Starts"} {estimatedStartTime}
+                  </Heading>
+                </Skeleton>
+                <Skeleton isLoaded={!proposalSnapshotBlockLoading}>
+                  <Text fontWeight={"normal"} fontSize={"sm"}>
+                    At block #{proposalSnapshotBlock}
+                  </Text>
+                </Skeleton>
               </Box>
             )}
             <CastVoteButton proposal={proposal} />
