@@ -18,22 +18,22 @@ abstract contract XAllocationGovernorVotesQuorumFractionUpgradeable is
 {
   using Checkpoints for Checkpoints.Trace208;
 
-  /// @custom:storage-location erc7201:b3tr.storage.GovernorVotesQuorumFraction
-  struct GovernorVotesQuorumFractionStorage {
+  /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.GovernorVotesQuorumFraction
+  struct XAllocationGovernorVotesQuorumFractionStorage {
     Checkpoints.Trace208 _quorumNumeratorHistory;
   }
 
-  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.GovernorVotesQuorumFraction")) - 1)) & ~bytes32(uint256(0xff))
-  bytes32 private constant GovernorVotesQuorumFractionStorageLocation =
-    0x80591ec4ff6d1506223368471cadc2b4568b450b05eb374eb7d48c87f1fbc500;
+  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.GovernorVotesQuorumFraction")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 private constant XAllocationGovernorVotesQuorumFractionStorageLocation =
+    0x3aec15a9ab86c1d9a3503ad735a580c4d2693ffe9622524eeb57b98631c17500;
 
-  function _getGovernorVotesQuorumFractionStorage()
+  function _getXAllocationGovernorVotesQuorumFractionStorage()
     private
     pure
-    returns (GovernorVotesQuorumFractionStorage storage $)
+    returns (XAllocationGovernorVotesQuorumFractionStorage storage $)
   {
     assembly {
-      $.slot := GovernorVotesQuorumFractionStorageLocation
+      $.slot := XAllocationGovernorVotesQuorumFractionStorageLocation
     }
   }
 
@@ -63,7 +63,7 @@ abstract contract XAllocationGovernorVotesQuorumFractionUpgradeable is
    * @dev Returns the current quorum numerator. See {quorumDenominator}.
    */
   function quorumNumerator() public view virtual returns (uint256) {
-    GovernorVotesQuorumFractionStorage storage $ = _getGovernorVotesQuorumFractionStorage();
+    XAllocationGovernorVotesQuorumFractionStorage storage $ = _getXAllocationGovernorVotesQuorumFractionStorage();
     return $._quorumNumeratorHistory.latest();
   }
 
@@ -71,7 +71,7 @@ abstract contract XAllocationGovernorVotesQuorumFractionUpgradeable is
    * @dev Returns the quorum numerator at a specific timepoint. See {quorumDenominator}.
    */
   function quorumNumerator(uint256 timepoint) public view virtual returns (uint256) {
-    GovernorVotesQuorumFractionStorage storage $ = _getGovernorVotesQuorumFractionStorage();
+    XAllocationGovernorVotesQuorumFractionStorage storage $ = _getXAllocationGovernorVotesQuorumFractionStorage();
 
     uint256 length = $._quorumNumeratorHistory._checkpoints.length;
 
@@ -132,7 +132,7 @@ abstract contract XAllocationGovernorVotesQuorumFractionUpgradeable is
 
     uint256 oldQuorumNumerator = quorumNumerator();
 
-    GovernorVotesQuorumFractionStorage storage $ = _getGovernorVotesQuorumFractionStorage();
+    XAllocationGovernorVotesQuorumFractionStorage storage $ = _getXAllocationGovernorVotesQuorumFractionStorage();
     $._quorumNumeratorHistory.push(clock(), SafeCast.toUint208(newQuorumNumerator));
 
     emit QuorumNumeratorUpdated(oldQuorumNumerator, newQuorumNumerator);

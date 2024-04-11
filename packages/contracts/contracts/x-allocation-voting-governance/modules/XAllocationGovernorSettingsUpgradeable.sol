@@ -12,19 +12,23 @@ import { IEmissions } from "../../interfaces/IEmissions.sol";
  */
 abstract contract XAllocationGovernorSettingsUpgradeable is Initializable, XAllocationVotingGovernor {
   /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.GovernorSettings
-  struct GovernorSettingsStorage {
+  struct XAllocationGovernorSettingsStorage {
     // duration: limited to uint32 in core
     uint32 _votingPeriod;
     IEmissions _emissions;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.GovernorSettings")) - 1)) & ~bytes32(uint256(0xff))
-  bytes32 private constant GovernorSettingsStorageLocation =
+  bytes32 private constant XAllocationGovernorSettingsLocation =
     0x61dedaa499b53d67b3d7e1868cee5772a81e32ad239a9603b0a8a5f779327500;
 
-  function _getGovernorSettingsStorage() private pure returns (GovernorSettingsStorage storage $) {
+  function _getXAllocationGovernorSettingsStorage()
+    private
+    pure
+    returns (XAllocationGovernorSettingsStorage storage $)
+  {
     assembly {
-      $.slot := GovernorSettingsStorageLocation
+      $.slot := XAllocationGovernorSettingsLocation
     }
   }
 
@@ -47,7 +51,7 @@ abstract contract XAllocationGovernorSettingsUpgradeable is Initializable, XAllo
    * @dev See {IXAllocationVotingGovernor-votingPeriod}.
    */
   function votingPeriod() public view virtual override returns (uint256) {
-    GovernorSettingsStorage storage $ = _getGovernorSettingsStorage();
+    XAllocationGovernorSettingsStorage storage $ = _getXAllocationGovernorSettingsStorage();
     return $._votingPeriod;
   }
 
@@ -55,7 +59,7 @@ abstract contract XAllocationGovernorSettingsUpgradeable is Initializable, XAllo
    * @dev The emissions contract.
    */
   function emissions() public view virtual returns (IEmissions) {
-    GovernorSettingsStorage storage $ = _getGovernorSettingsStorage();
+    XAllocationGovernorSettingsStorage storage $ = _getXAllocationGovernorSettingsStorage();
     return $._emissions;
   }
 
@@ -84,7 +88,7 @@ abstract contract XAllocationGovernorSettingsUpgradeable is Initializable, XAllo
       revert GovernorInvalidVotingPeriod(newVotingPeriod);
     }
 
-    GovernorSettingsStorage storage $ = _getGovernorSettingsStorage();
+    XAllocationGovernorSettingsStorage storage $ = _getXAllocationGovernorSettingsStorage();
 
     emit VotingPeriodSet($._votingPeriod, newVotingPeriod);
     $._votingPeriod = newVotingPeriod;
@@ -99,7 +103,7 @@ abstract contract XAllocationGovernorSettingsUpgradeable is Initializable, XAllo
    */
   function _setEmissions(address newEmisionsAddress) internal virtual {
     require(newEmisionsAddress != address(0), "GovernorSettings: emissions is the zero address");
-    GovernorSettingsStorage storage $ = _getGovernorSettingsStorage();
+    XAllocationGovernorSettingsStorage storage $ = _getXAllocationGovernorSettingsStorage();
     $._emissions = IEmissions(newEmisionsAddress);
 
     emit EmissionContractSet(address($._emissions), newEmisionsAddress);
