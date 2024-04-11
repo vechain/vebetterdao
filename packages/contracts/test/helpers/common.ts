@@ -32,7 +32,6 @@ export const waitForNextBlock = async () => {
 
 export const moveBlocks = async (blocks: number) => {
   for (let i = 0; i < blocks; i++) {
-    console.log(`Waiting for ${blocks - i} blocks to pass`)
     await waitForNextBlock()
   }
 }
