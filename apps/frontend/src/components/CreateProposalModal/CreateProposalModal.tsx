@@ -27,7 +27,7 @@ import { useEffect, useMemo } from "react"
 import { GenerateFunctionToCallParamsInput } from "./GenerateFunctionToCallParamsInput"
 import { FaPlus } from "react-icons/fa6"
 import { ProposalAction, useCreateProposal } from "@/hooks/useCreateProposal"
-import { useGetVotes, useProposalThreshold, useVot3Balance, useVot3Delegates } from "@/api"
+import { useCurrentAllocationsRoundId, useGetVotes, useProposalThreshold, useVot3Balance } from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useDelegateVot3 } from "@/hooks/useDelegateVot3"
 import { governanceAvailableContracts } from "@/constants"
@@ -49,11 +49,14 @@ export type FormData = {
 
 export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose, onOpen }) => {
   const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
+  const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const createProposalMutation = useCreateProposal({})
 
-  const onSubmit = (description?: string, actions?: ProposalAction[]) => {
+  const onSubmit = (description: string, actions: ProposalAction[]) => {
+    if (!currentRoundId) throw new Error("Current round id is not available")
+    const startRoundId = Number(currentRoundId) + 2
     onConfirmationOpen()
-    createProposalMutation.sendTransaction(description, actions)
+    createProposalMutation.sendTransaction({ description, actions, startRoundId })
   }
 
   const onTryAgain = () => {
@@ -89,7 +92,7 @@ export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose, onOpen }
 }
 
 type CreateProposalModalFormProps = {
-  onSubmit: (description?: string, actions?: ProposalAction[]) => void
+  onSubmit: (description: string, actions: ProposalAction[]) => void
 }
 
 export const CreateProposalModalForm: React.FC<CreateProposalModalFormProps> = ({ onSubmit }) => {
@@ -172,7 +175,7 @@ export const CreateProposalModalForm: React.FC<CreateProposalModalFormProps> = (
   }, [selectedContractFunctionInputs, remove, append])
 
   const handleOnSubmit = (data: FormData) => {
-    onSubmit(data.description, [
+    onSubmit(data.description ?? "", [
       {
         contractAddress: data.contractAddress,
         contractAbi: selectedAbi,
