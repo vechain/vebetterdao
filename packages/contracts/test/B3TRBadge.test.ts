@@ -429,7 +429,7 @@ describe("B3TRBadge", () => {
       expect(await b3trBadge.balanceOf(await voter.getAddress())).to.equal(1) // Other account has 1 badge
       expect(await b3trBadge.ownerOf(1)).to.equal(await voter.getAddress()) // Owner of the first badge is the otherAccount
       expect(await b3trBadge.totalSupply()).to.equal(1) // Total supply is 1
-      expect(await b3trBadge.getLevel(voter)).to.equal(1) // Level 0
+      expect(await b3trBadge.getHighestLevel(voter)).to.equal(1) // Level 0
     })
 
     it("User can free mint if he participated both in B3TR Governance and in x-allocation voting", async () => {
@@ -510,8 +510,8 @@ describe("B3TRBadge", () => {
       expect(await b3trBadge.ownerOf(1)).to.equal(await otherAccount.getAddress()) // Owner of the first badge is the otherAccount
       expect(await b3trBadge.totalSupply()).to.equal(1) // Total supply is 1
 
-      expect(await b3trBadge.getLevel(otherAccount)).to.equal(1) // Level 1
-      expect(await b3trBadge.getPastLevel(await otherAccount.getAddress(), receipt.blockNumber - 1)).to.equal(0) // Level 0 in the past
+      expect(await b3trBadge.getHighestLevel(otherAccount)).to.equal(1) // Level 1
+      expect(await b3trBadge.getPastHighestLevel(await otherAccount.getAddress(), receipt.blockNumber - 1)).to.equal(0) // Level 0 in the past
 
       expect(await b3trBadge.tokenByIndex(0)).to.equal(1) // Token ID of the first badge is 1
       expect(await b3trBadge.tokenOfOwnerByIndex(await otherAccount.getAddress(), 0)).to.equal(1) // Token ID of the first badge owned by otherAccount is 1
@@ -536,7 +536,7 @@ describe("B3TRBadge", () => {
 
       expect(await b3trBadge.balanceOf(await otherAccount.getAddress())).to.equal(2) // Other account has 2 badges
 
-      expect(await b3trBadge.getLevel(otherAccount)).to.equal(1) // Level 1
+      expect(await b3trBadge.getHighestLevel(otherAccount)).to.equal(1) // Level 1
     })
 
     it("Should handle multiple mints from different accounts correctly", async () => {
@@ -574,8 +574,8 @@ describe("B3TRBadge", () => {
       expect(await b3trBadge.tokenOfOwnerByIndex(await otherAccount.getAddress(), 0)).to.equal(1) // Token ID of the first badge owned by otherAccount is 1
       expect(await b3trBadge.tokenOfOwnerByIndex(await owner.getAddress(), 0)).to.equal(2) // Token ID of the first badge owned by owner is 1
 
-      expect(await b3trBadge.getLevel(otherAccount)).to.equal(1) // Level 1
-      expect(await b3trBadge.getLevel(owner)).to.equal(1) // Level 1
+      expect(await b3trBadge.getHighestLevel(otherAccount)).to.equal(1) // Level 1
+      expect(await b3trBadge.getHighestLevel(owner)).to.equal(1) // Level 1
     })
 
     it("Cannot mint if badge is paused", async () => {
@@ -611,15 +611,15 @@ describe("B3TRBadge", () => {
 
       await b3trBadge.connect(owner).freeMint()
 
-      expect(await b3trBadge.getLevel(owner)).to.equal(1) // Level 1
+      expect(await b3trBadge.getHighestLevel(owner)).to.equal(1) // Level 1
 
       await b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1)
 
-      expect(await b3trBadge.getLevel(owner)).to.equal(0) // Level 0 (no badge)
+      expect(await b3trBadge.getHighestLevel(owner)).to.equal(0) // Level 0 (no badge)
 
       await b3trBadge.connect(owner).freeMint()
 
-      expect(await b3trBadge.getLevel(owner)).to.equal(1) // Level 1
+      expect(await b3trBadge.getHighestLevel(owner)).to.equal(1) // Level 1
 
       expect(await b3trBadge.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 badge
       expect(await b3trBadge.balanceOf(await owner.getAddress())).to.equal(1) // Owner has 1 badge
@@ -784,11 +784,11 @@ describe("B3TRBadge", () => {
       expect(await b3trBadge.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 badge
       expect(await b3trBadge.balanceOf(await owner.getAddress())).to.equal(0) // Owner has 0 badges
 
-      expect(await b3trBadge.getLevel(await otherAccount.getAddress())).to.equal(1) // Level 1
-      expect(await b3trBadge.getLevel(await owner.getAddress())).to.equal(0) // Level 0
+      expect(await b3trBadge.getHighestLevel(await otherAccount.getAddress())).to.equal(1) // Level 1
+      expect(await b3trBadge.getHighestLevel(await owner.getAddress())).to.equal(0) // Level 0
 
-      expect(await b3trBadge.getPastLevel(await otherAccount.getAddress(), receipt.blockNumber - 1)).to.equal(0) // Level 0 in the past
-      expect(await b3trBadge.getPastLevel(await owner.getAddress(), receipt.blockNumber - 1)).to.equal(1) // Level 1 in the past
+      expect(await b3trBadge.getPastHighestLevel(await otherAccount.getAddress(), receipt.blockNumber - 1)).to.equal(0) // Level 0 in the past
+      expect(await b3trBadge.getPastHighestLevel(await owner.getAddress(), receipt.blockNumber - 1)).to.equal(1) // Level 1 in the past
 
       tx = await b3trBadge
         .connect(otherAccount)
@@ -802,13 +802,13 @@ describe("B3TRBadge", () => {
       expect(await b3trBadge.balanceOf(await otherAccounts[0].getAddress())).to.equal(1) // Other account has 1 badge
       expect(await b3trBadge.balanceOf(await owner.getAddress())).to.equal(0) // Owner has 0 badges
 
-      expect(await b3trBadge.getLevel(await otherAccount.getAddress())).to.equal(0) // Level 0
-      expect(await b3trBadge.getLevel(await otherAccounts[0].getAddress())).to.equal(1) // Level 1
-      expect(await b3trBadge.getLevel(await owner.getAddress())).to.equal(0) // Level 0
+      expect(await b3trBadge.getHighestLevel(await otherAccount.getAddress())).to.equal(0) // Level 0
+      expect(await b3trBadge.getHighestLevel(await otherAccounts[0].getAddress())).to.equal(1) // Level 1
+      expect(await b3trBadge.getHighestLevel(await owner.getAddress())).to.equal(0) // Level 0
 
-      expect(await b3trBadge.getPastLevel(await otherAccount.getAddress(), receipt.blockNumber - 1)).to.equal(1) // Level 1 in the past
-      expect(await b3trBadge.getPastLevel(await otherAccounts[0].getAddress(), receipt.blockNumber - 1)).to.equal(0) // Level 0 in the past
-      expect(await b3trBadge.getPastLevel(await owner.getAddress(), receipt.blockNumber - 1)).to.equal(0) // Level 0 in the past
+      expect(await b3trBadge.getPastHighestLevel(await otherAccount.getAddress(), receipt.blockNumber - 1)).to.equal(1) // Level 1 in the past
+      expect(await b3trBadge.getPastHighestLevel(await otherAccounts[0].getAddress(), receipt.blockNumber - 1)).to.equal(0) // Level 0 in the past
+      expect(await b3trBadge.getPastHighestLevel(await owner.getAddress(), receipt.blockNumber - 1)).to.equal(0) // Level 0 in the past
     })
   })
 
@@ -830,8 +830,8 @@ describe("B3TRBadge", () => {
 
       if (!receipt?.blockNumber) throw new Error("No receipt block number")
 
-      expect(await b3trBadge.getLevel(await owner.getAddress())).to.equal(1) // Level 1
-      expect(await b3trBadge.getPastLevel(await owner.getAddress(), receipt.blockNumber - 1)).to.equal(0) // Level 0 in the past
+      expect(await b3trBadge.getHighestLevel(await owner.getAddress())).to.equal(1) // Level 1
+      expect(await b3trBadge.getPastHighestLevel(await owner.getAddress(), receipt.blockNumber - 1)).to.equal(0) // Level 0 in the past
 
       await b3trBadge.connect(owner).freeMint()
 
@@ -844,18 +844,18 @@ describe("B3TRBadge", () => {
       expect(await b3trBadge.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 badge
       expect(await b3trBadge.balanceOf(await owner.getAddress())).to.equal(1) // Owner has 1 badge
 
-      expect(await b3trBadge.getLevel(await otherAccount.getAddress())).to.equal(1) // Level 1
-      expect(await b3trBadge.getLevel(await owner.getAddress())).to.equal(1) // Level 1 (because owner still has a token)
+      expect(await b3trBadge.getHighestLevel(await otherAccount.getAddress())).to.equal(1) // Level 1
+      expect(await b3trBadge.getHighestLevel(await owner.getAddress())).to.equal(1) // Level 1 (because owner still has a token)
 
-      expect(await b3trBadge.getPastLevel(await otherAccount.getAddress(), receipt?.blockNumber - 1)).to.equal(0) // Level 0 in the past
+      expect(await b3trBadge.getPastHighestLevel(await otherAccount.getAddress(), receipt?.blockNumber - 1)).to.equal(0) // Level 0 in the past
 
       await b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 2)
 
       expect(await b3trBadge.balanceOf(await otherAccount.getAddress())).to.equal(2) // Other account has 2 badges
 
-      expect(await b3trBadge.getLevel(await otherAccount.getAddress())).to.equal(1) // Level 1
+      expect(await b3trBadge.getHighestLevel(await otherAccount.getAddress())).to.equal(1) // Level 1
 
-      expect(await b3trBadge.getLevel(await owner.getAddress())).to.equal(0) // Level 0 (because owner doesn't have any tokens now)
+      expect(await b3trBadge.getHighestLevel(await owner.getAddress())).to.equal(0) // Level 0 (because owner doesn't have any tokens now)
     })
 
     it("Should select level of token received from another account if I don't have any tokens", async () => {
@@ -922,8 +922,8 @@ describe("B3TRBadge", () => {
       expect(await b3trBadge.balanceOf(await otherAccount.getAddress())).to.equal(0) // Other account has 0 tokens
       expect(await b3trBadge.balanceOf(await owner.getAddress())).to.equal(1) // Owner has 1 token
 
-      expect(await b3trBadge.getLevel(await otherAccount.getAddress())).to.equal(0) // Level 0
-      expect(await b3trBadge.getLevel(await owner.getAddress())).to.equal(1) // Level 1
+      expect(await b3trBadge.getHighestLevel(await otherAccount.getAddress())).to.equal(0) // Level 0
+      expect(await b3trBadge.getHighestLevel(await owner.getAddress())).to.equal(1) // Level 1
     })
   })
 
@@ -976,7 +976,7 @@ describe("B3TRBadge", () => {
 
       expect(await b3trBadge.levelOf(1)).to.equal(2) // Level 2
 
-      expect(await b3trBadge.getLevel(await owner.getAddress())).to.equal(2) // Level 2
+      expect(await b3trBadge.getHighestLevel(await owner.getAddress())).to.equal(2) // Level 2
     })
 
     it("Should be able to transfer a token with level greater than 1", async () => {
@@ -1050,8 +1050,8 @@ describe("B3TRBadge", () => {
 
       expect(await b3trBadge.levelOf(1)).to.equal(2) // Level 2
 
-      expect(await b3trBadge.getLevel(await otherAccount.getAddress())).to.equal(2) // Level 2
-      expect(await b3trBadge.getLevel(await owner.getAddress())).to.equal(0) // Level 0
+      expect(await b3trBadge.getHighestLevel(await otherAccount.getAddress())).to.equal(2) // Level 2
+      expect(await b3trBadge.getHighestLevel(await owner.getAddress())).to.equal(0) // Level 0
     })
   })
 
@@ -1096,15 +1096,15 @@ describe("B3TRBadge", () => {
 
     expect(await b3trBadge.levelOf(1)).to.equal(10) // Level 10
 
-    expect(await b3trBadge.getLevel(await owner.getAddress())).to.equal(10) // Level 10
+    expect(await b3trBadge.getHighestLevel(await owner.getAddress())).to.equal(10) // Level 10
 
     // Transfer the token to another account
     await b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1)
 
     expect(await b3trBadge.levelOf(1)).to.equal(10) // Level 10
-    expect(await b3trBadge.getLevel(await owner.getAddress())).to.equal(0) // Level 0
+    expect(await b3trBadge.getHighestLevel(await owner.getAddress())).to.equal(0) // Level 0
 
-    expect(await b3trBadge.getLevel(await otherAccount.getAddress())).to.equal(10) // Level 10
+    expect(await b3trBadge.getHighestLevel(await otherAccount.getAddress())).to.equal(10) // Level 10
   })
 
   it("Should not be able to upgrade token not owned", async () => {
@@ -1252,9 +1252,9 @@ describe("B3TRBadge", () => {
     */
     await b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 5)
 
-    expect(await b3trBadge.getLevel(await owner.getAddress())).to.equal(5) // Owner has highest level of 5
+    expect(await b3trBadge.getHighestLevel(await owner.getAddress())).to.equal(5) // Owner has highest level of 5
 
-    expect(await b3trBadge.getLevel(await otherAccount.getAddress())).to.equal(1) // Other account now has the highest level of 1
+    expect(await b3trBadge.getHighestLevel(await otherAccount.getAddress())).to.equal(1) // Other account now has the highest level of 1
 
     /*
       Transfer token ID 1 of level 5 to other account
@@ -1267,9 +1267,9 @@ describe("B3TRBadge", () => {
     */
     await b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1)
 
-    expect(await b3trBadge.getLevel(await owner.getAddress())).to.equal(5) // Owner still has the highest level of 5
+    expect(await b3trBadge.getHighestLevel(await owner.getAddress())).to.equal(5) // Owner still has the highest level of 5
 
-    expect(await b3trBadge.getLevel(await otherAccount.getAddress())).to.equal(5) // Other account now has the highest level of 5
+    expect(await b3trBadge.getHighestLevel(await otherAccount.getAddress())).to.equal(5) // Other account now has the highest level of 5
 
     /*
       Transfer token ID 2 of level 5 to other account
@@ -1281,9 +1281,9 @@ describe("B3TRBadge", () => {
     */
     await b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 2)
 
-    expect(await b3trBadge.getLevel(await owner.getAddress())).to.equal(4) // Owner now has the highest level of 4
+    expect(await b3trBadge.getHighestLevel(await owner.getAddress())).to.equal(4) // Owner now has the highest level of 4
 
-    expect(await b3trBadge.getLevel(await otherAccount.getAddress())).to.equal(5) // Other account retains the highest level of 5
+    expect(await b3trBadge.getHighestLevel(await otherAccount.getAddress())).to.equal(5) // Other account retains the highest level of 5
 
     /*
       Transfer token ID 3 of level 4 to other account
@@ -1293,9 +1293,9 @@ describe("B3TRBadge", () => {
     */
     await b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 3)
 
-    expect(await b3trBadge.getLevel(await owner.getAddress())).to.equal(3) // Owner now has the highest level of 3
+    expect(await b3trBadge.getHighestLevel(await owner.getAddress())).to.equal(3) // Owner now has the highest level of 3
 
-    expect(await b3trBadge.getLevel(await otherAccount.getAddress())).to.equal(5) // Other account retains the highest level of 5
+    expect(await b3trBadge.getHighestLevel(await otherAccount.getAddress())).to.equal(5) // Other account retains the highest level of 5
 
     /*
       Transfer token ID 4 of level 3 to other account
@@ -1304,8 +1304,8 @@ describe("B3TRBadge", () => {
     */
     await b3trBadge.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 4)
 
-    expect(await b3trBadge.getLevel(await owner.getAddress())).to.equal(0) // Owner now has no tokens so the highest level is 0 (no Level)
+    expect(await b3trBadge.getHighestLevel(await owner.getAddress())).to.equal(0) // Owner now has no tokens so the highest level is 0 (no Level)
 
-    expect(await b3trBadge.getLevel(await otherAccount.getAddress())).to.equal(5) // Other account retains the highest level of 5
+    expect(await b3trBadge.getHighestLevel(await otherAccount.getAddress())).to.equal(5) // Other account retains the highest level of 5
   })
 })

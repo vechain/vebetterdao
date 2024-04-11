@@ -115,13 +115,13 @@ interface IB3TRBadge {
 
   function getB3TRtoUpgradeToLevel(uint256 level) external view returns (uint256);
 
-  function getLevel(address owner) external view returns (uint256);
+  function getHighestLevel(address owner) external view returns (uint256);
 
   function getMaxMintableLevelOfXNode(uint8 xNodeType) external view returns (uint256);
 
   function getNextLevel(uint256 tokenId) external view returns (uint256);
 
-  function getPastLevel(address owner, uint256 timepoint) external view returns (uint256);
+  function getPastHighestLevel(address owner, uint256 timepoint) external view returns (uint256);
 
   function getRoleAdmin(bytes32 role) external view returns (bytes32);
 
