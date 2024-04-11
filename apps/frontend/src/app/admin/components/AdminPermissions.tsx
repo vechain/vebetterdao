@@ -24,7 +24,7 @@ export const AdminPermissions = () => {
     isAdminOfXAllocationVoting,
     isAdminOfXAllocationPool,
     isAdminOfDAO,
-    isAdminOfB3trBadge,
+    isAdminOfGalaxyMember,
     isAdminOfVot3,
     isAdminOfVoterRewards,
     isAdminOfTimeLock,
@@ -33,7 +33,7 @@ export const AdminPermissions = () => {
     isUpgraderOfEmissions,
     isUpgraderOfXAllocationVoting,
     isUpgraderOfXAllocationPool,
-    isUpgraderOfB3trBadge,
+    isUpgraderOfGalaxyMember,
     isUpgraderOfVot3,
     isUpgraderOfVoterRewards,
     isUpgraderOfTimelock,
@@ -58,7 +58,7 @@ export const AdminPermissions = () => {
                   <Th>Emissions</Th>
                   <Th>DAO</Th>
                   <Th>TimeLock</Th>
-                  <Th>B3TR Badge</Th>
+                  <Th>Galaxy Member</Th>
                   <Th>Voter Rewards</Th>
                   <Th>XAllocation Voting</Th>
                   <Th>XAllocation Pool</Th>
@@ -73,7 +73,7 @@ export const AdminPermissions = () => {
                   <Td>{isAdminOfEmissions ? "Yes" : "No"}</Td>
                   <Td>{isAdminOfDAO ? "Yes" : "No"}</Td>
                   <Td>{isAdminOfTimeLock ? "Yes" : "No"}</Td>
-                  <Td>{isAdminOfB3trBadge ? "Yes" : "No"}</Td>
+                  <Td>{isAdminOfGalaxyMember ? "Yes" : "No"}</Td>
                   <Td>{isAdminOfVoterRewards ? "Yes" : "No"}</Td>
                   <Td>{isAdminOfXAllocationVoting ? "Yes" : "No"}</Td>
                   <Td>{isAdminOfXAllocationPool ? "Yes" : "No"}</Td>
@@ -99,7 +99,7 @@ export const AdminPermissions = () => {
                   <Td>{isUpgraderOfEmissions ? "Yes" : "No"}</Td>
                   <Td></Td>
                   <Td>{isUpgraderOfTimelock ? "Yes" : "No"}</Td>
-                  <Td>{isUpgraderOfB3trBadge ? "Yes" : "No"}</Td>
+                  <Td>{isUpgraderOfGalaxyMember ? "Yes" : "No"}</Td>
                   <Td>{isUpgraderOfVoterRewards ? "Yes" : "No"}</Td>
                   <Td>{isUpgraderOfXAllocationVoting ? "Yes" : "No"}</Td>
                   <Td>{isUpgraderOfXAllocationPool ? "Yes" : "No"}</Td>
