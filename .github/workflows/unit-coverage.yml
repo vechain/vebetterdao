@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  run-unit-tests:
-    name: Unit Testing
+  run-coverage:
+    name: Unit tests coverage
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -29,11 +29,6 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Setup
-        run:  |
-          cd packages/config
-          yarn check-or-generate-local-config
-          
       - name: Run coverage
         id: coverage
         run: |   
