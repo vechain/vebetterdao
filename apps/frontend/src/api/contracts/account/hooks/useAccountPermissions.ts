@@ -9,7 +9,7 @@ type useAccountPermissionsResponse = {
   isAdminOfXAllocationVoting: boolean
   isAdminOfXAllocationPool: boolean
   isAdminOfDAO: boolean
-  isAdminOfB3trBadge: boolean
+  isAdminOfGalaxyMember: boolean
   isAdminOfVot3: boolean
   isAdminOfVoterRewards: boolean
   isAdminOfTimeLock: boolean
@@ -19,7 +19,7 @@ type useAccountPermissionsResponse = {
   isUpgraderOfEmissions: boolean
   isUpgraderOfXAllocationVoting: boolean
   isUpgraderOfXAllocationPool: boolean
-  isUpgraderOfB3trBadge: boolean
+  isUpgraderOfGalaxyMember: boolean
   isUpgraderOfVot3: boolean
   isUpgraderOfVoterRewards: boolean
   isUpgraderOfTimelock: boolean
@@ -40,7 +40,7 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
   const { data: isAdminOfXAllocationVoting } = useHasRole(ADMIN_ROLE, config.xAllocationVotingContractAddress, address)
   const { data: isAdminOfXAllocationPool } = useHasRole(ADMIN_ROLE, config.xAllocationPoolContractAddress, address)
   const { data: isAdminOfDAO } = useHasRole(ADMIN_ROLE, config.b3trGovernorAddress, address)
-  const { data: isAdminOfB3trBadge } = useHasRole(ADMIN_ROLE, config.nftBadgeContractAddress, address)
+  const { data: isAdminOfGalaxyMember } = useHasRole(ADMIN_ROLE, config.galaxyMemberContractAddress, address)
   const { data: isAdminOfVot3 } = useHasRole(ADMIN_ROLE, config.vot3ContractAddress, address)
   const { data: isAdminOfVoterRewards } = useHasRole(ADMIN_ROLE, config.voterRewardsContractAddress, address)
   const { data: isAdminOfTimeLock } = useHasRole(ADMIN_ROLE, config.timelockContractAddress, address)
@@ -60,7 +60,7 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
     config.xAllocationPoolContractAddress,
     address,
   )
-  const { data: isUpgraderOfB3trBadge } = useHasRole(UPGRADER_ROLE, config.nftBadgeContractAddress, address)
+  const { data: isUpgraderOfGalaxyMember } = useHasRole(UPGRADER_ROLE, config.galaxyMemberContractAddress, address)
   const { data: isUpgraderOfVot3 } = useHasRole(UPGRADER_ROLE, config.vot3ContractAddress, address)
   const { data: isUpgraderOfVoterRewards } = useHasRole(UPGRADER_ROLE, config.voterRewardsContractAddress, address)
   const { data: isUpgraderOfTimelock } = useHasRole(UPGRADER_ROLE, config.timelockContractAddress, address)
@@ -74,7 +74,7 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
         isAdminOfXAllocationVoting ||
         isAdminOfXAllocationPool ||
         isAdminOfDAO ||
-        isAdminOfB3trBadge ||
+        isAdminOfGalaxyMember ||
         isAdminOfVot3 ||
         isAdminOfVoterRewards,
       isAdminOfB3tr: isAdminOfB3tr ?? false,
@@ -82,7 +82,7 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
       isAdminOfXAllocationVoting: isAdminOfXAllocationVoting ?? false,
       isAdminOfXAllocationPool: isAdminOfXAllocationPool ?? false,
       isAdminOfDAO: isAdminOfDAO ?? false,
-      isAdminOfB3trBadge: isAdminOfB3trBadge ?? false,
+      isAdminOfGalaxyMember: isAdminOfGalaxyMember ?? false,
       isAdminOfVot3: isAdminOfVot3 ?? false,
       isAdminOfVoterRewards: isAdminOfVoterRewards ?? false,
       isAdminOfTimeLock: isAdminOfTimeLock ?? false,
@@ -92,7 +92,7 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
       isUpgraderOfEmissions: isUpgraderOfEmissions ?? false,
       isUpgraderOfXAllocationVoting: isUpgraderOfXAllocationVoting ?? false,
       isUpgraderOfXAllocationPool: isUpgraderOfXAllocationPool ?? false,
-      isUpgraderOfB3trBadge: isUpgraderOfB3trBadge ?? false,
+      isUpgraderOfGalaxyMember: isUpgraderOfGalaxyMember ?? false,
       isUpgraderOfVot3: isUpgraderOfVot3 ?? false,
       isUpgraderOfVoterRewards: isUpgraderOfVoterRewards ?? false,
       isUpgraderOfTimelock: isUpgraderOfTimelock ?? false,
@@ -104,7 +104,7 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
     isAdminOfXAllocationVoting,
     isAdminOfXAllocationPool,
     isAdminOfDAO,
-    isAdminOfB3trBadge,
+    isAdminOfGalaxyMember,
     isAdminOfVot3,
     isAdminOfVoterRewards,
     isMinterOfB3tr,
@@ -112,7 +112,7 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
     isUpgraderOfEmissions,
     isUpgraderOfXAllocationVoting,
     isUpgraderOfXAllocationPool,
-    isUpgraderOfB3trBadge,
+    isUpgraderOfGalaxyMember,
     isUpgraderOfVot3,
     isUpgraderOfVoterRewards,
     isUpgraderOfTimelock,
