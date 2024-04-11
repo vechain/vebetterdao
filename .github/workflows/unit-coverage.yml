@@ -29,10 +29,25 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Unit Tests
-        run: yarn test:coverage
+      - name: Setup
+        run:  |
+          cd packages/config
+          yarn check-or-generate-local-config
+          
+      - name: Run FE coverage
+        id: fe-coverage
+        run: |
+          cd apps/frontend    
+          yarn test:coverage
+
+      - name: Run Contract coverage
+        id: contract-coverage
+        run: |
+          cd packages/contracts
+          yarn test:coverage
 
       - name: Archive FE coverage
+        if: steps.fe-coverage.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
             name: fe-coverage
@@ -40,6 +55,7 @@ jobs:
             retention-days: 10
     
       - name: Archive Contract coverage
+        if: steps.contract-coverage.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
             name: contract-coverage
