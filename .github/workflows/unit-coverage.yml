@@ -29,19 +29,24 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Run coverage
-        id: coverage
-        run: |   
-          yarn test:coverage
+      - name: Run FE coverage
+        id: fe-coverage
+        run: yarn test:coverage:fe
 
       - name: Archive FE coverage
+        if: steps.fe-coverage.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
             name: fe-coverage
             path: apps/frontend/coverage
             retention-days: 10
     
+      - name: Run solidity coverage
+        id: contract-coverage
+        run: yarn test:coverage:solidity   
+
       - name: Archive Contract coverage
+        if: steps.contract-coverage.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
             name: contract-coverage

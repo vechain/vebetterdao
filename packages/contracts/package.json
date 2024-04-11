@@ -7,7 +7,7 @@
   "scripts": {
     "test:thor-solo": "npx hardhat test",
     "test:hardhat": "hardhat test --network hardhat",
-    "test:coverage": "hardhat coverage --testfiles ./test/**/*test.ts",
+    "test:coverage:solidity": "hardhat coverage --testfiles ./test/**/*test.ts",
     "compile": "npx hardhat compile",
     "deploy": "npx hardhat run scripts/deploy",
     "deploy:testnet": "npx hardhat run scripts/deploy --network vechain_testnet",
