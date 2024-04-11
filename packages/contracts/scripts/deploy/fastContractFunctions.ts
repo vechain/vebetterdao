@@ -152,7 +152,7 @@ export const airdropVTHO = async (accounts: SeedAccount[], signingAcct: IHDNode)
 export const airdropB3trFromTreasury = async (treasuryAddress: string, admin: IHDNode, accounts: SeedAccount[]) => {
   console.log(`Airdropping B3TR...`)
 
-  const accountChunks = chunk(accounts, 200)
+  const accountChunks = chunk(accounts, 100)
 
   for (const accountChunk of accountChunks) {
     const clauses: TransactionClause[] = []
@@ -223,7 +223,7 @@ export const castVotesToXDapps = async (
   apps: string[],
 ) => {
   console.log("Casting votes to xDapps...")
-  const chunks = chunk(accounts, 20)
+  const chunks = chunk(accounts, 50)
   const contractAddress = await xAllocationVoting.getAddress()
 
   for (const chunk of chunks) {
