@@ -122,7 +122,7 @@ export async function deployAll(config: ContractsConfig) {
   console.log(`Deploying XAllocationVoting contract`)
   const xAllocationVoting = (await deployProxy("XAllocationVoting", [
     {
-      vot3Token: await timelock.getAddress(),
+      vot3Token: await vot3.getAddress(),
       quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE,
       initialVotingPeriod: config.EMISSIONS_CYCLE_DURATION - 1,
       b3trGovernor: await timelock.getAddress(),
