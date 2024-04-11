@@ -1,0 +1,84 @@
+import { B3TR, Emissions, Treasury, VOT3, VoterRewards, XAllocationVoting } from "../../typechain-types"
+import { moveBlocks } from "../../test/helpers"
+import { SeedStrategy, getAccounts, getSeedAccounts } from "../helpers/seedAccounts"
+import {
+  airdropB3trFromTreasury,
+  airdropVTHO,
+  castVotesToXDapps,
+  claimVoterRewards,
+  distributeEmissions,
+  startEmissions,
+  swapB3trForVot3,
+} from "./fastContractFunctions"
+
+const ACCT_OFFSET = 15
+// Number of users to seed. If you increase this number you will need to increase the EMISSIONS_CYCLE_DURATION to make sure there is enough time to vote
+const NUM_USERS_TO_SEED = 10
+const SEED_STRATEGY = SeedStrategy.RANDOM
+
+export const simulateRounds = async (
+  b3tr: B3TR,
+  vot3: VOT3,
+  xAllocationVoting: XAllocationVoting,
+  emissions: Emissions,
+  voterRewards: VoterRewards,
+  treasury: Treasury,
+) => {
+  const start = performance.now()
+  console.log("Running simulation...")
+
+  const accounts = getAccounts(10)
+  const seedAccounts = getSeedAccounts(SEED_STRATEGY, NUM_USERS_TO_SEED, ACCT_OFFSET)
+
+  // Define specific accounts
+  const admin = accounts[0]
+
+  // Airdrop VTHO
+  await airdropVTHO(seedAccounts, accounts[8])
+
+  // Airdrop B3TR from Treasury
+  const treasuryAddress = await treasury.getAddress()
+  await airdropB3trFromTreasury(treasuryAddress, admin, seedAccounts)
+
+  // Swap for VOT3
+  await swapB3trForVot3(b3tr, vot3, seedAccounts)
+
+  // Start emissions
+  const emissionsContract = await emissions.getAddress()
+  await startEmissions(emissionsContract, admin)
+  const roundId = parseInt((await xAllocationVoting.currentRoundId()).toString())
+
+  // console.log("Casting random votes to xDapps...")
+  const xDapps = (await xAllocationVoting.getAllApps()).map(app => app.id)
+  await castVotesToXDapps(vot3, xAllocationVoting, seedAccounts, roundId, xDapps)
+
+  // Wait for round to end
+  await waitForRoundToEnd(roundId, xAllocationVoting)
+
+  // Claim voter rewards
+  await claimVoterRewards(voterRewards, roundId, admin, seedAccounts)
+
+  // Swap for VOT3
+  await swapB3trForVot3(b3tr, vot3, seedAccounts)
+
+  for (let i = 1; i < 15; i++) {
+    await distributeEmissions(emissionsContract, admin)
+    const roundId = parseInt((await xAllocationVoting.currentRoundId()).toString())
+    console.log(`Casting random votes to xDapps for round ${roundId}...`)
+    await castVotesToXDapps(vot3, xAllocationVoting, seedAccounts, roundId, xDapps)
+    await waitForRoundToEnd(roundId, xAllocationVoting)
+    await claimVoterRewards(voterRewards, roundId, admin, seedAccounts)
+
+    // Swap for VOT3
+    await swapB3trForVot3(b3tr, vot3, seedAccounts)
+  }
+
+  const end = performance.now()
+  console.log(`Simulation complete in ${end - start}ms`)
+}
+
+const waitForRoundToEnd = async (roundId: number, xAllocationVoting: XAllocationVoting) => {
+  const deadline = await xAllocationVoting.roundDeadline(roundId)
+  const currentBlock = await xAllocationVoting.clock()
+  await moveBlocks(parseInt((deadline - currentBlock + BigInt(1)).toString()))
+}
