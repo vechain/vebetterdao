@@ -9,7 +9,7 @@ const config: AppConfig = {
   xAllocationVotingContractAddress: "0x438e497987c76F08A8289a701Bf97D6E62bA3aB1",
   emissionsContractAddress: "0x2Cc2E01d72f0bAe294F56Cdb3F8DF42d24E80659",
   voterRewardsContractAddress: "0x2eAc8e1554a559d168C1BEa39ac0fBa439Cba8ed",
-  nftBadgeContractAddress: "0xddFc8b1d37F9eB1Eec745BB924763D16DCf103Ec",
+  galaxyMemberContractAddress: "0xddFc8b1d37F9eB1Eec745BB924763D16DCf103Ec",
   treasuryContractAddress: "0x9A5533e15757c0deDD84f97a0F5A7709e9984794",
   mixPanelProjectToken: "e03f4f5f6a753dae2dac30a69dfe21f7",
   nodeUrl: "https://thor-solo.dev.b3tr.vechain.org",
