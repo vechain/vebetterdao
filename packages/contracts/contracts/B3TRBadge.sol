@@ -196,7 +196,7 @@ contract B3TRBadge is
     $._ownedLevels[msg.sender][currentLevel]--;
     $._ownedLevels[msg.sender][currentLevel + 1]++;
 
-    uint256 currentHighestLevel = getLevel(msg.sender);
+    uint256 currentHighestLevel = getHighestLevel(msg.sender);
 
     if ($.levelOf[tokenId] > currentHighestLevel) {
       _updateLevelSelected(msg.sender, $.levelOf[tokenId]);
@@ -254,12 +254,12 @@ contract B3TRBadge is
 
         // If the user is transferring a token of the highest level they own then we select the next highest level
         // note that it might be the same level if they own multiple tokens of the same level
-        if ($.levelOf[tokenId] == getLevel(from) && balanceOf(from) > 1) _selectHighestLevel(from);
+        if ($.levelOf[tokenId] == getHighestLevel(from) && balanceOf(from) > 1) _selectHighestLevel(from);
       }
       if (to != address(0)) {
         $._ownedLevels[to][$.levelOf[tokenId]]++;
 
-        if ($.levelOf[tokenId] > getLevel(to)) {
+        if ($.levelOf[tokenId] > getHighestLevel(to)) {
           _updateLevelSelected(to, $.levelOf[tokenId]);
         }
       }
@@ -269,7 +269,7 @@ contract B3TRBadge is
   function _updateLevelSelected(address owner, uint256 level) internal whenNotPaused {
     B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
     // If the selected level is different from the new level then we checkpoint the selected level to the new level
-    if (getLevel(owner) != level) {
+    if (getHighestLevel(owner) != level) {
       (uint256 oldLevel, uint256 newLevel) = _push($._selectedLevelCheckpoints[owner], SafeCast.toUint208(level));
 
       emit SelectedLevel(owner, oldLevel, newLevel);
@@ -344,12 +344,12 @@ contract B3TRBadge is
 
   // ---------- Getters ---------- //
 
-  function getLevel(address owner) public view returns (uint256) {
+  function getHighestLevel(address owner) public view returns (uint256) {
     B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
     return $._selectedLevelCheckpoints[owner].latest();
   }
 
-  function getPastLevel(address owner, uint256 timepoint) public view returns (uint256) {
+  function getPastHighestLevel(address owner, uint256 timepoint) public view returns (uint256) {
     uint48 currentTimepoint = clock();
     if (timepoint >= currentTimepoint) {
       revert ERC5805FutureLookup(timepoint, currentTimepoint);
