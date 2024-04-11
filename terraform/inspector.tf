@@ -1,5 +1,5 @@
 module "inspector" {
-  source = "git@github.com:vechain/terraform_infrastructure_modules.git//s3-cloudfront-hosting?ref=main"
+  source = "git@github.com:vechain/terraform_infrastructure_modules.git//s3-cloudfront-hosting?ref=677fbdb"
 
   env           = local.env
   origin_id     = "${local.domains[2].name}_origin_id"
