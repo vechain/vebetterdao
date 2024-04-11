@@ -632,14 +632,14 @@ describe("VoterRewards", () => {
 
       await upgradeNFTtoLevel(1, 5, b3trBadge, b3tr, voter1, minterAccount) // Upgrading to level 5
 
-      expect(await b3trBadge.getLevel(voter1.address)).to.equal(5)
+      expect(await b3trBadge.getHighestLevel(voter1.address)).to.equal(5)
 
       // Second round
       await emissions.connect(voter1).distribute() // Anyone can distribute the cycle
 
       await waitForNextBlock()
 
-      expect(await b3trBadge.getPastLevel(voter1.address, await xAllocationVoting.roundSnapshot(2))).to.equal(5)
+      expect(await b3trBadge.getPastHighestLevel(voter1.address, await xAllocationVoting.roundSnapshot(2))).to.equal(5)
 
       const roundId2 = await xAllocationVoting.currentRoundId()
 
@@ -756,9 +756,9 @@ describe("VoterRewards", () => {
 
       await upgradeNFTtoLevel(1, 2, b3trBadge, b3tr, voter1, minterAccount) // Upgrading to level 2
 
-      expect(await b3trBadge.getLevel(voter1.address)).to.equal(2)
+      expect(await b3trBadge.getHighestLevel(voter1.address)).to.equal(2)
 
-      expect(await b3trBadge.getPastLevel(voter1.address, await xAllocationVoting.roundSnapshot(2))).to.equal(0) // Voter 1 upgraded after the round snapshot so he results in not having a level for the round
+      expect(await b3trBadge.getPastHighestLevel(voter1.address, await xAllocationVoting.roundSnapshot(2))).to.equal(0) // Voter 1 upgraded after the round snapshot so he results in not having a level for the round
 
       const roundId2 = await xAllocationVoting.currentRoundId()
 
@@ -873,19 +873,19 @@ describe("VoterRewards", () => {
 
       await upgradeNFTtoLevel(1, 5, b3trBadge, b3tr, voter1, minterAccount) // Upgrading to level 5
 
-      expect(await b3trBadge.getLevel(voter1.address)).to.equal(5)
+      expect(await b3trBadge.getHighestLevel(voter1.address)).to.equal(5)
 
       await b3trBadge.connect(voter2).freeMint()
 
       await upgradeNFTtoLevel(2, 10, b3trBadge, b3tr, voter2, minterAccount) // Upgrading to level 10
 
-      expect(await b3trBadge.getLevel(voter2.address)).to.equal(10)
+      expect(await b3trBadge.getHighestLevel(voter2.address)).to.equal(10)
 
       await b3trBadge.connect(voter3).freeMint()
 
       await upgradeNFTtoLevel(3, 2, b3trBadge, b3tr, voter3, minterAccount) // Upgrading to level 2
 
-      expect(await b3trBadge.getLevel(voter3.address)).to.equal(2)
+      expect(await b3trBadge.getHighestLevel(voter3.address)).to.equal(2)
 
       await emissions.connect(voter1).distribute() // Anyone can distribute the cycle
 
@@ -1019,7 +1019,7 @@ describe("VoterRewards", () => {
 
       await upgradeNFTtoLevel(1, 5, b3trBadge, b3tr, voter1, minterAccount) // Upgrading to level 5
 
-      expect(await b3trBadge.getLevel(voter1.address)).to.equal(5)
+      expect(await b3trBadge.getHighestLevel(voter1.address)).to.equal(5)
 
       await emissions.connect(voter1).distribute() // Anyone can distribute the cycle
 
@@ -1034,7 +1034,7 @@ describe("VoterRewards", () => {
       // Transfer GM NFT to another account
       await b3trBadge.connect(voter1).transferFrom(voter1.address, voter2.address, 1)
 
-      expect(await b3trBadge.getLevel(voter2.address)).to.equal(5)
+      expect(await b3trBadge.getHighestLevel(voter2.address)).to.equal(5)
 
       // Vote on apps for the second round
       await voteOnApps(
@@ -1143,12 +1143,12 @@ describe("VoterRewards", () => {
 
       await upgradeNFTtoLevel(1, 5, b3trBadge, b3tr, voter1, minterAccount) // Upgrading to level 5
 
-      expect(await b3trBadge.getLevel(voter1.address)).to.equal(5)
+      expect(await b3trBadge.getHighestLevel(voter1.address)).to.equal(5)
 
       // Send GM NFT to another account
       await b3trBadge.connect(voter1).transferFrom(voter1.address, voter2.address, 1)
 
-      expect(await b3trBadge.getLevel(voter2.address)).to.equal(5)
+      expect(await b3trBadge.getHighestLevel(voter2.address)).to.equal(5)
 
       await emissions.connect(voter1).distribute() // Anyone can distribute the cycle
 
@@ -1533,7 +1533,7 @@ describe("VoterRewards", () => {
 
       await upgradeNFTtoLevel(1, 5, b3trBadge, b3tr, voter1, minterAccount) // Upgrading to level 5
 
-      expect(await b3trBadge.getLevel(voter1.address)).to.equal(5)
+      expect(await b3trBadge.getHighestLevel(voter1.address)).to.equal(5)
 
       // Vote on apps for the second round
       await voteOnApps(
