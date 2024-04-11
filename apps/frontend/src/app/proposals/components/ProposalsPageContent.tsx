@@ -138,7 +138,7 @@ export const ProposalsPageContent = () => {
   }, [pastProposals, pastProposalsError, pastProposalsLoading])
 
   return (
-    <VStack w="full" spacing={8} alignItems={"flex-start"} justify="center">
+    <VStack w="full" spacing={8} alignItems={"flex-start"} justify="center" data-testid="proposals">
       <HStack spacing={4} w="full" justify={"space-between"} alignItems={"center"}>
         <Box>
           <HStack spacing={3} alignItems={"center"}>

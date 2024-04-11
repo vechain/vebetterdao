@@ -1,7 +1,5 @@
 import { Card, CardBody, CardHeader, Heading, VStack } from "@chakra-ui/react"
 
-import { UpdateProposalThreshold } from "./UpdateProposalThreshold"
-
 export const ProposalsAdmin = () => {
   return (
     <Card w={"full"}>
