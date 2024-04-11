@@ -38,7 +38,7 @@ export const usePastProposals = () => {
         })
 
         if (Number(proposalVoteEnd) < lastBlock) {
-          return proposal
+          filteredProposals.push(proposal)
         }
       }
 
