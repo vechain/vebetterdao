@@ -1,0 +1,49 @@
+name: Unit Test Coverage
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-unit-tests:
+    name: Unit Testing
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node v20
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .nvmrc
+          cache: "yarn"
+
+      - name: Configure npm for private package
+        run: |
+          echo "@vechain:registry=https://npm.pkg.github.com/" >> .npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GH_READ_PACKAGES_TOKEN }}" >> .npmrc
+          echo "registry=https://registry.npmjs.org/" >> .npmrc
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Unit Tests
+        run: yarn test:coverage
+
+      - name: Archive FE coverage
+        uses: actions/upload-artifact@v4
+        with:
+            name: fe-coverage
+            path: apps/frontend/coverage
+            retention-days: 10
+    
+      - name: Archive Contract coverage
+        uses: actions/upload-artifact@v4
+        with:
+            name: contract-coverage
+            path: packages/contracts/coverage
+            retention-days: 10
+
+      

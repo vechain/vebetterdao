@@ -7,6 +7,7 @@
   "scripts": {
     "test:thor-solo": "npx hardhat test",
     "test:hardhat": "hardhat test --network hardhat",
+    "test:coverage": "hardhat coverage --testfiles ./test/**/*test.ts",
     "compile": "npx hardhat compile",
     "deploy": "npx hardhat run scripts/deploy",
     "deploy:testnet": "npx hardhat run scripts/deploy --network vechain_testnet",
@@ -66,6 +67,7 @@
     "ethers": "^6.9.0",
     "hardhat": "^2.19.1",
     "nft.storage": "^7.1.1",
-    "prettier": "^3.2.4"
+    "prettier": "^3.2.4",
+    "solidity-coverage": "^0.8.11"
   }
 }
