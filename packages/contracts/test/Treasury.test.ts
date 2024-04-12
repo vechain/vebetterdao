@@ -1,10 +1,12 @@
-import { ethers } from "hardhat"
+import { ethers, network } from "hardhat"
 import { expect } from "chai"
 import {
   getOrDeployContractInstances,
   catchRevert,
   createProposalAndExecuteIt,
   bootstrapAndStartEmissions,
+  bootstrapEmissions,
+  participateInAllocationVoting,
 } from "./helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it, before } from "mocha"
@@ -17,7 +19,7 @@ describe("Treasury", () => {
   let treasuryProxy: any
   let b3tr: any
   let vot3: any
-  let timeLock: any
+  let b3trBadge: any
   let owner: HardhatEthersSigner
   let otherAccount: HardhatEthersSigner
   before(async () => {
@@ -32,7 +34,7 @@ describe("Treasury", () => {
     otherAccount = info.otherAccount
     b3tr = info.b3tr
     vot3 = info.vot3
-    timeLock = info.timeLock
+    b3trBadge = info.b3trBadge
 
     await fundTreasuryVTHO(await treasuryProxy.getAddress(), ethers.parseEther("10"))
     await fundTreasuryVET(await treasuryProxy.getAddress(), 10)
@@ -44,7 +46,14 @@ describe("Treasury", () => {
   describe("Tokens", () => {
     describe("VTHO", () => {
       it("should transfer VTHO", async () => {
-        expect(treasuryProxy.transferVTHO(otherAccount.address, ethers.parseEther("1"))).not.to.be.reverted
+        if (network.name == "hardhat") {
+          return console.log(
+            "Skipping VTHO transfer test on hardhat network as hardcoded VTHO contract address in Treasury does not exist",
+          )
+        }
+        const balance = await treasuryProxy.getVTHOBalance()
+        await expect(treasuryProxy.transferVTHO(otherAccount.address, ethers.parseEther("1"))).not.to.be.reverted
+        expect(await treasuryProxy.getVTHOBalance()).to.be.lessThan(balance)
       })
       it("should revert if not called by GOVERNANCE_ROLE", async () => {
         await catchRevert(
@@ -84,6 +93,9 @@ describe("Treasury", () => {
           treasuryProxy.connect(otherAccount).transferB3TR(otherAccount.address, ethers.parseEther("1")),
         )
       })
+      it("should return correct address for contract", async () => {
+        expect(await treasuryProxy.b3trAddress()).to.eql(await b3tr.getAddress())
+      })
     })
     describe("VOT3", () => {
       it("should transfer VOT3", async () => {
@@ -104,6 +116,64 @@ describe("Treasury", () => {
           treasuryProxy.connect(otherAccount).transferVOT3(otherAccount.address, ethers.parseEther("1")),
         )
       })
+      it("should return correct address for contract", async () => {
+        expect(await treasuryProxy.vot3Address()).to.eql(await vot3.getAddress())
+      })
+    })
+    describe("ERC20", () => {
+      it("should transfer ERC20", async () => {
+        await b3tr.mint(await treasuryProxy.getAddress(), ethers.parseEther("10"))
+        expect(await treasuryProxy.getB3TRBalance()).to.eql(ethers.parseEther("18"))
+        expect(await treasuryProxy.getTokenBalance(await b3tr.getAddress())).to.eql(ethers.parseEther("18"))
+        await treasuryProxy.transferTokens(await b3tr.getAddress(), otherAccount.address, ethers.parseEther("8"))
+        expect(await treasuryProxy.getTokenBalance(await b3tr.getAddress())).to.eql(ethers.parseEther("10"))
+      })
+      it("should revert if not enough balance", async () => {
+        await catchRevert(
+          treasuryProxy.transferTokens(await vot3.getAddress(), otherAccount.address, ethers.parseEther("6")),
+        )
+      })
+      it("should revert if not called by GOVERNANCE_ROLE", async () => {
+        await catchRevert(
+          treasuryProxy
+            .connect(otherAccount)
+            .transferTokens(await vot3.getAddress(), otherAccount.address, ethers.parseEther("1")),
+        )
+      })
+    })
+    describe("NFT", () => {
+      it("should transfer NFT", async () => {
+        // Bootstrap emissions
+        await bootstrapEmissions()
+
+        // Should be able to free mint after participating in allocation voting
+        await participateInAllocationVoting(otherAccount)
+
+        await expect(await b3trBadge.connect(otherAccount).freeMint()).not.to.be.reverted
+
+        expect(await b3trBadge.balanceOf(otherAccount.address)).to.equal(1)
+        expect(
+          await b3trBadge.connect(otherAccount).transferFrom(otherAccount.address, await treasuryProxy.getAddress(), 1),
+        ).not.to.be.reverted
+        const MAGIC_ON_ERC721_RECEIVED = "0x150b7a02"
+        expect(
+          await treasuryProxy.onERC721Received(owner.address, otherAccount.address, 1, ethers.toUtf8Bytes("")),
+        ).to.equal(MAGIC_ON_ERC721_RECEIVED)
+        expect(await b3trBadge.balanceOf(await treasuryProxy.getAddress())).to.equal(1)
+
+        expect(await treasuryProxy.getCollectionNFTBalance(await b3trBadge.getAddress())).to.equal(1)
+        expect(await treasuryProxy.transferNFT(await b3trBadge.getAddress(), otherAccount.address, 1)).not.to.be
+          .reverted
+        expect(await treasuryProxy.getCollectionNFTBalance(await b3trBadge.getAddress())).to.equal(0)
+      })
+      it("should revert if not called by GOVERNANCE_ROLE", async () => {
+        await catchRevert(
+          treasuryProxy.connect(otherAccount).transferNFT(await b3trBadge.getAddress(), otherAccount.address, 1),
+        )
+      })
+      it("should revert if not enough balance", async () => {
+        await catchRevert(treasuryProxy.transferNFT(await b3trBadge.getAddress(), otherAccount.address, 1))
+      })
     })
   })
   describe("UUPS", () => {
@@ -113,7 +183,7 @@ describe("Treasury", () => {
       const emptyBytes = new Uint8Array(0)
       await treasuryProxy.upgradeToAndCall(await newImplementation.getAddress(), emptyBytes)
       const treasury = await ethers.getContractAt("Treasury", await treasuryProxy.getAddress())
-      expect(await treasury.getB3TRBalance()).to.eql(ethers.parseEther("8"))
+      expect(await treasury.getVETBalance()).to.eql(ethers.parseEther("9"))
     })
     it("should revert if not called by ADMIN_ROLE", async () => {
       const newTreasury = await ethers.getContractFactory("Treasury")
@@ -122,6 +192,9 @@ describe("Treasury", () => {
       await catchRevert(
         treasuryProxy.connect(otherAccount).upgradeToAndCall(await newImplementation.getAddress(), emptyBytes),
       )
+    })
+    it("should return correct version", async () => {
+      expect(await treasuryProxy.getVersion()).to.eql("V1")
     })
   })
   describe("Pause", () => {
@@ -138,10 +211,13 @@ describe("Treasury", () => {
   describe("Timelock", () => {
     let tProxy: any
     before(async () => {
+      const info = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
       tProxy = (await deployProxy("Treasury", [
-        await b3tr.getAddress(),
-        await vot3.getAddress(),
-        await timeLock.getAddress(),
+        await info.b3tr.getAddress(),
+        await info.vot3.getAddress(),
+        await info.timeLock.getAddress(),
         owner.address,
         owner.address,
       ])) as Treasury
