@@ -292,7 +292,7 @@ export const startNewAllocationRound = async () => {
     await bootstrapAndStartEmissions()
   } else if (nextCycle === 1n) {
     await emissions.connect(minterAccount).start()
-  } else {
+  } else if (await emissions.isCycleEnded(await emissions.getCurrentCycle())) {
     await emissions.distribute()
   }
 
