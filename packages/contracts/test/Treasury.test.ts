@@ -19,7 +19,7 @@ describe("Treasury", () => {
   let treasuryProxy: any
   let b3tr: any
   let vot3: any
-  let b3trBadge: any
+  let galaxyMember: any
   let owner: HardhatEthersSigner
   let otherAccount: HardhatEthersSigner
   before(async () => {
@@ -34,7 +34,7 @@ describe("Treasury", () => {
     otherAccount = info.otherAccount
     b3tr = info.b3tr
     vot3 = info.vot3
-    b3trBadge = info.b3trBadge
+    galaxyMember = info.galaxyMember
 
     await fundTreasuryVTHO(await treasuryProxy.getAddress(), ethers.parseEther("10"))
     await fundTreasuryVET(await treasuryProxy.getAddress(), 10)
@@ -149,30 +149,32 @@ describe("Treasury", () => {
         // Should be able to free mint after participating in allocation voting
         await participateInAllocationVoting(otherAccount)
 
-        await expect(await b3trBadge.connect(otherAccount).freeMint()).not.to.be.reverted
+        await expect(await galaxyMember.connect(otherAccount).freeMint()).not.to.be.reverted
 
-        expect(await b3trBadge.balanceOf(otherAccount.address)).to.equal(1)
+        expect(await galaxyMember.balanceOf(otherAccount.address)).to.equal(1)
         expect(
-          await b3trBadge.connect(otherAccount).transferFrom(otherAccount.address, await treasuryProxy.getAddress(), 1),
+          await galaxyMember
+            .connect(otherAccount)
+            .transferFrom(otherAccount.address, await treasuryProxy.getAddress(), 1),
         ).not.to.be.reverted
         const MAGIC_ON_ERC721_RECEIVED = "0x150b7a02"
         expect(
           await treasuryProxy.onERC721Received(owner.address, otherAccount.address, 1, ethers.toUtf8Bytes("")),
         ).to.equal(MAGIC_ON_ERC721_RECEIVED)
-        expect(await b3trBadge.balanceOf(await treasuryProxy.getAddress())).to.equal(1)
+        expect(await galaxyMember.balanceOf(await treasuryProxy.getAddress())).to.equal(1)
 
-        expect(await treasuryProxy.getCollectionNFTBalance(await b3trBadge.getAddress())).to.equal(1)
-        expect(await treasuryProxy.transferNFT(await b3trBadge.getAddress(), otherAccount.address, 1)).not.to.be
+        expect(await treasuryProxy.getCollectionNFTBalance(await galaxyMember.getAddress())).to.equal(1)
+        expect(await treasuryProxy.transferNFT(await galaxyMember.getAddress(), otherAccount.address, 1)).not.to.be
           .reverted
-        expect(await treasuryProxy.getCollectionNFTBalance(await b3trBadge.getAddress())).to.equal(0)
+        expect(await treasuryProxy.getCollectionNFTBalance(await galaxyMember.getAddress())).to.equal(0)
       })
       it("should revert if not called by GOVERNANCE_ROLE", async () => {
         await catchRevert(
-          treasuryProxy.connect(otherAccount).transferNFT(await b3trBadge.getAddress(), otherAccount.address, 1),
+          treasuryProxy.connect(otherAccount).transferNFT(await galaxyMember.getAddress(), otherAccount.address, 1),
         )
       })
       it("should revert if not enough balance", async () => {
-        await catchRevert(treasuryProxy.transferNFT(await b3trBadge.getAddress(), otherAccount.address, 1))
+        await catchRevert(treasuryProxy.transferNFT(await galaxyMember.getAddress(), otherAccount.address, 1))
       })
     })
   })
