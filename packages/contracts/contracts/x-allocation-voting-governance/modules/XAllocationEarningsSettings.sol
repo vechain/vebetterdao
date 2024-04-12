@@ -111,7 +111,13 @@ abstract contract XAllocationEarningsSettings is Initializable, XAllocationVotin
 
   // ---------- Setters ---------- //
 
+  /**
+   * @dev See {IXAllocationVotingGovernor-setBaseAllocationPercentage}.
+   */
   function setAppSharesCap(uint256 appSharesCap_) external virtual;
 
+  /**
+   * @dev See {IXAllocationVotingGovernor-setBaseAllocationPercentage}.
+   */
   function setBaseAllocationPercentage(uint256 baseAllocationPercentage_) external virtual;
 }
