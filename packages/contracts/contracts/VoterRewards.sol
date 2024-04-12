@@ -3,7 +3,7 @@ pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import "./interfaces/IB3TRBadge.sol";
+import "./interfaces/IGalaxyMember.sol";
 import "./interfaces/IGovernor.sol";
 import "./interfaces/IXAllocationVotingGovernor.sol";
 import "./interfaces/IEmissions.sol";
@@ -17,10 +17,10 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
 
   /// @custom:storage-location erc7201:b3tr.storage.VoterRewards
   struct VoterRewardsStorage {
-    IB3TRBadge b3trBadge;
+    IGalaxyMember galaxyMember;
     IB3TR b3tr;
     IEmissions emissions;
-    // level => percentage multiplier for the level of the badge
+    // level => percentage multiplier for the level of the GM NFT
     mapping(uint256 => uint256) levelToMultiplier;
     // cycle => total weighted votes in the cycle
     mapping(uint256 => uint256) cycleToTotal;
@@ -52,12 +52,12 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
     address admin,
     address upgrader,
     address _emissions,
-    address _b3trBadge,
+    address _galaxyMember,
     address _b3tr,
     uint256[] memory levels,
     uint256[] memory multipliers
   ) public initializer {
-    require(_b3trBadge != address(0), "VoterRewards: _b3trBadge cannot be the zero address");
+    require(_galaxyMember != address(0), "VoterRewards: _galaxyMember cannot be the zero address");
     require(_emissions != address(0), "VoterRewards: emissions cannot be the zero address");
     require(_b3tr != address(0), "VoterRewards: _b3tr cannot be the zero address");
 
@@ -70,7 +70,7 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
 
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
 
-    $.b3trBadge = IB3TRBadge(_b3trBadge);
+    $.galaxyMember = IGalaxyMember(_galaxyMember);
     $.b3tr = IB3TR(_b3tr);
     $.emissions = IEmissions(_emissions);
     $.scalingFactor = 1e6;
@@ -94,9 +94,9 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
 
     uint256 cycle = $.emissions.getCurrentCycle();
 
-    uint256 badgeLevel = $.b3trBadge.getPastHighestLevel(voter, proposalStart);
+    uint256 gmNftLevel = $.galaxyMember.getPastHighestLevel(voter, proposalStart);
 
-    uint256 multiplier = $.levelToMultiplier[badgeLevel]; // Percentage multiplier for the level of the badge
+    uint256 multiplier = $.levelToMultiplier[gmNftLevel]; // Percentage multiplier for the level of the GM NFT
     uint256 total = votes + (votes * multiplier) / 100; // Total weighted votes
 
     $.cycleToTotal[cycle] += total; // Add total to the cycle
@@ -160,9 +160,9 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
     return $.levelToMultiplier[level];
   }
 
-  function b3trBadge() public view returns (IB3TRBadge) {
+  function galaxyMember() public view returns (IGalaxyMember) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
-    return $.b3trBadge;
+    return $.galaxyMember;
   }
 
   function emissions() public view returns (IEmissions) {
@@ -182,11 +182,11 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
 
   // ----------------- Setters ----------------- //
 
-  function setB3TRBadge(address _b3trBadge) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(_b3trBadge != address(0), "VoterRewards: _b3trBadge cannot be the zero address");
+  function setGalaxyMember(address _galaxyMember) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(_galaxyMember != address(0), "VoterRewards: _galaxyMember cannot be the zero address");
 
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
-    $.b3trBadge = IB3TRBadge(_b3trBadge);
+    $.galaxyMember = IGalaxyMember(_galaxyMember);
   }
 
   function setLevelToMultiplier(uint256 level, uint256 multiplier) public onlyRole(DEFAULT_ADMIN_ROLE) {

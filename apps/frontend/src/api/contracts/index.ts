@@ -1,5 +1,5 @@
 export * from "./b3tr"
-export * from "./b3trBadge"
+export * from "./galaxyMember"
 export * from "./vot3"
 export * from "./governance"
 export * from "./xAllocations"
