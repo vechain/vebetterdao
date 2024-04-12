@@ -5,7 +5,7 @@ import {
   B3TR,
   TimeLock,
   VOT3,
-  B3TRBadge,
+  GalaxyMember,
   Emissions,
   XAllocationVoting,
   XAllocationPool,
@@ -22,7 +22,7 @@ interface DeployInstance {
   vot3: VOT3
   timeLock: TimeLock
   governor: B3TRGovernor
-  b3trBadge: B3TRBadge
+  galaxyMember: GalaxyMember
   xAllocationVoting: XAllocationVoting
   xAllocationPool: XAllocationPool
   emissions: Emissions
@@ -35,13 +35,13 @@ interface DeployInstance {
   otherAccounts: HardhatEthersSigner[]
 }
 
-export const NFT_BADGE_NAME = "B3TRBadge"
-export const NFT_BADGE_SYMBOL = "B3TR"
+export const NFT_NAME = "GalaxyMember"
+export const NFT_SYMBOL = "GM"
 export const DEFAULT_MAX_MINTABLE_LEVEL = 1
 
 // // Voter Rewards
-export const levels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] // NFT Badge levels
-export const multipliers = [0, 10, 20, 50, 100, 150, 200, 400, 900, 2400] // NFT Badge percentage multipliers (in basis points)
+export const levels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] // Galaxy Member contract levels
+export const multipliers = [0, 10, 20, 50, 100, 150, 200, 400, 900, 2400] // Galaxy Member contract percentage multipliers (in basis points)
 
 let cachedDeployInstance: DeployInstance | undefined = undefined
 export const getOrDeployContractInstances = async ({
@@ -81,19 +81,19 @@ export const getOrDeployContractInstances = async ({
     owner.address,
   ])) as Treasury
 
-  // Deploy NFTBadge
-  const b3trBadge = (await deployProxy("B3TRBadge", [
-    NFT_BADGE_NAME,
-    NFT_BADGE_SYMBOL,
+  // Deploy GalaxyMember
+  const galaxyMember = (await deployProxy("GalaxyMember", [
+    NFT_NAME,
+    NFT_SYMBOL,
     owner.address,
     owner.address,
     maxMintableLevel,
-    config.NFT_BADGE_BASE_URI,
-    config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
-    config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+    config.GM_NFT_BASE_URI,
+    config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
+    config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
     await b3tr.getAddress(),
     await treasury.getAddress(),
-  ])) as B3TRBadge
+  ])) as GalaxyMember
 
   // Deploy XAllocationPool
   const xAllocationPool = (await deployProxy("XAllocationPool", [
@@ -130,7 +130,7 @@ export const getOrDeployContractInstances = async ({
     owner.address,
     owner.address,
     await emissions.getAddress(),
-    await b3trBadge.getAddress(),
+    await galaxyMember.getAddress(),
     await b3tr.getAddress(),
     levels,
     multipliers,
@@ -176,9 +176,9 @@ export const getOrDeployContractInstances = async ({
   await timeLock.connect(timelockAdmin).grantRole(EXECUTOR_ROLE, await governor.getAddress())
   await timeLock.connect(timelockAdmin).grantRole(CANCELLER_ROLE, await governor.getAddress())
 
-  // Set xAllocationVoting and Governor address in B3TRBadge
-  await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
-  await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+  // Set xAllocationVoting and Governor address in GalaxyMember
+  await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+  await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
 
   // Grant Vote registrar role to XAllocationVoting
   await voterRewards.connect(owner).setVoteRegistrarRole(await xAllocationVoting.getAddress())
@@ -212,7 +212,7 @@ export const getOrDeployContractInstances = async ({
     vot3,
     timeLock,
     governor,
-    b3trBadge,
+    galaxyMember,
     xAllocationVoting,
     xAllocationPool,
     emissions,

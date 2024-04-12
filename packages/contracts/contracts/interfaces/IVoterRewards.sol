@@ -68,7 +68,7 @@ interface IVoterRewards {
 
     function b3tr() external view returns (address);
 
-    function b3trBadge() external view returns (address);
+    function galaxyMember() external view returns (address);
 
     function claimReward(uint256 cycle, address voter) external;
 
@@ -99,7 +99,7 @@ interface IVoterRewards {
         address admin,
         address upgrader,
         address _emissions,
-        address _b3trBadge,
+        address _galaxyMember,
         address _b3tr,
         uint256[] memory levels,
         uint256[] memory multipliers
@@ -121,7 +121,7 @@ interface IVoterRewards {
 
     function scalingFactor() external view returns (uint256);
 
-    function setB3TRBadge(address _b3trBadge) external;
+    function setGalaxyMember(address _galaxyMember) external;
 
     function setEmissions(address _emissions) external;
 

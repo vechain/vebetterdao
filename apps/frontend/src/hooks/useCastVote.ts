@@ -1,7 +1,7 @@
 import {
   VoteType,
   buildCastVoteTx,
-  getB3trBadgeBalanceQueryKey,
+  getGMbalanceQueryKey,
   getHasVotedQueryKey,
   getParticipatedInGovernanceQueryKey,
   getProposalVotesQuerykey,
@@ -67,10 +67,10 @@ export const useCastVote = ({
       })
 
       await queryClient.cancelQueries({
-        queryKey: getB3trBadgeBalanceQueryKey(account),
+        queryKey: getGMbalanceQueryKey(account),
       })
       await queryClient.refetchQueries({
-        queryKey: getB3trBadgeBalanceQueryKey(account),
+        queryKey: getGMbalanceQueryKey(account),
       })
       await queryClient.cancelQueries({
         queryKey: getParticipatedInGovernanceQueryKey(account),

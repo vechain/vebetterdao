@@ -1,13 +1,13 @@
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useParticipatedInGovernance } from "./useParticipatedInGovernance"
-import { useB3trBadgeBalance } from "./useB3trBadgeBalance"
+import { useGMbalance } from "./useGMbalance"
 
 /**
- * Returns whether the user can claim an NFT
- * @returns Whether the user can claim an NFT
+ * Returns whether the user can claim a GM NFT
+ * @returns Whether the user can claim a GM NFT
  */
 
-export const useIsNFTClaimable = () => {
+export const useIsGMclaimable = () => {
   const { account } = useWallet()
   const {
     data: hasVoted,
@@ -15,7 +15,7 @@ export const useIsNFTClaimable = () => {
     isError: isErrorHasVoted,
   } = useParticipatedInGovernance(account)
 
-  const { data: nftBalance, isLoading: isLoadingNftBalance, isError: isErrorNftBalance } = useB3trBadgeBalance(account)
+  const { data: nftBalance, isLoading: isLoadingNftBalance, isError: isErrorNftBalance } = useGMbalance(account)
   if (isLoadingHasVoted || isErrorHasVoted || !hasVoted) return { isClaimable: false, isOwned: false }
   if (isLoadingNftBalance || isErrorNftBalance || nftBalance) return { isClaimable: false, isOwned: true }
 

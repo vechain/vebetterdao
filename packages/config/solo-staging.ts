@@ -9,7 +9,7 @@ import { AppConfig } from "."
   "xAllocationVotingContractAddress": "0x6b30645b82f7A6c3954298af951eaC989035beb1",
   "emissionsContractAddress": "0xCC1bD98B1B062533a841269cB711E632372BD12E",
   "voterRewardsContractAddress": "0xaBC28366bdF7E1b650D21E61be9Ace2F71687378",
-  "nftBadgeContractAddress": "0xa0442F069421f27D3517593b2a94Cd27A0339C3B",
+  "galaxyMemberContractAddress": "0xa0442F069421f27D3517593b2a94Cd27A0339C3B",
   "treasuryContractAddress": "0x2776b60603CA6ba8b862eebf570CeFcdbB356891",
   "mixPanelProjectToken": "e03f4f5f6a753dae2dac30a69dfe21f7",
   "nodeUrl": "https://thor-solo.dev.b3tr.vechain.org",
