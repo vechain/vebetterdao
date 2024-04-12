@@ -951,7 +951,7 @@ describe("X-Allocation Voting", function () {
       await waitForRoundToEnd(Number(roundId))
       expect(await xAllocationVoting.state(roundId)).to.eql(1n) // quorum failed
 
-      expect(await emissions.distribute()).to.not.be.reverted
+      await expect(emissions.distribute()).to.not.be.reverted
       roundId = await xAllocationVoting.currentRoundId()
       expect(roundId).to.eql(2n)
     })
