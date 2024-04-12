@@ -257,22 +257,29 @@ contract B3TRGovernor is
 
   /**
    * @dev See {IGovernor-proposalSnapshot}.
+   *
+   * We take for granted that the round starts the block after it ends. But it can happen that the round is not started yet for whatever reason.
+   * Knowing this, if the proposal starts 4 rounds in the future we need to consider also those extra blocks used to start the rounds.
    */
   function proposalSnapshot(uint256 proposalId) public view virtual override returns (uint256) {
     B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
     GovernorStorage storage $$ = _getGovernorStorage();
 
-    // if round is active or already occured proposal start block is the block when round started
+    // round when proposal should be active is already started
     if ($.xAllocationVoting.currentRoundId() >= $$._proposals[proposalId].roundIdVoteStart) {
       return $.xAllocationVoting.roundSnapshot($$._proposals[proposalId].roundIdVoteStart);
     }
 
-    // if we call this function before the round starts, it will return 0, so we need to estimate the start block
-    uint256 blocksLeftUntilCurrentRoundEnds = $.xAllocationVoting.currentRoundDeadline() - clock();
-    uint256 otherRoundsDurationIfTargetRoundIsNotNext = $.xAllocationVoting.votingPeriod() *
-      ($$._proposals[proposalId].roundIdVoteStart - $.xAllocationVoting.currentRoundId() - 1);
+    uint256 amountOfRoundsLeft = $$._proposals[proposalId].roundIdVoteStart - $.xAllocationVoting.currentRoundId();
+    uint256 roundsDurationLeft = $.xAllocationVoting.votingPeriod() * (amountOfRoundsLeft - 1); // -1 because if only 1 round left we want this to be 0
+    uint256 currentRoundDeadline = $.xAllocationVoting.currentRoundDeadline();
 
-    return clock() + blocksLeftUntilCurrentRoundEnds + otherRoundsDurationIfTargetRoundIsNotNext + 1;
+    // if current round ended and a new one did not start yet
+    if (currentRoundDeadline <= clock()) {
+      currentRoundDeadline = clock();
+    }
+
+    return currentRoundDeadline + roundsDurationLeft + amountOfRoundsLeft;
   }
 
   /**
