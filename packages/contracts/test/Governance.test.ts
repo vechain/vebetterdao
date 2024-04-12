@@ -730,6 +730,15 @@ describe("Governor and TimeLock", function () {
       expect(await governor.state(proposalId)).to.eql(7n)
     })
 
+    it("Cannot know if proposal is executable for a non existing proposal", async () => {
+      const { governor } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const proposalId = 1n
+      await expect(governor.proposalIsExecutable(proposalId)).to.be.reverted
+    })
+
     it("Parameters must have the same length", async () => {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
