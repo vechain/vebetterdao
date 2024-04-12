@@ -147,6 +147,14 @@ describe("Governor and TimeLock", function () {
       expect(await governor.quorumReached(proposalId)).to.eql(true)
     })
 
+    it("Only governance can upgrade the governor contract", async function () {
+      const { governor, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await expect(governor.connect(otherAccount).upgradeToAndCall(otherAccount.address, "0x")).to.be.reverted
+    })
+
     it("Should be able to initialize only once", async function () {
       const { governor, owner, vot3, timeLock, voterRewards, xAllocationVoting } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -186,6 +194,15 @@ describe("Governor and TimeLock", function () {
 
       const updatedAddress = await governor.xAllocationVotingAddress()
       expect(updatedAddress).to.eql(newAddress)
+    })
+
+    it("Should not support invalid interface", async function () {
+      const { governor } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const INVALID_ID = "0xffffffff"
+      expect(await governor.supportsInterface(INVALID_ID)).to.eql(false)
     })
 
     it("only governance can update xAllocationVoting address", async function () {
