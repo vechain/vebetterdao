@@ -279,7 +279,6 @@ contract B3TRGovernor is
       currentRoundDeadline = clock();
     }
 
-    // if the current round is still active
     return currentRoundDeadline + roundsDurationLeft + amountOfRoundsLeft;
   }
 
