@@ -11,6 +11,7 @@ import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
  *
  * Modifications:
  * - removed votingDelay()
+ * - updated event VoteCast and VoteCastWithParams to include `power` parameter
  */
 interface IGovernor is IERC165, IERC6372 {
   enum ProposalState {
@@ -142,7 +143,14 @@ interface IGovernor is IERC165, IERC6372 {
    *
    * Note: `support` values should be seen as buckets. Their interpretation depends on the voting module used.
    */
-  event VoteCast(address indexed voter, uint256 proposalId, uint8 support, uint256 weight, string reason);
+  event VoteCast(
+    address indexed voter,
+    uint256 proposalId,
+    uint8 support,
+    uint256 weight,
+    uint256 power,
+    string reason
+  );
 
   /**
    * @dev Emitted when a vote is cast with params.
@@ -155,6 +163,7 @@ interface IGovernor is IERC165, IERC6372 {
     uint256 proposalId,
     uint8 support,
     uint256 weight,
+    uint256 power,
     string reason,
     bytes params
   );

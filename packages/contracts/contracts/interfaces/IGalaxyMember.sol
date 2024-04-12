@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.20;
 
-interface IB3TRBadge {
+interface IGalaxyMember {
   error AccessControlBadConfirmation();
 
   error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);

@@ -28,7 +28,7 @@ export function createSoloStagingConfig() {
 
     INITIAL_X_ALLOCATION: BigInt("66666666666666666666666"), // 1M/15 rounded down -> 1/15th of the total supply for pilot show
 
-    NFT_BADGE_BASE_URI: "ipfs://bafybeiahr3qobzujfkxi64o6wrigkmdagrvgfa566rqqth6jm5nq7vf24y/", // IPFS base URI for the NFT Badge
+    GM_NFT_BASE_URI: "ipfs://bafybeiahr3qobzujfkxi64o6wrigkmdagrvgfa566rqqth6jm5nq7vf24y/", // IPFS base URI for the GM NFT
 
     /*
       X/Economic Node => Max Level For Free
@@ -41,7 +41,7 @@ export function createSoloStagingConfig() {
       ThunderX => 6,
       MjolnirX => 7,
     */
-    NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS: [2, 4, 6, 2, 4, 6, 7],
+    GM_NFT_X_NODE_UPGRADEABLE_LEVELS: [2, 4, 6, 2, 4, 6, 7],
 
     /*
       Level => B3TR Required
@@ -56,7 +56,7 @@ export function createSoloStagingConfig() {
       9 (Neptune) => 5,000,000 B3TR
       10 (Galaxy) => 25,000,000 B3TR
     */
-    NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL: [
+    GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL: [
       10000000000000000000000n,
       25000000000000000000000n,
       50000000000000000000000n,

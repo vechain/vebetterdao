@@ -1,4 +1,4 @@
-import { getB3trBadgeBalanceQueryKey, getTokenIdByAccountQueryKey } from "@/api"
+import { getGMbalanceQueryKey, getTokenIdByAccountQueryKey } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
@@ -7,9 +7,9 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { EnhancedClause } from "@/hooks"
 import { getConfig } from "@repo/config"
 
-import { B3TRBadge__factory } from "@repo/contracts"
+import { GalaxyMember__factory } from "@repo/contracts"
 
-const B3trBadgeInterface = B3TRBadge__factory.createInterface()
+const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
 
 type useClaimNFTProps = {
   onSuccess?: () => void
@@ -38,11 +38,11 @@ export const useClaimNFT = ({
   const buildClauses = useCallback((): EnhancedClause[] => {
     return [
       {
-        to: getConfig().nftBadgeContractAddress,
+        to: getConfig().galaxyMemberContractAddress,
         value: 0,
-        data: B3trBadgeInterface.encodeFunctionData("freeMint"),
+        data: GalaxyMemberInterface.encodeFunctionData("freeMint"),
         comment: `Claim NFT`,
-        abi: JSON.parse(JSON.stringify(B3trBadgeInterface.getFunction("freeMint"))),
+        abi: JSON.parse(JSON.stringify(GalaxyMemberInterface.getFunction("freeMint"))),
       },
     ]
   }, [])
@@ -54,13 +54,13 @@ export const useClaimNFT = ({
         queryKey: getTokenIdByAccountQueryKey(account),
       })
       await queryClient.refetchQueries({
-        queryKey: getB3trBadgeBalanceQueryKey(account),
+        queryKey: getGMbalanceQueryKey(account),
       })
     }
 
     toast({
-      title: "Galaxy Member Badge Claimed",
-      description: `You have correctly claimed your GM Badge!`,
+      title: "Galaxy Member NFT Claimed",
+      description: `You have correctly claimed your GM NFT!`,
       status: "success",
       position: "bottom-left",
       duration: 5000,

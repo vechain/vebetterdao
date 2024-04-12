@@ -23,7 +23,7 @@ export const generateMockLocalConfig = () => {
     xAllocationVotingContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     emissionsContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     voterRewardsContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
-    nftBadgeContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
+    galaxyMemberContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     treasuryContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     "nodeUrl": "http://localhost:8669",
     "network": {
