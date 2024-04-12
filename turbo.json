@@ -89,11 +89,11 @@
       "cache": false,
       "dependsOn": ["@repo/config#check-or-generate-local-config"]
     },
-    "generate-b3tr-badge-metadata": {
+    "generate-galaxy-member-metadata": {
       "cache": false,
       "dependsOn": ["@repo/config#check-or-generate-local-config"]
     },
-    "upload-b3tr-badge-metadata": {
+    "upload-galaxy-member-metadata": {
       "cache": false,
       "dependsOn": ["@repo/config#check-or-generate-local-config"]
     },

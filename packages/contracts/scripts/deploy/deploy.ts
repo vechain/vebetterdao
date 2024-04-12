@@ -6,7 +6,7 @@ import {
   XAllocationVoting,
   TimeLock,
   B3TRGovernor,
-  B3TRBadge,
+  GalaxyMember,
   VoterRewards,
   XAllocationPool,
   Treasury,
@@ -17,7 +17,7 @@ import { seedLocalEnvironment, seedTestnetEnvironment } from "./seed"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { deployProxy } from "../helpers"
 
-// NFT Badge Values
+// GalaxyMember NFT Values
 const name = "VeBetterDAO Galaxy Member"
 const symbol = "GM"
 
@@ -69,21 +69,21 @@ export async function deployAll(config: ContractsConfig) {
   ])) as XAllocationPool
   console.log(`XAllocationPool contract deployed at address ${await xAllocationPool.getAddress()}`)
 
-  // Deploy the NFT Badge contract with Max Mintable Level 1
-  console.log(`Deploying B3TRBadge NFT contract`)
-  const badge = (await deployProxy("B3TRBadge", [
+  // Deploy the GalaxyMember contract with Max Mintable Level 1
+  console.log(`Deploying GalaxyMember NFT contract`)
+  const galaxyMember = (await deployProxy("GalaxyMember", [
     name,
     symbol,
     TEMP_ADMIN,
     TEMP_ADMIN,
     1,
-    config.NFT_BADGE_BASE_URI,
-    config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
-    config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+    config.GM_NFT_BASE_URI,
+    config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
+    config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
     await b3tr.getAddress(),
     await treasury.getAddress(),
-  ])) as B3TRBadge
-  console.log(`NFTBadge contract deployed at address ${await badge.getAddress()}`)
+  ])) as GalaxyMember
+  console.log(`GalaxyMember contract deployed at address ${await galaxyMember.getAddress()}`)
 
   console.log(`Deploying Emissions contract`)
   const emissions = (await deployProxy("Emissions", [
@@ -112,7 +112,7 @@ export async function deployAll(config: ContractsConfig) {
     TEMP_ADMIN,
     TEMP_ADMIN,
     await emissions.getAddress(),
-    await badge.getAddress(),
+    await galaxyMember.getAddress(),
     await b3tr.getAddress(),
     config.VOTER_REWARDS_LEVELS,
     config.VOTER_REWARDS_MULTIPLIER,
@@ -122,7 +122,7 @@ export async function deployAll(config: ContractsConfig) {
   console.log(`Deploying XAllocationVoting contract`)
   const xAllocationVoting = (await deployProxy("XAllocationVoting", [
     {
-      vot3Token: await timelock.getAddress(),
+      vot3Token: await vot3.getAddress(),
       quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE,
       initialVotingPeriod: config.EMISSIONS_CYCLE_DURATION - 1,
       b3trGovernor: await timelock.getAddress(),
@@ -203,12 +203,12 @@ export async function deployAll(config: ContractsConfig) {
     .setEmissionsAddress(await emissions.getAddress())
     .then(async tx => await tx.wait())
 
-  // Set xAllocationVoting and B3TRGovernor address in B3TRBadge
-  await badge
+  // Set xAllocationVoting and B3TRGovernor address in GalaxyMember
+  await galaxyMember
     .connect(admin)
     .setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
     .then(async tx => await tx.wait())
-  await badge
+  await galaxyMember
     .connect(admin)
     .setB3trGovernorAddress(await governor.getAddress())
     .then(async tx => await tx.wait())
@@ -236,7 +236,7 @@ export async function deployAll(config: ContractsConfig) {
     await transferMinterRole(b3tr, admin, TEMP_ADMIN, await emissions.getAddress())
     await transferAdminRole(b3tr, admin, config.CONTRACTS_ADMIN_ADDRESS)
 
-    await transferAdminRole(badge, admin, config.CONTRACTS_ADMIN_ADDRESS)
+    await transferAdminRole(galaxyMember, admin, config.CONTRACTS_ADMIN_ADDRESS)
 
     await transferMinterRole(emissions, admin, admin.address, config.CONTRACTS_ADMIN_ADDRESS)
     await transferAdminRole(emissions, admin, config.CONTRACTS_ADMIN_ADDRESS)
@@ -263,7 +263,7 @@ export async function deployAll(config: ContractsConfig) {
     xAllocationVotingContractAddress: await xAllocationVoting.getAddress(),
     emissionsContractAddress: await emissions.getAddress(),
     voterRewardsContractAddress: await voterRewards.getAddress(),
-    nftBadgeContractAddress: await badge.getAddress(),
+    galaxyMemberContractAddress: await galaxyMember.getAddress(),
     treasuryContractAddress: await treasury.getAddress(),
   })
 
@@ -272,7 +272,7 @@ export async function deployAll(config: ContractsConfig) {
     timelock: timelock,
     b3tr: b3tr,
     vot3: vot3,
-    badge: badge,
+    galaxyMember: galaxyMember,
     xAllocationPool: xAllocationPool,
     xAllocationVoting: xAllocationVoting,
     emissions: emissions,
@@ -286,7 +286,7 @@ const transferAdminRole = async (
   contract:
     | B3TR
     | VOT3
-    | B3TRBadge
+    | GalaxyMember
     | Emissions
     | VoterRewards
     | XAllocationPool

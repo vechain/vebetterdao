@@ -6,7 +6,7 @@ import {
   XAllocationPoolJson,
   XAllocationVotingJson,
   VoterRewardsContractJson,
-  B3trBadgeContractJson,
+  GalaxyMemberContractJson,
   EmissionsContractJson,
 } from "@repo/contracts"
 
@@ -27,6 +27,6 @@ export const governanceAvailableContracts: ExecutorAvailableContracts[] = [
   { abi: XAllocationPoolJson, address: config.xAllocationPoolContractAddress },
   { abi: XAllocationVotingJson, address: config.xAllocationVotingContractAddress },
   { abi: VoterRewardsContractJson, address: config.voterRewardsContractAddress },
-  { abi: B3trBadgeContractJson, address: config.nftBadgeContractAddress },
+  { abi: GalaxyMemberContractJson, address: config.galaxyMemberContractAddress },
   { abi: EmissionsContractJson, address: config.emissionsContractAddress },
 ]
