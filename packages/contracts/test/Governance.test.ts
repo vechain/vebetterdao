@@ -850,6 +850,42 @@ describe("Governor and TimeLock", function () {
       ).to.be.reverted
     })
 
+    it("Cannot create same proposal twice", async () => {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.EMISSIONS_CYCLE_DURATION = 5
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      await bootstrapAndStartEmissions()
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+
+      // Now we can create a new proposal
+      const address = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+      const roundToStart = (await xAllocationVoting.currentRoundId()) + 2n
+
+      await expect(
+        governor
+          .connect(proposer) //@ts-ignore
+          .propose([address], [0], [encodedFunctionCall], "", roundToStart, {
+            gasLimit: 10_000_000,
+          }),
+      ).to.not.be.reverted
+
+      await expect(
+        governor
+          .connect(proposer) //@ts-ignore
+          .propose([address], [0], [encodedFunctionCall], "", roundToStart, {
+            gasLimit: 10_000_000,
+          }),
+      ).to.be.reverted
+    })
+
     it("Should not be able to create a proposal starting in a round that has already passed", async () => {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
