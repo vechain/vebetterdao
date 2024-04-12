@@ -461,7 +461,7 @@ describe("X-Allocation Pool", async function () {
       expect(isFinalized).to.eql(false)
 
       // CLAIMING
-      expect(await xAllocationPool.claim(round1, app1Id)).not.to.be.reverted
+      await expect(xAllocationPool.claim(round1, app1Id)).not.to.be.reverted
     })
 
     it("Can claim failed round after it's finalized", async function () {
@@ -505,7 +505,7 @@ describe("X-Allocation Pool", async function () {
       // ENDED SEEDING DATA
 
       // CLAIMING
-      expect(await xAllocationPool.claim(round1, app1Id)).not.to.be.reverted
+      await expect(xAllocationPool.claim(round1, app1Id)).not.to.be.reverted
     })
 
     it("Cannot claim active round", async function () {

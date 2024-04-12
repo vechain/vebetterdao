@@ -392,7 +392,7 @@ describe("B3TRBadge", () => {
       // Should be able to free mint after participating in allocation voting
       await participateInAllocationVoting(otherAccount)
 
-      expect(await b3trBadge.connect(otherAccount).freeMint()).not.to.be.reverted
+      await expect(b3trBadge.connect(otherAccount).freeMint()).to.not.be.reverted
 
       expect(await b3trBadge.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 badge
       expect(await b3trBadge.ownerOf(1)).to.equal(await otherAccount.getAddress()) // Owner of the first badge is the otherAccount
@@ -807,7 +807,9 @@ describe("B3TRBadge", () => {
       expect(await b3trBadge.getHighestLevel(await owner.getAddress())).to.equal(0) // Level 0
 
       expect(await b3trBadge.getPastHighestLevel(await otherAccount.getAddress(), receipt.blockNumber - 1)).to.equal(1) // Level 1 in the past
-      expect(await b3trBadge.getPastHighestLevel(await otherAccounts[0].getAddress(), receipt.blockNumber - 1)).to.equal(0) // Level 0 in the past
+      expect(
+        await b3trBadge.getPastHighestLevel(await otherAccounts[0].getAddress(), receipt.blockNumber - 1),
+      ).to.equal(0) // Level 0 in the past
       expect(await b3trBadge.getPastHighestLevel(await owner.getAddress(), receipt.blockNumber - 1)).to.equal(0) // Level 0 in the past
     })
   })
@@ -859,10 +861,9 @@ describe("B3TRBadge", () => {
     })
 
     it("Should select level of token received from another account if I don't have any tokens", async () => {
-      const { b3trBadge, otherAccount, owner, xAllocationVoting, b3tr, emissions, minterAccount } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const { b3trBadge, otherAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -1189,7 +1190,7 @@ describe("B3TRBadge", () => {
 
   it("Should correctly track highest level owned", async () => {
     const config = createTestConfig()
-    const { owner, xAllocationVoting, emissions, minterAccount, governor, b3tr, otherAccount, treasury } =
+    const { owner, xAllocationVoting, minterAccount, governor, b3tr, otherAccount, treasury } =
       await getOrDeployContractInstances({
         forceDeploy: true,
         config,

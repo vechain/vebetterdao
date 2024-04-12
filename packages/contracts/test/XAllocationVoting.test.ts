@@ -201,7 +201,7 @@ describe("X-Allocation Voting", function () {
     it("Contract should not be able to receive ether", async function () {
       const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: false })
 
-      expect(
+      await expect(
         owner.sendTransaction({
           to: await xAllocationVoting.getAddress(),
           value: ethers.parseEther("1.0"), // Sends exactly 1.0 ether
