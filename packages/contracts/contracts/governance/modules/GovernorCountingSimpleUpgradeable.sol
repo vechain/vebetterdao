@@ -36,6 +36,8 @@ abstract contract GovernorCountingSimpleUpgradeable is Initializable, GovernorUp
     mapping(uint256 => ProposalVote) _proposalVotes;
     // mapping to store that a user has voted at least one time
     mapping(address => bool) _hasVotedOnce;
+    // mapping to store the total votes for a proposal
+    mapping(uint256 => uint256) _proposalTotalVotes;
   }
 
   // keccak256(abi.encode(uint256(keccak256("openzeppelin.storage.GovernorCountingSimple")) - 1)) & ~bytes32(uint256(0xff))
@@ -69,7 +71,7 @@ abstract contract GovernorCountingSimpleUpgradeable is Initializable, GovernorUp
   }
 
   /**
-   * @dev Accessor to the internal vote counts.
+   * @dev Accessor to the internal vote counts, in terms of vote power.
    */
   function proposalVotes(
     uint256 proposalId
@@ -80,15 +82,19 @@ abstract contract GovernorCountingSimpleUpgradeable is Initializable, GovernorUp
   }
 
   /**
+   * @dev returns the total votes for a proposal
+   */
+  function proposalTotalVotes(uint256 proposalId) public view returns (uint256) {
+    GovernorCountingSimpleStorage storage $ = _getGovernorCountingSimpleStorage();
+    return $._proposalTotalVotes[proposalId];
+  }
+
+  /**
    * @dev See {Governor-_quorumReached}.
    */
   function _quorumReached(uint256 proposalId) internal view virtual override returns (bool) {
     GovernorCountingSimpleStorage storage $ = _getGovernorCountingSimpleStorage();
-    ProposalVote storage proposalVote = $._proposalVotes[proposalId];
-
-    return
-      quorum(proposalSnapshot(proposalId)) <=
-      proposalVote.forVotes + proposalVote.abstainVotes + proposalVote.againstVotes;
+    return quorum(proposalSnapshot(proposalId)) <= $._proposalTotalVotes[proposalId];
   }
 
   /**
@@ -119,6 +125,7 @@ abstract contract GovernorCountingSimpleUpgradeable is Initializable, GovernorUp
     address account,
     uint8 support,
     uint256 weight,
+    uint256 power,
     bytes memory // params
   ) internal virtual override {
     GovernorCountingSimpleStorage storage $ = _getGovernorCountingSimpleStorage();
@@ -130,14 +137,16 @@ abstract contract GovernorCountingSimpleUpgradeable is Initializable, GovernorUp
     proposalVote.hasVoted[account] = true;
 
     if (support == uint8(VoteType.Against)) {
-      proposalVote.againstVotes += weight;
+      proposalVote.againstVotes += power;
     } else if (support == uint8(VoteType.For)) {
-      proposalVote.forVotes += weight;
+      proposalVote.forVotes += power;
     } else if (support == uint8(VoteType.Abstain)) {
-      proposalVote.abstainVotes += weight;
+      proposalVote.abstainVotes += power;
     } else {
       revert GovernorInvalidVoteType();
     }
+
+    $._proposalTotalVotes[proposalId] += weight;
 
     // save that user cast vote only the first time
     if (!$._hasVotedOnce[account]) {
