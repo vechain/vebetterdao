@@ -14,6 +14,7 @@ interface IB3TRGovernor is IGovernor {
     string description,
     uint256 roundIdVoteStart
   );
+
   event MinVotingDelaySet(uint256 oldMinMinVotingDelay, uint256 newMinVotingDelay);
 
   error GovernorInvalidStartRound(uint256 roundId);

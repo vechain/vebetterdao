@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  run-unit-tests:
-    name: Unit Testing
+  run-coverage:
+    name: Unit tests coverage
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -29,20 +29,27 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Unit Tests
-        run: yarn test:coverage
+      - name: Run FE coverage
+        id: fe-coverage
+        run: yarn test:coverage:fe
 
       - name: Archive FE coverage
+        if: steps.fe-coverage.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
             name: fe-coverage
             path: apps/frontend/coverage
             retention-days: 10
     
-      - name: Archive Contract coverage
+      - name: Run solidity coverage
+        id: contract-coverage
+        run: yarn test:coverage:solidity   
+
+      - name: Archive solidity coverage
+        if: steps.contract-coverage.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
-            name: contract-coverage
+            name: solidity-coverage
             path: packages/contracts/coverage
             retention-days: 10
 

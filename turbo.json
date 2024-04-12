@@ -40,8 +40,7 @@
       "dependsOn": ["^compile", "@repo/contracts#check-contracts-deployment:testnet"]
     },
     "@repo/config#check-or-generate-local-config": {
-      "cache": false,
-      "dependsOn": ["^compile"]
+      "cache": false
     },
     "@repo/contracts#check-contracts-deployment": {
       "cache": false,
@@ -75,9 +74,13 @@
       "cache": false,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config", "test:hardhat"]
     },
-    "test:coverage": {
+    "test:coverage:fe": {
       "cache": false,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
+    },
+    "test:coverage:solidity": {
+      "cache": false,
+      "dependsOn": ["^@repo/config#check-or-generate-local-config"]
     },
     "test:thor-solo": {
       "cache": false
