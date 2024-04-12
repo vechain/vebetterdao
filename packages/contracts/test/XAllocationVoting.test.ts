@@ -396,6 +396,29 @@ describe("X-Allocation Voting", function () {
       const updatedCap = await xAllocationVoting.appSharesCap()
       expect(updatedCap).to.eql(initialCap)
     })
+
+    it("Admin can set baseURI for apps", async function () {
+      const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      const initialURI = await xAllocationVoting.baseURI()
+
+      await xAllocationVoting.connect(owner).setBaseURI("ipfs2://")
+
+      const updatedURI = await xAllocationVoting.baseURI()
+      expect(updatedURI).to.eql("ipfs2://")
+      expect(updatedURI).to.not.eql(initialURI)
+    })
+
+    it("Only admin can set baseURI for apps", async function () {
+      const { xAllocationVoting, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      const initialURI = await xAllocationVoting.baseURI()
+
+      await expect(xAllocationVoting.connect(otherAccounts[0]).setBaseURI("ipfs2://")).to.be.reverted
+
+      const updatedURI = await xAllocationVoting.baseURI()
+      expect(updatedURI).to.eql(initialURI)
+    })
   })
 
   describe("Allocation rounds", function () {
