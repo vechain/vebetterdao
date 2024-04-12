@@ -152,7 +152,7 @@ describe("Treasury", () => {
         await expect(await galaxyMember.connect(otherAccount).freeMint()).not.to.be.reverted
 
         expect(await galaxyMember.balanceOf(otherAccount.address)).to.equal(1)
-        expect(
+        await expect(
           await galaxyMember
             .connect(otherAccount)
             .transferFrom(otherAccount.address, await treasuryProxy.getAddress(), 1),
@@ -164,8 +164,8 @@ describe("Treasury", () => {
         expect(await galaxyMember.balanceOf(await treasuryProxy.getAddress())).to.equal(1)
 
         expect(await treasuryProxy.getCollectionNFTBalance(await galaxyMember.getAddress())).to.equal(1)
-        expect(await treasuryProxy.transferNFT(await galaxyMember.getAddress(), otherAccount.address, 1)).not.to.be
-          .reverted
+        await expect(await treasuryProxy.transferNFT(await galaxyMember.getAddress(), otherAccount.address, 1)).not.to
+          .be.reverted
         expect(await treasuryProxy.getCollectionNFTBalance(await galaxyMember.getAddress())).to.equal(0)
       })
       it("should revert if not called by GOVERNANCE_ROLE", async () => {
