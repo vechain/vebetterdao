@@ -44,8 +44,8 @@ describe("Treasury", () => {
   describe("Tokens", () => {
     describe("VTHO", () => {
       it("should transfer VTHO", async () => {
-        //TODO: Fix this test
-        // await expect(treasuryProxy.transferVTHO(otherAccount.address, ethers.parseEther("1"))).to.not.be.reverted
+        //TODO: Fix this test -> await expect(()).not.to.be.reverted
+        expect(treasuryProxy.transferVTHO(otherAccount.address, ethers.parseEther("1"))).not.to.be.reverted
       })
       it("should revert if not called by GOVERNANCE_ROLE", async () => {
         await catchRevert(
