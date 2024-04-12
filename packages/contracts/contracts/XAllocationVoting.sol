@@ -158,11 +158,6 @@ contract XAllocationVoting is
 
   // ---------- Getters ---------- //
 
-  function getCurrentAllocationRoundSnapshot() public view returns (uint256) {
-    uint256 currentId = currentRoundId();
-    return roundSnapshot(currentId);
-  }
-
   /**
    * This function could not be efficient with a large number of apps
    */
