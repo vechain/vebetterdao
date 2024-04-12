@@ -19,7 +19,7 @@ import { IB3TR } from "./interfaces/IB3TR.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract B3TRBadge is
+contract GalaxyMember is
   Initializable,
   ERC721Upgradeable,
   ERC721EnumerableUpgradeable,
@@ -32,8 +32,8 @@ contract B3TRBadge is
   using Checkpoints for Checkpoints.Trace208;
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
-  /// @custom:storage-location erc7201:b3tr.storage.B3TRBadge
-  struct B3TRBadgeStorage {
+  /// @custom:storage-location erc7201:b3tr.storage.GalaxyMember
+  struct GalaxyMemberStorage {
     IXAllocationVotingGovernor xAllocationsGovernor; // XAllocationVotingGovernor contract
     IB3TRGovernor b3trGovernor; // B3TRGovernor contract
     IB3TR b3tr; // B3TR token contract
@@ -44,8 +44,6 @@ contract B3TRBadge is
     uint256 MAX_LEVEL; // Set to 0 by allowing only the free minting of the Earth Token
     // Mapping from token ID to level
     mapping(uint256 => uint256) levelOf;
-    // Mapping from owner to tokenId selected for voting rewards
-    mapping(address => uint256) selectedTokenId;
     // Mapping from X/Economic node type to maximum mintable level
     /*
     0 => Strength
@@ -60,15 +58,17 @@ contract B3TRBadge is
     mapping(uint256 => uint256) _b3trToUpgradeToLevel;
     // Mapping from owner to their selected GM NFT level to be used for voter rewards
     mapping(address owner => Checkpoints.Trace208) _selectedLevelCheckpoints;
+    // Value-Frequency map tracking levels owned by users
+    mapping(address => mapping(uint256 => uint256)) _ownedLevels;
   }
 
-  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.B3TRBadge")) - 1)) & ~bytes32(uint256(0xff))
-  bytes32 private constant B3TRBadgeStorageLocation =
-    0x150e16fa8ec3868c60e68a743142094d7e1a46630e5f53ea9f65c39ff4b11000;
+  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.GalaxyMember")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 private constant GalaxyMemberStorageLocation =
+    0x7a79e46844ed04411e4579c7bc49d053e59b0854fa4e9a8df3d5a0597ce45200;
 
-  function _getB3TRBadgeStorage() private pure returns (B3TRBadgeStorage storage $) {
+  function _getGalaxyMemberStorage() private pure returns (GalaxyMemberStorage storage $) {
     assembly {
-      $.slot := B3TRBadgeStorageLocation
+      $.slot := GalaxyMemberStorageLocation
     }
   }
 
@@ -130,7 +130,7 @@ contract B3TRBadge is
     __ReentrancyGuard_init();
     __UUPSUpgradeable_init();
 
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
     $.MAX_LEVEL = maxLevel;
     $._baseTokenURI = baseTokenURI;
@@ -165,11 +165,7 @@ contract B3TRBadge is
   // Mints the highest level Token the caller is allowed to mint
   function freeMint() public {
     require(participatedInGovernance(msg.sender), "Galaxy Member: User has not participated in governance");
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
-
-    // TODO: Get User's X/Economic node type and check max mintable level
-    // TODO: Check if that X/Economic node has not already been used to mint a Token (e.g., MintedLevelOfXNode[xNodeId])
-    /* uint256 mintableLevel = 1; */
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
     uint256 tokenId = $._nextTokenId;
 
@@ -178,10 +174,9 @@ contract B3TRBadge is
     safeMint(msg.sender);
   }
 
-  // TODO: Mock X/Economic nodes NFT Contract, add to constructor and use it to check the X/Economic node type of the caller
   function upgrade(uint256 tokenId) public nonReentrant whenNotPaused {
     require(ownerOf(tokenId) == msg.sender, "Galaxy Member: you must own the Token to upgrade it");
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
     uint256 currentLevel = $.levelOf[tokenId];
 
@@ -191,44 +186,35 @@ contract B3TRBadge is
 
     require($.b3tr.balanceOf(msg.sender) >= b3trRequired, "Galaxy Member: Insufficient balance to upgrade");
 
+    require(
+      $.b3tr.allowance(msg.sender, address(this)) >= b3trRequired,
+      "Galaxy Member: Insufficient allowance to upgrade"
+    );
+
     $.levelOf[tokenId] = currentLevel + 1;
 
-    if ($.selectedTokenId[msg.sender] == tokenId) {
+    $._ownedLevels[msg.sender][currentLevel]--;
+    $._ownedLevels[msg.sender][currentLevel + 1]++;
+
+    uint256 currentHighestLevel = getHighestLevel(msg.sender);
+
+    if ($.levelOf[tokenId] > currentHighestLevel) {
       _updateLevelSelected(msg.sender, $.levelOf[tokenId]);
     }
 
-    require($.b3tr.transferFrom(msg.sender, $.treasury, b3trRequired), "B3TRBadge: Transfer failed");
+    require($.b3tr.transferFrom(msg.sender, $.treasury, b3trRequired), "GalaxyMember: Transfer failed");
 
     emit Upgraded(tokenId, currentLevel, $.levelOf[tokenId]);
   }
 
-  function select(uint256 tokenId) public {
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
-
-    require(ownerOf(tokenId) == msg.sender, "Galaxy Member: Caller is not the owner of the Token");
-    require($.selectedTokenId[msg.sender] != tokenId, "Galaxy Member: Token already selected");
-
-    _updateLevelSelected(msg.sender, $.levelOf[tokenId]);
-
-    _select(msg.sender, tokenId);
-  }
-
-  function upgradeAndSelect(uint256 tokenId) public {
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
-
-    require(
-      $.selectedTokenId[msg.sender] != tokenId,
-      "Galaxy Member: Token already selected, consider upgrading it instead"
-    );
-
-    upgrade(tokenId);
-    select(tokenId);
+  function selectHighestLevel() public {
+    _selectHighestLevel(msg.sender);
   }
 
   // Mints the Token for the given address
   // Can't be called externally but only from the contract
   function safeMint(address to) internal {
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     uint256 tokenId = $._nextTokenId++;
     _safeMint(to, tokenId);
   }
@@ -236,36 +222,54 @@ contract B3TRBadge is
   // ----------- Internal & Private ----------- //
 
   /**
-   * @dev Move ownership level from one address to another.
+   * @dev Selects the highest level owned by the owner
    */
-  function _moveOwnershipLevel(address from, address to, uint256 level, uint256 tokenId) internal {
-    if (from != to) {
-      // If the owner is transferring the last token then we checkpoint that the selected level is 0 because they no longer have a token
-      if (from != address(0) && balanceOf(from) == 1) {
-        _updateLevelSelected(from, 0); // Set the selected level to 0, i.e., no level selected
+  function _selectHighestLevel(address owner) internal {
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
-        _select(from, 0); // Set the selected token to 0, i.e., no token selected
-      }
-      // If the owner is receiving their first token then we checkpoint the selected level to the token's level
-      if (to != address(0) && balanceOf(to) == 0) {
-        _updateLevelSelected(to, level);
-
-        _select(to, tokenId);
+    /**
+     * @dev Loop through the levels owned by the user and select the highest level
+     * Out-of-gas safe as the loop will break as soon as the highest level is found and the MAX_LEVEL should not be too high
+     */
+    for (uint256 level = $.MAX_LEVEL; level > 0; level--) {
+      if ($._ownedLevels[owner][level] > 0) {
+        _updateLevelSelected(owner, level);
+        break;
       }
     }
   }
 
-  function _select(address owner, uint256 tokenId) internal whenNotPaused {
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
-    $.selectedTokenId[owner] = tokenId;
+  /**
+   * @dev Updates the highest level owned by the user
+   */
+  function _updateHighestLevelOwned(address from, address to, uint256 tokenId) internal {
+    if (from != to) {
+      GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
-    emit Selected(owner, tokenId);
+      if (from != address(0)) {
+        // If the owner is transferring their only token then we checkpoint the selected level to 0
+        if (balanceOf(from) == 1) _updateLevelSelected(from, 0);
+
+        $._ownedLevels[from][$.levelOf[tokenId]]--;
+
+        // If the user is transferring a token of the highest level they own then we select the next highest level
+        // note that it might be the same level if they own multiple tokens of the same level
+        if ($.levelOf[tokenId] == getHighestLevel(from) && balanceOf(from) > 1) _selectHighestLevel(from);
+      }
+      if (to != address(0)) {
+        $._ownedLevels[to][$.levelOf[tokenId]]++;
+
+        if ($.levelOf[tokenId] > getHighestLevel(to)) {
+          _updateLevelSelected(to, $.levelOf[tokenId]);
+        }
+      }
+    }
   }
 
   function _updateLevelSelected(address owner, uint256 level) internal whenNotPaused {
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     // If the selected level is different from the new level then we checkpoint the selected level to the new level
-    if (getLevel(owner) != level) {
+    if (getHighestLevel(owner) != level) {
       (uint256 oldLevel, uint256 newLevel) = _push($._selectedLevelCheckpoints[owner], SafeCast.toUint208(level));
 
       emit SelectedLevel(owner, oldLevel, newLevel);
@@ -280,7 +284,7 @@ contract B3TRBadge is
    * @dev Get number of checkpoints for `account`.
    */
   function _numCheckpoints(address account) internal view virtual returns (uint32) {
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return SafeCast.toUint32($._selectedLevelCheckpoints[account].length());
   }
 
@@ -288,8 +292,8 @@ contract B3TRBadge is
    * @dev Get the `pos`-th checkpoint for `account`.
    */
   function _checkpoints(address account, uint32 pos) internal view virtual returns (Checkpoints.Checkpoint208 memory) {
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
-    
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
+
     return $._selectedLevelCheckpoints[account].at(pos);
   }
 
@@ -297,7 +301,7 @@ contract B3TRBadge is
 
   function setMaxLevel(uint256 level) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(level > 0, "Galaxy Member: Max level must be greater than 0");
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     $.MAX_LEVEL = level;
   }
 
@@ -307,7 +311,7 @@ contract B3TRBadge is
       "Galaxy Member: Invalid number of max mintable levels. There should be 7 levels, one for each X/Economic node type"
     );
 
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     for (uint8 i = 0; i < maxMintableLevels.length; i++) {
       $._xNodeTypeToMaxMintableLevel[i] = maxMintableLevels[i];
     }
@@ -315,24 +319,24 @@ contract B3TRBadge is
 
   function setXAllocationsGovernorAddress(address _xAllocationsGovernor) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(_xAllocationsGovernor != address(0), "Galaxy Member: _xAllocationsGovernor cannot be the zero address");
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     $.xAllocationsGovernor = IXAllocationVotingGovernor(_xAllocationsGovernor);
   }
 
   function setB3trGovernorAddress(address _b3trGovernor) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(_b3trGovernor != address(0), "Galaxy Member: _b3trGovernor cannot be the zero address");
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     $.b3trGovernor = IB3TRGovernor(payable(_b3trGovernor));
   }
 
   function setBaseURI(string memory baseTokenURI) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(bytes(baseTokenURI).length > 0, "Galaxy Member: Base URI must be set");
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     $._baseTokenURI = baseTokenURI;
   }
 
   function setB3TRtoUpgradeToLevel(uint256[] memory b3trToUpgradeToLevel) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     for (uint8 i = 0; i < b3trToUpgradeToLevel.length; i++) {
       $._b3trToUpgradeToLevel[i + 2] = b3trToUpgradeToLevel[i]; // First Level that requires B3TR is level 2
     }
@@ -340,17 +344,17 @@ contract B3TRBadge is
 
   // ---------- Getters ---------- //
 
-  function getLevel(address owner) public view returns (uint256) {
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
+  function getHighestLevel(address owner) public view returns (uint256) {
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $._selectedLevelCheckpoints[owner].latest();
   }
 
-  function getPastLevel(address owner, uint256 timepoint) public view returns (uint256) {
+  function getPastHighestLevel(address owner, uint256 timepoint) public view returns (uint256) {
     uint48 currentTimepoint = clock();
     if (timepoint >= currentTimepoint) {
       revert ERC5805FutureLookup(timepoint, currentTimepoint);
     }
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $._selectedLevelCheckpoints[owner].upperLookupRecent(SafeCast.toUint48(timepoint));
   }
 
@@ -366,7 +370,7 @@ contract B3TRBadge is
   }
 
   function participatedInGovernance(address user) public view returns (bool) {
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     require(
       $.xAllocationsGovernor != IXAllocationVotingGovernor(address(0)),
       "Galaxy Member: XAllocationVotingGovernor not set"
@@ -385,22 +389,22 @@ contract B3TRBadge is
   }
 
   function getMaxMintableLevelOfXNode(uint8 xNodeType) public view returns (uint256) {
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $._xNodeTypeToMaxMintableLevel[xNodeType];
   }
 
   function getB3TRtoUpgradeToLevel(uint256 level) public view returns (uint256) {
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $._b3trToUpgradeToLevel[level];
   }
 
   function getNextLevel(uint256 tokenId) public view returns (uint256) {
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $.levelOf[tokenId] + 1;
   }
 
   function getB3TRtoUpgrade(uint256 tokenId) public view returns (uint256) {
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $._b3trToUpgradeToLevel[$.levelOf[tokenId] + 1];
   }
 
@@ -425,44 +429,39 @@ contract B3TRBadge is
   }
 
   function tokenURI(uint256 tokenId) public view override(ERC721Upgradeable) returns (string memory) {
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     uint256 levelOfToken = $.levelOf[tokenId];
     return levelOfToken > 0 ? string.concat(baseURI(), Strings.toString(levelOfToken)) : "";
   }
 
   function xAllocationsGovernor() public view returns (IXAllocationVotingGovernor) {
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $.xAllocationsGovernor;
   }
 
   function b3trGovernor() public view returns (IB3TRGovernor) {
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $.b3trGovernor;
   }
 
   function b3tr() public view returns (IB3TR) {
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $.b3tr;
   }
 
   function treasury() public view returns (address) {
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $.treasury;
   }
 
   function MAX_LEVEL() public view returns (uint256) {
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $.MAX_LEVEL;
   }
 
   function levelOf(uint256 tokenId) public view returns (uint256) {
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $.levelOf[tokenId];
-  }
-
-  function selectedTokenId(address owner) public view returns (uint256) {
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
-    return $.selectedTokenId[owner];
   }
 
   // ---------- Overrides ---------- //
@@ -472,8 +471,7 @@ contract B3TRBadge is
     uint256 tokenId,
     address auth
   ) internal override(ERC721Upgradeable, ERC721EnumerableUpgradeable, ERC721PausableUpgradeable) returns (address) {
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
-    _moveOwnershipLevel(auth, to, $.levelOf[tokenId], tokenId);
+    _updateHighestLevelOwned(auth, to, tokenId);
 
     return super._update(to, tokenId, auth);
   }
@@ -492,7 +490,7 @@ contract B3TRBadge is
   }
 
   function _baseURI() internal view override returns (string memory) {
-    B3TRBadgeStorage storage $ = _getB3TRBadgeStorage();
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $._baseTokenURI;
   }
 }

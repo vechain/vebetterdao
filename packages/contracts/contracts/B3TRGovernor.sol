@@ -12,6 +12,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { IVoterRewards } from "./interfaces/IVoterRewards.sol";
 import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
+import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 
 contract B3TRGovernor is
   Initializable,
@@ -117,6 +118,14 @@ contract B3TRGovernor is
     return _getB3TRGovernorStorage().voterRewards;
   }
 
+  /**
+   * @dev returns the quadratic voting power that `account` has.
+   */
+  function getQuadraticVotingPower(address account, uint256 timepoint) public view virtual returns (uint256) {
+    // scale the votes by 1e9 so that number returned is 1e18
+    return Math.sqrt(_getVotes(account, timepoint, _defaultParams())) * 1e9;
+  }
+
   function canProposalStartInNextRound() public view returns (bool) {
     B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
     uint256 currentRoundId = $.xAllocationVoting.currentRoundId();
@@ -135,6 +144,16 @@ contract B3TRGovernor is
     }
 
     return true;
+  }
+
+  function proposalIsExecutable(uint256 proposalId) public view returns (bool) {
+    GovernorStorage storage $ = _getGovernorStorage();
+    ProposalCore storage proposal = $._proposals[proposalId];
+    if (proposal.roundIdVoteStart == 0) {
+      revert GovernorNonexistentProposal(proposalId);
+    }
+
+    return proposal.isExecutable;
   }
 
   // ------------------ SETTERS ------------------ //
@@ -213,7 +232,7 @@ contract B3TRGovernor is
     GovernorStorage storage $ = _getGovernorStorage();
     proposalId = hashProposal(targets, values, calldatas, keccak256(bytes(description)));
 
-    if (targets.length != values.length || targets.length != calldatas.length || targets.length == 0) {
+    if (targets.length != values.length || targets.length != calldatas.length) {
       revert GovernorInvalidProposalLength(targets.length, calldatas.length, values.length);
     }
     if ($._proposals[proposalId].roundIdVoteStart != 0) {
@@ -225,6 +244,7 @@ contract B3TRGovernor is
     proposal.proposer = proposer;
     proposal.roundIdVoteStart = startRoundId;
     proposal.voteDuration = SafeCast.toUint32(votingPeriod());
+    proposal.isExecutable = targets.length > 0;
 
     emit ProposalCreated(
       proposalId,

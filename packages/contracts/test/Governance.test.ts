@@ -622,6 +622,107 @@ describe("Governor and TimeLock", function () {
       expect(await governor.state(proposalId)).to.eql(1n) // active
     })
 
+    it("Can create a non executable proposal", async () => {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.EMISSIONS_CYCLE_DURATION = 5
+      const { otherAccounts, governor, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // Now we can create a new proposal
+      const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
+      const tx = await governor
+        .connect(proposer) //@ts-ignore
+        .propose([], [], [], "", voteStartsInRoundId.toString(), {
+          gasLimit: 10_000_000,
+        })
+
+      const proposeReceipt = await tx.wait()
+      expect(proposeReceipt).not.to.be.null
+
+      const proposalId = await getProposalIdFromTx(tx)
+
+      expect(proposalId).not.to.be.null
+
+      expect(await governor.state(proposalId)).to.eql(0n) // pending
+
+      expect(await governor.proposalIsExecutable(proposalId)).to.eql(false)
+
+      // Let's make this proposal succeed
+      await waitForProposalToBeActive(proposalId)
+      expect(await governor.state(proposalId)).to.eql(1n) // active
+      await governor.connect(proposer).castVote(proposalId, 1)
+
+      // Move to the next round + 1 extra block
+      await waitForCurrentRoundToEnd()
+
+      expect(await governor.state(proposalId)).to.eql(4n) // succeeded
+
+      const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(""))
+
+      // Can still queue even if there is nothing to execute
+      await governor.queue([], [], [], descriptionHash)
+      expect(await governor.state(proposalId)).to.eql(5n) // queued
+
+      // Can still execute even if there is nothing to execute
+      await governor.execute([], [], [], descriptionHash)
+      expect(await governor.state(proposalId)).to.eql(7n)
+    })
+
+    it("Parameters must have the same length", async () => {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.EMISSIONS_CYCLE_DURATION = 5
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // Now we can create a new proposal
+      const address = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+      const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
+
+      // Parameters must have the same length
+      await catchRevert(
+        governor
+          .connect(proposer) //@ts-ignore
+          .propose([address], [0, 1], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
+            gasLimit: 10_000_000,
+          }),
+      )
+
+      await catchRevert(
+        governor
+          .connect(proposer) //@ts-ignore
+          .propose([address, address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
+            gasLimit: 10_000_000,
+          }),
+      )
+
+      await catchRevert(
+        governor
+          .connect(proposer) //@ts-ignore
+          .propose([address], [0], [encodedFunctionCall, encodedFunctionCall], "", voteStartsInRoundId.toString(), {
+            gasLimit: 10_000_000,
+          }),
+      )
+    })
+
     it("Proposal concludes when round ends", async () => {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
@@ -952,6 +1053,8 @@ describe("Governor and TimeLock", function () {
       expect(decodedLogs?.args[2].toString()).to.eql("1")
       // votes
       expect(decodedLogs?.args[3].toString()).to.eql("0")
+      // power
+      expect(decodedLogs?.args[4].toString()).to.eql("0")
     })
 
     it("can vote if self-delegated VOT3 holder before snapshot", async function () {
@@ -979,6 +1082,8 @@ describe("Governor and TimeLock", function () {
       expect(decodedLogs?.args[2].toString()).to.eql("1")
       // votes
       expect(decodedLogs?.args[3].toString()).not.to.eql("0")
+      // power
+      expect(decodedLogs?.args[4].toString()).not.to.eql("0")
 
       const hasVoted = await governor.hasVoted(proposalId, await voter3.getAddress())
       expect(hasVoted).to.eql(true)
@@ -1012,6 +1117,8 @@ describe("Governor and TimeLock", function () {
       expect(decodedLogs?.args[2].toString()).to.eql("1")
       // votes
       expect(decodedLogs?.args[3].toString()).to.eql("0") // weight 0 instead of 1000 because the snapshot was taken before the delegation
+      // power
+      expect(decodedLogs?.args[4].toString()).to.eql("0")
     })
 
     it("can count votes correctly", async function () {
@@ -1027,19 +1134,17 @@ describe("Governor and TimeLock", function () {
       // now we should have the following votes:
       // voter1: 0 yes
       // voter2: 0 yes
-      // voter3: 1000 yes
-      // voter4: 9 no
+      // voter3: sqrt(1000) =  31.6227 yes
+      // voter4: sqrt(9) = 3 no
       // abstain: 0
       const votes = await governor.proposalVotes(proposalId)
 
       // against votes
-      expect(votes[0]).to.eql(ethers.parseEther("9"))
+      expect(votes[0]).to.eql(ethers.parseEther("3"))
 
       // Note that if this test is ran in isolation, the following votes will be 0
-
-      // for
       expect(votes[1]).to.satisfy((votes: bigint) => {
-        return votes === ethers.parseEther("1000") || votes === BigInt(0)
+        return votes === ethers.parseEther("31.622776601") || votes === BigInt(0)
       })
 
       // abstain
@@ -1149,11 +1254,10 @@ describe("Governor and TimeLock", function () {
 
       const quorumNeeded = await governor.quorum(proposalSnapshot)
 
-      const proposalVotes = await governor.proposalVotes(proposalId)
+      const proposalVotes = await governor.proposalTotalVotes(proposalId)
       //sum of votes
-      const totalVotes = proposalVotes.reduce((a, b) => a + b, 0n)
-      expect(totalVotes).to.eql(ethers.parseEther("3000"))
-      expect(totalVotes).to.be.greaterThan(quorumNeeded)
+      expect(proposalVotes).to.eql(ethers.parseEther("3000"))
+      expect(proposalVotes).to.be.greaterThan(quorumNeeded)
 
       const isQuorumReached = await governor.quorumReached(proposalId)
       expect(isQuorumReached).to.equal(true)
@@ -1201,6 +1305,10 @@ describe("Governor and TimeLock", function () {
       // Check if quorum is calculated correctly
       const isQuorumReached = await governor.quorumReached(proposalId)
       expect(isQuorumReached).to.equal(true)
+
+      // check against votes are counted correctly
+      const votes = await governor.proposalVotes(proposalId)
+      expect(votes[0]).to.eql(ethers.parseEther("63.245553202"))
     })
 
     it("Abstain votes are counted correctly for quorum", async function () {
@@ -1245,6 +1353,10 @@ describe("Governor and TimeLock", function () {
       // Check if quorum is calculated correctly
       const isQuorumReached = await governor.quorumReached(proposalId)
       expect(isQuorumReached).to.equal(true)
+
+      // check abstain votes are counted correctly
+      const votes = await governor.proposalVotes(proposalId)
+      expect(votes[2]).to.eql(ethers.parseEther("63.245553202"))
     })
 
     it("Yes votes are counted correctly for quorum", async function () {
@@ -1289,6 +1401,65 @@ describe("Governor and TimeLock", function () {
       // Check if quorum is calculated correctly
       const isQuorumReached = await governor.quorumReached(proposalId)
       expect(isQuorumReached).to.equal(true)
+
+      // check yes votes are counted correctly
+      const votes = await governor.proposalVotes(proposalId)
+      // sqrt(1000) * 2 = 63.245553202 - scaled to 9 decimals
+      expect(votes[1]).to.eql(ethers.parseEther("63.245553202"))
+    })
+
+    it("Can get correct quadratic voting power", async function () {
+      const { governor, otherAccounts, b3tr, B3trContract } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      const voter = otherAccounts[0]
+      const voter2 = otherAccounts[1]
+      const voter3 = otherAccounts[2]
+      await getVot3Tokens(voter, "1000")
+      await getVot3Tokens(voter2, "1000")
+      await getVot3Tokens(voter3, "1000")
+      await waitForNextBlock()
+
+      // Create a proposal
+      const tx = await createProposal(
+        b3tr,
+        B3trContract,
+        voter,
+        description + ` ${this.test?.title}`,
+        functionToCall,
+        [],
+        false,
+      ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
+      const proposalId = await getProposalIdFromTx(tx)
+      const receipt = (await tx.wait()) as any
+      // wait
+      await waitForProposalToBeActive(proposalId)
+
+      const power1 = await governor.getQuadraticVotingPower(voter.address, receipt.blockNumber)
+      const power2 = await governor.getQuadraticVotingPower(voter2.address, receipt.blockNumber)
+      const power3 = await governor.getQuadraticVotingPower(voter3.address, receipt.blockNumber)
+
+      // vote
+      await governor.connect(voter).castVote(proposalId, 1) // vote yes
+      await governor.connect(voter2).castVote(proposalId, 1) // vote yes
+      await governor.connect(voter3).castVote(proposalId, 1) // vote yes
+
+      // wait
+      await waitForVotingPeriodToEnd(proposalId)
+
+      // Check if quorum is calculated correctly
+      const isQuorumReached = await governor.quorumReached(proposalId)
+      expect(isQuorumReached).to.equal(true)
+
+      // check yes votes are counted correctly
+      const votes = await governor.proposalVotes(proposalId)
+      // sqrt(1000) * 3 = 94.868329937 - scaled to 9 decimals
+      expect(votes[1]).to.eql(power1 + power2 + power3)
     })
   })
 

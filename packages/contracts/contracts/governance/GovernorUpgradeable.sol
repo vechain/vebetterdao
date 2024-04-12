@@ -15,6 +15,7 @@ import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import { ContextUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import { NoncesUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/NoncesUpgradeable.sol";
 import { IGovernor } from "../interfaces/IGovernor.sol";
+import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
@@ -33,6 +34,9 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
  * - removed voteStart block from ProposalCore
  * - abstract proposalSnapshot and proposalDeadline
  * - removed propose() and _propose()
+ * - updated _countVote() function signature to include power
+ * - updated _castVote() to calculate power as Math.sqrt(weight)
+ * - added isExecutable to ProposalCore
  */
 abstract contract GovernorUpgradeable is
   Initializable,
@@ -57,6 +61,7 @@ abstract contract GovernorUpgradeable is
     address proposer;
     uint256 roundIdVoteStart;
     uint32 voteDuration;
+    bool isExecutable;
     bool executed;
     bool canceled;
     uint48 etaSeconds;
@@ -284,6 +289,7 @@ abstract contract GovernorUpgradeable is
     address account,
     uint8 support,
     uint256 weight,
+    uint256 power,
     bytes memory params
   ) internal virtual;
 
@@ -599,12 +605,13 @@ abstract contract GovernorUpgradeable is
     _validateStateBitmap(proposalId, _encodeStateBitmap(ProposalState.Active));
 
     uint256 weight = _getVotes(account, proposalSnapshot(proposalId), params);
-    _countVote(proposalId, account, support, weight, params);
+    uint256 power = Math.sqrt(weight) * 1e9;
+    _countVote(proposalId, account, support, weight, power, params);
 
     if (params.length == 0) {
-      emit VoteCast(account, proposalId, support, weight, reason);
+      emit VoteCast(account, proposalId, support, weight, power, reason);
     } else {
-      emit VoteCastWithParams(account, proposalId, support, weight, reason, params);
+      emit VoteCastWithParams(account, proposalId, support, weight, power, reason, params);
     }
 
     return weight;

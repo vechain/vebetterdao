@@ -1,13 +1,19 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
-interface IB3TRBadge {
+interface IGalaxyMember {
   error AccessControlBadConfirmation();
 
   error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
 
+  error AddressEmptyCode(address target);
+
   error CheckpointUnorderedInsertion();
+
+  error ERC1967InvalidImplementation(address implementation);
+
+  error ERC1967NonPayable();
 
   error ERC5805FutureLookup(uint256 timepoint, uint48 clock);
 
@@ -37,13 +43,25 @@ interface IB3TRBadge {
 
   error ExpectedPause();
 
+  error FailedInnerCall();
+
+  error InvalidInitialization();
+
+  error NotInitializing();
+
+  error ReentrancyGuardReentrantCall();
+
   error SafeCastOverflowedUintDowncast(uint8 bits, uint256 value);
+
+  error UUPSUnauthorizedCallContext();
+
+  error UUPSUnsupportedProxiableUUID(bytes32 slot);
 
   event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);
 
   event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
 
-  event LevelOwnedChanged(address indexed owner, uint256 previousLevel, uint256 newLevel);
+  event Initialized(uint64 version);
 
   event Paused(address account);
 
@@ -53,9 +71,17 @@ interface IB3TRBadge {
 
   event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender);
 
+  event Selected(address indexed owner, uint256 tokenId);
+
+  event SelectedLevel(address indexed owner, uint256 oldLevel, uint256 newLevel);
+
   event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
 
   event Unpaused(address account);
+
+  event Upgraded(address indexed implementation);
+
+  event Upgraded(uint256 indexed tokenId, uint256 oldLevel, uint256 newLevel);
 
   function CLOCK_MODE() external view returns (string memory);
 
@@ -63,7 +89,13 @@ interface IB3TRBadge {
 
   function MAX_LEVEL() external view returns (uint256);
 
+  function UPGRADER_ROLE() external view returns (bytes32);
+
+  function UPGRADE_INTERFACE_VERSION() external view returns (string memory);
+
   function approve(address to, uint256 tokenId) external;
+
+  function b3tr() external view returns (address);
 
   function b3trGovernor() external view returns (address);
 
@@ -71,15 +103,25 @@ interface IB3TRBadge {
 
   function baseURI() external view returns (string memory);
 
+  function checkpoints(address account, uint32 pos) external view returns (Checkpoints.Checkpoint208 memory);
+
   function clock() external view returns (uint48);
 
   function freeMint() external;
 
   function getApproved(uint256 tokenId) external view returns (address);
 
-  function getLevel(address owner) external view returns (uint256);
+  function getB3TRtoUpgrade(uint256 tokenId) external view returns (uint256);
 
-  function getPastLevel(address owner, uint256 timepoint) external view returns (uint256);
+  function getB3TRtoUpgradeToLevel(uint256 level) external view returns (uint256);
+
+  function getHighestLevel(address owner) external view returns (uint256);
+
+  function getMaxMintableLevelOfXNode(uint8 xNodeType) external view returns (uint256);
+
+  function getNextLevel(uint256 tokenId) external view returns (uint256);
+
+  function getPastHighestLevel(address owner, uint256 timepoint) external view returns (uint256);
 
   function getRoleAdmin(bytes32 role) external view returns (bytes32);
 
@@ -87,9 +129,22 @@ interface IB3TRBadge {
 
   function hasRole(bytes32 role, address account) external view returns (bool);
 
+  function initialize(
+    string memory name,
+    string memory symbol,
+    address admin,
+    address upgrader,
+    uint256 maxLevel,
+    string memory baseTokenURI,
+    uint256[] memory xNodeMaxMintableLevels,
+    uint256[] memory b3trToUpgradeToLevel,
+    address _b3tr,
+    address _treasury
+  ) external;
+
   function isApprovedForAll(address owner, address operator) external view returns (bool);
 
-  function levelOf(uint256) external view returns (uint256);
+  function levelOf(uint256 tokenId) external view returns (uint256);
 
   function name() external view returns (string memory);
 
@@ -103,6 +158,8 @@ interface IB3TRBadge {
 
   function paused() external view returns (bool);
 
+  function proxiableUUID() external view returns (bytes32);
+
   function renounceRole(bytes32 role, address callerConfirmation) external;
 
   function revokeRole(bytes32 role, address account) external;
@@ -111,7 +168,11 @@ interface IB3TRBadge {
 
   function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) external;
 
+  function selectHighestLevel() external;
+
   function setApprovalForAll(address operator, bool approved) external;
+
+  function setB3TRtoUpgradeToLevel(uint256[] memory b3trToUpgradeToLevel) external;
 
   function setB3trGovernorAddress(address _b3trGovernor) external;
 
@@ -119,7 +180,7 @@ interface IB3TRBadge {
 
   function setMaxLevel(uint256 level) external;
 
-  function setMaxMintableLevels(uint256[] memory maxMintableLevels) external;
+  function setMaxMintableLevels(uint8[] memory maxMintableLevels) external;
 
   function setXAllocationsGovernorAddress(address _xAllocationsGovernor) external;
 
@@ -137,9 +198,20 @@ interface IB3TRBadge {
 
   function transferFrom(address from, address to, uint256 tokenId) external;
 
+  function treasury() external view returns (address);
+
   function unpause() external;
 
-  function xAllocationsGovernor() external view returns (address);
+  function upgrade(uint256 tokenId) external;
 
-  function xNodeTypeToMaxMintableLevel(uint8) external view returns (uint256);
+  function upgradeToAndCall(address newImplementation, bytes memory data) external payable;
+
+  function xAllocationsGovernor() external view returns (address);
+}
+
+interface Checkpoints {
+  struct Checkpoint208 {
+    uint48 _key;
+    uint208 _value;
+  }
 }

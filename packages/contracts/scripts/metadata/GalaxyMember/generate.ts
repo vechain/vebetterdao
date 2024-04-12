@@ -31,8 +31,8 @@ const levelAttributes: Record<string, string | number>[] = [
 const levelNames = ["VeBetterDAO Galaxy Member"]
 const description = "GM Earth is a community of people who participated in voting for the governance of VeBetter DAO."
 
-const METADATA_PATH = path.join(__dirname, "../../../metadata/badge/metadata")
-const IMAGE_PATH = path.join(__dirname, "../../../metadata/badge/images")
+const METADATA_PATH = path.join(__dirname, "../../../metadata/galaxyMember/metadata")
+const IMAGE_PATH = path.join(__dirname, "../../../metadata/galaxyMember/images")
 
 // NFT Storage
 const NFT_STORAGE_KEY = process.env.NEXT_PUBLIC_NFT_STORAGE_KEY ?? ""
@@ -94,7 +94,7 @@ async function generateAndSaveMetadata(): Promise<void> {
     // 1. Upload images to IPFS and get URL
     const [imagesIpfsUrl, images] = await uploadDirectoryToIPFS(IMAGE_PATH, NFT_STORAGE_KEY, levelAttributes.length)
 
-    console.log("B3TR Badge Images IPFS URL:", toIPFSURL(imagesIpfsUrl))
+    console.log("Galaxy Member Images IPFS URL:", toIPFSURL(imagesIpfsUrl))
 
     // 2. Generate metadata for each level
     for (let i = 0; i < levelAttributes.length; i++) {

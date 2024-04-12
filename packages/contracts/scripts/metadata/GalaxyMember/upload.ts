@@ -1,7 +1,7 @@
 import { uploadMetadataToIpfs } from "../../helpers/uploadFolderToIpfs"
 import path from "path"
 
-const METADATA_PATH = path.join(__dirname, "../../../metadata/badge/metadata")
+const METADATA_PATH = path.join(__dirname, "../../../metadata/galaxyMember/metadata")
 
 uploadMetadataToIpfs(METADATA_PATH)
   .then(() => process.exit(0))
