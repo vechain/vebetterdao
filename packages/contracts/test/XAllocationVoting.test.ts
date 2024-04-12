@@ -17,6 +17,7 @@ import {
   waitForVotingPeriodToEnd,
   bootstrapAndStartEmissions,
   waitForCurrentRoundToEnd,
+  ZERO_ADDRESS,
 } from "./helpers"
 import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
@@ -161,6 +162,28 @@ describe("X-Allocation Voting", function () {
       const newImplAddress = await getImplementationAddress(ethers.provider, await xAllocationVoting.getAddress())
       expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
     })
+
+    it("Cannot initialize twice", async function () {
+      const { owner, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await catchRevert(
+        xAllocationVoting.initialize({
+          vot3Token: owner.address,
+          quorumPercentage: 1,
+          initialVotingPeriod: 1,
+          b3trGovernor: owner.address,
+          voterRewards: owner.address,
+          emissions: owner.address,
+          admins: [owner.address],
+          upgrader: owner.address,
+          xAppsBaseURI: "ipfs://",
+          baseAllocationPercentage: 2,
+          appSharesCap: 2,
+        }),
+      )
+    })
   })
 
   describe("Settings", function () {
@@ -179,6 +202,16 @@ describe("X-Allocation Voting", function () {
 
       const updatedAddress = await xAllocationVoting.b3trGovernor()
       expect(updatedAddress).to.eql(otherAccounts[3].address)
+    })
+
+    it("Cannot set 0x00 address as B3trGovernanceAddress", async function () {
+      const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: false })
+
+      await catchRevert(xAllocationVoting.connect(owner).setB3trGovernanceAddress(ZERO_ADDRESS))
+
+      const updatedAddress = await xAllocationVoting.b3trGovernor()
+
+      expect(updatedAddress).to.not.eql(ZERO_ADDRESS)
     })
 
     it("Only admin should be able to change B3trGovernanceAddress", async function () {
@@ -286,6 +319,82 @@ describe("X-Allocation Voting", function () {
 
       const afterVotingPeriod = await xAllocationVoting.votingPeriod()
       expect(afterVotingPeriod).to.eql(beforeVotingPeriod)
+    })
+
+    it("Admin can set a new admin", async function () {
+      const { xAllocationVoting, owner, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      const ADMIN_ROLE = await xAllocationVoting.DEFAULT_ADMIN_ROLE()
+      expect(await xAllocationVoting.hasRole(ADMIN_ROLE, otherAccounts[0].address)).to.eql(false)
+      expect(await xAllocationVoting.hasRole(ADMIN_ROLE, owner.address)).to.eql(true)
+
+      await xAllocationVoting.connect(owner).setAdminRole(otherAccounts[0].address)
+
+      expect(await xAllocationVoting.hasRole(ADMIN_ROLE, otherAccounts[0].address)).to.eql(true)
+    })
+
+    it("Admin cannot set zero address as admin", async function () {
+      const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      const ADMIN_ROLE = await xAllocationVoting.DEFAULT_ADMIN_ROLE()
+      expect(await xAllocationVoting.hasRole(ADMIN_ROLE, owner.address)).to.eql(true)
+
+      await expect(xAllocationVoting.connect(owner).setAdminRole(ZERO_ADDRESS)).to.be.reverted
+    })
+
+    it("Only admin can set a new admin", async function () {
+      const { xAllocationVoting, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      const ADMIN_ROLE = await xAllocationVoting.DEFAULT_ADMIN_ROLE()
+      expect(await xAllocationVoting.hasRole(ADMIN_ROLE, otherAccounts[0].address)).to.eql(false)
+
+      await expect(xAllocationVoting.connect(otherAccounts[0]).setAdminRole(otherAccounts[0].address)).to.be.reverted
+    })
+
+    it("Admin can change allocation percentage", async function () {
+      const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      const initialPercentage = await xAllocationVoting.baseAllocationPercentage()
+
+      await xAllocationVoting.connect(owner).setBaseAllocationPercentage(3)
+
+      const updatedPercentage = await xAllocationVoting.baseAllocationPercentage()
+      expect(updatedPercentage).to.eql(3n)
+      expect(updatedPercentage).to.not.eql(initialPercentage)
+    })
+
+    it("Only admin can change allocation percentage", async function () {
+      const { xAllocationVoting, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      const initialPercentage = await xAllocationVoting.baseAllocationPercentage()
+
+      await expect(xAllocationVoting.connect(otherAccounts[0]).setBaseAllocationPercentage(3)).to.be.reverted
+
+      const updatedPercentage = await xAllocationVoting.baseAllocationPercentage()
+      expect(updatedPercentage).to.eql(initialPercentage)
+    })
+
+    it("Admin can change app shares cap", async function () {
+      const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      const initialCap = await xAllocationVoting.appSharesCap()
+
+      await xAllocationVoting.connect(owner).setAppSharesCap(3)
+
+      const updatedCap = await xAllocationVoting.appSharesCap()
+      expect(updatedCap).to.eql(3n)
+      expect(updatedCap).to.not.eql(initialCap)
+    })
+
+    it("Only admin can change app shares cap", async function () {
+      const { xAllocationVoting, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      const initialCap = await xAllocationVoting.appSharesCap()
+
+      await expect(xAllocationVoting.connect(otherAccounts[0]).setAppSharesCap(3)).to.be.reverted
+
+      const updatedCap = await xAllocationVoting.appSharesCap()
+      expect(updatedCap).to.eql(initialCap)
     })
   })
 
