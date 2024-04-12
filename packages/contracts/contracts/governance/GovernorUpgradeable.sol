@@ -766,12 +766,12 @@ abstract contract GovernorUpgradeable is
   /**
    * @dev See {IGovernor-proposalSnapshot}.
    */
-  function proposalSnapshot(uint256 proposalId) public view virtual override returns (uint256);
+  function proposalSnapshot(uint256 proposalId) public view virtual returns (uint256);
 
   /**
    * @dev See {IGovernor-proposalDeadline}.
    */
-  function proposalDeadline(uint256 proposalId) public view virtual override returns (uint256);
+  function proposalDeadline(uint256 proposalId) public view virtual returns (uint256);
 
   /**
    * @dev See {IGovernor-state}.

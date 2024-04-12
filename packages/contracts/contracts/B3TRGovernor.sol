@@ -330,10 +330,11 @@ contract B3TRGovernor is
 
   /**
    * @dev See {IGovernor-state}.
+   *
+   * This function is the copy of what was inside GovernorUpgradeable plus the copy of GovernorTimelockControlUpgradeable (when it ends up in QUEUED state),
+   * modified however to check the PENDING state based on roundId instead of based on the snapshot block.
    */
-  function state(
-    uint256 proposalId
-  ) public view virtual override(GovernorUpgradeable, GovernorTimelockControlUpgradeable) returns (ProposalState) {
+  function state(uint256 proposalId) public view virtual override returns (ProposalState) {
     GovernorStorage storage $ = _getGovernorStorage();
     // We read the struct fields into the stack at once so Solidity emits a single SLOAD
     ProposalCore storage proposal = $._proposals[proposalId];
@@ -368,7 +369,18 @@ contract B3TRGovernor is
     } else if (proposalEta(proposalId) == 0) {
       return ProposalState.Succeeded;
     } else {
-      return ProposalState.Queued;
+      // Forked from GovernorTimelockControlUpgradeable:state OZ implementation
+      GovernorTimelockControlStorage storage $$ = _getGovernorTimelockControlStorage();
+      bytes32 queueid = $$._timelockIds[proposalId];
+      if ($$._timelock.isOperationPending(queueid)) {
+        return ProposalState.Queued;
+      } else if ($$._timelock.isOperationDone(queueid)) {
+        // This can happen if the proposal is executed directly on the timelock.
+        return ProposalState.Executed;
+      } else {
+        // This can happen if the proposal is canceled directly on the timelock.
+        return ProposalState.Canceled;
+      }
     }
   }
 
