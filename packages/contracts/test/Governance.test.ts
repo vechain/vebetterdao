@@ -1025,6 +1025,86 @@ describe("Governor and TimeLock", function () {
       // Now we can create a proposal
       await createProposal(b3tr, B3trContract, otherAccount, description, functionToCall, [], false)
     })
+
+    it("Can correctly check description restriction", async () => {
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // throw new Error("Not implemented")
+      // with protection via proposer suffix
+      const address = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+      const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 2n // starts 2 rounds from now
+      await expect(
+        governor
+          .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+          .propose(
+            [address],
+            [0],
+            [encodedFunctionCall],
+            "#proposer=" + proposer.address,
+            voteStartsInRoundId.toString(),
+            {
+              gasLimit: 10_000_000,
+            },
+          ),
+      ).to.not.be.reverted
+
+      // with proposer suffix but bad address part (XYZ are not a valid hex char)
+      await expect(
+        governor
+          .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+          .propose(
+            [address],
+            [0],
+            [encodedFunctionCall],
+            "#proposer=0x3C44CdDdB6a900fa2b585dd299e03d12FA429XYZ",
+            voteStartsInRoundId.toString(),
+            {
+              gasLimit: 10_000_000,
+            },
+          ),
+      ).to.not.be.reverted
+
+      // with wrong suffix
+      await expect(
+        governor
+          .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+          .propose(
+            [address],
+            [0],
+            [encodedFunctionCall],
+            "#wrong-suffix=" + proposer.address,
+            voteStartsInRoundId.toString(),
+            {
+              gasLimit: 10_000_000,
+            },
+          ),
+      ).to.not.be.reverted
+
+      // with protection via proposer suffix but wrong proposer
+      await expect(
+        governor
+          .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+          .propose(
+            [address],
+            [0],
+            [encodedFunctionCall],
+            "#proposer=" + otherAccounts[1].address,
+            voteStartsInRoundId.toString(),
+            {
+              gasLimit: 10_000_000,
+            },
+          ),
+      ).to.be.reverted
+    })
   })
 
   // the tests described in this section cannot be run in isolation, but need to run in cascade
