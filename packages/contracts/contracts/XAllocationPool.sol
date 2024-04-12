@@ -238,7 +238,7 @@ contract XAllocationPool is
   }
 
   /**
-   * @dev Returns the scaled percentage of votes for a given app in a given round.
+   * @dev Returns the scaled quadratic funding percentage of votes for a given app in a given round.
    *
    * The maximum of each project is X% of the 70% of allocations (from the previous point).
    * That means there will be a cap to how much each x-app will be able to receive each round.
@@ -257,13 +257,15 @@ contract XAllocationPool is
       return (0, 0);
     }
 
-    uint256 totalVotes = xAllocationVoting().totalVotes(roundId);
-    uint256 appVotes = xAllocationVoting().getAppVotes(roundId, appId);
+    uint256 totalVotesQF = xAllocationVoting().totalVotesQF(roundId);
+    uint256 appVotesQF = xAllocationVoting().getAppVotesQF(roundId, appId);
+    
+    uint256 appVotesQFValue = appVotesQF * appVotesQF;
 
     // avoid division by zero
-    if (totalVotes == 0) return (0, 0);
+    if (appVotesQFValue == 0) return (0, 0);
 
-    uint256 appShare = (appVotes * percentagePrecisionScalingFactor) / totalVotes;
+    uint256 appShare = (appVotesQFValue * percentagePrecisionScalingFactor) / totalVotesQF;
 
     // This is the amount unallocated if appShare is greater than max cap, this will be sent to treasury
     uint256 unallocatedShare = 0;

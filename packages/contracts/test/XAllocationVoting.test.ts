@@ -163,7 +163,7 @@ describe("X-Allocation Voting", function () {
     })
   })
 
-  describe("Settings", function () {
+   describe("Settings", function () {
     it("Should be able to change B3trGovernanceAddress with admin role", async function () {
       const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: false,
@@ -1263,6 +1263,111 @@ describe("X-Allocation Voting", function () {
 
       let isFinalized = await xAllocationVoting.isFinalized(round1)
       expect(isFinalized).to.eql(false)
+    })
+  })
+
+  describe("Quadratic Funding", function () {
+    it("Can get the correct QF app votes", async function () {
+      const { xAllocationVoting, otherAccounts, owner, b3tr, emissions, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      otherAccounts.forEach(async account => {
+        await getVot3Tokens(account, "10000")
+      })
+
+      //Add apps
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
+      const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
+
+      //Start allocation round
+      const round1 = await startNewAllocationRound(xAllocationVoting)
+      // Vote
+      await xAllocationVoting
+        .connect(otherAccounts[1])
+        .castVote(
+          round1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[2])
+        .castVote(
+          round1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("500"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[3])
+        .castVote(
+          round1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("100"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[4])
+        .castVote(round1, [app2Id, app3Id], [ethers.parseEther("100"), ethers.parseEther("100")])
+
+      await xAllocationVoting
+        .connect(otherAccounts[5])
+        .castVote(
+          round1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("1000"), ethers.parseEther("0"), ethers.parseEther("100")],
+        )
+
+      await waitForRoundToEnd(round1, xAllocationVoting)
+
+      const expectedUnsquaredVotesApp1 = Math.sqrt(0) + Math.sqrt(0) + Math.sqrt(0) + Math.sqrt(0) + Math.sqrt(1000)
+      const app1VotesQF = await xAllocationVoting.getAppVotesQF(round1, app1Id)
+      // sqrt of 10^18 is 10^9 hence we need to divide by 10^9
+      expect(app1VotesQF).to.equal(ethers.parseEther(expectedUnsquaredVotesApp1.toString()) / 1000000000n)
+
+      const expectedUnsquaredVotesApp2 =
+        Math.sqrt(900) + Math.sqrt(500) + Math.sqrt(100) + Math.sqrt(100) + Math.sqrt(0)
+      const app2VotesQF = await xAllocationVoting.getAppVotesQF(round1, app2Id)
+      expect(app2VotesQF).to.equal(ethers.parseEther(expectedUnsquaredVotesApp2.toString()) / 1000000000n)
+
+      const expectedUnsquaredVotesApp3 =
+        Math.sqrt(100) + Math.sqrt(100) + Math.sqrt(100) + Math.sqrt(100) + Math.sqrt(100)
+      const app3VotesQF = await xAllocationVoting.getAppVotesQF(round1, app3Id)
+      expect(app3VotesQF).to.equal(ethers.parseEther(expectedUnsquaredVotesApp3.toString()) / 1000000000n)
+
+      const expectedTotalVotesQF =
+        expectedUnsquaredVotesApp1 ** 2 + expectedUnsquaredVotesApp2 ** 2 + expectedUnsquaredVotesApp3 ** 2
+      const totalVotes = await xAllocationVoting.totalVotesQF(round1)
+
+      expect(Number(ethers.formatEther(totalVotes)).toFixed(6)).to.equal(expectedTotalVotesQF.toFixed(6))
+
+      const expectedAppShare1 = expectedUnsquaredVotesApp1 ** 2 / expectedTotalVotesQF
+      const appShare1 = Number(app1VotesQF) ** 2 / Number(totalVotes)
+      expect(appShare1.toFixed(6)).to.equal(expectedAppShare1.toFixed(6))
+      expect(appShare1.toFixed(4)).to.equal("0.1145") // 11.45% of the total votes
+
+      const expectedAppShare2 = expectedUnsquaredVotesApp2 ** 2 / expectedTotalVotesQF
+      const appShare2 = Number(app2VotesQF) ** 2 / Number(totalVotes)
+      expect(appShare2.toFixed(6)).to.equal(expectedAppShare2.toFixed(6))
+      expect(appShare2.toFixed(4)).to.equal("0.5994") // 59.94% of the total votes
+
+      const expectedAppShare3 = expectedUnsquaredVotesApp3 ** 2 / expectedTotalVotesQF
+      const appShare3 = Number(app3VotesQF) ** 2 / Number(totalVotes)
+      expect(appShare3.toFixed(6)).to.equal(expectedAppShare3.toFixed(6))
+      expect(appShare3.toFixed(4)).to.equal("0.2862") // 28.61% of the total votes
     })
   })
 
