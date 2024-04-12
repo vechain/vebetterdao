@@ -24,6 +24,7 @@ contract GalaxyMember is
   ERC721Upgradeable,
   ERC721EnumerableUpgradeable,
   ERC721PausableUpgradeable,
+  ERC721BurnableUpgradeable,
   AccessControlUpgradeable,
   IERC6372,
   ReentrancyGuardUpgradeable,
@@ -126,6 +127,7 @@ contract GalaxyMember is
     __ERC721_init(name, symbol);
     __ERC721Enumerable_init();
     __ERC721Pausable_init();
+    __ERC721Burnable_init();
     __AccessControl_init();
     __ReentrancyGuard_init();
     __UUPSUpgradeable_init();
@@ -219,6 +221,11 @@ contract GalaxyMember is
     _safeMint(to, tokenId);
   }
 
+  function burn(uint256 tokenId) public override(ERC721BurnableUpgradeable) {
+    require(ownerOf(tokenId) == msg.sender, "Galaxy Member: caller is not the owner of the token");
+    super.burn(tokenId);
+  }
+
   // ----------- Internal & Private ----------- //
 
   /**
@@ -300,8 +307,10 @@ contract GalaxyMember is
   // ---------- Setters ---------- //
 
   function setMaxLevel(uint256 level) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(level > 0, "Galaxy Member: Max level must be greater than 0");
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
+
+    require(level > $.MAX_LEVEL, "Galaxy Member: Max level must be greater than the current max level");
+
     $.MAX_LEVEL = level;
   }
 
