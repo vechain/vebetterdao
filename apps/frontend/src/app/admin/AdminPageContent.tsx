@@ -20,7 +20,7 @@ export const AdminPageContent = () => {
   }, [])
 
   const { account } = useWallet()
-  const { isAdminOfB3tr, isAdminOfEmissions, isAdminOfXAllocationVoting, isAdminOfVot3, isAdminOfB3trBadge, isAdmin } =
+  const { isAdminOfB3tr, isAdminOfEmissions, isAdminOfXAllocationVoting, isAdminOfVot3, isAdminOfGalaxyMember, isAdmin } =
     useAccountPermissions(account ?? "")
 
   return (
@@ -69,7 +69,7 @@ export const AdminPageContent = () => {
         </CardBody>
       </Card>
 
-      {(isAdminOfB3trBadge || isAdminOfB3tr || isAdminOfVot3) && (
+      {(isAdminOfGalaxyMember || isAdminOfB3tr || isAdminOfVot3) && (
         <Card w={"full"}>
           <CardHeader>
             <Heading size="lg">Pausing</Heading>

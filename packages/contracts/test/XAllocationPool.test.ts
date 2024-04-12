@@ -14,6 +14,8 @@ import {
 } from "./helpers"
 import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
+import { XAllocationPoolJson } from ".."
+import { createLocalConfig } from "@repo/config/contracts/envs/local"
 
 describe("X-Allocation Pool", async function () {
   describe("Contract upgradeablity", () => {
@@ -859,6 +861,245 @@ describe("X-Allocation Pool", async function () {
       let expectedVariableAllocationR2App1 = await calculateVariableAppAllocationOffChain(Number(round2), app1Id)
       let claimableRewardsR2App1 = await xAllocationPool.roundEarnings(round2, app1Id)
       expect(claimableRewardsR2App1[0]).to.eql(expectedVariableAllocationR2App1 + expectedBaseAllocationR2)
+    })
+
+    it("Should calculate correct app shares with Quadratic funding distrubiton with max cap at 20%", async function () {
+      const { xAllocationVoting, otherAccounts, owner, b3tr, emissions, minterAccount, xAllocationPool } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      otherAccounts.forEach(async account => {
+        await getVot3Tokens(account, "10000")
+      })
+
+      //Add apps
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
+      const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))
+
+      //Start allocation round
+      const round1 = await startNewAllocationRound(xAllocationVoting)
+      // Vote
+      await xAllocationVoting
+        .connect(otherAccounts[1])
+        .castVote(
+          round1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[2])
+        .castVote(
+          round1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("500"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[3])
+        .castVote(
+          round1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("100"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[4])
+        .castVote(
+          round1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("100"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[5])
+        .castVote(
+          round1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("1000"), ethers.parseEther("0"), ethers.parseEther("100")],
+        )
+
+      await waitForRoundToEnd(round1, xAllocationVoting)
+
+      const app1Shares = await xAllocationPool.getAppShares(round1, app1Id)
+      const app2Shares = await xAllocationPool.getAppShares(round1, app2Id)
+      const app3Shares = await xAllocationPool.getAppShares(round1, app3Id)
+
+      expect(app1Shares[0]).to.eql(1144n)
+      expect(app2Shares[0]).to.eql(2000n) // reached cap would be 59.94% of the total votes
+      expect(app3Shares[0]).to.eql(2000n) // reached cap would be 28.61% of the total votes
+    })
+
+    it("Should calculate correct app shares with Quadratic funding distrubiton with no max cap", async function () {
+      const config = createLocalConfig()
+      config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP = 100
+      const { xAllocationVoting, otherAccounts, owner, b3tr, emissions, minterAccount, xAllocationPool } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      otherAccounts.forEach(async account => {
+        await getVot3Tokens(account, "10000")
+      })
+
+      //Add apps
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
+      const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app", "metadataURI")
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[4].address, otherAccounts[4].address, "My app #2", "metadataURI")
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[5].address, otherAccounts[5], "My app #3", "metadataURI")
+
+      //Start allocation round
+      const round1 = await startNewAllocationRound(xAllocationVoting)
+      // Vote
+      await xAllocationVoting
+        .connect(otherAccounts[1])
+        .castVote(
+          round1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[2])
+        .castVote(
+          round1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("500"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[3])
+        .castVote(
+          round1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("100"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[4])
+        .castVote(
+          round1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("100"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[5])
+        .castVote(
+          round1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("1000"), ethers.parseEther("0"), ethers.parseEther("100")],
+        )
+
+      await waitForRoundToEnd(round1, xAllocationVoting)
+
+      const app1Shares = await xAllocationPool.getAppShares(round1, app1Id)
+      const app2Shares = await xAllocationPool.getAppShares(round1, app2Id)
+      const app3Shares = await xAllocationPool.getAppShares(round1, app3Id)
+
+      expect(app1Shares[0]).to.eql(1144n)
+      expect(app2Shares[0]).to.eql(5993n) // reached cap would be 59.94% of the total votes
+      expect(app3Shares[0]).to.eql(2861n) // reached cap would be 28.61% of the total votes
+    })
+
+    it("Should give correct rewards based with Quadratic Funding", async function () {
+      const config = createLocalConfig()
+      config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP = 100
+      config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE = 0
+      config.INITIAL_X_ALLOCATION = 10000n
+      const { xAllocationVoting, otherAccounts, owner, b3tr, emissions, minterAccount, xAllocationPool } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+
+      otherAccounts.forEach(async account => {
+        await getVot3Tokens(account, "10000")
+      })
+
+      //Add apps
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
+      const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app", "metadataURI")
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[4].address, otherAccounts[4].address, "My app #2", "metadataURI")
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[5].address, otherAccounts[5].address, "My app #3", "metadataURI")
+
+      //Start allocation round
+      const round1 = await startNewAllocationRound(xAllocationVoting)
+      // Vote
+      await xAllocationVoting
+        .connect(otherAccounts[1])
+        .castVote(
+          round1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[2])
+        .castVote(
+          round1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("500"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[3])
+        .castVote(
+          round1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("100"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[4])
+        .castVote(
+          round1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("100"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[5])
+        .castVote(
+          round1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("1000"), ethers.parseEther("0"), ethers.parseEther("100")],
+        )
+
+      await waitForRoundToEnd(round1, xAllocationVoting)
+
+      const app1app1Earnings = await xAllocationPool.roundEarnings(round1, app1Id)
+      const app2app2Earnings = await xAllocationPool.roundEarnings(round1, app2Id)
+      const app3app3Earnings = await xAllocationPool.roundEarnings(round1, app3Id)
+
+      expect(app1app1Earnings[0]).to.eql(1144n)
+      expect(app2app2Earnings[0]).to.eql(5993n)
+      expect(app3app3Earnings[0]).to.eql(2861n)
     })
   })
 

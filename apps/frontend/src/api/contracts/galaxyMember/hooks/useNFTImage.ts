@@ -17,7 +17,7 @@ export const useNFTImage = () => {
     isLoading: isLoadingTokenID,
     isError: isErrorTokenID,
     error: errorTokenID,
-  } = useTokenIdByAccount(account)
+  } = useTokenIdByAccount(account, 0)
 
   const {
     data: metadataURI,

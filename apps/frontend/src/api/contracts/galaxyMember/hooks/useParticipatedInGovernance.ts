@@ -1,15 +1,17 @@
 import { useQuery } from "@tanstack/react-query"
 import { getConfig } from "@repo/config"
 import { useConnex } from "@vechain/dapp-kit-react"
-import { B3TRBadge__factory } from "@repo/contracts"
+import { GalaxyMember__factory } from "@repo/contracts"
 
-const B3TR_BADGE_CONTRACT = getConfig().nftBadgeContractAddress
+const GALAXY_MEMBER_CONTRACT = getConfig().galaxyMemberContractAddress
 
 export const getParticipatedInGovernance = async (thor: Connex.Thor, address: null | string) => {
   if (!address) return Promise.reject(new Error("Address not provided"))
 
-  const functionFragment = B3TRBadge__factory.createInterface().getFunction("participatedInGovernance").format("json")
-  const res = await thor.account(B3TR_BADGE_CONTRACT).method(JSON.parse(functionFragment)).call(address)
+  const functionFragment = GalaxyMember__factory.createInterface()
+    .getFunction("participatedInGovernance")
+    .format("json")
+  const res = await thor.account(GALAXY_MEMBER_CONTRACT).method(JSON.parse(functionFragment)).call(address)
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
@@ -18,14 +20,15 @@ export const getParticipatedInGovernance = async (thor: Connex.Thor, address: nu
 
 export const getParticipatedInGovernanceQueryKey = (address: null | string) => [
   "participatedInGovernance",
-  "b3trBadge",
+  "galaxyMember",
   address,
 ]
 
 /**
- * Get the number of b3tr badges for an address
- * @param address the address to get the number of b3tr badges for
- * @returns the number of b3tr badges for the address
+ * Get whether an address has participated in governance
+ *
+ * @param address the address to know if they have participated in governance
+ * @returns whether the address has participated in governance
  */
 export const useParticipatedInGovernance = (address: null | string) => {
   const { thor } = useConnex()

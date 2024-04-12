@@ -39,7 +39,7 @@ export function createTestConfig() {
       ThunderX => 6,
       MjolnirX => 7,
     */
-    NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS: [2, 4, 6, 2, 4, 6, 7],
+    GM_NFT_X_NODE_UPGRADEABLE_LEVELS: [2, 4, 6, 2, 4, 6, 7],
 
     /*
         Level => B3TR Required
@@ -54,7 +54,7 @@ export function createTestConfig() {
         9 (Neptune) => 5,000,000 B3TR
         10 (Galaxy) => 25,000,000 B3TR
       */
-    NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL: [
+    GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL: [
       10000000000000000000000n,
       25000000000000000000000n,
       50000000000000000000000n,
@@ -66,7 +66,7 @@ export function createTestConfig() {
       25000000000000000000000000n,
     ],
 
-    NFT_BADGE_BASE_URI: "ipfs://test/", // IPFS base URI for the NFT Badge
+    GM_NFT_BASE_URI: "ipfs://test/", // IPFS base URI for the Galaxy Member contract
 
     VOTER_REWARDS_LEVELS: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
 
