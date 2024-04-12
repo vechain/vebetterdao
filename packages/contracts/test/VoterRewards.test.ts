@@ -23,16 +23,16 @@ import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { createTestConfig } from "./helpers/config"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployProxy } from "../scripts/helpers"
-import { B3TRBadge } from "../typechain-types"
+import { GalaxyMember } from "../typechain-types"
 
 describe("VoterRewards", () => {
   describe("Contract parameters", () => {
     it("Should have correct parameters set on deployment", async () => {
-      const { voterRewards, owner, b3trBadge, emissions } = await getOrDeployContractInstances({ forceDeploy: true })
+      const { voterRewards, owner, galaxyMember, emissions } = await getOrDeployContractInstances({ forceDeploy: true })
 
       // Contract address checks
       expect(await voterRewards.emissions()).to.equal(await emissions.getAddress())
-      expect(await voterRewards.b3trBadge()).to.equal(await b3trBadge.getAddress())
+      expect(await voterRewards.galaxyMember()).to.equal(await galaxyMember.getAddress())
 
       // Admin role
       expect(await voterRewards.hasRole(await voterRewards.DEFAULT_ADMIN_ROLE(), owner.address)).to.equal(true)
@@ -56,17 +56,17 @@ describe("VoterRewards", () => {
       await expect(voterRewards.connect(otherAccount).setEmissions(otherAccount.address)).to.be.reverted
     })
 
-    it("Should be able to set new badge contract", async () => {
+    it("Should be able to set new Galaxy Member contract", async () => {
       const { voterRewards, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
 
-      await voterRewards.connect(owner).setB3TRBadge(otherAccount.address)
-      expect(await voterRewards.b3trBadge()).to.equal(otherAccount.address)
+      await voterRewards.connect(owner).setGalaxyMember(otherAccount.address)
+      expect(await voterRewards.galaxyMember()).to.equal(otherAccount.address)
     })
 
-    it("Should not be able to set new badge contract if not admin", async () => {
+    it("Should not be able to set new Galaxy Member contract if not admin", async () => {
       const { voterRewards, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
 
-      await expect(voterRewards.connect(otherAccount).setB3TRBadge(otherAccount.address)).to.be.reverted
+      await expect(voterRewards.connect(otherAccount).setGalaxyMember(otherAccount.address)).to.be.reverted
     })
   })
 
@@ -561,24 +561,24 @@ describe("VoterRewards", () => {
         forceDeploy: true,
       })
 
-      const b3trBadge = (await deployProxy("B3TRBadge", [
-        "b3trBadge",
-        "BDG",
+      const galaxyMember = (await deployProxy("GalaxyMember", [
+        "galaxyMember",
+        "GM",
         await owner.getAddress(),
         await owner.getAddress(),
         10,
-        config.NFT_BADGE_BASE_URI,
-        config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
-        config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+        config.GM_NFT_BASE_URI,
+        config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
+        config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
         await b3tr.getAddress(),
         await treasury.getAddress(),
-      ])) as B3TRBadge
+      ])) as GalaxyMember
 
-      await b3trBadge.waitForDeployment()
+      await galaxyMember.waitForDeployment()
 
-      await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
-      await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
-      await voterRewards.setB3TRBadge(await b3trBadge.getAddress())
+      await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+      await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+      await voterRewards.setGalaxyMember(await galaxyMember.getAddress())
 
       await xAllocationVoting
         .connect(owner)
@@ -628,18 +628,18 @@ describe("VoterRewards", () => {
       await waitForNextCycle()
 
       // GM NFT token mint and upgrade
-      await b3trBadge.connect(voter1).freeMint()
+      await galaxyMember.connect(voter1).freeMint()
 
-      await upgradeNFTtoLevel(1, 5, b3trBadge, b3tr, voter1, minterAccount) // Upgrading to level 5
+      await upgradeNFTtoLevel(1, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
 
-      expect(await b3trBadge.getHighestLevel(voter1.address)).to.equal(5)
+      expect(await galaxyMember.getHighestLevel(voter1.address)).to.equal(5)
 
       // Second round
       await emissions.connect(voter1).distribute() // Anyone can distribute the cycle
 
       await waitForNextBlock()
 
-      expect(await b3trBadge.getPastHighestLevel(voter1.address, await xAllocationVoting.roundSnapshot(2))).to.equal(5)
+      expect(await galaxyMember.getPastHighestLevel(voter1.address, await xAllocationVoting.roundSnapshot(2))).to.equal(5)
 
       const roundId2 = await xAllocationVoting.currentRoundId()
 
@@ -682,24 +682,24 @@ describe("VoterRewards", () => {
         forceDeploy: true,
       })
 
-      const b3trBadge = (await deployProxy("B3TRBadge", [
-        "b3trBadge",
+      const galaxyMember = (await deployProxy("GalaxyMember", [
+        "galaxyMember",
         "BDG",
         await owner.getAddress(),
         await owner.getAddress(),
         10,
-        config.NFT_BADGE_BASE_URI,
-        config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
-        config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+        config.GM_NFT_BASE_URI,
+        config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
+        config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
         await b3tr.getAddress(),
         await treasury.getAddress(),
-      ])) as B3TRBadge
+      ])) as GalaxyMember
 
-      await b3trBadge.waitForDeployment()
+      await galaxyMember.waitForDeployment()
 
-      await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
-      await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
-      await voterRewards.setB3TRBadge(await b3trBadge.getAddress())
+      await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+      await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+      await voterRewards.setGalaxyMember(await galaxyMember.getAddress())
 
       await xAllocationVoting
         .connect(owner)
@@ -752,13 +752,13 @@ describe("VoterRewards", () => {
       await emissions.connect(voter1).distribute() // Anyone can distribute the cycle
 
       // GM NFT token mint and upgrade
-      await b3trBadge.connect(voter1).freeMint()
+      await galaxyMember.connect(voter1).freeMint()
 
-      await upgradeNFTtoLevel(1, 2, b3trBadge, b3tr, voter1, minterAccount) // Upgrading to level 2
+      await upgradeNFTtoLevel(1, 2, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 2
 
-      expect(await b3trBadge.getHighestLevel(voter1.address)).to.equal(2)
+      expect(await galaxyMember.getHighestLevel(voter1.address)).to.equal(2)
 
-      expect(await b3trBadge.getPastHighestLevel(voter1.address, await xAllocationVoting.roundSnapshot(2))).to.equal(0) // Voter 1 upgraded after the round snapshot so he results in not having a level for the round
+      expect(await galaxyMember.getPastHighestLevel(voter1.address, await xAllocationVoting.roundSnapshot(2))).to.equal(0) // Voter 1 upgraded after the round snapshot so he results in not having a level for the round
 
       const roundId2 = await xAllocationVoting.currentRoundId()
 
@@ -802,24 +802,24 @@ describe("VoterRewards", () => {
         config,
       })
 
-      const b3trBadge = (await deployProxy("B3TRBadge", [
-        "b3trBadge",
-        "BDG",
+      const galaxyMember = (await deployProxy("GalaxyMember", [
+        "galaxyMember",
+        "GM",
         await owner.getAddress(),
         await owner.getAddress(),
         10,
-        config.NFT_BADGE_BASE_URI,
-        config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
-        config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+        config.GM_NFT_BASE_URI,
+        config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
+        config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
         await b3tr.getAddress(),
         await treasury.getAddress(),
-      ])) as B3TRBadge
+      ])) as GalaxyMember
 
-      await b3trBadge.waitForDeployment()
+      await galaxyMember.waitForDeployment()
 
-      await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
-      await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
-      await voterRewards.setB3TRBadge(await b3trBadge.getAddress())
+      await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+      await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+      await voterRewards.setGalaxyMember(await galaxyMember.getAddress())
 
       await xAllocationVoting
         .connect(owner)
@@ -869,23 +869,23 @@ describe("VoterRewards", () => {
       await waitForNextCycle()
 
       // GM NFT token mint and upgrade
-      await b3trBadge.connect(voter1).freeMint()
+      await galaxyMember.connect(voter1).freeMint()
 
-      await upgradeNFTtoLevel(1, 5, b3trBadge, b3tr, voter1, minterAccount) // Upgrading to level 5
+      await upgradeNFTtoLevel(1, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
 
-      expect(await b3trBadge.getHighestLevel(voter1.address)).to.equal(5)
+      expect(await galaxyMember.getHighestLevel(voter1.address)).to.equal(5)
 
-      await b3trBadge.connect(voter2).freeMint()
+      await galaxyMember.connect(voter2).freeMint()
 
-      await upgradeNFTtoLevel(2, 10, b3trBadge, b3tr, voter2, minterAccount) // Upgrading to level 10
+      await upgradeNFTtoLevel(2, 10, galaxyMember, b3tr, voter2, minterAccount) // Upgrading to level 10
 
-      expect(await b3trBadge.getHighestLevel(voter2.address)).to.equal(10)
+      expect(await galaxyMember.getHighestLevel(voter2.address)).to.equal(10)
 
-      await b3trBadge.connect(voter3).freeMint()
+      await galaxyMember.connect(voter3).freeMint()
 
-      await upgradeNFTtoLevel(3, 2, b3trBadge, b3tr, voter3, minterAccount) // Upgrading to level 2
+      await upgradeNFTtoLevel(3, 2, galaxyMember, b3tr, voter3, minterAccount) // Upgrading to level 2
 
-      expect(await b3trBadge.getHighestLevel(voter3.address)).to.equal(2)
+      expect(await galaxyMember.getHighestLevel(voter3.address)).to.equal(2)
 
       await emissions.connect(voter1).distribute() // Anyone can distribute the cycle
 
@@ -948,24 +948,24 @@ describe("VoterRewards", () => {
         config,
       })
 
-      const b3trBadge = (await deployProxy("B3TRBadge", [
-        "b3trBadge",
-        "BDG",
+      const galaxyMember = (await deployProxy("GalaxyMember", [
+        "galaxyMember",
+        "GM",
         await owner.getAddress(),
         await owner.getAddress(),
         10,
-        config.NFT_BADGE_BASE_URI,
-        config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
-        config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+        config.GM_NFT_BASE_URI,
+        config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
+        config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
         await b3tr.getAddress(),
         await treasury.getAddress(),
-      ])) as B3TRBadge
+      ])) as GalaxyMember
 
-      await b3trBadge.waitForDeployment()
+      await galaxyMember.waitForDeployment()
 
-      await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
-      await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
-      await voterRewards.setB3TRBadge(await b3trBadge.getAddress())
+      await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+      await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+      await voterRewards.setGalaxyMember(await galaxyMember.getAddress())
 
       await xAllocationVoting
         .connect(owner)
@@ -1015,11 +1015,11 @@ describe("VoterRewards", () => {
       await waitForNextCycle()
 
       // GM NFT token mint and upgrade
-      await b3trBadge.connect(voter1).freeMint()
+      await galaxyMember.connect(voter1).freeMint()
 
-      await upgradeNFTtoLevel(1, 5, b3trBadge, b3tr, voter1, minterAccount) // Upgrading to level 5
+      await upgradeNFTtoLevel(1, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
 
-      expect(await b3trBadge.getHighestLevel(voter1.address)).to.equal(5)
+      expect(await galaxyMember.getHighestLevel(voter1.address)).to.equal(5)
 
       await emissions.connect(voter1).distribute() // Anyone can distribute the cycle
 
@@ -1032,9 +1032,9 @@ describe("VoterRewards", () => {
       await waitForNextBlock()
 
       // Transfer GM NFT to another account
-      await b3trBadge.connect(voter1).transferFrom(voter1.address, voter2.address, 1)
+      await galaxyMember.connect(voter1).transferFrom(voter1.address, voter2.address, 1)
 
-      expect(await b3trBadge.getHighestLevel(voter2.address)).to.equal(5)
+      expect(await galaxyMember.getHighestLevel(voter2.address)).to.equal(5)
 
       // Vote on apps for the second round
       await voteOnApps(
@@ -1072,24 +1072,24 @@ describe("VoterRewards", () => {
         config,
       })
 
-      const b3trBadge = (await deployProxy("B3TRBadge", [
-        "b3trBadge",
-        "BDG",
+      const galaxyMember = (await deployProxy("GalaxyMember", [
+        "galaxyMember",
+        "GM",
         await owner.getAddress(),
         await owner.getAddress(),
         10,
-        config.NFT_BADGE_BASE_URI,
-        config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
-        config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+        config.GM_NFT_BASE_URI,
+        config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
+        config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
         await b3tr.getAddress(),
         await treasury.getAddress(),
-      ])) as B3TRBadge
+      ])) as GalaxyMember
 
-      await b3trBadge.waitForDeployment()
+      await galaxyMember.waitForDeployment()
 
-      await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
-      await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
-      await voterRewards.setB3TRBadge(await b3trBadge.getAddress())
+      await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+      await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+      await voterRewards.setGalaxyMember(await galaxyMember.getAddress())
 
       await xAllocationVoting
         .connect(owner)
@@ -1139,16 +1139,16 @@ describe("VoterRewards", () => {
       await waitForNextCycle()
 
       // GM NFT token mint and upgrade
-      await b3trBadge.connect(voter1).freeMint()
+      await galaxyMember.connect(voter1).freeMint()
 
-      await upgradeNFTtoLevel(1, 5, b3trBadge, b3tr, voter1, minterAccount) // Upgrading to level 5
+      await upgradeNFTtoLevel(1, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
 
-      expect(await b3trBadge.getHighestLevel(voter1.address)).to.equal(5)
+      expect(await galaxyMember.getHighestLevel(voter1.address)).to.equal(5)
 
       // Send GM NFT to another account
-      await b3trBadge.connect(voter1).transferFrom(voter1.address, voter2.address, 1)
+      await galaxyMember.connect(voter1).transferFrom(voter1.address, voter2.address, 1)
 
-      expect(await b3trBadge.getHighestLevel(voter2.address)).to.equal(5)
+      expect(await galaxyMember.getHighestLevel(voter2.address)).to.equal(5)
 
       await emissions.connect(voter1).distribute() // Anyone can distribute the cycle
 
@@ -1371,24 +1371,24 @@ describe("VoterRewards", () => {
         },
       })
 
-      const b3trBadge = (await deployProxy("B3TRBadge", [
-        "b3trBadge",
-        "BDG",
+      const galaxyMember = (await deployProxy("GalaxyMember", [
+        "galaxyMember",
+        "GM",
         await owner.getAddress(),
         await owner.getAddress(),
         10,
-        config.NFT_BADGE_BASE_URI,
-        config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
-        config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+        config.GM_NFT_BASE_URI,
+        config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
+        config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
         await b3tr.getAddress(),
         await treasury.getAddress(),
-      ])) as B3TRBadge
+      ])) as GalaxyMember
 
-      await b3trBadge.waitForDeployment()
+      await galaxyMember.waitForDeployment()
 
-      await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
-      await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
-      await voterRewards.setB3TRBadge(await b3trBadge.getAddress())
+      await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+      await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+      await voterRewards.setGalaxyMember(await galaxyMember.getAddress())
 
       const voter2 = otherAccounts[1]
 
@@ -1418,9 +1418,9 @@ describe("VoterRewards", () => {
       await emissions.connect(voter1).distribute() // Anyone can distribute the cycle
 
       // GM NFT token mint and upgrade
-      await b3trBadge.connect(voter1).freeMint()
+      await galaxyMember.connect(voter1).freeMint()
 
-      await upgradeNFTtoLevel(1, 5, b3trBadge, b3tr, voter1, minterAccount) // Upgrading to level 5
+      await upgradeNFTtoLevel(1, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
 
       tx = await createProposal(b3tr, B3trContract, voter1, description + "1", functionToCall, [])
       proposalId = await getProposalIdFromTx(tx)
@@ -1472,24 +1472,24 @@ describe("VoterRewards", () => {
         },
       })
 
-      const b3trBadge = (await deployProxy("B3TRBadge", [
-        "b3trBadge",
-        "BDG",
+      const galaxyMember = (await deployProxy("GalaxyMember", [
+        "galaxyMember",
+        "GM",
         await owner.getAddress(),
         await owner.getAddress(),
         10,
-        config.NFT_BADGE_BASE_URI,
-        config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
-        config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+        config.GM_NFT_BASE_URI,
+        config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
+        config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
         await b3tr.getAddress(),
         await treasury.getAddress(),
-      ])) as B3TRBadge
+      ])) as GalaxyMember
 
-      await b3trBadge.waitForDeployment()
+      await galaxyMember.waitForDeployment()
 
-      await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
-      await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
-      await voterRewards.setB3TRBadge(await b3trBadge.getAddress())
+      await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+      await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+      await voterRewards.setGalaxyMember(await galaxyMember.getAddress())
 
       await xAllocationVoting
         .connect(owner)
@@ -1529,11 +1529,11 @@ describe("VoterRewards", () => {
       expect(await xAllocationVoting.roundDeadline(xAllocationsRoundID)).to.lt(await emissions.getNextCycleBlock())
 
       // Upgrading GM NFT
-      await b3trBadge.connect(voter1).freeMint()
+      await galaxyMember.connect(voter1).freeMint()
 
-      await upgradeNFTtoLevel(1, 5, b3trBadge, b3tr, voter1, minterAccount) // Upgrading to level 5
+      await upgradeNFTtoLevel(1, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
 
-      expect(await b3trBadge.getHighestLevel(voter1.address)).to.equal(5)
+      expect(await galaxyMember.getHighestLevel(voter1.address)).to.equal(5)
 
       // Vote on apps for the second round
       await voteOnApps(
