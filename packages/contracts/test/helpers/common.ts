@@ -1,5 +1,5 @@
 import { ethers, network } from "hardhat"
-import { B3TR, B3TRBadge } from "../../typechain-types"
+import { B3TR, GalaxyMember } from "../../typechain-types"
 import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { getOrDeployContractInstances } from "./deploy"
@@ -417,7 +417,7 @@ export const bootstrapAndStartEmissions = async () => {
 export const upgradeNFTtoLevel = async (
   tokenId: number,
   level: number,
-  nft: B3TRBadge,
+  nft: GalaxyMember,
   b3tr: B3TR,
   owner: HardhatEthersSigner,
   minter: HardhatEthersSigner,
@@ -431,7 +431,7 @@ export const upgradeNFTtoLevel = async (
 
 export const upgradeNFTtoNextLevel = async (
   tokenId: number,
-  nft: B3TRBadge,
+  nft: GalaxyMember,
   b3tr: B3TR,
   owner: HardhatEthersSigner,
   minter: HardhatEthersSigner,
