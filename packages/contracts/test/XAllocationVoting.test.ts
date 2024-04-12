@@ -163,7 +163,7 @@ describe("X-Allocation Voting", function () {
     })
   })
 
-   describe("Settings", function () {
+  describe("Settings", function () {
     it("Should be able to change B3trGovernanceAddress with admin role", async function () {
       const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: false,
@@ -1268,13 +1268,12 @@ describe("X-Allocation Voting", function () {
 
   describe("Quadratic Funding", function () {
     it("Can get the correct QF app votes", async function () {
-      const { xAllocationVoting, otherAccounts, owner, b3tr, emissions, minterAccount } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       otherAccounts.forEach(async account => {
         await getVot3Tokens(account, "10000")
@@ -1296,7 +1295,7 @@ describe("X-Allocation Voting", function () {
         .addApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
 
       //Start allocation round
-      const round1 = await startNewAllocationRound(xAllocationVoting)
+      const round1 = await startNewAllocationRound()
       // Vote
       await xAllocationVoting
         .connect(otherAccounts[1])
@@ -1331,7 +1330,7 @@ describe("X-Allocation Voting", function () {
           [ethers.parseEther("1000"), ethers.parseEther("0"), ethers.parseEther("100")],
         )
 
-      await waitForRoundToEnd(round1, xAllocationVoting)
+      await waitForRoundToEnd(round1)
 
       const expectedUnsquaredVotesApp1 = Math.sqrt(0) + Math.sqrt(0) + Math.sqrt(0) + Math.sqrt(0) + Math.sqrt(1000)
       const app1VotesQF = await xAllocationVoting.getAppVotesQF(round1, app1Id)
