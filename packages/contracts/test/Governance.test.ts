@@ -707,7 +707,7 @@ describe("Governor and TimeLock", function () {
 
       expect(await governor.state(proposalId)).to.eql(0n) // pending
 
-      expect(await governor.proposalIsExecutable(proposalId)).to.eql(false)
+      expect(await governor.proposalNeedsQueuing(proposalId)).to.eql(false)
 
       // Let's make this proposal succeed
       await waitForProposalToBeActive(proposalId)
@@ -736,7 +736,7 @@ describe("Governor and TimeLock", function () {
       })
 
       const proposalId = 1n
-      await expect(governor.proposalIsExecutable(proposalId)).to.be.reverted
+      await expect(governor.proposalNeedsQueuing(proposalId)).to.be.reverted
     })
 
     it("Parameters must have the same length", async () => {

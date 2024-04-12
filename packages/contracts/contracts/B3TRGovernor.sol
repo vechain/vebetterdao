@@ -137,16 +137,6 @@ contract B3TRGovernor is
     return true;
   }
 
-  function proposalIsExecutable(uint256 proposalId) public view returns (bool) {
-    GovernorStorage storage $ = _getGovernorStorage();
-    ProposalCore storage proposal = $._proposals[proposalId];
-    if (proposal.roundIdVoteStart == 0) {
-      revert GovernorNonexistentProposal(proposalId);
-    }
-
-    return proposal.isExecutable;
-  }
-
   // ------------------ SETTERS ------------------ //
 
   function setVoterRewards(address _voterRewards) public onlyGovernance {
@@ -387,7 +377,13 @@ contract B3TRGovernor is
   function proposalNeedsQueuing(
     uint256 proposalId
   ) public view override(GovernorUpgradeable, GovernorTimelockControlUpgradeable) returns (bool) {
-    return super.proposalNeedsQueuing(proposalId);
+    GovernorStorage storage $ = _getGovernorStorage();
+    ProposalCore storage proposal = $._proposals[proposalId];
+    if (proposal.roundIdVoteStart == 0) {
+      revert GovernorNonexistentProposal(proposalId);
+    }
+
+    return proposal.isExecutable;
   }
 
   function proposalThreshold()
