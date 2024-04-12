@@ -23,7 +23,7 @@ import { B3TRGovernor } from "../typechain-types"
 
 describe("Governor and TimeLock", function () {
   describe("Governor deployment", function () {
-    it("should set constructors correctly", async function () {
+    it("Should set constructors correctly", async function () {
       const config = createLocalConfig()
       const { governor, vot3, owner, timeLock, xAllocationVoting, voterRewards } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -67,7 +67,7 @@ describe("Governor and TimeLock", function () {
       expect(clockMode.toString()).to.eql("mode=blocknumber&from=default")
     })
 
-    it("should be able to upgrade the governor contract through governance", async function () {
+    it("Should be able to upgrade the governor contract through governance", async function () {
       const { governor, owner, b3tr, emissions, xAllocationVoting } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -145,6 +145,25 @@ describe("Governor and TimeLock", function () {
       // expect data of previous contract to be untouched
       expect(await governor.state(proposalId)).to.eql(7n)
       expect(await governor.quorumReached(proposalId)).to.eql(true)
+    })
+
+    it("Should be able to initialize only once", async function () {
+      const { governor, owner, vot3, timeLock, voterRewards, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await catchRevert(
+        governor.initialize(
+          await vot3.getAddress(),
+          await timeLock.getAddress(),
+          await xAllocationVoting.getAddress(),
+          1, // quorum percentage
+          1, // voting threshold
+          1, // delay before vote starts
+          owner.address,
+          await voterRewards.getAddress(),
+        ),
+      )
     })
   })
 
@@ -336,6 +355,40 @@ describe("Governor and TimeLock", function () {
       ) // proposal should end at the end of the current round + 1 block + voting period
 
       expect(await governor.proposalStartRound(proposalId)).to.eql(2n) // proposal should start in round 2
+    })
+
+    it("Proposal cannot start in next round if current ended and the next one not started yet", async () => {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.EMISSIONS_CYCLE_DURATION = 5
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // We are in round 1 now, and we want to wait for it to wait and not start a new one
+      await waitForCurrentRoundToEnd()
+      await moveBlocks(2)
+
+      // Now if we try to create a proposal starting in the next round it should fail
+      expect(await governor.canProposalStartInNextRound()).to.be.false
+
+      const address = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+      const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n
+      await catchRevert(
+        governor
+          .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+          .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
+            gasLimit: 10_000_000,
+          }),
+      )
     })
 
     it("Can create a proposal that starts after 2 rounds", async () => {
