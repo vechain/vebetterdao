@@ -340,6 +340,59 @@ describe("X-Allocation Voting", function () {
           ),
         ).to.be.reverted
       })
+
+      it("Can get quorum of round successfully", async function () {
+        const { xAllocationVoting, otherAccount } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+        await getVot3Tokens(otherAccount, "1000")
+
+        // Bootstrap emissions
+        await bootstrapEmissions()
+
+        let round1 = await startNewAllocationRound()
+        await waitForRoundToEnd(round1)
+
+        let quorum = await xAllocationVoting.roundQuorum(round1)
+
+        let snapshot = await xAllocationVoting.roundSnapshot(round1)
+        let quorumAtSnapshot = await xAllocationVoting.quorum(snapshot)
+
+        expect(quorum).to.eql(quorumAtSnapshot)
+      })
+
+      it("Returns the quorum numerator correctly at a specific timepoint", async function () {
+        const { xAllocationVoting, otherAccount } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+        // @ts-ignore
+        let initialQuorumNumerator = await xAllocationVoting.quorumNumerator(snapshot)
+        await getVot3Tokens(otherAccount, "1000")
+
+        // Bootstrap emissions
+        await bootstrapEmissions()
+
+        let round1 = await startNewAllocationRound()
+
+        await createProposalAndExecuteIt(
+          otherAccount,
+          otherAccount,
+          xAllocationVoting,
+          await ethers.getContractFactory("XAllocationVoting"),
+          "Updating quorum numerator",
+          "updateQuorumNumerator",
+          [1],
+        )
+
+        await waitForRoundToEnd(round1)
+
+        let snapshot = await xAllocationVoting.roundSnapshot(round1)
+        //@ts-ignore
+        let quorumNumerator = await xAllocationVoting.quorumNumerator(snapshot)
+
+        expect(quorumNumerator).to.eql(initialQuorumNumerator)
+      })
     })
 
     describe("Voting period", function () {
@@ -1924,29 +1977,6 @@ describe("X-Allocation Voting", function () {
       const appShare3 = Number(app3VotesQF) ** 2 / Number(totalVotes)
       expect(appShare3.toFixed(6)).to.equal(expectedAppShare3.toFixed(6))
       expect(appShare3.toFixed(4)).to.equal("0.2862") // 28.61% of the total votes
-    })
-  })
-
-  describe("Quorum", function () {
-    it("Can get quorum of round successfully", async function () {
-      const { xAllocationVoting, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      await getVot3Tokens(otherAccount, "1000")
-
-      // Bootstrap emissions
-      await bootstrapEmissions()
-
-      let round1 = await startNewAllocationRound()
-      await waitForRoundToEnd(round1)
-
-      let quorum = await xAllocationVoting.roundQuorum(round1)
-
-      let snapshot = await xAllocationVoting.roundSnapshot(round1)
-      let quorumAtSnapshot = await xAllocationVoting.quorum(snapshot)
-
-      expect(quorum).to.eql(quorumAtSnapshot)
     })
   })
 })
