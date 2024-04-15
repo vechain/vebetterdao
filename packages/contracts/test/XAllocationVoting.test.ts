@@ -270,208 +270,290 @@ describe("X-Allocation Voting", function () {
       expect(await ethers.provider.getBalance(await xAllocationVoting.getAddress())).to.eql(0n)
     })
 
-    it("Can set voting period only through governance", async function () {
-      const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: false })
-      await expect(xAllocationVoting.connect(owner).setVotingPeriod(10)).to.be.reverted
-    })
-
-    it("Can set voting period if less than emissions cycle duration", async function () {
-      const { xAllocationVoting, owner, emissions, governor } = await getOrDeployContractInstances({
-        forceDeploy: true,
+    describe("Voting period", function () {
+      it("Can set voting period only through governance", async function () {
+        const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: false })
+        await expect(xAllocationVoting.connect(owner).setVotingPeriod(10)).to.be.reverted
       })
-      await bootstrapAndStartEmissions()
-      const votesThreshold = await governor.proposalThreshold()
-      await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
-      const cycleDuration = await emissions.cycleDuration()
 
-      // Now we can create a proposal
-      const encodedFunctionCall = xAllocationVoting.interface.encodeFunctionData("setVotingPeriod", [
-        cycleDuration - 1n,
-      ])
-      const description = "Updating voting period"
-      const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
+      it("Can set voting period if less than emissions cycle duration", async function () {
+        const { xAllocationVoting, owner, emissions, governor } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+        await bootstrapAndStartEmissions()
+        const votesThreshold = await governor.proposalThreshold()
+        await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
+        const cycleDuration = await emissions.cycleDuration()
 
-      const tx = await governor
-        .connect(owner) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
-        .propose([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], description)
+        // Now we can create a proposal
+        const encodedFunctionCall = xAllocationVoting.interface.encodeFunctionData("setVotingPeriod", [
+          cycleDuration - 1n,
+        ])
+        const description = "Updating voting period"
+        const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
 
-      const proposalId = await getProposalIdFromTx(tx)
-      await waitForProposalToBeActive(proposalId)
-      await governor.connect(owner).castVote(proposalId, 1)
-      await waitForVotingPeriodToEnd(proposalId)
-      expect(await governor.state(proposalId)).to.eql(4n) // succeded
+        const tx = await governor
+          .connect(owner) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+          .propose([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], description)
 
-      await governor.queue([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash)
-      expect(await governor.state(proposalId)).to.eql(5n)
+        const proposalId = await getProposalIdFromTx(tx)
+        await waitForProposalToBeActive(proposalId)
+        await governor.connect(owner).castVote(proposalId, 1)
+        await waitForVotingPeriodToEnd(proposalId)
+        expect(await governor.state(proposalId)).to.eql(4n) // succeded
 
-      await governor.execute([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash)
-      expect(await governor.state(proposalId)).to.eql(7n)
+        await governor.queue([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash)
+        expect(await governor.state(proposalId)).to.eql(5n)
 
-      const votingPeriod = await xAllocationVoting.votingPeriod()
-      expect(votingPeriod).to.eql(cycleDuration - 1n)
-    })
+        await governor.execute([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash)
+        expect(await governor.state(proposalId)).to.eql(7n)
 
-    it("Cannot set voting period if not less than emissions cycle duration", async function () {
-      const { xAllocationVoting, owner, emissions, governor } = await getOrDeployContractInstances({
-        forceDeploy: true,
+        const votingPeriod = await xAllocationVoting.votingPeriod()
+        expect(votingPeriod).to.eql(cycleDuration - 1n)
       })
-      await bootstrapAndStartEmissions()
-      const votesThreshold = await governor.proposalThreshold()
-      await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
-      const cycleDuration = await emissions.cycleDuration()
-      const beforeVotingPeriod = await xAllocationVoting.votingPeriod()
 
-      // Now we can create a proposal
-      const encodedFunctionCall = xAllocationVoting.interface.encodeFunctionData("setVotingPeriod", [cycleDuration])
-      const description = "Updating voting period"
-      const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
+      it("Cannot set voting period to 0", async function () {
+        const { xAllocationVoting, owner, governor } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+        await bootstrapAndStartEmissions()
+        const votesThreshold = await governor.proposalThreshold()
+        await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
 
-      const tx = await governor
-        .connect(owner) //@ts-ignore
-        .propose([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], description)
+        await expect(
+          createProposalAndExecuteIt(
+            owner,
+            owner,
+            xAllocationVoting,
+            await ethers.getContractFactory("XAllocationVoting"),
+            "Updating voting period",
+            "setVotingPeriod",
+            [0],
+          ),
+        ).to.be.reverted
 
-      const proposalId = await getProposalIdFromTx(tx)
-      await waitForProposalToBeActive(proposalId)
-      await governor.connect(owner).castVote(proposalId, 1)
-      await waitForVotingPeriodToEnd(proposalId)
-      expect(await governor.state(proposalId)).to.eql(4n) // succeded
+        const votingPeriod = await xAllocationVoting.votingPeriod()
+        expect(votingPeriod).to.not.eql(0n)
+      })
 
-      await governor.queue([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash)
-      expect(await governor.state(proposalId)).to.eql(5n)
+      it("Cannot set voting period if not less than emissions cycle duration", async function () {
+        const { xAllocationVoting, owner, emissions, governor } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+        await bootstrapAndStartEmissions()
+        const votesThreshold = await governor.proposalThreshold()
+        await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
+        const cycleDuration = await emissions.cycleDuration()
+        const beforeVotingPeriod = await xAllocationVoting.votingPeriod()
 
-      await expect(
-        governor.execute([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash),
-      ).to.be.reverted
+        // Now we can create a proposal
+        const encodedFunctionCall = xAllocationVoting.interface.encodeFunctionData("setVotingPeriod", [cycleDuration])
+        const description = "Updating voting period"
+        const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
 
-      const afterVotingPeriod = await xAllocationVoting.votingPeriod()
-      expect(afterVotingPeriod).to.eql(beforeVotingPeriod)
+        const tx = await governor
+          .connect(owner) //@ts-ignore
+          .propose([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], description)
+
+        const proposalId = await getProposalIdFromTx(tx)
+        await waitForProposalToBeActive(proposalId)
+        await governor.connect(owner).castVote(proposalId, 1)
+        await waitForVotingPeriodToEnd(proposalId)
+        expect(await governor.state(proposalId)).to.eql(4n) // succeded
+
+        await governor.queue([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash)
+        expect(await governor.state(proposalId)).to.eql(5n)
+
+        await expect(
+          governor.execute([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash),
+        ).to.be.reverted
+
+        const afterVotingPeriod = await xAllocationVoting.votingPeriod()
+        expect(afterVotingPeriod).to.eql(beforeVotingPeriod)
+      })
+
+      it("Can set emission contract address only through governance", async function () {
+        const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: false })
+        await expect(xAllocationVoting.connect(owner).setEmissions(owner.address)).to.be.reverted
+      })
+
+      it("Can change the emission contract address through governance", async function () {
+        const { xAllocationVoting, owner, governor } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+        await bootstrapAndStartEmissions()
+        const votesThreshold = await governor.proposalThreshold()
+        await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
+
+        await createProposalAndExecuteIt(
+          owner,
+          owner,
+          xAllocationVoting,
+          await ethers.getContractFactory("XAllocationVoting"),
+          "Updating emissions address",
+          "setEmissions",
+          [owner.address],
+        )
+
+        const updatedEmissionsAddress = await xAllocationVoting.emissions()
+        expect(updatedEmissionsAddress).to.eql(owner.address)
+      })
+
+      it("Cannot set the emission contract address to 0x00", async function () {
+        const { xAllocationVoting, owner, governor } = await getOrDeployContractInstances({ forceDeploy: true })
+
+        await bootstrapAndStartEmissions()
+        const votesThreshold = await governor.proposalThreshold()
+        await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
+
+        await expect(
+          createProposalAndExecuteIt(
+            owner,
+            owner,
+            xAllocationVoting,
+            await ethers.getContractFactory("XAllocationVoting"),
+            "Updating emissions address",
+            "setEmissions",
+            [ZERO_ADDRESS],
+          ),
+        ).to.be.reverted
+
+        const updatedEmissionsAddress = await xAllocationVoting.emissions()
+        expect(updatedEmissionsAddress).to.not.eql(ZERO_ADDRESS)
+      })
     })
 
-    it("Admin can set a new admin", async function () {
-      const { xAllocationVoting, owner, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
+    describe("Admin settings", function () {
+      it("Admin can set a new admin", async function () {
+        const { xAllocationVoting, owner, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
 
-      const ADMIN_ROLE = await xAllocationVoting.DEFAULT_ADMIN_ROLE()
-      expect(await xAllocationVoting.hasRole(ADMIN_ROLE, otherAccounts[0].address)).to.eql(false)
-      expect(await xAllocationVoting.hasRole(ADMIN_ROLE, owner.address)).to.eql(true)
+        const ADMIN_ROLE = await xAllocationVoting.DEFAULT_ADMIN_ROLE()
+        expect(await xAllocationVoting.hasRole(ADMIN_ROLE, otherAccounts[0].address)).to.eql(false)
+        expect(await xAllocationVoting.hasRole(ADMIN_ROLE, owner.address)).to.eql(true)
 
-      await xAllocationVoting.connect(owner).setAdminRole(otherAccounts[0].address)
+        await xAllocationVoting.connect(owner).setAdminRole(otherAccounts[0].address)
 
-      expect(await xAllocationVoting.hasRole(ADMIN_ROLE, otherAccounts[0].address)).to.eql(true)
+        expect(await xAllocationVoting.hasRole(ADMIN_ROLE, otherAccounts[0].address)).to.eql(true)
+      })
+
+      it("Admin cannot set zero address as admin", async function () {
+        const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+        const ADMIN_ROLE = await xAllocationVoting.DEFAULT_ADMIN_ROLE()
+        expect(await xAllocationVoting.hasRole(ADMIN_ROLE, owner.address)).to.eql(true)
+
+        await expect(xAllocationVoting.connect(owner).setAdminRole(ZERO_ADDRESS)).to.be.reverted
+      })
+
+      it("Only admin can set a new admin", async function () {
+        const { xAllocationVoting, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
+
+        const ADMIN_ROLE = await xAllocationVoting.DEFAULT_ADMIN_ROLE()
+        expect(await xAllocationVoting.hasRole(ADMIN_ROLE, otherAccounts[0].address)).to.eql(false)
+
+        await expect(xAllocationVoting.connect(otherAccounts[0]).setAdminRole(otherAccounts[0].address)).to.be.reverted
+      })
+
+      it("Admin can change allocation percentage", async function () {
+        const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+        const initialPercentage = await xAllocationVoting.baseAllocationPercentage()
+
+        await xAllocationVoting.connect(owner).setBaseAllocationPercentage(3)
+
+        const updatedPercentage = await xAllocationVoting.baseAllocationPercentage()
+        expect(updatedPercentage).to.eql(3n)
+        expect(updatedPercentage).to.not.eql(initialPercentage)
+      })
+
+      it("Only admin can change allocation percentage", async function () {
+        const { xAllocationVoting, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
+
+        const initialPercentage = await xAllocationVoting.baseAllocationPercentage()
+
+        await expect(xAllocationVoting.connect(otherAccounts[0]).setBaseAllocationPercentage(3)).to.be.reverted
+
+        const updatedPercentage = await xAllocationVoting.baseAllocationPercentage()
+        expect(updatedPercentage).to.eql(initialPercentage)
+      })
     })
 
-    it("Admin cannot set zero address as admin", async function () {
-      const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+    describe("Earnings settings", function () {
+      it("Max allocation percentage can be 100", async function () {
+        const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
 
-      const ADMIN_ROLE = await xAllocationVoting.DEFAULT_ADMIN_ROLE()
-      expect(await xAllocationVoting.hasRole(ADMIN_ROLE, owner.address)).to.eql(true)
+        const initialPercentage = await xAllocationVoting.baseAllocationPercentage()
 
-      await expect(xAllocationVoting.connect(owner).setAdminRole(ZERO_ADDRESS)).to.be.reverted
+        await xAllocationVoting.connect(owner).setBaseAllocationPercentage(100)
+
+        const updatedPercentage = await xAllocationVoting.baseAllocationPercentage()
+        expect(updatedPercentage).to.eql(100n)
+        expect(updatedPercentage).to.not.eql(initialPercentage)
+
+        await expect(xAllocationVoting.connect(owner).setBaseAllocationPercentage(101)).to.be.reverted
+      })
+
+      it("Admin can change app shares cap", async function () {
+        const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+        const initialCap = await xAllocationVoting.appSharesCap()
+
+        await xAllocationVoting.connect(owner).setAppSharesCap(3)
+
+        const updatedCap = await xAllocationVoting.appSharesCap()
+        expect(updatedCap).to.eql(3n)
+        expect(updatedCap).to.not.eql(initialCap)
+      })
+
+      it("Max app shares cap can be 100", async function () {
+        const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+        const initialCap = await xAllocationVoting.appSharesCap()
+
+        await xAllocationVoting.connect(owner).setAppSharesCap(100)
+
+        const updatedCap = await xAllocationVoting.appSharesCap()
+        expect(updatedCap).to.eql(100n)
+        expect(updatedCap).to.not.eql(initialCap)
+
+        await expect(xAllocationVoting.connect(owner).setAppSharesCap(101)).to.be.reverted
+      })
+
+      it("Only admin can change app shares cap", async function () {
+        const { xAllocationVoting, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
+
+        const initialCap = await xAllocationVoting.appSharesCap()
+
+        await expect(xAllocationVoting.connect(otherAccounts[0]).setAppSharesCap(3)).to.be.reverted
+
+        const updatedCap = await xAllocationVoting.appSharesCap()
+        expect(updatedCap).to.eql(initialCap)
+      })
+
+      it("Admin can set baseURI for apps", async function () {
+        const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+        const initialURI = await xAllocationVoting.baseURI()
+
+        await xAllocationVoting.connect(owner).setBaseURI("ipfs2://")
+
+        const updatedURI = await xAllocationVoting.baseURI()
+        expect(updatedURI).to.eql("ipfs2://")
+        expect(updatedURI).to.not.eql(initialURI)
+      })
     })
 
-    it("Only admin can set a new admin", async function () {
-      const { xAllocationVoting, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
+    describe("XApps", function () {
+      it("Only admin can set baseURI for apps", async function () {
+        const { xAllocationVoting, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
 
-      const ADMIN_ROLE = await xAllocationVoting.DEFAULT_ADMIN_ROLE()
-      expect(await xAllocationVoting.hasRole(ADMIN_ROLE, otherAccounts[0].address)).to.eql(false)
+        const initialURI = await xAllocationVoting.baseURI()
 
-      await expect(xAllocationVoting.connect(otherAccounts[0]).setAdminRole(otherAccounts[0].address)).to.be.reverted
-    })
+        await expect(xAllocationVoting.connect(otherAccounts[0]).setBaseURI("ipfs2://")).to.be.reverted
 
-    it("Admin can change allocation percentage", async function () {
-      const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
-
-      const initialPercentage = await xAllocationVoting.baseAllocationPercentage()
-
-      await xAllocationVoting.connect(owner).setBaseAllocationPercentage(3)
-
-      const updatedPercentage = await xAllocationVoting.baseAllocationPercentage()
-      expect(updatedPercentage).to.eql(3n)
-      expect(updatedPercentage).to.not.eql(initialPercentage)
-    })
-
-    it("Only admin can change allocation percentage", async function () {
-      const { xAllocationVoting, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
-
-      const initialPercentage = await xAllocationVoting.baseAllocationPercentage()
-
-      await expect(xAllocationVoting.connect(otherAccounts[0]).setBaseAllocationPercentage(3)).to.be.reverted
-
-      const updatedPercentage = await xAllocationVoting.baseAllocationPercentage()
-      expect(updatedPercentage).to.eql(initialPercentage)
-    })
-
-    it("Max allocation percentage can be 100", async function () {
-      const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
-
-      const initialPercentage = await xAllocationVoting.baseAllocationPercentage()
-
-      await xAllocationVoting.connect(owner).setBaseAllocationPercentage(100)
-
-      const updatedPercentage = await xAllocationVoting.baseAllocationPercentage()
-      expect(updatedPercentage).to.eql(100n)
-      expect(updatedPercentage).to.not.eql(initialPercentage)
-
-      await expect(xAllocationVoting.connect(owner).setBaseAllocationPercentage(101)).to.be.reverted
-    })
-
-    it("Admin can change app shares cap", async function () {
-      const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
-
-      const initialCap = await xAllocationVoting.appSharesCap()
-
-      await xAllocationVoting.connect(owner).setAppSharesCap(3)
-
-      const updatedCap = await xAllocationVoting.appSharesCap()
-      expect(updatedCap).to.eql(3n)
-      expect(updatedCap).to.not.eql(initialCap)
-    })
-
-    it("Max app shares cap can be 100", async function () {
-      const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
-
-      const initialCap = await xAllocationVoting.appSharesCap()
-
-      await xAllocationVoting.connect(owner).setAppSharesCap(100)
-
-      const updatedCap = await xAllocationVoting.appSharesCap()
-      expect(updatedCap).to.eql(100n)
-      expect(updatedCap).to.not.eql(initialCap)
-
-      await expect(xAllocationVoting.connect(owner).setAppSharesCap(101)).to.be.reverted
-    })
-
-    it("Only admin can change app shares cap", async function () {
-      const { xAllocationVoting, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
-
-      const initialCap = await xAllocationVoting.appSharesCap()
-
-      await expect(xAllocationVoting.connect(otherAccounts[0]).setAppSharesCap(3)).to.be.reverted
-
-      const updatedCap = await xAllocationVoting.appSharesCap()
-      expect(updatedCap).to.eql(initialCap)
-    })
-
-    it("Admin can set baseURI for apps", async function () {
-      const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
-
-      const initialURI = await xAllocationVoting.baseURI()
-
-      await xAllocationVoting.connect(owner).setBaseURI("ipfs2://")
-
-      const updatedURI = await xAllocationVoting.baseURI()
-      expect(updatedURI).to.eql("ipfs2://")
-      expect(updatedURI).to.not.eql(initialURI)
-    })
-
-    it("Only admin can set baseURI for apps", async function () {
-      const { xAllocationVoting, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
-
-      const initialURI = await xAllocationVoting.baseURI()
-
-      await expect(xAllocationVoting.connect(otherAccounts[0]).setBaseURI("ipfs2://")).to.be.reverted
-
-      const updatedURI = await xAllocationVoting.baseURI()
-      expect(updatedURI).to.eql(initialURI)
+        const updatedURI = await xAllocationVoting.baseURI()
+        expect(updatedURI).to.eql(initialURI)
+      })
     })
   })
 
