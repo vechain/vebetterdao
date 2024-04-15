@@ -81,7 +81,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
         <HStack justify={"space-between"} w="full">
           <Stack w="full" spacing={1}>
             <HStack spacing={2} w="fit-content" justify="space-between">
-              <AllocationRoundStateTag state={allocationRound.state} size="md" />
+              <AllocationRoundStateTag state={allocationRound.state} size="md" data-testid={"round-#" + round.roundId + "-status"} />
               <Show above="sm">
                 <DotSymbol color={"gray"} size={1} />
                 <Text fontWeight={"400"} color={"gray"}>
