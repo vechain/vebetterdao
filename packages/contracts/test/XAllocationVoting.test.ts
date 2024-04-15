@@ -366,14 +366,14 @@ describe("X-Allocation Voting", function () {
         const { xAllocationVoting, otherAccount } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
-        // @ts-ignore
-        let initialQuorumNumerator = await xAllocationVoting.quorumNumerator(snapshot)
+
         await getVot3Tokens(otherAccount, "1000")
 
-        // Bootstrap emissions
-        await bootstrapEmissions()
+        // @ts-ignore
+        let initialQuorumNumerator = await xAllocationVoting.quorumNumerator()
 
-        let round1 = await startNewAllocationRound()
+        // Bootstrap emissions
+        await bootstrapAndStartEmissions()
 
         await createProposalAndExecuteIt(
           otherAccount,
@@ -385,11 +385,9 @@ describe("X-Allocation Voting", function () {
           [1],
         )
 
-        await waitForRoundToEnd(round1)
-
-        let snapshot = await xAllocationVoting.roundSnapshot(round1)
+        let snapshot = await xAllocationVoting.roundSnapshot(1)
         //@ts-ignore
-        let quorumNumerator = await xAllocationVoting.quorumNumerator(snapshot)
+        let quorumNumerator = await xAllocationVoting.quorumNumerator(snapshot, {})
 
         expect(quorumNumerator).to.eql(initialQuorumNumerator)
       })
