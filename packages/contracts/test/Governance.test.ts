@@ -205,6 +205,12 @@ describe("Governor and TimeLock", function () {
       expect(await governor.supportsInterface(INVALID_ID)).to.eql(false)
     })
 
+    it("Should support ERC 165 interface", async () => {
+      const { governor } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      expect(await governor.supportsInterface("0x01ffc9a7")).to.equal(true) // ERC165
+    })
+
     it("only governance can update xAllocationVoting address", async function () {
       const { governor, owner } = await getOrDeployContractInstances({
         forceDeploy: true,

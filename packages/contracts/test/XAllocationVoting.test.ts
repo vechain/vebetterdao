@@ -18,6 +18,7 @@ import {
   bootstrapAndStartEmissions,
   waitForCurrentRoundToEnd,
   ZERO_ADDRESS,
+  waitForNextBlock,
 } from "./helpers"
 import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
@@ -35,6 +36,31 @@ describe("X-Allocation Voting", function () {
 
       expect(await xAllocationVoting.b3trGovernor()).to.eql(await timeLock.getAddress())
       expect(await xAllocationVoting.emissions()).to.eql(await emissions.getAddress())
+    })
+
+    it("Should not support invalid interface", async function () {
+      const { xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const INVALID_ID = "0xffffffff"
+      expect(await xAllocationVoting.supportsInterface(INVALID_ID)).to.eql(false)
+    })
+
+    it("Should support ERC 165 interface", async () => {
+      const { xAllocationVoting } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      expect(await xAllocationVoting.supportsInterface("0x01ffc9a7")).to.equal(true) // ERC165
+    })
+
+    // can correctly get name and version
+    it("Should correctly return name and version", async function () {
+      const { xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await xAllocationVoting.name()).to.eql("XAllocationVoting")
+      expect(await xAllocationVoting.version()).to.eql("1")
     })
   })
 
@@ -570,6 +596,28 @@ describe("X-Allocation Voting", function () {
 
       expect(roundSnapshot).to.eql(await xAllocationVoting.roundSnapshot(roundId))
       expect(deadline).to.eql(await xAllocationVoting.roundDeadline(roundId))
+    })
+
+    it("Should correctly store the round proposer", async function () {
+      const { xAllocationVoting, emissions, minterAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      await emissions.connect(minterAccount).start()
+
+      let roundId = await xAllocationVoting.currentRoundId()
+      let roundProposer = await xAllocationVoting.roundProposer(roundId)
+
+      expect(roundProposer).to.eql(await emissions.getAddress())
+    })
+
+    it("Cannot get state of non-existing round", async function () {
+      const { xAllocationVoting } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      await expect(xAllocationVoting.state(1)).to.be.reverted
     })
   })
 
@@ -1342,6 +1390,93 @@ describe("X-Allocation Voting", function () {
       voted = await xAllocationVoting.hasVotedOnce(otherAccount.address)
       expect(voted).to.equal(true)
     })
+
+    it("Cannot cast vote with apps and weights length mismatch", async function () {
+      const { xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+
+      await getVot3Tokens(otherAccount, "1000")
+
+      // Bootstrap emissions
+      await bootstrapAndStartEmissions()
+
+      let roundId = await xAllocationVoting.currentRoundId()
+      expect(roundId).to.eql(1n)
+
+      // I should be able to cast a vote
+      await catchRevert(
+        xAllocationVoting
+          .connect(otherAccount)
+          .castVote(roundId, [app1Id], [ethers.parseEther("500"), ethers.parseEther("500")]),
+      )
+    })
+
+    it("Cannot cast vote with no apps to vote for", async function () {
+      const { xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+
+      await getVot3Tokens(otherAccount, "1000")
+
+      // Bootstrap emissions
+      await bootstrapAndStartEmissions()
+
+      let roundId = await xAllocationVoting.currentRoundId()
+      expect(roundId).to.eql(1n)
+
+      // I should be able to cast a vote
+      await catchRevert(xAllocationVoting.connect(otherAccount).castVote(roundId, [], []))
+    })
+
+    // quorumReached
+    it("Quorum is reached correctly", async function () {
+      const { xAllocationVoting, otherAccount, otherAccounts, owner, vot3 } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // add apps
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+      const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+      const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+
+      await getVot3Tokens(otherAccount, "1000")
+
+      // Bootstrap emissions
+      await bootstrapAndStartEmissions()
+      await waitForNextBlock()
+
+      let roundId = await xAllocationVoting.currentRoundId()
+      expect(roundId).to.eql(1n)
+
+      expect(await xAllocationVoting.quorumReached(1)).to.eql(false)
+
+      await xAllocationVoting
+        .connect(otherAccount)
+        .castVote(1, [app1, app2], [ethers.parseEther("500"), ethers.parseEther("500")])
+
+      // quorum should be reached
+      expect(await xAllocationVoting.quorumReached(1)).to.eql(true)
+
+      waitForCurrentRoundToEnd()
+
+      // quorum should be reached
+      expect(await xAllocationVoting.quorumReached(1)).to.eql(true)
+    })
   })
 
   describe("Allocation Voting finalization", function () {
@@ -1441,6 +1576,30 @@ describe("X-Allocation Voting", function () {
       // check that round 1 is finalized
       expect(await xAllocationVoting.isFinalized(1)).to.eql(true)
       expect(await xAllocationVoting.latestSucceededRoundId(1)).to.eql(1n)
+    })
+
+    it("Can finalize failed round", async function () {
+      const { xAllocationVoting, emissions, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // we need to mint some token otherwise there is no quorum to reach
+      await getVot3Tokens(otherAccount, "1000")
+
+      // first round always succeeds
+      await bootstrapAndStartEmissions()
+      await waitForCurrentRoundToEnd()
+
+      // start and end new round
+      await emissions.distribute()
+      await waitForCurrentRoundToEnd()
+
+      // start round 3, it should finalize round 2
+      await emissions.distribute()
+
+      expect(await xAllocationVoting.state(2)).to.eql(1n) // quorum failed
+      expect(await xAllocationVoting.isFinalized(2)).to.eql(true)
+      expect(await xAllocationVoting.latestSucceededRoundId(2)).to.eql(1n)
     })
 
     it("Cannot finalize active round", async function () {
