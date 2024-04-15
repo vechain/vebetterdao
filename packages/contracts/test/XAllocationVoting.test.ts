@@ -400,6 +400,20 @@ describe("X-Allocation Voting", function () {
       expect(updatedPercentage).to.eql(initialPercentage)
     })
 
+    it("Max allocation percentage can be 100", async function () {
+      const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      const initialPercentage = await xAllocationVoting.baseAllocationPercentage()
+
+      await xAllocationVoting.connect(owner).setBaseAllocationPercentage(100)
+
+      const updatedPercentage = await xAllocationVoting.baseAllocationPercentage()
+      expect(updatedPercentage).to.eql(100n)
+      expect(updatedPercentage).to.not.eql(initialPercentage)
+
+      await expect(xAllocationVoting.connect(owner).setBaseAllocationPercentage(101)).to.be.reverted
+    })
+
     it("Admin can change app shares cap", async function () {
       const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
 
@@ -410,6 +424,20 @@ describe("X-Allocation Voting", function () {
       const updatedCap = await xAllocationVoting.appSharesCap()
       expect(updatedCap).to.eql(3n)
       expect(updatedCap).to.not.eql(initialCap)
+    })
+
+    it("Max app shares cap can be 100", async function () {
+      const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      const initialCap = await xAllocationVoting.appSharesCap()
+
+      await xAllocationVoting.connect(owner).setAppSharesCap(100)
+
+      const updatedCap = await xAllocationVoting.appSharesCap()
+      expect(updatedCap).to.eql(100n)
+      expect(updatedCap).to.not.eql(initialCap)
+
+      await expect(xAllocationVoting.connect(owner).setAppSharesCap(101)).to.be.reverted
     })
 
     it("Only admin can change app shares cap", async function () {
@@ -1440,7 +1468,7 @@ describe("X-Allocation Voting", function () {
 
     // quorumReached
     it("Quorum is reached correctly", async function () {
-      const { xAllocationVoting, otherAccount, otherAccounts, owner, vot3 } = await getOrDeployContractInstances({
+      const { xAllocationVoting, otherAccount, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -1476,6 +1504,31 @@ describe("X-Allocation Voting", function () {
 
       // quorum should be reached
       expect(await xAllocationVoting.quorumReached(1)).to.eql(true)
+    })
+
+    it("App shares cap per round is saved correctly", async function () {
+      const { xAllocationVoting, emissions } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await xAllocationVoting.setAppSharesCap(50)
+      expect(await xAllocationVoting.appSharesCap()).to.eql(50n)
+
+      // Bootstrap emissions
+      await bootstrapAndStartEmissions()
+      await waitForNextBlock()
+
+      expect(await xAllocationVoting.getRoundAppSharesCap(1)).to.eql(50n)
+
+      await xAllocationVoting.setAppSharesCap(60)
+
+      expect(await xAllocationVoting.getRoundAppSharesCap(1)).to.eql(50n)
+
+      await waitForCurrentRoundToEnd()
+      expect(await xAllocationVoting.getRoundAppSharesCap(1)).to.eql(50n)
+
+      await emissions.distribute()
+      expect(await xAllocationVoting.getRoundAppSharesCap(2)).to.eql(60n)
     })
   })
 
