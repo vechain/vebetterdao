@@ -189,6 +189,7 @@ contract XAllocationPool is
       lastSucceededRoundId = roundId;
     } else if (state == IXAllocationVotingGovernor.RoundState.Failed) {
       // The first round is always considered as the last succeeded round
+      // the round where previous round is pointing is the one we need
       lastSucceededRoundId = roundId == 1 ? roundId : xAllocationVoting().latestSucceededRoundId(roundId - 1);
     }
 
@@ -259,7 +260,7 @@ contract XAllocationPool is
 
     uint256 totalVotesQF = xAllocationVoting().totalVotesQF(roundId);
     uint256 appVotesQF = xAllocationVoting().getAppVotesQF(roundId, appId);
-    
+
     uint256 appVotesQFValue = appVotesQF * appVotesQF;
 
     // avoid division by zero

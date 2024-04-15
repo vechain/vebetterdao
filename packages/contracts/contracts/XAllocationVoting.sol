@@ -106,8 +106,9 @@ contract XAllocationVoting is
       revert GovernorUnexpectedRoundState(roundId, state(roundId), bytes32(0));
     }
 
-    // If checkpoint for latest round was not already created, create it
-    if (roundId > 1 && !isFinalized(roundId - 1)) {
+    // Do not run for the first round
+    if (roundId > 1) {
+      // finalize the previous round
       _finalizeRound(roundId - 1);
     }
 

@@ -1384,6 +1384,65 @@ describe("X-Allocation Voting", function () {
       expect(isFinalized).to.eql(true)
     })
 
+    it("No issues occurs in finalizing a round twice", async function () {
+      const { xAllocationVoting, emissions, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // we need to mint some token otherwise there is no quorum to reach
+      await getVot3Tokens(otherAccount, "1000")
+
+      // first round always succeeds
+      await bootstrapAndStartEmissions()
+      await waitForCurrentRoundToEnd()
+
+      // start new round
+      await emissions.distribute()
+
+      // check that round 1 is finalized
+      expect(await xAllocationVoting.isFinalized(1)).to.eql(true)
+
+      let roundId = await xAllocationVoting.currentRoundId()
+      await waitForCurrentRoundToEnd()
+
+      // should be failed since quorum is not reached
+      let state = await xAllocationVoting.state(roundId)
+      expect(state).to.eql(1n)
+
+      let isFinalized = await xAllocationVoting.isFinalized(roundId)
+      expect(isFinalized).to.eql(false)
+
+      await xAllocationVoting.finalize(roundId)
+
+      isFinalized = await xAllocationVoting.isFinalized(roundId)
+      expect(isFinalized).to.eql(true)
+
+      await expect(xAllocationVoting.finalize(roundId)).to.not.be.reverted
+      expect(await xAllocationVoting.isFinalized(roundId)).to.eql(true)
+    })
+
+    it("Round #1 is finalized even if quorum is not reached", async function () {
+      const { xAllocationVoting, emissions, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // we need to mint some token otherwise there is no quorum to reach
+      await getVot3Tokens(otherAccount, "1000")
+
+      // first round always succeeds
+      await bootstrapAndStartEmissions()
+      await waitForCurrentRoundToEnd()
+
+      // start new round
+      await emissions.distribute()
+
+      expect(await xAllocationVoting.state(1)).to.eql(1n) // quorum failed
+
+      // check that round 1 is finalized
+      expect(await xAllocationVoting.isFinalized(1)).to.eql(true)
+      expect(await xAllocationVoting.latestSucceededRoundId(1)).to.eql(1n)
+    })
+
     it("Cannot finalize active round", async function () {
       const { xAllocationVoting } = await getOrDeployContractInstances({
         forceDeploy: true,
