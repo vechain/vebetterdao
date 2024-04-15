@@ -229,61 +229,117 @@ describe("X-Allocation Voting", function () {
   })
 
   describe("Settings", function () {
-    it("Should be able to change B3trGovernanceAddress with admin role", async function () {
-      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
-        forceDeploy: false,
+    describe("General settigns", function () {
+      it("Should be able to change B3trGovernanceAddress with admin role", async function () {
+        const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
+          forceDeploy: false,
+        })
+        const ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000"
+
+        const initialAddress = await xAllocationVoting.b3trGovernor()
+        expect(initialAddress).to.exist
+
+        expect(await xAllocationVoting.hasRole(ADMIN_ROLE, owner.address)).to.eql(true)
+
+        await xAllocationVoting.connect(owner).setB3trGovernanceAddress(otherAccounts[3].address)
+
+        const updatedAddress = await xAllocationVoting.b3trGovernor()
+        expect(updatedAddress).to.eql(otherAccounts[3].address)
       })
-      const ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000"
 
-      const initialAddress = await xAllocationVoting.b3trGovernor()
-      expect(initialAddress).to.exist
+      it("Cannot set 0x00 address as B3trGovernanceAddress", async function () {
+        const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: false })
 
-      expect(await xAllocationVoting.hasRole(ADMIN_ROLE, owner.address)).to.eql(true)
+        await catchRevert(xAllocationVoting.connect(owner).setB3trGovernanceAddress(ZERO_ADDRESS))
 
-      await xAllocationVoting.connect(owner).setB3trGovernanceAddress(otherAccounts[3].address)
+        const updatedAddress = await xAllocationVoting.b3trGovernor()
 
-      const updatedAddress = await xAllocationVoting.b3trGovernor()
-      expect(updatedAddress).to.eql(otherAccounts[3].address)
-    })
-
-    it("Cannot set 0x00 address as B3trGovernanceAddress", async function () {
-      const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: false })
-
-      await catchRevert(xAllocationVoting.connect(owner).setB3trGovernanceAddress(ZERO_ADDRESS))
-
-      const updatedAddress = await xAllocationVoting.b3trGovernor()
-
-      expect(updatedAddress).to.not.eql(ZERO_ADDRESS)
-    })
-
-    it("Only admin should be able to change B3trGovernanceAddress", async function () {
-      const { xAllocationVoting, otherAccounts } = await getOrDeployContractInstances({
-        forceDeploy: false,
+        expect(updatedAddress).to.not.eql(ZERO_ADDRESS)
       })
-      const ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000"
 
-      const initialAddress = await xAllocationVoting.b3trGovernor()
-      expect(initialAddress).to.exist
+      it("Only admin should be able to change B3trGovernanceAddress", async function () {
+        const { xAllocationVoting, otherAccounts } = await getOrDeployContractInstances({
+          forceDeploy: false,
+        })
+        const ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000"
 
-      expect(await xAllocationVoting.hasRole(ADMIN_ROLE, otherAccounts[0].address)).to.eql(false)
+        const initialAddress = await xAllocationVoting.b3trGovernor()
+        expect(initialAddress).to.exist
 
-      await catchRevert(xAllocationVoting.connect(otherAccounts[0]).setB3trGovernanceAddress(otherAccounts[3].address))
+        expect(await xAllocationVoting.hasRole(ADMIN_ROLE, otherAccounts[0].address)).to.eql(false)
 
-      const updatedAddress = await xAllocationVoting.b3trGovernor()
-      expect(updatedAddress).to.eql(initialAddress)
+        await catchRevert(
+          xAllocationVoting.connect(otherAccounts[0]).setB3trGovernanceAddress(otherAccounts[3].address),
+        )
+
+        const updatedAddress = await xAllocationVoting.b3trGovernor()
+        expect(updatedAddress).to.eql(initialAddress)
+      })
+
+      it("Contract should not be able to receive ether", async function () {
+        const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: false })
+
+        await expect(
+          owner.sendTransaction({
+            to: await xAllocationVoting.getAddress(),
+            value: ethers.parseEther("1.0"), // Sends exactly 1.0 ether
+          }),
+        ).to.be.reverted
+
+        expect(await ethers.provider.getBalance(await xAllocationVoting.getAddress())).to.eql(0n)
+      })
     })
 
-    it("Contract should not be able to receive ether", async function () {
-      const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: false })
+    describe("Quorum", function () {
+      it("Governance can change quorum percentage", async function () {
+        const { xAllocationVoting, owner, governor } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+        await bootstrapAndStartEmissions()
+        const votesThreshold = await governor.proposalThreshold()
+        await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
 
-      await expect(
-        owner.sendTransaction({
-          to: await xAllocationVoting.getAddress(),
-          value: ethers.parseEther("1.0"), // Sends exactly 1.0 ether
-        }),
-      ).to.be.reverted
+        await createProposalAndExecuteIt(
+          owner,
+          owner,
+          xAllocationVoting,
+          await ethers.getContractFactory("XAllocationVoting"),
+          "Updating quorum numerator",
+          "updateQuorumNumerator",
+          [1],
+        )
 
-      expect(await ethers.provider.getBalance(await xAllocationVoting.getAddress())).to.eql(0n)
+        // @ts-ignore
+        const quorumNumerator = await xAllocationVoting.quorumNumerator()
+        expect(quorumNumerator).to.eql(1n)
+      })
+
+      it("Only governance can change quorum percentage", async function () {
+        const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+        await expect(xAllocationVoting.connect(owner).updateQuorumNumerator(1)).to.be.reverted
+      })
+
+      it("Cannot set the quorum nominator higher than the denominator", async function () {
+        const { xAllocationVoting, owner, governor } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+        await bootstrapAndStartEmissions()
+        const votesThreshold = await governor.proposalThreshold()
+        await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
+
+        await expect(
+          createProposalAndExecuteIt(
+            owner,
+            owner,
+            xAllocationVoting,
+            await ethers.getContractFactory("XAllocationVoting"),
+            "Updating quorum numerator",
+            "updateQuorumNumerator",
+            [(await xAllocationVoting.quorumDenominator()) + 1n],
+          ),
+        ).to.be.reverted
+      })
     })
 
     describe("Voting period", function () {
