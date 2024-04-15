@@ -30,13 +30,6 @@ export class DashboardPage {
     }
 
     /**
-     * Visit the dashboard page
-     */
-    async visit() {
-        await this.page.goto(HOMEPAGE)
-    }
-
-    /**
      * Connect wallet
      * @returns address of connected wallet
      */
