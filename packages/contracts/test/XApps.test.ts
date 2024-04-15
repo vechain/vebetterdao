@@ -1,6 +1,7 @@
 import { ethers } from "hardhat"
 import { expect } from "chai"
 import {
+  ZERO_ADDRESS,
   bootstrapAndStartEmissions,
   catchRevert,
   createProposalAndExecuteIt,
@@ -102,6 +103,53 @@ describe("X-Apps", function () {
       expect(app1ReceiverAddress).to.eql(otherAccounts[2].address)
       expect(app2ReceiverAddress).to.eql(otherAccounts[3].address)
     })
+
+    it("Cannot add an app that has ZERO address as the receiver", async function () {
+      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await catchRevert(
+        xAllocationVoting.connect(owner).addApp(ZERO_ADDRESS, otherAccounts[2].address, "My app", "metadataURI"),
+      )
+    })
+
+    it("Cannot add an app that has ZERO address as the admin", async function () {
+      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await catchRevert(
+        xAllocationVoting.connect(owner).addApp(otherAccounts[2].address, ZERO_ADDRESS, "My app", "metadataURI"),
+      )
+    })
+  })
+
+  describe("Admin address", function () {
+    it("Admin can update the admin address of an app", async function () {
+      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+
+      const app = await xAllocationVoting.getApp(app1Id)
+      expect(app.admin).to.eql(otherAccounts[0].address)
+
+      await xAllocationVoting.connect(owner).updateAppAdminAddress(app1Id, otherAccounts[1].address)
+
+      const updatedApp = await xAllocationVoting.getApp(app1Id)
+      expect(updatedApp.admin).to.eql(otherAccounts[1].address)
+      expect(updatedApp.admin).to.not.eql(app.admin)
+    })
+
+    it("Cannot update the admin address of a non-existing app", async function () {
+      const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      const newAdminAddress = ethers.Wallet.createRandom().address
+
+      await expect(xAllocationVoting.connect(owner).updateAppAdminAddress(app1Id, newAdminAddress)).to.be.rejected
+    })
   })
 
   describe("Apps metadata", function () {
@@ -189,6 +237,21 @@ describe("X-Apps", function () {
 
       const appURI = await xAllocationVoting.appURI(app1Id)
       expect(appURI).to.eql((await xAllocationVoting.baseURI()) + oldMetadataURI)
+    })
+
+    it("Cannot update metadata of non existing app", async function () {
+      const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      const newMetadataURI = "metadataURI2"
+
+      await expect(xAllocationVoting.connect(owner).updateAppMetadata(app1Id, newMetadataURI)).to.be.rejected
+    })
+
+    it("Cannot get app uri of non existing app", async function () {
+      const { xAllocationVoting } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+
+      await expect(xAllocationVoting.appURI(app1Id)).to.be.rejected
     })
   })
 
@@ -317,6 +380,14 @@ describe("X-Apps", function () {
       const appReceiverAddress2 = await xAllocationVoting.getAppReceiverAddress(app1Id)
       expect(appReceiverAddress2).to.eql(appReceiverAddress1)
     })
+
+    it("Cannot update the receiver address of a non-existing app", async function () {
+      const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      const newReceiverAddress = ethers.Wallet.createRandom().address
+
+      await expect(xAllocationVoting.connect(owner).updateAppReceiverAddress(app1Id, newReceiverAddress)).to.be.rejected
+    })
   })
 
   describe("App Moderators", function () {
@@ -438,6 +509,20 @@ describe("X-Apps", function () {
 
       isModerator = await xAllocationVoting.isAppModerator(app1Id, otherAccounts[2].address)
       expect(isModerator).to.be.false
+    })
+
+    it("Cannot add a moderator to a non-existing app", async function () {
+      const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+
+      await expect(xAllocationVoting.connect(owner).addAppModerator(app1Id, owner.address)).to.be.rejected
+    })
+
+    it("Cannot remove a moderator from a non-existing app", async function () {
+      const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+
+      await expect(xAllocationVoting.connect(owner).removeAppModerator(app1Id, owner.address)).to.be.rejected
     })
   })
 })
