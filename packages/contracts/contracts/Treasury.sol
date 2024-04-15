@@ -145,9 +145,9 @@ contract Treasury is
    */
   function transferVET(address _to, uint256 _value) public onlyGovernanceWhenNotPaused nonReentrant {
     require(address(this).balance >= _value, "Treasury: insufficient VET balance");
-    (bool sent,) = _to.call{value: _value}("");
+    (bool sent, ) = _to.call{ value: _value }("");
     require(sent, "Failed to send VET");
-    }
+  }
 
   /**
    * @notice transfer any ERC20 token to a given address
