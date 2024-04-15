@@ -62,6 +62,22 @@ describe("X-Allocation Voting", function () {
       expect(await xAllocationVoting.name()).to.eql("XAllocationVoting")
       expect(await xAllocationVoting.version()).to.eql("1")
     })
+
+    it("Counting mode is set correctly", async function () {
+      const { xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: false,
+      })
+
+      expect(await xAllocationVoting.COUNTING_MODE()).to.eql("support=x-allocations&quorum=auto")
+    })
+
+    it("Voter rewards address is set correctly", async function () {
+      const { xAllocationVoting, voterRewards } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await xAllocationVoting.voterRewards()).to.eql(await voterRewards.getAddress())
+    })
   })
 
   describe("Contract upgradeablity", () => {
@@ -729,6 +745,34 @@ describe("X-Allocation Voting", function () {
 
       await expect(xAllocationVoting.state(1)).to.be.reverted
     })
+
+    it("I can start a new round if no one voted in the previous one", async function () {
+      const { xAllocationVoting, otherAccounts, otherAccount, owner, emissions, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+
+      await getVot3Tokens(otherAccount, "1000")
+
+      await emissions.connect(minterAccount).start()
+
+      let roundId = await xAllocationVoting.currentRoundId()
+      expect(roundId).to.eql(1n)
+
+      await waitForRoundToEnd(Number(roundId))
+      expect(await xAllocationVoting.state(roundId)).to.eql(1n) // quorum failed
+
+      await expect(emissions.distribute()).to.not.be.reverted
+      roundId = await xAllocationVoting.currentRoundId()
+      expect(roundId).to.eql(2n)
+    })
   })
 
   describe("App availability for allocation voting", function () {
@@ -1216,34 +1260,6 @@ describe("X-Allocation Voting", function () {
 
       let appEarnings = await xAllocationPool.roundEarnings(roundId, app1)
       expect(appEarnings).to.eql([await xAllocationPool.baseAllocationAmount(roundId), 0n])
-    })
-
-    it("I can start a new round if no one voted in the previous one", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner, emissions, minterAccount } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
-
-      // Bootstrap emissions
-      await bootstrapEmissions()
-
-      await xAllocationVoting
-        .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
-
-      await getVot3Tokens(otherAccount, "1000")
-
-      await emissions.connect(minterAccount).start()
-
-      let roundId = await xAllocationVoting.currentRoundId()
-      expect(roundId).to.eql(1n)
-
-      await waitForRoundToEnd(Number(roundId))
-      expect(await xAllocationVoting.state(roundId)).to.eql(1n) // quorum failed
-
-      await expect(emissions.distribute()).to.not.be.reverted
-      roundId = await xAllocationVoting.currentRoundId()
-      expect(roundId).to.eql(2n)
     })
 
     it("I should be able to vote only for apps available in the allocation round", async function () {
