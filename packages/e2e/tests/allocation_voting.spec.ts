@@ -11,7 +11,8 @@ import { AllocationVote } from '../model/types';
 const votingDetails = [
   {
     accIndex: blockchainUtils.getRndAccountIndex(),
-    votingPower: 10,
+    b3trBalance: 0,
+    vot3Balance: 10,
     votes: [
       { appName: 'Vyvo', votePercentage: 50 },
       { appName: 'Mugshot', votePercentage: 20 },
@@ -20,7 +21,8 @@ const votingDetails = [
   },
   {
     accIndex: blockchainUtils.getRndAccountIndex(),
-    votingPower: 20,
+    b3trBalance: 1,
+    vot3Balance: 20,
     votes: [
       { appName: 'Vyvo', votePercentage: 20 },
       { appName: 'Mugshot', votePercentage: 50 },
@@ -29,7 +31,8 @@ const votingDetails = [
   },
   {
     accIndex: blockchainUtils.getRndAccountIndex(),
-    votingPower: 30,
+    b3trBalance: 2,
+    vot3Balance: 30,
     votes: [
       { appName: 'Vyvo', votePercentage: 30 },
       { appName: 'Mugshot', votePercentage: 20 },
@@ -42,7 +45,7 @@ const votingDetails = [
 const fundVotingAccounts = async () => {
   await test.step('Fund voting accounts', async() => {
     for (let voter of votingDetails) {
-      await blockchainUtils.fundAccount(voter.accIndex, BigNumber(1), BigNumber(voter.votingPower))
+      await blockchainUtils.fundAccount(voter.accIndex, BigNumber(voter.b3trBalance), BigNumber(voter.vot3Balance))
     } 
   })
 }
@@ -106,7 +109,7 @@ test.describe('Allocation voting', () => {
       const roundIndex = 1 // voting on round 1
       // vote from each user
       for (let voter of votingDetails) {
-        await castUserVote(page, voter.accIndex, roundIndex, voter.votes, voter.votingPower)
+        await castUserVote(page, voter.accIndex, roundIndex, voter.votes, voter.vot3Balance)
       }
       // complete round
       await blockchainUtils.waitForNextCycle()
@@ -121,7 +124,7 @@ test.describe('Allocation voting', () => {
       const menuBar = new MenuBar(page)
       const allocationsPage = await menuBar.gotoAllocations()
       const roundPage = await allocationsPage.clickOnRound(1)
-      const totalVotes = votingDetails.reduce((acc, voter) => acc + voter.votingPower, 0)
+      const totalVotes = votingDetails.reduce((acc, voter) => acc + voter.vot3Balance, 0)
       // assert total votes
       await roundPage.expectTotalVotes(totalVotes)
       // assert total voters
@@ -132,7 +135,7 @@ test.describe('Allocation voting', () => {
           if (!acc[vote.appName]) {
             acc[vote.appName] = 0
           }
-          acc[vote.appName] += vote.votePercentage * voter.votingPower / 100
+          acc[vote.appName] += vote.votePercentage * voter.vot3Balance / 100
         })
         return acc
       }, {})
@@ -143,11 +146,33 @@ test.describe('Allocation voting', () => {
     })
 
     test("Users can claim their allocation round rewards", async ({ page }) => {
-
+      for (let voter of votingDetails) {
+        const menuBar = new MenuBar(page)
+        const dashboardPage = await menuBar.gotoDashbard()
+        await veWorldMockClient.setSignerAccIndex(page, voter.accIndex)
+        await dashboardPage.connectWallet()
+        // assert rewards visible
+        await dashboardPage.expectVotingRewards()
+        // claim reward
+        await dashboardPage.clickClaimRewards()
+        // assert b3tr balance has increased
+        await dashboardPage.expectB3TRBalanceGreaterThan(voter.b3trBalance)
+        await dashboardPage.disconnectWallet(blockchainUtils.getAccountAddress(voter.accIndex))
+      }
     })
 
     test("Users can claim their allocation round NFT", async ({ page }) => {
-
+      for (let voter of votingDetails) {
+        const menuBar = new MenuBar(page)
+        const dashboardPage = await menuBar.gotoDashbard()
+        await veWorldMockClient.setSignerAccIndex(page, voter.accIndex)
+        await dashboardPage.connectWallet()
+        // claim NFT
+        await dashboardPage.mintNFT()
+        // assert NFT is displayed
+        await dashboardPage.expectNFTToBeDisplayed("GM Earth")
+        await dashboardPage.disconnectWallet(blockchainUtils.getAccountAddress(voter.accIndex))
+      }
     })
 
 })

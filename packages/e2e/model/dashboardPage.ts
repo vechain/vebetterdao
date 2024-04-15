@@ -17,6 +17,9 @@ export class DashboardPage {
     readonly b3trBalanceText: Locator
     readonly vot3BalanceText: Locator
     readonly swapButton: Locator
+    readonly claimRewardsButton: Locator
+    readonly votingRewardsAmount: Locator
+    readonly mintNFTButton: Locator
 
     constructor(page: Page) {
         this.page = page
@@ -27,6 +30,9 @@ export class DashboardPage {
         this.b3trBalanceText = this.page.locator('xpath=//p[contains(text(),"B3TR Tokens")]/preceding-sibling::h2')
         this.vot3BalanceText = this.page.locator('xpath=//p[contains(text(),"VOT3 Tokens")]/preceding-sibling::h2')
         this.swapButton = this.page.locator('xpath=//button[contains(text(), "Swap")]')
+        this.claimRewardsButton = this.page.locator('xpath=//button[contains(text(), "Claim")]')
+        this.votingRewardsAmount = this.page.getByTestId("voting-rewards")
+        this.mintNFTButton = this.page.locator('xpath=//button[contains(text(), "Mint now")]')
     }
 
     /**
@@ -85,6 +91,21 @@ export class DashboardPage {
     }
 
     /**
+     * Expect B3TR balance to be greater than expected balance
+     * @param expectedBalance expected B3TR balance
+     */
+    async expectB3TRBalanceGreaterThan(expectedBalance: number) {
+        await test.step(`Expect B3TR balance to be greater than ${expectedBalance}`, async() => {
+            await expect(async() => {
+                const text = await this.b3trBalanceText.first().textContent()
+                const textBalance = Number(text)
+                expect(textBalance).toBeGreaterThan(expectedBalance)
+            
+            }).toPass()
+        })
+    }
+
+    /**
      * Get VOT3 balance of connected wallet
      * @returns VOT3 balance
      */
@@ -116,6 +137,49 @@ export class DashboardPage {
             await this.page.locator('xpath=//button[contains(text(), "Swap")]').first().click();
             await expect(this.page.locator('section[role="dialog"]').first()).toBeVisible();
             return new SwapDialog(this.page)
+        })
+    }
+
+    /**
+     * Expect voting rewards to be displayed
+     */
+    async expectVotingRewards() {
+        await test.step('Expect voting rewards to be displayed', async() => {
+            await expect(this.votingRewardsAmount.first()).toBeVisible()
+            await expect(async() => {
+                const text = await this.votingRewardsAmount.first().textContent()
+                expect(Number(text)).toBeGreaterThan(0)
+            }).toPass()
+
+        })
+    }
+
+    /**
+     * Click claim rewards button
+     */
+    async clickClaimRewards() {
+        await test.step('Click Claim Rewards', async() => {
+            await this.claimRewardsButton.first().click()
+        })
+    }
+
+    /**
+     * Click on Mint Now
+     */
+    async mintNFT() {
+        await test.step('Click on Mint Now to mint NFT', async() => {
+            await this.mintNFTButton.first().click()
+        })
+    }
+
+    /**
+     * Assert that NFT is displayed
+     * @param nftName Name of NFT e.g. GM Earth
+     */
+    async expectNFTToBeDisplayed(nftName: string) {
+        await test.step(`Expect NFT ${nftName} to be displayed`, async() => {
+            const xpath = `xpath=//p[contains(text(),"${nftName} #")]`
+            await expect(this.page.locator(xpath).first()).toBeVisible()
         })
     }
 
