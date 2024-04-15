@@ -71,6 +71,14 @@ describe("X-Allocation Voting", function () {
       expect(await xAllocationVoting.COUNTING_MODE()).to.eql("support=x-allocations&quorum=auto")
     })
 
+    it("Clock mode is set correctly", async function () {
+      const { xAllocationVoting, vot3 } = await getOrDeployContractInstances({
+        forceDeploy: false,
+      })
+
+      expect(await xAllocationVoting.CLOCK_MODE()).to.eql(await vot3.CLOCK_MODE())
+    })
+
     it("Voter rewards address is set correctly", async function () {
       const { xAllocationVoting, voterRewards } = await getOrDeployContractInstances({
         forceDeploy: true,
