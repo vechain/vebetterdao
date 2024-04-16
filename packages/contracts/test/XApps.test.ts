@@ -130,7 +130,7 @@ describe("X-Apps", function () {
     })
   })
 
-  describe("Get apps", function () {
+  describe("Fetch apps", function () {
     it("Can retrieve app by id", async function () {
       const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
 
