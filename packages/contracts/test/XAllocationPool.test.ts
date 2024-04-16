@@ -14,7 +14,6 @@ import {
 } from "./helpers"
 import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
-import { XAllocationPoolJson } from ".."
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 
 describe("X-Allocation Pool", async function () {
@@ -463,7 +462,7 @@ describe("X-Allocation Pool", async function () {
       expect(isFinalized).to.eql(false)
 
       // CLAIMING
-      expect(await xAllocationPool.claim(round1, app1Id)).not.to.be.reverted
+      await expect(xAllocationPool.claim(round1, app1Id)).not.to.be.reverted
     })
 
     it("Can claim failed round after it's finalized", async function () {
@@ -507,7 +506,7 @@ describe("X-Allocation Pool", async function () {
       // ENDED SEEDING DATA
 
       // CLAIMING
-      expect(await xAllocationPool.claim(round1, app1Id)).not.to.be.reverted
+      await expect(xAllocationPool.claim(round1, app1Id)).not.to.be.reverted
     })
 
     it("Cannot claim active round", async function () {
@@ -864,13 +863,12 @@ describe("X-Allocation Pool", async function () {
     })
 
     it("Should calculate correct app shares with Quadratic funding distrubiton with max cap at 20%", async function () {
-      const { xAllocationVoting, otherAccounts, owner, b3tr, emissions, minterAccount, xAllocationPool } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const { xAllocationVoting, otherAccounts, owner, xAllocationPool } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       otherAccounts.forEach(async account => {
         await getVot3Tokens(account, "10000")
@@ -891,7 +889,7 @@ describe("X-Allocation Pool", async function () {
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))
 
       //Start allocation round
-      const round1 = await startNewAllocationRound(xAllocationVoting)
+      const round1 = await startNewAllocationRound()
       // Vote
       await xAllocationVoting
         .connect(otherAccounts[1])
@@ -929,7 +927,7 @@ describe("X-Allocation Pool", async function () {
           [ethers.parseEther("1000"), ethers.parseEther("0"), ethers.parseEther("100")],
         )
 
-      await waitForRoundToEnd(round1, xAllocationVoting)
+      await waitForRoundToEnd(round1)
 
       const app1Shares = await xAllocationPool.getAppShares(round1, app1Id)
       const app2Shares = await xAllocationPool.getAppShares(round1, app2Id)
@@ -943,14 +941,13 @@ describe("X-Allocation Pool", async function () {
     it("Should calculate correct app shares with Quadratic funding distrubiton with no max cap", async function () {
       const config = createLocalConfig()
       config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP = 100
-      const { xAllocationVoting, otherAccounts, owner, b3tr, emissions, minterAccount, xAllocationPool } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-          config,
-        })
+      const { xAllocationVoting, otherAccounts, owner, xAllocationPool } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       otherAccounts.forEach(async account => {
         await getVot3Tokens(account, "10000")
@@ -971,7 +968,7 @@ describe("X-Allocation Pool", async function () {
         .addApp(otherAccounts[5].address, otherAccounts[5], "My app #3", "metadataURI")
 
       //Start allocation round
-      const round1 = await startNewAllocationRound(xAllocationVoting)
+      const round1 = await startNewAllocationRound()
       // Vote
       await xAllocationVoting
         .connect(otherAccounts[1])
@@ -1009,7 +1006,7 @@ describe("X-Allocation Pool", async function () {
           [ethers.parseEther("1000"), ethers.parseEther("0"), ethers.parseEther("100")],
         )
 
-      await waitForRoundToEnd(round1, xAllocationVoting)
+      await waitForRoundToEnd(round1)
 
       const app1Shares = await xAllocationPool.getAppShares(round1, app1Id)
       const app2Shares = await xAllocationPool.getAppShares(round1, app2Id)
@@ -1025,14 +1022,13 @@ describe("X-Allocation Pool", async function () {
       config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP = 100
       config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE = 0
       config.INITIAL_X_ALLOCATION = 10000n
-      const { xAllocationVoting, otherAccounts, owner, b3tr, emissions, minterAccount, xAllocationPool } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-          config,
-        })
+      const { xAllocationVoting, otherAccounts, owner, xAllocationPool } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       otherAccounts.forEach(async account => {
         await getVot3Tokens(account, "10000")
@@ -1053,7 +1049,7 @@ describe("X-Allocation Pool", async function () {
         .addApp(otherAccounts[5].address, otherAccounts[5].address, "My app #3", "metadataURI")
 
       //Start allocation round
-      const round1 = await startNewAllocationRound(xAllocationVoting)
+      const round1 = await startNewAllocationRound()
       // Vote
       await xAllocationVoting
         .connect(otherAccounts[1])
@@ -1091,7 +1087,7 @@ describe("X-Allocation Pool", async function () {
           [ethers.parseEther("1000"), ethers.parseEther("0"), ethers.parseEther("100")],
         )
 
-      await waitForRoundToEnd(round1, xAllocationVoting)
+      await waitForRoundToEnd(round1)
 
       const app1app1Earnings = await xAllocationPool.roundEarnings(round1, app1Id)
       const app2app2Earnings = await xAllocationPool.roundEarnings(round1, app2Id)
