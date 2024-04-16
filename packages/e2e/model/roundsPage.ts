@@ -31,7 +31,7 @@ export class RoundsPage {
             }
             await this.castVoteButton.first().click()
             const voteCastDialog = new VoteCastDialog(this.page)
-            await voteCastDialog.expectVoteCompleted()
+            await voteCastDialog.expectDialogSuccess()
             await voteCastDialog.closeDialog()
         })
     }

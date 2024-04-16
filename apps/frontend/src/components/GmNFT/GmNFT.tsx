@@ -90,12 +90,12 @@ export const GmNFT = () => {
       )
 
     return (
-      <ModalContent w={"auto"} rounded="2xl">
-        <ModalCloseButton />
+      <ModalContent w={"auto"} rounded="2xl" data-testid="gmnft-modal">
+        <ModalCloseButton data-testid="gmnft-modal-close"/>
         <ModalBody display={"flex"} alignContent={"center"} alignItems={"center"} pt={12} px={6}>
           <VStack alignItems={"center"}>
             <Image src={imageData?.image} maxW={"auto"} rounded="3xl" />
-            <Heading alignSelf={"center"} size={"lg"} mt={4} textAlign={"center"}>
+            <Heading alignSelf={"center"} size={"lg"} mt={4} textAlign={"center"} data-testid={"gmnft-token-id"}>
               #{tokenID}
             </Heading>
           </VStack>

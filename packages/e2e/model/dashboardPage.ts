@@ -1,5 +1,4 @@
 import { Page } from 'playwright';
-import { HOMEPAGE } from '../utils/constants';
 import { expect } from '@playwright/test';
 import veWorldMockClient from '../utils/veworld-mock-client';
 import BigNumber from 'bignumber.js';
@@ -18,7 +17,7 @@ export class DashboardPage {
     readonly vot3BalanceText: Locator
     readonly swapButton: Locator
     readonly claimRewardsButton: Locator
-    readonly votingRewardsAmount: Locator
+    readonly votingRewardsAmount: string
     readonly mintNFTButton: Locator
 
     constructor(page: Page) {
@@ -31,7 +30,7 @@ export class DashboardPage {
         this.vot3BalanceText = this.page.locator('xpath=//p[contains(text(),"VOT3 Tokens")]/preceding-sibling::h2')
         this.swapButton = this.page.locator('xpath=//button[contains(text(), "Swap")]')
         this.claimRewardsButton = this.page.locator('xpath=//button[contains(text(), "Claim")]')
-        this.votingRewardsAmount = this.page.getByTestId("voting-rewards")
+        this.votingRewardsAmount = "voting-rewards"
         this.mintNFTButton = this.page.locator('xpath=//button[contains(text(), "Mint now")]')
     }
 
@@ -99,8 +98,8 @@ export class DashboardPage {
             await expect(async() => {
                 const text = await this.b3trBalanceText.first().textContent()
                 const textBalance = Number(text)
+                console.log(`B3TR balance: ${textBalance}`)
                 expect(textBalance).toBeGreaterThan(expectedBalance)
-            
             }).toPass()
         })
     }
@@ -141,24 +140,11 @@ export class DashboardPage {
     }
 
     /**
-     * Expect voting rewards to be displayed
-     */
-    async expectVotingRewards() {
-        await test.step('Expect voting rewards to be displayed', async() => {
-            await expect(this.votingRewardsAmount.first()).toBeVisible()
-            await expect(async() => {
-                const text = await this.votingRewardsAmount.first().textContent()
-                expect(Number(text)).toBeGreaterThan(0)
-            }).toPass()
-
-        })
-    }
-
-    /**
      * Click claim rewards button
      */
     async clickClaimRewards() {
         await test.step('Click Claim Rewards', async() => {
+            await expect(this.claimRewardsButton.first()).toBeEnabled()
             await this.claimRewardsButton.first().click()
         })
     }
@@ -168,6 +154,7 @@ export class DashboardPage {
      */
     async mintNFT() {
         await test.step('Click on Mint Now to mint NFT', async() => {
+            await expect(this.mintNFTButton.first()).toBeEnabled()
             await this.mintNFTButton.first().click()
         })
     }
