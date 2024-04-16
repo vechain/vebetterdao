@@ -206,7 +206,7 @@ yarn test:coverage:solidity
 
 This will generate a folder `coverage` in `packages/contracts` with the coverage report. Open the `index.html` file in the browser to view it.
 
-We forked some of the contracts from the `openzeppelin-contracts` library. We have added some custom logic to the contracts and we have written tests for them, but we did not write tests for the contracts that we did not modify. Therefore, the coverage report will show that some of the contracts have low coverage but this is expected and the real coverage for those contracts can be found [here](https://app.codecov.io/gh/OpenZeppelin/openzeppelin-contracts/tree/master/contracts%2Fgovernance).
+We forked some of the governance contracts from the `openzeppelin-contracts` library. We have added some custom logic to the contracts and we have written tests for them, but we did not write tests for the contracts that we did not modify. Therefore, the coverage report will show that some of the contracts have low coverage but this is expected and the real coverage for those contracts can be found [here](https://app.codecov.io/gh/OpenZeppelin/openzeppelin-contracts/tree/master/contracts%2Fgovernance).
 
 ### Manually deploy the contracts
 
