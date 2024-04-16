@@ -24,8 +24,11 @@ export const FUNDING_MIN_B3TR = BigNumber(10)
 export const FUNDING_MIN_VTHO = BigNumber(5000)
 export const FUNDING_MIN_VOT3 = BigNumber(5)
 export const DYNAMIC_ACCOUNT_MAX = 200
-export const DYNAMIC_ACCOUNT_MIN = 20
+export const DYNAMIC_ACCOUNT_MIN = 30
 
 // fixed user accounts
 export const DAO_ADMIN_ACCOUNT = 1
-export const FIXED_ACCOUNT1 = 10
+export const FIXED_VOTER1 = 10
+export const FIXED_VOTER2 = 11
+export const FIXED_VOTER3 = 12
+export const FIXED_ACCOUNT1 = 20

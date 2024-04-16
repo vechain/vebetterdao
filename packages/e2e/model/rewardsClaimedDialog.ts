@@ -2,11 +2,11 @@ import { Page } from 'playwright';
 import { BaseDialog } from './baseDialog';
 
 /**
- * Swap dialog model
+ * Rewards claimed dialog model
  */
-export class SwapConfirmationDialog extends BaseDialog{
+export class RewardsClaimedDialog extends BaseDialog{
 
     constructor(page: Page) {
-        super(page, "Swap Completed")
+        super(page, "Rewards Claimed")
     }
 }
