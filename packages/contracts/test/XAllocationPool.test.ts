@@ -721,7 +721,7 @@ describe("X-Allocation Pool", async function () {
       expect(app3Balance).to.eql(baseAllocationAmount)
     })
 
-    it("App shares cap and unallocated share of a past round and should remain the same even if value has been updated", async function () {
+    it("App shares cap and unallocated share of a past round should be checkpointed", async function () {
       const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
