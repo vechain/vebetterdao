@@ -48,14 +48,17 @@ contract XAllocationPool is
     _disableInitializers();
   }
 
-  function initialize(address _admin, address upgrader, address b3trAddress, address treasury) public initializer {
+  function initialize(address _admin, address upgrader, address _b3trAddress, address _treasury) public initializer {
+    require(_b3trAddress != address(0), "XAllocationPool: new b3tr is the zero address");
+    require(_treasury != address(0), "XAllocationPool: new treasury is the zero address");
+
     __AccessControl_init();
     __ReentrancyGuard_init();
     __UUPSUpgradeable_init();
 
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
-    $.b3tr = IB3TR(b3trAddress);
-    $.treasury = ITreasury(treasury);
+    $.b3tr = IB3TR(_b3trAddress);
+    $.treasury = ITreasury(_treasury);
 
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     _grantRole(UPGRADER_ROLE, upgrader);
@@ -66,18 +69,31 @@ contract XAllocationPool is
   // ---------- Setters ---------- //
 
   function setXAllocationVotingAddress(address xAllocationVoting_) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(xAllocationVoting_ != address(0), "XAllocationPool: new xAllocationVoting is the zero address");
+
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     $._xAllocationVoting = IXAllocationVotingGovernor(xAllocationVoting_);
   }
 
   function setEmissionsAddress(address emissions_) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(emissions_ != address(0), "XAllocationPool: new emissions is the zero address");
+
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     $._emissions = IEmissions(emissions_);
   }
 
   function setTreasuryAddress(address treasury_) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(treasury_ != address(0), "XAllocationPool: new treasury is the zero address");
+
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     $.treasury = ITreasury(treasury_);
+  }
+
+  function setB3trAddress(address b3tr_) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(b3tr_ != address(0), "XAllocationPool: new b3tr is the zero address");
+
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    $.b3tr = IB3TR(b3tr_);
   }
 
   function claim(uint256 roundId, bytes32 appId) public nonReentrant {
@@ -312,13 +328,13 @@ contract XAllocationPool is
     return $._emissions;
   }
 
+  function treasury() public view returns (ITreasury) {
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    return $.treasury;
+  }
+
   function b3tr() public view returns (IB3TR) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     return $.b3tr;
-  }
-
-  function claimedRewards(bytes32 appId, uint256 roundId) public view returns (bool) {
-    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
-    return $.claimedRewards[appId][roundId];
   }
 }
