@@ -160,6 +160,7 @@ describe("X-Apps", function () {
     })
 
     // Test is disabled because it takes a bit too long to run
+    console.log("Skipping test: Can index up to 1300 apps")
     // it("Can index up to 1300 apps", async function () {
     //   const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
 

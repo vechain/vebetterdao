@@ -16,6 +16,7 @@ import {
 import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
+import { deployProxy } from "../scripts/helpers"
 
 describe("X-Allocation Pool", async function () {
   describe("Contract upgradeablity", () => {
@@ -92,6 +93,20 @@ describe("X-Allocation Pool", async function () {
 
       expect(newImplAddress.toUpperCase()).to.not.eql(currentImplAddress.toUpperCase())
       expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
+    })
+
+    it("Cannot deploy contract with zero address", async function () {
+      const { b3tr, treasury, owner } = await getOrDeployContractInstances({
+        forceDeploy: false,
+      })
+
+      await expect(
+        deployProxy("XAllocationPool", [owner.address, owner.address, ZERO_ADDRESS, await treasury.getAddress()]),
+      ).to.be.reverted
+
+      await expect(
+        deployProxy("XAllocationPool", [owner.address, owner.address, await b3tr.getAddress(), ZERO_ADDRESS]),
+      ).to.be.reverted
     })
   })
 
@@ -560,6 +575,18 @@ describe("X-Allocation Pool", async function () {
         let claimableRewardsR2App1 = await xAllocationPool.roundEarnings(round2, app1Id)
         expect(claimableRewardsR2App1[0]).to.eql(expectedVariableAllocationR2App1 + expectedBaseAllocationR2)
       })
+
+      it("Cannot calculate base allocation amount and app shares if xAllocationVoting is not set", async function () {
+        const contract = await ethers.getContractFactory("XAllocationPool")
+        const xAllocationPool = await contract.deploy()
+        await xAllocationPool.waitForDeployment()
+
+        let roundId = await startNewAllocationRound()
+
+        await expect(xAllocationPool.baseAllocationAmount(roundId)).to.be.reverted
+        await expect(xAllocationPool.getAppShares(roundId, ethers.keccak256(ethers.toUtf8Bytes("My app")))).to.be
+          .reverted
+      })
     })
 
     describe("App earnings", async function () {
@@ -781,6 +808,71 @@ describe("X-Allocation Pool", async function () {
         expect(app2EarningsInRound3).to.eql(await xAllocationPool.roundEarnings(round3, app2Id))
         expect(app3EarningsInRound3).to.eql(await xAllocationPool.roundEarnings(round3, app3Id))
         expect((await xAllocationPool.roundEarnings(round3, app3Id))[0]).to.eql(0n)
+      })
+
+      it("Cannot calculate earnings if xAllocationVoting is not set", async function () {
+        const contract = await ethers.getContractFactory("XAllocationPool")
+        const xAllocationPool = await contract.deploy()
+        await xAllocationPool.waitForDeployment()
+
+        let roundId = await startNewAllocationRound()
+
+        await expect(xAllocationPool.currentRoundEarnings(ethers.keccak256(ethers.toUtf8Bytes("My app")))).to.be
+          .reverted
+        await expect(xAllocationPool.roundEarnings(roundId, ethers.keccak256(ethers.toUtf8Bytes("My app")))).to.be
+          .reverted
+      })
+
+      it("Earnings should be calculated correctly when round failed", async function () {
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
+
+        const voter1 = otherAccounts[1]
+        await getVot3Tokens(voter1, "1000")
+
+        //Add apps
+        const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+        const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
+        await xAllocationVoting
+          .connect(owner)
+          .addApp(otherAccounts[2].address, otherAccounts[2].address, "My app", "metadataURI")
+        await xAllocationVoting
+          .connect(owner)
+          .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app #2", "metadataURI")
+
+        // Bootstrap emissions
+        await bootstrapEmissions()
+        await emissions.connect(minterAccount).start()
+
+        const round1 = await xAllocationVoting.currentRoundId()
+
+        // Vote
+        await xAllocationVoting
+          .connect(voter1)
+          .castVote(round1, [app1Id, app2Id], [ethers.parseEther("100"), ethers.parseEther("900")])
+
+        await waitForRoundToEnd(Number(round1))
+        let state = await xAllocationVoting.state(round1)
+        expect(state).to.eql(2n) // succeeded
+
+        const app1Earnings = await xAllocationPool.roundEarnings(round1, app1Id)
+        const app2Earnings = await xAllocationPool.roundEarnings(round1, app2Id)
+
+        // Start new round
+        await emissions.connect(minterAccount).distribute()
+        const round2 = await xAllocationVoting.currentRoundId()
+
+        await waitForRoundToEnd(Number(round2))
+        state = await xAllocationVoting.state(round2)
+        expect(state).to.eql(1n) // failed
+
+        const app1EarningsInRound2 = await xAllocationPool.roundEarnings(round2, app1Id)
+        const app2EarningsInRound2 = await xAllocationPool.roundEarnings(round2, app2Id)
+
+        expect(app1Earnings).to.eql(app1EarningsInRound2)
+        expect(app2Earnings).to.eql(app2EarningsInRound2)
       })
     })
     describe("App claiming", async function () {
@@ -1216,6 +1308,88 @@ describe("X-Allocation Pool", async function () {
         const claimableAmount = await xAllocationPool.claimableAmount(round1, app1Id)
         expect(claimableAmount[0]).to.eql(0n)
       })
+
+      it("Cannot claim 0 rewards", async function () {
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
+
+        const voter1 = otherAccounts[1]
+        await getVot3Tokens(voter1, "1000")
+
+        await xAllocationVoting.setBaseAllocationPercentage(0)
+        expect(await xAllocationVoting.baseAllocationPercentage()).to.eql(0n)
+
+        //Add apps
+        const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+        const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
+        await xAllocationVoting
+          .connect(owner)
+          .addApp(otherAccounts[6].address, otherAccounts[6].address, "My app", "metadataURI")
+        await xAllocationVoting
+          .connect(owner)
+          .addApp(otherAccounts[7].address, otherAccounts[7].address, "My app #2", "metadataURI")
+
+        // Bootstrap emissions
+        await bootstrapEmissions()
+
+        await emissions.connect(minterAccount).start()
+
+        const round1 = await xAllocationVoting.currentRoundId()
+
+        // Vote
+        await xAllocationVoting
+          .connect(voter1)
+          .castVote(round1, [app1Id, app2Id], [ethers.parseEther("0"), ethers.parseEther("1000")])
+
+        await waitForRoundToEnd(Number(round1))
+        let state = await xAllocationVoting.state(round1)
+        expect(state).to.eql(2n)
+
+        const claimableAmount = await xAllocationPool.claimableAmount(round1, app1Id)
+        expect(claimableAmount[0]).to.eql(0n)
+
+        await catchRevert(xAllocationPool.connect(otherAccounts[6]).claim(round1, app1Id))
+      })
+
+      it("Cannot claim if b3tr token is paused", async function () {
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount, b3tr } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
+
+        const voter1 = otherAccounts[1]
+        await getVot3Tokens(voter1, "1000")
+
+        //Add apps
+        const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+        const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
+        await xAllocationVoting
+          .connect(owner)
+          .addApp(otherAccounts[6].address, otherAccounts[6].address, "My app", "metadataURI")
+        await xAllocationVoting
+          .connect(owner)
+          .addApp(otherAccounts[7].address, otherAccounts[7].address, "My app #2", "metadataURI")
+
+        // Bootstrap emissions -> sends funds to contract
+        await bootstrapEmissions()
+        await emissions.connect(minterAccount).start()
+
+        const round1 = await xAllocationVoting.currentRoundId()
+
+        // Vote
+        await xAllocationVoting
+          .connect(voter1)
+          .castVote(round1, [app1Id, app2Id], [ethers.parseEther("0"), ethers.parseEther("1000")])
+
+        await waitForRoundToEnd(Number(round1))
+
+        // pause b3tr transfer
+        await b3tr.pause()
+
+        await catchRevert(xAllocationPool.connect(otherAccounts[6]).claim(round1, app1Id))
+      })
     })
     describe("Unallocated funds", async function () {
       it("Unallocated rewards are returned to the treasury", async function () {
@@ -1269,6 +1443,57 @@ describe("X-Allocation Pool", async function () {
 
         expect(treasuryBalanceAfter).to.eql(treasuryBalanceBefore + app1Revenue[1] + app2Revenue[1])
         expect(treasuryBalanceAfter - treasuryBalanceBefore).to.be.gt(0)
+      })
+
+      it("Cannot transfer unallocated funds if b3tr token is paused", async function () {
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount, b3tr, treasury } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
+
+        const voter1 = otherAccounts[1]
+        await getVot3Tokens(voter1, "1000")
+
+        //Add apps
+        const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+        const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
+        await xAllocationVoting
+          .connect(owner)
+          .addApp(otherAccounts[6].address, otherAccounts[6].address, "My app", "metadataURI")
+        await xAllocationVoting
+          .connect(owner)
+          .addApp(otherAccounts[7].address, otherAccounts[7].address, "My app #2", "metadataURI")
+
+        // Bootstrap emissions -> sends funds to contract
+        await bootstrapEmissions()
+        await emissions.connect(minterAccount).start()
+
+        const round1 = await xAllocationVoting.currentRoundId()
+
+        // Vote
+        await xAllocationVoting
+          .connect(voter1)
+          .castVote(round1, [app1Id, app2Id], [ethers.parseEther("0"), ethers.parseEther("1000")])
+
+        await waitForRoundToEnd(Number(round1))
+        expect(await xAllocationVoting.state(round1)).to.eql(2n) // succeeded
+
+        const unallocatedAmount = (await xAllocationPool.claimableAmount(round1, app2Id))[1]
+        expect(unallocatedAmount).to.be.gt(0n)
+
+        const treasuryBalanceBefore = await b3tr.balanceOf(await treasury.getAddress())
+
+        // pause b3tr transfer
+        await b3tr.pause()
+
+        await catchRevert(xAllocationPool.connect(otherAccounts[6]).claim(round1, app2Id))
+
+        const treasuryBalanceAfter = await b3tr.balanceOf(await treasury.getAddress())
+        expect(treasuryBalanceAfter).to.eql(treasuryBalanceBefore)
+
+        await b3tr.unpause()
+        await xAllocationPool.connect(otherAccounts[6]).claim(round1, app2Id)
+        expect(await b3tr.balanceOf(await treasury.getAddress())).to.eql(treasuryBalanceBefore + unallocatedAmount)
       })
     })
 
