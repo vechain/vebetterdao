@@ -63,15 +63,14 @@ const adminOpenRound = async (page: Page) => {
     await adminPage.startEmissions()
     await dashboardPage.disconnectWallet(adminAddress)
     await page.evaluate(() => window.localStorage.clear());
-  await page.evaluate(() => window.sessionStorage.clear());
+    await page.evaluate(() => window.sessionStorage.clear());
   })
 }
 
 
 // Flow to cast a user vote 
 const castUserVote = async (page: Page, accountIndex: number, roundIndex: number, 
-    splitPercentage: Array<AllocationVote>, 
-    votingPower: number) => {
+    splitPercentage: Array<AllocationVote>) => {
   await test.step('Cast user vote', async() => {
     const menuBar = new MenuBar(page)
     const dashboardPage = await menuBar.gotoDashbard()
@@ -92,7 +91,7 @@ test.describe('Allocation voting', () => {
     test.describe.configure({ mode: 'serial' });
 
     test.beforeAll(async () => {
-      await fundVotingAccounts()
+      // await fundVotingAccounts()
     })
 
     // setup veworld mock before each test
@@ -109,7 +108,7 @@ test.describe('Allocation voting', () => {
       const roundIndex = 1 // voting on round 1
       // vote from each user
       for (let voter of votingDetails) {
-        await castUserVote(page, voter.accIndex, roundIndex, voter.votes, voter.vot3Balance)
+        await castUserVote(page, voter.accIndex, roundIndex, voter.votes)
       }
       // complete round
       await blockchainUtils.waitForNextCycle()
@@ -123,6 +122,8 @@ test.describe('Allocation voting', () => {
     test("Can view the results of a completed allocation round", async ({ page }) => {
       const menuBar = new MenuBar(page)
       const allocationsPage = await menuBar.gotoAllocations()
+      await allocationsPage.expectOnPage()
+      await allocationsPage.expectRoundStatus(1, 'Succeeded')
       const roundPage = await allocationsPage.clickOnRound(1)
       const totalVotes = votingDetails.reduce((acc, voter) => acc + voter.vot3Balance, 0)
       // assert total votes
