@@ -4,6 +4,11 @@ import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethe
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { getOrDeployContractInstances } from "./deploy"
 import { mine } from "@nomicfoundation/hardhat-network-helpers"
+import { clauseBuilder } from "@vechain/sdk-core"
+import { type TransactionClause, type TransactionBody } from "@vechain/sdk-core"
+import { ZERO_ADDRESS } from "./const"
+import { buildTxBody, signAndSendTx } from "../../scripts/helpers/txHelper"
+import { getAccounts } from "../../scripts/helpers/seedAccounts"
 
 export const waitForNextBlock = async () => {
   if (network.name === "hardhat") {
@@ -11,13 +16,18 @@ export const waitForNextBlock = async () => {
     return
   }
 
-  // since we do not support ethers' evm_mine yet, we need to wait for a block with a timeout function
-  let startingBlock = await ethers.provider.getBlockNumber()
-  let currentBlock
-  do {
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    currentBlock = await ethers.provider.getBlockNumber()
-  } while (startingBlock === currentBlock)
+  // since we do not support ethers' evm_mine yet, do a vet transaction to force a block
+  const clauses: TransactionClause[] = []
+  clauses.push(clauseBuilder.transferVET(ZERO_ADDRESS, BigInt(1)))
+
+  const accounts = getAccounts(3)
+  const signer = accounts[2]
+
+  const body: TransactionBody = await buildTxBody(clauses, signer.address, 32, 10_000_000)
+
+  if (!signer.privateKey) throw new Error("No private key")
+
+  return await signAndSendTx(body, signer.privateKey)
 }
 
 export const moveBlocks = async (blocks: number) => {
