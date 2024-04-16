@@ -252,7 +252,7 @@ export const castVotesToXDapps = async (
             [roundId, splits.map(split => split.app), splits.map(split => split.weight)],
           ),
         )
-        const body: TransactionBody = await buildTxBody(clauses, account.address, 32, 200_000 * splits.length)
+        const body: TransactionBody = await buildTxBody(clauses, account.address, 32, 250_000 * splits.length)
 
         await signAndSendTx(body, account.privateKey)
       }),
