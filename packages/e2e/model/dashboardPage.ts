@@ -73,7 +73,8 @@ export class DashboardPage {
         return await test.step('Getting B3TR balance', async() => {
             const text = await this.b3trBalanceText.first().textContent()
             const textBalance = text ?? (() => { throw new Error('B3TR balance not found') })()
-            const balance = new BigNumber(textBalance)
+            const fullTextBalance = textBalance.replace('K', '000')
+            const balance = new BigNumber(fullTextBalance)
             console.log(`B3TR balance: ${balance}`)
             return balance
         })
@@ -96,10 +97,9 @@ export class DashboardPage {
     async expectB3TRBalanceGreaterThan(expectedBalance: number) {
         await test.step(`Expect B3TR balance to be greater than ${expectedBalance}`, async() => {
             await expect(async() => {
-                const text = await this.b3trBalanceText.first().textContent()
-                const textBalance = Number(text)
-                console.log(`B3TR balance: ${textBalance}`)
-                expect(textBalance).toBeGreaterThan(expectedBalance)
+                const balance = await this.getB3TRBalance()
+                const expected = new BigNumber(expectedBalance)
+                expect(balance.isGreaterThan(expected)).toBeTruthy()
             }).toPass()
         })
     }
@@ -112,8 +112,8 @@ export class DashboardPage {
         return await test.step('Getting VOT3 balance', async() => {
             const text = await this.vot3BalanceText.first().textContent()
             const textBalance = text ?? (() => { throw new Error('VOT3 balance not found') })()
-            const balance = new BigNumber(textBalance)
-            console.log(`VOT3 balance: ${balance}`)
+            const fullTextBalance = textBalance.replace('K', '000')
+            const balance = new BigNumber(fullTextBalance)
             return balance
         }) 
     }
