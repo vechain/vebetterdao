@@ -9,7 +9,7 @@ import {
   distributeEmissions,
   startEmissions,
   swapB3trForVot3,
-} from "./fastContractFunctions"
+} from "../helpers/fastContractFunctions"
 
 const ACCT_OFFSET = 15
 // Number of users to seed. If you increase this number you will need to increase the EMISSIONS_CYCLE_DURATION to make sure there is enough time to vote

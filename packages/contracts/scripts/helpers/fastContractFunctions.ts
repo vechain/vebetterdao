@@ -20,9 +20,9 @@ import {
   VTHO_ADDRESS,
   unitsUtils,
 } from "@vechain/sdk-core"
-import { buildTxBody, signAndSendTx } from "../helpers/txHelper"
-import { SeedAccount } from "../helpers/seedAccounts"
-import { chunk } from "../helpers/chunk"
+import { buildTxBody, signAndSendTx } from "./txHelper"
+import { SeedAccount } from "./seedAccounts"
+import { chunk } from "./chunk"
 
 export type App = {
   address: string
