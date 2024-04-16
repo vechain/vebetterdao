@@ -17,6 +17,7 @@ import { setupLocalEnvironment, setupTestEnvironment } from "./setup"
 import { simulateRounds } from "./simulateRounds"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { deployProxy } from "../helpers"
+import { shouldRunSimulation } from "@repo/config/contracts"
 
 // GalaxyMember NFT Values
 const name = "VeBetterDAO Galaxy Member"
@@ -229,7 +230,7 @@ export async function deployAll(config: ContractsConfig) {
   }
 
   // ---------- Run Simulation ---------- //
-  if (network.name === "vechain_solo" && config.RUN_SIMULATION) {
+  if (shouldRunSimulation()) {
     await simulateRounds(b3tr, vot3, xAllocationVoting, emissions, voterRewards, treasury)
   }
 

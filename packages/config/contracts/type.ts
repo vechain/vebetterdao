@@ -1,8 +1,6 @@
 export type ContractsConfig = {
   NEXT_PUBLIC_APP_ENV: "local" | "solo-staging" | "testnet" | "production"
 
-  RUN_SIMULATION: boolean
-
   B3TR_CAP: number
   B3TR_GOVERNOR_QUORUM_PERCENTAGE: number
   B3TR_GOVERNOR_MIN_DELAY: number
