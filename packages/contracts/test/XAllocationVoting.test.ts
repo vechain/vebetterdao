@@ -22,6 +22,8 @@ import {
 } from "./helpers"
 import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
+import { deployProxy } from "../scripts/helpers"
+import { XAllocationVoting } from "../typechain-types"
 
 describe("X-Allocation Voting", function () {
   describe("Deployment", function () {
@@ -45,6 +47,37 @@ describe("X-Allocation Voting", function () {
 
       const INVALID_ID = "0xffffffff"
       expect(await xAllocationVoting.supportsInterface(INVALID_ID)).to.eql(false)
+    })
+
+    it("Can set multiple admins during deployment", async function () {
+      const { voterRewards, timeLock, emissions, vot3, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: false,
+      })
+      const xAllocationVoting = (await deployProxy("XAllocationVoting", [
+        {
+          vot3Token: await vot3.getAddress(),
+          quorumPercentage: 1,
+          initialVotingPeriod: 2,
+          b3trGovernor: await timeLock.getAddress(),
+          voterRewards: await voterRewards.getAddress(),
+          emissions: await emissions.getAddress(),
+          admins: [await timeLock.getAddress(), otherAccounts[2].address, otherAccounts[2].address],
+          upgrader: otherAccounts[2].address,
+          xAppsBaseURI: "ipfs://",
+          baseAllocationPercentage: 2,
+          appSharesCap: 2,
+        },
+      ])) as XAllocationVoting
+
+      expect(
+        await xAllocationVoting.hasRole(await xAllocationVoting.DEFAULT_ADMIN_ROLE(), await timeLock.getAddress()),
+      ).to.eql(true)
+      expect(
+        await xAllocationVoting.hasRole(await xAllocationVoting.DEFAULT_ADMIN_ROLE(), otherAccounts[2].address),
+      ).to.eql(true)
+      expect(
+        await xAllocationVoting.hasRole(await xAllocationVoting.DEFAULT_ADMIN_ROLE(), otherAccounts[2].address),
+      ).to.eql(true)
     })
 
     it("Should support ERC 165 interface", async () => {

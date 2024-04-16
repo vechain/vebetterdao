@@ -87,8 +87,7 @@ contract XAllocationVoting is
   function setB3trGovernanceAddress(address b3trGovernor_) public override onlyRole(DEFAULT_ADMIN_ROLE) {
     require(b3trGovernor_ != address(0), "XAllocationVoting: new B3trGovernor is the zero address");
 
-    XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
-    $._b3trGovernor = IGovernor(payable(b3trGovernor_));
+    _getXAllocationVotingGovernorStorage()._b3trGovernor = IGovernor(payable(b3trGovernor_));
   }
 
   function startNewRound() public override onlyRole(ROUND_STARTER_ROLE) returns (uint256) {
@@ -143,11 +142,11 @@ contract XAllocationVoting is
     _grantRole(DEFAULT_ADMIN_ROLE, _newAdmin);
   }
 
-  function setBaseURI(string memory baseURI_) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setBaseURI(string memory baseURI_) external onlyRole(DEFAULT_ADMIN_ROLE) {
     _setBaseURI(baseURI_);
   }
 
-  function setAppSharesCap(uint256 appSharesCap_) public virtual override onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setAppSharesCap(uint256 appSharesCap_) external virtual override onlyRole(DEFAULT_ADMIN_ROLE) {
     _setAppSharesCap(appSharesCap_);
   }
 
