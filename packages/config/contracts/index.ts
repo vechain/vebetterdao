@@ -19,3 +19,7 @@ export function getContractsConfig() {
       throw new Error(`Invalid NEXT_PUBLIC_APP_ENV "${process.env.NEXT_PUBLIC_APP_ENV}"`)
   }
 }
+
+export function shouldRunSimulation() {
+  return process.env.NEXT_PUBLIC_APP_ENV == "local" && process.env.RUN_SIMULATION === "true"
+}
