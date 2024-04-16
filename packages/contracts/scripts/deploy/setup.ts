@@ -1,6 +1,8 @@
 import { Emissions, Treasury, XAllocationVoting } from "../../typechain-types"
 import { SeedStrategy, getAccounts, getSeedAccounts } from "../helpers/seedAccounts"
-import { addXDapps, airdropB3trFromTreasury, bootstrapEmissions } from "../helpers/fastContractFunctions"
+import { bootstrapEmissions } from "../helpers/emissions"
+import { addXDapps } from "../helpers/xApp"
+import { airdropB3trFromTreasury } from "../helpers/airdrop"
 
 export const setupLocalEnvironment = async (
   xAllocationVoting: XAllocationVoting,

@@ -1,15 +1,11 @@
 import { B3TR, Emissions, Treasury, VOT3, VoterRewards, XAllocationVoting } from "../../typechain-types"
 import { moveBlocks } from "../../test/helpers"
 import { SeedStrategy, getAccounts, getSeedAccounts } from "../helpers/seedAccounts"
-import {
-  airdropB3trFromTreasury,
-  airdropVTHO,
-  castVotesToXDapps,
-  claimVoterRewards,
-  distributeEmissions,
-  startEmissions,
-  swapB3trForVot3,
-} from "../helpers/fastContractFunctions"
+import { distributeEmissions, startEmissions } from "../helpers/emissions"
+import { airdropB3trFromTreasury, airdropVTHO } from "../helpers/airdrop"
+import { swapB3trForVot3 } from "../helpers/swap"
+import { castVotesToXDapps } from "../helpers/xApp"
+import { claimVoterRewards } from "../helpers/voterRewards"
 
 const ACCT_OFFSET = 15
 // Number of users to seed. If you increase this number you will need to increase the EMISSIONS_CYCLE_DURATION to make sure there is enough time to vote
