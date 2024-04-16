@@ -76,7 +76,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
         }),
         cursor: "pointer",
         transition: "all 0.2s ease-in-out",
-      }}>
+      }} data-testid={"round-#" + round.roundId + "-card"}>
       <CardBody>
         <HStack justify={"space-between"} w="full">
           <Stack w="full" spacing={1}>
@@ -118,7 +118,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
                   )}
                 </Skeleton>
               </Box>
-              <Icon as={FaAngleRight} boxSize={6} color={cardTextColor} />
+              <Icon as={FaAngleRight} boxSize={6} color={cardTextColor} data-testid={"round-#" + round.roundId + "-link"}/>
             </HStack>
           </Stack>
         </HStack>

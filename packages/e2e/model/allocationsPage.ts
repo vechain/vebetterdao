@@ -1,5 +1,5 @@
 import { Page } from 'playwright';
-import { test, expect } from '@playwright/test';
+import { test, expect, Locator } from '@playwright/test';
 import { RoundsPage } from './roundsPage';
 
 /**
@@ -7,9 +7,20 @@ import { RoundsPage } from './roundsPage';
  */
 export class AllocationsPage {
     private page: Page
+    readonly pageTitleText: Locator
 
     constructor(page: Page) {
         this.page = page
+        this.pageTitleText = this.page.locator('xpath=//h2[contains(text(), "Total Allocations")]')
+    }
+
+    /**
+     * Assert on allocations page
+     */
+    async expectOnPage() {
+        await test.step('Expect on allocations page', async() => {
+            await expect(this.pageTitleText.first()).toBeVisible()
+        })
     }
 
     /**
@@ -19,8 +30,12 @@ export class AllocationsPage {
      */
     async clickOnRound(roundIndex: number): Promise<RoundsPage> {
         return await test.step(`Click on round #${roundIndex}`, async() => {
-            const xpath = `xpath=//h3[text()[contains(.,"${roundIndex}")]]`
-            await this.page.locator(xpath).first().click()
+            const id = `round-#${roundIndex}-card`
+            await expect(this.page.getByTestId(id)).toHaveCount(1)
+            await this.page.getByTestId(id).blur()
+            await this.page.getByTestId(id).hover()
+            await this.page.getByTestId(id).focus()
+            await this.page.getByTestId(id).click()
             return new RoundsPage(this.page)
         })
     }

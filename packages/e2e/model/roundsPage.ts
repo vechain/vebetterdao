@@ -24,9 +24,10 @@ export class RoundsPage {
             for (const vote of votes) {
                 const appName = vote.appName
                 const votePercentage = vote.votePercentage
-                const voteInput = this.page.locator(`xpath=//input[@data-testid="${appName}-vote"]`)
-                await expect(voteInput.first()).toBeEditable()
-                await voteInput.first().fill(String(votePercentage))
+                const xpath = `xpath=//input[@data-testid="${appName}-vote"]`
+                await expect(this.page.locator(xpath).first()).toBeEnabled()
+                await this.page.locator(xpath).first().scrollIntoViewIfNeeded()
+                await this.page.locator(xpath).first().fill(String(votePercentage))
             }
             await this.castVoteButton.first().click()
             const voteCastDialog = new VoteCastDialog(this.page)
