@@ -203,7 +203,7 @@ contract XAllocationPool is
       state == IXAllocationVotingGovernor.RoundState.Active || state == IXAllocationVotingGovernor.RoundState.Succeeded
     ) {
       lastSucceededRoundId = roundId;
-    } else if (state == IXAllocationVotingGovernor.RoundState.Failed) {
+    } else {
       // The first round is always considered as the last succeeded round
       // the round where previous round is pointing is the one we need
       lastSucceededRoundId = roundId == 1 ? roundId : xAllocationVoting().latestSucceededRoundId(roundId - 1);
