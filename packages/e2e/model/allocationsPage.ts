@@ -2,6 +2,7 @@ import { Page } from 'playwright';
 import { test, expect, Locator } from '@playwright/test';
 import { RoundsPage } from './roundsPage';
 import { delay } from '../utils/delay';
+import { MenuBar } from './menuBar';
 
 /**
  * Allocations page model
@@ -20,6 +21,7 @@ export class AllocationsPage {
      */
     async expectOnPage() {
         await test.step('Expect on allocations page', async() => {
+            await this.page.waitForLoadState()
             await expect(this.pageTitleText.first()).toBeVisible()
         })
     }
@@ -52,6 +54,12 @@ export class AllocationsPage {
                     console.log(`\t Error clicking on round #${roundIndex}: ${error}`)
                 } finally {
                     await delay(2000)
+                }
+                if (retry > 5) {
+                    console.log(`\t Reloading page`)
+                    const menuBar = new MenuBar(this.page)
+                    await menuBar.gotoDashbard()
+                    await menuBar.gotoAllocations()
                 }
             }
             if (retry >= 10) {
