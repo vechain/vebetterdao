@@ -35,14 +35,22 @@ export class AllocationsPage {
     async clickOnRound(roundIndex: number): Promise<RoundsPage> {
         return await test.step(`Click on round #${roundIndex}`, async() => {
             console.log(`Retry clicking on round #${roundIndex}`)
-            const id = `round-#${roundIndex}-card`
+            const id = `round-#${roundIndex}-link`
             const roundsPage = new RoundsPage(this.page)
             let retry = 0
-            for (retry = 0; retry < 10; retry++) {
+            const maxRetries = 10
+            for (retry = 0; retry < maxRetries; retry++) {
                 console.log(`\t Attempt #${retry + 1}`)
                 try {
                     const visible = await this.page.getByTestId(id).isVisible()
                     if (visible) {
+                        if (retry > 4) {
+                            console.log(`\t Attempting reloading page`)
+                            const menuBar = new MenuBar(this.page)
+                            await menuBar.gotoDashbard()
+                            await menuBar.gotoAllocations()
+                            await delay(5000)
+                        }
                         await this.page.getByTestId(id).blur()
                         await this.page.getByTestId(id).hover()
                         await this.page.getByTestId(id).focus()
@@ -53,16 +61,10 @@ export class AllocationsPage {
                 } catch (error) {
                     console.log(`\t Error clicking on round #${roundIndex}: ${error}`)
                 } finally {
-                    await delay(2000)
-                }
-                if (retry > 5) {
-                    console.log(`\t Reloading page`)
-                    const menuBar = new MenuBar(this.page)
-                    await menuBar.gotoDashbard()
-                    await menuBar.gotoAllocations()
+                    await delay(5000)
                 }
             }
-            if (retry >= 10) {
+            if (retry >= maxRetries) {
                 console.log(`\t Failed to click on round #${roundIndex} after ${retry} attempts`)
                 throw new Error(`Failed to click on round #${roundIndex}`)
             }
@@ -78,8 +80,8 @@ export class AllocationsPage {
      */
     async expectRoundStatus(roundIndex: number, state: string) {
         await test.step(`Expect round #${roundIndex} status to be ${state}`, async() => {
-            const xpath = `xpath=//p[@data-testid="round-#${roundIndex}-status"]`
-            await expect(this.page.locator(xpath)).toContainText(state)
+            const id = `round-#${roundIndex}-status`
+            await expect(this.page.getByTestId(id)).toContainText(state)
         })
     }
 
