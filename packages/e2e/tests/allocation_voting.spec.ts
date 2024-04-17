@@ -66,6 +66,7 @@ const adminOpenRound = async (page: Page) => {
     await dashboardPage.disconnectWallet(adminAddress)
     await page.evaluate(() => window.localStorage.clear());
     await page.evaluate(() => window.sessionStorage.clear());
+    await blockchainUtils.waitForNextCycle()
   })
 }
 
