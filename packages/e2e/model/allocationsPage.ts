@@ -32,6 +32,7 @@ export class AllocationsPage {
         return await test.step(`Click on round #${roundIndex}`, async() => {
             const id = `round-#${roundIndex}-card`
             await expect(this.page.getByTestId(id)).toHaveCount(1)
+            await this.expectRoundStatusToBeDisplayed(roundIndex)
             await this.page.getByTestId(id).blur()
             await this.page.getByTestId(id).hover()
             await this.page.getByTestId(id).focus()
@@ -49,6 +50,17 @@ export class AllocationsPage {
         await test.step(`Expect round #${roundIndex} status to be ${state}`, async() => {
             const xpath = `xpath=//p[@data-testid="round-#${roundIndex}-status"]`
             await expect(this.page.locator(xpath)).toContainText(state)
+        })
+    }
+
+    /**
+     * Expects the round to be displayed
+     * @param roundIndex index of the round
+     */
+    async expectRoundStatusToBeDisplayed(roundIndex: number) {
+        await test.step(`Expect round #${roundIndex} status to be displayed`, async() => {
+            const xpath = `xpath=//p[@data-testid="round-#${roundIndex}-status"]`
+            await expect(this.page.locator(xpath)).toBeVisible()
         })
     }
 
