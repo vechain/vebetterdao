@@ -14,11 +14,11 @@ export default defineConfig({
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on GHA if you accidentally left test.only in the source code. */
-  forbidOnly: !!process.env.CI,
+  forbidOnly: !!process.env.GITHUB_RUN_ID,
   /* Never retry failing tests */
   retries: 0,
   /* Set workers for GHA */
-  workers: process.env.CI ? 2 : undefined,
+  workers: process.env.GITHUB_RUN_ID ? 1 : undefined,
   /* HTML Reporter */
   reporter: [ ['html', { open: 'never' }] ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
