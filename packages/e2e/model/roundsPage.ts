@@ -22,8 +22,8 @@ export class RoundsPage {
      * @param roundIndex index of round
      */
     async expectOnPage(roundIndex: number, timeout?: number) {
-        await expect(this.roundTitleText).toBeVisible({ timeout})
-        await expect(this.roundTitleText).toHaveText(`Allocations | Round #${roundIndex}`, { timeout})
+        await expect(this.roundTitleText).toBeVisible({ timeout })
+        await expect(this.roundTitleText).toHaveText(`Allocations | Round #${roundIndex}`, { timeout })
     }
 
     /**
