@@ -189,9 +189,8 @@ export const useSendTransaction = ({
           const revertReason = await explainTxRevertReason(txReceipt)
           setError({
             type: "RevertReasonError",
-            reason: revertReason?.[0]?.revertReason,
+            reason: revertReason?.[0]?.revertReason ?? "Transaction reverted",
           })
-          console.error("revertReason", revertReason)
           setStatus("error")
         })()
 
