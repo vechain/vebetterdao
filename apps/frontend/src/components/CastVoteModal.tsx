@@ -76,7 +76,7 @@ export const CastVoteModal: React.FC<Props> = ({ isOpen, onOpen, onClose, propos
         onTryAgain={onTryAgain}
         pendingTitle="Casting vote..."
         txId={castVoteMutation.txReceipt?.meta.txID}
-        showExplorerButton={true}
+        showExplorerButton
       />
     )
 
