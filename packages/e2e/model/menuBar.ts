@@ -1,5 +1,5 @@
 import { Page } from 'playwright';
-import { Locator, test } from '@playwright/test';
+import { Locator, test, expect } from '@playwright/test';
 import { AdminPage } from './adminPage';
 import { DashboardPage } from './dashboardPage';
 import { AllocationsPage } from './allocationsPage';
@@ -46,7 +46,11 @@ export class MenuBar {
      */
     async gotoAllocations(): Promise<AllocationsPage> {
         return await test.step('Go to allocations', async () => {
-            await this.allocationsButton.first().click();
+            await expect( async () => {
+                await this.allocationsButton.first().click();
+                const allocationsPage = new AllocationsPage(this.page)
+                await allocationsPage.expectOnPage()
+            }).toPass()
             return new AllocationsPage(this.page)
         })
     }
