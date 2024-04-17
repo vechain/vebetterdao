@@ -14,7 +14,7 @@ const votingDetails = [
   {
     accIndex: FIXED_VOTER1,
     b3trBalance: 0,
-    vot3Balance: 10,
+    vot3Balance: 20,
     votes: [
       { appName: 'Vyvo', votePercentage: 50 },
       { appName: 'Mugshot', votePercentage: 20 },
@@ -24,7 +24,7 @@ const votingDetails = [
   {
     accIndex: FIXED_VOTER2,
     b3trBalance: 1,
-    vot3Balance: 20,
+    vot3Balance: 30,
     votes: [
       { appName: 'Vyvo', votePercentage: 20 },
       { appName: 'Mugshot', votePercentage: 50 },
@@ -34,7 +34,7 @@ const votingDetails = [
   {
     accIndex: FIXED_VOTER3,
     b3trBalance: 2,
-    vot3Balance: 30,
+    vot3Balance: 50,
     votes: [
       { appName: 'Vyvo', votePercentage: 30 },
       { appName: 'Mugshot', votePercentage: 20 },
