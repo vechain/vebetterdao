@@ -1,7 +1,6 @@
 import { Page } from 'playwright';
 import { test, expect, Locator } from '@playwright/test';
 import { RoundsPage } from './roundsPage';
-import { time } from 'console';
 import { delay } from '../utils/delay';
 
 /**
@@ -27,22 +26,37 @@ export class AllocationsPage {
 
     /**
      * Click on the round, this asserts the round page is displayed
+     * Note: This click has proven problematic, so it has a retry mechanism
      * @param roundIndex index of the round
      * @returns RoundsPage
      */
-    async clickOnRound(roundIndex: number, timeout: number = 60000): Promise<RoundsPage> {
+    async clickOnRound(roundIndex: number): Promise<RoundsPage> {
         return await test.step(`Click on round #${roundIndex}`, async() => {
+            console.log(`Retry clicking on round #${roundIndex}`)
             const id = `round-#${roundIndex}-card`
             const roundsPage = new RoundsPage(this.page)
-            let counter = 0
-            for (counter = 0; counter < 5; counter++) {
-                const visible = await this.page.getByTestId(id).isVisible()
-                if (visible) {
-                    await this.page.getByTestId(id).click()
-                } else {
-                    break
+            let retry = 0
+            for (retry = 0; retry < 10; retry++) {
+                console.log(`\t Attempt #${retry + 1}`)
+                try {
+                    const visible = await this.page.getByTestId(id).isVisible()
+                    if (visible) {
+                        await this.page.getByTestId(id).blur()
+                        await this.page.getByTestId(id).hover()
+                        await this.page.getByTestId(id).focus()
+                        await this.page.getByTestId(id).click()
+                    } else {
+                        break
+                    }
+                } catch (error) {
+                    console.log(`\t Error clicking on round #${roundIndex}: ${error}`)
+                } finally {
+                    await delay(2000)
                 }
-                await delay(1000)
+            }
+            if (retry >= 10) {
+                console.log(`\t Failed to click on round #${roundIndex} after ${retry} attempts`)
+                throw new Error(`Failed to click on round #${roundIndex}`)
             }
             await roundsPage.expectOnPage(roundIndex)
             return roundsPage
