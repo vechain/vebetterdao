@@ -1,7 +1,8 @@
+import { getConfig } from "@repo/config"
 import { TransactionHandler, networkInfo, type TransactionClause, type TransactionBody } from "@vechain/sdk-core"
 import { HttpClient, ThorClient } from "@vechain/sdk-network"
 
-const thorNetwork = new HttpClient("http://localhost:8669")
+const thorNetwork = new HttpClient(getConfig().nodeUrl)
 const thorClient = new ThorClient(thorNetwork)
 
 export const getBestBlockRef = async (): Promise<string> => {
@@ -51,6 +52,7 @@ export const signAndSendTx = async (body: TransactionBody, pk: Buffer) => {
   const sendTransactionResult = await thorClient.transactions.sendTransaction(signedTx)
 
   const txReceipt = await thorClient.transactions.waitForTransaction(sendTransactionResult.id)
+  console.log(`Transaction receipt: ${JSON.stringify(txReceipt)}`)
 
   if (!txReceipt) {
     throw new Error("Transaction failed")
