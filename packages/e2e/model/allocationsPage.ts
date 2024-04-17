@@ -36,20 +36,15 @@ export class AllocationsPage {
             const roundsPage = new RoundsPage(this.page)
             let counter = 0
             for (counter = 0; counter < 5; counter++) {
-                const visible = await roundsPage.roundTitleText.isVisible()
-                if (!visible) {
-                    try {
-                        await this.page.getByTestId(id).click()
-                        await roundsPage.expectOnPage(roundIndex, Math.floor(timeout / 5))
-                    } catch {}
+                const visible = await this.page.getByTestId(id).isVisible()
+                if (visible) {
+                    await this.page.getByTestId(id).click()
                 } else {
                     break
                 }
                 await delay(1000)
             }
-            if (counter === 5) {
-                await roundsPage.expectOnPage(roundIndex)
-            }
+            await roundsPage.expectOnPage(roundIndex)
             return roundsPage
         })
     }
