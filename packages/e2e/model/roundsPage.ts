@@ -9,10 +9,21 @@ import { AllocationVote } from './types';
 export class RoundsPage {
     private page: Page
     readonly castVoteButton: Locator
+    readonly roundTitleText: Locator
 
     constructor(page: Page) {
         this.page = page
         this.castVoteButton = this.page.locator('xpath=//button[contains(text(), "Cast vote now")]')
+        this.roundTitleText = this.page.getByTestId('round-title')
+    }
+
+    /**
+     * Assert on rounds page for a specific round
+     * @param roundIndex index of round
+     */
+    async expectOnPage(roundIndex: number, timeout?: number) {
+        await expect(this.roundTitleText).toBeVisible({ timeout})
+        await expect(this.roundTitleText).toHaveText(`Allocations | Round #${roundIndex}`, { timeout})
     }
 
     /**

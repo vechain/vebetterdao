@@ -1,6 +1,7 @@
 import { Page } from 'playwright';
 import { test, expect, Locator } from '@playwright/test';
 import { RoundsPage } from './roundsPage';
+import { time } from 'console';
 
 /**
  * Allocations page model
@@ -24,19 +25,23 @@ export class AllocationsPage {
     }
 
     /**
-     * Click on the round
+     * Click on the round, this asserts the round page is displayed
      * @param roundIndex index of the round
      * @returns RoundsPage
      */
-    async clickOnRound(roundIndex: number): Promise<RoundsPage> {
+    async clickOnRound(roundIndex: number, timeout: number = 30000): Promise<RoundsPage> {
         return await test.step(`Click on round #${roundIndex}`, async() => {
-            const id = `round-#${roundIndex}-card`
-            await expect(this.page.getByTestId(id)).toHaveCount(1)
-            await this.expectRoundStatusToBeDisplayed(roundIndex)
-            await this.page.getByTestId(id).blur()
-            await this.page.getByTestId(id).hover()
-            await this.page.getByTestId(id).focus()
-            await this.page.getByTestId(id).click()
+            await expect( async() => {
+                const id = `round-#${roundIndex}-card`
+                await expect(this.page.getByTestId(id)).toHaveCount(1)
+                await this.expectRoundStatusToBeDisplayed(roundIndex)
+                await this.page.getByTestId(id).blur()
+                await this.page.getByTestId(id).hover()
+                await this.page.getByTestId(id).focus()
+                await this.page.getByTestId(id).click()
+                const roundsPage = new RoundsPage(this.page)
+                await roundsPage.expectOnPage(roundIndex, Math.floor(timeout / 5))
+            }).toPass({ timeout })
             return new RoundsPage(this.page)
         })
     }
