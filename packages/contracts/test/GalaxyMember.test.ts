@@ -1,5 +1,7 @@
 import { describe, it } from "mocha"
 import {
+  NFT_NAME,
+  NFT_SYMBOL,
   ZERO_ADDRESS,
   bootstrapAndStartEmissions,
   bootstrapEmissions,
@@ -35,19 +37,33 @@ describe("Galaxy Member", () => {
     })
 
     it("Admin should be able to set x-allocation voting contract address", async () => {
-      const { galaxyMember, owner, xAllocationVoting } = await getOrDeployContractInstances({ forceDeploy: true })
+      const { galaxyMember, owner, xAllocationVoting, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
 
       expect(await galaxyMember.xAllocationsGovernor()).to.equal(await xAllocationVoting.getAddress())
+
+      await expect(galaxyMember.connect(otherAccount).setXAllocationsGovernorAddress(await otherAccount.getAddress()))
+        .to.be.reverted // Only admin should be able to set x-allocation voting contract address
+
+      await expect(galaxyMember.connect(owner).setXAllocationsGovernorAddress(ZERO_ADDRESS)).to.be.reverted // Cannot set x-allocation voting contract address to zero address
     })
 
     it("Admin should be able to set B3TR Governor contract address", async () => {
-      const { galaxyMember, owner, xAllocationVoting } = await getOrDeployContractInstances({ forceDeploy: true })
+      const { galaxyMember, owner, xAllocationVoting, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       await galaxyMember.connect(owner).setB3trGovernorAddress(await xAllocationVoting.getAddress())
 
       expect(await galaxyMember.b3trGovernor()).to.equal(await xAllocationVoting.getAddress())
+
+      await expect(galaxyMember.connect(otherAccount).setB3trGovernorAddress(await otherAccount.getAddress())).to.be
+        .reverted // Only admin should be able to set B3TR Governor contract address
+
+      await expect(galaxyMember.connect(owner).setB3trGovernorAddress(ZERO_ADDRESS)).to.be.reverted
     })
 
     it("Only admin should be able to set B3TR Governor contract address", async () => {
@@ -95,6 +111,8 @@ describe("Galaxy Member", () => {
       await galaxyMember.connect(owner).unpause()
 
       expect(await galaxyMember.paused()).to.equal(false)
+
+      await catchRevert(galaxyMember.connect(otherAccount).unpause())
     })
 
     it("Should not be able to update max mintable levels if not admin", async () => {
@@ -183,6 +201,39 @@ describe("Galaxy Member", () => {
       expect(await galaxyMember.getB3TRtoUpgradeToLevel(9)).to.equal(5000000000000000000000001n)
       expect(await galaxyMember.getB3TRtoUpgradeToLevel(10)).to.equal(25000000000000000000000001n)
     })
+
+    it("Admin should be able to set new base uri", async () => {
+      const { galaxyMember, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      const newBaseURI = "https://newbaseuri.com/"
+
+      await galaxyMember.connect(owner).setBaseURI(newBaseURI)
+
+      expect(await galaxyMember.baseURI()).to.equal(newBaseURI)
+
+      await expect(galaxyMember.connect(otherAccount).setBaseURI(newBaseURI + "2")).to.be.reverted
+
+      await expect(galaxyMember.connect(owner).setBaseURI("")).to.be.reverted // base uri cannot be empty
+    })
+
+    it("CLOCK_MODE should be set to blockNumber", async () => {
+      const { galaxyMember } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      expect(await galaxyMember.CLOCK_MODE()).to.equal("mode=blocknumber&from=default")
+    })
+
+    it("Should have b3tr and treasury addresses set correctly", async () => {
+      const { galaxyMember, b3tr, treasury } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      expect(await galaxyMember.b3tr()).to.equal(await b3tr.getAddress())
+      expect(await galaxyMember.treasury()).to.equal(await treasury.getAddress())
+    })
+
+    it("Should support ERC 165 interface", async () => {
+      const { galaxyMember } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      expect(await galaxyMember.supportsInterface("0x01ffc9a7")).to.equal(true) // ERC165
+    })
   })
 
   describe("Contract upgradeablity", () => {
@@ -259,6 +310,146 @@ describe("Galaxy Member", () => {
 
       expect(newImplAddress.toUpperCase()).to.not.eql(currentImplAddress.toUpperCase())
       expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
+    })
+
+    it("Shouldn't be able to initialize the contract if already initialized", async function () {
+      const config = createLocalConfig()
+      const { galaxyMember, owner, b3tr, treasury } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      await expect(
+        galaxyMember
+          .connect(owner)
+          .initialize(
+            NFT_NAME,
+            NFT_SYMBOL,
+            owner.address,
+            owner.address,
+            1,
+            config.GM_NFT_BASE_URI,
+            config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
+            config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+            await b3tr.getAddress(),
+            await treasury.getAddress(),
+          ),
+      ).to.be.reverted
+    })
+
+    it("Should not be able to deploy contract with max level less than 1", async function () {
+      const { owner, b3tr, treasury } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const config = createLocalConfig()
+
+      await expect(
+        deployProxy("GalaxyMember", [
+          NFT_NAME,
+          NFT_SYMBOL,
+          owner.address,
+          owner.address,
+          0,
+          config.GM_NFT_BASE_URI,
+          config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
+          config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+          await b3tr.getAddress(),
+          await treasury.getAddress(),
+        ]),
+      ).to.be.reverted
+    })
+
+    it("Should not be able to deploy contract if base uri is empty", async function () {
+      const { owner, b3tr, treasury } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const config = createLocalConfig()
+
+      await expect(
+        deployProxy("GalaxyMember", [
+          NFT_NAME,
+          NFT_SYMBOL,
+          owner.address,
+          owner.address,
+          1,
+          "",
+          config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
+          config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+          await b3tr.getAddress(),
+          await treasury.getAddress(),
+        ]),
+      ).to.be.reverted
+    })
+
+    it("Should not be able to deploy contract if x node upgradeable levels are not 7", async function () {
+      const { owner, b3tr, treasury } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const config = createLocalConfig()
+
+      await expect(
+        deployProxy("GalaxyMember", [
+          NFT_NAME,
+          NFT_SYMBOL,
+          owner.address,
+          owner.address,
+          1,
+          config.GM_NFT_BASE_URI,
+          [1, 2, 3, 4, 5, 6],
+          config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+          await b3tr.getAddress(),
+          await treasury.getAddress(),
+        ]),
+      ).to.be.reverted
+    })
+
+    it("Should not be able to deploy contract if b3tr address is not set", async function () {
+      const { owner, treasury } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const config = createLocalConfig()
+
+      await expect(
+        deployProxy("GalaxyMember", [
+          NFT_NAME,
+          NFT_SYMBOL,
+          owner.address,
+          owner.address,
+          1,
+          config.GM_NFT_BASE_URI,
+          config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
+          config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+          ZERO_ADDRESS,
+          await treasury.getAddress(),
+        ]),
+      ).to.be.reverted
+    })
+
+    it("Should not be able to deploy contract if treasury address is not set", async function () {
+      const { owner, b3tr } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const config = createLocalConfig()
+
+      await expect(
+        deployProxy("GalaxyMember", [
+          NFT_NAME,
+          NFT_SYMBOL,
+          owner.address,
+          owner.address,
+          1,
+          config.GM_NFT_BASE_URI,
+          config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
+          config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+          await b3tr.getAddress(),
+          ZERO_ADDRESS,
+        ]),
+      ).to.be.reverted
     })
   })
 
@@ -520,6 +711,9 @@ describe("Galaxy Member", () => {
       expect(await galaxyMember.getPastHighestLevel(await otherAccount.getAddress(), receipt.blockNumber - 1)).to.equal(
         0,
       ) // Level 0 in the past
+
+      await expect(galaxyMember.getPastHighestLevel(await otherAccount.getAddress(), receipt.blockNumber + 1)).to.be
+        .reverted // Should revert if block number is in the future
 
       expect(await galaxyMember.tokenByIndex(0)).to.equal(1) // Token ID of the first NFT is 1
       expect(await galaxyMember.tokenOfOwnerByIndex(await otherAccount.getAddress(), 0)).to.equal(1) // Token ID of the first NFT owned by otherAccount is 1
@@ -826,6 +1020,53 @@ describe("Galaxy Member", () => {
     })
   })
 
+  describe("Transferring", () => {
+    it("Should be able to send GM NFT to same account", async () => {
+      const { galaxyMember, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(owner)
+
+      await galaxyMember.connect(owner).freeMint()
+
+      await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await owner.getAddress(), 1)
+
+      expect(await galaxyMember.balanceOf(await owner.getAddress())).to.equal(1) // Owner has 1 NFT
+      expect(await galaxyMember.ownerOf(1)).to.equal(await owner.getAddress()) // Owner of the first NFT is the owner
+      expect(await galaxyMember.totalSupply()).to.equal(1) // Total supply is 1
+    })
+
+    it("Should be able to burn a GM NFT owned", async () => {
+      const { galaxyMember, owner, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(owner)
+
+      await galaxyMember.connect(owner).freeMint()
+
+      await galaxyMember.connect(owner).freeMint()
+
+      await galaxyMember.transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 2)
+
+      await galaxyMember.connect(owner).burn(1)
+
+      expect(await galaxyMember.balanceOf(await owner.getAddress())).to.equal(0) // Owner has 0 NFTs
+      expect(await galaxyMember.totalSupply()).to.equal(1) // Total supply is 0
+
+      await expect(galaxyMember.connect(owner).burn(2)).to.be.reverted // Owner cannot burn a token he doesn't own
+    })
+  })
+
   describe("Level Selection", () => {
     it("Should not select level 0 if I still have a token when transferring out", async () => {
       const { galaxyMember, otherAccount, owner } = await getOrDeployContractInstances({
@@ -891,6 +1132,8 @@ describe("Galaxy Member", () => {
 
       if (!receipt?.blockNumber) throw new Error("No receipt block number")
 
+      const blockOfMint = receipt.blockNumber
+
       // Check for Selected and SelectedLevel events
       let events = receipt?.logs
 
@@ -939,15 +1182,22 @@ describe("Galaxy Member", () => {
 
       expect(await galaxyMember.getHighestLevel(await otherAccount.getAddress())).to.equal(0) // Level 0
       expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(1) // Level 1
+
+      const checkpoint = await galaxyMember.checkpoints(await otherAccount.getAddress(), 0)
+
+      // Checkpointed at block of mint with level 1
+      expect(checkpoint[0]).to.equal(blockOfMint)
+      expect(checkpoint[1]).to.equal(1)
     })
   })
 
   describe("Upgrading", () => {
     it("Should be able to upgrade a level 1 token to a level 2 token", async () => {
       const config = createLocalConfig()
-      const { owner, xAllocationVoting, b3tr, minterAccount, governor, treasury } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { owner, xAllocationVoting, b3tr, minterAccount, governor, treasury, otherAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -992,6 +1242,16 @@ describe("Galaxy Member", () => {
       expect(await galaxyMember.levelOf(1)).to.equal(2) // Level 2
 
       expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(2) // Level 2
+
+      await expect(upgradeNFTtoLevel(1, 3, galaxyMember, b3tr, owner, minterAccount)).to.be.reverted // Level 3 is not available
+
+      await expect(galaxyMember.connect(otherAccount).setMaxLevel(3)).to.be.reverted // Only owner can set max level
+
+      await expect(galaxyMember.connect(owner).setMaxLevel(2)).to.be.reverted // Max level must be greater than current level
+
+      await galaxyMember.connect(owner).setMaxLevel(3)
+
+      await upgradeNFTtoLevel(1, 3, galaxyMember, b3tr, owner, minterAccount) // Now we can upgrade to level 3
     })
 
     it("Should be able to transfer a token with level greater than 1", async () => {
@@ -1069,6 +1329,88 @@ describe("Galaxy Member", () => {
 
       expect(await galaxyMember.getHighestLevel(await otherAccount.getAddress())).to.equal(2) // Level 2
       expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(0) // Level 0
+
+      expect(await galaxyMember.getNextLevel(1)).to.equal(3) // Next level is 3
+    })
+
+    it("Should not be able to upgrade if contract is paused", async () => {
+      const config = createLocalConfig()
+      const { owner, xAllocationVoting, b3tr, minterAccount, governor, treasury } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(owner, true)
+
+      const galaxyMember = (await deployProxy("GalaxyMember", [
+        "galaxyMember",
+        "GM",
+        owner.address,
+        owner.address,
+        10,
+        config.GM_NFT_BASE_URI,
+        config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
+        config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+        await b3tr.getAddress(),
+        await treasury.getAddress(),
+      ])) as GalaxyMember
+
+      await galaxyMember.waitForDeployment()
+
+      await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+      await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+
+      await galaxyMember.connect(owner).freeMint() // Token id 1
+
+      await upgradeNFTtoLevel(1, 2, galaxyMember, b3tr, owner, minterAccount)
+
+      await galaxyMember.connect(owner).pause()
+
+      await catchRevert(galaxyMember.connect(owner).upgrade(1))
+
+      await galaxyMember.connect(owner).unpause()
+
+      await upgradeNFTtoLevel(1, 3, galaxyMember, b3tr, owner, minterAccount)
+    })
+
+    it("Should not be able to upgrade if allowance is not set", async () => {
+      const config = createLocalConfig()
+      const { owner, xAllocationVoting, b3tr, minterAccount, governor, treasury } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(owner, true)
+
+      const galaxyMember = (await deployProxy("GalaxyMember", [
+        "galaxyMember",
+        "GM",
+        owner.address,
+        owner.address,
+        10,
+        config.GM_NFT_BASE_URI,
+        config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
+        config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+        await b3tr.getAddress(),
+        await treasury.getAddress(),
+      ])) as GalaxyMember
+
+      await galaxyMember.waitForDeployment()
+
+      await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+      await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+
+      await galaxyMember.connect(owner).freeMint() // Token id 1
+
+      await b3tr.connect(minterAccount).mint(owner, ethers.parseEther("10000")) // Get some 10,000 B3TR required to upgrade to level 2
+
+      await catchRevert(galaxyMember.connect(owner).upgrade(1)) // Allowance not set
     })
   })
 
@@ -1324,5 +1666,64 @@ describe("Galaxy Member", () => {
     expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(0) // Owner now has no tokens so the highest level is 0 (no Level)
 
     expect(await galaxyMember.getHighestLevel(await otherAccount.getAddress())).to.equal(5) // Other account retains the highest level of 5
+  })
+
+  it("Should be able to select the highest level owned manually", async () => {
+    const config = createTestConfig()
+    const { owner, xAllocationVoting, minterAccount, governor, b3tr, treasury } = await getOrDeployContractInstances({
+      forceDeploy: true,
+      config,
+    })
+
+    // Bootstrap emissions
+    await bootstrapEmissions()
+
+    // participation in governance is a requirement for minting
+    await participateInAllocationVoting(owner, true)
+
+    const galaxyMember = (await deployProxy("GalaxyMember", [
+      "galaxyMember",
+      "GM",
+      owner.address,
+      owner.address,
+      10,
+      config.GM_NFT_BASE_URI,
+      config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
+      config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+      await b3tr.getAddress(),
+      await treasury.getAddress(),
+    ])) as GalaxyMember
+
+    await galaxyMember.waitForDeployment()
+
+    await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+    await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+
+    await galaxyMember.connect(owner).freeMint() // Token id 1
+    await galaxyMember.connect(owner).freeMint() // Token id 2
+    await galaxyMember.connect(owner).freeMint() // Token id 3
+    await galaxyMember.connect(owner).freeMint() // Token id 4
+    await galaxyMember.connect(owner).freeMint() // Token id 5
+
+    expect(await galaxyMember.levelOf(1)).to.equal(1) // Level 1
+    expect(await galaxyMember.ownerOf(1)).to.equal(await owner.getAddress()) // Owner of the first NFT is the owner
+
+    /*
+      Tokens owned:
+
+      Level 5: 2 tokens
+      Level 4: 1 token
+      Level 3: 1 token
+      Level 1: 1 token
+    */
+    await upgradeNFTtoLevel(3, 4, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 3 to level 4
+    await upgradeNFTtoLevel(4, 3, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 4 to level 3
+    await upgradeNFTtoLevel(1, 5, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 1 to level 5
+    await upgradeNFTtoLevel(5, 1, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 5 to level 1
+    await upgradeNFTtoLevel(2, 5, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 2 to level 5
+
+    await galaxyMember.connect(owner).selectHighestLevel() // Select the highest level owned
+
+    expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(5) // Owner has the highest level of 5
   })
 })

@@ -9,6 +9,7 @@
     "build:staging": "dotenv -v NEXT_PUBLIC_APP_ENV=solo-staging -- turbo build",
     "build:testnet": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- turbo build",
     "dev": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo dev --",
+    "dev:simulation": "dotenv -v NEXT_PUBLIC_APP_ENV=local -v RUN_SIMULATION=true -- turbo dev --",
     "dev:staging": "dotenv -v NEXT_PUBLIC_APP_ENV=solo-staging -e .env -- turbo dev --",
     "dev:testnet": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -e .env -- turbo dev:testnet --",
     "dev:e2e": "dotenv -v NEXT_PUBLIC_APP_ENV=e2e -- turbo dev --",

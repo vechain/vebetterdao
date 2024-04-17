@@ -23,7 +23,7 @@ import { B3TRGovernor } from "../typechain-types"
 
 describe("Governor and TimeLock", function () {
   describe("Governor deployment", function () {
-    it("should set constructors correctly", async function () {
+    it("Should set constructors correctly", async function () {
       const config = createLocalConfig()
       const { governor, vot3, owner, timeLock, xAllocationVoting, voterRewards } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -67,7 +67,7 @@ describe("Governor and TimeLock", function () {
       expect(clockMode.toString()).to.eql("mode=blocknumber&from=default")
     })
 
-    it("should be able to upgrade the governor contract through governance", async function () {
+    it("Should be able to upgrade the governor contract through governance", async function () {
       const { governor, owner, b3tr, emissions, xAllocationVoting } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -146,6 +146,33 @@ describe("Governor and TimeLock", function () {
       expect(await governor.state(proposalId)).to.eql(7n)
       expect(await governor.quorumReached(proposalId)).to.eql(true)
     })
+
+    it("Only governance can upgrade the governor contract", async function () {
+      const { governor, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await expect(governor.connect(otherAccount).upgradeToAndCall(otherAccount.address, "0x")).to.be.reverted
+    })
+
+    it("Should be able to initialize only once", async function () {
+      const { governor, owner, vot3, timeLock, voterRewards, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await catchRevert(
+        governor.initialize(
+          await vot3.getAddress(),
+          await timeLock.getAddress(),
+          await xAllocationVoting.getAddress(),
+          1, // quorum percentage
+          1, // voting threshold
+          1, // delay before vote starts
+          owner.address,
+          await voterRewards.getAddress(),
+        ),
+      )
+    })
   })
 
   describe("Governor settings", function () {
@@ -167,6 +194,21 @@ describe("Governor and TimeLock", function () {
 
       const updatedAddress = await governor.xAllocationVotingAddress()
       expect(updatedAddress).to.eql(newAddress)
+    })
+
+    it("Should not support invalid interface", async function () {
+      const { governor } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const INVALID_ID = "0xffffffff"
+      expect(await governor.supportsInterface(INVALID_ID)).to.eql(false)
+    })
+
+    it("Should support ERC 165 interface", async () => {
+      const { governor } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      expect(await governor.supportsInterface("0x01ffc9a7")).to.equal(true) // ERC165
     })
 
     it("only governance can update xAllocationVoting address", async function () {
@@ -336,6 +378,40 @@ describe("Governor and TimeLock", function () {
       ) // proposal should end at the end of the current round + 1 block + voting period
 
       expect(await governor.proposalStartRound(proposalId)).to.eql(2n) // proposal should start in round 2
+    })
+
+    it("Proposal cannot start in next round if current ended and the next one not started yet", async () => {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.EMISSIONS_CYCLE_DURATION = 5
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // We are in round 1 now, and we want to wait for it to wait and not start a new one
+      await waitForCurrentRoundToEnd()
+      await moveBlocks(2)
+
+      // Now if we try to create a proposal starting in the next round it should fail
+      expect(await governor.canProposalStartInNextRound()).to.be.false
+
+      const address = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+      const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n
+      await catchRevert(
+        governor
+          .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+          .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
+            gasLimit: 10_000_000,
+          }),
+      )
     })
 
     it("Can create a proposal that starts after 2 rounds", async () => {
@@ -654,7 +730,7 @@ describe("Governor and TimeLock", function () {
 
       expect(await governor.state(proposalId)).to.eql(0n) // pending
 
-      expect(await governor.proposalIsExecutable(proposalId)).to.eql(false)
+      expect(await governor.proposalNeedsQueuing(proposalId)).to.eql(false)
 
       // Let's make this proposal succeed
       await waitForProposalToBeActive(proposalId)
@@ -675,6 +751,15 @@ describe("Governor and TimeLock", function () {
       // Can still execute even if there is nothing to execute
       await governor.execute([], [], [], descriptionHash)
       expect(await governor.state(proposalId)).to.eql(7n)
+    })
+
+    it("Cannot know if proposal is executable for a non existing proposal", async () => {
+      const { governor } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const proposalId = 1n
+      await expect(governor.proposalNeedsQueuing(proposalId)).to.be.reverted
     })
 
     it("Parameters must have the same length", async () => {
@@ -792,6 +877,42 @@ describe("Governor and TimeLock", function () {
         governor
           .connect(proposer) //@ts-ignore
           .propose([address], [0], [encodedFunctionCall], "", 1n, {
+            gasLimit: 10_000_000,
+          }),
+      ).to.be.reverted
+    })
+
+    it("Cannot create same proposal twice", async () => {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.EMISSIONS_CYCLE_DURATION = 5
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      await bootstrapAndStartEmissions()
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+
+      // Now we can create a new proposal
+      const address = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+      const roundToStart = (await xAllocationVoting.currentRoundId()) + 2n
+
+      await expect(
+        governor
+          .connect(proposer) //@ts-ignore
+          .propose([address], [0], [encodedFunctionCall], "", roundToStart, {
+            gasLimit: 10_000_000,
+          }),
+      ).to.not.be.reverted
+
+      await expect(
+        governor
+          .connect(proposer) //@ts-ignore
+          .propose([address], [0], [encodedFunctionCall], "", roundToStart, {
             gasLimit: 10_000_000,
           }),
       ).to.be.reverted
@@ -971,6 +1092,86 @@ describe("Governor and TimeLock", function () {
 
       // Now we can create a proposal
       await createProposal(b3tr, B3trContract, otherAccount, description, functionToCall, [], false)
+    })
+
+    it("Can correctly check description restriction", async () => {
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // throw new Error("Not implemented")
+      // with protection via proposer suffix
+      const address = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+      const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 2n // starts 2 rounds from now
+      await expect(
+        governor
+          .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+          .propose(
+            [address],
+            [0],
+            [encodedFunctionCall],
+            "#proposer=" + proposer.address,
+            voteStartsInRoundId.toString(),
+            {
+              gasLimit: 10_000_000,
+            },
+          ),
+      ).to.not.be.reverted
+
+      // with proposer suffix but bad address part (XYZ are not a valid hex char)
+      await expect(
+        governor
+          .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+          .propose(
+            [address],
+            [0],
+            [encodedFunctionCall],
+            "#proposer=0x3C44CdDdB6a900fa2b585dd299e03d12FA429XYZ",
+            voteStartsInRoundId.toString(),
+            {
+              gasLimit: 10_000_000,
+            },
+          ),
+      ).to.not.be.reverted
+
+      // with wrong suffix
+      await expect(
+        governor
+          .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+          .propose(
+            [address],
+            [0],
+            [encodedFunctionCall],
+            "#wrong-suffix=" + proposer.address,
+            voteStartsInRoundId.toString(),
+            {
+              gasLimit: 10_000_000,
+            },
+          ),
+      ).to.not.be.reverted
+
+      // with protection via proposer suffix but wrong proposer
+      await expect(
+        governor
+          .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+          .propose(
+            [address],
+            [0],
+            [encodedFunctionCall],
+            "#proposer=" + otherAccounts[1].address,
+            voteStartsInRoundId.toString(),
+            {
+              gasLimit: 10_000_000,
+            },
+          ),
+      ).to.be.reverted
     })
   })
 

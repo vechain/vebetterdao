@@ -13,9 +13,11 @@ import {
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
-import { seedLocalEnvironment, seedTestnetEnvironment } from "./seed"
+import { setupLocalEnvironment, setupTestEnvironment } from "./setup"
+import { simulateRounds } from "./simulateRounds"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { deployProxy } from "../helpers"
+import { shouldRunSimulation } from "@repo/config/contracts"
 
 // GalaxyMember NFT Values
 const name = "VeBetterDAO Galaxy Member"
@@ -152,9 +154,9 @@ export async function deployAll(config: ContractsConfig) {
 
   console.log("Contracts deployed")
 
-  // ---------- Contracts set up ---------- //
+  // ---------- Configure contract roles for setup ---------- //
 
-  console.log("Setting up contracts...")
+  console.log("Configuring contract roles for setup...")
   // Grant MINTER_ROLE on B3TR to emissions contract so it can bootstrap and distribute
   await b3tr.grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress()).then(async tx => await tx.wait())
 
@@ -220,17 +222,22 @@ export async function deployAll(config: ContractsConfig) {
     .grantRole(roundStarterRole, await emissions.getAddress())
     .then(async tx => await tx.wait())
 
-  // ---------- Seeding ---------- //
+  // ---------- Setup Contracts ---------- //
   if (network.name === "vechain_testnet") {
-    await seedTestnetEnvironment(b3tr, xAllocationVoting, emissions)
+    await setupTestEnvironment(xAllocationVoting, emissions)
   } else if (network.name === "vechain_solo") {
-    await seedLocalEnvironment(treasury, vot3, xAllocationVoting, emissions)
+    await setupLocalEnvironment(xAllocationVoting, emissions, treasury)
+  }
+
+  // ---------- Run Simulation ---------- //
+  if (shouldRunSimulation()) {
+    await simulateRounds(b3tr, vot3, xAllocationVoting, emissions, voterRewards, treasury)
   }
 
   // ---------- Role updates ---------- //
   // Do not update roles on solo network since it would just increase dev time
   if (network.name === "vechain_testnet") {
-    console.log("Updating roles...")
+    console.log("Updating contract roles after setup...")
     console.log("New admin address", config.CONTRACTS_ADMIN_ADDRESS)
 
     await transferMinterRole(b3tr, admin, TEMP_ADMIN, await emissions.getAddress())
