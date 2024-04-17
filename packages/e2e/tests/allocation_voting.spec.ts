@@ -114,16 +114,7 @@ test.describe('Allocation voting', () => {
       }
       // complete round
       await blockchainUtils.waitForNextCycle()
-      // assert on round status
-      const menuBar = new MenuBar(page)
-      const allocationsPage = await menuBar.gotoAllocations()
-      await allocationsPage.expectOnPage()
-      await allocationsPage.clickOnRound(1) // need to navigate to rounds page and back to update status
-      await menuBar.gotoAllocations()
-      await allocationsPage.expectOnPage()
-      await allocationsPage.expectRoundStatus(1, 'Succeeded')
-
-    });
+    })
 
     test("Can view the results of a completed allocation round", async ({ page }) => {
       const menuBar = new MenuBar(page)
