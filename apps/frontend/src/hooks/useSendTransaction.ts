@@ -153,25 +153,6 @@ export const useSendTransaction = ({
    */
   const [error, setError] = useState<TransactionStatusErrorType>()
 
-  useEffect(() => {
-    console.log("txReceipt", txReceipt)
-    if (!txReceipt) return
-    if (txReceipt.reverted) {
-      ;(async () => {
-        const revertReason = await explainTxRevertReason(txReceipt)
-        setError({
-          type: "RevertReasonError",
-          reason: revertReason?.[0]?.revertReason,
-        })
-        console.error("revertReason", revertReason)
-      })()
-
-      return
-    }
-    onTxConfirmed?.()
-  }, [txReceipt, onTxConfirmed])
-  // do not add onTxConfirmed to the dependencies array, it will cause toast notifications
-
   /**
    * TODO: In case of errors, call the callback
    */
@@ -202,10 +183,27 @@ export const useSendTransaction = ({
       return
     }
 
-    if (txReceipt) return setStatus("success")
+    if (txReceipt) {
+      if (txReceipt.reverted) {
+        ;(async () => {
+          const revertReason = await explainTxRevertReason(txReceipt)
+          setError({
+            type: "RevertReasonError",
+            reason: revertReason?.[0]?.revertReason,
+          })
+          console.error("revertReason", revertReason)
+          setStatus("error")
+        })()
+
+        return
+      }
+      setStatus("success")
+      onTxConfirmed?.()
+      return
+    }
 
     return setStatus("ready")
-  }, [sendTransactionPending, isTxReceiptLoading, sendTransactionError, txReceiptError, txReceipt])
+  }, [sendTransactionPending, isTxReceiptLoading, sendTransactionError, txReceiptError, txReceipt, onTxConfirmed])
 
   const resetStatus = useCallback(() => {
     setStatus("ready")
