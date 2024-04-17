@@ -2,6 +2,7 @@ import { Page } from 'playwright';
 import { test, expect, Locator } from '@playwright/test';
 import { RoundsPage } from './roundsPage';
 import { time } from 'console';
+import { delay } from '../utils/delay';
 
 /**
  * Allocations page model
@@ -31,13 +32,25 @@ export class AllocationsPage {
      */
     async clickOnRound(roundIndex: number, timeout: number = 60000): Promise<RoundsPage> {
         return await test.step(`Click on round #${roundIndex}`, async() => {
-            await expect( async() => {
-                const id = `round-#${roundIndex}-card`
-                await this.page.getByTestId(id).click()
-                const roundsPage = new RoundsPage(this.page)
-                await roundsPage.expectOnPage(roundIndex, Math.floor(timeout / 10))
-            }).toPass({ timeout, intervals: [1000] })
-            return new RoundsPage(this.page)
+            const id = `round-#${roundIndex}-card`
+            const roundsPage = new RoundsPage(this.page)
+            let counter = 0
+            for (counter = 0; counter < 5; counter++) {
+                const visible = await roundsPage.roundTitleText.isVisible()
+                if (!visible) {
+                    try {
+                        await this.page.getByTestId(id).click()
+                        await roundsPage.expectOnPage(roundIndex, Math.floor(timeout / 5))
+                    } catch {}
+                } else {
+                    break
+                }
+                await delay(1000)
+            }
+            if (counter === 5) {
+                await roundsPage.expectOnPage(roundIndex)
+            }
+            return roundsPage
         })
     }
 
