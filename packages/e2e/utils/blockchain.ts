@@ -338,6 +338,7 @@ const waitForBlock = async (blockNumber: number) => {
       const blocksToWait = blockNumber - currentBlock?.number
       if (blocksToWait > 0) await moveBlocks(blocksToWait)
     }
+    console.log(`Block number ${blockNumber} reached`)
 }
 
 /**

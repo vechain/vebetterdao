@@ -66,7 +66,6 @@ const adminOpenRound = async (page: Page) => {
     await dashboardPage.disconnectWallet(adminAddress)
     await page.evaluate(() => window.localStorage.clear());
     await page.evaluate(() => window.sessionStorage.clear());
-    await blockchainUtils.waitForNextCycle()
   })
 }
 
@@ -107,7 +106,7 @@ test.describe('Allocation voting', () => {
     })
       
     test('Users can vote on a allocation round', async ({ page }) => {
-      test.setTimeout(300000) // 5 mins
+      test.setTimeout(300000) // 5 mins timeout to allow for voting
       const roundIndex = 1 // voting on round 1
       // vote from each user
       for (let voter of votingDetails) {
