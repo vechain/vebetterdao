@@ -1,4 +1,4 @@
-import { ProposalCreatedEvent, VoteType, useGetVotesOnBlock } from "@/api"
+import { ProposalCreatedEvent, VoteType, useGetVotesOnBlock, useProposalSnapshot } from "@/api"
 import { useCastVote } from "@/hooks"
 import {
   ModalOverlay,
@@ -20,49 +20,72 @@ import {
   HStack,
   Icon,
   Box,
+  Skeleton,
+  useDisclosure,
 } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { FormEvent, useMemo, useState } from "react"
-import { ConfirmTransactionModalContent } from "./ConfirmTransactionModalContent"
+import { FormEvent, useCallback, useState } from "react"
 import { MdHowToVote } from "react-icons/md"
 import { FaThumbsDown, FaThumbsUp } from "react-icons/fa6"
 import { humanAddress } from "@repo/utils/FormattingUtils"
+import { TransactionModal } from "./TransactionModal"
 
 type Props = {
   isOpen: boolean
+  onOpen: () => void
   onClose: () => void
   proposal: ProposalCreatedEvent
 }
 
-export const CastVoteModal: React.FC<Props> = ({ isOpen, onClose, proposal }) => {
-  const onSuccess = () => {
+export const CastVoteModal: React.FC<Props> = ({ isOpen, onOpen, onClose, proposal }) => {
+  const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
+  const onSuccess = useCallback(() => {
     onClose()
-  }
+  }, [onClose])
 
-  const { sendTransaction, status, sendTransactionError, resetStatus, txReceiptError } = useCastVote({
+  const castVoteMutation = useCastVote({
     proposalId: proposal.proposalId,
     onSuccess,
   })
 
-  const renderContent = useMemo(() => {
-    const formattedProposalId = humanAddress(proposal.proposalId)
-    if (status !== "ready")
-      return (
-        <ConfirmTransactionModalContent
-          description={`Cast your vote for proposal ${formattedProposalId}`}
-          status={status}
-          error={sendTransactionError?.message ?? txReceiptError?.message}
-          onSuccess={onSuccess}
-          onTryAgain={resetStatus}
-        />
-      )
-    return <CastVoteModalContent onVote={sendTransaction} proposal={proposal} />
-  }, [status, sendTransactionError, txReceiptError, resetStatus, onSuccess, proposal])
+  const onSubmit = useCallback(
+    (vote: VoteType, reason?: string) => {
+      onClose()
+      onConfirmationOpen()
+      castVoteMutation.sendTransaction(vote, reason)
+    },
+    [castVoteMutation, onClose, onConfirmationOpen],
+  )
+
+  const onTryAgain = useCallback(() => {
+    castVoteMutation.resetStatus()
+    onOpen()
+  }, [onConfirmationClose, onOpen])
+
+  if (castVoteMutation.status !== "ready")
+    return (
+      <TransactionModal
+        isOpen={isConfirmationOpen}
+        onClose={onConfirmationClose}
+        confirmationTitle="Cast your vote"
+        successTitle="Vote casted!"
+        status={castVoteMutation.error ? "error" : castVoteMutation.status}
+        errorDescription={castVoteMutation.error?.reason}
+        errorTitle={castVoteMutation.error ? "Error creating proposal" : undefined}
+        showTryAgainButton={true}
+        onTryAgain={onTryAgain}
+        pendingTitle="Casting vote..."
+        txId={castVoteMutation.txReceipt?.meta.txID}
+        showExplorerButton={true}
+      />
+    )
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
       <ModalOverlay />
-      <ModalContent>{renderContent}</ModalContent>
+      <ModalContent>
+        <CastVoteModalContent onVote={onSubmit} proposal={proposal} />
+      </ModalContent>
     </Modal>
   )
 }
@@ -74,7 +97,10 @@ type CastVoteModalFormContentProps = {
 
 const CastVoteModalContent: React.FC<CastVoteModalFormContentProps> = ({ onVote, proposal }) => {
   const { account } = useWallet()
-  const { data: votes } = useGetVotesOnBlock(Number(proposal.voteStart), account ?? undefined)
+  const { data: proposalSnapshotBlock, isLoading: proposalSnapshotBlockLoading } = useProposalSnapshot(
+    proposal.proposalId,
+  )
+  const { data: votes } = useGetVotesOnBlock(Number(proposalSnapshotBlock), account ?? undefined)
   const [selectedVote, setSelectedVote] = useState<VoteType>(VoteType.VOTE_FOR)
   const [reason, setReason] = useState<string>("")
 
@@ -110,7 +136,9 @@ const CastVoteModalContent: React.FC<CastVoteModalFormContentProps> = ({ onVote,
                     {votes?.formatted ?? "0"}
                   </Heading>
                 </HStack>
-                <Text fontSize="xs">Votes snapshotted at block #{proposal.voteStart}</Text>
+                <Skeleton isLoaded={!proposalSnapshotBlockLoading}>
+                  <Text fontSize="xs">Votes snapshotted at block #{proposalSnapshotBlock}</Text>
+                </Skeleton>
               </Box>
               <Text fontSize="sm" fontWeight={"thin"}>
                 You can get more votes by staking more B3TR
