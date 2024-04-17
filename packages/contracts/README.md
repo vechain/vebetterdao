@@ -16,51 +16,13 @@ docker
 docker-compose
 ```
 
-### Local development setup
+## Monorepo
 
-## Since we are using a monorepo executing those commands from inside the `packages/contracts` folder will cause issues with the turbo plugin and the management of .env files. Instead, execute the commands from the root of the monorepo.
+Since we are using a monorepo architecture please refer to the `README.md` in the root folder to know how to run test and deploy commands. If you cd inside this folder you can only run the `yarn compile` command.
 
-1. Install dependencies
+## Contracts
 
-   ```
-   yarn install
-   ```
-
-2. Start solo node
-
-   ```
-   yarn start-solo
-   ```
-
-   You can add flags to the command to customize the solo node. For example, to start the solo node in background mode, run `yarn start-solo -d`.
-   Other command line options can be found [here](https://docs.vechain.org/start-building/tutorials/how-to-run-a-thor-solo-node).
-
-3. Compile contracts
-
-   ```
-   yarn compile
-   ```
-
-   Compiled contracts will be placed in the `artifacts` folder.
-
-4. Run tests
-
-   ```
-    yarn test
-   ```
-
-   By default the tests will run against the solo node so the solo node has to be up and running locally. Alternatively if you run the tests from the root of the monorepo, turbo will ensure the solo node is up.
-   You can change the network by adding the `--network` flag. For example, to run the tests against the testnet, run `yarn test --network vechain_testnet`.
-
-5. Deploy
-
-   ```
-   yarn deploy
-   ```
-
-   This command will automatically execute the `deploy.ts` script in the `scripts` folder. You can customize the script to deploy your contracts.
-   By default it will deploy to the solo node.
-   `MNEMONIC` and `NEXT_PUBLIC_APP_ENV`needs to be set in the `.env` file of the main root folder.
+Contracts are written using latest solidity version but compiled against "Paris" evm compiler to be compatible with Vechain Thor network.
 
 ## Additional features
 
@@ -106,9 +68,3 @@ const tx = await clauseBuilder
   })
   .send()
 ```
-
-### Insight explorer
-
-If you need to inspect the transaction, you can use the `insight` explorer. We recomend using [this](https://github.com/vechainfoundation/rewards-insight-app/tree/main) repo since it handles the solo network.
-
-Just clone the repository, run `npm install`, update the `.env` file to point to your local solo node and run `npm serve`.
