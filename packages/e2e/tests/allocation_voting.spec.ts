@@ -79,6 +79,7 @@ const castUserVote = async (page: Page, accountIndex: number, roundIndex: number
     await veWorldMockClient.setSignerAccIndex(page, accountIndex)
     await dashboardPage.connectWallet()
     const allocationsPage = await menuBar.gotoAllocations()
+    await allocationsPage.expectOnPage()
     const roundsPage = await allocationsPage.clickOnRound(roundIndex)
     await roundsPage.castVote(splitPercentage)
     await menuBar.gotoDashbard()
