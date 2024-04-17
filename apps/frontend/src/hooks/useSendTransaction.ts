@@ -90,22 +90,25 @@ export const useSendTransaction = ({
     return clauses
   }
 
-  const sendTransaction = async () => {
+  const sendTransaction = useCallback(async () => {
     if (!clauses) throw new Error("clauses is required")
     return await convertClauses(clauses).then(clauses => {
       if (signerAccount) return vendor.sign("tx", clauses).signer(signerAccount).request()
       return vendor.sign("tx", clauses).request()
     })
-  }
+  }, [clauses, vendor, signerAccount])
 
   /**
    * Send a transaction with the given clauses (in case you need to pass data to build the clauses to mutate directly)
    * @returns see {@link UseSendTransactionReturnValue}
    */
-  const sendTransactionWithClauses = async (clauses: EnhancedClause[]) => {
-    if (signerAccount) return vendor.sign("tx", clauses).signer(signerAccount).request()
-    return vendor.sign("tx", clauses).request()
-  }
+  const sendTransactionWithClauses = useCallback(
+    async (clauses: EnhancedClause[]) => {
+      if (signerAccount) return vendor.sign("tx", clauses).signer(signerAccount).request()
+      return vendor.sign("tx", clauses).request()
+    },
+    [vendor, signerAccount],
+  )
 
   const sendTransactionAdapter = useCallback(
     async (_clauses?: EnhancedClause[]) => {
@@ -135,15 +138,18 @@ export const useSendTransaction = ({
     error: txReceiptError,
   } = useTxReceipt(sendTransactionTx?.txid)
 
-  const explainTxRevertReason = async (txReceipt: Connex.Thor.Transaction.Receipt) => {
-    if (!txReceipt.reverted) return
-    const transactionData = await thor.transaction(txReceipt.meta.txID).get()
-    if (!transactionData) return
+  const explainTxRevertReason = useCallback(
+    async (txReceipt: Connex.Thor.Transaction.Receipt) => {
+      if (!txReceipt.reverted) return
+      const transactionData = await thor.transaction(txReceipt.meta.txID).get()
+      if (!transactionData) return
 
-    const explained = await thor.explain(transactionData.clauses).caller(transactionData.origin).execute()
-    console.log("explained", explained)
-    return explained
-  }
+      const explained = await thor.explain(transactionData.clauses).caller(transactionData.origin).execute()
+      console.log("explained", explained)
+      return explained
+    },
+    [thor],
+  )
 
   /**
    * General error that is set when
@@ -202,7 +208,15 @@ export const useSendTransaction = ({
     }
 
     return setStatus("ready")
-  }, [sendTransactionPending, isTxReceiptLoading, sendTransactionError, txReceiptError, txReceipt, onTxConfirmed])
+  }, [
+    sendTransactionPending,
+    isTxReceiptLoading,
+    sendTransactionError,
+    txReceiptError,
+    txReceipt,
+    onTxConfirmed,
+    explainTxRevertReason,
+  ])
 
   const resetStatus = useCallback(() => {
     setStatus("ready")
