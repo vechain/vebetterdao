@@ -51,10 +51,10 @@
     "hardhat-contract-sizer": "^2.10.0",
     "hardhat-gas-reporter": "^1.0.8",
     "hardhat-ignore-warnings": "^0.2.11",
-    "solidity-coverage": "^0.8.1",
     "ts-node": ">=8.0.0",
     "typechain": "^8.1.0",
-    "typescript": ">=4.5.0"
+    "typescript": ">=4.5.0",
+    "solidity-coverage": "^0.8.11"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
@@ -67,7 +67,6 @@
     "ethers": "^6.9.0",
     "hardhat": "^2.19.1",
     "nft.storage": "^7.1.1",
-    "prettier": "^3.2.4",
-    "solidity-coverage": "^0.8.11"
+    "prettier": "^3.2.4"
   }
 }

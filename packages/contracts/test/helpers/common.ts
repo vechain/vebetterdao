@@ -284,7 +284,7 @@ export const addAppsToAllocationVoting = async (apps: string[], owner: HardhatEt
   return appIds
 }
 
-export const startNewAllocationRound = async () => {
+export const startNewAllocationRound = async (): Promise<number> => {
   const { emissions, xAllocationVoting, minterAccount } = await getOrDeployContractInstances({})
   const nextCycle = await emissions.nextCycle()
 
