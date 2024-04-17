@@ -58,7 +58,6 @@ yarn dev
 ```
 
 If contracts are not deployed, the script will deploy them automatically. In order to this to work, the `MNEMONIC` variable need to be set in the `.env` file.
-Ensure that the urls in `./packages/config/local.ts` are pointing to the correct solo node.
 
 This command relies on a turbo pipeline which:
 
@@ -150,7 +149,7 @@ make solo-down
 Each environment has its own configuration file under `./packages/config/contracts/envs` folder:
 
 - `local`: used for local development with thor solo;
-- `solo-staging`: used for testing against serlf hosted solo node;
+- `solo-staging`: used for testing against self hosted solo node;
 - `testnet`: used for testing against vechain testnet;
 
 ### Compile
