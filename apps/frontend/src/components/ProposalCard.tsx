@@ -133,13 +133,36 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
     return <Code>{value}</Code>
   }
 
+  const proposalStateTagColor = useMemo(() => {
+    switch (state) {
+      case 7:
+        return "green"
+      case 6:
+        return "red"
+      case 5:
+        return "blue"
+      case 4:
+        return "green"
+      case 3:
+        return "red"
+      case 2:
+        return "red"
+      case 1:
+        return "green"
+      case 0:
+        return "orange"
+      default:
+        return "gray"
+    }
+  }, [state])
+
   return (
     <Card flex={1}>
       <CardHeader>
         <VStack spacing={4} w="full" align="flex-start">
           <HStack w="full" justify="space-between">
             <Tag colorScheme="blue">Governance</Tag>
-            <Tag colorScheme="green">{state !== undefined && ProposalState[state]}</Tag>
+            <Tag colorScheme={proposalStateTagColor}>{state !== undefined ? ProposalState[state] : "N/A"}</Tag>
           </HStack>
           <HStack justify={"space-between"} w="full">
             <Heading size="sm"> Proposer</Heading>
@@ -211,13 +234,8 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
               <Box>
                 <Skeleton isLoaded={!!estimatedStartTime}>
                   <Heading as="h4" size="sm" color="orange">
-                    {"Starts"} {estimatedStartTime}
+                    {"Starts"} in round #{proposal.roundIdVoteStart}
                   </Heading>
-                </Skeleton>
-                <Skeleton isLoaded={!proposalSnapshotBlockLoading}>
-                  <Text fontWeight={"normal"} fontSize={"sm"}>
-                    At block #{proposalSnapshotBlock}
-                  </Text>
                 </Skeleton>
               </Box>
             )}
