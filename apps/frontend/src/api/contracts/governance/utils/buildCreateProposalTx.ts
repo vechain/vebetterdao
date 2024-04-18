@@ -1,32 +1,10 @@
 import { getConfig } from "@repo/config"
 import { abi } from "thor-devkit"
-import { B3TRGovernorJson } from "@repo/contracts"
-import { AvailableContractAbis } from "@/hooks"
-const b3trGovernorAbi = B3TRGovernorJson.abi
+import { AvailableContractAbis, EnhancedClause } from "@/hooks"
+import { B3TRGovernor__factory } from "@repo/contracts/typechain-types/factories/contracts"
 
 const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
-
-// /**
-//  * Get the votes of the given address at the given timepoint
-//  * @param thor  the thor client
-//  * @returns the votes of the given address at the given timepoint
-//  */
-// export const getVotes = async (thor: Connex.Thor, address?: string) => {
-//   if (!address) throw new Error("address is required")
-
-//   const timepoint = thor.status.head.number
-
-//   console.log({ timepoint })
-
-//   const getVotesAbi = b3trGovernorAbi.find(abi => abi.name === "getVotes")
-//   if (!getVotesAbi) throw new Error("getVotes function not found")
-//   const res = await thor.account(GOVERNANCE_CONTRACT).method(getVotesAbi).call(address, timepoint)
-
-//   console.log({ res })
-//   if (res.vmError) return Promise.reject(new Error(res.vmError))
-
-//   return res.decoded[0]
-// }
+const b3trGovernorInterface = B3TRGovernor__factory.createInterface()
 
 /**
  * Build the clause to create a proposal with the given parameters
@@ -39,11 +17,11 @@ const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
  * @returns the clause to create the proposal
  */
 export const buildCreateProposalTx = (
-  thor: Connex.Thor,
   contractsAbi: AvailableContractAbis[],
   targets: string[],
   values: (string | number)[][],
   description: string,
+  startRoundId: number | string,
 ): Connex.Vendor.TxMessage[0] => {
   // all the arrays must have the same length as there is a 1 to 1 mapping between the elements
   const arrays = [contractsAbi, targets, values]
@@ -61,15 +39,21 @@ export const buildCreateProposalTx = (
     callData.push(encodedCallData)
   }
 
-  // build the clause to create the proposal with the given parameters
-  const proposalAbi = b3trGovernorAbi.find(abi => abi.name === "propose")
-  if (!proposalAbi) throw new Error("Proposal abi not found")
-
-  const clause = thor.account(GOVERNANCE_CONTRACT).method(proposalAbi).asClause(targets, [0], callData, description)
-
-  return {
-    ...clause,
-    comment: `Create proposal to ${targets} with values ${values} and callData ${callData}`,
-    abi: proposalAbi,
+  const clause: EnhancedClause = {
+    to: GOVERNANCE_CONTRACT,
+    value: 0,
+    data: b3trGovernorInterface.encodeFunctionData("propose(address[],uint256[],bytes[],string,uint256)", [
+      targets,
+      [0],
+      callData,
+      description,
+      startRoundId,
+    ]),
+    comment: `Create new proposal for round ${startRoundId} with description: ${description}`,
+    abi: JSON.parse(
+      JSON.stringify(b3trGovernorInterface.getFunction("propose(address[],uint256[],bytes[],string,uint256)")),
+    ),
   }
+
+  return clause
 }

@@ -549,6 +549,75 @@ describe("Governor and TimeLock", function () {
       expect(finalDeadline).to.eql(newDeadline)
     })
 
+    it("Proposal snapshot and deadline behaves correctly if a new round is not starting for some unexpected reason", async () => {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.EMISSIONS_CYCLE_DURATION = 5
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // We want to start a proposal in round 3
+      const tx = await governor
+        .connect(proposer) //@ts-ignore
+        .propose(
+          [await b3tr.getAddress()],
+          [0],
+          [B3trContract.interface.encodeFunctionData("tokenDetails", [])],
+          "Creating some random proposal",
+          (await xAllocationVoting.currentRoundId()) + 2n,
+          {
+            gasLimit: 10_000_000,
+          },
+        )
+      const proposalId = await getProposalIdFromTx(tx)
+
+      expect(await xAllocationVoting.currentRoundId()).to.eql(1n)
+      expect(await xAllocationVoting.state(1n)).to.eql(0n) // active
+      expect(await xAllocationVoting.currentRoundDeadline()).to.be.greaterThan(await governor.clock())
+      // we are in round 1 (active), round 2 still needs to start, our proposal is in round 3
+
+      // so the snapshot should be: block when round 1 ends + 1 block to start round 2 + duration of round 2 + 1 block to start round 3
+      const snapshot = await governor.proposalSnapshot(proposalId)
+      const currentRoundEndsAt = await xAllocationVoting.currentRoundDeadline()
+      expect(snapshot).to.eql(currentRoundEndsAt + 1n + (await xAllocationVoting.votingPeriod()) + 1n)
+
+      // deadline is the moment the proposal starts (snapshot) + the voting period
+      const deadline = await governor.proposalDeadline(proposalId)
+      expect(deadline).to.eql(snapshot + (await xAllocationVoting.votingPeriod()))
+
+      // We can now simulate that round 1 ends but round 2 is not starting for some reason
+      await waitForCurrentRoundToEnd()
+      await moveBlocks(2)
+
+      expect(await xAllocationVoting.currentRoundId()).to.eql(1n)
+      expect(await xAllocationVoting.state(1n)).to.not.eql(0n) // not active
+      // we are in round 1 (ended), round 2 still needs to start, our proposal is in round 3
+
+      // the new snapshot should be: now + 1 block (because we suppose round will start the next block) + the voting period of round 2 + 1 block for starting round 3
+      const newSnapshot = await governor.proposalSnapshot(proposalId)
+      expect(newSnapshot).to.eql((await governor.clock()) + 1n + (await xAllocationVoting.votingPeriod()) + 1n)
+
+      const newDeadline = await governor.proposalDeadline(proposalId)
+      expect(newDeadline).to.eql(newSnapshot + (await xAllocationVoting.votingPeriod()))
+
+      // every block that passes should increase the snapshot and deadline by 1 block
+      await moveBlocks(1)
+      const newSnapshot2 = await governor.proposalSnapshot(proposalId)
+      expect(newSnapshot2).to.eql(newSnapshot + 1n)
+
+      await moveBlocks(1)
+      const newSnapshot3 = await governor.proposalSnapshot(proposalId)
+      expect(newSnapshot3).to.eql(newSnapshot2 + 1n)
+    })
+
     it("Creating proposal through deprecated propose() function will create a proposal starting next round", async () => {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
