@@ -71,6 +71,21 @@ const VOT3_stake_abi = JSON.stringify([{
       type: "function"
 }])
 
+// Emissions getNextCycleBlock function ABI
+const Emissions_nextCycleBlock_abi = JSON.stringify([{
+    inputs: [],
+    name: "getNextCycleBlock",
+    outputs: [
+        {
+            internalType: "uint256",
+            name: "",
+            type: "uint256"
+        }
+    ],
+    stateMutability: "view",
+    type: "function"
+}])
+
 /**
  * Get account address from index
  * @param index Index of account
@@ -268,7 +283,7 @@ const fundAccount = async (account_index: number, min_b3tr=constants.FUNDING_MIN
     }
     if (totalNeeded.isGreaterThan(0)) {
         // transfer B3TR to account
-        await blockchainUtils.fundB3TR(address, b3trNeeded)
+        await blockchainUtils.fundB3TR(address, totalNeeded)
         // swap B3TR for VOT3
         if (vot3Needed.isGreaterThan(0)) {
             await blockchainUtils.swapB3TRForVOT3(privateKey, address, vot3Needed)
@@ -287,6 +302,60 @@ const getRndAccountIndex = () => {
     return rndIndex
 }
 
+// Wait for the next block to be mined
+export const waitForNextBlock = async () => {
+    const httpClient = new HttpClient(constants.THOR_URL)
+    const thorClient = new ThorClient(httpClient)
+    let startingBlock = await thorClient.blocks.getBestBlockCompressed()
+    let currentBlock
+    do {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      currentBlock = await thorClient.blocks.getBestBlockCompressed()
+    } while (startingBlock?.number === currentBlock?.number)
+  }
+
+
+/**
+ * Move the specified number of blocks
+ * @param blocks Number of blocks to move
+ */
+export const moveBlocks = async (blocks: number) => {
+    for (let i = 0; i < blocks; i++) {
+      await waitForNextBlock()
+    }
+  }
+
+/** 
+ * Waits for the specified block number
+ */
+const waitForBlock = async (blockNumber: number) => {
+    const httpClient = new HttpClient(constants.THOR_URL)
+    const thorClient = new ThorClient(httpClient)
+    const currentBlock = await thorClient.blocks.getBestBlockCompressed()
+    if (!currentBlock?.number) throw new Error("Could not get current block number")
+    if (currentBlock?.number < blockNumber) {
+      // Get blocks required to wait
+      const blocksToWait = blockNumber - currentBlock?.number
+      if (blocksToWait > 0) await moveBlocks(blocksToWait)
+    }
+    console.log(`Block number ${blockNumber} reached`)
+}
+
+/**
+ * Waits for the allocation voting cycle to complete
+ */
+const waitForNextCycle = async () => {
+    const httpClient = new HttpClient(constants.THOR_URL)
+    const thorClient = new ThorClient(httpClient)
+    const response = await thorClient.contracts.executeContractCall(
+        constants.EMISSIONS_CONTRACT_ADDRESS,
+        coder.createInterface(Emissions_nextCycleBlock_abi).getFunction("getNextCycleBlock") as FunctionFragment,[]
+    )
+    const blockNumber = response[0].toString()
+    console.log(`Next allocation cycle block number to wait for: ${blockNumber}`)
+    await waitForBlock(blockNumber)
+}
+
 
 
 const blockchainUtils = {
@@ -299,6 +368,7 @@ const blockchainUtils = {
     fundB3TR,
     fundAccount,
     swapB3TRForVOT3,
-    getRndAccountIndex
+    getRndAccountIndex,
+    waitForNextCycle
 }
 export default blockchainUtils

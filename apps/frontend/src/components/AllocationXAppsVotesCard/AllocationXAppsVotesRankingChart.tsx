@@ -105,7 +105,7 @@ const VotesHorizontalBar = ({
             </Skeleton>
           </VStack>
           <VStack spacing={0} align="flex-end">
-            <Heading size={["sm", "md"]} fontWeight={"700"} color="green.500">
+            <Heading size={["sm", "md"]} fontWeight={"700"} color="green.500" data-testid={appMetadata?.name + "-total-votes"}>
               {compactFormatter.format(Number(data.votes))}
             </Heading>
 
