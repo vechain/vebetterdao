@@ -10,3 +10,5 @@ Tests are designed to always expect this starting point - this means to run the 
 - `yarn dev:e2e`
 - In a new terminal `yarn playwright:e2e`
 
+These should be executed from root folder of repo
+
