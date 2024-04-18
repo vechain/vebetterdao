@@ -91,7 +91,6 @@ abstract contract XAllocationVotingGovernor is
   // ---------- Setters ---------- //
 
   function finalize(uint256 roundId) public {
-    require(!isFinalized(roundId), "Governor: round already finalized");
     require(!isActive(roundId), "Governor: round is not ended yet");
 
     _finalizeRound(roundId);
@@ -117,6 +116,13 @@ abstract contract XAllocationVotingGovernor is
    */
   function _finalizeRound(uint256 roundId) internal virtual {
     XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
+
+    // First round is always succeeded
+    if (roundId == 1) {
+      $._latestSucceededRoundId[roundId] = 1;
+      $._roundFinalized[roundId] = true;
+      return;
+    }
 
     if (state(roundId) == RoundState.Succeeded) {
       $._latestSucceededRoundId[roundId] = roundId;
@@ -182,6 +188,14 @@ abstract contract XAllocationVotingGovernor is
   function currentRoundId() public view virtual override returns (uint256) {
     XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
     return $._roundCount;
+  }
+
+  function currentRoundSnapshot() public view virtual returns (uint256) {
+    return roundSnapshot(currentRoundId());
+  }
+
+  function currentRoundDeadline() public view virtual returns (uint256) {
+    return roundDeadline(currentRoundId());
   }
 
   function isActive(uint256 roundId) public view virtual override returns (bool) {

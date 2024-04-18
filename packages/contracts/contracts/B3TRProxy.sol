@@ -14,6 +14,7 @@ import { ERC1967Utils } from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Utils
  * in the location specified by https://eips.ethereum.org/EIPS/eip-1967[EIP1967],
  * so that it doesn't conflict with the storage layout of the implementation behind the proxy.
  */
+// https://stackoverflow.com/a/61678986/7302689
 // solc-ignore-next-line missing-receive
 contract B3TRProxy is Proxy {
   /**

@@ -7,13 +7,14 @@
   "scripts": {
     "test:thor-solo": "npx hardhat test",
     "test:hardhat": "hardhat test --network hardhat",
+    "test:coverage:solidity": "hardhat coverage --testfiles ./test/**/*test.ts",
     "compile": "npx hardhat compile",
     "deploy": "npx hardhat run scripts/deploy",
     "deploy:testnet": "npx hardhat run scripts/deploy --network vechain_testnet",
     "check-contracts-deployment": "npx hardhat run scripts/checkContractsDeployment.ts",
     "check-contracts-deployment:testnet": "npx hardhat run scripts/checkContractsDeployment.ts --network vechain_testnet",
-    "generate-b3tr-badge-metadata": "npx hardhat run scripts/metadata/B3TRBadgeNFTs/generate.ts",
-    "upload-b3tr-badge-metadata": "yarn generate-b3tr-badge-metadata && npx hardhat run scripts/metadata/B3TRBadgeNFTs/upload.ts",
+    "generate-galaxy-member-metadata": "npx hardhat run scripts/metadata/GalaxyMember/generate.ts",
+    "upload-galaxy-member-metadata": "yarn generate-galaxy-member-metadata && npx hardhat run scripts/metadata/GalaxyMember/upload.ts",
     "generate-xapp-metadata": "npx hardhat run scripts/metadata/xApps/generate.ts",
     "upload-xapp-metadata": "yarn generate-xapp-metadata && npx hardhat run scripts/metadata/xApps/upload.ts",
     "start-round:testnet": "npx hardhat run scripts/emissions/startRound.ts --network vechain_testnet",
@@ -41,6 +42,8 @@
     "@types/mocha": ">=9.1.0",
     "@vechain/hardhat-ethers": "^0.1.4",
     "@vechain/hardhat-vechain": "^0.1.4",
+    "@vechain/sdk-network": "^1.0.0-beta.3",
+    "@vechain/sdk-wallet": "^1.0.0-beta.3",
     "@vechain/web3-providers-connex": "^1.1.2",
     "chai": "^4.2.0",
     "dotenv": "^16.3.1",
@@ -48,10 +51,10 @@
     "hardhat-contract-sizer": "^2.10.0",
     "hardhat-gas-reporter": "^1.0.8",
     "hardhat-ignore-warnings": "^0.2.11",
-    "solidity-coverage": "^0.8.1",
     "ts-node": ">=8.0.0",
     "typechain": "^8.1.0",
-    "typescript": ">=4.5.0"
+    "typescript": ">=4.5.0",
+    "solidity-coverage": "^0.8.11"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",

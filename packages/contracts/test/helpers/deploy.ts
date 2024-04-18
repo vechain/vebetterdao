@@ -3,15 +3,15 @@ import { ContractFactory, ContractTransactionResponse } from "ethers"
 import { ethers } from "hardhat"
 import {
   B3TR,
-  B3TRGovernor,
   TimeLock,
   VOT3,
-  B3TRBadge,
+  GalaxyMember,
   Emissions,
   XAllocationVoting,
   XAllocationPool,
   VoterRewards,
   Treasury,
+  B3TRGovernor,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy } from "../../scripts/helpers"
@@ -22,7 +22,7 @@ interface DeployInstance {
   vot3: VOT3
   timeLock: TimeLock
   governor: B3TRGovernor
-  b3trBadge: B3TRBadge
+  galaxyMember: GalaxyMember
   xAllocationVoting: XAllocationVoting
   xAllocationPool: XAllocationPool
   emissions: Emissions
@@ -35,13 +35,13 @@ interface DeployInstance {
   otherAccounts: HardhatEthersSigner[]
 }
 
-export const NFT_BADGE_NAME = "B3TRBadge"
-export const NFT_BADGE_SYMBOL = "B3TR"
+export const NFT_NAME = "GalaxyMember"
+export const NFT_SYMBOL = "GM"
 export const DEFAULT_MAX_MINTABLE_LEVEL = 1
 
 // // Voter Rewards
-export const levels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] // NFT Badge levels
-export const multipliers = [0, 10, 20, 50, 100, 150, 200, 400, 900, 2400] // NFT Badge percentage multipliers (in basis points)
+export const levels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] // Galaxy Member contract levels
+export const multipliers = [0, 10, 20, 50, 100, 150, 200, 400, 900, 2400] // Galaxy Member contract percentage multipliers (in basis points)
 
 let cachedDeployInstance: DeployInstance | undefined = undefined
 export const getOrDeployContractInstances = async ({
@@ -63,6 +63,15 @@ export const getOrDeployContractInstances = async ({
   // Deploy VOT3
   const vot3 = (await deployProxy("VOT3", [owner.address, await b3tr.getAddress()])) as VOT3
 
+  // Deploy TimeLock
+  const timeLock = (await deployProxy("TimeLock", [
+    0, //0 seconds delay for immediate execution
+    [],
+    [],
+    timelockAdmin.address,
+    timelockAdmin.address,
+  ])) as TimeLock
+
   // Deploy Treasury
   const treasury = (await deployProxy("Treasury", [
     await b3tr.getAddress(),
@@ -72,19 +81,19 @@ export const getOrDeployContractInstances = async ({
     owner.address,
   ])) as Treasury
 
-  // Deploy NFTBadge
-  const b3trBadge = (await deployProxy("B3TRBadge", [
-    NFT_BADGE_NAME,
-    NFT_BADGE_SYMBOL,
+  // Deploy GalaxyMember
+  const galaxyMember = (await deployProxy("GalaxyMember", [
+    NFT_NAME,
+    NFT_SYMBOL,
     owner.address,
     owner.address,
     maxMintableLevel,
-    config.NFT_BADGE_BASE_URI,
-    config.NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS,
-    config.NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+    config.GM_NFT_BASE_URI,
+    config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
+    config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
     await b3tr.getAddress(),
     await treasury.getAddress(),
-  ])) as B3TRBadge
+  ])) as GalaxyMember
 
   // Deploy XAllocationPool
   const xAllocationPool = (await deployProxy("XAllocationPool", [
@@ -121,40 +130,11 @@ export const getOrDeployContractInstances = async ({
     owner.address,
     owner.address,
     await emissions.getAddress(),
-    await b3trBadge.getAddress(),
+    await galaxyMember.getAddress(),
     await b3tr.getAddress(),
     levels,
     multipliers,
   ])) as VoterRewards
-
-  // Deploy TimeLock
-  const timeLock = (await deployProxy("TimeLock", [
-    0, //0 seconds delay for immediate execution
-    [],
-    [],
-    timelockAdmin.address,
-    timelockAdmin.address,
-  ])) as TimeLock
-
-  // Deploy Governor
-  const governor = (await deployProxy("B3TRGovernor", [
-    await vot3.getAddress(),
-    await timeLock.getAddress(),
-    config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
-    config.B3TR_GOVERNOR_VOTING_PERIOD, // voting period
-    config.B3TR_GOVERNOR_VOTING_DELAY, // voting delay
-    config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD, // voting threshold
-    owner.address,
-    await voterRewards.getAddress(),
-  ])) as B3TRGovernor
-
-  // Set up roles
-  const PROPOSER_ROLE = await timeLock.PROPOSER_ROLE()
-  const EXECUTOR_ROLE = await timeLock.EXECUTOR_ROLE()
-  const CANCELLER_ROLE = await timeLock.CANCELLER_ROLE()
-  await timeLock.connect(timelockAdmin).grantRole(PROPOSER_ROLE, await governor.getAddress())
-  await timeLock.connect(timelockAdmin).grantRole(EXECUTOR_ROLE, await governor.getAddress())
-  await timeLock.connect(timelockAdmin).grantRole(CANCELLER_ROLE, await governor.getAddress())
 
   // Set vote 2 earn (VoterRewards deployed contract) address in emissions
   await emissions.connect(owner).setVote2EarnAddress(await voterRewards.getAddress())
@@ -176,9 +156,29 @@ export const getOrDeployContractInstances = async ({
     },
   ])) as XAllocationVoting
 
-  // Set xAllocationVoting and Governor address in B3TRBadge
-  await b3trBadge.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
-  await b3trBadge.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+  // Deploy Governor
+  const governor = (await deployProxy("B3TRGovernor", [
+    await vot3.getAddress(),
+    await timeLock.getAddress(),
+    await xAllocationVoting.getAddress(),
+    config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
+    config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD, // voting threshold
+    config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
+    owner.address,
+    await voterRewards.getAddress(),
+  ])) as B3TRGovernor
+
+  // Set up roles
+  const PROPOSER_ROLE = await timeLock.PROPOSER_ROLE()
+  const EXECUTOR_ROLE = await timeLock.EXECUTOR_ROLE()
+  const CANCELLER_ROLE = await timeLock.CANCELLER_ROLE()
+  await timeLock.connect(timelockAdmin).grantRole(PROPOSER_ROLE, await governor.getAddress())
+  await timeLock.connect(timelockAdmin).grantRole(EXECUTOR_ROLE, await governor.getAddress())
+  await timeLock.connect(timelockAdmin).grantRole(CANCELLER_ROLE, await governor.getAddress())
+
+  // Set xAllocationVoting and Governor address in GalaxyMember
+  await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+  await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
 
   // Grant Vote registrar role to XAllocationVoting
   await voterRewards.connect(owner).setVoteRegistrarRole(await xAllocationVoting.getAddress())
@@ -212,7 +212,7 @@ export const getOrDeployContractInstances = async ({
     vot3,
     timeLock,
     governor,
-    b3trBadge,
+    galaxyMember,
     xAllocationVoting,
     xAllocationPool,
     emissions,

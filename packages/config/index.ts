@@ -15,7 +15,7 @@ export type AppConfig = {
   xAllocationVotingContractAddress: string
   emissionsContractAddress: string
   voterRewardsContractAddress: string
-  nftBadgeContractAddress: string
+  galaxyMemberContractAddress: string
   treasuryContractAddress: string
   nodeUrl: string
   network: Network

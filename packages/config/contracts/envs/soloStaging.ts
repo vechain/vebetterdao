@@ -6,10 +6,9 @@ export function createSoloStagingConfig() {
 
     B3TR_CAP: 3_750_000, // 3_750_000 -> 3.75 million B3TR tokens for pilot show
     B3TR_GOVERNOR_QUORUM_PERCENTAGE: 4, // 4 -> Need 4% of voters to pass
-    B3TR_GOVERNOR_MIN_DELAY: 30, //after a vote passes, you have 5 min before you can vote queue the proposal
-    B3TR_GOVERNOR_VOTING_PERIOD: 180, // blocks - how long the vote lasts.
-    B3TR_GOVERNOR_VOTING_DELAY: 90, // How many blocks till a proposal vote becomes active
+    B3TR_GOVERNOR_MIN_DELAY: 30, //after a vote passes, you have 5 min before you can queue the proposal
     B3TR_GOVERNOR_PROPOSAL_THRESHOLD: 1000, // How many votes are needed to create a proposal
+    B3TR_GOVERNOR_MIN_VOTING_DELAY: 30, // 5 minutes
 
     EMISSIONS_CYCLE_DURATION: 30, // blocks - 30 blocks - 5 minutes.
     EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE: 4, // 4% decay every cycle
@@ -29,7 +28,7 @@ export function createSoloStagingConfig() {
 
     INITIAL_X_ALLOCATION: BigInt("66666666666666666666666"), // 1M/15 rounded down -> 1/15th of the total supply for pilot show
 
-    NFT_BADGE_BASE_URI: "ipfs://bafybeiahr3qobzujfkxi64o6wrigkmdagrvgfa566rqqth6jm5nq7vf24y/", // IPFS base URI for the NFT Badge
+    GM_NFT_BASE_URI: "ipfs://bafybeiahr3qobzujfkxi64o6wrigkmdagrvgfa566rqqth6jm5nq7vf24y/", // IPFS base URI for the GM NFT
 
     /*
       X/Economic Node => Max Level For Free
@@ -42,7 +41,7 @@ export function createSoloStagingConfig() {
       ThunderX => 6,
       MjolnirX => 7,
     */
-    NFT_BADGE_X_NODE_UPGRADEABLE_LEVELS: [2, 4, 6, 2, 4, 6, 7],
+    GM_NFT_X_NODE_UPGRADEABLE_LEVELS: [2, 4, 6, 2, 4, 6, 7],
 
     /*
       Level => B3TR Required
@@ -57,7 +56,7 @@ export function createSoloStagingConfig() {
       9 (Neptune) => 5,000,000 B3TR
       10 (Galaxy) => 25,000,000 B3TR
     */
-    NFT_BADGE_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL: [
+    GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL: [
       10000000000000000000000n,
       25000000000000000000000n,
       50000000000000000000000n,
@@ -69,8 +68,7 @@ export function createSoloStagingConfig() {
       25000000000000000000000000n,
     ],
 
-
-    VOTER_REWARDS_LEVELS : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    VOTER_REWARDS_LEVELS: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
 
     /*
       Level => Percentage Multiplier
@@ -85,7 +83,7 @@ export function createSoloStagingConfig() {
       9 (Neptune) => 900% (10x)
       10 (Galaxy) => 2400% (25x)
     */
-    VOTER_REWARDS_MULTIPLIER : [0, 10, 20, 50, 100, 150, 200, 400, 900, 2400],
+    VOTER_REWARDS_MULTIPLIER: [0, 10, 20, 50, 100, 150, 200, 400, 900, 2400],
 
     XAPP_BASE_URI: "ipfs://",
   })
