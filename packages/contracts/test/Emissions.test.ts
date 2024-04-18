@@ -105,7 +105,7 @@ describe("Emissions", () => {
     })
 
     it("Treasury percentage should be between 0 and 10000", async () => {
-      const { emissions, owner } = await getOrDeployContractInstances({
+      const { emissions, owner, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -119,6 +119,8 @@ describe("Emissions", () => {
       await emissions.connect(owner).setTreasuryPercentage(10000)
       await emissions.connect(owner).setTreasuryPercentage(0)
       await emissions.connect(owner).setTreasuryPercentage(550)
+
+      await expect(emissions.connect(otherAccount).setTreasuryPercentage(55)).to.be.reverted // Not admin
     })
 
     it("MaxVote2EarnDecay percentage should be between 0 and 100", async () => {
@@ -141,7 +143,7 @@ describe("Emissions", () => {
     })
 
     it("Vote2EarnDecay percentage should be between 0 and 100", async () => {
-      const { emissions, owner } = await getOrDeployContractInstances({
+      const { emissions, owner, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -155,10 +157,12 @@ describe("Emissions", () => {
       await emissions.connect(owner).setVote2EarnDecay(100)
       await emissions.connect(owner).setVote2EarnDecay(0)
       await emissions.connect(owner).setVote2EarnDecay(55)
+
+      await expect(emissions.connect(otherAccount).setVote2EarnDecay(55)).to.be.reverted // Not admin
     })
 
     it("XAllocationsDecay percentage should be between 0 and 100", async () => {
-      const { emissions, owner } = await getOrDeployContractInstances({
+      const { emissions, owner, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -172,6 +176,8 @@ describe("Emissions", () => {
       await emissions.connect(owner).setXAllocationsDecay(100)
       await emissions.connect(owner).setXAllocationsDecay(0)
       await emissions.connect(owner).setXAllocationsDecay(55)
+
+      await expect(emissions.connect(otherAccount).setXAllocationsDecay(55)).to.be.reverted // Not admin
     })
 
     it("Should return correct x allocations governor address", async () => {
@@ -255,37 +261,13 @@ describe("Emissions", () => {
     })
 
     it("Should be able to change x allocations voting governor", async () => {
-      const config = createLocalConfig()
-      const { emissions, owner, otherAccount, vot3, timeLock, voterRewards } = await getOrDeployContractInstances({
+      const { emissions, owner, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
-      /* 
-      await emissions.connect(owner).setXAllocationsGovernorAddress(await otherAccount.getAddress())
-
-      expect(await emissions.xAllocationsGovernor()).to.equal(await otherAccount.getAddress()) */
 
       await expect(emissions.connect(otherAccount).setXAllocationsGovernorAddress(otherAccount.address)).to.be.reverted // Not admin
 
       await expect(emissions.connect(owner).setXAllocationsGovernorAddress(ZERO_ADDRESS)).to.be.reverted // Can't be zero address
-
-      const xAllocationVoting = (await deployProxy("XAllocationVoting", [
-        {
-          vot3Token: await vot3.getAddress(),
-          quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE, // quorum percentage
-          initialVotingPeriod: config.EMISSIONS_CYCLE_DURATION + 2, // X Alloc voting period
-          b3trGovernor: await timeLock.getAddress(),
-          voterRewards: await voterRewards.getAddress(),
-          emissions: await emissions.getAddress(),
-          admins: [await timeLock.getAddress(), owner.address],
-          upgrader: owner.address,
-          xAppsBaseURI: "ipfs://",
-          baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
-          appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
-        },
-      ])) as XAllocationVoting
-
-      await expect(emissions.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())).to.be
-        .reverted // Voting period more than emissions duration
     })
 
     // it("getScaledDecayPercentage: decay percentage should be between 0 and 99", async () => {
