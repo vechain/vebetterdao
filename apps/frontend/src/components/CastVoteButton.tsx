@@ -18,7 +18,7 @@ export const CastVoteButton: React.FC<Props> = ({ proposal }) => {
 
   return (
     <>
-      <CastVoteModal isOpen={isOpen} onClose={onClose} proposal={proposal} />
+      <CastVoteModal isOpen={isOpen} onOpen={onOpen} onClose={onClose} proposal={proposal} />
 
       <Button onClick={onOpen} isDisabled={isDisabled}>
         {hasVoted ? "You voted" : "Cast your vote"}

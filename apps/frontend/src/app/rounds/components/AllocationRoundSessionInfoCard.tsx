@@ -126,7 +126,7 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
             </Text>
             <Skeleton isLoaded={!votesLoading}>
               <HStack spacing={2}>
-                <Heading size="lg">{compactFormatter.format(Number(votes))}</Heading>
+                <Heading size="lg" data-testid="total-votes" >{compactFormatter.format(Number(votes))}</Heading>
                 <VOT3Icon boxSize={6} />
               </HStack>
             </Skeleton>

@@ -1,6 +1,6 @@
 import { useB3trPaused, useVot3Paused } from "@/api"
 import { useAccountPermissions } from "@/api/contracts/account"
-import { useB3trBadgePaused } from "@/api/contracts/b3trBadge"
+import { useIsGMpaused } from "@/api/contracts/galaxyMember"
 import { usePauseContract } from "@/hooks"
 import { Button, HStack, VStack, Text, Show } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
@@ -9,9 +9,9 @@ import React, { useCallback } from "react"
 
 export const Pause: React.FC = () => {
   const { account } = useWallet()
-  const { isAdminOfB3tr, isAdminOfB3trBadge, isAdminOfVot3 } = useAccountPermissions(account ?? "")
+  const { isAdminOfB3tr, isAdminOfGalaxyMember, isAdminOfVot3 } = useAccountPermissions(account ?? "")
 
-  const { data: isB3trBadgePaused, isLoading: isB3trBadgePausedLoading } = useB3trBadgePaused()
+  const { data: isGalaxyMemberPaused, isLoading: isGalaxyMemberPausedLoading } = useIsGMpaused()
 
   const { data: isVot3Paused, isLoading: isVot3PausedLoading } = useVot3Paused()
 
@@ -27,9 +27,9 @@ export const Pause: React.FC = () => {
     contractName: "VOT3",
   })
 
-  const { pauseTxResult: pauseB3trBadgeTxResult, unpauseTxResult: unpauseB3trBadgeTxResult } = usePauseContract({
-    contract: getConfig().nftBadgeContractAddress,
-    contractName: "B3TR Badge",
+  const { pauseTxResult: pauseGalaxyMemberTxResult, unpauseTxResult: unpauseGalaxyMemberTxResult } = usePauseContract({
+    contract: getConfig().galaxyMemberContractAddress,
+    contractName: "Galaxy Member",
   })
 
   const isToggleB3trPausedLoading =
@@ -46,12 +46,12 @@ export const Pause: React.FC = () => {
     pauseVot3TxResult.sendTransactionPending ||
     unpauseVot3TxResult.sendTransactionPending
 
-  const isToggleB3trBadgePausedLoading =
-    isB3trBadgePausedLoading ||
-    pauseB3trBadgeTxResult.isTxReceiptLoading ||
-    unpauseB3trBadgeTxResult.isTxReceiptLoading ||
-    pauseB3trBadgeTxResult.sendTransactionPending ||
-    unpauseB3trBadgeTxResult.sendTransactionPending
+  const isToggleGalaxyMemberPausedLoading =
+    isGalaxyMemberPausedLoading ||
+    pauseGalaxyMemberTxResult.isTxReceiptLoading ||
+    unpauseGalaxyMemberTxResult.isTxReceiptLoading ||
+    pauseGalaxyMemberTxResult.sendTransactionPending ||
+    unpauseGalaxyMemberTxResult.sendTransactionPending
 
   const handleToggleB3trPause = useCallback(() => {
     if (isB3trPaused) {
@@ -69,13 +69,13 @@ export const Pause: React.FC = () => {
     }
   }, [isVot3Paused, pauseVot3TxResult, unpauseVot3TxResult])
 
-  const handleToggleB3trBadgePause = useCallback(() => {
-    if (isB3trBadgePaused) {
-      unpauseB3trBadgeTxResult.sendTransaction()
+  const handleToggleGalaxyMemberPause = useCallback(() => {
+    if (isGalaxyMemberPaused) {
+      unpauseGalaxyMemberTxResult.sendTransaction()
     } else {
-      pauseB3trBadgeTxResult.sendTransaction()
+      pauseGalaxyMemberTxResult.sendTransaction()
     }
-  }, [isB3trBadgePaused, pauseB3trBadgeTxResult, unpauseB3trBadgeTxResult])
+  }, [isGalaxyMemberPaused, pauseGalaxyMemberTxResult, unpauseGalaxyMemberTxResult])
 
   const pauseB3TR = (
     <>
@@ -101,13 +101,13 @@ export const Pause: React.FC = () => {
     </>
   )
 
-  const pauseB3trBadge = (
+  const pauseGalaxyMember = (
     <>
       <Button
-        colorScheme={`${isB3trBadgePaused ? "blue" : "red"}`}
-        onClick={handleToggleB3trBadgePause}
-        isLoading={isToggleB3trBadgePausedLoading}>
-        {isB3trBadgePaused ? "Unpause B3TR Badge" : "Pause B3TR Badge"}
+        colorScheme={`${isGalaxyMemberPaused ? "blue" : "red"}`}
+        onClick={handleToggleGalaxyMemberPause}
+        isLoading={isToggleGalaxyMemberPausedLoading}>
+        {isGalaxyMemberPaused ? "Unpause Galaxy Member" : "Pause Galaxy Member"}
       </Button>
       <Text>Pausing disables: Transfers, Minting</Text>
     </>
@@ -137,13 +137,13 @@ export const Pause: React.FC = () => {
         </>
       )}
 
-      {isAdminOfB3trBadge && (
+      {isAdminOfGalaxyMember && (
         <>
           <Show above="sm">
-            <HStack>{pauseB3trBadge}</HStack>
+            <HStack>{pauseGalaxyMember}</HStack>
           </Show>
           <Show below="sm">
-            <VStack align={"flex-start"}>{pauseB3trBadge}</VStack>
+            <VStack align={"flex-start"}>{pauseGalaxyMember}</VStack>
           </Show>
         </>
       )}

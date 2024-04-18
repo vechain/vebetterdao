@@ -10,7 +10,7 @@ const config: AppConfig = {
   xAllocationVotingContractAddress: "0x90c1a329e11CE6429eeF0ab9b8f7DAaB68694e7d",
   emissionsContractAddress: "0x3D7616213191a10460e49CfdB7edBf88D6a10942",
   voterRewardsContractAddress: "0x2D0EfF77e390cff063E0567A7735c904cBC4D1cf",
-  nftBadgeContractAddress: "0xa9aC49C030c1148b95F056E86f2531f8F3d5bf27",
+  galaxyMemberContractAddress: "0xa9aC49C030c1148b95F056E86f2531f8F3d5bf27",
   treasuryContractAddress: "",
   nodeUrl: "https://testnet.vechain.org",
   network: {

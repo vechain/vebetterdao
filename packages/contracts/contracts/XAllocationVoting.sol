@@ -2,11 +2,12 @@
 pragma solidity ^0.8.18;
 
 import "./x-allocation-voting-governance/XAllocationVotingGovernor.sol";
-import "./x-allocation-voting-governance/modules/GovernorXAllocationVotesCountingUpgradeable.sol";
-import "./x-allocation-voting-governance/modules/GovernorVotesUpgradeable.sol";
-import "./x-allocation-voting-governance/modules/GovernorVotesQuorumFractionUpgradeable.sol";
-import "./x-allocation-voting-governance/modules/GovernorSettingsUpgradeable.sol";
+import "./x-allocation-voting-governance/modules/XAllocationGovernorVotesCountingUpgradeable.sol";
+import "./x-allocation-voting-governance/modules/XAllocationGovernorVotesUpgradeable.sol";
+import "./x-allocation-voting-governance/modules/XAllocationGovernorVotesQuorumFractionUpgradeable.sol";
+import "./x-allocation-voting-governance/modules/XAllocationGovernorSettingsUpgradeable.sol";
 import "./x-allocation-voting-governance/modules/XAppsUpgradeable.sol";
+import "./x-allocation-voting-governance/modules/XAllocationEarningsSettings.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -14,10 +15,11 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 contract XAllocationVoting is
   Initializable,
   XAllocationVotingGovernor,
-  GovernorSettingsUpgradeable,
-  GovernorXAllocationVotesCountingUpgradeable,
-  GovernorVotesUpgradeable,
-  GovernorVotesQuorumFractionUpgradeable,
+  XAllocationGovernorSettingsUpgradeable,
+  XAllocationGovernorVotesCountingUpgradeable,
+  XAllocationGovernorVotesUpgradeable,
+  XAllocationGovernorVotesQuorumFractionUpgradeable,
+  XAllocationEarningsSettings,
   XAppsUpgradeable,
   AccessControlUpgradeable,
   UUPSUpgradeable
@@ -53,24 +55,6 @@ contract XAllocationVoting is
     uint256 appSharesCap;
   }
 
-  /// @custom:storage-location erc7201:b3tr.storage.XAllocationVoting
-  struct XAllocationVotingStorage {
-    uint256 baseAllocationPercentage;
-    uint256 appSharesCap;
-    mapping(uint256 => uint256) _roundBaseAllocationPercentage;
-    mapping(uint256 => uint256) _roundAppSharesCap;
-  }
-
-  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVoting")) - 1)) & ~bytes32(uint256(0xff))
-  bytes32 private constant XAllocationVotingStorageLocation =
-    0x5b9ce609d9b570ff2fee5cd5fe0d8c801dcc65fb3338b719bf34ef6a513e8800;
-
-  function _getXAllocationVotingStorage() private pure returns (XAllocationVotingStorage storage $) {
-    assembly {
-      $.slot := XAllocationVotingStorageLocation
-    }
-  }
-
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
@@ -87,6 +71,7 @@ contract XAllocationVoting is
     __GovernorVotes_init(data.vot3Token);
     __GovernorVotesQuorumFraction_init(data.quorumPercentage);
     __XApps_init(data.xAppsBaseURI);
+    __XAllocationEarningsSettings_init(data.baseAllocationPercentage, data.appSharesCap);
     __AccessControl_init();
     __UUPSUpgradeable_init();
 
@@ -94,8 +79,6 @@ contract XAllocationVoting is
       _grantRole(DEFAULT_ADMIN_ROLE, data.admins[i]);
     }
 
-    setBaseAllocationPercentage(data.baseAllocationPercentage);
-    setAppSharesCap(data.appSharesCap);
     _grantRole(UPGRADER_ROLE, data.upgrader);
   }
 
@@ -104,8 +87,7 @@ contract XAllocationVoting is
   function setB3trGovernanceAddress(address b3trGovernor_) public override onlyRole(DEFAULT_ADMIN_ROLE) {
     require(b3trGovernor_ != address(0), "XAllocationVoting: new B3trGovernor is the zero address");
 
-    XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
-    $._b3trGovernor = IGovernor(payable(b3trGovernor_));
+    _getXAllocationVotingGovernorStorage()._b3trGovernor = IGovernor(payable(b3trGovernor_));
   }
 
   function startNewRound() public override onlyRole(ROUND_STARTER_ROLE) returns (uint256) {
@@ -113,7 +95,7 @@ contract XAllocationVoting is
   }
 
   function _startNewRound(address proposer) internal virtual override returns (uint256 roundId) {
-    XAllocationVotingStorage storage $ = _getXAllocationVotingStorage();
+    EarningsSettingsStorage storage $ = _getEarningsSettingsStorage();
     XAllocationVotingGovernorStorage storage xAllocationVotingGovernorStorage = _getXAllocationVotingGovernorStorage();
 
     ++xAllocationVotingGovernorStorage._roundCount;
@@ -123,8 +105,9 @@ contract XAllocationVoting is
       revert GovernorUnexpectedRoundState(roundId, state(roundId), bytes32(0));
     }
 
-    // If checkpoint for latest round was not already created, create it
-    if (roundId > 1 && !isFinalized(roundId - 1)) {
+    // Do not run for the first round
+    if (roundId > 1) {
+      // finalize the previous round
       _finalizeRound(roundId - 1);
     }
 
@@ -153,52 +136,27 @@ contract XAllocationVoting is
     super.setVotingElegibility(appId, isElegible);
   }
 
-  /**
-   * @notice Set the base allocation percentage
-   * @param baseAllocationPercentage_ The new base allocation percentage
-   */
-  function setBaseAllocationPercentage(uint256 baseAllocationPercentage_) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(baseAllocationPercentage_ <= 100, "Base allocation percentage must be less than or equal to 100");
-    XAllocationVotingStorage storage $ = _getXAllocationVotingStorage();
-    $.baseAllocationPercentage = baseAllocationPercentage_;
-  }
-
-  /**
-   * @notice Set the app shares cap
-   * @param appSharesCap_ The new app shares cap
-   */
-  function setAppSharesCap(uint256 appSharesCap_) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(appSharesCap_ <= 100, "App shares cap must be less than or equal to 100");
-    XAllocationVotingStorage storage $ = _getXAllocationVotingStorage();
-    $.appSharesCap = appSharesCap_;
-  }
-
-  function baseAllocationPercentage() public view returns (uint256) {
-    XAllocationVotingStorage storage $ = _getXAllocationVotingStorage();
-    return $.baseAllocationPercentage;
-  }
-
-  function appSharesCap() public view returns (uint256) {
-    XAllocationVotingStorage storage $ = _getXAllocationVotingStorage();
-    return $.appSharesCap;
-  }
-
   function setAdminRole(address _newAdmin) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(_newAdmin != address(0), "XAllocationVoting: new admin is the zero address");
 
     _grantRole(DEFAULT_ADMIN_ROLE, _newAdmin);
   }
 
-  function setBaseURI(string memory baseURI_) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setBaseURI(string memory baseURI_) external onlyRole(DEFAULT_ADMIN_ROLE) {
     _setBaseURI(baseURI_);
   }
 
-  // ---------- Getters ---------- //
-
-  function getCurrentAllocationRoundSnapshot() public view returns (uint256) {
-    uint256 currentId = currentRoundId();
-    return roundSnapshot(currentId);
+  function setAppSharesCap(uint256 appSharesCap_) external virtual override onlyRole(DEFAULT_ADMIN_ROLE) {
+    _setAppSharesCap(appSharesCap_);
   }
+
+  function setBaseAllocationPercentage(
+    uint256 baseAllocationPercentage_
+  ) public virtual override onlyRole(DEFAULT_ADMIN_ROLE) {
+    _setBaseAllocationPercentage(baseAllocationPercentage_);
+  }
+
+  // ---------- Getters ---------- //
 
   /**
    * This function could not be efficient with a large number of apps
@@ -224,28 +182,12 @@ contract XAllocationVoting is
     return quorum(roundSnapshot(roundId));
   }
 
-  /**
-   * Returns the base allocation percentage for a given round
-   */
-  function getRoundBaseAllocationPercentage(uint256 roundId) public view returns (uint256) {
-    XAllocationVotingStorage storage $ = _getXAllocationVotingStorage();
-    return $._roundBaseAllocationPercentage[roundId];
-  }
-
-  /**
-   * Returns the app shares cap for a given round
-   */
-  function getRoundAppSharesCap(uint256 roundId) public view returns (uint256) {
-    XAllocationVotingStorage storage $ = _getXAllocationVotingStorage();
-    return $._roundAppSharesCap[roundId];
-  }
-
   // ---------- Required overrides ---------- //
 
   function votingPeriod()
     public
     view
-    override(XAllocationVotingGovernor, GovernorSettingsUpgradeable)
+    override(XAllocationVotingGovernor, XAllocationGovernorSettingsUpgradeable)
     returns (uint256)
   {
     return super.votingPeriod();
@@ -253,7 +195,12 @@ contract XAllocationVoting is
 
   function quorum(
     uint256 blockNumber
-  ) public view override(XAllocationVotingGovernor, GovernorVotesQuorumFractionUpgradeable) returns (uint256) {
+  )
+    public
+    view
+    override(XAllocationVotingGovernor, XAllocationGovernorVotesQuorumFractionUpgradeable)
+    returns (uint256)
+  {
     return super.quorum(blockNumber);
   }
 

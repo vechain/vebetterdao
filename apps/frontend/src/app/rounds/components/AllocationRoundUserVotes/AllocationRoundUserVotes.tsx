@@ -133,7 +133,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
           w="full"
           spacing={0}>
           <Heading size="xl">Voting concluded</Heading>
-          <Heading size="md" color={hasVoted ? "green.500" : "orange.500"}>
+          <Heading size="md" color={hasVoted ? "green.500" : "orange.500"} data-testid="total-votes-cast">
             {compactFormatter.format(totalVotesCast ?? 0)} votes cast
           </Heading>
         </Stack>

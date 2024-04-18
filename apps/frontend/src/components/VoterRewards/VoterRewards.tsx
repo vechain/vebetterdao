@@ -153,7 +153,7 @@ export const VoterRewards: React.FC = () => {
             </Box>
 
             <HStack w="full" spacing={4}>
-              <Heading size={{ base: "2xl", md: "xl" }}>
+              <Heading size={{ base: "2xl", md: "xl" }} test-dataid="voting-rewards">
                 {compactFormatter.format(Number(totalRewardsFormatted))}
               </Heading>
               <B3TRIcon boxSize="auto" />

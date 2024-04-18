@@ -45,7 +45,7 @@ async function overrideLocalConfigWithNewContracts(contracts: Awaited<ReturnType
     xAllocationVotingContractAddress: await contracts.xAllocationVoting.getAddress(),
     emissionsContractAddress: await contracts.emissions.getAddress(),
     voterRewardsContractAddress: await contracts.voterRewards.getAddress(),
-    nftBadgeContractAddress: await contracts.badge.getAddress(),
+    galaxyMemberContractAddress: await contracts.galaxyMember.getAddress(),
     treasuryContractAddress: await contracts.treasury.getAddress(),
   }
 

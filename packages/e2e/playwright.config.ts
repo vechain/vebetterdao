@@ -18,7 +18,7 @@ export default defineConfig({
   /* Never retry failing tests */
   retries: 0,
   /* Set workers for GHA */
-  workers: process.env.GITHUB_RUN_ID ? 2 : undefined,
+  workers: process.env.GITHUB_RUN_ID ? 1 : undefined,
   /* HTML Reporter */
   reporter: [ ['html', { open: 'never' }] ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */

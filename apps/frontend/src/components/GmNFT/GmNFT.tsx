@@ -1,5 +1,5 @@
-import { useB3trBadgeBalance, useIsNFTClaimable, useParticipatedInGovernance } from "@/api"
-import { useNFTImage } from "@/api/contracts/b3trBadge/hooks/useNFTImage"
+import { useGMbalance, useIsGMclaimable, useParticipatedInGovernance } from "@/api"
+import { useNFTImage } from "@/api/contracts/galaxyMember/hooks/useNFTImage"
 import { useClaimNFT } from "@/hooks"
 import {
   Box,
@@ -31,13 +31,13 @@ import { coinFlipAnimation, pulseAnimation } from "@/constants"
 const MotionImage = motion(Image)
 
 export const GmNFT = () => {
-  const { isClaimable: isNFTClaimable, isOwned } = useIsNFTClaimable()
+  const { isClaimable: isNFTClaimable, isOwned } = useIsGMclaimable()
 
   const { account } = useWallet()
 
   const { isLoading: isLoadingHasVoted } = useParticipatedInGovernance(account)
 
-  const { data: nftBalance, isLoading: isLoadingNftBalance } = useB3trBadgeBalance(account)
+  const { data: nftBalance, isLoading: isLoadingNftBalance } = useGMbalance(account)
 
   const buttonColor = useColorModeValue("400", "300")
 
@@ -90,12 +90,12 @@ export const GmNFT = () => {
       )
 
     return (
-      <ModalContent w={"auto"} rounded="2xl">
-        <ModalCloseButton />
+      <ModalContent w={"auto"} rounded="2xl" data-testid="gmnft-modal">
+        <ModalCloseButton data-testid="gmnft-modal-close"/>
         <ModalBody display={"flex"} alignContent={"center"} alignItems={"center"} pt={12} px={6}>
           <VStack alignItems={"center"}>
             <Image src={imageData?.image} maxW={"auto"} rounded="3xl" />
-            <Heading alignSelf={"center"} size={"lg"} mt={4} textAlign={"center"}>
+            <Heading alignSelf={"center"} size={"lg"} mt={4} textAlign={"center"} data-testid={"gmnft-token-id"}>
               #{tokenID}
             </Heading>
           </VStack>
@@ -128,7 +128,7 @@ export const GmNFT = () => {
 
                   <VStack alignItems={"self-start"} spacing={3} pr={4}>
                     <Text fontWeight={600} lineHeight="22px" fontSize={{ base: "18px", md: "20px" }}>
-                      You have a new badge
+                      You have a new GM NFT
                     </Text>
                   </VStack>
                 </HStack>

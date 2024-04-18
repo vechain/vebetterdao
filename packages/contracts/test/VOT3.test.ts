@@ -532,4 +532,61 @@ describe("VOT3", function () {
       expect(await vot3.getVotes(owner)).to.eql(ethers.parseEther("1000"))
     })
   })
+
+  describe("Voting power", function () {
+    let vot3Contract: any
+    let other: any
+    let accounts: any
+    this.beforeAll(async function () {
+      const { vot3, otherAccount, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+      vot3Contract = vot3
+      other = otherAccount
+      accounts = otherAccounts
+    })
+    it("Voting power should be the square root of the amount of vote", async function () {
+      // Mint some B3TR and swap for VOT3
+      await getVot3Tokens(other, "1000")
+
+      // Initial state: 1000 VOT3, 1000 voting power, self-delegated
+      expect(await vot3Contract.balanceOf(other)).to.eql(ethers.parseEther("1000"))
+      //scale down by 1e9 as sqrt of 10^18 is 10^9
+      expect(await vot3Contract.getQuadraticVotingPower(other)).to.eql(ethers.parseEther("31.622776601"))
+    })
+    it("Voting power should be the square root of the amount of delegated votes", async function () {
+      await getVot3Tokens(accounts[1], "9")
+      await getVot3Tokens(accounts[2], "7")
+
+      expect(await vot3Contract.balanceOf(accounts[1])).to.eql(ethers.parseEther("9"))
+      expect(await vot3Contract.balanceOf(accounts[2])).to.eql(ethers.parseEther("7"))
+
+      // delegate to another user
+      await vot3Contract.connect(accounts[1]).delegate(accounts[2].address, { gasLimit: 10_000_000 })
+
+      // Initial state: 7 VOT3, recived 9 delegated VOT3s, 16 VOT3s in total and 4 voting power
+      expect(await vot3Contract.getVotes(accounts[2])).to.eql(ethers.parseEther("16"))
+      expect(await vot3Contract.getQuadraticVotingPower(accounts[2])).to.eql(ethers.parseEther("4"))
+    })
+    it("Should be able to get past voting power", async function () {
+      await getVot3Tokens(accounts[3], "50000")
+
+      // Initial state: 50000 VOT3, sqrt(50000) voting power, self-delegated
+      expect(await vot3Contract.balanceOf(accounts[3])).to.eql(ethers.parseEther("50000"))
+      expect(await vot3Contract.getQuadraticVotingPower(accounts[3])).to.eql(ethers.parseEther("223.606797749"))
+
+      // Transfer to another account
+      const tx = await vot3Contract.connect(accounts[3]).transfer(accounts[4].address, ethers.parseEther("10000"))
+      const receipt = await tx.wait()
+
+      // 40000 VOT3, sqrt(40000) voting power, self-delegated
+      expect(await vot3Contract.balanceOf(accounts[3])).to.eql(ethers.parseEther("40000"))
+      expect(await vot3Contract.getQuadraticVotingPower(accounts[3])).to.eql(ethers.parseEther("200"))
+
+      // Voting power should be the same as before the transfer
+      expect(await vot3Contract.getPastQuadraticVotingPower(accounts[3], receipt.blockNumber - 1)).to.eql(
+        ethers.parseEther("223.606797749"),
+      )
+    })
+  })
 })

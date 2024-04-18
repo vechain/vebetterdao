@@ -325,12 +325,12 @@ describe("Emissions", () => {
     })
 
     it("Should not be able to bootstrap emissions twice", async () => {
-      const { emissions, b3tr, minterAccount, owner } = await getOrDeployContractInstances({
+      const { emissions, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       // Try to bootstrap emissions again - Should revert
       await catchRevert(emissions.connect(minterAccount).bootstrap())
@@ -340,14 +340,14 @@ describe("Emissions", () => {
   describe("Start emissions", () => {
     it("Should be able to start emissions", async () => {
       const config = createLocalConfig()
-      const { emissions, b3tr, minterAccount, treasury, owner, xAllocationPool, voterRewards } =
+      const { emissions, b3tr, minterAccount, treasury, xAllocationPool, voterRewards } =
         await getOrDeployContractInstances({
           forceDeploy: true,
           config,
         })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       const tx = await emissions.connect(minterAccount).start()
 
@@ -379,7 +379,7 @@ describe("Emissions", () => {
       })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await b3tr.connect(owner).pause()
 
@@ -391,12 +391,12 @@ describe("Emissions", () => {
     })
 
     it("Should not be able start emissions twice", async () => {
-      const { emissions, b3tr, minterAccount, owner } = await getOrDeployContractInstances({
+      const { emissions, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       // Start emissions
       await emissions.connect(minterAccount).start()
@@ -418,13 +418,13 @@ describe("Emissions", () => {
   describe("Emissions distribution", () => {
     it("Should be able to calculate emissions correctly for first cycle", async () => {
       const config = createLocalConfig()
-      const { emissions, b3tr, minterAccount, owner } = await getOrDeployContractInstances({
+      const { emissions, b3tr, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       // Start emissions
       await emissions.connect(minterAccount).start()
@@ -432,7 +432,7 @@ describe("Emissions", () => {
       // Expect next cycle to be 2
       expect(await emissions.nextCycle()).to.equal(2)
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       // Calculate emissions for first cycle
       const xAllocationAmount = await emissions.getXAllocationAmount(2)
@@ -490,12 +490,12 @@ describe("Emissions", () => {
       })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       // Start emissions
       await emissions.connect(minterAccount).start()
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       // Pause B3TR transfers
       await b3tr.connect(owner).pause()
@@ -512,13 +512,13 @@ describe("Emissions", () => {
 
     it("Should not be able to distribute emissions before next cycle starts", async () => {
       const config = createLocalConfig()
-      const { emissions, b3tr, minterAccount, owner } = await getOrDeployContractInstances({
+      const { emissions, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       // Start emissions
       await emissions.connect(minterAccount).start()
@@ -547,18 +547,18 @@ describe("Emissions", () => {
 
     it("Should be able to calculate emissions correctly for second cycle", async () => {
       const config = createLocalConfig()
-      const { emissions, b3tr, minterAccount, owner } = await getOrDeployContractInstances({
+      const { emissions, b3tr, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       // Start emissions
       await emissions.connect(minterAccount).start()
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       // Distribute emissions
       await emissions.connect(minterAccount).distribute()
@@ -580,7 +580,7 @@ describe("Emissions", () => {
       expect(await b3tr.balanceOf(await emissions.vote2Earn())).to.equal(initialVoteAllocation * 2n)
       expect(await b3tr.balanceOf(await emissions.treasury())).to.equal(initialTreasuryAlloc * 2n)
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       expect(await emissions.nextCycle()).to.equal(3)
 
@@ -611,18 +611,18 @@ describe("Emissions", () => {
 
     it("Should calculate emissions properly after first X-Alloc decay period", async () => {
       const config = createTestConfig()
-      const { emissions, b3tr, minterAccount, owner } = await getOrDeployContractInstances({
+      const { emissions, b3tr, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       // Start emissions
       await emissions.connect(minterAccount).start()
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       // Distribute emissions
       await emissions.connect(minterAccount).distribute()
@@ -635,11 +635,11 @@ describe("Emissions", () => {
 
       // Move to after first decay period
       const cycle = config.EMISSIONS_X_ALLOCATION_DECAY_PERIOD + 2
-      await moveToCycle(emissions, minterAccount, cycle)
+      await moveToCycle(cycle)
 
       expect(await emissions.nextCycle()).to.equal(cycle)
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       const xAllocationsAmount = await emissions.getXAllocationAmount(cycle)
       const vote2EarnAmount = await emissions.getVote2EarnAmount(cycle)
@@ -659,18 +659,18 @@ describe("Emissions", () => {
 
     it("Should calculate emissions properly after first Rewards decay period", async () => {
       const config = createTestConfig()
-      const { emissions, b3tr, minterAccount, owner } = await getOrDeployContractInstances({
+      const { emissions, b3tr, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       // Start emissions
       await emissions.connect(minterAccount).start()
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       // Distribute emissions
       await emissions.connect(minterAccount).distribute()
@@ -683,11 +683,11 @@ describe("Emissions", () => {
 
       // Move to after first Rewards decay period
       const cycle = config.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD + 2
-      await moveToCycle(emissions, minterAccount, cycle)
+      await moveToCycle(cycle)
 
       expect(await emissions.nextCycle()).to.equal(cycle)
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       const xAllocationsAmount = await emissions.getXAllocationAmount(cycle)
       const vote2EarnAmount = await emissions.getVote2EarnAmount(cycle)
@@ -707,13 +707,13 @@ describe("Emissions", () => {
 
     it("Should calculate decay amounts correctly for pilot show parameters", async () => {
       const config = createLocalConfig()
-      const { emissions, owner, minterAccount, b3tr } = await getOrDeployContractInstances({
+      const { emissions, minterAccount, b3tr } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       expect(await emissions.nextCycle()).to.equal(1)
 
@@ -734,7 +734,7 @@ describe("Emissions", () => {
 
       // Loop through all cycles as simulated in the b3tr emissions spreadsheet
       for (let i = 0; i < b3trAllocations.length; i++) {
-        await waitForNextCycle(emissions)
+        await waitForNextCycle()
 
         const allocations = b3trAllocations[i]
 
@@ -775,12 +775,12 @@ describe("Emissions", () => {
     }).timeout(1000 * 60 * 10) // 10 minutes
 
     it("Should not be able to start emissions if not minter", async () => {
-      const { emissions, minterAccount, b3tr, owner, otherAccount } = await getOrDeployContractInstances({
+      const { emissions, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       await catchRevert(emissions.connect(otherAccount).start())
     })
@@ -791,13 +791,13 @@ describe("Emissions", () => {
         return
       }
       const config = createTestConfig()
-      const { emissions, b3tr, minterAccount, owner } = await getOrDeployContractInstances({
+      const { emissions, b3tr, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       // Start emissions
       await emissions.connect(minterAccount).start()
@@ -814,7 +814,7 @@ describe("Emissions", () => {
 
       // Loop through all cycles as simulated in the b3tr emissions spreadsheet
       for (let i = 0; i < b3trAllocations.length; i++) {
-        await waitForNextCycle(emissions)
+        await waitForNextCycle()
 
         const allocations = b3trAllocations[i]
 
@@ -859,17 +859,17 @@ describe("Emissions", () => {
     }).timeout(1000 * 60 * 5) // 5 minutes
 
     it("Should not be able to distribute if cycle is not ready", async () => {
-      const { emissions, minterAccount, b3tr, owner } = await getOrDeployContractInstances({
+      const { emissions, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       // Start emissions
       await emissions.connect(minterAccount).start()
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       // Distribute emissions
       await emissions.connect(minterAccount).distribute()
@@ -878,22 +878,22 @@ describe("Emissions", () => {
     })
 
     it("Should be able to perform emissions also after the next cycle block", async () => {
-      const { emissions, minterAccount, b3tr, owner } = await getOrDeployContractInstances({
+      const { emissions, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
       // Bootstrap emissions
-      await bootstrapEmissions(b3tr, emissions, owner, minterAccount)
+      await bootstrapEmissions()
 
       // Start emissions
       await emissions.connect(minterAccount).start()
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       // Distribute emissions
       await emissions.connect(minterAccount).distribute()
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       await waitForBlock(10) // Simulate a delay of 10 blocks before distributing the next cycle
 
@@ -901,7 +901,7 @@ describe("Emissions", () => {
 
       expect(await emissions.getCurrentCycle()).to.equal(3)
 
-      await waitForNextCycle(emissions)
+      await waitForNextCycle()
 
       await emissions.connect(minterAccount).distribute()
     })
