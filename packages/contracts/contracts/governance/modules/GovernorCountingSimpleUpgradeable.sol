@@ -5,6 +5,7 @@ pragma solidity ^0.8.20;
 
 import { GovernorUpgradeable } from "../GovernorUpgradeable.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { ICountingStrategy } from "../../interfaces/ICountingStrategy.sol";
 
 /**
  * @dev Extension of {Governor} for simple, 3 options, vote counting.
@@ -15,29 +16,9 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
  * - Include against votes in quorum calculation
  */
 abstract contract GovernorCountingSimpleUpgradeable is Initializable, GovernorUpgradeable {
-  /**
-   * @dev Supported vote types. Matches Governor Bravo ordering.
-   */
-  enum VoteType {
-    Against,
-    For,
-    Abstain
-  }
-
-  struct ProposalVote {
-    uint256 againstVotes;
-    uint256 forVotes;
-    uint256 abstainVotes;
-    mapping(address => bool) hasVoted;
-  }
-
   /// @custom:storage-location erc7201:openzeppelin.storage.GovernorCountingSimple
   struct GovernorCountingSimpleStorage {
-    mapping(uint256 => ProposalVote) _proposalVotes;
-    // mapping to store that a user has voted at least one time
-    mapping(address => bool) _hasVotedOnce;
-    // mapping to store the total votes for a proposal
-    mapping(uint256 => uint256) _proposalTotalVotes;
+    ICountingStrategy countingStrategy;
   }
 
   // keccak256(abi.encode(uint256(keccak256("openzeppelin.storage.GovernorCountingSimple")) - 1)) & ~bytes32(uint256(0xff))
@@ -50,24 +31,29 @@ abstract contract GovernorCountingSimpleUpgradeable is Initializable, GovernorUp
     }
   }
 
-  function __GovernorCountingSimple_init() internal onlyInitializing {}
+  function __GovernorCountingSimple_init(ICountingStrategy _countingStrategy) internal onlyInitializing {}
 
-  function __GovernorCountingSimple_init_unchained() internal onlyInitializing {}
+  function __GovernorCountingSimple_init_unchained(ICountingStrategy _countingStrategy) internal onlyInitializing {
+    _getGovernorCountingSimpleStorage().countingStrategy = _countingStrategy;
+  }
+
+  function countingStrategy() public view returns (ICountingStrategy) {
+    return _getGovernorCountingSimpleStorage().countingStrategy;
+  }
 
   /**
    * @dev See {IGovernor-COUNTING_MODE}.
    */
   // solhint-disable-next-line func-name-mixedcase
-  function COUNTING_MODE() public pure virtual override returns (string memory) {
-    return "support=bravo&quorum=for,abstain,against";
+  function COUNTING_MODE() public view virtual override returns (string memory) {
+    return _getGovernorCountingSimpleStorage().countingStrategy.COUNTING_MODE();
   }
 
   /**
    * @dev See {IGovernor-hasVoted}.
    */
   function hasVoted(uint256 proposalId, address account) public view virtual override returns (bool) {
-    GovernorCountingSimpleStorage storage $ = _getGovernorCountingSimpleStorage();
-    return $._proposalVotes[proposalId].hasVoted[account];
+    return _getGovernorCountingSimpleStorage().countingStrategy.hasVoted(proposalId, account);
   }
 
   /**
@@ -76,35 +62,33 @@ abstract contract GovernorCountingSimpleUpgradeable is Initializable, GovernorUp
   function proposalVotes(
     uint256 proposalId
   ) public view virtual returns (uint256 againstVotes, uint256 forVotes, uint256 abstainVotes) {
-    GovernorCountingSimpleStorage storage $ = _getGovernorCountingSimpleStorage();
-    ProposalVote storage proposalVote = $._proposalVotes[proposalId];
-    return (proposalVote.againstVotes, proposalVote.forVotes, proposalVote.abstainVotes);
+    return _getGovernorCountingSimpleStorage().countingStrategy.proposalVotes(proposalId);
   }
 
   /**
    * @dev returns the total votes for a proposal
    */
   function proposalTotalVotes(uint256 proposalId) public view returns (uint256) {
-    GovernorCountingSimpleStorage storage $ = _getGovernorCountingSimpleStorage();
-    return $._proposalTotalVotes[proposalId];
+    return _getGovernorCountingSimpleStorage().countingStrategy.proposalTotalVotes(proposalId);
   }
 
   /**
    * @dev See {Governor-_quorumReached}.
    */
   function _quorumReached(uint256 proposalId) internal view virtual override returns (bool) {
-    GovernorCountingSimpleStorage storage $ = _getGovernorCountingSimpleStorage();
-    return quorum(proposalSnapshot(proposalId)) <= $._proposalTotalVotes[proposalId];
+    return
+      quorum(proposalSnapshot(proposalId)) <=
+      _getGovernorCountingSimpleStorage().countingStrategy.proposalTotalVotes(proposalId);
   }
 
   /**
    * @dev See {Governor-_voteSucceeded}. In this module, the forVotes must be strictly over the againstVotes.
    */
   function _voteSucceeded(uint256 proposalId) internal view virtual override returns (bool) {
-    GovernorCountingSimpleStorage storage $ = _getGovernorCountingSimpleStorage();
-    ProposalVote storage proposalVote = $._proposalVotes[proposalId];
-
-    return proposalVote.forVotes > proposalVote.againstVotes;
+    (uint256 againstVotes, uint256 forVotes, ) = _getGovernorCountingSimpleStorage().countingStrategy.proposalVotes(
+      proposalId
+    );
+    return forVotes > againstVotes;
   }
 
   /**
@@ -113,8 +97,7 @@ abstract contract GovernorCountingSimpleUpgradeable is Initializable, GovernorUp
    * @param user The address of the user to check if has voted at least one time
    */
   function hasVotedOnce(address user) public view returns (bool) {
-    GovernorCountingSimpleStorage storage $ = _getGovernorCountingSimpleStorage();
-    return $._hasVotedOnce[user];
+    return _getGovernorCountingSimpleStorage().countingStrategy.hasVotedOnce(user);
   }
 
   /**
@@ -125,32 +108,15 @@ abstract contract GovernorCountingSimpleUpgradeable is Initializable, GovernorUp
     address account,
     uint8 support,
     uint256 weight,
-    uint256 power,
-    bytes memory // params
+    uint256 power
   ) internal virtual override {
+    _getGovernorCountingSimpleStorage().countingStrategy._countVote(proposalId, account, support, weight, power, "");
+  }
+
+  function _setCountingStrategyAddress(address newCountingStrategyAddress) internal virtual {
+    require(newCountingStrategyAddress != address(0), "GCS: zero address");
+
     GovernorCountingSimpleStorage storage $ = _getGovernorCountingSimpleStorage();
-    ProposalVote storage proposalVote = $._proposalVotes[proposalId];
-
-    if (proposalVote.hasVoted[account]) {
-      revert GovernorAlreadyCastVote(account);
-    }
-    proposalVote.hasVoted[account] = true;
-
-    if (support == uint8(VoteType.Against)) {
-      proposalVote.againstVotes += power;
-    } else if (support == uint8(VoteType.For)) {
-      proposalVote.forVotes += power;
-    } else if (support == uint8(VoteType.Abstain)) {
-      proposalVote.abstainVotes += power;
-    } else {
-      revert GovernorInvalidVoteType();
-    }
-
-    $._proposalTotalVotes[proposalId] += weight;
-
-    // save that user cast vote only the first time
-    if (!$._hasVotedOnce[account]) {
-      $._hasVotedOnce[account] = true;
-    }
+    $.countingStrategy = ICountingStrategy(newCountingStrategyAddress);
   }
 }

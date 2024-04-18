@@ -18,6 +18,7 @@ import { IGovernor } from "../interfaces/IGovernor.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { Validation } from "./library/Validation.sol";
 
 /**
  * @dev Core of the governance system, designed to be extended through various modules.
@@ -50,13 +51,6 @@ abstract contract GovernorUpgradeable is
 {
   using DoubleEndedQueue for DoubleEndedQueue.Bytes32Deque;
 
-  bytes32 public constant BALLOT_TYPEHASH =
-    keccak256("Ballot(uint256 proposalId,uint8 support,address voter,uint256 nonce)");
-  bytes32 public constant EXTENDED_BALLOT_TYPEHASH =
-    keccak256(
-      "ExtendedBallot(uint256 proposalId,uint8 support,address voter,uint256 nonce,string reason,bytes params)"
-    );
-
   struct ProposalCore {
     address proposer;
     uint256 roundIdVoteStart;
@@ -66,7 +60,6 @@ abstract contract GovernorUpgradeable is
     bool canceled;
     uint48 etaSeconds;
   }
-
   bytes32 private constant ALL_PROPOSAL_STATES_BITMAP = bytes32((2 ** (uint8(type(ProposalState).max) + 1)) - 1);
   /// @custom:storage-location erc7201:openzeppelin.storage.Governor
   struct GovernorStorage {
@@ -98,6 +91,7 @@ abstract contract GovernorUpgradeable is
    * for example, additional timelock proposers are not able to change governance parameters without going through the
    * governance protocol (since v4.6).
    */
+  // this increaqses gas by 0.010 kb
   modifier onlyGovernance() {
     _checkGovernance();
     _;
@@ -171,7 +165,7 @@ abstract contract GovernorUpgradeable is
     bytes[] memory calldatas,
     bytes32 descriptionHash
   ) public pure virtual returns (uint256) {
-    return uint256(keccak256(abi.encode(targets, values, calldatas, descriptionHash)));
+    return Validation.hashProposal(targets, values, calldatas, descriptionHash);
   }
 
   /**
@@ -234,7 +228,7 @@ abstract contract GovernorUpgradeable is
   /**
    * @dev Get the voting weight of `account` at a specific `timepoint`, for a vote as described by `params`.
    */
-  function _getVotes(address account, uint256 timepoint, bytes memory params) internal view virtual returns (uint256);
+  function _getVotes(address account, uint256 timepoint) internal view virtual returns (uint256);
 
   /**
    * @dev Register a vote for `proposalId` by `account` with a given `support`, voting `weight` and voting `params`.
@@ -246,19 +240,8 @@ abstract contract GovernorUpgradeable is
     address account,
     uint8 support,
     uint256 weight,
-    uint256 power,
-    bytes memory params
+    uint256 power
   ) internal virtual;
-
-  /**
-   * @dev Default additional encoded parameters used by castVote methods that don't include them
-   *
-   * Note: Should be overridden by specific implementations to use an appropriate value, the
-   * meaning of the additional params, in the context of that implementation
-   */
-  function _defaultParams() internal view virtual returns (bytes memory) {
-    return "";
-  }
 
   /**
    * @dev See {IGovernor-queue}.
@@ -371,29 +354,6 @@ abstract contract GovernorUpgradeable is
   }
 
   /**
-   * @dev See {IGovernor-cancel}.
-   */
-  function cancel(
-    address[] memory targets,
-    uint256[] memory values,
-    bytes[] memory calldatas,
-    bytes32 descriptionHash
-  ) public virtual returns (uint256) {
-    // The proposalId will be recomputed in the `_cancel` call further down. However we need the value before we
-    // do the internal call, because we need to check the proposal state BEFORE the internal `_cancel` call
-    // changes it. The `hashProposal` duplication has a cost that is limited, and that we accept.
-    uint256 proposalId = hashProposal(targets, values, calldatas, descriptionHash);
-
-    // public cancel restrictions (on top of existing _cancel restrictions).
-    _validateStateBitmap(proposalId, _encodeStateBitmap(ProposalState.Pending));
-    if (_msgSender() != proposalProposer(proposalId)) {
-      revert GovernorOnlyProposer(_msgSender());
-    }
-
-    return _cancel(targets, values, calldatas, descriptionHash);
-  }
-
-  /**
    * @dev Internal cancel mechanism with minimal restrictions. A proposal can be cancelled in any state other than
    * Canceled, Expired, or Executed. Once cancelled a proposal can't be re-submitted.
    *
@@ -426,109 +386,7 @@ abstract contract GovernorUpgradeable is
    * @dev See {IGovernor-getVotes}.
    */
   function getVotes(address account, uint256 timepoint) public view virtual returns (uint256) {
-    return _getVotes(account, timepoint, _defaultParams());
-  }
-
-  /**
-   * @dev See {IGovernor-getVotesWithParams}.
-   */
-  function getVotesWithParams(
-    address account,
-    uint256 timepoint,
-    bytes memory params
-  ) public view virtual returns (uint256) {
-    return _getVotes(account, timepoint, params);
-  }
-
-  /**
-   * @dev See {IGovernor-castVote}.
-   */
-  function castVote(uint256 proposalId, uint8 support) public virtual returns (uint256) {
-    address voter = _msgSender();
-    return _castVote(proposalId, voter, support, "");
-  }
-
-  /**
-   * @dev See {IGovernor-castVoteWithReason}.
-   */
-  function castVoteWithReason(
-    uint256 proposalId,
-    uint8 support,
-    string calldata reason
-  ) public virtual returns (uint256) {
-    address voter = _msgSender();
-    return _castVote(proposalId, voter, support, reason);
-  }
-
-  /**
-   * @dev See {IGovernor-castVoteWithReasonAndParams}.
-   */
-  function castVoteWithReasonAndParams(
-    uint256 proposalId,
-    uint8 support,
-    string calldata reason,
-    bytes memory params
-  ) public virtual returns (uint256) {
-    address voter = _msgSender();
-    return _castVote(proposalId, voter, support, reason, params);
-  }
-
-  /**
-   * @dev See {IGovernor-castVoteBySig}.
-   */
-  function castVoteBySig(
-    uint256 proposalId,
-    uint8 support,
-    address voter,
-    bytes memory signature
-  ) public virtual returns (uint256) {
-    bool valid = SignatureChecker.isValidSignatureNow(
-      voter,
-      _hashTypedDataV4(keccak256(abi.encode(BALLOT_TYPEHASH, proposalId, support, voter, _useNonce(voter)))),
-      signature
-    );
-
-    if (!valid) {
-      revert GovernorInvalidSignature(voter);
-    }
-
-    return _castVote(proposalId, voter, support, "");
-  }
-
-  /**
-   * @dev See {IGovernor-castVoteWithReasonAndParamsBySig}.
-   */
-  function castVoteWithReasonAndParamsBySig(
-    uint256 proposalId,
-    uint8 support,
-    address voter,
-    string calldata reason,
-    bytes memory params,
-    bytes memory signature
-  ) public virtual returns (uint256) {
-    bool valid = SignatureChecker.isValidSignatureNow(
-      voter,
-      _hashTypedDataV4(
-        keccak256(
-          abi.encode(
-            EXTENDED_BALLOT_TYPEHASH,
-            proposalId,
-            support,
-            voter,
-            _useNonce(voter),
-            keccak256(bytes(reason)),
-            keccak256(params)
-          )
-        )
-      ),
-      signature
-    );
-
-    if (!valid) {
-      revert GovernorInvalidSignature(voter);
-    }
-
-    return _castVote(proposalId, voter, support, reason, params);
+    return _getVotes(account, timepoint);
   }
 
   /**
@@ -543,33 +401,13 @@ abstract contract GovernorUpgradeable is
     uint8 support,
     string memory reason
   ) internal virtual returns (uint256) {
-    return _castVote(proposalId, account, support, reason, _defaultParams());
-  }
-
-  /**
-   * @dev Internal vote casting mechanism: Check that the vote is pending, that it has not been cast yet, retrieve
-   * voting weight using {IGovernor-getVotes} and call the {_countVote} internal function.
-   *
-   * Emits a {IGovernor-VoteCast} event.
-   */
-  function _castVote(
-    uint256 proposalId,
-    address account,
-    uint8 support,
-    string memory reason,
-    bytes memory params
-  ) internal virtual returns (uint256) {
     _validateStateBitmap(proposalId, _encodeStateBitmap(ProposalState.Active));
 
-    uint256 weight = _getVotes(account, proposalSnapshot(proposalId), params);
+    uint256 weight = _getVotes(account, proposalSnapshot(proposalId));
     uint256 power = Math.sqrt(weight) * 1e9;
-    _countVote(proposalId, account, support, weight, power, params);
+    _countVote(proposalId, account, support, weight, power);
 
-    if (params.length == 0) {
-      emit VoteCast(account, proposalId, support, weight, power, reason);
-    } else {
-      emit VoteCastWithParams(account, proposalId, support, weight, power, reason, params);
-    }
+    emit VoteCast(account, proposalId, support, weight, power, reason);
 
     return weight;
   }
@@ -654,97 +492,12 @@ abstract contract GovernorUpgradeable is
    *
    * If requirements are not met, reverts with a {GovernorUnexpectedProposalState} error.
    */
-  function _validateStateBitmap(uint256 proposalId, bytes32 allowedStates) private view returns (ProposalState) {
+  function _validateStateBitmap(uint256 proposalId, bytes32 allowedStates) internal view returns (ProposalState) {
     ProposalState currentState = state(proposalId);
     if (_encodeStateBitmap(currentState) & allowedStates == bytes32(0)) {
       revert GovernorUnexpectedProposalState(proposalId, currentState, allowedStates);
     }
     return currentState;
-  }
-
-  /*
-   * @dev Check if the proposer is authorized to submit a proposal with the given description.
-   *
-   * If the proposal description ends with `#proposer=0x???`, where `0x???` is an address written as a hex string
-   * (case insensitive), then the submission of this proposal will only be authorized to said address.
-   *
-   * This is used for frontrunning protection. By adding this pattern at the end of their proposal, one can ensure
-   * that no other address can submit the same proposal. An attacker would have to either remove or change that part,
-   * which would result in a different proposal id.
-   *
-   * If the description does not match this pattern, it is unrestricted and anyone can submit it. This includes:
-   * - If the `0x???` part is not a valid hex string.
-   * - If the `0x???` part is a valid hex string, but does not contain exactly 40 hex digits.
-   * - If it ends with the expected suffix followed by newlines or other whitespace.
-   * - If it ends with some other similar suffix, e.g. `#other=abc`.
-   * - If it does not end with any such suffix.
-   */
-  function _isValidDescriptionForProposer(
-    address proposer,
-    string memory description
-  ) internal view virtual returns (bool) {
-    uint256 len = bytes(description).length;
-
-    // Length is too short to contain a valid proposer suffix
-    if (len < 52) {
-      return true;
-    }
-
-    // Extract what would be the `#proposer=0x` marker beginning the suffix
-    bytes12 marker;
-    assembly {
-      // - Start of the string contents in memory = description + 32
-      // - First character of the marker = len - 52
-      //   - Length of "#proposer=0x0000000000000000000000000000000000000000" = 52
-      // - We read the memory word starting at the first character of the marker:
-      //   - (description + 32) + (len - 52) = description + (len - 20)
-      // - Note: Solidity will ignore anything past the first 12 bytes
-      marker := mload(add(description, sub(len, 20)))
-    }
-
-    // If the marker is not found, there is no proposer suffix to check
-    if (marker != bytes12("#proposer=0x")) {
-      return true;
-    }
-
-    // Parse the 40 characters following the marker as uint160
-    uint160 recovered = 0;
-    for (uint256 i = len - 40; i < len; ++i) {
-      (bool isHex, uint8 value) = _tryHexToUint(bytes(description)[i]);
-      // If any of the characters is not a hex digit, ignore the suffix entirely
-      if (!isHex) {
-        return true;
-      }
-      recovered = (recovered << 4) | value;
-    }
-
-    return recovered == uint160(proposer);
-  }
-
-  /**
-   * @dev Try to parse a character from a string as a hex value. Returns `(true, value)` if the char is in
-   * `[0-9a-fA-F]` and `(false, 0)` otherwise. Value is guaranteed to be in the range `0 <= value < 16`
-   */
-  function _tryHexToUint(bytes1 char) private pure returns (bool, uint8) {
-    uint8 c = uint8(char);
-    unchecked {
-      // Case 0-9
-      if (47 < c && c < 58) {
-        return (true, c - 48);
-      }
-      // Case A-F
-      else if (64 < c && c < 71) {
-        return (true, c - 55);
-      }
-      // Case a-f
-      else if (96 < c && c < 103) {
-        return (true, c - 87);
-      }
-      // Else: not a hex char
-      else {
-        return (false, 0);
-      }
-    }
   }
 
   /**

@@ -2,23 +2,24 @@
 pragma solidity ^0.8.20;
 
 import "./governance/GovernorUpgradeable.sol";
-import "./governance/modules/GovernorSettingsUpgradeable.sol";
 import "./governance/modules/GovernorVotesUpgradeable.sol";
 import "./governance/modules/GovernorVotesQuorumFractionUpgradeable.sol";
 import "./governance/modules/GovernorTimelockControlUpgradeable.sol";
 import "./governance/modules/GovernorCountingSimpleUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { IVoterRewards } from "./interfaces/IVoterRewards.sol";
 import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
+import { IGovernanceSettings } from "./interfaces/IGovernanceSettings.sol";
+import { ICountingStrategy } from "./interfaces/ICountingStrategy.sol";
+import { Validation } from "./governance/library/Validation.sol";
 
 contract B3TRGovernor is
   Initializable,
   AccessControlUpgradeable,
   GovernorUpgradeable,
-  GovernorSettingsUpgradeable,
   GovernorCountingSimpleUpgradeable,
   GovernorVotesUpgradeable,
   GovernorVotesQuorumFractionUpgradeable,
@@ -51,6 +52,7 @@ contract B3TRGovernor is
   struct B3TRGovernorStorage {
     IVoterRewards voterRewards;
     IXAllocationVotingGovernor xAllocationVoting;
+    IGovernanceSettings governanceSettings;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.B3TRGovernor")) - 1)) & ~bytes32(uint256(0xff))
@@ -63,14 +65,16 @@ contract B3TRGovernor is
     }
   }
 
+  //  * @param _initialProposalThreshold The Proposal Threshold is the amount of voting power that an account needs to make a proposal
+  //  * @param _initialMinVotingDelay The minimum delay before a proposal can start
   /**
    * @dev Initializes the contract with the initial parameters
    * @param _vot3Token The address of the Vot3 token used for voting
    * @param _timelock The address of the Timelock
    * @param _xAllocationVoting The address of the xAllocationVoting
    * @param _quorumPercentage quorum as a percentage of the total supply at the block a proposal’s voting power is retrieved
-   * @param _initialProposalThreshold The Proposal Threshold is the amount of voting power that an account needs to make a proposal
-   * @param _initialMinVotingDelay The minimum delay before a proposal can start
+   * @param _governanceSettings The address of the governance settings contract
+   * @param _countingStrategy The address of the counting strategy contract
    * @param governorAdmin The address of the governor admin
    * @param _voterRewards The address of the voter rewards contract
    */
@@ -79,14 +83,13 @@ contract B3TRGovernor is
     TimelockControllerUpgradeable _timelock,
     IXAllocationVotingGovernor _xAllocationVoting,
     uint256 _quorumPercentage,
-    uint256 _initialProposalThreshold,
-    uint256 _initialMinVotingDelay,
+    IGovernanceSettings _governanceSettings,
+    ICountingStrategy _countingStrategy,
     address governorAdmin,
-    address _voterRewards
+    IVoterRewards _voterRewards
   ) public initializer {
     __Governor_init("B3TRGovernor");
-    __GovernorSettings_init(_initialProposalThreshold, _initialMinVotingDelay);
-    __GovernorCountingSimple_init();
+    __GovernorCountingSimple_init(_countingStrategy);
     __GovernorVotes_init(_vot3Token);
     __GovernorVotesQuorumFraction_init(_quorumPercentage);
     __GovernorTimelockControl_init(_timelock);
@@ -94,8 +97,9 @@ contract B3TRGovernor is
     __UUPSUpgradeable_init();
 
     B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
-    $.voterRewards = IVoterRewards(_voterRewards);
+    $.voterRewards = _voterRewards;
     $.xAllocationVoting = _xAllocationVoting;
+    $.governanceSettings = _governanceSettings;
 
     _grantRole(DEFAULT_ADMIN_ROLE, governorAdmin);
   }
@@ -118,18 +122,21 @@ contract B3TRGovernor is
     return _getB3TRGovernorStorage().voterRewards;
   }
 
+  function governorSettings() public view returns (IGovernanceSettings) {
+    return _getB3TRGovernorStorage().governanceSettings;
+  }
+
   /**
    * @dev returns the quadratic voting power that `account` has.
    */
   function getQuadraticVotingPower(address account, uint256 timepoint) public view virtual returns (uint256) {
     // scale the votes by 1e9 so that number returned is 1e18
-    return Math.sqrt(_getVotes(account, timepoint, _defaultParams())) * 1e9;
+    return Math.sqrt(_getVotes(account, timepoint)) * 1e9;
   }
 
   function canProposalStartInNextRound() public view returns (bool) {
     B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
     uint256 currentRoundId = $.xAllocationVoting.currentRoundId();
-    uint256 minVotingDelay = minVotingDelay();
     uint256 currentRoundDeadline = $.xAllocationVoting.roundDeadline(currentRoundId);
     uint48 currentBlock = clock();
 
@@ -139,7 +146,7 @@ contract B3TRGovernor is
     }
 
     // if between now and the start of the new round is less then the min delay, revert
-    if (minVotingDelay > currentRoundDeadline - currentBlock) {
+    if ($.governanceSettings.minVotingDelay() > currentRoundDeadline - currentBlock) {
       return false;
     }
 
@@ -157,6 +164,14 @@ contract B3TRGovernor is
   function setXAllocationVoting(IXAllocationVotingGovernor _xAllocationVoting) public onlyGovernance {
     B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
     $.xAllocationVoting = _xAllocationVoting;
+  }
+
+  function setGovernanceSettingsAddress(address newGovernanceSettingsAddress) public onlyGovernance {
+    _getB3TRGovernorStorage().governanceSettings = IGovernanceSettings(newGovernanceSettingsAddress);
+  }
+
+  function setCountingStrategyAddress(address newCountingStrategyAddress) public onlyGovernance {
+    _setCountingStrategyAddress(newCountingStrategyAddress);
   }
 
   /**
@@ -192,7 +207,7 @@ contract B3TRGovernor is
     }
 
     // check description restriction
-    if (!_isValidDescriptionForProposer(proposer, description)) {
+    if (!Validation._isValidDescriptionForProposer(proposer, description)) {
       revert GovernorRestrictedProposer(proposer);
     }
 
@@ -254,6 +269,10 @@ contract B3TRGovernor is
 
   function _authorizeUpgrade(address newImplementation) internal override onlyGovernance {}
 
+  function proposalThreshold() public view override returns (uint256) {
+    return _getB3TRGovernorStorage().governanceSettings.proposalThreshold();
+  }
+
   /**
    * @dev See {IGovernor-proposalSnapshot}.
    */
@@ -305,7 +324,7 @@ contract B3TRGovernor is
       revert UnauthorizedAccess(_msgSender());
     }
 
-    require(state(proposalId) == ProposalState.Pending, "Governor: proposal not pending");
+    _validateStateBitmap(proposalId, _encodeStateBitmap(ProposalState.Pending));
 
     return _cancel(targets, values, calldatas, descriptionHash);
   }
@@ -395,15 +414,6 @@ contract B3TRGovernor is
     return proposal.isExecutable;
   }
 
-  function proposalThreshold()
-    public
-    view
-    override(GovernorUpgradeable, GovernorSettingsUpgradeable)
-    returns (uint256)
-  {
-    return super.proposalThreshold();
-  }
-
   // To maintain compatibility with the previous version of the Governor, we need to override the propose function
   // to call the new propose function with a default value for roundId (currentRoundId + 1)
   function propose(
@@ -419,8 +429,32 @@ contract B3TRGovernor is
     return propose(targets, values, calldatas, description, currentRoundId + 1);
   }
 
-  function castVote(uint256 proposalId, uint8 support) public override(GovernorUpgradeable) returns (uint256) {
-    uint256 weight = super.castVote(proposalId, support);
+  /**
+   * @dev See {IGovernor-castVote}.
+   */
+  function castVote(uint256 proposalId, uint8 support) public virtual returns (uint256) {
+    address voter = _msgSender();
+    uint256 weight = _castVote(proposalId, voter, support, "");
+
+    if (weight > 0) {
+      B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
+
+      $.voterRewards.registerVote(proposalSnapshot(proposalId), msg.sender, weight);
+    }
+
+    return weight;
+  }
+
+  /**
+   * @dev See {IGovernor-castVoteWithReason}.
+   */
+  function castVoteWithReason(
+    uint256 proposalId,
+    uint8 support,
+    string calldata reason
+  ) public virtual returns (uint256) {
+    address voter = _msgSender();
+    uint256 weight = _castVote(proposalId, voter, support, reason);
 
     if (weight > 0) {
       B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();

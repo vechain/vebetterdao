@@ -3,24 +3,17 @@
 
 pragma solidity ^0.8.20;
 
-import { GovernorUpgradeable } from "../GovernorUpgradeable.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
-/**
- * @dev Extension of {Governor} for settings updatable through governance.
- *
- * Modifications:
- * - removed _votingPeriod
- * - removed _votingDelay (now it depends on the x-allocation roundId)
- * - added _minVotingDelay
- */
-abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradeable {
+contract GovernanceSettings is Initializable, UUPSUpgradeable, AccessControlUpgradeable {
   /// @custom:storage-location erc7201:openzeppelin.storage.GovernorSettings
   struct GovernorSettingsStorage {
     // amount of token
-    uint256 _proposalThreshold;
+    uint256 _generalGovernanceProposalThreshold;
     // min delay before voting can start
-    uint256 _minVotingDelay;
+    uint256 _generalGovernanceMinVotingDelay;
   }
 
   // keccak256(abi.encode(uint256(keccak256("openzeppelin.storage.GovernorSettings")) - 1)) & ~bytes32(uint256(0xff))
@@ -57,9 +50,9 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
   /**
    * @dev See {Governor-proposalThreshold}.
    */
-  function proposalThreshold() public view virtual override returns (uint256) {
+  function proposalThreshold() public view virtual returns (uint256) {
     GovernorSettingsStorage storage $ = _getGovernorSettingsStorage();
-    return $._proposalThreshold;
+    return $._generalGovernanceProposalThreshold;
   }
 
   /**
@@ -67,7 +60,7 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
    */
   function minVotingDelay() public view virtual returns (uint256) {
     GovernorSettingsStorage storage $ = _getGovernorSettingsStorage();
-    return $._minVotingDelay;
+    return $._generalGovernanceMinVotingDelay;
   }
 
   /**
@@ -75,7 +68,7 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
    *
    * Emits a {ProposalThresholdSet} event.
    */
-  function setProposalThreshold(uint256 newProposalThreshold) public virtual onlyGovernance {
+  function setProposalThreshold(uint256 newProposalThreshold) public virtual {
     _setProposalThreshold(newProposalThreshold);
   }
 
@@ -85,7 +78,7 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
    *
    * Emits a {MinVotingDelaySet} event.
    */
-  function setMinVotingDelay(uint256 newMinVotingDelay) public virtual onlyGovernance {
+  function setMinVotingDelay(uint256 newMinVotingDelay) public virtual {
     _setMinVotingDelay(newMinVotingDelay);
   }
 
@@ -96,8 +89,8 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
    */
   function _setProposalThreshold(uint256 newProposalThreshold) internal virtual {
     GovernorSettingsStorage storage $ = _getGovernorSettingsStorage();
-    emit ProposalThresholdSet($._proposalThreshold, newProposalThreshold);
-    $._proposalThreshold = newProposalThreshold;
+    emit ProposalThresholdSet($._generalGovernanceProposalThreshold, newProposalThreshold);
+    $._generalGovernanceProposalThreshold = newProposalThreshold;
   }
 
   /**
@@ -107,7 +100,9 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
    */
   function _setMinVotingDelay(uint256 newMinVotingDelay) internal virtual {
     GovernorSettingsStorage storage $ = _getGovernorSettingsStorage();
-    emit MinVotingDelaySet($._minVotingDelay, newMinVotingDelay);
-    $._minVotingDelay = newMinVotingDelay;
+    emit MinVotingDelaySet($._generalGovernanceMinVotingDelay, newMinVotingDelay);
+    $._generalGovernanceMinVotingDelay = newMinVotingDelay;
   }
+
+  function _authorizeUpgrade(address newImplementation) internal virtual override {}
 }
