@@ -8,7 +8,7 @@ import { ContextUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/Co
 import { NoncesUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/NoncesUpgradeable.sol";
 import { IXAllocationVotingGovernor, IERC6372 } from "../interfaces/IXAllocationVotingGovernor.sol";
 import { IXAllocationPool } from "../interfaces/IXAllocationPool.sol";
-import { IGovernor } from "../interfaces/IGovernor.sol";
+import { IB3TRGovernor } from "../interfaces/IB3TRGovernor.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /**
@@ -43,7 +43,7 @@ abstract contract XAllocationVotingGovernor is
     mapping(uint256 => uint256) _latestSucceededRoundId;
     mapping(uint256 => bool) _roundFinalized;
     string _name;
-    IGovernor _b3trGovernor;
+    IB3TRGovernor _b3trGovernor;
     mapping(uint256 roundId => RoundCore) _rounds;
     mapping(uint256 roundId => bytes32[]) _appsElegibleForVoting;
   }
@@ -71,7 +71,7 @@ abstract contract XAllocationVotingGovernor is
   ) internal onlyInitializing {
     XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
     $._name = name_;
-    $._b3trGovernor = IGovernor(payable(b3trGovernor_));
+    $._b3trGovernor = IB3TRGovernor(payable(b3trGovernor_));
   }
 
   // ---------- Modifiers ---------- //
@@ -175,7 +175,7 @@ abstract contract XAllocationVotingGovernor is
     return "1";
   }
 
-  function b3trGovernor() public view returns (IGovernor) {
+  function b3trGovernor() public view returns (IB3TRGovernor) {
     XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
     return $._b3trGovernor;
   }
