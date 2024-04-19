@@ -12,7 +12,7 @@
     "dev:simulation": "dotenv -v NEXT_PUBLIC_APP_ENV=local -v RUN_SIMULATION=true -- turbo dev --",
     "dev:staging": "dotenv -v NEXT_PUBLIC_APP_ENV=solo-staging -e .env -- turbo dev --",
     "dev:testnet": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -e .env -- turbo dev:testnet --",
-    "dev:e2e": "dotenv -v NEXT_PUBLIC_APP_ENV=e2e -- turbo dev --",
+    "dev:e2e": "dotenv -v NEXT_PUBLIC_APP_ENV=e2e -e .env -- turbo dev --",
     "lint": "turbo lint",
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",

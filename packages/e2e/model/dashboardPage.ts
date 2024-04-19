@@ -1,10 +1,12 @@
 import { Page } from 'playwright';
-import { APPS, HOMEPAGE } from "../utils/constants"
+import { appNames, HOMEPAGE } from "../utils/constants"
 import { expect } from '@playwright/test';
 import veWorldMockClient from '../utils/veworld-mock-client';
 import BigNumber from 'bignumber.js';
 import { SwapDialog } from './swapDialog';
 import { test, Locator } from '@playwright/test';
+import { AppName } from './types';
+import { AppDetailsPage } from './appDetailsPage';
 
 /**
  * Dashboard page model
@@ -177,17 +179,15 @@ export class DashboardPage {
         })
     }
 
-    async openAppDetails(appName: AppName) {
-        return test.step(`Open the "${appName}" app details page`, async () => {
+    /**
+     * Click on app to open app details page 
+     * @param appName Name of the app
+     * @returns instance of AppDetailsPage
+     */
+    async openAppDetails(appName: AppName): Promise<AppDetailsPage {
+        return await test.step(`Open the "${appName}" app details page`, async () => {
             await this.appTitle(appName).click()
-        })
-    }
-
-    async getAppDescription(appName: AppName) {
-        return test.step(`Get "${appName}" description text`, async () => {
-            await this.appTitle(appName).click()
+            return new AppDetailsPage(this.page)
         })
     }
 }
-
-export type AppName = typeof APPS[number]

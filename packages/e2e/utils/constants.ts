@@ -37,7 +37,7 @@ export const APP_ADMIN_ACCOUNTS = {
   "Mugshot": 8,
   "Cleanify": 10,
 }
-export const APPS = <const>[
+export const appNames = <const>[
   'Vyvo',
   'Mugshot',
   'Cleanify',
