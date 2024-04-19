@@ -7,7 +7,7 @@ export const CreateProposalButton = () => {
 
   return (
     <>
-      <CreateProposalModal isOpen={isOpen} onClose={onClose} />
+      <CreateProposalModal isOpen={isOpen} onClose={onClose} onOpen={onOpen} />
       <Button onClick={onOpen} leftIcon={<FaPlus />}>
         Create Proposal
       </Button>

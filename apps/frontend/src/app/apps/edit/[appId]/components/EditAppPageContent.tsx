@@ -127,7 +127,7 @@ export const EditAppPageContent = ({ appId }: Props) => {
         onTryAgain={onTryAgain}
         pendingTitle="Updating app details..."
         txId={updateAppMetadataMutation.txReceipt?.meta.txID}
-        showExplorerButton={true}
+        showExplorerButton
       />
 
       <VStack w="full" spacing={4} align="stretch" data-testid={`edit-app-${appId}-detail`}>

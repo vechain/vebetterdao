@@ -17,6 +17,7 @@ export const StartRound = () => {
     sendTransactionPending,
     resetStatus,
     status,
+    error,
     txReceipt,
     sendTransactionTx,
   } = useDistributeEmission({})
@@ -57,12 +58,15 @@ export const StartRound = () => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        status={status}
+        status={error ? "error" : status}
         successTitle={"Round started!"}
         onTryAgain={handleSubmit}
         showTryAgainButton
         showExplorerButton
         txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        pendingTitle="Starting round..."
+        errorTitle={"Error starting round"}
+        errorDescription={error?.reason}
       />
     </VStack>
   )
