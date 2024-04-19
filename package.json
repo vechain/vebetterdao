@@ -9,8 +9,10 @@
     "build:staging": "dotenv -v NEXT_PUBLIC_APP_ENV=solo-staging -- turbo build",
     "build:testnet": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- turbo build",
     "dev": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo dev --",
+    "dev:simulation": "dotenv -v NEXT_PUBLIC_APP_ENV=local -v RUN_SIMULATION=true -- turbo dev --",
     "dev:staging": "dotenv -v NEXT_PUBLIC_APP_ENV=solo-staging -e .env -- turbo dev --",
     "dev:testnet": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -e .env -- turbo dev:testnet --",
+    "dev:e2e": "dotenv -v NEXT_PUBLIC_APP_ENV=e2e -- turbo dev --",
     "lint": "turbo lint",
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
@@ -27,7 +29,7 @@
     "contracts:generate-xapp-metadata": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run generate-xapp-metadata --filter=contracts",
     "contracts:upload-xapp-metadata": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run upload-xapp-metadata --filter=contracts",
     "solo-up": "make solo-up",
-    "playwright:e2e": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run playwright:e2e"
+    "playwright:e2e": "dotenv -v NEXT_PUBLIC_APP_ENV=e2e -- turbo run playwright:e2e"
   },
   "devDependencies": {
     "@repo/eslint-config": "*",

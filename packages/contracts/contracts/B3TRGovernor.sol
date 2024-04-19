@@ -146,16 +146,6 @@ contract B3TRGovernor is
     return true;
   }
 
-  function proposalIsExecutable(uint256 proposalId) public view returns (bool) {
-    GovernorStorage storage $ = _getGovernorStorage();
-    ProposalCore storage proposal = $._proposals[proposalId];
-    if (proposal.roundIdVoteStart == 0) {
-      revert GovernorNonexistentProposal(proposalId);
-    }
-
-    return proposal.isExecutable;
-  }
-
   // ------------------ SETTERS ------------------ //
 
   function setVoterRewards(address _voterRewards) public onlyGovernance {
@@ -266,22 +256,29 @@ contract B3TRGovernor is
 
   /**
    * @dev See {IGovernor-proposalSnapshot}.
+   *
+   * We take for granted that the round starts the block after it ends. But it can happen that the round is not started yet for whatever reason.
+   * Knowing this, if the proposal starts 4 rounds in the future we need to consider also those extra blocks used to start the rounds.
    */
   function proposalSnapshot(uint256 proposalId) public view virtual override returns (uint256) {
     B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
     GovernorStorage storage $$ = _getGovernorStorage();
 
-    // if round is active or already occured proposal start block is the block when round started
+    // round when proposal should be active is already started
     if ($.xAllocationVoting.currentRoundId() >= $$._proposals[proposalId].roundIdVoteStart) {
       return $.xAllocationVoting.roundSnapshot($$._proposals[proposalId].roundIdVoteStart);
     }
 
-    // if we call this function before the round starts, it will return 0, so we need to estimate the start block
-    uint256 blocksLeftUntilCurrentRoundEnds = $.xAllocationVoting.currentRoundDeadline() - clock();
-    uint256 otherRoundsDurationIfTargetRoundIsNotNext = $.xAllocationVoting.votingPeriod() *
-      ($$._proposals[proposalId].roundIdVoteStart - $.xAllocationVoting.currentRoundId() - 1);
+    uint256 amountOfRoundsLeft = $$._proposals[proposalId].roundIdVoteStart - $.xAllocationVoting.currentRoundId();
+    uint256 roundsDurationLeft = $.xAllocationVoting.votingPeriod() * (amountOfRoundsLeft - 1); // -1 because if only 1 round left we want this to be 0
+    uint256 currentRoundDeadline = $.xAllocationVoting.currentRoundDeadline();
 
-    return clock() + blocksLeftUntilCurrentRoundEnds + otherRoundsDurationIfTargetRoundIsNotNext + 1;
+    // if current round ended and a new one did not start yet
+    if (currentRoundDeadline <= clock()) {
+      currentRoundDeadline = clock();
+    }
+
+    return currentRoundDeadline + roundsDurationLeft + amountOfRoundsLeft;
   }
 
   /**
@@ -339,10 +336,11 @@ contract B3TRGovernor is
 
   /**
    * @dev See {IGovernor-state}.
+   *
+   * This function is the copy of what was inside GovernorUpgradeable plus the copy of GovernorTimelockControlUpgradeable (when it ends up in QUEUED state),
+   * modified however to check the PENDING state based on roundId instead of based on the snapshot block.
    */
-  function state(
-    uint256 proposalId
-  ) public view virtual override(GovernorUpgradeable, GovernorTimelockControlUpgradeable) returns (ProposalState) {
+  function state(uint256 proposalId) public view virtual override returns (ProposalState) {
     GovernorStorage storage $ = _getGovernorStorage();
     // We read the struct fields into the stack at once so Solidity emits a single SLOAD
     ProposalCore storage proposal = $._proposals[proposalId];
@@ -377,14 +375,31 @@ contract B3TRGovernor is
     } else if (proposalEta(proposalId) == 0) {
       return ProposalState.Succeeded;
     } else {
-      return ProposalState.Queued;
+      // Forked from GovernorTimelockControlUpgradeable:state OZ implementation
+      GovernorTimelockControlStorage storage $$ = _getGovernorTimelockControlStorage();
+      bytes32 queueid = $$._timelockIds[proposalId];
+      if ($$._timelock.isOperationPending(queueid)) {
+        return ProposalState.Queued;
+      } else if ($$._timelock.isOperationDone(queueid)) {
+        // This can happen if the proposal is executed directly on the timelock.
+        return ProposalState.Executed;
+      } else {
+        // This can happen if the proposal is canceled directly on the timelock.
+        return ProposalState.Canceled;
+      }
     }
   }
 
   function proposalNeedsQueuing(
     uint256 proposalId
   ) public view override(GovernorUpgradeable, GovernorTimelockControlUpgradeable) returns (bool) {
-    return super.proposalNeedsQueuing(proposalId);
+    GovernorStorage storage $ = _getGovernorStorage();
+    ProposalCore storage proposal = $._proposals[proposalId];
+    if (proposal.roundIdVoteStart == 0) {
+      revert GovernorNonexistentProposal(proposalId);
+    }
+
+    return proposal.isExecutable;
   }
 
   function proposalThreshold()

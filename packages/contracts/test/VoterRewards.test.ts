@@ -639,7 +639,9 @@ describe("VoterRewards", () => {
 
       await waitForNextBlock()
 
-      expect(await galaxyMember.getPastHighestLevel(voter1.address, await xAllocationVoting.roundSnapshot(2))).to.equal(5)
+      expect(await galaxyMember.getPastHighestLevel(voter1.address, await xAllocationVoting.roundSnapshot(2))).to.equal(
+        5,
+      )
 
       const roundId2 = await xAllocationVoting.currentRoundId()
 
@@ -758,7 +760,9 @@ describe("VoterRewards", () => {
 
       expect(await galaxyMember.getHighestLevel(voter1.address)).to.equal(2)
 
-      expect(await galaxyMember.getPastHighestLevel(voter1.address, await xAllocationVoting.roundSnapshot(2))).to.equal(0) // Voter 1 upgraded after the round snapshot so he results in not having a level for the round
+      expect(await galaxyMember.getPastHighestLevel(voter1.address, await xAllocationVoting.roundSnapshot(2))).to.equal(
+        0,
+      ) // Voter 1 upgraded after the round snapshot so he results in not having a level for the round
 
       const roundId2 = await xAllocationVoting.currentRoundId()
 

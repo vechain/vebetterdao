@@ -175,49 +175,6 @@ abstract contract GovernorUpgradeable is
   }
 
   /**
-   * @dev See {IGovernor-state}.
-   */
-  function state(uint256 proposalId) public view virtual returns (ProposalState) {
-    GovernorStorage storage $ = _getGovernorStorage();
-    // We read the struct fields into the stack at once so Solidity emits a single SLOAD
-    ProposalCore storage proposal = $._proposals[proposalId];
-    bool proposalExecuted = proposal.executed;
-    bool proposalCanceled = proposal.canceled;
-
-    if (proposalExecuted) {
-      return ProposalState.Executed;
-    }
-
-    if (proposalCanceled) {
-      return ProposalState.Canceled;
-    }
-
-    uint256 snapshot = proposalSnapshot(proposalId);
-
-    if (snapshot == 0) {
-      revert GovernorNonexistentProposal(proposalId);
-    }
-
-    uint256 currentTimepoint = clock();
-
-    if (snapshot >= currentTimepoint) {
-      return ProposalState.Pending;
-    }
-
-    uint256 deadline = proposalDeadline(proposalId);
-
-    if (deadline >= currentTimepoint) {
-      return ProposalState.Active;
-    } else if (!_quorumReached(proposalId) || !_voteSucceeded(proposalId)) {
-      return ProposalState.Defeated;
-    } else if (proposalEta(proposalId) == 0) {
-      return ProposalState.Succeeded;
-    } else {
-      return ProposalState.Queued;
-    }
-  }
-
-  /**
    * @dev See {IGovernor-proposalThreshold}.
    */
   function proposalThreshold() public view virtual returns (uint256) {
@@ -814,10 +771,15 @@ abstract contract GovernorUpgradeable is
   /**
    * @dev See {IGovernor-proposalSnapshot}.
    */
-  function proposalSnapshot(uint256 proposalId) public view virtual override returns (uint256);
+  function proposalSnapshot(uint256 proposalId) public view virtual returns (uint256);
 
   /**
    * @dev See {IGovernor-proposalDeadline}.
    */
-  function proposalDeadline(uint256 proposalId) public view virtual override returns (uint256);
+  function proposalDeadline(uint256 proposalId) public view virtual returns (uint256);
+
+  /**
+   * @dev See {IGovernor-state}.
+   */
+  function state(uint256 proposalId) public view virtual returns (ProposalState);
 }

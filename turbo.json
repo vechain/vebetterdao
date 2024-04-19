@@ -2,7 +2,7 @@
   "$schema": "https://turbo.build/schema.json",
   "globalDotEnv": [".env"],
   "globalDependencies": ["**/.env.*local"],
-  "globalEnv": ["NEXT_PUBLIC_APP_ENV", "MNEMONIC", "NEXT_PUBLIC_NFT_STORAGE_KEY", "IS_TEST_COVERAGE"],
+  "globalEnv": ["NEXT_PUBLIC_APP_ENV", "MNEMONIC", "NEXT_PUBLIC_NFT_STORAGE_KEY", "IS_TEST_COVERAGE", "RUN_SIMULATION"],
   "pipeline": {
     "install": {
       "dependsOn": ["@repo/contracts#install", "^compile"]
@@ -57,7 +57,7 @@
       "cache": false
     },
     "deploy": {
-      "dependsOn": ["^deploy"]
+      "dependsOn": ["^deploy", "@repo/config#check-or-generate-local-config"]
     },
     "deploy:testnet": {
       "dependsOn": ["^deploy:testnet"]
