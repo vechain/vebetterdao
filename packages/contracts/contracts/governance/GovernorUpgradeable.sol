@@ -232,9 +232,9 @@ abstract contract GovernorUpgradeable is
   function _voteSucceeded(uint256 proposalId) internal view virtual returns (bool);
 
   /**
-   * @dev Get the voting weight of `account` at a specific `timepoint`, for a vote as described by `params`.
+   * @dev Get the voting weight of `account` at a specific `timepoint`.
    */
-  function _getVotes(address account, uint256 timepoint, bytes memory params) internal view virtual returns (uint256);
+  function _getVotes(address account, uint256 timepoint) internal view virtual returns (uint256);
 
   /**
    * @dev Register a vote for `proposalId` by `account` with a given `support`, voting `weight` and voting `params`.
@@ -246,19 +246,8 @@ abstract contract GovernorUpgradeable is
     address account,
     uint8 support,
     uint256 weight,
-    uint256 power,
-    bytes memory params
+    uint256 power
   ) internal virtual;
-
-  /**
-   * @dev Default additional encoded parameters used by castVote methods that don't include them
-   *
-   * Note: Should be overridden by specific implementations to use an appropriate value, the
-   * meaning of the additional params, in the context of that implementation
-   */
-  function _defaultParams() internal view virtual returns (bytes memory) {
-    return "";
-  }
 
   /**
    * @dev See {IGovernor-queue}.
@@ -426,18 +415,7 @@ abstract contract GovernorUpgradeable is
    * @dev See {IGovernor-getVotes}.
    */
   function getVotes(address account, uint256 timepoint) public view virtual returns (uint256) {
-    return _getVotes(account, timepoint, _defaultParams());
-  }
-
-  /**
-   * @dev See {IGovernor-getVotesWithParams}.
-   */
-  function getVotesWithParams(
-    address account,
-    uint256 timepoint,
-    bytes memory params
-  ) public view virtual returns (uint256) {
-    return _getVotes(account, timepoint, params);
+    return _getVotes(account, timepoint);
   }
 
   /**
@@ -461,77 +439,6 @@ abstract contract GovernorUpgradeable is
   }
 
   /**
-   * @dev See {IGovernor-castVoteWithReasonAndParams}.
-   */
-  function castVoteWithReasonAndParams(
-    uint256 proposalId,
-    uint8 support,
-    string calldata reason,
-    bytes memory params
-  ) public virtual returns (uint256) {
-    address voter = _msgSender();
-    return _castVote(proposalId, voter, support, reason, params);
-  }
-
-  /**
-   * @dev See {IGovernor-castVoteBySig}.
-   */
-  function castVoteBySig(
-    uint256 proposalId,
-    uint8 support,
-    address voter,
-    bytes memory signature
-  ) public virtual returns (uint256) {
-    bool valid = SignatureChecker.isValidSignatureNow(
-      voter,
-      _hashTypedDataV4(keccak256(abi.encode(BALLOT_TYPEHASH, proposalId, support, voter, _useNonce(voter)))),
-      signature
-    );
-
-    if (!valid) {
-      revert GovernorInvalidSignature(voter);
-    }
-
-    return _castVote(proposalId, voter, support, "");
-  }
-
-  /**
-   * @dev See {IGovernor-castVoteWithReasonAndParamsBySig}.
-   */
-  function castVoteWithReasonAndParamsBySig(
-    uint256 proposalId,
-    uint8 support,
-    address voter,
-    string calldata reason,
-    bytes memory params,
-    bytes memory signature
-  ) public virtual returns (uint256) {
-    bool valid = SignatureChecker.isValidSignatureNow(
-      voter,
-      _hashTypedDataV4(
-        keccak256(
-          abi.encode(
-            EXTENDED_BALLOT_TYPEHASH,
-            proposalId,
-            support,
-            voter,
-            _useNonce(voter),
-            keccak256(bytes(reason)),
-            keccak256(params)
-          )
-        )
-      ),
-      signature
-    );
-
-    if (!valid) {
-      revert GovernorInvalidSignature(voter);
-    }
-
-    return _castVote(proposalId, voter, support, reason, params);
-  }
-
-  /**
    * @dev Internal vote casting mechanism: Check that the vote is pending, that it has not been cast yet, retrieve
    * voting weight using {IGovernor-getVotes} and call the {_countVote} internal function. Uses the _defaultParams().
    *
@@ -543,33 +450,13 @@ abstract contract GovernorUpgradeable is
     uint8 support,
     string memory reason
   ) internal virtual returns (uint256) {
-    return _castVote(proposalId, account, support, reason, _defaultParams());
-  }
-
-  /**
-   * @dev Internal vote casting mechanism: Check that the vote is pending, that it has not been cast yet, retrieve
-   * voting weight using {IGovernor-getVotes} and call the {_countVote} internal function.
-   *
-   * Emits a {IGovernor-VoteCast} event.
-   */
-  function _castVote(
-    uint256 proposalId,
-    address account,
-    uint8 support,
-    string memory reason,
-    bytes memory params
-  ) internal virtual returns (uint256) {
     _validateStateBitmap(proposalId, _encodeStateBitmap(ProposalState.Active));
 
-    uint256 weight = _getVotes(account, proposalSnapshot(proposalId), params);
+    uint256 weight = _getVotes(account, proposalSnapshot(proposalId));
     uint256 power = Math.sqrt(weight) * 1e9;
-    _countVote(proposalId, account, support, weight, power, params);
+    _countVote(proposalId, account, support, weight, power);
 
-    if (params.length == 0) {
-      emit VoteCast(account, proposalId, support, weight, power, reason);
-    } else {
-      emit VoteCastWithParams(account, proposalId, support, weight, power, reason, params);
-    }
+    emit VoteCast(account, proposalId, support, weight, power, reason);
 
     return weight;
   }

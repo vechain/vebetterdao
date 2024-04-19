@@ -13,6 +13,7 @@ import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
  * - removed votingDelay()
  * - updated event VoteCast and VoteCastWithParams to include `power` parameter
  * - removed old ProposalCreated event
+ * - removed the possibility to cast vote with params and with signature
  */
 interface IGovernor is IERC165, IERC6372 {
   enum ProposalState {
@@ -104,12 +105,6 @@ interface IGovernor is IERC165, IERC6372 {
   error GovernorAlreadyQueuedProposal(uint256 proposalId);
 
   /**
-   * @dev The provided signature is not valid for the expected `voter`.
-   * If the `voter` is a contract, the signature is not valid using {IERC1271-isValidSignature}.
-   */
-  error GovernorInvalidSignature(address voter);
-
-  /**
    * @dev Emitted when a proposal is queued.
    */
   event ProposalQueued(uint256 proposalId, uint256 etaSeconds);
@@ -136,22 +131,6 @@ interface IGovernor is IERC165, IERC6372 {
     uint256 weight,
     uint256 power,
     string reason
-  );
-
-  /**
-   * @dev Emitted when a vote is cast with params.
-   *
-   * Note: `support` values should be seen as buckets. Their interpretation depends on the voting module used.
-   * `params` are additional encoded parameters. Their interpepretation also depends on the voting module used.
-   */
-  event VoteCastWithParams(
-    address indexed voter,
-    uint256 proposalId,
-    uint8 support,
-    uint256 weight,
-    uint256 power,
-    string reason,
-    bytes params
   );
 
   /**
@@ -282,12 +261,6 @@ interface IGovernor is IERC165, IERC6372 {
   function getVotes(address account, uint256 timepoint) external view returns (uint256);
 
   /**
-   * @notice module:reputation
-   * @dev Voting power of an `account` at a specific `timepoint` given additional encoded parameters.
-   */
-  function getVotesWithParams(address account, uint256 timepoint, bytes memory params) external view returns (uint256);
-
-  /**
    * @notice module:voting
    * @dev Returns whether `account` has cast a vote on `proposalId`.
    */
@@ -365,44 +338,5 @@ interface IGovernor is IERC165, IERC6372 {
     uint256 proposalId,
     uint8 support,
     string calldata reason
-  ) external returns (uint256 balance);
-
-  /**
-   * @dev Cast a vote with a reason and additional encoded parameters
-   *
-   * Emits a {VoteCast} or {VoteCastWithParams} event depending on the length of params.
-   */
-  function castVoteWithReasonAndParams(
-    uint256 proposalId,
-    uint8 support,
-    string calldata reason,
-    bytes memory params
-  ) external returns (uint256 balance);
-
-  /**
-   * @dev Cast a vote using the voter's signature, including ERC-1271 signature support.
-   *
-   * Emits a {VoteCast} event.
-   */
-  function castVoteBySig(
-    uint256 proposalId,
-    uint8 support,
-    address voter,
-    bytes memory signature
-  ) external returns (uint256 balance);
-
-  /**
-   * @dev Cast a vote with a reason and additional encoded parameters using the voter's signature,
-   * including ERC-1271 signature support.
-   *
-   * Emits a {VoteCast} or {VoteCastWithParams} event depending on the length of params.
-   */
-  function castVoteWithReasonAndParamsBySig(
-    uint256 proposalId,
-    uint8 support,
-    address voter,
-    string calldata reason,
-    bytes memory params,
-    bytes memory signature
   ) external returns (uint256 balance);
 }

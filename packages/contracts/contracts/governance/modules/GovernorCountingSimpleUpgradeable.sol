@@ -125,8 +125,7 @@ abstract contract GovernorCountingSimpleUpgradeable is Initializable, GovernorUp
     address account,
     uint8 support,
     uint256 weight,
-    uint256 power,
-    bytes memory // params
+    uint256 power
   ) internal virtual override {
     GovernorCountingSimpleStorage storage $ = _getGovernorCountingSimpleStorage();
     ProposalVote storage proposalVote = $._proposalVotes[proposalId];

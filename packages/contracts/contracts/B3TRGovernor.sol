@@ -123,7 +123,7 @@ contract B3TRGovernor is
    */
   function getQuadraticVotingPower(address account, uint256 timepoint) public view virtual returns (uint256) {
     // scale the votes by 1e9 so that number returned is 1e18
-    return Math.sqrt(_getVotes(account, timepoint, _defaultParams())) * 1e9;
+    return Math.sqrt(_getVotes(account, timepoint)) * 1e9;
   }
 
   function canProposalStartInNextRound() public view returns (bool) {
