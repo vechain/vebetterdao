@@ -1,5 +1,6 @@
 import { describe, it } from "mocha"
 import {
+  ZERO_ADDRESS,
   bootstrapEmissions,
   catchRevert,
   getOrDeployContractInstances,
@@ -14,6 +15,8 @@ import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { createTestConfig } from "./helpers/config"
 import { generateB3trAllocations } from "./helpers/generateB3trAllocations"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
+import { deployProxy } from "../scripts/helpers"
+import { XAllocationVoting } from "../typechain-types"
 
 describe("Emissions", () => {
   describe("Contract parameters", () => {
@@ -58,15 +61,21 @@ describe("Emissions", () => {
         forceDeploy: true,
       })
 
+      await expect(emissions.connect(owner).setXallocationsAddress(ZERO_ADDRESS)).to.be.reverted
+
       await emissions.connect(owner).setXallocationsAddress(otherAccounts[3].address)
 
       expect(await emissions.xAllocations()).to.equal(otherAccounts[3].address)
     })
 
     it("Should be able to change the Vote 2 Earn address", async () => {
-      const { emissions, otherAccounts, owner } = await getOrDeployContractInstances({
+      const { emissions, otherAccounts, owner, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
+
+      await expect(emissions.connect(owner).setVote2EarnAddress(ZERO_ADDRESS)).to.be.reverted
+
+      await expect(emissions.connect(otherAccount).setVote2EarnAddress(otherAccounts[3].address)).to.be.reverted // Not admin
 
       await emissions.connect(owner).setVote2EarnAddress(otherAccounts[3].address)
 
@@ -74,9 +83,13 @@ describe("Emissions", () => {
     })
 
     it("Should be able to change the Treasury address", async () => {
-      const { emissions, otherAccounts, owner } = await getOrDeployContractInstances({
+      const { emissions, otherAccounts, owner, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
+
+      await expect(emissions.connect(owner).setTreasuryAddress(ZERO_ADDRESS)).to.be.reverted
+
+      await expect(emissions.connect(otherAccount).setTreasuryAddress(otherAccounts[3].address)).to.be.reverted // Not admin
 
       await emissions.connect(owner).setTreasuryAddress(otherAccounts[3].address)
 
@@ -92,7 +105,7 @@ describe("Emissions", () => {
     })
 
     it("Treasury percentage should be between 0 and 10000", async () => {
-      const { emissions, owner } = await getOrDeployContractInstances({
+      const { emissions, owner, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -106,10 +119,12 @@ describe("Emissions", () => {
       await emissions.connect(owner).setTreasuryPercentage(10000)
       await emissions.connect(owner).setTreasuryPercentage(0)
       await emissions.connect(owner).setTreasuryPercentage(550)
+
+      await expect(emissions.connect(otherAccount).setTreasuryPercentage(55)).to.be.reverted // Not admin
     })
 
     it("MaxVote2EarnDecay percentage should be between 0 and 100", async () => {
-      const { emissions, owner } = await getOrDeployContractInstances({
+      const { emissions, owner, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -123,10 +138,12 @@ describe("Emissions", () => {
       await emissions.connect(owner).setMaxVote2EarnDecay(100)
       await emissions.connect(owner).setMaxVote2EarnDecay(0)
       await emissions.connect(owner).setMaxVote2EarnDecay(55)
+
+      await expect(emissions.connect(otherAccount).setMaxVote2EarnDecay(55)).to.be.reverted // Not admin
     })
 
     it("Vote2EarnDecay percentage should be between 0 and 100", async () => {
-      const { emissions, owner } = await getOrDeployContractInstances({
+      const { emissions, owner, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -140,10 +157,12 @@ describe("Emissions", () => {
       await emissions.connect(owner).setVote2EarnDecay(100)
       await emissions.connect(owner).setVote2EarnDecay(0)
       await emissions.connect(owner).setVote2EarnDecay(55)
+
+      await expect(emissions.connect(otherAccount).setVote2EarnDecay(55)).to.be.reverted // Not admin
     })
 
     it("XAllocationsDecay percentage should be between 0 and 100", async () => {
-      const { emissions, owner } = await getOrDeployContractInstances({
+      const { emissions, owner, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -157,6 +176,98 @@ describe("Emissions", () => {
       await emissions.connect(owner).setXAllocationsDecay(100)
       await emissions.connect(owner).setXAllocationsDecay(0)
       await emissions.connect(owner).setXAllocationsDecay(55)
+
+      await expect(emissions.connect(otherAccount).setXAllocationsDecay(55)).to.be.reverted // Not admin
+    })
+
+    it("Should return correct x allocations governor address", async () => {
+      const { emissions, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await emissions.xAllocationsGovernor()).to.equal(await xAllocationVoting.getAddress())
+    })
+
+    it("Should return max vote 2 earn decay percentage", async () => {
+      const { emissions } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await emissions.maxVote2EarnDecay()).to.equal(80)
+    })
+
+    it("Should return scaling factor", async () => {
+      const { emissions } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await emissions.scalingFactor()).to.equal(10 ** 6)
+    })
+
+    it("Should be able to change cycle duration", async () => {
+      const { emissions, owner, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await emissions.connect(owner).setCycleDuration(1000)
+
+      expect(await emissions.cycleDuration()).to.equal(1000)
+
+      await expect(emissions.connect(otherAccount).setCycleDuration(1000)).to.be.reverted // Not admin
+
+      await expect(emissions.connect(owner).setCycleDuration(0)).to.be.reverted // At least 1 block
+    })
+
+    it("Should be able to change x allocations decay period", async () => {
+      const { emissions, owner, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await emissions.connect(owner).setXAllocationsDecayPeriod(1000)
+
+      expect(await emissions.xAllocationsDecayPeriod()).to.equal(1000)
+
+      await expect(emissions.connect(otherAccount).setXAllocationsDecayPeriod(1000)).to.be.reverted // Not admin
+
+      await expect(emissions.connect(owner).setXAllocationsDecayPeriod(0)).to.be.reverted // At least 1 block
+    })
+
+    it("Should be able to change vote 2 earn decay period", async () => {
+      const { emissions, owner, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await emissions.connect(owner).setVote2EarnDecayPeriod(1000)
+
+      expect(await emissions.vote2EarnDecayPeriod()).to.equal(1000)
+
+      await expect(emissions.connect(otherAccount).setVote2EarnDecayPeriod(1000)).to.be.reverted // Not admin
+
+      await expect(emissions.connect(owner).setVote2EarnDecayPeriod(0)).to.be.reverted // At least 1 block
+    })
+
+    it("Should be able to change scaling factor", async () => {
+      const { emissions, owner, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await emissions.connect(owner).setScalingFactor(1000)
+
+      expect(await emissions.scalingFactor()).to.equal(1000)
+
+      await expect(emissions.connect(otherAccount).setScalingFactor(1000)).to.be.reverted // Not admin
+
+      await expect(emissions.connect(owner).setScalingFactor(0)).to.be.reverted // At least 1
+    })
+
+    it("Should be able to change x allocations voting governor", async () => {
+      const { emissions, owner, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await expect(emissions.connect(otherAccount).setXAllocationsGovernorAddress(otherAccount.address)).to.be.reverted // Not admin
+
+      await expect(emissions.connect(owner).setXAllocationsGovernorAddress(ZERO_ADDRESS)).to.be.reverted // Can't be zero address
     })
 
     // it("getScaledDecayPercentage: decay percentage should be between 0 and 99", async () => {
@@ -253,6 +364,311 @@ describe("Emissions", () => {
       expect(newImplAddress.toUpperCase()).to.not.eql(currentImplAddress.toUpperCase())
       expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
     })
+
+    it("Should not be able to call initializer after deployment", async () => {
+      const config = createLocalConfig()
+      const { emissions, owner, minterAccount, xAllocationPool, voterRewards, treasury, b3tr } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
+
+      expect(
+        emissions.initialize({
+          minter: minterAccount.address,
+          admin: owner.address,
+          upgrader: owner.address,
+          b3trAddress: await b3tr.getAddress(),
+          destinations: [
+            await xAllocationPool.getAddress(),
+            await voterRewards.getAddress(),
+            await treasury.getAddress(),
+          ],
+          initialXAppAllocation: 0,
+          cycleDuration: config.EMISSIONS_CYCLE_DURATION,
+          decaySettings: [
+            config.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE,
+            config.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE,
+            config.EMISSIONS_X_ALLOCATION_DECAY_PERIOD,
+            config.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD,
+          ],
+          treasuryPercentage: config.EMISSIONS_TREASURY_PERCENTAGE,
+          maxVote2EarnDecay: config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
+        }),
+      ).to.be.reverted
+    })
+
+    it("Should not be able to deploy with initial X Allocations zero", async () => {
+      const config = createTestConfig()
+      const { owner, minterAccount, b3tr, xAllocationPool, voterRewards, treasury } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      await expect(
+        deployProxy("Emissions", [
+          {
+            minter: minterAccount.address,
+            admin: owner.address,
+            upgrader: owner.address,
+            b3trAddress: await b3tr.getAddress(),
+            destinations: [
+              await xAllocationPool.getAddress(),
+              await voterRewards.getAddress(),
+              await treasury.getAddress(),
+            ],
+            initialXAppAllocation: 0,
+            cycleDuration: config.EMISSIONS_CYCLE_DURATION,
+            decaySettings: [
+              config.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE,
+              config.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE,
+              config.EMISSIONS_X_ALLOCATION_DECAY_PERIOD,
+              config.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD,
+            ],
+            treasuryPercentage: config.EMISSIONS_TREASURY_PERCENTAGE,
+            maxVote2EarnDecay: config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
+          },
+        ]),
+      ).to.be.reverted
+    })
+
+    it("Should not be able to deploy with cycle duration less or equal to 0", async () => {
+      const config = createTestConfig()
+      const { owner, minterAccount, b3tr, xAllocationPool, voterRewards, treasury } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      await expect(
+        deployProxy("Emissions", [
+          {
+            minter: minterAccount.address,
+            admin: owner.address,
+            upgrader: owner.address,
+            b3trAddress: await b3tr.getAddress(),
+            destinations: [
+              await xAllocationPool.getAddress(),
+              await voterRewards.getAddress(),
+              await treasury.getAddress(),
+            ],
+            initialXAppAllocation: config.INITIAL_X_ALLOCATION,
+            cycleDuration: 0,
+            decaySettings: [
+              config.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE,
+              config.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE,
+              config.EMISSIONS_X_ALLOCATION_DECAY_PERIOD,
+              config.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD,
+            ],
+            treasuryPercentage: config.EMISSIONS_TREASURY_PERCENTAGE,
+            maxVote2EarnDecay: config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
+          },
+        ]),
+      ).to.be.reverted
+    })
+
+    it("Should not be able to deploy with treasury percentage not between 1 and 10000", async () => {
+      const config = createTestConfig()
+      const { owner, minterAccount, b3tr, xAllocationPool, voterRewards, treasury } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      await expect(
+        deployProxy("Emissions", [
+          {
+            minter: minterAccount.address,
+            admin: owner.address,
+            upgrader: owner.address,
+            b3trAddress: await b3tr.getAddress(),
+            destinations: [
+              await xAllocationPool.getAddress(),
+              await voterRewards.getAddress(),
+              await treasury.getAddress(),
+            ],
+            initialXAppAllocation: config.INITIAL_X_ALLOCATION,
+            cycleDuration: config.EMISSIONS_CYCLE_DURATION,
+            decaySettings: [
+              config.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE,
+              config.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE,
+              config.EMISSIONS_X_ALLOCATION_DECAY_PERIOD,
+              config.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD,
+            ],
+            treasuryPercentage: 0,
+            maxVote2EarnDecay: config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
+          },
+        ]),
+      ).to.be.reverted
+    })
+
+    it("Should not be able to deploy with x allocations decay percentage not between 1 and 100", async () => {
+      const config = createTestConfig()
+      const { owner, minterAccount, b3tr, xAllocationPool, voterRewards, treasury } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      await expect(
+        deployProxy("Emissions", [
+          {
+            minter: minterAccount.address,
+            admin: owner.address,
+            upgrader: owner.address,
+            b3trAddress: await b3tr.getAddress(),
+            destinations: [
+              await xAllocationPool.getAddress(),
+              await voterRewards.getAddress(),
+              await treasury.getAddress(),
+            ],
+            initialXAppAllocation: config.INITIAL_X_ALLOCATION,
+            cycleDuration: config.EMISSIONS_CYCLE_DURATION,
+            decaySettings: [
+              101,
+              config.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE,
+              config.EMISSIONS_X_ALLOCATION_DECAY_PERIOD,
+              config.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD,
+            ],
+            treasuryPercentage: config.EMISSIONS_TREASURY_PERCENTAGE,
+            maxVote2EarnDecay: config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
+          },
+        ]),
+      ).to.be.reverted
+    })
+
+    it("Should not be able to deploy with vote2Earn decay percentage not between 1 and 100", async () => {
+      const config = createTestConfig()
+      const { owner, minterAccount, b3tr, xAllocationPool, voterRewards, treasury } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      await expect(
+        deployProxy("Emissions", [
+          {
+            minter: minterAccount.address,
+            admin: owner.address,
+            upgrader: owner.address,
+            b3trAddress: await b3tr.getAddress(),
+            destinations: [
+              await xAllocationPool.getAddress(),
+              await voterRewards.getAddress(),
+              await treasury.getAddress(),
+            ],
+            initialXAppAllocation: config.INITIAL_X_ALLOCATION,
+            cycleDuration: config.EMISSIONS_CYCLE_DURATION,
+            decaySettings: [
+              config.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE,
+              0,
+              config.EMISSIONS_X_ALLOCATION_DECAY_PERIOD,
+              config.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD,
+            ],
+            treasuryPercentage: config.EMISSIONS_TREASURY_PERCENTAGE,
+            maxVote2EarnDecay: config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
+          },
+        ]),
+      ).to.be.reverted
+    })
+
+    it("Should not be able to deploy with xAllocations decay delay period less than 1", async () => {
+      const config = createTestConfig()
+      const { owner, minterAccount, b3tr, xAllocationPool, voterRewards, treasury } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      await expect(
+        deployProxy("Emissions", [
+          {
+            minter: minterAccount.address,
+            admin: owner.address,
+            upgrader: owner.address,
+            b3trAddress: await b3tr.getAddress(),
+            destinations: [
+              await xAllocationPool.getAddress(),
+              await voterRewards.getAddress(),
+              await treasury.getAddress(),
+            ],
+            initialXAppAllocation: config.INITIAL_X_ALLOCATION,
+            cycleDuration: config.EMISSIONS_CYCLE_DURATION,
+            decaySettings: [
+              config.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE,
+              config.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE,
+              0,
+              config.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD,
+            ],
+            treasuryPercentage: config.EMISSIONS_TREASURY_PERCENTAGE,
+            maxVote2EarnDecay: config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
+          },
+        ]),
+      ).to.be.reverted
+    })
+
+    it("Should not be able to deploy with vote2Earn decay delay period less than 1", async () => {
+      const config = createTestConfig()
+      const { owner, minterAccount, b3tr, xAllocationPool, voterRewards, treasury } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      await expect(
+        deployProxy("Emissions", [
+          {
+            minter: minterAccount.address,
+            admin: owner.address,
+            upgrader: owner.address,
+            b3trAddress: await b3tr.getAddress(),
+            destinations: [
+              await xAllocationPool.getAddress(),
+              await voterRewards.getAddress(),
+              await treasury.getAddress(),
+            ],
+            initialXAppAllocation: config.INITIAL_X_ALLOCATION,
+            cycleDuration: config.EMISSIONS_CYCLE_DURATION,
+            decaySettings: [
+              config.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE,
+              config.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE,
+              config.EMISSIONS_X_ALLOCATION_DECAY_PERIOD,
+              0,
+            ],
+            treasuryPercentage: config.EMISSIONS_TREASURY_PERCENTAGE,
+            maxVote2EarnDecay: config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
+          },
+        ]),
+      ).to.be.reverted
+    })
+
+    it("Should not be able to deploy with max vote2Earn decay percentage not between 1 and 100", async () => {
+      const config = createTestConfig()
+      const { owner, minterAccount, b3tr, xAllocationPool, voterRewards, treasury } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      await expect(
+        deployProxy("Emissions", [
+          {
+            minter: minterAccount.address,
+            admin: owner.address,
+            upgrader: owner.address,
+            b3trAddress: await b3tr.getAddress(),
+            destinations: [
+              await xAllocationPool.getAddress(),
+              await voterRewards.getAddress(),
+              await treasury.getAddress(),
+            ],
+            initialXAppAllocation: config.INITIAL_X_ALLOCATION,
+            cycleDuration: config.EMISSIONS_CYCLE_DURATION,
+            decaySettings: [
+              config.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE,
+              config.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE,
+              config.EMISSIONS_X_ALLOCATION_DECAY_PERIOD,
+              config.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD,
+            ],
+            treasuryPercentage: config.EMISSIONS_TREASURY_PERCENTAGE,
+            maxVote2EarnDecay: 0,
+          },
+        ]),
+      ).to.be.reverted
+    })
   })
 
   describe("Bootstrap emissions", () => {
@@ -307,6 +723,66 @@ describe("Emissions", () => {
       expect(await emissions.nextCycle()).to.equal(1)
     })
 
+    it("Should not be able to get vote 2 earn amount if emissions have not started", async () => {
+      const { emissions } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await expect(emissions.getVote2EarnAmount(0)).to.be.reverted
+    })
+
+    it("Should not be able to get current cycle if emissions have not started", async () => {
+      const { emissions } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await expect(emissions.getCurrentCycle()).to.be.reverted
+    })
+
+    it("Should not be able to get X allocations amount for cycle that has not started", async () => {
+      const { emissions } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await bootstrapEmissions()
+
+      await expect(emissions.getXAllocationAmount(2)).to.be.reverted
+    })
+
+    it("Should correctly determine if cycle is ended", async () => {
+      const { emissions, minterAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await bootstrapEmissions()
+
+      await emissions.connect(minterAccount).start()
+
+      expect(await emissions.isCycleEnded(1)).to.equal(false)
+
+      await waitForNextCycle()
+
+      expect(await emissions.isCycleEnded(1)).to.equal(true)
+
+      await emissions.connect(minterAccount).distribute()
+
+      expect(await emissions.isCycleDistributed(1)).to.equal(true)
+    })
+
+    it("Should be able to get last emissions block", async () => {
+      const { emissions, minterAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await bootstrapEmissions()
+
+      await emissions.connect(minterAccount).start()
+
+      const lastBlock = await emissions.lastEmissionBlock()
+
+      expect(lastBlock).to.be.greaterThan(0)
+    })
+
     it("Should not be able to bootstrap emissions if B3TR transfers are paused", async () => {
       const { emissions, b3tr, minterAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -334,6 +810,34 @@ describe("Emissions", () => {
 
       // Try to bootstrap emissions again - Should revert
       await catchRevert(emissions.connect(minterAccount).bootstrap())
+    })
+
+    it("Should not be able to bootstrap emissions if not minter", async () => {
+      const { emissions, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Try to bootstrap emissions without minter role - Should revert
+      await catchRevert(emissions.connect(otherAccounts[0]).bootstrap())
+    })
+
+    it("Should return emissions values for a given cycle", async () => {
+      const config = createLocalConfig()
+      const { emissions, minterAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      await emissions.connect(minterAccount).start()
+
+      expect(await emissions.emissions(1)).to.eql([
+        66666666666666666666666n,
+        66666666666666666666666n,
+        116666666666666666666665n,
+      ])
     })
   })
 
@@ -904,6 +1408,14 @@ describe("Emissions", () => {
       await waitForNextCycle()
 
       await emissions.connect(minterAccount).distribute()
+    })
+
+    it("Should not be able to distribute emissions if emissions not started", async () => {
+      const { emissions, minterAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await catchRevert(emissions.connect(minterAccount).distribute())
     })
   })
 })
