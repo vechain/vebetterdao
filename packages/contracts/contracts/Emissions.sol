@@ -84,21 +84,21 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
     require(data.cycleDuration > 0, "Emissions: Cycle duration must be greater than 0");
     require(data.decaySettings.length == 4, "Emissions: Invalid decay settings input length. Expected 4.");
     require(
-      data.treasuryPercentage > 0 && data.treasuryPercentage < 10000,
-      "Emissions: Treasury percentage must be between 0 and 10000"
+      data.treasuryPercentage > 0 && data.treasuryPercentage <= 10000,
+      "Emissions: Treasury percentage must be between 1 and 10000"
     );
     require(
-      data.decaySettings[0] > 0 && data.decaySettings[0] < 100,
-      "Emissions: xAllocations decay must be between 0 and 100"
+      data.decaySettings[0] > 0 && data.decaySettings[0] <= 100,
+      "Emissions: xAllocations decay must be between 1 and 100"
     );
     require(
-      data.decaySettings[1] > 0 && data.decaySettings[1] < 100,
-      "Emissions: vote2Earn decay must be between 0 and 100"
+      data.decaySettings[1] > 0 && data.decaySettings[1] <= 100,
+      "Emissions: vote2Earn decay must be between 1 and 100"
     );
     require(data.decaySettings[2] > 0, "Emissions: xAllocations decay delay must be greater than 0");
     require(data.decaySettings[3] > 0, "Emissions: vote2Earn decay delay must be greater than 0");
     require(
-      data.maxVote2EarnDecay > 0 && data.maxVote2EarnDecay < 100,
+      data.maxVote2EarnDecay > 0 && data.maxVote2EarnDecay <= 100,
       "Emissions: Max vote2Earn decay must be between 0 and 100"
     );
 
@@ -249,7 +249,6 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   function _calculateVote2EarnDecayPeriods() internal view returns (uint256) {
     EmissionsStorage storage $ = _getEmissionsStorage();
 
-    require($.vote2EarnDecayPeriod > 0, "Emissions: Invalid decay period for Vote2Earn");
     require($.nextCycle > 0, "Emissions: Invalid cycle number");
     if ($.nextCycle == 1) {
       return 0;

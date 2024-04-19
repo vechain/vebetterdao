@@ -85,7 +85,7 @@ export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose, onOpen }
         onTryAgain={onTryAgain}
         pendingTitle="Creating proposal..."
         txId={createProposalMutation.txReceipt?.meta.txID}
-        showExplorerButton={true}
+        showExplorerButton
       />
     )
 
