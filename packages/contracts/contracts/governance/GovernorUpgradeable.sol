@@ -50,13 +50,6 @@ abstract contract GovernorUpgradeable is
 {
   using DoubleEndedQueue for DoubleEndedQueue.Bytes32Deque;
 
-  bytes32 public constant BALLOT_TYPEHASH =
-    keccak256("Ballot(uint256 proposalId,uint8 support,address voter,uint256 nonce)");
-  bytes32 public constant EXTENDED_BALLOT_TYPEHASH =
-    keccak256(
-      "ExtendedBallot(uint256 proposalId,uint8 support,address voter,uint256 nonce,string reason,bytes params)"
-    );
-
   struct ProposalCore {
     address proposer;
     uint256 roundIdVoteStart;
@@ -244,7 +237,7 @@ abstract contract GovernorUpgradeable is
   function _getVotes(address account, uint256 timepoint) internal view virtual returns (uint256);
 
   /**
-   * @dev Register a vote for `proposalId` by `account` with a given `support`, voting `weight` and voting `params`.
+   * @dev Register a vote for `proposalId` by `account` with a given `support`, and voting `weight`.
    *
    * Note: Support is generic and can represent various things depending on the voting system used.
    */
