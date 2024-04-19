@@ -1,12 +1,12 @@
 import { Box, Card, CardBody, Heading, Image, Text, VStack } from "@chakra-ui/react"
 
-export type Props = {
+export type StepCardProps = {
   stepImageSrc: string
   stepNumber: number
   stepTitle: string
   stepDescription: string
 }
-export const CreateNewAppStepCard = ({ stepImageSrc, stepNumber, stepTitle, stepDescription }: Props) => {
+export const StepCard: React.FC<StepCardProps> = ({ stepImageSrc, stepNumber, stepTitle, stepDescription }) => {
   return (
     <Card variant="filled" rounded={"3xl"}>
       <CardBody>

@@ -1,8 +1,8 @@
+import { StepCardProps, StepCard } from "@/components/StepCard"
 import { Button, Card, CardBody, Grid, GridItem, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react"
-import { CreateNewAppStepCard, Props as StepProps } from "."
 import { useRouter } from "next/navigation"
 
-const Steps: StepProps[] = [
+const Steps: StepCardProps[] = [
   {
     stepImageSrc: "/images/sign.svg",
     stepNumber: 1,
@@ -43,7 +43,7 @@ export const NewAppPageContent = () => {
               </Text>
               <Stack direction={["column", "row"]} w="full" spacing={4}>
                 {Steps.map(step => (
-                  <CreateNewAppStepCard {...step} key={step.stepNumber} />
+                  <StepCard {...step} key={step.stepNumber} />
                 ))}
               </Stack>
               <HStack alignSelf={"flex-end"} spacing={4}>
