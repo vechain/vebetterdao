@@ -632,6 +632,8 @@ describe("Governor and TimeLock", function () {
       // Start emissions
       await bootstrapAndStartEmissions()
 
+      const currentRoundId = await xAllocationVoting.currentRoundId()
+
       // old propose() function without the voteStartInRound parameter
       const tx = await governor
         .connect(proposer) //@ts-ignore
@@ -640,6 +642,7 @@ describe("Governor and TimeLock", function () {
           [0],
           [B3trContract.interface.encodeFunctionData("tokenDetails", [])],
           "Creating some random proposal",
+          currentRoundId + 1n,
         )
 
       const proposalId = await getProposalIdFromTx(tx)
