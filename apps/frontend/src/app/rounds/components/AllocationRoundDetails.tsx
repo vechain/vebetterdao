@@ -121,7 +121,7 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
               </HStack>
             </Skeleton>
             <Skeleton isLoaded={!isLoading}>
-              <Heading size={["lg", "xl"]}>Allocations | Round #{data?.roundId}</Heading>
+              <Heading size={["lg", "xl"]} data-testid="round-title">Allocations | Round #{data?.roundId}</Heading>
             </Skeleton>
             <Skeleton isLoaded={!isLoading}>
               <Text color="gray.500" fontSize={["sm", "md"]}>

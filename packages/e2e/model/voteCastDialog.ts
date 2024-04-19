@@ -2,11 +2,12 @@ import { Page } from 'playwright';
 import { BaseDialog } from './baseDialog';
 
 /**
- * Swap dialog model
+ * Vost cast dialog model
  */
-export class SwapConfirmationDialog extends BaseDialog{
+export class VoteCastDialog extends BaseDialog {
 
     constructor(page: Page) {
-        super(page, "Swap Completed")
+        super(page, "Vote Cast")
     }
+
 }
