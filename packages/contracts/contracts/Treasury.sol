@@ -145,6 +145,7 @@ contract Treasury is
    */
   function transferVET(address _to, uint256 _value) public onlyGovernanceWhenNotPaused nonReentrant {
     require(address(this).balance >= _value, "Treasury: insufficient VET balance");
+    require(_to != address(0), "Treasury: invalid address");
     (bool sent, ) = _to.call{ value: _value }("");
     require(sent, "Failed to send VET");
   }
