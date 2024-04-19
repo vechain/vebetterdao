@@ -1,7 +1,6 @@
 import { Button, Card, CardBody, Grid, GridItem, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { StepCard, StepCardProps } from "@/components/StepCard"
-import { X } from "vitest/dist/reporters-P7C2ytIv"
 
 const Steps: StepCardProps[] = [
   {
@@ -29,7 +28,11 @@ export const NewProposalPageContent = () => {
     router.push("/proposals/new/type")
   }
   return (
-    <Grid templateColumns={["repeat(1, 1fr)", "repeat(4, 1fr)"]} gap={6} w="full" data-testid="new-app">
+    <Grid
+      templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(4, 1fr)"]}
+      gap={6}
+      w="full"
+      data-testid="new-app">
       <GridItem colSpan={3}>
         <Card>
           <CardBody>
@@ -40,12 +43,12 @@ export const NewProposalPageContent = () => {
                 aspects of the ecosystem. Each proposal undergoes a voting process, and upon approval, is brought to
                 life.
               </Text>
-              <Stack direction={["column", "row"]} w="full" spacing={4}>
+              <Stack direction={["column", "column", "row"]} w="full" spacing={4}>
                 {Steps.map(step => (
-                  <StepCard {...step} key={step.stepNumber} />
+                  <StepCard {...step} key={step.stepNumber} flex={1} />
                 ))}
               </Stack>
-              <HStack w="full" justify={"space-between"}>
+              <Stack direction={["column", "column", "row"]} w="full" justify={"space-between"} spacing={8}>
                 <Text fontSize="sm" color="gray.500" flex={1}>
                   Remember that by creating a proposal you will not be able to move your funds for X days.
                 </Text>
@@ -57,7 +60,7 @@ export const NewProposalPageContent = () => {
                     Continue
                   </Button>
                 </HStack>
-              </HStack>
+              </Stack>
             </VStack>
           </CardBody>
         </Card>
