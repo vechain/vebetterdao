@@ -93,10 +93,11 @@ describe("Governor and TimeLock", function () {
       ])
       const description = "Upgrading Governance contracts"
       const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
+      const currentRoundId = await xAllocationVoting.currentRoundId()
 
       const tx = await governor
-        .connect(owner) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
-        .propose([await governor.getAddress()], [0], [encodedFunctionCall], description)
+        .connect(owner)
+        .propose([await governor.getAddress()], [0], [encodedFunctionCall], description, currentRoundId + 1n)
 
       const proposalId = await getProposalIdFromTx(tx)
       await waitForProposalToBeActive(proposalId)
@@ -122,7 +123,7 @@ describe("Governor and TimeLock", function () {
 
       // create a new proposal
       const newTx = await newGovernor
-        .connect(owner) //@ts-ignore
+        .connect(owner)
         .propose(
           [await b3tr.getAddress()],
           [0],
@@ -347,7 +348,7 @@ describe("Governor and TimeLock", function () {
       const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
       const tx = await governor
-        .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+        .connect(proposer)
         .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
           gasLimit: 10_000_000,
         })
@@ -406,11 +407,9 @@ describe("Governor and TimeLock", function () {
       const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n
       await catchRevert(
-        governor
-          .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
-          .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
-            gasLimit: 10_000_000,
-          }),
+        governor.connect(proposer).propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
+          gasLimit: 10_000_000,
+        }),
       )
     })
 
@@ -435,7 +434,7 @@ describe("Governor and TimeLock", function () {
       const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 2n // starts 2 rounds from now
       const tx = await governor
-        .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+        .connect(proposer)
         .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
           gasLimit: 10_000_000,
         })
@@ -498,7 +497,7 @@ describe("Governor and TimeLock", function () {
       await bootstrapAndStartEmissions()
 
       const tx = await governor
-        .connect(proposer) //@ts-ignore
+        .connect(proposer)
         .propose(
           [await b3tr.getAddress()],
           [0],
@@ -549,36 +548,6 @@ describe("Governor and TimeLock", function () {
       expect(finalDeadline).to.eql(newDeadline)
     })
 
-    it("Creating proposal through deprecated propose() function will create a proposal starting next round", async () => {
-      const config = createLocalConfig()
-      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
-      config.EMISSIONS_CYCLE_DURATION = 5
-      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        config,
-      })
-
-      const proposer = otherAccounts[0]
-      await getVot3Tokens(proposer, "1000")
-
-      // Start emissions
-      await bootstrapAndStartEmissions()
-
-      // old propose() function without the voteStartInRound parameter
-      const tx = await governor
-        .connect(proposer) //@ts-ignore
-        .propose(
-          [await b3tr.getAddress()],
-          [0],
-          [B3trContract.interface.encodeFunctionData("tokenDetails", [])],
-          "Creating some random proposal",
-        )
-
-      const proposalId = await getProposalIdFromTx(tx)
-      const voteStartsInRound = await governor.proposalStartRound(proposalId)
-      expect(voteStartsInRound).to.eql((await xAllocationVoting.currentRoundId()) + 1n)
-    })
-
     it("Period between proposal creation and round start must be higher than min delay set in the contract", async () => {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
@@ -609,7 +578,7 @@ describe("Governor and TimeLock", function () {
       let voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
       await expect(
         governor
-          .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+          .connect(proposer)
           .propose(
             [await b3tr.getAddress()],
             [0],
@@ -637,7 +606,7 @@ describe("Governor and TimeLock", function () {
 
       await expect(
         governor
-          .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+          .connect(proposer)
           .propose(
             [await b3tr.getAddress()],
             [0],
@@ -672,7 +641,7 @@ describe("Governor and TimeLock", function () {
       const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
       const tx = await governor
-        .connect(proposer) //@ts-ignore
+        .connect(proposer)
         .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
           gasLimit: 10_000_000,
         })
@@ -715,11 +684,9 @@ describe("Governor and TimeLock", function () {
 
       // Now we can create a new proposal
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
-      const tx = await governor
-        .connect(proposer) //@ts-ignore
-        .propose([], [], [], "", voteStartsInRoundId.toString(), {
-          gasLimit: 10_000_000,
-        })
+      const tx = await governor.connect(proposer).propose([], [], [], "", voteStartsInRoundId.toString(), {
+        gasLimit: 10_000_000,
+      })
 
       const proposeReceipt = await tx.wait()
       expect(proposeReceipt).not.to.be.null
@@ -785,7 +752,7 @@ describe("Governor and TimeLock", function () {
       // Parameters must have the same length
       await catchRevert(
         governor
-          .connect(proposer) //@ts-ignore
+          .connect(proposer)
           .propose([address], [0, 1], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
             gasLimit: 10_000_000,
           }),
@@ -793,7 +760,7 @@ describe("Governor and TimeLock", function () {
 
       await catchRevert(
         governor
-          .connect(proposer) //@ts-ignore
+          .connect(proposer)
           .propose([address, address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
             gasLimit: 10_000_000,
           }),
@@ -801,7 +768,7 @@ describe("Governor and TimeLock", function () {
 
       await catchRevert(
         governor
-          .connect(proposer) //@ts-ignore
+          .connect(proposer)
           .propose([address], [0], [encodedFunctionCall, encodedFunctionCall], "", voteStartsInRoundId.toString(), {
             gasLimit: 10_000_000,
           }),
@@ -829,7 +796,7 @@ describe("Governor and TimeLock", function () {
       const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
       const tx = await governor
-        .connect(proposer) //@ts-ignore
+        .connect(proposer)
         .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
           gasLimit: 10_000_000,
         })
@@ -874,11 +841,9 @@ describe("Governor and TimeLock", function () {
       expect(currentRoundId).to.eql(0n)
 
       await expect(
-        governor
-          .connect(proposer) //@ts-ignore
-          .propose([address], [0], [encodedFunctionCall], "", 1n, {
-            gasLimit: 10_000_000,
-          }),
+        governor.connect(proposer).propose([address], [0], [encodedFunctionCall], "", 1n, {
+          gasLimit: 10_000_000,
+        }),
       ).to.be.reverted
     })
 
@@ -902,19 +867,15 @@ describe("Governor and TimeLock", function () {
       const roundToStart = (await xAllocationVoting.currentRoundId()) + 2n
 
       await expect(
-        governor
-          .connect(proposer) //@ts-ignore
-          .propose([address], [0], [encodedFunctionCall], "", roundToStart, {
-            gasLimit: 10_000_000,
-          }),
+        governor.connect(proposer).propose([address], [0], [encodedFunctionCall], "", roundToStart, {
+          gasLimit: 10_000_000,
+        }),
       ).to.not.be.reverted
 
       await expect(
-        governor
-          .connect(proposer) //@ts-ignore
-          .propose([address], [0], [encodedFunctionCall], "", roundToStart, {
-            gasLimit: 10_000_000,
-          }),
+        governor.connect(proposer).propose([address], [0], [encodedFunctionCall], "", roundToStart, {
+          gasLimit: 10_000_000,
+        }),
       ).to.be.reverted
     })
 
@@ -938,20 +899,16 @@ describe("Governor and TimeLock", function () {
       const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
       let voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) - 1n // starts in previous round
       await catchRevert(
-        governor
-          .connect(proposer) //@ts-ignore
-          .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
-            gasLimit: 10_000_000,
-          }),
+        governor.connect(proposer).propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
+          gasLimit: 10_000_000,
+        }),
       )
 
       voteStartsInRoundId = await xAllocationVoting.currentRoundId() // starts in current round
       await catchRevert(
-        governor
-          .connect(proposer) //@ts-ignore
-          .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
-            gasLimit: 10_000_000,
-          }),
+        governor.connect(proposer).propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
+          gasLimit: 10_000_000,
+        }),
       )
     })
 
@@ -1112,7 +1069,7 @@ describe("Governor and TimeLock", function () {
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 2n // starts 2 rounds from now
       await expect(
         governor
-          .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+          .connect(proposer)
           .propose(
             [address],
             [0],
@@ -1128,7 +1085,7 @@ describe("Governor and TimeLock", function () {
       // with proposer suffix but bad address part (XYZ are not a valid hex char)
       await expect(
         governor
-          .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+          .connect(proposer)
           .propose(
             [address],
             [0],
@@ -1144,7 +1101,7 @@ describe("Governor and TimeLock", function () {
       // with wrong suffix
       await expect(
         governor
-          .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+          .connect(proposer)
           .propose(
             [address],
             [0],
@@ -1160,7 +1117,7 @@ describe("Governor and TimeLock", function () {
       // with protection via proposer suffix but wrong proposer
       await expect(
         governor
-          .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+          .connect(proposer)
           .propose(
             [address],
             [0],
