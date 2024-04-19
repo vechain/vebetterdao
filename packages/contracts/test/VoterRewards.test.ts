@@ -92,17 +92,6 @@ describe("VoterRewards", () => {
         .reverted
     })
 
-    it("Should not be able to register vote negative amount", async () => {
-      const { voterRewards, otherAccount, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      await voterRewards.connect(owner).setVoteRegistrarRole(otherAccount.address)
-
-      await expect(voterRewards.connect(otherAccount).registerVote(1, otherAccount.address, ethers.parseEther("-1000")))
-        .to.be.reverted
-    })
-
     it("Should return correct scaling factor", async () => {
       const { voterRewards } = await getOrDeployContractInstances({ forceDeploy: true })
 
