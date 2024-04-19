@@ -17,7 +17,7 @@ export const StepCard: React.FC<StepCardProps> = ({
     <Card variant="filled" rounded={"3xl"} {...props}>
       <CardBody>
         <VStack spacing={4} align={"flex-start"}>
-          <Image src={stepImageSrc} boxSize={32} alignSelf={"center"} />
+          <Image src={stepImageSrc} boxSize={32} />
           <Box>
             <Text textTransform={"uppercase"} fontWeight={600}>
               Step {stepNumber}

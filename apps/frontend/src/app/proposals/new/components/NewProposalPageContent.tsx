@@ -25,7 +25,7 @@ const Steps: StepCardProps[] = [
 export const NewProposalPageContent = () => {
   const router = useRouter()
   const onContinueClick = () => {
-    router.push("/proposals/new/type")
+    router.push("/proposals/new/form/type")
   }
   return (
     <Grid
