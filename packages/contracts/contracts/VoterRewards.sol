@@ -86,8 +86,6 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
   function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
   function registerVote(uint256 proposalStart, address voter, uint256 votes) public onlyRole(VOTE_REGISTRAR_ROLE) {
-    require(votes >= 0, "VoterRewards: votes must be greater than or equal to 0");
-
     if (votes == 0) {
       return;
     }
