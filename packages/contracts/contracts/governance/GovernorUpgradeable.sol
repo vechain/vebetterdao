@@ -201,7 +201,8 @@ abstract contract GovernorUpgradeable is
    * @dev See {IB3TRGovernor-proposalStartRound}
    */
   function proposalStartRound(uint256 proposalId) public view returns (uint256) {
-    return _getGovernorStorage()._proposals[proposalId].roundIdVoteStart;
+    GovernorStorage storage $ = _getGovernorStorage();
+    return $._proposals[proposalId].roundIdVoteStart;
   }
 
   /**
