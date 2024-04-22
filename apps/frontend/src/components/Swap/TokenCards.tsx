@@ -110,6 +110,7 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
             onChange={e => onChange(filterAmount(e.target.value))}
             variant="unstyled"
             _placeholder={{ color: "black" }}
+            data-testid="amount-input"
           />
         )}
       />
@@ -129,7 +130,8 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
         size="xs"
         color={"white"}
         rounded={"full"}
-        bgColor="primary.400">
+        bgColor="primary.400"
+        data-testid="max-swap-btn">
         Max
       </Button>
     ),
@@ -139,7 +141,10 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
   return (
     <motion.div initial="initial" animate="animate" variants={containerVariants}>
       <Stack direction={isB3trToVot3 ? "column" : "column-reverse"}>
-        <motion.div layout transition={layoutTransition}>
+        <motion.div
+          layout
+          transition={layoutTransition}
+          data-testid={`${isB3trToVot3 ? 'send' : 'receive'}-card-b3tr`}>
           <VStack
             bgGradient={b3trBgGradient}
             py={6}
@@ -175,14 +180,17 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
                   <HStack flex={1}>
                     <B3TRIcon h={"32px"} w={"32px"} />
                     {amountInput}
-                  </HStack>
+                  </HStack >
                   {isB3trToVot3 && Number(maxBalance) !== Number(amount) && maxButton}
                 </HStack>
               </VStack>
             </HStack>
           </VStack>
         </motion.div>
-        <motion.div layout transition={layoutTransition}>
+        <motion.div
+          layout
+          transition={layoutTransition}
+          data-testid={`${isB3trToVot3 ? 'receive' : 'send'}-card-vot3`}>
           <VStack
             bgGradient={vot3BgGradient}
             py={6}
@@ -203,7 +211,9 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
               />
               <VStack justify="stretch" flex={1} gap={1}>
                 <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
-                  <Text>{isB3trToVot3 ? "Receive" : "Send"}</Text>
+                  <Text data-testid={`'swap-receive-${isB3trToVot3 ? 'vot3' : 'b3tr'}`}>
+                    {isB3trToVot3 ? "Receive" : "Send"}
+                  </Text>
                   <VStack gap={0} alignItems={"flex-end"}>
                     <Text fontSize="10px">VOT3 Balance</Text>
                     <HStack gap={1}>

@@ -33,6 +33,7 @@ export const SwitchTokenButton = ({ setIsB3trToVot3 }: Props) => {
         icon={<FaRepeat />}
         transform={"rotate(90deg)"}
         _hover={{ bgColor: `primary.${useColorModeValue("300", "400")}` }}
+        data-testid="switch-tokens-btn"
       />
     </Flex>
   )

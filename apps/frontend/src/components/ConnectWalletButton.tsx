@@ -18,7 +18,12 @@ export const ConnectWalletButton = ({ responsiveVariant }: Props) => {
     if (shouldRenderDesktop)
       return (
         <Fade in={true}>
-          <Button onClick={open} colorScheme="primary" size="md" leftIcon={<FaWallet />}>
+          <Button
+            onClick={open}
+            colorScheme="primary"
+            size="md"
+            leftIcon={<FaWallet />}
+            data-testid="connect-wallet-btn">
             Connect Wallet
           </Button>
         </Fade>
@@ -33,7 +38,12 @@ export const ConnectWalletButton = ({ responsiveVariant }: Props) => {
   if (shouldRenderDesktop)
     return (
       <Fade in={true}>
-        <Button onClick={open} rounded={"full"} color="black" size="md" bg="rgba(235, 236, 252, 1)">
+        <Button
+          onClick={open}
+          rounded={"full"}
+          color="black" size="md"
+          bg="rgba(235, 236, 252, 1)"
+          data-testid="address-btn">
           <HStack spacing={2}>
             <AddressIcon address={account} boxSize={4} rounded={"full"} />
             <Text fontWeight={"400"}>{humanAddress(account, 4, 6)}</Text>

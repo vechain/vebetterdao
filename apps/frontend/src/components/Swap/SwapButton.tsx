@@ -32,7 +32,9 @@ export const SwapButton: React.FC<Props> = ({ isIconButton = false }) => {
           onClick={onOpen}
           leftIcon={<FaRepeat />}
           colorScheme="primary"
-          borderRadius={"full"}>
+          borderRadius={"full"}
+          data-testid="swap-button"
+        >
           Swap
         </Button>
       )}

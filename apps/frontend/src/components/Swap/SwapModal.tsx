@@ -86,7 +86,7 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
           <Text as="b">{amountText}</Text>
           <Text color={b3trColor}>B3TR</Text>
           <FaArrowRight />
-          <Text as="b">{amountText}</Text>
+          <Text as="b" data-testid="b3tr-amount">{amountText}</Text>
           <Text color={vot3Color}>VOT3</Text>
         </HStack>
       )
@@ -127,7 +127,7 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
         <Card w="full" rounded={20}>
           <CardBody>
             <form onSubmit={formData.handleSubmit(handleStake)}>
-              <ModalCloseButton top={4} right={4} />
+              <ModalCloseButton top={4} right={4} data-testid="modal-close-btn" />
               <VStack align={"flex-start"}>
                 <Heading size="md" mb={4}>
                   Swap
@@ -143,7 +143,8 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
                   w={"full"}
                   rounded={"full"}
                   isDisabled={invalidAmount}
-                  size="lg">
+                  size="lg"
+                  data-testid="swap-submit-btn">
                   Swap
                 </Button>
               </VStack>
