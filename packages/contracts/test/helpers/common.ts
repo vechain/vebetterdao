@@ -78,8 +78,8 @@ export const createProposal = async (
   const encodedFunctionCall = ContractFactory.interface.encodeFunctionData(functionTocall, values)
 
   const tx = await governor
-    .connect(proposer) //@ts-ignore
-    .propose([address], [0], [encodedFunctionCall], description, parseInt(roundId), {
+    .connect(proposer)
+    .propose([address], [0], [encodedFunctionCall], description, roundId.toString(), {
       gasLimit: 10_000_000,
     })
 
