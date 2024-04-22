@@ -56,6 +56,7 @@ export const EditAppPageContent = ({ appId }: Props) => {
     onSuccess: goToAppDetail,
   })
   const onSubmit = async (data: CreateEditAppFormData) => {
+    updateAppMetadataMutation.resetStatus()
     onConfirmationOpen()
 
     const metadataUri = await onMetadataUpload({
@@ -82,8 +83,8 @@ export const EditAppPageContent = ({ appId }: Props) => {
   const onTryAgain = useCallback(() => {
     updateAppMetadataMutation.resetStatus()
     onConfirmationClose()
-    onConfirmationOpen()
-  }, [onConfirmationClose, onConfirmationOpen, updateAppMetadataMutation])
+    handleSubmit(onSubmit)()
+  }, [onConfirmationClose, updateAppMetadataMutation, handleSubmit, onSubmit])
 
   const isAllowedToEditAddress = compareAddresses(appData?.adminAddress, account ?? "")
   const { data: appModerators } = useAppModerators(appId)
@@ -130,7 +131,7 @@ export const EditAppPageContent = ({ appId }: Props) => {
         showExplorerButton
       />
 
-      <VStack w="full" spacing={4} align="stretch" data-testid={`edit-app-${appId}-detail`}>
+      <VStack w="full" spacing={4} align="flex-start" data-testid={`edit-app-${appId}-detail`}>
         <Button colorScheme="gray" size="md" variant="outline" leftIcon={<FaArrowLeft />} onClick={goToAppDetail}>
           App detail
         </Button>
