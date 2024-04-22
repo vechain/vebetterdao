@@ -18,8 +18,7 @@ test.describe('Connect Wallet', () => {
 
   test('User can disconnect wallet', async ({ page }) => {
     const dashboardPage = new DashboardPage(page);
-    const address = await dashboardPage.connectWallet()
-    await dashboardPage.disconnectWallet(address)
+    await dashboardPage.disconnectWallet()
   });
 
   test('User can see B3TR balance after connecting wallet', async ({ page }) => {

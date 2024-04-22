@@ -5,6 +5,7 @@ import veWorldMockClient from '../utils/veworld-mock-client';
 import BigNumber from 'bignumber.js';
 import { SwapDialog } from './swapDialog';
 import { test, Locator } from '@playwright/test';
+import { trimmedAddress } from "../utils/helpers"
 
 /**
  * Dashboard page model
@@ -13,6 +14,7 @@ export class DashboardPage {
     private page: Page
     readonly connectWalletButton: Locator
     readonly veWorldOption: Locator
+    readonly currentUserBtn: Locator
     readonly disconnectOption: Locator
     readonly b3trBalanceText: Locator
     readonly vot3BalanceText: Locator
@@ -21,12 +23,13 @@ export class DashboardPage {
     constructor(page: Page) {
         this.page = page
 
-        this.connectWalletButton = this.page.locator('xpath=//button[contains(text(), "Connect Wallet")]')
-        this.veWorldOption = this.page.locator('div.modal-body button.card.LIGHT')
-        this.disconnectOption = this.page.locator('div.modal-footer button.LIGHT')
-        this.b3trBalanceText = this.page.locator('xpath=//p[contains(text(),"B3TR Tokens")]/preceding-sibling::h2')
-        this.vot3BalanceText = this.page.locator('xpath=//p[contains(text(),"VOT3 Tokens")]/preceding-sibling::h2')
-        this.swapButton = this.page.locator('xpath=//button[contains(text(), "Swap")]')
+        this.connectWalletButton = this.page.locator("//*[@data-testid='connect-wallet-btn']").first()
+        this.veWorldOption = this.page.locator('div.modal-body button.card.LIGHT').first()
+        this.currentUserBtn = this.page.locator("//*[@data-testid='address-btn']")
+        this.disconnectOption = this.page.locator('div.modal-footer button.LIGHT').first()
+        this.b3trBalanceText = this.page.locator("//*[@data-testid='b3tr-balance']")
+        this.vot3BalanceText = this.page.locator("//*[@data-testid='vot3-balance']")
+        this.swapButton = this.page.locator("//*[@data-testid='swap-button']")
     }
 
     /**
@@ -42,28 +45,23 @@ export class DashboardPage {
      */
     async connectWallet(): Promise<string> {
         return await test.step('Connect Wallet', async() => {
-            await expect(this.page.getByText('Connect Wallet').first()).toBeVisible();
-            await this.connectWalletButton.first().click();
-            await this.veWorldOption.first().click();
+            await this.connectWalletButton.click();
+            await this.veWorldOption.click();
             const mockAddress = await veWorldMockClient.getMockAddress(this.page);
             console.log('connected wallet address', mockAddress)
-            const trimmedAddress = mockAddress.slice(-6)
-            await expect(this.page.locator(`xpath=//p[contains(text(), "${trimmedAddress}")]`).first()).toBeVisible();
+            await expect(this.currentUserBtn).toHaveText(trimmedAddress(mockAddress))
             return mockAddress
         })
     }
 
     /**
      * Disconnect wallet
-     * @param address address of connected wallet
      */
-    async disconnectWallet(address: string) {
+    async disconnectWallet() {
         await test.step('Disconnect Wallet', async() => {
-            const trimmedAddress = address.slice(-6)
-            await expect(this.page.locator(`xpath=//p[contains(text(), "${trimmedAddress}")]`).first()).toBeVisible();
-            await this.page.locator(`xpath=//p[contains(text(), "${trimmedAddress}")]`).first().click();
-            await this.disconnectOption.first().click(); 
-            await expect(this.page.getByText('Connect Wallet').first()).toBeVisible();
+            await this.currentUserBtn.click();
+            await this.disconnectOption.click();
+            await expect(this.connectWalletButton).toBeVisible();
         })
     }
 
@@ -125,5 +123,4 @@ export class DashboardPage {
             return new SwapDialog(this.page)
         })
     }
-
 }
