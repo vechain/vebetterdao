@@ -7,6 +7,7 @@ import "./governance/modules/GovernorVotesUpgradeable.sol";
 import "./governance/modules/GovernorVotesQuorumFractionUpgradeable.sol";
 import "./governance/modules/GovernorTimelockControlUpgradeable.sol";
 import "./governance/modules/GovernorCountingSimpleUpgradeable.sol";
+import "./governance/modules/GovernorDepositUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -23,6 +24,7 @@ contract B3TRGovernor is
   GovernorVotesUpgradeable,
   GovernorVotesQuorumFractionUpgradeable,
   GovernorTimelockControlUpgradeable,
+  GovernorDepositUpgradeable,
   UUPSUpgradeable
 {
   /**
@@ -169,7 +171,8 @@ contract B3TRGovernor is
     uint256[] memory values,
     bytes[] memory calldatas,
     string memory description,
-    uint256 startRoundId
+    uint256 startRoundId,
+    uint256 depositAmount
   ) public virtual returns (uint256) {
     address proposer = _msgSender();
     uint256 currentRoundId = _getB3TRGovernorStorage().xAllocationVoting.currentRoundId();
@@ -196,14 +199,7 @@ contract B3TRGovernor is
       revert GovernorRestrictedProposer(proposer);
     }
 
-    // check proposal threshold
-    uint256 proposerVotes = getVotes(proposer, clock() - 1);
-    uint256 votesThreshold = proposalThreshold();
-    if (proposerVotes < votesThreshold) {
-      revert GovernorInsufficientProposerVotes(proposer, proposerVotes, votesThreshold);
-    }
-
-    return _propose(targets, values, calldatas, description, proposer, startRoundId);
+    return _propose(targets, values, calldatas, description, proposer, startRoundId, depositAmount);
   }
 
   /**
@@ -217,7 +213,8 @@ contract B3TRGovernor is
     bytes[] memory calldatas,
     string memory description,
     address proposer,
-    uint256 startRoundId
+    uint256 startRoundId,
+    uint256 depositAmount
   ) internal virtual returns (uint256 proposalId) {
     GovernorStorage storage $ = _getGovernorStorage();
     proposalId = hashProposal(targets, values, calldatas, keccak256(bytes(description)));
@@ -235,6 +232,9 @@ contract B3TRGovernor is
     proposal.roundIdVoteStart = startRoundId;
     proposal.voteDuration = SafeCast.toUint32(votingPeriod());
     proposal.isExecutable = targets.length > 0;
+    proposal.depositAmount = depositAmount;
+
+    _depositFunds(depositAmount, proposer, proposalId);
 
     emit ProposalCreated(
       proposalId,
@@ -369,7 +369,11 @@ contract B3TRGovernor is
     uint256 deadline = proposalDeadline(proposalId);
 
     if (deadline >= currentTimepoint) {
-      return ProposalState.Active;
+      if(proposalDepositReached(proposalId)) {
+        return ProposalState.Active;
+      } else {
+        return ProposalState.Canceled;
+      }
     } else if (!_quorumReached(proposalId) || !_voteSucceeded(proposalId)) {
       return ProposalState.Defeated;
     } else if (proposalEta(proposalId) == 0) {
@@ -422,8 +426,8 @@ contract B3TRGovernor is
     B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
     uint256 currentRoundId = $.xAllocationVoting.currentRoundId();
 
-    // call the new propose function with the next round id as default value
-    return propose(targets, values, calldatas, description, currentRoundId + 1);
+    // call the new propose function with the next round id as default value and 0 as deposit amount
+    return propose(targets, values, calldatas, description, currentRoundId + 1, 0);
   }
 
   function castVote(uint256 proposalId, uint8 support) public override(GovernorUpgradeable) returns (uint256) {
