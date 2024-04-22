@@ -1,6 +1,7 @@
 import { Page } from 'playwright';
 import { expect, test, Locator } from '@playwright/test';
 import BigNumber from 'bignumber.js';
+import { Token } from "./commonActions"
 
 /**
  * Swap dialog model
@@ -8,30 +9,66 @@ import BigNumber from 'bignumber.js';
 export class SwapDialog {
     private page: Page
 
-    readonly firstTextBox: Locator
-    readonly secondTextBox: Locator
+    readonly sendCard: Locator
+    readonly receiveCard: Locator
+    readonly sendAmountInput: Locator
+    readonly receiveAmountInput: Locator
     readonly maxButton: Locator
     readonly swapButton: Locator
     readonly switchTokensButton: Locator
+    readonly swapSendTokenName: Locator
+    readonly swapReceiveTokenName: Locator
+    readonly closeBtn: Locator
+    readonly amountInputByToken: (tokenName: Token) => Locator
 
     constructor(page: Page) {
         this.page = page
 
-        this.firstTextBox = this.page.locator('section[role="dialog"] input').first()
-        this.secondTextBox = this.page.locator('section[role="dialog"] input').last()
-        this.maxButton = this.page.locator('xpath=//section[@role="dialog"]/descendant::button[contains(text(),"Max")]').first()
-        this.swapButton = this.page.locator('xpath=//section[@role="dialog"]/descendant::button[contains(text(),"Swap")]').first()
-        this.switchTokensButton = this.page.locator('xpath=//section[@role="dialog"]/descendant::button[@aria-label="Switch Tokens"]').first()
+        this.sendCard = this.page.locator("//*[contains(@data-testid, 'send-card')]")
+        this.receiveCard = this.page.locator("//*[contains(@data-testid, 'receive-card')]")
+        // this.sendAmountInput = this.page.locator("//*[contains(@data-testid, 'send-card')]//*[@data-testid='amount-input']")
+        this.sendAmountInput = this.sendCard.locator("//*[@data-testid='amount-input']")
+        // this.receiveAmountInput = this.page.locator("//*[contains(@data-testid, 'receive-card')]//*[@data-testid='amount-input']")
+        this.receiveAmountInput = this.receiveCard.locator("//*[@data-testid='amount-input']")
+        this.maxButton = this.page.locator('//*[@data-testid="max-swap-btn"]')
+        this.swapButton = this.page.locator('//*[@data-testid="swap-submit-btn"]')
+        this.switchTokensButton = this.page.locator('//*[@data-testid="switch-tokens-btn"]')
+        this.swapSendTokenName = this.page.locator("//*[contains(@data-testid, 'swap-send')]")
+        this.swapReceiveTokenName = this.page.locator("//*[contains(@data-testid, 'swap-receive')]")
+        this.closeBtn = this.page.locator("//*[@data-testid='modal-close-btn']")
+        this.amountInputByToken = (tokenName: Token) => {
+            return this.page.locator(`//*[contains(@data-testid, "card-${tokenName.toLowerCase()}")]//*[@data-testid="amount-input"]`)
+        }
     }
 
-     /**
+    async setSendToken(tokenName: Token) {
+        await test.step(`Set send token to be "${tokenName}"`, async() => {
+            if (await this.getSendTokenName() !== tokenName) {
+                await this.clickSwitchTokens()
+            }
+        })
+    }
+
+    async setSendAmount(args: SetSendSwapAmount ) {
+        await test.step(`Set send ${args.token} swap amount to ${args.max ? "max swappable amount" : `"${args.amount}"`}`, async () => {
+            if (args.max === undefined && args.amount === undefined) {
+                throw new Error("Can't set swap amount: both 'max' and 'amount' args are passed undefined -- at least one of these args should be passed as value.")
+            }
+
+            args.max
+                ? await this.maxButton.click()
+                : await this.amountInputByToken(args.token).fill(args.amount.toString())
+        })
+    }
+
+    /**
      * Enters the first amount in the swap dialog
      * i.e. first input field
      * @param amount Decimal amount to enter
      */
-     async enterFirstAmount(amount: BigNumber) {
+    async enterSendAmount(amount: BigNumber) {
         await test.step(`Entering first swap amount: ${amount}`, async() => {
-            await this.firstTextBox.fill(amount.toString());
+            await this.sendAmountInput.fill(amount.toString());
         })
     }
 
@@ -40,9 +77,9 @@ export class SwapDialog {
      * i.e. second input field
      * @param amount Decimal amount to enter
      */
-    async enterSecondAmount(amount: BigNumber) {
+    async enterReceiveAmount(amount: BigNumber) {
         await test.step(`Entering second swap amount: ${amount}`, async() => {
-            await this.secondTextBox.fill(amount.toString());
+            await this.receiveAmountInput.fill(amount.toString());
         })
     }
 
@@ -50,9 +87,9 @@ export class SwapDialog {
      * Gets the second amount in the swap dialog
      * @returns Decimal amount
      */
-    async getSecondAmount(): Promise<BigNumber> {
+    async getSendAmount(): Promise<BigNumber> {
         return await test.step(`Getting second swap amount`, async() => {
-            const text = await this.secondTextBox.textContent()
+            const text = await this.receiveAmountInput.textContent()
             const amount = text ?? (() => { throw new Error('Second amount not found') })()
             return new BigNumber(amount)
         })
@@ -62,9 +99,9 @@ export class SwapDialog {
      * Asserts the second amount in the swap dialog
      * @param amount decimal amount to assert
      */
-    async expectSecondAmount(amount: BigNumber) {
+    async expectReceiveAmount(amount: BigNumber) {
         await test.step(`Expecting second swap amount to be: ${amount}`, async() => {
-            expect(this.secondTextBox).toHaveText(amount.toString())
+            await expect(this.receiveAmountInput).toHaveText(amount.toString())
         })
     }
 
@@ -94,4 +131,59 @@ export class SwapDialog {
             await this.switchTokensButton.click();
         })
     }
+
+    /**
+     * Gets the name of a token in a swap pair that's currently set as "Send"
+     * @returns {Token}
+     */
+    async getSendTokenName(): Promise<Token> {
+        return await test.step('Get current send token name in the Swap modal', async () => {
+            // return await this.swapSendTokenName.innerText()
+            //   .then(text => { return text.substring(0, text.indexOf(' ')) })
+            const testIdVal: string = await this.sendCard.getAttribute('data-testid')
+            return testIdVal.substring(testIdVal.length - 4).toUpperCase() as Token
+        })
+    }
+
+    /**
+     * Gets the name of a token in a swap pair that's currently set as "Receive"
+     * @returns {Token}
+     */
+    async getReceiveTokenName(): Promise<Token> {
+        const testIdVal: string = await this.receiveCard.getAttribute('data-testid')
+        return testIdVal.substring(testIdVal.length - 4).toUpperCase() as Token
+    }
+
+    /**
+     * Closes swap modal
+     */
+    async closeSwapModal() {
+        await test.step('Close swap modal', async() => {
+            await this.closeBtn.click();
+        })
+    }
+
+    /**
+     * Verify that max amount for a given token is equal to an expected amount
+     * @param {Token} tokenName
+     * @param {string} amount
+     */
+    async expectMaxSwappableAmount(tokenName: Token, amount: string) {
+        await test.step(`Expect Max swappable amount for "${tokenName}" to be "${amount}"`, async () => {
+            await this.setSendToken(tokenName)
+            await this.setSendAmount({ token: tokenName, max: true })
+            await expect(this.amountInputByToken(tokenName)).toHaveValue(amount)
+        })
+    }
+}
+
+/**
+ * {Token} token - token name
+ * {BigNumber} amount - swap send amount
+ * {boolean} max - should it
+ */
+export interface SetSendSwapAmount {
+    token: Token
+    amount?: BigNumber
+    max?: boolean
 }
