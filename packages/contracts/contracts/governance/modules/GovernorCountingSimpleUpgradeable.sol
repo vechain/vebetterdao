@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts (last updated v5.0.0) (governance/extensions/GovernorCountingSimple.sol)
+// Forked from OpenZeppelin Contracts (last updated v5.0.0) (governance/extensions/GovernorCountingSimple.sol)
 
 pragma solidity ^0.8.20;
 
@@ -7,7 +7,7 @@ import { GovernorUpgradeable } from "../GovernorUpgradeable.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /**
- * @dev Extension of {Governor} for simple, 3 options, vote counting.
+ * @dev Extension of {B3TRGovernor} for simple, 3 options, vote counting.
  *
  * Modified:
  * - Added `_hasVotedOnce` mapping to store that a user has voted at least one time
@@ -55,7 +55,7 @@ abstract contract GovernorCountingSimpleUpgradeable is Initializable, GovernorUp
   function __GovernorCountingSimple_init_unchained() internal onlyInitializing {}
 
   /**
-   * @dev See {IGovernor-COUNTING_MODE}.
+   * @dev See {IB3TRGovernor-COUNTING_MODE}.
    */
   // solhint-disable-next-line func-name-mixedcase
   function COUNTING_MODE() public pure virtual override returns (string memory) {
@@ -63,7 +63,7 @@ abstract contract GovernorCountingSimpleUpgradeable is Initializable, GovernorUp
   }
 
   /**
-   * @dev See {IGovernor-hasVoted}.
+   * @dev See {IB3TRGovernor-hasVoted}.
    */
   function hasVoted(uint256 proposalId, address account) public view virtual override returns (bool) {
     GovernorCountingSimpleStorage storage $ = _getGovernorCountingSimpleStorage();
@@ -90,6 +90,13 @@ abstract contract GovernorCountingSimpleUpgradeable is Initializable, GovernorUp
   }
 
   /**
+   * @dev returns if quorum was reached or not
+   */
+  function quorumReached(uint256 proposalId) public view virtual returns (bool) {
+    return _quorumReached(proposalId);
+  }
+
+  /**
    * @dev See {Governor-_quorumReached}.
    */
   function _quorumReached(uint256 proposalId) internal view virtual override returns (bool) {
@@ -112,7 +119,7 @@ abstract contract GovernorCountingSimpleUpgradeable is Initializable, GovernorUp
    *
    * @param user The address of the user to check if has voted at least one time
    */
-  function hasVotedOnce(address user) public view returns (bool) {
+  function hasVotedOnce(address user) public view virtual override returns (bool) {
     GovernorCountingSimpleStorage storage $ = _getGovernorCountingSimpleStorage();
     return $._hasVotedOnce[user];
   }
@@ -125,8 +132,7 @@ abstract contract GovernorCountingSimpleUpgradeable is Initializable, GovernorUp
     address account,
     uint8 support,
     uint256 weight,
-    uint256 power,
-    bytes memory // params
+    uint256 power
   ) internal virtual override {
     GovernorCountingSimpleStorage storage $ = _getGovernorCountingSimpleStorage();
     ProposalVote storage proposalVote = $._proposalVotes[proposalId];
