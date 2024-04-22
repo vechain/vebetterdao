@@ -72,6 +72,18 @@ const VOT3_stake_abi = JSON.stringify([{
 }])
 
 /**
+ * Builds an object with account details - index, address, private key
+ * @param accountIndex
+ */
+const account = (accountIndex: number): Account => {
+    return {
+        index: accountIndex,
+        address: getAccountAddress(accountIndex),
+        pk: getAccountPrivateKey(accountIndex),
+    }
+}
+
+/**
  * Get account address from index
  * @param index Index of account
  * @returns Address of account
@@ -115,20 +127,26 @@ const getERC20Balance = async (address: string, contractAddress: string): Promis
 
 /**
  * Transfer ERC20 tokens from the funding account to another account
- * @param contract ERC20 contract address
- * @param address Receiver address
- * @param amount Token amount to transfer (this is a decimal value)
+ * @param {ERC20TransferArgs} args
  */
-const doERC20Transfer = async (contract: string, address: string, amount: BigNumber) => {
-    const senderPrivateKey = getAccountPrivateKey(constants.FUNDING_ACCOUNT_INDEX)
-    const senderAddress = getAccountAddress(constants.FUNDING_ACCOUNT_INDEX)
+const doERC20Transfer = async (args: ERC20TransferArgs) => {
+    // funding account is used by default. if sender account was provided - use it instead.
+    const sender = args.sender
+        ? args.sender
+        : account(constants.FUNDING_ACCOUNT_INDEX)
+
     const httpClient = new HttpClient(constants.THOR_URL)
     const thorClient = new ThorClient(httpClient)
-    const fullAmount = BigInt(amount.multipliedBy(constants.TOKEN_DECIMALS).toString())
+    const fullAmount = BigInt(args.amount.multipliedBy(constants.TOKEN_DECIMALS).toString())
+
     const latestBlock = await thorClient.blocks.getBestBlockCompressed()
-    const clauses = [clauseBuilder.transferToken(contract, address, fullAmount)]
-    const gasResult = await thorClient.gas.estimateGas(clauses, senderAddress, {gasPadding: 0.1})
-    const transactionBody = {
+    const clauses = [ clauseBuilder.transferToken(args.contract, args.receiver, fullAmount) ]
+    const gasResult = await thorClient.gas.estimateGas(
+      clauses,
+      sender.address,
+      { gasPadding: 0.1 }
+    )
+    const txBody = {
         chainTag: constants.THOR_CHAIN_TAG,
         blockRef: latestBlock !== null ? latestBlock.id.slice(0, 18) : '0x0',
         expiration: 32,
@@ -138,13 +156,14 @@ const doERC20Transfer = async (contract: string, address: string, amount: BigNum
         dependsOn: null,
         nonce: 12345678
     }
-    const rawNormalSigned = TransactionHandler.sign(transactionBody, senderPrivateKey).encoded
+    const rawNormalSigned = TransactionHandler.sign(txBody, sender.pk).encoded
     const send = await thorClient.transactions.sendRawTransaction(`0x${rawNormalSigned.toString('hex')}`)
     const txId = send.id
     console.log(`ERC20 transfer transaction ID: ${txId}`)
     const txModule = new TransactionsModule(thorClient)
     const waitTx = await txModule.waitForTransaction(txId, {intervalMs: constants.TX_RECEIPT_INTERVAL, timeoutMs: constants.TX_RECEIPT_TIMEOUT})
     const txReceipt = waitTx ?? (() => { throw new Error('Unable to get transaction receipt') })()
+    console.log(`txReceipt: ${JSON.stringify(txReceipt, null, 2)}`)
     console.log(`ERC20 transfer transaction reverted: ${txReceipt.reverted}`)
     if (txReceipt.reverted) {
         throw new Error(`ERC20 transfer transaction reverted: ${txId}`)
@@ -191,7 +210,11 @@ const getVTHOBalance = async (address: string): Promise<BigNumber> => {
  */
 const fundVTHO = async (address: string, amount: BigNumber) => {
     console.log(`Transferring ${amount} VTHO to ${address}`)
-    await doERC20Transfer(constants.VTHO_CONTRACT_ADDRESS, address, amount)
+    await doERC20Transfer({
+        contract: constants.VTHO_CONTRACT_ADDRESS,
+        receiver: address,
+        amount: amount,
+    })
 }
 
 /**
@@ -201,9 +224,12 @@ const fundVTHO = async (address: string, amount: BigNumber) => {
  */
 const fundB3TR = async (address: string, amount: BigNumber) => {
     console.log(`Transferring ${amount} B3TR to ${address}`)
-    await doERC20Transfer(constants.B3TR_CONTRACT_ADDRESS, address, amount)
+    await doERC20Transfer({
+        contract: constants.B3TR_CONTRACT_ADDRESS,
+        receiver: address,
+        amount: amount,
+    })
 }
-
 
 /**
  * Swap B3TR for VOT3
@@ -216,13 +242,22 @@ const swapB3TRForVOT3 = async (privateKey: Buffer, address: string, amount: BigN
     const httpClient = new HttpClient(constants.THOR_URL)
     const thorClient = new ThorClient(httpClient)
     // approve VOT3 contract to spend B3TR
-    const approveClause = clauseBuilder.functionInteraction(constants.B3TR_CONTRACT_ADDRESS,
+
+    const approveClause = clauseBuilder.functionInteraction(
+        constants.B3TR_CONTRACT_ADDRESS,
         coder.createInterface(ERC20_approve_abi).getFunction("approve") as FunctionFragment,
-        [constants.VOT3_CONTRACT_ADDRESS, amount.multipliedBy(constants.TOKEN_DECIMALS).toString()])
-    const stakeClause = clauseBuilder.functionInteraction(constants.VOT3_CONTRACT_ADDRESS,
+        [
+            constants.VOT3_CONTRACT_ADDRESS,
+            amount.multipliedBy(constants.TOKEN_DECIMALS).toString()
+        ]
+    )
+    const stakeClause = clauseBuilder.functionInteraction(
+        constants.VOT3_CONTRACT_ADDRESS,
         coder.createInterface(VOT3_stake_abi).getFunction("stake") as FunctionFragment,
-        [amount.multipliedBy(constants.TOKEN_DECIMALS).toString()])
+        [ amount.multipliedBy(constants.TOKEN_DECIMALS).toString() ]
+    )
     const clauses = [approveClause, stakeClause]
+
     const gasResult = await thorClient.gas.estimateGas(clauses, address, {gasPadding: 0.1})
     const latestBlock = await thorClient.blocks.getBestBlockCompressed()
     const transactionBody = {
@@ -250,7 +285,9 @@ const swapB3TRForVOT3 = async (privateKey: Buffer, address: string, amount: BigN
 
 /**
  * Seed an account to have a minimum balance of B3TR and VTHO
- * @param address Account address
+ * @param account_index
+ * @param min_b3tr
+ * @param min_vot3
  */
 const fundAccount = async (account_index: number, min_b3tr=constants.FUNDING_MIN_B3TR, min_vot3=constants.FUNDING_MIN_VOT3) => {
     const privateKey = getAccountPrivateKey(account_index)
@@ -299,6 +336,33 @@ const blockchainUtils = {
     fundB3TR,
     fundAccount,
     swapB3TRForVOT3,
-    getRndAccountIndex
+    getRndAccountIndex,
+    doERC20Transfer,
+    account,
 }
 export default blockchainUtils
+
+/**
+ * @param {string} contract - ERC20 contract address
+ * @param {BigNumber} amount - amount to transfer; e.g. BigNumber(2) will transfer 2 ERC20 tokens
+ * @param {string} - receiver address
+ * @param {Account} sender - sender account details that include acc index, address and private key
+ */
+export interface ERC20TransferArgs {
+    contract: string
+    amount: BigNumber
+    receiver: string
+    sender?: Account
+}
+
+/**
+ * @param {number} index - account index
+ * @param {string} address - wallet address
+ * @param {Buffer} pk - wallet private key;
+ *                      if you need string val instead of Buffer - call `.toString('hex')` on it
+ */
+export interface Account {
+    index: number,
+    address: string,
+    pk: Buffer
+}
