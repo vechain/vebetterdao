@@ -50,6 +50,9 @@ abstract contract GovernorUpgradeable is
 {
   using DoubleEndedQueue for DoubleEndedQueue.Bytes32Deque;
 
+  bytes32 public constant BALLOT_TYPEHASH =
+    keccak256("Ballot(uint256 proposalId,uint8 support,address voter,uint256 nonce)");
+
   struct ProposalCore {
     address proposer;
     uint256 roundIdVoteStart;
@@ -445,6 +448,28 @@ abstract contract GovernorUpgradeable is
   ) public virtual returns (uint256) {
     address voter = _msgSender();
     return _castVote(proposalId, voter, support, reason);
+  }
+
+  /**
+   * @dev See {IB3TRGovernor-castVoteBySig}.
+   */
+  function castVoteBySig(
+    uint256 proposalId,
+    uint8 support,
+    address voter,
+    bytes memory signature
+  ) public virtual returns (uint256) {
+    bool valid = SignatureChecker.isValidSignatureNow(
+      voter,
+      _hashTypedDataV4(keccak256(abi.encode(BALLOT_TYPEHASH, proposalId, support, voter, _useNonce(voter)))),
+      signature
+    );
+
+    if (!valid) {
+      revert GovernorInvalidSignature(voter);
+    }
+
+    return _castVote(proposalId, voter, support, "");
   }
 
   /**
