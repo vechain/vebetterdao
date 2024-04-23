@@ -33,13 +33,6 @@ abstract contract Settings is Initializable, X2EarnAppsUpgradeable {
   }
 
   /**
-   * @dev Update the base URI to retrieve the metadata of the x2earn apps
-   *
-   * @param baseURI_ the base URI for the contract
-   */
-  function setBaseURI(string memory baseURI_) external virtual override;
-
-  /**
    * @dev Internal function to update the base URI to retrieve the metadata of the x2earn apps
    *
    * @param baseURI_ the base URI for the contract

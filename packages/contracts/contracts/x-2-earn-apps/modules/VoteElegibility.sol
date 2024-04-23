@@ -101,7 +101,9 @@ abstract contract VoteElegibility is Initializable, X2EarnAppsUpgradeable {
    * @param appId the hashed name of the app
    * @param timepoint the timepoint when the app should be checked for elegibility
    */
-  function isElegible(bytes32 appId, uint256 timepoint) public view override exists(appId) returns (bool) {
+  function isElegible(bytes32 appId, uint256 timepoint) public view override returns (bool) {
+    require(appExists(appId), "XApps: app does not exist");
+
     VoteElegibilityStorage storage $ = _getVoteElegibilityStorage();
 
     uint48 currentTimepoint = clock();
@@ -112,7 +114,9 @@ abstract contract VoteElegibility is Initializable, X2EarnAppsUpgradeable {
     return $._isAppElegibleCheckpoints[appId].upperLookupRecent(SafeCast.toUint48(timepoint)) == 1;
   }
 
-  function isElegibleNow(bytes32 appId) public view exists(appId) returns (bool) {
+  function isElegibleNow(bytes32 appId) public view override returns (bool) {
+    require(appExists(appId), "XApps: app does not exist");
+
     VoteElegibilityStorage storage $ = _getVoteElegibilityStorage();
 
     return $._isAppElegibleCheckpoints[appId].latest() == 1;

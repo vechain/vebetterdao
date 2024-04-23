@@ -6,6 +6,7 @@ import { DataTypes } from "./libraries/DataTypes.sol";
 import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { Administration } from "./x-2-earn-apps/modules/Administration.sol";
+import { AppsStorage } from "./x-2-earn-apps/modules/AppsStorage.sol";
 import { Settings } from "./x-2-earn-apps/modules/Settings.sol";
 import { VoteElegibility } from "./x-2-earn-apps/modules/VoteElegibility.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -17,6 +18,7 @@ contract X2EarnApps is
   Administration,
   Settings,
   VoteElegibility,
+  AppsStorage,
   AccessControlUpgradeable,
   UUPSUpgradeable
 {
@@ -30,6 +32,7 @@ contract X2EarnApps is
    */
   function initialize(string memory baseURI_, address[] memory _admins) public initializer {
     __Administration_init();
+    __AppsStorage_init();
     __Settings_init(baseURI_);
     __VoteElegibility_init();
     __UUPSUpgradeable_init();
@@ -41,7 +44,7 @@ contract X2EarnApps is
   }
 
   // ---------- Overrides ------------ //
-  function setBaseURI(string memory baseURI_) external override(IX2EarnApps, Settings) onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setBaseURI(string memory baseURI_) external override onlyRole(DEFAULT_ADMIN_ROLE) {
     _setBaseURI(baseURI_);
   }
 

@@ -7,33 +7,6 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 import { DataTypes } from "../libraries/DataTypes.sol";
 
 abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
-  /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.X2EarnAppsUpgradeable
-  struct X2EarnAppsStorage {
-    // Mapping from app ID to app
-    mapping(bytes32 => DataTypes.App) _apps;
-    // List of app IDs to enable retrieval of all _apps
-    bytes32[] _appIds;
-  }
-
-  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnApps.X2EarnAppsUpgradeable")) - 1)) & ~bytes32(uint256(0xff))
-  bytes32 private constant X2EarnAppsStorageLocation =
-    0xb423b41d65418e0143bc6b14b268b74bdbc6d11d6910765864262835c534cb00;
-
-  function _getX2EarnAppsStorage() internal pure returns (X2EarnAppsStorage storage $) {
-    assembly {
-      $.slot := X2EarnAppsStorageLocation
-    }
-  }
-
-  modifier exists(bytes32 appId) {
-    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
-    require($._apps[appId].receiverAddress != address(0), "App does not exist");
-    _;
-  }
-
-  /**
-   * @dev Sets the value for {baseURI}
-   */
   function __XApps_init() internal onlyInitializing {
     __XApps_init_unchained();
   }
@@ -53,45 +26,7 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
     require(receiverAddress != address(0), "XApps: receiverAddress is the zero address");
     require(admin != address(0), "XApps: admin is the zero address");
 
-    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
-    bytes32 id = hashName(appName);
-
-    require($._apps[id].receiverAddress == address(0), "App with this ID already exists");
-
-    // Store the new app
-    $._apps[id] = DataTypes.App(id, receiverAddress, appName, metadataURI, clock(), block.timestamp);
-    $._appIds.push(id);
-    _setAppAdmin(id, admin);
-    _pushAppToEligbleApps(id);
-
-    emit AppAdded(id, receiverAddress, appName, true);
-  }
-
-  /**
-   * @dev Update the metadata URI of the app
-   *
-   * @param appId the hashed name of the app
-   * @param metadataURI the metadata URI of the app
-   */
-  function updateAppMetadata(bytes32 appId, string memory metadataURI) external exists(appId) {
-    _authorizeAppMetadataUpdate(appId);
-    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
-
-    $._apps[appId].metadataURI = metadataURI;
-  }
-
-  /**
-   * @dev Update the address where the x2earn app receives allocation funds
-   *
-   * @param appId the hashed name of the app
-   * @param newReceiverAddress the address of the new receiver
-   */
-  function updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) external exists(appId) {
-    _authorizeAppManagement(appId);
-
-    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
-
-    $._apps[appId].receiverAddress = newReceiverAddress;
+    _addApp(receiverAddress, admin, appName, metadataURI);
   }
 
   // ---------- Getters ---------- //
@@ -104,50 +39,11 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
     return Time.blockNumber();
   }
 
-  function appExists(bytes32 appId) public view override returns (bool) {
-    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
-
-    return $._apps[appId].receiverAddress != address(0);
-  }
-
+  /**
+   * @dev Hashes the name of the app to be used as the app ID.
+   */
   function hashName(string memory appName) public pure returns (bytes32) {
     return keccak256(abi.encodePacked(appName));
-  }
-
-  // Function to retrieve an app by ID
-  function app(bytes32 appId) public view virtual exists(appId) returns (DataTypes.App memory) {
-    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
-    return $._apps[appId];
-  }
-
-  // Function to retrieve all apps
-  function apps() public view returns (DataTypes.App[] memory) {
-    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
-
-    DataTypes.App[] memory allApps = new DataTypes.App[]($._appIds.length);
-    uint256 length = $._appIds.length;
-    for (uint i = 0; i < length; i++) {
-      allApps[i] = $._apps[$._appIds[i]];
-    }
-    return allApps;
-  }
-
-  function getAppReceiverAddress(bytes32 appId) public view virtual returns (address) {
-    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
-
-    return $._apps[appId].receiverAddress;
-  }
-
-  function appURI(bytes32 appId) public view exists(appId) returns (string memory) {
-    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
-
-    return string(abi.encodePacked(baseURI(), $._apps[appId].metadataURI));
-  }
-
-  function createdAt(bytes32 appId) public view override exists(appId) returns (uint48) {
-    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
-
-    return $._apps[appId].createdAt;
   }
 
   // --- To be implemented by the inheriting contract --- //
@@ -155,6 +51,25 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   function _pushAppToEligbleApps(bytes32 appId) internal virtual;
 
   function _setAppAdmin(bytes32 appId, address admin) internal virtual;
+
+  function appExists(bytes32 appId) public view virtual returns (bool);
+
+  /**
+   * @dev Function that should add an app. Called by {addApp}.
+   *
+   * @param receiverAddress the address of the app
+   * @param admin the address of the admin
+   * @param appName the name of the app
+   * @param metadataURI the metadata URI of the app
+   *
+   * Emits a {AppAdded} event.
+   */
+  function _addApp(
+    address receiverAddress,
+    address admin,
+    string memory appName,
+    string memory metadataURI
+  ) internal virtual;
 
   function baseURI() public view virtual returns (string memory);
 
