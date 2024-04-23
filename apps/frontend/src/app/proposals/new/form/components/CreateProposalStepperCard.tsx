@@ -23,8 +23,8 @@ type CreateProposalStep = {
 }
 
 const steps: CreateProposalStep[] = [
-  { key: "basicInfo", title: "Basic information" },
-  { key: "functions", title: "Functions to execute" },
+  { key: "creationMethod", title: "Creation method" },
+  { key: "basicInfoAndFunctions", title: "Basic information and functions" },
   { key: "additionalInfo", title: "Additional information" },
   { key: "votingSessionDate", title: "Voting session date" },
   { key: "previewAndPublish", title: "Preview and publish" },

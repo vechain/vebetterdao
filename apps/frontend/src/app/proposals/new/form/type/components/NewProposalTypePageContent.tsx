@@ -7,7 +7,7 @@ const Steps: (StepCardProps & {
   route: string
 })[] = [
   {
-    route: "/proposals/new/form/scratch",
+    route: "/proposals/new/form/info-and-functions",
     stepImageSrc: "/images/sign.svg",
     stepNumber: 1,
     stepTitle: "Create a proposal from scratch",

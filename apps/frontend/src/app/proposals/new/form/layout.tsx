@@ -5,7 +5,7 @@ import { CreateProposalStepperCard } from "./components/CreateProposalStepperCar
 type Props = {
   children: React.ReactNode
 }
-export default function FormProposalLayout({ children }: Props) {
+export default function FormProposalLayout({ children }: Readonly<Props>) {
   return (
     <Grid
       templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(4, 1fr)"]}
