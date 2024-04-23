@@ -1,0 +1,64 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import { DataTypes } from "../../libraries/DataTypes.sol";
+import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
+
+abstract contract Settings is Initializable, X2EarnAppsUpgradeable {
+  /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.Settings
+  struct SettingsStorage {
+    string _baseURI;
+  }
+
+  //TODO: change this to the correct storage location
+  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnApps.Settings")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 private constant SettingsStorageLocation = 0xd0d069a754be3c8727b213bc00d418e344adac8f83a7b6d5e0e426a9ddbe0700;
+
+  function _getSettingsStorage() internal pure returns (SettingsStorage storage $) {
+    assembly {
+      $.slot := SettingsStorageLocation
+    }
+  }
+
+  /**
+   * @dev Sets the value for {baseURI}
+   */
+  function __Settings_init(string memory baseURI_) internal onlyInitializing {
+    __Settings_init_unchained(baseURI_);
+  }
+
+  function __Settings_init_unchained(string memory baseURI_) internal onlyInitializing {
+    SettingsStorage storage $ = _getSettingsStorage();
+    $._baseURI = baseURI_;
+  }
+
+  /**
+   * @dev Update the base URI to retrieve the metadata of the x2earn apps
+   *
+   * @param baseURI_ the base URI for the contract
+   */
+  function setBaseURI(string memory baseURI_) external virtual {
+    _setBaseURI(baseURI_);
+  }
+
+  /**
+   * @dev Internal function to update the base URI to retrieve the metadata of the x2earn apps
+   *
+   * @param baseURI_ the base URI for the contract
+   */
+  function _setBaseURI(string memory baseURI_) internal {
+    SettingsStorage storage $ = _getSettingsStorage();
+
+    $._baseURI = baseURI_;
+  }
+
+  /**
+   * @dev Returns the base URI to retrieve the metadata of the x2earn apps
+   */
+  function baseURI() public view virtual override returns (string memory) {
+    SettingsStorage storage $ = _getSettingsStorage();
+
+    return $._baseURI;
+  }
+}

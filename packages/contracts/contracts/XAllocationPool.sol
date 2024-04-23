@@ -13,6 +13,7 @@ import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/
 import { IB3TR } from "./interfaces/IB3TR.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import { IXApps } from "./interfaces/IXApps.sol";
 
 contract XAllocationPool is
   Initializable,
@@ -30,6 +31,7 @@ contract XAllocationPool is
     IEmissions _emissions;
     IB3TR b3tr;
     ITreasury treasury;
+    IXApps x2EarnApps;
     mapping(bytes32 => mapping(uint256 => bool)) claimedRewards;
   }
 
@@ -101,6 +103,7 @@ contract XAllocationPool is
 
     require(!$.claimedRewards[appId][roundId], "XAllocationPool: rewards already claimed for this app and round");
     require(!xAllocationVoting().isActive(roundId), "XAllocationPool: round not ended yet");
+    require($.x2EarnApps.appExists(appId), "XAllocationPool: app does not exist");
 
     (uint256 amountToClaim, uint256 unallocatedAmount) = claimableAmount(roundId, appId);
     require(amountToClaim > 0, "XAllocationPool: no rewards available for this app");
@@ -108,7 +111,7 @@ contract XAllocationPool is
     // update the claimedRewards mapping
     $.claimedRewards[appId][roundId] = true;
 
-    address receiverAddress = xAllocationVoting().getAppReceiverAddress(appId);
+    address receiverAddress = $.x2EarnApps.getAppReceiverAddress(appId);
 
     //check that contract has enough funds to pay the reward
     require($.b3tr.balanceOf(address(this)) >= (amountToClaim + unallocatedAmount), "Insufficient funds");
@@ -246,7 +249,7 @@ contract XAllocationPool is
     );
 
     uint256 total = _emissionAmount(roundId);
-    bytes32[] memory eligibleApps = xAllocationVoting().getRoundApps(roundId);
+    bytes32[] memory eligibleApps = xAllocationVoting().getAppIds(roundId);
 
     uint256 available = (total * xAllocationVoting().getRoundBaseAllocationPercentage(roundId)) / 100;
 
@@ -336,5 +339,10 @@ contract XAllocationPool is
   function b3tr() public view returns (IB3TR) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     return $.b3tr;
+  }
+
+  function x2EarnApps() public view returns (IXApps) {
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    return $.x2EarnApps;
   }
 }

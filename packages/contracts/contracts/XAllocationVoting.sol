@@ -11,6 +11,7 @@ import "./x-allocation-voting-governance/modules/XAllocationEarningsSettings.sol
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import { DataTypes } from "./libraries/DataTypes.sol";
 
 contract XAllocationVoting is
   Initializable,
@@ -50,7 +51,7 @@ contract XAllocationVoting is
     address emissions;
     address[] admins;
     address upgrader;
-    string xAppsBaseURI;
+    IXApps x2EarnAppsAddress;
     uint256 baseAllocationPercentage;
     uint256 appSharesCap;
   }
@@ -70,7 +71,7 @@ contract XAllocationVoting is
     __GovernorXAllocationVotesCounting_init(data.voterRewards);
     __GovernorVotes_init(data.vot3Token);
     __GovernorVotesQuorumFraction_init(data.quorumPercentage);
-    __XApps_init(data.xAppsBaseURI);
+    __XApps_init(data.x2EarnAppsAddress);
     __XAllocationEarningsSettings_init(data.baseAllocationPercentage, data.appSharesCap);
     __AccessControl_init();
     __UUPSUpgradeable_init();
@@ -132,18 +133,10 @@ contract XAllocationVoting is
     // Using a named return variable to avoid stack too deep errors
   }
 
-  function setVotingElegibility(bytes32 appId, bool isElegible) public override onlyRole(DEFAULT_ADMIN_ROLE) {
-    super.setVotingElegibility(appId, isElegible);
-  }
-
   function setAdminRole(address _newAdmin) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(_newAdmin != address(0), "XAllocationVoting: new admin is the zero address");
 
     _grantRole(DEFAULT_ADMIN_ROLE, _newAdmin);
-  }
-
-  function setBaseURI(string memory baseURI_) external onlyRole(DEFAULT_ADMIN_ROLE) {
-    _setBaseURI(baseURI_);
   }
 
   function setAppSharesCap(uint256 appSharesCap_) external virtual override onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -157,23 +150,6 @@ contract XAllocationVoting is
   }
 
   // ---------- Getters ---------- //
-
-  /**
-   * This function could not be efficient with a large number of apps
-   */
-  function getRoundAppsWithDetails(uint256 roundId) public view returns (App[] memory) {
-    XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
-    XAppsStorage storage $xAppsStorage = _getXAppsStorageStorage();
-
-    bytes32[] memory appsInRound = $._appsElegibleForVoting[roundId];
-    App[] memory allApps = new App[](appsInRound.length);
-
-    uint256 length = appsInRound.length;
-    for (uint i = 0; i < length; i++) {
-      allApps[i] = $xAppsStorage._apps[appsInRound[i]];
-    }
-    return allApps;
-  }
 
   /**
    * Returns the quorum for a given round
@@ -204,10 +180,6 @@ contract XAllocationVoting is
     return super.quorum(blockNumber);
   }
 
-  function state(uint256 roundId) public view override(XAllocationVotingGovernor) returns (RoundState) {
-    return super.state(roundId);
-  }
-
   function supportsInterface(
     bytes4 interfaceId
   ) public view override(AccessControlUpgradeable, XAllocationVotingGovernor) returns (bool) {
@@ -217,20 +189,4 @@ contract XAllocationVoting is
   // ---------- Authorizations ------------ //
 
   function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
-
-  function _authorizeAppMetadataUpdate(bytes32 appId) internal view override {
-    require(
-      hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || isAppModerator(appId, msg.sender) || isAppAdmin(appId, msg.sender),
-      "XAllocationVoting: sender must be an admin or app moderator"
-    );
-  }
-
-  function _authorizeAppManagement(bytes32 appId) internal view override {
-    require(
-      hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || isAppAdmin(appId, msg.sender),
-      "XAllocationVoting: sender must be an admin"
-    );
-  }
-
-  function _authorizeAddApp() internal view override onlyRole(DEFAULT_ADMIN_ROLE) {}
 }

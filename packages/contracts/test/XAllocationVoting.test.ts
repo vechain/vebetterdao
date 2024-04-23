@@ -1099,7 +1099,7 @@ describe("X-Allocation Voting", function () {
       expect(avaiableApps[0]).to.equal(app1)
       expect(avaiableApps[1]).to.equal(app2)
 
-      let appsVotedInSpecificRound = await xAllocationVoting.getRoundApps(roundId)
+      let appsVotedInSpecificRound = await xAllocationVoting.getAppIds(roundId)
       expect(appsVotedInSpecificRound.length).to.equal(2)
       expect(appsVotedInSpecificRound[0]).to.equal(app1)
       expect(appsVotedInSpecificRound[1]).to.equal(app2)
@@ -1401,8 +1401,8 @@ describe("X-Allocation Voting", function () {
         .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       let round1 = await startNewAllocationRound()
-      let getRoundApps = await xAllocationVoting.getRoundApps(round1)
-      expect(getRoundApps.length).to.equal(2n)
+      let getAppIds = await xAllocationVoting.getAppIds(round1)
+      expect(getAppIds.length).to.equal(2n)
 
       // add new app before round ends
       await xAllocationVoting
@@ -1415,8 +1415,8 @@ describe("X-Allocation Voting", function () {
 
       // 4 apps in round2
       let round2 = await startNewAllocationRound()
-      getRoundApps = await xAllocationVoting.getRoundApps(round2)
-      expect(getRoundApps.length).to.equal(4n)
+      getAppIds = await xAllocationVoting.getAppIds(round2)
+      expect(getAppIds.length).to.equal(4n)
 
       // remove apps before round ends
       await xAllocationVoting.setVotingElegibility(app1, false)
@@ -1425,8 +1425,8 @@ describe("X-Allocation Voting", function () {
 
       // 2 app in round 3
       let round3 = await startNewAllocationRound()
-      getRoundApps = await xAllocationVoting.getRoundApps(round3)
-      expect(getRoundApps.length).to.equal(2n)
+      getAppIds = await xAllocationVoting.getAppIds(round3)
+      expect(getAppIds.length).to.equal(2n)
 
       // add another app before round ends
       await xAllocationVoting
@@ -1436,16 +1436,16 @@ describe("X-Allocation Voting", function () {
 
       // 3 apps in round 4
       let round4 = await startNewAllocationRound()
-      getRoundApps = await xAllocationVoting.getRoundApps(round4)
-      expect(getRoundApps.length).to.equal(3n)
+      getAppIds = await xAllocationVoting.getAppIds(round4)
+      expect(getAppIds.length).to.equal(3n)
 
       // I can still get old rounds
-      getRoundApps = await xAllocationVoting.getRoundApps(round1)
-      expect(getRoundApps.length).to.equal(2n)
-      getRoundApps = await xAllocationVoting.getRoundApps(round2)
-      expect(getRoundApps.length).to.equal(4n)
-      getRoundApps = await xAllocationVoting.getRoundApps(round3)
-      expect(getRoundApps.length).to.equal(2n)
+      getAppIds = await xAllocationVoting.getAppIds(round1)
+      expect(getAppIds.length).to.equal(2n)
+      getAppIds = await xAllocationVoting.getAppIds(round2)
+      expect(getAppIds.length).to.equal(4n)
+      getAppIds = await xAllocationVoting.getAppIds(round3)
+      expect(getAppIds.length).to.equal(2n)
     })
 
     it("I can fetch all apps with details available for voting", async function () {
@@ -1463,10 +1463,10 @@ describe("X-Allocation Voting", function () {
         .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       let round1 = await startNewAllocationRound()
-      let getRoundApps = await xAllocationVoting.getRoundApps(round1)
-      expect(getRoundApps.length).to.equal(2n)
+      let getAppIds = await xAllocationVoting.getAppIds(round1)
+      expect(getAppIds.length).to.equal(2n)
 
-      let apps = await xAllocationVoting.getRoundAppsWithDetails(round1)
+      let apps = await xAllocationVoting.getApps(round1)
       expect(apps.length).to.equal(2n)
       expect(apps[0].id).to.equal(app1)
       expect(apps[1].id).to.equal(app2)

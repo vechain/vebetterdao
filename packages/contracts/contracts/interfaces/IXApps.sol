@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
+import { DataTypes } from "../libraries/DataTypes.sol";
+
 interface IXApps {
   /**
    * @dev The clock was incorrectly modified.
@@ -12,9 +14,43 @@ interface IXApps {
    */
   error ERC5805FutureLookup(uint256 timepoint, uint48 clock);
 
+  /**
+   * @dev Event fired when a new app is added.
+   */
   event AppAdded(bytes32 indexed id, address addr, string name, bool appAvailableForAllocationVoting);
 
+  /**
+   * @dev Event fired when an app elegibility for allocation voting changes.
+   */
   event VotingElegibilityChanged(bytes32 indexed appId, bool isAvailable);
 
+  /**
+   * @dev Generates the hash of the app name to be used as the app id.
+   *
+   * @param name the name of the app
+   */
   function hashName(string memory name) external pure returns (bytes32);
+
+  function allElegibleApps() external view returns (bytes32[] memory);
+
+  function appExists(bytes32 appId) external view returns (bool);
+
+  function isElegible(bytes32 appId, uint256 timepoint) external view returns (bool);
+
+  function isElegibleNow(bytes32 appId) external view returns (bool);
+
+  function getAppReceiverAddress(bytes32 appId) external view returns (address);
+
+  function createdAt(bytes32 appId) external view returns (uint48);
+
+  function app(bytes32 appId) external view returns (DataTypes.App memory);
+
+  /**
+   * @dev Update the base URI to retrieve the metadata of the x2earn apps
+   *
+   * @param baseUri the base URI for the contract
+   */
+  function setBaseUri(string memory baseUri) external;
+
+  function addAppModerator(bytes32 appId, address moderator) external;
 }

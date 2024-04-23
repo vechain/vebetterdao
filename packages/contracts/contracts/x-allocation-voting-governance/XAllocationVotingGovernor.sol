@@ -180,11 +180,6 @@ abstract contract XAllocationVotingGovernor is
     return $._b3trGovernor;
   }
 
-  function getRoundApps(uint256 roundId) public view override returns (bytes32[] memory) {
-    XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
-    return $._appsElegibleForVoting[roundId];
-  }
-
   function currentRoundId() public view virtual override returns (uint256) {
     XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
     return $._roundCount;

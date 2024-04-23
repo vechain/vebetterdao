@@ -245,7 +245,7 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
 
   function quorumReached(uint256 roundId) external view returns (bool);
 
-  function getRoundApps(uint256 roundId) external view returns (bytes32[] memory);
+  function getAppIds(uint256 roundId) external view returns (bytes32[] memory);
 
   function isEligibleForVote(bytes32 appId, uint256 roundId) external view returns (bool);
 
@@ -254,8 +254,6 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   function isFinalized(uint256 roundId) external view returns (bool);
 
   function latestSucceededRoundId(uint256 roundId) external view returns (uint256);
-
-  function getAppReceiverAddress(bytes32 appId) external view returns (address);
 
   function hasVotedOnce(address user) external view returns (bool);
 
