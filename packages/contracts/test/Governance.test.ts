@@ -1,4 +1,4 @@
-import { ethers } from "hardhat"
+import { ethers, network } from "hardhat"
 import { expect } from "chai"
 import {
   createProposal,
@@ -20,6 +20,8 @@ import { describe, it } from "mocha"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { B3TRGovernor } from "../typechain-types"
+import { signTypedData } from "./helpers/EIP712"
+import { EIP712Domain, EIP712TypeDefinition } from "./helpers/EIP712.types"
 
 describe("Governor and TimeLock", function () {
   describe("Governor deployment", function () {
@@ -93,10 +95,11 @@ describe("Governor and TimeLock", function () {
       ])
       const description = "Upgrading Governance contracts"
       const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
+      const currentRoundId = await xAllocationVoting.currentRoundId()
 
       const tx = await governor
-        .connect(owner) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
-        .propose([await governor.getAddress()], [0], [encodedFunctionCall], description)
+        .connect(owner)
+        .propose([await governor.getAddress()], [0], [encodedFunctionCall], description, currentRoundId + 1n)
 
       const proposalId = await getProposalIdFromTx(tx)
       await waitForProposalToBeActive(proposalId)
@@ -122,7 +125,7 @@ describe("Governor and TimeLock", function () {
 
       // create a new proposal
       const newTx = await newGovernor
-        .connect(owner) //@ts-ignore
+        .connect(owner)
         .propose(
           [await b3tr.getAddress()],
           [0],
@@ -347,7 +350,7 @@ describe("Governor and TimeLock", function () {
       const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
       const tx = await governor
-        .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+        .connect(proposer)
         .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
           gasLimit: 10_000_000,
         })
@@ -406,11 +409,9 @@ describe("Governor and TimeLock", function () {
       const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n
       await catchRevert(
-        governor
-          .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
-          .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
-            gasLimit: 10_000_000,
-          }),
+        governor.connect(proposer).propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
+          gasLimit: 10_000_000,
+        }),
       )
     })
 
@@ -435,7 +436,7 @@ describe("Governor and TimeLock", function () {
       const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 2n // starts 2 rounds from now
       const tx = await governor
-        .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+        .connect(proposer)
         .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
           gasLimit: 10_000_000,
         })
@@ -498,7 +499,7 @@ describe("Governor and TimeLock", function () {
       await bootstrapAndStartEmissions()
 
       const tx = await governor
-        .connect(proposer) //@ts-ignore
+        .connect(proposer)
         .propose(
           [await b3tr.getAddress()],
           [0],
@@ -633,6 +634,8 @@ describe("Governor and TimeLock", function () {
       // Start emissions
       await bootstrapAndStartEmissions()
 
+      const currentRoundId = await xAllocationVoting.currentRoundId()
+
       // old propose() function without the voteStartInRound parameter
       const tx = await governor
         .connect(proposer) //@ts-ignore
@@ -641,6 +644,7 @@ describe("Governor and TimeLock", function () {
           [0],
           [B3trContract.interface.encodeFunctionData("tokenDetails", [])],
           "Creating some random proposal",
+          currentRoundId + 1n,
         )
 
       const proposalId = await getProposalIdFromTx(tx)
@@ -678,7 +682,7 @@ describe("Governor and TimeLock", function () {
       let voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
       await expect(
         governor
-          .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+          .connect(proposer)
           .propose(
             [await b3tr.getAddress()],
             [0],
@@ -706,7 +710,7 @@ describe("Governor and TimeLock", function () {
 
       await expect(
         governor
-          .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+          .connect(proposer)
           .propose(
             [await b3tr.getAddress()],
             [0],
@@ -741,7 +745,7 @@ describe("Governor and TimeLock", function () {
       const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
       const tx = await governor
-        .connect(proposer) //@ts-ignore
+        .connect(proposer)
         .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
           gasLimit: 10_000_000,
         })
@@ -784,11 +788,9 @@ describe("Governor and TimeLock", function () {
 
       // Now we can create a new proposal
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
-      const tx = await governor
-        .connect(proposer) //@ts-ignore
-        .propose([], [], [], "", voteStartsInRoundId.toString(), {
-          gasLimit: 10_000_000,
-        })
+      const tx = await governor.connect(proposer).propose([], [], [], "", voteStartsInRoundId.toString(), {
+        gasLimit: 10_000_000,
+      })
 
       const proposeReceipt = await tx.wait()
       expect(proposeReceipt).not.to.be.null
@@ -854,7 +856,7 @@ describe("Governor and TimeLock", function () {
       // Parameters must have the same length
       await catchRevert(
         governor
-          .connect(proposer) //@ts-ignore
+          .connect(proposer)
           .propose([address], [0, 1], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
             gasLimit: 10_000_000,
           }),
@@ -862,7 +864,7 @@ describe("Governor and TimeLock", function () {
 
       await catchRevert(
         governor
-          .connect(proposer) //@ts-ignore
+          .connect(proposer)
           .propose([address, address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
             gasLimit: 10_000_000,
           }),
@@ -870,7 +872,7 @@ describe("Governor and TimeLock", function () {
 
       await catchRevert(
         governor
-          .connect(proposer) //@ts-ignore
+          .connect(proposer)
           .propose([address], [0], [encodedFunctionCall, encodedFunctionCall], "", voteStartsInRoundId.toString(), {
             gasLimit: 10_000_000,
           }),
@@ -898,7 +900,7 @@ describe("Governor and TimeLock", function () {
       const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
       const tx = await governor
-        .connect(proposer) //@ts-ignore
+        .connect(proposer)
         .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
           gasLimit: 10_000_000,
         })
@@ -943,11 +945,9 @@ describe("Governor and TimeLock", function () {
       expect(currentRoundId).to.eql(0n)
 
       await expect(
-        governor
-          .connect(proposer) //@ts-ignore
-          .propose([address], [0], [encodedFunctionCall], "", 1n, {
-            gasLimit: 10_000_000,
-          }),
+        governor.connect(proposer).propose([address], [0], [encodedFunctionCall], "", 1n, {
+          gasLimit: 10_000_000,
+        }),
       ).to.be.reverted
     })
 
@@ -971,19 +971,15 @@ describe("Governor and TimeLock", function () {
       const roundToStart = (await xAllocationVoting.currentRoundId()) + 2n
 
       await expect(
-        governor
-          .connect(proposer) //@ts-ignore
-          .propose([address], [0], [encodedFunctionCall], "", roundToStart, {
-            gasLimit: 10_000_000,
-          }),
+        governor.connect(proposer).propose([address], [0], [encodedFunctionCall], "", roundToStart, {
+          gasLimit: 10_000_000,
+        }),
       ).to.not.be.reverted
 
       await expect(
-        governor
-          .connect(proposer) //@ts-ignore
-          .propose([address], [0], [encodedFunctionCall], "", roundToStart, {
-            gasLimit: 10_000_000,
-          }),
+        governor.connect(proposer).propose([address], [0], [encodedFunctionCall], "", roundToStart, {
+          gasLimit: 10_000_000,
+        }),
       ).to.be.reverted
     })
 
@@ -1007,20 +1003,16 @@ describe("Governor and TimeLock", function () {
       const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
       let voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) - 1n // starts in previous round
       await catchRevert(
-        governor
-          .connect(proposer) //@ts-ignore
-          .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
-            gasLimit: 10_000_000,
-          }),
+        governor.connect(proposer).propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
+          gasLimit: 10_000_000,
+        }),
       )
 
       voteStartsInRoundId = await xAllocationVoting.currentRoundId() // starts in current round
       await catchRevert(
-        governor
-          .connect(proposer) //@ts-ignore
-          .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
-            gasLimit: 10_000_000,
-          }),
+        governor.connect(proposer).propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
+          gasLimit: 10_000_000,
+        }),
       )
     })
 
@@ -1181,7 +1173,7 @@ describe("Governor and TimeLock", function () {
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 2n // starts 2 rounds from now
       await expect(
         governor
-          .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+          .connect(proposer)
           .propose(
             [address],
             [0],
@@ -1197,7 +1189,7 @@ describe("Governor and TimeLock", function () {
       // with proposer suffix but bad address part (XYZ are not a valid hex char)
       await expect(
         governor
-          .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+          .connect(proposer)
           .propose(
             [address],
             [0],
@@ -1213,7 +1205,7 @@ describe("Governor and TimeLock", function () {
       // with wrong suffix
       await expect(
         governor
-          .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+          .connect(proposer)
           .propose(
             [address],
             [0],
@@ -1229,7 +1221,7 @@ describe("Governor and TimeLock", function () {
       // with protection via proposer suffix but wrong proposer
       await expect(
         governor
-          .connect(proposer) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
+          .connect(proposer)
           .propose(
             [address],
             [0],
@@ -1380,7 +1372,7 @@ describe("Governor and TimeLock", function () {
       //event exists
       expect(decodedLogs?.name).to.eql("VoteCast")
       // voter
-      expect(decodedLogs?.args[0]).to.eql(await newVoter.getAddress())
+      expect(decodedLogs?.args[0]).to.eql(newVoter.address)
       // proposal id
       expect(decodedLogs?.args[1]).to.eql(proposalId)
       // support
@@ -1730,6 +1722,288 @@ describe("Governor and TimeLock", function () {
       const votes = await governor.proposalVotes(proposalId)
       // sqrt(1000) * 3 = 94.868329937 - scaled to 9 decimals
       expect(votes[1]).to.eql(power1 + power2 + power3)
+    })
+
+    it("Can cast vote with signature", async function () {
+      const { governor, otherAccounts, b3tr, B3trContract } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      const voter = otherAccounts[0]
+      await getVot3Tokens(voter, "1000")
+      await waitForNextBlock()
+
+      // Create a proposal
+      const tx = await createProposal(
+        b3tr,
+        B3trContract,
+        voter,
+        description + ` ${this.test?.title}`,
+        functionToCall,
+        [],
+        false,
+      ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
+      const proposalId = await getProposalIdFromTx(tx)
+      // wait
+      await waitForProposalToBeActive(proposalId)
+
+      // vote
+      // Create an EIP712 domainSeparator
+      // https://eips.ethereum.org/EIPS/eip-712#definition-of-domainseparator
+      const domainName = "B3TRGovernor" // the user readable name of signing domain, i.e. the name of the DApp or the protocol.
+      const signatureVersion = "1" // the current major version of the signing domain. Signatures from different versions are not compatible.
+      const chainId = network.config.chainId as number // the EIP-155 chain id. The user-agent should refuse signing if it does not match the currently active chain.
+      // The typeHash is designed to turn into a compile time constant in Solidity. For example:
+      // bytes32 constant MAIL_TYPEHASH = keccak256("Mail(address from,address to,string contents)");
+      // https://eips.ethereum.org/EIPS/eip-712#rationale-for-typehash
+      // const typeHash = "Ballot(uint256 proposalId,uint8 support,address voter,uint256 nonce)"
+      // const argumentTypeHash = ethers.keccak256(ethers.toUtf8Bytes(typeHash)) // convert to byteslike, then hash it
+
+      // https://eips.ethereum.org/EIPS/eip-712#specification-of-the-eth_signtypeddata-json-rpc
+      const types: EIP712TypeDefinition = {
+        Ballot: [
+          { name: "proposalId", type: "uint256" },
+          { name: "support", type: "uint8" },
+          { name: "voter", type: "address" },
+          { name: "nonce", type: "uint256" },
+        ],
+      }
+
+      const domain: EIP712Domain = {
+        name: domainName,
+        version: signatureVersion,
+        chainId: chainId,
+        verifyingContract: await governor.getAddress(),
+      }
+
+      const ballot = {
+        proposalId: proposalId,
+        support: 1,
+        voter: voter.address,
+        nonce: await governor.nonces(voter.address),
+      }
+
+      const signature = await signTypedData(domain, types, ballot, voter)
+
+      const voteTx = await governor.connect(voter).castVoteBySig(proposalId, 1, voter.address, signature)
+
+      expect(await governor.hasVoted(proposalId, voter.address)).to.be.true
+
+      const proposeReceipt = await voteTx.wait()
+      const event = proposeReceipt?.logs[0]
+      const decodedLogs = governor.interface.parseLog({
+        topics: [...(event?.topics as string[])],
+        data: event ? event.data : "",
+      })
+
+      //event exists
+      expect(decodedLogs?.name).to.eql("VoteCast")
+      // voter
+      expect(decodedLogs?.args[0]).to.eql(voter.address)
+      // proposal id
+      expect(decodedLogs?.args[1]).to.eql(proposalId)
+      // support
+      expect(decodedLogs?.args[2].toString()).to.eql("1")
+      // votes
+      expect(decodedLogs?.args[3].toString()).to.eql("1000000000000000000000")
+      // power
+      expect(decodedLogs?.args[4].toString()).to.eql("31622776601000000000")
+
+      // wait
+      await waitForVotingPeriodToEnd(proposalId)
+
+      // Check if quorum is calculated correctly
+      const isQuorumReached = await governor.quorumReached(proposalId)
+      expect(isQuorumReached).to.equal(true)
+    })
+
+    it("Another user can broadcast a vote on behalf of a voter", async function () {
+      const { governor, otherAccounts, b3tr, B3trContract } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      const voteSender = otherAccounts[1]
+      const voter = otherAccounts[0]
+      await getVot3Tokens(voter, "1000")
+      await waitForNextBlock()
+
+      // Create a proposal
+      const tx = await createProposal(
+        b3tr,
+        B3trContract,
+        voter,
+        description + ` ${this.test?.title}`,
+        functionToCall,
+        [],
+        false,
+      ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
+      const proposalId = await getProposalIdFromTx(tx)
+      // wait
+      await waitForProposalToBeActive(proposalId)
+
+      // vote
+      // Create an EIP712 domainSeparator
+      // https://eips.ethereum.org/EIPS/eip-712#definition-of-domainseparator
+      const domainName = "B3TRGovernor" // the user readable name of signing domain, i.e. the name of the DApp or the protocol.
+      const signatureVersion = "1" // the current major version of the signing domain. Signatures from different versions are not compatible.
+      const chainId = network.config.chainId as number // the EIP-155 chain id. The user-agent should refuse signing if it does not match the currently active chain.
+      // The typeHash is designed to turn into a compile time constant in Solidity. For example:
+      // bytes32 constant MAIL_TYPEHASH = keccak256("Mail(address from,address to,string contents)");
+      // https://eips.ethereum.org/EIPS/eip-712#rationale-for-typehash
+      // const typeHash = "Ballot(uint256 proposalId,uint8 support,address voter,uint256 nonce)"
+      // const argumentTypeHash = ethers.keccak256(ethers.toUtf8Bytes(typeHash)) // convert to byteslike, then hash it
+
+      // https://eips.ethereum.org/EIPS/eip-712#specification-of-the-eth_signtypeddata-json-rpc
+      const types: EIP712TypeDefinition = {
+        Ballot: [
+          { name: "proposalId", type: "uint256" },
+          { name: "support", type: "uint8" },
+          { name: "voter", type: "address" },
+          { name: "nonce", type: "uint256" },
+        ],
+      }
+
+      const domain: EIP712Domain = {
+        name: domainName,
+        version: signatureVersion,
+        chainId: chainId,
+        verifyingContract: await governor.getAddress(),
+      }
+
+      const ballot = {
+        proposalId: proposalId,
+        support: 1,
+        voter: voter.address,
+        nonce: await governor.nonces(voter.address),
+      }
+
+      const signature = await signTypedData(domain, types, ballot, voter)
+
+      const voteTx = await governor.connect(voteSender).castVoteBySig(proposalId, 1, voter.address, signature)
+
+      expect(await governor.hasVoted(proposalId, voter.address)).to.be.true
+      expect(await governor.hasVoted(proposalId, voteSender.address)).to.be.false
+
+      const proposeReceipt = await voteTx.wait()
+      const event = proposeReceipt?.logs[0]
+      const decodedLogs = governor.interface.parseLog({
+        topics: [...(event?.topics as string[])],
+        data: event ? event.data : "",
+      })
+
+      //event exists
+      expect(decodedLogs?.name).to.eql("VoteCast")
+      // voter
+      expect(decodedLogs?.args[0]).to.eql(voter.address)
+      // proposal id
+      expect(decodedLogs?.args[1]).to.eql(proposalId)
+      // support
+      expect(decodedLogs?.args[2].toString()).to.eql("1")
+      // votes
+      expect(decodedLogs?.args[3].toString()).to.eql("1000000000000000000000")
+      // power
+      expect(decodedLogs?.args[4].toString()).to.eql("31622776601000000000")
+    })
+
+    it("Cannot cast vote with invalid signature", async function () {
+      const { governor, otherAccounts, b3tr, B3trContract } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      const voter = otherAccounts[0]
+      await getVot3Tokens(voter, "1000")
+      await waitForNextBlock()
+
+      // Create a proposal
+      const tx = await createProposal(
+        b3tr,
+        B3trContract,
+        voter,
+        description + ` ${this.test?.title}`,
+        functionToCall,
+        [],
+        false,
+      ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
+      const proposalId = await getProposalIdFromTx(tx)
+      // wait
+      await waitForProposalToBeActive(proposalId)
+
+      // vote
+      // Create an EIP712 domainSeparator
+      // https://eips.ethereum.org/EIPS/eip-712#definition-of-domainseparator
+      const domainName = "B3TRGovernor" // the user readable name of signing domain, i.e. the name of the DApp or the protocol.
+      const signatureVersion = "1" // the current major version of the signing domain. Signatures from different versions are not compatible.
+      const chainId = network.config.chainId as number // the EIP-155 chain id. The user-agent should refuse signing if it does not match the currently active chain.
+      // The typeHash is designed to turn into a compile time constant in Solidity. For example:
+      // bytes32 constant MAIL_TYPEHASH = keccak256("Mail(address from,address to,string contents)");
+      // https://eips.ethereum.org/EIPS/eip-712#rationale-for-typehash
+      // const typeHash = "Ballot(uint256 proposalId,uint8 support,address voter,uint256 nonce)"
+      // const argumentTypeHash = ethers.keccak256(ethers.toUtf8Bytes(typeHash)) // convert to byteslike, then hash it
+
+      // https://eips.ethereum.org/EIPS/eip-712#specification-of-the-eth_signtypeddata-json-rpc
+      const types: EIP712TypeDefinition = {
+        Ballot: [
+          { name: "proposalId", type: "uint256" },
+          { name: "support", type: "uint8" },
+          { name: "voter", type: "address" },
+          { name: "nonce", type: "uint256" },
+        ],
+      }
+
+      const domain: EIP712Domain = {
+        name: domainName,
+        version: signatureVersion,
+        chainId: chainId,
+        verifyingContract: await governor.getAddress(),
+      }
+
+      let ballot = {
+        proposalId: proposalId,
+        support: 0, // vote against
+        voter: voter.address,
+        nonce: await governor.nonces(voter.address),
+      }
+
+      let signature = await signTypedData(domain, types, ballot, voter)
+
+      // change the vote
+      await expect(governor.connect(voter).castVoteBySig(proposalId, 1, voter.address, signature)).to.be.reverted
+
+      ballot = {
+        proposalId: proposalId,
+        support: 1,
+        voter: voter.address,
+        nonce: 5n, // wrong nonce
+      }
+
+      signature = await signTypedData(domain, types, ballot, voter)
+
+      // change the vote
+      await expect(governor.connect(voter).castVoteBySig(proposalId, 1, voter.address, signature)).to.be.reverted
+
+      ballot = {
+        proposalId: ethers.keccak256(ethers.toUtf8Bytes("proposalId")), // wrong proposalId
+        support: 1,
+        voter: voter.address,
+        nonce: await governor.nonces(voter.address),
+      }
+
+      signature = await signTypedData(domain, types, ballot, voter)
+
+      // change the vote
+      await expect(governor.connect(voter).castVoteBySig(proposalId, 1, voter.address, signature)).to.be.reverted
     })
   })
 
