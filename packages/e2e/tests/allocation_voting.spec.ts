@@ -28,7 +28,7 @@ const votingDetails = [
   {
     accIndex: FIXED_VOTER1,
     b3trBalance: 0,
-    vot3Balance: 20,
+    vot3Balance: 10,
     votes: [
       { appName: 'Vyvo', votePercentage: 50 },
       { appName: 'Mugshot', votePercentage: 20 },
@@ -38,7 +38,7 @@ const votingDetails = [
   {
     accIndex: FIXED_VOTER2,
     b3trBalance: 1,
-    vot3Balance: 30,
+    vot3Balance: 40,
     votes: [
       { appName: 'Vyvo', votePercentage: 20 },
       { appName: 'Mugshot', votePercentage: 50 },
@@ -210,10 +210,9 @@ test.describe('Allocation voting', () => {
     test('Users vote on the second allocation round, quorum not reached', async ({ page }) => {
       test.setTimeout(300000) // 5 mins timeout to allow for voting
       const roundIndex = 2 // voting on round 2
-      // vote from only first two users, so quorum is not reached
-      for (let voter of votingDetails.slice(0, 2)) {
-        await castUserVote(page, voter.accIndex, roundIndex, voter.votes)
-      }
+      // vote from only first user, so quorum is not reached
+      const voter = votingDetails[0]
+      await castUserVote(page, voter.accIndex, roundIndex, voter.votes)
       // complete round
       await blockchainUtils.waitForNextCycle()
     })
@@ -226,12 +225,10 @@ test.describe('Allocation voting', () => {
       await allocationsPage.expectRoundStatus(2, 'Quorum failed')
       const roundPage = await allocationsPage.clickOnRound(2)
       await roundPage.expectQuorumNotReached()
-      const voters = votingDetails.slice(0, 2)
-      const totalVotes = voters.reduce((acc, voter) => acc + voter.vot3Balance, 0)
       // assert total votes
-      await roundPage.expectTotalVotes(totalVotes)
+      await roundPage.expectTotalVotes(votingDetails[0].vot3Balance)
       // assert total voters
-      await roundPage.expectTotalVoters(2)
+      await roundPage.expectTotalVoters(1)
     })
 
 })
