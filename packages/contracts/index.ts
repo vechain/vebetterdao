@@ -8,6 +8,7 @@ import TimeLockContractJson from "./artifacts/contracts/TimeLock.sol/TimeLock.js
 import XAllocationPoolJson from "./artifacts/contracts/XAllocationPool.sol/XAllocationPool.json"
 import XAllocationVotingJson from "./artifacts/contracts/XAllocationVoting.sol/XAllocationVoting.json"
 import XAllocationVotingGovernorJson from "./artifacts/contracts/x-allocation-voting-governance/XAllocationVotingGovernor.sol/XAllocationVotingGovernor.json"
+import TreasuryContractJson from "./artifacts/contracts/Treasury.sol/Treasury.json"
 
 export {
   VOT3__factory,
@@ -20,6 +21,7 @@ export {
   XAllocationPool__factory,
   XAllocationVoting__factory,
   XAllocationVotingGovernor__factory,
+  Treasury__factory,
 } from "./typechain-types"
 
 export {
@@ -33,4 +35,5 @@ export {
   XAllocationPoolJson,
   XAllocationVotingJson,
   XAllocationVotingGovernorJson,
+  TreasuryContractJson,
 }
