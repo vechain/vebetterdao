@@ -26,9 +26,9 @@ export const ErrorModalContent = ({
 }: ErrorModalContentProps) => {
   return (
     <ModalAnimation>
-      <ModalCloseButton top={4} right={4} />
+      <ModalCloseButton top={4} right={4} data-testid={"modal-close-btn"}/>
       <VStack align={"center"} p={6} gap={0}>
-        <Heading size="md">{title}</Heading>
+        <Heading size="md" data-testid={"modal-title"}>{title}</Heading>
         <motion.div
           transition={{
             duration: 4,
