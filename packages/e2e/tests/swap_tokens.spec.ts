@@ -168,7 +168,7 @@ test.describe('Swap Tokens', () => {
         })
       })
       // 8. [acc A]: max balance of vot3 at swap is 2
-e .      await actions.loginAs(accountA.index)
+      await actions.loginAs(accountA.index)
       await dashboardPage.clickSwapButton()
       await swapDialog.expectMaxSwappableAmount('VOT3', '2')
       await swapDialog.closeSwapModal()
