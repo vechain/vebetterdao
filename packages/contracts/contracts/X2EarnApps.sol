@@ -29,9 +29,9 @@ contract X2EarnApps is
    * @dev This function is called only once during the contract deployment
    */
   function initialize(string memory baseURI_, address[] memory _admins) public initializer {
-    __Moderation_init_unchained();
-    __Settings_init_unchained(baseURI_);
-    __VoteElegibility_init_unchained();
+    __Moderation_init();
+    __Settings_init(baseURI_);
+    __VoteElegibility_init();
     __UUPSUpgradeable_init();
     __AccessControl_init();
 

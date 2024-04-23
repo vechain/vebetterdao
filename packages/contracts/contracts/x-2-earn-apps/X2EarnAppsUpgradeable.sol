@@ -59,11 +59,39 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
     require($._apps[id].receiverAddress == address(0), "App with this ID already exists");
 
     // Store the new app
-    $._apps[id] = DataTypes.App(id, receiverAddress, admin, appName, metadataURI, clock(), block.timestamp);
+    $._apps[id] = DataTypes.App(id, receiverAddress, appName, metadataURI, clock(), block.timestamp);
     $._appIds.push(id);
+    _setAppAdmin(id, admin);
     _pushAppToEligbleApps(id);
 
     emit AppAdded(id, receiverAddress, appName, true);
+  }
+
+  /**
+   * @dev Update the metadata URI of the app
+   *
+   * @param appId the hashed name of the app
+   * @param metadataURI the metadata URI of the app
+   */
+  function updateAppMetadata(bytes32 appId, string memory metadataURI) external exists(appId) {
+    _authorizeAppMetadataUpdate(appId);
+    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
+
+    $._apps[appId].metadataURI = metadataURI;
+  }
+
+  /**
+   * @dev Update the address where the x2earn app receives allocation funds
+   *
+   * @param appId the hashed name of the app
+   * @param newReceiverAddress the address of the new receiver
+   */
+  function updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) external exists(appId) {
+    _authorizeAppManagement(appId);
+
+    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
+
+    $._apps[appId].receiverAddress = newReceiverAddress;
   }
 
   // ---------- Getters ---------- //
@@ -126,6 +154,8 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
 
   function _pushAppToEligbleApps(bytes32 appId) internal virtual;
 
+  function _setAppAdmin(bytes32 appId, address admin) internal virtual;
+
   function baseURI() public view virtual returns (string memory);
 
   /**
@@ -139,4 +169,16 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
    * ```
    */
   function _authorizeAddApp() internal virtual;
+
+  /**
+   * @dev Function that should revert when `msg.sender` is not authorized to sensible updates to an app. Called by
+   * {addAppModerator}, {removeAppModerator}, {setAppAdminAddress}, {updateAppReceiverAddress}.
+   */
+  function _authorizeAppManagement(bytes32 appId) internal virtual;
+
+  /**
+   * @dev Function that should revert when `msg.sender` is not authorized to update the app. Called by
+   * {updateAppMetadata}.
+   */
+  function _authorizeAppMetadataUpdate(bytes32 appId) internal virtual;
 }

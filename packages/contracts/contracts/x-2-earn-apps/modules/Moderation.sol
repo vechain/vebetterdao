@@ -9,6 +9,7 @@ abstract contract Moderation is Initializable, X2EarnAppsUpgradeable {
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.Moderation
   struct ModerationStorage {
     mapping(bytes32 => address[]) _appModerators;
+    mapping(bytes32 => address) _admin;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnApps.Moderation")) - 1)) & ~bytes32(uint256(0xff))
@@ -30,35 +31,7 @@ abstract contract Moderation is Initializable, X2EarnAppsUpgradeable {
 
   function __Moderation_init_unchained() internal onlyInitializing {}
 
-  /**
-   * @dev Returns true if an account is moderator of the app
-   *
-   * @param appId the hashed name of the app
-   * @param account the address of the account
-   */
-  function isAppModerator(bytes32 appId, address account) public view returns (bool) {
-    ModerationStorage storage $ = _getModerationStorage();
-
-    address[] memory moderators = $._appModerators[appId];
-    for (uint256 i = 0; i < moderators.length; i++) {
-      if (moderators[i] == account) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  /**
-   * @dev Returns the list of moderators of the app
-   *
-   * @param appId the hashed name of the app
-   */
-  function appModerators(bytes32 appId) public view returns (address[] memory) {
-    ModerationStorage storage $ = _getModerationStorage();
-
-    return $._appModerators[appId];
-  }
+  /////// Admin ///////
 
   /**
    * @dev Returns true if an account is the admin of the app
@@ -67,10 +40,49 @@ abstract contract Moderation is Initializable, X2EarnAppsUpgradeable {
    * @param account the address of the account
    */
   function isAppAdmin(bytes32 appId, address account) public view returns (bool) {
-    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
+    ModerationStorage storage $ = _getModerationStorage();
 
-    return $._apps[appId].admin == account;
+    return $._admin[appId] == account;
   }
+
+  /**
+   * @dev Returns the admin address of the app
+   *
+   * @param appId the hashed name of the app
+   */
+  function admin(bytes32 appId) public view returns (address) {
+    ModerationStorage storage $ = _getModerationStorage();
+
+    return $._admin[appId];
+  }
+
+  /**
+   * @dev Update the admin address of the app
+   *
+   * @param appId the hashed name of the app
+   * @param newAdmin the address of the new admin
+   */
+  function setAppAdmin(bytes32 appId, address newAdmin) external exists(appId) {
+    _authorizeAppManagement(appId);
+
+    _setAppAdmin(appId, newAdmin);
+  }
+
+  /**
+   * @dev Internal function to set the admin address of the app
+   *
+   * @param appId the hashed name of the app
+   * @param newAdmin the address of the new admin
+   */
+  function _setAppAdmin(bytes32 appId, address newAdmin) internal virtual override exists(appId) {
+    require(newAdmin != address(0), "XApps: admin is the zero address");
+
+    ModerationStorage storage $ = _getModerationStorage();
+
+    $._admin[appId] = newAdmin;
+  }
+
+  /////// Moderators ///////
 
   /**
    * @dev Add a moderator to the app
@@ -108,55 +120,32 @@ abstract contract Moderation is Initializable, X2EarnAppsUpgradeable {
   }
 
   /**
-   * @dev Update the admin address of the app
+   * @dev Returns the list of moderators of the app
    *
    * @param appId the hashed name of the app
-   * @param newAdmin the address of the new admin
    */
-  function updateAppAdminAddress(bytes32 appId, address newAdmin) external exists(appId) {
-    _authorizeAppManagement(appId);
+  function appModerators(bytes32 appId) public view returns (address[] memory) {
+    ModerationStorage storage $ = _getModerationStorage();
 
-    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
-
-    $._apps[appId].admin = newAdmin;
+    return $._appModerators[appId];
   }
 
   /**
-   * @dev Update the metadata URI of the app
+   * @dev Returns true if an account is moderator of the app
    *
    * @param appId the hashed name of the app
-   * @param metadataURI the metadata URI of the app
+   * @param account the address of the account
    */
-  function updateAppMetadata(bytes32 appId, string memory metadataURI) external exists(appId) {
-    _authorizeAppMetadataUpdate(appId);
-    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
+  function isAppModerator(bytes32 appId, address account) public view returns (bool) {
+    ModerationStorage storage $ = _getModerationStorage();
 
-    $._apps[appId].metadataURI = metadataURI;
+    address[] memory moderators = $._appModerators[appId];
+    for (uint256 i = 0; i < moderators.length; i++) {
+      if (moderators[i] == account) {
+        return true;
+      }
+    }
+
+    return false;
   }
-
-  /**
-   * @dev Update the address where the x2earn app receives allocation funds
-   *
-   * @param appId the hashed name of the app
-   * @param newReceiverAddress the address of the new receiver
-   */
-  function updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) external exists(appId) {
-    _authorizeAppManagement(appId);
-
-    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
-
-    $._apps[appId].receiverAddress = newReceiverAddress;
-  }
-
-  /**
-   * @dev Function that should revert when `msg.sender` is not authorized to sensible updates to an app. Called by
-   * {addAppModerator}, {removeAppModerator}, {updateAppAdminAddress}, {updateAppReceiverAddress}.
-   */
-  function _authorizeAppManagement(bytes32 appId) internal virtual;
-
-  /**
-   * @dev Function that should revert when `msg.sender` is not authorized to update the app. Called by
-   * {updateAppMetadata}.
-   */
-  function _authorizeAppMetadataUpdate(bytes32 appId) internal virtual;
 }

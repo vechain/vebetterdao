@@ -105,8 +105,10 @@ describe("X-Apps", function () {
       const app = await x2EarnApps.app(app1Id)
       expect(app[0]).to.eql(app1Id)
       expect(app[1]).to.eql(otherAccounts[1].address)
-      expect(app[2]).to.eql(otherAccounts[1].address)
-      expect(app[3]).to.eql("Bike 4 Life")
+      expect(app[2]).to.eql("Bike 4 Life")
+
+      const admin = await x2EarnApps.admin(app1Id)
+      expect(admin).to.eql(otherAccounts[1].address)
     }).timeout(18000000)
 
     it("Should be able to fetch app receiver address", async function () {
@@ -160,9 +162,11 @@ describe("X-Apps", function () {
         .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       const app = await x2EarnApps.app(app1Id)
-      expect(app.admin).to.eql(otherAccounts[0].address)
+      expect(app.id).to.eql(app1Id)
       expect(app.receiverAddress).to.eql(otherAccounts[0].address)
       expect(app.name).to.eql("My app")
+      expect(app.metadataURI).to.eql("metadataURI")
+      expect(app.createdAt).to.eql(await x2EarnApps.clock())
     })
 
     it("Can index apps", async function () {
@@ -424,14 +428,14 @@ describe("X-Apps", function () {
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
-      const app = await x2EarnApps.app(app1Id)
-      expect(app.admin).to.eql(otherAccounts[0].address)
+      const admin = await x2EarnApps.admin(app1Id)
+      expect(admin).to.eql(otherAccounts[0].address)
 
-      await x2EarnApps.connect(owner).updateAppAdminAddress(app1Id, otherAccounts[1].address)
+      await x2EarnApps.connect(owner).setAppAdmin(app1Id, otherAccounts[1].address)
 
-      const updatedApp = await x2EarnApps.app(app1Id)
-      expect(updatedApp.admin).to.eql(otherAccounts[1].address)
-      expect(updatedApp.admin).to.not.eql(app.admin)
+      const updatedAdmin = await x2EarnApps.admin(app1Id)
+      expect(updatedAdmin).to.eql(otherAccounts[1].address)
+      expect(updatedAdmin).to.not.eql(admin)
     })
 
     it("Cannot update the admin address of a non-existing app", async function () {
@@ -439,7 +443,7 @@ describe("X-Apps", function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       const newAdminAddress = ethers.Wallet.createRandom().address
 
-      await expect(x2EarnApps.connect(owner).updateAppAdminAddress(app1Id, newAdminAddress)).to.be.rejected
+      await expect(x2EarnApps.connect(owner).setAppAdmin(app1Id, newAdminAddress)).to.be.rejected
     })
   })
 
