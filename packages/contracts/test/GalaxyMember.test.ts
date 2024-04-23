@@ -23,7 +23,7 @@ import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployProxy } from "../scripts/helpers"
 import { GalaxyMember } from "../typechain-types"
 
-describe("Galaxy Member", () => {
+describe.only("Galaxy Member", () => {
   describe("Contract parameters", () => {
     it("Should have correct parameters set on deployment", async () => {
       const { galaxyMember, owner } = await getOrDeployContractInstances({ forceDeploy: true })
@@ -882,7 +882,7 @@ describe("Galaxy Member", () => {
 
       await galaxyMember.connect(owner).mint(await otherAccount.getAddress())
 
-      await expect(galaxyMember.connect(otherAccount)).to.be.reverted // Other account cannot mint as he is not admin
+      await expect(galaxyMember.connect(otherAccount).freeMint()).to.be.reverted // Other account cannot mint as he is not admin
 
       expect(await galaxyMember.balanceOf(await otherAccount.getAddress())).to.equal(1) // Owner has 1 NFT
 
