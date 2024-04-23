@@ -16,7 +16,7 @@ abstract contract GovernorDepositUpgradeable is Initializable, GovernorUpgradeab
   }
   // keccak256(abi.encode(uint256(keccak256("openzeppelin.storage.GovernorDeposit")) - 1)) & ~bytes32(uint256(0xff))
   bytes32 public constant GovernorDepositStorageLocation =
-    0x0d5829787b8befdbc6044ef7457d8a95c2a04bc99235349f1a212c063e59d400;
+    0x6e861975245d8f68d2d68ec4cace963e2e161ad0daef78ed15e673f8a3c1c600;
 
   function _getGovernorDepositStorage() private pure returns (GovernorDepositStorage storage $) {
     assembly {
@@ -32,13 +32,6 @@ abstract contract GovernorDepositUpgradeable is Initializable, GovernorUpgradeab
     GovernorDepositStorage storage $ = _getGovernorDepositStorage();
     $.vot3 = IVOT3(_vot3Token);
   }
-
-  // ---------- Events ---------- //
-
-  /**
-   * @dev Emitted when a deposit is made to a proposal.
-   */
-  event ProposalDeposit(address indexed depositor, uint256 indexed proposalId, uint256 amount);
 
   // ---------- Setters ---------- //
 
@@ -117,12 +110,23 @@ abstract contract GovernorDepositUpgradeable is Initializable, GovernorUpgradeab
     return getProposalDeposits(proposalId) >= proposalThreshold();
   }
 
+  /**
+   * @dev Returns the amount of tokens a specific user has deposited to a proposal.
+   *
+   * @param proposalId The id of the proposal.
+   * @param user The address of the user.
+   */
+  function getUserDeposit(uint256 proposalId, address user) public view returns (uint256) {
+    GovernorDepositStorage storage $ = _getGovernorDepositStorage();
+    return $.deposits[proposalId][user];
+  }
+
   // ---------- Internal and private ---------- //
 
   /**
    * @dev Deposit tokens to a proposal.
    *
-   * Emits a {ProposalDeposit} event.
+   * Emits a {IB3TRGovernor-ProposalDeposit} event.
    *
    * @param amount The amount of tokens to deposit.
    * @param depositor The address of the depositor.
@@ -131,7 +135,6 @@ abstract contract GovernorDepositUpgradeable is Initializable, GovernorUpgradeab
   function _depositFunds(uint256 amount, address depositor, uint256 proposalId) internal {
     GovernorDepositStorage storage $ = _getGovernorDepositStorage();
 
-    require($.vot3.balanceOf(address(this)) >= amount, "B3TRGovernor: insufficient balance");
     require($.vot3.transferFrom(depositor, address(this), amount), "B3TRGovernor: transfer failed");
 
     $.deposits[proposalId][depositor] += amount;

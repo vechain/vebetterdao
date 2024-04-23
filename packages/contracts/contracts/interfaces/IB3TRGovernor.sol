@@ -158,6 +158,11 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   );
 
   /**
+   * @dev Emitted when a deposit is made to a proposal.
+   */
+  event ProposalDeposit(address indexed depositor, uint256 indexed proposalId, uint256 amount);
+
+  /**
    * @notice module:core
    * @dev Name of the governor instance (used in building the ERC712 domain separator).
    */
@@ -314,7 +319,8 @@ interface IB3TRGovernor is IERC165, IERC6372 {
     uint256[] memory values,
     bytes[] memory calldatas,
     string memory description,
-    uint256 startRoundId
+    uint256 startRoundId,
+    uint256 depositAmount
   ) external returns (uint256 proposalId);
 
   /**
@@ -404,4 +410,19 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @dev Check if proposal can start in the next allocation round.
    */
   function canProposalStartInNextRound() external view returns (bool);
+
+  // Function to deposit tokens to a proposal
+  function deposit(uint256 amount, uint256 proposalId) external;
+
+  // Function to withdraw tokens from a proposal
+  function withdraw(uint256 proposalId) external;
+
+  // Getter to retrieve the total amount of tokens deposited to a proposal
+  function getProposalDeposits(uint256 proposalId) external view returns (uint256);
+
+  // Function to check if the deposit threshold for a proposal has been reached
+  function proposalDepositReached(uint256 proposalId) external view returns (bool);
+
+  // Getter to retrieve the amount of tokens a specific user has deposited to a proposal
+  function getUserDeposit(uint256 proposalId, address user) external view returns (uint256);
 }

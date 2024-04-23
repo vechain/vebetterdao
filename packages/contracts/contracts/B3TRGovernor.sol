@@ -77,6 +77,7 @@ contract B3TRGovernor is
     __GovernorVotes_init(_vot3Token);
     __GovernorVotesQuorumFraction_init(_quorumPercentage);
     __GovernorTimelockControl_init(_timelock);
+    __GovernorDeposit_init(address(_vot3Token));
     __AccessControl_init();
     __UUPSUpgradeable_init();
 
