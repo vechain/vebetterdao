@@ -41,10 +41,6 @@ abstract contract XAppsUpgradeable is Initializable, XAllocationVotingGovernor {
     $._x2EarnApps = x2earnAppsAddress;
   }
 
-  // ---------- Setters ---------- //
-
-  // ---------- Getters ---------- //
-
   /**
    * @dev Returns true if an app is enabled to be voted and if it was created before the start of the requested round.
    *

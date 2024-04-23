@@ -12,6 +12,7 @@ import {
   VoterRewards,
   Treasury,
   B3TRGovernor,
+  X2EarnApps,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy } from "../../scripts/helpers"
@@ -23,6 +24,7 @@ interface DeployInstance {
   timeLock: TimeLock
   governor: B3TRGovernor
   galaxyMember: GalaxyMember
+  x2EarnApps: X2EarnApps
   xAllocationVoting: XAllocationVoting
   xAllocationPool: XAllocationPool
   emissions: Emissions
@@ -55,6 +57,11 @@ export const getOrDeployContractInstances = async ({
 
   // Contracts are deployed using the first signer/account by default
   const [owner, otherAccount, minterAccount, timelockAdmin, ...otherAccounts] = await ethers.getSigners()
+
+  // Deploy Libraries
+  const DataTypes = await ethers.getContractFactory("DataTypes")
+  const DataTypesLib = await DataTypes.deploy()
+  await DataTypesLib.waitForDeployment()
 
   // Deploy B3TR
   const B3trContract = await ethers.getContractFactory("B3TR")
@@ -95,12 +102,18 @@ export const getOrDeployContractInstances = async ({
     await treasury.getAddress(),
   ])) as GalaxyMember
 
+  // Deploy X2EarnApps
+  const x2EarnApps = (await deployProxy("X2EarnApps", ["ipfs://", [await timeLock.getAddress(), owner.address]], {
+    DataTypes: await DataTypesLib.getAddress(),
+  })) as X2EarnApps
+
   // Deploy XAllocationPool
   const xAllocationPool = (await deployProxy("XAllocationPool", [
     owner.address,
     owner.address,
     await b3tr.getAddress(),
     await treasury.getAddress(),
+    await x2EarnApps.getAddress(),
   ])) as XAllocationPool
 
   const X_ALLOCATIONS_ADDRESS = await xAllocationPool.getAddress()
@@ -150,7 +163,7 @@ export const getOrDeployContractInstances = async ({
       emissions: await emissions.getAddress(),
       admins: [await timeLock.getAddress(), owner.address],
       upgrader: owner.address,
-      xAppsBaseURI: "ipfs://",
+      x2EarnAppsAddress: await x2EarnApps.getAddress(),
       baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
       appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
     },
@@ -213,6 +226,7 @@ export const getOrDeployContractInstances = async ({
     timeLock,
     governor,
     galaxyMember,
+    x2EarnApps,
     xAllocationVoting,
     xAllocationPool,
     emissions,

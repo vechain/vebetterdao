@@ -61,7 +61,7 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
     // Store the new app
     $._apps[id] = DataTypes.App(id, receiverAddress, admin, appName, metadataURI, clock(), block.timestamp);
     $._appIds.push(id);
-    pushAppToEligbleApps(id);
+    _pushAppToEligbleApps(id);
 
     emit AppAdded(id, receiverAddress, appName, true);
   }
@@ -124,7 +124,7 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
 
   // --- To be implemented by the inheriting contract --- //
 
-  function pushAppToEligbleApps(bytes32 appId) internal virtual;
+  function _pushAppToEligbleApps(bytes32 appId) internal virtual;
 
   function baseURI() public view virtual returns (string memory);
 

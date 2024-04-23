@@ -42,7 +42,7 @@ abstract contract VoteElegibility is Initializable, X2EarnAppsUpgradeable {
     _updateVotingElegibilityCheckpoint(_appId, _isElegible);
   }
 
-  function pushAppToEligbleApps(bytes32 appId) internal virtual override {
+  function _pushAppToEligbleApps(bytes32 appId) internal virtual override {
     VoteElegibilityStorage storage $ = _getVoteElegibilityStorage();
 
     $._elegibleAppsForNextRound.push(appId);
@@ -76,7 +76,7 @@ abstract contract VoteElegibility is Initializable, X2EarnAppsUpgradeable {
       // delete the mapping that belongs to the app we removed
       delete $._idToElegibleAppsIndex[appId];
     } else {
-      pushAppToEligbleApps(appId);
+      _pushAppToEligbleApps(appId);
     }
 
     emit VotingElegibilityChanged(appId, canBeVoted);
@@ -101,11 +101,11 @@ abstract contract VoteElegibility is Initializable, X2EarnAppsUpgradeable {
    * @param appId the hashed name of the app
    * @param timepoint the timepoint when the app should be checked for elegibility
    */
-  function isElegible(bytes32 appId, uint256 timepoint) public view override returns (bool) {
+  function isElegible(bytes32 appId, uint256 timepoint) public view override exists(appId) returns (bool) {
     VoteElegibilityStorage storage $ = _getVoteElegibilityStorage();
 
     uint48 currentTimepoint = clock();
-    if (timepoint >= currentTimepoint) {
+    if (timepoint > currentTimepoint) {
       revert ERC5805FutureLookup(timepoint, currentTimepoint);
     }
 

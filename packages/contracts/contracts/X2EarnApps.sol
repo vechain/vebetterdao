@@ -11,7 +11,7 @@ import { VoteElegibility } from "./x-2-earn-apps/modules/VoteElegibility.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
-abstract contract X2EarnApps is
+contract X2EarnApps is
   Initializable,
   X2EarnAppsUpgradeable,
   Moderation,
@@ -23,13 +23,12 @@ abstract contract X2EarnApps is
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
   /**
-   * @dev Sets the value for {baseURI}
+   * @notice Initialize the contract
+   * @param baseURI_ the base URI for the contract
+   * @param _admins the addresses of the admins
+   * @dev This function is called only once during the contract deployment
    */
-  function __X2EarnApps_init(string memory baseURI_, address[] memory _admins) internal onlyInitializing {
-    __X2EarnApps_init_unchained(baseURI_, _admins);
-  }
-
-  function __X2EarnApps_init_unchained(string memory baseURI_, address[] memory _admins) internal onlyInitializing {
+  function initialize(string memory baseURI_, address[] memory _admins) public initializer {
     __Moderation_init_unchained();
     __Settings_init_unchained(baseURI_);
     __VoteElegibility_init_unchained();
@@ -42,12 +41,12 @@ abstract contract X2EarnApps is
   }
 
   // ---------- Overrides ------------ //
+  function setBaseURI(string memory baseURI_) external override(IX2EarnApps, Settings) onlyRole(DEFAULT_ADMIN_ROLE) {
+    _setBaseURI(baseURI_);
+  }
 
-  /**
-   * @dev Return the base URI to retrieve the metadata of the x2earn apps
-   */
-  function baseURI() public view virtual override(Settings, X2EarnAppsUpgradeable) returns (string memory) {
-    return super.baseURI();
+  function setVotingElegibility(bytes32 _appId, bool _isElegible) public override onlyRole(DEFAULT_ADMIN_ROLE) {
+    super.setVotingElegibility(_appId, _isElegible);
   }
 
   // ---------- Authorizations ------------ //

@@ -96,16 +96,38 @@ describe("X-Allocation Pool", async function () {
     })
 
     it("Cannot deploy contract with zero address", async function () {
-      const { b3tr, treasury, owner } = await getOrDeployContractInstances({
+      const { b3tr, treasury, owner, x2EarnApps } = await getOrDeployContractInstances({
         forceDeploy: false,
       })
 
       await expect(
-        deployProxy("XAllocationPool", [owner.address, owner.address, ZERO_ADDRESS, await treasury.getAddress()]),
+        deployProxy("XAllocationPool", [
+          owner.address,
+          owner.address,
+          ZERO_ADDRESS,
+          await treasury.getAddress(),
+          await x2EarnApps.getAddress(),
+        ]),
       ).to.be.reverted
 
       await expect(
-        deployProxy("XAllocationPool", [owner.address, owner.address, await b3tr.getAddress(), ZERO_ADDRESS]),
+        deployProxy("XAllocationPool", [
+          owner.address,
+          owner.address,
+          await b3tr.getAddress(),
+          ZERO_ADDRESS,
+          await x2EarnApps.getAddress(),
+        ]),
+      ).to.be.reverted
+
+      await expect(
+        deployProxy("XAllocationPool", [
+          owner.address,
+          owner.address,
+          await b3tr.getAddress(),
+          await treasury.getAddress(),
+          ZERO_ADDRESS,
+        ]),
       ).to.be.reverted
     })
   })
@@ -253,9 +275,10 @@ describe("X-Allocation Pool", async function () {
   describe("Allocation rewards for x-apps", async function () {
     describe("App shares and base allocation", async function () {
       it("App can receive a max amount of allocation share and unallocated amount gets sent to treasury", async function () {
-        const { xAllocationVoting, otherAccounts, owner, xAllocationPool } = await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, x2EarnApps } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
 
         // Bootstrap emissions
         await bootstrapEmissions()
@@ -266,10 +289,10 @@ describe("X-Allocation Pool", async function () {
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
         const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app", "metadataURI")
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[4].address, otherAccounts[4].address, "My app #2", "metadataURI")
 
@@ -295,7 +318,7 @@ describe("X-Allocation Pool", async function () {
       })
 
       it("Every app in the round receives a base allocation", async function () {
-        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, b3tr, emissions, minterAccount } =
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, b3tr, emissions, minterAccount, x2EarnApps } =
           await getOrDeployContractInstances({
             forceDeploy: true,
           })
@@ -310,10 +333,8 @@ describe("X-Allocation Pool", async function () {
         const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
         const app1ReceiverAddress = otherAccounts[3].address
         const app2ReceiverAddress = otherAccounts[4].address
-        await xAllocationVoting.connect(owner).addApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
-        await xAllocationVoting
-          .connect(owner)
-          .addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
+        await x2EarnApps.connect(owner).addApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
+        await x2EarnApps.connect(owner).addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
 
         // Bootstrap emissions
         await bootstrapEmissions()
@@ -353,7 +374,7 @@ describe("X-Allocation Pool", async function () {
       })
 
       it("New app of failed round receives a base allocation even if it was not elegible in previous round", async function () {
-        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, b3tr, emissions, minterAccount } =
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, b3tr, emissions, minterAccount, x2EarnApps } =
           await getOrDeployContractInstances({
             forceDeploy: true,
           })
@@ -368,10 +389,8 @@ describe("X-Allocation Pool", async function () {
         const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
         const app1ReceiverAddress = otherAccounts[3].address
         const app2ReceiverAddress = otherAccounts[4].address
-        await xAllocationVoting.connect(owner).addApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
-        await xAllocationVoting
-          .connect(owner)
-          .addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
+        await x2EarnApps.connect(owner).addApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
+        await x2EarnApps.connect(owner).addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
 
         // Bootstrap emissions
         await bootstrapEmissions()
@@ -395,9 +414,7 @@ describe("X-Allocation Pool", async function () {
         // new emission, new round and new app
         const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
         const app3ReceiverAddress = otherAccounts[4].address
-        await xAllocationVoting
-          .connect(owner)
-          .addApp(app3ReceiverAddress, app3ReceiverAddress, "My app #3", "metadataURI")
+        await x2EarnApps.connect(owner).addApp(app3ReceiverAddress, app3ReceiverAddress, "My app #3", "metadataURI")
         await moveToCycle(3)
         const round2 = parseInt((await xAllocationVoting.currentRoundId()).toString())
         expect(round2).to.eql(2)
@@ -430,7 +447,7 @@ describe("X-Allocation Pool", async function () {
       })
 
       it("App shares cap and unallocated share of a past round should be checkpointed", async function () {
-        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount } =
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount, x2EarnApps } =
           await getOrDeployContractInstances({
             forceDeploy: true,
           })
@@ -441,10 +458,10 @@ describe("X-Allocation Pool", async function () {
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
         const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[2].address, otherAccounts[2].address, "My app", "metadataURI")
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app #2", "metadataURI")
 
@@ -516,7 +533,7 @@ describe("X-Allocation Pool", async function () {
       })
 
       it("Base allocation of a past round should remain the same even if value has been updated", async function () {
-        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount } =
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount, x2EarnApps } =
           await getOrDeployContractInstances({
             forceDeploy: true,
           })
@@ -527,10 +544,10 @@ describe("X-Allocation Pool", async function () {
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
         const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[2].address, otherAccounts[2].address, "My app", "metadataURI")
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app #2", "metadataURI")
 
@@ -591,7 +608,7 @@ describe("X-Allocation Pool", async function () {
 
     describe("App earnings", async function () {
       it("Allocation rewards are calculated correctly", async function () {
-        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount } =
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount, x2EarnApps } =
           await getOrDeployContractInstances({
             forceDeploy: true,
           })
@@ -602,10 +619,10 @@ describe("X-Allocation Pool", async function () {
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
         const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[2].address, otherAccounts[2].address, "My app", "metadataURI")
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app #2", "metadataURI")
 
@@ -656,7 +673,7 @@ describe("X-Allocation Pool", async function () {
       })
 
       it("Should correctly count live earnings when current round failed (round > 1 )", async function () {
-        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount } =
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount, x2EarnApps } =
           await getOrDeployContractInstances({
             forceDeploy: true,
           })
@@ -667,10 +684,10 @@ describe("X-Allocation Pool", async function () {
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
         const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[2].address, otherAccounts[2].address, "My app", "metadataURI")
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app #2", "metadataURI")
 
@@ -718,7 +735,7 @@ describe("X-Allocation Pool", async function () {
       })
 
       it("When adding new app previous allocations should remain the same", async function () {
-        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount } =
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount, x2EarnApps } =
           await getOrDeployContractInstances({
             forceDeploy: true,
           })
@@ -730,10 +747,10 @@ describe("X-Allocation Pool", async function () {
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
         const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
         const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3")) // to add later
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[2].address, otherAccounts[2].address, "My app", "metadataURI")
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app #2", "metadataURI")
 
@@ -760,7 +777,7 @@ describe("X-Allocation Pool", async function () {
         const baseAllocationAmountBeforeAddingApp3 = await xAllocationPool.baseAllocationAmount(round1)
 
         // Add new app
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[4].address, otherAccounts[4].address, "My app #3", "metadataURI")
 
@@ -777,7 +794,7 @@ describe("X-Allocation Pool", async function () {
         await waitForRoundToEnd(Number(await xAllocationVoting.currentRoundId()))
 
         // remove app
-        await xAllocationVoting.connect(owner).setVotingElegibility(app3Id, false)
+        await x2EarnApps.connect(owner).setVotingElegibility(app3Id, false)
 
         // Start new round
         await emissions.distribute()
@@ -799,7 +816,7 @@ describe("X-Allocation Pool", async function () {
         expect(app3EarningsInRound3[0]).to.eql(0n)
 
         // add again
-        await xAllocationVoting.connect(owner).setVotingElegibility(app3Id, true)
+        await x2EarnApps.connect(owner).setVotingElegibility(app3Id, true)
 
         // Start new round
         await emissions.distribute()
@@ -824,7 +841,7 @@ describe("X-Allocation Pool", async function () {
       })
 
       it("Earnings should be calculated correctly when round failed", async function () {
-        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount } =
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount, x2EarnApps } =
           await getOrDeployContractInstances({
             forceDeploy: true,
           })
@@ -835,10 +852,10 @@ describe("X-Allocation Pool", async function () {
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
         const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[2].address, otherAccounts[2].address, "My app", "metadataURI")
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app #2", "metadataURI")
 
@@ -877,7 +894,7 @@ describe("X-Allocation Pool", async function () {
     })
     describe("App claiming", async function () {
       it("Allocation rewards are claimed correctly", async function () {
-        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, b3tr, emissions, minterAccount } =
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, b3tr, emissions, minterAccount, x2EarnApps } =
           await getOrDeployContractInstances({
             forceDeploy: true,
           })
@@ -892,10 +909,8 @@ describe("X-Allocation Pool", async function () {
         const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
         const app1ReceiverAddress = otherAccounts[3].address
         const app2ReceiverAddress = otherAccounts[4].address
-        await xAllocationVoting.connect(owner).addApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
-        await xAllocationVoting
-          .connect(owner)
-          .addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
+        await x2EarnApps.connect(owner).addApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
+        await x2EarnApps.connect(owner).addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
 
         // Bootstrap emissions
         await bootstrapEmissions()
@@ -940,7 +955,7 @@ describe("X-Allocation Pool", async function () {
       })
 
       it("App cannot claim two times in the same round", async function () {
-        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount } =
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount, x2EarnApps } =
           await getOrDeployContractInstances({
             forceDeploy: true,
           })
@@ -955,10 +970,8 @@ describe("X-Allocation Pool", async function () {
         const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
         const app1ReceiverAddress = otherAccounts[3].address
         const app2ReceiverAddress = otherAccounts[4].address
-        await xAllocationVoting.connect(owner).addApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
-        await xAllocationVoting
-          .connect(owner)
-          .addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
+        await x2EarnApps.connect(owner).addApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
+        await x2EarnApps.connect(owner).addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
 
         // Bootstrap emissions
         await bootstrapEmissions()
@@ -987,7 +1000,7 @@ describe("X-Allocation Pool", async function () {
       })
 
       it("Anyone can trigger claiming of allocation to app", async function () {
-        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, b3tr, emissions, minterAccount } =
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, b3tr, emissions, minterAccount, x2EarnApps } =
           await getOrDeployContractInstances({
             forceDeploy: true,
           })
@@ -1002,10 +1015,8 @@ describe("X-Allocation Pool", async function () {
         const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
         const app1ReceiverAddress = otherAccounts[3].address
         const app2ReceiverAddress = otherAccounts[4].address
-        await xAllocationVoting.connect(owner).addApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
-        await xAllocationVoting
-          .connect(owner)
-          .addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
+        await x2EarnApps.connect(owner).addApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
+        await x2EarnApps.connect(owner).addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
 
         // Bootstrap emissions
         await bootstrapEmissions()
@@ -1037,7 +1048,7 @@ describe("X-Allocation Pool", async function () {
       })
 
       it("Can claim first round even if it's not finalized", async function () {
-        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount } =
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount, x2EarnApps } =
           await getOrDeployContractInstances({
             forceDeploy: true,
           })
@@ -1051,10 +1062,8 @@ describe("X-Allocation Pool", async function () {
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
         const app1ReceiverAddress = otherAccounts[3].address
         const app2ReceiverAddress = otherAccounts[4].address
-        await xAllocationVoting.connect(owner).addApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
-        await xAllocationVoting
-          .connect(owner)
-          .addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
+        await x2EarnApps.connect(owner).addApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
+        await x2EarnApps.connect(owner).addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
 
         // Bootstrap emissions
         await bootstrapEmissions()
@@ -1081,7 +1090,7 @@ describe("X-Allocation Pool", async function () {
       })
 
       it("Can claim failed not finalized round [ROUND > 1]", async function () {
-        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount } =
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount, x2EarnApps } =
           await getOrDeployContractInstances({
             forceDeploy: true,
           })
@@ -1092,10 +1101,10 @@ describe("X-Allocation Pool", async function () {
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
         const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[2].address, otherAccounts[2].address, "My app", "metadataURI")
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app #2", "metadataURI")
 
@@ -1136,7 +1145,7 @@ describe("X-Allocation Pool", async function () {
       })
 
       it("Can claim failed round after it's finalized", async function () {
-        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount } =
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount, x2EarnApps } =
           await getOrDeployContractInstances({
             forceDeploy: true,
           })
@@ -1150,10 +1159,8 @@ describe("X-Allocation Pool", async function () {
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
         const app1ReceiverAddress = otherAccounts[3].address
         const app2ReceiverAddress = otherAccounts[4].address
-        await xAllocationVoting.connect(owner).addApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
-        await xAllocationVoting
-          .connect(owner)
-          .addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
+        await x2EarnApps.connect(owner).addApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
+        await x2EarnApps.connect(owner).addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
 
         // Bootstrap emissions
         await bootstrapEmissions()
@@ -1180,7 +1187,7 @@ describe("X-Allocation Pool", async function () {
       })
 
       it("Cannot claim active round", async function () {
-        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount } =
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount, x2EarnApps } =
           await getOrDeployContractInstances({
             forceDeploy: true,
           })
@@ -1194,10 +1201,8 @@ describe("X-Allocation Pool", async function () {
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
         const app1ReceiverAddress = otherAccounts[3].address
         const app2ReceiverAddress = otherAccounts[4].address
-        await xAllocationVoting.connect(owner).addApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
-        await xAllocationVoting
-          .connect(owner)
-          .addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
+        await x2EarnApps.connect(owner).addApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
+        await x2EarnApps.connect(owner).addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
 
         // Bootstrap emissions
         await bootstrapEmissions()
@@ -1215,7 +1220,7 @@ describe("X-Allocation Pool", async function () {
       })
 
       it("User should be able to check his available earnings to claim", async function () {
-        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, b3tr, minterAccount } =
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, b3tr, minterAccount, x2EarnApps } =
           await getOrDeployContractInstances({
             forceDeploy: true,
           })
@@ -1226,10 +1231,10 @@ describe("X-Allocation Pool", async function () {
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
         const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[6].address, otherAccounts[6].address, "My app", "metadataURI")
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[7].address, otherAccounts[7].address, "My app #2", "metadataURI")
 
@@ -1272,7 +1277,7 @@ describe("X-Allocation Pool", async function () {
       })
 
       it("Claimable amount for an active round should be 0", async function () {
-        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount } =
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount, x2EarnApps } =
           await getOrDeployContractInstances({
             forceDeploy: true,
           })
@@ -1283,10 +1288,10 @@ describe("X-Allocation Pool", async function () {
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
         const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[6].address, otherAccounts[6].address, "My app", "metadataURI")
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[7].address, otherAccounts[7].address, "My app #2", "metadataURI")
 
@@ -1310,7 +1315,7 @@ describe("X-Allocation Pool", async function () {
       })
 
       it("Cannot claim 0 rewards", async function () {
-        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount } =
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount, x2EarnApps } =
           await getOrDeployContractInstances({
             forceDeploy: true,
           })
@@ -1324,10 +1329,10 @@ describe("X-Allocation Pool", async function () {
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
         const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[6].address, otherAccounts[6].address, "My app", "metadataURI")
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[7].address, otherAccounts[7].address, "My app #2", "metadataURI")
 
@@ -1354,7 +1359,7 @@ describe("X-Allocation Pool", async function () {
       })
 
       it("Cannot claim if b3tr token is paused", async function () {
-        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount, b3tr } =
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount, b3tr, x2EarnApps } =
           await getOrDeployContractInstances({
             forceDeploy: true,
           })
@@ -1365,10 +1370,10 @@ describe("X-Allocation Pool", async function () {
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
         const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[6].address, otherAccounts[6].address, "My app", "metadataURI")
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[7].address, otherAccounts[7].address, "My app #2", "metadataURI")
 
@@ -1393,10 +1398,19 @@ describe("X-Allocation Pool", async function () {
     })
     describe("Unallocated funds", async function () {
       it("Unallocated rewards are returned to the treasury", async function () {
-        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, b3tr, emissions, minterAccount, treasury } =
-          await getOrDeployContractInstances({
-            forceDeploy: true,
-          })
+        const {
+          xAllocationVoting,
+          otherAccounts,
+          owner,
+          xAllocationPool,
+          b3tr,
+          emissions,
+          minterAccount,
+          treasury,
+          x2EarnApps,
+        } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
         // SEED DATA
 
@@ -1408,10 +1422,8 @@ describe("X-Allocation Pool", async function () {
         const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
         const app1ReceiverAddress = otherAccounts[3].address
         const app2ReceiverAddress = otherAccounts[4].address
-        await xAllocationVoting.connect(owner).addApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
-        await xAllocationVoting
-          .connect(owner)
-          .addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
+        await x2EarnApps.connect(owner).addApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
+        await x2EarnApps.connect(owner).addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
 
         // Bootstrap emissions
         await bootstrapEmissions()
@@ -1446,10 +1458,19 @@ describe("X-Allocation Pool", async function () {
       })
 
       it("Cannot transfer unallocated funds if b3tr token is paused", async function () {
-        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount, b3tr, treasury } =
-          await getOrDeployContractInstances({
-            forceDeploy: true,
-          })
+        const {
+          xAllocationVoting,
+          otherAccounts,
+          owner,
+          xAllocationPool,
+          emissions,
+          minterAccount,
+          b3tr,
+          treasury,
+          x2EarnApps,
+        } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
         const voter1 = otherAccounts[1]
         await getVot3Tokens(voter1, "1000")
@@ -1457,10 +1478,10 @@ describe("X-Allocation Pool", async function () {
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
         const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[6].address, otherAccounts[6].address, "My app", "metadataURI")
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[7].address, otherAccounts[7].address, "My app #2", "metadataURI")
 
@@ -1499,9 +1520,10 @@ describe("X-Allocation Pool", async function () {
 
     describe("Quadratic funding", async function () {
       it("Should calculate correct app shares with Quadratic funding distrubiton with max cap at 20%", async function () {
-        const { xAllocationVoting, otherAccounts, owner, xAllocationPool } = await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, x2EarnApps } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
 
         // Bootstrap emissions
         await bootstrapEmissions()
@@ -1511,13 +1533,13 @@ describe("X-Allocation Pool", async function () {
         })
 
         //Add apps
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
@@ -1577,10 +1599,11 @@ describe("X-Allocation Pool", async function () {
       it("Should calculate correct app shares with Quadratic funding distrubiton with no max cap", async function () {
         const config = createLocalConfig()
         config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP = 100
-        const { xAllocationVoting, otherAccounts, owner, xAllocationPool } = await getOrDeployContractInstances({
-          forceDeploy: true,
-          config,
-        })
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, x2EarnApps } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+            config,
+          })
 
         // Bootstrap emissions
         await bootstrapEmissions()
@@ -1593,15 +1616,13 @@ describe("X-Allocation Pool", async function () {
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
         const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
         const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app", "metadataURI")
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[4].address, otherAccounts[4].address, "My app #2", "metadataURI")
-        await xAllocationVoting
-          .connect(owner)
-          .addApp(otherAccounts[5].address, otherAccounts[5], "My app #3", "metadataURI")
+        await x2EarnApps.connect(owner).addApp(otherAccounts[5].address, otherAccounts[5], "My app #3", "metadataURI")
 
         //Start allocation round
         const round1 = await startNewAllocationRound()
@@ -1658,10 +1679,11 @@ describe("X-Allocation Pool", async function () {
         config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP = 100
         config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE = 0
         config.INITIAL_X_ALLOCATION = 10000n
-        const { xAllocationVoting, otherAccounts, owner, xAllocationPool } = await getOrDeployContractInstances({
-          forceDeploy: true,
-          config,
-        })
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, x2EarnApps } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+            config,
+          })
 
         // Bootstrap emissions
         await bootstrapEmissions()
@@ -1674,13 +1696,13 @@ describe("X-Allocation Pool", async function () {
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
         const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
         const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app", "metadataURI")
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[4].address, otherAccounts[4].address, "My app #2", "metadataURI")
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[5].address, otherAccounts[5].address, "My app #3", "metadataURI")
 

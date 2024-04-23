@@ -50,9 +50,16 @@ contract XAllocationPool is
     _disableInitializers();
   }
 
-  function initialize(address _admin, address upgrader, address _b3trAddress, address _treasury) public initializer {
+  function initialize(
+    address _admin,
+    address upgrader,
+    address _b3trAddress,
+    address _treasury,
+    address _x2EarnApps
+  ) public initializer {
     require(_b3trAddress != address(0), "XAllocationPool: new b3tr is the zero address");
     require(_treasury != address(0), "XAllocationPool: new treasury is the zero address");
+    require(_x2EarnApps != address(0), "XAllocationPool: new x2EarnApps is the zero address");
 
     __AccessControl_init();
     __ReentrancyGuard_init();
@@ -61,6 +68,7 @@ contract XAllocationPool is
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     $.b3tr = IB3TR(_b3trAddress);
     $.treasury = ITreasury(_treasury);
+    $.x2EarnApps = IX2EarnApps(_x2EarnApps);
 
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     _grantRole(UPGRADER_ROLE, upgrader);

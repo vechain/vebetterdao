@@ -50,7 +50,7 @@ interface IX2EarnApps {
    *
    * @param baseUri the base URI for the contract
    */
-  function setBaseUri(string memory baseUri) external;
+  function setBaseURI(string memory baseUri) external;
 
   function addAppModerator(bytes32 appId, address moderator) external;
 }
