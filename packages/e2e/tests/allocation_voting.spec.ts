@@ -209,7 +209,7 @@ test.describe('Allocation voting', () => {
 
     test('Users vote on the second allocation round, quorum not reached', async ({ page }) => {
       test.setTimeout(300000) // 5 mins timeout to allow for voting
-      const roundIndex = 1 // voting on round 1
+      const roundIndex = 2 // voting on round 2
       // vote from only first two users, so quorum is not reached
       for (let voter of votingDetails.slice(0, 2)) {
         await castUserVote(page, voter.accIndex, roundIndex, voter.votes)
