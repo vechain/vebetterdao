@@ -225,10 +225,11 @@ describe("X-Allocation Voting", function () {
       ])
       const description = "Upgrading XAllocationVoting contracts"
       const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
+      const currentRoundId = await xAllocationVoting.currentRoundId()
 
       const tx = await governor
-        .connect(owner) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
-        .propose([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], description)
+        .connect(owner)
+        .propose([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], description, currentRoundId + 1n)
 
       const proposalId = await getProposalIdFromTx(tx)
       await waitForProposalToBeActive(proposalId)
@@ -455,10 +456,11 @@ describe("X-Allocation Voting", function () {
         ])
         const description = "Updating voting period"
         const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
+        const currentRoundId = await xAllocationVoting.currentRoundId()
 
         const tx = await governor
-          .connect(owner) //@ts-ignore, https://github.com/ethers-io/ethers.js/issues/4296
-          .propose([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], description)
+          .connect(owner)
+          .propose([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], description, currentRoundId + 1n)
 
         const proposalId = await getProposalIdFromTx(tx)
         await waitForProposalToBeActive(proposalId)
@@ -514,10 +516,11 @@ describe("X-Allocation Voting", function () {
         const encodedFunctionCall = xAllocationVoting.interface.encodeFunctionData("setVotingPeriod", [cycleDuration])
         const description = "Updating voting period"
         const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
+        const currentRoundId = await xAllocationVoting.currentRoundId()
 
         const tx = await governor
-          .connect(owner) //@ts-ignore
-          .propose([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], description)
+          .connect(owner)
+          .propose([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], description, currentRoundId + 1n)
 
         const proposalId = await getProposalIdFromTx(tx)
         await waitForProposalToBeActive(proposalId)

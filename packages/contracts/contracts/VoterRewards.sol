@@ -4,7 +4,7 @@ pragma solidity ^0.8.18;
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import "./interfaces/IGalaxyMember.sol";
-import "./interfaces/IGovernor.sol";
+import "./interfaces/IB3TRGovernor.sol";
 import "./interfaces/IXAllocationVotingGovernor.sol";
 import "./interfaces/IEmissions.sol";
 import "./interfaces/IB3TR.sol";
