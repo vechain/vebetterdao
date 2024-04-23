@@ -223,7 +223,7 @@ test.describe('Allocation voting', () => {
       const allocationsPage = await menuBar.gotoAllocations()
       await allocationsPage.expectOnPage()
       // assert round status
-      await allocationsPage.expectRoundStatus(1, 'Quorum failed')
+      await allocationsPage.expectRoundStatus(2, 'Quorum failed')
       const roundPage = await allocationsPage.clickOnRound(2)
       await roundPage.expectQuorumNotReached()
       const voters = votingDetails.slice(0, 2)
