@@ -96,7 +96,8 @@ test.describe('Swap Tokens', () => {
   });
 
   // the following `describe` covers a single test case
-  test.describe('max swappable amount', () => {
+  // skipped until this ticket is merged into main branch: https://github.com/vechain/b3tr/issues/537
+  test.describe.skip('max swappable amount', () => {
     test.describe.configure({ mode: 'serial' });
 
     let accountA: Account
