@@ -5,7 +5,7 @@ import { X2EarnAppsUpgradeable } from "./x-2-earn-apps/X2EarnAppsUpgradeable.sol
 import { DataTypes } from "./libraries/DataTypes.sol";
 import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import { Moderation } from "./x-2-earn-apps/modules/Moderation.sol";
+import { Administration } from "./x-2-earn-apps/modules/Administration.sol";
 import { Settings } from "./x-2-earn-apps/modules/Settings.sol";
 import { VoteElegibility } from "./x-2-earn-apps/modules/VoteElegibility.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -14,7 +14,7 @@ import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/ac
 contract X2EarnApps is
   Initializable,
   X2EarnAppsUpgradeable,
-  Moderation,
+  Administration,
   Settings,
   VoteElegibility,
   AccessControlUpgradeable,
@@ -29,7 +29,7 @@ contract X2EarnApps is
    * @dev This function is called only once during the contract deployment
    */
   function initialize(string memory baseURI_, address[] memory _admins) public initializer {
-    __Moderation_init();
+    __Administration_init();
     __Settings_init(baseURI_);
     __VoteElegibility_init();
     __UUPSUpgradeable_init();

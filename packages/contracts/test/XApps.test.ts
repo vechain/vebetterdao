@@ -107,7 +107,7 @@ describe("X-Apps", function () {
       expect(app[1]).to.eql(otherAccounts[1].address)
       expect(app[2]).to.eql("Bike 4 Life")
 
-      const admin = await x2EarnApps.admin(app1Id)
+      const admin = await x2EarnApps.appAdmin(app1Id)
       expect(admin).to.eql(otherAccounts[1].address)
     }).timeout(18000000)
 
@@ -428,12 +428,12 @@ describe("X-Apps", function () {
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
-      const admin = await x2EarnApps.admin(app1Id)
+      const admin = await x2EarnApps.appAdmin(app1Id)
       expect(admin).to.eql(otherAccounts[0].address)
 
       await x2EarnApps.connect(owner).setAppAdmin(app1Id, otherAccounts[1].address)
 
-      const updatedAdmin = await x2EarnApps.admin(app1Id)
+      const updatedAdmin = await x2EarnApps.appAdmin(app1Id)
       expect(updatedAdmin).to.eql(otherAccounts[1].address)
       expect(updatedAdmin).to.not.eql(admin)
     })

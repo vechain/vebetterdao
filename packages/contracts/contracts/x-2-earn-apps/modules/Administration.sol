@@ -5,56 +5,33 @@ import { DataTypes } from "../../libraries/DataTypes.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
 
-abstract contract Moderation is Initializable, X2EarnAppsUpgradeable {
-  /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.Moderation
-  struct ModerationStorage {
-    mapping(bytes32 => address[]) _appModerators;
+abstract contract Administration is Initializable, X2EarnAppsUpgradeable {
+  /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.Administration
+  struct AdministrationStorage {
+    mapping(bytes32 => address[]) _moderators;
     mapping(bytes32 => address) _admin;
   }
 
-  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnApps.Moderation")) - 1)) & ~bytes32(uint256(0xff))
-  bytes32 private constant ModerationStorageLocation =
-    0x3afe0a34e7e49fed8548e2cced017fb9ddf26feed8e8f54514897fdcd4779800;
+  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnApps.Administration")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 private constant AdministrationStorageLocation =
+    0x5830f0e95c01712d916c34d9e2fa42e9f749b325b67bce7382d70bb99c623500;
 
-  function _getModerationStorage() internal pure returns (ModerationStorage storage $) {
+  function _getAdministrationStorage() internal pure returns (AdministrationStorage storage $) {
     assembly {
-      $.slot := ModerationStorageLocation
+      $.slot := AdministrationStorageLocation
     }
   }
 
   /**
    * @dev Initializes the contract
    */
-  function __Moderation_init() internal onlyInitializing {
-    __Moderation_init_unchained();
+  function __Administration_init() internal onlyInitializing {
+    __Administration_init_unchained();
   }
 
-  function __Moderation_init_unchained() internal onlyInitializing {}
+  function __Administration_init_unchained() internal onlyInitializing {}
 
-  /////// Admin ///////
-
-  /**
-   * @dev Returns true if an account is the admin of the app
-   *
-   * @param appId the hashed name of the app
-   * @param account the address of the account
-   */
-  function isAppAdmin(bytes32 appId, address account) public view returns (bool) {
-    ModerationStorage storage $ = _getModerationStorage();
-
-    return $._admin[appId] == account;
-  }
-
-  /**
-   * @dev Returns the admin address of the app
-   *
-   * @param appId the hashed name of the app
-   */
-  function admin(bytes32 appId) public view returns (address) {
-    ModerationStorage storage $ = _getModerationStorage();
-
-    return $._admin[appId];
-  }
+  // ---------- Setters ---------- //
 
   /**
    * @dev Update the admin address of the app
@@ -77,12 +54,10 @@ abstract contract Moderation is Initializable, X2EarnAppsUpgradeable {
   function _setAppAdmin(bytes32 appId, address newAdmin) internal virtual override exists(appId) {
     require(newAdmin != address(0), "XApps: admin is the zero address");
 
-    ModerationStorage storage $ = _getModerationStorage();
+    AdministrationStorage storage $ = _getAdministrationStorage();
 
     $._admin[appId] = newAdmin;
   }
-
-  /////// Moderators ///////
 
   /**
    * @dev Add a moderator to the app
@@ -93,9 +68,9 @@ abstract contract Moderation is Initializable, X2EarnAppsUpgradeable {
   function addAppModerator(bytes32 appId, address moderator) external virtual exists(appId) {
     _authorizeAppManagement(appId);
 
-    ModerationStorage storage $ = _getModerationStorage();
+    AdministrationStorage storage $ = _getAdministrationStorage();
 
-    $._appModerators[appId].push(moderator);
+    $._moderators[appId].push(moderator);
   }
 
   /**
@@ -107,9 +82,9 @@ abstract contract Moderation is Initializable, X2EarnAppsUpgradeable {
   function removeAppModerator(bytes32 appId, address moderator) external exists(appId) {
     _authorizeAppManagement(appId);
 
-    ModerationStorage storage $ = _getModerationStorage();
+    AdministrationStorage storage $ = _getAdministrationStorage();
 
-    address[] storage moderators = $._appModerators[appId];
+    address[] storage moderators = $._moderators[appId];
     for (uint256 i = 0; i < moderators.length; i++) {
       if (moderators[i] == moderator) {
         moderators[i] = moderators[moderators.length - 1];
@@ -119,15 +94,40 @@ abstract contract Moderation is Initializable, X2EarnAppsUpgradeable {
     }
   }
 
+  // ---------- Getters ---------- //
+
+  /**
+   * @dev Returns true if an account is the admin of the app
+   *
+   * @param appId the hashed name of the app
+   * @param account the address of the account
+   */
+  function isAppAdmin(bytes32 appId, address account) public view returns (bool) {
+    AdministrationStorage storage $ = _getAdministrationStorage();
+
+    return $._admin[appId] == account;
+  }
+
+  /**
+   * @dev Returns the admin address of the app
+   *
+   * @param appId the hashed name of the app
+   */
+  function appAdmin(bytes32 appId) public view returns (address) {
+    AdministrationStorage storage $ = _getAdministrationStorage();
+
+    return $._admin[appId];
+  }
+
   /**
    * @dev Returns the list of moderators of the app
    *
    * @param appId the hashed name of the app
    */
   function appModerators(bytes32 appId) public view returns (address[] memory) {
-    ModerationStorage storage $ = _getModerationStorage();
+    AdministrationStorage storage $ = _getAdministrationStorage();
 
-    return $._appModerators[appId];
+    return $._moderators[appId];
   }
 
   /**
@@ -137,9 +137,9 @@ abstract contract Moderation is Initializable, X2EarnAppsUpgradeable {
    * @param account the address of the account
    */
   function isAppModerator(bytes32 appId, address account) public view returns (bool) {
-    ModerationStorage storage $ = _getModerationStorage();
+    AdministrationStorage storage $ = _getAdministrationStorage();
 
-    address[] memory moderators = $._appModerators[appId];
+    address[] memory moderators = $._moderators[appId];
     for (uint256 i = 0; i < moderators.length; i++) {
       if (moderators[i] == account) {
         return true;
