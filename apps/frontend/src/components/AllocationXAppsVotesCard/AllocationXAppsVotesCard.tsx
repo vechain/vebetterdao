@@ -129,7 +129,7 @@ export const AllocationXAppsVotesCard = ({ roundId, maxRanks = 5 }: Props) => {
             </VStack>
             <VStack align={["flex-start"]} spacing={0}>
               <Skeleton isLoaded={!votersLoading}>
-                <Heading size={["xl"]} color={"primary.500"}>
+                <Heading size={["xl"]} color={"primary.500"} data-testid="total-voters">
                   {compactFormatter.format(Number(voters))}
                 </Heading>
               </Skeleton>

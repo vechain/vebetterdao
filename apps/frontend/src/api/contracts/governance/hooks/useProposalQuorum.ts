@@ -15,12 +15,13 @@ const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
  */
 export const getProposalQuorum = async (
   thor: Connex.Thor,
-  blockNumber: string,
+  blockNumber?: string | number,
 ): Promise<{
   original: string
   scaled: string
   formatted: string
 }> => {
+  if (!blockNumber) return Promise.reject(new Error("blockNumber is required"))
   const quorumAbi = b3trGovernorAbi.find(abi => abi.name === "quorum")
   if (!quorumAbi) throw new Error("quorum function not found")
   const res = await thor.account(GOVERNANCE_CONTRACT).method(quorumAbi).call(blockNumber)
@@ -38,18 +39,18 @@ export const getProposalQuorum = async (
   }
 }
 
-export const getProposalQuorumQueryKey = (blockNumber: string) => ["proposalQuorum", blockNumber]
+export const getProposalQuorumQueryKey = (blockNumber?: string | number) => ["proposalQuorum", blockNumber]
 /**
  *  Hook to get the quorum at a given block number
  * @param blockNumber  the block number to check (proposal.voteStart)
  * @returns  the quorum at the given block number
  */
-export const useProposalQuorum = (blockNumber: string) => {
+export const useProposalQuorum = (blockNumber?: string | number) => {
   const { thor } = useConnex()
 
   return useQuery({
     queryKey: getProposalQuorumQueryKey(blockNumber),
     queryFn: async () => await getProposalQuorum(thor, blockNumber),
-    enabled: !!thor,
+    enabled: !!thor && !!blockNumber,
   })
 }

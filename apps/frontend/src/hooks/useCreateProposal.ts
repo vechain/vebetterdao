@@ -1,9 +1,8 @@
 import { buildCreateProposalTx, getProposalEvents } from "@/api"
-import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
-import { useConnex, useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/dapp-kit-react"
 import { governanceAvailableContracts } from "@/constants"
 import { ethers } from "ethers"
 export type AvailableContractAbis = (typeof governanceAvailableContracts)[number]["abi"]["abi"][number]
@@ -29,8 +28,14 @@ export type useCreateProposalProps = {
   onSuccess?: () => void
 }
 
+type BuildClausesProps = {
+  description: string
+  actions: ProposalAction[]
+  startRoundId: number | string
+}
+
 type useCreateProposalReturnValue = {
-  sendTransaction: (description?: string, actions?: ProposalAction[]) => Promise<void>
+  sendTransaction: (props: BuildClausesProps) => Promise<void>
 } & Omit<UseSendTransactionReturnValue, "sendTransaction">
 
 /**
@@ -44,9 +49,7 @@ export const useCreateProposal = ({
   invalidateCache = true,
   onSuccess,
 }: useCreateProposalProps): useCreateProposalReturnValue => {
-  const { thor } = useConnex()
   const { account } = useWallet()
-  const toast = useToast()
   const queryClient = useQueryClient()
 
   //Refetch queries to update ui after the tx is confirmed
@@ -60,16 +63,8 @@ export const useCreateProposal = ({
       })
     }
 
-    toast({
-      title: "Proposal created",
-      description: `Your proposal has been created successfully`,
-      status: "success",
-      position: "bottom-left",
-      duration: 5000,
-      isClosable: true,
-    })
     onSuccess?.()
-  }, [invalidateCache, queryClient, toast, onSuccess])
+  }, [invalidateCache, queryClient, onSuccess])
 
   const result = useSendTransaction({
     signerAccount: account,
@@ -77,7 +72,7 @@ export const useCreateProposal = ({
   })
 
   const buildClauses = useCallback(
-    (description: string, actions: ProposalAction[]) => {
+    ({ description, actions, startRoundId }: BuildClausesProps) => {
       if (!account) throw new Error("Account is required")
       type ReducedActions = {
         contractsAbi: AvailableContractAbis[]
@@ -103,26 +98,24 @@ export const useCreateProposal = ({
       )
 
       const createProposalClause = buildCreateProposalTx(
-        thor,
         res.contractsAbi,
         res.contractsAddress,
         res.functionsParams,
         description,
+        startRoundId,
       )
-
-      //   const delegateClause = buildDelegateVot3Tx(thor, account)
 
       return [createProposalClause]
     },
-    [thor, account],
+    [account],
   )
 
   const onMutate = useCallback(
-    async (description?: string, actions?: ProposalAction[]) => {
-      if (!description) throw new Error("description is required")
-      if (!actions) throw new Error("actions is required")
+    async (data: BuildClausesProps) => {
+      if (!data.description) throw new Error("description is required")
+      if (!data.actions) throw new Error("actions is required")
 
-      const clauses = buildClauses(description, actions)
+      const clauses = buildClauses(data)
       return result.sendTransaction(clauses)
     },
     [buildClauses, result],

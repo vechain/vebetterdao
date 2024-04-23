@@ -2,19 +2,18 @@ import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 
 import { getConfig } from "@repo/config"
+import { B3TRGovernor__factory } from "@repo/contracts"
 const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
-import { B3TRGovernorJson } from "@repo/contracts"
-const b3trGovernorAbi = B3TRGovernorJson.abi
 
+const governorInterface = B3TRGovernor__factory.createInterface()
 /**
  * Get the current proposal threshold from the governor contract (i.e the number of votes required to create a proposal)
  * @param thor  the thor client
  * @returns  the current proposal threshold
  */
 export const getProposalThreshold = async (thor: Connex.Thor) => {
-  const proposalThresholdAbi = b3trGovernorAbi.find(abi => abi.name === "proposalThreshold")
-  if (!proposalThresholdAbi) throw new Error("proposalThreshold function not found")
-  const res = await thor.account(GOVERNANCE_CONTRACT).method(proposalThresholdAbi).call()
+  const functionFragment = governorInterface.getFunction("proposalThreshold").format("json")
+  const res = await thor.account(GOVERNANCE_CONTRACT).method(JSON.parse(functionFragment)).call()
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
   return res.decoded[0]

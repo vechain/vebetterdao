@@ -16,6 +16,7 @@ import {
   getProposalIdFromTx,
   waitForProposalToBeActive,
   bootstrapAndStartEmissions,
+  ZERO_ADDRESS,
 } from "./helpers"
 import { expect } from "chai"
 import { ethers } from "hardhat"
@@ -67,6 +68,92 @@ describe("VoterRewards", () => {
       const { voterRewards, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
 
       await expect(voterRewards.connect(otherAccount).setGalaxyMember(otherAccount.address)).to.be.reverted
+    })
+
+    it("Should not be able to register vote if proposal start is zero", async () => {
+      const { voterRewards, otherAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await voterRewards.connect(owner).setVoteRegistrarRole(otherAccount.address)
+
+      await expect(voterRewards.connect(otherAccount).registerVote(0, otherAccount.address, ethers.parseEther("1000")))
+        .to.be.reverted
+    })
+
+    it("Should not be able to register vote for zero address voter", async () => {
+      const { voterRewards, otherAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await voterRewards.connect(owner).setVoteRegistrarRole(otherAccount.address)
+
+      await expect(voterRewards.connect(otherAccount).registerVote(1, ZERO_ADDRESS, ethers.parseEther("1000"))).to.be
+        .reverted
+    })
+
+    it("Should return correct scaling factor", async () => {
+      const { voterRewards } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      expect(await voterRewards.scalingFactor()).to.equal(10 ** 6)
+    })
+
+    it("Should return correct b3tr address", async () => {
+      const { voterRewards, b3tr } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      expect(await voterRewards.b3tr()).to.equal(await b3tr.getAddress())
+    })
+
+    it("Should be able to set level to multiplier", async () => {
+      const { voterRewards, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      await voterRewards.connect(owner).setLevelToMultiplier(1, 2)
+      expect(await voterRewards.levelToMultiplier(1)).to.equal(2)
+
+      await expect(voterRewards.connect(owner).setLevelToMultiplier(0, 2)).to.be.reverted // Level cannot be zero
+      await expect(voterRewards.connect(owner).setLevelToMultiplier(1, 0)).to.be.reverted // Multiplier cannot be zero
+
+      await expect(voterRewards.connect(otherAccount).setLevelToMultiplier(1, 2)).to.be.reverted // Should not be able to set level to multiplier if not admin
+    })
+
+    it("Should be able to set scaling factor", async () => {
+      const { voterRewards, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      await voterRewards.connect(owner).setScalingFactor(100)
+      expect(await voterRewards.scalingFactor()).to.equal(100)
+
+      await expect(voterRewards.connect(otherAccount).setScalingFactor(100)).to.be.reverted // Should not be able to set scaling factor if not admin
+
+      await expect(voterRewards.connect(owner).setScalingFactor(0)).to.be.reverted // Scaling factor cannot be zero
+    })
+
+    it("Should be able to set galaxy member address", async () => {
+      const { voterRewards, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      await voterRewards.connect(owner).setGalaxyMember(otherAccount.address)
+      expect(await voterRewards.galaxyMember()).to.equal(otherAccount.address)
+
+      await expect(voterRewards.connect(otherAccount).setGalaxyMember(otherAccount.address)).to.be.reverted // Should not be able to set galaxy member address if not admin
+      await expect(voterRewards.connect(owner).setGalaxyMember(ZERO_ADDRESS)).to.be.reverted // Galaxy member address cannot be zero
+    })
+
+    it("Should be able to set emissions address", async () => {
+      const { voterRewards, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      await voterRewards.connect(owner).setEmissions(otherAccount.address)
+      expect(await voterRewards.emissions()).to.equal(otherAccount.address)
+
+      await expect(voterRewards.connect(otherAccount).setEmissions(otherAccount.address)).to.be.reverted // Should not be able to set emissions address if not admin
+      await expect(voterRewards.connect(owner).setEmissions(ZERO_ADDRESS)).to.be.reverted // Emissions address cannot be zero
+    })
+
+    it("Should be able to set vote registrar role address", async () => {
+      const { voterRewards, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      await voterRewards.connect(owner).setVoteRegistrarRole(otherAccount.address)
+
+      await expect(voterRewards.connect(otherAccount).setVoteRegistrarRole(otherAccount.address)).to.be.reverted // Should not be able to set vote registrar role if not admin
+      await expect(voterRewards.connect(owner).setVoteRegistrarRole(ZERO_ADDRESS)).to.be.reverted // Vote registrar role address cannot be zero
     })
   })
 
@@ -144,6 +231,114 @@ describe("VoterRewards", () => {
 
       expect(newImplAddress.toUpperCase()).to.not.eql(currentImplAddress.toUpperCase())
       expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
+    })
+
+    it("Should not be able to initialize the contract after already being initialized", async function () {
+      const { voterRewards, owner, emissions, galaxyMember, b3tr } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await expect(
+        voterRewards.initialize(
+          owner.address,
+          owner.address,
+          await emissions.getAddress(),
+          await galaxyMember.getAddress(),
+          await b3tr.getAddress(),
+          levels,
+          multipliers,
+        ),
+      ).to.be.reverted
+    })
+
+    it("Should not be able to deploy proxy with galaxy member address as zero address", async function () {
+      const { owner, emissions, b3tr } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await expect(
+        deployProxy("VoterRewards", [
+          owner.address,
+          owner.address,
+          await emissions.getAddress(),
+          ZERO_ADDRESS,
+          await b3tr.getAddress(),
+          levels,
+          multipliers,
+        ]),
+      ).to.be.reverted
+    })
+
+    it("Should not be able to deploy proxy with emissions address as zero address", async function () {
+      const { owner, galaxyMember, b3tr } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await expect(
+        deployProxy("VoterRewards", [
+          owner.address,
+          owner.address,
+          ZERO_ADDRESS,
+          await galaxyMember.getAddress(),
+          await b3tr.getAddress(),
+          levels,
+          multipliers,
+        ]),
+      ).to.be.reverted
+    })
+
+    it("Should not be able to deploy proxy with b3tr address as zero address", async function () {
+      const { owner, emissions, galaxyMember } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await expect(
+        deployProxy("VoterRewards", [
+          owner.address,
+          owner.address,
+          await emissions.getAddress(),
+          await galaxyMember.getAddress(),
+          ZERO_ADDRESS,
+          levels,
+          multipliers,
+        ]),
+      ).to.be.reverted
+    })
+
+    it("Should not be able to deploy proxy with incorrect levels and multipliers", async function () {
+      const { owner, emissions, galaxyMember, b3tr } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await expect(
+        deployProxy("VoterRewards", [
+          owner.address,
+          owner.address,
+          await emissions.getAddress(),
+          await galaxyMember.getAddress(),
+          await b3tr.getAddress(),
+          [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+          [1, 2, 3, 4, 5, 6, 7, 8, 9], // Incorrect multipliers length should be same as levels length
+        ]),
+      ).to.be.reverted
+    })
+
+    it("Should not be able to deploy proxy with levels empty", async function () {
+      const { owner, emissions, galaxyMember, b3tr } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await expect(
+        deployProxy("VoterRewards", [
+          owner.address,
+          owner.address,
+          await emissions.getAddress(),
+          await galaxyMember.getAddress(),
+          await b3tr.getAddress(),
+          [],
+          [],
+        ]),
+      ).to.be.reverted
     })
   })
 
@@ -324,6 +519,8 @@ describe("VoterRewards", () => {
 
       await voterRewards.connect(voter2).claimReward(1, voter2.address)
       await voterRewards.connect(voter3).claimReward(1, voter3.address)
+
+      await expect(voterRewards.connect(voter2).claimReward(1, ZERO_ADDRESS)).to.be.reverted // Should not be able to claim rewards for zero address
 
       expect(await b3tr.balanceOf(voter2.address)).to.equal(voter2Rewards)
       expect(await b3tr.balanceOf(voter3.address)).to.equal(voter3Rewards)
@@ -639,7 +836,9 @@ describe("VoterRewards", () => {
 
       await waitForNextBlock()
 
-      expect(await galaxyMember.getPastHighestLevel(voter1.address, await xAllocationVoting.roundSnapshot(2))).to.equal(5)
+      expect(await galaxyMember.getPastHighestLevel(voter1.address, await xAllocationVoting.roundSnapshot(2))).to.equal(
+        5,
+      )
 
       const roundId2 = await xAllocationVoting.currentRoundId()
 
@@ -758,7 +957,9 @@ describe("VoterRewards", () => {
 
       expect(await galaxyMember.getHighestLevel(voter1.address)).to.equal(2)
 
-      expect(await galaxyMember.getPastHighestLevel(voter1.address, await xAllocationVoting.roundSnapshot(2))).to.equal(0) // Voter 1 upgraded after the round snapshot so he results in not having a level for the round
+      expect(await galaxyMember.getPastHighestLevel(voter1.address, await xAllocationVoting.roundSnapshot(2))).to.equal(
+        0,
+      ) // Voter 1 upgraded after the round snapshot so he results in not having a level for the round
 
       const roundId2 = await xAllocationVoting.currentRoundId()
 
@@ -1261,6 +1462,34 @@ describe("VoterRewards", () => {
       await expect(
         voterRewards.connect(otherAccount).registerVote(proposalStart, otherAccount.address, ethers.parseEther("1000")),
       ).to.be.reverted
+    })
+
+    it("Should not be able to claim rewards for cycle zero", async () => {
+      const { voterRewards, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await expect(voterRewards.claimReward(0, otherAccount.address)).to.be.reverted // Cycle zero is a non-existing cycle, first cycle when emissions start is 1
+    })
+
+    it("Should not register any vote if voting power is zero", async () => {
+      const { voterRewards, otherAccount, owner, emissions, minterAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await voterRewards.connect(owner).setVoteRegistrarRole(otherAccount.address)
+
+      await bootstrapEmissions()
+
+      await emissions.connect(minterAccount).start()
+
+      const totalVotesBefore = await voterRewards.cycleToTotal(1)
+
+      await voterRewards.connect(otherAccount).registerVote(1, otherAccount.address, ethers.parseEther("0"))
+
+      const totalVotesAfter = await voterRewards.cycleToTotal(1)
+
+      expect(totalVotesBefore).to.equal(totalVotesAfter) // We expect no votes to be registered when voting power is zero
     })
   })
 

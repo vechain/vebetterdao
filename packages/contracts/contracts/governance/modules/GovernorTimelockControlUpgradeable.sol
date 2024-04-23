@@ -3,7 +3,7 @@
 
 pragma solidity ^0.8.20;
 
-import { IGovernor } from "../../interfaces/IGovernor.sol";
+import { IB3TRGovernor } from "../../interfaces/IB3TRGovernor.sol";
 import { GovernorUpgradeable } from "../GovernorUpgradeable.sol";
 import { TimelockControllerUpgradeable } from "@openzeppelin/contracts-upgradeable/governance/TimelockControllerUpgradeable.sol";
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
@@ -26,6 +26,10 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
  *
  * NOTE: `AccessManager` does not support scheduling more than one operation with the same target and calldata at
  * the same time. See {AccessManager-schedule} for a workaround.
+ *
+ * Modification:
+ * - Made storage internal
+ * - Moved state logic inside B3TRGovernor:state
  */
 abstract contract GovernorTimelockControlUpgradeable is Initializable, GovernorUpgradeable {
   /// @custom:storage-location erc7201:openzeppelin.storage.GovernorTimelockControl
@@ -38,7 +42,7 @@ abstract contract GovernorTimelockControlUpgradeable is Initializable, GovernorU
   bytes32 private constant GovernorTimelockControlStorageLocation =
     0x0d5829787b8befdbc6044ef7457d8a95c2a04bc99235349f1a212c063e59d400;
 
-  function _getGovernorTimelockControlStorage() private pure returns (GovernorTimelockControlStorage storage $) {
+  function _getGovernorTimelockControlStorage() internal pure returns (GovernorTimelockControlStorage storage $) {
     assembly {
       $.slot := GovernorTimelockControlStorageLocation
     }
@@ -63,29 +67,6 @@ abstract contract GovernorTimelockControlUpgradeable is Initializable, GovernorU
   }
 
   /**
-   * @dev Overridden version of the {Governor-state} function that considers the status reported by the timelock.
-   */
-  function state(uint256 proposalId) public view virtual override returns (ProposalState) {
-    GovernorTimelockControlStorage storage $ = _getGovernorTimelockControlStorage();
-    ProposalState currentState = super.state(proposalId);
-
-    if (currentState != ProposalState.Queued) {
-      return currentState;
-    }
-
-    bytes32 queueid = $._timelockIds[proposalId];
-    if ($._timelock.isOperationPending(queueid)) {
-      return ProposalState.Queued;
-    } else if ($._timelock.isOperationDone(queueid)) {
-      // This can happen if the proposal is executed directly on the timelock.
-      return ProposalState.Executed;
-    } else {
-      // This can happen if the proposal is canceled directly on the timelock.
-      return ProposalState.Canceled;
-    }
-  }
-
-  /**
    * @dev Public accessor to check the address of the timelock
    */
   function timelock() public view virtual returns (address) {
@@ -94,7 +75,7 @@ abstract contract GovernorTimelockControlUpgradeable is Initializable, GovernorU
   }
 
   /**
-   * @dev See {IGovernor-proposalNeedsQueuing}.
+   * @dev See {IB3TRGovernor-proposalNeedsQueuing}.
    */
   function proposalNeedsQueuing(uint256) public view virtual override returns (bool) {
     return true;

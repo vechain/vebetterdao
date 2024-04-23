@@ -18,6 +18,8 @@ import {
   Heading,
   ModalFooter,
   Box,
+  useDisclosure,
+  Text,
 } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { useFieldArray, useForm } from "react-hook-form"
@@ -26,17 +28,24 @@ import { useEffect, useMemo } from "react"
 import { GenerateFunctionToCallParamsInput } from "./GenerateFunctionToCallParamsInput"
 import { FaPlus } from "react-icons/fa6"
 import { ProposalAction, useCreateProposal } from "@/hooks/useCreateProposal"
-import { useGetVotes, useProposalThreshold, useVot3Balance, useVot3Delegates } from "@/api"
+import {
+  useCanProposalStartInNextRound,
+  useCurrentAllocationsRoundId,
+  useGetVotes,
+  useProposalThreshold,
+  useVot3Balance,
+} from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useDelegateVot3 } from "@/hooks/useDelegateVot3"
 import { governanceAvailableContracts } from "@/constants"
-import { ConfirmTransactionModalContent } from "../ConfirmTransactionModalContent"
+import { TransactionModal } from "../TransactionModal"
 
 const AvailableContracts = governanceAvailableContracts
 
 type Props = {
   isOpen: boolean
   onClose: () => void
+  onOpen: () => void
 }
 export type FunctionParamsField = { id: string; name: string; type: string; internalType: string; value: any }
 
@@ -45,42 +54,53 @@ export type FormData = {
   functionToCall?: string
 } & Omit<ProposalAction, "contractAbi">
 
-export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose }) => {
-  const { sendTransaction, status, sendTransactionError, txReceiptError, resetStatus } = useCreateProposal({})
+export const CreateProposalModal: React.FC<Props> = ({ isOpen, onClose, onOpen }) => {
+  const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
+  const { data: currentRoundId } = useCurrentAllocationsRoundId()
+  const { data: canProposalStartInNextRound } = useCanProposalStartInNextRound()
+  const createProposalMutation = useCreateProposal({})
 
-  const onSuccess = () => {
-    resetStatus()
-    onClose()
+  const onSubmit = (description: string, actions: ProposalAction[]) => {
+    if (!currentRoundId) throw new Error("Current round id is not available")
+    const startRoundId = Number(currentRoundId) + (canProposalStartInNextRound ? 1 : 2)
+    onConfirmationOpen()
+    createProposalMutation.sendTransaction({ description, actions, startRoundId })
   }
 
-  const onSubmit = (description?: string, actions?: ProposalAction[]) => {
-    sendTransaction(description, actions)
+  const onTryAgain = () => {
+    onConfirmationClose()
+    onOpen()
   }
-
-  const renderContent = useMemo(() => {
-    if (status !== "ready")
-      return (
-        <ConfirmTransactionModalContent
-          description={`Create a proposal`}
-          status={status}
-          error={sendTransactionError?.message ?? txReceiptError?.message}
-          onSuccess={onSuccess}
-          onTryAgain={resetStatus}
-        />
-      )
-    return <CreateProposalModalForm onSubmit={onSubmit} />
-  }, [status])
+  if (createProposalMutation.status !== "ready")
+    return (
+      <TransactionModal
+        isOpen={isConfirmationOpen}
+        onClose={onConfirmationClose}
+        confirmationTitle="Create new proposal"
+        successTitle="Proposal created!"
+        status={createProposalMutation.error ? "error" : createProposalMutation.status}
+        errorDescription={createProposalMutation.error?.reason}
+        errorTitle={createProposalMutation.error ? "Error creating proposal" : undefined}
+        showTryAgainButton={true}
+        onTryAgain={onTryAgain}
+        pendingTitle="Creating proposal..."
+        txId={createProposalMutation.txReceipt?.meta.txID}
+        showExplorerButton
+      />
+    )
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
       <ModalOverlay />
-      <ModalContent>{renderContent}</ModalContent>
+      <ModalContent>
+        <CreateProposalModalForm onSubmit={onSubmit} />
+      </ModalContent>
     </Modal>
   )
 }
 
 type CreateProposalModalFormProps = {
-  onSubmit: (description?: string, actions?: ProposalAction[]) => void
+  onSubmit: (description: string, actions: ProposalAction[]) => void
 }
 
 export const CreateProposalModalForm: React.FC<CreateProposalModalFormProps> = ({ onSubmit }) => {
@@ -93,6 +113,7 @@ export const CreateProposalModalForm: React.FC<CreateProposalModalFormProps> = (
   const votes = votesObject?.scaled
 
   const { data: vot3Balance } = useVot3Balance(account ?? undefined)
+  const { data: canProposalStartInNextRound } = useCanProposalStartInNextRound()
 
   const {
     handleSubmit,
@@ -163,7 +184,7 @@ export const CreateProposalModalForm: React.FC<CreateProposalModalFormProps> = (
   }, [selectedContractFunctionInputs, remove, append])
 
   const handleOnSubmit = (data: FormData) => {
-    onSubmit(data.description, [
+    onSubmit(data.description ?? "", [
       {
         contractAddress: data.contractAddress,
         contractAbi: selectedAbi,
@@ -292,6 +313,11 @@ export const CreateProposalModalForm: React.FC<CreateProposalModalFormProps> = (
           <Box alignSelf={"flex-start"} mt={2}>
             {delegationMessage}
           </Box>
+          <Text alignSelf={"flex-start"} mt={2} fontSize={"xs"}>
+            {canProposalStartInNextRound
+              ? "Proposal is going to be votable in the next round"
+              : "Not enough time before the next round. Proposal is going to be votable in the round after the next one"}
+          </Text>
         </VStack>
       </ModalBody>
       <ModalFooter>

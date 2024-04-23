@@ -42,6 +42,30 @@ describe("VOT3", function () {
       await catchRevert(vot3.connect(otherAccount).pause())
       await catchRevert(vot3.connect(otherAccount).unpause())
     })
+
+    it("Should be able to pause and unpause VOT3 contract", async function () {
+      const { vot3, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      await vot3.connect(owner).pause()
+
+      await expect(vot3.connect(otherAccount).unpause()).to.be.reverted // only admin can unpause
+
+      await vot3.connect(owner).unpause()
+
+      await expect(vot3.connect(otherAccount).pause()).to.be.reverted // only admin can pause
+    })
+
+    it("Should be able to get nonces", async function () {
+      const { vot3, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      await vot3.nonces(owner)
+    })
+
+    it("Should be able to get b3tr address", async function () {
+      const { vot3, b3tr } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      expect(await vot3.b3tr()).to.eql(await b3tr.getAddress())
+    })
   })
 
   describe("Contract upgradeablity", () => {
@@ -116,6 +140,14 @@ describe("VOT3", function () {
 
       expect(newImplAddress.toUpperCase()).to.not.eql(currentImplAddress.toUpperCase())
       expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
+    })
+
+    it("Should not be able to initialize the contract after it has already been initialized", async function () {
+      const { vot3, owner, b3tr } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await expect(vot3.initialize(owner.address, await b3tr.getAddress())).to.be.reverted // already initialized
     })
   })
 
@@ -587,6 +619,37 @@ describe("VOT3", function () {
       expect(await vot3Contract.getPastQuadraticVotingPower(accounts[3], receipt.blockNumber - 1)).to.eql(
         ethers.parseEther("223.606797749"),
       )
+    })
+  })
+
+  describe("Transferring", function () {
+    it("Should be able to transfer VOT3", async function () {
+      const { vot3, otherAccount, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      // Mint some B3TR and swap for VOT3
+      await getVot3Tokens(otherAccount, "1000")
+
+      // transfer
+      await vot3.connect(otherAccount).transfer(owner.address, ethers.parseEther("1"))
+
+      expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("999"))
+      expect(await vot3.balanceOf(owner)).to.eql(ethers.parseEther("1"))
+    })
+
+    it("Should be able to approve and transferFrom VOT3", async function () {
+      const { vot3, otherAccount, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      // Mint some B3TR and swap for VOT3
+      await getVot3Tokens(otherAccount, "1000")
+
+      // approve
+      await vot3.connect(otherAccount).approve(owner.address, ethers.parseEther("1"))
+
+      // transferFrom
+      await vot3.connect(owner).transferFrom(otherAccount.address, owner.address, ethers.parseEther("1"))
+
+      expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("999"))
+      expect(await vot3.balanceOf(owner)).to.eql(ethers.parseEther("1"))
     })
   })
 })

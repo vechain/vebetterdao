@@ -1,6 +1,6 @@
 import { ethers } from "hardhat"
 import { expect } from "chai"
-import { getOrDeployContractInstances } from "./helpers"
+import { catchRevert, getOrDeployContractInstances } from "./helpers"
 import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 
@@ -80,6 +80,14 @@ describe("TimeLock", function () {
 
       expect(newImplAddress.toUpperCase()).to.not.eql(currentImplAddress.toUpperCase())
       expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
+    })
+
+    it("Cannot initialize twice", async function () {
+      const { owner, timeLock } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await catchRevert(timeLock.initialize(1, [], [], owner.address, owner.address))
     })
   })
 })

@@ -79,6 +79,7 @@ export const SelectAppVotesInput = ({
                 render={({ field: { onChange, value } }) => {
                   return (
                     <Input
+                      data-testid={`${xApp?.name}-vote`}
                       w="full"
                       placeholder="0"
                       value={value}

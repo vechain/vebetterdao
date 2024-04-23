@@ -4670,10 +4670,37 @@
     elliptic "^6.5.5"
     ethers "6.11.1"
 
+"@vechain/sdk-core@1.0.0-beta.3":
+  version "1.0.0-beta.3"
+  resolved "https://registry.yarnpkg.com/@vechain/sdk-core/-/sdk-core-1.0.0-beta.3.tgz#e095902dced4bd2a4a8c9b65033f6ac4b0226dc1"
+  integrity sha512-PgKjCPOwb+9rAXp8FTcrG1UwFnAaV0gzfmbCA/pPiEr8jOIrQd5+1S4Q9vDZ5dVDCnJq73y2OH5zPf4ff84IAA==
+  dependencies:
+    "@ethereumjs/rlp" "^5.0.2"
+    "@types/elliptic" "^6.4.18"
+    "@vechain/sdk-errors" "1.0.0-beta.3"
+    blakejs "^1.2.1"
+    elliptic "^6.5.5"
+    ethers "6.11.1"
+
 "@vechain/sdk-errors@1.0.0-beta.2":
   version "1.0.0-beta.2"
   resolved "https://registry.yarnpkg.com/@vechain/sdk-errors/-/sdk-errors-1.0.0-beta.2.tgz#29ee4b4b0a4371a83e823b52170af8bb45e1085d"
   integrity sha512-O7CVZ15jzrFZmDEvymeRl5mhLug1pGYuOsJzU8a1V3qk5wzyzIZthMT1eK6xczapJsLArx6F82vMR+5mYIDQOA==
+
+"@vechain/sdk-errors@1.0.0-beta.3":
+  version "1.0.0-beta.3"
+  resolved "https://registry.yarnpkg.com/@vechain/sdk-errors/-/sdk-errors-1.0.0-beta.3.tgz#44eb37d4ef0d1b050373b2611256667a9ee8f7b4"
+  integrity sha512-ojuCG/sA4gGQqhpAqLtC3T096TtJEEd+2WhdifZL5IGxQX34Gn/eJF8UDo7DapybAUhWUDTdOO8pI/0zLEetsQ==
+
+"@vechain/sdk-network@1.0.0-beta.3", "@vechain/sdk-network@^1.0.0-beta.3":
+  version "1.0.0-beta.3"
+  resolved "https://registry.yarnpkg.com/@vechain/sdk-network/-/sdk-network-1.0.0-beta.3.tgz#1bc94e49b0ed6e7b013d206bb835be58966006e0"
+  integrity sha512-tEha4Ct88+Oy7lNvhKJDGGw7rTcpgI7M+uK7Bl2kR8k7ypkP6znWS6p+RgjMzrls/uEpCSN1f9Fo+OWuzvY98A==
+  dependencies:
+    "@types/ws" "^8.5.10"
+    "@vechain/sdk-core" "1.0.0-beta.3"
+    "@vechain/sdk-errors" "1.0.0-beta.3"
+    axios "^1.6.7"
 
 "@vechain/sdk-network@^1.0.0-beta.1":
   version "1.0.0-beta.2"
@@ -4684,6 +4711,13 @@
     "@vechain/sdk-core" "1.0.0-beta.2"
     "@vechain/sdk-errors" "1.0.0-beta.2"
     axios "^1.6.7"
+
+"@vechain/sdk-wallet@^1.0.0-beta.3":
+  version "1.0.0-beta.3"
+  resolved "https://registry.yarnpkg.com/@vechain/sdk-wallet/-/sdk-wallet-1.0.0-beta.3.tgz#91009b63d894c528ca18446815a2d0a012896781"
+  integrity sha512-/dwk9PhRZ7o32rvMfZtSVXTcf/Q90Gm2g65EJQx9m1JRr8HdKKgJIBsONLQ+mRDL0UJycsqifk0uR556wTv8+A==
+  dependencies:
+    "@vechain/sdk-network" "1.0.0-beta.3"
 
 "@vechain/web3-providers-connex@^1.1.2":
   version "1.1.2"
@@ -15407,7 +15441,7 @@ solidity-comments@^0.0.2:
     solidity-comments-win32-ia32-msvc "0.0.2"
     solidity-comments-win32-x64-msvc "0.0.2"
 
-solidity-coverage@^0.8.1:
+solidity-coverage@^0.8.11:
   version "0.8.12"
   resolved "https://registry.yarnpkg.com/solidity-coverage/-/solidity-coverage-0.8.12.tgz#c4fa2f64eff8ada7a1387b235d6b5b0e6c6985ed"
   integrity sha512-8cOB1PtjnjFRqOgwFiD8DaUsYJtVJ6+YdXQtSZDrLGf8cdhhh8xzTtGzVTGeBf15kTv0v7lYPJlV/az7zLEPJw==

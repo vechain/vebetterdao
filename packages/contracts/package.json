@@ -42,6 +42,8 @@
     "@types/mocha": ">=9.1.0",
     "@vechain/hardhat-ethers": "^0.1.4",
     "@vechain/hardhat-vechain": "^0.1.4",
+    "@vechain/sdk-network": "^1.0.0-beta.3",
+    "@vechain/sdk-wallet": "^1.0.0-beta.3",
     "@vechain/web3-providers-connex": "^1.1.2",
     "chai": "^4.2.0",
     "dotenv": "^16.3.1",
@@ -49,7 +51,7 @@
     "hardhat-contract-sizer": "^2.10.0",
     "hardhat-gas-reporter": "^1.0.8",
     "hardhat-ignore-warnings": "^0.2.11",
-    "solidity-coverage": "^0.8.1",
+    "solidity-coverage": "^0.8.11",
     "ts-node": ">=8.0.0",
     "typechain": "^8.1.0",
     "typescript": ">=4.5.0"
@@ -65,7 +67,6 @@
     "ethers": "^6.9.0",
     "hardhat": "^2.19.1",
     "nft.storage": "^7.1.1",
-    "prettier": "^3.2.4",
-    "solidity-coverage": "^0.8.11"
+    "prettier": "^3.2.4"
   }
 }

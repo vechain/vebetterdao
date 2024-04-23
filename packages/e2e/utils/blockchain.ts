@@ -71,16 +71,31 @@ const VOT3_stake_abi = JSON.stringify([{
       type: "function"
 }])
 
+// Emissions getNextCycleBlock function ABI
+const Emissions_nextCycleBlock_abi = JSON.stringify([{
+    inputs: [],
+    name: "getNextCycleBlock",
+    outputs: [
+        {
+            internalType: "uint256",
+            name: "",
+            type: "uint256"
+        }
+    ],
+    stateMutability: "view",
+    type: "function"
+}])
+
 /**
  * Builds an object with account details - index, address, private key
  * @param accountIndex
  */
 const account = (accountIndex: number): Account => {
-    return {
-        index: accountIndex,
-        address: getAccountAddress(accountIndex),
-        pk: getAccountPrivateKey(accountIndex),
-    }
+  return {
+    index: accountIndex,
+    address: getAccountAddress(accountIndex),
+    pk: getAccountPrivateKey(accountIndex),
+  }
 }
 
 /**
@@ -163,7 +178,6 @@ const doERC20Transfer = async (args: ERC20TransferArgs) => {
     const txModule = new TransactionsModule(thorClient)
     const waitTx = await txModule.waitForTransaction(txId, {intervalMs: constants.TX_RECEIPT_INTERVAL, timeoutMs: constants.TX_RECEIPT_TIMEOUT})
     const txReceipt = waitTx ?? (() => { throw new Error('Unable to get transaction receipt') })()
-    console.log(`txReceipt: ${JSON.stringify(txReceipt, null, 2)}`)
     console.log(`ERC20 transfer transaction reverted: ${txReceipt.reverted}`)
     if (txReceipt.reverted) {
         throw new Error(`ERC20 transfer transaction reverted: ${txId}`)
@@ -231,6 +245,7 @@ const fundB3TR = async (address: string, amount: BigNumber) => {
     })
 }
 
+
 /**
  * Swap B3TR for VOT3
  * @param privateKey Private key of account
@@ -242,22 +257,13 @@ const swapB3TRForVOT3 = async (privateKey: Buffer, address: string, amount: BigN
     const httpClient = new HttpClient(constants.THOR_URL)
     const thorClient = new ThorClient(httpClient)
     // approve VOT3 contract to spend B3TR
-
-    const approveClause = clauseBuilder.functionInteraction(
-        constants.B3TR_CONTRACT_ADDRESS,
+    const approveClause = clauseBuilder.functionInteraction(constants.B3TR_CONTRACT_ADDRESS,
         coder.createInterface(ERC20_approve_abi).getFunction("approve") as FunctionFragment,
-        [
-            constants.VOT3_CONTRACT_ADDRESS,
-            amount.multipliedBy(constants.TOKEN_DECIMALS).toString()
-        ]
-    )
-    const stakeClause = clauseBuilder.functionInteraction(
-        constants.VOT3_CONTRACT_ADDRESS,
+        [constants.VOT3_CONTRACT_ADDRESS, amount.multipliedBy(constants.TOKEN_DECIMALS).toString()])
+    const stakeClause = clauseBuilder.functionInteraction(constants.VOT3_CONTRACT_ADDRESS,
         coder.createInterface(VOT3_stake_abi).getFunction("stake") as FunctionFragment,
-        [ amount.multipliedBy(constants.TOKEN_DECIMALS).toString() ]
-    )
+        [amount.multipliedBy(constants.TOKEN_DECIMALS).toString()])
     const clauses = [approveClause, stakeClause]
-
     const gasResult = await thorClient.gas.estimateGas(clauses, address, {gasPadding: 0.1})
     const latestBlock = await thorClient.blocks.getBestBlockCompressed()
     const transactionBody = {
@@ -305,7 +311,7 @@ const fundAccount = async (account_index: number, min_b3tr=constants.FUNDING_MIN
     }
     if (totalNeeded.isGreaterThan(0)) {
         // transfer B3TR to account
-        await blockchainUtils.fundB3TR(address, b3trNeeded)
+        await blockchainUtils.fundB3TR(address, totalNeeded)
         // swap B3TR for VOT3
         if (vot3Needed.isGreaterThan(0)) {
             await blockchainUtils.swapB3TRForVOT3(privateKey, address, vot3Needed)
@@ -324,6 +330,60 @@ const getRndAccountIndex = () => {
     return rndIndex
 }
 
+// Wait for the next block to be mined
+export const waitForNextBlock = async () => {
+    const httpClient = new HttpClient(constants.THOR_URL)
+    const thorClient = new ThorClient(httpClient)
+    let startingBlock = await thorClient.blocks.getBestBlockCompressed()
+    let currentBlock
+    do {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      currentBlock = await thorClient.blocks.getBestBlockCompressed()
+    } while (startingBlock?.number === currentBlock?.number)
+  }
+
+
+/**
+ * Move the specified number of blocks
+ * @param blocks Number of blocks to move
+ */
+export const moveBlocks = async (blocks: number) => {
+    for (let i = 0; i < blocks; i++) {
+      await waitForNextBlock()
+    }
+  }
+
+/**
+ * Waits for the specified block number
+ */
+const waitForBlock = async (blockNumber: number) => {
+    const httpClient = new HttpClient(constants.THOR_URL)
+    const thorClient = new ThorClient(httpClient)
+    const currentBlock = await thorClient.blocks.getBestBlockCompressed()
+    if (!currentBlock?.number) throw new Error("Could not get current block number")
+    if (currentBlock?.number < blockNumber) {
+      // Get blocks required to wait
+      const blocksToWait = blockNumber - currentBlock?.number
+      if (blocksToWait > 0) await moveBlocks(blocksToWait)
+    }
+    console.log(`Block number ${blockNumber} reached`)
+}
+
+/**
+ * Waits for the allocation voting cycle to complete
+ */
+const waitForNextCycle = async () => {
+    const httpClient = new HttpClient(constants.THOR_URL)
+    const thorClient = new ThorClient(httpClient)
+    const response = await thorClient.contracts.executeContractCall(
+        constants.EMISSIONS_CONTRACT_ADDRESS,
+        coder.createInterface(Emissions_nextCycleBlock_abi).getFunction("getNextCycleBlock") as FunctionFragment,[]
+    )
+    const blockNumber = response[0].toString()
+    console.log(`Next allocation cycle block number to wait for: ${blockNumber}`)
+    await waitForBlock(blockNumber)
+}
+
 
 
 const blockchainUtils = {
@@ -337,6 +397,7 @@ const blockchainUtils = {
     fundAccount,
     swapB3TRForVOT3,
     getRndAccountIndex,
+    waitForNextCycle,
     doERC20Transfer,
     account,
 }

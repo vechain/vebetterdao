@@ -40,7 +40,7 @@ test.describe('Swap Tokens', () => {
     await swapDialog.enterSendAmount(BigNumber(amountToSwap))
     await swapDialog.clickSwap()
     const confirm = new SwapConfirmationDialog(page)
-    await confirm.expectSwapCompleted()
+    await confirm.expectDialogSuccess()
     await confirm.closeDialog()
     const expectedB3TRBalance = bt3rBalanceBefore.minus(amountToSwap)
     const expectedVOT3Balance = vot3BalanceBefore.plus(amountToSwap)
@@ -68,7 +68,7 @@ test.describe('Swap Tokens', () => {
     await swapDialog.enterSendAmount(BigNumber(amountToSwap))
     await swapDialog.clickSwap()
     const confirm = new SwapConfirmationDialog(page)
-    await confirm.expectSwapCompleted()
+    await confirm.expectDialogSuccess()
     await confirm.closeDialog()
     const expectedB3TRBalance = bt3rBalanceBefore.plus(amountToSwap)
     const expectedVOT3Balance = vot3BalanceBefore.minus(amountToSwap)
@@ -92,7 +92,7 @@ test.describe('Swap Tokens', () => {
     await swapDialog.enterSendAmount(new BigNumber(1))
     await swapDialog.clickSwap()
     const confirm = new SwapConfirmationDialog(page)
-    await confirm.expectSwapFailed()
+    await confirm.expectDialogFailed()
   });
 
   // the following `describe` covers a single test case

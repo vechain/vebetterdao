@@ -1,4 +1,4 @@
-import { ProposalCreatedEvent, useCurrentBlock, useProposalQuorum, useProposalState, useProposalVotes } from "@/api"
+import { ProposalCreatedEvent, useCurrentBlock, useProposalQuorum, useProposalSnapshot, useProposalVotes } from "@/api"
 import { Box, HStack, Heading, Icon, Progress, Skeleton, Text } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
@@ -18,12 +18,13 @@ export const ProposalVotesProgressBar: React.FC<Props> = ({ proposal }) => {
     error: proposalVotesError,
     isLoading: proposalVotesLoading,
   } = useProposalVotes(proposal.proposalId)
-  const { data: quorum, isLoading: quorumLoading } = useProposalQuorum(proposal.voteStart)
+  const { data: proposalSnapshotBlock } = useProposalSnapshot(proposal.proposalId)
+  const { data: quorum, isLoading: quorumLoading } = useProposalQuorum(proposalSnapshotBlock)
   const { data: currentBlock } = useCurrentBlock()
 
   const estimatedStartTime = useMemo(() => {
-    if (!proposal.voteStart) return null
-    const startBlock = Number(proposal.voteStart)
+    if (!proposalSnapshotBlock) return null
+    const startBlock = Number(proposalSnapshotBlock)
     if (!startBlock || !currentBlock) return null
     const startBlockFromNow = startBlock - currentBlock.number
     //not started yet
@@ -32,14 +33,14 @@ export const ProposalVotesProgressBar: React.FC<Props> = ({ proposal }) => {
       const startDate = dayjs().add(durationLeftTimestamp, "milliseconds")
       return startDate.fromNow()
     } else return "Started"
-  }, [proposal])
+  }, [proposalSnapshotBlock, currentBlock])
 
   const isIncoming = useMemo(() => {
-    const startBlock = Number(proposal.voteStart)
+    const startBlock = Number(proposalSnapshotBlock)
     if (!startBlock || !currentBlock) return null
     const startBlockFromNow = startBlock - currentBlock.number
     return startBlockFromNow >= 0
-  }, [proposal, currentBlock])
+  }, [proposalSnapshotBlock, currentBlock])
 
   const progress = useMemo(() => {
     if (!proposalVotes) return 0
