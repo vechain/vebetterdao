@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.20;
 
 import { X2EarnAppsUpgradeable } from "./x-2-earn-apps/X2EarnAppsUpgradeable.sol";
 import { DataTypes } from "./libraries/DataTypes.sol";
@@ -44,7 +44,7 @@ contract X2EarnApps is
   }
 
   // ---------- Overrides ------------ //
-  function setBaseURI(string memory baseURI_) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setBaseURI(string memory baseURI_) external onlyRole(DEFAULT_ADMIN_ROLE) {
     _setBaseURI(baseURI_);
   }
 

@@ -48,11 +48,11 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
 
   // --- To be implemented by the inheriting contract --- //
 
+  function appExists(bytes32 appId) public view virtual returns (bool);
+
   function _pushAppToEligbleApps(bytes32 appId) internal virtual;
 
   function _setAppAdmin(bytes32 appId, address admin) internal virtual;
-
-  function appExists(bytes32 appId) public view virtual returns (bool);
 
   /**
    * @dev Function that should add an app. Called by {addApp}.
@@ -76,12 +76,6 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   /**
    * @dev Function that should revert when `msg.sender` is not authorized to add an app. Called by
    * {addApp}.
-   *
-   * Normally, this function will use an xref:access.adoc[access control] modifier such as {Ownable-onlyOwner}.
-   *
-   * ```solidity
-   * function _authorizeAddApp(address) internal onlyOwner {}
-   * ```
    */
   function _authorizeAddApp() internal virtual;
 
