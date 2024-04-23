@@ -51,7 +51,7 @@ contract XAllocationVoting is
     address emissions;
     address[] admins;
     address upgrader;
-    IXApps x2EarnAppsAddress;
+    IX2EarnApps x2EarnAppsAddress;
     uint256 baseAllocationPercentage;
     uint256 appSharesCap;
   }

@@ -2,30 +2,31 @@
 pragma solidity ^0.8.20;
 
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
-import { IXApps } from "../interfaces/IXApps.sol";
+import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
 
-abstract contract X2EarnAppsUpgradeable is Initializable, IXApps {
-  /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.XApps
-  struct XAppsStorage {
+abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
+  /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.X2EarnAppsUpgradeable
+  struct X2EarnAppsStorage {
     // Mapping from app ID to app
     mapping(bytes32 => DataTypes.App) _apps;
     // List of app IDs to enable retrieval of all _apps
     bytes32[] _appIds;
   }
 
-  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.XApps")) - 1)) & ~bytes32(uint256(0xff))
-  bytes32 private constant XAppsStorageLocation = 0xd0d069a754be3c8727b213bc00d418e344adac8f83a7b6d5e0e426a9ddbe0700;
+  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnApps.X2EarnAppsUpgradeable")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 private constant X2EarnAppsStorageLocation =
+    0xb423b41d65418e0143bc6b14b268b74bdbc6d11d6910765864262835c534cb00;
 
-  function _getXAppsStorage() internal pure returns (XAppsStorage storage $) {
+  function _getX2EarnAppsStorage() internal pure returns (X2EarnAppsStorage storage $) {
     assembly {
-      $.slot := XAppsStorageLocation
+      $.slot := X2EarnAppsStorageLocation
     }
   }
 
   modifier exists(bytes32 appId) {
-    XAppsStorage storage $ = _getXAppsStorage();
+    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
     require($._apps[appId].receiverAddress != address(0), "App does not exist");
     _;
   }
@@ -52,7 +53,7 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IXApps {
     require(receiverAddress != address(0), "XApps: receiverAddress is the zero address");
     require(admin != address(0), "XApps: admin is the zero address");
 
-    XAppsStorage storage $ = _getXAppsStorage();
+    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
     bytes32 id = hashName(appName);
 
     require($._apps[id].receiverAddress == address(0), "App with this ID already exists");
@@ -76,7 +77,7 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IXApps {
   }
 
   function appExists(bytes32 appId) public view override returns (bool) {
-    XAppsStorage storage $ = _getXAppsStorage();
+    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
 
     return $._apps[appId].receiverAddress != address(0);
   }
@@ -87,13 +88,13 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IXApps {
 
   // Function to retrieve an app by ID
   function app(bytes32 appId) public view virtual exists(appId) returns (DataTypes.App memory) {
-    XAppsStorage storage $ = _getXAppsStorage();
+    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
     return $._apps[appId];
   }
 
   // Function to retrieve all apps
   function apps() public view returns (DataTypes.App[] memory) {
-    XAppsStorage storage $ = _getXAppsStorage();
+    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
 
     DataTypes.App[] memory allApps = new DataTypes.App[]($._appIds.length);
     uint256 length = $._appIds.length;
@@ -104,19 +105,19 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IXApps {
   }
 
   function getAppReceiverAddress(bytes32 appId) public view virtual returns (address) {
-    XAppsStorage storage $ = _getXAppsStorage();
+    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
 
     return $._apps[appId].receiverAddress;
   }
 
   function appURI(bytes32 appId) public view exists(appId) returns (string memory) {
-    XAppsStorage storage $ = _getXAppsStorage();
+    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
 
     return string(abi.encodePacked(baseURI(), $._apps[appId].metadataURI));
   }
 
   function createdAt(bytes32 appId) public view override exists(appId) returns (uint48) {
-    XAppsStorage storage $ = _getXAppsStorage();
+    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
 
     return $._apps[appId].createdAt;
   }

@@ -13,7 +13,7 @@ import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/
 import { IB3TR } from "./interfaces/IB3TR.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import { IXApps } from "./interfaces/IXApps.sol";
+import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
 
 contract XAllocationPool is
   Initializable,
@@ -31,7 +31,7 @@ contract XAllocationPool is
     IEmissions _emissions;
     IB3TR b3tr;
     ITreasury treasury;
-    IXApps x2EarnApps;
+    IX2EarnApps x2EarnApps;
     mapping(bytes32 => mapping(uint256 => bool)) claimedRewards;
   }
 
@@ -341,7 +341,7 @@ contract XAllocationPool is
     return $.b3tr;
   }
 
-  function x2EarnApps() public view returns (IXApps) {
+  function x2EarnApps() public view returns (IX2EarnApps) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     return $.x2EarnApps;
   }

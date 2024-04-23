@@ -11,9 +11,8 @@ abstract contract Settings is Initializable, X2EarnAppsUpgradeable {
     string _baseURI;
   }
 
-  //TODO: change this to the correct storage location
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnApps.Settings")) - 1)) & ~bytes32(uint256(0xff))
-  bytes32 private constant SettingsStorageLocation = 0xd0d069a754be3c8727b213bc00d418e344adac8f83a7b6d5e0e426a9ddbe0700;
+  bytes32 private constant SettingsStorageLocation = 0x83b9a7e51f394efa93107c3888716138908bbbe611dfc86afa3639a826441100;
 
   function _getSettingsStorage() internal pure returns (SettingsStorage storage $) {
     assembly {

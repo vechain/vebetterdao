@@ -5,7 +5,7 @@ import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.s
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { XAllocationVotingGovernor } from "../XAllocationVotingGovernor.sol";
-import { IXApps } from "../../interfaces/IXApps.sol";
+import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { DataTypes } from "../../libraries/DataTypes.sol";
@@ -14,15 +14,15 @@ abstract contract XAppsUpgradeable is Initializable, XAllocationVotingGovernor {
   using Checkpoints for Checkpoints.Trace208;
 
   /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.XApps
-  struct XAppsStorage {
+  struct X2EarnAppsStorage {
     // x2EarnApps
-    IXApps _x2EarnApps;
+    IX2EarnApps _x2EarnApps;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.XApps")) - 1)) & ~bytes32(uint256(0xff))
   bytes32 private constant XAppsStorageLocation = 0xd0d069a754be3c8727b213bc00d418e344adac8f83a7b6d5e0e426a9ddbe0700;
 
-  function _getXAppsStorage() internal pure returns (XAppsStorage storage $) {
+  function _getX2EarnAppsStorage() internal pure returns (X2EarnAppsStorage storage $) {
     assembly {
       $.slot := XAppsStorageLocation
     }
@@ -32,12 +32,12 @@ abstract contract XAppsUpgradeable is Initializable, XAllocationVotingGovernor {
    * @dev Initializes the contract
    * @param x2earnAppsAddress the address of the x2earn apps contract
    */
-  function __XApps_init(IXApps x2earnAppsAddress) internal onlyInitializing {
+  function __XApps_init(IX2EarnApps x2earnAppsAddress) internal onlyInitializing {
     __XApps_init_unchained(x2earnAppsAddress);
   }
 
-  function __XApps_init_unchained(IXApps x2earnAppsAddress) internal onlyInitializing {
-    XAppsStorage storage $ = _getXAppsStorage();
+  function __XApps_init_unchained(IX2EarnApps x2earnAppsAddress) internal onlyInitializing {
+    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
     $._x2EarnApps = x2earnAppsAddress;
   }
 
@@ -52,7 +52,7 @@ abstract contract XAppsUpgradeable is Initializable, XAllocationVotingGovernor {
    * @param roundId the round id from the XAllocationVoting contract which represents the allocation round
    */
   function isEligibleForVote(bytes32 appId, uint256 roundId) public view override returns (bool) {
-    XAppsStorage storage $ = _getXAppsStorage();
+    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
 
     // App does not exist
     if ($._x2EarnApps.appExists(appId) == false) {
@@ -71,13 +71,9 @@ abstract contract XAppsUpgradeable is Initializable, XAllocationVotingGovernor {
    * All apps that are elegible for voting in x-allocation rounds
    */
   function allElegibleApps() public view returns (bytes32[] memory) {
-    XAppsStorage storage $ = _getXAppsStorage();
+    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
 
     return $._x2EarnApps.allElegibleApps();
-  }
-
-  function hashName(string memory appName) public pure returns (bytes32) {
-    return keccak256(abi.encodePacked(appName));
   }
 
   function getAppIds(uint256 roundId) public view override returns (bytes32[] memory) {
@@ -90,7 +86,7 @@ abstract contract XAppsUpgradeable is Initializable, XAllocationVotingGovernor {
    */
   function getApps(uint256 roundId) public view returns (DataTypes.App[] memory) {
     XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
-    XAppsStorage storage $$ = _getXAppsStorage();
+    X2EarnAppsStorage storage $$ = _getX2EarnAppsStorage();
 
     bytes32[] memory appsInRound = $._appsElegibleForVoting[roundId];
     DataTypes.App[] memory allApps = new DataTypes.App[](appsInRound.length);

@@ -6,15 +6,14 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
 
 abstract contract Moderation is Initializable, X2EarnAppsUpgradeable {
-  /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.Settings
+  /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.Moderation
   struct ModerationStorage {
     mapping(bytes32 => address[]) _appModerators;
   }
 
-  //TODO: change this to the correct storage location
-  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnApps.Settings")) - 1)) & ~bytes32(uint256(0xff))
+  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnApps.Moderation")) - 1)) & ~bytes32(uint256(0xff))
   bytes32 private constant ModerationStorageLocation =
-    0xd0d069a754be3c8727b213bc00d418e344adac8f83a7b6d5e0e426a9ddbe0700;
+    0x3afe0a34e7e49fed8548e2cced017fb9ddf26feed8e8f54514897fdcd4779800;
 
   function _getModerationStorage() internal pure returns (ModerationStorage storage $) {
     assembly {
@@ -68,7 +67,7 @@ abstract contract Moderation is Initializable, X2EarnAppsUpgradeable {
    * @param account the address of the account
    */
   function isAppAdmin(bytes32 appId, address account) public view returns (bool) {
-    XAppsStorage storage $ = _getXAppsStorage();
+    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
 
     return $._apps[appId].admin == account;
   }
@@ -117,7 +116,7 @@ abstract contract Moderation is Initializable, X2EarnAppsUpgradeable {
   function updateAppAdminAddress(bytes32 appId, address newAdmin) external exists(appId) {
     _authorizeAppManagement(appId);
 
-    XAppsStorage storage $ = _getXAppsStorage();
+    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
 
     $._apps[appId].admin = newAdmin;
   }
@@ -130,7 +129,7 @@ abstract contract Moderation is Initializable, X2EarnAppsUpgradeable {
    */
   function updateAppMetadata(bytes32 appId, string memory metadataURI) external exists(appId) {
     _authorizeAppMetadataUpdate(appId);
-    XAppsStorage storage $ = _getXAppsStorage();
+    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
 
     $._apps[appId].metadataURI = metadataURI;
   }
@@ -144,7 +143,7 @@ abstract contract Moderation is Initializable, X2EarnAppsUpgradeable {
   function updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) external exists(appId) {
     _authorizeAppManagement(appId);
 
-    XAppsStorage storage $ = _getXAppsStorage();
+    X2EarnAppsStorage storage $ = _getX2EarnAppsStorage();
 
     $._apps[appId].receiverAddress = newReceiverAddress;
   }

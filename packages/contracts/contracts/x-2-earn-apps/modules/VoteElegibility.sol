@@ -9,7 +9,7 @@ import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 abstract contract VoteElegibility is Initializable, X2EarnAppsUpgradeable {
   using Checkpoints for Checkpoints.Trace208;
-  /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.Settings
+  /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.VoteElegibility
   struct VoteElegibilityStorage {
     // Array containing an up to date list of apps that are elegible for voting
     bytes32[] _elegibleAppsForNextRound;
@@ -19,10 +19,9 @@ abstract contract VoteElegibility is Initializable, X2EarnAppsUpgradeable {
     mapping(bytes32 appId => Checkpoints.Trace208) _isAppElegibleCheckpoints;
   }
 
-  //TODO: change this to the correct storage location
-  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnApps.Settings")) - 1)) & ~bytes32(uint256(0xff))
+  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnApps.VoteElegibility")) - 1)) & ~bytes32(uint256(0xff))
   bytes32 private constant VoteElegibilityStorageLocation =
-    0xd0d069a754be3c8727b213bc00d418e344adac8f83a7b6d5e0e426a9ddbe0700;
+    0x1b89599d9cb7d2a710d5070bd3bdaa71840495c5ed3eca567ac62b6cc4584a00;
 
   function _getVoteElegibilityStorage() internal pure returns (VoteElegibilityStorage storage $) {
     assembly {

@@ -3,7 +3,7 @@ pragma solidity ^0.8.18;
 
 import { X2EarnAppsUpgradeable } from "./x-2-earn-apps/X2EarnAppsUpgradeable.sol";
 import { DataTypes } from "./libraries/DataTypes.sol";
-import { IXApps } from "./interfaces/IXApps.sol";
+import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { Moderation } from "./x-2-earn-apps/modules/Moderation.sol";
 import { Settings } from "./x-2-earn-apps/modules/Settings.sol";
@@ -43,6 +43,9 @@ abstract contract X2EarnApps is
 
   // ---------- Overrides ------------ //
 
+  /**
+   * @dev Return the base URI to retrieve the metadata of the x2earn apps
+   */
   function baseURI() public view virtual override(Settings, X2EarnAppsUpgradeable) returns (string memory) {
     return super.baseURI();
   }

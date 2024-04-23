@@ -3,7 +3,7 @@ pragma solidity ^0.8.18;
 
 import { DataTypes } from "../libraries/DataTypes.sol";
 
-interface IXApps {
+interface IX2EarnApps {
   /**
    * @dev The clock was incorrectly modified.
    */
