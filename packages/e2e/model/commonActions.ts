@@ -7,6 +7,7 @@ import { HOMEPAGE } from "../utils/constants"
 import veWorldMockClient from '../utils/veworld-mock-client';
 import BigNumber from "bignumber.js"
 import blockchainUtils from "../utils/blockchain"
+import { BaseDialog } from "./baseDialog"
 
 export class CommonActions {
   private readonly page: Page
@@ -41,7 +42,7 @@ export class CommonActions {
       await this.swapDialog.setSendToken(args.sendToken)
       await this.swapDialog.setSendAmount({ token: args.sendToken, max: args.max, amount: args.sendAmount })
       await this.swapDialog.clickSwap()
-      await this.swapConfirmationDialog.expectSwapCompleted()
+      await new BaseDialog(this.page, 'Swap Completed!').expectDialogSuccess()
       await this.swapConfirmationDialog.closeDialog()
     })
   }
