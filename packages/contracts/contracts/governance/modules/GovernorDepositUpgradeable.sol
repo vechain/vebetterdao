@@ -6,7 +6,7 @@ import { IVOT3 } from "../../interfaces/IVOT3.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /**
- * @dev Extension of {Governor} for simple, 3 options, vote counting.
+ * @dev Extension of {Governor} for depositing tokens to a proposal.
  */
 abstract contract GovernorDepositUpgradeable is Initializable, GovernorUpgradeable {
   /// @custom:storage-location erc7201:openzeppelin.storage.GovernorDeposit
