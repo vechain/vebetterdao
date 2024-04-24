@@ -4,10 +4,10 @@ import { useQueryClient } from "@tanstack/react-query"
 import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
 import { useConnex, useWallet } from "@vechain/dapp-kit-react"
-import { XAllocationVoting__factory } from "@repo/contracts"
+import { X2EarnApps__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 
-const XAllocationVotingInterface = XAllocationVoting__factory.createInterface()
+const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
 
 type useUpdateAppDetailsProps = {
   appId: string
@@ -43,23 +43,20 @@ export const useUpdateAppDetails = ({
     ({ metadataUri, receiverAddress }: BuildClausesProps) => {
       const clauses: EnhancedClause[] = [
         {
-          to: getConfig().xAllocationVotingContractAddress,
+          to: getConfig().x2EarnAppsContractAddress,
           value: 0,
-          data: XAllocationVotingInterface.encodeFunctionData("updateAppMetadata", [appId, metadataUri]),
+          data: X2EarnAppsInterface.encodeFunctionData("updateAppMetadata", [appId, metadataUri]),
           comment: "Update app metadata",
-          abi: JSON.parse(JSON.stringify(XAllocationVotingInterface.getFunction("updateAppMetadata"))),
+          abi: JSON.parse(JSON.stringify(X2EarnAppsInterface.getFunction("updateAppMetadata"))),
         },
         ...(receiverAddress
           ? [
               {
-                to: getConfig().xAllocationVotingContractAddress,
+                to: getConfig().x2EarnAppsContractAddress,
                 value: 0,
-                data: XAllocationVotingInterface.encodeFunctionData("updateAppReceiverAddress", [
-                  appId,
-                  receiverAddress,
-                ]),
+                data: X2EarnAppsInterface.encodeFunctionData("updateAppReceiverAddress", [appId, receiverAddress]),
                 comment: "Update app receiver address",
-                abi: JSON.parse(JSON.stringify(XAllocationVotingInterface.getFunction("updateAppReceiverAddress"))),
+                abi: JSON.parse(JSON.stringify(X2EarnAppsInterface.getFunction("updateAppReceiverAddress"))),
               },
             ]
           : []),
