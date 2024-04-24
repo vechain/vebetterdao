@@ -1,4 +1,4 @@
-import { FormControl, FormErrorMessage, FormLabel, Input } from "@chakra-ui/react"
+import { FormControl, FormErrorMessage, FormLabel, Input, Stack } from "@chakra-ui/react"
 import { FieldError, FieldErrorsImpl, Merge, UseFormRegister } from "react-hook-form"
 import { FormData, FunctionParamsField } from "../CreateProposalModal"
 import { AddressUtils } from "@repo/utils"
@@ -7,19 +7,21 @@ type Props = {
   field: FunctionParamsField
   index: number
   error?: FieldError | Merge<FieldError, FieldErrorsImpl<any>> | undefined
-  register: UseFormRegister<FormData>
+  register: UseFormRegister<{ functionParams: FunctionParamsField[] }>
 }
 
 export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({ field, index, error, register }) => {
   if (field.type === "address") {
     return (
       <FormControl key={field.id} isInvalid={!!error}>
-        <FormLabel>{field.name}</FormLabel>
+        <FormLabel as="samp" fontSize="sm" fontWeight={400} color={"gray.500"}>
+          {field.name} ({field.type})
+        </FormLabel>
         <Input
           type="text"
-          placeholder={field.name}
+          placeholder="Insert value..."
           {...register(`functionParams.${index}.value`, {
-            required: true,
+            required: "Field is required",
             validate: value => AddressUtils.isValid(value) || "Invalid address",
           })}
         />
@@ -30,11 +32,13 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({ field, inde
   if (field.type === "uint256") {
     return (
       <FormControl key={field.id} isInvalid={!!error}>
-        <FormLabel>{field.name}</FormLabel>
+        <FormLabel as="samp" fontSize="sm" fontWeight={400} color={"gray.500"}>
+          {field.name} ({field.type})
+        </FormLabel>
         <Input
           type="number"
-          placeholder={field.name}
-          {...register(`functionParams.${index}.value`, { required: true })}
+          placeholder="Insert value..."
+          {...register(`functionParams.${index}.value`, { required: "Field is required" })}
         />
         <FormErrorMessage>{error && error.message?.toString()}</FormErrorMessage>
       </FormControl>
@@ -43,8 +47,14 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({ field, inde
 
   return (
     <FormControl key={field.id} isInvalid={!!error}>
-      <FormLabel>{field.name}</FormLabel>
-      <Input type="text" placeholder={field.name} {...register(`functionParams.${index}.value`, { required: true })} />
+      <FormLabel as="samp" fontSize="sm" fontWeight={400} color={"gray.500"}>
+        {field.name} ({field.type})
+      </FormLabel>
+      <Input
+        type="text"
+        placeholder="Insert value..."
+        {...register(`functionParams.${index}.value`, { required: "Field is required" })}
+      />
       <FormErrorMessage>{error && error.message?.toString()}</FormErrorMessage>
     </FormControl>
   )

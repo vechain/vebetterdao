@@ -47,7 +47,7 @@ type Props = {
   onClose: () => void
   onOpen: () => void
 }
-export type FunctionParamsField = { id: string; name: string; type: string; internalType: string; value: any }
+export type FunctionParamsField = { id: string; name: string; type: string; internalType?: string; value: any }
 
 export type FormData = {
   description?: string
