@@ -1,8 +1,8 @@
 import { Page } from 'playwright';
 import { test, expect, Locator } from '@playwright/test';
 import { RoundsPage } from './roundsPage';
-import { delay } from '../utils/delay';
 import { MenuBar } from './menuBar';
+import { delay } from "../utils/helpers"
 
 /**
  * Allocations page model
