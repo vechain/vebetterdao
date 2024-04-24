@@ -1,5 +1,6 @@
 import { GovernanceFeaturedContractsWithFunctions } from "@/constants"
 import { Box, Card, CardBody, Divider, HStack, Heading, IconButton, Text, VStack } from "@chakra-ui/react"
+import { useMemo } from "react"
 import { FaX } from "react-icons/fa6"
 import { abi } from "thor-devkit"
 
@@ -18,7 +19,13 @@ export const SelectedFunctionBox = ({ functionData, index, onRemove }: Props) =>
     contract => contract.contract.address === functionData.contractAddress,
   )?.functions.find(func => func.functionName === functionData.abi.definition.name)
 
-  console.log("featuredContract", featuredContract)
+  const decodedCalldata = useMemo(() => {
+    return abi.decodeParameters(functionData.abi.definition.inputs, `0x${functionData.calldata.slice(10)}`)
+  }, [functionData.calldata, functionData.abi])
+
+  console.log(decodedCalldata, "decoded")
+
+  console.log(functionData.abi.definition.inputs, "inputs")
 
   return (
     <Card w="full" variant="baseWithBorder">
@@ -30,7 +37,11 @@ export const SelectedFunctionBox = ({ functionData, index, onRemove }: Props) =>
           </HStack>
           <VStack spacing={0} align="flex-start">
             <Text px={4} fontSize="sm" as="samp">
-              {featuredContract?.name ?? functionData.abi.definition.name}
+              {featuredContract
+                ? `${featuredContract.name} - ${featuredContract.functionName}(${functionData.abi.definition.inputs.map(
+                    input => `${decodedCalldata[input.name]}`,
+                  )})`
+                : functionData.abi.definition.name}
             </Text>
             <Text px={4} fontSize="sm" fontWeight={400} color={"gray.500"} as="samp">
               {featuredContract?.description ?? functionData.abi.definition.name}
