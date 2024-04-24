@@ -29,9 +29,9 @@ describe("Emissions", () => {
         })
 
       // Destination addresses should be set correctly
-      expect(await emissions.xAllocations()).to.equal(await xAllocationPool.getAddress())
-      expect(await emissions.vote2Earn()).to.equal(await voterRewards.getAddress())
-      expect(await emissions.treasury()).to.equal(await treasury.getAddress())
+      expect(await emissions.getXAllocationsAddress()).to.equal(await xAllocationPool.getAddress())
+      expect(await emissions.getVote2EarnAddress()).to.equal(await voterRewards.getAddress())
+      expect(await emissions.getTreasuryAddress()).to.equal(await treasury.getAddress())
 
       // Admin should be set correctly
       expect(await emissions.hasRole(await emissions.DEFAULT_ADMIN_ROLE(), await owner.getAddress())).to.equal(true)
@@ -65,7 +65,7 @@ describe("Emissions", () => {
 
       await emissions.connect(owner).setXallocationsAddress(otherAccounts[3].address)
 
-      expect(await emissions.xAllocations()).to.equal(otherAccounts[3].address)
+      expect(await emissions.getXAllocationsAddress()).to.equal(otherAccounts[3].address)
     })
 
     it("Should be able to change the Vote 2 Earn address", async () => {
@@ -93,7 +93,7 @@ describe("Emissions", () => {
 
       await emissions.connect(owner).setTreasuryAddress(otherAccounts[3].address)
 
-      expect(await emissions.treasury()).to.equal(otherAccounts[3].address)
+      expect(await emissions.getTreasuryAddress()).to.equal(otherAccounts[3].address)
     })
 
     it("Should not be able to change the X allocations address if not admin", async () => {
@@ -981,9 +981,9 @@ describe("Emissions", () => {
       expect(await b3tr.totalSupply()).to.equal(
         (config.INITIAL_X_ALLOCATION + initialVoteAllocation + initialTreasuryAlloc) * 2n,
       )
-      expect(await b3tr.balanceOf(await emissions.xAllocations())).to.equal(config.INITIAL_X_ALLOCATION * 2n)
+      expect(await b3tr.balanceOf(await emissions.getXAllocationsAddress())).to.equal(config.INITIAL_X_ALLOCATION * 2n)
       expect(await b3tr.balanceOf(await emissions.vote2Earn())).to.equal(initialVoteAllocation * 2n)
-      expect(await b3tr.balanceOf(await emissions.treasury())).to.equal(initialTreasuryAlloc * 2n)
+      expect(await b3tr.balanceOf(await emissions.getTreasuryAddress())).to.equal(initialTreasuryAlloc * 2n)
     })
 
     it("Should not be able to distribute emissions if B3TR transfers are paused", async () => {
@@ -1080,9 +1080,9 @@ describe("Emissions", () => {
       expect(await b3tr.totalSupply()).to.equal(
         (config.INITIAL_X_ALLOCATION + initialVoteAllocation + initialTreasuryAlloc) * 2n,
       )
-      expect(await b3tr.balanceOf(await emissions.xAllocations())).to.equal(config.INITIAL_X_ALLOCATION * 2n)
+      expect(await b3tr.balanceOf(await emissions.getXAllocationsAddress())).to.equal(config.INITIAL_X_ALLOCATION * 2n)
       expect(await b3tr.balanceOf(await emissions.vote2Earn())).to.equal(initialVoteAllocation * 2n)
-      expect(await b3tr.balanceOf(await emissions.treasury())).to.equal(initialTreasuryAlloc * 2n)
+      expect(await b3tr.balanceOf(await emissions.getTreasuryAddress())).to.equal(initialTreasuryAlloc * 2n)
 
       await waitForNextCycle()
 
@@ -1106,9 +1106,9 @@ describe("Emissions", () => {
       expect(await b3tr.totalSupply()).to.equal(
         (config.INITIAL_X_ALLOCATION + initialVoteAllocation + initialTreasuryAlloc) * 3n,
       )
-      expect(await b3tr.balanceOf(await emissions.xAllocations())).to.equal(config.INITIAL_X_ALLOCATION * 3n)
+      expect(await b3tr.balanceOf(await emissions.getXAllocationsAddress())).to.equal(config.INITIAL_X_ALLOCATION * 3n)
       expect(await b3tr.balanceOf(await emissions.vote2Earn())).to.equal(initialVoteAllocation * 3n)
-      expect(await b3tr.balanceOf(await emissions.treasury())).to.equal(initialTreasuryAlloc * 3n)
+      expect(await b3tr.balanceOf(await emissions.getTreasuryAddress())).to.equal(initialTreasuryAlloc * 3n)
 
       expect(await emissions.nextCycle()).to.equal(4)
     })
@@ -1133,9 +1133,9 @@ describe("Emissions", () => {
 
       // Check supply
       expect(await b3tr.totalSupply()).to.equal(ethers.parseEther("10000000"))
-      expect(await b3tr.balanceOf(await emissions.xAllocations())).to.equal(ethers.parseEther("4000000"))
+      expect(await b3tr.balanceOf(await emissions.getXAllocationsAddress())).to.equal(ethers.parseEther("4000000"))
       expect(await b3tr.balanceOf(await emissions.vote2Earn())).to.equal(ethers.parseEther("4000000"))
-      expect(await b3tr.balanceOf(await emissions.treasury())).to.equal(ethers.parseEther("2000000"))
+      expect(await b3tr.balanceOf(await emissions.getTreasuryAddress())).to.equal(ethers.parseEther("2000000"))
 
       // Move to after first decay period
       const cycle = config.EMISSIONS_X_ALLOCATION_DECAY_PERIOD + 2
@@ -1155,9 +1155,9 @@ describe("Emissions", () => {
       expect(treasuryAmount).to.equal(ethers.parseEther("960000"))
 
       // Check supply
-      expect(await b3tr.balanceOf(await emissions.xAllocations())).to.equal(ethers.parseEther("25920000"))
+      expect(await b3tr.balanceOf(await emissions.getXAllocationsAddress())).to.equal(ethers.parseEther("25920000"))
       expect(await b3tr.balanceOf(await emissions.vote2Earn())).to.equal(ethers.parseEther("25920000"))
-      expect(await b3tr.balanceOf(await emissions.treasury())).to.equal(ethers.parseEther("12960000"))
+      expect(await b3tr.balanceOf(await emissions.getTreasuryAddress())).to.equal(ethers.parseEther("12960000"))
       expect(await b3tr.totalSupply()).to.equal(ethers.parseEther("64800000"))
     }).timeout(1000 * 60 * 10) // 10 minutes
 
@@ -1181,9 +1181,9 @@ describe("Emissions", () => {
 
       // Check supply
       expect(await b3tr.totalSupply()).to.equal(ethers.parseEther("10000000"))
-      expect(await b3tr.balanceOf(await emissions.xAllocations())).to.equal(ethers.parseEther("4000000"))
+      expect(await b3tr.balanceOf(await emissions.getXAllocationsAddress())).to.equal(ethers.parseEther("4000000"))
       expect(await b3tr.balanceOf(await emissions.vote2Earn())).to.equal(ethers.parseEther("4000000"))
-      expect(await b3tr.balanceOf(await emissions.treasury())).to.equal(ethers.parseEther("2000000"))
+      expect(await b3tr.balanceOf(await emissions.getTreasuryAddress())).to.equal(ethers.parseEther("2000000"))
 
       // Move to after first Rewards decay period
       const cycle = config.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD + 2
@@ -1203,9 +1203,9 @@ describe("Emissions", () => {
       expect(treasuryAmount).to.equal(ethers.parseEther("764411.904"))
 
       // Check supply
-      expect(await b3tr.balanceOf(await emissions.xAllocations())).to.equal(ethers.parseEther("95488143.36"))
+      expect(await b3tr.balanceOf(await emissions.getXAllocationsAddress())).to.equal(ethers.parseEther("95488143.36"))
       expect(await b3tr.balanceOf(await emissions.vote2Earn())).to.equal(ethers.parseEther("95148404.736"))
-      expect(await b3tr.balanceOf(await emissions.treasury())).to.equal(ethers.parseEther("47659137.024"))
+      expect(await b3tr.balanceOf(await emissions.getTreasuryAddress())).to.equal(ethers.parseEther("47659137.024"))
       expect(await b3tr.totalSupply()).to.equal(ethers.parseEther("238295685.12"))
     }).timeout(1000 * 60 * 10) // 10 minutes
 
