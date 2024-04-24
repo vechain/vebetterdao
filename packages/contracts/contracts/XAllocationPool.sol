@@ -324,6 +324,15 @@ contract XAllocationPool is
   }
 
   /**
+   * @dev Returns the maximum amount an app can claim for a given round.
+   */
+  function getMaxAppAllocation(uint256 roundId) public view returns (uint256) {
+    uint256 roundBaseAllocationAmount = baseAllocationAmount(roundId);
+    uint256 maxAppShares = _rewardAmount(roundId, scaledAppSharesCap(roundId));
+    return roundBaseAllocationAmount + maxAppShares;
+  }
+
+  /**
    * @dev Returns the XAllocationVotingGovernor contract.
    */
   function xAllocationVoting() public view returns (IXAllocationVotingGovernor) {
