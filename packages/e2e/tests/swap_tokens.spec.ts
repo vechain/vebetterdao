@@ -105,9 +105,8 @@ test.describe('Swap Tokens', () => {
     let accountB: Account
 
     test.beforeAll(async () => {
-      const randomAccGenerator = uniqueRandom(constants.DYNAMIC_ACCOUNT_MIN, constants.DYNAMIC_ACCOUNT_MAX)
-      accountA = blockchainUtils.account(randomAccGenerator.next().value)
-      accountB = blockchainUtils.account(randomAccGenerator.next().value)
+      accountA = blockchainUtils.account(blockchainUtils.getRndAccountIndex())
+      accountB = blockchainUtils.account(blockchainUtils.getRndAccountIndex())
 
       // 1. fund accounts
       await test.step(`[bcUtils] Fund ${accountA.address} and ${accountB.address} with 5 B3TR and 5k VTHO each`, async () => {
