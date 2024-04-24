@@ -18,6 +18,7 @@ test.describe('Connect Wallet', () => {
 
   test('User can disconnect wallet', async ({ page }) => {
     const dashboardPage = new DashboardPage(page);
+    await dashboardPage.connectWallet()
     await dashboardPage.disconnectWallet()
   });
 
