@@ -8,12 +8,12 @@ import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.s
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 /**
- * @title VoteElegibility
+ * @title VoteElegibilityUpgradeable
  * @notice Contract module that provides the vote elegibility functionalities of the x2earn apps.
  * By deafult every new added app becomes elegible for voting. The elegibility can be changed.
  * The elegibility is stored in a checkpoint so we can track the changes over time.
  */
-abstract contract VoteElegibility is Initializable, X2EarnAppsUpgradeable {
+abstract contract VoteElegibilityUpgradeable is Initializable, X2EarnAppsUpgradeable {
   using Checkpoints for Checkpoints.Trace208; // Checkpoints used to track elegibility changes over time
 
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.VoteElegibility

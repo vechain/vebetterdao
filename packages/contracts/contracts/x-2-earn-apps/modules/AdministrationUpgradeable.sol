@@ -6,13 +6,13 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
 
 /**
- * @title Administration
+ * @title AdministrationUpgradeable
  * @dev Contract module that provides the administration functionalities of the x2earn apps.
  * Each app has an admin and a list of moderators that can manage the app.
  * The admin can add/remove moderators and change the admin address.
  * Those roles can be used to manage the app and its metadata.
  */
-abstract contract Administration is Initializable, X2EarnAppsUpgradeable {
+abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradeable {
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.Administration
   struct AdministrationStorage {
     mapping(bytes32 => address[]) _moderators;

@@ -6,11 +6,11 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
 
 /**
- * @title Settings
+ * @title SettingsUpgradeable
  * @dev Contract module that provides the settings functionalities of the x2earn apps.
  * Each app has a base URI that can be used to retrieve the metadata of the app. Eg: ipfs:// or some other gateway.
  */
-abstract contract Settings is Initializable, X2EarnAppsUpgradeable {
+abstract contract SettingsUpgradeable is Initializable, X2EarnAppsUpgradeable {
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.Settings
   struct SettingsStorage {
     string _baseURI;

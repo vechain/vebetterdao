@@ -5,20 +5,20 @@ import { X2EarnAppsUpgradeable } from "./x-2-earn-apps/X2EarnAppsUpgradeable.sol
 import { DataTypes } from "./libraries/DataTypes.sol";
 import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import { Administration } from "./x-2-earn-apps/modules/Administration.sol";
-import { AppsStorage } from "./x-2-earn-apps/modules/AppsStorage.sol";
-import { Settings } from "./x-2-earn-apps/modules/Settings.sol";
-import { VoteElegibility } from "./x-2-earn-apps/modules/VoteElegibility.sol";
+import { AdministrationUpgradeable } from "./x-2-earn-apps/modules/AdministrationUpgradeable.sol";
+import { AppsStorageUpgradeable } from "./x-2-earn-apps/modules/AppsStorageUpgradeable.sol";
+import { SettingsUpgradeable } from "./x-2-earn-apps/modules/SettingsUpgradeable.sol";
+import { VoteElegibilityUpgradeable } from "./x-2-earn-apps/modules/VoteElegibilityUpgradeable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
 contract X2EarnApps is
   Initializable,
   X2EarnAppsUpgradeable,
-  Administration,
-  Settings,
-  VoteElegibility,
-  AppsStorage,
+  AdministrationUpgradeable,
+  SettingsUpgradeable,
+  VoteElegibilityUpgradeable,
+  AppsStorageUpgradeable,
   AccessControlUpgradeable,
   UUPSUpgradeable
 {
