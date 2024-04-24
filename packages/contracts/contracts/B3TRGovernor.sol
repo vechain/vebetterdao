@@ -129,7 +129,7 @@ contract B3TRGovernor is
   function canProposalStartInNextRound() public view returns (bool) {
     B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
     uint256 currentRoundId = $.xAllocationVoting.currentRoundId();
-    uint256 minVotingDelay = minVotingDelay();
+    uint256 minVotingDelay = getMinVotingDelay();
     uint256 currentRoundDeadline = $.xAllocationVoting.roundDeadline(currentRoundId);
     uint48 currentBlock = clock();
 

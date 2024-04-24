@@ -65,7 +65,7 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
   /**
    * @dev See {B3TRGovernor-minVotingDelay}.
    */
-  function minVotingDelay() public view virtual returns (uint256) {
+  function getMinVotingDelay() public view virtual returns (uint256) {
     GovernorSettingsStorage storage $ = _getGovernorSettingsStorage();
     return $._minVotingDelay;
   }

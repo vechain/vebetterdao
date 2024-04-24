@@ -105,17 +105,17 @@ interface IEmissions {
 
   function totalEmissions() external view returns (uint256);
 
-  function treasury() external view returns (address);
+  function getTreasuryAddress() external view returns (address);
 
   function treasuryPercentage() external view returns (uint256);
 
-  function vote2Earn() external view returns (address);
+  function getVote2EarnAddress() external view returns (address);
 
   function vote2EarnDecay() external view returns (uint256);
 
   function vote2EarnDecayDelay() external view returns (uint256);
 
-  function xAllocations() external view returns (address);
+  function getXAllocationsAddress() external view returns (address);
 
   function xAllocationsDecay() external view returns (uint256);
 

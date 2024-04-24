@@ -367,15 +367,15 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
     return $.b3tr.cap() - $.totalEmissions;
   }
 
-  function treasury() public view returns (address) {
+  function getTreasuryAddress() public view returns (address) {
     return _getEmissionsStorage()._treasury;
   }
 
-  function vote2Earn() public view returns (address) {
+  function getVote2EarnAddress() public view returns (address) {
     return _getEmissionsStorage()._vote2Earn;
   }
 
-  function xAllocations() public view returns (address) {
+  function getXAllocationsAddress() public view returns (address) {
     return _getEmissionsStorage()._xAllocations;
   }
 
