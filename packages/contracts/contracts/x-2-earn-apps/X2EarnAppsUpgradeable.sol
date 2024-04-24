@@ -26,6 +26,42 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
     _addApp(receiverAddress, admin, appName, metadataURI);
   }
 
+  function updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) public virtual {
+    _authorizeAppManagement(appId);
+
+    _updateAppReceiverAddress(appId, newReceiverAddress);
+  }
+
+  function updateAppMetadata(bytes32 appId, string memory metadataURI) public virtual {
+    _authorizeAppMetadataUpdate(appId);
+
+    _updateAppMetadata(appId, metadataURI);
+  }
+
+  /**
+   * @dev Update the admin address of the app
+   *
+   * @param appId the hashed name of the app
+   * @param newAdmin the address of the new admin
+   */
+  function setAppAdmin(bytes32 appId, address newAdmin) public virtual {
+    _authorizeAppManagement(appId);
+
+    _setAppAdmin(appId, newAdmin);
+  }
+
+  function addAppModerator(bytes32 appId, address moderator) public virtual {
+    _authorizeAppManagement(appId);
+
+    _addAppModerator(appId, moderator);
+  }
+
+  function removeAppModerator(bytes32 appId, address moderator) public virtual {
+    _authorizeAppManagement(appId);
+
+    _removeAppModerator(appId, moderator);
+  }
+
   // ---------- Getters ---------- //
 
   /**
@@ -47,9 +83,19 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
 
   function appExists(bytes32 appId) public view virtual returns (bool);
 
+  function baseURI() public view virtual returns (string memory);
+
   function _pushAppToEligbleApps(bytes32 appId) internal virtual;
 
   function _setAppAdmin(bytes32 appId, address admin) internal virtual;
+
+  function _updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) internal virtual;
+
+  function _updateAppMetadata(bytes32 appId, string memory metadataURI) internal virtual;
+
+  function _addAppModerator(bytes32 appId, address moderator) internal virtual;
+
+  function _removeAppModerator(bytes32 appId, address moderator) internal virtual;
 
   /**
    * @dev Function that should add an app. Called by {addApp}.
@@ -67,8 +113,6 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
     string memory appName,
     string memory metadataURI
   ) internal virtual;
-
-  function baseURI() public view virtual returns (string memory);
 
   /**
    * @dev Function that should revert when `msg.sender` is not authorized to add an app. Called by

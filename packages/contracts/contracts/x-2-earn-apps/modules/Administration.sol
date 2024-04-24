@@ -39,23 +39,6 @@ abstract contract Administration is Initializable, X2EarnAppsUpgradeable {
   function __Administration_init_unchained() internal onlyInitializing {}
 
   // ---------- Setters ---------- //
-
-  /**
-   * @dev Update the admin address of the app
-   *
-   * @param appId the hashed name of the app
-   * @param newAdmin the address of the new admin
-   */
-  function setAppAdmin(bytes32 appId, address newAdmin) external {
-    if (!appExists(appId)) {
-      revert X2EarnNonexistentApp(appId);
-    }
-
-    _authorizeAppManagement(appId);
-
-    _setAppAdmin(appId, newAdmin);
-  }
-
   /**
    * @dev Internal function to set the admin address of the app
    *
@@ -82,14 +65,13 @@ abstract contract Administration is Initializable, X2EarnAppsUpgradeable {
    * @param appId the hashed name of the app
    * @param moderator the address of the moderator
    */
-  function addAppModerator(bytes32 appId, address moderator) external virtual {
+  function _addAppModerator(bytes32 appId, address moderator) internal virtual override {
     if (!appExists(appId)) {
       revert X2EarnNonexistentApp(appId);
     }
     if (moderator == address(0)) {
       revert X2EarnInvalidAddress(moderator);
     }
-    _authorizeAppManagement(appId);
 
     AdministrationStorage storage $ = _getAdministrationStorage();
 
@@ -102,15 +84,13 @@ abstract contract Administration is Initializable, X2EarnAppsUpgradeable {
    * @param appId the hashed name of the app
    * @param moderator the address of the moderator
    */
-  function removeAppModerator(bytes32 appId, address moderator) external {
+  function _removeAppModerator(bytes32 appId, address moderator) internal virtual override {
     if (!appExists(appId)) {
       revert X2EarnNonexistentApp(appId);
     }
     if (moderator == address(0)) {
       revert X2EarnInvalidAddress(moderator);
     }
-
-    _authorizeAppManagement(appId);
 
     AdministrationStorage storage $ = _getAdministrationStorage();
 

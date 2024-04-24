@@ -5,6 +5,11 @@ import { DataTypes } from "../../libraries/DataTypes.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
 
+/**
+ * @title AppsStorage
+ * @notice Contract to manage the x2earn apps storage.
+ * Through this contract, the x2earn apps can be added, retrieved, indexed, and managed (update metadata and receiver address).
+ */
 abstract contract AppsStorage is Initializable, X2EarnAppsUpgradeable {
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.AppsStorage
   struct AppsStorageStorage {
@@ -73,19 +78,17 @@ abstract contract AppsStorage is Initializable, X2EarnAppsUpgradeable {
     emit AppAdded(id, receiverAddress, appName, true);
   }
 
-  // ---------- Setters ---------- //
   /**
    * @dev Update the metadata URI of the app
    *
    * @param appId the hashed name of the app
    * @param metadataURI the metadata URI of the app
    */
-  function updateAppMetadata(bytes32 appId, string memory metadataURI) external {
+  function _updateAppMetadata(bytes32 appId, string memory metadataURI) internal virtual override {
     if (!appExists(appId)) {
       revert X2EarnNonexistentApp(appId);
     }
 
-    _authorizeAppMetadataUpdate(appId);
     AppsStorageStorage storage $ = _getAppsStorageStorage();
 
     $._apps[appId].metadataURI = metadataURI;
@@ -97,7 +100,7 @@ abstract contract AppsStorage is Initializable, X2EarnAppsUpgradeable {
    * @param appId the hashed name of the app
    * @param newReceiverAddress the address of the new receiver
    */
-  function updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) external {
+  function _updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) internal virtual override {
     if (!appExists(appId)) {
       revert X2EarnNonexistentApp(appId);
     }
@@ -106,20 +109,18 @@ abstract contract AppsStorage is Initializable, X2EarnAppsUpgradeable {
       revert X2EarnInvalidAddress(newReceiverAddress);
     }
 
-    _authorizeAppManagement(appId);
-
     AppsStorageStorage storage $ = _getAppsStorageStorage();
 
     $._apps[appId].receiverAddress = newReceiverAddress;
   }
 
+  // ---------- Getters ---------- //
   function appExists(bytes32 appId) public view override returns (bool) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
 
     return $._apps[appId].receiverAddress != address(0);
   }
 
-  // ---------- Getters ---------- //
   // Function to retrieve an app by ID
   function app(bytes32 appId) public view virtual returns (DataTypes.App memory) {
     if (!appExists(appId)) {
