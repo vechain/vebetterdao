@@ -88,7 +88,7 @@ const Emissions_nextCycleBlock_abi = JSON.stringify([{
 
 /**
  * Builds an object with account details - index, address, private key
- * @param accountIndex
+ * @param {number} accountIndex
  */
 const account = (accountIndex: number): Account => {
   return {
@@ -291,9 +291,9 @@ const swapB3TRForVOT3 = async (privateKey: Buffer, address: string, amount: BigN
 
 /**
  * Seed an account to have a minimum balance of B3TR and VTHO
- * @param account_index
- * @param min_b3tr
- * @param min_vot3
+ * @param {number} account_index
+ * @param {BigNumber} min_b3tr
+ * @param {BigNumber} min_vot3
  */
 const fundAccount = async (account_index: number, min_b3tr=constants.FUNDING_MIN_B3TR, min_vot3=constants.FUNDING_MIN_VOT3) => {
     const privateKey = getAccountPrivateKey(account_index)

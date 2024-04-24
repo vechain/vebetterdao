@@ -41,6 +41,10 @@ export class SwapDialog {
         }
     }
 
+    /**
+     * Switches "Swap Send" token to the one specified in tokenName arg
+     * @param {Token} tokenName
+     */
     async setSendToken(tokenName: Token) {
         await test.step(`Set send token to be "${tokenName}"`, async() => {
             if (await this.getSendTokenName() !== tokenName) {
@@ -49,6 +53,10 @@ export class SwapDialog {
         })
     }
 
+    /**
+     * Set swap send amount
+     * @param {SetSendSwapAmount} args
+     */
     async setSendAmount(args: SetSendSwapAmount ) {
         await test.step(`Set send ${args.token} swap amount to ${args.max ? "max swappable amount" : `"${args.amount}"`}`, async () => {
             if (args.max === undefined && args.amount === undefined) {

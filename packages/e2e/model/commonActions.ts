@@ -25,7 +25,8 @@ export class CommonActions {
 
   /**
    * Logs in and returns an account address of an active user
-   * @param accountIndex
+   * @param {number} accountIndex
+   * @returns {string} - account address
    */
   async loginAs(accountIndex: number): Promise<string> {
     const address = blockchainUtils.getAccountAddress(accountIndex)
@@ -36,6 +37,10 @@ export class CommonActions {
     })
   }
 
+  /**
+   * Performs swap scenario
+   * @param {SwapArgs} args
+   */
   async swap(args: SwapArgs){
     await test.step(`Swap ${args.max ? "max available amount of" : args.sendAmount} ${args.sendToken} for ${args.receiveToken}`, async () => {
       await this.dashboardPage.clickSwapButton()
