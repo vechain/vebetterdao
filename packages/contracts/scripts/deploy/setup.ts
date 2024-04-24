@@ -1,14 +1,10 @@
-import { Emissions, Treasury, XAllocationVoting } from "../../typechain-types"
+import { Emissions, Treasury, X2EarnApps } from "../../typechain-types"
 import { SeedStrategy, getAccounts, getSeedAccounts } from "../helpers/seedAccounts"
 import { bootstrapEmissions } from "../helpers/emissions"
 import { addXDapps } from "../helpers/xApp"
 import { airdropB3trFromTreasury } from "../helpers/airdrop"
 
-export const setupLocalEnvironment = async (
-  xAllocationVoting: XAllocationVoting,
-  emissions: Emissions,
-  treasury: Treasury,
-) => {
+export const setupLocalEnvironment = async (emissions: Emissions, treasury: Treasury, x2EarnApps: X2EarnApps) => {
   const start = performance.now()
   console.log("Setup local environment")
 
@@ -50,8 +46,8 @@ export const setupLocalEnvironment = async (
   await bootstrapEmissions(emissionsContract, admin)
 
   // Add x-apps to the XAllocationPool
-  const xAllocAddress = await xAllocationVoting.getAddress()
-  await addXDapps(xAllocAddress, admin, APPS)
+  const x2EarnAppsAddress = await x2EarnApps.getAddress()
+  await addXDapps(x2EarnAppsAddress, admin, APPS)
 
   // Seed the first 5 accounts with some tokens
   const treasuryAddress = await treasury.getAddress()
@@ -62,7 +58,7 @@ export const setupLocalEnvironment = async (
   console.log(`Setup complete in ${end - start}ms`)
 }
 
-export const setupTestEnvironment = async (xAllocationVoting: XAllocationVoting, emissions: Emissions) => {
+export const setupTestEnvironment = async (emissions: Emissions, x2EarnApps: X2EarnApps) => {
   console.log("Setup Testnet environment:")
   const start = performance.now()
 
@@ -94,8 +90,8 @@ export const setupTestEnvironment = async (xAllocationVoting: XAllocationVoting,
   ]
 
   // Add x-apps to the XAllocationPool
-  const xAllocAddress = await xAllocationVoting.getAddress()
-  await addXDapps(xAllocAddress, admin, APPS)
+  const x2EarnAppsAddress = await x2EarnApps.getAddress()
+  await addXDapps(x2EarnAppsAddress, admin, APPS)
 
   const end = performance.now()
   console.log(`Setup complete in ${end - start}ms`)

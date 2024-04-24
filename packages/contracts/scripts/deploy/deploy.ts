@@ -10,6 +10,7 @@ import {
   VoterRewards,
   XAllocationPool,
   Treasury,
+  X2EarnApps,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -24,6 +25,7 @@ const name = "VeBetterDAO Galaxy Member"
 const symbol = "GM"
 
 export async function deployAll(config: ContractsConfig) {
+  const start = performance.now()
   const networkConfig = network.config as HttpNetworkConfig
   console.log(
     `Deploying contracts on ${network.name} (${networkConfig.url}) with ${config.NEXT_PUBLIC_APP_ENV} configurations...`,
@@ -35,6 +37,13 @@ export async function deployAll(config: ContractsConfig) {
   console.log("Temporary admin set to ", TEMP_ADMIN)
 
   // ---------- Contracts Deployment ---------- //
+
+  // Deploy Libraries
+  console.log(`Deploying DataTypes library`)
+  const DataTypes = await ethers.getContractFactory("DataTypes")
+  const DataTypesLib = await DataTypes.deploy()
+  await DataTypesLib.waitForDeployment()
+  console.log(`DataTypes library deployed at address ${await DataTypesLib.getAddress()}`)
 
   const b3tr = await deployB3trToken(TEMP_ADMIN, config.B3TR_CAP)
 
@@ -62,12 +71,23 @@ export async function deployAll(config: ContractsConfig) {
   ])) as Treasury
   console.log(`Treasury contract deployed at address ${await treasury.getAddress()}`)
 
+  console.log(`Deploying X2EarnApps`)
+  const x2EarnApps = (await deployProxy(
+    "X2EarnApps",
+    [config.XAPP_BASE_URI, [await timelock.getAddress(), TEMP_ADMIN]],
+    {
+      DataTypes: await DataTypesLib.getAddress(),
+    },
+  )) as X2EarnApps
+  console.log(`X2EarnApps contract deployed at address ${await x2EarnApps.getAddress()}`)
+
   console.log(`Deploying XAllocationPool contract`)
   const xAllocationPool = (await deployProxy("XAllocationPool", [
     TEMP_ADMIN,
     TEMP_ADMIN,
     await b3tr.getAddress(),
     await treasury.getAddress(),
+    await x2EarnApps.getAddress(),
   ])) as XAllocationPool
   console.log(`XAllocationPool contract deployed at address ${await xAllocationPool.getAddress()}`)
 
@@ -134,7 +154,7 @@ export async function deployAll(config: ContractsConfig) {
       emissions: await emissions.getAddress(),
       admins: [await timelock.getAddress(), TEMP_ADMIN],
       upgrader: TEMP_ADMIN,
-      xAppsBaseURI: config.XAPP_BASE_URI,
+      x2EarnAppsAddress: await x2EarnApps.getAddress(),
       baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
       appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
     },
@@ -154,7 +174,8 @@ export async function deployAll(config: ContractsConfig) {
   ])) as B3TRGovernor
   console.log(`Governor contract deployed at address ${await governor.getAddress()}`)
 
-  console.log("Contracts deployed")
+  const end = performance.now()
+  console.log(`Contracts deployed in  ${end - start}ms`)
 
   // ---------- Configure contract roles for setup ---------- //
 
@@ -226,9 +247,9 @@ export async function deployAll(config: ContractsConfig) {
 
   // ---------- Setup Contracts ---------- //
   if (network.name === "vechain_testnet") {
-    await setupTestEnvironment(xAllocationVoting, emissions)
+    await setupTestEnvironment(emissions, x2EarnApps)
   } else if (network.name === "vechain_solo") {
-    await setupLocalEnvironment(xAllocationVoting, emissions, treasury)
+    await setupLocalEnvironment(emissions, treasury, x2EarnApps)
   }
 
   // ---------- Run Simulation ---------- //
@@ -260,6 +281,8 @@ export async function deployAll(config: ContractsConfig) {
 
     await transferAdminRole(governor, admin, config.CONTRACTS_ADMIN_ADDRESS)
 
+    await transferAdminRole(x2EarnApps, admin, config.CONTRACTS_ADMIN_ADDRESS)
+
     console.log("Roles updated successfully!")
   }
 
@@ -274,6 +297,7 @@ export async function deployAll(config: ContractsConfig) {
     voterRewardsContractAddress: await voterRewards.getAddress(),
     galaxyMemberContractAddress: await galaxyMember.getAddress(),
     treasuryContractAddress: await treasury.getAddress(),
+    x2EarnAppsContractAddress: await x2EarnApps.getAddress(),
   })
 
   return {
@@ -287,6 +311,7 @@ export async function deployAll(config: ContractsConfig) {
     emissions: emissions,
     voterRewards: voterRewards,
     treasury: treasury,
+    x2EarnApps: x2EarnApps,
   }
   // close the script
 }
@@ -301,7 +326,8 @@ const transferAdminRole = async (
     | XAllocationPool
     | XAllocationVoting
     | Treasury
-    | B3TRGovernor,
+    | B3TRGovernor
+    | X2EarnApps,
   oldAdmin: HardhatEthersSigner,
   newAdminAddress: string,
 ) => {

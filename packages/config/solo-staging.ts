@@ -11,6 +11,7 @@ const config: AppConfig = {
   voterRewardsContractAddress: "0x2feDE0Db5460610e88bec69bF63BfddCAbFCE38D",
   galaxyMemberContractAddress: "0x8C4201c99bDe2CB6aFDD641a76e2aD8F27793331",
   treasuryContractAddress: "0xD4410Ce1FB6921826B5EA15B0f4bE37C9a3A1dE5",
+  x2EarnAppsContractAddress: "",
   mixPanelProjectToken: "e03f4f5f6a753dae2dac30a69dfe21f7",
   nodeUrl: "https://thor-solo.dev.b3tr.vechain.org",
   network: {
