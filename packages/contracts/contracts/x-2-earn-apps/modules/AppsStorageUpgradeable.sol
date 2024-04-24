@@ -6,11 +6,11 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
 
 /**
- * @title AppsStorage
+ * @title AppsStorageUpgradeable
  * @notice Contract to manage the x2earn apps storage.
  * Through this contract, the x2earn apps can be added, retrieved, indexed, and managed (update metadata and receiver address).
  */
-abstract contract AppsStorage is Initializable, X2EarnAppsUpgradeable {
+abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable {
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.AppsStorage
   struct AppsStorageStorage {
     // Mapping from app ID to app
