@@ -12,13 +12,23 @@ import {
   useDisclosure,
 } from "@chakra-ui/react"
 import { FaPlus, FaMagnifyingGlass } from "react-icons/fa6"
-import { SearchFeaturedFunctionsModal } from "./SearchFeaturedFunctionsModal"
+import { OnFunctionClickProps, SearchFeaturedFunctionsModal } from "./SearchFeaturedFunctionsModal"
+import { useCallback } from "react"
 
 export const InfoAndFunctionsPageContent = () => {
   const { isOpen: isSearchModaOpen, onOpen: openSearchModal, onClose: closeSearchModal } = useDisclosure()
+
+  const handleAddFunction = useCallback((data: { selectedFunction: OnFunctionClickProps; calldata: string }) => {
+    console.log(data)
+  }, [])
+
   return (
     <>
-      <SearchFeaturedFunctionsModal isOpen={isSearchModaOpen} onClose={closeSearchModal} />
+      <SearchFeaturedFunctionsModal
+        isOpen={isSearchModaOpen}
+        onClose={closeSearchModal}
+        handleAddFunction={handleAddFunction}
+      />
       <Card w="full">
         <CardBody py={8}>
           <VStack spacing={8} align="flex-start">

@@ -26,15 +26,16 @@ import { abi } from "thor-devkit"
 type Props = {
   isOpen: boolean
   onClose: () => void
+  handleAddFunction: (data: { selectedFunction: OnFunctionClickProps; calldata: string }) => void
 }
 
-type OnFunctionClickProps = {
+export type OnFunctionClickProps = {
   abiFunction: abi.Function
   contractAddress: string
   functionName: string
   functionDescription: string
 }
-export const SearchFeaturedFunctionsModal: React.FC<Props> = ({ isOpen, onClose }) => {
+export const SearchFeaturedFunctionsModal: React.FC<Props> = ({ isOpen, onClose, handleAddFunction }) => {
   const [selectedFunction, setSelectedFunction] = useState<OnFunctionClickProps | null>(null)
   const onFunctionClick = useCallback(
     (data: OnFunctionClickProps) => () => {
@@ -44,6 +45,19 @@ export const SearchFeaturedFunctionsModal: React.FC<Props> = ({ isOpen, onClose 
       }
     },
     [onClose],
+  )
+
+  const handleOnClose = useCallback(() => {
+    setSelectedFunction(null)
+    onClose()
+  }, [onClose])
+
+  const onAddFunction = useCallback(
+    (data: { selectedFunction: OnFunctionClickProps; calldata: string }) => {
+      handleAddFunction(data)
+      handleOnClose()
+    },
+    [handleAddFunction, handleOnClose],
   )
 
   const header = useMemo(
@@ -67,15 +81,15 @@ export const SearchFeaturedFunctionsModal: React.FC<Props> = ({ isOpen, onClose 
   const body = useMemo(
     () =>
       selectedFunction ? (
-        <SelectedFunctionModalBody {...selectedFunction} />
+        <SelectedFunctionModalBody selectedFunction={selectedFunction} onAddFunction={onAddFunction} />
       ) : (
         <SearchFeaturedFunctionsForm onFunctionClick={onFunctionClick} />
       ),
-    [selectedFunction],
+    [selectedFunction, onAddFunction, onFunctionClick],
   )
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} isCentered={true} size="3xl" scrollBehavior="inside">
+    <Modal isOpen={isOpen} onClose={handleOnClose} isCentered={true} size="3xl" scrollBehavior="inside">
       <ModalOverlay />
       <CustomModalContent>
         <ModalCloseButton />
@@ -143,12 +157,13 @@ const SearchFeaturedFunctionsForm: React.FC<SearchFeaturedFunctionsFormProps> = 
   )
 }
 
-type SelectedFunctionModalBodyProps = OnFunctionClickProps
+type SelectedFunctionModalBodyProps = {
+  selectedFunction: OnFunctionClickProps
+  onAddFunction: (data: { selectedFunction: OnFunctionClickProps; calldata: string }) => void
+}
 const SelectedFunctionModalBody: React.FC<SelectedFunctionModalBodyProps> = ({
-  abiFunction,
-  contractAddress,
-  functionDescription,
-  functionName,
+  selectedFunction: { abiFunction, contractAddress, functionName, functionDescription },
+  onAddFunction,
 }) => {
   const { handleSubmit, register, control, formState } = useForm<{ functionParams: FunctionParamsField[] }>()
 
@@ -166,9 +181,18 @@ const SelectedFunctionModalBody: React.FC<SelectedFunctionModalBodyProps> = ({
     })
   }, [abiFunction, remove, append])
 
-  const onSubmit = useCallback((data: { functionParams: FunctionParamsField[] }) => {
-    console.log(data)
-  }, [])
+  // encode the function call data and pass it to the parent component
+  const onSubmit = useCallback(
+    (data: { functionParams: FunctionParamsField[] }) => {
+      const values = data.functionParams.map(param => param.value)
+      const encodedCallData = abiFunction.encode(...values)
+      onAddFunction({
+        selectedFunction: { abiFunction, contractAddress, functionName, functionDescription },
+        calldata: encodedCallData,
+      })
+    },
+    [onAddFunction],
+  )
 
   return (
     <form
