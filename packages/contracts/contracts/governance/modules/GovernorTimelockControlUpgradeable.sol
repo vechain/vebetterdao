@@ -3,7 +3,7 @@
 
 pragma solidity ^0.8.20;
 
-import { IGovernor } from "../../interfaces/IGovernor.sol";
+import { IB3TRGovernor } from "../../interfaces/IB3TRGovernor.sol";
 import { GovernorUpgradeable } from "../GovernorUpgradeable.sol";
 import { TimelockControllerUpgradeable } from "@openzeppelin/contracts-upgradeable/governance/TimelockControllerUpgradeable.sol";
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
@@ -75,7 +75,7 @@ abstract contract GovernorTimelockControlUpgradeable is Initializable, GovernorU
   }
 
   /**
-   * @dev See {IGovernor-proposalNeedsQueuing}.
+   * @dev See {IB3TRGovernor-proposalNeedsQueuing}.
    */
   function proposalNeedsQueuing(uint256) public view virtual override returns (bool) {
     return true;
