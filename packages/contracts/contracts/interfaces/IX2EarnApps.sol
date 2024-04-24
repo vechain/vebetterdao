@@ -49,21 +49,37 @@ interface IX2EarnApps {
    *
    * @param name the name of the app
    */
-  function hashName(string memory name) external pure returns (bytes32);
+  function hashAppName(string memory name) external pure returns (bytes32);
 
-  function allElegibleApps() external view returns (bytes32[] memory);
+  function addApp(address receiverAddress, address admin, string memory appName, string memory metadataURI) external;
 
-  function appExists(bytes32 appId) external view returns (bool);
+  function app(bytes32 appId) external view returns (DataTypes.App memory);
 
-  function isElegible(bytes32 appId, uint256 timepoint) external view returns (bool);
+  function addAppModerator(bytes32 appId, address moderator) external;
 
-  function isElegibleNow(bytes32 appId) external view returns (bool);
+  function removeAppModerator(bytes32 appId, address moderator) external;
+
+  function setAppAdmin(bytes32 appId, address admin) external;
+
+  function updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) external;
+
+  function updateAppMetadata(bytes32 appId, string memory metadataURI) external;
+
+  function appAdmin(bytes32 appId) external view returns (address);
 
   function getAppReceiverAddress(bytes32 appId) external view returns (address);
 
   function createdAt(bytes32 appId) external view returns (uint48);
 
-  function app(bytes32 appId) external view returns (DataTypes.App memory);
+  function appExists(bytes32 appId) external view returns (bool);
+
+  function setVotingElegibility(bytes32 _appId, bool _isElegible) external;
+
+  function allElegibleApps() external view returns (bytes32[] memory);
+
+  function isElegible(bytes32 appId, uint256 timepoint) external view returns (bool);
+
+  function isElegibleNow(bytes32 appId) external view returns (bool);
 
   /**
    * @dev Update the base URI to retrieve the metadata of the x2earn apps
@@ -71,6 +87,4 @@ interface IX2EarnApps {
    * @param baseUri the base URI for the contract
    */
   function setBaseURI(string memory baseUri) external;
-
-  function addAppModerator(bytes32 appId, address moderator) external;
 }

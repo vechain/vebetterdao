@@ -38,7 +38,7 @@ abstract contract VoteElegibility is Initializable, X2EarnAppsUpgradeable {
 
   function __VoteElegibility_init_unchained() internal onlyInitializing {}
 
-  function setVotingElegibility(bytes32 _appId, bool _isElegible) public virtual {
+  function setVotingElegibility(bytes32 _appId, bool _isElegible) public virtual override {
     _updateVotingElegibilityCheckpoint(_appId, _isElegible);
   }
 

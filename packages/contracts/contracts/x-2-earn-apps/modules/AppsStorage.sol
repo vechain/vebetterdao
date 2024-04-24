@@ -57,7 +57,7 @@ abstract contract AppsStorage is Initializable, X2EarnAppsUpgradeable {
     string memory metadataURI
   ) internal virtual override {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
-    bytes32 id = hashName(appName);
+    bytes32 id = hashAppName(appName);
 
     if ($._apps[id].receiverAddress != address(0)) {
       revert X2EarnAppAlreadyExists(id);

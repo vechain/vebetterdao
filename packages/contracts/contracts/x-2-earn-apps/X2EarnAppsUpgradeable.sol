@@ -75,7 +75,7 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   /**
    * @dev Hashes the name of the app to be used as the app ID.
    */
-  function hashName(string memory appName) public pure returns (bytes32) {
+  function hashAppName(string memory appName) public pure returns (bytes32) {
     return keccak256(abi.encodePacked(appName));
   }
 
@@ -84,6 +84,8 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   function appExists(bytes32 appId) public view virtual returns (bool);
 
   function baseURI() public view virtual returns (string memory);
+
+  function setVotingElegibility(bytes32 _appId, bool _isElegible) public virtual;
 
   function _pushAppToEligbleApps(bytes32 appId) internal virtual;
 

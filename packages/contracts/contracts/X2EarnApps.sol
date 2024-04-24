@@ -48,7 +48,10 @@ contract X2EarnApps is
     _setBaseURI(baseURI_);
   }
 
-  function setVotingElegibility(bytes32 _appId, bool _isElegible) public override onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setVotingElegibility(
+    bytes32 _appId,
+    bool _isElegible
+  ) public override(VoteElegibility, X2EarnAppsUpgradeable) onlyRole(DEFAULT_ADMIN_ROLE) {
     super.setVotingElegibility(_appId, _isElegible);
   }
 
