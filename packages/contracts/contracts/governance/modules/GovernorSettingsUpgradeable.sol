@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts (last updated v5.0.0) (governance/extensions/GovernorSettings.sol)
+// Forked from OpenZeppelin Contracts (last updated v5.0.0) (governance/extensions/GovernorSettings.sol)
 
 pragma solidity ^0.8.20;
 
@@ -65,7 +65,7 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
   /**
    * @dev See {B3TRGovernor-minVotingDelay}.
    */
-  function getMinVotingDelay() public view virtual returns (uint256) {
+  function getMinVotingDelay() public view virtual override returns (uint256) {
     GovernorSettingsStorage storage $ = _getGovernorSettingsStorage();
     return $._minVotingDelay;
   }
