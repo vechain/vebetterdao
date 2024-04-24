@@ -63,24 +63,28 @@ contract X2EarnApps is
    * @dev View {X2EarnAppsUpgradeable-_authorizeAppMetadataUpdate}
    */
   function _authorizeAppMetadataUpdate(bytes32 appId) internal view override {
-    require(
-      hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || isAppModerator(appId, msg.sender) || isAppAdmin(appId, msg.sender),
-      "X2EarnApps: sender must be an admin or app moderator"
-    );
+    if (
+      !hasRole(DEFAULT_ADMIN_ROLE, msg.sender) && !isAppModerator(appId, msg.sender) && !isAppAdmin(appId, msg.sender)
+    ) {
+      revert X2EarnUnauthorizedUser(msg.sender);
+    }
   }
 
   /**
    * @dev View {X2EarnAppsUpgradeable-_authorizeAppManagement}
    */
   function _authorizeAppManagement(bytes32 appId) internal view override {
-    require(
-      hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || isAppAdmin(appId, msg.sender),
-      "X2EarnApps: sender must be an admin"
-    );
+    if (!hasRole(DEFAULT_ADMIN_ROLE, msg.sender) && !isAppAdmin(appId, msg.sender)) {
+      revert X2EarnUnauthorizedUser(msg.sender);
+    }
   }
 
   /**
    * @dev View {X2EarnAppsUpgradeable-_authorizeAddApp}
    */
-  function _authorizeAddApp() internal view override onlyRole(DEFAULT_ADMIN_ROLE) {}
+  function _authorizeAddApp() internal view override {
+    if (!hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {
+      revert X2EarnUnauthorizedUser(msg.sender);
+    }
+  }
 }

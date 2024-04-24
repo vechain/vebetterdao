@@ -47,7 +47,10 @@ abstract contract Administration is Initializable, X2EarnAppsUpgradeable {
    * @param newAdmin the address of the new admin
    */
   function setAppAdmin(bytes32 appId, address newAdmin) external {
-    require(appExists(appId), "XApps: app does not exist");
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+
     _authorizeAppManagement(appId);
 
     _setAppAdmin(appId, newAdmin);
@@ -60,8 +63,13 @@ abstract contract Administration is Initializable, X2EarnAppsUpgradeable {
    * @param newAdmin the address of the new admin
    */
   function _setAppAdmin(bytes32 appId, address newAdmin) internal virtual override {
-    require(appExists(appId), "XApps: app does not exist");
-    require(newAdmin != address(0), "XApps: admin is the zero address");
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+
+    if (newAdmin == address(0)) {
+      revert X2EarnInvalidAddress(newAdmin);
+    }
 
     AdministrationStorage storage $ = _getAdministrationStorage();
 
@@ -75,7 +83,12 @@ abstract contract Administration is Initializable, X2EarnAppsUpgradeable {
    * @param moderator the address of the moderator
    */
   function addAppModerator(bytes32 appId, address moderator) external virtual {
-    require(appExists(appId), "XApps: app does not exist");
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+    if (moderator == address(0)) {
+      revert X2EarnInvalidAddress(moderator);
+    }
     _authorizeAppManagement(appId);
 
     AdministrationStorage storage $ = _getAdministrationStorage();
@@ -90,7 +103,12 @@ abstract contract Administration is Initializable, X2EarnAppsUpgradeable {
    * @param moderator the address of the moderator
    */
   function removeAppModerator(bytes32 appId, address moderator) external {
-    require(appExists(appId), "XApps: app does not exist");
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+    if (moderator == address(0)) {
+      revert X2EarnInvalidAddress(moderator);
+    }
 
     _authorizeAppManagement(appId);
 

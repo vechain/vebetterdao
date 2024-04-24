@@ -10,6 +10,26 @@ interface IX2EarnApps {
   error ERC6372InconsistentClock();
 
   /**
+   * @dev The `appId` doesn't exist.
+   */
+  error X2EarnNonexistentApp(bytes32 appId);
+
+  /**
+   * @dev The `addr` is not valid (eg: is the ZERO ADDRESS).
+   */
+  error X2EarnInvalidAddress(address addr);
+
+  /**
+   * @dev An app with the specified `appId` already exists.
+   */
+  error X2EarnAppAlreadyExists(bytes32 appId);
+
+  /**
+   * @dev The user is not authorized to perform the action.
+   */
+  error X2EarnUnauthorizedUser(address user);
+
+  /**
    * @dev Lookup to future votes is not available.
    */
   error ERC5805FutureLookup(uint256 timepoint, uint48 clock);

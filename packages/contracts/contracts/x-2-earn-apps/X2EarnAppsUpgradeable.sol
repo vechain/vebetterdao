@@ -23,9 +23,6 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   ) public virtual {
     _authorizeAddApp();
 
-    require(receiverAddress != address(0), "XApps: receiverAddress is the zero address");
-    require(admin != address(0), "XApps: admin is the zero address");
-
     _addApp(receiverAddress, admin, appName, metadataURI);
   }
 

@@ -54,7 +54,15 @@ abstract contract AppsStorage is Initializable, X2EarnAppsUpgradeable {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
     bytes32 id = hashName(appName);
 
-    require($._apps[id].receiverAddress == address(0), "App with this ID already exists");
+    if ($._apps[id].receiverAddress != address(0)) {
+      revert X2EarnAppAlreadyExists(id);
+    }
+    if (receiverAddress == address(0)) {
+      revert X2EarnInvalidAddress(receiverAddress);
+    }
+    if (admin == address(0)) {
+      revert X2EarnInvalidAddress(admin);
+    }
 
     // Store the new app
     $._apps[id] = DataTypes.App(id, receiverAddress, appName, metadataURI, clock(), block.timestamp);
@@ -73,7 +81,9 @@ abstract contract AppsStorage is Initializable, X2EarnAppsUpgradeable {
    * @param metadataURI the metadata URI of the app
    */
   function updateAppMetadata(bytes32 appId, string memory metadataURI) external {
-    require(appExists(appId), "XApps: app does not exist");
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
 
     _authorizeAppMetadataUpdate(appId);
     AppsStorageStorage storage $ = _getAppsStorageStorage();
@@ -88,7 +98,13 @@ abstract contract AppsStorage is Initializable, X2EarnAppsUpgradeable {
    * @param newReceiverAddress the address of the new receiver
    */
   function updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) external {
-    require(appExists(appId), "XApps: app does not exist");
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+
+    if (newReceiverAddress == address(0)) {
+      revert X2EarnInvalidAddress(newReceiverAddress);
+    }
 
     _authorizeAppManagement(appId);
 
@@ -106,7 +122,9 @@ abstract contract AppsStorage is Initializable, X2EarnAppsUpgradeable {
   // ---------- Getters ---------- //
   // Function to retrieve an app by ID
   function app(bytes32 appId) public view virtual returns (DataTypes.App memory) {
-    require(appExists(appId), "XApps: app does not exist");
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
 
     AppsStorageStorage storage $ = _getAppsStorageStorage();
     return $._apps[appId];
@@ -131,7 +149,9 @@ abstract contract AppsStorage is Initializable, X2EarnAppsUpgradeable {
   }
 
   function appURI(bytes32 appId) public view returns (string memory) {
-    require(appExists(appId), "XApps: app does not exist");
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
 
     AppsStorageStorage storage $ = _getAppsStorageStorage();
 
@@ -139,7 +159,9 @@ abstract contract AppsStorage is Initializable, X2EarnAppsUpgradeable {
   }
 
   function createdAt(bytes32 appId) public view override returns (uint48) {
-    require(appExists(appId), "XApps: app does not exist");
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
 
     AppsStorageStorage storage $ = _getAppsStorageStorage();
 
