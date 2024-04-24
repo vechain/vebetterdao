@@ -11,7 +11,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 abstract contract GovernorDepositUpgradeable is Initializable, GovernorUpgradeable {
   /// @custom:storage-location erc7201:openzeppelin.storage.GovernorDeposit
   struct GovernorDepositStorage {
-    mapping(uint256 => mapping(address => uint256)) deposits;
+    mapping(uint256 => mapping(address => uint256)) deposits; // mapping to track deposits made to proposals by address
     IVOT3 vot3;
   }
   // keccak256(abi.encode(uint256(keccak256("openzeppelin.storage.GovernorDeposit")) - 1)) & ~bytes32(uint256(0xff))
