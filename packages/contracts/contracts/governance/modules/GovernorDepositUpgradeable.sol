@@ -71,10 +71,11 @@ abstract contract GovernorDepositUpgradeable is Initializable, GovernorUpgradeab
    * Reverts if the token transfer fails.
    *
    * @param proposalId The id of the proposal to withdraw deposits from.
+   * @param depositer The address of the depositer.
    */
-  function withdraw(uint256 proposalId) public {
+  function withdraw(uint256 proposalId, address depositer) public {
     GovernorDepositStorage storage $ = _getGovernorDepositStorage();
-    uint256 amount = $.deposits[proposalId][_msgSender()];
+    uint256 amount = $.deposits[proposalId][depositer];
 
     _validateStateBitmap(
       proposalId,
@@ -83,9 +84,9 @@ abstract contract GovernorDepositUpgradeable is Initializable, GovernorUpgradeab
 
     require(amount > 0, "B3TRGovernor: no deposit to withdraw");
 
-    $.deposits[proposalId][_msgSender()] = 0;
+    $.deposits[proposalId][depositer] = 0;
 
-    require($.vot3.transfer(_msgSender(), amount), "B3TRGovernor: transfer failed");
+    require($.vot3.transfer(depositer, amount), "B3TRGovernor: transfer failed");
   }
 
   // ---------- Getters ---------- //
