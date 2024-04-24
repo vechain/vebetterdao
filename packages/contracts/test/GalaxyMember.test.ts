@@ -846,6 +846,54 @@ describe("Galaxy Member", () => {
 
       expect(await galaxyMember.tokenURI(0)).to.equal("")
     })
+
+    it("Should not be able to free mint if public minting is paused", async () => {
+      const { galaxyMember, otherAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(otherAccount)
+
+      await galaxyMember.connect(owner).setIsPublicMintingPaused(true)
+
+      await expect(galaxyMember.connect(otherAccount).freeMint()).to.be.reverted
+
+      await galaxyMember.connect(owner).setIsPublicMintingPaused(false)
+
+      await galaxyMember.connect(otherAccount).freeMint()
+    })
+
+    it("Should be able to mint with adming if public minting is paused", async () => {
+      const { galaxyMember, otherAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(otherAccount)
+
+      await galaxyMember.connect(owner).setIsPublicMintingPaused(true)
+
+      await galaxyMember.connect(owner).mint(await otherAccount.getAddress())
+
+      await expect(galaxyMember.connect(otherAccount).freeMint()).to.be.reverted // Other account cannot mint as he is not admin
+
+      expect(await galaxyMember.balanceOf(await otherAccount.getAddress())).to.equal(1) // Owner has 1 NFT
+
+      expect(await galaxyMember.ownerOf(1)).to.equal(await otherAccount.getAddress()) // Owner of the first NFT is the otherAccount
+
+      expect(await galaxyMember.totalSupply()).to.equal(1) // Total supply is 1
+
+      expect(await galaxyMember.levelOf(1)).to.equal(1) // Level 1
+
+      expect(await galaxyMember.getHighestLevel(otherAccount)).to.equal(1) // Level 1
+    })
   })
 
   describe("Transferring", () => {
