@@ -45,7 +45,9 @@ abstract contract GovernorDepositUpgradeable is Initializable, GovernorUpgradeab
    * @param proposalId The id of the proposal.
    */
   function deposit(uint256 amount, uint256 proposalId) external {
-    require(amount > 0, "Deposit amount must be greater than 0");
+    if (amount == 0) {
+      revert GovernorInvalidDepositAmount();
+    }
 
     GovernorStorage storage $ = _getGovernorStorage();
     ProposalCore storage proposal = $._proposals[proposalId];
@@ -82,7 +84,9 @@ abstract contract GovernorDepositUpgradeable is Initializable, GovernorUpgradeab
       ALL_PROPOSAL_STATES_BITMAP ^ _encodeStateBitmap(ProposalState.Pending) ^ _encodeStateBitmap(ProposalState.Active)
     );
 
-    require(amount > 0, "B3TRGovernor: no deposit to withdraw");
+    if (amount == 0) {
+      revert GovernorNoDepositToWithdraw(proposalId, depositer);
+    }
 
     $.deposits[proposalId][depositer] = 0;
 

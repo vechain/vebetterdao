@@ -115,6 +115,16 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   error GovernorInvalidStartRound(uint256 roundId);
 
   /**
+   * @dev There is no deposit to withdraw.
+   */
+  error GovernorNoDepositToWithdraw(uint256 proposalId, address depositer);
+
+    /**
+   * @dev The deposit amount must be greater than 0.
+   */
+  error GovernorInvalidDepositAmount();
+
+  /**
    * @dev Emitted when a proposal is created
    */
   event ProposalCreated(
