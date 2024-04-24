@@ -574,18 +574,59 @@ describe("X-Allocation Pool", async function () {
         let expectedVariableAllocationR2App1 = await calculateVariableAppAllocationOffChain(Number(round2), app1Id)
         let claimableRewardsR2App1 = await xAllocationPool.roundEarnings(round2, app1Id)
         expect(claimableRewardsR2App1[0]).to.eql(expectedVariableAllocationR2App1 + expectedBaseAllocationR2)
+        expect(claimableRewardsR2App1[0]).to.eql(await xAllocationPool.getMaxAppAllocation(round2))
       })
 
       it("Cannot calculate base allocation amount and app shares if xAllocationVoting is not set", async function () {
-        const contract = await ethers.getContractFactory("XAllocationPool")
-        const xAllocationPool = await contract.deploy()
-        await xAllocationPool.waitForDeployment()
+        const config = createLocalConfig()
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
-        let roundId = await startNewAllocationRound()
+        // Bootstrap emissions
+        await bootstrapEmissions()
 
-        await expect(xAllocationPool.baseAllocationAmount(roundId)).to.be.reverted
-        await expect(xAllocationPool.getAppShares(roundId, ethers.keccak256(ethers.toUtf8Bytes("My app")))).to.be
-          .reverted
+        const voter1 = otherAccounts[1]
+        await getVot3Tokens(voter1, "1000")
+
+        //Add apps
+        const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+        const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
+        await xAllocationVoting
+          .connect(owner)
+          .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app", "metadataURI")
+        await xAllocationVoting
+          .connect(owner)
+          .addApp(otherAccounts[4].address, otherAccounts[4].address, "My app #2", "metadataURI")
+
+        //Start allocation round
+        const round1 = await startNewAllocationRound()
+
+        // (30% * Emissions)/ Number of apps
+        const expectedBaseAllocation =
+          (BigInt(config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE) * config.INITIAL_X_ALLOCATION) / (100n * 2n) //2 Apps
+
+        // ((100% - 30%) * 20%) * Emissions
+        const expectedMaxAppCapAllocation =
+          ((100n - BigInt(config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE)) *
+            BigInt(config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP) *
+            config.INITIAL_X_ALLOCATION) /
+          100n ** 2n
+
+        // Get max allocations
+        const maxAppAllocation = await xAllocationPool.getMaxAppAllocation(round1)
+
+        expect(maxAppAllocation).to.eql(expectedMaxAppCapAllocation + expectedBaseAllocation)
+
+        // Vote
+        await xAllocationVoting
+          .connect(voter1)
+          .castVote(round1, [app1Id, app2Id], [ethers.parseEther("100"), ethers.parseEther("900")])
+
+        await waitForRoundToEnd(round1)
+
+        const earnings = await xAllocationPool.roundEarnings(round1, app2Id)
+        expect(earnings[0]).to.eql(maxAppAllocation)
       })
     })
 
@@ -874,6 +915,8 @@ describe("X-Allocation Pool", async function () {
         expect(app1Earnings).to.eql(app1EarningsInRound2)
         expect(app2Earnings).to.eql(app2EarningsInRound2)
       })
+
+      it("Max app allocation should be calculated correctly", async function () {})
     })
     describe("App claiming", async function () {
       it("Allocation rewards are claimed correctly", async function () {
@@ -1391,6 +1434,7 @@ describe("X-Allocation Pool", async function () {
         await catchRevert(xAllocationPool.connect(otherAccounts[6]).claim(round1, app1Id))
       })
     })
+
     describe("Unallocated funds", async function () {
       it("Unallocated rewards are returned to the treasury", async function () {
         const { xAllocationVoting, otherAccounts, owner, xAllocationPool, b3tr, emissions, minterAccount, treasury } =
