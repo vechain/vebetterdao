@@ -2,7 +2,7 @@ import { test, TestInfo } from '@playwright/test';
 import { HOMEPAGE } from '../utils/constants';
 import veWorldMockClient from '../utils/veworld-mock-client';
 import { DashboardPage } from '../model/dashboardPage';
-import blockchainUtils, { Account } from '../utils/blockchain';
+import blockchainUtils from '../utils/blockchain';
 import BigNumber from 'bignumber.js';
 import { SwapConfirmationDialog } from '../model/swapConfirmationDialog';
 import { CommonActions } from "../model/commonActions"
@@ -10,6 +10,7 @@ import { SwapDialog } from "../model/swapDialog"
 import * as constants from '../utils/constants'
 import { trimmedAddress } from "../utils/helpers"
 import uniqueRandom from "../utils/unique-random"
+import { Account } from "../model/types"
 
 test.describe('Swap Tokens', () => {
 

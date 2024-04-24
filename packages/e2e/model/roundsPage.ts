@@ -20,6 +20,7 @@ export class RoundsPage {
     /**
      * Assert on rounds page for a specific round
      * @param roundIndex index of round
+     * @param timeout
      */
     async expectOnPage(roundIndex: number, timeout?: number) {
         await expect(this.roundTitleText).toBeVisible({ timeout })

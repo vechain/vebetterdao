@@ -3,6 +3,7 @@ import { clauseBuilder, coder, FunctionFragment, HDNode, TransactionHandler } fr
 import * as constants from './constants';
 import { BigNumber } from 'bignumber.js';
 import uniqueRandom from './unique-random';
+import { Account, ERC20TransferArgs } from "../model/types"
 
 // When toString will return an exponential value
 BigNumber.config({ EXPONENTIAL_AT: 100 })
@@ -402,28 +403,3 @@ const blockchainUtils = {
     account,
 }
 export default blockchainUtils
-
-/**
- * @param {string} contract - ERC20 contract address
- * @param {BigNumber} amount - amount to transfer; e.g. BigNumber(2) will transfer 2 ERC20 tokens
- * @param {string} - receiver address
- * @param {Account} sender - sender account details that include acc index, address and private key
- */
-export interface ERC20TransferArgs {
-    contract: string
-    amount: BigNumber
-    receiver: string
-    sender?: Account
-}
-
-/**
- * @param {number} index - account index
- * @param {string} address - wallet address
- * @param {Buffer} pk - wallet private key;
- *                      if you need string val instead of Buffer - call `.toString('hex')` on it
- */
-export interface Account {
-    index: number,
-    address: string,
-    pk: Buffer
-}

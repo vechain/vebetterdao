@@ -1,7 +1,7 @@
 import { Page } from 'playwright';
 import { expect, test, Locator } from '@playwright/test';
 import BigNumber from 'bignumber.js';
-import { Token } from "./commonActions"
+import { SetSendSwapAmountArgs, Token } from "./types"
 
 /**
  * Swap dialog model
@@ -55,9 +55,9 @@ export class SwapDialog {
 
     /**
      * Set swap send amount
-     * @param {SetSendSwapAmount} args
+     * @param {SetSendSwapAmountArgs} args
      */
-    async setSendAmount(args: SetSendSwapAmount ) {
+    async setSendAmount(args: SetSendSwapAmountArgs ) {
         await test.step(`Set send ${args.token} swap amount to ${args.max ? "max swappable amount" : `"${args.amount}"`}`, async () => {
             if (args.max === undefined && args.amount === undefined) {
                 throw new Error("Can't set swap amount: both 'max' and 'amount' args are passed undefined -- at least one of these args should be passed as value.")
@@ -183,15 +183,4 @@ export class SwapDialog {
             await expect(this.amountInputByToken(tokenName)).toHaveValue(amount)
         })
     }
-}
-
-/**
- * {Token} token - token name
- * {BigNumber} amount - swap send amount
- * {boolean} max - should it
- */
-export interface SetSendSwapAmount {
-    token: Token
-    amount?: BigNumber
-    max?: boolean
 }

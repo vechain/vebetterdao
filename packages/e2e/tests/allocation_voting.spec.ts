@@ -63,7 +63,7 @@ const adminOpenRound = async (page: Page) => {
     const menuBar = new MenuBar(page)
     const adminPage = await menuBar.gotoAdmin()
     await adminPage.startEmissions()
-    await dashboardPage.disconnectWallet(adminAddress)
+    await dashboardPage.disconnectWallet()
     await page.evaluate(() => window.localStorage.clear());
     await page.evaluate(() => window.sessionStorage.clear());
   })
@@ -83,7 +83,7 @@ const castUserVote = async (page: Page, accountIndex: number, roundIndex: number
     const roundsPage = await allocationsPage.clickOnRound(roundIndex)
     await roundsPage.castVote(splitPercentage)
     await menuBar.gotoDashbard()
-    await dashboardPage.disconnectWallet(blockchainUtils.getAccountAddress(accountIndex))
+    await dashboardPage.disconnectWallet()
   })
 }
 
@@ -157,7 +157,7 @@ test.describe('Allocation voting', () => {
         await dialog.closeDialog()
         // assert b3tr balance has increased
         await dashboardPage.expectB3TRBalanceGreaterThan(voter.b3trBalance)
-        await dashboardPage.disconnectWallet(blockchainUtils.getAccountAddress(voter.accIndex))
+        await dashboardPage.disconnectWallet()
       }
     })
 
@@ -175,7 +175,7 @@ test.describe('Allocation voting', () => {
         await dialog.closeDialog()
         // assert NFT is displayed
         await dashboardPage.expectNFTToBeDisplayed("GM Earth")
-        await dashboardPage.disconnectWallet(blockchainUtils.getAccountAddress(voter.accIndex))
+        await dashboardPage.disconnectWallet()
         nftCounter++
       }
     })

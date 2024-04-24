@@ -5,9 +5,9 @@ import { SwapConfirmationDialog } from "./swapConfirmationDialog"
 import { SwapDialog } from "./swapDialog"
 import { HOMEPAGE } from "../utils/constants"
 import veWorldMockClient from '../utils/veworld-mock-client';
-import BigNumber from "bignumber.js"
 import blockchainUtils from "../utils/blockchain"
 import { BaseDialog } from "./baseDialog"
+import { SwapArgs } from "./types"
 
 export class CommonActions {
   private readonly page: Page
@@ -51,18 +51,4 @@ export class CommonActions {
       await this.swapConfirmationDialog.closeDialog()
     })
   }
-
-  // await this.dashboardPage.disconnectWallet(address)
-}
-
-export type Token = 'B3TR' | 'VOT3'
-
-/**
- * address {string} - wallet address on which the swap is performed; required to verify if the swap was successful
- */
-export interface SwapArgs {
-  sendToken: Token
-  receiveToken: Token
-  sendAmount?: BigNumber
-  max?: boolean
 }
