@@ -41,9 +41,13 @@ abstract contract Settings is Initializable, X2EarnAppsUpgradeable {
    * @dev Internal function to update the base URI to retrieve the metadata of the x2earn apps
    *
    * @param baseURI_ the base URI for the contract
+   *
+   * Emits a {BaseURIUpdated} event.
    */
   function _setBaseURI(string memory baseURI_) internal {
     SettingsStorage storage $ = _getSettingsStorage();
+
+    emit BaseURIUpdated($._baseURI, baseURI_);
 
     $._baseURI = baseURI_;
   }

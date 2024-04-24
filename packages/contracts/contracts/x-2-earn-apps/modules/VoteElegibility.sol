@@ -70,7 +70,7 @@ abstract contract VoteElegibility is Initializable, X2EarnAppsUpgradeable {
       _push($._isAppElegibleCheckpoints[appId], 1);
     }
 
-    emit VotingElegibilityChanged(appId, canBeVoted);
+    emit VotingElegibilityUpdated(appId, canBeVoted);
   }
 
   function _push(Checkpoints.Trace208 storage store, uint208 delta) private returns (uint208, uint208) {

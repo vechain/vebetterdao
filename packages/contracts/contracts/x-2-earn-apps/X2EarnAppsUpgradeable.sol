@@ -81,10 +81,23 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   // ---------- Getters ---------- //
 
   /**
-   * @dev Clock used for flagging checkpoints or to retrieve the current block number.
+   * @dev Clock used for flagging checkpoints or to retrieve the current block number. Can be overridden to implement timestamp based
+   * checkpoints (and voting), in which case {CLOCK_MODE} should be overridden as well to match.
    */
   function clock() public view virtual returns (uint48) {
     return Time.blockNumber();
+  }
+
+  /**
+   * @dev Machine-readable description of the clock as specified in EIP-6372.
+   */
+  // solhint-disable-next-line func-name-mixedcase
+  function CLOCK_MODE() public view virtual returns (string memory) {
+    // Check that the clock was not modified
+    if (clock() != Time.blockNumber()) {
+      revert ERC6372InconsistentClock();
+    }
+    return "mode=blocknumber&from=default";
   }
 
   /**

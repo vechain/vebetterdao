@@ -83,6 +83,8 @@ abstract contract AppsStorage is Initializable, X2EarnAppsUpgradeable {
    *
    * @param appId the hashed name of the app
    * @param metadataURI the metadata URI of the app
+   *
+   * Emits a {AppMetadataURIUpdated} event.
    */
   function _updateAppMetadata(bytes32 appId, string memory metadataURI) internal virtual override {
     if (!appExists(appId)) {
@@ -90,6 +92,7 @@ abstract contract AppsStorage is Initializable, X2EarnAppsUpgradeable {
     }
 
     AppsStorageStorage storage $ = _getAppsStorageStorage();
+    emit AppMetadataURIUpdated(appId, $._apps[appId].metadataURI, metadataURI);
 
     $._apps[appId].metadataURI = metadataURI;
   }
@@ -110,6 +113,8 @@ abstract contract AppsStorage is Initializable, X2EarnAppsUpgradeable {
     }
 
     AppsStorageStorage storage $ = _getAppsStorageStorage();
+
+    emit AppReceiverAddressUpdated(appId, $._apps[appId].receiverAddress, newReceiverAddress);
 
     $._apps[appId].receiverAddress = newReceiverAddress;
   }

@@ -56,6 +56,8 @@ abstract contract Administration is Initializable, X2EarnAppsUpgradeable {
 
     AdministrationStorage storage $ = _getAdministrationStorage();
 
+    emit AppAdminUpdated(appId, $._admin[appId], newAdmin);
+
     $._admin[appId] = newAdmin;
   }
 
@@ -76,6 +78,8 @@ abstract contract Administration is Initializable, X2EarnAppsUpgradeable {
     AdministrationStorage storage $ = _getAdministrationStorage();
 
     $._moderators[appId].push(moderator);
+
+    emit ModeratorAddedToApp(appId, moderator);
   }
 
   /**
@@ -99,6 +103,7 @@ abstract contract Administration is Initializable, X2EarnAppsUpgradeable {
       if (moderators[i] == moderator) {
         moderators[i] = moderators[moderators.length - 1];
         moderators.pop();
+        emit ModeratorRemovedFromApp(appId, moderator);
         break;
       }
     }

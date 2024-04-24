@@ -47,7 +47,37 @@ interface IX2EarnApps {
   /**
    * @dev Event fired when an app elegibility for allocation voting changes.
    */
-  event VotingElegibilityChanged(bytes32 indexed appId, bool isAvailable);
+  event VotingElegibilityUpdated(bytes32 indexed appId, bool isAvailable);
+
+  /**
+   * @dev Event fired when the admin adds a new moderator to the app.
+   */
+  event ModeratorAddedToApp(bytes32 indexed appId, address moderator);
+
+  /**
+   * @dev Event fired when the admin removes a moderator from the app.
+   */
+  event ModeratorRemovedFromApp(bytes32 indexed appId, address moderator);
+
+  /**
+   * @dev Event fired when the admin of an app changes.
+   */
+  event AppAdminUpdated(bytes32 indexed appId, address oldAdmin, address newAdmin);
+
+  /**
+   * @dev Event fired when the address where the x2earn app receives allocation funds is changed.
+   */
+  event AppReceiverAddressUpdated(bytes32 indexed appId, address oldReceiverAddress, address newReceiverAddress);
+
+  /**
+   * @dev Event fired when the metadata URI of the app is changed.
+   */
+  event AppMetadataURIUpdated(bytes32 indexed appId, string oldMetadataURI, string newMetadataURI);
+
+  /**
+   * @dev Event fired when the base URI is updated.
+   */
+  event BaseURIUpdated(string oldBaseURI, string newBaseURI);
 
   /**
    * @dev Generates the hash of the app name to be used as the app id.
@@ -81,7 +111,7 @@ interface IX2EarnApps {
    * @param appId the id of the app
    * @param moderator the address of the moderator
    *
-   * TODO: Emits a {ModeratorAddedToApp} event.
+   * Emits a {ModeratorAddedToApp} event.
    */
   function addAppModerator(bytes32 appId, address moderator) external;
 
@@ -91,7 +121,7 @@ interface IX2EarnApps {
    * @param appId the id of the app
    * @param moderator the address of the moderator
    *
-   * TODO: Emits a {ModeratorRemovedFromApp} event.
+   * Emits a {ModeratorRemovedFromApp} event.
    */
   function removeAppModerator(bytes32 appId, address moderator) external;
 
@@ -101,7 +131,7 @@ interface IX2EarnApps {
    * @param appId the id of the app
    * @param admin the address of the admin
    *
-   * TODO: Emits a {AppAdminChanged} event.
+   * Emits a {AppAdminUpdated} event.
    */
   function setAppAdmin(bytes32 appId, address admin) external;
 
@@ -118,7 +148,7 @@ interface IX2EarnApps {
    * @param appId the id of the app
    * @param newReceiverAddress the new address where the app should receive allocation funds
    *
-   * TODO: Emits a {AppReceiverAddressChanged} event.
+   * Emits a {AppReceiverAddressUpdated} event.
    */
   function updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) external;
 
@@ -135,7 +165,7 @@ interface IX2EarnApps {
    * @param appId the id of the app
    * @param metadataURI the new metadata URI of the app containing details about the app
    *
-   * TODO: Emits a {AppMetadataURIChanged} event.
+   * Emits a {AppMetadataURIUpdated} event.
    */
   function updateAppMetadata(bytes32 appId, string memory metadataURI) external;
 
@@ -159,7 +189,7 @@ interface IX2EarnApps {
    * @param _appId the id of the app
    * @param _isElegible true if the app should be elegible for voting, false otherwise
    *
-   * Emits a {VotingElegibilityChanged} event.
+   * Emits a {VotingElegibilityUpdated} event.
    */
   function setVotingElegibility(bytes32 _appId, bool _isElegible) external;
 
@@ -188,6 +218,8 @@ interface IX2EarnApps {
    * @dev Update the base URI to retrieve the metadata of the x2earn apps
    *
    * @param baseUri the base URI for the contract
+   *
+   * Emits a {BaseURIUpdated} event.
    */
   function setBaseURI(string memory baseUri) external;
 
