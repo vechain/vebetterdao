@@ -14,13 +14,45 @@ import {
 import { FaPlus, FaMagnifyingGlass } from "react-icons/fa6"
 import { OnFunctionClickProps, SearchFeaturedFunctionsModal } from "./SearchFeaturedFunctionsModal"
 import { useCallback } from "react"
+import { useProposalFormStore } from "@/store/useProposalFormStore"
+import { SelectedFunctionBox } from "./SelectedFunctionBox"
 
 export const InfoAndFunctionsPageContent = () => {
   const { isOpen: isSearchModaOpen, onOpen: openSearchModal, onClose: closeSearchModal } = useDisclosure()
 
-  const handleAddFunction = useCallback((data: { selectedFunction: OnFunctionClickProps; calldata: string }) => {
-    console.log(data)
-  }, [])
+  const { stepOne: infoAndFunctionsData, setData } = useProposalFormStore()
+  const handleAddFunction = useCallback(
+    (data: { selectedFunction: OnFunctionClickProps; calldata: string }) => {
+      setData({
+        step: 1,
+        data: {
+          description: "",
+          actions: [
+            ...(infoAndFunctionsData?.actions ?? []),
+            {
+              contractAddress: data.selectedFunction.contractAddress,
+              calldata: data.calldata,
+              abi: data.selectedFunction.abiFunction,
+            },
+          ],
+        },
+      })
+    },
+    [infoAndFunctionsData],
+  )
+
+  const handleRemoveFunction = useCallback(
+    (indexToRemove: number) => () => {
+      setData({
+        step: 1,
+        data: {
+          description: "",
+          actions: infoAndFunctionsData?.actions.filter((_, index) => index !== indexToRemove) ?? [],
+        },
+      })
+    },
+    [infoAndFunctionsData],
+  )
 
   return (
     <>
@@ -59,6 +91,14 @@ export const InfoAndFunctionsPageContent = () => {
                 Help me with AI
               </Button>
             </HStack>
+            {infoAndFunctionsData?.actions.map((action, index) => (
+              <SelectedFunctionBox
+                key={index}
+                functionData={action}
+                index={index}
+                onRemove={handleRemoveFunction(index)}
+              />
+            ))}
           </VStack>
         </CardBody>
       </Card>

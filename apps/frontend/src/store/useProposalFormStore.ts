@@ -1,4 +1,5 @@
 import { ProposalAction } from "@/hooks"
+import { abi } from "thor-devkit"
 import create from "zustand"
 import { devtools, persist } from "zustand/middleware"
 
@@ -8,9 +9,12 @@ const stepVariant = {
 }
 
 type StepOneData = {
-  title: string
   description: string
-  action: ProposalAction[]
+  actions: {
+    contractAddress: string
+    calldata: string
+    abi: abi.Function
+  }[]
 }
 
 type StepTwoData = {
