@@ -5,6 +5,11 @@ import { DataTypes } from "../../libraries/DataTypes.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
 
+/**
+ * @title Settings
+ * @dev Contract module that provides the settings functionalities of the x2earn apps.
+ * Each app has a base URI that can be used to retrieve the metadata of the app. Eg: ipfs:// or some other gateway.
+ */
 abstract contract Settings is Initializable, X2EarnAppsUpgradeable {
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.Settings
   struct SettingsStorage {
@@ -44,7 +49,7 @@ abstract contract Settings is Initializable, X2EarnAppsUpgradeable {
   }
 
   /**
-   * @dev Returns the base URI to retrieve the metadata of the x2earn apps
+   * @dev See {IX2EarnApps-baseURI}.
    */
   function baseURI() public view virtual override returns (string memory) {
     SettingsStorage storage $ = _getSettingsStorage();

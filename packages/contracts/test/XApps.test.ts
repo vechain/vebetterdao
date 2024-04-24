@@ -205,7 +205,7 @@ describe("X-Apps", function () {
         forceDeploy: true,
       })
 
-      const app1Id = await x2EarnApps.hashName(otherAccounts[0].address)
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
 
       await x2EarnApps
         .connect(owner)
@@ -222,7 +222,7 @@ describe("X-Apps", function () {
         forceDeploy: true,
       })
 
-      const app1Id = await x2EarnApps.hashName(otherAccounts[0].address)
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
       await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
@@ -258,7 +258,7 @@ describe("X-Apps", function () {
         forceDeploy: true,
       })
 
-      const app1Id = await x2EarnApps.hashName(otherAccounts[0].address)
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
       await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
@@ -291,7 +291,7 @@ describe("X-Apps", function () {
     it("Cannot get eligibility for non-existing app", async function () {
       const { xAllocationVoting, x2EarnApps } = await getOrDeployContractInstances({ forceDeploy: true })
 
-      const app1Id = await x2EarnApps.hashName(ZERO_ADDRESS)
+      const app1Id = await x2EarnApps.hashAppName(ZERO_ADDRESS)
 
       await expect(x2EarnApps.isElegibleNow(app1Id)).to.be.reverted
       await expect(x2EarnApps.isElegible(app1Id, (await xAllocationVoting.clock()) - 1n)).to.be.reverted
@@ -302,7 +302,7 @@ describe("X-Apps", function () {
         forceDeploy: true,
       })
 
-      const app1Id = await x2EarnApps.hashName(otherAccounts[0].address)
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
       await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
@@ -317,7 +317,7 @@ describe("X-Apps", function () {
 
       await bootstrapAndStartEmissions()
 
-      const app1Id = await x2EarnApps.hashName("Bike 4 Life")
+      const app1Id = await x2EarnApps.hashAppName("Bike 4 Life")
       const proposer = otherAccounts[0]
       const voter1 = otherAccounts[1]
 
@@ -369,7 +369,7 @@ describe("X-Apps", function () {
     it("Non-admin address cannot make an app available or unavailable for allocation voting", async function () {
       const { x2EarnApps, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: false })
 
-      const app1Id = await x2EarnApps.hashName(otherAccounts[0].address)
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
 
       await catchRevert(x2EarnApps.connect(otherAccounts[0]).setVotingElegibility(app1Id, true))
     })
@@ -385,7 +385,7 @@ describe("X-Apps", function () {
       const voter = otherAccounts[0]
       await getVot3Tokens(voter, "1000")
 
-      const app1Id = await x2EarnApps.hashName(otherAccounts[0].address)
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
 
       let round1 = await startNewAllocationRound()
 
@@ -462,7 +462,7 @@ describe("X-Apps", function () {
 
     it("Should be able to fetch app metadata", async function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
-      const app1Id = await x2EarnApps.hashName("My app")
+      const app1Id = await x2EarnApps.hashAppName("My app")
       await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")

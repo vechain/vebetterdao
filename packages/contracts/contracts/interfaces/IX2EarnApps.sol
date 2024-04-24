@@ -3,6 +3,11 @@ pragma solidity ^0.8.18;
 
 import { DataTypes } from "../libraries/DataTypes.sol";
 
+/**
+ * @title IX2EarnApps
+ * @notice Interface for the X2EarnApps contract.
+ * @dev The contract inheriting this interface should be able to manage the x2earn apps and their elegibility for allocation voting.
+ */
 interface IX2EarnApps {
   /**
    * @dev The clock was incorrectly modified.
@@ -51,34 +56,132 @@ interface IX2EarnApps {
    */
   function hashAppName(string memory name) external pure returns (bytes32);
 
+  /**
+   * @dev Add a new app to the x2earn apps.
+   *
+   * @param receiverAddress the address where the app should receive allocation funds
+   * @param admin the address of the admin that will be able to manage the app and perform all administration actions
+   * @param appName the name of the app
+   * @param metadataURI the metadata URI of the app
+   *
+   * Emits a {AppAdded} event.
+   */
   function addApp(address receiverAddress, address admin, string memory appName, string memory metadataURI) external;
 
+  /**
+   * @dev Get the app data by its id.
+   *
+   * @param appId the id of the app
+   */
   function app(bytes32 appId) external view returns (DataTypes.App memory);
 
+  /**
+   * @dev Add a new moderator to the app.
+   *
+   * @param appId the id of the app
+   * @param moderator the address of the moderator
+   *
+   * TODO: Emits a {ModeratorAddedToApp} event.
+   */
   function addAppModerator(bytes32 appId, address moderator) external;
 
+  /**
+   * @dev Remove a moderator from the app.
+   *
+   * @param appId the id of the app
+   * @param moderator the address of the moderator
+   *
+   * TODO: Emits a {ModeratorRemovedFromApp} event.
+   */
   function removeAppModerator(bytes32 appId, address moderator) external;
 
+  /**
+   * @dev Set the app admin.
+   *
+   * @param appId the id of the app
+   * @param admin the address of the admin
+   *
+   * TODO: Emits a {AppAdminChanged} event.
+   */
   function setAppAdmin(bytes32 appId, address admin) external;
 
-  function updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) external;
-
-  function updateAppMetadata(bytes32 appId, string memory metadataURI) external;
-
+  /**
+   * @dev Get the app admin.
+   *
+   * @param appId the id of the app
+   */
   function appAdmin(bytes32 appId) external view returns (address);
 
+  /**
+   * @dev Update the address where the x2earn app receives allocation funds.
+   *
+   * @param appId the id of the app
+   * @param newReceiverAddress the new address where the app should receive allocation funds
+   *
+   * TODO: Emits a {AppReceiverAddressChanged} event.
+   */
+  function updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) external;
+
+  /**
+   * @dev Get the address where the x2earn app receives allocation funds.
+   *
+   * @param appId the id of the app
+   */
   function getAppReceiverAddress(bytes32 appId) external view returns (address);
 
+  /**
+   * @dev Update the metadata URI of the app.
+   *
+   * @param appId the id of the app
+   * @param metadataURI the new metadata URI of the app containing details about the app
+   *
+   * TODO: Emits a {AppMetadataURIChanged} event.
+   */
+  function updateAppMetadata(bytes32 appId, string memory metadataURI) external;
+
+  /**
+   * @dev Get the block when the app was first added.
+   *
+   * @param appId the id of the app
+   */
   function createdAt(bytes32 appId) external view returns (uint48);
 
+  /**
+   * @dev Check if there is an app with the specified `appId`.
+   *
+   * @param appId the id of the app
+   */
   function appExists(bytes32 appId) external view returns (bool);
 
+  /**
+   * @dev Allow or deny an app to participate in the next allocation voting rounds.
+   *
+   * @param _appId the id of the app
+   * @param _isElegible true if the app should be elegible for voting, false otherwise
+   *
+   * Emits a {VotingElegibilityChanged} event.
+   */
   function setVotingElegibility(bytes32 _appId, bool _isElegible) external;
 
+  /**
+   * @dev Get all the app ids that are elegible for voting in the next allocation rounds.
+   */
   function allElegibleApps() external view returns (bytes32[] memory);
 
+  /**
+   * @dev Check if an app was allowed to participate in the allocation rounds in a specific timepoint.
+   * XAllocationVoting contract can use this function to check if an app was elegible for voting in the block when the round starts.
+   *
+   * @param appId the id of the app
+   * @param timepoint the timepoint when the app should be checked for elegibility
+   */
   function isElegible(bytes32 appId, uint256 timepoint) external view returns (bool);
 
+  /**
+   * @dev Check if an app is allowed to participate in the allocation rounds in the current block.
+   *
+   * @param appId the id of the app
+   */
   function isElegibleNow(bytes32 appId) external view returns (bool);
 
   /**
@@ -87,4 +190,9 @@ interface IX2EarnApps {
    * @param baseUri the base URI for the contract
    */
   function setBaseURI(string memory baseUri) external;
+
+  /**
+   * @dev return the base URI for the contract
+   */
+  function baseURI() external view returns (string memory);
 }

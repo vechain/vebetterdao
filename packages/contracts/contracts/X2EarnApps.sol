@@ -44,26 +44,29 @@ contract X2EarnApps is
   }
 
   // ---------- Overrides ------------ //
+  /**
+   * @dev See {IX2EarnApps-setBaseURI}.
+   */
   function setBaseURI(string memory baseURI_) external onlyRole(DEFAULT_ADMIN_ROLE) {
     _setBaseURI(baseURI_);
   }
 
-  function setVotingElegibility(
-    bytes32 _appId,
-    bool _isElegible
-  ) public override(VoteElegibility, X2EarnAppsUpgradeable) onlyRole(DEFAULT_ADMIN_ROLE) {
+  /**
+   * @dev See {IX2EarnApps-setVotingElegibility}.
+   */
+  function setVotingElegibility(bytes32 _appId, bool _isElegible) public override onlyRole(DEFAULT_ADMIN_ROLE) {
     super.setVotingElegibility(_appId, _isElegible);
   }
 
   // ---------- Authorizations ------------ //
 
   /**
-   * @dev View {UUPSUpgradeable-_authorizeUpgrade}
+   * @dev See {UUPSUpgradeable-_authorizeUpgrade}
    */
   function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
   /**
-   * @dev View {X2EarnAppsUpgradeable-_authorizeAppMetadataUpdate}
+   * @dev See {X2EarnAppsUpgradeable-_authorizeAppMetadataUpdate}
    */
   function _authorizeAppMetadataUpdate(bytes32 appId) internal view override {
     if (
@@ -74,7 +77,7 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev View {X2EarnAppsUpgradeable-_authorizeAppManagement}
+   * @dev See {X2EarnAppsUpgradeable-_authorizeAppManagement}
    */
   function _authorizeAppManagement(bytes32 appId) internal view override {
     if (!hasRole(DEFAULT_ADMIN_ROLE, msg.sender) && !isAppAdmin(appId, msg.sender)) {
@@ -83,7 +86,7 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev View {X2EarnAppsUpgradeable-_authorizeAddApp}
+   * @dev See {X2EarnAppsUpgradeable-_authorizeAddApp}
    */
   function _authorizeAddApp() internal view override {
     if (!hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {

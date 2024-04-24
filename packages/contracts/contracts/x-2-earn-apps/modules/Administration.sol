@@ -60,7 +60,7 @@ abstract contract Administration is Initializable, X2EarnAppsUpgradeable {
   }
 
   /**
-   * @dev Add a moderator to the app
+   * @dev Internal function to add a moderator to the app
    *
    * @param appId the hashed name of the app
    * @param moderator the address of the moderator
@@ -79,7 +79,7 @@ abstract contract Administration is Initializable, X2EarnAppsUpgradeable {
   }
 
   /**
-   * @dev Remove a moderator from the app
+   * @dev Internal function to remove a moderator from the app
    *
    * @param appId the hashed name of the app
    * @param moderator the address of the moderator
@@ -107,7 +107,7 @@ abstract contract Administration is Initializable, X2EarnAppsUpgradeable {
   // ---------- Getters ---------- //
 
   /**
-   * @dev Returns true if an account is the admin of the app
+   * @dev Check if an account is the admin of the app
    *
    * @param appId the hashed name of the app
    * @param account the address of the account
@@ -119,9 +119,7 @@ abstract contract Administration is Initializable, X2EarnAppsUpgradeable {
   }
 
   /**
-   * @dev Returns the admin address of the app
-   *
-   * @param appId the hashed name of the app
+   * @dev See {IX2EarnApps-appAdmin}
    */
   function appAdmin(bytes32 appId) public view returns (address) {
     AdministrationStorage storage $ = _getAdministrationStorage();

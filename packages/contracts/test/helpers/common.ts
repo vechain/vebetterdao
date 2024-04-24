@@ -362,7 +362,7 @@ export const participateInAllocationVoting = async (user: HardhatEthersSigner, w
   // Vote
   await xAllocationVoting
     .connect(user)
-    .castVote(roundId, [await x2EarnApps.hashName(appName)], [ethers.parseEther("1")])
+    .castVote(roundId, [await x2EarnApps.hashAppName(appName)], [ethers.parseEther("1")])
 
   if (waitRoundToEnd) {
     await waitForRoundToEnd(roundId)

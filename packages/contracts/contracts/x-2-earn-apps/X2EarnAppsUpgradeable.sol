@@ -15,6 +15,9 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
 
   // ---------- Setters ---------- //
 
+  /**
+   * @dev See {IX2EarnApps-addApp}.
+   */
   function addApp(
     address receiverAddress,
     address admin,
@@ -26,12 +29,18 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
     _addApp(receiverAddress, admin, appName, metadataURI);
   }
 
+  /**
+   * @dev See {IX2EarnApps-updateAppReceiverAddress}.
+   */
   function updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) public virtual {
     _authorizeAppManagement(appId);
 
     _updateAppReceiverAddress(appId, newReceiverAddress);
   }
 
+  /**
+   * @dev See {IX2EarnApps-updateAppMetadata}.
+   */
   function updateAppMetadata(bytes32 appId, string memory metadataURI) public virtual {
     _authorizeAppMetadataUpdate(appId);
 
@@ -39,10 +48,7 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   }
 
   /**
-   * @dev Update the admin address of the app
-   *
-   * @param appId the hashed name of the app
-   * @param newAdmin the address of the new admin
+   * @dev See {IX2EarnApps-setAppAdmin}.
    */
   function setAppAdmin(bytes32 appId, address newAdmin) public virtual {
     _authorizeAppManagement(appId);
@@ -50,30 +56,39 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
     _setAppAdmin(appId, newAdmin);
   }
 
+  /**
+   * @dev See {IX2EarnApps-addAppModerator}.
+   */
   function addAppModerator(bytes32 appId, address moderator) public virtual {
     _authorizeAppManagement(appId);
 
     _addAppModerator(appId, moderator);
   }
 
+  /**
+   * @dev See {IX2EarnApps-removeAppModerator}.
+   */
   function removeAppModerator(bytes32 appId, address moderator) public virtual {
     _authorizeAppManagement(appId);
 
     _removeAppModerator(appId, moderator);
   }
 
+  function setVotingElegibility(bytes32 _appId, bool _isElegible) public virtual override {
+    _setVotingElegibility(_appId, _isElegible);
+  }
+
   // ---------- Getters ---------- //
 
   /**
-   * @dev Clock used for flagging checkpoints. Can be overridden to implement timestamp based
-   * checkpoints (and voting), in which case {CLOCK_MODE} should be overridden as well to match.
+   * @dev Clock used for flagging checkpoints or to retrieve the current block number.
    */
   function clock() public view virtual returns (uint48) {
     return Time.blockNumber();
   }
 
   /**
-   * @dev Hashes the name of the app to be used as the app ID.
+   * @dev See {IX2EarnApps-hashAppName}.
    */
   function hashAppName(string memory appName) public pure returns (bytes32) {
     return keccak256(abi.encodePacked(appName));
@@ -81,33 +96,48 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
 
   // --- To be implemented by the inheriting contract --- //
 
+  /**
+   * @inheritdoc IX2EarnApps
+   */
   function appExists(bytes32 appId) public view virtual returns (bool);
 
-  function baseURI() public view virtual returns (string memory);
+  /**
+   * @inheritdoc IX2EarnApps
+   */
+  function baseURI() public view virtual override returns (string memory);
 
-  function setVotingElegibility(bytes32 _appId, bool _isElegible) public virtual;
+  /**
+   * @dev Function to set the voting elegibility of an app.
+   */
+  function _setVotingElegibility(bytes32 _appId, bool _isElegible) internal virtual;
 
-  function _pushAppToEligbleApps(bytes32 appId) internal virtual;
-
+  /**
+   * @dev Function to update the admin of the app.
+   */
   function _setAppAdmin(bytes32 appId, address admin) internal virtual;
 
+  /**
+   * @dev Function to update the receiver address of the app.
+   */
   function _updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) internal virtual;
 
+  /**
+   * @dev Function to update the metadata URI of the app.
+   */
   function _updateAppMetadata(bytes32 appId, string memory metadataURI) internal virtual;
 
+  /**
+   * @dev Function to add a moderator to the app.
+   */
   function _addAppModerator(bytes32 appId, address moderator) internal virtual;
 
+  /**
+   * @dev Function to remove a moderator from the app.
+   */
   function _removeAppModerator(bytes32 appId, address moderator) internal virtual;
 
   /**
-   * @dev Function that should add an app. Called by {addApp}.
-   *
-   * @param receiverAddress the address of the app
-   * @param admin the address of the admin
-   * @param appName the name of the app
-   * @param metadataURI the metadata URI of the app
-   *
-   * Emits a {AppAdded} event.
+   * @dev Save app in storage.
    */
   function _addApp(
     address receiverAddress,

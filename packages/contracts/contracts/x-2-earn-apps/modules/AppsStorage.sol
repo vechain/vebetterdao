@@ -73,7 +73,7 @@ abstract contract AppsStorage is Initializable, X2EarnAppsUpgradeable {
     $._apps[id] = DataTypes.App(id, receiverAddress, appName, metadataURI, clock(), block.timestamp);
     $._appIds.push(id);
     _setAppAdmin(id, admin);
-    _pushAppToEligbleApps(id);
+    _setVotingElegibility(id, true);
 
     emit AppAdded(id, receiverAddress, appName, true);
   }
@@ -115,13 +115,18 @@ abstract contract AppsStorage is Initializable, X2EarnAppsUpgradeable {
   }
 
   // ---------- Getters ---------- //
+  /**
+   * @dev See {IX2EarnApps-appExists}.
+   */
   function appExists(bytes32 appId) public view override returns (bool) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
 
     return $._apps[appId].receiverAddress != address(0);
   }
 
-  // Function to retrieve an app by ID
+  /**
+   * @dev See {IX2EarnApps-app}.
+   */
   function app(bytes32 appId) public view virtual returns (DataTypes.App memory) {
     if (!appExists(appId)) {
       revert X2EarnNonexistentApp(appId);
@@ -131,7 +136,9 @@ abstract contract AppsStorage is Initializable, X2EarnAppsUpgradeable {
     return $._apps[appId];
   }
 
-  // Function to retrieve all apps
+  /**
+   * @dev Get all apps
+   */
   function apps() public view returns (DataTypes.App[] memory) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
 
@@ -143,12 +150,22 @@ abstract contract AppsStorage is Initializable, X2EarnAppsUpgradeable {
     return allApps;
   }
 
+  /**
+   * @dev Get the receiver address of the app
+   *
+   * @param appId the hashed name of the app
+   */
   function getAppReceiverAddress(bytes32 appId) public view virtual returns (address) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
 
     return $._apps[appId].receiverAddress;
   }
 
+  /**
+   * @dev Get the baseURI and metadata URI of the app concatenated
+   *
+   * @param appId the hashed name of the app
+   */
   function appURI(bytes32 appId) public view returns (string memory) {
     if (!appExists(appId)) {
       revert X2EarnNonexistentApp(appId);
@@ -159,6 +176,9 @@ abstract contract AppsStorage is Initializable, X2EarnAppsUpgradeable {
     return string(abi.encodePacked(baseURI(), $._apps[appId].metadataURI));
   }
 
+  /**
+   * @dev See {IX2EarnApps-createdAt}.
+   */
   function createdAt(bytes32 appId) public view override returns (uint48) {
     if (!appExists(appId)) {
       revert X2EarnNonexistentApp(appId);

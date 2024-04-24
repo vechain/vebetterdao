@@ -1486,7 +1486,7 @@ describe("X-Allocation Voting", function () {
       // Vote
       await xAllocationVoting
         .connect(otherAccount)
-        .castVote(roundId, [await x2EarnApps.hashName(appName)], [ethers.parseEther("1")])
+        .castVote(roundId, [await x2EarnApps.hashAppName(appName)], [ethers.parseEther("1")])
 
       // Check if user voted
       voted = await xAllocationVoting.hasVotedOnce(otherAccount.address)

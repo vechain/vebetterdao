@@ -38,22 +38,10 @@ abstract contract VoteElegibility is Initializable, X2EarnAppsUpgradeable {
 
   function __VoteElegibility_init_unchained() internal onlyInitializing {}
 
-  function setVotingElegibility(bytes32 _appId, bool _isElegible) public virtual override {
-    _updateVotingElegibilityCheckpoint(_appId, _isElegible);
-  }
-
-  function _pushAppToEligbleApps(bytes32 appId) internal virtual override {
-    VoteElegibilityStorage storage $ = _getVoteElegibilityStorage();
-
-    $._elegibleAppsForNextRound.push(appId);
-    $._idToElegibleAppsIndex[appId] = $._elegibleAppsForNextRound.length - 1;
-    _push($._isAppElegibleCheckpoints[appId], 1);
-  }
-
   /**
    * @dev Update the app availability for voting checkpoint.
    */
-  function _updateVotingElegibilityCheckpoint(bytes32 appId, bool canBeVoted) private {
+  function _setVotingElegibility(bytes32 appId, bool canBeVoted) internal virtual override {
     VoteElegibilityStorage storage $ = _getVoteElegibilityStorage();
 
     _push($._isAppElegibleCheckpoints[appId], canBeVoted ? 1 : 0);
@@ -76,7 +64,10 @@ abstract contract VoteElegibility is Initializable, X2EarnAppsUpgradeable {
       // delete the mapping that belongs to the app we removed
       delete $._idToElegibleAppsIndex[appId];
     } else {
-      _pushAppToEligbleApps(appId);
+      // push app to elegible apps
+      $._elegibleAppsForNextRound.push(appId);
+      $._idToElegibleAppsIndex[appId] = $._elegibleAppsForNextRound.length - 1;
+      _push($._isAppElegibleCheckpoints[appId], 1);
     }
 
     emit VotingElegibilityChanged(appId, canBeVoted);
