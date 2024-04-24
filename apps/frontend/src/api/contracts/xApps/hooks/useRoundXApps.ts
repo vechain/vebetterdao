@@ -22,11 +22,10 @@ export const getRoundXApps = async (thor: Connex.Thor, roundId: string): Promise
   return apps.map((app: any) => ({
     id: app[0],
     receiverAddress: app[1],
-    adminAddress: app[2],
-    name: app[3],
-    metadataURI: app[4],
-    createdAt: app[5],
-    createdAtTimestamp: app[6],
+    name: app[2],
+    metadataURI: app[3],
+    createdAt: app[4],
+    createdAtTimestamp: app[5],
   }))
 }
 
