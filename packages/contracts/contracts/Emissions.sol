@@ -189,13 +189,13 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
     _grantRole(UPGRADER_ROLE, data.upgrader);
   }
 
-  /// @dev Authorized upgrading of the contract implementation
-  /// @notice This function can only be called by addresses with the UPGRADER_ROLE
+  /// @notice Authorized upgrading of the contract implementation
+  /// @dev This function can only be called by addresses with the UPGRADER_ROLE
   /// @param newImplementation Address of the new contract implementation
   function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
-  /// @dev Handles the bootstrapping of the initial emission cycle.
-  /// @notice This function can only be called by addresses with the MINTER_ROLE and only when the next cycle is 0.
+  /// @notice Handles the bootstrapping of the initial emission cycle.
+  /// @dev This function can only be called by addresses with the MINTER_ROLE and only when the next cycle is 0.
   function bootstrap() public onlyRole(MINTER_ROLE) nonReentrant {
     EmissionsStorage storage $ = _getEmissionsStorage();
     require($.nextCycle == 0, "Emissions: Can only bootstrap emissions when next cycle = 0");
@@ -220,8 +220,8 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
     );
   }
 
-  /// @dev Starts the emission process after the initial bootstrap.
-  /// @notice This function can only be called by addresses with the MINTER_ROLE and only when the next cycle is 1.
+  /// @notice Starts the emission process after the initial bootstrap.
+  /// @dev This function can only be called by addresses with the MINTER_ROLE and only when the next cycle is 1.
   function start() public onlyRole(MINTER_ROLE) nonReentrant {
     EmissionsStorage storage $ = _getEmissionsStorage();
     require($.b3tr.paused() == false, "Emissions: B3TR token is paused");
@@ -234,7 +234,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
     $.nextCycle++;
   }
 
-  /// @dev Distributes the tokens for the current cycle, calculates allocations based on decay rates.
+  /// @notice Distributes the tokens for the current cycle, calculates allocations based on decay rates.
   function distribute() public nonReentrant {
     EmissionsStorage storage $ = _getEmissionsStorage();
     require($.nextCycle > 1, "Emissions: Please start emissions first");
