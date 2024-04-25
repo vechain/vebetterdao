@@ -146,9 +146,7 @@ export class SwapDialog {
      */
     async getSendTokenName(): Promise<Token> {
         return await test.step('Get current send token name in the Swap modal', async () => {
-            // return await this.swapSendTokenName.innerText()
-            //   .then(text => { return text.substring(0, text.indexOf(' ')) })
-            const testIdVal: string = await this.sendCard.getAttribute('data-testid')
+            const testIdVal: string = await this.sendCard.getAttribute(testId)
             return testIdVal.substring(testIdVal.length - 4).toUpperCase() as Token
         })
     }
@@ -158,7 +156,7 @@ export class SwapDialog {
      * @returns {Token}
      */
     async getReceiveTokenName(): Promise<Token> {
-        const testIdVal: string = await this.receiveCard.getAttribute('data-testid')
+        const testIdVal: string = await this.receiveCard.getAttribute(testId)
         return testIdVal.substring(testIdVal.length - 4).toUpperCase() as Token
     }
 
