@@ -31,7 +31,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 /// @title Emissions Distribution Contract
-/// @dev Manages the periodic distribution of B3TR tokens to various stakeholders including XAllocation, Vote2Earn, and Treasury allocations.
+/// @dev Manages the periodic distribution of B3TR tokens to XAllocation, Vote2Earn, and Treasury allocations.
 /// @dev This contract leverages openzeppelin's AccessControl, ReentrancyGuard, and UUPSUpgradeable libraries for access control, reentrancy protection, and upgradability.
 /// @notice This contract is responsible for the scheduled distribution of emissions based on predefined cycles and decay settings.
 contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
@@ -290,7 +290,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   /// @notice Calculates the number of decay periods that have passed since the start of the emissions
   /// @dev Used to determine how many times the decay rate should be applied to the Vote2Earn emissions
   /// @dev The number of decay periods is calculated as follows: `number of decay periods = floor(number of periods / decay period)`
-  /// @return uint256, number of decay periods since the start of emissions
+  /// @return uint256 The number of decay periods since the start of emissions
   function _calculateVote2EarnDecayPeriods() internal view returns (uint256) {
     EmissionsStorage storage $ = _getEmissionsStorage();
 
@@ -332,7 +332,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
 
   /// @notice Calculates the token allocation for the Treasury based on the total allocations to XAllocations and Vote2Earn
   /// @dev Treasury gets a percentage of the combined XAllocations and Vote2Earn amounts, adjusted by the treasury percentage
-  /// @return unit256, calculated number of tokens for the Treasury for the next cycle
+  /// @return unit256 The calculated number of tokens for the Treasury for the next cycle
   function _calculateTreasuryAmount() internal view returns (uint256) {
     EmissionsStorage storage $ = _getEmissionsStorage();
    uint256 scaledAllocations = (_calculateNextXAllocation() + _calculateVote2EarnAmount()) * $.scalingFactor;
@@ -346,7 +346,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   /// @notice Retrieves the XAllocation amount for a specified cycle
   /// @dev Returns the allocated amount if the cycle has been distributed, otherwise calculates the expected allocation
   /// @param cycle The cycle number to query
-  /// @return The amount of XAllocations for the specified cycle
+  /// @return uint256 The amount of XAllocations for the specified cycle
   function getXAllocationAmount(uint256 cycle) public view returns (uint256) {
     EmissionsStorage storage $ = _getEmissionsStorage();
 
@@ -357,7 +357,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   /// @notice Retrieves the Vote2Earn allocation for a specified cycle
   /// @dev Returns the allocated amount if the cycle has been distributed, otherwise calculates the expected allocation
   /// @param cycle The cycle number to query
-  /// @return The amount of Vote2Earn for the specified cycle
+  /// @return uint256 The amount of Vote2Earn for the specified cycle
   function getVote2EarnAmount(uint256 cycle) public view returns (uint256) {
     EmissionsStorage storage $ = _getEmissionsStorage();
 
@@ -368,7 +368,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   /// @notice Retrieves the Treasury allocation for a specified cycle
   /// @dev Returns the allocated amount if the cycle has been distributed, otherwise calculates the expected allocation
   /// @param cycle The cycle number to query
-  /// @return The amount of Treasury allocation for the specified cycle
+  /// @return uint256 The amount of Treasury allocation for the specified cycle
   function getTreasuryAmount(uint256 cycle) public view returns (uint256) {
     EmissionsStorage storage $ = _getEmissionsStorage();
 
