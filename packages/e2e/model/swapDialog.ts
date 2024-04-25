@@ -1,7 +1,9 @@
 import { Page } from 'playwright';
-import { expect, test, Locator } from '@playwright/test';
+import { expect, test, Locator, defineConfig as conf } from '@playwright/test';
 import BigNumber from 'bignumber.js';
 import { SetSendSwapAmountArgs, Token } from "./types"
+import defineConfig from '../playwright.config'
+const testId = defineConfig.use!.testIdAttribute
 
 /**
  * Swap dialog model
@@ -24,20 +26,18 @@ export class SwapDialog {
     constructor(page: Page) {
         this.page = page
 
-        this.sendCard = this.page.locator("//*[contains(@data-testid, 'send-card')]")
-        this.receiveCard = this.page.locator("//*[contains(@data-testid, 'receive-card')]")
-        // this.sendAmountInput = this.page.locator("//*[contains(@data-testid, 'send-card')]//*[@data-testid='amount-input']")
-        this.sendAmountInput = this.sendCard.locator("//*[@data-testid='amount-input']")
-        // this.receiveAmountInput = this.page.locator("//*[contains(@data-testid, 'receive-card')]//*[@data-testid='amount-input']")
-        this.receiveAmountInput = this.receiveCard.locator("//*[@data-testid='amount-input']")
-        this.maxButton = this.page.locator('//*[@data-testid="max-swap-btn"]')
-        this.swapButton = this.page.locator('//*[@data-testid="swap-submit-btn"]')
-        this.switchTokensButton = this.page.locator('//*[@data-testid="switch-tokens-btn"]')
-        this.swapSendTokenName = this.page.locator("//*[contains(@data-testid, 'swap-send')]")
-        this.swapReceiveTokenName = this.page.locator("//*[contains(@data-testid, 'swap-receive')]")
-        this.closeBtn = this.page.locator("//*[@data-testid='modal-close-btn']")
+        this.sendCard = this.page.locator(`//*[contains(@${testId}, 'send-card')]`)
+        this.receiveCard = this.page.locator(`//*[contains(@${testId}, 'receive-card')]`)
+        this.sendAmountInput = this.sendCard.getByTestId('amount-input')
+        this.receiveAmountInput = this.receiveCard.getByTestId('amount-input')
+        this.maxButton = this.page.getByTestId('max-swap-btn')
+        this.swapButton = this.page.getByTestId('swap-submit-btn')
+        this.switchTokensButton = this.page.getByTestId('switch-tokens-btn')
+        this.swapSendTokenName = this.page.locator(`//*[contains(@${testId}, 'swap-send')]`)
+        this.swapReceiveTokenName = this.page.locator(`//*[contains(@${testId}, 'swap-receive')]`)
+        this.closeBtn = this.page.getByTestId('modal-close-btn')
         this.amountInputByToken = (tokenName: Token) => {
-            return this.page.locator(`//*[contains(@data-testid, "card-${tokenName.toLowerCase()}")]//*[@data-testid="amount-input"]`)
+            return this.page.locator(`//*[contains(@${testId}, "card-${tokenName.toLowerCase()}")]//*[@${testId}="amount-input"]`)
         }
     }
 

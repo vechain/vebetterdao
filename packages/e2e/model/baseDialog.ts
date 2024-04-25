@@ -16,8 +16,8 @@ export class BaseDialog {
         this.page = page
         this.successTitle = successTitle
         this.errorTitle = errorTitle
-        this.dialogTitle = this.page.locator('//*[@data-testid="modal-title"]')
-        this.closeDialogButton = this.page.locator('//*[@data-testid="modal-close-btn"]')
+        this.dialogTitle = this.page.getByTestId('modal-title')
+        this.closeDialogButton = this.page.getByTestId('modal-close-btn')
     }
 
     /**

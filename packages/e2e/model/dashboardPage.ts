@@ -4,7 +4,7 @@ import veWorldMockClient from '../utils/veworld-mock-client';
 import BigNumber from 'bignumber.js';
 import { SwapDialog } from './swapDialog';
 import { test, Locator } from '@playwright/test';
-import { trimmedAddress } from "../utils/helpers"
+import { trimmedAddress } from "../utils/address"
 
 /**
  * Dashboard page model
@@ -25,13 +25,13 @@ export class DashboardPage {
     constructor(page: Page) {
         this.page = page
 
-        this.connectWalletButton = this.page.locator("//*[@data-testid='connect-wallet-btn']").first()
+        this.connectWalletButton = this.page.getByTestId("connect-wallet-btn").first()
         this.veWorldOption = this.page.locator('div.modal-body button.card.LIGHT').first()
-        this.currentUserBtn = this.page.locator("//*[@data-testid='address-btn']")
+        this.currentUserBtn = this.page.getByTestId("address-btn")
         this.disconnectOption = this.page.locator('div.modal-footer button.LIGHT').first()
-        this.b3trBalanceText = this.page.locator("//*[@data-testid='b3tr-balance']")
-        this.vot3BalanceText = this.page.locator("//*[@data-testid='vot3-balance']")
-        this.swapButton = this.page.locator("//*[@data-testid='swap-button']")
+        this.b3trBalanceText = this.page.getByTestId("b3tr-balance")
+        this.vot3BalanceText = this.page.getByTestId("vot3-balance")
+        this.swapButton = this.page.getByTestId("swap-button")
         this.claimRewardsButton = this.page.locator('xpath=//button[contains(text(), "Claim")]')
         this.votingRewardsAmount = "voting-rewards"
         this.mintNFTButton = this.page.locator('xpath=//button[contains(text(), "Mint now")]')
