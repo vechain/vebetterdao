@@ -190,6 +190,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   }
 
   /// @dev Authorized upgrading of the contract implementation
+  /// @notice This function can only be called by addresses with the UPGRADER_ROLE
   /// @param newImplementation Address of the new contract implementation
   function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
