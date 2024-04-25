@@ -9,12 +9,26 @@ import { AllocationVote } from "../model/types"
 import { RewardsClaimedDialog } from "../model/rewardsClaimedDialog"
 import { GMNFTDialog } from "../model/gmnftDialog"
 
+
+/**
+ * This file contains a sequential set of tests:
+ * - Admin user can open the first allocation round
+ * - Users vote on the first allocation round to reach quorum
+ * - Can view the results of the first completed allocation round
+ * - Users can claim their first round allocation round rewards
+ * - Users can claim their allocation round NFT after voting on the first round
+ * - Admin user can open the second allocation round
+ * - Users vote on the second allocation round, quorum not reached
+ * - Can view the results of the second allocation round that did not reach quorum
+ */
+
+
 // description of voting accounts
 const votingDetails = [
   {
     accIndex: FIXED_VOTER1,
     b3trBalance: 0,
-    vot3Balance: 20,
+    vot3Balance: 10,
     votes: [
       { appName: "Vyvo", votePercentage: 50 },
       { appName: "Mugshot", votePercentage: 20 },
@@ -24,7 +38,7 @@ const votingDetails = [
   {
     accIndex: FIXED_VOTER2,
     b3trBalance: 1,
-    vot3Balance: 30,
+    vot3Balance: 40,
     votes: [
       { appName: "Vyvo", votePercentage: 20 },
       { appName: "Mugshot", votePercentage: 50 },
@@ -53,8 +67,8 @@ const fundVotingAccounts = async () => {
 }
 
 // flow to start a new allocation round
-const adminOpenRound = async (page: Page) => {
-  await test.step("Start a new allocation round", async () => {
+const adminOpenRound = async (page: Page, isFirstRound: boolean = false) => {
+  await test.step('Start a new allocation round', async() => {
     await veWorldMockClient.installForSolo(page, HOMEPAGE)
     await veWorldMockClient.setSignerAccIndex(page, DAO_ADMIN_ACCOUNT)
     let dashboardPage = new DashboardPage(page)
@@ -62,7 +76,16 @@ const adminOpenRound = async (page: Page) => {
     const adminAddress = await veWorldMockClient.getMockAddress(page)
     const menuBar = new MenuBar(page)
     const adminPage = await menuBar.gotoAdmin()
-    await adminPage.startEmissions()
+    if (isFirstRound) {
+      // start emissions for the first round, no dialog
+      await adminPage.startEmissions()
+    } else {
+      // start a new allocation round, has a dialog
+      const dialog = await adminPage.startAllocationRound()
+      await dialog.expectDialogSuccess()
+      await dialog.closeDialog()
+
+    }
     await dashboardPage.disconnectWallet(adminAddress)
     await page.evaluate(() => window.localStorage.clear())
     await page.evaluate(() => window.sessionStorage.clear())
@@ -145,26 +168,22 @@ test.describe("Allocation voting", () => {
     }
   })
 
-  test("Users can claim their allocation round rewards", async ({ page }) => {
-    for (let voter of votingDetails) {
-      const menuBar = new MenuBar(page)
-      const dashboardPage = await menuBar.gotoDashbard()
-      await veWorldMockClient.setSignerAccIndex(page, voter.accIndex)
-      await dashboardPage.connectWallet()
-      // claim reward
-      await dashboardPage.clickClaimRewards()
-      const dialog = new RewardsClaimedDialog(page)
-      await dialog.expectDialogSuccess()
-      await dialog.closeDialog()
-      // assert b3tr balance has increased
-      await dashboardPage.expectB3TRBalanceGreaterThan(voter.b3trBalance)
-      await dashboardPage.disconnectWallet(blockchainUtils.getAccountAddress(voter.accIndex))
-    }
-  })
+    test('Admin user can open the first allocation round', async ({ page }) => {
+      await adminOpenRound(page, true)
+    })
+      
+    test('Users vote on the first allocation round to reach quorum', async ({ page }) => {
+      test.setTimeout(300000) // 5 mins timeout to allow for voting
+      const roundIndex = 1 // voting on round 1
+      // vote from each user
+      for (let voter of votingDetails) {
+        await castUserVote(page, voter.accIndex, roundIndex, voter.votes)
+      }
+      // complete round
+      await blockchainUtils.waitForNextCycle()
+    })
 
-  test("Users can claim their allocation round NFT", async ({ page }) => {
-    let nftCounter = 1
-    for (let voter of votingDetails) {
+    test("Can view the results of the first completed allocation round", async ({ page }) => {
       const menuBar = new MenuBar(page)
       const dashboardPage = await menuBar.gotoDashbard()
       await veWorldMockClient.setSignerAccIndex(page, voter.accIndex)
@@ -180,4 +199,70 @@ test.describe("Allocation voting", () => {
       nftCounter++
     }
   })
+})
+
+    test("Users can claim their first round allocation round rewards", async ({ page }) => {
+      for (let voter of votingDetails) {
+        const menuBar = new MenuBar(page)
+        const dashboardPage = await menuBar.gotoDashbard()
+        await veWorldMockClient.setSignerAccIndex(page, voter.accIndex)
+        await dashboardPage.connectWallet()
+        // claim reward
+        await dashboardPage.clickClaimRewards()
+        const dialog = new RewardsClaimedDialog(page)
+        await dialog.expectDialogSuccess()
+        await dialog.closeDialog()
+        // assert b3tr balance has increased
+        await dashboardPage.expectB3TRBalanceGreaterThan(voter.b3trBalance)
+        await dashboardPage.disconnectWallet(blockchainUtils.getAccountAddress(voter.accIndex))
+      }
+    })
+
+    test("Users can claim their allocation round NFT after voting on the first round", async ({ page }) => {
+      let nftCounter = 1
+      for (let voter of votingDetails) {
+        const menuBar = new MenuBar(page)
+        const dashboardPage = await menuBar.gotoDashbard()
+        await veWorldMockClient.setSignerAccIndex(page, voter.accIndex)
+        await dashboardPage.connectWallet()
+        // claim NFT
+        await dashboardPage.mintNFT()
+        const dialog = new GMNFTDialog(page)
+        await dialog.expectDialogDisplayed(nftCounter)
+        await dialog.closeDialog()
+        // assert NFT is displayed
+        await dashboardPage.expectNFTToBeDisplayed("GM Earth")
+        await dashboardPage.disconnectWallet(blockchainUtils.getAccountAddress(voter.accIndex))
+        nftCounter++
+      }
+    })
+
+    test("Admin user can open the second allocation round", async ({ page }) => {
+      await adminOpenRound(page, false)
+    })
+
+    test('Users vote on the second allocation round, quorum not reached', async ({ page }) => {
+      test.setTimeout(300000) // 5 mins timeout to allow for voting
+      const roundIndex = 2 // voting on round 2
+      // vote from only first user, so quorum is not reached
+      const voter = votingDetails[0]
+      await castUserVote(page, voter.accIndex, roundIndex, voter.votes)
+      // complete round
+      await blockchainUtils.waitForNextCycle()
+    })
+
+    test("Can view the results of the second allocation round that did not reach quorum", async ({ page }) => {
+      const menuBar = new MenuBar(page)
+      const allocationsPage = await menuBar.gotoAllocations()
+      await allocationsPage.expectOnPage()
+      // assert round status
+      await allocationsPage.expectRoundStatus(2, 'Quorum failed')
+      const roundPage = await allocationsPage.clickOnRound(2)
+      await roundPage.expectQuorumNotReached()
+      // assert total votes
+      await roundPage.expectTotalVotes(votingDetails[0].vot3Balance)
+      // assert total voters
+      await roundPage.expectTotalVoters(1)
+    })
+
 })
