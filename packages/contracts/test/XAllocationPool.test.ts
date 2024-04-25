@@ -596,9 +596,10 @@ describe("X-Allocation Pool", async function () {
 
       it("Cannot calculate base allocation amount and app shares if xAllocationVoting is not set", async function () {
         const config = createLocalConfig()
-        const { xAllocationVoting, otherAccounts, owner, xAllocationPool } = await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, x2EarnApps } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
 
         // Bootstrap emissions
         await bootstrapEmissions()
@@ -609,10 +610,10 @@ describe("X-Allocation Pool", async function () {
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
         const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app", "metadataURI")
-        await xAllocationVoting
+        await x2EarnApps
           .connect(owner)
           .addApp(otherAccounts[4].address, otherAccounts[4].address, "My app #2", "metadataURI")
 
