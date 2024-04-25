@@ -2,7 +2,7 @@ import { Page } from 'playwright';
 import { test, expect, Locator } from '@playwright/test';
 import { RoundsPage } from './roundsPage';
 import { MenuBar } from './menuBar';
-import { delay } from "../utils/helpers"
+import { delay } from "../utils/delay"
 
 /**
  * Allocations page model
@@ -10,10 +10,12 @@ import { delay } from "../utils/helpers"
 export class AllocationsPage {
     private page: Page
     readonly pageTitleText: Locator
+    readonly roundStatusByRoundIndex: (roundIndex: number) => Locator
 
     constructor(page: Page) {
         this.page = page
         this.pageTitleText = this.page.locator('xpath=//h2[contains(text(), "Total Allocations")]')
+        this.roundStatusByRoundIndex = (roundIndex) => { return this.page.getByTestId(`round-#${roundIndex}-status`) }
     }
 
     /**
@@ -91,8 +93,7 @@ export class AllocationsPage {
      */
     async expectRoundStatusToBeDisplayed(roundIndex: number) {
         await test.step(`Expect round #${roundIndex} status to be displayed`, async() => {
-            const xpath = `xpath=//p[@data-testid="round-#${roundIndex}-status"]`
-            await expect(this.page.locator(xpath)).toBeVisible()
+            await expect(this.roundStatusByRoundIndex(roundIndex)).toBeVisible()
         })
     }
 

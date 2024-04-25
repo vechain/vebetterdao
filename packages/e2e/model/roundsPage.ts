@@ -10,11 +10,13 @@ export class RoundsPage {
     private page: Page
     readonly castVoteButton: Locator
     readonly roundTitleText: Locator
+    readonly voteByAppName: (appName: string) => Locator
 
     constructor(page: Page) {
         this.page = page
         this.castVoteButton = this.page.locator('xpath=//button[contains(text(), "Cast vote now")]')
         this.roundTitleText = this.page.getByTestId('round-title')
+        this.voteByAppName = (appName) => { return this.page.getByTestId(`${appName}-vote`) }
     }
 
     /**
@@ -36,10 +38,9 @@ export class RoundsPage {
             for (const vote of votes) {
                 const appName = vote.appName
                 const votePercentage = vote.votePercentage
-                const xpath = `xpath=//input[@data-testid="${appName}-vote"]`
-                await expect(this.page.locator(xpath).first()).toBeEnabled()
-                await this.page.locator(xpath).first().scrollIntoViewIfNeeded()
-                await this.page.locator(xpath).first().fill(String(votePercentage))
+                await expect(this.voteByAppName(appName)).toBeEnabled()
+                await this.voteByAppName(appName).scrollIntoViewIfNeeded()
+                await this.voteByAppName(appName).fill(String(votePercentage))
             }
             await this.castVoteButton.first().click()
             const voteCastDialog = new VoteCastDialog(this.page)

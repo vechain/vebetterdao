@@ -1,15 +1,13 @@
 import { test, TestInfo } from '@playwright/test';
-import { HOMEPAGE } from '../utils/constants';
-import veWorldMockClient from '../utils/veworld-mock-client';
-import { DashboardPage } from '../model/dashboardPage';
-import blockchainUtils from '../utils/blockchain';
 import BigNumber from 'bignumber.js';
+import veWorldMockClient from '../utils/veworld-mock-client';
+import blockchainUtils from '../utils/blockchain';
+import { HOMEPAGE, VOT3_CONTRACT_ADDRESS } from '../utils/constants';
+import { trimmedAddress } from "../utils/address"
+import { DashboardPage } from '../model/dashboardPage';
 import { SwapConfirmationDialog } from '../model/swapConfirmationDialog';
 import { CommonActions } from "../model/commonActions"
 import { SwapDialog } from "../model/swapDialog"
-import * as constants from '../utils/constants'
-import { trimmedAddress } from "../utils/helpers"
-import uniqueRandom from "../utils/unique-random"
 import { Account } from "../model/types"
 
 test.describe('Swap Tokens', () => {
@@ -129,7 +127,7 @@ test.describe('Swap Tokens', () => {
       // 4. [acc A]: transfer 2 VOT3 to acc B
       await test.step(`[bcUtils] Send 2 VOT3 from "${trimmedAddress(accountA.address)}" to "${trimmedAddress(accountB.address)}"`, async () => {
         await blockchainUtils.doERC20Transfer({
-          contract: constants.VOT3_CONTRACT_ADDRESS,
+          contract: VOT3_CONTRACT_ADDRESS,
           amount: BigNumber(2),
           sender: accountA,
           receiver: accountB.address
@@ -162,7 +160,7 @@ test.describe('Swap Tokens', () => {
       // 7. [acc B]: transfer 2 vot3 back to acc A
       await test.step(`[bcUtils] Send 2 VOT3 from "${trimmedAddress(accountA.address)}" to "${trimmedAddress(accountB.address)}"`, async () => {
         await blockchainUtils.doERC20Transfer({
-          contract: constants.VOT3_CONTRACT_ADDRESS,
+          contract: VOT3_CONTRACT_ADDRESS,
           amount: BigNumber(2),
           sender: accountA,
           receiver: accountB.address
