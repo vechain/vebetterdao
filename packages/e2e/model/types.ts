@@ -42,14 +42,3 @@ export type SwapArgs = {
     sendAmount?: BigNumber
     max?: boolean
 }
-
-/**
- * {Token} token - token name
- * {BigNumber} amount - swap send amount
- * {boolean} max - should it
- */
-export type SetSendSwapAmountArgs = {
-    token: Token
-    amount?: BigNumber
-    max?: boolean
-}

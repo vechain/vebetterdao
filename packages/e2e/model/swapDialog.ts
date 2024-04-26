@@ -1,7 +1,7 @@
 import { Page } from 'playwright';
 import { expect, test, Locator, defineConfig as conf } from '@playwright/test';
 import BigNumber from 'bignumber.js';
-import { SetSendSwapAmountArgs, Token } from "./types"
+import { Token } from "./types"
 import defineConfig from '../playwright.config'
 const testId = defineConfig.use!.testIdAttribute
 
@@ -54,18 +54,22 @@ export class SwapDialog {
     }
 
     /**
-     * Set swap send amount
-     * @param {SetSendSwapAmountArgs} args
+     * Sets send swap amount to a given value
+     * @param {number | string | BigNumber} amount
      */
-    async setSendAmount(args: SetSendSwapAmountArgs ) {
-        await test.step(`Set send ${args.token} swap amount to ${args.max ? "max swappable amount" : `"${args.amount}"`}`, async () => {
-            if (args.max === undefined && args.amount === undefined) {
-                throw new Error("Can't set swap amount: both 'max' and 'amount' args are passed undefined -- at least one of these args should be passed as value.")
-            }
+    async setSendAmount(amount: number | string | BigNumber) {
+        await test.step(`Set send swap amount to "${amount}"`, async () => {
+            const swapAmount = typeof amount === 'string' ? amount : amount.toString()
+            await this.sendAmountInput.fill(swapAmount)
+        })
+    }
 
-            args.max
-                ? await this.maxButton.click()
-                : await this.amountInputByToken(args.token).fill(args.amount.toString())
+    /**
+     * Sets send swap amount to maximum value available
+     */
+    async setSendAmountToMax() {
+        await test.step('Set send swap amount to max amount available', async () => {
+            await this.maxButton.click()
         })
     }
 
@@ -177,7 +181,7 @@ export class SwapDialog {
     async expectMaxSwappableAmount(tokenName: Token, amount: string) {
         await test.step(`Expect Max swappable amount for "${tokenName}" to be "${amount}"`, async () => {
             await this.setSendToken(tokenName)
-            await this.setSendAmount({ token: tokenName, max: true })
+            await this.setSendAmountToMax()
             await expect(this.amountInputByToken(tokenName)).toHaveValue(amount)
         })
     }

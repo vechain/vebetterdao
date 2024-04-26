@@ -45,7 +45,9 @@ export class CommonActions {
     await test.step(`Swap ${args.max ? "max available amount of" : args.sendAmount} ${args.sendToken} for ${args.receiveToken}`, async () => {
       await this.dashboardPage.clickSwapButton()
       await this.swapDialog.setSendToken(args.sendToken)
-      await this.swapDialog.setSendAmount({ token: args.sendToken, max: args.max, amount: args.sendAmount })
+      args.max === undefined
+        ? await this.swapDialog.setSendAmount(args.sendAmount)
+        : await this.swapDialog.setSendAmountToMax()
       await this.swapDialog.clickSwap()
       await new BaseDialog(this.page, 'Swap Completed!').expectDialogSuccess()
       await this.swapConfirmationDialog.closeDialog()
