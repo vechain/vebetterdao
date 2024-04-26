@@ -61,6 +61,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
     uint256 maxVote2EarnDecay;
   }
 
+  /// @notice Storage structure for the Emissions contract
   /// @dev Struct to store the state of emissions
   /// @custom:storage-location erc7201:b3tr.storage.Emissions
   struct EmissionsStorage {
@@ -90,7 +91,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
     uint256 scalingFactor;
   }
 
-  /// @dev The slot for Emission storage in the contract storage
+  /// @dev Storage slot for the EmissionsStorage struct
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.Emissions")) - 1)) & ~bytes32(uint256(0xff))
   bytes32 private constant EmissionsStorageLocation =
     0xa3a4dbdafa3539d2a7f76379fff3516428de5d09ad2bbe195434cac5e7193900;
