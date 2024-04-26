@@ -52,7 +52,8 @@ contract Treasury is
   /// @notice Address of VTHO token (Built-in Contract on Vechain Thor)
   address public constant VTHO = 0x0000000000000000000000000000456E65726779;
 
-  /// @dev Struct to hold token addresses and additional storage related to the Treasury
+  /// @notice Storage structure for Treasury
+  /// @dev GalaxyMemberStorage structure holds all the state variables in a single location.
   /// @custom:storage-location erc7201:b3tr.storage.Treasury
   struct TreasuryStorage {
     address B3TR;
@@ -124,17 +125,21 @@ contract Treasury is
 
   /// ---------- Setters ---------- //
 
-  /// @notice Pauses all pausable actions in the contract, restricting execution to admins
+  /// @notice Pauses the Treasury contract
+  /// @dev Pausing the contract will prevent all transfers and staking operations
+  /// @dev Only admin can pause the contract
   function pause() public onlyAdmin {
     _pause();
   }
 
-  /// @notice Unpauses the contract allowing normal operations
+  /// @notice Unpauses the Treasury contract allowing normal operations
+  /// @dev Only admin can unpause the contract
   function unpause() public onlyAdmin {
     _unpause();
   }
 
   /// @notice Transfers a specified amount of VTHO tokens to a specified address
+  /// @dev Only governance can transfer VTHO when the contract is not paused
   /// @param _to Recipient of the VTHO
   /// @param _value Amount of VTHO to transfer
   function transferVTHO(address _to, uint256 _value) public onlyGovernanceWhenNotPaused {
@@ -144,6 +149,7 @@ contract Treasury is
   }
 
   /// @notice Transfers a specified amount of B3TR tokens to a specified address
+  /// @dev Only governance can transfer B3TR when the contract is not paused
   /// @param _to Recipient of the B3TR
   /// @param _value Amount of B3TR to transfer
   function transferB3TR(address _to, uint256 _value) public onlyGovernanceWhenNotPaused {
@@ -153,6 +159,7 @@ contract Treasury is
   }
 
   /// @notice Transfers a specified amount of VOT3 tokens to a specified address
+  /// @dev Only governance can transfer B3TR when the contract is not paused
   /// @param _to Recipient of the VOT3
   /// @param _value Amount of VOT3 to transfer
   function transferVOT3(address _to, uint256 _value) public onlyGovernanceWhenNotPaused {
@@ -162,6 +169,7 @@ contract Treasury is
   }
 
   /// @notice Transfers a specified amount of VET to a specified address
+  /// @dev Only governance can transfer B3TR when the contract is not paused
   /// @param _to Recipient of the VET
   /// @param _value Amount of VET to transfer
   function transferVET(address _to, uint256 _value) public onlyGovernanceWhenNotPaused nonReentrant {
@@ -171,6 +179,7 @@ contract Treasury is
   }
 
   /// @notice Transfers any ERC20 token to a given address
+  /// @dev Only governance can transfer B3TR when the contract is not paused
   /// @param _token The ERC20 token to transfer
   /// @param _to Recipient of the ERC20 token
   /// @param _value Amount of the ERC20 token to transfer
@@ -181,6 +190,7 @@ contract Treasury is
   }
 
   /// @notice Transfers an ERC721 token to a specified address
+  /// @dev Only governance can transfer B3TR when the contract is not paused
   /// @param _nft The ERC721 token to transfer
   /// @param _to Recipient of the ERC721 token
   /// @param _tokenId The id of the ERC721 token to transfer
@@ -191,6 +201,7 @@ contract Treasury is
   }
 
   /// @notice Stakes a specified amount of B3TR to VOT3
+  /// @dev Only governance can stake B3TR when the contract is not paused
   /// @param _b3trAmount Amount of B3TR to stake
   function stakeB3TR(uint256 _b3trAmount) public onlyGovernanceWhenNotPaused {
     IERC20 b3tr = _getERC20Contract(b3trAddress());
@@ -201,6 +212,7 @@ contract Treasury is
   }
 
   /// @notice Unstakes a specified amount of B3TR from VOT3
+  /// @dev Only governance can unstake B3TR when the contract is not paused
   /// @param _vot3Amount Amount of VOT3 to unstake
   function unstakeB3TR(uint256 _vot3Amount) public onlyGovernanceWhenNotPaused {
     IVOT3 vot3 = IVOT3(vot3Address());
@@ -209,7 +221,7 @@ contract Treasury is
   }
 
   // ---------- Getters ---------- //
-  
+
   /// @notice Retrieves the balance of VTHO held by the contract
   function getVTHOBalance() public view returns (uint256) {
     IERC20 vtho = _getERC20Contract(VTHO);
@@ -264,7 +276,7 @@ contract Treasury is
     return $.VOT3;
   }
 
- // ----------- Internal & Private ----------- //
+  // ----------- Internal & Private ----------- //
 
   /// @dev Internal function to get the ERC20 contract instance
   function _getERC20Contract(address token) internal pure returns (IERC20) {
