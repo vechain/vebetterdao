@@ -185,9 +185,9 @@ contract VOT3 is
 
   /// @dev Updates the token balance of the sender and receiver upon transfer
   /// @dev Overrides the _update function to self-delegate if the user is neither unstaking nor has delegated previously nor burning tokens
-  /// @param to The address to transfer the token to
-  /// @param tokenId The token ID to update
-  /// @param auth The address of the sender
+  /// @param from Address to transfer from
+  /// @param to Address to transfer to
+  /// @param amount Amount of tokens to transfer
   function _update(
     address from,
     address to,
@@ -236,7 +236,7 @@ contract VOT3 is
   /// @dev The quadratic voting power is calculated as the square root of the number of votes the account had at the specified block
   /// @param account The address to calculate the voting power for
   /// @param timepoint The block number to get the past votes from
-  /// @return The past quadratic voting power
+  /// @return uint256 The past quadratic voting power
   function getPastQuadraticVotingPower(address account, uint256 timepoint) public view returns (uint256) {
     // scaling by 1e9 so that number retuned is 1e18
     return Math.sqrt(getPastVotes(account, timepoint)) * 1e9;
