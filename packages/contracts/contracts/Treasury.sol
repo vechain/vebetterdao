@@ -159,7 +159,7 @@ contract Treasury is
   }
 
   /// @notice Transfers a specified amount of VOT3 tokens to a specified address
-  /// @dev Only governance can transfer B3TR when the contract is not paused
+  /// @dev Only governance can transfer VOT3 when the contract is not paused
   /// @param _to Recipient of the VOT3
   /// @param _value Amount of VOT3 to transfer
   function transferVOT3(address _to, uint256 _value) public onlyGovernanceWhenNotPaused {
@@ -169,7 +169,7 @@ contract Treasury is
   }
 
   /// @notice Transfers a specified amount of VET to a specified address
-  /// @dev Only governance can transfer B3TR when the contract is not paused
+  /// @dev Only governance can transfer VET when the contract is not paused
   /// @param _to Recipient of the VET
   /// @param _value Amount of VET to transfer
   function transferVET(address _to, uint256 _value) public onlyGovernanceWhenNotPaused nonReentrant {
@@ -179,7 +179,7 @@ contract Treasury is
   }
 
   /// @notice Transfers any ERC20 token to a given address
-  /// @dev Only governance can transfer B3TR when the contract is not paused
+  /// @dev Only governance can transfer tokens when the contract is not paused
   /// @param _token The ERC20 token to transfer
   /// @param _to Recipient of the ERC20 token
   /// @param _value Amount of the ERC20 token to transfer
@@ -190,7 +190,7 @@ contract Treasury is
   }
 
   /// @notice Transfers an ERC721 token to a specified address
-  /// @dev Only governance can transfer B3TR when the contract is not paused
+  /// @dev Only governance can transfer NFTs when the contract is not paused
   /// @param _nft The ERC721 token to transfer
   /// @param _to Recipient of the ERC721 token
   /// @param _tokenId The id of the ERC721 token to transfer
