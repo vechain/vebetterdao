@@ -29,12 +29,6 @@ jobs:
           node-version-file: .nvmrc
           cache: "yarn"
 
-      - name: Configure npm for private package
-        run: |
-          echo "@vechain:registry=https://npm.pkg.github.com/" >> .npmrc
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GH_READ_PACKAGES_TOKEN }}" >> .npmrc
-          echo "registry=https://registry.npmjs.org/" >> .npmrc
-
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
@@ -59,7 +53,7 @@ jobs:
           solc-version: "0.8.20"
           fail-on: none
           slither-args: --filter-paths "openzeppelin" --exclude-informational --exclude-optimization --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
-    
+
       - name: Create/update checklist as PR comment
         uses: actions/github-script@v7
         if: github.event_name == 'pull_request' && steps.contract_changes.outputs.src == 'true'
@@ -67,7 +61,7 @@ jobs:
           REPORT: ${{ steps.slither.outputs.stdout }}
         with:
           script: |
-           const script = require('.github/scripts/comment')
-           const header = '# Slither report'
-           const body = process.env.REPORT
-           await script({ github, context, header, body })
+            const script = require('.github/scripts/comment')
+            const header = '# Slither report'
+            const body = process.env.REPORT
+            await script({ github, context, header, body })
