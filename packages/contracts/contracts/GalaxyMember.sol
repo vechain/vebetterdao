@@ -1,5 +1,27 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.18;
+
+//                                      #######
+//                                 ################
+//                               ####################
+//                             ###########   #########
+//                            #########      #########
+//          #######          #########       #########
+//          #########       #########      ##########
+//           ##########     ########     ####################
+//            ##########   #########  #########################
+//              ################### ############################
+//               #################  ##########          ########
+//                 ##############      ###              ########
+//                  ############                       #########
+//                    ##########                     ##########
+//                     ########                    ###########
+//                       ###                    ############
+//                                          ##############
+//                                    #################
+//                                   ##############
+//                                   #########
+
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
@@ -19,6 +41,9 @@ import { IB3TR } from "./interfaces/IB3TR.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
+/// @title GalaxyMember NFT Contract
+/// @dev Extends ERC721 Non-Fungible Token Standard basic implementation with upgradeable pattern, burnable, pausable, and access control functionalities.
+/// @notice This contract manages the unique assets owned by users within the Galaxy Member ecosystem.
 contract GalaxyMember is
   Initializable,
   ERC721Upgradeable,
@@ -30,79 +55,92 @@ contract GalaxyMember is
   ReentrancyGuardUpgradeable,
   UUPSUpgradeable
 {
-  using Checkpoints for Checkpoints.Trace208;
+  using Checkpoints for Checkpoints.Trace208; // Checkpoints library for managing checkpoints of the selected level of the user
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
+  /// @notice Storage structure for GalaxyMember
+  /// @dev GalaxyMemberStorage structure holds all the state variables in a single location.
   /// @custom:storage-location erc7201:b3tr.storage.GalaxyMember
   struct GalaxyMemberStorage {
     IXAllocationVotingGovernor xAllocationsGovernor; // XAllocationVotingGovernor contract
     IB3TRGovernor b3trGovernor; // B3TRGovernor contract
     IB3TR b3tr; // B3TR token contract
-    address treasury;
+    address treasury; // Treasury contract address
     string _baseTokenURI; // Base URI for the Token
-    uint256 _nextTokenId; // Token ID counter
-    // Current Maximum level the Token can be minted or upgraded to
-    uint256 MAX_LEVEL; // Set to 0 by allowing only the free minting of the Earth Token
-    // Mapping from token ID to level
-    mapping(uint256 => uint256) levelOf;
-    // Mapping from X/Economic node type to maximum mintable level
+    uint256 _nextTokenId; // Next Token ID to be minted
+    uint256 MAX_LEVEL; // Current Maximum level the Token can be minted or upgraded to
+    mapping(uint256 => uint256) levelOf; // Mapping from token ID to level of the Token
     /*
-    0 => Strength
-    1 => Thunder
-    2 => Mjolnir
-    3 => VeThorX
-    4 => StrengthX
-    5 => ThunderX
-    6 => MjolnirX
+      Mapping from X/Economic node type to maximum mintable level for free minting / upgrading
+
+      0 => Strength
+      1 => Thunder
+      2 => Mjolnir
+      3 => VeThorX
+      4 => StrengthX
+      5 => ThunderX
+      6 => MjolnirX
     */
     mapping(uint8 => uint256) _xNodeTypeToMaxMintableLevel;
-    mapping(uint256 => uint256) _b3trToUpgradeToLevel;
-    // Mapping from owner to their selected GM NFT level to be used for voter rewards
-    mapping(address owner => Checkpoints.Trace208) _selectedLevelCheckpoints;
-    // Value-Frequency map tracking levels owned by users
-    mapping(address => mapping(uint256 => uint256)) _ownedLevels;
+    mapping(uint256 => uint256) _b3trToUpgradeToLevel; // Mapping from level to B3TR required to upgrade to that level
+    mapping(address owner => Checkpoints.Trace208) _selectedLevelCheckpoints; // Checkpoints for selected level of the user
+    mapping(address => mapping(uint256 => uint256)) _ownedLevels; // Value-Frequency map tracking levels owned by users
+    bool isPublicMintingPaused; // Flag to pause public minting
   }
 
-  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.GalaxyMember")) - 1)) & ~bytes32(uint256(0xff))
+  /// @notice Storage slot for GalaxyMemberStorage
+  /// @dev keccak256(abi.encode(uint256(keccak256("b3tr.storage.GalaxyMember")) - 1)) & ~bytes32(uint256(0xff))
   bytes32 private constant GalaxyMemberStorageLocation =
     0x7a79e46844ed04411e4579c7bc49d053e59b0854fa4e9a8df3d5a0597ce45200;
 
+  /// @dev Retrieves the current state from the GalaxyMemberStorage mapping
   function _getGalaxyMemberStorage() private pure returns (GalaxyMemberStorage storage $) {
     assembly {
       $.slot := GalaxyMemberStorageLocation
     }
   }
 
-  /**
-   * @dev The clock was incorrectly modified.
-   */
+  /// @dev The clock was incorrectly modified.
   error ERC6372InconsistentClock();
 
-  /**
-   * @dev Lookup to future votes is not available.
-   */
+  /// @dev Lookup to future votes is not available.
   error ERC5805FutureLookup(uint256 timepoint, uint48 clock);
 
-  /**
-   * @dev Emitted when an account changes the selected token for voting rewards.
-   */
+  /// @dev Emitted when an account changes the selected token for voting rewards.
   event Selected(address indexed owner, uint256 tokenId);
 
-  /**
-   * @dev Emitted when an account changes the selected level for voting rewards.
-   */
+  /// @dev Emitted when an account changes the selected level for voting rewards.
   event SelectedLevel(address indexed owner, uint256 oldLevel, uint256 newLevel);
 
-  /**
-   * @dev Emitted when a token is upgraded.
-   */
+  /// @dev Emitted when a token is upgraded.
   event Upgraded(uint256 indexed tokenId, uint256 oldLevel, uint256 newLevel);
 
+  /// @notice Modifier to check if public minting is not paused
+  modifier whenPublicMintingNotPaused() {
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
+    require(!$.isPublicMintingPaused, "Galaxy Member: Public minting is paused");
+    _;
+  }
+
+  /// @notice Ensures only initializer functions are called when deploying a proxy
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
   }
 
+  /// @notice Initializes a new GalaxyMember contract
+  /// @dev Sets initial values for all relevant contract properties and state variables.
+  /// @param name Name of the ERC721 token
+  /// @param symbol Symbol of the ERC721 token
+  /// @param admin Address to grant the admin role
+  /// @param upgrader Address to grant the upgrader role
+  /// @param maxLevel Maximum level tokens can achieve
+  /// @param baseTokenURI Base URI for computing {tokenURI}
+  /// @param xNodeMaxMintableLevels Array of maximum levels for each node type
+  /// @param b3trToUpgradeToLevel Mapping of B3TR requirements per level
+  /// @param _b3tr B3TR token contract address
+  /// @param _treasury Address of the treasury
+  /// @custom:oz-upgrades-unsafe-allow constructor
   function initialize(
     string memory name,
     string memory symbol,
@@ -150,22 +188,33 @@ contract GalaxyMember is
 
     $._nextTokenId = 1; // First token ID starts from 1
 
+    $.isPublicMintingPaused = false;
+
     _grantRole(DEFAULT_ADMIN_ROLE, admin);
     _grantRole(UPGRADER_ROLE, upgrader);
   }
 
+  /// @notice Internal function to authorize contract upgrades
+  /// @dev Restricts upgrade authorization to addresses with UPGRADER_ROLE
+  /// @param newImplementation Address of the new contract implementation
   function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
+  /// @notice Pauses the Galaxy Member contract
+  /// @dev pausing the contract will prevent minting, upgrading, and transferring of tokens
+  /// @dev Only callable by the admin role
   function pause() public onlyRole(DEFAULT_ADMIN_ROLE) {
     _pause();
   }
 
+  /// @notice Unpauses the Galaxy Member contract
+  /// @dev Only callable by the admin role
   function unpause() public onlyRole(DEFAULT_ADMIN_ROLE) {
     _unpause();
   }
 
-  // Mints the highest level Token the caller is allowed to mint
-  function freeMint() public {
+  /// @notice Allows a user to freely mint a token if they have participated in governance
+  /// @dev Mints a token with level 1 and ensures that the public minting is not paused
+  function freeMint() public whenPublicMintingNotPaused {
     require(participatedInGovernance(msg.sender), "Galaxy Member: User has not participated in governance");
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
@@ -176,6 +225,23 @@ contract GalaxyMember is
     safeMint(msg.sender);
   }
 
+  /// @notice Mints a new token to a specified address
+  /// @dev Only callable by the admin role
+  /// @dev Can be used to mint when public minting is paused
+  /// @param to Address to mint the token to
+  function mint(address to) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
+
+    uint256 tokenId = $._nextTokenId;
+
+    $.levelOf[tokenId] = 1;
+
+    safeMint(to);
+  }
+
+  /// @notice Upgrades a token to the next level
+  /// @dev Requires the owner to have enough B3TR tokens and sufficient allowance for the contract to use them
+  /// @param tokenId Token ID to upgrade
   function upgrade(uint256 tokenId) public nonReentrant whenNotPaused {
     require(ownerOf(tokenId) == msg.sender, "Galaxy Member: you must own the Token to upgrade it");
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
@@ -209,28 +275,34 @@ contract GalaxyMember is
     emit Upgraded(tokenId, currentLevel, $.levelOf[tokenId]);
   }
 
+  /// @notice Automatically selects the highest level token owned by the caller for voting rewards
   function selectHighestLevel() public {
     _selectHighestLevel(msg.sender);
   }
 
-  // Mints the Token for the given address
-  // Can't be called externally but only from the contract
-  function safeMint(address to) internal {
-    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
-    uint256 tokenId = $._nextTokenId++;
-    _safeMint(to, tokenId);
-  }
-
+  /// @notice Allows the token owner to burn their token
+  /// @dev Overrides the ERC721BurnableUpgradeable function to include custom burning logic
+  /// @param tokenId Token ID to burn
   function burn(uint256 tokenId) public override(ERC721BurnableUpgradeable) {
     require(ownerOf(tokenId) == msg.sender, "Galaxy Member: caller is not the owner of the token");
+
     super.burn(tokenId);
   }
 
   // ----------- Internal & Private ----------- //
 
-  /**
-   * @dev Selects the highest level owned by the owner
-   */
+  /// @notice Internal function to safely mint a token
+  /// @dev Adds a token to the total supply and assigns it to an address, incrementing the owner's balance
+  /// @param to Address to mint the token to
+  function safeMint(address to) internal {
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
+
+    uint256 tokenId = $._nextTokenId++;
+    _safeMint(to, tokenId);
+  }
+
+  /// @notice Internal function to select the highest level owned by the owner
+  /// @dev Loops through the levels owned by the user and selects the highest level by updating the selected level checkpoint
   function _selectHighestLevel(address owner) internal {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
@@ -246,9 +318,8 @@ contract GalaxyMember is
     }
   }
 
-  /**
-   * @dev Updates the highest level owned by the user
-   */
+  /// @notice Internal function to update the highest level owned by the owner
+  /// @dev Updates the highest level owned by the owner and updates the selected level checkpoint
   function _updateHighestLevelOwned(address from, address to, uint256 tokenId) internal {
     if (from != to) {
       GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
@@ -266,6 +337,7 @@ contract GalaxyMember is
       if (to != address(0)) {
         $._ownedLevels[to][$.levelOf[tokenId]]++;
 
+        // If the user is receiving a token of a higher level than they currently have selected then we update the selected level
         if ($.levelOf[tokenId] > getHighestLevel(to)) {
           _updateLevelSelected(to, $.levelOf[tokenId]);
         }
@@ -273,7 +345,9 @@ contract GalaxyMember is
     }
   }
 
-  function _updateLevelSelected(address owner, uint256 level) internal whenNotPaused {
+  /// @notice Internal function to update the selected level checkpoint
+  /// @dev Updates the selected level checkpoint for the owner
+  function _updateLevelSelected(address owner, uint256 level) internal {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     // If the selected level is different from the new level then we checkpoint the selected level to the new level
     if (getHighestLevel(owner) != level) {
@@ -283,21 +357,19 @@ contract GalaxyMember is
     }
   }
 
+  /// @notice Internal function to push a new checkpoint
+  /// @dev Pushes a new checkpoint to the selected level checkpoints
   function _push(Checkpoints.Trace208 storage store, uint208 delta) private returns (uint208, uint208) {
     return store.push(clock(), delta);
   }
 
-  /**
-   * @dev Get number of checkpoints for `account`.
-   */
+  /// @dev Get number of checkpoints for `account`.
   function _numCheckpoints(address account) internal view virtual returns (uint32) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return SafeCast.toUint32($._selectedLevelCheckpoints[account].length());
   }
 
-  /**
-   * @dev Get the `pos`-th checkpoint for `account`.
-   */
+  /// @dev Get the `pos`-th checkpoint for `account`.
   function _checkpoints(address account, uint32 pos) internal view virtual returns (Checkpoints.Checkpoint208 memory) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
@@ -306,6 +378,8 @@ contract GalaxyMember is
 
   // ---------- Setters ---------- //
 
+  /// @notice Sets the maximum level that tokens can be minted or upgraded to
+  /// @dev Only callable by the admin role
   function setMaxLevel(uint256 level) public onlyRole(DEFAULT_ADMIN_ROLE) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
@@ -314,6 +388,8 @@ contract GalaxyMember is
     $.MAX_LEVEL = level;
   }
 
+  /// @notice Sets the maximum mintable levels for each X/Economic node type
+  /// @dev Only callable by the admin role
   function setMaxMintableLevels(uint8[] memory maxMintableLevels) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(
       maxMintableLevels.length == 7,
@@ -326,24 +402,36 @@ contract GalaxyMember is
     }
   }
 
+  /// @notice Sets the XAllocationVotingGovernor contract address
+  /// @dev Only callable by the admin role
+  /// @param _xAllocationsGovernor XAllocationVotingGovernor contract address
   function setXAllocationsGovernorAddress(address _xAllocationsGovernor) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(_xAllocationsGovernor != address(0), "Galaxy Member: _xAllocationsGovernor cannot be the zero address");
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     $.xAllocationsGovernor = IXAllocationVotingGovernor(_xAllocationsGovernor);
   }
 
+  /// @notice Sets the B3TRGovernor contract address
+  /// @dev Only callable by the admin role
+  /// @param _b3trGovernor B3TRGovernor contract address
   function setB3trGovernorAddress(address _b3trGovernor) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(_b3trGovernor != address(0), "Galaxy Member: _b3trGovernor cannot be the zero address");
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     $.b3trGovernor = IB3TRGovernor(payable(_b3trGovernor));
   }
 
+  /// @notice Sets the base URI for computing the tokenURI
+  /// @dev Only callable by the admin role
+  /// @param baseTokenURI Base URI for the Token
   function setBaseURI(string memory baseTokenURI) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(bytes(baseTokenURI).length > 0, "Galaxy Member: Base URI must be set");
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     $._baseTokenURI = baseTokenURI;
   }
 
+  /// @notice Sets the amount of B3TR required to upgrade to each level
+  /// @dev Only callable by the admin role
+  /// @param b3trToUpgradeToLevel Mapping of B3TR requirements per level
   function setB3TRtoUpgradeToLevel(uint256[] memory b3trToUpgradeToLevel) public onlyRole(DEFAULT_ADMIN_ROLE) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     for (uint8 i = 0; i < b3trToUpgradeToLevel.length; i++) {
@@ -351,13 +439,27 @@ contract GalaxyMember is
     }
   }
 
+  /// @notice Pauses public minting
+  /// @dev Only callable by the admin role
+  /// @param isPaused Flag to pause or unpause public minting
+  function setIsPublicMintingPaused(bool isPaused) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
+    $.isPublicMintingPaused = isPaused;
+  }
+
   // ---------- Getters ---------- //
 
+  /// @notice Gets the highest level owned by the owner
+  /// @param owner The address of the owner
   function getHighestLevel(address owner) public view returns (uint256) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $._selectedLevelCheckpoints[owner].latest();
   }
 
+  /// @notice Gets the highest level owned by the owner at a specific timepoint
+  /// @dev Reverts if the timepoint is in the future
+  /// @param owner The address of the owner
+  /// @param timepoint The timepoint to check
   function getPastHighestLevel(address owner, uint256 timepoint) public view returns (uint256) {
     uint48 currentTimepoint = clock();
     if (timepoint >= currentTimepoint) {
@@ -367,17 +469,22 @@ contract GalaxyMember is
     return $._selectedLevelCheckpoints[owner].upperLookupRecent(SafeCast.toUint48(timepoint));
   }
 
+  /// @notice Gets the selected level of the owner
+  /// @param account The address of the account to check
   function numCheckpoints(address account) public view returns (uint32) {
     return _numCheckpoints(account);
   }
 
-  /**
-   * @dev Get the `pos`-th checkpoint for `account`.
-   */
+  /// @notice Gets the checkpoints of a specific account at a specific position
+  /// @dev Get the `pos`-th checkpoint for `account`.
+  /// @param account The address of the account to check
+  /// @param pos The position of the checkpoint to check
   function checkpoints(address account, uint32 pos) public view virtual returns (Checkpoints.Checkpoint208 memory) {
     return _checkpoints(account, pos);
   }
 
+  /// @notice Gets whether the user has participated in governance
+  /// @param user The address of the user to check
   function participatedInGovernance(address user) public view returns (bool) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     require(
@@ -393,41 +500,45 @@ contract GalaxyMember is
     return false;
   }
 
+  /// @notice Gets the base URI for computing the tokenURI
   function baseURI() public view returns (string memory) {
     return _baseURI();
   }
 
+  /// @notice Gets the maximum level an X/Economic node can freely mint or upgrade to
+  /// @param xNodeType X/Economic node type
   function getMaxMintableLevelOfXNode(uint8 xNodeType) public view returns (uint256) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $._xNodeTypeToMaxMintableLevel[xNodeType];
   }
 
+  /// @notice Gets the B3TR required to upgrade to a specific level
+  /// @param level Level to upgrade to
   function getB3TRtoUpgradeToLevel(uint256 level) public view returns (uint256) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $._b3trToUpgradeToLevel[level];
   }
 
+  /// @notice Gets the next level of the token
+  /// @param tokenId Token ID to check
   function getNextLevel(uint256 tokenId) public view returns (uint256) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $.levelOf[tokenId] + 1;
   }
 
+  /// @notice Gets the B3TR required to upgrade to the next level of the token
+  /// @param tokenId Token ID to check
   function getB3TRtoUpgrade(uint256 tokenId) public view returns (uint256) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $._b3trToUpgradeToLevel[$.levelOf[tokenId] + 1];
   }
 
-  /**
-   * @dev Clock used for flagging checkpoints. Can be overridden to implement timestamp based
-   * checkpoints (and voting), in which case {CLOCK_MODE} should be overridden as well to match.
-   */
+  /// @dev Clock used for flagging checkpoints. Can be overridden to implement timestamp based checkpoints (and voting), in which case {CLOCK_MODE} should be overridden as well to match.
   function clock() public view virtual returns (uint48) {
     return Time.blockNumber();
   }
 
-  /**
-   * @dev Machine-readable description of the clock as specified in EIP-6372.
-   */
+  /// @dev Machine-readable description of the clock as specified in EIP-6372.
   // solhint-disable-next-line func-name-mixedcase
   function CLOCK_MODE() public view virtual returns (string memory) {
     // Check that the clock was not modified
@@ -437,37 +548,46 @@ contract GalaxyMember is
     return "mode=blocknumber&from=default";
   }
 
+  /// @notice gets the token URI for a specific token
+  /// @dev computes the token URI based on the base URI and the level of the token
+  /// @param tokenId Token ID to get the URI for
   function tokenURI(uint256 tokenId) public view override(ERC721Upgradeable) returns (string memory) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     uint256 levelOfToken = $.levelOf[tokenId];
     return levelOfToken > 0 ? string.concat(baseURI(), Strings.toString(levelOfToken)) : "";
   }
 
+  /// @notice Gets the xAllocationsGovernor contract address
   function xAllocationsGovernor() public view returns (IXAllocationVotingGovernor) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $.xAllocationsGovernor;
   }
 
+  /// @notice Gets the b3trGovernor contract address
   function b3trGovernor() public view returns (IB3TRGovernor) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $.b3trGovernor;
   }
 
+  /// @notice Gets the B3TR token contract address
   function b3tr() public view returns (IB3TR) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $.b3tr;
   }
 
+  /// @notice Gets the treasury contract address
   function treasury() public view returns (address) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $.treasury;
   }
 
+  /// @notice Gets the maximum level that tokens can be minted or upgraded to
   function MAX_LEVEL() public view returns (uint256) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $.MAX_LEVEL;
   }
 
+  /// @notice Gets the level of the token
   function levelOf(uint256 tokenId) public view returns (uint256) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $.levelOf[tokenId];
@@ -475,16 +595,27 @@ contract GalaxyMember is
 
   // ---------- Overrides ---------- //
 
+  /// @notice Performs automatic level updating upon token updates
+  /// @dev Overrides the _update function to update the highest level owned by the owner
+  /// @param to The address to transfer the token to
+  /// @param tokenId The token ID to update 
+  /// @param auth The address of the sender
   function _update(
     address to,
     uint256 tokenId,
     address auth
-  ) internal override(ERC721Upgradeable, ERC721EnumerableUpgradeable, ERC721PausableUpgradeable) returns (address) {
+  )
+    internal
+    override(ERC721Upgradeable, ERC721EnumerableUpgradeable, ERC721PausableUpgradeable)
+    whenNotPaused
+    returns (address)
+  {
     _updateHighestLevelOwned(auth, to, tokenId);
 
     return super._update(to, tokenId, auth);
   }
 
+  /// @dev Overrides the _increaseBalance for ERC721Upgradeable and ERC721EnumerableUpgradeable
   function _increaseBalance(
     address account,
     uint128 value
@@ -492,12 +623,14 @@ contract GalaxyMember is
     super._increaseBalance(account, value);
   }
 
+  /// @dev Overrides the supportsInterface for ERC721Upgradeable, ERC721EnumerableUpgradeable, and AccessControlUpgradeable
   function supportsInterface(
     bytes4 interfaceId
   ) public view override(ERC721Upgradeable, ERC721EnumerableUpgradeable, AccessControlUpgradeable) returns (bool) {
     return super.supportsInterface(interfaceId);
   }
 
+  /// @dev Overrides the _baseURI for ERC721URIStorageUpgradeable
   function _baseURI() internal view override returns (string memory) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $._baseTokenURI;

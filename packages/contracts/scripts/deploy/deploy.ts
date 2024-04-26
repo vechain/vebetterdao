@@ -87,6 +87,8 @@ export async function deployAll(config: ContractsConfig) {
   ])) as GalaxyMember
   console.log(`GalaxyMember contract deployed at address ${await galaxyMember.getAddress()}`)
 
+  // await galaxyMember.connect(admin).setIsPublicMintingPaused(true) // TODO: Uncomment this line to pause public minting of GM NFTs when deploying to Mainnet
+
   console.log(`Deploying Emissions contract`)
   const emissions = (await deployProxy("Emissions", [
     {

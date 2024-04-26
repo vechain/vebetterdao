@@ -1,10 +1,9 @@
 import {
   useAllocationAmount,
   useAllocationBaseAmount,
-  useAllocationSharesCap,
   useAllocationsRound,
   useHasVotedInRound,
-  useRoundXApps,
+  useMaxAllocationAmount,
 } from "@/api"
 import { B3TRIcon } from "@/components"
 import {
@@ -37,8 +36,7 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
   const { data: roundAmount, isLoading: roundAmountLoading, error: roundAmountError } = useAllocationAmount(roundId)
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
   const { data: baseAmount, isLoading: baseAmountLoading, error: baseAmountError } = useAllocationBaseAmount(roundId)
-  const { data: appSharesCap } = useAllocationSharesCap(roundId)
-  const { data: xApps } = useRoundXApps(roundId)
+  const { data: maxDAppAllocation, isLoading: maxDAppAllocationLoading, error: maxDAppAllocationError } = useMaxAllocationAmount(roundId)
 
   const isVotingConcluded = data?.voteEndTimestamp?.isBefore()
 
@@ -48,17 +46,6 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
     if (isVotingConcluded) return `Voting ended ${data?.voteEndTimestamp?.fromNow()}`
     return `Voting ends ${data?.voteEndTimestamp?.fromNow()}`
   }, [isVotingConcluded, data?.voteEndTimestamp])
-
-  const maxDAppAllocation = useMemo(() => {
-    if (!roundAmount || !appSharesCap || !baseAmount || !xApps) return 0
-
-    // it's the base allocation plus the shares of the voters
-    const remainingAllocation = parseInt(roundAmount.voteXAllocations) - parseInt(baseAmount) * xApps.length
-
-    const maxVariableAllocation = Math.round(remainingAllocation * (parseInt(appSharesCap) / 100))
-
-    return maxVariableAllocation + parseInt(baseAmount)
-  }, [baseAmount, roundAmount, appSharesCap, xApps])
 
   const renderVoteStatusMessage = useMemo(() => {
     if (!isVotingConcluded) {
@@ -196,9 +183,9 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
                   </Text>
                 </Box>
                 <Box>
-                  <Skeleton isLoaded={!baseAmountLoading}>
-                    {baseAmountError ? (
-                      <Text color="red.500">{baseAmountError.message}</Text>
+                  <Skeleton isLoaded={!maxDAppAllocationLoading}>
+                    {maxDAppAllocationError ? (
+                      <Text color="red.500">{maxDAppAllocationError.message}</Text>
                     ) : (
                       <HStack spacing={2}>
                         <Heading size="xl">{compactFormatter.format(Number(maxDAppAllocation))}</Heading>
