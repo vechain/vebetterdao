@@ -106,7 +106,7 @@ const castUserVote = async (page: Page, accountIndex: number, roundIndex: number
     const roundsPage = await allocationsPage.clickOnRound(roundIndex)
     await roundsPage.castVote(splitPercentage)
     await menuBar.gotoDashbard()
-    await dashboardPage.disconnectWallet(blockchainUtils.getAccountAddress(accountIndex))
+    await dashboardPage.disconnectWallet()
   })
 }
 
