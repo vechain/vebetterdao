@@ -14,6 +14,7 @@ import {
   waitForCurrentRoundToEnd,
   moveBlocks,
   createProposalAndExecuteIt,
+  createProposalWithMultipleFunctionsAndExecuteIt,
 } from "./helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it } from "mocha"
@@ -173,8 +174,17 @@ describe("Governor and TimeLock", function () {
           1, // delay before vote starts
           owner.address,
           await voterRewards.getAddress(),
+          [],
         ),
       )
+    })
+
+    it("Should not be able to set function whitelist if not governance", async function () {
+      const { governor, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await catchRevert(governor.connect(otherAccount).setWhitelistFunction("0x12345678", true))
     })
   })
 
@@ -324,6 +334,171 @@ describe("Governor and TimeLock", function () {
 
       const updatedDelay = await governor.minVotingDelay()
       expect(updatedDelay).to.not.eql(newDelay)
+    })
+
+    it("Should not be able to create proposal of a restricted function", async function () {
+      const { governor, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const funcSig = governor.interface.getFunction("setMinVotingDelay")?.selector
+
+      await createProposalAndExecuteIt(
+        owner,
+        owner,
+        governor,
+        await ethers.getContractFactory("B3TRGovernor"),
+        "Update Min Voting Delay",
+        "setWhitelistFunction",
+        [funcSig, false], // restrict the function "setMinVotingDelay" from being called
+      )
+
+      const newDelay = 10n
+      await expect(
+        createProposalAndExecuteIt(
+          owner,
+          owner,
+          governor,
+          await ethers.getContractFactory("B3TRGovernor"),
+          "Update Min Voting Delay",
+          "setMinVotingDelay",
+          [newDelay],
+        ),
+      ).to.be.reverted
+
+      // remove setMinVotingDelay from restricted functions
+      await createProposalAndExecuteIt(
+        owner,
+        owner,
+        governor,
+        await ethers.getContractFactory("B3TRGovernor"),
+        "Update Min Voting Delay",
+        "setWhitelistFunction",
+        [funcSig, true],
+      )
+
+      // now the proposal should be successful
+      await createProposalAndExecuteIt(
+        owner,
+        owner,
+        governor,
+        await ethers.getContractFactory("B3TRGovernor"),
+        "Update Min Voting Delay",
+        "setMinVotingDelay",
+        [newDelay],
+      )
+    })
+
+    it("Should not be able to create a proposal with one of the restricted functions in the array of calldata", async function () {
+      const { governor, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // remove setProposalThreshold from whitelisted functions
+      await createProposalAndExecuteIt(
+        owner,
+        owner,
+        governor,
+        await ethers.getContractFactory("B3TRGovernor"),
+        "Update Min Voting Delay",
+        "setWhitelistFunction",
+        [governor.interface.getFunction("setProposalThreshold")?.selector, false],
+      )
+
+      await expect(
+        createProposalWithMultipleFunctionsAndExecuteIt(
+          owner,
+          owner,
+          [governor, governor],
+          await ethers.getContractFactory("B3TRGovernor"),
+          "Update Min Voting Delay",
+          ["setMinVotingDelay", "setProposalThreshold"],
+          [[10n], [10n]],
+        ),
+      ).to.be.reverted
+    })
+
+    it("Should be able to create proposal with multiple whitelist functions", async function () {
+      const { governor, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await createProposalWithMultipleFunctionsAndExecuteIt(
+        owner,
+        owner,
+        [governor, governor],
+        await ethers.getContractFactory("B3TRGovernor"),
+        "Update Min Voting Delay",
+        ["setMinVotingDelay", "setProposalThreshold"],
+        [[10n], [10n]],
+      )
+
+      expect(await governor.minVotingDelay()).to.eql(10n)
+      expect(await governor.proposalThreshold()).to.eql(10n)
+    })
+
+    it("Should be able to execute any function if function restriction is disabled", async function () {
+      const { governor, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await createProposalAndExecuteIt(
+        owner,
+        owner,
+        governor,
+        await ethers.getContractFactory("B3TRGovernor"),
+        "Disable function restriction",
+        "setIsFunctionRestrictionEnabled",
+        [false],
+      )
+
+      // Set setMinVotingDelay as restricted
+      const funcSig = governor.interface.getFunction("setMinVotingDelay")?.selector
+      await createProposalAndExecuteIt(
+        owner,
+        owner,
+        governor,
+        await ethers.getContractFactory("B3TRGovernor"),
+        "Update Min Voting Delay",
+        "setWhitelistFunction",
+        [funcSig, false],
+      )
+
+      const newDelay = 10n
+      // Should be able to execute the function even if it is restricted because function restriction is disabled
+      await createProposalAndExecuteIt(
+        owner,
+        owner,
+        governor,
+        await ethers.getContractFactory("B3TRGovernor"),
+        "Update Min Voting Delay",
+        "setMinVotingDelay",
+        [newDelay],
+      )
+
+      // Set function restriction back to enabled
+      await createProposalAndExecuteIt(
+        owner,
+        owner,
+        governor,
+        await ethers.getContractFactory("B3TRGovernor"),
+        "Enable function restriction",
+        "setIsFunctionRestrictionEnabled",
+        [true],
+      )
+
+      // Should not be able to execute the function now
+      await expect(
+        createProposalAndExecuteIt(
+          owner,
+          owner,
+          governor,
+          await ethers.getContractFactory("B3TRGovernor"),
+          "Update Min Voting Delay",
+          "setMinVotingDelay",
+          [newDelay],
+        ),
+      ).to.be.reverted
     })
   })
 
