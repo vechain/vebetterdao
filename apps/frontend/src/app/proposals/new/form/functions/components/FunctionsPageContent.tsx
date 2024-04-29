@@ -1,9 +1,10 @@
-import { Card, CardBody, VStack, Heading, HStack, Box, Divider, Text, Checkbox } from "@chakra-ui/react"
+import { Card, CardBody, VStack, Heading, HStack, Box, Divider, Text, Checkbox, Button } from "@chakra-ui/react"
 import { FaAngleRight } from "react-icons/fa6"
 import { useCallback } from "react"
 import { useProposalFormStore } from "@/store/useProposalFormStore"
 import { GovernanceFeaturedContractsWithFunctions } from "@/constants"
 import { abi } from "thor-devkit"
+import { useRouter } from "next/navigation"
 
 type SelectedFunction = {
   contractAddress: string
@@ -13,6 +14,17 @@ type SelectedFunction = {
 }
 export const FunctionsPageContent = () => {
   const { actions, setData } = useProposalFormStore()
+
+  const router = useRouter()
+
+  const onContinue = useCallback(() => {
+    router.push("/proposals/new/form/details")
+  }, [router])
+
+  const goBack = useCallback(() => {
+    router.back()
+  }, [router])
+
   const handleAddFunction = useCallback(
     (data: SelectedFunction) => () => {
       setData({
@@ -101,6 +113,14 @@ export const FunctionsPageContent = () => {
                 </VStack>
               </VStack>
             ))}
+            <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
+              <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
+                Go back
+              </Button>
+              <Button rounded="full" colorScheme="primary" size="lg" onClick={onContinue}>
+                Continue
+              </Button>
+            </HStack>
           </VStack>
         </CardBody>
       </Card>

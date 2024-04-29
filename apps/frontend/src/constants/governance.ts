@@ -88,7 +88,7 @@ export const GovernanceFeaturedContractsWithFunctions: GovernanceFeaturedContrac
   {
     name: "XAllocations",
     description: "Change the params that govern the XAllocation pool",
-    contract: { abi: XAllocationVotingJson, address: config.b3trGovernorAddress },
+    contract: { abi: XAllocationVotingJson, address: config.xAllocationVotingContractAddress },
     functions: [
       {
         name: "Update quorum numerator",
