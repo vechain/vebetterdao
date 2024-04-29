@@ -151,6 +151,7 @@ export async function deployAll(config: ContractsConfig) {
     config.B3TR_GOVERNOR_MIN_VOTING_DELAY,
     TEMP_ADMIN,
     await voterRewards.getAddress(),
+    await getWhitelistedFunctions(config),
   ])) as B3TRGovernor
   console.log(`Governor contract deployed at address ${await governor.getAddress()}`)
 
@@ -403,4 +404,31 @@ async function deployB3trToken(admin: string, cap: number): Promise<B3TR> {
   console.log(`B3tr contract deployed at address ${await contract.getAddress()}`)
 
   return contract
+}
+
+/**
+ * Get the list of whitelisted functions for the governor contract
+ * @param config - Contracts configuration
+ *
+ * @note - For ambiguous functions (functions with same name), the function signature is used to differentiate them
+ * e.g., instead of using "setVoterRewards", we use "setVoterRewards(address)" in the config
+ *
+ * @returns - List of whitelisted functions' selectors (e.g., ["0x12345678", "0x87654321"])
+ */
+export const getWhitelistedFunctions = async (config: ContractsConfig) => {
+  const { B3TR_GOVERNOR_WHITELISTED_METHODS } = config
+
+  const whitelistFunctions = []
+
+  // Each key is the contract name and the value is the list of functions that are whitelisted
+  for (const [contract, functions] of Object.entries(B3TR_GOVERNOR_WHITELISTED_METHODS)) {
+    const contractFactory = await ethers.getContractFactory(contract)
+    for (const func of functions) {
+      const sig = contractFactory.interface.getFunction(func)?.selector
+
+      whitelistFunctions.push(sig)
+    }
+  }
+
+  return whitelistFunctions
 }

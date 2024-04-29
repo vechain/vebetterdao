@@ -15,6 +15,7 @@ import {
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy } from "../../scripts/helpers"
+import { getWhitelistedFunctions } from "../../scripts/deploy/deploy"
 
 interface DeployInstance {
   B3trContract: ContractFactory
@@ -166,6 +167,7 @@ export const getOrDeployContractInstances = async ({
     config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
     owner.address,
     await voterRewards.getAddress(),
+    await getWhitelistedFunctions(config),
   ])) as B3TRGovernor
 
   // Set up roles
