@@ -125,8 +125,8 @@ describe("X-Apps", function () {
         .connect(owner)
         .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app #2", "metadataURI")
 
-      const app1ReceiverAddress = await x2EarnApps.getAppReceiverAddress(app1Id)
-      const app2ReceiverAddress = await x2EarnApps.getAppReceiverAddress(app2Id)
+      const app1ReceiverAddress = await x2EarnApps.appReceiverAddress(app1Id)
+      const app2ReceiverAddress = await x2EarnApps.appReceiverAddress(app2Id)
       expect(app1ReceiverAddress).to.eql(otherAccounts[2].address)
       expect(app2ReceiverAddress).to.eql(otherAccounts[3].address)
     })
@@ -556,7 +556,7 @@ describe("X-Apps", function () {
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
-      const appReceiverAddress = await x2EarnApps.getAppReceiverAddress(app1Id)
+      const appReceiverAddress = await x2EarnApps.appReceiverAddress(app1Id)
       expect(appReceiverAddress).to.eql(otherAccounts[0].address)
     })
 
@@ -567,7 +567,7 @@ describe("X-Apps", function () {
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
-      const appReceiverAddress1 = await x2EarnApps.getAppReceiverAddress(app1Id)
+      const appReceiverAddress1 = await x2EarnApps.appReceiverAddress(app1Id)
 
       const adminRole = await x2EarnApps.DEFAULT_ADMIN_ROLE()
       const isAdmin = await x2EarnApps.hasRole(adminRole, owner.address)
@@ -575,7 +575,7 @@ describe("X-Apps", function () {
 
       await x2EarnApps.connect(owner).updateAppReceiverAddress(app1Id, otherAccounts[1].address)
 
-      const appReceiverAddress2 = await x2EarnApps.getAppReceiverAddress(app1Id)
+      const appReceiverAddress2 = await x2EarnApps.appReceiverAddress(app1Id)
       expect(appReceiverAddress2).to.eql(otherAccounts[1].address)
       expect(appReceiverAddress1).to.not.eql(appReceiverAddress2)
     })
@@ -586,7 +586,7 @@ describe("X-Apps", function () {
       const appAdmin = otherAccounts[9]
       await x2EarnApps.connect(owner).addApp(otherAccounts[0].address, appAdmin.address, "My app", "metadataURI")
 
-      const appReceiverAddress1 = await x2EarnApps.getAppReceiverAddress(app1Id)
+      const appReceiverAddress1 = await x2EarnApps.appReceiverAddress(app1Id)
 
       const adminRole = await x2EarnApps.DEFAULT_ADMIN_ROLE()
       const isAdmin = await x2EarnApps.hasRole(adminRole, appAdmin.address)
@@ -596,7 +596,7 @@ describe("X-Apps", function () {
 
       await x2EarnApps.connect(appAdmin).updateAppReceiverAddress(app1Id, otherAccounts[1].address)
 
-      const appReceiverAddress2 = await x2EarnApps.getAppReceiverAddress(app1Id)
+      const appReceiverAddress2 = await x2EarnApps.appReceiverAddress(app1Id)
       expect(appReceiverAddress2).to.eql(otherAccounts[1].address)
       expect(appReceiverAddress1).to.not.eql(appReceiverAddress2)
     })
@@ -608,7 +608,7 @@ describe("X-Apps", function () {
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
-      const appReceiverAddress1 = await x2EarnApps.getAppReceiverAddress(app1Id)
+      const appReceiverAddress1 = await x2EarnApps.appReceiverAddress(app1Id)
 
       const adminRole = await x2EarnApps.DEFAULT_ADMIN_ROLE()
       const isAdmin = await x2EarnApps.hasRole(adminRole, owner.address)
@@ -622,7 +622,7 @@ describe("X-Apps", function () {
       await expect(x2EarnApps.connect(otherAccounts[1]).updateAppReceiverAddress(app1Id, otherAccounts[1].address)).to
         .be.rejected
 
-      const appReceiverAddress2 = await x2EarnApps.getAppReceiverAddress(app1Id)
+      const appReceiverAddress2 = await x2EarnApps.appReceiverAddress(app1Id)
       expect(appReceiverAddress2).to.eql(appReceiverAddress1)
     })
 
@@ -633,7 +633,7 @@ describe("X-Apps", function () {
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
-      const appReceiverAddress1 = await x2EarnApps.getAppReceiverAddress(app1Id)
+      const appReceiverAddress1 = await x2EarnApps.appReceiverAddress(app1Id)
 
       const adminRole = await x2EarnApps.DEFAULT_ADMIN_ROLE()
       const isAdmin = await x2EarnApps.hasRole(adminRole, owner.address)
@@ -647,7 +647,7 @@ describe("X-Apps", function () {
       await expect(x2EarnApps.connect(otherAccounts[1]).updateAppReceiverAddress(app1Id, otherAccounts[1].address)).to
         .be.rejected
 
-      const appReceiverAddress2 = await x2EarnApps.getAppReceiverAddress(app1Id)
+      const appReceiverAddress2 = await x2EarnApps.appReceiverAddress(app1Id)
       expect(appReceiverAddress2).to.eql(appReceiverAddress1)
     })
 
@@ -658,7 +658,7 @@ describe("X-Apps", function () {
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
-      const appReceiverAddress1 = await x2EarnApps.getAppReceiverAddress(app1Id)
+      const appReceiverAddress1 = await x2EarnApps.appReceiverAddress(app1Id)
 
       const adminRole = await x2EarnApps.DEFAULT_ADMIN_ROLE()
       const isAdmin = await x2EarnApps.hasRole(adminRole, otherAccounts[1].address)
@@ -667,7 +667,7 @@ describe("X-Apps", function () {
       await expect(x2EarnApps.connect(otherAccounts[1]).updateAppReceiverAddress(app1Id, otherAccounts[1].address)).to
         .be.rejected
 
-      const appReceiverAddress2 = await x2EarnApps.getAppReceiverAddress(app1Id)
+      const appReceiverAddress2 = await x2EarnApps.appReceiverAddress(app1Id)
       expect(appReceiverAddress2).to.eql(appReceiverAddress1)
     })
 

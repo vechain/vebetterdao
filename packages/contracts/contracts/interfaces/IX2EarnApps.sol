@@ -157,7 +157,7 @@ interface IX2EarnApps {
    *
    * @param appId the id of the app
    */
-  function getAppReceiverAddress(bytes32 appId) external view returns (address);
+  function appReceiverAddress(bytes32 appId) external view returns (address);
 
   /**
    * @dev Update the metadata URI of the app.

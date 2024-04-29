@@ -160,7 +160,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
    *
    * @param appId the hashed name of the app
    */
-  function getAppReceiverAddress(bytes32 appId) public view virtual returns (address) {
+  function appReceiverAddress(bytes32 appId) public view virtual returns (address) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
 
     return $._apps[appId].receiverAddress;

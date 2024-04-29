@@ -119,7 +119,7 @@ contract XAllocationPool is
     // update the claimedRewards mapping
     $.claimedRewards[appId][roundId] = true;
 
-    address receiverAddress = $.x2EarnApps.getAppReceiverAddress(appId);
+    address receiverAddress = $.x2EarnApps.appReceiverAddress(appId);
 
     //check that contract has enough funds to pay the reward
     require($.b3tr.balanceOf(address(this)) >= (amountToClaim + unallocatedAmount), "Insufficient funds");
