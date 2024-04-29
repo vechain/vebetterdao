@@ -20,12 +20,6 @@ jobs:
           node-version-file: .nvmrc
           cache: "yarn"
 
-      - name: Configure npm for private package
-        run: |
-          echo "@vechain:registry=https://npm.pkg.github.com/" >> .npmrc
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GH_READ_PACKAGES_TOKEN }}" >> .npmrc
-          echo "registry=https://registry.npmjs.org/" >> .npmrc
-
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
@@ -37,20 +31,18 @@ jobs:
         if: steps.fe-coverage.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
-            name: fe-coverage
-            path: apps/frontend/coverage
-            retention-days: 10
-    
+          name: fe-coverage
+          path: apps/frontend/coverage
+          retention-days: 10
+
       - name: Run solidity coverage
         id: contract-coverage
-        run: yarn test:coverage:solidity   
+        run: yarn test:coverage:solidity
 
       - name: Archive solidity coverage
         if: steps.contract-coverage.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
-            name: solidity-coverage
-            path: packages/contracts/coverage
-            retention-days: 10
-
-      
+          name: solidity-coverage
+          path: packages/contracts/coverage
+          retention-days: 10
