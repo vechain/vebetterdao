@@ -54,7 +54,8 @@
       "cache": false
     },
     "compile": {
-      "cache": false
+      "cache": false,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
     },
     "deploy": {
       "dependsOn": ["^deploy", "@repo/config#check-or-generate-local-config"]
