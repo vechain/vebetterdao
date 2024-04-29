@@ -12,12 +12,21 @@ const Steps: StepCardProps[] = [
   {
     stepImageSrc: "/images/handshake.svg",
     stepNumber: 2,
-    stepTitle: "Voting session",
-    stepDescription: "Vote for your proposal during the biweekly round to determine its outcome.",
+    stepTitle: "Funding",
+    stepDescription:
+      "For a proposal to became active, you'll need to lock X BT3R tokens. If you lack sufficient tokens or prefer not to use them all, your proposal can be supported by the community.",
   },
+
   {
     stepImageSrc: "/images/vote.svg",
     stepNumber: 3,
+    stepTitle: "Voting",
+    stepDescription:
+      "If your proposal gets funded before the voting session starts, the community will vote to decide if they support or reject your idea.",
+  },
+  {
+    stepImageSrc: "/images/arrow-right.svg",
+    stepNumber: 4,
     stepTitle: "Execution",
     stepDescription: "If your proposal receives enough votes, it will be executed.",
   },
@@ -43,15 +52,20 @@ export const NewProposalPageContent = () => {
                 aspects of the ecosystem. Each proposal undergoes a voting process, and upon approval, is brought to
                 life.
               </Text>
-              <Stack direction={["column", "column", "row"]} w="full" spacing={4}>
+              <Stack direction={["column"]} w="full" spacing={4}>
                 {Steps.map(step => (
-                  <StepCard {...step} key={step.stepNumber} flex={1} />
+                  <StepCard
+                    {...step}
+                    key={step.stepNumber}
+                    flex={1}
+                    stackProps={{
+                      direction: ["column", "column", "row"],
+                      alignItems: ["flex-start", "flex-start", "center"],
+                    }}
+                  />
                 ))}
               </Stack>
               <Stack direction={["column", "column", "row"]} w="full" justify={"space-between"} spacing={8}>
-                <Text fontSize="sm" color="gray.500" flex={1}>
-                  Remember that by creating a proposal you will not be able to move your funds for X days.
-                </Text>
                 <HStack justify={"flex-end"} spacing={4} flex={1}>
                   <Button rounded="full" variant={"outline"} colorScheme="primary" size="lg">
                     More info
