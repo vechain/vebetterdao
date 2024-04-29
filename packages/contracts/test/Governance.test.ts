@@ -186,6 +186,14 @@ describe("Governor and TimeLock", function () {
 
       await catchRevert(governor.connect(otherAccount).setWhitelistFunction("0x12345678", true))
     })
+
+    it("Should not be able to call setIsFunctionRestrictionEnabled if not governance", async function () {
+      const { governor, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await catchRevert(governor.connect(otherAccount).setIsFunctionRestrictionEnabled(true))
+    })
   })
 
   describe("Governor settings", function () {
@@ -1407,6 +1415,28 @@ describe("Governor and TimeLock", function () {
               gasLimit: 10_000_000,
             },
           ),
+      ).to.be.reverted
+    })
+
+    it("Should not be able to create proposal with invalid calldata", async () => {
+      const { b3tr, otherAccounts, governor, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      const address = await b3tr.getAddress()
+      const encodedFunctionCall = "0x" // invalid calldata
+      const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
+
+      await expect(
+        governor.connect(proposer).propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
+          gasLimit: 10_000_000,
+        }),
       ).to.be.reverted
     })
   })
