@@ -15,8 +15,8 @@ import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
 abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradeable {
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.Administration
   struct AdministrationStorage {
-    mapping(bytes32 => address[]) _moderators;
-    mapping(bytes32 => address) _admin;
+    mapping(bytes32 appId => address[]) _moderators;
+    mapping(bytes32 appId => address) _admin;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnApps.Administration")) - 1)) & ~bytes32(uint256(0xff))

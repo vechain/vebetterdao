@@ -14,7 +14,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.AppsStorage
   struct AppsStorageStorage {
     // Mapping from app ID to app
-    mapping(bytes32 => DataTypes.App) _apps;
+    mapping(bytes32 appId => DataTypes.App) _apps;
     // List of app IDs to enable retrieval of all _apps
     bytes32[] _appIds;
   }
