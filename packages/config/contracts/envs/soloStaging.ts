@@ -1,5 +1,5 @@
-import { VOT3 } from './../../../contracts/typechain-types/contracts/VOT3';
-import { GalaxyMember } from './../../../contracts/typechain-types/contracts/GalaxyMember';
+import { VOT3 } from "./../../../contracts/typechain-types/contracts/VOT3"
+import { GalaxyMember } from "./../../../contracts/typechain-types/contracts/GalaxyMember"
 import { defineConfig } from "../defineConfig"
 
 export function createSoloStagingConfig() {
@@ -19,16 +19,22 @@ export function createSoloStagingConfig() {
       B3TR: ["tokenDetails"],
       B3TRGovernor: [
         "upgradeToAndCall",
-        "setXAllocationVoting",
-        "setVoterRewards",
         "setProposalThreshold",
         "setMinVotingDelay",
         "setWhitelistFunction",
         "setIsFunctionRestrictionEnabled",
         "updateQuorumNumerator",
+        "updateDelay",
+        "setDepositThreashold",
       ],
-      Treasury: ["transferVET", "transferB3TR"],
-      XAllocationVoting: ["updateQuorumNumerator", "setVotingPeriod", "setEmissions", "addApp", "setVotingElegibility", "upgradeToAndCall"],
+      Treasury: ["transferB3TR"],
+      XAllocationVoting: [
+        "upgradeToAndCall",
+        "updateQuorumNumerator",
+        "setBaseAllocationPercentage",
+        "setAppSharesCap",
+        "setVotingElegibility",
+      ],
       Emissions: ["upgradeToAndCall"],
       GalaxyMember: ["upgradeToAndCall"],
       TimeLock: ["upgradeToAndCall"],
