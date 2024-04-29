@@ -202,6 +202,90 @@ export const createProposalAndExecuteIt = async (
   })
 }
 
+export const createProposalWithMultipleFunctionsAndExecuteIt = async (
+  proposer: HardhatEthersSigner,
+  voter: HardhatEthersSigner,
+  contractsToCall: BaseContract[],
+  Contract: ContractFactory,
+  description: string,
+  functionsToCall: string[],
+  args: any[][],
+  roundId?: string,
+) => {
+  const { governor, emissions, xAllocationVoting } = await getOrDeployContractInstances({})
+
+  // load votes
+  // console.log("Loading votes");
+  await getVot3Tokens(voter, "1000")
+  await waitForNextBlock()
+
+  if (!roundId) {
+    // to ensure that test will work correctly before creating a proposal we wait for current round to end
+    // and start a new one
+    if ((await emissions.nextCycle()) === 0n) {
+      // if emissions are not started yet, we need to bootstrap and start them
+      await bootstrapAndStartEmissions()
+    } else {
+      // otherwise we need to wait for the current round to end and start the next one
+      await waitForCurrentRoundToEnd()
+      await emissions.distribute()
+    }
+    roundId = ((await xAllocationVoting.currentRoundId()) + 1n).toString()
+  }
+
+  // Encode functions
+  const encodedFunctionCalls = functionsToCall.map((func, index) => {
+    return Contract.interface.encodeFunctionData(func, args[index])
+  })
+
+  // create a new proposal
+  const tx = await governor
+    .connect(proposer)
+    .propose(
+      contractsToCall,
+      Array(functionsToCall.length).fill(0),
+      encodedFunctionCalls,
+      description,
+      roundId.toString(),
+      {
+        gasLimit: 10_000_000,
+      },
+    )
+  const proposalId = await getProposalIdFromTx(tx)
+
+  // wait
+  // console.log("Waiting for voting period to start");
+  await waitForProposalToBeActive(proposalId)
+
+  // vote
+  // console.log("Voting");
+  await governor.connect(voter).castVote(proposalId, 1, { gasLimit: 10_000_000 }) // vote for
+
+  // wait
+  // console.log("Waiting for voting period to end");
+  await waitForVotingPeriodToEnd(proposalId)
+
+  // queue it
+  // console.log("Queueing");
+  const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
+  await governor.queue(contractsToCall, Array(functionsToCall.length).fill(0), encodedFunctionCalls, descriptionHash, {
+    gasLimit: 10_000_000,
+  })
+  await waitForNextBlock()
+
+  // execute it
+  // console.log("Executing");
+  await governor.execute(
+    contractsToCall,
+    Array(functionsToCall.length).fill(0),
+    encodedFunctionCalls,
+    descriptionHash,
+    {
+      gasLimit: 10_000_000,
+    },
+  )
+}
+
 export const addAppThroughGovernance = async (
   proposer: HardhatEthersSigner,
   voter: HardhatEthersSigner,
