@@ -1,6 +1,5 @@
-import { ProposalAction } from "@/hooks"
 import { abi } from "thor-devkit"
-import create from "zustand"
+import { create } from "zustand"
 import { devtools, persist } from "zustand/middleware"
 
 const stepVariant = {
@@ -8,41 +7,37 @@ const stepVariant = {
   2: "stepTwo",
 }
 
-type StepOneData = {
-  description: string
+type FormState = {
+  title?: string
+  shortDescription?: string
+  markdownDescription?: string
   actions: {
     contractAddress: string
-    calldata: string
+    calldata?: string
     abi: abi.Function
+    functionName?: string
+    functionDescription?: string
   }[]
-}
-
-type StepTwoData = {
-  votingSessionRoundId: string | number
-}
-
-type setDataType = { step: 1; data: StepOneData } | { step: 2; data: StepTwoData }
-
-type State = {
-  stepOne: StepOneData | null
-  stepTwo: StepTwoData | null
-  setData: ({ step, data }: setDataType) => void
+  votingStartRoundId?: number
+  setData: (data: Partial<FormState>) => void
 }
 
 /**
  * Store for the multi-step proposal form data
  */
-export const useProposalFormStore = create<State>()(
+export const useProposalFormStore = create<FormState>()(
   devtools(
     persist(
       (set, get) => ({
-        stepOne: null,
-        stepTwo: null,
-        stepThree: null,
-        setData: ({ step, data }) =>
+        title: undefined,
+        shortDescription: undefined,
+        markdownDescription: undefined,
+        actions: [],
+        votingStartRoundId: undefined,
+        setData: (data: Partial<FormState>) =>
           set(state => ({
             ...state,
-            [stepVariant[step]]: data,
+            ...data,
           })),
       }),
       {

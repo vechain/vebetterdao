@@ -1,5 +1,5 @@
 import { GovernanceFeaturedContractsWithFunctions } from "@/constants"
-import { Box, Card, CardBody, Divider, HStack, Heading, IconButton, Text, VStack } from "@chakra-ui/react"
+import { Card, CardBody, Divider, HStack, Heading, IconButton, Text, VStack } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { FaX } from "react-icons/fa6"
 import { abi } from "thor-devkit"

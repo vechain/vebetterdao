@@ -34,7 +34,7 @@ const Steps: StepCardProps[] = [
 export const NewProposalPageContent = () => {
   const router = useRouter()
   const onContinueClick = () => {
-    router.push("/proposals/new/form/type")
+    router.push("/proposals/new/type")
   }
   return (
     <Grid
@@ -67,7 +67,7 @@ export const NewProposalPageContent = () => {
               </Stack>
               <Stack direction={["column", "column", "row"]} w="full" justify={"space-between"} spacing={8}>
                 <HStack justify={"flex-end"} spacing={4} flex={1}>
-                  <Button rounded="full" variant={"outline"} colorScheme="primary" size="lg">
+                  <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg">
                     More info
                   </Button>
                   <Button rounded="full" colorScheme="primary" size="lg" onClick={onContinueClick}>

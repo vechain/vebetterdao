@@ -6,8 +6,8 @@ import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
-const InfoAndFunctionsPageContent = dynamic(
-  () => import("./components/InfoAndFunctionsPageContent").then(mod => mod.InfoAndFunctionsPageContent),
+const FunctionsPageContent = dynamic(
+  () => import("./components/FunctionsPageContent").then(mod => mod.FunctionsPageContent),
   {
     ssr: false,
     loading: () => (
@@ -25,7 +25,7 @@ export default function NewProposalPage() {
 
   return (
     <MotionVStack>
-      <InfoAndFunctionsPageContent />
+      <FunctionsPageContent />
     </MotionVStack>
   )
 }
