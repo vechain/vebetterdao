@@ -33,7 +33,7 @@ describe("Governor and TimeLock", function () {
 
       await bootstrapAndStartEmissions()
 
-      const votesThreshold = (await governor.proposalThreshold()).toString()
+      const votesThreshold = (await governor.depositThreshold()).toString()
       const votingPeriod = await governor.votingPeriod()
       const minVotingDelay = await governor.minVotingDelay()
 
@@ -75,7 +75,7 @@ describe("Governor and TimeLock", function () {
           forceDeploy: true,
         })
 
-      const votesThreshold = await governor.proposalThreshold()
+      const votesThreshold = await governor.depositThreshold()
       await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
       await getVot3Tokens(otherAccount, "1000")
 
@@ -296,7 +296,7 @@ describe("Governor and TimeLock", function () {
         [newThreshold],
       )
 
-      const updatedThreshold = await governor.proposalThreshold()
+      const updatedThreshold = await governor.depositThreshold()
       expect(updatedThreshold).to.eql(newThreshold)
     })
 
@@ -309,7 +309,7 @@ describe("Governor and TimeLock", function () {
 
       await catchRevert(governor.connect(owner).setProposalThreshold(newThreshold))
 
-      const updatedThreshold = await governor.proposalThreshold()
+      const updatedThreshold = await governor.depositThreshold()
       expect(updatedThreshold).to.not.eql(newThreshold)
     })
 
@@ -2560,7 +2560,7 @@ describe("Governor and TimeLock", function () {
   })
 
   describe("Proposal Deposit", function () {
-    it("A proposal gets set to cancelled if deposit not met by time voting round starts", async () => {
+    it("A proposal state gets set to `DepositNotMet` if deposit not met by time voting round starts", async () => {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1000000000000000
       const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3 } =
@@ -2620,7 +2620,7 @@ describe("Governor and TimeLock", function () {
       expect(await governor.proposalDepositReached(proposalId)).to.eql(false)
 
       await waitForProposalToBeActive(proposalId)
-      expect(await governor.state(proposalId)).to.eql(2n) // cancelled
+      expect(await governor.state(proposalId)).to.eql(8n) // deposit not met
     })
 
     it("Sponsers can contribute to deposit total", async () => {
