@@ -13,12 +13,15 @@ on:
         
 jobs:
   unit-test:
-    name: Unit Test With Coverage
+    name: FE Unit Test With Coverage
     uses: ./.github/workflows/unit-coverage.yml
+    with:
+      run_fe: true
+      run_solidity: false
     secrets: inherit
 
   sonar-scan:
-    name: Sonar Scan
+    name: FE Sonar Scan
     needs: unit-test
     runs-on: ubuntu-latest
     steps:
