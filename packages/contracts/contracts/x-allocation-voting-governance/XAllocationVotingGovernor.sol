@@ -13,13 +13,18 @@ import { DataTypes } from "../libraries/DataTypes.sol";
 import { IEmissions } from "../interfaces/IEmissions.sol";
 
 /**
- * @dev Core of the x-allocation votes governance system, designed to be extended through various modules.
+ * @title XAllocationVotingGovernor
+ * @dev Core of the voting system of allocation rounds for x-2-earn applications, designed to be extended through various modules.
  *
  * This contract is abstract and requires several functions to be implemented in various modules:
  *
  * - A counting module must implement {quorum}, {_quorumReached}, {_voteSucceeded}, and {_countVote}
- * - A voting module must implement {_getVotes}
- * - Additionally, {votingPeriod} must also be implemented
+ * - A voting module must implement {_getVotes}, {clock}, and {CLOCK_MODE}
+ * - A settings module must implement {votingPeriod}
+ * - An external contracts module must implement {x2EarnApps} and {emissions}
+ * - A rounds storage module must implement {_startNewRound}, {roundSnapshot}, {roundDeadline}, and {currentRoundId}
+ * - A rounds finalization module must implement {finalize}
+ * - A earnings settings module must implement {_snapshotRoundEarnings}
  */
 abstract contract XAllocationVotingGovernor is
   Initializable,
@@ -58,20 +63,25 @@ abstract contract XAllocationVotingGovernor is
 
   // ---------- Setters ---------- //
 
+  /**
+   * @dev Starts a new round of voting to allocate funds to x-2-earn applications.
+   */
   function startNewRound() public virtual returns (uint256) {
     address proposer = _msgSender();
 
     // check that there isn't an already ongoing round
     // but only do it after we have at least 1 round otherwise it will fail with `GovernorNonexistentRound`
-    if (currentRoundId() > 0) {
-      require(!isActive(currentRoundId()), "Governor: there can be only one round per time");
+    uint256 currentRound = currentRoundId();
+    if (currentRound > 0) {
+      require(!isActive(currentRound), "Governor: there can be only one round per time");
     }
 
     return _startNewRound(proposer);
   }
 
-  // ---------- Internal and Private ---------- //
-
+  /**
+   * @dev Cast a vote for a set of x-2-earn applications.
+   */
   function castVote(uint256 roundId, bytes32[] memory appIds, uint256[] memory voteWeights) public virtual {
     _validateStateBitmap(roundId, _encodeStateBitmap(RoundState.Active));
 
@@ -82,6 +92,8 @@ abstract contract XAllocationVotingGovernor is
 
     _countVote(roundId, voter, appIds, voteWeights);
   }
+
+  // ---------- Internal and Private ---------- //
 
   /**
    * @dev Check that the current state of a round matches the requirements described by the `allowedStates` bitmap.
@@ -105,19 +117,31 @@ abstract contract XAllocationVotingGovernor is
     return interfaceId == type(IXAllocationVotingGovernor).interfaceId || super.supportsInterface(interfaceId);
   }
 
+  /**
+   * @dev Returns the name of the governor.
+   */
   function name() public view virtual returns (string memory) {
     XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
     return $._name;
   }
 
+  /**
+   * @dev Returns the version of the governor.
+   */
   function version() public view virtual returns (string memory) {
     return "1";
   }
 
+  /**
+   * @dev Checks if the specified round is in active state or not.
+   */
   function isActive(uint256 roundId) public view virtual override returns (bool) {
     return state(roundId) == RoundState.Active;
   }
 
+  /**
+   * @dev Returns the current state of a round.
+   */
   function state(uint256 roundId) public view virtual returns (RoundState) {
     uint256 snapshot = roundSnapshot(roundId);
 
@@ -138,14 +162,23 @@ abstract contract XAllocationVotingGovernor is
     }
   }
 
+  /**
+   * @dev Checks if the quorum has been reached for a given round.
+   */
   function quorumReached(uint256 roundId) public view returns (bool) {
     return _quorumReached(roundId);
   }
 
+  /**
+   * @dev Returns the available votes votes for a given account at a given timepoint.
+   */
   function getVotes(address account, uint256 timepoint) public view virtual returns (uint256) {
     return _getVotes(account, timepoint, "");
   }
 
+  /**
+   * @dev Checks if the given appId can be voted for in the given round.
+   */
   function isEligibleForVote(bytes32 appId, uint256 roundId) public view virtual returns (bool) {
     return x2EarnApps().isElegible(appId, roundSnapshot(roundId));
   }
@@ -166,6 +199,9 @@ abstract contract XAllocationVotingGovernor is
 
   // ---------- Virtual ---------- //
 
+  /**
+   * @dev Internal function to store a vote in storage.
+   */
   function _countVote(
     uint256 roundId,
     address account,
@@ -173,33 +209,78 @@ abstract contract XAllocationVotingGovernor is
     uint256[] memory voteWeights
   ) internal virtual;
 
+  /**
+   * @dev Internal function to save the app shares cap and base allocation percentage for a round.
+   */
   function _snapshotRoundEarnings(uint256 roundId) internal virtual;
 
+  /**
+   * @dev Internal function to check if the quorum has been reached for a given round.
+   */
   function _quorumReached(uint256 roundId) internal view virtual returns (bool);
 
+  /**
+   * @dev Internal function to check if the vote has succeeded for a given round.
+   */
   function _voteSucceeded(uint256 roundId) internal view virtual returns (bool);
 
-  function _getVotes(address account, uint256 timepoint, bytes memory params) internal view virtual returns (uint256);
-
+  /**
+   * @dev Internal function that starts a new round of voting to allocate funds to x-2-earn applications.
+   */
   function _startNewRound(address proposer) internal virtual returns (uint256);
 
+  /**
+   * @dev Internal function to get the available votes for a given account at a given timepoint.
+   */
+  function _getVotes(address account, uint256 timepoint, bytes memory params) internal view virtual returns (uint256);
+
+  /**
+   * @dev Function to store the last succeeded round once a round ends.
+   */
   function finalize(uint256 roundId) public virtual;
 
+  /**
+   * @dev Clock used for flagging checkpoints. Can be overridden to implement timestamp based checkpoints (and voting), in which case {CLOCK_MODE} should be overridden as well to match.
+   */
   function clock() public view virtual returns (uint48);
 
+  /**
+   * @dev Machine-readable description of the clock as specified in EIP-6372.
+   */
   function CLOCK_MODE() public view virtual returns (string memory);
 
+  /**
+   * @dev Returns the voting duration.
+   */
   function votingPeriod() public view virtual returns (uint256);
 
+  /**
+   * @dev Returns the quorum for a given timepoint.
+   */
   function quorum(uint256 timepoint) public view virtual returns (uint256);
 
+  /**
+   * @dev Returns the block number when the round starts.
+   */
   function roundSnapshot(uint256 roundId) public view virtual returns (uint256);
 
+  /**
+   * @dev Returns the block number when the round ends.
+   */
   function roundDeadline(uint256 roundId) public view virtual returns (uint256);
 
+  /**
+   * @dev Returns the latest round id.
+   */
   function currentRoundId() public view virtual returns (uint256);
 
+  /**
+   * @dev Returns the x-2-earn apps contract.
+   */
   function x2EarnApps() public view virtual returns (IX2EarnApps);
 
+  /**
+   * @dev Returns the emissions contract.
+   */
   function emissions() public view virtual returns (IEmissions);
 }
