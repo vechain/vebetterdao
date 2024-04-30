@@ -105,12 +105,6 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   error GovernorAlreadyQueuedProposal(uint256 proposalId);
 
   /**
-   * @dev The provided signature is not valid for the expected `voter`.
-   * If the `voter` is a contract, the signature is not valid using {IERC1271-isValidSignature}.
-   */
-  error GovernorInvalidSignature(address voter);
-
-  /**
    * @dev The round when proposal should start is not valid.
    */
   error GovernorInvalidStartRound(uint256 roundId);
@@ -383,18 +377,6 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * Emits a {VoteCast} event.
    */
   function castVote(uint256 proposalId, uint8 support) external returns (uint256 balance);
-
-  /**
-   * @dev Cast a vote using the voter's signature, including ERC-1271 signature support.
-   *
-   * Emits a {VoteCast} event.
-   */
-  function castVoteBySig(
-    uint256 proposalId,
-    uint8 support,
-    address voter,
-    bytes memory signature
-  ) external returns (uint256 balance);
 
   /**
    * @dev Cast a vote with a reason
