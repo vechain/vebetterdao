@@ -4,11 +4,12 @@ pragma solidity ^0.8.20;
 import { GovernorUpgradeable } from "../GovernorUpgradeable.sol";
 import { IVOT3 } from "../../interfaces/IVOT3.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
 /**
  * @dev Extension of {Governor} for depositing tokens to a proposal.
  */
-abstract contract GovernorDepositUpgradeable is Initializable, GovernorUpgradeable {
+abstract contract GovernorDepositUpgradeable is Initializable, ReentrancyGuardUpgradeable, GovernorUpgradeable {
   /// @custom:storage-location erc7201:openzeppelin.storage.GovernorDeposit
   struct GovernorDepositStorage {
     mapping(uint256 => mapping(address => uint256)) deposits; // mapping to track deposits made to proposals by address
@@ -31,6 +32,7 @@ abstract contract GovernorDepositUpgradeable is Initializable, GovernorUpgradeab
   function __GovernorDeposit_init_unchained(address _vot3Token) internal onlyInitializing {
     GovernorDepositStorage storage $ = _getGovernorDepositStorage();
     $.vot3 = IVOT3(_vot3Token);
+    __ReentrancyGuard_init();
   }
 
   // ---------- Setters ---------- //
@@ -137,7 +139,7 @@ abstract contract GovernorDepositUpgradeable is Initializable, GovernorUpgradeab
    * @param depositor The address of the depositor.
    * @param proposalId The id of the proposal.
    */
-  function _depositFunds(uint256 amount, address depositor, uint256 proposalId) internal {
+  function _depositFunds(uint256 amount, address depositor, uint256 proposalId) internal nonReentrant {
     GovernorDepositStorage storage $ = _getGovernorDepositStorage();
 
     require($.vot3.transferFrom(depositor, address(this), amount), "B3TRGovernor: transfer failed");
