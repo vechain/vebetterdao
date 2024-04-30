@@ -112,7 +112,7 @@ abstract contract GovernorDepositUpgradeable is Initializable, GovernorUpgradeab
    * @param proposalId The id of the proposal.
    */
   function proposalDepositReached(uint256 proposalId) public view returns (bool) {
-    return getProposalDeposits(proposalId) >= proposalThreshold();
+    return getProposalDeposits(proposalId) >= depositThreshold();
   }
 
   /**

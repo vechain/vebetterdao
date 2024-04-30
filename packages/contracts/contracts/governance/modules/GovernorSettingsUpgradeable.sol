@@ -55,9 +55,9 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
   }
 
   /**
-   * @dev See {Governor-proposalThreshold}.
+   * @dev See {Governor-depositThreshold}.
    */
-  function proposalThreshold() public view virtual override returns (uint256) {
+  function depositThreshold() public view virtual override returns (uint256) {
     GovernorSettingsStorage storage $ = _getGovernorSettingsStorage();
     return $._proposalThreshold;
   }

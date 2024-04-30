@@ -348,7 +348,7 @@ contract B3TRGovernor is
       if(proposalDepositReached(proposalId)) {
         return ProposalState.Active;
       } else {
-        return ProposalState.Canceled;
+        return ProposalState.DepositNotMet;
       }
     } else if (!_quorumReached(proposalId) || !_voteSucceeded(proposalId)) {
       return ProposalState.Defeated;
@@ -388,13 +388,13 @@ contract B3TRGovernor is
     return super.quorum(blockNumber);
   }
 
-  function proposalThreshold()
+  function depositThreshold()
     public
     view
     override(GovernorUpgradeable, GovernorSettingsUpgradeable)
     returns (uint256)
   {
-    return super.proposalThreshold();
+    return super.depositThreshold();
   }
 
   function _queueOperations(

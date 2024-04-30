@@ -172,9 +172,9 @@ abstract contract GovernorUpgradeable is
   }
 
   /**
-   * @dev See {IB3TRGovernor-proposalThreshold}.
+   * @dev See {IB3TRGovernor-depositThreshold}.
    */
-  function proposalThreshold() public view virtual returns (uint256) {
+  function depositThreshold() public view virtual returns (uint256) {
     return 0;
   }
 

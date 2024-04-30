@@ -23,7 +23,8 @@ interface IB3TRGovernor is IERC165, IERC6372 {
     Succeeded,
     Queued,
     Expired,
-    Executed
+    Executed,
+    DepositNotMet
   }
 
   /**
@@ -234,9 +235,9 @@ interface IB3TRGovernor is IERC165, IERC6372 {
 
   /**
    * @notice module:core
-   * @dev The number of votes required in order for a voter to become a proposer.
+   * @dev The number of votes in support of a proposal required in order for a proposal to become active.
    */
-  function proposalThreshold() external view returns (uint256);
+  function depositThreshold() external view returns (uint256);
 
   /**
    * @notice module:core
