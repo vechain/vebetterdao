@@ -31,7 +31,7 @@ jobs:
           fetch-depth: 0
 
       - name: Download FE coverage
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: fe-coverage
           path: apps/frontend/coverage
