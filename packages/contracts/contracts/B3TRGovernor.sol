@@ -176,6 +176,8 @@ contract B3TRGovernor is
    *
    * Emits a {IB3TRGovernor-ProposalCreated} event.
    */
+  // This function is getting market as a false positive by Slither as there is a reentrancy guard in place on _depositFunds
+  // slither-disable-next-line reentrancy-no-eth
   function _propose(
     address[] memory targets,
     uint256[] memory values,
@@ -345,7 +347,7 @@ contract B3TRGovernor is
     uint256 deadline = proposalDeadline(proposalId);
 
     if (deadline >= currentTimepoint) {
-      if(proposalDepositReached(proposalId)) {
+      if (proposalDepositReached(proposalId)) {
         return ProposalState.Active;
       } else {
         return ProposalState.DepositNotMet;
@@ -388,12 +390,7 @@ contract B3TRGovernor is
     return super.quorum(blockNumber);
   }
 
-  function depositThreshold()
-    public
-    view
-    override(GovernorUpgradeable, GovernorSettingsUpgradeable)
-    returns (uint256)
-  {
+  function depositThreshold() public view override(GovernorUpgradeable, GovernorSettingsUpgradeable) returns (uint256) {
     return super.depositThreshold();
   }
 
