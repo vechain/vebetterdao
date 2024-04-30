@@ -200,7 +200,7 @@ export async function deployAll(config: ContractsConfig) {
   // Emissions contract should be able to start new rounds
   await xAllocationVoting
     .connect(admin)
-    .setAdminRole(await emissions.getAddress())
+    .grantRole(await xAllocationVoting.DEFAULT_ADMIN_ROLE(), await emissions.getAddress())
     .then(async tx => await tx.wait())
   console.log("Admin role granted to emissions contract")
 

@@ -98,12 +98,6 @@ contract XAllocationVoting is
     return super.startNewRound();
   }
 
-  function setAdminRole(address _newAdmin) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(_newAdmin != address(0), "XAllocationVoting: new admin is the zero address");
-
-    _grantRole(DEFAULT_ADMIN_ROLE, _newAdmin);
-  }
-
   function setAppSharesCap(uint256 appSharesCap_) external virtual override onlyRole(DEFAULT_ADMIN_ROLE) {
     _setAppSharesCap(appSharesCap_);
   }

@@ -600,7 +600,7 @@ describe("X-Allocation Voting", function () {
         expect(await xAllocationVoting.hasRole(ADMIN_ROLE, otherAccounts[0].address)).to.eql(false)
         expect(await xAllocationVoting.hasRole(ADMIN_ROLE, owner.address)).to.eql(true)
 
-        await xAllocationVoting.connect(owner).setAdminRole(otherAccounts[0].address)
+        await xAllocationVoting.connect(owner).grantRole(ADMIN_ROLE, otherAccounts[0].address)
 
         expect(await xAllocationVoting.hasRole(ADMIN_ROLE, otherAccounts[0].address)).to.eql(true)
       })
@@ -611,7 +611,7 @@ describe("X-Allocation Voting", function () {
         const ADMIN_ROLE = await xAllocationVoting.DEFAULT_ADMIN_ROLE()
         expect(await xAllocationVoting.hasRole(ADMIN_ROLE, owner.address)).to.eql(true)
 
-        await expect(xAllocationVoting.connect(owner).setAdminRole(ZERO_ADDRESS)).to.be.reverted
+        await expect(xAllocationVoting.connect(owner).grantRole(ADMIN_ROLE, ZERO_ADDRESS)).to.be.reverted
       })
 
       it("Only admin can set a new admin", async function () {
@@ -620,7 +620,8 @@ describe("X-Allocation Voting", function () {
         const ADMIN_ROLE = await xAllocationVoting.DEFAULT_ADMIN_ROLE()
         expect(await xAllocationVoting.hasRole(ADMIN_ROLE, otherAccounts[0].address)).to.eql(false)
 
-        await expect(xAllocationVoting.connect(otherAccounts[0]).setAdminRole(otherAccounts[0].address)).to.be.reverted
+        await expect(xAllocationVoting.connect(otherAccounts[0]).grantRole(ADMIN_ROLE, otherAccounts[0].address)).to.be
+          .reverted
       })
 
       it("Admin can change allocation percentage", async function () {
