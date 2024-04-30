@@ -34,7 +34,7 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Run FE coverage
-        if: ${{ github.event.inputs.run_fe }}
+        if: github.event.inputs.run_fe == true
         id: fe-coverage
         run: yarn test:coverage:fe
 
@@ -47,7 +47,7 @@ jobs:
           retention-days: 10
 
       - name: Run solidity coverage
-        if: ${{ github.event.inputs.run_solidity }}
+        if: github.event.inputs.run_solidity == true
         id: contract-coverage
         run: yarn test:coverage:solidity
 
