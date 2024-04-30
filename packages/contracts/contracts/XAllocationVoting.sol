@@ -29,15 +29,19 @@ contract XAllocationVoting is
   AccessControlUpgradeable,
   UUPSUpgradeable
 {
+  /// @notice Role identifier for the address that can start a new round
   bytes32 public constant ROUND_STARTER_ROLE = keccak256("ROUND_STARTER_ROLE");
+  /// @notice Role identifier for the address that can upgrade the contract
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+  /// @notice Role identifier for governance operations
+  bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
 
   /**
    * @notice Data for initializing the contract
    * @param vot3Token The address of the Vot3 token used for voting
    * @param quorumPercentage quorum as a percentage of the total supply at the block a proposal’s voting power is retrieved
    * @param initialVotingPeriod How long does a proposal remain open to votes
-   * @param b3trGovernor The address of the B3trGovernor contract
+   * @param _timeLock Address of the timelock contract controlling governance actions
    * @param voterRewards The address of the VoterRewards contract
    * @param emissions The address of the Emissions contract
    * @param admins The addresses of the admins
@@ -50,7 +54,7 @@ contract XAllocationVoting is
     IVotes vot3Token;
     uint256 quorumPercentage;
     uint32 initialVotingPeriod;
-    IB3TRGovernor b3trGovernor;
+    address timeLock;
     address voterRewards;
     IEmissions emissions;
     address[] admins;
@@ -71,7 +75,7 @@ contract XAllocationVoting is
    */
   function initialize(InitializationData memory data) public initializer {
     __XAllocationVotingGovernor_init("XAllocationVoting");
-    __ExternalContracts_init(data.b3trGovernor, data.x2EarnAppsAddress, data.emissions);
+    __ExternalContracts_init(data.x2EarnAppsAddress, data.emissions);
     __GovernorSettings_init(data.initialVotingPeriod);
     __GovernorXAllocationVotesCounting_init(data.voterRewards);
     __GovernorVotes_init(data.vot3Token);
@@ -87,14 +91,10 @@ contract XAllocationVoting is
     }
 
     _grantRole(UPGRADER_ROLE, data.upgrader);
+    _grantRole(GOVERNANCE_ROLE, data.timeLock);
   }
 
   // ---------- Setters ---------- //
-
-  function setB3trGovernorAddress(IB3TRGovernor newB3trGovernor) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    _setB3trGovernor(newB3trGovernor);
-  }
-
   function setX2EarnAppsAddress(IX2EarnApps newX2EarnApps) public onlyRole(DEFAULT_ADMIN_ROLE) {
     _setX2EarnApps(newX2EarnApps);
   }
@@ -115,6 +115,14 @@ contract XAllocationVoting is
     uint256 baseAllocationPercentage_
   ) public virtual override onlyRole(DEFAULT_ADMIN_ROLE) {
     _setBaseAllocationPercentage(baseAllocationPercentage_);
+  }
+
+  function setVotingPeriod(uint32 newVotingPeriod) public virtual onlyRole(GOVERNANCE_ROLE) {
+    _setVotingPeriod(newVotingPeriod);
+  }
+
+  function updateQuorumNumerator(uint256 newQuorumNumerator) public virtual override onlyRole(GOVERNANCE_ROLE) {
+    super.updateQuorumNumerator(newQuorumNumerator);
   }
 
   // ---------- Getters ---------- //

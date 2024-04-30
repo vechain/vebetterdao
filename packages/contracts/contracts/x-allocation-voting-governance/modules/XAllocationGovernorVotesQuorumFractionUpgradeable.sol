@@ -108,10 +108,9 @@ abstract contract XAllocationGovernorVotesQuorumFractionUpgradeable is
    *
    * Requirements:
    *
-   * - Must be called through a governance round.
    * - New numerator must be smaller or equal to the denominator.
    */
-  function updateQuorumNumerator(uint256 newQuorumNumerator) external virtual onlyGovernance {
+  function updateQuorumNumerator(uint256 newQuorumNumerator) public virtual {
     _updateQuorumNumerator(newQuorumNumerator);
   }
 

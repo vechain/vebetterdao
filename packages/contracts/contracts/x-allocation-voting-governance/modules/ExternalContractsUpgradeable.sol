@@ -18,7 +18,6 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
 
   /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.ExternalContracts
   struct ExternalContractsStorage {
-    IB3TRGovernor _b3trGovernor;
     IX2EarnApps _x2EarnApps;
     IEmissions _emissions;
   }
@@ -35,39 +34,26 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
 
   /**
    * @dev Initializes the contract
-   * @param initialB3TRGovernor The initial B3TRGovernor contract address
    * @param initialX2EarnApps The initial X2EarnApps contract address
    * @param initialEmissions The initial Emissions contract address
    */
   function __ExternalContracts_init(
-    IB3TRGovernor initialB3TRGovernor,
     IX2EarnApps initialX2EarnApps,
     IEmissions initialEmissions
   ) internal onlyInitializing {
-    __ExternalContracts_init_unchained(initialB3TRGovernor, initialX2EarnApps, initialEmissions);
+    __ExternalContracts_init_unchained(initialX2EarnApps, initialEmissions);
   }
 
   function __ExternalContracts_init_unchained(
-    IB3TRGovernor initialB3TRGovernor,
     IX2EarnApps initialX2EarnApps,
     IEmissions initialEmissions
   ) internal onlyInitializing {
     ExternalContractsStorage storage $ = _getExternalContractsStorage();
-    $._b3trGovernor = initialB3TRGovernor;
     $._x2EarnApps = initialX2EarnApps;
     $._emissions = initialEmissions;
   }
 
   // ------- Getters ------- //
-
-  /**
-   * @dev The B3TRGovernor contract.
-   */
-  function b3trGovernor() public view override returns (IB3TRGovernor) {
-    ExternalContractsStorage storage $ = _getExternalContractsStorage();
-    return $._b3trGovernor;
-  }
-
   /**
    * @dev The X2EarnApps contract.
    */
@@ -97,22 +83,6 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
     $._emissions = IEmissions(newEmisionsAddress);
 
     emit EmissionsSet(address($._emissions), address(newEmisionsAddress));
-  }
-
-  /**
-   * @dev Sets the B3TRGovernor contract
-   * @param newB3trGovernance The new B3TRGovernor contract address
-   *
-   * Emits a {B3trGovernanceSet} event
-   */
-  function _setB3trGovernor(IB3TRGovernor newB3trGovernance) internal virtual {
-    require(address(newB3trGovernance) != address(0), "XAllocationVoting: new B3trGovernor is the zero address");
-
-    ExternalContractsStorage storage $ = _getExternalContractsStorage();
-
-    $._b3trGovernor = newB3trGovernance;
-
-    emit B3trGovernanceSet(address($._b3trGovernor), address(newB3trGovernance));
   }
 
   /**

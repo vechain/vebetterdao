@@ -25,10 +25,10 @@ import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployProxy } from "../scripts/helpers"
 import { XAllocationVoting } from "../typechain-types"
 
-describe.only("X-Allocation Voting", function () {
+describe("X-Allocation Voting", function () {
   describe("Deployment", function () {
     it("Admins and addresses should be set correctly", async function () {
-      const { xAllocationVoting, owner, timeLock, emissions } = await getOrDeployContractInstances({
+      const { xAllocationVoting, owner, timeLock, emissions, x2EarnApps } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
       const ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000"
@@ -36,8 +36,8 @@ describe.only("X-Allocation Voting", function () {
       expect(await xAllocationVoting.hasRole(ADMIN_ROLE, await timeLock.getAddress())).to.eql(true)
       expect(await xAllocationVoting.hasRole(ADMIN_ROLE, owner.address)).to.eql(true)
 
-      expect(await xAllocationVoting.b3trGovernor()).to.eql(await timeLock.getAddress())
       expect(await xAllocationVoting.emissions()).to.eql(await emissions.getAddress())
+      expect(await xAllocationVoting.x2EarnApps()).to.eql(await x2EarnApps.getAddress())
     })
 
     it("Should not support invalid interface", async function () {
@@ -60,7 +60,7 @@ describe.only("X-Allocation Voting", function () {
           vot3Token: await vot3.getAddress(),
           quorumPercentage: 1,
           initialVotingPeriod: 2,
-          b3trGovernor: await timeLock.getAddress(),
+          timeLock: await timeLock.getAddress(),
           voterRewards: await voterRewards.getAddress(),
           emissions: await emissions.getAddress(),
           admins: [await timeLock.getAddress(), otherAccounts[2].address, otherAccounts[2].address],
@@ -259,7 +259,7 @@ describe.only("X-Allocation Voting", function () {
           vot3Token: owner.address,
           quorumPercentage: 1,
           initialVotingPeriod: 1,
-          b3trGovernor: owner.address,
+          timeLock: owner.address,
           voterRewards: owner.address,
           emissions: owner.address,
           admins: [owner.address],
@@ -274,50 +274,6 @@ describe.only("X-Allocation Voting", function () {
 
   describe("Settings", function () {
     describe("General settigns", function () {
-      it("Should be able to change B3trGovernanceAddress with admin role", async function () {
-        const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
-          forceDeploy: false,
-        })
-        const ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000"
-
-        const initialAddress = await xAllocationVoting.b3trGovernor()
-        expect(initialAddress).to.exist
-
-        expect(await xAllocationVoting.hasRole(ADMIN_ROLE, owner.address)).to.eql(true)
-
-        await xAllocationVoting.connect(owner).setB3trGovernorAddress(otherAccounts[3].address)
-
-        const updatedAddress = await xAllocationVoting.b3trGovernor()
-        expect(updatedAddress).to.eql(otherAccounts[3].address)
-      })
-
-      it("Cannot set 0x00 address as B3trGovernanceAddress", async function () {
-        const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: false })
-
-        await catchRevert(xAllocationVoting.connect(owner).setB3trGovernorAddress(ZERO_ADDRESS))
-
-        const updatedAddress = await xAllocationVoting.b3trGovernor()
-
-        expect(updatedAddress).to.not.eql(ZERO_ADDRESS)
-      })
-
-      it("Only admin should be able to change B3trGovernanceAddress", async function () {
-        const { xAllocationVoting, otherAccounts } = await getOrDeployContractInstances({
-          forceDeploy: false,
-        })
-        const ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000"
-
-        const initialAddress = await xAllocationVoting.b3trGovernor()
-        expect(initialAddress).to.exist
-
-        expect(await xAllocationVoting.hasRole(ADMIN_ROLE, otherAccounts[0].address)).to.eql(false)
-
-        await catchRevert(xAllocationVoting.connect(otherAccounts[0]).setB3trGovernorAddress(otherAccounts[3].address))
-
-        const updatedAddress = await xAllocationVoting.b3trGovernor()
-        expect(updatedAddress).to.eql(initialAddress)
-      })
-
       it("Contract should not be able to receive ether", async function () {
         const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: false })
 
@@ -329,6 +285,34 @@ describe.only("X-Allocation Voting", function () {
         ).to.be.reverted
 
         expect(await ethers.provider.getBalance(await xAllocationVoting.getAddress())).to.eql(0n)
+      })
+
+      it("Can set a new emissions contract correctly", async function () {
+        const { xAllocationVoting, owner, governor } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+        await bootstrapAndStartEmissions()
+        const votesThreshold = await governor.proposalThreshold()
+        await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
+
+        await xAllocationVoting.connect(owner).setEmissionsAddress(owner.address)
+
+        const updatedEmissionsAddress = await xAllocationVoting.emissions()
+        expect(updatedEmissionsAddress).to.eql(owner.address)
+      })
+
+      it("Cannot set a new emissions contract to zero address", async function () {
+        const { xAllocationVoting, owner, governor } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+        await bootstrapAndStartEmissions()
+        const votesThreshold = await governor.proposalThreshold()
+        await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
+
+        await expect(xAllocationVoting.connect(owner).setEmissionsAddress(ZERO_ADDRESS)).to.be.reverted
+
+        const updatedEmissionsAddress = await xAllocationVoting.emissions()
+        expect(updatedEmissionsAddress).to.not.eql(ZERO_ADDRESS)
       })
     })
 
@@ -537,59 +521,6 @@ describe.only("X-Allocation Voting", function () {
 
         const afterVotingPeriod = await xAllocationVoting.votingPeriod()
         expect(afterVotingPeriod).to.eql(beforeVotingPeriod)
-      })
-
-      //TODO: refactor
-      it("Can set emission contract address only through governance", async function () {
-        const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: false })
-        await expect(xAllocationVoting.connect(owner).setEmissionsAddress(owner.address)).to.be.reverted
-      })
-
-      //TODO: refactor
-      it("Can change the emission contract address through governance", async function () {
-        const { xAllocationVoting, owner, governor } = await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
-        await bootstrapAndStartEmissions()
-        const votesThreshold = await governor.proposalThreshold()
-        await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
-
-        await createProposalAndExecuteIt(
-          owner,
-          owner,
-          xAllocationVoting,
-          await ethers.getContractFactory("XAllocationVoting"),
-          "Updating emissions address",
-          "setEmissionsAddress",
-          [owner.address],
-        )
-
-        const updatedEmissionsAddress = await xAllocationVoting.emissions()
-        expect(updatedEmissionsAddress).to.eql(owner.address)
-      })
-
-      //TODO: refactor
-      it("Cannot set the emission contract address to 0x00", async function () {
-        const { xAllocationVoting, owner, governor } = await getOrDeployContractInstances({ forceDeploy: true })
-
-        await bootstrapAndStartEmissions()
-        const votesThreshold = await governor.proposalThreshold()
-        await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
-
-        await expect(
-          createProposalAndExecuteIt(
-            owner,
-            owner,
-            xAllocationVoting,
-            await ethers.getContractFactory("XAllocationVoting"),
-            "Updating emissions address",
-            "setEmissionsAddress",
-            [ZERO_ADDRESS],
-          ),
-        ).to.be.reverted
-
-        const updatedEmissionsAddress = await xAllocationVoting.emissions()
-        expect(updatedEmissionsAddress).to.not.eql(ZERO_ADDRESS)
       })
     })
 

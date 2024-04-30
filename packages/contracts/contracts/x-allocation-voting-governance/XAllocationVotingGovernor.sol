@@ -3,9 +3,7 @@ pragma solidity ^0.8.18;
 
 import { ERC165Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
-import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { ContextUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import { NoncesUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/NoncesUpgradeable.sol";
 import { IXAllocationVotingGovernor, IERC6372 } from "../interfaces/IXAllocationVotingGovernor.sol";
 import { IXAllocationPool } from "../interfaces/IXAllocationPool.sol";
 import { IB3TRGovernor } from "../interfaces/IB3TRGovernor.sol";
@@ -27,7 +25,6 @@ abstract contract XAllocationVotingGovernor is
   Initializable,
   ContextUpgradeable,
   ERC165Upgradeable,
-  NoncesUpgradeable,
   IXAllocationVotingGovernor
 {
   bytes32 private constant ALL_ROUND_STATES_BITMAP = bytes32((2 ** (uint8(type(RoundState).max) + 1)) - 1);
@@ -57,17 +54,6 @@ abstract contract XAllocationVotingGovernor is
   function __XAllocationVotingGovernor_init_unchained(string memory name_) internal onlyInitializing {
     XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
     $._name = name_;
-  }
-
-  /**
-   * @dev Restricts a function so it can only be executed through governance proposals. For example, governance
-   * parameter setters in {GovernorSettings} are protected using this modifier.
-   */
-  modifier onlyGovernance() {
-    if (address(b3trGovernor()) != _msgSender()) {
-      revert B3TRGovernorOnlyExecutor(_msgSender());
-    }
-    _;
   }
 
   // ---------- Setters ---------- //
@@ -212,8 +198,6 @@ abstract contract XAllocationVotingGovernor is
   function roundDeadline(uint256 roundId) public view virtual returns (uint256);
 
   function currentRoundId() public view virtual returns (uint256);
-
-  function b3trGovernor() public view virtual returns (IB3TRGovernor);
 
   function x2EarnApps() public view virtual returns (IX2EarnApps);
 

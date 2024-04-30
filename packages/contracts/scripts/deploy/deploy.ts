@@ -137,7 +137,7 @@ export async function deployAll(config: ContractsConfig) {
       vot3Token: await vot3.getAddress(),
       quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE,
       initialVotingPeriod: config.EMISSIONS_CYCLE_DURATION - 1,
-      b3trGovernor: await timelock.getAddress(),
+      timeLock: await timelock.getAddress(),
       voterRewards: await voterRewards.getAddress(),
       emissions: await emissions.getAddress(),
       admins: [await timelock.getAddress(), TEMP_ADMIN],

@@ -48,15 +48,6 @@ abstract contract XAllocationGovernorSettingsUpgradeable is Initializable, XAllo
   }
 
   /**
-   * @dev Update the voting period. This operation can only be performed through a governance proposal.
-   *
-   * Emits a {VotingPeriodSet} event.
-   */
-  function setVotingPeriod(uint32 newVotingPeriod) public virtual onlyGovernance {
-    _setVotingPeriod(newVotingPeriod);
-  }
-
-  /**
    * @dev Internal setter for the voting period.
    *
    * Emits a {VotingPeriodSet} event.

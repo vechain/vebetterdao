@@ -158,7 +158,7 @@ export const getOrDeployContractInstances = async ({
       vot3Token: await vot3.getAddress(),
       quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE, // quorum percentage
       initialVotingPeriod: config.EMISSIONS_CYCLE_DURATION - 1, // X Alloc voting period
-      b3trGovernor: await timeLock.getAddress(),
+      timeLock: await timeLock.getAddress(),
       voterRewards: await voterRewards.getAddress(),
       emissions: await emissions.getAddress(),
       admins: [await timeLock.getAddress(), owner.address],
