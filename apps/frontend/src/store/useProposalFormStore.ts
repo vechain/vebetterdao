@@ -7,7 +7,7 @@ const stepVariant = {
   2: "stepTwo",
 }
 
-type FormState = {
+export type ProposalFormStoreState = {
   title?: string
   shortDescription?: string
   markdownDescription?: string
@@ -19,13 +19,13 @@ type FormState = {
     functionDescription?: string
   }[]
   votingStartRoundId?: number
-  setData: (data: Partial<FormState>) => void
+  setData: (data: Partial<ProposalFormStoreState>) => void
 }
 
 /**
  * Store for the multi-step proposal form data
  */
-export const useProposalFormStore = create<FormState>()(
+export const useProposalFormStore = create<ProposalFormStoreState>()(
   devtools(
     persist(
       (set, get) => ({
@@ -34,7 +34,7 @@ export const useProposalFormStore = create<FormState>()(
         markdownDescription: undefined,
         actions: [],
         votingStartRoundId: undefined,
-        setData: (data: Partial<FormState>) =>
+        setData: (data: Partial<ProposalFormStoreState>) =>
           set(state => ({
             ...state,
             ...data,

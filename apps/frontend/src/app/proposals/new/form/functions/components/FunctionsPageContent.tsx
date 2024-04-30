@@ -1,5 +1,4 @@
 import { Card, CardBody, VStack, Heading, HStack, Box, Divider, Text, Checkbox, Button } from "@chakra-ui/react"
-import { FaAngleRight } from "react-icons/fa6"
 import { useCallback } from "react"
 import { useProposalFormStore } from "@/store/useProposalFormStore"
 import { GovernanceFeaturedContractsWithFunctions } from "@/constants"
@@ -18,7 +17,7 @@ export const FunctionsPageContent = () => {
   const router = useRouter()
 
   const onContinue = useCallback(() => {
-    router.push("/proposals/new/form/details")
+    router.push("/proposals/new/form/functions/details")
   }, [router])
 
   const goBack = useCallback(() => {
