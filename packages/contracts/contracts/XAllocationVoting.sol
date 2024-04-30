@@ -55,7 +55,7 @@ contract XAllocationVoting is
     uint256 quorumPercentage;
     uint32 initialVotingPeriod;
     address timeLock;
-    address voterRewards;
+    IVoterRewards voterRewards;
     IEmissions emissions;
     address[] admins;
     address upgrader;
@@ -75,9 +75,9 @@ contract XAllocationVoting is
    */
   function initialize(InitializationData memory data) public initializer {
     __XAllocationVotingGovernor_init("XAllocationVoting");
-    __ExternalContracts_init(data.x2EarnAppsAddress, data.emissions);
+    __ExternalContracts_init(data.x2EarnAppsAddress, data.emissions, data.voterRewards);
     __GovernorSettings_init(data.initialVotingPeriod);
-    __GovernorXAllocationVotesCounting_init(data.voterRewards);
+    __GovernorXAllocationVotesCounting_init();
     __GovernorVotes_init(data.vot3Token);
     __GovernorVotesQuorumFraction_init(data.quorumPercentage);
     __XAllocationEarningsSettings_init(data.baseAllocationPercentage, data.appSharesCap);
@@ -101,6 +101,10 @@ contract XAllocationVoting is
 
   function setEmissionsAddress(IEmissions newEmissions) public onlyRole(DEFAULT_ADMIN_ROLE) {
     _setEmissions(newEmissions);
+  }
+
+  function setVoterRewardsAddress(IVoterRewards newVoterRewards) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    _setVoterRewards(newVoterRewards);
   }
 
   function startNewRound() public override onlyRole(ROUND_STARTER_ROLE) returns (uint256) {

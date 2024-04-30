@@ -11,6 +11,7 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
 import { IEmissions } from "../interfaces/IEmissions.sol";
+import { IVoterRewards } from "../interfaces/IVoterRewards.sol";
 
 /**
  * @title XAllocationVotingGovernor
@@ -21,7 +22,7 @@ import { IEmissions } from "../interfaces/IEmissions.sol";
  * - A counting module must implement {quorum}, {_quorumReached}, {_voteSucceeded}, and {_countVote}
  * - A voting module must implement {_getVotes}, {clock}, and {CLOCK_MODE}
  * - A settings module must implement {votingPeriod}
- * - An external contracts module must implement {x2EarnApps} and {emissions}
+ * - An external contracts module must implement {x2EarnApps}, {emissions} and {voterRewards}
  * - A rounds storage module must implement {_startNewRound}, {roundSnapshot}, {roundDeadline}, and {currentRoundId}
  * - A rounds finalization module must implement {finalize}
  * - A earnings settings module must implement {_snapshotRoundEarnings}
@@ -275,12 +276,17 @@ abstract contract XAllocationVotingGovernor is
   function currentRoundId() public view virtual returns (uint256);
 
   /**
-   * @dev Returns the x-2-earn apps contract.
+   * @dev Returns the X2EarnApps contract.
    */
   function x2EarnApps() public view virtual returns (IX2EarnApps);
 
   /**
-   * @dev Returns the emissions contract.
+   * @dev Returns the Emissions contract.
    */
   function emissions() public view virtual returns (IEmissions);
+
+  /**
+   * @dev Returns the VoterRewards contract.
+   */
+  function voterRewards() public view virtual returns (IVoterRewards);
 }

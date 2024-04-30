@@ -28,10 +28,8 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
 
   /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.GovernorXAllocationVotesCounting
   struct GovernorXAllocationVotesCountingStorage {
-    // mapping to store that a user has voted at least one time
-    mapping(address => bool) _hasVotedOnce;
-    mapping(uint256 roundId => RoundVote) _roundVotes;
-    IVoterRewards voterRewards;
+    mapping(address user => bool) _hasVotedOnce; // mapping to store that a user has voted at least one time
+    mapping(uint256 roundId => RoundVote) _roundVotes; // mapping to store the votes for each round
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.GovernorXAllocationVotesCounting")) - 1)) & ~bytes32(uint256(0xff))
@@ -50,17 +48,12 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
 
   /**
    * @dev Initializes the contract
-   * @param _voterRewards The address of the voter rewards contract
    */
-  function __GovernorXAllocationVotesCounting_init(address _voterRewards) internal onlyInitializing {
-    __GovernorXAllocationVotesCounting_init_unchained(_voterRewards);
+  function __GovernorXAllocationVotesCounting_init() internal onlyInitializing {
+    __GovernorXAllocationVotesCounting_init_unchained();
   }
 
-  function __GovernorXAllocationVotesCounting_init_unchained(address _voterRewards) internal onlyInitializing {
-    GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
-
-    $.voterRewards = IVoterRewards(_voterRewards);
-  }
+  function __GovernorXAllocationVotesCounting_init_unchained() internal onlyInitializing {}
 
   /**
    * @dev See {IXAllocationVotingGovernor-COUNTING_MODE}.
@@ -138,7 +131,7 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
 
     emit AllocationVoteCast(voter, roundId, apps, weights);
 
-    $.voterRewards.registerVote(roundStart, voter, totalWeight);
+    voterRewards().registerVote(roundStart, voter, totalWeight);
   }
 
   /**
@@ -210,13 +203,5 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
   function hasVotedOnce(address user) public view returns (bool) {
     GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
     return $._hasVotedOnce[user];
-  }
-
-  /**
-   * @dev Get the voter rewards contract
-   */
-  function voterRewards() public view returns (IVoterRewards) {
-    GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
-    return $.voterRewards;
   }
 }

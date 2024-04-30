@@ -5,7 +5,7 @@ import { XAllocationVotingGovernor } from "../XAllocationVotingGovernor.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { IEmissions } from "../../interfaces/IEmissions.sol";
 import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
-import { IB3TRGovernor } from "../../interfaces/IB3TRGovernor.sol";
+import { IVoterRewards } from "../../interfaces/IVoterRewards.sol";
 
 /**
  * @title ExternalContractsUpgradeable
@@ -16,6 +16,7 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
   struct ExternalContractsStorage {
     IX2EarnApps _x2EarnApps;
     IEmissions _emissions;
+    IVoterRewards _voterRewards;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.ExternalContracts")) - 1)) & ~bytes32(uint256(0xff))
@@ -30,26 +31,31 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
 
   event EmissionsSet(address oldContractAddress, address newContractAddress);
   event X2EarnAppsSet(address oldContractAddress, address newContractAddress);
+  event VoterRewardsSet(address oldContractAddress, address newContractAddress);
 
   /**
    * @dev Initializes the contract
    * @param initialX2EarnApps The initial X2EarnApps contract address
    * @param initialEmissions The initial Emissions contract address
+   * @param initialVoterRewards The initial VoterRewards contract address
    */
   function __ExternalContracts_init(
     IX2EarnApps initialX2EarnApps,
-    IEmissions initialEmissions
+    IEmissions initialEmissions,
+    IVoterRewards initialVoterRewards
   ) internal onlyInitializing {
-    __ExternalContracts_init_unchained(initialX2EarnApps, initialEmissions);
+    __ExternalContracts_init_unchained(initialX2EarnApps, initialEmissions, initialVoterRewards);
   }
 
   function __ExternalContracts_init_unchained(
     IX2EarnApps initialX2EarnApps,
-    IEmissions initialEmissions
+    IEmissions initialEmissions,
+    IVoterRewards initialVoterRewards
   ) internal onlyInitializing {
     ExternalContractsStorage storage $ = _getExternalContractsStorage();
     $._x2EarnApps = initialX2EarnApps;
     $._emissions = initialEmissions;
+    $._voterRewards = initialVoterRewards;
   }
 
   // ------- Getters ------- //
@@ -67,6 +73,14 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
   function emissions() public view override returns (IEmissions) {
     ExternalContractsStorage storage $ = _getExternalContractsStorage();
     return $._emissions;
+  }
+
+  /**
+   * @dev Get the voter rewards contract
+   */
+  function voterRewards() public view override returns (IVoterRewards) {
+    ExternalContractsStorage storage $ = _getExternalContractsStorage();
+    return $._voterRewards;
   }
 
   // ------- Internal Functions ------- //
@@ -98,5 +112,19 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
     $._x2EarnApps = newX2EarnApps;
 
     emit X2EarnAppsSet(address($._x2EarnApps), address(newX2EarnApps));
+  }
+
+  /**
+   * @dev Sets the voter rewards contract
+   * @param newVoterRewards The new voter rewards contract address
+   */
+  function _setVoterRewards(IVoterRewards newVoterRewards) internal virtual {
+    require(address(newVoterRewards) != address(0), "XAllocationVoting: new voter rewards is the zero address");
+
+    ExternalContractsStorage storage $ = _getExternalContractsStorage();
+
+    $._voterRewards = newVoterRewards;
+
+    emit VoterRewardsSet(address($._voterRewards), address(newVoterRewards));
   }
 }
