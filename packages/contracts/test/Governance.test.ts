@@ -289,8 +289,8 @@ describe("Governor and TimeLock", function () {
         owner,
         governor,
         await ethers.getContractFactory("B3TRGovernor"),
-        "Update Proposal Threshold",
-        "setProposalThreshold",
+        "Update Deposit Threshold",
+        "setDepositThreshold",
         [newThreshold],
       )
 
@@ -305,7 +305,7 @@ describe("Governor and TimeLock", function () {
 
       const newThreshold = 10n
 
-      await catchRevert(governor.connect(owner).setProposalThreshold(newThreshold))
+      await catchRevert(governor.connect(owner).setDepositThreshold(newThreshold))
 
       const updatedThreshold = await governor.depositThreshold()
       expect(updatedThreshold).to.not.eql(newThreshold)
