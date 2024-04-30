@@ -288,13 +288,13 @@ describe("X-Apps", function () {
       expect(isEligibleForVote).to.eql(true)
     })
 
-    it("Cannot get eligibility for non-existing app", async function () {
+    it("Non existing app is not elegible", async function () {
       const { xAllocationVoting, x2EarnApps } = await getOrDeployContractInstances({ forceDeploy: true })
 
       const app1Id = await x2EarnApps.hashAppName(ZERO_ADDRESS)
 
-      await expect(x2EarnApps.isElegibleNow(app1Id)).to.be.reverted
-      await expect(x2EarnApps.isElegible(app1Id, (await xAllocationVoting.clock()) - 1n)).to.be.reverted
+      expect(await x2EarnApps.isElegibleNow(app1Id)).to.eql(false)
+      expect(await x2EarnApps.isElegible(app1Id, (await xAllocationVoting.clock()) - 1n)).to.eql(false)
     })
 
     it("Cannot get elegilibity in the future", async function () {

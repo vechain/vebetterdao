@@ -1073,7 +1073,7 @@ describe("X-Allocation Voting", function () {
       expect(app1Available).to.equal(true)
       expect(app2Available).to.equal(true)
 
-      const avaiableApps = await xAllocationVoting.allElegibleApps()
+      const avaiableApps = await x2EarnApps.allElegibleApps()
       expect(avaiableApps.length).to.equal(2)
       expect(avaiableApps[0]).to.equal(app1)
       expect(avaiableApps[1]).to.equal(app2)
@@ -1613,9 +1613,11 @@ describe("X-Allocation Voting", function () {
       })
 
       let round1 = await startNewAllocationRound()
+      let isFinalized = await xAllocationVoting.isFinalized(round1)
+      expect(isFinalized).to.eql(false)
       await waitForRoundToEnd(round1)
 
-      let isFinalized = await xAllocationVoting.isFinalized(round1)
+      isFinalized = await xAllocationVoting.isFinalized(round1)
       expect(isFinalized).to.eql(false)
 
       await startNewAllocationRound()

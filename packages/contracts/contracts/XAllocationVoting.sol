@@ -6,8 +6,9 @@ import "./x-allocation-voting-governance/modules/XAllocationGovernorVotesCountin
 import "./x-allocation-voting-governance/modules/XAllocationGovernorVotesUpgradeable.sol";
 import "./x-allocation-voting-governance/modules/XAllocationGovernorVotesQuorumFractionUpgradeable.sol";
 import "./x-allocation-voting-governance/modules/XAllocationGovernorSettingsUpgradeable.sol";
-import "./x-allocation-voting-governance/modules/XAppsUpgradeable.sol";
 import "./x-allocation-voting-governance/modules/XAllocationEarningsSettings.sol";
+import "./x-allocation-voting-governance/modules/RoundFinalizationUpgradeable.sol";
+import "./x-allocation-voting-governance/modules/RoundsStorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -21,7 +22,8 @@ contract XAllocationVoting is
   XAllocationGovernorVotesUpgradeable,
   XAllocationGovernorVotesQuorumFractionUpgradeable,
   XAllocationEarningsSettings,
-  XAppsUpgradeable,
+  RoundsStorageUpgradeable,
+  RoundFinalizationUpgradeable,
   AccessControlUpgradeable,
   UUPSUpgradeable
 {
@@ -46,7 +48,7 @@ contract XAllocationVoting is
     IVotes vot3Token;
     uint256 quorumPercentage;
     uint32 initialVotingPeriod;
-    address b3trGovernor;
+    IB3TRGovernor b3trGovernor;
     address voterRewards;
     address emissions;
     address[] admins;
@@ -66,13 +68,14 @@ contract XAllocationVoting is
    * @param data The initialization data
    */
   function initialize(InitializationData memory data) public initializer {
-    __XAllocationVotingGovernor_init("XAllocationVoting", data.b3trGovernor);
+    __XAllocationVotingGovernor_init("XAllocationVoting", data.b3trGovernor, data.x2EarnAppsAddress);
     __GovernorSettings_init(data.initialVotingPeriod, data.emissions);
     __GovernorXAllocationVotesCounting_init(data.voterRewards);
     __GovernorVotes_init(data.vot3Token);
     __GovernorVotesQuorumFraction_init(data.quorumPercentage);
-    __XApps_init(data.x2EarnAppsAddress);
     __XAllocationEarningsSettings_init(data.baseAllocationPercentage, data.appSharesCap);
+    __RoundFinalization_init();
+    __RoundsStorage_init();
     __AccessControl_init();
     __UUPSUpgradeable_init();
 
@@ -93,44 +96,6 @@ contract XAllocationVoting is
 
   function startNewRound() public override onlyRole(ROUND_STARTER_ROLE) returns (uint256) {
     return super.startNewRound();
-  }
-
-  function _startNewRound(address proposer) internal virtual override returns (uint256 roundId) {
-    EarningsSettingsStorage storage $ = _getEarningsSettingsStorage();
-    XAllocationVotingGovernorStorage storage xAllocationVotingGovernorStorage = _getXAllocationVotingGovernorStorage();
-
-    ++xAllocationVotingGovernorStorage._roundCount;
-    roundId = xAllocationVotingGovernorStorage._roundCount;
-
-    if (xAllocationVotingGovernorStorage._rounds[roundId].voteStart != 0) {
-      revert GovernorUnexpectedRoundState(roundId, state(roundId), bytes32(0));
-    }
-
-    // Do not run for the first round
-    if (roundId > 1) {
-      // finalize the previous round
-      _finalizeRound(roundId - 1);
-    }
-
-    // save x-apps that users can vote for
-    bytes32[] memory apps = allElegibleApps();
-    xAllocationVotingGovernorStorage._appsElegibleForVoting[roundId] = apps;
-
-    // save the base allocation percentage and app shares cap for this round
-    $._roundBaseAllocationPercentage[roundId] = $.baseAllocationPercentage;
-    $._roundAppSharesCap[roundId] = $.appSharesCap;
-
-    uint256 snapshot = clock();
-    uint256 duration = votingPeriod();
-
-    RoundCore storage round = xAllocationVotingGovernorStorage._rounds[roundId];
-    round.proposer = proposer;
-    round.voteStart = SafeCast.toUint48(snapshot);
-    round.voteDuration = SafeCast.toUint32(duration);
-
-    emit RoundCreated(roundId, proposer, snapshot, snapshot + duration);
-
-    // Using a named return variable to avoid stack too deep errors
   }
 
   function setAdminRole(address _newAdmin) public onlyRole(DEFAULT_ADMIN_ROLE) {

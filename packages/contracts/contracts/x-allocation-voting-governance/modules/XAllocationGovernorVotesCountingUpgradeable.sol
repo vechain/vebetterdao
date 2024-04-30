@@ -67,17 +67,17 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
     return "support=x-allocations&quorum=auto";
   }
 
-/**
- * @dev Counts votes for a given round of voting, applying quadratic funding principles.
- * This function allows a voter to allocate weights (votes) to various applications (apps) for a specific voting round.
- * It checks if the voter has already voted in the round to prevent double voting.
- * Each vote's weight is applied to the specified applications, and the total and quadratic votes for each application
- * are updated accordingly.
- * 
- * Quadratic Funding (QF) is implemented here to calculate the impact of each vote. In QF, the value of each vote is squared,
- * emphasizing the number of participants over the size of individual contributions. This method aims to democratize the voting
- * process by amplifying the influence of a larger number of smaller votes.
- */
+  /**
+   * @dev Counts votes for a given round of voting, applying quadratic funding principles.
+   * This function allows a voter to allocate weights (votes) to various applications (apps) for a specific voting round.
+   * It checks if the voter has already voted in the round to prevent double voting.
+   * Each vote's weight is applied to the specified applications, and the total and quadratic votes for each application
+   * are updated accordingly.
+   *
+   * Quadratic Funding (QF) is implemented here to calculate the impact of each vote. In QF, the value of each vote is squared,
+   * emphasizing the number of participants over the size of individual contributions. This method aims to democratize the voting
+   * process by amplifying the influence of a larger number of smaller votes.
+   */
   function _countVote(
     uint256 roundId,
     address voter,
@@ -89,9 +89,8 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
     }
 
     GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
-    XAllocationVotingGovernorStorage storage $governorStorage = _getXAllocationVotingGovernorStorage();
 
-    RoundCore storage round = $governorStorage._rounds[roundId];
+    uint256 roundStart = roundSnapshot(roundId);
 
     uint256 totalWeight = 0;
     uint256 totalQFVotesAdjustment = 0;
@@ -118,7 +117,7 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
     }
 
     require(
-      totalWeight <= getVotes(voter, round.voteStart),
+      totalWeight <= getVotes(voter, roundStart),
       "Governor: account has insufficient voting power for this round"
     );
 
@@ -136,7 +135,7 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
 
     emit AllocationVoteCast(voter, roundId, apps, weights);
 
-    $.voterRewards.registerVote(round.voteStart, voter, totalWeight);
+    $.voterRewards.registerVote(roundStart, voter, totalWeight);
   }
 
   function getAppVotes(uint256 roundId, bytes32 app) public view override returns (uint256) {

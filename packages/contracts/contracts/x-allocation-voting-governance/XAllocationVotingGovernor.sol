@@ -10,6 +10,8 @@ import { IXAllocationVotingGovernor, IERC6372 } from "../interfaces/IXAllocation
 import { IXAllocationPool } from "../interfaces/IXAllocationPool.sol";
 import { IB3TRGovernor } from "../interfaces/IB3TRGovernor.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
+import { DataTypes } from "../libraries/DataTypes.sol";
 
 /**
  * @dev Core of the x-allocation votes governance system, designed to be extended through various modules.
@@ -27,25 +29,13 @@ abstract contract XAllocationVotingGovernor is
   NoncesUpgradeable,
   IXAllocationVotingGovernor
 {
-  struct RoundCore {
-    address proposer;
-    uint48 voteStart;
-    uint32 voteDuration;
-  }
-
   bytes32 private constant ALL_ROUND_STATES_BITMAP = bytes32((2 ** (uint8(type(RoundState).max) + 1)) - 1);
 
   /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor
   struct XAllocationVotingGovernorStorage {
-    // counter to count the number of proposals and also used to create the id
-    uint256 _roundCount;
-    // for each round store a pointer to the latest succeeded round
-    mapping(uint256 => uint256) _latestSucceededRoundId;
-    mapping(uint256 => bool) _roundFinalized;
     string _name;
     IB3TRGovernor _b3trGovernor;
-    mapping(uint256 roundId => RoundCore) _rounds;
-    mapping(uint256 roundId => bytes32[]) _appsElegibleForVoting;
+    IX2EarnApps _x2EarnApps;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor")) - 1)) & ~bytes32(uint256(0xff))
@@ -61,17 +51,23 @@ abstract contract XAllocationVotingGovernor is
   /**
    * @dev Sets the value for {name} and {b3trGovernor} address
    */
-  function __XAllocationVotingGovernor_init(string memory name_, address b3trGovernor_) internal onlyInitializing {
-    __XAllocationVotingGovernor_init_unchained(name_, b3trGovernor_);
+  function __XAllocationVotingGovernor_init(
+    string memory name_,
+    IB3TRGovernor b3trGovernor_,
+    IX2EarnApps x2EarnApps_
+  ) internal onlyInitializing {
+    __XAllocationVotingGovernor_init_unchained(name_, b3trGovernor_, x2EarnApps_);
   }
 
   function __XAllocationVotingGovernor_init_unchained(
     string memory name_,
-    address b3trGovernor_
+    IB3TRGovernor b3trGovernor_,
+    IX2EarnApps x2EarnApps_
   ) internal onlyInitializing {
     XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
     $._name = name_;
-    $._b3trGovernor = IB3TRGovernor(payable(b3trGovernor_));
+    $._b3trGovernor = b3trGovernor_;
+    $._x2EarnApps = x2EarnApps_;
   }
 
   // ---------- Modifiers ---------- //
@@ -90,48 +86,19 @@ abstract contract XAllocationVotingGovernor is
 
   // ---------- Setters ---------- //
 
-  function finalize(uint256 roundId) public {
-    require(!isActive(roundId), "Governor: round is not ended yet");
-
-    _finalizeRound(roundId);
-  }
-
   function startNewRound() public virtual returns (uint256) {
-    XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
     address proposer = _msgSender();
 
     // check that there isn't an already ongoing round
     // but only do it after we have at least 1 round otherwise it will fail with `GovernorNonexistentRound`
-    if ($._roundCount > 0) {
-      require(!isActive($._roundCount), "Governor: there can be only one round per time");
+    if (currentRoundId() > 0) {
+      require(!isActive(currentRoundId()), "Governor: there can be only one round per time");
     }
 
     return _startNewRound(proposer);
   }
 
   // ---------- Internal and Private ---------- //
-
-  /**
-   * Store the checkpoints of last succeeded round for the round
-   */
-  function _finalizeRound(uint256 roundId) internal virtual {
-    XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
-
-    // First round is always succeeded
-    if (roundId == 1) {
-      $._latestSucceededRoundId[roundId] = 1;
-      $._roundFinalized[roundId] = true;
-      return;
-    }
-
-    if (state(roundId) == RoundState.Succeeded) {
-      $._latestSucceededRoundId[roundId] = roundId;
-      $._roundFinalized[roundId] = true;
-    } else if (state(roundId) == RoundState.Failed) {
-      $._latestSucceededRoundId[roundId] = $._latestSucceededRoundId[roundId - 1];
-      $._roundFinalized[roundId] = true;
-    }
-  }
 
   function castVote(uint256 roundId, bytes32[] memory appIds, uint256[] memory voteWeights) public virtual {
     _validateStateBitmap(roundId, _encodeStateBitmap(RoundState.Active));
@@ -180,26 +147,13 @@ abstract contract XAllocationVotingGovernor is
     return $._b3trGovernor;
   }
 
-  function currentRoundId() public view virtual override returns (uint256) {
+  function x2EarnApps() public view returns (IX2EarnApps) {
     XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
-    return $._roundCount;
-  }
-
-  function currentRoundSnapshot() public view virtual returns (uint256) {
-    return roundSnapshot(currentRoundId());
-  }
-
-  function currentRoundDeadline() public view virtual returns (uint256) {
-    return roundDeadline(currentRoundId());
+    return $._x2EarnApps;
   }
 
   function isActive(uint256 roundId) public view virtual override returns (bool) {
     return state(roundId) == RoundState.Active;
-  }
-
-  function latestSucceededRoundId(uint256 roundId) public view override returns (uint256) {
-    XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
-    return $._latestSucceededRoundId[roundId];
   }
 
   function state(uint256 roundId) public view virtual returns (RoundState) {
@@ -226,28 +180,14 @@ abstract contract XAllocationVotingGovernor is
     return _quorumReached(roundId);
   }
 
-  function roundSnapshot(uint256 roundId) public view virtual returns (uint256) {
-    XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
-    return $._rounds[roundId].voteStart;
-  }
-
-  function roundDeadline(uint256 roundId) public view virtual returns (uint256) {
-    XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
-    return $._rounds[roundId].voteStart + $._rounds[roundId].voteDuration;
-  }
-
-  function roundProposer(uint256 roundId) public view virtual returns (address) {
-    XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
-    return $._rounds[roundId].proposer;
-  }
-
-  function isFinalized(uint256 roundId) public view virtual returns (bool) {
-    XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
-    return $._roundFinalized[roundId];
-  }
-
   function getVotes(address account, uint256 timepoint) public view virtual returns (uint256) {
     return _getVotes(account, timepoint, "");
+  }
+
+  function isEligibleForVote(bytes32 appId, uint256 roundId) public view virtual returns (bool) {
+    XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
+
+    return $._x2EarnApps.isElegible(appId, roundSnapshot(roundId));
   }
 
   /**
@@ -266,8 +206,6 @@ abstract contract XAllocationVotingGovernor is
 
   // ---------- Virtual ---------- //
 
-  function _startNewRound(address proposer) internal virtual returns (uint256 roundId);
-
   function _countVote(
     uint256 roundId,
     address account,
@@ -275,11 +213,17 @@ abstract contract XAllocationVotingGovernor is
     uint256[] memory voteWeights
   ) internal virtual;
 
+  function _snapshotRoundEarnings(uint256 roundId) internal virtual;
+
   function _quorumReached(uint256 roundId) internal view virtual returns (bool);
 
   function _voteSucceeded(uint256 roundId) internal view virtual returns (bool);
 
   function _getVotes(address account, uint256 timepoint, bytes memory params) internal view virtual returns (uint256);
+
+  function _startNewRound(address proposer) internal virtual returns (uint256);
+
+  function finalize(uint256 roundId) public virtual;
 
   function clock() public view virtual returns (uint48);
 
@@ -291,5 +235,9 @@ abstract contract XAllocationVotingGovernor is
 
   function setB3trGovernanceAddress(address newB3trGovernance) public virtual;
 
-  function isEligibleForVote(bytes32 appId, uint256 roundId) public view virtual returns (bool);
+  function roundSnapshot(uint256 roundId) public view virtual returns (uint256);
+
+  function roundDeadline(uint256 roundId) public view virtual returns (uint256);
+
+  function currentRoundId() public view virtual returns (uint256);
 }

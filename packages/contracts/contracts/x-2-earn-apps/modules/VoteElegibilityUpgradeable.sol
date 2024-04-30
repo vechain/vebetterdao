@@ -123,7 +123,7 @@ abstract contract VoteElegibilityUpgradeable is Initializable, X2EarnAppsUpgrade
    */
   function isElegible(bytes32 appId, uint256 timepoint) public view override returns (bool) {
     if (!appExists(appId)) {
-      revert X2EarnNonexistentApp(appId);
+      return false;
     }
 
     VoteElegibilityStorage storage $ = _getVoteElegibilityStorage();
@@ -133,7 +133,11 @@ abstract contract VoteElegibilityUpgradeable is Initializable, X2EarnAppsUpgrade
       revert ERC5805FutureLookup(timepoint, currentTimepoint);
     }
 
-    return $._isAppElegibleCheckpoints[appId].upperLookupRecent(SafeCast.toUint48(timepoint)) == 1;
+    // We check also that the timepoint is after the app creation because once the first checkpoint is created
+    // it will return true for any block before that timepoint.
+    return
+      $._isAppElegibleCheckpoints[appId].upperLookupRecent(SafeCast.toUint48(timepoint)) == 1 &&
+      createdAt(appId) <= timepoint;
   }
 
   /**
@@ -143,7 +147,7 @@ abstract contract VoteElegibilityUpgradeable is Initializable, X2EarnAppsUpgrade
    */
   function isElegibleNow(bytes32 appId) public view override returns (bool) {
     if (!appExists(appId)) {
-      revert X2EarnNonexistentApp(appId);
+      return false;
     }
 
     VoteElegibilityStorage storage $ = _getVoteElegibilityStorage();

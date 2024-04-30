@@ -170,18 +170,18 @@ interface IX2EarnApps {
   function updateAppMetadata(bytes32 appId, string memory metadataURI) external;
 
   /**
-   * @dev Get the block when the app was first added.
-   *
-   * @param appId the id of the app
-   */
-  function createdAt(bytes32 appId) external view returns (uint48);
-
-  /**
    * @dev Check if there is an app with the specified `appId`.
    *
    * @param appId the id of the app
    */
   function appExists(bytes32 appId) external view returns (bool);
+
+  /**
+   * @dev Block number when the app was added for the first time.
+   *
+   * @param appId the id of the app
+   */
+  function createdAt(bytes32 appId) external view returns (uint48);
 
   /**
    * @dev Allow or deny an app to participate in the next allocation voting rounds.

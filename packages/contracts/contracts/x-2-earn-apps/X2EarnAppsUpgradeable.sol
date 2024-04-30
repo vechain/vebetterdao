@@ -120,6 +120,11 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   function baseURI() public view virtual override returns (string memory);
 
   /**
+   * @inheritdoc IX2EarnApps
+   */
+  function createdAt(bytes32 appId) public view virtual returns (uint48);
+
+  /**
    * @dev Function to set the voting elegibility of an app.
    */
   function _setVotingElegibility(bytes32 _appId, bool _isElegible) internal virtual;

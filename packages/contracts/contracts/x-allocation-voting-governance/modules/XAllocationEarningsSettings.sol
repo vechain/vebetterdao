@@ -109,6 +109,12 @@ abstract contract XAllocationEarningsSettings is Initializable, XAllocationVotin
     $.appSharesCap = appSharesCap_;
   }
 
+  function _snapshotRoundEarnings(uint256 roundId) internal virtual override {
+    EarningsSettingsStorage storage $ = _getEarningsSettingsStorage();
+    $._roundBaseAllocationPercentage[roundId] = $.baseAllocationPercentage;
+    $._roundAppSharesCap[roundId] = $.appSharesCap;
+  }
+
   // ---------- Setters ---------- //
 
   /**
