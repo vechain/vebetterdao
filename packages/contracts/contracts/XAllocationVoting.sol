@@ -50,7 +50,7 @@ contract XAllocationVoting is
     IVotes vot3Token;
     uint256 quorumPercentage;
     uint32 initialVotingPeriod;
-    address b3trGovernor;
+    IB3TRGovernor b3trGovernor;
     address voterRewards;
     IEmissions emissions;
     address[] admins;
@@ -91,8 +91,16 @@ contract XAllocationVoting is
 
   // ---------- Setters ---------- //
 
-  function setB3trGovernanceAddress(address b3trGovernor_) public override onlyRole(DEFAULT_ADMIN_ROLE) {
-    super.setB3trGovernanceAddress(b3trGovernor_);
+  function setB3trGovernorAddress(IB3TRGovernor newB3trGovernor) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    _setB3trGovernor(newB3trGovernor);
+  }
+
+  function setX2EarnAppsAddress(IX2EarnApps newX2EarnApps) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    _setX2EarnApps(newX2EarnApps);
+  }
+
+  function setEmissionsAddress(IEmissions newEmissions) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    _setEmissions(newEmissions);
   }
 
   function startNewRound() public override onlyRole(ROUND_STARTER_ROLE) returns (uint256) {
