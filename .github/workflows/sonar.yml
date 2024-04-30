@@ -1,4 +1,4 @@
-name: PR Sonar Scan
+name: FE Sonar Scan
 
 on:
     pull_request:
