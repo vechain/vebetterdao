@@ -9,6 +9,7 @@ import "./x-allocation-voting-governance/modules/XAllocationGovernorSettingsUpgr
 import "./x-allocation-voting-governance/modules/XAllocationEarningsSettings.sol";
 import "./x-allocation-voting-governance/modules/RoundFinalizationUpgradeable.sol";
 import "./x-allocation-voting-governance/modules/RoundsStorageUpgradeable.sol";
+import "./x-allocation-voting-governance/modules/ExternalContractsUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -22,6 +23,7 @@ contract XAllocationVoting is
   XAllocationGovernorVotesUpgradeable,
   XAllocationGovernorVotesQuorumFractionUpgradeable,
   XAllocationEarningsSettings,
+  ExternalContractsUpgradeable,
   RoundsStorageUpgradeable,
   RoundFinalizationUpgradeable,
   AccessControlUpgradeable,
@@ -48,9 +50,9 @@ contract XAllocationVoting is
     IVotes vot3Token;
     uint256 quorumPercentage;
     uint32 initialVotingPeriod;
-    IB3TRGovernor b3trGovernor;
+    address b3trGovernor;
     address voterRewards;
-    address emissions;
+    IEmissions emissions;
     address[] admins;
     address upgrader;
     IX2EarnApps x2EarnAppsAddress;
@@ -68,8 +70,9 @@ contract XAllocationVoting is
    * @param data The initialization data
    */
   function initialize(InitializationData memory data) public initializer {
-    __XAllocationVotingGovernor_init("XAllocationVoting", data.b3trGovernor, data.x2EarnAppsAddress);
-    __GovernorSettings_init(data.initialVotingPeriod, data.emissions);
+    __XAllocationVotingGovernor_init("XAllocationVoting");
+    __ExternalContracts_init(data.b3trGovernor, data.x2EarnAppsAddress, data.emissions);
+    __GovernorSettings_init(data.initialVotingPeriod);
     __GovernorXAllocationVotesCounting_init(data.voterRewards);
     __GovernorVotes_init(data.vot3Token);
     __GovernorVotesQuorumFraction_init(data.quorumPercentage);
@@ -89,9 +92,7 @@ contract XAllocationVoting is
   // ---------- Setters ---------- //
 
   function setB3trGovernanceAddress(address b3trGovernor_) public override onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(b3trGovernor_ != address(0), "XAllocationVoting: new B3trGovernor is the zero address");
-
-    _getXAllocationVotingGovernorStorage()._b3trGovernor = IB3TRGovernor(payable(b3trGovernor_));
+    super.setB3trGovernanceAddress(b3trGovernor_);
   }
 
   function startNewRound() public override onlyRole(ROUND_STARTER_ROLE) returns (uint256) {

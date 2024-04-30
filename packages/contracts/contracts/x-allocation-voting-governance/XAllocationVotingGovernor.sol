@@ -12,6 +12,7 @@ import { IB3TRGovernor } from "../interfaces/IB3TRGovernor.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
+import { IEmissions } from "../interfaces/IEmissions.sol";
 
 /**
  * @dev Core of the x-allocation votes governance system, designed to be extended through various modules.
@@ -34,8 +35,6 @@ abstract contract XAllocationVotingGovernor is
   /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor
   struct XAllocationVotingGovernorStorage {
     string _name;
-    IB3TRGovernor _b3trGovernor;
-    IX2EarnApps _x2EarnApps;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor")) - 1)) & ~bytes32(uint256(0xff))
@@ -49,36 +48,23 @@ abstract contract XAllocationVotingGovernor is
   }
 
   /**
-   * @dev Sets the value for {name} and {b3trGovernor} address
+   * @dev Sets the value for {name}
    */
-  function __XAllocationVotingGovernor_init(
-    string memory name_,
-    IB3TRGovernor b3trGovernor_,
-    IX2EarnApps x2EarnApps_
-  ) internal onlyInitializing {
-    __XAllocationVotingGovernor_init_unchained(name_, b3trGovernor_, x2EarnApps_);
+  function __XAllocationVotingGovernor_init(string memory name_) internal onlyInitializing {
+    __XAllocationVotingGovernor_init_unchained(name_);
   }
 
-  function __XAllocationVotingGovernor_init_unchained(
-    string memory name_,
-    IB3TRGovernor b3trGovernor_,
-    IX2EarnApps x2EarnApps_
-  ) internal onlyInitializing {
+  function __XAllocationVotingGovernor_init_unchained(string memory name_) internal onlyInitializing {
     XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
     $._name = name_;
-    $._b3trGovernor = b3trGovernor_;
-    $._x2EarnApps = x2EarnApps_;
   }
-
-  // ---------- Modifiers ---------- //
 
   /**
    * @dev Restricts a function so it can only be executed through governance proposals. For example, governance
    * parameter setters in {GovernorSettings} are protected using this modifier.
    */
   modifier onlyGovernance() {
-    XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
-    if (address($._b3trGovernor) != _msgSender()) {
+    if (address(b3trGovernor()) != _msgSender()) {
       revert B3TRGovernorOnlyExecutor(_msgSender());
     }
     _;
@@ -142,16 +128,6 @@ abstract contract XAllocationVotingGovernor is
     return "1";
   }
 
-  function b3trGovernor() public view returns (IB3TRGovernor) {
-    XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
-    return $._b3trGovernor;
-  }
-
-  function x2EarnApps() public view returns (IX2EarnApps) {
-    XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
-    return $._x2EarnApps;
-  }
-
   function isActive(uint256 roundId) public view virtual override returns (bool) {
     return state(roundId) == RoundState.Active;
   }
@@ -185,9 +161,7 @@ abstract contract XAllocationVotingGovernor is
   }
 
   function isEligibleForVote(bytes32 appId, uint256 roundId) public view virtual returns (bool) {
-    XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
-
-    return $._x2EarnApps.isElegible(appId, roundSnapshot(roundId));
+    return x2EarnApps().isElegible(appId, roundSnapshot(roundId));
   }
 
   /**
@@ -233,11 +207,15 @@ abstract contract XAllocationVotingGovernor is
 
   function quorum(uint256 timepoint) public view virtual returns (uint256);
 
-  function setB3trGovernanceAddress(address newB3trGovernance) public virtual;
-
   function roundSnapshot(uint256 roundId) public view virtual returns (uint256);
 
   function roundDeadline(uint256 roundId) public view virtual returns (uint256);
 
   function currentRoundId() public view virtual returns (uint256);
+
+  function b3trGovernor() public view virtual returns (IB3TRGovernor);
+
+  function x2EarnApps() public view virtual returns (IX2EarnApps);
+
+  function emissions() public view virtual returns (IEmissions);
 }
