@@ -2,6 +2,16 @@ name: Unit Test Coverage
 
 on:
   workflow_dispatch:
+    inputs:
+      run_fe:
+        required: false
+        type: boolean
+        default: true
+      run_solidity:
+        required: false
+        type: boolean
+        default: true
+
   workflow_call:
     inputs:
       run_fe:
@@ -34,7 +44,7 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Run FE coverage
-        if: github.event.inputs.run_fe == true
+        if: inputs.run_fe == true
         id: fe-coverage
         run: yarn test:coverage:fe
 
@@ -47,7 +57,7 @@ jobs:
           retention-days: 10
 
       - name: Run solidity coverage
-        if: github.event.inputs.run_solidity == true
+        if: inputs.run_solidity == true
         id: contract-coverage
         run: yarn test:coverage:solidity
 
