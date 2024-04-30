@@ -65,7 +65,7 @@ export const createProposal = async (
   // the proposer needs to have some delegated VOT3 to be able to create a proposal
   const clock = await governor.clock()
   const proposerVotes = await governor.getVotes(proposer, clock - BigInt(1))
-  const votesThreshold = await governor.proposalThreshold()
+  const votesThreshold = await governor.depositThreshold()
 
   if (votesThreshold > proposerVotes && !avoidMintingAndDelegating) {
     //The proposer needs to have some delegated VOT3 to be able to create a proposal
