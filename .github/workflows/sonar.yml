@@ -2,18 +2,39 @@ name: PR Sonar Scan
 
 on:
     pull_request:
+      branches:
+        - main
+        - testnet
+    push:
+      branches:
+        - main
+        - testnet
+        - sonar/**
         
 jobs:
+  unit-test:
+    name: Unit Test With Coverage
+    uses: ./.github/workflows/unit-coverage.yml
+    secrets: inherit
+
   sonar-scan:
     name: Sonar Scan
+    needs: unit-test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      - name: Download FE coverage
+        uses: actions/download-artifact@v2
+        with:
+          name: fe-coverage
+          path: apps/frontend/coverage
+
       - name: SonarCloud Scan
+        id: sonarcloud-scan
         uses: sonarsource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -21,4 +42,23 @@ jobs:
         with:
           args: >
             -Dsonar.verbose=false
-            -Dsonar.branch.name=${{ github.head_ref || github.ref_name }}
+
+      - name: Check quality gate
+        id: sonarqube-quality-gate-check
+        if: always() && ${{ steps.sonarcloud-scan.outputs.status == 'success' }}
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Post to slack
+        if: always() && steps.sonarqube-quality-gate-check.outputs.quality-gate-status != 'PASSED' && github.ref == 'refs/heads/main'
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+            payload: |
+              {
+                "source": "Sonar",
+                "message": "Sonar quality gate failed on main branch"
+              }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
