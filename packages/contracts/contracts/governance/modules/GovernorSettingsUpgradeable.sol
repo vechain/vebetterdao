@@ -71,7 +71,7 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
   }
 
   /**
-   * @dev Update the proposal threshold. This operation can only be performed through a governance proposal.
+   * @dev Update the deposit threshold. This operation can only be performed through a governance proposal.
    *
    * Emits a {DepositThresholdSet} event.
    */
@@ -90,7 +90,7 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
   }
 
   /**
-   * @dev Internal setter for the proposal threshold.
+   * @dev Internal setter for the deposit threshold.
    *
    * Emits a {DepositThresholdSet} event.
    */

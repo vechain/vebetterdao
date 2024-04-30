@@ -56,7 +56,7 @@ contract B3TRGovernor is
    * @param _timelock The address of the Timelock
    * @param _xAllocationVoting The address of the xAllocationVoting
    * @param _quorumPercentage quorum as a percentage of the total supply at the block a proposal’s voting power is retrieved
-   * @param _initialDepositThreshold The Proposal Threshold is the amount of voting power that an account needs to make a proposal
+   * @param _initialDepositThreshold The Deposit Threshold is the amount of voting power that an account needs to make a proposal
    * @param _initialMinVotingDelay The minimum delay before a proposal can start
    * @param governorAdmin The address of the governor admin
    * @param _voterRewards The address of the voter rewards contract
