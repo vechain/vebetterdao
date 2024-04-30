@@ -9,13 +9,9 @@ import { IB3TRGovernor } from "../../interfaces/IB3TRGovernor.sol";
 
 /**
  * @title ExternalContractsUpgradeable
- * @dev Contract module that handles the storage of external contracts for the XAllocationVotingGovernor.
+ * @dev Extension of {XAllocationVotingGovernor} that handles the storage of external contracts for the XAllocationVotingGovernor.
  */
 abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVotingGovernor {
-  event EmissionsSet(address oldContractAddress, address newContractAddress);
-  event B3trGovernanceSet(address oldContractAddress, address newContractAddress);
-  event X2EarnAppsSet(address oldContractAddress, address newContractAddress);
-
   /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.ExternalContracts
   struct ExternalContractsStorage {
     IX2EarnApps _x2EarnApps;
@@ -31,6 +27,9 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
       $.slot := ExternalContractsStorageLocation
     }
   }
+
+  event EmissionsSet(address oldContractAddress, address newContractAddress);
+  event X2EarnAppsSet(address oldContractAddress, address newContractAddress);
 
   /**
    * @dev Initializes the contract

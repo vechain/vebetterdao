@@ -1566,7 +1566,7 @@ describe("X-Allocation Voting", function () {
       let isFinalized = await xAllocationVoting.isFinalized(round1)
       expect(isFinalized).to.eql(false)
 
-      await xAllocationVoting.finalize(round1)
+      await xAllocationVoting.finalizeRound(round1)
 
       isFinalized = await xAllocationVoting.isFinalized(round1)
       expect(isFinalized).to.eql(true)
@@ -1600,12 +1600,12 @@ describe("X-Allocation Voting", function () {
       let isFinalized = await xAllocationVoting.isFinalized(roundId)
       expect(isFinalized).to.eql(false)
 
-      await xAllocationVoting.finalize(roundId)
+      await xAllocationVoting.finalizeRound(roundId)
 
       isFinalized = await xAllocationVoting.isFinalized(roundId)
       expect(isFinalized).to.eql(true)
 
-      await expect(xAllocationVoting.finalize(roundId)).to.not.be.reverted
+      await expect(xAllocationVoting.finalizeRound(roundId)).to.not.be.reverted
       expect(await xAllocationVoting.isFinalized(roundId)).to.eql(true)
     })
 
@@ -1662,7 +1662,7 @@ describe("X-Allocation Voting", function () {
 
       let round1 = await startNewAllocationRound()
 
-      await catchRevert(xAllocationVoting.finalize(round1))
+      await catchRevert(xAllocationVoting.finalizeRound(round1))
 
       let isFinalized = await xAllocationVoting.isFinalized(round1)
       expect(isFinalized).to.eql(false)

@@ -6,6 +6,10 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { DataTypes } from "../../libraries/DataTypes.sol";
 
+/**
+ * @title RoundsStorageUpgradeable
+ * @dev Extension of {XAllocationVotingGovernor} for storing rounds data and managing the rounds lifecycle.
+ */
 abstract contract RoundsStorageUpgradeable is Initializable, XAllocationVotingGovernor {
   struct RoundCore {
     address proposer;
@@ -15,10 +19,9 @@ abstract contract RoundsStorageUpgradeable is Initializable, XAllocationVotingGo
 
   /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.RoundsStorage
   struct RoundsStorageStorage {
-    // counter to count the number of proposals and also used to create the id
-    uint256 _roundCount;
-    mapping(uint256 roundId => RoundCore) _rounds;
-    mapping(uint256 roundId => bytes32[]) _appsElegibleForVoting;
+    uint256 _roundCount; // counter to count the number of proposals and also used to create the id
+    mapping(uint256 roundId => RoundCore) _rounds; // mapping to store the round data
+    mapping(uint256 roundId => bytes32[]) _appsElegibleForVoting; // mapping to store the apps elegible for voting in each round
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.RoundsStorage")) - 1)) & ~bytes32(uint256(0xff))
@@ -40,6 +43,15 @@ abstract contract RoundsStorageUpgradeable is Initializable, XAllocationVotingGo
 
   function __RoundsStorage_init_unchained() internal onlyInitializing {}
 
+  // ------- Setters ------- //
+
+  /**
+   * @dev Internal function to start a new round
+   * @param proposer The address of the proposer
+   * @return roundId The id of the new round
+   *
+   * Emits a {RoundCreated} event
+   */
   function _startNewRound(address proposer) internal virtual override returns (uint256 roundId) {
     RoundsStorageStorage storage $ = _getRoundsStorageStorage();
 
@@ -52,7 +64,7 @@ abstract contract RoundsStorageUpgradeable is Initializable, XAllocationVotingGo
     // Do not run for the first round
     if (roundId > 1) {
       // finalize the previous round
-      finalize(roundId - 1);
+      finalizeRound(roundId - 1);
     }
 
     // save x-apps that users can vote for
@@ -74,45 +86,73 @@ abstract contract RoundsStorageUpgradeable is Initializable, XAllocationVotingGo
     // Using a named return variable to avoid stack too deep errors
   }
 
-  function currentRoundId() public view virtual override returns (uint256) {
-    RoundsStorageStorage storage $ = _getRoundsStorageStorage();
-    return $._roundCount;
-  }
+  // ------- Getters ------- //
 
-  function currentRoundSnapshot() public view virtual returns (uint256) {
-    return roundSnapshot(currentRoundId());
-  }
-
-  function currentRoundDeadline() public view virtual returns (uint256) {
-    return roundDeadline(currentRoundId());
-  }
-
-  function roundSnapshot(uint256 roundId) public view virtual override returns (uint256) {
-    RoundsStorageStorage storage $ = _getRoundsStorageStorage();
-    return $._rounds[roundId].voteStart;
-  }
-
-  function roundDeadline(uint256 roundId) public view virtual override returns (uint256) {
-    RoundsStorageStorage storage $ = _getRoundsStorageStorage();
-    return $._rounds[roundId].voteStart + $._rounds[roundId].voteDuration;
-  }
-
-  function roundProposer(uint256 roundId) public view virtual returns (address) {
-    RoundsStorageStorage storage $ = _getRoundsStorageStorage();
-    return $._rounds[roundId].proposer;
-  }
-
-  function getAppIds(uint256 roundId) public view override returns (bytes32[] memory) {
-    RoundsStorageStorage storage $ = _getRoundsStorageStorage();
-    return $._appsElegibleForVoting[roundId];
-  }
-
+  /**
+   * @dev Get the data of a round
+   */
   function getRound(uint256 roundId) public view returns (RoundCore memory) {
     RoundsStorageStorage storage $ = _getRoundsStorageStorage();
     return $._rounds[roundId];
   }
 
   /**
+   * @dev Get the current round id
+   */
+  function currentRoundId() public view virtual override returns (uint256) {
+    RoundsStorageStorage storage $ = _getRoundsStorageStorage();
+    return $._roundCount;
+  }
+
+  /**
+   * @dev Get the current round start block
+   */
+  function currentRoundSnapshot() public view virtual returns (uint256) {
+    return roundSnapshot(currentRoundId());
+  }
+
+  /**
+   * @dev Get the current round deadline block
+   */
+  function currentRoundDeadline() public view virtual returns (uint256) {
+    return roundDeadline(currentRoundId());
+  }
+
+  /**
+   * @dev Get the start block of a round
+   */
+  function roundSnapshot(uint256 roundId) public view virtual override returns (uint256) {
+    RoundsStorageStorage storage $ = _getRoundsStorageStorage();
+    return $._rounds[roundId].voteStart;
+  }
+
+  /**
+   * @dev Get the deadline block of a round
+   */
+  function roundDeadline(uint256 roundId) public view virtual override returns (uint256) {
+    RoundsStorageStorage storage $ = _getRoundsStorageStorage();
+    return $._rounds[roundId].voteStart + $._rounds[roundId].voteDuration;
+  }
+
+  /**
+   * @dev Get the proposer of a round
+   */
+  function roundProposer(uint256 roundId) public view virtual returns (address) {
+    RoundsStorageStorage storage $ = _getRoundsStorageStorage();
+    return $._rounds[roundId].proposer;
+  }
+
+  /**
+   * @dev Get the ids of the apps elegible for voting in a round
+   */
+  function getAppIds(uint256 roundId) public view override returns (bytes32[] memory) {
+    RoundsStorageStorage storage $ = _getRoundsStorageStorage();
+    return $._appsElegibleForVoting[roundId];
+  }
+
+  /**
+   * @dev Get all the apps in the form of {App} elegible for voting in a round
+   *
    * This function could not be efficient with a large number of apps
    */
   function getApps(uint256 roundId) public view returns (DataTypes.App[] memory) {

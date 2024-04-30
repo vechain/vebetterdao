@@ -16,11 +16,10 @@ import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
  *
  * In every round users can vote a fraction of their balance for the elegible apps in that round.
  */
-
 abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, XAllocationVotingGovernor {
   struct RoundVote {
-    mapping(bytes32 app => uint256) votesReceived;
-    mapping(bytes32 app => uint256) votesReceivedQF;
+    mapping(bytes32 appId => uint256) votesReceived;
+    mapping(bytes32 appId => uint256) votesReceivedQF;
     uint256 totalVotes;
     uint256 totalVotesQF;
     mapping(address user => bool) hasVoted;
@@ -49,6 +48,10 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
     }
   }
 
+  /**
+   * @dev Initializes the contract
+   * @param _voterRewards The address of the voter rewards contract
+   */
   function __GovernorXAllocationVotesCounting_init(address _voterRewards) internal onlyInitializing {
     __GovernorXAllocationVotesCounting_init_unchained(_voterRewards);
   }
@@ -138,50 +141,80 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
     $.voterRewards.registerVote(roundStart, voter, totalWeight);
   }
 
+  /**
+   * @dev Get the votes received by a specific application in a given round
+   */
   function getAppVotes(uint256 roundId, bytes32 app) public view override returns (uint256) {
     GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
     return $._roundVotes[roundId].votesReceived[app];
   }
 
+  /**
+   * @dev Get the quadratic funding votes received by a specific application in a given round
+   */
   function getAppVotesQF(uint256 roundId, bytes32 app) public view override returns (uint256) {
     GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
     return $._roundVotes[roundId].votesReceivedQF[app];
   }
 
+  /**
+   * @dev Get the total quadratic funding votes cast in a given round
+   */
   function totalVotesQF(uint256 roundId) public view override returns (uint256) {
     GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
     return $._roundVotes[roundId].totalVotesQF;
   }
 
+  /**
+   * @dev Get the total votes cast in a given round
+   */
   function totalVotes(uint256 roundId) public view override returns (uint256) {
     GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
     return $._roundVotes[roundId].totalVotes;
   }
 
+  /**
+   * @dev Get the total number of voters in a given round
+   */
   function totalVoters(uint256 roundId) public view override returns (uint256) {
     GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
     return $._roundVotes[roundId].totalVoters;
   }
 
+  /**
+   * @dev Check if a user has voted in a given round
+   */
   function hasVoted(uint256 roundId, address user) public view returns (bool) {
     GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
     return $._roundVotes[roundId].hasVoted[user];
   }
 
+  /**
+   * @dev Internal function to check if the quorum is reached for a given round
+   */
   function _quorumReached(uint256 roundId) internal view virtual override returns (bool) {
     return quorum(roundSnapshot(roundId)) <= totalVotes(roundId);
   }
 
-  // vote is successful if quorum is reached
+  /**
+   * @dev Internal function to check if the vote succeeded for a given round
+   */
   function _voteSucceeded(uint256 roundId) internal view virtual override returns (bool) {
+    // vote is successful if quorum is reached
     return _quorumReached(roundId);
   }
 
+  /**
+   * @dev Check if a user has voted at least once from the deployment of the contract
+   */
   function hasVotedOnce(address user) public view returns (bool) {
     GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
     return $._hasVotedOnce[user];
   }
 
+  /**
+   * @dev Get the voter rewards contract
+   */
   function voterRewards() public view returns (IVoterRewards) {
     GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
     return $.voterRewards;

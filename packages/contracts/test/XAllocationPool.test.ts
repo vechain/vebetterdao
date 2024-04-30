@@ -345,7 +345,7 @@ describe("X-Allocation Pool", async function () {
         const round1 = parseInt((await xAllocationVoting.currentRoundId()).toString())
         // Nobody votes
         await waitForRoundToEnd(round1)
-        await xAllocationVoting.finalize(round1)
+        await xAllocationVoting.finalizeRound(round1)
 
         // ENDED SEEDING DATA
 
@@ -405,7 +405,7 @@ describe("X-Allocation Pool", async function () {
           .castVote(round1, [app1Id, app2Id], [ethers.parseEther("100"), ethers.parseEther("900")])
 
         await waitForRoundToEnd(round1)
-        await xAllocationVoting.finalize(round1)
+        await xAllocationVoting.finalizeRound(round1)
 
         let state = await xAllocationVoting.state(round1)
         // should be succeeded
@@ -421,7 +421,7 @@ describe("X-Allocation Pool", async function () {
 
         await xAllocationVoting.connect(voter1).castVote(round2, [app3Id], [ethers.parseEther("1")])
         await waitForRoundToEnd(round2)
-        await xAllocationVoting.finalize(round2)
+        await xAllocationVoting.finalizeRound(round2)
 
         state = await xAllocationVoting.state(round2)
         // should be failed
@@ -969,7 +969,7 @@ describe("X-Allocation Pool", async function () {
           .castVote(round1, [app1Id, app2Id], [ethers.parseEther("100"), ethers.parseEther("900")])
 
         await waitForRoundToEnd(round1)
-        await xAllocationVoting.finalize(round1)
+        await xAllocationVoting.finalizeRound(round1)
 
         // ENDED SEEDING DATA
 
@@ -1030,7 +1030,7 @@ describe("X-Allocation Pool", async function () {
           .castVote(round1, [app1Id, app2Id], [ethers.parseEther("100"), ethers.parseEther("900")])
 
         await waitForRoundToEnd(round1)
-        await xAllocationVoting.finalize(round1)
+        await xAllocationVoting.finalizeRound(round1)
 
         // ENDED SEEDING DATA
 
@@ -1075,7 +1075,7 @@ describe("X-Allocation Pool", async function () {
           .castVote(round1, [app1Id, app2Id], [ethers.parseEther("100"), ethers.parseEther("900")])
 
         await waitForRoundToEnd(round1)
-        await xAllocationVoting.finalize(round1)
+        await xAllocationVoting.finalizeRound(round1)
 
         // ENDED SEEDING DATA
 
@@ -1125,7 +1125,7 @@ describe("X-Allocation Pool", async function () {
         expect(state).to.eql(1n)
 
         // ROUND IS NOT FINALIZED
-        // await xAllocationVoting.finalize(round1)
+        // await xAllocationVoting.finalizeRound(round1)
 
         // ENDED SEEDING DATA
 
@@ -1222,7 +1222,7 @@ describe("X-Allocation Pool", async function () {
         expect(state).to.eql(1n)
 
         // ROUND IS FINALIZED
-        await xAllocationVoting.finalize(round1)
+        await xAllocationVoting.finalizeRound(round1)
 
         // ENDED SEEDING DATA
 
@@ -1483,7 +1483,7 @@ describe("X-Allocation Pool", async function () {
           .castVote(round1, [app1Id, app2Id], [ethers.parseEther("100"), ethers.parseEther("900")])
 
         await waitForRoundToEnd(round1)
-        await xAllocationVoting.finalize(round1)
+        await xAllocationVoting.finalizeRound(round1)
 
         // ENDED SEEDING DATA
 

@@ -9,6 +9,7 @@ import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.s
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /**
+ * @title XAllocationGovernorVotesQuorumFractionUpgradeable
  * @dev Extension of {XAllocationVotingGovernor} for voting weight extraction from an {ERC20Votes} token and a quorum expressed as a
  * fraction of the total supply.
  */

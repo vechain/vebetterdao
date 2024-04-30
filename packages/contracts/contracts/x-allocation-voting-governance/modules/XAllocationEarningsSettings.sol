@@ -6,7 +6,7 @@ import { XAllocationVotingGovernor } from "../XAllocationVotingGovernor.sol";
 
 /**
  * @title XAllocationEarningsSettings
- * @notice The settings for the x-allocation earnings calculations:
+ * @notice Extension of {XAllocationVotingGovernor} to handle the settings for the x-allocation earnings calculations:
  * - baseAllocationPercentage: The base allocation percentage to be divided among the x-apps each round
  * - appSharesCap: The maximum percentage of shares an x-app can reach in each round
  *
@@ -17,8 +17,8 @@ abstract contract XAllocationEarningsSettings is Initializable, XAllocationVotin
   struct EarningsSettingsStorage {
     uint256 baseAllocationPercentage;
     uint256 appSharesCap;
-    mapping(uint256 => uint256) _roundBaseAllocationPercentage;
-    mapping(uint256 => uint256) _roundAppSharesCap;
+    mapping(uint256 roundId => uint256) _roundBaseAllocationPercentage;
+    mapping(uint256 roundId => uint256) _roundAppSharesCap;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationEarningsSettings")) - 1)) & ~bytes32(uint256(0xff))
@@ -109,6 +109,10 @@ abstract contract XAllocationEarningsSettings is Initializable, XAllocationVotin
     $.appSharesCap = appSharesCap_;
   }
 
+  /**
+   * @dev Save the earnings settings for a new round
+   * @param roundId The id of the new round
+   */
   function _snapshotRoundEarnings(uint256 roundId) internal virtual override {
     EarningsSettingsStorage storage $ = _getEarningsSettingsStorage();
     $._roundBaseAllocationPercentage[roundId] = $.baseAllocationPercentage;

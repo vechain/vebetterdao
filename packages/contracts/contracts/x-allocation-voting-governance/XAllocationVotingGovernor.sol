@@ -237,7 +237,7 @@ abstract contract XAllocationVotingGovernor is
   /**
    * @dev Function to store the last succeeded round once a round ends.
    */
-  function finalize(uint256 roundId) public virtual;
+  function finalizeRound(uint256 roundId) public virtual;
 
   /**
    * @dev Clock used for flagging checkpoints. Can be overridden to implement timestamp based checkpoints (and voting), in which case {CLOCK_MODE} should be overridden as well to match.
