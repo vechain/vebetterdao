@@ -1,4 +1,26 @@
 // SPDX-License-Identifier: MIT
+
+//                                      #######
+//                                 ################
+//                               ####################
+//                             ###########   #########
+//                            #########      #########
+//          #######          #########       #########
+//          #########       #########      ##########
+//           ##########     ########     ####################
+//            ##########   #########  #########################
+//              ################### ############################
+//               #################  ##########          ########
+//                 ##############      ###              ########
+//                  ############                       #########
+//                    ##########                     ##########
+//                     ########                    ###########
+//                       ###                    ############
+//                                          ##############
+//                                    #################
+//                                   ##############
+//                                   #########
+
 pragma solidity ^0.8.18;
 
 import { IXAllocationPool } from "./interfaces/IXAllocationPool.sol";
@@ -15,6 +37,12 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
 
+/**
+ * @title XAllocationPool
+ * @notice This contracts allows x2earn apps to withdraw their funds from the allocation rounds.
+ *
+ * The contract is using AccessControl to handle roles for upgrading the contract.
+ */
 contract XAllocationPool is
   Initializable,
   IXAllocationPool,

@@ -1,4 +1,26 @@
 // SPDX-License-Identifier: MIT
+
+//                                      #######
+//                                 ################
+//                               ####################
+//                             ###########   #########
+//                            #########      #########
+//          #######          #########       #########
+//          #########       #########      ##########
+//           ##########     ########     ####################
+//            ##########   #########  #########################
+//              ################### ############################
+//               #################  ##########          ########
+//                 ##############      ###              ########
+//                  ############                       #########
+//                    ##########                     ##########
+//                     ########                    ###########
+//                       ###                    ############
+//                                          ##############
+//                                    #################
+//                                   ##############
+//                                   #########
+
 pragma solidity ^0.8.18;
 
 import "./x-allocation-voting-governance/XAllocationVotingGovernor.sol";
@@ -15,6 +37,12 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { DataTypes } from "./libraries/DataTypes.sol";
 
+/**
+ * @title XAllocationVoting
+ * @notice The main contract for handling the voting rounds for the x-2-earn apps funds allocations.
+ *
+ * The contract is using AccessControl to handle roles for admin, governance and round starting operations.
+ */
 contract XAllocationVoting is
   Initializable,
   XAllocationVotingGovernor,
@@ -95,36 +123,60 @@ contract XAllocationVoting is
   }
 
   // ---------- Setters ---------- //
+  /**
+   * @dev Set the address of the X2EarnApps contract
+   */
   function setX2EarnAppsAddress(IX2EarnApps newX2EarnApps) public onlyRole(DEFAULT_ADMIN_ROLE) {
     _setX2EarnApps(newX2EarnApps);
   }
 
+  /**
+   * @dev Set the address of the Emissions contract
+   */
   function setEmissionsAddress(IEmissions newEmissions) public onlyRole(DEFAULT_ADMIN_ROLE) {
     _setEmissions(newEmissions);
   }
 
+  /**
+   * @dev Set the address of the VoterRewards contract
+   */
   function setVoterRewardsAddress(IVoterRewards newVoterRewards) public onlyRole(DEFAULT_ADMIN_ROLE) {
     _setVoterRewards(newVoterRewards);
   }
 
+  /**
+   * @dev Start a new voting round for allocating funds to the x-apps
+   */
   function startNewRound() public override onlyRole(ROUND_STARTER_ROLE) returns (uint256) {
     return super.startNewRound();
   }
 
+  /**
+   * @dev Set the max amount of shares an app can get in a round
+   */
   function setAppSharesCap(uint256 appSharesCap_) external virtual override onlyRole(DEFAULT_ADMIN_ROLE) {
     _setAppSharesCap(appSharesCap_);
   }
 
+  /**
+   * @dev Set the base allocation percentage for funds distribution in a round
+   */
   function setBaseAllocationPercentage(
     uint256 baseAllocationPercentage_
   ) public virtual override onlyRole(DEFAULT_ADMIN_ROLE) {
     _setBaseAllocationPercentage(baseAllocationPercentage_);
   }
 
+  /**
+   * @dev Set the voting period for a round
+   */
   function setVotingPeriod(uint32 newVotingPeriod) public virtual onlyRole(GOVERNANCE_ROLE) {
     _setVotingPeriod(newVotingPeriod);
   }
 
+  /**
+   * @dev Update the quorum a round needs to reach to be successful
+   */
   function updateQuorumNumerator(uint256 newQuorumNumerator) public virtual override onlyRole(GOVERNANCE_ROLE) {
     super.updateQuorumNumerator(newQuorumNumerator);
   }

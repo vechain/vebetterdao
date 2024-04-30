@@ -1,4 +1,26 @@
 // SPDX-License-Identifier: MIT
+
+//                                      #######
+//                                 ################
+//                               ####################
+//                             ###########   #########
+//                            #########      #########
+//          #######          #########       #########
+//          #########       #########      ##########
+//           ##########     ########     ####################
+//            ##########   #########  #########################
+//              ################### ############################
+//               #################  ##########          ########
+//                 ##############      ###              ########
+//                  ############                       #########
+//                    ##########                     ##########
+//                     ########                    ###########
+//                       ###                    ############
+//                                          ##############
+//                                    #################
+//                                   ##############
+//                                   #########
+
 pragma solidity ^0.8.20;
 
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
@@ -6,6 +28,14 @@ import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
 
+/**
+ * @title X2EarnAppsUpgradeable
+ * @dev Core x-2-earn applications management, designed to be extended through various modules.
+ *
+ * This contract is abstract and requires several functions to be implemented in various modules:
+ *
+ *  TODO: add more details here
+ */
 abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   function __XApps_init() internal onlyInitializing {
     __XApps_init_unchained();
