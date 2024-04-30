@@ -32,7 +32,7 @@ import {
   useCanProposalStartInNextRound,
   useCurrentAllocationsRoundId,
   useGetVotes,
-  useProposalThreshold,
+  useDepositThreshold,
   useVot3Balance,
 } from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"
@@ -106,7 +106,7 @@ type CreateProposalModalFormProps = {
 export const CreateProposalModalForm: React.FC<CreateProposalModalFormProps> = ({ onSubmit }) => {
   const { account } = useWallet()
 
-  const { data: depositThreshold } = useProposalThreshold()
+  const { data: depositThreshold } = useDepositThreshold()
 
   const { sendTransaction: delegate } = useDelegateVot3({ address: account ?? undefined })
   const { data: votesObject, isLoading: votesLoading } = useGetVotes(account ?? undefined)

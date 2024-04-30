@@ -56,7 +56,7 @@ contract B3TRGovernor is
    * @param _timelock The address of the Timelock
    * @param _xAllocationVoting The address of the xAllocationVoting
    * @param _quorumPercentage quorum as a percentage of the total supply at the block a proposal’s voting power is retrieved
-   * @param _initialProposalThreshold The Proposal Threshold is the amount of voting power that an account needs to make a proposal
+   * @param _initialDepositThreshold The Proposal Threshold is the amount of voting power that an account needs to make a proposal
    * @param _initialMinVotingDelay The minimum delay before a proposal can start
    * @param governorAdmin The address of the governor admin
    * @param _voterRewards The address of the voter rewards contract
@@ -66,13 +66,13 @@ contract B3TRGovernor is
     TimelockControllerUpgradeable _timelock,
     IXAllocationVotingGovernor _xAllocationVoting,
     uint256 _quorumPercentage,
-    uint256 _initialProposalThreshold,
+    uint256 _initialDepositThreshold,
     uint256 _initialMinVotingDelay,
     address governorAdmin,
     address _voterRewards
   ) public initializer {
     __Governor_init("B3TRGovernor");
-    __GovernorSettings_init(_initialProposalThreshold, _initialMinVotingDelay);
+    __GovernorSettings_init(_initialDepositThreshold, _initialMinVotingDelay);
     __GovernorCountingSimple_init();
     __GovernorVotes_init(_vot3Token);
     __GovernorVotesQuorumFraction_init(_quorumPercentage);

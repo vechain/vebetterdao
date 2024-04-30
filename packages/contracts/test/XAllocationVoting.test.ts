@@ -202,7 +202,7 @@ describe("X-Allocation Voting", function () {
         forceDeploy: true,
       })
 
-      const votesThreshold = await governor.proposalThreshold()
+      const votesThreshold = await governor.depositThreshold()
       await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
       await vot3.connect(owner).approve(await governor.getAddress(), votesThreshold)
 
@@ -350,7 +350,7 @@ describe("X-Allocation Voting", function () {
           forceDeploy: true,
         })
         await bootstrapAndStartEmissions()
-        const votesThreshold = await governor.proposalThreshold()
+        const votesThreshold = await governor.depositThreshold()
         await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
 
         await createProposalAndExecuteIt(
@@ -379,7 +379,7 @@ describe("X-Allocation Voting", function () {
           forceDeploy: true,
         })
         await bootstrapAndStartEmissions()
-        const votesThreshold = await governor.proposalThreshold()
+        const votesThreshold = await governor.depositThreshold()
         await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
 
         await expect(
@@ -459,7 +459,7 @@ describe("X-Allocation Voting", function () {
             forceDeploy: true,
           })
         await bootstrapAndStartEmissions()
-        const votesThreshold = await governor.proposalThreshold()
+        const votesThreshold = await governor.depositThreshold()
         await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
         await getVot3Tokens(otherAccount, (votesThreshold + BigInt(1)).toString())
         const cycleDuration = await emissions.cycleDuration()
@@ -506,7 +506,7 @@ describe("X-Allocation Voting", function () {
           forceDeploy: true,
         })
         await bootstrapAndStartEmissions()
-        const votesThreshold = await governor.proposalThreshold()
+        const votesThreshold = await governor.depositThreshold()
         await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
 
         await expect(
@@ -531,7 +531,7 @@ describe("X-Allocation Voting", function () {
             forceDeploy: true,
           })
         await bootstrapAndStartEmissions()
-        const votesThreshold = await governor.proposalThreshold()
+        const votesThreshold = await governor.depositThreshold()
         await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
         await getVot3Tokens(otherAccount, (votesThreshold + BigInt(1)).toString())
         const cycleDuration = await emissions.cycleDuration()
@@ -583,7 +583,7 @@ describe("X-Allocation Voting", function () {
           forceDeploy: true,
         })
         await bootstrapAndStartEmissions()
-        const votesThreshold = await governor.proposalThreshold()
+        const votesThreshold = await governor.depositThreshold()
         await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
 
         await createProposalAndExecuteIt(
@@ -604,7 +604,7 @@ describe("X-Allocation Voting", function () {
         const { xAllocationVoting, owner, governor } = await getOrDeployContractInstances({ forceDeploy: true })
 
         await bootstrapAndStartEmissions()
-        const votesThreshold = await governor.proposalThreshold()
+        const votesThreshold = await governor.depositThreshold()
         await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
 
         await expect(

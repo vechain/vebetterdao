@@ -11,7 +11,7 @@ const governorInterface = B3TRGovernor__factory.createInterface()
  * @param thor  the thor client
  * @returns  the current proposal threshold
  */
-export const getProposalThreshold = async (thor: Connex.Thor) => {
+export const getDepositThreshold = async (thor: Connex.Thor) => {
   const functionFragment = governorInterface.getFunction("depositThreshold").format("json")
   const res = await thor.account(GOVERNANCE_CONTRACT).method(JSON.parse(functionFragment)).call()
 
@@ -19,17 +19,17 @@ export const getProposalThreshold = async (thor: Connex.Thor) => {
   return res.decoded[0]
 }
 
-export const getProposalThresholdQueryKey = () => ["depositThreshold"]
+export const getDepositThresholdQueryKey = () => ["depositThreshold"]
 /**
  *  Hook to get the proposal threshold from the governor contract (i.e the number of votes required to create a proposal)
  * @returns
  */
-export const useProposalThreshold = () => {
+export const useDepositThreshold = () => {
   const { thor } = useConnex()
 
   return useQuery({
-    queryKey: getProposalThresholdQueryKey(),
-    queryFn: async () => await getProposalThreshold(thor),
+    queryKey: getDepositThresholdQueryKey(),
+    queryFn: async () => await getDepositThreshold(thor),
     enabled: !!thor,
   })
 }
