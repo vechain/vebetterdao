@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MITtotalVotesQR
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
 import { XAllocationVotingGovernor } from "../XAllocationVotingGovernor.sol";
