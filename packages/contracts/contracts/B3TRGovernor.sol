@@ -27,9 +27,9 @@ contract B3TRGovernor is
 {
   error UnauthorizedAccess(address user);
 
-  error GovernorRestrictedFunction(bytes4 functionSignature);
+  error GovernorRestrictedFunction(bytes4 functionSelector);
 
-  error GovernorFunctionInvalidSignature(bytes signature);
+  error GovernorFunctionInvalidSelector(bytes selector);
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
@@ -40,7 +40,7 @@ contract B3TRGovernor is
   struct B3TRGovernorStorage {
     IVoterRewards voterRewards;
     IXAllocationVotingGovernor xAllocationVoting;
-    mapping(bytes4 => bool) whitelistedFunctions; // mapping of whitelisted function signatures that can be proposed by a proposer
+    mapping(address => mapping(bytes4 => bool)) whitelistedFunctions; // mapping of target address to function selector to bool indicating if function is whitelisted for proposals
     bool isFunctionRestrictionEnabled; // flag to enable/disable function restriction
   }
 
@@ -52,6 +52,12 @@ contract B3TRGovernor is
     assembly {
       $.slot := B3TRGovernorStorageLocation
     }
+  }
+
+  /// @notice modifier to check if the caller is admin or if the function is part of a governance proposal
+  modifier onlyAdminOrGovernance() {
+    if (!hasRole(DEFAULT_ADMIN_ROLE, _msgSender())) _checkGovernance();
+    _;
   }
 
   /**
@@ -73,8 +79,7 @@ contract B3TRGovernor is
     uint256 _initialProposalThreshold,
     uint256 _initialMinVotingDelay,
     address governorAdmin,
-    address _voterRewards,
-    bytes4[] memory _restrictedFunctions
+    address _voterRewards
   ) public initializer {
     __Governor_init("B3TRGovernor");
     __GovernorSettings_init(_initialProposalThreshold, _initialMinVotingDelay);
@@ -90,10 +95,6 @@ contract B3TRGovernor is
     $.xAllocationVoting = _xAllocationVoting;
 
     $.isFunctionRestrictionEnabled = true;
-
-    for (uint256 i = 0; i < _restrictedFunctions.length; i++) {
-      $.whitelistedFunctions[_restrictedFunctions[i]] = true;
-    }
 
     _grantRole(DEFAULT_ADMIN_ROLE, governorAdmin);
   }
@@ -127,6 +128,10 @@ contract B3TRGovernor is
     return true;
   }
 
+  function isFunctionWhitelisted(address target, bytes4 functionSelector) public view returns (bool) {
+    return _getB3TRGovernorStorage().whitelistedFunctions[target][functionSelector];
+  }
+
   // ------------------ SETTERS ------------------ //
 
   function setVoterRewards(address _voterRewards) public onlyGovernance {
@@ -140,12 +145,27 @@ contract B3TRGovernor is
     $.xAllocationVoting = _xAllocationVoting;
   }
 
-  function setWhitelistFunction(bytes4 functionSignature, bool isWhitelisted) public onlyGovernance {
+  function setWhitelistFunction(
+    address target,
+    bytes4 functionSelector,
+    bool isWhitelisted
+  ) public onlyAdminOrGovernance {
     B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
-    $.whitelistedFunctions[functionSignature] = isWhitelisted;
+    $.whitelistedFunctions[target][functionSelector] = isWhitelisted;
   }
 
-  function setIsFunctionRestrictionEnabled(bool isEnabled) public onlyGovernance {
+  function setWhitelistFunctions(
+    address target,
+    bytes4[] memory functionSelectors,
+    bool isWhitelisted
+  ) public onlyAdminOrGovernance {
+    B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
+    for (uint256 i = 0; i < functionSelectors.length; i++) {
+      $.whitelistedFunctions[target][functionSelectors[i]] = isWhitelisted;
+    }
+  }
+
+  function setIsFunctionRestrictionEnabled(bool isEnabled) public onlyAdminOrGovernance {
     B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
     $.isFunctionRestrictionEnabled = isEnabled;
   }
@@ -222,14 +242,12 @@ contract B3TRGovernor is
       revert GovernorUnexpectedProposalState(proposalId, state(proposalId), bytes32(0));
     }
 
-    // Check if the calldatas function signatures are whitelisted
+    // Check if the calldatas function selectors are whitelisted
     if ($$.isFunctionRestrictionEnabled == true) {
-      for (uint256 i = 0; i < calldatas.length; i++) {
-        // Extract the function signature from each calldata
-        bytes4 functionSignature = _extractFunctionSignature(calldatas[i]);
-
-        if (!$$.whitelistedFunctions[functionSignature]) {
-          revert GovernorRestrictedFunction(functionSignature);
+      for (uint256 i = 0; i < targets.length; i++) {
+        bytes4 functionSelector = _extractFunctionSelector(calldatas[i]);
+        if ($$.whitelistedFunctions[targets[i]][functionSelector] == false) {
+          revert GovernorRestrictedFunction(functionSelector);
         }
       }
     }
@@ -254,8 +272,8 @@ contract B3TRGovernor is
     // Using a named return variable to avoid stack too deep errors
   }
 
-  function _extractFunctionSignature(bytes memory data) internal pure returns (bytes4) {
-    if (data.length < 4) revert GovernorFunctionInvalidSignature(data);
+  function _extractFunctionSelector(bytes memory data) internal pure returns (bytes4) {
+    if (data.length < 4) revert GovernorFunctionInvalidSelector(data);
     bytes4 sig;
     assembly {
       sig := mload(add(data, 32))
