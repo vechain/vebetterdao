@@ -1517,13 +1517,15 @@ describe("VoterRewards", () => {
       await emissions.connect(minterAccount).start()
 
       const voter2 = otherAccounts[1]
+      const proposar = otherAccounts[2]
 
       // we do it here but will use in the next test
       await getVot3Tokens(voter1, "1000")
       await getVot3Tokens(voter2, "1000")
+      await getVot3Tokens(proposar, "1000")
 
       // Now we can create a new proposal
-      const tx = await createProposal(b3tr, B3trContract, voter1, description, functionToCall, [])
+      const tx = await createProposal(b3tr, B3trContract, proposar, description, functionToCall, [])
       const proposalId = await getProposalIdFromTx(tx)
       const cycle = await governor.proposalStartRound(proposalId)
 
@@ -1620,14 +1622,16 @@ describe("VoterRewards", () => {
       await voterRewards.setGalaxyMember(await galaxyMember.getAddress())
 
       const voter2 = otherAccounts[1]
+      const proposar = otherAccounts[2]
 
       await getVot3Tokens(voter1, "1000")
       await getVot3Tokens(voter2, "1000")
+      await getVot3Tokens(proposar, "2000")
 
       await bootstrapAndStartEmissions()
 
       // Now we can create a new proposal
-      let tx = await createProposal(b3tr, B3trContract, voter1, description, functionToCall, [])
+      let tx = await createProposal(b3tr, B3trContract, proposar, description, functionToCall, [])
       let proposalId = await getProposalIdFromTx(tx)
       let cycle = await governor.proposalStartRound(proposalId)
 
@@ -1651,7 +1655,7 @@ describe("VoterRewards", () => {
 
       await upgradeNFTtoLevel(1, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
 
-      tx = await createProposal(b3tr, B3trContract, voter1, description + "1", functionToCall, [])
+      tx = await createProposal(b3tr, B3trContract, proposar, description + "1", functionToCall, [])
       proposalId = await getProposalIdFromTx(tx)
       cycle = await governor.proposalStartRound(proposalId)
 
@@ -1731,10 +1735,12 @@ describe("VoterRewards", () => {
 
       const voter2 = otherAccounts[1]
       const voter3 = otherAccounts[2]
+      const proposar = otherAccounts[3]
 
       await getVot3Tokens(voter1, "1000")
       await getVot3Tokens(voter2, "1000")
       await getVot3Tokens(voter3, "1000")
+      await getVot3Tokens(proposar, "2000")
 
       // Bootstrap emissions
       await bootstrapAndStartEmissions() // round 1
@@ -1742,7 +1748,7 @@ describe("VoterRewards", () => {
       let nextCycle = await emissions.nextCycle() // next cycle round 2
 
       // Now we can create a new proposal
-      let tx = await createProposal(b3tr, B3trContract, voter1, description, functionToCall, [], false, nextCycle)
+      let tx = await createProposal(b3tr, B3trContract, proposar, description, functionToCall, [], false, nextCycle)
       let proposalId = await getProposalIdFromTx(tx)
 
       const proposalState = await waitForProposalToBeActive(proposalId) // we are now in round 2
@@ -1793,7 +1799,7 @@ describe("VoterRewards", () => {
       nextCycle = await emissions.nextCycle() // next cycle round 3
 
       // Now we can create a new proposal and the GM NFT upgrade will be taken into account
-      tx = await createProposal(b3tr, B3trContract, voter1, description + "1", functionToCall, [], false, nextCycle)
+      tx = await createProposal(b3tr, B3trContract, proposar, description + "1", functionToCall, [], false, nextCycle)
       proposalId = await getProposalIdFromTx(tx)
 
       await waitForProposalToBeActive(proposalId) // we are in round 3 now

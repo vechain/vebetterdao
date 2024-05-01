@@ -65,7 +65,7 @@ export const createProposal = async (
   // the proposer needs to have some delegated VOT3 to be able to create a proposal
   const clock = await governor.clock()
   const proposerVotes = await governor.getVotes(proposer, clock - BigInt(1))
-  const votesThreshold = await governor.proposalThreshold()
+  const votesThreshold = await governor.depositThreshold()
 
   if (votesThreshold > proposerVotes && !avoidMintingAndDelegating) {
     //The proposer needs to have some delegated VOT3 to be able to create a proposal
@@ -73,13 +73,16 @@ export const createProposal = async (
     // We also need to wait a block to update the proposer's votes snapshot
     await waitForNextBlock()
   }
+  const { vot3 } = await getOrDeployContractInstances({ forceDeploy: false })
+  // grant approval for governor to spend proposer's VOT3
+  await vot3.connect(proposer).approve(await governor.getAddress(), votesThreshold)
 
   const address = await contractToCall.getAddress()
   const encodedFunctionCall = ContractFactory.interface.encodeFunctionData(functionTocall, values)
 
   const tx = await governor
     .connect(proposer)
-    .propose([address], [0], [encodedFunctionCall], description, roundId.toString(), {
+    .propose([address], [0], [encodedFunctionCall], description, roundId.toString(), votesThreshold, {
       gasLimit: 10_000_000,
     })
 
@@ -89,7 +92,8 @@ export const createProposal = async (
 export const getProposalIdFromTx = async (tx: ContractTransactionResponse) => {
   const { governor } = await getOrDeployContractInstances({})
   const proposeReceipt = await tx.wait()
-  const event = proposeReceipt?.logs[0]
+  const event = proposeReceipt?.logs[3]
+
   const decodedLogs = governor.interface.parseLog({
     topics: [...(event?.topics as string[])],
     data: event ? event.data : "",
