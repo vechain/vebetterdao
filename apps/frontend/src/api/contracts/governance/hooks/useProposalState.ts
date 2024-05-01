@@ -15,6 +15,7 @@ export const ProposalState = {
   5: "Queued",
   6: "Expired",
   7: "Executed",
+  8: "DepositNotMet"
 }
 
 export const getProposalState = async (thor: Connex.Thor, proposalId: string): Promise<keyof typeof ProposalState> => {
