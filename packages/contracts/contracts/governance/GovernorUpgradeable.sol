@@ -54,9 +54,10 @@ abstract contract GovernorUpgradeable is
     bool executed;
     bool canceled;
     uint48 etaSeconds;
+    uint256 depositAmount;
   }
 
-  bytes32 private constant ALL_PROPOSAL_STATES_BITMAP = bytes32((2 ** (uint8(type(ProposalState).max) + 1)) - 1);
+  bytes32 internal constant ALL_PROPOSAL_STATES_BITMAP = bytes32((2 ** (uint8(type(ProposalState).max) + 1)) - 1);
   /// @custom:storage-location erc7201:openzeppelin.storage.Governor
   struct GovernorStorage {
     string _name;
@@ -163,9 +164,9 @@ abstract contract GovernorUpgradeable is
   }
 
   /**
-   * @dev See {IB3TRGovernor-proposalThreshold}.
+   * @dev See {IB3TRGovernor-depositThreshold}.
    */
-  function proposalThreshold() public view virtual returns (uint256) {
+  function depositThreshold() public view virtual returns (uint256) {
     return 0;
   }
 
@@ -545,7 +546,7 @@ abstract contract GovernorUpgradeable is
    *
    * If requirements are not met, reverts with a {GovernorUnexpectedProposalState} error.
    */
-  function _validateStateBitmap(uint256 proposalId, bytes32 allowedStates) private view returns (ProposalState) {
+  function _validateStateBitmap(uint256 proposalId, bytes32 allowedStates) internal view returns (ProposalState) {
     ProposalState currentState = state(proposalId);
     if (_encodeStateBitmap(currentState) & allowedStates == bytes32(0)) {
       revert GovernorUnexpectedProposalState(proposalId, currentState, allowedStates);
