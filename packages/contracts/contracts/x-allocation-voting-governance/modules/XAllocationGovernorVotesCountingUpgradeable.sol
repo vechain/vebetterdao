@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MITtotalVotesQR
 pragma solidity ^0.8.18;
 
 import { XAllocationVotingGovernor } from "../XAllocationVotingGovernor.sol";
@@ -67,17 +67,17 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
     return "support=x-allocations&quorum=auto";
   }
 
-/**
- * @dev Counts votes for a given round of voting, applying quadratic funding principles.
- * This function allows a voter to allocate weights (votes) to various applications (apps) for a specific voting round.
- * It checks if the voter has already voted in the round to prevent double voting.
- * Each vote's weight is applied to the specified applications, and the total and quadratic votes for each application
- * are updated accordingly.
- * 
- * Quadratic Funding (QF) is implemented here to calculate the impact of each vote. In QF, the value of each vote is squared,
- * emphasizing the number of participants over the size of individual contributions. This method aims to democratize the voting
- * process by amplifying the influence of a larger number of smaller votes.
- */
+  /**
+   * @dev Counts votes for a given round of voting, applying quadratic funding principles.
+   * This function allows a voter to allocate weights (votes) to various applications (apps) for a specific voting round.
+   * It checks if the voter has already voted in the round to prevent double voting.
+   * Each vote's weight is applied to the specified applications, and the total and quadratic votes for each application
+   * are updated accordingly.
+   *
+   * Quadratic Funding (QF) is implemented here to calculate the impact of each vote. In QF, the value of each vote is squared,
+   * emphasizing the number of participants over the size of individual contributions. This method aims to democratize the voting
+   * process by amplifying the influence of a larger number of smaller votes.
+   */
   function _countVote(
     uint256 roundId,
     address voter,
@@ -136,7 +136,8 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
 
     emit AllocationVoteCast(voter, roundId, apps, weights);
 
-    $.voterRewards.registerVote(round.voteStart, voter, totalWeight);
+    // Register the vote for rewards calculation where the vote power is the square root of the total votes cast by the voter
+    $.voterRewards.registerVote(round.voteStart, voter, totalWeight, Math.sqrt(totalWeight) * 1e9);
   }
 
   function getAppVotes(uint256 roundId, bytes32 app) public view override returns (uint256) {

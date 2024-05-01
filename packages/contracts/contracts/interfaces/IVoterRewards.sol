@@ -55,7 +55,8 @@ interface IVoterRewards {
     event VoteRegistered(
         uint256 indexed cycle,
         address indexed voter,
-        uint256 votes
+        uint256 votes,
+        uint256 rewardWeightedVote
     );
 
     function DEFAULT_ADMIN_ROLE() external view returns (bytes32);
@@ -112,7 +113,8 @@ interface IVoterRewards {
     function registerVote(
         uint256 proposalStart,
         address voter,
-        uint256 votes
+        uint256 votes,
+        uint256 votePower
     ) external;
 
     function renounceRole(bytes32 role, address callerConfirmation) external;

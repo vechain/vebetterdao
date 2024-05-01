@@ -277,7 +277,7 @@ contract B3TRGovernor is
     if (weight > 0) {
       B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
 
-      $.voterRewards.registerVote(proposalSnapshot(proposalId), msg.sender, weight);
+      $.voterRewards.registerVote(proposalSnapshot(proposalId), msg.sender, weight, Math.sqrt(weight) * 1e9);
     }
 
     return weight;
