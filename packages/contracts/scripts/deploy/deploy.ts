@@ -151,7 +151,6 @@ export async function deployAll(config: ContractsConfig) {
     config.B3TR_GOVERNOR_MIN_VOTING_DELAY,
     TEMP_ADMIN,
     await voterRewards.getAddress(),
-    await getWhitelistedFunctions(config),
   ])) as B3TRGovernor
   console.log(`Governor contract deployed at address ${await governor.getAddress()}`)
 
@@ -407,28 +406,42 @@ async function deployB3trToken(admin: string, cap: number): Promise<B3TR> {
 }
 
 /**
- * Get the list of whitelisted functions for the governor contract
+ * Set the whitelisted functions from config
+ * Performs the following steps for each contract:
+ *    1. Get the function signatures from the contract factory
+ *    2. Set the whitelisted functions in the governor contract
+ *
+ * @param contractAddresses - Addresses of the deployed contracts
  * @param config - Contracts configuration
+ * @param governor - B3TRGovernor contract instance
+ * @param admin - Admin signer
  *
  * @note - For ambiguous functions (functions with same name), the function signature is used to differentiate them
  * e.g., instead of using "setVoterRewards", we use "setVoterRewards(address)" in the config
- *
- * @returns - List of whitelisted functions' selectors (e.g., ["0x12345678", "0x87654321"])
  */
-export const getWhitelistedFunctions = async (config: ContractsConfig) => {
+export const setWhitelistedFunctions = async (
+  contractAddresses: Record<string, string>,
+  config: ContractsConfig,
+  governor: B3TRGovernor,
+  admin: HardhatEthersSigner,
+) => {
   const { B3TR_GOVERNOR_WHITELISTED_METHODS } = config
 
-  const whitelistFunctions = []
-
-  // Each key is the contract name and the value is the list of functions that are whitelisted
   for (const [contract, functions] of Object.entries(B3TR_GOVERNOR_WHITELISTED_METHODS)) {
     const contractFactory = await ethers.getContractFactory(contract)
+    const whitelistFunctionSelectors = []
+
     for (const func of functions) {
       const sig = contractFactory.interface.getFunction(func)?.selector
 
-      whitelistFunctions.push(sig)
+      if (sig) whitelistFunctionSelectors.push(sig)
+    }
+
+    if (whitelistFunctionSelectors.length !== 0) {
+      await governor
+        .connect(admin)
+        .setWhitelistFunctions(contractAddresses[contract], whitelistFunctionSelectors, true)
+        .then(async tx => await tx.wait())
     }
   }
-
-  return whitelistFunctions
 }
