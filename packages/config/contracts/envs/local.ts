@@ -18,10 +18,10 @@ export function createLocalConfig() {
         "upgradeToAndCall",
         "setXAllocationVoting",
         "setVoterRewards",
-        "setProposalThreshold",
         "setMinVotingDelay",
         "setWhitelistFunction",
         "setIsFunctionRestrictionEnabled",
+        "setDepositThreshold",
       ],
       Treasury: ["transferVET"],
       XAllocationVoting: [
