@@ -24,7 +24,14 @@ export function createLocalConfig() {
         "setIsFunctionRestrictionEnabled",
       ],
       Treasury: ["transferVET"],
-      XAllocationVoting: ["updateQuorumNumerator", "setVotingPeriod", "setEmissions", "addApp", "setVotingElegibility"],
+      XAllocationVoting: [
+        "upgradeToAndCall",
+        "updateQuorumNumerator",
+        "setVotingPeriod",
+        "setEmissions",
+        "addApp",
+        "setVotingElegibility",
+      ],
     },
 
     EMISSIONS_CYCLE_DURATION: 12, // 12 blocks - 2 minutes.

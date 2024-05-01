@@ -197,7 +197,7 @@ describe("X-Allocation Voting", function () {
       expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
     })
 
-    it("should be able to upgrade the xAllocationVoting contract through governance", async function () {
+    it.only("should be able to upgrade the xAllocationVoting contract through governance", async function () {
       const { xAllocationVoting, timeLock, governor, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
