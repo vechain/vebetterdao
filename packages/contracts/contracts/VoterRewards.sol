@@ -39,7 +39,7 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
     }
   }
 
-  event VoteRegistered(uint256 indexed cycle, address indexed voter, uint256 votes);
+  event VoteRegistered(uint256 indexed cycle, address indexed voter, uint256 votes, uint256 rewardWeightedVote);
 
   event RewardClaimed(uint256 indexed cycle, address indexed voter, uint256 reward);
 
@@ -85,11 +85,24 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
 
   function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
-  function registerVote(uint256 proposalStart, address voter, uint256 votes) public onlyRole(VOTE_REGISTRAR_ROLE) {
-    if (votes == 0) {
+  // @notice Register the votes of a user for rewards calculation.
+  // @dev Quadratic rewarding is used to reward users fairly based on their voting power.
+  // @param proposalStart The start time of the proposal.
+  // @param voter The address of the voter.
+  // @param votes The number of votes cast by the voter.
+  // @param votePower The square root of the total votes cast by the voter.
+  function registerVote(
+    uint256 proposalStart,
+    address voter,
+    uint256 votes,
+    uint256 votePower
+  ) public onlyRole(VOTE_REGISTRAR_ROLE) {
+    // If votePower is zero, exit the function to avoid unnecessary computations.
+    if (votePower == 0) {
       return;
     }
 
+    // Ensure the proposal start time is valid and the voter address is not zero.
     require(proposalStart > 0, "VoterRewards: proposalStart must be greater than 0");
     require(voter != address(0), "VoterRewards: voter cannot be the zero address");
 
@@ -97,15 +110,23 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
 
     uint256 cycle = $.emissions.getCurrentCycle();
 
+    // Fetch the highest level achieved by the voter in Galaxy Member NFT up to the proposal start time.
     uint256 gmNftLevel = $.galaxyMember.getPastHighestLevel(voter, proposalStart);
 
+    // Determine the reward multiplier based on the GM NFT level.
     uint256 multiplier = $.levelToMultiplier[gmNftLevel]; // Percentage multiplier for the level of the GM NFT
-    uint256 total = votes + (votes * multiplier) / 100; // Total weighted votes
 
-    $.cycleToTotal[cycle] += total; // Add total to the cycle
-    $.cycleToVoterToTotal[cycle][voter] += total; // Add total to the voter in the cycle
+    // Calculate the weighted vote power for rewards, adjusting vote power with the level-based multiplier.
+    // votePower is the square root of the total votes cast by the voter.
+    uint256 rewardWeightedVote = votePower + (votePower * multiplier) / 100; // Adjusted vote power used for rewards calculation.
 
-    emit VoteRegistered(cycle, voter, total);
+    // Update the total reward-weighted votes in the cycle.
+    $.cycleToTotal[cycle] += rewardWeightedVote;
+
+    // Record the reward-weighted vote power for the voter in the cycle.
+    $.cycleToVoterToTotal[cycle][voter] += rewardWeightedVote;
+
+    emit VoteRegistered(cycle, voter, votes, rewardWeightedVote);
   }
 
   function claimReward(uint256 cycle, address voter) public nonReentrant {
