@@ -171,13 +171,6 @@ export async function deployAll(config: ContractsConfig) {
 
   await setWhitelistedFunctions(contractAddresses, config, governor, admin) // Set whitelisted functions for governor proposals
 
-  console.log(
-    await governor.isFunctionWhitelisted(
-      await governor.getAddress(),
-      governor.interface.getFunction("upgradeToAndCall").selector,
-    ),
-  )
-
   // ---------- Configure contract roles for setup ---------- //
 
   console.log("Configuring contract roles for setup...")
