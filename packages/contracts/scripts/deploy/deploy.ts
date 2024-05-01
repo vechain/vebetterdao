@@ -156,6 +156,28 @@ export async function deployAll(config: ContractsConfig) {
 
   console.log("Contracts deployed")
 
+  const contractAddresses: Record<string, string> = {
+    B3TR: await b3tr.getAddress(),
+    VoterRewards: await voterRewards.getAddress(),
+    Treasury: await treasury.getAddress(),
+    XAllocationVoting: await xAllocationVoting.getAddress(),
+    Emissions: await emissions.getAddress(),
+    GalaxyMember: await galaxyMember.getAddress(),
+    TimeLock: await timelock.getAddress(),
+    VOT3: await vot3.getAddress(),
+    XAllocationPool: await xAllocationPool.getAddress(),
+    B3TRGovernor: await governor.getAddress(),
+  }
+
+  await setWhitelistedFunctions(contractAddresses, config, governor, admin) // Set whitelisted functions for governor proposals
+
+  console.log(
+    await governor.isFunctionWhitelisted(
+      await governor.getAddress(),
+      governor.interface.getFunction("upgradeToAndCall").selector,
+    ),
+  )
+
   // ---------- Configure contract roles for setup ---------- //
 
   console.log("Configuring contract roles for setup...")
