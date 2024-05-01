@@ -440,7 +440,7 @@ describe("Governor and TimeLock", function () {
         forceDeploy: true,
       })
 
-      // remove setProposalThreshold from whitelisted functions
+      // remove setVoterRewards from whitelisted functions
       await createProposalAndExecuteIt(
         owner,
         owner,
@@ -448,7 +448,7 @@ describe("Governor and TimeLock", function () {
         await ethers.getContractFactory("B3TRGovernor"),
         "Update Min Voting Delay",
         "setWhitelistFunction",
-        [await governor.getAddress(), governor.interface.getFunction("setProposalThreshold")?.selector, false],
+        [await governor.getAddress(), governor.interface.getFunction("setVoterRewards")?.selector, false],
       )
 
       await expect(
@@ -458,8 +458,8 @@ describe("Governor and TimeLock", function () {
           [governor, governor],
           await ethers.getContractFactory("B3TRGovernor"),
           "Update Min Voting Delay",
-          ["setMinVotingDelay", "setProposalThreshold"],
-          [[10n], [10n]],
+          ["setMinVotingDelay", "setVoterRewards"],
+          [[10n], [await owner.getAddress()]],
         ),
       ).to.be.reverted
     })
@@ -475,16 +475,16 @@ describe("Governor and TimeLock", function () {
         [governor, governor],
         await ethers.getContractFactory("B3TRGovernor"),
         "Update Min Voting Delay",
-        ["setMinVotingDelay", "setProposalThreshold"],
+        ["setMinVotingDelay", "setDepositThreshold"],
         [[10n], [10n]],
       )
 
       expect(await governor.minVotingDelay()).to.eql(10n)
-      expect(await governor.proposalThreshold()).to.eql(10n)
+      expect(await governor.depositThreshold()).to.eql(10n)
     })
 
     it("Should be able to execute any function if function restriction is disabled", async function () {
-      const { governor, owner } = await getOrDeployContractInstances({
+      const { governor, owner, xAllocationVoting } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -531,6 +531,7 @@ describe("Governor and TimeLock", function () {
         "Enable function restriction",
         "setIsFunctionRestrictionEnabled",
         [true],
+        (await xAllocationVoting.currentRoundId()) + BigInt(2),
       )
 
       // Should not be able to execute the function now
@@ -1626,9 +1627,19 @@ describe("Governor and TimeLock", function () {
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
 
       await expect(
-        governor.connect(proposer).propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), {
-          gasLimit: 10_000_000,
-        }),
+        governor
+          .connect(proposer)
+          .propose(
+            [address],
+            [0],
+            [encodedFunctionCall],
+            "",
+            voteStartsInRoundId.toString(),
+            ethers.parseEther("1000"),
+            {
+              gasLimit: 10_000_000,
+            },
+          ),
       ).to.be.reverted
     })
   })
@@ -2885,18 +2896,22 @@ describe("Governor and TimeLock", function () {
       expect(await governor.state(proposalId)).to.eql(0n) // pending
 
       // deposits cannot be withdrawn when proposal is pending
-      await expect(governor.connect(proposer).withdraw(proposalId, proposer.address, { gasLimit: 10_000_000 })).to.be.reverted
+      await expect(governor.connect(proposer).withdraw(proposalId, proposer.address, { gasLimit: 10_000_000 })).to.be
+        .reverted
 
-      await expect(governor.connect(sponser).withdraw(proposalId, sponser.address, { gasLimit: 10_000_000 })).to.be.reverted
+      await expect(governor.connect(sponser).withdraw(proposalId, sponser.address, { gasLimit: 10_000_000 })).to.be
+        .reverted
 
       await waitForProposalToBeActive(proposalId)
       // proposal should be in active state as deposit was met
       expect(await governor.state(proposalId)).to.eql(1n) // active
 
       // deposits cannot be withdrawn when proposal is active
-      await expect(governor.connect(proposer).withdraw(proposalId, proposer.address, { gasLimit: 10_000_000 })).to.be.reverted
+      await expect(governor.connect(proposer).withdraw(proposalId, proposer.address, { gasLimit: 10_000_000 })).to.be
+        .reverted
 
-      await expect(governor.connect(sponser).withdraw(proposalId, sponser.address, { gasLimit: 10_000_000 })).to.be.reverted
+      await expect(governor.connect(sponser).withdraw(proposalId, sponser.address, { gasLimit: 10_000_000 })).to.be
+        .reverted
 
       // wait for voting period to end
       await waitForVotingPeriodToEnd(proposalId)
