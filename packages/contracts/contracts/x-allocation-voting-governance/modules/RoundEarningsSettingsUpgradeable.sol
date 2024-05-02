@@ -27,14 +27,14 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 import { XAllocationVotingGovernor } from "../XAllocationVotingGovernor.sol";
 
 /**
- * @title RoundEarningsSettings
+ * @title RoundEarningsSettingsUpgradeable
  * @notice Extension of {XAllocationVotingGovernor} to handle the settings for the x-allocation earnings calculations:
  * - baseAllocationPercentage: The base allocation percentage to be divided among the x-apps each round
  * - appSharesCap: The maximum percentage of shares an x-app can reach in each round
  *
  * Since the base allocation percentage and app shares cap can be updated, we store the values for each round.
  */
-abstract contract RoundEarningsSettings is Initializable, XAllocationVotingGovernor {
+abstract contract RoundEarningsSettingsUpgradeable is Initializable, XAllocationVotingGovernor {
   /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.RoundEarningsSettings
   struct EarningsSettingsStorage {
     uint256 baseAllocationPercentage;
