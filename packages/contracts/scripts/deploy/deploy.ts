@@ -69,7 +69,7 @@ export async function deployAll(config: ContractsConfig) {
 
   const x2EarnApps = (await deployProxy(
     "X2EarnApps",
-    [config.XAPP_BASE_URI, [await timelock.getAddress(), TEMP_ADMIN]],
+    [config.XAPP_BASE_URI, [await timelock.getAddress(), TEMP_ADMIN], TEMP_ADMIN],
     {
       DataTypes: await DataTypesLib.getAddress(),
     },

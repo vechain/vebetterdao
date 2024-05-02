@@ -15,8 +15,71 @@ import {
   waitForRoundToEnd,
 } from "./helpers"
 import { describe, it } from "mocha"
+import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 
 describe("X-Apps", function () {
+  describe("Deployment", function () {
+    it("Clock mode is set correctly", async function () {
+      const { x2EarnApps } = await getOrDeployContractInstances({ forceDeploy: true })
+      expect(await x2EarnApps.CLOCK_MODE()).to.eql("mode=blocknumber&from=default")
+    })
+  })
+
+  describe("Contract upgradeablity", () => {
+    it("Cannot initialize twice", async function () {
+      const { x2EarnApps, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      await catchRevert(x2EarnApps.initialize("ipfs://", [owner.address], owner.address))
+    })
+
+    it("User with UPGRADER_ROLE should be able to upgrade the contract", async function () {
+      const { x2EarnApps, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Deploy the implementation contract
+      const Contract = await ethers.getContractFactory("X2EarnApps")
+      const implementation = await Contract.deploy()
+      await implementation.waitForDeployment()
+
+      const currentImplAddress = await getImplementationAddress(ethers.provider, await x2EarnApps.getAddress())
+
+      const UPGRADER_ROLE = await x2EarnApps.UPGRADER_ROLE()
+      expect(await x2EarnApps.hasRole(UPGRADER_ROLE, owner.address)).to.eql(true)
+
+      await expect(x2EarnApps.connect(owner).upgradeToAndCall(await implementation.getAddress(), "0x")).to.not.be
+        .reverted
+
+      const newImplAddress = await getImplementationAddress(ethers.provider, await x2EarnApps.getAddress())
+
+      expect(newImplAddress.toUpperCase()).to.not.eql(currentImplAddress.toUpperCase())
+      expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
+    })
+
+    it("Only user with UPGRADER_ROLE should be able to upgrade the contract", async function () {
+      const { x2EarnApps, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Deploy the implementation contract
+      const Contract = await ethers.getContractFactory("X2EarnApps")
+      const implementation = await Contract.deploy()
+      await implementation.waitForDeployment()
+
+      const currentImplAddress = await getImplementationAddress(ethers.provider, await x2EarnApps.getAddress())
+
+      const UPGRADER_ROLE = await x2EarnApps.UPGRADER_ROLE()
+      expect(await x2EarnApps.hasRole(UPGRADER_ROLE, otherAccount.address)).to.eql(false)
+
+      await expect(x2EarnApps.connect(otherAccount).upgradeToAndCall(await implementation.getAddress(), "0x")).to.be
+        .reverted
+
+      const newImplAddress = await getImplementationAddress(ethers.provider, await x2EarnApps.getAddress())
+
+      expect(newImplAddress.toUpperCase()).to.eql(currentImplAddress.toUpperCase())
+      expect(newImplAddress.toUpperCase()).to.not.eql((await implementation.getAddress()).toUpperCase())
+    })
+  })
+
   describe("Settings", function () {
     it("Admin can set baseURI for apps", async function () {
       const { owner, x2EarnApps } = await getOrDeployContractInstances({ forceDeploy: true })
@@ -197,6 +260,13 @@ describe("X-Apps", function () {
     //   const apps = await x2EarnApps.apps()
     //   expect(apps.length).to.eql(1300)
     // })
+
+    it("Cannot get creation date of non existing app", async function () {
+      const { x2EarnApps } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+
+      await expect(x2EarnApps.createdAt(app1Id)).to.be.reverted
+    })
   })
 
   describe("App availability for allocation voting", function () {
@@ -418,6 +488,14 @@ describe("X-Apps", function () {
       appVotes = await xAllocationVoting.getAppVotes(round2, app1Id)
       expect(appVotes).to.equal(ethers.parseEther("1"))
     })
+
+    it("Cannot set elegibility for non existing app", async function () {
+      const { x2EarnApps } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+
+      await catchRevert(x2EarnApps.setVotingElegibility(app1Id, true))
+    })
   })
 
   describe("Admin address", function () {
@@ -444,6 +522,16 @@ describe("X-Apps", function () {
       const newAdminAddress = ethers.Wallet.createRandom().address
 
       await expect(x2EarnApps.connect(owner).setAppAdmin(app1Id, newAdminAddress)).to.be.rejected
+    })
+
+    it("Cannot set the admin address of an app to ZERO address", async function () {
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+
+      await catchRevert(x2EarnApps.connect(otherAccounts[0]).setAppAdmin(app1Id, ZERO_ADDRESS))
     })
   })
 
@@ -678,6 +766,16 @@ describe("X-Apps", function () {
 
       await expect(x2EarnApps.connect(owner).updateAppReceiverAddress(app1Id, newReceiverAddress)).to.be.rejected
     })
+
+    it("Receiver address cannot be updated to ZERO address", async function () {
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+
+      await catchRevert(x2EarnApps.connect(otherAccounts[0]).updateAppReceiverAddress(app1Id, ZERO_ADDRESS))
+    })
   })
 
   describe("App Moderators", function () {
@@ -816,6 +914,17 @@ describe("X-Apps", function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
 
       await expect(x2EarnApps.connect(owner).removeAppModerator(app1Id, owner.address)).to.be.rejected
+    })
+
+    it("Cannot add ZERO_ADDRESS as a moderator of an app", async function () {
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+
+      await expect(x2EarnApps.connect(otherAccounts[0]).addAppModerator(app1Id, ZERO_ADDRESS)).to.be.rejected
     })
   })
 })

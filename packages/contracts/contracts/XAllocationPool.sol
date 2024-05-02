@@ -134,6 +134,13 @@ contract XAllocationPool is
     $.b3tr = IB3TR(b3tr_);
   }
 
+  function setX2EarnAppsAddress(address x2EarnApps_) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(x2EarnApps_ != address(0), "XAllocationPool: new x2EarnApps is the zero address");
+
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    $.x2EarnApps = IX2EarnApps(x2EarnApps_);
+  }
+
   function claim(uint256 roundId, bytes32 appId) public nonReentrant {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
 

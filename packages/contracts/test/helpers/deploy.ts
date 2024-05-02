@@ -103,9 +103,13 @@ export const getOrDeployContractInstances = async ({
   ])) as GalaxyMember
 
   // Deploy X2EarnApps
-  const x2EarnApps = (await deployProxy("X2EarnApps", ["ipfs://", [await timeLock.getAddress(), owner.address]], {
-    DataTypes: await DataTypesLib.getAddress(),
-  })) as X2EarnApps
+  const x2EarnApps = (await deployProxy(
+    "X2EarnApps",
+    ["ipfs://", [await timeLock.getAddress(), owner.address], owner.address],
+    {
+      DataTypes: await DataTypesLib.getAddress(),
+    },
+  )) as X2EarnApps
 
   // Deploy XAllocationPool
   const xAllocationPool = (await deployProxy("XAllocationPool", [

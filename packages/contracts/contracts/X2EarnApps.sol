@@ -53,14 +53,16 @@ contract X2EarnApps is
 
   /**
    * @notice Initialize the contract
-   * @param baseURI_ the base URI for the contract
+   * @param _baseURI the base URI for the contract
    * @param _admins the addresses of the admins
+   * @param _upgrader the address of the upgrader
+   *
    * @dev This function is called only once during the contract deployment
    */
-  function initialize(string memory baseURI_, address[] memory _admins) public initializer {
+  function initialize(string memory _baseURI, address[] memory _admins, address _upgrader) public initializer {
     __Administration_init();
     __AppsStorage_init();
-    __Settings_init(baseURI_);
+    __Settings_init(_baseURI);
     __VoteElegibility_init();
     __UUPSUpgradeable_init();
     __AccessControl_init();
@@ -68,14 +70,16 @@ contract X2EarnApps is
     for (uint256 i = 0; i < _admins.length; i++) {
       _grantRole(DEFAULT_ADMIN_ROLE, _admins[i]);
     }
+
+    _grantRole(UPGRADER_ROLE, _upgrader);
   }
 
   // ---------- Overrides ------------ //
   /**
    * @dev See {IX2EarnApps-setBaseURI}.
    */
-  function setBaseURI(string memory baseURI_) external onlyRole(DEFAULT_ADMIN_ROLE) {
-    _setBaseURI(baseURI_);
+  function setBaseURI(string memory _baseURI) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    _setBaseURI(_baseURI);
   }
 
   /**

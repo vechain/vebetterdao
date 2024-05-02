@@ -17,8 +17,28 @@ import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy } from "../scripts/helpers"
+import { XAllocationPool } from "../typechain-types"
 
 describe("X-Allocation Pool", async function () {
+  describe("Deployment", async function () {
+    it("Contract is correctly initialized", async function () {
+      const { xAllocationPool, owner, x2EarnApps, emissions, b3tr, treasury } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await xAllocationPool.treasury()).to.eql(await treasury.getAddress())
+      expect(await xAllocationPool.b3tr()).to.eql(await b3tr.getAddress())
+      expect(await xAllocationPool.emissions()).to.eql(await emissions.getAddress())
+      expect(await xAllocationPool.x2EarnApps()).to.eql(await x2EarnApps.getAddress())
+
+      const DEFAULT_ADMIN_ROLE = await xAllocationPool.DEFAULT_ADMIN_ROLE()
+      const UPGRADER_ROLE = await xAllocationPool.UPGRADER_ROLE()
+
+      expect(await xAllocationPool.hasRole(DEFAULT_ADMIN_ROLE, owner.address)).to.eql(true)
+      expect(await xAllocationPool.hasRole(UPGRADER_ROLE, owner.address)).to.eql(true)
+    })
+  })
+
   describe("Contract upgradeablity", () => {
     it("Admin should be able to upgrade the contract", async function () {
       const { xAllocationPool, owner } = await getOrDeployContractInstances({
@@ -130,145 +150,234 @@ describe("X-Allocation Pool", async function () {
         ]),
       ).to.be.reverted
     })
+
+    it("Cannot initilize twice", async function () {
+      const { xAllocationPool, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      await catchRevert(
+        xAllocationPool.initialize(owner.address, owner.address, owner.address, owner.address, owner.address),
+      )
+    })
   })
 
   describe("Settings", async function () {
-    it("Admin can set treasury address", async function () {
-      const { xAllocationPool, owner, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
+    describe("Treasury address", async function () {
+      it("Admin can set treasury address", async function () {
+        const { xAllocationPool, owner, otherAccount } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+        const newTreasuryAddress = otherAccount.address
+
+        await xAllocationPool.connect(owner).setTreasuryAddress(newTreasuryAddress)
+
+        const treasuryAddress = await xAllocationPool.treasury()
+
+        expect(treasuryAddress).to.eql(newTreasuryAddress)
       })
 
-      const newTreasuryAddress = otherAccount.address
+      it("Only admin can set treasury address", async function () {
+        const { xAllocationPool, otherAccount } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
-      await xAllocationPool.connect(owner).setTreasuryAddress(newTreasuryAddress)
+        const newTreasuryAddress = otherAccount.address
 
-      const treasuryAddress = await xAllocationPool.treasury()
+        await expect(xAllocationPool.connect(otherAccount).setTreasuryAddress(newTreasuryAddress)).to.be.reverted
+      })
 
-      expect(treasuryAddress).to.eql(newTreasuryAddress)
+      it("Cannot set treasury address to zero address", async function () {
+        const { xAllocationPool, owner } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+        const newTreasuryAddress = ZERO_ADDRESS
+
+        await expect(xAllocationPool.connect(owner).setTreasuryAddress(newTreasuryAddress)).to.be.reverted
+      })
     })
 
-    it("Only admin can set treasury address", async function () {
-      const { xAllocationPool, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
+    describe("Emissions address", async function () {
+      it("Admin can set emissions contract address", async function () {
+        const { xAllocationPool, owner, otherAccount } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+        const newEmissionsAddress = otherAccount.address
+
+        await xAllocationPool.connect(owner).setEmissionsAddress(newEmissionsAddress)
+
+        const emissionsAddress = await xAllocationPool.emissions()
+
+        expect(emissionsAddress).to.eql(newEmissionsAddress)
       })
 
-      const newTreasuryAddress = otherAccount.address
+      it("Only admin can set emissions contract address", async function () {
+        const { xAllocationPool, otherAccount } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
-      await expect(xAllocationPool.connect(otherAccount).setTreasuryAddress(newTreasuryAddress)).to.be.reverted
+        const newEmissionsAddress = otherAccount.address
+
+        await expect(xAllocationPool.connect(otherAccount).setEmissionsAddress(newEmissionsAddress)).to.be.reverted
+      })
+
+      it("Cannot set emissions contract address to zero address", async function () {
+        const { xAllocationPool, owner } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+        const newEmissionsAddress = ZERO_ADDRESS
+
+        await expect(xAllocationPool.connect(owner).setEmissionsAddress(newEmissionsAddress)).to.be.reverted
+      })
+
+      it("Cannot calculate emissions amount if emissions contract is not set", async function () {
+        const { owner, b3tr, treasury, x2EarnApps } = await getOrDeployContractInstances({
+          forceDeploy: false,
+        })
+
+        // Deploy XAllocationPool
+        const xAllocationPool = (await deployProxy("XAllocationPool", [
+          owner.address,
+          owner.address,
+          await b3tr.getAddress(),
+          await treasury.getAddress(),
+          await x2EarnApps.getAddress(),
+        ])) as XAllocationPool
+
+        expect(await xAllocationPool.emissions()).to.eql(ZERO_ADDRESS)
+
+        await expect(xAllocationPool.baseAllocationAmount(1)).to.be.reverted
+      })
     })
 
-    it("Cannot set treasury address to zero address", async function () {
-      const { xAllocationPool, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
+    describe("XAllocationVoting address", async function () {
+      it("Admin can set xAllocationVoting contract address", async function () {
+        const { xAllocationPool, owner, otherAccount } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+        const newXAllocationVotingAddress = otherAccount.address
+
+        await xAllocationPool.connect(owner).setXAllocationVotingAddress(newXAllocationVotingAddress)
+
+        const xAllocationVotingAddress = await xAllocationPool.xAllocationVoting()
+
+        expect(xAllocationVotingAddress).to.eql(newXAllocationVotingAddress)
       })
 
-      const newTreasuryAddress = ZERO_ADDRESS
+      it("Only admin can set xAllocationVoting contract address", async function () {
+        const { xAllocationPool, otherAccount } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
-      await expect(xAllocationPool.connect(owner).setTreasuryAddress(newTreasuryAddress)).to.be.reverted
+        const newXAllocationVotingAddress = otherAccount.address
+
+        await expect(xAllocationPool.connect(otherAccount).setXAllocationVotingAddress(newXAllocationVotingAddress)).to
+          .be.reverted
+      })
+
+      it("Cannot set xAllocationVoting contract address to zero address", async function () {
+        const { xAllocationPool, owner } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+        const newXAllocationVotingAddress = ZERO_ADDRESS
+
+        await expect(xAllocationPool.connect(owner).setXAllocationVotingAddress(newXAllocationVotingAddress)).to.be
+          .reverted
+      })
+
+      it("Cannot call getAppShares or baseAllocationAmount if xAllocationVoting is not set", async function () {
+        const { owner, b3tr, treasury, x2EarnApps } = await getOrDeployContractInstances({
+          forceDeploy: false,
+        })
+
+        // Deploy XAllocationPool
+        const xAllocationPool = (await deployProxy("XAllocationPool", [
+          owner.address,
+          owner.address,
+          await b3tr.getAddress(),
+          await treasury.getAddress(),
+          await x2EarnApps.getAddress(),
+        ])) as XAllocationPool
+
+        expect(await xAllocationPool.xAllocationVoting()).to.eql(ZERO_ADDRESS)
+
+        await expect(xAllocationPool.baseAllocationAmount(1)).to.be.reverted
+        await expect(xAllocationPool.getAppShares(1, ethers.keccak256(ethers.toUtf8Bytes(ZERO_ADDRESS)))).to.be.reverted
+      })
     })
 
-    it("Admin can set emissions contract address", async function () {
-      const { xAllocationPool, owner, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
+    describe("B3TR address", async function () {
+      it("Admin can set b3tr contract address", async function () {
+        const { xAllocationPool, owner, otherAccount } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+        const newB3trAddress = otherAccount.address
+
+        await xAllocationPool.connect(owner).setB3trAddress(newB3trAddress)
+
+        const b3trAddress = await xAllocationPool.b3tr()
+
+        expect(b3trAddress).to.eql(newB3trAddress)
       })
 
-      const newEmissionsAddress = otherAccount.address
+      it("Only admin can set b3tr contract address", async function () {
+        const { xAllocationPool, otherAccount } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
-      await xAllocationPool.connect(owner).setEmissionsAddress(newEmissionsAddress)
+        const newB3trAddress = otherAccount.address
 
-      const emissionsAddress = await xAllocationPool.emissions()
+        await expect(xAllocationPool.connect(otherAccount).setB3trAddress(newB3trAddress)).to.be.reverted
+      })
 
-      expect(emissionsAddress).to.eql(newEmissionsAddress)
+      it("Cannot set b3tr contract address to zero address", async function () {
+        const { xAllocationPool, owner } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+        const newB3trAddress = ZERO_ADDRESS
+
+        await expect(xAllocationPool.connect(owner).setB3trAddress(newB3trAddress)).to.be.reverted
+      })
     })
+    describe("x2EarnApps address", async function () {
+      it("Admin can set x2EarnApps contract address", async function () {
+        const { xAllocationPool, owner, otherAccount } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
-    it("Only admin can set emissions contract address", async function () {
-      const { xAllocationPool, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
+        const newX2EarnAppsAddress = otherAccount.address
+
+        await xAllocationPool.connect(owner).setX2EarnAppsAddress(newX2EarnAppsAddress)
+
+        const x2EarnAppsAddress = await xAllocationPool.x2EarnApps()
+
+        expect(x2EarnAppsAddress).to.eql(newX2EarnAppsAddress)
       })
 
-      const newEmissionsAddress = otherAccount.address
+      it("Only admin can set x2EarnApps contract address", async function () {
+        const { xAllocationPool, otherAccount } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
-      await expect(xAllocationPool.connect(otherAccount).setEmissionsAddress(newEmissionsAddress)).to.be.reverted
-    })
+        const newX2EarnAppsAddress = otherAccount.address
 
-    it("Cannot set emissions contract address to zero address", async function () {
-      const { xAllocationPool, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
+        await expect(xAllocationPool.connect(otherAccount).setX2EarnAppsAddress(newX2EarnAppsAddress)).to.be.reverted
       })
 
-      const newEmissionsAddress = ZERO_ADDRESS
+      it("Cannot set x2EarnApps contract address to zero address", async function () {
+        const { xAllocationPool, owner } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
-      await expect(xAllocationPool.connect(owner).setEmissionsAddress(newEmissionsAddress)).to.be.reverted
-    })
+        const newX2EarnAppsAddress = ZERO_ADDRESS
 
-    it("Admin can set xAllocationVoting contract address", async function () {
-      const { xAllocationPool, owner, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
+        await expect(xAllocationPool.connect(owner).setX2EarnAppsAddress(newX2EarnAppsAddress)).to.be.reverted
       })
-
-      const newXAllocationVotingAddress = otherAccount.address
-
-      await xAllocationPool.connect(owner).setXAllocationVotingAddress(newXAllocationVotingAddress)
-
-      const xAllocationVotingAddress = await xAllocationPool.xAllocationVoting()
-
-      expect(xAllocationVotingAddress).to.eql(newXAllocationVotingAddress)
-    })
-
-    it("Only admin can set xAllocationVoting contract address", async function () {
-      const { xAllocationPool, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      const newXAllocationVotingAddress = otherAccount.address
-
-      await expect(xAllocationPool.connect(otherAccount).setXAllocationVotingAddress(newXAllocationVotingAddress)).to.be
-        .reverted
-    })
-
-    it("Cannot set xAllocationVoting contract address to zero address", async function () {
-      const { xAllocationPool, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      const newXAllocationVotingAddress = ZERO_ADDRESS
-
-      await expect(xAllocationPool.connect(owner).setXAllocationVotingAddress(newXAllocationVotingAddress)).to.be
-        .reverted
-    })
-
-    it("Admin can set b3tr contract address", async function () {
-      const { xAllocationPool, owner, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      const newB3trAddress = otherAccount.address
-
-      await xAllocationPool.connect(owner).setB3trAddress(newB3trAddress)
-
-      const b3trAddress = await xAllocationPool.b3tr()
-
-      expect(b3trAddress).to.eql(newB3trAddress)
-    })
-
-    it("Only admin can set b3tr contract address", async function () {
-      const { xAllocationPool, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      const newB3trAddress = otherAccount.address
-
-      await expect(xAllocationPool.connect(otherAccount).setB3trAddress(newB3trAddress)).to.be.reverted
-    })
-
-    it("Cannot set b3tr contract address to zero address", async function () {
-      const { xAllocationPool, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      const newB3trAddress = ZERO_ADDRESS
-
-      await expect(xAllocationPool.connect(owner).setB3trAddress(newB3trAddress)).to.be.reverted
     })
   })
 
@@ -1444,6 +1553,37 @@ describe("X-Allocation Pool", async function () {
         await b3tr.pause()
 
         await catchRevert(xAllocationPool.connect(otherAccounts[6]).claim(round1, app1Id))
+      })
+
+      it("Cannot claim for app that does not exist", async function () {
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, minterAccount, x2EarnApps } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
+
+        const voter1 = otherAccounts[1]
+        await getVot3Tokens(voter1, "1000")
+
+        //Add apps
+        const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+        await x2EarnApps
+          .connect(owner)
+          .addApp(otherAccounts[6].address, otherAccounts[6].address, "My app", "metadataURI")
+
+        // Bootstrap emissions -> sends funds to contract
+        await bootstrapEmissions()
+        await emissions.connect(minterAccount).start()
+
+        const round1 = await xAllocationVoting.currentRoundId()
+
+        // Vote
+        await xAllocationVoting.connect(voter1).castVote(round1, [app1Id], [ethers.parseEther("1")])
+
+        await waitForRoundToEnd(Number(round1))
+
+        await catchRevert(
+          xAllocationPool.connect(otherAccounts[6]).claim(round1, ethers.keccak256(ethers.toUtf8Bytes("My app #2"))),
+        )
       })
     })
 

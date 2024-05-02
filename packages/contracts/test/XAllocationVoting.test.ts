@@ -88,7 +88,6 @@ describe("X-Allocation Voting", function () {
       expect(await xAllocationVoting.supportsInterface("0x01ffc9a7")).to.equal(true) // ERC165
     })
 
-    // can correctly get name and version
     it("Should correctly return name and version", async function () {
       const { xAllocationVoting } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -299,28 +298,104 @@ describe("X-Allocation Voting", function () {
         expect(await ethers.provider.getBalance(await xAllocationVoting.getAddress())).to.eql(0n)
       })
 
-      it("Can set a new emissions contract correctly", async function () {
-        const { xAllocationVoting, owner } = await getOrDeployContractInstances({
-          forceDeploy: true,
+      describe("emissions address", function () {
+        it("Can set a new emissions contract correctly", async function () {
+          const { xAllocationVoting, owner } = await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
+          await bootstrapAndStartEmissions()
+
+          await xAllocationVoting.connect(owner).setEmissionsAddress(owner.address)
+
+          const updatedEmissionsAddress = await xAllocationVoting.emissions()
+          expect(updatedEmissionsAddress).to.eql(owner.address)
         })
-        await bootstrapAndStartEmissions()
 
-        await xAllocationVoting.connect(owner).setEmissionsAddress(owner.address)
+        it("Cannot set a new emissions contract to zero address", async function () {
+          const { xAllocationVoting, owner } = await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
+          await bootstrapAndStartEmissions()
 
-        const updatedEmissionsAddress = await xAllocationVoting.emissions()
-        expect(updatedEmissionsAddress).to.eql(owner.address)
+          await expect(xAllocationVoting.connect(owner).setEmissionsAddress(ZERO_ADDRESS)).to.be.reverted
+
+          const updatedEmissionsAddress = await xAllocationVoting.emissions()
+          expect(updatedEmissionsAddress).to.not.eql(ZERO_ADDRESS)
+        })
+
+        it("Only admin should be able to set a new emissions contract", async function () {
+          const { xAllocationVoting, otherAccount } = await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
+
+          await expect(xAllocationVoting.connect(otherAccount).setEmissionsAddress(otherAccount.address)).to.be.reverted
+        })
       })
 
-      it("Cannot set a new emissions contract to zero address", async function () {
-        const { xAllocationVoting, owner } = await getOrDeployContractInstances({
-          forceDeploy: true,
+      describe("x2EarnApps address", function () {
+        it("Can set x2EarnApps address correctly", async function () {
+          const { xAllocationVoting, owner } = await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
+
+          await xAllocationVoting.connect(owner).setX2EarnAppsAddress(owner.address)
+
+          const updatedX2EarnAppsAddress = await xAllocationVoting.x2EarnApps()
+          expect(updatedX2EarnAppsAddress).to.eql(owner.address)
         })
-        await bootstrapAndStartEmissions()
 
-        await expect(xAllocationVoting.connect(owner).setEmissionsAddress(ZERO_ADDRESS)).to.be.reverted
+        it("Cannot set x2EarnApps address to zero address", async function () {
+          const { xAllocationVoting, owner } = await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
 
-        const updatedEmissionsAddress = await xAllocationVoting.emissions()
-        expect(updatedEmissionsAddress).to.not.eql(ZERO_ADDRESS)
+          await expect(xAllocationVoting.connect(owner).setX2EarnAppsAddress(ZERO_ADDRESS)).to.be.reverted
+
+          const updatedX2EarnAppsAddress = await xAllocationVoting.x2EarnApps()
+          expect(updatedX2EarnAppsAddress).to.not.eql(ZERO_ADDRESS)
+        })
+
+        it("Only admin can set x2EarnApps address", async function () {
+          const { xAllocationVoting, otherAccount } = await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
+
+          await expect(xAllocationVoting.connect(otherAccount).setX2EarnAppsAddress(otherAccount.address)).to.be
+            .reverted
+        })
+      })
+
+      describe("VoterRewards address", function () {
+        it("Can set voter rewards address correctly", async function () {
+          const { xAllocationVoting, owner } = await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
+
+          await xAllocationVoting.connect(owner).setVoterRewardsAddress(owner.address)
+
+          const updatedVoterRewardsAddress = await xAllocationVoting.voterRewards()
+          expect(updatedVoterRewardsAddress).to.eql(owner.address)
+        })
+
+        it("Cannot set voter rewards address to zero address", async function () {
+          const { xAllocationVoting, owner } = await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
+
+          await expect(xAllocationVoting.connect(owner).setVoterRewardsAddress(ZERO_ADDRESS)).to.be.reverted
+
+          const updatedVoterRewardsAddress = await xAllocationVoting.voterRewards()
+          expect(updatedVoterRewardsAddress).to.not.eql(ZERO_ADDRESS)
+        })
+
+        it("Only admin can set voter rewards address", async function () {
+          const { xAllocationVoting, otherAccount } = await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
+
+          await expect(xAllocationVoting.connect(otherAccount).setVoterRewardsAddress(otherAccount.address)).to.be
+            .reverted
+        })
       })
     })
 
