@@ -28,7 +28,6 @@ import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol
 import { ContextUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import { IXAllocationVotingGovernor, IERC6372 } from "../interfaces/IXAllocationVotingGovernor.sol";
 import { IXAllocationPool } from "../interfaces/IXAllocationPool.sol";
-import { IB3TRGovernor } from "../interfaces/IB3TRGovernor.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
 import { IEmissions } from "../interfaces/IEmissions.sol";
