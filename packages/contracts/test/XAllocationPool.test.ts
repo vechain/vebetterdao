@@ -1372,7 +1372,7 @@ describe("X-Allocation Pool", async function () {
         await getVot3Tokens(voter1, "1000")
 
         const GOVERNANCE_ROLE = await xAllocationVoting.GOVERNANCE_ROLE()
-        await xAllocationVoting.grantRole(GOVERNANCE_ROLE, otherAccounts[1].address)
+        await xAllocationVoting.grantRole(GOVERNANCE_ROLE, owner.address)
         await xAllocationVoting.setBaseAllocationPercentage(0)
         expect(await xAllocationVoting.baseAllocationPercentage()).to.eql(0n)
 
