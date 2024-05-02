@@ -13,7 +13,7 @@ import { XApp } from "./useXApps"
  * @returns  all the available xApps (apps that can be voted on for allocation) capped to 256 see {@link XApp}
  */
 export const getRoundXApps = async (thor: Connex.Thor, roundId: string): Promise<XApp[]> => {
-  const functionFragment = XAllocationVoting.createInterface().getFunction("getApps").format("json")
+  const functionFragment = XAllocationVoting.createInterface().getFunction("getAppsOfRound").format("json")
   const res = await thor.account(XALLOCATIONVOTING_CONTRACT).method(JSON.parse(functionFragment)).call(roundId)
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))

@@ -208,13 +208,6 @@ interface IX2EarnApps {
   function isElegible(bytes32 appId, uint256 timepoint) external view returns (bool);
 
   /**
-   * @dev Check if an app is allowed to participate in the allocation rounds in the current block.
-   *
-   * @param appId the id of the app
-   */
-  function isElegibleNow(bytes32 appId) external view returns (bool);
-
-  /**
    * @dev Update the base URI to retrieve the metadata of the x2earn apps
    *
    * @param baseUri the base URI for the contract

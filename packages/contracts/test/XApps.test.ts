@@ -235,7 +235,7 @@ describe("X-Apps", function () {
       let isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round1)
       expect(isEligibleForVote).to.eql(true)
 
-      let appsVotedInSpecificRound = await xAllocationVoting.getAppIds(round1)
+      let appsVotedInSpecificRound = await xAllocationVoting.getAppIdsOfRound(round1)
       expect(appsVotedInSpecificRound.length).to.equal(1n)
 
       await waitForRoundToEnd(round1)
@@ -245,7 +245,7 @@ describe("X-Apps", function () {
       isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round2)
       expect(isEligibleForVote).to.eql(false)
 
-      appsVotedInSpecificRound = await xAllocationVoting.getAppIds(round2)
+      appsVotedInSpecificRound = await xAllocationVoting.getAppIdsOfRound(round2)
       expect(appsVotedInSpecificRound.length).to.equal(0)
 
       // if checking for the previous round, it should still be eligible
@@ -401,7 +401,7 @@ describe("X-Apps", function () {
       let appVotes = await xAllocationVoting.getAppVotes(round1, app1Id)
       expect(appVotes).to.equal(0n)
 
-      let appsVotedInSpecificRound = await xAllocationVoting.getAppIds(round1)
+      let appsVotedInSpecificRound = await xAllocationVoting.getAppIdsOfRound(round1)
       expect(appsVotedInSpecificRound.length).to.equal(0)
 
       await waitForRoundToEnd(round1)

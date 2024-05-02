@@ -285,7 +285,7 @@ contract XAllocationPool is
     );
 
     uint256 total = _emissionAmount(roundId);
-    bytes32[] memory eligibleApps = xAllocationVoting().getAppIds(roundId);
+    bytes32[] memory eligibleApps = xAllocationVoting().getAppIdsOfRound(roundId);
 
     uint256 available = (total * xAllocationVoting().getRoundBaseAllocationPercentage(roundId)) / 100;
 

@@ -167,7 +167,7 @@ abstract contract RoundsStorageUpgradeable is Initializable, XAllocationVotingGo
   /**
    * @dev Get the ids of the apps elegible for voting in a round
    */
-  function getAppIds(uint256 roundId) public view override returns (bytes32[] memory) {
+  function getAppIdsOfRound(uint256 roundId) public view override returns (bytes32[] memory) {
     RoundsStorageStorage storage $ = _getRoundsStorageStorage();
     return $._appsElegibleForVoting[roundId];
   }
@@ -177,7 +177,7 @@ abstract contract RoundsStorageUpgradeable is Initializable, XAllocationVotingGo
    *
    * This function could not be efficient with a large number of apps
    */
-  function getApps(uint256 roundId) public view returns (DataTypes.App[] memory) {
+  function getAppsOfRound(uint256 roundId) public view returns (DataTypes.App[] memory) {
     RoundsStorageStorage storage $ = _getRoundsStorageStorage();
 
     bytes32[] memory appsInRound = $._appsElegibleForVoting[roundId];
