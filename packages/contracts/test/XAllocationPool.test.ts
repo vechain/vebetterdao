@@ -482,6 +482,8 @@ describe("X-Allocation Pool", async function () {
         expect(state).to.eql(BigInt(2))
 
         // Update cap
+        const GOVERNANCE_ROLE = await xAllocationVoting.GOVERNANCE_ROLE()
+        await xAllocationVoting.connect(owner).grantRole(GOVERNANCE_ROLE, owner.address)
         await xAllocationVoting.connect(owner).setAppSharesCap(50)
 
         await xAllocationVoting.connect(owner).startNewRound()
@@ -568,6 +570,8 @@ describe("X-Allocation Pool", async function () {
         expect(state).to.eql(BigInt(2))
 
         // Update BaseAllocationPercentage
+        const GOVERNANCE_ROLE = await xAllocationVoting.GOVERNANCE_ROLE()
+        await xAllocationVoting.connect(owner).grantRole(GOVERNANCE_ROLE, owner.address)
         await xAllocationVoting.connect(owner).setBaseAllocationPercentage(50)
 
         await xAllocationVoting.connect(owner).startNewRound()
@@ -1367,6 +1371,8 @@ describe("X-Allocation Pool", async function () {
         const voter1 = otherAccounts[1]
         await getVot3Tokens(voter1, "1000")
 
+        const GOVERNANCE_ROLE = await xAllocationVoting.GOVERNANCE_ROLE()
+        await xAllocationVoting.grantRole(GOVERNANCE_ROLE, otherAccounts[1].address)
         await xAllocationVoting.setBaseAllocationPercentage(0)
         expect(await xAllocationVoting.baseAllocationPercentage()).to.eql(0n)
 
