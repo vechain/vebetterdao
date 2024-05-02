@@ -94,7 +94,7 @@ abstract contract XAllocationVotingGovernor is
     // but only do it after we have at least 1 round otherwise it will fail with `GovernorNonexistentRound`
     uint256 currentRound = currentRoundId();
     if (currentRound > 0) {
-      require(!isActive(currentRound), "Governor: there can be only one round per time");
+      require(!isActive(currentRound), "XAllocationVotingGovernor: there can be only one round per time");
     }
 
     return _startNewRound(proposer);
