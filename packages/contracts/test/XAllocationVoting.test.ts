@@ -577,10 +577,13 @@ describe("X-Allocation Voting", function () {
           .reverted
       })
 
-      it("Admin can change allocation percentage", async function () {
+      it("GOVERNANCE_ROLE can change allocation percentage", async function () {
         const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
 
         const initialPercentage = await xAllocationVoting.baseAllocationPercentage()
+
+        const GOVERNANCE_ROLE = await xAllocationVoting.GOVERNANCE_ROLE()
+        await xAllocationVoting.connect(owner).grantRole(GOVERNANCE_ROLE, owner.address)
 
         await xAllocationVoting.connect(owner).setBaseAllocationPercentage(3)
 
@@ -589,10 +592,13 @@ describe("X-Allocation Voting", function () {
         expect(updatedPercentage).to.not.eql(initialPercentage)
       })
 
-      it("Only admin can change allocation percentage", async function () {
+      it("Only GOVERNANCE_ROLE can change allocation percentage", async function () {
         const { xAllocationVoting, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
 
         const initialPercentage = await xAllocationVoting.baseAllocationPercentage()
+
+        const GOVERNANCE_ROLE = await xAllocationVoting.GOVERNANCE_ROLE()
+        expect(await xAllocationVoting.hasRole(GOVERNANCE_ROLE, otherAccounts[0].address)).to.eql(false)
 
         await expect(xAllocationVoting.connect(otherAccounts[0]).setBaseAllocationPercentage(3)).to.be.reverted
 
@@ -607,6 +613,9 @@ describe("X-Allocation Voting", function () {
 
         const initialPercentage = await xAllocationVoting.baseAllocationPercentage()
 
+        const GOVERNANCE_ROLE = await xAllocationVoting.GOVERNANCE_ROLE()
+        await xAllocationVoting.connect(owner).grantRole(GOVERNANCE_ROLE, owner.address)
+
         await xAllocationVoting.connect(owner).setBaseAllocationPercentage(100)
 
         const updatedPercentage = await xAllocationVoting.baseAllocationPercentage()
@@ -616,10 +625,13 @@ describe("X-Allocation Voting", function () {
         await expect(xAllocationVoting.connect(owner).setBaseAllocationPercentage(101)).to.be.reverted
       })
 
-      it("Admin can change app shares cap", async function () {
+      it("GOVERNANCE_ROLE can change app shares cap", async function () {
         const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
 
         const initialCap = await xAllocationVoting.appSharesCap()
+
+        const GOVERNANCE_ROLE = await xAllocationVoting.GOVERNANCE_ROLE()
+        await xAllocationVoting.connect(owner).grantRole(GOVERNANCE_ROLE, owner.address)
 
         await xAllocationVoting.connect(owner).setAppSharesCap(3)
 
@@ -633,6 +645,9 @@ describe("X-Allocation Voting", function () {
 
         const initialCap = await xAllocationVoting.appSharesCap()
 
+        const GOVERNANCE_ROLE = await xAllocationVoting.GOVERNANCE_ROLE()
+        await xAllocationVoting.connect(owner).grantRole(GOVERNANCE_ROLE, owner.address)
+
         await xAllocationVoting.connect(owner).setAppSharesCap(100)
 
         const updatedCap = await xAllocationVoting.appSharesCap()
@@ -642,10 +657,13 @@ describe("X-Allocation Voting", function () {
         await expect(xAllocationVoting.connect(owner).setAppSharesCap(101)).to.be.reverted
       })
 
-      it("Only admin can change app shares cap", async function () {
+      it("Only GOVERNANCE_ROLE can change app shares cap", async function () {
         const { xAllocationVoting, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
 
         const initialCap = await xAllocationVoting.appSharesCap()
+
+        const GOVERNANCE_ROLE = await xAllocationVoting.GOVERNANCE_ROLE()
+        expect(await xAllocationVoting.hasRole(GOVERNANCE_ROLE, otherAccounts[0].address)).to.eql(false)
 
         await expect(xAllocationVoting.connect(otherAccounts[0]).setAppSharesCap(3)).to.be.reverted
 
@@ -1535,9 +1553,12 @@ describe("X-Allocation Voting", function () {
     })
 
     it("App shares cap per round is saved correctly", async function () {
-      const { xAllocationVoting, emissions } = await getOrDeployContractInstances({
+      const { xAllocationVoting, emissions, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
+
+      const GOVERNANCE_ROLE = await xAllocationVoting.GOVERNANCE_ROLE()
+      await xAllocationVoting.connect(owner).grantRole(GOVERNANCE_ROLE, owner.address)
 
       await xAllocationVoting.setAppSharesCap(50)
       expect(await xAllocationVoting.appSharesCap()).to.eql(50n)
