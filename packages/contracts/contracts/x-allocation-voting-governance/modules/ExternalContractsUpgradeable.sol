@@ -113,7 +113,7 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
    * Emits a {EmissionContractSet} event
    */
   function _setEmissions(IEmissions newEmisionsAddress) internal virtual {
-    require(address(newEmisionsAddress) != address(0), "ExternalContractsUpgradeable: emissions is the zero address");
+    require(address(newEmisionsAddress) != address(0), "XAllocationVotingGovernor: emissions is the zero address");
     ExternalContractsStorage storage $ = _getExternalContractsStorage();
     $._emissions = IEmissions(newEmisionsAddress);
 
