@@ -772,6 +772,11 @@ describe("X-Allocation Voting", function () {
       //Proposal should be active
       let roundState = await xAllocationVoting.state(roundId)
       expect(roundState).to.eql(BigInt(0))
+
+      let round = await xAllocationVoting.getRound(roundId)
+      expect(round.proposer).to.eql(owner.address)
+      expect(round.voteStart.toString()).to.eql(receipt.blockNumber.toString())
+      expect(round.voteDuration).to.eql(await xAllocationVoting.votingPeriod())
     })
 
     it("Should not be able to start a new allocation round if there is an active one", async function () {

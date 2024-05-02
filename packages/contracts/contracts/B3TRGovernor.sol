@@ -372,9 +372,7 @@ contract B3TRGovernor is
     }
   }
 
-  function proposalNeedsQueuing(
-    uint256 proposalId
-  ) public view override(GovernorUpgradeable, GovernorTimelockControlUpgradeable) returns (bool) {
+  function proposalNeedsQueuing(uint256 proposalId) public view returns (bool) {
     GovernorStorage storage $ = _getGovernorStorage();
     ProposalCore storage proposal = $._proposals[proposalId];
     if (proposal.roundIdVoteStart == 0) {

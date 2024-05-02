@@ -245,6 +245,8 @@ describe("X-Allocation Pool", async function () {
           await x2EarnApps.getAddress(),
         ])) as XAllocationPool
 
+        await xAllocationPool.setXAllocationVotingAddress(owner.address)
+
         expect(await xAllocationPool.emissions()).to.eql(ZERO_ADDRESS)
 
         await expect(xAllocationPool.baseAllocationAmount(1)).to.be.reverted
