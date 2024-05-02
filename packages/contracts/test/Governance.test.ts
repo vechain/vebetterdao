@@ -2614,18 +2614,22 @@ describe("Governor and TimeLock", function () {
       expect(await governor.state(proposalId)).to.eql(0n) // pending
 
       // deposits cannot be withdrawn when proposal is pending
-      await expect(governor.connect(proposer).withdraw(proposalId, proposer.address, { gasLimit: 10_000_000 })).to.be.reverted
+      await expect(governor.connect(proposer).withdraw(proposalId, proposer.address, { gasLimit: 10_000_000 })).to.be
+        .reverted
 
-      await expect(governor.connect(sponser).withdraw(proposalId, sponser.address, { gasLimit: 10_000_000 })).to.be.reverted
+      await expect(governor.connect(sponser).withdraw(proposalId, sponser.address, { gasLimit: 10_000_000 })).to.be
+        .reverted
 
       await waitForProposalToBeActive(proposalId)
       // proposal should be in active state as deposit was met
       expect(await governor.state(proposalId)).to.eql(1n) // active
 
       // deposits cannot be withdrawn when proposal is active
-      await expect(governor.connect(proposer).withdraw(proposalId, proposer.address, { gasLimit: 10_000_000 })).to.be.reverted
+      await expect(governor.connect(proposer).withdraw(proposalId, proposer.address, { gasLimit: 10_000_000 })).to.be
+        .reverted
 
-      await expect(governor.connect(sponser).withdraw(proposalId, sponser.address, { gasLimit: 10_000_000 })).to.be.reverted
+      await expect(governor.connect(sponser).withdraw(proposalId, sponser.address, { gasLimit: 10_000_000 })).to.be
+        .reverted
 
       // wait for voting period to end
       await waitForVotingPeriodToEnd(proposalId)
