@@ -31,32 +31,31 @@ import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /**
- * @title XAllocationGovernorVotesUpgradeable
+ * @title VotesUpgradeable
  * @dev Extension of {XAllocationVotingGovernor} for voting weight extraction from an {ERC20Votes} token, or since v4.5 an {ERC721Votes}
  * token.
  */
-abstract contract XAllocationGovernorVotesUpgradeable is Initializable, XAllocationVotingGovernor {
-  /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.GovernorVotes
-  struct GovernorVotesStorage {
+abstract contract VotesUpgradeable is Initializable, XAllocationVotingGovernor {
+  /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.VotesUpgradeable
+  struct VotesStorage {
     IERC5805 _token;
   }
 
-  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.GovernorVotes")) - 1)) & ~bytes32(uint256(0xff))
-  bytes32 private constant GovernorVotesStorageLocation =
-    0x1fd39a1a04c688cfdfe2fc0db51d4f96629f1828304800fbba14f96e8ddf4c00;
+  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.VotesUpgradeable")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 private constant VotesStorageLocation = 0x6eb1bf0a160cdf1b5e63f5e5c6b310f6c2542cd9e2a47ff1bc977c526dfab500;
 
-  function _getGovernorVotesStorage() private pure returns (GovernorVotesStorage storage $) {
+  function _getVotesStorage() private pure returns (VotesStorage storage $) {
     assembly {
-      $.slot := GovernorVotesStorageLocation
+      $.slot := VotesStorageLocation
     }
   }
 
-  function __GovernorVotes_init(IVotes tokenAddress) internal onlyInitializing {
-    __GovernorVotes_init_unchained(tokenAddress);
+  function __Votes_init(IVotes tokenAddress) internal onlyInitializing {
+    __Votes_init_unchained(tokenAddress);
   }
 
-  function __GovernorVotes_init_unchained(IVotes tokenAddress) internal onlyInitializing {
-    GovernorVotesStorage storage $ = _getGovernorVotesStorage();
+  function __Votes_init_unchained(IVotes tokenAddress) internal onlyInitializing {
+    VotesStorage storage $ = _getVotesStorage();
     $._token = IERC5805(address(tokenAddress));
   }
 
@@ -64,7 +63,7 @@ abstract contract XAllocationGovernorVotesUpgradeable is Initializable, XAllocat
    * @dev The token that voting power is sourced from.
    */
   function token() public view virtual returns (IERC5805) {
-    GovernorVotesStorage storage $ = _getGovernorVotesStorage();
+    VotesStorage storage $ = _getVotesStorage();
     return $._token;
   }
 

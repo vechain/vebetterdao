@@ -27,15 +27,15 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 import { XAllocationVotingGovernor } from "../XAllocationVotingGovernor.sol";
 
 /**
- * @title XAllocationEarningsSettings
+ * @title RoundEarningsSettings
  * @notice Extension of {XAllocationVotingGovernor} to handle the settings for the x-allocation earnings calculations:
  * - baseAllocationPercentage: The base allocation percentage to be divided among the x-apps each round
  * - appSharesCap: The maximum percentage of shares an x-app can reach in each round
  *
  * Since the base allocation percentage and app shares cap can be updated, we store the values for each round.
  */
-abstract contract XAllocationEarningsSettings is Initializable, XAllocationVotingGovernor {
-  /// @custom:storage-location erc7201:b3tr.storage.XAllocationEarningsSettings
+abstract contract RoundEarningsSettings is Initializable, XAllocationVotingGovernor {
+  /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.RoundEarningsSettings
   struct EarningsSettingsStorage {
     uint256 baseAllocationPercentage;
     uint256 appSharesCap;
@@ -43,9 +43,9 @@ abstract contract XAllocationEarningsSettings is Initializable, XAllocationVotin
     mapping(uint256 roundId => uint256) _roundAppSharesCap;
   }
 
-  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationEarningsSettings")) - 1)) & ~bytes32(uint256(0xff))
+  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.RoundEarningsSettings")) - 1)) & ~bytes32(uint256(0xff))
   bytes32 private constant EarningsSettingsStorageLocation =
-    0xc3a4d99759cc5032c73cc00e3f07178d23bb491c1e49c7c1383ff18be60ed800;
+    0xc74db4e191410c7a6c18f14684e1218b5e87c449d0f81ab47e8c67bf971c3500;
 
   function _getEarningsSettingsStorage() internal pure returns (EarningsSettingsStorage storage $) {
     assembly {
@@ -60,14 +60,14 @@ abstract contract XAllocationEarningsSettings is Initializable, XAllocationVotin
    * @param initialBaseAllocationPercentage The initial base allocation percentage
    * @param initialAppSharesCap The initial app shares cap
    */
-  function __XAllocationEarningsSettings_init(
+  function __RoundEarningsSettings_init(
     uint256 initialBaseAllocationPercentage,
     uint256 initialAppSharesCap
   ) internal onlyInitializing {
-    __XAllocationEarningsSettings_init_unchained(initialBaseAllocationPercentage, initialAppSharesCap);
+    __RoundEarningsSettings_init_unchained(initialBaseAllocationPercentage, initialAppSharesCap);
   }
 
-  function __XAllocationEarningsSettings_init_unchained(
+  function __RoundEarningsSettings_init_unchained(
     uint256 initialBaseAllocationPercentage,
     uint256 initialAppSharesCap
   ) internal onlyInitializing {

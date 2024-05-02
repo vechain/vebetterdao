@@ -24,11 +24,11 @@
 pragma solidity ^0.8.18;
 
 import "./x-allocation-voting-governance/XAllocationVotingGovernor.sol";
-import "./x-allocation-voting-governance/modules/XAllocationGovernorVotesCountingUpgradeable.sol";
-import "./x-allocation-voting-governance/modules/XAllocationGovernorVotesUpgradeable.sol";
-import "./x-allocation-voting-governance/modules/XAllocationGovernorVotesQuorumFractionUpgradeable.sol";
-import "./x-allocation-voting-governance/modules/XAllocationGovernorSettingsUpgradeable.sol";
-import "./x-allocation-voting-governance/modules/XAllocationEarningsSettings.sol";
+import "./x-allocation-voting-governance/modules/RoundVotesCountingUpgradeable.sol";
+import "./x-allocation-voting-governance/modules/VotesUpgradeable.sol";
+import "./x-allocation-voting-governance/modules/VotesQuorumFractionUpgradeable.sol";
+import "./x-allocation-voting-governance/modules/VotingSettingsUpgradeable.sol";
+import "./x-allocation-voting-governance/modules/RoundEarningsSettings.sol";
 import "./x-allocation-voting-governance/modules/RoundFinalizationUpgradeable.sol";
 import "./x-allocation-voting-governance/modules/RoundsStorageUpgradeable.sol";
 import "./x-allocation-voting-governance/modules/ExternalContractsUpgradeable.sol";
@@ -46,11 +46,11 @@ import { DataTypes } from "./libraries/DataTypes.sol";
 contract XAllocationVoting is
   Initializable,
   XAllocationVotingGovernor,
-  XAllocationGovernorSettingsUpgradeable,
-  XAllocationGovernorVotesCountingUpgradeable,
-  XAllocationGovernorVotesUpgradeable,
-  XAllocationGovernorVotesQuorumFractionUpgradeable,
-  XAllocationEarningsSettings,
+  VotingSettingsUpgradeable,
+  RoundVotesCountingUpgradeable,
+  VotesUpgradeable,
+  VotesQuorumFractionUpgradeable,
+  RoundEarningsSettings,
   ExternalContractsUpgradeable,
   RoundsStorageUpgradeable,
   RoundFinalizationUpgradeable,
@@ -104,11 +104,11 @@ contract XAllocationVoting is
   function initialize(InitializationData memory data) public initializer {
     __XAllocationVotingGovernor_init("XAllocationVoting");
     __ExternalContracts_init(data.x2EarnAppsAddress, data.emissions, data.voterRewards);
-    __GovernorSettings_init(data.initialVotingPeriod);
-    __GovernorXAllocationVotesCounting_init();
-    __GovernorVotes_init(data.vot3Token);
-    __GovernorVotesQuorumFraction_init(data.quorumPercentage);
-    __XAllocationEarningsSettings_init(data.baseAllocationPercentage, data.appSharesCap);
+    __VotingSettings_init(data.initialVotingPeriod);
+    __RoundVotesCounting_init();
+    __Votes_init(data.vot3Token);
+    __VotesQuorumFraction_init(data.quorumPercentage);
+    __RoundEarningsSettings_init(data.baseAllocationPercentage, data.appSharesCap);
     __RoundFinalization_init();
     __RoundsStorage_init();
     __AccessControl_init();
@@ -154,7 +154,7 @@ contract XAllocationVoting is
   /**
    * @dev Set the max amount of shares an app can get in a round
    */
-  function setAppSharesCap(uint256 appSharesCap_) external virtual override onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setAppSharesCap(uint256 appSharesCap_) external virtual override onlyRole(GOVERNANCE_ROLE) {
     _setAppSharesCap(appSharesCap_);
   }
 
@@ -163,7 +163,7 @@ contract XAllocationVoting is
    */
   function setBaseAllocationPercentage(
     uint256 baseAllocationPercentage_
-  ) public virtual override onlyRole(DEFAULT_ADMIN_ROLE) {
+  ) public virtual override onlyRole(GOVERNANCE_ROLE) {
     _setBaseAllocationPercentage(baseAllocationPercentage_);
   }
 
@@ -192,23 +192,13 @@ contract XAllocationVoting is
 
   // ---------- Required overrides ---------- //
 
-  function votingPeriod()
-    public
-    view
-    override(XAllocationVotingGovernor, XAllocationGovernorSettingsUpgradeable)
-    returns (uint256)
-  {
+  function votingPeriod() public view override(XAllocationVotingGovernor, VotingSettingsUpgradeable) returns (uint256) {
     return super.votingPeriod();
   }
 
   function quorum(
     uint256 blockNumber
-  )
-    public
-    view
-    override(XAllocationVotingGovernor, XAllocationGovernorVotesQuorumFractionUpgradeable)
-    returns (uint256)
-  {
+  ) public view override(XAllocationVotingGovernor, VotesQuorumFractionUpgradeable) returns (uint256) {
     return super.quorum(blockNumber);
   }
 

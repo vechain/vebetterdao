@@ -32,13 +32,13 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 
 /**
- * @title XAllocationGovernorVotesCountingUpgradeable
+ * @title RoundVotesCountingUpgradeable
  *
  * @dev Extension of {XAllocationVotingGovernor} for counting votes for allocation rounds.
  *
  * In every round users can vote a fraction of their balance for the elegible apps in that round.
  */
-abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, XAllocationVotingGovernor {
+abstract contract RoundVotesCountingUpgradeable is Initializable, XAllocationVotingGovernor {
   struct RoundVote {
     mapping(bytes32 appId => uint256) votesReceived;
     mapping(bytes32 appId => uint256) votesReceivedQF;
@@ -48,34 +48,30 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
     uint256 totalVoters;
   }
 
-  /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.GovernorXAllocationVotesCounting
-  struct GovernorXAllocationVotesCountingStorage {
+  /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.RoundVotesCounting
+  struct RoundVotesCountingStorage {
     mapping(address user => bool) _hasVotedOnce; // mapping to store that a user has voted at least one time
     mapping(uint256 roundId => RoundVote) _roundVotes; // mapping to store the votes for each round
   }
 
-  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.GovernorXAllocationVotesCounting")) - 1)) & ~bytes32(uint256(0xff))
-  bytes32 private constant GovernorXAllocationVotesCountingStorageLocation =
-    0x5c00912e49838455c1e1b04f95a9c09c8d40dfdf1d79671a7f8ad0273f827300;
+  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.RoundVotesCounting")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 private constant RoundVotesCountingStorageLocation =
+    0xa760c041d4a9fa3a2c67d0d325f3592ba2c7e4330f7ba2283ebf9fe63913d500;
 
-  function _getGovernorXAllocationVotesCountingStorage()
-    private
-    pure
-    returns (GovernorXAllocationVotesCountingStorage storage $)
-  {
+  function _getRoundVotesCountingStorage() private pure returns (RoundVotesCountingStorage storage $) {
     assembly {
-      $.slot := GovernorXAllocationVotesCountingStorageLocation
+      $.slot := RoundVotesCountingStorageLocation
     }
   }
 
   /**
    * @dev Initializes the contract
    */
-  function __GovernorXAllocationVotesCounting_init() internal onlyInitializing {
-    __GovernorXAllocationVotesCounting_init_unchained();
+  function __RoundVotesCounting_init() internal onlyInitializing {
+    __RoundVotesCounting_init_unchained();
   }
 
-  function __GovernorXAllocationVotesCounting_init_unchained() internal onlyInitializing {}
+  function __RoundVotesCounting_init_unchained() internal onlyInitializing {}
 
   /**
    * @dev See {IXAllocationVotingGovernor-COUNTING_MODE}.
@@ -106,7 +102,7 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
       revert GovernorAlreadyCastVote(voter);
     }
 
-    GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
+    RoundVotesCountingStorage storage $ = _getRoundVotesCountingStorage();
 
     uint256 roundStart = roundSnapshot(roundId);
 
@@ -160,7 +156,7 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
    * @dev Get the votes received by a specific application in a given round
    */
   function getAppVotes(uint256 roundId, bytes32 app) public view override returns (uint256) {
-    GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
+    RoundVotesCountingStorage storage $ = _getRoundVotesCountingStorage();
     return $._roundVotes[roundId].votesReceived[app];
   }
 
@@ -168,7 +164,7 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
    * @dev Get the quadratic funding votes received by a specific application in a given round
    */
   function getAppVotesQF(uint256 roundId, bytes32 app) public view override returns (uint256) {
-    GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
+    RoundVotesCountingStorage storage $ = _getRoundVotesCountingStorage();
     return $._roundVotes[roundId].votesReceivedQF[app];
   }
 
@@ -176,7 +172,7 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
    * @dev Get the total quadratic funding votes cast in a given round
    */
   function totalVotesQF(uint256 roundId) public view override returns (uint256) {
-    GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
+    RoundVotesCountingStorage storage $ = _getRoundVotesCountingStorage();
     return $._roundVotes[roundId].totalVotesQF;
   }
 
@@ -184,7 +180,7 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
    * @dev Get the total votes cast in a given round
    */
   function totalVotes(uint256 roundId) public view override returns (uint256) {
-    GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
+    RoundVotesCountingStorage storage $ = _getRoundVotesCountingStorage();
     return $._roundVotes[roundId].totalVotes;
   }
 
@@ -192,7 +188,7 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
    * @dev Get the total number of voters in a given round
    */
   function totalVoters(uint256 roundId) public view override returns (uint256) {
-    GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
+    RoundVotesCountingStorage storage $ = _getRoundVotesCountingStorage();
     return $._roundVotes[roundId].totalVoters;
   }
 
@@ -200,7 +196,7 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
    * @dev Check if a user has voted in a given round
    */
   function hasVoted(uint256 roundId, address user) public view returns (bool) {
-    GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
+    RoundVotesCountingStorage storage $ = _getRoundVotesCountingStorage();
     return $._roundVotes[roundId].hasVoted[user];
   }
 
@@ -223,7 +219,7 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
    * @dev Check if a user has voted at least once from the deployment of the contract
    */
   function hasVotedOnce(address user) public view returns (bool) {
-    GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
+    RoundVotesCountingStorage storage $ = _getRoundVotesCountingStorage();
     return $._hasVotedOnce[user];
   }
 }

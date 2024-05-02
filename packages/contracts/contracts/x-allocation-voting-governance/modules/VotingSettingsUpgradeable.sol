@@ -27,22 +27,22 @@ import { XAllocationVotingGovernor } from "../XAllocationVotingGovernor.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /**
- * @title XAllocationGovernorSettingsUpgradeable
+ * @title VotingSettingsUpgradeable
  * @dev Extension of {XAllocationVotingGovernor} for voting settings.
  */
-abstract contract XAllocationGovernorSettingsUpgradeable is Initializable, XAllocationVotingGovernor {
-  /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.GovernorSettings
-  struct GovernorSettingsStorage {
+abstract contract VotingSettingsUpgradeable is Initializable, XAllocationVotingGovernor {
+  /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.VotingSettings
+  struct VotingSettingsStorage {
     uint32 _votingPeriod;
   }
 
-  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.GovernorSettings")) - 1)) & ~bytes32(uint256(0xff))
-  bytes32 private constant GovernorSettingsStorageLocation =
-    0x61dedaa499b53d67b3d7e1868cee5772a81e32ad239a9603b0a8a5f779327500;
+  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.VotingSettings")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 private constant VotingSettingsStorageLocation =
+    0xd69d068053671881d25a4d751dcad1e692749d9b24184f608cb1d01af3a99900;
 
-  function _getGovernorSettingsStorage() private pure returns (GovernorSettingsStorage storage $) {
+  function _getVotingSettingsStorage() private pure returns (VotingSettingsStorage storage $) {
     assembly {
-      $.slot := GovernorSettingsStorageLocation
+      $.slot := VotingSettingsStorageLocation
     }
   }
 
@@ -51,11 +51,11 @@ abstract contract XAllocationGovernorSettingsUpgradeable is Initializable, XAllo
   /**
    * @dev Initialize the governance parameters.
    */
-  function __GovernorSettings_init(uint32 initialVotingPeriod) internal onlyInitializing {
-    __GovernorSettings_init_unchained(initialVotingPeriod);
+  function __VotingSettings_init(uint32 initialVotingPeriod) internal onlyInitializing {
+    __VotingSettings_init_unchained(initialVotingPeriod);
   }
 
-  function __GovernorSettings_init_unchained(uint32 initialVotingPeriod) internal onlyInitializing {
+  function __VotingSettings_init_unchained(uint32 initialVotingPeriod) internal onlyInitializing {
     _setVotingPeriod(initialVotingPeriod);
   }
 
@@ -63,7 +63,7 @@ abstract contract XAllocationGovernorSettingsUpgradeable is Initializable, XAllo
    * @dev See {IXAllocationVotingGovernor-votingPeriod}.
    */
   function votingPeriod() public view virtual override returns (uint256) {
-    GovernorSettingsStorage storage $ = _getGovernorSettingsStorage();
+    VotingSettingsStorage storage $ = _getVotingSettingsStorage();
     return $._votingPeriod;
   }
 
@@ -83,7 +83,7 @@ abstract contract XAllocationGovernorSettingsUpgradeable is Initializable, XAllo
       revert GovernorInvalidVotingPeriod(newVotingPeriod);
     }
 
-    GovernorSettingsStorage storage $ = _getGovernorSettingsStorage();
+    VotingSettingsStorage storage $ = _getVotingSettingsStorage();
 
     emit VotingPeriodSet($._votingPeriod, newVotingPeriod);
     $._votingPeriod = newVotingPeriod;
