@@ -26,7 +26,6 @@ pragma solidity ^0.8.20;
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import { DataTypes } from "../libraries/DataTypes.sol";
 
 /**
  * @title X2EarnAppsUpgradeable

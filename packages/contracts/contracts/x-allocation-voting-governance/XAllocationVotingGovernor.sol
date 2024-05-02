@@ -31,7 +31,6 @@ import { IXAllocationPool } from "../interfaces/IXAllocationPool.sol";
 import { IB3TRGovernor } from "../interfaces/IB3TRGovernor.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
-import { DataTypes } from "../libraries/DataTypes.sol";
 import { IEmissions } from "../interfaces/IEmissions.sol";
 import { IVoterRewards } from "../interfaces/IVoterRewards.sol";
 
