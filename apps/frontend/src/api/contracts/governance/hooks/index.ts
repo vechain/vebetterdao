@@ -1,4 +1,4 @@
-export * from "./useProposalThreshold"
+export * from "./useDepositThreshold"
 export * from "./useProposalsEvents"
 export * from "./useIncomingProposals"
 export * from "./useActiveProposals"
