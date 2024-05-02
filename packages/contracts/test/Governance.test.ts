@@ -1553,42 +1553,6 @@ describe("Governor and TimeLock", function () {
       expect(votes[2].toString()).to.eql("0")
     })
 
-    it("Can correctly cast vote with reason", async () => {
-      const { governor, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: false })
-
-      const voter = otherAccounts[0]
-      await getVot3Tokens(voter, "1000")
-
-      const proposalState = await waitForProposalToBeActive(proposalId) // proposal id of the proposal in the beforeAll step & block when the proposal was created
-
-      expect(proposalState.toString()).to.eql("1") // active
-
-      //vote against
-      const reason = "I don't agree with this proposal"
-      const tx = await governor.connect(voter).castVoteWithReason(proposalId, 0, reason)
-      const proposeReceipt = await tx.wait()
-      const event = proposeReceipt?.logs[0]
-      const decodedLogs = governor.interface.parseLog({
-        topics: [...(event?.topics as string[])],
-        data: event ? event.data : "",
-      })
-
-      //event exists
-      expect(decodedLogs?.name).to.eql("VoteCast")
-      // voter
-      expect(decodedLogs?.args[0]).to.eql(voter.address)
-      // proposal id
-      expect(decodedLogs?.args[1]).to.eql(proposalId)
-      // support
-      expect(decodedLogs?.args[2].toString()).to.eql("0")
-      // votes
-      expect(decodedLogs?.args[3].toString()).to.eql("0")
-      // power
-      expect(decodedLogs?.args[4].toString()).to.eql("1000")
-      // reason
-      expect(decodedLogs?.args[5]).to.eql(reason)
-    })
-
     it("cannot vote twice", async function () {
       const { governor } = await getOrDeployContractInstances({ forceDeploy: false })
 
@@ -1900,6 +1864,42 @@ describe("Governor and TimeLock", function () {
       const votes = await governor.proposalVotes(proposalId)
       // sqrt(1000) * 3 = 94.868329937 - scaled to 9 decimals
       expect(votes[1]).to.eql(power1 + power2 + power3)
+    })
+
+    it("Can correctly cast vote with reason", async () => {
+      const { governor, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      const voter = otherAccounts[0]
+      await getVot3Tokens(voter, "1000")
+
+      const proposalState = await waitForProposalToBeActive(proposalId) // proposal id of the proposal in the beforeAll step & block when the proposal was created
+
+      expect(proposalState.toString()).to.eql("1") // active
+
+      //vote against
+      const reason = "I don't agree with this proposal"
+      const tx = await governor.connect(voter).castVoteWithReason(proposalId, 0, reason)
+      const proposeReceipt = await tx.wait()
+      const event = proposeReceipt?.logs[0]
+      const decodedLogs = governor.interface.parseLog({
+        topics: [...(event?.topics as string[])],
+        data: event ? event.data : "",
+      })
+
+      //event exists
+      expect(decodedLogs?.name).to.eql("VoteCast")
+      // voter
+      expect(decodedLogs?.args[0]).to.eql(voter.address)
+      // proposal id
+      expect(decodedLogs?.args[1]).to.eql(proposalId)
+      // support
+      expect(decodedLogs?.args[2].toString()).to.eql("0")
+      // votes
+      expect(decodedLogs?.args[3].toString()).to.eql("0")
+      // power
+      expect(decodedLogs?.args[4].toString()).to.eql("1000")
+      // reason
+      expect(decodedLogs?.args[5]).to.eql(reason)
     })
   })
 
