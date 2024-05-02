@@ -3,7 +3,7 @@ import { FieldError, FieldErrorsImpl, Merge, UseFormRegister } from "react-hook-
 import { FunctionParamsField } from "../CreateProposalModal"
 import { AddressUtils } from "@repo/utils"
 import { useMemo } from "react"
-import { FormData as ProposalFunctionFormData } from "@/app/proposals/new/form/functions/details/components/NewProposalFormDetailsPageContent"
+import { FormData as ProposalFunctionFormData } from "@/app/proposals/new/form/functions/details/components/NewProposalForm"
 
 type Props = {
   actionIndex: number

@@ -1,16 +1,17 @@
 import { Box, Card, CardBody, HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import { FieldArrayWithId, FieldError, FieldErrors, Merge, UseFormRegister } from "react-hook-form"
 import { GenerateFunctionToCallParamsInput } from "@/components/CreateProposalModal/GenerateFunctionToCallParamsInput"
-import { FormData } from "./NewProposalFormDetailsPageContent"
+import { FormData } from "./NewProposalForm"
 
 type Props = {
   field: FieldArrayWithId<FormData, "actions", "id">
   index: number
   register: UseFormRegister<FormData>
   errors?: FieldErrors<FormData>
+  isDisabled?: boolean
 }
 
-export const ExecutableFunctionCard: React.FC<Props> = ({ field, index, errors, register }) => {
+export const ExecutableFunctionCard: React.FC<Props> = ({ field, index, errors, register, isDisabled = false }) => {
   return (
     <Card w="full" variant="filled">
       <CardBody py={4}>
@@ -50,6 +51,7 @@ export const ExecutableFunctionCard: React.FC<Props> = ({ field, index, errors, 
                   inputProps={{
                     bg: "white",
                     borderRadius: "lg",
+                    isDisabled: isDisabled,
                   }}
                   formLabelProps={{
                     fontWeight: 600,
