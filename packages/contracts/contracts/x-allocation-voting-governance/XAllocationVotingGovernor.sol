@@ -47,7 +47,7 @@ import { IVoterRewards } from "../interfaces/IVoterRewards.sol";
  * - An external contracts module must implement {x2EarnApps}, {emissions} and {voterRewards}
  * - A rounds storage module must implement {_startNewRound}, {roundSnapshot}, {roundDeadline}, and {currentRoundId}
  * - A rounds finalization module must implement {finalize}
- * - A earnings settings module must implement {_snapshotRoundEarnings}
+ * - A earnings settings module must implement {_snapshotRoundEarningsCap}
  */
 abstract contract XAllocationVotingGovernor is
   Initializable,
@@ -235,7 +235,7 @@ abstract contract XAllocationVotingGovernor is
   /**
    * @dev Internal function to save the app shares cap and base allocation percentage for a round.
    */
-  function _snapshotRoundEarnings(uint256 roundId) internal virtual;
+  function _snapshotRoundEarningsCap(uint256 roundId) internal virtual;
 
   /**
    * @dev Internal function to check if the quorum has been reached for a given round.

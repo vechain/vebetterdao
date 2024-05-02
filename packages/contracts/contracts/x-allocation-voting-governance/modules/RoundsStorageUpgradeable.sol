@@ -93,7 +93,7 @@ abstract contract RoundsStorageUpgradeable is Initializable, XAllocationVotingGo
     bytes32[] memory apps = x2EarnApps().allElegibleApps();
     $._appsElegibleForVoting[roundId] = apps;
 
-    _snapshotRoundEarnings(roundId);
+    _snapshotRoundEarningsCap(roundId);
 
     uint256 snapshot = clock();
     uint256 duration = votingPeriod();

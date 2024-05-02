@@ -135,7 +135,7 @@ abstract contract RoundEarningsSettings is Initializable, XAllocationVotingGover
    * @dev Save the earnings settings for a new round
    * @param roundId The id of the new round
    */
-  function _snapshotRoundEarnings(uint256 roundId) internal virtual override {
+  function _snapshotRoundEarningsCap(uint256 roundId) internal virtual override {
     EarningsSettingsStorage storage $ = _getEarningsSettingsStorage();
     $._roundBaseAllocationPercentage[roundId] = $.baseAllocationPercentage;
     $._roundAppSharesCap[roundId] = $.appSharesCap;
