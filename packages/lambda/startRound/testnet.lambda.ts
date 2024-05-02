@@ -4,6 +4,7 @@ import testnetConfig from "@repo/config/testnet"
 import { EmissionsContractJson } from "@repo/contracts"
 import { FunctionFragment } from "ethers"
 import { addressUtils, clauseBuilder, coder } from "@vechain/sdk-core"
+import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager"
 
 // Serialize the ABI of the Emissions contract for use in contract interaction
 const emissionsABI = JSON.stringify(EmissionsContractJson.abi)
@@ -11,8 +12,22 @@ const emissionsABI = JSON.stringify(EmissionsContractJson.abi)
 // Define the URL for the Vechain testnet
 const nodeURL = "https://testnet.vechain.org/"
 
-// Developer account private key, publicly available
-const DEV_PK = "99f0500549792796c14fed62011a51081dc5b5e68fe8bd8a13b86be829c4fd36"
+const client = new SecretsManagerClient({
+  region: "eu-north-1",
+})
+
+/**
+ * Retrieves the private key from AWS Secrets Manager
+ */
+async function getPrivateKey(): Promise<string> {
+  const secretId = "start_emissions_pk"
+  const data = await client.send(new GetSecretValueCommand({ SecretId: secretId }))
+
+  if (data.SecretString) {
+    return JSON.parse(data.SecretString)["start-emissions-pk"]
+  }
+  throw new Error("Secret not found or invalid")
+}
 
 /**
  * Asynchronously waits for the start of the next emissions round by checking the next cycle block
@@ -46,6 +61,8 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
   console.log(`Context: ${JSON.stringify(context, null, 2)}`)
 
   try {
+    const privateKey = await getPrivateKey()
+
     // Initialize the Thor client with the testnet URL and disable polling
     const thorClient = new ThorClient(new HttpClient(nodeURL), {
       isPollingEnabled: false,
@@ -64,7 +81,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
     // Estimate the gas cost for the transaction
     const gasResult = await thorClient.gas.estimateGas(
       [clause],
-      addressUtils.fromPrivateKey(Buffer.from(DEV_PK, "hex")),
+      addressUtils.fromPrivateKey(Buffer.from(privateKey, "hex")),
     )
 
     // Check if the transaction was estimated to revert and handle accordingly
@@ -82,7 +99,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
     const txBody = await thorClient.transactions.buildTransactionBody([clause], gasResult.totalGas)
 
     // Sign the transaction with the developer's private key
-    const signedTx = await thorClient.transactions.signTransaction(txBody, DEV_PK)
+    const signedTx = await thorClient.transactions.signTransaction(txBody, privateKey)
 
     // Send the signed transaction to the blockchain
     const tx = await thorClient.transactions.sendTransaction(signedTx)

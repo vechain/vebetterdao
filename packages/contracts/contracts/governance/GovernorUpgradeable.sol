@@ -5,16 +5,13 @@ pragma solidity ^0.8.20;
 
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
-import { EIP712Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
-import { SignatureChecker } from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import { ERC165Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { DoubleEndedQueue } from "@openzeppelin/contracts/utils/structs/DoubleEndedQueue.sol";
 import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import { ContextUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import { NoncesUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/NoncesUpgradeable.sol";
-import { IGovernor } from "../interfaces/IGovernor.sol";
+import { IB3TRGovernor } from "../interfaces/IB3TRGovernor.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -37,25 +34,17 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
  * - updated _countVote() function signature to include power
  * - updated _castVote() to calculate power as Math.sqrt(weight)
  * - added isExecutable to ProposalCore
+ * - Removed voteWithSignature
  */
 abstract contract GovernorUpgradeable is
   Initializable,
   ContextUpgradeable,
   ERC165Upgradeable,
-  EIP712Upgradeable,
-  NoncesUpgradeable,
-  IGovernor,
+  IB3TRGovernor,
   IERC721Receiver,
   IERC1155Receiver
 {
   using DoubleEndedQueue for DoubleEndedQueue.Bytes32Deque;
-
-  bytes32 public constant BALLOT_TYPEHASH =
-    keccak256("Ballot(uint256 proposalId,uint8 support,address voter,uint256 nonce)");
-  bytes32 public constant EXTENDED_BALLOT_TYPEHASH =
-    keccak256(
-      "ExtendedBallot(uint256 proposalId,uint8 support,address voter,uint256 nonce,string reason,bytes params)"
-    );
 
   struct ProposalCore {
     address proposer;
@@ -65,9 +54,10 @@ abstract contract GovernorUpgradeable is
     bool executed;
     bool canceled;
     uint48 etaSeconds;
+    uint256 depositAmount;
   }
 
-  bytes32 private constant ALL_PROPOSAL_STATES_BITMAP = bytes32((2 ** (uint8(type(ProposalState).max) + 1)) - 1);
+  bytes32 internal constant ALL_PROPOSAL_STATES_BITMAP = bytes32((2 ** (uint8(type(ProposalState).max) + 1)) - 1);
   /// @custom:storage-location erc7201:openzeppelin.storage.Governor
   struct GovernorStorage {
     string _name;
@@ -107,7 +97,6 @@ abstract contract GovernorUpgradeable is
    * @dev Sets the value for {name}, {version} in the storage.
    */
   function __Governor_init(string memory name_) internal onlyInitializing {
-    __EIP712_init_unchained(name_, version());
     __Governor_init_unchained(name_);
   }
 
@@ -132,13 +121,13 @@ abstract contract GovernorUpgradeable is
     bytes4 interfaceId
   ) public view virtual override(IERC165, ERC165Upgradeable) returns (bool) {
     return
-      interfaceId == type(IGovernor).interfaceId ||
+      interfaceId == type(IB3TRGovernor).interfaceId ||
       interfaceId == type(IERC1155Receiver).interfaceId ||
       super.supportsInterface(interfaceId);
   }
 
   /**
-   * @dev See {IGovernor-name}.
+   * @dev See {IB3TRGovernor-name}.
    */
   function name() public view virtual returns (string memory) {
     GovernorStorage storage $ = _getGovernorStorage();
@@ -146,14 +135,14 @@ abstract contract GovernorUpgradeable is
   }
 
   /**
-   * @dev See {IGovernor-version}.
+   * @dev See {IB3TRGovernor-version}.
    */
   function version() public view virtual returns (string memory) {
     return "1";
   }
 
   /**
-   * @dev See {IGovernor-hashProposal}.
+   * @dev See {IB3TRGovernor-hashProposal}.
    *
    * The proposal id is produced by hashing the ABI encoded `targets` array, the `values` array, the `calldatas` array
    * and the descriptionHash (bytes32 which itself is the keccak256 hash of the description string). This proposal id
@@ -175,14 +164,14 @@ abstract contract GovernorUpgradeable is
   }
 
   /**
-   * @dev See {IGovernor-proposalThreshold}.
+   * @dev See {IB3TRGovernor-depositThreshold}.
    */
-  function proposalThreshold() public view virtual returns (uint256) {
+  function depositThreshold() public view virtual returns (uint256) {
     return 0;
   }
 
   /**
-   * @dev See {IGovernor-proposalProposer}.
+   * @dev See {IB3TRGovernor-proposalProposer}.
    */
   function proposalProposer(uint256 proposalId) public view virtual returns (address) {
     GovernorStorage storage $ = _getGovernorStorage();
@@ -190,7 +179,7 @@ abstract contract GovernorUpgradeable is
   }
 
   /**
-   * @dev See {IGovernor-proposalEta}.
+   * @dev See {IB3TRGovernor-proposalEta}.
    */
   function proposalEta(uint256 proposalId) public view virtual returns (uint256) {
     GovernorStorage storage $ = _getGovernorStorage();
@@ -198,10 +187,18 @@ abstract contract GovernorUpgradeable is
   }
 
   /**
-   * @dev See {IGovernor-proposalNeedsQueuing}.
+   * @dev See {IB3TRGovernor-proposalNeedsQueuing}.
    */
   function proposalNeedsQueuing(uint256) public view virtual returns (bool) {
     return false;
+  }
+
+  /**
+   * @dev See {IB3TRGovernor-proposalStartRound}
+   */
+  function proposalStartRound(uint256 proposalId) public view returns (uint256) {
+    GovernorStorage storage $ = _getGovernorStorage();
+    return $._proposals[proposalId].roundIdVoteStart;
   }
 
   /**
@@ -232,12 +229,12 @@ abstract contract GovernorUpgradeable is
   function _voteSucceeded(uint256 proposalId) internal view virtual returns (bool);
 
   /**
-   * @dev Get the voting weight of `account` at a specific `timepoint`, for a vote as described by `params`.
+   * @dev Get the voting weight of `account` at a specific `timepoint`.
    */
-  function _getVotes(address account, uint256 timepoint, bytes memory params) internal view virtual returns (uint256);
+  function _getVotes(address account, uint256 timepoint) internal view virtual returns (uint256);
 
   /**
-   * @dev Register a vote for `proposalId` by `account` with a given `support`, voting `weight` and voting `params`.
+   * @dev Register a vote for `proposalId` by `account` with a given `support`, and voting `weight`.
    *
    * Note: Support is generic and can represent various things depending on the voting system used.
    */
@@ -246,22 +243,11 @@ abstract contract GovernorUpgradeable is
     address account,
     uint8 support,
     uint256 weight,
-    uint256 power,
-    bytes memory params
+    uint256 power
   ) internal virtual;
 
   /**
-   * @dev Default additional encoded parameters used by castVote methods that don't include them
-   *
-   * Note: Should be overridden by specific implementations to use an appropriate value, the
-   * meaning of the additional params, in the context of that implementation
-   */
-  function _defaultParams() internal view virtual returns (bytes memory) {
-    return "";
-  }
-
-  /**
-   * @dev See {IGovernor-queue}.
+   * @dev See {IB3TRGovernor-queue}.
    */
   function queue(
     address[] memory targets,
@@ -310,7 +296,7 @@ abstract contract GovernorUpgradeable is
   }
 
   /**
-   * @dev See {IGovernor-execute}.
+   * @dev See {IB3TRGovernor-execute}.
    */
   function execute(
     address[] memory targets,
@@ -371,7 +357,7 @@ abstract contract GovernorUpgradeable is
   }
 
   /**
-   * @dev See {IGovernor-cancel}.
+   * @dev See {IB3TRGovernor-cancel}.
    */
   function cancel(
     address[] memory targets,
@@ -397,7 +383,7 @@ abstract contract GovernorUpgradeable is
    * @dev Internal cancel mechanism with minimal restrictions. A proposal can be cancelled in any state other than
    * Canceled, Expired, or Executed. Once cancelled a proposal can't be re-submitted.
    *
-   * Emits a {IGovernor-ProposalCanceled} event.
+   * Emits a {IB3TRGovernor-ProposalCanceled} event.
    */
   function _cancel(
     address[] memory targets,
@@ -423,25 +409,22 @@ abstract contract GovernorUpgradeable is
   }
 
   /**
-   * @dev See {IGovernor-getVotes}.
+   * @dev See {IB3TRGovernor-getVotes}.
    */
   function getVotes(address account, uint256 timepoint) public view virtual returns (uint256) {
-    return _getVotes(account, timepoint, _defaultParams());
+    return _getVotes(account, timepoint);
   }
 
   /**
-   * @dev See {IGovernor-getVotesWithParams}.
+   * @dev returns the quadratic voting power that `account` has.  See {IB3TRGovernor-getQuadraticVotingPower}.
    */
-  function getVotesWithParams(
-    address account,
-    uint256 timepoint,
-    bytes memory params
-  ) public view virtual returns (uint256) {
-    return _getVotes(account, timepoint, params);
+  function getQuadraticVotingPower(address account, uint256 timepoint) public view virtual returns (uint256) {
+    // scale the votes by 1e9 so that number returned is 1e18
+    return Math.sqrt(_getVotes(account, timepoint)) * 1e9;
   }
 
   /**
-   * @dev See {IGovernor-castVote}.
+   * @dev See {IB3TRGovernor-castVote}.
    */
   function castVote(uint256 proposalId, uint8 support) public virtual returns (uint256) {
     address voter = _msgSender();
@@ -449,7 +432,7 @@ abstract contract GovernorUpgradeable is
   }
 
   /**
-   * @dev See {IGovernor-castVoteWithReason}.
+   * @dev See {IB3TRGovernor-castVoteWithReason}.
    */
   function castVoteWithReason(
     uint256 proposalId,
@@ -461,81 +444,10 @@ abstract contract GovernorUpgradeable is
   }
 
   /**
-   * @dev See {IGovernor-castVoteWithReasonAndParams}.
-   */
-  function castVoteWithReasonAndParams(
-    uint256 proposalId,
-    uint8 support,
-    string calldata reason,
-    bytes memory params
-  ) public virtual returns (uint256) {
-    address voter = _msgSender();
-    return _castVote(proposalId, voter, support, reason, params);
-  }
-
-  /**
-   * @dev See {IGovernor-castVoteBySig}.
-   */
-  function castVoteBySig(
-    uint256 proposalId,
-    uint8 support,
-    address voter,
-    bytes memory signature
-  ) public virtual returns (uint256) {
-    bool valid = SignatureChecker.isValidSignatureNow(
-      voter,
-      _hashTypedDataV4(keccak256(abi.encode(BALLOT_TYPEHASH, proposalId, support, voter, _useNonce(voter)))),
-      signature
-    );
-
-    if (!valid) {
-      revert GovernorInvalidSignature(voter);
-    }
-
-    return _castVote(proposalId, voter, support, "");
-  }
-
-  /**
-   * @dev See {IGovernor-castVoteWithReasonAndParamsBySig}.
-   */
-  function castVoteWithReasonAndParamsBySig(
-    uint256 proposalId,
-    uint8 support,
-    address voter,
-    string calldata reason,
-    bytes memory params,
-    bytes memory signature
-  ) public virtual returns (uint256) {
-    bool valid = SignatureChecker.isValidSignatureNow(
-      voter,
-      _hashTypedDataV4(
-        keccak256(
-          abi.encode(
-            EXTENDED_BALLOT_TYPEHASH,
-            proposalId,
-            support,
-            voter,
-            _useNonce(voter),
-            keccak256(bytes(reason)),
-            keccak256(params)
-          )
-        )
-      ),
-      signature
-    );
-
-    if (!valid) {
-      revert GovernorInvalidSignature(voter);
-    }
-
-    return _castVote(proposalId, voter, support, reason, params);
-  }
-
-  /**
    * @dev Internal vote casting mechanism: Check that the vote is pending, that it has not been cast yet, retrieve
-   * voting weight using {IGovernor-getVotes} and call the {_countVote} internal function. Uses the _defaultParams().
+   * voting weight using {IB3TRGovernor-getVotes} and call the {_countVote} internal function. Uses the _defaultParams().
    *
-   * Emits a {IGovernor-VoteCast} event.
+   * Emits a {IB3TRGovernor-VoteCast} event.
    */
   function _castVote(
     uint256 proposalId,
@@ -543,33 +455,13 @@ abstract contract GovernorUpgradeable is
     uint8 support,
     string memory reason
   ) internal virtual returns (uint256) {
-    return _castVote(proposalId, account, support, reason, _defaultParams());
-  }
-
-  /**
-   * @dev Internal vote casting mechanism: Check that the vote is pending, that it has not been cast yet, retrieve
-   * voting weight using {IGovernor-getVotes} and call the {_countVote} internal function.
-   *
-   * Emits a {IGovernor-VoteCast} event.
-   */
-  function _castVote(
-    uint256 proposalId,
-    address account,
-    uint8 support,
-    string memory reason,
-    bytes memory params
-  ) internal virtual returns (uint256) {
     _validateStateBitmap(proposalId, _encodeStateBitmap(ProposalState.Active));
 
-    uint256 weight = _getVotes(account, proposalSnapshot(proposalId), params);
+    uint256 weight = _getVotes(account, proposalSnapshot(proposalId));
     uint256 power = Math.sqrt(weight) * 1e9;
-    _countVote(proposalId, account, support, weight, power, params);
+    _countVote(proposalId, account, support, weight, power);
 
-    if (params.length == 0) {
-      emit VoteCast(account, proposalId, support, weight, power, reason);
-    } else {
-      emit VoteCastWithParams(account, proposalId, support, weight, power, reason, params);
-    }
+    emit VoteCast(account, proposalId, support, weight, power, reason);
 
     return weight;
   }
@@ -654,7 +546,7 @@ abstract contract GovernorUpgradeable is
    *
    * If requirements are not met, reverts with a {GovernorUnexpectedProposalState} error.
    */
-  function _validateStateBitmap(uint256 proposalId, bytes32 allowedStates) private view returns (ProposalState) {
+  function _validateStateBitmap(uint256 proposalId, bytes32 allowedStates) internal view returns (ProposalState) {
     ProposalState currentState = state(proposalId);
     if (_encodeStateBitmap(currentState) & allowedStates == bytes32(0)) {
       revert GovernorUnexpectedProposalState(proposalId, currentState, allowedStates);
@@ -759,27 +651,27 @@ abstract contract GovernorUpgradeable is
   function CLOCK_MODE() public view virtual returns (string memory);
 
   /**
-   * @inheritdoc IGovernor
+   * @inheritdoc IB3TRGovernor
    */
   function votingPeriod() public view virtual returns (uint256);
 
   /**
-   * @inheritdoc IGovernor
+   * @inheritdoc IB3TRGovernor
    */
   function quorum(uint256 timepoint) public view virtual returns (uint256);
 
   /**
-   * @dev See {IGovernor-proposalSnapshot}.
+   * @dev See {IB3TRGovernor-proposalSnapshot}.
    */
   function proposalSnapshot(uint256 proposalId) public view virtual returns (uint256);
 
   /**
-   * @dev See {IGovernor-proposalDeadline}.
+   * @dev See {IB3TRGovernor-proposalDeadline}.
    */
   function proposalDeadline(uint256 proposalId) public view virtual returns (uint256);
 
   /**
-   * @dev See {IGovernor-state}.
+   * @dev See {IB3TRGovernor-state}.
    */
   function state(uint256 proposalId) public view virtual returns (ProposalState);
 }

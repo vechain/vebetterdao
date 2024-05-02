@@ -10,11 +10,13 @@ export class RoundsPage {
     private page: Page
     readonly castVoteButton: Locator
     readonly roundTitleText: Locator
+    readonly quorumFailedError: Locator
 
     constructor(page: Page) {
         this.page = page
         this.castVoteButton = this.page.locator('xpath=//button[contains(text(), "Cast vote now")]')
         this.roundTitleText = this.page.getByTestId('round-title')
+        this.quorumFailedError = this.page.locator('css=div[data-status="error"][role="alert"] div').first()
     }
 
     /**
@@ -75,6 +77,15 @@ export class RoundsPage {
     async expectAppVotes(appName: string, votes: number) {
         await test.step(`Expect app votes: ${appName} to be ${votes}`, async() => {
             await expect(this.page.getByTestId(`${appName}-total-votes`)).toHaveText(String(votes))
+        })
+    }
+
+    /**
+     * Expect page to display quorum was not reached
+     */
+    async expectQuorumNotReached() {
+        await test.step('Expect quorum not reached', async() => {
+            await expect(this.quorumFailedError).toContainText('Quorum was not reached for this round')
         })
     }
 }

@@ -32,7 +32,7 @@ import {
   useCanProposalStartInNextRound,
   useCurrentAllocationsRoundId,
   useGetVotes,
-  useProposalThreshold,
+  useDepositThreshold,
   useVot3Balance,
 } from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"
@@ -106,7 +106,7 @@ type CreateProposalModalFormProps = {
 export const CreateProposalModalForm: React.FC<CreateProposalModalFormProps> = ({ onSubmit }) => {
   const { account } = useWallet()
 
-  const { data: proposalThreshold } = useProposalThreshold()
+  const { data: depositThreshold } = useDepositThreshold()
 
   const { sendTransaction: delegate } = useDelegateVot3({ address: account ?? undefined })
   const { data: votesObject, isLoading: votesLoading } = useGetVotes(account ?? undefined)
@@ -194,10 +194,10 @@ export const CreateProposalModalForm: React.FC<CreateProposalModalFormProps> = (
   }
 
   const delegationMessage = useMemo(() => {
-    if (!votes || !vot3Balance || !proposalThreshold) return null
+    if (!votes || !vot3Balance || !depositThreshold) return null
 
-    if (Number(votes) < Number(proposalThreshold)) {
-      if (Number(vot3Balance) > Number(proposalThreshold)) {
+    if (Number(votes) < Number(depositThreshold)) {
+      if (Number(vot3Balance) > Number(depositThreshold)) {
         return (
           <Heading size="xs" color="orange">
             Your address is not self-delegated to VOT3. Click
@@ -210,7 +210,7 @@ export const CreateProposalModalForm: React.FC<CreateProposalModalFormProps> = (
       } else {
         return (
           <Heading size="xs" color="orange">
-            You have not enough balance or delegated VOT3. You need to have at least {proposalThreshold} VOT3 to create
+            You have not enough balance or delegated VOT3. You need to have at least {depositThreshold} VOT3 to create
             a proposal
           </Heading>
         )
@@ -218,14 +218,14 @@ export const CreateProposalModalForm: React.FC<CreateProposalModalFormProps> = (
     }
 
     return <></>
-  }, [votes, vot3Balance, proposalThreshold])
+  }, [votes, vot3Balance, depositThreshold])
 
   const canCreateProposal = useMemo(() => {
-    if (!votes || !vot3Balance || !proposalThreshold) return false
+    if (!votes || !vot3Balance || !depositThreshold) return false
 
-    if (Number(votes) < Number(proposalThreshold)) return false
+    if (Number(votes) < Number(depositThreshold)) return false
     return true
-  }, [votes, vot3Balance, proposalThreshold])
+  }, [votes, vot3Balance, depositThreshold])
 
   return (
     <form onSubmit={handleSubmit(handleOnSubmit)}>
