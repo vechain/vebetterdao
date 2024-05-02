@@ -28,7 +28,7 @@ import "./x-allocation-voting-governance/modules/RoundVotesCountingUpgradeable.s
 import "./x-allocation-voting-governance/modules/VotesUpgradeable.sol";
 import "./x-allocation-voting-governance/modules/VotesQuorumFractionUpgradeable.sol";
 import "./x-allocation-voting-governance/modules/VotingSettingsUpgradeable.sol";
-import "./x-allocation-voting-governance/modules/RoundEarningsSettings.sol";
+import "./x-allocation-voting-governance/modules/RoundEarningsSettingsUpgradeable.sol";
 import "./x-allocation-voting-governance/modules/RoundFinalizationUpgradeable.sol";
 import "./x-allocation-voting-governance/modules/RoundsStorageUpgradeable.sol";
 import "./x-allocation-voting-governance/modules/ExternalContractsUpgradeable.sol";
@@ -50,7 +50,7 @@ contract XAllocationVoting is
   RoundVotesCountingUpgradeable,
   VotesUpgradeable,
   VotesQuorumFractionUpgradeable,
-  RoundEarningsSettings,
+  RoundEarningsSettingsUpgradeable,
   ExternalContractsUpgradeable,
   RoundsStorageUpgradeable,
   RoundFinalizationUpgradeable,
