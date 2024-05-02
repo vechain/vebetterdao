@@ -18,7 +18,6 @@ export function createSoloStagingConfig() {
     B3TR_GOVERNOR_WHITELISTED_METHODS: {
       B3TR: ["tokenDetails"],
       B3TRGovernor: [
-        "upgradeToAndCall",
         "setProposalThreshold",
         "setMinVotingDelay",
         "setWhitelistFunction",
@@ -29,18 +28,11 @@ export function createSoloStagingConfig() {
       ],
       Treasury: ["transferB3TR"],
       XAllocationVoting: [
-        "upgradeToAndCall",
         "updateQuorumNumerator",
         "setBaseAllocationPercentage",
         "setAppSharesCap",
         "setVotingElegibility",
       ],
-      Emissions: ["upgradeToAndCall"],
-      GalaxyMember: ["upgradeToAndCall"],
-      TimeLock: ["upgradeToAndCall"],
-      VOT3: ["upgradeToAndCall"],
-      VoterRewards: ["upgradeToAndCall"],
-      XAllocationPool: ["upgradeToAndCall"],
     },
 
     EMISSIONS_CYCLE_DURATION: 30, // blocks - 30 blocks - 5 minutes.
