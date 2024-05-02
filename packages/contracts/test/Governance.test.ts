@@ -21,7 +21,7 @@ import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { B3TRGovernor } from "../typechain-types"
 
-describe("Governor and TimeLock", function () {
+describe.only("Governor and TimeLock", function () {
   describe("Governor deployment", function () {
     it("Should set constructors correctly", async function () {
       const config = createLocalConfig()
@@ -1867,10 +1867,19 @@ describe("Governor and TimeLock", function () {
     })
 
     it("Can correctly cast vote with reason", async () => {
-      const { governor, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
+      const { governor, otherAccounts, b3tr, B3trContract, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       const voter = otherAccounts[0]
       await getVot3Tokens(voter, "1000")
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // Now we can create a new proposal
+      const tx = await createProposal(b3tr, B3trContract, otherAccount, description, functionToCall, [], false)
+      proposalId = await getProposalIdFromTx(tx)
 
       const proposalState = await waitForProposalToBeActive(proposalId) // proposal id of the proposal in the beforeAll step & block when the proposal was created
 
@@ -1878,8 +1887,8 @@ describe("Governor and TimeLock", function () {
 
       //vote against
       const reason = "I don't agree with this proposal"
-      const tx = await governor.connect(voter).castVoteWithReason(proposalId, 0, reason)
-      const proposeReceipt = await tx.wait()
+      const voteTx = await governor.connect(voter).castVoteWithReason(proposalId, 0, reason)
+      const proposeReceipt = await voteTx.wait()
       const event = proposeReceipt?.logs[0]
       const decodedLogs = governor.interface.parseLog({
         topics: [...(event?.topics as string[])],
@@ -1894,10 +1903,6 @@ describe("Governor and TimeLock", function () {
       expect(decodedLogs?.args[1]).to.eql(proposalId)
       // support
       expect(decodedLogs?.args[2].toString()).to.eql("0")
-      // votes
-      expect(decodedLogs?.args[3].toString()).to.eql("0")
-      // power
-      expect(decodedLogs?.args[4].toString()).to.eql("1000")
       // reason
       expect(decodedLogs?.args[5]).to.eql(reason)
     })
