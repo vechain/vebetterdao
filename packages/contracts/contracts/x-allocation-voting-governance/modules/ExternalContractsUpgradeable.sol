@@ -113,7 +113,7 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
    * Emits a {EmissionContractSet} event
    */
   function _setEmissions(IEmissions newEmisionsAddress) internal virtual {
-    require(address(newEmisionsAddress) != address(0), "GovernorSettings: emissions is the zero address");
+    require(address(newEmisionsAddress) != address(0), "ExternalContractsUpgradeable: emissions is the zero address");
     ExternalContractsStorage storage $ = _getExternalContractsStorage();
     $._emissions = IEmissions(newEmisionsAddress);
 
@@ -127,7 +127,7 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
    * Emits a {X2EarnAppsSet} event
    */
   function _setX2EarnApps(IX2EarnApps newX2EarnApps) internal virtual {
-    require(address(newX2EarnApps) != address(0), "XAllocationVoting: new X2EarnApps is the zero address");
+    require(address(newX2EarnApps) != address(0), "XAllocationVotingGovernor: new X2EarnApps is the zero address");
 
     ExternalContractsStorage storage $ = _getExternalContractsStorage();
 
@@ -141,7 +141,7 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
    * @param newVoterRewards The new voter rewards contract address
    */
   function _setVoterRewards(IVoterRewards newVoterRewards) internal virtual {
-    require(address(newVoterRewards) != address(0), "XAllocationVoting: new voter rewards is the zero address");
+    require(address(newVoterRewards) != address(0), "XAllocationVotingGovernor: new voter rewards is the zero address");
 
     ExternalContractsStorage storage $ = _getExternalContractsStorage();
 

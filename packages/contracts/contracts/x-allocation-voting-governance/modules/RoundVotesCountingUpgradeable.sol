@@ -129,7 +129,7 @@ abstract contract RoundVotesCountingUpgradeable is Initializable, XAllocationVot
 
     require(
       totalWeight <= getVotes(voter, roundStart),
-      "Governor: account has insufficient voting power for this round"
+      "XAllocationVotingGovernor: account has insufficient voting power for this round"
     );
 
     // Apply the total adjustment to storage

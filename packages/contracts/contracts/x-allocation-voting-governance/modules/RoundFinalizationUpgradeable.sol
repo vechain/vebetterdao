@@ -66,7 +66,7 @@ abstract contract RoundFinalizationUpgradeable is Initializable, XAllocationVoti
    * @param roundId The round to finalize
    */
   function finalizeRound(uint256 roundId) public virtual override {
-    require(!isActive(roundId), "Governor: round is not ended yet");
+    require(!isActive(roundId), "XAllocationVotingGovernor: round is not ended yet");
 
     RoundFinalizationStorage storage $ = _getRoundFinalizationStorage();
     // First round is always considered succeeded

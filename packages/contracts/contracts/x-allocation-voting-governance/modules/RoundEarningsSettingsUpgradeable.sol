@@ -116,7 +116,10 @@ abstract contract RoundEarningsSettingsUpgradeable is Initializable, XAllocation
    * @param baseAllocationPercentage_ The new base allocation percentage
    */
   function _setBaseAllocationPercentage(uint256 baseAllocationPercentage_) internal {
-    require(baseAllocationPercentage_ <= 100, "Base allocation percentage must be less than or equal to 100");
+    require(
+      baseAllocationPercentage_ <= 100,
+      "XAllocationVotingGovernor: Base allocation percentage must be less than or equal to 100"
+    );
     EarningsSettingsStorage storage $ = _getEarningsSettingsStorage();
     $.baseAllocationPercentage = baseAllocationPercentage_;
   }
@@ -126,7 +129,7 @@ abstract contract RoundEarningsSettingsUpgradeable is Initializable, XAllocation
    * @param appSharesCap_ The new app shares cap
    */
   function _setAppSharesCap(uint256 appSharesCap_) internal {
-    require(appSharesCap_ <= 100, "App shares cap must be less than or equal to 100");
+    require(appSharesCap_ <= 100, "XAllocationVotingGovernor: App shares cap must be less than or equal to 100");
     EarningsSettingsStorage storage $ = _getEarningsSettingsStorage();
     $.appSharesCap = appSharesCap_;
   }
