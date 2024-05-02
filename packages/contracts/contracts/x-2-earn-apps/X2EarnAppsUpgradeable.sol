@@ -40,11 +40,14 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
  * The inheriting contract should also implement the authorization functions {_authorizeAddApp}, {_authorizeAppManagement}, and {_authorizeAppMetadataUpdate}.
  */
 abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
-  function __XApps_init() internal onlyInitializing {
-    __XApps_init_unchained();
+  /**
+   * @dev Initializes the contract
+   */
+  function __X2EarnApps_init() internal onlyInitializing {
+    __X2EarnApps_init_unchained();
   }
 
-  function __XApps_init_unchained() internal onlyInitializing {}
+  function __X2EarnApps_init_unchained() internal onlyInitializing {}
 
   // ---------- Setters ---------- //
 
