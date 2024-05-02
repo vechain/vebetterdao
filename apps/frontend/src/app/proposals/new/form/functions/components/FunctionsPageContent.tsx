@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation"
 
 type SelectedFunction = {
   contractAddress: string
-  abi: abi.Function
+  abiDefinition: abi.Function.Definition
   functionName?: string
   functionDescription?: string
 }
@@ -87,7 +87,7 @@ export const FunctionsPageContent = () => {
                           isSelected
                             ? handleRemoveFunction(isSelectedIndex)
                             : handleAddFunction({
-                                abi: abiFunction,
+                                abiDefinition: abiFunction.definition,
                                 contractAddress: contract.contract.address,
                                 functionName: func.name,
                                 functionDescription: func.description,

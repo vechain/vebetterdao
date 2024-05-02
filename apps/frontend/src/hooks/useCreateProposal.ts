@@ -10,7 +10,7 @@ export type AvailableContractAbis = (typeof governanceAvailableContracts)[number
  * Represent a single parameter of the function to call in the smart contract
  * This is used to typing the inputs of the abi definition
  */
-export type FunctionParamsField = { id: string; name: string; type: string; internalType: string; value: any }
+export type FunctionParamsField = { id: string; name: string; type: string; internalType?: string; value: any }
 /**
  * Represent a single action to be exeuted in case the proposal is successful
  * This is equal to a smart contract call to the given function with the given params

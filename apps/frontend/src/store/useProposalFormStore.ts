@@ -14,7 +14,7 @@ export type ProposalFormStoreState = {
   actions: {
     contractAddress: string
     calldata?: string
-    abi: abi.Function
+    abiDefinition: abi.Function.Definition
     functionName?: string
     functionDescription?: string
   }[]
