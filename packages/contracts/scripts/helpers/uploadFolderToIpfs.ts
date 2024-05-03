@@ -1,7 +1,7 @@
 import { toIPFSURL, uploadDirectoryToIPFS } from "."
 
 // NFT Storage
-const NFT_STORAGE_KEY = process.env.NFT_STORAGE_KEY ?? ""
+const NFT_STORAGE_KEY = process.env.NEXT_PUBLIC_NFT_STORAGE_KEY ?? ""
 
 export async function uploadMetadataToIpfs(METADATA_PATH: string): Promise<void> {
   try {
