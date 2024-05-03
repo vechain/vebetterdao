@@ -1,6 +1,6 @@
 import { Box, Card, CardBody, HStack, Heading, Text, VStack } from "@chakra-ui/react"
-import { FieldArrayWithId, FieldError, FieldErrors, Merge, UseFormRegister } from "react-hook-form"
-import { GenerateFunctionToCallParamsInput } from "@/components/CreateProposalModal/GenerateFunctionToCallParamsInput"
+import { FieldArrayWithId, FieldError, FieldErrors, UseFormRegister } from "react-hook-form"
+import { GenerateFunctionToCallParamsInput } from "@/components"
 import { FormData } from "./NewProposalForm"
 
 type Props = {

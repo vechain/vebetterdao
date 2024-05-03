@@ -1,6 +1,6 @@
 import { FormControl, FormErrorMessage, FormLabel, FormLabelProps, Input, InputProps, Stack } from "@chakra-ui/react"
 import { FieldError, FieldErrorsImpl, Merge, UseFormRegister } from "react-hook-form"
-import { FunctionParamsField } from "../CreateProposalModal"
+import { FunctionParamsField } from "../CreateProposalModal/CreateProposalModal"
 import { AddressUtils } from "@repo/utils"
 import { useMemo } from "react"
 import { FormData as ProposalFunctionFormData } from "@/app/proposals/new/form/functions/details/components/NewProposalForm"

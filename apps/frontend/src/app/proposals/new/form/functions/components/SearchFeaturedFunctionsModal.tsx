@@ -1,5 +1,5 @@
 import { FunctionParamsField, MotionVStack } from "@/components"
-import { GenerateFunctionToCallParamsInput } from "@/components/CreateProposalModal/GenerateFunctionToCallParamsInput"
+import { GenerateFunctionToCallParamsInput } from "@/components/GenerateFunctionToCallParamsInput"
 import { CustomModalContent } from "@/components/CustomModalContent"
 import { GovernanceFeaturedContractsWithFunctions } from "@/constants"
 import {

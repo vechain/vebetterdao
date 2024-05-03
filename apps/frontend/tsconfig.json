@@ -22,7 +22,7 @@
         "**/*.ts",
         "**/*.tsx",
         ".next/types/**/*.ts",
-        "src/components/CreateProposalModal/GenerateFunctionToCallParamsInput",
+        "src/components/GenerateFunctionToCallParamsInput",
         "dist/types/**/*.ts"
     ],
     "exclude": [
