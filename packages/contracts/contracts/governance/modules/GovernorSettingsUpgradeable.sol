@@ -21,6 +21,8 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
     uint256 _depositThreshold;
     // min delay before voting can start
     uint256 _minVotingDelay;
+    // minimum amount of tokens needed to cast a vote
+    uint256 _votingThreshold;
   }
 
   // keccak256(abi.encode(uint256(keccak256("openzeppelin.storage.GovernorSettings")) - 1)) & ~bytes32(uint256(0xff))
@@ -35,23 +37,27 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
 
   event DepositThresholdSet(uint256 oldDepositThreshold, uint256 newDepositThreshold);
   event MinVotingDelaySet(uint256 oldMinMinVotingDelay, uint256 newMinVotingDelay);
+  event VotingThresholdSet(uint256 oldVotingThreshold, uint256 newVotingThreshold);
 
   /**
    * @dev Initialize the governance parameters.
    */
   function __GovernorSettings_init(
     uint256 initialDepositThreshold,
-    uint256 initialMinVotingDelay
+    uint256 initialMinVotingDelay,
+    uint256 initialVotingThreshold
   ) internal onlyInitializing {
-    __GovernorSettings_init_unchained(initialDepositThreshold, initialMinVotingDelay);
+    __GovernorSettings_init_unchained(initialDepositThreshold, initialMinVotingDelay, initialVotingThreshold);
   }
 
   function __GovernorSettings_init_unchained(
     uint256 initialDepositThreshold,
-    uint256 initialMinVotingDelay
+    uint256 initialMinVotingDelay,
+    uint256 initialVotingThreshold
   ) internal onlyInitializing {
     _setDepositThreshold(initialDepositThreshold);
     _setMinVotingDelay(initialMinVotingDelay);
+    _setVotingThreshold(initialVotingThreshold);
   }
 
   /**
@@ -60,6 +66,14 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
   function depositThreshold() public view virtual override returns (uint256) {
     GovernorSettingsStorage storage $ = _getGovernorSettingsStorage();
     return $._depositThreshold;
+  }
+
+  /**
+   * @dev See {Governor-votingThreshold}.
+   */
+  function votingThreshold() public view virtual override returns (uint256) {
+    GovernorSettingsStorage storage $ = _getGovernorSettingsStorage();
+    return $._votingThreshold;
   }
 
   /**
@@ -77,6 +91,15 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
    */
   function setDepositThreshold(uint256 newDepositThreshold) public virtual onlyGovernance {
     _setDepositThreshold(newDepositThreshold);
+  }
+
+  /**
+   * @dev Update the voting threshold. This operation can only be performed through a governance proposal.
+   *
+   * Emits a {VotingThresholdSet} event.
+   */
+  function setVotingThreshold(uint256 newVotingThreshold) public virtual onlyGovernance {
+    _setVotingThreshold(newVotingThreshold);
   }
 
   /**
@@ -98,6 +121,17 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
     GovernorSettingsStorage storage $ = _getGovernorSettingsStorage();
     emit DepositThresholdSet($._depositThreshold, newDepositThreshold);
     $._depositThreshold = newDepositThreshold;
+  }
+
+  /**
+   * @dev Internal setter for the voting threshold.
+   *
+   * Emits a {VotingThresholdSet} event.
+   */
+  function _setVotingThreshold(uint256 newVotingThreshold) internal virtual {
+    GovernorSettingsStorage storage $ = _getGovernorSettingsStorage();
+    emit VotingThresholdSet($._votingThreshold, newVotingThreshold);
+    $._votingThreshold = newVotingThreshold;
   }
 
   /**

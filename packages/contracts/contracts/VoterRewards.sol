@@ -116,9 +116,12 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
     // Determine the reward multiplier based on the GM NFT level.
     uint256 multiplier = $.levelToMultiplier[gmNftLevel]; // Percentage multiplier for the level of the GM NFT
 
+    // Scale vote power by 1e9 to counteract the square root operation on 1e18.
+    uint256 scaledVotePower = votePower * 1e9;
+
     // Calculate the weighted vote power for rewards, adjusting vote power with the level-based multiplier.
     // votePower is the square root of the total votes cast by the voter.
-    uint256 rewardWeightedVote = votePower + (votePower * multiplier) / 100; // Adjusted vote power used for rewards calculation.
+    uint256 rewardWeightedVote = scaledVotePower + (scaledVotePower * multiplier) / 100; // Adjusted vote power used for rewards calculation.
 
     // Update the total reward-weighted votes in the cycle.
     $.cycleToTotal[cycle] += rewardWeightedVote;

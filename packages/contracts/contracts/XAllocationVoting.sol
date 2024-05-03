@@ -53,6 +53,7 @@ contract XAllocationVoting is
     string xAppsBaseURI;
     uint256 baseAllocationPercentage;
     uint256 appSharesCap;
+    uint256 votingThreshold;
   }
 
   /// @custom:oz-upgrades-unsafe-allow constructor
@@ -67,7 +68,7 @@ contract XAllocationVoting is
   function initialize(InitializationData memory data) public initializer {
     __XAllocationVotingGovernor_init("XAllocationVoting", data.b3trGovernor);
     __GovernorSettings_init(data.initialVotingPeriod, data.emissions);
-    __GovernorXAllocationVotesCounting_init(data.voterRewards);
+    __GovernorXAllocationVotesCounting_init(data.voterRewards, data.votingThreshold);
     __GovernorVotes_init(data.vot3Token);
     __GovernorVotesQuorumFraction_init(data.quorumPercentage);
     __XApps_init(data.xAppsBaseURI);

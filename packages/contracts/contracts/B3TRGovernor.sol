@@ -68,11 +68,12 @@ contract B3TRGovernor is
     uint256 _quorumPercentage,
     uint256 _initialDepositThreshold,
     uint256 _initialMinVotingDelay,
+    uint256 _initialVotingThreshold,
     address governorAdmin,
     address _voterRewards
   ) public initializer {
     __Governor_init("B3TRGovernor");
-    __GovernorSettings_init(_initialDepositThreshold, _initialMinVotingDelay);
+    __GovernorSettings_init(_initialDepositThreshold, _initialMinVotingDelay, _initialVotingThreshold);
     __GovernorCountingSimple_init();
     __GovernorVotes_init(_vot3Token);
     __GovernorVotesQuorumFraction_init(_quorumPercentage);
@@ -274,12 +275,12 @@ contract B3TRGovernor is
   function castVote(uint256 proposalId, uint8 support) public override(GovernorUpgradeable) returns (uint256) {
     uint256 weight = super.castVote(proposalId, support);
 
-    if (weight > 0) {
-      B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
-
-      $.voterRewards.registerVote(proposalSnapshot(proposalId), msg.sender, weight, Math.sqrt(weight) * 1e9);
+    if (weight < votingThreshold()) {
+      revert GovernorVotingThresholdNotMet(weight, votingThreshold());
     }
 
+    B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
+    $.voterRewards.registerVote(proposalSnapshot(proposalId), msg.sender, weight, Math.sqrt(weight));
     return weight;
   }
 
