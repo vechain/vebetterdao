@@ -8,6 +8,7 @@ import "./governance/modules/GovernorVotesQuorumFractionUpgradeable.sol";
 import "./governance/modules/GovernorTimelockControlUpgradeable.sol";
 import "./governance/modules/GovernorCountingSimpleUpgradeable.sol";
 import "./governance/modules/GovernorDepositUpgradeable.sol";
+import "./governance/modules/GovernorFunctionsSettingsUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -25,13 +26,12 @@ contract B3TRGovernor is
   GovernorVotesQuorumFractionUpgradeable,
   GovernorTimelockControlUpgradeable,
   GovernorDepositUpgradeable,
+  GovernorFunctionsSettingsUpgradeable,
   UUPSUpgradeable
 {
+  bytes32 public constant GOVERNOR_FUNCTIONS_SETTINGS_ROLE = keccak256("GOVERNOR_FUNCTIONS_SETTINGS_ROLE");
+
   error UnauthorizedAccess(address user);
-
-  error GovernorRestrictedFunction(bytes4 functionSelector);
-
-  error GovernorFunctionInvalidSelector(bytes selector);
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
@@ -42,8 +42,6 @@ contract B3TRGovernor is
   struct B3TRGovernorStorage {
     IVoterRewards voterRewards;
     IXAllocationVotingGovernor xAllocationVoting;
-    mapping(address => mapping(bytes4 => bool)) whitelistedFunctions; // mapping of target address to function selector to bool indicating if function is whitelisted for proposals
-    bool isFunctionRestrictionEnabled; // flag to enable/disable function restriction
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.B3TRGovernor")) - 1)) & ~bytes32(uint256(0xff))
@@ -56,9 +54,9 @@ contract B3TRGovernor is
     }
   }
 
-  /// @notice modifier to check if the caller is admin or if the function is part of a governance proposal
-  modifier onlyAdminOrGovernance() {
-    if (!hasRole(DEFAULT_ADMIN_ROLE, _msgSender())) _checkGovernance();
+  /// @notice modifier to check if the caller has the specified role or if the function is called through a governance proposal
+  modifier onlyRoleOrGovernance(bytes32 role) {
+    if (!hasRole(role, _msgSender())) _checkGovernance();
     _;
   }
 
@@ -81,7 +79,9 @@ contract B3TRGovernor is
     uint256 _initialDepositThreshold,
     uint256 _initialMinVotingDelay,
     address governorAdmin,
-    address _voterRewards
+    address _voterRewards,
+    address governorFunctionSettingsRoleAddress,
+    bool _isFunctionRestrictionEnabled
   ) public initializer {
     __Governor_init("B3TRGovernor");
     __GovernorSettings_init(_initialDepositThreshold, _initialMinVotingDelay);
@@ -90,6 +90,7 @@ contract B3TRGovernor is
     __GovernorVotesQuorumFraction_init(_quorumPercentage);
     __GovernorTimelockControl_init(_timelock);
     __GovernorDeposit_init(address(_vot3Token));
+    __GovernorFunctionsSettings_init(_isFunctionRestrictionEnabled);
     __AccessControl_init();
     __UUPSUpgradeable_init();
 
@@ -97,12 +98,12 @@ contract B3TRGovernor is
     $.voterRewards = IVoterRewards(_voterRewards);
     $.xAllocationVoting = _xAllocationVoting;
 
-    $.isFunctionRestrictionEnabled = true;
-
     _grantRole(DEFAULT_ADMIN_ROLE, governorAdmin);
+    _grantRole(GOVERNOR_FUNCTIONS_SETTINGS_ROLE, governorFunctionSettingsRoleAddress);
   }
 
   // ------------------ GETTERS ------------------ //
+
   function xAllocationVotingAddress() public view returns (IXAllocationVotingGovernor) {
     return _getB3TRGovernorStorage().xAllocationVoting;
   }
@@ -131,10 +132,6 @@ contract B3TRGovernor is
     return true;
   }
 
-  function isFunctionWhitelisted(address target, bytes4 functionSelector) public view returns (bool) {
-    return _getB3TRGovernorStorage().whitelistedFunctions[target][functionSelector];
-  }
-
   // ------------------ SETTERS ------------------ //
 
   function setVoterRewards(address _voterRewards) public onlyGovernance {
@@ -148,29 +145,41 @@ contract B3TRGovernor is
     $.xAllocationVoting = _xAllocationVoting;
   }
 
+  /**
+   * @dev See {GovernorFunctionsSettingsUpgradeable-setWhitelistFunction}.
+   *
+   * This function is only callable by the GOVERNOR_FUNCTIONS_SETTINGS_ROLE
+   */
   function setWhitelistFunction(
     address target,
     bytes4 functionSelector,
     bool isWhitelisted
-  ) public onlyAdminOrGovernance {
-    B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
-    $.whitelistedFunctions[target][functionSelector] = isWhitelisted;
+  ) public override onlyRoleOrGovernance(GOVERNOR_FUNCTIONS_SETTINGS_ROLE) {
+    super.setWhitelistFunction(target, functionSelector, isWhitelisted);
   }
 
+  /**
+   * @dev See {GovernorFunctionsSettingsUpgradeable-setWhitelistFunctions}.
+   *
+   * This function is only callable by the GOVERNOR_FUNCTIONS_SETTINGS_ROLE
+   */
   function setWhitelistFunctions(
     address target,
     bytes4[] memory functionSelectors,
     bool isWhitelisted
-  ) public onlyAdminOrGovernance {
-    B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
-    for (uint256 i = 0; i < functionSelectors.length; i++) {
-      $.whitelistedFunctions[target][functionSelectors[i]] = isWhitelisted;
-    }
+  ) public override onlyRoleOrGovernance(GOVERNOR_FUNCTIONS_SETTINGS_ROLE) {
+    super.setWhitelistFunctions(target, functionSelectors, isWhitelisted);
   }
 
-  function setIsFunctionRestrictionEnabled(bool isEnabled) public onlyAdminOrGovernance {
-    B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
-    $.isFunctionRestrictionEnabled = isEnabled;
+  /**
+   * @dev See {GovernorFunctionsSettingsUpgradeable-setIsFunctionRestrictionEnabled}.
+   *
+   * This function is only callable by the GOVERNOR_FUNCTIONS_SETTINGS_ROLE
+   */
+  function setIsFunctionRestrictionEnabled(
+    bool isEnabled
+  ) public override onlyRoleOrGovernance(GOVERNOR_FUNCTIONS_SETTINGS_ROLE) {
+    super.setIsFunctionRestrictionEnabled(isEnabled);
   }
 
   /**
@@ -231,7 +240,7 @@ contract B3TRGovernor is
     uint256 depositAmount
   ) internal virtual returns (uint256 proposalId) {
     GovernorStorage storage $ = _getGovernorStorage();
-    B3TRGovernorStorage storage $$ = _getB3TRGovernorStorage();
+    GovernorFunctionsSettingsStorage storage $$ = _getGovernorFunctionsSettingsStorage();
     proposalId = hashProposal(targets, values, calldatas, keccak256(bytes(description)));
 
     if (targets.length != values.length || targets.length != calldatas.length) {
