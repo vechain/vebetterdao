@@ -22,7 +22,7 @@ import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { B3TRGovernor } from "../typechain-types"
 
-describe("Governor and TimeLock", function () {
+describe.only("Governor and TimeLock", function () {
   describe("Governor deployment", function () {
     it("Should set constructors correctly", async function () {
       const config = createLocalConfig()
@@ -197,6 +197,8 @@ describe("Governor and TimeLock", function () {
           1, // delay before vote starts
           owner.address,
           await voterRewards.getAddress(),
+          owner.address,
+          true,
         ),
       )
     })

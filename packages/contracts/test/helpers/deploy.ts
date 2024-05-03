@@ -167,6 +167,8 @@ export const getOrDeployContractInstances = async ({
     config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
     owner.address,
     await voterRewards.getAddress(),
+    owner.address,
+    true,
   ])) as B3TRGovernor
 
   const contractAddresses: Record<string, string> = {
