@@ -22,7 +22,7 @@ import { FiArrowUpRight } from "react-icons/fi"
 type Props = {
   maxApps?: number
 }
-export const DashboardXApps = ({ maxApps = 5 }: Props) => {
+export const DashboardXApps = ({ maxApps = 8 }: Props) => {
   const { data: xApps } = useXApps()
 
   const slicedXApps = useMemo(() => xApps?.slice(0, maxApps), [xApps, maxApps])
@@ -43,14 +43,14 @@ export const DashboardXApps = ({ maxApps = 5 }: Props) => {
       </CardHeader>
       <CardBody>
         <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
-          {slicedXApps?.map(xApp => <XApp key={xApp.id} xApp={xApp} />)}
+          {slicedXApps?.map(xApp => <XAppCard key={xApp.id} xApp={xApp} />)}
         </Grid>
       </CardBody>
     </Card>
   )
 }
 
-const XApp = ({ xApp }: { xApp: XApp }) => {
+const XAppCard = ({ xApp }: { xApp: XApp }) => {
   const {
     data: appMetadata,
     isLoading: appMetadataLoading,
