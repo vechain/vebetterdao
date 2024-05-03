@@ -19,6 +19,7 @@ export type ProposalFormStoreState = {
     functionDescription?: string
   }[]
   votingStartRoundId?: number
+  depositAmount?: number
   setData: (data: Partial<ProposalFormStoreState>) => void
 }
 

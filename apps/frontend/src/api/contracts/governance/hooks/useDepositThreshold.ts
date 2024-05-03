@@ -11,7 +11,7 @@ const governorInterface = B3TRGovernor__factory.createInterface()
  * @param thor  the thor client
  * @returns  the current proposal threshold
  */
-export const getDepositThreshold = async (thor: Connex.Thor) => {
+export const getDepositThreshold = async (thor: Connex.Thor): Promise<string> => {
   const functionFragment = governorInterface.getFunction("depositThreshold").format("json")
   const res = await thor.account(GOVERNANCE_CONTRACT).method(JSON.parse(functionFragment)).call()
 
