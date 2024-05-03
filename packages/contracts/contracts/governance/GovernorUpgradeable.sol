@@ -5,15 +5,12 @@ pragma solidity ^0.8.20;
 
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
-import { EIP712Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
-import { SignatureChecker } from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import { ERC165Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { DoubleEndedQueue } from "@openzeppelin/contracts/utils/structs/DoubleEndedQueue.sol";
 import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import { ContextUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import { NoncesUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/NoncesUpgradeable.sol";
 import { IB3TRGovernor } from "../interfaces/IB3TRGovernor.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
@@ -37,21 +34,17 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
  * - updated _countVote() function signature to include power
  * - updated _castVote() to calculate power as Math.sqrt(weight)
  * - added isExecutable to ProposalCore
+ * - Removed voteWithSignature
  */
 abstract contract GovernorUpgradeable is
   Initializable,
   ContextUpgradeable,
   ERC165Upgradeable,
-  EIP712Upgradeable,
-  NoncesUpgradeable,
   IB3TRGovernor,
   IERC721Receiver,
   IERC1155Receiver
 {
   using DoubleEndedQueue for DoubleEndedQueue.Bytes32Deque;
-
-  bytes32 public constant BALLOT_TYPEHASH =
-    keccak256("Ballot(uint256 proposalId,uint8 support,address voter,uint256 nonce)");
 
   struct ProposalCore {
     address proposer;
@@ -61,9 +54,10 @@ abstract contract GovernorUpgradeable is
     bool executed;
     bool canceled;
     uint48 etaSeconds;
+    uint256 depositAmount;
   }
 
-  bytes32 private constant ALL_PROPOSAL_STATES_BITMAP = bytes32((2 ** (uint8(type(ProposalState).max) + 1)) - 1);
+  bytes32 internal constant ALL_PROPOSAL_STATES_BITMAP = bytes32((2 ** (uint8(type(ProposalState).max) + 1)) - 1);
   /// @custom:storage-location erc7201:openzeppelin.storage.Governor
   struct GovernorStorage {
     string _name;
@@ -103,7 +97,6 @@ abstract contract GovernorUpgradeable is
    * @dev Sets the value for {name}, {version} in the storage.
    */
   function __Governor_init(string memory name_) internal onlyInitializing {
-    __EIP712_init_unchained(name_, version());
     __Governor_init_unchained(name_);
   }
 
@@ -171,9 +164,9 @@ abstract contract GovernorUpgradeable is
   }
 
   /**
-   * @dev See {IB3TRGovernor-proposalThreshold}.
+   * @dev See {IB3TRGovernor-depositThreshold}.
    */
-  function proposalThreshold() public view virtual returns (uint256) {
+  function depositThreshold() public view virtual returns (uint256) {
     return 0;
   }
 
@@ -451,28 +444,6 @@ abstract contract GovernorUpgradeable is
   }
 
   /**
-   * @dev See {IB3TRGovernor-castVoteBySig}.
-   */
-  function castVoteBySig(
-    uint256 proposalId,
-    uint8 support,
-    address voter,
-    bytes memory signature
-  ) public virtual returns (uint256) {
-    bool valid = SignatureChecker.isValidSignatureNow(
-      voter,
-      _hashTypedDataV4(keccak256(abi.encode(BALLOT_TYPEHASH, proposalId, support, voter, _useNonce(voter)))),
-      signature
-    );
-
-    if (!valid) {
-      revert GovernorInvalidSignature(voter);
-    }
-
-    return _castVote(proposalId, voter, support, "");
-  }
-
-  /**
    * @dev Internal vote casting mechanism: Check that the vote is pending, that it has not been cast yet, retrieve
    * voting weight using {IB3TRGovernor-getVotes} and call the {_countVote} internal function. Uses the _defaultParams().
    *
@@ -575,7 +546,7 @@ abstract contract GovernorUpgradeable is
    *
    * If requirements are not met, reverts with a {GovernorUnexpectedProposalState} error.
    */
-  function _validateStateBitmap(uint256 proposalId, bytes32 allowedStates) private view returns (ProposalState) {
+  function _validateStateBitmap(uint256 proposalId, bytes32 allowedStates) internal view returns (ProposalState) {
     ProposalState currentState = state(proposalId);
     if (_encodeStateBitmap(currentState) & allowedStates == bytes32(0)) {
       revert GovernorUnexpectedProposalState(proposalId, currentState, allowedStates);

@@ -11,6 +11,7 @@
     "test": "yarn build && jest"
   },
   "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.556.0",
     "@repo/contracts": "*",
     "lambda-local": "^2.1.2"
   },

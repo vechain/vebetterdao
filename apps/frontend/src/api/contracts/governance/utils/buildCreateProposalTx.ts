@@ -42,7 +42,7 @@ export const buildCreateProposalTx = (
   const clause: EnhancedClause = {
     to: GOVERNANCE_CONTRACT,
     value: 0,
-    data: b3trGovernorInterface.encodeFunctionData("propose", [targets, [0], callData, description, startRoundId]),
+    data: b3trGovernorInterface.encodeFunctionData("propose", [targets, [0], callData, description, startRoundId, 0]),
     comment: `Create new proposal for round ${startRoundId} with description: ${description}`,
     abi: JSON.parse(JSON.stringify(b3trGovernorInterface.getFunction("propose"))),
   }

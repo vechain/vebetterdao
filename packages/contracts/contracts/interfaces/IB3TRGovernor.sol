@@ -23,7 +23,8 @@ interface IB3TRGovernor is IERC165, IERC6372 {
     Succeeded,
     Queued,
     Expired,
-    Executed
+    Executed,
+    DepositNotMet
   }
 
   /**
@@ -104,15 +105,19 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   error GovernorAlreadyQueuedProposal(uint256 proposalId);
 
   /**
-   * @dev The provided signature is not valid for the expected `voter`.
-   * If the `voter` is a contract, the signature is not valid using {IERC1271-isValidSignature}.
-   */
-  error GovernorInvalidSignature(address voter);
-
-  /**
    * @dev The round when proposal should start is not valid.
    */
   error GovernorInvalidStartRound(uint256 roundId);
+
+  /**
+   * @dev There is no deposit to withdraw.
+   */
+  error GovernorNoDepositToWithdraw(uint256 proposalId, address depositer);
+
+    /**
+   * @dev The deposit amount must be greater than 0.
+   */
+  error GovernorInvalidDepositAmount();
 
   /**
    * @dev Emitted when a proposal is created
@@ -156,6 +161,11 @@ interface IB3TRGovernor is IERC165, IERC6372 {
     uint256 power,
     string reason
   );
+
+  /**
+   * @dev Emitted when a deposit is made to a proposal.
+   */
+  event ProposalDeposit(address indexed depositor, uint256 indexed proposalId, uint256 amount);
 
   /**
    * @notice module:core
@@ -219,9 +229,9 @@ interface IB3TRGovernor is IERC165, IERC6372 {
 
   /**
    * @notice module:core
-   * @dev The number of votes required in order for a voter to become a proposer.
+   * @dev The number of votes in support of a proposal required in order for a proposal to become active.
    */
-  function proposalThreshold() external view returns (uint256);
+  function depositThreshold() external view returns (uint256);
 
   /**
    * @notice module:core
@@ -314,7 +324,8 @@ interface IB3TRGovernor is IERC165, IERC6372 {
     uint256[] memory values,
     bytes[] memory calldatas,
     string memory description,
-    uint256 startRoundId
+    uint256 startRoundId,
+    uint256 depositAmount
   ) external returns (uint256 proposalId);
 
   /**
@@ -368,18 +379,6 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   function castVote(uint256 proposalId, uint8 support) external returns (uint256 balance);
 
   /**
-   * @dev Cast a vote using the voter's signature, including ERC-1271 signature support.
-   *
-   * Emits a {VoteCast} event.
-   */
-  function castVoteBySig(
-    uint256 proposalId,
-    uint8 support,
-    address voter,
-    bytes memory signature
-  ) external returns (uint256 balance);
-
-  /**
    * @dev Cast a vote with a reason
    *
    * Emits a {VoteCast} event.
@@ -404,4 +403,19 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @dev Check if proposal can start in the next allocation round.
    */
   function canProposalStartInNextRound() external view returns (bool);
+
+  // Function to deposit tokens to a proposal
+  function deposit(uint256 amount, uint256 proposalId) external;
+
+  // Function to withdraw tokens from a proposal
+  function withdraw(uint256 proposalId, address depositer) external;
+
+  // Getter to retrieve the total amount of tokens deposited to a proposal
+  function getProposalDeposits(uint256 proposalId) external view returns (uint256);
+
+  // Function to check if the deposit threshold for a proposal has been reached
+  function proposalDepositReached(uint256 proposalId) external view returns (bool);
+
+  // Getter to retrieve the amount of tokens a specific user has deposited to a proposal
+  function getUserDeposit(uint256 proposalId, address user) external view returns (uint256);
 }
