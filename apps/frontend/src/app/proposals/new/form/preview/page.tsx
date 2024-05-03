@@ -23,7 +23,7 @@ export default function NewProposalPage() {
   }, [router])
 
   useEffect(() => {
-    AnalyticsUtils.trackPage("NewProposal/info-and-functions")
+    AnalyticsUtils.trackPage("NewProposal/preview")
   }, [])
 
   useEffect(() => {
