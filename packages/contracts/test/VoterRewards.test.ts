@@ -461,7 +461,7 @@ describe("VoterRewards", () => {
       receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
 
-      expect(await voterRewards.cycleToVoterToTotal(1, voter3)).to.equal(ethers.parseEther("24.494897427")) // I'm expecting 24.29 because I voted 100 for app1 and 500 for app2 at the first cycle which is 600 and the square root of 600 is 24.49
+      expect(await voterRewards.cycleToVoterToTotal(1, voter3)).to.equal(ethers.parseEther("24.494897427")) // I'm expecting 24.49 because I voted 100 for app1 and 500 for app2 at the first cycle which is 600 and the square root of 600 is 24.49
 
       // Votes should be tracked correctly
       let appVotes = await xAllocationVoting.getAppVotes(roundId, app1)
@@ -1576,6 +1576,10 @@ describe("VoterRewards", () => {
     })
 
     it("Should be able to vote with 0 VOT3 tokens and not receive rewards", async () => {
+      const config = createTestConfig()
+      config.B3TR_GOVERNOR_VOTING_THRESHOLD = ethers.parseEther("0")
+      config.INITIAL_X_ALLOCATION = BigInt("66666666666666666666666")
+
       const {
         otherAccounts,
         otherAccount: voter1,
@@ -1585,6 +1589,7 @@ describe("VoterRewards", () => {
         voterRewards,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
+        config,
       })
 
       await bootstrapAndStartEmissions()
@@ -1820,7 +1825,7 @@ describe("VoterRewards", () => {
         voter3 = 0 votes for governance voting and 1000 votes (reward weighted votes 31.26) for x allocation voting = 1000 votes (reward weighted votes 31.26)
 
         Total reward weighted votes = 158.10
-        voter1 allocation = 63.24 / 158.10 * 100 = 40% (800000 B3T4)
+        voter1 allocation = 63.24 / 158.10 * 100 = 40% (800000 B3T3)
         voter2 allocation = 63.24 / 158.10 * 100 = 40% (800000 B3TR)
         voter3 allocation = 31.62 / 158.10 * 100 = 20% (400000 B3TR)
       */
