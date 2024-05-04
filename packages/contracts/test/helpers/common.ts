@@ -279,7 +279,8 @@ export const createProposalWithMultipleFunctionsAndExecuteIt = async (
   args: any[][],
   roundId?: string,
 ) => {
-  const { governor, emissions, xAllocationVoting } = await getOrDeployContractInstances({})
+  const { governor, emissions, xAllocationVoting, governorProposalExecutor, governorProposalQueuer } =
+    await getOrDeployContractInstances({})
 
   // load votes
   // console.log("Loading votes");
@@ -332,22 +333,20 @@ export const createProposalWithMultipleFunctionsAndExecuteIt = async (
   // queue it
   // console.log("Queueing");
   const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
-  await governor.queue(contractsToCall, Array(functionsToCall.length).fill(0), encodedFunctionCalls, descriptionHash, {
-    gasLimit: 10_000_000,
-  })
+  await governor
+    .connect(governorProposalQueuer)
+    .queue(contractsToCall, Array(functionsToCall.length).fill(0), encodedFunctionCalls, descriptionHash, {
+      gasLimit: 10_000_000,
+    })
   await waitForNextBlock()
 
   // execute it
   // console.log("Executing");
-  await governor.execute(
-    contractsToCall,
-    Array(functionsToCall.length).fill(0),
-    encodedFunctionCalls,
-    descriptionHash,
-    {
+  await governor
+    .connect(governorProposalExecutor)
+    .execute(contractsToCall, Array(functionsToCall.length).fill(0), encodedFunctionCalls, descriptionHash, {
       gasLimit: 10_000_000,
-    },
-  )
+    })
 }
 
 export const addAppThroughGovernance = async (

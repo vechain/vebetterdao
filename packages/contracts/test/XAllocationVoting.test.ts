@@ -198,7 +198,16 @@ describe("X-Allocation Voting", function () {
     })
 
     it("should be able to upgrade the xAllocationVoting contract through governance", async function () {
-      const { xAllocationVoting, timeLock, governor, owner, otherAccount, vot3 } = await getOrDeployContractInstances({
+      const {
+        xAllocationVoting,
+        timeLock,
+        governor,
+        owner,
+        otherAccount,
+        vot3,
+        governorProposalExecutor,
+        governorProposalQueuer,
+      } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -249,10 +258,14 @@ describe("X-Allocation Voting", function () {
       await waitForVotingPeriodToEnd(proposalId)
       expect(await governor.state(proposalId)).to.eql(4n) // succeded
 
-      await governor.queue([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash)
+      await governor
+        .connect(governorProposalQueuer)
+        .queue([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash)
       expect(await governor.state(proposalId)).to.eql(5n)
 
-      await governor.execute([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash)
+      await governor
+        .connect(governorProposalExecutor)
+        .execute([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash)
       expect(await governor.state(proposalId)).to.eql(7n)
 
       const newImplAddress = await getImplementationAddress(ethers.provider, await xAllocationVoting.getAddress())
@@ -454,10 +467,18 @@ describe("X-Allocation Voting", function () {
       })
 
       it("Can set voting period if less than emissions cycle duration", async function () {
-        const { xAllocationVoting, owner, emissions, governor, otherAccount, vot3 } =
-          await getOrDeployContractInstances({
-            forceDeploy: true,
-          })
+        const {
+          xAllocationVoting,
+          owner,
+          emissions,
+          governor,
+          otherAccount,
+          vot3,
+          governorProposalExecutor,
+          governorProposalQueuer,
+        } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
         await bootstrapAndStartEmissions()
         const votesThreshold = await governor.depositThreshold()
         await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
@@ -491,10 +512,14 @@ describe("X-Allocation Voting", function () {
         await waitForVotingPeriodToEnd(proposalId)
         expect(await governor.state(proposalId)).to.eql(4n) // succeded
 
-        await governor.queue([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash)
+        await governor
+          .connect(governorProposalQueuer)
+          .queue([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash)
         expect(await governor.state(proposalId)).to.eql(5n)
 
-        await governor.execute([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash)
+        await governor
+          .connect(governorProposalExecutor)
+          .execute([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash)
         expect(await governor.state(proposalId)).to.eql(7n)
 
         const votingPeriod = await xAllocationVoting.votingPeriod()
@@ -526,10 +551,18 @@ describe("X-Allocation Voting", function () {
       })
 
       it("Cannot set voting period if not less than emissions cycle duration", async function () {
-        const { xAllocationVoting, owner, emissions, governor, otherAccount, vot3 } =
-          await getOrDeployContractInstances({
-            forceDeploy: true,
-          })
+        const {
+          xAllocationVoting,
+          owner,
+          emissions,
+          governor,
+          otherAccount,
+          vot3,
+          governorProposalExecutor,
+          governorProposalQueuer,
+        } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
         await bootstrapAndStartEmissions()
         const votesThreshold = await governor.depositThreshold()
         await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
@@ -562,11 +595,15 @@ describe("X-Allocation Voting", function () {
         await waitForVotingPeriodToEnd(proposalId)
         expect(await governor.state(proposalId)).to.eql(4n) // succeded
 
-        await governor.queue([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash)
+        await governor
+          .connect(governorProposalQueuer)
+          .queue([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash)
         expect(await governor.state(proposalId)).to.eql(5n)
 
         await expect(
-          governor.execute([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash),
+          governor
+            .connect(governorProposalExecutor)
+            .execute([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash),
         ).to.be.reverted
 
         const afterVotingPeriod = await xAllocationVoting.votingPeriod()
