@@ -77,8 +77,16 @@ describe("VoterRewards", () => {
 
       await voterRewards.connect(owner).setVoteRegistrarRole(otherAccount.address)
 
-      await expect(voterRewards.connect(otherAccount).registerVote(0, otherAccount.address, ethers.parseEther("1000")))
-        .to.be.reverted
+      await expect(
+        voterRewards
+          .connect(otherAccount)
+          .registerVote(
+            0,
+            otherAccount.address,
+            ethers.parseEther("1000"),
+            ethers.parseEther(Math.sqrt(1000).toString()),
+          ),
+      ).to.be.reverted
     })
 
     it("Should not be able to register vote for zero address voter", async () => {
@@ -88,8 +96,11 @@ describe("VoterRewards", () => {
 
       await voterRewards.connect(owner).setVoteRegistrarRole(otherAccount.address)
 
-      await expect(voterRewards.connect(otherAccount).registerVote(1, ZERO_ADDRESS, ethers.parseEther("1000"))).to.be
-        .reverted
+      await expect(
+        voterRewards
+          .connect(otherAccount)
+          .registerVote(1, ZERO_ADDRESS, ethers.parseEther("1000"), ethers.parseEther(Math.sqrt(1000).toString())),
+      ).to.be.reverted
     })
 
     it("Should return correct scaling factor", async () => {
@@ -427,12 +438,13 @@ describe("VoterRewards", () => {
       expect(decodedEvents[1]?.args?.[0]).to.equal(1) // Cycle
       expect(decodedEvents[1]?.args?.[1]).to.equal(otherAccount.address) // Voter
       expect(decodedEvents[1]?.args?.[2]).to.equal(ethers.parseEther("500")) // Votes
+      expect(decodedEvents[1]?.args?.[3]).to.equal(ethers.parseEther("22.360679774")) // Reward weight
 
       expect(await emissions.isCycleEnded(1)).to.equal(false)
 
       await catchRevert(voterRewards.claimReward(1, otherAccount.address)) // Should not be able to claim rewards before cycle ended
 
-      expect(await voterRewards.cycleToVoterToTotal(1, otherAccount)).to.equal(ethers.parseEther("500")) // I'm expecting 500 because I voted 300 for app1 and 200 for app2 at the first cycle
+      expect(await voterRewards.cycleToVoterToTotal(1, otherAccount)).to.equal(ethers.parseEther("22.360679774")) // I'm expecting 22.36 because I voted 300 for app1 and 200 for app2 at the first cycle which is 500 and the square root of 500 is 22.36
 
       tx = await xAllocationVoting
         .connect(voter2)
@@ -440,7 +452,7 @@ describe("VoterRewards", () => {
       receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
 
-      expect(await voterRewards.cycleToVoterToTotal(1, voter2)).to.equal(ethers.parseEther("300")) // I'm expecting 300 because I voted 200 for app1 and 100 for app2 at the first cycle
+      expect(await voterRewards.cycleToVoterToTotal(1, voter2)).to.equal(ethers.parseEther("17.320508075")) // I'm expecting 17.32 because I voted 200 for app1 and 100 for app2 at the first cycle which is 300 and the square root of 300 is 17.32
 
       await catchRevert(voterRewards.claimReward(1, voter2.address)) // Should not be able to claim rewards before cycle ended
 
@@ -450,7 +462,7 @@ describe("VoterRewards", () => {
       receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
 
-      expect(await voterRewards.cycleToVoterToTotal(1, voter3)).to.equal(ethers.parseEther("600")) // I'm expecting 600 because I voted 100 for app1 and 500 for app2 at the first cycle
+      expect(await voterRewards.cycleToVoterToTotal(1, voter3)).to.equal(ethers.parseEther("24.494897427")) // I'm expecting 24.49 because I voted 100 for app1 and 500 for app2 at the first cycle which is 600 and the square root of 600 is 24.49
 
       // Votes should be tracked correctly
       let appVotes = await xAllocationVoting.getAppVotes(roundId, app1)
@@ -466,7 +478,7 @@ describe("VoterRewards", () => {
       expect(totalVoters).to.eql(BigInt(3))
 
       // Voter rewards checks
-      expect(await voterRewards.cycleToTotal(1)).to.equal(ethers.parseEther("1400")) // Total votes
+      expect(await voterRewards.cycleToTotal(1)).to.equal(ethers.parseEther("64.176085276")) // Total votes -> Math.sqrt(500) + Math.sqrt(300) + Math.sqrt(600)
       expect(await voterRewards.cycleToTotal(1)).to.equal(
         (await voterRewards.cycleToVoterToTotal(1, otherAccount)) +
           (await voterRewards.cycleToVoterToTotal(1, voter2)) +
@@ -516,7 +528,7 @@ describe("VoterRewards", () => {
 
       expect(rewardClaimedEvent?.args?.[0]).to.equal(1) // Cycle
       expect(rewardClaimedEvent?.args?.[1]).to.equal(otherAccount.address) // Voter
-      expect(rewardClaimedEvent?.args?.[2]).to.equal(23809523809523809523809n) // Reward
+      expect(rewardClaimedEvent?.args?.[2]).to.equal(23228465533886600374276n) // Reward
 
       await voterRewards.connect(voter2).claimReward(1, voter2.address)
       await voterRewards.connect(voter3).claimReward(1, voter3.address)
@@ -586,13 +598,13 @@ describe("VoterRewards", () => {
 
       await catchRevert(voterRewards.claimReward(1, voter1.address))
 
-      expect(await voterRewards.cycleToVoterToTotal(1, voter1)).to.equal(ethers.parseEther("1000"))
+      expect(await voterRewards.cycleToVoterToTotal(1, voter1)).to.equal(ethers.parseEther("31.622776601"))
 
-      expect(await voterRewards.cycleToVoterToTotal(1, voter2)).to.equal(ethers.parseEther("300"))
+      expect(await voterRewards.cycleToVoterToTotal(1, voter2)).to.equal(ethers.parseEther("17.320508075"))
 
       await catchRevert(voterRewards.claimReward(1, voter2.address))
 
-      expect(await voterRewards.cycleToVoterToTotal(1, voter3)).to.equal(ethers.parseEther("1000"))
+      expect(await voterRewards.cycleToVoterToTotal(1, voter3)).to.equal(ethers.parseEther("31.622776601"))
 
       // Votes should be tracked correctly
       let appVotes = await xAllocationVoting.getAppVotes(roundId, app1)
@@ -608,7 +620,7 @@ describe("VoterRewards", () => {
       expect(totalVoters).to.eql(BigInt(3))
 
       // Voter rewards checks
-      expect(await voterRewards.cycleToTotal(1)).to.equal(ethers.parseEther("2300")) // Total votes
+      expect(await voterRewards.cycleToTotal(1)).to.equal(ethers.parseEther("80.566061277")) // Total votes -> Math.sqrt(1000) + Math.sqrt(300) + Math.sqrt(1000)
       expect(await voterRewards.cycleToTotal(1)).to.equal(
         (await voterRewards.cycleToVoterToTotal(1, voter1)) +
           (await voterRewards.cycleToVoterToTotal(1, voter2)) +
@@ -672,13 +684,13 @@ describe("VoterRewards", () => {
 
       await catchRevert(voterRewards.claimReward(2, voter1.address))
 
-      expect(await voterRewards.cycleToVoterToTotal(2, voter1)).to.equal(ethers.parseEther("1000"))
+      expect(await voterRewards.cycleToVoterToTotal(2, voter1)).to.equal(ethers.parseEther("31.622776601"))
 
-      expect(await voterRewards.cycleToVoterToTotal(2, voter2)).to.equal(ethers.parseEther("600"))
+      expect(await voterRewards.cycleToVoterToTotal(2, voter2)).to.equal(ethers.parseEther("24.494897427"))
 
       await catchRevert(voterRewards.claimReward(2, voter2.address))
 
-      expect(await voterRewards.cycleToVoterToTotal(2, voter3)).to.equal(ethers.parseEther("1000"))
+      expect(await voterRewards.cycleToVoterToTotal(2, voter3)).to.equal(ethers.parseEther("31.622776601"))
 
       // Votes should be tracked correctly
       appVotes = await xAllocationVoting.getAppVotes(roundId2, app1)
@@ -694,7 +706,7 @@ describe("VoterRewards", () => {
       expect(totalVoters).to.eql(BigInt(3))
 
       // Voter rewards checks
-      expect(await voterRewards.cycleToTotal(2)).to.equal(ethers.parseEther("2600")) // Total votes
+      expect(await voterRewards.cycleToTotal(2)).to.equal(ethers.parseEther("87.740450629")) // Total votes -> Math.sqrt(1000) + Math.sqrt(300) + Math.sqrt(1000)
       expect(await voterRewards.cycleToTotal(2)).to.equal(
         (await voterRewards.cycleToVoterToTotal(2, voter1)) +
           (await voterRewards.cycleToVoterToTotal(2, voter2)) +
@@ -1115,21 +1127,30 @@ describe("VoterRewards", () => {
         roundId2, // Second round
       )
 
-      expect(await voterRewards.cycleToTotal(2)).to.equal(28100000000000000000000n) // Total votes power
-      expect(await voterRewards.cycleToVoterToTotal(2, voter1)).to.equal(2000000000000000000000n) // Voter 1 votes power
-      expect(await voterRewards.cycleToVoterToTotal(2, voter2)).to.equal(25000000000000000000000n) // Voter 2 votes power
-      expect(await voterRewards.cycleToVoterToTotal(2, voter3)).to.equal(1100000000000000000000n) // Voter 3 votes power
-
-      // Rewards to be claimed are now NOT the same for all voters because voters have different levels of NFTs:
       /*
-        voter 1 = 1000 votes * 100% multiplier = 2000 power
-        voter 2 = 1000 votes * 25x multiplier = 25000 power
-        voter 3 = 1000 votes * 10% multiplier = 1100 power
+        voter 1 = 31.62 reward weighted votes * 100% multiplier = 63.24 reward weighted power
+        voter 2 = 31.62 reward weighted votes * 25x multiplier = 790.57 reward weighted power
+        voter 3 = 31.62 reward weighted votes * 10% multiplier = 34.78 reward weighted power
 
-        Total power = 28100
-        voter 1 allocation = 2000 / 28100 * 100 = 7.11%
-        voter 2 allocation = 25000 / 28100 * 100 = 88.96%
-        voter 3 allocation = 1100 / 28100 * 100 = 3.91%
+        Total power = 888.60
+        voter 1 allocation = 63.24 / 888.60 * 100 = 7.11%
+        voter 2 allocation = 790.57 / 888.60 * 100 = 88.96%
+        voter 3 allocation = 34.78 / 888.60 * 100 = 3.91%
+      */
+      expect(await voterRewards.cycleToTotal(2)).to.equal(ethers.parseEther("888.6000224881")) // Total reward weighted votes
+      expect(await voterRewards.cycleToVoterToTotal(2, voter1)).to.equal(ethers.parseEther("63.245553202")) // Voter 1 reward weighted votes
+      expect(await voterRewards.cycleToVoterToTotal(2, voter2)).to.equal(ethers.parseEther("790.569415025")) // Voter 2 reward weighted votes
+      expect(await voterRewards.cycleToVoterToTotal(2, voter3)).to.equal(ethers.parseEther("34.7850542611")) // Voter 3 reward weighted votes
+
+      /*
+        voter 1 = 31.62 reward weighted votes * 100% multiplier = 63.24 reward weighted power
+        voter 2 = 31.62 reward weighted votes * 25x multiplier = 790.57 reward weighted power
+        voter 3 = 31.62 reward weighted votes * 10% multiplier = 34.78 reward weighted power
+
+        Total power = 888.60
+        voter 1 allocation = 63.24 / 888.60 * 100 = 7.11%
+        voter 2 allocation = 790.57 / 888.60 * 100 = 88.96%
+        voter 3 allocation = 34.78 / 888.60 * 100 = 3.91%
       */
       expect(await voterRewards.getReward(2, voter1.address)).to.equal(142348754448398576512455n) // 7.11%
       expect(await voterRewards.getReward(2, voter2.address)).to.equal(1779359430604982206405693n) // 88.96%
@@ -1248,9 +1269,9 @@ describe("VoterRewards", () => {
         [app1, app2],
         [voter1, voter2, voter3],
         [
-          [ethers.parseEther("0"), ethers.parseEther("1000")], // Voter 1 votes 1000 for app2
-          [ethers.parseEther("0"), ethers.parseEther("1000")], // Voter 2 votes 1000 for app2
-          [ethers.parseEther("500"), ethers.parseEther("500")], // Voter 3 votes 500 for app1 and 500 for app2
+          [ethers.parseEther("0"), ethers.parseEther("1000")], // Voter 1 votes 1000 for app2 -> 31.62 reward weighted votes
+          [ethers.parseEther("0"), ethers.parseEther("1000")], // Voter 2 votes 1000 for app2 -> 31.62 reward weighted votes
+          [ethers.parseEther("500"), ethers.parseEther("500")], // Voter 3 votes 500 for app1 and 500 for app2 -> 31.62 reward weighted votes
         ],
         roundId2, // Second round
       )
@@ -1330,9 +1351,9 @@ describe("VoterRewards", () => {
         [app1, app2],
         [voter1, voter2, voter3],
         [
-          [ethers.parseEther("1000"), ethers.parseEther("0")], // Voter 1 votes 1000 for app1
-          [ethers.parseEther("500"), ethers.parseEther("500")], // Voter 2 votes 500 for app1 and 500 for app2
-          [ethers.parseEther("500"), ethers.parseEther("500")], // Voter 3 votes 500 for app1 and 500 for app2
+          [ethers.parseEther("1000"), ethers.parseEther("0")], // Voter 1 votes 1000 for app1 -> 31.62 reward weighted votes
+          [ethers.parseEther("500"), ethers.parseEther("500")], // Voter 2 votes 500 for app1 and 500 for app2 -> 31.62 reward weighted votes
+          [ethers.parseEther("500"), ethers.parseEther("500")], // Voter 3 votes 500 for app1 and 500 for app2 -> 31.62 reward weighted votes
         ],
         roundId, // First round
       )
@@ -1373,9 +1394,9 @@ describe("VoterRewards", () => {
         [app1, app2],
         [voter1, voter2, voter3],
         [
-          [ethers.parseEther("0"), ethers.parseEther("1000")], // Voter 1 votes 1000 for app2
-          [ethers.parseEther("0"), ethers.parseEther("1000")], // Voter 2 votes 1000 for app2
-          [ethers.parseEther("500"), ethers.parseEther("500")], // Voter 3 votes 500 for app1 and 500 for app2
+          [ethers.parseEther("0"), ethers.parseEther("1000")], // Voter 1 votes 1000 for app2 -> 31.62 reward weighted votes
+          [ethers.parseEther("0"), ethers.parseEther("1000")], // Voter 2 votes 1000 for app2 -> 31.62 reward weighted votes
+          [ethers.parseEther("500"), ethers.parseEther("500")], // Voter 3 votes 500 for app1 and 500 for app2 -> 31.62 reward weighted votes
         ],
         roundId2, // Second round
       )
@@ -1467,7 +1488,14 @@ describe("VoterRewards", () => {
       const proposalStart = await xAllocationVoting.roundSnapshot(roundId)
 
       await expect(
-        voterRewards.connect(otherAccount).registerVote(proposalStart, otherAccount.address, ethers.parseEther("1000")),
+        voterRewards
+          .connect(otherAccount)
+          .registerVote(
+            proposalStart,
+            otherAccount.address,
+            ethers.parseEther("1000"),
+            ethers.parseEther("31.6227766017"),
+          ),
       ).to.be.reverted
     })
 
@@ -1492,7 +1520,9 @@ describe("VoterRewards", () => {
 
       const totalVotesBefore = await voterRewards.cycleToTotal(1)
 
-      await voterRewards.connect(otherAccount).registerVote(1, otherAccount.address, ethers.parseEther("0"))
+      await voterRewards
+        .connect(otherAccount)
+        .registerVote(1, otherAccount.address, ethers.parseEther("0"), ethers.parseEther("0"))
 
       const totalVotesAfter = await voterRewards.cycleToTotal(1)
 
@@ -1548,9 +1578,15 @@ describe("VoterRewards", () => {
 
       expect(await voterRewards.getReward(cycle, voter1.address)).to.equal(33333333333333333333333n) // 50% of the rewards
       expect(await voterRewards.getReward(cycle, voter2.address)).to.equal(33333333333333333333333n) // 50% of the rewards
+
+      expect(await voterRewards.cycleToTotal(cycle)).to.equal(ethers.parseEther("63.245553202")) // Total reward weighted votes
     })
 
     it("Should be able to vote with 0 VOT3 tokens and not receive rewards", async () => {
+      const config = createTestConfig()
+      config.B3TR_GOVERNOR_VOTING_THRESHOLD = ethers.parseEther("0")
+      config.INITIAL_X_ALLOCATION = BigInt("66666666666666666666666")
+
       const {
         otherAccounts,
         otherAccount: voter1,
@@ -1560,6 +1596,7 @@ describe("VoterRewards", () => {
         voterRewards,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
+        config,
       })
 
       await bootstrapAndStartEmissions()
@@ -1674,12 +1711,12 @@ describe("VoterRewards", () => {
       await waitForNextCycle()
 
       /*
-        voter1 = 1000 votes for governance voting * 100% multiplier = 2000 votes
-        voter2 = 1000 votes for governance voting without NFT upgrade = 1000 votes
+        voter1 = 1000 votes (31.62 reward weighted votes) for governance voting * 100% multiplier = 63.24 reward weighted power
+        voter2 = 1000 votes (31.62 reward weighted votes) for governance voting without NFT upgrade = 31.62 reward weighted power
 
-        Total votes = 3000 votes
-        voter1 allocation = 2000 / 3000 * 100 = 66.67% (1333333333333333333333333 B3TR)
-        voter2 allocation = 1000 / 3000 * 100 = 33.33% (666666666666666666666666 B3TR)
+        Total power = 94.86
+        voter1 allocation = 63.24 / 94.86 * 100 = 66.67%
+        voter2 allocation = 31.62 / 94.86 * 100 = 33.33%
       */
       expect(await voterRewards.getReward(cycle, voter1.address)).to.equal(1333333333333333333333333n)
       expect(await voterRewards.getReward(cycle, voter2.address)).to.equal(666666666666666666666666n)
@@ -1791,15 +1828,16 @@ describe("VoterRewards", () => {
       )
 
       /*
-        voter1 = 1000 votes for governance voting and 1000 votes for x allocation voting = 2000 votes
-        voter2 = 1000 votes for governance voting and 1000 votes for x allocation voting = 2000 votes
-        voter3 = 0 votes for governance voting and 1000 votes for x allocation voting = 1000 votes
+        voter1 = 1000 votes (reward weighted votes 31.26) for governance voting and 1000 votes (reward weighted votes 31.26) for x allocation voting = 2000 votes (reward weighted votes 63.24)
+        voter2 = 1000 votes (reward weighted votes 31.26) for governance voting and 1000 votes (reward weighted votes 31.26) for x allocation voting = 2000 votes (reward weighted votes 63.24)
+        voter3 = 0 votes for governance voting and 1000 votes (reward weighted votes 31.26) for x allocation voting = 1000 votes (reward weighted votes 31.26)
 
-        Total votes = 5000 votes
-        voter1 allocation = 2000 / 5000 * 100 = 40% (800000 B3TR)
-        voter2 allocation = 2000 / 5000 * 100 = 40% (800000 B3TR)
-        voter3 allocation = 1000 / 5000 * 100 = 20% (400000 B3TR) 
+        Total reward weighted votes = 158.10
+        voter1 allocation = 63.24 / 158.10 * 100 = 40% (800000 B3T3)
+        voter2 allocation = 63.24 / 158.10 * 100 = 40% (800000 B3TR)
+        voter3 allocation = 31.62 / 158.10 * 100 = 20% (400000 B3TR)
       */
+
       expect(await voterRewards.getReward(xAllocationsRoundID, voter1.address)).to.equal(800000000000000000000000n) // 40% (Notice that voter1 has a level 5 NFT but didn't increase the rewards, this is because the snapshot of the proposal was taken before the NFT upgrade)
       expect(await voterRewards.getReward(xAllocationsRoundID, voter2.address)).to.equal(800000000000000000000000n) // 40%
       expect(await voterRewards.getReward(xAllocationsRoundID, voter3.address)).to.equal(400000000000000000000000n) // 20%
@@ -1830,14 +1868,15 @@ describe("VoterRewards", () => {
       )
 
       /*
-        voter 1 votes = 1000 votes for governance proposal 1 voting and 1000 votes for x allocation voting = 2000 votes * 100% multiplier = 4000 total votes 
-        voter 2 votes = 1000 votes for governance proposal 1 voting and 1000 votes for x allocation voting = 2000 votes (without multiplier) = 2000 total votes
-        voter 3 votes = 0 votes for governance proposal 1 voting and 1000 votes for x allocation voting = 1000 votes
+        voter 1 = 1000 votes (reward weighted votes 31.26) for governance voting and 1000 votes (reward weighted votes 31.26) for x allocation voting = reward weighted votes 63.24 * 100% multiplier = 126.48 total reward weighted votes
+        voter 2 votes = 1000 votes (reward weighted votes 31.26) for governance voting and 1000 votes (reward weighted votes 31.26) for x allocation voting = reward weighted votes 63.24 with no multiplier = 63.2 total reward weighted votes
+        voter 3 votes = 0 votes for governance voting and 1000 votes (reward weighted votes 31.26) for x allocation voting = reward weighted votes 31.62 with no multiplier = 31.62 total reward weighted votes
 
-        Total votes = 7000 votes | Total rewards = 2000000000000000000000000
-        voter 1 allocation = 4000 / 7000 * 100 = 57.14% (1142857142857142857142857 B3TR)
-        voter 2 allocation = 2000 / 7000 * 100 = 28.57% (571428571428571428571428 B3TR)
-        voter 3 allocation = 1000 / 7000 * 100 = 14.29% (285714285714285714285714 B3TR)
+        Total reward weighted votes = 221.32 (126.48 + 63.24 + 31.62) = 221.32
+        Total rewards = 2000000000000000000000000 (2,000,000 B3TR)
+        voter 1 allocation = 126.48 / 221.32 * 100 = 57.14%
+        voter 2 allocation = 63.24 / 221.32 * 100 = 28.57%
+        voter 3 allocation = 31.62 / 221.32 * 100 = 14.29%
       */
       expect(await voterRewards.getReward(xAllocationsRoundID, voter1.address)).to.equal(1142857142857142857142857n)
       expect(await voterRewards.getReward(xAllocationsRoundID, voter2.address)).to.equal(571428571428571428571428n)

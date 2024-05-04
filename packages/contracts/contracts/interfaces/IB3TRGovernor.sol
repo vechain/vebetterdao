@@ -62,6 +62,11 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   error GovernorNonexistentProposal(uint256 proposalId);
 
   /**
+   * @dev The `votingThreshold` is not met.
+   */
+  error GovernorVotingThresholdNotMet(uint256 threshold, uint256 votes);
+
+  /**
    * @dev The current state of a proposal is not the required for performing an operation.
    * The `expectedStates` is a bitmap with the bits enabled for each ProposalState enum position
    * counting from right to left.
@@ -236,6 +241,12 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @dev The number of votes in support of a proposal required in order for a proposal to become active.
    */
   function depositThreshold() external view returns (uint256);
+
+  /**
+   * @notice module:core
+   * @dev The minimum number of vote tokens needed to cast a vote
+   */
+  function votingThreshold() external view returns (uint256);
 
   /**
    * @notice module:core

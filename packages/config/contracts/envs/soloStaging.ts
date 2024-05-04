@@ -1,3 +1,5 @@
+import { VOT3 } from "./../../../contracts/typechain-types/contracts/VOT3"
+import { GalaxyMember } from "./../../../contracts/typechain-types/contracts/GalaxyMember"
 import { defineConfig } from "../defineConfig"
 
 export function createSoloStagingConfig() {
@@ -8,7 +10,33 @@ export function createSoloStagingConfig() {
     B3TR_GOVERNOR_QUORUM_PERCENTAGE: 4, // 4 -> Need 4% of voters to pass
     B3TR_GOVERNOR_MIN_DELAY: 30, //after a vote passes, you have 5 min before you can queue the proposal
     B3TR_GOVERNOR_PROPOSAL_THRESHOLD: 1000, // How many votes are needed to create a proposal
+    B3TR_GOVERNOR_VOTING_THRESHOLD: BigInt("1000000000000000000"), // 1 vote
     B3TR_GOVERNOR_MIN_VOTING_DELAY: 30, // 5 minutes
+    /*
+      For ambiguous functions (functions with same name), the function signature is used to differentiate them
+      e.g., instead of using "setVoterRewards", we use "setVoterRewards(address)"
+    */
+    B3TR_GOVERNOR_WHITELISTED_METHODS: {
+      B3TR: ["tokenDetails"],
+      B3TRGovernor: [
+        "setProposalThreshold",
+        "setMinVotingDelay",
+        "setWhitelistFunction",
+        "setIsFunctionRestrictionEnabled",
+        "updateQuorumNumerator",
+        "updateDelay",
+        "setDepositThreshold",
+        "setVotingThreshold",
+      ],
+      Treasury: ["transferB3TR"],
+      XAllocationVoting: [
+        "updateQuorumNumerator",
+        "setBaseAllocationPercentage",
+        "setAppSharesCap",
+        "setVotingElegibility",
+        "setVotingThreshold",
+      ],
+    },
 
     EMISSIONS_CYCLE_DURATION: 30, // blocks - 30 blocks - 5 minutes.
     EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE: 4, // 4% decay every cycle
@@ -19,6 +47,7 @@ export function createSoloStagingConfig() {
     EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE: 80,
 
     X_ALLOCATION_VOTING_QUORUM_PERCENTAGE: 40, // 40 -> Need 40% of total supply to succeed
+    X_ALLOCATION_VOTING_VOTING_THRESHOLD: BigInt("1000000000000000000"), // 1 vote
 
     X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE: 30, // min amount of X tokens that a project will get each round
     X_ALLOCATION_POOL_APP_SHARES_MAX_CAP: 20, // an app can get max % in allocation round

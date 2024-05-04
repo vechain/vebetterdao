@@ -89,6 +89,7 @@ contract XAllocationVoting is
     IX2EarnApps x2EarnAppsAddress;
     uint256 baseAllocationPercentage;
     uint256 appSharesCap;
+    uint256 votingThreshold;
   }
 
   /// @custom:oz-upgrades-unsafe-allow constructor
@@ -104,7 +105,7 @@ contract XAllocationVoting is
     __XAllocationVotingGovernor_init("XAllocationVoting");
     __ExternalContracts_init(data.x2EarnAppsAddress, data.emissions, data.voterRewards);
     __VotingSettings_init(data.initialVotingPeriod);
-    __RoundVotesCounting_init();
+    __RoundVotesCounting_init(data.votingThreshold);
     __Votes_init(data.vot3Token);
     __VotesQuorumFraction_init(data.quorumPercentage);
     __RoundEarningsSettings_init(data.baseAllocationPercentage, data.appSharesCap);

@@ -9,6 +9,12 @@ export function createTestnetConfig() {
     B3TR_GOVERNOR_MIN_DELAY: 30, //after a vote passes, you have 5 min before you can queue the proposal
     B3TR_GOVERNOR_PROPOSAL_THRESHOLD: 1000, // How many votes are needed to create a proposal
     B3TR_GOVERNOR_MIN_VOTING_DELAY: 25920, // 3 days
+    B3TR_GOVERNOR_VOTING_THRESHOLD: BigInt("1000000000000000000"), // 1 vote
+    /*
+      For ambiguous functions (functions with same name), the function signature is used to differentiate them
+      e.g., instead of using "setVoterRewards", we use "setVoterRewards(address)"
+    */
+    B3TR_GOVERNOR_WHITELISTED_METHODS: {},
 
     EMISSIONS_CYCLE_DURATION: 60480, // blocks - 60480 blocks - 1 week.
     EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE: 4, // 4% decay every cycle
@@ -19,6 +25,7 @@ export function createTestnetConfig() {
     EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE: 80,
 
     X_ALLOCATION_VOTING_QUORUM_PERCENTAGE: 40, // 40 -> Need 40% of total supply to succeed
+    X_ALLOCATION_VOTING_VOTING_THRESHOLD: BigInt("1000000000000000000"), // 1 vote
 
     X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE: 30, // min amount of X tokens that a project will get each round
     X_ALLOCATION_POOL_APP_SHARES_MAX_CAP: 20, // an app can get max % in allocation round

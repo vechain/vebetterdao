@@ -14,6 +14,7 @@ import {
   waitForCurrentRoundToEnd,
   moveBlocks,
   createProposalAndExecuteIt,
+  createProposalWithMultipleFunctionsAndExecuteIt,
 } from "./helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it } from "mocha"
@@ -138,8 +139,13 @@ describe("Governor and TimeLock", function () {
       const newImplAddress = await getImplementationAddress(ethers.provider, await governor.getAddress())
       expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
 
+      // Blacklist the old upgradeToAndCall function
+      const funcSig = V1Contract.interface.getFunction("upgradeToAndCall")?.selector
+
       // Check that the new implementation works
       const newGovernor = Contract.attach(await governor.getAddress()) as B3TRGovernor
+
+      await newGovernor.connect(owner).setWhitelistFunction(b3tr, funcSig, true) // whitelist the function for b3tr contract
 
       // start new round
       await emissions.distribute()
@@ -186,17 +192,52 @@ describe("Governor and TimeLock", function () {
       })
 
       await catchRevert(
-        governor.initialize(
-          await vot3.getAddress(),
-          await timeLock.getAddress(),
-          await xAllocationVoting.getAddress(),
-          1, // quorum percentage
-          1, // voting threshold
-          1, // delay before vote starts
-          owner.address,
-          await voterRewards.getAddress(),
-        ),
+        governor.initialize({
+          vot3Token: await vot3.getAddress(),
+          timelock: await timeLock.getAddress(),
+          xAllocationVoting: await xAllocationVoting.getAddress(),
+          quorumPercentage: 1, // quorum percentage
+          initialDepositThreshold: 1, // voting threshold
+          initialMinVotingDelay: 1, // delay before vote starts
+          initialVotingThreshold: 1, // voting threshold
+          governorAdmin: owner.address,
+          voterRewards: await voterRewards.getAddress(),
+          governorFunctionSettingsRoleAddress: owner.address,
+          isFunctionRestrictionEnabled: true,
+        }),
       )
+    })
+
+    it("Should not be able to set function whitelist if not governance nor admin", async function () {
+      const { governor, otherAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await catchRevert(governor.connect(otherAccount).setWhitelistFunction(governor, "0x12345678", true))
+
+      await governor.connect(owner).setWhitelistFunction(governor, "0x12345678", false) // Does not revert as owner is the admin
+    })
+
+    it("Should not be able to call setIsFunctionRestrictionEnabled if not governance nor admin", async function () {
+      const { governor, otherAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await catchRevert(governor.connect(otherAccount).setIsFunctionRestrictionEnabled(true))
+
+      await governor.connect(owner).setIsFunctionRestrictionEnabled(true) // Doesn't revert as owner is the admin
+    })
+
+    it("Should not be able to set whitelist functions if not governance nor admin", async function () {
+      const { governor, otherAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await catchRevert(
+        governor.connect(otherAccount).setWhitelistFunctions(await governor.getAddress(), ["0x12345678"], true),
+      )
+
+      await governor.connect(owner).setWhitelistFunctions(await governor.getAddress(), ["0x12345678"], false) // Admin can perform the onlyAdminOrGovernance restricted method
     })
   })
 
@@ -315,6 +356,39 @@ describe("Governor and TimeLock", function () {
       expect(updatedThreshold).to.not.eql(newThreshold)
     })
 
+    it("can update voting threshold through governance", async function () {
+      const { governor, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const newThreshold = 10n
+      await createProposalAndExecuteIt(
+        owner,
+        owner,
+        governor,
+        await ethers.getContractFactory("B3TRGovernor"),
+        "Update Voting Threshold",
+        "setVotingThreshold",
+        [newThreshold],
+      )
+
+      const updatedThreshold = await governor.votingThreshold()
+      expect(updatedThreshold).to.eql(newThreshold)
+    })
+
+    it("only governance can update voting threshold", async function () {
+      const { governor, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const newThreshold = 10n
+
+      await catchRevert(governor.connect(owner).setVotingThreshold(newThreshold))
+
+      const updatedThreshold = await governor.votingThreshold()
+      expect(updatedThreshold).to.not.eql(newThreshold)
+    })
+
     it("can update min voting delay through governance", async function () {
       const { governor, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -346,6 +420,218 @@ describe("Governor and TimeLock", function () {
 
       const updatedDelay = await governor.minVotingDelay()
       expect(updatedDelay).to.not.eql(newDelay)
+    })
+
+    it("Should not be able to create proposal of a restricted function", async function () {
+      const { governor, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const funcSig = governor.interface.getFunction("setMinVotingDelay")?.selector
+
+      await createProposalAndExecuteIt(
+        owner,
+        owner,
+        governor,
+        await ethers.getContractFactory("B3TRGovernor"),
+        "Update Min Voting Delay",
+        "setWhitelistFunction",
+        [await governor.getAddress(), funcSig, false], // restrict the function "setMinVotingDelay" from being called
+      )
+
+      const newDelay = 10n
+      await expect(
+        createProposalAndExecuteIt(
+          owner,
+          owner,
+          governor,
+          await ethers.getContractFactory("B3TRGovernor"),
+          "Update Min Voting Delay",
+          "setMinVotingDelay",
+          [newDelay],
+        ),
+      ).to.be.reverted
+
+      // remove setMinVotingDelay from restricted functions
+      await createProposalAndExecuteIt(
+        owner,
+        owner,
+        governor,
+        await ethers.getContractFactory("B3TRGovernor"),
+        "Update Min Voting Delay",
+        "setWhitelistFunction",
+        [await governor.getAddress(), funcSig, true],
+      )
+
+      // now the proposal should be successful
+      await createProposalAndExecuteIt(
+        owner,
+        owner,
+        governor,
+        await ethers.getContractFactory("B3TRGovernor"),
+        "Update Min Voting Delay",
+        "setMinVotingDelay",
+        [newDelay],
+      )
+    })
+
+    it("Should not be able to create a proposal with one of the restricted functions in the array of calldata", async function () {
+      const { governor, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // remove setVoterRewards from whitelisted functions
+      await createProposalAndExecuteIt(
+        owner,
+        owner,
+        governor,
+        await ethers.getContractFactory("B3TRGovernor"),
+        "Update Min Voting Delay",
+        "setWhitelistFunction",
+        [await governor.getAddress(), governor.interface.getFunction("setVoterRewards")?.selector, false],
+      )
+
+      await expect(
+        createProposalWithMultipleFunctionsAndExecuteIt(
+          owner,
+          owner,
+          [governor, governor],
+          await ethers.getContractFactory("B3TRGovernor"),
+          "Update Min Voting Delay",
+          ["setMinVotingDelay", "setVoterRewards"],
+          [[10n], [await owner.getAddress()]],
+        ),
+      ).to.be.reverted
+    })
+
+    it("Should be able to create proposal with multiple whitelist functions", async function () {
+      const { governor, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await createProposalWithMultipleFunctionsAndExecuteIt(
+        owner,
+        owner,
+        [governor, governor],
+        await ethers.getContractFactory("B3TRGovernor"),
+        "Update Min Voting Delay",
+        ["setMinVotingDelay", "setDepositThreshold"],
+        [[10n], [10n]],
+      )
+
+      expect(await governor.minVotingDelay()).to.eql(10n)
+      expect(await governor.depositThreshold()).to.eql(10n)
+    })
+
+    it("Should be able to execute any function if function restriction is disabled", async function () {
+      const { governor, owner, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await createProposalAndExecuteIt(
+        owner,
+        owner,
+        governor,
+        await ethers.getContractFactory("B3TRGovernor"),
+        "Disable function restriction",
+        "setIsFunctionRestrictionEnabled",
+        [false],
+      )
+
+      // Set setMinVotingDelay as restricted
+      const funcSig = governor.interface.getFunction("setMinVotingDelay")?.selector
+      await createProposalAndExecuteIt(
+        owner,
+        owner,
+        governor,
+        await ethers.getContractFactory("B3TRGovernor"),
+        "Update Min Voting Delay",
+        "setWhitelistFunction",
+        [await governor.getAddress(), funcSig, false],
+      )
+
+      const newDelay = 10n
+      // Should be able to execute the function even if it is restricted because function restriction is disabled
+      await createProposalAndExecuteIt(
+        owner,
+        owner,
+        governor,
+        await ethers.getContractFactory("B3TRGovernor"),
+        "Update Min Voting Delay",
+        "setMinVotingDelay",
+        [newDelay],
+      )
+
+      // Set function restriction back to enabled
+      await createProposalAndExecuteIt(
+        owner,
+        owner,
+        governor,
+        await ethers.getContractFactory("B3TRGovernor"),
+        "Enable function restriction",
+        "setIsFunctionRestrictionEnabled",
+        [true],
+        (await xAllocationVoting.currentRoundId()) + BigInt(2),
+      )
+
+      // Should not be able to execute the function now
+      await expect(
+        createProposalAndExecuteIt(
+          owner,
+          owner,
+          governor,
+          await ethers.getContractFactory("B3TRGovernor"),
+          "Update Min Voting Delay",
+          "setMinVotingDelay",
+          [newDelay],
+        ),
+      ).to.be.reverted
+    })
+
+    it("Should not restrict a target function if another target has the same function selector restricted", async () => {
+      const { governor, owner, galaxyMember, b3tr } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const b3trBalanceOfSelector = (await ethers.getContractFactory("B3TR")).interface.getFunction(
+        "balanceOf",
+      )?.selector
+      const galxyMemberBalanceOfSelector = (await ethers.getContractFactory("GalaxyMember")).interface.getFunction(
+        "balanceOf",
+      )?.selector
+
+      expect(b3trBalanceOfSelector).to.equal(galxyMemberBalanceOfSelector)
+
+      // Whitelist B3TR 'balanceOf'
+      await governor.connect(owner).setWhitelistFunction(await b3tr.getAddress(), b3trBalanceOfSelector as string, true)
+
+      expect(await governor.isFunctionWhitelisted(await b3tr.getAddress(), b3trBalanceOfSelector as string)).to.equal(
+        true,
+      )
+
+      // Should be able to propose and execute because balanceOf for B3TR contract is whitelisted
+      await createProposalAndExecuteIt(
+        owner,
+        owner,
+        b3tr,
+        await ethers.getContractFactory("B3TR"),
+        "Get balance",
+        "balanceOf",
+        [await owner.getAddress()],
+      )
+
+      // Should not be able to propose and execute because balanceOf for GalaxyMember contract is not whitelisted
+      await expect(
+        createProposalAndExecuteIt(
+          owner,
+          owner,
+          galaxyMember,
+          await ethers.getContractFactory("GalaxyMember"),
+          "Get balance",
+          "balanceOf",
+          [await owner.getAddress()],
+        ),
+      ).to.be.reverted
     })
   })
 
@@ -511,7 +797,7 @@ describe("Governor and TimeLock", function () {
         })
 
       const proposer = otherAccounts[0]
-      await getVot3Tokens(proposer, "1000")
+      await getVot3Tokens(proposer, "2000")
       await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
 
       // Start emissions
@@ -1374,6 +1660,38 @@ describe("Governor and TimeLock", function () {
           ),
       ).to.be.reverted
     })
+
+    it("Should not be able to create proposal with invalid calldata", async () => {
+      const { b3tr, otherAccounts, governor, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      const address = await b3tr.getAddress()
+      const encodedFunctionCall = "0x" // invalid calldata
+      const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
+
+      await expect(
+        governor
+          .connect(proposer)
+          .propose(
+            [address],
+            [0],
+            [encodedFunctionCall],
+            "",
+            voteStartsInRoundId.toString(),
+            ethers.parseEther("1000"),
+            {
+              gasLimit: 10_000_000,
+            },
+          ),
+      ).to.be.reverted
+    })
   })
 
   // the tests described in this section cannot be run in isolation, but need to run in cascade
@@ -1382,6 +1700,9 @@ describe("Governor and TimeLock", function () {
     let voter2: HardhatEthersSigner
     let voter3: HardhatEthersSigner
     let voter4: HardhatEthersSigner
+    let voter5: HardhatEthersSigner
+    let voter6: HardhatEthersSigner
+    let voter7: HardhatEthersSigner
 
     const functionToCall = "tokenDetails"
     const description = "Get token details"
@@ -1390,7 +1711,7 @@ describe("Governor and TimeLock", function () {
     this.beforeAll(async function () {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
-      config.EMISSIONS_CYCLE_DURATION = 10
+      config.EMISSIONS_CYCLE_DURATION = 15
       const { vot3, b3tr, otherAccounts, minterAccount, B3trContract, otherAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -1401,6 +1722,9 @@ describe("Governor and TimeLock", function () {
       voter2 = otherAccounts[1] // with VOT3 but no delegation
       voter3 = otherAccounts[2] // with VOT3 and delegation
       voter4 = otherAccounts[3] // with VOT3 and delegation
+      voter5 = otherAccounts[4] // with VOT3 and delegation
+      voter6 = otherAccounts[5] // with VOT3 and delegation
+      voter7 = otherAccounts[6] // with VOT3 and delegation
 
       // Before trying to vote we need to mint some VOT3 tokens to the voter2
       await b3tr.connect(minterAccount).mint(voter2, ethers.parseEther("1000"))
@@ -1410,6 +1734,9 @@ describe("Governor and TimeLock", function () {
       // we do it here but will use in the next test
       await getVot3Tokens(voter3, "1000")
       await getVot3Tokens(voter4, "9")
+      await getVot3Tokens(voter5, "0.1")
+      await getVot3Tokens(voter6, "100")
+      await getVot3Tokens(voter7, "1")
 
       // Start emissions
       await bootstrapAndStartEmissions()
@@ -1429,7 +1756,7 @@ describe("Governor and TimeLock", function () {
       await catchRevert(governor.connect(voter3).castVote(proposalId, 1))
     })
 
-    it("user without VOT3 can vote with weight 0", async function () {
+    it("user without VOT3 can't vote with weight 0", async function () {
       const { governor } = await getOrDeployContractInstances({ forceDeploy: false })
 
       const proposalState = await waitForProposalToBeActive(proposalId) // proposal id of the proposal in the beforeAll step & block when the proposal was created
@@ -1437,7 +1764,34 @@ describe("Governor and TimeLock", function () {
       expect(proposalState.toString()).to.eql("1") // active
 
       //vote
-      const tx = await governor.connect(voter1).castVote(proposalId, 1)
+      await expect(governor.connect(voter1).castVote(proposalId, 1)).to.be.revertedWithCustomError(
+        governor,
+        "GovernorVotingThresholdNotMet",
+      )
+    })
+
+    it("user with VOT3 can't vote with weight less than 1", async function () {
+      const { governor } = await getOrDeployContractInstances({ forceDeploy: false })
+
+      const proposalState = await waitForProposalToBeActive(proposalId) // proposal id of the proposal in the beforeAll step & block when the proposal was created
+
+      expect(proposalState.toString()).to.eql("1") // active
+
+      //vote
+      await expect(governor.connect(voter1).castVote(proposalId, 1)).to.be.revertedWithCustomError(
+        governor,
+        "GovernorVotingThresholdNotMet",
+      )
+    })
+
+    it("user with 1 VOT3 can vote", async function () {
+      const { governor } = await getOrDeployContractInstances({ forceDeploy: false })
+
+      const proposalState = await waitForProposalToBeActive(proposalId) // proposal id of the proposal in the beforeAll step & block when the proposal was created
+
+      expect(proposalState.toString()).to.eql("1") // active
+
+      const tx = await governor.connect(voter7).castVote(proposalId, 1)
       const proposeReceipt = await tx.wait()
       const event = proposeReceipt?.logs[0]
       const decodedLogs = governor.interface.parseLog({
@@ -1448,15 +1802,18 @@ describe("Governor and TimeLock", function () {
       //event exists
       expect(decodedLogs?.name).to.eql("VoteCast")
       // voter
-      expect(decodedLogs?.args[0]).to.eql(await voter1.getAddress())
+      expect(decodedLogs?.args[0]).to.eql(await voter7.getAddress())
       // proposal id
       expect(decodedLogs?.args[1]).to.eql(proposalId)
       // support
       expect(decodedLogs?.args[2].toString()).to.eql("1")
       // votes
-      expect(decodedLogs?.args[3].toString()).to.eql("0")
+      expect(decodedLogs?.args[3].toString()).not.to.eql("1")
       // power
-      expect(decodedLogs?.args[4].toString()).to.eql("0")
+      expect(decodedLogs?.args[4].toString()).not.to.eql("1")
+
+      const hasVoted = await governor.hasVoted(proposalId, await voter7.getAddress())
+      expect(hasVoted).to.eql(true)
     })
 
     it("can vote if self-delegated VOT3 holder before snapshot", async function () {
@@ -1501,26 +1858,11 @@ describe("Governor and TimeLock", function () {
 
       expect(proposalState.toString()).to.eql("1") // active
 
-      const tx = await governor.connect(newVoter).castVote(proposalId, 1)
-      const proposeReceipt = await tx.wait()
-      const event = proposeReceipt?.logs[0]
-      const decodedLogs = governor.interface.parseLog({
-        topics: [...(event?.topics as string[])],
-        data: event ? event.data : "",
-      })
-
-      //event exists
-      expect(decodedLogs?.name).to.eql("VoteCast")
-      // voter
-      expect(decodedLogs?.args[0]).to.eql(newVoter.address)
-      // proposal id
-      expect(decodedLogs?.args[1]).to.eql(proposalId)
-      // support
-      expect(decodedLogs?.args[2].toString()).to.eql("1")
-      // votes
-      expect(decodedLogs?.args[3].toString()).to.eql("0") // weight 0 instead of 1000 because the snapshot was taken before the delegation
-      // power
-      expect(decodedLogs?.args[4].toString()).to.eql("0")
+      //vote
+      await expect(governor.connect(voter1).castVote(proposalId, 1)).to.be.revertedWithCustomError(
+        governor,
+        "GovernorVotingThresholdNotMet",
+      )
     })
 
     it("can count votes correctly", async function () {
@@ -1536,7 +1878,7 @@ describe("Governor and TimeLock", function () {
       // now we should have the following votes:
       // voter1: 0 yes
       // voter2: 0 yes
-      // voter3: sqrt(1000) =  31.6227 yes
+      // voter3: sqrt(1000) + sqrt(1) =  32.6227 yes
       // voter4: sqrt(9) = 3 no
       // abstain: 0
       const votes = await governor.proposalVotes(proposalId)
@@ -1546,7 +1888,7 @@ describe("Governor and TimeLock", function () {
 
       // Note that if this test is ran in isolation, the following votes will be 0
       expect(votes[1]).to.satisfy((votes: bigint) => {
-        return votes === ethers.parseEther("31.622776601") || votes === BigInt(0)
+        return votes === ethers.parseEther("32.622776601") || votes === BigInt(0)
       })
 
       // abstain
@@ -1574,9 +1916,9 @@ describe("Governor and TimeLock", function () {
 
       expect(proposalState.toString()).to.eql("1") // active
 
-      const hasVoted = await governor.hasVoted(proposalId, await voter3.getAddress()) // voter3 has already voted to reach quorum otherwise the proposal would be defeated (state 3)
+      const hasVoted = await governor.hasVoted(proposalId, await voter6.getAddress()) // voter6 has already voted to reach quorum otherwise the proposal would be defeated (state 3)
 
-      if (!hasVoted) await governor.connect(voter3).castVote(proposalId, 1)
+      if (!hasVoted) await governor.connect(voter6).castVote(proposalId, 1)
 
       await waitForVotingPeriodToEnd(proposalId)
 
