@@ -137,22 +137,26 @@ export async function deployAll(config: ContractsConfig) {
       xAppsBaseURI: config.XAPP_BASE_URI,
       baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
       appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
+      votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
     },
   ])) as XAllocationVoting
   console.log(`XAllocationVoting contract deployed at address ${await xAllocationVoting.getAddress()}`)
 
   console.log(`Deploying Governor contract`)
   const governor = (await deployProxy("B3TRGovernor", [
-    await vot3.getAddress(),
-    await timelock.getAddress(),
-    await xAllocationVoting.getAddress(),
-    config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
-    config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD,
-    config.B3TR_GOVERNOR_MIN_VOTING_DELAY,
-    TEMP_ADMIN,
-    await voterRewards.getAddress(),
-    TEMP_ADMIN,
-    true,
+    {
+      vot3Token: await vot3.getAddress(),
+      timelock: await timelock.getAddress(),
+      xAllocationVoting: await xAllocationVoting.getAddress(),
+      quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
+      initialDepositThreshold: config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD,
+      initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY,
+      initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD,
+      governorAdmin: TEMP_ADMIN,
+      voterRewards: await voterRewards.getAddress(),
+      governorFunctionSettingsRoleAddress: TEMP_ADMIN,
+      isFunctionRestrictionEnabled: true,
+    },
   ])) as B3TRGovernor
   console.log(`Governor contract deployed at address ${await governor.getAddress()}`)
 
