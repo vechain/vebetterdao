@@ -1068,13 +1068,13 @@ describe("X-Allocation Voting", function () {
     })
 
     it("I should not be able to cast vote if my total VOT3 holding is less than 1", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
+      const { x2EarnApps, xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
       // Bootstrap emissions
       await bootstrapEmissions()
 
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
