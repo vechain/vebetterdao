@@ -192,7 +192,7 @@ contract B3TRGovernor is
   }
 
   /**
-   * @dev See {IB3TRGovernor-propose}. This function has opt-in frontrunning protection, described in {_isValidDescriptionForProposer}.
+   * @dev See {IB3TRGovernor-propose}.
    *
    * The {startRoundId} parameter is used to specify the round in which the proposal should be active. The round must be in the future.
    *
@@ -229,11 +229,6 @@ contract B3TRGovernor is
       if (!canProposalStartInNextRound()) {
         revert GovernorInvalidStartRound(startRoundId);
       }
-    }
-
-    // check description restriction
-    if (!_isValidDescriptionForProposer(proposer, description)) {
-      revert GovernorRestrictedProposer(proposer);
     }
 
     return _propose(targets, values, calldatas, description, proposer, startRoundId, depositAmount);
