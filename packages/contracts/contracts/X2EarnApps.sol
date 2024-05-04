@@ -78,8 +78,8 @@ contract X2EarnApps is
   /**
    * @dev See {IX2EarnApps-setBaseURI}.
    */
-  function setBaseURI(string memory _baseURI) external onlyRole(DEFAULT_ADMIN_ROLE) {
-    _setBaseURI(_baseURI);
+  function setBaseURI(string memory _baseURI) public override onlyRole(DEFAULT_ADMIN_ROLE) {
+    super.setBaseURI(_baseURI);
   }
 
   /**

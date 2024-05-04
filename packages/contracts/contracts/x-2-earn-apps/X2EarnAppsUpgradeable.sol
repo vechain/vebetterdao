@@ -153,7 +153,7 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   /**
    * @inheritdoc IX2EarnApps
    */
-  function baseURI() public view virtual override returns (string memory);
+  function baseURI() public view virtual returns (string memory);
 
   /**
    * @inheritdoc IX2EarnApps

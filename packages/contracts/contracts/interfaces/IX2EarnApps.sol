@@ -208,15 +208,6 @@ interface IX2EarnApps {
   function isElegible(bytes32 appId, uint256 timepoint) external view returns (bool);
 
   /**
-   * @dev Update the base URI to retrieve the metadata of the x2earn apps
-   *
-   * @param baseUri the base URI for the contract
-   *
-   * Emits a {BaseURIUpdated} event.
-   */
-  function setBaseURI(string memory baseUri) external;
-
-  /**
    * @dev return the base URI for the contract
    */
   function baseURI() external view returns (string memory);
