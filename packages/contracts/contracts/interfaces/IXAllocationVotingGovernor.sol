@@ -69,6 +69,16 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   error GovernorAppNotAvailableForVoting(bytes32 appId);
 
   /**
+   * @dev The `votingThreshold` is not met.
+   */
+  error GovernorVotingThresholdNotMet(uint256 threshold, uint256 votes);
+
+  /**
+   * @dev The `voter` has insufficient voting power for this round to cast the votes.
+   */
+  error GovernorInsufficientVotingPower();
+
+  /**
    * @dev Emitted when a round is created.
    */
   event RoundCreated(uint256 roundId, address proposer, uint256 voteStart, uint256 voteEnd);

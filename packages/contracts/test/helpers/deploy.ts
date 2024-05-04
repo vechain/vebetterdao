@@ -154,21 +154,25 @@ export const getOrDeployContractInstances = async ({
       xAppsBaseURI: "ipfs://",
       baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
       appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
+      votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
     },
   ])) as XAllocationVoting
 
   // Deploy Governor
   const governor = (await deployProxy("B3TRGovernor", [
-    await vot3.getAddress(),
-    await timeLock.getAddress(),
-    await xAllocationVoting.getAddress(),
-    config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
-    config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD, // voting threshold
-    config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
-    owner.address,
-    await voterRewards.getAddress(),
-    owner.address,
-    true,
+    {
+      vot3Token: await vot3.getAddress(),
+      timelock: await timeLock.getAddress(),
+      xAllocationVoting: await xAllocationVoting.getAddress(),
+      quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
+      initialDepositThreshold: config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD, // voting threshold
+      initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
+      initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD, // voting threshold
+      governorAdmin: owner.address,
+      voterRewards: await voterRewards.getAddress(),
+      governorFunctionSettingsRoleAddress: owner.address,
+      isFunctionRestrictionEnabled: true,
+    },
   ])) as B3TRGovernor
 
   const contractAddresses: Record<string, string> = {
