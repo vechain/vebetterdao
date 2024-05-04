@@ -37,11 +37,17 @@ import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
  */
 abstract contract RoundVotesCountingUpgradeable is Initializable, XAllocationVotingGovernor {
   struct RoundVote {
+    // Total votes received for each app
     mapping(bytes32 appId => uint256) votesReceived;
-    mapping(bytes32 appId => uint256) votesReceivedQF;
+    // Total votes received for each app in quadratic funding
+    mapping(bytes32 appId => uint256) votesReceivedQF; // ∑(sqrt(votes)) -> sqrt(votes1) + sqrt(votes2) + ...
+    // Total votes cast in the round
     uint256 totalVotes;
-    uint256 totalVotesQF;
+    // Total votes cast in the round in quadratic funding
+    uint256 totalVotesQF; // ∑(∑sqrt(votes))^2 -> (sqrt(votesAppX1) + sqrt(votesAppX2) + ...)^2 + (sqrt(votesAppY1) + sqrt(votesAppY2) + ...)^2 + ...
+    // Mapping to store if a user has voted
     mapping(address user => bool) hasVoted;
+    // Total number of voters in the round
     uint256 totalVoters;
   }
 
@@ -109,15 +115,25 @@ abstract contract RoundVotesCountingUpgradeable is Initializable, XAllocationVot
 
   /**
    * @dev Counts votes for a given round of voting, applying quadratic funding principles.
-   * This function allows a voter to allocate weights (votes) to various applications (apps) for a specific voting round.
-   * It checks if the voter has already voted in the round to prevent double voting.
-   * Each vote's weight is applied to the specified applications, and the total and quadratic votes for each application
-   * are updated accordingly.
+   * Allows a voter to allocate weights to various applications (apps) for a specific voting round,
+   * ensuring each voter votes only once per round to prevent double voting.
    *
-   * Quadratic Funding (QF) is implemented here to calculate the impact of each vote. In QF, the value of each vote is squared,
-   * emphasizing the number of participants over the size of individual contributions. This method aims to democratize the voting
-   * process by amplifying the influence of a larger number of smaller votes.
+   * Quadratic funding is used to calculate the impact of each vote. For each app, the square root of the 
+   * individual vote's weight is computed and added to the total sum of square roots for that app.
+   * After updating with each vote, this sum of square roots is squared to determine the total quadratic funding votes for the app. 
+   * This method aims to democratize the voting process by amplifying the influence of a larger number of smaller votes.
+
+   * Requirements:
+   * - The voter must not have voted in this round already.
+   * - The total voting weight allocated by the voter must not exceed the voter's available voting power.
+   * - Each app voted on must be eligible for votes in the current round.
+   *
+   * @param roundId The identifier of the current voting round.
+   * @param voter The address of the voter casting the votes.
+   * @param apps An array of app identifiers that the voter is allocating votes to.
+   * @param weights An array of vote weights corresponding to each app.
    */
+
   function _countVote(
     uint256 roundId,
     address voter,
@@ -130,57 +146,61 @@ abstract contract RoundVotesCountingUpgradeable is Initializable, XAllocationVot
 
     RoundVotesCountingStorage storage $ = _getRoundVotesCountingStorage();
 
+    // Get the start of the round
     uint256 roundStart = roundSnapshot(roundId);
 
+    // To hold the total weight of votes cast by the voter
     uint256 totalWeight = 0;
+    // To hold the total adjustment to the quadratic funding value for the given app
     uint256 totalQFVotesAdjustment = 0;
+
+    // Iterate through the apps and weights to calculate the total weight of votes cast by the voter
     for (uint256 i = 0; i < apps.length; i++) {
+      // Update the total weight of votes cast by the voter
       totalWeight += weights[i];
 
+      // Check if the app is eligible for votes in the current round
       if (!isEligibleForVote(apps[i], roundId)) {
         revert GovernorAppNotAvailableForVoting(apps[i]);
       }
 
       // Get the current sum of the square roots of individual votes for the given project
-      uint256 qfAppVotesPreVote = $._roundVotes[roundId].votesReceivedQF[apps[i]];
+      uint256 qfAppVotesPreVote = $._roundVotes[roundId].votesReceivedQF[apps[i]];// ∑(sqrt(votes)) -> sqrt(votes1) + sqrt(votes2) + ... + sqrt(votesN)
 
       // Calculate the new sum of the square roots of individual votes for the given project
-      uint256 newQFVotes = Math.sqrt(weights[i]);
-      uint256 qfAppVotesPostVote = qfAppVotesPreVote + newQFVotes;
+      uint256 newQFVotes = Math.sqrt(weights[i]); // sqrt(votes)
+      uint256 qfAppVotesPostVote = qfAppVotesPreVote + newQFVotes; // ∑(sqrt(votes)) -> sqrt(votes1) + sqrt(votes2) + ... + sqrt(votesN) + sqrt(votesN+1)
 
       // Calculate the adjustment to the quadratic funding value for the given app
-      totalQFVotesAdjustment += (qfAppVotesPostVote * qfAppVotesPostVote) - (qfAppVotesPreVote * qfAppVotesPreVote);
+      totalQFVotesAdjustment += (qfAppVotesPostVote * qfAppVotesPostVote) - (qfAppVotesPreVote * qfAppVotesPreVote); // (sqrt(votes1) + ... + sqrt(votesN+1))^2 - (sqrt(votes1) + ... + sqrt(votesN))^2
 
       // Update the quadratic funding votes received for the given app - sum of the square roots of individual votes
-      $._roundVotes[roundId].votesReceivedQF[apps[i]] = qfAppVotesPostVote;
-      $._roundVotes[roundId].votesReceived[apps[i]] += weights[i];
+      $._roundVotes[roundId].votesReceivedQF[apps[i]] = qfAppVotesPostVote; // ∑(sqrt(votes)) -> sqrt(votes1) + sqrt(votes2) + ... + sqrt(votesN+1)
+      $._roundVotes[roundId].votesReceived[apps[i]] += weights[i]; // ∑votes + votesN+1
     }
 
+    // Check if the total weight of votes cast by the voter is greater than the voting threshold
     if (totalWeight < votingThreshold()) {
       revert GovernorVotingThresholdNotMet(votingThreshold(), totalWeight);
     }
 
+    // Check if the total weight of votes cast by the voter is greater than the voter's available voting power
     if (totalWeight > getVotes(voter, roundStart)) {
       revert GovernorInsufficientVotingPower();
     }
 
-    require(
-      totalWeight <= getVotes(voter, roundStart),
-      "XAllocationVotingGovernor: account has insufficient voting power for this round"
-    );
-
     // Apply the total adjustment to storage
-    $._roundVotes[roundId].totalVotesQF += totalQFVotesAdjustment;
-
-    $._roundVotes[roundId].totalVotes += totalWeight;
-    $._roundVotes[roundId].hasVoted[voter] = true;
-    $._roundVotes[roundId].totalVoters++;
+    $._roundVotes[roundId].totalVotesQF += totalQFVotesAdjustment; // update the total quadratic funding value for the round - ∑(∑sqrt(votes))^2 -> (sqrt(votesAppX1) + sqrt(votesAppX2) + ...)^2 + (sqrt(votesAppY1) + sqrt(votesAppY2) + ...)^2 + ...
+    $._roundVotes[roundId].totalVotes += totalWeight; // update total votes -> ∑votes + votesN+1
+    $._roundVotes[roundId].hasVoted[voter] = true; // mark the voter as having voted
+    $._roundVotes[roundId].totalVoters++; // increment the total number of voters
 
     // save that user cast vote only the first time
     if (!$._hasVotedOnce[voter]) {
       $._hasVotedOnce[voter] = true;
     }
 
+    // Emit the AllocationVoteCast event
     emit AllocationVoteCast(voter, roundId, apps, weights);
 
     // Register the vote for rewards calculation where the vote power is the square root of the total votes cast by the voter
