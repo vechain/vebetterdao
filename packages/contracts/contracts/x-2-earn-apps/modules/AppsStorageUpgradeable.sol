@@ -78,17 +78,18 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
     string memory appName,
     string memory metadataURI
   ) internal virtual override {
-    AppsStorageStorage storage $ = _getAppsStorageStorage();
-    bytes32 id = hashAppName(appName);
-
-    if ($._apps[id].receiverAddress != address(0)) {
-      revert X2EarnAppAlreadyExists(id);
-    }
     if (receiverAddress == address(0)) {
       revert X2EarnInvalidAddress(receiverAddress);
     }
     if (admin == address(0)) {
       revert X2EarnInvalidAddress(admin);
+    }
+
+    AppsStorageStorage storage $ = _getAppsStorageStorage();
+    bytes32 id = hashAppName(appName);
+
+    if (appExists(id)) {
+      revert X2EarnAppAlreadyExists(id);
     }
 
     // Store the new app
@@ -114,9 +115,9 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
     }
 
     AppsStorageStorage storage $ = _getAppsStorageStorage();
-    emit AppMetadataURIUpdated(appId, $._apps[appId].metadataURI, metadataURI);
-
     $._apps[appId].metadataURI = metadataURI;
+
+    emit AppMetadataURIUpdated(appId, $._apps[appId].metadataURI, metadataURI);
   }
 
   /**
@@ -126,19 +127,18 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @param newReceiverAddress the address of the new receiver
    */
   function _updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) internal virtual override {
-    if (!appExists(appId)) {
-      revert X2EarnNonexistentApp(appId);
-    }
-
     if (newReceiverAddress == address(0)) {
       revert X2EarnInvalidAddress(newReceiverAddress);
     }
 
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+
     AppsStorageStorage storage $ = _getAppsStorageStorage();
+    $._apps[appId].receiverAddress = newReceiverAddress;
 
     emit AppReceiverAddressUpdated(appId, $._apps[appId].receiverAddress, newReceiverAddress);
-
-    $._apps[appId].receiverAddress = newReceiverAddress;
   }
 
   // ---------- Getters ---------- //
