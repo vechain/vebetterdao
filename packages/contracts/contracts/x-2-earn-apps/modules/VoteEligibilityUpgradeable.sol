@@ -76,7 +76,7 @@ abstract contract VoteEligibilityUpgradeable is Initializable, X2EarnAppsUpgrade
     VoteEligibilityStorage storage $ = _getVoteEligibilityStorage();
 
     // We update the checkpoint with the new Eligibility status
-    _pushCheckpoint($._isAppEligibleCheckpoints[appId], canBeVoted ? 1 : 0);
+    _pushCheckpoint($._isAppEligibleCheckpoints[appId], canBeVoted ? SafeCast.toUint208(1) : SafeCast.toUint208(0));
 
     if (!canBeVoted) {
       // If the app is not eligible for voting we need to remove it from the _eligibleApps array
