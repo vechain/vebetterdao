@@ -51,8 +51,11 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
     }
   }
 
+  // @dev Emit when the emissions contract is set
   event EmissionsSet(address oldContractAddress, address newContractAddress);
+  // @dev Emit when the X2EarnApps contract is set
   event X2EarnAppsSet(address oldContractAddress, address newContractAddress);
+  // @dev Emit when the voter rewards contract is set
   event VoterRewardsSet(address oldContractAddress, address newContractAddress);
 
   /**
