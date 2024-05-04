@@ -60,9 +60,9 @@ export const getOrDeployContractInstances = async ({
   const [owner, otherAccount, minterAccount, timelockAdmin, ...otherAccounts] = await ethers.getSigners()
 
   // Deploy Libraries
-  const DataTypes = await ethers.getContractFactory("DataTypes")
-  const DataTypesLib = await DataTypes.deploy()
-  await DataTypesLib.waitForDeployment()
+  const X2EarnAppsDataTypes = await ethers.getContractFactory("X2EarnAppsDataTypes")
+  const X2EarnAppsDataTypesLib = await X2EarnAppsDataTypes.deploy()
+  await X2EarnAppsDataTypesLib.waitForDeployment()
 
   // Deploy B3TR
   const B3trContract = await ethers.getContractFactory("B3TR")
@@ -108,7 +108,7 @@ export const getOrDeployContractInstances = async ({
     "X2EarnApps",
     ["ipfs://", [await timeLock.getAddress(), owner.address], owner.address],
     {
-      DataTypes: await DataTypesLib.getAddress(),
+      X2EarnAppsDataTypes: await X2EarnAppsDataTypesLib.getAddress(),
     },
   )) as X2EarnApps
 

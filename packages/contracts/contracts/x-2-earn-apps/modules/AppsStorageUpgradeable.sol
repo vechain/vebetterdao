@@ -23,7 +23,7 @@
 
 pragma solidity ^0.8.20;
 
-import { DataTypes } from "../../libraries/DataTypes.sol";
+import { X2EarnAppsDataTypes } from "../../libraries/X2EarnAppsDataTypes.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
 
@@ -36,7 +36,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.AppsStorage
   struct AppsStorageStorage {
     // Mapping from app ID to app
-    mapping(bytes32 appId => DataTypes.App) _apps;
+    mapping(bytes32 appId => X2EarnAppsDataTypes.App) _apps;
     // List of app IDs to enable retrieval of all _apps
     bytes32[] _appIds;
   }
@@ -92,7 +92,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
     }
 
     // Store the new app
-    $._apps[id] = DataTypes.App(id, receiverAddress, appName, metadataURI, clock(), block.timestamp);
+    $._apps[id] = X2EarnAppsDataTypes.App(id, receiverAddress, appName, metadataURI, clock(), block.timestamp);
     $._appIds.push(id);
     _setAppAdmin(id, admin);
     _setVotingEligibility(id, true);
@@ -154,7 +154,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   /**
    * @dev See {IX2EarnApps-app}.
    */
-  function app(bytes32 appId) public view virtual returns (DataTypes.App memory) {
+  function app(bytes32 appId) public view virtual returns (X2EarnAppsDataTypes.App memory) {
     if (!appExists(appId)) {
       revert X2EarnNonexistentApp(appId);
     }
@@ -166,10 +166,10 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   /**
    * @dev Get all apps
    */
-  function apps() public view returns (DataTypes.App[] memory) {
+  function apps() public view returns (X2EarnAppsDataTypes.App[] memory) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
 
-    DataTypes.App[] memory allApps = new DataTypes.App[]($._appIds.length);
+    X2EarnAppsDataTypes.App[] memory allApps = new X2EarnAppsDataTypes.App[]($._appIds.length);
     uint256 length = $._appIds.length;
     for (uint i = 0; i < length; i++) {
       allApps[i] = $._apps[$._appIds[i]];

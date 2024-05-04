@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import { DataTypes } from "../libraries/DataTypes.sol";
+import { X2EarnAppsDataTypes } from "../libraries/X2EarnAppsDataTypes.sol";
 
 /**
  * @title IX2EarnApps
@@ -103,7 +103,7 @@ interface IX2EarnApps {
    *
    * @param appId the id of the app
    */
-  function app(bytes32 appId) external view returns (DataTypes.App memory);
+  function app(bytes32 appId) external view returns (X2EarnAppsDataTypes.App memory);
 
   /**
    * @dev Add a new moderator to the app.

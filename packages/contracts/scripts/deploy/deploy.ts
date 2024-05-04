@@ -39,10 +39,10 @@ export async function deployAll(config: ContractsConfig) {
   // ---------- Contracts Deployment ---------- //
 
   // Deploy Libraries
-  const DataTypes = await ethers.getContractFactory("DataTypes")
-  const DataTypesLib = await DataTypes.deploy()
-  await DataTypesLib.waitForDeployment()
-  console.log(`DataTypes deployed at ${await DataTypesLib.getAddress()}`)
+  const X2EarnAppsDataTypes = await ethers.getContractFactory("X2EarnAppsDataTypes")
+  const X2EarnAppsDataTypesLib = await X2EarnAppsDataTypes.deploy()
+  await X2EarnAppsDataTypesLib.waitForDeployment()
+  console.log(`X2EarnAppsDataTypes deployed at ${await X2EarnAppsDataTypesLib.getAddress()}`)
 
   const b3tr = await deployB3trToken(TEMP_ADMIN, config.B3TR_CAP)
 
@@ -71,7 +71,7 @@ export async function deployAll(config: ContractsConfig) {
     "X2EarnApps",
     [config.XAPP_BASE_URI, [await timelock.getAddress(), TEMP_ADMIN], TEMP_ADMIN],
     {
-      DataTypes: await DataTypesLib.getAddress(),
+      X2EarnAppsDataTypes: await X2EarnAppsDataTypesLib.getAddress(),
     },
   )) as X2EarnApps
   console.log(`X2EarnApps deployed at ${await x2EarnApps.getAddress()}`)
