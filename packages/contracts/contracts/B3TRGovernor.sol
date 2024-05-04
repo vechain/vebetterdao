@@ -66,24 +66,6 @@ contract B3TRGovernor is
     bool isFunctionRestrictionEnabled;
   }
 
-  /**
-   * @dev Struct containing data to create a proposal (done to avoid stack too deep errors)
-   * @param targets The addresses of the contracts to call
-   * @param values The values to send to the contracts
-   * @param calldatas Function signatures and arguments
-   * @param description The description of the proposal
-   * @param startRoundId The round in which the proposal should be active
-   * @param depositAmount The amount of tokens the proposer intends to deposit
-   */
-  struct ProposalCreationData {
-    address[] targets;
-    uint256[] values;
-    bytes[] calldatas;
-    string description;
-    uint256 startRoundId;
-    uint256 depositAmount;
-  }
-
   /// @custom:storage-location erc7201:b3tr.storage.B3TRGovernor
   struct B3TRGovernorStorage {
     IVoterRewards voterRewards;
@@ -210,7 +192,16 @@ contract B3TRGovernor is
   }
 
   /**
-   * @dev See {IB3TRGovernor-propose}.
+   * @dev See {IB3TRGovernor-propose}. This function has opt-in frontrunning protection, described in {_isValidDescriptionForProposer}.
+   *
+   * The {startRoundId} parameter is used to specify the round in which the proposal should be active. The round must be in the future.
+   *
+   * @param targets The addresses of the contracts to call
+   * @param values The values to send to the contracts
+   * @param calldatas Function signatures and arguments
+   * @param description The description of the proposal
+   * @param startRoundId The round in which the proposal should be active
+   * @param depositAmount The amount of tokens the proposer intends to deposit
    */
   function propose(
     address[] memory targets,
@@ -220,96 +211,150 @@ contract B3TRGovernor is
     uint256 startRoundId,
     uint256 depositAmount
   ) public virtual returns (uint256) {
-    // Transforming into struct and calling the internal propose function to avoid stack too deep errors
-    ProposalCreationData memory data = ProposalCreationData({
-      targets: targets,
-      values: values,
-      calldatas: calldatas,
-      description: description,
-      startRoundId: startRoundId,
-      depositAmount: depositAmount
-    });
-    return _propose(data);
-  }
-
-  /**
-   * @dev Internal propose mechanism. Can be overridden to add more logic on proposal creation.
-   * This function has opt-in frontrunning protection, described in {_isValidDescriptionForProposer}.
-   *
-   * The {startRoundId} parameter is used to specify the round in which the proposal should be active. The round must be in the future.
-   *
-   * Emits a {IB3TRGovernor-ProposalCreated} event.
-   */
-  // This function is getting market as a false positive by Slither as there is a reentrancy guard in place on _depositFunds
-  // slither-disable-next-line reentrancy-no-eth
-  function _propose(ProposalCreationData memory data) public virtual returns (uint256 proposalId) {
     address proposer = _msgSender();
     uint256 currentRoundId = _getB3TRGovernorStorage().xAllocationVoting.currentRoundId();
 
     // if allocation rounds did not start yet, revert, otherwise we will have issues with roundSnapshot and roundDeadline
     if (currentRoundId == 0) {
-      revert GovernorInvalidStartRound(data.startRoundId);
+      revert GovernorInvalidStartRound(startRoundId);
     }
 
     // round must be in the future
-    if (data.startRoundId <= currentRoundId) {
-      revert GovernorInvalidStartRound(data.startRoundId);
+    if (startRoundId <= currentRoundId) {
+      revert GovernorInvalidStartRound(startRoundId);
     }
 
     // only do this check if user wants to start proposal in the next round
-    if (data.startRoundId == currentRoundId + 1) {
+    if (startRoundId == currentRoundId + 1) {
       if (!canProposalStartInNextRound()) {
-        revert GovernorInvalidStartRound(data.startRoundId);
+        revert GovernorInvalidStartRound(startRoundId);
       }
     }
 
     // check description restriction
-    if (!_isValidDescriptionForProposer(proposer, data.description)) {
+    if (!_isValidDescriptionForProposer(proposer, description)) {
       revert GovernorRestrictedProposer(proposer);
     }
 
-    GovernorStorage storage $ = _getGovernorStorage();
-    GovernorFunctionsSettingsStorage storage $$ = _getGovernorFunctionsSettingsStorage();
-    proposalId = hashProposal(data.targets, data.values, data.calldatas, keccak256(bytes(data.description)));
+    return _propose(targets, values, calldatas, description, proposer, startRoundId, depositAmount);
+  }
 
-    if (data.targets.length != data.values.length || data.targets.length != data.calldatas.length) {
-      revert GovernorInvalidProposalLength(data.targets.length, data.calldatas.length, data.values.length);
+  /**
+   * @dev Internal propose mechanism. Can be overridden to add more logic on proposal creation.
+   *
+   * @param targets The addresses of the contracts to call
+   * @param values The values to send to the contracts
+   * @param calldatas Function signatures and arguments
+   * @param description The description of the proposal
+   * @param proposer The address of the proposer
+   * @param startRoundId The round in which the proposal should be active
+   * @param depositAmount The amount of tokens the proposer intends to deposit
+   *
+   * Emits a {IB3TRGovernor-ProposalCreated} event.
+   */
+  // This function is getting market as a false positive by Slither as there is a reentrancy guard in place on _depositFunds
+  // slither-disable-next-line reentrancy-no-eth
+  function _propose(
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    string memory description,
+    address proposer,
+    uint256 startRoundId,
+    uint256 depositAmount
+  ) internal virtual returns (uint256 proposalId) {
+    proposalId = hashProposal(targets, values, calldatas, keccak256(bytes(description)));
+
+    _validateProposeParams(targets, values, calldatas, proposalId);
+
+    _checkFunctionsRestriction(targets, calldatas);
+
+    _setProposal(proposalId, proposer, SafeCast.toUint32(votingPeriod()), targets.length > 0, depositAmount);
+
+    _depositFunds(depositAmount, proposer, proposalId);
+
+    emit ProposalCreated(
+      proposalId,
+      proposer,
+      targets,
+      values,
+      new string[](targets.length),
+      calldatas,
+      description,
+      startRoundId
+    );
+
+    // Using a named return variable to avoid stack too deep errors
+  }
+
+  /**
+   * @dev Internal function to validate the propose parameters
+   *
+   * @param targets The addresses of the contracts to call
+   * @param values The values to send to the contracts
+   * @param calldatas Function signatures and arguments
+   * @param proposalId The id of the proposal
+   */
+  function _validateProposeParams(
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    uint256 proposalId
+  ) internal view {
+    GovernorStorage storage $ = _getGovernorStorage();
+
+    if (targets.length != values.length || targets.length != calldatas.length) {
+      revert GovernorInvalidProposalLength(targets.length, calldatas.length, values.length);
     }
     if ($._proposals[proposalId].roundIdVoteStart != 0) {
       // Proposal already exists
       revert GovernorUnexpectedProposalState(proposalId, state(proposalId), bytes32(0));
     }
+  }
 
-    // Check if the calldatas function selectors are whitelisted
+  /**
+   * @dev Internal function to save the proposal data in storage
+   *
+   * @param proposalId The id of the proposal
+   * @param proposer The address of the proposer
+   * @param voteDuration The duration of the vote
+   * @param isExecutable If the proposal is executable
+   * @param depositAmount The amount of tokens the proposer intends to deposit
+   */
+  function _setProposal(
+    uint256 proposalId,
+    address proposer,
+    uint32 voteDuration,
+    bool isExecutable,
+    uint256 depositAmount
+  ) internal {
+    GovernorStorage storage $ = _getGovernorStorage();
+
+    ProposalCore storage proposal = $._proposals[proposalId];
+
+    proposal.proposer = proposer;
+    proposal.roundIdVoteStart = _getB3TRGovernorStorage().xAllocationVoting.currentRoundId();
+    proposal.voteDuration = voteDuration;
+    proposal.isExecutable = isExecutable;
+    proposal.depositAmount = depositAmount;
+  }
+
+  /**
+   * @dev Internal function check if the targets and calldatas are whitelisted
+   * @param targets The addresses of the contracts to call
+   * @param calldatas Function signatures and arguments
+   */
+  function _checkFunctionsRestriction(address[] memory targets, bytes[] memory calldatas) internal view {
+    GovernorFunctionsSettingsStorage storage $$ = _getGovernorFunctionsSettingsStorage();
+
     if ($$.isFunctionRestrictionEnabled == true) {
-      for (uint256 i = 0; i < data.targets.length; i++) {
-        bytes4 functionSelector = _extractFunctionSelector(data.calldatas[i]);
-        if ($$.whitelistedFunctions[data.targets[i]][functionSelector] == false) {
+      for (uint256 i = 0; i < targets.length; i++) {
+        bytes4 functionSelector = _extractFunctionSelector(calldatas[i]);
+        if ($$.whitelistedFunctions[targets[i]][functionSelector] == false) {
           revert GovernorRestrictedFunction(functionSelector);
         }
       }
     }
-
-    ProposalCore storage proposal = $._proposals[proposalId];
-    proposal.proposer = proposer;
-    proposal.roundIdVoteStart = data.startRoundId;
-    proposal.voteDuration = SafeCast.toUint32(votingPeriod());
-    proposal.isExecutable = data.targets.length > 0;
-    proposal.depositAmount = data.depositAmount;
-
-    _depositFunds(data.depositAmount, proposer, proposalId);
-
-    emit ProposalCreated(
-      proposalId,
-      proposer,
-      data.targets,
-      data.values,
-      new string[](data.targets.length),
-      data.calldatas,
-      data.description,
-      data.startRoundId
-    );
-    // Using a named return variable to avoid stack too deep errors
   }
 
   function _extractFunctionSelector(bytes memory data) internal pure returns (bytes4) {
