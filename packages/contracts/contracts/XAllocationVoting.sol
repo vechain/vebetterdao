@@ -145,6 +145,15 @@ contract XAllocationVoting is
   }
 
   /**
+   * @dev Update the voting threshold. This operation can only be performed through a governance proposal.
+   *
+   * Emits a {VotingThresholdSet} event.
+   */
+  function setVotingThreshold(uint256 newVotingThreshold) public virtual override onlyRole(GOVERNANCE_ROLE) {
+    super.setVotingThreshold(newVotingThreshold);
+  }
+
+  /**
    * @dev Start a new voting round for allocating funds to the x-apps
    */
   function startNewRound() public override onlyRole(ROUND_STARTER_ROLE) returns (uint256) {

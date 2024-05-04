@@ -49,6 +49,7 @@ abstract contract RoundVotesCountingUpgradeable is Initializable, XAllocationVot
   struct RoundVotesCountingStorage {
     mapping(address user => bool) _hasVotedOnce; // mapping to store that a user has voted at least one time
     mapping(uint256 roundId => RoundVote) _roundVotes; // mapping to store the votes for each round
+    uint256 votingThreshold; // minimum number of tokens needed to cast a vote
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.RoundVotesCounting")) - 1)) & ~bytes32(uint256(0xff))
@@ -61,14 +62,21 @@ abstract contract RoundVotesCountingUpgradeable is Initializable, XAllocationVot
     }
   }
 
+  //@notice emitted when a the minimum number of tokens needed to cast a vote is updated
+  event VotingThresholdSet(uint256 oldVotingThreshold, uint256 newVotingThreshold);
+
   /**
    * @dev Initializes the contract
    */
-  function __RoundVotesCounting_init() internal onlyInitializing {
-    __RoundVotesCounting_init_unchained();
+  function __RoundVotesCounting_init(uint256 _votingThreshold) internal onlyInitializing {
+    __RoundVotesCounting_init_unchained(_votingThreshold);
   }
 
-  function __RoundVotesCounting_init_unchained() internal onlyInitializing {}
+  function __RoundVotesCounting_init_unchained(uint256 _votingThreshold) internal onlyInitializing {
+    RoundVotesCountingStorage storage $ = _getRoundVotesCountingStorage();
+
+    $.votingThreshold = _votingThreshold;
+  }
 
   /**
    * @dev See {IXAllocationVotingGovernor-COUNTING_MODE}.
@@ -76,6 +84,27 @@ abstract contract RoundVotesCountingUpgradeable is Initializable, XAllocationVot
   // solhint-disable-next-line func-name-mixedcase
   function COUNTING_MODE() public pure virtual override returns (string memory) {
     return "support=x-allocations&quorum=auto";
+  }
+
+  /**
+   * @dev Update the voting threshold. This operation can only be performed through a governance proposal.
+   *
+   * Emits a {VotingThresholdSet} event.
+   */
+  function setVotingThreshold(uint256 newVotingThreshold) public virtual {
+    _setVotingThreshold(newVotingThreshold);
+  }
+
+  /**
+   * @dev Internal setter for the voting threshold.
+   *
+   * Emits a {VotingThresholdSet} event.
+   */
+  function _setVotingThreshold(uint256 newVotingThreshold) internal virtual {
+    RoundVotesCountingStorage storage $ = _getRoundVotesCountingStorage();
+
+    emit VotingThresholdSet($.votingThreshold, newVotingThreshold);
+    $.votingThreshold = newVotingThreshold;
   }
 
   /**
@@ -127,6 +156,14 @@ abstract contract RoundVotesCountingUpgradeable is Initializable, XAllocationVot
       $._roundVotes[roundId].votesReceived[apps[i]] += weights[i];
     }
 
+    if (totalWeight < votingThreshold()) {
+      revert GovernorVotingThresholdNotMet(votingThreshold(), totalWeight);
+    }
+
+    if (totalWeight > getVotes(voter, roundStart)) {
+      revert GovernorInsufficientVotingPower();
+    }
+
     require(
       totalWeight <= getVotes(voter, roundStart),
       "XAllocationVotingGovernor: account has insufficient voting power for this round"
@@ -146,7 +183,8 @@ abstract contract RoundVotesCountingUpgradeable is Initializable, XAllocationVot
 
     emit AllocationVoteCast(voter, roundId, apps, weights);
 
-    voterRewards().registerVote(roundStart, voter, totalWeight);
+    // Register the vote for rewards calculation where the vote power is the square root of the total votes cast by the voter
+    voterRewards().registerVote(roundStart, voter, totalWeight, Math.sqrt(totalWeight));
   }
 
   /**
@@ -187,6 +225,15 @@ abstract contract RoundVotesCountingUpgradeable is Initializable, XAllocationVot
   function totalVoters(uint256 roundId) public view override returns (uint256) {
     RoundVotesCountingStorage storage $ = _getRoundVotesCountingStorage();
     return $._roundVotes[roundId].totalVoters;
+  }
+
+  /**
+   * @notice The voting threshold.
+   * @dev The minimum number of tokens needed to cast a vote.
+   */
+  function votingThreshold() public view virtual returns (uint256) {
+    RoundVotesCountingStorage storage $ = _getRoundVotesCountingStorage();
+    return $.votingThreshold;
   }
 
   /**
