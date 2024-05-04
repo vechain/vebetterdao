@@ -188,19 +188,19 @@ describe("Governor and TimeLock", function () {
       })
 
       await catchRevert(
-        governor.initialize(
-          await vot3.getAddress(),
-          await timeLock.getAddress(),
-          await xAllocationVoting.getAddress(),
-          1, // quorum percentage
-          1, // deposit threshold
-          1, // delay before vote starts
-          1, // voting threshold
-          owner.address,
-          await voterRewards.getAddress(),
-          owner.address,
-          true,
-        ),
+        governor.initialize({
+          vot3Token: await vot3.getAddress(),
+          timelock: await timeLock.getAddress(),
+          xAllocationVoting: await xAllocationVoting.getAddress(),
+          quorumPercentage: 1, // quorum percentage
+          initialDepositThreshold: 1, // voting threshold
+          initialMinVotingDelay: 1, // delay before vote starts
+          initialVotingThreshold: 1, // voting threshold
+          governorAdmin: owner.address,
+          voterRewards: await voterRewards.getAddress(),
+          governorFunctionSettingsRoleAddress: owner.address,
+          isFunctionRestrictionEnabled: true,
+        }),
       )
     })
 
@@ -3043,5 +3043,5 @@ describe("Governor and TimeLock", function () {
       // user cannot deposit when proposal is not pending
       await expect(governor.connect(sponser).deposit(ethers.parseEther("1000"), proposalId, { gasLimit: 10_000_000 }))
     })
-  }) 
+  })
 })

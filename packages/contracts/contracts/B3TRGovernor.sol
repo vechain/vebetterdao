@@ -38,6 +38,34 @@ contract B3TRGovernor is
     _disableInitializers();
   }
 
+  /**
+   * @dev Struct containing data to initialize the contract
+   * @param vot3Token The address of the Vot3 token used for voting
+   * @param timelock The address of the Timelock
+   * @param xAllocationVoting The address of the xAllocationVoting
+   * @param quorumPercentage quorum as a percentage of the total supply at the block a proposal’s voting power is retrieved
+   * @param initialDepositThreshold The Deposit Threshold is the amount of voting power that an account needs to make a proposal
+   * @param initialMinVotingDelay The minimum delay before a proposal can start
+   * @param initialVotingThreshold The minimum amount of voting power needed in order to vote
+   * @param governorAdmin The address of the governor admin
+   * @param voterRewards The address of the voter rewards contract
+   * @param governorFunctionSettingsRoleAddress The address that should have the GOVERNOR_FUNCTIONS_SETTINGS_ROLE
+   * @param isFunctionRestrictionEnabled If the function restriction is enabled
+   */
+  struct InitializationData {
+    IVotes vot3Token;
+    TimelockControllerUpgradeable timelock;
+    IXAllocationVotingGovernor xAllocationVoting;
+    uint256 quorumPercentage;
+    uint256 initialDepositThreshold;
+    uint256 initialMinVotingDelay;
+    uint256 initialVotingThreshold;
+    address governorAdmin;
+    address voterRewards;
+    address governorFunctionSettingsRoleAddress;
+    bool isFunctionRestrictionEnabled;
+  }
+
   /// @custom:storage-location erc7201:b3tr.storage.B3TRGovernor
   struct B3TRGovernorStorage {
     IVoterRewards voterRewards;
@@ -62,45 +90,25 @@ contract B3TRGovernor is
 
   /**
    * @dev Initializes the contract with the initial parameters
-   * @param _vot3Token The address of the Vot3 token used for voting
-   * @param _timelock The address of the Timelock
-   * @param _xAllocationVoting The address of the xAllocationVoting
-   * @param _quorumPercentage quorum as a percentage of the total supply at the block a proposal’s voting power is retrieved
-   * @param _initialDepositThreshold The Deposit Threshold is the amount of voting power that an account needs to make a proposal
-   * @param _initialMinVotingDelay The minimum delay before a proposal can start
-   * @param governorAdmin The address of the governor admin
-   * @param _voterRewards The address of the voter rewards contract
    */
-  function initialize(
-    IVotes _vot3Token,
-    TimelockControllerUpgradeable _timelock,
-    IXAllocationVotingGovernor _xAllocationVoting,
-    uint256 _quorumPercentage,
-    uint256 _initialDepositThreshold,
-    uint256 _initialMinVotingDelay,
-    uint256 _initialVotingThreshold,
-    address governorAdmin,
-    address _voterRewards,
-    address governorFunctionSettingsRoleAddress,
-    bool _isFunctionRestrictionEnabled
-  ) public initializer {
+  function initialize(InitializationData memory data) public initializer {
     __Governor_init("B3TRGovernor");
-    __GovernorSettings_init(_initialDepositThreshold, _initialMinVotingDelay, _initialVotingThreshold);
+    __GovernorSettings_init(data.initialDepositThreshold, data.initialMinVotingDelay, data.initialVotingThreshold);
     __GovernorCountingSimple_init();
-    __GovernorVotes_init(_vot3Token);
-    __GovernorVotesQuorumFraction_init(_quorumPercentage);
-    __GovernorTimelockControl_init(_timelock);
-    __GovernorDeposit_init(address(_vot3Token));
-    __GovernorFunctionsSettings_init(_isFunctionRestrictionEnabled);
+    __GovernorVotes_init(data.vot3Token);
+    __GovernorVotesQuorumFraction_init(data.quorumPercentage);
+    __GovernorTimelockControl_init(data.timelock);
+    __GovernorDeposit_init(address(data.vot3Token));
+    __GovernorFunctionsSettings_init(data.isFunctionRestrictionEnabled);
     __AccessControl_init();
     __UUPSUpgradeable_init();
 
     B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
-    $.voterRewards = IVoterRewards(_voterRewards);
-    $.xAllocationVoting = _xAllocationVoting;
+    $.voterRewards = IVoterRewards(data.voterRewards);
+    $.xAllocationVoting = data.xAllocationVoting;
 
-    _grantRole(DEFAULT_ADMIN_ROLE, governorAdmin);
-    _grantRole(GOVERNOR_FUNCTIONS_SETTINGS_ROLE, governorFunctionSettingsRoleAddress);
+    _grantRole(DEFAULT_ADMIN_ROLE, data.governorAdmin);
+    _grantRole(GOVERNOR_FUNCTIONS_SETTINGS_ROLE, data.governorFunctionSettingsRoleAddress);
   }
 
   // ------------------ GETTERS ------------------ //

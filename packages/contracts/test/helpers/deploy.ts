@@ -160,17 +160,19 @@ export const getOrDeployContractInstances = async ({
 
   // Deploy Governor
   const governor = (await deployProxy("B3TRGovernor", [
-    await vot3.getAddress(),
-    await timeLock.getAddress(),
-    await xAllocationVoting.getAddress(),
-    config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
-    config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD, // voting threshold
-    config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
-    config.B3TR_GOVERNOR_VOTING_THRESHOLD, // voting threshold
-    owner.address,
-    await voterRewards.getAddress(),
-    owner.address,
-    true,
+    {
+      vot3Token: await vot3.getAddress(),
+      timelock: await timeLock.getAddress(),
+      xAllocationVoting: await xAllocationVoting.getAddress(),
+      quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
+      initialDepositThreshold: config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD, // voting threshold
+      initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
+      initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD, // voting threshold
+      governorAdmin: owner.address,
+      voterRewards: await voterRewards.getAddress(),
+      governorFunctionSettingsRoleAddress: owner.address,
+      isFunctionRestrictionEnabled: true,
+    },
   ])) as B3TRGovernor
 
   const contractAddresses: Record<string, string> = {
