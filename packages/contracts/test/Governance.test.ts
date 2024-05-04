@@ -203,20 +203,20 @@ describe("Governor and TimeLock", function () {
       })
 
       await catchRevert(
-        governor.initialize(
-          await vot3.getAddress(),
-          await timeLock.getAddress(),
-          await xAllocationVoting.getAddress(),
-          1, // quorum percentage
-          1, // voting threshold
-          1, // delay before vote starts
-          owner.address,
-          owner.address,
-          owner.address,
-          await voterRewards.getAddress(),
-          owner.address,
-          true,
-        ),
+        governor.initialize({
+          vot3Token: await vot3.getAddress(),
+          timelock: await timeLock.getAddress(),
+          xAllocationVoting: await xAllocationVoting.getAddress(),
+          quorumPercentage: 1, // quorum percentage
+          initialDepositThreshold: 1, // voting threshold
+          initialMinVotingDelay: 1, // delay before vote starts
+          governorAdmin: owner.address,
+          proposalQueuer: owner.address,
+          proposalExecutor: owner.address,
+          voterRewards: await voterRewards.getAddress(),
+          governorFunctionSettingsRoleAddress: owner.address,
+          isFunctionRestrictionEnabled: true,
+        }),
       )
     })
 
