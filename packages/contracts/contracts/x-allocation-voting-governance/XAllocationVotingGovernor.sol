@@ -198,10 +198,10 @@ abstract contract XAllocationVotingGovernor is
   }
 
   /**
-   * @dev Checks if the given appId can be voted for in the given round.
+   * @dev Checks if the given appId can be voted for in the given round: it needs to be eligible in the block before the round starts.
    */
   function isEligibleForVote(bytes32 appId, uint256 roundId) public view virtual returns (bool) {
-    return x2EarnApps().isEligible(appId, roundSnapshot(roundId));
+    return x2EarnApps().isEligible(appId, roundSnapshot(roundId) - 1);
   }
 
   /**

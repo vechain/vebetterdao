@@ -152,7 +152,7 @@ abstract contract VoteEligibilityUpgradeable is Initializable, X2EarnAppsUpgrade
     VoteEligibilityStorage storage $ = _getVoteEligibilityStorage();
 
     uint48 currentTimepoint = clock();
-    if (timepoint > currentTimepoint) {
+    if (timepoint >= currentTimepoint) {
       revert ERC5805FutureLookup(timepoint, currentTimepoint);
     }
 
