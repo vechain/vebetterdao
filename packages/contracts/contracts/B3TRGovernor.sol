@@ -84,12 +84,10 @@ contract B3TRGovernor is
     }
   }
 
-  /// @notice modifier to check if the caller has the specified role or if the function is called through a governance proposal
-  modifier onlyRoleOrGovernance(bytes32 role) {
-    if (!hasRole(role, _msgSender())) _checkGovernance();
-    _;
-  }
-
+  /**
+   * @dev Initializes the contract
+   * @param data The data to initialize the contract
+   */
   function initialize(InitializationData memory data) public initializer {
     __Governor_init("B3TRGovernor");
     __GovernorSettings_init(data.initialDepositThreshold, data.initialMinVotingDelay);
@@ -110,9 +108,6 @@ contract B3TRGovernor is
     _grantRole(GOVERNOR_FUNCTIONS_SETTINGS_ROLE, data.governorFunctionSettingsRoleAddress);
     _grantRole(PROPOSAL_EXECUTOR_ROLE, data.proposalExecutor);
     _grantRole(PROPOSAL_QUEUER_ROLE, data.proposalQueuer);
-
-    // self administration
-    // _grantRole(DEFAULT_ADMIN_ROLE, address(this));
   }
 
   // ------------------ MODIFIERS ------------------ //
@@ -126,6 +121,12 @@ contract B3TRGovernor is
     if (!hasRole(role, address(0))) {
       _checkRole(role, _msgSender());
     }
+    _;
+  }
+
+  /// @notice modifier to check if the caller has the specified role or if the function is called through a governance proposal
+  modifier onlyRoleOrGovernance(bytes32 role) {
+    if (!hasRole(role, _msgSender())) _checkGovernance();
     _;
   }
 
