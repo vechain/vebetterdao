@@ -24,8 +24,7 @@ export const getRoundXApps = async (thor: Connex.Thor, roundId: string): Promise
     receiverAddress: app[1],
     name: app[2],
     metadataURI: app[3],
-    createdAt: app[4],
-    createdAtTimestamp: app[5],
+    createdAtTimestamp: app[4],
   }))
 }
 

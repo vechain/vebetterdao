@@ -177,13 +177,6 @@ interface IX2EarnApps {
   function appExists(bytes32 appId) external view returns (bool);
 
   /**
-   * @dev Block number when the app was added for the first time.
-   *
-   * @param appId the id of the app
-   */
-  function createdAt(bytes32 appId) external view returns (uint48);
-
-  /**
    * @dev Allow or deny an app to participate in the next allocation voting rounds.
    *
    * @param _appId the id of the app

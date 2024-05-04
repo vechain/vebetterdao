@@ -93,7 +93,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
     }
 
     // Store the new app
-    $._apps[id] = X2EarnAppsDataTypes.App(id, receiverAddress, appName, metadataURI, clock(), block.timestamp);
+    $._apps[id] = X2EarnAppsDataTypes.App(id, receiverAddress, appName, metadataURI, block.timestamp);
     $._appIds.push(id);
     _setAppAdmin(id, admin);
     _setVotingEligibility(id, true);
@@ -201,18 +201,5 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
     AppsStorageStorage storage $ = _getAppsStorageStorage();
 
     return string(abi.encodePacked(baseURI(), $._apps[appId].metadataURI));
-  }
-
-  /**
-   * @dev See {IX2EarnApps-createdAt}.
-   */
-  function createdAt(bytes32 appId) public view override returns (uint48) {
-    if (!appExists(appId)) {
-      revert X2EarnNonexistentApp(appId);
-    }
-
-    AppsStorageStorage storage $ = _getAppsStorageStorage();
-
-    return $._apps[appId].createdAt;
   }
 }

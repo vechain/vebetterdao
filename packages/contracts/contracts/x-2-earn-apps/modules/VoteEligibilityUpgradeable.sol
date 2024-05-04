@@ -156,11 +156,7 @@ abstract contract VoteEligibilityUpgradeable is Initializable, X2EarnAppsUpgrade
       revert ERC5805FutureLookup(timepoint, currentTimepoint);
     }
 
-    // We check also that the timepoint is after the app creation because once the first checkpoint is created
-    // it will return true for any block before that timepoint.
-    return
-      $._isAppEligibleCheckpoints[appId].upperLookupRecent(SafeCast.toUint48(timepoint)) == 1 &&
-      createdAt(appId) <= timepoint;
+    return $._isAppEligibleCheckpoints[appId].upperLookupRecent(SafeCast.toUint48(timepoint)) == 1;
   }
 
   /**

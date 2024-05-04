@@ -7,7 +7,6 @@ library X2EarnAppsDataTypes {
     address receiverAddress;
     string name;
     string metadataURI;
-    uint48 createdAt; // block number when app was added
     uint256 createdAtTimestamp;
   }
 }

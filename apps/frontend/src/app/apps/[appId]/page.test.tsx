@@ -9,7 +9,6 @@ describe("AppDetail", () => {
     vi.spyOn(hooks, "useXApps").mockReturnValue({
       data: [
         {
-          createdAt: 12347455,
           id: "1",
           name: "Round 1",
           receiverAddress: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",

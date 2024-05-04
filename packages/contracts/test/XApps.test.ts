@@ -229,7 +229,6 @@ describe("X-Apps", function () {
       expect(app.receiverAddress).to.eql(otherAccounts[0].address)
       expect(app.name).to.eql("My app")
       expect(app.metadataURI).to.eql("metadataURI")
-      expect(app.createdAt).to.eql(await x2EarnApps.clock())
     })
 
     it("Can index apps", async function () {
@@ -260,13 +259,6 @@ describe("X-Apps", function () {
     //   const apps = await x2EarnApps.apps()
     //   expect(apps.length).to.eql(1300)
     // })
-
-    it("Cannot get creation date of non existing app", async function () {
-      const { x2EarnApps } = await getOrDeployContractInstances({ forceDeploy: true })
-      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
-
-      await expect(x2EarnApps.createdAt(app1Id)).to.be.reverted
-    })
   })
 
   describe("App availability for allocation voting", function () {

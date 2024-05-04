@@ -32,7 +32,7 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
  * @dev Core of x-2-earn applications management, designed to be extended through various modules.
  *
  * This contract is abstract and requires several functions to be implemented in various modules:
- * - a module to handle the storage of the apps and implement {_addApp}, {appExists}, {_updateAppMetadata}, {_updateAppReceiverAddress}, and {createdAt} functions
+ * - a module to handle the storage of the apps and implement {_addApp}, {appExists}, {_updateAppMetadata}, and {_updateAppReceiverAddress} functions
  * - a module to handle the voting Eligibility of the apps and implement {_setVotingEligibility} and {isEligible} functions
  * - a module to handle the authorization to addresses to perform app management and implement {_setAppAdmin}, {_addAppModerator}, {_removeAppModerator} functions
  * - a module to handle the settings of the apps and implement {baseURI} function
@@ -154,11 +154,6 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
    * @inheritdoc IX2EarnApps
    */
   function baseURI() public view virtual returns (string memory);
-
-  /**
-   * @inheritdoc IX2EarnApps
-   */
-  function createdAt(bytes32 appId) public view virtual returns (uint48);
 
   /**
    * @dev Function to set the voting Eligibility of an app.
