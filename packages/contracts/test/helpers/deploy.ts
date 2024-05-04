@@ -15,6 +15,7 @@ import {
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy } from "../../scripts/helpers"
+import { setWhitelistedFunctions } from "../../scripts/deploy/deploy"
 
 interface DeployInstance {
   B3trContract: ContractFactory
@@ -168,7 +169,24 @@ export const getOrDeployContractInstances = async ({
     config.B3TR_GOVERNOR_VOTING_THRESHOLD, // voting threshold
     owner.address,
     await voterRewards.getAddress(),
+    owner.address,
+    true,
   ])) as B3TRGovernor
+
+  const contractAddresses: Record<string, string> = {
+    B3TR: await b3tr.getAddress(),
+    VoterRewards: await voterRewards.getAddress(),
+    Treasury: await treasury.getAddress(),
+    XAllocationVoting: await xAllocationVoting.getAddress(),
+    Emissions: await emissions.getAddress(),
+    GalaxyMember: await galaxyMember.getAddress(),
+    TimeLock: await timeLock.getAddress(),
+    VOT3: await vot3.getAddress(),
+    XAllocationPool: await xAllocationPool.getAddress(),
+    B3TRGovernor: await governor.getAddress(),
+  }
+
+  await setWhitelistedFunctions(contractAddresses, config, governor, owner) // Set whitelisted functions for governor proposals
 
   // Set up roles
   const PROPOSER_ROLE = await timeLock.PROPOSER_ROLE()

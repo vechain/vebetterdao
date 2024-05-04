@@ -1,3 +1,5 @@
+import { VOT3 } from "./../../../contracts/typechain-types/contracts/VOT3"
+import { GalaxyMember } from "./../../../contracts/typechain-types/contracts/GalaxyMember"
 import { defineConfig } from "../defineConfig"
 
 export function createSoloStagingConfig() {
@@ -8,8 +10,31 @@ export function createSoloStagingConfig() {
     B3TR_GOVERNOR_QUORUM_PERCENTAGE: 4, // 4 -> Need 4% of voters to pass
     B3TR_GOVERNOR_MIN_DELAY: 30, //after a vote passes, you have 5 min before you can queue the proposal
     B3TR_GOVERNOR_PROPOSAL_THRESHOLD: 1000, // How many votes are needed to create a proposal
-    B3TR_GOVERNOR_MIN_VOTING_DELAY: 30, // 5 minute
     B3TR_GOVERNOR_VOTING_THRESHOLD: BigInt("1000000000000000000"), // 1 vote
+    B3TR_GOVERNOR_MIN_VOTING_DELAY: 30, // 5 minutes
+    /*
+      For ambiguous functions (functions with same name), the function signature is used to differentiate them
+      e.g., instead of using "setVoterRewards", we use "setVoterRewards(address)"
+    */
+    B3TR_GOVERNOR_WHITELISTED_METHODS: {
+      B3TR: ["tokenDetails"],
+      B3TRGovernor: [
+        "setProposalThreshold",
+        "setMinVotingDelay",
+        "setWhitelistFunction",
+        "setIsFunctionRestrictionEnabled",
+        "updateQuorumNumerator",
+        "updateDelay",
+        "setDepositThreshold",
+      ],
+      Treasury: ["transferB3TR"],
+      XAllocationVoting: [
+        "updateQuorumNumerator",
+        "setBaseAllocationPercentage",
+        "setAppSharesCap",
+        "setVotingElegibility",
+      ],
+    },
 
     EMISSIONS_CYCLE_DURATION: 30, // blocks - 30 blocks - 5 minutes.
     EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE: 4, // 4% decay every cycle
