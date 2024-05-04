@@ -143,18 +143,20 @@ export async function deployAll(config: ContractsConfig) {
 
   console.log(`Deploying Governor contract`)
   const governor = (await deployProxy("B3TRGovernor", [
-    await vot3.getAddress(),
-    await timelock.getAddress(),
-    await xAllocationVoting.getAddress(),
-    config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
-    config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD,
-    config.B3TR_GOVERNOR_MIN_VOTING_DELAY,
-    TEMP_ADMIN,
-    config.B3TR_GOVERNOR_QUEUER_ADDRESS,
-    config.B3TR_GOVERNOR_EXECUTOR_ADDRESS,
-    await voterRewards.getAddress(),
-    TEMP_ADMIN,
-    true,
+    {
+      vot3Token: await vot3.getAddress(),
+      timelock: await timelock.getAddress(),
+      xAllocationVoting: await xAllocationVoting.getAddress(),
+      quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
+      initialDepositThreshold: config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD,
+      initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY,
+      governorAdmin: TEMP_ADMIN,
+      proposalQueuer: config.B3TR_GOVERNOR_QUEUER_ADDRESS,
+      proposalExecutor: config.B3TR_GOVERNOR_EXECUTOR_ADDRESS,
+      voterRewards: await voterRewards.getAddress(),
+      governorFunctionSettingsRoleAddress: TEMP_ADMIN,
+      isFunctionRestrictionEnabled: true,
+    },
   ])) as B3TRGovernor
   console.log(`Governor contract deployed at address ${await governor.getAddress()}`)
 

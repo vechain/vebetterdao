@@ -114,10 +114,15 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    */
   error GovernorNoDepositToWithdraw(uint256 proposalId, address depositer);
 
-    /**
+  /**
    * @dev The deposit amount must be greater than 0.
    */
   error GovernorInvalidDepositAmount();
+
+  /**
+   * @dev Address is not authorized to call this function.
+   */
+  error UnauthorizedAccess(address user);
 
   /**
    * @dev Emitted when a proposal is created
