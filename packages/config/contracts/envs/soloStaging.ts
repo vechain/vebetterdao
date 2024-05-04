@@ -8,7 +8,7 @@ export function createSoloStagingConfig() {
 
     B3TR_CAP: 3_750_000, // 3_750_000 -> 3.75 million B3TR tokens for pilot show
     B3TR_GOVERNOR_QUORUM_PERCENTAGE: 4, // 4 -> Need 4% of voters to pass
-    B3TR_GOVERNOR_MIN_DELAY: 30, //after a vote passes, you have 5 min before you can queue the proposal
+    TIMELOCK_MIN_DELAY: 30, //after a vote passes, you have 5 min before you can queue the proposal
     B3TR_GOVERNOR_PROPOSAL_THRESHOLD: 1000, // How many votes are needed to create a proposal
     B3TR_GOVERNOR_MIN_VOTING_DELAY: 30, // 5 minutes
     B3TR_GOVERNOR_QUEUER_ADDRESS: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa", //1nd account from mnemonic of solo network

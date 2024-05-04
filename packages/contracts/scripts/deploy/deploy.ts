@@ -44,7 +44,7 @@ export async function deployAll(config: ContractsConfig) {
 
   console.log(`Deploying TimeLock contract`)
   const timelock = (await deployProxy("TimeLock", [
-    config.B3TR_GOVERNOR_MIN_DELAY,
+    config.TIMELOCK_MIN_DELAY,
     [],
     [],
     TEMP_ADMIN,

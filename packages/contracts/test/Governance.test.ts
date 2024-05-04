@@ -16,6 +16,7 @@ import {
   createProposalAndExecuteIt,
   createProposalWithMultipleFunctionsAndExecuteIt,
   ZERO_ADDRESS,
+  waitForQueuedProosalToBeReady,
 } from "./helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it } from "mocha"
@@ -2765,6 +2766,85 @@ describe("Governor and TimeLock", function () {
         },
         "AccessControlUnauthorizedAccount",
       )
+    })
+
+    it("Cannot execute proposal if min delay has not passed", async function () {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.EMISSIONS_CYCLE_DURATION = 10
+      config.TIMELOCK_MIN_DELAY = 10
+      const {
+        governor,
+        b3tr,
+        B3trContract,
+        otherAccount: proposer,
+        governorProposalExecutor,
+        governorProposalQueuer,
+        otherAccounts,
+      } = await getOrDeployContractInstances({ forceDeploy: true, config })
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // load votes
+      voter = otherAccounts[0]
+      await getVot3Tokens(voter, "1000")
+      await waitForNextBlock()
+
+      // create a new proposal
+      const tx = await createProposal(
+        b3tr,
+        B3trContract,
+        proposer,
+        description + ` ${this.test?.title}`,
+        functionToCall,
+        [],
+        false,
+      ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
+      proposalId = await getProposalIdFromTx(tx)
+
+      // wait
+      await waitForProposalToBeActive(proposalId)
+
+      // vote
+      await governor.connect(voter).castVote(proposalId, 1) // vote for
+
+      // wait
+      await waitForVotingPeriodToEnd(proposalId)
+      let proposalState = await governor.state(proposalId)
+      expect(proposalState.toString()).to.eql("4") // succeded
+
+      // queue it
+      const b3trAddress = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
+      const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description + ` ${this.test?.title}`))
+
+      await governor.connect(governorProposalQueuer).queue([b3trAddress], [0], [encodedFunctionCall], descriptionHash)
+
+      // proposal should be in queued state
+      proposalState = await governor.state(proposalId)
+      expect(proposalState.toString()).to.eql("5")
+
+      // Since we incerased the min delay to 10 blocks we should not be able to execute the proposal
+      await catchRevert(
+        governor.connect(governorProposalExecutor).execute([b3trAddress], [0], [encodedFunctionCall], descriptionHash),
+      )
+
+      // proposal should be in queued state
+      proposalState = await governor.state(proposalId)
+      expect(proposalState.toString()).to.eql("5")
+
+      await waitForQueuedProosalToBeReady(proposalId)
+
+      // Now it should be ok
+      await governor
+        .connect(governorProposalExecutor)
+        .execute([b3trAddress], [0], [encodedFunctionCall], descriptionHash)
+
+      // proposal should be in executed state
+      proposalState = await governor.state(proposalId)
+      expect(proposalState.toString()).to.eql("7")
     })
 
     it("can set the PROPOSAL_EXECUTOR_ROLE to zero address and allow anyone to execute a proposals", async function () {

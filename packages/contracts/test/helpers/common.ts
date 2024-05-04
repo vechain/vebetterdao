@@ -340,6 +340,8 @@ export const createProposalWithMultipleFunctionsAndExecuteIt = async (
     })
   await waitForNextBlock()
 
+  await waitForQueuedProosalToBeReady(proposalId)
+
   // execute it
   // console.log("Executing");
   await governor
@@ -347,6 +349,24 @@ export const createProposalWithMultipleFunctionsAndExecuteIt = async (
     .execute(contractsToCall, Array(functionsToCall.length).fill(0), encodedFunctionCalls, descriptionHash, {
       gasLimit: 10_000_000,
     })
+}
+
+/**
+ * Calls the timelock to see if the operation is ready
+ *
+ * @param proposalId the proposal id
+ */
+export const waitForQueuedProosalToBeReady = async (proposalId: number) => {
+  const { timeLock, governor } = await getOrDeployContractInstances({})
+
+  const timelockId = await governor.getTimelockId(proposalId)
+
+  let isOperationReady = await timeLock.isOperationReady(timelockId)
+
+  do {
+    await moveBlocks(1)
+    isOperationReady = await timeLock.isOperationReady(timelockId)
+  } while (isOperationReady === false)
 }
 
 export const addAppThroughGovernance = async (
