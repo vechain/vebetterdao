@@ -1,46 +1,45 @@
-import { AppConfig } from "." 
- const config: AppConfig = {
-  "basePath": "https://b3tr-frontend.vercel.app",
-  "b3trContractAddress": "0xc9aD67A3B765B78bd16bd72f08b7fb9523349a8E",
-  "vot3ContractAddress": "0x0a5fe6E114e32225b7BDa24f9B444Db8D40aFf17",
-  "b3trGovernorAddress": "0x7Ff4a4b785CD70C918ca356A9Ce77E58a09FFfd9",
-  "timelockContractAddress": "0xBBbCBC1a3Db4529694Ad1e630afB2A9514C17A8A",
-  "xAllocationPoolContractAddress": "0x278e030574c1E0a779DD76a2d8746e609a96c0AC",
-  "xAllocationVotingContractAddress": "0xa230A2c881Cf35273A832748538cd7Ef3D09B294",
-  "emissionsContractAddress": "0xF77d9c9AD307BAdcd68848FbAfF3167661639f98",
-  "voterRewardsContractAddress": "0x98009d01f4C84320570824B0C653922FeC5A04a0",
-  "galaxyMemberContractAddress": "0x57D80d39A1242D47F95964e0cAEE84fCF32e3dA8",
-  "treasuryContractAddress": "0x4fF6924755382e5cFb21E753D6be2A5b0ce9F90a",
-  "mixPanelProjectToken": "e03f4f5f6a753dae2dac30a69dfe21f7",
-  "nodeUrl": "https://thor-solo.dev.b3tr.vechain.org",
-  "network": {
-    "id": "solo-staging",
-    "name": "solo-staging",
-    "type": "solo",
-    "defaultNet": true,
-    "urls": [
-      "https://thor-solo.dev.b3tr.vechain.org"
-    ],
-    "explorerUrl": "https://insight.dev.b3tr.vechain.org/#/solo",
-    "blockTime": 10000,
-    "genesis": {
-      "number": 0,
-      "id": "0x00000000c05a20fbca2bf6ae3affba6af4a74b800b585bf7a4988aba7aea69f6",
-      "size": 170,
-      "parentID": "0xffffffff53616c757465202620526573706563742c20457468657265756d2100",
-      "timestamp": 1530316800,
-      "gasLimit": 10000000,
-      "beneficiary": "0x0000000000000000000000000000000000000000",
-      "gasUsed": 0,
-      "totalScore": 0,
-      "txsRoot": "0x45b0cfc220ceec5b7c1c62c4d4193d38e4eba48e8815729ce75f9c0ab0e4c1c0",
-      "txsFeatures": 0,
-      "stateRoot": "0x93de0ffb1f33bc0af053abc2a87c4af44594f5dcb1cb879dd823686a15d68550",
-      "receiptsRoot": "0x45b0cfc220ceec5b7c1c62c4d4193d38e4eba48e8815729ce75f9c0ab0e4c1c0",
-      "signer": "0x0000000000000000000000000000000000000000",
-      "isTrunk": true,
-      "transactions": []
-    }
-  }
-};
-  export default config;
+import { AppConfig } from "."
+const config: AppConfig = {
+  basePath: "https://b3tr-frontend.vercel.app",
+  b3trContractAddress: "0xa44701Db52D26A6f940d142c5A5e29d8957710F2",
+  vot3ContractAddress: "0xdB51bB91cE1BD0b7d8a2ea89DbF1CE0849eCC1DE",
+  b3trGovernorAddress: "0x887B1F68fDb902224E2f6965b5e8D1933C3bD02B",
+  timelockContractAddress: "0x4CAd2C10004459abB97C150F29a9626421b2B024",
+  xAllocationPoolContractAddress: "0x0ae2F2bA3F67d3ba735dd164142D0C12B1D929a8",
+  xAllocationVotingContractAddress: "0xa4C7385E4EE0De1DF26A370C347d823215F6c439",
+  emissionsContractAddress: "0xb4569645c5329C4050b6d61a396e82955419A1CB",
+  voterRewardsContractAddress: "0x03735e1DAcc3b1097F7ebC3CDb42358ada788ce3",
+  galaxyMemberContractAddress: "0x3F1621a56512783D6f2cC6B2DF7eBE7D126BD4fb",
+  treasuryContractAddress: "0x1b2940Dd6988AB0ef56dDc2A98F75c02a06AD665",
+  x2EarnAppsContractAddress: "0xf75C51Cf87D991Ebb89b7Ac7E3D0A5Fe758743bA",
+  mixPanelProjectToken: "e03f4f5f6a753dae2dac30a69dfe21f7",
+  nodeUrl: "https://thor-solo.dev.b3tr.vechain.org",
+  network: {
+    id: "solo-staging",
+    name: "solo-staging",
+    type: "solo",
+    defaultNet: true,
+    urls: ["https://thor-solo.dev.b3tr.vechain.org"],
+    explorerUrl: "https://insight.dev.b3tr.vechain.org/#/solo",
+    blockTime: 10000,
+    genesis: {
+      number: 0,
+      id: "0x00000000c05a20fbca2bf6ae3affba6af4a74b800b585bf7a4988aba7aea69f6",
+      size: 170,
+      parentID: "0xffffffff53616c757465202620526573706563742c20457468657265756d2100",
+      timestamp: 1530316800,
+      gasLimit: 10000000,
+      beneficiary: "0x0000000000000000000000000000000000000000",
+      gasUsed: 0,
+      totalScore: 0,
+      txsRoot: "0x45b0cfc220ceec5b7c1c62c4d4193d38e4eba48e8815729ce75f9c0ab0e4c1c0",
+      txsFeatures: 0,
+      stateRoot: "0x93de0ffb1f33bc0af053abc2a87c4af44594f5dcb1cb879dd823686a15d68550",
+      receiptsRoot: "0x45b0cfc220ceec5b7c1c62c4d4193d38e4eba48e8815729ce75f9c0ab0e4c1c0",
+      signer: "0x0000000000000000000000000000000000000000",
+      isTrunk: true,
+      transactions: [],
+    },
+  },
+}
+export default config

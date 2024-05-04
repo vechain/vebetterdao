@@ -366,16 +366,17 @@ describe("VoterRewards", () => {
         emissions,
         b3tr,
         minterAccount,
+        x2EarnApps,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
 
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
@@ -434,10 +435,10 @@ describe("VoterRewards", () => {
         })
       })
 
-      expect(decodedEvents[1]?.args?.[0]).to.equal(1) // Cycle
-      expect(decodedEvents[1]?.args?.[1]).to.equal(otherAccount.address) // Voter
-      expect(decodedEvents[1]?.args?.[2]).to.equal(ethers.parseEther("500")) // Votes
-      expect(decodedEvents[1]?.args?.[3]).to.equal(ethers.parseEther("22.360679774")) // Reward weight
+      expect(decodedEvents[0]?.args?.[0]).to.equal(1) // Cycle
+      expect(decodedEvents[0]?.args?.[1]).to.equal(otherAccount.address) // Voter
+      expect(decodedEvents[0]?.args?.[2]).to.equal(ethers.parseEther("500")) // Votes
+      expect(decodedEvents[0]?.args?.[3]).to.equal(ethers.parseEther("22.360679774")) // Reward weight
 
       expect(await emissions.isCycleEnded(1)).to.equal(false)
 
@@ -550,15 +551,16 @@ describe("VoterRewards", () => {
         emissions,
         b3tr,
         minterAccount,
+        x2EarnApps,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
@@ -766,6 +768,7 @@ describe("VoterRewards", () => {
         minterAccount,
         governor,
         treasury,
+        x2EarnApps,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -789,11 +792,11 @@ describe("VoterRewards", () => {
       await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
       await voterRewards.setGalaxyMember(await galaxyMember.getAddress())
 
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
@@ -889,6 +892,7 @@ describe("VoterRewards", () => {
         minterAccount,
         governor,
         treasury,
+        x2EarnApps,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -912,11 +916,11 @@ describe("VoterRewards", () => {
       await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
       await voterRewards.setGalaxyMember(await galaxyMember.getAddress())
 
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
@@ -1010,6 +1014,7 @@ describe("VoterRewards", () => {
         minterAccount,
         governor,
         treasury,
+        x2EarnApps,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -1034,11 +1039,11 @@ describe("VoterRewards", () => {
       await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
       await voterRewards.setGalaxyMember(await galaxyMember.getAddress())
 
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
@@ -1165,6 +1170,7 @@ describe("VoterRewards", () => {
         minterAccount,
         governor,
         treasury,
+        x2EarnApps,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -1189,11 +1195,11 @@ describe("VoterRewards", () => {
       await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
       await voterRewards.setGalaxyMember(await galaxyMember.getAddress())
 
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
@@ -1289,6 +1295,7 @@ describe("VoterRewards", () => {
         minterAccount,
         governor,
         treasury,
+        x2EarnApps,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -1313,11 +1320,11 @@ describe("VoterRewards", () => {
       await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
       await voterRewards.setGalaxyMember(await galaxyMember.getAddress())
 
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
@@ -1734,6 +1741,7 @@ describe("VoterRewards", () => {
         voterRewards,
         xAllocationVoting,
         treasury,
+        x2EarnApps,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
         config: {
@@ -1761,11 +1769,11 @@ describe("VoterRewards", () => {
       await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
       await voterRewards.setGalaxyMember(await galaxyMember.getAddress())
 
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))

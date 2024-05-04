@@ -14,6 +14,7 @@ type useAccountPermissionsResponse = {
   isAdminOfVoterRewards: boolean
   isAdminOfTimeLock: boolean
   isAdminOfTreasury: boolean
+  isAdminOfX2EarnApps: boolean
   isMinterOfB3tr: boolean
   isMinterOfEmissions: boolean
   isUpgraderOfEmissions: boolean
@@ -24,6 +25,7 @@ type useAccountPermissionsResponse = {
   isUpgraderOfVoterRewards: boolean
   isUpgraderOfTimelock: boolean
   isUpgraderOfTreasury: boolean
+  isUpgraderOfX2EarnApps: boolean
 }
 
 /**
@@ -45,6 +47,7 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
   const { data: isAdminOfVoterRewards } = useHasRole(ADMIN_ROLE, config.voterRewardsContractAddress, address)
   const { data: isAdminOfTimeLock } = useHasRole(ADMIN_ROLE, config.timelockContractAddress, address)
   const { data: isAdminOfTreasury } = useHasRole(ADMIN_ROLE, config.treasuryContractAddress, address)
+  const { data: isAdminOfX2EarnApps } = useHasRole(ADMIN_ROLE, config.x2EarnAppsContractAddress, address)
 
   const { data: isMinterOfB3tr } = useHasRole(MINTER_ROLE, config.b3trContractAddress, address)
   const { data: isMinterOfEmissions } = useHasRole(MINTER_ROLE, config.emissionsContractAddress, address)
@@ -65,6 +68,7 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
   const { data: isUpgraderOfVoterRewards } = useHasRole(UPGRADER_ROLE, config.voterRewardsContractAddress, address)
   const { data: isUpgraderOfTimelock } = useHasRole(UPGRADER_ROLE, config.timelockContractAddress, address)
   const { data: isUpgraderOfTreasury } = useHasRole(UPGRADER_ROLE, config.treasuryContractAddress, address)
+  const { data: isUpgraderOfX2EarnApps } = useHasRole(UPGRADER_ROLE, config.x2EarnAppsContractAddress, address)
 
   return useMemo(() => {
     return {
@@ -76,7 +80,8 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
         isAdminOfDAO ||
         isAdminOfGalaxyMember ||
         isAdminOfVot3 ||
-        isAdminOfVoterRewards,
+        isAdminOfVoterRewards ||
+        isAdminOfX2EarnApps,
       isAdminOfB3tr: isAdminOfB3tr ?? false,
       isAdminOfEmissions: isAdminOfEmissions ?? false,
       isAdminOfXAllocationVoting: isAdminOfXAllocationVoting ?? false,
@@ -87,6 +92,7 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
       isAdminOfVoterRewards: isAdminOfVoterRewards ?? false,
       isAdminOfTimeLock: isAdminOfTimeLock ?? false,
       isAdminOfTreasury: isAdminOfTreasury ?? false,
+      isAdminOfX2EarnApps: isAdminOfX2EarnApps ?? false,
       isMinterOfB3tr: isMinterOfB3tr ?? false,
       isMinterOfEmissions: isMinterOfEmissions ?? false,
       isUpgraderOfEmissions: isUpgraderOfEmissions ?? false,
@@ -97,6 +103,7 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
       isUpgraderOfVoterRewards: isUpgraderOfVoterRewards ?? false,
       isUpgraderOfTimelock: isUpgraderOfTimelock ?? false,
       isUpgraderOfTreasury: isUpgraderOfTreasury ?? false,
+      isUpgraderOfX2EarnApps: isUpgraderOfX2EarnApps ?? false,
     }
   }, [
     isAdminOfB3tr,
@@ -118,5 +125,7 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
     isUpgraderOfTimelock,
     isUpgraderOfTreasury,
     isAdminOfTreasury,
+    isAdminOfX2EarnApps,
+    isUpgraderOfX2EarnApps,
   ])
 }
