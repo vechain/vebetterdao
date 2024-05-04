@@ -11,13 +11,13 @@ import {
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it, before } from "mocha"
 import { fundTreasuryVET, fundTreasuryVTHO } from "./helpers/fundTreasury"
-import { B3TRGovernor, Treasury } from "../typechain-types"
+import { B3TR, B3TRGovernor, Treasury } from "../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy } from "../scripts/helpers"
 
 describe("Treasury", () => {
   let treasuryProxy: Treasury
-  let b3tr: any
+  let b3tr: B3TR
   let vot3: any
   let galaxyMember: any
   let owner: HardhatEthersSigner
@@ -36,12 +36,16 @@ describe("Treasury", () => {
     vot3 = info.vot3
     galaxyMember = info.galaxyMember
 
+    await treasuryProxy.setTransferLimitVET(ethers.parseEther("1"))
+    await treasuryProxy.setTransferLimitToken(await b3tr.getAddress(), ethers.parseEther("1"))
+    await treasuryProxy.setTransferLimitToken(await vot3.getAddress(), ethers.parseEther("1"))
+
     await fundTreasuryVTHO(await treasuryProxy.getAddress(), ethers.parseEther("10"))
     await fundTreasuryVET(await treasuryProxy.getAddress(), 10)
 
     const operatorRole = await b3tr.MINTER_ROLE()
     await b3tr.grantRole(operatorRole, owner)
-    await b3tr.mint(await treasuryProxy.getAddress(), ethers.parseEther("10"))
+    await b3tr.mint(await treasuryProxy.getAddress(), ethers.parseEther("20"))
   })
   describe("Tokens", () => {
     describe("VTHO", () => {
@@ -73,17 +77,28 @@ describe("Treasury", () => {
       it("should revert if not called by GOVERNANCE_ROLE", async () => {
         await catchRevert(treasuryProxy.connect(otherAccount).transferVET(otherAccount.address, ethers.parseEther("1")))
       })
+      it("Should revert if transfer exceeds limit", async () => {
+        await catchRevert(treasuryProxy.transferVET(otherAccount.address, ethers.parseEther("2")))
+      })
+      it("Should be able to set transfer limit", async () => {
+        await treasuryProxy.connect(owner).setTransferLimitVET(ethers.parseEther("2"))
+        expect(await treasuryProxy.getTransferLimitVET()).to.eql(ethers.parseEther("2"))
+        await treasuryProxy.transferVET(otherAccount.address, ethers.parseEther("2"))
+        expect(await treasuryProxy.getVETBalance()).to.eql(ethers.parseEther("7"))
+
+        await expect(treasuryProxy.connect(otherAccount).setTransferLimitVET(ethers.parseEther("2"))).to.be.reverted // not admin
+      })
     })
     describe("B3TR", () => {
       it("should transfer B3TR", async () => {
-        expect(await treasuryProxy.getB3TRBalance()).to.eql(ethers.parseEther("10"))
+        expect(await treasuryProxy.getB3TRBalance()).to.eql(ethers.parseEther("20"))
         await treasuryProxy.transferB3TR(otherAccount.address, ethers.parseEther("1"))
-        expect(await treasuryProxy.getB3TRBalance()).to.eql(ethers.parseEther("9"))
+        expect(await treasuryProxy.getB3TRBalance()).to.eql(ethers.parseEther("19"))
       })
       it("should stake B3TR and recieve VOT3", async () => {
-        await treasuryProxy.stakeB3TR(ethers.parseEther("5"))
-        expect(await treasuryProxy.getB3TRBalance()).to.eql(ethers.parseEther("4"))
-        expect(await treasuryProxy.getVOT3Balance()).to.eql(ethers.parseEther("5"))
+        await treasuryProxy.stakeB3TR(ethers.parseEther("10"))
+        expect(await treasuryProxy.getB3TRBalance()).to.eql(ethers.parseEther("9"))
+        expect(await treasuryProxy.getVOT3Balance()).to.eql(ethers.parseEther("10"))
       })
       it("should revert if not enough balance", async () => {
         await catchRevert(treasuryProxy.transferB3TR(otherAccount.address, ethers.parseEther("11")))
@@ -96,17 +111,30 @@ describe("Treasury", () => {
       it("should return correct address for contract", async () => {
         expect(await treasuryProxy.b3trAddress()).to.eql(await b3tr.getAddress())
       })
+      it("Should revert if transfer exceeds limit", async () => {
+        await catchRevert(treasuryProxy.transferB3TR(otherAccount.address, ethers.parseEther("2")))
+      })
+      it("Should be able to set transfer limit", async () => {
+        await treasuryProxy.connect(owner).setTransferLimitToken(await b3tr.getAddress(), ethers.parseEther("2"))
+        expect(await treasuryProxy.getTransferLimitToken(await b3tr.getAddress())).to.eql(ethers.parseEther("2"))
+        await treasuryProxy.transferB3TR(otherAccount.address, ethers.parseEther("2"))
+        expect(await treasuryProxy.getB3TRBalance()).to.eql(ethers.parseEther("7"))
+
+        await expect(
+          treasuryProxy.connect(otherAccount).setTransferLimitToken(await b3tr.getAddress(), ethers.parseEther("2")),
+        ).to.be.reverted // not admin
+      })
     })
     describe("VOT3", () => {
       it("should transfer VOT3", async () => {
-        expect(await treasuryProxy.getVOT3Balance()).to.eql(ethers.parseEther("5"))
+        expect(await treasuryProxy.getVOT3Balance()).to.eql(ethers.parseEther("10"))
         await treasuryProxy.transferVOT3(otherAccount.address, ethers.parseEther("1"))
-        expect(await treasuryProxy.getVOT3Balance()).to.eql(ethers.parseEther("4"))
+        expect(await treasuryProxy.getVOT3Balance()).to.eql(ethers.parseEther("9"))
       })
       it("should unstake B3TR and recieve B3TR", async () => {
-        await treasuryProxy.unstakeB3TR(ethers.parseEther("4"))
-        expect(await treasuryProxy.getB3TRBalance()).to.eql(ethers.parseEther("8"))
-        expect(await treasuryProxy.getVOT3Balance()).to.eql(ethers.parseEther("0"))
+        await treasuryProxy.unstakeB3TR(ethers.parseEther("5"))
+        expect(await treasuryProxy.getB3TRBalance()).to.eql(ethers.parseEther("12"))
+        expect(await treasuryProxy.getVOT3Balance()).to.eql(ethers.parseEther("4"))
       })
       it("should revert if not enough staked to unstake", async () => {
         await catchRevert(treasuryProxy.unstakeB3TR(ethers.parseEther("11")))
@@ -119,14 +147,28 @@ describe("Treasury", () => {
       it("should return correct address for contract", async () => {
         expect(await treasuryProxy.vot3Address()).to.eql(await vot3.getAddress())
       })
+      it("Should revert if transfer exceeds limit", async () => {
+        await catchRevert(treasuryProxy.transferVOT3(otherAccount.address, ethers.parseEther("2")))
+      })
+      it("Should be able to set transfer limit", async () => {
+        await treasuryProxy.stakeB3TR(ethers.parseEther("10"))
+        await treasuryProxy.connect(owner).setTransferLimitToken(await vot3.getAddress(), ethers.parseEther("2"))
+        expect(await treasuryProxy.getTransferLimitToken(await vot3.getAddress())).to.eql(ethers.parseEther("2"))
+        await treasuryProxy.transferVOT3(otherAccount.address, ethers.parseEther("2"))
+        expect(await treasuryProxy.getVOT3Balance()).to.eql(ethers.parseEther("12"))
+
+        await expect(
+          treasuryProxy.connect(otherAccount).setTransferLimitToken(await vot3.getAddress(), ethers.parseEther("2")),
+        ).to.be.reverted // not admin
+      })
     })
     describe("ERC20", () => {
       it("should transfer ERC20", async () => {
         await b3tr.mint(await treasuryProxy.getAddress(), ethers.parseEther("10"))
-        expect(await treasuryProxy.getB3TRBalance()).to.eql(ethers.parseEther("18"))
-        expect(await treasuryProxy.getTokenBalance(await b3tr.getAddress())).to.eql(ethers.parseEther("18"))
-        await treasuryProxy.transferTokens(await b3tr.getAddress(), otherAccount.address, ethers.parseEther("8"))
-        expect(await treasuryProxy.getTokenBalance(await b3tr.getAddress())).to.eql(ethers.parseEther("10"))
+        expect(await treasuryProxy.getB3TRBalance()).to.eql(ethers.parseEther("12"))
+        expect(await treasuryProxy.getTokenBalance(await b3tr.getAddress())).to.eql(ethers.parseEther("12"))
+        await treasuryProxy.transferTokens(await b3tr.getAddress(), otherAccount.address, ethers.parseEther("1"))
+        expect(await treasuryProxy.getTokenBalance(await b3tr.getAddress())).to.eql(ethers.parseEther("11"))
       })
       it("should revert if not enough balance", async () => {
         await catchRevert(
@@ -139,6 +181,21 @@ describe("Treasury", () => {
             .connect(otherAccount)
             .transferTokens(await vot3.getAddress(), otherAccount.address, ethers.parseEther("1")),
         )
+      })
+      it("Should revert if transfer exceeds limit", async () => {
+        await catchRevert(
+          treasuryProxy.transferTokens(await vot3.getAddress(), otherAccount.address, ethers.parseEther("6")),
+        )
+      })
+      it("Should be able to set transfer limit", async () => {
+        await treasuryProxy.connect(owner).setTransferLimitToken(await b3tr.getAddress(), ethers.parseEther("2"))
+        expect(await treasuryProxy.getTransferLimitToken(await b3tr.getAddress())).to.eql(ethers.parseEther("2"))
+        await treasuryProxy.transferTokens(await b3tr.getAddress(), otherAccount.address, ethers.parseEther("2"))
+        expect(await treasuryProxy.getTokenBalance(await b3tr.getAddress())).to.eql(ethers.parseEther("9"))
+
+        await expect(
+          treasuryProxy.connect(otherAccount).setTransferLimitToken(await b3tr.getAddress(), ethers.parseEther("2")),
+        ).to.be.reverted // not admin
       })
     })
     describe("NFT", () => {
@@ -185,7 +242,7 @@ describe("Treasury", () => {
       const emptyBytes = new Uint8Array(0)
       await treasuryProxy.upgradeToAndCall(await newImplementation.getAddress(), emptyBytes)
       const treasury = await ethers.getContractAt("Treasury", await treasuryProxy.getAddress())
-      expect(await treasury.getVETBalance()).to.eql(ethers.parseEther("9"))
+      expect(await treasury.getVETBalance()).to.eql(ethers.parseEther("7"))
     })
     it("should revert if not called by ADMIN_ROLE", async () => {
       const newTreasury = await ethers.getContractFactory("Treasury")
@@ -220,12 +277,18 @@ describe("Treasury", () => {
 
       governor = info.governor
 
+      const config = createLocalConfig()
+
       tProxy = (await deployProxy("Treasury", [
         await info.b3tr.getAddress(),
         await info.vot3.getAddress(),
         await info.timeLock.getAddress(),
         owner.address,
         owner.address,
+        config.TREASURY_TRANSFER_LIMIT_VET,
+        config.TREASURY_TRANSFER_LIMIT_B3TR,
+        config.TREASURY_TRANSFER_LIMIT_VOT3,
+        config.TREASURY_TRANSFER_LIMIT_VTHO,
       ])) as Treasury
 
       await fundTreasuryVET(await tProxy.getAddress(), 10)
@@ -250,10 +313,10 @@ describe("Treasury", () => {
         treasuryContractFactory,
         description,
         "transferVET",
-        [owner.address, ethers.parseEther("5")],
+        [owner.address, ethers.parseEther("1")],
       )
 
-      expect(await tProxy.getVETBalance()).to.eql(ethers.parseEther("5"))
+      expect(await tProxy.getVETBalance()).to.eql(ethers.parseEther("9"))
     })
   })
 })
