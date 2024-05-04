@@ -181,6 +181,7 @@ export async function deployAll(config: ContractsConfig) {
     VOT3: await vot3.getAddress(),
     XAllocationPool: await xAllocationPool.getAddress(),
     B3TRGovernor: await governor.getAddress(),
+    X2EarnApps: await x2EarnApps.getAddress(),
   }
 
   await setWhitelistedFunctions(contractAddresses, config, governor, admin) // Set whitelisted functions for governor proposals

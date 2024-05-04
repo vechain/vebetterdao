@@ -203,6 +203,7 @@ export const getOrDeployContractInstances = async ({
     VOT3: await vot3.getAddress(),
     XAllocationPool: await xAllocationPool.getAddress(),
     B3TRGovernor: await governor.getAddress(),
+    X2EarnApps: await x2EarnApps.getAddress(),
   }
 
   await setWhitelistedFunctions(contractAddresses, config, governor, owner) // Set whitelisted functions for governor proposals
