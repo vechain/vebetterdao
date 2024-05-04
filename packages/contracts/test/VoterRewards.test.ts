@@ -354,7 +354,7 @@ describe("VoterRewards", () => {
   })
 
   describe("X Allocation voting rewards", () => {
-    it.only("Should track voting rewards correctly involving multiple voters", async () => {
+    it("Should track voting rewards correctly involving multiple voters", async () => {
       const config = createLocalConfig()
       const {
         xAllocationVoting,
