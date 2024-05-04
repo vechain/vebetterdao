@@ -95,7 +95,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
     $._apps[id] = DataTypes.App(id, receiverAddress, appName, metadataURI, clock(), block.timestamp);
     $._appIds.push(id);
     _setAppAdmin(id, admin);
-    _setVotingElegibility(id, true);
+    _setVotingEligibility(id, true);
 
     emit AppAdded(id, receiverAddress, appName, true);
   }

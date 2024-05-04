@@ -1183,13 +1183,13 @@ describe("X-Allocation Voting", function () {
 
       await waitForNextBlock()
 
-      // both apps should be elegible for votes
+      // both apps should be eligible for votes
       const app1Available = await xAllocationVoting.isEligibleForVote(app1, roundId)
       const app2Available = await xAllocationVoting.isEligibleForVote(app1, roundId)
       expect(app1Available).to.equal(true)
       expect(app2Available).to.equal(true)
 
-      const avaiableApps = await x2EarnApps.allElegibleApps()
+      const avaiableApps = await x2EarnApps.allEligibleApps()
       expect(avaiableApps.length).to.equal(2)
       expect(avaiableApps[0]).to.equal(app1)
       expect(avaiableApps[1]).to.equal(app2)
@@ -1524,8 +1524,8 @@ describe("X-Allocation Voting", function () {
       expect(getAppIdsOfRound.length).to.equal(4n)
 
       // remove apps before round ends
-      await x2EarnApps.setVotingElegibility(app1, false)
-      await x2EarnApps.setVotingElegibility(app2, false)
+      await x2EarnApps.setVotingEligibility(app1, false)
+      await x2EarnApps.setVotingEligibility(app2, false)
       await waitForRoundToEnd(round2)
 
       // 2 app in round 3

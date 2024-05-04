@@ -33,7 +33,7 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
  *
  * This contract is abstract and requires several functions to be implemented in various modules:
  * - a module to handle the storage of the apps and implement {_addApp}, {appExists}, {_updateAppMetadata}, {_updateAppReceiverAddress}, and {createdAt} functions
- * - a module to handle the voting elegibility of the apps and implement {_setVotingElegibility} and {isElegible} functions
+ * - a module to handle the voting Eligibility of the apps and implement {_setVotingEligibility} and {isEligible} functions
  * - a module to handle the authorization to addresses to perform app management and implement {_setAppAdmin}, {_addAppModerator}, {_removeAppModerator} functions
  * - a module to handle the settings of the apps and implement {baseURI} function
  *
@@ -110,8 +110,8 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
     _removeAppModerator(appId, moderator);
   }
 
-  function setVotingElegibility(bytes32 _appId, bool _isElegible) public virtual override {
-    _setVotingElegibility(_appId, _isElegible);
+  function setVotingEligibility(bytes32 _appId, bool _isEligible) public virtual override {
+    _setVotingEligibility(_appId, _isEligible);
   }
 
   // ---------- Getters ---------- //
@@ -161,9 +161,9 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   function createdAt(bytes32 appId) public view virtual returns (uint48);
 
   /**
-   * @dev Function to set the voting elegibility of an app.
+   * @dev Function to set the voting Eligibility of an app.
    */
-  function _setVotingElegibility(bytes32 _appId, bool _isElegible) internal virtual;
+  function _setVotingEligibility(bytes32 _appId, bool _isEligible) internal virtual;
 
   /**
    * @dev Function to update the admin of the app.

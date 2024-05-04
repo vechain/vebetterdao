@@ -6,7 +6,7 @@ import { DataTypes } from "../libraries/DataTypes.sol";
 /**
  * @title IX2EarnApps
  * @notice Interface for the X2EarnApps contract.
- * @dev The contract inheriting this interface should be able to manage the x2earn apps and their elegibility for allocation voting.
+ * @dev The contract inheriting this interface should be able to manage the x2earn apps and their Eligibility for allocation voting.
  */
 interface IX2EarnApps {
   /**
@@ -45,9 +45,9 @@ interface IX2EarnApps {
   event AppAdded(bytes32 indexed id, address addr, string name, bool appAvailableForAllocationVoting);
 
   /**
-   * @dev Event fired when an app elegibility for allocation voting changes.
+   * @dev Event fired when an app Eligibility for allocation voting changes.
    */
-  event VotingElegibilityUpdated(bytes32 indexed appId, bool isAvailable);
+  event VotingEligibilityUpdated(bytes32 indexed appId, bool isAvailable);
 
   /**
    * @dev Event fired when the admin adds a new moderator to the app.
@@ -187,25 +187,25 @@ interface IX2EarnApps {
    * @dev Allow or deny an app to participate in the next allocation voting rounds.
    *
    * @param _appId the id of the app
-   * @param _isElegible true if the app should be elegible for voting, false otherwise
+   * @param _isEligible true if the app should be eligible for voting, false otherwise
    *
-   * Emits a {VotingElegibilityUpdated} event.
+   * Emits a {VotingEligibilityUpdated} event.
    */
-  function setVotingElegibility(bytes32 _appId, bool _isElegible) external;
+  function setVotingEligibility(bytes32 _appId, bool _isEligible) external;
 
   /**
-   * @dev Get all the app ids that are elegible for voting in the next allocation rounds.
+   * @dev Get all the app ids that are eligible for voting in the next allocation rounds.
    */
-  function allElegibleApps() external view returns (bytes32[] memory);
+  function allEligibleApps() external view returns (bytes32[] memory);
 
   /**
    * @dev Check if an app was allowed to participate in the allocation rounds in a specific timepoint.
-   * XAllocationVoting contract can use this function to check if an app was elegible for voting in the block when the round starts.
+   * XAllocationVoting contract can use this function to check if an app was eligible for voting in the block when the round starts.
    *
    * @param appId the id of the app
-   * @param timepoint the timepoint when the app should be checked for elegibility
+   * @param timepoint the timepoint when the app should be checked for Eligibility
    */
-  function isElegible(bytes32 appId, uint256 timepoint) external view returns (bool);
+  function isEligible(bytes32 appId, uint256 timepoint) external view returns (bool);
 
   /**
    * @dev return the base URI for the contract

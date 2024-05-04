@@ -484,7 +484,7 @@ describe("X-Allocation Pool", async function () {
         expect(app2Balance).to.eql(baseAllocationAmount)
       })
 
-      it("New app of failed round receives a base allocation even if it was not elegible in previous round", async function () {
+      it("New app of failed round receives a base allocation even if it was not eligible in previous round", async function () {
         const { xAllocationVoting, otherAccounts, owner, xAllocationPool, b3tr, emissions, minterAccount, x2EarnApps } =
           await getOrDeployContractInstances({
             forceDeploy: true,
@@ -951,7 +951,7 @@ describe("X-Allocation Pool", async function () {
         await waitForRoundToEnd(Number(await xAllocationVoting.currentRoundId()))
 
         // remove app
-        await x2EarnApps.connect(owner).setVotingElegibility(app3Id, false)
+        await x2EarnApps.connect(owner).setVotingEligibility(app3Id, false)
 
         // Start new round
         await emissions.distribute()
@@ -973,7 +973,7 @@ describe("X-Allocation Pool", async function () {
         expect(app3EarningsInRound3[0]).to.eql(0n)
 
         // add again
-        await x2EarnApps.connect(owner).setVotingElegibility(app3Id, true)
+        await x2EarnApps.connect(owner).setVotingEligibility(app3Id, true)
 
         // Start new round
         await emissions.distribute()

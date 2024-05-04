@@ -299,7 +299,7 @@ describe("X-Apps", function () {
 
       let round1 = await startNewAllocationRound()
 
-      await x2EarnApps.connect(owner).setVotingElegibility(app1Id, false)
+      await x2EarnApps.connect(owner).setVotingEligibility(app1Id, false)
 
       // app should still be eligible for the current round
       let isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round1)
@@ -311,7 +311,7 @@ describe("X-Apps", function () {
       await waitForRoundToEnd(round1)
       let round2 = await startNewAllocationRound()
 
-      // app should not be elegible from this round
+      // app should not be eligible from this round
       isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round2)
       expect(isEligibleForVote).to.eql(false)
 
@@ -333,7 +333,7 @@ describe("X-Apps", function () {
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
 
-      await x2EarnApps.connect(owner).setVotingElegibility(app1Id, false)
+      await x2EarnApps.connect(owner).setVotingEligibility(app1Id, false)
       expect(await x2EarnApps.isElegibleNow(app1Id)).to.eql(false)
 
       let round1 = await startNewAllocationRound()
@@ -342,29 +342,29 @@ describe("X-Apps", function () {
       let isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round1)
       expect(isEligibleForVote).to.eql(false)
 
-      await x2EarnApps.connect(owner).setVotingElegibility(app1Id, true)
+      await x2EarnApps.connect(owner).setVotingEligibility(app1Id, true)
       expect(await x2EarnApps.isElegibleNow(app1Id)).to.eql(true)
-      expect(await x2EarnApps.isElegible(app1Id, await xAllocationVoting.roundSnapshot(round1))).to.eql(false)
+      expect(await x2EarnApps.isEligible(app1Id, await xAllocationVoting.roundSnapshot(round1))).to.eql(false)
 
-      // app still should not be elegible from this round
+      // app still should not be eligible from this round
       expect(await xAllocationVoting.isEligibleForVote(app1Id, round1)).to.eql(false)
 
       await waitForRoundToEnd(round1)
 
       let round2 = await startNewAllocationRound()
 
-      // app should be elegible from this round
+      // app should be eligible from this round
       isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round2)
       expect(isEligibleForVote).to.eql(true)
     })
 
-    it("Non existing app is not elegible", async function () {
+    it("Non existing app is not eligible", async function () {
       const { xAllocationVoting, x2EarnApps } = await getOrDeployContractInstances({ forceDeploy: true })
 
       const app1Id = await x2EarnApps.hashAppName(ZERO_ADDRESS)
 
       expect(await x2EarnApps.isElegibleNow(app1Id)).to.eql(false)
-      expect(await x2EarnApps.isElegible(app1Id, (await xAllocationVoting.clock()) - 1n)).to.eql(false)
+      expect(await x2EarnApps.isEligible(app1Id, (await xAllocationVoting.clock()) - 1n)).to.eql(false)
     })
 
     it("Cannot get elegilibity in the future", async function () {
@@ -377,7 +377,7 @@ describe("X-Apps", function () {
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
 
-      await expect(x2EarnApps.isElegible(app1Id, (await xAllocationVoting.clock()) + 1n)).to.be.reverted
+      await expect(x2EarnApps.isEligible(app1Id, (await xAllocationVoting.clock()) + 1n)).to.be.reverted
     })
 
     it("DAO can make an app unavailable for allocation voting starting from next round", async function () {
@@ -418,7 +418,7 @@ describe("X-Apps", function () {
         x2EarnApps,
         await ethers.getContractFactory("X2EarnApps"),
         "Exclude app from the allocation voting rounds",
-        "setVotingElegibility",
+        "setVotingEligibility",
         [app1Id, false],
       )
 
@@ -431,7 +431,7 @@ describe("X-Apps", function () {
       await emissions.distribute()
       let round2 = await xAllocationVoting.currentRoundId()
 
-      // app should not be elegible from this round
+      // app should not be eligible from this round
       isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round2)
       expect(isEligibleForVote).to.eql(false)
     })
@@ -441,7 +441,7 @@ describe("X-Apps", function () {
 
       const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
 
-      await catchRevert(x2EarnApps.connect(otherAccounts[0]).setVotingElegibility(app1Id, true))
+      await catchRevert(x2EarnApps.connect(otherAccounts[0]).setVotingEligibility(app1Id, true))
     })
 
     it("App needs to wait next round if added during an ongoing round", async function () {
@@ -477,7 +477,7 @@ describe("X-Apps", function () {
       await waitForRoundToEnd(round1)
       let round2 = await startNewAllocationRound()
 
-      // app should not be elegible from this round
+      // app should not be eligible from this round
       isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round2)
       expect(isEligibleForVote).to.eql(true)
 
@@ -489,12 +489,12 @@ describe("X-Apps", function () {
       expect(appVotes).to.equal(ethers.parseEther("1"))
     })
 
-    it("Cannot set elegibility for non existing app", async function () {
+    it("Cannot set Eligibility for non existing app", async function () {
       const { x2EarnApps } = await getOrDeployContractInstances({ forceDeploy: true })
 
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
 
-      await catchRevert(x2EarnApps.setVotingElegibility(app1Id, true))
+      await catchRevert(x2EarnApps.setVotingEligibility(app1Id, true))
     })
   })
 

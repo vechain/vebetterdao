@@ -33,7 +33,7 @@ import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
  *
  * @dev Extension of {XAllocationVotingGovernor} for counting votes for allocation rounds.
  *
- * In every round users can vote a fraction of their balance for the elegible apps in that round.
+ * In every round users can vote a fraction of their balance for the eligible apps in that round.
  */
 abstract contract RoundVotesCountingUpgradeable is Initializable, XAllocationVotingGovernor {
   struct RoundVote {

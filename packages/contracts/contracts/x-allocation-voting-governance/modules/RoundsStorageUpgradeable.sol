@@ -43,7 +43,7 @@ abstract contract RoundsStorageUpgradeable is Initializable, XAllocationVotingGo
   struct RoundsStorageStorage {
     uint256 _roundCount; // counter to count the number of proposals and also used to create the id
     mapping(uint256 roundId => RoundCore) _rounds; // mapping to store the round data
-    mapping(uint256 roundId => bytes32[]) _appsElegibleForVoting; // mapping to store the apps elegible for voting in each round
+    mapping(uint256 roundId => bytes32[]) _appsEligibleForVoting; // mapping to store the apps eligible for voting in each round
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.RoundsStorage")) - 1)) & ~bytes32(uint256(0xff))
@@ -90,8 +90,8 @@ abstract contract RoundsStorageUpgradeable is Initializable, XAllocationVotingGo
     }
 
     // save x-apps that users can vote for
-    bytes32[] memory apps = x2EarnApps().allElegibleApps();
-    $._appsElegibleForVoting[roundId] = apps;
+    bytes32[] memory apps = x2EarnApps().allEligibleApps();
+    $._appsEligibleForVoting[roundId] = apps;
 
     _snapshotRoundEarningsCap(roundId);
 
@@ -165,22 +165,22 @@ abstract contract RoundsStorageUpgradeable is Initializable, XAllocationVotingGo
   }
 
   /**
-   * @dev Get the ids of the apps elegible for voting in a round
+   * @dev Get the ids of the apps eligible for voting in a round
    */
   function getAppIdsOfRound(uint256 roundId) public view override returns (bytes32[] memory) {
     RoundsStorageStorage storage $ = _getRoundsStorageStorage();
-    return $._appsElegibleForVoting[roundId];
+    return $._appsEligibleForVoting[roundId];
   }
 
   /**
-   * @dev Get all the apps in the form of {App} elegible for voting in a round
+   * @dev Get all the apps in the form of {App} eligible for voting in a round
    *
    * This function could not be efficient with a large number of apps
    */
   function getAppsOfRound(uint256 roundId) public view returns (DataTypes.App[] memory) {
     RoundsStorageStorage storage $ = _getRoundsStorageStorage();
 
-    bytes32[] memory appsInRound = $._appsElegibleForVoting[roundId];
+    bytes32[] memory appsInRound = $._appsEligibleForVoting[roundId];
     DataTypes.App[] memory allApps = new DataTypes.App[](appsInRound.length);
 
     uint256 length = appsInRound.length;

@@ -27,7 +27,7 @@ import { X2EarnAppsUpgradeable } from "./x-2-earn-apps/X2EarnAppsUpgradeable.sol
 import { AdministrationUpgradeable } from "./x-2-earn-apps/modules/AdministrationUpgradeable.sol";
 import { AppsStorageUpgradeable } from "./x-2-earn-apps/modules/AppsStorageUpgradeable.sol";
 import { SettingsUpgradeable } from "./x-2-earn-apps/modules/SettingsUpgradeable.sol";
-import { VoteElegibilityUpgradeable } from "./x-2-earn-apps/modules/VoteElegibilityUpgradeable.sol";
+import { VoteEligibilityUpgradeable } from "./x-2-earn-apps/modules/VoteEligibilityUpgradeable.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
@@ -43,7 +43,7 @@ contract X2EarnApps is
   X2EarnAppsUpgradeable,
   AdministrationUpgradeable,
   SettingsUpgradeable,
-  VoteElegibilityUpgradeable,
+  VoteEligibilityUpgradeable,
   AppsStorageUpgradeable,
   AccessControlUpgradeable,
   UUPSUpgradeable
@@ -63,7 +63,7 @@ contract X2EarnApps is
     __Administration_init();
     __AppsStorage_init();
     __Settings_init(_baseURI);
-    __VoteElegibility_init();
+    __VoteEligibility_init();
     __UUPSUpgradeable_init();
     __AccessControl_init();
 
@@ -83,10 +83,10 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev See {IX2EarnApps-setVotingElegibility}.
+   * @dev See {IX2EarnApps-setVotingEligibility}.
    */
-  function setVotingElegibility(bytes32 _appId, bool _isElegible) public override onlyRole(DEFAULT_ADMIN_ROLE) {
-    super.setVotingElegibility(_appId, _isElegible);
+  function setVotingEligibility(bytes32 _appId, bool _isEligible) public override onlyRole(DEFAULT_ADMIN_ROLE) {
+    super.setVotingEligibility(_appId, _isEligible);
   }
 
   // ---------- Authorizations ------------ //
