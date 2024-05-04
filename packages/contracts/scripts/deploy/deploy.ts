@@ -59,6 +59,10 @@ export async function deployAll(config: ContractsConfig) {
     await timelock.getAddress(),
     TEMP_ADMIN,
     TEMP_ADMIN,
+    config.TREASURY_TRANSFER_LIMIT_VET,
+    config.TREASURY_TRANSFER_LIMIT_B3TR,
+    config.TREASURY_TRANSFER_LIMIT_VOT3,
+    config.TREASURY_TRANSFER_LIMIT_VTHO,
   ])) as Treasury
   console.log(`Treasury contract deployed at address ${await treasury.getAddress()}`)
 
