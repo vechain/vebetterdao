@@ -20,7 +20,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it } from "mocha"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
-import { B3TRGovernor } from "../typechain-types"
+import { B3TRGovernor, B3TRGovernor__factory } from "../typechain-types"
 
 describe("Governor and TimeLock", function () {
   describe("Governor deployment", function () {
@@ -70,6 +70,10 @@ describe("Governor and TimeLock", function () {
       // check version
       const version = await governor.version()
       expect(version).to.eql("1")
+
+      // should be unpaused
+      const paused = await governor.paused()
+      expect(paused).to.be.false
     })
 
     it("Should be able to upgrade the governor contract through governance", async function () {
@@ -632,6 +636,207 @@ describe("Governor and TimeLock", function () {
           [await owner.getAddress()],
         ),
       ).to.be.reverted
+    })
+
+    describe("Pausability", function () {
+      it("Admin should be able to pause the contract", async function () {
+        const { governor, owner } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+        const DEFAULT_ADMIN_ROLE = await governor.DEFAULT_ADMIN_ROLE()
+        const hasRole = await governor.hasRole(DEFAULT_ADMIN_ROLE, owner.address)
+        expect(hasRole).to.be.true
+
+        await governor.connect(owner).pause()
+
+        expect(await governor.paused()).to.be.true
+      })
+
+      it("Admin should be able to unpause the contract", async function () {
+        const { governor, owner } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+        const DEFAULT_ADMIN_ROLE = await governor.DEFAULT_ADMIN_ROLE()
+        const hasRole = await governor.hasRole(DEFAULT_ADMIN_ROLE, owner.address)
+        expect(hasRole).to.be.true
+
+        await governor.connect(owner).pause()
+        expect(await governor.paused()).to.be.true
+
+        await governor.connect(owner).unpause()
+        expect(await governor.paused()).to.be.false
+      })
+
+      it("Only admin can pause and unpause", async function () {
+        const { governor, otherAccount } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+        const DEFAULT_ADMIN_ROLE = await governor.DEFAULT_ADMIN_ROLE()
+        const hasRole = await governor.hasRole(DEFAULT_ADMIN_ROLE, otherAccount.address)
+        expect(hasRole).to.be.false
+
+        await catchRevert(governor.connect(otherAccount).pause())
+        await catchRevert(governor.connect(otherAccount).unpause())
+      })
+
+      // when paused no proposals can be created
+      it("When paused no proposals can be created", async function () {
+        const { governor, owner, B3trContract, b3tr } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+        await governor.connect(owner).pause()
+
+        const functionToCall = "tokenDetails"
+        const description = "Get token details"
+
+        await expect(
+          createProposal(b3tr, B3trContract, owner, description, functionToCall, [], true),
+        ).to.be.revertedWithCustomError(
+          {
+            interface: B3TRGovernor__factory.createInterface(),
+          },
+          "EnforcedPause",
+        )
+      })
+
+      it("Cannot queue proposal when contract is paused", async function () {
+        const {
+          governor,
+          b3tr,
+          B3trContract,
+          otherAccount: proposer,
+          otherAccounts,
+          owner,
+        } = await getOrDeployContractInstances({ forceDeploy: true })
+        const functionToCall = "tokenDetails"
+        const description = "Get token details"
+
+        // Start emissions
+        await bootstrapAndStartEmissions()
+
+        // load votes
+        const voter = otherAccounts[0]
+        await getVot3Tokens(voter, "1000")
+        await waitForNextBlock()
+
+        // create a new proposal
+        const tx = await createProposal(
+          b3tr,
+          B3trContract,
+          proposer,
+          description + ` ${this.test?.title}`,
+          functionToCall,
+          [],
+          false,
+        ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
+        const proposalId = await getProposalIdFromTx(tx)
+
+        // wait
+        await waitForProposalToBeActive(proposalId)
+
+        // vote
+        await governor.connect(voter).castVote(proposalId, 1) // vote for
+
+        // wait
+        await waitForVotingPeriodToEnd(proposalId)
+        let proposalState = await governor.state(proposalId)
+        expect(proposalState.toString()).to.eql("4") // succeded
+
+        // pause the contract
+        await governor.connect(owner).pause()
+
+        // queue it
+        const b3trAddress = await b3tr.getAddress()
+        const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
+        const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description + ` ${this.test?.title}`))
+
+        await expect(
+          governor.queue([b3trAddress], [0], [encodedFunctionCall], descriptionHash),
+        ).to.be.revertedWithCustomError(
+          {
+            interface: B3TRGovernor__factory.createInterface(),
+          },
+          "EnforcedPause",
+        )
+
+        // proposal should be in queued state
+        proposalState = await governor.state(proposalId)
+        expect(proposalState.toString()).to.eql("4")
+      })
+
+      it("Cannot execute proposal when contract is paused", async function () {
+        const {
+          governor,
+          b3tr,
+          B3trContract,
+          otherAccount: proposer,
+          otherAccounts,
+          owner,
+        } = await getOrDeployContractInstances({ forceDeploy: true })
+        const functionToCall = "tokenDetails"
+        const description = "Get token details"
+
+        // Start emissions
+        await bootstrapAndStartEmissions()
+
+        // load votes
+        const voter = otherAccounts[0]
+        await getVot3Tokens(voter, "1000")
+        await waitForNextBlock()
+
+        // create a new proposal
+        const tx = await createProposal(
+          b3tr,
+          B3trContract,
+          proposer,
+          description + ` ${this.test?.title}`,
+          functionToCall,
+          [],
+          false,
+        ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
+        const proposalId = await getProposalIdFromTx(tx)
+
+        // wait
+        await waitForProposalToBeActive(proposalId)
+
+        // vote
+        await governor.connect(voter).castVote(proposalId, 1) // vote for
+
+        // wait
+        await waitForVotingPeriodToEnd(proposalId)
+        let proposalState = await governor.state(proposalId)
+        expect(proposalState.toString()).to.eql("4") // succeded
+
+        // queue it
+        const b3trAddress = await b3tr.getAddress()
+        const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
+        const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description + ` ${this.test?.title}`))
+
+        await governor.queue([b3trAddress], [0], [encodedFunctionCall], descriptionHash)
+
+        // proposal should be in queued state
+        proposalState = await governor.state(proposalId)
+        expect(proposalState.toString()).to.eql("5")
+
+        // pause the contract
+        await governor.connect(owner).pause()
+
+        // execute it
+        await expect(
+          governor.execute([b3trAddress], [0], [encodedFunctionCall], descriptionHash),
+        ).to.be.revertedWithCustomError(
+          {
+            interface: B3TRGovernor__factory.createInterface(),
+          },
+          "EnforcedPause",
+        )
+      })
     })
   })
 
