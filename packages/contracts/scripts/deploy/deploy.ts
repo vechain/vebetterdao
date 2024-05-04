@@ -137,6 +137,7 @@ export async function deployAll(config: ContractsConfig) {
       xAppsBaseURI: config.XAPP_BASE_URI,
       baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
       appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
+      votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
     },
   ])) as XAllocationVoting
   console.log(`XAllocationVoting contract deployed at address ${await xAllocationVoting.getAddress()}`)
@@ -150,6 +151,7 @@ export async function deployAll(config: ContractsConfig) {
       quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
       initialDepositThreshold: config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD,
       initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY,
+      initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD,
       governorAdmin: TEMP_ADMIN,
       proposalQueuer: config.B3TR_GOVERNOR_QUEUER_ADDRESS,
       proposalExecutor: config.B3TR_GOVERNOR_EXECUTOR_ADDRESS,

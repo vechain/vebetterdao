@@ -33,6 +33,7 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
     mapping(address => bool) _hasVotedOnce;
     mapping(uint256 roundId => RoundVote) _roundVotes;
     IVoterRewards voterRewards;
+    uint256 votingThreshold; // minimum number of tokens needed to cast a vote
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.GovernorXAllocationVotesCounting")) - 1)) & ~bytes32(uint256(0xff))
@@ -49,14 +50,18 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
     }
   }
 
-  function __GovernorXAllocationVotesCounting_init(address _voterRewards) internal onlyInitializing {
-    __GovernorXAllocationVotesCounting_init_unchained(_voterRewards);
+  //@notice emitted when a the minimum number of tokens needed to cast a vote is updated
+  event VotingThresholdSet(uint256 oldVotingThreshold, uint256 newVotingThreshold);
+
+  function __GovernorXAllocationVotesCounting_init(address _voterRewards, uint256 _votingThreshold) internal onlyInitializing {
+    __GovernorXAllocationVotesCounting_init_unchained(_voterRewards, _votingThreshold);
   }
 
-  function __GovernorXAllocationVotesCounting_init_unchained(address _voterRewards) internal onlyInitializing {
+  function __GovernorXAllocationVotesCounting_init_unchained(address _voterRewards, uint256 _votingThreshold) internal onlyInitializing {
     GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
 
     $.voterRewards = IVoterRewards(_voterRewards);
+    $.votingThreshold = _votingThreshold;
   }
 
   /**
@@ -67,17 +72,38 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
     return "support=x-allocations&quorum=auto";
   }
 
-/**
- * @dev Counts votes for a given round of voting, applying quadratic funding principles.
- * This function allows a voter to allocate weights (votes) to various applications (apps) for a specific voting round.
- * It checks if the voter has already voted in the round to prevent double voting.
- * Each vote's weight is applied to the specified applications, and the total and quadratic votes for each application
- * are updated accordingly.
- * 
- * Quadratic Funding (QF) is implemented here to calculate the impact of each vote. In QF, the value of each vote is squared,
- * emphasizing the number of participants over the size of individual contributions. This method aims to democratize the voting
- * process by amplifying the influence of a larger number of smaller votes.
- */
+  /**
+   * @dev Update the voting threshold. This operation can only be performed through a governance proposal.
+   *
+   * Emits a {VotingThresholdSet} event.
+   */
+  function setVotingThreshold(uint256 newVotingThreshold) public virtual onlyGovernance {
+    _setVotingThreshold(newVotingThreshold);
+  }
+
+  /**
+   * @dev Internal setter for the voting threshold.
+   *
+   * Emits a {VotingThresholdSet} event.
+   */
+  function _setVotingThreshold(uint256 newVotingThreshold) internal virtual {
+    GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
+
+    emit VotingThresholdSet($.votingThreshold, newVotingThreshold);
+    $.votingThreshold = newVotingThreshold;
+  }
+
+  /**
+   * @dev Counts votes for a given round of voting, applying quadratic funding principles.
+   * This function allows a voter to allocate weights (votes) to various applications (apps) for a specific voting round.
+   * It checks if the voter has already voted in the round to prevent double voting.
+   * Each vote's weight is applied to the specified applications, and the total and quadratic votes for each application
+   * are updated accordingly.
+   *
+   * Quadratic Funding (QF) is implemented here to calculate the impact of each vote. In QF, the value of each vote is squared,
+   * emphasizing the number of participants over the size of individual contributions. This method aims to democratize the voting
+   * process by amplifying the influence of a larger number of smaller votes.
+   */
   function _countVote(
     uint256 roundId,
     address voter,
@@ -117,10 +143,13 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
       $._roundVotes[roundId].votesReceived[apps[i]] += weights[i];
     }
 
-    require(
-      totalWeight <= getVotes(voter, round.voteStart),
-      "Governor: account has insufficient voting power for this round"
-    );
+    if(totalWeight < votingThreshold()){
+      revert GovernorVotingThresholdNotMet(votingThreshold(), totalWeight);
+    }
+
+    if (totalWeight > getVotes(voter, round.voteStart)){
+      revert GovernorInsufficientVotingPower();
+    }
 
     // Apply the total adjustment to storage
     $._roundVotes[roundId].totalVotesQF += totalQFVotesAdjustment;
@@ -136,7 +165,8 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
 
     emit AllocationVoteCast(voter, roundId, apps, weights);
 
-    $.voterRewards.registerVote(round.voteStart, voter, totalWeight);
+    // Register the vote for rewards calculation where the vote power is the square root of the total votes cast by the voter
+    $.voterRewards.registerVote(round.voteStart, voter, totalWeight, Math.sqrt(totalWeight));
   }
 
   function getAppVotes(uint256 roundId, bytes32 app) public view override returns (uint256) {
@@ -162,6 +192,15 @@ abstract contract XAllocationGovernorVotesCountingUpgradeable is Initializable, 
   function totalVoters(uint256 roundId) public view override returns (uint256) {
     GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
     return $._roundVotes[roundId].totalVoters;
+  }
+
+  /**
+   * @notice The voting threshold.
+   * @dev The minimum number of tokens needed to cast a vote.
+   */
+  function votingThreshold() public view virtual returns (uint256) {
+    GovernorXAllocationVotesCountingStorage storage $ = _getGovernorXAllocationVotesCountingStorage();
+    return $.votingThreshold;
   }
 
   function hasVoted(uint256 roundId, address user) public view returns (bool) {

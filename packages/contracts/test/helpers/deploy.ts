@@ -164,6 +164,7 @@ export const getOrDeployContractInstances = async ({
       xAppsBaseURI: "ipfs://",
       baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
       appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
+      votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
     },
   ])) as XAllocationVoting
 
@@ -176,6 +177,7 @@ export const getOrDeployContractInstances = async ({
       quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
       initialDepositThreshold: config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD, // voting threshold
       initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
+      initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD, // voting threshold
       governorAdmin: owner.address,
       proposalQueuer: governorProposalQueuer.address,
       proposalExecutor: governorProposalExecutor.address,

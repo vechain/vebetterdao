@@ -66,6 +66,7 @@ describe("X-Allocation Voting", function () {
           xAppsBaseURI: "ipfs://",
           baseAllocationPercentage: 2,
           appSharesCap: 2,
+          votingThreshold: BigInt(1),
         },
       ])) as XAllocationVoting
 
@@ -290,6 +291,7 @@ describe("X-Allocation Voting", function () {
           xAppsBaseURI: "ipfs://",
           baseAllocationPercentage: 2,
           appSharesCap: 2,
+          votingThreshold: BigInt(1),
         }),
       )
     })
@@ -354,6 +356,41 @@ describe("X-Allocation Voting", function () {
         ).to.be.reverted
 
         expect(await ethers.provider.getBalance(await xAllocationVoting.getAddress())).to.eql(0n)
+      })
+    })
+
+    describe("Voting threshold", function () {
+      it("can update voting threshold through governance", async function () {
+        const { owner, xAllocationVoting } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+        const newThreshold = 10n
+        await createProposalAndExecuteIt(
+          owner,
+          owner,
+          xAllocationVoting,
+          await ethers.getContractFactory("B3TRGovernor"),
+          "Update Voting Threshold",
+          "setVotingThreshold",
+          [newThreshold],
+        )
+
+        const updatedThreshold = await xAllocationVoting.votingThreshold()
+        expect(updatedThreshold).to.eql(newThreshold)
+      })
+
+      it("only governance can update voting threshold", async function () {
+        const { xAllocationVoting, owner } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+        const newThreshold = 10n
+
+        await catchRevert(xAllocationVoting.connect(owner).setVotingThreshold(newThreshold))
+
+        const updatedThreshold = await xAllocationVoting.votingThreshold()
+        expect(updatedThreshold).to.not.eql(newThreshold)
       })
     })
 
@@ -1070,6 +1107,33 @@ describe("X-Allocation Voting", function () {
 
       let totalVotes = await xAllocationVoting.totalVotes(roundId)
       expect(totalVotes).to.eql(ethers.parseEther("1000"))
+    })
+
+    it("I should not be able to cast vote if my total VOT3 holding is less than 1", async function () {
+      const { xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      await xAllocationVoting
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+      const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+
+      await getVot3Tokens(otherAccount, "0.1")
+
+      let tx = await xAllocationVoting.startNewRound()
+      let receipt = await tx.wait()
+      if (!receipt) throw new Error("No receipt")
+      // Event should be emitted
+      let roundCreated = filterEventsByName(receipt.logs, "RoundCreated")
+      let { roundId } = parseRoundStartedEvent(roundCreated[0], xAllocationVoting)
+
+      // I cannot cast a vote twice for the same round
+      await expect(
+        xAllocationVoting.connect(otherAccount).castVote(roundId, [app1], [ethers.parseEther("0.1")]),
+      ).to.be.revertedWithCustomError(xAllocationVoting, "GovernorVotingThresholdNotMet")
     })
 
     it("I should not be able to cast vote twice", async function () {

@@ -9,6 +9,7 @@ export function createTestConfig() {
     TIMELOCK_MIN_DELAY: 30, //after a vote passes, you have 5 min before you can vote queue the proposal
     B3TR_GOVERNOR_PROPOSAL_THRESHOLD: 1000, // How many votes are needed to create a proposal
     B3TR_GOVERNOR_MIN_VOTING_DELAY: 1, // 1 -> 1 block before the vote starts
+    B3TR_GOVERNOR_VOTING_THRESHOLD: BigInt("1000000000000000000"), // 1 vote
     B3TR_GOVERNOR_WHITELISTED_METHODS: {
       B3TR: ["tokenDetails"],
     },
@@ -22,6 +23,7 @@ export function createTestConfig() {
     EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE: 80,
 
     X_ALLOCATION_VOTING_QUORUM_PERCENTAGE: 40, // 40 -> Need 40% of total supply to succeed
+    X_ALLOCATION_VOTING_VOTING_THRESHOLD: BigInt("1000000000000000000"), // 1 vote
 
     X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE: 30, // min amount of X tokens that a project will get each round
     X_ALLOCATION_POOL_APP_SHARES_MAX_CAP: 20, // an app can get max % in allocation round

@@ -46,6 +46,7 @@ contract B3TRGovernor is
    * @param quorumPercentage quorum as a percentage of the total supply at the block a proposal’s voting power is retrieved
    * @param initialDepositThreshold The Deposit Threshold is the amount of voting power that an account needs to make a proposal
    * @param initialMinVotingDelay The minimum delay before a proposal can start
+   * @param initialVotingThreshold The minimum amount of voting power needed in order to vote
    * @param governorAdmin The address of the governor admin
    * @param proposalQueuer The address that should have the PROPOSAL_QUEUER_ROLE
    * @param proposalExecutor The address that should be set as executor and have the PROPOSAL_EXECUTOR_ROLE
@@ -60,6 +61,7 @@ contract B3TRGovernor is
     uint256 quorumPercentage;
     uint256 initialDepositThreshold;
     uint256 initialMinVotingDelay;
+    uint256 initialVotingThreshold;
     address governorAdmin;
     address proposalQueuer;
     address proposalExecutor;
@@ -85,12 +87,11 @@ contract B3TRGovernor is
   }
 
   /**
-   * @dev Initializes the contract
-   * @param data The data to initialize the contract
+   * @dev Initializes the contract with the initial parameters
    */
   function initialize(InitializationData memory data) public initializer {
     __Governor_init("B3TRGovernor");
-    __GovernorSettings_init(data.initialDepositThreshold, data.initialMinVotingDelay);
+    __GovernorSettings_init(data.initialDepositThreshold, data.initialMinVotingDelay, data.initialVotingThreshold);
     __GovernorCountingSimple_init();
     __GovernorVotes_init(data.vot3Token);
     __GovernorVotesQuorumFraction_init(data.quorumPercentage);
@@ -398,12 +399,12 @@ contract B3TRGovernor is
   function castVote(uint256 proposalId, uint8 support) public override(GovernorUpgradeable) returns (uint256) {
     uint256 weight = super.castVote(proposalId, support);
 
-    if (weight > 0) {
-      B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
-
-      $.voterRewards.registerVote(proposalSnapshot(proposalId), msg.sender, weight);
+    if (weight < votingThreshold()) {
+      revert GovernorVotingThresholdNotMet(weight, votingThreshold());
     }
 
+    B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
+    $.voterRewards.registerVote(proposalSnapshot(proposalId), msg.sender, weight, Math.sqrt(weight));
     return weight;
   }
 
