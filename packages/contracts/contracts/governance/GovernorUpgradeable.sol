@@ -187,13 +187,6 @@ abstract contract GovernorUpgradeable is
   }
 
   /**
-   * @dev See {IB3TRGovernor-proposalNeedsQueuing}.
-   */
-  function proposalNeedsQueuing(uint256) public view virtual returns (bool) {
-    return false;
-  }
-
-  /**
    * @dev See {IB3TRGovernor-proposalStartRound}
    */
   function proposalStartRound(uint256 proposalId) public view returns (uint256) {

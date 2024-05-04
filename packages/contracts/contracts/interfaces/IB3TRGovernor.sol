@@ -13,6 +13,10 @@ import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
  * - Removed votingDelay()
  * - Removed the possibility to cast vote with params and with signature
  * - Updated propose() and ProposalCreated event to accept the x allocation round id as param when proposal should become active
+ * - Added proposalStartRound() to get the round when the proposal should become active
+ * - Added canProposalStartInNextRound() to check if the proposal can start in the next allocation round
+ * - Added new state `DepositNotMet` to ProposalState enum
+ * - Added depositThreshold() to get the minimum required deposit for a proposal and removed proposalThreshold
  */
 interface IB3TRGovernor is IERC165, IERC6372 {
   enum ProposalState {
@@ -128,14 +132,14 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @dev Emitted when a proposal is created
    */
   event ProposalCreated(
-    uint256 proposalId,
-    address proposer,
+    uint256 indexed proposalId,
+    address indexed proposer,
     address[] targets,
     uint256[] values,
     string[] signatures,
     bytes[] calldatas,
     string description,
-    uint256 roundIdVoteStart
+    uint256 indexed roundIdVoteStart
   );
 
   /**
@@ -160,7 +164,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    */
   event VoteCast(
     address indexed voter,
-    uint256 proposalId,
+    uint256 indexed proposalId,
     uint8 support,
     uint256 weight,
     uint256 power,
@@ -415,18 +419,28 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    */
   function canProposalStartInNextRound() external view returns (bool);
 
-  // Function to deposit tokens to a proposal
+  /**
+   * @dev Function to deposit tokens to a proposal
+   */
   function deposit(uint256 amount, uint256 proposalId) external;
 
-  // Function to withdraw tokens from a proposal
+  /**
+   * @dev Function to withdraw tokens from a proposal
+   */
   function withdraw(uint256 proposalId, address depositer) external;
 
-  // Getter to retrieve the total amount of tokens deposited to a proposal
+  /**
+   * @dev Getter to retrieve the total amount of tokens deposited to a proposal
+   */
   function getProposalDeposits(uint256 proposalId) external view returns (uint256);
 
-  // Function to check if the deposit threshold for a proposal has been reached
+  /**
+   * @dev Function to check if the deposit threshold for a proposal has been reached
+   */
   function proposalDepositReached(uint256 proposalId) external view returns (bool);
 
-  // Getter to retrieve the amount of tokens a specific user has deposited to a proposal
+  /**
+   * @dev Getter to retrieve the amount of tokens a specific user has deposited to a proposal
+   */
   function getUserDeposit(uint256 proposalId, address user) external view returns (uint256);
 }
