@@ -154,10 +154,18 @@ abstract contract RoundVotesCountingUpgradeable is Initializable, XAllocationVot
     // To hold the total adjustment to the quadratic funding value for the given app
     uint256 totalQFVotesAdjustment = 0;
 
+    // Get the total voting power of the voter to use in the for loop to check
+    // if the total weight of votes cast by the voter is greater than the voter's available voting power
+    uint256 voterAvailableVotes = getVotes(voter, roundStart);
+
     // Iterate through the apps and weights to calculate the total weight of votes cast by the voter
     for (uint256 i = 0; i < apps.length; i++) {
       // Update the total weight of votes cast by the voter
       totalWeight += weights[i];
+
+      if (totalWeight > voterAvailableVotes) {
+        revert GovernorInsufficientVotingPower();
+      }
 
       // Check if the app is eligible for votes in the current round
       if (!isEligibleForVote(apps[i], roundId)) {
@@ -165,7 +173,7 @@ abstract contract RoundVotesCountingUpgradeable is Initializable, XAllocationVot
       }
 
       // Get the current sum of the square roots of individual votes for the given project
-      uint256 qfAppVotesPreVote = $._roundVotes[roundId].votesReceivedQF[apps[i]];// ∑(sqrt(votes)) -> sqrt(votes1) + sqrt(votes2) + ... + sqrt(votesN)
+      uint256 qfAppVotesPreVote = $._roundVotes[roundId].votesReceivedQF[apps[i]]; // ∑(sqrt(votes)) -> sqrt(votes1) + sqrt(votes2) + ... + sqrt(votesN)
 
       // Calculate the new sum of the square roots of individual votes for the given project
       uint256 newQFVotes = Math.sqrt(weights[i]); // sqrt(votes)
@@ -184,11 +192,6 @@ abstract contract RoundVotesCountingUpgradeable is Initializable, XAllocationVot
       revert GovernorVotingThresholdNotMet(votingThreshold(), totalWeight);
     }
 
-    // Check if the total weight of votes cast by the voter is greater than the voter's available voting power
-    if (totalWeight > getVotes(voter, roundStart)) {
-      revert GovernorInsufficientVotingPower();
-    }
-
     // Apply the total adjustment to storage
     $._roundVotes[roundId].totalVotesQF += totalQFVotesAdjustment; // update the total quadratic funding value for the round - ∑(∑sqrt(votes))^2 -> (sqrt(votesAppX1) + sqrt(votesAppX2) + ...)^2 + (sqrt(votesAppY1) + sqrt(votesAppY2) + ...)^2 + ...
     $._roundVotes[roundId].totalVotes += totalWeight; // update total votes -> ∑votes + votesN+1
@@ -200,11 +203,11 @@ abstract contract RoundVotesCountingUpgradeable is Initializable, XAllocationVot
       $._hasVotedOnce[voter] = true;
     }
 
-    // Emit the AllocationVoteCast event
-    emit AllocationVoteCast(voter, roundId, apps, weights);
-
     // Register the vote for rewards calculation where the vote power is the square root of the total votes cast by the voter
     voterRewards().registerVote(roundStart, voter, totalWeight, Math.sqrt(totalWeight));
+
+    // Emit the AllocationVoteCast event
+    emit AllocationVoteCast(voter, roundId, apps, weights);
   }
 
   /**
