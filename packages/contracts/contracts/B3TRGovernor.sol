@@ -269,7 +269,14 @@ contract B3TRGovernor is
 
     _checkFunctionsRestriction(targets, calldatas);
 
-    _setProposal(proposalId, proposer, SafeCast.toUint32(votingPeriod()), targets.length > 0, depositAmount);
+    _setProposal(
+      proposalId,
+      proposer,
+      SafeCast.toUint32(votingPeriod()),
+      startRoundId,
+      targets.length > 0,
+      depositAmount
+    );
 
     _depositFunds(depositAmount, proposer, proposalId);
 
@@ -318,6 +325,7 @@ contract B3TRGovernor is
    * @param proposalId The id of the proposal
    * @param proposer The address of the proposer
    * @param voteDuration The duration of the vote
+   * @param roundIdVoteStart The round in which the proposal should be active
    * @param isExecutable If the proposal is executable
    * @param depositAmount The amount of tokens the proposer intends to deposit
    */
@@ -325,6 +333,7 @@ contract B3TRGovernor is
     uint256 proposalId,
     address proposer,
     uint32 voteDuration,
+    uint256 roundIdVoteStart,
     bool isExecutable,
     uint256 depositAmount
   ) internal {
@@ -333,7 +342,7 @@ contract B3TRGovernor is
     ProposalCore storage proposal = $._proposals[proposalId];
 
     proposal.proposer = proposer;
-    proposal.roundIdVoteStart = _getB3TRGovernorStorage().xAllocationVoting.currentRoundId();
+    proposal.roundIdVoteStart = roundIdVoteStart;
     proposal.voteDuration = voteDuration;
     proposal.isExecutable = isExecutable;
     proposal.depositAmount = depositAmount;
