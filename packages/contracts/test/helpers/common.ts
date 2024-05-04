@@ -166,7 +166,7 @@ export const createProposalAndExecuteIt = async (
   functionToCall: string,
   args: any[] = [],
 ) => {
-  const { governor } = await getOrDeployContractInstances({})
+  const { governor, governorProposalExecutor, governorProposalQueuer } = await getOrDeployContractInstances({})
 
   // load votes
   // console.log("Loading votes");
@@ -194,16 +194,20 @@ export const createProposalAndExecuteIt = async (
   // console.log("Queueing");
   const encodedFunctionCall = Contract.interface.encodeFunctionData(functionToCall, args)
   const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
-  await governor.queue([await contractToCall.getAddress()], [0], [encodedFunctionCall], descriptionHash, {
-    gasLimit: 10_000_000,
-  })
+  await governor
+    .connect(governorProposalQueuer)
+    .queue([await contractToCall.getAddress()], [0], [encodedFunctionCall], descriptionHash, {
+      gasLimit: 10_000_000,
+    })
   await waitForNextBlock()
 
   // execute it
   // console.log("Executing");
-  await governor.execute([await contractToCall.getAddress()], [0], [encodedFunctionCall], descriptionHash, {
-    gasLimit: 10_000_000,
-  })
+  await governor
+    .connect(governorProposalExecutor)
+    .execute([await contractToCall.getAddress()], [0], [encodedFunctionCall], descriptionHash, {
+      gasLimit: 10_000_000,
+    })
 }
 
 export const addAppThroughGovernance = async (

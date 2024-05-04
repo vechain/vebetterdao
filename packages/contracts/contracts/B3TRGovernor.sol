@@ -29,6 +29,9 @@ contract B3TRGovernor is
 {
   error UnauthorizedAccess(address user);
 
+  bytes32 public constant PROPOSAL_EXECUTOR_ROLE = keccak256("PROPOSAL_EXECUTOR_ROLE");
+  bytes32 public constant PROPOSAL_QUEUER_ROLE = keccak256("PROPOSAL_QUEUER_ROLE");
+
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
@@ -59,6 +62,8 @@ contract B3TRGovernor is
    * @param _initialDepositThreshold The Deposit Threshold is the amount of voting power that an account needs to make a proposal
    * @param _initialMinVotingDelay The minimum delay before a proposal can start
    * @param governorAdmin The address of the governor admin
+   * @param proposalExecutor The address that should be set as executor and have the PROPOSAL_EXECUTOR_ROLE
+   * @param proposalQueuer The address that should have the PROPOSAL_QUEUER_ROLE
    * @param _voterRewards The address of the voter rewards contract
    */
   function initialize(
@@ -69,6 +74,8 @@ contract B3TRGovernor is
     uint256 _initialDepositThreshold,
     uint256 _initialMinVotingDelay,
     address governorAdmin,
+    address proposalExecutor,
+    address proposalQueuer,
     address _voterRewards
   ) public initializer {
     __Governor_init("B3TRGovernor");
@@ -86,6 +93,25 @@ contract B3TRGovernor is
     $.xAllocationVoting = _xAllocationVoting;
 
     _grantRole(DEFAULT_ADMIN_ROLE, governorAdmin);
+    _grantRole(PROPOSAL_EXECUTOR_ROLE, proposalExecutor);
+    _grantRole(PROPOSAL_QUEUER_ROLE, proposalQueuer);
+
+    // self administration
+    // _grantRole(DEFAULT_ADMIN_ROLE, address(this));
+  }
+
+  // ------------------ MODIFIERS ------------------ //
+  /**
+   * @dev Modifier to make a function callable only by a certain role. In
+   * addition to checking the sender's role, `address(0)` 's role is also
+   * considered. Granting a role to `address(0)` is equivalent to enabling
+   * this role for everyone.
+   */
+  modifier onlyRoleOrOpenRole(bytes32 role) {
+    if (!hasRole(role, address(0))) {
+      _checkRole(role, _msgSender());
+    }
+    _;
   }
 
   // ------------------ GETTERS ------------------ //
@@ -224,6 +250,30 @@ contract B3TRGovernor is
   // ------------------ OVERRIDES ------------------ //
 
   function _authorizeUpgrade(address newImplementation) internal override onlyGovernance {}
+
+  /**
+   * @dev See {IB3TRGovernor-queue}.
+   */
+  function queue(
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    bytes32 descriptionHash
+  ) public override onlyRoleOrOpenRole(PROPOSAL_QUEUER_ROLE) returns (uint256) {
+    return super.queue(targets, values, calldatas, descriptionHash);
+  }
+
+  /**
+   * @dev See {IB3TRGovernor-execute}.
+   */
+  function execute(
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    bytes32 descriptionHash
+  ) public payable override onlyRoleOrOpenRole(PROPOSAL_EXECUTOR_ROLE) returns (uint256) {
+    return super.execute(targets, values, calldatas, descriptionHash);
+  }
 
   /**
    * @dev See {IB3TRGovernor-proposalSnapshot}.

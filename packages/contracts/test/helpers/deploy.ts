@@ -29,6 +29,8 @@ interface DeployInstance {
   voterRewards: VoterRewards
   treasury: Treasury
   owner: HardhatEthersSigner
+  governorProposalExecutor: HardhatEthersSigner
+  governorProposalQueuer: HardhatEthersSigner
   otherAccount: HardhatEthersSigner
   minterAccount: HardhatEthersSigner
   timelockAdmin: HardhatEthersSigner
@@ -54,7 +56,15 @@ export const getOrDeployContractInstances = async ({
   }
 
   // Contracts are deployed using the first signer/account by default
-  const [owner, otherAccount, minterAccount, timelockAdmin, ...otherAccounts] = await ethers.getSigners()
+  const [
+    owner,
+    otherAccount,
+    minterAccount,
+    timelockAdmin,
+    governorProposalExecutor,
+    governorProposalQueuer,
+    ...otherAccounts
+  ] = await ethers.getSigners()
 
   // Deploy B3TR
   const B3trContract = await ethers.getContractFactory("B3TR")
@@ -165,6 +175,8 @@ export const getOrDeployContractInstances = async ({
     config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD, // voting threshold
     config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
     owner.address,
+    governorProposalExecutor.address,
+    governorProposalQueuer.address,
     await voterRewards.getAddress(),
   ])) as B3TRGovernor
 
@@ -218,6 +230,8 @@ export const getOrDeployContractInstances = async ({
     emissions,
     voterRewards,
     owner,
+    governorProposalExecutor,
+    governorProposalQueuer,
     otherAccount,
     minterAccount,
     timelockAdmin,
