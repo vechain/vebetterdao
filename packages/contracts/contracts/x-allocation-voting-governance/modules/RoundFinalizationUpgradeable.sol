@@ -62,7 +62,7 @@ abstract contract RoundFinalizationUpgradeable is Initializable, XAllocationVoti
   // ------- Setters ------- //
 
   /**
-   * @dev Store the checkpoints of last succeeded round for the given round
+   * @dev Store the last succeeded round for the given round
    * @param roundId The round to finalize
    */
   function finalizeRound(uint256 roundId) public virtual override {

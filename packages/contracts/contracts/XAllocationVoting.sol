@@ -68,7 +68,7 @@ contract XAllocationVoting is
    * @param vot3Token The address of the Vot3 token used for voting
    * @param quorumPercentage quorum as a percentage of the total supply at the block a proposal’s voting power is retrieved
    * @param initialVotingPeriod How long does a proposal remain open to votes
-   * @param _timeLock Address of the timelock contract controlling governance actions
+   * @param timeLock Address of the timelock contract controlling governance actions
    * @param voterRewards The address of the VoterRewards contract
    * @param emissions The address of the Emissions contract
    * @param admins The addresses of the admins
