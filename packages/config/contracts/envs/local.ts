@@ -34,6 +34,7 @@ export function createLocalConfig() {
         "setEmissions",
         "addApp",
         "setVotingElegibility",
+        "setVotingThreshold",
       ],
     },
 
