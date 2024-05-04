@@ -32,10 +32,9 @@ export function createLocalConfig() {
         "updateQuorumNumerator",
         "setVotingPeriod",
         "setEmissions",
-        "addApp",
-        "setVotingElegibility",
         "setVotingThreshold",
       ],
+      X2EarnApps: ["addApp", "setVotingElegibility"],
     },
 
     EMISSIONS_CYCLE_DURATION: 12, // 12 blocks - 2 minutes.

@@ -33,9 +33,9 @@ export function createSoloStagingConfig() {
         "updateQuorumNumerator",
         "setBaseAllocationPercentage",
         "setAppSharesCap",
-        "setVotingElegibility",
         "setVotingThreshold",
       ],
+      X2EarnApps: ["addApp", "setVotingElegibility"],
     },
 
     EMISSIONS_CYCLE_DURATION: 30, // blocks - 30 blocks - 5 minutes.
