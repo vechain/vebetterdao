@@ -334,7 +334,7 @@ describe("X-Apps", function () {
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
 
       await x2EarnApps.connect(owner).setVotingEligibility(app1Id, false)
-      expect(await x2EarnApps.isElegibleNow(app1Id)).to.eql(false)
+      expect(await x2EarnApps.isEligibleNow(app1Id)).to.eql(false)
 
       let round1 = await startNewAllocationRound()
 
@@ -343,7 +343,7 @@ describe("X-Apps", function () {
       expect(isEligibleForVote).to.eql(false)
 
       await x2EarnApps.connect(owner).setVotingEligibility(app1Id, true)
-      expect(await x2EarnApps.isElegibleNow(app1Id)).to.eql(true)
+      expect(await x2EarnApps.isEligibleNow(app1Id)).to.eql(true)
       expect(await x2EarnApps.isEligible(app1Id, await xAllocationVoting.roundSnapshot(round1))).to.eql(false)
 
       // app still should not be eligible from this round
@@ -363,7 +363,7 @@ describe("X-Apps", function () {
 
       const app1Id = await x2EarnApps.hashAppName(ZERO_ADDRESS)
 
-      expect(await x2EarnApps.isElegibleNow(app1Id)).to.eql(false)
+      expect(await x2EarnApps.isEligibleNow(app1Id)).to.eql(false)
       expect(await x2EarnApps.isEligible(app1Id, (await xAllocationVoting.clock()) - 1n)).to.eql(false)
     })
 
