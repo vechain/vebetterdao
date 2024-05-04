@@ -24,6 +24,7 @@ export function createLocalConfig() {
         "setWhitelistFunction",
         "setIsFunctionRestrictionEnabled",
         "setDepositThreshold",
+        "setVotingThreshold",
       ],
       Treasury: ["transferVET"],
       XAllocationVoting: [

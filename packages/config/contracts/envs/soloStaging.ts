@@ -26,6 +26,7 @@ export function createSoloStagingConfig() {
         "updateQuorumNumerator",
         "updateDelay",
         "setDepositThreshold",
+        "setVotingThreshold",
       ],
       Treasury: ["transferB3TR"],
       XAllocationVoting: [
