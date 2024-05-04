@@ -1314,7 +1314,7 @@ describe("Governor and TimeLock", function () {
       expect(await governor.state(proposalId)).to.not.eql(0n) // pending
     })
 
-    it("Cannot create a proposal if emissions did not start", async () => {
+    it("Cannot create a proposal that starts in first round if emissions did not start", async () => {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 5
@@ -1326,6 +1326,8 @@ describe("Governor and TimeLock", function () {
 
       const proposer = otherAccounts[0]
       await getVot3Tokens(proposer, "1000")
+
+      expect(await xAllocationVoting.currentRoundId()).to.eql(0n)
 
       // Now we can create a new proposal
       const address = await b3tr.getAddress()
@@ -1339,6 +1341,35 @@ describe("Governor and TimeLock", function () {
           gasLimit: 10_000_000,
         }),
       ).to.be.reverted
+    })
+
+    it("Ca create a proposal that starts from second round if emissions did not start", async () => {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.EMISSIONS_CYCLE_DURATION = 5
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3 } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+
+      expect(await xAllocationVoting.currentRoundId()).to.eql(0n)
+
+      // Now we can create a new proposal
+      const address = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+      const currentRoundId = await xAllocationVoting.currentRoundId() // starts in current round
+      expect(currentRoundId).to.eql(0n)
+
+      await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
+      await expect(
+        governor.connect(proposer).propose([address], [0], [encodedFunctionCall], "", 2n, ethers.parseEther("1000"), {
+          gasLimit: 10_000_000,
+        }),
+      ).to.not.be.reverted
     })
 
     it("Cannot create same proposal twice", async () => {
