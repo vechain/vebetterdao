@@ -124,8 +124,8 @@ contract B3TRGovernor is
   /**
    * @dev Check if the proposal can start in the next round
    *
-   * If we are in round 0 (so emissions di not start yet) there is an unknown amount of time between now and the start of the first round
-   * and we do not know how much time will pass until it will start: it could be 1 hour or 1 week.
+   * If we are in round 0 (so emissions di not start yet) there is an unknown amount of time between now
+   * and the start of the first round: it could start in 1 hour or 1 week.
    * For this reason, the check we have in place to enforce a minimum delay period will fail.
    *
    * We can still create proposals that starts in round 2, because we know the voting period of first round.
