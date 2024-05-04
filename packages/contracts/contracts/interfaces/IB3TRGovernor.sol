@@ -424,7 +424,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    */
   function deposit(uint256 amount, uint256 proposalId) external;
 
-   /**
+  /**
    * @dev Function to withdraw tokens from a proposal
    */
   function withdraw(uint256 proposalId, address depositer) external;
@@ -434,7 +434,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    */
   function getProposalDeposits(uint256 proposalId) external view returns (uint256);
 
-   /**
+  /**
    * @dev Function to check if the deposit threshold for a proposal has been reached
    */
   function proposalDepositReached(uint256 proposalId) external view returns (bool);
