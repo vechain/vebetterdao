@@ -367,7 +367,7 @@ describe("X-Apps", function () {
       expect(await x2EarnApps.isEligible(app1Id, (await xAllocationVoting.clock()) - 1n)).to.eql(false)
     })
 
-    it("Cannot get elegilibity in the future", async function () {
+    it("Cannot get eligilibity in the future", async function () {
       const { xAllocationVoting, x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
