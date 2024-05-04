@@ -1,6 +1,6 @@
 import { ethers, network } from "hardhat"
 import { B3TR, GalaxyMember } from "../../typechain-types"
-import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers"
+import { BaseContract, BytesLike, ContractFactory, ContractTransactionResponse } from "ethers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { getOrDeployContractInstances } from "./deploy"
 import { mine } from "@nomicfoundation/hardhat-network-helpers"
@@ -166,7 +166,7 @@ export const createProposalAndExecuteIt = async (
   functionToCall: string,
   args: any[] = [],
 ) => {
-  const { governor } = await getOrDeployContractInstances({})
+  const { governor, proposalExecutor, timeLock } = await getOrDeployContractInstances({})
 
   // load votes
   // console.log("Loading votes");
@@ -199,11 +199,36 @@ export const createProposalAndExecuteIt = async (
   })
   await waitForNextBlock()
 
+  await waitForQueuedProosalToBeReady(proposalId)
+
   // execute it
   // console.log("Executing");
-  await governor.execute([await contractToCall.getAddress()], [0], [encodedFunctionCall], descriptionHash, {
-    gasLimit: 10_000_000,
-  })
+  await timeLock
+    .connect(proposalExecutor)
+    .executeBatch(
+      [await contractToCall.getAddress()],
+      [0],
+      [encodedFunctionCall],
+      ethers.ZeroHash,
+      await governor.timelockSalt(descriptionHash),
+    )
+}
+
+export const waitForQueuedProosalToBeReady = async (proposalId: number) => {
+  const { timeLock, governor } = await getOrDeployContractInstances({})
+
+  const timelockId = await governor.getTimelockId(proposalId)
+
+  console.log("Waiting for operation to be ready", timelockId)
+
+  let isOperationReady = await timeLock.isOperationReady(timelockId)
+  console.log("isOperationReady", isOperationReady)
+
+  do {
+    await moveBlocks(1)
+    isOperationReady = await timeLock.isOperationReady(timelockId)
+    console.log("isOperationReady", isOperationReady)
+  } while (isOperationReady === false)
 }
 
 export const addAppThroughGovernance = async (

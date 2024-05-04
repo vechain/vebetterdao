@@ -14,6 +14,7 @@ import {
   waitForCurrentRoundToEnd,
   moveBlocks,
   createProposalAndExecuteIt,
+  waitForQueuedProosalToBeReady,
 } from "./helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it } from "mocha"
@@ -21,7 +22,7 @@ import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { B3TRGovernor } from "../typechain-types"
 
-describe("Governor and TimeLock", function () {
+describe.only("Governor and TimeLock", function () {
   describe("Governor deployment", function () {
     it("Should set constructors correctly", async function () {
       const config = createLocalConfig()
@@ -68,7 +69,7 @@ describe("Governor and TimeLock", function () {
     })
 
     it("Should be able to upgrade the governor contract through governance", async function () {
-      const { governor, owner, otherAccount, b3tr, emissions, xAllocationVoting, vot3 } =
+      const { governor, owner, otherAccount, b3tr, emissions, xAllocationVoting, vot3, timeLock, proposalExecutor } =
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
@@ -125,7 +126,17 @@ describe("Governor and TimeLock", function () {
       await governor.queue([await governor.getAddress()], [0], [encodedFunctionCall], descriptionHash)
       expect(await governor.state(proposalId)).to.eql(5n)
 
-      await governor.execute([await governor.getAddress()], [0], [encodedFunctionCall], descriptionHash)
+      await waitForQueuedProosalToBeReady(proposalId)
+
+      await timeLock
+        .connect(proposalExecutor)
+        .executeBatch(
+          [await governor.getAddress()],
+          [0],
+          [encodedFunctionCall],
+          ethers.ZeroHash,
+          await governor.timelockSalt(descriptionHash),
+        )
       expect(await governor.state(proposalId)).to.eql(7n)
 
       await governor.connect(owner).withdraw(proposalId, owner.address)
@@ -828,10 +839,11 @@ describe("Governor and TimeLock", function () {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 5
-      const { otherAccounts, governor, xAllocationVoting, vot3 } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        config,
-      })
+      const { otherAccounts, governor, xAllocationVoting, vot3, proposalExecutor, timeLock } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
 
       const proposer = otherAccounts[0]
       await getVot3Tokens(proposer, "1000")
@@ -880,7 +892,9 @@ describe("Governor and TimeLock", function () {
       expect(await governor.state(proposalId)).to.eql(5n) // queued
 
       // Can still execute even if there is nothing to execute
-      await governor.execute([], [], [], descriptionHash)
+      await timeLock
+        .connect(proposalExecutor)
+        .executeBatch([], [], [], ethers.ZeroHash, await governor.timelockSalt(descriptionHash))
       expect(await governor.state(proposalId)).to.eql(7n)
     })
 
@@ -1923,6 +1937,8 @@ describe("Governor and TimeLock", function () {
         b3tr,
         B3trContract,
         otherAccount: proposer,
+        proposalExecutor,
+        timeLock,
       } = await getOrDeployContractInstances({ forceDeploy: false })
 
       // create a new proposal
@@ -1953,7 +1969,17 @@ describe("Governor and TimeLock", function () {
       const b3trAddress = await b3tr.getAddress()
       const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
       const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
-      await catchRevert(governor.execute([b3trAddress], [0], [encodedFunctionCall], descriptionHash))
+      await catchRevert(
+        timeLock
+          .connect(proposalExecutor)
+          .executeBatch(
+            [b3trAddress],
+            [0],
+            [encodedFunctionCall],
+            ethers.ZeroHash,
+            await governor.timelockSalt(descriptionHash),
+          ),
+      )
     })
 
     it("can correctly queue proposal if vote succeeded", async function () {
@@ -2007,6 +2033,8 @@ describe("Governor and TimeLock", function () {
         b3tr,
         B3trContract,
         otherAccount: proposer,
+        timeLock,
+        proposalExecutor,
       } = await getOrDeployContractInstances({ forceDeploy: false })
 
       // create a new proposal
@@ -2044,7 +2072,15 @@ describe("Governor and TimeLock", function () {
       proposalState = await governor.state(proposalId)
       expect(proposalState.toString()).to.eql("5")
 
-      await governor.execute([b3trAddress], [0], [encodedFunctionCall], descriptionHash)
+      await timeLock
+        .connect(proposalExecutor)
+        .executeBatch(
+          [b3trAddress],
+          [0],
+          [encodedFunctionCall],
+          ethers.ZeroHash,
+          await governor.timelockSalt(descriptionHash),
+        )
 
       // proposal should be in executed state
       proposalState = await governor.state(proposalId)
@@ -2057,6 +2093,8 @@ describe("Governor and TimeLock", function () {
         b3tr,
         B3trContract,
         otherAccount: proposer,
+        timeLock,
+        proposalExecutor,
       } = await getOrDeployContractInstances({ forceDeploy: false })
 
       // create a new proposal
@@ -2094,14 +2132,32 @@ describe("Governor and TimeLock", function () {
       proposalState = await governor.state(proposalId)
       expect(proposalState.toString()).to.eql("5")
 
-      await governor.execute([b3trAddress], [0], [encodedFunctionCall], descriptionHash)
+      await timeLock
+        .connect(proposalExecutor)
+        .executeBatch(
+          [b3trAddress],
+          [0],
+          [encodedFunctionCall],
+          ethers.ZeroHash,
+          await governor.timelockSalt(descriptionHash),
+        )
 
       // proposal should be in executed state
       proposalState = await governor.state(proposalId)
       expect(proposalState.toString()).to.eql("7")
 
       // try to execute again
-      await catchRevert(governor.execute([b3trAddress], [0], [encodedFunctionCall], descriptionHash))
+      await catchRevert(
+        timeLock
+          .connect(proposalExecutor)
+          .executeBatch(
+            [b3trAddress],
+            [0],
+            [encodedFunctionCall],
+            ethers.ZeroHash,
+            await governor.timelockSalt(descriptionHash),
+          ),
+      )
     })
   })
 
@@ -2614,18 +2670,22 @@ describe("Governor and TimeLock", function () {
       expect(await governor.state(proposalId)).to.eql(0n) // pending
 
       // deposits cannot be withdrawn when proposal is pending
-      await expect(governor.connect(proposer).withdraw(proposalId, proposer.address, { gasLimit: 10_000_000 })).to.be.reverted
+      await expect(governor.connect(proposer).withdraw(proposalId, proposer.address, { gasLimit: 10_000_000 })).to.be
+        .reverted
 
-      await expect(governor.connect(sponser).withdraw(proposalId, sponser.address, { gasLimit: 10_000_000 })).to.be.reverted
+      await expect(governor.connect(sponser).withdraw(proposalId, sponser.address, { gasLimit: 10_000_000 })).to.be
+        .reverted
 
       await waitForProposalToBeActive(proposalId)
       // proposal should be in active state as deposit was met
       expect(await governor.state(proposalId)).to.eql(1n) // active
 
       // deposits cannot be withdrawn when proposal is active
-      await expect(governor.connect(proposer).withdraw(proposalId, proposer.address, { gasLimit: 10_000_000 })).to.be.reverted
+      await expect(governor.connect(proposer).withdraw(proposalId, proposer.address, { gasLimit: 10_000_000 })).to.be
+        .reverted
 
-      await expect(governor.connect(sponser).withdraw(proposalId, sponser.address, { gasLimit: 10_000_000 })).to.be.reverted
+      await expect(governor.connect(sponser).withdraw(proposalId, sponser.address, { gasLimit: 10_000_000 })).to.be
+        .reverted
 
       // wait for voting period to end
       await waitForVotingPeriodToEnd(proposalId)

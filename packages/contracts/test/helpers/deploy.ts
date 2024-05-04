@@ -29,6 +29,7 @@ interface DeployInstance {
   voterRewards: VoterRewards
   treasury: Treasury
   owner: HardhatEthersSigner
+  proposalExecutor: HardhatEthersSigner
   otherAccount: HardhatEthersSigner
   minterAccount: HardhatEthersSigner
   timelockAdmin: HardhatEthersSigner
@@ -54,7 +55,8 @@ export const getOrDeployContractInstances = async ({
   }
 
   // Contracts are deployed using the first signer/account by default
-  const [owner, otherAccount, minterAccount, timelockAdmin, ...otherAccounts] = await ethers.getSigners()
+  const [owner, otherAccount, minterAccount, timelockAdmin, proposalExecutor, ...otherAccounts] =
+    await ethers.getSigners()
 
   // Deploy B3TR
   const B3trContract = await ethers.getContractFactory("B3TR")
@@ -173,8 +175,8 @@ export const getOrDeployContractInstances = async ({
   const EXECUTOR_ROLE = await timeLock.EXECUTOR_ROLE()
   const CANCELLER_ROLE = await timeLock.CANCELLER_ROLE()
   await timeLock.connect(timelockAdmin).grantRole(PROPOSER_ROLE, await governor.getAddress())
-  await timeLock.connect(timelockAdmin).grantRole(EXECUTOR_ROLE, await governor.getAddress())
-  await timeLock.connect(timelockAdmin).grantRole(CANCELLER_ROLE, await governor.getAddress())
+  await timeLock.connect(timelockAdmin).grantRole(EXECUTOR_ROLE, proposalExecutor.address)
+  await timeLock.connect(timelockAdmin).grantRole(CANCELLER_ROLE, proposalExecutor.address)
 
   // Set xAllocationVoting and Governor address in GalaxyMember
   await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
@@ -218,6 +220,7 @@ export const getOrDeployContractInstances = async ({
     emissions,
     voterRewards,
     owner,
+    proposalExecutor,
     otherAccount,
     minterAccount,
     timelockAdmin,

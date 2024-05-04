@@ -8,7 +8,6 @@ import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import { ERC165Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import { DoubleEndedQueue } from "@openzeppelin/contracts/utils/structs/DoubleEndedQueue.sol";
 import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import { ContextUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import { IB3TRGovernor } from "../interfaces/IB3TRGovernor.sol";
@@ -44,8 +43,6 @@ abstract contract GovernorUpgradeable is
   IERC721Receiver,
   IERC1155Receiver
 {
-  using DoubleEndedQueue for DoubleEndedQueue.Bytes32Deque;
-
   struct ProposalCore {
     address proposer;
     uint256 roundIdVoteStart;
@@ -62,11 +59,6 @@ abstract contract GovernorUpgradeable is
   struct GovernorStorage {
     string _name;
     mapping(uint256 proposalId => ProposalCore) _proposals;
-    // This queue keeps track of the governor operating on itself. Calls to functions protected by the {onlyGovernance}
-    // modifier needs to be whitelisted in this queue. Whitelisting is set in {execute}, consumed by the
-    // {onlyGovernance} modifier and eventually reset after {_executeOperations} completes. This ensures that the
-    // execution of {onlyGovernance} protected calls can only be achieved through successful proposals.
-    DoubleEndedQueue.Bytes32Deque _governanceCall;
   }
 
   // keccak256(abi.encode(uint256(keccak256("openzeppelin.storage.Governor")) - 1)) & ~bytes32(uint256(0xff))
@@ -202,19 +194,11 @@ abstract contract GovernorUpgradeable is
   }
 
   /**
-   * @dev Reverts if the `msg.sender` is not the executor. In case the executor is not this contract
-   * itself, the function reverts if `msg.data` is not whitelisted as a result of an {execute}
-   * operation. See {onlyGovernance}.
+   * @dev Reverts if the `msg.sender` is not the executor.
    */
   function _checkGovernance() internal virtual {
-    GovernorStorage storage $ = _getGovernorStorage();
     if (_executor() != _msgSender()) {
       revert GovernorOnlyExecutor(_msgSender());
-    }
-    if (_executor() != address(this)) {
-      bytes32 msgDataHash = keccak256(_msgData());
-      // loop until popping the expected operation - throw if deque is empty (operation not authorized)
-      while ($._governanceCall.popFront() != msgDataHash) {}
     }
   }
 
@@ -315,21 +299,7 @@ abstract contract GovernorUpgradeable is
     // mark as executed before calls to avoid reentrancy
     $._proposals[proposalId].executed = true;
 
-    // before execute: register governance call in queue.
-    if (_executor() != address(this)) {
-      for (uint256 i = 0; i < targets.length; ++i) {
-        if (targets[i] == address(this)) {
-          $._governanceCall.pushBack(keccak256(calldatas[i]));
-        }
-      }
-    }
-
     _executeOperations(proposalId, targets, values, calldatas, descriptionHash);
-
-    // after execute: cleanup governance call queue.
-    if (_executor() != address(this) && !$._governanceCall.empty()) {
-      $._governanceCall.clear();
-    }
 
     emit ProposalExecuted(proposalId);
 
