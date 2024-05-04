@@ -9,6 +9,11 @@ export function createTestnetConfig() {
     B3TR_GOVERNOR_MIN_DELAY: 30, //after a vote passes, you have 5 min before you can queue the proposal
     B3TR_GOVERNOR_PROPOSAL_THRESHOLD: 1000, // How many votes are needed to create a proposal
     B3TR_GOVERNOR_MIN_VOTING_DELAY: 25920, // 3 days
+    /*
+      For ambiguous functions (functions with same name), the function signature is used to differentiate them
+      e.g., instead of using "setVoterRewards", we use "setVoterRewards(address)"
+    */
+    B3TR_GOVERNOR_WHITELISTED_METHODS: {},
 
     EMISSIONS_CYCLE_DURATION: 60480, // blocks - 60480 blocks - 1 week.
     EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE: 4, // 4% decay every cycle
