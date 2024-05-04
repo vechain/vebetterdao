@@ -8,6 +8,7 @@ import "./governance/modules/GovernorVotesQuorumFractionUpgradeable.sol";
 import "./governance/modules/GovernorTimelockControlUpgradeable.sol";
 import "./governance/modules/GovernorCountingSimpleUpgradeable.sol";
 import "./governance/modules/GovernorDepositUpgradeable.sol";
+import "./governance/modules/GovernorFunctionsSettingsUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -25,8 +26,11 @@ contract B3TRGovernor is
   GovernorVotesQuorumFractionUpgradeable,
   GovernorTimelockControlUpgradeable,
   GovernorDepositUpgradeable,
+  GovernorFunctionsSettingsUpgradeable,
   UUPSUpgradeable
 {
+  bytes32 public constant GOVERNOR_FUNCTIONS_SETTINGS_ROLE = keccak256("GOVERNOR_FUNCTIONS_SETTINGS_ROLE");
+
   error UnauthorizedAccess(address user);
 
   /// @custom:oz-upgrades-unsafe-allow constructor
@@ -50,6 +54,12 @@ contract B3TRGovernor is
     }
   }
 
+  /// @notice modifier to check if the caller has the specified role or if the function is called through a governance proposal
+  modifier onlyRoleOrGovernance(bytes32 role) {
+    if (!hasRole(role, _msgSender())) _checkGovernance();
+    _;
+  }
+
   /**
    * @dev Initializes the contract with the initial parameters
    * @param _vot3Token The address of the Vot3 token used for voting
@@ -69,7 +79,9 @@ contract B3TRGovernor is
     uint256 _initialDepositThreshold,
     uint256 _initialMinVotingDelay,
     address governorAdmin,
-    address _voterRewards
+    address _voterRewards,
+    address governorFunctionSettingsRoleAddress,
+    bool _isFunctionRestrictionEnabled
   ) public initializer {
     __Governor_init("B3TRGovernor");
     __GovernorSettings_init(_initialDepositThreshold, _initialMinVotingDelay);
@@ -78,6 +90,7 @@ contract B3TRGovernor is
     __GovernorVotesQuorumFraction_init(_quorumPercentage);
     __GovernorTimelockControl_init(_timelock);
     __GovernorDeposit_init(address(_vot3Token));
+    __GovernorFunctionsSettings_init(_isFunctionRestrictionEnabled);
     __AccessControl_init();
     __UUPSUpgradeable_init();
 
@@ -86,9 +99,11 @@ contract B3TRGovernor is
     $.xAllocationVoting = _xAllocationVoting;
 
     _grantRole(DEFAULT_ADMIN_ROLE, governorAdmin);
+    _grantRole(GOVERNOR_FUNCTIONS_SETTINGS_ROLE, governorFunctionSettingsRoleAddress);
   }
 
   // ------------------ GETTERS ------------------ //
+
   function xAllocationVotingAddress() public view returns (IXAllocationVotingGovernor) {
     return _getB3TRGovernorStorage().xAllocationVoting;
   }
@@ -128,6 +143,43 @@ contract B3TRGovernor is
   function setXAllocationVoting(IXAllocationVotingGovernor _xAllocationVoting) public onlyGovernance {
     B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
     $.xAllocationVoting = _xAllocationVoting;
+  }
+
+  /**
+   * @dev See {GovernorFunctionsSettingsUpgradeable-setWhitelistFunction}.
+   *
+   * This function is only callable by the GOVERNOR_FUNCTIONS_SETTINGS_ROLE
+   */
+  function setWhitelistFunction(
+    address target,
+    bytes4 functionSelector,
+    bool isWhitelisted
+  ) public override onlyRoleOrGovernance(GOVERNOR_FUNCTIONS_SETTINGS_ROLE) {
+    super.setWhitelistFunction(target, functionSelector, isWhitelisted);
+  }
+
+  /**
+   * @dev See {GovernorFunctionsSettingsUpgradeable-setWhitelistFunctions}.
+   *
+   * This function is only callable by the GOVERNOR_FUNCTIONS_SETTINGS_ROLE
+   */
+  function setWhitelistFunctions(
+    address target,
+    bytes4[] memory functionSelectors,
+    bool isWhitelisted
+  ) public override onlyRoleOrGovernance(GOVERNOR_FUNCTIONS_SETTINGS_ROLE) {
+    super.setWhitelistFunctions(target, functionSelectors, isWhitelisted);
+  }
+
+  /**
+   * @dev See {GovernorFunctionsSettingsUpgradeable-setIsFunctionRestrictionEnabled}.
+   *
+   * This function is only callable by the GOVERNOR_FUNCTIONS_SETTINGS_ROLE
+   */
+  function setIsFunctionRestrictionEnabled(
+    bool isEnabled
+  ) public override onlyRoleOrGovernance(GOVERNOR_FUNCTIONS_SETTINGS_ROLE) {
+    super.setIsFunctionRestrictionEnabled(isEnabled);
   }
 
   /**
@@ -188,6 +240,7 @@ contract B3TRGovernor is
     uint256 depositAmount
   ) internal virtual returns (uint256 proposalId) {
     GovernorStorage storage $ = _getGovernorStorage();
+    GovernorFunctionsSettingsStorage storage $$ = _getGovernorFunctionsSettingsStorage();
     proposalId = hashProposal(targets, values, calldatas, keccak256(bytes(description)));
 
     if (targets.length != values.length || targets.length != calldatas.length) {
@@ -196,6 +249,16 @@ contract B3TRGovernor is
     if ($._proposals[proposalId].roundIdVoteStart != 0) {
       // Proposal already exists
       revert GovernorUnexpectedProposalState(proposalId, state(proposalId), bytes32(0));
+    }
+
+    // Check if the calldatas function selectors are whitelisted
+    if ($$.isFunctionRestrictionEnabled == true) {
+      for (uint256 i = 0; i < targets.length; i++) {
+        bytes4 functionSelector = _extractFunctionSelector(calldatas[i]);
+        if ($$.whitelistedFunctions[targets[i]][functionSelector] == false) {
+          revert GovernorRestrictedFunction(functionSelector);
+        }
+      }
     }
 
     ProposalCore storage proposal = $._proposals[proposalId];
@@ -219,6 +282,15 @@ contract B3TRGovernor is
     );
 
     // Using a named return variable to avoid stack too deep errors
+  }
+
+  function _extractFunctionSelector(bytes memory data) internal pure returns (bytes4) {
+    if (data.length < 4) revert GovernorFunctionInvalidSelector(data);
+    bytes4 sig;
+    assembly {
+      sig := mload(add(data, 32))
+    }
+    return sig;
   }
 
   // ------------------ OVERRIDES ------------------ //
