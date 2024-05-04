@@ -1343,7 +1343,7 @@ describe("Governor and TimeLock", function () {
       ).to.be.reverted
     })
 
-    it("Ca create a proposal that starts from second round if emissions did not start", async () => {
+    it("Can create a proposal that starts from second round if emissions did not start", async () => {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 5
