@@ -89,11 +89,12 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
    * @param moderator the address of the moderator
    */
   function _addAppModerator(bytes32 appId, address moderator) internal virtual override {
-    if (!appExists(appId)) {
-      revert X2EarnNonexistentApp(appId);
-    }
     if (moderator == address(0)) {
       revert X2EarnInvalidAddress(moderator);
+    }
+
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
     }
 
     AdministrationStorage storage $ = _getAdministrationStorage();
@@ -110,11 +111,12 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
    * @param moderator the address of the moderator
    */
   function _removeAppModerator(bytes32 appId, address moderator) internal virtual override {
-    if (!appExists(appId)) {
-      revert X2EarnNonexistentApp(appId);
-    }
     if (moderator == address(0)) {
       revert X2EarnInvalidAddress(moderator);
+    }
+
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
     }
 
     AdministrationStorage storage $ = _getAdministrationStorage();
