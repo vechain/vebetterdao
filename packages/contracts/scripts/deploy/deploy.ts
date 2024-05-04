@@ -150,6 +150,8 @@ export async function deployAll(config: ContractsConfig) {
     config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD,
     config.B3TR_GOVERNOR_MIN_VOTING_DELAY,
     TEMP_ADMIN,
+    config.B3TR_GOVERNOR_QUEUER_ADDRESS,
+    config.B3TR_GOVERNOR_EXECUTOR_ADDRESS,
     await voterRewards.getAddress(),
   ])) as B3TRGovernor
   console.log(`Governor contract deployed at address ${await governor.getAddress()}`)

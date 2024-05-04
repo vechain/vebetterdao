@@ -8,6 +8,8 @@ export function createLocalConfig() {
     B3TR_GOVERNOR_MIN_DELAY: 30, //after a vote passes, you have 5 min before you can queue the proposal
     B3TR_GOVERNOR_PROPOSAL_THRESHOLD: 1000, // How many votes are needed to create a proposal
     B3TR_GOVERNOR_MIN_VOTING_DELAY: 1, // 1 -> 1 block before the vote starts
+    B3TR_GOVERNOR_QUEUER_ADDRESS: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa", //1nd account from mnemonic of solo network
+    B3TR_GOVERNOR_EXECUTOR_ADDRESS: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa", //1nd account from mnemonic of solo network
 
     EMISSIONS_CYCLE_DURATION: 12, // 12 blocks - 2 minutes.
     EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE: 4, // 4% decay every cycle
