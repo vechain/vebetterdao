@@ -1,4 +1,26 @@
 // SPDX-License-Identifier: MIT
+
+//                                      #######
+//                                 ################
+//                               ####################
+//                             ###########   #########
+//                            #########      #########
+//          #######          #########       #########
+//          #########       #########      ##########
+//           ##########     ########     ####################
+//            ##########   #########  #########################
+//              ################### ############################
+//               #################  ##########          ########
+//                 ##############      ###              ########
+//                  ############                       #########
+//                    ##########                     ##########
+//                     ########                    ###########
+//                       ###                    ############
+//                                          ##############
+//                                    #################
+//                                   ##############
+//                                   #########
+
 pragma solidity ^0.8.18;
 
 import { IXAllocationPool } from "./interfaces/IXAllocationPool.sol";
@@ -13,7 +35,14 @@ import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/
 import { IB3TR } from "./interfaces/IB3TR.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
 
+/**
+ * @title XAllocationPool
+ * @notice This contracts allows x2earn apps to withdraw their funds from the allocation rounds.
+ *
+ * The contract is using AccessControl to handle roles for upgrading the contract.
+ */
 contract XAllocationPool is
   Initializable,
   IXAllocationPool,
@@ -30,6 +59,7 @@ contract XAllocationPool is
     IEmissions _emissions;
     IB3TR b3tr;
     ITreasury treasury;
+    IX2EarnApps x2EarnApps;
     mapping(bytes32 => mapping(uint256 => bool)) claimedRewards;
   }
 
@@ -48,9 +78,16 @@ contract XAllocationPool is
     _disableInitializers();
   }
 
-  function initialize(address _admin, address upgrader, address _b3trAddress, address _treasury) public initializer {
+  function initialize(
+    address _admin,
+    address upgrader,
+    address _b3trAddress,
+    address _treasury,
+    address _x2EarnApps
+  ) public initializer {
     require(_b3trAddress != address(0), "XAllocationPool: new b3tr is the zero address");
     require(_treasury != address(0), "XAllocationPool: new treasury is the zero address");
+    require(_x2EarnApps != address(0), "XAllocationPool: new x2EarnApps is the zero address");
 
     __AccessControl_init();
     __ReentrancyGuard_init();
@@ -59,6 +96,7 @@ contract XAllocationPool is
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     $.b3tr = IB3TR(_b3trAddress);
     $.treasury = ITreasury(_treasury);
+    $.x2EarnApps = IX2EarnApps(_x2EarnApps);
 
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     _grantRole(UPGRADER_ROLE, upgrader);
@@ -96,11 +134,19 @@ contract XAllocationPool is
     $.b3tr = IB3TR(b3tr_);
   }
 
+  function setX2EarnAppsAddress(address x2EarnApps_) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(x2EarnApps_ != address(0), "XAllocationPool: new x2EarnApps is the zero address");
+
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    $.x2EarnApps = IX2EarnApps(x2EarnApps_);
+  }
+
   function claim(uint256 roundId, bytes32 appId) public nonReentrant {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
 
     require(!$.claimedRewards[appId][roundId], "XAllocationPool: rewards already claimed for this app and round");
     require(!xAllocationVoting().isActive(roundId), "XAllocationPool: round not ended yet");
+    require($.x2EarnApps.appExists(appId), "XAllocationPool: app does not exist");
 
     (uint256 amountToClaim, uint256 unallocatedAmount) = claimableAmount(roundId, appId);
     require(amountToClaim > 0, "XAllocationPool: no rewards available for this app");
@@ -108,7 +154,7 @@ contract XAllocationPool is
     // update the claimedRewards mapping
     $.claimedRewards[appId][roundId] = true;
 
-    address receiverAddress = xAllocationVoting().getAppReceiverAddress(appId);
+    address receiverAddress = $.x2EarnApps.appReceiverAddress(appId);
 
     //check that contract has enough funds to pay the reward
     require($.b3tr.balanceOf(address(this)) >= (amountToClaim + unallocatedAmount), "Insufficient funds");
@@ -246,7 +292,7 @@ contract XAllocationPool is
     );
 
     uint256 total = _emissionAmount(roundId);
-    bytes32[] memory eligibleApps = xAllocationVoting().getRoundApps(roundId);
+    bytes32[] memory eligibleApps = xAllocationVoting().getAppIdsOfRound(roundId);
 
     uint256 available = (total * xAllocationVoting().getRoundBaseAllocationPercentage(roundId)) / 100;
 
@@ -345,5 +391,10 @@ contract XAllocationPool is
   function b3tr() public view returns (IB3TR) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     return $.b3tr;
+  }
+
+  function x2EarnApps() public view returns (IX2EarnApps) {
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    return $.x2EarnApps;
   }
 }

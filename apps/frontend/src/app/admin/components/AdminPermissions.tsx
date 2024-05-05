@@ -39,6 +39,8 @@ export const AdminPermissions = () => {
     isUpgraderOfTimelock,
     isUpgraderOfTreasury,
     isAdminOfTreasury,
+    isAdminOfX2EarnApps,
+    isUpgraderOfX2EarnApps,
   } = useAccountPermissions(account ?? "")
 
   return (
@@ -62,6 +64,7 @@ export const AdminPermissions = () => {
                   <Th>Voter Rewards</Th>
                   <Th>XAllocation Voting</Th>
                   <Th>XAllocation Pool</Th>
+                  <Th>X2Earn Apps</Th>
                   <Th>Treasury</Th>
                 </Tr>
               </Thead>
@@ -77,6 +80,7 @@ export const AdminPermissions = () => {
                   <Td>{isAdminOfVoterRewards ? "Yes" : "No"}</Td>
                   <Td>{isAdminOfXAllocationVoting ? "Yes" : "No"}</Td>
                   <Td>{isAdminOfXAllocationPool ? "Yes" : "No"}</Td>
+                  <Td>{isAdminOfX2EarnApps ? "Yes" : "No"}</Td>
                   <Td>{isAdminOfTreasury ? "Yes" : "No"}</Td>
                 </Tr>
                 <Tr>
@@ -84,6 +88,7 @@ export const AdminPermissions = () => {
                   <Td>{isMinterOfB3tr ? "Yes" : "No"}</Td>
                   <Td></Td>
                   <Td>{isMinterOfEmissions ? "Yes" : "No"}</Td>
+                  <Td></Td>
                   <Td></Td>
                   <Td></Td>
                   <Td></Td>
@@ -103,6 +108,7 @@ export const AdminPermissions = () => {
                   <Td>{isUpgraderOfVoterRewards ? "Yes" : "No"}</Td>
                   <Td>{isUpgraderOfXAllocationVoting ? "Yes" : "No"}</Td>
                   <Td>{isUpgraderOfXAllocationPool ? "Yes" : "No"}</Td>
+                  <Td>{isUpgraderOfX2EarnApps ? "Yes" : "No"}</Td>
                   <Td>{isUpgraderOfTreasury ? "Yes" : "No"}</Td>
                 </Tr>
               </Tbody>

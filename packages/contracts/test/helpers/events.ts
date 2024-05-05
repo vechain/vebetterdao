@@ -1,5 +1,6 @@
 import { BaseContract } from "ethers"
 import { XAllocationVoting } from "../../typechain-types"
+import { getOrDeployContractInstances } from "./deploy"
 
 export const filterEventsByName = (events: any[], eventName: string) => {
   return events.filter(event => event.fragment && event.fragment.name === eventName)
@@ -40,8 +41,9 @@ export const parseAllocationVoteCastEvent = (event: any, xAllocationVoting: XAll
   }
 }
 
-export const parseAppAddedEvent = (event: any, xAllocationVoting: XAllocationVoting) => {
-  const decoded = decodeEvent(event, xAllocationVoting)
+export const parseAppAddedEvent = async (event: any) => {
+  const { x2EarnApps } = await getOrDeployContractInstances({ forceDeploy: false })
+  const decoded = decodeEvent(event, x2EarnApps)
 
   return {
     id: decoded?.args[0],

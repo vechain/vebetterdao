@@ -1,16 +1,12 @@
-import { Emissions, Treasury, XAllocationVoting } from "../../typechain-types"
+import { Emissions, Treasury, X2EarnApps } from "../../typechain-types"
 import { SeedStrategy, getAccounts, getSeedAccounts } from "../helpers/seedAccounts"
 import { bootstrapEmissions } from "../helpers/emissions"
 import { addXDapps } from "../helpers/xApp"
 import { airdropB3trFromTreasury } from "../helpers/airdrop"
 
-export const setupLocalEnvironment = async (
-  xAllocationVoting: XAllocationVoting,
-  emissions: Emissions,
-  treasury: Treasury,
-) => {
+export const setupLocalEnvironment = async (emissions: Emissions, treasury: Treasury, x2EarnApps: X2EarnApps) => {
   const start = performance.now()
-  console.log("Setup local environment")
+  console.log("================ Setup local environment ================")
 
   const accounts = getAccounts(12)
 
@@ -50,20 +46,20 @@ export const setupLocalEnvironment = async (
   await bootstrapEmissions(emissionsContract, admin)
 
   // Add x-apps to the XAllocationPool
-  const xAllocAddress = await xAllocationVoting.getAddress()
-  await addXDapps(xAllocAddress, admin, APPS)
+  const x2EarnAppsAddress = await x2EarnApps.getAddress()
+  await addXDapps(x2EarnAppsAddress, admin, APPS)
 
   // Seed the first 5 accounts with some tokens
   const treasuryAddress = await treasury.getAddress()
   const seedAccounts = getSeedAccounts(SeedStrategy.FIXED, 5, 0)
   await airdropB3trFromTreasury(treasuryAddress, admin, seedAccounts)
 
-  const end = performance.now()
-  console.log(`Setup complete in ${end - start}ms`)
+  const end = new Date(performance.now() - start)
+  console.log(`Setup complete in ${end.getMinutes()}m ${end.getSeconds()}s`)
 }
 
-export const setupTestEnvironment = async (xAllocationVoting: XAllocationVoting, emissions: Emissions) => {
-  console.log("Setup Testnet environment:")
+export const setupTestEnvironment = async (emissions: Emissions, x2EarnApps: X2EarnApps) => {
+  console.log("================ Setup Testnet environment ================")
   const start = performance.now()
 
   const accounts = getAccounts(10)
@@ -94,8 +90,9 @@ export const setupTestEnvironment = async (xAllocationVoting: XAllocationVoting,
   ]
 
   // Add x-apps to the XAllocationPool
-  const xAllocAddress = await xAllocationVoting.getAddress()
-  await addXDapps(xAllocAddress, admin, APPS)
+  const x2EarnAppsAddress = await x2EarnApps.getAddress()
+  await addXDapps(x2EarnAppsAddress, admin, APPS)
+  console.log("x-apps added")
 
   const end = performance.now()
   console.log(`Setup complete in ${end - start}ms`)

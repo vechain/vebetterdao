@@ -196,6 +196,13 @@ contract B3TRGovernor is
    * @dev See {IB3TRGovernor-propose}. This function has opt-in frontrunning protection, described in {_isValidDescriptionForProposer}.
    *
    * The {startRoundId} parameter is used to specify the round in which the proposal should be active. The round must be in the future.
+   *
+   * @param targets The addresses of the contracts to call
+   * @param values The values to send to the contracts
+   * @param calldatas Function signatures and arguments
+   * @param description The description of the proposal
+   * @param startRoundId The round in which the proposal should be active
+   * @param depositAmount The amount of tokens the proposer intends to deposit
    */
   function propose(
     address[] memory targets,
@@ -236,6 +243,14 @@ contract B3TRGovernor is
   /**
    * @dev Internal propose mechanism. Can be overridden to add more logic on proposal creation.
    *
+   * @param targets The addresses of the contracts to call
+   * @param values The values to send to the contracts
+   * @param calldatas Function signatures and arguments
+   * @param description The description of the proposal
+   * @param proposer The address of the proposer
+   * @param startRoundId The round in which the proposal should be active
+   * @param depositAmount The amount of tokens the proposer intends to deposit
+   *
    * Emits a {IB3TRGovernor-ProposalCreated} event.
    */
   // This function is getting market as a false positive by Slither as there is a reentrancy guard in place on _depositFunds
@@ -249,35 +264,20 @@ contract B3TRGovernor is
     uint256 startRoundId,
     uint256 depositAmount
   ) internal virtual returns (uint256 proposalId) {
-    GovernorStorage storage $ = _getGovernorStorage();
-    GovernorFunctionsSettingsStorage storage $$ = _getGovernorFunctionsSettingsStorage();
     proposalId = hashProposal(targets, values, calldatas, keccak256(bytes(description)));
 
-    if (targets.length != values.length || targets.length != calldatas.length) {
-      revert GovernorInvalidProposalLength(targets.length, calldatas.length, values.length);
-    }
-    if ($._proposals[proposalId].roundIdVoteStart != 0) {
-      // Proposal already exists
-      revert GovernorUnexpectedProposalState(proposalId, state(proposalId), bytes32(0));
-    }
+    _validateProposeParams(targets, values, calldatas, proposalId);
 
-    // Check if the calldatas function selectors are whitelisted
-    if ($$.isFunctionRestrictionEnabled == true) {
-      for (uint256 i = 0; i < targets.length; i++) {
-        bytes4 functionSelector = _extractFunctionSelector(calldatas[i]);
-        if ($$.whitelistedFunctions[targets[i]][functionSelector] == false) {
-          revert GovernorRestrictedFunction(functionSelector);
-        }
-      }
-    }
+    _checkFunctionsRestriction(targets, calldatas);
 
-    ProposalCore storage proposal = $._proposals[proposalId];
-    proposal.proposer = proposer;
-    proposal.roundIdVoteStart = startRoundId;
-    proposal.voteDuration = SafeCast.toUint32(votingPeriod());
-    proposal.isExecutable = targets.length > 0;
-    proposal.depositAmount = depositAmount;
-    proposal.depositThreshold = depositThreshold();
+    _setProposal(
+      proposalId,
+      proposer,
+      SafeCast.toUint32(votingPeriod()),
+      startRoundId,
+      targets.length > 0,
+      depositAmount
+    );
 
     _depositFunds(depositAmount, proposer, proposalId);
 
@@ -293,6 +293,79 @@ contract B3TRGovernor is
     );
 
     // Using a named return variable to avoid stack too deep errors
+  }
+
+  /**
+   * @dev Internal function to validate the propose parameters
+   *
+   * @param targets The addresses of the contracts to call
+   * @param values The values to send to the contracts
+   * @param calldatas Function signatures and arguments
+   * @param proposalId The id of the proposal
+   */
+  function _validateProposeParams(
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    uint256 proposalId
+  ) internal view {
+    GovernorStorage storage $ = _getGovernorStorage();
+
+    if (targets.length != values.length || targets.length != calldatas.length) {
+      revert GovernorInvalidProposalLength(targets.length, calldatas.length, values.length);
+    }
+    if ($._proposals[proposalId].roundIdVoteStart != 0) {
+      // Proposal already exists
+      revert GovernorUnexpectedProposalState(proposalId, state(proposalId), bytes32(0));
+    }
+  }
+
+  /**
+   * @dev Internal function to save the proposal data in storage
+   *
+   * @param proposalId The id of the proposal
+   * @param proposer The address of the proposer
+   * @param voteDuration The duration of the vote
+   * @param roundIdVoteStart The round in which the proposal should be active
+   * @param isExecutable If the proposal is executable
+   * @param depositAmount The amount of tokens the proposer intends to deposit
+   */
+  function _setProposal(
+    uint256 proposalId,
+    address proposer,
+    uint32 voteDuration,
+    uint256 roundIdVoteStart,
+    bool isExecutable,
+    uint256 depositAmount
+  ) internal {
+    GovernorStorage storage $ = _getGovernorStorage();
+
+    ProposalCore storage proposal = $._proposals[proposalId];
+
+    proposal.proposer = proposer;
+    proposal.roundIdVoteStart = roundIdVoteStart;
+    proposal.voteDuration = voteDuration;
+    proposal.isExecutable = isExecutable;
+    proposal.depositAmount = depositAmount;
+    proposal.depositThreshold = depositThreshold();
+  }
+
+  /**
+   * @dev Internal function check if the targets and calldatas are whitelisted
+   * @param targets The addresses of the contracts to call
+   * @param calldatas Function signatures and arguments
+   */
+  function _checkFunctionsRestriction(address[] memory targets, bytes[] memory calldatas) internal view {
+    GovernorFunctionsSettingsStorage storage $$ = _getGovernorFunctionsSettingsStorage();
+
+    if ($$.isFunctionRestrictionEnabled == true) {
+      for (uint256 i = 0; i < targets.length; i++) {
+        bytes4 functionSelector = _extractFunctionSelector(calldatas[i]);
+        if ($$.whitelistedFunctions[targets[i]][functionSelector] == false) {
+          revert GovernorRestrictedFunction(functionSelector);
+        }
+      }
+    }
   }
 
   function _extractFunctionSelector(bytes memory data) internal pure returns (bytes4) {
@@ -455,9 +528,7 @@ contract B3TRGovernor is
     }
   }
 
-  function proposalNeedsQueuing(
-    uint256 proposalId
-  ) public view override(GovernorUpgradeable, GovernorTimelockControlUpgradeable) returns (bool) {
+  function proposalNeedsQueuing(uint256 proposalId) public view returns (bool) {
     GovernorStorage storage $ = _getGovernorStorage();
     ProposalCore storage proposal = $._proposals[proposalId];
     if (proposal.roundIdVoteStart == 0) {
