@@ -164,8 +164,9 @@ export const getOrDeployContractInstances = async ({
       vot3Token: await vot3.getAddress(),
       timelock: await timeLock.getAddress(),
       xAllocationVoting: await xAllocationVoting.getAddress(),
+      b3tr: await b3tr.getAddress(),
       quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
-      initialDepositThreshold: config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD, // voting threshold
+      initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD, // deposit threshold
       initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
       initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD, // voting threshold
       governorAdmin: owner.address,
