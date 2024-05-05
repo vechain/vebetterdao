@@ -149,7 +149,7 @@ export async function deployAll(config: ContractsConfig) {
       timelock: await timelock.getAddress(),
       xAllocationVoting: await xAllocationVoting.getAddress(),
       quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
-      initialDepositThreshold: config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD,
+      initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD,
       initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY,
       initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD,
       governorAdmin: TEMP_ADMIN,
