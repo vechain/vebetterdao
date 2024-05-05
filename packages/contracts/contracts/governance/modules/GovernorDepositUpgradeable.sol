@@ -115,7 +115,8 @@ abstract contract GovernorDepositUpgradeable is Initializable, ReentrancyGuardUp
    */
   function proposalDepositReached(uint256 proposalId) public view returns (bool) {
     GovernorStorage storage $ = _getGovernorStorage();
-    return getProposalDeposits(proposalId) >= $._proposals[proposalId].depositThreshold;
+    ProposalCore storage proposal = $._proposals[proposalId];
+    return proposal.depositAmount >= proposal.depositThreshold;
   }
 
   /**

@@ -182,7 +182,7 @@ describe("B3TR Token", function () {
 
       const balance = await b3tr.balanceOf(otherAccount)
       expect(String(balance)).to.eql(ethers.parseEther(config.B3TR_CAP.toString()).toString())
-      expect(await b3tr.getTotalSupply()).to.eql(ethers.parseEther(config.B3TR_CAP.toString()))
+      expect(await b3tr.getCurrentTotalSupply()).to.eql(ethers.parseEther(config.B3TR_CAP.toString()))
     })
   })
 
@@ -247,14 +247,14 @@ describe("B3TR Token", function () {
       if (!receipt1) assert.fail("No receipt")
 
       expect(await b3tr.getPastTotalSupply(receipt1.blockNumber - 1)).to.eql(ethers.parseEther("0"))
-      expect(await b3tr.getTotalSupply()).to.eql(ethers.parseEther("1"))
+      expect(await b3tr.getCurrentTotalSupply()).to.eql(ethers.parseEther("1"))
 
       const tx2 = await b3tr.mint(otherAccount, ethers.parseEther("10"))
       const receipt2 = await tx2.wait()
       if (!receipt2) assert.fail("No receipt")
 
       expect(await b3tr.getPastTotalSupply(receipt2.blockNumber - 1)).to.eql(ethers.parseEther("1"))
-      expect(await b3tr.getTotalSupply()).to.eql(ethers.parseEther("11"))
+      expect(await b3tr.getCurrentTotalSupply()).to.eql(ethers.parseEther("11"))
 
       await waitForNextBlock()
       await waitForNextBlock()

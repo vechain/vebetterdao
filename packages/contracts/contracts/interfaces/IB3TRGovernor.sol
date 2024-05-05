@@ -130,7 +130,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   error GovernorInvalidDepositAmount();
 
   /**
-   * @dev The vote was already cast.
+   * @dev The deposit threshold is not in the valid range for a percentage - 0 to 100.
    */
   error GovernorDepositThresholdNotInRange(uint256 depositThreshold);
 
