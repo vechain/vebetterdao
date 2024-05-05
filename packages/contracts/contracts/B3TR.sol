@@ -26,8 +26,6 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
-import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
-import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 /// @title B3TR Token Contract
 /// @dev Extends ERC20 Token Standard with capping, pausing, and access control functionalities to manage B3TR tokens in the VeBetter ecosystem.
