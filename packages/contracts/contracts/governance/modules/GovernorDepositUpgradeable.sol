@@ -135,7 +135,7 @@ abstract contract GovernorDepositUpgradeable is Initializable, ReentrancyGuardUp
    *
    * @param proposalId The id of the proposal.
    */
-  function proposalDepositReached(uint256 proposalId) public view returns (bool) {
+  function proposalDepositReached(uint256 proposalId) public view override returns (bool) {
     return getProposalDeposits(proposalId) >= depositThreshold();
   }
 
@@ -161,7 +161,7 @@ abstract contract GovernorDepositUpgradeable is Initializable, ReentrancyGuardUp
    * @param depositor The address of the depositor.
    * @param proposalId The id of the proposal.
    */
-  function _depositFunds(uint256 amount, address depositor, uint256 proposalId) internal nonReentrant {
+  function _depositFunds(uint256 amount, address depositor, uint256 proposalId) internal override nonReentrant {
     GovernorDepositStorage storage $ = _getGovernorDepositStorage();
 
     require($.vot3.transferFrom(depositor, address(this), amount), "B3TRGovernor: transfer failed");

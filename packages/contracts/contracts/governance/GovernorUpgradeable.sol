@@ -46,8 +46,9 @@ import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGove
  * - A counting module must implement {quorum}, {_quorumReached}, {_voteSucceeded} and {_countVote}
  * - A voting module must implement {_getVotes}
  * - A settings module must implement {votingPeriod}, {minVotingDelay}, {voteThreshold}
- * - A deposit module must implement {depositThreshold} and {proposalDepositReached}
+ * - A deposit module must implement {proposalDepositReached} and {_depositFunds}
  * - A settings module must implement {xAllocationVoting} and {voterRewards}, and handle the storage of external contracts
+ * - A whitelist module must implement {_checkFunctionsRestriction}
  */
 abstract contract GovernorUpgradeable is
   Initializable,
@@ -323,6 +324,20 @@ abstract contract GovernorUpgradeable is
   }
 
   /**
+   * @dev Function to know if a proposal is executable or not.
+   * If the proposal was creted without any targets, values, or calldatas, it is not executable.
+   */
+  function proposalNeedsQueuing(uint256 proposalId) public view returns (bool) {
+    GovernorStorage storage $ = _getGovernorStorage();
+    ProposalCore storage proposal = $._proposals[proposalId];
+    if (proposal.roundIdVoteStart == 0) {
+      revert GovernorNonexistentProposal(proposalId);
+    }
+
+    return proposal.isExecutable;
+  }
+
+  /**
    * @dev Reverts if the `msg.sender` is not the executor. In case the executor is not this contract
    * itself, the function reverts if `msg.data` is not whitelisted as a result of an {execute}
    * operation. See {onlyGovernance}.
@@ -340,45 +355,162 @@ abstract contract GovernorUpgradeable is
   }
 
   /**
-   * @dev Amount of votes already cast passes the threshold limit.
-   */
-  function _quorumReached(uint256 proposalId) internal view virtual returns (bool);
-
-  /**
-   * @dev Is the proposal successful or not.
-   */
-  function _voteSucceeded(uint256 proposalId) internal view virtual returns (bool);
-
-  /**
-   * @dev Get the voting weight of `account` at a specific `timepoint`.
-   */
-  function _getVotes(address account, uint256 timepoint) internal view virtual returns (uint256);
-
-  /**
-   * @dev Register a vote for `proposalId` by `account` with a given `support`, and voting `weight`.
+   * @dev See {IB3TRGovernor-propose}. This function has opt-in frontrunning protection, described in {_isValidDescriptionForProposer}.
    *
-   * Note: Support is generic and can represent various things depending on the voting system used.
+   * The {startRoundId} parameter is used to specify the round in which the proposal should be active. The round must be in the future.
+   *
+   * @param targets The addresses of the contracts to call
+   * @param values The values to send to the contracts
+   * @param calldatas Function signatures and arguments
+   * @param description The description of the proposal
+   * @param startRoundId The round in which the proposal should be active
+   * @param depositAmount The amount of tokens the proposer intends to deposit
    */
-  function _countVote(
-    uint256 proposalId,
-    address account,
-    uint8 support,
-    uint256 weight,
-    uint256 power
-  ) internal virtual;
+  function propose(
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    string memory description,
+    uint256 startRoundId,
+    uint256 depositAmount
+  ) public virtual returns (uint256) {
+    address proposer = _msgSender();
+    uint256 currentRoundId = xAllocationVoting().currentRoundId();
 
-  /**
-   * @dev Function to know if a proposal is executable or not.
-   * If the proposal was creted without any targets, values, or calldatas, it is not executable.
-   */
-  function proposalNeedsQueuing(uint256 proposalId) public view returns (bool) {
-    GovernorStorage storage $ = _getGovernorStorage();
-    ProposalCore storage proposal = $._proposals[proposalId];
-    if (proposal.roundIdVoteStart == 0) {
-      revert GovernorNonexistentProposal(proposalId);
+    // if allocation rounds did not start yet, revert, otherwise we will have issues with roundSnapshot and roundDeadline
+    if (currentRoundId == 0) {
+      revert GovernorInvalidStartRound(startRoundId);
     }
 
-    return proposal.isExecutable;
+    // round must be in the future
+    if (startRoundId <= currentRoundId) {
+      revert GovernorInvalidStartRound(startRoundId);
+    }
+
+    // only do this check if user wants to start proposal in the next round
+    if (startRoundId == currentRoundId + 1) {
+      if (!canProposalStartInNextRound()) {
+        revert GovernorInvalidStartRound(startRoundId);
+      }
+    }
+
+    // check description restriction
+    if (!_isValidDescriptionForProposer(proposer, description)) {
+      revert GovernorRestrictedProposer(proposer);
+    }
+
+    return _propose(targets, values, calldatas, description, proposer, startRoundId, depositAmount);
+  }
+
+  /**
+   * @dev Internal propose mechanism. Can be overridden to add more logic on proposal creation.
+   *
+   * @param targets The addresses of the contracts to call
+   * @param values The values to send to the contracts
+   * @param calldatas Function signatures and arguments
+   * @param description The description of the proposal
+   * @param proposer The address of the proposer
+   * @param startRoundId The round in which the proposal should be active
+   * @param depositAmount The amount of tokens the proposer intends to deposit
+   *
+   * Emits a {IB3TRGovernor-ProposalCreated} event.
+   */
+  // This function is getting market as a false positive by Slither as there is a reentrancy guard in place on _depositFunds
+  // slither-disable-next-line reentrancy-no-eth
+  function _propose(
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    string memory description,
+    address proposer,
+    uint256 startRoundId,
+    uint256 depositAmount
+  ) internal virtual returns (uint256 proposalId) {
+    proposalId = hashProposal(targets, values, calldatas, keccak256(bytes(description)));
+
+    // The implementation consists of multiple internal function calls to avoid stack too deep errors.
+
+    _validateProposeParams(targets, values, calldatas, proposalId);
+
+    _checkFunctionsRestriction(targets, calldatas);
+
+    _setProposal(
+      proposalId,
+      proposer,
+      SafeCast.toUint32(votingPeriod()),
+      startRoundId,
+      targets.length > 0,
+      depositAmount
+    );
+
+    _depositFunds(depositAmount, proposer, proposalId);
+
+    emit ProposalCreated(
+      proposalId,
+      proposer,
+      targets,
+      values,
+      new string[](targets.length),
+      calldatas,
+      description,
+      startRoundId
+    );
+
+    // Using a named return variable to avoid stack too deep errors
+  }
+
+  /**
+   * @dev Internal function to validate the propose parameters
+   *
+   * @param targets The addresses of the contracts to call
+   * @param values The values to send to the contracts
+   * @param calldatas Function signatures and arguments
+   * @param proposalId The id of the proposal
+   */
+  function _validateProposeParams(
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    uint256 proposalId
+  ) internal view {
+    GovernorStorage storage $ = _getGovernorStorage();
+
+    if (targets.length != values.length || targets.length != calldatas.length) {
+      revert GovernorInvalidProposalLength(targets.length, calldatas.length, values.length);
+    }
+    if ($._proposals[proposalId].roundIdVoteStart != 0) {
+      // Proposal already exists
+      revert GovernorUnexpectedProposalState(proposalId, state(proposalId), bytes32(0));
+    }
+  }
+
+  /**
+   * @dev Internal function to save the proposal data in storage
+   *
+   * @param proposalId The id of the proposal
+   * @param proposer The address of the proposer
+   * @param voteDuration The duration of the vote
+   * @param roundIdVoteStart The round in which the proposal should be active
+   * @param isExecutable If the proposal is executable
+   * @param depositAmount The amount of tokens the proposer intends to deposit
+   */
+  function _setProposal(
+    uint256 proposalId,
+    address proposer,
+    uint32 voteDuration,
+    uint256 roundIdVoteStart,
+    bool isExecutable,
+    uint256 depositAmount
+  ) internal {
+    GovernorStorage storage $ = _getGovernorStorage();
+
+    ProposalCore storage proposal = $._proposals[proposalId];
+
+    proposal.proposer = proposer;
+    proposal.roundIdVoteStart = roundIdVoteStart;
+    proposal.voteDuration = voteDuration;
+    proposal.isExecutable = isExecutable;
+    proposal.depositAmount = depositAmount;
   }
 
   /**
@@ -826,4 +958,42 @@ abstract contract GovernorUpgradeable is
    * @dev Check if the required B3TR amount needed for the proposal to be active has been reached.
    */
   function proposalDepositReached(uint256 proposalId) public view virtual returns (bool);
+
+  /**
+   * @dev Check if the functions in the proposal are restricted.
+   */
+  function _checkFunctionsRestriction(address[] memory targets, bytes[] memory calldatas) internal view virtual;
+
+  /**
+   * @dev Deposit the required B3TR amount needed for the proposal to be active.
+   */
+  function _depositFunds(uint256 depositAmount, address depositor, uint256 proposalId) internal virtual;
+
+  /**
+   * @dev Amount of votes already cast passes the threshold limit.
+   */
+  function _quorumReached(uint256 proposalId) internal view virtual returns (bool);
+
+  /**
+   * @dev Is the proposal successful or not.
+   */
+  function _voteSucceeded(uint256 proposalId) internal view virtual returns (bool);
+
+  /**
+   * @dev Get the voting weight of `account` at a specific `timepoint`.
+   */
+  function _getVotes(address account, uint256 timepoint) internal view virtual returns (uint256);
+
+  /**
+   * @dev Register a vote for `proposalId` by `account` with a given `support`, and voting `weight`.
+   *
+   * Note: Support is generic and can represent various things depending on the voting system used.
+   */
+  function _countVote(
+    uint256 proposalId,
+    address account,
+    uint8 support,
+    uint256 weight,
+    uint256 power
+  ) internal virtual;
 }

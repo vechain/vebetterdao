@@ -116,8 +116,6 @@ contract B3TRGovernor is
     _grantRole(GOVERNOR_FUNCTIONS_SETTINGS_ROLE, data.governorFunctionSettingsRoleAddress);
   }
 
-  // ------------------ GETTERS ------------------ //
-
   // ------------------ SETTERS ------------------ //
 
   /**
@@ -176,167 +174,6 @@ contract B3TRGovernor is
   }
 
   /**
-   * @dev See {IB3TRGovernor-propose}. This function has opt-in frontrunning protection, described in {_isValidDescriptionForProposer}.
-   *
-   * The {startRoundId} parameter is used to specify the round in which the proposal should be active. The round must be in the future.
-   *
-   * @param targets The addresses of the contracts to call
-   * @param values The values to send to the contracts
-   * @param calldatas Function signatures and arguments
-   * @param description The description of the proposal
-   * @param startRoundId The round in which the proposal should be active
-   * @param depositAmount The amount of tokens the proposer intends to deposit
-   */
-  function propose(
-    address[] memory targets,
-    uint256[] memory values,
-    bytes[] memory calldatas,
-    string memory description,
-    uint256 startRoundId,
-    uint256 depositAmount
-  ) public virtual returns (uint256) {
-    address proposer = _msgSender();
-    uint256 currentRoundId = xAllocationVoting().currentRoundId();
-
-    // if allocation rounds did not start yet, revert, otherwise we will have issues with roundSnapshot and roundDeadline
-    if (currentRoundId == 0) {
-      revert GovernorInvalidStartRound(startRoundId);
-    }
-
-    // round must be in the future
-    if (startRoundId <= currentRoundId) {
-      revert GovernorInvalidStartRound(startRoundId);
-    }
-
-    // only do this check if user wants to start proposal in the next round
-    if (startRoundId == currentRoundId + 1) {
-      if (!canProposalStartInNextRound()) {
-        revert GovernorInvalidStartRound(startRoundId);
-      }
-    }
-
-    // check description restriction
-    if (!_isValidDescriptionForProposer(proposer, description)) {
-      revert GovernorRestrictedProposer(proposer);
-    }
-
-    return _propose(targets, values, calldatas, description, proposer, startRoundId, depositAmount);
-  }
-
-  /**
-   * @dev Internal propose mechanism. Can be overridden to add more logic on proposal creation.
-   *
-   * @param targets The addresses of the contracts to call
-   * @param values The values to send to the contracts
-   * @param calldatas Function signatures and arguments
-   * @param description The description of the proposal
-   * @param proposer The address of the proposer
-   * @param startRoundId The round in which the proposal should be active
-   * @param depositAmount The amount of tokens the proposer intends to deposit
-   *
-   * Emits a {IB3TRGovernor-ProposalCreated} event.
-   */
-  // This function is getting market as a false positive by Slither as there is a reentrancy guard in place on _depositFunds
-  // slither-disable-next-line reentrancy-no-eth
-  function _propose(
-    address[] memory targets,
-    uint256[] memory values,
-    bytes[] memory calldatas,
-    string memory description,
-    address proposer,
-    uint256 startRoundId,
-    uint256 depositAmount
-  ) internal virtual returns (uint256 proposalId) {
-    proposalId = hashProposal(targets, values, calldatas, keccak256(bytes(description)));
-
-    _validateProposeParams(targets, values, calldatas, proposalId);
-
-    _checkFunctionsRestriction(targets, calldatas);
-
-    _setProposal(
-      proposalId,
-      proposer,
-      SafeCast.toUint32(votingPeriod()),
-      startRoundId,
-      targets.length > 0,
-      depositAmount
-    );
-
-    _depositFunds(depositAmount, proposer, proposalId);
-
-    emit ProposalCreated(
-      proposalId,
-      proposer,
-      targets,
-      values,
-      new string[](targets.length),
-      calldatas,
-      description,
-      startRoundId
-    );
-
-    // Using a named return variable to avoid stack too deep errors
-  }
-
-  /**
-   * @dev Internal function to validate the propose parameters
-   *
-   * @param targets The addresses of the contracts to call
-   * @param values The values to send to the contracts
-   * @param calldatas Function signatures and arguments
-   * @param proposalId The id of the proposal
-   */
-  function _validateProposeParams(
-    address[] memory targets,
-    uint256[] memory values,
-    bytes[] memory calldatas,
-    uint256 proposalId
-  ) internal view {
-    GovernorStorage storage $ = _getGovernorStorage();
-
-    if (targets.length != values.length || targets.length != calldatas.length) {
-      revert GovernorInvalidProposalLength(targets.length, calldatas.length, values.length);
-    }
-    if ($._proposals[proposalId].roundIdVoteStart != 0) {
-      // Proposal already exists
-      revert GovernorUnexpectedProposalState(proposalId, state(proposalId), bytes32(0));
-    }
-  }
-
-  /**
-   * @dev Internal function to save the proposal data in storage
-   *
-   * @param proposalId The id of the proposal
-   * @param proposer The address of the proposer
-   * @param voteDuration The duration of the vote
-   * @param roundIdVoteStart The round in which the proposal should be active
-   * @param isExecutable If the proposal is executable
-   * @param depositAmount The amount of tokens the proposer intends to deposit
-   */
-  function _setProposal(
-    uint256 proposalId,
-    address proposer,
-    uint32 voteDuration,
-    uint256 roundIdVoteStart,
-    bool isExecutable,
-    uint256 depositAmount
-  ) internal {
-    GovernorStorage storage $ = _getGovernorStorage();
-
-    ProposalCore storage proposal = $._proposals[proposalId];
-
-    proposal.proposer = proposer;
-    proposal.roundIdVoteStart = roundIdVoteStart;
-    proposal.voteDuration = voteDuration;
-    proposal.isExecutable = isExecutable;
-    proposal.depositAmount = depositAmount;
-  }
-
-  // ------------------ OVERRIDES ------------------ //
-
-  function _authorizeUpgrade(address newImplementation) internal override onlyGovernance {}
-
-  /**
    * @dev See {Governor-cancel}.
    *
    * Proposal can be canceled by the proposer or by the admin before it becomes active.
@@ -357,6 +194,10 @@ contract B3TRGovernor is
 
     return _cancel(targets, values, calldatas, descriptionHash);
   }
+
+  // ------------------ OVERRIDES ------------------ //
+
+  function _authorizeUpgrade(address newImplementation) internal override onlyGovernance {}
 
   function state(
     uint256 proposalId
