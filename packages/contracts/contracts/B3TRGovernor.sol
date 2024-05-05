@@ -96,33 +96,22 @@ contract B3TRGovernor is
 
   // ------------------ GETTERS ------------------ //
 
-  function canProposalStartInNextRound() public view returns (bool) {
-    IXAllocationVotingGovernor xAllocationVoting = xAllocationVoting();
-
-    uint256 currentRoundId = xAllocationVoting.currentRoundId();
-    uint256 minVotingDelay = minVotingDelay();
-    uint256 currentRoundDeadline = xAllocationVoting.roundDeadline(currentRoundId);
-    uint48 currentBlock = clock();
-
-    // this could happen if the round ended and the next one not started yet
-    if (currentRoundDeadline <= currentBlock) {
-      return false;
-    }
-
-    // if between now and the start of the new round is less then the min delay, revert
-    if (minVotingDelay > currentRoundDeadline - currentBlock) {
-      return false;
-    }
-
-    return true;
-  }
-
   // ------------------ SETTERS ------------------ //
 
+  /**
+   * @dev See {GovernorExternalContractsUpgradeable-setVoterRewards}.
+   *
+   * This function is only callable through governance
+   */
   function setVoterRewards(IVoterRewards _voterRewards) public override onlyGovernance {
     super.setVoterRewards(_voterRewards);
   }
 
+  /**
+   * @dev See {GovernorExternalContractsUpgradeable-setXAllocationVoting}.
+   *
+   * This function is only callable through governance
+   */
   function setXAllocationVoting(IXAllocationVotingGovernor _xAllocationVoting) public override onlyGovernance {
     super.setXAllocationVoting(_xAllocationVoting);
   }
@@ -353,65 +342,6 @@ contract B3TRGovernor is
   function _authorizeUpgrade(address newImplementation) internal override onlyGovernance {}
 
   /**
-   * @dev See {IB3TRGovernor-proposalSnapshot}.
-   *
-   * We take for granted that the round starts the block after it ends. But it can happen that the round is not started yet for whatever reason.
-   * Knowing this, if the proposal starts 4 rounds in the future we need to consider also those extra blocks used to start the rounds.
-   */
-  function proposalSnapshot(uint256 proposalId) public view virtual override returns (uint256) {
-    GovernorStorage storage $$ = _getGovernorStorage();
-
-    IXAllocationVotingGovernor xAllocationVoting = xAllocationVoting();
-
-    // round when proposal should be active is already started
-    if (xAllocationVoting.currentRoundId() >= $$._proposals[proposalId].roundIdVoteStart) {
-      return xAllocationVoting.roundSnapshot($$._proposals[proposalId].roundIdVoteStart);
-    }
-
-    uint256 amountOfRoundsLeft = $$._proposals[proposalId].roundIdVoteStart - xAllocationVoting.currentRoundId();
-    uint256 roundsDurationLeft = xAllocationVoting.votingPeriod() * (amountOfRoundsLeft - 1); // -1 because if only 1 round left we want this to be 0
-    uint256 currentRoundDeadline = xAllocationVoting.currentRoundDeadline();
-
-    // if current round ended and a new one did not start yet
-    if (currentRoundDeadline <= clock()) {
-      currentRoundDeadline = clock();
-    }
-
-    return currentRoundDeadline + roundsDurationLeft + amountOfRoundsLeft;
-  }
-
-  /**
-   * @dev See {IB3TRGovernor-proposalDeadline}.
-   */
-  function proposalDeadline(uint256 proposalId) public view virtual override returns (uint256) {
-    GovernorStorage storage $$ = _getGovernorStorage();
-
-    IXAllocationVotingGovernor xAllocationVoting = xAllocationVoting();
-
-    // if round is active or already occured proposal end block is the block when round ends
-    if (xAllocationVoting.currentRoundId() >= $$._proposals[proposalId].roundIdVoteStart) {
-      return xAllocationVoting.roundDeadline($$._proposals[proposalId].roundIdVoteStart);
-    }
-
-    // if we call this function before the round starts, it will return 0, so we need to estimate the end block
-    return proposalSnapshot(proposalId) + xAllocationVoting.votingPeriod();
-  }
-
-  /**
-   * @dev See {IB3TRGovernor-castVote}.
-   */
-  function castVote(uint256 proposalId, uint8 support) public override(GovernorUpgradeable) returns (uint256) {
-    uint256 weight = super.castVote(proposalId, support);
-
-    if (weight < votingThreshold()) {
-      revert GovernorVotingThresholdNotMet(weight, votingThreshold());
-    }
-
-    voterRewards().registerVote(proposalSnapshot(proposalId), msg.sender, weight, Math.sqrt(weight));
-    return weight;
-  }
-
-  /**
    * @dev See {Governor-cancel}.
    *
    * Proposal can be canceled by the proposer or by the admin before it becomes active.
@@ -491,16 +421,6 @@ contract B3TRGovernor is
         return ProposalState.Canceled;
       }
     }
-  }
-
-  function proposalNeedsQueuing(uint256 proposalId) public view returns (bool) {
-    GovernorStorage storage $ = _getGovernorStorage();
-    ProposalCore storage proposal = $._proposals[proposalId];
-    if (proposal.roundIdVoteStart == 0) {
-      revert GovernorNonexistentProposal(proposalId);
-    }
-
-    return proposal.isExecutable;
   }
 
   function quorum(

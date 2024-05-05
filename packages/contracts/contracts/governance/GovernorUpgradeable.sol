@@ -166,6 +166,30 @@ abstract contract GovernorUpgradeable is
   }
 
   /**
+   * @dev Function to check if in the current timepoint someone
+   * can create a proposal that starts in the next xAllocationVoting round.
+   */
+  function canProposalStartInNextRound() public view returns (bool) {
+    IXAllocationVotingGovernor _xAllocationVoting = xAllocationVoting();
+
+    uint256 currentRoundId = _xAllocationVoting.currentRoundId();
+    uint256 currentRoundDeadline = _xAllocationVoting.roundDeadline(currentRoundId);
+    uint48 currentBlock = clock();
+
+    // this could happen if the round ended and the next one not started yet
+    if (currentRoundDeadline <= currentBlock) {
+      return false;
+    }
+
+    // if between now and the start of the new round is less then the min delay, revert
+    if (minVotingDelay() > currentRoundDeadline - currentBlock) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
    * @dev See {IB3TRGovernor-depositThreshold}.
    */
   function depositThreshold() public view virtual returns (uint256) {
@@ -194,6 +218,51 @@ abstract contract GovernorUpgradeable is
   function proposalStartRound(uint256 proposalId) public view returns (uint256) {
     GovernorStorage storage $ = _getGovernorStorage();
     return $._proposals[proposalId].roundIdVoteStart;
+  }
+
+  /**
+   * @dev See {IB3TRGovernor-proposalSnapshot}.
+   *
+   * We take for granted that the round starts the block after it ends. But it can happen that the round is not started yet for whatever reason.
+   * Knowing this, if the proposal starts 4 rounds in the future we need to consider also those extra blocks used to start the rounds.
+   */
+  function proposalSnapshot(uint256 proposalId) public view virtual returns (uint256) {
+    GovernorStorage storage $ = _getGovernorStorage();
+
+    IXAllocationVotingGovernor _xAllocationVoting = xAllocationVoting();
+
+    // round when proposal should be active is already started
+    if (_xAllocationVoting.currentRoundId() >= $._proposals[proposalId].roundIdVoteStart) {
+      return _xAllocationVoting.roundSnapshot($._proposals[proposalId].roundIdVoteStart);
+    }
+
+    uint256 amountOfRoundsLeft = $._proposals[proposalId].roundIdVoteStart - _xAllocationVoting.currentRoundId();
+    uint256 roundsDurationLeft = _xAllocationVoting.votingPeriod() * (amountOfRoundsLeft - 1); // -1 because if only 1 round left we want this to be 0
+    uint256 currentRoundDeadline = _xAllocationVoting.currentRoundDeadline();
+
+    // if current round ended and a new one did not start yet
+    if (currentRoundDeadline <= clock()) {
+      currentRoundDeadline = clock();
+    }
+
+    return currentRoundDeadline + roundsDurationLeft + amountOfRoundsLeft;
+  }
+
+  /**
+   * @dev See {IB3TRGovernor-proposalDeadline}.
+   */
+  function proposalDeadline(uint256 proposalId) public view virtual returns (uint256) {
+    GovernorStorage storage $ = _getGovernorStorage();
+
+    IXAllocationVotingGovernor _xAllocationVoting = xAllocationVoting();
+
+    // if round is active or already occured proposal end block is the block when round ends
+    if (_xAllocationVoting.currentRoundId() >= $._proposals[proposalId].roundIdVoteStart) {
+      return _xAllocationVoting.roundDeadline($._proposals[proposalId].roundIdVoteStart);
+    }
+
+    // if we call this function before the round starts, it will return 0, so we need to estimate the end block
+    return proposalSnapshot(proposalId) + _xAllocationVoting.votingPeriod();
   }
 
   /**
@@ -240,6 +309,20 @@ abstract contract GovernorUpgradeable is
     uint256 weight,
     uint256 power
   ) internal virtual;
+
+  /**
+   * @dev Function to know if a proposal is executable or not.
+   * If the proposal was creted without any targets, values, or calldatas, it is not executable.
+   */
+  function proposalNeedsQueuing(uint256 proposalId) public view returns (bool) {
+    GovernorStorage storage $ = _getGovernorStorage();
+    ProposalCore storage proposal = $._proposals[proposalId];
+    if (proposal.roundIdVoteStart == 0) {
+      revert GovernorNonexistentProposal(proposalId);
+    }
+
+    return proposal.isExecutable;
+  }
 
   /**
    * @dev See {IB3TRGovernor-queue}.
@@ -423,7 +506,14 @@ abstract contract GovernorUpgradeable is
    */
   function castVote(uint256 proposalId, uint8 support) public virtual returns (uint256) {
     address voter = _msgSender();
-    return _castVote(proposalId, voter, support, "");
+    uint256 weight = _castVote(proposalId, voter, support, "");
+
+    if (weight < votingThreshold()) {
+      revert GovernorVotingThresholdNotMet(weight, votingThreshold());
+    }
+
+    voterRewards().registerVote(proposalSnapshot(proposalId), msg.sender, weight, Math.sqrt(weight));
+    return weight;
   }
 
   /**
@@ -656,16 +746,6 @@ abstract contract GovernorUpgradeable is
   function quorum(uint256 timepoint) public view virtual returns (uint256);
 
   /**
-   * @dev See {IB3TRGovernor-proposalSnapshot}.
-   */
-  function proposalSnapshot(uint256 proposalId) public view virtual returns (uint256);
-
-  /**
-   * @dev See {IB3TRGovernor-proposalDeadline}.
-   */
-  function proposalDeadline(uint256 proposalId) public view virtual returns (uint256);
-
-  /**
    * @dev See {IB3TRGovernor-state}.
    */
   function state(uint256 proposalId) public view virtual returns (ProposalState);
@@ -679,4 +759,14 @@ abstract contract GovernorUpgradeable is
    * @dev The XAllocationVotingGovernor contract.
    */
   function xAllocationVoting() public view virtual returns (IXAllocationVotingGovernor);
+
+  /**
+   *  @dev See {Governor-votingThreshold}.
+   */
+  function votingThreshold() public view virtual returns (uint256);
+
+  /**
+   *  @dev See {Governor-minVotingDelay}.
+   */
+  function minVotingDelay() public view virtual returns (uint256);
 }
