@@ -1461,7 +1461,7 @@ describe("Governor and TimeLock", function () {
       // Before creating a proposal, we need to mint some VOT3 tokens to the owner
       await b3tr.connect(minterAccount).mint(owner, ethers.parseEther("1000"))
       await b3tr.connect(owner).approve(await vot3.getAddress(), ethers.parseEther("9"))
-      await vot3.connect(owner).stake(ethers.parseEther("9"), { gasLimit: 10_000_000 })
+      await vot3.connect(owner).convertToVOT3(ethers.parseEther("9"), { gasLimit: 10_000_000 })
 
       const functionToCall = "tokenDetails"
       const description = "Get token details"
@@ -1729,7 +1729,7 @@ describe("Governor and TimeLock", function () {
       // Before trying to vote we need to mint some VOT3 tokens to the voter2
       await b3tr.connect(minterAccount).mint(voter2, ethers.parseEther("1000"))
       await b3tr.connect(voter2).approve(await vot3.getAddress(), ethers.parseEther("9"))
-      await vot3.connect(voter2).stake(ethers.parseEther("9"))
+      await vot3.connect(voter2).convertToVOT3(ethers.parseEther("9"))
 
       // we do it here but will use in the next test
       await getVot3Tokens(voter3, "1000")

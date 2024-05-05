@@ -163,13 +163,13 @@ describe("VOT3", function () {
         .reverted
 
       // Lock B3TR to get VOT3
-      await expect(vot3.connect(otherAccount).stake(ethers.parseEther("9"))).not.to.be.reverted
+      await expect(vot3.connect(otherAccount).convertToVOT3(ethers.parseEther("9"))).not.to.be.reverted
 
       // Check balances
       expect(await b3tr.balanceOf(otherAccount)).to.eql(ethers.parseEther("991"))
       expect(await b3tr.balanceOf(await vot3.getAddress())).to.eql(ethers.parseEther("9"))
       expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("9"))
-      expect(await vot3.stakedBalanceOf(otherAccount)).to.eql(ethers.parseEther("9"))
+      expect(await vot3.convertedBalanceOf(otherAccount)).to.eql(ethers.parseEther("9"))
     })
 
     it("should not lock B3TR if not enough B3TR approved", async function () {
@@ -183,7 +183,7 @@ describe("VOT3", function () {
         .reverted
 
       // Lock B3TR to get VOT3
-      await catchRevert(vot3.stake(ethers.parseEther("10")))
+      await catchRevert(vot3.convertToVOT3(ethers.parseEther("10")))
     })
 
     it("Should not be able to lock B3TR if VOT3 contract is paused", async function () {
@@ -202,13 +202,13 @@ describe("VOT3", function () {
       await vot3.connect(owner).pause()
 
       // Lock B3TR to get VOT3
-      await catchRevert(vot3.connect(otherAccount).stake(ethers.parseEther("9")))
+      await catchRevert(vot3.connect(otherAccount).convertToVOT3(ethers.parseEther("9")))
 
       // Unpause VOT3
       await vot3.connect(owner).unpause()
 
       // Lock B3TR to get VOT3
-      await expect(vot3.connect(otherAccount).stake(ethers.parseEther("9"))).not.to.be.reverted
+      await expect(vot3.connect(otherAccount).convertToVOT3(ethers.parseEther("9"))).not.to.be.reverted
     })
   })
 
@@ -225,23 +225,23 @@ describe("VOT3", function () {
       await expect(b3tr.connect(otherAccount).approve(vot3Address, ethers.parseEther("9"))).not.to.be.reverted
 
       // Lock B3TR to get VOT3
-      await expect(vot3.connect(otherAccount).stake(ethers.parseEther("9"))).not.to.be.reverted
+      await expect(vot3.connect(otherAccount).convertToVOT3(ethers.parseEther("9"))).not.to.be.reverted
 
       // Check balances
       expect(await b3tr.balanceOf(otherAccount)).to.eql(ethers.parseEther("991"))
       expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("9"))
-      expect(await vot3.stakedBalanceOf(otherAccount)).to.eql(ethers.parseEther("9"))
+      expect(await vot3.convertedBalanceOf(otherAccount)).to.eql(ethers.parseEther("9"))
       expect(await b3tr.balanceOf(vot3Address)).to.eql(ethers.parseEther("9"))
 
       // Unlock B3TR to burn VOT3
-      await expect(vot3.connect(otherAccount).unstake(ethers.parseEther("9"), { gasLimit: 10_000_000 })).not.to.be
+      await expect(vot3.connect(otherAccount).convertToB3TR(ethers.parseEther("9"), { gasLimit: 10_000_000 })).not.to.be
         .reverted
 
       // Check balances
       expect(await b3tr.balanceOf(otherAccount)).to.eql(ethers.parseEther("1000"))
       expect(await b3tr.balanceOf(vot3Address)).to.eql(ethers.parseEther("0"))
       expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("0"))
-      expect(await vot3.stakedBalanceOf(otherAccount)).to.eql(ethers.parseEther("0"))
+      expect(await vot3.convertedBalanceOf(otherAccount)).to.eql(ethers.parseEther("0"))
     })
 
     it("should not unlock B3TR if not enough VOT3", async function () {
@@ -255,20 +255,20 @@ describe("VOT3", function () {
         .reverted
 
       // Lock B3TR to get VOT3
-      await expect(vot3.connect(otherAccount).stake(ethers.parseEther("9"), { gasLimit: 10_000_000 })).not.to.be
+      await expect(vot3.connect(otherAccount).convertToVOT3(ethers.parseEther("9"), { gasLimit: 10_000_000 })).not.to.be
         .reverted
 
       // Check balances
       expect(await b3tr.balanceOf(otherAccount)).to.eql(ethers.parseEther("991"))
       expect(await b3tr.balanceOf(await vot3.getAddress())).to.eql(ethers.parseEther("9"))
       expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("9"))
-      expect(await vot3.stakedBalanceOf(otherAccount)).to.eql(ethers.parseEther("9"))
+      expect(await vot3.convertedBalanceOf(otherAccount)).to.eql(ethers.parseEther("9"))
 
       // Unlock B3TR to burn VOT3
-      await catchRevert(vot3.connect(otherAccount).unstake(ethers.parseEther("10"), { gasLimit: 10_000_000 }))
+      await catchRevert(vot3.connect(otherAccount).convertToB3TR(ethers.parseEther("10"), { gasLimit: 10_000_000 }))
     })
 
-    it("should not unlock B3TR if not enough staked balance, even if there is enough VOT3 balance)", async function () {
+    it("should not unlock B3TR if not enough converted balance, even if there is enough VOT3 balance", async function () {
       const { b3tr, vot3, minterAccount, otherAccount, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -284,21 +284,21 @@ describe("VOT3", function () {
         .reverted
 
       // Lock B3TR to get VOT3
-      await expect(vot3.connect(otherAccount).stake(ethers.parseEther("7"), { gasLimit: 10_000_000 })).not.to.be
+      await expect(vot3.connect(otherAccount).convertToVOT3(ethers.parseEther("7"), { gasLimit: 10_000_000 })).not.to.be
         .reverted
-      await expect(vot3.connect(otherAccounts[0]).stake(ethers.parseEther("8"), { gasLimit: 10_000_000 })).not.to.be
-        .reverted
+      await expect(vot3.connect(otherAccounts[0]).convertToVOT3(ethers.parseEther("8"), { gasLimit: 10_000_000 })).not
+        .to.be.reverted
 
       // Check balances
       expect(await b3tr.balanceOf(await vot3.getAddress())).to.eql(ethers.parseEther("15"))
 
       expect(await b3tr.balanceOf(otherAccount)).to.eql(ethers.parseEther("993"))
       expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("7"))
-      expect(await vot3.stakedBalanceOf(otherAccount)).to.eql(ethers.parseEther("7"))
+      expect(await vot3.convertedBalanceOf(otherAccount)).to.eql(ethers.parseEther("7"))
 
       expect(await b3tr.balanceOf(otherAccounts[0])).to.eql(ethers.parseEther("992"))
       expect(await vot3.balanceOf(otherAccounts[0])).to.eql(ethers.parseEther("8"))
-      expect(await vot3.stakedBalanceOf(otherAccounts[0])).to.eql(ethers.parseEther("8"))
+      expect(await vot3.convertedBalanceOf(otherAccounts[0])).to.eql(ethers.parseEther("8"))
 
       // Transfer VOT3 from otherAccounts[0] to otherAccount
       await expect(
@@ -307,16 +307,16 @@ describe("VOT3", function () {
 
       // Check balances
       expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("9"))
-      expect(await vot3.stakedBalanceOf(otherAccount)).to.eql(ethers.parseEther("7"))
+      expect(await vot3.convertedBalanceOf(otherAccount)).to.eql(ethers.parseEther("7"))
 
       expect(await vot3.balanceOf(otherAccounts[0])).to.eql(ethers.parseEther("6"))
-      expect(await vot3.stakedBalanceOf(otherAccounts[0])).to.eql(ethers.parseEther("8"))
+      expect(await vot3.convertedBalanceOf(otherAccounts[0])).to.eql(ethers.parseEther("8"))
 
       // Attempt to unlock 8 VOT3 from otherAccount
-      await catchRevert(vot3.connect(otherAccount).unstake(ethers.parseEther("8"), { gasLimit: 10_000_000 }))
+      await catchRevert(vot3.connect(otherAccount).convertToB3TR(ethers.parseEther("8"), { gasLimit: 10_000_000 }))
 
       // Finally unlock 7 VOT3 from otherAccount
-      await expect(vot3.connect(otherAccount).unstake(ethers.parseEther("7"), { gasLimit: 10_000_000 })).not.to.be
+      await expect(vot3.connect(otherAccount).convertToB3TR(ethers.parseEther("7"), { gasLimit: 10_000_000 })).not.to.be
         .reverted
     })
 
@@ -333,20 +333,20 @@ describe("VOT3", function () {
         .reverted
 
       // Lock B3TR to get VOT3
-      await expect(vot3.connect(otherAccount).stake(ethers.parseEther("9"), { gasLimit: 10_000_000 })).not.to.be
+      await expect(vot3.connect(otherAccount).convertToVOT3(ethers.parseEther("9"), { gasLimit: 10_000_000 })).not.to.be
         .reverted
 
       // Pause VOT3
       await vot3.connect(owner).pause()
 
       // Unlock B3TR to burn VOT3
-      await catchRevert(vot3.connect(otherAccount).unstake(ethers.parseEther("9"), { gasLimit: 10_000_000 }))
+      await catchRevert(vot3.connect(otherAccount).convertToB3TR(ethers.parseEther("9"), { gasLimit: 10_000_000 }))
 
       // Unpause VOT3
       await vot3.connect(owner).unpause()
 
       // Unlock B3TR to burn VOT3
-      await expect(vot3.connect(otherAccount).unstake(ethers.parseEther("9"), { gasLimit: 10_000_000 })).not.to.be
+      await expect(vot3.connect(otherAccount).convertToB3TR(ethers.parseEther("9"), { gasLimit: 10_000_000 })).not.to.be
         .reverted
     })
   })
@@ -363,7 +363,7 @@ describe("VOT3", function () {
     it("Self-delegation should be automatic upon swapping B3TR for VOT3", async function () {
       const { vot3, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
 
-      // Mint some B3TR and swap for VOT3
+      // Mint some B3TR and Convert B3TR for VOT3
       await getVot3Tokens(otherAccount, "1000")
 
       expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("1000"))
@@ -374,7 +374,7 @@ describe("VOT3", function () {
     it("Self-delegation should be automatic upon receiving VOT3 from another user", async function () {
       const { vot3, minterAccount, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
 
-      // Mint some B3TR and swap for VOT3
+      // Mint some B3TR and Convert B3TR for VOT3
       await getVot3Tokens(minterAccount, "1000")
 
       // user has no VOT3 and no delegation
@@ -394,7 +394,7 @@ describe("VOT3", function () {
     it("Vote power is being tracked correctly", async function () {
       const { vot3, minterAccount, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
 
-      // Mint some B3TR and swap for VOT3
+      // Mint some B3TR and Convert B3TR for VOT3
       await getVot3Tokens(otherAccount, "1000")
 
       // Initial state: 1000 VOT3, 1000 voting power, self-delegated
@@ -422,8 +422,8 @@ describe("VOT3", function () {
       expect(await vot3.getVotes(otherAccount)).to.eql(ethers.parseEther("1000"))
       expect(await vot3.delegates(otherAccount)).to.eql(otherAccount.address)
 
-      // unstake
-      await vot3.connect(otherAccount).unstake(ethers.parseEther("1000"), { gasLimit: 10_000_000 })
+      // convertToB3TR
+      await vot3.connect(otherAccount).convertToB3TR(ethers.parseEther("1000"), { gasLimit: 10_000_000 })
 
       expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("0"))
       expect(await vot3.getVotes(otherAccount)).to.eql(ethers.parseEther("0"))
@@ -445,7 +445,7 @@ describe("VOT3", function () {
       await b3tr.connect(otherAccount).approve(await vot3.getAddress(), ethers.parseEther("1000"))
 
       // Lock B3TR to get VOT3
-      const tx = await vot3.connect(otherAccount).stake(ethers.parseEther("1000"))
+      const tx = await vot3.connect(otherAccount).convertToVOT3(ethers.parseEther("1000"))
       let receipt = await tx.wait()
 
       let events = receipt?.logs
@@ -460,7 +460,7 @@ describe("VOT3", function () {
       // Now if I do it again, it should not emit the event because it's already delegated to itself
       await b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("1000"))
       await b3tr.connect(otherAccount).approve(await vot3.getAddress(), ethers.parseEther("1000"))
-      const secondTx = await vot3.connect(otherAccount).stake(ethers.parseEther("1000"))
+      const secondTx = await vot3.connect(otherAccount).convertToVOT3(ethers.parseEther("1000"))
       receipt = await secondTx.wait()
 
       events = receipt?.logs
@@ -474,7 +474,7 @@ describe("VOT3", function () {
     it("Delegation to another user should still be possible", async function () {
       const { vot3, minterAccount, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
 
-      // Mint some B3TR and swap for VOT3
+      // Mint some B3TR and Convert B3TR for VOT3
       await getVot3Tokens(otherAccount, "1000")
 
       // delegate to another user
@@ -491,11 +491,11 @@ describe("VOT3", function () {
     it("Self delegation is not happening for the VOT3 contract itself", async function () {
       const { vot3, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
 
-      // Mint some B3TR and swap for VOT3
+      // Mint some B3TR and Convert B3TR for VOT3
       await getVot3Tokens(otherAccount, "1000")
 
       // delegate to another user
-      await vot3.connect(otherAccount).unstake(ethers.parseEther("1000"), { gasLimit: 10_000_000 })
+      await vot3.connect(otherAccount).convertToB3TR(ethers.parseEther("1000"), { gasLimit: 10_000_000 })
 
       expect(await vot3.getVotes(await vot3.getAddress())).to.eql(ethers.parseEther("0"))
     })
@@ -503,7 +503,7 @@ describe("VOT3", function () {
     it("Self delegation is not happening if interacting with another contract", async function () {
       const { vot3, otherAccount, b3tr } = await getOrDeployContractInstances({ forceDeploy: true })
 
-      // Mint some B3TR and swap for VOT3
+      // Mint some B3TR and Convert B3TR for VOT3
       await getVot3Tokens(otherAccount, "1000")
 
       await vot3
@@ -518,13 +518,13 @@ describe("VOT3", function () {
       // Pause VOT3
       await vot3.connect(owner).pause()
 
-      // Mint some B3TR and swap for VOT3
-      await expect(vot3.connect(otherAccount).stake(ethers.parseEther("1000"))).to.be.reverted
+      // Mint some B3TR and Convert B3TR for VOT3
+      await expect(vot3.connect(otherAccount).convertToVOT3(ethers.parseEther("1000"))).to.be.reverted
 
       // Unpause VOT3
       await vot3.connect(owner).unpause()
 
-      // Mint some B3TR and swap for VOT3
+      // Mint some B3TR and Convert B3TR for VOT3
       await getVot3Tokens(otherAccount, "1000")
 
       // delegate to another user
@@ -541,7 +541,7 @@ describe("VOT3", function () {
     it("Should not be able to delegate voting power if VOT3 transfers are paused", async function () {
       const { vot3, otherAccount, owner } = await getOrDeployContractInstances({ forceDeploy: true })
 
-      // Mint some B3TR and swap for VOT3
+      // Mint some B3TR and Convert B3TR for VOT3
       await getVot3Tokens(otherAccount, "1000")
 
       // Pause VOT3
@@ -578,7 +578,7 @@ describe("VOT3", function () {
       accounts = otherAccounts
     })
     it("Voting power should be the square root of the amount of vote", async function () {
-      // Mint some B3TR and swap for VOT3
+      // Mint some B3TR and Convert B3TR for VOT3
       await getVot3Tokens(other, "1000")
 
       // Initial state: 1000 VOT3, 1000 voting power, self-delegated
@@ -626,7 +626,7 @@ describe("VOT3", function () {
     it("Should be able to transfer VOT3", async function () {
       const { vot3, otherAccount, owner } = await getOrDeployContractInstances({ forceDeploy: true })
 
-      // Mint some B3TR and swap for VOT3
+      // Mint some B3TR and Convert B3TR for VOT3
       await getVot3Tokens(otherAccount, "1000")
 
       // transfer
@@ -639,7 +639,7 @@ describe("VOT3", function () {
     it("Should be able to approve and transferFrom VOT3", async function () {
       const { vot3, otherAccount, owner } = await getOrDeployContractInstances({ forceDeploy: true })
 
-      // Mint some B3TR and swap for VOT3
+      // Mint some B3TR and Convert B3TR for VOT3
       await getVot3Tokens(otherAccount, "1000")
 
       // approve
