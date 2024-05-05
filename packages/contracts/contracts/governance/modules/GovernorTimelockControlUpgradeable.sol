@@ -67,6 +67,29 @@ abstract contract GovernorTimelockControlUpgradeable is Initializable, GovernorU
   }
 
   /**
+   * @dev Overridden version of the {Governor-state} function that considers the status reported by the timelock.
+   */
+  function state(uint256 proposalId) public view virtual override returns (ProposalState) {
+    GovernorTimelockControlStorage storage $ = _getGovernorTimelockControlStorage();
+    ProposalState currentState = super.state(proposalId);
+
+    if (currentState != ProposalState.Queued) {
+      return currentState;
+    }
+
+    bytes32 queueid = $._timelockIds[proposalId];
+    if ($._timelock.isOperationPending(queueid)) {
+      return ProposalState.Queued;
+    } else if ($._timelock.isOperationDone(queueid)) {
+      // This can happen if the proposal is executed directly on the timelock.
+      return ProposalState.Executed;
+    } else {
+      // This can happen if the proposal is canceled directly on the timelock.
+      return ProposalState.Canceled;
+    }
+  }
+
+  /**
    * @dev Public accessor to check the address of the timelock
    */
   function timelock() public view virtual returns (address) {

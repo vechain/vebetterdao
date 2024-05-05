@@ -385,64 +385,10 @@ contract B3TRGovernor is
     return _cancel(targets, values, calldatas, descriptionHash);
   }
 
-  /**
-   * @dev See {IB3TRGovernor-state}.
-   *
-   * This function is the copy of what was inside GovernorUpgradeable plus the copy of GovernorTimelockControlUpgradeable (when it ends up in QUEUED state),
-   * modified however to check the PENDING state based on roundId instead of based on the snapshot block.
-   */
-  function state(uint256 proposalId) public view virtual override returns (ProposalState) {
-    GovernorStorage storage $ = _getGovernorStorage();
-    // We read the struct fields into the stack at once so Solidity emits a single SLOAD
-    ProposalCore storage proposal = $._proposals[proposalId];
-    bool proposalExecuted = proposal.executed;
-    bool proposalCanceled = proposal.canceled;
-
-    if (proposalExecuted) {
-      return ProposalState.Executed;
-    }
-
-    if (proposalCanceled) {
-      return ProposalState.Canceled;
-    }
-
-    if (proposal.roundIdVoteStart == 0) {
-      revert GovernorNonexistentProposal(proposalId);
-    }
-
-    // If the round where the proposal should be active is not started yet, the proposal is pending
-    if (xAllocationVoting().currentRoundId() < proposal.roundIdVoteStart) {
-      return ProposalState.Pending;
-    }
-
-    uint256 currentTimepoint = clock();
-
-    uint256 deadline = proposalDeadline(proposalId);
-
-    if (deadline >= currentTimepoint) {
-      if (proposalDepositReached(proposalId)) {
-        return ProposalState.Active;
-      } else {
-        return ProposalState.DepositNotMet;
-      }
-    } else if (!_quorumReached(proposalId) || !_voteSucceeded(proposalId)) {
-      return ProposalState.Defeated;
-    } else if (proposalEta(proposalId) == 0) {
-      return ProposalState.Succeeded;
-    } else {
-      // Forked from GovernorTimelockControlUpgradeable:state OZ implementation
-      GovernorTimelockControlStorage storage $$ = _getGovernorTimelockControlStorage();
-      bytes32 queueid = $$._timelockIds[proposalId];
-      if ($$._timelock.isOperationPending(queueid)) {
-        return ProposalState.Queued;
-      } else if ($$._timelock.isOperationDone(queueid)) {
-        // This can happen if the proposal is executed directly on the timelock.
-        return ProposalState.Executed;
-      } else {
-        // This can happen if the proposal is canceled directly on the timelock.
-        return ProposalState.Canceled;
-      }
-    }
+  function state(
+    uint256 proposalId
+  ) public view override(GovernorUpgradeable, GovernorTimelockControlUpgradeable) returns (ProposalState) {
+    return super.state(proposalId);
   }
 
   function quorum(

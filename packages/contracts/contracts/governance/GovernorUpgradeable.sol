@@ -46,7 +46,7 @@ import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGove
  * - A counting module must implement {quorum}, {_quorumReached}, {_voteSucceeded} and {_countVote}
  * - A voting module must implement {_getVotes}
  * - A settings module must implement {votingPeriod}, {minVotingDelay}, {voteThreshold}
- * - A deposit module must implement {depositThreshold}
+ * - A deposit module must implement {depositThreshold} and {proposalDepositReached}
  * - A settings module must implement {xAllocationVoting} and {voterRewards}, and handle the storage of external contracts
  */
 abstract contract GovernorUpgradeable is
@@ -174,6 +174,52 @@ abstract contract GovernorUpgradeable is
     bytes32 descriptionHash
   ) public pure virtual returns (uint256) {
     return uint256(keccak256(abi.encode(targets, values, calldatas, descriptionHash)));
+  }
+
+  /**
+   * @dev See {IB3TRGovernor-state}.
+   */
+  function state(uint256 proposalId) public view virtual override returns (ProposalState) {
+    GovernorStorage storage $ = _getGovernorStorage();
+    // We read the struct fields into the stack at once so Solidity emits a single SLOAD
+    ProposalCore storage proposal = $._proposals[proposalId];
+    bool proposalExecuted = proposal.executed;
+    bool proposalCanceled = proposal.canceled;
+
+    if (proposalExecuted) {
+      return ProposalState.Executed;
+    }
+
+    if (proposalCanceled) {
+      return ProposalState.Canceled;
+    }
+
+    if (proposal.roundIdVoteStart == 0) {
+      revert GovernorNonexistentProposal(proposalId);
+    }
+
+    // If the round where the proposal should be active is not started yet, the proposal is pending
+    if (xAllocationVoting().currentRoundId() < proposal.roundIdVoteStart) {
+      return ProposalState.Pending;
+    }
+
+    uint256 currentTimepoint = clock();
+
+    uint256 deadline = proposalDeadline(proposalId);
+
+    if (deadline >= currentTimepoint) {
+      if (proposalDepositReached(proposalId)) {
+        return ProposalState.Active;
+      } else {
+        return ProposalState.DepositNotMet;
+      }
+    } else if (!_quorumReached(proposalId) || !_voteSucceeded(proposalId)) {
+      return ProposalState.Defeated;
+    } else if (proposalEta(proposalId) == 0) {
+      return ProposalState.Succeeded;
+    } else {
+      return ProposalState.Queued;
+    }
   }
 
   /**
@@ -767,11 +813,6 @@ abstract contract GovernorUpgradeable is
   function quorum(uint256 timepoint) public view virtual returns (uint256);
 
   /**
-   * @dev See {IB3TRGovernor-state}.
-   */
-  function state(uint256 proposalId) public view virtual returns (ProposalState);
-
-  /**
    * @dev The voter rewards contract.
    */
   function voterRewards() public view virtual returns (IVoterRewards);
@@ -780,4 +821,9 @@ abstract contract GovernorUpgradeable is
    * @dev The XAllocationVotingGovernor contract.
    */
   function xAllocationVoting() public view virtual returns (IXAllocationVotingGovernor);
+
+  /**
+   * @dev Check if the required B3TR amount needed for the proposal to be active has been reached.
+   */
+  function proposalDepositReached(uint256 proposalId) public view virtual returns (bool);
 }
