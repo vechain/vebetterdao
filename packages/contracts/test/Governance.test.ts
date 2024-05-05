@@ -15,12 +15,14 @@ import {
   moveBlocks,
   createProposalAndExecuteIt,
   createProposalWithMultipleFunctionsAndExecuteIt,
+  bootstrapEmissions,
 } from "./helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it } from "mocha"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { B3TRGovernor } from "../typechain-types"
+import { startEmissions } from "../scripts/helpers/emissions"
 
 describe("Governor and TimeLock", function () {
   describe("Governor deployment", function () {
@@ -1324,6 +1326,8 @@ describe("Governor and TimeLock", function () {
           config,
         })
 
+      await bootstrapEmissions()
+
       const proposer = otherAccounts[0]
       await getVot3Tokens(proposer, "1000")
 
@@ -1347,11 +1351,13 @@ describe("Governor and TimeLock", function () {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 5
-      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3 } =
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3, emissions, minterAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
           config,
         })
+
+      await bootstrapEmissions()
 
       const proposer = otherAccounts[0]
       await getVot3Tokens(proposer, "1000")
@@ -1365,11 +1371,54 @@ describe("Governor and TimeLock", function () {
       expect(currentRoundId).to.eql(0n)
 
       await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
-      await expect(
-        governor.connect(proposer).propose([address], [0], [encodedFunctionCall], "", 2n, ethers.parseEther("1000"), {
+
+      const tx = await governor
+        .connect(proposer)
+        .propose([address], [0], [encodedFunctionCall], "", 2n, ethers.parseEther("1000"), {
           gasLimit: 10_000_000,
-        }),
-      ).to.not.be.reverted
+        })
+
+      const proposalId = await getProposalIdFromTx(tx)
+
+      // proposal state should be pending
+      expect(await governor.state(proposalId)).to.eql(0n)
+
+      // proposal should start in round 2
+      expect(await governor.proposalStartRound(proposalId)).to.eql(2n)
+
+      // proposal snapshot should be: current block + 1 block (expecting round 1 to start) + round 1 duration + 1 block (expecting round 2 to start)
+      expect(await governor.proposalSnapshot(proposalId)).to.eql(
+        (await governor.clock()) + 1n + (await xAllocationVoting.votingPeriod()) + 1n,
+      )
+
+      // proposal deadline should be: snapshot + voting period
+      expect(await governor.proposalDeadline(proposalId)).to.eql(
+        (await governor.clock()) +
+          1n +
+          (await xAllocationVoting.votingPeriod()) +
+          1n +
+          (await xAllocationVoting.votingPeriod()),
+      )
+
+      // when round 1 starts the proposal should still be pending and snapshot updated
+
+      // Start emissions
+      await emissions.connect(minterAccount).start()
+      expect(await xAllocationVoting.currentRoundId()).to.eql(1n)
+
+      expect(await governor.state(proposalId)).to.eql(0n) // still pending
+
+      // should start when round 1 ends + 1 estimated block to start round 2
+      expect(await governor.proposalSnapshot(proposalId)).to.eql((await xAllocationVoting.currentRoundDeadline()) + 1n)
+
+      // when round 2 starts the proposal should be active
+      await waitForCurrentRoundToEnd()
+      expect(await governor.state(proposalId)).to.eql(0n) // should still pending
+
+      // start new round
+      await emissions.distribute()
+      expect(await xAllocationVoting.currentRoundId()).to.eql(2n)
+      expect(await governor.state(proposalId)).to.eql(1n) // should be active
     })
 
     it("Cannot create same proposal twice", async () => {
