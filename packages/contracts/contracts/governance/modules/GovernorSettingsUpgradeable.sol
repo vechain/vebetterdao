@@ -85,6 +85,13 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
   }
 
   /**
+   * @dev See {IB3TRGovernor-votingPeriod}.
+   */
+  function votingPeriod() public view virtual override returns (uint256) {
+    return xAllocationVoting().votingPeriod();
+  }
+
+  /**
    * @dev Update the deposit threshold. This operation can only be performed through a governance proposal.
    *
    * Emits a {DepositThresholdSet} event.
