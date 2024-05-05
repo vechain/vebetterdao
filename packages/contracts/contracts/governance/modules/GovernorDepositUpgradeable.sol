@@ -114,8 +114,20 @@ abstract contract GovernorDepositUpgradeable is Initializable, ReentrancyGuardUp
    * @param proposalId The id of the proposal.
    */
   function proposalDepositReached(uint256 proposalId) public view returns (bool) {
-    return getProposalDeposits(proposalId) >= depositThreshold();
+    GovernorStorage storage $ = _getGovernorStorage();
+    return getProposalDeposits(proposalId) >= $._proposals[proposalId].depositThreshold;
   }
+
+  /**
+   * @dev Returns the deposit threshold for a proposal.
+   * @param proposalId The id of the proposal.
+   * @return uint256 The deposit threshold for the proposal.
+   */
+  function proposalDepositThreshold(uint256 proposalId) public view returns (uint256) {
+    GovernorStorage storage $ = _getGovernorStorage();
+    return $._proposals[proposalId].depositThreshold;
+  }
+
 
   /**
    * @dev Returns the amount of tokens a specific user has deposited to a proposal.

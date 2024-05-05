@@ -56,6 +56,7 @@ contract B3TRGovernor is
     IVotes vot3Token;
     TimelockControllerUpgradeable timelock;
     IXAllocationVotingGovernor xAllocationVoting;
+    IB3TR b3tr;
     uint256 quorumPercentage;
     uint256 initialDepositThreshold;
     uint256 initialMinVotingDelay;
@@ -93,7 +94,7 @@ contract B3TRGovernor is
    */
   function initialize(InitializationData memory data) public initializer {
     __Governor_init("B3TRGovernor");
-    __GovernorSettings_init(data.initialDepositThreshold, data.initialMinVotingDelay, data.initialVotingThreshold);
+    __GovernorSettings_init(data.initialDepositThreshold, data.initialMinVotingDelay, data.initialVotingThreshold, data.b3tr);
     __GovernorCountingSimple_init();
     __GovernorVotes_init(data.vot3Token);
     __GovernorVotesQuorumFraction_init(data.quorumPercentage);
@@ -276,6 +277,7 @@ contract B3TRGovernor is
     proposal.voteDuration = SafeCast.toUint32(votingPeriod());
     proposal.isExecutable = targets.length > 0;
     proposal.depositAmount = depositAmount;
+    proposal.depositThreshold = depositThreshold();
 
     _depositFunds(depositAmount, proposer, proposalId);
 
