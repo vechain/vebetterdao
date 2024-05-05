@@ -88,7 +88,7 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
     GovernorSettingsStorage storage $ = _getGovernorSettingsStorage();
 
     // deposit threshold is a percentage of the total supply of B3TR tokens
-    return ($._depositThreshold * $._b3tr.getCurrentTotalSupply()) / 100;
+    return ($._depositThreshold * $._b3tr.totalSupply()) / 100;
   }
 
   /**

@@ -2150,6 +2150,7 @@ describe("Governor and TimeLock", function () {
       // Now we can create a new proposal
       const tx = await createProposal(b3tr, B3trContract, otherAccount, description, functionToCall, [], false)
       proposalId = await getProposalIdFromTx(tx)
+      await payDeposit(proposalId, otherAccount)
 
       const proposalState = await waitForProposalToBeActive(proposalId) // proposal id of the proposal in the beforeAll step & block when the proposal was created
 
@@ -3053,7 +3054,7 @@ describe("Governor and TimeLock", function () {
       // Start emissions
       await bootstrapAndStartEmissions()
 
-      const b3trSupply = await b3tr.getCurrentTotalSupply()
+      const b3trSupply = await b3tr.totalSupply()
       const depositAmount = await governor.depositThreshold()
       expect(depositAmount).to.eql(b3trSupply / 50n)
 
@@ -3088,7 +3089,7 @@ describe("Governor and TimeLock", function () {
       expect(await governor.proposalDepositReached(proposalId)).to.eql(true)
       expect(await governor.getProposalDeposits(proposalId)).to.eql(proposalDeposit)
 
-      const b3trSupply2 = await b3tr.getCurrentTotalSupply()
+      const b3trSupply2 = await b3tr.totalSupply()
       const depositAmount2 = await governor.depositThreshold()
       expect(depositAmount2).to.eql(b3trSupply2 / 50n)
 
