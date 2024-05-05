@@ -45,7 +45,9 @@ import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGove
  *
  * - A counting module must implement {quorum}, {_quorumReached}, {_voteSucceeded} and {_countVote}
  * - A voting module must implement {_getVotes}
- * - Additionally, {votingPeriod} must also be implemented
+ * - A settings module must implement {votingPeriod}, {minVotingDelay}, {voteThreshold}
+ * - A deposit module must implement {depositThreshold}
+ * - A settings module must implement {xAllocationVoting} and {voterRewards}, and handle the storage of external contracts
  */
 abstract contract GovernorUpgradeable is
   Initializable,
@@ -750,6 +752,16 @@ abstract contract GovernorUpgradeable is
   function votingPeriod() public view virtual returns (uint256);
 
   /**
+   *  @dev See {Governor-votingThreshold}.
+   */
+  function votingThreshold() public view virtual returns (uint256);
+
+  /**
+   *  @dev See {Governor-minVotingDelay}.
+   */
+  function minVotingDelay() public view virtual returns (uint256);
+
+  /**
    * @inheritdoc IB3TRGovernor
    */
   function quorum(uint256 timepoint) public view virtual returns (uint256);
@@ -768,14 +780,4 @@ abstract contract GovernorUpgradeable is
    * @dev The XAllocationVotingGovernor contract.
    */
   function xAllocationVoting() public view virtual returns (IXAllocationVotingGovernor);
-
-  /**
-   *  @dev See {Governor-votingThreshold}.
-   */
-  function votingThreshold() public view virtual returns (uint256);
-
-  /**
-   *  @dev See {Governor-minVotingDelay}.
-   */
-  function minVotingDelay() public view virtual returns (uint256);
 }
