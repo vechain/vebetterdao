@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-// Forked from OpenZeppelin Contracts (last updated v5.0.0) (governance/IGovernor.sol)
 
 pragma solidity ^0.8.20;
 
@@ -8,15 +7,6 @@ import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
 
 /**
  * @dev Interface of the {B3TRGovernor} core.
- *
- * Modifications to original forked contract from OZ:
- * - Removed votingDelay()
- * - Removed the possibility to cast vote with params and with signature
- * - Updated propose() and ProposalCreated event to accept the x allocation round id as param when proposal should become active
- * - Added proposalStartRound() to get the round when the proposal should become active
- * - Added canProposalStartInNextRound() to check if the proposal can start in the next allocation round
- * - Added new state `DepositNotMet` to ProposalState enum
- * - Added depositThreshold() to get the minimum required deposit for a proposal and removed proposalThreshold
  */
 interface IB3TRGovernor is IERC165, IERC6372 {
   enum ProposalState {
