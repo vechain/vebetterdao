@@ -1,8 +1,10 @@
 import { ethers } from "hardhat"
-import { expect } from "chai"
-import { catchRevert, getOrDeployContractInstances } from "./helpers"
+import { assert, expect } from "chai"
+import { catchRevert, getOrDeployContractInstances, waitForNextBlock } from "./helpers"
 import { describe, it } from "mocha"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
+import { ContractTransactionResponse } from "ethers"
+import { B3TR } from "../typechain-types"
 
 describe("B3TR Token", function () {
   describe("Deployment", function () {
@@ -180,6 +182,7 @@ describe("B3TR Token", function () {
 
       const balance = await b3tr.balanceOf(otherAccount)
       expect(String(balance)).to.eql(ethers.parseEther(config.B3TR_CAP.toString()).toString())
+      expect(await b3tr.getTotalSupply()).to.eql(ethers.parseEther(config.B3TR_CAP.toString()))
     })
   })
 
@@ -230,6 +233,64 @@ describe("B3TR Token", function () {
       expect(tokenDetails[2]).to.eql(decimals)
       expect(tokenDetails[3]).to.eql(totalSupply)
       expect(tokenDetails[4]).to.eql(cap)
+    })
+  })
+
+  describe("Checkpoints", function () {
+    it("Should store correct suppply in checkpoints", async function () {
+      const { b3tr, otherAccount, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      const operatorRole = await b3tr.MINTER_ROLE()
+      await b3tr.grantRole(operatorRole, owner)
+      const tx = await b3tr.mint(otherAccount, ethers.parseEther("1"))
+      const receipt1 = await tx.wait()
+      if (!receipt1) assert.fail("No receipt")
+
+      expect(await b3tr.getPastTotalSupply(receipt1.blockNumber - 1)).to.eql(ethers.parseEther("0"))
+      expect(await b3tr.getTotalSupply()).to.eql(ethers.parseEther("1"))
+
+      const tx2 = await b3tr.mint(otherAccount, ethers.parseEther("10"))
+      const receipt2 = await tx2.wait()
+      if (!receipt2) assert.fail("No receipt")
+
+      expect(await b3tr.getPastTotalSupply(receipt2.blockNumber - 1)).to.eql(ethers.parseEther("1"))
+      expect(await b3tr.getTotalSupply()).to.eql(ethers.parseEther("11"))
+
+      await waitForNextBlock()
+      await waitForNextBlock()
+
+      expect(await b3tr.getPastTotalSupply(receipt2.blockNumber + 1)).to.eql(ethers.parseEther("11"))
+    })
+    it("Should not allow future lookup", async function () {
+      const { b3tr, otherAccount, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      const operatorRole = await b3tr.MINTER_ROLE()
+      await b3tr.grantRole(operatorRole, owner)
+      const tx = await b3tr.mint(otherAccount, ethers.parseEther("1"))
+      const receipt1 = await tx.wait()
+      if (!receipt1) assert.fail("No receipt")
+
+      await expect(b3tr.getPastTotalSupply(receipt1.blockNumber + 1)).to.be.revertedWithCustomError(
+        b3tr,
+        "FutureLookup",
+      )
+    })
+  })
+
+  describe("Clock", function () {
+    let b3tr: B3TR & { deploymentTransaction(): ContractTransactionResponse }
+    this.beforeAll(async function () {
+      const contractInstances = await getOrDeployContractInstances({ forceDeploy: true })
+      b3tr = contractInstances.b3tr
+    })
+    it("Should return correct block number", async function () {
+      const blockNumber = await b3tr.clock()
+      const expectedBlockNumber = await ethers.provider.getBlockNumber()
+      expect(blockNumber).to.eql(BigInt(expectedBlockNumber))
+    })
+    it("Should return correct clock mode", async function () {
+      const mode = await b3tr.CLOCK_MODE()
+      expect(mode).to.eql("mode=blocknumber&from=default")
     })
   })
 })
