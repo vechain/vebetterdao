@@ -1,5 +1,25 @@
 // SPDX-License-Identifier: MIT
-// Forked from OpenZeppelin Contracts (last updated v5.0.0) (governance/extensions/GovernorSettings.sol)
+
+//                                      #######
+//                                 ################
+//                               ####################
+//                             ###########   #########
+//                            #########      #########
+//          #######          #########       #########
+//          #########       #########      ##########
+//           ##########     ########     ####################
+//            ##########   #########  #########################
+//              ################### ############################
+//               #################  ##########          ########
+//                 ##############      ###              ########
+//                  ############                       #########
+//                    ##########                     ##########
+//                     ########                    ###########
+//                       ###                    ############
+//                                          ##############
+//                                    #################
+//                                   ##############
+//                                   #########
 
 pragma solidity ^0.8.20;
 
@@ -8,11 +28,6 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 
 /**
  * @dev Extension of {Governor} for settings updatable through governance.
- *
- * Modifications:
- * - removed _votingPeriod
- * - removed _votingDelay (now it depends on the x-allocation roundId)
- * - added _minVotingDelay
  */
 abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradeable {
   /// @custom:storage-location erc7201:openzeppelin.storage.GovernorSettings
@@ -60,6 +75,8 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
     _setVotingThreshold(initialVotingThreshold);
   }
 
+  // ---------- Getters ---------- //
+
   /**
    * @dev See {Governor-depositThreshold}.
    */
@@ -91,6 +108,8 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
     return xAllocationVoting().votingPeriod();
   }
 
+  // ---------- Setters ---------- //
+
   /**
    * @dev Update the deposit threshold. This operation can only be performed through a governance proposal.
    *
@@ -118,6 +137,8 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
   function setMinVotingDelay(uint256 newMinVotingDelay) public virtual onlyGovernance {
     _setMinVotingDelay(newMinVotingDelay);
   }
+
+  // ---------- Internal ---------- //
 
   /**
    * @dev Internal setter for the deposit threshold.

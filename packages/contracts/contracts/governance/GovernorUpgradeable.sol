@@ -670,7 +670,13 @@ abstract contract GovernorUpgradeable is
    */
   function state(uint256 proposalId) public view virtual returns (ProposalState);
 
+  /**
+   * @dev The voter rewards contract.
+   */
   function voterRewards() public view virtual returns (IVoterRewards);
 
+  /**
+   * @dev The XAllocationVotingGovernor contract.
+   */
   function xAllocationVoting() public view virtual returns (IXAllocationVotingGovernor);
 }

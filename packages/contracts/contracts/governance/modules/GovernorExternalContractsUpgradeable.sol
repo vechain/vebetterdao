@@ -76,15 +76,30 @@ abstract contract GovernorExternalContractsUpgradeable is Initializable, Governo
   }
 
   // ------- Setters ------- //
+  /**
+   * @dev Set the voter rewards contract
+   *
+   * @param newVoterRewards The new voter rewards contract
+   */
   function setVoterRewards(IVoterRewards newVoterRewards) public virtual {
     _setVoterRewards(newVoterRewards);
   }
 
+  /**
+   * @dev Set the XAllocationVotingGovernor contract
+   *
+   * @param newXAllocationVoting The new XAllocationVotingGovernor contract
+   */
   function setXAllocationVoting(IXAllocationVotingGovernor newXAllocationVoting) public virtual {
     _setXAllocationVoting(newXAllocationVoting);
   }
 
   // ------- Internal Functions ------- //
+  /**
+   * @dev Internal function to set the voter rewards contract
+   *
+   * @param newVoterRewards The new voter rewards contract
+   */
   function _setVoterRewards(IVoterRewards newVoterRewards) internal {
     GovernorExternalContractsStorage storage $ = _getGovernorExternalContractsStorage();
     $.voterRewards = newVoterRewards;
@@ -92,6 +107,11 @@ abstract contract GovernorExternalContractsUpgradeable is Initializable, Governo
     emit VoterRewardsSet(address($.voterRewards), address(newVoterRewards));
   }
 
+  /**
+   * @dev Internal function to set the XAllocationVotingGovernor contract
+   *
+   * @param newXAllocationVoting The new XAllocationVotingGovernor contract
+   */
   function _setXAllocationVoting(IXAllocationVotingGovernor newXAllocationVoting) internal {
     GovernorExternalContractsStorage storage $ = _getGovernorExternalContractsStorage();
     $.xAllocationVoting = newXAllocationVoting;
@@ -101,11 +121,17 @@ abstract contract GovernorExternalContractsUpgradeable is Initializable, Governo
 
   // ------- Getters ------- //
 
+  /**
+   * @dev The voter rewards contract.
+   */
   function voterRewards() public view virtual override returns (IVoterRewards) {
     GovernorExternalContractsStorage storage $ = _getGovernorExternalContractsStorage();
     return $.voterRewards;
   }
 
+  /**
+   * @dev The XAllocationVotingGovernor contract.
+   */
   function xAllocationVoting() public view virtual override returns (IXAllocationVotingGovernor) {
     GovernorExternalContractsStorage storage $ = _getGovernorExternalContractsStorage();
     return $.xAllocationVoting;
