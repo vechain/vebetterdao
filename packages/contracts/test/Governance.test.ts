@@ -3169,6 +3169,109 @@ describe("Governor and TimeLock", function () {
       expect(0n).to.eql(await vot3.balanceOf(await governor.getAddress()))
     })
 
+    it("User cannot withdraw if there is no deposit to withdraw", async () => {
+      const config = createLocalConfig()
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3 } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+      // grant approval to the governor contract
+      await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // Now we can create a new proposal
+      const address = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+      const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
+
+      // Create a proposal with a deposit of 10 VOT3
+      const tx = await governor
+        .connect(proposer)
+        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("1000"), {
+          gasLimit: 10_000_000,
+        })
+
+      const proposalId = await getProposalIdFromTx(tx)
+      expect(await governor.getUserDeposit(proposalId, proposer)).to.eql(ethers.parseEther("1000"))
+
+      // cancel the proposal to allow withdrawal
+      await governor
+        .connect(proposer)
+        .cancel([address], [0], [encodedFunctionCall], ethers.keccak256(ethers.toUtf8Bytes("")), {
+          gasLimit: 10_000_000,
+        })
+      expect(await governor.state(proposalId)).to.eql(2n) // cancelled
+
+      // user cannot withdraw non existent deposit
+      await governor.connect(proposer).withdraw(proposalId, proposer.address, { gasLimit: 10_000_000 })
+
+      // should not be able to withdraw again
+      await expect(governor.connect(proposer).withdraw(proposalId, proposer.address, { gasLimit: 10_000_000 })).to.be
+        .reverted
+
+      // random user cannot withdraw
+      await expect(
+        governor.connect(otherAccounts[1]).withdraw(proposalId, otherAccounts[1].address, { gasLimit: 10_000_000 }),
+      ).to.be.reverted
+
+      // should not be able to withdraw non existing proposal
+      await expect(governor.connect(proposer).withdraw(ethers.ZeroHash, proposer.address, { gasLimit: 10_000_000 })).to
+        .be.reverted
+    })
+
+    it("User cannot withdraw if VOT3 contract is paused", async () => {
+      const config = createLocalConfig()
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3, owner } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+      // grant approval to the governor contract
+      await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // Now we can create a new proposal
+      const address = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+      const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
+
+      // Create a proposal with a deposit of 10 VOT3
+      const tx = await governor
+        .connect(proposer)
+        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("1000"), {
+          gasLimit: 10_000_000,
+        })
+
+      const proposalId = await getProposalIdFromTx(tx)
+      expect(await governor.getUserDeposit(proposalId, proposer)).to.eql(ethers.parseEther("1000"))
+
+      // cancel the proposal
+      await governor
+        .connect(proposer)
+        .cancel([address], [0], [encodedFunctionCall], ethers.keccak256(ethers.toUtf8Bytes("")), {
+          gasLimit: 10_000_000,
+        })
+      expect(await governor.state(proposalId)).to.eql(2n) // cancelled
+
+      // pause the VOT3 contract
+      await vot3.connect(owner).pause()
+
+      // user cannot withdraw when VOT3 contract is paused
+      await expect(governor.connect(proposer).withdraw(proposalId, proposer.address, { gasLimit: 10_000_000 })).to.be
+        .reverted
+    })
+
     it("Should not be able to make a deposit if the proposal is state is not pending", async () => {
       const config = createLocalConfig()
       const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3 } =
