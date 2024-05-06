@@ -1,4 +1,5 @@
 import { DotSymbol } from "@/components"
+import { useProposalFormStore } from "@/store/useProposalFormStore"
 import {
   Box,
   Card,
@@ -15,8 +16,9 @@ import {
   Stepper,
   useSteps,
 } from "@chakra-ui/react"
+import { steps } from "framer-motion"
 import { usePathname } from "next/navigation"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 
 type CreateProposalStep = {
   key: string
@@ -25,7 +27,7 @@ type CreateProposalStep = {
   pathnames?: string[]
 }
 
-const steps: CreateProposalStep[] = [
+const FunctionTypeSteps: CreateProposalStep[] = [
   { key: "creationMethod", title: "Creation method" },
   { key: "proposalTopic", title: "Proposal topic", pathnames: ["/proposals/new/form/functions"] },
   { key: "basicsAndFunctions", title: "Proposal basics and functions", pathnames: ["/proposals/new/form/details"] },
@@ -34,19 +36,41 @@ const steps: CreateProposalStep[] = [
   { key: "round", title: "Round", pathnames: ["/proposals/new/form/round"] },
   { key: "fundingAndPublish", title: "Funding and publish!", pathnames: ["/proposals/new/form/deposit"] },
 ]
+
+const DiscussionTypeSteps: CreateProposalStep[] = [
+  { key: "creationMethod", title: "Creation method" },
+  { key: "details", title: "Proposal details", pathnames: ["/proposals/new/form/content"] },
+  { key: "preview", title: "Preview", pathnames: ["/proposals/new/form/preview"] },
+  { key: "round", title: "Round", pathnames: ["/proposals/new/form/round"] },
+  { key: "fundingAndPublish", title: "Funding and publish!", pathnames: ["/proposals/new/form/deposit"] },
+]
+
 export const CreateProposalStepperCard = () => {
   const pathname = usePathname()
+  const { actions } = useProposalFormStore()
+  const [steps, setSteps] = useState<CreateProposalStep[]>([])
+
   const { activeStep, setActiveStep } = useSteps({
     index: 1,
     count: steps.length,
   })
 
+  //set active step based on the current pathname
   useEffect(() => {
     const step = steps.find(step => step.pathnames?.includes(pathname))
     if (step) {
       setActiveStep(steps.indexOf(step))
     }
-  }, [pathname, setActiveStep])
+  }, [pathname, setActiveStep, steps])
+
+  //set steps based on the current actions + pathname
+  useEffect(() => {
+    const isInFunctionsPage = pathname.includes("/proposals/new/form/functions")
+    const hasActions = actions.length > 0
+
+    if (isInFunctionsPage || hasActions) setSteps(FunctionTypeSteps)
+    else setSteps(DiscussionTypeSteps)
+  }, [actions, pathname])
 
   return (
     <Card>
