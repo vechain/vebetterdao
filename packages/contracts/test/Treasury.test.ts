@@ -60,6 +60,16 @@ describe("Treasury", () => {
           treasuryProxy.connect(otherAccount).transferVTHO(otherAccount.address, ethers.parseEther("1")),
         )
       })
+      it("only governance can transfer VTHO", async () => {
+        await catchRevert(
+          treasuryProxy.connect(otherAccount).transferVTHO(otherAccount.address, ethers.parseEther("1")),
+        )
+      })
+      it("should revert if contract is paused", async () => {
+        await treasuryProxy.pause()
+        await catchRevert(treasuryProxy.transferVTHO(otherAccount.address, ethers.parseEther("1")))
+        await treasuryProxy.unpause()
+      })
     })
     describe("VET", () => {
       it("should transfer VET", async () => {
@@ -93,6 +103,14 @@ describe("Treasury", () => {
           treasuryProxy.connect(otherAccount).transferB3TR(otherAccount.address, ethers.parseEther("1")),
         )
       })
+      it("should revert if contract is paused", async () => {
+        await treasuryProxy.pause()
+        await catchRevert(treasuryProxy.transferB3TR(otherAccount.address, ethers.parseEther("1")))
+        await treasuryProxy.unpause()
+      })
+      it("can't stake more than balance", async () => {
+        await catchRevert(treasuryProxy.stakeB3TR(ethers.parseEther("6")))
+      })
       it("should return correct address for contract", async () => {
         expect(await treasuryProxy.b3trAddress()).to.eql(await b3tr.getAddress())
       })
@@ -116,8 +134,16 @@ describe("Treasury", () => {
           treasuryProxy.connect(otherAccount).transferVOT3(otherAccount.address, ethers.parseEther("1")),
         )
       })
+      it("should revert if contract is paused", async () => {
+        await treasuryProxy.pause()
+        await catchRevert(treasuryProxy.transferVOT3(otherAccount.address, ethers.parseEther("1")))
+        await treasuryProxy.unpause()
+      })
       it("should return correct address for contract", async () => {
         expect(await treasuryProxy.vot3Address()).to.eql(await vot3.getAddress())
+      })
+      it("should revert if not enough balance", async () => {
+        await catchRevert(treasuryProxy.transferVOT3(otherAccount.address, ethers.parseEther("6")))
       })
     })
     describe("ERC20", () => {
@@ -139,6 +165,13 @@ describe("Treasury", () => {
             .connect(otherAccount)
             .transferTokens(await vot3.getAddress(), otherAccount.address, ethers.parseEther("1")),
         )
+      })
+      it("should revert if B3TR contract is paused", async () => {
+        await b3tr.pause()
+        await catchRevert(
+          treasuryProxy.transferTokens(await b3tr.getAddress(), otherAccount.address, ethers.parseEther("1")),
+        )
+        await b3tr.unpause()
       })
     })
     describe("NFT", () => {
@@ -198,6 +231,11 @@ describe("Treasury", () => {
     it("should return correct version", async () => {
       expect(await treasuryProxy.getVersion()).to.eql("V1")
     })
+    it("can be initialized only once", async () => {
+      await catchRevert(
+        treasuryProxy.initialize(owner.address, owner.address, owner.address, owner.address, owner.address),
+      )
+    })
   })
   describe("Pause", () => {
     it("should pause and unpause", async () => {
@@ -208,6 +246,7 @@ describe("Treasury", () => {
     })
     it("should revert if not called by ADMIN_ROLE", async () => {
       await catchRevert(treasuryProxy.connect(otherAccount).pause())
+      await catchRevert(treasuryProxy.connect(otherAccount).unpause())
     })
   })
   describe("Timelock", () => {
