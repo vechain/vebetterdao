@@ -201,11 +201,10 @@ contract XAllocationPool is
    */
   function claim(uint256 roundId, bytes32 appId) public nonReentrant {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
-    IX2EarnApps _x2EarnApps = x2EarnApps();
 
     require(!$.claimedRewards[appId][roundId], "XAllocationPool: rewards already claimed for this app and round");
     require(!xAllocationVoting().isActive(roundId), "XAllocationPool: round not ended yet");
-    require(_x2EarnApps.appExists(appId), "XAllocationPool: app does not exist");
+    require($.x2EarnApps.appExists(appId), "XAllocationPool: app does not exist");
 
     (uint256 amountToClaim, uint256 unallocatedAmount) = claimableAmount(roundId, appId);
     require(amountToClaim > 0, "XAllocationPool: no rewards available for this app");
@@ -213,7 +212,7 @@ contract XAllocationPool is
     // update the claimedRewards mapping
     $.claimedRewards[appId][roundId] = true;
 
-    address receiverAddress = _x2EarnApps.appReceiverAddress(appId);
+    address receiverAddress = $.x2EarnApps.appReceiverAddress(appId);
 
     //check that contract has enough funds to pay the reward
     require($.b3tr.balanceOf(address(this)) >= (amountToClaim + unallocatedAmount), "Insufficient funds");
