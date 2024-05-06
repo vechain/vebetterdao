@@ -37,4 +37,6 @@ export {
   XAllocationPoolJson,
   XAllocationVotingJson,
   XAllocationVotingGovernorJson,
+  TreasuryContractJson,
+  X2EarnAppsJson,
 }
