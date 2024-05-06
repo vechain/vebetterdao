@@ -205,6 +205,13 @@ contract B3TRGovernor is
     $.voterRewards = IVoterRewards(_voterRewards);
   }
 
+  /**
+   * @dev Set the xAllocationVoting contract
+   *
+   * This function is only callable through goverance proposals
+   *
+   * @param _xAllocationVoting The new xAllocationVoting contract
+   */
   function setXAllocationVoting(IXAllocationVotingGovernor _xAllocationVoting) public onlyGovernance {
     B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
     $.xAllocationVoting = _xAllocationVoting;
@@ -582,6 +589,9 @@ contract B3TRGovernor is
     }
   }
 
+  /**
+   * @dev See {IB3TRGovernor-proposalNeedsQueuing}.
+   */
   function proposalNeedsQueuing(uint256 proposalId) public view returns (bool) {
     GovernorStorage storage $ = _getGovernorStorage();
     ProposalCore storage proposal = $._proposals[proposalId];
