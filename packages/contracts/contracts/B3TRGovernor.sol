@@ -43,7 +43,7 @@ import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
  * @notice This contract is the main governance contract for the VeBetterDAO ecosystem.
  * Anyone can create a proposal to both change the state of the contract, to execute a transaction
  * on the timelock or to ask for a vote from the community without performing any onchain action.
- * In order for the proposal to become active, the community needs to deposit a certain amount of B3TR tokens.
+ * In order for the proposal to become active, the community needs to deposit a certain amount of VOT3 tokens.
  * This is used as a heath check for the proposal, and funds are returned to the depositors after vote is concluded.
  * Votes for proposals start periodically, based on the allocation rounds (see xAllocationVoting contract), and the round
  * in which the proposal should be active is specified by the proposer during the proposal creation.
