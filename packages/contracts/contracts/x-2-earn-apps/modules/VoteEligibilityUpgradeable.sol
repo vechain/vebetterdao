@@ -30,7 +30,7 @@ import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 /**
  * @title VoteEligibilityUpgradeable
- * @notice Contract module that provides the vote eligibility functionalities of the x2earn apps.
+ * @dev Contract module that provides the vote eligibility functionalities of the x2earn apps.
  * By deafult every new added app becomes eligible for voting. The eligibility can be changed.
  * All eligible apps are stored in an array and can be retrieved at any tiem. Since eligibility of an app can change over time
  * we also have a checkpoint to track the changes for each single app (not for the array which is always up to date).
