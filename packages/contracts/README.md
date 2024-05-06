@@ -24,7 +24,7 @@ Since we are using a monorepo architecture please refer to the `README.md` in th
 
 Contracts are written using latest solidity version but compiled against "Paris" evm compiler to be compatible with Vechain Thor network.
 
-## Additional features
+## Additional Hardhat features for vechain
 
 ### Fee delegation
 
