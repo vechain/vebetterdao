@@ -300,4 +300,11 @@ describe("Treasury", () => {
       expect(await tProxy.getVETBalance()).to.eql(ethers.parseEther("5"))
     })
   })
+  describe("Fallback", () => {
+    it("Fallback function handles incoming VET when data is sent", async () => {
+      const balance = await treasuryProxy.getVETBalance()
+      await owner.sendTransaction({ to: await treasuryProxy.getAddress(), value: ethers.parseEther("1") })
+      expect(await treasuryProxy.getVETBalance()).to.be.gt(balance)
+    })
+  })
 })
