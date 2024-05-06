@@ -114,6 +114,11 @@ describe("Treasury", () => {
       it("should return correct address for contract", async () => {
         expect(await treasuryProxy.b3trAddress()).to.eql(await b3tr.getAddress())
       })
+      it("should revert stake if contract is paused", async () => {
+        await treasuryProxy.pause()
+        await catchRevert(treasuryProxy.stakeB3TR(ethers.parseEther("1")))
+        await treasuryProxy.unpause()
+      })
     })
     describe("VOT3", () => {
       it("should transfer VOT3", async () => {
@@ -136,7 +141,7 @@ describe("Treasury", () => {
       })
       it("should revert if contract is paused", async () => {
         await treasuryProxy.pause()
-        await catchRevert(treasuryProxy.transferVOT3(otherAccount.address, ethers.parseEther("1")))
+        await catchRevert(treasuryProxy.unstakeB3TR(ethers.parseEther("1")))
         await treasuryProxy.unpause()
       })
       it("should return correct address for contract", async () => {
