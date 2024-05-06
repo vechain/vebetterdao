@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useProposalFormStore } from "@/store/useProposalFormStore"
 import { VOT3Icon } from "@/components"
-import { useB3trBalance, useDepositThreshold } from "@/api"
+import { useDepositThreshold, useVot3Balance } from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useForm } from "react-hook-form"
 
@@ -29,7 +29,7 @@ type FormData = {
 export const NewProposalDepositPageContent = () => {
   const router = useRouter()
   const { account } = useWallet()
-  const { data: balance, isLoading: balanceLoading } = useB3trBalance(account ?? undefined)
+  const { data: balance, isLoading: balanceLoading } = useVot3Balance(account ?? undefined)
   const { data: threshold, isLoading: thresholdLoading } = useDepositThreshold()
   const { setData } = useProposalFormStore()
 
@@ -59,8 +59,8 @@ export const NewProposalDepositPageContent = () => {
           <VStack spacing={8} align="flex-start">
             <Heading size="lg">Lock VOT3 to fund your proposal</Heading>
             <Text fontSize="md" color="gray.500">
-              Your proposal will need at least 10.000 VOT3 to become active. You can take this VOT3 from your wallet, or
-              wait until other users fund your proposal.
+              Your proposal will need at least {balance?.formatted} VOT3 to become active. You can take this VOT3 from
+              your wallet, or wait until other users fund your proposal.
             </Text>
             <VStack spacing={2} align="flex-start" w="full">
               <Heading size="md">How much VOT3 do you want to lock to fund this proposal?</Heading>
