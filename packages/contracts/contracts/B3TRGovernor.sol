@@ -1,4 +1,26 @@
 // SPDX-License-Identifier: MIT
+
+//                                      #######
+//                                 ################
+//                               ####################
+//                             ###########   #########
+//                            #########      #########
+//          #######          #########       #########
+//          #########       #########      ##########
+//           ##########     ########     ####################
+//            ##########   #########  #########################
+//              ################### ############################
+//               #################  ##########          ########
+//                 ##############      ###              ########
+//                  ############                       #########
+//                    ##########                     ##########
+//                     ########                    ###########
+//                       ###                    ############
+//                                          ##############
+//                                    #################
+//                                   ##############
+//                                   #########
+
 pragma solidity ^0.8.20;
 
 import "./governance/GovernorUpgradeable.sol";
@@ -16,6 +38,24 @@ import { IVoterRewards } from "./interfaces/IVoterRewards.sol";
 import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 
+/**
+ * @title B3TRGovernor
+ * @notice This contract is the main governance contract for the VeBetterDAO ecosystem.
+ * Anyone can create a proposal to both change the state of the contract, to execute a transaction
+ * on the timelock or to ask for a vote from the community without performing any onchain action.
+ * In order for the proposal to become active, the community needs to deposit a certain amount of B3TR tokens.
+ * This is used as a heath check for the proposal, and funds are returned to the depositors after vote is concluded.
+ * Votes for proposals start periodically, based on the allocation rounds (see xAllocationVoting contract), and the round
+ * in which the proposal should be active is specified by the proposer during the proposal creation.
+ *
+ * A mininimum amount of voting power is required in order to vote on a proposal.
+ * The voting power is calculated through the quadratic vote formula based on the amount of VOT3 tokens held by the
+ * voter at the block when the proposal becomes active.
+ *
+ * Once a proposal succeeds, it can be executed by the timelock contract.
+ *
+ * The contract is upgradeable and uses the UUPS pattern.
+ */
 contract B3TRGovernor is
   Initializable,
   AccessControlUpgradeable,
@@ -43,9 +83,9 @@ contract B3TRGovernor is
    * @param vot3Token The address of the Vot3 token used for voting
    * @param timelock The address of the Timelock
    * @param xAllocationVoting The address of the xAllocationVoting
-   * @param quorumPercentage quorum as a percentage of the total supply at the block a proposal’s voting power is retrieved
-   * @param initialDepositThreshold The Deposit Threshold is the amount of voting power that an account needs to make a proposal
-   * @param initialMinVotingDelay The minimum delay before a proposal can start
+   * @param quorumPercentage quorum as a percentage of the total supply of VOT3 tokens
+   * @param initialDepositThreshold The Deposit Threshold for a proposal to be active
+   * @param initialMinVotingDelay The minimum amount of blocks a proposal needs to wait before it can start
    * @param initialVotingThreshold The minimum amount of voting power needed in order to vote
    * @param governorAdmin The address of the governor admin
    * @param voterRewards The address of the voter rewards contract
@@ -113,14 +153,23 @@ contract B3TRGovernor is
 
   // ------------------ GETTERS ------------------ //
 
+  /**
+   * @dev Get the address of the xAllocationVoting contract
+   */
   function xAllocationVotingAddress() public view returns (IXAllocationVotingGovernor) {
     return _getB3TRGovernorStorage().xAllocationVoting;
   }
 
+  /**
+   * @dev Get the address of the voter rewards contract
+   */
   function voterRewardsAddress() public view returns (IVoterRewards) {
     return _getB3TRGovernorStorage().voterRewards;
   }
 
+  /**
+   * @dev Check if a proposal can start in the next round
+   */
   function canProposalStartInNextRound() public view returns (bool) {
     B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
     uint256 currentRoundId = $.xAllocationVoting.currentRoundId();
@@ -143,6 +192,13 @@ contract B3TRGovernor is
 
   // ------------------ SETTERS ------------------ //
 
+  /**
+   * @dev Set the voter rewards contract
+   *
+   * This function is only callable through goverance proposals
+   *
+   * @param _voterRewards The new voter rewards contract
+   */
   function setVoterRewards(address _voterRewards) public onlyGovernance {
     B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
 
