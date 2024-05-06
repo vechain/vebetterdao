@@ -11,19 +11,18 @@ import {
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it, before } from "mocha"
 import { fundTreasuryVET, fundTreasuryVTHO } from "./helpers/fundTreasury"
-import { B3TR, B3TRGovernor, TimeLock, Treasury } from "../typechain-types"
+import { B3TR, B3TRGovernor, Treasury } from "../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy } from "../scripts/helpers"
 
-describe.only("Treasury", () => {
+describe("Treasury", () => {
   let treasuryProxy: Treasury
   let b3tr: B3TR
   let vot3: any
   let galaxyMember: any
   let owner: HardhatEthersSigner
   let otherAccount: HardhatEthersSigner
-  let governor: B3TRGovernor
-  let timelock: TimeLock
+
   before(async () => {
     const config = createLocalConfig()
     config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
@@ -37,8 +36,6 @@ describe.only("Treasury", () => {
     b3tr = info.b3tr
     vot3 = info.vot3
     galaxyMember = info.galaxyMember
-    governor = info.governor
-    timelock = info.timeLock
 
     await treasuryProxy.setTransferLimitVET(ethers.parseEther("1"))
     await treasuryProxy.setTransferLimitToken(await b3tr.getAddress(), ethers.parseEther("1"))
