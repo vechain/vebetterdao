@@ -10,6 +10,7 @@ type SelectedFunction = {
   abiDefinition: abi.Function.Definition
   functionName?: string
   functionDescription?: string
+  requiresEthParse?: boolean
 }
 export const FunctionsPageContent = () => {
   const { actions, setData } = useProposalFormStore()
@@ -89,6 +90,7 @@ export const FunctionsPageContent = () => {
                               contractAddress: contract.contract.address,
                               functionName: func.name,
                               functionDescription: func.description,
+                              requiresEthParse: func.requiresEthParse,
                             })
                       }>
                       <CardBody>

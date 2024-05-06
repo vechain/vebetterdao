@@ -83,6 +83,7 @@ export type ProposalFormStoreState = {
     abiDefinition: abi.Function.Definition
     functionName?: string
     functionDescription?: string
+    requiresEthParse?: boolean
   }[]
   votingStartRoundId?: number
   depositAmount?: number

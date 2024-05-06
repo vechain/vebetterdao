@@ -21,17 +21,19 @@ import { VOT3Icon } from "@/components"
 import { useDepositThreshold, useVot3Balance } from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useForm } from "react-hook-form"
+import { useCreateProposal } from "@/hooks"
 
 type FormData = {
   amount: number
 }
 
-export const NewProposalDepositPageContent = () => {
+export const NewProposalFundAndPublishPageContent = () => {
   const router = useRouter()
+  const createProposalMutation = useCreateProposal({})
   const { account } = useWallet()
   const { data: balance, isLoading: balanceLoading } = useVot3Balance(account ?? undefined)
   const { data: threshold, isLoading: thresholdLoading } = useDepositThreshold()
-  const { setData } = useProposalFormStore()
+  const { setData, markdownDescription, actions, votingStartRoundId } = useProposalFormStore()
 
   const { register, handleSubmit, formState } = useForm<FormData>({
     defaultValues: {
@@ -48,8 +50,15 @@ export const NewProposalDepositPageContent = () => {
   const onSubmit = useCallback(
     (data: FormData) => {
       setData({ depositAmount: data.amount })
+      if (!votingStartRoundId || !actions || !markdownDescription) throw new Error("Missing data")
+
+      createProposalMutation.sendTransaction({
+        actions,
+        description: markdownDescription,
+        startRoundId: votingStartRoundId,
+      })
     },
-    [setData],
+    [setData, createProposalMutation, markdownDescription, actions, votingStartRoundId],
   )
 
   return (

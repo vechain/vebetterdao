@@ -16,7 +16,6 @@ import {
   Stepper,
   useSteps,
 } from "@chakra-ui/react"
-import { steps } from "framer-motion"
 import { usePathname } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 

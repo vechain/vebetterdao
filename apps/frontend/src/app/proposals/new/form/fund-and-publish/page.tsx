@@ -6,8 +6,9 @@ import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
-const NewProposalDepositPageContent = dynamic(
-  () => import("./components/NewProposalDepositPageContent").then(mod => mod.NewProposalDepositPageContent),
+const NewProposalFundAndPublishPageContent = dynamic(
+  () =>
+    import("./components/NewProposalFundAndPublishPageContent").then(mod => mod.NewProposalFundAndPublishPageContent),
   {
     ssr: false,
     loading: () => (
@@ -18,14 +19,14 @@ const NewProposalDepositPageContent = dynamic(
   },
 )
 
-export default function NewProposalRoundPage() {
+export default function NewProposalFundAndPublishPage() {
   useEffect(() => {
-    AnalyticsUtils.trackPage("NewProposal/deposit")
+    AnalyticsUtils.trackPage("NewProposal/fund-and-publish")
   }, [])
 
   return (
     <MotionVStack>
-      <NewProposalDepositPageContent />
+      <NewProposalFundAndPublishPageContent />
     </MotionVStack>
   )
 }
