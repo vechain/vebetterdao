@@ -18,7 +18,7 @@ import {
 } from "@chakra-ui/react"
 import { steps } from "framer-motion"
 import { usePathname } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 
 type CreateProposalStep = {
   key: string
@@ -30,7 +30,11 @@ type CreateProposalStep = {
 const FunctionTypeSteps: CreateProposalStep[] = [
   { key: "creationMethod", title: "Creation method" },
   { key: "proposalTopic", title: "Proposal topic", pathnames: ["/proposals/new/form/functions"] },
-  { key: "basicsAndFunctions", title: "Proposal basics and functions", pathnames: ["/proposals/new/form/details"] },
+  {
+    key: "basicsAndFunctions",
+    title: "Proposal basics and functions",
+    pathnames: ["/proposals/new/form/functions/details"],
+  },
   { key: "details", title: "Proposal details", pathnames: ["/proposals/new/form/content"] },
   { key: "preview", title: "Preview", pathnames: ["/proposals/new/form/preview"] },
   { key: "round", title: "Round", pathnames: ["/proposals/new/form/round"] },
@@ -72,6 +76,10 @@ export const CreateProposalStepperCard = () => {
     else setSteps(DiscussionTypeSteps)
   }, [actions, pathname])
 
+  const height = useMemo(() => {
+    return steps.length * 60
+  }, [steps])
+
   return (
     <Card>
       <CardHeader>
@@ -84,7 +92,7 @@ export const CreateProposalStepperCard = () => {
           orientation="vertical"
           colorScheme="primary"
           gap="0"
-          height="300px"
+          height={height}
           mt={4}>
           {steps.map((step, index) => (
             <Step key={index}>

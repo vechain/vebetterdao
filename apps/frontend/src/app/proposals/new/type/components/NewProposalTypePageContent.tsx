@@ -10,16 +10,16 @@ const Steps: (Omit<CheckableCardProps, "checked" | "onChange"> & {
   {
     route: "/proposals/new/form/functions",
     imageSrc: "/images/blockchain.svg",
-    title: "Function-driven proposal",
+    title: "Perform actions or changes",
     description:
-      "Propose changes to the DAO that involve executing specific functions upon successful voting. These proposals aim to implement concrete actions or modifications within the ecosystem.",
+      "These proposals involve specific changes upon successful voting, aiming to implement concrete actions or modifications within the ecosystem.",
   },
   {
     route: "/proposals/new/form/discussion",
     imageSrc: "/images/people.svg",
-    title: "Discussion starter",
+    title: "Text only proposals",
     description:
-      "Submit proposals containing textual ideas and suggestions to kickstart discussions within the DAO community. These proposals focus on generating ideas and fostering dialogue.",
+      "These types of proposals do not bring about any concrete change, but rather validate certain ideas or suggestions about the DAO.",
   },
 ]
 export const NewProposalTypePageContent = () => {

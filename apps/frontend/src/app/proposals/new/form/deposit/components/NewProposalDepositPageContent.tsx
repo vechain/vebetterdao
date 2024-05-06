@@ -17,7 +17,7 @@ import {
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useProposalFormStore } from "@/store/useProposalFormStore"
-import { B3TRIcon } from "@/components"
+import { VOT3Icon } from "@/components"
 import { useB3trBalance, useDepositThreshold } from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useForm } from "react-hook-form"
@@ -57,21 +57,21 @@ export const NewProposalDepositPageContent = () => {
       <CardBody py={8}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <VStack spacing={8} align="flex-start">
-            <Heading size="lg">Lock B3TR to fund your proposal</Heading>
+            <Heading size="lg">Lock VOT3 to fund your proposal</Heading>
             <Text fontSize="md" color="gray.500">
-              Your proposal will need at least 10.000 B3TR to become active. You can take this B3TR from your wallet, or
+              Your proposal will need at least 10.000 VOT3 to become active. You can take this VOT3 from your wallet, or
               wait until other users fund your proposal.
             </Text>
             <VStack spacing={2} align="flex-start" w="full">
-              <Heading size="md">How much B3TR do you want to lock to fund this proposal?</Heading>
+              <Heading size="md">How much VOT3 do you want to lock to fund this proposal?</Heading>
               <Text fontSize="sm" color="gray.500">
-                Your B3TR will be unlocked when the voting session ends.
+                Your VOT3 will be unlocked when the voting session ends.
               </Text>
 
               <FormControl isInvalid={!!errors.amount}>
                 <InputGroup w="full" mt={4}>
                   <InputLeftElement pointerEvents="none">
-                    <B3TRIcon colorVariant="dark" />
+                    <VOT3Icon colorVariant="dark" />
                   </InputLeftElement>
                   <Input
                     {...register("amount", {
@@ -86,7 +86,7 @@ export const NewProposalDepositPageContent = () => {
                     ml={2}
                     w="full"
                     variant="flushed"
-                    placeholder="Enter the amount of B3TR"
+                    placeholder="Enter the amount of VOT3"
                     fontSize={["xl", "xl", "3xl"]}
                     fontFamily={"Instrument Sans Variable"}
                   />
@@ -102,7 +102,7 @@ export const NewProposalDepositPageContent = () => {
                   {errors.amount ? (
                     <FormHelperText color="red.500">{errors.amount.message}</FormHelperText>
                   ) : (
-                    <FormHelperText>Your current B3TR balance is {balance?.formatted}</FormHelperText>
+                    <FormHelperText>Your current VOT3 balance is {balance?.formatted}</FormHelperText>
                   )}
                 </Skeleton>
               </FormControl>

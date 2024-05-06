@@ -1,4 +1,4 @@
-import { Box, Card, CardBody, CardProps, Heading, Image, Stack, StackProps, Text, VStack } from "@chakra-ui/react"
+import { Box, Card, CardBody, CardProps, Heading, Image, Stack, StackProps, Text } from "@chakra-ui/react"
 
 export type StepCardProps = {
   stepImageSrc: string
@@ -21,7 +21,7 @@ export const StepCard: React.FC<StepCardProps> = ({
         <Stack spacing={4} align={"flex-start"} {...stackProps}>
           <Image src={stepImageSrc} boxSize={32} />
           <Box>
-            <Text textTransform={"uppercase"} fontWeight={600}>
+            <Text textTransform={"uppercase"} fontWeight={400} color="gray.500">
               Step {stepNumber}
             </Text>
             <Heading size="md">{stepTitle}</Heading>

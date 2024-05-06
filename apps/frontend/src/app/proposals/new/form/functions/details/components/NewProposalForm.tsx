@@ -1,4 +1,4 @@
-import { VStack, Heading, FormControl, FormLabel, Input, Textarea, Box, FormErrorMessage } from "@chakra-ui/react"
+import { VStack, Heading, FormControl, FormLabel, Input, Textarea, FormErrorMessage } from "@chakra-ui/react"
 
 import { useEffect, useCallback } from "react"
 import { useForm, useFieldArray, Controller } from "react-hook-form"

@@ -12,9 +12,8 @@ const Steps: StepCardProps[] = [
   {
     stepImageSrc: "/images/handshake.svg",
     stepNumber: 2,
-    stepTitle: "Funding",
-    stepDescription:
-      "For a proposal to became active, you'll need to lock X BT3R tokens. If you lack sufficient tokens or prefer not to use them all, your proposal can be supported by the community.",
+    stepTitle: "Look for support",
+    stepDescription: "In order for your proposal to be voted on, it will have to have the support of the community.",
   },
 
   {
@@ -47,7 +46,7 @@ export const NewProposalPageContent = () => {
           <CardBody>
             <VStack spacing={8} align="flex-start">
               <Heading size="lg">Create a new proposal</Heading>
-              <Text>
+              <Text fontSize={"lg"}>
                 Proposals represent your ideas as a valued member of the DAO community, aimed at enhancing or modifying
                 aspects of the ecosystem. Each proposal undergoes a voting process, and upon approval, is brought to
                 life.
