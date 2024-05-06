@@ -38,7 +38,10 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 /**
  * @title XAllocationVoting
- * @notice The main contract for handling the voting rounds for the x-2-earn apps funds allocations.
+ * @notice This is the contract that handles the voting rounds for the x-2-earn apps funds allocations.
+ * It needs to interact with the X2EarnApps contract to get the apps data (eg: app ids, app existance, eligible apps for each rounds).
+ * Rounds are started by the ROUND_STARTER_ROLE (assigned to the Emissions cotnract) and users can cast their votes based on their VOT3 token balance.
+ * When a user votes, the VotingRewards contract is called to save the user action, which will be used to calculate the rewards for the user.
  *
  * The contract is using AccessControl to handle roles for admin, governance and round starting operations.
  */
@@ -65,17 +68,18 @@ contract XAllocationVoting is
 
   /**
    * @notice Data for initializing the contract
-   * @param vot3Token The address of the Vot3 token used for voting
-   * @param quorumPercentage quorum as a percentage of the total supply at the block a proposal’s voting power is retrieved
-   * @param initialVotingPeriod How long does a proposal remain open to votes
+   * @param vot3Token The address of the VOT3 token used for voting
+   * @param quorumPercentage quorum as a percentage of the total supply
+   * @param initialVotingPeriod The round duration
    * @param timeLock Address of the timelock contract controlling governance actions
    * @param voterRewards The address of the VoterRewards contract
    * @param emissions The address of the Emissions contract
    * @param admins The addresses of the admins
    * @param upgrader The address of the upgrader
-   * @param xAppsBaseURI The base URI for the xApps
-   * @param baseAllocationPercentage The base allocation percentage
-   * @param appSharesCap The app shares cap
+   * @param x2EarnAppsAddress The address of the X2EarnApps contract
+   * @param baseAllocationPercentage A percentage of the total amount of allocations that should be equaly distributed to all apps in a round
+   * @param appSharesCap Max amount of % of votes an app can get in a round
+   * @param votingThreshold Minimum amount of VOT3 balance to cast a vote
    */
   struct InitializationData {
     IVotes vot3Token;
