@@ -148,7 +148,7 @@ interface IVOT3 {
 
   function convertToVOT3(uint256 amount) external;
 
-  function convertedBalanceOf(address account) external view returns (uint256);
+  function convertedB3trOf(address account) external view returns (uint256);
 
   function supportsInterface(bytes4 interfaceId) external view returns (bool);
 

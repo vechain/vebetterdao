@@ -169,7 +169,7 @@ describe("VOT3", function () {
       expect(await b3tr.balanceOf(otherAccount)).to.eql(ethers.parseEther("991"))
       expect(await b3tr.balanceOf(await vot3.getAddress())).to.eql(ethers.parseEther("9"))
       expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("9"))
-      expect(await vot3.convertedBalanceOf(otherAccount)).to.eql(ethers.parseEther("9"))
+      expect(await vot3.convertedB3trOf(otherAccount)).to.eql(ethers.parseEther("9"))
     })
 
     it("should not lock B3TR if not enough B3TR approved", async function () {
@@ -230,7 +230,7 @@ describe("VOT3", function () {
       // Check balances
       expect(await b3tr.balanceOf(otherAccount)).to.eql(ethers.parseEther("991"))
       expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("9"))
-      expect(await vot3.convertedBalanceOf(otherAccount)).to.eql(ethers.parseEther("9"))
+      expect(await vot3.convertedB3trOf(otherAccount)).to.eql(ethers.parseEther("9"))
       expect(await b3tr.balanceOf(vot3Address)).to.eql(ethers.parseEther("9"))
 
       // Unlock B3TR to burn VOT3
@@ -241,7 +241,7 @@ describe("VOT3", function () {
       expect(await b3tr.balanceOf(otherAccount)).to.eql(ethers.parseEther("1000"))
       expect(await b3tr.balanceOf(vot3Address)).to.eql(ethers.parseEther("0"))
       expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("0"))
-      expect(await vot3.convertedBalanceOf(otherAccount)).to.eql(ethers.parseEther("0"))
+      expect(await vot3.convertedB3trOf(otherAccount)).to.eql(ethers.parseEther("0"))
     })
 
     it("should not unlock B3TR if not enough VOT3", async function () {
@@ -262,7 +262,7 @@ describe("VOT3", function () {
       expect(await b3tr.balanceOf(otherAccount)).to.eql(ethers.parseEther("991"))
       expect(await b3tr.balanceOf(await vot3.getAddress())).to.eql(ethers.parseEther("9"))
       expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("9"))
-      expect(await vot3.convertedBalanceOf(otherAccount)).to.eql(ethers.parseEther("9"))
+      expect(await vot3.convertedB3trOf(otherAccount)).to.eql(ethers.parseEther("9"))
 
       // Unlock B3TR to burn VOT3
       await catchRevert(vot3.connect(otherAccount).convertToB3TR(ethers.parseEther("10"), { gasLimit: 10_000_000 }))
@@ -294,11 +294,11 @@ describe("VOT3", function () {
 
       expect(await b3tr.balanceOf(otherAccount)).to.eql(ethers.parseEther("993"))
       expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("7"))
-      expect(await vot3.convertedBalanceOf(otherAccount)).to.eql(ethers.parseEther("7"))
+      expect(await vot3.convertedB3trOf(otherAccount)).to.eql(ethers.parseEther("7"))
 
       expect(await b3tr.balanceOf(otherAccounts[0])).to.eql(ethers.parseEther("992"))
       expect(await vot3.balanceOf(otherAccounts[0])).to.eql(ethers.parseEther("8"))
-      expect(await vot3.convertedBalanceOf(otherAccounts[0])).to.eql(ethers.parseEther("8"))
+      expect(await vot3.convertedB3trOf(otherAccounts[0])).to.eql(ethers.parseEther("8"))
 
       // Transfer VOT3 from otherAccounts[0] to otherAccount
       await expect(
@@ -307,10 +307,10 @@ describe("VOT3", function () {
 
       // Check balances
       expect(await vot3.balanceOf(otherAccount)).to.eql(ethers.parseEther("9"))
-      expect(await vot3.convertedBalanceOf(otherAccount)).to.eql(ethers.parseEther("7"))
+      expect(await vot3.convertedB3trOf(otherAccount)).to.eql(ethers.parseEther("7"))
 
       expect(await vot3.balanceOf(otherAccounts[0])).to.eql(ethers.parseEther("6"))
-      expect(await vot3.convertedBalanceOf(otherAccounts[0])).to.eql(ethers.parseEther("8"))
+      expect(await vot3.convertedB3trOf(otherAccounts[0])).to.eql(ethers.parseEther("8"))
 
       // Attempt to unlock 8 VOT3 from otherAccount
       await catchRevert(vot3.connect(otherAccount).convertToB3TR(ethers.parseEther("8"), { gasLimit: 10_000_000 }))

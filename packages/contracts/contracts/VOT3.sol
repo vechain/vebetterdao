@@ -113,7 +113,7 @@ contract VOT3 is
   /// @notice Retrieves the number of converted B3TR tokens for a specific user
   /// @param account Address of the user to check
   /// @return uint256 The amount of converted tokens
-  function convertedBalanceOf(address account) public view returns (uint256) {
+  function convertedB3trOf(address account) public view returns (uint256) {
     VOT3Storage storage $ = _getVOT3Storage();
     return $._convertedB3TR[account];
   }

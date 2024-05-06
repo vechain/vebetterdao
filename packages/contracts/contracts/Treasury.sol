@@ -216,7 +216,7 @@ contract Treasury is
   /// @param _vot3Amount Amount of VOT3 to convert
   function convertVOT3(uint256 _vot3Amount) public onlyGovernanceWhenNotPaused {
     IVOT3 vot3 = IVOT3(vot3Address());
-    require(vot3.convertedBalanceOf(address(this)) >= _vot3Amount, "Treasury: insufficient B3TR converted");
+    require(vot3.convertedB3trOf(address(this)) >= _vot3Amount, "Treasury: insufficient B3TR converted");
     vot3.convertToB3TR(_vot3Amount);
   }
 
