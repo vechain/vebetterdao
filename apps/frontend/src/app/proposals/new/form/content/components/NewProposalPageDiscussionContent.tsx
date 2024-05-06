@@ -3,11 +3,10 @@ import "@uiw/react-markdown-preview/markdown.css"
 
 import { Box, Button, Card, CardBody, HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
-import { ChangeEvent, useCallback, useEffect } from "react"
+import { ChangeEvent, useCallback } from "react"
 import { useProposalFormStore } from "@/store/useProposalFormStore"
 import dynamic from "next/dynamic"
 
-import * as commands from "@uiw/react-md-editor/commands"
 import { ContextStore } from "@uiw/react-md-editor"
 import rehypeSanitize from "rehype-sanitize"
 
@@ -32,14 +31,8 @@ export const NewProposalPageDiscussionContent = () => {
     router.push("/proposals/new/form/preview")
   }, [router])
 
-  useEffect(() => {
-    document.documentElement.setAttribute("data-color-mode", "light")
-    return () => {
-      document.documentElement.removeAttribute("data-color-mode")
-    }
-  }, [])
   return (
-    <Card>
+    <Card w="full">
       <CardBody py={8}>
         <VStack spacing={8} align="flex-start">
           <Heading size="lg">Share more about your idea</Heading>

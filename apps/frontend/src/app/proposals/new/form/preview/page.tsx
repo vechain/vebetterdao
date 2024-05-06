@@ -10,7 +10,7 @@ import { NewProposalForm } from "../functions/details/components/NewProposalForm
 import { useRouter } from "next/navigation"
 
 export default function NewProposalPage() {
-  const { markdownDescription } = useProposalFormStore()
+  const { markdownDescription, actions } = useProposalFormStore()
 
   const router = useRouter()
 
@@ -26,13 +26,6 @@ export default function NewProposalPage() {
     AnalyticsUtils.trackPage("NewProposal/preview")
   }, [])
 
-  useEffect(() => {
-    document.documentElement.setAttribute("data-color-mode", "light")
-    return () => {
-      document.documentElement.removeAttribute("data-color-mode")
-    }
-  }, [])
-
   return (
     <MotionVStack>
       <Card w="full">
@@ -45,7 +38,7 @@ export default function NewProposalPage() {
                 padding: "1rem",
               }}
             />
-            <NewProposalForm renderTitle={false} renderDescription={false} isDisabled={true} />
+            {!!actions.length && <NewProposalForm renderTitle={false} renderDescription={false} isDisabled={true} />}
             <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
               <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
                 Go back
