@@ -11,7 +11,7 @@ import {
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it, before } from "mocha"
 import { fundTreasuryVET, fundTreasuryVTHO } from "./helpers/fundTreasury"
-import { B3TRGovernor, Treasury } from "../typechain-types"
+import { B3TRGovernor, Treasury, Treasury__factory } from "../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy } from "../scripts/helpers"
 
@@ -108,6 +108,11 @@ describe("Treasury", () => {
         await catchRevert(treasuryProxy.transferB3TR(otherAccount.address, ethers.parseEther("1")))
         await treasuryProxy.unpause()
       })
+      it("should revert if b3tr contract is paused", async () => {
+        await b3tr.pause()
+        await catchRevert(treasuryProxy.transferB3TR(otherAccount.address, ethers.parseEther("1")))
+        await b3tr.unpause()
+      })
       it("can't stake more than balance", async () => {
         await catchRevert(treasuryProxy.stakeB3TR(ethers.parseEther("6")))
       })
@@ -149,6 +154,11 @@ describe("Treasury", () => {
       })
       it("should revert if not enough balance", async () => {
         await catchRevert(treasuryProxy.transferVOT3(otherAccount.address, ethers.parseEther("6")))
+      })
+      it("should revert if vot3 contract is paused", async () => {
+        await vot3.pause()
+        await catchRevert(treasuryProxy.transferVOT3(otherAccount.address, ethers.parseEther("1")))
+        await vot3.unpause()
       })
     })
     describe("ERC20", () => {
@@ -301,10 +311,14 @@ describe("Treasury", () => {
     })
   })
   describe("Fallback", () => {
-    it("Fallback function handles incoming VET when data is sent", async () => {
-      const balance = await treasuryProxy.getVETBalance()
-      await owner.sendTransaction({ to: await treasuryProxy.getAddress(), value: ethers.parseEther("1") })
-      expect(await treasuryProxy.getVETBalance()).to.be.gt(balance)
+    it("Fallback function handles invalid calls", async () => {
+      const nonExistentFuncSignature = "nonExistentFunction(uint256,uint256)"
+      const treasuryWithFakeFunction = new ethers.Contract(
+        await treasuryProxy.getAddress(),
+        [...Treasury__factory.createInterface().fragments, `function ${nonExistentFuncSignature}`],
+        owner,
+      )
+      await treasuryWithFakeFunction.nonExistentFunction(1, 1)
     })
   })
 })
