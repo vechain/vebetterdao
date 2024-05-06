@@ -1,39 +1,53 @@
 // SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts (last updated v5.0.0) (governance/extensions/GovernorVotesQuorumFraction.sol)
+
+//                                      #######
+//                                 ################
+//                               ####################
+//                             ###########   #########
+//                            #########      #########
+//          #######          #########       #########
+//          #########       #########      ##########
+//           ##########     ########     ####################
+//            ##########   #########  #########################
+//              ################### ############################
+//               #################  ##########          ########
+//                 ##############      ###              ########
+//                  ############                       #########
+//                    ##########                     ##########
+//                     ########                    ###########
+//                       ###                    ############
+//                                          ##############
+//                                    #################
+//                                   ##############
+//                                   #########
 
 pragma solidity ^0.8.18;
 
-import { XAllocationGovernorVotesUpgradeable } from "./XAllocationGovernorVotesUpgradeable.sol";
+import { VotesUpgradeable } from "./VotesUpgradeable.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /**
+ * @title VotesQuorumFractionUpgradeable
  * @dev Extension of {XAllocationVotingGovernor} for voting weight extraction from an {ERC20Votes} token and a quorum expressed as a
  * fraction of the total supply.
  */
-abstract contract XAllocationGovernorVotesQuorumFractionUpgradeable is
-  Initializable,
-  XAllocationGovernorVotesUpgradeable
-{
+abstract contract VotesQuorumFractionUpgradeable is Initializable, VotesUpgradeable {
   using Checkpoints for Checkpoints.Trace208;
 
-  /// @custom:storage-location erc7201:b3tr.storage.GovernorVotesQuorumFraction
-  struct GovernorVotesQuorumFractionStorage {
+  /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.VotesQuorumFraction
+  struct VotesQuorumFractionStorage {
     Checkpoints.Trace208 _quorumNumeratorHistory;
   }
 
-  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.GovernorVotesQuorumFraction")) - 1)) & ~bytes32(uint256(0xff))
-  bytes32 private constant GovernorVotesQuorumFractionStorageLocation =
-    0x80591ec4ff6d1506223368471cadc2b4568b450b05eb374eb7d48c87f1fbc500;
+  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.VotesQuorumFraction")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 private constant VotesQuorumFractionStorageLocation =
+    0x49d99284d013647f52e2a267fd5944583bd36be17443e784ec3e86bbd4c32400;
 
-  function _getGovernorVotesQuorumFractionStorage()
-    private
-    pure
-    returns (GovernorVotesQuorumFractionStorage storage $)
-  {
+  function _getVotesQuorumFractionStorage() private pure returns (VotesQuorumFractionStorage storage $) {
     assembly {
-      $.slot := GovernorVotesQuorumFractionStorageLocation
+      $.slot := VotesQuorumFractionStorageLocation
     }
   }
 
@@ -51,11 +65,11 @@ abstract contract XAllocationGovernorVotesQuorumFractionUpgradeable is
    * specified as a percent: a numerator of 10 corresponds to quorum being 10% of total supply. The denominator can be
    * customized by overriding {quorumDenominator}.
    */
-  function __GovernorVotesQuorumFraction_init(uint256 quorumNumeratorValue) internal onlyInitializing {
-    __GovernorVotesQuorumFraction_init_unchained(quorumNumeratorValue);
+  function __VotesQuorumFraction_init(uint256 quorumNumeratorValue) internal onlyInitializing {
+    __VotesQuorumFraction_init_unchained(quorumNumeratorValue);
   }
 
-  function __GovernorVotesQuorumFraction_init_unchained(uint256 quorumNumeratorValue) internal onlyInitializing {
+  function __VotesQuorumFraction_init_unchained(uint256 quorumNumeratorValue) internal onlyInitializing {
     _updateQuorumNumerator(quorumNumeratorValue);
   }
 
@@ -63,7 +77,7 @@ abstract contract XAllocationGovernorVotesQuorumFractionUpgradeable is
    * @dev Returns the current quorum numerator. See {quorumDenominator}.
    */
   function quorumNumerator() public view virtual returns (uint256) {
-    GovernorVotesQuorumFractionStorage storage $ = _getGovernorVotesQuorumFractionStorage();
+    VotesQuorumFractionStorage storage $ = _getVotesQuorumFractionStorage();
     return $._quorumNumeratorHistory.latest();
   }
 
@@ -71,7 +85,7 @@ abstract contract XAllocationGovernorVotesQuorumFractionUpgradeable is
    * @dev Returns the quorum numerator at a specific timepoint. See {quorumDenominator}.
    */
   function quorumNumerator(uint256 timepoint) public view virtual returns (uint256) {
-    GovernorVotesQuorumFractionStorage storage $ = _getGovernorVotesQuorumFractionStorage();
+    VotesQuorumFractionStorage storage $ = _getVotesQuorumFractionStorage();
 
     uint256 length = $._quorumNumeratorHistory._checkpoints.length;
 
@@ -108,10 +122,9 @@ abstract contract XAllocationGovernorVotesQuorumFractionUpgradeable is
    *
    * Requirements:
    *
-   * - Must be called through a governance round.
    * - New numerator must be smaller or equal to the denominator.
    */
-  function updateQuorumNumerator(uint256 newQuorumNumerator) external virtual onlyGovernance {
+  function updateQuorumNumerator(uint256 newQuorumNumerator) public virtual {
     _updateQuorumNumerator(newQuorumNumerator);
   }
 
@@ -132,7 +145,7 @@ abstract contract XAllocationGovernorVotesQuorumFractionUpgradeable is
 
     uint256 oldQuorumNumerator = quorumNumerator();
 
-    GovernorVotesQuorumFractionStorage storage $ = _getGovernorVotesQuorumFractionStorage();
+    VotesQuorumFractionStorage storage $ = _getVotesQuorumFractionStorage();
     $._quorumNumeratorHistory.push(clock(), SafeCast.toUint208(newQuorumNumerator));
 
     emit QuorumNumeratorUpdated(oldQuorumNumerator, newQuorumNumerator);

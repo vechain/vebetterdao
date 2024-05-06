@@ -89,6 +89,64 @@ export const createProposal = async (
   return tx
 }
 
+export const createProposalWithMultipleFunctions = async (
+  proposer: HardhatEthersSigner,
+  contractToCalls: BaseContract[],
+  Contract: ContractFactory,
+  description: string,
+  functionsToCall: string[],
+  args: any[],
+  avoidMintingAndDelegating: boolean = false, // in some scenarios we want the operation to fail if the proposer does not have enough VOT3
+  roundId?: string,
+) => {
+  const { governor, emissions, xAllocationVoting } = await getOrDeployContractInstances({})
+
+  if (!roundId) {
+    // to ensure that test will work correctly before creating a proposal we wait for current round to end
+    // and start a new one
+    if ((await emissions.nextCycle()) === 0n) {
+      // if emissions are not started yet, we need to bootstrap and start them
+      await bootstrapAndStartEmissions()
+    } else {
+      // otherwise we need to wait for the current round to end and start the next one
+      await waitForCurrentRoundToEnd()
+      await emissions.distribute()
+    }
+    roundId = ((await xAllocationVoting.currentRoundId()) + 1n).toString()
+  }
+
+  const clock = await governor.clock()
+  const proposerVotes = await governor.getVotes(proposer, clock - BigInt(1))
+  const votesThreshold = await governor.depositThreshold()
+
+  if (votesThreshold > proposerVotes && !avoidMintingAndDelegating) {
+    //The proposer needs to have some delegated VOT3 to be able to create a proposal
+    await getVot3Tokens(proposer, (votesThreshold + BigInt(1)).toString())
+    // We also need to wait a block to update the proposer's votes snapshot
+    await waitForNextBlock()
+  }
+  const { vot3 } = await getOrDeployContractInstances({ forceDeploy: false })
+  // grant approval for governor to spend proposer's VOT3
+  await vot3.connect(proposer).approve(await governor.getAddress(), votesThreshold)
+
+  // create a new proposal
+  const tx = await governor.connect(proposer).propose(
+    contractToCalls,
+    Array(functionsToCall.length).fill(0),
+    functionsToCall.map((func, index) => {
+      return Contract.interface.encodeFunctionData(func, args[index])
+    }),
+    description,
+    roundId.toString(),
+    votesThreshold,
+    {
+      gasLimit: 10_000_000,
+    },
+  )
+
+  return tx
+}
+
 export const getProposalIdFromTx = async (tx: ContractTransactionResponse) => {
   const { governor } = await getOrDeployContractInstances({})
   const proposeReceipt = await tx.wait()
@@ -165,6 +223,7 @@ export const createProposalAndExecuteIt = async (
   description: string,
   functionToCall: string,
   args: any[] = [],
+  roundId?: string | bigint | number,
 ) => {
   const { governor } = await getOrDeployContractInstances({})
 
@@ -175,7 +234,7 @@ export const createProposalAndExecuteIt = async (
 
   // create a new proposal
   // console.log("Creating proposal");
-  const tx = await createProposal(contractToCall, Contract, proposer, description, functionToCall, args)
+  const tx = await createProposal(contractToCall, Contract, proposer, description, functionToCall, args, false, roundId)
   const proposalId = await getProposalIdFromTx(tx)
 
   // wait
@@ -204,6 +263,87 @@ export const createProposalAndExecuteIt = async (
   await governor.execute([await contractToCall.getAddress()], [0], [encodedFunctionCall], descriptionHash, {
     gasLimit: 10_000_000,
   })
+}
+
+export const createProposalWithMultipleFunctionsAndExecuteIt = async (
+  proposer: HardhatEthersSigner,
+  voter: HardhatEthersSigner,
+  contractsToCall: BaseContract[],
+  Contract: ContractFactory,
+  description: string,
+  functionsToCall: string[],
+  args: any[][],
+  roundId?: string,
+) => {
+  const { governor, emissions, xAllocationVoting } = await getOrDeployContractInstances({})
+
+  // load votes
+  // console.log("Loading votes");
+  await getVot3Tokens(voter, "1000")
+  await waitForNextBlock()
+
+  if (!roundId) {
+    // to ensure that test will work correctly before creating a proposal we wait for current round to end
+    // and start a new one
+    if ((await emissions.nextCycle()) === 0n) {
+      // if emissions are not started yet, we need to bootstrap and start them
+      await bootstrapAndStartEmissions()
+    } else {
+      // otherwise we need to wait for the current round to end and start the next one
+      await waitForCurrentRoundToEnd()
+      await emissions.distribute()
+    }
+    roundId = ((await xAllocationVoting.currentRoundId()) + 1n).toString()
+  }
+
+  // Encode functions
+  const encodedFunctionCalls = functionsToCall.map((func, index) => {
+    return Contract.interface.encodeFunctionData(func, args[index])
+  })
+
+  // create a new proposal
+  const tx = await createProposalWithMultipleFunctions(
+    proposer,
+    contractsToCall,
+    Contract,
+    description,
+    functionsToCall,
+    args,
+  )
+
+  const proposalId = await getProposalIdFromTx(tx)
+
+  // wait
+  // console.log("Waiting for voting period to start");
+  await waitForProposalToBeActive(proposalId)
+
+  // vote
+  // console.log("Voting");
+  await governor.connect(voter).castVote(proposalId, 1, { gasLimit: 10_000_000 }) // vote for
+
+  // wait
+  // console.log("Waiting for voting period to end");
+  await waitForVotingPeriodToEnd(proposalId)
+
+  // queue it
+  // console.log("Queueing");
+  const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
+  await governor.queue(contractsToCall, Array(functionsToCall.length).fill(0), encodedFunctionCalls, descriptionHash, {
+    gasLimit: 10_000_000,
+  })
+  await waitForNextBlock()
+
+  // execute it
+  // console.log("Executing");
+  await governor.execute(
+    contractsToCall,
+    Array(functionsToCall.length).fill(0),
+    encodedFunctionCalls,
+    descriptionHash,
+    {
+      gasLimit: 10_000_000,
+    },
+  )
 }
 
 export const addAppThroughGovernance = async (
@@ -277,11 +417,11 @@ export const voteOnApps = async (
 }
 
 export const addAppsToAllocationVoting = async (apps: string[], owner: HardhatEthersSigner) => {
-  const { xAllocationVoting } = await getOrDeployContractInstances({})
+  const { x2EarnApps } = await getOrDeployContractInstances({})
 
   let appIds: string[] = []
   for (const app of apps) {
-    await xAllocationVoting.connect(owner).addApp(app, app, app, "metadataURI")
+    await x2EarnApps.connect(owner).addApp(app, app, app, "metadataURI")
     appIds.push(ethers.keccak256(ethers.toUtf8Bytes(app)))
   }
 
@@ -309,7 +449,7 @@ export const calculateBaseAllocationOffChain = async (roundId: number) => {
   // Amount available for this round (assuming the amount is already scaled by 1e18 for precision)
   let totalAmount = await emissions.getXAllocationAmount(roundId)
 
-  let elegibleApps = await xAllocationVoting.getRoundApps(roundId)
+  let elegibleApps = await xAllocationVoting.getAppIdsOfRound(roundId)
 
   const baseAllcoationPercentage = await xAllocationVoting.getRoundBaseAllocationPercentage(roundId)
 
@@ -353,20 +493,20 @@ export const calculateUnallocatedAppAllocationOffChain = async (roundId: number,
 }
 
 export const participateInAllocationVoting = async (user: HardhatEthersSigner, waitRoundToEnd: boolean = false) => {
-  const { xAllocationVoting, owner } = await getOrDeployContractInstances({})
+  const { xAllocationVoting, x2EarnApps, owner } = await getOrDeployContractInstances({})
 
   await getVot3Tokens(user, "1")
   await getVot3Tokens(owner, "1000")
 
   const appName = "App" + Math.random()
 
-  await xAllocationVoting.connect(owner).addApp(user.address, user.address, appName, "metadataURI")
+  await x2EarnApps.connect(owner).addApp(user.address, user.address, appName, "metadataURI")
   const roundId = await startNewAllocationRound()
 
   // Vote
   await xAllocationVoting
     .connect(user)
-    .castVote(roundId, [await xAllocationVoting.hashName(appName)], [ethers.parseEther("1")])
+    .castVote(roundId, [await x2EarnApps.hashAppName(appName)], [ethers.parseEther("1")])
 
   if (waitRoundToEnd) {
     await waitForRoundToEnd(roundId)

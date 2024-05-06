@@ -2,9 +2,8 @@ import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 
 import { getConfig } from "@repo/config"
-const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
-import { XAllocationVoting__factory as XAllocationVoting } from "@repo/contracts"
-import { XApp } from "./useXApps"
+const X2EARNAPPS_CONTRACT = getConfig().x2EarnAppsContractAddress
+import { X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
 
 /**
  *  Get the moderators of the app
@@ -13,8 +12,8 @@ import { XApp } from "./useXApps"
  * @returns  the moderators of the app
  */
 export const getAppModerators = async (thor: Connex.Thor, appId: string): Promise<string[]> => {
-  const functionFragment = XAllocationVoting.createInterface().getFunction("appModerators").format("json")
-  const res = await thor.account(XALLOCATIONVOTING_CONTRACT).method(JSON.parse(functionFragment)).call(appId)
+  const functionFragment = X2EarnApps.createInterface().getFunction("appModerators").format("json")
+  const res = await thor.account(X2EARNAPPS_CONTRACT).method(JSON.parse(functionFragment)).call(appId)
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 

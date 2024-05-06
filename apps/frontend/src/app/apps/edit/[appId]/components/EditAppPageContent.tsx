@@ -1,4 +1,4 @@
-import { useAppModerators, useXApp, useXAppMetadata } from "@/api"
+import { useAppAdmin, useAppModerators, useXApp, useXAppMetadata } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { CreateEditAppForm, CreateEditAppFormData } from "@/components/CreateEditAppForm"
 import { TransactionModal } from "@/components/TransactionModal"
@@ -20,6 +20,7 @@ export const EditAppPageContent = ({ appId }: Props) => {
   const { account } = useWallet()
   const { data: appData } = useXApp(appId)
   const { data: metadata, isLoading: appMetadataLoading, error: appMetadataError } = useXAppMetadata(appId)
+  const { data: xAppAdmin } = useAppAdmin(appId)
   const router = useRouter()
 
   const { register, setValue, setError, formState, watch, handleSubmit, clearErrors, control } =
@@ -86,13 +87,13 @@ export const EditAppPageContent = ({ appId }: Props) => {
     handleSubmit(onSubmit)()
   }, [onConfirmationClose, updateAppMetadataMutation, handleSubmit, onSubmit])
 
-  const isAllowedToEditAddress = compareAddresses(appData?.adminAddress, account ?? "")
+  const isAllowedToEditAddress = compareAddresses(xAppAdmin, account ?? "")
   const { data: appModerators } = useAppModerators(appId)
   const isAllowedToEdit = useMemo(() => {
-    if (!account || !appModerators) return false
-    if (compareAddresses(appData?.adminAddress, account)) return true
+    if (!account || !appModerators || !xAppAdmin) return false
+    if (compareAddresses(xAppAdmin, account)) return true
     return appModerators.some(mod => compareAddresses(mod, account))
-  }, [account, appModerators, appData?.receiverAddress])
+  }, [account, appModerators, appData?.receiverAddress, xAppAdmin])
 
   useEffect(() => {
     if (!isAllowedToEditAddress) {

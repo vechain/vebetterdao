@@ -1,4 +1,4 @@
-import { useAppModerators, useXApp, useXAppMetadata } from "@/api"
+import { useAppAdmin, useAppModerators, useXApp, useXAppMetadata } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
 import {
@@ -33,6 +33,7 @@ export const AppDetailCard = ({ appId, showEditButton = true }: Props) => {
 
   const { data: xApp } = useXApp(appId)
   const { data: appMetadata, isLoading: appMetadataLoading, error: appMetadataError } = useXAppMetadata(appId)
+  const { data: xAppAdmin } = useAppAdmin(appId)
 
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
   const { data: banner, isLoading: isBannerLoading } = useIpfsImage(appMetadata?.banner)
@@ -40,10 +41,10 @@ export const AppDetailCard = ({ appId, showEditButton = true }: Props) => {
   const { isOpen: isMobileOptionsOpen, onClose: closeMobileOptions, onOpen: openMobileOptions } = useDisclosure()
   const { data: appModerators } = useAppModerators(appId)
   const isAllowedToEdit = useMemo(() => {
-    if (!account || !appModerators) return false
-    if (compareAddresses(xApp?.adminAddress, account)) return true
+    if (!account || !appModerators || !xAppAdmin) return false
+    if (compareAddresses(xAppAdmin, account)) return true
     return appModerators.some(mod => compareAddresses(mod, account))
-  }, [account, appModerators, xApp?.receiverAddress])
+  }, [account, appModerators, xApp?.receiverAddress, xAppAdmin])
 
   const navigateToEdit = () => {
     router.push(`/apps/edit/${appId}`)

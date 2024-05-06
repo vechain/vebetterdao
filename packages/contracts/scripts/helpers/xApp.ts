@@ -1,4 +1,4 @@
-import { VOT3, XAllocationVoting, XAllocationVoting__factory } from "../../typechain-types"
+import { VOT3, X2EarnApps__factory, XAllocationVoting, XAllocationVoting__factory } from "../../typechain-types"
 import {
   clauseBuilder,
   type TransactionClause,
@@ -29,9 +29,7 @@ export const addXDapps = async (contractAddress: string, account: IHDNode, apps:
       clauses.push(
         clauseBuilder.functionInteraction(
           contractAddress,
-          coder
-            .createInterface(JSON.stringify(XAllocationVoting__factory.abi))
-            .getFunction("addApp") as FunctionFragment,
+          coder.createInterface(JSON.stringify(X2EarnApps__factory.abi)).getFunction("addApp") as FunctionFragment,
           [app.address, app.address, app.name, app.metadataURI],
         ),
       )

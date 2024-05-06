@@ -11,12 +11,12 @@ import {
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it, before } from "mocha"
 import { fundTreasuryVET, fundTreasuryVTHO } from "./helpers/fundTreasury"
-import { Treasury } from "../typechain-types"
+import { B3TRGovernor, Treasury } from "../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy } from "../scripts/helpers"
 
 describe("Treasury", () => {
-  let treasuryProxy: any
+  let treasuryProxy: Treasury
   let b3tr: any
   let vot3: any
   let galaxyMember: any
@@ -211,11 +211,15 @@ describe("Treasury", () => {
     })
   })
   describe("Timelock", () => {
-    let tProxy: any
+    let tProxy: Treasury
+    let governor: B3TRGovernor
     before(async () => {
       const info = await getOrDeployContractInstances({
         forceDeploy: true,
       })
+
+      governor = info.governor
+
       tProxy = (await deployProxy("Treasury", [
         await info.b3tr.getAddress(),
         await info.vot3.getAddress(),
@@ -230,6 +234,15 @@ describe("Treasury", () => {
       const description = "Test Proposal: testing propsal for Transfer VET from tresausry"
       const treasuryContractFactory = await ethers.getContractFactory("Treasury")
       await bootstrapAndStartEmissions()
+
+      await governor
+        .connect(owner)
+        .setWhitelistFunction(
+          await tProxy.getAddress(),
+          tProxy.interface.getFunction("transferVET").selector as string,
+          true,
+        )
+
       await createProposalAndExecuteIt(
         owner,
         otherAccount,

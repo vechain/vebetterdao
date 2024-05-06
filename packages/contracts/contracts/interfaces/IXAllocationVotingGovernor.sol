@@ -69,6 +69,16 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   error GovernorAppNotAvailableForVoting(bytes32 appId);
 
   /**
+   * @dev The `votingThreshold` is not met.
+   */
+  error GovernorVotingThresholdNotMet(uint256 threshold, uint256 votes);
+
+  /**
+   * @dev The `voter` has insufficient voting power for this round to cast the votes.
+   */
+  error GovernorInsufficientVotingPower();
+
+  /**
    * @dev Emitted when a round is created.
    */
   event RoundCreated(uint256 roundId, address proposer, uint256 voteStart, uint256 voteEnd);
@@ -245,17 +255,13 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
 
   function quorumReached(uint256 roundId) external view returns (bool);
 
-  function getRoundApps(uint256 roundId) external view returns (bytes32[] memory);
+  function getAppIdsOfRound(uint256 roundId) external view returns (bytes32[] memory);
 
   function isEligibleForVote(bytes32 appId, uint256 roundId) external view returns (bool);
 
   function isActive(uint256 roundId) external view returns (bool);
 
-  function isFinalized(uint256 roundId) external view returns (bool);
-
   function latestSucceededRoundId(uint256 roundId) external view returns (uint256);
-
-  function getAppReceiverAddress(bytes32 appId) external view returns (address);
 
   function hasVotedOnce(address user) external view returns (bool);
 
