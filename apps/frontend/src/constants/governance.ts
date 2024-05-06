@@ -37,6 +37,7 @@ export type GovernanceFeaturedFunction = {
   name: string
   description: string
   functionName: string
+  requiresEthParse?: boolean
 }
 type GovernanceFeaturedContractWithFunctions = {
   name: string
@@ -55,6 +56,7 @@ export const GovernanceFeaturedContractsWithFunctions: GovernanceFeaturedContrac
         name: "Transfer B3TR",
         description: "Transfer B3TR tokens to a recipient",
         functionName: "transferB3TR",
+        requiresEthParse: true,
       },
     ],
   },
