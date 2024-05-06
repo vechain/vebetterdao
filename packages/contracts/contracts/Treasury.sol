@@ -86,6 +86,14 @@ contract Treasury is
     _;
   }
 
+  modifier onlyAdminOrGovernance() {
+    require(
+      hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) || hasRole(GOVERNANCE_ROLE, _msgSender()),
+      "Treasury: caller is not an admin or governance actor"
+    );
+    _;
+  }
+
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
@@ -255,14 +263,14 @@ contract Treasury is
 
   /// @notice Sets the transfer limit for VET
   /// @param _transferLimitVET The new transfer limit for VET
-  function setTransferLimitVET(uint256 _transferLimitVET) public onlyAdmin {
+  function setTransferLimitVET(uint256 _transferLimitVET) public onlyAdminOrGovernance {
     TreasuryStorage storage $ = _getTreasuryStorage();
     $.transferLimitVET = _transferLimitVET;
   }
 
   /// @notice Sets the transfer limit for any token
   /// @param _token The token to set the transfer limit for
-  function setTransferLimitToken(address _token, uint256 _transferLimit) public onlyAdmin {
+  function setTransferLimitToken(address _token, uint256 _transferLimit) public onlyAdminOrGovernance {
     TreasuryStorage storage $ = _getTreasuryStorage();
     $.transferLimit[_token] = _transferLimit;
   }
