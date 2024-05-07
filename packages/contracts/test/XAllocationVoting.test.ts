@@ -803,8 +803,15 @@ describe("X-Allocation Voting", function () {
       let roundCreated = filterEventsByName(receipt.logs, "RoundCreated")
       expect(roundCreated).not.to.eql([])
 
-      let { roundId } = parseRoundStartedEvent(roundCreated[0], xAllocationVoting)
-      expect(roundId).to.eql(BigInt(1))
+      let { roundId, proposer, voteStart, voteEnd, appsIds } = parseRoundStartedEvent(
+        roundCreated[0],
+        xAllocationVoting,
+      )
+      expect(roundId).to.eql(1)
+      expect(proposer).to.eql(owner.address)
+      expect(voteStart.toString()).to.eql(receipt.blockNumber.toString())
+      expect(voteEnd).to.eql(BigInt(receipt.blockNumber.toString()) + (await xAllocationVoting.votingPeriod()))
+      expect(appsIds).to.eql(await xAllocationVoting.getAppIdsOfRound(roundId))
 
       //Proposal should be active
       let roundState = await xAllocationVoting.state(roundId)
@@ -858,7 +865,7 @@ describe("X-Allocation Voting", function () {
       // Event should be emitted
       let roundCreated = filterEventsByName(receipt.logs, "RoundCreated")
       let { roundId } = parseRoundStartedEvent(roundCreated[0], xAllocationVoting)
-      expect(roundId).to.eql(BigInt(1))
+      expect(roundId).to.eql(1)
 
       await waitForRoundToEnd(roundId)
 
@@ -871,7 +878,7 @@ describe("X-Allocation Voting", function () {
       expect(roundCreated).not.to.eql([])
       ;({ roundId } = parseRoundStartedEvent(roundCreated[0], xAllocationVoting))
 
-      expect(roundId).to.eql(BigInt(2))
+      expect(roundId).to.eql(2)
 
       const currentRoundId = await xAllocationVoting.currentRoundId()
       expect(currentRoundId).to.eql(BigInt(2))
@@ -1215,7 +1222,7 @@ describe("X-Allocation Voting", function () {
         roundId: votedRoundId,
       } = parseAllocationVoteCastEvent(allocationVoteCast[0], xAllocationVoting)
       expect(voter).to.eql(otherAccount.address)
-      expect(votedRoundId).to.eql(roundId)
+      expect(votedRoundId).to.eql(BigInt(roundId))
       expect(votedApps).to.eql([app1, app2])
       expect(voteWeights).to.eql([ethers.parseEther("300"), ethers.parseEther("200")])
 
