@@ -16,7 +16,6 @@ import { createTestConfig } from "./helpers/config"
 import { generateB3trAllocations } from "./helpers/generateB3trAllocations"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployProxy } from "../scripts/helpers"
-import { XAllocationVoting } from "../typechain-types"
 
 describe("Emissions", () => {
   describe("Contract parameters", () => {
@@ -668,6 +667,14 @@ describe("Emissions", () => {
           },
         ]),
       ).to.be.reverted
+    })
+
+    it("Should return correct version of the contract", async () => {
+      const { emissions } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await emissions.version()).to.equal("1")
     })
   })
 

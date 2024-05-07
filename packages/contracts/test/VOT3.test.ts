@@ -149,6 +149,14 @@ describe("VOT3", function () {
 
       await expect(vot3.initialize(owner.address, await b3tr.getAddress())).to.be.reverted // already initialized
     })
+
+    it("Should return correct version of the contract", async () => {
+      const { vot3 } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await vot3.version()).to.equal("1")
+    })
   })
 
   describe("Lock B3TR", function () {

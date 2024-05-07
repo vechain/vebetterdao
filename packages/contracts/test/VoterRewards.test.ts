@@ -358,6 +358,14 @@ describe("VoterRewards", () => {
         ]),
       ).to.be.reverted
     })
+
+    it("Should return correct version of the contract", async () => {
+      const { voterRewards } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await voterRewards.version()).to.equal("1")
+    })
   })
 
   describe("X Allocation voting rewards", () => {
