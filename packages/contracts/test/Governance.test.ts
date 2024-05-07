@@ -327,6 +327,10 @@ describe.only("Governor and TimeLock", function () {
         forceDeploy: true,
       })
 
+      // first whitelist
+      const funcSig = governor.interface.getFunction("setB3tr")?.selector
+      await governor.connect(owner).setWhitelistFunction(await governor.getAddress(), funcSig, true)
+
       const newAddress = ethers.Wallet.createRandom().address
       await createProposalAndExecuteIt(
         owner,
