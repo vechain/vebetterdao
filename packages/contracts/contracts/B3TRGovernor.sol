@@ -138,37 +138,6 @@ contract B3TRGovernor is
     _grantRole(GOVERNOR_FUNCTIONS_SETTINGS_ROLE, data.governorFunctionSettingsRoleAddress);
   }
 
-  // ------------------ GETTERS ------------------ //
-
-  /**
-   * @dev Check if the proposal can start in the next round
-   *
-   * If we are in round 0 (so emissions did not start yet) there is an unknown amount of time between now
-   * and the start of the first round: it could start in 1 hour or 1 week.
-   * For this reason, the check we have in place to enforce a minimum delay period will fail.
-   *
-   * We can still create proposals that starts in round 2, because we know the voting period of first round.
-   */
-  function canProposalStartInNextRound() public view returns (bool) {
-    IXAllocationVotingGovernor _xAllocationVoting = xAllocationVoting();
-    uint256 currentRoundId = _xAllocationVoting.currentRoundId();
-    uint256 minVotingDelay = minVotingDelay();
-    uint256 currentRoundDeadline = _xAllocationVoting.roundDeadline(currentRoundId);
-    uint48 currentBlock = clock();
-
-    // this could happen if the round ended and the next one not started yet
-    if (currentRoundDeadline <= currentBlock) {
-      return false;
-    }
-
-    // if between now and the start of the new round is less then the min delay, revert
-    if (minVotingDelay > currentRoundDeadline - currentBlock) {
-      return false;
-    }
-
-    return true;
-  }
-
   // ------------------ SETTERS ------------------ //
 
   /**
