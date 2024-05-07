@@ -105,7 +105,7 @@ export const useCreateProposal = ({
         value: 0,
         data: b3trGovernorInterface.encodeFunctionData("propose", [
           targetsAndCalldata.contractsAddress,
-          [0],
+          Array(actions.length).fill(0),
           targetsAndCalldata.calldatas,
           description,
           startRoundId,
