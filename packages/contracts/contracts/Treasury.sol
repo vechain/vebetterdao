@@ -58,6 +58,8 @@ contract Treasury is
   struct TreasuryStorage {
     address B3TR;
     address VOT3;
+    mapping(address => uint256) transferLimit; // Mapping of token addresses to their transfer limits
+    uint256 transferLimitVET; // Transfer limit for VET
   }
 
   /// @dev The slot for Treasury storage in contract storage
@@ -84,6 +86,14 @@ contract Treasury is
     _;
   }
 
+  modifier onlyAdminOrGovernance() {
+    require(
+      hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) || hasRole(GOVERNANCE_ROLE, _msgSender()),
+      "Treasury: caller is not an admin or governance actor"
+    );
+    _;
+  }
+
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
@@ -100,7 +110,11 @@ contract Treasury is
     address _vot3,
     address _timeLock,
     address _admin,
-    address _proxyAdmin
+    address _proxyAdmin,
+    uint256 _transferLimitVET,
+    uint256 _transferLimitB3TR,
+    uint256 _transferLimitVOT3,
+    uint256 _transferLimitVTHO
   ) public initializer {
     TreasuryStorage storage $ = _getTreasuryStorage();
 
@@ -112,6 +126,12 @@ contract Treasury is
     __Pausable_init();
     __ReentrancyGuard_init();
 
+    $.transferLimitVET = _transferLimitVET;
+
+    $.transferLimit[$.B3TR] = _transferLimitB3TR;
+    $.transferLimit[$.VOT3] = _transferLimitVOT3;
+    $.transferLimit[VTHO] = _transferLimitVTHO;
+
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     _grantRole(GOVERNANCE_ROLE, _timeLock);
     _grantRole(UPGRADER_ROLE, _proxyAdmin);
@@ -122,8 +142,6 @@ contract Treasury is
 
   /// @notice Fallback function to handle incoming VET when data is sent
   fallback() external payable {}
-
-  /// ---------- Setters ---------- //
 
   /// @notice Pauses the Treasury contract
   /// @dev Pausing the contract will prevent all transfers and staking operations
@@ -143,7 +161,12 @@ contract Treasury is
   /// @param _to Recipient of the VTHO
   /// @param _value Amount of VTHO to transfer
   function transferVTHO(address _to, uint256 _value) public onlyGovernanceWhenNotPaused {
+    TreasuryStorage storage $ = _getTreasuryStorage();
+
+    require($.transferLimit[VTHO] >= _value, "Treasury: transfer limit exceeded");
+
     IERC20 vtho = _getERC20Contract(VTHO);
+
     require(vtho.balanceOf(address(this)) >= _value, "Treasury: insufficient VTHO balance");
     require(vtho.transfer(_to, _value), "Treasury: transfer failed");
   }
@@ -153,6 +176,10 @@ contract Treasury is
   /// @param _to Recipient of the B3TR
   /// @param _value Amount of B3TR to transfer
   function transferB3TR(address _to, uint256 _value) public onlyGovernanceWhenNotPaused {
+    TreasuryStorage storage $ = _getTreasuryStorage();
+
+    require($.transferLimit[$.B3TR] >= _value, "Treasury: transfer limit exceeded");
+
     IERC20 b3tr = _getERC20Contract(b3trAddress());
     require(b3tr.balanceOf(address(this)) >= _value, "Treasury: insufficient B3TR balance");
     require(b3tr.transfer(_to, _value), "Treasury: transfer failed");
@@ -163,6 +190,10 @@ contract Treasury is
   /// @param _to Recipient of the VOT3
   /// @param _value Amount of VOT3 to transfer
   function transferVOT3(address _to, uint256 _value) public onlyGovernanceWhenNotPaused {
+    TreasuryStorage storage $ = _getTreasuryStorage();
+
+    require($.transferLimit[$.VOT3] >= _value, "Treasury: transfer limit exceeded");
+
     IERC20 vot3 = _getERC20Contract(vot3Address());
     require(vot3.balanceOf(address(this)) >= _value, "Treasury: insufficient VOT3 balance");
     require(vot3.transfer(_to, _value), "Treasury: transfer failed");
@@ -173,6 +204,10 @@ contract Treasury is
   /// @param _to Recipient of the VET
   /// @param _value Amount of VET to transfer
   function transferVET(address _to, uint256 _value) public onlyGovernanceWhenNotPaused nonReentrant {
+    TreasuryStorage storage $ = _getTreasuryStorage();
+
+    require($.transferLimitVET >= _value, "Treasury: transfer limit exceeded");
+
     require(address(this).balance >= _value, "Treasury: insufficient VET balance");
     (bool sent, ) = _to.call{ value: _value }("");
     require(sent, "Failed to send VET");
@@ -184,6 +219,10 @@ contract Treasury is
   /// @param _to Recipient of the ERC20 token
   /// @param _value Amount of the ERC20 token to transfer
   function transferTokens(address _token, address _to, uint256 _value) public onlyGovernanceWhenNotPaused {
+    TreasuryStorage storage $ = _getTreasuryStorage();
+
+    require($.transferLimit[_token] >= _value, "Treasury: transfer limit exceeded");
+
     IERC20 token = _getERC20Contract(_token);
     require(token.balanceOf(address(this)) >= _value, "Treasury: insufficient balance");
     require(token.transfer(_to, _value), "Treasury: transfer failed");
@@ -218,6 +257,22 @@ contract Treasury is
     IVOT3 vot3 = IVOT3(vot3Address());
     require(vot3.convertedB3trOf(address(this)) >= _vot3Amount, "Treasury: insufficient B3TR converted");
     vot3.convertToB3TR(_vot3Amount);
+  }
+
+  /// ---------- Setters ---------- //
+
+  /// @notice Sets the transfer limit for VET
+  /// @param _transferLimitVET The new transfer limit for VET
+  function setTransferLimitVET(uint256 _transferLimitVET) public onlyAdminOrGovernance {
+    TreasuryStorage storage $ = _getTreasuryStorage();
+    $.transferLimitVET = _transferLimitVET;
+  }
+
+  /// @notice Sets the transfer limit for any token
+  /// @param _token The token to set the transfer limit for
+  function setTransferLimitToken(address _token, uint256 _transferLimit) public onlyAdminOrGovernance {
+    TreasuryStorage storage $ = _getTreasuryStorage();
+    $.transferLimit[_token] = _transferLimit;
   }
 
   // ---------- Getters ---------- //
@@ -274,6 +329,16 @@ contract Treasury is
   function vot3Address() public view returns (address) {
     TreasuryStorage storage $ = _getTreasuryStorage();
     return $.VOT3;
+  }
+
+  function getTransferLimitVET() public view returns (uint256) {
+    TreasuryStorage storage $ = _getTreasuryStorage();
+    return $.transferLimitVET;
+  }
+
+  function getTransferLimitToken(address _token) public view returns (uint256) {
+    TreasuryStorage storage $ = _getTreasuryStorage();
+    return $.transferLimit[_token];
   }
 
   // ----------- Internal & Private ----------- //

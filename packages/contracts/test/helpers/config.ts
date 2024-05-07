@@ -91,5 +91,13 @@ export function createTestConfig() {
     VOTER_REWARDS_MULTIPLIER: [0, 10, 20, 50, 100, 150, 200, 400, 900, 2400],
 
     XAPP_BASE_URI: "ipfs://",
+
+    /*
+      Token transfer limits. These values are not final and are for testing purposes only.
+    */
+    TREASURY_TRANSFER_LIMIT_VET: BigInt("1000000000000000000"), // 1 VET
+    TREASURY_TRANSFER_LIMIT_B3TR: BigInt("1000000000000000000"), // 1 B3TR
+    TREASURY_TRANSFER_LIMIT_VTHO: BigInt("1000000000000000000"), // 1 VTHO
+    TREASURY_TRANSFER_LIMIT_VOT3: BigInt("1000000000000000000"), // 1 VOT3
   })
 }

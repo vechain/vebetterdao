@@ -29,7 +29,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 /**
  * @title GovernorFunctionsSettingsUpgradeable
  * @author VeBetterDAO
- * @notice Contract module which provides a way to restrict functions that can be called by proposals
+ * @dev Contract module which provides a way to restrict functions that can be called by proposals
  */
 abstract contract GovernorFunctionsSettingsUpgradeable is Initializable, GovernorUpgradeable {
   /// @custom:storage-location erc7201:b3tr.storage.GovernorFunctionsSettingsUpgradeable

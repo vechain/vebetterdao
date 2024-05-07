@@ -50,7 +50,9 @@ abstract contract GovernorCountingSimpleUpgradeable is Initializable, GovernorUp
     }
   }
 
-  function __GovernorCountingSimple_init() internal onlyInitializing {}
+  function __GovernorCountingSimple_init() internal onlyInitializing {
+    __GovernorCountingSimple_init_unchained();
+  }
 
   function __GovernorCountingSimple_init_unchained() internal onlyInitializing {}
 
