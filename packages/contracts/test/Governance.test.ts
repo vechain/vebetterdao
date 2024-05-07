@@ -3107,7 +3107,25 @@ describe("Governor and TimeLock", function () {
           },
         )
 
+      const proposeReceipt = await tx2.wait()
+      // Check that the ProposalDeposit event was emitted with the correct parameters
+      const event = proposeReceipt?.logs[2]
+      expect(event).not.to.be.undefined
+
+      const decodedLogs = governor.interface.parseLog({
+        topics: [...(event?.topics as string[])],
+        data: event ? event.data : "",
+      })
+
+      // deposit amount
+      expect(decodedLogs?.args[2]).to.eql(ethers.parseEther("1000"))
+      // total amount
+      expect(decodedLogs?.args[3]).to.eql(ethers.parseEther("1000"))
+      //depsoit threshold
+      expect(decodedLogs?.args[4]).to.eql(depositAmount2)
+
       const proposalId2 = await getProposalIdFromTx(tx2, true)
+
       const proposalDeposit2 = await governor.proposalDepositThreshold(proposalId2)
 
       expect(proposalDeposit).to.not.eql(proposalDeposit2)
