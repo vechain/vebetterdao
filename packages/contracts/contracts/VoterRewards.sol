@@ -1,5 +1,27 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.18;
+
+//                                      #######
+//                                 ################
+//                               ####################
+//                             ###########   #########
+//                            #########      #########
+//          #######          #########       #########
+//          #########       #########      ##########
+//           ##########     ########     ####################
+//            ##########   #########  #########################
+//              ################### ############################
+//               #################  ##########          ########
+//                 ##############      ###              ########
+//                  ############                       #########
+//                    ##########                     ##########
+//                     ########                    ###########
+//                       ###                    ############
+//                                          ##############
+//                                    #################
+//                                   ##############
+//                                   #########
+
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
@@ -11,8 +33,30 @@ import "./interfaces/IB3TR.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
+/**
+ * @title VoterRewards
+ * @author VeBetterDAO
+ *
+ * @notice This contract handles the rewards for voters in the VeBetterDAO ecosystem.
+ * It calculates the rewards for voters based on their voting power and the level of their Galaxy Member NFT.
+ *
+ * @dev The contract is
+ * - upgradeable using UUPSUpgradeable.
+ * - using AccessControl to handle the admin and upgrader roles.
+ * - using ReentrancyGuard to prevent reentrancy attacks.
+ * - using Initializable to initialize the contract.
+ * - following the ERC-7201 standard for storage layout.
+ *
+ * Roles:
+ * - DEFAULT_ADMIN_ROLE: The role that can add new admins and upgraders. It is also the role that can set the Galaxy Member contract, Emissions contract, scaling factor, and the Galaxy Member level to multiplier mapping.
+ * - UPGRADER_ROLE: The role that can upgrade the contract.
+ * - VOTE_REGISTRAR_ROLE: The role that can register votes for rewards calculation.
+ */
 contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
+  /// @notice The role that can register votes for rewards calculation.
   bytes32 public constant VOTE_REGISTRAR_ROLE = keccak256("VOTE_REGISTRAR_ROLE");
+
+  /// @notice The role that can upgrade the contract.
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
   /// @custom:storage-location erc7201:b3tr.storage.VoterRewards
@@ -33,14 +77,24 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
   bytes32 private constant VoterRewardsStorageLocation =
     0x114e7ffaaf205d38cd05b17b56f3357806ef2ce889cb4748445ae91cdfc37c00;
 
+  /// @notice Get the VoterRewardsStorage struct from the specified storage slot specified by the VoterRewardsStorageLocation.
   function _getVoterRewardsStorage() internal pure returns (VoterRewardsStorage storage $) {
     assembly {
       $.slot := VoterRewardsStorageLocation
     }
   }
 
+  /// @notice Emitted when a user registers their votes for rewards calculation.
+  /// @param cycle - The cycle in which the votes were registered.
+  /// @param voter- The address of the voter.
+  /// @param votes - The number of votes cast by the voter.
+  /// @param rewardWeightedVote - The reward-weighted vote power for the voter based on their voting power and GM NFT level.
   event VoteRegistered(uint256 indexed cycle, address indexed voter, uint256 votes, uint256 rewardWeightedVote);
 
+  /// @notice Emitted when a user claims their rewards.
+  /// @param cycle - The cycle in which the rewards were claimed.
+  /// @param voter - The address of the voter.
+  /// @param reward - The amount of B3TR reward claimed by the voter.
   event RewardClaimed(uint256 indexed cycle, address indexed voter, uint256 reward);
 
   /// @custom:oz-upgrades-unsafe-allow constructor
@@ -48,6 +102,14 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
     _disableInitializers();
   }
 
+  /// @notice Initialize the VoterRewards contract.
+  /// @param admin - The address of the admin.
+  /// @param upgrader - The address of the upgrader.
+  /// @param _emissions - The address of the emissions contract.
+  /// @param _galaxyMember - The address of the Galaxy Member contract.
+  /// @param _b3tr - The address of the B3TR token contract.
+  /// @param levels - The levels of the Galaxy Member NFTs.
+  /// @param multipliers  - The multipliers for the levels of the Galaxy Member NFTs.
   function initialize(
     address admin,
     address upgrader,
@@ -75,6 +137,7 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
     $.emissions = IEmissions(_emissions);
     $.scalingFactor = 1e6;
 
+    // Set the level to multiplier mapping.
     for (uint256 i = 0; i < levels.length; i++) {
       $.levelToMultiplier[levels[i]] = multipliers[i];
     }
@@ -83,14 +146,17 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
     _grantRole(UPGRADER_ROLE, upgrader);
   }
 
+  /// @notice Upgrade the implementation of the VoterRewards contract.
+  /// @dev Only the address with the UPGRADER_ROLE can call this function.
+  /// @param newImplementation - The address of the new implementation contract.
   function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
-  // @notice Register the votes of a user for rewards calculation.
-  // @dev Quadratic rewarding is used to reward users fairly based on their voting power.
-  // @param proposalStart The start time of the proposal.
-  // @param voter The address of the voter.
-  // @param votes The number of votes cast by the voter.
-  // @param votePower The square root of the total votes cast by the voter.
+  /// @notice Register the votes of a user for rewards calculation.
+  /// @dev Quadratic rewarding is used to reward users with quadratic-weight based on their voting power and the level of their Galaxy Member NFT.
+  /// @param proposalStart - The start time of the proposal.
+  /// @param voter - The address of the voter.
+  /// @param votes - The number of votes cast by the voter.
+  /// @param votePower - The square root of the total votes cast by the voter.
   function registerVote(
     uint256 proposalStart,
     address voter,
@@ -108,6 +174,7 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
 
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
 
+    // Get the current cycle number.
     uint256 cycle = $.emissions.getCurrentCycle();
 
     // Fetch the highest level achieved by the voter in Galaxy Member NFT up to the proposal start time.
@@ -129,38 +196,53 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
     // Record the reward-weighted vote power for the voter in the cycle.
     $.cycleToVoterToTotal[cycle][voter] += rewardWeightedVote;
 
+    // Emit an event to log the registration of the votes.
     emit VoteRegistered(cycle, voter, votes, rewardWeightedVote);
   }
 
+  /// @notice Claim the rewards for a user in a specific cycle.
+  /// @dev The rewards are claimed based on the reward-weighted votes of the user in the cycle.
+  /// @param cycle - The cycle in which the rewards are claimed.
+  /// @param voter - The address of the voter.
   function claimReward(uint256 cycle, address voter) public nonReentrant {
     require(cycle > 0, "VoterRewards: cycle must be greater than 0");
     require(voter != address(0), "VoterRewards: voter cannot be the zero address");
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
 
+    // Check if the cycle has ended before claiming rewards.
     require($.emissions.isCycleEnded(cycle), "VoterRewards: cycle must be ended");
 
+    // Get the reward for the voter in the cycle.
     uint256 reward = getReward(cycle, voter);
 
     require(reward > 0, "VoterRewards: reward must be greater than 0");
     require($.b3tr.balanceOf(address(this)) >= reward, "VoterRewards: not enough B3TR in the contract to pay reward");
 
+    // Reset the reward-weighted votes for the voter in the cycle.
     $.cycleToVoterToTotal[cycle][voter] = 0;
 
     // transfer reward to voter
     require($.b3tr.transfer(voter, reward), "VoterRewards: transfer failed");
 
+    // Emit an event to log the reward claimed by the voter.
     emit RewardClaimed(cycle, voter, reward);
   }
 
   // ----------------- Getters ----------------- //
 
+  /// @notice Get the reward for a user in a specific cycle.
+  /// @param cycle - The cycle in which the rewards are claimed.
+  /// @param voter - The address of the voter.
   function getReward(uint256 cycle, address voter) public view returns (uint256) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
 
+    // Get the total reward-weighted votes for the voter in the cycle.
     uint256 total = $.cycleToVoterToTotal[cycle][voter];
 
+    // Get the total reward-weighted votes in the cycle.
     uint256 totalCycle = $.cycleToTotal[cycle];
 
+    // Get the emissions for voter rewards in the cycle.
     uint256 emissionsAmount = $.emissions.getVote2EarnAmount(cycle);
     require(emissionsAmount > 0, "VoterRewards: emissionsAmount must be greater than 0");
 
@@ -172,36 +254,47 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
     return reward / $.scalingFactor;
   }
 
+  /// @notice Get the total reward-weighted votes for a user in a specific cycle.
+  /// @param cycle - The cycle in which the rewards are claimed.
+  /// @param voter - The address of the voter.
   function cycleToVoterToTotal(uint256 cycle, address voter) public view returns (uint256) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
     return $.cycleToVoterToTotal[cycle][voter];
   }
 
+  /// @notice Get the total reward-weighted votes in a specific cycle.
+  /// @param cycle - The cycle in which the rewards are claimed.
   function cycleToTotal(uint256 cycle) public view returns (uint256) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
     return $.cycleToTotal[cycle];
   }
 
+  /// @notice Get the reward multiplier for a specific level of the Galaxy Member NFT.
+  /// @param level - The level of the Galaxy Member NFT.
   function levelToMultiplier(uint256 level) public view returns (uint256) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
     return $.levelToMultiplier[level];
   }
 
+  /// @notice Get the Galaxy Member contract.
   function galaxyMember() public view returns (IGalaxyMember) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
     return $.galaxyMember;
   }
 
+  /// @notice Get the Emissions contract.
   function emissions() public view returns (IEmissions) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
     return $.emissions;
   }
 
+  /// @notice Get the scaling factor for the rewards calculation.
   function scalingFactor() public view returns (uint256) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
     return $.scalingFactor;
   }
 
+  /// @notice Get the B3TR token contract.
   function b3tr() public view returns (IB3TR) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
     return $.b3tr;
@@ -209,6 +302,8 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
 
   // ----------------- Setters ----------------- //
 
+  /// @notice Set the Galaxy Member contract.
+  /// @param _galaxyMember - The address of the Galaxy Member contract.
   function setGalaxyMember(address _galaxyMember) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(_galaxyMember != address(0), "VoterRewards: _galaxyMember cannot be the zero address");
 
@@ -216,6 +311,9 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
     $.galaxyMember = IGalaxyMember(_galaxyMember);
   }
 
+  /// @notice Set the Galaxy Member level to multiplier mapping.
+  /// @param level - The level of the Galaxy Member NFT.
+  /// @param multiplier - The percentage multiplier for the level of the Galaxy Member NFT.
   function setLevelToMultiplier(uint256 level, uint256 multiplier) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(level > 0, "VoterRewards: level must be greater than 0");
     require(multiplier > 0, "VoterRewards: multiplier must be greater than 0");
@@ -224,6 +322,8 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
     $.levelToMultiplier[level] = multiplier;
   }
 
+  /// @notice Set the Emmissions contract.
+  /// @param _emissions - The address of the emissions contract.
   function setEmissions(address _emissions) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(_emissions != address(0), "VoterRewards: emissions cannot be the zero address");
 
@@ -231,11 +331,15 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
     $.emissions = IEmissions(_emissions);
   }
 
+  /// @notice Set the VOTE_REGISTRAR_ROLE role.
+  /// @param _voteRegistrar - The address of the vote registrar.
   function setVoteRegistrarRole(address _voteRegistrar) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(_voteRegistrar != address(0), "VoterRewards: _voteRegistrar cannot be the zero address");
     _grantRole(VOTE_REGISTRAR_ROLE, _voteRegistrar);
   }
 
+  /// @notice Set the scaling factor for the rewards calculation.
+  /// @param newScalingFactor - The new scaling factor.
   function setScalingFactor(uint256 newScalingFactor) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(newScalingFactor > 0, "VoterRewards: Scaling factor must be greater than 0");
 

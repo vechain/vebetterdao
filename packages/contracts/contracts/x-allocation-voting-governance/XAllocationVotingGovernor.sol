@@ -35,10 +35,9 @@ import { IVoterRewards } from "../interfaces/IVoterRewards.sol";
 
 /**
  * @title XAllocationVotingGovernor
- * @dev Core of the voting system of allocation rounds for x-2-earn applications, designed to be extended through various modules.
+ * @dev Core of the voting system of allocation rounds, designed to be extended through various modules.
  *
  * This contract is abstract and requires several functions to be implemented in various modules:
- *
  * - A counting module must implement {quorum}, {_quorumReached}, {_voteSucceeded}, and {_countVote}
  * - A voting module must implement {_getVotes}, {clock}, and {CLOCK_MODE}
  * - A settings module must implement {votingPeriod}

@@ -11,7 +11,7 @@ import {
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it, before } from "mocha"
 import { fundTreasuryVET, fundTreasuryVTHO } from "./helpers/fundTreasury"
-import { B3TR, B3TRGovernor, Treasury } from "../typechain-types"
+import { B3TR, B3TRGovernor, Treasury, Treasury__factory } from "../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy } from "../scripts/helpers"
 
@@ -65,6 +65,16 @@ describe.only("Treasury", () => {
           treasuryProxy.connect(otherAccount).transferVTHO(otherAccount.address, ethers.parseEther("1")),
         )
       })
+      it("only governance can transfer VTHO", async () => {
+        await catchRevert(
+          treasuryProxy.connect(otherAccount).transferVTHO(otherAccount.address, ethers.parseEther("1")),
+        )
+      })
+      it("should revert if contract is paused", async () => {
+        await treasuryProxy.pause()
+        await catchRevert(treasuryProxy.transferVTHO(otherAccount.address, ethers.parseEther("1")))
+        await treasuryProxy.unpause()
+      })
     })
     describe("VET", () => {
       it("should transfer VET", async () => {
@@ -109,8 +119,27 @@ describe.only("Treasury", () => {
           treasuryProxy.connect(otherAccount).transferB3TR(otherAccount.address, ethers.parseEther("1")),
         )
       })
+      it("should revert if contract is paused", async () => {
+        await treasuryProxy.pause()
+        await catchRevert(treasuryProxy.transferB3TR(otherAccount.address, ethers.parseEther("1")))
+        await treasuryProxy.unpause()
+      })
+      it("should revert if b3tr contract is paused", async () => {
+        await b3tr.pause()
+        await catchRevert(treasuryProxy.transferB3TR(otherAccount.address, ethers.parseEther("1")))
+        await b3tr.unpause()
+      })
+      it("can't convert more than balance", async () => {
+        const balance = await treasuryProxy.getB3TRBalance()
+        await catchRevert(treasuryProxy.convertB3TR(balance + 1n))
+      })
       it("should return correct address for contract", async () => {
         expect(await treasuryProxy.b3trAddress()).to.eql(await b3tr.getAddress())
+      })
+      it("should revert convert if contract is paused", async () => {
+        await treasuryProxy.pause()
+        await catchRevert(treasuryProxy.convertB3TR(ethers.parseEther("1")))
+        await treasuryProxy.unpause()
       })
       it("Should revert if transfer exceeds limit", async () => {
         await catchRevert(treasuryProxy.transferB3TR(otherAccount.address, ethers.parseEther("2")))
@@ -145,8 +174,21 @@ describe.only("Treasury", () => {
           treasuryProxy.connect(otherAccount).transferVOT3(otherAccount.address, ethers.parseEther("1")),
         )
       })
+      it("should revert if contract is paused", async () => {
+        await treasuryProxy.pause()
+        await catchRevert(treasuryProxy.convertVOT3(ethers.parseEther("1")))
+        await treasuryProxy.unpause()
+      })
       it("should return correct address for contract", async () => {
         expect(await treasuryProxy.vot3Address()).to.eql(await vot3.getAddress())
+      })
+      it("should revert if not enough balance", async () => {
+        await catchRevert(treasuryProxy.transferVOT3(otherAccount.address, ethers.parseEther("6")))
+      })
+      it("should revert if vot3 contract is paused", async () => {
+        await vot3.pause()
+        await catchRevert(treasuryProxy.transferVOT3(otherAccount.address, ethers.parseEther("1")))
+        await vot3.unpause()
       })
       it("Should revert if transfer exceeds limit", async () => {
         await catchRevert(treasuryProxy.transferVOT3(otherAccount.address, ethers.parseEther("2")))
@@ -182,6 +224,13 @@ describe.only("Treasury", () => {
             .connect(otherAccount)
             .transferTokens(await vot3.getAddress(), otherAccount.address, ethers.parseEther("1")),
         )
+      })
+      it("should revert if B3TR contract is paused", async () => {
+        await b3tr.pause()
+        await catchRevert(
+          treasuryProxy.transferTokens(await b3tr.getAddress(), otherAccount.address, ethers.parseEther("1")),
+        )
+        await b3tr.unpause()
       })
       it("Should revert if transfer exceeds limit", async () => {
         await catchRevert(
@@ -256,6 +305,11 @@ describe.only("Treasury", () => {
     it("should return correct version", async () => {
       expect(await treasuryProxy.getVersion()).to.eql("V1")
     })
+    it("can be initialized only once", async () => {
+      await catchRevert(
+        treasuryProxy.initialize(owner.address, owner.address, owner.address, owner.address, owner.address, 1, 1, 1, 1),
+      )
+    })
   })
   describe("Pause", () => {
     it("should pause and unpause", async () => {
@@ -266,6 +320,7 @@ describe.only("Treasury", () => {
     })
     it("should revert if not called by ADMIN_ROLE", async () => {
       await catchRevert(treasuryProxy.connect(otherAccount).pause())
+      await catchRevert(treasuryProxy.connect(otherAccount).unpause())
     })
   })
   describe("Timelock", () => {
@@ -370,6 +425,17 @@ describe.only("Treasury", () => {
       )
 
       expect(await tProxy.getTransferLimitToken(await b3tr.getAddress())).to.eql(ethers.parseEther("3"))
+    })
+  })
+  describe("Fallback", () => {
+    it("Fallback function handles invalid calls", async () => {
+      const nonExistentFuncSignature = "nonExistentFunction(uint256,uint256)"
+      const treasuryWithFakeFunction = new ethers.Contract(
+        await treasuryProxy.getAddress(),
+        [...Treasury__factory.createInterface().fragments, `function ${nonExistentFuncSignature}`],
+        owner,
+      )
+      await treasuryWithFakeFunction.nonExistentFunction(1, 1)
     })
   })
 })
