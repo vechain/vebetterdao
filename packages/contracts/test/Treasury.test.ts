@@ -130,7 +130,8 @@ describe.only("Treasury", () => {
         await b3tr.unpause()
       })
       it("can't convert more than balance", async () => {
-        await catchRevert(treasuryProxy.convertB3TR(ethers.parseEther("6")))
+        const balance = await treasuryProxy.getB3TRBalance()
+        await catchRevert(treasuryProxy.convertB3TR(balance + 1n))
       })
       it("should return correct address for contract", async () => {
         expect(await treasuryProxy.b3trAddress()).to.eql(await b3tr.getAddress())
@@ -306,7 +307,7 @@ describe.only("Treasury", () => {
     })
     it("can be initialized only once", async () => {
       await catchRevert(
-        treasuryProxy.initialize(owner.address, owner.address, owner.address, owner.address, owner.address),
+        treasuryProxy.initialize(owner.address, owner.address, owner.address, owner.address, owner.address, 1, 1, 1, 1),
       )
     })
   })
