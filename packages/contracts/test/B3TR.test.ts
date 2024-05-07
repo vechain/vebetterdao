@@ -186,12 +186,14 @@ describe("B3TR Token", function () {
   describe("Mint", function () {
     it("only accounts with minter role can mint", async function () {
       const { b3tr, otherAccount, owner } = await getOrDeployContractInstances({ forceDeploy: true })
-
+      expect(await b3tr.totalSupply()).to.eql(0n)
       await expect(b3tr.mint(otherAccount, ethers.parseEther("1"))).to.be.reverted
+      expect(await b3tr.totalSupply()).to.eql(0n)
       const operatorRole = await b3tr.MINTER_ROLE()
 
       await b3tr.grantRole(operatorRole, owner)
       await expect(b3tr.mint(otherAccount, ethers.parseEther("1"))).not.to.be.reverted
+      expect(await b3tr.totalSupply()).to.eql(ethers.parseEther("1"))
 
       const balance = await b3tr.balanceOf(otherAccount)
       expect(String(balance)).to.eql(ethers.parseEther("1").toString())

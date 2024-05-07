@@ -17,6 +17,7 @@ import {
   waitForProposalToBeActive,
   bootstrapAndStartEmissions,
   ZERO_ADDRESS,
+  payDeposit,
 } from "./helpers"
 import { expect } from "chai"
 import { ethers } from "hardhat"
@@ -1570,6 +1571,8 @@ describe("VoterRewards", () => {
       // Now we can create a new proposal
       const tx = await createProposal(b3tr, B3trContract, proposar, description, functionToCall, [])
       const proposalId = await getProposalIdFromTx(tx)
+      await payDeposit(proposalId, proposar)
+
       const cycle = await governor.proposalStartRound(proposalId)
 
       const proposalState = await waitForProposalToBeActive(proposalId)
@@ -1614,6 +1617,8 @@ describe("VoterRewards", () => {
       // Now we can create a new proposal
       const tx = await createProposal(b3tr, B3trContract, voter1, description, functionToCall, [])
       const proposalId = await getProposalIdFromTx(tx)
+      await payDeposit(proposalId, voter1)
+
       const cycle = await governor.proposalStartRound(proposalId)
 
       const proposalState = await waitForProposalToBeActive(proposalId)
@@ -1683,6 +1688,8 @@ describe("VoterRewards", () => {
       // Now we can create a new proposal
       let tx = await createProposal(b3tr, B3trContract, proposar, description, functionToCall, [])
       let proposalId = await getProposalIdFromTx(tx)
+      await payDeposit(proposalId, proposar)
+
       let cycle = await governor.proposalStartRound(proposalId)
 
       const proposalState = await waitForProposalToBeActive(proposalId)
@@ -1707,6 +1714,7 @@ describe("VoterRewards", () => {
 
       tx = await createProposal(b3tr, B3trContract, proposar, description + "1", functionToCall, [])
       proposalId = await getProposalIdFromTx(tx)
+      await payDeposit(proposalId, proposar)
       cycle = await governor.proposalStartRound(proposalId)
 
       await waitForProposalToBeActive(proposalId)
@@ -1753,6 +1761,7 @@ describe("VoterRewards", () => {
         config: {
           ...config,
           EMISSIONS_CYCLE_DURATION: 200,
+          B3TR_GOVERNOR_DEPOSIT_THRESHOLD: 0,
         },
       })
 
@@ -1799,7 +1808,7 @@ describe("VoterRewards", () => {
       let nextCycle = await emissions.nextCycle() // next cycle round 2
 
       // Now we can create a new proposal
-      let tx = await createProposal(b3tr, B3trContract, proposar, description, functionToCall, [], false, nextCycle)
+      let tx = await createProposal(b3tr, B3trContract, proposar, description, functionToCall, [], nextCycle)
       let proposalId = await getProposalIdFromTx(tx)
 
       const proposalState = await waitForProposalToBeActive(proposalId) // we are now in round 2
@@ -1851,7 +1860,7 @@ describe("VoterRewards", () => {
       nextCycle = await emissions.nextCycle() // next cycle round 3
 
       // Now we can create a new proposal and the GM NFT upgrade will be taken into account
-      tx = await createProposal(b3tr, B3trContract, proposar, description + "1", functionToCall, [], false, nextCycle)
+      tx = await createProposal(b3tr, B3trContract, proposar, description + "1", functionToCall, [], nextCycle)
       proposalId = await getProposalIdFromTx(tx)
 
       await waitForProposalToBeActive(proposalId) // we are in round 3 now
