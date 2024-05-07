@@ -38,12 +38,11 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 /**
  * @title XAllocationVoting
- * @notice This is the contract that handles the voting rounds for the x-2-earn apps funds allocations.
- * It needs to interact with the X2EarnApps contract to get the apps data (eg: app ids, app existance, eligible apps for each rounds).
- * Rounds are started by the ROUND_STARTER_ROLE (assigned to the Emissions cotnract) and users can cast their votes based on their VOT3 token balance.
- * When a user votes, the VotingRewards contract is called to save the user action, which will be used to calculate the rewards for the user.
- *
- * The contract is using AccessControl to handle roles for admin, governance and round starting operations.
+ * @notice This contract handles the voting for the most supported x2Earn applications through periodic allocation rounds. 
+ * The user's voting power is calculated on his VOT3 holdings at the start of each round, using a "Quadratic Funding" formula. Rounds are started by the Emissions contract.
+@dev Interacts with the X2EarnApps contract to get the app data (eg: app IDs, app existence, eligible apps for each round). 
+@dev Interacts with the VotingRewards contract to save the user from casting a vote.
+@dev The contract is using AccessControl to handle roles for admin, governance, and round-starting operations.
  */
 contract XAllocationVoting is
   Initializable,

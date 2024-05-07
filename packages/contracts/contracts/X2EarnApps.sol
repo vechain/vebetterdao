@@ -34,9 +34,9 @@ import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/ac
 
 /**
  * @title X2EarnApps
- * @notice This contract handles the x-2-earn applications of the VeBetterDAO ecosystem.
- * It will be call by various contracts to get the apps data (eg: app ids, app existance, eligible apps for each rounds).
- * The contract is using AccessControl to handle the admin and upgrader roles.
+ * @notice This contract handles the x-2-earn applications of the VeBetterDAO ecosystem. The contract allows the insert, management and
+ * eligibility of apps for the B3TR allocation rounds.
+ * @dev The contract is using AccessControl to handle the admin and upgrader roles.
  * Only users with the DEFAULT_ADMIN_ROLE can add new apps, set the base URI and set the voting eligibility for an app.
  * Admins can also control the app metadata and management.
  * Each app has a set of admins and moderators (built without using AccessControl) that can manage the app metadata and management.

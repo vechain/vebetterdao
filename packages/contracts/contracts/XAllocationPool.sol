@@ -39,12 +39,11 @@ import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
 
 /**
  * @title XAllocationPool
- * @notice This contract is the receiver of B3TR emissions and allows x2earn apps to withdraw their funds from each allocation round.
- * The contract is havily dependent on the XAllocationVotingGovernor contract for the allcoation voting rounds data, base and variable allocation percentages.
- * Also interacts with the Emissions contract to get the amount of B3TR available for distribution each round,
- * and the x2EarnApps contract to check app existance and to get the app receiver address.
- *
- * The contract is using AccessControl to handle roles for upgrading the contract and external contracts addresses.
+ * @notice This contract is the receiver and distributor of weekly B3TR emissions for x2earn apps.
+ * Funds can be claimed by the X2Earn apps at the end of each allocation round
+ * @dev Interacts with the Emissions contract to get the amount of B3TR available for distribution in each round,
+ * and the x2EarnApps contract to check app existence and receiver address.
+ * @dev The contract is using AccessControl to handle roles for upgrading the contract and external contract addresses.
  */
 contract XAllocationPool is
   Initializable,
