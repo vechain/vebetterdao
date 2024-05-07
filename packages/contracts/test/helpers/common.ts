@@ -80,7 +80,6 @@ export const createProposalWithMultipleFunctions = async (
   description: string,
   functionsToCall: string[],
   args: any[],
-  avoidMintingAndDelegating: boolean = false, // in some scenarios we want the operation to fail if the proposer does not have enough VOT3
   roundId?: string,
 ) => {
   const { governor, emissions, xAllocationVoting } = await getOrDeployContractInstances({})
