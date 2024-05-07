@@ -1,28 +1,46 @@
 // SPDX-License-Identifier: MIT
-// Forked from OpenZeppelin Contracts (last updated v5.0.0) (governance/extensions/GovernorSettings.sol)
+
+//                                      #######
+//                                 ################
+//                               ####################
+//                             ###########   #########
+//                            #########      #########
+//          #######          #########       #########
+//          #########       #########      ##########
+//           ##########     ########     ####################
+//            ##########   #########  #########################
+//              ################### ############################
+//               #################  ##########          ########
+//                 ##############      ###              ########
+//                  ############                       #########
+//                    ##########                     ##########
+//                     ########                    ###########
+//                       ###                    ############
+//                                          ##############
+//                                    #################
+//                                   ##############
+//                                   #########
 
 pragma solidity ^0.8.20;
 
 import { GovernorUpgradeable } from "../GovernorUpgradeable.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { IB3TR } from "../../interfaces/IB3TR.sol";
 
 /**
  * @dev Extension of {Governor} for settings updatable through governance.
- *
- * Modifications:
- * - removed _votingPeriod
- * - removed _votingDelay (now it depends on the x-allocation roundId)
- * - added _minVotingDelay
  */
 abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradeable {
   /// @custom:storage-location erc7201:openzeppelin.storage.GovernorSettings
   struct GovernorSettingsStorage {
-    // amount of token
+    // percentage of the total supply of B3TR tokens that need to be deposited in VOT3 to create a proposal
     uint256 _depositThreshold;
     // min delay before voting can start
     uint256 _minVotingDelay;
     // minimum amount of tokens needed to cast a vote
     uint256 _votingThreshold;
+    // B3TR contract
+    IB3TR _b3tr;
   }
 
   // keccak256(abi.encode(uint256(keccak256("openzeppelin.storage.GovernorSettings")) - 1)) & ~bytes32(uint256(0xff))
@@ -45,17 +63,27 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
   function __GovernorSettings_init(
     uint256 initialDepositThreshold,
     uint256 initialMinVotingDelay,
-    uint256 initialVotingThreshold
+    uint256 initialVotingThreshold,
+    IB3TR b3trContract
   ) internal onlyInitializing {
-    __GovernorSettings_init_unchained(initialDepositThreshold, initialMinVotingDelay, initialVotingThreshold);
+    __GovernorSettings_init_unchained(
+      initialDepositThreshold,
+      initialMinVotingDelay,
+      initialVotingThreshold,
+      b3trContract
+    );
   }
 
   function __GovernorSettings_init_unchained(
     uint256 initialDepositThreshold,
     uint256 initialMinVotingDelay,
-    uint256 initialVotingThreshold
+    uint256 initialVotingThreshold,
+    IB3TR b3trContract
   ) internal onlyInitializing {
-    _setDepositThreshold(initialDepositThreshold);
+    GovernorSettingsStorage storage $ = _getGovernorSettingsStorage();
+    $._b3tr = IB3TR(b3trContract);
+
+    _setDepositThresholdPercentage(initialDepositThreshold);
     _setMinVotingDelay(initialMinVotingDelay);
     _setVotingThreshold(initialVotingThreshold);
   }
@@ -63,9 +91,19 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
   /**
    * @dev See {Governor-depositThreshold}.
    */
-  function depositThreshold() public view virtual override returns (uint256) {
+  function depositThresholdPercentage() public view virtual returns (uint256) {
     GovernorSettingsStorage storage $ = _getGovernorSettingsStorage();
     return $._depositThreshold;
+  }
+
+  /**
+   * @dev See {Governor-depositThreshold}.
+   */
+  function depositThreshold() public view virtual override returns (uint256) {
+    GovernorSettingsStorage storage $ = _getGovernorSettingsStorage();
+
+    // deposit threshold is a percentage of the total supply of B3TR tokens
+    return ($._depositThreshold * $._b3tr.totalSupply()) / 100;
   }
 
   /**
@@ -85,12 +123,19 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
   }
 
   /**
+   * @dev See {B3TRGovernor-b3tr}.
+   */
+  function b3tr() public view returns (IB3TR) {
+    return _getGovernorSettingsStorage()._b3tr;
+  }
+
+  /**
    * @dev Update the deposit threshold. This operation can only be performed through a governance proposal.
    *
    * Emits a {DepositThresholdSet} event.
    */
-  function setDepositThreshold(uint256 newDepositThreshold) public virtual onlyGovernance {
-    _setDepositThreshold(newDepositThreshold);
+  function setDepositThresholdPercentage(uint256 newDepositThreshold) public virtual onlyGovernance {
+    _setDepositThresholdPercentage(newDepositThreshold);
   }
 
   /**
@@ -117,8 +162,11 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
    *
    * Emits a {DepositThresholdSet} event.
    */
-  function _setDepositThreshold(uint256 newDepositThreshold) internal virtual {
+  function _setDepositThresholdPercentage(uint256 newDepositThreshold) internal virtual {
     GovernorSettingsStorage storage $ = _getGovernorSettingsStorage();
+    if (newDepositThreshold > 100) {
+      revert GovernorDepositThresholdNotInRange(newDepositThreshold);
+    }
     emit DepositThresholdSet($._depositThreshold, newDepositThreshold);
     $._depositThreshold = newDepositThreshold;
   }

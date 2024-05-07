@@ -19,14 +19,24 @@ export const decodeEvent = (event: any, contract: BaseContract) => {
   })
 }
 
-export const parseRoundStartedEvent = (event: any, xAllocationVoting: XAllocationVoting) => {
+export const parseRoundStartedEvent = (
+  event: any,
+  xAllocationVoting: XAllocationVoting,
+): {
+  roundId: number
+  proposer: string
+  voteStart: BigInt
+  voteEnd: BigInt
+  appsIds: string[]
+} => {
   const decoded = decodeEvent(event, xAllocationVoting)
 
   return {
-    roundId: decoded?.args[0],
+    roundId: parseInt(decoded?.args[0].toString()),
     proposer: decoded?.args[1],
     voteStart: decoded?.args[2],
     voteEnd: decoded?.args[3],
+    appsIds: decoded?.args[4],
   }
 }
 

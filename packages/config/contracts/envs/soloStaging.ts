@@ -9,7 +9,7 @@ export function createSoloStagingConfig() {
     B3TR_CAP: 3_750_000, // 3_750_000 -> 3.75 million B3TR tokens for pilot show
     B3TR_GOVERNOR_QUORUM_PERCENTAGE: 4, // 4 -> Need 4% of voters to pass
     B3TR_GOVERNOR_MIN_DELAY: 30, //after a vote passes, you have 5 min before you can queue the proposal
-    B3TR_GOVERNOR_PROPOSAL_THRESHOLD: 1000, // How many votes are needed to create a proposal
+    B3TR_GOVERNOR_DEPOSIT_THRESHOLD: 2, // Percentage of total B3TR supply needed to be deposited to create a proposal
     B3TR_GOVERNOR_VOTING_THRESHOLD: BigInt("1000000000000000000"), // 1 vote
     B3TR_GOVERNOR_MIN_VOTING_DELAY: 30, // 5 minutes
     /*
@@ -25,7 +25,7 @@ export function createSoloStagingConfig() {
         "setIsFunctionRestrictionEnabled",
         "updateQuorumNumerator",
         "updateDelay",
-        "setDepositThreshold",
+        "setDepositThresholdPercentage",
         "setVotingThreshold",
       ],
       Treasury: ["transferB3TR"],
@@ -115,5 +115,13 @@ export function createSoloStagingConfig() {
     VOTER_REWARDS_MULTIPLIER: [0, 10, 20, 50, 100, 150, 200, 400, 900, 2400],
 
     XAPP_BASE_URI: "ipfs://",
+
+    /*
+      Token transfer limits. These values are not final and are for testing purposes only.
+    */
+    TREASURY_TRANSFER_LIMIT_VET: BigInt("200000000000000000000000"), // 200,000 VET
+    TREASURY_TRANSFER_LIMIT_B3TR: BigInt("500000000000000000000000"), // 50,000 B3TR
+    TREASURY_TRANSFER_LIMIT_VTHO: BigInt("3000000000000000000000000"), // 3,000,000 VTHO
+    TREASURY_TRANSFER_LIMIT_VOT3: BigInt("500000000000000000000000"), // 50,000 VOT3
   })
 }

@@ -8,18 +8,18 @@ const config = getConfig()
 const VOT3_CONTRACT = config.vot3ContractAddress
 
 /**
- * Build the clause to stake B3TR tokens for the given address and amount
+ * Build the clause to convert B3TR tokens to VOT3 for the given address and amount
  * @param thor thor instance
- * @param amount the amount of tokens to mint. Should not already include decimals
+ * @param amount the amount of tokens to convert
  * @param decimals the decimals of the token
- * @returns the clause to mint B3TR tokens
+ * @returns the clause to convert B3TR to VOT3
  */
-export const buildStakeB3trTx = (
+export const buildConvertB3trTx = (
   thor: Connex.Thor,
   amount: string | number,
   decimals = 18,
 ): Connex.Vendor.TxMessage[0] => {
-  const functionAbi = vot3Abi.find(e => e.name === "stake")
+  const functionAbi = vot3Abi.find(e => e.name === "convertToVOT3")
   if (!functionAbi) throw new Error("Function abi not found for mint")
 
   const formattedAmount = FormattingUtils.humanNumber(amount ?? 0, amount)
@@ -29,7 +29,7 @@ export const buildStakeB3trTx = (
 
   return {
     ...clause,
-    comment: `Stake ${formattedAmount} B3TR`,
+    comment: `Convert ${formattedAmount} B3TR to VOT3`,
     abi: functionAbi,
   }
 }

@@ -1,4 +1,26 @@
 // SPDX-License-Identifier: MIT
+
+//                                      #######
+//                                 ################
+//                               ####################
+//                             ###########   #########
+//                            #########      #########
+//          #######          #########       #########
+//          #########       #########      ##########
+//           ##########     ########     ####################
+//            ##########   #########  #########################
+//              ################### ############################
+//               #################  ##########          ########
+//                 ##############      ###              ########
+//                  ############                       #########
+//                    ##########                     ##########
+//                     ########                    ###########
+//                       ###                    ############
+//                                          ##############
+//                                    #################
+//                                   ##############
+//                                   #########
+
 pragma solidity ^0.8.20;
 
 import "./governance/GovernorUpgradeable.sol";
@@ -15,7 +37,26 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { IVoterRewards } from "./interfaces/IVoterRewards.sol";
 import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
+import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 
+/**
+ * @title B3TRGovernor
+ * @notice This contract is the main governance contract for the VeBetterDAO ecosystem.
+ * Anyone can create a proposal to both change the state of the contract, to execute a transaction
+ * on the timelock or to ask for a vote from the community without performing any onchain action.
+ * In order for the proposal to become active, the community needs to deposit a certain amount of VOT3 tokens.
+ * This is used as a heath check for the proposal, and funds are returned to the depositors after vote is concluded.
+ * Votes for proposals start periodically, based on the allocation rounds (see xAllocationVoting contract), and the round
+ * in which the proposal should be active is specified by the proposer during the proposal creation.
+ *
+ * A mininimum amount of voting power is required in order to vote on a proposal.
+ * The voting power is calculated through the quadratic vote formula based on the amount of VOT3 tokens held by the
+ * voter at the block when the proposal becomes active.
+ *
+ * Once a proposal succeeds, it can be executed by the timelock contract.
+ *
+ * The contract is upgradeable and uses the UUPS pattern.
+ */
 contract B3TRGovernor is
   Initializable,
   AccessControlUpgradeable,
@@ -27,7 +68,8 @@ contract B3TRGovernor is
   GovernorTimelockControlUpgradeable,
   GovernorDepositUpgradeable,
   GovernorFunctionsSettingsUpgradeable,
-  UUPSUpgradeable
+  UUPSUpgradeable,
+  PausableUpgradeable
 {
   bytes32 public constant GOVERNOR_FUNCTIONS_SETTINGS_ROLE = keccak256("GOVERNOR_FUNCTIONS_SETTINGS_ROLE");
 
@@ -43,9 +85,9 @@ contract B3TRGovernor is
    * @param vot3Token The address of the Vot3 token used for voting
    * @param timelock The address of the Timelock
    * @param xAllocationVoting The address of the xAllocationVoting
-   * @param quorumPercentage quorum as a percentage of the total supply at the block a proposal’s voting power is retrieved
-   * @param initialDepositThreshold The Deposit Threshold is the amount of voting power that an account needs to make a proposal
-   * @param initialMinVotingDelay The minimum delay before a proposal can start
+   * @param quorumPercentage quorum as a percentage of the total supply of VOT3 tokens
+   * @param initialDepositThreshold The Deposit Threshold for a proposal to be active
+   * @param initialMinVotingDelay The minimum amount of blocks a proposal needs to wait before it can start
    * @param initialVotingThreshold The minimum amount of voting power needed in order to vote
    * @param governorAdmin The address of the governor admin
    * @param voterRewards The address of the voter rewards contract
@@ -56,6 +98,7 @@ contract B3TRGovernor is
     IVotes vot3Token;
     TimelockControllerUpgradeable timelock;
     IXAllocationVotingGovernor xAllocationVoting;
+    IB3TR b3tr;
     uint256 quorumPercentage;
     uint256 initialDepositThreshold;
     uint256 initialMinVotingDelay;
@@ -93,7 +136,12 @@ contract B3TRGovernor is
    */
   function initialize(InitializationData memory data) public initializer {
     __Governor_init("B3TRGovernor");
-    __GovernorSettings_init(data.initialDepositThreshold, data.initialMinVotingDelay, data.initialVotingThreshold);
+    __GovernorSettings_init(
+      data.initialDepositThreshold,
+      data.initialMinVotingDelay,
+      data.initialVotingThreshold,
+      data.b3tr
+    );
     __GovernorCountingSimple_init();
     __GovernorVotes_init(data.vot3Token);
     __GovernorVotesQuorumFraction_init(data.quorumPercentage);
@@ -102,6 +150,7 @@ contract B3TRGovernor is
     __GovernorFunctionsSettings_init(data.isFunctionRestrictionEnabled);
     __AccessControl_init();
     __UUPSUpgradeable_init();
+    __Pausable_init();
 
     B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
     $.voterRewards = IVoterRewards(data.voterRewards);
@@ -113,14 +162,29 @@ contract B3TRGovernor is
 
   // ------------------ GETTERS ------------------ //
 
+  /**
+   * @dev Get the address of the xAllocationVoting contract
+   */
   function xAllocationVotingAddress() public view returns (IXAllocationVotingGovernor) {
     return _getB3TRGovernorStorage().xAllocationVoting;
   }
 
+  /**
+   * @dev Get the address of the voter rewards contract
+   */
   function voterRewardsAddress() public view returns (IVoterRewards) {
     return _getB3TRGovernorStorage().voterRewards;
   }
 
+  /**
+   * @dev Check if the proposal can start in the next round
+   *
+   * If we are in round 0 (so emissions did not start yet) there is an unknown amount of time between now
+   * and the start of the first round: it could start in 1 hour or 1 week.
+   * For this reason, the check we have in place to enforce a minimum delay period will fail.
+   *
+   * We can still create proposals that starts in round 2, because we know the voting period of first round.
+   */
   function canProposalStartInNextRound() public view returns (bool) {
     B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
     uint256 currentRoundId = $.xAllocationVoting.currentRoundId();
@@ -143,12 +207,26 @@ contract B3TRGovernor is
 
   // ------------------ SETTERS ------------------ //
 
+  /**
+   * @dev Set the voter rewards contract
+   *
+   * This function is only callable through goverance proposals
+   *
+   * @param _voterRewards The new voter rewards contract
+   */
   function setVoterRewards(address _voterRewards) public onlyGovernance {
     B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
 
     $.voterRewards = IVoterRewards(_voterRewards);
   }
 
+  /**
+   * @dev Set the xAllocationVoting contract
+   *
+   * This function is only callable through goverance proposals
+   *
+   * @param _xAllocationVoting The new xAllocationVoting contract
+   */
   function setXAllocationVoting(IXAllocationVotingGovernor _xAllocationVoting) public onlyGovernance {
     B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
     $.xAllocationVoting = _xAllocationVoting;
@@ -210,14 +288,9 @@ contract B3TRGovernor is
     string memory description,
     uint256 startRoundId,
     uint256 depositAmount
-  ) public virtual returns (uint256) {
+  ) public virtual whenNotPaused returns (uint256) {
     address proposer = _msgSender();
     uint256 currentRoundId = _getB3TRGovernorStorage().xAllocationVoting.currentRoundId();
-
-    // if allocation rounds did not start yet, revert, otherwise we will have issues with roundSnapshot and roundDeadline
-    if (currentRoundId == 0) {
-      revert GovernorInvalidStartRound(startRoundId);
-    }
 
     // round must be in the future
     if (startRoundId <= currentRoundId) {
@@ -269,13 +342,16 @@ contract B3TRGovernor is
 
     _checkFunctionsRestriction(targets, calldatas);
 
+    uint256 depositThresholdAmount = depositThreshold();
+
     _setProposal(
       proposalId,
       proposer,
       SafeCast.toUint32(votingPeriod()),
       startRoundId,
       targets.length > 0,
-      depositAmount
+      depositAmount,
+      depositThresholdAmount
     );
 
     _depositFunds(depositAmount, proposer, proposalId);
@@ -288,7 +364,8 @@ contract B3TRGovernor is
       new string[](targets.length),
       calldatas,
       description,
-      startRoundId
+      startRoundId,
+      depositThresholdAmount
     );
 
     // Using a named return variable to avoid stack too deep errors
@@ -328,6 +405,7 @@ contract B3TRGovernor is
    * @param roundIdVoteStart The round in which the proposal should be active
    * @param isExecutable If the proposal is executable
    * @param depositAmount The amount of tokens the proposer intends to deposit
+   * @param proposalDepositThreshold The deposit threshold for the proposal
    */
   function _setProposal(
     uint256 proposalId,
@@ -335,7 +413,8 @@ contract B3TRGovernor is
     uint32 voteDuration,
     uint256 roundIdVoteStart,
     bool isExecutable,
-    uint256 depositAmount
+    uint256 depositAmount,
+    uint256 proposalDepositThreshold
   ) internal {
     GovernorStorage storage $ = _getGovernorStorage();
 
@@ -346,6 +425,7 @@ contract B3TRGovernor is
     proposal.voteDuration = voteDuration;
     proposal.isExecutable = isExecutable;
     proposal.depositAmount = depositAmount;
+    proposal.depositThreshold = proposalDepositThreshold;
   }
 
   /**
@@ -375,9 +455,47 @@ contract B3TRGovernor is
     return sig;
   }
 
+  /**
+   * @dev Pause the contract
+   */
+  function pause() public onlyRole(DEFAULT_ADMIN_ROLE) {
+    _pause();
+  }
+
+  /**
+   * @dev Unpause the contract
+   */
+  function unpause() public onlyRole(DEFAULT_ADMIN_ROLE) {
+    _unpause();
+  }
+
   // ------------------ OVERRIDES ------------------ //
 
   function _authorizeUpgrade(address newImplementation) internal override onlyGovernance {}
+
+  /**
+   * @dev See {IB3TRGovernor-queue}.
+   */
+  function queue(
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    bytes32 descriptionHash
+  ) public override whenNotPaused returns (uint256) {
+    return super.queue(targets, values, calldatas, descriptionHash);
+  }
+
+  /**
+   * @dev See {IB3TRGovernor-execute}.
+   */
+  function execute(
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    bytes32 descriptionHash
+  ) public payable override whenNotPaused returns (uint256) {
+    return super.execute(targets, values, calldatas, descriptionHash);
+  }
 
   /**
    * @dev See {IB3TRGovernor-proposalSnapshot}.
@@ -526,6 +644,9 @@ contract B3TRGovernor is
     }
   }
 
+  /**
+   * @dev See {IB3TRGovernor-proposalNeedsQueuing}.
+   */
   function proposalNeedsQueuing(uint256 proposalId) public view returns (bool) {
     GovernorStorage storage $ = _getGovernorStorage();
     ProposalCore storage proposal = $._proposals[proposalId];

@@ -29,7 +29,7 @@ import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
 
 /**
  * @title AppsStorageUpgradeable
- * @notice Contract to manage the x2earn apps storage.
+ * @dev Contract to manage the x2earn apps storage.
  * Through this contract, the x2earn apps can be added, retrieved, indexed, and managed (update metadata and receiver address).
  */
 abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable {

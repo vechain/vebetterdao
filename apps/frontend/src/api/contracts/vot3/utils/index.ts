@@ -1,3 +1,3 @@
 export * from "./buildDelegateVot3Tx"
-export * from "./buildStakeB3trTx"
-export * from "./buildUnstakeB3trTx"
+export * from "./buildConvertB3trTx"
+export * from "./buildConvertVot3Tx"

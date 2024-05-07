@@ -1,5 +1,5 @@
 import { ethers } from "hardhat"
-import { expect } from "chai"
+import { assert, expect } from "chai"
 import {
   createProposal,
   getOrDeployContractInstances,
@@ -15,12 +15,14 @@ import {
   moveBlocks,
   createProposalAndExecuteIt,
   createProposalWithMultipleFunctionsAndExecuteIt,
+  payDeposit,
+  bootstrapEmissions,
 } from "./helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it } from "mocha"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
-import { B3TRGovernor } from "../typechain-types"
+import { B3TRGovernor, B3TRGovernor__factory } from "../typechain-types"
 
 describe("Governor and TimeLock", function () {
   describe("Governor deployment", function () {
@@ -32,11 +34,10 @@ describe("Governor and TimeLock", function () {
 
       await bootstrapAndStartEmissions()
 
-      const votesThreshold = (await governor.depositThreshold()).toString()
+      const votesThreshold = (await governor.depositThresholdPercentage()).toString()
       const votingPeriod = await governor.votingPeriod()
       const minVotingDelay = await governor.minVotingDelay()
-
-      expect(votesThreshold).to.eql(config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD.toString())
+      expect(votesThreshold).to.eql(config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD.toString())
       expect(votingPeriod).to.eql(await xAllocationVoting.votingPeriod())
       expect(minVotingDelay.toString()).to.eql(config.B3TR_GOVERNOR_MIN_VOTING_DELAY.toString())
 
@@ -70,6 +71,18 @@ describe("Governor and TimeLock", function () {
       // check version
       const version = await governor.version()
       expect(version).to.eql("1")
+
+      // deposit threshold is set correctly
+      const depositThreshold = await governor.depositThresholdPercentage()
+      expect(depositThreshold.toString()).to.eql(config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD.toString())
+
+      // counting mode is set correctly
+      const countingMode = await governor.COUNTING_MODE()
+      expect(countingMode.toString()).to.eql("support=bravo&quorum=for,abstain,against")
+
+      // should be unpaused
+      const paused = await governor.paused()
+      expect(paused).to.be.false
     })
 
     it("Should be able to upgrade the governor contract through governance", async function () {
@@ -77,10 +90,6 @@ describe("Governor and TimeLock", function () {
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
-
-      const votesThreshold = await governor.depositThreshold()
-      await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
-      await getVot3Tokens(otherAccount, "1000")
 
       // Start emissions
       await bootstrapAndStartEmissions()
@@ -102,25 +111,22 @@ describe("Governor and TimeLock", function () {
       const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
       const currentRoundId = await xAllocationVoting.currentRoundId()
 
-      await vot3.connect(owner).approve(await governor.getAddress(), ethers.parseEther("1000"))
-
       const tx = await governor
         .connect(owner)
-        .propose(
-          [await governor.getAddress()],
-          [0],
-          [encodedFunctionCall],
-          description,
-          currentRoundId + 1n,
-          ethers.parseEther("1000"),
-          {
-            gasLimit: 10_000_000,
-          },
-        )
-
-      await tx.wait()
+        .propose([await governor.getAddress()], [0], [encodedFunctionCall], description, currentRoundId + 1n, 0, {
+          gasLimit: 10_000_000,
+        })
 
       const proposalId = await getProposalIdFromTx(tx)
+
+      // Pay the proposal deposit
+      const deposit = await governor.proposalDepositThreshold(proposalId)
+      await getVot3Tokens(owner, ethers.formatEther(deposit))
+      await vot3.connect(owner).approve(await governor.getAddress(), ethers.parseEther(deposit.toString()))
+      await governor.connect(owner).deposit(deposit, proposalId)
+
+      await getVot3Tokens(otherAccount, "10000")
+
       await waitForProposalToBeActive(proposalId)
 
       await governor.connect(otherAccount).castVote(proposalId, 1)
@@ -187,15 +193,17 @@ describe("Governor and TimeLock", function () {
     })
 
     it("Should be able to initialize only once", async function () {
-      const { governor, owner, vot3, timeLock, voterRewards, xAllocationVoting } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { governor, owner, vot3, timeLock, voterRewards, xAllocationVoting, b3tr } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       await catchRevert(
         governor.initialize({
           vot3Token: await vot3.getAddress(),
           timelock: await timeLock.getAddress(),
           xAllocationVoting: await xAllocationVoting.getAddress(),
+          b3tr: await b3tr.getAddress(),
           quorumPercentage: 1, // quorum percentage
           initialDepositThreshold: 1, // voting threshold
           initialMinVotingDelay: 1, // delay before vote starts
@@ -242,6 +250,30 @@ describe("Governor and TimeLock", function () {
   })
 
   describe("Governor settings", function () {
+    it("should be able to update the timelock address through governance", async function () {
+      const { governor, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // first add updateTimelock to the whitelist
+      const funcSig = governor.interface.getFunction("updateTimelock")?.selector
+      await governor.connect(owner).setWhitelistFunction(await governor.getAddress(), funcSig, true)
+
+      const newAddress = ethers.Wallet.createRandom().address
+      await createProposalAndExecuteIt(
+        owner,
+        owner,
+        governor,
+        await ethers.getContractFactory("B3TRGovernor"),
+        "Update TimeLock address",
+        "updateTimelock",
+        [newAddress],
+      )
+
+      const updatedAddress = await governor.timelock()
+      expect(updatedAddress).to.eql(newAddress)
+    })
+
     it("should be able to update the xAllocationVoting address through governance", async function () {
       const { governor, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -335,11 +367,11 @@ describe("Governor and TimeLock", function () {
         governor,
         await ethers.getContractFactory("B3TRGovernor"),
         "Update Deposit Threshold",
-        "setDepositThreshold",
+        "setDepositThresholdPercentage",
         [newThreshold],
       )
 
-      const updatedThreshold = await governor.depositThreshold()
+      const updatedThreshold = await governor.depositThresholdPercentage()
       expect(updatedThreshold).to.eql(newThreshold)
     })
 
@@ -350,9 +382,9 @@ describe("Governor and TimeLock", function () {
 
       const newThreshold = 10n
 
-      await catchRevert(governor.connect(owner).setDepositThreshold(newThreshold))
+      await catchRevert(governor.connect(owner).setDepositThresholdPercentage(newThreshold))
 
-      const updatedThreshold = await governor.depositThreshold()
+      const updatedThreshold = await governor.depositThresholdPercentage()
       expect(updatedThreshold).to.not.eql(newThreshold)
     })
 
@@ -515,12 +547,12 @@ describe("Governor and TimeLock", function () {
         [governor, governor],
         await ethers.getContractFactory("B3TRGovernor"),
         "Update Min Voting Delay",
-        ["setMinVotingDelay", "setDepositThreshold"],
+        ["setMinVotingDelay", "setDepositThresholdPercentage"],
         [[10n], [10n]],
       )
 
       expect(await governor.minVotingDelay()).to.eql(10n)
-      expect(await governor.depositThreshold()).to.eql(10n)
+      expect(await governor.depositThresholdPercentage()).to.eql(10n)
     })
 
     it("Should be able to execute any function if function restriction is disabled", async function () {
@@ -633,12 +665,268 @@ describe("Governor and TimeLock", function () {
         ),
       ).to.be.reverted
     })
+
+    it("Should be able to update the quorum percentage through governance", async function () {
+      const { governor, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // first add updateTimelock to the whitelist
+      const funcSig = governor.interface.getFunction("updateQuorumNumerator")?.selector
+      await governor.connect(owner).setWhitelistFunction(await governor.getAddress(), funcSig, true)
+
+      const newQuorum = 10n
+      await createProposalAndExecuteIt(
+        owner,
+        owner,
+        governor,
+        await ethers.getContractFactory("B3TRGovernor"),
+        "Update Quorum Percentage",
+        "updateQuorumNumerator",
+        [newQuorum],
+      )
+
+      const updatedQuorum = await governor["quorumNumerator()"]()
+      expect(updatedQuorum).to.eql(newQuorum)
+    })
+
+    it("Should not be able to set a quorum numerator higher than the denominator", async function () {
+      const { governor, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // first add updateTimelock to the whitelist
+      const funcSig = governor.interface.getFunction("updateQuorumNumerator")?.selector
+      await governor.connect(owner).setWhitelistFunction(await governor.getAddress(), funcSig, true)
+
+      const newQuorum = 101n
+      try {
+        await createProposalAndExecuteIt(
+          owner,
+          owner,
+          governor,
+          await ethers.getContractFactory("B3TRGovernor"),
+          "Update Quorum Percentage",
+          "updateQuorumNumerator",
+          [newQuorum],
+        )
+
+        assert.fail("Should revert")
+      } catch (e) {
+        /* empty */
+      }
+
+      const updatedQuorum = await governor["quorumNumerator()"]()
+      expect(updatedQuorum).to.not.eql(newQuorum)
+    })
+
+    describe("Pausability", function () {
+      it("Admin should be able to pause the contract", async function () {
+        const { governor, owner } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+        const DEFAULT_ADMIN_ROLE = await governor.DEFAULT_ADMIN_ROLE()
+        const hasRole = await governor.hasRole(DEFAULT_ADMIN_ROLE, owner.address)
+        expect(hasRole).to.be.true
+
+        await governor.connect(owner).pause()
+
+        expect(await governor.paused()).to.be.true
+      })
+
+      it("Admin should be able to unpause the contract", async function () {
+        const { governor, owner } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+        const DEFAULT_ADMIN_ROLE = await governor.DEFAULT_ADMIN_ROLE()
+        const hasRole = await governor.hasRole(DEFAULT_ADMIN_ROLE, owner.address)
+        expect(hasRole).to.be.true
+
+        await governor.connect(owner).pause()
+        expect(await governor.paused()).to.be.true
+
+        await governor.connect(owner).unpause()
+        expect(await governor.paused()).to.be.false
+      })
+
+      it("Only admin can pause and unpause", async function () {
+        const { governor, otherAccount } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+        const DEFAULT_ADMIN_ROLE = await governor.DEFAULT_ADMIN_ROLE()
+        const hasRole = await governor.hasRole(DEFAULT_ADMIN_ROLE, otherAccount.address)
+        expect(hasRole).to.be.false
+
+        await catchRevert(governor.connect(otherAccount).pause())
+        await catchRevert(governor.connect(otherAccount).unpause())
+      })
+
+      it("When paused no proposals can be created", async function () {
+        const { governor, owner, B3trContract, b3tr } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+        await governor.connect(owner).pause()
+
+        const functionToCall = "tokenDetails"
+        const description = "Get token details"
+
+        await expect(
+          createProposal(b3tr, B3trContract, owner, description, functionToCall, []),
+        ).to.be.revertedWithCustomError(
+          {
+            interface: B3TRGovernor__factory.createInterface(),
+          },
+          "EnforcedPause",
+        )
+      })
+
+      it("Cannot queue proposal when contract is paused", async function () {
+        const {
+          governor,
+          b3tr,
+          B3trContract,
+          otherAccount: proposer,
+          otherAccounts,
+          owner,
+        } = await getOrDeployContractInstances({ forceDeploy: true })
+        const functionToCall = "tokenDetails"
+        const description = "Get token details"
+
+        // Start emissions
+        await bootstrapAndStartEmissions()
+
+        // load votes
+        const voter = otherAccounts[0]
+        await getVot3Tokens(voter, "1000")
+        await waitForNextBlock()
+
+        // create a new proposal
+        const tx = await createProposal(
+          b3tr,
+          B3trContract,
+          proposer,
+          description + ` ${this.test?.title}`,
+          functionToCall,
+          [],
+        ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
+        const proposalId = await getProposalIdFromTx(tx)
+
+        await payDeposit(proposalId, proposer)
+
+        // wait
+        await waitForProposalToBeActive(proposalId)
+
+        // vote
+        await governor.connect(voter).castVote(proposalId, 1) // vote for
+
+        // wait
+        await waitForVotingPeriodToEnd(proposalId)
+        let proposalState = await governor.state(proposalId)
+        expect(proposalState.toString()).to.eql("4") // succeded
+
+        // pause the contract
+        await governor.connect(owner).pause()
+
+        // queue it
+        const b3trAddress = await b3tr.getAddress()
+        const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
+        const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description + ` ${this.test?.title}`))
+
+        await expect(
+          governor.queue([b3trAddress], [0], [encodedFunctionCall], descriptionHash),
+        ).to.be.revertedWithCustomError(
+          {
+            interface: B3TRGovernor__factory.createInterface(),
+          },
+          "EnforcedPause",
+        )
+
+        // proposal should be in queued state
+        proposalState = await governor.state(proposalId)
+        expect(proposalState.toString()).to.eql("4")
+      })
+
+      it("Cannot execute proposal when contract is paused", async function () {
+        const {
+          governor,
+          b3tr,
+          B3trContract,
+          otherAccount: proposer,
+          otherAccounts,
+          owner,
+        } = await getOrDeployContractInstances({ forceDeploy: true })
+        const functionToCall = "tokenDetails"
+        const description = "Get token details"
+
+        // Start emissions
+        await bootstrapAndStartEmissions()
+
+        // load votes
+        const voter = otherAccounts[0]
+        await getVot3Tokens(voter, "1000")
+        await waitForNextBlock()
+
+        // create a new proposal
+        const tx = await createProposal(
+          b3tr,
+          B3trContract,
+          proposer,
+          description + ` ${this.test?.title}`,
+          functionToCall,
+          [],
+        ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
+        const proposalId = await getProposalIdFromTx(tx)
+
+        await payDeposit(proposalId, proposer)
+
+        // wait
+        await waitForProposalToBeActive(proposalId)
+
+        // vote
+        await governor.connect(voter).castVote(proposalId, 1) // vote for
+
+        // wait
+        await waitForVotingPeriodToEnd(proposalId)
+        let proposalState = await governor.state(proposalId)
+        expect(proposalState.toString()).to.eql("4") // succeded
+
+        // queue it
+        const b3trAddress = await b3tr.getAddress()
+        const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
+        const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description + ` ${this.test?.title}`))
+
+        await governor.queue([b3trAddress], [0], [encodedFunctionCall], descriptionHash)
+
+        // proposal should be in queued state
+        proposalState = await governor.state(proposalId)
+        expect(proposalState.toString()).to.eql("5")
+
+        // pause the contract
+        await governor.connect(owner).pause()
+
+        // execute it
+        await expect(
+          governor.execute([b3trAddress], [0], [encodedFunctionCall], descriptionHash),
+        ).to.be.revertedWithCustomError(
+          {
+            interface: B3TRGovernor__factory.createInterface(),
+          },
+          "EnforcedPause",
+        )
+      })
+    })
   })
 
   describe("Proposal Creation", function () {
     it("When creating a proposal we should specify the round when it should become active", async () => {
       const config = createLocalConfig()
-      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 5
       const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3 } =
         await getOrDeployContractInstances({
@@ -681,7 +969,7 @@ describe("Governor and TimeLock", function () {
       // roundId when proposal will start
       expect(decodedLogs?.args[7]).to.eql(2n)
 
-      const proposalId = await getProposalIdFromTx(tx)
+      const proposalId = await getProposalIdFromTx(tx, true)
       expect(proposalId).not.to.be.null
 
       expect(await governor.state(proposalId)).to.eql(0n) // pending
@@ -696,7 +984,7 @@ describe("Governor and TimeLock", function () {
 
     it("Proposal cannot start in next round if current ended and the next one not started yet", async () => {
       const config = createLocalConfig()
-      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 5
       const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3 } =
         await getOrDeployContractInstances({
@@ -741,7 +1029,7 @@ describe("Governor and TimeLock", function () {
 
     it("Proposal cannot start in next round there isn't enough delay", async () => {
       const config = createLocalConfig()
-      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 5
       config.B3TR_GOVERNOR_MIN_VOTING_DELAY = 3
       const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3 } =
@@ -788,7 +1076,7 @@ describe("Governor and TimeLock", function () {
 
     it("Can create a proposal that starts after 2 rounds", async () => {
       const config = createLocalConfig()
-      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 5
       const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, emissions, vot3 } =
         await getOrDeployContractInstances({
@@ -796,21 +1084,25 @@ describe("Governor and TimeLock", function () {
           config,
         })
 
-      const proposer = otherAccounts[0]
-      await getVot3Tokens(proposer, "2000")
-      await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
-
       // Start emissions
       await bootstrapAndStartEmissions()
+
+      const proposer = otherAccounts[0]
+      const depositPreVOT3Tokens = await governor.depositThreshold()
+      await getVot3Tokens(proposer, (Number(ethers.formatEther(depositPreVOT3Tokens)) * 1.2).toString())
+      const deposit = await governor.depositThreshold()
+      await vot3.connect(proposer).approve(await governor.getAddress(), deposit)
 
       // Now we can create a new proposal
       const address = await b3tr.getAddress()
       const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 2n // starts 2 rounds from now
 
+      const depositThreshold = await governor.depositThreshold()
+
       const tx = await governor
         .connect(proposer)
-        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("1000"), {
+        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), deposit, {
           gasLimit: 10_000_000,
         })
 
@@ -828,8 +1120,10 @@ describe("Governor and TimeLock", function () {
 
       // roundId when proposal will start
       expect(decodedLogs?.args[7]).to.eql(3n)
+      // deposit threshold
+      expect(decodedLogs?.args[8]).to.eql(depositThreshold)
 
-      const proposalId = await getProposalIdFromTx(tx)
+      const proposalId = await getProposalIdFromTx(tx, true)
       expect(proposalId).not.to.be.null
 
       expect(await governor.state(proposalId)).to.eql(0n) // pending
@@ -857,7 +1151,7 @@ describe("Governor and TimeLock", function () {
 
     it("Proposal snapshot and deadline behaves correctly", async () => {
       const config = createLocalConfig()
-      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 0
       config.EMISSIONS_CYCLE_DURATION = 5
       const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, emissions, vot3 } =
         await getOrDeployContractInstances({
@@ -886,7 +1180,7 @@ describe("Governor and TimeLock", function () {
           },
         )
 
-      const proposalId = await getProposalIdFromTx(tx)
+      const proposalId = await getProposalIdFromTx(tx, true)
 
       // since round 2 did not start yet the proposal snapshot should be an estimation
       const snapshot = await governor.proposalSnapshot(proposalId)
@@ -927,7 +1221,7 @@ describe("Governor and TimeLock", function () {
 
     it("Proposal snapshot and deadline behaves correctly if a new round is not starting for some unexpected reason", async () => {
       const config = createLocalConfig()
-      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 5
       const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3 } =
         await getOrDeployContractInstances({
@@ -956,7 +1250,7 @@ describe("Governor and TimeLock", function () {
             gasLimit: 10_000_000,
           },
         )
-      const proposalId = await getProposalIdFromTx(tx)
+      const proposalId = await getProposalIdFromTx(tx, true)
 
       expect(await xAllocationVoting.currentRoundId()).to.eql(1n)
       expect(await xAllocationVoting.state(1n)).to.eql(0n) // active
@@ -999,7 +1293,7 @@ describe("Governor and TimeLock", function () {
 
     it("Period between proposal creation and round start must be higher than min delay set in the contract", async () => {
       const config = createLocalConfig()
-      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 5
       config.B3TR_GOVERNOR_MIN_VOTING_DELAY = 3
       const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, emissions, vot3 } =
@@ -1076,8 +1370,8 @@ describe("Governor and TimeLock", function () {
 
     it("Proposal is not active until the target round starts", async () => {
       const config = createLocalConfig()
-      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
-      config.EMISSIONS_CYCLE_DURATION = 5
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
+      config.EMISSIONS_CYCLE_DURATION = 7
       const { b3tr, otherAccounts, governor, B3trContract, emissions, xAllocationVoting, vot3 } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -1085,7 +1379,6 @@ describe("Governor and TimeLock", function () {
         })
 
       const proposer = otherAccounts[0]
-      await getVot3Tokens(proposer, "1000")
 
       // Start emissions
       await bootstrapAndStartEmissions()
@@ -1095,18 +1388,22 @@ describe("Governor and TimeLock", function () {
       const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
 
-      await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
+      // We need to have enough VOT3 tokens to pay for the deposit
+      const depositPreVOT3Tokens = await governor.depositThreshold()
+      await getVot3Tokens(proposer, (Number(ethers.formatEther(depositPreVOT3Tokens)) * 1.2).toString())
+      const deposit = await governor.depositThreshold()
+      await vot3.connect(proposer).approve(await governor.getAddress(), deposit)
 
       const tx = await governor
         .connect(proposer)
-        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("1000"), {
+        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), deposit, {
           gasLimit: 10_000_000,
         })
 
       const proposeReceipt = await tx.wait()
       expect(proposeReceipt).not.to.be.null
 
-      const proposalId = await getProposalIdFromTx(tx)
+      const proposalId = await getProposalIdFromTx(tx, true)
       expect(proposalId).not.to.be.null
 
       expect(await governor.state(proposalId)).to.eql(0n) // pending
@@ -1126,16 +1423,14 @@ describe("Governor and TimeLock", function () {
 
     it("Can create a non executable proposal", async () => {
       const config = createLocalConfig()
-      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
-      config.EMISSIONS_CYCLE_DURATION = 5
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
+      config.EMISSIONS_CYCLE_DURATION = 7
       const { otherAccounts, governor, xAllocationVoting, vot3 } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
 
       const proposer = otherAccounts[0]
-      await getVot3Tokens(proposer, "1000")
-      await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
 
       const voter = otherAccounts[1]
       await getVot3Tokens(voter, "1000")
@@ -1143,19 +1438,23 @@ describe("Governor and TimeLock", function () {
       // Start emissions
       await bootstrapAndStartEmissions()
 
+      // We need to have enough VOT3 tokens to pay for the deposit
+      const depositPreVOT3Tokens = await governor.depositThreshold()
+      await getVot3Tokens(proposer, (Number(ethers.formatEther(depositPreVOT3Tokens)) * 1.2).toString())
+      const deposit = await governor.depositThreshold()
+      await vot3.connect(proposer).approve(await governor.getAddress(), deposit)
+
       // Now we can create a new proposal
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
 
-      const tx = await governor
-        .connect(proposer)
-        .propose([], [], [], "", voteStartsInRoundId.toString(), ethers.parseEther("1000"), {
-          gasLimit: 10_000_000,
-        })
+      const tx = await governor.connect(proposer).propose([], [], [], "", voteStartsInRoundId.toString(), deposit, {
+        gasLimit: 10_000_000,
+      })
 
       const proposeReceipt = await tx.wait()
       expect(proposeReceipt).not.to.be.null
 
-      const proposalId = await getProposalIdFromTx(tx)
+      const proposalId = await getProposalIdFromTx(tx, true)
 
       expect(proposalId).not.to.be.null
 
@@ -1195,7 +1494,7 @@ describe("Governor and TimeLock", function () {
 
     it("Parameters must have the same length", async () => {
       const config = createLocalConfig()
-      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 5
       const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3 } =
         await getOrDeployContractInstances({
@@ -1267,8 +1566,8 @@ describe("Governor and TimeLock", function () {
 
     it("Proposal concludes when round ends", async () => {
       const config = createLocalConfig()
-      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
-      config.EMISSIONS_CYCLE_DURATION = 5
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
+      config.EMISSIONS_CYCLE_DURATION = 8
       const { b3tr, otherAccounts, governor, B3trContract, emissions, xAllocationVoting, vot3 } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -1276,27 +1575,32 @@ describe("Governor and TimeLock", function () {
         })
 
       const proposer = otherAccounts[0]
-      await getVot3Tokens(proposer, "1000")
 
       // Start emissions
       await bootstrapAndStartEmissions()
+
+      // Get VOT3 to pay deposit
+      const depositPreVOT3Tokens = await governor.depositThreshold()
+      await getVot3Tokens(proposer, (Number(ethers.formatEther(depositPreVOT3Tokens)) * 1.2).toString())
+      const deposit = await governor.depositThreshold()
+      await vot3.connect(proposer).approve(await governor.getAddress(), deposit)
 
       // Now we can create a new proposal
       const address = await b3tr.getAddress()
       const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
 
-      await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
+      await vot3.connect(proposer).approve(await governor.getAddress(), deposit)
       const tx = await governor
         .connect(proposer)
-        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("1000"), {
+        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), deposit, {
           gasLimit: 10_000_000,
         })
 
       const proposeReceipt = await tx.wait()
       expect(proposeReceipt).not.to.be.null
 
-      const proposalId = await getProposalIdFromTx(tx)
+      const proposalId = await getProposalIdFromTx(tx, true)
       expect(proposalId).not.to.be.null
 
       expect(await governor.state(proposalId)).to.eql(0n) // pending
@@ -1314,9 +1618,9 @@ describe("Governor and TimeLock", function () {
       expect(await governor.state(proposalId)).to.not.eql(0n) // pending
     })
 
-    it("Cannot create a proposal if emissions did not start", async () => {
+    it("Cannot create a proposal that starts in first round if emissions did not start", async () => {
       const config = createLocalConfig()
-      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 5
       const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3 } =
         await getOrDeployContractInstances({
@@ -1324,8 +1628,12 @@ describe("Governor and TimeLock", function () {
           config,
         })
 
+      await bootstrapEmissions()
+
       const proposer = otherAccounts[0]
       await getVot3Tokens(proposer, "1000")
+
+      expect(await xAllocationVoting.currentRoundId()).to.eql(0n)
 
       // Now we can create a new proposal
       const address = await b3tr.getAddress()
@@ -1341,9 +1649,84 @@ describe("Governor and TimeLock", function () {
       ).to.be.reverted
     })
 
+    it("Can create a proposal that starts from second round if emissions did not start", async () => {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
+      config.EMISSIONS_CYCLE_DURATION = 5
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3, emissions, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
+
+      await bootstrapEmissions()
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+
+      expect(await xAllocationVoting.currentRoundId()).to.eql(0n)
+
+      // Now we can create a new proposal
+      const address = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+      const currentRoundId = await xAllocationVoting.currentRoundId() // starts in current round
+      expect(currentRoundId).to.eql(0n)
+
+      await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
+
+      const tx = await governor
+        .connect(proposer)
+        .propose([address], [0], [encodedFunctionCall], "", 2n, ethers.parseEther("1000"), {
+          gasLimit: 10_000_000,
+        })
+
+      const proposalId = await getProposalIdFromTx(tx, true)
+      await payDeposit(proposalId, proposer)
+
+      // proposal state should be pending
+      expect(await governor.state(proposalId)).to.eql(0n)
+
+      // proposal should start in round 2
+      expect(await governor.proposalStartRound(proposalId)).to.eql(2n)
+
+      // proposal snapshot should be: current block + 1 block (expecting round 1 to start) + round 1 duration + 1 block (expecting round 2 to start)
+      expect(await governor.proposalSnapshot(proposalId)).to.eql(
+        (await governor.clock()) + 1n + (await xAllocationVoting.votingPeriod()) + 1n,
+      )
+
+      // proposal deadline should be: snapshot + voting period
+      expect(await governor.proposalDeadline(proposalId)).to.eql(
+        (await governor.clock()) +
+          1n +
+          (await xAllocationVoting.votingPeriod()) +
+          1n +
+          (await xAllocationVoting.votingPeriod()),
+      )
+
+      // when round 1 starts the proposal should still be pending and snapshot updated
+
+      // Start emissions
+      await emissions.connect(minterAccount).start()
+      expect(await xAllocationVoting.currentRoundId()).to.eql(1n)
+
+      expect(await governor.state(proposalId)).to.eql(0n) // still pending
+
+      // should start when round 1 ends + 1 estimated block to start round 2
+      expect(await governor.proposalSnapshot(proposalId)).to.eql((await xAllocationVoting.currentRoundDeadline()) + 1n)
+
+      // when round 2 starts the proposal should be active
+      await waitForCurrentRoundToEnd()
+      expect(await governor.state(proposalId)).to.eql(0n) // should still pending
+
+      // start new round
+      await emissions.distribute()
+      expect(await xAllocationVoting.currentRoundId()).to.eql(2n)
+      expect(await governor.state(proposalId)).to.eql(1n) // should be active
+    })
+
     it("Cannot create same proposal twice", async () => {
       const config = createLocalConfig()
-      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 5
       const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3 } =
         await getOrDeployContractInstances({
@@ -1381,7 +1764,7 @@ describe("Governor and TimeLock", function () {
 
     it("Should not be able to create a proposal starting in a round that has already passed", async () => {
       const config = createLocalConfig()
-      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 5
       const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3 } =
         await getOrDeployContractInstances({
@@ -1435,21 +1818,6 @@ describe("Governor and TimeLock", function () {
       )
     })
 
-    it("cannot create a proposal if NOT a VOT3 holder", async function () {
-      const config = createLocalConfig()
-      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
-      const { B3trContract, b3tr, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        config,
-      })
-      // Start emissions
-      await bootstrapAndStartEmissions()
-
-      const functionToCall = "tokenDetails"
-      const description = "Get token details"
-      await catchRevert(createProposal(b3tr, B3trContract, owner, description, functionToCall, [], true))
-    })
-
     it("can create a proposal even if user did not manually self delegated (because of automatic self-delegation)", async function () {
       const { B3trContract, vot3, b3tr, owner, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -1461,17 +1829,17 @@ describe("Governor and TimeLock", function () {
       // Before creating a proposal, we need to mint some VOT3 tokens to the owner
       await b3tr.connect(minterAccount).mint(owner, ethers.parseEther("1000"))
       await b3tr.connect(owner).approve(await vot3.getAddress(), ethers.parseEther("9"))
-      await vot3.connect(owner).stake(ethers.parseEther("9"), { gasLimit: 10_000_000 })
+      await vot3.connect(owner).convertToVOT3(ethers.parseEther("9"), { gasLimit: 10_000_000 })
 
       const functionToCall = "tokenDetails"
       const description = "Get token details"
 
-      await createProposal(b3tr, B3trContract, owner, description, functionToCall, [], true)
+      await createProposal(b3tr, B3trContract, owner, description, functionToCall, [])
     })
 
     it("can create a proposal if VOT3 holder that self-delegated", async function () {
       const config = createLocalConfig()
-      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
       const { governor, B3trContract, b3tr, owner, xAllocationVoting } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -1484,12 +1852,12 @@ describe("Governor and TimeLock", function () {
       const description = "Get token details"
 
       // Now we can create a proposal
-      const tx = await createProposal(b3tr, B3trContract, owner, description, functionToCall, [], false)
+      const tx = await createProposal(b3tr, B3trContract, owner, description, functionToCall, [])
       const proposeReceipt = await tx.wait()
       expect(proposeReceipt).not.to.be.null
 
       // Check that the ProposalCreated event was emitted with the correct parameters
-      const event = proposeReceipt?.logs[3]
+      const event = proposeReceipt?.logs[2]
       expect(event).not.to.be.undefined
 
       const decodedLogs = governor.interface.parseLog({
@@ -1520,6 +1888,8 @@ describe("Governor and TimeLock", function () {
       const voteStartsInRoundId = decodedLogs?.args[7]
       expect(voteStartsInRoundId).not.to.be.null
       expect(voteStartsInRoundId).to.eql((await xAllocationVoting.currentRoundId()) + 1n)
+      // proposal threshold
+      expect(decodedLogs?.args[8].toString()).not.to.be.null
 
       // proposal should be in pending state
       const proposalState = await governor.state(proposalId)
@@ -1537,7 +1907,7 @@ describe("Governor and TimeLock", function () {
       await bootstrapAndStartEmissions()
 
       // Now we can create a proposal
-      const tx = await createProposal(b3tr, B3trContract, owner, description, functionToCall, [], false)
+      const tx = await createProposal(b3tr, B3trContract, owner, description, functionToCall, [])
 
       const proposalId = await getProposalIdFromTx(tx)
 
@@ -1558,7 +1928,7 @@ describe("Governor and TimeLock", function () {
 
     it("ANY user that holds VOT3 and DELEGATED can create a proposal", async function () {
       const config = createLocalConfig()
-      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
       const { B3trContract, otherAccount, b3tr } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -1571,7 +1941,7 @@ describe("Governor and TimeLock", function () {
       const description = "Get token details"
 
       // Now we can create a proposal
-      await createProposal(b3tr, B3trContract, otherAccount, description, functionToCall, [], false)
+      await createProposal(b3tr, B3trContract, otherAccount, description, functionToCall, [])
     })
 
     it("Can correctly check description restriction", async () => {
@@ -1710,7 +2080,7 @@ describe("Governor and TimeLock", function () {
 
     this.beforeAll(async function () {
       const config = createLocalConfig()
-      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 15
       const { vot3, b3tr, otherAccounts, minterAccount, B3trContract, otherAccount } =
         await getOrDeployContractInstances({
@@ -1729,7 +2099,7 @@ describe("Governor and TimeLock", function () {
       // Before trying to vote we need to mint some VOT3 tokens to the voter2
       await b3tr.connect(minterAccount).mint(voter2, ethers.parseEther("1000"))
       await b3tr.connect(voter2).approve(await vot3.getAddress(), ethers.parseEther("9"))
-      await vot3.connect(voter2).stake(ethers.parseEther("9"))
+      await vot3.connect(voter2).convertToVOT3(ethers.parseEther("9"))
 
       // we do it here but will use in the next test
       await getVot3Tokens(voter3, "1000")
@@ -1742,8 +2112,9 @@ describe("Governor and TimeLock", function () {
       await bootstrapAndStartEmissions()
 
       // Now we can create a new proposal
-      const tx = await createProposal(b3tr, B3trContract, otherAccount, description, functionToCall, [], false)
+      const tx = await createProposal(b3tr, B3trContract, otherAccount, description, functionToCall, [])
       proposalId = await getProposalIdFromTx(tx)
+      payDeposit(proposalId, otherAccount)
     })
 
     it("cannot vote if proposal is not in active state", async function () {
@@ -1980,10 +2351,12 @@ describe("Governor and TimeLock", function () {
         description + ` ${this.test?.title}`,
         functionToCall,
         [],
-        false,
       ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
 
       const proposalId = await getProposalIdFromTx(tx)
+
+      // pay deposit
+      await payDeposit(proposalId, proposer)
 
       // wait
       await waitForProposalToBeActive(proposalId)
@@ -2033,10 +2406,12 @@ describe("Governor and TimeLock", function () {
         description + ` ${this.test?.title}`,
         functionToCall,
         [],
-        false,
       ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
 
       const proposalId = await getProposalIdFromTx(tx)
+
+      // pay deposit
+      await payDeposit(proposalId, voter)
 
       // wait
       await waitForProposalToBeActive(proposalId)
@@ -2081,10 +2456,12 @@ describe("Governor and TimeLock", function () {
         description + ` ${this.test?.title}`,
         functionToCall,
         [],
-        false,
       ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
 
       const proposalId = await getProposalIdFromTx(tx)
+
+      // pay deposit
+      await payDeposit(proposalId, voter)
 
       // wait
       await waitForProposalToBeActive(proposalId)
@@ -2129,10 +2506,12 @@ describe("Governor and TimeLock", function () {
         description + ` ${this.test?.title}`,
         functionToCall,
         [],
-        false,
       ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
 
       const proposalId = await getProposalIdFromTx(tx)
+
+      // pay deposit
+      await payDeposit(proposalId, voter)
 
       // wait
       await waitForProposalToBeActive(proposalId)
@@ -2178,11 +2557,14 @@ describe("Governor and TimeLock", function () {
         description + ` ${this.test?.title}`,
         functionToCall,
         [],
-        false,
       ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
 
       const proposalId = await getProposalIdFromTx(tx)
       const receipt = (await tx.wait()) as any
+
+      // pay deposit
+      await payDeposit(proposalId, voter)
+
       // wait
       await waitForProposalToBeActive(proposalId)
 
@@ -2220,8 +2602,9 @@ describe("Governor and TimeLock", function () {
       await bootstrapAndStartEmissions()
 
       // Now we can create a new proposal
-      const tx = await createProposal(b3tr, B3trContract, otherAccount, description, functionToCall, [], false)
+      const tx = await createProposal(b3tr, B3trContract, otherAccount, description, functionToCall, [])
       proposalId = await getProposalIdFromTx(tx)
+      await payDeposit(proposalId, otherAccount)
 
       const proposalState = await waitForProposalToBeActive(proposalId) // proposal id of the proposal in the beforeAll step & block when the proposal was created
 
@@ -2248,6 +2631,48 @@ describe("Governor and TimeLock", function () {
       // reason
       expect(decodedLogs?.args[5]).to.eql(reason)
     })
+
+    it("Can abstain", async () => {
+      const { governor, otherAccounts, b3tr, B3trContract, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const voter = otherAccounts[0]
+      await getVot3Tokens(voter, "1000")
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // Now we can create a new proposal
+      const tx = await createProposal(b3tr, B3trContract, otherAccount, description, functionToCall, [])
+      proposalId = await getProposalIdFromTx(tx)
+      await payDeposit(proposalId, otherAccount)
+
+      const proposalState = await waitForProposalToBeActive(proposalId) // proposal id of the proposal in the beforeAll step & block when the proposal was created
+
+      expect(proposalState.toString()).to.eql("1") // active
+
+      //vote against
+      const reason = "I don't know well about it so I abstain"
+      const voteTx = await governor.connect(voter).castVoteWithReason(proposalId, 2, reason)
+      const proposeReceipt = await voteTx.wait()
+      const event = proposeReceipt?.logs[0]
+      const decodedLogs = governor.interface.parseLog({
+        topics: [...(event?.topics as string[])],
+        data: event ? event.data : "",
+      })
+
+      //event exists
+      expect(decodedLogs?.name).to.eql("VoteCast")
+      // voter
+      expect(decodedLogs?.args[0]).to.eql(voter.address)
+      // proposal id
+      expect(decodedLogs?.args[1]).to.eql(proposalId)
+      // support
+      expect(decodedLogs?.args[2].toString()).to.eql("2")
+      // reason
+      expect(decodedLogs?.args[5]).to.eql(reason)
+    })
   })
 
   describe("Proposal Execution", function () {
@@ -2259,7 +2684,7 @@ describe("Governor and TimeLock", function () {
 
     this.beforeAll(async function () {
       const config = createLocalConfig()
-      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 10
       const { otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -2291,10 +2716,12 @@ describe("Governor and TimeLock", function () {
         description + ` ${this.test?.title}`,
         functionToCall,
         [],
-        false,
       ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
 
       proposalId = await getProposalIdFromTx(tx)
+
+      // pay deposit
+      await payDeposit(proposalId.toString(), proposer)
 
       // wait
       await waitForProposalToBeActive(proposalId)
@@ -2330,10 +2757,12 @@ describe("Governor and TimeLock", function () {
         description + ` ${this.test?.title}`,
         functionToCall,
         [],
-        false,
       ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
 
       proposalId = await getProposalIdFromTx(tx)
+
+      // pay deposit
+      await payDeposit(proposalId.toString(), proposer)
 
       // wait
       await waitForProposalToBeActive(proposalId)
@@ -2361,6 +2790,8 @@ describe("Governor and TimeLock", function () {
         otherAccount: proposer,
       } = await getOrDeployContractInstances({ forceDeploy: false })
 
+      await getVot3Tokens(voter, "1000")
+
       // create a new proposal
       const tx = await createProposal(
         b3tr,
@@ -2369,10 +2800,12 @@ describe("Governor and TimeLock", function () {
         description + ` ${this.test?.title}`,
         functionToCall,
         [],
-        false,
       ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
 
       proposalId = await getProposalIdFromTx(tx)
+
+      // pay deposit
+      await payDeposit(proposalId.toString(), proposer)
 
       // wait
       await waitForProposalToBeActive(proposalId)
@@ -2406,6 +2839,8 @@ describe("Governor and TimeLock", function () {
         otherAccount: proposer,
       } = await getOrDeployContractInstances({ forceDeploy: false })
 
+      await getVot3Tokens(voter, "1000")
+
       // create a new proposal
       const tx = await createProposal(
         b3tr,
@@ -2414,10 +2849,12 @@ describe("Governor and TimeLock", function () {
         description + ` ${this.test?.title}`,
         functionToCall,
         [],
-        false,
       ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
 
       proposalId = await getProposalIdFromTx(tx)
+
+      // pay deposit
+      await payDeposit(proposalId.toString(), proposer)
 
       // wait
       await waitForProposalToBeActive(proposalId)
@@ -2456,6 +2893,8 @@ describe("Governor and TimeLock", function () {
         otherAccount: proposer,
       } = await getOrDeployContractInstances({ forceDeploy: false })
 
+      await getVot3Tokens(voter, "1000")
+
       // create a new proposal
       const tx = await createProposal(
         b3tr,
@@ -2464,10 +2903,12 @@ describe("Governor and TimeLock", function () {
         description + ` ${this.test?.title}`,
         functionToCall,
         [],
-        false,
       ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
 
       proposalId = await getProposalIdFromTx(tx)
+
+      // pay deposit
+      await payDeposit(proposalId.toString(), proposer)
 
       // wait
       await waitForProposalToBeActive(proposalId)
@@ -2509,7 +2950,7 @@ describe("Governor and TimeLock", function () {
 
     it("cannot cancel a proposal if not in pending state", async function () {
       const config = createLocalConfig()
-      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 10
       const {
         governor,
@@ -2526,10 +2967,12 @@ describe("Governor and TimeLock", function () {
         description + ` ${this.test?.title}`,
         functionToCall,
         [],
-        false,
       ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
 
       proposalId = await getProposalIdFromTx(tx)
+
+      // pay deposit
+      await payDeposit(proposalId.toString(), proposer)
 
       // wait
       await waitForProposalToBeActive(proposalId)
@@ -2565,7 +3008,6 @@ describe("Governor and TimeLock", function () {
         description + ` ${this.test?.title}`,
         functionToCall,
         [],
-        false,
       ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
 
       proposalId = await getProposalIdFromTx(tx)
@@ -2604,7 +3046,6 @@ describe("Governor and TimeLock", function () {
         description + ` ${this.test?.title}`,
         functionToCall,
         [],
-        false,
       )
 
       proposalId = await getProposalIdFromTx(tx)
@@ -2643,7 +3084,6 @@ describe("Governor and TimeLock", function () {
         description + ` ${this.test?.title}`,
         functionToCall,
         [],
-        false,
       )
 
       proposalId = await getProposalIdFromTx(tx)
@@ -2668,16 +3108,13 @@ describe("Governor and TimeLock", function () {
 
   describe("Proposal Deposit", function () {
     it("A proposal state gets set to `DepositNotMet` if deposit not met by time voting round starts", async () => {
-      const config = createLocalConfig()
-      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1000000000000000
       const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3 } =
         await getOrDeployContractInstances({
           forceDeploy: true,
-          config,
         })
 
       const proposer = otherAccounts[0]
-      await getVot3Tokens(proposer, "1000")
+      await getVot3Tokens(proposer, "10")
       // grant approval to the governor contract
       await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("10"))
 
@@ -2692,17 +3129,9 @@ describe("Governor and TimeLock", function () {
       // Create a proposal with a deposit of 10 VOT3
       const tx = await governor
         .connect(proposer)
-        .propose(
-          [address],
-          [0],
-          [encodedFunctionCall],
-          "",
-          voteStartsInRoundId.toString(),
-          ethers.parseEther("0.0001"),
-          {
-            gasLimit: 10_000_000,
-          },
-        )
+        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("10"), {
+          gasLimit: 10_000_000,
+        })
 
       const proposeReceipt = await tx.wait()
       expect(proposeReceipt).not.to.be.null
@@ -2717,9 +3146,9 @@ describe("Governor and TimeLock", function () {
       })
 
       // deposit amount
-      expect(decodedLogs?.args[2]).to.eql(ethers.parseEther("0.0001"))
+      expect(decodedLogs?.args[2]).to.eql(ethers.parseEther("10"))
 
-      const proposalId = await getProposalIdFromTx(tx)
+      const proposalId = await getProposalIdFromTx(tx, true)
       expect(proposalId).not.to.be.null
 
       expect(await governor.state(proposalId)).to.eql(0n) // pending
@@ -2732,7 +3161,7 @@ describe("Governor and TimeLock", function () {
 
     it("Sponsers can contribute to deposit total", async () => {
       const config = createLocalConfig()
-      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1000000000000000
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
       const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3 } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -2742,55 +3171,50 @@ describe("Governor and TimeLock", function () {
       const proposer = otherAccounts[0]
       await getVot3Tokens(proposer, "1000")
       // grant approval to the governor contract
-      await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("0.0001"))
+      await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
 
       const sponser = otherAccounts[1]
       await getVot3Tokens(sponser, "1000")
       // grant approval to the governor contract
-      await vot3.connect(sponser).approve(await governor.getAddress(), ethers.parseEther("0.0001"))
-
-      const sponser2 = otherAccounts[2]
-      await getVot3Tokens(sponser2, "1000")
-      // grant approval to the governor contract
-      await vot3.connect(sponser2).approve(await governor.getAddress(), ethers.parseEther("100"))
+      await vot3.connect(sponser).approve(await governor.getAddress(), ethers.parseEther("1000"))
 
       // Start emissions
       await bootstrapAndStartEmissions()
+
+      // get enough to pay the deposit
+      const sponser2 = otherAccounts[2]
+      const depositAmount = await governor.depositThreshold()
+      const depositAmountToPay = (Number(ethers.formatEther(depositAmount)) * 1.2).toString()
+      await getVot3Tokens(sponser2, depositAmountToPay.toString())
+      // grant approval to the governor contract
+      await vot3.connect(sponser2).approve(await governor.getAddress(), ethers.parseEther(depositAmountToPay))
 
       // Now we can create a new proposal
       const address = await b3tr.getAddress()
       const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
 
-      // Create a proposal with a deposit of 10 VOT3
+      // Create a proposal with a deposit of 1000 VOT3
       const tx = await governor
         .connect(proposer)
-        .propose(
-          [address],
-          [0],
-          [encodedFunctionCall],
-          "",
-          voteStartsInRoundId.toString(),
-          ethers.parseEther("0.0001"),
-          {
-            gasLimit: 10_000_000,
-          },
-        )
+        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("1000"), {
+          gasLimit: 10_000_000,
+        })
 
-      const proposalId = await getProposalIdFromTx(tx)
+      const proposalId = await getProposalIdFromTx(tx, true)
       expect(await governor.proposalDepositReached(proposalId)).to.eql(false)
-      expect(await governor.getProposalDeposits(proposalId)).to.eql(ethers.parseEther("0.0001"))
-      expect(await governor.getUserDeposit(proposalId, proposer)).to.eql(ethers.parseEther("0.0001"))
+      expect(await governor.getProposalDeposits(proposalId)).to.eql(ethers.parseEther("1000"))
+      expect(await governor.getUserDeposit(proposalId, proposer)).to.eql(ethers.parseEther("1000"))
 
       // sponser contributes to the deposit
       const tx2 = await governor
         .connect(sponser)
-        .deposit(ethers.parseEther("0.0001"), proposalId, { gasLimit: 10_000_000 })
+        .deposit(ethers.parseEther("1000"), proposalId, { gasLimit: 10_000_000 })
       const depositReceipt = await tx2.wait()
 
       expect(await governor.proposalDepositReached(proposalId)).to.eql(false)
-      expect(await governor.getProposalDeposits(proposalId)).to.eql(ethers.parseEther("0.0002"))
-      expect(await governor.getUserDeposit(proposalId, sponser)).to.eql(ethers.parseEther("0.0001"))
+      expect(await governor.getProposalDeposits(proposalId)).to.eql(ethers.parseEther("2000"))
+      expect(await governor.getUserDeposit(proposalId, sponser)).to.eql(ethers.parseEther("1000"))
 
       // Check that the ProposalDeposit event was emitted with the correct parameters
       const event = depositReceipt?.logs[2]
@@ -2802,17 +3226,18 @@ describe("Governor and TimeLock", function () {
       })
 
       // deposit amount
-      expect(decodedLogs?.args[2]).to.eql(ethers.parseEther("0.0001"))
-
+      expect(decodedLogs?.args[2]).to.eql(ethers.parseEther("1000"))
       // sponser2 contributes to the deposit
       const tx3 = await governor
         .connect(sponser2)
-        .deposit(ethers.parseEther("100"), proposalId, { gasLimit: 10_000_000 })
+        .deposit(ethers.parseEther(depositAmountToPay), proposalId, { gasLimit: 10_000_000 })
 
       await tx3.wait()
 
       expect(await governor.proposalDepositReached(proposalId)).to.eql(true)
-      expect(await governor.getProposalDeposits(proposalId)).to.eql(ethers.parseEther("100.0002"))
+      expect(await governor.getProposalDeposits(proposalId)).to.eql(
+        ethers.parseEther(depositAmountToPay) + ethers.parseEther("2000"),
+      )
 
       expect(await governor.state(proposalId)).to.eql(0n) // pending
 
@@ -2822,61 +3247,59 @@ describe("Governor and TimeLock", function () {
     })
 
     it("Deposits can be withdrawn when round ends", async () => {
-      const config = createLocalConfig()
-      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1000000000000000
       const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3 } =
         await getOrDeployContractInstances({
           forceDeploy: true,
-          config,
         })
 
       const proposer = otherAccounts[0]
       await getVot3Tokens(proposer, "1000")
       // grant approval to the governor contract
-      await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("0.0001"))
-
-      const sponser = otherAccounts[1]
-      await getVot3Tokens(sponser, "1000")
-      // grant approval to the governor contract
-      await vot3.connect(sponser).approve(await governor.getAddress(), ethers.parseEther("10"))
+      await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
 
       // Start emissions
       await bootstrapAndStartEmissions()
+
+      // get enough to pay the deposit
+      const sponser = otherAccounts[1]
+      const depositAmount = await governor.depositThreshold()
+      const depositAmountToPay = (Number(ethers.formatEther(depositAmount)) * 1.2).toString()
+      await getVot3Tokens(sponser, depositAmountToPay.toString())
+      // grant approval to the governor contract
+      await vot3.connect(sponser).approve(await governor.getAddress(), ethers.parseEther(depositAmountToPay))
 
       // Now we can create a new proposal
       const address = await b3tr.getAddress()
       const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
 
-      // Create a proposal with a deposit of 10 VOT3
+      // Create a proposal with a deposit of 1000 VOT3
       const tx = await governor
         .connect(proposer)
-        .propose(
-          [address],
-          [0],
-          [encodedFunctionCall],
-          "",
-          voteStartsInRoundId.toString(),
-          ethers.parseEther("0.0001"),
-          {
-            gasLimit: 10_000_000,
-          },
-        )
+        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("1000"), {
+          gasLimit: 10_000_000,
+        })
 
-      const proposalId = await getProposalIdFromTx(tx)
+      const proposalId = await getProposalIdFromTx(tx, true)
       expect(await governor.proposalDepositReached(proposalId)).to.eql(false)
-      expect(await governor.getProposalDeposits(proposalId)).to.eql(ethers.parseEther("0.0001"))
-      expect(await governor.getUserDeposit(proposalId, proposer)).to.eql(ethers.parseEther("0.0001"))
+      expect(await governor.getProposalDeposits(proposalId)).to.eql(ethers.parseEther("1000"))
+      expect(await governor.getUserDeposit(proposalId, proposer)).to.eql(ethers.parseEther("1000"))
 
       // sponser contributes to the deposit
-      await governor.connect(sponser).deposit(ethers.parseEther("10"), proposalId, { gasLimit: 10_000_000 })
+      await governor
+        .connect(sponser)
+        .deposit(ethers.parseEther(depositAmountToPay), proposalId, { gasLimit: 10_000_000 })
 
       expect(await governor.proposalDepositReached(proposalId)).to.eql(true)
-      expect(await governor.getProposalDeposits(proposalId)).to.eql(ethers.parseEther("10.0001"))
-      expect(await governor.getUserDeposit(proposalId, sponser)).to.eql(ethers.parseEther("10"))
+      expect(await governor.getProposalDeposits(proposalId)).to.eql(
+        ethers.parseEther(`${Number(depositAmountToPay) + 1000}`),
+      )
+      expect(await governor.getUserDeposit(proposalId, sponser)).to.eql(ethers.parseEther(depositAmountToPay))
 
       expect(await governor.proposalDepositReached(proposalId)).to.eql(true)
-      expect(await governor.getProposalDeposits(proposalId)).to.eql(ethers.parseEther("10.0001"))
+      expect(await governor.getProposalDeposits(proposalId)).to.eql(
+        ethers.parseEther(`${Number(depositAmountToPay) + 1000}`),
+      )
 
       expect(await governor.state(proposalId)).to.eql(0n) // pending
 
@@ -2887,7 +3310,9 @@ describe("Governor and TimeLock", function () {
       // wait for voting period to end
       await waitForVotingPeriodToEnd(proposalId)
 
-      expect(ethers.parseEther("10.0001")).to.eql(await vot3.balanceOf(await governor.getAddress()))
+      expect(ethers.parseEther(`${Number(depositAmountToPay) + 1000}`)).to.eql(
+        await vot3.balanceOf(await governor.getAddress()),
+      )
 
       await governor.connect(proposer).withdraw(proposalId, proposer.address, { gasLimit: 10_000_000 })
       expect(await governor.getUserDeposit(proposalId, proposer)).to.eql(0n)
@@ -2899,11 +3324,9 @@ describe("Governor and TimeLock", function () {
     })
 
     it("Deposits can be withdrawn when proposal is cancelled", async () => {
-      const config = createLocalConfig()
       const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3 } =
         await getOrDeployContractInstances({
           forceDeploy: true,
-          config,
         })
 
       const proposer = otherAccounts[0]
@@ -2924,26 +3347,22 @@ describe("Governor and TimeLock", function () {
       const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
 
-      // Create a proposal with a deposit of 10 VOT3
+      // Create a proposal with a deposit of 1000 VOT3
       const tx = await governor
         .connect(proposer)
         .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("1000"), {
           gasLimit: 10_000_000,
         })
 
-      const proposalId = await getProposalIdFromTx(tx)
+      const proposalId = await getProposalIdFromTx(tx, true)
       expect(await governor.getProposalDeposits(proposalId)).to.eql(ethers.parseEther("1000"))
       expect(await governor.getUserDeposit(proposalId, proposer)).to.eql(ethers.parseEther("1000"))
 
       // sponser contributes to the deposit
       await governor.connect(sponser).deposit(ethers.parseEther("1000"), proposalId, { gasLimit: 10_000_000 })
 
-      expect(await governor.proposalDepositReached(proposalId)).to.eql(true)
       expect(await governor.getProposalDeposits(proposalId)).to.eql(ethers.parseEther("2000"))
       expect(await governor.getUserDeposit(proposalId, sponser)).to.eql(ethers.parseEther("1000"))
-
-      expect(await governor.proposalDepositReached(proposalId)).to.eql(true)
-      expect(await governor.getProposalDeposits(proposalId)).to.eql(ethers.parseEther("2000"))
 
       expect(await governor.state(proposalId)).to.eql(0n) // pending
 
@@ -2979,34 +3398,39 @@ describe("Governor and TimeLock", function () {
       // grant approval to the governor contract
       await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
 
-      const sponser = otherAccounts[1]
-      await getVot3Tokens(sponser, "1000")
-      // grant approval to the governor contract
-      await vot3.connect(sponser).approve(await governor.getAddress(), ethers.parseEther("1000"))
-
       // Start emissions
       await bootstrapAndStartEmissions()
+
+      // get enough to pay the deposit
+      const sponser = otherAccounts[1]
+      const depositAmount = await governor.depositThreshold()
+      const depositAmountToPay = (Number(ethers.formatEther(depositAmount)) * 1.2).toString()
+      await getVot3Tokens(sponser, depositAmountToPay.toString())
+      // grant approval to the governor contract
+      await vot3.connect(sponser).approve(await governor.getAddress(), ethers.parseEther(depositAmountToPay))
 
       // Now we can create a new proposal
       const address = await b3tr.getAddress()
       const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
 
-      // Create a proposal with a deposit of 10 VOT3
+      // Create a proposal with a deposit of 1000 VOT3
       const tx = await governor
         .connect(proposer)
         .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("1000"), {
           gasLimit: 10_000_000,
         })
 
-      const proposalId = await getProposalIdFromTx(tx)
+      const proposalId = await getProposalIdFromTx(tx, true)
 
       expect(await governor.getUserDeposit(proposalId, proposer)).to.eql(ethers.parseEther("1000"))
 
       // sponser contributes to the deposit
-      await governor.connect(sponser).deposit(ethers.parseEther("1000"), proposalId, { gasLimit: 10_000_000 })
+      await governor
+        .connect(sponser)
+        .deposit(ethers.parseEther(depositAmountToPay), proposalId, { gasLimit: 10_000_000 })
 
-      expect(await governor.getUserDeposit(proposalId, sponser)).to.eql(ethers.parseEther("1000"))
+      expect(await governor.getUserDeposit(proposalId, sponser)).to.eql(ethers.parseEther(depositAmountToPay))
 
       expect(await governor.state(proposalId)).to.eql(0n) // pending
 
@@ -3031,7 +3455,9 @@ describe("Governor and TimeLock", function () {
       // wait for voting period to end
       await waitForVotingPeriodToEnd(proposalId)
 
-      expect(ethers.parseEther("2000")).to.eql(await vot3.balanceOf(await governor.getAddress()))
+      expect(ethers.parseEther(`${Number(depositAmountToPay) + 1000}`)).to.eql(
+        await vot3.balanceOf(await governor.getAddress()),
+      )
 
       await governor.connect(proposer).withdraw(proposalId, proposer.address, { gasLimit: 10_000_000 })
       expect(await governor.getUserDeposit(proposalId, proposer)).to.eql(0n)
@@ -3042,7 +3468,7 @@ describe("Governor and TimeLock", function () {
       expect(0n).to.eql(await vot3.balanceOf(await governor.getAddress()))
     })
 
-    it("Should not be able to make a deposit if the proposal is state is not pending", async () => {
+    it("User cannot withdraw if there is no deposit to withdraw", async () => {
       const config = createLocalConfig()
       const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3 } =
         await getOrDeployContractInstances({
@@ -3054,11 +3480,6 @@ describe("Governor and TimeLock", function () {
       await getVot3Tokens(proposer, "1000")
       // grant approval to the governor contract
       await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
-
-      const sponser = otherAccounts[1]
-      await getVot3Tokens(sponser, "1000")
-      // grant approval to the governor contract
-      await vot3.connect(sponser).approve(await governor.getAddress(), ethers.parseEther("1000"))
 
       // Start emissions
       await bootstrapAndStartEmissions()
@@ -3075,7 +3496,229 @@ describe("Governor and TimeLock", function () {
           gasLimit: 10_000_000,
         })
 
-      const proposalId = await getProposalIdFromTx(tx)
+      const proposalId = await getProposalIdFromTx(tx, true)
+      expect(await governor.getUserDeposit(proposalId, proposer)).to.eql(ethers.parseEther("1000"))
+
+      // cancel the proposal to allow withdrawal
+      await governor
+        .connect(proposer)
+        .cancel([address], [0], [encodedFunctionCall], ethers.keccak256(ethers.toUtf8Bytes("")), {
+          gasLimit: 10_000_000,
+        })
+      expect(await governor.state(proposalId)).to.eql(2n) // cancelled
+
+      // user cannot withdraw non existent deposit
+      await governor.connect(proposer).withdraw(proposalId, proposer.address, { gasLimit: 10_000_000 })
+
+      // should not be able to withdraw again
+      await expect(governor.connect(proposer).withdraw(proposalId, proposer.address, { gasLimit: 10_000_000 })).to.be
+        .reverted
+
+      // random user cannot withdraw
+      await expect(
+        governor.connect(otherAccounts[1]).withdraw(proposalId, otherAccounts[1].address, { gasLimit: 10_000_000 }),
+      ).to.be.reverted
+
+      // should not be able to withdraw non existing proposal
+      await expect(governor.connect(proposer).withdraw(ethers.ZeroHash, proposer.address, { gasLimit: 10_000_000 })).to
+        .be.reverted
+    })
+
+    it("User cannot withdraw if VOT3 contract is paused", async () => {
+      const config = createLocalConfig()
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3, owner } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+      // grant approval to the governor contract
+      await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // Now we can create a new proposal
+      const address = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+      const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
+
+      // Create a proposal with a deposit of 10 VOT3
+      const tx = await governor
+        .connect(proposer)
+        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("1000"), {
+          gasLimit: 10_000_000,
+        })
+
+      const proposalId = await getProposalIdFromTx(tx, true)
+      expect(await governor.getUserDeposit(proposalId, proposer)).to.eql(ethers.parseEther("1000"))
+
+      // cancel the proposal
+      await governor
+        .connect(proposer)
+        .cancel([address], [0], [encodedFunctionCall], ethers.keccak256(ethers.toUtf8Bytes("")), {
+          gasLimit: 10_000_000,
+        })
+      expect(await governor.state(proposalId)).to.eql(2n) // cancelled
+
+      // pause the VOT3 contract
+      await vot3.connect(owner).pause()
+
+      // user cannot withdraw when VOT3 contract is paused
+      await expect(governor.connect(proposer).withdraw(proposalId, proposer.address, { gasLimit: 10_000_000 })).to.be
+        .reverted
+    })
+
+    it("User cannot withdraw if there is no deposit to withdraw", async () => {
+      const config = createLocalConfig()
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3 } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+      // grant approval to the governor contract
+      await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // Now we can create a new proposal
+      const address = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+      const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
+
+      // Create a proposal with a deposit of 10 VOT3
+      const tx = await governor
+        .connect(proposer)
+        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("1000"), {
+          gasLimit: 10_000_000,
+        })
+
+      const proposalId = await getProposalIdFromTx(tx, true)
+      expect(await governor.getUserDeposit(proposalId, proposer)).to.eql(ethers.parseEther("1000"))
+
+      // cancel the proposal to allow withdrawal
+      await governor
+        .connect(proposer)
+        .cancel([address], [0], [encodedFunctionCall], ethers.keccak256(ethers.toUtf8Bytes("")), {
+          gasLimit: 10_000_000,
+        })
+      expect(await governor.state(proposalId)).to.eql(2n) // cancelled
+
+      // user cannot withdraw non existent deposit
+      await governor.connect(proposer).withdraw(proposalId, proposer.address, { gasLimit: 10_000_000 })
+
+      // should not be able to withdraw again
+      await expect(governor.connect(proposer).withdraw(proposalId, proposer.address, { gasLimit: 10_000_000 })).to.be
+        .reverted
+
+      // random user cannot withdraw
+      await expect(
+        governor.connect(otherAccounts[1]).withdraw(proposalId, otherAccounts[1].address, { gasLimit: 10_000_000 }),
+      ).to.be.reverted
+
+      // should not be able to withdraw non existing proposal
+      await expect(governor.connect(proposer).withdraw(ethers.ZeroHash, proposer.address, { gasLimit: 10_000_000 })).to
+        .be.reverted
+    })
+
+    it("User cannot withdraw if VOT3 contract is paused", async () => {
+      const config = createLocalConfig()
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3, owner } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+      // grant approval to the governor contract
+      await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // Now we can create a new proposal
+      const address = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+      const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
+
+      // Create a proposal with a deposit
+      const tx = await governor
+        .connect(proposer)
+        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("1000"), {
+          gasLimit: 10_000_000,
+        })
+
+      const proposalId = await getProposalIdFromTx(tx, true)
+      expect(await governor.getUserDeposit(proposalId, proposer)).to.eql(ethers.parseEther("1000"))
+
+      // cancel the proposal
+      await governor
+        .connect(proposer)
+        .cancel([address], [0], [encodedFunctionCall], ethers.keccak256(ethers.toUtf8Bytes("")), {
+          gasLimit: 10_000_000,
+        })
+      expect(await governor.state(proposalId)).to.eql(2n) // cancelled
+
+      // pause the VOT3 contract
+      await vot3.connect(owner).pause()
+
+      // user cannot withdraw when VOT3 contract is paused
+      await expect(governor.connect(proposer).withdraw(proposalId, proposer.address, { gasLimit: 10_000_000 })).to.be
+        .reverted
+    })
+
+    it("Should not be able to make a deposit if the proposal is state is not pending", async () => {
+      const config = createLocalConfig()
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3 } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
+
+      const sponser = otherAccounts[1]
+      await getVot3Tokens(sponser, "1000")
+      // grant approval to the governor contract
+      await vot3.connect(sponser).approve(await governor.getAddress(), ethers.parseEther("1000"))
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // get enough to pay the deposit
+      const proposer = otherAccounts[1]
+      const depositAmount = await governor.depositThreshold()
+      const depositAmountToPay = (Number(ethers.formatEther(depositAmount)) * 1.2).toString()
+      await getVot3Tokens(proposer, depositAmountToPay.toString())
+      // grant approval to the governor contract
+      await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther(depositAmountToPay))
+
+      // Now we can create a new proposal
+      const address = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+      const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
+
+      // Create a proposal with a deposit
+      const tx = await governor
+        .connect(proposer)
+        .propose(
+          [address],
+          [0],
+          [encodedFunctionCall],
+          "",
+          voteStartsInRoundId.toString(),
+          ethers.parseEther(depositAmountToPay),
+          {
+            gasLimit: 10_000_000,
+          },
+        )
+
+      const proposalId = await getProposalIdFromTx(tx, true)
 
       expect(await governor.state(proposalId)).to.eql(0n) // pending
 
@@ -3097,6 +3740,166 @@ describe("Governor and TimeLock", function () {
 
       // user cannot deposit when proposal is not pending
       await expect(governor.connect(sponser).deposit(ethers.parseEther("1000"), proposalId, { gasLimit: 10_000_000 }))
+    })
+
+    it("Deposit should be 2% of the total B3TR supply when proposal was created", async () => {
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3 } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+      // grant approval to the governor contract
+      await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      const b3trSupply = await b3tr.totalSupply()
+      const depositAmount = await governor.depositThreshold()
+      expect(depositAmount).to.eql(b3trSupply / 50n)
+
+      // Now we can create a new proposal
+      const address = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+      const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
+
+      // Create a proposal with a no deposit
+      const tx = await governor
+        .connect(proposer)
+        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), 0, {
+          gasLimit: 10_000_000,
+        })
+
+      const proposalId = await getProposalIdFromTx(tx, false)
+
+      expect(await governor.proposalDepositReached(proposalId)).to.eql(false)
+
+      const proposalDeposit = await governor.proposalDepositThreshold(proposalId)
+      expect(proposalDeposit).to.eql(depositAmount)
+
+      // get enough to pay the deposit
+      const sponser = otherAccounts[1]
+      await getVot3Tokens(sponser, ethers.formatEther(depositAmount))
+      // grant approval to the governor contract
+      await vot3.connect(sponser).approve(await governor.getAddress(), proposalDeposit)
+
+      // sponser contributes to the deposit
+      await governor.connect(sponser).deposit(proposalDeposit, proposalId, { gasLimit: 10_000_000 })
+
+      expect(await governor.proposalDepositReached(proposalId)).to.eql(true)
+      expect(await governor.getProposalDeposits(proposalId)).to.eql(proposalDeposit)
+
+      const b3trSupply2 = await b3tr.totalSupply()
+      const depositAmount2 = await governor.depositThreshold()
+      expect(depositAmount2).to.eql(b3trSupply2 / 50n)
+
+      const tx2 = await governor
+        .connect(proposer)
+        .propose(
+          [await b3tr.getAddress()],
+          [0],
+          [B3trContract.interface.encodeFunctionData("tokenDetails", [])],
+          "Creating some random proposal",
+          (await xAllocationVoting.currentRoundId()) + 1n,
+          ethers.parseEther("1000"),
+          {
+            gasLimit: 10_000_000,
+          },
+        )
+
+      const proposeReceipt = await tx2.wait()
+      // Check that the ProposalDeposit event was emitted with the correct parameters
+      const event = proposeReceipt?.logs[2]
+      expect(event).not.to.be.undefined
+
+      const decodedLogs = governor.interface.parseLog({
+        topics: [...(event?.topics as string[])],
+        data: event ? event.data : "",
+      })
+
+      // deposit amount
+      expect(decodedLogs?.args[2]).to.eql(ethers.parseEther("1000"))
+
+      const proposalId2 = await getProposalIdFromTx(tx2, true)
+
+      const proposalDeposit2 = await governor.proposalDepositThreshold(proposalId2)
+
+      expect(proposalDeposit).to.not.eql(proposalDeposit2)
+    })
+
+    it("Should not be able to deposit 0 B3TR", async () => {
+      const config = createLocalConfig()
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3 } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+      // grant approval to the governor contract
+      await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // Now we can create a new proposal
+      const address = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+      const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
+
+      // Create a proposal with a deposit of 10 VOT3
+      const tx = await governor
+        .connect(proposer)
+        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("1000"), {
+          gasLimit: 10_000_000,
+        })
+
+      const proposalId = await getProposalIdFromTx(tx, true)
+
+      expect(await governor.state(proposalId)).to.eql(0n) // pending
+
+      // user cannot deposit 0 B3TR
+      await expect(governor.connect(proposer).deposit(0, proposalId, { gasLimit: 10_000_000 })).to.be.reverted
+    })
+
+    it("Should not be able to deposit for a proposal that does not exist", async () => {
+      const config = createLocalConfig()
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3 } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+      // grant approval to the governor contract
+      await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // Now we can create a new proposal
+      const address = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+      const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
+
+      // Create a proposal with a deposit of 10 VOT3
+      const tx = await governor
+        .connect(proposer)
+        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("1000"), {
+          gasLimit: 10_000_000,
+        })
+
+      const proposalId = await getProposalIdFromTx(tx, true)
+
+      expect(await governor.state(proposalId)).to.eql(0n) // pending
+
+      // user cannot deposit for a proposal that does not exist
+      await expect(governor.connect(proposer).deposit(ethers.parseEther("1000"), 100, { gasLimit: 10_000_000 })).to.be
+        .reverted
     })
   })
 })

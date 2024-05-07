@@ -1,4 +1,26 @@
 // SPDX-License-Identifier: MIT
+
+//                                      #######
+//                                 ################
+//                               ####################
+//                             ###########   #########
+//                            #########      #########
+//          #######          #########       #########
+//          #########       #########      ##########
+//           ##########     ########     ####################
+//            ##########   #########  #########################
+//              ################### ############################
+//               #################  ##########          ########
+//                 ##############      ###              ########
+//                  ############                       #########
+//                    ##########                     ##########
+//                     ########                    ###########
+//                       ###                    ############
+//                                          ##############
+//                                    #################
+//                                   ##############
+//                                   #########
+
 pragma solidity ^0.8.20;
 
 import { GovernorUpgradeable } from "../GovernorUpgradeable.sol";
@@ -114,7 +136,19 @@ abstract contract GovernorDepositUpgradeable is Initializable, ReentrancyGuardUp
    * @param proposalId The id of the proposal.
    */
   function proposalDepositReached(uint256 proposalId) public view returns (bool) {
-    return getProposalDeposits(proposalId) >= depositThreshold();
+    GovernorStorage storage $ = _getGovernorStorage();
+    ProposalCore storage proposal = $._proposals[proposalId];
+    return proposal.depositAmount >= proposal.depositThreshold;
+  }
+
+  /**
+   * @dev Returns the deposit threshold for a proposal.
+   * @param proposalId The id of the proposal.
+   * @return uint256 The deposit threshold for the proposal.
+   */
+  function proposalDepositThreshold(uint256 proposalId) public view returns (uint256) {
+    GovernorStorage storage $ = _getGovernorStorage();
+    return $._proposals[proposalId].depositThreshold;
   }
 
   /**
