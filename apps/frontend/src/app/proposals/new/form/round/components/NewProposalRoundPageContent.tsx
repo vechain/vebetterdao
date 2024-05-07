@@ -22,7 +22,7 @@ export const NewProposalRoundPageContent = () => {
   }, [router])
 
   const onContinue = useCallback(() => {
-    router.push("/proposals/new/form/deposit")
+    router.push("/proposals/new/form/fund-and-publish")
   }, [router])
 
   const rounds = useMemo(() => {

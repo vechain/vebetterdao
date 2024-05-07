@@ -5,8 +5,8 @@ import { useCallback } from "react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { governanceAvailableContracts } from "@/constants"
 import { ethers } from "ethers"
-import getConfig from "next/config"
 import { B3TRGovernor__factory, VOT3__factory } from "@repo/contracts"
+import { getConfig } from "@repo/config"
 export type AvailableContractAbis = (typeof governanceAvailableContracts)[number]["abi"]["abi"][number]
 
 const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
