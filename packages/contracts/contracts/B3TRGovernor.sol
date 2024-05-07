@@ -370,33 +370,6 @@ contract B3TRGovernor is
   }
 
   /**
-   * @dev Internal function check if the targets and calldatas are whitelisted
-   * @param targets The addresses of the contracts to call
-   * @param calldatas Function signatures and arguments
-   */
-  function _checkFunctionsRestriction(address[] memory targets, bytes[] memory calldatas) internal view {
-    GovernorFunctionsSettingsStorage storage $$ = _getGovernorFunctionsSettingsStorage();
-
-    if ($$.isFunctionRestrictionEnabled == true) {
-      for (uint256 i = 0; i < targets.length; i++) {
-        bytes4 functionSelector = _extractFunctionSelector(calldatas[i]);
-        if ($$.whitelistedFunctions[targets[i]][functionSelector] == false) {
-          revert GovernorRestrictedFunction(functionSelector);
-        }
-      }
-    }
-  }
-
-  function _extractFunctionSelector(bytes memory data) internal pure returns (bytes4) {
-    if (data.length < 4) revert GovernorFunctionInvalidSelector(data);
-    bytes4 sig;
-    assembly {
-      sig := mload(add(data, 32))
-    }
-    return sig;
-  }
-
-  /**
    * @dev Pause the contract
    */
   function pause() public onlyRole(DEFAULT_ADMIN_ROLE) {
