@@ -52,10 +52,16 @@ export const NewProposalFundAndPublishPageContent = () => {
       setData({ depositAmount: data.amount })
       if (!votingStartRoundId || !actions || !markdownDescription) throw new Error("Missing data")
 
+      const isSomeCalldataEmpty = actions.some(action => !action.calldata)
+      if (isSomeCalldataEmpty) throw new Error("Missing calldata for some actions")
       createProposalMutation.sendTransaction({
-        actions,
+        actions: actions.map(action => ({
+          contractAddress: action.contractAddress,
+          calldata: action.calldata as string,
+        })),
         description: markdownDescription,
         startRoundId: votingStartRoundId,
+        depositAmount: data.amount.toString(),
       })
     },
     [setData, createProposalMutation, markdownDescription, actions, votingStartRoundId],

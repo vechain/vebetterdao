@@ -1,24 +1,26 @@
-import { buildCreateProposalTx, getProposalEvents } from "@/api"
+import { getProposalEvents } from "@/api"
 import { useQueryClient } from "@tanstack/react-query"
-import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
+import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { governanceAvailableContracts } from "@/constants"
 import { ethers } from "ethers"
+import getConfig from "next/config"
+import { B3TRGovernor__factory, VOT3__factory } from "@repo/contracts"
 export type AvailableContractAbis = (typeof governanceAvailableContracts)[number]["abi"]["abi"][number]
-/**
- * Represent a single parameter of the function to call in the smart contract
- * This is used to typing the inputs of the abi definition
- */
-export type FunctionParamsField = { id: string; name: string; type: string; internalType?: string; value: any }
+
+const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
+const b3trGovernorInterface = B3TRGovernor__factory.createInterface()
+
+const vot3Interface = VOT3__factory.createInterface()
+
 /**
  * Represent a single action to be exeuted in case the proposal is successful
  * This is equal to a smart contract call to the given function with the given params
  */
 export type ProposalAction = {
   contractAddress: string
-  contractAbi?: AvailableContractAbis
-  functionParams: FunctionParamsField[]
+  calldata: string
 }
 /**
  * Data required to create a proposal. Multiple actions could be provided in case we want multiple function to be executed
@@ -32,6 +34,7 @@ type BuildClausesProps = {
   description: string
   actions: ProposalAction[]
   startRoundId: number | string
+  depositAmount: string
 }
 
 type useCreateProposalReturnValue = {
@@ -72,40 +75,47 @@ export const useCreateProposal = ({
   })
 
   const buildClauses = useCallback(
-    ({ description, actions, startRoundId }: BuildClausesProps) => {
+    ({ description, actions, startRoundId, depositAmount }: BuildClausesProps) => {
       if (!account) throw new Error("Account is required")
       type ReducedActions = {
-        contractsAbi: AvailableContractAbis[]
         contractsAddress: string[]
-        functionsParams: (string | number)[][]
+        calldatas: string[]
       }
-      // Using Array.reduce to map objects into separate arrays based on keys
-      const res: ReducedActions = actions.reduce(
-        (result, obj) => {
-          if (!obj.contractAbi) throw new Error("contractAbi is required")
-          result.contractsAbi.push(obj.contractAbi)
-          result.contractsAddress.push(obj.contractAddress)
-          // parse values if needed
-          result.functionsParams.push(
-            obj.functionParams.map(param => {
-              if (param.type === "bytes32") return ethers.encodeBytes32String(param.value)
-              return param.value
-            }),
-          )
-          return result
+      const parsedDepositAmount = ethers.parseEther(depositAmount).toString()
+
+      const approveClause: EnhancedClause = {
+        to: getConfig().vot3ContractAddress,
+        value: depositAmount,
+        data: vot3Interface.encodeFunctionData("approve", [GOVERNANCE_CONTRACT, parsedDepositAmount]),
+        comment: `Approve ${GOVERNANCE_CONTRACT} to transfer ${depositAmount} VOT3`,
+        abi: JSON.parse(JSON.stringify(vot3Interface.getFunction("approve"))),
+      }
+
+      const targetsAndCalldata = actions.reduce<ReducedActions>(
+        (acc, action) => {
+          acc.contractsAddress.push(action.contractAddress)
+          acc.calldatas.push(action.calldata)
+          return acc
         },
-        { contractsAbi: [], contractsAddress: [], functionsParams: [] } as ReducedActions,
+        { contractsAddress: [], calldatas: [] },
       )
 
-      const createProposalClauses = buildCreateProposalTx(
-        res.contractsAbi,
-        res.contractsAddress,
-        res.functionsParams,
-        description,
-        startRoundId,
-      )
+      const createProposalClause: EnhancedClause = {
+        to: GOVERNANCE_CONTRACT,
+        value: 0,
+        data: b3trGovernorInterface.encodeFunctionData("propose", [
+          targetsAndCalldata.contractsAddress,
+          [0],
+          targetsAndCalldata.calldatas,
+          description,
+          startRoundId,
+          depositAmount,
+        ]),
+        comment: `Create new proposal for round ${startRoundId} with description: ${description}`,
+        abi: JSON.parse(JSON.stringify(b3trGovernorInterface.getFunction("propose"))),
+      }
 
-      return createProposalClauses
+      return [approveClause, createProposalClause]
     },
     [account],
   )
