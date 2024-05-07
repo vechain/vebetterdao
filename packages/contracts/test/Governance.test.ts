@@ -334,7 +334,7 @@ describe.only("Governor and TimeLock", function () {
         governor,
         await ethers.getContractFactory("B3TRGovernor"),
         "Update B3TR address",
-        "setB3TR",
+        "setB3tr",
         [newAddress],
       )
 
@@ -349,7 +349,7 @@ describe.only("Governor and TimeLock", function () {
 
       const newAddress = ethers.Wallet.createRandom().address
 
-      await catchRevert(governor.connect(owner).setB3TR(newAddress))
+      await catchRevert(governor.connect(owner).setB3tr(newAddress))
 
       const updatedAddress = await governor.b3tr()
       expect(updatedAddress).to.not.eql(newAddress)
