@@ -291,7 +291,7 @@ contract B3TRGovernor is
       depositThresholdAmount
     );
 
-    _depositFunds(depositAmount, proposer, proposalId, depositAmount, depositThresholdAmount);
+    _depositFunds(depositAmount, proposer, proposalId);
 
     emit ProposalCreated(
       proposalId,
@@ -301,7 +301,8 @@ contract B3TRGovernor is
       new string[](targets.length),
       calldatas,
       description,
-      startRoundId
+      startRoundId,
+      depositThresholdAmount
     );
 
     // Using a named return variable to avoid stack too deep errors

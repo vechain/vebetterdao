@@ -84,7 +84,7 @@ abstract contract GovernorDepositUpgradeable is Initializable, ReentrancyGuardUp
 
     proposal.depositAmount += amount;
 
-    _depositFunds(amount, _msgSender(), proposalId, proposal.depositAmount, proposal.depositThreshold);
+    _depositFunds(amount, _msgSender(), proposalId);
   }
 
   /**
@@ -172,22 +172,14 @@ abstract contract GovernorDepositUpgradeable is Initializable, ReentrancyGuardUp
    * @param amount The amount of tokens to deposit.
    * @param depositor The address of the depositor.
    * @param proposalId The id of the proposal.
-   * @param depositTotal The total amount of deposits made to the proposal.
-   * @param depositThreshold The threshold amount of deposits required to reach the proposal.
    */
-  function _depositFunds(
-    uint256 amount,
-    address depositor,
-    uint256 proposalId,
-    uint256 depositTotal,
-    uint256 depositThreshold
-  ) internal nonReentrant {
+  function _depositFunds(uint256 amount, address depositor, uint256 proposalId) internal nonReentrant {
     GovernorDepositStorage storage $ = _getGovernorDepositStorage();
 
     require($.vot3.transferFrom(depositor, address(this), amount), "B3TRGovernor: transfer failed");
 
     $.deposits[proposalId][depositor] += amount;
 
-    emit ProposalDeposit(depositor, proposalId, amount, depositTotal, depositThreshold);
+    emit ProposalDeposit(depositor, proposalId, amount);
   }
 }

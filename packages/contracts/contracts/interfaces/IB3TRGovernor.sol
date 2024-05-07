@@ -145,7 +145,8 @@ interface IB3TRGovernor is IERC165, IERC6372 {
     string[] signatures,
     bytes[] calldatas,
     string description,
-    uint256 indexed roundIdVoteStart
+    uint256 indexed roundIdVoteStart,
+    uint256 depositThreshold
   );
 
   /**
@@ -180,7 +181,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   /**
    * @dev Emitted when a deposit is made to a proposal.
    */
-  event ProposalDeposit(address indexed depositor, uint256 indexed proposalId, uint256 amount, uint256 total, uint256 depositThreshold);
+  event ProposalDeposit(address indexed depositor, uint256 indexed proposalId, uint256 amount);
 
   /**
    * @notice module:core

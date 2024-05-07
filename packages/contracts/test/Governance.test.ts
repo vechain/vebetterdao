@@ -807,6 +807,8 @@ describe("Governor and TimeLock", function () {
       const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 2n // starts 2 rounds from now
 
+      const depositThreshold = await governor.depositThreshold()
+
       const tx = await governor
         .connect(proposer)
         .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), deposit, {
@@ -827,6 +829,8 @@ describe("Governor and TimeLock", function () {
 
       // roundId when proposal will start
       expect(decodedLogs?.args[7]).to.eql(3n)
+      // deposit threshold
+      expect(decodedLogs?.args[8]).to.eql(depositThreshold)
 
       const proposalId = await getProposalIdFromTx(tx, true)
       expect(proposalId).not.to.be.null
@@ -1593,6 +1597,8 @@ describe("Governor and TimeLock", function () {
       const voteStartsInRoundId = decodedLogs?.args[7]
       expect(voteStartsInRoundId).not.to.be.null
       expect(voteStartsInRoundId).to.eql((await xAllocationVoting.currentRoundId()) + 1n)
+      // proposal threshold
+      expect(decodedLogs?.args[8].toString()).not.to.be.null
 
       // proposal should be in pending state
       const proposalState = await governor.state(proposalId)
@@ -3276,10 +3282,6 @@ describe("Governor and TimeLock", function () {
 
       // deposit amount
       expect(decodedLogs?.args[2]).to.eql(ethers.parseEther("1000"))
-      // total amount
-      expect(decodedLogs?.args[3]).to.eql(ethers.parseEther("1000"))
-      //depsoit threshold
-      expect(decodedLogs?.args[4]).to.eql(depositAmount2)
 
       const proposalId2 = await getProposalIdFromTx(tx2, true)
 
