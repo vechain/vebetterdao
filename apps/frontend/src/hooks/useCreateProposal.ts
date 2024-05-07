@@ -97,7 +97,7 @@ export const useCreateProposal = ({
         { contractsAbi: [], contractsAddress: [], functionsParams: [] } as ReducedActions,
       )
 
-      const createProposalClause = buildCreateProposalTx(
+      const createProposalClauses = buildCreateProposalTx(
         res.contractsAbi,
         res.contractsAddress,
         res.functionsParams,
@@ -105,7 +105,7 @@ export const useCreateProposal = ({
         startRoundId,
       )
 
-      return [createProposalClause]
+      return createProposalClauses
     },
     [account],
   )
