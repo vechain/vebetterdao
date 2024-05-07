@@ -1,5 +1,25 @@
 // SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts (last updated v5.0.0) (governance/Governor.sol)
+
+//                                      #######
+//                                 ################
+//                               ####################
+//                             ###########   #########
+//                            #########      #########
+//          #######          #########       #########
+//          #########       #########      ##########
+//           ##########     ########     ####################
+//            ##########   #########  #########################
+//              ################### ############################
+//               #################  ##########          ########
+//                 ##############      ###              ########
+//                  ############                       #########
+//                    ##########                     ##########
+//                     ########                    ###########
+//                       ###                    ############
+//                                          ##############
+//                                    #################
+//                                   ##############
+//                                   #########
 
 pragma solidity ^0.8.20;
 
@@ -26,18 +46,9 @@ import { IB3TR } from "../interfaces/IB3TR.sol";
  *
  * - A counting module must implement {quorum}, {_quorumReached}, {_voteSucceeded} and {_countVote}
  * - A voting module must implement {_getVotes}
+ * - A contracts manager module must implement {b3tr}, {voterRewards}, {xAllocationVoting}
+ * - A settings module must implement {minVotingDelay}, {minVotingPeriod}, {maxVotingPeriod}, {depositThreshold}
  * - Additionally, {votingPeriod} must also be implemented
- *
- * Modifications:
- * - _getGovernorStorage is internal
- * - Added roundIdVoteStart to ProposalCore
- * - removed voteStart block from ProposalCore
- * - abstract proposalSnapshot and proposalDeadline
- * - removed propose() and _propose()
- * - updated _countVote() function signature to include power
- * - updated _castVote() to calculate power as Math.sqrt(weight)
- * - added isExecutable to ProposalCore
- * - Removed voteWithSignature
  */
 abstract contract GovernorUpgradeable is
   Initializable,
