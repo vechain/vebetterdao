@@ -81,7 +81,7 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   /**
    * @dev Emitted when a round is created.
    */
-  event RoundCreated(uint256 roundId, address proposer, uint256 voteStart, uint256 voteEnd);
+  event RoundCreated(uint256 roundId, address proposer, uint256 voteStart, uint256 voteEnd, bytes32[] appsIds);
 
   /**
    * @dev Emitted when votes are cast.
