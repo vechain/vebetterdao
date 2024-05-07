@@ -439,49 +439,6 @@ contract B3TRGovernor is
   }
 
   /**
-   * @dev See {IB3TRGovernor-proposalSnapshot}.
-   *
-   * We take for granted that the round starts the block after it ends. But it can happen that the round is not started yet for whatever reason.
-   * Knowing this, if the proposal starts 4 rounds in the future we need to consider also those extra blocks used to start the rounds.
-   */
-  function proposalSnapshot(uint256 proposalId) public view virtual override returns (uint256) {
-    IXAllocationVotingGovernor _xAllocationVoting = xAllocationVoting();
-    GovernorStorage storage $ = _getGovernorStorage();
-
-    // round when proposal should be active is already started
-    if (_xAllocationVoting.currentRoundId() >= $._proposals[proposalId].roundIdVoteStart) {
-      return _xAllocationVoting.roundSnapshot($._proposals[proposalId].roundIdVoteStart);
-    }
-
-    uint256 amountOfRoundsLeft = $._proposals[proposalId].roundIdVoteStart - _xAllocationVoting.currentRoundId();
-    uint256 roundsDurationLeft = _xAllocationVoting.votingPeriod() * (amountOfRoundsLeft - 1); // -1 because if only 1 round left we want this to be 0
-    uint256 currentRoundDeadline = _xAllocationVoting.currentRoundDeadline();
-
-    // if current round ended and a new one did not start yet
-    if (currentRoundDeadline <= clock()) {
-      currentRoundDeadline = clock();
-    }
-
-    return currentRoundDeadline + roundsDurationLeft + amountOfRoundsLeft;
-  }
-
-  /**
-   * @dev See {IB3TRGovernor-proposalDeadline}.
-   */
-  function proposalDeadline(uint256 proposalId) public view virtual override returns (uint256) {
-    IXAllocationVotingGovernor _xAllocationVoting = xAllocationVoting();
-    GovernorStorage storage $$ = _getGovernorStorage();
-
-    // if round is active or already occured proposal end block is the block when round ends
-    if (_xAllocationVoting.currentRoundId() >= $$._proposals[proposalId].roundIdVoteStart) {
-      return _xAllocationVoting.roundDeadline($$._proposals[proposalId].roundIdVoteStart);
-    }
-
-    // if we call this function before the round starts, it will return 0, so we need to estimate the end block
-    return proposalSnapshot(proposalId) + _xAllocationVoting.votingPeriod();
-  }
-
-  /**
    * @dev See {IB3TRGovernor-castVote}.
    */
   function castVote(uint256 proposalId, uint8 support) public override(GovernorUpgradeable) returns (uint256) {
