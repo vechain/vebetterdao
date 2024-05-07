@@ -764,7 +764,6 @@ describe("Governor and TimeLock", function () {
         await catchRevert(governor.connect(otherAccount).unpause())
       })
 
-      // when paused no proposals can be created
       it("When paused no proposals can be created", async function () {
         const { governor, owner, B3trContract, b3tr } = await getOrDeployContractInstances({
           forceDeploy: true,
@@ -776,7 +775,7 @@ describe("Governor and TimeLock", function () {
         const description = "Get token details"
 
         await expect(
-          createProposal(b3tr, B3trContract, owner, description, functionToCall, [], true),
+          createProposal(b3tr, B3trContract, owner, description, functionToCall, []),
         ).to.be.revertedWithCustomError(
           {
             interface: B3TRGovernor__factory.createInterface(),
@@ -813,10 +812,11 @@ describe("Governor and TimeLock", function () {
           description + ` ${this.test?.title}`,
           functionToCall,
           [],
-          false,
         ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
 
         const proposalId = await getProposalIdFromTx(tx)
+
+        await payDeposit(proposalId, proposer)
 
         // wait
         await waitForProposalToBeActive(proposalId)
@@ -879,10 +879,11 @@ describe("Governor and TimeLock", function () {
           description + ` ${this.test?.title}`,
           functionToCall,
           [],
-          false,
         ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
 
         const proposalId = await getProposalIdFromTx(tx)
+
+        await payDeposit(proposalId, proposer)
 
         // wait
         await waitForProposalToBeActive(proposalId)
@@ -1028,7 +1029,7 @@ describe("Governor and TimeLock", function () {
 
     it("Proposal cannot start in next round there isn't enough delay", async () => {
       const config = createLocalConfig()
-      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 5
       config.B3TR_GOVERNOR_MIN_VOTING_DELAY = 3
       const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3 } =
@@ -1650,7 +1651,7 @@ describe("Governor and TimeLock", function () {
 
     it("Can create a proposal that starts from second round if emissions did not start", async () => {
       const config = createLocalConfig()
-      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 5
       const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3, emissions, minterAccount } =
         await getOrDeployContractInstances({
@@ -1838,7 +1839,7 @@ describe("Governor and TimeLock", function () {
 
     it("can create a proposal if VOT3 holder that self-delegated", async function () {
       const config = createLocalConfig()
-      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
       const { governor, B3trContract, b3tr, owner, xAllocationVoting } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -1906,7 +1907,7 @@ describe("Governor and TimeLock", function () {
       await bootstrapAndStartEmissions()
 
       // Now we can create a proposal
-      const tx = await createProposal(b3tr, B3trContract, owner, description, functionToCall, [], false)
+      const tx = await createProposal(b3tr, B3trContract, owner, description, functionToCall, [])
 
       const proposalId = await getProposalIdFromTx(tx)
 
@@ -1940,7 +1941,7 @@ describe("Governor and TimeLock", function () {
       const description = "Get token details"
 
       // Now we can create a proposal
-      await createProposal(b3tr, B3trContract, otherAccount, description, functionToCall, [], false)
+      await createProposal(b3tr, B3trContract, otherAccount, description, functionToCall, [])
     })
 
     it("Can correctly check description restriction", async () => {
@@ -2081,7 +2082,7 @@ describe("Governor and TimeLock", function () {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 15
-      const { vot3, b3tr, otherAccounts, minterAccount, B3trContract, otherAccount, governor } =
+      const { vot3, b3tr, otherAccounts, minterAccount, B3trContract, otherAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
           config,
@@ -2601,7 +2602,7 @@ describe("Governor and TimeLock", function () {
       await bootstrapAndStartEmissions()
 
       // Now we can create a new proposal
-      const tx = await createProposal(b3tr, B3trContract, otherAccount, description, functionToCall, [], false)
+      const tx = await createProposal(b3tr, B3trContract, otherAccount, description, functionToCall, [])
       proposalId = await getProposalIdFromTx(tx)
       await payDeposit(proposalId, otherAccount)
 
@@ -2643,7 +2644,7 @@ describe("Governor and TimeLock", function () {
       await bootstrapAndStartEmissions()
 
       // Now we can create a new proposal
-      const tx = await createProposal(b3tr, B3trContract, otherAccount, description, functionToCall, [], false)
+      const tx = await createProposal(b3tr, B3trContract, otherAccount, description, functionToCall, [])
       proposalId = await getProposalIdFromTx(tx)
       await payDeposit(proposalId, otherAccount)
 

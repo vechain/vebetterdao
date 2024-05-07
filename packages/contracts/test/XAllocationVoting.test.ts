@@ -544,10 +544,9 @@ describe("X-Allocation Voting", function () {
       })
 
       it("Can set voting period if less than emissions cycle duration", async function () {
-        const { xAllocationVoting, owner, emissions, governor, otherAccount, vot3 } =
-          await getOrDeployContractInstances({
-            forceDeploy: true,
-          })
+        const { xAllocationVoting, owner, emissions, governor, otherAccount } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
         await bootstrapAndStartEmissions()
         await getVot3Tokens(otherAccount, "1000")
         const cycleDuration = await emissions.cycleDuration()
@@ -612,10 +611,9 @@ describe("X-Allocation Voting", function () {
       })
 
       it("Cannot set voting period if not less than emissions cycle duration", async function () {
-        const { xAllocationVoting, owner, emissions, governor, otherAccount, vot3 } =
-          await getOrDeployContractInstances({
-            forceDeploy: true,
-          })
+        const { xAllocationVoting, owner, emissions, governor, otherAccount } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
         await bootstrapAndStartEmissions()
         await getVot3Tokens(otherAccount, "1000")
         const cycleDuration = await emissions.cycleDuration()
