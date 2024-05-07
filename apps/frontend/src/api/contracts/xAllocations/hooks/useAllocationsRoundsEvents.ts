@@ -13,6 +13,7 @@ export type RoundCreated = {
   proposer: string
   voteStart: string
   voteEnd: string
+  appsIds: string[]
 }
 
 export const getAllocationsRoundsEvents = async (thor: Connex.Thor) => {
@@ -48,6 +49,7 @@ export const getAllocationsRoundsEvents = async (thor: Connex.Thor) => {
           proposer: decoded[1],
           voteStart: decoded[2],
           voteEnd: decoded[3],
+          appsIds: decoded[4],
         })
         break
       }
