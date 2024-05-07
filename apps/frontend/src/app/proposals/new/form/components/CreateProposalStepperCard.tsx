@@ -37,7 +37,7 @@ const FunctionTypeSteps: CreateProposalStep[] = [
   { key: "details", title: "Proposal details", pathnames: ["/proposals/new/form/content"] },
   { key: "preview", title: "Preview", pathnames: ["/proposals/new/form/preview"] },
   { key: "round", title: "Round", pathnames: ["/proposals/new/form/round"] },
-  { key: "fundingAndPublish", title: "Funding and publish!", pathnames: ["/proposals/new/form/deposit"] },
+  { key: "fundingAndPublish", title: "Funding and publish!", pathnames: ["/proposals/new/form/fund-and-publish"] },
 ]
 
 const DiscussionTypeSteps: CreateProposalStep[] = [
@@ -45,7 +45,7 @@ const DiscussionTypeSteps: CreateProposalStep[] = [
   { key: "details", title: "Proposal details", pathnames: ["/proposals/new/form/content"] },
   { key: "preview", title: "Preview", pathnames: ["/proposals/new/form/preview"] },
   { key: "round", title: "Round", pathnames: ["/proposals/new/form/round"] },
-  { key: "fundingAndPublish", title: "Funding and publish!", pathnames: ["/proposals/new/form/deposit"] },
+  { key: "fundingAndPublish", title: "Funding and publish!", pathnames: ["/proposals/new/form/fund-and-publish"] },
 ]
 
 export const CreateProposalStepperCard = () => {
