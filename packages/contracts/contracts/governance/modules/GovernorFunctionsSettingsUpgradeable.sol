@@ -113,7 +113,7 @@ abstract contract GovernorFunctionsSettingsUpgradeable is Initializable, Governo
    * @param targets The addresses of the contracts to call
    * @param calldatas Function signatures and arguments
    */
-  function _checkFunctionsRestriction(address[] memory targets, bytes[] memory calldatas) internal view {
+  function _checkFunctionsRestriction(address[] memory targets, bytes[] memory calldatas) internal view override {
     GovernorFunctionsSettingsStorage storage $$ = _getGovernorFunctionsSettingsStorage();
 
     if ($$.isFunctionRestrictionEnabled == true) {
