@@ -15,7 +15,7 @@ import { B3TR, B3TRGovernor, Treasury } from "../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy } from "../scripts/helpers"
 
-describe("Treasury", () => {
+describe.only("Treasury", () => {
   let treasuryProxy: Treasury
   let b3tr: B3TR
   let vot3: any
@@ -97,9 +97,9 @@ describe("Treasury", () => {
         expect(await treasuryProxy.getB3TRBalance()).to.eql(ethers.parseEther("19"))
       })
       it("should convert B3TR and recieve VOT3", async () => {
-        await treasuryProxy.convertB3TR(ethers.parseEther("5"))
-        expect(await treasuryProxy.getB3TRBalance()).to.eql(ethers.parseEther("4"))
-        expect(await treasuryProxy.getVOT3Balance()).to.eql(ethers.parseEther("5"))
+        await treasuryProxy.convertB3TR(ethers.parseEther("10"))
+        expect(await treasuryProxy.getB3TRBalance()).to.eql(ethers.parseEther("9"))
+        expect(await treasuryProxy.getVOT3Balance()).to.eql(ethers.parseEther("10"))
       })
       it("should revert if not enough balance", async () => {
         await catchRevert(treasuryProxy.transferB3TR(otherAccount.address, ethers.parseEther("11")))
@@ -133,9 +133,9 @@ describe("Treasury", () => {
         expect(await treasuryProxy.getVOT3Balance()).to.eql(ethers.parseEther("9"))
       })
       it("should convert VOT3 and recieve B3TR", async () => {
-        await treasuryProxy.convertVOT3(ethers.parseEther("4"))
-        expect(await treasuryProxy.getB3TRBalance()).to.eql(ethers.parseEther("8"))
-        expect(await treasuryProxy.getVOT3Balance()).to.eql(ethers.parseEther("0"))
+        await treasuryProxy.convertVOT3(ethers.parseEther("5"))
+        expect(await treasuryProxy.getB3TRBalance()).to.eql(ethers.parseEther("12"))
+        expect(await treasuryProxy.getVOT3Balance()).to.eql(ethers.parseEther("4"))
       })
       it("should revert if not enough converted B3TR to convert back", async () => {
         await catchRevert(treasuryProxy.convertVOT3(ethers.parseEther("11")))
@@ -152,7 +152,7 @@ describe("Treasury", () => {
         await catchRevert(treasuryProxy.transferVOT3(otherAccount.address, ethers.parseEther("2")))
       })
       it("Should be able to set transfer limit", async () => {
-        await treasuryProxy.stakeB3TR(ethers.parseEther("10"))
+        await treasuryProxy.convertB3TR(ethers.parseEther("10"))
         await treasuryProxy.connect(owner).setTransferLimitToken(await vot3.getAddress(), ethers.parseEther("2"))
         expect(await treasuryProxy.getTransferLimitToken(await vot3.getAddress())).to.eql(ethers.parseEther("2"))
         await treasuryProxy.transferVOT3(otherAccount.address, ethers.parseEther("2"))
