@@ -2,26 +2,28 @@ import { Divider, Flex, HStack, Heading, IconButton, Spacer, Text, VStack } from
 import { BaseCard } from "../../../components/BaseCard"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { AddressIcon } from "@/components/AddressIcon"
-import { FaRegBell, FaRegClock, FaShareNodes, FaTriangleExclamation } from "react-icons/fa6"
+import { FaRegBell, FaRegClock, FaShareNodes } from "react-icons/fa6"
 import { VOT3Icon } from "@/components"
+import { useCurrentProposal } from "@/api"
+import { ProposalOverviewVotes } from "./components/ProposalOverviewVotes"
+import { timestampToTimeLeftCompact } from "@/utils"
 
 export const ProposalOverview = () => {
+  // TODO: abstract quorum not reached
+  // TODO: abstract upcoming voting
+  // TODO: abstract starts in
+  // TODO: add cast your vote button
+
+  // ask erik about the following:
+  // TODO: should the round be the current round or the start voting round?
   // TODO: should we move colors variables to theme?
-  // TODO: fill below data with real data
   // TODO: is there i18n?
   // TODO: font-size should be in theme?
-  // TODO: vot3 icon is different from figma
   // TODO: how to handle notify button?
-  // TODO: icons are different (attention and share)
-  const round = 15 // TODO: is this the round number? or the proposal round?
-  const title = "This is the proposal title"
-  const isDepositPending = true
-  const description =
-    "This section serves as the proposal description, where users have the opportunity to concisely articulate their idea or initiative for consideration within the DAO ecosystem. Here, users can provide a detailed overview of their proposal, outlining its objectives, rationale, and potential benefits. Through clear and co. This section serves as the proposal description, where users have the opportunity to concisely articulate their idea or initiative for consideration within the DAO ecosystem. Here, users can provide a detailed overview of their proposal, outlining its objectives, rationale, and potential benefits. Through clear and co"
-  const creator = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa"
-  const startsInDate = "3 days"
-  const deposited = 1000
-  const totalDeposit = 10000
+  // TODO: how to handle share button?
+  // TODO: icons are different (vot3, warning and share)
+
+  const { proposal } = useCurrentProposal()
 
   return (
     <BaseCard>
@@ -29,16 +31,16 @@ export const ProposalOverview = () => {
         <VStack gap={"20px"} alignItems={"stretch"} flex={3}>
           <VStack alignItems={"stretch"}>
             <Text fontWeight={"600"} color="#6A6A6A">
-              ROUND #{round}
+              ROUND #{proposal.roundIdVoteStart}
             </Text>
             <Heading fontWeight={700} fontSize="36px" color="#252525">
-              {title}
+              {proposal.title}
             </Heading>
-            <Text fontWeight={"600"} color={isDepositPending ? "#F29B32" : "#6194F5"}>
-              {isDepositPending ? "VOT3 deposit pending" : "Upcoming voting"}
+            <Text fontWeight={"600"} color={proposal.isDepositPending ? "#F29B32" : "#6194F5"}>
+              {proposal.isDepositPending ? "VOT3 deposit pending" : "Upcoming voting"}
             </Text>
             <Spacer h={"24px"} />
-            <Text color="#252525">{description}</Text>
+            <Text color="#252525">{proposal.description}</Text>
           </VStack>
           <Divider color="#D5D5D5" />
           <HStack justify={"space-between"}>
@@ -48,8 +50,8 @@ export const ProposalOverview = () => {
                   Created by
                 </Text>
                 <HStack>
-                  <AddressIcon address={creator} rounded="full" h="20px" w="20px" />
-                  <Text color="#252525">{humanAddress(creator, 7, 5)}</Text>
+                  <AddressIcon address={proposal.proposer} rounded="full" h="20px" w="20px" />
+                  <Text color="#252525">{humanAddress(proposal.proposer, 7, 5)}</Text>
                 </HStack>
               </VStack>
               <VStack alignItems={"stretch"}>
@@ -58,21 +60,19 @@ export const ProposalOverview = () => {
                 </Text>
                 <HStack>
                   <FaRegClock />
-                  <Text color="#252525">{startsInDate}</Text>
+                  <Text color="#252525">{timestampToTimeLeftCompact(proposal.startsInDate)}</Text>
                 </HStack>
               </VStack>
               <VStack alignItems={"stretch"}>
                 <Text fontWeight={"400"} color="#6A6A6A">
                   VOT3 deposit
                 </Text>
-                <HStack>
+                <HStack gap={0}>
                   <VOT3Icon h="20px" w="20px" />
-                  <Text color="#252525">
-                    <Text color="#6A6A6A" display={"inline-flex"}>
-                      {deposited}
-                    </Text>
-                    /{totalDeposit}
+                  <Text color="#6A6A6A" display={"inline-flex"} ml={2}>
+                    {proposal.deposited}
                   </Text>
+                  <Text color="#252525">/{proposal.depositThreshold}</Text>
                 </HStack>
               </VStack>
             </HStack>
@@ -86,17 +86,7 @@ export const ProposalOverview = () => {
             </HStack>
           </HStack>
         </VStack>
-        <Flex h={"full"} bg={"#F8F8F8"} rounded="8px" justify={"center"} alignItems={"center"} flex={1.5}>
-          <VStack p="32px">
-            <FaTriangleExclamation size="60px" color="#F29B32" />
-            <Text color="#252525" fontWeight={"500"} textAlign={"center"} fontSize="20px">
-              This proposal has to reach the necessary VOT3 before
-            </Text>
-            <Text color="#252525" fontWeight={"700"} textAlign={"center"} fontSize="36px">
-              3d 16h 12m
-            </Text>
-          </VStack>
-        </Flex>
+        <ProposalOverviewVotes />
       </Flex>
     </BaseCard>
   )
