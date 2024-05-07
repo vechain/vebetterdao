@@ -7,7 +7,7 @@ export function createTestConfig() {
     B3TR_CAP: 1_000_000_000, // 1B
     B3TR_GOVERNOR_QUORUM_PERCENTAGE: 4, // 4 -> Need 4% of voters to pass
     B3TR_GOVERNOR_MIN_DELAY: 30, //after a vote passes, you have 5 min before you can vote queue the proposal
-    B3TR_GOVERNOR_PROPOSAL_THRESHOLD: 1000, // How many votes are needed to create a proposal
+    B3TR_GOVERNOR_DEPOSIT_THRESHOLD: 2, // 2% of total B3TR supply needed to be deposited to create a proposal
     B3TR_GOVERNOR_MIN_VOTING_DELAY: 1, // 1 -> 1 block before the vote starts
     B3TR_GOVERNOR_VOTING_THRESHOLD: BigInt("1000000000000000000"), // 1 vote
     B3TR_GOVERNOR_WHITELISTED_METHODS: {

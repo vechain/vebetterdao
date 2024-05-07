@@ -185,8 +185,9 @@ export const getOrDeployContractInstances = async ({
       vot3Token: await vot3.getAddress(),
       timelock: await timeLock.getAddress(),
       xAllocationVoting: await xAllocationVoting.getAddress(),
+      b3tr: await b3tr.getAddress(),
       quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
-      initialDepositThreshold: config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD, // voting threshold
+      initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD, // deposit threshold
       initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
       initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD, // voting threshold
       governorAdmin: owner.address,
@@ -225,9 +226,11 @@ export const getOrDeployContractInstances = async ({
   await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
 
   // Grant Vote registrar role to XAllocationVoting
-  await voterRewards.connect(owner).setVoteRegistrarRole(await xAllocationVoting.getAddress())
+  await voterRewards
+    .connect(owner)
+    .grantRole(await voterRewards.VOTE_REGISTRAR_ROLE(), await xAllocationVoting.getAddress())
   // Grant Vote registrar role to Governor
-  await voterRewards.connect(owner).setVoteRegistrarRole(await governor.getAddress())
+  await voterRewards.connect(owner).grantRole(await voterRewards.VOTE_REGISTRAR_ROLE(), await governor.getAddress())
 
   // Grant admin role to voter rewards for registering x allocation voting
   await xAllocationVoting.connect(owner).grantRole(await xAllocationVoting.DEFAULT_ADMIN_ROLE(), emissions.getAddress())

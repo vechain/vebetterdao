@@ -27,24 +27,17 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
 
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
-
 /// @title B3TR Token Contract
 /// @dev Extends ERC20 Token Standard with capping, pausing, and access control functionalities to manage B3TR tokens in the VeBetter ecosystem.
 /// @notice This contract governs the issuance and management of B3TR fungible tokens within the VeBetter ecosystem, allowing for minting under a capped total supply.
 contract B3TR is ERC20Capped, ERC20Pausable, AccessControl {
-  /// @notice Role hash for addresses allowed to mint new tokens
   bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
-  /// @notice Initializes the contract with specified cap, token details, and admin roles
+  /// @dev Initializes the contract with specified cap, token details, and admin roles
   /// @param _admin The address that will be granted the default admin role
   /// @param _defaultMinter The address that will be granted the minter role initially
   /// @param _cap The maximum amount of tokens that can be minted (expressed in token units)
-  constructor(address _admin, address _defaultMinter, uint256 _cap)
-    ERC20("B3TR", "B3TR")
-    ERC20Capped(_cap * 1e18) {
+  constructor(address _admin, address _defaultMinter, uint256 _cap) ERC20("B3TR", "B3TR") ERC20Capped(_cap * 1e18) {
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     _grantRole(MINTER_ROLE, _defaultMinter);
   }

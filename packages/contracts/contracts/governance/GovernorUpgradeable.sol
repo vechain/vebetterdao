@@ -55,6 +55,7 @@ abstract contract GovernorUpgradeable is
     bool canceled;
     uint48 etaSeconds;
     uint256 depositAmount;
+    uint256 depositThreshold;
   }
 
   bytes32 internal constant ALL_PROPOSAL_STATES_BITMAP = bytes32((2 ** (uint8(type(ProposalState).max) + 1)) - 1);
