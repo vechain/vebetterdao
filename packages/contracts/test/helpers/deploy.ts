@@ -12,6 +12,7 @@ import {
   VoterRewards,
   Treasury,
   B3TRGovernor,
+  X2EarnApps,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy } from "../../scripts/helpers"
@@ -24,6 +25,7 @@ interface DeployInstance {
   timeLock: TimeLock
   governor: B3TRGovernor
   galaxyMember: GalaxyMember
+  x2EarnApps: X2EarnApps
   xAllocationVoting: XAllocationVoting
   xAllocationPool: XAllocationPool
   emissions: Emissions
@@ -56,6 +58,11 @@ export const getOrDeployContractInstances = async ({
 
   // Contracts are deployed using the first signer/account by default
   const [owner, otherAccount, minterAccount, timelockAdmin, ...otherAccounts] = await ethers.getSigners()
+
+  // Deploy Libraries
+  const X2EarnAppsDataTypes = await ethers.getContractFactory("X2EarnAppsDataTypes")
+  const X2EarnAppsDataTypesLib = await X2EarnAppsDataTypes.deploy()
+  await X2EarnAppsDataTypesLib.waitForDeployment()
 
   // Deploy B3TR
   const B3trContract = await ethers.getContractFactory("B3TR")
@@ -100,12 +107,22 @@ export const getOrDeployContractInstances = async ({
     await treasury.getAddress(),
   ])) as GalaxyMember
 
+  // Deploy X2EarnApps
+  const x2EarnApps = (await deployProxy(
+    "X2EarnApps",
+    ["ipfs://", [await timeLock.getAddress(), owner.address], owner.address],
+    {
+      X2EarnAppsDataTypes: await X2EarnAppsDataTypesLib.getAddress(),
+    },
+  )) as X2EarnApps
+
   // Deploy XAllocationPool
   const xAllocationPool = (await deployProxy("XAllocationPool", [
     owner.address,
     owner.address,
     await b3tr.getAddress(),
     await treasury.getAddress(),
+    await x2EarnApps.getAddress(),
   ])) as XAllocationPool
 
   const X_ALLOCATIONS_ADDRESS = await xAllocationPool.getAddress()
@@ -150,12 +167,12 @@ export const getOrDeployContractInstances = async ({
       vot3Token: await vot3.getAddress(),
       quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE, // quorum percentage
       initialVotingPeriod: config.EMISSIONS_CYCLE_DURATION - 1, // X Alloc voting period
-      b3trGovernor: await timeLock.getAddress(),
+      timeLock: await timeLock.getAddress(),
       voterRewards: await voterRewards.getAddress(),
       emissions: await emissions.getAddress(),
       admins: [await timeLock.getAddress(), owner.address],
       upgrader: owner.address,
-      xAppsBaseURI: "ipfs://",
+      x2EarnAppsAddress: await x2EarnApps.getAddress(),
       baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
       appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
       votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
@@ -190,6 +207,7 @@ export const getOrDeployContractInstances = async ({
     VOT3: await vot3.getAddress(),
     XAllocationPool: await xAllocationPool.getAddress(),
     B3TRGovernor: await governor.getAddress(),
+    X2EarnApps: await x2EarnApps.getAddress(),
   }
 
   await setWhitelistedFunctions(contractAddresses, config, governor, owner) // Set whitelisted functions for governor proposals
@@ -212,7 +230,7 @@ export const getOrDeployContractInstances = async ({
   await voterRewards.connect(owner).setVoteRegistrarRole(await governor.getAddress())
 
   // Grant admin role to voter rewards for registering x allocation voting
-  await xAllocationVoting.connect(owner).setAdminRole(await emissions.getAddress())
+  await xAllocationVoting.connect(owner).grantRole(await xAllocationVoting.DEFAULT_ADMIN_ROLE(), emissions.getAddress())
 
   // Set xAllocationGovernor in emissions
   await emissions.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
@@ -239,6 +257,7 @@ export const getOrDeployContractInstances = async ({
     timeLock,
     governor,
     galaxyMember,
+    x2EarnApps,
     xAllocationVoting,
     xAllocationPool,
     emissions,

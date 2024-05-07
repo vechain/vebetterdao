@@ -52,7 +52,7 @@ export const signAndSendTx = async (body: TransactionBody, pk: Buffer) => {
   const sendTransactionResult = await thorClient.transactions.sendTransaction(signedTx)
 
   const txReceipt = await thorClient.transactions.waitForTransaction(sendTransactionResult.id)
-  console.log(`Transaction receipt: ${JSON.stringify(txReceipt)}`)
+  // console.log(`Transaction receipt: ${JSON.stringify(txReceipt)}`)
 
   if (!txReceipt) {
     throw new Error("Transaction failed")

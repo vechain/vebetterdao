@@ -239,24 +239,24 @@ contract Treasury is
     nft.safeTransferFrom(address(this), _to, _tokenId);
   }
 
-  /// @notice Stakes a specified amount of B3TR to VOT3
-  /// @dev Only governance can stake B3TR when the contract is not paused
-  /// @param _b3trAmount Amount of B3TR to stake
-  function stakeB3TR(uint256 _b3trAmount) public onlyGovernanceWhenNotPaused {
+  /// @notice Converts a specified amount of B3TR to VOT3
+  /// @dev Only governance can convert B3TR when the contract is not paused
+  /// @param _b3trAmount Amount of B3TR to convert
+  function convertB3TR(uint256 _b3trAmount) public onlyGovernanceWhenNotPaused {
     IERC20 b3tr = _getERC20Contract(b3trAddress());
     IVOT3 vot3 = IVOT3(vot3Address());
     require(b3tr.balanceOf(address(this)) >= _b3trAmount, "Treasury: insufficient B3TR balance");
     require(b3tr.approve(vot3Address(), _b3trAmount), "Treasury: approval for VOT3 failed");
-    vot3.stake(_b3trAmount);
+    vot3.convertToVOT3(_b3trAmount);
   }
 
-  /// @notice Unstakes a specified amount of B3TR from VOT3
-  /// @dev Only governance can unstake B3TR when the contract is not paused
-  /// @param _vot3Amount Amount of VOT3 to unstake
-  function unstakeB3TR(uint256 _vot3Amount) public onlyGovernanceWhenNotPaused {
+  /// @notice Converts a specified amount of VOT3 to B3TR
+  /// @dev Only governance can convert VOT3 when the contract is not paused
+  /// @param _vot3Amount Amount of VOT3 to convert
+  function convertVOT3(uint256 _vot3Amount) public onlyGovernanceWhenNotPaused {
     IVOT3 vot3 = IVOT3(vot3Address());
-    require(vot3.stakedBalanceOf(address(this)) >= _vot3Amount, "Treasury: insufficient B3TR staked");
-    vot3.unstake(_vot3Amount);
+    require(vot3.convertedB3trOf(address(this)) >= _vot3Amount, "Treasury: insufficient B3TR converted");
+    vot3.convertToB3TR(_vot3Amount);
   }
 
   /// ---------- Setters ---------- //

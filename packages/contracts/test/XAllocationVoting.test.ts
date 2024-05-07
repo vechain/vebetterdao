@@ -28,7 +28,7 @@ import { XAllocationVoting } from "../typechain-types"
 describe("X-Allocation Voting", function () {
   describe("Deployment", function () {
     it("Admins and addresses should be set correctly", async function () {
-      const { xAllocationVoting, owner, timeLock, emissions } = await getOrDeployContractInstances({
+      const { xAllocationVoting, owner, timeLock, emissions, x2EarnApps } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
       const ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000"
@@ -36,8 +36,8 @@ describe("X-Allocation Voting", function () {
       expect(await xAllocationVoting.hasRole(ADMIN_ROLE, await timeLock.getAddress())).to.eql(true)
       expect(await xAllocationVoting.hasRole(ADMIN_ROLE, owner.address)).to.eql(true)
 
-      expect(await xAllocationVoting.b3trGovernor()).to.eql(await timeLock.getAddress())
       expect(await xAllocationVoting.emissions()).to.eql(await emissions.getAddress())
+      expect(await xAllocationVoting.x2EarnApps()).to.eql(await x2EarnApps.getAddress())
     })
 
     it("Should not support invalid interface", async function () {
@@ -50,20 +50,22 @@ describe("X-Allocation Voting", function () {
     })
 
     it("Can set multiple admins during deployment", async function () {
-      const { voterRewards, timeLock, emissions, vot3, otherAccounts } = await getOrDeployContractInstances({
-        forceDeploy: false,
-      })
+      const { voterRewards, timeLock, emissions, x2EarnApps, vot3, otherAccounts } = await getOrDeployContractInstances(
+        {
+          forceDeploy: false,
+        },
+      )
       const xAllocationVoting = (await deployProxy("XAllocationVoting", [
         {
           vot3Token: await vot3.getAddress(),
           quorumPercentage: 1,
           initialVotingPeriod: 2,
-          b3trGovernor: await timeLock.getAddress(),
+          timeLock: await timeLock.getAddress(),
           voterRewards: await voterRewards.getAddress(),
           emissions: await emissions.getAddress(),
           admins: [await timeLock.getAddress(), otherAccounts[2].address, otherAccounts[2].address],
           upgrader: otherAccounts[2].address,
-          xAppsBaseURI: "ipfs://",
+          x2EarnAppsAddress: await x2EarnApps.getAddress(),
           baseAllocationPercentage: 2,
           appSharesCap: 2,
           votingThreshold: BigInt(1),
@@ -87,7 +89,6 @@ describe("X-Allocation Voting", function () {
       expect(await xAllocationVoting.supportsInterface("0x01ffc9a7")).to.equal(true) // ERC165
     })
 
-    // can correctly get name and version
     it("Should correctly return name and version", async function () {
       const { xAllocationVoting } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -270,12 +271,12 @@ describe("X-Allocation Voting", function () {
           vot3Token: owner.address,
           quorumPercentage: 1,
           initialVotingPeriod: 1,
-          b3trGovernor: owner.address,
+          timeLock: owner.address,
           voterRewards: owner.address,
           emissions: owner.address,
           admins: [owner.address],
           upgrader: owner.address,
-          xAppsBaseURI: "ipfs://",
+          x2EarnAppsAddress: owner.address,
           baseAllocationPercentage: 2,
           appSharesCap: 2,
           votingThreshold: BigInt(1),
@@ -286,52 +287,6 @@ describe("X-Allocation Voting", function () {
 
   describe("Settings", function () {
     describe("General settigns", function () {
-      it("Should be able to change B3trGovernanceAddress with admin role", async function () {
-        const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
-          forceDeploy: false,
-        })
-        const ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000"
-
-        const initialAddress = await xAllocationVoting.b3trGovernor()
-        expect(initialAddress).to.exist
-
-        expect(await xAllocationVoting.hasRole(ADMIN_ROLE, owner.address)).to.eql(true)
-
-        await xAllocationVoting.connect(owner).setB3trGovernanceAddress(otherAccounts[3].address)
-
-        const updatedAddress = await xAllocationVoting.b3trGovernor()
-        expect(updatedAddress).to.eql(otherAccounts[3].address)
-      })
-
-      it("Cannot set 0x00 address as B3trGovernanceAddress", async function () {
-        const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: false })
-
-        await catchRevert(xAllocationVoting.connect(owner).setB3trGovernanceAddress(ZERO_ADDRESS))
-
-        const updatedAddress = await xAllocationVoting.b3trGovernor()
-
-        expect(updatedAddress).to.not.eql(ZERO_ADDRESS)
-      })
-
-      it("Only admin should be able to change B3trGovernanceAddress", async function () {
-        const { xAllocationVoting, otherAccounts } = await getOrDeployContractInstances({
-          forceDeploy: false,
-        })
-        const ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000"
-
-        const initialAddress = await xAllocationVoting.b3trGovernor()
-        expect(initialAddress).to.exist
-
-        expect(await xAllocationVoting.hasRole(ADMIN_ROLE, otherAccounts[0].address)).to.eql(false)
-
-        await catchRevert(
-          xAllocationVoting.connect(otherAccounts[0]).setB3trGovernanceAddress(otherAccounts[3].address),
-        )
-
-        const updatedAddress = await xAllocationVoting.b3trGovernor()
-        expect(updatedAddress).to.eql(initialAddress)
-      })
-
       it("Contract should not be able to receive ether", async function () {
         const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: false })
 
@@ -343,6 +298,106 @@ describe("X-Allocation Voting", function () {
         ).to.be.reverted
 
         expect(await ethers.provider.getBalance(await xAllocationVoting.getAddress())).to.eql(0n)
+      })
+
+      describe("emissions address", function () {
+        it("Can set a new emissions contract correctly", async function () {
+          const { xAllocationVoting, owner } = await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
+          await bootstrapAndStartEmissions()
+
+          await xAllocationVoting.connect(owner).setEmissionsAddress(owner.address)
+
+          const updatedEmissionsAddress = await xAllocationVoting.emissions()
+          expect(updatedEmissionsAddress).to.eql(owner.address)
+        })
+
+        it("Cannot set a new emissions contract to zero address", async function () {
+          const { xAllocationVoting, owner } = await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
+          await bootstrapAndStartEmissions()
+
+          await expect(xAllocationVoting.connect(owner).setEmissionsAddress(ZERO_ADDRESS)).to.be.reverted
+
+          const updatedEmissionsAddress = await xAllocationVoting.emissions()
+          expect(updatedEmissionsAddress).to.not.eql(ZERO_ADDRESS)
+        })
+
+        it("Only admin should be able to set a new emissions contract", async function () {
+          const { xAllocationVoting, otherAccount } = await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
+
+          await expect(xAllocationVoting.connect(otherAccount).setEmissionsAddress(otherAccount.address)).to.be.reverted
+        })
+      })
+
+      describe("x2EarnApps address", function () {
+        it("Can set x2EarnApps address correctly", async function () {
+          const { xAllocationVoting, owner } = await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
+
+          await xAllocationVoting.connect(owner).setX2EarnAppsAddress(owner.address)
+
+          const updatedX2EarnAppsAddress = await xAllocationVoting.x2EarnApps()
+          expect(updatedX2EarnAppsAddress).to.eql(owner.address)
+        })
+
+        it("Cannot set x2EarnApps address to zero address", async function () {
+          const { xAllocationVoting, owner } = await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
+
+          await expect(xAllocationVoting.connect(owner).setX2EarnAppsAddress(ZERO_ADDRESS)).to.be.reverted
+
+          const updatedX2EarnAppsAddress = await xAllocationVoting.x2EarnApps()
+          expect(updatedX2EarnAppsAddress).to.not.eql(ZERO_ADDRESS)
+        })
+
+        it("Only admin can set x2EarnApps address", async function () {
+          const { xAllocationVoting, otherAccount } = await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
+
+          await expect(xAllocationVoting.connect(otherAccount).setX2EarnAppsAddress(otherAccount.address)).to.be
+            .reverted
+        })
+      })
+
+      describe("VoterRewards address", function () {
+        it("Can set voter rewards address correctly", async function () {
+          const { xAllocationVoting, owner } = await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
+
+          await xAllocationVoting.connect(owner).setVoterRewardsAddress(owner.address)
+
+          const updatedVoterRewardsAddress = await xAllocationVoting.voterRewards()
+          expect(updatedVoterRewardsAddress).to.eql(owner.address)
+        })
+
+        it("Cannot set voter rewards address to zero address", async function () {
+          const { xAllocationVoting, owner } = await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
+
+          await expect(xAllocationVoting.connect(owner).setVoterRewardsAddress(ZERO_ADDRESS)).to.be.reverted
+
+          const updatedVoterRewardsAddress = await xAllocationVoting.voterRewards()
+          expect(updatedVoterRewardsAddress).to.not.eql(ZERO_ADDRESS)
+        })
+
+        it("Only admin can set voter rewards address", async function () {
+          const { xAllocationVoting, otherAccount } = await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
+
+          await expect(xAllocationVoting.connect(otherAccount).setVoterRewardsAddress(otherAccount.address)).to.be
+            .reverted
+        })
       })
     })
 
@@ -609,56 +664,6 @@ describe("X-Allocation Voting", function () {
         const afterVotingPeriod = await xAllocationVoting.votingPeriod()
         expect(afterVotingPeriod).to.eql(beforeVotingPeriod)
       })
-
-      it("Can set emission contract address only through governance", async function () {
-        const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: false })
-        await expect(xAllocationVoting.connect(owner).setEmissions(owner.address)).to.be.reverted
-      })
-
-      it("Can change the emission contract address through governance", async function () {
-        const { xAllocationVoting, owner, governor } = await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
-        await bootstrapAndStartEmissions()
-        const votesThreshold = await governor.depositThreshold()
-        await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
-
-        await createProposalAndExecuteIt(
-          owner,
-          owner,
-          xAllocationVoting,
-          await ethers.getContractFactory("XAllocationVoting"),
-          "Updating emissions address",
-          "setEmissions",
-          [owner.address],
-        )
-
-        const updatedEmissionsAddress = await xAllocationVoting.emissions()
-        expect(updatedEmissionsAddress).to.eql(owner.address)
-      })
-
-      it("Cannot set the emission contract address to 0x00", async function () {
-        const { xAllocationVoting, owner, governor } = await getOrDeployContractInstances({ forceDeploy: true })
-
-        await bootstrapAndStartEmissions()
-        const votesThreshold = await governor.depositThreshold()
-        await getVot3Tokens(owner, (votesThreshold + BigInt(1)).toString())
-
-        await expect(
-          createProposalAndExecuteIt(
-            owner,
-            owner,
-            xAllocationVoting,
-            await ethers.getContractFactory("XAllocationVoting"),
-            "Updating emissions address",
-            "setEmissions",
-            [ZERO_ADDRESS],
-          ),
-        ).to.be.reverted
-
-        const updatedEmissionsAddress = await xAllocationVoting.emissions()
-        expect(updatedEmissionsAddress).to.not.eql(ZERO_ADDRESS)
-      })
     })
 
     describe("Admin settings", function () {
@@ -669,18 +674,9 @@ describe("X-Allocation Voting", function () {
         expect(await xAllocationVoting.hasRole(ADMIN_ROLE, otherAccounts[0].address)).to.eql(false)
         expect(await xAllocationVoting.hasRole(ADMIN_ROLE, owner.address)).to.eql(true)
 
-        await xAllocationVoting.connect(owner).setAdminRole(otherAccounts[0].address)
+        await xAllocationVoting.connect(owner).grantRole(ADMIN_ROLE, otherAccounts[0].address)
 
         expect(await xAllocationVoting.hasRole(ADMIN_ROLE, otherAccounts[0].address)).to.eql(true)
-      })
-
-      it("Admin cannot set zero address as admin", async function () {
-        const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
-
-        const ADMIN_ROLE = await xAllocationVoting.DEFAULT_ADMIN_ROLE()
-        expect(await xAllocationVoting.hasRole(ADMIN_ROLE, owner.address)).to.eql(true)
-
-        await expect(xAllocationVoting.connect(owner).setAdminRole(ZERO_ADDRESS)).to.be.reverted
       })
 
       it("Only admin can set a new admin", async function () {
@@ -689,13 +685,17 @@ describe("X-Allocation Voting", function () {
         const ADMIN_ROLE = await xAllocationVoting.DEFAULT_ADMIN_ROLE()
         expect(await xAllocationVoting.hasRole(ADMIN_ROLE, otherAccounts[0].address)).to.eql(false)
 
-        await expect(xAllocationVoting.connect(otherAccounts[0]).setAdminRole(otherAccounts[0].address)).to.be.reverted
+        await expect(xAllocationVoting.connect(otherAccounts[0]).grantRole(ADMIN_ROLE, otherAccounts[0].address)).to.be
+          .reverted
       })
 
-      it("Admin can change allocation percentage", async function () {
+      it("GOVERNANCE_ROLE can change allocation percentage", async function () {
         const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
 
         const initialPercentage = await xAllocationVoting.baseAllocationPercentage()
+
+        const GOVERNANCE_ROLE = await xAllocationVoting.GOVERNANCE_ROLE()
+        await xAllocationVoting.connect(owner).grantRole(GOVERNANCE_ROLE, owner.address)
 
         await xAllocationVoting.connect(owner).setBaseAllocationPercentage(3)
 
@@ -704,10 +704,13 @@ describe("X-Allocation Voting", function () {
         expect(updatedPercentage).to.not.eql(initialPercentage)
       })
 
-      it("Only admin can change allocation percentage", async function () {
+      it("Only GOVERNANCE_ROLE can change allocation percentage", async function () {
         const { xAllocationVoting, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
 
         const initialPercentage = await xAllocationVoting.baseAllocationPercentage()
+
+        const GOVERNANCE_ROLE = await xAllocationVoting.GOVERNANCE_ROLE()
+        expect(await xAllocationVoting.hasRole(GOVERNANCE_ROLE, otherAccounts[0].address)).to.eql(false)
 
         await expect(xAllocationVoting.connect(otherAccounts[0]).setBaseAllocationPercentage(3)).to.be.reverted
 
@@ -722,6 +725,9 @@ describe("X-Allocation Voting", function () {
 
         const initialPercentage = await xAllocationVoting.baseAllocationPercentage()
 
+        const GOVERNANCE_ROLE = await xAllocationVoting.GOVERNANCE_ROLE()
+        await xAllocationVoting.connect(owner).grantRole(GOVERNANCE_ROLE, owner.address)
+
         await xAllocationVoting.connect(owner).setBaseAllocationPercentage(100)
 
         const updatedPercentage = await xAllocationVoting.baseAllocationPercentage()
@@ -731,10 +737,13 @@ describe("X-Allocation Voting", function () {
         await expect(xAllocationVoting.connect(owner).setBaseAllocationPercentage(101)).to.be.reverted
       })
 
-      it("Admin can change app shares cap", async function () {
+      it("GOVERNANCE_ROLE can change app shares cap", async function () {
         const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
 
         const initialCap = await xAllocationVoting.appSharesCap()
+
+        const GOVERNANCE_ROLE = await xAllocationVoting.GOVERNANCE_ROLE()
+        await xAllocationVoting.connect(owner).grantRole(GOVERNANCE_ROLE, owner.address)
 
         await xAllocationVoting.connect(owner).setAppSharesCap(3)
 
@@ -748,6 +757,9 @@ describe("X-Allocation Voting", function () {
 
         const initialCap = await xAllocationVoting.appSharesCap()
 
+        const GOVERNANCE_ROLE = await xAllocationVoting.GOVERNANCE_ROLE()
+        await xAllocationVoting.connect(owner).grantRole(GOVERNANCE_ROLE, owner.address)
+
         await xAllocationVoting.connect(owner).setAppSharesCap(100)
 
         const updatedCap = await xAllocationVoting.appSharesCap()
@@ -757,51 +769,29 @@ describe("X-Allocation Voting", function () {
         await expect(xAllocationVoting.connect(owner).setAppSharesCap(101)).to.be.reverted
       })
 
-      it("Only admin can change app shares cap", async function () {
+      it("Only GOVERNANCE_ROLE can change app shares cap", async function () {
         const { xAllocationVoting, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
 
         const initialCap = await xAllocationVoting.appSharesCap()
+
+        const GOVERNANCE_ROLE = await xAllocationVoting.GOVERNANCE_ROLE()
+        expect(await xAllocationVoting.hasRole(GOVERNANCE_ROLE, otherAccounts[0].address)).to.eql(false)
 
         await expect(xAllocationVoting.connect(otherAccounts[0]).setAppSharesCap(3)).to.be.reverted
 
         const updatedCap = await xAllocationVoting.appSharesCap()
         expect(updatedCap).to.eql(initialCap)
       })
-
-      it("Admin can set baseURI for apps", async function () {
-        const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
-
-        const initialURI = await xAllocationVoting.baseURI()
-
-        await xAllocationVoting.connect(owner).setBaseURI("ipfs2://")
-
-        const updatedURI = await xAllocationVoting.baseURI()
-        expect(updatedURI).to.eql("ipfs2://")
-        expect(updatedURI).to.not.eql(initialURI)
-      })
-    })
-
-    describe("XApps", function () {
-      it("Only admin can set baseURI for apps", async function () {
-        const { xAllocationVoting, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
-
-        const initialURI = await xAllocationVoting.baseURI()
-
-        await expect(xAllocationVoting.connect(otherAccounts[0]).setBaseURI("ipfs2://")).to.be.reverted
-
-        const updatedURI = await xAllocationVoting.baseURI()
-        expect(updatedURI).to.eql(initialURI)
-      })
     })
   })
 
   describe("Allocation rounds", function () {
     it("Should be able to start a new allocation round successfully", async function () {
-      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
+      const { xAllocationVoting, x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
 
@@ -819,6 +809,11 @@ describe("X-Allocation Voting", function () {
       //Proposal should be active
       let roundState = await xAllocationVoting.state(roundId)
       expect(roundState).to.eql(BigInt(0))
+
+      let round = await xAllocationVoting.getRound(roundId)
+      expect(round.proposer).to.eql(owner.address)
+      expect(round.voteStart.toString()).to.eql(receipt.blockNumber.toString())
+      expect(round.voteDuration).to.eql(await xAllocationVoting.votingPeriod())
     })
 
     it("Should not be able to start a new allocation round if there is an active one", async function () {
@@ -969,7 +964,7 @@ describe("X-Allocation Voting", function () {
     })
 
     it("I can start a new round if no one voted in the previous one", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner, emissions, minterAccount } =
+      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner, emissions, minterAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
@@ -977,7 +972,7 @@ describe("X-Allocation Voting", function () {
       // Bootstrap emissions
       await bootstrapEmissions()
 
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
 
@@ -999,14 +994,14 @@ describe("X-Allocation Voting", function () {
 
   describe("Allocation Voting", function () {
     it("I cannot cast a vote with higher balance than I have", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
+      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
       // Bootstrap emissions
       await bootstrapEmissions()
 
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
@@ -1025,7 +1020,7 @@ describe("X-Allocation Voting", function () {
     })
 
     it("I should be able to cast a vote", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner, emissions, minterAccount } =
+      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner, emissions, minterAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
@@ -1033,7 +1028,7 @@ describe("X-Allocation Voting", function () {
       // Bootstrap emissions
       await bootstrapEmissions()
 
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
@@ -1073,13 +1068,13 @@ describe("X-Allocation Voting", function () {
     })
 
     it("I should not be able to cast vote if my total VOT3 holding is less than 1", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
+      const { x2EarnApps, xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
       // Bootstrap emissions
       await bootstrapEmissions()
 
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
@@ -1100,13 +1095,13 @@ describe("X-Allocation Voting", function () {
     })
 
     it("I should not be able to cast vote twice", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
+      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
       // Bootstrap emissions
       await bootstrapEmissions()
 
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
@@ -1129,14 +1124,14 @@ describe("X-Allocation Voting", function () {
     })
 
     it("Cannot cast a vote if the allocation round ended", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
+      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
       // Bootstrap emissions
       await bootstrapEmissions()
 
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
@@ -1161,17 +1156,17 @@ describe("X-Allocation Voting", function () {
     })
 
     it("I should be able to vote for multiple apps", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
+      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
       // Bootstrap emissions
       await bootstrapEmissions()
 
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
@@ -1186,18 +1181,20 @@ describe("X-Allocation Voting", function () {
       expect(roundCreated).not.to.eql([])
       let { roundId } = parseRoundStartedEvent(roundCreated[0], xAllocationVoting)
 
-      // both apps should be elegible for votes
+      await waitForNextBlock()
+
+      // both apps should be eligible for votes
       const app1Available = await xAllocationVoting.isEligibleForVote(app1, roundId)
       const app2Available = await xAllocationVoting.isEligibleForVote(app1, roundId)
       expect(app1Available).to.equal(true)
       expect(app2Available).to.equal(true)
 
-      const avaiableApps = await xAllocationVoting.allElegibleApps()
+      const avaiableApps = await x2EarnApps.allEligibleApps()
       expect(avaiableApps.length).to.equal(2)
       expect(avaiableApps[0]).to.equal(app1)
       expect(avaiableApps[1]).to.equal(app2)
 
-      let appsVotedInSpecificRound = await xAllocationVoting.getRoundApps(roundId)
+      let appsVotedInSpecificRound = await xAllocationVoting.getAppIdsOfRound(roundId)
       expect(appsVotedInSpecificRound.length).to.equal(2)
       expect(appsVotedInSpecificRound[0]).to.equal(app1)
       expect(appsVotedInSpecificRound[1]).to.equal(app2)
@@ -1233,18 +1230,18 @@ describe("X-Allocation Voting", function () {
     })
 
     it("Votes should be tracked correctly", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
+      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
       // Bootstrap emissions
       await bootstrapEmissions()
 
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
@@ -1307,15 +1304,23 @@ describe("X-Allocation Voting", function () {
     })
 
     it("If no one votes everything is tracked correctly", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner, emissions, minterAccount, xAllocationPool } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const {
+        xAllocationVoting,
+        x2EarnApps,
+        otherAccounts,
+        otherAccount,
+        owner,
+        emissions,
+        minterAccount,
+        xAllocationPool,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       // Bootstrap emissions
       await bootstrapEmissions()
 
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
@@ -1348,18 +1353,18 @@ describe("X-Allocation Voting", function () {
     })
 
     it("I should be able to vote only for apps available in the allocation round", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
+      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
       // Bootstrap emissions
       await bootstrapEmissions()
 
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
@@ -1390,18 +1395,19 @@ describe("X-Allocation Voting", function () {
     })
 
     it("Allocation round should be successfull if quorum was reached", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner, vot3 } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner, vot3 } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       // Bootstrap emissions
       await bootstrapEmissions()
 
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
@@ -1437,18 +1443,19 @@ describe("X-Allocation Voting", function () {
     }).timeout(18000000)
 
     it("Allocation round should be failed if quorum was not reached", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner, vot3 } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner, vot3 } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       // Bootstrap emissions
       await bootstrapEmissions()
 
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
@@ -1482,7 +1489,7 @@ describe("X-Allocation Voting", function () {
     }).timeout(18000000)
 
     it("Can track apps available for voting on current and previous rounds correctly", async function () {
-      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
+      const { xAllocationVoting, x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -1490,81 +1497,81 @@ describe("X-Allocation Voting", function () {
       await bootstrapEmissions()
 
       // 2 apps in round1
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       let round1 = await startNewAllocationRound()
-      let getRoundApps = await xAllocationVoting.getRoundApps(round1)
-      expect(getRoundApps.length).to.equal(2n)
+      let getAppIdsOfRound = await xAllocationVoting.getAppIdsOfRound(round1)
+      expect(getAppIdsOfRound.length).to.equal(2n)
 
       // add new app before round ends
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
       await waitForRoundToEnd(round1)
 
       // 4 apps in round2
       let round2 = await startNewAllocationRound()
-      getRoundApps = await xAllocationVoting.getRoundApps(round2)
-      expect(getRoundApps.length).to.equal(4n)
+      getAppIdsOfRound = await xAllocationVoting.getAppIdsOfRound(round2)
+      expect(getAppIdsOfRound.length).to.equal(4n)
 
       // remove apps before round ends
-      await xAllocationVoting.setVotingElegibility(app1, false)
-      await xAllocationVoting.setVotingElegibility(app2, false)
+      await x2EarnApps.setVotingEligibility(app1, false)
+      await x2EarnApps.setVotingEligibility(app2, false)
       await waitForRoundToEnd(round2)
 
       // 2 app in round 3
       let round3 = await startNewAllocationRound()
-      getRoundApps = await xAllocationVoting.getRoundApps(round3)
-      expect(getRoundApps.length).to.equal(2n)
+      getAppIdsOfRound = await xAllocationVoting.getAppIdsOfRound(round3)
+      expect(getAppIdsOfRound.length).to.equal(2n)
 
       // add another app before round ends
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
       await waitForRoundToEnd(round3)
 
       // 3 apps in round 4
       let round4 = await startNewAllocationRound()
-      getRoundApps = await xAllocationVoting.getRoundApps(round4)
-      expect(getRoundApps.length).to.equal(3n)
+      getAppIdsOfRound = await xAllocationVoting.getAppIdsOfRound(round4)
+      expect(getAppIdsOfRound.length).to.equal(3n)
 
       // I can still get old rounds
-      getRoundApps = await xAllocationVoting.getRoundApps(round1)
-      expect(getRoundApps.length).to.equal(2n)
-      getRoundApps = await xAllocationVoting.getRoundApps(round2)
-      expect(getRoundApps.length).to.equal(4n)
-      getRoundApps = await xAllocationVoting.getRoundApps(round3)
-      expect(getRoundApps.length).to.equal(2n)
+      getAppIdsOfRound = await xAllocationVoting.getAppIdsOfRound(round1)
+      expect(getAppIdsOfRound.length).to.equal(2n)
+      getAppIdsOfRound = await xAllocationVoting.getAppIdsOfRound(round2)
+      expect(getAppIdsOfRound.length).to.equal(4n)
+      getAppIdsOfRound = await xAllocationVoting.getAppIdsOfRound(round3)
+      expect(getAppIdsOfRound.length).to.equal(2n)
     })
 
     it("I can fetch all apps with details available for voting", async function () {
-      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
+      const { xAllocationVoting, x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
       // 2 apps in round1
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       let round1 = await startNewAllocationRound()
-      let getRoundApps = await xAllocationVoting.getRoundApps(round1)
-      expect(getRoundApps.length).to.equal(2n)
+      let getAppIdsOfRound = await xAllocationVoting.getAppIdsOfRound(round1)
+      expect(getAppIdsOfRound.length).to.equal(2n)
 
-      let apps = await xAllocationVoting.getRoundAppsWithDetails(round1)
+      let apps = await xAllocationVoting.getAppsOfRound(round1)
       expect(apps.length).to.equal(2n)
       expect(apps[0].id).to.equal(app1)
       expect(apps[1].id).to.equal(app2)
@@ -1573,7 +1580,7 @@ describe("X-Allocation Voting", function () {
     })
 
     it("Stores that a user voted at least once", async function () {
-      const { xAllocationVoting, otherAccount, owner } = await getOrDeployContractInstances({
+      const { xAllocationVoting, x2EarnApps, otherAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -1589,13 +1596,13 @@ describe("X-Allocation Voting", function () {
 
       const appName = "App"
 
-      await xAllocationVoting.connect(owner).addApp(otherAccount.address, otherAccount.address, appName, "metadataURI")
+      await x2EarnApps.connect(owner).addApp(otherAccount.address, otherAccount.address, appName, "metadataURI")
       const roundId = await startNewAllocationRound()
 
       // Vote
       await xAllocationVoting
         .connect(otherAccount)
-        .castVote(roundId, [await xAllocationVoting.hashName(appName)], [ethers.parseEther("1")])
+        .castVote(roundId, [await x2EarnApps.hashAppName(appName)], [ethers.parseEther("1")])
 
       // Check if user voted
       voted = await xAllocationVoting.hasVotedOnce(otherAccount.address)
@@ -1603,11 +1610,11 @@ describe("X-Allocation Voting", function () {
     })
 
     it("Cannot cast vote with apps and weights length mismatch", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
+      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
@@ -1629,11 +1636,11 @@ describe("X-Allocation Voting", function () {
     })
 
     it("Cannot cast vote with no apps to vote for", async function () {
-      const { xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
+      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
 
@@ -1651,16 +1658,16 @@ describe("X-Allocation Voting", function () {
 
     // quorumReached
     it("Quorum is reached correctly", async function () {
-      const { xAllocationVoting, otherAccount, otherAccounts, owner } = await getOrDeployContractInstances({
+      const { xAllocationVoting, x2EarnApps, otherAccount, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
       // add apps
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
@@ -1690,9 +1697,12 @@ describe("X-Allocation Voting", function () {
     })
 
     it("App shares cap per round is saved correctly", async function () {
-      const { xAllocationVoting, emissions } = await getOrDeployContractInstances({
+      const { xAllocationVoting, emissions, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
+
+      const GOVERNANCE_ROLE = await xAllocationVoting.GOVERNANCE_ROLE()
+      await xAllocationVoting.connect(owner).grantRole(GOVERNANCE_ROLE, owner.address)
 
       await xAllocationVoting.setAppSharesCap(50)
       expect(await xAllocationVoting.appSharesCap()).to.eql(50n)
@@ -1722,9 +1732,11 @@ describe("X-Allocation Voting", function () {
       })
 
       let round1 = await startNewAllocationRound()
+      let isFinalized = await xAllocationVoting.isFinalized(round1)
+      expect(isFinalized).to.eql(false)
       await waitForRoundToEnd(round1)
 
-      let isFinalized = await xAllocationVoting.isFinalized(round1)
+      isFinalized = await xAllocationVoting.isFinalized(round1)
       expect(isFinalized).to.eql(false)
 
       await startNewAllocationRound()
@@ -1749,7 +1761,7 @@ describe("X-Allocation Voting", function () {
       let isFinalized = await xAllocationVoting.isFinalized(round1)
       expect(isFinalized).to.eql(false)
 
-      await xAllocationVoting.finalize(round1)
+      await xAllocationVoting.finalizeRound(round1)
 
       isFinalized = await xAllocationVoting.isFinalized(round1)
       expect(isFinalized).to.eql(true)
@@ -1783,12 +1795,12 @@ describe("X-Allocation Voting", function () {
       let isFinalized = await xAllocationVoting.isFinalized(roundId)
       expect(isFinalized).to.eql(false)
 
-      await xAllocationVoting.finalize(roundId)
+      await xAllocationVoting.finalizeRound(roundId)
 
       isFinalized = await xAllocationVoting.isFinalized(roundId)
       expect(isFinalized).to.eql(true)
 
-      await expect(xAllocationVoting.finalize(roundId)).to.not.be.reverted
+      await expect(xAllocationVoting.finalizeRound(roundId)).to.not.be.reverted
       expect(await xAllocationVoting.isFinalized(roundId)).to.eql(true)
     })
 
@@ -1845,7 +1857,7 @@ describe("X-Allocation Voting", function () {
 
       let round1 = await startNewAllocationRound()
 
-      await catchRevert(xAllocationVoting.finalize(round1))
+      await catchRevert(xAllocationVoting.finalizeRound(round1))
 
       let isFinalized = await xAllocationVoting.isFinalized(round1)
       expect(isFinalized).to.eql(false)
@@ -1854,7 +1866,7 @@ describe("X-Allocation Voting", function () {
 
   describe("Quadratic Funding", function () {
     it("Can get the correct QF app votes", async function () {
-      const { xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
+      const { xAllocationVoting, x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -1870,13 +1882,13 @@ describe("X-Allocation Voting", function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
-      await xAllocationVoting
+      await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
 

@@ -201,7 +201,7 @@ export const waitForProposalToBeActive = async (proposalId: number): Promise<big
   return proposalState
 }
 
-// Mint some B3TR and swap for VOT3
+// Mint some B3TR and Convert B3TR for VOT3
 export const getVot3Tokens = async (receiver: HardhatEthersSigner, amount: string) => {
   const { b3tr, vot3, minterAccount } = await getOrDeployContractInstances({ forceDeploy: false })
 
@@ -212,7 +212,7 @@ export const getVot3Tokens = async (receiver: HardhatEthersSigner, amount: strin
   await b3tr.connect(receiver).approve(await vot3.getAddress(), ethers.parseEther(amount))
 
   // Lock B3TR to get VOT3
-  await vot3.connect(receiver).stake(ethers.parseEther(amount))
+  await vot3.connect(receiver).convertToVOT3(ethers.parseEther(amount))
 }
 
 export const createProposalAndExecuteIt = async (
@@ -417,11 +417,11 @@ export const voteOnApps = async (
 }
 
 export const addAppsToAllocationVoting = async (apps: string[], owner: HardhatEthersSigner) => {
-  const { xAllocationVoting } = await getOrDeployContractInstances({})
+  const { x2EarnApps } = await getOrDeployContractInstances({})
 
   let appIds: string[] = []
   for (const app of apps) {
-    await xAllocationVoting.connect(owner).addApp(app, app, app, "metadataURI")
+    await x2EarnApps.connect(owner).addApp(app, app, app, "metadataURI")
     appIds.push(ethers.keccak256(ethers.toUtf8Bytes(app)))
   }
 
@@ -449,7 +449,7 @@ export const calculateBaseAllocationOffChain = async (roundId: number) => {
   // Amount available for this round (assuming the amount is already scaled by 1e18 for precision)
   let totalAmount = await emissions.getXAllocationAmount(roundId)
 
-  let elegibleApps = await xAllocationVoting.getRoundApps(roundId)
+  let elegibleApps = await xAllocationVoting.getAppIdsOfRound(roundId)
 
   const baseAllcoationPercentage = await xAllocationVoting.getRoundBaseAllocationPercentage(roundId)
 
@@ -493,20 +493,20 @@ export const calculateUnallocatedAppAllocationOffChain = async (roundId: number,
 }
 
 export const participateInAllocationVoting = async (user: HardhatEthersSigner, waitRoundToEnd: boolean = false) => {
-  const { xAllocationVoting, owner } = await getOrDeployContractInstances({})
+  const { xAllocationVoting, x2EarnApps, owner } = await getOrDeployContractInstances({})
 
   await getVot3Tokens(user, "1")
   await getVot3Tokens(owner, "1000")
 
   const appName = "App" + Math.random()
 
-  await xAllocationVoting.connect(owner).addApp(user.address, user.address, appName, "metadataURI")
+  await x2EarnApps.connect(owner).addApp(user.address, user.address, appName, "metadataURI")
   const roundId = await startNewAllocationRound()
 
   // Vote
   await xAllocationVoting
     .connect(user)
-    .castVote(roundId, [await xAllocationVoting.hashName(appName)], [ethers.parseEther("1")])
+    .castVote(roundId, [await x2EarnApps.hashAppName(appName)], [ethers.parseEther("1")])
 
   if (waitRoundToEnd) {
     await waitForRoundToEnd(roundId)

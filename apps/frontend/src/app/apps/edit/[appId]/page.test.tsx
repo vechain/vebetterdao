@@ -17,11 +17,9 @@ vi.mock("@vechain/dapp-kit-react", async importOriginal => {
 })
 
 const mockedApp: hooks.XApp = {
-  createdAt: 12347455,
   id: "1",
   name: "Round 1",
   receiverAddress: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",
-  adminAddress,
   createdAtTimestamp: 16347455,
   metadataURI: "ipfs://QmQmQmQmQmQmQmQmQmQmQmQmQmQmQm",
 }
@@ -38,6 +36,13 @@ describe("EditAppDetail", () => {
     //@ts-ignore
     vi.spyOn(hooks, "useXApp").mockReturnValue({
       data: mockedApp,
+      isLoading: false,
+      isError: false,
+    })
+
+    //@ts-ignore
+    vi.spyOn(hooks, "useAppAdmin").mockReturnValue({
+      data: adminAddress,
       isLoading: false,
       isError: false,
     })

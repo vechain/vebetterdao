@@ -15,12 +15,14 @@ import {
   moveBlocks,
   createProposalAndExecuteIt,
   createProposalWithMultipleFunctionsAndExecuteIt,
+  bootstrapEmissions,
 } from "./helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it } from "mocha"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { B3TRGovernor } from "../typechain-types"
+import { startEmissions } from "../scripts/helpers/emissions"
 
 describe("Governor and TimeLock", function () {
   describe("Governor deployment", function () {
@@ -66,6 +68,10 @@ describe("Governor and TimeLock", function () {
       // clock mode is set correctly
       const clockMode = await governor.CLOCK_MODE()
       expect(clockMode.toString()).to.eql("mode=blocknumber&from=default")
+
+      // check version
+      const version = await governor.version()
+      expect(version).to.eql("1")
     })
 
     it("Should be able to upgrade the governor contract through governance", async function () {
@@ -735,6 +741,53 @@ describe("Governor and TimeLock", function () {
       ).to.be.reverted
     })
 
+    it("Proposal cannot start in next round there isn't enough delay", async () => {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.EMISSIONS_CYCLE_DURATION = 5
+      config.B3TR_GOVERNOR_MIN_VOTING_DELAY = 3
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3 } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+      await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
+
+      const minVotingDelay = await governor.minVotingDelay()
+      expect(minVotingDelay).to.eql(3n)
+
+      // Start emissions
+      await bootstrapAndStartEmissions() //block 1, round ends in block 5
+
+      await moveBlocks(2) // block 3, round 2 should start in 2 blocks
+
+      // Now if we try to create a proposal starting in the next round it should fail
+      expect(await governor.canProposalStartInNextRound()).to.be.false
+
+      const address = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+      const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n
+
+      await expect(
+        governor
+          .connect(proposer)
+          .propose(
+            [address],
+            [0],
+            [encodedFunctionCall],
+            "",
+            voteStartsInRoundId.toString(),
+            ethers.parseEther("1000"),
+            {
+              gasLimit: 10_000_000,
+            },
+          ),
+      ).to.be.reverted
+    })
+
     it("Can create a proposal that starts after 2 rounds", async () => {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
@@ -944,43 +997,6 @@ describe("Governor and TimeLock", function () {
       await moveBlocks(1)
       const newSnapshot3 = await governor.proposalSnapshot(proposalId)
       expect(newSnapshot3).to.eql(newSnapshot2 + 1n)
-    })
-
-    it("Creating proposal through deprecated propose() function will create a proposal starting next round", async () => {
-      const config = createLocalConfig()
-      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
-      config.EMISSIONS_CYCLE_DURATION = 5
-      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3 } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-          config,
-        })
-
-      const proposer = otherAccounts[0]
-      await getVot3Tokens(proposer, "1000")
-
-      // Start emissions
-      await bootstrapAndStartEmissions()
-
-      const currentRoundId = await xAllocationVoting.currentRoundId()
-
-      await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
-
-      // old propose() function without the voteStartInRound parameter
-      const tx = await governor
-        .connect(proposer) //@ts-ignore
-        .propose(
-          [await b3tr.getAddress()],
-          [0],
-          [B3trContract.interface.encodeFunctionData("tokenDetails", [])],
-          "Creating some random proposal",
-          currentRoundId + 1n,
-          ethers.parseEther("1000"),
-        )
-
-      const proposalId = await getProposalIdFromTx(tx)
-      const voteStartsInRound = await governor.proposalStartRound(proposalId)
-      expect(voteStartsInRound).to.eql((await xAllocationVoting.currentRoundId()) + 1n)
     })
 
     it("Period between proposal creation and round start must be higher than min delay set in the contract", async () => {
@@ -1300,7 +1316,7 @@ describe("Governor and TimeLock", function () {
       expect(await governor.state(proposalId)).to.not.eql(0n) // pending
     })
 
-    it("Cannot create a proposal if emissions did not start", async () => {
+    it("Cannot create a proposal that starts in first round if emissions did not start", async () => {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 5
@@ -1310,8 +1326,12 @@ describe("Governor and TimeLock", function () {
           config,
         })
 
+      await bootstrapEmissions()
+
       const proposer = otherAccounts[0]
       await getVot3Tokens(proposer, "1000")
+
+      expect(await xAllocationVoting.currentRoundId()).to.eql(0n)
 
       // Now we can create a new proposal
       const address = await b3tr.getAddress()
@@ -1325,6 +1345,80 @@ describe("Governor and TimeLock", function () {
           gasLimit: 10_000_000,
         }),
       ).to.be.reverted
+    })
+
+    it("Can create a proposal that starts from second round if emissions did not start", async () => {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+      config.EMISSIONS_CYCLE_DURATION = 5
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3, emissions, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
+
+      await bootstrapEmissions()
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+
+      expect(await xAllocationVoting.currentRoundId()).to.eql(0n)
+
+      // Now we can create a new proposal
+      const address = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+      const currentRoundId = await xAllocationVoting.currentRoundId() // starts in current round
+      expect(currentRoundId).to.eql(0n)
+
+      await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
+
+      const tx = await governor
+        .connect(proposer)
+        .propose([address], [0], [encodedFunctionCall], "", 2n, ethers.parseEther("1000"), {
+          gasLimit: 10_000_000,
+        })
+
+      const proposalId = await getProposalIdFromTx(tx)
+
+      // proposal state should be pending
+      expect(await governor.state(proposalId)).to.eql(0n)
+
+      // proposal should start in round 2
+      expect(await governor.proposalStartRound(proposalId)).to.eql(2n)
+
+      // proposal snapshot should be: current block + 1 block (expecting round 1 to start) + round 1 duration + 1 block (expecting round 2 to start)
+      expect(await governor.proposalSnapshot(proposalId)).to.eql(
+        (await governor.clock()) + 1n + (await xAllocationVoting.votingPeriod()) + 1n,
+      )
+
+      // proposal deadline should be: snapshot + voting period
+      expect(await governor.proposalDeadline(proposalId)).to.eql(
+        (await governor.clock()) +
+          1n +
+          (await xAllocationVoting.votingPeriod()) +
+          1n +
+          (await xAllocationVoting.votingPeriod()),
+      )
+
+      // when round 1 starts the proposal should still be pending and snapshot updated
+
+      // Start emissions
+      await emissions.connect(minterAccount).start()
+      expect(await xAllocationVoting.currentRoundId()).to.eql(1n)
+
+      expect(await governor.state(proposalId)).to.eql(0n) // still pending
+
+      // should start when round 1 ends + 1 estimated block to start round 2
+      expect(await governor.proposalSnapshot(proposalId)).to.eql((await xAllocationVoting.currentRoundDeadline()) + 1n)
+
+      // when round 2 starts the proposal should be active
+      await waitForCurrentRoundToEnd()
+      expect(await governor.state(proposalId)).to.eql(0n) // should still pending
+
+      // start new round
+      await emissions.distribute()
+      expect(await xAllocationVoting.currentRoundId()).to.eql(2n)
+      expect(await governor.state(proposalId)).to.eql(1n) // should be active
     })
 
     it("Cannot create same proposal twice", async () => {
@@ -1447,7 +1541,7 @@ describe("Governor and TimeLock", function () {
       // Before creating a proposal, we need to mint some VOT3 tokens to the owner
       await b3tr.connect(minterAccount).mint(owner, ethers.parseEther("1000"))
       await b3tr.connect(owner).approve(await vot3.getAddress(), ethers.parseEther("9"))
-      await vot3.connect(owner).stake(ethers.parseEther("9"), { gasLimit: 10_000_000 })
+      await vot3.connect(owner).convertToVOT3(ethers.parseEther("9"), { gasLimit: 10_000_000 })
 
       const functionToCall = "tokenDetails"
       const description = "Get token details"
@@ -1715,7 +1809,7 @@ describe("Governor and TimeLock", function () {
       // Before trying to vote we need to mint some VOT3 tokens to the voter2
       await b3tr.connect(minterAccount).mint(voter2, ethers.parseEther("1000"))
       await b3tr.connect(voter2).approve(await vot3.getAddress(), ethers.parseEther("9"))
-      await vot3.connect(voter2).stake(ethers.parseEther("9"))
+      await vot3.connect(voter2).convertToVOT3(ethers.parseEther("9"))
 
       // we do it here but will use in the next test
       await getVot3Tokens(voter3, "1000")
@@ -2192,6 +2286,47 @@ describe("Governor and TimeLock", function () {
       const votes = await governor.proposalVotes(proposalId)
       // sqrt(1000) * 3 = 94.868329937 - scaled to 9 decimals
       expect(votes[1]).to.eql(power1 + power2 + power3)
+    })
+
+    it("Can correctly cast vote with reason", async () => {
+      const { governor, otherAccounts, b3tr, B3trContract, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const voter = otherAccounts[0]
+      await getVot3Tokens(voter, "1000")
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // Now we can create a new proposal
+      const tx = await createProposal(b3tr, B3trContract, otherAccount, description, functionToCall, [], false)
+      proposalId = await getProposalIdFromTx(tx)
+
+      const proposalState = await waitForProposalToBeActive(proposalId) // proposal id of the proposal in the beforeAll step & block when the proposal was created
+
+      expect(proposalState.toString()).to.eql("1") // active
+
+      //vote against
+      const reason = "I don't agree with this proposal"
+      const voteTx = await governor.connect(voter).castVoteWithReason(proposalId, 0, reason)
+      const proposeReceipt = await voteTx.wait()
+      const event = proposeReceipt?.logs[0]
+      const decodedLogs = governor.interface.parseLog({
+        topics: [...(event?.topics as string[])],
+        data: event ? event.data : "",
+      })
+
+      //event exists
+      expect(decodedLogs?.name).to.eql("VoteCast")
+      // voter
+      expect(decodedLogs?.args[0]).to.eql(voter.address)
+      // proposal id
+      expect(decodedLogs?.args[1]).to.eql(proposalId)
+      // support
+      expect(decodedLogs?.args[2].toString()).to.eql("0")
+      // reason
+      expect(decodedLogs?.args[5]).to.eql(reason)
     })
   })
 
