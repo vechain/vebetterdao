@@ -17,9 +17,9 @@ const Steps: (Omit<CheckableCardProps, "checked" | "onChange"> & {
   {
     route: "/proposals/new/form/discussion",
     imageSrc: "/images/people.svg",
-    title: "Text only proposals",
+    title: "General proposal",
     description:
-      "These types of proposals do not bring about any concrete change, but rather validate certain ideas or suggestions about the DAO.",
+      "If the desired outcome cannot be achieved by callid smart contract functions, then please describe what change idea you would like to propose",
   },
 ]
 export const NewProposalTypePageContent = () => {
