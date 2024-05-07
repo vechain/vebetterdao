@@ -226,9 +226,11 @@ export const getOrDeployContractInstances = async ({
   await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
 
   // Grant Vote registrar role to XAllocationVoting
-  await voterRewards.connect(owner).setVoteRegistrarRole(await xAllocationVoting.getAddress())
+  await voterRewards
+    .connect(owner)
+    .grantRole(await voterRewards.VOTE_REGISTRAR_ROLE(), await xAllocationVoting.getAddress())
   // Grant Vote registrar role to Governor
-  await voterRewards.connect(owner).setVoteRegistrarRole(await governor.getAddress())
+  await voterRewards.connect(owner).grantRole(await voterRewards.VOTE_REGISTRAR_ROLE(), await governor.getAddress())
 
   // Grant admin role to voter rewards for registering x allocation voting
   await xAllocationVoting.connect(owner).grantRole(await xAllocationVoting.DEFAULT_ADMIN_ROLE(), emissions.getAddress())

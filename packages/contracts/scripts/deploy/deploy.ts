@@ -220,9 +220,15 @@ export async function deployAll(config: ContractsConfig) {
   // Grant Vote Registrar role to XAllocationVoting
   await voterRewards
     .connect(admin)
-    .setVoteRegistrarRole(await xAllocationVoting.getAddress())
+    .grantRole(await voterRewards.VOTE_REGISTRAR_ROLE(), await xAllocationVoting.getAddress())
     .then(async tx => await tx.wait())
   console.log("Vote registrar role granted to XAllocationVoting")
+  // Grant Vote Registrar role to B3TRGovernor
+  await voterRewards
+    .connect(admin)
+    .grantRole(await voterRewards.VOTE_REGISTRAR_ROLE(), await governor.getAddress())
+    .then(async tx => await tx.wait())
+  console.log("Vote registrar role granted to B3TRGovernor")
 
   // Emissions contract should be able to start new rounds
   await xAllocationVoting

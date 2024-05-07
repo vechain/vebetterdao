@@ -76,7 +76,7 @@ describe("VoterRewards", () => {
         forceDeploy: true,
       })
 
-      await voterRewards.connect(owner).setVoteRegistrarRole(otherAccount.address)
+      await voterRewards.connect(owner).grantRole(await voterRewards.VOTE_REGISTRAR_ROLE(), otherAccount.address)
 
       await expect(
         voterRewards
@@ -95,7 +95,7 @@ describe("VoterRewards", () => {
         forceDeploy: true,
       })
 
-      await voterRewards.connect(owner).setVoteRegistrarRole(otherAccount.address)
+      await voterRewards.connect(owner).grantRole(await voterRewards.VOTE_REGISTRAR_ROLE(), otherAccount.address)
 
       await expect(
         voterRewards
@@ -159,13 +159,19 @@ describe("VoterRewards", () => {
       await expect(voterRewards.connect(owner).setEmissions(ZERO_ADDRESS)).to.be.reverted // Emissions address cannot be zero
     })
 
-    it("Should be able to set vote registrar role address", async () => {
+    it("Admin should be able to set vote registrar role address", async () => {
       const { voterRewards, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
 
-      await voterRewards.connect(owner).setVoteRegistrarRole(otherAccount.address)
+      await voterRewards.connect(owner).grantRole(await voterRewards.VOTE_REGISTRAR_ROLE(), otherAccount.address)
+    })
 
-      await expect(voterRewards.connect(otherAccount).setVoteRegistrarRole(otherAccount.address)).to.be.reverted // Should not be able to set vote registrar role if not admin
-      await expect(voterRewards.connect(owner).setVoteRegistrarRole(ZERO_ADDRESS)).to.be.reverted // Vote registrar role address cannot be zero
+    it("Only admin should be able to set vote registrar role address", async () => {
+      const { voterRewards, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      expect(await voterRewards.hasRole(await voterRewards.VOTE_REGISTRAR_ROLE(), otherAccount.address)).to.eql(false)
+      await expect(
+        voterRewards.connect(otherAccount).grantRole(await voterRewards.VOTE_REGISTRAR_ROLE(), otherAccount.address),
+      ).to.be.reverted
     })
   })
 
@@ -1513,7 +1519,7 @@ describe("VoterRewards", () => {
         forceDeploy: true,
       })
 
-      await voterRewards.connect(owner).setVoteRegistrarRole(otherAccount.address)
+      await voterRewards.connect(owner).grantRole(await voterRewards.VOTE_REGISTRAR_ROLE(), otherAccount.address)
 
       await bootstrapEmissions()
 

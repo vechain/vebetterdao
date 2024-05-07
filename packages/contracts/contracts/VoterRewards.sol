@@ -331,13 +331,6 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
     $.emissions = IEmissions(_emissions);
   }
 
-  /// @notice Set the VOTE_REGISTRAR_ROLE role.
-  /// @param _voteRegistrar - The address of the vote registrar.
-  function setVoteRegistrarRole(address _voteRegistrar) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(_voteRegistrar != address(0), "VoterRewards: _voteRegistrar cannot be the zero address");
-    _grantRole(VOTE_REGISTRAR_ROLE, _voteRegistrar);
-  }
-
   /// @notice Set the scaling factor for the rewards calculation.
   /// @param newScalingFactor - The new scaling factor.
   function setScalingFactor(uint256 newScalingFactor) public onlyRole(DEFAULT_ADMIN_ROLE) {
