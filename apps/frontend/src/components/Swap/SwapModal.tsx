@@ -13,7 +13,7 @@ import {
   ModalCloseButton,
 } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
-import { useStakeB3tr, useTokenColors, useUnstakeB3tr } from "@/hooks"
+import { useConvertB3tr, useTokenColors, useConvertVot3 } from "@/hooks"
 import { FaArrowRight } from "react-icons/fa6"
 import { useForm } from "react-hook-form"
 import { CustomModalContent } from "../CustomModalContent"
@@ -44,20 +44,20 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
   const amount = watch("amount")
   const invalidAmount = useMemo(() => Number(amount) === 0 || isNaN(Number(amount)), [amount])
 
-  const stakeMutation = useStakeB3tr({
+  const convertB3trMutation = useConvertB3tr({
     amount,
   })
 
-  const unstakeMutation = useUnstakeB3tr({
+  const convertVot3Mutation = useConvertVot3({
     amount,
   })
 
   const mutationData = useMemo(() => {
-    if (isB3trToVot3) return stakeMutation
-    return unstakeMutation
-  }, [isB3trToVot3, stakeMutation, unstakeMutation])
+    if (isB3trToVot3) return convertB3trMutation
+    return convertVot3Mutation
+  }, [isB3trToVot3, convertB3trMutation, convertVot3Mutation])
 
-  const handleStake = useCallback(() => {
+  const handleConvertB3tr = useCallback(() => {
     mutationData.resetStatus()
     mutationData.sendTransaction(undefined)
   }, [mutationData.resetStatus, mutationData.sendTransaction])
@@ -114,7 +114,7 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
         errorDescription={mutationData.error?.reason}
         errorTitle={mutationData.error ? "Error swapping" : undefined}
         showTryAgainButton
-        onTryAgain={handleStake}
+        onTryAgain={handleConvertB3tr}
         pendingTitle="Swapping..."
         showSocialButtons
         socialDescriptionEncoded="%F0%9F%94%84%20Just%20swapped%20between%20B3TR%20and%20VOT3%20on%20%23VeBetterDAO%21%20%0A%0A%F0%9F%8C%B1%20Explore%20and%20join%20us%20at%20https%3A%2F%2Fvebetterdao.org.%0A%0A%23VeBetterDAO%20%23Vechain"
@@ -129,7 +129,7 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
       <CustomModalContent>
         <Card w="full" rounded={20}>
           <CardBody>
-            <form onSubmit={formData.handleSubmit(handleStake)}>
+            <form onSubmit={formData.handleSubmit(handleConvertB3tr)}>
               <ModalCloseButton top={4} right={4} />
               <VStack align={"flex-start"}>
                 <Heading size="md" mb={4}>
