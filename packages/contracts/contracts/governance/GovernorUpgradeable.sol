@@ -514,7 +514,14 @@ abstract contract GovernorUpgradeable is
    */
   function castVote(uint256 proposalId, uint8 support) public virtual returns (uint256) {
     address voter = _msgSender();
-    return _castVote(proposalId, voter, support, "");
+    uint256 weight = _castVote(proposalId, voter, support, "");
+
+    if (weight < votingThreshold()) {
+      revert GovernorVotingThresholdNotMet(weight, votingThreshold());
+    }
+
+    voterRewards().registerVote(proposalSnapshot(proposalId), msg.sender, weight, Math.sqrt(weight));
+    return weight;
   }
 
   /**
@@ -742,6 +749,16 @@ abstract contract GovernorUpgradeable is
   function votingPeriod() public view virtual returns (uint256);
 
   /**
+   *  @dev See {Governor-minVotingDelay}.
+   */
+  function minVotingDelay() public view virtual returns (uint256);
+
+  /**
+   *  @dev See {Governor-votingThreshold}.
+   */
+  function votingThreshold() public view virtual returns (uint256);
+
+  /**
    * @inheritdoc IB3TRGovernor
    */
   function quorum(uint256 timepoint) public view virtual returns (uint256);
@@ -765,9 +782,4 @@ abstract contract GovernorUpgradeable is
    * @dev See {IB3TRGovernor-b3tr}.
    */
   function b3tr() public view virtual returns (IB3TR);
-
-  /**
-   *  @dev See {Governor-minVotingDelay}.
-   */
-  function minVotingDelay() public view virtual returns (uint256);
 }

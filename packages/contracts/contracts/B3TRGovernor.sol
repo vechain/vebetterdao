@@ -439,20 +439,6 @@ contract B3TRGovernor is
   }
 
   /**
-   * @dev See {IB3TRGovernor-castVote}.
-   */
-  function castVote(uint256 proposalId, uint8 support) public override(GovernorUpgradeable) returns (uint256) {
-    uint256 weight = super.castVote(proposalId, support);
-
-    if (weight < votingThreshold()) {
-      revert GovernorVotingThresholdNotMet(weight, votingThreshold());
-    }
-
-    voterRewards().registerVote(proposalSnapshot(proposalId), msg.sender, weight, Math.sqrt(weight));
-    return weight;
-  }
-
-  /**
    * @dev See {Governor-cancel}.
    */
   function cancel(
