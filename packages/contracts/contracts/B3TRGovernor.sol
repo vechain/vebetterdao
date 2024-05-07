@@ -122,19 +122,14 @@ contract B3TRGovernor is
    */
   function initialize(InitializationData memory data) public initializer {
     __Governor_init("B3TRGovernor");
-    __GovernorSettings_init(
-      data.initialDepositThreshold,
-      data.initialMinVotingDelay,
-      data.initialVotingThreshold,
-      data.b3tr
-    );
+    __GovernorSettings_init(data.initialDepositThreshold, data.initialMinVotingDelay, data.initialVotingThreshold);
     __GovernorCountingSimple_init();
     __GovernorVotes_init(data.vot3Token);
     __GovernorVotesQuorumFraction_init(data.quorumPercentage);
     __GovernorTimelockControl_init(data.timelock);
     __GovernorDeposit_init(address(data.vot3Token));
     __GovernorFunctionsSettings_init(data.isFunctionRestrictionEnabled);
-    __ExternalContracts_init(data.voterRewards, data.xAllocationVoting);
+    __ExternalContracts_init(data.voterRewards, data.xAllocationVoting, data.b3tr);
     __AccessControl_init();
     __UUPSUpgradeable_init();
     __Pausable_init();

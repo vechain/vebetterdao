@@ -17,6 +17,7 @@ import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { IVoterRewards } from "../interfaces/IVoterRewards.sol";
 import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGovernor.sol";
+import { IB3TR } from "../interfaces/IB3TR.sol";
 
 /**
  * @dev Core of the governance system, designed to be extended through various modules.
@@ -671,7 +672,18 @@ abstract contract GovernorUpgradeable is
    */
   function state(uint256 proposalId) public view virtual returns (ProposalState);
 
+  /**
+   * @dev See {IB3TRGovernor-voterRewards}.
+   */
   function voterRewards() public view virtual returns (IVoterRewards);
 
+  /**
+   * @dev See {IB3TRGovernor-xAllocationVoting}.
+   */
   function xAllocationVoting() public view virtual returns (IXAllocationVotingGovernor);
+
+  /**
+   * @dev See {IB3TRGovernor-b3tr}.
+   */
+  function b3tr() public view virtual returns (IB3TR);
 }
