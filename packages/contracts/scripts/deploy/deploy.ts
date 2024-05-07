@@ -159,8 +159,9 @@ export async function deployAll(config: ContractsConfig) {
       vot3Token: await vot3.getAddress(),
       timelock: await timelock.getAddress(),
       xAllocationVoting: await xAllocationVoting.getAddress(),
+      b3tr: await b3tr.getAddress(),
       quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
-      initialDepositThreshold: config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD,
+      initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD,
       initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY,
       initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD,
       governorAdmin: TEMP_ADMIN,
@@ -219,9 +220,15 @@ export async function deployAll(config: ContractsConfig) {
   // Grant Vote Registrar role to XAllocationVoting
   await voterRewards
     .connect(admin)
-    .setVoteRegistrarRole(await xAllocationVoting.getAddress())
+    .grantRole(await voterRewards.VOTE_REGISTRAR_ROLE(), await xAllocationVoting.getAddress())
     .then(async tx => await tx.wait())
   console.log("Vote registrar role granted to XAllocationVoting")
+  // Grant Vote Registrar role to B3TRGovernor
+  await voterRewards
+    .connect(admin)
+    .grantRole(await voterRewards.VOTE_REGISTRAR_ROLE(), await governor.getAddress())
+    .then(async tx => await tx.wait())
+  console.log("Vote registrar role granted to B3TRGovernor")
 
   // Emissions contract should be able to start new rounds
   await xAllocationVoting
