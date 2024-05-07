@@ -15,7 +15,7 @@ import { B3TR, B3TRGovernor, Treasury, Treasury__factory } from "../typechain-ty
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy } from "../scripts/helpers"
 
-describe.only("Treasury", () => {
+describe("Treasury", () => {
   let treasuryProxy: Treasury
   let b3tr: B3TR
   let vot3: any
