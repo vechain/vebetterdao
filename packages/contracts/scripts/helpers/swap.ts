@@ -4,8 +4,8 @@ import { buildTxBody, signAndSendTx } from "./txHelper"
 import { SeedAccount } from "./seedAccounts"
 import { chunk } from "./chunk"
 
-export const swapB3trForVot3 = async (b3tr: B3TR, vot3: VOT3, accounts: SeedAccount[]) => {
-  console.log(`Swapping B3TR for VOT3...`)
+export const convertB3trForVot3 = async (b3tr: B3TR, vot3: VOT3, accounts: SeedAccount[]) => {
+  console.log(`Converting B3TR for VOT3...`)
 
   const acctChunks = chunk(accounts, 100)
 
@@ -30,7 +30,7 @@ export const swapB3trForVot3 = async (b3tr: B3TR, vot3: VOT3, accounts: SeedAcco
         clauses.push(
           clauseBuilder.functionInteraction(
             vot3Addr,
-            coder.createInterface(JSON.stringify(VOT3__factory.abi)).getFunction("stake") as FunctionFragment,
+            coder.createInterface(JSON.stringify(VOT3__factory.abi)).getFunction("convertToVOT3") as FunctionFragment,
             [b3trAmount],
           ),
         )
