@@ -547,13 +547,6 @@ contract B3TRGovernor is
   }
 
   /**
-   * @dev See {IB3TRGovernor-votingPeriod}.
-   */
-  function votingPeriod() public view virtual override returns (uint256) {
-    return xAllocationVoting().votingPeriod();
-  }
-
-  /**
    * @dev See {IB3TRGovernor-state}.
    *
    * This function is the copy of what was inside GovernorUpgradeable plus the copy of GovernorTimelockControlUpgradeable (when it ends up in QUEUED state),

@@ -75,6 +75,8 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
     _setVotingThreshold(initialVotingThreshold);
   }
 
+  // ---------- Getters ---------- //
+
   /**
    * @dev See {Governor-depositThreshold}.
    */
@@ -110,6 +112,15 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
   }
 
   /**
+   * @dev See {IB3TRGovernor-votingPeriod}.
+   */
+  function votingPeriod() public view virtual override returns (uint256) {
+    return xAllocationVoting().votingPeriod();
+  }
+
+  // ---------- Setters ---------- //
+
+  /**
    * @dev Update the deposit threshold. This operation can only be performed through a governance proposal.
    *
    * Emits a {DepositThresholdSet} event.
@@ -136,6 +147,8 @@ abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradea
   function setMinVotingDelay(uint256 newMinVotingDelay) public virtual onlyGovernance {
     _setMinVotingDelay(newMinVotingDelay);
   }
+
+  // ---------- Internal ---------- //
 
   /**
    * @dev Internal setter for the deposit threshold.
