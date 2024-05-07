@@ -4,10 +4,10 @@ import { useEffect, useCallback } from "react"
 import { useForm, useFieldArray, Controller } from "react-hook-form"
 import { abi } from "thor-devkit"
 import { ExecutableFunctionCard } from "./ExecutableFunctionCard"
-import { FunctionParamsField } from "@/hooks"
 import { ProposalFormStoreState, useProposalFormStore } from "@/store/useProposalFormStore"
 import MDEditor from "@uiw/react-md-editor"
 import rehypeSanitize from "rehype-sanitize"
+import { FunctionParamsField } from "@/components"
 
 export type FormData = {
   title: string
@@ -38,7 +38,7 @@ export const NewProposalForm: React.FC<Props> = ({
   const { handleSubmit, register, control, formState, setValue } = useForm<FormData>()
 
   const { errors } = formState
-  const { fields, append, remove } = useFieldArray({
+  const { fields } = useFieldArray({
     control, // control props comes from useForm (optional: if you are using FormContext)
     name: "actions", // unique name for your Field Array
   })

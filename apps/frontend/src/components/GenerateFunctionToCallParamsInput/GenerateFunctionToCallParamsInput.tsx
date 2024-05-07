@@ -1,9 +1,14 @@
 import { FormControl, FormErrorMessage, FormLabel, FormLabelProps, Input, InputProps, Stack } from "@chakra-ui/react"
 import { FieldError, FieldErrorsImpl, Merge, UseFormRegister } from "react-hook-form"
-import { FunctionParamsField } from "../CreateProposalModal/CreateProposalModal"
 import { AddressUtils } from "@repo/utils"
 import { useMemo } from "react"
 import { FormData as ProposalFunctionFormData } from "@/app/proposals/new/form/functions/details/components/NewProposalForm"
+
+/**
+ * Represent a single parameter of the function to call in the smart contract
+ * This is used to typing the inputs of the abi definition
+ */
+export type FunctionParamsField = { id: string; name: string; type: string; internalType?: string; value: any }
 
 type Props = {
   actionIndex: number
