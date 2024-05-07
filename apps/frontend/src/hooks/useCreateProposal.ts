@@ -85,7 +85,7 @@ export const useCreateProposal = ({
 
       const approveClause: EnhancedClause = {
         to: getConfig().vot3ContractAddress,
-        value: depositAmount,
+        value: 0,
         data: vot3Interface.encodeFunctionData("approve", [GOVERNANCE_CONTRACT, parsedDepositAmount]),
         comment: `Approve ${GOVERNANCE_CONTRACT} to transfer ${depositAmount} VOT3`,
         abi: JSON.parse(JSON.stringify(vot3Interface.getFunction("approve"))),
@@ -109,11 +109,13 @@ export const useCreateProposal = ({
           targetsAndCalldata.calldatas,
           description,
           startRoundId,
-          depositAmount,
+          parsedDepositAmount,
         ]),
         comment: `Create new proposal for round ${startRoundId} with description: ${description}`,
         abi: JSON.parse(JSON.stringify(b3trGovernorInterface.getFunction("propose"))),
       }
+
+      console.log("ok")
 
       return [approveClause, createProposalClause]
     },
@@ -124,6 +126,8 @@ export const useCreateProposal = ({
     async (data: BuildClausesProps) => {
       if (!data.description) throw new Error("description is required")
       if (!data.actions) throw new Error("actions is required")
+      if (!data.startRoundId) throw new Error("startRoundId is required")
+      if (!data.depositAmount) throw new Error("depositAmount is required")
 
       const clauses = buildClauses(data)
       return result.sendTransaction(clauses)

@@ -31,11 +31,11 @@ type FormData = {
 
 export const NewProposalFundAndPublishPageContent = () => {
   const router = useRouter()
-  const createProposalMutation = useCreateProposal({})
+
   const { account } = useWallet()
   const { data: balance, isLoading: balanceLoading } = useVot3Balance(account ?? undefined)
   const { data: threshold, isLoading: thresholdLoading } = useDepositThreshold()
-  const { setData, markdownDescription, actions, votingStartRoundId } = useProposalFormStore()
+  const { setData, markdownDescription, actions, votingStartRoundId, shortDescription } = useProposalFormStore()
 
   const { register, handleSubmit, formState } = useForm<FormData>({
     defaultValues: {
@@ -51,11 +51,16 @@ export const NewProposalFundAndPublishPageContent = () => {
 
   const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
 
+  const onSuccess = useCallback(() => router.push("/proposals"), [router])
+
+  const createProposalMutation = useCreateProposal({ onSuccess })
+
   const onSubmit = useCallback(
     (data: FormData) => {
+      createProposalMutation.resetStatus()
       onConfirmationOpen()
       setData({ depositAmount: data.amount })
-      if (!votingStartRoundId || !actions || !markdownDescription) throw new Error("Missing data")
+      if (!votingStartRoundId || !actions || !shortDescription) throw new Error("Missing data")
 
       const isSomeCalldataEmpty = actions.some(action => !action.calldata)
       if (isSomeCalldataEmpty) throw new Error("Missing calldata for some actions")
@@ -64,18 +69,18 @@ export const NewProposalFundAndPublishPageContent = () => {
           contractAddress: action.contractAddress,
           calldata: action.calldata as string,
         })),
-        description: markdownDescription,
+        description: shortDescription,
         startRoundId: votingStartRoundId,
         depositAmount: data.amount.toString(),
       })
     },
-    [setData, onConfirmationOpen, createProposalMutation, markdownDescription, actions, votingStartRoundId],
+    [setData, onConfirmationOpen, createProposalMutation, shortDescription, actions, votingStartRoundId],
   )
 
   const onTryAgain = useCallback(() => {
     createProposalMutation.resetStatus()
-    onConfirmationOpen()
-  }, [createProposalMutation, onConfirmationOpen])
+    handleSubmit(onSubmit)()
+  }, [createProposalMutation, handleSubmit])
 
   return (
     <>
