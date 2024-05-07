@@ -25,7 +25,7 @@ describe("Treasury", () => {
 
   before(async () => {
     const config = createLocalConfig()
-    config.B3TR_GOVERNOR_PROPOSAL_THRESHOLD = 1
+    config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
     const info = await getOrDeployContractInstances({
       forceDeploy: true,
       config,

@@ -37,6 +37,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { IVoterRewards } from "./interfaces/IVoterRewards.sol";
 import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
+import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 
 /**
  * @title B3TRGovernor
@@ -67,7 +68,8 @@ contract B3TRGovernor is
   GovernorTimelockControlUpgradeable,
   GovernorDepositUpgradeable,
   GovernorFunctionsSettingsUpgradeable,
-  UUPSUpgradeable
+  UUPSUpgradeable,
+  PausableUpgradeable
 {
   bytes32 public constant GOVERNOR_FUNCTIONS_SETTINGS_ROLE = keccak256("GOVERNOR_FUNCTIONS_SETTINGS_ROLE");
 
@@ -148,6 +150,7 @@ contract B3TRGovernor is
     __GovernorFunctionsSettings_init(data.isFunctionRestrictionEnabled);
     __AccessControl_init();
     __UUPSUpgradeable_init();
+    __Pausable_init();
 
     B3TRGovernorStorage storage $ = _getB3TRGovernorStorage();
     $.voterRewards = IVoterRewards(data.voterRewards);
@@ -285,7 +288,7 @@ contract B3TRGovernor is
     string memory description,
     uint256 startRoundId,
     uint256 depositAmount
-  ) public virtual returns (uint256) {
+  ) public virtual whenNotPaused returns (uint256) {
     address proposer = _msgSender();
     uint256 currentRoundId = _getB3TRGovernorStorage().xAllocationVoting.currentRoundId();
 
@@ -452,9 +455,47 @@ contract B3TRGovernor is
     return sig;
   }
 
+  /**
+   * @dev Pause the contract
+   */
+  function pause() public onlyRole(DEFAULT_ADMIN_ROLE) {
+    _pause();
+  }
+
+  /**
+   * @dev Unpause the contract
+   */
+  function unpause() public onlyRole(DEFAULT_ADMIN_ROLE) {
+    _unpause();
+  }
+
   // ------------------ OVERRIDES ------------------ //
 
   function _authorizeUpgrade(address newImplementation) internal override onlyGovernance {}
+
+  /**
+   * @dev See {IB3TRGovernor-queue}.
+   */
+  function queue(
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    bytes32 descriptionHash
+  ) public override whenNotPaused returns (uint256) {
+    return super.queue(targets, values, calldatas, descriptionHash);
+  }
+
+  /**
+   * @dev See {IB3TRGovernor-execute}.
+   */
+  function execute(
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    bytes32 descriptionHash
+  ) public payable override whenNotPaused returns (uint256) {
+    return super.execute(targets, values, calldatas, descriptionHash);
+  }
 
   /**
    * @dev See {IB3TRGovernor-proposalSnapshot}.
