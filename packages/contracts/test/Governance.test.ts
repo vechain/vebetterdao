@@ -24,7 +24,7 @@ import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { B3TRGovernor, B3TRGovernor__factory } from "../typechain-types"
 
-describe("Governor and TimeLock", function () {
+describe.only("Governor and TimeLock", function () {
   describe("Governor deployment", function () {
     it("Should set constructors correctly", async function () {
       const config = createLocalConfig()
@@ -41,8 +41,8 @@ describe("Governor and TimeLock", function () {
       expect(votingPeriod).to.eql(await xAllocationVoting.votingPeriod())
       expect(minVotingDelay.toString()).to.eql(config.B3TR_GOVERNOR_MIN_VOTING_DELAY.toString())
 
-      const xAllocationVotingAddress = await governor.xAllocationVotingAddress()
-      const voterRewardsAddress = await governor.voterRewardsAddress()
+      const xAllocationVotingAddress = await governor.xAllocationVoting()
+      const voterRewardsAddress = await governor.voterRewards()
 
       expect(xAllocationVotingAddress).to.eql(await xAllocationVoting.getAddress())
       expect(voterRewardsAddress).to.eql(await voterRewards.getAddress())
@@ -290,7 +290,7 @@ describe("Governor and TimeLock", function () {
         [newAddress],
       )
 
-      const updatedAddress = await governor.xAllocationVotingAddress()
+      const updatedAddress = await governor.xAllocationVoting()
       expect(updatedAddress).to.eql(newAddress)
     })
 
@@ -318,7 +318,7 @@ describe("Governor and TimeLock", function () {
 
       await catchRevert(governor.connect(owner).setXAllocationVoting(newAddress))
 
-      const updatedAddress = await governor.xAllocationVotingAddress()
+      const updatedAddress = await governor.xAllocationVoting()
       expect(updatedAddress).to.not.eql(newAddress)
     })
 
@@ -338,7 +338,7 @@ describe("Governor and TimeLock", function () {
         [newAddress],
       )
 
-      const updatedAddress = await governor.voterRewardsAddress()
+      const updatedAddress = await governor.voterRewards()
       expect(updatedAddress).to.eql(newAddress)
     })
 
@@ -351,7 +351,7 @@ describe("Governor and TimeLock", function () {
 
       await catchRevert(governor.connect(owner).setVoterRewards(newAddress))
 
-      const updatedAddress = await governor.voterRewardsAddress()
+      const updatedAddress = await governor.voterRewards()
       expect(updatedAddress).to.not.eql(newAddress)
     })
 
