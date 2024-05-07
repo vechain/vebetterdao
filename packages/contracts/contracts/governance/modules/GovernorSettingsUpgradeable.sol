@@ -21,8 +21,6 @@
 //                                   ##############
 //                                   #########
 
-// Forked from OpenZeppelin Contracts (last updated v5.0.0) (governance/extensions/GovernorSettings.sol)
-
 pragma solidity ^0.8.20;
 
 import { GovernorUpgradeable } from "../GovernorUpgradeable.sol";
@@ -31,11 +29,6 @@ import { IB3TR } from "../../interfaces/IB3TR.sol";
 
 /**
  * @dev Extension of {Governor} for settings updatable through governance.
- *
- * Modifications:
- * - removed _votingPeriod
- * - removed _votingDelay (now it depends on the x-allocation roundId)
- * - added _minVotingDelay
  */
 abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradeable {
   /// @custom:storage-location erc7201:openzeppelin.storage.GovernorSettings
