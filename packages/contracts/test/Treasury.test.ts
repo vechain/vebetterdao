@@ -113,15 +113,15 @@ describe("Treasury", () => {
         await catchRevert(treasuryProxy.transferB3TR(otherAccount.address, ethers.parseEther("1")))
         await b3tr.unpause()
       })
-      it("can't stake more than balance", async () => {
-        await catchRevert(treasuryProxy.stakeB3TR(ethers.parseEther("6")))
+      it("can't convert more than balance", async () => {
+        await catchRevert(treasuryProxy.convertB3TR(ethers.parseEther("6")))
       })
       it("should return correct address for contract", async () => {
         expect(await treasuryProxy.b3trAddress()).to.eql(await b3tr.getAddress())
       })
-      it("should revert stake if contract is paused", async () => {
+      it("should revert convert if contract is paused", async () => {
         await treasuryProxy.pause()
-        await catchRevert(treasuryProxy.stakeB3TR(ethers.parseEther("1")))
+        await catchRevert(treasuryProxy.convertB3TR(ethers.parseEther("1")))
         await treasuryProxy.unpause()
       })
     })
@@ -146,7 +146,7 @@ describe("Treasury", () => {
       })
       it("should revert if contract is paused", async () => {
         await treasuryProxy.pause()
-        await catchRevert(treasuryProxy.unstakeB3TR(ethers.parseEther("1")))
+        await catchRevert(treasuryProxy.convertVOT3(ethers.parseEther("1")))
         await treasuryProxy.unpause()
       })
       it("should return correct address for contract", async () => {

@@ -22,7 +22,6 @@ import { describe, it } from "mocha"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { B3TRGovernor } from "../typechain-types"
-import { startEmissions } from "../scripts/helpers/emissions"
 
 describe("Governor and TimeLock", function () {
   describe("Governor deployment", function () {
