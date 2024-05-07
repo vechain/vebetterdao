@@ -322,6 +322,39 @@ describe.only("Governor and TimeLock", function () {
       expect(updatedAddress).to.not.eql(newAddress)
     })
 
+    it("should be able to update the B3TR address through governance", async function () {
+      const { governor, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const newAddress = ethers.Wallet.createRandom().address
+      await createProposalAndExecuteIt(
+        owner,
+        owner,
+        governor,
+        await ethers.getContractFactory("B3TRGovernor"),
+        "Update B3TR address",
+        "setB3TR",
+        [newAddress],
+      )
+
+      const updatedAddress = await governor.b3tr()
+      expect(updatedAddress).to.eql(newAddress)
+    })
+
+    it("only governance can update B3TR address", async function () {
+      const { governor, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const newAddress = ethers.Wallet.createRandom().address
+
+      await catchRevert(governor.connect(owner).setB3TR(newAddress))
+
+      const updatedAddress = await governor.b3tr()
+      expect(updatedAddress).to.not.eql(newAddress)
+    })
+
     it("can update voterRewards address through governance", async function () {
       const { governor, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
