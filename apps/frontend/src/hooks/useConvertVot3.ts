@@ -1,10 +1,9 @@
 import {
   getB3TrBalanceQueryKey,
   useB3trTokenDetails,
-  buildStakeB3trTx,
   getVot3BalanceQueryKey,
+  buildConvertVot3Tx,
   getVotesQueryKey,
-  buildB3trApprovesTx,
   getB3TrTokenDetailsQueryKey,
 } from "@/api"
 import { useToast } from "@chakra-ui/react"
@@ -13,7 +12,6 @@ import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTran
 import { useCallback, useMemo } from "react"
 import { useConnex, useWallet } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
-import BigNumber from "bignumber.js"
 import { removingExcessDecimals } from "@/utils/MathUtils"
 
 const config = getConfig()
@@ -25,14 +23,14 @@ type useMintB3trProps = {
   onSuccessMessageTitle?: string
 }
 /**
- * Hook to stake a certain amount of B3TR tokens
- * This hook will stake the tokens and wait for the txConfirmation
- * @param amount the amount of tokens to stake. Should not already include decimals
+ * Hook to convert VOT3 tokens to B3TR tokens
+ * This hook will convert the tokens and wait for the txConfirmation
+ * @param amount the amount of tokens to convert. Should not already include decimals
  * @param onSuccess callback to run when the upgrade is successful
  * @param invalidateCache boolean to indicate if the related react-query cache should be updated (default: true)
  * @returns see {@link UseSendTransactionReturnValue}
  */
-export const useStakeB3tr = ({
+export const useConvertVot3 = ({
   amount,
   onSuccess,
   invalidateCache = true,
@@ -48,10 +46,9 @@ export const useStakeB3tr = ({
   const buildClauses = useCallback(() => {
     if (!contractAmount) throw new Error("amount is required")
     if (!tokenDetails) throw new Error("tokenDetails is required")
-    const approveClause = buildB3trApprovesTx(thor, contractAmount, config.vot3ContractAddress, tokenDetails.decimals)
-    const stakeClause = buildStakeB3trTx(thor, contractAmount, tokenDetails.decimals)
-    return [approveClause, stakeClause]
-  }, [thor, tokenDetails, contractAmount])
+    const convertVot3Clause = buildConvertVot3Tx(thor, contractAmount, tokenDetails.decimals)
+    return [convertVot3Clause]
+  }, [thor, contractAmount, tokenDetails])
 
   //Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {

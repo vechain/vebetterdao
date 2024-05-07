@@ -80,8 +80,8 @@ describe("Treasury", () => {
         await treasuryProxy.transferB3TR(otherAccount.address, ethers.parseEther("1"))
         expect(await treasuryProxy.getB3TRBalance()).to.eql(ethers.parseEther("9"))
       })
-      it("should stake B3TR and recieve VOT3", async () => {
-        await treasuryProxy.stakeB3TR(ethers.parseEther("5"))
+      it("should convert B3TR and recieve VOT3", async () => {
+        await treasuryProxy.convertB3TR(ethers.parseEther("5"))
         expect(await treasuryProxy.getB3TRBalance()).to.eql(ethers.parseEther("4"))
         expect(await treasuryProxy.getVOT3Balance()).to.eql(ethers.parseEther("5"))
       })
@@ -103,13 +103,13 @@ describe("Treasury", () => {
         await treasuryProxy.transferVOT3(otherAccount.address, ethers.parseEther("1"))
         expect(await treasuryProxy.getVOT3Balance()).to.eql(ethers.parseEther("4"))
       })
-      it("should unstake B3TR and recieve B3TR", async () => {
-        await treasuryProxy.unstakeB3TR(ethers.parseEther("4"))
+      it("should convert VOT3 and recieve B3TR", async () => {
+        await treasuryProxy.convertVOT3(ethers.parseEther("4"))
         expect(await treasuryProxy.getB3TRBalance()).to.eql(ethers.parseEther("8"))
         expect(await treasuryProxy.getVOT3Balance()).to.eql(ethers.parseEther("0"))
       })
-      it("should revert if not enough staked to unstake", async () => {
-        await catchRevert(treasuryProxy.unstakeB3TR(ethers.parseEther("11")))
+      it("should revert if not enough converted B3TR to convert back", async () => {
+        await catchRevert(treasuryProxy.convertVOT3(ethers.parseEther("11")))
       })
       it("should revert if not called by GOVERNANCE_ROLE", async () => {
         await catchRevert(
