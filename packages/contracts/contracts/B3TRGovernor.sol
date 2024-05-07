@@ -533,16 +533,28 @@ contract B3TRGovernor is
   }
 
   /**
-   * @dev See {IB3TRGovernor-proposalNeedsQueuing}.
+   * @dev Function to know if a proposal is executable or not.
+   * If the proposal was creted without any targets, values, or calldatas, it is not executable.
+   * If the propsoal has targets then call GovernorUpgradeable and GovernorTimelockControlUpgradeable
+   * to check if the proposal is executable.
+   *
+   * @param proposalId The id of the proposal
    */
-  function proposalNeedsQueuing(uint256 proposalId) public view returns (bool) {
+  function proposalNeedsQueuing(
+    uint256 proposalId
+  ) public view override(GovernorUpgradeable, GovernorTimelockControlUpgradeable) returns (bool) {
     GovernorStorage storage $ = _getGovernorStorage();
     ProposalCore storage proposal = $._proposals[proposalId];
     if (proposal.roundIdVoteStart == 0) {
-      revert GovernorNonexistentProposal(proposalId);
+      return false;
     }
 
-    return proposal.isExecutable;
+    if (proposal.isExecutable) {
+      // Call GovernorUpgradeable and GovernorTimelockControlUpgradeable to check if the proposal is executable
+      return super.proposalNeedsQueuing(proposalId);
+    } else {
+      return false;
+    }
   }
 
   function quorum(

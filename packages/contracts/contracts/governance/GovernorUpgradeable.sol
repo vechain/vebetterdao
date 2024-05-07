@@ -270,6 +270,13 @@ abstract contract GovernorUpgradeable is
   }
 
   /**
+   * @dev See {IGovernor-proposalNeedsQueuing}.
+   */
+  function proposalNeedsQueuing(uint256) public view virtual returns (bool) {
+    return false;
+  }
+
+  /**
    * @dev Reverts if the `msg.sender` is not the executor. In case the executor is not this contract
    * itself, the function reverts if `msg.data` is not whitelisted as a result of an {execute}
    * operation. See {onlyGovernance}.

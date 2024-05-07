@@ -75,6 +75,13 @@ abstract contract GovernorTimelockControlUpgradeable is Initializable, GovernorU
   }
 
   /**
+   * @dev See {IGovernor-proposalNeedsQueuing}.
+   */
+  function proposalNeedsQueuing(uint256) public view virtual override returns (bool) {
+    return true;
+  }
+
+  /**
    * @dev Function to queue a proposal to the timelock.
    */
   function _queueOperations(

@@ -1520,13 +1520,13 @@ describe.only("Governor and TimeLock", function () {
       expect(await governor.state(proposalId)).to.eql(7n)
     })
 
-    it("Cannot know if proposal is executable for a non existing proposal", async () => {
+    it("Non existing proposal does not need to be queued", async () => {
       const { governor } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
       const proposalId = 1n
-      await expect(governor.proposalNeedsQueuing(proposalId)).to.be.reverted
+      expect(await governor.proposalNeedsQueuing(proposalId)).to.be.false
     })
 
     it("Parameters must have the same length", async () => {
