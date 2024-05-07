@@ -485,7 +485,7 @@ contract XAllocationPool is
 
   /**
    * @notice Returns the version of the contract
-   * @dev This should be updated every time a new version of implementation is deployed
+   * @dev Version of the governor instance (used in building the ERC712 domain separator). Default: "1"
    * @return sting The version of the contract
    */
   function version() public pure virtual returns (string memory) {

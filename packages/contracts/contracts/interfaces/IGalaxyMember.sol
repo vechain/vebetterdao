@@ -207,6 +207,8 @@ interface IGalaxyMember {
   function upgradeToAndCall(address newImplementation, bytes memory data) external payable;
 
   function xAllocationsGovernor() external view returns (address);
+
+  function version() external view returns (string memory);
 }
 
 interface Checkpoints {
