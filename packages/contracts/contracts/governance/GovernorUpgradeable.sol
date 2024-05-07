@@ -352,16 +352,6 @@ abstract contract GovernorUpgradeable is
   }
 
   /**
-   * @dev Check if the targets and calldatas are whitelisted
-   */
-  function _checkFunctionsRestriction(address[] memory targets, bytes[] memory calldatas) internal view virtual;
-
-  /**
-   * @dev Deposit tokens to a proposal.
-   */
-  function _depositFunds(uint256 amount, address depositor, uint256 proposalId) internal virtual;
-
-  /**
    * @dev See {IB3TRGovernor-propose}. This function has opt-in frontrunning protection, described in {_isValidDescriptionForProposer}.
    *
    * The {startRoundId} parameter is used to specify the round in which the proposal should be active. The round must be in the future.
@@ -519,34 +509,6 @@ abstract contract GovernorUpgradeable is
     proposal.depositAmount = depositAmount;
     proposal.depositThreshold = proposalDepositThreshold;
   }
-
-  /**
-   * @dev Amount of votes already cast passes the threshold limit.
-   */
-  function _quorumReached(uint256 proposalId) internal view virtual returns (bool);
-
-  /**
-   * @dev Is the proposal successful or not.
-   */
-  function _voteSucceeded(uint256 proposalId) internal view virtual returns (bool);
-
-  /**
-   * @dev Get the voting weight of `account` at a specific `timepoint`.
-   */
-  function _getVotes(address account, uint256 timepoint) internal view virtual returns (uint256);
-
-  /**
-   * @dev Register a vote for `proposalId` by `account` with a given `support`, and voting `weight`.
-   *
-   * Note: Support is generic and can represent various things depending on the voting system used.
-   */
-  function _countVote(
-    uint256 proposalId,
-    address account,
-    uint8 support,
-    uint256 weight,
-    uint256 power
-  ) internal virtual;
 
   /**
    * @dev See {IB3TRGovernor-queue}.
@@ -947,6 +909,44 @@ abstract contract GovernorUpgradeable is
       }
     }
   }
+
+  /**
+   * @dev Check if the targets and calldatas are whitelisted
+   */
+  function _checkFunctionsRestriction(address[] memory targets, bytes[] memory calldatas) internal view virtual;
+
+  /**
+   * @dev Deposit tokens to a proposal.
+   */
+  function _depositFunds(uint256 amount, address depositor, uint256 proposalId) internal virtual;
+
+  /**
+   * @dev Amount of votes already cast passes the threshold limit.
+   */
+  function _quorumReached(uint256 proposalId) internal view virtual returns (bool);
+
+  /**
+   * @dev Is the proposal successful or not.
+   */
+  function _voteSucceeded(uint256 proposalId) internal view virtual returns (bool);
+
+  /**
+   * @dev Get the voting weight of `account` at a specific `timepoint`.
+   */
+  function _getVotes(address account, uint256 timepoint) internal view virtual returns (uint256);
+
+  /**
+   * @dev Register a vote for `proposalId` by `account` with a given `support`, and voting `weight`.
+   *
+   * Note: Support is generic and can represent various things depending on the voting system used.
+   */
+  function _countVote(
+    uint256 proposalId,
+    address account,
+    uint8 support,
+    uint256 weight,
+    uint256 power
+  ) internal virtual;
 
   /**
    * @inheritdoc IERC6372
