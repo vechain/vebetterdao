@@ -17,7 +17,8 @@ export type ProposalCreatedEvent = {
   signatures: string[]
   callDatas: string[]
   description: string
-  roundIdVoteStart: string
+  roundIdVoteStart: string,
+  depositThreshold: string
 }
 
 export type ProposalCanceledEvent = {
@@ -99,6 +100,7 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
           callDatas: decoded[5],
           description: decoded[6],
           roundIdVoteStart: decoded[7],
+          depositThreshold: decoded[8],
         })
         break
       }
