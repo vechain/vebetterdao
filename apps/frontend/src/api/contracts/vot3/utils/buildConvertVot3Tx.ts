@@ -7,18 +7,18 @@ const config = getConfig()
 const VOT3_CONTRACT = config.vot3ContractAddress
 
 /**
- * Build the clause to unstake B3TR tokens for the given address and amount
+ * Build the clause to convert VOT3 tokens to B3TR for the given address and amount
  * @param thor thor instance
- * @param amount the amount of tokens to mint. Should not already include decimals
+ * @param amount the amount of tokens to convert to B3TR
  * @param decimals the decimals of the token
- * @returns the clause to mint B3TR tokens
+ * @returns the clause to convert VOT3 to B3TR
  */
-export const buildUnstakeStakeB3trTx = (
+export const buildConvertVot3Tx = (
   thor: Connex.Thor,
   amount: string | number,
   decimals = 18,
 ): Connex.Vendor.TxMessage[0] => {
-  const functionAbi = Vot3ContractJson.abi.find(e => e.name === "unstake")
+  const functionAbi = Vot3ContractJson.abi.find(e => e.name === "convertToB3TR")
   if (!functionAbi) throw new Error("Function abi not found for mint")
 
   const formattedAmount = FormattingUtils.humanNumber(amount ?? 0, amount)
@@ -28,7 +28,7 @@ export const buildUnstakeStakeB3trTx = (
 
   return {
     ...clause,
-    comment: `Unstake ${formattedAmount} B3TR`,
+    comment: `Convert ${formattedAmount} VOT3 to B3TR`,
     abi: functionAbi,
   }
 }

@@ -3,7 +3,7 @@ import { moveBlocks } from "../../test/helpers"
 import { SeedStrategy, getAccounts, getSeedAccounts } from "../helpers/seedAccounts"
 import { distributeEmissions, startEmissions } from "../helpers/emissions"
 import { airdropB3trFromTreasury, airdropVTHO } from "../helpers/airdrop"
-import { swapB3trForVot3 } from "../helpers/swap"
+import { convertB3trForVot3 } from "../helpers/swap"
 import { castVotesToXDapps } from "../helpers/xApp"
 import { claimVoterRewards } from "../helpers/voterRewards"
 
@@ -36,8 +36,8 @@ export const simulateRounds = async (
   const treasuryAddress = await treasury.getAddress()
   await airdropB3trFromTreasury(treasuryAddress, admin, seedAccounts)
 
-  // Swap for VOT3
-  await swapB3trForVot3(b3tr, vot3, seedAccounts)
+  // Convert B3TR for VOT3
+  await convertB3trForVot3(b3tr, vot3, seedAccounts)
 
   // Start emissions
   const emissionsContract = await emissions.getAddress()
@@ -54,8 +54,8 @@ export const simulateRounds = async (
   // Claim voter rewards
   await claimVoterRewards(voterRewards, roundId, admin, seedAccounts)
 
-  // Swap for VOT3
-  await swapB3trForVot3(b3tr, vot3, seedAccounts)
+  // Convert B3TR for VOT3
+  await convertB3trForVot3(b3tr, vot3, seedAccounts)
 
   for (let i = 1; i < 15; i++) {
     await distributeEmissions(emissionsContract, admin)
@@ -65,8 +65,8 @@ export const simulateRounds = async (
     await waitForRoundToEnd(roundId, xAllocationVoting)
     await claimVoterRewards(voterRewards, roundId, admin, seedAccounts)
 
-    // Swap for VOT3
-    await swapB3trForVot3(b3tr, vot3, seedAccounts)
+    // Convert B3TR for VOT3
+    await convertB3trForVot3(b3tr, vot3, seedAccounts)
   }
 
   const end = performance.now()
