@@ -1,4 +1,26 @@
 // SPDX-License-Identifier: MIT
+
+//                                      #######
+//                                 ################
+//                               ####################
+//                             ###########   #########
+//                            #########      #########
+//          #######          #########       #########
+//          #########       #########      ##########
+//           ##########     ########     ####################
+//            ##########   #########  #########################
+//              ################### ############################
+//               #################  ##########          ########
+//                 ##############      ###              ########
+//                  ############                       #########
+//                    ##########                     ##########
+//                     ########                    ###########
+//                       ###                    ############
+//                                          ##############
+//                                    #################
+//                                   ##############
+//                                   #########
+
 pragma solidity ^0.8.20;
 
 import { GovernorUpgradeable } from "../GovernorUpgradeable.sol";
@@ -62,7 +84,7 @@ abstract contract GovernorDepositUpgradeable is Initializable, ReentrancyGuardUp
 
     proposal.depositAmount += amount;
 
-    _depositFunds(amount, _msgSender(), proposalId);
+    _depositFunds(amount, _msgSender(), proposalId, proposal.depositAmount, proposal.depositThreshold);
   }
 
   /**
@@ -129,7 +151,6 @@ abstract contract GovernorDepositUpgradeable is Initializable, ReentrancyGuardUp
     return $._proposals[proposalId].depositThreshold;
   }
 
-
   /**
    * @dev Returns the amount of tokens a specific user has deposited to a proposal.
    *
@@ -151,14 +172,22 @@ abstract contract GovernorDepositUpgradeable is Initializable, ReentrancyGuardUp
    * @param amount The amount of tokens to deposit.
    * @param depositor The address of the depositor.
    * @param proposalId The id of the proposal.
+   * @param depositTotal The total amount of deposits made to the proposal.
+   * @param depositThreshold The threshold amount of deposits required to reach the proposal.
    */
-  function _depositFunds(uint256 amount, address depositor, uint256 proposalId) internal nonReentrant {
+  function _depositFunds(
+    uint256 amount,
+    address depositor,
+    uint256 proposalId,
+    uint256 depositTotal,
+    uint256 depositThreshold
+  ) internal nonReentrant {
     GovernorDepositStorage storage $ = _getGovernorDepositStorage();
 
     require($.vot3.transferFrom(depositor, address(this), amount), "B3TRGovernor: transfer failed");
 
     $.deposits[proposalId][depositor] += amount;
 
-    emit ProposalDeposit(depositor, proposalId, amount);
+    emit ProposalDeposit(depositor, proposalId, amount, depositTotal, depositThreshold);
   }
 }

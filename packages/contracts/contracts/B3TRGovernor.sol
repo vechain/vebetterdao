@@ -94,7 +94,12 @@ contract B3TRGovernor is
    */
   function initialize(InitializationData memory data) public initializer {
     __Governor_init("B3TRGovernor");
-    __GovernorSettings_init(data.initialDepositThreshold, data.initialMinVotingDelay, data.initialVotingThreshold, data.b3tr);
+    __GovernorSettings_init(
+      data.initialDepositThreshold,
+      data.initialMinVotingDelay,
+      data.initialVotingThreshold,
+      data.b3tr
+    );
     __GovernorCountingSimple_init();
     __GovernorVotes_init(data.vot3Token);
     __GovernorVotesQuorumFraction_init(data.quorumPercentage);
@@ -270,16 +275,19 @@ contract B3TRGovernor is
 
     _checkFunctionsRestriction(targets, calldatas);
 
+    uint256 depositThresholdAmount = depositThreshold();
+
     _setProposal(
       proposalId,
       proposer,
       SafeCast.toUint32(votingPeriod()),
       startRoundId,
       targets.length > 0,
-      depositAmount
+      depositAmount,
+      depositThresholdAmount
     );
 
-    _depositFunds(depositAmount, proposer, proposalId);
+    _depositFunds(depositAmount, proposer, proposalId, depositAmount, depositThresholdAmount);
 
     emit ProposalCreated(
       proposalId,
@@ -329,6 +337,7 @@ contract B3TRGovernor is
    * @param roundIdVoteStart The round in which the proposal should be active
    * @param isExecutable If the proposal is executable
    * @param depositAmount The amount of tokens the proposer intends to deposit
+   * @param proposalDepositThreshold The deposit threshold for the proposal
    */
   function _setProposal(
     uint256 proposalId,
@@ -336,7 +345,8 @@ contract B3TRGovernor is
     uint32 voteDuration,
     uint256 roundIdVoteStart,
     bool isExecutable,
-    uint256 depositAmount
+    uint256 depositAmount,
+    uint256 proposalDepositThreshold
   ) internal {
     GovernorStorage storage $ = _getGovernorStorage();
 
@@ -347,7 +357,7 @@ contract B3TRGovernor is
     proposal.voteDuration = voteDuration;
     proposal.isExecutable = isExecutable;
     proposal.depositAmount = depositAmount;
-    proposal.depositThreshold = depositThreshold();
+    proposal.depositThreshold = proposalDepositThreshold;
   }
 
   /**

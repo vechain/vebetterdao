@@ -1,4 +1,26 @@
 // SPDX-License-Identifier: MIT
+
+//                                      #######
+//                                 ################
+//                               ####################
+//                             ###########   #########
+//                            #########      #########
+//          #######          #########       #########
+//          #########       #########      ##########
+//           ##########     ########     ####################
+//            ##########   #########  #########################
+//              ################### ############################
+//               #################  ##########          ########
+//                 ##############      ###              ########
+//                  ############                       #########
+//                    ##########                     ##########
+//                     ########                    ###########
+//                       ###                    ############
+//                                          ##############
+//                                    #################
+//                                   ##############
+//                                   #########
+
 // Forked from OpenZeppelin Contracts (last updated v5.0.0) (governance/extensions/GovernorSettings.sol)
 
 pragma solidity ^0.8.20;
@@ -18,7 +40,7 @@ import { IB3TR } from "../../interfaces/IB3TR.sol";
 abstract contract GovernorSettingsUpgradeable is Initializable, GovernorUpgradeable {
   /// @custom:storage-location erc7201:openzeppelin.storage.GovernorSettings
   struct GovernorSettingsStorage {
-    // percentage of the total supply of B3TR tokens that need to be deposited to create a proposal
+    // percentage of the total supply of B3TR tokens that need to be deposited in VOT3 to create a proposal
     uint256 _depositThreshold;
     // min delay before voting can start
     uint256 _minVotingDelay;
