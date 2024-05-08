@@ -53,7 +53,7 @@ contract VOT3 is
   /// @custom:storage-location erc7201:b3tr.storage.VOT3
   struct VOT3Storage {
     IERC20 b3tr; // B3TR token contract
-    mapping(address account => uint256) _stakedBalances; // Account staked balances
+    mapping(address account => uint256) _convertedB3TR; // Mapping of B3TR tokens converted to VOT3 tokens
   }
 
   /// @dev The slot for VOT3 storage in contract storage
@@ -110,35 +110,35 @@ contract VOT3 is
   /// @param newImplementation Address of the new contract implementation
   function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
-  /// @notice Retrieves the number of staked B3TR tokens for a specific account
+  /// @notice Retrieves the number of converted B3TR tokens for a specific user
   /// @param account Address of the user to check
-  /// @return uint256 The amount of staked tokens
-  function stakedBalanceOf(address account) public view returns (uint256) {
+  /// @return uint256 The amount of converted tokens
+  function convertedB3trOf(address account) public view returns (uint256) {
     VOT3Storage storage $ = _getVOT3Storage();
-    return $._stakedBalances[account];
+    return $._convertedB3TR[account];
   }
 
-  /// @notice Stake B3TR tokens in exchange for VOT3 tokens
-  /// @dev Stakes B3TR tokens and mints VOT3 tokens in return
-  /// @param amount Amount of B3TR tokens to stake
-  function stake(uint256 amount) external {
+  /// @notice Convert B3TR tokens in exchange for VOT3 tokens
+  /// @dev Converts B3TR tokens and mints VOT3 tokens in return
+  /// @param amount Amount of B3TR tokens to convert
+  function convertToVOT3(uint256 amount) external {
     VOT3Storage storage $ = _getVOT3Storage();
     _mint(msg.sender, amount);
-    $._stakedBalances[msg.sender] += amount;
+    $._convertedB3TR[msg.sender] += amount;
 
     require($.b3tr.transferFrom(msg.sender, address(this), amount), "Transfer failed");
   }
 
-  /// @notice Unstake B3TR tokens
-  /// @dev Unstakes by burning VOT3 tokens and returning B3TR tokens
-  /// @param amount Amount of VOT3 tokens to unstake
-  function unstake(uint256 amount) external {
+  /// @notice Convert VOT3 previously converted back to B3TR tokens
+  /// @dev Burns VOT3 tokens and transfers B3TR tokens in return
+  /// @param amount Amount of VOT3 tokens to convert
+  function convertToB3TR(uint256 amount) external {
     VOT3Storage storage $ = _getVOT3Storage();
 
     require(balanceOf(msg.sender) >= amount, "Insufficient Vot3 Tokens");
-    require($._stakedBalances[msg.sender] >= amount, "Insufficient staked Vot3 Tokens");
+    require($._convertedB3TR[msg.sender] >= amount, "Insufficient converted B3TR tokens");
     _burn(msg.sender, amount);
-    $._stakedBalances[msg.sender] -= amount;
+    $._convertedB3TR[msg.sender] -= amount;
     require($.b3tr.transfer(msg.sender, amount), "Transfer failed");
   }
 
@@ -240,5 +240,12 @@ contract VOT3 is
   function getPastQuadraticVotingPower(address account, uint256 timepoint) public view returns (uint256) {
     // scaling by 1e9 so that number retuned is 1e18
     return Math.sqrt(getPastVotes(account, timepoint)) * 1e9;
+  }
+
+  /// @notice Returns the version of the contract
+  /// @dev This should be updated every time a new version of implementation is deployed
+  /// @return string The version of the contract
+  function version() public pure virtual returns (string memory) {
+    return "1";
   }
 }

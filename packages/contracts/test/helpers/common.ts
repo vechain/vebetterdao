@@ -43,7 +43,6 @@ export const createProposal = async (
   description: string = "",
   functionTocall: string = "tokenDetails",
   values: any[] = [],
-  avoidMintingAndDelegating: boolean = false, // in some scenarios we want the operation to fail if the proposer does not have enough VOT3
   roundId?: string | BigInt | number,
 ): Promise<ContractTransactionResponse> => {
   const { xAllocationVoting, governor, emissions } = await getOrDeployContractInstances({})
@@ -62,27 +61,12 @@ export const createProposal = async (
     roundId = ((await xAllocationVoting.currentRoundId()) + 1n).toString()
   }
 
-  // the proposer needs to have some delegated VOT3 to be able to create a proposal
-  const clock = await governor.clock()
-  const proposerVotes = await governor.getVotes(proposer, clock - BigInt(1))
-  const votesThreshold = await governor.depositThreshold()
-
-  if (votesThreshold > proposerVotes && !avoidMintingAndDelegating) {
-    //The proposer needs to have some delegated VOT3 to be able to create a proposal
-    await getVot3Tokens(proposer, (votesThreshold + BigInt(1)).toString())
-    // We also need to wait a block to update the proposer's votes snapshot
-    await waitForNextBlock()
-  }
-  const { vot3 } = await getOrDeployContractInstances({ forceDeploy: false })
-  // grant approval for governor to spend proposer's VOT3
-  await vot3.connect(proposer).approve(await governor.getAddress(), votesThreshold)
-
   const address = await contractToCall.getAddress()
   const encodedFunctionCall = ContractFactory.interface.encodeFunctionData(functionTocall, values)
 
   const tx = await governor
     .connect(proposer)
-    .propose([address], [0], [encodedFunctionCall], description, roundId.toString(), votesThreshold, {
+    .propose([address], [0], [encodedFunctionCall], description, roundId.toString(), 0, {
       gasLimit: 10_000_000,
     })
 
@@ -96,7 +80,6 @@ export const createProposalWithMultipleFunctions = async (
   description: string,
   functionsToCall: string[],
   args: any[],
-  avoidMintingAndDelegating: boolean = false, // in some scenarios we want the operation to fail if the proposer does not have enough VOT3
   roundId?: string,
 ) => {
   const { governor, emissions, xAllocationVoting } = await getOrDeployContractInstances({})
@@ -115,20 +98,6 @@ export const createProposalWithMultipleFunctions = async (
     roundId = ((await xAllocationVoting.currentRoundId()) + 1n).toString()
   }
 
-  const clock = await governor.clock()
-  const proposerVotes = await governor.getVotes(proposer, clock - BigInt(1))
-  const votesThreshold = await governor.depositThreshold()
-
-  if (votesThreshold > proposerVotes && !avoidMintingAndDelegating) {
-    //The proposer needs to have some delegated VOT3 to be able to create a proposal
-    await getVot3Tokens(proposer, (votesThreshold + BigInt(1)).toString())
-    // We also need to wait a block to update the proposer's votes snapshot
-    await waitForNextBlock()
-  }
-  const { vot3 } = await getOrDeployContractInstances({ forceDeploy: false })
-  // grant approval for governor to spend proposer's VOT3
-  await vot3.connect(proposer).approve(await governor.getAddress(), votesThreshold)
-
   // create a new proposal
   const tx = await governor.connect(proposer).propose(
     contractToCalls,
@@ -138,7 +107,7 @@ export const createProposalWithMultipleFunctions = async (
     }),
     description,
     roundId.toString(),
-    votesThreshold,
+    0,
     {
       gasLimit: 10_000_000,
     },
@@ -147,10 +116,10 @@ export const createProposalWithMultipleFunctions = async (
   return tx
 }
 
-export const getProposalIdFromTx = async (tx: ContractTransactionResponse) => {
+export const getProposalIdFromTx = async (tx: ContractTransactionResponse, depositPayed: boolean = false) => {
   const { governor } = await getOrDeployContractInstances({})
   const proposeReceipt = await tx.wait()
-  const event = proposeReceipt?.logs[3]
+  const event = depositPayed ? proposeReceipt?.logs[3] : proposeReceipt?.logs[2]
 
   const decodedLogs = governor.interface.parseLog({
     topics: [...(event?.topics as string[])],
@@ -158,6 +127,25 @@ export const getProposalIdFromTx = async (tx: ContractTransactionResponse) => {
   })
 
   return decodedLogs?.args[0]
+}
+
+export const payDeposit = async (proposalId: string, depositer: HardhatEthersSigner) => {
+  const { governor, vot3 } = await getOrDeployContractInstances({})
+
+  // get the proposal deposit amount
+  const proposalThreshold = await governor.proposalDepositThreshold(proposalId)
+
+  const vot3Balance = await vot3.balanceOf(depositer.address)
+
+  if (proposalThreshold > vot3Balance) {
+    //The proposer needs to have some delegated VOT3 to be able to create a proposal
+    await getVot3Tokens(depositer, ethers.formatEther(proposalThreshold))
+    // We also need to wait a block to update the proposer's votes snapshot
+    await waitForNextBlock()
+  }
+
+  await vot3.connect(depositer).approve(await governor.getAddress(), proposalThreshold)
+  await governor.connect(depositer).deposit(proposalThreshold, proposalId)
 }
 
 export const waitForVotingPeriodToEnd = async (proposalId: number) => {
@@ -201,7 +189,7 @@ export const waitForProposalToBeActive = async (proposalId: number): Promise<big
   return proposalState
 }
 
-// Mint some B3TR and swap for VOT3
+// Mint some B3TR and Convert B3TR for VOT3
 export const getVot3Tokens = async (receiver: HardhatEthersSigner, amount: string) => {
   const { b3tr, vot3, minterAccount } = await getOrDeployContractInstances({ forceDeploy: false })
 
@@ -212,7 +200,7 @@ export const getVot3Tokens = async (receiver: HardhatEthersSigner, amount: strin
   await b3tr.connect(receiver).approve(await vot3.getAddress(), ethers.parseEther(amount))
 
   // Lock B3TR to get VOT3
-  await vot3.connect(receiver).stake(ethers.parseEther(amount))
+  await vot3.connect(receiver).convertToVOT3(ethers.parseEther(amount))
 }
 
 export const createProposalAndExecuteIt = async (
@@ -234,8 +222,9 @@ export const createProposalAndExecuteIt = async (
 
   // create a new proposal
   // console.log("Creating proposal");
-  const tx = await createProposal(contractToCall, Contract, proposer, description, functionToCall, args, false, roundId)
+  const tx = await createProposal(contractToCall, Contract, proposer, description, functionToCall, args, roundId)
   const proposalId = await getProposalIdFromTx(tx)
+  await payDeposit(proposalId, proposer)
 
   // wait
   // console.log("Waiting for voting period to start");
@@ -312,6 +301,8 @@ export const createProposalWithMultipleFunctionsAndExecuteIt = async (
   )
 
   const proposalId = await getProposalIdFromTx(tx)
+
+  await payDeposit(proposalId, proposer)
 
   // wait
   // console.log("Waiting for voting period to start");
@@ -528,8 +519,11 @@ export const participateInGovernanceVoting = async (
   await getVot3Tokens(user, "1")
   await getVot3Tokens(admin, "1000")
 
-  const tx = await createProposal(contractToCall, Contract, admin, description, functionToCall, args, false)
+  const tx = await createProposal(contractToCall, Contract, admin, description, functionToCall, args)
   const proposalId = await getProposalIdFromTx(tx)
+
+  // pay for the deposit
+  await payDeposit(proposalId, admin)
 
   await waitForProposalToBeActive(proposalId)
 

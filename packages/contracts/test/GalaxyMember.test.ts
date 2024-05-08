@@ -11,6 +11,7 @@ import {
   getProposalIdFromTx,
   getVot3Tokens,
   participateInAllocationVoting,
+  payDeposit,
   upgradeNFTtoLevel,
   waitForCurrentRoundToEnd,
   waitForProposalToBeActive,
@@ -451,6 +452,14 @@ describe("Galaxy Member", () => {
         ]),
       ).to.be.reverted
     })
+
+    it("Should return correct version of the contract", async () => {
+      const { galaxyMember } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await galaxyMember.version()).to.equal("1")
+    })
   })
 
   describe("Minting", () => {
@@ -616,6 +625,7 @@ describe("Galaxy Member", () => {
       // Now we can create a new proposal
       const tx = await createProposal(b3tr, B3trContract, otherAccount, "", "tokenDetails", [])
       const proposalId = await getProposalIdFromTx(tx)
+      await payDeposit(proposalId, otherAccount)
       await waitForProposalToBeActive(proposalId)
       // Now we can vote
       await governor.connect(voter).castVote(proposalId, 1)
@@ -649,6 +659,8 @@ describe("Galaxy Member", () => {
       // Now we can create a new proposal
       const tx = await createProposal(b3tr, B3trContract, otherAccount, "", "tokenDetails", [])
       const proposalId = await getProposalIdFromTx(tx)
+      await payDeposit(proposalId, otherAccount)
+
       await waitForProposalToBeActive(proposalId)
       // Now we can vote
       await governor.connect(voter).castVote(proposalId, 1)

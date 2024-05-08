@@ -103,7 +103,7 @@ abstract contract RoundsStorageUpgradeable is Initializable, XAllocationVotingGo
     round.voteStart = SafeCast.toUint48(snapshot);
     round.voteDuration = SafeCast.toUint32(duration);
 
-    emit RoundCreated(roundId, proposer, snapshot, snapshot + duration);
+    emit RoundCreated(roundId, proposer, snapshot, snapshot + duration, apps);
 
     // Using a named return variable to avoid stack too deep errors
   }

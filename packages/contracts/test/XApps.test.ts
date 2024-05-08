@@ -78,6 +78,14 @@ describe("X-Apps", function () {
       expect(newImplAddress.toUpperCase()).to.eql(currentImplAddress.toUpperCase())
       expect(newImplAddress.toUpperCase()).to.not.eql((await implementation.getAddress()).toUpperCase())
     })
+
+    it("Should return correct version of the contract", async () => {
+      const { x2EarnApps } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await x2EarnApps.version()).to.equal("1")
+    })
   })
 
   describe("Settings", function () {
@@ -245,20 +253,19 @@ describe("X-Apps", function () {
       expect(apps.length).to.eql(2)
     })
 
-    // Test is disabled because it takes a bit too long to run
-    console.log("Skipping test: Can index up to 1300 apps")
-    // it("Can index up to 1300 apps", async function () {
-    //   const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+    it("Can index up to 1300 apps", async function () {
+      console.log("Test is disabled because it takes a bit too long to run")
+      // const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
 
-    //   for (let i = 0; i < 1300; i++) {
-    //     await x2EarnApps
-    //       .connect(owner)
-    //       .addApp(otherAccounts[1].address, otherAccounts[1].address, "My app" + i, "metadataURI")
-    //   }
+      // for (let i = 0; i < 1300; i++) {
+      //   await x2EarnApps
+      //     .connect(owner)
+      //     .addApp(otherAccounts[1].address, otherAccounts[1].address, "My app" + i, "metadataURI")
+      // }
 
-    //   const apps = await x2EarnApps.apps()
-    //   expect(apps.length).to.eql(1300)
-    // })
+      // const apps = await x2EarnApps.apps()
+      // expect(apps.length).to.eql(1300)
+    })
   })
 
   describe("App availability for allocation voting", function () {

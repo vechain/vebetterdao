@@ -7,11 +7,11 @@ export function createSoloStagingConfig() {
     NEXT_PUBLIC_APP_ENV: "solo-staging",
 
     B3TR_CAP: 3_750_000, // 3_750_000 -> 3.75 million B3TR tokens for pilot show
-    B3TR_GOVERNOR_QUORUM_PERCENTAGE: 4, // 4 -> Need 4% of voters to pass
-    B3TR_GOVERNOR_MIN_DELAY: 30, //after a vote passes, you have 5 min before you can queue the proposal
-    B3TR_GOVERNOR_PROPOSAL_THRESHOLD: 1000, // How many votes are needed to create a proposal
+    B3TR_GOVERNOR_QUORUM_PERCENTAGE: 51, // Need 51% of voters to pass
+    B3TR_GOVERNOR_MIN_DELAY: 30, // wait period before executing a proposal after it was queued, 5 minutes
+    B3TR_GOVERNOR_DEPOSIT_THRESHOLD: 2, // Percentage of total B3TR supply needed to be deposited to create a proposal
     B3TR_GOVERNOR_VOTING_THRESHOLD: BigInt("1000000000000000000"), // 1 vote
-    B3TR_GOVERNOR_MIN_VOTING_DELAY: 30, // 5 minutes
+    B3TR_GOVERNOR_MIN_VOTING_DELAY: 60, // 10 minutes
     /*
       For ambiguous functions (functions with same name), the function signature is used to differentiate them
       e.g., instead of using "setVoterRewards", we use "setVoterRewards(address)"
@@ -25,7 +25,7 @@ export function createSoloStagingConfig() {
         "setIsFunctionRestrictionEnabled",
         "updateQuorumNumerator",
         "updateDelay",
-        "setDepositThreshold",
+        "setDepositThresholdPercentage",
         "setVotingThreshold",
       ],
       Treasury: ["transferB3TR"],
@@ -38,7 +38,7 @@ export function createSoloStagingConfig() {
       X2EarnApps: ["addApp", "setVotingEligibility"],
     },
 
-    EMISSIONS_CYCLE_DURATION: 30, // blocks - 30 blocks - 5 minutes.
+    EMISSIONS_CYCLE_DURATION: 60, // blocks - 10 minutes.
     EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE: 4, // 4% decay every cycle
     EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE: 20, // 20% decay every cycle
     EMISSIONS_X_ALLOCATION_DECAY_PERIOD: 999999, // should never decay in pilot show
@@ -49,8 +49,8 @@ export function createSoloStagingConfig() {
     X_ALLOCATION_VOTING_QUORUM_PERCENTAGE: 40, // 40 -> Need 40% of total supply to succeed
     X_ALLOCATION_VOTING_VOTING_THRESHOLD: BigInt("1000000000000000000"), // 1 vote
 
-    X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE: 30, // min amount of X tokens that a project will get each round
-    X_ALLOCATION_POOL_APP_SHARES_MAX_CAP: 20, // an app can get max % in allocation round
+    X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE: 30, // % of tokens from each round that are equally distributed to all apps
+    X_ALLOCATION_POOL_APP_SHARES_MAX_CAP: 20, // max % votes an app can receive in a round
 
     CONTRACTS_ADMIN_ADDRESS: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa", //1st account from mnemonic of solo network
     VOTE_2_EARN_POOL_ADDRESS: "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68", //2nd account from mnemonic of solo network
@@ -115,5 +115,13 @@ export function createSoloStagingConfig() {
     VOTER_REWARDS_MULTIPLIER: [0, 10, 20, 50, 100, 150, 200, 400, 900, 2400],
 
     XAPP_BASE_URI: "ipfs://",
+
+    /*
+      Token transfer limits. These values are not final and are for testing purposes only.
+    */
+    TREASURY_TRANSFER_LIMIT_VET: BigInt("200000000000000000000000"), // 200,000 VET
+    TREASURY_TRANSFER_LIMIT_B3TR: BigInt("500000000000000000000000"), // 50,000 B3TR
+    TREASURY_TRANSFER_LIMIT_VTHO: BigInt("3000000000000000000000000"), // 3,000,000 VTHO
+    TREASURY_TRANSFER_LIMIT_VOT3: BigInt("500000000000000000000000"), // 50,000 VOT3
   })
 }

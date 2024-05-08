@@ -5,6 +5,9 @@ pragma solidity ^0.8.20;
 
 import { IERC165 } from "@openzeppelin/contracts/interfaces/IERC165.sol";
 import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
+import { IB3TR } from "./IB3TR.sol";
+import { IVoterRewards } from "../interfaces/IVoterRewards.sol";
+import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGovernor.sol";
 
 /**
  * @dev Interface of the {B3TRGovernor} core.
@@ -129,6 +132,16 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   error GovernorInvalidDepositAmount();
 
   /**
+   * @dev The deposit threshold is not in the valid range for a percentage - 0 to 100.
+   */
+  error GovernorDepositThresholdNotInRange(uint256 depositThreshold);
+
+  /**
+   * @dev User is not authorized to perform the action.
+   */
+  error UnauthorizedAccess(address user);
+
+  /**
    * @dev Emitted when a proposal is created
    */
   event ProposalCreated(
@@ -139,7 +152,8 @@ interface IB3TRGovernor is IERC165, IERC6372 {
     string[] signatures,
     bytes[] calldatas,
     string description,
-    uint256 indexed roundIdVoteStart
+    uint256 indexed roundIdVoteStart,
+    uint256 depositThreshold
   );
 
   /**
@@ -238,9 +252,33 @@ interface IB3TRGovernor is IERC165, IERC6372 {
 
   /**
    * @notice module:core
+   * @dev The B3TR contract address
+   */
+  function b3tr() external view returns (IB3TR);
+
+  /**
+   * @notice module:core
+   * @dev Getter for the VoterRewards contract
+   */
+  function voterRewards() external view returns (IVoterRewards);
+
+  /**
+   * @notice module:core
+   * @dev Getter for the XAllocationVoting contract
+   */
+  function xAllocationVoting() external view returns (IXAllocationVotingGovernor);
+
+  /**
+   * @notice module:core
    * @dev The number of votes in support of a proposal required in order for a proposal to become active.
    */
   function depositThreshold() external view returns (uint256);
+
+  /**
+   * @notice module:core
+   * @dev The deposit threshold percentage of the total supply of B3TR tokens that need to be deposited to create a proposal
+   */
+  function depositThresholdPercentage() external view returns (uint256);
 
   /**
    * @notice module:core

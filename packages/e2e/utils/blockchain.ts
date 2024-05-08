@@ -56,8 +56,8 @@ const ERC20_approve_abi = JSON.stringify([{
       type: "function"
 }])
 
-// VOT3 stake function ABI
-const VOT3_stake_abi = JSON.stringify([{
+// VOT3 convertToVOT3 function ABI
+const VOT3_convertToVOT3_abi = JSON.stringify([{
     inputs: [
         {
           internalType: "uint256",
@@ -65,7 +65,7 @@ const VOT3_stake_abi = JSON.stringify([{
           type: "uint256"
         }
       ],
-      name: "stake",
+      name: "convertToVOT3",
       outputs: [],
       stateMutability: "nonpayable",
       type: "function"
@@ -221,12 +221,12 @@ const fundB3TR = async (address: string, amount: BigNumber) => {
 
 
 /**
- * Swap B3TR for VOT3
+ * Convert B3TR for VOT3
  * @param privateKey Private key of account
  * @param address Address of account
- * @param amount Amount of B3TR to swap (this is a decimal value)
+ * @param amount Amount of B3TR to convert (this is a decimal value)
  */
-const swapB3TRForVOT3 = async (privateKey: Buffer, address: string, amount: BigNumber) => {
+const convertB3TRForVOT3 = async (privateKey: Buffer, address: string, amount: BigNumber) => {
     // approve VOT3 contract to spend B3TR
     const httpClient = new HttpClient(constants.THOR_URL)
     const thorClient = new ThorClient(httpClient)
@@ -234,10 +234,10 @@ const swapB3TRForVOT3 = async (privateKey: Buffer, address: string, amount: BigN
     const approveClause = clauseBuilder.functionInteraction(constants.B3TR_CONTRACT_ADDRESS,
         coder.createInterface(ERC20_approve_abi).getFunction("approve") as FunctionFragment,
         [constants.VOT3_CONTRACT_ADDRESS, amount.multipliedBy(constants.TOKEN_DECIMALS).toString()])
-    const stakeClause = clauseBuilder.functionInteraction(constants.VOT3_CONTRACT_ADDRESS,
-        coder.createInterface(VOT3_stake_abi).getFunction("stake") as FunctionFragment,
+    const convertToVOT3clause = clauseBuilder.functionInteraction(constants.VOT3_CONTRACT_ADDRESS,
+        coder.createInterface(VOT3_convertToVOT3_abi).getFunction("convertToVOT3") as FunctionFragment,
         [amount.multipliedBy(constants.TOKEN_DECIMALS).toString()])
-    const clauses = [approveClause, stakeClause]
+    const clauses = [approveClause, convertToVOT3clause]
     const gasResult = await thorClient.gas.estimateGas(clauses, address, {gasPadding: 0.1})
     const latestBlock = await thorClient.blocks.getBestBlockCompressed()
     const transactionBody = {
@@ -253,13 +253,13 @@ const swapB3TRForVOT3 = async (privateKey: Buffer, address: string, amount: BigN
     const rawNormalSigned = TransactionHandler.sign(transactionBody, privateKey).encoded
     const send = await thorClient.transactions.sendRawTransaction(`0x${rawNormalSigned.toString('hex')}`)
     const txId = send.id
-    console.log(`Swap transfer transaction ID: ${txId}`)
+    console.log(`Convert transfer transaction ID: ${txId}`)
     const txModule = new TransactionsModule(thorClient)
     const waitTx = await txModule.waitForTransaction(txId, {intervalMs: constants.TX_RECEIPT_INTERVAL, timeoutMs: constants.TX_RECEIPT_TIMEOUT})
     const txReceipt = waitTx ?? (() => { throw new Error('Unable to get transaction receipt') })()
-    console.log(`Swap transfer transaction reverted: ${txReceipt.reverted}`)
+    console.log(`Convert transfer transaction reverted: ${txReceipt.reverted}`)
     if (txReceipt.reverted) {
-        throw new Error(`Swap transfer transaction reverted: ${txId}`)
+        throw new Error(`Convert transfer transaction reverted: ${txId}`)
     }
 }
 
@@ -284,9 +284,9 @@ const fundAccount = async (account_index: number, min_b3tr=constants.FUNDING_MIN
     if (totalNeeded.isGreaterThan(0)) {
         // transfer B3TR to account
         await blockchainUtils.fundB3TR(address, totalNeeded)
-        // swap B3TR for VOT3
+        // Convert B3TR for VOT3
         if (vot3Needed.isGreaterThan(0)) {
-            await blockchainUtils.swapB3TRForVOT3(privateKey, address, vot3Needed)
+            await blockchainUtils.convertB3TRForVOT3(privateKey, address, vot3Needed)
         }
     }
     console.log(`Account ${address} seeded`)
@@ -367,7 +367,7 @@ const blockchainUtils = {
     fundVTHO,
     fundB3TR,
     fundAccount,
-    swapB3TRForVOT3,
+    convertB3TRForVOT3,
     getRndAccountIndex,
     waitForNextCycle
 }

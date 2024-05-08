@@ -39,9 +39,11 @@ import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
 
 /**
  * @title XAllocationPool
- * @notice This contracts allows x2earn apps to withdraw their funds from the allocation rounds.
- *
- * The contract is using AccessControl to handle roles for upgrading the contract.
+ * @notice This contract is the receiver and distributor of weekly B3TR emissions for x2earn apps.
+ * Funds can be claimed by the X2Earn apps at the end of each allocation round
+ * @dev Interacts with the Emissions contract to get the amount of B3TR available for distribution in each round,
+ * and the x2EarnApps contract to check app existence and receiver address.
+ * @dev The contract is using AccessControl to handle roles for upgrading the contract and external contract addresses.
  */
 contract XAllocationPool is
   Initializable,
@@ -78,6 +80,15 @@ contract XAllocationPool is
     _disableInitializers();
   }
 
+  /**
+   * @dev Initializes the contract.
+   *
+   * @param _admin The address of the admin.
+   * @param upgrader The address of the upgrader.
+   * @param _b3trAddress The address of the B3TR token.
+   * @param _treasury The address of the VeBetterDAO treasury.
+   * @param _x2EarnApps The address of the x2EarnApps contract.
+   */
   function initialize(
     address _admin,
     address upgrader,
@@ -102,45 +113,91 @@ contract XAllocationPool is
     _grantRole(UPGRADER_ROLE, upgrader);
   }
 
+  // @dev Emit when the xAllocationVoting contract is set
+  event XAllocationVotingSet(address oldContractAddress, address newContractAddress);
+  // @dev Emit when the emissions contract is set
+  event EmissionsContractSet(address oldContractAddress, address newContractAddress);
+  // @dev Emit when the treasury contract is set
+  event TreasuryContractSet(address oldContractAddress, address newContractAddress);
+  // @dev Emit when the x2EarnApps contract is set
+  event X2EarnAppsContractSet(address oldContractAddress, address newContractAddress);
+  // @dev Emit when the B3TR contract is set
+  event B3trContractSet(address oldContractAddress, address newContractAddress);
+
+  // ---------- Authorizers ---------- //
+
   function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
   // ---------- Setters ---------- //
 
+  /**
+   * @dev Set the address of the XAllocationVotingGovernor contract.
+   */
   function setXAllocationVotingAddress(address xAllocationVoting_) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(xAllocationVoting_ != address(0), "XAllocationPool: new xAllocationVoting is the zero address");
 
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     $._xAllocationVoting = IXAllocationVotingGovernor(xAllocationVoting_);
+
+    emit XAllocationVotingSet(address($._xAllocationVoting), xAllocationVoting_);
   }
 
+  /**
+   * @dev Set the address of the emissions contract.
+   */
   function setEmissionsAddress(address emissions_) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(emissions_ != address(0), "XAllocationPool: new emissions is the zero address");
 
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     $._emissions = IEmissions(emissions_);
+
+    emit EmissionsContractSet(address($._emissions), emissions_);
   }
 
+  /**
+   * @dev Set the address of the treasury contract.
+   */
   function setTreasuryAddress(address treasury_) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(treasury_ != address(0), "XAllocationPool: new treasury is the zero address");
 
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     $.treasury = ITreasury(treasury_);
+
+    emit TreasuryContractSet(address($.treasury), treasury_);
   }
 
+  /**
+   * @dev Set the address of the B3TR token contract.
+   */
   function setB3trAddress(address b3tr_) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(b3tr_ != address(0), "XAllocationPool: new b3tr is the zero address");
 
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     $.b3tr = IB3TR(b3tr_);
+
+    emit B3trContractSet(address($.b3tr), b3tr_);
   }
 
+  /**
+   * @dev Set the address of the x2EarnApps contract.
+   */
   function setX2EarnAppsAddress(address x2EarnApps_) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(x2EarnApps_ != address(0), "XAllocationPool: new x2EarnApps is the zero address");
 
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     $.x2EarnApps = IX2EarnApps(x2EarnApps_);
+
+    emit X2EarnAppsContractSet(address($.x2EarnApps), x2EarnApps_);
   }
 
+  /**
+   * @dev Claim the rewards for an app in a given round.
+   * Anyone can call this function. Round must be valid and app must exist.
+   * Unallocated rewards for each app will be sent to the VeBetterDAO treasury.
+   *
+   * @param roundId The round ID from XAllocationVoting contract for which to claim the rewards.
+   * @param appId The ID of the app from X2EarnApps contract for which to claim the rewards.
+   */
   function claim(uint256 roundId, bytes32 appId) public nonReentrant {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
 
@@ -183,14 +240,20 @@ contract XAllocationPool is
    * @param roundId The round ID for which to calculate the amount available for allocation.
    */
   function _emissionAmount(uint256 roundId) internal view returns (uint256) {
-    require(emissions() != IEmissions(address(0)), "Emissions contract not set");
+    IEmissions _emissions = emissions();
+    require(_emissions != IEmissions(address(0)), "Emissions contract not set");
 
     // Amount available for this round (assuming the amount is already scaled by 1e18 for precision)
-    return emissions().getXAllocationAmount(roundId);
+    return _emissions.getXAllocationAmount(roundId);
   }
 
   /**
    * @dev Returns the amount of $B3TR to be distrubuted to either the app or the treasury.
+   * The amount is calculated based on the share of votes the app received.
+   * The amount is scaled by 1e18 for precision.
+   *
+   * @param roundId The round ID for which to calculate the amount available for allocation.
+   * @param share The percentage of the total votes the app received.
    */
   function _rewardAmount(uint256 roundId, uint256 share) internal view returns (uint256) {
     uint256 total = _emissionAmount(roundId);
@@ -205,7 +268,7 @@ contract XAllocationPool is
   // ---------- Getters ---------- //
 
   /**
-   * How much an app can claim for a given round.
+   * @dev Get how much an app can claim for a given round.
    *
    * @param roundId The round ID for which to calculate the amount available for allocation.
    * @param appId The ID of the app for which to calculate the amount available for allocation.
@@ -220,39 +283,40 @@ contract XAllocationPool is
   }
 
   /**
-   * The allocations distribution from the X-Allocation Pool to X-Apps will be in two parts:
-   * - `baseAllocationPercentage` of allocations will be on average distributed to each qualified X Application
-   *    as the base part of the allocation (so all the x-apps in the ecosystem will receive a minimum amount of $B3TR)
-   * - `variableAllocationPercentage` of allocations will be distributed based on the % portion received from entire votes
+   * @dev The amount of allocation to distribute to the apps is calculated in two parts:
+   * - There is a minimum amount calculated through the `baseAllocationPercentage` of total available funds for the round divided by the number of eligible apps
+   * - There is a variable amount (calculated upon the `variableAllocationPercentage` of total available funds) that depends on the amounts of votes that an app receives.
+   * There is a cap to how much each x-app will be able to receive each round. Unallocated amount is calculated when the app share is greater than the max share an app get have.
    *
-   * If a round failed then it will calculate the shares against the last successful round.
-   * If a round is active then results should be treated as real time estimation and not final.
+   * If a round fails then we calculate the % of received votes (shares) against the previous succeeded round.
+   * If a round is succeeded then we calculate the % of received votes (shares) against it.
+   * If a round is active then results should be treated as real time estimation and not final results, since voting is still in progress.
+   *
    * @param roundId The round ID for which to calculate the amount available for allocation.
    * @param appId The ID of the app for which to calculate the amount available for allocation.
+   *
    * @return appShare The percentage of the total votes the app received.
    * @return unallocatedShare The percentage of the total votes that were not allocated to the app.
    */
   function roundEarnings(uint256 roundId, bytes32 appId) public view returns (uint256, uint256) {
-    require(
-      xAllocationVoting() != IXAllocationVotingGovernor(address(0)),
-      "XAllocationVotingGovernor contract not set"
-    );
+    IXAllocationVotingGovernor _xAllocationVoting = xAllocationVoting();
+
+    require(_xAllocationVoting != IXAllocationVotingGovernor(address(0)), "XAllocationVotingGovernor contract not set");
 
     // if app did not participate in the round, return 0
-    if (!xAllocationVoting().isEligibleForVote(appId, roundId)) {
+    if (!_xAllocationVoting.isEligibleForVote(appId, roundId)) {
       return (0, 0);
     }
 
     uint256 lastSucceededRoundId;
-    IXAllocationVotingGovernor.RoundState state = xAllocationVoting().state(roundId);
+    IXAllocationVotingGovernor.RoundState state = _xAllocationVoting.state(roundId);
     if (
       state == IXAllocationVotingGovernor.RoundState.Active || state == IXAllocationVotingGovernor.RoundState.Succeeded
     ) {
       lastSucceededRoundId = roundId;
     } else {
       // The first round is always considered as the last succeeded round
-      // the round where previous round is pointing is the one we need
-      lastSucceededRoundId = roundId == 1 ? roundId : xAllocationVoting().latestSucceededRoundId(roundId - 1);
+      lastSucceededRoundId = roundId == 1 ? roundId : _xAllocationVoting.latestSucceededRoundId(roundId - 1);
     }
 
     (uint256 appShare, uint256 unallocatedShare) = getAppShares(lastSucceededRoundId, appId);
@@ -267,34 +331,37 @@ contract XAllocationPool is
   }
 
   /**
-   * Fetches the id of the current round and calculates the earnings.
+   * @dev Fetches the id of the current round and calculates the earnings.
+   * Usually when calling this function round is active, and the results should be treated as real time estimation and not final results.
+   * If round ends and a new round did not start yet, then the results can be considered final.
+   *
+   * @param appId The ID of the app for which to calculate the amount available for allocation.
    */
   function currentRoundEarnings(bytes32 appId) public view returns (uint256) {
-    require(
-      xAllocationVoting() != IXAllocationVotingGovernor(address(0)),
-      "XAllocationVotingGovernor contract not set"
-    );
+    IXAllocationVotingGovernor _xAllocationVoting = xAllocationVoting();
 
-    uint256 roundId = xAllocationVoting().currentRoundId();
+    require(_xAllocationVoting != IXAllocationVotingGovernor(address(0)), "XAllocationVotingGovernor contract not set");
+
+    uint256 roundId = _xAllocationVoting.currentRoundId();
 
     (uint256 earnings, ) = roundEarnings(roundId, appId);
     return earnings;
   }
 
   /**
+   * @dev Calculate the minimum amount of $B3TR that will be distributed to each qualified X Application in a given round.
    * `baseAllocationPercentage`% of allocations will be on average distributed to each qualified X Application as the base
    * part of the allocation (so all the x-apps in the ecosystem will receive a minimum amount of $B3TR).
    */
   function baseAllocationAmount(uint256 roundId) public view returns (uint256) {
-    require(
-      xAllocationVoting() != IXAllocationVotingGovernor(address(0)),
-      "XAllocationVotingGovernor contract not set"
-    );
+    IXAllocationVotingGovernor _xAllocationVoting = xAllocationVoting();
+
+    require(_xAllocationVoting != IXAllocationVotingGovernor(address(0)), "XAllocationVotingGovernor contract not set");
 
     uint256 total = _emissionAmount(roundId);
-    bytes32[] memory eligibleApps = xAllocationVoting().getAppIdsOfRound(roundId);
+    bytes32[] memory eligibleApps = _xAllocationVoting.getAppIdsOfRound(roundId);
 
-    uint256 available = (total * xAllocationVoting().getRoundBaseAllocationPercentage(roundId)) / 100;
+    uint256 available = (total * _xAllocationVoting.getRoundBaseAllocationPercentage(roundId)) / 100;
 
     uint256 amountPerApp = available / eligibleApps.length;
     return amountPerApp;
@@ -302,26 +369,25 @@ contract XAllocationPool is
 
   /**
    * @dev Returns the scaled quadratic funding percentage of votes for a given app in a given round.
+   * When calculating the percentage of votes received we check if the app exceeds the max cap of shares, eg:
+   * if an app has 80 votes out of 100, and the max cap is 50, then the app will have a share of 50% of the available funds.
+   * The remaining 30% will be sent to the treasury.
    *
-   * The maximum of each project is X% of the 70% of allocations (from the previous point).
-   * That means there will be a cap to how much each x-app will be able to receive each round.
-   * That means at least there will be 6 projects participating in voting every week.
-   * Any distribution left in this pool will be allocated by DAO voting (BD pool or marketing or tech reserve, etc.)
-   *
+   * @param roundId The round ID for which to calculate the amount of votes received in percentage.
+   * @param appId The ID of the app.
    */
   function getAppShares(uint256 roundId, bytes32 appId) public view returns (uint256, uint256) {
-    require(
-      xAllocationVoting() != IXAllocationVotingGovernor(address(0)),
-      "XAllocationVotingGovernor contract not set"
-    );
+    IXAllocationVotingGovernor _xAllocationVoting = xAllocationVoting();
+
+    require(_xAllocationVoting != IXAllocationVotingGovernor(address(0)), "XAllocationVotingGovernor contract not set");
 
     // if app did not participate in the round, return 0
-    if (!xAllocationVoting().isEligibleForVote(appId, roundId)) {
+    if (!_xAllocationVoting.isEligibleForVote(appId, roundId)) {
       return (0, 0);
     }
 
-    uint256 totalVotesQF = xAllocationVoting().totalVotesQF(roundId);
-    uint256 appVotesQF = xAllocationVoting().getAppVotesQF(roundId, appId);
+    uint256 totalVotesQF = _xAllocationVoting.totalVotesQF(roundId);
+    uint256 appVotesQF = _xAllocationVoting.getAppVotesQF(roundId, appId);
 
     uint256 appVotesQFValue = appVotesQF * appVotesQF;
 
@@ -334,7 +400,7 @@ contract XAllocationPool is
     uint256 unallocatedShare = 0;
 
     // Cap the app share to the maximum variable allocation percentage so even if an app has 80 votes out of 100,
-    // it will still get a max of `appSharesCap` percentage of the available funds
+    // it will still get only a max of `appSharesCap` percentage of the available funds
     uint256 _allocationRewardMaxCap = scaledAppSharesCap(roundId);
     if (appShare > _allocationRewardMaxCap) {
       unallocatedShare = appShare - _allocationRewardMaxCap;
@@ -345,6 +411,12 @@ contract XAllocationPool is
     return (appShare, unallocatedShare);
   }
 
+  /**
+   * @dev Check if app has already claimed the rewards for a given round.
+   *
+   * @param roundId The round ID for which to check if the app has claimed the rewards.
+   * @param appId The ID of the app.
+   */
   function claimed(uint256 roundId, bytes32 appId) public view returns (bool) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     return $.claimedRewards[appId][roundId];
@@ -353,6 +425,8 @@ contract XAllocationPool is
   /**
    * @dev Returns the maximum app shares cap scaled by 1e2 for precision since our
    * shares calculation is scaled by 1e4.
+   *
+   * @param roundId The round ID
    */
   function scaledAppSharesCap(uint256 roundId) public view returns (uint256) {
     return xAllocationVoting().getRoundAppSharesCap(roundId) * 1e2;
@@ -360,6 +434,8 @@ contract XAllocationPool is
 
   /**
    * @dev Returns the maximum amount an app can claim for a given round.
+   *
+   * @param roundId The round ID
    */
   function getMaxAppAllocation(uint256 roundId) public view returns (uint256) {
     uint256 roundBaseAllocationAmount = baseAllocationAmount(roundId);
@@ -383,18 +459,36 @@ contract XAllocationPool is
     return $._emissions;
   }
 
+  /**
+   * @dev Returns the emissions contract.
+   */
   function treasury() public view returns (ITreasury) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     return $.treasury;
   }
 
+  /**
+   * @dev Returns the b3tr contract.
+   */
   function b3tr() public view returns (IB3TR) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     return $.b3tr;
   }
 
+  /**
+   * @dev Returns the x2EarnApp contract.
+   */
   function x2EarnApps() public view returns (IX2EarnApps) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     return $.x2EarnApps;
+  }
+
+  /**
+   * @notice Returns the version of the contract
+   * @dev Version of the governor instance (used in building the ERC712 domain separator). Default: "1"
+   * @return sting The version of the contract
+   */
+  function version() public pure virtual returns (string memory) {
+    return "1";
   }
 }

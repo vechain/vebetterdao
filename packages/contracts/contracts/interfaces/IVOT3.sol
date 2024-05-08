@@ -146,9 +146,9 @@ interface IVOT3 {
 
   function revokeRole(bytes32 role, address account) external;
 
-  function stake(uint256 amount) external;
+  function convertToVOT3(uint256 amount) external;
 
-  function stakedBalanceOf(address account) external view returns (uint256);
+  function convertedB3trOf(address account) external view returns (uint256);
 
   function supportsInterface(bytes4 interfaceId) external view returns (bool);
 
@@ -162,11 +162,13 @@ interface IVOT3 {
 
   function unpause() external;
 
-  function unstake(uint256 amount) external;
+  function convertToB3TR(uint256 amount) external;
 
   function getQuadraticVotingPower(address account) external view returns (uint256);
 
   function getPastQuadraticVotingPower(address account, uint256 timepoint) external view returns (uint256);
+
+  function version() external view returns (string memory);
 }
 
 interface Checkpoints {
