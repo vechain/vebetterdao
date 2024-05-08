@@ -23,7 +23,7 @@ export const AdminPermissions = () => {
     isAdminOfEmissions,
     isAdminOfXAllocationVoting,
     isAdminOfXAllocationPool,
-    isAdminOfDAO,
+    isAdminOfB3TRGovernor,
     isAdminOfGalaxyMember,
     isAdminOfVot3,
     isAdminOfVoterRewards,
@@ -74,7 +74,7 @@ export const AdminPermissions = () => {
                   <Td>{isAdminOfB3tr ? "Yes" : "No"}</Td>
                   <Td>{isAdminOfVot3 ? "Yes" : "No"}</Td>
                   <Td>{isAdminOfEmissions ? "Yes" : "No"}</Td>
-                  <Td>{isAdminOfDAO ? "Yes" : "No"}</Td>
+                  <Td>{isAdminOfB3TRGovernor ? "Yes" : "No"}</Td>
                   <Td>{isAdminOfTimeLock ? "Yes" : "No"}</Td>
                   <Td>{isAdminOfGalaxyMember ? "Yes" : "No"}</Td>
                   <Td>{isAdminOfVoterRewards ? "Yes" : "No"}</Td>
