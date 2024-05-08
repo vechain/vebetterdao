@@ -167,6 +167,7 @@ export const NewProposalForm: React.FC<Props> = ({
               field={field}
               index={index}
               register={register}
+              control={control}
               errors={errors}
               isDisabled={isDisabled}
             />

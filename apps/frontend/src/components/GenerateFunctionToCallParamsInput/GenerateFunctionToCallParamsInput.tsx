@@ -1,5 +1,14 @@
-import { FormControl, FormErrorMessage, FormLabel, FormLabelProps, Input, InputProps, Stack } from "@chakra-ui/react"
-import { FieldError, FieldErrorsImpl, Merge, UseFormRegister } from "react-hook-form"
+import {
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+  FormLabelProps,
+  Input,
+  InputProps,
+  Select,
+  SelectProps,
+} from "@chakra-ui/react"
+import { Control, Controller, FieldError, FieldErrorsImpl, Merge, UseFormRegister } from "react-hook-form"
 import { AddressUtils } from "@repo/utils"
 import { useMemo } from "react"
 import { FormData as ProposalFunctionFormData } from "@/app/proposals/new/form/functions/details/components/NewProposalForm"
@@ -17,8 +26,10 @@ type Props = {
   error?: FieldError | Merge<FieldError, FieldErrorsImpl<any>> | undefined
   register: UseFormRegister<ProposalFunctionFormData>
   inputProps?: InputProps
+  selectProps?: SelectProps
   formLabelProps?: FormLabelProps
   humanizeLabels?: boolean
+  control: Control<ProposalFunctionFormData, any>
 }
 
 export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
@@ -28,8 +39,10 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
   error,
   register,
   inputProps = {},
+  selectProps = {},
   formLabelProps = {},
   humanizeLabels = true,
+  control,
 }) => {
   const label = useMemo(() => {
     if (humanizeLabels) {
@@ -79,6 +92,29 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
             valueAsNumber: true,
           })}
           {...inputProps}
+        />
+        <FormErrorMessage>{error && error.message?.toString()}</FormErrorMessage>
+      </FormControl>
+    )
+  }
+  if (field.type === "bool") {
+    return (
+      <FormControl isInvalid={!!error}>
+        <FormLabel {...formLabelProps}>{label}</FormLabel>
+        <Controller
+          name={`actions.${actionIndex}.params.${index}.value`}
+          control={control}
+          defaultValue={false}
+          render={({ field }) => (
+            <Select
+              placeholder="Select value..."
+              value={field.value}
+              onChange={e => field.onChange(e.target.value === "true")}
+              {...selectProps}>
+              <option value="true">True</option>
+              <option value="false">False</option>
+            </Select>
+          )}
         />
         <FormErrorMessage>{error && error.message?.toString()}</FormErrorMessage>
       </FormControl>
