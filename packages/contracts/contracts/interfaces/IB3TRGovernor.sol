@@ -137,6 +137,11 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   error GovernorDepositThresholdNotInRange(uint256 depositThreshold);
 
   /**
+   * @dev User is not authorized to perform the action.
+   */
+  error UnauthorizedAccess(address user);
+
+  /**
    * @dev Emitted when a proposal is created
    */
   event ProposalCreated(

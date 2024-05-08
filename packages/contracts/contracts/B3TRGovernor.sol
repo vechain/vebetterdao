@@ -75,8 +75,6 @@ contract B3TRGovernor is
 {
   bytes32 public constant GOVERNOR_FUNCTIONS_SETTINGS_ROLE = keccak256("GOVERNOR_FUNCTIONS_SETTINGS_ROLE");
 
-  error UnauthorizedAccess(address user);
-
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
@@ -138,7 +136,112 @@ contract B3TRGovernor is
     _grantRole(GOVERNOR_FUNCTIONS_SETTINGS_ROLE, data.governorFunctionSettingsRoleAddress);
   }
 
+  // ------------------ GETTERS ------------------ //
+
+  /**
+   * @dev Function to know if a proposal is executable or not.
+   * If the proposal was creted without any targets, values, or calldatas, it is not executable.
+   * If the propsoal has targets then call GovernorUpgradeable and GovernorTimelockControlUpgradeable
+   * to check if the proposal is executable.
+   *
+   * @param proposalId The id of the proposal
+   */
+  function proposalNeedsQueuing(
+    uint256 proposalId
+  ) public view override(GovernorUpgradeable, GovernorTimelockControlUpgradeable) returns (bool) {
+    GovernorStorage storage $ = _getGovernorStorage();
+    ProposalCore storage proposal = $._proposals[proposalId];
+    if (proposal.roundIdVoteStart == 0) {
+      return false;
+    }
+
+    if (proposal.isExecutable) {
+      // Call GovernorUpgradeable and GovernorTimelockControlUpgradeable to check if the proposal is executable
+      return super.proposalNeedsQueuing(proposalId);
+    } else {
+      return false;
+    }
+  }
+
   // ------------------ SETTERS ------------------ //
+
+  /**
+   * @dev Pause the contract
+   */
+  function pause() public onlyRole(DEFAULT_ADMIN_ROLE) {
+    _pause();
+  }
+
+  /**
+   * @dev Unpause the contract
+   */
+  function unpause() public onlyRole(DEFAULT_ADMIN_ROLE) {
+    _unpause();
+  }
+
+  // ------------------ Overrides ------------------ //
+
+  function _authorizeUpgrade(address newImplementation) internal override onlyGovernance {}
+
+  /**
+   * @dev See {IB3TRGovernor-propose}.
+   *
+   * Callable only when contract is not paused.
+   */
+  function propose(
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    string memory description,
+    uint256 startRoundId,
+    uint256 depositAmount
+  ) public override whenNotPaused returns (uint256) {
+    return super.propose(targets, values, calldatas, description, startRoundId, depositAmount);
+  }
+
+  /**
+   * @dev See {IB3TRGovernor-queue}.
+   */
+  function queue(
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    bytes32 descriptionHash
+  ) public override whenNotPaused returns (uint256) {
+    return super.queue(targets, values, calldatas, descriptionHash);
+  }
+
+  /**
+   * @dev See {IB3TRGovernor-execute}.
+   */
+  function execute(
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    bytes32 descriptionHash
+  ) public payable override whenNotPaused returns (uint256) {
+    return super.execute(targets, values, calldatas, descriptionHash);
+  }
+
+  /**
+   * @dev See {Governor-cancel}.
+   */
+  function cancel(
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    bytes32 descriptionHash
+  ) public virtual override returns (uint256) {
+    uint256 proposalId = hashProposal(targets, values, calldatas, descriptionHash);
+
+    if (_msgSender() != proposalProposer(proposalId) && !hasRole(DEFAULT_ADMIN_ROLE, _msgSender())) {
+      revert UnauthorizedAccess(_msgSender());
+    }
+
+    require(state(proposalId) == ProposalState.Pending, "Governor: proposal not pending");
+
+    return _cancel(targets, values, calldatas, descriptionHash);
+  }
 
   /**
    * @dev Set the voter rewards contract
@@ -210,114 +313,12 @@ contract B3TRGovernor is
     super.setIsFunctionRestrictionEnabled(isEnabled);
   }
 
-  /**
-   * @dev Pause the contract
-   */
-  function pause() public onlyRole(DEFAULT_ADMIN_ROLE) {
-    _pause();
-  }
+  // ------------------ Overrides riquired by solidity ------------------ //
 
-  /**
-   * @dev Unpause the contract
-   */
-  function unpause() public onlyRole(DEFAULT_ADMIN_ROLE) {
-    _unpause();
-  }
-
-  function _authorizeUpgrade(address newImplementation) internal override onlyGovernance {}
-
-  /**
-   * @dev See {IB3TRGovernor-propose}.
-   *
-   * Callable only when contract is not paused.
-   */
-  function propose(
-    address[] memory targets,
-    uint256[] memory values,
-    bytes[] memory calldatas,
-    string memory description,
-    uint256 startRoundId,
-    uint256 depositAmount
-  ) public override whenNotPaused returns (uint256) {
-    return super.propose(targets, values, calldatas, description, startRoundId, depositAmount);
-  }
-
-  /**
-   * @dev See {IB3TRGovernor-queue}.
-   */
-  function queue(
-    address[] memory targets,
-    uint256[] memory values,
-    bytes[] memory calldatas,
-    bytes32 descriptionHash
-  ) public override whenNotPaused returns (uint256) {
-    return super.queue(targets, values, calldatas, descriptionHash);
-  }
-
-  /**
-   * @dev See {IB3TRGovernor-execute}.
-   */
-  function execute(
-    address[] memory targets,
-    uint256[] memory values,
-    bytes[] memory calldatas,
-    bytes32 descriptionHash
-  ) public payable override whenNotPaused returns (uint256) {
-    return super.execute(targets, values, calldatas, descriptionHash);
-  }
-
-  /**
-   * @dev See {Governor-cancel}.
-   */
-  function cancel(
-    address[] memory targets,
-    uint256[] memory values,
-    bytes[] memory calldatas,
-    bytes32 descriptionHash
-  ) public virtual override returns (uint256) {
-    uint256 proposalId = hashProposal(targets, values, calldatas, descriptionHash);
-
-    if (_msgSender() != proposalProposer(proposalId) && !hasRole(DEFAULT_ADMIN_ROLE, _msgSender())) {
-      revert UnauthorizedAccess(_msgSender());
-    }
-
-    require(state(proposalId) == ProposalState.Pending, "Governor: proposal not pending");
-
-    return _cancel(targets, values, calldatas, descriptionHash);
-  }
-
-  /**
-   * @dev See {IB3TRGovernor-state}.
-   */
   function state(
     uint256 proposalId
   ) public view override(GovernorUpgradeable, GovernorTimelockControlUpgradeable) returns (ProposalState) {
     return super.state(proposalId);
-  }
-
-  /**
-   * @dev Function to know if a proposal is executable or not.
-   * If the proposal was creted without any targets, values, or calldatas, it is not executable.
-   * If the propsoal has targets then call GovernorUpgradeable and GovernorTimelockControlUpgradeable
-   * to check if the proposal is executable.
-   *
-   * @param proposalId The id of the proposal
-   */
-  function proposalNeedsQueuing(
-    uint256 proposalId
-  ) public view override(GovernorUpgradeable, GovernorTimelockControlUpgradeable) returns (bool) {
-    GovernorStorage storage $ = _getGovernorStorage();
-    ProposalCore storage proposal = $._proposals[proposalId];
-    if (proposal.roundIdVoteStart == 0) {
-      return false;
-    }
-
-    if (proposal.isExecutable) {
-      // Call GovernorUpgradeable and GovernorTimelockControlUpgradeable to check if the proposal is executable
-      return super.proposalNeedsQueuing(proposalId);
-    } else {
-      return false;
-    }
   }
 
   function quorum(
