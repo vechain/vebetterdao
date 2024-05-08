@@ -9,9 +9,8 @@ import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
  * This interface was forked from OpenZeppelin's IGovernor.sol and modified to fit the needs of a voting mechanism
  * where a user can vote on multpile x-apps belonging to the ecosystem and fractionalize their votes accross the x-apps.
  *
- * We consider each round as a round, that only the Emissions contract can start,
- * with the only condition that there can be only one round per time.
- * After the round is created the round is immediately active.
+ * There can be only one round per time.
+ * After the round is created  it becomes immediately active.
  * There can be only two possible outcomes of a round: it succeeds or it fails.
  * To succeed the only requirement is that the quorum is reached.
  *
@@ -20,9 +19,7 @@ import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
  *
  * If the round fails, we will need to “finalize” it, which means we will create a pointer to the last succeeded round
  * where shares should be calculated. Anyone can finalize the failed round,
- * but it will be automatically done when the emissions contract starts a new round.
- *
- * There should be only one round per time.
+ * but it will be automatically done when a new round starts.
  */
 interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   enum RoundState {
@@ -249,23 +246,53 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
    */
   function currentRoundId() external view returns (uint256);
 
+  /**
+   * @dev Returns the current allocation round block when it starts.
+   */
   function currentRoundSnapshot() external view returns (uint256);
 
+  /**
+   * @dev Returns the current allocation round block when it ends.
+   */
   function currentRoundDeadline() external view returns (uint256);
 
+  /**
+   * @dev Returns if quorum was reached for a specific round.
+   */
   function quorumReached(uint256 roundId) external view returns (bool);
 
+  /**
+   * @dev Returns the ids of apps that are available for voting in a specific round.
+   */
   function getAppIdsOfRound(uint256 roundId) external view returns (bytes32[] memory);
 
+  /**
+   * @dev Returns if an app can be voted in a specific round.
+   */
   function isEligibleForVote(bytes32 appId, uint256 roundId) external view returns (bool);
 
+  /**
+   * @dev Checks if the state of the round is {RoundState.Active}.
+   */
   function isActive(uint256 roundId) external view returns (bool);
 
+  /**
+   * @dev Returns the id of the last round that succeeded.
+   */
   function latestSucceededRoundId(uint256 roundId) external view returns (uint256);
 
+  /**
+   * @dev Returns true if an account has voted at least one time in any round.
+   */
   function hasVotedOnce(address user) external view returns (bool);
 
+  /**
+   * @dev Returns the base allocation percentage for funds distribution in a round.
+   */
   function getRoundBaseAllocationPercentage(uint256 roundId) external view returns (uint256);
 
+  /**
+   * @dev Returns the max amount of shares an app can get in a round.
+   */
   function getRoundAppSharesCap(uint256 roundId) external view returns (uint256);
 }
