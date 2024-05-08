@@ -50,7 +50,6 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
  *
  * Modification:
  * - Made storage internal
- * - Moved state logic inside B3TRGovernor:state
  */
 abstract contract GovernorTimelockControlUpgradeable is Initializable, GovernorUpgradeable {
   /// @custom:storage-location erc7201:openzeppelin.storage.GovernorTimelockControl

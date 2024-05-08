@@ -199,7 +199,7 @@ abstract contract GovernorUpgradeable is
   /**
    * @dev See {IB3TRGovernor-state}.
    */
-  function state(uint256 proposalId) public view virtual override returns (ProposalState) {
+  function state(uint256 proposalId) public view virtual returns (ProposalState) {
     GovernorStorage storage $ = _getGovernorStorage();
     // We read the struct fields into the stack at once so Solidity emits a single SLOAD
     ProposalCore storage proposal = $._proposals[proposalId];
