@@ -8,6 +8,7 @@ import { ProposalFormStoreState, useProposalFormStore } from "@/store/useProposa
 import MDEditor from "@uiw/react-md-editor"
 import rehypeSanitize from "rehype-sanitize"
 import { FunctionParamsField } from "@/components"
+import { ethers } from "ethers"
 
 export type FormData = {
   title: string
@@ -59,7 +60,7 @@ export const NewProposalForm: React.FC<Props> = ({
           return {
             name: param.name,
             type: param.type,
-            value: decoded[param.name],
+            value: action.requiresEthParse ? ethers.formatEther(decoded[param.name]) : decoded[param.name],
           }
         }),
       }

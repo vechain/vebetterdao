@@ -64,9 +64,6 @@ export const FunctionsPageContent = () => {
               </Box>
               <VStack spacing={4} align="flex-start" divider={<Divider />} w="full">
                 {contract.functions.map((func, index) => {
-                  const functionFragment = contract.contract.abi.abi.find(abi => abi.name === func.functionName)
-                  if (!functionFragment) return null
-                  const abiFunction = new abi.Function(functionFragment as abi.Function.Definition)
                   const isSelectedIndex = actions?.findIndex(
                     action => action.contractAddress === contract.contract.address && action.functionName === func.name,
                   )
@@ -86,11 +83,10 @@ export const FunctionsPageContent = () => {
                         isSelected
                           ? handleRemoveFunction(isSelectedIndex)
                           : handleAddFunction({
-                              abiDefinition: abiFunction.definition,
+                              abiDefinition: func.abiDefinition,
                               contractAddress: contract.contract.address,
                               functionName: func.name,
                               functionDescription: func.description,
-                              requiresEthParse: func.requiresEthParse,
                             })
                       }>
                       <CardBody>
