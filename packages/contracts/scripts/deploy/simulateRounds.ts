@@ -45,7 +45,7 @@ export const simulateRounds = async (
   const roundId = parseInt((await xAllocationVoting.currentRoundId()).toString())
 
   // console.log("Casting random votes to xDapps...")
-  const xDapps = (await xAllocationVoting.getAllApps()).map(app => app.id)
+  const xDapps = (await xAllocationVoting.getAppsOfRound(roundId)).map(app => app.id)
   await castVotesToXDapps(vot3, xAllocationVoting, seedAccounts, roundId, xDapps)
 
   // Wait for round to end
