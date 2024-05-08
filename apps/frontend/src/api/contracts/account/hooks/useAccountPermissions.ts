@@ -8,7 +8,7 @@ type useAccountPermissionsResponse = {
   isAdminOfEmissions: boolean
   isAdminOfXAllocationVoting: boolean
   isAdminOfXAllocationPool: boolean
-  isAdminOfDAO: boolean
+  isAdminOfB3TRGovernor: boolean
   isAdminOfGalaxyMember: boolean
   isAdminOfVot3: boolean
   isAdminOfVoterRewards: boolean
@@ -41,7 +41,7 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
   const { data: isAdminOfEmissions } = useHasRole(ADMIN_ROLE, config.emissionsContractAddress, address)
   const { data: isAdminOfXAllocationVoting } = useHasRole(ADMIN_ROLE, config.xAllocationVotingContractAddress, address)
   const { data: isAdminOfXAllocationPool } = useHasRole(ADMIN_ROLE, config.xAllocationPoolContractAddress, address)
-  const { data: isAdminOfDAO } = useHasRole(ADMIN_ROLE, config.b3trGovernorAddress, address)
+  const { data: isAdminOfB3TRGovernor } = useHasRole(ADMIN_ROLE, config.b3trGovernorAddress, address)
   const { data: isAdminOfGalaxyMember } = useHasRole(ADMIN_ROLE, config.galaxyMemberContractAddress, address)
   const { data: isAdminOfVot3 } = useHasRole(ADMIN_ROLE, config.vot3ContractAddress, address)
   const { data: isAdminOfVoterRewards } = useHasRole(ADMIN_ROLE, config.voterRewardsContractAddress, address)
@@ -77,7 +77,7 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
         isAdminOfEmissions ||
         isAdminOfXAllocationVoting ||
         isAdminOfXAllocationPool ||
-        isAdminOfDAO ||
+        isAdminOfB3TRGovernor ||
         isAdminOfGalaxyMember ||
         isAdminOfVot3 ||
         isAdminOfVoterRewards ||
@@ -86,7 +86,7 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
       isAdminOfEmissions: isAdminOfEmissions ?? false,
       isAdminOfXAllocationVoting: isAdminOfXAllocationVoting ?? false,
       isAdminOfXAllocationPool: isAdminOfXAllocationPool ?? false,
-      isAdminOfDAO: isAdminOfDAO ?? false,
+      isAdminOfB3TRGovernor: isAdminOfB3TRGovernor ?? false,
       isAdminOfGalaxyMember: isAdminOfGalaxyMember ?? false,
       isAdminOfVot3: isAdminOfVot3 ?? false,
       isAdminOfVoterRewards: isAdminOfVoterRewards ?? false,
@@ -110,7 +110,7 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
     isAdminOfEmissions,
     isAdminOfXAllocationVoting,
     isAdminOfXAllocationPool,
-    isAdminOfDAO,
+    isAdminOfB3TRGovernor,
     isAdminOfGalaxyMember,
     isAdminOfVot3,
     isAdminOfVoterRewards,
