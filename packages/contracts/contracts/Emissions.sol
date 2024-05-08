@@ -533,6 +533,13 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
     return _getEmissionsStorage().emissions[cycle];
   }
 
+  /// @notice Retrieves the current version of the contract
+  /// @dev This function is used to identify the version of the contract and should be overridden in each new version
+  /// @return The version of the contract
+  function version() public pure virtual returns (string memory) {
+    return "1";
+  }
+
   // ----------- Setters ----------- //
 
   /// @notice Sets the address for XAllocations

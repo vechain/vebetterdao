@@ -54,4 +54,11 @@ contract TimeLock is Initializable, TimelockControllerUpgradeable, UUPSUpgradeab
   }
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyRole(UPGRADER_ROLE) {}
+
+  /// @notice Retrieves the current version of the contract
+  /// @dev This function is used to identify the version of the contract and should be updated in each new version
+  /// @return string The version of the contract
+  function version() public pure virtual returns (string memory) {
+    return "1";
+  }
 }
