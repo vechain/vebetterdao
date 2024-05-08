@@ -45,6 +45,7 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
   control,
 }) => {
   const label = useMemo(() => {
+    //TODO: handle this with humanName field in the featured fucntion param itself
     if (humanizeLabels) {
       switch (field.name) {
         case "_to":

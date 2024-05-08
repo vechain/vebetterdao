@@ -95,7 +95,7 @@ export const FunctionsPageContent = () => {
                               {func.description}
                             </Text>
                           </VStack>
-                          <Checkbox size="lg" colorScheme="primary" isChecked={isSelected} />
+                          <Checkbox pointerEvents={"none"} size="lg" colorScheme="primary" isChecked={isSelected} />
                         </HStack>
                       </CardBody>
                     </Card>
