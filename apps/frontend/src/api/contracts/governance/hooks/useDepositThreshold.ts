@@ -3,6 +3,7 @@ import { useConnex } from "@vechain/dapp-kit-react"
 
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
+import { ethers } from "ethers"
 const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
 
 const governorInterface = B3TRGovernor__factory.createInterface()
@@ -16,7 +17,7 @@ export const getDepositThreshold = async (thor: Connex.Thor): Promise<string> =>
   const res = await thor.account(GOVERNANCE_CONTRACT).method(JSON.parse(functionFragment)).call()
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
-  return res.decoded[0]
+  return ethers.formatEther(res.decoded[0])
 }
 
 export const getDepositThresholdQueryKey = () => ["depositThreshold"]
