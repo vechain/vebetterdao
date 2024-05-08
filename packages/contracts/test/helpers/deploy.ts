@@ -69,7 +69,7 @@ export const getOrDeployContractInstances = async ({
   const b3tr = await B3trContract.deploy(owner, minterAccount, owner, config.B3TR_CAP)
 
   // Deploy VOT3
-  const vot3 = (await deployProxy("VOT3", [owner.address, await b3tr.getAddress()])) as VOT3
+  const vot3 = (await deployProxy("VOT3", [owner.address, owner.address, await b3tr.getAddress()])) as VOT3
 
   // Deploy TimeLock
   const timeLock = (await deployProxy("TimeLock", [

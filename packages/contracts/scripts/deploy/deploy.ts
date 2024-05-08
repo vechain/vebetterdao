@@ -51,7 +51,11 @@ export async function deployAll(config: ContractsConfig) {
     config.B3TR_CAP,
   )
 
-  const vot3 = (await deployProxy("VOT3", [TEMP_ADMIN, await b3tr.getAddress()])) as VOT3
+  const vot3 = (await deployProxy("VOT3", [
+    TEMP_ADMIN, // admin
+    config.CONTRACTS_ADMIN_ADDRESS, // pauser
+    await b3tr.getAddress(),
+  ])) as VOT3
   console.log(`Vot3 deployed at ${await vot3.getAddress()}`)
 
   const timelock = (await deployProxy("TimeLock", [
