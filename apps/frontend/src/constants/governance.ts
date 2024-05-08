@@ -75,6 +75,9 @@ type GovernanceFeaturedContractWithFunctions = {
   functions: GovernanceFeaturedFunction[]
 }
 
+/**
+ *  List of featured contracts with their functions that will be displayed in the NewProposalFlow page
+ */
 export const GovernanceFeaturedContractsWithFunctions: GovernanceFeaturedContractWithFunctions[] = [
   {
     name: "Treasury",

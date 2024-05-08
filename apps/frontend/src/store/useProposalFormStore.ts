@@ -1,3 +1,4 @@
+import { GovernanceFeaturedFunction } from "@/constants"
 import { abi } from "thor-devkit"
 import { create } from "zustand"
 import { devtools, persist } from "zustand/middleware"
@@ -77,14 +78,10 @@ export type ProposalFormStoreState = {
   title?: string
   shortDescription?: string
   markdownDescription?: string
-  actions: {
+  actions: (GovernanceFeaturedFunction & {
     contractAddress: string
     calldata?: string
-    abiDefinition: abi.Function.Definition
-    functionName?: string
-    functionDescription?: string
-    requiresEthParse?: boolean
-  }[]
+  })[]
   votingStartRoundId?: number
   depositAmount?: number
   setData: (data: Partial<ProposalFormStoreState>) => void

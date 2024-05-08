@@ -1,16 +1,12 @@
 import { Card, CardBody, VStack, Heading, HStack, Box, Divider, Text, Checkbox, Button } from "@chakra-ui/react"
 import { useCallback } from "react"
 import { useProposalFormStore } from "@/store/useProposalFormStore"
-import { GovernanceFeaturedContractsWithFunctions } from "@/constants"
+import { GovernanceFeaturedContractsWithFunctions, GovernanceFeaturedFunction } from "@/constants"
 import { abi } from "thor-devkit"
 import { useRouter } from "next/navigation"
 
-type SelectedFunction = {
+type SelectedFunction = GovernanceFeaturedFunction & {
   contractAddress: string
-  abiDefinition: abi.Function.Definition
-  functionName?: string
-  functionDescription?: string
-  requiresEthParse?: boolean
 }
 export const FunctionsPageContent = () => {
   const { actions, setData } = useProposalFormStore()
@@ -65,7 +61,7 @@ export const FunctionsPageContent = () => {
               <VStack spacing={4} align="flex-start" divider={<Divider />} w="full">
                 {contract.functions.map((func, index) => {
                   const isSelectedIndex = actions?.findIndex(
-                    action => action.contractAddress === contract.contract.address && action.functionName === func.name,
+                    action => action.contractAddress === contract.contract.address && action.name === func.name,
                   )
                   const isSelected = isSelectedIndex !== -1
                   return (
@@ -85,8 +81,8 @@ export const FunctionsPageContent = () => {
                           : handleAddFunction({
                               abiDefinition: func.abiDefinition,
                               contractAddress: contract.contract.address,
-                              functionName: func.name,
-                              functionDescription: func.description,
+                              name: func.name,
+                              description: func.description,
                             })
                       }>
                       <CardBody>

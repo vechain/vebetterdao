@@ -30,9 +30,9 @@ export const ExecutableFunctionCard: React.FC<Props> = ({ field, index, errors, 
                 </Text>
               </Box>
               <Box>
-                <Heading size="md">{field.functionName}</Heading>
+                <Heading size="md">{field.name}</Heading>
                 <Text fontSize="sm" color="gray.500">
-                  {field.functionDescription}
+                  {field.description}
                 </Text>
               </Box>
             </HStack>

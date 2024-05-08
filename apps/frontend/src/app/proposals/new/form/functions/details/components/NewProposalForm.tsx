@@ -56,11 +56,15 @@ export const NewProposalForm: React.FC<Props> = ({
       }
       return {
         ...action,
-        params: _abi.definition.inputs.map(param => {
+        params: action.abiDefinition.inputs.map(param => {
           return {
             name: param.name,
             type: param.type,
-            value: action.requiresEthParse ? ethers.formatEther(decoded[param.name]) : decoded[param.name],
+            value: decoded[param.name]
+              ? param.requiresEthParse
+                ? ethers.formatEther(decoded[param.name])
+                : decoded[param.name]
+              : undefined,
           }
         }),
       }
@@ -80,9 +84,9 @@ export const NewProposalForm: React.FC<Props> = ({
           const _abi = new abi.Function(action.abiDefinition)
           return {
             contractAddress: action.contractAddress,
-            abiDefinition: _abi.definition,
-            functionName: action.functionName,
-            functionDescription: action.functionDescription,
+            abiDefinition: action.abiDefinition,
+            name: action.name,
+            description: action.description,
             calldata: _abi.encode(...action.params.map(param => param.value)),
           }
         }),
