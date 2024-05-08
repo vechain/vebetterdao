@@ -80,6 +80,24 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
       </FormControl>
     )
   }
+
+  if (field.type === "bytes32") {
+    return (
+      <FormControl isInvalid={!!error}>
+        <FormLabel {...formLabelProps}>{label}</FormLabel>
+        <Input
+          type="text"
+          placeholder="Insert value..."
+          {...register(`actions.${actionIndex}.params.${index}.value`, {
+            required: "Field is required",
+            validate: value => value.length === 66 || "Invalid bytes32",
+          })}
+          {...inputProps}
+        />
+        <FormErrorMessage>{error && error.message?.toString()}</FormErrorMessage>
+      </FormControl>
+    )
+  }
   if (field.type === "uint256") {
     return (
       <FormControl isInvalid={!!error}>
@@ -109,7 +127,7 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
             <Select
               placeholder="Select value..."
               value={field.value}
-              onChange={e => field.onChange(e.target.value === "true")}
+              onChange={e => field.onChange(e.target.value === "true" ? 1 : 0)}
               {...selectProps}>
               <option value="true">True</option>
               <option value="false">False</option>

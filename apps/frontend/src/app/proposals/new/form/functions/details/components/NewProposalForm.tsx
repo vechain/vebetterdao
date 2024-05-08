@@ -77,6 +77,7 @@ export const NewProposalForm: React.FC<Props> = ({
 
   const onFormSubmit = useCallback(
     (data: FormData) => {
+      console.log(data)
       setData({
         title: data.title,
         shortDescription: data.description,
