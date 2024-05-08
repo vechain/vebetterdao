@@ -65,6 +65,7 @@ export const NewProposalForm: React.FC<Props> = ({
                 ? ethers.formatEther(decoded[param.name])
                 : decoded[param.name]
               : undefined,
+            requiresEthParse: param.requiresEthParse,
           }
         }),
       }
@@ -87,7 +88,14 @@ export const NewProposalForm: React.FC<Props> = ({
             abiDefinition: action.abiDefinition,
             name: action.name,
             description: action.description,
-            calldata: _abi.encode(...action.params.map(param => param.value)),
+            calldata: _abi.encode(
+              ...action.params.map(param => {
+                if (param.requiresEthParse) {
+                  const value = ethers.parseEther(String(param.value))
+                  return value.toString()
+                } else return param.value
+              }),
+            ),
           }
         }),
       })

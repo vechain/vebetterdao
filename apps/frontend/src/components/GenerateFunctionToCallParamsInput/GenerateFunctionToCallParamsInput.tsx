@@ -17,7 +17,14 @@ import { FormData as ProposalFunctionFormData } from "@/app/proposals/new/form/f
  * Represent a single parameter of the function to call in the smart contract
  * This is used to typing the inputs of the abi definition
  */
-export type FunctionParamsField = { id: string; name: string; type: string; internalType?: string; value: any }
+export type FunctionParamsField = {
+  id: string
+  name: string
+  type: string
+  internalType?: string
+  value: any
+  requiresEthParse?: boolean
+}
 
 type Props = {
   actionIndex: number

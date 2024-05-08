@@ -93,7 +93,7 @@ export const GovernanceFeaturedContractsWithFunctions: GovernanceFeaturedContrac
             ...transferB3trDefinition,
             inputs: transferB3trDefinition.inputs.map(input => ({
               ...input,
-              requiresEthParse: input.name === "_to",
+              requiresEthParse: input.name === "_value",
             })),
           }
         })(),
