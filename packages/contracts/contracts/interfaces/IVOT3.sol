@@ -167,6 +167,8 @@ interface IVOT3 {
   function getQuadraticVotingPower(address account) external view returns (uint256);
 
   function getPastQuadraticVotingPower(address account, uint256 timepoint) external view returns (uint256);
+
+  function version() external view returns (string memory);
 }
 
 interface Checkpoints {

@@ -89,5 +89,13 @@ describe("TimeLock", function () {
 
       await catchRevert(timeLock.initialize(1, [], [], owner.address, owner.address))
     })
+
+    it("Should return correct version of the contract", async () => {
+      const { timeLock } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await timeLock.version()).to.equal("1")
+    })
   })
 })

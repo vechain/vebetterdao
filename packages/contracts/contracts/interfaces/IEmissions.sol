@@ -122,4 +122,6 @@ interface IEmissions {
   function xAllocationsDecayDelay() external view returns (uint256);
 
   function xAllocationsGovernor() external view returns (address);
+
+  function version() external view returns (string memory);
 }

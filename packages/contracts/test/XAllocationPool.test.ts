@@ -157,6 +157,14 @@ describe("X-Allocation Pool", async function () {
         xAllocationPool.initialize(owner.address, owner.address, owner.address, owner.address, owner.address),
       )
     })
+
+    it("Should return correct version of the contract", async () => {
+      const { xAllocationPool } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await xAllocationPool.version()).to.equal("1")
+    })
   })
 
   describe("Settings", async function () {

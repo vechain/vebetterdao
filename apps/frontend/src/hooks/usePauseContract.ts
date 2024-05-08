@@ -4,12 +4,13 @@ import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { useCallback, useMemo } from "react"
 import { getConfig } from "@repo/config"
-import { GalaxyMember__factory, B3TR__factory, VOT3__factory } from "@repo/contracts"
+import { GalaxyMember__factory, B3TR__factory, VOT3__factory, B3TRGovernor__factory } from "@repo/contracts"
 import {
   currentBlockQueryKey,
   getIsGMPausedQueryKey,
   getIsB3trPausedQueryKey,
   getIsVot3PausedQueryKey,
+  getIsB3TRGovernorPausedQueryKey,
 } from "@/api"
 
 type Props = {
@@ -25,6 +26,8 @@ const VOT3Interface = VOT3__factory.createInterface()
 
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
 
+const B3TRGovernorInterface = B3TRGovernor__factory.createInterface()
+
 /**
  * getInterface is a function that returns the contract interface based on the contract address.
  * @param contract - The contract address
@@ -38,6 +41,8 @@ const getInterface = (contract: string) => {
       return VOT3Interface
     case getConfig().galaxyMemberContractAddress:
       return GalaxyMemberInterface
+    case getConfig().b3trGovernorAddress:
+      return B3TRGovernorInterface
     default:
       throw new Error("Invalid contract address")
   }
@@ -56,6 +61,8 @@ const getQueryToInvalidate = (contract: string) => {
       return getIsVot3PausedQueryKey()
     case getConfig().galaxyMemberContractAddress:
       return getIsGMPausedQueryKey()
+    case getConfig().b3trGovernorAddress:
+      return getIsB3TRGovernorPausedQueryKey()
     default:
       return ""
   }

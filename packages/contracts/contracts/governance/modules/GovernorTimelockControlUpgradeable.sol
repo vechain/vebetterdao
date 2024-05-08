@@ -1,6 +1,27 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v5.0.0) (governance/extensions/GovernorTimelockControl.sol)
 
+//                                      #######
+//                                 ################
+//                               ####################
+//                             ###########   #########
+//                            #########      #########
+//          #######          #########       #########
+//          #########       #########      ##########
+//           ##########     ########     ####################
+//            ##########   #########  #########################
+//              ################### ############################
+//               #################  ##########          ########
+//                 ##############      ###              ########
+//                  ############                       #########
+//                    ##########                     ##########
+//                     ########                    ###########
+//                       ###                    ############
+//                                          ##############
+//                                    #################
+//                                   ##############
+//                                   #########
+
 pragma solidity ^0.8.20;
 
 import { IB3TRGovernor } from "../../interfaces/IB3TRGovernor.sol";
@@ -29,7 +50,6 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
  *
  * Modification:
  * - Made storage internal
- * - Moved state logic inside B3TRGovernor:state
  */
 abstract contract GovernorTimelockControlUpgradeable is Initializable, GovernorUpgradeable {
   /// @custom:storage-location erc7201:openzeppelin.storage.GovernorTimelockControl
@@ -67,11 +87,41 @@ abstract contract GovernorTimelockControlUpgradeable is Initializable, GovernorU
   }
 
   /**
+   * @dev Overridden version of the {Governor-state} function that considers the status reported by the timelock.
+   */
+  function state(uint256 proposalId) public view virtual override returns (ProposalState) {
+    GovernorTimelockControlStorage storage $ = _getGovernorTimelockControlStorage();
+    ProposalState currentState = super.state(proposalId);
+
+    if (currentState != ProposalState.Queued) {
+      return currentState;
+    }
+
+    bytes32 queueid = $._timelockIds[proposalId];
+    if ($._timelock.isOperationPending(queueid)) {
+      return ProposalState.Queued;
+    } else if ($._timelock.isOperationDone(queueid)) {
+      // This can happen if the proposal is executed directly on the timelock.
+      return ProposalState.Executed;
+    } else {
+      // This can happen if the proposal is canceled directly on the timelock.
+      return ProposalState.Canceled;
+    }
+  }
+
+  /**
    * @dev Public accessor to check the address of the timelock
    */
   function timelock() public view virtual returns (address) {
     GovernorTimelockControlStorage storage $ = _getGovernorTimelockControlStorage();
     return address($._timelock);
+  }
+
+  /**
+   * @dev See {IGovernor-proposalNeedsQueuing}.
+   */
+  function proposalNeedsQueuing(uint256) public view virtual override returns (bool) {
+    return true;
   }
 
   /**

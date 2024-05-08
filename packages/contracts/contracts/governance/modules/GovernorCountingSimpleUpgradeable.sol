@@ -1,5 +1,25 @@
 // SPDX-License-Identifier: MIT
-// Forked from OpenZeppelin Contracts (last updated v5.0.0) (governance/extensions/GovernorCountingSimple.sol)
+
+//                                      #######
+//                                 ################
+//                               ####################
+//                             ###########   #########
+//                            #########      #########
+//          #######          #########       #########
+//          #########       #########      ##########
+//           ##########     ########     ####################
+//            ##########   #########  #########################
+//              ################### ############################
+//               #################  ##########          ########
+//                 ##############      ###              ########
+//                  ############                       #########
+//                    ##########                     ##########
+//                     ########                    ###########
+//                       ###                    ############
+//                                          ##############
+//                                    #################
+//                                   ##############
+//                                   #########
 
 pragma solidity ^0.8.20;
 
@@ -8,11 +28,7 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 
 /**
  * @dev Extension of {B3TRGovernor} for simple, 3 options, vote counting.
- *
- * Modified:
- * - Added `_hasVotedOnce` mapping to store that a user has voted at least one time
- * - Added `hasVotedOnce` function to check if a user has voted at least one time
- * - Include against votes in quorum calculation
+ * Also saves if voter has voted at least one time.
  */
 abstract contract GovernorCountingSimpleUpgradeable is Initializable, GovernorUpgradeable {
   /**

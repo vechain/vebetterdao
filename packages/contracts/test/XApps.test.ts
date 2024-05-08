@@ -78,6 +78,14 @@ describe("X-Apps", function () {
       expect(newImplAddress.toUpperCase()).to.eql(currentImplAddress.toUpperCase())
       expect(newImplAddress.toUpperCase()).to.not.eql((await implementation.getAddress()).toUpperCase())
     })
+
+    it("Should return correct version of the contract", async () => {
+      const { x2EarnApps } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await x2EarnApps.version()).to.equal("1")
+    })
   })
 
   describe("Settings", function () {

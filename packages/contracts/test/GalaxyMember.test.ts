@@ -452,6 +452,14 @@ describe("Galaxy Member", () => {
         ]),
       ).to.be.reverted
     })
+
+    it("Should return correct version of the contract", async () => {
+      const { galaxyMember } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await galaxyMember.version()).to.equal("1")
+    })
   })
 
   describe("Minting", () => {
