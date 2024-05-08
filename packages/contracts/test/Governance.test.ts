@@ -24,7 +24,7 @@ import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { B3TRGovernor, B3TRGovernor__factory } from "../typechain-types"
 
-describe.only("Governor and TimeLock", function () {
+describe("Governor and TimeLock", function () {
   describe("Governor deployment", function () {
     it("Should set constructors correctly", async function () {
       const config = createLocalConfig()
