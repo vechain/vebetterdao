@@ -66,7 +66,7 @@ export const getOrDeployContractInstances = async ({
 
   // Deploy B3TR
   const B3trContract = await ethers.getContractFactory("B3TR")
-  const b3tr = await B3trContract.deploy(owner, minterAccount, config.B3TR_CAP)
+  const b3tr = await B3trContract.deploy(owner, minterAccount, owner, config.B3TR_CAP)
 
   // Deploy VOT3
   const vot3 = (await deployProxy("VOT3", [owner.address, await b3tr.getAddress()])) as VOT3
