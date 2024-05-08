@@ -241,4 +241,11 @@ contract VOT3 is
     // scaling by 1e9 so that number retuned is 1e18
     return Math.sqrt(getPastVotes(account, timepoint)) * 1e9;
   }
+
+  /// @notice Returns the version of the contract
+  /// @dev This should be updated every time a new version of implementation is deployed
+  /// @return string The version of the contract
+  function version() public pure virtual returns (string memory) {
+    return "1";
+  }
 }

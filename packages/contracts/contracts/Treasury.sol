@@ -315,8 +315,8 @@ contract Treasury is
   }
 
   /// @notice Retrieves the current version of the contract
-  function getVersion() public pure virtual returns (string memory) {
-    return "V1";
+  function version() public pure virtual returns (string memory) {
+    return "1";
   }
 
   /// @notice Retrieves the address of the B3TR token

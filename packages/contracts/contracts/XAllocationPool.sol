@@ -459,18 +459,36 @@ contract XAllocationPool is
     return $._emissions;
   }
 
+  /**
+   * @dev Returns the emissions contract.
+   */
   function treasury() public view returns (ITreasury) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     return $.treasury;
   }
 
+  /**
+   * @dev Returns the b3tr contract.
+   */
   function b3tr() public view returns (IB3TR) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     return $.b3tr;
   }
 
+  /**
+   * @dev Returns the x2EarnApp contract.
+   */
   function x2EarnApps() public view returns (IX2EarnApps) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     return $.x2EarnApps;
+  }
+
+  /**
+   * @notice Returns the version of the contract
+   * @dev Version of the governor instance (used in building the ERC712 domain separator). Default: "1"
+   * @return sting The version of the contract
+   */
+  function version() public pure virtual returns (string memory) {
+    return "1";
   }
 }

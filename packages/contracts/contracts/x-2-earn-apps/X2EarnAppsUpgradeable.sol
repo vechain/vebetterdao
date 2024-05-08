@@ -143,6 +143,15 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
     return keccak256(abi.encodePacked(appName));
   }
 
+  /**
+   * @notice Returns the version of the contract
+   * @dev This should be updated every time a new version of implementation is deployed
+   * @return sting The version of the contract
+   */
+  function version() public pure virtual returns (string memory) {
+    return "1";
+  }
+
   // --- To be implemented by the inheriting contract --- //
 
   /**

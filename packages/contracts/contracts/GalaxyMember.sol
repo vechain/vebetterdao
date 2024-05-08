@@ -593,12 +593,19 @@ contract GalaxyMember is
     return $.levelOf[tokenId];
   }
 
+  /// @notice Retrieves the current version of the contract
+  /// @dev This function is used to identify the version of the contract and should be updated in each new version
+  /// @return string The version of the contract
+  function version() public pure virtual returns (string memory) {
+    return "1";
+  }
+
   // ---------- Overrides ---------- //
 
   /// @notice Performs automatic level updating upon token updates
   /// @dev Overrides the _update function to update the highest level owned by the owner
   /// @param to The address to transfer the token to
-  /// @param tokenId The token ID to update 
+  /// @param tokenId The token ID to update
   /// @param auth The address of the sender
   function _update(
     address to,

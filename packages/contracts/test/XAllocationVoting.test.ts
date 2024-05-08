@@ -285,6 +285,14 @@ describe("X-Allocation Voting", function () {
         }),
       )
     })
+
+    it("Should return correct version of the contract", async () => {
+      const { xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await xAllocationVoting.version()).to.equal("1")
+    })
   })
 
   describe("Settings", function () {

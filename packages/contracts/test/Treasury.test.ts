@@ -303,7 +303,7 @@ describe("Treasury", () => {
       )
     })
     it("should return correct version", async () => {
-      expect(await treasuryProxy.getVersion()).to.eql("V1")
+      expect(await treasuryProxy.version()).to.eql("1")
     })
     it("can be initialized only once", async () => {
       await catchRevert(

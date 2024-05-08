@@ -339,4 +339,11 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
     $.scalingFactor = newScalingFactor;
   }
+
+  /// @notice Returns the version of the contract
+  /// @dev This should be updated every time a new version of implementation is deployed
+  /// @return string The version of the contract
+  function version() public pure virtual returns (string memory) {
+    return "1";
+  }
 }

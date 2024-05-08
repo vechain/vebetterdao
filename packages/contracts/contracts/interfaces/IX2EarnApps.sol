@@ -204,4 +204,10 @@ interface IX2EarnApps {
    * @dev return the base URI for the contract
    */
   function baseURI() external view returns (string memory);
+
+  /**
+   * @notice Get the version of the contract.
+   * @dev This should be updated every time a new version of implementation is deployed.
+   */
+  function version() external view returns (string memory);
 }
