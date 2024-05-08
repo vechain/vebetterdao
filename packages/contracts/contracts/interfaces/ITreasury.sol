@@ -18,7 +18,7 @@ interface ITreasury {
   function getVETBalance() external view returns (uint256);
   function getTokenBalance(address _token) external view returns (uint256);
   function getCollectionNFTBalance(address _nft) external view returns (uint256);
-  function getVersion() external pure returns (string memory);
+  function version() external pure returns (string memory);
   function b3trAddress() external view returns (address);
   function vot3Address() external view returns (address);
 }
