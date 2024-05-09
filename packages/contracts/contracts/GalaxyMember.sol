@@ -70,18 +70,6 @@ contract GalaxyMember is
     uint256 _nextTokenId; // Next Token ID to be minted
     uint256 MAX_LEVEL; // Current Maximum level the Token can be minted or upgraded to
     mapping(uint256 => uint256) levelOf; // Mapping from token ID to level of the Token
-    /*
-      Mapping from X/Economic node type to maximum mintable level for free minting / upgrading
-
-      0 => Strength
-      1 => Thunder
-      2 => Mjolnir
-      3 => VeThorX
-      4 => StrengthX
-      5 => ThunderX
-      6 => MjolnirX
-    */
-    mapping(uint8 => uint256) _xNodeTypeToMaxMintableLevel;
     mapping(uint256 => uint256) _b3trToUpgradeToLevel; // Mapping from level to B3TR required to upgrade to that level
     mapping(address owner => Checkpoints.Trace208) _selectedLevelCheckpoints; // Checkpoints for selected level of the user
     mapping(address => mapping(uint256 => uint256)) _ownedLevels; // Value-Frequency map tracking levels owned by users
@@ -136,7 +124,6 @@ contract GalaxyMember is
   /// @param upgrader Address to grant the upgrader role
   /// @param maxLevel Maximum level tokens can achieve
   /// @param baseTokenURI Base URI for computing {tokenURI}
-  /// @param xNodeMaxMintableLevels Array of maximum levels for each node type
   /// @param b3trToUpgradeToLevel Mapping of B3TR requirements per level
   /// @param _b3tr B3TR token contract address
   /// @param _treasury Address of the treasury
@@ -148,17 +135,12 @@ contract GalaxyMember is
     address upgrader,
     uint256 maxLevel,
     string memory baseTokenURI,
-    uint256[] memory xNodeMaxMintableLevels,
     uint256[] memory b3trToUpgradeToLevel,
     address _b3tr,
     address _treasury
   ) public initializer {
     require(maxLevel > 0, "Galaxy Member: Max level must be greater than 0");
     require(bytes(baseTokenURI).length > 0, "Galaxy Member: Base URI must be set");
-    require(
-      xNodeMaxMintableLevels.length == 7,
-      "Galaxy Member: Invalid number of max mintable levels. There should be 7 levels, one for each X/Economic node type"
-    );
     require(_b3tr != address(0), "Galaxy Member: B3TR token address cannot be the zero address");
     require(_treasury != address(0), "Galaxy Member: Treasury address cannot be the zero address");
 
@@ -174,10 +156,6 @@ contract GalaxyMember is
 
     $.MAX_LEVEL = maxLevel;
     $._baseTokenURI = baseTokenURI;
-
-    for (uint8 i = 0; i < xNodeMaxMintableLevels.length; i++) {
-      $._xNodeTypeToMaxMintableLevel[i] = xNodeMaxMintableLevels[i];
-    }
 
     for (uint8 i = 0; i < b3trToUpgradeToLevel.length; i++) {
       $._b3trToUpgradeToLevel[i + 2] = b3trToUpgradeToLevel[i]; // First Level that requires B3TR is level 2
@@ -388,20 +366,6 @@ contract GalaxyMember is
     $.MAX_LEVEL = level;
   }
 
-  /// @notice Sets the maximum mintable levels for each X/Economic node type
-  /// @dev Only callable by the admin role
-  function setMaxMintableLevels(uint8[] memory maxMintableLevels) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(
-      maxMintableLevels.length == 7,
-      "Galaxy Member: Invalid number of max mintable levels. There should be 7 levels, one for each X/Economic node type"
-    );
-
-    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
-    for (uint8 i = 0; i < maxMintableLevels.length; i++) {
-      $._xNodeTypeToMaxMintableLevel[i] = maxMintableLevels[i];
-    }
-  }
-
   /// @notice Sets the XAllocationVotingGovernor contract address
   /// @dev Only callable by the admin role
   /// @param _xAllocationsGovernor XAllocationVotingGovernor contract address
@@ -503,13 +467,6 @@ contract GalaxyMember is
   /// @notice Gets the base URI for computing the tokenURI
   function baseURI() public view returns (string memory) {
     return _baseURI();
-  }
-
-  /// @notice Gets the maximum level an X/Economic node can freely mint or upgrade to
-  /// @param xNodeType X/Economic node type
-  function getMaxMintableLevelOfXNode(uint8 xNodeType) public view returns (uint256) {
-    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
-    return $._xNodeTypeToMaxMintableLevel[xNodeType];
   }
 
   /// @notice Gets the B3TR required to upgrade to a specific level
