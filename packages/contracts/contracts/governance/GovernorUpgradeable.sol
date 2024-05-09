@@ -437,7 +437,9 @@ abstract contract GovernorUpgradeable is
       depositThresholdAmount
     );
 
-    _depositFunds(depositAmount, proposer, proposalId);
+    if (depositAmount > 0) {
+      _depositFunds(depositAmount, proposer, proposalId);
+    }
 
     emit ProposalCreated(
       proposalId,
