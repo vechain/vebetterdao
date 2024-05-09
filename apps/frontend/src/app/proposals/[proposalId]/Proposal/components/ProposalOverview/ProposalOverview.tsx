@@ -1,4 +1,15 @@
-import { Divider, Flex, HStack, Heading, IconButton, Image, Spacer, Text, VStack } from "@chakra-ui/react"
+import {
+  Divider,
+  Flex,
+  HStack,
+  Heading,
+  IconButton,
+  Skeleton,
+  SkeletonText,
+  Spacer,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { BaseCard } from "../../../components/BaseCard"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { AddressIcon } from "@/components/AddressIcon"
@@ -10,19 +21,6 @@ import { ProposalOverviewStatusLabel } from "./components/ProposalOverviewStatus
 import { ProposalOverviewSupport } from "./components/ProposalOverviewSupport"
 
 export const ProposalOverview = () => {
-  // TODO: loaders
-  // TODO: check theme and colors?
-  // TODO: is there i18n?
-  // TODO: font-size should be in theme?
-  // TODO: change different icons (vot3, warning and share)
-  // TODO: adapt to the last iteration of the design
-  // TODO: get the right data for the proposal
-  // TODO: cast vote
-  // TODO: bind information for ProposalVotesResults
-
-  // waiting designers
-  // TODO: how to handle share button? (Waiting for design)
-
   const { proposal } = useCurrentProposal()
 
   return (
@@ -31,14 +29,23 @@ export const ProposalOverview = () => {
         <VStack gap={"20px"} alignItems={"stretch"} flex={3} justify={"space-between"}>
           <VStack alignItems={"stretch"}>
             <Text fontWeight={"600"} color="#6A6A6A">
-              ROUND #{proposal.roundIdVoteStart}
+              ROUND
+              <Skeleton isLoaded={!proposal.isRoundIdVoteStartLoading} display={"inline-flex"} ml={1}>
+                #{proposal.roundIdVoteStart}
+              </Skeleton>
             </Text>
-            <Heading fontWeight={700} fontSize="36px" color="#252525">
-              {proposal.title}
-            </Heading>
-            <ProposalOverviewStatusLabel />
+            <Skeleton isLoaded={!proposal.isTitleLoading}>
+              <Heading fontWeight={700} fontSize="36px" color="#252525">
+                {proposal.title}
+              </Heading>
+            </Skeleton>
+            <Skeleton isLoaded={!proposal.isStateLoading}>
+              <ProposalOverviewStatusLabel />
+            </Skeleton>
             <Spacer h={"24px"} />
-            <Text color="#252525">{proposal.description}</Text>
+            <SkeletonText isLoaded={!proposal.isDescriptionLoading}>
+              <Text color="#252525">{proposal.description}</Text>
+            </SkeletonText>
           </VStack>
           <VStack alignItems={"stretch"}>
             <Divider color="#D5D5D5" />
@@ -47,20 +54,31 @@ export const ProposalOverview = () => {
                 <Text fontWeight={"400"} color="#6A6A6A">
                   Created by
                 </Text>
-                <HStack>
-                  <AddressIcon address={proposal.proposer} rounded="full" h="20px" w="20px" />
-                  <Text color="#252525">{humanAddress(proposal.proposer, 7, 5)}</Text>
-                </HStack>
+                <Skeleton isLoaded={!proposal.isProposerLoading}>
+                  <HStack>
+                    <AddressIcon address={proposal.proposer} rounded="full" h="20px" w="20px" />
+                    <Text color="#252525">{humanAddress(proposal.proposer, 7, 5)}</Text>
+                  </HStack>
+                </Skeleton>
               </VStack>
               <ProposalOverviewTime />
               <ProposalOverviewSupport />
-              <IconButton aria-label="share" rounded="full" bgColor="#E0E9FE" color="#004CFC" h="40px" w="40px">
+              <IconButton
+                isDisabled={proposal.isStateLoading}
+                aria-label="share"
+                rounded="full"
+                bgColor="#E0E9FE"
+                color="#004CFC"
+                h="40px"
+                w="40px">
                 <UilShareAlt size="20px" />
               </IconButton>
             </HStack>
           </VStack>
         </VStack>
-        <ProposalOverviewVotes />
+        <Skeleton isLoaded={!proposal.isVotesLoading && !proposal.isStateLoading} rounded="8px" flex={1.5}>
+          <ProposalOverviewVotes />
+        </Skeleton>
       </Flex>
     </BaseCard>
   )

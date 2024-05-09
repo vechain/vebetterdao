@@ -1,19 +1,19 @@
-import { useCurrentProposal } from "@/api"
+import { ProposalState, useCurrentProposal } from "@/api"
 import { timestampToTimeLeft } from "@/utils"
-import { Box, Flex, Image, Spacer, Text, VStack } from "@chakra-ui/react"
-import { FaCheckToSlot, FaCircleXmark, FaThumbsDown, FaThumbsUp, FaTriangleExclamation } from "react-icons/fa6"
+import { Box, Flex, Image, Text, VStack } from "@chakra-ui/react"
 import { ProposalVotesProgressBar } from "./components/ProposalVotesProgressBar"
 import { ProposalVotesResults } from "./components/ProposalVotesResults"
 import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
+import { ExclamationTriangle } from "@/components"
 
 export const ProposalOverviewVotes = () => {
   const { proposal } = useCurrentProposal()
 
-  if (proposal.isDepositPending) {
+  if (proposal.state === ProposalState.DepositNotMet) {
     return (
       <Flex h={"full"} bg={"#F8F8F8"} rounded="8px" justify={"center"} alignItems={"center"} flex={1.5}>
         <VStack p="32px">
-          <Image w="88px" h="88px" color="#F29B32" src="/icons/exclamation-triangle.svg" />
+          <ExclamationTriangle />
           <Text color="#252525" fontWeight={"500"} textAlign={"center"} fontSize="20px">
             This proposal must get the support of the community before the round starts
           </Text>
@@ -24,11 +24,24 @@ export const ProposalOverviewVotes = () => {
       </Flex>
     )
   }
-  if (!proposal.isProposalActive) {
+  if (proposal.state === ProposalState.Defeated) {
     return (
       <Flex h={"full"} bg={"#F8F8F8"} rounded="8px" justify={"center"} alignItems={"center"} flex={1.5}>
         <VStack p="32px">
-          <Image w="88px" h="88px" color="#004CFC" src="/icons/vote.svg" />
+          <ExclamationTriangle color="#757575" />
+          <Text color="#252525" fontWeight={"500"} textAlign={"center"} fontSize="20px">
+            The community has not supported this proposal and was canceled
+          </Text>
+        </VStack>
+      </Flex>
+    )
+  }
+
+  if (proposal.state === ProposalState.Pending) {
+    return (
+      <Flex h={"full"} bg={"#F8F8F8"} rounded="8px" justify={"center"} alignItems={"center"} flex={1.5}>
+        <VStack p="32px">
+          <Image w="88px" h="88px" color="#004CFC" src="/images/vote.svg" />
           <Text color="#252525" fontWeight={"500"} textAlign={"center"} fontSize="20px">
             This proposal will be voted in
           </Text>
@@ -40,39 +53,41 @@ export const ProposalOverviewVotes = () => {
     )
   }
 
-  return (
-    <Flex h={"full"} bg={"#F8F8F8"} rounded="8px" flex={1.5}>
-      <VStack p="24px" alignItems={"stretch"} w="full" justify={"space-between"}>
-        <Text color="#000000" fontWeight={"700"} fontSize="20px">
-          Real time votes
-        </Text>
-        <VStack alignItems={"stretch"} gap={6}>
-          <ProposalVotesProgressBar
-            text="Votes for"
-            votes={proposal.forVotes}
-            percentage={proposal.forPercentage}
-            color="#38BF66"
-            icon={<UilThumbsUp size="16px" color="#38BF66" />}
-          />
-          <ProposalVotesProgressBar
-            text="Against"
-            votes={proposal.againstVotes}
-            percentage={proposal.againstPercentage}
-            color="#D23F63"
-            icon={<UilThumbsDown size="16px" color="#D23F63" />}
-          />
-          <ProposalVotesProgressBar
-            text="Abstained"
-            votes={proposal.abstainVotes}
-            percentage={proposal.abstainPercentage}
-            color="#B59525"
-            icon={<Image src={"/icons/abstained.svg"} />}
-          />
+  if (proposal.state === ProposalState.Active) {
+    return (
+      <Flex h={"full"} bg={"#F8F8F8"} rounded="8px" flex={1.5}>
+        <VStack p="24px" alignItems={"stretch"} w="full" justify={"space-between"}>
+          <Text color="#000000" fontWeight={"700"} fontSize="20px">
+            Real time votes
+          </Text>
+          <VStack alignItems={"stretch"} gap={6}>
+            <ProposalVotesProgressBar
+              text="Votes for"
+              votes={proposal.forVotes}
+              percentage={proposal.forPercentage}
+              color="#38BF66"
+              icon={<UilThumbsUp size="16px" color="#38BF66" />}
+            />
+            <ProposalVotesProgressBar
+              text="Against"
+              votes={proposal.againstVotes}
+              percentage={proposal.againstPercentage}
+              color="#D23F63"
+              icon={<UilThumbsDown size="16px" color="#D23F63" />}
+            />
+            <ProposalVotesProgressBar
+              text="Abstained"
+              votes={proposal.abstainVotes}
+              percentage={proposal.abstainPercentage}
+              color="#B59525"
+              icon={<Image src={"/images/abstained.svg"} />}
+            />
+          </VStack>
+          <Box mt={2}>
+            <ProposalVotesResults />
+          </Box>
         </VStack>
-        <Box mt={2}>
-          <ProposalVotesResults />
-        </Box>
-      </VStack>
-    </Flex>
-  )
+      </Flex>
+    )
+  }
 }

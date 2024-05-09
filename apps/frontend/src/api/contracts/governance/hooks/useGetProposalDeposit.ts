@@ -39,6 +39,6 @@ export const useProposalDeposits = (proposalId: string) => {
   return useQuery({
     queryKey: getProposalDepositQueryKey(proposalId),
     queryFn: async () => await getProposalDeposit(thor),
-    enabled: !!thor,
+    enabled: !!thor && thor.status.head.number > 0,
   })
 }

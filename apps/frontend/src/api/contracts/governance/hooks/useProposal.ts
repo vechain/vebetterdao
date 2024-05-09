@@ -1,9 +1,8 @@
 import { useMemo } from "react"
 import { useProposalCreatedEvent } from "./useProposalCreatedEvent"
 import { useProposalDeadline } from "./useProposalDeadline"
-import { useProposalQuorum } from "./useProposalQuorum"
 import { useProposalSnapshot } from "./useProposalSnapshot"
-import { useProposalState } from "./useProposalState"
+import { ProposalState, useProposalState } from "./useProposalState"
 import { useProposalVotes } from "./useProposalVotes"
 import { useParams } from "next/navigation"
 import { useProposalDeposits } from "./useGetProposalDeposit"
@@ -13,71 +12,79 @@ export const useProposal = (proposalId: string) => {
   const proposalSnapshot = useProposalSnapshot(proposalId)
   const proposalVotes = useProposalVotes(proposalId)
   const proposalDeadline = useProposalDeadline(proposalId)
-  const proposalQuorum = useProposalQuorum(proposalId)
   const proposalCreatedEvent = useProposalCreatedEvent(proposalId)
   const proposalDeposits = useProposalDeposits(proposalId)
 
+  const calls = [
+    proposalState,
+    proposalSnapshot,
+    proposalVotes,
+    proposalDeadline,
+    proposalCreatedEvent,
+    proposalDeposits,
+  ]
+
   // remap main info
-  const proposal = useMemo(() => {
-    const forVotes = Number(proposalVotes.data?.forVotes || "0")
-    const againstVotes = Number(proposalVotes.data?.againstVotes || "0")
-    const abstainVotes = Number(proposalVotes.data?.abstainVotes || "0")
-    const totalVotes = forVotes + againstVotes + abstainVotes
-    const forPercentage = (totalVotes ? forVotes / totalVotes : 0) * 100
-    const againstPercentage = (totalVotes ? againstVotes / totalVotes : 0) * 100
-    const abstainPercentage = (totalVotes ? abstainVotes / totalVotes : 0) * 100
+  const proposal = useMemo(
+    () => {
+      const forVotes = Number(proposalVotes.data?.forVotes || "0")
+      const againstVotes = Number(proposalVotes.data?.againstVotes || "0")
+      const abstainVotes = Number(proposalVotes.data?.abstainVotes || "0")
+      const totalVotes = forVotes + againstVotes + abstainVotes
+      const forPercentage = (totalVotes ? forVotes / totalVotes : 0) * 100
+      const againstPercentage = (totalVotes ? againstVotes / totalVotes : 0) * 100
+      const abstainPercentage = (totalVotes ? abstainVotes / totalVotes : 0) * 100
 
-    return {
-      title: proposalCreatedEvent.data?.description,
-      // description: proposalCreatedEvent.data?.description, // TODO: get the right description
-      description:
-        "lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-      proposer: proposalCreatedEvent.data?.proposer || "",
-      roundIdVoteStart: proposalCreatedEvent.data?.roundIdVoteStart,
-      startDate: new Date().getTime() + 1000 * 60 * 60 * 24 * 3, // TODO: stimare
-      endDate: new Date().getTime() + 1000 * 60 * 60 * 24 * 4, // TODO: stimare
-      deposited: proposalDeposits?.data || 0, // TODO: understand if it is correct
-      yourSupport: proposalDeposits?.data || 0, // TODO: understand if it is correct
-      depositThreshold: proposalCreatedEvent.data?.depositThreshold, // not used right now, remove if not needed
-      state: proposalState.data,
-      // isDepositPending: proposalState.data === 8,
-      isDepositPending: false,
-      // isProposalActive: proposalState.data === 1,
-      isProposalActive: true,
-      forVotes,
-      againstVotes,
-      abstainVotes,
-      totalVotes,
-      forPercentage,
-      againstPercentage,
-      abstainPercentage,
-    }
-  }, [])
+      const result = {
+        title: proposalCreatedEvent.data?.description,
+        isTitleLoading: proposalCreatedEvent.isLoading,
+        description: proposalCreatedEvent.data?.description, // TODO: get the right description
+        isDescriptionLoading: proposalCreatedEvent.isLoading,
+        proposer: proposalCreatedEvent.data?.proposer || "",
+        isProposerLoading: proposalCreatedEvent.isLoading,
+        roundIdVoteStart: proposalCreatedEvent.data?.roundIdVoteStart,
+        isRoundIdVoteStartLoading: proposalCreatedEvent.isLoading,
+        startDate: new Date().getTime() + 1000 * 60 * 60 * 24 * 3, // TODO: stimare
+        endDate: new Date().getTime() + 1000 * 60 * 60 * 24 * 4, // TODO: stimare
+        deposited: proposalDeposits?.data || 0, // TODO: understand if it is correct
+        yourSupport: proposalDeposits?.data || 0, // TODO: understand if it is correct
+        depositThreshold: proposalCreatedEvent.data?.depositThreshold, // not used right now, remove if not needed
+        state: proposalState.data,
+        isStateLoading: proposalState.isLoading,
+        forVotes,
+        againstVotes,
+        abstainVotes,
+        totalVotes,
+        forPercentage,
+        againstPercentage,
+        abstainPercentage,
+        isVotesLoading: proposalVotes.isLoading,
+      }
 
-  const isLoading =
-    proposalState.isLoading ||
-    proposalSnapshot.isLoading ||
-    proposalVotes.isLoading ||
-    proposalDeadline.isLoading ||
-    proposalQuorum.isLoading ||
-    proposalCreatedEvent.isLoading ||
-    proposalDeposits.isLoading
+      const mock = {}
 
-  const error =
-    proposalState.error ||
-    proposalSnapshot.error ||
-    proposalVotes.error ||
-    proposalDeadline.error ||
-    proposalQuorum.error ||
-    proposalCreatedEvent.error ||
-    proposalDeposits.error
+      return { ...result, ...mock }
+    },
+    calls.map(call => call.data),
+  )
+
+  const isLoading = useMemo(
+    () => calls.some(call => call.isLoading),
+    calls.map(call => call.isLoading),
+  )
+
+  const error = useMemo(
+    () => calls.find(call => call.error)?.error || null,
+    calls.map(call => call.error),
+  )
+  if (error) console.error("useProposal", error)
 
   return {
     proposalState,
     proposalSnapshot,
     proposalVotes,
     proposalDeadline,
-    proposalQuorum,
+    //proposalQuorum,
     proposalCreatedEvent,
     proposalDeposits,
     proposal,

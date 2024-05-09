@@ -23,6 +23,13 @@ const FreshDeskWidget = dynamic(() => import("@/components/FreshDeskWidget").the
 //TODO: Is there a better place to initialise mixpanel? next/script?
 typeof window != "undefined" && mixpanelToken && AnalyticsUtils.initialise()
 
+// workaround for "@iconscout/react-unicons
+const error = console.error
+console.error = (...args: any) => {
+  if (/defaultProps/.test(args[0])) return
+  error(...args)
+}
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html
