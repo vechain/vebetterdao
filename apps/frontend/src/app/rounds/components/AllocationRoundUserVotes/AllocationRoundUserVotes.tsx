@@ -122,9 +122,10 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
 
     console.log("appVotesPercentagesToValue", appVotesPercentagesToValue)
     console.log(
-      "totalVotes",
+      "totalVotesToCast",
       appVotesPercentagesToValue.reduce((acc, vote) => acc + Number(vote.votes), 0),
     )
+    console.log("totalVotesAvailable", votesAtSnapshot.scaled)
 
     onOpen()
     castAllocationVotes.sendTransaction(appVotesPercentagesToValue)
