@@ -1,8 +1,11 @@
 name: PR Sonar Scan
 
 on:
+    push:
+        branches:
+          - main
     pull_request:
-        
+
 jobs:
   sonar-scan:
     name: Sonar Scan
