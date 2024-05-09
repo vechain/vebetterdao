@@ -59,6 +59,7 @@ contract GalaxyMember is
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
   bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+  bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
 
   /// @notice Storage structure for GalaxyMember
   /// @dev GalaxyMemberStorage structure holds all the state variables in a single location.
@@ -137,6 +138,7 @@ contract GalaxyMember is
   /// @param upgrader Address to grant the upgrader role
   /// @param pauser Address to grant the pauser role
   /// @param minter Address to grant the minter role
+  /// @param contractsAddressManager Address that can update external contracts address
   /// @param maxLevel Maximum level tokens can achieve
   /// @param baseTokenURI Base URI for computing {tokenURI}
   /// @param xNodeMaxMintableLevels Array of maximum levels for each node type
@@ -150,6 +152,7 @@ contract GalaxyMember is
     address upgrader;
     address pauser;
     address minter;
+    address contractsAddressManager;
     uint256 maxLevel;
     string baseTokenURI;
     uint256[] xNodeMaxMintableLevels;
@@ -203,6 +206,7 @@ contract GalaxyMember is
     _grantRole(UPGRADER_ROLE, data.upgrader);
     _grantRole(PAUSER_ROLE, data.pauser);
     _grantRole(MINTER_ROLE, data.minter);
+    _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, data.contractsAddressManager);
   }
 
   /// @notice Internal function to authorize contract upgrades
@@ -414,18 +418,20 @@ contract GalaxyMember is
   }
 
   /// @notice Sets the XAllocationVotingGovernor contract address
-  /// @dev Only callable by the admin role
+  /// @dev Only callable by the contractsAddressManager role
   /// @param _xAllocationsGovernor XAllocationVotingGovernor contract address
-  function setXAllocationsGovernorAddress(address _xAllocationsGovernor) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setXAllocationsGovernorAddress(
+    address _xAllocationsGovernor
+  ) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(_xAllocationsGovernor != address(0), "Galaxy Member: _xAllocationsGovernor cannot be the zero address");
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     $.xAllocationsGovernor = IXAllocationVotingGovernor(_xAllocationsGovernor);
   }
 
   /// @notice Sets the B3TRGovernor contract address
-  /// @dev Only callable by the admin role
+  /// @dev Only callable by the contractsAddressManager role
   /// @param _b3trGovernor B3TRGovernor contract address
-  function setB3trGovernorAddress(address _b3trGovernor) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setB3trGovernorAddress(address _b3trGovernor) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(_b3trGovernor != address(0), "Galaxy Member: _b3trGovernor cannot be the zero address");
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     $.b3trGovernor = IB3TRGovernor(payable(_b3trGovernor));

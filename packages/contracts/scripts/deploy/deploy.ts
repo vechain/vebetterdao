@@ -107,6 +107,7 @@ export async function deployAll(config: ContractsConfig) {
       upgrader: config.CONTRACTS_ADMIN_ADDRESS,
       pauser: config.CONTRACTS_ADMIN_ADDRESS,
       minter: config.CONTRACTS_ADMIN_ADDRESS,
+      contractsAddressManager: TEMP_ADMIN,
       maxLevel: 1,
       baseTokenURI: config.GM_NFT_BASE_URI,
       xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
@@ -314,6 +315,7 @@ export async function deployAll(config: ContractsConfig) {
     await transferAdminRole(b3tr, admin, config.CONTRACTS_ADMIN_ADDRESS)
 
     await transferAdminRole(galaxyMember, admin, config.CONTRACTS_ADMIN_ADDRESS)
+    await transferContractsAddressManagerRole(galaxyMember, admin, config.CONTRACTS_ADMIN_ADDRESS)
 
     await transferMinterRole(emissions, admin, admin.address, config.CONTRACTS_ADMIN_ADDRESS)
     await transferAdminRole(emissions, admin, config.CONTRACTS_ADMIN_ADDRESS)
@@ -477,6 +479,29 @@ const transferGovernanceRole = async (
 
     console.log("Governance role revoked (without granting new) successfully on " + typeof contract)
   }
+}
+
+const transferContractsAddressManagerRole = async (
+  contract: GalaxyMember,
+  admin: HardhatEthersSigner,
+  newAddress: string,
+) => {
+  const contractsAddressManagerRole = await contract.CONTRACTS_ADDRESS_MANAGER_ROLE()
+
+  await contract
+    .connect(admin)
+    .grantRole(contractsAddressManagerRole, newAddress)
+    .then(async tx => await tx.wait())
+  await contract
+    .connect(admin)
+    .renounceRole(contractsAddressManagerRole, admin.address)
+    .then(async tx => await tx.wait())
+
+  const newRoleSet = await contract.hasRole(contractsAddressManagerRole, newAddress)
+  const oldRoleRemoved = !(await contract.hasRole(contractsAddressManagerRole, admin.address))
+  if (!newRoleSet || !oldRoleRemoved) throw new Error("Role not set correctly on " + (await contract.getAddress()))
+
+  console.log("Role transferred successfully on " + typeof contract)
 }
 
 async function deployB3trToken(admin: string, minter: string, pauser: string, cap: number): Promise<B3TR> {
