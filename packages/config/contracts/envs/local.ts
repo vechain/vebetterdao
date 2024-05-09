@@ -57,18 +57,6 @@ export function createLocalConfig() {
     INITIAL_X_ALLOCATION: BigInt("66666666666666666666666"), // 1M/15 rounded down -> 1/15th of the total supply for pilot show
 
     GM_NFT_BASE_URI: "ipfs://bafybeiahr3qobzujfkxi64o6wrigkmdagrvgfa566rqqth6jm5nq7vf24y/", // IPFS base URI for the GM NFT
-    /*
-       X/Economic Node => Max Level For Free
-
-       Strength => 2,
-       Thunder => 4,
-       Mjolnir => 6,
-       VeThorX => 2,
-       StrengthX => 4,
-       ThunderX => 6,
-       MjolnirX => 7,
-    */
-    GM_NFT_X_NODE_UPGRADEABLE_LEVELS: [2, 4, 6, 2, 4, 6, 7],
 
     /*
       Level => B3TR Required

@@ -38,19 +38,6 @@ export function createTestnetConfig() {
     GM_NFT_BASE_URI: "ipfs://bafybeiahr3qobzujfkxi64o6wrigkmdagrvgfa566rqqth6jm5nq7vf24y/", // IPFS base URI for the GM NFT
 
     /*
-      X/Economic Node => Max Level For Free
-
-      Strength => 2,
-      Thunder => 4,
-      Mjolnir => 6,
-      VeThorX => 2,
-      StrengthX => 4,
-      ThunderX => 6,
-      MjolnirX => 7,
-    */
-    GM_NFT_X_NODE_UPGRADEABLE_LEVELS: [2, 4, 6, 2, 4, 6, 7],
-
-    /*
       Level => B3TR Required
   
       2 (Moon) => 10,000 B3TR
