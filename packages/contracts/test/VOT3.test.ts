@@ -152,7 +152,7 @@ describe("VOT3", function () {
         forceDeploy: true,
       })
 
-      await expect(vot3.initialize(owner.address, owner.address, await b3tr.getAddress())).to.be.reverted // already initialized
+      await expect(vot3.initialize(owner.address, owner.address, owner.address, await b3tr.getAddress())).to.be.reverted // already initialized
     })
 
     it("Should return correct version of the contract", async () => {

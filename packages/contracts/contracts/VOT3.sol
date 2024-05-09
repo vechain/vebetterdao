@@ -76,9 +76,10 @@ contract VOT3 is
   /// @notice Initializes the VOT3 token
   /// @dev Sets initial values for all relevant contract properties and state variables.
   /// @param _admin Address to grant admin roles
+  /// @param _upgrader Address to grant upgrader roles
   /// @param _pauser Address to grant pauser roles
   /// @param _b3tr B3TR token contract address
-  function initialize(address _admin, address _pauser, address _b3tr) public initializer {
+  function initialize(address _admin, address _upgrader, address _pauser, address _b3tr) public initializer {
     __ERC20_init("VOT3", "VOT3");
     __ERC20Pausable_init();
     __AccessControl_init();
@@ -90,7 +91,7 @@ contract VOT3 is
     VOT3Storage storage $ = _getVOT3Storage();
     // Grant the contract deployer the default admin role and the UPGRADER_ROLE
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
-    _grantRole(UPGRADER_ROLE, _admin);
+    _grantRole(UPGRADER_ROLE, _upgrader);
     _grantRole(PAUSER_ROLE, _pauser);
     $.b3tr = IERC20(_b3tr);
   }

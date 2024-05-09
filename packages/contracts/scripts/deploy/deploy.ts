@@ -52,8 +52,9 @@ export async function deployAll(config: ContractsConfig) {
   )
 
   const vot3 = (await deployProxy("VOT3", [
-    TEMP_ADMIN, // admin
+    config.CONTRACTS_ADMIN_ADDRESS, // admin
     config.CONTRACTS_ADMIN_ADDRESS, // pauser
+    config.CONTRACTS_ADMIN_ADDRESS, // upgrader
     await b3tr.getAddress(),
   ])) as VOT3
   console.log(`Vot3 deployed at ${await vot3.getAddress()}`)
@@ -319,8 +320,6 @@ export async function deployAll(config: ContractsConfig) {
 
     await transferMinterRole(emissions, admin, admin.address, config.CONTRACTS_ADMIN_ADDRESS)
     await transferAdminRole(emissions, admin, config.CONTRACTS_ADMIN_ADDRESS)
-
-    await transferAdminRole(vot3, admin, config.CONTRACTS_ADMIN_ADDRESS)
 
     await transferAdminRole(voterRewards, admin, config.CONTRACTS_ADMIN_ADDRESS)
 
