@@ -219,6 +219,7 @@ export const getOrDeployContractInstances = async ({
         governorAdmin: owner.address,
         pauser: owner.address,
         contractsAddressManager: owner.address,
+        proposalExecutor: owner.address,
         voterRewards: await voterRewards.getAddress(),
         governorFunctionSettingsRoleAddress: owner.address,
         isFunctionRestrictionEnabled: true,

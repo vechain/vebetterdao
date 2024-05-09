@@ -193,6 +193,7 @@ export async function deployAll(config: ContractsConfig) {
         governorAdmin: TEMP_ADMIN,
         pauser: config.CONTRACTS_ADMIN_ADDRESS,
         contractsAddressManager: config.CONTRACTS_ADMIN_ADDRESS,
+        proposalExecutor: config.CONTRACTS_ADMIN_ADDRESS,
         voterRewards: await voterRewards.getAddress(),
         governorFunctionSettingsRoleAddress: TEMP_ADMIN,
         isFunctionRestrictionEnabled: true,
@@ -426,6 +427,12 @@ export async function deployAll(config: ContractsConfig) {
       config.CONTRACTS_ADMIN_ADDRESS,
       TEMP_ADMIN,
       await governor.CONTRACTS_ADDRESS_MANAGER_ROLE(),
+    )
+    await validateContractRole(
+      governor,
+      config.CONTRACTS_ADMIN_ADDRESS,
+      TEMP_ADMIN,
+      await governor.PROPOSAL_EXECUTOR_ROLE(),
     )
 
     // Emissions
