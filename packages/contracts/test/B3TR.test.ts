@@ -147,12 +147,14 @@ describe("B3TR Token", function () {
       await b3tr.connect(newAdmin).grantRole(adminRole, otherAccounts[5])
     })
 
-    it("Only admin can toggle pause of b3tr transfers", async function () {
-      const { b3tr, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
+    it("Only admin with PAUSER_ROLE can toggle pause of b3tr transfers", async function () {
+      const { b3tr, otherAccount, owner } = await getOrDeployContractInstances({ forceDeploy: true })
 
+      expect(await b3tr.hasRole(await b3tr.PAUSER_ROLE(), otherAccount.address)).to.eql(false)
       await catchRevert(b3tr.connect(otherAccount).pause())
       await catchRevert(b3tr.connect(otherAccount).unpause())
 
+      expect(await b3tr.hasRole(await b3tr.PAUSER_ROLE(), owner.address)).to.eql(true)
       await b3tr.connect(owner).pause()
       expect(await b3tr.paused()).to.eql(true)
 
