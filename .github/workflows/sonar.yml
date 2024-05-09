@@ -10,7 +10,7 @@ on:
         - main
         - testnet
         - sonar/**
-        
+
 jobs:
   unit-test:
     name: FE Unit Test With Coverage
