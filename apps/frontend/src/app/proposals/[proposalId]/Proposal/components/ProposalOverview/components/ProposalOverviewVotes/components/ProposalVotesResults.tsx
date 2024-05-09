@@ -1,10 +1,10 @@
 import { HStack, Text } from "@chakra-ui/react"
-import { FaCircleExclamation } from "react-icons/fa6"
+import { UilExclamationCircle } from "@iconscout/react-unicons"
 
 export const ProposalVotesResults = () => {
   return (
     <HStack>
-      <FaCircleExclamation />
+      <UilExclamationCircle />
       <Text fontSize="14px" color="#6A6A6A">
         Quorum not reached yet
       </Text>

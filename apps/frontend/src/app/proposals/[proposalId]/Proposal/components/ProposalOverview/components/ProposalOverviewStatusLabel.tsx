@@ -1,29 +1,36 @@
 import { useCurrentProposal } from "@/api"
-import { Circle, HStack, Text, VStack } from "@chakra-ui/react"
+import { Circle, HStack, Image, Text, VStack } from "@chakra-ui/react"
+import { UilClockEight } from "@iconscout/react-unicons"
 
 export const ProposalOverviewStatusLabel = () => {
   const { proposal } = useCurrentProposal()
 
   if (proposal.isDepositPending) {
     return (
-      <Text fontWeight={"600"} color="#F29B32">
-        VOT3 deposit pending
-      </Text>
+      <HStack>
+        <Image h="20px" w="20px" src="/icons/arm.svg" />
+        <Text fontWeight={"600"} color="#F29B32">
+          Looking for support
+        </Text>
+      </HStack>
     )
   }
   if (!proposal.isProposalActive) {
     return (
-      <Text fontWeight={"600"} color="#6194F5">
-        Upcoming voting
-      </Text>
+      <HStack>
+        <UilClockEight color="#004CFC" size="20px" />
+        <Text fontWeight={"600"} color="#004CFC">
+          Waiting for the round to start
+        </Text>
+      </HStack>
     )
   }
 
   return (
-    <HStack bg="#CDFF9F" alignSelf={"flex-start"} px="10px" py="4px" rounded="10px">
-      <Circle size="6px" bg="#FC0000" />
-      <Text fontSize="14px" color="#3A6F00">
-        Active now
+    <HStack alignSelf={"flex-start"}>
+      <Circle size="8px" bg="#F50000" />
+      <Text fontWeight={600} color="#6DCB09">
+        Active now!
       </Text>
     </HStack>
   )

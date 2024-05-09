@@ -3,22 +3,27 @@ import { ReactElement } from "react"
 
 type Props = {
   votes: number
+  text: string
   percentage: number
   color: string
   icon: ReactElement
 }
-export const ProposalVotesProgressBar = ({ votes, percentage, color, icon }: Props) => {
+export const ProposalVotesProgressBar = ({ text, votes, percentage, color, icon }: Props) => {
   return (
     <VStack alignItems={"stretch"}>
       <HStack justify={"space-between"}>
         <HStack>
           {icon}
-          <Text color={color}>Abstained</Text>
+          <Text color={color}>{text}</Text>
+        </HStack>
+        <HStack alignItems={"baseline"} gap={1}>
           <Text color={color} fontWeight={600}>
-            {votes} V3
+            {votes}
+          </Text>
+          <Text color={color} fontSize="12px">
+            ({percentage}%)
           </Text>
         </HStack>
-        <Text>{percentage}%</Text>
       </HStack>
       <Box position="relative">
         <Box bg="#D5D5D5" h="8px" rounded="full" />
