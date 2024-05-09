@@ -1,4 +1,4 @@
-## B3TR Contracts
+# B3TR Contracts
 
 ### Overview
 
@@ -11,7 +11,7 @@ This repository contains the smart contracts for the B3TR project.
 
 ```
 yarn
-node: ^16.20 || ^18.16 || >=20
+node: ^18.13.0 || >=20.9.0
 docker
 docker-compose
 ```
@@ -23,6 +23,18 @@ Since we are using a monorepo architecture please refer to the `README.md` in th
 ## Contracts
 
 Contracts are written using latest solidity version but compiled against "Paris" evm compiler to be compatible with Vechain Thor network.
+
+You can run the following command to generate the documentation for the contracts:
+
+```
+yarn docs
+```
+
+You can see the generated documentation in the `docs` folder.
+
+# Hardhat
+
+This is a forked version of Hardhat with additional features for vechain.
 
 ## Additional Hardhat features for vechain
 
