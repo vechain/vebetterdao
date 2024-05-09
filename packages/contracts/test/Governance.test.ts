@@ -204,6 +204,80 @@ describe("Governor and TimeLock", function () {
       expect(await governor.quorumReached(proposalId)).to.eql(true)
     })
 
+    it("Should be able to upgrade the governor contract through governance when libraries change", async function () {
+      const { governorDescriptionValidatorLib, governorQuorumFractionLib } = await getOrDeployContractInstances({
+        forceDeploy: false,
+      })
+
+      const { governor, owner, otherAccount, xAllocationVoting, vot3 } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // Deploy the implementation contract
+      const Contract = await ethers.getContractFactory("B3TRGovernor", {
+        libraries: {
+          GovernorDescriptionValidator: await governorDescriptionValidatorLib.getAddress(),
+          GovernorQuorumFraction: await governorQuorumFractionLib.getAddress(),
+        },
+      })
+      const implementation = await Contract.deploy()
+      await implementation.waitForDeployment()
+
+      // V1 Contract
+      const V1Contract = await ethers.getContractAt("B3TRGovernor", await governor.getAddress())
+
+      // Now we can create a proposal
+      const encodedFunctionCall = V1Contract.interface.encodeFunctionData("upgradeToAndCall", [
+        await implementation.getAddress(),
+        "0x",
+      ])
+      const description = "Upgrading Governance contracts"
+      const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
+      const currentRoundId = await xAllocationVoting.currentRoundId()
+
+      const tx = await governor
+        .connect(owner)
+        .propose([await governor.getAddress()], [0], [encodedFunctionCall], description, currentRoundId + 1n, 0, {
+          gasLimit: 10_000_000,
+        })
+
+      const proposalId = await getProposalIdFromTx(tx)
+
+      // Pay the proposal deposit
+      const deposit = await governor.proposalDepositThreshold(proposalId)
+      await getVot3Tokens(owner, ethers.formatEther(deposit))
+      await vot3.connect(owner).approve(await governor.getAddress(), ethers.parseEther(deposit.toString()))
+      await governor.connect(owner).deposit(deposit, proposalId)
+
+      await getVot3Tokens(otherAccount, "10000")
+
+      await waitForProposalToBeActive(proposalId)
+
+      await governor.connect(otherAccount).castVote(proposalId, 1)
+      await waitForVotingPeriodToEnd(proposalId)
+      expect(await governor.state(proposalId)).to.eql(4n) // succeded
+
+      await governor.queue([await governor.getAddress()], [0], [encodedFunctionCall], descriptionHash)
+      expect(await governor.state(proposalId)).to.eql(5n)
+
+      await governor.execute([await governor.getAddress()], [0], [encodedFunctionCall], descriptionHash)
+      expect(await governor.state(proposalId)).to.eql(7n)
+
+      await governor.connect(owner).withdraw(proposalId, owner.address)
+      await vot3.connect(owner).approve(await governor.getAddress(), ethers.parseEther("1000"))
+
+      const newImplAddress = await getImplementationAddress(ethers.provider, await governor.getAddress())
+      expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
+
+      // Check that the new implementation works
+      const newGovernor = Contract.attach(await governor.getAddress()) as B3TRGovernor
+
+      expect(await newGovernor.quorumDenominator()).to.equal(100)
+    })
+
     it("Only governance can upgrade the governor contract", async function () {
       const { governor, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
