@@ -21,7 +21,7 @@ const walletConnectOptions: WalletConnectOptions = {
     name: "VeBetterDAO Governance",
     description: "Participate in the VeBetterDAO Governance",
     url: "https://governance.vebetterdao.org",
-    icons: ['https://governance.vebetterdao.org/images/favicon.png'],
+    icons: ["https://governance.vebetterdao.org/images/favicon.png"],
   },
 }
 
@@ -46,7 +46,7 @@ export const DappKitWithChakraProvider = ({ children }: { children: React.ReactN
       requireCertificate={false}
       genesis={appConfig.network.genesis}
       nodeUrl={appConfig.nodeUrl}
-      logLevel={"DEBUG"}
+      logLevel={"WARN"}
       walletConnectOptions={walletConnectOptions}>
       {children}
     </DAppKitProvider>

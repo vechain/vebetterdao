@@ -124,6 +124,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     const totalVotes = xApps?.length ?? 0
     const rawValue = scaledDivision(100, totalVotes)
     const votesPerApp = new BigNumber(rawValue).toFixed(2, BigNumber.ROUND_HALF_DOWN)
+    console.log("votesPerApp", votesPerApp, "rawValue", rawValue)
     xApps?.forEach((xApp, index) => {
       update(index, { appId: xApp.id, value: votesPerApp, rawValue })
     })

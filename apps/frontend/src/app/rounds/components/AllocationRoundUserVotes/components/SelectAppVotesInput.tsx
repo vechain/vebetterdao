@@ -45,8 +45,6 @@ export const SelectAppVotesInput = ({
   isDisabled = false,
   totalVotesAvailable,
 }: Props) => {
-  console.log("errors", errors, "totalVotes", totalVotesAvailable)
-
   const { data: appMetadata } = useXAppMetadata(xApp?.id)
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
 
