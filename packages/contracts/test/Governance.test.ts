@@ -18,7 +18,7 @@ import {
   payDeposit,
   bootstrapEmissions,
   ZERO_ADDRESS,
-  waitForQueuedProosalToBeReady,
+  waitForQueuedProposalToBeReady,
 } from "./helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it } from "mocha"
@@ -3425,7 +3425,7 @@ describe("Governor and TimeLock", function () {
       proposalState = await governor.state(proposalId)
       expect(proposalState.toString()).to.eql("5")
 
-      await waitForQueuedProosalToBeReady(proposalId)
+      await waitForQueuedProposalToBeReady(proposalId)
 
       // Now it should be ok
       await governor.connect(owner).execute([b3trAddress], [0], [encodedFunctionCall], descriptionHash)

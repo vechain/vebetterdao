@@ -194,7 +194,7 @@ export const waitForProposalToBeActive = async (proposalId: number): Promise<big
  *
  * @param proposalId the proposal id
  */
-export const waitForQueuedProosalToBeReady = async (proposalId: number) => {
+export const waitForQueuedProposalToBeReady = async (proposalId: number) => {
   const { timeLock, governor } = await getOrDeployContractInstances({})
 
   const timelockId = await governor.getTimelockId(proposalId)
