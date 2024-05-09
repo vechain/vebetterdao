@@ -299,17 +299,6 @@ contract B3TRGovernor is
   }
 
   /**
-   * @dev Set the B3TR contract
-   *
-   * This function is only callable through goverance proposals or by the CONTRACTS_ADDRESS_MANAGER_ROLE
-   *
-   * @param _b3tr The new B3TR contract
-   */
-  function setB3tr(IB3TR _b3tr) public override onlyRoleOrGovernance(CONTRACTS_ADDRESS_MANAGER_ROLE) {
-    super.setB3tr(_b3tr);
-  }
-
-  /**
    * @dev See {GovernorFunctionsSettingsUpgradeable-setWhitelistFunction}.
    *
    * This function is only callable by the GOVERNOR_FUNCTIONS_SETTINGS_ROLE
