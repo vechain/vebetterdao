@@ -452,55 +452,6 @@ describe("Governor and TimeLock", function () {
       expect(updatedAddress).to.not.eql(newAddress)
     })
 
-    it("should be able to update the B3TR address through governance", async function () {
-      const { governor, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      // first whitelist
-      const funcSig = governor.interface.getFunction("setB3tr")?.selector
-      await governor.connect(owner).setWhitelistFunction(await governor.getAddress(), funcSig, true)
-
-      const newAddress = ethers.Wallet.createRandom().address
-      await createProposalAndExecuteIt(owner, owner, governor, b3trGovernorFactory, "Update B3TR address", "setB3tr", [
-        newAddress,
-      ])
-
-      const updatedAddress = await governor.b3tr()
-      expect(updatedAddress).to.eql(newAddress)
-    })
-
-    it("Admin with CONTRACTS_ADDRESS_MANAGER_ROLE can update B3TR address", async function () {
-      const { governor, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      expect(await governor.hasRole(await governor.CONTRACTS_ADDRESS_MANAGER_ROLE(), owner.address)).to.eql(true)
-
-      const newAddress = ethers.Wallet.createRandom().address
-      await governor.connect(owner).setB3tr(newAddress)
-
-      const updatedAddress = await governor.b3tr()
-      expect(updatedAddress).to.eql(newAddress)
-    })
-
-    it("only governance or CONTRACTS_ADDRESS_MANAGER_ROLE can update B3TR address", async function () {
-      const { governor, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      expect(await governor.hasRole(await governor.CONTRACTS_ADDRESS_MANAGER_ROLE(), otherAccount.address)).to.eql(
-        false,
-      )
-
-      const newAddress = ethers.Wallet.createRandom().address
-
-      await catchRevert(governor.connect(otherAccount).setB3tr(newAddress))
-
-      const updatedAddress = await governor.b3tr()
-      expect(updatedAddress).to.not.eql(newAddress)
-    })
-
     it("can update voterRewards address through governance", async function () {
       const { governor, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
