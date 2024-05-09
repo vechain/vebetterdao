@@ -87,6 +87,7 @@ export const getOrDeployContractInstances = async ({
     owner.address,
     owner.address,
     owner.address,
+    owner.address,
     config.TREASURY_TRANSFER_LIMIT_VET,
     config.TREASURY_TRANSFER_LIMIT_B3TR,
     config.TREASURY_TRANSFER_LIMIT_VOT3,
