@@ -66,7 +66,7 @@ export async function deployAll(config: ContractsConfig) {
   console.log(`Vot3 deployed at ${await vot3.getAddress()}`)
 
   const timelock = (await deployProxy("TimeLock", [
-    config.B3TR_GOVERNOR_MIN_DELAY,
+    config.TIMELOCK_MIN_DELAY,
     [], // proposers
     [], // executors
     TEMP_ADMIN, // admin
@@ -193,6 +193,7 @@ export async function deployAll(config: ContractsConfig) {
         governorAdmin: TEMP_ADMIN,
         pauser: config.CONTRACTS_ADMIN_ADDRESS,
         contractsAddressManager: config.CONTRACTS_ADMIN_ADDRESS,
+        proposalExecutor: config.CONTRACTS_ADMIN_ADDRESS,
         voterRewards: await voterRewards.getAddress(),
         governorFunctionSettingsRoleAddress: TEMP_ADMIN,
         isFunctionRestrictionEnabled: true,
@@ -427,6 +428,12 @@ export async function deployAll(config: ContractsConfig) {
       TEMP_ADMIN,
       await governor.CONTRACTS_ADDRESS_MANAGER_ROLE(),
     )
+    await validateContractRole(
+      governor,
+      config.CONTRACTS_ADMIN_ADDRESS,
+      TEMP_ADMIN,
+      await governor.PROPOSAL_EXECUTOR_ROLE(),
+    )
 
     // Emissions
     await validateContractRole(emissions, config.CONTRACTS_ADMIN_ADDRESS, TEMP_ADMIN, await emissions.MINTER_ROLE())
@@ -438,7 +445,7 @@ export async function deployAll(config: ContractsConfig) {
     )
     await validateContractRole(emissions, config.CONTRACTS_ADMIN_ADDRESS, TEMP_ADMIN, await emissions.UPGRADER_ROLE())
 
-    // Voter Rewards
+    // VoterRewards
     await validateContractRole(
       voterRewards,
       config.CONTRACTS_ADMIN_ADDRESS,

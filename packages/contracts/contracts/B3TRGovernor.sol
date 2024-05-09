@@ -54,7 +54,7 @@ import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
  * The voting power is calculated through the quadratic vote formula based on the amount of VOT3 tokens held by the
  * voter at the block when the proposal becomes active.
  *
- * Once a proposal succeeds, it can be executed by the timelock contract.
+ * Once a proposal succeeds, it can be queued and executed. The execution is done through the timelock contract.
  *
  * The contract is upgradeable and uses the UUPS pattern.
  */
@@ -79,6 +79,8 @@ contract B3TRGovernor is
   bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
   /// @notice The role that can set external contracts addresses
   bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
+  /// @notice The role that can execute a proposal
+  bytes32 public constant PROPOSAL_EXECUTOR_ROLE = keccak256("PROPOSAL_EXECUTOR_ROLE");
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
@@ -97,6 +99,7 @@ contract B3TRGovernor is
    * @param governorAdmin The address of the governor admin
    * @param pauser The address of the pauser
    * @param contractsAddressManager The address of the contracts address manager
+   * @param proposalExecutor The address that should be set as executor and have the PROPOSAL_EXECUTOR_ROLE
    * @param voterRewards The address of the voter rewards contract
    * @param governorFunctionSettingsRoleAddress The address that should have the GOVERNOR_FUNCTIONS_SETTINGS_ROLE
    * @param isFunctionRestrictionEnabled If the function restriction is enabled
@@ -113,6 +116,7 @@ contract B3TRGovernor is
     address governorAdmin;
     address pauser;
     address contractsAddressManager;
+    address proposalExecutor;
     IVoterRewards voterRewards;
     address governorFunctionSettingsRoleAddress;
     bool isFunctionRestrictionEnabled;
@@ -121,6 +125,19 @@ contract B3TRGovernor is
   /// @notice modifier to check if the caller has the specified role or if the function is called through a governance proposal
   modifier onlyRoleOrGovernance(bytes32 role) {
     if (!hasRole(role, _msgSender())) _checkGovernance();
+    _;
+  }
+
+  /**
+   * @dev Modifier to make a function callable only by a certain role. In
+   * addition to checking the sender's role, `address(0)` 's role is also
+   * considered. Granting a role to `address(0)` is equivalent to enabling
+   * this role for everyone.
+   */
+  modifier onlyRoleOrOpenRole(bytes32 role) {
+    if (!hasRole(role, address(0))) {
+      _checkRole(role, _msgSender());
+    }
     _;
   }
 
@@ -145,6 +162,7 @@ contract B3TRGovernor is
     _grantRole(GOVERNOR_FUNCTIONS_SETTINGS_ROLE, data.governorFunctionSettingsRoleAddress);
     _grantRole(PAUSER_ROLE, data.pauser);
     _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, data.contractsAddressManager);
+    _grantRole(PROPOSAL_EXECUTOR_ROLE, data.proposalExecutor);
   }
 
   // ------------------ GETTERS ------------------ //
@@ -230,7 +248,7 @@ contract B3TRGovernor is
     uint256[] memory values,
     bytes[] memory calldatas,
     bytes32 descriptionHash
-  ) public payable override whenNotPaused returns (uint256) {
+  ) public payable override whenNotPaused onlyRoleOrOpenRole(PROPOSAL_EXECUTOR_ROLE) returns (uint256) {
     return super.execute(targets, values, calldatas, descriptionHash);
   }
 

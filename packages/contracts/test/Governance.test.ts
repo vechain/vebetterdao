@@ -17,6 +17,8 @@ import {
   createProposalWithMultipleFunctionsAndExecuteIt,
   payDeposit,
   bootstrapEmissions,
+  ZERO_ADDRESS,
+  waitForQueuedProposalToBeReady,
 } from "./helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it } from "mocha"
@@ -305,6 +307,7 @@ describe("Governor and TimeLock", function () {
           governorAdmin: owner.address,
           pauser: owner.address,
           contractsAddressManager: owner.address,
+          proposalExecutor: owner.address,
           voterRewards: await voterRewards.getAddress(),
           governorFunctionSettingsRoleAddress: owner.address,
           isFunctionRestrictionEnabled: true,
@@ -3066,12 +3069,13 @@ describe("Governor and TimeLock", function () {
     })
 
     // this test needs the previous one to be run first
-    it("can correctly execute proposal after it was queued", async function () {
+    it("PROPOSAL_EXECUTOR_ROLE can correctly execute proposal after it was queued", async function () {
       const {
         governor,
         b3tr,
         B3trContract,
         otherAccount: proposer,
+        owner,
       } = await getOrDeployContractInstances({ forceDeploy: false })
 
       await getVot3Tokens(voter, "1000")
@@ -3113,7 +3117,8 @@ describe("Governor and TimeLock", function () {
       proposalState = await governor.state(proposalId)
       expect(proposalState.toString()).to.eql("5")
 
-      await governor.execute([b3trAddress], [0], [encodedFunctionCall], descriptionHash)
+      expect(await governor.hasRole(await governor.PROPOSAL_EXECUTOR_ROLE(), owner.address)).to.eql(true)
+      await governor.connect(owner).execute([b3trAddress], [0], [encodedFunctionCall], descriptionHash)
 
       // proposal should be in executed state
       proposalState = await governor.state(proposalId)
@@ -3175,6 +3180,299 @@ describe("Governor and TimeLock", function () {
 
       // try to execute again
       await catchRevert(governor.execute([b3trAddress], [0], [encodedFunctionCall], descriptionHash))
+    })
+
+    it("If PROPOSAL_EXECUTOR_ROLE is set then only the proposer can execute the proposal", async function () {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
+      config.EMISSIONS_CYCLE_DURATION = 15
+      const {
+        governor,
+        b3tr,
+        B3trContract,
+        otherAccount: proposer,
+      } = await getOrDeployContractInstances({ forceDeploy: true, config })
+
+      await getVot3Tokens(voter, "1000")
+
+      // create a new proposal
+      const tx = await createProposal(
+        b3tr,
+        B3trContract,
+        proposer,
+        description + ` ${this.test?.title}`,
+        functionToCall,
+        [],
+      ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
+      proposalId = await getProposalIdFromTx(tx)
+
+      // pay deposit
+      await payDeposit(proposalId.toString(), proposer)
+
+      // wait
+      await waitForProposalToBeActive(proposalId)
+
+      // vote
+      await governor.connect(voter).castVote(proposalId, 1) // vote for
+
+      // wait
+      await waitForVotingPeriodToEnd(proposalId)
+      let proposalState = await governor.state(proposalId)
+      expect(proposalState.toString()).to.eql("4") // succeded
+
+      // queue it
+      const b3trAddress = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
+      const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description + ` ${this.test?.title}`))
+
+      await governor.queue([b3trAddress], [0], [encodedFunctionCall], descriptionHash)
+
+      // proposal should be in queued state
+      proposalState = await governor.state(proposalId)
+      expect(proposalState.toString()).to.eql("5")
+
+      // set proposer executor role
+      expect(await governor.hasRole(await governor.PROPOSAL_EXECUTOR_ROLE(), ZERO_ADDRESS)).to.eql(false)
+      expect(await governor.hasRole(await governor.PROPOSAL_EXECUTOR_ROLE(), proposer.address)).to.eql(false)
+
+      await expect(governor.connect(proposer).execute([b3trAddress], [0], [encodedFunctionCall], descriptionHash)).to.be
+        .reverted
+      // proposal should be in queued state
+      proposalState = await governor.state(proposalId)
+      expect(proposalState.toString()).to.eql("5")
+
+      // give role to proposer
+      await governor.grantRole(await governor.PROPOSAL_EXECUTOR_ROLE(), proposer.address)
+      await governor.connect(proposer).execute([b3trAddress], [0], [encodedFunctionCall], descriptionHash)
+
+      // proposal should be in executed state
+      proposalState = await governor.state(proposalId)
+      expect(proposalState.toString()).to.eql("7")
+    })
+
+    it("If PROPOSAL_EXECUTOR_ROLE is set to ZERO_ADDRESS then anyone can execute proposals", async function () {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
+      config.EMISSIONS_CYCLE_DURATION = 15
+      const {
+        governor,
+        b3tr,
+        B3trContract,
+        otherAccount: proposer,
+      } = await getOrDeployContractInstances({ forceDeploy: true, config })
+
+      await getVot3Tokens(voter, "1000")
+
+      // create a new proposal
+      const tx = await createProposal(
+        b3tr,
+        B3trContract,
+        proposer,
+        description + ` ${this.test?.title}`,
+        functionToCall,
+        [],
+      ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
+      proposalId = await getProposalIdFromTx(tx)
+
+      // pay deposit
+      await payDeposit(proposalId.toString(), proposer)
+
+      // wait
+      await waitForProposalToBeActive(proposalId)
+
+      // vote
+      await governor.connect(voter).castVote(proposalId, 1) // vote for
+
+      // wait
+      await waitForVotingPeriodToEnd(proposalId)
+      let proposalState = await governor.state(proposalId)
+      expect(proposalState.toString()).to.eql("4") // succeded
+
+      // queue it
+      const b3trAddress = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
+      const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description + ` ${this.test?.title}`))
+
+      await governor.queue([b3trAddress], [0], [encodedFunctionCall], descriptionHash)
+
+      // proposal should be in queued state
+      proposalState = await governor.state(proposalId)
+      expect(proposalState.toString()).to.eql("5")
+
+      // set proposer executor role
+      expect(await governor.hasRole(await governor.PROPOSAL_EXECUTOR_ROLE(), ZERO_ADDRESS)).to.eql(false)
+      expect(await governor.hasRole(await governor.PROPOSAL_EXECUTOR_ROLE(), proposer.address)).to.eql(false)
+
+      await expect(governor.connect(proposer).execute([b3trAddress], [0], [encodedFunctionCall], descriptionHash)).to.be
+        .reverted
+      // proposal should be in queued state
+      proposalState = await governor.state(proposalId)
+      expect(proposalState.toString()).to.eql("5")
+
+      // set to zero address so that anyone can execute
+      await governor.grantRole(await governor.PROPOSAL_EXECUTOR_ROLE(), ZERO_ADDRESS)
+      await governor.connect(proposer).execute([b3trAddress], [0], [encodedFunctionCall], descriptionHash)
+
+      // proposal should be in executed state
+      proposalState = await governor.state(proposalId)
+      expect(proposalState.toString()).to.eql("7")
+    })
+
+    it("Cannot execute prpopsal directly from TimeLock", async function () {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
+      config.EMISSIONS_CYCLE_DURATION = 15
+      const {
+        governor,
+        b3tr,
+        B3trContract,
+        otherAccount: proposer,
+        otherAccounts,
+        timeLock,
+        owner,
+      } = await getOrDeployContractInstances({ forceDeploy: true, config })
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // load votes
+      voter = otherAccounts[0]
+      await getVot3Tokens(voter, "1000")
+      await waitForNextBlock()
+
+      // create a new proposal
+      const tx = await createProposal(
+        b3tr,
+        B3trContract,
+        proposer,
+        description + ` ${this.test?.title}`,
+        functionToCall,
+        [],
+      ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
+      proposalId = await getProposalIdFromTx(tx)
+
+      // pay deposit
+      await payDeposit(proposalId.toString(), proposer)
+
+      // wait
+      await waitForProposalToBeActive(proposalId)
+
+      // vote
+      await governor.connect(voter).castVote(proposalId, 1) // vote for
+
+      // wait
+      await waitForVotingPeriodToEnd(proposalId)
+      let proposalState = await governor.state(proposalId)
+      expect(proposalState.toString()).to.eql("4") // succeded
+
+      // queue it
+      const b3trAddress = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
+      const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description + ` ${this.test?.title}`))
+
+      await governor.queue([b3trAddress], [0], [encodedFunctionCall], descriptionHash)
+
+      // proposal should be in queued state
+      proposalState = await governor.state(proposalId)
+      expect(proposalState.toString()).to.eql("5")
+
+      // Instead of executing the proposal from the governor, we will try to execute it directly from the TimeLock
+      // Only the governor should be able to execute the proposal
+      await expect(
+        timeLock
+          .connect(owner)
+          .executeBatch(
+            [b3trAddress],
+            [0],
+            [encodedFunctionCall],
+            ethers.ZeroHash,
+            await governor.timelockSalt(descriptionHash),
+          ),
+      ).to.be.revertedWithCustomError(
+        {
+          interface: B3TRGovernor__factory.createInterface(),
+        },
+        "AccessControlUnauthorizedAccount",
+      )
+    })
+
+    it("Cannot execute proposal if min delay has not passed", async function () {
+      const config = createLocalConfig()
+      config.EMISSIONS_CYCLE_DURATION = 10
+      config.TIMELOCK_MIN_DELAY = 10
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
+      const {
+        governor,
+        b3tr,
+        B3trContract,
+        otherAccount: proposer,
+        otherAccounts,
+        owner,
+      } = await getOrDeployContractInstances({ forceDeploy: true, config })
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // load votes
+      voter = otherAccounts[0]
+      await getVot3Tokens(voter, "1000")
+      await waitForNextBlock()
+
+      // create a new proposal
+      const tx = await createProposal(
+        b3tr,
+        B3trContract,
+        proposer,
+        description + ` ${this.test?.title}`,
+        functionToCall,
+        [],
+      ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
+      proposalId = await getProposalIdFromTx(tx)
+
+      // pay deposit
+      await payDeposit(proposalId.toString(), proposer)
+
+      // wait
+      await waitForProposalToBeActive(proposalId)
+
+      // vote
+      await governor.connect(voter).castVote(proposalId, 1) // vote for
+
+      // wait
+      await waitForVotingPeriodToEnd(proposalId)
+      let proposalState = await governor.state(proposalId)
+      expect(proposalState.toString()).to.eql("4") // succeded
+
+      // queue it
+      const b3trAddress = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
+      const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description + ` ${this.test?.title}`))
+
+      await governor.queue([b3trAddress], [0], [encodedFunctionCall], descriptionHash)
+
+      // proposal should be in queued state
+      proposalState = await governor.state(proposalId)
+      expect(proposalState.toString()).to.eql("5")
+
+      // Since we incerased the min delay to 10 blocks we should not be able to execute the proposal
+      await catchRevert(governor.connect(owner).execute([b3trAddress], [0], [encodedFunctionCall], descriptionHash))
+
+      // proposal should be in queued state
+      proposalState = await governor.state(proposalId)
+      expect(proposalState.toString()).to.eql("5")
+
+      await waitForQueuedProposalToBeReady(proposalId)
+
+      // Now it should be ok
+      await governor.connect(owner).execute([b3trAddress], [0], [encodedFunctionCall], descriptionHash)
+
+      // proposal should be in executed state
+      proposalState = await governor.state(proposalId)
+      expect(proposalState.toString()).to.eql("7")
     })
   })
 
