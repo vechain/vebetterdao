@@ -159,6 +159,7 @@ export async function deployAll(config: ContractsConfig) {
       emissions: await emissions.getAddress(),
       admins: [await timelock.getAddress(), TEMP_ADMIN],
       upgrader: config.CONTRACTS_ADMIN_ADDRESS,
+      contractsAddressManager: TEMP_ADMIN,
       x2EarnAppsAddress: await x2EarnApps.getAddress(),
       baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
       appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
@@ -246,7 +247,7 @@ export async function deployAll(config: ContractsConfig) {
   // Emissions contract should be able to start new rounds
   await xAllocationVoting
     .connect(admin)
-    .grantRole(await xAllocationVoting.DEFAULT_ADMIN_ROLE(), await emissions.getAddress())
+    .grantRole(await xAllocationVoting.ROUND_STARTER_ROLE(), await emissions.getAddress())
     .then(async tx => await tx.wait())
   console.log("Admin role granted to emissions contract")
 
@@ -327,6 +328,7 @@ export async function deployAll(config: ContractsConfig) {
     await transferContractsAddressManagerRole(xAllocationPool, admin, config.CONTRACTS_ADMIN_ADDRESS)
 
     await transferAdminRole(xAllocationVoting, admin, config.CONTRACTS_ADMIN_ADDRESS)
+    await transferContractsAddressManagerRole(xAllocationVoting, admin, config.CONTRACTS_ADMIN_ADDRESS)
 
     await transferGovernanceRole(treasury, admin, admin.address, config.CONTRACTS_ADMIN_ADDRESS)
     await transferAdminRole(treasury, admin, config.CONTRACTS_ADMIN_ADDRESS)
@@ -486,7 +488,7 @@ const transferGovernanceRole = async (
 }
 
 const transferContractsAddressManagerRole = async (
-  contract: GalaxyMember | XAllocationPool,
+  contract: GalaxyMember | XAllocationPool | XAllocationVoting,
   admin: HardhatEthersSigner,
   newAddress: string,
 ) => {

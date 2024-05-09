@@ -180,6 +180,7 @@ export const getOrDeployContractInstances = async ({
       emissions: await emissions.getAddress(),
       admins: [await timeLock.getAddress(), owner.address],
       upgrader: owner.address,
+      contractsAddressManager: owner.address,
       x2EarnAppsAddress: await x2EarnApps.getAddress(),
       baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
       appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
