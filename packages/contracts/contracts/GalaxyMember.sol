@@ -58,6 +58,7 @@ contract GalaxyMember is
   using Checkpoints for Checkpoints.Trace208; // Checkpoints library for managing checkpoints of the selected level of the user
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+  bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
   /// @notice Storage structure for GalaxyMember
   /// @dev GalaxyMemberStorage structure holds all the state variables in a single location.
@@ -134,6 +135,8 @@ contract GalaxyMember is
   /// @param symbol Symbol of the ERC721 token
   /// @param admin Address to grant the admin role
   /// @param upgrader Address to grant the upgrader role
+  /// @param pauser Address to grant the pauser role
+  /// @param minter Address to grant the minter role
   /// @param maxLevel Maximum level tokens can achieve
   /// @param baseTokenURI Base URI for computing {tokenURI}
   /// @param xNodeMaxMintableLevels Array of maximum levels for each node type
@@ -146,6 +149,7 @@ contract GalaxyMember is
     address admin;
     address upgrader;
     address pauser;
+    address minter;
     uint256 maxLevel;
     string baseTokenURI;
     uint256[] xNodeMaxMintableLevels;
@@ -198,6 +202,7 @@ contract GalaxyMember is
     _grantRole(DEFAULT_ADMIN_ROLE, data.admin);
     _grantRole(UPGRADER_ROLE, data.upgrader);
     _grantRole(PAUSER_ROLE, data.pauser);
+    _grantRole(MINTER_ROLE, data.minter);
   }
 
   /// @notice Internal function to authorize contract upgrades
@@ -232,10 +237,10 @@ contract GalaxyMember is
   }
 
   /// @notice Mints a new token to a specified address
-  /// @dev Only callable by the admin role
+  /// @dev Only callable by the minter role
   /// @dev Can be used to mint when public minting is paused
   /// @param to Address to mint the token to
-  function mint(address to) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function mint(address to) public onlyRole(MINTER_ROLE) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
     uint256 tokenId = $._nextTokenId;

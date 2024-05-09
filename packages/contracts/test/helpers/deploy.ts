@@ -101,6 +101,7 @@ export const getOrDeployContractInstances = async ({
       admin: owner.address,
       upgrader: owner.address,
       pauser: owner.address,
+      minter: owner.address,
       maxLevel: maxMintableLevel,
       baseTokenURI: config.GM_NFT_BASE_URI,
       xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,

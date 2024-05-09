@@ -331,6 +331,7 @@ describe("Galaxy Member", () => {
           admin: owner.address,
           upgrader: owner.address,
           pauser: owner.address,
+          minter: owner.address,
           maxLevel: 1,
           baseTokenURI: config.GM_NFT_BASE_URI,
           xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
@@ -356,6 +357,7 @@ describe("Galaxy Member", () => {
             admin: owner.address,
             upgrader: owner.address,
             pauser: owner.address,
+            minter: owner.address,
             maxLevel: 0,
             baseTokenURI: config.GM_NFT_BASE_URI,
             xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
@@ -382,6 +384,7 @@ describe("Galaxy Member", () => {
             admin: owner.address,
             upgrader: owner.address,
             pauser: owner.address,
+            minter: owner.address,
             maxLevel: 1,
             baseTokenURI: "",
             xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
@@ -408,6 +411,7 @@ describe("Galaxy Member", () => {
             admin: owner.address,
             upgrader: owner.address,
             pauser: owner.address,
+            minter: owner.address,
             maxLevel: 1,
             baseTokenURI: config.GM_NFT_BASE_URI,
             xNodeMaxMintableLevels: [1, 2, 3, 4, 5, 6],
@@ -434,6 +438,7 @@ describe("Galaxy Member", () => {
             admin: owner.address,
             upgrader: owner.address,
             pauser: owner.address,
+            minter: owner.address,
             maxLevel: 1,
             baseTokenURI: config.GM_NFT_BASE_URI,
             xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
@@ -460,6 +465,7 @@ describe("Galaxy Member", () => {
             admin: owner.address,
             upgrader: owner.address,
             pauser: owner.address,
+            minter: owner.address,
             maxLevel: 1,
             baseTokenURI: config.GM_NFT_BASE_URI,
             xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
@@ -506,6 +512,7 @@ describe("Galaxy Member", () => {
           admin: owner.address,
           upgrader: owner.address,
           pauser: owner.address,
+          minter: owner.address,
           maxLevel: 1,
           baseTokenURI: config.GM_NFT_BASE_URI,
           xNodeMaxMintableLevels: [1, 2, 3, 4, 5, 6, 7],
@@ -547,6 +554,7 @@ describe("Galaxy Member", () => {
           admin: owner.address,
           upgrader: owner.address,
           pauser: owner.address,
+          minter: owner.address,
           maxLevel: 1,
           baseTokenURI: config.GM_NFT_BASE_URI,
           xNodeMaxMintableLevels: [1, 2, 3, 4, 5, 6, 7],
@@ -584,6 +592,7 @@ describe("Galaxy Member", () => {
           admin: owner.address,
           upgrader: owner.address,
           pauser: owner.address,
+          minter: owner.address,
           maxLevel: 1,
           baseTokenURI: config.GM_NFT_BASE_URI,
           xNodeMaxMintableLevels: [1, 2, 3, 4, 5, 6, 7],
@@ -906,7 +915,7 @@ describe("Galaxy Member", () => {
       await galaxyMember.connect(otherAccount).freeMint()
     })
 
-    it("Should be able to mint with adming if public minting is paused", async () => {
+    it("Should be able to mint with minter role if public minting is paused", async () => {
       const { galaxyMember, otherAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -919,8 +928,10 @@ describe("Galaxy Member", () => {
 
       await galaxyMember.connect(owner).setIsPublicMintingPaused(true)
 
+      expect(await galaxyMember.hasRole(await galaxyMember.MINTER_ROLE(), owner.address)).to.equal(true)
       await galaxyMember.connect(owner).mint(await otherAccount.getAddress())
 
+      expect(await galaxyMember.hasRole(await galaxyMember.MINTER_ROLE(), otherAccount.address)).to.equal(false)
       await expect(galaxyMember.connect(otherAccount).freeMint()).to.be.reverted // Other account cannot mint as he is not admin
 
       expect(await galaxyMember.balanceOf(await otherAccount.getAddress())).to.equal(1) // Owner has 1 NFT
@@ -1299,6 +1310,7 @@ describe("Galaxy Member", () => {
           admin: owner.address,
           upgrader: owner.address,
           pauser: owner.address,
+          minter: owner.address,
           maxLevel: 2,
           baseTokenURI: config.GM_NFT_BASE_URI,
           xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
@@ -1364,6 +1376,7 @@ describe("Galaxy Member", () => {
           admin: owner.address,
           upgrader: owner.address,
           pauser: owner.address,
+          minter: owner.address,
           maxLevel: 2,
           baseTokenURI: config.GM_NFT_BASE_URI,
           xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
@@ -1445,6 +1458,7 @@ describe("Galaxy Member", () => {
           admin: owner.address,
           upgrader: owner.address,
           pauser: owner.address,
+          minter: owner.address,
           maxLevel: 10,
           baseTokenURI: config.GM_NFT_BASE_URI,
           xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
@@ -1491,6 +1505,7 @@ describe("Galaxy Member", () => {
           admin: owner.address,
           upgrader: owner.address,
           pauser: owner.address,
+          minter: owner.address,
           maxLevel: 10,
           baseTokenURI: config.GM_NFT_BASE_URI,
           xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
@@ -1534,6 +1549,7 @@ describe("Galaxy Member", () => {
         admin: owner.address,
         upgrader: owner.address,
         pauser: owner.address,
+        minter: owner.address,
         maxLevel: 10,
         baseTokenURI: config.GM_NFT_BASE_URI,
         xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
@@ -1589,6 +1605,7 @@ describe("Galaxy Member", () => {
         admin: owner.address,
         upgrader: owner.address,
         pauser: owner.address,
+        minter: owner.address,
         maxLevel: 10,
         baseTokenURI: config.GM_NFT_BASE_URI,
         xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
@@ -1632,6 +1649,7 @@ describe("Galaxy Member", () => {
         admin: owner.address,
         upgrader: owner.address,
         pauser: owner.address,
+        minter: owner.address,
         maxLevel: 10,
         baseTokenURI: config.GM_NFT_BASE_URI,
         xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
@@ -1675,6 +1693,7 @@ describe("Galaxy Member", () => {
         admin: owner.address,
         upgrader: owner.address,
         pauser: owner.address,
+        minter: owner.address,
         maxLevel: 10,
         baseTokenURI: config.GM_NFT_BASE_URI,
         xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
@@ -1799,6 +1818,7 @@ describe("Galaxy Member", () => {
         admin: owner.address,
         upgrader: owner.address,
         pauser: owner.address,
+        minter: owner.address,
         maxLevel: 10,
         baseTokenURI: config.GM_NFT_BASE_URI,
         xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
