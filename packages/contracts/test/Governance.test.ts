@@ -1719,6 +1719,8 @@ describe("Governor and TimeLock", function () {
       expect(proposalId).not.to.be.null
 
       expect(await governor.state(proposalId)).to.eql(0n) // pending
+      expect(await governor.getUserDeposit(proposalId, proposer.address)).to.eql(0n)
+      expect(await governor.getProposalDeposits(proposalId)).to.eql(0n)
     })
 
     it("Non existing proposal does not need to be queued", async () => {
