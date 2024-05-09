@@ -118,7 +118,6 @@ export async function deployAll(config: ContractsConfig) {
       contractsAddressManager: TEMP_ADMIN,
       maxLevel: 1,
       baseTokenURI: config.GM_NFT_BASE_URI,
-      xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
       b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
       b3tr: await b3tr.getAddress(),
       treasury: await treasury.getAddress(),

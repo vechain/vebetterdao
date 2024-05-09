@@ -30,7 +30,6 @@ export type ContractsConfig = {
   INITIAL_X_ALLOCATION: bigint
 
   GM_NFT_BASE_URI: string
-  GM_NFT_X_NODE_UPGRADEABLE_LEVELS: number[]
   GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL: bigint[]
 
   VOTER_REWARDS_LEVELS: number[]
