@@ -445,7 +445,7 @@ export async function deployAll(config: ContractsConfig) {
     )
     await validateContractRole(emissions, config.CONTRACTS_ADMIN_ADDRESS, TEMP_ADMIN, await emissions.UPGRADER_ROLE())
 
-    // Voter Rewards
+    // VoterRewards
     await validateContractRole(
       voterRewards,
       config.CONTRACTS_ADMIN_ADDRESS,
