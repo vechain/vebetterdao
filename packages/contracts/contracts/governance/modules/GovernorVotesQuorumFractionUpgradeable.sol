@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts (last updated v5.0.0) (governance/extensions/GovernorVotesQuorumFraction.sol)
 
 //                                      #######
 //                                 ################
@@ -28,6 +27,7 @@ import { GovernorVotesUpgradeable } from "./GovernorVotesUpgradeable.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { GovernorQuorumFraction } from "../libraries/GovernorQuorumFraction.sol";
 
 /**
  * @dev Extension of {Governor} for voting weight extraction from an {ERC20Votes} token and a quorum expressed as a
@@ -35,6 +35,7 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
  */
 abstract contract GovernorVotesQuorumFractionUpgradeable is Initializable, GovernorVotesUpgradeable {
   using Checkpoints for Checkpoints.Trace208;
+  using GovernorQuorumFraction for Checkpoints.Trace208;
 
   /// @custom:storage-location erc7201:openzeppelin.storage.GovernorVotesQuorumFraction
   struct GovernorVotesQuorumFractionStorage {
@@ -54,13 +55,6 @@ abstract contract GovernorVotesQuorumFractionUpgradeable is Initializable, Gover
       $.slot := GovernorVotesQuorumFractionStorageLocation
     }
   }
-
-  event QuorumNumeratorUpdated(uint256 oldQuorumNumerator, uint256 newQuorumNumerator);
-
-  /**
-   * @dev The quorum set is not a valid fraction.
-   */
-  error GovernorInvalidQuorumFraction(uint256 quorumNumerator, uint256 quorumDenominator);
 
   /**
    * @dev Initialize quorum as a fraction of the token's total supply.
@@ -86,29 +80,18 @@ abstract contract GovernorVotesQuorumFractionUpgradeable is Initializable, Gover
   }
 
   /**
-   * @dev Returns the quorum numerator at a specific timepoint. See {quorumDenominator}.
+   * @dev Returns the quorum numerator at a specific timepoint using the GovernorQuorumFraction library.
    */
   function quorumNumerator(uint256 timepoint) public view virtual returns (uint256) {
     GovernorVotesQuorumFractionStorage storage $ = _getGovernorVotesQuorumFractionStorage();
-    uint256 length = $._quorumNumeratorHistory._checkpoints.length;
-
-    // Optimistic search, check the latest checkpoint
-    Checkpoints.Checkpoint208 storage latest = $._quorumNumeratorHistory._checkpoints[length - 1];
-    uint48 latestKey = latest._key;
-    uint208 latestValue = latest._value;
-    if (latestKey <= timepoint) {
-      return latestValue;
-    }
-
-    // Otherwise, do the binary search
-    return $._quorumNumeratorHistory.upperLookupRecent(SafeCast.toUint48(timepoint));
+    return $._quorumNumeratorHistory.quorumNumerator(timepoint);
   }
 
   /**
-   * @dev Returns the quorum denominator. Defaults to 100, but may be overridden.
+   * @dev Returns the quorum denominator using the GovernorQuorumFraction library. Defaults to 100, but may be overridden.
    */
   function quorumDenominator() public view virtual returns (uint256) {
-    return 100;
+    return GovernorQuorumFraction.quorumDenominator();
   }
 
   /**
@@ -133,7 +116,7 @@ abstract contract GovernorVotesQuorumFractionUpgradeable is Initializable, Gover
   }
 
   /**
-   * @dev Changes the quorum numerator.
+   * @dev Changes the quorum numerator using the GovernorQuorumFraction library.
    *
    * Emits a {QuorumNumeratorUpdated} event.
    *
@@ -143,14 +126,6 @@ abstract contract GovernorVotesQuorumFractionUpgradeable is Initializable, Gover
    */
   function _updateQuorumNumerator(uint256 newQuorumNumerator) internal virtual {
     GovernorVotesQuorumFractionStorage storage $ = _getGovernorVotesQuorumFractionStorage();
-    uint256 denominator = quorumDenominator();
-    if (newQuorumNumerator > denominator) {
-      revert GovernorInvalidQuorumFraction(newQuorumNumerator, denominator);
-    }
-
-    uint256 oldQuorumNumerator = quorumNumerator();
-    $._quorumNumeratorHistory.push(clock(), SafeCast.toUint208(newQuorumNumerator));
-
-    emit QuorumNumeratorUpdated(oldQuorumNumerator, newQuorumNumerator);
+    $._quorumNumeratorHistory.updateQuorumNumerator(newQuorumNumerator, quorumNumerator(), clock());
   }
 }
