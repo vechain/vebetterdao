@@ -60,10 +60,10 @@ export async function deployAll(config: ContractsConfig) {
 
   const timelock = (await deployProxy("TimeLock", [
     config.B3TR_GOVERNOR_MIN_DELAY,
-    [],
-    [],
-    TEMP_ADMIN,
-    TEMP_ADMIN,
+    [], // proposers
+    [], // executors
+    TEMP_ADMIN, // admin
+    config.CONTRACTS_ADMIN_ADDRESS, // upgrader
   ])) as TimeLock
   console.log(`TimeLock deployed at ${await timelock.getAddress()}`)
 
@@ -71,8 +71,8 @@ export async function deployAll(config: ContractsConfig) {
     await b3tr.getAddress(),
     await vot3.getAddress(),
     await timelock.getAddress(),
-    TEMP_ADMIN,
-    TEMP_ADMIN,
+    TEMP_ADMIN, // admin
+    config.CONTRACTS_ADMIN_ADDRESS, // upgrader
     config.CONTRACTS_ADMIN_ADDRESS, //pauser
     config.TREASURY_TRANSFER_LIMIT_VET,
     config.TREASURY_TRANSFER_LIMIT_B3TR,
@@ -87,8 +87,9 @@ export async function deployAll(config: ContractsConfig) {
   console.log(`X2EarnApps deployed at ${await x2EarnApps.getAddress()}`)
 
   const xAllocationPool = (await deployProxy("XAllocationPool", [
-    TEMP_ADMIN,
-    TEMP_ADMIN,
+    TEMP_ADMIN, // admin
+    config.CONTRACTS_ADMIN_ADDRESS, // upgrader
+    TEMP_ADMIN, // contractsAddressManager
     await b3tr.getAddress(),
     await treasury.getAddress(),
     await x2EarnApps.getAddress(),
@@ -119,7 +120,7 @@ export async function deployAll(config: ContractsConfig) {
     {
       minter: TEMP_ADMIN,
       admin: TEMP_ADMIN,
-      upgrader: TEMP_ADMIN,
+      upgrader: config.CONTRACTS_ADMIN_ADDRESS,
       b3trAddress: await b3tr.getAddress(),
       destinations: [await xAllocationPool.getAddress(), config.VOTE_2_EARN_POOL_ADDRESS, await treasury.getAddress()],
       initialXAppAllocation: config.INITIAL_X_ALLOCATION,
@@ -157,7 +158,7 @@ export async function deployAll(config: ContractsConfig) {
       voterRewards: await voterRewards.getAddress(),
       emissions: await emissions.getAddress(),
       admins: [await timelock.getAddress(), TEMP_ADMIN],
-      upgrader: TEMP_ADMIN,
+      upgrader: config.CONTRACTS_ADMIN_ADDRESS,
       x2EarnAppsAddress: await x2EarnApps.getAddress(),
       baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
       appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
@@ -319,8 +320,12 @@ export async function deployAll(config: ContractsConfig) {
     await transferAdminRole(emissions, admin, config.CONTRACTS_ADMIN_ADDRESS)
 
     await transferAdminRole(vot3, admin, config.CONTRACTS_ADMIN_ADDRESS)
+
     await transferAdminRole(voterRewards, admin, config.CONTRACTS_ADMIN_ADDRESS)
+
     await transferAdminRole(xAllocationPool, admin, config.CONTRACTS_ADMIN_ADDRESS)
+    await transferContractsAddressManagerRole(xAllocationPool, admin, config.CONTRACTS_ADMIN_ADDRESS)
+
     await transferAdminRole(xAllocationVoting, admin, config.CONTRACTS_ADMIN_ADDRESS)
 
     await transferGovernanceRole(treasury, admin, admin.address, config.CONTRACTS_ADMIN_ADDRESS)
@@ -481,7 +486,7 @@ const transferGovernanceRole = async (
 }
 
 const transferContractsAddressManagerRole = async (
-  contract: GalaxyMember,
+  contract: GalaxyMember | XAllocationPool,
   admin: HardhatEthersSigner,
   newAddress: string,
 ) => {

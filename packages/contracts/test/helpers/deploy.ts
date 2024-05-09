@@ -126,6 +126,7 @@ export const getOrDeployContractInstances = async ({
   const xAllocationPool = (await deployProxy("XAllocationPool", [
     owner.address,
     owner.address,
+    owner.address,
     await b3tr.getAddress(),
     await treasury.getAddress(),
     await x2EarnApps.getAddress(),
