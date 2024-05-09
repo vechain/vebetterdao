@@ -81,13 +81,9 @@ export async function deployAll(config: ContractsConfig) {
   ])) as Treasury
   console.log(`Treasury deployed at ${await treasury.getAddress()}`)
 
-  const x2EarnApps = (await deployProxy(
-    "X2EarnApps",
-    [config.XAPP_BASE_URI, [await timelock.getAddress(), TEMP_ADMIN], TEMP_ADMIN],
-    {
-      X2EarnAppsDataTypes: await X2EarnAppsDataTypesLib.getAddress(),
-    },
-  )) as X2EarnApps
+  const x2EarnApps = (await deployProxy("X2EarnApps", [config.XAPP_BASE_URI, [TEMP_ADMIN], TEMP_ADMIN, TEMP_ADMIN], {
+    X2EarnAppsDataTypes: await X2EarnAppsDataTypesLib.getAddress(),
+  })) as X2EarnApps
   console.log(`X2EarnApps deployed at ${await x2EarnApps.getAddress()}`)
 
   const xAllocationPool = (await deployProxy("XAllocationPool", [
@@ -333,6 +329,7 @@ export async function deployAll(config: ContractsConfig) {
     await transferAdminRole(governor, admin, config.CONTRACTS_ADMIN_ADDRESS)
 
     await transferAdminRole(x2EarnApps, admin, config.CONTRACTS_ADMIN_ADDRESS)
+    await transferGovernanceRole(x2EarnApps, admin, admin.address, config.CONTRACTS_ADMIN_ADDRESS)
 
     console.log("Roles updated successfully!")
   }
@@ -444,14 +441,14 @@ const transferMinterRole = async (
 
 // Transfer governance role to treasury contract admin for intial phases of project
 const transferGovernanceRole = async (
-  contract: Treasury,
+  contract: Treasury | X2EarnApps,
   admin: HardhatEthersSigner,
   oldAddress: string,
   newAddress?: string,
 ) => {
   const governanceRole = await contract.GOVERNANCE_ROLE()
 
-  // If newMinterAddress is provided, set a new minter before revoking the old one
+  // If newAddress is provided, set a new admin before revoking the old one
   // otherwise just revoke the old one
   if (newAddress) {
     await contract

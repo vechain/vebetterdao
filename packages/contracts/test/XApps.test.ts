@@ -28,7 +28,7 @@ describe("X-Apps", function () {
   describe("Contract upgradeablity", () => {
     it("Cannot initialize twice", async function () {
       const { x2EarnApps, owner } = await getOrDeployContractInstances({ forceDeploy: true })
-      await catchRevert(x2EarnApps.initialize("ipfs://", [owner.address], owner.address))
+      await catchRevert(x2EarnApps.initialize("ipfs://", [owner.address], owner.address, owner.address))
     })
 
     it("User with UPGRADER_ROLE should be able to upgrade the contract", async function () {
@@ -145,7 +145,7 @@ describe("X-Apps", function () {
     })
 
     it("Should be possible to add a new app through the DAO", async function () {
-      const { otherAccounts, x2EarnApps, governor, owner } = await getOrDeployContractInstances({
+      const { otherAccounts, x2EarnApps, governor, owner, timeLock } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -156,8 +156,8 @@ describe("X-Apps", function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("Bike 4 Life"))
 
       // check that the DAO is admin of the x2EarnApps contract
-      await x2EarnApps.connect(owner).grantRole(await x2EarnApps.DEFAULT_ADMIN_ROLE(), await governor.getAddress())
-      expect(await x2EarnApps.hasRole(await x2EarnApps.DEFAULT_ADMIN_ROLE(), await governor.getAddress())).to.be.true
+      await x2EarnApps.connect(owner).grantRole(await x2EarnApps.GOVERNANCE_ROLE(), await timeLock.getAddress())
+      expect(await x2EarnApps.hasRole(await x2EarnApps.GOVERNANCE_ROLE(), await timeLock.getAddress())).to.be.true
 
       // check that app does not exists
       expect(await x2EarnApps.appExists(app1Id)).to.be.false
@@ -274,6 +274,8 @@ describe("X-Apps", function () {
         forceDeploy: true,
       })
 
+      expect(await x2EarnApps.hasRole(await x2EarnApps.GOVERNANCE_ROLE(), owner.address)).to.eql(true)
+
       const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
 
       await x2EarnApps
@@ -290,6 +292,8 @@ describe("X-Apps", function () {
       const { xAllocationVoting, x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
+
+      expect(await x2EarnApps.hasRole(await x2EarnApps.GOVERNANCE_ROLE(), owner.address)).to.eql(true)
 
       const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
       await x2EarnApps
@@ -322,10 +326,12 @@ describe("X-Apps", function () {
       expect(isEligibleForVote).to.eql(true)
     })
 
-    it("Admin can make an unavailable app available again starting from next round", async function () {
+    it("Admin with governance role can make an unavailable app available again starting from next round", async function () {
       const { xAllocationVoting, x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
+
+      expect(await x2EarnApps.hasRole(await x2EarnApps.GOVERNANCE_ROLE(), owner.address)).to.eql(true)
 
       const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
       await x2EarnApps
@@ -380,7 +386,7 @@ describe("X-Apps", function () {
     })
 
     it("DAO can make an app unavailable for allocation voting starting from next round", async function () {
-      const { otherAccounts, x2EarnApps, xAllocationVoting, emissions } = await getOrDeployContractInstances({
+      const { otherAccounts, x2EarnApps, xAllocationVoting, emissions, timeLock } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -392,6 +398,9 @@ describe("X-Apps", function () {
 
       // check that app does not exists
       await expect(x2EarnApps.app(app1Id)).to.be.reverted
+
+      // granting role to the timelock
+      await x2EarnApps.grantRole(await x2EarnApps.GOVERNANCE_ROLE(), await timeLock.getAddress())
 
       await createProposalAndExecuteIt(
         proposer,
@@ -440,7 +449,21 @@ describe("X-Apps", function () {
 
       const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
 
+      expect(await x2EarnApps.hasRole(await x2EarnApps.GOVERNANCE_ROLE(), otherAccounts[0].address)).to.eql(false)
+
       await catchRevert(x2EarnApps.connect(otherAccounts[0]).setVotingEligibility(app1Id, true))
+    })
+
+    it("Only admin with governor role add an app to the list", async function () {
+      const { x2EarnApps, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: false })
+
+      expect(await x2EarnApps.hasRole(await x2EarnApps.GOVERNANCE_ROLE(), otherAccounts[0].address)).to.eql(false)
+
+      await catchRevert(
+        x2EarnApps
+          .connect(otherAccounts[0])
+          .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI"),
+      )
     })
 
     it("App needs to wait next round if added during an ongoing round", async function () {

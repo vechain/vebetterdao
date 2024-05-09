@@ -116,7 +116,7 @@ export const getOrDeployContractInstances = async ({
   // Deploy X2EarnApps
   const x2EarnApps = (await deployProxy(
     "X2EarnApps",
-    ["ipfs://", [await timeLock.getAddress(), owner.address], owner.address],
+    ["ipfs://", [await timeLock.getAddress(), owner.address], owner.address, owner.address],
     {
       X2EarnAppsDataTypes: await X2EarnAppsDataTypesLib.getAddress(),
     },
