@@ -89,7 +89,7 @@ export const getOrDeployContractInstances = async ({
 
   // Deploy TimeLock
   const timeLock = (await deployProxy("TimeLock", [
-    0, //0 seconds delay for immediate execution
+    config.TIMELOCK_MIN_DELAY, //0 seconds delay for immediate execution
     [],
     [],
     timelockAdmin.address,
@@ -219,6 +219,7 @@ export const getOrDeployContractInstances = async ({
         governorAdmin: owner.address,
         pauser: owner.address,
         contractsAddressManager: owner.address,
+        proposalExecutor: owner.address,
         voterRewards: await voterRewards.getAddress(),
         governorFunctionSettingsRoleAddress: owner.address,
         isFunctionRestrictionEnabled: true,
