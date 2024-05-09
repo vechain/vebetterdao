@@ -8,7 +8,7 @@ export function createSoloStagingConfig() {
 
     B3TR_CAP: 3_750_000, // 3_750_000 -> 3.75 million B3TR tokens for pilot show
     B3TR_GOVERNOR_QUORUM_PERCENTAGE: 51, // Need 51% of voters to pass
-    B3TR_GOVERNOR_MIN_DELAY: 30, // wait period before executing a proposal after it was queued, 5 minutes
+    TIMELOCK_MIN_DELAY: 30, // wait period before executing a proposal after it was queued, 5 minutes
     B3TR_GOVERNOR_DEPOSIT_THRESHOLD: 2, // Percentage of total B3TR supply needed to be deposited to create a proposal
     B3TR_GOVERNOR_VOTING_THRESHOLD: BigInt("1000000000000000000"), // 1 vote
     B3TR_GOVERNOR_MIN_VOTING_DELAY: 60, // 10 minutes
