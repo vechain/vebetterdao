@@ -40,10 +40,15 @@ export async function deployAll(config: ContractsConfig) {
   // ---------- Contracts Deployment ---------- //
 
   // Deploy Libraries
-  const X2EarnAppsDataTypes = await ethers.getContractFactory("X2EarnAppsDataTypes")
-  const X2EarnAppsDataTypesLib = await X2EarnAppsDataTypes.deploy()
-  await X2EarnAppsDataTypesLib.waitForDeployment()
-  console.log(`X2EarnAppsDataTypes deployed at ${await X2EarnAppsDataTypesLib.getAddress()}`)
+  // Deploy GovernorDescriptionValidator library
+  const GovernorDescriptionValidator = await ethers.getContractFactory("GovernorDescriptionValidator")
+  const GovernorDescriptionValidatorLib = await GovernorDescriptionValidator.deploy()
+  await GovernorDescriptionValidatorLib.waitForDeployment()
+
+  // Deploy GovernorQuorumFraction library
+  const GovernorQuorumFraction = await ethers.getContractFactory("GovernorQuorumFraction")
+  const GovernorQuorumFractionLib = await GovernorQuorumFraction.deploy()
+  await GovernorQuorumFractionLib.waitForDeployment()
 
   const b3tr = await deployB3trToken(
     TEMP_ADMIN,
@@ -90,10 +95,7 @@ export async function deployAll(config: ContractsConfig) {
       [TEMP_ADMIN], //admins
       config.CONTRACTS_ADMIN_ADDRESS, // upgrader
       TEMP_ADMIN, // governance role
-    ],
-    {
-      X2EarnAppsDataTypes: await X2EarnAppsDataTypesLib.getAddress(),
-    },
+    ]
   )) as X2EarnApps
   console.log(`X2EarnApps deployed at ${await x2EarnApps.getAddress()}`)
 
@@ -179,22 +181,29 @@ export async function deployAll(config: ContractsConfig) {
   ])) as XAllocationVoting
   console.log(`XAllocationVoting deployed at ${await xAllocationVoting.getAddress()}`)
 
-  const governor = (await deployProxy("B3TRGovernor", [
+  const governor = (await deployProxy(
+    "B3TRGovernor",
+    [
+      {
+        vot3Token: await vot3.getAddress(),
+        timelock: await timelock.getAddress(),
+        xAllocationVoting: await xAllocationVoting.getAddress(),
+        b3tr: await b3tr.getAddress(),
+        quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
+        initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD,
+        initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY,
+        initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD,
+        governorAdmin: TEMP_ADMIN,
+        voterRewards: await voterRewards.getAddress(),
+        governorFunctionSettingsRoleAddress: TEMP_ADMIN,
+        isFunctionRestrictionEnabled: true,
+      },
+    ],
     {
-      vot3Token: await vot3.getAddress(),
-      timelock: await timelock.getAddress(),
-      xAllocationVoting: await xAllocationVoting.getAddress(),
-      b3tr: await b3tr.getAddress(),
-      quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
-      initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD,
-      initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY,
-      initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD,
-      governorAdmin: TEMP_ADMIN,
-      voterRewards: await voterRewards.getAddress(),
-      governorFunctionSettingsRoleAddress: TEMP_ADMIN,
-      isFunctionRestrictionEnabled: true,
+      GovernorDescriptionValidator: await GovernorDescriptionValidatorLib.getAddress(),
+      GovernorQuorumFraction: await GovernorQuorumFractionLib.getAddress(),
     },
-  ])) as B3TRGovernor
+  )) as B3TRGovernor
   console.log(`Governor deployed at ${await governor.getAddress()}`)
 
   const date = new Date(performance.now() - start)
@@ -214,7 +223,14 @@ export async function deployAll(config: ContractsConfig) {
     X2EarnApps: await x2EarnApps.getAddress(),
   }
 
-  await setWhitelistedFunctions(contractAddresses, config, governor, deployer) // Set whitelisted functions for governor proposals
+  const libraries = {
+    B3TRGovernor: {
+      GovernorDescriptionValidator: await GovernorDescriptionValidatorLib.getAddress(),
+      GovernorQuorumFraction: await GovernorQuorumFractionLib.getAddress(),
+    },
+  }
+
+  await setWhitelistedFunctions(contractAddresses, config, governor, admin, libraries) // Set whitelisted functions for governor proposals
 
   // ---------- Configure contract roles for setup ---------- //
 
@@ -803,11 +819,19 @@ export const setWhitelistedFunctions = async (
   config: ContractsConfig,
   governor: B3TRGovernor,
   admin: HardhatEthersSigner,
+  libraries: Record<string, Record<string, string>>,
 ) => {
   const { B3TR_GOVERNOR_WHITELISTED_METHODS } = config
 
   for (const [contract, functions] of Object.entries(B3TR_GOVERNOR_WHITELISTED_METHODS)) {
-    const contractFactory = await ethers.getContractFactory(contract)
+    // Check if the current contract requires linking with any libraries
+    const contractLibraries = libraries[contract]
+
+    // Getting the contract factory with or without libraries as needed
+    const contractFactory = contractLibraries
+      ? await ethers.getContractFactory(contract, { libraries: contractLibraries })
+      : await ethers.getContractFactory(contract)
+
     const whitelistFunctionSelectors = []
 
     for (const func of functions) {

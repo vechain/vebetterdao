@@ -70,6 +70,11 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   error GovernorVotingThresholdNotMet(uint256 threshold, uint256 votes);
 
   /**
+   * @dev The quorum numerator is greater than the quorum denominator.
+   */
+  error GovernorInvalidQuorumFraction(uint256 quorumNumerator, uint256 quorumDenominator);
+
+  /**
    * @dev The current state of a proposal is not the required for performing an operation.
    * The `expectedStates` is a bitmap with the bits enabled for each ProposalState enum position
    * counting from right to left.
@@ -170,6 +175,11 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @dev Emitted when a proposal is canceled.
    */
   event ProposalCanceled(uint256 proposalId);
+
+  /**
+   * @dev Emitted when the quorum numerator is updated.
+   */
+  event QuorumNumeratorUpdated(uint256 oldNumerator, uint256 newNumerator);
 
   /**
    * @dev Emitted when a vote is cast without params.

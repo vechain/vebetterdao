@@ -2,14 +2,16 @@ import { BaseContract, Interface } from "ethers"
 import { ethers } from "hardhat"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 
-export const deployProxy = async (contractName: string, args: any[], libraries: {} = {}): Promise<BaseContract> => {
+export const deployProxy = async (
+  contractName: string,
+  args: any[],
+  libraries: { [libraryName: string]: string } = {},
+): Promise<BaseContract> => {
   // Deploy the implementation contract
-  const Contract = await ethers.getContractFactory(
-    contractName,
-    libraries ?? {
-      libraries: libraries,
-    },
-  )
+  // Deploy the implementation contract
+  const Contract = await ethers.getContractFactory(contractName, {
+    libraries: libraries,
+  })
   const implementation = await Contract.deploy()
   await implementation.waitForDeployment()
 
