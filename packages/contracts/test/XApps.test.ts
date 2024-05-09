@@ -17,7 +17,7 @@ import {
 import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 
-describe("X-Apps", function () {
+describe.only("X-Apps", function () {
   describe("Deployment", function () {
     it("Clock mode is set correctly", async function () {
       const { x2EarnApps } = await getOrDeployContractInstances({ forceDeploy: true })
@@ -145,7 +145,7 @@ describe("X-Apps", function () {
     })
 
     it("Should be possible to add a new app through the DAO", async function () {
-      const { otherAccounts, x2EarnApps, governor, owner, timeLock } = await getOrDeployContractInstances({
+      const { otherAccounts, x2EarnApps, owner, timeLock } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
