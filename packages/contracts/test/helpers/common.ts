@@ -249,9 +249,17 @@ export const createProposalAndExecuteIt = async (
 
   // execute it
   // console.log("Executing");
-  await governor.execute([await contractToCall.getAddress()], [0], [encodedFunctionCall], descriptionHash, {
-    gasLimit: 10_000_000,
-  })
+  const extecutionTX = await governor.execute(
+    [await contractToCall.getAddress()],
+    [0],
+    [encodedFunctionCall],
+    descriptionHash,
+    {
+      gasLimit: 10_000_000,
+    },
+  )
+
+  return extecutionTX
 }
 
 export const createProposalWithMultipleFunctionsAndExecuteIt = async (
