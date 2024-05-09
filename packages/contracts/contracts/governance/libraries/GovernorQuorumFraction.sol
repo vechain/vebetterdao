@@ -31,11 +31,6 @@ import "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 library GovernorQuorumFraction {
   using Checkpoints for Checkpoints.Trace208;
 
-  /// @dev Struct to encapsulate quorum numerator history.
-  struct QuorumFractionStorage {
-    Checkpoints.Trace208 _quorumNumeratorHistory;
-  }
-
   /// @notice Error that is thrown when the new quorum numerator exceeds the denominator.
   /// @param quorumNumerator The attempted new numerator that failed the update
   /// @param quorumDenominator The denominator against which the numerator was compared
