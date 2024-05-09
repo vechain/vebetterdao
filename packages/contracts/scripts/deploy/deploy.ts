@@ -100,7 +100,6 @@ export async function deployAll(config: ContractsConfig) {
     TEMP_ADMIN,
     1,
     config.GM_NFT_BASE_URI,
-    config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
     config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
     await b3tr.getAddress(),
     await treasury.getAddress(),
