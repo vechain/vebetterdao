@@ -1520,6 +1520,46 @@ describe("Governor and TimeLock", function () {
       expect(await governor.state(proposalId)).to.eql(7n)
     })
 
+    it("Can create a proposal with no deposit", async () => {
+      const config = createLocalConfig()
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
+      config.EMISSIONS_CYCLE_DURATION = 7
+      const { otherAccounts, governor, xAllocationVoting, vot3 } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      const proposer = otherAccounts[0]
+
+      const voter = otherAccounts[1]
+      await getVot3Tokens(voter, "1000")
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // We need to have enough VOT3 tokens to pay for the deposit
+      const depositPreVOT3Tokens = await governor.depositThreshold()
+      await getVot3Tokens(proposer, (Number(ethers.formatEther(depositPreVOT3Tokens)) * 1.2).toString())
+      const deposit = await governor.depositThreshold()
+      await vot3.connect(proposer).approve(await governor.getAddress(), deposit)
+
+      // Now we can create a new proposal
+      const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
+
+      const tx = await governor.connect(proposer).propose([], [], [], "", voteStartsInRoundId.toString(), 0, {
+        gasLimit: 10_000_000,
+      })
+
+      const proposeReceipt = await tx.wait()
+      expect(proposeReceipt).not.to.be.null
+
+      const proposalId = await getProposalIdFromTx(tx)
+
+      expect(proposalId).not.to.be.null
+
+      expect(await governor.state(proposalId)).to.eql(0n) // pending
+    })
+
     it("Non existing proposal does not need to be queued", async () => {
       const { governor } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -1894,7 +1934,7 @@ describe("Governor and TimeLock", function () {
       expect(proposeReceipt).not.to.be.null
 
       // Check that the ProposalCreated event was emitted with the correct parameters
-      const event = proposeReceipt?.logs[2]
+      const event = proposeReceipt?.logs[0]
       expect(event).not.to.be.undefined
 
       const decodedLogs = governor.interface.parseLog({

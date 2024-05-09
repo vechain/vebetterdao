@@ -119,7 +119,7 @@ export const createProposalWithMultipleFunctions = async (
 export const getProposalIdFromTx = async (tx: ContractTransactionResponse, depositPayed: boolean = false) => {
   const { governor } = await getOrDeployContractInstances({})
   const proposeReceipt = await tx.wait()
-  const event = depositPayed ? proposeReceipt?.logs[3] : proposeReceipt?.logs[2]
+  const event = depositPayed ? proposeReceipt?.logs[3] : proposeReceipt?.logs[0]
 
   const decodedLogs = governor.interface.parseLog({
     topics: [...(event?.topics as string[])],
