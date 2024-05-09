@@ -126,6 +126,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     console.log("totalVotesAvailable", votesAtSnapshot.scaled)
 
     console.log("percentageOfTotalVotesToCast", (totalVotesToCast / Number(votesAtSnapshot.scaled)) * 100)
+    console.log("votesNotCasting", Number(votesAtSnapshot.scaled) - totalVotesToCast)
 
     onOpen()
     castAllocationVotes.sendTransaction(appVotesPercentagesToValue)
