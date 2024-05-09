@@ -304,6 +304,7 @@ describe("Governor and TimeLock", function () {
           initialVotingThreshold: 1, // voting threshold
           governorAdmin: owner.address,
           pauser: owner.address,
+          contractsAddressManager: owner.address,
           voterRewards: await voterRewards.getAddress(),
           governorFunctionSettingsRoleAddress: owner.address,
           isFunctionRestrictionEnabled: true,
@@ -417,14 +418,32 @@ describe("Governor and TimeLock", function () {
       expect(await governor.supportsInterface("0x01ffc9a7")).to.equal(true) // ERC165
     })
 
-    it("only governance can update xAllocationVoting address", async function () {
+    it("Admin with CONTRACTS_ADDRESS_MANAGER_ROLE can update xAllocationVoting address", async function () {
       const { governor, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
+      expect(await governor.hasRole(await governor.CONTRACTS_ADDRESS_MANAGER_ROLE(), owner.address)).to.eql(true)
+
+      const newAddress = ethers.Wallet.createRandom().address
+      await governor.connect(owner).setXAllocationVoting(newAddress)
+
+      const updatedAddress = await governor.xAllocationVoting()
+      expect(updatedAddress).to.eql(newAddress)
+    })
+
+    it("only governance or CONTRACTS_ADDRESS_MANAGER_ROLE can update xAllocationVoting address", async function () {
+      const { governor, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await governor.hasRole(await governor.CONTRACTS_ADDRESS_MANAGER_ROLE(), otherAccount.address)).to.eql(
+        false,
+      )
+
       const newAddress = ethers.Wallet.createRandom().address
 
-      await catchRevert(governor.connect(owner).setXAllocationVoting(newAddress))
+      await catchRevert(governor.connect(otherAccount).setXAllocationVoting(newAddress))
 
       const updatedAddress = await governor.xAllocationVoting()
       expect(updatedAddress).to.not.eql(newAddress)
@@ -448,14 +467,32 @@ describe("Governor and TimeLock", function () {
       expect(updatedAddress).to.eql(newAddress)
     })
 
-    it("only governance can update B3TR address", async function () {
+    it("Admin with CONTRACTS_ADDRESS_MANAGER_ROLE can update B3TR address", async function () {
       const { governor, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
+      expect(await governor.hasRole(await governor.CONTRACTS_ADDRESS_MANAGER_ROLE(), owner.address)).to.eql(true)
+
+      const newAddress = ethers.Wallet.createRandom().address
+      await governor.connect(owner).setB3tr(newAddress)
+
+      const updatedAddress = await governor.b3tr()
+      expect(updatedAddress).to.eql(newAddress)
+    })
+
+    it("only governance or CONTRACTS_ADDRESS_MANAGER_ROLE can update B3TR address", async function () {
+      const { governor, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await governor.hasRole(await governor.CONTRACTS_ADDRESS_MANAGER_ROLE(), otherAccount.address)).to.eql(
+        false,
+      )
+
       const newAddress = ethers.Wallet.createRandom().address
 
-      await catchRevert(governor.connect(owner).setB3tr(newAddress))
+      await catchRevert(governor.connect(otherAccount).setB3tr(newAddress))
 
       const updatedAddress = await governor.b3tr()
       expect(updatedAddress).to.not.eql(newAddress)
@@ -481,14 +518,33 @@ describe("Governor and TimeLock", function () {
       expect(updatedAddress).to.eql(newAddress)
     })
 
-    it("only governance can update voterRewards address", async function () {
+    it("Admin with CONTRACTS_ADDRESS_MANAGER_ROLE can update voterRewards address", async function () {
       const { governor, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
+      expect(await governor.hasRole(await governor.CONTRACTS_ADDRESS_MANAGER_ROLE(), owner.address)).to.eql(true)
+
       const newAddress = ethers.Wallet.createRandom().address
 
-      await catchRevert(governor.connect(owner).setVoterRewards(newAddress))
+      await governor.connect(owner).setVoterRewards(newAddress)
+
+      const updatedAddress = await governor.voterRewards()
+      expect(updatedAddress).to.eql(newAddress)
+    })
+
+    it("only governance or CONTRACTS_ADDRESS_MANAGER_ROLE can update voterRewards address", async function () {
+      const { governor, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await governor.hasRole(await governor.CONTRACTS_ADDRESS_MANAGER_ROLE(), otherAccount.address)).to.eql(
+        false,
+      )
+
+      const newAddress = ethers.Wallet.createRandom().address
+
+      await catchRevert(governor.connect(otherAccount).setVoterRewards(newAddress))
 
       const updatedAddress = await governor.voterRewards()
       expect(updatedAddress).to.not.eql(newAddress)

@@ -77,6 +77,8 @@ contract B3TRGovernor is
   bytes32 public constant GOVERNOR_FUNCTIONS_SETTINGS_ROLE = keccak256("GOVERNOR_FUNCTIONS_SETTINGS_ROLE");
   /// @notice The role that can pause the contract
   bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+  /// @notice The role that can set external contracts addresses
+  bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
@@ -94,6 +96,7 @@ contract B3TRGovernor is
    * @param initialVotingThreshold The minimum amount of voting power needed in order to vote
    * @param governorAdmin The address of the governor admin
    * @param pauser The address of the pauser
+   * @param contractsAddressManager The address of the contracts address manager
    * @param voterRewards The address of the voter rewards contract
    * @param governorFunctionSettingsRoleAddress The address that should have the GOVERNOR_FUNCTIONS_SETTINGS_ROLE
    * @param isFunctionRestrictionEnabled If the function restriction is enabled
@@ -109,6 +112,7 @@ contract B3TRGovernor is
     uint256 initialVotingThreshold;
     address governorAdmin;
     address pauser;
+    address contractsAddressManager;
     IVoterRewards voterRewards;
     address governorFunctionSettingsRoleAddress;
     bool isFunctionRestrictionEnabled;
@@ -140,6 +144,7 @@ contract B3TRGovernor is
     _grantRole(DEFAULT_ADMIN_ROLE, data.governorAdmin);
     _grantRole(GOVERNOR_FUNCTIONS_SETTINGS_ROLE, data.governorFunctionSettingsRoleAddress);
     _grantRole(PAUSER_ROLE, data.pauser);
+    _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, data.contractsAddressManager);
   }
 
   // ------------------ GETTERS ------------------ //
@@ -252,33 +257,37 @@ contract B3TRGovernor is
   /**
    * @dev Set the voter rewards contract
    *
-   * This function is only callable through goverance proposals
+   * This function is only callable through goverance proposals or by the CONTRACTS_ADDRESS_MANAGER_ROLE
    *
    * @param _voterRewards The new voter rewards contract
    */
-  function setVoterRewards(IVoterRewards _voterRewards) public override onlyGovernance {
+  function setVoterRewards(
+    IVoterRewards _voterRewards
+  ) public override onlyRoleOrGovernance(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     super.setVoterRewards(_voterRewards);
   }
 
   /**
    * @dev Set the xAllocationVoting contract
    *
-   * This function is only callable through goverance proposals
+   * This function is only callable through goverance proposals or by the CONTRACTS_ADDRESS_MANAGER_ROLE
    *
    * @param _xAllocationVoting The new xAllocationVoting contract
    */
-  function setXAllocationVoting(IXAllocationVotingGovernor _xAllocationVoting) public override onlyGovernance {
+  function setXAllocationVoting(
+    IXAllocationVotingGovernor _xAllocationVoting
+  ) public override onlyRoleOrGovernance(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     super.setXAllocationVoting(_xAllocationVoting);
   }
 
   /**
    * @dev Set the B3TR contract
    *
-   * This function is only callable through goverance proposals
+   * This function is only callable through goverance proposals or by the CONTRACTS_ADDRESS_MANAGER_ROLE
    *
    * @param _b3tr The new B3TR contract
    */
-  function setB3tr(IB3TR _b3tr) public override onlyGovernance {
+  function setB3tr(IB3TR _b3tr) public override onlyRoleOrGovernance(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     super.setB3tr(_b3tr);
   }
 

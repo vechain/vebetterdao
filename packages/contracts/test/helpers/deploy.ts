@@ -218,6 +218,7 @@ export const getOrDeployContractInstances = async ({
         initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD, // voting threshold
         governorAdmin: owner.address,
         pauser: owner.address,
+        contractsAddressManager: owner.address,
         voterRewards: await voterRewards.getAddress(),
         governorFunctionSettingsRoleAddress: owner.address,
         isFunctionRestrictionEnabled: true,
