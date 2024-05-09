@@ -89,7 +89,7 @@ export const getOrDeployContractInstances = async ({
 
   // Deploy TimeLock
   const timeLock = (await deployProxy("TimeLock", [
-    0, //0 seconds delay for immediate execution
+    config.TIMELOCK_MIN_DELAY, //0 seconds delay for immediate execution
     [],
     [],
     timelockAdmin.address,
