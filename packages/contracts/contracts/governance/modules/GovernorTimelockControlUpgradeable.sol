@@ -222,4 +222,19 @@ abstract contract GovernorTimelockControlUpgradeable is Initializable, GovernorU
   function _timelockSalt(bytes32 descriptionHash) private view returns (bytes32) {
     return bytes20(address(this)) ^ descriptionHash;
   }
+
+  /**
+   * @dev Public endpoint to get the salt used for the timelock operation.
+   */
+  function timelockSalt(bytes32 descriptionHash) external view returns (bytes32) {
+    return _timelockSalt(descriptionHash);
+  }
+
+  /**
+   * @dev Public endpoint to retrieve the timelock id of a proposal.
+   */
+  function getTimelockId(uint256 proposalId) public view returns (bytes32) {
+    GovernorTimelockControlStorage storage $ = _getGovernorTimelockControlStorage();
+    return $._timelockIds[proposalId];
+  }
 }

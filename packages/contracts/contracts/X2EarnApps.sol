@@ -51,17 +51,26 @@ contract X2EarnApps is
   AccessControlUpgradeable,
   UUPSUpgradeable
 {
+  /// @notice The role that can upgrade the contract.
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+  /// @notice The role that can manage the contract settings.
+  bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
 
   /**
    * @notice Initialize the contract
    * @param _baseURI the base URI for the contract
    * @param _admins the addresses of the admins
    * @param _upgrader the address of the upgrader
+   * @param _governor the address that will be granted the governance role
    *
    * @dev This function is called only once during the contract deployment
    */
-  function initialize(string memory _baseURI, address[] memory _admins, address _upgrader) public initializer {
+  function initialize(
+    string memory _baseURI,
+    address[] memory _admins,
+    address _upgrader,
+    address _governor
+  ) public initializer {
     __X2EarnApps_init();
     __Administration_init();
     __AppsStorage_init();
@@ -75,6 +84,7 @@ contract X2EarnApps is
     }
 
     _grantRole(UPGRADER_ROLE, _upgrader);
+    _grantRole(GOVERNANCE_ROLE, _governor);
   }
 
   // ---------- Overrides ------------ //
@@ -88,7 +98,7 @@ contract X2EarnApps is
   /**
    * @dev See {IX2EarnApps-setVotingEligibility}.
    */
-  function setVotingEligibility(bytes32 _appId, bool _isEligible) public override onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setVotingEligibility(bytes32 _appId, bool _isEligible) public override onlyRole(GOVERNANCE_ROLE) {
     super.setVotingEligibility(_appId, _isEligible);
   }
 
@@ -123,7 +133,7 @@ contract X2EarnApps is
    * @dev See {X2EarnAppsUpgradeable-_authorizeAddApp}
    */
   function _authorizeAddApp() internal view override {
-    if (!hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {
+    if (!hasRole(GOVERNANCE_ROLE, msg.sender)) {
       revert X2EarnUnauthorizedUser(msg.sender);
     }
   }

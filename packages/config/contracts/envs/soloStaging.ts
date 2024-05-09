@@ -8,7 +8,7 @@ export function createSoloStagingConfig() {
 
     B3TR_CAP: 3_750_000, // 3_750_000 -> 3.75 million B3TR tokens for pilot show
     B3TR_GOVERNOR_QUORUM_PERCENTAGE: 51, // Need 51% of voters to pass
-    B3TR_GOVERNOR_MIN_DELAY: 30, // wait period before executing a proposal after it was queued, 5 minutes
+    TIMELOCK_MIN_DELAY: 30, //time to wait before you can execute a queued proposal, 0 for immediate execution
     B3TR_GOVERNOR_DEPOSIT_THRESHOLD: 2, // Percentage of total B3TR supply needed to be deposited to create a proposal
     B3TR_GOVERNOR_VOTING_THRESHOLD: BigInt("1000000000000000000"), // 1 vote
     B3TR_GOVERNOR_MIN_VOTING_DELAY: 60, // 10 minutes
@@ -58,19 +58,6 @@ export function createSoloStagingConfig() {
     INITIAL_X_ALLOCATION: BigInt("66666666666666666666666"), // 1M/15 rounded down -> 1/15th of the total supply for pilot show
 
     GM_NFT_BASE_URI: "ipfs://bafybeiahr3qobzujfkxi64o6wrigkmdagrvgfa566rqqth6jm5nq7vf24y/", // IPFS base URI for the GM NFT
-
-    /*
-      X/Economic Node => Max Level For Free
-
-      Strength => 2,
-      Thunder => 4,
-      Mjolnir => 6,
-      VeThorX => 2,
-      StrengthX => 4,
-      ThunderX => 6,
-      MjolnirX => 7,
-    */
-    GM_NFT_X_NODE_UPGRADEABLE_LEVELS: [2, 4, 6, 2, 4, 6, 7],
 
     /*
       Level => B3TR Required

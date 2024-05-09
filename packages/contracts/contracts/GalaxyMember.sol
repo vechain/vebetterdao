@@ -57,6 +57,9 @@ contract GalaxyMember is
 {
   using Checkpoints for Checkpoints.Trace208; // Checkpoints library for managing checkpoints of the selected level of the user
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+  bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+  bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+  bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
 
   /// @notice Storage structure for GalaxyMember
   /// @dev GalaxyMemberStorage structure holds all the state variables in a single location.
@@ -70,18 +73,6 @@ contract GalaxyMember is
     uint256 _nextTokenId; // Next Token ID to be minted
     uint256 MAX_LEVEL; // Current Maximum level the Token can be minted or upgraded to
     mapping(uint256 => uint256) levelOf; // Mapping from token ID to level of the Token
-    /*
-      Mapping from X/Economic node type to maximum mintable level for free minting / upgrading
-
-      0 => Strength
-      1 => Thunder
-      2 => Mjolnir
-      3 => VeThorX
-      4 => StrengthX
-      5 => ThunderX
-      6 => MjolnirX
-    */
-    mapping(uint8 => uint256) _xNodeTypeToMaxMintableLevel;
     mapping(uint256 => uint256) _b3trToUpgradeToLevel; // Mapping from level to B3TR required to upgrade to that level
     mapping(address owner => Checkpoints.Trace208) _selectedLevelCheckpoints; // Checkpoints for selected level of the user
     mapping(address => mapping(uint256 => uint256)) _ownedLevels; // Value-Frequency map tracking levels owned by users
@@ -128,41 +119,44 @@ contract GalaxyMember is
     _disableInitializers();
   }
 
-  /// @notice Initializes a new GalaxyMember contract
-  /// @dev Sets initial values for all relevant contract properties and state variables.
+  /// @notice Data for initializing the contract
   /// @param name Name of the ERC721 token
   /// @param symbol Symbol of the ERC721 token
   /// @param admin Address to grant the admin role
   /// @param upgrader Address to grant the upgrader role
+  /// @param pauser Address to grant the pauser role
+  /// @param minter Address to grant the minter role
+  /// @param contractsAddressManager Address that can update external contracts address
   /// @param maxLevel Maximum level tokens can achieve
   /// @param baseTokenURI Base URI for computing {tokenURI}
-  /// @param xNodeMaxMintableLevels Array of maximum levels for each node type
   /// @param b3trToUpgradeToLevel Mapping of B3TR requirements per level
   /// @param _b3tr B3TR token contract address
   /// @param _treasury Address of the treasury
-  /// @custom:oz-upgrades-unsafe-allow constructor
-  function initialize(
-    string memory name,
-    string memory symbol,
-    address admin,
-    address upgrader,
-    uint256 maxLevel,
-    string memory baseTokenURI,
-    uint256[] memory xNodeMaxMintableLevels,
-    uint256[] memory b3trToUpgradeToLevel,
-    address _b3tr,
-    address _treasury
-  ) public initializer {
-    require(maxLevel > 0, "Galaxy Member: Max level must be greater than 0");
-    require(bytes(baseTokenURI).length > 0, "Galaxy Member: Base URI must be set");
-    require(
-      xNodeMaxMintableLevels.length == 7,
-      "Galaxy Member: Invalid number of max mintable levels. There should be 7 levels, one for each X/Economic node type"
-    );
-    require(_b3tr != address(0), "Galaxy Member: B3TR token address cannot be the zero address");
-    require(_treasury != address(0), "Galaxy Member: Treasury address cannot be the zero address");
+  struct InitializationData {
+    string name;
+    string symbol;
+    address admin;
+    address upgrader;
+    address pauser;
+    address minter;
+    address contractsAddressManager;
+    uint256 maxLevel;
+    string baseTokenURI;
+    uint256[] b3trToUpgradeToLevel;
+    address b3tr;
+    address treasury;
+  }
 
-    __ERC721_init(name, symbol);
+  /// @notice Initializes a new GalaxyMember contract
+  /// @dev Sets initial values for all relevant contract properties and state variables.
+  /// @custom:oz-upgrades-unsafe-allow constructor
+  function initialize(InitializationData memory data) public initializer {
+    require(data.maxLevel > 0, "Galaxy Member: Max level must be greater than 0");
+    require(bytes(data.baseTokenURI).length > 0, "Galaxy Member: Base URI must be set");
+    require(data.b3tr != address(0), "Galaxy Member: B3TR token address cannot be the zero address");
+    require(data.treasury != address(0), "Galaxy Member: Treasury address cannot be the zero address");
+
+    __ERC721_init(data.name, data.symbol);
     __ERC721Enumerable_init();
     __ERC721Pausable_init();
     __ERC721Burnable_init();
@@ -172,26 +166,25 @@ contract GalaxyMember is
 
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
-    $.MAX_LEVEL = maxLevel;
-    $._baseTokenURI = baseTokenURI;
+    $.MAX_LEVEL = data.maxLevel;
+    $._baseTokenURI = data.baseTokenURI;
 
-    for (uint8 i = 0; i < xNodeMaxMintableLevels.length; i++) {
-      $._xNodeTypeToMaxMintableLevel[i] = xNodeMaxMintableLevels[i];
+    for (uint8 i = 0; i < data.b3trToUpgradeToLevel.length; i++) {
+      $._b3trToUpgradeToLevel[i + 2] = data.b3trToUpgradeToLevel[i]; // First Level that requires B3TR is level 2
     }
 
-    for (uint8 i = 0; i < b3trToUpgradeToLevel.length; i++) {
-      $._b3trToUpgradeToLevel[i + 2] = b3trToUpgradeToLevel[i]; // First Level that requires B3TR is level 2
-    }
-
-    $.b3tr = IB3TR(_b3tr);
-    $.treasury = _treasury;
+    $.b3tr = IB3TR(data.b3tr);
+    $.treasury = data.treasury;
 
     $._nextTokenId = 1; // First token ID starts from 1
 
     $.isPublicMintingPaused = false;
 
-    _grantRole(DEFAULT_ADMIN_ROLE, admin);
-    _grantRole(UPGRADER_ROLE, upgrader);
+    _grantRole(DEFAULT_ADMIN_ROLE, data.admin);
+    _grantRole(UPGRADER_ROLE, data.upgrader);
+    _grantRole(PAUSER_ROLE, data.pauser);
+    _grantRole(MINTER_ROLE, data.minter);
+    _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, data.contractsAddressManager);
   }
 
   /// @notice Internal function to authorize contract upgrades
@@ -201,14 +194,14 @@ contract GalaxyMember is
 
   /// @notice Pauses the Galaxy Member contract
   /// @dev pausing the contract will prevent minting, upgrading, and transferring of tokens
-  /// @dev Only callable by the admin role
-  function pause() public onlyRole(DEFAULT_ADMIN_ROLE) {
+  /// @dev Only callable by the pauser role
+  function pause() public onlyRole(PAUSER_ROLE) {
     _pause();
   }
 
   /// @notice Unpauses the Galaxy Member contract
-  /// @dev Only callable by the admin role
-  function unpause() public onlyRole(DEFAULT_ADMIN_ROLE) {
+  /// @dev Only callable by the pauser role
+  function unpause() public onlyRole(PAUSER_ROLE) {
     _unpause();
   }
 
@@ -226,10 +219,10 @@ contract GalaxyMember is
   }
 
   /// @notice Mints a new token to a specified address
-  /// @dev Only callable by the admin role
+  /// @dev Only callable by the minter role
   /// @dev Can be used to mint when public minting is paused
   /// @param to Address to mint the token to
-  function mint(address to) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function mint(address to) public onlyRole(MINTER_ROLE) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
     uint256 tokenId = $._nextTokenId;
@@ -388,33 +381,21 @@ contract GalaxyMember is
     $.MAX_LEVEL = level;
   }
 
-  /// @notice Sets the maximum mintable levels for each X/Economic node type
-  /// @dev Only callable by the admin role
-  function setMaxMintableLevels(uint8[] memory maxMintableLevels) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(
-      maxMintableLevels.length == 7,
-      "Galaxy Member: Invalid number of max mintable levels. There should be 7 levels, one for each X/Economic node type"
-    );
-
-    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
-    for (uint8 i = 0; i < maxMintableLevels.length; i++) {
-      $._xNodeTypeToMaxMintableLevel[i] = maxMintableLevels[i];
-    }
-  }
-
   /// @notice Sets the XAllocationVotingGovernor contract address
-  /// @dev Only callable by the admin role
+  /// @dev Only callable by the contractsAddressManager role
   /// @param _xAllocationsGovernor XAllocationVotingGovernor contract address
-  function setXAllocationsGovernorAddress(address _xAllocationsGovernor) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setXAllocationsGovernorAddress(
+    address _xAllocationsGovernor
+  ) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(_xAllocationsGovernor != address(0), "Galaxy Member: _xAllocationsGovernor cannot be the zero address");
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     $.xAllocationsGovernor = IXAllocationVotingGovernor(_xAllocationsGovernor);
   }
 
   /// @notice Sets the B3TRGovernor contract address
-  /// @dev Only callable by the admin role
+  /// @dev Only callable by the contractsAddressManager role
   /// @param _b3trGovernor B3TRGovernor contract address
-  function setB3trGovernorAddress(address _b3trGovernor) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setB3trGovernorAddress(address _b3trGovernor) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(_b3trGovernor != address(0), "Galaxy Member: _b3trGovernor cannot be the zero address");
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     $.b3trGovernor = IB3TRGovernor(payable(_b3trGovernor));
@@ -503,13 +484,6 @@ contract GalaxyMember is
   /// @notice Gets the base URI for computing the tokenURI
   function baseURI() public view returns (string memory) {
     return _baseURI();
-  }
-
-  /// @notice Gets the maximum level an X/Economic node can freely mint or upgrade to
-  /// @param xNodeType X/Economic node type
-  function getMaxMintableLevelOfXNode(uint8 xNodeType) public view returns (uint256) {
-    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
-    return $._xNodeTypeToMaxMintableLevel[xNodeType];
   }
 
   /// @notice Gets the B3TR required to upgrade to a specific level
