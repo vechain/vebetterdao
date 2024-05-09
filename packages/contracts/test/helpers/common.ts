@@ -189,6 +189,24 @@ export const waitForProposalToBeActive = async (proposalId: number): Promise<big
   return proposalState
 }
 
+/**
+ * Calls the timelock to see if the operation is ready
+ *
+ * @param proposalId the proposal id
+ */
+export const waitForQueuedProposalToBeReady = async (proposalId: number) => {
+  const { timeLock, governor } = await getOrDeployContractInstances({})
+
+  const timelockId = await governor.getTimelockId(proposalId)
+
+  let isOperationReady = await timeLock.isOperationReady(timelockId)
+
+  do {
+    await moveBlocks(1)
+    isOperationReady = await timeLock.isOperationReady(timelockId)
+  } while (isOperationReady === false)
+}
+
 // Mint some B3TR and Convert B3TR for VOT3
 export const getVot3Tokens = async (receiver: HardhatEthersSigner, amount: string) => {
   const { b3tr, vot3, minterAccount } = await getOrDeployContractInstances({ forceDeploy: false })
