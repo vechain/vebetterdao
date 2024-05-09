@@ -267,3 +267,13 @@ The seeding strategy can be adjusted by changing the `SEED_STRATEGY` variable in
 - `RANDOM` - Will seed accounts within the range `5-1000` with a weighting towards selecting more accounts with values on the low end of this range
 - `FIXED` - All accounts receive `500` tokens
 - `LINEAR` - Accounts are seeded on an increasing linear scale `[5,10,15,20.....]`
+
+## Generate documentation
+
+To generate the documentation for the contracts run:
+
+```
+yarn contracts:generate-docs
+```
+
+The documentation will be generated in the `docs` folder inside `./packages/contracts`, and it's generated based on the @natspec tags in the contracts.

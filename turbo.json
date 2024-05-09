@@ -108,6 +108,9 @@
     },
     "playwright:e2e": {
       "cache": false
+    },
+    "generate-docs": {
+      "cache": false
     }
   }
 }
