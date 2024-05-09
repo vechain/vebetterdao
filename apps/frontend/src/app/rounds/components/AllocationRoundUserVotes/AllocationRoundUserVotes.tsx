@@ -113,20 +113,11 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     if (!votesAtSnapshot) throw new Error("Votes at snapshot not found")
     const appVotesPercentagesToValue: CastAllocationVotesProps = data.votes.map(vote => {
       const rawValue = scaledDivision(Number(vote.rawValue) * Number(votesAtSnapshot.scaled), 100)
-      console.log("rawValue", rawValue)
       return {
         appId: vote.appId,
         votes: rawValue,
       }
     })
-
-    console.log("appVotesPercentagesToValue", appVotesPercentagesToValue)
-    const totalVotesToCast = appVotesPercentagesToValue.reduce((acc, vote) => acc + Number(vote.votes), 0)
-    console.log("totalVotesToCast", totalVotesToCast)
-    console.log("totalVotesAvailable", votesAtSnapshot.scaled)
-
-    console.log("percentageOfTotalVotesToCast", (totalVotesToCast / Number(votesAtSnapshot.scaled)) * 100)
-    console.log("votesNotCasting", Number(votesAtSnapshot.scaled) - totalVotesToCast)
 
     onOpen()
     castAllocationVotes.sendTransaction(appVotesPercentagesToValue)
