@@ -88,15 +88,12 @@ export async function deployAll(config: ContractsConfig) {
   ])) as Treasury
   console.log(`Treasury deployed at ${await treasury.getAddress()}`)
 
-  const x2EarnApps = (await deployProxy(
-    "X2EarnApps",
-    [
-      config.XAPP_BASE_URI,
-      [TEMP_ADMIN], //admins
-      config.CONTRACTS_ADMIN_ADDRESS, // upgrader
-      TEMP_ADMIN, // governance role
-    ]
-  )) as X2EarnApps
+  const x2EarnApps = (await deployProxy("X2EarnApps", [
+    config.XAPP_BASE_URI,
+    [TEMP_ADMIN], //admins
+    config.CONTRACTS_ADMIN_ADDRESS, // upgrader
+    TEMP_ADMIN, // governance role
+  ])) as X2EarnApps
   console.log(`X2EarnApps deployed at ${await x2EarnApps.getAddress()}`)
 
   const xAllocationPool = (await deployProxy("XAllocationPool", [
@@ -230,7 +227,7 @@ export async function deployAll(config: ContractsConfig) {
     },
   }
 
-  await setWhitelistedFunctions(contractAddresses, config, governor, admin, libraries) // Set whitelisted functions for governor proposals
+  await setWhitelistedFunctions(contractAddresses, config, governor, deployer, libraries) // Set whitelisted functions for governor proposals
 
   // ---------- Configure contract roles for setup ---------- //
 
