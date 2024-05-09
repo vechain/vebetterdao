@@ -132,51 +132,6 @@ describe("Galaxy Member", () => {
       await catchRevert(galaxyMember.connect(otherAccount).unpause())
     })
 
-    it("Should not be able to update max mintable levels if not admin", async () => {
-      const { galaxyMember, otherAccount } = await getOrDeployContractInstances({ forceDeploy: false })
-
-      await catchRevert(galaxyMember.connect(otherAccount).setMaxMintableLevels(Array(7).fill(1)))
-    })
-
-    it("Should not be able to update max mintable levels if not enough levels", async () => {
-      const { galaxyMember, owner } = await getOrDeployContractInstances({ forceDeploy: false })
-
-      await catchRevert(galaxyMember.connect(owner).setMaxMintableLevels(Array(6).fill(1))) // 6 levels instead of 7. This is because there are 7 X/Economic node NFTs.
-    })
-
-    it("Should be able to update max mintable levels if admin", async () => {
-      const { galaxyMember, owner } = await getOrDeployContractInstances({ forceDeploy: false })
-
-      await galaxyMember.connect(owner).setMaxMintableLevels([1, 2, 3, 4, 5, 6, 7])
-
-      // Check if the max mintable levels are set correctly
-      expect(await galaxyMember.getMaxMintableLevelOfXNode(0)).to.equal(1)
-      expect(await galaxyMember.getMaxMintableLevelOfXNode(1)).to.equal(2)
-      expect(await galaxyMember.getMaxMintableLevelOfXNode(2)).to.equal(3)
-      expect(await galaxyMember.getMaxMintableLevelOfXNode(3)).to.equal(4)
-      expect(await galaxyMember.getMaxMintableLevelOfXNode(4)).to.equal(5)
-      expect(await galaxyMember.getMaxMintableLevelOfXNode(5)).to.equal(6)
-      expect(await galaxyMember.getMaxMintableLevelOfXNode(6)).to.equal(7)
-    })
-
-    it("Should have correct max mintable levels set on deployment", async () => {
-      const { galaxyMember } = await getOrDeployContractInstances({ forceDeploy: true })
-
-      expect(await galaxyMember.getMaxMintableLevelOfXNode(0)).to.equal(2)
-      expect(await galaxyMember.getMaxMintableLevelOfXNode(1)).to.equal(4)
-      expect(await galaxyMember.getMaxMintableLevelOfXNode(2)).to.equal(6)
-      expect(await galaxyMember.getMaxMintableLevelOfXNode(3)).to.equal(2)
-      expect(await galaxyMember.getMaxMintableLevelOfXNode(4)).to.equal(4)
-      expect(await galaxyMember.getMaxMintableLevelOfXNode(5)).to.equal(6)
-      expect(await galaxyMember.getMaxMintableLevelOfXNode(6)).to.equal(7)
-    })
-
-    it("Should not be able to update max mintable levels if not admin", async () => {
-      const { galaxyMember, otherAccount } = await getOrDeployContractInstances({ forceDeploy: false })
-
-      await catchRevert(galaxyMember.connect(otherAccount).setMaxMintableLevels(Array(7).fill(1)))
-    })
-
     it("Should have b3tr required to upgrade set on deployment", async () => {
       const { galaxyMember } = await getOrDeployContractInstances({ forceDeploy: true })
 
@@ -347,7 +302,6 @@ describe("Galaxy Member", () => {
           contractsAddressManager: owner.address,
           maxLevel: 1,
           baseTokenURI: config.GM_NFT_BASE_URI,
-          xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
           b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
           b3tr: await b3tr.getAddress(),
           treasury: await treasury.getAddress(),
@@ -374,7 +328,6 @@ describe("Galaxy Member", () => {
             contractsAddressManager: owner.address,
             maxLevel: 0,
             baseTokenURI: config.GM_NFT_BASE_URI,
-            xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
             b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
             b3tr: await b3tr.getAddress(),
             treasury: await treasury.getAddress(),
@@ -402,35 +355,6 @@ describe("Galaxy Member", () => {
             contractsAddressManager: owner.address,
             maxLevel: 1,
             baseTokenURI: "",
-            xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
-            b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
-            b3tr: await b3tr.getAddress(),
-            treasury: await treasury.getAddress(),
-          },
-        ]),
-      ).to.be.reverted
-    })
-
-    it("Should not be able to deploy contract if x node upgradeable levels are not 7", async function () {
-      const { owner, b3tr, treasury } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      const config = createLocalConfig()
-
-      await expect(
-        deployProxy("GalaxyMember", [
-          {
-            name: NFT_NAME,
-            symbol: NFT_SYMBOL,
-            admin: owner.address,
-            upgrader: owner.address,
-            pauser: owner.address,
-            minter: owner.address,
-            contractsAddressManager: owner.address,
-            maxLevel: 1,
-            baseTokenURI: config.GM_NFT_BASE_URI,
-            xNodeMaxMintableLevels: [1, 2, 3, 4, 5, 6],
             b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
             b3tr: await b3tr.getAddress(),
             treasury: await treasury.getAddress(),
@@ -458,7 +382,6 @@ describe("Galaxy Member", () => {
             contractsAddressManager: owner.address,
             maxLevel: 1,
             baseTokenURI: config.GM_NFT_BASE_URI,
-            xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
             b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
             b3tr: ZERO_ADDRESS,
             treasury: await treasury.getAddress(),
@@ -486,7 +409,6 @@ describe("Galaxy Member", () => {
             contractsAddressManager: owner.address,
             maxLevel: 1,
             baseTokenURI: config.GM_NFT_BASE_URI,
-            xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
             b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
             b3tr: await b3tr.getAddress(),
             treasury: ZERO_ADDRESS,
@@ -1335,7 +1257,6 @@ describe("Galaxy Member", () => {
           contractsAddressManager: owner.address,
           maxLevel: 2,
           baseTokenURI: config.GM_NFT_BASE_URI,
-          xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
           b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
           b3tr: await b3tr.getAddress(),
           treasury: await treasury.getAddress(),
@@ -1402,7 +1323,6 @@ describe("Galaxy Member", () => {
           contractsAddressManager: owner.address,
           maxLevel: 2,
           baseTokenURI: config.GM_NFT_BASE_URI,
-          xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
           b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
           b3tr: await b3tr.getAddress(),
           treasury: await treasury.getAddress(),
@@ -1485,7 +1405,6 @@ describe("Galaxy Member", () => {
           contractsAddressManager: owner.address,
           maxLevel: 10,
           baseTokenURI: config.GM_NFT_BASE_URI,
-          xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
           b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
           b3tr: await b3tr.getAddress(),
           treasury: await treasury.getAddress(),
@@ -1533,7 +1452,6 @@ describe("Galaxy Member", () => {
           contractsAddressManager: owner.address,
           maxLevel: 10,
           baseTokenURI: config.GM_NFT_BASE_URI,
-          xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
           b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
           b3tr: await b3tr.getAddress(),
           treasury: await treasury.getAddress(),
@@ -1578,7 +1496,6 @@ describe("Galaxy Member", () => {
         contractsAddressManager: owner.address,
         maxLevel: 10,
         baseTokenURI: config.GM_NFT_BASE_URI,
-        xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
         b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
         b3tr: await b3tr.getAddress(),
         treasury: await treasury.getAddress(),
@@ -1635,7 +1552,6 @@ describe("Galaxy Member", () => {
         contractsAddressManager: owner.address,
         maxLevel: 10,
         baseTokenURI: config.GM_NFT_BASE_URI,
-        xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
         b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
         b3tr: await b3tr.getAddress(),
         treasury: await treasury.getAddress(),
@@ -1680,7 +1596,6 @@ describe("Galaxy Member", () => {
         contractsAddressManager: owner.address,
         maxLevel: 10,
         baseTokenURI: config.GM_NFT_BASE_URI,
-        xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
         b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
         b3tr: await b3tr.getAddress(),
         treasury: await treasury.getAddress(),
@@ -1725,7 +1640,6 @@ describe("Galaxy Member", () => {
         contractsAddressManager: owner.address,
         maxLevel: 10,
         baseTokenURI: config.GM_NFT_BASE_URI,
-        xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
         b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
         b3tr: await b3tr.getAddress(),
         treasury: await treasury.getAddress(),
@@ -1851,7 +1765,6 @@ describe("Galaxy Member", () => {
         contractsAddressManager: owner.address,
         maxLevel: 10,
         baseTokenURI: config.GM_NFT_BASE_URI,
-        xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
         b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
         b3tr: await b3tr.getAddress(),
         treasury: await treasury.getAddress(),
