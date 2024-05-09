@@ -49,6 +49,8 @@ contract Treasury is
   bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
   /// @notice Role identifier for upgrading the contract
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+  /// @notice Role identifier for pausing the contract
+  bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
   /// @notice Address of VTHO token (Built-in Contract on Vechain Thor)
   address public constant VTHO = 0x0000000000000000000000000000456E65726779;
 
@@ -71,12 +73,6 @@ contract Treasury is
     assembly {
       $.slot := TreasuryStorageLocation
     }
-  }
-
-  /// @dev Ensures that only users with admin role can perform certain actions
-  modifier onlyAdmin() {
-    require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "Treasury: caller is not an admin");
-    _;
   }
 
   /// @dev Ensures that only users with governance role can perform actions when the contract is not paused
@@ -105,12 +101,18 @@ contract Treasury is
   /// @param _timeLock Address of the timelock contract controlling governance actions
   /// @param _admin Address of the admin responsible for initial setup
   /// @param _proxyAdmin Address of the proxy administrator for upgrade purposes
+  /// @param _pauser Address of the pauser role
+  /// @param _transferLimitVET Transfer limit for VET
+  /// @param _transferLimitB3TR Transfer limit for B3TR
+  /// @param _transferLimitVOT3 Transfer limit for VOT3
+  /// @param _transferLimitVTHO Transfer limit for VTHO
   function initialize(
     address _b3tr,
     address _vot3,
     address _timeLock,
     address _admin,
     address _proxyAdmin,
+    address _pauser,
     uint256 _transferLimitVET,
     uint256 _transferLimitB3TR,
     uint256 _transferLimitVOT3,
@@ -135,6 +137,7 @@ contract Treasury is
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     _grantRole(GOVERNANCE_ROLE, _timeLock);
     _grantRole(UPGRADER_ROLE, _proxyAdmin);
+    _grantRole(PAUSER_ROLE, _pauser);
   }
 
   /// @notice Allows the contract to receive VET directly
@@ -145,14 +148,14 @@ contract Treasury is
 
   /// @notice Pauses the Treasury contract
   /// @dev Pausing the contract will prevent all transfers and staking operations
-  /// @dev Only admin can pause the contract
-  function pause() public onlyAdmin {
+  /// @dev Only admin with pauser role can pause the contract
+  function pause() public onlyRole(PAUSER_ROLE) {
     _pause();
   }
 
   /// @notice Unpauses the Treasury contract allowing normal operations
-  /// @dev Only admin can unpause the contract
-  function unpause() public onlyAdmin {
+  /// @dev Only admin with pauser role can unpause the contract
+  function unpause() public onlyRole(PAUSER_ROLE) {
     _unpause();
   }
 

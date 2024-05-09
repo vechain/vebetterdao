@@ -48,9 +48,10 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  * - following the ERC-7201 standard for storage layout.
  *
  * Roles:
- * - DEFAULT_ADMIN_ROLE: The role that can add new admins and upgraders. It is also the role that can set the Galaxy Member contract, Emissions contract, scaling factor, and the Galaxy Member level to multiplier mapping.
+ * - DEFAULT_ADMIN_ROLE: The role that can add new admins and upgraders. It is also the role that can set scaling factor and the Galaxy Member level to multiplier mapping.
  * - UPGRADER_ROLE: The role that can upgrade the contract.
  * - VOTE_REGISTRAR_ROLE: The role that can register votes for rewards calculation.
+ * - CONTRACTS_ADDRESS_MANAGER_ROLE: The role that can set the addresses of the contracts used by the VoterRewards contract.
  */
 contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
   /// @notice The role that can register votes for rewards calculation.
@@ -58,6 +59,9 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
 
   /// @notice The role that can upgrade the contract.
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+
+  /// @notice The role that can set the addresses of the contracts used by the VoterRewards contract.
+  bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
 
   /// @custom:storage-location erc7201:b3tr.storage.VoterRewards
   struct VoterRewardsStorage {
@@ -105,6 +109,7 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
   /// @notice Initialize the VoterRewards contract.
   /// @param admin - The address of the admin.
   /// @param upgrader - The address of the upgrader.
+  /// @param contractsAddressManager - The address of the contract address manager.
   /// @param _emissions - The address of the emissions contract.
   /// @param _galaxyMember - The address of the Galaxy Member contract.
   /// @param _b3tr - The address of the B3TR token contract.
@@ -113,6 +118,7 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
   function initialize(
     address admin,
     address upgrader,
+    address contractsAddressManager,
     address _emissions,
     address _galaxyMember,
     address _b3tr,
@@ -144,6 +150,7 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
 
     _grantRole(DEFAULT_ADMIN_ROLE, admin);
     _grantRole(UPGRADER_ROLE, upgrader);
+    _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, contractsAddressManager);
   }
 
   /// @notice Upgrade the implementation of the VoterRewards contract.
@@ -304,7 +311,7 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
 
   /// @notice Set the Galaxy Member contract.
   /// @param _galaxyMember - The address of the Galaxy Member contract.
-  function setGalaxyMember(address _galaxyMember) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setGalaxyMember(address _galaxyMember) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(_galaxyMember != address(0), "VoterRewards: _galaxyMember cannot be the zero address");
 
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
@@ -324,7 +331,7 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
 
   /// @notice Set the Emmissions contract.
   /// @param _emissions - The address of the emissions contract.
-  function setEmissions(address _emissions) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setEmissions(address _emissions) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(_emissions != address(0), "VoterRewards: emissions cannot be the zero address");
 
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
