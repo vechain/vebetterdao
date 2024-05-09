@@ -260,6 +260,7 @@ describe("VoterRewards", () => {
         voterRewards.initialize(
           owner.address,
           owner.address,
+          owner.address,
           await emissions.getAddress(),
           await galaxyMember.getAddress(),
           await b3tr.getAddress(),
@@ -276,6 +277,7 @@ describe("VoterRewards", () => {
 
       await expect(
         deployProxy("VoterRewards", [
+          owner.address,
           owner.address,
           owner.address,
           await emissions.getAddress(),
@@ -296,6 +298,7 @@ describe("VoterRewards", () => {
         deployProxy("VoterRewards", [
           owner.address,
           owner.address,
+          owner.address,
           ZERO_ADDRESS,
           await galaxyMember.getAddress(),
           await b3tr.getAddress(),
@@ -312,6 +315,7 @@ describe("VoterRewards", () => {
 
       await expect(
         deployProxy("VoterRewards", [
+          owner.address,
           owner.address,
           owner.address,
           await emissions.getAddress(),
@@ -332,6 +336,7 @@ describe("VoterRewards", () => {
         deployProxy("VoterRewards", [
           owner.address,
           owner.address,
+          owner.address,
           await emissions.getAddress(),
           await galaxyMember.getAddress(),
           await b3tr.getAddress(),
@@ -348,6 +353,7 @@ describe("VoterRewards", () => {
 
       await expect(
         deployProxy("VoterRewards", [
+          owner.address,
           owner.address,
           owner.address,
           await emissions.getAddress(),
@@ -789,15 +795,20 @@ describe("VoterRewards", () => {
       })
 
       const galaxyMember = (await deployProxy("GalaxyMember", [
-        "galaxyMember",
-        "GM",
-        await owner.getAddress(),
-        await owner.getAddress(),
-        10,
-        config.GM_NFT_BASE_URI,
-        config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
-        await b3tr.getAddress(),
-        await treasury.getAddress(),
+        {
+          name: "galaxyMember",
+          symbol: "GM",
+          admin: owner.address,
+          upgrader: owner.address,
+          pauser: owner.address,
+          minter: owner.address,
+          contractsAddressManager: owner.address,
+          maxLevel: 10,
+          baseTokenURI: config.GM_NFT_BASE_URI,
+          b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+          b3tr: await b3tr.getAddress(),
+          treasury: await treasury.getAddress(),
+        },
       ])) as GalaxyMember
 
       await galaxyMember.waitForDeployment()
@@ -912,15 +923,20 @@ describe("VoterRewards", () => {
       })
 
       const galaxyMember = (await deployProxy("GalaxyMember", [
-        "galaxyMember",
-        "BDG",
-        await owner.getAddress(),
-        await owner.getAddress(),
-        10,
-        config.GM_NFT_BASE_URI,
-        config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
-        await b3tr.getAddress(),
-        await treasury.getAddress(),
+        {
+          name: "galaxyMember",
+          symbol: "BDG",
+          admin: owner.address,
+          upgrader: owner.address,
+          pauser: owner.address,
+          minter: owner.address,
+          contractsAddressManager: owner.address,
+          maxLevel: 10,
+          baseTokenURI: config.GM_NFT_BASE_URI,
+          b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+          b3tr: await b3tr.getAddress(),
+          treasury: await treasury.getAddress(),
+        },
       ])) as GalaxyMember
 
       await galaxyMember.waitForDeployment()
@@ -1034,15 +1050,20 @@ describe("VoterRewards", () => {
       })
 
       const galaxyMember = (await deployProxy("GalaxyMember", [
-        "galaxyMember",
-        "GM",
-        await owner.getAddress(),
-        await owner.getAddress(),
-        10,
-        config.GM_NFT_BASE_URI,
-        config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
-        await b3tr.getAddress(),
-        await treasury.getAddress(),
+        {
+          name: "galaxyMember",
+          symbol: "GM",
+          admin: owner.address,
+          upgrader: owner.address,
+          pauser: owner.address,
+          minter: owner.address,
+          contractsAddressManager: owner.address,
+          maxLevel: 10,
+          baseTokenURI: config.GM_NFT_BASE_URI,
+          b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+          b3tr: await b3tr.getAddress(),
+          treasury: await treasury.getAddress(),
+        },
       ])) as GalaxyMember
 
       await galaxyMember.waitForDeployment()
@@ -1189,15 +1210,20 @@ describe("VoterRewards", () => {
       })
 
       const galaxyMember = (await deployProxy("GalaxyMember", [
-        "galaxyMember",
-        "GM",
-        await owner.getAddress(),
-        await owner.getAddress(),
-        10,
-        config.GM_NFT_BASE_URI,
-        config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
-        await b3tr.getAddress(),
-        await treasury.getAddress(),
+        {
+          name: "galaxyMember",
+          symbol: "GM",
+          admin: owner.address,
+          upgrader: owner.address,
+          pauser: owner.address,
+          minter: owner.address,
+          contractsAddressManager: owner.address,
+          maxLevel: 10,
+          baseTokenURI: config.GM_NFT_BASE_URI,
+          b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+          b3tr: await b3tr.getAddress(),
+          treasury: await treasury.getAddress(),
+        },
       ])) as GalaxyMember
 
       await galaxyMember.waitForDeployment()
@@ -1313,15 +1339,20 @@ describe("VoterRewards", () => {
       })
 
       const galaxyMember = (await deployProxy("GalaxyMember", [
-        "galaxyMember",
-        "GM",
-        await owner.getAddress(),
-        await owner.getAddress(),
-        10,
-        config.GM_NFT_BASE_URI,
-        config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
-        await b3tr.getAddress(),
-        await treasury.getAddress(),
+        {
+          name: "galaxyMember",
+          symbol: "GM",
+          admin: owner.address,
+          upgrader: owner.address,
+          pauser: owner.address,
+          minter: owner.address,
+          contractsAddressManager: owner.address,
+          maxLevel: 10,
+          baseTokenURI: config.GM_NFT_BASE_URI,
+          b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+          b3tr: await b3tr.getAddress(),
+          treasury: await treasury.getAddress(),
+        },
       ])) as GalaxyMember
 
       await galaxyMember.waitForDeployment()
@@ -1661,15 +1692,20 @@ describe("VoterRewards", () => {
       })
 
       const galaxyMember = (await deployProxy("GalaxyMember", [
-        "galaxyMember",
-        "GM",
-        await owner.getAddress(),
-        await owner.getAddress(),
-        10,
-        config.GM_NFT_BASE_URI,
-        config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
-        await b3tr.getAddress(),
-        await treasury.getAddress(),
+        {
+          name: "galaxyMember",
+          symbol: "GM",
+          admin: owner.address,
+          upgrader: owner.address,
+          pauser: owner.address,
+          minter: owner.address,
+          contractsAddressManager: owner.address,
+          maxLevel: 10,
+          baseTokenURI: config.GM_NFT_BASE_URI,
+          b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+          b3tr: await b3tr.getAddress(),
+          treasury: await treasury.getAddress(),
+        },
       ])) as GalaxyMember
 
       await galaxyMember.waitForDeployment()
@@ -1768,15 +1804,20 @@ describe("VoterRewards", () => {
       })
 
       const galaxyMember = (await deployProxy("GalaxyMember", [
-        "galaxyMember",
-        "GM",
-        await owner.getAddress(),
-        await owner.getAddress(),
-        10,
-        config.GM_NFT_BASE_URI,
-        config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
-        await b3tr.getAddress(),
-        await treasury.getAddress(),
+        {
+          name: "galaxyMember",
+          symbol: "GM",
+          admin: owner.address,
+          upgrader: owner.address,
+          pauser: owner.address,
+          minter: owner.address,
+          contractsAddressManager: owner.address,
+          maxLevel: 10,
+          baseTokenURI: config.GM_NFT_BASE_URI,
+          b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+          b3tr: await b3tr.getAddress(),
+          treasury: await treasury.getAddress(),
+        },
       ])) as GalaxyMember
 
       await galaxyMember.waitForDeployment()
