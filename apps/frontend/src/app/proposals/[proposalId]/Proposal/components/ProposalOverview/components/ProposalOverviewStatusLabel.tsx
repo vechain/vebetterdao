@@ -6,45 +6,59 @@ import { UilClockEight } from "@iconscout/react-unicons"
 export const ProposalOverviewStatusLabel = () => {
   const { proposal } = useCurrentProposal()
 
-  if (proposal.state === ProposalState.DepositNotMet) {
-    return (
-      <HStack>
-        <Arm />
-        <Text fontWeight={"600"} color="#F29B32">
-          Looking for support
-        </Text>
-      </HStack>
-    )
-  }
-  if (proposal.state === ProposalState.Defeated) {
-    return (
-      <HStack>
-        <Arm color="#D23F63" />
+  switch (proposal.state) {
+    case ProposalState.Succeeded:
+      return (
+        <HStack>
+          <Arm color="#6DCB09" />
+          <Text fontWeight={"600"} color="#6DCB09">
+            Approved
+          </Text>
+        </HStack>
+      )
+    case ProposalState.DepositNotMet:
+      return (
+        <HStack>
+          <Arm />
+          <Text fontWeight={"600"} color="#F29B32">
+            Looking for support
+          </Text>
+        </HStack>
+      )
+    case ProposalState.Canceled:
+      return (
         <Text fontWeight={"600"} color="#D23F63">
-          Canceled due lack of support
+          Canceled
         </Text>
-      </HStack>
-    )
-  }
-  if (proposal.state === ProposalState.Pending) {
-    return (
-      <HStack>
-        <UilClockEight color="#004CFC" size="20px" />
-        <Text fontWeight={"600"} color="#004CFC">
-          Waiting for the round to start
-        </Text>
-      </HStack>
-    )
-  }
-
-  if (proposal.state === ProposalState.Active) {
-    return (
-      <HStack alignSelf={"flex-start"}>
-        <Circle size="8px" bg="#F50000" />
-        <Text fontWeight={600} color="#6DCB09">
-          Active now!
-        </Text>
-      </HStack>
-    )
+      )
+    case ProposalState.Defeated:
+      return (
+        <HStack>
+          <Arm color="#D23F63" />
+          <Text fontWeight={"600"} color="#D23F63">
+            Canceled due lack of support
+          </Text>
+        </HStack>
+      )
+    case ProposalState.Pending:
+      return (
+        <HStack>
+          <UilClockEight color="#004CFC" size="20px" />
+          <Text fontWeight={"600"} color="#004CFC">
+            Waiting for the round to start
+          </Text>
+        </HStack>
+      )
+    case ProposalState.Active:
+      return (
+        <HStack alignSelf={"flex-start"}>
+          <Circle size="8px" bg="#F50000" />
+          <Text fontWeight={600} color="#6DCB09">
+            Active now!
+          </Text>
+        </HStack>
+      )
+    default:
+      return null
   }
 }
