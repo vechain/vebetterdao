@@ -5,8 +5,6 @@ terraform {
     }
   }
   backend "s3" {
-    # The states of DEV and PROD environments are stored in separate S3 buckets in their
-    # respective AWS accounts. The {{{ENV}}} placeholder is replaced manually (dev/prod)
     bucket = "b3tr-terraform-state-{{{ENV}}}"
     key    = "b3tr-thor-solo.tfstate"
     region = "eu-west-1"
