@@ -124,6 +124,7 @@ describe("X-Allocation Pool", async function () {
         deployProxy("XAllocationPool", [
           owner.address,
           owner.address,
+          owner.address,
           ZERO_ADDRESS,
           await treasury.getAddress(),
           await x2EarnApps.getAddress(),
@@ -134,6 +135,7 @@ describe("X-Allocation Pool", async function () {
         deployProxy("XAllocationPool", [
           owner.address,
           owner.address,
+          owner.address,
           await b3tr.getAddress(),
           ZERO_ADDRESS,
           await x2EarnApps.getAddress(),
@@ -142,6 +144,7 @@ describe("X-Allocation Pool", async function () {
 
       await expect(
         deployProxy("XAllocationPool", [
+          owner.address,
           owner.address,
           owner.address,
           await b3tr.getAddress(),
@@ -154,7 +157,14 @@ describe("X-Allocation Pool", async function () {
     it("Cannot initilize twice", async function () {
       const { xAllocationPool, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       await catchRevert(
-        xAllocationPool.initialize(owner.address, owner.address, owner.address, owner.address, owner.address),
+        xAllocationPool.initialize(
+          owner.address,
+          owner.address,
+          owner.address,
+          owner.address,
+          owner.address,
+          owner.address,
+        ),
       )
     })
 
@@ -169,10 +179,14 @@ describe("X-Allocation Pool", async function () {
 
   describe("Settings", async function () {
     describe("Treasury address", async function () {
-      it("Admin can set treasury address", async function () {
+      it("Admin with CONTRACTS_ADDRESS_MANAGER_ROLE can set treasury address", async function () {
         const { xAllocationPool, owner, otherAccount } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
+
+        expect(
+          await xAllocationPool.hasRole(await xAllocationPool.CONTRACTS_ADDRESS_MANAGER_ROLE(), owner.address),
+        ).to.eql(true)
 
         const newTreasuryAddress = otherAccount.address
 
@@ -183,10 +197,14 @@ describe("X-Allocation Pool", async function () {
         expect(treasuryAddress).to.eql(newTreasuryAddress)
       })
 
-      it("Only admin can set treasury address", async function () {
+      it("Only admin with CONTRACTS_ADDRESS_MANAGER_ROLE can set treasury address", async function () {
         const { xAllocationPool, otherAccount } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
+
+        expect(
+          await xAllocationPool.hasRole(await xAllocationPool.CONTRACTS_ADDRESS_MANAGER_ROLE(), otherAccount.address),
+        ).to.eql(false)
 
         const newTreasuryAddress = otherAccount.address
 
@@ -205,10 +223,14 @@ describe("X-Allocation Pool", async function () {
     })
 
     describe("Emissions address", async function () {
-      it("Admin can set emissions contract address", async function () {
+      it("Admin with CONTRACTS_ADDRESS_MANAGER_ROLE can set emissions contract address", async function () {
         const { xAllocationPool, owner, otherAccount } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
+
+        expect(
+          await xAllocationPool.hasRole(await xAllocationPool.CONTRACTS_ADDRESS_MANAGER_ROLE(), owner.address),
+        ).to.eql(true)
 
         const newEmissionsAddress = otherAccount.address
 
@@ -219,10 +241,14 @@ describe("X-Allocation Pool", async function () {
         expect(emissionsAddress).to.eql(newEmissionsAddress)
       })
 
-      it("Only admin can set emissions contract address", async function () {
+      it("Only admin with CONTRACTS_ADDRESS_MANAGER_ROLE can set emissions contract address", async function () {
         const { xAllocationPool, otherAccount } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
+
+        expect(
+          await xAllocationPool.hasRole(await xAllocationPool.CONTRACTS_ADDRESS_MANAGER_ROLE(), otherAccount.address),
+        ).to.eql(false)
 
         const newEmissionsAddress = otherAccount.address
 
@@ -248,6 +274,7 @@ describe("X-Allocation Pool", async function () {
         const xAllocationPool = (await deployProxy("XAllocationPool", [
           owner.address,
           owner.address,
+          owner.address,
           await b3tr.getAddress(),
           await treasury.getAddress(),
           await x2EarnApps.getAddress(),
@@ -262,10 +289,14 @@ describe("X-Allocation Pool", async function () {
     })
 
     describe("XAllocationVoting address", async function () {
-      it("Admin can set xAllocationVoting contract address", async function () {
+      it("Admin with CONTRACTS_ADDRESS_MANAGER_ROLE can set xAllocationVoting contract address", async function () {
         const { xAllocationPool, owner, otherAccount } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
+
+        expect(
+          await xAllocationPool.hasRole(await xAllocationPool.CONTRACTS_ADDRESS_MANAGER_ROLE(), owner.address),
+        ).to.eql(true)
 
         const newXAllocationVotingAddress = otherAccount.address
 
@@ -276,10 +307,14 @@ describe("X-Allocation Pool", async function () {
         expect(xAllocationVotingAddress).to.eql(newXAllocationVotingAddress)
       })
 
-      it("Only admin can set xAllocationVoting contract address", async function () {
+      it("Only admin with CONTRACTS_ADDRESS_MANAGER_ROLE can set xAllocationVoting contract address", async function () {
         const { xAllocationPool, otherAccount } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
+
+        expect(
+          await xAllocationPool.hasRole(await xAllocationPool.CONTRACTS_ADDRESS_MANAGER_ROLE(), otherAccount.address),
+        ).to.eql(false)
 
         const newXAllocationVotingAddress = otherAccount.address
 
@@ -307,6 +342,7 @@ describe("X-Allocation Pool", async function () {
         const xAllocationPool = (await deployProxy("XAllocationPool", [
           owner.address,
           owner.address,
+          owner.address,
           await b3tr.getAddress(),
           await treasury.getAddress(),
           await x2EarnApps.getAddress(),
@@ -320,10 +356,14 @@ describe("X-Allocation Pool", async function () {
     })
 
     describe("B3TR address", async function () {
-      it("Admin can set b3tr contract address", async function () {
+      it("Admin with CONTRACTS_ADDRESS_MANAGER_ROLE can set b3tr contract address", async function () {
         const { xAllocationPool, owner, otherAccount } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
+
+        expect(
+          await xAllocationPool.hasRole(await xAllocationPool.CONTRACTS_ADDRESS_MANAGER_ROLE(), owner.address),
+        ).to.eql(true)
 
         const newB3trAddress = otherAccount.address
 
@@ -334,10 +374,14 @@ describe("X-Allocation Pool", async function () {
         expect(b3trAddress).to.eql(newB3trAddress)
       })
 
-      it("Only admin can set b3tr contract address", async function () {
+      it("Only admin with CONTRACTS_ADDRESS_MANAGER_ROLE can set b3tr contract address", async function () {
         const { xAllocationPool, otherAccount } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
+
+        expect(
+          await xAllocationPool.hasRole(await xAllocationPool.CONTRACTS_ADDRESS_MANAGER_ROLE(), otherAccount.address),
+        ).to.eql(false)
 
         const newB3trAddress = otherAccount.address
 
@@ -355,10 +399,14 @@ describe("X-Allocation Pool", async function () {
       })
     })
     describe("x2EarnApps address", async function () {
-      it("Admin can set x2EarnApps contract address", async function () {
+      it("Admin with CONTRACTS_ADDRESS_MANAGER_ROLE can set x2EarnApps contract address", async function () {
         const { xAllocationPool, owner, otherAccount } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
+
+        expect(
+          await xAllocationPool.hasRole(await xAllocationPool.CONTRACTS_ADDRESS_MANAGER_ROLE(), owner.address),
+        ).to.eql(true)
 
         const newX2EarnAppsAddress = otherAccount.address
 
@@ -369,10 +417,14 @@ describe("X-Allocation Pool", async function () {
         expect(x2EarnAppsAddress).to.eql(newX2EarnAppsAddress)
       })
 
-      it("Only admin can set x2EarnApps contract address", async function () {
+      it("Only admin with CONTRACTS_ADDRESS_MANAGER_ROLE can set x2EarnApps contract address", async function () {
         const { xAllocationPool, otherAccount } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
+
+        expect(
+          await xAllocationPool.hasRole(await xAllocationPool.CONTRACTS_ADDRESS_MANAGER_ROLE(), otherAccount.address),
+        ).to.eql(false)
 
         const newX2EarnAppsAddress = otherAccount.address
 

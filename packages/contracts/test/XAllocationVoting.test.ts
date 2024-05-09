@@ -67,6 +67,7 @@ describe("X-Allocation Voting", function () {
           emissions: await emissions.getAddress(),
           admins: [await timeLock.getAddress(), otherAccounts[2].address, otherAccounts[2].address],
           upgrader: otherAccounts[2].address,
+          contractsAddressManager: otherAccounts[2].address,
           x2EarnAppsAddress: await x2EarnApps.getAddress(),
           baseAllocationPercentage: 2,
           appSharesCap: 2,
@@ -278,6 +279,7 @@ describe("X-Allocation Voting", function () {
           emissions: owner.address,
           admins: [owner.address],
           upgrader: owner.address,
+          contractsAddressManager: owner.address,
           x2EarnAppsAddress: owner.address,
           baseAllocationPercentage: 2,
           appSharesCap: 2,
@@ -311,11 +313,15 @@ describe("X-Allocation Voting", function () {
       })
 
       describe("emissions address", function () {
-        it("Can set a new emissions contract correctly", async function () {
+        it("Admin with CONTRACTS_ADDRESS_MANAGER_ROLE can set a new emissions contract correctly", async function () {
           const { xAllocationVoting, owner } = await getOrDeployContractInstances({
             forceDeploy: true,
           })
           await bootstrapAndStartEmissions()
+
+          expect(
+            await xAllocationVoting.hasRole(await xAllocationVoting.CONTRACTS_ADDRESS_MANAGER_ROLE(), owner.address),
+          ).to.be.true
 
           await xAllocationVoting.connect(owner).setEmissionsAddress(owner.address)
 
@@ -335,20 +341,31 @@ describe("X-Allocation Voting", function () {
           expect(updatedEmissionsAddress).to.not.eql(ZERO_ADDRESS)
         })
 
-        it("Only admin should be able to set a new emissions contract", async function () {
+        it("Only admin with CONTRACTS_ADDRESS_MANAGER_ROLE should be able to set a new emissions contract", async function () {
           const { xAllocationVoting, otherAccount } = await getOrDeployContractInstances({
             forceDeploy: true,
           })
+
+          expect(
+            await xAllocationVoting.hasRole(
+              await xAllocationVoting.CONTRACTS_ADDRESS_MANAGER_ROLE(),
+              otherAccount.address,
+            ),
+          ).to.be.false
 
           await expect(xAllocationVoting.connect(otherAccount).setEmissionsAddress(otherAccount.address)).to.be.reverted
         })
       })
 
       describe("x2EarnApps address", function () {
-        it("Can set x2EarnApps address correctly", async function () {
+        it("Admin with CONTRACTS_ADDRESS_MANAGER_ROLE can set x2EarnApps address correctly", async function () {
           const { xAllocationVoting, owner } = await getOrDeployContractInstances({
             forceDeploy: true,
           })
+
+          expect(
+            await xAllocationVoting.hasRole(await xAllocationVoting.CONTRACTS_ADDRESS_MANAGER_ROLE(), owner.address),
+          ).to.be.true
 
           await xAllocationVoting.connect(owner).setX2EarnAppsAddress(owner.address)
 
@@ -367,10 +384,17 @@ describe("X-Allocation Voting", function () {
           expect(updatedX2EarnAppsAddress).to.not.eql(ZERO_ADDRESS)
         })
 
-        it("Only admin can set x2EarnApps address", async function () {
+        it("Only admin with CONTRACTS_ADDRESS_MANAGER_ROLE can set x2EarnApps address", async function () {
           const { xAllocationVoting, otherAccount } = await getOrDeployContractInstances({
             forceDeploy: true,
           })
+
+          expect(
+            await xAllocationVoting.hasRole(
+              await xAllocationVoting.CONTRACTS_ADDRESS_MANAGER_ROLE(),
+              otherAccount.address,
+            ),
+          ).to.be.false
 
           await expect(xAllocationVoting.connect(otherAccount).setX2EarnAppsAddress(otherAccount.address)).to.be
             .reverted
@@ -378,10 +402,14 @@ describe("X-Allocation Voting", function () {
       })
 
       describe("VoterRewards address", function () {
-        it("Can set voter rewards address correctly", async function () {
+        it("Admin with CONTRACTS_ADDRESS_MANAGER_ROLE can set voter rewards address correctly", async function () {
           const { xAllocationVoting, owner } = await getOrDeployContractInstances({
             forceDeploy: true,
           })
+
+          expect(
+            await xAllocationVoting.hasRole(await xAllocationVoting.CONTRACTS_ADDRESS_MANAGER_ROLE(), owner.address),
+          ).to.be.true
 
           await xAllocationVoting.connect(owner).setVoterRewardsAddress(owner.address)
 
@@ -400,10 +428,17 @@ describe("X-Allocation Voting", function () {
           expect(updatedVoterRewardsAddress).to.not.eql(ZERO_ADDRESS)
         })
 
-        it("Only admin can set voter rewards address", async function () {
+        it("Only admin with CONTRACTS_ADDRESS_MANAGER_ROLE can set voter rewards address", async function () {
           const { xAllocationVoting, otherAccount } = await getOrDeployContractInstances({
             forceDeploy: true,
           })
+
+          expect(
+            await xAllocationVoting.hasRole(
+              await xAllocationVoting.CONTRACTS_ADDRESS_MANAGER_ROLE(),
+              otherAccount.address,
+            ),
+          ).to.be.false
 
           await expect(xAllocationVoting.connect(otherAccount).setVoterRewardsAddress(otherAccount.address)).to.be
             .reverted
@@ -413,16 +448,22 @@ describe("X-Allocation Voting", function () {
 
     describe("Voting threshold", function () {
       it("can update voting threshold through governance", async function () {
-        const { owner, xAllocationVoting } = await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+        const { owner, xAllocationVoting, governorQuorumFractionLib, governorDescriptionValidatorLib } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
 
         const newThreshold = 10n
         await createProposalAndExecuteIt(
           owner,
           owner,
           xAllocationVoting,
-          await ethers.getContractFactory("B3TRGovernor"),
+          await ethers.getContractFactory("B3TRGovernor", {
+            libraries: {
+              GovernorDescriptionValidator: await governorDescriptionValidatorLib.getAddress(),
+              GovernorQuorumFraction: await governorQuorumFractionLib.getAddress(),
+            },
+          }),
           "Update Voting Threshold",
           "setVotingThreshold",
           [newThreshold],
