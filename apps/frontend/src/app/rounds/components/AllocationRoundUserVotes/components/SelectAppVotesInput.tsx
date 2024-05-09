@@ -1,6 +1,6 @@
 import { XApp, useXAppMetadata } from "@/api"
 import { Control, Controller, FieldArrayWithId, FieldErrors, UseFormGetValues } from "react-hook-form"
-import { FormData } from "../AllocationRoundUserVotes"
+import { FormData as UserVotesFormData } from "../AllocationRoundUserVotes"
 import {
   Box,
   Card,
@@ -23,14 +23,12 @@ import BigNumber from "bignumber.js"
 import { scaledDivision } from "@/utils/MathUtils"
 
 type Props = {
-  control: Control<{
-    votes: CastAllocationVotesProps
-  }>
-  getValues: UseFormGetValues<FormData>
+  control: Control<UserVotesFormData, any>
+  getValues: UseFormGetValues<UserVotesFormData>
   index: number
   xApp?: XApp
-  field: FieldArrayWithId<FormData, "votes", "id">
-  errors: FieldErrors<FormData>
+  field: FieldArrayWithId<UserVotesFormData, "votes", "id">
+  errors: FieldErrors<UserVotesFormData>
   isDisabled?: boolean
   totalVotesAvailable?: string
 }
@@ -68,7 +66,10 @@ export const SelectAppVotesInput = ({
                 rules={{
                   validate: {
                     lessThanHundred: () => {
-                      const allValuesTotal = getValues().votes.reduce((acc, vote) => acc + Number(vote.value) || 0, 0)
+                      const allValuesTotal = getValues().votes.reduce(
+                        (acc, vote) => acc + Number(vote.rawValue) || 0,
+                        0,
+                      )
                       if (allValuesTotal > 100) return "Total votes exceed 100"
                       return true
                     },

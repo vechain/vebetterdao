@@ -18,7 +18,11 @@ type Props = {
 }
 
 export type FormData = {
-  votes: CastAllocationVotesProps
+  votes: {
+    appId: string
+    value: string
+    rawValue: number
+  }[]
 }
 
 const DECIMAL_PLACES = 2
@@ -107,26 +111,36 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
 
   const onSubmit = (data: FormData) => {
     if (!votesAtSnapshot) throw new Error("Votes at snapshot not found")
-    const appVotesPercentagesToValue = data.votes.map(vote => {
-      const rawValue = scaledDivision(Number(vote.value) * Number(votesAtSnapshot.scaled), 100)
+    const appVotesPercentagesToValue: CastAllocationVotesProps = data.votes.map(vote => {
+      const rawValue = scaledDivision(Number(vote.rawValue) * Number(votesAtSnapshot.scaled), 100)
+      console.log("rawValue", rawValue)
       return {
         appId: vote.appId,
-        value: new BigNumber(rawValue).toFixed(2, BigNumber.ROUND_HALF_DOWN),
-        rawValue,
+        votes: rawValue,
       }
     })
+
+    console.log("appVotesPercentagesToValue", appVotesPercentagesToValue)
+    console.log(
+      "totalVotes",
+      appVotesPercentagesToValue.reduce((acc, vote) => acc + Number(vote.votes), 0),
+    )
 
     onOpen()
     castAllocationVotes.sendTransaction(appVotesPercentagesToValue)
   }
 
   const splitEvenly = () => {
-    const totalVotes = xApps?.length ?? 0
-    const rawValue = scaledDivision(100, totalVotes)
+    const totalAppsToVote = xApps?.length ?? 0
+    const rawValue = scaledDivision(100, totalAppsToVote)
+    const remainingPercentage = 100 - rawValue * totalAppsToVote
     const votesPerApp = new BigNumber(rawValue).toFixed(2, BigNumber.ROUND_HALF_DOWN)
-    console.log("votesPerApp", votesPerApp, "rawValue", rawValue)
+
+    // in case the division is not exact, we add the remaining percentage to a random app
+    const randomAppIndex = Math.floor(Math.random() * totalAppsToVote)
     xApps?.forEach((xApp, index) => {
-      update(index, { appId: xApp.id, value: votesPerApp, rawValue })
+      const parsedRawValue = index === randomAppIndex ? rawValue + remainingPercentage : rawValue
+      update(index, { appId: xApp.id, value: votesPerApp, rawValue: parsedRawValue })
     })
   }
 
