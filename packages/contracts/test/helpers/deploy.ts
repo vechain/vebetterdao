@@ -155,8 +155,9 @@ export const getOrDeployContractInstances = async ({
   ])) as Emissions
 
   const voterRewards = (await deployProxy("VoterRewards", [
-    owner.address,
-    owner.address,
+    owner.address, // admin
+    owner.address, // upgrader
+    owner.address, // contractsAddressManager
     await emissions.getAddress(),
     await galaxyMember.getAddress(),
     await b3tr.getAddress(),

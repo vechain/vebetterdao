@@ -141,8 +141,9 @@ export async function deployAll(config: ContractsConfig) {
   console.log(`Emissions deployed at ${await emissions.getAddress()}`)
 
   const voterRewards = (await deployProxy("VoterRewards", [
-    TEMP_ADMIN,
-    TEMP_ADMIN,
+    TEMP_ADMIN, // admin
+    config.CONTRACTS_ADMIN_ADDRESS, // upgrader
+    config.CONTRACTS_ADMIN_ADDRESS, // contractsAddressManager
     await emissions.getAddress(),
     await galaxyMember.getAddress(),
     await b3tr.getAddress(),
