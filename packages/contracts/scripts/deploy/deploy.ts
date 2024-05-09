@@ -191,6 +191,7 @@ export async function deployAll(config: ContractsConfig) {
         initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY,
         initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD,
         governorAdmin: TEMP_ADMIN,
+        pauser: config.CONTRACTS_ADMIN_ADDRESS,
         voterRewards: await voterRewards.getAddress(),
         governorFunctionSettingsRoleAddress: TEMP_ADMIN,
         isFunctionRestrictionEnabled: true,
@@ -418,6 +419,7 @@ export async function deployAll(config: ContractsConfig) {
       TEMP_ADMIN,
       await governor.GOVERNOR_FUNCTIONS_SETTINGS_ROLE(),
     )
+    await validateContractRole(governor, config.CONTRACTS_ADMIN_ADDRESS, TEMP_ADMIN, await governor.PAUSER_ROLE())
 
     // Emissions
     await validateContractRole(emissions, config.CONTRACTS_ADMIN_ADDRESS, TEMP_ADMIN, await emissions.MINTER_ROLE())

@@ -73,7 +73,10 @@ contract B3TRGovernor is
   UUPSUpgradeable,
   PausableUpgradeable
 {
+  /// @notice The role that can whitelist allowed functions in the propose function
   bytes32 public constant GOVERNOR_FUNCTIONS_SETTINGS_ROLE = keccak256("GOVERNOR_FUNCTIONS_SETTINGS_ROLE");
+  /// @notice The role that can pause the contract
+  bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
@@ -90,6 +93,7 @@ contract B3TRGovernor is
    * @param initialMinVotingDelay The minimum amount of blocks a proposal needs to wait before it can start
    * @param initialVotingThreshold The minimum amount of voting power needed in order to vote
    * @param governorAdmin The address of the governor admin
+   * @param pauser The address of the pauser
    * @param voterRewards The address of the voter rewards contract
    * @param governorFunctionSettingsRoleAddress The address that should have the GOVERNOR_FUNCTIONS_SETTINGS_ROLE
    * @param isFunctionRestrictionEnabled If the function restriction is enabled
@@ -104,6 +108,7 @@ contract B3TRGovernor is
     uint256 initialMinVotingDelay;
     uint256 initialVotingThreshold;
     address governorAdmin;
+    address pauser;
     IVoterRewards voterRewards;
     address governorFunctionSettingsRoleAddress;
     bool isFunctionRestrictionEnabled;
@@ -134,6 +139,7 @@ contract B3TRGovernor is
 
     _grantRole(DEFAULT_ADMIN_ROLE, data.governorAdmin);
     _grantRole(GOVERNOR_FUNCTIONS_SETTINGS_ROLE, data.governorFunctionSettingsRoleAddress);
+    _grantRole(PAUSER_ROLE, data.pauser);
   }
 
   // ------------------ GETTERS ------------------ //
@@ -168,14 +174,14 @@ contract B3TRGovernor is
   /**
    * @dev Pause the contract
    */
-  function pause() public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function pause() public onlyRole(PAUSER_ROLE) {
     _pause();
   }
 
   /**
    * @dev Unpause the contract
    */
-  function unpause() public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function unpause() public onlyRole(PAUSER_ROLE) {
     _unpause();
   }
 

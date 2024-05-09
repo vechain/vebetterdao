@@ -130,10 +130,12 @@ export const getOrDeployContractInstances = async ({
   ])) as GalaxyMember
 
   // Deploy X2EarnApps
-  const x2EarnApps = (await deployProxy(
-    "X2EarnApps",
-    ["ipfs://", [await timeLock.getAddress(), owner.address], owner.address, owner.address],
-  )) as X2EarnApps
+  const x2EarnApps = (await deployProxy("X2EarnApps", [
+    "ipfs://",
+    [await timeLock.getAddress(), owner.address],
+    owner.address,
+    owner.address,
+  ])) as X2EarnApps
 
   // Deploy XAllocationPool
   const xAllocationPool = (await deployProxy("XAllocationPool", [
@@ -215,6 +217,7 @@ export const getOrDeployContractInstances = async ({
         initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
         initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD, // voting threshold
         governorAdmin: owner.address,
+        pauser: owner.address,
         voterRewards: await voterRewards.getAddress(),
         governorFunctionSettingsRoleAddress: owner.address,
         isFunctionRestrictionEnabled: true,

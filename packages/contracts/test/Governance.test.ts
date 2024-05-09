@@ -303,6 +303,7 @@ describe("Governor and TimeLock", function () {
           initialMinVotingDelay: 1, // delay before vote starts
           initialVotingThreshold: 1, // voting threshold
           governorAdmin: owner.address,
+          pauser: owner.address,
           voterRewards: await voterRewards.getAddress(),
           governorFunctionSettingsRoleAddress: owner.address,
           isFunctionRestrictionEnabled: true,
@@ -850,20 +851,22 @@ describe("Governor and TimeLock", function () {
         )
 
         assert.fail("Should revert")
-      } catch (e) {}
+      } catch (e) {
+        // expect to revert
+      }
 
       const updatedQuorum = await governor["quorumNumerator()"]()
       expect(updatedQuorum).to.not.eql(newQuorum)
     })
 
     describe("Pausability", function () {
-      it("Admin should be able to pause the contract", async function () {
+      it("Admin with PAUSER_ROLE should be able to pause the contract", async function () {
         const { governor, owner } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
 
-        const DEFAULT_ADMIN_ROLE = await governor.DEFAULT_ADMIN_ROLE()
-        const hasRole = await governor.hasRole(DEFAULT_ADMIN_ROLE, owner.address)
+        const PAUSER_ROLE = await governor.PAUSER_ROLE()
+        const hasRole = await governor.hasRole(PAUSER_ROLE, owner.address)
         expect(hasRole).to.be.true
 
         await governor.connect(owner).pause()
@@ -871,13 +874,13 @@ describe("Governor and TimeLock", function () {
         expect(await governor.paused()).to.be.true
       })
 
-      it("Admin should be able to unpause the contract", async function () {
+      it("Admin with PAUSER_ROLE should be able to unpause the contract", async function () {
         const { governor, owner } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
 
-        const DEFAULT_ADMIN_ROLE = await governor.DEFAULT_ADMIN_ROLE()
-        const hasRole = await governor.hasRole(DEFAULT_ADMIN_ROLE, owner.address)
+        const PAUSER_ROLE = await governor.PAUSER_ROLE()
+        const hasRole = await governor.hasRole(PAUSER_ROLE, owner.address)
         expect(hasRole).to.be.true
 
         await governor.connect(owner).pause()
@@ -887,13 +890,13 @@ describe("Governor and TimeLock", function () {
         expect(await governor.paused()).to.be.false
       })
 
-      it("Only admin can pause and unpause", async function () {
+      it("Only admin with PAUSER_ROLE can pause and unpause", async function () {
         const { governor, otherAccount } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
 
-        const DEFAULT_ADMIN_ROLE = await governor.DEFAULT_ADMIN_ROLE()
-        const hasRole = await governor.hasRole(DEFAULT_ADMIN_ROLE, otherAccount.address)
+        const PAUSER_ROLE = await governor.PAUSER_ROLE()
+        const hasRole = await governor.hasRole(PAUSER_ROLE, otherAccount.address)
         expect(hasRole).to.be.false
 
         await catchRevert(governor.connect(otherAccount).pause())
