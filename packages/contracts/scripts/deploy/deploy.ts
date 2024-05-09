@@ -100,16 +100,19 @@ export async function deployAll(config: ContractsConfig) {
 
   // Deploy the GalaxyMember contract with Max Mintable Level 1
   const galaxyMember = (await deployProxy("GalaxyMember", [
-    name,
-    symbol,
-    TEMP_ADMIN,
-    TEMP_ADMIN,
-    1,
-    config.GM_NFT_BASE_URI,
-    config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
-    config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
-    await b3tr.getAddress(),
-    await treasury.getAddress(),
+    {
+      name: name,
+      symbol: symbol,
+      admin: TEMP_ADMIN,
+      upgrader: config.CONTRACTS_ADMIN_ADDRESS,
+      pauser: config.CONTRACTS_ADMIN_ADDRESS,
+      maxLevel: 1,
+      baseTokenURI: config.GM_NFT_BASE_URI,
+      xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
+      b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+      b3tr: await b3tr.getAddress(),
+      treasury: await treasury.getAddress(),
+    },
   ])) as GalaxyMember
   console.log(`GalaxyMember deployed at ${await galaxyMember.getAddress()}`)
 

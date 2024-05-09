@@ -95,16 +95,19 @@ export const getOrDeployContractInstances = async ({
 
   // Deploy GalaxyMember
   const galaxyMember = (await deployProxy("GalaxyMember", [
-    NFT_NAME,
-    NFT_SYMBOL,
-    owner.address,
-    owner.address,
-    maxMintableLevel,
-    config.GM_NFT_BASE_URI,
-    config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
-    config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
-    await b3tr.getAddress(),
-    await treasury.getAddress(),
+    {
+      name: NFT_NAME,
+      symbol: NFT_SYMBOL,
+      admin: owner.address,
+      upgrader: owner.address,
+      pauser: owner.address,
+      maxLevel: maxMintableLevel,
+      baseTokenURI: config.GM_NFT_BASE_URI,
+      xNodeMaxMintableLevels: config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
+      b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+      b3tr: await b3tr.getAddress(),
+      treasury: await treasury.getAddress(),
+    },
   ])) as GalaxyMember
 
   // Deploy X2EarnApps
