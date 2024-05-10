@@ -4,7 +4,7 @@ import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 
 export const ProposalYourVote = () => {
   const { proposal } = useCurrentProposal()
-
+  // TODO: understand rendering logic
   return (
     <VStack alignItems={"stretch"}>
       <Text fontWeight={"400"} color="#6A6A6A">
@@ -14,10 +14,10 @@ export const ProposalYourVote = () => {
         <HStack gap={1}>
           <Image src={"/images/abstained.svg"} />
           <Text color="#252525" fontWeight={600}>
-            You
+            You voted
           </Text>
           <Text color="#B59525" fontWeight={600}>
-            Abstained
+            Abstain
           </Text>
         </HStack>
       </Skeleton>
