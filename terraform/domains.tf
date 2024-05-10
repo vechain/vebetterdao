@@ -9,7 +9,7 @@ locals {
 }
 module "thor-solo_domain" {
   depends_on = [module.ecr]
-  source     = "git@github.com:vechain/terraform_infrastructure_modules.git//domains?ref=677fbdb"
+  source     = "git@github.com:vechain/terraform_infrastructure_modules.git//domains?ref=v.1.0.21"
 
   domain_name = local.domains[0].name
   zone_id     = local.domains[0].zone
