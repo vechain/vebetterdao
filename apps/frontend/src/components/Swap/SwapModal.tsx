@@ -80,7 +80,7 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
   const handleStake = useCallback(() => {
     mutationData.resetStatus()
     mutationData.sendTransaction(undefined)
-  }, [mutationData.sendTransaction])
+  }, [mutationData])
 
   const handleClose = useCallback(() => {
     mutationData.resetStatus()

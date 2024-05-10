@@ -1,16 +1,17 @@
 import { getXAppMetadata, getXAppMetadataQueryKey, useAllocationsRound, useGetVotesOnBlock } from "@/api"
 import { getIpfsImage, getIpfsImageQueryKey } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
-import { CastAllocationVotesProps } from "@/hooks"
 import { Box, Card, CardBody, HStack, Heading, Icon, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useQueries } from "@tanstack/react-query"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { FaInfoCircle } from "react-icons/fa"
 import BigNumber from "bignumber.js"
+import { FormData as UserVotesFormData } from "../AllocationRoundUserVotes"
+import { useMemo } from "react"
 
 type Props = {
   roundId: string
-  votes: CastAllocationVotesProps
+  votes: UserVotesFormData["votes"]
 }
 
 const compactFormatter = new Intl.NumberFormat("en-US", {
@@ -25,7 +26,13 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
     Number(roundInfo.voteStart),
     account ?? undefined,
   )
-  const totalVotes = votes.reduce((acc, vote) => acc + (Number(vote.value) || 0), 0)
+
+  const totalVotes = useMemo(() => {
+    const rawValue = votes.reduce((acc, vote) => acc + (Number(vote.rawValue) || 0), 0)
+    if (rawValue >= 99.99) return 100
+    return rawValue
+  }, [votes])
+
   const isCompletedAllocated = totalVotes >= 100
 
   const isOverDistributed = totalVotes > 100
