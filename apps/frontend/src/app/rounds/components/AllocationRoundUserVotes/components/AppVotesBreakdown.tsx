@@ -7,6 +7,7 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { FaInfoCircle } from "react-icons/fa"
 import BigNumber from "bignumber.js"
 import { FormData as UserVotesFormData } from "../AllocationRoundUserVotes"
+import { useMemo } from "react"
 
 type Props = {
   roundId: string
@@ -25,7 +26,13 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
     Number(roundInfo.voteStart),
     account ?? undefined,
   )
-  const totalVotes = votes.reduce((acc, vote) => acc + (Number(vote.rawValue) || 0), 0)
+
+  const totalVotes = useMemo(() => {
+    const rawValue = votes.reduce((acc, vote) => acc + (Number(vote.rawValue) || 0), 0)
+    if (rawValue >= 99.99) return 100
+    return rawValue
+  }, [votes])
+
   const isCompletedAllocated = totalVotes >= 100
 
   const isOverDistributed = totalVotes > 100
