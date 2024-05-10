@@ -6,7 +6,7 @@ export function createTestConfig() {
 
     B3TR_CAP: 1_000_000_000, // 1B
     B3TR_GOVERNOR_QUORUM_PERCENTAGE: 4, // 4 -> Need 4% of voters to pass
-    B3TR_GOVERNOR_MIN_DELAY: 30, //after a vote passes, you have 5 min before you can vote queue the proposal
+    TIMELOCK_MIN_DELAY: 30, //after a vote passes, you have 5 min before you can vote queue the proposal
     B3TR_GOVERNOR_DEPOSIT_THRESHOLD: 2, // 2% of total B3TR supply needed to be deposited to create a proposal
     B3TR_GOVERNOR_MIN_VOTING_DELAY: 1, // 1 -> 1 block before the vote starts
     B3TR_GOVERNOR_VOTING_THRESHOLD: BigInt("1000000000000000000"), // 1 vote
@@ -32,19 +32,6 @@ export function createTestConfig() {
     VOTE_2_EARN_POOL_ADDRESS: "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68", //2nd account from mnemonic of solo network
 
     INITIAL_X_ALLOCATION: BigInt("2000000000000000000000000"), // 2M
-
-    /*
-      X/Economic Node => Max Level For Free
-
-      Strength => 2,
-      Thunder => 4,
-      Mjolnir => 6,
-      VeThorX => 2,
-      StrengthX => 4,
-      ThunderX => 6,
-      MjolnirX => 7,
-    */
-    GM_NFT_X_NODE_UPGRADEABLE_LEVELS: [2, 4, 6, 2, 4, 6, 7],
 
     /*
         Level => B3TR Required

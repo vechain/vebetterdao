@@ -119,7 +119,7 @@ export const createProposalWithMultipleFunctions = async (
 export const getProposalIdFromTx = async (tx: ContractTransactionResponse, depositPayed: boolean = false) => {
   const { governor } = await getOrDeployContractInstances({})
   const proposeReceipt = await tx.wait()
-  const event = depositPayed ? proposeReceipt?.logs[3] : proposeReceipt?.logs[2]
+  const event = depositPayed ? proposeReceipt?.logs[3] : proposeReceipt?.logs[0]
 
   const decodedLogs = governor.interface.parseLog({
     topics: [...(event?.topics as string[])],
@@ -189,6 +189,24 @@ export const waitForProposalToBeActive = async (proposalId: number): Promise<big
   return proposalState
 }
 
+/**
+ * Calls the timelock to see if the operation is ready
+ *
+ * @param proposalId the proposal id
+ */
+export const waitForQueuedProposalToBeReady = async (proposalId: number) => {
+  const { timeLock, governor } = await getOrDeployContractInstances({})
+
+  const timelockId = await governor.getTimelockId(proposalId)
+
+  let isOperationReady = await timeLock.isOperationReady(timelockId)
+
+  do {
+    await moveBlocks(1)
+    isOperationReady = await timeLock.isOperationReady(timelockId)
+  } while (isOperationReady === false)
+}
+
 // Mint some B3TR and Convert B3TR for VOT3
 export const getVot3Tokens = async (receiver: HardhatEthersSigner, amount: string) => {
   const { b3tr, vot3, minterAccount } = await getOrDeployContractInstances({ forceDeploy: false })
@@ -249,9 +267,17 @@ export const createProposalAndExecuteIt = async (
 
   // execute it
   // console.log("Executing");
-  await governor.execute([await contractToCall.getAddress()], [0], [encodedFunctionCall], descriptionHash, {
-    gasLimit: 10_000_000,
-  })
+  const extecutionTX = await governor.execute(
+    [await contractToCall.getAddress()],
+    [0],
+    [encodedFunctionCall],
+    descriptionHash,
+    {
+      gasLimit: 10_000_000,
+    },
+  )
+
+  return extecutionTX
 }
 
 export const createProposalWithMultipleFunctionsAndExecuteIt = async (

@@ -21,7 +21,7 @@
 //                                   ##############
 //                                   #########
 
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.20;
 
 import { IXAllocationPool } from "./interfaces/IXAllocationPool.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
@@ -43,7 +43,7 @@ import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
  * Funds can be claimed by the X2Earn apps at the end of each allocation round
  * @dev Interacts with the Emissions contract to get the amount of B3TR available for distribution in each round,
  * and the x2EarnApps contract to check app existence and receiver address.
- * @dev The contract is using AccessControl to handle roles for upgrading the contract and external contract addresses.
+ * The contract is using AccessControl to handle roles for upgrading the contract and external contract addresses.
  */
 contract XAllocationPool is
   Initializable,
@@ -52,8 +52,11 @@ contract XAllocationPool is
   ReentrancyGuardUpgradeable,
   UUPSUpgradeable
 {
-  uint256 public constant percentagePrecisionScalingFactor = 1e4;
+  uint256 public constant PERCENTAGE_PRECISION_SCALING_FACTOR = 1e4;
+  /// @notice The role that can upgrade the contract.
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+  /// @notice The role that can set the addresses of the contracts used by the VoterRewards contract.
+  bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
 
   /// @custom:storage-location erc7201:b3tr.storage.XAllocationPool
   struct XAllocationPoolStorage {
@@ -85,6 +88,7 @@ contract XAllocationPool is
    *
    * @param _admin The address of the admin.
    * @param upgrader The address of the upgrader.
+   * @param contractsAddressManager The address of the contracts address manager.
    * @param _b3trAddress The address of the B3TR token.
    * @param _treasury The address of the VeBetterDAO treasury.
    * @param _x2EarnApps The address of the x2EarnApps contract.
@@ -92,6 +96,7 @@ contract XAllocationPool is
   function initialize(
     address _admin,
     address upgrader,
+    address contractsAddressManager,
     address _b3trAddress,
     address _treasury,
     address _x2EarnApps
@@ -111,6 +116,7 @@ contract XAllocationPool is
 
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     _grantRole(UPGRADER_ROLE, upgrader);
+    _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, contractsAddressManager);
   }
 
   // @dev Emit when the xAllocationVoting contract is set
@@ -121,8 +127,6 @@ contract XAllocationPool is
   event TreasuryContractSet(address oldContractAddress, address newContractAddress);
   // @dev Emit when the x2EarnApps contract is set
   event X2EarnAppsContractSet(address oldContractAddress, address newContractAddress);
-  // @dev Emit when the B3TR contract is set
-  event B3trContractSet(address oldContractAddress, address newContractAddress);
 
   // ---------- Authorizers ---------- //
 
@@ -133,7 +137,7 @@ contract XAllocationPool is
   /**
    * @dev Set the address of the XAllocationVotingGovernor contract.
    */
-  function setXAllocationVotingAddress(address xAllocationVoting_) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setXAllocationVotingAddress(address xAllocationVoting_) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(xAllocationVoting_ != address(0), "XAllocationPool: new xAllocationVoting is the zero address");
 
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
@@ -145,7 +149,7 @@ contract XAllocationPool is
   /**
    * @dev Set the address of the emissions contract.
    */
-  function setEmissionsAddress(address emissions_) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setEmissionsAddress(address emissions_) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(emissions_ != address(0), "XAllocationPool: new emissions is the zero address");
 
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
@@ -157,7 +161,7 @@ contract XAllocationPool is
   /**
    * @dev Set the address of the treasury contract.
    */
-  function setTreasuryAddress(address treasury_) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setTreasuryAddress(address treasury_) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(treasury_ != address(0), "XAllocationPool: new treasury is the zero address");
 
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
@@ -167,21 +171,9 @@ contract XAllocationPool is
   }
 
   /**
-   * @dev Set the address of the B3TR token contract.
-   */
-  function setB3trAddress(address b3tr_) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(b3tr_ != address(0), "XAllocationPool: new b3tr is the zero address");
-
-    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
-    $.b3tr = IB3TR(b3tr_);
-
-    emit B3trContractSet(address($.b3tr), b3tr_);
-  }
-
-  /**
    * @dev Set the address of the x2EarnApps contract.
    */
-  function setX2EarnAppsAddress(address x2EarnApps_) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setX2EarnAppsAddress(address x2EarnApps_) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(x2EarnApps_ != address(0), "XAllocationPool: new x2EarnApps is the zero address");
 
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
@@ -261,7 +253,7 @@ contract XAllocationPool is
     uint256 variableAllocationPercentage = 100 - xAllocationVoting().getRoundBaseAllocationPercentage(roundId);
     uint256 available = (total * variableAllocationPercentage) / 100;
 
-    uint256 rewardAmount = (available * share) / percentagePrecisionScalingFactor;
+    uint256 rewardAmount = (available * share) / PERCENTAGE_PRECISION_SCALING_FACTOR;
     return rewardAmount;
   }
 
@@ -394,7 +386,7 @@ contract XAllocationPool is
     // avoid division by zero
     if (appVotesQFValue == 0) return (0, 0);
 
-    uint256 appShare = (appVotesQFValue * percentagePrecisionScalingFactor) / totalVotesQF;
+    uint256 appShare = (appVotesQFValue * PERCENTAGE_PRECISION_SCALING_FACTOR) / totalVotesQF;
 
     // This is the amount unallocated if appShare is greater than max cap, this will be sent to treasury
     uint256 unallocatedShare = 0;

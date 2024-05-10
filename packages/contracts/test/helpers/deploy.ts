@@ -13,6 +13,8 @@ import {
   Treasury,
   B3TRGovernor,
   X2EarnApps,
+  GovernorDescriptionValidator,
+  GovernorQuorumFraction,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy } from "../../scripts/helpers"
@@ -36,6 +38,8 @@ interface DeployInstance {
   minterAccount: HardhatEthersSigner
   timelockAdmin: HardhatEthersSigner
   otherAccounts: HardhatEthersSigner[]
+  governorDescriptionValidatorLib: GovernorDescriptionValidator
+  governorQuorumFractionLib: GovernorQuorumFraction
 }
 
 export const NFT_NAME = "GalaxyMember"
@@ -59,21 +63,33 @@ export const getOrDeployContractInstances = async ({
   // Contracts are deployed using the first signer/account by default
   const [owner, otherAccount, minterAccount, timelockAdmin, ...otherAccounts] = await ethers.getSigners()
 
-  // Deploy Libraries
-  const X2EarnAppsDataTypes = await ethers.getContractFactory("X2EarnAppsDataTypes")
-  const X2EarnAppsDataTypesLib = await X2EarnAppsDataTypes.deploy()
-  await X2EarnAppsDataTypesLib.waitForDeployment()
+  // Deploy GovernorDescriptionValidator library
+  const GovernorDescriptionValidator = await ethers.getContractFactory("GovernorDescriptionValidator")
+  const GovernorDescriptionValidatorLib = await GovernorDescriptionValidator.deploy()
+  await GovernorDescriptionValidatorLib.waitForDeployment()
+
+  // Deploy GovernorQuorumFraction library
+  const GovernorQuorumFraction = await ethers.getContractFactory("GovernorQuorumFraction")
+  const GovernorQuorumFractionLib = await GovernorQuorumFraction.deploy()
+  await GovernorQuorumFractionLib.waitForDeployment()
+
+  // Deploy Governor
 
   // Deploy B3TR
   const B3trContract = await ethers.getContractFactory("B3TR")
-  const b3tr = await B3trContract.deploy(owner, minterAccount, config.B3TR_CAP)
+  const b3tr = await B3trContract.deploy(owner, minterAccount, owner, config.B3TR_CAP)
 
   // Deploy VOT3
-  const vot3 = (await deployProxy("VOT3", [owner.address, await b3tr.getAddress()])) as VOT3
+  const vot3 = (await deployProxy("VOT3", [
+    owner.address,
+    owner.address,
+    owner.address,
+    await b3tr.getAddress(),
+  ])) as VOT3
 
   // Deploy TimeLock
   const timeLock = (await deployProxy("TimeLock", [
-    0, //0 seconds delay for immediate execution
+    config.TIMELOCK_MIN_DELAY, //0 seconds delay for immediate execution
     [],
     [],
     timelockAdmin.address,
@@ -87,6 +103,7 @@ export const getOrDeployContractInstances = async ({
     owner.address,
     owner.address,
     owner.address,
+    owner.address,
     config.TREASURY_TRANSFER_LIMIT_VET,
     config.TREASURY_TRANSFER_LIMIT_B3TR,
     config.TREASURY_TRANSFER_LIMIT_VOT3,
@@ -95,29 +112,33 @@ export const getOrDeployContractInstances = async ({
 
   // Deploy GalaxyMember
   const galaxyMember = (await deployProxy("GalaxyMember", [
-    NFT_NAME,
-    NFT_SYMBOL,
-    owner.address,
-    owner.address,
-    maxMintableLevel,
-    config.GM_NFT_BASE_URI,
-    config.GM_NFT_X_NODE_UPGRADEABLE_LEVELS,
-    config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
-    await b3tr.getAddress(),
-    await treasury.getAddress(),
+    {
+      name: NFT_NAME,
+      symbol: NFT_SYMBOL,
+      admin: owner.address,
+      upgrader: owner.address,
+      pauser: owner.address,
+      minter: owner.address,
+      contractsAddressManager: owner.address,
+      maxLevel: maxMintableLevel,
+      baseTokenURI: config.GM_NFT_BASE_URI,
+      b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+      b3tr: await b3tr.getAddress(),
+      treasury: await treasury.getAddress(),
+    },
   ])) as GalaxyMember
 
   // Deploy X2EarnApps
-  const x2EarnApps = (await deployProxy(
-    "X2EarnApps",
-    ["ipfs://", [await timeLock.getAddress(), owner.address], owner.address],
-    {
-      X2EarnAppsDataTypes: await X2EarnAppsDataTypesLib.getAddress(),
-    },
-  )) as X2EarnApps
+  const x2EarnApps = (await deployProxy("X2EarnApps", [
+    "ipfs://",
+    [await timeLock.getAddress(), owner.address],
+    owner.address,
+    owner.address,
+  ])) as X2EarnApps
 
   // Deploy XAllocationPool
   const xAllocationPool = (await deployProxy("XAllocationPool", [
+    owner.address,
     owner.address,
     owner.address,
     await b3tr.getAddress(),
@@ -149,8 +170,9 @@ export const getOrDeployContractInstances = async ({
   ])) as Emissions
 
   const voterRewards = (await deployProxy("VoterRewards", [
-    owner.address,
-    owner.address,
+    owner.address, // admin
+    owner.address, // upgrader
+    owner.address, // contractsAddressManager
     await emissions.getAddress(),
     await galaxyMember.getAddress(),
     await b3tr.getAddress(),
@@ -172,6 +194,7 @@ export const getOrDeployContractInstances = async ({
       emissions: await emissions.getAddress(),
       admins: [await timeLock.getAddress(), owner.address],
       upgrader: owner.address,
+      contractsAddressManager: owner.address,
       x2EarnAppsAddress: await x2EarnApps.getAddress(),
       baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
       appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
@@ -180,22 +203,32 @@ export const getOrDeployContractInstances = async ({
   ])) as XAllocationVoting
 
   // Deploy Governor
-  const governor = (await deployProxy("B3TRGovernor", [
+  const governor = (await deployProxy(
+    "B3TRGovernor",
+    [
+      {
+        vot3Token: await vot3.getAddress(),
+        timelock: await timeLock.getAddress(),
+        xAllocationVoting: await xAllocationVoting.getAddress(),
+        b3tr: await b3tr.getAddress(),
+        quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
+        initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD, // deposit threshold
+        initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
+        initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD, // voting threshold
+        governorAdmin: owner.address,
+        pauser: owner.address,
+        contractsAddressManager: owner.address,
+        proposalExecutor: owner.address,
+        voterRewards: await voterRewards.getAddress(),
+        governorFunctionSettingsRoleAddress: owner.address,
+        isFunctionRestrictionEnabled: true,
+      },
+    ],
     {
-      vot3Token: await vot3.getAddress(),
-      timelock: await timeLock.getAddress(),
-      xAllocationVoting: await xAllocationVoting.getAddress(),
-      b3tr: await b3tr.getAddress(),
-      quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
-      initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD, // deposit threshold
-      initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
-      initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD, // voting threshold
-      governorAdmin: owner.address,
-      voterRewards: await voterRewards.getAddress(),
-      governorFunctionSettingsRoleAddress: owner.address,
-      isFunctionRestrictionEnabled: true,
+      GovernorDescriptionValidator: await GovernorDescriptionValidatorLib.getAddress(),
+      GovernorQuorumFraction: await GovernorQuorumFractionLib.getAddress(),
     },
-  ])) as B3TRGovernor
+  )) as B3TRGovernor
 
   const contractAddresses: Record<string, string> = {
     B3TR: await b3tr.getAddress(),
@@ -211,7 +244,14 @@ export const getOrDeployContractInstances = async ({
     X2EarnApps: await x2EarnApps.getAddress(),
   }
 
-  await setWhitelistedFunctions(contractAddresses, config, governor, owner) // Set whitelisted functions for governor proposals
+  const libraries = {
+    B3TRGovernor: {
+      GovernorDescriptionValidator: await GovernorDescriptionValidatorLib.getAddress(),
+      GovernorQuorumFraction: await GovernorQuorumFractionLib.getAddress(),
+    },
+  }
+
+  await setWhitelistedFunctions(contractAddresses, config, governor, owner, libraries) // Set whitelisted functions for governor proposals
 
   // Set up roles
   const PROPOSER_ROLE = await timeLock.PROPOSER_ROLE()
@@ -271,6 +311,8 @@ export const getOrDeployContractInstances = async ({
     timelockAdmin,
     otherAccounts,
     treasury,
+    governorDescriptionValidatorLib: GovernorDescriptionValidatorLib,
+    governorQuorumFractionLib: GovernorQuorumFractionLib as GovernorQuorumFraction,
   }
   return cachedDeployInstance
 }
