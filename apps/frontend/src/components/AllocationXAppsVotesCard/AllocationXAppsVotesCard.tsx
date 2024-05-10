@@ -32,7 +32,7 @@ type Props = {
   maxRanks?: number
 }
 
-export const AllocationXAppsVotesCard = ({ roundId, maxRanks = 5 }: Props) => {
+export const AllocationXAppsVotesCard = ({ roundId, maxRanks = 8 }: Props) => {
   const { data: xApps, isLoading: xAppsLoading } = useRoundXApps(roundId)
 
   const xAppsVotes = useXAppsVotes(xApps?.map(app => app.id) ?? [], roundId)
