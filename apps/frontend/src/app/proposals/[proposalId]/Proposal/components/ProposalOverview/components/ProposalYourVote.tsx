@@ -1,6 +1,6 @@
 import { useCurrentProposal } from "@/api"
-import { AddressIcon } from "@/components/AddressIcon"
-import { HStack, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { HStack, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 
 export const ProposalYourVote = () => {
   const { proposal } = useCurrentProposal()
@@ -11,8 +11,52 @@ export const ProposalYourVote = () => {
         Your vote
       </Text>
       <Skeleton isLoaded={!proposal.isProposerLoading}>
-        <HStack>
-          <AddressIcon address={proposal.proposer} rounded="full" h="20px" w="20px" />
+        <HStack gap={1}>
+          <Image src={"/images/abstained.svg"} />
+          <Text color="#252525" fontWeight={600}>
+            You
+          </Text>
+          <Text color="#B59525" fontWeight={600}>
+            Abstained
+          </Text>
+        </HStack>
+      </Skeleton>
+    </VStack>
+  )
+
+  return (
+    <VStack alignItems={"stretch"}>
+      <Text fontWeight={"400"} color="#6A6A6A">
+        Your vote
+      </Text>
+      <Skeleton isLoaded={!proposal.isProposerLoading}>
+        <HStack gap={1}>
+          <UilThumbsDown size="20px" color="#D23F63" />
+          <Text color="#252525" fontWeight={600}>
+            You voted
+          </Text>
+          <Text color="#D23F63" fontWeight={600}>
+            Against
+          </Text>
+        </HStack>
+      </Skeleton>
+    </VStack>
+  )
+
+  return (
+    <VStack alignItems={"stretch"}>
+      <Text fontWeight={"400"} color="#6A6A6A">
+        Your vote
+      </Text>
+      <Skeleton isLoaded={!proposal.isProposerLoading}>
+        <HStack gap={1}>
+          <UilThumbsUp size="20px" color="#38BF66" />
+          <Text color="#252525" fontWeight={600}>
+            You voted
+          </Text>
+          <Text color="#38BF66" fontWeight={600}>
+            For
+          </Text>
         </HStack>
       </Skeleton>
     </VStack>
