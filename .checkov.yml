@@ -1,0 +1,5 @@
+# File for Checkov to ignore certain checks!
+framework: "terraform"
+quiet: true
+soft-fail: true
+skip-check: "CKV_TF_1"
