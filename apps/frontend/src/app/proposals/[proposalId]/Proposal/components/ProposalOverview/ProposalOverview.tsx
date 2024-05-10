@@ -1,4 +1,5 @@
 import {
+  Card,
   Divider,
   Flex,
   HStack,
@@ -10,7 +11,6 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { BaseCard } from "../../../components/BaseCard"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { AddressIcon } from "@/components/AddressIcon"
 import { useCurrentProposal } from "@/api"
@@ -25,7 +25,7 @@ export const ProposalOverview = () => {
   const { proposal } = useCurrentProposal()
 
   return (
-    <BaseCard>
+    <Card border="1px solid #D5D5D5" rounded="16px" p="24px">
       <Flex gap="48px" flexDir={["column", "column", "row"]}>
         <VStack gap={"20px"} alignItems={"stretch"} flex={3} justify={"space-between"}>
           <VStack alignItems={"stretch"}>
@@ -86,6 +86,6 @@ export const ProposalOverview = () => {
           <ProposalOverviewVotes />
         </Skeleton>
       </Flex>
-    </BaseCard>
+    </Card>
   )
 }
