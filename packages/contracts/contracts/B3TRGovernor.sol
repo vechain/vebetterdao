@@ -54,7 +54,7 @@ import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
  * The voting power is calculated through the quadratic vote formula based on the amount of VOT3 tokens held by the
  * voter at the block when the proposal becomes active.
  *
- * Once a proposal succeeds, it can be executed by the timelock contract.
+ * Once a proposal succeeds, it can be queued and executed. The execution is done through the timelock contract.
  *
  * The contract is upgradeable and uses the UUPS pattern.
  */
@@ -73,7 +73,14 @@ contract B3TRGovernor is
   UUPSUpgradeable,
   PausableUpgradeable
 {
+  /// @notice The role that can whitelist allowed functions in the propose function
   bytes32 public constant GOVERNOR_FUNCTIONS_SETTINGS_ROLE = keccak256("GOVERNOR_FUNCTIONS_SETTINGS_ROLE");
+  /// @notice The role that can pause the contract
+  bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+  /// @notice The role that can set external contracts addresses
+  bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
+  /// @notice The role that can execute a proposal
+  bytes32 public constant PROPOSAL_EXECUTOR_ROLE = keccak256("PROPOSAL_EXECUTOR_ROLE");
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
@@ -90,6 +97,9 @@ contract B3TRGovernor is
    * @param initialMinVotingDelay The minimum amount of blocks a proposal needs to wait before it can start
    * @param initialVotingThreshold The minimum amount of voting power needed in order to vote
    * @param governorAdmin The address of the governor admin
+   * @param pauser The address of the pauser
+   * @param contractsAddressManager The address of the contracts address manager
+   * @param proposalExecutor The address that should be set as executor and have the PROPOSAL_EXECUTOR_ROLE
    * @param voterRewards The address of the voter rewards contract
    * @param governorFunctionSettingsRoleAddress The address that should have the GOVERNOR_FUNCTIONS_SETTINGS_ROLE
    * @param isFunctionRestrictionEnabled If the function restriction is enabled
@@ -104,6 +114,9 @@ contract B3TRGovernor is
     uint256 initialMinVotingDelay;
     uint256 initialVotingThreshold;
     address governorAdmin;
+    address pauser;
+    address contractsAddressManager;
+    address proposalExecutor;
     IVoterRewards voterRewards;
     address governorFunctionSettingsRoleAddress;
     bool isFunctionRestrictionEnabled;
@@ -112,6 +125,19 @@ contract B3TRGovernor is
   /// @notice modifier to check if the caller has the specified role or if the function is called through a governance proposal
   modifier onlyRoleOrGovernance(bytes32 role) {
     if (!hasRole(role, _msgSender())) _checkGovernance();
+    _;
+  }
+
+  /**
+   * @dev Modifier to make a function callable only by a certain role. In
+   * addition to checking the sender's role, `address(0)` 's role is also
+   * considered. Granting a role to `address(0)` is equivalent to enabling
+   * this role for everyone.
+   */
+  modifier onlyRoleOrOpenRole(bytes32 role) {
+    if (!hasRole(role, address(0))) {
+      _checkRole(role, _msgSender());
+    }
     _;
   }
 
@@ -134,6 +160,9 @@ contract B3TRGovernor is
 
     _grantRole(DEFAULT_ADMIN_ROLE, data.governorAdmin);
     _grantRole(GOVERNOR_FUNCTIONS_SETTINGS_ROLE, data.governorFunctionSettingsRoleAddress);
+    _grantRole(PAUSER_ROLE, data.pauser);
+    _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, data.contractsAddressManager);
+    _grantRole(PROPOSAL_EXECUTOR_ROLE, data.proposalExecutor);
   }
 
   // ------------------ GETTERS ------------------ //
@@ -168,14 +197,14 @@ contract B3TRGovernor is
   /**
    * @dev Pause the contract
    */
-  function pause() public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function pause() public onlyRole(PAUSER_ROLE) {
     _pause();
   }
 
   /**
    * @dev Unpause the contract
    */
-  function unpause() public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function unpause() public onlyRole(PAUSER_ROLE) {
     _unpause();
   }
 
@@ -219,7 +248,7 @@ contract B3TRGovernor is
     uint256[] memory values,
     bytes[] memory calldatas,
     bytes32 descriptionHash
-  ) public payable override whenNotPaused returns (uint256) {
+  ) public payable override whenNotPaused onlyRoleOrOpenRole(PROPOSAL_EXECUTOR_ROLE) returns (uint256) {
     return super.execute(targets, values, calldatas, descriptionHash);
   }
 
@@ -246,34 +275,27 @@ contract B3TRGovernor is
   /**
    * @dev Set the voter rewards contract
    *
-   * This function is only callable through goverance proposals
+   * This function is only callable through goverance proposals or by the CONTRACTS_ADDRESS_MANAGER_ROLE
    *
    * @param _voterRewards The new voter rewards contract
    */
-  function setVoterRewards(IVoterRewards _voterRewards) public override onlyGovernance {
+  function setVoterRewards(
+    IVoterRewards _voterRewards
+  ) public override onlyRoleOrGovernance(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     super.setVoterRewards(_voterRewards);
   }
 
   /**
    * @dev Set the xAllocationVoting contract
    *
-   * This function is only callable through goverance proposals
+   * This function is only callable through goverance proposals or by the CONTRACTS_ADDRESS_MANAGER_ROLE
    *
    * @param _xAllocationVoting The new xAllocationVoting contract
    */
-  function setXAllocationVoting(IXAllocationVotingGovernor _xAllocationVoting) public override onlyGovernance {
+  function setXAllocationVoting(
+    IXAllocationVotingGovernor _xAllocationVoting
+  ) public override onlyRoleOrGovernance(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     super.setXAllocationVoting(_xAllocationVoting);
-  }
-
-  /**
-   * @dev Set the B3TR contract
-   *
-   * This function is only callable through goverance proposals
-   *
-   * @param _b3tr The new B3TR contract
-   */
-  function setB3tr(IB3TR _b3tr) public override onlyGovernance {
-    super.setB3tr(_b3tr);
   }
 
   /**

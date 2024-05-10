@@ -21,7 +21,7 @@
 //                                   ##############
 //                                   #########
 
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.20;
 
 import "./x-allocation-voting-governance/XAllocationVotingGovernor.sol";
 import "./x-allocation-voting-governance/modules/RoundVotesCountingUpgradeable.sol";
@@ -65,6 +65,8 @@ contract XAllocationVoting is
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   /// @notice Role identifier for governance operations
   bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
+  /// @notice The role that can set the addresses of the contracts used by the VoterRewards contract.
+  bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
 
   /**
    * @notice Data for initializing the contract
@@ -76,6 +78,7 @@ contract XAllocationVoting is
    * @param emissions The address of the Emissions contract
    * @param admins The addresses of the admins
    * @param upgrader The address of the upgrader
+   * @param contractsAddressManager The address of the contracts address manager.
    * @param x2EarnAppsAddress The address of the X2EarnApps contract
    * @param baseAllocationPercentage A percentage of the total amount of allocations that should be equaly distributed to all apps in a round
    * @param appSharesCap Max amount of % of votes an app can get in a round
@@ -90,6 +93,7 @@ contract XAllocationVoting is
     IEmissions emissions;
     address[] admins;
     address upgrader;
+    address contractsAddressManager;
     IX2EarnApps x2EarnAppsAddress;
     uint256 baseAllocationPercentage;
     uint256 appSharesCap;
@@ -124,27 +128,28 @@ contract XAllocationVoting is
 
     _grantRole(UPGRADER_ROLE, data.upgrader);
     _grantRole(GOVERNANCE_ROLE, data.timeLock);
+    _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, data.contractsAddressManager);
   }
 
   // ---------- Setters ---------- //
   /**
    * @dev Set the address of the X2EarnApps contract
    */
-  function setX2EarnAppsAddress(IX2EarnApps newX2EarnApps) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setX2EarnAppsAddress(IX2EarnApps newX2EarnApps) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     _setX2EarnApps(newX2EarnApps);
   }
 
   /**
    * @dev Set the address of the Emissions contract
    */
-  function setEmissionsAddress(IEmissions newEmissions) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setEmissionsAddress(IEmissions newEmissions) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     _setEmissions(newEmissions);
   }
 
   /**
    * @dev Set the address of the VoterRewards contract
    */
-  function setVoterRewardsAddress(IVoterRewards newVoterRewards) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setVoterRewardsAddress(IVoterRewards newVoterRewards) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     _setVoterRewards(newVoterRewards);
   }
 

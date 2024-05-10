@@ -23,7 +23,8 @@
     "stop-solo": "docker compose down",
     "clean": "rm -rf dist artifacts typechain-types cache node_modules",
     "lint": "eslint . --ext .ts",
-    "format": "eslint . --ext .ts --fix"
+    "format": "eslint . --ext .ts --fix",
+    "generate-docs": "npx hardhat docgen"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",
@@ -52,6 +53,7 @@
     "hardhat-gas-reporter": "^1.0.8",
     "hardhat-ignore-warnings": "^0.2.11",
     "solidity-coverage": "^0.8.11",
+    "solidity-docgen": "^0.6.0-beta.36",
     "ts-node": ">=8.0.0",
     "typechain": "^8.1.0",
     "typescript": ">=4.5.0"

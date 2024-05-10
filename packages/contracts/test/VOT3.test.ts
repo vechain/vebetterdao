@@ -36,15 +36,20 @@ describe("VOT3", function () {
     it("Only admin should be able to pause and unpause VOT3 contract", async function () {
       const { vot3, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
 
+      expect(await vot3.hasRole(await vot3.PAUSER_ROLE(), owner.address)).to.eql(true)
       await vot3.connect(owner).pause()
       await vot3.connect(owner).unpause()
 
+      expect(await vot3.hasRole(await vot3.PAUSER_ROLE(), otherAccount.address)).to.eql(false)
       await catchRevert(vot3.connect(otherAccount).pause())
       await catchRevert(vot3.connect(otherAccount).unpause())
     })
 
     it("Should be able to pause and unpause VOT3 contract", async function () {
       const { vot3, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      expect(await vot3.hasRole(await vot3.PAUSER_ROLE(), owner.address)).to.eql(true)
+      expect(await vot3.hasRole(await vot3.PAUSER_ROLE(), otherAccount.address)).to.eql(false)
 
       await vot3.connect(owner).pause()
 
@@ -147,7 +152,7 @@ describe("VOT3", function () {
         forceDeploy: true,
       })
 
-      await expect(vot3.initialize(owner.address, await b3tr.getAddress())).to.be.reverted // already initialized
+      await expect(vot3.initialize(owner.address, owner.address, owner.address, await b3tr.getAddress())).to.be.reverted // already initialized
     })
 
     it("Should return correct version of the contract", async () => {

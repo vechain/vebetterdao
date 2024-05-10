@@ -307,18 +307,31 @@ describe("Treasury", () => {
     })
     it("can be initialized only once", async () => {
       await catchRevert(
-        treasuryProxy.initialize(owner.address, owner.address, owner.address, owner.address, owner.address, 1, 1, 1, 1),
+        treasuryProxy.initialize(
+          owner.address,
+          owner.address,
+          owner.address,
+          owner.address,
+          owner.address,
+          owner.address,
+          1,
+          1,
+          1,
+          1,
+        ),
       )
     })
   })
   describe("Pause", () => {
     it("should pause and unpause", async () => {
+      expect(await treasuryProxy.hasRole(await treasuryProxy.PAUSER_ROLE(), owner.address)).to.eql(true)
       await treasuryProxy.pause()
       expect(await treasuryProxy.paused()).to.eql(true)
       await treasuryProxy.unpause()
       expect(await treasuryProxy.paused()).to.eql(false)
     })
     it("should revert if not called by ADMIN_ROLE", async () => {
+      expect(await treasuryProxy.hasRole(await treasuryProxy.PAUSER_ROLE(), otherAccount.address)).to.eql(false)
       await catchRevert(treasuryProxy.connect(otherAccount).pause())
       await catchRevert(treasuryProxy.connect(otherAccount).unpause())
     })
@@ -339,6 +352,7 @@ describe("Treasury", () => {
         await info.b3tr.getAddress(),
         await info.vot3.getAddress(),
         await info.timeLock.getAddress(),
+        owner.address,
         owner.address,
         owner.address,
         config.TREASURY_TRANSFER_LIMIT_VET,

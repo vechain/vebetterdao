@@ -28,6 +28,7 @@
     "contracts:upload-galaxy-member-metadata": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run upload-galaxy-member-metadata --filter=contracts",
     "contracts:generate-xapp-metadata": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run generate-xapp-metadata --filter=contracts",
     "contracts:upload-xapp-metadata": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run upload-xapp-metadata --filter=contracts",
+    "contracts:generate-docs": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run generate-docs --filter=contracts",
     "solo-up": "make solo-up",
     "playwright:e2e": "dotenv -v NEXT_PUBLIC_APP_ENV=e2e -- turbo run playwright:e2e"
   },
