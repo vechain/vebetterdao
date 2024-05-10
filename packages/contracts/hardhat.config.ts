@@ -8,6 +8,7 @@ import "hardhat-contract-sizer"
 import "hardhat-ignore-warnings"
 import { getConfig } from "@repo/config"
 import "solidity-coverage"
+import "solidity-docgen"
 
 const config: HardhatUserConfig = {
   solidity: "0.8.20",
@@ -81,6 +82,9 @@ module.exports = {
       restful: true,
       gas: 10000000,
     },
+  },
+  docgen: {
+    pages: "files",
   },
 }
 

@@ -55,8 +55,6 @@ abstract contract GovernorExternalContractsUpgradeable is Initializable, Governo
   event VoterRewardsSet(address oldContractAddress, address newContractAddress);
   // @dev Emit when the XAllocationVotingGovernor contract is set
   event XAllocationVotingSet(address oldContractAddress, address newContractAddress);
-  // @dev Emit when the B3TR contract is set
-  event B3TRSet(address oldContractAddress, address newContractAddress);
 
   /**
    * @dev Initializes the contract
@@ -106,17 +104,6 @@ abstract contract GovernorExternalContractsUpgradeable is Initializable, Governo
     _setXAllocationVoting(newXAllocationVoting);
   }
 
-  /**
-   * @dev Set the B3TR contract
-   *
-   * @param newB3trContract The new B3TR contract
-   *
-   * Emits a {B3TRSet} event
-   */
-  function setB3tr(IB3TR newB3trContract) public virtual {
-    _setB3tr(newB3trContract);
-  }
-
   // ------- Internal Functions ------- //
   /**
    * @dev Internal function to set the voter rewards contract
@@ -144,20 +131,6 @@ abstract contract GovernorExternalContractsUpgradeable is Initializable, Governo
     $.xAllocationVoting = newXAllocationVoting;
 
     emit XAllocationVotingSet(address($.xAllocationVoting), address(newXAllocationVoting));
-  }
-
-  /**
-   * @dev Internal function to set the B3TR contract
-   *
-   * @param newB3trContract The new B3TR contract
-   *
-   * Emits a {B3TRSet} event
-   */
-  function _setB3tr(IB3TR newB3trContract) internal {
-    GovernorExternalContractsStorage storage $ = _getGovernorExternalContractsStorage();
-    $.b3tr = newB3trContract;
-
-    emit B3TRSet(address($.b3tr), address(newB3trContract));
   }
 
   // ------- Getters ------- //

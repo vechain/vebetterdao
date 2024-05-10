@@ -355,49 +355,6 @@ describe("X-Allocation Pool", async function () {
       })
     })
 
-    describe("B3TR address", async function () {
-      it("Admin with CONTRACTS_ADDRESS_MANAGER_ROLE can set b3tr contract address", async function () {
-        const { xAllocationPool, owner, otherAccount } = await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
-
-        expect(
-          await xAllocationPool.hasRole(await xAllocationPool.CONTRACTS_ADDRESS_MANAGER_ROLE(), owner.address),
-        ).to.eql(true)
-
-        const newB3trAddress = otherAccount.address
-
-        await xAllocationPool.connect(owner).setB3trAddress(newB3trAddress)
-
-        const b3trAddress = await xAllocationPool.b3tr()
-
-        expect(b3trAddress).to.eql(newB3trAddress)
-      })
-
-      it("Only admin with CONTRACTS_ADDRESS_MANAGER_ROLE can set b3tr contract address", async function () {
-        const { xAllocationPool, otherAccount } = await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
-
-        expect(
-          await xAllocationPool.hasRole(await xAllocationPool.CONTRACTS_ADDRESS_MANAGER_ROLE(), otherAccount.address),
-        ).to.eql(false)
-
-        const newB3trAddress = otherAccount.address
-
-        await expect(xAllocationPool.connect(otherAccount).setB3trAddress(newB3trAddress)).to.be.reverted
-      })
-
-      it("Cannot set b3tr contract address to zero address", async function () {
-        const { xAllocationPool, owner } = await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
-
-        const newB3trAddress = ZERO_ADDRESS
-
-        await expect(xAllocationPool.connect(owner).setB3trAddress(newB3trAddress)).to.be.reverted
-      })
-    })
     describe("x2EarnApps address", async function () {
       it("Admin with CONTRACTS_ADDRESS_MANAGER_ROLE can set x2EarnApps contract address", async function () {
         const { xAllocationPool, owner, otherAccount } = await getOrDeployContractInstances({

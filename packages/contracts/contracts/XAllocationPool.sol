@@ -21,7 +21,7 @@
 //                                   ##############
 //                                   #########
 
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.20;
 
 import { IXAllocationPool } from "./interfaces/IXAllocationPool.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
@@ -127,8 +127,6 @@ contract XAllocationPool is
   event TreasuryContractSet(address oldContractAddress, address newContractAddress);
   // @dev Emit when the x2EarnApps contract is set
   event X2EarnAppsContractSet(address oldContractAddress, address newContractAddress);
-  // @dev Emit when the B3TR contract is set
-  event B3trContractSet(address oldContractAddress, address newContractAddress);
 
   // ---------- Authorizers ---------- //
 
@@ -170,18 +168,6 @@ contract XAllocationPool is
     $.treasury = ITreasury(treasury_);
 
     emit TreasuryContractSet(address($.treasury), treasury_);
-  }
-
-  /**
-   * @dev Set the address of the B3TR token contract.
-   */
-  function setB3trAddress(address b3tr_) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
-    require(b3tr_ != address(0), "XAllocationPool: new b3tr is the zero address");
-
-    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
-    $.b3tr = IB3TR(b3tr_);
-
-    emit B3trContractSet(address($.b3tr), b3tr_);
   }
 
   /**
