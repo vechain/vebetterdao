@@ -14,7 +14,7 @@ resource "aws_service_discovery_private_dns_namespace" "ns" {
 
 ##thor-solo ecs service creation
 module "thor_solo_node" {
-  source              = "git@github.com:vechain/devops.git//ecs"
+  source              = "git@github.com:vechain/devops.git//ecs?ref=main"
   vpc_id              = local.config.vpc_id
   public_subnets      = local.config.public_subnets
   private_subnets     = local.config.private_subnets
