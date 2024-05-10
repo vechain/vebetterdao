@@ -128,13 +128,16 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        status={mutationData.status}
         confirmationTitle={swapText}
         successTitle={"Swap Completed!"}
+        status={mutationData.error ? "error" : mutationData.status}
+        errorDescription={mutationData.error?.reason}
+        errorTitle={mutationData.error ? "Error swapping" : undefined}
+        showTryAgainButton
+        onTryAgain={handleStake}
+        pendingTitle="Swapping..."
         showSocialButtons
         socialDescriptionEncoded="%F0%9F%94%84%20Just%20swapped%20between%20B3TR%20and%20VOT3%20on%20%23VeBetterDAO%21%20%0A%0A%F0%9F%8C%B1%20Explore%20and%20join%20us%20at%20https%3A%2F%2Fvebetterdao.org.%0A%0A%23VeBetterDAO%20%23Vechain"
-        onTryAgain={handleStake}
-        showTryAgainButton
         showExplorerButton
         txId={mutationData.txReceipt?.meta.txID ?? mutationData.sendTransactionTx?.txid}
       />
