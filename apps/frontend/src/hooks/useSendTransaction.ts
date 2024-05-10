@@ -1,5 +1,4 @@
 import { useTxReceipt } from "@/api"
-import { useToast } from "@chakra-ui/react"
 import { UseMutateFunction, useMutation } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 import { useCallback, useEffect, useState } from "react"
@@ -10,8 +9,15 @@ import { useCallback, useEffect, useState } from "react"
  * waitingConfirmation: the transaction has been sent and we're waiting for the transaction to be confirmed by the chain
  * success: the transaction has been confirmed by the chain
  * error: the transaction has failed
+ * unknown: the transaction receipt has failed to load
  */
-export type TransactionStatus = "ready" | "pending" | "waitingConfirmation" | "success" | "error"
+
+export type TransactionStatus = "ready" | "pending" | "waitingConfirmation" | "success" | "error" | "unknown"
+
+export type TransactionStatusErrorType = {
+  type: "SendTransactionError" | "TxReceiptError" | "RevertReasonError"
+  reason?: string
+}
 
 /**
  * An enhanced clause with a comment and an abi
@@ -57,6 +63,7 @@ export type UseSendTransactionReturnValue = {
   txReceipt: Connex.Thor.Transaction.Receipt | null | undefined
   status: TransactionStatus
   resetStatus: () => void
+  error?: TransactionStatusErrorType
 }
 
 /**
@@ -72,7 +79,6 @@ export const useSendTransaction = ({
   onTxConfirmed,
   onTxFailedOrCancelled,
 }: UseSendTransactionProps): UseSendTransactionReturnValue => {
-  const toast = useToast()
   const { vendor, thor } = useConnex()
 
   async function convertClauses(
@@ -84,22 +90,25 @@ export const useSendTransaction = ({
     return clauses
   }
 
-  const sendTransaction = async () => {
+  const sendTransaction = useCallback(async () => {
     if (!clauses) throw new Error("clauses is required")
     return await convertClauses(clauses).then(clauses => {
       if (signerAccount) return vendor.sign("tx", clauses).signer(signerAccount).request()
       return vendor.sign("tx", clauses).request()
     })
-  }
+  }, [clauses, vendor, signerAccount])
 
   /**
    * Send a transaction with the given clauses (in case you need to pass data to build the clauses to mutate directly)
    * @returns see {@link UseSendTransactionReturnValue}
    */
-  const sendTransactionWithClauses = async (clauses: EnhancedClause[]) => {
-    if (signerAccount) return vendor.sign("tx", clauses).signer(signerAccount).request()
-    return vendor.sign("tx", clauses).request()
-  }
+  const sendTransactionWithClauses = useCallback(
+    async (clauses: EnhancedClause[]) => {
+      if (signerAccount) return vendor.sign("tx", clauses).signer(signerAccount).request()
+      return vendor.sign("tx", clauses).request()
+    },
+    [vendor, signerAccount],
+  )
 
   const sendTransactionAdapter = useCallback(
     async (_clauses?: EnhancedClause[]) => {
@@ -119,15 +128,6 @@ export const useSendTransaction = ({
     mutationFn: sendTransactionAdapter,
     onError: error => {
       console.error(error)
-      // toast({
-      //   title: "Error while signing the transaction.",
-      //   description: `${error.message}`,
-      //   status: "error",
-      //   position: "bottom-left",
-      //   duration: 5000,
-      //   isClosable: true,
-      // })
-
       onTxFailedOrCancelled?.()
     },
   })
@@ -138,41 +138,26 @@ export const useSendTransaction = ({
     error: txReceiptError,
   } = useTxReceipt(sendTransactionTx?.txid)
 
-  const explainTxRevertReason = async (txReceipt: Connex.Thor.Transaction.Receipt) => {
-    if (!txReceipt.reverted) return
-    const transactionData = await thor.transaction(txReceipt.meta.txID).get()
-    if (!transactionData) return
+  const explainTxRevertReason = useCallback(
+    async (txReceipt: Connex.Thor.Transaction.Receipt) => {
+      if (!txReceipt.reverted) return
+      const transactionData = await thor.transaction(txReceipt.meta.txID).get()
+      if (!transactionData) return
 
-    const explained = await thor.explain(transactionData.clauses).caller(transactionData.origin).execute()
-    console.log("explained", explained)
-    return explained
-  }
+      const explained = await thor.explain(transactionData.clauses).caller(transactionData.origin).execute()
+      console.log("explained", explained)
+      return explained
+    },
+    [thor],
+  )
 
-  useEffect(() => {
-    console.log("txReceipt", txReceipt)
-    if (!txReceipt) return
-    if (txReceipt.reverted) {
-      ;(async () => {
-        const revertReason = await explainTxRevertReason(txReceipt)
-        console.error("revertReason", revertReason)
-        // const moreThanOneReverted = (revertReason?.filter(receipt => receipt.reverted) ?? []).length > 0
-        // toast({
-        //   title: "Transaction reverted.",
-        //   description: moreThanOneReverted
-        //     ? "More than one tx reverted"
-        //     : revertReason?.[0]?.revertReason ?? "No revert reason available",
-        //   status: "error",
-        //   position: "bottom-left",
-        //   duration: 5000,
-        //   isClosable: true,
-        // })
-      })()
-
-      return
-    }
-    onTxConfirmed?.()
-  }, [txReceipt, onTxConfirmed])
-  // do not add onTxConfirmed to the dependencies array, it will cause toast notifications
+  /**
+   * General error that is set when
+   * - unable to send the tx
+   * - unable to fetch the receipt
+   * - the transaction is reverted
+   */
+  const [error, setError] = useState<TransactionStatusErrorType>()
 
   /**
    * TODO: In case of errors, call the callback
@@ -187,14 +172,56 @@ export const useSendTransaction = ({
 
     if (isTxReceiptLoading) return setStatus("waitingConfirmation")
 
-    if (sendTransactionError || txReceiptError || txReceipt?.reverted) return setStatus("error")
+    if (sendTransactionError) {
+      setError({
+        type: "SendTransactionError",
+        reason: sendTransactionError.message,
+      })
+      return setStatus("error")
+    }
 
-    if (txReceipt) return setStatus("success")
+    if (txReceiptError) {
+      setStatus("error")
+      setError({
+        type: "TxReceiptError",
+        reason: txReceiptError.message,
+      })
+      return
+    }
+
+    if (txReceipt) {
+      if (txReceipt.reverted) {
+        ;(async () => {
+          const revertReason = await explainTxRevertReason(txReceipt)
+          setError({
+            type: "RevertReasonError",
+            reason: revertReason?.[0]?.revertReason ?? "Transaction reverted",
+          })
+          setStatus("error")
+        })()
+
+        return
+      }
+      setStatus("success")
+      onTxConfirmed?.()
+      return
+    }
 
     return setStatus("ready")
-  }, [sendTransactionPending, isTxReceiptLoading, sendTransactionError, txReceiptError, txReceipt])
+  }, [
+    sendTransactionPending,
+    isTxReceiptLoading,
+    sendTransactionError,
+    txReceiptError,
+    txReceipt,
+    onTxConfirmed,
+    explainTxRevertReason,
+  ])
 
-  const resetStatus = useCallback(() => setStatus("ready"), [])
+  const resetStatus = useCallback(() => {
+    setStatus("ready")
+    setError(undefined)
+  }, [])
 
   return {
     sendTransaction: runSendTransaction,
@@ -206,5 +233,6 @@ export const useSendTransaction = ({
     txReceipt,
     status,
     resetStatus,
+    error,
   }
 }
