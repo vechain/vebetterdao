@@ -8,6 +8,7 @@ import { useProposalVoteDates } from "./useProposalVoteDates"
 import { useProposalUserDeposit } from "./useProposalUserDeposit"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useIsDepositReached } from "./useIsDepositReached"
+import { useIsProposalQuorumReached } from "./useIsProposalQuorumReached"
 
 export const useProposal = (proposalId: string) => {
   const { account } = useWallet()
@@ -17,6 +18,8 @@ export const useProposal = (proposalId: string) => {
   const proposalDeposits = useProposalDeposits(proposalId)
   const proposalUserDeposit = useProposalUserDeposit(proposalId, account || "")
   const isDepositReached = useIsDepositReached(proposalId)
+  const isQuorumReached = useIsProposalQuorumReached(proposalId)
+
   const calls = [
     proposalState,
     proposalVotes,
@@ -24,6 +27,7 @@ export const useProposal = (proposalId: string) => {
     proposalDeposits,
     proposalUserDeposit,
     isDepositReached,
+    isQuorumReached,
   ]
 
   const { votingStartDate, isVotingStartDateLoading, votingEndDate, isVotingEndDateLoading } =
@@ -71,16 +75,11 @@ export const useProposal = (proposalId: string) => {
       againstPercentage,
       abstainPercentage,
       isVotesLoading: proposalVotes.isLoading,
+      isQuorumReached: isQuorumReached.data,
+      isQuorumReachedLoading: isQuorumReached.isLoading,
     }
 
-    const mock = {
-      // state: ProposalState.Active,
-      // isDepositReached: true,
-      // isStateLoading: false,
-      // isVotesLoading: false,
-      // isTitleLoading: false,
-      // isDescriptionLoading: false,
-    }
+    const mock = {}
 
     return { ...result, ...mock }
   }, [
@@ -100,7 +99,6 @@ export const useProposal = (proposalId: string) => {
   return {
     proposalState,
     proposalVotes,
-    //proposalQuorum,
     proposalCreatedEvent,
     proposalDeposits,
     proposal,

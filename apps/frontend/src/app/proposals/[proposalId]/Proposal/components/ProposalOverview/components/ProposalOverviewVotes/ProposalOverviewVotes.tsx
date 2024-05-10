@@ -65,10 +65,16 @@ export const ProposalOverviewVotes = () => {
     case ProposalState.Active:
     case ProposalState.Succeeded:
     case ProposalState.Canceled:
+    case ProposalState.Defeated:
+    case ProposalState.Queued:
+    case ProposalState.Executed:
       const borderColorMap = {
         [ProposalState.Active]: undefined,
         [ProposalState.Canceled]: "#D23F63",
+        [ProposalState.Defeated]: "#D23F63",
         [ProposalState.Succeeded]: "#38BF66",
+        [ProposalState.Queued]: "#38BF66",
+        [ProposalState.Executed]: "#38BF66",
       }
       return (
         <Flex

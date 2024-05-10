@@ -7,22 +7,24 @@ export const ProposalVotesResults = () => {
 
   switch (proposal.state) {
     case ProposalState.Defeated:
-      return (
-        <HStack gap={1}>
-          <Text fontSize="14px">The proposal is being</Text>
-          <Text fontSize="14px" color="#D23F63">
-            rejected
+      if (!proposal.isQuorumReached)
+        return (
+          <Text fontSize="14px" color="#D23F63" fontWeight={600}>
+            Quorum was not reached
           </Text>
-        </HStack>
+        )
+      return (
+        <Text fontSize="14px" color="#D23F63" fontWeight={600}>
+          Proposal rejected by voting
+        </Text>
       )
     case ProposalState.Succeeded:
+    case ProposalState.Queued:
+    case ProposalState.Executed:
       return (
-        <HStack gap={1}>
-          <Text fontSize="14px">The proposal is being</Text>
-          <Text fontSize="14px" color="#38BF66">
-            approved
-          </Text>
-        </HStack>
+        <Text fontSize="14px" color="#38BF66" fontWeight={600}>
+          Proposal approved by voting
+        </Text>
       )
     case ProposalState.Canceled:
       return (
@@ -33,14 +35,15 @@ export const ProposalVotesResults = () => {
           </Text>
         </HStack>
       )
-    default:
-      return (
-        <HStack>
-          <UilExclamationCircle />
-          <Text fontSize="14px" color="#6A6A6A">
-            Quorum not reached yet
-          </Text>
-        </HStack>
-      )
+    case ProposalState.Active:
+      if (!proposal.isQuorumReached)
+        return (
+          <HStack>
+            <UilExclamationCircle />
+            <Text fontSize="14px" color="#6A6A6A">
+              Quorum not reached yet
+            </Text>
+          </HStack>
+        )
   }
 }

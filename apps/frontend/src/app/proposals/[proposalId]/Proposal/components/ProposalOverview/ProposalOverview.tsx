@@ -45,7 +45,7 @@ export const ProposalOverview = () => {
                 {proposal.title}
               </Heading>
             </Skeleton>
-            <Skeleton isLoaded={!proposal.isStateLoading}>
+            <Skeleton isLoaded={!proposal.isStateLoading} alignSelf={"flex-start"}>
               <ProposalOverviewStatusLabel />
             </Skeleton>
             <Spacer h={"24px"} />
