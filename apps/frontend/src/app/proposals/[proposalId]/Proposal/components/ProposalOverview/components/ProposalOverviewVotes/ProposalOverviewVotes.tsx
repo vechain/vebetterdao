@@ -24,20 +24,6 @@ export const ProposalOverviewVotes = () => {
       return (
         <Flex h={"full"} bg={"#F8F8F8"} rounded="8px" justify={"center"} alignItems={"center"} flex={1.5}>
           <VStack p="32px">
-            <ExclamationTriangle />
-            <Text color="#252525" fontWeight={"500"} textAlign={"center"} fontSize="20px">
-              This proposal must get the support of the community before the round starts
-            </Text>
-            <Text color="#252525" fontWeight={"700"} textAlign={"center"} fontSize="36px">
-              {timestampToTimeLeft(proposal.votingStartDate)}
-            </Text>
-          </VStack>
-        </Flex>
-      )
-    case ProposalState.Defeated:
-      return (
-        <Flex h={"full"} bg={"#F8F8F8"} rounded="8px" justify={"center"} alignItems={"center"} flex={1.5}>
-          <VStack p="32px">
             <ExclamationTriangle color="#757575" />
             <Text color="#252525" fontWeight={"500"} textAlign={"center"} fontSize="20px">
               The community has not supported this proposal and was canceled
@@ -47,12 +33,27 @@ export const ProposalOverviewVotes = () => {
       )
 
     case ProposalState.Pending:
+      if (proposal.isDepositReached) {
+        return (
+          <Flex h={"full"} bg={"#F8F8F8"} rounded="8px" justify={"center"} alignItems={"center"} flex={1.5}>
+            <VStack p="32px">
+              <Image w="88px" h="88px" color="#004CFC" src="/images/vote.svg" />
+              <Text color="#252525" fontWeight={"500"} textAlign={"center"} fontSize="20px">
+                This proposal will be voted in
+              </Text>
+              <Text color="#252525" fontWeight={"700"} textAlign={"center"} fontSize="36px">
+                {timestampToTimeLeft(proposal.votingStartDate)}
+              </Text>
+            </VStack>
+          </Flex>
+        )
+      }
       return (
         <Flex h={"full"} bg={"#F8F8F8"} rounded="8px" justify={"center"} alignItems={"center"} flex={1.5}>
           <VStack p="32px">
-            <Image w="88px" h="88px" color="#004CFC" src="/images/vote.svg" />
+            <ExclamationTriangle />
             <Text color="#252525" fontWeight={"500"} textAlign={"center"} fontSize="20px">
-              This proposal will be voted in
+              This proposal must get the support of the community before the round starts
             </Text>
             <Text color="#252525" fontWeight={"700"} textAlign={"center"} fontSize="36px">
               {timestampToTimeLeft(proposal.votingStartDate)}

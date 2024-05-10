@@ -19,23 +19,25 @@ export const ProposalOverviewTime = () => {
           </HStack>
         </VStack>
       )
-    case ProposalState.DepositNotMet:
+
+    case ProposalState.Pending:
+      if (proposal.isDepositReached) {
+        return (
+          <VStack alignItems={"stretch"}>
+            <Text fontWeight={"400"} color="#6A6A6A">
+              Starts in
+            </Text>
+            <HStack color="#004CFC">
+              <UilClockEight size="20px" />
+              <Text fontWeight={600}>{timestampToTimeLeftCompact(proposal.votingStartDate)}</Text>
+            </HStack>
+          </VStack>
+        )
+      }
       return (
         <VStack alignItems={"stretch"}>
           <Text fontWeight={"400"}>Starts in</Text>
           <HStack>
-            <UilClockEight size="20px" />
-            <Text fontWeight={600}>{timestampToTimeLeftCompact(proposal.votingStartDate)}</Text>
-          </HStack>
-        </VStack>
-      )
-    case ProposalState.Pending:
-      return (
-        <VStack alignItems={"stretch"}>
-          <Text fontWeight={"400"} color="#6A6A6A">
-            Starts in
-          </Text>
-          <HStack color="#004CFC">
             <UilClockEight size="20px" />
             <Text fontWeight={600}>{timestampToTimeLeftCompact(proposal.votingStartDate)}</Text>
           </HStack>

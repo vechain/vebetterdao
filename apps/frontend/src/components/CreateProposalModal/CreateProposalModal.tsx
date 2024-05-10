@@ -210,8 +210,8 @@ export const CreateProposalModalForm: React.FC<CreateProposalModalFormProps> = (
       } else {
         return (
           <Heading size="xs" color="orange">
-            You have not enough balance or delegated VOT3. You need to have at least {depositThreshold} VOT3 to create
-            a proposal
+            You have not enough balance or delegated VOT3. You need to have at least {depositThreshold} VOT3 to create a
+            proposal
           </Heading>
         )
       }
@@ -223,7 +223,6 @@ export const CreateProposalModalForm: React.FC<CreateProposalModalFormProps> = (
   const canCreateProposal = useMemo(() => {
     if (!votes || !vot3Balance || !depositThreshold) return false
 
-    if (Number(votes) < Number(depositThreshold)) return false
     return true
   }, [votes, vot3Balance, depositThreshold])
 

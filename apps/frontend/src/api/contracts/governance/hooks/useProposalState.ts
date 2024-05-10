@@ -13,7 +13,7 @@ export enum ProposalState {
   Defeated, // didn't reached the quorum || unsuccessful votes
   Succeeded, // when the proposal has been voted for and reached the quorum
   Queued, // in queue to be executed
-  Expired, //
+  Expired, // almost not used TODO: check if we need to remove it
   Executed, // executed by the dao
   DepositNotMet, // it's the round and the community didn't supported the proposal yet
 }

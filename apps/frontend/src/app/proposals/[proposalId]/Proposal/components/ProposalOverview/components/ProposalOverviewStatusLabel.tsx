@@ -16,22 +16,13 @@ export const ProposalOverviewStatusLabel = () => {
           </Text>
         </HStack>
       )
-    case ProposalState.DepositNotMet:
-      return (
-        <HStack>
-          <Arm />
-          <Text fontWeight={"600"} color="#F29B32">
-            Looking for support
-          </Text>
-        </HStack>
-      )
     case ProposalState.Canceled:
       return (
         <Text fontWeight={"600"} color="#D23F63">
           Canceled
         </Text>
       )
-    case ProposalState.Defeated:
+    case ProposalState.DepositNotMet:
       return (
         <HStack>
           <Arm color="#D23F63" />
@@ -41,14 +32,25 @@ export const ProposalOverviewStatusLabel = () => {
         </HStack>
       )
     case ProposalState.Pending:
+      if (proposal.isDepositReached) {
+        return (
+          <HStack>
+            <UilClockEight color="#004CFC" size="20px" />
+            <Text fontWeight={"600"} color="#004CFC">
+              Waiting for the round to start
+            </Text>
+          </HStack>
+        )
+      }
       return (
         <HStack>
-          <UilClockEight color="#004CFC" size="20px" />
-          <Text fontWeight={"600"} color="#004CFC">
-            Waiting for the round to start
+          <Arm />
+          <Text fontWeight={"600"} color="#F29B32">
+            Looking for support
           </Text>
         </HStack>
       )
+
     case ProposalState.Active:
       return (
         <HStack alignSelf={"flex-start"}>

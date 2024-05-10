@@ -1,6 +1,6 @@
 import { useCurrentProposal } from "@/api"
 import { HStack, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
-import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
+import { UilArrowUpRight, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 
 export const ProposalYourVote = () => {
   const { proposal } = useCurrentProposal()
@@ -19,6 +19,7 @@ export const ProposalYourVote = () => {
           <Text color="#B59525" fontWeight={600}>
             Abstain
           </Text>
+          <UilArrowUpRight size="20px" color="#004CFC" />
         </HStack>
       </Skeleton>
     </VStack>
@@ -38,6 +39,7 @@ export const ProposalYourVote = () => {
           <Text color="#D23F63" fontWeight={600}>
             Against
           </Text>
+          <UilArrowUpRight size="20px" color="#004CFC" />
         </HStack>
       </Skeleton>
     </VStack>
@@ -57,6 +59,7 @@ export const ProposalYourVote = () => {
           <Text color="#38BF66" fontWeight={600}>
             For
           </Text>
+          <UilArrowUpRight size="20px" color="#004CFC" />
         </HStack>
       </Skeleton>
     </VStack>
