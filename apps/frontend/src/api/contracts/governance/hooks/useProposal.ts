@@ -55,9 +55,7 @@ export const useProposal = (proposalId: string) => {
         isVotesLoading: proposalVotes.isLoading,
       }
 
-      const mock = {
-        state: ProposalState.DepositNotMet,
-      }
+      const mock = {}
 
       return { ...result, ...mock }
     },

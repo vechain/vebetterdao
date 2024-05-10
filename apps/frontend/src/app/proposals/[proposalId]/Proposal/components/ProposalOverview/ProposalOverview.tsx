@@ -29,12 +29,16 @@ export const ProposalOverview = () => {
       <Flex gap="48px" flexDir={["column", "column", "row"]}>
         <VStack gap={"20px"} alignItems={"stretch"} flex={3} justify={"space-between"}>
           <VStack alignItems={"stretch"}>
-            <Text fontWeight={"600"} color="#6A6A6A">
-              ROUND
+            <HStack gap={1}>
+              <Text fontWeight={"600"} color="#6A6A6A">
+                ROUND
+              </Text>
               <Skeleton isLoaded={!proposal.isRoundIdVoteStartLoading} display={"inline-flex"} ml={1}>
-                #{proposal.roundIdVoteStart}
+                <Text fontWeight={"600"} color="#6A6A6A">
+                  #{proposal.roundIdVoteStart}
+                </Text>
               </Skeleton>
-            </Text>
+            </HStack>
             <Skeleton isLoaded={!proposal.isTitleLoading}>
               <Heading fontWeight={700} fontSize="36px" color="#252525">
                 {proposal.title}
