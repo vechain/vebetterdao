@@ -1,28 +1,20 @@
 import { useMemo } from "react"
 import { useProposalCreatedEvent } from "./useProposalCreatedEvent"
-import { useProposalDeadline } from "./useProposalDeadline"
-import { useProposalSnapshot } from "./useProposalSnapshot"
 import { ProposalState, useProposalState } from "./useProposalState"
 import { useProposalVotes } from "./useProposalVotes"
 import { useParams } from "next/navigation"
 import { useProposalDeposits } from "./useGetProposalDeposit"
+import { useProposalVoteDates } from "./useProposalVoteDates"
 
 export const useProposal = (proposalId: string) => {
   const proposalState = useProposalState(proposalId)
-  const proposalSnapshot = useProposalSnapshot(proposalId)
   const proposalVotes = useProposalVotes(proposalId)
-  const proposalDeadline = useProposalDeadline(proposalId)
   const proposalCreatedEvent = useProposalCreatedEvent(proposalId)
   const proposalDeposits = useProposalDeposits(proposalId)
+  const { votingStartDate, isVotingStartDateLoading, votingEndDate, isVotingEndDateLoading } =
+    useProposalVoteDates(proposalId)
 
-  const calls = [
-    proposalState,
-    proposalSnapshot,
-    proposalVotes,
-    proposalDeadline,
-    proposalCreatedEvent,
-    proposalDeposits,
-  ]
+  const calls = [proposalState, proposalVotes, proposalCreatedEvent, proposalDeposits]
 
   // remap main info
   const proposal = useMemo(
@@ -44,8 +36,10 @@ export const useProposal = (proposalId: string) => {
         isProposerLoading: proposalCreatedEvent.isLoading,
         roundIdVoteStart: proposalCreatedEvent.data?.roundIdVoteStart,
         isRoundIdVoteStartLoading: proposalCreatedEvent.isLoading,
-        startDate: new Date().getTime() + 1000 * 60 * 60 * 24 * 3, // TODO: stimare
-        endDate: new Date().getTime() + 1000 * 60 * 60 * 24 * 4, // TODO: stimare
+        votingStartDate,
+        isVotingStartDateLoading,
+        votingEndDate,
+        isVotingEndDateLoading,
         deposited: proposalDeposits?.data || 0, // TODO: understand if it is correct
         yourSupport: proposalDeposits?.data || 0, // TODO: understand if it is correct
         depositThreshold: proposalCreatedEvent.data?.depositThreshold, // not used right now, remove if not needed
@@ -61,7 +55,9 @@ export const useProposal = (proposalId: string) => {
         isVotesLoading: proposalVotes.isLoading,
       }
 
-      const mock = {}
+      const mock = {
+        state: ProposalState.DepositNotMet,
+      }
 
       return { ...result, ...mock }
     },
@@ -77,13 +73,11 @@ export const useProposal = (proposalId: string) => {
     () => calls.find(call => call.error)?.error || null,
     calls.map(call => call.error),
   )
-  if (error) console.error("useProposal", error)
+  // if (error) console.error("useProposal", error)
 
   return {
     proposalState,
-    proposalSnapshot,
     proposalVotes,
-    proposalDeadline,
     //proposalQuorum,
     proposalCreatedEvent,
     proposalDeposits,

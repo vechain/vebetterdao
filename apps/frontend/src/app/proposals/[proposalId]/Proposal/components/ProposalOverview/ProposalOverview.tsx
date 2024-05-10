@@ -19,6 +19,7 @@ import { UilShareAlt } from "@iconscout/react-unicons"
 import { ProposalOverviewTime } from "./components/ProposalOverviewTime"
 import { ProposalOverviewStatusLabel } from "./components/ProposalOverviewStatusLabel"
 import { ProposalOverviewSupport } from "./components/ProposalOverviewSupport"
+import { ProposalYourVote } from "./components/ProposalYourVote"
 
 export const ProposalOverview = () => {
   const { proposal } = useCurrentProposal()
@@ -61,6 +62,7 @@ export const ProposalOverview = () => {
                   </HStack>
                 </Skeleton>
               </VStack>
+              <ProposalYourVote />
               <ProposalOverviewTime />
               <ProposalOverviewSupport />
               <IconButton

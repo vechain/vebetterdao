@@ -6,17 +6,14 @@ const b3trGovernorInterface = B3TRGovernor__factory.createInterface()
 
 const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
 
-// TODO: questions
-// a proposal can get support from the community during the pending period?
-
 export enum ProposalState {
-  Pending, // when the round is before the vote round
+  Pending, // when the round is before the vote round and the community can support
   Active, // it's the round and the community already supported the proposal, you can vote
-  Canceled, // canceled by the dao
+  Canceled, // canceled by the admin dao or the user but before it becomes active
   Defeated, // didn't reached the quorum || unsuccessful votes
-  Succeeded, // ??
-  Queued, // ??
-  Expired, // ??
+  Succeeded, // when the proposal has been voted for and reached the quorum
+  Queued, // in queue to be executed
+  Expired, //
   Executed, // executed by the dao
   DepositNotMet, // it's the round and the community didn't supported the proposal yet
 }

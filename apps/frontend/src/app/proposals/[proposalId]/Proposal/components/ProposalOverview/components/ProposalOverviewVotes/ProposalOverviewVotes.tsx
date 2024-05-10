@@ -5,9 +5,19 @@ import { ProposalVotesProgressBar } from "./components/ProposalVotesProgressBar"
 import { ProposalVotesResults } from "./components/ProposalVotesResults"
 import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { ExclamationTriangle } from "@/components"
+import { useEffect, useState } from "react"
 
 export const ProposalOverviewVotes = () => {
   const { proposal } = useCurrentProposal()
+
+  const [_, setSeconds] = useState(0)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSeconds(s => s + 1)
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [])
 
   switch (proposal.state) {
     case ProposalState.DepositNotMet:
@@ -19,7 +29,7 @@ export const ProposalOverviewVotes = () => {
               This proposal must get the support of the community before the round starts
             </Text>
             <Text color="#252525" fontWeight={"700"} textAlign={"center"} fontSize="36px">
-              {timestampToTimeLeft(proposal.startDate)}
+              {timestampToTimeLeft(proposal.votingStartDate)}
             </Text>
           </VStack>
         </Flex>
@@ -45,7 +55,7 @@ export const ProposalOverviewVotes = () => {
               This proposal will be voted in
             </Text>
             <Text color="#252525" fontWeight={"700"} textAlign={"center"} fontSize="36px">
-              {timestampToTimeLeft(proposal.startDate)}
+              {timestampToTimeLeft(proposal.votingStartDate)}
             </Text>
           </VStack>
         </Flex>

@@ -15,7 +15,7 @@ export const ProposalOverviewTime = () => {
           <Text fontWeight={"400"}>Finished</Text>
           <HStack>
             <UilClockEight />
-            <Text>{timestampToTimeLeftCompact(proposal.endDate)} ago</Text>
+            <Text>{timestampToTimeLeftCompact(proposal.votingEndDate)} ago</Text>
           </HStack>
         </VStack>
       )
@@ -25,7 +25,7 @@ export const ProposalOverviewTime = () => {
           <Text fontWeight={"400"}>Starts in</Text>
           <HStack>
             <UilClockEight size="20px" />
-            <Text fontWeight={600}>{timestampToTimeLeftCompact(proposal.startDate)}</Text>
+            <Text fontWeight={600}>{timestampToTimeLeftCompact(proposal.votingStartDate)}</Text>
           </HStack>
         </VStack>
       )
@@ -37,7 +37,7 @@ export const ProposalOverviewTime = () => {
           </Text>
           <HStack color="#004CFC">
             <UilClockEight size="20px" />
-            <Text fontWeight={600}>{timestampToTimeLeftCompact(proposal.startDate)}</Text>
+            <Text fontWeight={600}>{timestampToTimeLeftCompact(proposal.votingStartDate)}</Text>
           </HStack>
         </VStack>
       )
@@ -49,7 +49,7 @@ export const ProposalOverviewTime = () => {
           </Text>
           <HStack>
             <UilClockEight />
-            <Text color="#252525">{timestampToTimeLeftCompact(proposal.endDate)}</Text>
+            <Text color="#252525">{timestampToTimeLeftCompact(proposal.votingEndDate)}</Text>
           </HStack>
         </VStack>
       )
