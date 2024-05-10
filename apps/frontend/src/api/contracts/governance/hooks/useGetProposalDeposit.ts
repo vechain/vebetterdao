@@ -13,9 +13,9 @@ const governorInterface = B3TRGovernor__factory.createInterface()
  * @param thor - The Connex.Thor instance.
  * @returns A Promise that resolves to the proposal deposit as a string.
  */
-export const getProposalDeposit = async (thor: Connex.Thor): Promise<string> => {
+export const getProposalDeposit = async (thor: Connex.Thor, proposalId: string): Promise<string> => {
   const functionFragment = governorInterface.getFunction("getProposalDeposits").format("json")
-  const res = await thor.account(GOVERNANCE_CONTRACT).method(JSON.parse(functionFragment)).call()
+  const res = await thor.account(GOVERNANCE_CONTRACT).method(JSON.parse(functionFragment)).call(proposalId)
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
   return res.decoded[0]
@@ -38,7 +38,7 @@ export const useProposalDeposits = (proposalId: string) => {
 
   return useQuery({
     queryKey: getProposalDepositQueryKey(proposalId),
-    queryFn: async () => await getProposalDeposit(thor),
+    queryFn: async () => await getProposalDeposit(thor, proposalId),
     enabled: !!thor && thor.status.head.number > 0,
   })
 }

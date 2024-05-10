@@ -74,11 +74,12 @@ export const useProposal = (proposalId: string) => {
     }
 
     const mock = {
-      state: ProposalState.Pending,
-      isStateLoading: false,
-      isVotesLoading: false,
-      isTitleLoading: false,
-      isDescriptionLoading: false,
+      // state: ProposalState.Active,
+      // isDepositReached: true,
+      // isStateLoading: false,
+      // isVotesLoading: false,
+      // isTitleLoading: false,
+      // isDescriptionLoading: false,
     }
 
     return { ...result, ...mock }

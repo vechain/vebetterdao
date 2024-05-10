@@ -4,7 +4,8 @@ import { UilArrowUpRight, UilThumbsDown, UilThumbsUp } from "@iconscout/react-un
 
 export const ProposalYourVote = () => {
   const { proposal } = useCurrentProposal()
-  // TODO: understand rendering logic
+  // TODO: Implement logic
+  return null
   return (
     <VStack alignItems={"stretch"}>
       <Text fontWeight={"400"} color="#6A6A6A">

@@ -18,7 +18,8 @@ import { ProposalOverviewVotes } from "./components/ProposalOverviewVotes"
 import { UilShareAlt } from "@iconscout/react-unicons"
 import { ProposalOverviewTime } from "./components/ProposalOverviewTime"
 import { ProposalOverviewStatusLabel } from "./components/ProposalOverviewStatusLabel"
-import { ProposalOverviewSupport } from "./components/ProposalOverviewSupport"
+import { ProposalOverviewYourSupport } from "./components/ProposalOverviewYourSupport"
+import { ProposalOverviewCommunitySupport } from "./components/ProposalOverviewCommunitySupport"
 import { ProposalYourVote } from "./components/ProposalYourVote"
 
 export const ProposalOverview = () => {
@@ -68,7 +69,8 @@ export const ProposalOverview = () => {
               </VStack>
               <ProposalYourVote />
               <ProposalOverviewTime />
-              <ProposalOverviewSupport />
+              <ProposalOverviewCommunitySupport />
+              <ProposalOverviewYourSupport />
               <IconButton
                 isDisabled={proposal.isStateLoading}
                 aria-label="share"
