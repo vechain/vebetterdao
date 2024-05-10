@@ -2,12 +2,37 @@ import { ethers } from "hardhat"
 import { B3TR, Emissions, VOT3, XAllocationVoting, XApps } from "../../typechain-types"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { BytesLike } from "ethers"
-import { waitForRoundToEnd } from "../../test/helpers"
 
 type App = {
   address: string
   name: string
 }
+const getApps = (accounts: HardhatEthersSigner[]): App[] => [
+  {
+    address: accounts[6].address,
+    name: "Vyvo",
+  },
+  {
+    address: accounts[7].address,
+    name: "Mugshot",
+  },
+  {
+    address: accounts[9].address,
+    name: "Cleanify",
+  },
+  {
+    address: accounts[9].address,
+    name: "Non Fungible Book Club (NFBC)",
+  },
+  {
+    address: accounts[9].address,
+    name: "Green Ambassador Challenge",
+  },
+  {
+    address: accounts[9].address,
+    name: "GreenCart",
+  },
+]
 
 export const seedLocalEnvironment = async (
   b3tr: B3TR,
@@ -18,21 +43,6 @@ export const seedLocalEnvironment = async (
   const start = performance.now()
   console.log("Seeding local environment")
   const accounts = await ethers.getSigners()
-
-  const APPS: App[] = [
-    {
-      address: accounts[6].address,
-      name: "Vyvo",
-    },
-    {
-      address: accounts[7].address,
-      name: "Mugshot",
-    },
-    {
-      address: accounts[9].address,
-      name: "Cleanify",
-    },
-  ]
 
   // Bootstrap emissions
   console.log("Bootstrapping emissions...")
@@ -52,7 +62,7 @@ export const seedLocalEnvironment = async (
   }
 
   //   Add x-apps to the XAllocationPool
-  await addXDapps(xAllocationVoting, accountsToSeed, APPS)
+  await addXDapps(xAllocationVoting, accountsToSeed, getApps(accounts))
 
   // const xDappsFromContract = await xAllocationVoting.getAllApps()
 
@@ -98,22 +108,9 @@ export const seedTestEnvironment = async (b3tr: B3TR, xAllocationVoting: XAlloca
 
   //   Add x-apps to the XAllocationPool
   console.log("Adding x-apps...")
-  const APPS: App[] = [
-    {
-      address: "0x61fFC950b04090f5CE857ebF056852a6D27b0c3c",
-      name: "Vyvo",
-    },
-    {
-      address: "0xbfE2122a82C0AEa091514f57C7713C3118101eDa",
-      name: "Mugshot",
-    },
-    {
-      address: "0x6B020E5C8E8574388a275cC498B27E3EB91ec3f2",
-      name: "Cleanify",
-    },
-  ]
+  const apps = getApps(accounts)
 
-  for (const app of APPS) {
+  for (const app of apps) {
     await xAllocationVoting
       .connect(admin)
       .addApp(app.address, app.name)

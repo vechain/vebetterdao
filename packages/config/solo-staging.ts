@@ -1,45 +1,43 @@
-import { AppConfig } from "." 
- const config: AppConfig = {
-  "basePath": "https://b3tr-frontend.vercel.app",
-  "b3trContractAddress": "0xc8aD228aa1438F8DD1c966F91b3DF0496Be5A76E",
-  "vot3ContractAddress": "0x3E46D24C191E66232c5D5a2bDa9ef46a2418aEA7",
-  "b3trGovernorAddress": "0xB5396b7D6f4Dd26448f7852ffe19ded6c95b8BAd",
-  "timelockContractAddress": "0xc756fd4EcA58a5D534B52E0Dc2eC2c24da4765b8",
-  "xAllocationPoolContractAddress": "0x1b54BD7416784cDEE78ebC48D701e475F48ef54D",
-  "xAllocationVotingContractAddress": "0xC5ecaCd52EDeb8Ae11f6f577df064714f1D918Ad",
-  "emissionsContractAddress": "0xBC2499aA72D5b58eb86c0334cff04b11592693BA",
-  "voterRewardsContractAddress": "0xB5bb5cfb77B956503D7984132413Dd18E849Ea67",
-  "nftBadgeContractAddress": "0x77eecb2432e6373bEe76E0579D27aD75A4481964",
-  "mixPanelProjectToken": "e03f4f5f6a753dae2dac30a69dfe21f7",
-  "nodeUrl": "https://thor-solo.dev.b3tr.vechain.org/",
-  "network": {
-    "id": "solo-staging",
-    "name": "solo-staging",
-    "type": "solo",
-    "defaultNet": true,
-    "urls": [
-      "https://thor-solo.dev.b3tr.vechain.org/"
-    ],
-    "explorerUrl": "https://insight.dev.b3tr.vechain.org/#/solo/",
-    "blockTime": 10000,
-    "genesis": {
-      "number": 0,
-      "id": "0x00000000c05a20fbca2bf6ae3affba6af4a74b800b585bf7a4988aba7aea69f6",
-      "size": 170,
-      "parentID": "0xffffffff53616c757465202620526573706563742c20457468657265756d2100",
-      "timestamp": 1530316800,
-      "gasLimit": 10000000,
-      "beneficiary": "0x0000000000000000000000000000000000000000",
-      "gasUsed": 0,
-      "totalScore": 0,
-      "txsRoot": "0x45b0cfc220ceec5b7c1c62c4d4193d38e4eba48e8815729ce75f9c0ab0e4c1c0",
-      "txsFeatures": 0,
-      "stateRoot": "0x93de0ffb1f33bc0af053abc2a87c4af44594f5dcb1cb879dd823686a15d68550",
-      "receiptsRoot": "0x45b0cfc220ceec5b7c1c62c4d4193d38e4eba48e8815729ce75f9c0ab0e4c1c0",
-      "signer": "0x0000000000000000000000000000000000000000",
-      "isTrunk": true,
-      "transactions": []
-    }
-  }
-};
-  export default config;
+import { AppConfig } from "."
+const config: AppConfig = {
+  basePath: "https://b3tr-frontend.vercel.app",
+  b3trContractAddress: "0x9855C237628d5AdFBaE64b94A64B44E570Bcc7de",
+  vot3ContractAddress: "0x56892A37A508CC0AF316167e5B6E80b761CeD819",
+  b3trGovernorAddress: "0x5c9eEa9a3B46b12f1a34468fA531c37855be0404",
+  timelockContractAddress: "0x2Ae7114A2B83621aacAE15BBF19Ef971e0529f0d",
+  xAllocationPoolContractAddress: "0x00685715d91e250F5A0EEf6A91560624D59c50b8",
+  xAllocationVotingContractAddress: "0x76A3f65224b6c4EC50AbAaD4af01289C9Fc0115a",
+  emissionsContractAddress: "0x72F8F450B5e96C21810205a389A89EA24315D5A4",
+  voterRewardsContractAddress: "0xC99BBCCFF58b2c9b53F21fB1F09509e8b9208935",
+  nftBadgeContractAddress: "0x58b1710880fDD23f7FB9C407b72101e4C8488C5C",
+  mixPanelProjectToken: "e03f4f5f6a753dae2dac30a69dfe21f7",
+  nodeUrl: "https://thor-solo.dev.b3tr.vechain.org/",
+  network: {
+    id: "solo-staging",
+    name: "solo-staging",
+    type: "solo",
+    defaultNet: true,
+    urls: ["https://thor-solo.dev.b3tr.vechain.org/"],
+    explorerUrl: "https://insight.dev.b3tr.vechain.org/#/solo/",
+    blockTime: 10000,
+    genesis: {
+      number: 0,
+      id: "0x00000000c05a20fbca2bf6ae3affba6af4a74b800b585bf7a4988aba7aea69f6",
+      size: 170,
+      parentID: "0xffffffff53616c757465202620526573706563742c20457468657265756d2100",
+      timestamp: 1530316800,
+      gasLimit: 10000000,
+      beneficiary: "0x0000000000000000000000000000000000000000",
+      gasUsed: 0,
+      totalScore: 0,
+      txsRoot: "0x45b0cfc220ceec5b7c1c62c4d4193d38e4eba48e8815729ce75f9c0ab0e4c1c0",
+      txsFeatures: 0,
+      stateRoot: "0x93de0ffb1f33bc0af053abc2a87c4af44594f5dcb1cb879dd823686a15d68550",
+      receiptsRoot: "0x45b0cfc220ceec5b7c1c62c4d4193d38e4eba48e8815729ce75f9c0ab0e4c1c0",
+      signer: "0x0000000000000000000000000000000000000000",
+      isTrunk: true,
+      transactions: [],
+    },
+  },
+}
+export default config
