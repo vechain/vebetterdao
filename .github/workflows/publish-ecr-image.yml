@@ -3,12 +3,6 @@ name: Build & Publish Docker Image
 on:
   workflow_call:
     inputs:
-      imageTag:
-        required: true
-        type: string
-      latestTag:
-        required: true
-        type: string
       workingDirectory:
         required: true
         type: string
@@ -21,9 +15,41 @@ on:
       imagePlatform:
         required: false
         type: string
-      env:
+      environment:
         required: true
         type: string
+  workflow_dispatch:
+    inputs:
+      workingDirectory:
+        required: true
+        type: choice
+        options:
+          - ./thor
+      buildArgs:
+        required: false
+        type: choice
+        options:
+          - "THOR_SOLO_PACKAGE=thor-solo"
+      packageName:
+        required: true
+        type: choice
+        options:
+          - thor-solo
+      imagePlatform:
+        required: false
+        type: choice
+        options:
+          - linux/arm64
+      environment:
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+
+env:
+  latestTag: ${{ inputs.environment }}-latest
+  imageTag: ${{ github.sha }}
 
 # Required for authentication through GitHub OIDC
 permissions:
@@ -38,18 +64,14 @@ jobs:
       run:
         working-directory: ${{ inputs.workingDirectory }}
 
-    environment: ${{ inputs.env }}
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Determine AWS account ID and role
         id: account
         run: |
-            if [ "${{ inputs.env }}" == "prod" ]; then
+            if [ "${{ inputs.environment }}" == "prod" ]; then
               echo "role_arn=${{ secrets.PROD_AWS_ACC_ROLE }}" >> $GITHUB_OUTPUT
             else
               echo "role_arn=${{ secrets.DEV_AWS_ACC_ROLE }}" >> $GITHUB_OUTPUT
@@ -101,15 +123,15 @@ jobs:
           context: ${{ inputs.workingDirectory }}
           provenance: false
           tags: |
-            ${{ steps.login-ecr.outputs.registry }}/b3tr/${{ inputs.packageName }}:${{ inputs.imageTag }}
-            ${{ steps.login-ecr.outputs.registry }}/b3tr/${{ inputs.packageName }}:${{ inputs.latestTag }}
+            ${{ steps.login-ecr.outputs.registry }}/b3tr/${{ inputs.packageName }}:${{ env.imageTag }}
+            ${{ steps.login-ecr.outputs.registry }}/b3tr/${{ inputs.packageName }}:${{ env.latestTag }}
 
       - name: Scan Docker image
         id: docker-scan
         uses: alexjurkiewicz/ecr-scan-image@v1.7.1
         with:
           repository: b3tr/${{ inputs.packageName }}
-          tag: ${{ inputs.imageTag }}
+          tag: ${{ env.imageTag }}
           fail_threshold: high
 
       - name: On Scan Failure
@@ -117,4 +139,4 @@ jobs:
         run: |
           aws ecr batch-delete-image \
             --repository-name b3tr/${{ inputs.packageName }} \
-            --image-ids imageTag=${{ inputs.imageTag }} imageTag=${{ inputs.latestTag }}
+            --image-ids imageTag=${{ env.imageTag }} imageTag=${{ env.latestTag }}
