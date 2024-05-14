@@ -6,12 +6,14 @@ import { Providers } from "./providers"
 import dayjs from "dayjs"
 
 import relativeTime from "dayjs/plugin/relativeTime"
+import duration from "dayjs/plugin/duration"
 import { AlphaTestnetBanner, Footer } from "@/components"
 import dynamic from "next/dynamic"
 import { AnalyticsUtils } from "@/utils"
 import { getConfig } from "@repo/config"
 
 dayjs.extend(relativeTime)
+dayjs.extend(duration)
 
 const mixpanelToken = getConfig().mixPanelProjectToken
 const isProduction = process.env.NODE_ENV === "production"
@@ -22,6 +24,13 @@ const FreshDeskWidget = dynamic(() => import("@/components/FreshDeskWidget").the
 
 //TODO: Is there a better place to initialise mixpanel? next/script?
 typeof window != "undefined" && mixpanelToken && AnalyticsUtils.initialise()
+
+// workaround for "@iconscout/react-unicons
+const error = console.error
+console.error = (...args: any) => {
+  if (/defaultProps/.test(args[0])) return
+  error(...args)
+}
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
