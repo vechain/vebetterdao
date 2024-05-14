@@ -14,7 +14,6 @@ variable "domain_name_data" {
     "dev" = {
       suffix  = "dev.b3tr.vechain.org"
       zone_id = "Z09214252JN9OW8DF7KO4"
-
     }
   }
 }
