@@ -1,3 +1,9 @@
+import dayjs from "dayjs"
+import relativeTime from "dayjs/plugin/relativeTime"
+import duration from "dayjs/plugin/duration"
+
+dayjs.extend(relativeTime)
+dayjs.extend(duration)
 /**
  * Converts a timestamp to a compact time left string.
  * @param endDate - The end date timestamp.
@@ -8,28 +14,7 @@
  */
 export const timestampToTimeLeftCompact = (endDate: number, startDate: number = new Date().getTime()): string => {
   let difference = endDate - startDate
-
-  if (difference < 0) {
-    return "0 seconds"
-  }
-
-  let seconds = Math.floor(difference / 1000)
-  let minutes = Math.floor(seconds / 60)
-  seconds = seconds - minutes * 60
-  let hours = Math.floor(minutes / 60)
-  minutes = minutes - hours * 60
-  let days = Math.floor(hours / 24)
-  hours = hours - days * 24
-
-  if (days > 0) {
-    return `${days} day${days > 1 ? "s" : ""}`
-  } else if (hours > 0) {
-    return `${hours} hour${hours > 1 ? "s" : ""}`
-  } else if (minutes > 0) {
-    return `${minutes} minute${minutes > 1 ? "s" : ""}`
-  } else {
-    return `${seconds} second${seconds > 1 ? "s" : ""}`
-  }
+  return dayjs.duration(difference, "milliseconds").humanize(false)
 }
 
 /**
@@ -46,27 +31,16 @@ export const timestampToTimeLeft = (endDate: number, startDate: number = new Dat
     return "0s"
   }
 
-  let seconds = Math.floor(difference / 1000)
-  let minutes = Math.floor(seconds / 60)
-  seconds = seconds - minutes * 60
-  let hours = Math.floor(minutes / 60)
-  minutes = minutes - hours * 60
-  let days = Math.floor(hours / 24)
-  hours = hours - days * 24
-  let result = ""
+  const dayjsObject = dayjs.duration(difference, "milliseconds")
 
-  if (days > 0) {
-    result += `${days}d `
+  if (dayjsObject.days() > 0) {
+    return dayjsObject.format("D[d] H[h] m[m] s[s]")
   }
-  if (days > 0 || hours > 0) {
-    result += `${hours}h `
+  if (dayjsObject.hours() > 0) {
+    return dayjsObject.format("H[h] m[m] s[s]")
   }
-  if (days > 0 || hours > 0 || minutes > 0) {
-    result += `${minutes}m${days === 0 ? " " : ""}`
+  if (dayjsObject.minutes() > 0) {
+    return dayjsObject.format("m[m] s[s]")
   }
-  if (days === 0) {
-    result += `${seconds}s`
-  }
-
-  return result
+  return dayjsObject.format("s[s]")
 }

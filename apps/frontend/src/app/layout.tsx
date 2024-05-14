@@ -6,12 +6,14 @@ import { Providers } from "./providers"
 import dayjs from "dayjs"
 
 import relativeTime from "dayjs/plugin/relativeTime"
+import duration from "dayjs/plugin/duration"
 import { AlphaTestnetBanner, Footer } from "@/components"
 import dynamic from "next/dynamic"
 import { AnalyticsUtils } from "@/utils"
 import { getConfig } from "@repo/config"
 
 dayjs.extend(relativeTime)
+dayjs.extend(duration)
 
 const mixpanelToken = getConfig().mixPanelProjectToken
 const isProduction = process.env.NODE_ENV === "production"
