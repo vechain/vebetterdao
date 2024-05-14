@@ -23,7 +23,7 @@ module "thor_solo_node" {
   common_ecr_repo_url = "${local.base_registry_url}/${local.config.project}/thor-solo"
   internal_url_name   = "thor-solo.local"
   app_name            = "thor-solo"
-  image_tag           = "latest"
+  image_tag           = local.config.image_tag
   project             = local.config.project
   cpu                 = 256
   memory              = 512
