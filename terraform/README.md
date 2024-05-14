@@ -14,7 +14,7 @@ https://vechain.atlassian.net/wiki/spaces/Devops/pages/183435265/Playing+nice+wi
 
 To initialize  infra use following terraform init command:
 ```bash
-cd terraform/solo-thor
+cd terraform
 terraform init 
 ```
 To plan infra use following terraform plan command:

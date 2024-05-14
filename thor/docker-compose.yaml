@@ -2,6 +2,7 @@ version: "3.7"
 
 services:
   thor-solo:
+    platform: linux/amd64
     build:
       dockerfile: Dockerfile
       context: ./
@@ -18,25 +19,6 @@ services:
     networks:
       - vechain-thor
 
-  thor-tx-script:
-    hostname: thor-tx-script
-    image: ghcr.io/vechainfoundation/thor-transactions-script:a6975cfcd38d65b4b30a0e0a54dfb26468e64b78
-    user: root
-    depends_on:
-      thor-solo:
-        condition: service_healthy
-    environment:
-      # The node to point to, defaults to http://localhost:8669
-      - NODE_URL=http://thor-solo:8669
-      # The mnemonic to use. Defaults to Thor solo mnemonic
-      - MNEMONIC_WORDS=denial kitchen pet squirrel other broom bar gas better priority spoil cross
-      # How many times to iterate the mints and transfers. Defaults to 5
-      - ITERATE_TX_AMOUNT=1
-    volumes:
-      - ./.output/:/app/.output
-    networks:
-      - vechain-thor
-
 volumes:
   thor-volume:
 
@@ -44,4 +26,3 @@ networks:
   vechain-thor:
     driver: bridge
     name: vechain-thor
-    
