@@ -39,7 +39,7 @@ on:
         required: false
         type: choice
         options:
-          - linux/arm64
+          - linux/amd64
       environment:
         required: true
         type: choice

@@ -20,7 +20,6 @@ provider "aws" {
       Terraform   = "true"
     }
   }
-
 }
 
 data "external" "git" {
