@@ -9,7 +9,7 @@ slack_alert_channel   : C06M2KBPGSY
 slack_alert_workspace : T03L3PQD8GK
 
 #thor solo settings
-image_tag:                       latest
+image_tag: dev-latest
 cpu: 256
 memory: 512
 region : "eu-west-1"

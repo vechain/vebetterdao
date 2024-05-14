@@ -23,7 +23,7 @@ import { FiArrowUpRight } from "react-icons/fi"
 type Props = {
   maxApps?: number
 }
-export const DashboardXApps = ({ maxApps = 5 }: Props) => {
+export const DashboardXApps = ({ maxApps = 8 }: Props) => {
   const { data: xApps } = useXApps()
 
   const slicedXApps = useMemo(() => xApps?.slice(0, maxApps), [xApps, maxApps])

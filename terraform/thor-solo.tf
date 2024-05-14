@@ -14,7 +14,7 @@ resource "aws_service_discovery_private_dns_namespace" "ns" {
 
 ##thor-solo ecs service creation
 module "thor_solo_node" {
-  source              = "git@github.com:vechain/devops.git//ecs?ref=677fbdb"
+  source              = "git@github.com:vechain/devops.git//ecs?ref=main"
   vpc_id              = local.config.vpc_id
   public_subnets      = local.config.public_subnets
   private_subnets     = local.config.private_subnets
@@ -23,7 +23,7 @@ module "thor_solo_node" {
   common_ecr_repo_url = "${local.base_registry_url}/${local.config.project}/thor-solo"
   internal_url_name   = "thor-solo.local"
   app_name            = "thor-solo"
-  image_tag           = "latest"
+  image_tag           = local.config.image_tag
   project             = local.config.project
   cpu                 = 256
   memory              = 512
