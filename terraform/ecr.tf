@@ -5,4 +5,5 @@ module "ecr" {
   project  = local.config.project
   env      = local.env
   app_name = "thor-solo"
+  image_tag_mutability = "MUTABLE"
 }
