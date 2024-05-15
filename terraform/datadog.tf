@@ -72,15 +72,15 @@ module "datadog_integration_aws" {
   ]
   
   filter_tags = []
-  host_tags   = ["Env:${local.config.environment}", "datadog:enabled"]
+  host_tags   = ["Env:${local.config.evnironment_name}", "datadog:enabled"]
   namespace_rules = {
     auto_scaling = false
     opsworks     = false
   }
   excluded_regions = ["us-east-2, us-west-1, us-west-2, ca-central-1, eu-west-2, eu-west-3, eu-central-1, eu-north-1, ap-south-1, ap-northeast-1, ap-northeast-2, ap-southeast-1, ap-southeast-2, sa-east-1"]
 
-  dashboard_title       = "${local.config.project_name} Dashboard"
-  dashboard_description = "Monitoring dashboard for ${local.config.project_name}"
+  dashboard_title       = "${local.config.evnironment_name} Dashboard"
+  dashboard_description = "Monitoring dashboard for ${local.config.evnironment_name}"
   layout_type          = "ordered"
   alert_id             = "some-alert-id"
   widget_type          = "timeseries"
