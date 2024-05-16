@@ -1,8 +1,7 @@
-"use client"
 import { VStack } from "@chakra-ui/react"
-import { ProposalOverview } from "./components/ProposalOverview"
+import { ProposalOverview } from "./ProposalOverview"
 
-export const Proposal = () => {
+export const ProposalPageContent = () => {
   return (
     <VStack w="full" alignItems="stretch">
       <ProposalOverview />
