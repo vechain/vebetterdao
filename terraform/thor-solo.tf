@@ -88,10 +88,10 @@ resource "aws_security_group" "ecs_service_sg" {
 
 module "ecs-cluster" {
   source  = "git::git@github.com:/vechain/terraform_infrastructure_modules.git//ecs_cluster?ref=v.1.0.19"
-  env     = local.config.environment
+  env     = local.env
   project = local.config.project
-  vpc_id  = data.terraform_remote_state.vpc.outputs.vpc_id
-  cidr    = data.terraform_remote_state.vpc.outputs.vpc_ipv4
+  vpc_id  = local.config.vpc_id
+  cidr    = local.config.vpc_cidr
 }
 
 ################################################################################
@@ -108,9 +108,9 @@ module "ecs-lb-service-thor-solo" {
   lb_subnets                 = local.config.private_subnets
   internal_alb               = true
   app_subnets                = local.config.private_subnets
-  env                        = local.config.environment
+  env                        = local.env
   is_create_repo             = false
-  ecr_repo_uri               = module.ecr.repository_url
+  ecr_repo_uri               = module.ecr.repository_url[0]
   secrets_enable             = false
   assign_public_ip           = false
   app_name                   = "${local.config.project}-${local.env}"
@@ -118,12 +118,12 @@ module "ecs-lb-service-thor-solo" {
   project                    = local.config.project
   cpu                        = local.config.cpu
   memory                     = local.config.memory
-  cidr                       = local.config.cidr
+  cidr                       = local.config.vpc_cidr
   container_port             = 8669
   certificate_arn            = module.thor-solo_domain.certificate_arn
   ecs_sg                     = [aws_security_group.ecs_service_sg.id]
   rule_0_path_pattern        = ["/api/v*", "/api-docs", "/swagger-ui/*"]
-  alb_sg                     = [aws_security_group.internal-alb-sg.id]
+  alb_sg                     = [aws_security_group.alb-sg.id]
   enable_deletion_protection = local.env == "prod" ? true : false
   namespace_id               = aws_service_discovery_private_dns_namespace.ns.id
   https_tg_healthcheck_path  = "/blocks/0"
@@ -139,13 +139,13 @@ module "ecs-lb-service-thor-solo" {
   enable_ecs_cpu_based_autoscaling    = true
   enable_ecs_memory_based_autoscaling = true
   min_capacity                        = 1
-  max_capacity                        = each.value.mass.max_capacity
+  max_capacity                        = local.config.max_capacity
   target_cpu_value                    = 70
   target_memory_value                 = 70
   disable_scale_in                    = false
   # scale_in_cooldown = 300
   # scale_out_cooldown = 300
-  name = "auto-scaling-group"
+  name                                = "auto-scaling-group"
 }
 
 ##thor-solo ecs service creation
