@@ -27,11 +27,11 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
     account ?? undefined,
   )
 
-  const totalVotes = useMemo(() => {
+  const totalVotes = (() => {
     const rawValue = votes.reduce((acc, vote) => acc + (Number(vote.rawValue) || 0), 0)
-    if (rawValue >= 99.99) return 100
+    if (rawValue >= 99.99 && rawValue < 100) return 100
     return rawValue
-  }, [votes])
+  })()
 
   const isCompletedAllocated = totalVotes >= 100
 

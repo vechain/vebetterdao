@@ -18,7 +18,6 @@ import {
 } from "@chakra-ui/react"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
-import { CastAllocationVotesProps } from "@/hooks"
 import BigNumber from "bignumber.js"
 import { scaledDivision } from "@/utils/MathUtils"
 
@@ -62,7 +61,7 @@ export const SelectAppVotesInput = ({
             <InputGroup>
               <Controller
                 control={control}
-                name={`votes.${index}.value`}
+                name={`votes.${index}`}
                 rules={{
                   validate: {
                     lessThanHundred: () => {
@@ -80,7 +79,7 @@ export const SelectAppVotesInput = ({
                     <Input
                       w="full"
                       placeholder="0"
-                      value={value}
+                      value={value.value}
                       onChange={e => {
                         const newValue = e.target.value
                           .replace(",", ".") // Replace comma with dot
@@ -88,10 +87,18 @@ export const SelectAppVotesInput = ({
                           .replace(/\.(?=.*\.)/g, "") // Filter out duplicate decimal separators
                           .replace(/(\.\d\d)\d+/g, "$1") // Remove decimal digits after the second one
 
-                        if (Number(newValue) > Number("100")) {
-                          onChange("100")
+                        if (Number(newValue) > 100) {
+                          onChange({
+                            rawValue: 100,
+                            value: "100",
+                            appId: value.appId,
+                          })
                         } else {
-                          onChange(newValue)
+                          onChange({
+                            rawValue: Number(newValue),
+                            value: newValue,
+                            appId: value.appId,
+                          })
                         }
                       }}
                       isDisabled={isDisabled}
@@ -99,9 +106,9 @@ export const SelectAppVotesInput = ({
                   )
                 }}
               />
-              <InputRightElement children="%" />
+              <InputRightElement>%</InputRightElement>
             </InputGroup>
-            {value && totalVotesAvailable && !errors.votes?.[index]?.value ? (
+            {value && totalVotesAvailable && !errors.votes?.[index] ? (
               <FormHelperText>
                 =~{" "}
                 {new BigNumber(scaledDivision(Number(value) * Number(totalVotesAvailable), 100)).toFixed(
@@ -111,7 +118,7 @@ export const SelectAppVotesInput = ({
                 votes
               </FormHelperText>
             ) : (
-              <FormErrorMessage>{errors.votes?.[index]?.value?.message}</FormErrorMessage>
+              <FormErrorMessage>{errors.votes?.[index]?.message}</FormErrorMessage>
             )}
           </FormControl>
         </Box>
