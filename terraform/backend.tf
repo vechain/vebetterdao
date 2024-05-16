@@ -5,8 +5,10 @@ terraform {
     }
   }
   backend "s3" {
-    key    = "b3tr-thor-solo/terraform.tfstate"
+    bucket = "b3tr-terraform-state-dev"
+    key    = "b3tr-thor-solo.tfstate"
     region = "eu-west-1"
+    workspace_key_prefix = "workspaces"
   }
 }
 
@@ -18,7 +20,6 @@ provider "aws" {
       Terraform   = "true"
     }
   }
-
 }
 
 data "external" "git" {

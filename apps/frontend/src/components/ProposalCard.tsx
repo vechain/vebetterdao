@@ -8,6 +8,7 @@ import {
 } from "@/api"
 import {
   Box,
+  Button,
   Card,
   CardBody,
   CardFooter,
@@ -21,7 +22,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { AddressButton } from "./AddressButton"
-import { useMemo } from "react"
+import { useCallback, useMemo } from "react"
 import { governanceAvailableContracts } from "@/constants"
 import { abi } from "thor-devkit"
 import { AddressUtils, ContractUtils } from "@repo/utils"
@@ -31,6 +32,9 @@ import dayjs from "dayjs"
 import { ethers } from "ethers"
 import { ProposalVotesProgressBar } from "./ProposalVotesProgressBar"
 import { CastVoteButton } from "./CastVoteButton"
+import { FaArrowRight, FaChevronRight } from "react-icons/fa6"
+import { FaCaretRight } from "react-icons/fa"
+import { useRouter } from "next/navigation"
 
 const config = getConfig()
 const blockTime = config.network.blockTime
@@ -156,6 +160,11 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
     }
   }, [state])
 
+  const router = useRouter()
+  const goToProposal = useCallback(() => {
+    router.push(`/proposals/${proposal.proposalId}`)
+  }, [])
+
   return (
     <Card flex={1}>
       <CardHeader>
@@ -240,6 +249,9 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
               </Box>
             )}
             <CastVoteButton proposal={proposal} />
+            <Button size="sm" colorScheme="blue" rounded={"full"} rightIcon={<FaChevronRight />} onClick={goToProposal}>
+              See More
+            </Button>
           </HStack>
         </VStack>
       </CardFooter>

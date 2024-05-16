@@ -10,6 +10,7 @@ import XAllocationVotingJson from "./artifacts/contracts/XAllocationVoting.sol/X
 import XAllocationVotingGovernorJson from "./artifacts/contracts/x-allocation-voting-governance/XAllocationVotingGovernor.sol/XAllocationVotingGovernor.json"
 import TreasuryContractJson from "./artifacts/contracts/Treasury.sol/Treasury.json"
 import X2EarnAppsJson from "./artifacts/contracts/X2EarnApps.sol/X2EarnApps.json"
+import TreasuryJson from "./artifacts/contracts/Treasury.sol/Treasury.json"
 
 export {
   VOT3__factory,
@@ -39,4 +40,5 @@ export {
   XAllocationVotingGovernorJson,
   TreasuryContractJson,
   X2EarnAppsJson,
+  TreasuryJson,
 }

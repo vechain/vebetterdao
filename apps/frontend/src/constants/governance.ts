@@ -10,6 +10,7 @@ import {
   EmissionsContractJson,
   TreasuryContractJson,
   X2EarnAppsJson,
+  TreasuryJson,
 } from "@repo/contracts"
 
 import { getConfig } from "@repo/config"
@@ -50,6 +51,7 @@ export const governanceAvailableContracts: ExecutorAvailableContracts[] = [
   { abi: VoterRewardsContractJson, address: config.voterRewardsContractAddress },
   { abi: GalaxyMemberContractJson, address: config.galaxyMemberContractAddress },
   { abi: EmissionsContractJson, address: config.emissionsContractAddress },
+  { abi: TreasuryJson, address: config.treasuryContractAddress },
 ]
 
 export const getFunctionDefinitionFromAbi = (jsonContract: JsonContractType, functionName: string) => {

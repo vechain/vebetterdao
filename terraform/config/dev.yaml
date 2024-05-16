@@ -8,8 +8,13 @@ cloudwatch_alarms     : true
 slack_alert_channel   : C06M2KBPGSY
 slack_alert_workspace : T03L3PQD8GK
 
+#datadog settings
+environment_name: b3tr-dev
+secret_arn:   arn:aws:secretsmanager:eu-west-1:211125319139:secret:dev/datadog_keys-fbWmra
+
+
 #thor solo settings
-image_tag:                       latest
+image_tag: dev-latest
 cpu: 256
 memory: 512
 region : "eu-west-1"
