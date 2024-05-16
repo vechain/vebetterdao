@@ -95,10 +95,10 @@ module "ecs-cluster" {
 }
 
 ################################################################################
-# Module For ECS Load Balanced Service mass
+# Module For ECS Load Balanced Thor-Solo Service
 ################################################################################
 
-module "ecs-lb-service-mass" {
+module "ecs-lb-service-thor-solo" {
   depends_on                 = [module.ecs-cluster, resource.aws_security_group.ecs_service_sg, resource.aws_security_group.alb-sg]
   source                     = "git::git@github.com:/vechain/terraform_infrastructure_modules.git//ecs-loadbalanced-webservice?ref=v.1.0.21"
   region                     = local.config.region
@@ -110,21 +110,21 @@ module "ecs-lb-service-mass" {
   app_subnets                = local.config.private_subnets
   env                        = local.config.environment
   is_create_repo             = false
-  ecr_repo_uri               = each.value.mass.ecr_common_repo
+  ecr_repo_uri               = module.ecr.repository_url
   secrets_enable             = false
   assign_public_ip           = false
-  app_name                   = "${each.key}-mass"
+  app_name                   = "${local.config.project}-${local.env}"
   ecr_image_tag              = local.config.image_tag
   project                    = local.config.project
   cpu                        = local.config.cpu
   memory                     = local.config.memory
   cidr                       = local.config.cidr
   container_port             = 8669
-  certificate_arn            = module.domain.certificate_arn
+  certificate_arn            = module.thor-solo_domain.certificate_arn
   ecs_sg                     = [aws_security_group.ecs_service_sg.id]
   rule_0_path_pattern        = ["/api/v*", "/api-docs", "/swagger-ui/*"]
   alb_sg                     = [aws_security_group.internal-alb-sg.id]
-  enable_deletion_protection = startswith(local.config.environment, "prod") ? true : false
+  enable_deletion_protection = local.env == "prod" ? true : false
   namespace_id               = aws_service_discovery_private_dns_namespace.ns.id
   https_tg_healthcheck_path  = "/blocks/0"
   environment_variables = []
