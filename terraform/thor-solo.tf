@@ -26,7 +26,7 @@ module "thor_solo_node" {
   image_tag           = local.config.image_tag
   project             = local.config.project
   cpu                 = 256
-  memory              = 512
+  memory              = 1024
   cidr                = local.config.vpc_cidr
   desired_capacity    = "1"
   container_port      = 8669
