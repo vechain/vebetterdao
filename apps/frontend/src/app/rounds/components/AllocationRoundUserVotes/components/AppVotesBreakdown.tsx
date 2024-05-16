@@ -7,7 +7,6 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { FaInfoCircle } from "react-icons/fa"
 import BigNumber from "bignumber.js"
 import { FormData as UserVotesFormData } from "../AllocationRoundUserVotes"
-import { useMemo } from "react"
 
 type Props = {
   roundId: string
