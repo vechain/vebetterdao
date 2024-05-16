@@ -16,7 +16,7 @@ provider "aws" {
   region = "eu-west-1"
   default_tags {
     tags = {
-      Commit_Hash = "b338cb291bc59a3e119e369c409f24205b62402f"
+      Commit_Hash = data.external.git.result.sha
       Terraform   = "true"
     }
   }
