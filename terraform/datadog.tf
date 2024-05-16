@@ -1,5 +1,5 @@
 module "datadog_integration_aws" {
-  source = "git::git@github.com:vechain/terraform_infrastructure_modules.git//datadog?ref=main"
+  source = "git::git@github.com:vechain/terraform_infrastructure_modules.git//datadog?ref=v.1.0.23"
   project_name = local.config.environment_name
   role_name  = "DatadogAWSIntegrationRole"
   aws_permissions_list = [
