@@ -12,6 +12,142 @@ resource "aws_service_discovery_private_dns_namespace" "ns" {
   vpc  = local.config.vpc_id
 }
 
+######################
+# Public ALB Security Group
+######################
+
+resource "aws_security_group" "alb-sg" {
+  description = "security-group-alb"
+  name        = "${local.env}-${local.config.project}-sg-alb"
+  egress {
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = 0
+    protocol    = "-1"
+    to_port     = 0
+  }
+
+  ingress {
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = 80
+    protocol    = "tcp"
+    to_port     = 80
+  }
+
+  ingress {
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = 443
+    protocol    = "tcp"
+    to_port     = 443
+  }
+
+  tags = {
+    Environment = local.env
+    Name        = "${local.env}-${local.config.project}-sg-alb"
+  }
+  vpc_id = local.config.vpc_id
+}
+
+######################
+# ECS Service Security Group
+######################
+
+resource "aws_security_group" "ecs_service_sg" {
+  description = "security-group-service"
+
+  name = "${local.env}-${local.config.project}-sg-service"
+  egress {
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = 0
+    protocol    = "-1"
+    to_port     = 0
+  }
+  ingress {
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = 0
+    protocol    = "-1"
+    to_port     = 0
+  }
+  ingress {
+    from_port = 0
+    protocol  = "-1"
+    to_port   = 0
+    self      = true
+  }
+
+  tags = {
+    Environment = local.env
+    Name        = "${local.env}-${local.config.project}-sg-service"
+  }
+
+  vpc_id = local.config.vpc_id
+}
+
+################################################################################
+# Module For ECS Cluster creation
+################################################################################
+
+module "ecs-cluster" {
+  source  = "git::git@github.com:/vechain/terraform_infrastructure_modules.git//ecs_cluster?ref=v.1.0.19"
+  env     = local.config.environment
+  project = local.config.project
+  vpc_id  = data.terraform_remote_state.vpc.outputs.vpc_id
+  cidr    = data.terraform_remote_state.vpc.outputs.vpc_ipv4
+}
+
+################################################################################
+# Module For ECS Load Balanced Service mass
+################################################################################
+
+module "ecs-lb-service-mass" {
+  depends_on                 = [module.ecs-cluster, resource.aws_security_group.ecs_service_sg, resource.aws_security_group.alb-sg]
+  source                     = "git::git@github.com:/vechain/terraform_infrastructure_modules.git//ecs-loadbalanced-webservice?ref=v.1.0.21"
+  region                     = local.config.region
+  vpc_id                     = local.config.vpc_id
+  cluster_name               = module.ecs-cluster.name
+  autoscale_cluster_name     = module.ecs-cluster.name
+  lb_subnets                 = local.config.private_subnets
+  internal_alb               = true
+  app_subnets                = local.config.private_subnets
+  env                        = local.config.environment
+  is_create_repo             = false
+  ecr_repo_uri               = each.value.mass.ecr_common_repo
+  secrets_enable             = false
+  assign_public_ip           = false
+  app_name                   = "${each.key}-mass"
+  ecr_image_tag              = local.config.image_tag
+  project                    = local.config.project
+  cpu                        = local.config.cpu
+  memory                     = local.config.memory
+  cidr                       = local.config.cidr
+  container_port             = 8669
+  certificate_arn            = module.domain.certificate_arn
+  ecs_sg                     = [aws_security_group.ecs_service_sg.id]
+  rule_0_path_pattern        = ["/api/v*", "/api-docs", "/swagger-ui/*"]
+  alb_sg                     = [aws_security_group.internal-alb-sg.id]
+  enable_deletion_protection = startswith(local.config.environment, "prod") ? true : false
+  namespace_id               = aws_service_discovery_private_dns_namespace.ns.id
+  https_tg_healthcheck_path  = "/blocks/0"
+  environment_variables = []
+  log_metric_filters = [
+    {
+      name    = "AppUnhealthy",
+      pattern = "Application is UNHEALTHY"
+    }
+  ]
+
+  ####### enable autoscailing #######
+  enable_ecs_cpu_based_autoscaling    = true
+  enable_ecs_memory_based_autoscaling = true
+  min_capacity                        = 1
+  max_capacity                        = each.value.mass.max_capacity
+  target_cpu_value                    = 70
+  target_memory_value                 = 70
+  disable_scale_in                    = false
+  # scale_in_cooldown = 300
+  # scale_out_cooldown = 300
+  name = "auto-scaling-group"
+}
+
 ##thor-solo ecs service creation
 module "thor_solo_node" {
   source              = "git@github.com:vechain/devops.git//ecs?ref=main"
@@ -25,8 +161,8 @@ module "thor_solo_node" {
   app_name            = "thor-solo"
   image_tag           = local.config.image_tag
   project             = local.config.project
-  cpu                 = 256
-  memory              = 512
+  cpu                 = local.config.cpu
+  memory              = local.config.memory
   cidr                = local.config.vpc_cidr
   desired_capacity    = "1"
   container_port      = 8669
