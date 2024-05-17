@@ -238,7 +238,7 @@ const convertB3TRForVOT3 = async (privateKey: Buffer, address: string, amount: B
         coder.createInterface(VOT3_convertToVOT3_abi).getFunction("convertToVOT3") as FunctionFragment,
         [amount.multipliedBy(constants.TOKEN_DECIMALS).toString()])
     const clauses = [approveClause, convertToVOT3clause]
-    const gasResult = await thorClient.gas.estimateGas(clauses, address, {gasPadding: 0.1})
+    const gasResult = await thorClient.gas.estimateGas(clauses, address, {gasPadding: 0.5})
     const latestBlock = await thorClient.blocks.getBestBlockCompressed()
     const transactionBody = {
         chainTag: constants.THOR_CHAIN_TAG,

@@ -12,6 +12,7 @@ test.describe('Swap Tokens', () => {
     await veWorldMockClient.load(page)
     await page.goto(HOMEPAGE)
     await veWorldMockClient.installMock(page)
+    await veWorldMockClient.setOptions(page, { gasMultiplier: 0.5 })
   })
 
   test.afterEach(async ({ page }, testInfo: TestInfo) => {
