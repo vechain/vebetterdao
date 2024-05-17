@@ -6,14 +6,14 @@ import {
   CardHeader,
   Heading,
   Stack,
-  VStack,
-  HStack,
   Text,
   Tabs,
   TabList,
   Tab,
   TabPanels,
   TabPanel,
+  Grid,
+  GridItem,
 } from "@chakra-ui/react"
 import { useEffect } from "react"
 import { AnalyticsUtils } from "@/utils"
@@ -24,10 +24,8 @@ import { B3trAllowance } from "./components/B3trAllowance"
 import { BulkClaimXAppsAllocations } from "./components/BulkClaimXAppsAllocations"
 import { ClaimXAppAllocations } from "./components/ClaimXAppAllocations"
 import { Pause } from "./components/Pause"
-import { StartEmissionsButton } from "./components/StartEmissionsButton"
-import { StartRoundButton } from "./components/StartRoundButton"
 import { UpdateReceiverAddress } from "./components/UpdateReceiverAddress"
-import { ProposalsAdmin } from "./components/ProposalsAdmin/ProposalsAdmin"
+import { StartRoundCard } from "./components/StartRoundCard/StartRoundCard"
 
 export const AdminPageContent = () => {
   useEffect(() => {
@@ -35,14 +33,8 @@ export const AdminPageContent = () => {
   }, [])
 
   const { account } = useWallet()
-  const {
-    isAdminOfB3tr,
-    isAdminOfEmissions,
-    isAdminOfXAllocationVoting,
-    isAdminOfVot3,
-    isAdminOfGalaxyMember,
-    isAdmin,
-  } = useAccountPermissions(account ?? "")
+  const { isAdminOfB3tr, isAdminOfXAllocationVoting, isAdminOfVot3, isAdminOfGalaxyMember, isAdmin } =
+    useAccountPermissions(account ?? "")
 
   return (
     <Stack spacing={12} w={"full"} data-testid="admin-page">
@@ -56,22 +48,13 @@ export const AdminPageContent = () => {
 
         <TabPanels>
           <TabPanel>
-            <Card w={"full"}>
-              <CardHeader>
-                <Heading size="lg">Emissions and Rounds</Heading>
-              </CardHeader>
-              <CardBody>
-                <VStack w={"full"} spacing={4} alignItems={"start"}>
-                  {isAdminOfEmissions && <StartEmissionsButton />}
-                  <StartRoundButton />
-                </VStack>
-              </CardBody>
-            </Card>
-
-            <Stack direction={["column", "row"]} w={"full"} spacing={6} pt={6} alignItems={"start"}>
+            <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
+              <GridItem colSpan={2}>
+                <StartRoundCard />
+              </GridItem>
               <ClaimXAppAllocations />
               <BulkClaimXAppsAllocations />
-            </Stack>
+            </Grid>
           </TabPanel>
           <TabPanel>
             <Stack direction={["column", "row"]} w={"full"} spacing={12} alignItems={"start"}>
