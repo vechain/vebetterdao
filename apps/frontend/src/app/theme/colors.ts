@@ -1,5 +1,3 @@
-import { defineStyle } from "@chakra-ui/react"
-
 export const lightPrimary = {
   "50": "#98A3FF",
   "100": "#7F8CFF",
@@ -11,6 +9,7 @@ export const lightPrimary = {
   "700": "#111F8D",
   "800": "#001665",
   "900": "#000B3C",
+  active: "#004cfc",
 }
 export const lighSecondary = {
   "50": "#F7FFD7",
@@ -47,6 +46,7 @@ export const darkPrimary = {
   "700": "#425c26",
   "800": "#384e20",
   "900": "#283817",
+  active: "#004cfc",
 }
 
 export const lightThemeColors = {
