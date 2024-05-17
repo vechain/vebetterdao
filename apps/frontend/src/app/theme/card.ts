@@ -27,6 +27,15 @@ const variants = {
         borderColor: props.colorMode === "dark" ? "#2D2D2F" : "gray.100",
       },
     }),
+  secondaryBoxShadow: (props: StyleFunctionProps) =>
+    definePartsStyle({
+      container: {
+        boxShadow: "inset 0px 0px 100px 5px rgba(177, 241, 108, 1)",
+        bg: props.colorMode === "dark" ? "#1A1A1A" : "#FFF",
+        borderWidth: "1px",
+        borderColor: props.colorMode === "dark" ? "#2D2D2F" : "gray.100",
+      },
+    }),
 }
 
 // export variants in the component theme
