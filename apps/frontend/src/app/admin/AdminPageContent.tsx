@@ -57,13 +57,13 @@ export const AdminPageContent = () => {
             </Grid>
           </TabPanel>
           <TabPanel>
-            <Stack direction={["column", "row"]} w={"full"} spacing={12} alignItems={"start"}>
+            <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
               {isAdminOfXAllocationVoting && <UpdateReceiverAddress />}
-            </Stack>
+            </Grid>
           </TabPanel>
           <TabPanel>
-            <Stack direction={["column", "row"]} w={"full"} spacing={12} alignItems={"start"}>
-              {isAdmin && <AdminPermissions />}
+            <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
+              <GridItem colSpan={2}>{isAdmin && <AdminPermissions />}</GridItem>
 
               <Card w={"full"}>
                 <CardHeader>
@@ -74,7 +74,7 @@ export const AdminPageContent = () => {
                   <B3trAllowance />
                 </CardBody>
               </Card>
-            </Stack>
+            </Grid>
           </TabPanel>
           <TabPanel>
             {(isAdminOfGalaxyMember || isAdminOfB3tr || isAdminOfVot3) && (
