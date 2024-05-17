@@ -113,13 +113,15 @@ module "ecs-lb-service-thor-solo" {
   ecr_repo_uri               = module.ecr.repository_url[0]
   secrets_enable             = false
   assign_public_ip           = false
-  app_name                   = "${local.config.project}-${local.env}"
+  app_name                   = "thor-solo-${local.env}"
   ecr_image_tag              = local.config.image_tag
   project                    = local.config.project
   cpu                        = local.config.cpu
   memory                     = local.config.memory
   cidr                       = local.config.vpc_cidr
   container_port             = 8669
+  https_tg_port              = 8669
+  runtime_platform           = var.runtime_platform
   certificate_arn            = module.thor-solo_domain.certificate_arn
   ecs_sg                     = [aws_security_group.ecs_service_sg.id]
   rule_0_path_pattern        = ["/api/v*", "/api-docs", "/swagger-ui/*"]
