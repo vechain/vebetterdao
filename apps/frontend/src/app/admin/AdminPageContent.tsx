@@ -56,37 +56,22 @@ export const AdminPageContent = () => {
               <BulkClaimXAppsAllocations />
             </Grid>
           </TabPanel>
+
           <TabPanel>
             <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
               {isAdminOfXAllocationVoting && <UpdateReceiverAddress />}
             </Grid>
           </TabPanel>
+
           <TabPanel>
             <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
               <GridItem colSpan={2}>{isAdmin && <AdminPermissions />}</GridItem>
-
-              <Card w={"full"}>
-                <CardHeader>
-                  <Heading size="lg">B3TR Token Allowance</Heading>
-                  <Text fontSize="sm">Allow an external address to spend your B3TR tokens.</Text>
-                </CardHeader>
-                <CardBody>
-                  <B3trAllowance />
-                </CardBody>
-              </Card>
+              <B3trAllowance />
             </Grid>
           </TabPanel>
+
           <TabPanel>
-            {(isAdminOfGalaxyMember || isAdminOfB3tr || isAdminOfVot3) && (
-              <Card w={"full"}>
-                <CardHeader>
-                  <Heading size="lg">Pausing</Heading>
-                </CardHeader>
-                <CardBody>
-                  <Pause />
-                </CardBody>
-              </Card>
-            )}
+            <Pause />
           </TabPanel>
         </TabPanels>
       </Tabs>
