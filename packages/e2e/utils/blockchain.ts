@@ -93,7 +93,7 @@ const Emissions_nextCycleBlock_abi = JSON.stringify([{
  */
 const getAccountAddress = (index: number): string => {
     const hdNode = HDNode.fromMnemonic(constants.SOLO_MNEMONIC)
-    const childNode = hdNode.derive(index - 1);
+    const childNode = hdNode.derive(index);
     return childNode.address
 }
 
@@ -104,7 +104,7 @@ const getAccountAddress = (index: number): string => {
  */
 const getAccountPrivateKey = (index: number): Buffer => {
     const hdNode = HDNode.fromMnemonic(constants.SOLO_MNEMONIC)
-    const childNode = hdNode.derive(index - 1);
+    const childNode = hdNode.derive(index);
     const privateKey = childNode.privateKey ?? (() => { throw new Error('Unable to derive private key') })()
     return privateKey
 }
