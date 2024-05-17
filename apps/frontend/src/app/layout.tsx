@@ -11,6 +11,7 @@ import { AlphaTestnetBanner, Footer } from "@/components"
 import dynamic from "next/dynamic"
 import { AnalyticsUtils } from "@/utils"
 import { getConfig } from "@repo/config"
+import "@/i18n"
 
 dayjs.extend(relativeTime)
 dayjs.extend(duration)
