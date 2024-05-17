@@ -55,7 +55,6 @@ jobs:
             id: run-tests
             run: |
                 cd packages/e2e
-                yarn build
                 yarn playwright:e2e
 
           - name: Upload test results
