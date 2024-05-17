@@ -1,6 +1,6 @@
-import { useColorMode, useToken } from "@chakra-ui/react"
+import { useToken } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
-import { WalletConnectOptions } from "@vechain/dapp-kit-react"
+import { type WalletConnectOptions } from "@vechain/dapp-kit-react"
 import dynamic from "next/dynamic"
 
 const appConfig = getConfig()
@@ -21,7 +21,7 @@ const walletConnectOptions: WalletConnectOptions = {
     name: "VeBetterDAO Governance",
     description: "Participate in the VeBetterDAO Governance",
     url: "https://governance.vebetterdao.org",
-    icons: ['https://governance.vebetterdao.org/images/favicon.png'],
+    icons: ["https://governance.vebetterdao.org/images/favicon.png"],
   },
 }
 
