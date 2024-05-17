@@ -23,7 +23,11 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
     Number(roundInfo.voteStart),
     account ?? undefined,
   )
-  const totalVotes = votes.reduce((acc, vote) => acc + (Number(vote.value) || 0), 0)
+  const totalVotes = (() => {
+    const rawValue = votes.reduce((acc, vote) => acc + (Number(vote.value) || 0), 0)
+    if (rawValue >= 99.99 && rawValue < 100) return 100
+    return rawValue
+  })()
   const isCompletedAllocated = totalVotes >= 100
 
   const isOverDistributed = totalVotes > 100
