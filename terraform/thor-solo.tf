@@ -106,7 +106,6 @@ module "ecs-lb-service-thor-solo" {
   cluster_name               = module.ecs-cluster.name
   autoscale_cluster_name     = module.ecs-cluster.name
   lb_subnets                 = local.config.private_subnets
-  internal_alb               = true
   app_subnets                = local.config.private_subnets
   env                        = local.env
   is_create_repo             = false

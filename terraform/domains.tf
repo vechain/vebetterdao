@@ -8,8 +8,7 @@ locals {
   base_registry_url = "${module.ecr.registry_id[0]}.dkr.ecr.eu-west-1.amazonaws.com"
 }
 module "thor-solo_domain" {
-  depends_on = [module.ecs-lb-service-thor-solo]
-  source     = "git@github.com:vechain/terraform_infrastructure_modules.git//domains?ref=v.1.0.23"
+  source     = "git@github.com:vechain/terraform_infrastructure_modules.git//domains?ref=677fbdb"
 
   domain_name = local.domains[0].name
   zone_id     = local.domains[0].zone
