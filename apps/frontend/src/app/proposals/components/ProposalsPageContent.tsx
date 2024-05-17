@@ -20,10 +20,12 @@ import {
 } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
+import { useTranslation } from "react-i18next"
 import { FaPlus, FaScroll } from "react-icons/fa6"
 
 export const ProposalsPageContent = () => {
   const router = useRouter()
+  const { t } = useTranslation()
   const { data: proposalsEvents, error: proposalsEventsError, isLoading: proposalsEventsLoading } = useProposalsEvents()
   const { data: activeProposals, error: activeProposalsError, isLoading: activeProposalsLoading } = useActiveProposals()
   const {
@@ -155,7 +157,11 @@ export const ProposalsPageContent = () => {
             </Heading>
           </HStack>
           <Skeleton isLoaded={!proposalsEventsLoading}>
-            <Text fontSize="md">{proposalsEvents?.created.length} proposals created from the beginning</Text>
+            <Text fontSize="md">
+              {t("{proposals} proposals created from the beginning", {
+                proposals: proposalsEvents?.created.length,
+              })}
+            </Text>
           </Skeleton>
         </Box>
         <Box>
