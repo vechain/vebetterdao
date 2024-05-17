@@ -100,7 +100,7 @@ module "ecs-cluster" {
 
 module "ecs-lb-service-thor-solo" {
   depends_on                 = [module.ecs-cluster, resource.aws_security_group.ecs_service_sg, resource.aws_security_group.alb-sg]
-  source                     = "git::git@github.com:/vechain/terraform_infrastructure_modules.git//ecs-loadbalanced-webservice?ref=v.1.0.21"
+  source                     = "git::git@github.com:/vechain/terraform_infrastructure_modules.git//ecs-loadbalanced-webservice?ref=v.1.0.23"
   region                     = local.config.region
   vpc_id                     = local.config.vpc_id
   cluster_name               = module.ecs-cluster.name
