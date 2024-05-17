@@ -58,7 +58,7 @@ export const AdminPageContent = () => {
           <TabPanel>
             <Card w={"full"}>
               <CardHeader>
-                <Heading size="lg">Start round</Heading>
+                <Heading size="lg">Emissions and Rounds</Heading>
               </CardHeader>
               <CardBody>
                 <VStack w={"full"} spacing={4} alignItems={"start"}>
