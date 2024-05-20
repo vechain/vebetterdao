@@ -23,10 +23,20 @@
 
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+import { GovernorTypes } from "./GovernorTypes.sol";
+import { IVoterRewards } from "../../interfaces/IVoterRewards.sol";
+import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
+import { IB3TR } from "../../interfaces/IB3TR.sol";
+import { IVOT3 } from "../../interfaces/IVOT3.sol";
+import { TimelockControllerUpgradeable } from "@openzeppelin/contracts-upgradeable/governance/TimelockControllerUpgradeable.sol";
+import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 
+/// @title GovernorStorageTypes
+/// @notice Library for defining storage types used in the Governor contract.
 library GovernorStorageTypes {
-  struct QuorumGovernorStorage {
+  using Checkpoints for Checkpoints.Trace208;
+
+  struct GovernorQuoromStorage {
     Checkpoints.Trace208 quorumNumeratorHistory; // quorum numerator history
   }
 
@@ -57,17 +67,9 @@ library GovernorStorageTypes {
     mapping(uint256 => mapping(address => uint256)) deposits; // mapping to track deposits made to proposals by address
   }
 
-  struct GovernorVoteCountingStorage {
-    mapping(uint256 => ProposalVote) proposalVotes; // mapping to store the votes for a proposal
+  struct GovernorVotesStorage {
+    mapping(uint256 => GovernorTypes.ProposalVote) proposalVotes; // mapping to store the votes for a proposal
     mapping(address => bool) hasVotedOnce; // mapping to store that a user has voted at least one time
     mapping(uint256 => uint256) proposalTotalVotes; // mapping to store the total votes for a proposal
-  }
-
-  // ProposalVote struct to store the votes for a proposal
-  struct ProposalVote {
-    uint256 againstVotes;
-    uint256 forVotes;
-    uint256 abstainVotes;
-    mapping(address => bool) hasVoted;
   }
 }
