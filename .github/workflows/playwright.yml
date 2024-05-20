@@ -43,7 +43,7 @@ jobs:
           - name: Launch app
             run:  |
               cp .env.example .env
-              yarn dev &
+              yarn dev:e2e &
         
           - name: Health check
             run: |
