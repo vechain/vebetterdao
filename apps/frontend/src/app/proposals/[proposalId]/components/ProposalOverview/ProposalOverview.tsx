@@ -21,9 +21,11 @@ import { ProposalOverviewStatusLabel } from "./components/ProposalOverviewStatus
 import { ProposalOverviewYourSupport } from "./components/ProposalOverviewYourSupport"
 import { ProposalOverviewCommunitySupport } from "./components/ProposalOverviewCommunitySupport"
 import { ProposalYourVote } from "./components/ProposalYourVote"
+import { useTranslation } from "react-i18next"
 
 export const ProposalOverview = () => {
   const { proposal } = useCurrentProposal()
+  const { t } = useTranslation()
 
   return (
     <Card border="1px solid #D5D5D5" rounded="16px" p="24px">
@@ -32,11 +34,11 @@ export const ProposalOverview = () => {
           <VStack alignItems={"stretch"}>
             <HStack gap={1}>
               <Text fontWeight={"600"} color="#6A6A6A">
-                ROUND
+                {t("ROUND")}
               </Text>
               <Skeleton isLoaded={!proposal.isRoundIdVoteStartLoading} display={"inline-flex"} ml={1}>
                 <Text fontWeight={"600"} color="#6A6A6A">
-                  #{proposal.roundIdVoteStart}
+                  {t(`#{{round}}`, { round: proposal.roundIdVoteStart })}
                 </Text>
               </Skeleton>
             </HStack>
@@ -58,7 +60,7 @@ export const ProposalOverview = () => {
             <HStack justify={"space-between"} flexWrap={"wrap"}>
               <VStack alignItems={"stretch"}>
                 <Text fontWeight={"400"} color="#6A6A6A">
-                  Created by
+                  {t("Created by")}
                 </Text>
                 <Skeleton isLoaded={!proposal.isProposerLoading}>
                   <HStack>
