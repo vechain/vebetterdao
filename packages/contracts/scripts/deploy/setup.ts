@@ -3,7 +3,7 @@ import { SeedStrategy, getAccounts, getSeedAccounts } from "../helpers/seedAccou
 import { bootstrapEmissions } from "../helpers/emissions"
 import { addXDapps } from "../helpers/xApp"
 import { airdropB3trFromTreasury, airdropB3trPercentage } from "../helpers/airdrop"
-import { shouldRunSimulation } from "@repo/config/contracts"
+import { isE2E, shouldRunSimulation } from "@repo/config/contracts"
 
 const accounts = getAccounts(12)
 
@@ -65,7 +65,7 @@ export const setupLocalEnvironment = async (
   const seedAccounts = getSeedAccounts(SeedStrategy.FIXED, 5, 0)
   await airdropB3trFromTreasury(treasuryAddress, admin, seedAccounts)
 
-  if (!shouldRunSimulation()) {
+  if (!shouldRunSimulation() && !isE2E()) {
     const firstAccount = seedAccounts[0]
     await airdropB3trPercentage(treasuryAddress, admin, firstAccount, 10, b3tr) // 10% of total supply
   }
