@@ -21,8 +21,7 @@ import { ethers } from "ethers"
  */
 export type CastAllocationVotesProps = {
   appId: string
-  value: string
-  rawValue: number
+  votes: number
 }[]
 
 type useCastAllocationVotesProps = {
@@ -56,10 +55,12 @@ export const useCastAllocationVotes = ({
 
   const buildClauses = useCallback(
     (data: CastAllocationVotesProps) => {
-      const filteredData = data.filter(value => value.rawValue > 0)
+      const filteredData = data.filter(value => value.votes > 0)
 
       const apps = filteredData.map(value => value.appId)
-      const votes = filteredData.map(value => ethers.parseEther(value.rawValue.toString()))
+      const votes = filteredData.map(value => ethers.parseEther(value.votes.toString()))
+
+      const totalVotes = votes.reduce((acc, vote) => acc + Number(vote), 0)
 
       const clause: EnhancedClause = {
         to: getConfig().xAllocationVotingContractAddress,
@@ -71,7 +72,7 @@ export const useCastAllocationVotes = ({
 
       return [clause]
     },
-    [thor, roundId],
+    [roundId],
   )
 
   //Refetch queries to update ui after the tx is confirmed

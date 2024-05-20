@@ -19,7 +19,11 @@ type Props = {
 }
 
 export type FormData = {
-  votes: CastAllocationVotesProps
+  votes: {
+    appId: string
+    value: string
+    rawValue: number
+  }[]
 }
 
 const compactFormatter = getCompactFormatter(2)
@@ -102,12 +106,11 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
 
   const onSubmit = (data: FormData) => {
     if (!votesAtSnapshot) throw new Error("Votes at snapshot not found")
-    const appVotesPercentagesToValue = data.votes.map(vote => {
-      const rawValue = scaledDivision(Number(vote.value) * Number(votesAtSnapshot.scaled), 100)
+    const appVotesPercentagesToValue: CastAllocationVotesProps = data.votes.map(vote => {
+      const rawValue = scaledDivision(Number(vote.rawValue) * Number(votesAtSnapshot.scaled), 100)
       return {
         appId: vote.appId,
-        value: new BigNumber(rawValue).toFixed(2, BigNumber.ROUND_HALF_DOWN),
-        rawValue,
+        votes: rawValue,
       }
     })
 
@@ -121,11 +124,16 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
   }, [castAllocationVotes.resetStatus, handleSubmit, onSubmit])
 
   const splitEvenly = () => {
-    const totalVotes = xApps?.length ?? 0
-    const rawValue = scaledDivision(100, totalVotes)
+    const totalAppsToVote = xApps?.length ?? 0
+    const rawValue = scaledDivision(100, totalAppsToVote)
+    const remainingPercentage = 100 - rawValue * totalAppsToVote
     const votesPerApp = new BigNumber(rawValue).toFixed(2, BigNumber.ROUND_HALF_DOWN)
+
+    // in case the division is not exact, we add the remaining percentage to a random app
+    const randomAppIndex = Math.floor(Math.random() * totalAppsToVote)
     xApps?.forEach((xApp, index) => {
-      update(index, { appId: xApp.id, value: votesPerApp, rawValue })
+      const parsedRawValue = index === randomAppIndex ? rawValue + remainingPercentage : rawValue
+      update(index, { appId: xApp.id, value: votesPerApp, rawValue: parsedRawValue })
     })
   }
 
@@ -166,8 +174,6 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     )
   }, [hasVoted, isVotingConcluded])
 
-  console.log("fields", fields)
-
   return (
     <Card w="full" id="user-votes" maxH={[!account ? "600px" : "auto", "auto"]} overflowY={"hidden"}>
       <CardBody>
@@ -202,7 +208,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
                 <Box>
                   <Heading size="md">{hasVoted ? "Voted apps" : "Available apps"}</Heading>
                   {!hasVoted && !isVotingConcluded && (
-                    <Button variant="link" onClick={splitEvenly}>
+                    <Button variant="link" onClick={splitEvenly} data-testid="split-evenly">
                       Split evenly
                     </Button>
                   )}
@@ -214,7 +220,6 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
               <VStack spacing={4} mt={8}>
                 {fields.map((field, index) => {
                   const xApp = xApps?.find(xApp => xApp.id === field.appId)
-                  console.log("xApp", xApp)
                   return (
                     <SelectAppVotesInput
                       totalVotesAvailable={votesAtSnapshot?.scaled}
@@ -238,6 +243,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
                   isDisabled={isFormDisabled}
                   type="submit"
                   size="lg"
+                  data-testid="cast-vote-button"
                   colorScheme="primary"
                   borderRadius={"full"}
                   leftIcon={<MdHowToVote />}

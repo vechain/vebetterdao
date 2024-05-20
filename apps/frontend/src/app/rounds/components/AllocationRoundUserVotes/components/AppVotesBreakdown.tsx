@@ -1,17 +1,17 @@
 import { getXAppMetadata, getXAppMetadataQueryKey, useAllocationsRound, useGetVotesOnBlock } from "@/api"
 import { getIpfsImage, getIpfsImageQueryKey } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
-import { CastAllocationVotesProps } from "@/hooks"
 import { Box, Card, CardBody, HStack, Heading, Icon, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useQueries } from "@tanstack/react-query"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { FaInfoCircle } from "react-icons/fa"
 import BigNumber from "bignumber.js"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { FormData } from "../AllocationRoundUserVotes"
 
 type Props = {
   roundId: string
-  votes: CastAllocationVotesProps
+  votes: FormData["votes"]
 }
 
 const compactFormatter = getCompactFormatter()
@@ -112,7 +112,7 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
                         borderRadius="9px"
                       />
                     </Skeleton>
-                    <Text fontSize="sm" mt={1}>
+                    <Text fontSize="sm" mt={1} data-testid={`app-${vote.appId}-vote-${vote.value}`}>
                       {vote.value}%
                     </Text>
                   </VStack>

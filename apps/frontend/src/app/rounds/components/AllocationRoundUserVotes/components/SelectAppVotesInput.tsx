@@ -24,7 +24,7 @@ import { scaledDivision } from "@/utils/MathUtils"
 
 type Props = {
   control: Control<{
-    votes: CastAllocationVotesProps
+    votes: FormData["votes"]
   }>
   getValues: UseFormGetValues<FormData>
   index: number
