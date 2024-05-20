@@ -26,6 +26,7 @@ const compactFormatter = getCompactFormatter(2)
 
 export const AllocationRoundUserVotes = ({ roundId }: Props) => {
   const { account } = useWallet()
+
   const { data: xApps } = useRoundXApps(roundId)
 
   const castAllocationVotes = useCastAllocationVotes({ roundId })
@@ -165,6 +166,8 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     )
   }, [hasVoted, isVotingConcluded])
 
+  console.log("fields", fields)
+
   return (
     <Card w="full" id="user-votes" maxH={[!account ? "600px" : "auto", "auto"]} overflowY={"hidden"}>
       <CardBody>
@@ -211,6 +214,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
               <VStack spacing={4} mt={8}>
                 {fields.map((field, index) => {
                   const xApp = xApps?.find(xApp => xApp.id === field.appId)
+                  console.log("xApp", xApp)
                   return (
                     <SelectAppVotesInput
                       totalVotesAvailable={votesAtSnapshot?.scaled}

@@ -45,8 +45,6 @@ export const SelectAppVotesInput = ({
   isDisabled = false,
   totalVotesAvailable,
 }: Props) => {
-  console.log("errors", errors, "totalVotes", totalVotesAvailable)
-
   const { data: appMetadata } = useXAppMetadata(xApp?.id)
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
 
@@ -79,7 +77,7 @@ export const SelectAppVotesInput = ({
                 render={({ field: { onChange, value } }) => {
                   return (
                     <Input
-                      data-testid={`${xApp?.name}-vote`}
+                      data-testid={`${xApp?.name}-vote-input`}
                       w="full"
                       placeholder="0"
                       value={value.value}

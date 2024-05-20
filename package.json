@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "test": "dotenv -v NEXT_PUBLIC_APP_ENV=solo-staging -e .env.example turbo run test --",
+    "test:watch": "dotenv -v NEXT_PUBLIC_APP_ENV=solo-staging -e .env.example turbo run test:watch --",
     "test:coverage:solidity": "dotenv -v NEXT_PUBLIC_APP_ENV=solo-staging -v IS_TEST_COVERAGE=true -e .env.example turbo run test:coverage:solidity",
     "test:coverage:fe": "dotenv -v NEXT_PUBLIC_APP_ENV=solo-staging -e .env.example turbo run test:coverage:fe",
     "build": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo build",
