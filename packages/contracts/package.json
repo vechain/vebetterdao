@@ -21,7 +21,7 @@
     "start-round": "npx hardhat run scripts/emissions/startRound.ts",
     "start-solo": "docker compose up -d",
     "stop-solo": "docker compose down",
-    "clean": "rm -rf dist artifacts node_modules",
+    "clean": "rm -rf dist artifacts typechain-types cache node_modules",
     "lint": "eslint . --ext .ts",
     "format": "eslint . --ext .ts --fix",
     "generate-docs": "npx hardhat docgen"

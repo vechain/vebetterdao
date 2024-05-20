@@ -1,5 +1,5 @@
 import { useProposalsEvents, useActiveProposals, useIncomingProposals, usePastProposals, useCurrentBlock } from "@/api"
-import { CreateProposalButton, ProposalCard } from "@/components"
+import { ProposalCard } from "@/components"
 import {
   VStack,
   HStack,
@@ -16,11 +16,16 @@ import {
   Text,
   Skeleton,
   Spinner,
+  Button,
 } from "@chakra-ui/react"
-import { useMemo } from "react"
-import { FaScroll } from "react-icons/fa6"
+import { useRouter } from "next/navigation"
+import { useCallback, useMemo } from "react"
+import { useTranslation } from "react-i18next"
+import { FaPlus, FaScroll } from "react-icons/fa6"
 
 export const ProposalsPageContent = () => {
+  const router = useRouter()
+  const { t } = useTranslation()
   const { data: proposalsEvents, error: proposalsEventsError, isLoading: proposalsEventsLoading } = useProposalsEvents()
   const { data: activeProposals, error: activeProposalsError, isLoading: activeProposalsLoading } = useActiveProposals()
   const {
@@ -102,6 +107,10 @@ export const ProposalsPageContent = () => {
     )
   }, [incomingProposals, incomingProposalsError, incomingProposalsLoading])
 
+  const onNewCLick = useCallback(() => {
+    router.push("/proposals/new")
+  }, [router])
+
   const renderPastProposalsTab = useMemo(() => {
     if (pastProposalsLoading) {
       return (
@@ -148,11 +157,17 @@ export const ProposalsPageContent = () => {
             </Heading>
           </HStack>
           <Skeleton isLoaded={!proposalsEventsLoading}>
-            <Text fontSize="md">{proposalsEvents?.created.length} proposals created from the beginning</Text>
+            <Text fontSize="md">
+              {t("{proposals} proposals created from the beginning", {
+                proposals: proposalsEvents?.created.length,
+              })}
+            </Text>
           </Skeleton>
         </Box>
         <Box>
-          <CreateProposalButton />
+          <Button onClick={onNewCLick} leftIcon={<FaPlus />}>
+            Create proposal
+          </Button>
           <Text fontSize="md" textAlign={"center"}>
             Current block: <b>{currentBlock?.number}</b>
           </Text>
