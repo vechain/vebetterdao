@@ -105,7 +105,7 @@ module "ecs-lb-service-thor-solo" {
   vpc_id                     = local.config.vpc_id
   cluster_name               = module.ecs-cluster.name
   autoscale_cluster_name     = module.ecs-cluster.name
-  lb_subnets                 = local.config.private_subnets
+  lb_subnets                 = local.config.public_subnets
   app_subnets                = local.config.private_subnets
   env                        = local.env
   is_create_repo             = false
