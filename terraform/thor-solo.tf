@@ -142,7 +142,7 @@ module "ecs-lb-service-thor-solo" {
   min_capacity                        = 1
   max_capacity                        = local.config.max_capacity
   target_cpu_value                    = 70
-  target_memory_value                 = 70
+  target_memory_value                 = 95
   disable_scale_in                    = false
   # scale_in_cooldown = 300
   # scale_out_cooldown = 300
