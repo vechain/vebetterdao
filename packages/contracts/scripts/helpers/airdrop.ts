@@ -78,11 +78,7 @@ export const airdropB3trPercentage = async (
 
   const b3trSupply: bigint = await b3tr.totalSupply()
 
-  console.log("B3TR Supply: ", b3trSupply.toString())
-
   const amount = (b3trSupply * BigInt(percentage)) / BigInt(100)
-
-  console.log("Amount: ", amount.toString())
 
   const clause: TransactionClause = clauseBuilder.functionInteraction(
     treasuryAddress,

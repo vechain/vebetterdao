@@ -3,6 +3,7 @@ import { SeedStrategy, getAccounts, getSeedAccounts } from "../helpers/seedAccou
 import { bootstrapEmissions } from "../helpers/emissions"
 import { addXDapps } from "../helpers/xApp"
 import { airdropB3trFromTreasury, airdropB3trPercentage } from "../helpers/airdrop"
+import { shouldRunSimulation } from "@repo/config/contracts"
 
 const accounts = getAccounts(12)
 
@@ -64,9 +65,10 @@ export const setupLocalEnvironment = async (
   const seedAccounts = getSeedAccounts(SeedStrategy.FIXED, 5, 0)
   await airdropB3trFromTreasury(treasuryAddress, admin, seedAccounts)
 
-  // Airdrop 5% of the total supply to the first account
-  const firstAccount = seedAccounts[0]
-  await airdropB3trPercentage(treasuryAddress, admin, firstAccount, 10, b3tr)
+  if (!shouldRunSimulation()) {
+    const firstAccount = seedAccounts[0]
+    await airdropB3trPercentage(treasuryAddress, admin, firstAccount, 10, b3tr) // 10% of total supply
+  }
 
   const end = new Date(performance.now() - start)
   console.log(`Setup complete in ${end.getMinutes()}m ${end.getSeconds()}s`)
