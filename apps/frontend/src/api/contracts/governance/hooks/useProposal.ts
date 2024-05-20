@@ -9,12 +9,14 @@ import { useProposalUserDeposit } from "./useProposalUserDeposit"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useIsDepositReached } from "./useIsDepositReached"
 import { useIsProposalQuorumReached } from "./useIsProposalQuorumReached"
+import { useProposalDepositEvent } from "./useProposalDepositEvent"
 
 export const useProposal = (proposalId: string) => {
   const { account } = useWallet()
   const proposalState = useProposalState(proposalId)
   const proposalVotes = useProposalVotes(proposalId)
   const proposalCreatedEvent = useProposalCreatedEvent(proposalId)
+  const proposalDepositEvent = useProposalDepositEvent(proposalId)
   const proposalDeposits = useProposalDeposits(proposalId)
   const proposalUserDeposit = useProposalUserDeposit(proposalId, account || "")
   const isDepositReached = useIsDepositReached(proposalId)
@@ -24,6 +26,7 @@ export const useProposal = (proposalId: string) => {
     proposalState,
     proposalVotes,
     proposalCreatedEvent,
+    proposalDepositEvent,
     proposalDeposits,
     proposalUserDeposit,
     isDepositReached,
@@ -65,6 +68,13 @@ export const useProposal = (proposalId: string) => {
       isDepositReachedLoading: isDepositReached.isLoading,
       yourSupport: proposalUserDeposit?.data || 0,
       isYourSupportLoading: proposalUserDeposit.isLoading,
+      yourSupportPercentage: Number(proposalUserDeposit?.data) / Number(proposalDeposits?.data),
+      othersSupport: Number(proposalDeposits?.data || 0) - Number(proposalUserDeposit?.data || 0),
+      isOthersSupportLoading: proposalDeposits.isLoading || proposalUserDeposit.isLoading,
+      othersSupportPercentage:
+        (Number(proposalDeposits?.data) - Number(proposalUserDeposit?.data)) / Number(proposalDeposits?.data),
+      supportingUserCount: proposalDepositEvent.supportingUserCount,
+      isSupportinUserCountLoading: proposalDepositEvent.isLoading,
       state: proposalState.data,
       isStateLoading: proposalState.isLoading,
       forVotes,
@@ -82,8 +92,10 @@ export const useProposal = (proposalId: string) => {
     const mock = {}
 
     return { ...result, ...mock }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     ...calls.map(call => call.data),
+    ...calls.map(call => call.isLoading),
     votingStartDate,
     isVotingStartDateLoading,
     votingEndDate,
@@ -94,7 +106,7 @@ export const useProposal = (proposalId: string) => {
     () => calls.find(call => call.error)?.error || null,
     calls.map(call => call.error),
   )
-  if (error) console.error("useProposal", error)
+  // if (error) console.error("useProposal", error)
 
   return {
     proposalState,
