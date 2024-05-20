@@ -1,53 +1,15 @@
-import { render } from "../../../../../test"
+import { fireEvent, render } from "../../../../../test"
 import * as apiHooks from "../../../../api"
 import * as dappkit from "@vechain/dapp-kit-react"
 import { AllocationRoundUserVotes } from "./AllocationRoundUserVotes"
+import { APPS } from "../../../../../test/mocks/Apps"
+import dayjs from "dayjs"
+import { ethers } from "ethers"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { scaledDivision } from "@/utils/MathUtils"
+import BigNumber from "bignumber.js"
 
 const address = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa"
-const APPS: apiHooks.XApp[] = [
-  {
-    id: "1",
-    createdAtTimestamp: 1630000000,
-    receiverAddress: address,
-    name: "Vyvo",
-    metadataURI: "bafkreigk7faih4jmdee4ritah6564jqpfn5s2gl4dcsvii7woijy5ls7ca",
-  },
-  {
-    id: "2",
-    createdAtTimestamp: 1630000000,
-    receiverAddress: address,
-    name: "Mugshot",
-    metadataURI: "bafkreicglvjxjy2yxruwpmu6czm5th76bauu5phfhnlf2oxbyc66fdrzkm",
-  },
-  {
-    id: "3",
-    createdAtTimestamp: 1630000000,
-    receiverAddress: address,
-    name: "Cleanify",
-    metadataURI: "bafkreicw6g34t3th63z7hq3o4xkay6dkrei5ny5evyrlclw53gfz6o6lgu",
-  },
-  {
-    id: "4",
-    createdAtTimestamp: 1630000000,
-    receiverAddress: address,
-    name: "Non Fungible Book Club (NFBC)",
-    metadataURI: "bafkreicdcol6afcsfb4efxmjzqsuonukn54jixmfqmfsirhw4wujvxfpxy",
-  },
-  {
-    id: "5",
-    createdAtTimestamp: 1630000000,
-    receiverAddress: address,
-    name: "Green Ambassador Challenge",
-    metadataURI: "bafkreigrwjowwwcmdd7bdm3yqsquu77ufeqcao6mjbd2fednwo5qfmtldi",
-  },
-  {
-    id: "6",
-    createdAtTimestamp: 1630000000,
-    receiverAddress: address,
-    name: "GreenCart",
-    metadataURI: "bafkreie6gdx7xugiemmubpfb6r5c4bdwfjucjtmb43mk2fhemyx3x3kvnu",
-  },
-]
 
 vi.mock("@vechain/dapp-kit-react", async importOriginal => {
   const mod = await importOriginal<typeof import("@vechain/dapp-kit-react")>()
@@ -80,18 +42,329 @@ describe("AllocationRoundUserVotes", () => {
     await screen.findByText("Connect your wallet to cast your vote!")
   })
 
-  it("wallet connected - apps available - should render correctly", async () => {
-    //@ts-ignore
-    vi.spyOn(dappkit, "useWallet").mockReturnValue({
-      account: address,
+  describe("wallet connected", () => {
+    beforeEach(() => {
+      //@ts-ignore
+      vi.spyOn(dappkit, "useWallet").mockReturnValue({
+        account: address,
+      })
     })
-    const screen = render(<AllocationRoundUserVotes roundId={roundId} />)
+    it("apps available - should render correctly", async () => {
+      const screen = render(<AllocationRoundUserVotes roundId={roundId} />)
 
-    expect(screen.queryByTestId("wallet-not-connected-overlay")).not.toBeInTheDocument()
-    expect(screen.queryByText("Connect your wallet to cast your vote!")).not.toBeInTheDocument()
+      expect(screen.queryByTestId("wallet-not-connected-overlay")).not.toBeInTheDocument()
+      expect(screen.queryByText("Connect your wallet to cast your vote!")).not.toBeInTheDocument()
 
-    for (const app of APPS) {
-      await screen.findByTestId(`${app.name}-vote-input`)
-    }
+      for (const app of APPS) {
+        await screen.findByTestId(`${app.name}-vote-input`)
+      }
+    })
+    it("apps not available - should render correctly", async () => {
+      //@ts-ignore
+      vi.spyOn(apiHooks, "useRoundXApps").mockReturnValue({
+        data: [],
+        isLoading: false,
+        isError: false,
+      })
+      const screen = render(<AllocationRoundUserVotes roundId={roundId} />)
+
+      expect(screen.queryByTestId("wallet-not-connected-overlay")).not.toBeInTheDocument()
+      expect(screen.queryByText("Connect your wallet to cast your vote!")).not.toBeInTheDocument()
+
+      for (const app of APPS) {
+        expect(screen.queryByTestId(`${app.name}-vote-input`)).not.toBeInTheDocument()
+      }
+    })
+    describe("voting active", () => {
+      const totalVotes = "100"
+      const randomAppsExcludedId = APPS.filter(() => Math.random() > 0.5).map(app => app.id)
+      const appsVoted = APPS.filter(app => !randomAppsExcludedId.includes(app.id))
+      beforeEach(() => {
+        // tell vitest we use mocked time
+        vi.useFakeTimers()
+        vi.setSystemTime(dayjs().valueOf())
+        //@ts-ignore
+        vi.spyOn(apiHooks, "useAllocationsRound").mockReturnValue({
+          data: {
+            voteEndTimestamp: dayjs().add(1, "day"),
+            voteStartTimestamp: dayjs().subtract(2, "day"),
+            appsIds: APPS.filter(app => !randomAppsExcludedId.includes(app.id)).map(app => app.id),
+            isCurrent: true,
+            proposer: "0x123",
+            voteStart: "1",
+            voteEnd: "2",
+            roundId: "1",
+            state: "1",
+          },
+          isLoading: false,
+          isError: false,
+        })
+
+        //@ts-ignore
+        vi.spyOn(apiHooks, "useGetVotesOnBlock").mockReturnValue({
+          data: {
+            formatted: totalVotes,
+            original: ethers.parseEther(totalVotes).toString(),
+            scaled: totalVotes,
+          },
+          isLoading: false,
+          isError: false,
+        })
+      })
+      afterEach(() => {
+        // restoring date after each test run
+        vi.useRealTimers()
+      })
+
+      describe("user has not voted", () => {
+        beforeEach(() => {
+          //@ts-ignore
+          vi.spyOn(apiHooks, "useUserVotesInRound").mockReturnValue({
+            data: null,
+            isLoading: false,
+            isError: false,
+          })
+
+          //@ts-ignore
+          vi.spyOn(apiHooks, "useHasVotedInRound").mockReturnValue({
+            data: false,
+            isLoading: false,
+            isError: false,
+          })
+        })
+        it("should render correctly", async () => {
+          const screen = render(<AllocationRoundUserVotes roundId={roundId} />)
+
+          expect(await screen.findByText("Assign voting power to apps")).toBeInTheDocument()
+          expect(
+            await screen.findByText(
+              "Distribute your voting power among your selected apps to help them receive more B3TR allocation.",
+            ),
+          ).toBeInTheDocument()
+          expect(await screen.findByText("Available apps")).toBeInTheDocument()
+          expect(await screen.findByText("Voting power to distribute")).toBeInTheDocument()
+
+          expect(await screen.findByTestId("split-evenly")).toBeInTheDocument()
+          expect(await screen.findByTestId("cast-vote-button")).toBeInTheDocument()
+
+          for (const app of APPS) {
+            const input = await screen.findByTestId(`${app.name}-vote-input`)
+            expect(input).toBeEnabled()
+          }
+        })
+        it("splitEvenly", async () => {
+          const screen = render(<AllocationRoundUserVotes roundId={roundId} />)
+
+          const splitEvenly = await screen.findByTestId("split-evenly")
+          fireEvent.click(splitEvenly)
+          const votesPerApp = scaledDivision(Number(totalVotes), APPS.length)
+          const humanValue = new BigNumber(votesPerApp).toFixed(2, BigNumber.ROUND_HALF_DOWN)
+          expect(await screen.findByTestId("cast-vote-button")).toBeInTheDocument()
+
+          for (const app of APPS) {
+            const input = await screen.findByTestId(`${app.name}-vote-input`)
+            expect(input).toBeEnabled()
+            expect(input).toHaveValue(humanValue)
+          }
+        })
+      }) // user has not voted
+      it("user has voted - should render correctly", async () => {
+        //@ts-ignore
+        vi.spyOn(apiHooks, "useHasVotedInRound").mockReturnValue({
+          data: true,
+          isLoading: false,
+          isError: false,
+        })
+
+        const votesPerApp = "10"
+        //@ts-ignore
+        vi.spyOn(apiHooks, "useUserVotesInRound").mockReturnValue({
+          data: {
+            appsIds: appsVoted.map(app => app.id),
+            roundId: "1",
+            voteWeights: appsVoted.map(app => ethers.parseEther(votesPerApp).toString()),
+            voter: address,
+          },
+          isLoading: false,
+          isError: false,
+        })
+
+        const totalVotesCast = appsVoted.length * Number(votesPerApp)
+        const screen = render(<AllocationRoundUserVotes roundId={roundId} />)
+        const percentageDistributed = scaledDivision(totalVotesCast * 100, Number(totalVotes))
+
+        expect(await screen.findByText("Your voting distribution")).toBeInTheDocument()
+        expect(
+          await screen.findByText(
+            "You have already cast your vote. See below the distribution of your voting power among the apps.",
+          ),
+        ).toBeInTheDocument()
+
+        // test percentageDistributed
+
+        expect(await screen.findByText("Voted apps")).toBeInTheDocument()
+
+        expect(await screen.findByText("Distributed voting power")).toBeInTheDocument()
+
+        expect(screen.queryByTestId("split-evenly")).not.toBeInTheDocument()
+        expect(screen.queryByTestId("cast-vote-button")).not.toBeInTheDocument()
+
+        for (const app of APPS) {
+          const isExcluded = randomAppsExcludedId.includes(app.id)
+          if (!isExcluded) {
+            // inputs
+            const input = await screen.findByTestId(`${app.name}-vote-input`)
+            expect(input).toBeDisabled()
+            const rawValue = scaledDivision(Number(votesPerApp) * 100, Number(totalVotes))
+            const humanValue = new BigNumber(rawValue).toFixed(2, BigNumber.ROUND_HALF_DOWN)
+            expect(input).toHaveValue(humanValue)
+
+            //votesbreakdown
+            await screen.findByTestId(`app-${app.id}-vote-${humanValue}`)
+          } else {
+            const input = screen.queryByTestId(`${app.name}-vote-input`)
+            expect(input).not.toBeInTheDocument()
+
+            expect(screen.queryByTestId(`app-${app.id}-vote-${"10.00"}`)).not.toBeInTheDocument()
+          }
+        }
+      })
+    }) // voting active
+
+    describe("voting concluded", () => {
+      const totalVotes = "100"
+      const randomAppsExcludedId = APPS.filter(() => Math.random() > 0.5).map(app => app.id)
+      const appsVoted = APPS.filter(app => !randomAppsExcludedId.includes(app.id))
+      beforeEach(() => {
+        // tell vitest we use mocked time
+        vi.useFakeTimers()
+        vi.setSystemTime(dayjs().valueOf())
+        //@ts-ignore
+        vi.spyOn(apiHooks, "useAllocationsRound").mockReturnValue({
+          data: {
+            voteEndTimestamp: dayjs().subtract(1, "day"),
+            voteStartTimestamp: dayjs().subtract(2, "day"),
+            appsIds: APPS.filter(app => !randomAppsExcludedId.includes(app.id)).map(app => app.id),
+            isCurrent: true,
+            proposer: "0x123",
+            voteStart: "1",
+            voteEnd: "2",
+            roundId: "1",
+            state: "1",
+          },
+          isLoading: false,
+          isError: false,
+        })
+
+        //@ts-ignore
+        vi.spyOn(apiHooks, "useGetVotesOnBlock").mockReturnValue({
+          data: {
+            formatted: totalVotes,
+            original: ethers.parseEther(totalVotes).toString(),
+            scaled: totalVotes,
+          },
+          isLoading: false,
+          isError: false,
+        })
+      })
+      afterEach(() => {
+        // restoring date after each test run
+        vi.useRealTimers()
+      })
+
+      it("user has not voted - should render correctly", async () => {
+        //@ts-ignore
+        vi.spyOn(apiHooks, "useHasVotedInRound").mockReturnValue({
+          data: false,
+          isLoading: false,
+          isError: false,
+        })
+        //@ts-ignore
+        vi.spyOn(apiHooks, "useUserVotesInRound").mockReturnValue({
+          data: null,
+          isLoading: false,
+          isError: false,
+        })
+        const screen = render(<AllocationRoundUserVotes roundId={roundId} />)
+
+        expect(await screen.findByText("Voting concluded")).toBeInTheDocument()
+        expect(
+          await screen.findByText("Voting is concluded. You can no longer cast your vote. No votes were cast."),
+        ).toBeInTheDocument()
+        expect(await screen.findByText("Available apps")).toBeInTheDocument()
+        expect(await screen.findByText("Distributed voting power")).toBeInTheDocument()
+
+        expect(screen.queryByTestId("split-evenly")).not.toBeInTheDocument()
+        expect(screen.queryByTestId("cast-vote-button")).not.toBeInTheDocument()
+
+        for (const app of APPS) {
+          const input = await screen.findByTestId(`${app.name}-vote-input`)
+          expect(input).toBeDisabled()
+        }
+      })
+      it("user has voted - should render correctly", async () => {
+        //@ts-ignore
+        vi.spyOn(apiHooks, "useHasVotedInRound").mockReturnValue({
+          data: true,
+          isLoading: false,
+          isError: false,
+        })
+
+        const votesPerApp = "10"
+        //@ts-ignore
+        vi.spyOn(apiHooks, "useUserVotesInRound").mockReturnValue({
+          data: {
+            appsIds: appsVoted.map(app => app.id),
+            roundId: "1",
+            voteWeights: appsVoted.map(app => ethers.parseEther(votesPerApp).toString()),
+            voter: address,
+          },
+          isLoading: false,
+          isError: false,
+        })
+
+        const totalVotesCast = appsVoted.length * Number(votesPerApp)
+        const screen = render(<AllocationRoundUserVotes roundId={roundId} />)
+        const percentageDistributed = scaledDivision(totalVotesCast * 100, Number(totalVotes))
+
+        expect(await screen.findByText("Voting concluded")).toBeInTheDocument()
+        expect(
+          await screen.findByText(
+            "Voting is concluded. See below the distribution of your voting power among the apps.",
+          ),
+        ).toBeInTheDocument()
+
+        // test percentageDistributed
+
+        expect(
+          await screen.findByText(`${getCompactFormatter().format(totalVotesCast)} votes cast`),
+        ).toBeInTheDocument()
+        expect(await screen.findByText("Voted apps")).toBeInTheDocument()
+        expect(await screen.findByText("Distributed voting power")).toBeInTheDocument()
+
+        expect(screen.queryByTestId("split-evenly")).not.toBeInTheDocument()
+        expect(screen.queryByTestId("cast-vote-button")).not.toBeInTheDocument()
+
+        for (const app of APPS) {
+          const isExcluded = randomAppsExcludedId.includes(app.id)
+          if (!isExcluded) {
+            // inputs
+            const input = await screen.findByTestId(`${app.name}-vote-input`)
+            expect(input).toBeDisabled()
+            const rawValue = scaledDivision(Number(votesPerApp) * 100, Number(totalVotes))
+            const humanValue = new BigNumber(rawValue).toFixed(2, BigNumber.ROUND_HALF_DOWN)
+            expect(input).toHaveValue(humanValue)
+
+            //votesbreakdown
+            await screen.findByTestId(`app-${app.id}-vote-${humanValue}`)
+          } else {
+            const input = screen.queryByTestId(`${app.name}-vote-input`)
+            expect(input).not.toBeInTheDocument()
+
+            expect(screen.queryByTestId(`app-${app.id}-vote-${"10.00"}`)).not.toBeInTheDocument()
+          }
+        }
+      })
+    }) // voting concluded
   })
 })
