@@ -1,0 +1,9 @@
+{
+  "extends": "next",
+  "rules": {
+    "react/no-children-prop": "warn",
+    "react/no-unescaped-entities": "warn",
+    "react/display-name": "off",
+    "react/jsx-no-literals": "warn"
+  }
+}

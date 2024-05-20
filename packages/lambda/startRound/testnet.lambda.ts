@@ -5,6 +5,7 @@ import { EmissionsContractJson } from "@repo/contracts"
 import { FunctionFragment } from "ethers"
 import { addressUtils, clauseBuilder, coder } from "@vechain/sdk-core"
 import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager"
+import { WebClient } from "@slack/web-api"
 
 // Serialize the ABI of the Emissions contract for use in contract interaction
 const emissionsABI = JSON.stringify(EmissionsContractJson.abi)
@@ -17,16 +18,41 @@ const client = new SecretsManagerClient({
 })
 
 /**
- * Retrieves the private key from AWS Secrets Manager
+ * Retrieves a secret from AWS Secrets Manager
+ * @param secretId - The ID of the secret to retrieve
+ * @param key - The key of the secret value to retrieve
+ * @returns The secret value
  */
-async function getPrivateKey(): Promise<string> {
-  const secretId = "start_emissions_pk"
+async function getSecret(secretId: string, key: string): Promise<string> {
   const data = await client.send(new GetSecretValueCommand({ SecretId: secretId }))
 
   if (data.SecretString) {
-    return JSON.parse(data.SecretString)["start-emissions-pk"]
+    return JSON.parse(data.SecretString)[key]
   }
+
   throw new Error("Secret not found or invalid")
+}
+
+/**
+ * Publishes a message to a Slack channel using the Slack API
+ * @param id - The channel ID to send the message to
+ * @param text - The message to send
+ */
+async function publishMessage(id: string, text: string) {
+  const token = await getSecret("slack_app_token", "slack-app-token")
+
+  const slackClient = new WebClient(token)
+
+  try {
+    const result = await slackClient.chat.postMessage({
+      channel: id,
+      text: text,
+    })
+
+    console.log(result)
+  } catch (error) {
+    console.error(error)
+  }
 }
 
 /**
@@ -61,7 +87,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
   console.log(`Context: ${JSON.stringify(context, null, 2)}`)
 
   try {
-    const privateKey = await getPrivateKey()
+    const privateKey = await getSecret("start_emissions_pk", "start-emissions-pk")
 
     // Initialize the Thor client with the testnet URL and disable polling
     const thorClient = new ThorClient(new HttpClient(nodeURL), {
@@ -87,6 +113,13 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
     // Check if the transaction was estimated to revert and handle accordingly
     if (gasResult.reverted) {
       console.log("Transaction reverted:", gasResult.revertReasons, gasResult.vmErrors)
+
+      // Publish an error message to the Slack channel
+      await publishMessage(
+        "C06BLEJE5SA",
+        `:alert: Round failed to start: ${gasResult.revertReasons}, ${gasResult.vmErrors}`,
+      )
+
       return {
         statusCode: 500,
         body: JSON.stringify({
@@ -110,6 +143,9 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
     // Log the transaction receipt for debugging and verification
     console.log("Receipt:", receipt)
 
+    // Publish a success message to the Slack channel
+    await publishMessage("C06BLEJE5SA", `:white_check_mark: Round started successfully`)
+
     // Return a successful response with the transaction receipt
     return {
       statusCode: 200,
@@ -120,6 +156,10 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
   } catch (error) {
     // Log and return errors if the process fails at any point
     console.log("Error starting the round:", error)
+
+    // Publish an error message to the Slack channel
+    await publishMessage("C06BLEJE5SA", `:alert: Error starting the round: ${error}`)
+
     return {
       statusCode: 500,
       body: JSON.stringify({
