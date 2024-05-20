@@ -20,7 +20,6 @@ const themeConfig = {
   // 2. Add your color mode config
   initialColorMode: "system",
   useSystemColorMode: true,
-  /* eslint-disable  @typescript-eslint/ban-ts-comment */
   //@ts-ignore
   semanticTokens: {
     colors: {
