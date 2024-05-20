@@ -3,6 +3,7 @@ import { darkThemeColors, lightThemeColors } from "./colors"
 import { cardTheme } from "./card"
 import "@fontsource-variable/instrument-sans"
 import "@fontsource-variable/inter"
+import { ButtonStyle } from "./button"
 
 const themeConfig = {
   //@ts-ignore
@@ -13,19 +14,12 @@ const themeConfig = {
 
   components: {
     Card: cardTheme,
-    Button: {
-      // 6. We can overwrite defaultProps
-      defaultProps: {
-        size: "md",
-        borderRadius: "full",
-      },
-    },
+    Button: ButtonStyle,
   },
 
   // 2. Add your color mode config
   initialColorMode: "system",
   useSystemColorMode: true,
-  /* eslint-disable  @typescript-eslint/ban-ts-comment */
   //@ts-ignore
   semanticTokens: {
     colors: {
