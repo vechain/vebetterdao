@@ -1,4 +1,4 @@
-import { Treasury__factory } from "../../typechain-types"
+import { B3TR, Treasury__factory } from "../../typechain-types"
 import {
   clauseBuilder,
   type TransactionClause,
@@ -62,4 +62,34 @@ export const airdropB3trFromTreasury = async (treasuryAddress: string, admin: IH
     }
     await signAndSendTx(body, admin.privateKey)
   }
+}
+
+/**
+ * Airdrop a percentage of B3TR supply to a specific account
+ */
+export const airdropB3trPercentage = async (
+  treasuryAddress: string,
+  admin: IHDNode,
+  account: SeedAccount,
+  percentage: number,
+  b3tr: B3TR,
+) => {
+  console.log(`Airdropping ${percentage}% of B3TR supply to ${account}...`)
+
+  const b3trSupply: bigint = await b3tr.totalSupply()
+
+  const amount = (b3trSupply * BigInt(percentage)) / BigInt(100)
+
+  const clause: TransactionClause = clauseBuilder.functionInteraction(
+    treasuryAddress,
+    coder.createInterface(JSON.stringify(Treasury__factory.abi)).getFunction("transferB3TR") as FunctionFragment,
+    [account.address, amount],
+  )
+
+  const body: TransactionBody = await buildTxBody([clause], admin.address, 32)
+
+  if (!admin.privateKey) {
+    throw new Error("Account does not have a private key")
+  }
+  await signAndSendTx(body, admin.privateKey)
 }
