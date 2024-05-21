@@ -5764,6 +5764,31 @@
   dependencies:
     "@vechain/sdk-network" "1.0.0-beta.3"
 
+"@vechain/veworld-mock-playwright@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@vechain/veworld-mock-playwright/-/veworld-mock-playwright-1.0.4.tgz#585d201affd27a4fddcda9047e0ddcd475262d57"
+  integrity sha512-UyytrSn+KB3CqGCObMAPDmkaRaVZfukA9mZfOlX3vWuEna43FXpUhuOk4IdcsNXJlMdpg7S4gPb0N9+53IFCjg==
+  dependencies:
+    "@playwright/test" "^1.42.1"
+    "@vechain/veworld-mock" "1.0.4"
+
+"@vechain/veworld-mock@1.0.4", "@vechain/veworld-mock@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@vechain/veworld-mock/-/veworld-mock-1.0.4.tgz#a75f36537573f8d8e13b1a87654c4287c34ebb10"
+  integrity sha512-u0leIYHlzSWJ0ckEe9lDVzaOs3dPPxzVZlszbHgC/ByqmdUhydDv3QPHhXSf7UYPSSY3ELz1/8ITMzQuunUf6g==
+  dependencies:
+    "@vechain/sdk-core" "^1.0.0-beta.1"
+    "@vechain/sdk-network" "^1.0.0-beta.1"
+    bignumber.js "^9.1.2"
+    buffer "^6.0.3"
+    crypto-browserify "^3.12.0"
+    https-browserify "^1.0.0"
+    process "^0.11.10"
+    stream-browserify "^3.0.0"
+    stream-http "^3.2.0"
+    url "^0.11.3"
+    vm-browserify "^1.1.2"
+
 "@vechain/web3-providers-connex@^1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@vechain/web3-providers-connex/-/web3-providers-connex-1.1.2.tgz#4c8541fc3b9da3ff958f9a28be2eaf7a3c0b3445"
@@ -19468,6 +19493,11 @@ vitest@^1.2.2, vitest@^1.4.0:
     vite "^5.0.0"
     vite-node "1.4.0"
     why-is-node-running "^2.2.2"
+
+vm-browserify@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/vm-browserify/-/vm-browserify-1.1.2.tgz#78641c488b8e6ca91a75f511e7a3b32a86e5dda0"
+  integrity sha512-2ham8XPWTONajOR0ohOKOHXkm3+gaBmGut3SRuu75xLd/RRaY6vqgh8NBYYk7+RW3u5AtzPQZG8F10LHkl0lAQ==
 
 void-elements@3.1.0:
   version "3.1.0"
