@@ -154,3 +154,8 @@ packages/e2e/test-results/
 packages/e2e/playwright-report/
 packages/e2e/dist/
 packages/e2e/screenshots/
+
+# vitest
+lib-cov
+coverage
+!**/integrations/coverage

@@ -106,7 +106,6 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
 
   const onSubmit = useCallback(
     (data: FormData) => {
-      console.log("data", data)
       if (!votesAtSnapshot) throw new Error("Votes at snapshot not found")
       const appVotesPercentagesToValue: CastAllocationVotesProps = data.votes.map(vote => {
         const rawValue = scaledDivision(Number(vote.rawValue) * Number(votesAtSnapshot.scaled), 100)
