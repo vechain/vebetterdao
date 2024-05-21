@@ -43,7 +43,7 @@ jobs:
           - name: Launch app
             run:  |
               cp .env.example .env
-              yarn dev &
+              yarn dev:e2e &
         
           - name: Health check
             run: |
@@ -55,7 +55,6 @@ jobs:
             id: run-tests
             run: |
                 cd packages/e2e
-                yarn build
                 yarn playwright:e2e
 
           - name: Upload test results

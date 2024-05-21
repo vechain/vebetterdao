@@ -1,6 +1,6 @@
 import { test, TestInfo } from '@playwright/test';
 import { HOMEPAGE } from '../utils/constants';
-import veWorldMockClient from '../utils/veworld-mock-client';
+import { veWorldMockClient } from "@vechain/veworld-mock-playwright";
 import { DashboardPage } from '../model/dashboardPage';
 import blockchainUtils from '../utils/blockchain';
 import BigNumber from 'bignumber.js';
@@ -9,11 +9,14 @@ import { SwapConfirmationDialog } from '../model/swapConfirmationDialog';
 test.describe('Swap Tokens', () => {
 
   test.beforeEach(async ({ page }) => {
-    await veWorldMockClient.installForSolo(page, HOMEPAGE)
+    await veWorldMockClient.load(page)
+    await page.goto(HOMEPAGE)
+    await veWorldMockClient.installMock(page)
+    await veWorldMockClient.setOptions(page, { gasMultiplier: 0.5 })
   })
 
   test.afterEach(async ({ page }, testInfo: TestInfo) => {
-    const lastTxId = await veWorldMockClient.getTxId(page)
+    const lastTxId = await veWorldMockClient.getSenderTxId(page)
     console.log(`Last tx id: ${lastTxId}`)
   })
 
@@ -21,7 +24,7 @@ test.describe('Swap Tokens', () => {
     // setup rnd account
     const accountIndex = blockchainUtils.getRndAccountIndex()
     const accAddress = blockchainUtils.getAccountAddress(accountIndex)
-    await veWorldMockClient.setSignerAccIndex(page, accountIndex)
+    await veWorldMockClient.setConfig(page, { accountIndex: accountIndex })
     await blockchainUtils.fundAccount(accountIndex)
     // connect wallet
     const dashboardPage = new DashboardPage(page);
@@ -48,7 +51,7 @@ test.describe('Swap Tokens', () => {
     // setup rnd account
     const accountIndex = blockchainUtils.getRndAccountIndex()
     const accAddress = blockchainUtils.getAccountAddress(accountIndex)
-    await veWorldMockClient.setSignerAccIndex(page, accountIndex)
+    await veWorldMockClient.setConfig(page, { accountIndex: accountIndex })
     await blockchainUtils.fundAccount(accountIndex)
     // connect wallet
     const dashboardPage = new DashboardPage(page);
@@ -75,13 +78,13 @@ test.describe('Swap Tokens', () => {
   test('User gets error if swap tx is reverted', async ({ page }) => {
     // setup rnd account
     const accountIndex = blockchainUtils.getRndAccountIndex()
-    await veWorldMockClient.setSignerAccIndex(page, accountIndex)
+    await veWorldMockClient.setConfig(page, { accountIndex: accountIndex })
     await blockchainUtils.fundAccount(accountIndex)
     // connect wallet
     const dashboardPage = new DashboardPage(page);
     await dashboardPage.connectWallet()
     // set tx to revert
-    await veWorldMockClient.setTxError(page, true)
+    await veWorldMockClient.setOptions(page, { mockTransaction: 'revert' })
     // do the swap via ui
     const swapDialog = await dashboardPage.clickSwapButton()
     await swapDialog.enterFirstAmount(new BigNumber(1))
