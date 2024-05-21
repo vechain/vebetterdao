@@ -93,7 +93,7 @@ const Emissions_nextCycleBlock_abi = JSON.stringify([{
  */
 const getAccountAddress = (index: number): string => {
     const hdNode = HDNode.fromMnemonic(constants.SOLO_MNEMONIC)
-    const childNode = hdNode.derive(index - 1);
+    const childNode = hdNode.derive(index);
     return childNode.address
 }
 
@@ -104,7 +104,7 @@ const getAccountAddress = (index: number): string => {
  */
 const getAccountPrivateKey = (index: number): Buffer => {
     const hdNode = HDNode.fromMnemonic(constants.SOLO_MNEMONIC)
-    const childNode = hdNode.derive(index - 1);
+    const childNode = hdNode.derive(index);
     const privateKey = childNode.privateKey ?? (() => { throw new Error('Unable to derive private key') })()
     return privateKey
 }
@@ -238,7 +238,7 @@ const convertB3TRForVOT3 = async (privateKey: Buffer, address: string, amount: B
         coder.createInterface(VOT3_convertToVOT3_abi).getFunction("convertToVOT3") as FunctionFragment,
         [amount.multipliedBy(constants.TOKEN_DECIMALS).toString()])
     const clauses = [approveClause, convertToVOT3clause]
-    const gasResult = await thorClient.gas.estimateGas(clauses, address, {gasPadding: 0.1})
+    const gasResult = await thorClient.gas.estimateGas(clauses, address, {gasPadding: 0.5})
     const latestBlock = await thorClient.blocks.getBestBlockCompressed()
     const transactionBody = {
         chainTag: constants.THOR_CHAIN_TAG,

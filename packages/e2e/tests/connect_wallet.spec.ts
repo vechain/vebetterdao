@@ -1,14 +1,15 @@
 import { test } from '@playwright/test';
-import { FIXED_ACCOUNT1, HOMEPAGE } from '../utils/constants';
-import veWorldMockClient from '../utils/veworld-mock-client';
+import { veWorldMockClient } from "@vechain/veworld-mock-playwright"
 import { DashboardPage } from '../model/dashboardPage';
 import blockchainUtils from '../utils/blockchain';
+import { HOMEPAGE } from '../utils/constants';
 
 test.describe('Connect Wallet', () => {
 
   test.beforeEach(async ({ page }) => {
-    await veWorldMockClient.installForSolo(page, HOMEPAGE)
-    await veWorldMockClient.setSignerAccIndex(page, FIXED_ACCOUNT1)
+    await veWorldMockClient.load(page)
+    await page.goto(HOMEPAGE)
+    await veWorldMockClient.installMock(page)
   })
 
   test('User can connect wallet', async ({ page }) => {
