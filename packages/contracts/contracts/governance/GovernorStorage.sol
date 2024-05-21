@@ -59,6 +59,10 @@ contract B3TRGovernorStorage is Initializable {
   bytes32 private constant GovernorVotesStorageLocation =
     0xcb6cb12dc59022840a1c776f4f7dc071bcd58829ba542523309c31825375c500;
 
+  // keccak256(abi.encode(uint256(keccak256("GovernorGeneralStorage")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 private constant GovernorGeneralStorageLocation =
+    0x5af455dc74aeb146c90fc4a1404fc385af450c3a522aa60eedbb49c62be6b800;
+
   /// @dev Internal function to access the governor quorum storage slot.
   function getGovernorQuoromStorage() internal pure returns (GovernorStorageTypes.GovernorQuoromStorage storage $) {
     assembly {
@@ -70,13 +74,6 @@ contract B3TRGovernorStorage is Initializable {
   function getGovernorTimeLockStorage() internal pure returns (GovernorStorageTypes.GovernorTimeLockStorage storage $) {
     assembly {
       $.slot := GovernorTimeLockStorageLocation
-    }
-  }
-
-  /// @dev Internal function to access the governor settings storage slot.
-  function getGovernorSettingsStorage() internal pure returns (GovernorStorageTypes.GovernorSettingsStorage storage $) {
-    assembly {
-      $.slot := GovernorSettingsStorageLocation
     }
   }
 
@@ -116,14 +113,25 @@ contract B3TRGovernorStorage is Initializable {
     }
   }
 
+  /// @dev Internal function to access the governor general storage slot.
+  function getGovernorGeneralStorage() internal pure returns (GovernorStorageTypes.GovernorGeneralStorage storage $) {
+    assembly {
+      $.slot := GovernorGeneralStorageLocation
+    }
+  }
+
   /// @dev Initializes the governor storage with the address of the VOT3 token.
-  function __GovernorStorage_init(GovernorTypes.InitializationData memory initializationData) internal onlyInitializing {
-    __GovernorStorage_init_unchained(initializationData);
+  function __GovernorStorage_init(
+    GovernorTypes.InitializationData memory initializationData,
+    string memory governorName
+  ) internal onlyInitializing {
+    __GovernorStorage_init_unchained(initializationData, governorName);
   }
 
   /// @dev Part of the initialization process that configures the deposit storage.
   function __GovernorStorage_init_unchained(
-    GovernorTypes.InitializationData memory initializationData
+    GovernorTypes.InitializationData memory initializationData,
+    string memory governorName
   ) internal onlyInitializing {
     // Set the governor quorum storage
     //GovernorStorageTypes.GovernorQuoromStorage storage quorumStorage = getGovernorQuoromStorage();
@@ -132,12 +140,6 @@ contract B3TRGovernorStorage is Initializable {
     // Set the governor time lock storage
     GovernorStorageTypes.GovernorTimeLockStorage storage timeLockStorage = getGovernorTimeLockStorage();
     timeLockStorage.timelock = initializationData.timelock;
-
-    // Set the governor settings storage
-    GovernorStorageTypes.GovernorSettingsStorage storage settingsStorage = getGovernorSettingsStorage();
-    settingsStorage.depositThreshold = initializationData.initialDepositThreshold;
-    settingsStorage.minVotingDelay = initializationData.initialMinVotingDelay;
-    settingsStorage.votingThreshold = initializationData.initialVotingThreshold;
 
     // Set the governor function restrictions storage
     GovernorStorageTypes.GovernorFunctionRestrictionsStorage
@@ -151,5 +153,18 @@ contract B3TRGovernorStorage is Initializable {
     externalContractsStorage.xAllocationVoting = initializationData.xAllocationVoting;
     externalContractsStorage.b3tr = initializationData.b3tr;
     externalContractsStorage.vot3 = initializationData.vot3Token;
+
+    // Set the governor general storage
+    GovernorStorageTypes.GovernorGeneralStorage storage generalStorage = getGovernorGeneralStorage();
+    generalStorage.name = governorName;
+    generalStorage.minVotingDelay = initializationData.initialMinVotingDelay;
+
+    // Set the governor deposit storage
+    GovernorStorageTypes.GovernorDepositStorage storage depositStorage = getGovernorDepositStorage();
+    depositStorage.depositThresholdPercentage = initializationData.initialDepositThreshold;
+
+    // Set the governor votes storage
+    GovernorStorageTypes.GovernorVotesStorage storage votesStorage = getGovernorVotesStorage();
+    votesStorage.votingThreshold = initializationData.initialVotingThreshold;
   }
 }
