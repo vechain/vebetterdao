@@ -63,4 +63,30 @@ library GovernorTypes {
     uint256 abstainVotes;
     mapping(address => bool) hasVoted;
   }
+
+  // ProposalCore struct to store the core data for a proposal
+  struct ProposalCore {
+    address proposer;
+    uint256 roundIdVoteStart;
+    uint32 voteDuration;
+    bool isExecutable;
+    bool executed;
+    bool canceled;
+    uint48 etaSeconds;
+    uint256 depositAmount;
+    uint256 depositThreshold;
+  }
+
+  // ProposalState enum to store the state of a proposal
+  enum ProposalState {
+    Pending,
+    Active,
+    Canceled,
+    Defeated,
+    Succeeded,
+    Queued,
+    Expired,
+    Executed,
+    DepositNotMet
+  }
 }
