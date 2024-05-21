@@ -254,7 +254,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
                   Cast vote now
                 </Button>
                 {hasNoVotes && (
-                  <Text size="sm" textAlign={"center"} mt={1} color="orange">
+                  <Text size="sm" textAlign={"center"} mt={1} color="orange" data-testid="no-votes-label">
                     You have no votes to cast
                   </Text>
                 )}

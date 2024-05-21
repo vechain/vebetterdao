@@ -146,7 +146,7 @@ describe("AllocationRoundUserVotes", () => {
             error: undefined,
           })
         })
-        it("should render correctly", async () => {
+        it("has votes to cast - should render correctly", async () => {
           const screen = render(<AllocationRoundUserVotes roundId={roundId} />)
 
           expect(await screen.findByText("Assign voting power to apps")).toBeInTheDocument()
@@ -165,6 +165,38 @@ describe("AllocationRoundUserVotes", () => {
             const input = await screen.findByTestId(`${app.name}-vote-input`)
             expect(input).toBeEnabled()
           }
+        })
+        it("no votes to cast - should render correctly", async () => {
+          //@ts-ignore
+          vi.spyOn(apiHooks, "useGetVotesOnBlock").mockReturnValue({
+            data: {
+              formatted: "0",
+              original: "0",
+              scaled: "0",
+            },
+            isLoading: false,
+            isError: false,
+          })
+          const screen = render(<AllocationRoundUserVotes roundId={roundId} />)
+
+          expect(await screen.findByText("Assign voting power to apps")).toBeInTheDocument()
+          expect(
+            await screen.findByText(
+              "Distribute your voting power among your selected apps to help them receive more B3TR allocation.",
+            ),
+          ).toBeInTheDocument()
+          expect(await screen.findByText("Available apps")).toBeInTheDocument()
+          expect(await screen.findByText("Voting power to distribute")).toBeInTheDocument()
+
+          expect(await screen.findByTestId("split-evenly")).toBeInTheDocument()
+          const castButton = await screen.findByTestId("cast-vote-button")
+          expect(castButton).toBeDisabled()
+
+          for (const app of APPS) {
+            const input = await screen.findByTestId(`${app.name}-vote-input`)
+            expect(input).toBeDisabled()
+          }
+          await screen.findByTestId("no-votes-label")
         })
         it("splitEvenly", async () => {
           const screen = render(<AllocationRoundUserVotes roundId={roundId} />)
