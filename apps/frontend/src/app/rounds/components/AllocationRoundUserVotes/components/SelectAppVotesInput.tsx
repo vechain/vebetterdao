@@ -110,7 +110,7 @@ export const SelectAppVotesInput = ({
               <InputRightElement>%</InputRightElement>
             </InputGroup>
             {value && totalVotesAvailable && !errors.votes?.[index] ? (
-              <FormHelperText>
+              <FormHelperText data-testid={`${xApp?.name}-vote-estimated-votes`}>
                 =~{" "}
                 {new BigNumber(scaledDivision(Number(value) * Number(totalVotesAvailable), 100)).toFixed(
                   2,
@@ -119,7 +119,9 @@ export const SelectAppVotesInput = ({
                 votes
               </FormHelperText>
             ) : (
-              <FormErrorMessage>{errors.votes?.[index]?.message}</FormErrorMessage>
+              <FormErrorMessage data-testid={`${xApp?.name}-vote-error`}>
+                {errors.votes?.[index]?.message}
+              </FormErrorMessage>
             )}
           </FormControl>
         </Box>

@@ -73,7 +73,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
   const handleClose = useCallback(() => {
     castAllocationVotes.resetStatus()
     onClose()
-  }, [castAllocationVotes.resetStatus, onClose])
+  }, [castAllocationVotes, onClose])
 
   const watchVotes = watch("votes")
 
@@ -104,24 +104,28 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     }
   }, [xApps, replace, parsedCastVotesPercentages])
 
-  const onSubmit = (data: FormData) => {
-    if (!votesAtSnapshot) throw new Error("Votes at snapshot not found")
-    const appVotesPercentagesToValue: CastAllocationVotesProps = data.votes.map(vote => {
-      const rawValue = scaledDivision(Number(vote.rawValue) * Number(votesAtSnapshot.scaled), 100)
-      return {
-        appId: vote.appId,
-        votes: rawValue,
-      }
-    })
+  const onSubmit = useCallback(
+    (data: FormData) => {
+      console.log("data", data)
+      if (!votesAtSnapshot) throw new Error("Votes at snapshot not found")
+      const appVotesPercentagesToValue: CastAllocationVotesProps = data.votes.map(vote => {
+        const rawValue = scaledDivision(Number(vote.rawValue) * Number(votesAtSnapshot.scaled), 100)
+        return {
+          appId: vote.appId,
+          votes: rawValue,
+        }
+      })
 
-    onOpen()
-    castAllocationVotes.sendTransaction(appVotesPercentagesToValue)
-  }
+      onOpen()
+      castAllocationVotes.sendTransaction(appVotesPercentagesToValue)
+    },
+    [castAllocationVotes, onOpen, votesAtSnapshot],
+  )
 
   const onTryAgain = useCallback(() => {
     castAllocationVotes.resetStatus()
     handleSubmit(onSubmit)()
-  }, [castAllocationVotes.resetStatus, handleSubmit, onSubmit])
+  }, [castAllocationVotes, handleSubmit, onSubmit])
 
   const splitEvenly = () => {
     const totalAppsToVote = xApps?.length ?? 0

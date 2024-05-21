@@ -1,6 +1,7 @@
-import { fireEvent, render } from "../../../../../test"
+import { fireEvent, render, waitFor } from "../../../../../test"
 import * as apiHooks from "../../../../api"
 import * as dappkit from "@vechain/dapp-kit-react"
+import * as hooks from "../../../../hooks"
 import { AllocationRoundUserVotes } from "./AllocationRoundUserVotes"
 import { APPS } from "../../../../../test/mocks/Apps"
 import dayjs from "dayjs"
@@ -117,6 +118,7 @@ describe("AllocationRoundUserVotes", () => {
       })
 
       describe("user has not voted", () => {
+        const mockSendtransaction = vi.fn()
         beforeEach(() => {
           //@ts-ignore
           vi.spyOn(apiHooks, "useUserVotesInRound").mockReturnValue({
@@ -130,6 +132,18 @@ describe("AllocationRoundUserVotes", () => {
             data: false,
             isLoading: false,
             isError: false,
+          })
+          vi.spyOn(hooks, "useCastAllocationVotes").mockReturnValue({
+            sendTransaction: mockSendtransaction,
+            resetStatus: vi.fn(),
+            status: "ready",
+            isTxReceiptLoading: false,
+            sendTransactionError: null,
+            sendTransactionPending: false,
+            sendTransactionTx: null,
+            txReceipt: null,
+            txReceiptError: null,
+            error: undefined,
           })
         })
         it("should render correctly", async () => {
@@ -159,14 +173,131 @@ describe("AllocationRoundUserVotes", () => {
           fireEvent.click(splitEvenly)
           const votesPerApp = scaledDivision(Number(totalVotes), APPS.length)
           const humanValue = new BigNumber(votesPerApp).toFixed(2, BigNumber.ROUND_HALF_DOWN)
-          expect(await screen.findByTestId("cast-vote-button")).toBeInTheDocument()
+          const castButton = await screen.findByTestId("cast-vote-button")
+          expect(castButton).toBeEnabled()
 
           for (const app of APPS) {
             const input = await screen.findByTestId(`${app.name}-vote-input`)
             expect(input).toBeEnabled()
             expect(input).toHaveValue(humanValue)
+            expect(screen.queryByTestId(`app-${app.name}-vote-error`)).not.toBeInTheDocument()
+            await screen.findByTestId(`${app.name}-vote-estimated-votes`)
           }
+          expect(castButton).toBeEnabled()
+          fireEvent.submit(castButton)
+          await waitFor(() => {
+            for (const app of APPS) {
+              //no errors
+              expect(screen.queryByTestId(`app-${app.name}-vote-error`)).not.toBeInTheDocument()
+              expect(screen.queryByTestId(`${app.name}-vote-estimated-votes`)).toBeInTheDocument()
+            }
+          })
+          //   //TODO: not being able to detect this
+          //   await waitFor(() => {
+          //     expect(mockSendtransaction).toHaveBeenCalledWith({
+          //       votes: APPS.map(app => ({ appId: app.id, value: votesPerApp })),
+          //       roundId,
+          //     })
+          //   })
         })
+        describe("manual votes", () => {
+          it("all-in on a single app - works", async () => {
+            const screen = render(<AllocationRoundUserVotes roundId={roundId} />)
+
+            const castButton = await screen.findByTestId("cast-vote-button")
+            expect(castButton).toBeEnabled()
+
+            const randomApp = APPS[Math.floor(Math.random() * APPS.length)]
+            if (!randomApp) throw new Error("randomApp is undefined")
+
+            const input = await screen.findByTestId(`${randomApp.name}-vote-input`)
+            expect(input).toBeEnabled()
+
+            expect(screen.queryByTestId(`app-${randomApp.id}-vote-100`)).not.toBeInTheDocument()
+            await screen.findByText("0.00% distributed")
+            fireEvent.input(input, { target: { value: 100 } })
+            expect(input).toHaveValue("100")
+
+            //AppVotesBreakdown updates correctly
+            await screen.findByTestId(`app-${randomApp.id}-vote-100`)
+            await screen.findByText("100.00% distributed")
+
+            fireEvent.submit(castButton)
+
+            //no errors
+            await waitFor(() => {
+              expect(screen.queryByTestId(`app-${randomApp.name}-vote-error`)).not.toBeInTheDocument()
+              expect(screen.queryByTestId(`${randomApp.name}-vote-estimated-votes`)).toBeInTheDocument()
+            })
+          }) // all-in on a single app - works
+          it("voting random apps < 100 - works", async () => {
+            const screen = render(<AllocationRoundUserVotes roundId={roundId} />)
+
+            const castButton = await screen.findByTestId("cast-vote-button")
+            expect(castButton).toBeEnabled()
+            const votesPerApp = "10"
+            for (const [index, app] of appsVoted.entries()) {
+              const input = await screen.findByTestId(`${app.name}-vote-input`)
+              expect(input).toBeEnabled()
+              expect(screen.queryByTestId(`app-${app.id}-vote-${votesPerApp}`)).not.toBeInTheDocument()
+              const currentVotes = index * Number(votesPerApp)
+              await screen.findByText(`${currentVotes.toFixed(2)}% distributed`)
+              fireEvent.input(input, { target: { value: votesPerApp } })
+              expect(input).toHaveValue(votesPerApp)
+
+              //AppVotesBreakdown updates correctly
+              await screen.findByTestId(`app-${app.id}-vote-${votesPerApp}`)
+
+              //total distrivbuted increment gradually
+              const votes = (index + 1) * Number(votesPerApp)
+              await screen.findByText(`${votes.toFixed(2)}% distributed`)
+            }
+            fireEvent.click(castButton)
+            await waitFor(() => {
+              for (const app of appsVoted) {
+                //no errors
+                expect(screen.queryByTestId(`app-${app.name}-vote-error`)).not.toBeInTheDocument()
+                expect(screen.queryByTestId(`${app.name}-vote-estimated-votes`)).toBeInTheDocument()
+              }
+            })
+          }) // voting random apps < 100 - works
+          it("voting random apps > 100 - render errors", async () => {
+            const screen = render(<AllocationRoundUserVotes roundId={roundId} />)
+
+            const castButton = await screen.findByTestId("cast-vote-button")
+            expect(castButton).toBeEnabled()
+            const votesPerApp = "50"
+            for (const [index, app] of APPS.entries()) {
+              const input = await screen.findByTestId(`${app.name}-vote-input`)
+              expect(input).toBeEnabled()
+              expect(screen.queryByTestId(`app-${app.id}-vote-${votesPerApp}`)).not.toBeInTheDocument()
+              const currentVotes = index * Number(votesPerApp)
+              await screen.findByText(`${currentVotes.toFixed(2)}% distributed`)
+              fireEvent.input(input, { target: { value: votesPerApp } })
+              expect(input).toHaveValue(votesPerApp)
+
+              //no errors
+              expect(screen.queryByTestId(`app-${app.name}-vote-error`)).not.toBeInTheDocument()
+              await screen.findByTestId(`${app.name}-vote-estimated-votes`)
+
+              //AppVotesBreakdown updates correctly
+              await screen.findByTestId(`app-${app.id}-vote-${votesPerApp}`)
+
+              //total distrivbuted increment gradually
+              const votes = (index + 1) * Number(votesPerApp)
+              await screen.findByText(`${votes.toFixed(2)}% distributed`)
+            }
+            fireEvent.submit(castButton)
+
+            //render errors for all fields
+            await waitFor(() => {
+              for (const app of APPS) {
+                expect(screen.queryByTestId(`${app.name}-vote-error`)).toBeInTheDocument()
+                expect(screen.queryByTestId(`${app.name}-vote-estimated-votes`)).not.toBeInTheDocument()
+              }
+            })
+          }) // voting random apps < 100 - works
+        }) //manual votes
       }) // user has not voted
       it("user has voted - should render correctly", async () => {
         //@ts-ignore
@@ -345,7 +476,7 @@ describe("AllocationRoundUserVotes", () => {
         expect(screen.queryByTestId("split-evenly")).not.toBeInTheDocument()
         expect(screen.queryByTestId("cast-vote-button")).not.toBeInTheDocument()
 
-        for (const app of APPS) {
+        for (const app of appsVoted) {
           const isExcluded = randomAppsExcludedId.includes(app.id)
           if (!isExcluded) {
             // inputs
