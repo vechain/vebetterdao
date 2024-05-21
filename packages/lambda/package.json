@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "prebuild": "rm -rf dist",
-    "build": "yarn prebuild && find startRound -name '*.ts' -exec sh -c 'yarn esbuild {} --bundle --minify --sourcemap --platform=node --outfile=dist/$(basename {} .lambda.ts)/index.js' \\;",
+    "build": "yarn prebuild && find startRound -name '*lambda.ts' -exec sh -c 'yarn esbuild {} --bundle --minify --sourcemap --platform=node --outfile=dist/$(basename {} .lambda.ts)/index.js' \\;",
     "postbuild": "find dist/* -type d -exec sh -c 'cd {} && zip -r index.zip *' \\;",
     "test": "yarn build && jest"
   },
