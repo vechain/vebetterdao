@@ -5,6 +5,13 @@ import { ThorClient } from "@vechain/sdk-network"
 import { xallocationsPoolABI } from "../const"
 import { coder } from "@vechain/sdk-core"
 
+/**
+ * Retrieves the IDs of the xApps that have not yet claimed their rewards for the specified round.
+ * @param thor - The ThorClient instance.
+ * @param xapps - The xApps to check for unclaimed rewards.
+ * @param roundId - The round ID to check for unclaimed rewards.
+ * @returns an array of xApp IDs that have not yet claimed their rewards.
+ */
 export const getIdsOfUnclaimed = async (thor: ThorClient, xapps: XApp[], roundId: string): Promise<string[]> => {
   const unclaimed: string[] = []
 
