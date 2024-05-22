@@ -11,7 +11,7 @@ import { useWallet } from "@vechain/dapp-kit-react"
 // Maximum precision of 4 decimals. Must also round down
 const compactFormatter = getCompactFormatter(4)
 
-export const ContractsBalances = () => {
+export const ContractsDetails = () => {
   const config = getConfig()
   return (
     <Grid w="full" gap={4} templateColumns={["repeat(1, 1fr)", "repeat(3, 1fr)"]}>

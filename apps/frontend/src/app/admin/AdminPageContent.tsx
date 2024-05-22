@@ -11,7 +11,7 @@ import { ClaimXAppAllocations } from "./components/ClaimXAppAllocations"
 import { Pause } from "./components/Pause"
 import { UpdateReceiverAddress } from "./components/UpdateReceiverAddress"
 import { StartRoundCard } from "./components/StartRoundCard/StartRoundCard"
-import { ContractsBalances } from "./components/Contracts/ContractsBalances"
+import { ContractsDetails } from "./components/ContractsDetails"
 
 export const AdminPageContent = () => {
   useEffect(() => {
@@ -19,17 +19,20 @@ export const AdminPageContent = () => {
   }, [])
 
   const { account } = useWallet()
-  const { isAdminOfXAllocationVoting, isAdmin } = useAccountPermissions(account ?? "")
+  const { isAdminOfX2EarnApps, isAdminOfVot3, isAdminOfB3tr, isAdminOfGalaxyMember, isAdminOfB3TRGovernor } =
+    useAccountPermissions(account ?? "")
+
+  const canSeePauseTab = isAdminOfB3tr || isAdminOfGalaxyMember || isAdminOfVot3 || isAdminOfB3TRGovernor
 
   return (
     <Stack spacing={12} w={"full"} data-testid="admin-page">
       <Tabs>
         <TabList>
-          <Tab>Emissions</Tab>
-          <Tab>X2Earn Apps</Tab>
-          <Tab>Utils</Tab>
-          <Tab>Contracts</Tab>
-          <Tab>Pausing</Tab>
+          <Tab>{"Emissions"}</Tab>
+          {isAdminOfX2EarnApps && <Tab>{"X2Earn Apps"}</Tab>}
+          <Tab>{"Utils"}</Tab>
+          <Tab>{"Contracts"}</Tab>
+          {canSeePauseTab && <Tab>{"Pausing"}</Tab>}
         </TabList>
 
         <TabPanels>
@@ -43,11 +46,13 @@ export const AdminPageContent = () => {
             </Grid>
           </TabPanel>
 
-          <TabPanel>
-            <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
-              {isAdminOfXAllocationVoting && <UpdateReceiverAddress />}
-            </Grid>
-          </TabPanel>
+          {isAdminOfX2EarnApps && (
+            <TabPanel>
+              <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
+                <UpdateReceiverAddress />
+              </Grid>
+            </TabPanel>
+          )}
 
           <TabPanel>
             <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
@@ -56,12 +61,14 @@ export const AdminPageContent = () => {
           </TabPanel>
 
           <TabPanel>
-            <ContractsBalances />
+            <ContractsDetails />
           </TabPanel>
 
-          <TabPanel>
-            <Pause />
-          </TabPanel>
+          {canSeePauseTab && (
+            <TabPanel>
+              <Pause />
+            </TabPanel>
+          )}
         </TabPanels>
       </Tabs>
     </Stack>
