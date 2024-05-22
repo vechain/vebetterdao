@@ -5,9 +5,10 @@ export const useProposalDepositEvent = (proposalId: string) => {
   const events = useProposalsEvents()
 
   const proposalDepositEvent = useMemo(() => {
-    const supportingUserCount = [...new Set(events.data?.deposits.map(deposit => deposit.depositor))]
+    const supportingUsers = [...new Set(events.data?.deposits.map(deposit => deposit.depositor))]
     return {
-      supportingUserCount,
+      supportingUsers,
+      supportingUserCount: supportingUsers.length,
       data: events.data?.deposits,
       isLoading: events.isLoading,
       error: events.error,

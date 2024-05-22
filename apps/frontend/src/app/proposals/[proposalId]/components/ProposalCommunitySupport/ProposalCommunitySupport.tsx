@@ -1,24 +1,20 @@
 import { Arm } from "@/components/Icons/Arm"
-import { Box, Button, Card, Circle, Flex, HStack, Heading, Text, VStack } from "@chakra-ui/react"
+import { Box, Card, Circle, Flex, HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
+import { CommunitySupportButton } from "./components/CommunitySupportButton"
+import { useCurrentProposal } from "@/api"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+
+const compactFormatter = getCompactFormatter()
 
 export const ProposalCommunitySupport = () => {
-  const proposal = {
-    isDepositReached: true,
-    roundIdVoteStart: 1,
-    communityDeposits: 0,
-    depositThreshold: 10000,
-    communityDepositPercentage: 0.8,
-    supportingUserCount: 20,
-    yourSupport: 20,
-    othersSupport: 500,
-    othersSupportPercentage: 0.7,
-  }
+  const { proposal } = useCurrentProposal()
   const { t } = useTranslation()
 
   const yourDepositColor = proposal.isDepositReached ? "#6DCB09" : "#004CFC"
   const othersDepositColor = proposal.isDepositReached ? "#B1F16C" : "#77A0FF"
+
   return (
     <Card
       border={`1px solid ${proposal.isDepositReached ? "#D5D5D5" : "#004CFC"}`}
@@ -50,11 +46,11 @@ export const ProposalCommunitySupport = () => {
                 {t("/")}
               </Text>
               <Text fontSize={"20px"} fontWeight={500} color={"#252525"}>
-                {proposal.depositThreshold}
+                {compactFormatter.format(Number(proposal.depositThreshold))}
               </Text>
             </HStack>
             <Text fontSize={"18px"} fontWeight={400} color={"#6A6A6A"}>
-              {proposal.communityDepositPercentage * 100}
+              {compactFormatter.format(proposal.communityDepositPercentage * 100)}
               {t("%")}
             </Text>
           </HStack>
@@ -64,7 +60,7 @@ export const ProposalCommunitySupport = () => {
               bg={yourDepositColor}
               h="10px"
               rounded="full"
-              w={`${proposal.communityDepositPercentage * 100 || 0}%`}
+              w={`${proposal.communityDepositChartPercentage}%`}
               position="absolute"
               top={0}
               left={0}
@@ -73,7 +69,7 @@ export const ProposalCommunitySupport = () => {
               bg={othersDepositColor}
               h="10px"
               rounded="full"
-              w={`${proposal.othersSupportPercentage * 100 || 0}%`}
+              w={`${proposal.othersSupportChartPercentage}%`}
               position="absolute"
               top={0}
               left={0}
@@ -85,7 +81,7 @@ export const ProposalCommunitySupport = () => {
               <Text fontSize="14px" fontWeight={400}>
                 {t("From {{users}} users {{vot3}} V3.", {
                   vot3: proposal.othersSupport || 0,
-                  users: proposal.supportingUserCount,
+                  users: proposal.othersSupportUserCount,
                 })}
               </Text>
             </HStack>
@@ -101,15 +97,7 @@ export const ProposalCommunitySupport = () => {
           <Text fontSize="14px" fontWeight={600}>
             {t("You will be able to claim your tokens back when the voting round ends.")}
           </Text>
-          <Button
-            bgColor={proposal.isDepositReached ? "#E1E1E1" : "#004CFC"}
-            disabled={proposal.isDepositReached}
-            color={"#FFFFFF"}
-            rounded={"full"}
-            fontSize={"16px"}
-            fontWeight={500}>
-            {t("Support this proposal")}
-          </Button>
+          <CommunitySupportButton />
         </HStack>
       </VStack>
     </Card>
