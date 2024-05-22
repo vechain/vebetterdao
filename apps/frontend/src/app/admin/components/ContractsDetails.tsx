@@ -1,4 +1,4 @@
-import { useB3trBalance, useContractVersion, useVetBalance, useVot3Balance, useVthoBalance } from "@/api"
+import { useAccountBalance, useB3trBalance, useContractVersion, useVot3Balance } from "@/api"
 import { AddressButton } from "@/components/AddressButton"
 import { B3TRIcon, VETIcon, VOT3Icon, VTHOIcon } from "@/components"
 import { Card, CardBody, CardHeader, Grid, HStack, Heading, Skeleton, Text, VStack } from "@chakra-ui/react"
@@ -97,8 +97,7 @@ const ContractAddressAndBalanceCard = ({ title, address, roles }: ContractAddres
   //Get balances
   const { data: b3trBalance, isLoading: b3trBalanceLoading } = useB3trBalance(address)
   const { data: vot3Balance, isLoading: vot3BalanceLoading } = useVot3Balance(address)
-  const { data: vetBalance, isLoading: vetBalanceLoading } = useVetBalance(address)
-  const { data: vthoBalance, isLoading: vthoBalanceLoading } = useVthoBalance(address)
+  const { data: accountBalance, isLoading: accountBalanceLoading } = useAccountBalance(address)
 
   const b3trBalanceScaled = useMemo(() => {
     return b3trBalance?.scaled ?? "0"
@@ -109,12 +108,12 @@ const ContractAddressAndBalanceCard = ({ title, address, roles }: ContractAddres
   }, [vot3Balance])
 
   const vetBalanceScaled = useMemo(() => {
-    return vetBalance?.scaled ?? "0"
-  }, [vetBalance])
+    return accountBalance?.balance.scaled ?? "0"
+  }, [accountBalance])
 
   const vthoBalanceScaled = useMemo(() => {
-    return vthoBalance?.scaled ?? "0"
-  }, [vthoBalance])
+    return accountBalance?.energy.scaled ?? "0"
+  }, [accountBalance])
 
   // Get contract version
   const { data: version } = useContractVersion(address)
@@ -167,13 +166,13 @@ const ContractAddressAndBalanceCard = ({ title, address, roles }: ContractAddres
               <VOT3Icon boxSize={5} />
             </HStack>
             <HStack spacing={1}>
-              <Skeleton isLoaded={!vetBalanceLoading}>
+              <Skeleton isLoaded={!accountBalanceLoading}>
                 <Text fontSize="md"> {compactFormatter.format(Number(vetBalanceScaled))}</Text>
               </Skeleton>
               <VETIcon boxSize={5} />
             </HStack>
             <HStack spacing={1}>
-              <Skeleton isLoaded={!vthoBalanceLoading}>
+              <Skeleton isLoaded={!accountBalanceLoading}>
                 <Text fontSize="md"> {compactFormatter.format(Number(vthoBalanceScaled))}</Text>
               </Skeleton>
               <VTHOIcon boxSize={5} />
