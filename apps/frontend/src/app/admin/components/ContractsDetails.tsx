@@ -15,12 +15,12 @@ export const ContractsDetails = () => {
   const config = getConfig()
   return (
     <Grid w="full" gap={4} templateColumns={["repeat(1, 1fr)", "repeat(3, 1fr)"]}>
-      <ContractAddressAndBalanceCard
+      <ContractDetailsCard
         title="B3TR"
         address={config.b3trContractAddress}
         roles={["DEFAULT_ADMIN_ROLE", "MINTER_ROLE", "PAUSER_ROLE"]}
       />
-      <ContractAddressAndBalanceCard
+      <ContractDetailsCard
         title="B3TRGovernor"
         address={config.b3trGovernorAddress}
         roles={[
@@ -31,47 +31,47 @@ export const ContractsDetails = () => {
           "CONTRACTS_ADDRESS_MANAGER_ROLE",
         ]}
       />
-      <ContractAddressAndBalanceCard
+      <ContractDetailsCard
         title="Emissions"
         address={config.emissionsContractAddress}
         roles={["DEFAULT_ADMIN_ROLE", "MINTER_ROLE", "UPGRADER_ROLE"]}
       />
-      <ContractAddressAndBalanceCard
+      <ContractDetailsCard
         title="GalaxyMember"
         address={config.galaxyMemberContractAddress}
         roles={["DEFAULT_ADMIN_ROLE", "PAUSER_ROLE", "UPGRADER_ROLE", "MINTER_ROLE", "CONTRACTS_ADDRESS_MANAGER_ROLE"]}
       />
-      <ContractAddressAndBalanceCard
+      <ContractDetailsCard
         title="TimeLock"
         address={config.timelockContractAddress}
         roles={["DEFAULT_ADMIN_ROLE", "Proposer", "Executor", "UPGRADER_ROLE"]}
       />
-      <ContractAddressAndBalanceCard
+      <ContractDetailsCard
         title="Treasury"
         address={config.treasuryContractAddress}
         roles={["DEFAULT_ADMIN_ROLE", "PAUSER_ROLE", "UPGRADER_ROLE", "GOVERNANCE_ROLE"]}
       />
-      <ContractAddressAndBalanceCard
+      <ContractDetailsCard
         title="VOT3"
         address={config.vot3ContractAddress}
         roles={["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "PAUSER_ROLE"]}
       />
-      <ContractAddressAndBalanceCard
+      <ContractDetailsCard
         title="VoterRewards"
         address={config.voterRewardsContractAddress}
         roles={["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "VOTE_REGISTRAR_ROLE", "CONTRACTS_ADDRESS_MANAGER_ROLE"]}
       />
-      <ContractAddressAndBalanceCard
+      <ContractDetailsCard
         title="X2EarnApps"
         address={config.x2EarnAppsContractAddress}
         roles={["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "GOVERNANCE_ROLE"]}
       />
-      <ContractAddressAndBalanceCard
+      <ContractDetailsCard
         title="XAllocationPool"
         address={config.xAllocationPoolContractAddress}
         roles={["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "GOVERNANCE_ROLE"]}
       />
-      <ContractAddressAndBalanceCard
+      <ContractDetailsCard
         title="XAllocationVoting"
         address={config.xAllocationVotingContractAddress}
         roles={[
@@ -86,12 +86,12 @@ export const ContractsDetails = () => {
   )
 }
 
-type ContractAddressAndBalanceCardProps = {
+type ContractDetailsCardProps = {
   title: string
   address: string
   roles: string[]
 }
-const ContractAddressAndBalanceCard = ({ title, address, roles }: ContractAddressAndBalanceCardProps) => {
+const ContractDetailsCard = ({ title, address, roles }: ContractDetailsCardProps) => {
   const { account } = useWallet()
 
   //Get balances
