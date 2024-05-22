@@ -9,7 +9,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query"
 import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
-import { useConnex, useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/dapp-kit-react"
 import { XAllocationVoting__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { ethers } from "ethers"
@@ -49,7 +49,6 @@ export const useCastAllocationVotes = ({
   onSuccess,
   invalidateCache = true,
 }: useCastAllocationVotesProps): useCastAllocationVotesReturnValue => {
-  const { thor } = useConnex()
   const { account } = useWallet()
   const queryClient = useQueryClient()
 
@@ -59,8 +58,6 @@ export const useCastAllocationVotes = ({
 
       const apps = filteredData.map(value => value.appId)
       const votes = filteredData.map(value => ethers.parseEther(value.votes.toString()))
-
-      const totalVotes = votes.reduce((acc, vote) => acc + Number(vote), 0)
 
       const clause: EnhancedClause = {
         to: getConfig().xAllocationVotingContractAddress,
