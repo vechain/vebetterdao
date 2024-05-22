@@ -16,7 +16,7 @@ secret_arn:   arn:aws:secretsmanager:eu-west-1:211125319139:secret:dev/datadog_k
 #thor solo settings
 image_tag: dev-latest
 cpu: 256
-memory: 512
+memory: 2048
 region : "eu-west-1"
 
 # vpc settings
