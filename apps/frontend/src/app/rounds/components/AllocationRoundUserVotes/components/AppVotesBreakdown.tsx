@@ -24,7 +24,7 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
     account ?? undefined,
   )
   const totalVotes = (() => {
-    const rawValue = votes.reduce((acc, vote) => acc + (Number(vote.value) || 0), 0)
+    const rawValue = votes.reduce((acc, vote) => acc + (Number(vote.rawValue) || 0), 0)
     if (rawValue >= 99.99 && rawValue < 100) return 100
     return rawValue
   })()

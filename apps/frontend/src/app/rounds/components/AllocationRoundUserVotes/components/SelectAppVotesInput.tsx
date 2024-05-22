@@ -68,7 +68,10 @@ export const SelectAppVotesInput = ({
                 rules={{
                   validate: {
                     lessThanHundred: () => {
-                      const allValuesTotal = getValues().votes.reduce((acc, vote) => acc + Number(vote.value) || 0, 0)
+                      const allValuesTotal = getValues().votes.reduce(
+                        (acc, vote) => acc + Number(vote.rawValue) || 0,
+                        0,
+                      )
                       if (allValuesTotal > 100) return "Total votes exceed 100"
                       return true
                     },
