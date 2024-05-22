@@ -1,6 +1,6 @@
 import { Page, test } from "@playwright/test"
 import { DAO_ADMIN_ACCOUNT, FIXED_VOTER1, FIXED_VOTER2, FIXED_VOTER3, HOMEPAGE } from "../utils/constants"
-import veWorldMockClient from "../utils/veworld-mock-client"
+import { veWorldMockClient } from "@vechain/veworld-mock-playwright"
 import { DashboardPage } from "../model/dashboardPage"
 import blockchainUtils from "../utils/blockchain"
 import BigNumber from "bignumber.js"
@@ -67,11 +67,10 @@ const fundVotingAccounts = async () => {
 // flow to start a new allocation round
 const adminOpenRound = async (page: Page, isFirstRound: boolean = false) => {
   await test.step("Start a new allocation round", async () => {
-    await veWorldMockClient.installForSolo(page, HOMEPAGE)
-    await veWorldMockClient.setSignerAccIndex(page, DAO_ADMIN_ACCOUNT)
+    await veWorldMockClient.setConfig(page, { accountIndex: DAO_ADMIN_ACCOUNT})
     let dashboardPage = new DashboardPage(page)
     await dashboardPage.connectWallet()
-    const adminAddress = await veWorldMockClient.getMockAddress(page)
+    const adminAddress = await veWorldMockClient.getSignerAddress(page)
     const menuBar = new MenuBar(page)
     const adminPage = await menuBar.gotoAdmin()
     if (isFirstRound) {
@@ -99,7 +98,7 @@ const castUserVote = async (
   await test.step("Cast user vote", async () => {
     const menuBar = new MenuBar(page)
     const dashboardPage = await menuBar.gotoDashbard()
-    await veWorldMockClient.setSignerAccIndex(page, accountIndex)
+    await veWorldMockClient.setConfig(page, { accountIndex: accountIndex })
     await dashboardPage.connectWallet()
     const allocationsPage = await menuBar.gotoAllocations()
     await allocationsPage.expectOnPage()
@@ -120,7 +119,9 @@ test.describe("Allocation voting", () => {
 
   // setup veworld mock before each test
   test.beforeEach(async ({ page }) => {
-    await veWorldMockClient.installForSolo(page, HOMEPAGE)
+    await veWorldMockClient.load(page)
+    await page.goto(HOMEPAGE)
+    await veWorldMockClient.installMock(page)
   })
 
   test("Admin user can open the first allocation round", async ({ page }) => {
@@ -169,7 +170,7 @@ test.describe("Allocation voting", () => {
     for (let voter of votingDetails) {
       const menuBar = new MenuBar(page)
       const dashboardPage = await menuBar.gotoDashbard()
-      await veWorldMockClient.setSignerAccIndex(page, voter.accIndex)
+      await veWorldMockClient.setConfig(page, { accountIndex: voter.accIndex })
       await dashboardPage.connectWallet()
       // claim reward
       await dashboardPage.clickClaimRewards()
@@ -187,7 +188,7 @@ test.describe("Allocation voting", () => {
     for (let voter of votingDetails) {
       const menuBar = new MenuBar(page)
       const dashboardPage = await menuBar.gotoDashbard()
-      await veWorldMockClient.setSignerAccIndex(page, voter.accIndex)
+      await veWorldMockClient.setConfig(page, { accountIndex: voter.accIndex })
       await dashboardPage.connectWallet()
       // claim NFT
       await dashboardPage.mintNFT()

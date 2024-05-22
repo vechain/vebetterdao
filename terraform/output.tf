@@ -1,13 +1,13 @@
 output "thor-solo-node" {
-  value = module.thor_solo_node.service_name
+  value = module.ecs-lb-service-thor-solo.service_name
 }
 
 output "thor-solo-cluster" {
-  value = module.thor_solo_node.cluster_name
+  value = module.ecs-cluster.name
 }
 
 output "thor-solo-domain" {
-  value = module.thor-solo_domain.route53_name
+  value = local.domains[0].name
 }
 
 output "ecr_name" {

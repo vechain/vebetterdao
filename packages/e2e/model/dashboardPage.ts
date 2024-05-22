@@ -1,6 +1,6 @@
 import { Page } from 'playwright';
 import { expect } from '@playwright/test';
-import veWorldMockClient from '../utils/veworld-mock-client';
+import { veWorldMockClient } from "@vechain/veworld-mock-playwright";
 import BigNumber from 'bignumber.js';
 import { SwapDialog } from './swapDialog';
 import { test, Locator } from '@playwright/test';
@@ -23,7 +23,7 @@ export class DashboardPage {
     constructor(page: Page) {
         this.page = page
 
-        this.connectWalletButton = this.page.locator('xpath=//button[contains(text(), "Connect Wallet")]')
+        this.connectWalletButton = this.page.getByTestId('connect-wallet')
         this.veWorldOption = this.page.locator('div.modal-body button.card.LIGHT')
         this.disconnectOption = this.page.locator('div.modal-footer button.LIGHT')
         this.b3trBalanceText = this.page.locator('xpath=//p[contains(text(),"B3TR Tokens")]/preceding-sibling::h2')
@@ -40,12 +40,13 @@ export class DashboardPage {
      */
     async connectWallet(): Promise<string> {
         return await test.step('Connect Wallet', async() => {
-            await expect(this.page.getByText('Connect Wallet').first()).toBeVisible();
+            await expect(this.connectWalletButton.first()).toBeVisible();
             await this.connectWalletButton.first().click();
             await this.veWorldOption.first().click();
-            const mockAddress = await veWorldMockClient.getMockAddress(this.page);
+            await expect(this.connectWalletButton.first()).not.toBeVisible();
+            const mockAddress = await veWorldMockClient.getSignerAddress(this.page);
             console.log('connected wallet address', mockAddress)
-            const trimmedAddress = mockAddress.slice(-6)
+            const trimmedAddress = mockAddress.toLowerCase().slice(-6)
             await expect(this.page.locator(`xpath=//p[contains(text(), "${trimmedAddress}")]`).first()).toBeVisible();
             return mockAddress
         })
@@ -57,11 +58,11 @@ export class DashboardPage {
      */
     async disconnectWallet(address: string) {
         await test.step('Disconnect Wallet', async() => {
-            const trimmedAddress = address.slice(-6)
+            const trimmedAddress = address.toLowerCase().slice(-6)
             await expect(this.page.locator(`xpath=//p[contains(text(), "${trimmedAddress}")]`).first()).toBeVisible();
             await this.page.locator(`xpath=//p[contains(text(), "${trimmedAddress}")]`).first().click();
             await this.disconnectOption.first().click(); 
-            await expect(this.page.getByText('Connect Wallet').first()).toBeVisible();
+            await expect(this.connectWalletButton.first()).toBeVisible();
         })
     }
 
