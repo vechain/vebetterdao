@@ -1,8 +1,9 @@
-import { Emissions, Treasury, X2EarnApps } from "../../typechain-types"
+import { B3TR, Emissions, Treasury, X2EarnApps } from "../../typechain-types"
 import { SeedStrategy, getAccounts, getSeedAccounts } from "../helpers/seedAccounts"
 import { bootstrapEmissions } from "../helpers/emissions"
 import { addXDapps } from "../helpers/xApp"
-import { airdropB3trFromTreasury } from "../helpers/airdrop"
+import { airdropB3trFromTreasury, airdropB3trPercentage } from "../helpers/airdrop"
+import { isE2E, shouldRunSimulation } from "@repo/config/contracts"
 
 const accounts = getAccounts(12)
 
@@ -39,7 +40,12 @@ const APPS = [
   },
 ]
 
-export const setupLocalEnvironment = async (emissions: Emissions, treasury: Treasury, x2EarnApps: X2EarnApps) => {
+export const setupLocalEnvironment = async (
+  emissions: Emissions,
+  treasury: Treasury,
+  x2EarnApps: X2EarnApps,
+  b3tr: B3TR,
+) => {
   const start = performance.now()
   console.log("================ Setup local environment ================")
 
@@ -58,6 +64,11 @@ export const setupLocalEnvironment = async (emissions: Emissions, treasury: Trea
   const treasuryAddress = await treasury.getAddress()
   const seedAccounts = getSeedAccounts(SeedStrategy.FIXED, 5, 0)
   await airdropB3trFromTreasury(treasuryAddress, admin, seedAccounts)
+
+  if (!shouldRunSimulation() && !isE2E()) {
+    const firstAccount = seedAccounts[0]
+    await airdropB3trPercentage(treasuryAddress, admin, firstAccount, 10, b3tr) // 10% of total supply
+  }
 
   const end = new Date(performance.now() - start)
   console.log(`Setup complete in ${end.getMinutes()}m ${end.getSeconds()}s`)
