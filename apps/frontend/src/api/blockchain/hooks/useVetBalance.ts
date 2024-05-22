@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 
 /**
- *  Get the vet balance of an address from the contract
+ * Get the vet balance of an address
  * @param thor  The thor instance
  * @param address  The address to get the balance of. If not provided, will return an error (for better react-query DX)
  * @param scaleDecimals  The decimals of the token. Defaults to 18

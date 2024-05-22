@@ -7,7 +7,7 @@ const b3trAbi = B3trContractJson.abi
 const VTHO_CONTRACT = "0x0000000000000000000000000000456e65726779"
 
 /**
- *  Get the vet balance of an address from the contract
+ *  Get the vtho balance of an address
  * @param thor  The thor instance
  * @param address  The address to get the balance of. If not provided, will return an error (for better react-query DX)
  * @param scaleDecimals  The decimals of the token. Defaults to 18
