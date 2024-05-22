@@ -1,20 +1,13 @@
 import { VoterRewards, VoterRewards__factory } from "../../typechain-types"
-import {
-  clauseBuilder,
-  type TransactionClause,
-  type TransactionBody,
-  coder,
-  FunctionFragment,
-  type IHDNode,
-} from "@vechain/sdk-core"
+import { clauseBuilder, type TransactionClause, type TransactionBody, coder, FunctionFragment } from "@vechain/sdk-core"
 import { buildTxBody, signAndSendTx } from "./txHelper"
-import { SeedAccount } from "./seedAccounts"
+import { SeedAccount, TestPk } from "./seedAccounts"
 import { chunk } from "./chunk"
 
 export const claimVoterRewards = async (
   voterRewards: VoterRewards,
   roundId: number,
-  signingAcct: IHDNode,
+  signingAcct: TestPk,
   accounts: SeedAccount[],
 ) => {
   console.log("Claiming voter rewards...")
@@ -32,17 +25,17 @@ export const claimVoterRewards = async (
           coder
             .createInterface(JSON.stringify(VoterRewards__factory.abi))
             .getFunction("claimReward") as FunctionFragment,
-          [roundId, account.address],
+          [roundId, account.key.address],
         ),
       )
     })
 
     const body: TransactionBody = await buildTxBody(clauses, signingAcct.address, 32)
 
-    if (!signingAcct.privateKey) {
+    if (!signingAcct.pk) {
       throw new Error("Account does not have a private key")
     }
 
-    await signAndSendTx(body, signingAcct.privateKey)
+    await signAndSendTx(body, signingAcct.pk)
   }
 }
