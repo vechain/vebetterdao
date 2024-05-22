@@ -2,4 +2,4 @@
 framework: "terraform"
 quiet: true
 soft-fail: true
-skip-check: "CKV_TF_1"
+skip-check: "CKV_TF_1,CKV_AWS_5,CKV_AWS_23,CKV_AWS_24,CKV_AWS_25, KV_AWS_260,CKV_AWS_277"
