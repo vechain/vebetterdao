@@ -13,7 +13,7 @@ const ProposalPageContent = dynamic(
     ),
   },
 )
-// TODO: add dynamic import if needed
+
 export default () => {
   return <ProposalPageContent />
 }

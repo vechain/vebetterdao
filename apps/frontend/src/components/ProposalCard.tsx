@@ -1,5 +1,6 @@
 import {
   ProposalCreatedEvent,
+  ProposalMetadata,
   ProposalState,
   useCurrentBlock,
   useProposalDeadline,
@@ -32,9 +33,11 @@ import dayjs from "dayjs"
 import { ethers } from "ethers"
 import { ProposalVotesProgressBar } from "./ProposalVotesProgressBar"
 import { CastVoteButton } from "./CastVoteButton"
-import { FaArrowRight, FaChevronRight } from "react-icons/fa6"
-import { FaCaretRight } from "react-icons/fa"
+import { FaChevronRight } from "react-icons/fa6"
+
 import { useRouter } from "next/navigation"
+import { useIpfsMetadata } from "@/api/ipfs"
+import { toIPFSURL } from "@/utils"
 
 const config = getConfig()
 const blockTime = config.network.blockTime
@@ -50,6 +53,8 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
   const { data: proposalDeadlineBlock, isLoading: proposalDeadlineBlockLoading } = useProposalDeadline(
     proposal.proposalId,
   )
+
+  const proposalMetadata = useIpfsMetadata<ProposalMetadata>(toIPFSURL(proposal.description))
 
   const decodedCallDatas = useMemo(() => {
     const decoded = []
@@ -177,9 +182,13 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
             <Heading size="sm"> Proposer</Heading>
             <AddressButton address={proposal.proposer} buttonSize="xs" addressFontSize="xs" />
           </HStack>
-          <Heading as="h3" size="md">
-            {proposal.description}
-          </Heading>
+          <Skeleton isLoaded={!proposalMetadata.isLoading}>
+            <Heading as="h3" size="md" color={proposalMetadata.error ? "red.500" : "inherit"}>
+              {proposalMetadata.error?.message
+                ? "Error fetching metadata"
+                : proposalMetadata.data?.title ?? "Loading..."}
+            </Heading>
+          </Skeleton>
         </VStack>
       </CardHeader>
       <CardBody>

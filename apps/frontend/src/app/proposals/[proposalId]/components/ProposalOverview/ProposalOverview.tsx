@@ -13,7 +13,7 @@ import {
 } from "@chakra-ui/react"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { AddressIcon } from "@/components/AddressIcon"
-import { useCurrentProposal } from "@/api"
+import { ProposalMetadata, useCurrentProposal } from "@/api"
 import { ProposalOverviewVotes } from "./components/ProposalOverviewVotes"
 import { UilShareAlt } from "@iconscout/react-unicons"
 import { ProposalOverviewTime } from "./components/ProposalOverviewTime"
@@ -21,9 +21,14 @@ import { ProposalOverviewStatusLabel } from "./components/ProposalOverviewStatus
 import { ProposalOverviewYourSupport } from "./components/ProposalOverviewYourSupport"
 import { ProposalOverviewCommunitySupport } from "./components/ProposalOverviewCommunitySupport"
 import { ProposalYourVote } from "./components/ProposalYourVote"
+import { useIpfsMetadata } from "@/api/ipfs"
+import { toIPFSURL } from "@/utils"
 
 export const ProposalOverview = () => {
   const { proposal } = useCurrentProposal()
+
+  const metadataUri = proposal.description ? toIPFSURL(proposal.description) : undefined
+  const metadata = useIpfsMetadata<ProposalMetadata>(metadataUri)
 
   return (
     <Card border="1px solid #D5D5D5" rounded="16px" p="24px">
@@ -40,17 +45,19 @@ export const ProposalOverview = () => {
                 </Text>
               </Skeleton>
             </HStack>
-            <Skeleton isLoaded={!proposal.isTitleLoading}>
+            <Skeleton isLoaded={!metadata.isLoading}>
               <Heading fontWeight={700} fontSize="36px" color="#252525">
-                {proposal.title}
+                {metadata.error ? "Error fetching metadata" : metadata.data?.title ?? "Loading..."}
               </Heading>
             </Skeleton>
             <Skeleton isLoaded={!proposal.isStateLoading} alignSelf={"flex-start"}>
               <ProposalOverviewStatusLabel />
             </Skeleton>
             <Spacer h={"24px"} />
-            <SkeletonText isLoaded={!proposal.isDescriptionLoading}>
-              <Text color="#252525">{proposal.description}</Text>
+            <SkeletonText isLoaded={!metadata.isLoading}>
+              <Text color="#252525">
+                {metadata.error ? "Error fetching metadata" : metadata.data?.shortDescription ?? "Loading..."}
+              </Text>
             </SkeletonText>
           </VStack>
           <VStack alignItems={"stretch"}>
