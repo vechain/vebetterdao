@@ -5,7 +5,6 @@ import { useEffect } from "react"
 import { AnalyticsUtils } from "@/utils"
 import { useAccountPermissions } from "@/api/contracts/account"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { AdminPermissions } from "./components/AdminPermissions"
 import { B3trAllowance } from "./components/B3trAllowance"
 import { BulkClaimXAppsAllocations } from "./components/BulkClaimXAppsAllocations"
 import { ClaimXAppAllocations } from "./components/ClaimXAppAllocations"
@@ -28,7 +27,7 @@ export const AdminPageContent = () => {
         <TabList>
           <Tab>Emissions</Tab>
           <Tab>X2Earn Apps</Tab>
-          <Tab>Permissions</Tab>
+          <Tab>Utils</Tab>
           <Tab>Contracts</Tab>
           <Tab>Pausing</Tab>
         </TabList>
@@ -52,7 +51,6 @@ export const AdminPageContent = () => {
 
           <TabPanel>
             <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
-              <GridItem colSpan={2}>{isAdmin && <AdminPermissions />}</GridItem>
               <B3trAllowance />
             </Grid>
           </TabPanel>
