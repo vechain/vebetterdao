@@ -17,7 +17,7 @@ export const swapB3trForVot3 = async (b3tr: B3TR, vot3: VOT3, accounts: SeedAcco
       chunk.map(async account => {
         const clauses: TransactionClause[] = []
 
-        const b3trAmount = await b3tr.balanceOf(account.address)
+        const b3trAmount = await b3tr.balanceOf(account.key.address)
 
         clauses.push(
           clauseBuilder.functionInteraction(
@@ -35,9 +35,9 @@ export const swapB3trForVot3 = async (b3tr: B3TR, vot3: VOT3, accounts: SeedAcco
           ),
         )
 
-        const body: TransactionBody = await buildTxBody(clauses, account.address, 32)
+        const body: TransactionBody = await buildTxBody(clauses, account.key.address, 32)
 
-        await signAndSendTx(body, account.privateKey)
+        await signAndSendTx(body, account.key.pk)
       }),
     )
   }

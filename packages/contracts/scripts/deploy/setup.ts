@@ -1,5 +1,5 @@
 import { B3TR, Emissions, XAllocationVoting } from "../../typechain-types"
-import { SeedStrategy, getAccounts, getSeedAccounts } from "../helpers/seedAccounts"
+import { SeedStrategy, getTestKeys, getSeedAccounts } from "../helpers/seedAccounts"
 import { bootstrapEmissions } from "../helpers/emissions"
 import { App, addXDapps } from "../helpers/xApp"
 import { airdropB3tr } from "../helpers/airdrop"
@@ -7,7 +7,7 @@ import { airdropB3tr } from "../helpers/airdrop"
 export const setupLocalEnvironment = async (b3tr: B3TR, xAllocationVoting: XAllocationVoting, emissions: Emissions) => {
   const start = performance.now()
   console.log("Setup local environment")
-  const accounts = getAccounts(12)
+  const accounts = getTestKeys(12)
 
   // Define specific accounts
   const admin = accounts[0]
@@ -57,7 +57,7 @@ export const setupTestEnvironment = async (xAllocationVoting: XAllocationVoting,
   console.log("Setup Testnet environment:")
   const start = performance.now()
 
-  const accounts = getAccounts(10)
+  const accounts = getTestKeys(10)
   const admin = accounts[0]
 
   // Bootstrap emissions
