@@ -1,6 +1,6 @@
-import { useB3trBalance, useContractVersion, useVetBalance, useVot3Balance } from "@/api"
+import { useB3trBalance, useContractVersion, useVetBalance, useVot3Balance, useVthoBalance } from "@/api"
 import { AddressButton } from "@/components/AddressButton"
-import { B3TRIcon, VETIcon, VOT3Icon } from "@/components"
+import { B3TRIcon, VETIcon, VOT3Icon, VTHOIcon } from "@/components"
 import { Card, CardBody, CardHeader, Grid, HStack, Heading, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { useMemo } from "react"
@@ -36,6 +36,7 @@ const ContractAddressAndBalanceCard = ({ title, address }: ContractAddressAndBal
   const { data: b3trBalance, isLoading: b3trBalanceLoading } = useB3trBalance(address)
   const { data: vot3Balance, isLoading: vot3BalanceLoading } = useVot3Balance(address)
   const { data: vetBalance, isLoading: vetBalanceLoading } = useVetBalance(address)
+  const { data: vthoBalance, isLoading: vthoBalanceLoading } = useVthoBalance(address)
 
   const { data: version } = useContractVersion(address)
 
@@ -50,6 +51,10 @@ const ContractAddressAndBalanceCard = ({ title, address }: ContractAddressAndBal
   const vetBalanceScaled = useMemo(() => {
     return vetBalance?.scaled ?? "0"
   }, [vetBalance])
+
+  const vthoBalanceScaled = useMemo(() => {
+    return vthoBalance?.scaled ?? "0"
+  }, [vthoBalance])
 
   return (
     <Card w="full" borderRadius={"2xl"} p={2}>
@@ -95,6 +100,12 @@ const ContractAddressAndBalanceCard = ({ title, address }: ContractAddressAndBal
                 <Text fontSize="md"> {compactFormatter.format(Number(vetBalanceScaled))}</Text>
               </Skeleton>
               <VETIcon boxSize={5} />
+            </HStack>
+            <HStack spacing={1}>
+              <Skeleton isLoaded={!vthoBalanceLoading}>
+                <Text fontSize="md"> {compactFormatter.format(Number(vthoBalanceScaled))}</Text>
+              </Skeleton>
+              <VTHOIcon boxSize={5} />
             </HStack>
           </HStack>
         </VStack>
