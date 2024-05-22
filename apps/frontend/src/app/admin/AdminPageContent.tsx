@@ -1,20 +1,6 @@
 "use client"
 
-import {
-  Card,
-  CardBody,
-  CardHeader,
-  Heading,
-  Stack,
-  Text,
-  Tabs,
-  TabList,
-  Tab,
-  TabPanels,
-  TabPanel,
-  Grid,
-  GridItem,
-} from "@chakra-ui/react"
+import { Stack, Tabs, TabList, Tab, TabPanels, TabPanel, Grid, GridItem } from "@chakra-ui/react"
 import { useEffect } from "react"
 import { AnalyticsUtils } from "@/utils"
 import { useAccountPermissions } from "@/api/contracts/account"
@@ -26,6 +12,7 @@ import { ClaimXAppAllocations } from "./components/ClaimXAppAllocations"
 import { Pause } from "./components/Pause"
 import { UpdateReceiverAddress } from "./components/UpdateReceiverAddress"
 import { StartRoundCard } from "./components/StartRoundCard/StartRoundCard"
+import { ContractsBalances } from "./components/Contracts/ContractsBalances"
 
 export const AdminPageContent = () => {
   useEffect(() => {
@@ -33,8 +20,7 @@ export const AdminPageContent = () => {
   }, [])
 
   const { account } = useWallet()
-  const { isAdminOfB3tr, isAdminOfXAllocationVoting, isAdminOfVot3, isAdminOfGalaxyMember, isAdmin } =
-    useAccountPermissions(account ?? "")
+  const { isAdminOfXAllocationVoting, isAdmin } = useAccountPermissions(account ?? "")
 
   return (
     <Stack spacing={12} w={"full"} data-testid="admin-page">
@@ -43,6 +29,7 @@ export const AdminPageContent = () => {
           <Tab>Emissions</Tab>
           <Tab>X2Earn Apps</Tab>
           <Tab>Permissions</Tab>
+          <Tab>Contracts</Tab>
           <Tab>Pausing</Tab>
         </TabList>
 
@@ -68,6 +55,10 @@ export const AdminPageContent = () => {
               <GridItem colSpan={2}>{isAdmin && <AdminPermissions />}</GridItem>
               <B3trAllowance />
             </Grid>
+          </TabPanel>
+
+          <TabPanel>
+            <ContractsBalances />
           </TabPanel>
 
           <TabPanel>
