@@ -9,6 +9,11 @@ const b3trGovernorAbi = B3TRGovernorJson.abi
 
 const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
 
+export type ProposalMetadata = {
+  title: string
+  shortDescription: string
+  markdownDescription: string
+}
 export type ProposalCreatedEvent = {
   proposalId: string
   proposer: string
@@ -17,7 +22,7 @@ export type ProposalCreatedEvent = {
   signatures: string[]
   callDatas: string[]
   description: string
-  roundIdVoteStart: string,
+  roundIdVoteStart: string
   depositThreshold: string
 }
 

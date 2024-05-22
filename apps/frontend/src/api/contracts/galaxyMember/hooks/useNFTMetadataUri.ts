@@ -19,7 +19,7 @@ export const getNFTMetadataUriQueryKey = (tokenID: null | string) => ["tokenURI"
 
 /**
  * Get the metadata URI for an NFT
- * 
+ *
  * @param tokenID the token ID to get the metadata URI for
  * @returns the metadata URI for the token
  */
