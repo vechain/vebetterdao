@@ -138,7 +138,7 @@ const ContractAddressAndBalanceCard = ({ title, address, roles }: ContractAddres
             <Text fontSize="md" wordBreak={"break-word"} fontWeight={600}>
               {"Address"}
             </Text>
-            <AddressButton address={address} />
+            <AddressButton address={address} size={"sm"} />
           </HStack>
 
           <HStack w="full" justify={"space-between"}>
