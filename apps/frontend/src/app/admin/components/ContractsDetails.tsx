@@ -9,7 +9,7 @@ import { useHasRoles } from "@/api/contracts/account"
 import { useWallet } from "@vechain/dapp-kit-react"
 
 // Maximum precision of 4 decimals. Must also round down
-const compactFormatter = getCompactFormatter(4)
+const compactFormatter = getCompactFormatter(2)
 
 export const ContractsDetails = () => {
   const config = getConfig()
