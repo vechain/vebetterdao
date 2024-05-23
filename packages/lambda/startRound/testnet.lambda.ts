@@ -4,8 +4,12 @@ import testnetConfig from "@repo/config/testnet"
 import { EmissionsContractJson } from "@repo/contracts"
 import { FunctionFragment } from "ethers"
 import { addressUtils, clauseBuilder, coder } from "@vechain/sdk-core"
-import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager"
-import { WebClient } from "@slack/web-api"
+import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager"
+import { buildClaimClauses, getRoundXApps } from "./helpers/xApps"
+import { getIdsOfUnclaimed } from "./helpers/xApps"
+import { getSecret } from "./helpers/secret"
+import { waitForRoundStart } from "./helpers/emissions"
+import { publishMessage } from "./helpers/slack"
 
 // Serialize the ABI of the Emissions contract for use in contract interaction
 const emissionsABI = JSON.stringify(EmissionsContractJson.abi)
@@ -18,59 +22,113 @@ const client = new SecretsManagerClient({
 })
 
 /**
- * Retrieves a secret from AWS Secrets Manager
- * @param secretId - The ID of the secret to retrieve
- * @param key - The key of the secret value to retrieve
- * @returns The secret value
- */
-async function getSecret(secretId: string, key: string): Promise<string> {
-  const data = await client.send(new GetSecretValueCommand({ SecretId: secretId }))
-
-  if (data.SecretString) {
-    return JSON.parse(data.SecretString)[key]
-  }
-
-  throw new Error("Secret not found or invalid")
-}
-
-/**
- * Publishes a message to a Slack channel using the Slack API
- * @param id - The channel ID to send the message to
- * @param text - The message to send
- */
-async function publishMessage(id: string, text: string) {
-  const token = await getSecret("slack_app_token", "slack-app-token")
-
-  const slackClient = new WebClient(token)
-
-  try {
-    const result = await slackClient.chat.postMessage({
-      channel: id,
-      text: text,
-    })
-
-    console.log(result)
-  } catch (error) {
-    console.error(error)
-  }
-}
-
-/**
- * Asynchronously waits for the start of the next emissions round by checking the next cycle block
- * and waiting until the blockchain reaches that block.
+ * Distributes the VeBetterDAO emissions and starts the next round.
  *
- * @param {ThorClient} thor - An initialized Thor client for blockchain interactions.
+ * @param thor - The ThorClient instance
+ * @returns the transaction receipt of the distribution of emissions if successful and the gas result
  */
-async function waitForRoundStart(thor: ThorClient) {
-  // Execute a contract call to get the block number of the next cycle
-  const nextRoundBlock = await thor.contracts.executeContractCall(
+async function distributeEmissions(thor: ThorClient) {
+  const privateKey = await getSecret(client, "start_emissions_pk", "start-emissions-pk")
+
+  // Wait for the next round to start before proceeding
+  await waitForRoundStart(thor)
+
+  // Prepare the contract function call with necessary parameters
+  const clause = clauseBuilder.functionInteraction(
     testnetConfig.emissionsContractAddress,
-    coder.createInterface(emissionsABI).getFunction("getNextCycleBlock") as FunctionFragment,
+    coder.createInterface(emissionsABI).getFunction("distribute") as FunctionFragment,
     [],
   )
 
-  // Wait for the blockchain to reach the specified block number
-  await thor.blocks.waitForBlockCompressed(Number(nextRoundBlock[0]), { intervalMs: 10000 })
+  // Estimate the gas cost for the transaction
+  let gasResult = await thor.gas.estimateGas([clause], addressUtils.fromPrivateKey(Buffer.from(privateKey, "hex")))
+
+  // Check if the transaction was estimated to revert and handle accordingly
+  if (gasResult.reverted) {
+    console.log("Transaction reverted:", gasResult.revertReasons, gasResult.vmErrors)
+
+    // Publish an error message to the Slack channel
+    await publishMessage(
+      client,
+      "C06BLEJE5SA",
+      `:alert: Round failed to start: ${gasResult.revertReasons}, ${gasResult.vmErrors}`,
+    )
+
+    return { receipt: null, gasResult }
+  }
+
+  // Build the transaction body with the estimated gas
+  let txBody = await thor.transactions.buildTransactionBody([clause], gasResult.totalGas)
+
+  // Sign the transaction with the developer's private key
+  let signedTx = await thor.transactions.signTransaction(txBody, privateKey)
+
+  // Send the signed transaction to the blockchain
+  let tx = await thor.transactions.sendTransaction(signedTx)
+
+  // Wait for the transaction to be processed and get the receipt
+  const receipt = await thor.transactions.waitForTransaction(tx.id)
+
+  return { receipt, gasResult }
+}
+
+/**
+ * Distributes X-Allocations to the X-App addresses that have not yet claimed their allocations.
+ *
+ * @param thor - The ThorClient instance
+ * @returns the transaction receipt of the distribution of X-Allocations if successful and the gas result
+ */
+async function distributeXAllocations(thor: ThorClient) {
+  const privateKey = await getSecret(client, "start_emissions_pk", "start-emissions-pk")
+
+  // Get the current round number from the Emissions contract
+  const currentRound = await thor.contracts.executeContractCall(
+    testnetConfig.emissionsContractAddress,
+    coder.createInterface(emissionsABI).getFunction("getCurrentCycle") as FunctionFragment,
+    [],
+  )
+
+  // Get the X-Apps for the current round
+  const xApps = await getRoundXApps(thor, currentRound[0].toString())
+
+  // Get the IDs of the X-Apps that have not yet claimed their allocations
+  const xAppIds = await getIdsOfUnclaimed(thor, xApps, currentRound[0].toString())
+
+  // Build the claim clauses for the X-Apps
+  const claimClauses = buildClaimClauses(xAppIds, currentRound[0].toString())
+
+  // Estimate the gas cost for the transaction
+  const gasResult = await thor.gas.estimateGas(
+    claimClauses,
+    addressUtils.fromPrivateKey(Buffer.from(privateKey, "hex")),
+  )
+
+  // Check if the transaction was estimated to revert and handle accordingly
+  if (gasResult.reverted) {
+    console.log("Transaction reverted:", gasResult.revertReasons, gasResult.vmErrors)
+
+    await publishMessage(
+      client,
+      "C06BLEJE5SA",
+      `:alert: Failed to distribute X-Allocations:\n${gasResult.revertReasons}, ${gasResult.vmErrors}`,
+    )
+
+    return { receipt: null, gasResult }
+  }
+
+  // Build the transaction body with the estimated gas
+  const txBody = await thor.transactions.buildTransactionBody(claimClauses, gasResult.totalGas)
+
+  // Sign the transaction with the developer's private key
+  const signedTx = await thor.transactions.signTransaction(txBody, privateKey)
+
+  // Send the signed transaction to the blockchain
+  const tx = await thor.transactions.sendTransaction(signedTx)
+
+  const receipt = await thor.transactions.waitForTransaction(tx.id)
+
+  // Return the transaction receipt
+  return { receipt, gasResult }
 }
 
 /**
@@ -87,70 +145,51 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
   console.log(`Context: ${JSON.stringify(context, null, 2)}`)
 
   try {
-    const privateKey = await getSecret("start_emissions_pk", "start-emissions-pk")
-
     // Initialize the Thor client with the testnet URL and disable polling
     const thorClient = new ThorClient(new HttpClient(nodeURL), {
       isPollingEnabled: false,
     })
 
-    // Wait for the next round to start before proceeding
-    await waitForRoundStart(thorClient)
+    // Distribute the emissions to the VeBetterDAO and start the next round
+    const { receipt: receiptEmissions, gasResult: gasResultEmissions } = await distributeEmissions(thorClient)
 
-    // Prepare the contract function call with necessary parameters
-    const clause = clauseBuilder.functionInteraction(
-      testnetConfig.emissionsContractAddress,
-      coder.createInterface(emissionsABI).getFunction("distribute") as FunctionFragment,
-      [],
-    )
-
-    // Estimate the gas cost for the transaction
-    const gasResult = await thorClient.gas.estimateGas(
-      [clause],
-      addressUtils.fromPrivateKey(Buffer.from(privateKey, "hex")),
-    )
-
-    // Check if the transaction was estimated to revert and handle accordingly
-    if (gasResult.reverted) {
-      console.log("Transaction reverted:", gasResult.revertReasons, gasResult.vmErrors)
-
-      // Publish an error message to the Slack channel
-      await publishMessage(
-        "C06BLEJE5SA",
-        `:alert: Round failed to start: ${gasResult.revertReasons}, ${gasResult.vmErrors}`,
-      )
-
+    if (!receiptEmissions)
       return {
         statusCode: 500,
         body: JSON.stringify({
-          error: `Transaction reverted: ${gasResult.revertReasons}, ${gasResult.vmErrors}`,
+          error: `Transaction reverted: ${gasResultEmissions.revertReasons}, ${gasResultEmissions.vmErrors}`,
         }),
       }
-    }
-
-    // Build the transaction body with the estimated gas
-    const txBody = await thorClient.transactions.buildTransactionBody([clause], gasResult.totalGas)
-
-    // Sign the transaction with the developer's private key
-    const signedTx = await thorClient.transactions.signTransaction(txBody, privateKey)
-
-    // Send the signed transaction to the blockchain
-    const tx = await thorClient.transactions.sendTransaction(signedTx)
-
-    // Wait for the transaction to be processed and get the receipt
-    const receipt = await thorClient.transactions.waitForTransaction(tx.id)
 
     // Log the transaction receipt for debugging and verification
-    console.log("Receipt:", receipt)
+    console.log("Receipt:", receiptEmissions)
 
     // Publish a success message to the Slack channel
-    await publishMessage("C06BLEJE5SA", `:white_check_mark: Round started successfully`)
+    await publishMessage(client, "C06BLEJE5SA", `:white_check_mark: Round started successfully`)
+
+    // Distribute the X-Allocations to the X-App addresses that have not yet claimed them
+    const { receipt: receiptClaim, gasResult: gasResultXallocations } = await distributeXAllocations(thorClient)
+
+    if (!receiptClaim)
+      return {
+        statusCode: 500,
+        body: JSON.stringify({
+          error: `Transaction reverted: ${gasResultXallocations.revertReasons}, ${gasResultXallocations.vmErrors}`,
+        }),
+      }
+
+    // Log the transaction receipt for debugging and verification
+    console.log("Receipt:", receiptClaim)
+
+    // Publish a success message to the Slack channel
+    await publishMessage(client, "C06BLEJE5SA", `:white_check_mark: X-Allocations distributed successfully`)
 
     // Return a successful response with the transaction receipt
     return {
       statusCode: 200,
       body: JSON.stringify({
-        receipt,
+        receiptEmissions,
+        receiptClaim,
       }),
     }
   } catch (error) {
@@ -158,7 +197,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
     console.log("Error starting the round:", error)
 
     // Publish an error message to the Slack channel
-    await publishMessage("C06BLEJE5SA", `:alert: Error starting the round: ${error}`)
+    await publishMessage(client, "C06BLEJE5SA", `:alert: Error starting the round: ${error}`)
 
     return {
       statusCode: 500,
