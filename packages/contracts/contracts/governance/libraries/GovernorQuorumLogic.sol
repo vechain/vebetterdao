@@ -34,9 +34,9 @@ import { GovernorProposalLogic } from "./GovernorProposalLogic.sol";
 /// @notice Library for managing quorum numerators using checkpointed data structures.
 library GovernorQuorumLogic {
   using Checkpoints for Checkpoints.Trace208;
-  using GovernorClockLogic for GovernorStorageTypes.GovernorExternalContractsStorage;
-  using GovernorVotesLogic for GovernorStorageTypes.GovernorVotesStorage;
-  using GovernorProposalLogic for GovernorStorageTypes.GovernorGeneralStorage;
+  using GovernorClockLogic for GovernorStorageTypes.GovernorStorage;
+  using GovernorVotesLogic for GovernorStorageTypes.GovernorStorage;
+  using GovernorProposalLogic for GovernorStorageTypes.GovernorStorage;
 
   /// @notice Error that is thrown when the new quorum numerator exceeds the denominator.
   /// @param quorumNumerator The attempted new numerator that failed the update
@@ -59,7 +59,7 @@ library GovernorQuorumLogic {
   /// @param timepoint The specific timepoint for which to fetch the numerator
   /// @return The quorum numerator at the given timepoint
   function quorumNumerator(
-    GovernorStorageTypes.GovernorQuoromStorage storage self,
+    GovernorStorageTypes.GovernorStorage storage self,
     uint256 timepoint
   ) public view returns (uint256) {
     uint256 length = self.quorumNumeratorHistory._checkpoints.length;
@@ -76,6 +76,13 @@ library GovernorQuorumLogic {
     return self.quorumNumeratorHistory.upperLookupRecent(SafeCast.toUint48(timepoint));
   }
 
+  /// @notice Retrieves the the latest quorum numerator using the GovernorClockLogic library.
+  /// @param self The storage structure containing the quorum numerator history
+  /// @return The quorum numerator at the given timepoint
+  function quorumNumerator(GovernorStorageTypes.GovernorStorage storage self) public view returns (uint256) {
+    return self.quorumNumeratorHistory.latest();
+  }
+
   /// @notice Updates the quorum numerator to a new value at a specified time, emitting an event upon success.
   /// @dev This function should only be called from governance actions where numerators need updating.
   /// @dev New numerator must be smaller or equal to the denominator.
@@ -84,7 +91,7 @@ library GovernorQuorumLogic {
   /// @param oldQuorumNumerator The previous value for the quorum numerator, needed for the event emission
   /// @param clock The block timestamp or other clock identifier to register in the history
   function updateQuorumNumerator(
-    GovernorStorageTypes.GovernorQuoromStorage storage self,
+    GovernorStorageTypes.GovernorStorage storage self,
     uint256 newQuorumNumerator,
     uint256 oldQuorumNumerator,
     uint48 clock
@@ -104,26 +111,16 @@ library GovernorQuorumLogic {
    * @dev See {Governor-_quorumReached}.
    */
   function quorumReached(
-    GovernorStorageTypes.GovernorQuoromStorage storage self,
-    GovernorStorageTypes.GovernorGeneralStorage storage general,
-    GovernorStorageTypes.GovernorExternalContractsStorage storage externalContracts,
-    GovernorStorageTypes.GovernorVotesStorage storage votes,
+    GovernorStorageTypes.GovernorStorage storage self,
     uint256 proposalId
   ) internal view returns (bool) {
-    return
-      quorum(self, externalContracts, general.proposalSnapshot(externalContracts, proposalId)) <=
-      votes.proposalTotalVotes[proposalId];
+    return quorum(self, self.proposalSnapshot(proposalId)) <= self.proposalTotalVotes[proposalId];
   }
 
   /**
    * @dev Returns the quorum for a timepoint, in terms of number of votes: `supply * numerator / denominator`.
    */
-  function quorum(
-    GovernorStorageTypes.GovernorQuoromStorage storage self,
-    GovernorStorageTypes.GovernorExternalContractsStorage storage externalContracts,
-    uint256 timepoint
-  ) public view returns (uint256) {
-    return
-      (externalContracts.vot3.getPastTotalSupply(timepoint) * quorumNumerator(self, timepoint)) / quorumDenominator();
+  function quorum(GovernorStorageTypes.GovernorStorage storage self, uint256 timepoint) public view returns (uint256) {
+    return (self.vot3.getPastTotalSupply(timepoint) * quorumNumerator(self, timepoint)) / quorumDenominator();
   }
 }
