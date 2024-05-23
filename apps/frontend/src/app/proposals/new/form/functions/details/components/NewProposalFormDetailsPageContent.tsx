@@ -8,7 +8,7 @@ import { ethers } from "ethers"
 
 export const NewProposalFormDetailsPageContent: React.FC = () => {
   const router = useRouter()
-  const { setData, title, shortDescription, actions, markdownDescription } = useProposalFormStore()
+  const { setData } = useProposalFormStore()
 
   const goBack = useCallback(() => {
     router.back()
@@ -48,14 +48,7 @@ export const NewProposalFormDetailsPageContent: React.FC = () => {
         <VStack spacing={8} align="flex-start">
           <Heading size="lg">What is your proposal about?</Heading>
           <Heading size="md">Basic information</Heading>
-          <NewProposalForm
-            onSubmit={onSubmit}
-            formId="new-proposal-form"
-            title={title}
-            description={shortDescription}
-            actions={actions}
-            markdownDescription={markdownDescription}
-          />
+          <NewProposalForm onSubmit={onSubmit} formId="new-proposal-form" />
           <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
             <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
               Go back

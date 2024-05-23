@@ -1,21 +1,10 @@
 import { ProposalCreatedEvent, ProposalMetadata } from "@/api"
 import { useIpfsMetadata } from "@/api/ipfs"
-import { NewProposalForm } from "@/app/proposals/new/form/functions/details/components/NewProposalForm"
+import { ProposalExecutableActions } from "@/components/ProposalExecutableActions"
 import { GovernanceFeaturedContractsWithFunctions, getActionsFromTargetsAndCalldatas } from "@/constants"
 import { ProposalFormAction } from "@/store/useProposalFormStore"
 import { toIPFSURL } from "@/utils"
-import {
-  Card,
-  CardBody,
-  VStack,
-  Divider,
-  Heading,
-  Alert,
-  AlertIcon,
-  AlertDescription,
-  AlertTitle,
-  Box,
-} from "@chakra-ui/react"
+import { Card, CardBody, Heading, Alert, AlertIcon, AlertDescription, AlertTitle, Box, VStack } from "@chakra-ui/react"
 import MarkdownPreview from "@uiw/react-markdown-preview"
 import { useMemo, useState } from "react"
 
@@ -65,9 +54,7 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
               </Box>
             </Alert>
           )}
-          {!!actions.length && (
-            <NewProposalForm renderTitle={false} renderDescription={false} isDisabled={true} actions={actions} />
-          )}
+          {!!actions.length && <ProposalExecutableActions actions={actions} />}
         </VStack>
       </CardBody>
     </Card>

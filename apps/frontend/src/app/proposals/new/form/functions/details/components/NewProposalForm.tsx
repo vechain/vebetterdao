@@ -4,7 +4,7 @@ import { useEffect, useCallback } from "react"
 import { useForm, useFieldArray, Controller } from "react-hook-form"
 import { abi } from "thor-devkit"
 import { ExecutableFunctionCard } from "./ExecutableFunctionCard"
-import { ProposalFormStoreState } from "@/store/useProposalFormStore"
+import { ProposalFormStoreState, useProposalFormStore } from "@/store/useProposalFormStore"
 import MDEditor from "@uiw/react-md-editor"
 import rehypeSanitize from "rehype-sanitize"
 import { FunctionParamsField } from "@/components"
@@ -22,27 +22,26 @@ type Props = {
   isDisabled?: boolean
   formId?: string
   renderTitle?: boolean
-  title?: string
   renderDescription?: boolean
-  description?: string
   renderMarkdownDescription?: boolean
-  markdownDescription?: string
   renderActions?: boolean
-  actions?: ProposalFormStoreState["actions"]
 }
+
+/**
+ * This component read/write from/to useFormStore and renders a form to create a new proposal
+ * @param param0
+ * @returns
+ */
 export const NewProposalForm: React.FC<Props> = ({
   onSubmit,
   isDisabled = false,
   formId = "proposal-functions-form",
   renderTitle = true,
-  title,
   renderDescription = true,
-  description,
   renderMarkdownDescription = false,
-  markdownDescription,
   renderActions = true,
-  actions = [],
 }) => {
+  const { actions, setData, title, shortDescription, markdownDescription } = useProposalFormStore()
   const { handleSubmit, register, control, formState, setValue } = useForm<FormData>()
 
   const { errors } = formState
@@ -79,15 +78,36 @@ export const NewProposalForm: React.FC<Props> = ({
     })
     setValue("actions", formActions)
     setValue("title", title ?? "")
-    setValue("description", description ?? "")
+    setValue("description", shortDescription ?? "")
     setValue("markdownDescription", markdownDescription ?? "")
-  }, [actions, title, description, markdownDescription, setValue])
+  }, [actions, title, shortDescription, setValue, markdownDescription])
 
   const onFormSubmit = useCallback(
     (data: FormData) => {
+      setData({
+        title: data.title,
+        shortDescription: data.description,
+        actions: data.actions.map(action => {
+          const _abi = new abi.Function(action.abiDefinition)
+          return {
+            contractAddress: action.contractAddress,
+            abiDefinition: action.abiDefinition,
+            name: action.name,
+            description: action.description,
+            calldata: _abi.encode(
+              ...action.params.map(param => {
+                if (param.requiresEthParse) {
+                  const value = ethers.parseEther(String(param.value))
+                  return value.toString()
+                } else return param.value
+              }),
+            ),
+          }
+        }),
+      })
       onSubmit?.(data)
     },
-    [onSubmit],
+    [setData, onSubmit],
   )
 
   return (

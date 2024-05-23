@@ -7,7 +7,7 @@ import { useProposalFormStore } from "@/store/useProposalFormStore"
 export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
   const router = useRouter()
 
-  const { title, shortDescription, markdownDescription, setData } = useProposalFormStore()
+  const { setData } = useProposalFormStore()
 
   const goBack = useCallback(() => {
     router.back()
@@ -36,9 +36,6 @@ export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
             formId="new-proposal-form"
             renderActions={false}
             renderMarkdownDescription={true}
-            title={title}
-            description={shortDescription}
-            markdownDescription={markdownDescription}
             onSubmit={onSubmit}
           />
         </VStack>

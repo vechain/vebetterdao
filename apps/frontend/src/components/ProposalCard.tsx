@@ -37,8 +37,8 @@ import { useRouter } from "next/navigation"
 import { useIpfsMetadata } from "@/api/ipfs"
 import { toIPFSURL } from "@/utils"
 import { ProposalFormAction } from "@/store/useProposalFormStore"
-import { NewProposalForm } from "@/app/proposals/new/form/functions/details/components/NewProposalForm"
 import dayjs from "dayjs"
+import { ProposalExecutableActions } from "./ProposalExecutableActions"
 
 const config = getConfig()
 const blockTime = config.network.blockTime
@@ -187,9 +187,7 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
               </Box>
             </Alert>
           )}
-          {!!actions.length && (
-            <NewProposalForm renderTitle={false} renderDescription={false} isDisabled={true} actions={actions} />
-          )}
+          {!!actions.length && <ProposalExecutableActions actions={actions} />}
           <ProposalVotesProgressBar proposal={proposal} />
         </VStack>
       </CardBody>
