@@ -24,7 +24,7 @@
 pragma solidity ^0.8.20;
 
 import "./governance/GovernorUpgradeable.sol";
-import { GovenorProposalLogic } from "./governance/libraries/GovernorProposalLogic.sol";
+import { GovernorProposalLogic } from "./governance/libraries/GovernorProposalLogic.sol";
 import { GovernorStateLogic } from "./governance/libraries/GovernorStateLogic.sol";
 import { GovernorVotesLogic } from "./governance/libraries/GovernorVotesLogic.sol";
 import { GovernorQuorumLogic } from "./governance/libraries/GovernorQuorumLogic.sol";
@@ -32,11 +32,14 @@ import { GovernorDepositLogic } from "./governance/libraries/GovernorDepositLogi
 import { GovernorStorageTypes } from "./governance/libraries/GovernorStorageTypes.sol";
 import { GovernorClockLogic } from "./governance/libraries/GovernorClockLogic.sol";
 import { GovernorFunctionRestrictionsLogic } from "./governance/libraries/GovernorFunctionRestrictionsLogic.sol";
+import { GovernorGovernanceLogic } from "./governance/libraries/GovernorGovernanceLogic.sol";
 import { GovernorTypes } from "./governance/libraries/GovernorTypes.sol";
-import { GovernanceStorage } from "./governance/GovernanceStorage.sol";
+import { GovernorStorage } from "./governance/GovernorStorage.sol";
 import { IVoterRewards } from "./interfaces/IVoterRewards.sol";
 import { IVOT3 } from "./interfaces/IVOT3.sol";
+import { IB3TRGovernor } from "./interfaces/IB3TRGovernor.sol";
 import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
+import { TimelockControllerUpgradeable } from "@openzeppelin/contracts-upgradeable/governance/TimelockControllerUpgradeable.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
@@ -63,7 +66,8 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  */
 contract B3TRGovernor is
   Initializable,
-  GovernanceStorage,
+  IB3TRGovernor,
+  GovernorStorage,
   AccessControlUpgradeable,
   UUPSUpgradeable,
   PausableUpgradeable
@@ -75,6 +79,7 @@ contract B3TRGovernor is
   using GovernorDepositLogic for GovernorStorageTypes.GovernorStorage;
   using GovernorClockLogic for GovernorStorageTypes.GovernorStorage;
   using GovernorFunctionRestrictionsLogic for GovernorStorageTypes.GovernorStorage;
+  using GovernorGovernanceLogic for GovernorStorageTypes.GovernorStorage;
 
   /// @notice The role that can whitelist allowed functions in the propose function
   bytes32 public constant GOVERNOR_FUNCTIONS_SETTINGS_ROLE = keccak256("GOVERNOR_FUNCTIONS_SETTINGS_ROLE");
@@ -108,7 +113,7 @@ contract B3TRGovernor is
    * @param isFunctionRestrictionEnabled If the function restriction is enabled
    */
   struct InitializationData {
-    IVotes vot3Token;
+    IVOT3 vot3Token;
     TimelockControllerUpgradeable timelock;
     IXAllocationVotingGovernor xAllocationVoting;
     IB3TR b3tr;
@@ -125,9 +130,26 @@ contract B3TRGovernor is
     bool isFunctionRestrictionEnabled;
   }
 
+  /**
+   * @dev Restricts a function so it can only be executed through governance proposals. For example, governance
+   * parameter setters in {GovernorSettings} are protected using this modifier.
+   *
+   * The governance executing address may be different from the Governor's own address, for example it could be a
+   * timelock. This can be customized by modules by overriding {_executor}. The executor is only able to invoke these
+   * functions during the execution of the governor's {execute} function, and not under any other circumstances. Thus,
+   * for example, additional timelock proposers are not able to change governance parameters without going through the
+   * governance protocol (since v4.6).
+   */
+  modifier onlyGovernance() {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    $.checkGovernance(_msgSender(), _msgData(), address(this));
+    _;
+  }
+
   /// @notice modifier to check if the caller has the specified role or if the function is called through a governance proposal
   modifier onlyRoleOrGovernance(bytes32 role) {
-    if (!hasRole(role, _msgSender())) _checkGovernance();
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    if (!hasRole(role, _msgSender())) $.checkGovernance(_msgSender(), _msgData(), address(this));
     _;
   }
 
@@ -242,6 +264,30 @@ contract B3TRGovernor is
   }
 
   /**
+   * @dev See {Governor-depositThreshold}.
+   */
+  function depositThresholdPercentage() public view virtual returns (uint256) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return $.depositThresholdPercentage();
+  }
+
+  /**
+   * @dev See {Governor-votingThreshold}.
+   */
+  function votingThreshold() public view virtual override returns (uint256) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    $.votingThreshold();
+  }
+
+  /**
+   * @dev See {B3TRGovernor-minVotingDelay}.
+   */
+  function minVotingDelay() public view virtual override returns (uint256) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    $.minVotingDelay();
+  }
+
+  /**
    * @dev See {IB3TRGovernor-getVotes}.
    */
   function getVotes(address account, uint256 timepoint) public view virtual returns (uint256) {
@@ -295,8 +341,8 @@ contract B3TRGovernor is
    * @dev Returns the current quorum numerator. See {quorumDenominator}.
    */
   function quorumNumerator() public view virtual returns (uint256) {
-    GovernorVotesQuorumFractionStorage storage $ = _getGovernorVotesQuorumFractionStorage();
-    return $._quorumNumeratorHistory.latest();
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return $.quorumNumerator();
   }
 
   /**
@@ -365,7 +411,7 @@ contract B3TRGovernor is
     bytes32 descriptionHash
   ) public override whenNotPaused returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return $.queue(targets, values, calldatas, descriptionHash);
+    return $.queue(address(this), targets, values, calldatas, descriptionHash);
   }
 
   /**
@@ -393,7 +439,6 @@ contract B3TRGovernor is
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return
       $.cancelPendingProposal(
-        self,
         _msgSender(),
         hasRole(DEFAULT_ADMIN_ROLE, _msgSender()),
         targets,
@@ -414,11 +459,7 @@ contract B3TRGovernor is
   /**
    * @dev See {IB3TRGovernor-castVoteWithReason}.
    */
-  function castVoteWithReason(
-    uint256 proposalId,
-    uint8 support,
-    string calldata reason
-  ) public returns (uint256) {
+  function castVoteWithReason(uint256 proposalId, uint8 support, string calldata reason) public returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return $.castVote(proposalId, _msgSender(), support, reason);
   }
@@ -435,14 +476,18 @@ contract B3TRGovernor is
    */
   function updateQuorumNumerator(uint256 newQuorumNumerator) external onlyGovernance {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    $.updateQuorumNumerator(self, newQuorumNumerator);
+    $.updateQuorumNumerator(newQuorumNumerator);
   }
 
   /// @notice method that allows to restrict functions that can be called by proposals for a single function selector
   /// @param target - address of the contract
   /// @param functionSelector - function selector
   /// @param isWhitelisted - bool indicating if function is whitelisted for proposals
-  function setWhitelistFunction(address target, bytes4 functionSelector, bool isWhitelisted) public {
+  function setWhitelistFunction(
+    address target,
+    bytes4 functionSelector,
+    bool isWhitelisted
+  ) public onlyRoleOrGovernance(GOVERNOR_FUNCTIONS_SETTINGS_ROLE) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     $.setWhitelistFunction(target, functionSelector, isWhitelisted);
   }
@@ -451,14 +496,20 @@ contract B3TRGovernor is
   /// @param target - address of the contract
   /// @param functionSelectors - array of function selectors
   /// @param isWhitelisted - bool indicating if function is whitelisted for proposals
-  function setWhitelistFunctions(address target, bytes4[] memory functionSelectors, bool isWhitelisted) public virtual {
+  function setWhitelistFunctions(
+    address target,
+    bytes4[] memory functionSelectors,
+    bool isWhitelisted
+  ) public onlyRoleOrGovernance(GOVERNOR_FUNCTIONS_SETTINGS_ROLE) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     $.setWhitelistFunctions(target, functionSelectors, isWhitelisted);
   }
 
   /// @notice method that allows to toggle the function restriction on/off
   /// @param isEnabled - flag to enable/disable function restriction
-  function setIsFunctionRestrictionEnabled(bool isEnabled) public virtual {
+  function setIsFunctionRestrictionEnabled(
+    bool isEnabled
+  ) public onlyRoleOrGovernance(GOVERNOR_FUNCTIONS_SETTINGS_ROLE) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     $.setIsFunctionRestrictionEnabled(isEnabled);
   }
@@ -474,10 +525,9 @@ contract B3TRGovernor is
    *
    * @param _voterRewards The new voter rewards contract
    */
-  function setVoterRewards(
-    IVoterRewards _voterRewards
-  ) public override onlyRoleOrGovernance(CONTRACTS_ADDRESS_MANAGER_ROLE) {
-    super.setVoterRewards(_voterRewards);
+  function setVoterRewards(IVoterRewards _voterRewards) public onlyRoleOrGovernance(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    $.voterRewards = _voterRewards;
   }
 
   /**
@@ -489,45 +539,9 @@ contract B3TRGovernor is
    */
   function setXAllocationVoting(
     IXAllocationVotingGovernor _xAllocationVoting
-  ) public override onlyRoleOrGovernance(CONTRACTS_ADDRESS_MANAGER_ROLE) {
-    super.setXAllocationVoting(_xAllocationVoting);
-  }
-
-  /**
-   * @dev See {GovernorFunctionsSettingsUpgradeable-setWhitelistFunction}.
-   *
-   * This function is only callable by the GOVERNOR_FUNCTIONS_SETTINGS_ROLE
-   */
-  function setWhitelistFunction(
-    address target,
-    bytes4 functionSelector,
-    bool isWhitelisted
-  ) public override onlyRoleOrGovernance(GOVERNOR_FUNCTIONS_SETTINGS_ROLE) {
-    super.setWhitelistFunction(target, functionSelector, isWhitelisted);
-  }
-
-  /**
-   * @dev See {GovernorFunctionsSettingsUpgradeable-setWhitelistFunctions}.
-   *
-   * This function is only callable by the GOVERNOR_FUNCTIONS_SETTINGS_ROLE
-   */
-  function setWhitelistFunctions(
-    address target,
-    bytes4[] memory functionSelectors,
-    bool isWhitelisted
-  ) public override onlyRoleOrGovernance(GOVERNOR_FUNCTIONS_SETTINGS_ROLE) {
-    super.setWhitelistFunctions(target, functionSelectors, isWhitelisted);
-  }
-
-  /**
-   * @dev See {GovernorFunctionsSettingsUpgradeable-setIsFunctionRestrictionEnabled}.
-   *
-   * This function is only callable by the GOVERNOR_FUNCTIONS_SETTINGS_ROLE
-   */
-  function setIsFunctionRestrictionEnabled(
-    bool isEnabled
-  ) public override onlyRoleOrGovernance(GOVERNOR_FUNCTIONS_SETTINGS_ROLE) {
-    super.setIsFunctionRestrictionEnabled(isEnabled);
+  ) public onlyRoleOrGovernance(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    $.xAllocationVoting = _xAllocationVoting;
   }
 
   function supportsInterface(
@@ -551,7 +565,8 @@ contract B3TRGovernor is
    * Receiving tokens is disabled if the governance executor is other than the governor itself (eg. when using with a timelock).
    */
   function onERC1155Received(address, address, uint256, uint256, bytes memory) public virtual returns (bytes4) {
-    if (_executor() != address(this)) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    if ($.executor() != address(this)) {
       revert GovernorDisabledDeposit();
     }
     return this.onERC1155Received.selector;
@@ -562,7 +577,8 @@ contract B3TRGovernor is
    * Receiving tokens is disabled if the governance executor is other than the governor itself (eg. when using with a timelock).
    */
   function onERC721Received(address, address, uint256, bytes memory) public virtual returns (bytes4) {
-    if (_executor() != address(this)) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    if ($.executor() != address(this)) {
       revert GovernorDisabledDeposit();
     }
     return this.onERC721Received.selector;
@@ -579,7 +595,8 @@ contract B3TRGovernor is
     uint256[] memory,
     bytes memory
   ) public virtual returns (bytes4) {
-    if (_executor() != address(this)) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    if ($.executor() != address(this)) {
       revert GovernorDisabledDeposit();
     }
     return this.onERC1155BatchReceived.selector;
