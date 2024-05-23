@@ -12,6 +12,7 @@ import { Pause } from "./components/Pause"
 import { UpdateReceiverAddress } from "./components/UpdateReceiverAddress"
 import { StartRoundCard } from "./components/StartRoundCard/StartRoundCard"
 import { ContractsDetails } from "./components/ContractsDetails"
+import { UpdateAppsEligibility } from "./components/UpdateAppsEligibility"
 
 export const AdminPageContent = () => {
   useEffect(() => {
@@ -56,6 +57,7 @@ export const AdminPageContent = () => {
             <TabPanel>
               <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
                 <UpdateReceiverAddress />
+                <UpdateAppsEligibility />
               </Grid>
             </TabPanel>
           )}
