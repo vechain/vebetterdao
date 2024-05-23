@@ -153,6 +153,8 @@ const ContractDetailsCard = ({ title, address, roles }: ContractDetailsCardProps
             <Text fontSize="md" wordBreak={"break-word"} fontWeight={600}>
               {"Balance"}
             </Text>
+          </HStack>
+          <HStack w="full" justify={"space-between"}>
             <HStack spacing={1}>
               <Skeleton isLoaded={!b3trBalanceLoading}>
                 <Text fontSize="md"> {compactFormatter.format(Number(b3trBalanceScaled))}</Text>
@@ -188,7 +190,7 @@ const ContractDetailsCard = ({ title, address, roles }: ContractDetailsCardProps
             <VStack align="flex-start" w={"full"}>
               {userRoles.map(role => (
                 <HStack key={role.name + address} w={"full"} justify={"space-between"}>
-                  <Text fontSize="sm">{role.name}</Text>
+                  <Text fontSize="xs">{role.name}</Text>
                   <Text fontSize="sm" justifyContent={"flex-end"}>
                     {role.hasRole ? "✅" : "❌"}
                   </Text>
