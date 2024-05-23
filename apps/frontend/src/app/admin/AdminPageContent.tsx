@@ -27,7 +27,14 @@ export const AdminPageContent = () => {
   return (
     <Stack spacing={12} w={"full"} data-testid="admin-page">
       <Tabs>
-        <TabList>
+        <TabList
+          overflowY="hidden"
+          sx={{
+            scrollbarWidth: "none",
+            "::-webkit-scrollbar": {
+              display: "none",
+            },
+          }}>
           <Tab>{"Emissions"}</Tab>
           {isAdminOfX2EarnApps && <Tab>{"X2Earn Apps"}</Tab>}
           <Tab>{"Utils"}</Tab>
