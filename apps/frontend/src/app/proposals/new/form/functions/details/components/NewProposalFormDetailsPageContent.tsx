@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation"
 import { FormData, NewProposalForm } from "./NewProposalForm"
 import { abi } from "thor-devkit"
 import { useProposalFormStore } from "@/store/useProposalFormStore"
-import ethers from "ethers"
+import { ethers } from "ethers"
 
 export const NewProposalFormDetailsPageContent: React.FC = () => {
   const router = useRouter()

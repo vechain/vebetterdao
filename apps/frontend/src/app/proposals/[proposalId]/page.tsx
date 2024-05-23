@@ -14,6 +14,12 @@ const ProposalPageContent = dynamic(
   },
 )
 
-export default () => {
-  return <ProposalPageContent />
+type Props = {
+  params: {
+    proposalId: string
+  }
+}
+
+export default function ProposalPage({ params }: Readonly<Props>) {
+  return <ProposalPageContent proposalId={params.proposalId} />
 }

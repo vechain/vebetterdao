@@ -10,7 +10,9 @@ import { convertUriToUrl } from "@/utils/uri"
  */
 export const getIpfsMetadata = async <T>(uri?: string, parseJson = false): Promise<T> => {
   if (!uri) throw new Error("No URI provided")
-  const metadata = await axios.get<string>(convertUriToUrl(uri), {
+  const newUri = convertUriToUrl(uri)
+  console.log("newUrio", newUri)
+  const metadata = await axios.get<string>(newUri, {
     timeout: 20000,
   })
 
