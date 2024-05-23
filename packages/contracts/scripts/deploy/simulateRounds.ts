@@ -1,4 +1,4 @@
-import { B3TR, Emissions, VOT3, VoterRewards, XAllocationVoting } from "../../typechain-types"
+import { B3TR, B3TRBadge, Emissions, VOT3, VoterRewards, XAllocationVoting } from "../../typechain-types"
 import { moveBlocks } from "../../test/helpers"
 import { SeedStrategy, getTestKeys, getSeedAccounts } from "../helpers/seedAccounts"
 import { distributeEmissions, startEmissions } from "../helpers/emissions"
@@ -6,6 +6,7 @@ import { airdropB3tr, airdropVTHO } from "../helpers/airdrop"
 import { swapB3trForVot3 } from "../helpers/swap"
 import { castVotesToXDapps } from "../helpers/xApp"
 import { claimVoterRewards } from "../helpers/voterRewards"
+import { claimGmNfts } from "../helpers/gmNfts"
 
 const ACCT_OFFSET = 15
 // Number of users to seed. If you increase this number you will need to increase the EMISSIONS_CYCLE_DURATION to make sure there is enough time to vote
@@ -18,6 +19,7 @@ export const simulateRounds = async (
   xAllocationVoting: XAllocationVoting,
   emissions: Emissions,
   voterRewards: VoterRewards,
+  gmNft: B3TRBadge,
 ) => {
   const start = performance.now()
   console.log("Running simulation...")
@@ -50,8 +52,19 @@ export const simulateRounds = async (
   // Wait for round to end
   await waitForRoundToEnd(roundId, xAllocationVoting)
 
-  // Claim voter rewards
-  await claimVoterRewards(voterRewards, roundId, admin, seedAccounts)
+  // Claim GM NFTs for ~75% of users
+  await claimGmNfts(
+    gmNft,
+    seedAccounts.filter(() => Math.random() < 0.75),
+  )
+
+  // Claim voter rewards for ~75% of users
+  await claimVoterRewards(
+    voterRewards,
+    roundId,
+    admin,
+    seedAccounts.filter(() => Math.random() < 0.75),
+  )
 
   // Swap for VOT3
   await swapB3trForVot3(b3tr, vot3, seedAccounts)

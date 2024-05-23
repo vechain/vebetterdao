@@ -169,7 +169,7 @@ export async function deployAll(config: ContractsConfig) {
 
   // ---------- Run Simulation ---------- //
   if (shouldRunSimulation()) {
-    await simulateRounds(b3tr, vot3, xAllocationVoting, emissions, voterRewards)
+    await simulateRounds(b3tr, vot3, xAllocationVoting, emissions, voterRewards, badge)
   }
 
   // ---------- Role updates ---------- //
