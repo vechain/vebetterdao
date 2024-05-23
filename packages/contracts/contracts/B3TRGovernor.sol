@@ -33,6 +33,7 @@ import { GovernorStorageTypes } from "./governance/libraries/GovernorStorageType
 import { GovernorClockLogic } from "./governance/libraries/GovernorClockLogic.sol";
 import { GovernorFunctionRestrictionsLogic } from "./governance/libraries/GovernorFunctionRestrictionsLogic.sol";
 import { GovernorGovernanceLogic } from "./governance/libraries/GovernorGovernanceLogic.sol";
+import { GovernorConfigurator } from "./governance/libraries/GovernorConfigurator.sol";
 import { GovernorTypes } from "./governance/libraries/GovernorTypes.sol";
 import { GovernorStorage } from "./governance/GovernorStorage.sol";
 import { IVoterRewards } from "./interfaces/IVoterRewards.sol";
@@ -280,14 +281,6 @@ contract B3TRGovernor is
   }
 
   /**
-   * @dev See {B3TRGovernor-minVotingDelay}.
-   */
-  function minVotingDelay() public view virtual override returns (uint256) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    $.minVotingDelay();
-  }
-
-  /**
    * @dev See {IB3TRGovernor-getVotes}.
    */
   function getVotes(address account, uint256 timepoint) public view virtual returns (uint256) {
@@ -366,6 +359,71 @@ contract B3TRGovernor is
   function isFunctionWhitelisted(address target, bytes4 functionSelector) public view returns (bool) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return $.isFunctionWhitelisted(target, functionSelector);
+  }
+
+  /**
+   * @dev See {B3TRGovernor-minVotingDelay}.
+   */
+  function minVotingDelay() public view virtual override returns (uint256) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return $.getMinVotingDelay();
+  }
+
+  /**
+   * @dev See {IB3TRGovernor-votingPeriod}.
+   */
+  function votingPeriod() public view virtual override returns (uint256) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return $.xAllocationVoting.votingPeriod();
+  }
+
+  /**
+   * @dev Check if a user has voted at least one time.
+   *
+   * @param user The address of the user to check if has voted at least one time
+   */
+  function hasVotedOnce(address user) public view virtual override returns (bool) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return $.hasVotedOnce(user);
+  }
+
+  /**
+   * @dev returns if quorum was reached or not
+   */
+  function quorumReached(uint256 proposalId) public view virtual returns (bool) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return $.quorumReached(proposalId);
+  }
+
+  /**
+   * @dev returns the total votes for a proposal
+   */
+  function proposalTotalVotes(uint256 proposalId) public view returns (uint256) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return $.proposalTotalVotes(proposalId);
+  }
+
+  /**
+   * @dev Accessor to the internal vote counts, in terms of vote power.
+   */
+  function proposalVotes(
+    uint256 proposalId
+  ) public view virtual returns (uint256 againstVotes, uint256 forVotes, uint256 abstainVotes) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return $.proposalVotes(proposalId);
+  }
+
+  // solhint-disable-next-line func-name-mixedcase
+  function COUNTING_MODE() public pure virtual override returns (string memory) {
+    return "support=bravo&quorum=for,abstain,against";
+  }
+
+  /**
+   * @dev See {IB3TRGovernor-hasVoted}.
+   */
+  function hasVoted(uint256 proposalId, address account) public view virtual override returns (bool) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return $.hasVoted(proposalId, account);
   }
 
   // ------------------ SETTERS ------------------ //
@@ -514,9 +572,36 @@ contract B3TRGovernor is
     $.setIsFunctionRestrictionEnabled(isEnabled);
   }
 
-  // ------------------ Overrides ------------------ //
+  /**
+   * @dev Update the deposit threshold. This operation can only be performed through a governance proposal.
+   *
+   * Emits a {DepositThresholdSet} event.
+   */
+  function setDepositThresholdPercentage(uint256 newDepositThreshold) public onlyGovernance {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    $.setDepositThresholdPercentage(newDepositThreshold);
+  }
 
-  function _authorizeUpgrade(address newImplementation) internal override onlyGovernance {}
+  /**
+   * @dev Update the voting threshold. This operation can only be performed through a governance proposal.
+   *
+   * Emits a {VotingThresholdSet} event.
+   */
+  function setVotingThreshold(uint256 newVotingThreshold) public virtual onlyGovernance {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    $.setVotingThreshold(newVotingThreshold);
+  }
+
+  /**
+   * @dev Update the min voting delay before vote can start.
+   * This operation can only be performed through a governance proposal.
+   *
+   * Emits a {MinVotingDelaySet} event.
+   */
+  function setMinVotingDelay(uint256 newMinVotingDelay) public virtual onlyGovernance {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    $.setMinVotingDelay(newMinVotingDelay);
+  }
 
   /**
    * @dev Set the voter rewards contract
@@ -544,9 +629,13 @@ contract B3TRGovernor is
     $.xAllocationVoting = _xAllocationVoting;
   }
 
+  // ------------------ Overrides ------------------ //
+
+  function _authorizeUpgrade(address newImplementation) internal override onlyGovernance {}
+
   function supportsInterface(
     bytes4 interfaceId
-  ) public view override(GovernorUpgradeable, AccessControlUpgradeable) returns (bool) {
+  ) public view override(IERC165, AccessControlUpgradeable) returns (bool) {
     return
       interfaceId == type(IB3TRGovernor).interfaceId ||
       interfaceId == type(IERC1155Receiver).interfaceId ||
