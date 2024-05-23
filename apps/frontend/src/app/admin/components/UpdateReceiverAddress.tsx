@@ -10,6 +10,9 @@ import {
   Heading,
   FormErrorMessage,
   Select,
+  Card,
+  CardHeader,
+  CardBody,
 } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
 import { useMemo, useState } from "react"
@@ -48,65 +51,71 @@ export const UpdateReceiverAddress = () => {
   const isFormValid = useMemo(() => isValidAddress && appId !== undefined && appId !== "", [appId, isValidAddress])
 
   return (
-    <VStack spacing={8} alignItems={"start"} w="full">
-      <Heading size="md">Update Receiver Address</Heading>
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          width: "100%",
-        }}>
-        <VStack spacing={4} alignItems={"start"}>
-          <FormControl isRequired>
-            <FormLabel>
-              <strong>{"App"}</strong>
-            </FormLabel>
-            <Select
-              placeholder="Select app"
-              isDisabled={isLoading}
-              onChange={e => setAppId(e.target.value)}
-              value={appId}>
-              {xApps?.map(item => {
-                return (
-                  <option key={"Select" + item.name} value={item.id}>
-                    {item.name}
-                  </option>
-                )
-              })}
-            </Select>
-          </FormControl>
+    <Card w={"full"}>
+      <CardHeader>
+        <Heading size="lg">Update Receiver Address</Heading>
+      </CardHeader>
+      <CardBody>
+        <VStack spacing={8} alignItems={"start"} w="full">
+          <form
+            onSubmit={handleSubmit}
+            style={{
+              width: "100%",
+            }}>
+            <VStack spacing={4} alignItems={"start"}>
+              <FormControl isRequired>
+                <FormLabel>
+                  <strong>{"App"}</strong>
+                </FormLabel>
+                <Select
+                  placeholder="Select app"
+                  isDisabled={isLoading}
+                  onChange={e => setAppId(e.target.value)}
+                  value={appId}>
+                  {xApps?.map(item => {
+                    return (
+                      <option key={"Select" + item.name} value={item.id}>
+                        {item.name}
+                      </option>
+                    )
+                  })}
+                </Select>
+              </FormControl>
 
-          <FormControl>
-            <FormLabel>
-              <strong>{"Current Address"}</strong>
-            </FormLabel>
-            <InputGroup>
-              <Input value={currentAddress} disabled />
-            </InputGroup>
-          </FormControl>
+              <FormControl>
+                <FormLabel>
+                  <strong>{"Current Address"}</strong>
+                </FormLabel>
+                <InputGroup>
+                  <Input value={currentAddress} disabled />
+                </InputGroup>
+              </FormControl>
 
-          <FormControl isRequired isInvalid={!isValidAddress && newAddressFieldIsDirty}>
-            <FormLabel>
-              <strong>{"New Address"}</strong>
-            </FormLabel>
-            <InputGroup>
-              <Input
-                placeholder="Where should the allocation tokens be sent?"
-                value={newAddress}
-                onChange={e => {
-                  setNewAddress(e.target.value)
-                  setNewAddressFieldIsDirty(true)
-                }}
-                disabled={isLoading}
-              />
-            </InputGroup>
-            <FormErrorMessage>{"Address not valid"}</FormErrorMessage>
-          </FormControl>
+              <FormControl isRequired isInvalid={!isValidAddress && newAddressFieldIsDirty}>
+                <FormLabel>
+                  <strong>{"New Address"}</strong>
+                </FormLabel>
+                <InputGroup>
+                  <Input
+                    placeholder="Where should the allocation tokens be sent?"
+                    value={newAddress}
+                    onChange={e => {
+                      setNewAddress(e.target.value)
+                      setNewAddressFieldIsDirty(true)
+                    }}
+                    disabled={isLoading}
+                  />
+                </InputGroup>
+                <FormErrorMessage>{"Address not valid"}</FormErrorMessage>
+              </FormControl>
 
-          <Button isDisabled={!isFormValid} colorScheme="blue" type="submit" isLoading={isLoading}>
-            Save
-          </Button>
+              <Button isDisabled={!isFormValid} colorScheme="blue" type="submit" isLoading={isLoading}>
+                Save
+              </Button>
+            </VStack>
+          </form>
         </VStack>
-      </form>
-    </VStack>
+      </CardBody>
+    </Card>
   )
 }

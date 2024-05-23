@@ -2,7 +2,7 @@ import { useCurrentAllocationsRoundId } from "@/api"
 import { useStartEmission } from "@/hooks"
 import { HStack, Button } from "@chakra-ui/react"
 
-export const StartEmissions = () => {
+export const StartEmissionsButton = () => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
 
   const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useStartEmission({})
