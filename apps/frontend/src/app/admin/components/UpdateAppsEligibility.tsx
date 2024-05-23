@@ -1,4 +1,5 @@
 import { useAppsEligibleInNextRound, useXApps } from "@/api"
+import { useSetVotingEligibility } from "@/hooks"
 import {
   VStack,
   FormControl,
@@ -12,7 +13,7 @@ import {
   HStack,
   Divider,
 } from "@chakra-ui/react"
-import { useMemo, useState } from "react"
+import { useMemo } from "react"
 
 export const UpdateAppsEligibility = () => {
   const { data: eligibleAppsIds } = useAppsEligibleInNextRound()
@@ -20,7 +21,7 @@ export const UpdateAppsEligibility = () => {
 
   // loop through x2EarnApps and check if appIds are in x2EarnApps,
   // if they are in then put elegible true, otherwise eligible false
-  const x2EarnAppsEligible = useMemo(() => {
+  let x2EarnAppsEligible = useMemo(() => {
     return x2EarnApps?.map(app => {
       return {
         ...app,
@@ -37,16 +38,38 @@ export const UpdateAppsEligibility = () => {
       <CardBody>
         <FormControl as={SimpleGrid} gap={3}>
           {x2EarnAppsEligible?.map(app => (
-            <VStack key={app.id}>
-              <HStack w={"full"} justifyContent={"space-between"}>
-                <FormLabel>{app.name}</FormLabel>
-                <Switch isChecked={app.eligible} />
-              </HStack>
-              <Divider />
-            </VStack>
+            <AppEligibility key={app.id} id={app.id} name={app.name} isEligible={app.eligible ?? false} />
           ))}
         </FormControl>
       </CardBody>
     </Card>
+  )
+}
+
+const AppEligibility = ({ id, name, isEligible }: { id: string; name: string; isEligible: boolean }) => {
+  const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useSetVotingEligibility({
+    appId: id,
+    isEligible: !isEligible,
+    appName: name,
+    invalidateCache: true,
+  })
+
+  const handleEligibilityChange = (event: { preventDefault: () => void }) => {
+    event.preventDefault()
+
+    sendTransaction(undefined)
+  }
+  return (
+    <VStack>
+      <HStack w={"full"} justifyContent={"space-between"}>
+        <FormLabel>{name}</FormLabel>
+        <Switch
+          isChecked={isEligible}
+          onChange={event => handleEligibilityChange(event)}
+          disabled={isTxReceiptLoading || sendTransactionPending}
+        />
+      </HStack>
+      <Divider />
+    </VStack>
   )
 }
