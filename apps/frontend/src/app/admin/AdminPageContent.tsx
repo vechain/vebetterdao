@@ -45,9 +45,8 @@ export const AdminPageContent = () => {
         <TabPanels>
           <TabPanel>
             <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
-              <GridItem colSpan={2}>
-                <StartRoundCard />
-              </GridItem>
+              <StartRoundCard />
+              <GridItem />
               <ClaimXAppAllocations />
               <BulkClaimXAppsAllocations />
             </Grid>
