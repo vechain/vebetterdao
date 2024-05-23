@@ -31,5 +31,6 @@ export const useIpfsMetadata = <T>(ipfsUri?: string, parseJson = false) => {
     queryKey: getIpfsMetadataQueryKey(ipfsUri),
     queryFn: () => getIpfsMetadata<T>(ipfsUri, parseJson),
     enabled: !!ipfsUri,
+    staleTime: Infinity,
   })
 }
