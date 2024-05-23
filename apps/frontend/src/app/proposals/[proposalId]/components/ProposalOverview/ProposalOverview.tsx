@@ -1,5 +1,6 @@
 import {
   Card,
+  CardBody,
   Divider,
   Flex,
   HStack,
@@ -31,70 +32,72 @@ export const ProposalOverview = () => {
   const metadata = useIpfsMetadata<ProposalMetadata>(metadataUri)
 
   return (
-    <Card border="1px solid #D5D5D5" rounded="16px" p="24px">
-      <Flex gap="48px" flexDir={["column", "column", "row"]}>
-        <VStack gap={"20px"} alignItems={"stretch"} flex={3} justify={"space-between"}>
-          <VStack alignItems={"stretch"}>
-            <HStack gap={1}>
-              <Text fontWeight={"600"} color="#6A6A6A">
-                ROUND
-              </Text>
-              <Skeleton isLoaded={!proposal.isRoundIdVoteStartLoading} display={"inline-flex"} ml={1}>
+    <Card variant="baseWithBorder" rounded="xl">
+      <CardBody>
+        <Flex gap="48px" flexDir={["column", "column", "row"]}>
+          <VStack gap={"20px"} alignItems={"stretch"} flex={3} justify={"space-between"}>
+            <VStack alignItems={"stretch"}>
+              <HStack gap={1}>
                 <Text fontWeight={"600"} color="#6A6A6A">
-                  #{proposal.roundIdVoteStart}
+                  ROUND
                 </Text>
-              </Skeleton>
-            </HStack>
-            <Skeleton isLoaded={!metadata.isLoading}>
-              <Heading fontWeight={700} fontSize="36px" color="#252525">
-                {metadata.error ? "Error fetching metadata" : metadata.data?.title ?? "Loading..."}
-              </Heading>
-            </Skeleton>
-            <Skeleton isLoaded={!proposal.isStateLoading} alignSelf={"flex-start"}>
-              <ProposalOverviewStatusLabel />
-            </Skeleton>
-            <Spacer h={"24px"} />
-            <SkeletonText isLoaded={!metadata.isLoading}>
-              <Text color="#252525">
-                {metadata.error ? "Error fetching metadata" : metadata.data?.shortDescription ?? "Loading..."}
-              </Text>
-            </SkeletonText>
-          </VStack>
-          <VStack alignItems={"stretch"}>
-            <Divider color="#D5D5D5" />
-            <HStack justify={"space-between"} flexWrap={"wrap"}>
-              <VStack alignItems={"stretch"}>
-                <Text fontWeight={"400"} color="#6A6A6A">
-                  Created by
-                </Text>
-                <Skeleton isLoaded={!proposal.isProposerLoading}>
-                  <HStack>
-                    <AddressIcon address={proposal.proposer} rounded="full" h="20px" w="20px" />
-                    <Text color="#252525">{humanAddress(proposal.proposer, 7, 5)}</Text>
-                  </HStack>
+                <Skeleton isLoaded={!proposal.isRoundIdVoteStartLoading} display={"inline-flex"} ml={1}>
+                  <Text fontWeight={"600"} color="#6A6A6A">
+                    #{proposal.roundIdVoteStart}
+                  </Text>
                 </Skeleton>
-              </VStack>
-              <ProposalYourVote />
-              <ProposalOverviewTime />
-              <ProposalOverviewCommunitySupport />
-              <ProposalOverviewYourSupport />
-              <IconButton
-                isDisabled={proposal.isStateLoading}
-                aria-label="share"
-                rounded="full"
-                bgColor="#E0E9FE"
-                color="#004CFC"
-                h="40px"
-                w="40px">
-                <UilShareAlt size="20px" />
-              </IconButton>
-            </HStack>
+              </HStack>
+              <Skeleton isLoaded={!metadata.isLoading}>
+                <Heading fontWeight={700} fontSize="36px" color="#252525">
+                  {metadata.error ? "Error fetching metadata" : metadata.data?.title ?? "Loading..."}
+                </Heading>
+              </Skeleton>
+              <Skeleton isLoaded={!proposal.isStateLoading} alignSelf={"flex-start"}>
+                <ProposalOverviewStatusLabel />
+              </Skeleton>
+              <Spacer h={"24px"} />
+              <SkeletonText isLoaded={!metadata.isLoading}>
+                <Text color="#252525">
+                  {metadata.error ? "Error fetching metadata" : metadata.data?.shortDescription ?? "Loading..."}
+                </Text>
+              </SkeletonText>
+            </VStack>
+            <VStack alignItems={"stretch"}>
+              <Divider color="#D5D5D5" />
+              <HStack justify={"space-between"} flexWrap={"wrap"}>
+                <VStack alignItems={"stretch"}>
+                  <Text fontWeight={"400"} color="#6A6A6A">
+                    Created by
+                  </Text>
+                  <Skeleton isLoaded={!proposal.isProposerLoading}>
+                    <HStack>
+                      <AddressIcon address={proposal.proposer} rounded="full" h="20px" w="20px" />
+                      <Text color="#252525">{humanAddress(proposal.proposer, 7, 5)}</Text>
+                    </HStack>
+                  </Skeleton>
+                </VStack>
+                <ProposalYourVote />
+                <ProposalOverviewTime />
+                <ProposalOverviewCommunitySupport />
+                <ProposalOverviewYourSupport />
+                <IconButton
+                  isDisabled={proposal.isStateLoading}
+                  aria-label="share"
+                  rounded="full"
+                  bgColor="#E0E9FE"
+                  color="#004CFC"
+                  h="40px"
+                  w="40px">
+                  <UilShareAlt size="20px" />
+                </IconButton>
+              </HStack>
+            </VStack>
           </VStack>
-        </VStack>
-        <Skeleton isLoaded={!proposal.isVotesLoading && !proposal.isStateLoading} rounded="8px" flex={1.5}>
-          <ProposalOverviewVotes />
-        </Skeleton>
-      </Flex>
+          <Skeleton isLoaded={!proposal.isVotesLoading && !proposal.isStateLoading} rounded="8px" flex={1.5}>
+            <ProposalOverviewVotes />
+          </Skeleton>
+        </Flex>
+      </CardBody>
     </Card>
   )
 }
