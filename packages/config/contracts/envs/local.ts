@@ -37,7 +37,7 @@ export function createLocalConfig() {
       X2EarnApps: ["addApp", "setVotingEligibility"],
     },
 
-    EMISSIONS_CYCLE_DURATION: 12, // 12 blocks - 2 minutes.
+    EMISSIONS_CYCLE_DURATION: 24, // 24 blocks - 4 minutes.
     EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE: 4, // 4% decay every cycle
     EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE: 20, // 20% decay every cycle
     EMISSIONS_X_ALLOCATION_DECAY_PERIOD: 999999, // should never decay in pilot show

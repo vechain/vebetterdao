@@ -1,15 +1,9 @@
 import { Emissions__factory } from "../../typechain-types"
-import {
-  clauseBuilder,
-  type TransactionClause,
-  type TransactionBody,
-  coder,
-  FunctionFragment,
-  type IHDNode,
-} from "@vechain/sdk-core"
+import { clauseBuilder, type TransactionClause, type TransactionBody, coder, FunctionFragment } from "@vechain/sdk-core"
 import { buildTxBody, signAndSendTx } from "./txHelper"
+import { TestPk } from "./seedAccounts"
 
-export const bootstrapEmissions = async (contractAddress: string, admin: IHDNode) => {
+export const bootstrapEmissions = async (contractAddress: string, admin: TestPk) => {
   console.log("Bootstrapping emissions...")
 
   const clauses: TransactionClause[] = []
@@ -24,13 +18,13 @@ export const bootstrapEmissions = async (contractAddress: string, admin: IHDNode
 
   const body: TransactionBody = await buildTxBody(clauses, admin.address, 32)
 
-  if (!admin.privateKey) {
+  if (!admin.pk) {
     throw new Error("Account does not have a private key")
   }
-  await signAndSendTx(body, admin.privateKey)
+  await signAndSendTx(body, admin.pk)
 }
 
-export const startEmissions = async (contractAddress: string, acct: IHDNode) => {
+export const startEmissions = async (contractAddress: string, acct: TestPk) => {
   console.log("Starting emissions...")
 
   const clauses: TransactionClause[] = []
@@ -45,14 +39,14 @@ export const startEmissions = async (contractAddress: string, acct: IHDNode) => 
 
   const body: TransactionBody = await buildTxBody(clauses, acct.address, 32)
 
-  if (!acct.privateKey) {
+  if (!acct.pk) {
     throw new Error("Account does not have a private key")
   }
 
-  await signAndSendTx(body, acct.privateKey)
+  await signAndSendTx(body, acct.pk)
 }
 
-export const distributeEmissions = async (contractAddress: string, acct: IHDNode) => {
+export const distributeEmissions = async (contractAddress: string, acct: TestPk) => {
   console.log("Distributing emissions...")
 
   const clauses: TransactionClause[] = []
@@ -67,9 +61,9 @@ export const distributeEmissions = async (contractAddress: string, acct: IHDNode
 
   const body: TransactionBody = await buildTxBody(clauses, acct.address, 32)
 
-  if (!acct.privateKey) {
+  if (!acct.pk) {
     throw new Error("Account does not have a private key")
   }
 
-  await signAndSendTx(body, acct.privateKey)
+  await signAndSendTx(body, acct.pk)
 }
