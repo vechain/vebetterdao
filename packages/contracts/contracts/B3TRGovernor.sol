@@ -81,6 +81,7 @@ contract B3TRGovernor is
   using GovernorClockLogic for GovernorStorageTypes.GovernorStorage;
   using GovernorFunctionRestrictionsLogic for GovernorStorageTypes.GovernorStorage;
   using GovernorGovernanceLogic for GovernorStorageTypes.GovernorStorage;
+  using GovernorConfigurator for GovernorStorageTypes.GovernorStorage;
 
   /// @notice The role that can whitelist allowed functions in the propose function
   bytes32 public constant GOVERNOR_FUNCTIONS_SETTINGS_ROLE = keccak256("GOVERNOR_FUNCTIONS_SETTINGS_ROLE");
@@ -192,7 +193,7 @@ contract B3TRGovernor is
    *
    * @param proposalId The id of the proposal
    */
-  function proposalNeedsQueuing(uint256 proposalId) public view returns (bool) {
+  function proposalNeedsQueuing(uint256 proposalId) external view returns (bool) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     $.proposalNeedsQueuing(proposalId);
   }
@@ -246,7 +247,7 @@ contract B3TRGovernor is
    * We take for granted that the round starts the block after it ends. But it can happen that the round is not started yet for whatever reason.
    * Knowing this, if the proposal starts 4 rounds in the future we need to consider also those extra blocks used to start the rounds.
    */
-  function proposalSnapshot(uint256 proposalId) public view virtual returns (uint256) {
+  function proposalSnapshot(uint256 proposalId) external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return $.proposalSnapshot(proposalId);
   }
@@ -254,7 +255,7 @@ contract B3TRGovernor is
   /**
    * @dev See {IB3TRGovernor-proposalDeadline}.
    */
-  function proposalDeadline(uint256 proposalId) public view virtual returns (uint256) {
+  function proposalDeadline(uint256 proposalId) external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return $.proposalDeadline(proposalId);
   }
@@ -267,31 +268,31 @@ contract B3TRGovernor is
   /**
    * @dev See {Governor-depositThreshold}.
    */
-  function depositThresholdPercentage() public view virtual returns (uint256) {
+  function depositThresholdPercentage() external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return $.depositThresholdPercentage();
+    return $.getDepositThresholdPercentage();
   }
 
   /**
    * @dev See {Governor-votingThreshold}.
    */
-  function votingThreshold() public view virtual override returns (uint256) {
+  function votingThreshold() external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    $.votingThreshold();
+    $.getVotingThreshold();
   }
 
   /**
    * @dev See {IB3TRGovernor-getVotes}.
    */
-  function getVotes(address account, uint256 timepoint) public view virtual returns (uint256) {
+  function getVotes(address account, uint256 timepoint) external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return $.depositThreshold(account, timepoint);
+    return $.getVotes(account, timepoint);
   }
 
   /**
    * @dev returns the quadratic voting power that `account` has.  See {IB3TRGovernor-getQuadraticVotingPower}.
    */
-  function getQuadraticVotingPower(address account, uint256 timepoint) public view virtual returns (uint256) {
+  function getQuadraticVotingPower(address account, uint256 timepoint) external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return $.getQuadraticVotingPower(account, timepoint);
   }
@@ -300,7 +301,7 @@ contract B3TRGovernor is
    * @dev Clock (as specified in EIP-6372) is set to match the token's clock. Fallback to block numbers if the token
    * does not implement EIP-6372.
    */
-  function clock() public view virtual override returns (uint48) {
+  function clock() external view returns (uint48) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return $.clock();
   }
@@ -309,7 +310,7 @@ contract B3TRGovernor is
    * @dev Machine-readable description of the clock as specified in EIP-6372.
    */
   // solhint-disable-next-line func-name-mixedcase
-  function CLOCK_MODE() public view virtual override returns (string memory) {
+  function CLOCK_MODE() external view returns (string memory) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return $.CLOCK_MODE();
   }
@@ -317,7 +318,7 @@ contract B3TRGovernor is
   /**
    * @dev The token that voting power is sourced from.
    */
-  function token() public view virtual returns (IVOT3) {
+  function token() external view returns (IVOT3) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return $.vot3;
   }
@@ -333,7 +334,7 @@ contract B3TRGovernor is
   /**
    * @dev Returns the current quorum numerator. See {quorumDenominator}.
    */
-  function quorumNumerator() public view virtual returns (uint256) {
+  function quorumNumerator() external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return $.quorumNumerator();
   }
@@ -341,7 +342,7 @@ contract B3TRGovernor is
   /**
    * @dev Returns the quorum numerator at a specific timepoint using the GovernorQuorumFraction library.
    */
-  function quorumNumerator(uint256 timepoint) public view virtual returns (uint256) {
+  function quorumNumerator(uint256 timepoint) external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return $.quorumNumerator(timepoint);
   }
@@ -349,14 +350,14 @@ contract B3TRGovernor is
   /**
    * @dev Returns the quorum denominator using the GovernorQuorumFraction library. Defaults to 100, but may be overridden.
    */
-  function quorumDenominator() public view virtual returns (uint256) {
+  function quorumDenominator() external view returns (uint256) {
     return GovernorQuorumLogic.quorumDenominator();
   }
 
   /// @notice Check if a function is restricted by the governor
   /// @param target - address of the contract
   /// @param functionSelector - function selector
-  function isFunctionWhitelisted(address target, bytes4 functionSelector) public view returns (bool) {
+  function isFunctionWhitelisted(address target, bytes4 functionSelector) external view returns (bool) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return $.isFunctionWhitelisted(target, functionSelector);
   }
@@ -364,7 +365,7 @@ contract B3TRGovernor is
   /**
    * @dev See {B3TRGovernor-minVotingDelay}.
    */
-  function minVotingDelay() public view virtual override returns (uint256) {
+  function minVotingDelay() external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return $.getMinVotingDelay();
   }
@@ -372,7 +373,7 @@ contract B3TRGovernor is
   /**
    * @dev See {IB3TRGovernor-votingPeriod}.
    */
-  function votingPeriod() public view virtual override returns (uint256) {
+  function votingPeriod() external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return $.xAllocationVoting.votingPeriod();
   }
@@ -382,15 +383,15 @@ contract B3TRGovernor is
    *
    * @param user The address of the user to check if has voted at least one time
    */
-  function hasVotedOnce(address user) public view virtual override returns (bool) {
+  function hasVotedOnce(address user) external view returns (bool) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return $.hasVotedOnce(user);
+    return $.userVotedOnce(user);
   }
 
   /**
    * @dev returns if quorum was reached or not
    */
-  function quorumReached(uint256 proposalId) public view virtual returns (bool) {
+  function quorumReached(uint256 proposalId) external view returns (bool) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return $.quorumReached(proposalId);
   }
@@ -398,9 +399,9 @@ contract B3TRGovernor is
   /**
    * @dev returns the total votes for a proposal
    */
-  function proposalTotalVotes(uint256 proposalId) public view returns (uint256) {
+  function proposalTotalVotes(uint256 proposalId) external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return $.proposalTotalVotes(proposalId);
+    return $.getProposalTotalVotes(proposalId);
   }
 
   /**
@@ -408,22 +409,63 @@ contract B3TRGovernor is
    */
   function proposalVotes(
     uint256 proposalId
-  ) public view virtual returns (uint256 againstVotes, uint256 forVotes, uint256 abstainVotes) {
+  ) external view returns (uint256 againstVotes, uint256 forVotes, uint256 abstainVotes) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return $.proposalVotes(proposalId);
+    return $.getProposalVotes(proposalId);
   }
 
   // solhint-disable-next-line func-name-mixedcase
-  function COUNTING_MODE() public pure virtual override returns (string memory) {
+  function COUNTING_MODE() external pure returns (string memory) {
     return "support=bravo&quorum=for,abstain,against";
   }
 
   /**
    * @dev See {IB3TRGovernor-hasVoted}.
    */
-  function hasVoted(uint256 proposalId, address account) public view virtual override returns (bool) {
+  function hasVoted(uint256 proposalId, address account) external view override returns (bool) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return $.hasVoted(proposalId, account);
+  }
+
+  /**
+   * @dev Returns the amount of deposits made to a proposal.
+   *
+   * @param proposalId The id of the proposal.
+   */
+  function getProposalDeposits(uint256 proposalId) external view returns (uint256) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return $.getProposalDeposits(proposalId);
+  }
+
+  /**
+   * @dev Returns true if the threshold of deposits required to reach a proposal has been reached.
+   *
+   * @param proposalId The id of the proposal.
+   */
+  function proposalDepositReached(uint256 proposalId) external view returns (bool) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return $.proposalDepositReached(proposalId);
+  }
+
+  /**
+   * @dev Returns the deposit threshold for a proposal.
+   * @param proposalId The id of the proposal.
+   * @return uint256 The deposit threshold for the proposal.
+   */
+  function proposalDepositThreshold(uint256 proposalId) external view returns (uint256) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return $.proposalDepositThreshold(proposalId);
+  }
+
+  /**
+   * @dev Returns the amount of tokens a specific user has deposited to a proposal.
+   *
+   * @param proposalId The id of the proposal.
+   * @param user The address of the user.
+   */
+  function getUserDeposit(uint256 proposalId, address user) public view returns (uint256) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return $.getUserDeposit(proposalId, user);
   }
 
   // ------------------ SETTERS ------------------ //
@@ -522,6 +564,16 @@ contract B3TRGovernor is
     return $.castVote(proposalId, _msgSender(), support, reason);
   }
 
+  function withdraw(uint256 proposalId, address depositer) external {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    $.withdraw(proposalId, depositer);
+  }
+
+  function deposit(uint256 amount, uint256 proposalId) external {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    $.deposit(amount, proposalId);
+  }
+
   /**
    * @dev Changes the quorum numerator.
    *
@@ -587,7 +639,7 @@ contract B3TRGovernor is
    *
    * Emits a {VotingThresholdSet} event.
    */
-  function setVotingThreshold(uint256 newVotingThreshold) public virtual onlyGovernance {
+  function setVotingThreshold(uint256 newVotingThreshold) public onlyGovernance {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     $.setVotingThreshold(newVotingThreshold);
   }
@@ -598,7 +650,7 @@ contract B3TRGovernor is
    *
    * Emits a {MinVotingDelaySet} event.
    */
-  function setMinVotingDelay(uint256 newMinVotingDelay) public virtual onlyGovernance {
+  function setMinVotingDelay(uint256 newMinVotingDelay) public onlyGovernance {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     $.setMinVotingDelay(newMinVotingDelay);
   }
