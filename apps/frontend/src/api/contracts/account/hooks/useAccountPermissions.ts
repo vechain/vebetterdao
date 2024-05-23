@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { ADMIN_ROLE, MINTER_ROLE, UPGRADER_ROLE, useHasRole } from "./useHasRole"
+import { useHasRole } from "./useHasRole"
 import { useMemo } from "react"
 
 type useAccountPermissionsResponse = {
@@ -37,38 +37,46 @@ type useAccountPermissionsResponse = {
 export const useAccountPermissions = (address?: string): useAccountPermissionsResponse => {
   const config = getConfig()
 
-  const { data: isAdminOfB3tr } = useHasRole(ADMIN_ROLE, config.b3trContractAddress, address)
-  const { data: isAdminOfEmissions } = useHasRole(ADMIN_ROLE, config.emissionsContractAddress, address)
-  const { data: isAdminOfXAllocationVoting } = useHasRole(ADMIN_ROLE, config.xAllocationVotingContractAddress, address)
-  const { data: isAdminOfXAllocationPool } = useHasRole(ADMIN_ROLE, config.xAllocationPoolContractAddress, address)
-  const { data: isAdminOfB3TRGovernor } = useHasRole(ADMIN_ROLE, config.b3trGovernorAddress, address)
-  const { data: isAdminOfGalaxyMember } = useHasRole(ADMIN_ROLE, config.galaxyMemberContractAddress, address)
-  const { data: isAdminOfVot3 } = useHasRole(ADMIN_ROLE, config.vot3ContractAddress, address)
-  const { data: isAdminOfVoterRewards } = useHasRole(ADMIN_ROLE, config.voterRewardsContractAddress, address)
-  const { data: isAdminOfTimeLock } = useHasRole(ADMIN_ROLE, config.timelockContractAddress, address)
-  const { data: isAdminOfTreasury } = useHasRole(ADMIN_ROLE, config.treasuryContractAddress, address)
-  const { data: isAdminOfX2EarnApps } = useHasRole(ADMIN_ROLE, config.x2EarnAppsContractAddress, address)
+  const { data: isAdminOfB3tr } = useHasRole("DEFAULT_ADMIN_ROLE", config.b3trContractAddress, address)
+  const { data: isAdminOfEmissions } = useHasRole("DEFAULT_ADMIN_ROLE", config.emissionsContractAddress, address)
+  const { data: isAdminOfXAllocationVoting } = useHasRole(
+    "DEFAULT_ADMIN_ROLE",
+    config.xAllocationVotingContractAddress,
+    address,
+  )
+  const { data: isAdminOfXAllocationPool } = useHasRole(
+    "DEFAULT_ADMIN_ROLE",
+    config.xAllocationPoolContractAddress,
+    address,
+  )
+  const { data: isAdminOfB3TRGovernor } = useHasRole("DEFAULT_ADMIN_ROLE", config.b3trGovernorAddress, address)
+  const { data: isAdminOfGalaxyMember } = useHasRole("DEFAULT_ADMIN_ROLE", config.galaxyMemberContractAddress, address)
+  const { data: isAdminOfVot3 } = useHasRole("DEFAULT_ADMIN_ROLE", config.vot3ContractAddress, address)
+  const { data: isAdminOfVoterRewards } = useHasRole("DEFAULT_ADMIN_ROLE", config.voterRewardsContractAddress, address)
+  const { data: isAdminOfTimeLock } = useHasRole("DEFAULT_ADMIN_ROLE", config.timelockContractAddress, address)
+  const { data: isAdminOfTreasury } = useHasRole("DEFAULT_ADMIN_ROLE", config.treasuryContractAddress, address)
+  const { data: isAdminOfX2EarnApps } = useHasRole("DEFAULT_ADMIN_ROLE", config.x2EarnAppsContractAddress, address)
 
-  const { data: isMinterOfB3tr } = useHasRole(MINTER_ROLE, config.b3trContractAddress, address)
-  const { data: isMinterOfEmissions } = useHasRole(MINTER_ROLE, config.emissionsContractAddress, address)
+  const { data: isMinterOfB3tr } = useHasRole("MINTER_ROLE", config.b3trContractAddress, address)
+  const { data: isMinterOfEmissions } = useHasRole("MINTER_ROLE", config.emissionsContractAddress, address)
 
-  const { data: isUpgraderOfEmissions } = useHasRole(UPGRADER_ROLE, config.emissionsContractAddress, address)
+  const { data: isUpgraderOfEmissions } = useHasRole("UPGRADER_ROLE", config.emissionsContractAddress, address)
   const { data: isUpgraderOfXAllocationVoting } = useHasRole(
-    UPGRADER_ROLE,
+    "UPGRADER_ROLE",
     config.xAllocationVotingContractAddress,
     address,
   )
   const { data: isUpgraderOfXAllocationPool } = useHasRole(
-    UPGRADER_ROLE,
+    "UPGRADER_ROLE",
     config.xAllocationPoolContractAddress,
     address,
   )
-  const { data: isUpgraderOfGalaxyMember } = useHasRole(UPGRADER_ROLE, config.galaxyMemberContractAddress, address)
-  const { data: isUpgraderOfVot3 } = useHasRole(UPGRADER_ROLE, config.vot3ContractAddress, address)
-  const { data: isUpgraderOfVoterRewards } = useHasRole(UPGRADER_ROLE, config.voterRewardsContractAddress, address)
-  const { data: isUpgraderOfTimelock } = useHasRole(UPGRADER_ROLE, config.timelockContractAddress, address)
-  const { data: isUpgraderOfTreasury } = useHasRole(UPGRADER_ROLE, config.treasuryContractAddress, address)
-  const { data: isUpgraderOfX2EarnApps } = useHasRole(UPGRADER_ROLE, config.x2EarnAppsContractAddress, address)
+  const { data: isUpgraderOfGalaxyMember } = useHasRole("UPGRADER_ROLE", config.galaxyMemberContractAddress, address)
+  const { data: isUpgraderOfVot3 } = useHasRole("UPGRADER_ROLE", config.vot3ContractAddress, address)
+  const { data: isUpgraderOfVoterRewards } = useHasRole("UPGRADER_ROLE", config.voterRewardsContractAddress, address)
+  const { data: isUpgraderOfTimelock } = useHasRole("UPGRADER_ROLE", config.timelockContractAddress, address)
+  const { data: isUpgraderOfTreasury } = useHasRole("UPGRADER_ROLE", config.treasuryContractAddress, address)
+  const { data: isUpgraderOfX2EarnApps } = useHasRole("UPGRADER_ROLE", config.x2EarnAppsContractAddress, address)
 
   return useMemo(() => {
     return {
@@ -114,6 +122,7 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
     isAdminOfGalaxyMember,
     isAdminOfVot3,
     isAdminOfVoterRewards,
+    isAdminOfTimeLock,
     isMinterOfB3tr,
     isMinterOfEmissions,
     isUpgraderOfEmissions,
