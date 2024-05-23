@@ -31,6 +31,7 @@ import { GovernorQuorumLogic } from "./governance/libraries/GovernorQuorumLogic.
 import { GovernorDepositLogic } from "./governance/libraries/GovernorDepositLogic.sol";
 import { GovernorStorageTypes } from "./governance/libraries/GovernorStorageTypes.sol";
 import { GovernorClockLogic } from "./governance/libraries/GovernorClockLogic.sol";
+import { GovernorFunctionRestrictionsLogic } from "./governance/libraries/GovernorFunctionRestrictionsLogic.sol";
 import { GovernorTypes } from "./governance/libraries/GovernorTypes.sol";
 import { GovernanceStorage } from "./governance/GovernanceStorage.sol";
 import { IVoterRewards } from "./interfaces/IVoterRewards.sol";
@@ -73,6 +74,7 @@ contract B3TRGovernor is
   using GovernorVotesLogic for GovernorStorageTypes.GovernorStorage;
   using GovernorDepositLogic for GovernorStorageTypes.GovernorStorage;
   using GovernorClockLogic for GovernorStorageTypes.GovernorStorage;
+  using GovernorFunctionRestrictionsLogic for GovernorStorageTypes.GovernorStorage;
 
   /// @notice The role that can whitelist allowed functions in the propose function
   bytes32 public constant GOVERNOR_FUNCTIONS_SETTINGS_ROLE = keccak256("GOVERNOR_FUNCTIONS_SETTINGS_ROLE");
@@ -312,18 +314,12 @@ contract B3TRGovernor is
     return GovernorQuorumLogic.quorumDenominator();
   }
 
-  /**
-   * @dev Changes the quorum numerator.
-   *
-   * Emits a {QuorumNumeratorUpdated} event.
-   *
-   * Requirements:
-   *
-   * - Must be called through a governance proposal.
-   * - New numerator must be smaller or equal to the denominator.
-   */
-  function updateQuorumNumerator(uint256 newQuorumNumerator) external virtual onlyGovernance {
-    _updateQuorumNumerator(newQuorumNumerator);
+  /// @notice Check if a function is restricted by the governor
+  /// @param target - address of the contract
+  /// @param functionSelector - function selector
+  function isFunctionWhitelisted(address target, bytes4 functionSelector) public view returns (bool) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return $.isFunctionWhitelisted(target, functionSelector);
   }
 
   // ------------------ SETTERS ------------------ //
@@ -410,7 +406,7 @@ contract B3TRGovernor is
   /**
    * @dev See {IB3TRGovernor-castVote}.
    */
-  function castVote(uint256 proposalId, uint8 support) public virtual returns (uint256) {
+  function castVote(uint256 proposalId, uint8 support) public returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return $.castVote(proposalId, _msgSender(), support, "");
   }
@@ -422,9 +418,49 @@ contract B3TRGovernor is
     uint256 proposalId,
     uint8 support,
     string calldata reason
-  ) public virtual returns (uint256) {
+  ) public returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return $.castVote(proposalId, _msgSender(), support, reason);
+  }
+
+  /**
+   * @dev Changes the quorum numerator.
+   *
+   * Emits a {QuorumNumeratorUpdated} event.
+   *
+   * Requirements:
+   *
+   * - Must be called through a governance proposal.
+   * - New numerator must be smaller or equal to the denominator.
+   */
+  function updateQuorumNumerator(uint256 newQuorumNumerator) external onlyGovernance {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    $.updateQuorumNumerator(self, newQuorumNumerator);
+  }
+
+  /// @notice method that allows to restrict functions that can be called by proposals for a single function selector
+  /// @param target - address of the contract
+  /// @param functionSelector - function selector
+  /// @param isWhitelisted - bool indicating if function is whitelisted for proposals
+  function setWhitelistFunction(address target, bytes4 functionSelector, bool isWhitelisted) public {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    $.setWhitelistFunction(target, functionSelector, isWhitelisted);
+  }
+
+  /// @notice method that allows to restrict functions that can be called by proposals for multiple function selectors at once
+  /// @param target - address of the contract
+  /// @param functionSelectors - array of function selectors
+  /// @param isWhitelisted - bool indicating if function is whitelisted for proposals
+  function setWhitelistFunctions(address target, bytes4[] memory functionSelectors, bool isWhitelisted) public virtual {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    $.setWhitelistFunctions(target, functionSelectors, isWhitelisted);
+  }
+
+  /// @notice method that allows to toggle the function restriction on/off
+  /// @param isEnabled - flag to enable/disable function restriction
+  function setIsFunctionRestrictionEnabled(bool isEnabled) public virtual {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    $.setIsFunctionRestrictionEnabled(isEnabled);
   }
 
   // ------------------ Overrides ------------------ //
