@@ -43,7 +43,7 @@ export const ProposalOverview = () => {
               </Skeleton>
             </HStack>
             <Skeleton isLoaded={!proposal.isTitleLoading}>
-              <Heading fontWeight={700} fontSize="36px" color="#252525">
+              <Heading fontWeight={700} fontSize="36px" color="#252525" wordBreak={"break-word"}>
                 {proposal.title}
               </Heading>
             </Skeleton>
@@ -52,7 +52,9 @@ export const ProposalOverview = () => {
             </Skeleton>
             <Spacer h={"24px"} />
             <SkeletonText isLoaded={!proposal.isDescriptionLoading}>
-              <Text color="#252525">{proposal.description}</Text>
+              <Text color="#252525" wordBreak={"break-word"}>
+                {proposal.description}
+              </Text>
             </SkeletonText>
           </VStack>
           <VStack alignItems={"stretch"}>

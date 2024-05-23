@@ -17,7 +17,7 @@ export const filterAmountInput = (
   }
   if (maxBalance) {
     if (Number(filteredAmount) > Number(maxBalance)) {
-      return (maxBalance || 0).toString()
+      return maxBalance.toString()
     }
   }
   return filteredAmount

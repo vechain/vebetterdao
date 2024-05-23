@@ -133,7 +133,7 @@ export const useProposal = (proposalId: string) => {
     () => calls.find(call => call.error)?.error || null,
     calls.map(call => call.error),
   )
-  // if (error) console.error("useProposal", error)
+  if (error) console.error("useProposal", error)
 
   return {
     proposalState,

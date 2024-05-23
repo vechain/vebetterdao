@@ -25,7 +25,7 @@ describe("filterAmountInput function", () => {
   })
 
   it("should handle undefined maxBalance", () => {
-    expect(filterAmountInput("1000.50", undefined)).toBe("1000.50")
+    expect(filterAmountInput("1000.50")).toBe("1000.50")
   })
 
   it("should handle maxBalance correctly", () => {
