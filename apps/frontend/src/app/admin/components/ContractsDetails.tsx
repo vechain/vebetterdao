@@ -191,7 +191,7 @@ const ContractDetailsCard = ({ title, address, roles }: ContractDetailsCardProps
               {userRoles.map(role => (
                 <HStack key={role.name + address} w={"full"} justify={"space-between"}>
                   <Text fontSize="xs">{role.name}</Text>
-                  <Text fontSize="sm" justifyContent={"flex-end"}>
+                  <Text fontSize="xs" justifyContent={"flex-end"}>
                     {role.hasRole ? "✅" : "❌"}
                   </Text>
                 </HStack>
