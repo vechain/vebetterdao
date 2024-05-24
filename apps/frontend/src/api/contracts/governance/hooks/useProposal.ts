@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react"
 import { useProposalCreatedEvent } from "./useProposalCreatedEvent"
-import { useProposalState } from "./useProposalState"
+import { ProposalState, useProposalState } from "./useProposalState"
 import { useProposalVotes } from "./useProposalVotes"
 import { useParams } from "next/navigation"
 import { useProposalDeposits } from "./useGetProposalDeposit"
@@ -12,28 +12,48 @@ import { useIsProposalQuorumReached } from "./useIsProposalQuorumReached"
 import { useProposalDepositEvent } from "./useProposalDepositEvent"
 import { scaleNumberDown } from "@repo/utils/FormattingUtils"
 import { useVot3TokenDetails } from "../../vot3"
+import { useProposalVoteEvent } from "./useProposalVoteEvent"
+import { useProposalSnapshotVotingPower } from "./useProposalSnapshotVotingPower"
+import { useProposalSnapshotVot3 } from "./useProposalSnapshotVot3"
+import { useProposalSnapshot } from "./useProposalSnapshot"
 
 export const useProposal = (proposalId: string) => {
   const { account } = useWallet()
   const proposalState = useProposalState(proposalId)
-  const proposalVotes = useProposalVotes(proposalId)
+  const proposalVoteEvents = useProposalVoteEvent(proposalId)
   const proposalCreatedEvent = useProposalCreatedEvent(proposalId)
   const proposalDepositEvent = useProposalDepositEvent(proposalId)
   const proposalDeposits = useProposalDeposits(proposalId)
   const proposalUserDeposit = useProposalUserDeposit(proposalId, account || "")
+  const proposalSnapshot = useProposalSnapshot(proposalId)
+  const proposalSnapshotBlock = useMemo(() => {
+    return Number(proposalSnapshot.data)
+  }, [proposalSnapshot.data])
   const isDepositReached = useIsDepositReached(proposalId)
-  const isQuorumReached = useIsProposalQuorumReached(proposalId)
+  const isProposalActive = useMemo(() => {
+    return !!(proposalState?.data === ProposalState.Active)
+  }, [proposalState?.data])
+  const isQuorumReached = useIsProposalQuorumReached(proposalId, isProposalActive)
+  const proposalVotes = useProposalVotes(proposalId, isProposalActive)
+  const proposalSnapshotVotingPower = useProposalSnapshotVotingPower(proposalSnapshotBlock, isProposalActive)
+  const proposalSnapshotVot3 = useProposalSnapshotVot3(proposalSnapshotBlock, isProposalActive)
   const vot3Token = useVot3TokenDetails()
+  const roundIdVoteStart = useMemo(() => {
+    return proposalCreatedEvent.data?.roundIdVoteStart
+  }, [proposalCreatedEvent.data?.roundIdVoteStart])
 
   const calls = [
     proposalState,
     proposalVotes,
+    proposalVoteEvents,
     proposalCreatedEvent,
     proposalDepositEvent,
     proposalDeposits,
     proposalUserDeposit,
     isDepositReached,
     isQuorumReached,
+    proposalSnapshotVotingPower,
+    proposalSnapshotVot3,
   ]
 
   const { votingStartDate, isVotingStartDateLoading, votingEndDate, isVotingEndDateLoading } =
@@ -47,6 +67,8 @@ export const useProposal = (proposalId: string) => {
   )
 
   const proposal = useMemo(() => {
+    const yourVote = proposalVoteEvents.yourVote
+    const haveYouVoted = proposalVoteEvents.haveYouVoted
     const forVotes = Number(proposalVotes.data?.forVotes || "0")
     const againstVotes = Number(proposalVotes.data?.againstVotes || "0")
     const abstainVotes = Number(proposalVotes.data?.abstainVotes || "0")
@@ -76,7 +98,7 @@ export const useProposal = (proposalId: string) => {
       isDescriptionLoading: proposalCreatedEvent.isLoading,
       proposer: proposalCreatedEvent.data?.proposer || "",
       isProposerLoading: proposalCreatedEvent.isLoading,
-      roundIdVoteStart: proposalCreatedEvent.data?.roundIdVoteStart,
+      roundIdVoteStart,
       isRoundIdVoteStartLoading: proposalCreatedEvent.isLoading,
       votingStartDate,
       isVotingStartDateLoading,
@@ -111,6 +133,12 @@ export const useProposal = (proposalId: string) => {
       forPercentage,
       againstPercentage,
       abstainPercentage,
+      yourVote,
+      haveYouVoted,
+      userVotingPowerOnSnapshot: proposalSnapshotVotingPower.data,
+      isUserVotingPowerOnSnapshotLoading: proposalSnapshotVotingPower.isLoading,
+      userVot3OnSnapshot: proposalSnapshotVot3.data,
+      isUserVot3OnSnapshotLoading: proposalSnapshotVot3.isLoading,
       isVotesLoading: proposalVotes.isLoading,
       isQuorumReached: isQuorumReached.data,
       isQuorumReachedLoading: isQuorumReached.isLoading,
@@ -120,20 +148,13 @@ export const useProposal = (proposalId: string) => {
 
     return { ...result, ...mock }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    ...calls.map(call => call.data),
-    ...calls.map(call => call.isLoading),
-    votingStartDate,
-    isVotingStartDateLoading,
-    votingEndDate,
-    isVotingEndDateLoading,
-  ])
+  }, [...calls, votingStartDate, isVotingStartDateLoading, votingEndDate, isVotingEndDateLoading])
 
   const error = useMemo(
     () => calls.find(call => call.error)?.error || null,
-    calls.map(call => call.error),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [...calls],
   )
-  if (error) console.error("useProposal", error)
 
   return {
     proposalState,

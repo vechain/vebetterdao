@@ -87,7 +87,7 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
               <Arm color={"#004CFC"} size={"36"} />
             </Flex>
             <Text fontSize={"28px"} color={"#252525"} fontWeight={400}>
-              {proposal.communityDeposits}
+              {compactFormatter.format(Number(proposal.communityDeposits))}
             </Text>
             <Text fontSize={"20px"} fontWeight={500} color={"#6A6A6A"}>
               {t("/")}

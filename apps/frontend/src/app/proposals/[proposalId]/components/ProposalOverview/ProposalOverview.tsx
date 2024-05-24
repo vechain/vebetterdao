@@ -22,6 +22,7 @@ import { ProposalOverviewYourSupport } from "./components/ProposalOverviewYourSu
 import { ProposalOverviewCommunitySupport } from "./components/ProposalOverviewCommunitySupport"
 import { ProposalYourVote } from "./components/ProposalYourVote"
 import { useTranslation } from "react-i18next"
+import { CastProposalVoteButton } from "./components/CastProposalVoteButton"
 
 export const ProposalOverview = () => {
   const { proposal } = useCurrentProposal()
@@ -85,6 +86,7 @@ export const ProposalOverview = () => {
                 w="40px">
                 <UilShareAlt size="20px" />
               </IconButton>
+              <CastProposalVoteButton />
             </HStack>
           </VStack>
         </VStack>

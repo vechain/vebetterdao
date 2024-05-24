@@ -1,7 +1,10 @@
 import { ProposalState, useCurrentProposal } from "@/api"
 import { HStack, Image, Text, VStack } from "@chakra-ui/react"
 import { UilArrowUpRight } from "@iconscout/react-unicons"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
+
+const compactFormatter = getCompactFormatter()
 
 export const ProposalOverviewYourSupport = () => {
   const { proposal } = useCurrentProposal()
@@ -19,7 +22,7 @@ export const ProposalOverviewYourSupport = () => {
           <HStack gap={2}>
             <Image h="20px" w="20px" src="/images/vot3-token.png" alt="vot3-token" />
             <Text color="#252525" fontWeight={600}>
-              {proposal.yourSupport}
+              {compactFormatter.format(Number(proposal.yourSupport))}
             </Text>
             <Text color="#252525">{t("V3")}</Text>
             <UilArrowUpRight size="20px" color="#004CFC" />

@@ -40,7 +40,7 @@ export const ProposalCommunitySupport = () => {
                 <Arm color={yourDepositColor} size={"36"} />
               </Flex>
               <Text fontSize={"28px"} color={"#252525"} fontWeight={700}>
-                {proposal.communityDeposits}
+                {compactFormatter.format(Number(proposal.communityDeposits))}
               </Text>
               <Text fontSize={"20px"} fontWeight={500} color={"#252525"}>
                 {t("/")}
@@ -81,14 +81,14 @@ export const ProposalCommunitySupport = () => {
               <Text fontSize="14px" fontWeight={400}>
                 {t("From {{users}} users {{vot3}} V3.", {
                   vot3: proposal.othersSupport || 0,
-                  users: proposal.othersSupportUserCount,
+                  users: compactFormatter.format(Number(proposal.othersSupportUserCount)),
                 })}
               </Text>
             </HStack>
             <HStack>
               <Circle size="12px" bg={yourDepositColor} />
               <Text fontSize="14px" fontWeight={400}>
-                {t("From you {{vot3}} V3.", { vot3: proposal.yourSupport || 0 })}
+                {t("From you {{vot3}} V3.", { vot3: compactFormatter.format(Number(proposal.yourSupport)) })}
               </Text>
             </HStack>
           </HStack>

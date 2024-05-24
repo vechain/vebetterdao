@@ -8,7 +8,7 @@ export const ProposalOverviewCommunitySupport = () => {
   const { proposal } = useCurrentProposal()
   const { t } = useTranslation()
 
-  const arcIconColor = useMemo(() => {
+  const armIconColor = useMemo(() => {
     if (proposal.state === ProposalState.DepositNotMet) {
       return "#D23F63"
     }
@@ -26,9 +26,9 @@ export const ProposalOverviewCommunitySupport = () => {
             {t("Community support")}
           </Text>
           <HStack>
-            <Arm color={arcIconColor} />
+            <Arm color={armIconColor} />
             <Text color="#252525">
-              {t("{{percentage}}%", { percentage: Math.floor(proposal.communityDepositPercentage) })}
+              {t("{{percentage}}%", { percentage: Math.floor(proposal.communityDepositPercentage * 100) })}
             </Text>
           </HStack>
         </VStack>

@@ -19,12 +19,12 @@ export const getIsProposalQuorumReached = async (thor: Connex.Thor, proposalId: 
 
 export const getIsProposalQuorumReachedQueryKey = (proposalId: string) => ["quorumReached", proposalId]
 
-export const useIsProposalQuorumReached = (proposalId: string) => {
+export const useIsProposalQuorumReached = (proposalId: string, enabled: boolean = true) => {
   const { thor } = useConnex()
 
   return useQuery({
     queryKey: getIsProposalQuorumReachedQueryKey(proposalId),
     queryFn: async () => await getIsProposalQuorumReached(thor, proposalId),
-    enabled: !!thor && !!proposalId,
+    enabled: !!thor && !!proposalId && enabled,
   })
 }
