@@ -23,7 +23,6 @@
 
 pragma solidity ^0.8.20;
 
-import "./governance/GovernorUpgradeable.sol";
 import { GovernorProposalLogic } from "./governance/libraries/GovernorProposalLogic.sol";
 import { GovernorStateLogic } from "./governance/libraries/GovernorStateLogic.sol";
 import { GovernorVotesLogic } from "./governance/libraries/GovernorVotesLogic.sol";
@@ -38,10 +37,15 @@ import { GovernorTypes } from "./governance/libraries/GovernorTypes.sol";
 import { GovernorStorage } from "./governance/GovernorStorage.sol";
 import { IVoterRewards } from "./interfaces/IVoterRewards.sol";
 import { IVOT3 } from "./interfaces/IVOT3.sol";
+import { IB3TR } from "./interfaces/IB3TR.sol";
 import { IB3TRGovernor } from "./interfaces/IB3TRGovernor.sol";
 import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
 import { TimelockControllerUpgradeable } from "@openzeppelin/contracts-upgradeable/governance/TimelockControllerUpgradeable.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
+import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
+import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -98,41 +102,6 @@ contract B3TRGovernor is
   }
 
   /**
-   * @dev Struct containing data to initialize the contract
-   * @param vot3Token The address of the Vot3 token used for voting
-   * @param timelock The address of the Timelock
-   * @param xAllocationVoting The address of the xAllocationVoting
-   * @param quorumPercentage quorum as a percentage of the total supply of VOT3 tokens
-   * @param initialDepositThreshold The Deposit Threshold for a proposal to be active
-   * @param initialMinVotingDelay The minimum amount of blocks a proposal needs to wait before it can start
-   * @param initialVotingThreshold The minimum amount of voting power needed in order to vote
-   * @param governorAdmin The address of the governor admin
-   * @param pauser The address of the pauser
-   * @param contractsAddressManager The address of the contracts address manager
-   * @param proposalExecutor The address that should be set as executor and have the PROPOSAL_EXECUTOR_ROLE
-   * @param voterRewards The address of the voter rewards contract
-   * @param governorFunctionSettingsRoleAddress The address that should have the GOVERNOR_FUNCTIONS_SETTINGS_ROLE
-   * @param isFunctionRestrictionEnabled If the function restriction is enabled
-   */
-  struct InitializationData {
-    IVOT3 vot3Token;
-    TimelockControllerUpgradeable timelock;
-    IXAllocationVotingGovernor xAllocationVoting;
-    IB3TR b3tr;
-    uint256 quorumPercentage;
-    uint256 initialDepositThreshold;
-    uint256 initialMinVotingDelay;
-    uint256 initialVotingThreshold;
-    address governorAdmin;
-    address pauser;
-    address contractsAddressManager;
-    address proposalExecutor;
-    IVoterRewards voterRewards;
-    address governorFunctionSettingsRoleAddress;
-    bool isFunctionRestrictionEnabled;
-  }
-
-  /**
    * @dev Restricts a function so it can only be executed through governance proposals. For example, governance
    * parameter setters in {GovernorSettings} are protected using this modifier.
    *
@@ -171,17 +140,41 @@ contract B3TRGovernor is
   /**
    * @dev Initializes the contract with the initial parameters
    */
-  function initialize(InitializationData memory data) public initializer {
+  function initialize(GovernorTypes.InitializationData memory data) public initializer {
     __GovernorStorage_init(data, "B3TRGovernor");
     __AccessControl_init();
     __UUPSUpgradeable_init();
     __Pausable_init();
+
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    $.updateQuorumNumerator(data.quorumPercentage);
 
     _grantRole(DEFAULT_ADMIN_ROLE, data.governorAdmin);
     _grantRole(GOVERNOR_FUNCTIONS_SETTINGS_ROLE, data.governorFunctionSettingsRoleAddress);
     _grantRole(PAUSER_ROLE, data.pauser);
     _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, data.contractsAddressManager);
     _grantRole(PROPOSAL_EXECUTOR_ROLE, data.proposalExecutor);
+  }
+
+  /**
+   * @dev Function to receive VET that will be handled by the governor (disabled if executor is a third party contract)
+   */
+  receive() external payable virtual {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    if ($.executor() != address(this)) {
+      revert GovernorDisabledDeposit();
+    }
+  }
+
+  /**
+   * @dev Relays a transaction or function call to an arbitrary target. In cases where the governance executor
+   * is some contract other than the governor itself, like when using a timelock, this function can be invoked
+   * in a governance proposal to recover tokens or Ether that was sent to the governor contract by mistake.
+   * Note that if the executor is simply the governor itself, use of `relay` is redundant.
+   */
+  function relay(address target, uint256 value, bytes calldata data) external payable virtual onlyGovernance {
+    (bool success, bytes memory returndata) = target.call{ value: value }(data);
+    Address.verifyCallResult(success, returndata);
   }
 
   // ------------------ GETTERS ------------------ //
@@ -195,12 +188,12 @@ contract B3TRGovernor is
    */
   function proposalNeedsQueuing(uint256 proposalId) external view returns (bool) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    $.proposalNeedsQueuing(proposalId);
+    return $.proposalNeedsQueuing(proposalId);
   }
 
   function state(uint256 proposalId) external view returns (GovernorTypes.ProposalState) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return $.state(proposalId);
+    return $.getProposalState(proposalId);
   }
 
   /**
@@ -262,7 +255,7 @@ contract B3TRGovernor is
 
   function depositThreshold() external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return $.depositThreshold();
+    return $.getDepositThreshold();
   }
 
   /**
@@ -278,7 +271,7 @@ contract B3TRGovernor is
    */
   function votingThreshold() external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    $.getVotingThreshold();
+    return $.getVotingThreshold();
   }
 
   /**
@@ -350,7 +343,7 @@ contract B3TRGovernor is
   /**
    * @dev Returns the quorum denominator using the GovernorQuorumFraction library. Defaults to 100, but may be overridden.
    */
-  function quorumDenominator() external view returns (uint256) {
+  function quorumDenominator() external pure returns (uint256) {
     return GovernorQuorumLogic.quorumDenominator();
   }
 
@@ -393,7 +386,7 @@ contract B3TRGovernor is
    */
   function quorumReached(uint256 proposalId) external view returns (bool) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return $.quorumReached(proposalId);
+    return $.isQuorumReached(proposalId);
   }
 
   /**
@@ -458,6 +451,14 @@ contract B3TRGovernor is
   }
 
   /**
+   * @dev Public endpoint to retrieve the timelock id of a proposal.
+   */
+  function getTimelockId(uint256 proposalId) public view returns (bytes32) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return $.getTimelockId(proposalId);
+  }
+
+  /**
    * @dev Returns the amount of tokens a specific user has deposited to a proposal.
    *
    * @param proposalId The id of the proposal.
@@ -466,6 +467,82 @@ contract B3TRGovernor is
   function getUserDeposit(uint256 proposalId, address user) public view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return $.getUserDeposit(proposalId, user);
+  }
+
+  /**
+   * @dev See {IB3TRGovernor-name}.
+   */
+  function name() public view virtual returns (string memory) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return $.name;
+  }
+
+  /**
+   * @dev See {IB3TRGovernor-version}.
+   */
+  function version() public view virtual returns (string memory) {
+    return "1";
+  }
+
+  /**
+   * @dev See {IB3TRGovernor-hashProposal}.
+   *
+   * The proposal id is produced by hashing the ABI encoded `targets` array, the `values` array, the `calldatas` array
+   * and the descriptionHash (bytes32 which itself is the keccak256 hash of the description string). This proposal id
+   * can be produced from the proposal data which is part of the {ProposalCreated} event. It can even be computed in
+   * advance, before the proposal is submitted.
+   *
+   * Note that the chainId and the governor address are not part of the proposal id computation. Consequently, the
+   * same proposal (with same operation and same description) will have the same id if submitted on multiple governors
+   * across multiple networks. This also means that in order to execute the same operation twice (on the same
+   * governor) the proposer will have to change the description in order to avoid proposal id conflicts.
+   */
+  function hashProposal(
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    bytes32 descriptionHash
+  ) public pure returns (uint256) {
+    return GovernorProposalLogic.hashProposal(targets, values, calldatas, descriptionHash);
+  }
+
+  /**
+   * @dev Public endpoint to get the salt used for the timelock operation.
+   */
+  function timelockSalt(bytes32 descriptionHash) external view returns (bytes32) {
+    return GovernorGovernanceLogic.timelockSalt(descriptionHash, address(this));
+  }
+
+  /**
+   * @dev The voter rewards contract.
+   */
+  function voterRewards() public view override returns (IVoterRewards) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return $.voterRewards;
+  }
+
+  /**
+   * @dev The XAllocationVotingGovernor contract.
+   */
+  function xAllocationVoting() public view override returns (IXAllocationVotingGovernor) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return $.xAllocationVoting;
+  }
+
+  /**
+   * @dev See {B3TRGovernor-b3tr}.
+   */
+  function b3tr() public view override returns (IB3TR) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return $.b3tr;
+  }
+
+  /**
+   * @dev Public accessor to check the address of the timelock
+   */
+  function timelock() public view virtual returns (address) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return address($.timelock);
   }
 
   // ------------------ SETTERS ------------------ //
@@ -660,11 +737,11 @@ contract B3TRGovernor is
    *
    * This function is only callable through goverance proposals or by the CONTRACTS_ADDRESS_MANAGER_ROLE
    *
-   * @param _voterRewards The new voter rewards contract
+   * @param newVoterRewards The new voter rewards contract
    */
-  function setVoterRewards(IVoterRewards _voterRewards) public onlyRoleOrGovernance(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+  function setVoterRewards(IVoterRewards newVoterRewards) public onlyRoleOrGovernance(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    $.voterRewards = _voterRewards;
+    $.setVoterRewards(newVoterRewards);
   }
 
   /**
@@ -672,13 +749,24 @@ contract B3TRGovernor is
    *
    * This function is only callable through goverance proposals or by the CONTRACTS_ADDRESS_MANAGER_ROLE
    *
-   * @param _xAllocationVoting The new xAllocationVoting contract
+   * @param newXAllocationVoting The new xAllocationVoting contract
    */
   function setXAllocationVoting(
-    IXAllocationVotingGovernor _xAllocationVoting
+    IXAllocationVotingGovernor newXAllocationVoting
   ) public onlyRoleOrGovernance(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    $.xAllocationVoting = _xAllocationVoting;
+    $.setXAllocationVoting(newXAllocationVoting);
+  }
+
+  /**
+   * @dev Public endpoint to update the underlying timelock instance. Restricted to the timelock itself, so updates
+   * must be proposed, scheduled, and executed through governance proposals.
+   *
+   * CAUTION: It is not recommended to change the timelock while there are other queued governance proposals.
+   */
+  function updateTimelock(TimelockControllerUpgradeable newTimelock) external virtual onlyGovernance {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    $.updateTimelock(newTimelock);
   }
 
   // ------------------ Overrides ------------------ //
@@ -687,18 +775,11 @@ contract B3TRGovernor is
 
   function supportsInterface(
     bytes4 interfaceId
-  ) public view override(IERC165, AccessControlUpgradeable) returns (bool) {
+  ) public pure override(IERC165, AccessControlUpgradeable) returns (bool) {
     return
       interfaceId == type(IB3TRGovernor).interfaceId ||
       interfaceId == type(IERC1155Receiver).interfaceId ||
       interfaceId == type(IERC165).interfaceId;
-  }
-
-  /**
-   * @dev See {IB3TRGovernor-version}.
-   */
-  function version() public view virtual returns (string memory) {
-    return "1";
   }
 
   /**

@@ -8,6 +8,7 @@ import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
 import { IB3TR } from "./IB3TR.sol";
 import { IVoterRewards } from "../interfaces/IVoterRewards.sol";
 import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGovernor.sol";
+import { GovernorTypes } from "../governance/libraries/GovernorTypes.sol";
 
 /**
  * @dev Interface of the {B3TRGovernor} core.
@@ -182,6 +183,11 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   event QuorumNumeratorUpdated(uint256 oldNumerator, uint256 newNumerator);
 
   /**
+   * @dev Emitted when the timelock controller used for proposal execution is modified.
+   */
+  event TimelockChange(address oldTimelock, address newTimelock);
+
+  /**
    * @dev Emitted when a vote is cast without params.
    *
    * Note: `support` values should be seen as buckets. Their interpretation depends on the voting module used.
@@ -252,7 +258,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @notice module:core
    * @dev Current state of a proposal, following Compound's convention
    */
-  function state(uint256 proposalId) external view returns (ProposalState);
+  function state(uint256 proposalId) external view returns (GovernorTypes.ProposalState);
 
   /**
    * @notice module:core
