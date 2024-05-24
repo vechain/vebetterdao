@@ -38,7 +38,9 @@ library GovernorStorageTypes {
   using Checkpoints for Checkpoints.Trace208;
   using DoubleEndedQueue for DoubleEndedQueue.Bytes32Deque;
 
-  struct GovernorGeneralStorage {
+  struct GovernorStorage {
+    // ------------------------------- Version 1 -------------------------------
+    // ------------------------------- General Storage -------------------------------
     string name; // name of the Governor
     mapping(uint256 proposalId => GovernorTypes.ProposalCore) proposals;
     // This queue keeps track of the governor operating on itself. Calls to functions protected by the {onlyGovernance}
@@ -47,35 +49,23 @@ library GovernorStorageTypes {
     // execution of {onlyGovernance} protected calls can only be achieved through successful proposals.
     DoubleEndedQueue.Bytes32Deque governanceCall;
     uint256 minVotingDelay; // min delay before voting can start
-  }
-
-  struct GovernorQuoromStorage {
+    // ------------------------------- Quorum Storage -------------------------------
     Checkpoints.Trace208 quorumNumeratorHistory; // quorum numerator history
-  }
-
-  struct GovernorTimeLockStorage {
+    // ------------------------------- Timelock Storage -------------------------------
     TimelockControllerUpgradeable timelock; // Timelock contract
     mapping(uint256 proposalId => bytes32) timelockIds; // mapping of proposalId to timelockId
-  }
-
-  struct GovernorFunctionRestrictionsStorage {
+    // ------------------------------- Function Restriction Storage -------------------------------
     mapping(address => mapping(bytes4 => bool)) whitelistedFunctions; // mapping of target address to function selector to bool indicating if function is whitelisted for proposals
     bool isFunctionRestrictionEnabled; // flag to enable/disable function restriction
-  }
-
-  struct GovernorExternalContractsStorage {
+    // ------------------------------- External Contracts Storage -------------------------------
     IVoterRewards voterRewards; // Voter Rewards contract
     IXAllocationVotingGovernor xAllocationVoting; // XAllocationVotingGovernor contract
     IB3TR b3tr; // B3TR contract
     IVOT3 vot3; // VOT3 contract
-  }
-
-  struct GovernorDepositStorage {
+    // ------------------------------- Desposits Storage -------------------------------
     mapping(uint256 => mapping(address => uint256)) deposits; // mapping to track deposits made to proposals by address
     uint256 depositThresholdPercentage; // percentage of the total supply of B3TR tokens that need to be deposited in VOT3 to create a proposal
-  }
-
-  struct GovernorVotesStorage {
+    // ------------------------------- Voting Storage -------------------------------
     mapping(uint256 => GovernorTypes.ProposalVote) proposalVotes; // mapping to store the votes for a proposal
     mapping(address => bool) hasVotedOnce; // mapping to store that a user has voted at least one time
     mapping(uint256 => uint256) proposalTotalVotes; // mapping to store the total votes for a proposal
