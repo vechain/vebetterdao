@@ -25,7 +25,8 @@ type Props = {
 export const DashboardXApps = ({ maxApps = 8 }: Props) => {
   const { data: xApps } = useXApps()
 
-  const slicedXApps = useMemo(() => xApps?.slice(0, maxApps), [xApps, maxApps])
+  // esclude Vyvo from the list on homepage
+  const slicedXApps = useMemo(() => xApps?.filter(xApp => xApp.name !== "Vyvo").slice(0, maxApps), [xApps, maxApps])
 
   if (!slicedXApps?.length) return null
 
