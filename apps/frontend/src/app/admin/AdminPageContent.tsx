@@ -6,6 +6,7 @@ import { Suspense, useEffect } from "react"
 import { AnalyticsUtils } from "@/utils"
 import { useAccountPermissions } from "@/api/contracts/account"
 import { useWallet } from "@vechain/dapp-kit-react"
+import { UpdateAppsEligibility } from "./components/UpdateAppsEligibility"
 
 const StartEmissions = dynamic(() => import("./components/StartEmissions").then(mod => mod.StartEmissions), {
   ssr: false,
@@ -72,6 +73,8 @@ export const AdminPageContent = () => {
             </CardBody>
           </Card>
         </HStack>
+
+        {isAdminOfXAllocationVoting && <UpdateAppsEligibility />}
 
         <Card w={"full"}>
           <CardHeader>
