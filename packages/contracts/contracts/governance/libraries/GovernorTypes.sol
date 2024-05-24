@@ -30,7 +30,23 @@ import { IVOT3 } from "../../interfaces/IVOT3.sol";
 import { TimelockControllerUpgradeable } from "@openzeppelin/contracts-upgradeable/governance/TimelockControllerUpgradeable.sol";
 
 library GovernorTypes {
-  // InitializationData struct to store the initialization data for the Governor contract
+  /**
+   * @dev Struct containing data to initialize the contract
+   * @param vot3Token The address of the Vot3 token used for voting
+   * @param timelock The address of the Timelock
+   * @param xAllocationVoting The address of the xAllocationVoting
+   * @param quorumPercentage quorum as a percentage of the total supply of VOT3 tokens
+   * @param initialDepositThreshold The Deposit Threshold for a proposal to be active
+   * @param initialMinVotingDelay The minimum amount of blocks a proposal needs to wait before it can start
+   * @param initialVotingThreshold The minimum amount of voting power needed in order to vote
+   * @param governorAdmin The address of the governor admin
+   * @param pauser The address of the pauser
+   * @param contractsAddressManager The address of the contracts address manager
+   * @param proposalExecutor The address that should be set as executor and have the PROPOSAL_EXECUTOR_ROLE
+   * @param voterRewards The address of the voter rewards contract
+   * @param governorFunctionSettingsRoleAddress The address that should have the GOVERNOR_FUNCTIONS_SETTINGS_ROLE
+   * @param isFunctionRestrictionEnabled If the function restriction is enabled
+   */
   struct InitializationData {
     IVOT3 vot3Token;
     TimelockControllerUpgradeable timelock;
