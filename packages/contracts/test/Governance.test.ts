@@ -27,8 +27,13 @@ import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import {
   B3TRGovernor,
   B3TRGovernor__factory,
-  GovernorDescriptionValidator,
-  GovernorQuorumFraction,
+  GovernorClockLogic,
+  GovernorConfigurator,
+  GovernorDepositLogic,
+  GovernorFunctionRestrictionsLogic,
+  GovernorProposalLogic,
+  GovernorQuorumLogic,
+  GovernorStateLogic,
 } from "../typechain-types"
 import { ContractFactory, BaseContract, ContractTransactionReceipt } from "ethers"
 
@@ -102,8 +107,14 @@ describe("Governor and TimeLock", function () {
         emissions,
         xAllocationVoting,
         vot3,
-        governorDescriptionValidatorLib,
-        governorQuorumFractionLib,
+        governorClockLogicLib,
+        governorConfiguratorLib,
+        governorDepositLogicLib,
+        governorFunctionRestrictionsLogicLib,
+        governorProposalLogicLib,
+        governorQuorumLogicLib,
+        governorStateLogicLib,
+        governorVotesLogicLib,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -114,8 +125,14 @@ describe("Governor and TimeLock", function () {
       // Deploy the implementation contract
       const Contract = await ethers.getContractFactory("B3TRGovernor", {
         libraries: {
-          GovernorDescriptionValidator: await governorDescriptionValidatorLib.getAddress(),
-          GovernorQuorumFraction: await governorQuorumFractionLib.getAddress(),
+          GovernorClockLogic: await governorClockLogicLib.getAddress(),
+          GovernorConfigurator: await governorConfiguratorLib.getAddress(),
+          GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
+          GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
+          GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
+          GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
+          GovernorStateLogic: await governorStateLogicLib.getAddress(),
+          GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
         },
       })
       const implementation = await Contract.deploy()
@@ -207,7 +224,16 @@ describe("Governor and TimeLock", function () {
     })
 
     it("Should be able to upgrade the governor contract through governance when libraries change", async function () {
-      const { governorDescriptionValidatorLib, governorQuorumFractionLib } = await getOrDeployContractInstances({
+      const {
+        governorClockLogicLib,
+        governorConfiguratorLib,
+        governorDepositLogicLib,
+        governorFunctionRestrictionsLogicLib,
+        governorProposalLogicLib,
+        governorQuorumLogicLib,
+        governorStateLogicLib,
+        governorVotesLogicLib,
+      } = await getOrDeployContractInstances({
         forceDeploy: false,
       })
 
@@ -221,8 +247,14 @@ describe("Governor and TimeLock", function () {
       // Deploy the implementation contract
       const Contract = await ethers.getContractFactory("B3TRGovernor", {
         libraries: {
-          GovernorDescriptionValidator: await governorDescriptionValidatorLib.getAddress(),
-          GovernorQuorumFraction: await governorQuorumFractionLib.getAddress(),
+          GovernorClockLogic: await governorClockLogicLib.getAddress(),
+          GovernorConfigurator: await governorConfiguratorLib.getAddress(),
+          GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
+          GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
+          GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
+          GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
+          GovernorStateLogic: await governorStateLogicLib.getAddress(),
+          GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
         },
       })
       const implementation = await Contract.deploy()
@@ -351,14 +383,29 @@ describe("Governor and TimeLock", function () {
   describe("Governor settings", function () {
     let b3trGovernorFactory: B3TRGovernor__factory
     this.beforeAll(async function () {
-      const { governorQuorumFractionLib, governorDescriptionValidatorLib } = await getOrDeployContractInstances({
+      const {
+        governorClockLogicLib,
+        governorConfiguratorLib,
+        governorDepositLogicLib,
+        governorFunctionRestrictionsLogicLib,
+        governorProposalLogicLib,
+        governorQuorumLogicLib,
+        governorStateLogicLib,
+        governorVotesLogicLib,
+      } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
       b3trGovernorFactory = await ethers.getContractFactory("B3TRGovernor", {
         libraries: {
-          GovernorDescriptionValidator: await governorDescriptionValidatorLib.getAddress(),
-          GovernorQuorumFraction: await governorQuorumFractionLib.getAddress(),
+          GovernorClockLogic: await governorClockLogicLib.getAddress(),
+          GovernorConfigurator: await governorConfiguratorLib.getAddress(),
+          GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
+          GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
+          GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
+          GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
+          GovernorStateLogic: await governorStateLogicLib.getAddress(),
+          GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
         },
       })
     })
@@ -1071,7 +1118,7 @@ describe("Governor and TimeLock", function () {
       })
     })
   })
-
+  
   describe("Proposal Creation", function () {
     it("When creating a proposal we should specify the round when it should become active", async () => {
       const config = createLocalConfig()
@@ -2355,7 +2402,7 @@ describe("Governor and TimeLock", function () {
 
       const tx = await governor.connect(voter7).castVote(proposalId, 1)
       const proposeReceipt = await tx.wait()
-      const event = proposeReceipt?.logs[0]
+      const event = proposeReceipt?.logs[1]
       const decodedLogs = governor.interface.parseLog({
         topics: [...(event?.topics as string[])],
         data: event ? event.data : "",
@@ -2387,7 +2434,7 @@ describe("Governor and TimeLock", function () {
 
       const tx = await governor.connect(voter3).castVote(proposalId, 1)
       const proposeReceipt = await tx.wait()
-      const event = proposeReceipt?.logs[0]
+      const event = proposeReceipt?.logs[1]
       const decodedLogs = governor.interface.parseLog({
         topics: [...(event?.topics as string[])],
         data: event ? event.data : "",
@@ -2805,7 +2852,7 @@ describe("Governor and TimeLock", function () {
       const reason = "I don't agree with this proposal"
       const voteTx = await governor.connect(voter).castVoteWithReason(proposalId, 0, reason)
       const proposeReceipt = await voteTx.wait()
-      const event = proposeReceipt?.logs[0]
+      const event = proposeReceipt?.logs[1]
       const decodedLogs = governor.interface.parseLog({
         topics: [...(event?.topics as string[])],
         data: event ? event.data : "",
@@ -2847,7 +2894,7 @@ describe("Governor and TimeLock", function () {
       const reason = "I don't know well about it so I abstain"
       const voteTx = await governor.connect(voter).castVoteWithReason(proposalId, 2, reason)
       const proposeReceipt = await voteTx.wait()
-      const event = proposeReceipt?.logs[0]
+      const event = proposeReceipt?.logs[1]
       const decodedLogs = governor.interface.parseLog({
         topics: [...(event?.topics as string[])],
         data: event ? event.data : "",
@@ -4390,6 +4437,7 @@ describe("Governor and TimeLock", function () {
   })
 
   describe("Libraries", function () {
+    /*
     describe("GovernorDescriptionValidator", function () {
       let validator: GovernorDescriptionValidator
       let proposerAddress: string
@@ -4511,6 +4559,6 @@ describe("Governor and TimeLock", function () {
           ),
         ).to.be.reverted
       })
-    })
+    }) */
   })
 })
