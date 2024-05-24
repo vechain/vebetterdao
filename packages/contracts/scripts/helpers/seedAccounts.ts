@@ -1,9 +1,13 @@
-import { VECHAIN_DEFAULT_MNEMONIC } from "@vechain/hardhat-vechain"
-import { HDNode, unitsUtils, type IHDNode } from "@vechain/sdk-core"
+import { unitsUtils, addressUtils, mnemonic } from "@vechain/sdk-core"
+
+export type TestPk = {
+  pk: Uint8Array
+  pkHex: string
+  address: string
+}
 
 export type SeedAccount = {
-  address: string
-  privateKey: Buffer
+  key: TestPk
   amount: bigint
 }
 
@@ -13,12 +17,25 @@ export enum SeedStrategy {
   LINEAR,
 }
 
-const hdnode = HDNode.fromMnemonic(VECHAIN_DEFAULT_MNEMONIC.split(" "))
+const PHRASE = "denial kitchen pet squirrel other broom bar gas better priority spoil cross".split(" ")
 
-export const getAccounts = (count: number): IHDNode[] => {
+export const TEST_DERIVATION_PATH = "m"
+
+export const getTestKey = (index: number, derivationPath: string = TEST_DERIVATION_PATH): TestPk => {
+  const pk = mnemonic.derivePrivateKey(PHRASE, `${derivationPath}/${index}`)
+  const buffer = Buffer.from(pk)
+  const pkHex = buffer.toString("hex")
+  return {
+    pk,
+    pkHex,
+    address: addressUtils.fromPrivateKey(pk),
+  }
+}
+
+export const getTestKeys = (count: number): TestPk[] => {
   const accounts = []
   for (let i = 0; i < count; i++) {
-    accounts.push(hdnode.derive(i))
+    accounts.push(getTestKey(i))
   }
 
   return accounts
@@ -59,17 +76,13 @@ export const getSeedAccounts = (strategy: SeedStrategy, numAccounts: number, acc
 }
 
 const getSeedAccountsFixed = (numAccounts: number, acctOffset: number): SeedAccount[] => {
-  const accounts = getAccounts(numAccounts + acctOffset)
+  const keys = getTestKeys(numAccounts + acctOffset)
 
   const seedAccounts: SeedAccount[] = []
 
-  accounts.slice(acctOffset).forEach(account => {
-    if (!account.privateKey) {
-      throw new Error("Account does not have a private key")
-    }
+  keys.slice(acctOffset).forEach(key => {
     seedAccounts.push({
-      address: account.address,
-      privateKey: account.privateKey,
+      key,
       amount: unitsUtils.parseVET("500"),
     })
   })
@@ -78,17 +91,13 @@ const getSeedAccountsFixed = (numAccounts: number, acctOffset: number): SeedAcco
 }
 
 const getSeedAccountsRandom = (numAccounts: number, acctOffset: number): SeedAccount[] => {
-  const accounts = getAccounts(numAccounts + acctOffset)
+  const keys = getTestKeys(numAccounts + acctOffset)
 
   const seedAccounts: SeedAccount[] = []
 
-  accounts.slice(acctOffset).forEach(account => {
-    if (!account.privateKey) {
-      throw new Error("Account does not have a private key")
-    }
+  keys.slice(acctOffset).forEach(key => {
     seedAccounts.push({
-      address: account.address,
-      privateKey: account.privateKey,
+      key,
       amount: getRandomStartingBalance(5, 1000),
     })
   })
@@ -97,17 +106,13 @@ const getSeedAccountsRandom = (numAccounts: number, acctOffset: number): SeedAcc
 }
 
 const getSeedAccountsLinear = (numAccounts: number, acctOffset: number): SeedAccount[] => {
-  const accounts = getAccounts(numAccounts + acctOffset)
+  const keys = getTestKeys(numAccounts + acctOffset)
 
   const seedAccounts: SeedAccount[] = []
 
-  accounts.slice(acctOffset).forEach((account, index) => {
-    if (!account.privateKey) {
-      throw new Error("Account does not have a private key")
-    }
+  keys.slice(acctOffset).forEach((key, index) => {
     seedAccounts.push({
-      address: account.address,
-      privateKey: account.privateKey,
+      key,
       amount: unitsUtils.parseVET(((index + 1) * 5).toFixed(2)),
     })
   })

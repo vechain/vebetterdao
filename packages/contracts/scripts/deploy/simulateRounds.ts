@@ -1,6 +1,6 @@
 import { B3TR, Emissions, Treasury, VOT3, VoterRewards, XAllocationVoting } from "../../typechain-types"
 import { moveBlocks } from "../../test/helpers"
-import { SeedStrategy, getAccounts, getSeedAccounts } from "../helpers/seedAccounts"
+import { SeedStrategy, getSeedAccounts, getTestKeys } from "../helpers/seedAccounts"
 import { distributeEmissions, startEmissions } from "../helpers/emissions"
 import { airdropB3trFromTreasury, airdropVTHO } from "../helpers/airdrop"
 import { convertB3trForVot3 } from "../helpers/swap"
@@ -23,7 +23,7 @@ export const simulateRounds = async (
   const start = performance.now()
   console.log("Running simulation...")
 
-  const accounts = getAccounts(10)
+  const accounts = getTestKeys(10)
   const seedAccounts = getSeedAccounts(SEED_STRATEGY, NUM_USERS_TO_SEED, ACCT_OFFSET)
 
   // Define specific accounts
