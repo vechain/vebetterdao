@@ -71,7 +71,7 @@ library GovernorVotesLogic {
     uint8 support,
     uint256 weight,
     uint256 power
-  ) internal {
+  ) private {
     GovernorTypes.ProposalVote storage proposalVote = self.proposalVotes[proposalId];
 
     if (proposalVote.hasVoted[account]) {
@@ -126,7 +126,7 @@ library GovernorVotesLogic {
     GovernorStorageTypes.GovernorStorage storage self,
     address account,
     uint256 timepoint
-  ) internal view returns (uint256) {
+  ) external view returns (uint256) {
     // scale the votes by 1e9 so that number returned is 1e18
     return Math.sqrt(self.vot3.getPastVotes(account, timepoint)) * 1e9;
   }
@@ -134,8 +134,30 @@ library GovernorVotesLogic {
   /**
    * @dev See {IB3TRGovernor-hasVoted}.
    */
-  function hasVoted(GovernorStorageTypes.GovernorStorage storage self, uint256 proposalId, address account) public view returns (bool) {
+  function hasVoted(
+    GovernorStorageTypes.GovernorStorage storage self,
+    uint256 proposalId,
+    address account
+  ) internal view returns (bool) {
     return self.proposalVotes[proposalId].hasVoted[account];
+  }
+
+  /**
+   * @dev get the votes for a proposal.
+   */
+  function getProposalVotes(
+    GovernorStorageTypes.GovernorStorage storage self,
+    uint256 proposalId
+  ) internal view returns (uint256 againstVotes, uint256 forVotes, uint256 abstainVotes) {
+    GovernorTypes.ProposalVote storage proposalVote = self.proposalVotes[proposalId];
+    return (proposalVote.againstVotes, proposalVote.forVotes, proposalVote.abstainVotes);
+  }
+
+  /**
+   * @dev See {IB3TRGovernor-hasVoted}.
+   */
+  function userVotedOnce(GovernorStorageTypes.GovernorStorage storage self, address user) internal view returns (bool) {
+    return self.hasVotedOnce[user];
   }
 
   /**
@@ -150,7 +172,7 @@ library GovernorVotesLogic {
   ) external returns (uint256) {
     self.validateStateBitmap(proposalId, GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Active));
 
-    uint256 weight = self.vot3.getPastVotes(voter, self.proposalSnapshot(proposalId));
+    uint256 weight = self.vot3.getPastVotes(voter, self._proposalSnapshot(proposalId));
     uint256 power = Math.sqrt(weight) * 1e9;
 
     if (weight < self.getVotingThreshold()) {
@@ -159,7 +181,7 @@ library GovernorVotesLogic {
 
     _countVote(self, proposalId, voter, support, weight, power);
 
-    self.voterRewards.registerVote(self.proposalSnapshot(proposalId), voter, weight, Math.sqrt(weight));
+    self.voterRewards.registerVote(self._proposalSnapshot(proposalId), voter, weight, Math.sqrt(weight));
 
     emit VoteCast(voter, proposalId, support, weight, power, reason);
 

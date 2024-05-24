@@ -50,7 +50,7 @@ library GovernorQuorumLogic {
 
   /// @notice Retrieves the quorum denominator, which is a constant in this implementation.
   /// @return The quorum denominator (constant value of 100)
-  function quorumDenominator() public pure returns (uint256) {
+  function quorumDenominator() internal pure returns (uint256) {
     return 100;
   }
 
@@ -88,23 +88,30 @@ library GovernorQuorumLogic {
   /// @dev New numerator must be smaller or equal to the denominator.
   /// @param self The storage structure containing the quorum numerator history
   /// @param newQuorumNumerator The new value for the quorum numerator
-  /// @param oldQuorumNumerator The previous value for the quorum numerator, needed for the event emission
-  /// @param clock The block timestamp or other clock identifier to register in the history
   function updateQuorumNumerator(
     GovernorStorageTypes.GovernorStorage storage self,
-    uint256 newQuorumNumerator,
-    uint256 oldQuorumNumerator,
-    uint48 clock
+    uint256 newQuorumNumerator
   ) external {
     uint256 denominator = quorumDenominator();
+    uint256 oldQuorumNumerator = quorumNumerator(self);
 
     if (newQuorumNumerator > denominator) {
       revert GovernorInvalidQuorumFraction(newQuorumNumerator, denominator);
     }
 
-    self.quorumNumeratorHistory.push(clock, SafeCast.toUint208(newQuorumNumerator));
+    self.quorumNumeratorHistory.push(self.clock(), SafeCast.toUint208(newQuorumNumerator));
 
     emit QuorumNumeratorUpdated(oldQuorumNumerator, newQuorumNumerator);
+  }
+
+  /**
+   * @dev See {Governor-_quorumReached}.
+   */
+  function isQuorumReached(
+    GovernorStorageTypes.GovernorStorage storage self,
+    uint256 proposalId
+  ) external view returns (bool) {
+    return quorumReached(self, proposalId);
   }
 
   /**
@@ -114,7 +121,7 @@ library GovernorQuorumLogic {
     GovernorStorageTypes.GovernorStorage storage self,
     uint256 proposalId
   ) internal view returns (bool) {
-    return quorum(self, self.proposalSnapshot(proposalId)) <= self.proposalTotalVotes[proposalId];
+    return quorum(self, self._proposalSnapshot(proposalId)) <= self.proposalTotalVotes[proposalId];
   }
 
   /**

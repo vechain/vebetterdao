@@ -68,7 +68,7 @@ library GovernorFunctionRestrictionsLogic {
   /// @notice Check if a function is restricted by the governor
   /// @param target - address of the contract
   /// @param functionSelector - function selector
-  function isFunctionWhitelisted(GovernorStorageTypes.GovernorStorage storage self, address target, bytes4 functionSelector) public view returns (bool) {
+  function isFunctionWhitelisted(GovernorStorageTypes.GovernorStorage storage self, address target, bytes4 functionSelector) internal view returns (bool) {
     return self.whitelistedFunctions[target][functionSelector];
   }
 
@@ -93,7 +93,7 @@ library GovernorFunctionRestrictionsLogic {
   }
 
   /// @notice Extract the function selector from the calldata
-  function extractFunctionSelector(bytes memory data) internal pure returns (bytes4) {
+  function extractFunctionSelector(bytes memory data) private pure returns (bytes4) {
     if (data.length < 4) revert GovernorFunctionInvalidSelector(data);
     bytes4 sig;
     assembly {

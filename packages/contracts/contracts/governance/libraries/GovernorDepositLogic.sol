@@ -49,27 +49,7 @@ library GovernorDepositLogic {
    */
   error GovernorNonexistentProposal(uint256 proposalId);
 
-  /**
-   * @dev Returns true if the threshold of deposits required to reach a proposal has been reached.
-   *
-   * @param proposalId The id of the proposal.
-   */
-  function proposalDepositReached(
-    GovernorStorageTypes.GovernorStorage storage self,
-    uint256 proposalId
-  ) external view returns (bool) {
-    GovernorTypes.ProposalCore storage proposal = self.proposals[proposalId];
-    return proposal.depositAmount >= proposal.depositThreshold;
-  }
-
-  /**
-   * @dev See {Governor-depositThreshold}.
-   */
-  function depositThreshold(GovernorStorageTypes.GovernorStorage storage self) public view returns (uint256) {
-    // deposit threshold is a percentage of the total supply of B3TR tokens
-    return (self.depositThresholdPercentage * self.b3tr.totalSupply()) / 100;
-  }
-
+  // --------------- SETTERS ---------------
   /**
    * @dev Deposit tokens for a proposal. Proposer and proposal sponsors can contribute
    * towards a proposal's deposit using this function. The proposal must be in the
@@ -109,7 +89,7 @@ library GovernorDepositLogic {
    * @param proposalId The id of the proposal to withdraw deposits from.
    * @param depositer The address of the depositer.
    */
-  function withdraw(GovernorStorageTypes.GovernorStorage storage self, uint256 proposalId, address depositer) public {
+  function withdraw(GovernorStorageTypes.GovernorStorage storage self, uint256 proposalId, address depositer) external {
     uint256 amount = self.deposits[proposalId][depositer];
 
     self.validateStateBitmap(
@@ -150,11 +130,13 @@ library GovernorDepositLogic {
     emit ProposalDeposit(depositor, proposalId, amount);
   }
 
+  // --------------- GETTERS ---------------
+
   function getUserDeposit(
     GovernorStorageTypes.GovernorStorage storage self,
     uint256 proposalId,
     address user
-  ) public view returns (uint256) {
+  ) internal view returns (uint256) {
     return self.deposits[proposalId][user];
   }
 
@@ -166,7 +148,7 @@ library GovernorDepositLogic {
   function proposalDepositThreshold(
     GovernorStorageTypes.GovernorStorage storage self,
     uint256 proposalId
-  ) public view returns (uint256) {
+  ) internal view returns (uint256) {
     return self.proposals[proposalId].depositThreshold;
   }
 
@@ -178,7 +160,36 @@ library GovernorDepositLogic {
   function getProposalDeposits(
     GovernorStorageTypes.GovernorStorage storage self,
     uint256 proposalId
-  ) public view returns (uint256) {
+  ) internal view returns (uint256) {
     return self.proposals[proposalId].depositAmount;
+  }
+
+  /**
+   * @dev Returns true if the threshold of deposits required to reach a proposal has been reached.
+   *
+   * @param proposalId The id of the proposal.
+   */
+  function proposalDepositReached(
+    GovernorStorageTypes.GovernorStorage storage self,
+    uint256 proposalId
+  ) internal view returns (bool) {
+    GovernorTypes.ProposalCore storage proposal = self.proposals[proposalId];
+    return proposal.depositAmount >= proposal.depositThreshold;
+  }
+
+  /**
+   * @dev See {Governor-depositThreshold}.
+   */
+  function getDepositThreshold(GovernorStorageTypes.GovernorStorage storage self) external view returns (uint256) {
+    // deposit threshold is a percentage of the total supply of B3TR tokens
+    return depositThreshold(self);
+  }
+
+  /**
+   * @dev See {Governor-depositThreshold}.
+   */
+  function depositThreshold(GovernorStorageTypes.GovernorStorage storage self) internal view returns (uint256) {
+    // deposit threshold is a percentage of the total supply of B3TR tokens
+    return (self.depositThresholdPercentage * self.b3tr.totalSupply()) / 100;
   }
 }

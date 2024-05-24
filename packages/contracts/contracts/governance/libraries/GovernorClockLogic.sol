@@ -32,7 +32,7 @@ library GovernorClockLogic {
    * @dev Clock (as specified in EIP-6372) is set to match the token's clock. Fallback to block numbers if the token
    * does not implement EIP-6372.
    */
-  function clock(GovernorStorageTypes.GovernorExternalContractsStorage storage self) public view returns (uint48) {
+  function clock(GovernorStorageTypes.GovernorStorage storage self) public view returns (uint48) {
     try self.vot3.clock() returns (uint48 timepoint) {
       return timepoint;
     } catch {
@@ -45,7 +45,7 @@ library GovernorClockLogic {
    */
   // solhint-disable-next-line func-name-mixedcase
   function CLOCK_MODE(
-    GovernorStorageTypes.GovernorExternalContractsStorage storage self
+    GovernorStorageTypes.GovernorStorage storage self
   ) public view returns (string memory) {
     try self.vot3.CLOCK_MODE() returns (string memory clockmode) {
       return clockmode;
