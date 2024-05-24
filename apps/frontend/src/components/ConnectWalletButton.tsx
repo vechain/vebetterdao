@@ -18,7 +18,7 @@ export const ConnectWalletButton = ({ responsiveVariant }: Props) => {
     if (shouldRenderDesktop)
       return (
         <Fade in={true}>
-          <Button onClick={open} colorScheme="primary" size="md" leftIcon={<FaWallet />}>
+          <Button onClick={open} colorScheme="primary" size="md" leftIcon={<FaWallet />} data-testid="connect-wallet">
             Connect Wallet
           </Button>
         </Fade>

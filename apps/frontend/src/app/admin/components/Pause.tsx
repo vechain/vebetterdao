@@ -2,7 +2,7 @@ import { useB3TRGovernorPaused, useB3trPaused, useVot3Paused } from "@/api"
 import { useAccountPermissions } from "@/api/contracts/account"
 import { useIsGMpaused } from "@/api/contracts/galaxyMember"
 import { usePauseContract } from "@/hooks"
-import { Button, HStack, VStack, Text, Show } from "@chakra-ui/react"
+import { Button, HStack, VStack, Text, Show, Card, CardHeader, Heading, CardBody } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { useWallet } from "@vechain/dapp-kit-react"
 import React, { useCallback } from "react"
@@ -152,50 +152,57 @@ export const Pause: React.FC = () => {
   )
 
   return (
-    <VStack spacing={6} align={"flex-start"}>
-      {isAdminOfVot3 && (
-        <>
-          <Show above="sm">
-            <HStack>{pauseB3TR}</HStack>
-          </Show>
-          <Show below="sm">
-            <VStack align={"flex-start"}>{pauseB3TR}</VStack>
-          </Show>
-        </>
-      )}
+    <Card w={"full"}>
+      <CardHeader>
+        <Heading size="lg">Pausing</Heading>
+      </CardHeader>
+      <CardBody>
+        <VStack spacing={6} align={"flex-start"}>
+          {isAdminOfVot3 && (
+            <>
+              <Show above="sm">
+                <HStack>{pauseB3TR}</HStack>
+              </Show>
+              <Show below="sm">
+                <VStack align={"flex-start"}>{pauseB3TR}</VStack>
+              </Show>
+            </>
+          )}
 
-      {isAdminOfB3tr && (
-        <>
-          <Show above="sm">
-            <HStack>{pauseVOT3}</HStack>
-          </Show>
-          <Show below="sm">
-            <VStack align={"flex-start"}>{pauseVOT3}</VStack>
-          </Show>
-        </>
-      )}
+          {isAdminOfB3tr && (
+            <>
+              <Show above="sm">
+                <HStack>{pauseVOT3}</HStack>
+              </Show>
+              <Show below="sm">
+                <VStack align={"flex-start"}>{pauseVOT3}</VStack>
+              </Show>
+            </>
+          )}
 
-      {isAdminOfGalaxyMember && (
-        <>
-          <Show above="sm">
-            <HStack>{pauseGalaxyMember}</HStack>
-          </Show>
-          <Show below="sm">
-            <VStack align={"flex-start"}>{pauseGalaxyMember}</VStack>
-          </Show>
-        </>
-      )}
+          {isAdminOfGalaxyMember && (
+            <>
+              <Show above="sm">
+                <HStack>{pauseGalaxyMember}</HStack>
+              </Show>
+              <Show below="sm">
+                <VStack align={"flex-start"}>{pauseGalaxyMember}</VStack>
+              </Show>
+            </>
+          )}
 
-      {isAdminOfB3TRGovernor && (
-        <>
-          <Show above="sm">
-            <HStack>{pauseB3TRGovernor}</HStack>
-          </Show>
-          <Show below="sm">
-            <VStack align={"flex-start"}>{pauseB3TRGovernor}</VStack>
-          </Show>
-        </>
-      )}
-    </VStack>
+          {isAdminOfB3TRGovernor && (
+            <>
+              <Show above="sm">
+                <HStack>{pauseB3TRGovernor}</HStack>
+              </Show>
+              <Show below="sm">
+                <VStack align={"flex-start"}>{pauseB3TRGovernor}</VStack>
+              </Show>
+            </>
+          )}
+        </VStack>
+      </CardBody>
+    </Card>
   )
 }

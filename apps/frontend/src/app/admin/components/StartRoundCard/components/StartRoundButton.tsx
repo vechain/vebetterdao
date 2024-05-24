@@ -4,7 +4,7 @@ import { useDistributeEmission } from "@/hooks"
 import { VStack, Button, Text, useDisclosure } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 
-export const StartRound = () => {
+export const StartRoundButton = () => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: currentRound } = useAllocationsRound(currentRoundId)
   const isCurrentRoundActive = useMemo(() => {
