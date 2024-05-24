@@ -36,12 +36,11 @@ import { GovernorDepositLogic } from "./GovernorDepositLogic.sol";
  * @dev Library for Governor state logic.
  */
 library GovernorStateLogic {
-  using GovernorProposalLogic for GovernorStorageTypes.GovernorGeneralStorage;
-  using GovernorVotesLogic for GovernorStorageTypes.GovernorVotesStorage;
-  using GovernorQuorumLogic for GovernorStorageTypes.GovernorQuoromStorage;
-  using GovernorClockLogic for GovernorStorageTypes.GovernorExternalContractsStorage;
-  using GovernorDepositLogic for GovernorStorageTypes.GovernorDepositStorage;
-  using GovernorDepositLogic for GovernorStorageTypes.GovernorGeneralStorage;
+  using GovernorProposalLogic for GovernorStorageTypes.GovernorStorage;
+  using GovernorVotesLogic for GovernorStorageTypes.GovernorStorage;
+  using GovernorQuorumLogic for GovernorStorageTypes.GovernorStorage;
+  using GovernorClockLogic for GovernorStorageTypes.GovernorStorage;
+  using GovernorDepositLogic for GovernorStorageTypes.GovernorStorage;
 
   bytes32 internal constant ALL_PROPOSAL_STATES_BITMAP =
     bytes32((2 ** (uint8(type(GovernorTypes.ProposalState).max) + 1)) - 1);
@@ -67,16 +66,20 @@ library GovernorStateLogic {
     bytes32 expectedStates
   );
 
+  function getProposalState(
+    GovernorStorageTypes.GovernorStorage storage self,
+    uint256 proposalId
+  ) external view returns (GovernorTypes.ProposalState) {
+    return state(self, proposalId);
+  }
+
   /**
    * @dev See {IB3TRGovernor-state}.
    */
   function state(
-    GovernorStorageTypes.GovernorGeneralStorage storage self,
-    GovernorStorageTypes.GovernorExternalContractsStorage storage externalContracts,
-    GovernorStorageTypes.GovernorVotesStorage storage votes,
-    GovernorStorageTypes.GovernorQuoromStorage storage quorum,
+    GovernorStorageTypes.GovernorStorage storage self,
     uint256 proposalId
-  ) public view returns (GovernorTypes.ProposalState) {
+  ) internal view returns (GovernorTypes.ProposalState) {
     // We read the struct fields into the stack at once so Solidity emits a single SLOAD
     GovernorTypes.ProposalCore storage proposal = self.proposals[proposalId];
     bool proposalExecuted = proposal.executed;
@@ -95,13 +98,13 @@ library GovernorStateLogic {
     }
 
     // If the round where the proposal should be active is not started yet, the proposal is pending
-    if (externalContracts.xAllocationVoting.currentRoundId() < proposal.roundIdVoteStart) {
+    if (self.xAllocationVoting.currentRoundId() < proposal.roundIdVoteStart) {
       return GovernorTypes.ProposalState.Pending;
     }
 
-    uint256 currentTimepoint = externalContracts.clock();
+    uint256 currentTimepoint = self.clock();
 
-    uint256 deadline = self.proposalDeadline(externalContracts, proposalId);
+    uint256 deadline = self._proposalDeadline(proposalId);
 
     if (deadline >= currentTimepoint) {
       if (self.proposalDepositReached(proposalId)) {
@@ -109,12 +112,21 @@ library GovernorStateLogic {
       } else {
         return GovernorTypes.ProposalState.DepositNotMet;
       }
-    } else if (!quorum.quorumReached(self, externalContracts, votes, proposalId) || !votes.voteSucceeded(proposalId)) {
+    } else if (!self.quorumReached(proposalId) || !self.voteSucceeded(proposalId)) {
       return GovernorTypes.ProposalState.Defeated;
     } else if (self.proposalEta(proposalId) == 0) {
       return GovernorTypes.ProposalState.Succeeded;
     } else {
-      return GovernorTypes.ProposalState.Queued;
+      bytes32 queueid = self.timelockIds[proposalId];
+      if (self.timelock.isOperationPending(queueid)) {
+        return GovernorTypes.ProposalState.Queued;
+      } else if (self.timelock.isOperationDone(queueid)) {
+        // This can happen if the proposal is executed directly on the timelock.
+        return GovernorTypes.ProposalState.Executed;
+      } else {
+        // This can happen if the proposal is canceled directly on the timelock.
+        return GovernorTypes.ProposalState.Canceled;
+      }
     }
   }
 
@@ -125,14 +137,11 @@ library GovernorStateLogic {
    * If requirements are not met, reverts with a {GovernorUnexpectedProposalState} error.
    */
   function validateStateBitmap(
-    GovernorStorageTypes.GovernorGeneralStorage storage self,
-    GovernorStorageTypes.GovernorExternalContractsStorage storage externalContracts,
-    GovernorStorageTypes.GovernorVotesStorage storage votes,
-    GovernorStorageTypes.GovernorQuoromStorage storage quorum,
+    GovernorStorageTypes.GovernorStorage storage self,
     uint256 proposalId,
     bytes32 allowedStates
   ) internal view returns (GovernorTypes.ProposalState) {
-    GovernorTypes.ProposalState currentState = state(self, externalContracts, votes, quorum, proposalId);
+    GovernorTypes.ProposalState currentState = state(self, proposalId);
     if (encodeStateBitmap(currentState) & allowedStates == bytes32(0)) {
       revert GovernorUnexpectedProposalState(proposalId, currentState, allowedStates);
     }
