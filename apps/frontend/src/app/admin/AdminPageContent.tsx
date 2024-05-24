@@ -1,19 +1,18 @@
 "use client"
 
-import { Card, CardBody, CardHeader, Heading, Stack, VStack, HStack, Text } from "@chakra-ui/react"
+import { Stack, Tabs, TabList, Tab, TabPanels, TabPanel, Grid, GridItem } from "@chakra-ui/react"
 import { useEffect } from "react"
 import { AnalyticsUtils } from "@/utils"
 import { useAccountPermissions } from "@/api/contracts/account"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { AdminPermissions } from "./components/AdminPermissions"
 import { B3trAllowance } from "./components/B3trAllowance"
 import { BulkClaimXAppsAllocations } from "./components/BulkClaimXAppsAllocations"
 import { ClaimXAppAllocations } from "./components/ClaimXAppAllocations"
 import { Pause } from "./components/Pause"
-import { StartEmissions } from "./components/StartEmissions"
-import { StartRound } from "./components/StartRound"
 import { UpdateReceiverAddress } from "./components/UpdateReceiverAddress"
-import { ProposalsAdmin } from "./components/ProposalsAdmin/ProposalsAdmin"
+import { StartRoundCard } from "./components/StartRoundCard/StartRoundCard"
+import { ContractsDetails } from "./components/ContractsDetails"
+import { UpdateAppsEligibility } from "./components/UpdateAppsEligibility"
 
 export const AdminPageContent = () => {
   useEffect(() => {
@@ -21,62 +20,65 @@ export const AdminPageContent = () => {
   }, [])
 
   const { account } = useWallet()
-  const { isAdminOfB3tr, isAdminOfEmissions, isAdminOfXAllocationVoting, isAdminOfVot3, isAdminOfGalaxyMember, isAdmin } =
+  const { isAdminOfX2EarnApps, isAdminOfVot3, isAdminOfB3tr, isAdminOfGalaxyMember, isAdminOfB3TRGovernor } =
     useAccountPermissions(account ?? "")
+
+  const canSeePauseTab = isAdminOfB3tr || isAdminOfGalaxyMember || isAdminOfVot3 || isAdminOfB3TRGovernor
 
   return (
     <Stack spacing={12} w={"full"} data-testid="admin-page">
-      {isAdmin && <AdminPermissions />}
+      <Tabs>
+        <TabList
+          overflowY="hidden"
+          sx={{
+            scrollbarWidth: "none",
+            "::-webkit-scrollbar": {
+              display: "none",
+            },
+          }}>
+          <Tab>{"Emissions"}</Tab>
+          {isAdminOfX2EarnApps && <Tab>{"X2Earn Apps"}</Tab>}
+          <Tab>{"Utils"}</Tab>
+          <Tab>{"Contracts"}</Tab>
+          {canSeePauseTab && <Tab>{"Pausing"}</Tab>}
+        </TabList>
 
-      <Stack direction={["column", "row"]} w={"full"} spacing={12} alignItems={"start"}>
-        <Card w={"full"}>
-          <CardHeader>
-            <Heading size="lg">Emissions and Rounds</Heading>
-          </CardHeader>
-          <CardBody>
-            <VStack w={"full"} spacing={4} alignItems={"start"}>
-              {isAdminOfEmissions && <StartEmissions />}
-              <StartRound />
-            </VStack>
-          </CardBody>
-        </Card>
-
-        <Card w={"full"}>
-          <CardHeader>
-            <Heading size="lg">B3TR Token Allowance</Heading>
-            <Text fontSize="sm">Allow an external address to spend your B3TR tokens.</Text>
-          </CardHeader>
-          <CardBody>
-            <B3trAllowance />
-          </CardBody>
-        </Card>
-      </Stack>
-
-      <Card w={"full"}>
-        <CardHeader>
-          <Heading size="lg">X-2-Earn Apps</Heading>
-        </CardHeader>
-        <CardBody>
-          <VStack w={"full"} spacing={12} alignItems={"start"}>
-            <Stack direction={["column", "row"]} w={"full"} spacing={12} justify={"space-between"}>
+        <TabPanels>
+          <TabPanel>
+            <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
+              <StartRoundCard />
+              <GridItem />
               <ClaimXAppAllocations />
               <BulkClaimXAppsAllocations />
-            </Stack>
-            {isAdminOfXAllocationVoting && <UpdateReceiverAddress />}
-          </VStack>
-        </CardBody>
-      </Card>
+            </Grid>
+          </TabPanel>
 
-      {(isAdminOfGalaxyMember || isAdminOfB3tr || isAdminOfVot3) && (
-        <Card w={"full"}>
-          <CardHeader>
-            <Heading size="lg">Pausing</Heading>
-          </CardHeader>
-          <CardBody>
-            <Pause />
-          </CardBody>
-        </Card>
-      )}
+          {isAdminOfX2EarnApps && (
+            <TabPanel>
+              <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
+                <UpdateReceiverAddress />
+                <UpdateAppsEligibility />
+              </Grid>
+            </TabPanel>
+          )}
+
+          <TabPanel>
+            <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
+              <B3trAllowance />
+            </Grid>
+          </TabPanel>
+
+          <TabPanel>
+            <ContractsDetails />
+          </TabPanel>
+
+          {canSeePauseTab && (
+            <TabPanel>
+              <Pause />
+            </TabPanel>
+          )}
+        </TabPanels>
+      </Tabs>
     </Stack>
   )
 }

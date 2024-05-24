@@ -24,7 +24,7 @@ export class BaseDialog {
      * Expect the dialog to be displayed with success title
      */
     async expectDialogSuccess() {
-        await test.step('Expect vote cast dialog', async() => {
+        await test.step(`Expect ${this.successTitle} dialog`, async() => {
             await expect(this.dialogTitle.first()).toContainText(this.successTitle)
         })
     }
@@ -33,7 +33,7 @@ export class BaseDialog {
      * Expect the dialog to be displayed with error title
      */
     async expectDialogFailed() {
-        await test.step('Expect vote cast failed dialog', async() => {
+        await test.step(`Expect ${this.errorTitle} dialog`, async() => {
             await expect(this.dialogTitle.first()).toContainText(this.errorTitle)
         })
     }
