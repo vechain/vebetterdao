@@ -193,7 +193,7 @@ contract B3TRGovernor is
 
   function state(uint256 proposalId) external view returns (GovernorTypes.ProposalState) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return $.getProposalState(proposalId);
+    return $.state(proposalId);
   }
 
   /**
@@ -255,7 +255,7 @@ contract B3TRGovernor is
 
   function depositThreshold() external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return $.getDepositThreshold();
+    return $.depositThreshold();
   }
 
   /**

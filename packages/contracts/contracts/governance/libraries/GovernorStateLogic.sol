@@ -31,10 +31,8 @@ import { GovernorQuorumLogic } from "./GovernorQuorumLogic.sol";
 import { GovernorClockLogic } from "./GovernorClockLogic.sol";
 import { GovernorDepositLogic } from "./GovernorDepositLogic.sol";
 
-/**
- * @title Governor State Logic
- * @dev Library for Governor state logic.
- */
+/// @title GovernorStateLogic
+/// @notice Library for Governor state logic, managing the state transitions and validations of governance proposals.
 library GovernorStateLogic {
   using GovernorProposalLogic for GovernorStorageTypes.GovernorStorage;
   using GovernorVotesLogic for GovernorStorageTypes.GovernorStorage;
@@ -42,45 +40,81 @@ library GovernorStateLogic {
   using GovernorClockLogic for GovernorStorageTypes.GovernorStorage;
   using GovernorDepositLogic for GovernorStorageTypes.GovernorStorage;
 
+  /// @notice Bitmap representing all possible proposal states.
   bytes32 internal constant ALL_PROPOSAL_STATES_BITMAP =
     bytes32((2 ** (uint8(type(GovernorTypes.ProposalState).max) + 1)) - 1);
 
-  /**
-   * @dev The `proposalId` doesn't exist.
-   */
+  /// @dev Thrown when the `proposalId` does not exist.
+  /// @param proposalId The ID of the proposal that does not exist.
   error GovernorNonexistentProposal(uint256 proposalId);
 
-  /**
-   * @dev The current state of a proposal is not the required for performing an operation.
-   * The `expectedStates` is a bitmap with the bits enabled for each ProposalState enum position
-   * counting from right to left.
-   *
-   * NOTE: If `expectedState` is `bytes32(0)`, the proposal is expected to not be in any state (i.e. not exist).
-   * This is the case when a proposal that is expected to be unset is already initiated (the proposal is duplicated).
-   *
-   * See {Governor-_encodeStateBitmap}.
-   */
+  /// @dev Thrown when the current state of a proposal does not match the expected states.
+  /// @param proposalId The ID of the proposal.
+  /// @param current The current state of the proposal.
+  /// @param expectedStates The expected states of the proposal as a bitmap.
   error GovernorUnexpectedProposalState(
     uint256 proposalId,
     GovernorTypes.ProposalState current,
     bytes32 expectedStates
   );
 
-  function getProposalState(
-    GovernorStorageTypes.GovernorStorage storage self,
-    uint256 proposalId
-  ) external view returns (GovernorTypes.ProposalState) {
-    return state(self, proposalId);
-  }
+  /** ------------------ GETTERS ------------------ **/
 
   /**
-   * @dev See {IB3TRGovernor-state}.
+   * @notice Retrieves the current state of a proposal.
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposalId The ID of the proposal.
+   * @return The current state of the proposal.
    */
   function state(
     GovernorStorageTypes.GovernorStorage storage self,
     uint256 proposalId
+  ) external view returns (GovernorTypes.ProposalState) {
+    return _state(self, proposalId);
+  }
+
+  /** ------------------ INTERNAL FUNCTIONS ------------------ **/
+
+  /**
+   * @dev Internal function to validate the current state of a proposal against expected states.
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposalId The ID of the proposal.
+   * @param allowedStates The bitmap of allowed states.
+   * @return The current state of the proposal.
+   */
+  function validateStateBitmap(
+    GovernorStorageTypes.GovernorStorage storage self,
+    uint256 proposalId,
+    bytes32 allowedStates
   ) internal view returns (GovernorTypes.ProposalState) {
-    // We read the struct fields into the stack at once so Solidity emits a single SLOAD
+    GovernorTypes.ProposalState currentState = _state(self, proposalId);
+    if (encodeStateBitmap(currentState) & allowedStates == bytes32(0)) {
+      revert GovernorUnexpectedProposalState(proposalId, currentState, allowedStates);
+    }
+    return currentState;
+  }
+
+  /**
+   * @dev Encodes a `ProposalState` into a `bytes32` representation where each bit enabled corresponds to the underlying position in the `ProposalState` enum.
+   * @param proposalState The state to encode.
+   * @return The encoded state bitmap.
+   */
+  function encodeStateBitmap(GovernorTypes.ProposalState proposalState) internal pure returns (bytes32) {
+    return bytes32(1 << uint8(proposalState));
+  }
+
+  /**
+   * @notice Retrieves the current state of a proposal.
+   * @dev See {IB3TRGovernor-state}.
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposalId The ID of the proposal.
+   * @return The current state of the proposal.
+   */
+  function _state(
+    GovernorStorageTypes.GovernorStorage storage self,
+    uint256 proposalId
+  ) internal view returns (GovernorTypes.ProposalState) {
+    // Load the proposal into memory
     GovernorTypes.ProposalCore storage proposal = self.proposals[proposalId];
     bool proposalExecuted = proposal.executed;
     bool proposalCanceled = proposal.canceled;
@@ -97,13 +131,12 @@ library GovernorStateLogic {
       revert GovernorNonexistentProposal(proposalId);
     }
 
-    // If the round where the proposal should be active is not started yet, the proposal is pending
+    // Check if the proposal is pending
     if (self.xAllocationVoting.currentRoundId() < proposal.roundIdVoteStart) {
       return GovernorTypes.ProposalState.Pending;
     }
 
     uint256 currentTimepoint = self.clock();
-
     uint256 deadline = self._proposalDeadline(proposalId);
 
     if (deadline >= currentTimepoint) {
@@ -121,46 +154,10 @@ library GovernorStateLogic {
       if (self.timelock.isOperationPending(queueid)) {
         return GovernorTypes.ProposalState.Queued;
       } else if (self.timelock.isOperationDone(queueid)) {
-        // This can happen if the proposal is executed directly on the timelock.
         return GovernorTypes.ProposalState.Executed;
       } else {
-        // This can happen if the proposal is canceled directly on the timelock.
         return GovernorTypes.ProposalState.Canceled;
       }
     }
-  }
-
-  /**
-   * @dev Check that the current state of a proposal matches the requirements described by the `allowedStates` bitmap.
-   * This bitmap should be built using `_encodeStateBitmap`.
-   *
-   * If requirements are not met, reverts with a {GovernorUnexpectedProposalState} error.
-   */
-  function validateStateBitmap(
-    GovernorStorageTypes.GovernorStorage storage self,
-    uint256 proposalId,
-    bytes32 allowedStates
-  ) internal view returns (GovernorTypes.ProposalState) {
-    GovernorTypes.ProposalState currentState = state(self, proposalId);
-    if (encodeStateBitmap(currentState) & allowedStates == bytes32(0)) {
-      revert GovernorUnexpectedProposalState(proposalId, currentState, allowedStates);
-    }
-    return currentState;
-  }
-
-  /**
-   * @dev Encodes a `ProposalState` into a `bytes32` representation where each bit enabled corresponds to
-   * the underlying position in the `ProposalState` enum. For example:
-   *
-   * 0x000...10000
-   *   ^^^^^^------ ...
-   *         ^----- Succeeded
-   *          ^---- Defeated
-   *           ^--- Canceled
-   *            ^-- Active
-   *             ^- Pending
-   */
-  function encodeStateBitmap(GovernorTypes.ProposalState proposalState) internal pure returns (bytes32) {
-    return bytes32(1 << uint8(proposalState));
   }
 }

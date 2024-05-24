@@ -25,21 +25,27 @@ pragma solidity ^0.8.20;
 
 import { GovernorStorageTypes } from "./GovernorStorageTypes.sol";
 
-/// @title GovernorQuorumFraction
-/// @notice Library for managing quorum numerators using checkpointed data structures.
+/// @title GovernorFunctionRestrictionsLogic
+/// @notice Library for managing function restrictions within the Governor contract.
+/// @dev This library provides functions to whitelist or restrict functions that can be called by proposals.
 library GovernorFunctionRestrictionsLogic {
-  /// @notice Error message for when a function is restricted by the governor
-  /// @param functionSelector The function selector that is restricted
+  /// @notice Error message for when a function is restricted by the governor.
+  /// @param functionSelector The function selector that is restricted.
   error GovernorRestrictedFunction(bytes4 functionSelector);
 
-  /// @notice Error message for when a function selector is invalid
-  /// @param selector The function selector that is invalid
+  /// @notice Error message for when a function selector is invalid.
+  /// @param selector The function selector that is invalid.
   error GovernorFunctionInvalidSelector(bytes selector);
 
-  /// @notice method that allows to restrict functions that can be called by proposals for a single function selector
-  /// @param target - address of the contract
-  /// @param functionSelector - function selector
-  /// @param isWhitelisted - bool indicating if function is whitelisted for proposals
+  // --------------- SETTERS ---------------
+  /**
+   * @notice Set the whitelist status of a function for proposals.
+   * @dev This method allows restricting functions that can be called by proposals for a single function selector.
+   * @param self The storage reference for the GovernorStorage.
+   * @param target The address of the contract.
+   * @param functionSelector The function selector.
+   * @param isWhitelisted Boolean indicating if the function is whitelisted for proposals.
+   */
   function setWhitelistFunction(
     GovernorStorageTypes.GovernorStorage storage self,
     address target,
@@ -49,50 +55,81 @@ library GovernorFunctionRestrictionsLogic {
     self.whitelistedFunctions[target][functionSelector] = isWhitelisted;
   }
 
-  /// @notice method that allows to restrict functions that can be called by proposals for multiple function selectors at once
-  /// @param target - address of the contract
-  /// @param functionSelectors - array of function selectors
-  /// @param isWhitelisted - bool indicating if function is whitelisted for proposals
-  function setWhitelistFunctions(GovernorStorageTypes.GovernorStorage storage self, address target, bytes4[] memory functionSelectors, bool isWhitelisted) public {
+  /**
+   * @notice Set the whitelist status of multiple functions for proposals.
+   * @dev This method allows restricting functions that can be called by proposals for multiple function selectors at once.
+   * @param self The storage reference for the GovernorStorage.
+   * @param target The address of the contract.
+   * @param functionSelectors An array of function selectors.
+   * @param isWhitelisted Boolean indicating if the functions are whitelisted for proposals.
+   */
+  function setWhitelistFunctions(
+    GovernorStorageTypes.GovernorStorage storage self,
+    address target,
+    bytes4[] memory functionSelectors,
+    bool isWhitelisted
+  ) external {
     for (uint256 i = 0; i < functionSelectors.length; i++) {
       setWhitelistFunction(self, target, functionSelectors[i], isWhitelisted);
     }
   }
 
-  /// @notice method that allows to toggle the function restriction on/off
-  /// @param isEnabled - flag to enable/disable function restriction
-  function setIsFunctionRestrictionEnabled(GovernorStorageTypes.GovernorStorage storage self, bool isEnabled) public {
+  /**
+   * @notice Toggle the function restriction on or off.
+   * @dev This method allows enabling or disabling function restriction.
+   * @param self The storage reference for the GovernorStorage.
+   * @param isEnabled Flag to enable or disable function restriction.
+   */
+  function setIsFunctionRestrictionEnabled(GovernorStorageTypes.GovernorStorage storage self, bool isEnabled) external {
     self.isFunctionRestrictionEnabled = isEnabled;
   }
 
-  /// @notice Check if a function is restricted by the governor
-  /// @param target - address of the contract
-  /// @param functionSelector - function selector
-  function isFunctionWhitelisted(GovernorStorageTypes.GovernorStorage storage self, address target, bytes4 functionSelector) internal view returns (bool) {
+  // --------------- GETTERS ---------------
+  /**
+   * @notice Check if a function is whitelisted by the governor.
+   * @dev This method checks if a specific function is whitelisted for proposals.
+   * @param self The storage reference for the GovernorStorage.
+   * @param target The address of the contract.
+   * @param functionSelector The function selector.
+   * @return Boolean indicating if the function is whitelisted.
+   */
+  function isFunctionWhitelisted(
+    GovernorStorageTypes.GovernorStorage storage self,
+    address target,
+    bytes4 functionSelector
+  ) internal view returns (bool) {
     return self.whitelistedFunctions[target][functionSelector];
   }
 
   /**
-   * @dev Internal function check if the targets and calldatas are whitelisted
-   * @param targets The addresses of the contracts to call
-   * @param calldatas Function signatures and arguments
+   * @notice Check if the targets and calldatas are whitelisted.
+   * @dev Internal function to check if the provided targets and calldatas are whitelisted.
+   * @param self The storage reference for the GovernorStorage.
+   * @param targets The addresses of the contracts to call.
+   * @param calldatas Function signatures and arguments.
    */
   function checkFunctionsRestriction(
     GovernorStorageTypes.GovernorStorage storage self,
     address[] memory targets,
     bytes[] memory calldatas
   ) internal view {
-    if (self.isFunctionRestrictionEnabled == true) {
+    if (self.isFunctionRestrictionEnabled) {
       for (uint256 i = 0; i < targets.length; i++) {
         bytes4 functionSelector = extractFunctionSelector(calldatas[i]);
-        if (self.whitelistedFunctions[targets[i]][functionSelector] == false) {
+        if (!self.whitelistedFunctions[targets[i]][functionSelector]) {
           revert GovernorRestrictedFunction(functionSelector);
         }
       }
     }
   }
 
-  /// @notice Extract the function selector from the calldata
+  // --------------- PRIVATE FUNCTIONS ---------------
+  /**
+   * @notice Extract the function selector from the calldata.
+   * @dev Internal pure function to extract the function selector from the calldata.
+   * @param data The calldata from which to extract the function selector.
+   * @return bytes4 The extracted function selector.
+   */
   function extractFunctionSelector(bytes memory data) private pure returns (bytes4) {
     if (data.length < 4) revert GovernorFunctionInvalidSelector(data);
     bytes4 sig;

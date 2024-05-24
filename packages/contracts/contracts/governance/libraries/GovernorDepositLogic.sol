@@ -27,37 +27,31 @@ import { GovernorStorageTypes } from "./GovernorStorageTypes.sol";
 import { GovernorStateLogic } from "./GovernorStateLogic.sol";
 import { GovernorTypes } from "./GovernorTypes.sol";
 
+/// @title GovernorDepositLogic Library
+/// @notice Library for managing deposits related to proposals in the Governor contract.
+/// @dev This library provides functions to deposit and withdraw tokens for proposals, and to get deposit-related information.
 library GovernorDepositLogic {
   using GovernorStateLogic for GovernorStorageTypes.GovernorStorage;
-  /**
-   * @dev Emitted when a deposit is made to a proposal.
-   */
+
+  /// @dev Emitted when a deposit is made to a proposal.
   event ProposalDeposit(address indexed depositor, uint256 indexed proposalId, uint256 amount);
 
-  /**
-   * @dev There is no deposit to withdraw.
-   */
+  /// @dev Thrown when there is no deposit to withdraw.
   error GovernorNoDepositToWithdraw(uint256 proposalId, address depositer);
 
-  /**
-   * @dev The deposit amount must be greater than 0.
-   */
+  /// @dev Thrown when the deposit amount is invalid (must be greater than 0).
   error GovernorInvalidDepositAmount();
 
-  /**
-   * @dev The `proposalId` doesn't exist.
-   */
+  /// @dev Thrown when the proposal ID does not exist.
   error GovernorNonexistentProposal(uint256 proposalId);
 
   // --------------- SETTERS ---------------
   /**
-   * @dev Deposit tokens for a proposal. Proposer and proposal sponsors can contribute
-   * towards a proposal's deposit using this function. The proposal must be in the
-   * Pending state to make a deposit. The amount deposited from an address is tracked
-   * and can be withdrawn by the same address when the voting round is over.
-   *
+   * @notice Deposits tokens for a proposal.
+   * @dev Proposer and proposal sponsors can contribute towards a proposal's deposit using this function. The proposal must be in the Pending state to make a deposit. The amount deposited from an address is tracked and can be withdrawn by the same address when the voting round is over.
+   * @param self The storage reference for the GovernorStorage.
    * @param amount The amount of tokens to deposit.
-   * @param proposalId The id of the proposal.
+   * @param proposalId The ID of the proposal.
    */
   function deposit(GovernorStorageTypes.GovernorStorage storage self, uint256 amount, uint256 proposalId) external {
     if (amount == 0) {
@@ -78,16 +72,11 @@ library GovernorDepositLogic {
   }
 
   /**
-   * @dev Withdraw tokens previously deposited to a proposal. A depositor can only
-   * withdraw their tokens once the proposal is no longer Pending or Active. Each
-   * address can only withdraw once per proposal.
-   *
-   * Reverts if no deposits are available to withdraw or if the deposits have
-   * already been withdrawn by the message sender.
-   * Reverts if the token transfer fails.
-   *
-   * @param proposalId The id of the proposal to withdraw deposits from.
-   * @param depositer The address of the depositer.
+   * @notice Withdraws tokens previously deposited to a proposal.
+   * @dev A depositor can only withdraw their tokens once the proposal is no longer Pending or Active. Each address can only withdraw once per proposal. Reverts if no deposits are available to withdraw or if the deposits have already been withdrawn by the message sender. Reverts if the token transfer fails.
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposalId The ID of the proposal to withdraw deposits from.
+   * @param depositer The address of the depositor.
    */
   function withdraw(GovernorStorageTypes.GovernorStorage storage self, uint256 proposalId, address depositer) external {
     uint256 amount = self.deposits[proposalId][depositer];
@@ -109,13 +98,12 @@ library GovernorDepositLogic {
   }
 
   /**
-   * @dev Deposit tokens to a proposal.
-   *
-   * Emits a {IB3TRGovernor-ProposalDeposit} event.
-   *
+   * @notice Internal function to deposit tokens to a proposal.
+   * @dev Emits a {ProposalDeposit} event.
+   * @param self The storage reference for the GovernorStorage.
    * @param amount The amount of tokens to deposit.
    * @param depositor The address of the depositor.
-   * @param proposalId The id of the proposal.
+   * @param proposalId The ID of the proposal.
    */
   function depositFunds(
     GovernorStorageTypes.GovernorStorage storage self,
@@ -131,7 +119,13 @@ library GovernorDepositLogic {
   }
 
   // --------------- GETTERS ---------------
-
+  /**
+   * @notice Returns the amount of tokens deposited by a user for a proposal.
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposalId The ID of the proposal.
+   * @param user The address of the user.
+   * @return uint256 The amount of tokens deposited by the user.
+   */
   function getUserDeposit(
     GovernorStorageTypes.GovernorStorage storage self,
     uint256 proposalId,
@@ -141,8 +135,9 @@ library GovernorDepositLogic {
   }
 
   /**
-   * @dev Returns the deposit threshold for a proposal.
-   * @param proposalId The id of the proposal.
+   * @notice Returns the deposit threshold for a proposal.
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposalId The ID of the proposal.
    * @return uint256 The deposit threshold for the proposal.
    */
   function proposalDepositThreshold(
@@ -153,9 +148,10 @@ library GovernorDepositLogic {
   }
 
   /**
-   * @dev Returns the amount of deposits made to a proposal.
-   *
-   * @param proposalId The id of the proposal.
+   * @notice Returns the total amount of deposits made to a proposal.
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposalId The ID of the proposal.
+   * @return uint256 The total amount of deposits made to the proposal.
    */
   function getProposalDeposits(
     GovernorStorageTypes.GovernorStorage storage self,
@@ -165,9 +161,10 @@ library GovernorDepositLogic {
   }
 
   /**
-   * @dev Returns true if the threshold of deposits required to reach a proposal has been reached.
-   *
-   * @param proposalId The id of the proposal.
+   * @notice Returns true if the threshold of deposits required to reach a proposal has been reached.
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposalId The ID of the proposal.
+   * @return True if the deposit threshold has been reached, false otherwise.
    */
   function proposalDepositReached(
     GovernorStorageTypes.GovernorStorage storage self,
@@ -178,17 +175,20 @@ library GovernorDepositLogic {
   }
 
   /**
-   * @dev See {Governor-depositThreshold}.
+   * @notice Returns the deposit threshold.
+   * @param self The storage reference for the GovernorStorage.
+   * @return uint256 The deposit threshold.
    */
-  function getDepositThreshold(GovernorStorageTypes.GovernorStorage storage self) external view returns (uint256) {
-    // deposit threshold is a percentage of the total supply of B3TR tokens
-    return depositThreshold(self);
+  function depositThreshold(GovernorStorageTypes.GovernorStorage storage self) external view returns (uint256) {
+    return _depositThreshold(self);
   }
 
   /**
-   * @dev See {Governor-depositThreshold}.
+   * @notice Internal function to calculate the deposit threshold as a percentage of the total supply of B3TR tokens.
+   * @param self The storage reference for the GovernorStorage.
+   * @return uint256 The deposit threshold.
    */
-  function depositThreshold(GovernorStorageTypes.GovernorStorage storage self) internal view returns (uint256) {
+  function _depositThreshold(GovernorStorageTypes.GovernorStorage storage self) internal view returns (uint256) {
     // deposit threshold is a percentage of the total supply of B3TR tokens
     return (self.depositThresholdPercentage * self.b3tr.totalSupply()) / 100;
   }

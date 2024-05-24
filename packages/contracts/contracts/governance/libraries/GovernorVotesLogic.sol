@@ -30,31 +30,32 @@ import { GovernorConfigurator } from "./GovernorConfigurator.sol";
 import { GovernorProposalLogic } from "./GovernorProposalLogic.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 
+/// @title GovernorVotesLogic
+/// @notice Library for handling voting logic in the Governor contract.
 library GovernorVotesLogic {
   using GovernorStateLogic for GovernorStorageTypes.GovernorStorage;
   using GovernorProposalLogic for GovernorStorageTypes.GovernorStorage;
   using GovernorConfigurator for GovernorStorageTypes.GovernorStorage;
 
-  /**
-   * @dev The vote was already cast.
-   */
+  /// @dev Thrown when a vote has already been cast by the voter.
+  /// @param voter The address of the voter who already cast a vote.
   error GovernorAlreadyCastVote(address voter);
 
-  /**
-   * @dev The vote type used is not valid for the corresponding counting module.
-   */
+  /// @dev Thrown when an invalid vote type is used.
   error GovernorInvalidVoteType();
 
-  /**
-   * @dev The `votingThreshold` is not met.
-   */
+  /// @dev Thrown when the voting threshold is not met.
+  /// @param threshold The required voting threshold.
+  /// @param votes The actual votes received.
   error GovernorVotingThresholdNotMet(uint256 threshold, uint256 votes);
 
-  /**
-   * @dev Emitted when a vote is cast without params.
-   *
-   * Note: `support` values should be seen as buckets. Their interpretation depends on the voting module used.
-   */
+  /// @notice Emitted when a vote is cast without parameters.
+  /// @param voter The address of the voter.
+  /// @param proposalId The ID of the proposal being voted on.
+  /// @param support The support value of the vote.
+  /// @param weight The weight of the vote.
+  /// @param power The voting power of the voter.
+  /// @param reason The reason for the vote.
   event VoteCast(
     address indexed voter,
     uint256 indexed proposalId,
@@ -64,6 +65,17 @@ library GovernorVotesLogic {
     string reason
   );
 
+  /** ------------------ INTERNAL FUNCTIONS ------------------ **/
+
+  /**
+   * @dev Internal function to count a vote for a proposal.
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposalId The ID of the proposal.
+   * @param account The address of the voter.
+   * @param support The support value of the vote.
+   * @param weight The weight of the vote.
+   * @param power The voting power of the voter.
+   */
   function _countVote(
     GovernorStorageTypes.GovernorStorage storage self,
     uint256 proposalId,
@@ -91,14 +103,17 @@ library GovernorVotesLogic {
 
     self.proposalTotalVotes[proposalId] += weight;
 
-    // save that user cast vote only the first time
+    // Save that user cast vote only the first time
     if (!self.hasVotedOnce[account]) {
       self.hasVotedOnce[account] = true;
     }
   }
 
   /**
-   * @dev See {Governor-_voteSucceeded}. In this module, the forVotes must be strictly over the againstVotes.
+   * @dev Internal function to check if the vote succeeded.
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposalId The ID of the proposal.
+   * @return True if the vote succeeded, false otherwise.
    */
   function voteSucceeded(
     GovernorStorageTypes.GovernorStorage storage self,
@@ -108,8 +123,14 @@ library GovernorVotesLogic {
     return proposalVote.forVotes > proposalVote.againstVotes;
   }
 
+  /** ------------------ GETTERS ------------------ **/
+
   /**
-   * @dev See {IB3TRGovernor-getVotes}.
+   * @notice Retrieves the votes for a specific account at a given timepoint.
+   * @param self The storage reference for the GovernorStorage.
+   * @param account The address of the account.
+   * @param timepoint The specific timepoint.
+   * @return The votes of the account at the given timepoint.
    */
   function getVotes(
     GovernorStorageTypes.GovernorStorage storage self,
@@ -120,19 +141,27 @@ library GovernorVotesLogic {
   }
 
   /**
-   * @dev returns the quadratic voting power that `account` has.  See {IB3TRGovernor-getQuadraticVotingPower}.
+   * @notice Retrieves the quadratic voting power of an account at a given timepoint.
+   * @param self The storage reference for the GovernorStorage.
+   * @param account The address of the account.
+   * @param timepoint The specific timepoint.
+   * @return The quadratic voting power of the account.
    */
   function getQuadraticVotingPower(
     GovernorStorageTypes.GovernorStorage storage self,
     address account,
     uint256 timepoint
   ) external view returns (uint256) {
-    // scale the votes by 1e9 so that number returned is 1e18
+    // Scale the votes by 1e9 so that the number returned is 1e18
     return Math.sqrt(self.vot3.getPastVotes(account, timepoint)) * 1e9;
   }
 
   /**
-   * @dev See {IB3TRGovernor-hasVoted}.
+   * @notice Checks if an account has voted on a specific proposal.
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposalId The ID of the proposal.
+   * @param account The address of the account.
+   * @return True if the account has voted, false otherwise.
    */
   function hasVoted(
     GovernorStorageTypes.GovernorStorage storage self,
@@ -143,7 +172,12 @@ library GovernorVotesLogic {
   }
 
   /**
-   * @dev get the votes for a proposal.
+   * @notice Retrieves the votes for a proposal.
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposalId The ID of the proposal.
+   * @return againstVotes The number of votes against the proposal.
+   * @return forVotes The number of votes for the proposal.
+   * @return abstainVotes The number of abstain votes.
    */
   function getProposalVotes(
     GovernorStorageTypes.GovernorStorage storage self,
@@ -154,14 +188,25 @@ library GovernorVotesLogic {
   }
 
   /**
-   * @dev See {IB3TRGovernor-hasVoted}.
+   * @notice Checks if a user has voted at least once.
+   * @param self The storage reference for the GovernorStorage.
+   * @param user The address of the user.
+   * @return True if the user has voted once, false otherwise.
    */
   function userVotedOnce(GovernorStorageTypes.GovernorStorage storage self, address user) internal view returns (bool) {
     return self.hasVotedOnce[user];
   }
 
+  /** ------------------ EXTERNAL FUNCTIONS ------------------ **/
+
   /**
-   * @dev See {IB3TRGovernor-castVote}.
+   * @notice Casts a vote on a proposal.
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposalId The ID of the proposal.
+   * @param voter The address of the voter.
+   * @param support The support value of the vote.
+   * @param reason The reason for the vote.
+   * @return The weight of the vote.
    */
   function castVote(
     GovernorStorageTypes.GovernorStorage storage self,
