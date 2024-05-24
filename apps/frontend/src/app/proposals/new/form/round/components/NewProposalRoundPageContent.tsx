@@ -6,7 +6,6 @@ import { useProposalFormStore } from "@/store/useProposalFormStore"
 import { useCanProposalStartInNextRound, useCurrentAllocationsRoundId } from "@/api"
 import dayjs from "dayjs"
 import { SelectedRoundRadioCard } from "./SelectedRoundRadioCard"
-import { round } from "lodash"
 
 const roundsToRender = 3
 
@@ -44,8 +43,6 @@ export const NewProposalRoundPageContent = () => {
     },
     [setData],
   )
-
-  console.log("rounds", rounds)
 
   return (
     <Card>

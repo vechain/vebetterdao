@@ -1,12 +1,51 @@
-import { Card, VStack, HStack, Heading, Radio, Box, Skeleton } from "@chakra-ui/react"
+import { RoundCreated, useAllocationsRoundsEvents, useCurrentBlock, useVotingPeriod } from "@/api"
+import { Card, VStack, HStack, Heading, Radio, Box, Skeleton, Text } from "@chakra-ui/react"
+import { getConfig } from "@repo/config"
+import dayjs from "dayjs"
+import { round } from "lodash"
+import { useMemo } from "react"
+
+const blockTime = getConfig().network.blockTime
 
 type Props = {
-  roundId: number
+  roundId: number | string
   selected: boolean
   onSelect: () => void
   renderSkeleton?: boolean
 }
 export const SelectedRoundRadioCard: React.FC<Props> = ({ roundId, selected, onSelect, renderSkeleton }) => {
+  const { data: votingPeriod, isLoading: votingPeriodLoading } = useVotingPeriod()
+
+  const { data: allocationRoundEvents, isLoading } = useAllocationsRoundsEvents()
+
+  const { data: currentBlock } = useCurrentBlock()
+
+  const estimatedStartBlock = useMemo(() => {
+    if (!allocationRoundEvents?.created.length) return null
+
+    //round already exist
+    const roundEvent = allocationRoundEvents.created.find(event => event.roundId === roundId)
+    if (roundEvent) return Number(roundEvent.voteStart)
+
+    //future round
+    if (!votingPeriod) return null
+    const latestRound = allocationRoundEvents.created[allocationRoundEvents.created.length - 1] as RoundCreated
+
+    const roundsBetween = Math.abs(Number(roundId) - Number(latestRound.roundId))
+    const blocksBetween = roundsBetween * Number(votingPeriod)
+    const estimatedStartBlock = Number(latestRound.voteStart) + blocksBetween
+    return estimatedStartBlock
+  }, [allocationRoundEvents, roundId, votingPeriod])
+
+  const estimatedEndTime = useMemo(() => {
+    if (!estimatedStartBlock || !currentBlock) return null
+
+    const startBlockFromNow = estimatedStartBlock - currentBlock.number
+
+    const durationLeftTimestamp = startBlockFromNow * blockTime
+    return dayjs().add(durationLeftTimestamp, "milliseconds")
+  }, [currentBlock, estimatedStartBlock])
+
   return (
     <Card
       w="full"
@@ -25,14 +64,15 @@ export const SelectedRoundRadioCard: React.FC<Props> = ({ roundId, selected, onS
       })}>
       <VStack spacing={4} align="flex-start">
         <HStack justify="space-between" w="full">
-          <Box>
+          <VStack spacing={2} align="flex-start">
             <Skeleton isLoaded={!renderSkeleton}>
               <Heading size="md">Round #{roundId}</Heading>
             </Skeleton>
-            {/* <Text fontSize="lg" fontWeight="600">
-            {round.date}
-          </Text> */}
-          </Box>
+            <Text fontSize="md" as="span" display={"inline-flex"} gap={1}>
+              Starts on
+              <Text fontWeight="600">{estimatedEndTime?.format("MMM D")}</Text>
+            </Text>
+          </VStack>
           <Radio isChecked={selected} isDisabled={renderSkeleton} />
         </HStack>
       </VStack>
