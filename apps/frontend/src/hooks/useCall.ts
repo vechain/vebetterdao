@@ -2,17 +2,20 @@ import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 import { Interface } from "ethers"
 
-export type UseCallParams = {
-  contractInterface: Interface
+// Define a type to infer method names from the function definition
+type MethodName<T> = T extends (nameOrSignature: infer U) => any ? U : never
+
+export type UseCallParams<T extends Interface> = {
+  contractInterface: T
   contractAddress: string
-  method: string
-  args?: any[]
-  keyArgs?: any[]
+  method: MethodName<T["getFunction"]>
+  args?: unknown[]
+  keyArgs?: unknown[]
   enabled?: boolean
   mapResponse?: (res: any) => any
 }
 
-export const useCall = ({
+export const useCall = <T extends Interface>({
   contractInterface,
   contractAddress,
   method,
@@ -20,7 +23,7 @@ export const useCall = ({
   keyArgs = [],
   enabled = true,
   mapResponse,
-}: UseCallParams) => {
+}: UseCallParams<T>) => {
   const { thor } = useConnex()
 
   const queryFn = async () => {
