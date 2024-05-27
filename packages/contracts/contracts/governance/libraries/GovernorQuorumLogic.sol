@@ -24,7 +24,7 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { GovernorStorageTypes } from "./GovernorStorageTypes.sol";
 import { GovernorClockLogic } from "./GovernorClockLogic.sol";
 import { GovernorVotesLogic } from "./GovernorVotesLogic.sol";
