@@ -5,5 +5,6 @@ export * from "./uri"
 export * from "./media"
 export * from "./ipfs"
 export * from "./date"
+export * from "./filterAmountInput"
 
 export { AddressUtils, AnalyticsUtils, HexUtils }
