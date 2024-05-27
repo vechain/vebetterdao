@@ -33,7 +33,6 @@ import { GovernorFunctionRestrictionsLogic } from "./GovernorFunctionRestriction
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import { DoubleEndedQueue } from "@openzeppelin/contracts/utils/structs/DoubleEndedQueue.sol";
-import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 
 /// @title GovernorProposalLogic
 /// @notice Library for managing proposals in the Governor contract.

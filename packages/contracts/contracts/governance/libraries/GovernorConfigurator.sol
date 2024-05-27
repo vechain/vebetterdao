@@ -28,7 +28,6 @@ import { IVOT3 } from "../../interfaces/IVOT3.sol";
 import { IVoterRewards } from "../../interfaces/IVoterRewards.sol";
 import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
 import { TimelockControllerUpgradeable } from "@openzeppelin/contracts-upgradeable/governance/TimelockControllerUpgradeable.sol";
-import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { IB3TR } from "../../interfaces/IB3TR.sol";
 
 /// @title GovernorConfigurator Library

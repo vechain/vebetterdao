@@ -28,7 +28,6 @@ import { GovernorTypes } from "./GovernorTypes.sol";
 import { GovernorStateLogic } from "./GovernorStateLogic.sol";
 import { GovernorConfigurator } from "./GovernorConfigurator.sol";
 import { GovernorProposalLogic } from "./GovernorProposalLogic.sol";
-import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 
 /// @title GovernorVotesLogic

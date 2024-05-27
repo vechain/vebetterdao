@@ -25,7 +25,6 @@ pragma solidity ^0.8.20;
 
 import { GovernorStorageTypes } from "./libraries/GovernorStorageTypes.sol";
 import { GovernorTypes } from "./libraries/GovernorTypes.sol";
-import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /// @title GovernorStorage

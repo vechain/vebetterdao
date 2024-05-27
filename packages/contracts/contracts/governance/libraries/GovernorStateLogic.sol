@@ -30,7 +30,6 @@ import { GovernorVotesLogic } from "./GovernorVotesLogic.sol";
 import { GovernorQuorumLogic } from "./GovernorQuorumLogic.sol";
 import { GovernorClockLogic } from "./GovernorClockLogic.sol";
 import { GovernorDepositLogic } from "./GovernorDepositLogic.sol";
-import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 
 /// @title GovernorStateLogic
 /// @notice Library for Governor state logic, managing the state transitions and validations of governance proposals.
