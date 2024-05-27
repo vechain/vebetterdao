@@ -12,6 +12,7 @@ import dynamic from "next/dynamic"
 import { AnalyticsUtils } from "@/utils"
 import { getConfig } from "@repo/config"
 import "@/i18n"
+import { useEffect } from "react"
 
 dayjs.extend(relativeTime)
 dayjs.extend(duration)
@@ -34,6 +35,14 @@ console.error = (...args: any) => {
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  // set color mode of @uiw/react-md-editor
+  useEffect(() => {
+    document.documentElement.setAttribute("data-color-mode", "light")
+    return () => {
+      document.documentElement.removeAttribute("data-color-mode")
+    }
+  }, [])
+
   return (
     <html
       lang="en"
