@@ -14,10 +14,10 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
   const { proposal } = useCurrentProposal()
   const [amount, setAmount] = useState("")
   const { account } = useWallet()
-  const { data: vot3Balance } = useVot3Balance(account || "")
+  const { data: vot3Balance } = useVot3Balance(account ?? undefined)
 
   const depositMax = useCallback(() => {
-    setAmount(vot3Balance?.scaled || "")
+    setAmount(vot3Balance?.scaled ?? "")
   }, [vot3Balance])
 
   const handleChange = useCallback(

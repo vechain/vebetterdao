@@ -26,6 +26,12 @@ type Props = {
   renderMarkdownDescription?: boolean
   renderActions?: boolean
 }
+
+/**
+ * This component read/write from/to useFormStore and renders a form to create a new proposal
+ * @param param0
+ * @returns
+ */
 export const NewProposalForm: React.FC<Props> = ({
   onSubmit,
   isDisabled = false,
@@ -74,7 +80,7 @@ export const NewProposalForm: React.FC<Props> = ({
     setValue("title", title ?? "")
     setValue("description", shortDescription ?? "")
     setValue("markdownDescription", markdownDescription ?? "")
-  }, [actions, title, shortDescription, setValue])
+  }, [actions, title, shortDescription, setValue, markdownDescription])
 
   const onFormSubmit = useCallback(
     (data: FormData) => {

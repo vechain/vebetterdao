@@ -2,17 +2,24 @@
 import { VStack, Spinner } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 
-const ProposalPage = dynamic(() => import("./components/ProposalPage").then(mod => mod.ProposalPage), {
-  ssr: false,
-  loading: () => (
-    <VStack w="full" spacing={12} h="80vh" justify="center">
-      <Spinner size={"lg"} />
-    </VStack>
-  ),
-})
+const ProposalPageContent = dynamic(
+  () => import("./components/ProposalPageContent").then(mod => mod.ProposalPageContent),
+  {
+    ssr: false,
+    loading: () => (
+      <VStack w="full" spacing={12} h="80vh" justify="center">
+        <Spinner size={"lg"} />
+      </VStack>
+    ),
+  },
+)
 
-const ProposalPageContainer = () => {
-  return <ProposalPage />
+type Props = {
+  params: {
+    proposalId: string
+  }
 }
 
-export default ProposalPageContainer
+export default function ProposalPage({ params }: Readonly<Props>) {
+  return <ProposalPageContent proposalId={params.proposalId} />
+}

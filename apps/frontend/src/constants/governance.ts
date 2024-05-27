@@ -15,29 +15,18 @@ import {
 
 import { getConfig } from "@repo/config"
 import { abi } from "thor-devkit"
+import { JsonContractType, resolveAbiFunctionFromCalldata } from "@repo/utils/ContractUtils"
+import { ProposalFormAction } from "@/store/useProposalFormStore"
+import { compareAddresses } from "@repo/utils/AddressUtils"
 
 const config = getConfig()
 
+/**
+ * Used in GovernanceFeaturedFunctions to display the function name and the parameters
+ */
 export type ExecutorAvailableContracts = {
   abi: JsonContractType
   address: string
-}
-
-type JsonContractType = {
-  _format: string
-  contractName: string
-  abi: ((
-    | Omit<abi.Function.Definition, "type" | "name" | "stateMutability" | "inputs">
-    | Omit<abi.Event.Definition, "type" | "name" | "stateMutability" | "inputs">
-  ) & {
-    type: string
-    name?: string
-    stateMutability?: string
-    inputs?: (Omit<abi.Function.Parameter, "indexed"> & {
-      indexed?: boolean
-    })[]
-  })[]
-  bytecode: string
 }
 
 export const governanceAvailableContracts: ExecutorAvailableContracts[] = [
@@ -54,10 +43,51 @@ export const governanceAvailableContracts: ExecutorAvailableContracts[] = [
   { abi: TreasuryJson, address: config.treasuryContractAddress },
 ]
 
+/**
+ *  Get a function definition from the contract ABI using the function name
+ * @param jsonContract  The contract ABI
+ * @param functionName  The function name to get the definition of
+ * @returns  The function definition
+ */
 export const getFunctionDefinitionFromAbi = (jsonContract: JsonContractType, functionName: string) => {
   const abiDefinition = jsonContract.abi.find(f => f.name === functionName) as abi.Function.Definition | undefined
   if (!abiDefinition) throw new Error(`${functionName} not found in contract ${jsonContract.contractName}`)
   return abiDefinition
+}
+
+/**
+ * Given a list of targets and calldatas, it returns a list of actions with the contract address, calldata, name, description and abiDefinition
+ * @param targets The list of contract addresses
+ * @param calldatas The list of calldatas
+ * @param contractsToCheck  The list of featured contracts to check
+ * @returns  The list of actions
+ */
+export const getActionsFromTargetsAndCalldatas = (
+  targets: string[],
+  calldatas: string[],
+  contractsToCheck: GovernanceFeaturedContractWithFunctions[],
+) => {
+  if (targets.length !== calldatas.length) throw new Error("targets and calldats length mismatch")
+  return targets.map((target, index) => {
+    const calldata = calldatas[index] as string
+    const relatedContract = contractsToCheck.find(contract => compareAddresses(contract.contract.address, target))
+    if (!relatedContract) throw new Error("Contract not found")
+
+    const decodedFunctionFragment = resolveAbiFunctionFromCalldata(calldata, relatedContract.contract.abi)
+    if (!decodedFunctionFragment || !decodedFunctionFragment.name)
+      throw new Error("Function definition not found or name not found")
+
+    const featuredFunction = relatedContract.functions.find(f => f.abiDefinition.name === decodedFunctionFragment.name)
+    if (!featuredFunction) throw new Error("Function not found in contract ABI")
+
+    return {
+      contractAddress: target,
+      calldata,
+      name: featuredFunction.name,
+      description: featuredFunction.description,
+      abiDefinition: featuredFunction.abiDefinition,
+    } as ProposalFormAction
+  })
 }
 
 export type GovernanceFeaturedFunction = {

@@ -4,6 +4,10 @@ import { base64UrlToFile } from "@/utils/BlobUtils"
 import { NFTStorageUtils } from "@repo/utils"
 import { toIPFSURL } from "@/utils"
 
+/**
+ *  Uploads app metadata to IPFS
+ * @returns metadataUploading, metadataUploadError, onMetadataUpload
+ */
 export const useUploadAppMetadata = () => {
   const [metadataUploading, setMetadataUploading] = useState(false)
   const [metadataUploadError, setMetadataUploadError] = useState<Error>()

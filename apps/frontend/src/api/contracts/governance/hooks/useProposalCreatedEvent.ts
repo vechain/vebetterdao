@@ -10,7 +10,7 @@ export const useProposalCreatedEvent = (proposalId: string) => {
       isLoading: events.isLoading,
       error: events.error,
     }),
-    [events.data?.created, events.error, events.isLoading, proposalId],
+    [events, proposalId],
   )
   return proposalCreatedEvent
 }
