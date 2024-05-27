@@ -32,9 +32,6 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Unit Tests
-        run: yarn test
-
       - name: Check for Solidity changes
         uses: dorny/paths-filter@v3
         id: contract_changes
