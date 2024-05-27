@@ -1,7 +1,8 @@
 import { Grid, GridItem, VStack } from "@chakra-ui/react"
 import { ProposalOverview } from "./ProposalOverview"
 import { ProposalContentAndActions } from "./ProposalContentAndActions/ProposalContentAndActions"
-import { useProposalCreatedEvent } from "@/api"
+import { ProposalState, useProposalCreatedEvent, useProposalState } from "@/api"
+import { ProposalCommunitySupport } from "./ProposalCommunitySupport"
 
 type Props = {
   proposalId: string
@@ -9,6 +10,7 @@ type Props = {
 
 export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
   const { data: proposal } = useProposalCreatedEvent(proposalId)
+  const { data: proposalState } = useProposalState(proposalId)
 
   if (!proposal) return null
 
@@ -19,7 +21,9 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
         <GridItem colSpan={[3, 3, 2]}>
           <ProposalContentAndActions proposal={proposal} />
         </GridItem>
-        <GridItem colSpan={[3, 3, 1]}></GridItem>
+        <GridItem colSpan={[3, 3, 1]}>
+          {proposalState === ProposalState.Pending && <ProposalCommunitySupport />}
+        </GridItem>
       </Grid>
     </VStack>
   )

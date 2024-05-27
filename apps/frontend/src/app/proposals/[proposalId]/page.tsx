@@ -23,5 +23,3 @@ type Props = {
 export default function ProposalPage({ params }: Readonly<Props>) {
   return <ProposalPageContent proposalId={params.proposalId} />
 }
-
-export default ProposalPageContainer
