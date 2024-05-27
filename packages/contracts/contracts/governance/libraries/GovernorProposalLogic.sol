@@ -381,18 +381,16 @@ library GovernorProposalLogic {
   }
 
   /**
-   * @notice Cancels a pending proposal.
-   * @dev Cancels a proposal that is pending and has not yet been executed.
+   * @notice Cancels a proposal.
+   * @dev Cancels a proposal in any state other than Canceled, Expired, or Executed.
    * @param self The storage reference for the GovernorStorage.
-   * @param account The address of the account cancelling the proposal.
-   * @param admin A flag indicating if the caller is an admin.
    * @param targets The addresses of the contracts to call.
    * @param values The values to send to the contracts.
    * @param calldatas The function signatures and arguments.
    * @param descriptionHash The hash of the proposal description.
    * @return The proposal id.
    */
-  function cancelPendingProposal(
+  function cancel(
     GovernorStorageTypes.GovernorStorage storage self,
     address account,
     bool admin,
@@ -407,30 +405,6 @@ library GovernorProposalLogic {
       revert UnauthorizedAccess(account);
     }
 
-    require(self._state(proposalId) == GovernorTypes.ProposalState.Pending, "Governor: proposal not pending");
-
-    return _cancel(self, proposalId);
-  }
-
-  /**
-   * @notice Cancels a proposal.
-   * @dev Cancels a proposal in any state other than Canceled, Expired, or Executed.
-   * @param self The storage reference for the GovernorStorage.
-   * @param targets The addresses of the contracts to call.
-   * @param values The values to send to the contracts.
-   * @param calldatas The function signatures and arguments.
-   * @param descriptionHash The hash of the proposal description.
-   * @return The proposal id.
-   */
-  function cancel(
-    GovernorStorageTypes.GovernorStorage storage self,
-    address[] memory targets,
-    uint256[] memory values,
-    bytes[] memory calldatas,
-    bytes32 descriptionHash
-  ) external returns (uint256) {
-    uint256 proposalId = hashProposal(targets, values, calldatas, descriptionHash);
-
     GovernorStateLogic.validateStateBitmap(
       self,
       proposalId,
@@ -439,6 +413,10 @@ library GovernorProposalLogic {
         GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Expired) ^
         GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Executed)
     );
+
+    if (account == proposalProposer(self, proposalId)){
+      require(self._state(proposalId) == GovernorTypes.ProposalState.Pending, "Governor: proposal not pending");
+    }
 
     bytes32 timelockId = self.timelockIds[proposalId];
     if (timelockId != 0) {

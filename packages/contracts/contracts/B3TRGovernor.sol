@@ -615,7 +615,7 @@ contract B3TRGovernor is
   ) public virtual override returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return
-      $.cancelPendingProposal(
+      $.cancel(
         _msgSender(),
         hasRole(DEFAULT_ADMIN_ROLE, _msgSender()),
         targets,
