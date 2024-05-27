@@ -284,13 +284,15 @@ export const getOrDeployContractInstances = async ({
         initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD, // deposit threshold
         initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
         initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD, // voting threshold
+        voterRewards: await voterRewards.getAddress(),
+        isFunctionRestrictionEnabled: true,
+      },
+      {
         governorAdmin: owner.address,
         pauser: owner.address,
         contractsAddressManager: owner.address,
         proposalExecutor: owner.address,
-        voterRewards: await voterRewards.getAddress(),
         governorFunctionSettingsRoleAddress: owner.address,
-        isFunctionRestrictionEnabled: true,
       },
     ],
     {

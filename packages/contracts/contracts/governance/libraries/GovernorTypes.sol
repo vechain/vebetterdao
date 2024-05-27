@@ -39,12 +39,7 @@ library GovernorTypes {
    * @param initialDepositThreshold The Deposit Threshold for a proposal to be active
    * @param initialMinVotingDelay The minimum amount of blocks a proposal needs to wait before it can start
    * @param initialVotingThreshold The minimum amount of voting power needed in order to vote
-   * @param governorAdmin The address of the governor admin
-   * @param pauser The address of the pauser
-   * @param contractsAddressManager The address of the contracts address manager
-   * @param proposalExecutor The address that should be set as executor and have the PROPOSAL_EXECUTOR_ROLE
    * @param voterRewards The address of the voter rewards contract
-   * @param governorFunctionSettingsRoleAddress The address that should have the GOVERNOR_FUNCTIONS_SETTINGS_ROLE
    * @param isFunctionRestrictionEnabled If the function restriction is enabled
    */
   struct InitializationData {
@@ -56,13 +51,23 @@ library GovernorTypes {
     uint256 initialDepositThreshold;
     uint256 initialMinVotingDelay;
     uint256 initialVotingThreshold;
+    IVoterRewards voterRewards;
+    bool isFunctionRestrictionEnabled;
+  }
+
+  /**
+   * @param governorAdmin The address of the governor admin
+   * @param pauser The address of the pauser
+   * @param contractsAddressManager The address of the contracts address manager
+   * @param proposalExecutor The address that should be set as executor and have the PROPOSAL_EXECUTOR_ROLE
+   * @param governorFunctionSettingsRoleAddress The address that should have the GOVERNOR_FUNCTIONS_SETTINGS_ROLE
+   */
+  struct InitializationRolesData {
     address governorAdmin;
     address pauser;
     address contractsAddressManager;
     address proposalExecutor;
-    IVoterRewards voterRewards;
     address governorFunctionSettingsRoleAddress;
-    bool isFunctionRestrictionEnabled;
   }
 
   // Proposal vote types

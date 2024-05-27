@@ -145,7 +145,10 @@ contract B3TRGovernor is
    * @notice Initializes the contract with the initial parameters
    * @param data Initialization data containing the initial settings for the governor
    */
-  function initialize(GovernorTypes.InitializationData memory data) public initializer {
+  function initialize(
+    GovernorTypes.InitializationData memory data,
+    GovernorTypes.InitializationRolesData memory rolesData
+  ) public initializer {
     __GovernorStorage_init(data, "B3TRGovernor");
     __AccessControl_init();
     __UUPSUpgradeable_init();
@@ -154,11 +157,11 @@ contract B3TRGovernor is
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     $.updateQuorumNumerator(data.quorumPercentage);
 
-    _grantRole(DEFAULT_ADMIN_ROLE, data.governorAdmin);
-    _grantRole(GOVERNOR_FUNCTIONS_SETTINGS_ROLE, data.governorFunctionSettingsRoleAddress);
-    _grantRole(PAUSER_ROLE, data.pauser);
-    _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, data.contractsAddressManager);
-    _grantRole(PROPOSAL_EXECUTOR_ROLE, data.proposalExecutor);
+    _grantRole(DEFAULT_ADMIN_ROLE, rolesData.governorAdmin);
+    _grantRole(GOVERNOR_FUNCTIONS_SETTINGS_ROLE, rolesData.governorFunctionSettingsRoleAddress);
+    _grantRole(PAUSER_ROLE, rolesData.pauser);
+    _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, rolesData.contractsAddressManager);
+    _grantRole(PROPOSAL_EXECUTOR_ROLE, rolesData.proposalExecutor);
   }
 
   /**
@@ -447,7 +450,9 @@ contract B3TRGovernor is
   /**
    * @notice Accessor to the internal vote counts, in terms of vote power.
    * @param proposalId The id of the proposal
-   * @return uint256 againstVotes, uint256 forVotes, uint256 abstainVotes The vote counts
+   * @return againstVotes The votes against the proposal
+   * @return forVotes The votes for the proposal
+   * @return abstainVotes The votes abstaining the proposal
    */
   function proposalVotes(
     uint256 proposalId
@@ -707,14 +712,7 @@ contract B3TRGovernor is
   ) public virtual override returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return
-      $.cancel(
-        _msgSender(),
-        hasRole(DEFAULT_ADMIN_ROLE, _msgSender()),
-        targets,
-        values,
-        calldatas,
-        descriptionHash
-      );
+      $.cancel(_msgSender(), hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), targets, values, calldatas, descriptionHash);
   }
 
   /**

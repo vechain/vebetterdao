@@ -245,13 +245,15 @@ export async function deployAll(config: ContractsConfig) {
         initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD,
         initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY,
         initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD,
+        voterRewards: await voterRewards.getAddress(),
+        isFunctionRestrictionEnabled: true,
+      },
+      {
         governorAdmin: TEMP_ADMIN,
         pauser: config.CONTRACTS_ADMIN_ADDRESS,
         contractsAddressManager: config.CONTRACTS_ADMIN_ADDRESS,
         proposalExecutor: config.CONTRACTS_ADMIN_ADDRESS,
-        voterRewards: await voterRewards.getAddress(),
-        governorFunctionSettingsRoleAddress: TEMP_ADMIN,
-        isFunctionRestrictionEnabled: true,
+        governorFunctionSettingsRoleAddress: TEMP_ADMIN
       },
     ],
     {

@@ -34,14 +34,14 @@ contract GovernorStorage is Initializable {
   // keccak256(abi.encode(uint256(keccak256("GovernorStorageLocation")) - 1)) & ~bytes32(uint256(0xff))
   bytes32 private constant GovernorStorageLocation = 0xd09a0aaf4ab3087bae7fa25ef74ddd4e5a4950980903ce417e66228cf7dc7b00;
 
-  /// @dev Internal function to access the governor timelock storage slot.
+  /// @dev Internal function to access the governor storage slot.
   function getGovernorStorage() internal pure returns (GovernorStorageTypes.GovernorStorage storage $) {
     assembly {
       $.slot := GovernorStorageLocation
     }
   }
 
-  /// @dev Initializes the governor storage with the address of the VOT3 token.
+  /// @dev Initializes the governor storage
   function __GovernorStorage_init(
     GovernorTypes.InitializationData memory initializationData,
     string memory governorName
@@ -49,15 +49,11 @@ contract GovernorStorage is Initializable {
     __GovernorStorage_init_unchained(initializationData, governorName);
   }
 
-  /// @dev Part of the initialization process that configures the deposit storage.
+  /// @dev Part of the initialization process that configures the governor storage.
   function __GovernorStorage_init_unchained(
     GovernorTypes.InitializationData memory initializationData,
     string memory governorName
   ) internal onlyInitializing {
-    // Set the governor quorum storage
-    //GovernorStorageTypes.GovernorQuoromStorage storage quorumStorage = getGovernorQuoromStorage();
-    //quorumStorage.quorumPercentage = initializationData.quorumPercentage;
-
     // Set the governor time lock storage
     GovernorStorageTypes.GovernorStorage storage governorStorage = getGovernorStorage();
     governorStorage.timelock = initializationData.timelock;
