@@ -21,7 +21,7 @@
     "start-round": "npx hardhat run scripts/emissions/startRound.ts",
     "start-solo": "docker compose up -d",
     "stop-solo": "docker compose down",
-    "clean": "rm -rf dist artifacts node_modules",
+    "clean": "rm -rf dist artifacts typechain-types cache node_modules",
     "lint": "eslint . --ext .ts",
     "format": "eslint . --ext .ts --fix",
     "generate-docs": "npx hardhat docgen"
@@ -43,7 +43,7 @@
     "@types/mocha": ">=9.1.0",
     "@vechain/hardhat-ethers": "^0.1.4",
     "@vechain/hardhat-vechain": "^0.1.4",
-    "@vechain/sdk-network": "^1.0.0-beta.3",
+    "@vechain/sdk-network": "1.0.0-beta.5",
     "@vechain/sdk-wallet": "^1.0.0-beta.3",
     "@vechain/web3-providers-connex": "^1.1.2",
     "chai": "^4.2.0",

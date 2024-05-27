@@ -1,8 +1,8 @@
+import { StepCardProps, StepCard } from "@/components/StepCard"
 import { Button, Card, CardBody, Grid, GridItem, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react"
-import { CreateNewAppStepCard, Props as StepProps } from "."
 import { useRouter } from "next/navigation"
 
-const Steps: StepProps[] = [
+const Steps: StepCardProps[] = [
   {
     stepImageSrc: "/images/sign.svg",
     stepNumber: 1,
@@ -31,7 +31,11 @@ export const NewAppPageContent = () => {
     router.push("/apps/new/form")
   }
   return (
-    <Grid templateColumns={["repeat(1, 1fr)", "repeat(4, 1fr)"]} gap={6} w="full" data-testid="new-app">
+    <Grid
+      templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(4, 1fr)"]}
+      gap={6}
+      w="full"
+      data-testid="new-app">
       <GridItem colSpan={3}>
         <Card>
           <CardBody>
@@ -41,9 +45,9 @@ export const NewAppPageContent = () => {
                 Welcome to our platform where you can unleash your creativity and build dApps! Before your dApp can go
                 live, it will undergo a thorough review process by our moderators. Here's how it works:
               </Text>
-              <Stack direction={["column", "row"]} w="full" spacing={4}>
+              <Stack direction={["column", "column", "row"]} w="full" spacing={4}>
                 {Steps.map(step => (
-                  <CreateNewAppStepCard {...step} key={step.stepNumber} />
+                  <StepCard {...step} key={step.stepNumber} />
                 ))}
               </Stack>
               <HStack alignSelf={"flex-end"} spacing={4}>

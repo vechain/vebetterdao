@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "prebuild": "rm -rf dist",
-    "build": "yarn prebuild && find startRound -name '*.ts' -exec sh -c 'yarn esbuild {} --bundle --minify --sourcemap --platform=node --outfile=dist/$(basename {} .lambda.ts)/index.js' \\;",
+    "build": "yarn prebuild && find startRound -name '*lambda.ts' -exec sh -c 'yarn esbuild {} --bundle --minify --sourcemap --platform=node --outfile=dist/$(basename {} .lambda.ts)/index.js' \\;",
     "postbuild": "find dist/* -type d -exec sh -c 'cd {} && zip -r index.zip *' \\;",
     "test": "yarn build && jest"
   },
@@ -16,6 +16,7 @@
     "lambda-local": "^2.1.2"
   },
   "devDependencies": {
+    "@slack/web-api": "^7.0.4",
     "@types/aws-lambda": "^8.10.136",
     "@vechain/sdk-core": "^1.0.0-beta.1",
     "@vechain/sdk-network": "^1.0.0-beta.1",
