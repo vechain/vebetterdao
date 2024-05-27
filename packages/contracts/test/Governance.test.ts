@@ -317,23 +317,27 @@ describe("Governor and TimeLock", function () {
         })
 
       await catchRevert(
-        governor.initialize({
-          vot3Token: await vot3.getAddress(),
-          timelock: await timeLock.getAddress(),
-          xAllocationVoting: await xAllocationVoting.getAddress(),
-          b3tr: await b3tr.getAddress(),
-          quorumPercentage: 1, // quorum percentage
-          initialDepositThreshold: 1, // voting threshold
-          initialMinVotingDelay: 1, // delay before vote starts
-          initialVotingThreshold: 1, // voting threshold
-          governorAdmin: owner.address,
-          pauser: owner.address,
-          contractsAddressManager: owner.address,
-          proposalExecutor: owner.address,
-          voterRewards: await voterRewards.getAddress(),
-          governorFunctionSettingsRoleAddress: owner.address,
-          isFunctionRestrictionEnabled: true,
-        }),
+        governor.initialize(
+          {
+            vot3Token: await vot3.getAddress(),
+            timelock: await timeLock.getAddress(),
+            xAllocationVoting: await xAllocationVoting.getAddress(),
+            b3tr: await b3tr.getAddress(),
+            quorumPercentage: 1, // quorum percentage
+            initialDepositThreshold: 1, // voting threshold
+            initialMinVotingDelay: 1, // delay before vote starts
+            initialVotingThreshold: 1, // voting threshold
+            voterRewards: await voterRewards.getAddress(),
+            isFunctionRestrictionEnabled: true,
+          },
+          {
+            governorAdmin: owner.address,
+            pauser: owner.address,
+            contractsAddressManager: owner.address,
+            proposalExecutor: owner.address,
+            governorFunctionSettingsRoleAddress: owner.address,
+          },
+        ),
       )
     })
 
@@ -4418,13 +4422,15 @@ describe("Governor and TimeLock", function () {
               initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD, // deposit threshold
               initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
               initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD, // voting threshold
+              voterRewards: await voterRewards.getAddress(),
+              isFunctionRestrictionEnabled: true,
+            },
+            {
               governorAdmin: owner.address,
               pauser: owner.address,
               contractsAddressManager: owner.address,
               proposalExecutor: owner.address,
-              voterRewards: await voterRewards.getAddress(),
               governorFunctionSettingsRoleAddress: owner.address,
-              isFunctionRestrictionEnabled: true,
             },
           ],
           {
