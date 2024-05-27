@@ -48,7 +48,6 @@ jobs:
         id: slither
         if: steps.contract_changes.outputs.src == 'true'
         with:
-          ignore-compile: true
           target: "packages/contracts/"
           solc-version: "0.8.20"
           fail-on: none
