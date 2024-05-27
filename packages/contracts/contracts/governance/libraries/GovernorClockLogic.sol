@@ -24,6 +24,7 @@
 pragma solidity ^0.8.20;
 
 import { GovernorStorageTypes } from "./GovernorStorageTypes.sol";
+import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { IVOT3 } from "../../interfaces/IVOT3.sol";
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 

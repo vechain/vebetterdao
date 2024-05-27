@@ -26,6 +26,7 @@ pragma solidity ^0.8.20;
 import { GovernorStorageTypes } from "./GovernorStorageTypes.sol";
 import { GovernorStateLogic } from "./GovernorStateLogic.sol";
 import { GovernorTypes } from "./GovernorTypes.sol";
+import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 
 /// @title GovernorDepositLogic Library
 /// @notice Library for managing deposits related to proposals in the Governor contract.
