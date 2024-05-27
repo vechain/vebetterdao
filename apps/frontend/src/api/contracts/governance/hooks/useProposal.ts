@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react"
 import { useProposalCreatedEvent } from "./useProposalCreatedEvent"
-import { useProposalState } from "./useProposalState"
+import { ProposalState, useProposalState } from "./useProposalState"
 import { useProposalVotes } from "./useProposalVotes"
 import { useParams } from "next/navigation"
 import { useProposalDeposits } from "./useGetProposalDeposit"
