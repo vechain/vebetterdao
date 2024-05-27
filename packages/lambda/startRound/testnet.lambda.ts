@@ -88,14 +88,17 @@ async function distributeXAllocations(thor: ThorClient) {
     [],
   )
 
+  // Get the previous round number for which the X-Allocations are to be distributed
+  const previousRound = Number(currentRound[0]) - 1
+
   // Get the X-Apps for the current round
-  const xApps = await getRoundXApps(thor, currentRound[0].toString())
+  const xApps = await getRoundXApps(thor, previousRound.toString())
 
   // Get the IDs of the X-Apps that have not yet claimed their allocations
-  const xAppIds = await getIdsOfUnclaimed(thor, xApps, currentRound[0].toString())
+  const xAppIds = await getIdsOfUnclaimed(thor, xApps, previousRound.toString())
 
   // Build the claim clauses for the X-Apps
-  const claimClauses = buildClaimClauses(xAppIds, currentRound[0].toString())
+  const claimClauses = buildClaimClauses(xAppIds, previousRound.toString())
 
   // Estimate the gas cost for the transaction
   const gasResult = await thor.gas.estimateGas(
