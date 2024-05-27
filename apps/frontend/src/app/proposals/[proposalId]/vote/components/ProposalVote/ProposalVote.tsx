@@ -19,6 +19,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react"
 import { UilInfoCircle, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useRouter } from "next/navigation"
 import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -40,6 +41,8 @@ const votes = [
     icon: <AbstainedIcon size={24} />,
   },
 ]
+
+const compactFormatter = getCompactFormatter()
 
 export const ProposalVote = () => {
   const { proposal } = useCurrentProposal()
@@ -94,7 +97,7 @@ export const ProposalVote = () => {
               <HStack alignItems={"baseline"}>
                 <Image h="24px" w="24px" src="/images/vot3-token.png" alt="vot3-token" />
                 <Text fontSize={"28px"} fontWeight={700}>
-                  {proposal.userVot3OnSnapshot || 0}
+                  {compactFormatter.format(Number(proposal.userVot3OnSnapshot || 0))}
                 </Text>
                 <Text fontSize={"14px"} fontWeight={600}>
                   {t("VOT3 BALANCE ON SNAPSHOT")}
@@ -110,7 +113,7 @@ export const ProposalVote = () => {
               <HStack alignItems={"baseline"}>
                 <VoteIcon size={36} color="#004CFC" />
                 <Text fontSize={"48px"} fontWeight={700} color="#004CFC">
-                  {proposal.userVotingPowerOnSnapshot || 0}
+                  {compactFormatter.format(Number(proposal.userVotingPowerOnSnapshot || 0))}
                 </Text>
                 <Text fontSize={"14px"} fontWeight={600}>
                   {t("VOTING POWER")}
