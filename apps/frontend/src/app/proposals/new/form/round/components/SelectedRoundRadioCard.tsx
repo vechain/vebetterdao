@@ -14,9 +14,8 @@ type Props = {
   renderSkeleton?: boolean
 }
 export const SelectedRoundRadioCard: React.FC<Props> = ({ roundId, selected, onSelect, renderSkeleton }) => {
+  const { data: allocationRoundEvents, isLoading: allocationRoundsEventsLoading } = useAllocationsRoundsEvents()
   const { data: votingPeriod, isLoading: votingPeriodLoading } = useVotingPeriod()
-
-  const { data: allocationRoundEvents, isLoading } = useAllocationsRoundsEvents()
 
   const { data: currentBlock } = useCurrentBlock()
 
@@ -37,7 +36,7 @@ export const SelectedRoundRadioCard: React.FC<Props> = ({ roundId, selected, onS
     return estimatedStartBlock
   }, [allocationRoundEvents, roundId, votingPeriod])
 
-  const estimatedEndTime = useMemo(() => {
+  const estimatedStartTime = useMemo(() => {
     if (!estimatedStartBlock || !currentBlock) return null
 
     const startBlockFromNow = estimatedStartBlock - currentBlock.number
@@ -45,6 +44,8 @@ export const SelectedRoundRadioCard: React.FC<Props> = ({ roundId, selected, onS
     const durationLeftTimestamp = startBlockFromNow * blockTime
     return dayjs().add(durationLeftTimestamp, "milliseconds")
   }, [currentBlock, estimatedStartBlock])
+
+  const isEstimatedStartTimeLoading = !estimatedStartTime || !currentBlock || !estimatedStartBlock
 
   return (
     <Card
@@ -68,10 +69,12 @@ export const SelectedRoundRadioCard: React.FC<Props> = ({ roundId, selected, onS
             <Skeleton isLoaded={!renderSkeleton}>
               <Heading size="md">Round #{roundId}</Heading>
             </Skeleton>
-            <Text fontSize="md" as="span" display={"inline-flex"} gap={1}>
-              Starts on
-              <Text fontWeight="600">{estimatedEndTime?.format("MMM D")}</Text>
-            </Text>
+            <Skeleton isLoaded={!isEstimatedStartTimeLoading}>
+              <Text fontSize="md" as="span" display={"inline-flex"} gap={1}>
+                Starts on
+                <Text fontWeight="600">{estimatedStartTime?.format("MMM D")}</Text>
+              </Text>
+            </Skeleton>
           </VStack>
           <Radio isChecked={selected} isDisabled={renderSkeleton} />
         </HStack>
