@@ -24,6 +24,7 @@
 pragma solidity ^0.8.20;
 
 import { GovernorStorageTypes } from "./GovernorStorageTypes.sol";
+import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 
 /// @title GovernorFunctionRestrictionsLogic
 /// @notice Library for managing function restrictions within the Governor contract.
