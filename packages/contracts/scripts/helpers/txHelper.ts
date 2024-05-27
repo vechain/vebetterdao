@@ -46,8 +46,8 @@ export const buildTxBody = async (
   return body
 }
 
-export const signAndSendTx = async (body: TransactionBody, pk: Buffer) => {
-  const signedTx = TransactionHandler.sign(body, pk)
+export const signAndSendTx = async (body: TransactionBody, pk: Uint8Array) => {
+  const signedTx = TransactionHandler.sign(body, Buffer.from(pk))
 
   const sendTransactionResult = await thorClient.transactions.sendTransaction(signedTx)
 
