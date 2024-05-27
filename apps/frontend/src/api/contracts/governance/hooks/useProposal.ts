@@ -88,7 +88,11 @@ export const useProposal = (proposalId: string) => {
       communityDepositPercentage > 0 ? (othersSupport / Number(communityDeposits)) * 100 : othersSupportPercentage * 100
     const isYouSupporting = Number(yourSupport) > 0
     const supportingUserCount = proposalDepositEvent.supportingUserCount
-    const othersSupportUserCount = isYouSupporting ? Number(supportingUserCount) - 1 : Number(supportingUserCount)
+    const othersSupportUserCount = isYouSupporting
+      ? Math.max(Number(supportingUserCount) - 1, 0)
+      : Number(supportingUserCount)
+    const userVotingPowerOnSnapshot = scaleVot3Amount(proposalSnapshotVotingPower.data)
+    const userVot3OnSnapshot = scaleVot3Amount(proposalSnapshotVot3.data)
 
     const result = {
       id: proposalId,
@@ -135,9 +139,9 @@ export const useProposal = (proposalId: string) => {
       abstainPercentage,
       yourVote,
       haveYouVoted,
-      userVotingPowerOnSnapshot: proposalSnapshotVotingPower.data,
+      userVotingPowerOnSnapshot,
       isUserVotingPowerOnSnapshotLoading: proposalSnapshotVotingPower.isLoading,
-      userVot3OnSnapshot: proposalSnapshotVot3.data,
+      userVot3OnSnapshot,
       isUserVot3OnSnapshotLoading: proposalSnapshotVot3.isLoading,
       isVotesLoading: proposalVotes.isLoading,
       isQuorumReached: isQuorumReached.data,

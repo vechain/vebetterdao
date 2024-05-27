@@ -2,6 +2,7 @@ import { HStack, VStack } from "@chakra-ui/react"
 import { ProposalOverview } from "./ProposalOverview"
 import { ProposalCommunitySupport } from "./ProposalCommunitySupport"
 import { ProposalState, useCurrentProposal } from "@/api"
+import { ProposalWithdrawDeposit } from "./ProposalWithdrawDeposit"
 
 export const ProposalPage = () => {
   const { proposal } = useCurrentProposal()
@@ -12,7 +13,9 @@ export const ProposalPage = () => {
         <VStack alignItems="stretch" flex={3}>
           {proposal.state === ProposalState.Pending && <ProposalCommunitySupport />}
         </VStack>
-        <VStack alignItems="stretch" flex={1.5}></VStack>
+        <VStack alignItems="stretch" flex={1.5}>
+          <ProposalWithdrawDeposit />
+        </VStack>
       </HStack>
     </VStack>
   )

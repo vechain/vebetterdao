@@ -3,6 +3,7 @@ import { B3TRGovernor__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getProposalVotesQuerykey } from "@/api"
+import { buildClause } from "@/utils/buildClause"
 
 const GovernorInterface = B3TRGovernor__factory.createInterface()
 
@@ -22,15 +23,15 @@ type Props = { proposalId: string; onSuccess?: () => void }
  * @returns {ReturnType} - The return value of the custom hook.
  */
 export const useProposalCastVote = ({ proposalId, onSuccess }: Props) => {
-  const clauseBuilder = useCallback(({ proposalId, vote, comment }: ClausesProps) => {
+  const clauseBuilder = useCallback(({ proposalId, vote, comment = "" }: ClausesProps) => {
     return [
-      {
+      buildClause({
         to: getConfig().b3trGovernorAddress,
-        value: 0,
-        data: GovernorInterface.encodeFunctionData("castVoteWithReason", [proposalId, vote, comment]),
+        contractInterface: GovernorInterface,
+        method: "castVoteWithReason",
+        args: [proposalId, vote, comment],
         comment: "cast proposal vote",
-        abi: JSON.parse(JSON.stringify(GovernorInterface.getFunction("castVoteWithReason"))),
-      },
+      }),
     ]
   }, [])
 
