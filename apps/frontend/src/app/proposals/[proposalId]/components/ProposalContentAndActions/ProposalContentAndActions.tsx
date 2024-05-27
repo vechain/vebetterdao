@@ -7,12 +7,15 @@ import { toIPFSURL } from "@/utils"
 import { Card, CardBody, Heading, Alert, AlertIcon, AlertDescription, AlertTitle, Box, VStack } from "@chakra-ui/react"
 import MarkdownPreview from "@uiw/react-markdown-preview"
 import { useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 type Props = {
   proposal: ProposalCreatedEvent
 }
 export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
   const metadata = useIpfsMetadata<ProposalMetadata>(toIPFSURL(proposal.description))
+
+  const { t } = useTranslation()
 
   const [proposalDecodeError, setProposalDecodeError] = useState<string | null>(null)
 
@@ -37,7 +40,7 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
     <Card w="full" variant="baseWithBorder">
       <CardBody py={8}>
         <VStack spacing={8} align="flex-start">
-          <Heading size="lg">About the proposal</Heading>
+          <Heading size="lg">{t("About the proposal")}</Heading>
           <MarkdownPreview
             source={metadata?.data?.markdownDescription}
             style={{
@@ -49,7 +52,7 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
             <Alert status="error" borderRadius={"lg"}>
               <AlertIcon />
               <Box>
-                <AlertTitle>Error decoding the proposal calldatas</AlertTitle>
+                <AlertTitle>{t("Error decoding the proposal calldatas")}</AlertTitle>
                 <AlertDescription>{proposalDecodeError}</AlertDescription>
               </Box>
             </Alert>
