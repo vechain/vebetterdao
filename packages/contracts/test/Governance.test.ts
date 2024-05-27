@@ -24,18 +24,8 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it } from "mocha"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
-import {
-  B3TRGovernor,
-  B3TRGovernor__factory,
-  GovernorClockLogic,
-  GovernorConfigurator,
-  GovernorDepositLogic,
-  GovernorFunctionRestrictionsLogic,
-  GovernorProposalLogic,
-  GovernorQuorumLogic,
-  GovernorStateLogic,
-} from "../typechain-types"
-import { ContractFactory, BaseContract, ContractTransactionReceipt } from "ethers"
+import { B3TRGovernor, B3TRGovernor__factory } from "../typechain-types"
+import { deployProxy } from "../scripts/helpers"
 
 describe("Governor and TimeLock", function () {
   describe("Governor deployment", function () {
@@ -1118,7 +1108,7 @@ describe("Governor and TimeLock", function () {
       })
     })
   })
-  
+
   describe("Proposal Creation", function () {
     it("When creating a proposal we should specify the round when it should become active", async () => {
       const config = createLocalConfig()
@@ -3481,49 +3471,6 @@ describe("Governor and TimeLock", function () {
     const description = "Get token details"
     let proposalId: any
 
-    it("cannot cancel a proposal if not in pending state", async function () {
-      const config = createLocalConfig()
-      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
-      config.EMISSIONS_CYCLE_DURATION = 10
-      const {
-        governor,
-        b3tr,
-        B3trContract,
-        otherAccount: proposer,
-      } = await getOrDeployContractInstances({ forceDeploy: false, config })
-
-      // create a new proposal
-      const tx = await createProposal(
-        b3tr,
-        B3trContract,
-        proposer,
-        description + ` ${this.test?.title}`,
-        functionToCall,
-        [],
-      ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
-
-      proposalId = await getProposalIdFromTx(tx)
-
-      // pay deposit
-      await payDeposit(proposalId.toString(), proposer)
-
-      // wait
-      await waitForProposalToBeActive(proposalId)
-
-      const proposalState = await governor.state(proposalId)
-      expect(proposalState.toString()).to.eql("1") // active
-
-      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
-      // try to cancel
-      await catchRevert(
-        governor.cancel(
-          [await b3tr.getAddress()],
-          [0],
-          [encodedFunctionCall],
-          ethers.keccak256(ethers.toUtf8Bytes(`${description} ${this.test?.title}`)),
-        ),
-      )
-    })
     it("cannot cancel a proposal if not admin or proposer", async function () {
       const {
         governor,
@@ -4435,130 +4382,230 @@ describe("Governor and TimeLock", function () {
         .reverted
     })
   })
-
   describe("Libraries", function () {
-    /*
-    describe("GovernorDescriptionValidator", function () {
-      let validator: GovernorDescriptionValidator
-      let proposerAddress: string
-      let invalidAddress: string
-      let description
+    let governor: B3TRGovernor
 
+    describe("GovernorClockLogic", function () {
       this.beforeAll(async function () {
-        const deployment = await getOrDeployContractInstances({
+        const config = createLocalConfig()
+        const {
+          governorClockLogicLib,
+          governorConfiguratorLib,
+          governorDepositLogicLib,
+          governorFunctionRestrictionsLogicLib,
+          governorProposalLogicLib,
+          governorQuorumLogicLib,
+          governorStateLogicLib,
+          governorVotesLogicLib,
+          owner,
+          b3tr,
+          timeLock,
+          voterRewards,
+          xAllocationVoting,
+        } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
-        validator = deployment.governorDescriptionValidatorLib
-        proposerAddress = deployment.otherAccounts[0].address
-        invalidAddress = deployment.otherAccounts[1].address
+
+        governor = (await deployProxy(
+          "B3TRGovernor",
+          [
+            {
+              vot3Token: await voterRewards.getAddress(), // wrong address
+              timelock: await timeLock.getAddress(),
+              xAllocationVoting: await xAllocationVoting.getAddress(),
+              b3tr: await b3tr.getAddress(),
+              quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
+              initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD, // deposit threshold
+              initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
+              initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD, // voting threshold
+              governorAdmin: owner.address,
+              pauser: owner.address,
+              contractsAddressManager: owner.address,
+              proposalExecutor: owner.address,
+              voterRewards: await voterRewards.getAddress(),
+              governorFunctionSettingsRoleAddress: owner.address,
+              isFunctionRestrictionEnabled: true,
+            },
+          ],
+          {
+            GovernorClockLogic: await governorClockLogicLib.getAddress(),
+            GovernorConfigurator: await governorConfiguratorLib.getAddress(),
+            GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
+            GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
+            GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
+            GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
+            GovernorStateLogic: await governorStateLogicLib.getAddress(),
+            GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+          },
+        )) as B3TRGovernor
       })
 
-      describe("isValidDescriptionForProposer", function () {
-        it("should return true for a description without a suffix", async function () {
-          description = "This is a test proposal without any suffix"
-          expect(await validator.isValidDescriptionForProposer(proposerAddress, description)).to.be.true
-        })
+      it("Should return the block number retrieved via the Time library if error occurs getting block form vot3 contract", async () => {
+        const expectedBlockNumber = await ethers.provider.getBlockNumber()
+        const blockNumber = await governor.clock()
+        expect(blockNumber).to.eql(BigInt(expectedBlockNumber))
+      })
 
-        it("should return true for a description with a valid suffix", async function () {
-          description = `This proposal includes a valid proposer suffix #proposer=0x${proposerAddress.substring(2)}`
-          expect(await validator.isValidDescriptionForProposer(proposerAddress, description)).to.be.true
-        })
-
-        it("should return false for a description with an invalid suffix", async function () {
-          description = `This proposal includes an invalid proposer suffix #proposer=0x${invalidAddress.substring(2)}`
-          expect(await validator.isValidDescriptionForProposer(proposerAddress, description)).to.be.false
-        })
-
-        it("should return true for a description with an invalid marker", async function () {
-          description = "This proposal has an invalid marker #proposal=0x1234567890123456789012345678901234567890"
-          expect(await validator.isValidDescriptionForProposer(proposerAddress, description)).to.be.true
-        })
-
-        it("should return true if the suffix has invalid hex characters", async function () {
-          description = "Proposal with invalid hex in suffix #proposer=0xZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
-          expect(await validator.isValidDescriptionForProposer(proposerAddress, description)).to.be.true
-        })
+      it("Should return the hardcoded clock mode if error occurs getting clock mode form vot3 contract", async () => {
+        const blockNumber = await governor.CLOCK_MODE()
+        expect(blockNumber).to.eql("mode=blocknumber&from=default")
       })
     })
-    describe("GovernorQuorumFraction", function () {
-      let quoromFraction: GovernorQuorumFraction
-      let governor: B3TRGovernor
-      let owner: HardhatEthersSigner
-      let b3trGovernorFactory: ContractFactory<any[], BaseContract> | B3TRGovernor__factory
-      let receipt: ContractTransactionReceipt
+    describe("GovernorQuorumLogic", function () {
+      it("Should be able to lookup historic quorom numerators", async () => {
+        let b3trGovernorFactory: B3TRGovernor__factory
 
-      this.beforeAll(async function () {
-        const deployment = await getOrDeployContractInstances({
+        const {
+          governorClockLogicLib,
+          governorConfiguratorLib,
+          governorDepositLogicLib,
+          governorFunctionRestrictionsLogicLib,
+          governorProposalLogicLib,
+          governorQuorumLogicLib,
+          governorStateLogicLib,
+          governorVotesLogicLib,
+          governor,
+          owner,
+        } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
-        quoromFraction = deployment.governorQuorumFractionLib
-        governor = deployment.governor
-        owner = deployment.owner
 
         b3trGovernorFactory = await ethers.getContractFactory("B3TRGovernor", {
           libraries: {
-            GovernorDescriptionValidator: await deployment.governorDescriptionValidatorLib.getAddress(),
-            GovernorQuorumFraction: await deployment.governorQuorumFractionLib.getAddress(),
+            GovernorClockLogic: await governorClockLogicLib.getAddress(),
+            GovernorConfigurator: await governorConfiguratorLib.getAddress(),
+            GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
+            GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
+            GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
+            GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
+            GovernorStateLogic: await governorStateLogicLib.getAddress(),
+            GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
           },
         })
-      })
 
-      it("should retrieve the correct quorum denominator", async function () {
-        expect(await quoromFraction.quorumDenominator()).to.equal(100)
-      })
+        const quorumNumerator = await governor["quorumNumerator()"]()
+        const blockNumber = await ethers.provider.getBlockNumber()
 
-      it("should be able to update quorom numerator", async function () {
-        expect(await governor["quorumNumerator()"]()).to.equal(4) // 4%
-
-        // first add updateQuorumNumerator to the whitelist
+        // first add updateTimelock to the whitelist
         const funcSig = governor.interface.getFunction("updateQuorumNumerator")?.selector
-        const tx = await governor.connect(owner).setWhitelistFunction(await governor.getAddress(), funcSig, true)
-        receipt = (await tx.wait()) as ContractTransactionReceipt
+        await governor.connect(owner).setWhitelistFunction(await governor.getAddress(), funcSig, true)
 
-        const exeTx = await createProposalAndExecuteIt(
+        const newQuorum = 10n
+        await createProposalAndExecuteIt(
           owner,
           owner,
           governor,
           b3trGovernorFactory,
-          "Update Quorom Numerator",
+          "Update Quorum Percentage",
           "updateQuorumNumerator",
-          [50],
+          [newQuorum],
         )
 
-        const proposeReceipt = await exeTx.wait()
-        const event = proposeReceipt?.logs[0]
-        const decodedLogs = governor.interface.parseLog({
-          topics: [...(event?.topics as string[])],
-          data: event ? event.data : "",
-        })
+        const updatedQuorum = await governor["quorumNumerator()"]()
+        expect(updatedQuorum).to.eql(newQuorum)
 
-        expect(decodedLogs?.args[0]).to.equal(4)
-        expect(decodedLogs?.args[1]).to.equal(50)
-
-        waitForNextBlock()
-
-        expect(await governor["quorumNumerator()"]()).to.equal(50)
+        // old quorom should be the same
+        expect(await governor["quorumNumerator(uint256)"](blockNumber)).to.equal(quorumNumerator) // 4%
       })
+    })
+    describe("GovernorProposalLogic", function () {
+      it("Admin can cancel a proposal when queued in timelock", async function () {
+        const {
+          governor,
+          b3tr,
+          B3trContract,
+          otherAccount: proposer,
+          otherAccounts,
+        } = await getOrDeployContractInstances({ forceDeploy: false })
 
-      it("should retrieve the correct quorum denominator", async function () {
-        expect(await governor["quorumNumerator(uint256)"](receipt.blockNumber)).to.equal(4) // 4%
-        const currentBlock = await ethers.provider.getBlockNumber()
-        expect(await governor["quorumNumerator(uint256)"](currentBlock)).to.equal(50) // 50%
-      })
+        const functionToCall = "tokenDetails"
+        const description = "Get token details"
+        const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
+        const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description + ` ${this.test?.title}`))
 
-      it("should revert if quorum numerator is greater than quorum denominator", async function () {
-        await expect(
-          createProposalAndExecuteIt(
-            owner,
-            owner,
-            governor,
-            b3trGovernorFactory,
-            "Update Quorom Numerator",
-            "updateQuorumNumerator",
-            [101],
-          ),
-        ).to.be.reverted
+        const voter = otherAccounts[0]
+        await getVot3Tokens(voter, "5000")
+        await waitForNextBlock()
+
+        // create a new proposal
+        const tx = await createProposal(
+          b3tr,
+          B3trContract,
+          proposer,
+          description + ` ${this.test?.title}`,
+          functionToCall,
+          [],
+        ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
+        const proposalId = await getProposalIdFromTx(tx)
+
+        // pay deposit
+        await payDeposit(proposalId.toString(), proposer)
+
+        // wait
+        await waitForProposalToBeActive(proposalId)
+
+        // vote
+        await governor.connect(voter).castVote(proposalId, 1) // vote for
+
+        // wait
+        await waitForVotingPeriodToEnd(proposalId)
+        const proposalState = await governor.state(proposalId)
+        expect(proposalState.toString()).to.eql("4") // succeded
+
+        // queue
+        await governor.queue([await b3tr.getAddress()], [0], [encodedFunctionCall], descriptionHash)
+        expect(await governor.state(proposalId)).to.eql(5n)
+
+        // cancel the proposal
+        await governor.cancel([await b3tr.getAddress()], [0], [encodedFunctionCall], descriptionHash)
+        expect(await governor.state(proposalId)).to.eql(2n) // cancelled
       })
-    }) */
+      it("Proposal needs queuing should return true", async function () {
+        const {
+          governor,
+          b3tr,
+          B3trContract,
+          otherAccount: proposer,
+          otherAccounts,
+        } = await getOrDeployContractInstances({ forceDeploy: false })
+
+        const functionToCall = "tokenDetails"
+        const description = "Get token details"
+
+        const voter = otherAccounts[0]
+        await getVot3Tokens(voter, "5000")
+        await waitForNextBlock()
+
+        // create a new proposal
+        const tx = await createProposal(
+          b3tr,
+          B3trContract,
+          proposer,
+          description + ` ${this.test?.title}`,
+          functionToCall,
+          [],
+        ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
+        const proposalId = await getProposalIdFromTx(tx)
+
+        // pay deposit
+        await payDeposit(proposalId.toString(), proposer)
+
+        // wait
+        await waitForProposalToBeActive(proposalId)
+
+        // vote
+        await governor.connect(voter).castVote(proposalId, 1) // vote for
+
+        // wait
+        await waitForVotingPeriodToEnd(proposalId)
+        const proposalState = await governor.state(proposalId)
+        expect(proposalState.toString()).to.eql("4") // succeded
+
+        // queue
+        expect(await governor.proposalNeedsQueuing(proposalId)).to.eql(true)
+      })
+    })
   })
 })
