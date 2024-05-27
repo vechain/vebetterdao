@@ -1,11 +1,11 @@
 import { B3TR, Emissions, Treasury, X2EarnApps } from "../../typechain-types"
-import { SeedStrategy, getAccounts, getSeedAccounts } from "../helpers/seedAccounts"
+import { SeedStrategy, getSeedAccounts, getTestKey, getTestKeys } from "../helpers/seedAccounts"
 import { bootstrapEmissions } from "../helpers/emissions"
 import { addXDapps } from "../helpers/xApp"
 import { airdropB3trFromTreasury, airdropB3trPercentage } from "../helpers/airdrop"
 import { isE2E, shouldRunSimulation } from "@repo/config/contracts"
 
-const accounts = getAccounts(12)
+const accounts = getTestKeys(12)
 
 const APPS = [
   {
@@ -78,7 +78,6 @@ export const setupTestEnvironment = async (emissions: Emissions, x2EarnApps: X2E
   console.log("================ Setup Testnet environment ================")
   const start = performance.now()
 
-  const accounts = getAccounts(10)
   const admin = accounts[0]
 
   // Bootstrap emissions
