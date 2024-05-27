@@ -49,7 +49,7 @@ export const ProposalsPageContent = () => {
       return (
         <Box>
           <Heading textAlign={"center"} mt={16} color={"red"}>
-            Error loading active proposals
+            {t("Error loading active proposals")}
           </Heading>
           <Text textAlign={"center"}>{activeProposalsError.message}</Text>
         </Box>
@@ -59,9 +59,9 @@ export const ProposalsPageContent = () => {
       return (
         <Box>
           <Heading textAlign={"center"} mt={16}>
-            No active proposals
+            {t("No active proposals")}
           </Heading>
-          <Text textAlign={"center"}>Create a proposal to get started</Text>
+          <Text textAlign={"center"}>{t("Create a proposal to get started")}</Text>
         </Box>
       )
     }
@@ -70,7 +70,7 @@ export const ProposalsPageContent = () => {
         {activeProposals?.map(proposal => <ProposalCard proposal={proposal} key={proposal.proposalId} />)}
       </Grid>
     )
-  }, [activeProposals, activeProposalsError, activeProposalsLoading])
+  }, [activeProposals, activeProposalsError, activeProposalsLoading, t])
 
   const renderIncomingProposalsTab = useMemo(() => {
     if (incomingProposalsLoading) {
@@ -84,7 +84,7 @@ export const ProposalsPageContent = () => {
       return (
         <Box>
           <Heading textAlign={"center"} mt={16} color={"red"}>
-            Error loading incoming proposals
+            {t("Error loading incoming proposals")}
           </Heading>
           <Text textAlign={"center"}>{incomingProposalsError.message}</Text>
         </Box>
@@ -94,9 +94,9 @@ export const ProposalsPageContent = () => {
       return (
         <Box>
           <Heading textAlign={"center"} mt={16}>
-            No incoming proposals
+            {t("No incoming proposals")}
           </Heading>
-          <Text textAlign={"center"}>Incoming proposals are proposals that are not yet active</Text>
+          <Text textAlign={"center"}>{t("Incoming proposals are proposals that are not yet active")}</Text>
         </Box>
       )
     }
@@ -105,7 +105,7 @@ export const ProposalsPageContent = () => {
         {incomingProposals?.map(proposal => <ProposalCard proposal={proposal} key={proposal.proposalId} />)}
       </Grid>
     )
-  }, [incomingProposals, incomingProposalsError, incomingProposalsLoading])
+  }, [incomingProposals, incomingProposalsError, incomingProposalsLoading, t])
 
   const onNewCLick = useCallback(() => {
     router.push("/proposals/new")
@@ -123,7 +123,7 @@ export const ProposalsPageContent = () => {
       return (
         <Box>
           <Heading textAlign={"center"} mt={16} color={"red"}>
-            Error loading past proposals
+            {t("Error loading past proposals")}
           </Heading>
           <Text textAlign={"center"}>{pastProposalsError.message}</Text>
         </Box>
@@ -133,9 +133,9 @@ export const ProposalsPageContent = () => {
       return (
         <Box>
           <Heading textAlign={"center"} mt={16}>
-            No past proposals
+            {t("No past proposals")}
           </Heading>
-          <Text textAlign={"center"}>Past proposals are proposals that have been completed</Text>
+          <Text textAlign={"center"}>{t("Past proposals are proposals that have been completed")}</Text>
         </Box>
       )
     }
@@ -144,7 +144,7 @@ export const ProposalsPageContent = () => {
         {pastProposals?.map(proposal => <ProposalCard proposal={proposal} key={proposal.proposalId} />)}
       </Grid>
     )
-  }, [pastProposals, pastProposalsError, pastProposalsLoading])
+  }, [pastProposals, pastProposalsError, pastProposalsLoading, t])
 
   return (
     <VStack w="full" spacing={8} alignItems={"flex-start"} justify="center" data-testid="proposals">
@@ -153,12 +153,12 @@ export const ProposalsPageContent = () => {
           <HStack spacing={3} alignItems={"center"}>
             <Icon as={FaScroll} fontSize={"3xl"} />
             <Heading as="h1" size="xl">
-              Proposals
+              {t("Proposals")}
             </Heading>
           </HStack>
           <Skeleton isLoaded={!proposalsEventsLoading}>
             <Text fontSize="md">
-              {t("{proposals} proposals created from the beginning", {
+              {t("{{proposals}} proposals created from the beginning", {
                 proposals: proposalsEvents?.created.length,
               })}
             </Text>
@@ -166,18 +166,22 @@ export const ProposalsPageContent = () => {
         </Box>
         <Box>
           <Button onClick={onNewCLick} leftIcon={<FaPlus />}>
-            Create proposal
+            {t("Create proposal")}
           </Button>
           <Text fontSize="md" textAlign={"center"}>
-            Current block: <b>{currentBlock?.number}</b>
+            {t("Current block:")} <b>{currentBlock?.number}</b>
           </Text>
         </Box>
       </HStack>
       <Tabs position="relative" variant="unstyled" w="full">
         <TabList>
-          <Tab>Active ({activeProposals?.length ?? 0})</Tab>
-          <Tab isDisabled={incomingProposals?.length === 0}>Incoming ({incomingProposals?.length ?? 0})</Tab>
-          <Tab isDisabled={pastProposals?.length === 0}>Past ({pastProposals?.length ?? 0})</Tab>
+          <Tab>{t("Active ({{proposals}})", { proposals: activeProposals?.length ?? 0 })}</Tab>
+          <Tab isDisabled={incomingProposals?.length === 0}>
+            {t("Incoming ({{proposals}})", { proposals: incomingProposals?.length ?? 0 })}
+          </Tab>
+          <Tab isDisabled={pastProposals?.length === 0}>
+            {t("Past ({{proposals}})", { proposals: pastProposals?.length ?? 0 })}
+          </Tab>
         </TabList>
         <TabIndicator mt="-1.5px" height="2px" bg="blue.500" borderRadius="1px" />
         <TabPanels>
