@@ -1,0 +1,261 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`AllocationRoundUserVotes > should render correctly 1`] = `
+<div>
+  <div
+    class="chakra-card css-26fqi2"
+    id="user-votes"
+  >
+    <div
+      class="chakra-card__body css-1idwstw"
+    >
+      <div
+        class="chakra-stack css-1pqchyz"
+      >
+        <div
+          class="chakra-stack css-11bbf5y"
+        >
+          <div
+            class="css-0"
+          >
+            <div
+              class="chakra-skeleton css-cdkrf0"
+            >
+              <h2
+                class="chakra-heading css-1dklj6k"
+              >
+                Assign voting power to apps
+              </h2>
+            </div>
+            <div
+              class="chakra-skeleton css-cdkrf0"
+            >
+              <p
+                class="chakra-text css-154k8ae"
+              >
+                Distribute your voting power among your selected apps to help them receive more B3TR allocation.
+              </p>
+            </div>
+          </div>
+          <div
+            class="chakra-card css-1ebq55w"
+          >
+            <div
+              class="chakra-card__body css-1idwstw"
+            >
+              <div
+                class="chakra-stack css-1flyuon"
+              >
+                <div
+                  class="chakra-stack css-9q14pc"
+                >
+                  <div
+                    class="css-0"
+                  >
+                    <div
+                      class="chakra-skeleton css-cdkrf0"
+                    >
+                      <h2
+                        class="chakra-heading css-1jkx6l7"
+                      >
+                        NaN
+                      </h2>
+                    </div>
+                    <p
+                      class="chakra-text css-ley5ly"
+                    >
+                      Your Voting Power
+                    </p>
+                  </div>
+                  <p
+                    class="chakra-text css-1uhxyak"
+                  >
+                    0.00
+                    % distributed
+                  </p>
+                </div>
+                <div
+                  class="chakra-stack css-z7sqsq"
+                >
+                  <div
+                    class="chakra-stack css-b8zaqd"
+                  />
+                  <div
+                    class="chakra-stack css-1qwtery"
+                  />
+                </div>
+                <div
+                  class="chakra-stack css-1dujm7d"
+                >
+                  <svg
+                    class="chakra-icon css-15t4wcl"
+                    fill="currentColor"
+                    focusable="false"
+                    height="1em"
+                    stroke="currentColor"
+                    stroke-width="0"
+                    viewBox="0 0 512 512"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 110c23.196 0 42 18.804 42 42s-18.804 42-42 42-42-18.804-42-42 18.804-42 42-42zm56 254c0 6.627-5.373 12-12 12h-88c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h12v-64h-12c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h64c6.627 0 12 5.373 12 12v100h12c6.627 0 12 5.373 12 12v24z"
+                    />
+                  </svg>
+                  <p
+                    class="chakra-text css-w6ttxb"
+                  >
+                    This amount was snapshotted at the moment the proposal was created. If you got more VOT3 after that, you will use it on the next proposals.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <form
+          style="flex: 1; width: 100%; display: flex; flex-direction: column; justify-content: space-between;"
+        >
+          <div
+            class="css-0"
+          >
+            <div
+              class="chakra-stack css-ugggvy"
+            >
+              <div
+                class="css-0"
+              >
+                <h2
+                  class="chakra-heading css-18j379d"
+                >
+                  Available apps
+                </h2>
+                <button
+                  class="chakra-button css-x66jzz"
+                  type="button"
+                >
+                  Split evenly
+                </button>
+              </div>
+              <p
+                class="chakra-text css-p82bef"
+              >
+                Voting power to distribute
+              </p>
+            </div>
+            <div
+              class="chakra-stack css-139af11"
+            />
+          </div>
+          <div
+            class="css-z2mfwv"
+          >
+            <button
+              class="chakra-button css-1g7z1qn"
+              disabled=""
+              type="submit"
+            >
+              <span
+                class="chakra-button__icon css-1wh2kri"
+              >
+                <svg
+                  aria-hidden="true"
+                  fill="currentColor"
+                  focusable="false"
+                  height="1em"
+                  stroke="currentColor"
+                  stroke-width="0"
+                  viewBox="0 0 24 24"
+                  width="1em"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M0 0h24v24H0V0z"
+                    fill="none"
+                  />
+                  <path
+                    d="M18 13h-.68l-2 2h1.91L19 17H5l1.78-2h2.05l-2-2H6l-3 3v4c0 1.1.89 2 1.99 2H19a2 2 0 0 0 2-2v-4l-3-3zm-1-5.05-4.95 4.95-3.54-3.54 4.95-4.95L17 7.95zm-4.24-5.66L6.39 8.66a.996.996 0 0 0 0 1.41l4.95 4.95c.39.39 1.02.39 1.41 0l6.36-6.36a.996.996 0 0 0 0-1.41L14.16 2.3a.975.975 0 0 0-1.4-.01z"
+                  />
+                </svg>
+              </span>
+              Cast vote now
+            </button>
+            <p
+              class="chakra-text css-zd4tu1"
+            >
+              You have no votes to cast
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div
+      class="css-ys24u0"
+    >
+      <img
+        class="chakra-image css-1m86s9j"
+        src="/images/not_connected_wallet_bottom_layer.png"
+      />
+      <img
+        class="chakra-image css-8q59z8"
+        src="/images/not_connected_wallet_top_layer.png"
+      />
+      <div
+        class="chakra-stack css-eodt9j"
+      >
+        <img
+          class="chakra-image css-15o47s5"
+          src="/images/two_fingers_icon.svg"
+        />
+        <div
+          class="css-0"
+        >
+          <h2
+            class="chakra-heading css-auktvx"
+          >
+            Wallet not connected
+          </h2>
+          <p
+            class="chakra-text css-e3br0l"
+          >
+            Connect your wallet to cast your vote!
+          </p>
+        </div>
+        <div
+          class="chakra-fade"
+          style="opacity: 0;"
+        >
+          <button
+            class="chakra-button css-vda7qx"
+            type="button"
+          >
+            <span
+              class="chakra-button__icon css-1wh2kri"
+            >
+              <svg
+                aria-hidden="true"
+                fill="currentColor"
+                focusable="false"
+                height="1em"
+                stroke="currentColor"
+                stroke-width="0"
+                viewBox="0 0 512 512"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M64 32C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V192c0-35.3-28.7-64-64-64H80c-8.8 0-16-7.2-16-16s7.2-16 16-16H448c17.7 0 32-14.3 32-32s-14.3-32-32-32H64zM416 272a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"
+                />
+              </svg>
+            </span>
+            Connect Wallet
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</div>
+`;
