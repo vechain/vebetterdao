@@ -40,6 +40,9 @@ jobs:
             src:
               - 'packages/contracts/contracts/**'
 
+      - name: compile
+        run: yarn contracts:compile
+
       - name: Run Slither
         uses: crytic/slither-action@v0.3.1
         id: slither
