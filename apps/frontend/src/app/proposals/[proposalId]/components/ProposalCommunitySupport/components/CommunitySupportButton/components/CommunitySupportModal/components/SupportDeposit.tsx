@@ -126,15 +126,7 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
       <Text fontWeight={600} fontSize={"14px"}>
         {t("You will be able to claim your tokens back when the voting round ends.")}
       </Text>
-      <Button
-        onClick={handleSubmit}
-        isDisabled={!Number(amount)}
-        w="full"
-        bgColor={"#004CFC"}
-        color={"#FFFFFF"}
-        rounded={"full"}
-        fontSize={"16px"}
-        fontWeight={500}>
+      <Button onClick={handleSubmit} isDisabled={!Number(amount)} w="full" variant="primaryAction">
         {t("Deposit VOT3")}
       </Button>
     </VStack>

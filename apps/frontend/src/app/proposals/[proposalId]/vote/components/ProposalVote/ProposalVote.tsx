@@ -175,15 +175,7 @@ export const ProposalVote = () => {
             {t("Add comment")}
           </Text>
           <Textarea resize={"none"} onChange={handleChangeComment} />
-          <Button
-            leftIcon={<VoteIcon />}
-            onClick={handleCastVote}
-            bgColor={"#004CFC"}
-            color={"#FFFFFF"}
-            rounded={"full"}
-            fontSize={"16px"}
-            fontWeight={500}
-            w="full">
+          <Button leftIcon={<VoteIcon />} onClick={handleCastVote} variant="primaryAction" w="full">
             {t("Cast your vote")}
           </Button>
         </VStack>

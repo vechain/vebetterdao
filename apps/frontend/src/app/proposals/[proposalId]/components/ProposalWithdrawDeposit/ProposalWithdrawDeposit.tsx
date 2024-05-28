@@ -108,13 +108,7 @@ export const ProposalWithdrawDeposit = () => {
                   </HStack>
                 </VStack>
               </VStack>
-              <Button
-                onClick={withdraw}
-                bgColor={"#004CFC"}
-                color={"#FFFFFF"}
-                rounded={"full"}
-                fontSize={"16px"}
-                fontWeight={500}>
+              <Button onClick={withdraw} variant="primaryAction">
                 {t("Claim your tokens back")}
               </Button>
             </VStack>

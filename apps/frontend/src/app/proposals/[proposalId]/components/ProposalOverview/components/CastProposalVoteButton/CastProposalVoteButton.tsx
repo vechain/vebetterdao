@@ -19,13 +19,8 @@ export const CastProposalVoteButton = () => {
       <Button
         leftIcon={<VoteIcon />}
         onClick={goToProposalVote}
-        bgColor={"#004CFC"}
-        disabled={proposal.isDepositReached}
-        color={"#FFFFFF"}
-        rounded={"full"}
-        fontSize={"16px"}
-        fontWeight={500}
-        px="24px">
+        isDisabled={proposal.isDepositReached}
+        variant="primaryAction">
         {t("Cast your vote")}
       </Button>
     )
