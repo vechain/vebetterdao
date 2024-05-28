@@ -46,7 +46,7 @@ export const DappKitWithChakraProvider = ({ children }: { children: React.ReactN
       requireCertificate={false}
       genesis={appConfig.network.genesis}
       nodeUrl={appConfig.nodeUrl}
-      logLevel={"DEBUG"}
+      logLevel={"WARN"}
       walletConnectOptions={walletConnectOptions}>
       {children}
     </DAppKitProvider>
