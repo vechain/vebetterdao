@@ -70,7 +70,7 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
       }
     }
     return `${field.name} (${field.type})`
-  }, [field.name, humanizeLabels])
+  }, [field.name, field.type, humanizeLabels])
   if (field.type === "address") {
     return (
       <FormControl isInvalid={!!error}>
@@ -116,6 +116,7 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
           {...register(`actions.${actionIndex}.params.${index}.value`, {
             required: "Field is required",
             valueAsNumber: true,
+            validate: value => value >= 0 || "Value must be greater than or equal to 0",
           })}
           {...inputProps}
         />
