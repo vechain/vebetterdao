@@ -43,6 +43,9 @@ jobs:
       - name: Compile
         run: yarn contracts:compile
 
+      - name: Print node_modules folders
+        run: ls -d packages/contracts/
+
       - name: Run Slither
         uses: crytic/slither-action@v0.3.1
         id: slither
