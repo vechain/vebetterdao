@@ -24,6 +24,7 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { useForm } from "react-hook-form"
 import { useCreateProposal, useUploadProposalMetadata } from "@/hooks"
 import { TransactionModal } from "@/components/TransactionModal"
+import { useTranslation, useTranslation } from "react-i18next"
 
 type FormData = {
   amount: number
@@ -32,6 +33,7 @@ type FormData = {
 export const NewProposalFundAndPublishPageContent = () => {
   const router = useRouter()
 
+  const { t } = useTranslation()
   const { account } = useWallet()
   const { data: balance, isLoading: balanceLoading } = useVot3Balance(account ?? undefined)
   const { data: threshold, isLoading: thresholdLoading } = useDepositThreshold()
@@ -148,7 +150,7 @@ export const NewProposalFundAndPublishPageContent = () => {
                     </InputLeftElement>
                     <Input
                       {...register("amount", {
-                        required: "This field is required",
+                        required: t("This field is required"),
                         max: { value: threshold ?? 0, message: `The maximum amount is ${threshold}` },
                         validate: value => {
                           if (value > Number(balance?.scaled)) {
@@ -183,7 +185,7 @@ export const NewProposalFundAndPublishPageContent = () => {
 
               <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
                 <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
-                  Go back
+                  {t("Go back")}
                 </Button>
                 <Button rounded="full" colorScheme="primary" size="lg" type="submit">
                   Fund and publish

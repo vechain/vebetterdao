@@ -133,9 +133,9 @@ export const NewProposalForm: React.FC<Props> = ({
             <FormLabel>{t("Proposal title")}</FormLabel>
             <Input
               isDisabled={isDisabled}
-              placeholder="Enter proposal title"
+              placeholder={t("Enter proposal title")}
               {...register("title", {
-                required: "This field is required",
+                required: t("This field is required"),
               })}
             />
             {errors.title && <FormErrorMessage>{errors.title.message}</FormErrorMessage>}
@@ -146,9 +146,9 @@ export const NewProposalForm: React.FC<Props> = ({
             <FormLabel>{t("Proposal description")}</FormLabel>
             <Textarea
               isDisabled={isDisabled}
-              placeholder="Enter proposal description"
+              placeholder={t("Enter proposal description")}
               {...register("description", {
-                required: "This field is required",
+                required: t("This field is required"),
               })}
             />
             {errors.description && <FormErrorMessage>{errors.description.message}</FormErrorMessage>}

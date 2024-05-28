@@ -1,5 +1,8 @@
 {
+  "This field is required": "This field is required",
+  "Enter proposal title": "Enter proposal title",
   "Proposal title": "Proposal title",
+  "Enter proposal description": "Enter proposal description",
   "Proposal description": "Proposal description",
   "Your proposal": "Your proposal",
   "Executable functions": "Executable functions",
