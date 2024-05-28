@@ -14,13 +14,9 @@ export const CastProposalVoteButton = () => {
     router.push(`/proposals/${proposal.id}/vote`)
   }, [proposal.id, router])
 
-  if (proposal.state === ProposalState.Active && !proposal.haveYouVoted) {
+  if (proposal.state === ProposalState.Active && !proposal.hasUserVoted) {
     return (
-      <Button
-        leftIcon={<VoteIcon />}
-        onClick={goToProposalVote}
-        isDisabled={proposal.isDepositReached}
-        variant="primaryAction">
+      <Button leftIcon={<VoteIcon />} onClick={goToProposalVote} variant="primaryAction">
         {t("Cast your vote")}
       </Button>
     )

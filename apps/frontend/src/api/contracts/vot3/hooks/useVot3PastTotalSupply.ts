@@ -31,12 +31,12 @@ export const getVot3PastTotalSupplyQueryKey = (timepoint?: number | string) => [
  * @param timepoint  The timepoint to get the total supply at (block)
  * @returns  the total supply of VOT3 at the given timepoint
  */
-export const useVot3PastSupply = (timepoint?: number | string) => {
+export const useVot3PastSupply = (timepoint?: number | string, enabled = false) => {
   const { thor } = useConnex()
 
   return useQuery({
     queryKey: getVot3PastTotalSupplyQueryKey(timepoint),
     queryFn: () => getVot3PastTotalSupply(thor, timepoint),
-    enabled: !!timepoint,
+    enabled: !!timepoint && enabled,
   })
 }

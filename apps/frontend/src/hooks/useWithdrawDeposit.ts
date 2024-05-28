@@ -1,13 +1,10 @@
-import { getProposalUserDepositQueryKey, useVot3TokenDetails } from "@/api"
-import { UseSendTransactionReturnValue } from "./useSendTransaction"
+import { getProposalUserDepositQueryKey } from "@/api"
 import { useCallback, useMemo } from "react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
 import { buildClause } from "@/utils/buildClause"
 import { useBuildTransaction } from "./useBuildTransaction"
-import { getProposalDepositQueryKey } from "@/api/contracts/governance/hooks/useGetProposalDeposit"
-import { getIsDepositReachedQueryKey } from "@/api/contracts/governance/hooks/useIsDepositReached"
 
 const config = getConfig()
 
@@ -19,6 +16,14 @@ type UseProposalVot3DepositProps = {
   onSuccess?: () => void
 }
 
+/**
+ * Custom hook for withdrawing a deposit from a proposal.
+ *
+ * @param {Object} props - The hook props.
+ * @param {string} props.proposalId - The ID of the proposal.
+ * @param {Function} [props.onSuccess] - Optional callback function to be called on successful withdrawal.
+ * @returns {Object} - The result of the hook.
+ */
 export const useWithdrawDeposit = ({ proposalId, onSuccess }: UseProposalVot3DepositProps) => {
   const { account } = useWallet()
 

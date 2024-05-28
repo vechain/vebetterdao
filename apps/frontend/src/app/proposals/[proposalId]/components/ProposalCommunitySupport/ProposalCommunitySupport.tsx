@@ -88,7 +88,7 @@ export const ProposalCommunitySupport = () => {
             <HStack>
               <Circle size="12px" bg={yourDepositColor} />
               <Text fontSize="14px" fontWeight={400}>
-                {t("From you {{vot3}} V3.", { vot3: compactFormatter.format(Number(proposal.yourSupport)) })}
+                {t("From you {{vot3}} V3.", { vot3: compactFormatter.format(Number(proposal.userSupport)) })}
               </Text>
             </HStack>
           </HStack>

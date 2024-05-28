@@ -17,30 +17,32 @@ export const ProposalWithdrawDeposit = () => {
     proposalId: proposal.id,
   })
   const { isOpen, onClose: handleClose, onOpen } = useDisclosure()
-  const withdraw = useCallback(() => {
-    onOpen()
-    withdrawMutation.sendTransaction({})
-  }, [onOpen, withdrawMutation])
+  const withdraw = useCallback(
+    (e: React.FormEvent) => {
+      onOpen()
+      withdrawMutation.sendTransaction({})
+      e.preventDefault()
+    },
+    [onOpen, withdrawMutation],
+  )
   return (
     <>
-      {withdrawMutation.status !== "ready" && (
-        <TransactionModal
-          isOpen={isOpen}
-          onClose={handleClose}
-          successTitle={"Deposit Withdraw Completed!"}
-          status={withdrawMutation.error ? "error" : withdrawMutation.status}
-          errorDescription={withdrawMutation.error?.reason}
-          errorTitle={withdrawMutation.error ? "Error Withdrawing" : undefined}
-          pendingTitle="Withdrawing..."
-          showExplorerButton
-          txId={withdrawMutation.txReceipt?.meta.txID ?? withdrawMutation.sendTransactionTx?.txid}
-        />
-      )}
+      <TransactionModal
+        isOpen={isOpen}
+        onClose={handleClose}
+        successTitle={"Deposit Withdraw Completed!"}
+        status={withdrawMutation.error ? "error" : withdrawMutation.status}
+        errorDescription={withdrawMutation.error?.reason}
+        errorTitle={withdrawMutation.error ? "Error Withdrawing" : undefined}
+        pendingTitle="Withdrawing..."
+        showExplorerButton
+        txId={withdrawMutation.txReceipt?.meta.txID ?? withdrawMutation.sendTransactionTx?.txid}
+      />
       {proposal.state !== ProposalState.Pending &&
         proposal.state !== ProposalState.Active &&
-        Number(proposal.yourSupport) > 0 && (
+        Number(proposal.userSupport) > 0 && (
           <Card border={`1px solid #004CFC`} rounded="16px" p="24px" boxShadow={"0px 0px 16px 0px #004CFC59"}>
-            <VStack alignItems={"stretch"} gap={6}>
+            <VStack alignItems={"stretch"} gap={6} as="form" onSubmit={withdraw}>
               <HStack justify="space-between">
                 <Heading fontSize={"24px"} fontWeight={700}>
                   {t("Community Support")}
@@ -103,12 +105,12 @@ export const ProposalWithdrawDeposit = () => {
                   <HStack>
                     <Circle size="12px" bg={"#004CFC"} />
                     <Text fontSize="14px" fontWeight={400}>
-                      {t("From you {{vot3}} V3.", { vot3: compactFormatter.format(Number(proposal.yourSupport)) })}
+                      {t("From you {{vot3}} V3.", { vot3: compactFormatter.format(Number(proposal.userSupport)) })}
                     </Text>
                   </HStack>
                 </VStack>
               </VStack>
-              <Button onClick={withdraw} variant="primaryAction">
+              <Button type="submit" variant="primaryAction">
                 {t("Claim your tokens back")}
               </Button>
             </VStack>

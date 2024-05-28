@@ -22,7 +22,7 @@ export const ProposalOverviewYourSupport = () => {
           <HStack gap={2}>
             <Image h="20px" w="20px" src="/images/vot3-token.png" alt="vot3-token" />
             <Text color="#252525" fontWeight={600}>
-              {compactFormatter.format(Number(proposal.yourSupport))}
+              {compactFormatter.format(Number(proposal.userSupport))}
             </Text>
             <Text color="#252525">{t("V3")}</Text>
             <UilArrowUpRight size="20px" color="#004CFC" />

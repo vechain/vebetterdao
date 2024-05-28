@@ -11,21 +11,21 @@ import { compareAddresses } from "@repo/utils/AddressUtils"
 export const useProposalVoteEvent = (proposalId: string) => {
   const { account } = useWallet()
   const events = useProposalsEvents()
-  const yourVote = events.data?.votes?.find(
+  const userVote = events.data?.votes?.find(
     event => event.proposalId === proposalId && compareAddresses(event.account, account || ""),
   )
 
-  const haveYouVoted = !!yourVote
+  const hasUserVoted = !!userVote
 
   const proposalVoteEvent = useMemo(
     () => ({
-      haveYouVoted,
-      yourVote,
+      hasUserVoted,
+      userVote,
       votes: events.data?.votes?.find(event => event.proposalId === proposalId),
       isLoading: events.isLoading,
       error: events.error,
     }),
-    [events.data?.votes, events.error, events.isLoading, haveYouVoted, proposalId, yourVote],
+    [events, hasUserVoted, proposalId, userVote],
   )
   return proposalVoteEvent
 }

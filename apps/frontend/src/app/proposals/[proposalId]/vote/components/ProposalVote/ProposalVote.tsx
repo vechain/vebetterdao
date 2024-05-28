@@ -21,7 +21,7 @@ import {
 import { UilInfoCircle, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useRouter } from "next/navigation"
-import { useCallback, useState } from "react"
+import { FormEvent, useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 const votes = [
@@ -74,14 +74,18 @@ export const ProposalVote = () => {
     castVoteMutation.resetStatus()
   }, [onClose, castVoteMutation])
 
-  const handleCastVote = useCallback(() => {
-    onOpen()
-    castVoteMutation.sendTransaction({ proposalId: proposal.id, vote: selectedVote, comment })
-  }, [castVoteMutation, comment, onOpen, proposal.id, selectedVote])
+  const handleCastVote = useCallback(
+    (e?: FormEvent) => {
+      onOpen()
+      castVoteMutation.sendTransaction({ proposalId: proposal.id, vote: selectedVote, comment })
+      e?.preventDefault()
+    },
+    [castVoteMutation, comment, onOpen, proposal.id, selectedVote],
+  )
 
   return (
     <Card border="1px solid #D5D5D5" rounded="16px" p="56px" w="full">
-      <Stack flexDir={["column", "column", "row"]} gap={12}>
+      <Stack flexDir={["column", "column", "row"]} gap={12} as="form" onSubmit={handleCastVote}>
         <VStack alignItems={"stretch"} flex={1} gap={4}>
           <Text fontSize="14px" color="#6A6A6A" wordBreak={"break-word"}>
             {proposal.title}
@@ -175,30 +179,28 @@ export const ProposalVote = () => {
             {t("Add comment")}
           </Text>
           <Textarea resize={"none"} onChange={handleChangeComment} />
-          <Button leftIcon={<VoteIcon />} onClick={handleCastVote} variant="primaryAction" w="full">
+          <Button leftIcon={<VoteIcon />} type="submit" variant="primaryAction" w="full">
             {t("Cast your vote")}
           </Button>
         </VStack>
       </Stack>
-      {castVoteMutation.status !== "ready" && (
-        <TransactionModal
-          isOpen={isOpen}
-          onClose={handleClose}
-          successTitle={"Vote Completed!"}
-          status={castVoteMutation.error ? "error" : castVoteMutation.status}
-          errorDescription={castVoteMutation.error?.reason}
-          errorTitle={castVoteMutation.error ? "Error voting" : undefined}
-          showTryAgainButton
-          onTryAgain={handleCastVote}
-          pendingTitle="Voting..."
-          showSocialButtons
-          socialDescriptionEncoded={encodeURIComponent(
-            "🔄 Just voted for a proposal on #VeBetterDAO! \n\n🌱 Explore and join us at https://vebetterdao.org.\n\n#VeBetterDAO #Vechain",
-          )}
-          showExplorerButton
-          txId={castVoteMutation.txReceipt?.meta.txID ?? castVoteMutation.sendTransactionTx?.txid}
-        />
-      )}
+      <TransactionModal
+        isOpen={isOpen}
+        onClose={handleClose}
+        successTitle={"Vote Completed!"}
+        status={castVoteMutation.error ? "error" : castVoteMutation.status}
+        errorDescription={castVoteMutation.error?.reason}
+        errorTitle={castVoteMutation.error ? "Error voting" : undefined}
+        showTryAgainButton
+        onTryAgain={handleCastVote}
+        pendingTitle="Voting..."
+        showSocialButtons
+        socialDescriptionEncoded={encodeURIComponent(
+          "🔄 Just voted for a proposal on #VeBetterDAO! \n\n🌱 Explore and join us at https://vebetterdao.org.\n\n#VeBetterDAO #Vechain",
+        )}
+        showExplorerButton
+        txId={castVoteMutation.txReceipt?.meta.txID ?? castVoteMutation.sendTransactionTx?.txid}
+      />
     </Card>
   )
 }

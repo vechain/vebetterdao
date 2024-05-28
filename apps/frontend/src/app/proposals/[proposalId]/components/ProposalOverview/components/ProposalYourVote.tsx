@@ -1,4 +1,4 @@
-import { useCurrentProposal } from "@/api"
+import { VoteType, useCurrentProposal } from "@/api"
 import { HStack, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { UilArrowUpRight, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
@@ -7,8 +7,8 @@ export const ProposalYourVote = () => {
   const { proposal } = useCurrentProposal()
   const { t } = useTranslation()
 
-  switch (proposal.yourVote?.support) {
-    case "1":
+  switch (Number(proposal.userVote?.support)) {
+    case VoteType.VOTE_FOR:
       return (
         <VStack alignItems={"stretch"}>
           <Text fontWeight={"400"} color="#6A6A6A">
@@ -28,7 +28,7 @@ export const ProposalYourVote = () => {
           </Skeleton>
         </VStack>
       )
-    case "0":
+    case VoteType.VOTE_AGAINST:
       return (
         <VStack alignItems={"stretch"}>
           <Text fontWeight={"400"} color="#6A6A6A">
@@ -48,7 +48,7 @@ export const ProposalYourVote = () => {
           </Skeleton>
         </VStack>
       )
-    case "2":
+    case VoteType.ABSTAIN:
       return (
         <VStack alignItems={"stretch"}>
           <Text fontWeight={"400"} color="#6A6A6A">
@@ -68,5 +68,7 @@ export const ProposalYourVote = () => {
           </Skeleton>
         </VStack>
       )
+    default:
+      return null
   }
 }

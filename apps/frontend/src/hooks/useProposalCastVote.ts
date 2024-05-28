@@ -4,6 +4,7 @@ import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getProposalVotesQuerykey } from "@/api"
 import { buildClause } from "@/utils/buildClause"
+import { getIsProposalQuorumReachedQueryKey } from "@/api/contracts/governance/hooks/useIsProposalQuorumReached"
 
 const GovernorInterface = B3TRGovernor__factory.createInterface()
 
@@ -35,7 +36,10 @@ export const useProposalCastVote = ({ proposalId, onSuccess }: Props) => {
     ]
   }, [])
 
-  const refetchQueryKeys = useMemo(() => [getProposalVotesQuerykey(proposalId)], [proposalId])
+  const refetchQueryKeys = useMemo(
+    () => [getProposalVotesQuerykey(proposalId), getIsProposalQuorumReachedQueryKey(proposalId)],
+    [proposalId],
+  )
 
   return useBuildTransaction<ClausesProps>({
     clauseBuilder,
