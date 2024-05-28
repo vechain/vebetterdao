@@ -21,10 +21,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Use Node v20
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: "yarn"
@@ -43,11 +43,8 @@ jobs:
       - name: Compile
         run: yarn contracts:compile
 
-      - name: Print node_modules folders
-        run: ls -R packages/contracts/
-
       - name: Run Slither
-        uses: crytic/slither-action@v0.3.1
+        uses: crytic/slither-action@v0.4.0
         id: slither
         if: steps.contract_changes.outputs.src == 'true'
         with:
