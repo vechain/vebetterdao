@@ -35,6 +35,7 @@ import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.s
 /// @title GovernorStorageTypes
 /// @notice Library for defining storage types used in the Governor contract.
 library GovernorStorageTypes {
+  using Checkpoints for Checkpoints.Trace208;
   struct GovernorStorage {
     // ------------------------------- Version 1 -------------------------------
 
