@@ -1,4 +1,6 @@
 {
+  "Please select at least one function": "Please select at least one function",
+  "Select proposal type": "Select proposal type",
   "Dev: Choose an environment": "Dev: Choose an environment",
   "Select an environment": "Select an environment",
   "Proposals are based on smart contracts that will be executed. Select the action that you proposal will trigger if succeed in the voting session.": "Proposals are based on smart contracts that will be executed. Select the action that you proposal will trigger if succeed in the voting session.",

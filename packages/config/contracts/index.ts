@@ -5,7 +5,7 @@ import { createSoloStagingConfig } from "./envs/soloStaging"
 import { createTestnetConfig } from "./envs/testnet"
 import { createE2EConfig } from "./envs/e2e"
 
-export const EnvConfigValues = ["local", "e2e", "solo-staging", "testnet", "production"] as const
+export const EnvConfigValues = ["local", "e2e", "solo-staging", "testnet"] as const
 export type EnvConfig = (typeof EnvConfigValues)[number]
 
 export function getContractsConfig(env: EnvConfig) {
@@ -18,8 +18,6 @@ export function getContractsConfig(env: EnvConfig) {
       return createSoloStagingConfig()
     case "testnet":
       return createTestnetConfig()
-    case "production":
-      throw "Production contracts config are not implemented yet"
 
     default:
       throw new Error(`Invalid ENV "${env}"`)

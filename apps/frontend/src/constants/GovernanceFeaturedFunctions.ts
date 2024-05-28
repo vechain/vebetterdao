@@ -94,6 +94,7 @@ export const getActionsFromTargetsAndCalldatas = (
 export type GovernanceFeaturedFunction = {
   name: string
   description: string
+  icon?: string
   abiDefinition: Omit<abi.Function.Definition, "inputs"> & {
     inputs: (abi.Function.Parameter & {
       requiresEthParse?: boolean
@@ -119,6 +120,7 @@ export const GovernanceFeaturedContractsWithFunctions: GovernanceFeaturedContrac
     functions: [
       {
         name: "Transfer B3TR",
+        icon: "/images/arrow-right.svg",
         description: "Transfer B3TR tokens to a recipient",
         abiDefinition: (() => {
           const transferB3trDefinition = getFunctionDefinitionFromAbi(TreasuryContractJson, "transferB3TR")
