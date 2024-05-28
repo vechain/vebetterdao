@@ -1,5 +1,5 @@
-export const Arm = ({ color = "#F29B32" }: { color?: string }) => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+export const Arm = ({ color = "#F29B32", size = "24" }: { color?: string; size?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <g id="arm">
       <path
         fill={color}

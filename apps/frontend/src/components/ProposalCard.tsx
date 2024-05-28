@@ -1,5 +1,6 @@
 import {
   ProposalCreatedEvent,
+  ProposalMetadata,
   ProposalState,
   useCurrentBlock,
   useProposalDeadline,
@@ -7,13 +8,16 @@ import {
   useProposalState,
 } from "@/api"
 import {
+  Alert,
+  AlertDescription,
+  AlertIcon,
+  AlertTitle,
   Box,
   Button,
   Card,
   CardBody,
   CardFooter,
-  CardHeader,
-  Code,
+  Divider,
   HStack,
   Heading,
   Skeleton,
@@ -22,19 +26,19 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { AddressButton } from "./AddressButton"
-import { useCallback, useMemo } from "react"
-import { governanceAvailableContracts } from "@/constants"
-import { abi } from "thor-devkit"
-import { AddressUtils, ContractUtils } from "@repo/utils"
-import { humanAddress } from "@repo/utils/FormattingUtils"
+import { useCallback, useMemo, useState } from "react"
+import { GovernanceFeaturedContractsWithFunctions, getActionsFromTargetsAndCalldatas } from "@/constants"
 import { getConfig } from "@repo/config"
-import dayjs from "dayjs"
-import { ethers } from "ethers"
 import { ProposalVotesProgressBar } from "./ProposalVotesProgressBar"
 import { CastVoteButton } from "./CastVoteButton"
-import { FaArrowRight, FaChevronRight } from "react-icons/fa6"
-import { FaCaretRight } from "react-icons/fa"
+import { FaChevronRight } from "react-icons/fa6"
+
 import { useRouter } from "next/navigation"
+import { useIpfsMetadata } from "@/api/ipfs"
+import { toIPFSURL } from "@/utils"
+import { ProposalFormAction } from "@/store/useProposalFormStore"
+import dayjs from "dayjs"
+import { ProposalExecutableActions } from "./ProposalExecutableActions"
 
 const config = getConfig()
 const blockTime = config.network.blockTime
@@ -51,35 +55,25 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
     proposal.proposalId,
   )
 
-  const decodedCallDatas = useMemo(() => {
-    const decoded = []
-    for (const [index, contractAddress] of proposal.targets.entries()) {
-      //   console.log("Decoding call data for contract", contractAddress)
-      const contract = governanceAvailableContracts.find(c => AddressUtils.compareAddresses(c.address, contractAddress))
-      if (!contract) continue
+  const proposalMetadata = useIpfsMetadata<ProposalMetadata>(toIPFSURL(proposal.description))
 
-      const calldata = proposal.callDatas[index] as string
+  const [proposalDecodeError, setProposalDecodeError] = useState<string | null>(null)
 
-      try {
-        // The first 10 characters of the call data is the function to call, all the rest is the eventual encoded parameters
-        //TODO: use correct type of ABI
-        //@ts-ignore
-        const decodedMethod = ContractUtils.resolveAbiFunctionFromCalldata(calldata, contract.abi)
-        let _decodedCallData
-
-        if (decodedMethod) {
-          _decodedCallData = abi.decodeParameters(decodedMethod.inputs, `0x${calldata.slice(10)}`)
-        }
-        decoded.push({
-          contract: { ...contract, address: contractAddress },
-          method: decodedMethod,
-          params: _decodedCallData,
-        })
-      } catch (e) {
-        console.error("Error decoding call data", e)
+  const actions: ProposalFormAction[] = useMemo(() => {
+    try {
+      setProposalDecodeError(null)
+      return getActionsFromTargetsAndCalldatas(
+        proposal.targets,
+        proposal.callDatas,
+        GovernanceFeaturedContractsWithFunctions,
+      )
+    } catch (e: unknown) {
+      if (e instanceof Error) setProposalDecodeError(e.message)
+      else {
+        setProposalDecodeError("Error decoding proposal")
       }
+      return []
     }
-    return decoded
   }, [proposal])
 
   const isStarted = useMemo(() => {
@@ -87,14 +81,14 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
     if (!startBlock || !currentBlock) return null
     const startBlockFromNow = startBlock - currentBlock.number
     return startBlockFromNow <= 0
-  }, [proposal])
+  }, [currentBlock, proposalSnapshotBlock])
 
   const isEnded = useMemo(() => {
     const endBlock = Number(proposalDeadlineBlock)
     if (!endBlock || !currentBlock) return null
     const endBlockFromNow = endBlock - currentBlock.number
     return endBlockFromNow <= 0
-  }, [proposal])
+  }, [currentBlock, proposalDeadlineBlock])
 
   const estimatedEndTime = useMemo(() => {
     const endBlock = Number(proposalDeadlineBlock)
@@ -110,7 +104,7 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
       const endDate = dayjs().subtract(durationLeftTimestamp, "milliseconds")
       return endDate.fromNow()
     }
-  }, [proposalSnapshotBlock, proposalDeadlineBlock, currentBlock])
+  }, [proposalDeadlineBlock, currentBlock])
 
   const estimatedStartTime = useMemo(() => {
     if (!proposalSnapshotBlock) return null
@@ -124,18 +118,6 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
       return startDate.fromNow()
     } else return "Started"
   }, [proposalSnapshotBlock, currentBlock])
-
-  const renderInputParameterValue = (input: abi.Function.Parameter, value: string) => {
-    if (input.type === "address")
-      return (
-        <Code>
-          <AddressButton address={value} buttonSize="sm" addressFontSize="sm" variant="ghost" showAddressIcon={false} />
-        </Code>
-      )
-    if (input.type === "bytes32") return <Code>{ethers.decodeBytes32String(value)}</Code>
-
-    return <Code>{value}</Code>
-  }
 
   const proposalStateTagColor = useMemo(() => {
     switch (state) {
@@ -163,11 +145,11 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
   const router = useRouter()
   const goToProposal = useCallback(() => {
     router.push(`/proposals/${proposal.proposalId}`)
-  }, [])
+  }, [router, proposal])
 
   return (
     <Card flex={1}>
-      <CardHeader>
+      <CardBody>
         <VStack spacing={4} w="full" align="flex-start">
           <HStack w="full" justify="space-between">
             <Tag colorScheme="blue">Governance</Tag>
@@ -177,49 +159,35 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
             <Heading size="sm"> Proposer</Heading>
             <AddressButton address={proposal.proposer} buttonSize="xs" addressFontSize="xs" />
           </HStack>
-          <Heading as="h3" size="md">
-            {proposal.description}
-          </Heading>
+          <Box>
+            <Skeleton isLoaded={!proposalMetadata.isLoading}>
+              <Heading as="h3" size="md" color={proposalMetadata.error ? "red.500" : "inherit"}>
+                {proposalMetadata.error?.message
+                  ? "Error fetching metadata"
+                  : proposalMetadata.data?.title ?? "Loading..."}
+              </Heading>
+            </Skeleton>
+            <Skeleton isLoaded={!proposalMetadata.isLoading}>
+              <Text size="xs" color={proposalMetadata.error ? "red.500" : "inherit"}>
+                {proposalMetadata.error?.message
+                  ? "Error fetching metadata"
+                  : proposalMetadata.data?.shortDescription ?? "Loading..."}
+              </Text>
+            </Skeleton>
+          </Box>
         </VStack>
-      </CardHeader>
-      <CardBody>
+        <Divider my={4} />
         <VStack spacing={8} w="full" align="center">
-          <Card w="full">
-            <CardBody>
-              {decodedCallDatas.map((target, index) => (
-                <VStack spacing={2} w="full" align="flex-start" key={`${index} - ${target.contract.address}`}>
-                  <HStack w="full" justify={"space-between"}>
-                    <Text>Contract</Text>
-                    <Code>
-                      {humanAddress(target.contract.address, 6, 4)} ({target.contract.abi.contractName})
-                    </Code>
-                  </HStack>
-                  <HStack w="full" justify={"space-between"}>
-                    <Text>Method</Text>
-                    {target.method ? (
-                      <Code>
-                        {target.method.name}({target.method.inputs.map(i => `${i.type} ${i.name}`).join(", ")})
-                      </Code>
-                    ) : (
-                      <Code>Unknown</Code>
-                    )}
-                  </HStack>
-                  {target.method?.inputs.length && (
-                    <HStack w="full" justify={"space-between"}>
-                      <Text>Params</Text>
-                      <VStack align="flex-start">
-                        {target.method.inputs.map((input, i) => (
-                          <HStack key={i} w="full" justify={"space-between"}>
-                            {renderInputParameterValue(input, target.params?.[input.name])}
-                          </HStack>
-                        ))}
-                      </VStack>
-                    </HStack>
-                  )}
-                </VStack>
-              ))}
-            </CardBody>
-          </Card>
+          {proposalDecodeError && (
+            <Alert status="error" borderRadius={"lg"}>
+              <AlertIcon />
+              <Box>
+                <AlertTitle>Error decoding the proposal calldatas</AlertTitle>
+                <AlertDescription>{proposalDecodeError}</AlertDescription>
+              </Box>
+            </Alert>
+          )}
+          {!!actions.length && <ProposalExecutableActions actions={actions} />}
           <ProposalVotesProgressBar proposal={proposal} />
         </VStack>
       </CardBody>

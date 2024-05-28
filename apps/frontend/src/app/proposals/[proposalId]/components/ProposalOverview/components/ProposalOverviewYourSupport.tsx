@@ -1,9 +1,11 @@
 import { ProposalState, useCurrentProposal } from "@/api"
 import { HStack, Image, Text, VStack } from "@chakra-ui/react"
 import { UilArrowUpRight } from "@iconscout/react-unicons"
+import { useTranslation } from "react-i18next"
 
 export const ProposalOverviewYourSupport = () => {
   const { proposal } = useCurrentProposal()
+  const { t } = useTranslation()
 
   switch (proposal.state) {
     case ProposalState.Active:
@@ -12,14 +14,14 @@ export const ProposalOverviewYourSupport = () => {
       return (
         <VStack alignItems={"stretch"}>
           <Text fontWeight={"400"} color="#6A6A6A">
-            Your support
+            {t("Your support")}
           </Text>
           <HStack gap={2}>
-            <Image h="20px" w="20px" src="/images/vot3-token.png" />
+            <Image h="20px" w="20px" src="/images/vot3-token.png" alt="vot3-token" />
             <Text color="#252525" fontWeight={600}>
               {proposal.yourSupport}
             </Text>
-            <Text color="#252525">V3</Text>
+            <Text color="#252525">{t("V3")}</Text>
             <UilArrowUpRight size="20px" color="#004CFC" />
           </HStack>
         </VStack>

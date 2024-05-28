@@ -10,7 +10,7 @@ import { NewProposalForm } from "../functions/details/components/NewProposalForm
 import { useRouter } from "next/navigation"
 
 export default function NewProposalPage() {
-  const { markdownDescription, actions } = useProposalFormStore()
+  const { actions, markdownDescription } = useProposalFormStore()
 
   const router = useRouter()
 
