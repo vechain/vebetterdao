@@ -25,7 +25,7 @@ pragma solidity ^0.8.20;
 
 import { GovernorStorageTypes } from "./GovernorStorageTypes.sol";
 import "@openzeppelin/contracts/utils/structs/DoubleEndedQueue.sol";
-import "@openzeppelin/contracts/utils/structs/Checkpoints.sol"
+import "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 
 /// @title GovernorGovernanceLogic
 /// @notice Library for validating descriptions in governance proposals based on the proposer's address suffix.
