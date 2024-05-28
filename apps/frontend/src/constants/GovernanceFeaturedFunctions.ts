@@ -13,11 +13,12 @@ import {
   TreasuryJson,
 } from "@repo/contracts"
 
-import { getConfig } from "@repo/config"
+import { getConfig, getContractsConfig } from "@repo/config"
 import { abi } from "thor-devkit"
 import { JsonContractType, resolveAbiFunctionFromCalldata } from "@repo/utils/ContractUtils"
 import { ProposalFormAction } from "@/store/useProposalFormStore"
 import { compareAddresses } from "@repo/utils/AddressUtils"
+import { EnvConfig } from "@repo/config/contracts"
 
 const config = getConfig()
 
@@ -199,3 +200,25 @@ export const GovernanceFeaturedContractsWithFunctions: GovernanceFeaturedContrac
     ],
   },
 ]
+
+/**
+ * Get the list of contracts that are whitelisted in the current environment (uses the contract whitelist in the contracts config)
+ * @returns  The list of contracts that are whitelisted in the current environment
+ */
+export const getEnvWhitelistedContractsWithFunctions = (env: EnvConfig): GovernanceFeaturedContractWithFunctions[] => {
+  const config = getContractsConfig(env)
+  const whitelistedContracts = config.B3TR_GOVERNOR_WHITELISTED_METHODS
+
+  console.log("whitelistedContracts", whitelistedContracts)
+
+  return GovernanceFeaturedContractsWithFunctions.filter(contract => {
+    return Object.keys(whitelistedContracts).includes(contract.contract.abi.contractName)
+  }).map(contract => {
+    const whitelistedFunctions = whitelistedContracts[contract.contract.abi.contractName] as string[]
+    const functions = contract.functions.filter(f => whitelistedFunctions.includes(f.abiDefinition.name))
+    return {
+      ...contract,
+      functions,
+    }
+  })
+}

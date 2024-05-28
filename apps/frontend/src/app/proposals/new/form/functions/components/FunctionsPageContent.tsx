@@ -1,15 +1,40 @@
-import { Card, CardBody, VStack, Heading, HStack, Box, Divider, Text, Checkbox, Button } from "@chakra-ui/react"
-import { useCallback } from "react"
+import {
+  Card,
+  CardBody,
+  VStack,
+  Heading,
+  HStack,
+  Box,
+  Divider,
+  Text,
+  Checkbox,
+  Button,
+  FormControl,
+  Select,
+  FormLabel,
+} from "@chakra-ui/react"
+import { useCallback, useState } from "react"
 import { useProposalFormStore } from "@/store/useProposalFormStore"
-import { GovernanceFeaturedContractsWithFunctions, GovernanceFeaturedFunction } from "@/constants"
+import { GovernanceFeaturedFunction, getEnvWhitelistedContractsWithFunctions } from "@/constants"
 import { abi } from "thor-devkit"
 import { useRouter } from "next/navigation"
+
+import { getConfig } from "@repo/config"
+import { useTranslation } from "react-i18next"
+import { EnvConfig, EnvConfigValues } from "@repo/config/contracts"
+
+const env = getConfig().environment
+
+const devEnvs: EnvConfig[] = ["local", "e2e", "solo-staging"]
 
 type SelectedFunction = GovernanceFeaturedFunction & {
   contractAddress: string
 }
 export const FunctionsPageContent = () => {
+  const { t } = useTranslation()
   const { actions, setData } = useProposalFormStore()
+
+  const [featuredFunctionsEnv, setFeaturedFunctionsEnv] = useState<EnvConfig>(env)
 
   const router = useRouter()
 
@@ -44,13 +69,31 @@ export const FunctionsPageContent = () => {
       <CardBody py={8}>
         <VStack spacing={8} align="flex-start">
           <Box>
-            <Heading size="lg">What is your proposal about?</Heading>
+            <HStack w="full" justify={"space-between"}>
+              <Heading size="lg">{t("What is your proposal about?")}</Heading>
+              {devEnvs.includes(env) && (
+                <FormControl w="auto">
+                  <FormLabel>{t("Dev: Choose an environment")}</FormLabel>
+                  <Select
+                    placeholder={t("Select an environment")}
+                    value={featuredFunctionsEnv}
+                    onChange={e => setFeaturedFunctionsEnv(e.target.value as EnvConfig)}>
+                    {EnvConfigValues.map((env, index) => (
+                      <option key={index} value={env}>
+                        {env}
+                      </option>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
+            </HStack>
             <Text fontSize="sm" fontWeight={400} color={"gray.500"} mt={4}>
-              Proposals are based on smart contracts that will be executed. Select the action that you proposal will
-              trigger if succeed in the voting session.
+              {t(
+                "Proposals are based on smart contracts that will be executed. Select the action that you proposal will trigger if succeed in the voting session.",
+              )}
             </Text>
           </Box>
-          {GovernanceFeaturedContractsWithFunctions.map((contract, index) => (
+          {getEnvWhitelistedContractsWithFunctions(featuredFunctionsEnv).map((contract, index) => (
             <VStack key={index} spacing={4} align="flex-start" w="full">
               <Box>
                 <Heading size="sm">{contract.name}</Heading>
@@ -106,10 +149,10 @@ export const FunctionsPageContent = () => {
           ))}
           <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
             <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
-              Go back
+              {t("Go back")}
             </Button>
             <Button rounded="full" colorScheme="primary" size="lg" onClick={onContinue}>
-              Continue
+              {t("Continue")}
             </Button>
           </HStack>
         </VStack>

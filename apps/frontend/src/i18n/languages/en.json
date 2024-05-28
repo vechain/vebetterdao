@@ -1,4 +1,8 @@
 {
+  "Dev: Choose an environment": "Dev: Choose an environment",
+  "Select an environment": "Select an environment",
+  "Proposals are based on smart contracts that will be executed. Select the action that you proposal will trigger if succeed in the voting session.": "Proposals are based on smart contracts that will be executed. Select the action that you proposal will trigger if succeed in the voting session.",
+  "What is your proposal about?": "What is your proposal about?",
   "About the proposal": "About the proposal",
   "Error decoding the proposal calldatas": "Error decoding the proposal calldatas",
   "{{proposals}} proposals created from the beginning": "{{proposals}} proposals created from the beginning",
@@ -41,6 +45,7 @@
   "Ended and executed": "Ended and executed",
   "Community support": "Community support",
   "Continue": "Continue",
+  "Go back": "Go back",
   "{{percentage}}%": "{{percentage}}%",
   "({{percentage}}%)": "({{percentage}}%)",
   "Support this proposal with VOT3": "Support this proposal with VOT3",
