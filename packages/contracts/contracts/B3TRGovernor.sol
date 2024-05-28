@@ -57,7 +57,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  * Anyone can create a proposal to both change the state of the contract, to execute a transaction
  * on the timelock or to ask for a vote from the community without performing any onchain action.
  * In order for the proposal to become active, the community needs to deposit a certain amount of VOT3 tokens.
- * This is used as a health check for the proposal, and funds are returned to the depositors after vote is concluded.
+ * This is used as a heat check for the proposal, and funds are returned to the depositors after vote is concluded.
  * Votes for proposals start periodically, based on the allocation rounds (see xAllocationVoting contract), and the round
  * in which the proposal should be active is specified by the proposer during the proposal creation.
  *
@@ -193,7 +193,8 @@ contract B3TRGovernor is
   /**
    * @notice Function to know if a proposal is executable or not.
    * If the proposal was created without any targets, values, or calldatas, it is not executable.
-   * to check if the proposal is executable.
+   * to check if the proposal is executable. 
+   * @dev If no calldatas or targets then it's not executable, otherwise it will check if the governance can execute transactions or not.
    * @param proposalId The id of the proposal
    * @return bool True if the proposal needs queuing, false otherwise
    */
