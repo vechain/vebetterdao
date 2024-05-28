@@ -1,2 +1,1 @@
-export * from "./ProposalPage"
-export * from "./ProposalOverview"
+export * from "./ProposalPageContent"

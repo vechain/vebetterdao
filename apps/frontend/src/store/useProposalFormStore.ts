@@ -74,14 +74,15 @@ Oedipodioniae *auris terrae agmine* vires avibus sospes frater. Macies parentis
 recentem insomni inpiger incumbere postera movere remorata matres mixtaque
 terras? Dedi perde putares eris.`
 
+export type ProposalFormAction = GovernanceFeaturedFunction & {
+  contractAddress: string
+  calldata?: string
+}
 export type ProposalFormStoreState = {
   title?: string
   shortDescription?: string
   markdownDescription?: string
-  actions: (GovernanceFeaturedFunction & {
-    contractAddress: string
-    calldata?: string
-  })[]
+  actions: ProposalFormAction[]
   votingStartRoundId?: number
   depositAmount?: number
   setData: (data: Partial<ProposalFormStoreState>) => void

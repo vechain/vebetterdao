@@ -12,11 +12,17 @@ const variants = {
         borderWidth: "1px",
         borderColor: props.colorMode === "dark" ? "#2D2D2F" : "transparent",
       },
+      body: {
+        padding: "24px",
+      },
     }),
   filled: (props: StyleFunctionProps) =>
     definePartsStyle({
       container: {
         bg: props.colorMode === "dark" ? "#2D2D2F" : "#FAFAFA",
+      },
+      body: {
+        padding: "24px",
       },
     }),
   baseWithBorder: (props: StyleFunctionProps) =>
@@ -24,7 +30,10 @@ const variants = {
       container: {
         bg: props.colorMode === "dark" ? "#1A1A1A" : "#FFF",
         borderWidth: "1px",
-        borderColor: props.colorMode === "dark" ? "#2D2D2F" : "gray.100",
+        borderColor: props.colorMode === "dark" ? "#2D2D2F" : "#D5D5D5",
+      },
+      body: {
+        padding: "24px",
       },
     }),
   secondaryBoxShadow: (props: StyleFunctionProps) =>
@@ -35,6 +44,9 @@ const variants = {
         borderWidth: "1px",
         borderColor: props.colorMode === "dark" ? "#2D2D2F" : "gray.100",
       },
+      body: {
+        padding: "24px",
+      },
     }),
 }
 
@@ -43,5 +55,10 @@ export const cardTheme = defineMultiStyleConfig({
   variants,
   defaultProps: {
     variant: "base", // default is solid
+  },
+  baseStyle: {
+    container: {
+      borderRadius: "12px",
+    },
   },
 })

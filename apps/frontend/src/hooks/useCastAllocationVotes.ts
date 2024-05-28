@@ -50,7 +50,6 @@ export const useCastAllocationVotes = ({
   onSuccess,
   invalidateCache = true,
 }: useCastAllocationVotesProps): useCastAllocationVotesReturnValue => {
-  const { thor } = useConnex()
   const { account } = useWallet()
   const queryClient = useQueryClient()
 
@@ -71,7 +70,7 @@ export const useCastAllocationVotes = ({
 
       return [clause]
     },
-    [thor, roundId],
+    [roundId],
   )
 
   //Refetch queries to update ui after the tx is confirmed

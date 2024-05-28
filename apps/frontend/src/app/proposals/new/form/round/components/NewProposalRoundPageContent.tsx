@@ -58,14 +58,24 @@ export const NewProposalRoundPageContent = () => {
             along with the allocations.
           </Text>
 
-          {rounds.map(round => (
-            <SelectedRoundRadioCard
-              key={round.id}
-              roundId={round.id}
-              selected={round.id === votingStartRoundId}
-              onSelect={onSelectRound(round.id)}
-            />
-          ))}
+          {rounds.length === 0
+            ? [...Array(roundsToRender).keys()].map(index => (
+                <SelectedRoundRadioCard
+                  key={index}
+                  roundId={index}
+                  selected={false}
+                  onSelect={() => {}}
+                  renderSkeleton={true}
+                />
+              ))
+            : rounds.map(round => (
+                <SelectedRoundRadioCard
+                  key={round.id}
+                  roundId={round.id}
+                  selected={round.id === votingStartRoundId}
+                  onSelect={onSelectRound(round.id)}
+                />
+              ))}
 
           <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
             <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>

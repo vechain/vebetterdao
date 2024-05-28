@@ -1,4 +1,6 @@
 {
+  "About the proposal": "About the proposal",
+  "Error decoding the proposal calldatas": "Error decoding the proposal calldatas",
   "{{proposals}} proposals created from the beginning": "{{proposals}} proposals created from the beginning",
   "ROUND": "ROUND",
   "#{{round}}": "#{{round}}",

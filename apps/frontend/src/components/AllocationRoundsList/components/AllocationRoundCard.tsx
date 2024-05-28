@@ -45,7 +45,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
   }
   const isActive = useMemo(() => {
     return allocationRound?.state === "0" && allocationRound?.voteEndTimestamp?.isAfter()
-  }, [allocationRound, allocationRound?.state])
+  }, [allocationRound])
 
   const cardActiveBackgroundColor = useColorModeValue("secondary.50", "secondary.100")
   const cardActiveBorderColor = useColorModeValue("secondary.400", "secondary.700")
@@ -76,12 +76,17 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
         }),
         cursor: "pointer",
         transition: "all 0.2s ease-in-out",
-      }} data-testid={"round-#" + round.roundId + "-card"}>
+      }}
+      data-testid={"round-#" + round.roundId + "-card"}>
       <CardBody>
         <HStack justify={"space-between"} w="full">
           <Stack w="full" spacing={1}>
             <HStack spacing={2} w="fit-content" justify="space-between">
-              <AllocationRoundStateTag state={allocationRound.state} size="md" data-testid={"round-#" + round.roundId + "-status"} />
+              <AllocationRoundStateTag
+                state={allocationRound.state}
+                size="md"
+                data-testid={"round-#" + round.roundId + "-status"}
+              />
               <Show above="sm">
                 <DotSymbol color={"gray"} size={1} />
                 <Text fontWeight={"400"} color={"gray"}>
@@ -118,7 +123,12 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
                   )}
                 </Skeleton>
               </Box>
-              <Icon as={FaAngleRight} boxSize={6} color={cardTextColor} data-testid={"round-#" + round.roundId + "-link"}/>
+              <Icon
+                as={FaAngleRight}
+                boxSize={6}
+                color={cardTextColor}
+                data-testid={"round-#" + round.roundId + "-link"}
+              />
             </HStack>
           </Stack>
         </HStack>
