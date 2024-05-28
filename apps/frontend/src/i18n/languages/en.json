@@ -1,4 +1,12 @@
 {
+  "Proposal title": "Proposal title",
+  "Proposal description": "Proposal description",
+  "Your proposal": "Your proposal",
+  "Executable functions": "Executable functions",
+  "Providing more information will help the community understand the purpose of your proposal and make informed voting decisions. Include details such as motivation, a detailed description, or any other relevant information.": "Providing more information will help the community understand the purpose of your proposal and make informed voting decisions. Include details such as motivation, a detailed description, or any other relevant information.",
+  "Share more about your idea": "Share more about your idea",
+  "Basic information": "Basic information",
+  "Text only proposal": "Text only proposal",
   "Proposals represent your ideas as a valued member of the DAO community, aimed at enhancing or modifying aspects of the ecosystem. Each proposal undergoes a voting process, and upon approval, is brought to life.": "Proposals represent your ideas as a valued member of the DAO community, aimed at enhancing or modifying aspects of the ecosystem. Each proposal undergoes a voting process, and upon approval, is brought to life.",
   "Create a new proposal": "Create a new proposal",
   "Please select at least one function": "Please select at least one function",
