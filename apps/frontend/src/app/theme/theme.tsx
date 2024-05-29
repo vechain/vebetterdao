@@ -4,6 +4,7 @@ import { cardTheme } from "./card"
 import "@fontsource-variable/instrument-sans"
 import "@fontsource-variable/inter"
 import { ButtonStyle } from "./button"
+import { StepperStyle } from "./stepper"
 
 const themeConfig = {
   //@ts-ignore
@@ -15,6 +16,7 @@ const themeConfig = {
   components: {
     Card: cardTheme,
     Button: ButtonStyle,
+    Stepper: StepperStyle,
   },
 
   // 2. Add your color mode config

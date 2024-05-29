@@ -3,7 +3,7 @@ import { Box, Card, Circle, Flex, HStack, Heading, Text, VStack } from "@chakra-
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { CommunitySupportButton } from "./components/CommunitySupportButton"
-import { useCurrentProposal } from "@/api"
+import { ProposalState, useCurrentProposal } from "@/api"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
 const compactFormatter = getCompactFormatter()
@@ -14,7 +14,9 @@ export const ProposalCommunitySupport = () => {
 
   const yourDepositColor = proposal.isDepositReached ? "#6DCB09" : "#004CFC"
   const othersDepositColor = proposal.isDepositReached ? "#B1F16C" : "#77A0FF"
-
+  if (proposal.state !== ProposalState.Pending) {
+    return null
+  }
   return (
     <Card
       border={`1px solid ${proposal.isDepositReached ? "#D5D5D5" : "#004CFC"}`}

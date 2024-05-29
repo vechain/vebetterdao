@@ -15,6 +15,10 @@ import { useVot3PastSupply, useVot3TokenDetails } from "../../vot3"
 import { useProposalVoteEvent } from "./useProposalVoteEvent"
 import { useProposalSnapshotVotingPower } from "./useProposalSnapshotVotingPower"
 import { useProposalSnapshot } from "./useProposalSnapshot"
+import { toIPFSURL } from "@/utils"
+import { useIpfsMetadata } from "@/api/ipfs"
+import { ProposalMetadata } from "./useProposalsEvents"
+import { useProposalQuorum } from "./useProposalQuorum"
 
 export const useProposal = (proposalId: string) => {
   const { account } = useWallet()
@@ -30,16 +34,34 @@ export const useProposal = (proposalId: string) => {
   }, [proposalSnapshot.data])
   const isDepositReached = useIsDepositReached(proposalId)
   const isProposalActive = useMemo(() => {
-    return proposalState?.data === ProposalState.Active
+    return proposalState?.data !== ProposalState.Pending
   }, [proposalState?.data])
   const isQuorumReached = useIsProposalQuorumReached(proposalId, isProposalActive)
   const proposalVotes = useProposalVotes(proposalId, isProposalActive)
   const proposalSnapshotVotingPower = useProposalSnapshotVotingPower(proposalSnapshotBlock, isProposalActive)
   const proposalSnapshotVot3 = useVot3PastSupply(proposalSnapshotBlock, isProposalActive)
+  const proposalQuorum = useProposalQuorum(proposalSnapshotBlock, isProposalActive)
+
   const vot3Token = useVot3TokenDetails()
   const roundIdVoteStart = useMemo(() => {
     return proposalCreatedEvent.data?.roundIdVoteStart
   }, [proposalCreatedEvent.data?.roundIdVoteStart])
+  const metadataUri = useMemo(() => {
+    if (!proposalCreatedEvent.data?.description) {
+      return undefined
+    }
+    return toIPFSURL(proposalCreatedEvent.data?.description)
+  }, [proposalCreatedEvent.data?.description])
+  const totalVotes = useMemo(() => {
+    if (!proposalVotes.data) return 0
+    return (
+      Number(proposalVotes.data.forVotes) +
+      Number(proposalVotes.data.againstVotes) +
+      Number(proposalVotes.data.abstainVotes)
+    )
+  }, [proposalVotes.data])
+
+  const proposalMetadata = useIpfsMetadata<ProposalMetadata>(metadataUri)
 
   const calls = [
     proposalState,
@@ -53,6 +75,8 @@ export const useProposal = (proposalId: string) => {
     isQuorumReached,
     proposalSnapshotVotingPower,
     proposalSnapshotVot3,
+    proposalQuorum,
+    proposalMetadata,
   ]
 
   const { votingStartDate, isVotingStartDateLoading, votingEndDate, isVotingEndDateLoading } =
@@ -71,7 +95,6 @@ export const useProposal = (proposalId: string) => {
     const forVotes = Number(proposalVotes.data?.forVotes || "0")
     const againstVotes = Number(proposalVotes.data?.againstVotes || "0")
     const abstainVotes = Number(proposalVotes.data?.abstainVotes || "0")
-    const totalVotes = forVotes + againstVotes + abstainVotes
     const forPercentage = (totalVotes ? forVotes / totalVotes : 0) * 100
     const againstPercentage = (totalVotes ? againstVotes / totalVotes : 0) * 100
     const abstainPercentage = (totalVotes ? abstainVotes / totalVotes : 0) * 100
@@ -92,17 +115,21 @@ export const useProposal = (proposalId: string) => {
       : Number(supportingUserCount)
     const userVotingPowerOnSnapshot = scaleVot3Amount(proposalSnapshotVotingPower.data)
     const userVot3OnSnapshot = scaleVot3Amount(proposalSnapshotVot3.data)
+    const quorumPercentage = totalVotes ? totalVotes / Number(proposalQuorum.data?.scaled) : 0
+    const quorumChartPercentage = Math.min(quorumPercentage || 0, 1) * 100
 
     const result = {
       id: proposalId,
-      title: proposalCreatedEvent.data?.description,
-      isTitleLoading: proposalCreatedEvent.isLoading,
-      description: proposalCreatedEvent.data?.description, // TODO: get the right description
-      isDescriptionLoading: proposalCreatedEvent.isLoading,
+      title: proposalMetadata.data?.title || "",
+      isTitleLoading: proposalCreatedEvent.isLoading || proposalMetadata.isLoading,
+      description: proposalMetadata.data?.shortDescription || "",
+      isDescriptionLoading: proposalCreatedEvent.isLoading || proposalMetadata.isLoading,
       proposer: proposalCreatedEvent.data?.proposer || "",
       isProposerLoading: proposalCreatedEvent.isLoading,
       roundIdVoteStart,
       isRoundIdVoteStartLoading: proposalCreatedEvent.isLoading,
+      proposalCreationDate: new Date().getTime(), // TODO: calculate right value
+      supportReachedDate: new Date().getTime(), // TODO: calculate right value
       votingStartDate,
       isVotingStartDateLoading,
       votingEndDate,
@@ -145,13 +172,17 @@ export const useProposal = (proposalId: string) => {
       isVotesLoading: proposalVotes.isLoading,
       isQuorumReached: isQuorumReached.data,
       isQuorumReachedLoading: isQuorumReached.isLoading,
+      quorum: proposalQuorum.data?.scaled,
+      isQuorumLoading: proposalQuorum.isLoading,
+      quorumPercentage,
+      quorumChartPercentage,
     }
 
     const mock = {}
 
     return { ...result, ...mock }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [...calls, votingStartDate, isVotingStartDateLoading, votingEndDate, isVotingEndDateLoading])
+  }, [...calls, votingStartDate, isVotingStartDateLoading, votingEndDate, isVotingEndDateLoading, totalVotes])
 
   const error = useMemo(
     () => calls.find(call => call.error)?.error || null,

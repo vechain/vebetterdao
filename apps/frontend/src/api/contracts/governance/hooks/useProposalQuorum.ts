@@ -45,12 +45,12 @@ export const getProposalQuorumQueryKey = (blockNumber?: string | number) => ["pr
  * @param blockNumber  the block number to check (proposal.voteStart)
  * @returns  the quorum at the given block number
  */
-export const useProposalQuorum = (blockNumber?: string | number) => {
+export const useProposalQuorum = (blockNumber?: string | number, enabled = false) => {
   const { thor } = useConnex()
 
   return useQuery({
     queryKey: getProposalQuorumQueryKey(blockNumber),
     queryFn: async () => await getProposalQuorum(thor, blockNumber),
-    enabled: !!thor && !!blockNumber,
+    enabled: !!thor && !!blockNumber && enabled,
   })
 }
