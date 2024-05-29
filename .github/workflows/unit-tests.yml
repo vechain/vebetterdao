@@ -43,7 +43,7 @@ jobs:
           target: "packages/contracts/"
           solc-version: "0.8.20"
           fail-on: none
-          slither-args: --filter-paths "openzeppelin" "governance/libraries/GovernorGovernanceLogic.sol" --exclude-informational --exclude-optimization --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
+          slither-args: --filter-paths "openzeppelin" "contracts/governance/libraries/GovernorGovernanceLogic.sol" --exclude-informational --exclude-optimization --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
 
       - name: Create/update checklist as PR comment
         uses: actions/github-script@v7
