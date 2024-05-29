@@ -58,7 +58,7 @@ export const useB3trApprove = ({
       isClosable: true,
     })
     onSuccess?.()
-  }, [invalidateCache, toast, onSuccess, account, amount, spender])
+  }, [invalidateCache, toast, onSuccess, account, amount, spender, queryClient])
 
   const result = useSendTransaction({
     signerAccount: account,

@@ -64,7 +64,14 @@ export const AppPreviewDetailCard = ({
       <CardBody>
         <VStack w="full" spacing={4} align="flex-start">
           <Skeleton w="full" h={200} isLoaded={!isBannerLoading} rounded={"3xl"}>
-            <Image w="full" src={app.banner ?? notFoundImage} h={"full"} objectFit={"cover"} rounded={"3xl"} />
+            <Image
+              w="full"
+              src={app.banner ?? notFoundImage}
+              h={"full"}
+              objectFit={"cover"}
+              rounded={"3xl"}
+              alt={`${app.name} banner`}
+            />
           </Skeleton>
           <HStack w="full" justify={"space-between"}>
             <HStack spacing={4} mt={4}>

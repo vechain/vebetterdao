@@ -68,11 +68,11 @@ export const useClaimNFT = ({
     })
 
     onSuccess?.()
-  }, [queryClient, toast, account])
+  }, [queryClient, toast, account, invalidateCache, onSuccess])
 
   const handleOnFailure = useCallback(() => {
     onFailure?.()
-  }, [toast, onFailure])
+  }, [onFailure])
 
   const result = useSendTransaction({
     signerAccount: account,

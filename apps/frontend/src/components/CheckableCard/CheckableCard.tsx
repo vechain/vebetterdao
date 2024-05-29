@@ -51,7 +51,7 @@ export const CheckableCard: React.FC<CheckableCardProps> = ({
       <CardBody>
         <Stack spacing={4} align={"flex-start"} {...stackProps}>
           <HStack justify={"space-between"} w="full" alignItems={"flex-start"}>
-            <Image src={imageSrc} boxSize={32} />
+            <Image src={imageSrc} boxSize={32} alt={`Checkable card image for ${title}`} />
             <Radio size="lg" isChecked={checked} onChange={e => onChange(e.target.checked)} rounded={"full"} />
           </HStack>
           <Box>

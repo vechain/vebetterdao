@@ -31,6 +31,7 @@ export const AppCard = ({ xApp }: Props) => {
       <Box w="full" position={"relative"} h={100}>
         <Skeleton w="full" h="full" isLoaded={!isBannerLoading}>
           <Image
+            alt={`Banner for ${appMetadata?.name}`}
             w="full"
             src={banner?.image}
             h={"full"}

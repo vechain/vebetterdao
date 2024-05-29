@@ -26,7 +26,7 @@ type Props = {
 export default function EditAppPage({ params }: Readonly<Props>) {
   useEffect(() => {
     AnalyticsUtils.trackPage(`apps/edit/${params.appId}`)
-  }, [])
+  }, [params.appId])
 
   return (
     <MotionVStack>
