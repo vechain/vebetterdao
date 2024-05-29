@@ -60,7 +60,7 @@ export const CastVoteModal: React.FC<Props> = ({ isOpen, onOpen, onClose, propos
   const onTryAgain = useCallback(() => {
     castVoteMutation.resetStatus()
     onOpen()
-  }, [onConfirmationClose, onOpen])
+  }, [onOpen, castVoteMutation])
 
   if (castVoteMutation.status !== "ready")
     return (

@@ -36,7 +36,11 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
   const { data: roundAmount, isLoading: roundAmountLoading, error: roundAmountError } = useAllocationAmount(roundId)
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
   const { data: baseAmount, isLoading: baseAmountLoading, error: baseAmountError } = useAllocationBaseAmount(roundId)
-  const { data: maxDAppAllocation, isLoading: maxDAppAllocationLoading, error: maxDAppAllocationError } = useMaxAllocationAmount(roundId)
+  const {
+    data: maxDAppAllocation,
+    isLoading: maxDAppAllocationLoading,
+    error: maxDAppAllocationError,
+  } = useMaxAllocationAmount(roundId)
 
   const isVotingConcluded = data?.voteEndTimestamp?.isBefore()
 
@@ -92,7 +96,7 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
         </Text>
       </VStack>
     )
-  }, [hasVoted, isVotingConcluded])
+  }, [hasVoted, isVotingConcluded, bgGradient])
   return (
     <Card w="full" borderRadius={"3xl"}>
       <CardBody>
@@ -108,7 +112,9 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
               </HStack>
             </Skeleton>
             <Skeleton isLoaded={!isLoading}>
-              <Heading size={["lg", "xl"]} data-testid="round-title">Allocations | Round #{data?.roundId}</Heading>
+              <Heading size={["lg", "xl"]} data-testid="round-title">
+                Allocations | Round #{data?.roundId}
+              </Heading>
             </Skeleton>
             <Skeleton isLoaded={!isLoading}>
               <Text color="gray.500" fontSize={["sm", "md"]}>

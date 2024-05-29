@@ -120,7 +120,7 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
     // I needed a useEffect here because inside the callback the isB3trToVot3 wan not updated
     if (amount === "") return
     setValue("amount", filterAmount(amount))
-  }, [isB3trToVot3, amount])
+  }, [isB3trToVot3, amount, filterAmount, setValue])
 
   const maxButton = useMemo(
     () => (
@@ -133,7 +133,7 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
         Max
       </Button>
     ),
-    [maxBalance],
+    [maxBalance, setValue],
   )
 
   return (

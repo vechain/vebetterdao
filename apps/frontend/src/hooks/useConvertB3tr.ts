@@ -7,13 +7,11 @@ import {
   buildB3trApprovesTx,
   getB3TrTokenDetailsQueryKey,
 } from "@/api"
-import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback, useMemo } from "react"
 import { useConnex, useWallet } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
-import BigNumber from "bignumber.js"
 import { removingExcessDecimals } from "@/utils/MathUtils"
 
 const config = getConfig()
@@ -39,7 +37,6 @@ export const useConvertB3tr = ({
 }: useMintB3trProps): UseSendTransactionReturnValue => {
   const { thor } = useConnex()
   const { account } = useWallet()
-  const toast = useToast()
   const queryClient = useQueryClient()
 
   const { data: tokenDetails } = useB3trTokenDetails()
@@ -101,7 +98,7 @@ export const useConvertB3tr = ({
     }
 
     onSuccess?.()
-  }, [invalidateCache, queryClient, toast, onSuccess, account, amount])
+  }, [invalidateCache, queryClient, onSuccess, account])
 
   const result = useSendTransaction({
     signerAccount: account,

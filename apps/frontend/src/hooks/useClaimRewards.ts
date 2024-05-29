@@ -78,7 +78,7 @@ export const useClaimRewards = ({
   const onMutate = useCallback(async () => {
     const clauses = buildClauses(roundRewards)
     return result.sendTransaction(clauses)
-  }, [buildClauses, result])
+  }, [buildClauses, result, roundRewards])
 
   return { ...result, sendTransaction: onMutate }
 }

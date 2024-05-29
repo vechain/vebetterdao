@@ -54,7 +54,7 @@ export const B3trAllowance = () => {
     return amount <= parseInt(b3trBalance?.scaled)
   }, [amount, b3trBalance])
 
-  const isFormValid = useMemo(() => isValidAddress && isAmountValid, [isValidAddress, amount])
+  const isFormValid = useMemo(() => isValidAddress && isAmountValid, [isValidAddress, isAmountValid])
 
   const handleSubmit = (event: { preventDefault: () => void }) => {
     event.preventDefault()

@@ -44,7 +44,7 @@ export const AppDetailCard = ({ appId, showEditButton = true }: Props) => {
     if (!account || !appModerators || !xAppAdmin) return false
     if (compareAddresses(xAppAdmin, account)) return true
     return appModerators.some(mod => compareAddresses(mod, account))
-  }, [account, appModerators, xApp?.receiverAddress, xAppAdmin])
+  }, [account, appModerators, xAppAdmin])
 
   const navigateToEdit = () => {
     router.push(`/apps/edit/${appId}`)
@@ -80,14 +80,21 @@ export const AppDetailCard = ({ appId, showEditButton = true }: Props) => {
         xAppId={xApp.id}
       />
     )
-  }, [isMobile, openMobileOptions, xApp, isMobileOptionsOpen, closeMobileOptions])
+  }, [isMobile, openMobileOptions, xApp, isMobileOptionsOpen, closeMobileOptions, appMetadata, appMetadataLoading])
 
   return (
     <Card variant={"baseWithBorder"} w="full">
       <CardBody>
         <VStack w="full" spacing={4} align="flex-start">
           <Skeleton w="full" h={200} isLoaded={!isBannerLoading} rounded={"3xl"}>
-            <Image w="full" src={banner?.image} h={"full"} objectFit={"cover"} rounded={"3xl"} />
+            <Image
+              w="full"
+              src={banner?.image}
+              h={"full"}
+              objectFit={"cover"}
+              rounded={"3xl"}
+              alt={`${xApp?.name} banner`}
+            />
           </Skeleton>
           <HStack w="full" justify={"space-between"}>
             <HStack spacing={4} mt={4}>
