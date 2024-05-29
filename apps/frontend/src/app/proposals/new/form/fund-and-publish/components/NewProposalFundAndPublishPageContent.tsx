@@ -154,7 +154,7 @@ export const NewProposalFundAndPublishPageContent = () => {
                         required: t("This field is required"),
                         max: {
                           value: threshold ?? 0,
-                          message: t("The maximum amount is #{{threshold}}", { threshold: threshold }),
+                          message: t("The maximum amount is {{threshold}}", { threshold: threshold }),
                         },
                         validate: value => {
                           if (value > Number(balance?.scaled)) {
