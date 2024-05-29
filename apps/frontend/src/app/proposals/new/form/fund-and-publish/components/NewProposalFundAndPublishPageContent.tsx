@@ -16,7 +16,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
-import { useCallback, useEffect } from "react"
+import { useCallback } from "react"
 import { useProposalFormStore } from "@/store/useProposalFormStore"
 import { VOT3Icon } from "@/components"
 import { useDepositThreshold, useVot3Balance } from "@/api"
@@ -38,14 +38,6 @@ export const NewProposalFundAndPublishPageContent = () => {
   const { data: balance, isLoading: balanceLoading } = useVot3Balance(account ?? undefined)
   const { data: threshold, isLoading: thresholdLoading } = useDepositThreshold()
   const { setData, title, shortDescription, markdownDescription, actions, votingStartRoundId } = useProposalFormStore()
-
-  //redirect the user to the beginning of the form if the required data is missing
-  // this happens in case the user tries to access this page directly
-  useEffect(() => {
-    if (!title || !shortDescription || !markdownDescription || !votingStartRoundId) {
-      router.push("/proposals/new/form")
-    }
-  }, [title, shortDescription, markdownDescription, actions, votingStartRoundId, router])
 
   const { register, handleSubmit, formState } = useForm<FormData>({
     defaultValues: {

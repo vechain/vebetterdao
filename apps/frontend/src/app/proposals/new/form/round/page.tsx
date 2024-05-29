@@ -1,9 +1,11 @@
 "use client"
 
 import { MotionVStack } from "@/components"
+import { useProposalFormStore } from "@/store/useProposalFormStore"
 import { AnalyticsUtils } from "@/utils"
 import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
+import { useRouter } from "next/router"
 import { useEffect } from "react"
 
 const NewProposalRoundPageContent = dynamic(
@@ -19,9 +21,20 @@ const NewProposalRoundPageContent = dynamic(
 )
 
 export default function NewProposalRoundPage() {
+  const router = useRouter()
+  const { title, shortDescription, markdownDescription } = useProposalFormStore()
+
   useEffect(() => {
     AnalyticsUtils.trackPage("NewProposal/round")
   }, [])
+
+  //redirect the user to the beginning of the form if the required data is missing
+  // this happens in case the user tries to access this page directly
+  useEffect(() => {
+    if (!title || !shortDescription || !markdownDescription) {
+      router.push("/proposals/new")
+    }
+  }, [title, shortDescription, markdownDescription, router])
 
   return (
     <MotionVStack>
