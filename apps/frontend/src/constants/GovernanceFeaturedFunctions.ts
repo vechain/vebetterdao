@@ -101,7 +101,7 @@ export type GovernanceFeaturedFunction = {
     })[]
   }
 }
-type GovernanceFeaturedContractWithFunctions = {
+export type GovernanceFeaturedContractWithFunctions = {
   name: string
   description: string
 
