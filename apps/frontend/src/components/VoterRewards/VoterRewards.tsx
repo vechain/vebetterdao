@@ -12,7 +12,6 @@ import {
   Image,
   useDisclosure,
   ModalOverlay,
-  ModalContent,
   ModalBody,
   Modal,
 } from "@chakra-ui/react"
@@ -136,7 +135,7 @@ export const VoterRewards: React.FC = () => {
   return (
     <>
       <Card w="full">
-        <Image src="/images/voter-rewards-bg.svg" position={"absolute"} zIndex={0} />
+        <Image src="/images/voter-rewards-bg.svg" position={"absolute"} zIndex={0} alt="voter-rewards-background" />
         <CardBody p={6}>
           <VStack spacing={4} w="full" align={"flex-start"}>
             <HStack w="full" justify={"space-between"}>

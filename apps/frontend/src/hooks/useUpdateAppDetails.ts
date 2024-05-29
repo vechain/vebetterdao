@@ -1,5 +1,4 @@
 import { getXAppMetadataQueryKey, getXAppsQueryKey } from "@/api"
-import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
@@ -35,7 +34,6 @@ export const useUpdateAppDetails = ({
   invalidateCache = true,
 }: useUpdateAppDetailsProps): useUpdateAppMetadataReturnValue => {
   const { account } = useWallet()
-  const toast = useToast()
   const queryClient = useQueryClient()
 
   const buildClauses = useCallback(
@@ -84,7 +82,7 @@ export const useUpdateAppDetails = ({
     }
 
     onSuccess?.()
-  }, [invalidateCache, queryClient, toast, onSuccess, appId])
+  }, [invalidateCache, queryClient, onSuccess, appId])
 
   const result = useSendTransaction({
     signerAccount: account,
