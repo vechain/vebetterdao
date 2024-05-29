@@ -3,7 +3,7 @@
 import { MotionVStack } from "@/components"
 import { AnalyticsUtils } from "@/utils"
 import { Button, Card, CardBody, Divider, HStack, Heading, VStack } from "@chakra-ui/react"
-import { useCallback, useEffect } from "react"
+import { useCallback, useEffect, useLayoutEffect } from "react"
 import MarkdownPreview from "@uiw/react-markdown-preview"
 import { useProposalFormStore } from "@/store/useProposalFormStore"
 import { NewProposalForm } from "../functions/details/components/NewProposalForm"
@@ -15,13 +15,9 @@ export default function NewProposalPage() {
   const { t } = useTranslation()
   const { actions, markdownDescription, title, shortDescription } = useProposalFormStore()
 
-  useEffect(() => {
-    AnalyticsUtils.trackPage("NewProposalFormDetailsPage")
-  }, [])
-
   //redirect the user to the beginning of the form if the required data is missing
   // this happens in case the user tries to access this page directly
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!title || !shortDescription || !markdownDescription) {
       router.push("/proposals/new")
     }

@@ -6,7 +6,7 @@ import { AnalyticsUtils } from "@/utils"
 import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
-import { useEffect } from "react"
+import { useEffect, useLayoutEffect } from "react"
 
 const NewProposalFundAndPublishPageContent = dynamic(
   () =>
@@ -30,7 +30,7 @@ export default function NewProposalFundAndPublishPage() {
 
   //redirect the user to the beginning of the form if the required data is missing
   // this happens in case the user tries to access this page directly
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!title || !shortDescription || !markdownDescription || !votingStartRoundId) {
       router.push("/proposals/new")
     }
