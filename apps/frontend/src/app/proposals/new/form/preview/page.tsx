@@ -3,7 +3,7 @@
 import { MotionVStack } from "@/components"
 import { AnalyticsUtils } from "@/utils"
 import { Button, Card, CardBody, Divider, HStack, Heading, VStack } from "@chakra-ui/react"
-import { useCallback, useEffect, useLayoutEffect } from "react"
+import { useCallback, useEffect, useLayoutEffect, useMemo } from "react"
 import MarkdownPreview from "@uiw/react-markdown-preview"
 import { useProposalFormStore } from "@/store/useProposalFormStore"
 import { NewProposalForm } from "../functions/details/components/NewProposalForm"
@@ -17,11 +17,15 @@ export default function NewProposalPage() {
 
   //redirect the user to the beginning of the form if the required data is missing
   // this happens in case the user tries to access this page directly
+  const isVisitAuthorized = useMemo(
+    () => !!title && !!shortDescription && !!markdownDescription,
+    [title, shortDescription, markdownDescription],
+  )
   useLayoutEffect(() => {
-    if (!title || !shortDescription || !markdownDescription) {
+    if (!isVisitAuthorized) {
       router.push("/proposals/new")
     }
-  }, [title, shortDescription, markdownDescription, router])
+  }, [isVisitAuthorized, router])
 
   const onContinue = useCallback(() => {
     router.push("/proposals/new/form/round")
@@ -34,6 +38,8 @@ export default function NewProposalPage() {
   useEffect(() => {
     AnalyticsUtils.trackPage("NewProposal/preview")
   }, [])
+
+  if (!isVisitAuthorized) return null
 
   return (
     <MotionVStack>

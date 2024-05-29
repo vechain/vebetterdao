@@ -6,7 +6,7 @@ import { AnalyticsUtils } from "@/utils"
 import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/router"
-import { useEffect, useLayoutEffect } from "react"
+import { useEffect, useLayoutEffect, useMemo } from "react"
 
 const NewProposalRoundPageContent = dynamic(
   () => import("./components/NewProposalRoundPageContent").then(mod => mod.NewProposalRoundPageContent),
@@ -30,11 +30,18 @@ export default function NewProposalRoundPage() {
 
   //redirect the user to the beginning of the form if the required data is missing
   // this happens in case the user tries to access this page directly
+
+  const isVisitAuthorized = useMemo(
+    () => !!title && !!shortDescription && !!markdownDescription,
+    [title, shortDescription, markdownDescription],
+  )
   useLayoutEffect(() => {
-    if (!title || !shortDescription || !markdownDescription) {
+    if (!isVisitAuthorized) {
       router.push("/proposals/new")
     }
-  }, [title, shortDescription, markdownDescription, router])
+  }, [isVisitAuthorized, router])
+
+  if (!isVisitAuthorized) return null
 
   return (
     <MotionVStack>
