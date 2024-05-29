@@ -38,7 +38,7 @@ export const useDelegateVot3 = ({
 
     const clauses = buildDelegateVot3Tx(thor, address)
     return [clauses]
-  }, [thor, address])
+  }, [thor, address, tokenDetails])
 
   //Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {

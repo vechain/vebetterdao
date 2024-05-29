@@ -60,14 +60,14 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
   const handleConvertB3tr = useCallback(() => {
     mutationData.resetStatus()
     mutationData.sendTransaction(undefined)
-  }, [mutationData.resetStatus, mutationData.sendTransaction])
+  }, [mutationData])
 
   const handleClose = useCallback(() => {
     mutationData.resetStatus()
     onClose()
     setIsB3trToVot3(true)
     setValue("amount", "")
-  }, [mutationData.resetStatus, onClose])
+  }, [mutationData, onClose, setValue])
 
   const { b3trColor, vot3Color } = useTokenColors()
 
@@ -101,7 +101,7 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
         </HStack>
       )
     }
-  }, [isB3trToVot3, amount])
+  }, [isB3trToVot3, amountText, b3trColor, vot3Color])
 
   if (mutationData.status !== "ready")
     return (

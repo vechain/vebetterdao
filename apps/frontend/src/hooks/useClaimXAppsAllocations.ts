@@ -40,7 +40,7 @@ export const useClaimXAppsAllocations = ({
       const clauses = buildClaimXAppAllocationTx(thor, roundId, appIds)
       return clauses
     },
-    [account, thor],
+    [thor],
   )
 
   // Refetch queries to update ui after the tx is confirmed
@@ -83,7 +83,7 @@ export const useClaimXAppsAllocations = ({
   const onMutate = useCallback(async () => {
     const clauses = buildClauses(roundId, appIds)
     return result.sendTransaction(clauses)
-  }, [buildClauses, result])
+  }, [buildClauses, result, roundId, appIds])
 
   return { ...result, sendTransaction: onMutate }
 }

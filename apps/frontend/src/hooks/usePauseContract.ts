@@ -93,7 +93,7 @@ export const usePauseContract = ({ contract, contractName, onSuccess, invalidate
     ]
 
     return clauses
-  }, [])
+  }, [contract, contractInterface, contractName])
 
   const buildUnpauseClause = useCallback(() => {
     const clauses: EnhancedClause[] = [
@@ -107,7 +107,7 @@ export const usePauseContract = ({ contract, contractName, onSuccess, invalidate
     ]
 
     return clauses
-  }, [])
+  }, [contract, contractInterface, contractName])
 
   const performCacheInvalidation = useCallback(async () => {
     if (invalidateCache) {
@@ -129,7 +129,7 @@ export const usePauseContract = ({ contract, contractName, onSuccess, invalidate
         })
       }
     }
-  }, [invalidateCache, queryClient])
+  }, [invalidateCache, queryClient, contract])
 
   //Refetch queries to update ui after the tx is confirmed
   const handleOnSuccessPause = useCallback(async () => {
@@ -144,7 +144,7 @@ export const usePauseContract = ({ contract, contractName, onSuccess, invalidate
       isClosable: true,
     })
     onSuccess?.()
-  }, [invalidateCache, queryClient, toast, onSuccess])
+  }, [toast, onSuccess, contractName, performCacheInvalidation])
 
   const handleOnSuccessUnpause = useCallback(async () => {
     await performCacheInvalidation()
@@ -158,7 +158,7 @@ export const usePauseContract = ({ contract, contractName, onSuccess, invalidate
       isClosable: true,
     })
     onSuccess?.()
-  }, [invalidateCache, queryClient, toast, onSuccess])
+  }, [toast, onSuccess, contractName, performCacheInvalidation])
 
   const pauseTxResult = useSendTransaction({
     signerAccount: account,
