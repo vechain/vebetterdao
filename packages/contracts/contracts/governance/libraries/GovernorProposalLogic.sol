@@ -38,10 +38,6 @@ import { DoubleEndedQueue } from "@openzeppelin/contracts/utils/structs/DoubleEn
 /// @notice Library for managing proposals in the Governor contract.
 /// @dev This library provides functions to create, cancel, execute, and validate proposals.
 library GovernorProposalLogic {
-  using GovernorStateLogic for GovernorStorageTypes.GovernorStorage;
-  using GovernorClockLogic for GovernorStorageTypes.GovernorStorage;
-  using GovernorDepositLogic for GovernorStorageTypes.GovernorStorage;
-  using GovernorFunctionRestrictionsLogic for GovernorStorageTypes.GovernorStorage;
   using GovernorGovernanceLogic for GovernorStorageTypes.GovernorStorage;
   using DoubleEndedQueue for DoubleEndedQueue.Bytes32Deque;
 
@@ -307,7 +303,11 @@ library GovernorProposalLogic {
   ) external returns (uint256) {
     uint256 proposalId = hashProposal(targets, values, calldatas, descriptionHash);
 
-    self.validateStateBitmap(proposalId, GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Succeeded));
+    GovernorStateLogic.validateStateBitmap(
+      self,
+      proposalId,
+      GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Succeeded)
+    );
 
     uint48 etaSeconds = _queueOperations(
       self,
@@ -350,7 +350,8 @@ library GovernorProposalLogic {
   ) external returns (uint256) {
     uint256 proposalId = hashProposal(targets, values, calldatas, descriptionHash);
 
-    self.validateStateBitmap(
+    GovernorStateLogic.validateStateBitmap(
+      self,
       proposalId,
       GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Succeeded) |
         GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Queued)
@@ -414,8 +415,11 @@ library GovernorProposalLogic {
         GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Executed)
     );
 
-    if (account == proposalProposer(self, proposalId)){
-      require(self._state(proposalId) == GovernorTypes.ProposalState.Pending, "Governor: proposal not pending");
+    if (account == proposalProposer(self, proposalId)) {
+      require(
+        GovernorStateLogic._state(self, proposalId) == GovernorTypes.ProposalState.Pending,
+        "Governor: proposal not pending"
+      );
     }
 
     bytes32 timelockId = self.timelockIds[proposalId];
@@ -455,7 +459,7 @@ library GovernorProposalLogic {
     uint256 startRoundId,
     uint256 depositAmount
   ) private returns (uint256) {
-    uint256 depositThresholdAmount = self._depositThreshold();
+    uint256 depositThresholdAmount = GovernorDepositLogic._depositThreshold(self);
 
     _setProposal(
       self,
@@ -469,7 +473,7 @@ library GovernorProposalLogic {
     );
 
     if (depositAmount > 0) {
-      self.depositFunds(depositAmount, proposer, proposalId);
+      GovernorDepositLogic.depositFunds(self, depositAmount, proposer, proposalId);
     }
 
     emit ProposalCreated(
@@ -531,10 +535,10 @@ library GovernorProposalLogic {
 
     if (self.proposals[proposalId].roundIdVoteStart != 0) {
       // Proposal already exists
-      revert GovernorUnexpectedProposalState(proposalId, self._state(proposalId), bytes32(0));
+      revert GovernorUnexpectedProposalState(proposalId, GovernorStateLogic._state(self, proposalId), bytes32(0));
     }
 
-    self.checkFunctionsRestriction(targets, calldatas);
+    GovernorFunctionRestrictionsLogic.checkFunctionsRestriction(self, targets, calldatas);
   }
 
   /**
@@ -651,7 +655,7 @@ library GovernorProposalLogic {
   ) internal view returns (bool) {
     uint256 currentRoundId = self.xAllocationVoting.currentRoundId();
     uint256 currentRoundDeadline = self.xAllocationVoting.roundDeadline(currentRoundId);
-    uint48 currentBlock = self.clock();
+    uint48 currentBlock = GovernorClockLogic.clock(self);
 
     // this could happen if the round ended and the next one not started yet
     if (currentRoundDeadline <= currentBlock) {
@@ -686,8 +690,8 @@ library GovernorProposalLogic {
     uint256 currentRoundDeadline = self.xAllocationVoting.currentRoundDeadline();
 
     // if current round ended and a new one did not start yet
-    if (currentRoundDeadline <= self.clock()) {
-      currentRoundDeadline = self.clock();
+    if (currentRoundDeadline <= GovernorClockLogic.clock(self)) {
+      currentRoundDeadline = GovernorClockLogic.clock(self);
     }
 
     return currentRoundDeadline + roundsDurationLeft + amountOfRoundsLeft;

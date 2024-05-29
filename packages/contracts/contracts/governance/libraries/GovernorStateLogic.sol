@@ -34,12 +34,6 @@ import { GovernorDepositLogic } from "./GovernorDepositLogic.sol";
 /// @title GovernorStateLogic
 /// @notice Library for Governor state logic, managing the state transitions and validations of governance proposals.
 library GovernorStateLogic {
-  using GovernorProposalLogic for GovernorStorageTypes.GovernorStorage;
-  using GovernorVotesLogic for GovernorStorageTypes.GovernorStorage;
-  using GovernorQuorumLogic for GovernorStorageTypes.GovernorStorage;
-  using GovernorClockLogic for GovernorStorageTypes.GovernorStorage;
-  using GovernorDepositLogic for GovernorStorageTypes.GovernorStorage;
-
   /// @notice Bitmap representing all possible proposal states.
   bytes32 internal constant ALL_PROPOSAL_STATES_BITMAP =
     bytes32((2 ** (uint8(type(GovernorTypes.ProposalState).max) + 1)) - 1);
@@ -136,18 +130,20 @@ library GovernorStateLogic {
       return GovernorTypes.ProposalState.Pending;
     }
 
-    uint256 currentTimepoint = self.clock();
-    uint256 deadline = self._proposalDeadline(proposalId);
+    uint256 currentTimepoint = GovernorClockLogic.clock(self);
+    uint256 deadline = GovernorProposalLogic._proposalDeadline(self, proposalId);
 
     if (deadline >= currentTimepoint) {
-      if (self.proposalDepositReached(proposalId)) {
+      if (GovernorDepositLogic.proposalDepositReached(self, proposalId)) {
         return GovernorTypes.ProposalState.Active;
       } else {
         return GovernorTypes.ProposalState.DepositNotMet;
       }
-    } else if (!self.quorumReached(proposalId) || !self.voteSucceeded(proposalId)) {
+    } else if (
+      !GovernorQuorumLogic.quorumReached(self, proposalId) || !GovernorVotesLogic.voteSucceeded(self, proposalId)
+    ) {
       return GovernorTypes.ProposalState.Defeated;
-    } else if (self.proposalEta(proposalId) == 0) {
+    } else if (GovernorProposalLogic.proposalEta(self, proposalId) == 0) {
       return GovernorTypes.ProposalState.Succeeded;
     } else {
       bytes32 queueid = self.timelockIds[proposalId];

@@ -33,7 +33,6 @@ import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 /// @title GovernorVotesLogic
 /// @notice Library for handling voting logic in the Governor contract.
 library GovernorVotesLogic {
-  using GovernorStateLogic for GovernorStorageTypes.GovernorStorage;
   using GovernorProposalLogic for GovernorStorageTypes.GovernorStorage;
   using GovernorConfigurator for GovernorStorageTypes.GovernorStorage;
 
@@ -215,18 +214,18 @@ library GovernorVotesLogic {
     uint8 support,
     string calldata reason
   ) external returns (uint256) {
-    self.validateStateBitmap(proposalId, GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Active));
+    GovernorStateLogic.validateStateBitmap(self, proposalId, GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Active));
 
-    uint256 weight = self.vot3.getPastVotes(voter, self._proposalSnapshot(proposalId));
+    uint256 weight = self.vot3.getPastVotes(voter, GovernorProposalLogic._proposalSnapshot(self, proposalId));
     uint256 power = Math.sqrt(weight) * 1e9;
 
-    if (weight < self.getVotingThreshold()) {
-      revert GovernorVotingThresholdNotMet(weight, self.getVotingThreshold());
+    if (weight < GovernorConfigurator.getVotingThreshold(self)) {
+      revert GovernorVotingThresholdNotMet(weight, GovernorConfigurator.getVotingThreshold(self));
     }
 
     _countVote(self, proposalId, voter, support, weight, power);
 
-    self.voterRewards.registerVote(self._proposalSnapshot(proposalId), voter, weight, Math.sqrt(weight));
+    self.voterRewards.registerVote(GovernorProposalLogic._proposalSnapshot(self, proposalId), voter, weight, Math.sqrt(weight));
 
     emit VoteCast(voter, proposalId, support, weight, power, reason);
 

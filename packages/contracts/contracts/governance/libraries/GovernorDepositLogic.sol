@@ -31,8 +31,6 @@ import { GovernorTypes } from "./GovernorTypes.sol";
 /// @notice Library for managing deposits related to proposals in the Governor contract.
 /// @dev This library provides functions to deposit and withdraw tokens for proposals, and to get deposit-related information.
 library GovernorDepositLogic {
-  using GovernorStateLogic for GovernorStorageTypes.GovernorStorage;
-
   /// @dev Emitted when a deposit is made to a proposal.
   event ProposalDeposit(address indexed depositor, uint256 indexed proposalId, uint256 amount);
 
@@ -64,7 +62,11 @@ library GovernorDepositLogic {
       revert GovernorNonexistentProposal(proposalId);
     }
 
-    self.validateStateBitmap(proposalId, GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Pending));
+    GovernorStateLogic.validateStateBitmap(
+      self,
+      proposalId,
+      GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Pending)
+    );
 
     proposal.depositAmount += amount;
 
@@ -81,7 +83,8 @@ library GovernorDepositLogic {
   function withdraw(GovernorStorageTypes.GovernorStorage storage self, uint256 proposalId, address depositer) external {
     uint256 amount = self.deposits[proposalId][depositer];
 
-    self.validateStateBitmap(
+    GovernorStateLogic.validateStateBitmap(
+      self,
       proposalId,
       GovernorStateLogic.ALL_PROPOSAL_STATES_BITMAP ^
         GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Pending) ^

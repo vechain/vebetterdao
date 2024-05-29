@@ -34,8 +34,6 @@ import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.s
 /// @notice Library for managing quorum numerators using checkpointed data structures.
 library GovernorQuorumLogic {
   using Checkpoints for Checkpoints.Trace208;
-  using GovernorClockLogic for GovernorStorageTypes.GovernorStorage;
-  using GovernorVotesLogic for GovernorStorageTypes.GovernorStorage;
   using GovernorProposalLogic for GovernorStorageTypes.GovernorStorage;
 
   /// @notice Error that is thrown when the new quorum numerator exceeds the denominator.
@@ -128,7 +126,7 @@ library GovernorQuorumLogic {
       revert GovernorInvalidQuorumFraction(newQuorumNumerator, denominator);
     }
 
-    self.quorumNumeratorHistory.push(self.clock(), SafeCast.toUint208(newQuorumNumerator));
+    self.quorumNumeratorHistory.push(GovernorClockLogic.clock(self), SafeCast.toUint208(newQuorumNumerator));
 
     emit QuorumNumeratorUpdated(oldQuorumNumerator, newQuorumNumerator);
   }
@@ -145,6 +143,6 @@ library GovernorQuorumLogic {
     GovernorStorageTypes.GovernorStorage storage self,
     uint256 proposalId
   ) internal view returns (bool) {
-    return quorum(self, self._proposalSnapshot(proposalId)) <= self.proposalTotalVotes[proposalId];
+    return quorum(self, GovernorProposalLogic._proposalSnapshot(self, proposalId)) <= self.proposalTotalVotes[proposalId];
   }
 }
