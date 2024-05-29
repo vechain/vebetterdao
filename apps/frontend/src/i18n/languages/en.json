@@ -1,4 +1,7 @@
 {
+  "The maximum amount is #{{threshold}}": "The maximum amount is #{{threshold}}",
+  "Enter the amount of VOT3": "Enter the amount of VOT3",
+  "Insufficient balance": "Insufficient balance",
   "This field is required": "This field is required",
   "Enter proposal title": "Enter proposal title",
   "Proposal title": "Proposal title",

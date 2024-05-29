@@ -16,7 +16,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
-import { useCallback } from "react"
+import { useCallback, useEffect } from "react"
 import { useProposalFormStore } from "@/store/useProposalFormStore"
 import { VOT3Icon } from "@/components"
 import { useDepositThreshold, useVot3Balance } from "@/api"
@@ -24,7 +24,7 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { useForm } from "react-hook-form"
 import { useCreateProposal, useUploadProposalMetadata } from "@/hooks"
 import { TransactionModal } from "@/components/TransactionModal"
-import { useTranslation, useTranslation } from "react-i18next"
+import { useTranslation } from "react-i18next"
 
 type FormData = {
   amount: number
@@ -38,6 +38,14 @@ export const NewProposalFundAndPublishPageContent = () => {
   const { data: balance, isLoading: balanceLoading } = useVot3Balance(account ?? undefined)
   const { data: threshold, isLoading: thresholdLoading } = useDepositThreshold()
   const { setData, title, shortDescription, markdownDescription, actions, votingStartRoundId } = useProposalFormStore()
+
+  //redirect the user to the beginning of the form if the required data is missing
+  // this happens in case the user tries to access this page directly
+  useEffect(() => {
+    if (!title || !shortDescription || !markdownDescription || !votingStartRoundId) {
+      router.push("/proposals/new/form")
+    }
+  }, [title, shortDescription, markdownDescription, actions, votingStartRoundId, router])
 
   const { register, handleSubmit, formState } = useForm<FormData>({
     defaultValues: {
@@ -132,10 +140,11 @@ export const NewProposalFundAndPublishPageContent = () => {
         <CardBody py={8}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <VStack spacing={8} align="flex-start">
-              <Heading size="lg">Lock VOT3 to fund your proposal</Heading>
+              <Heading size="lg">Community support</Heading>
               <Text fontSize="md" color="gray.500">
-                Your proposal will need at least {balance?.formatted} VOT3 to become active. You can take this VOT3 from
-                your wallet, or wait until other users fund your proposal.
+                Your proposal will need support from the community to become active. Users who like your proposal and
+                want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will
+                need a total of {threshold} V3 to become active. You can also contribute with your own V3.
               </Text>
               <VStack spacing={2} align="flex-start" w="full">
                 <Heading size="md">How much VOT3 do you want to lock to fund this proposal?</Heading>
@@ -151,17 +160,20 @@ export const NewProposalFundAndPublishPageContent = () => {
                     <Input
                       {...register("amount", {
                         required: t("This field is required"),
-                        max: { value: threshold ?? 0, message: `The maximum amount is ${threshold}` },
+                        max: {
+                          value: threshold ?? 0,
+                          message: t("The maximum amount is #{{threshold}}", { threshold: threshold }),
+                        },
                         validate: value => {
                           if (value > Number(balance?.scaled)) {
-                            return "Insufficient balance"
+                            return t("Insufficient balance")
                           }
                         },
                       })}
                       ml={2}
                       w="full"
                       variant="flushed"
-                      placeholder="Enter the amount of VOT3"
+                      placeholder={t("Enter the amount of VOT3")}
                       fontSize={["xl", "xl", "3xl"]}
                       fontFamily={"Instrument Sans Variable"}
                     />
