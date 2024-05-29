@@ -116,7 +116,7 @@ export const ConfirmTransactionModalContent: React.FC<Props> = ({
           </>
         )
     }
-  }, [status, error])
+  }, [status, error, onTryAgain])
 
   //close modal after 3 seconds
   useEffect(() => {
@@ -129,7 +129,7 @@ export const ConfirmTransactionModalContent: React.FC<Props> = ({
     return () => {
       clearTimeout(timeout)
     }
-  }, [status, onSuccess])
+  }, [status, onSuccess, onSuccessTimeout])
 
   return (
     <>

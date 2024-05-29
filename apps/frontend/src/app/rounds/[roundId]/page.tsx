@@ -26,7 +26,7 @@ type Props = {
 export default function Round({ params }: Readonly<Props>) {
   useEffect(() => {
     AnalyticsUtils.trackPage(`Round/${params.roundId}`)
-  }, [])
+  }, [params.roundId])
 
   return (
     <MotionVStack>
