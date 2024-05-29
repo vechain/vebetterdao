@@ -211,8 +211,6 @@ export const getEnvWhitelistedContractsWithFunctions = (env: EnvConfig): Governa
   const config = getContractsConfig(env)
   const whitelistedContracts = config.B3TR_GOVERNOR_WHITELISTED_METHODS
 
-  console.log("whitelistedContracts", whitelistedContracts)
-
   return GovernanceFeaturedContractsWithFunctions.filter(contract => {
     return Object.keys(whitelistedContracts).includes(contract.contract.abi.contractName)
   }).map(contract => {
