@@ -14,5 +14,5 @@ export const VTHOIcon: React.FC<Props> = ({ colorVariant, ...props }) => {
   const logo = useColorModeValue(paths.light, paths.dark)
   const logoVariant = colorVariant ? paths[colorVariant] : logo
 
-  return <Image src={logoVariant} {...props} />
+  return <Image src={logoVariant} alt="vtho-icon" {...props} />
 }

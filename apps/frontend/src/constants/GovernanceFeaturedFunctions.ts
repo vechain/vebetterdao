@@ -13,11 +13,12 @@ import {
   TreasuryJson,
 } from "@repo/contracts"
 
-import { getConfig } from "@repo/config"
+import { getConfig, getContractsConfig } from "@repo/config"
 import { abi } from "thor-devkit"
 import { JsonContractType, resolveAbiFunctionFromCalldata } from "@repo/utils/ContractUtils"
 import { ProposalFormAction } from "@/store/useProposalFormStore"
 import { compareAddresses } from "@repo/utils/AddressUtils"
+import { EnvConfig } from "@repo/config/contracts"
 
 const config = getConfig()
 
@@ -93,13 +94,14 @@ export const getActionsFromTargetsAndCalldatas = (
 export type GovernanceFeaturedFunction = {
   name: string
   description: string
+  icon?: string
   abiDefinition: Omit<abi.Function.Definition, "inputs"> & {
     inputs: (abi.Function.Parameter & {
       requiresEthParse?: boolean
     })[]
   }
 }
-type GovernanceFeaturedContractWithFunctions = {
+export type GovernanceFeaturedContractWithFunctions = {
   name: string
   description: string
 
@@ -118,6 +120,7 @@ export const GovernanceFeaturedContractsWithFunctions: GovernanceFeaturedContrac
     functions: [
       {
         name: "Transfer B3TR",
+        icon: "/images/arrow-right.svg",
         description: "Transfer B3TR tokens to a recipient",
         abiDefinition: (() => {
           const transferB3trDefinition = getFunctionDefinitionFromAbi(TreasuryContractJson, "transferB3TR")
@@ -199,3 +202,23 @@ export const GovernanceFeaturedContractsWithFunctions: GovernanceFeaturedContrac
     ],
   },
 ]
+
+/**
+ * Get the list of contracts that are whitelisted in the current environment (uses the contract whitelist in the contracts config)
+ * @returns  The list of contracts that are whitelisted in the current environment
+ */
+export const getEnvWhitelistedContractsWithFunctions = (env: EnvConfig): GovernanceFeaturedContractWithFunctions[] => {
+  const config = getContractsConfig(env)
+  const whitelistedContracts = config.B3TR_GOVERNOR_WHITELISTED_METHODS
+
+  return GovernanceFeaturedContractsWithFunctions.filter(contract => {
+    return Object.keys(whitelistedContracts).includes(contract.contract.abi.contractName)
+  }).map(contract => {
+    const whitelistedFunctions = whitelistedContracts[contract.contract.abi.contractName] as string[]
+    const functions = contract.functions.filter(f => whitelistedFunctions.includes(f.abiDefinition.name))
+    return {
+      ...contract,
+      functions,
+    }
+  })
+}

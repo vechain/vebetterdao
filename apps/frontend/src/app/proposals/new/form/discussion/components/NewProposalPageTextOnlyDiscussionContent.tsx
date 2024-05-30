@@ -3,10 +3,12 @@ import { FormData, NewProposalForm } from "../../functions/details/components/Ne
 import { useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { useProposalFormStore } from "@/store/useProposalFormStore"
+import { useTranslation } from "react-i18next"
 
 export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
   const router = useRouter()
 
+  const { t } = useTranslation()
   const { setData } = useProposalFormStore()
 
   const goBack = useCallback(() => {
@@ -30,7 +32,7 @@ export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
     <Card w="full">
       <CardBody py={8}>
         <VStack spacing={8} align="flex-start">
-          <Heading size="lg">Text only proposal</Heading>
+          <Heading size="lg">{t("Text only proposal")}</Heading>
 
           <NewProposalForm
             formId="new-proposal-form"
@@ -43,10 +45,10 @@ export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
       <CardFooter>
         <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
           <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
-            Go back
+            {t("Go back")}
           </Button>
           <Button rounded="full" colorScheme="primary" size="lg" type="submit" form="new-proposal-form">
-            Continue
+            {t("Continue")}
           </Button>
         </HStack>
       </CardFooter>
