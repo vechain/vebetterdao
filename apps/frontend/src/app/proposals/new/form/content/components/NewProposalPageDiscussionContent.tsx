@@ -10,6 +10,7 @@ import dynamic from "next/dynamic"
 import { ContextStore } from "@uiw/react-md-editor"
 import rehypeSanitize from "rehype-sanitize"
 import { useTranslation } from "react-i18next"
+import { useAutomaticUpdateProposalTemplate } from "../../../hooks/useAutomaticUpdateProposalTemplate"
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false })
 
@@ -18,6 +19,9 @@ export const NewProposalPageDiscussionContent = () => {
   const router = useRouter()
 
   const { markdownDescription, setData } = useProposalFormStore()
+
+  //automatic update the proposal template based on the form data
+  useAutomaticUpdateProposalTemplate()
 
   const onChange = useCallback(
     (value?: string, _event?: ChangeEvent<HTMLTextAreaElement>, _state?: ContextStore) => {
