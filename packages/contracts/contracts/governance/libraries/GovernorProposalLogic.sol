@@ -38,7 +38,6 @@ import { DoubleEndedQueue } from "@openzeppelin/contracts/utils/structs/DoubleEn
 /// @notice Library for managing proposals in the Governor contract.
 /// @dev This library provides functions to create, cancel, execute, and validate proposals.
 library GovernorProposalLogic {
-  using GovernorGovernanceLogic for GovernorStorageTypes.GovernorStorage;
   using DoubleEndedQueue for DoubleEndedQueue.Bytes32Deque;
 
   /**
@@ -361,7 +360,7 @@ library GovernorProposalLogic {
     self.proposals[proposalId].executed = true;
 
     // before execute: register governance call in queue.
-    if (self.executor() != contractAddress) {
+    if (GovernorGovernanceLogic.executor(self) != contractAddress) {
       for (uint256 i = 0; i < targets.length; ++i) {
         if (targets[i] == address(this)) {
           self.governanceCall.pushBack(keccak256(calldatas[i]));
@@ -372,7 +371,7 @@ library GovernorProposalLogic {
     _executeOperations(self, contractAddress, proposalId, targets, values, calldatas, descriptionHash);
 
     // after execute: cleanup governance call queue.
-    if (self.executor() != contractAddress && !self.governanceCall.empty()) {
+    if (GovernorGovernanceLogic.executor(self) != contractAddress && !self.governanceCall.empty()) {
       self.governanceCall.clear();
     }
 
