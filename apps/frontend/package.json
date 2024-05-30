@@ -10,6 +10,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
+    "test:watch": "vitest watch",
     "test:coverage:fe": "vitest run --coverage",
     "clean": "rm -rf .next node_modules dist"
   },

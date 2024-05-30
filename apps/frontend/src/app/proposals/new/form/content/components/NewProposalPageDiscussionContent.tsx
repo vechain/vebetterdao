@@ -9,10 +9,12 @@ import dynamic from "next/dynamic"
 
 import { ContextStore } from "@uiw/react-md-editor"
 import rehypeSanitize from "rehype-sanitize"
+import { useTranslation } from "react-i18next"
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false })
 
 export const NewProposalPageDiscussionContent = () => {
+  const { t } = useTranslation()
   const router = useRouter()
 
   const { markdownDescription, setData } = useProposalFormStore()
@@ -35,11 +37,11 @@ export const NewProposalPageDiscussionContent = () => {
     <Card w="full">
       <CardBody py={8}>
         <VStack spacing={8} align="flex-start">
-          <Heading size="lg">Share more about your idea</Heading>
+          <Heading size="lg">{t("Share more about your idea")}</Heading>
           <Text fontSize="md" color="gray.500">
-            Providing more information will help the community understand the purpose of your proposal and make informed
-            voting decisions. Include details such as motivation, a detailed description, or any other relevant
-            information.
+            {t(
+              "Providing more information will help the community understand the purpose of your proposal and make informed voting decisions. Include details such as motivation, a detailed description, or any other relevant information.",
+            )}
           </Text>
 
           <Box w="full" h={500}>
@@ -55,10 +57,10 @@ export const NewProposalPageDiscussionContent = () => {
 
           <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
             <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
-              Go back
+              {t("Go back")}
             </Button>
             <Button rounded="full" colorScheme="primary" size="lg" onClick={onContinue}>
-              Continue
+              {t("Continue")}
             </Button>
           </HStack>
         </VStack>

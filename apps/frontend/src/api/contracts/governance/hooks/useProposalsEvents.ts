@@ -9,6 +9,11 @@ const b3trGovernorAbi = B3TRGovernorJson.abi
 
 const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
 
+export type ProposalMetadata = {
+  title: string
+  shortDescription: string
+  markdownDescription: string
+}
 export type ProposalCreatedEvent = {
   proposalId: string
   proposer: string
@@ -17,7 +22,7 @@ export type ProposalCreatedEvent = {
   signatures: string[]
   callDatas: string[]
   description: string
-  roundIdVoteStart: string,
+  roundIdVoteStart: string
   depositThreshold: string
 }
 
@@ -32,6 +37,12 @@ export type ProposalExecutedEvent = {
 export type ProposalQueuedEvent = {
   proposalId: string
   etaSeconds: string
+}
+
+export type ProposalDepositEvent = {
+  depositor: string
+  proposalId: string
+  amount: string
 }
 
 export const getProposalsEvents = async (thor: Connex.Thor) => {
@@ -50,6 +61,10 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
   const proposalQueuedAbi = b3trGovernorAbi.find(abi => abi.name === "ProposalQueued")
   if (!proposalQueuedAbi) throw new Error("ProposalQueued event not found")
   const proposalQueuedEvent = new abi.Event(proposalQueuedAbi as abi.Event.Definition)
+
+  const proposalDepositAbi = b3trGovernorAbi.find(abi => abi.name === "ProposalDeposit")
+  if (!proposalDepositAbi) throw new Error("ProposalDeposit event not found")
+  const proposalDepositEvent = new abi.Event(proposalDepositAbi as abi.Event.Definition)
 
   /**
    * Filter criteria to get the events from the governor contract that we are interested in
@@ -72,11 +87,13 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
       address: GOVERNANCE_CONTRACT,
       topic0: proposalQueuedEvent.signature,
     },
+    {
+      address: GOVERNANCE_CONTRACT,
+      topic0: proposalDepositEvent.signature,
+    },
   ]
 
   const events = await getAllEvents({ thor, filterCriteria })
-
-  console.log({ events })
 
   /**
    * Decode the events to get the data we are interested in (i.e the proposals)
@@ -85,6 +102,7 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
   const decodedCanceledProposalEvents: ProposalCanceledEvent[] = []
   const decodedExecutedProposalEvents: ProposalExecutedEvent[] = []
   const decodedQueuedProposalEvents: ProposalQueuedEvent[] = []
+  const decodedDepositProposalEvents: ProposalDepositEvent[] = []
 
   //   TODO: runtime validation with zod ?
   events.forEach(event => {
@@ -126,6 +144,15 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
         })
         break
       }
+      case proposalDepositEvent.signature: {
+        const decoded = proposalDepositEvent.decode(event.data, event.topics)
+        decodedDepositProposalEvents.push({
+          depositor: decoded[0],
+          proposalId: decoded[1],
+          amount: decoded[2],
+        })
+        break
+      }
       default: {
         throw new Error("Unknown event")
       }
@@ -137,6 +164,7 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
     canceled: decodedCanceledProposalEvents,
     executed: decodedExecutedProposalEvents,
     queued: decodedQueuedProposalEvents,
+    deposits: decodedDepositProposalEvents,
   }
 }
 

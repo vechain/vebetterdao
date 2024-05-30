@@ -2,9 +2,11 @@ import { ProposalState, useCurrentProposal } from "@/api"
 import { timestampToTimeLeftCompact } from "@/utils"
 import { HStack, Text, VStack } from "@chakra-ui/react"
 import { UilClockEight } from "@iconscout/react-unicons"
+import { useTranslation } from "react-i18next"
 
 export const ProposalOverviewTime = () => {
   const { proposal } = useCurrentProposal()
+  const { t } = useTranslation()
 
   if (proposal.isStateLoading) return null
 
@@ -12,10 +14,10 @@ export const ProposalOverviewTime = () => {
     case ProposalState.Succeeded:
       return (
         <VStack alignItems={"stretch"}>
-          <Text fontWeight={"400"}>Finished</Text>
+          <Text fontWeight={"400"}>{t("Finished")}</Text>
           <HStack>
             <UilClockEight />
-            <Text>{timestampToTimeLeftCompact(proposal.votingEndDate)} ago</Text>
+            <Text>{t("{{time}} ago", { time: timestampToTimeLeftCompact(proposal.votingEndDate) })}</Text>
           </HStack>
         </VStack>
       )
@@ -25,7 +27,7 @@ export const ProposalOverviewTime = () => {
         return (
           <VStack alignItems={"stretch"}>
             <Text fontWeight={"400"} color="#6A6A6A">
-              Starts in
+              {t("Starts in")}
             </Text>
             <HStack color="#004CFC">
               <UilClockEight size="20px" />
@@ -36,7 +38,7 @@ export const ProposalOverviewTime = () => {
       }
       return (
         <VStack alignItems={"stretch"}>
-          <Text fontWeight={"400"}>Starts in</Text>
+          <Text fontWeight={"400"}>{t("Starts in")}</Text>
           <HStack>
             <UilClockEight size="20px" />
             <Text fontWeight={600}>{timestampToTimeLeftCompact(proposal.votingStartDate)}</Text>
@@ -47,7 +49,7 @@ export const ProposalOverviewTime = () => {
       return (
         <VStack alignItems={"stretch"}>
           <Text fontWeight={"400"} color="#6A6A6A">
-            Finish in
+            {t("Finish in")}
           </Text>
           <HStack>
             <UilClockEight />

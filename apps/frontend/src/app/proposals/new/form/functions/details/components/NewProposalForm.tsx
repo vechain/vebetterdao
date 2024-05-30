@@ -9,6 +9,8 @@ import MDEditor from "@uiw/react-md-editor"
 import rehypeSanitize from "rehype-sanitize"
 import { FunctionParamsField } from "@/components"
 import { ethers } from "ethers"
+import { t } from "i18next"
+import { useTranslation } from "react-i18next"
 
 export type FormData = {
   title: string
@@ -26,6 +28,12 @@ type Props = {
   renderMarkdownDescription?: boolean
   renderActions?: boolean
 }
+
+/**
+ * This component read/write from/to useFormStore and renders a form to create a new proposal
+ * @param param0
+ * @returns
+ */
 export const NewProposalForm: React.FC<Props> = ({
   onSubmit,
   isDisabled = false,
@@ -35,8 +43,16 @@ export const NewProposalForm: React.FC<Props> = ({
   renderMarkdownDescription = false,
   renderActions = true,
 }) => {
+  const { t } = useTranslation()
   const { actions, setData, title, shortDescription, markdownDescription } = useProposalFormStore()
-  const { handleSubmit, register, control, formState, setValue } = useForm<FormData>()
+  const { handleSubmit, register, control, formState, setValue } = useForm<FormData>({
+    defaultValues: {
+      title: title ?? "",
+      description: shortDescription ?? "",
+      actions: [],
+      markdownDescription: markdownDescription ?? "",
+    },
+  })
 
   const { errors } = formState
   const { fields } = useFieldArray({
@@ -74,7 +90,7 @@ export const NewProposalForm: React.FC<Props> = ({
     setValue("title", title ?? "")
     setValue("description", shortDescription ?? "")
     setValue("markdownDescription", markdownDescription ?? "")
-  }, [actions, title, shortDescription, setValue])
+  }, [actions, title, shortDescription, setValue, markdownDescription])
 
   const onFormSubmit = useCallback(
     (data: FormData) => {
@@ -114,12 +130,12 @@ export const NewProposalForm: React.FC<Props> = ({
       <VStack spacing={8} align="flex-start" w="full">
         {renderTitle && (
           <FormControl isInvalid={!!errors.title}>
-            <FormLabel>Proposal title</FormLabel>
+            <FormLabel>{t("Proposal title")}</FormLabel>
             <Input
               isDisabled={isDisabled}
-              placeholder="Enter proposal title"
+              placeholder={t("Enter proposal title")}
               {...register("title", {
-                required: "This field is required",
+                required: t("This field is required"),
               })}
             />
             {errors.title && <FormErrorMessage>{errors.title.message}</FormErrorMessage>}
@@ -127,12 +143,12 @@ export const NewProposalForm: React.FC<Props> = ({
         )}
         {renderDescription && (
           <FormControl isInvalid={!!errors.description}>
-            <FormLabel>Proposal description</FormLabel>
+            <FormLabel>{t("Proposal description")}</FormLabel>
             <Textarea
               isDisabled={isDisabled}
-              placeholder="Enter proposal description"
+              placeholder={t("Enter proposal description")}
               {...register("description", {
-                required: "This field is required",
+                required: t("This field is required"),
               })}
             />
             {errors.description && <FormErrorMessage>{errors.description.message}</FormErrorMessage>}
@@ -141,7 +157,7 @@ export const NewProposalForm: React.FC<Props> = ({
         {renderMarkdownDescription && (
           <FormControl w="full" mt={4} maxH={400} h={400} isInvalid={!!errors.markdownDescription}>
             <FormLabel>
-              <Heading size="md">Your proposal</Heading>
+              <Heading size="md">{t("Your proposal")}</Heading>
             </FormLabel>
             <Controller
               name="markdownDescription"
@@ -153,7 +169,7 @@ export const NewProposalForm: React.FC<Props> = ({
                   }}
                   {...field}
                   height={"100%"}
-                  value={markdownDescription}
+                  value={field.value}
                   onChange={field.onChange}
                   previewOptions={{
                     rehypePlugins: [[rehypeSanitize]],
@@ -168,7 +184,7 @@ export const NewProposalForm: React.FC<Props> = ({
 
       {renderActions && (
         <VStack spacing={4} align="flex-start" w="full" mt={4}>
-          <Heading size="md">Executable functions</Heading>
+          <Heading size="md">{t("Executable functions")}</Heading>
           {fields?.map((field, index) => (
             <ExecutableFunctionCard
               key={field.id}

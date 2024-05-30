@@ -9,7 +9,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query"
 import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
-import { useConnex, useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/dapp-kit-react"
 import { XAllocationVoting__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { ethers } from "ethers"
@@ -21,8 +21,7 @@ import { ethers } from "ethers"
  */
 export type CastAllocationVotesProps = {
   appId: string
-  value: string
-  rawValue: number
+  votes: number
 }[]
 
 type useCastAllocationVotesProps = {
@@ -50,16 +49,15 @@ export const useCastAllocationVotes = ({
   onSuccess,
   invalidateCache = true,
 }: useCastAllocationVotesProps): useCastAllocationVotesReturnValue => {
-  const { thor } = useConnex()
   const { account } = useWallet()
   const queryClient = useQueryClient()
 
   const buildClauses = useCallback(
     (data: CastAllocationVotesProps) => {
-      const filteredData = data.filter(value => value.rawValue > 0)
+      const filteredData = data.filter(value => value.votes > 0)
 
       const apps = filteredData.map(value => value.appId)
-      const votes = filteredData.map(value => ethers.parseEther(value.rawValue.toString()))
+      const votes = filteredData.map(value => ethers.parseEther(value.votes.toString()))
 
       const clause: EnhancedClause = {
         to: getConfig().xAllocationVotingContractAddress,
@@ -71,7 +69,7 @@ export const useCastAllocationVotes = ({
 
       return [clause]
     },
-    [thor, roundId],
+    [roundId],
   )
 
   //Refetch queries to update ui after the tx is confirmed

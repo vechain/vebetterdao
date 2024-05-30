@@ -1,5 +1,6 @@
 import { Box, HStack, Text, VStack } from "@chakra-ui/react"
 import { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 type Props = {
   votes: number
@@ -9,6 +10,7 @@ type Props = {
   icon: ReactElement
 }
 export const ProposalVotesProgressBar = ({ text, votes, percentage, color, icon }: Props) => {
+  const { t } = useTranslation()
   return (
     <VStack alignItems={"stretch"}>
       <HStack justify={"space-between"}>
@@ -21,7 +23,7 @@ export const ProposalVotesProgressBar = ({ text, votes, percentage, color, icon 
             {votes}
           </Text>
           <Text color={color} fontSize="12px">
-            ({percentage}%)
+            {t("({{percentage}}%)", { percentage })}
           </Text>
         </HStack>
       </HStack>

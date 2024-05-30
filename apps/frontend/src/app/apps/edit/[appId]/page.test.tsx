@@ -2,7 +2,6 @@ import { expect, test, describe } from "vitest"
 import EditAppDetail from "./page"
 import { render, screen } from "../../../../../test"
 import * as hooks from "@/api/contracts/xApps"
-import * as dappKit from "@vechain/dapp-kit-react"
 
 const adminAddress = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa"
 //mock dappkit
