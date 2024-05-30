@@ -33,23 +33,19 @@ export const useProposal = (proposalId: string) => {
   const proposalDeposits = useProposalDeposits(proposalId)
   const proposalUserDeposit = useProposalUserDeposit(proposalId, account || "")
   const proposalSnapshot = useProposalSnapshot(proposalId)
-  const proposalSnapshotBlock = useMemo(() => {
-    return Number(proposalSnapshot.data)
-  }, [proposalSnapshot.data])
+  const proposalSnapshotBlock = useMemo(() => Number(proposalSnapshot.data), [proposalSnapshot.data])
   const isDepositReached = useIsDepositReached(proposalId)
-  const isProposalActive = useMemo(() => {
-    return proposalState?.data !== ProposalState.Pending
-  }, [proposalState?.data])
+  const isProposalActive = useMemo(() => proposalState?.data !== ProposalState.Pending, [proposalState?.data])
   const isQuorumReached = useIsProposalQuorumReached(proposalId, isProposalActive)
   const proposalVotes = useProposalVotes(proposalId, isProposalActive)
   const proposalSnapshotVotingPower = useProposalSnapshotVotingPower(proposalSnapshotBlock, isProposalActive)
   const proposalSnapshotVot3 = useVot3PastSupply(proposalSnapshotBlock, isProposalActive)
   const proposalQuorum = useProposalQuorum(proposalSnapshotBlock, isProposalActive)
-
   const vot3Token = useVot3TokenDetails()
-  const roundIdVoteStart = useMemo(() => {
-    return proposalCreatedEvent.data?.roundIdVoteStart
-  }, [proposalCreatedEvent.data?.roundIdVoteStart])
+  const roundIdVoteStart = useMemo(
+    () => proposalCreatedEvent.data?.roundIdVoteStart,
+    [proposalCreatedEvent.data?.roundIdVoteStart],
+  )
   const metadataUri = useMemo(() => {
     if (!proposalCreatedEvent.data?.description) {
       return undefined
@@ -210,53 +206,35 @@ export const useProposal = (proposalId: string) => {
 
     return { ...result, ...mock }
   }, [
-    proposalVoteEvents.userVote,
-    proposalVoteEvents.hasUserVoted,
-    proposalVotes.data?.forVotes,
-    proposalVotes.data?.againstVotes,
-    proposalVotes.data?.abstainVotes,
-    proposalVotes.isLoading,
+    proposalVoteEvents,
+    proposalVotes,
     totalVotes,
     scaleVot3Amount,
-    proposalCreatedEvent.data,
-    proposalCreatedEvent.isLoading,
-    proposalDeposits?.data,
-    proposalDeposits.isLoading,
-    proposalUserDeposit?.data,
-    proposalUserDeposit.isLoading,
-    proposalDepositEvent.supportingUserCount,
-    proposalDepositEvent.isLoading,
-    proposalSnapshotVotingPower.data,
-    proposalSnapshotVotingPower.isLoading,
-    proposalSnapshotVot3.data,
-    proposalSnapshotVot3.isLoading,
-    proposalQuorum.data?.scaled,
-    proposalQuorum.isLoading,
+    proposalCreatedEvent,
+    proposalDeposits,
+    proposalUserDeposit,
+    proposalDepositEvent,
+    proposalSnapshotVotingPower,
+    proposalSnapshotVot3,
+    proposalQuorum,
     proposalId,
-    proposalMetadata.data?.title,
-    proposalMetadata.data?.shortDescription,
-    proposalMetadata.isLoading,
+    proposalMetadata,
     roundIdVoteStart,
-    proposalQueuedEvent?.data,
-    proposalExecutedEvent?.data,
+    proposalQueuedEvent,
+    proposalExecutedEvent,
     votingStartDate,
     isVotingStartDateLoading,
     votingEndDate,
     isVotingEndDateLoading,
-    isDepositReached.data,
-    isDepositReached.isLoading,
-    proposalState.data,
-    proposalState.isLoading,
-    isQuorumReached.data,
-    isQuorumReached.isLoading,
+    isDepositReached,
+    proposalState,
+    isQuorumReached,
   ])
 
   const error = useMemo(() => calls.find(call => call.error)?.error || null, [calls])
   if (error) {
     console.error("error", error)
   }
-
-  console.log("pippo")
 
   return {
     proposal,

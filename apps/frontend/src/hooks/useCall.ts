@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 import { Interface } from "ethers"
+import { useCallback, useMemo } from "react"
 
 // Define a type to infer method names from the function definition
 type MethodName<T> = T extends (nameOrSignature: infer U) => any ? U : never
@@ -40,7 +41,7 @@ export const useCall = <T extends Interface>({
 }: UseCallParams<T>) => {
   const { thor } = useConnex()
 
-  const queryFn = async () => {
+  const queryFn = useCallback(async () => {
     try {
       const functionFragment = contractInterface?.getFunction(method)?.format("json")
       if (!functionFragment) throw new Error(`Method ${method} not found`)
@@ -62,12 +63,16 @@ export const useCall = <T extends Interface>({
       )
       throw error
     }
-  }
+  }, [args, contractAddress, contractInterface, mapResponse, method, thor])
+
+  const queryKey = useMemo(() => getCallKey({ method, keyArgs: keyArgs || args }), [method, keyArgs, args])
+
+  const enableQuery = useMemo(() => !!thor && thor.status.head.number > 0 && enabled, [enabled, thor])
 
   return useQuery({
-    queryFn: queryFn,
-    queryKey: getCallKey({ method, keyArgs: keyArgs || args }),
-    enabled: !!thor && thor.status.head.number > 0 && enabled,
+    queryFn,
+    queryKey,
+    enabled: enableQuery,
   })
 }
 
