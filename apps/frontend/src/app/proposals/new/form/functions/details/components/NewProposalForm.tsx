@@ -66,7 +66,7 @@ export const NewProposalForm: React.FC<Props> = ({
   })
 
   const { errors } = formState
-  const { fields, insert } = useFieldArray({
+  const { fields, insert, remove } = useFieldArray({
     control, // control props comes from useForm (optional: if you are using FormContext)
     name: "actions", // unique name for your Field Array
   })
@@ -208,6 +208,8 @@ export const NewProposalForm: React.FC<Props> = ({
                 calldata: undefined,
               })
             }
+
+            const wasAddedLater = fields.filter((_field, i) => _field.name === field.name && i < index).length > 0
             return (
               <ExecutableFunctionCard
                 key={field.id}
@@ -218,6 +220,7 @@ export const NewProposalForm: React.FC<Props> = ({
                 errors={errors}
                 isDisabled={isDisabled}
                 {...(canAddAnotherTransaction && { onAddAnotherTransactionClick: onAddAnotherTransactionClick })}
+                {...(wasAddedLater && { onRemoveTransactionClick: () => remove(index) })}
               />
             )
           })}
