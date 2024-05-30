@@ -41,19 +41,27 @@ export const useCall = <T extends Interface>({
   const { thor } = useConnex()
 
   const queryFn = async () => {
-    const functionFragment = contractInterface?.getFunction(method)?.format("json")
-    if (!functionFragment) throw new Error(`Method ${method} not found`)
+    try {
+      const functionFragment = contractInterface?.getFunction(method)?.format("json")
+      if (!functionFragment) throw new Error(`Method ${method} not found`)
 
-    const res = await thor
-      .account(contractAddress)
-      .method(JSON.parse(functionFragment))
-      .call(...args)
+      const res = await thor
+        .account(contractAddress)
+        .method(JSON.parse(functionFragment))
+        .call(...args)
 
-    if (res.vmError) return Promise.reject(new Error(`Method ${method} reverted: ${res.vmError}`))
+      if (res.vmError) return Promise.reject(new Error(`Method ${method} reverted: ${res.vmError}`))
 
-    if (mapResponse) return mapResponse(res)
+      if (mapResponse) return mapResponse(res)
 
-    return res.decoded[0]
+      return res.decoded[0]
+    } catch (error) {
+      console.error(
+        `Error calling ${method}: ${(error as Error)?.message} with args: ${JSON.stringify(args)}`,
+        (error as Error)?.stack,
+      )
+      throw error
+    }
   }
 
   return useQuery({

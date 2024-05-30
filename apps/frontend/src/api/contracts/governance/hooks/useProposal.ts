@@ -19,12 +19,16 @@ import { toIPFSURL } from "@/utils"
 import { useIpfsMetadata } from "@/api/ipfs"
 import { ProposalMetadata } from "./useProposalsEvents"
 import { useProposalQuorum } from "./useProposalQuorum"
+import { useProposalQueuedEvent } from "./useProposalQueuedEvent"
+import { useProposalExecutedEvent } from "./useProposalExecutedEvent"
 
 export const useProposal = (proposalId: string) => {
   const { account } = useWallet()
   const proposalState = useProposalState(proposalId)
   const proposalVoteEvents = useProposalVoteEvent(proposalId)
   const proposalCreatedEvent = useProposalCreatedEvent(proposalId)
+  const proposalQueuedEvent = useProposalQueuedEvent(proposalId)
+  const proposalExecutedEvent = useProposalExecutedEvent(proposalId)
   const proposalDepositEvent = useProposalDepositEvent(proposalId)
   const proposalDeposits = useProposalDeposits(proposalId)
   const proposalUserDeposit = useProposalUserDeposit(proposalId, account || "")
@@ -128,8 +132,15 @@ export const useProposal = (proposalId: string) => {
       isProposerLoading: proposalCreatedEvent.isLoading,
       roundIdVoteStart,
       isRoundIdVoteStartLoading: proposalCreatedEvent.isLoading,
-      proposalCreationDate: new Date().getTime(), // TODO: calculate right value
-      supportReachedDate: new Date().getTime(), // TODO: calculate right value
+      proposalCreationDate: proposalCreatedEvent?.data
+        ? new Date(proposalCreatedEvent?.data.blockMeta.blockTimestamp * 1000).getTime()
+        : undefined,
+      proposalQueuedDate: proposalQueuedEvent?.data
+        ? new Date(proposalQueuedEvent?.data.blockMeta.blockTimestamp * 1000).getTime()
+        : undefined,
+      proposalExecutedDate: proposalExecutedEvent?.data
+        ? new Date(proposalExecutedEvent?.data.blockMeta.blockTimestamp * 1000).getTime()
+        : undefined,
       votingStartDate,
       isVotingStartDateLoading,
       votingEndDate,
@@ -189,14 +200,12 @@ export const useProposal = (proposalId: string) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [...calls],
   )
+  if (error) {
+    console.error("error", error)
+  }
 
   return {
-    proposalState,
-    proposalVotes,
-    proposalCreatedEvent,
-    proposalDeposits,
     proposal,
-    error,
   }
 }
 

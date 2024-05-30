@@ -2,7 +2,6 @@ import {
   Circle,
   Heading,
   Step,
-  StepIcon,
   StepIndicator,
   StepSeparator,
   StepStatus,
@@ -14,48 +13,60 @@ import { t } from "i18next"
 import { useMemo } from "react"
 import { TimelineItem } from "./components/TimelineItem"
 import { ProposalCreatedTimelineItem } from "./components/ProposalCreatedTimelineItem"
-import { useCurrentProposal } from "@/api"
+import { ProposalState, useCurrentProposal } from "@/api"
 import dayjs from "dayjs"
 
 export const ProposalTimeline = () => {
   const { proposal } = useCurrentProposal()
   const steps = useMemo(
     () => [
-      () => <ProposalCreatedTimelineItem />,
-      () => (
-        <TimelineItem
-          title={t("Waiting for the round to start")}
-          description={dayjs(proposal.votingStartDate).format("MMM D, YYYY")}
-        />
-      ),
-      () => (
-        <TimelineItem
-          title={t("Voting session started")}
-          description={dayjs(proposal.votingStartDate).format("MMM D, YYYY")}
-        />
-      ),
-      () => (
-        <TimelineItem
-          title={t("Voting session ended")}
-          description={dayjs(proposal.votingStartDate).format("MMM D, YYYY")}
-        />
-      ),
-      () => (
-        <TimelineItem
-          title={t("Proposal on queue")}
-          description={dayjs(proposal.votingStartDate).format("MMM D, YYYY")}
-        />
-      ),
-      () => (
-        <TimelineItem
-          title={t("Proposal executed")}
-          description={dayjs(proposal.votingStartDate).format("MMM D, YYYY")}
-        />
-      ),
+      <ProposalCreatedTimelineItem key={0} />,
+      <TimelineItem key={1} title={t("Waiting for the round to start")} />,
+      <TimelineItem
+        key={2}
+        title={t("Voting session started")}
+        description={dayjs(proposal.votingStartDate).format("MMM D, YYYY")}
+      />,
+      <TimelineItem
+        key={3}
+        title={t("Voting session ended")}
+        description={dayjs(proposal.votingEndDate).format("MMM D, YYYY")}
+      />,
+      <TimelineItem
+        key={4}
+        title={t("Proposal on queue")}
+        description={proposal.proposalQueuedDate ? dayjs(proposal.proposalQueuedDate).format("MMM D, YYYY") : ""}
+      />,
+      <TimelineItem
+        key={5}
+        title={t("Proposal executed")}
+        description={proposal.proposalExecutedDate ? dayjs(proposal.proposalExecutedDate).format("MMM D, YYYY") : ""}
+      />,
     ],
-    [proposal.votingStartDate],
+    [proposal],
   )
-  const currentStep = 0
+  const currentStep = useMemo(() => {
+    if (proposal.state === ProposalState.Pending) {
+      return proposal.isDepositReached ? 1 : 0
+    }
+    if (proposal.state === ProposalState.Active) {
+      return 2
+    }
+    if (
+      proposal.state === ProposalState.Canceled ||
+      proposal.state === ProposalState.Defeated ||
+      proposal.state === ProposalState.Succeeded
+    ) {
+      return 3
+    }
+    if (proposal.state === ProposalState.Queued) {
+      return 4
+    }
+    if (proposal.state === ProposalState.Executed) {
+      return 5
+    }
+  }, [proposal.isDepositReached, proposal.state])
+
   const { activeStep } = useSteps({
     index: currentStep,
     count: steps.length,
@@ -75,7 +86,7 @@ export const ProposalTimeline = () => {
                 active={<Circle bg="#004CFC" size={"60%"} />}
               />
             </StepIndicator>
-            {step()}
+            {step}
             <StepSeparator />
           </Step>
         ))}
