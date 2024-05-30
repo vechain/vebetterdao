@@ -9,8 +9,10 @@ import { useProposalFormStore } from "@/store/useProposalFormStore"
 import { NewProposalForm } from "../functions/details/components/NewProposalForm"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 export default function NewProposalPage() {
+  const { account } = useWallet()
   const router = useRouter()
   const { t } = useTranslation()
   const { actions, markdownDescription, title, shortDescription } = useProposalFormStore()
@@ -18,8 +20,8 @@ export default function NewProposalPage() {
   //redirect the user to the beginning of the form if the required data is missing
   // this happens in case the user tries to access this page directly
   const isVisitAuthorized = useMemo(
-    () => !!title && !!shortDescription && !!markdownDescription,
-    [title, shortDescription, markdownDescription],
+    () => !!title && !!shortDescription && !!markdownDescription && !!account,
+    [title, shortDescription, markdownDescription, account],
   )
   useLayoutEffect(() => {
     if (!isVisitAuthorized) {

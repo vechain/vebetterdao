@@ -4,6 +4,7 @@ import { MotionVStack } from "@/components"
 import { useProposalFormStore } from "@/store/useProposalFormStore"
 import { AnalyticsUtils } from "@/utils"
 import { Spinner, VStack } from "@chakra-ui/react"
+import { useWallet } from "@vechain/dapp-kit-react"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 import { useEffect, useLayoutEffect, useMemo } from "react"
@@ -22,6 +23,7 @@ const NewProposalFundAndPublishPageContent = dynamic(
 )
 
 export default function NewProposalFundAndPublishPage() {
+  const { account } = useWallet()
   const router = useRouter()
   const { title, shortDescription, markdownDescription, votingStartRoundId } = useProposalFormStore()
   useEffect(() => {
@@ -31,8 +33,8 @@ export default function NewProposalFundAndPublishPage() {
   //redirect the user to the beginning of the form if the required data is missing
   // this happens in case the user tries to access this page directly
   const isVisitAuthorized = useMemo(
-    () => !!title && !!shortDescription && !!markdownDescription && !!votingStartRoundId,
-    [title, shortDescription, markdownDescription, votingStartRoundId],
+    () => !!title && !!shortDescription && !!markdownDescription && !!votingStartRoundId && !!account,
+    [title, shortDescription, markdownDescription, votingStartRoundId, account],
   )
 
   useLayoutEffect(() => {
