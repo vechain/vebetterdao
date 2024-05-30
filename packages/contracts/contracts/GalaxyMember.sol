@@ -176,8 +176,6 @@ contract GalaxyMember is
     $.b3tr = IB3TR(data.b3tr);
     $.treasury = data.treasury;
 
-    $._nextTokenId = 1; // First token ID starts from 1
-
     $.isPublicMintingPaused = false;
 
     _grantRole(DEFAULT_ADMIN_ROLE, data.admin);
