@@ -1,4 +1,4 @@
-import { useCurrentProposal } from "@/api"
+import { ProposalState, useCurrentProposal } from "@/api"
 import { Box, HStack, Image, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
@@ -8,6 +8,9 @@ const compactFormatter = getCompactFormatter()
 export const ProposalQuorumStatus = () => {
   const { t } = useTranslation()
   const { proposal } = useCurrentProposal()
+  if (proposal.state !== ProposalState.Active) {
+    return null
+  }
   return (
     <VStack align="stretch">
       <Text color="#6A6A6A" fontWeight={400} fontSize={"14px"}>
