@@ -67,21 +67,38 @@ export const useProposal = (proposalId: string) => {
 
   const proposalMetadata = useIpfsMetadata<ProposalMetadata>(metadataUri)
 
-  const calls = [
-    proposalState,
-    proposalVotes,
-    proposalVoteEvents,
-    proposalCreatedEvent,
-    proposalDepositEvent,
-    proposalDeposits,
-    proposalUserDeposit,
-    isDepositReached,
-    isQuorumReached,
-    proposalSnapshotVotingPower,
-    proposalSnapshotVot3,
-    proposalQuorum,
-    proposalMetadata,
-  ]
+  const calls = useMemo(
+    () => [
+      proposalState,
+      proposalVotes,
+      proposalVoteEvents,
+      proposalCreatedEvent,
+      proposalDepositEvent,
+      proposalDeposits,
+      proposalUserDeposit,
+      isDepositReached,
+      isQuorumReached,
+      proposalSnapshotVotingPower,
+      proposalSnapshotVot3,
+      proposalQuorum,
+      proposalMetadata,
+    ],
+    [
+      proposalState,
+      proposalVotes,
+      proposalVoteEvents,
+      proposalCreatedEvent,
+      proposalDepositEvent,
+      proposalDeposits,
+      proposalUserDeposit,
+      isDepositReached,
+      isQuorumReached,
+      proposalSnapshotVotingPower,
+      proposalSnapshotVot3,
+      proposalQuorum,
+      proposalMetadata,
+    ],
+  )
 
   const { votingStartDate, isVotingStartDateLoading, votingEndDate, isVotingEndDateLoading } =
     useProposalVoteDates(proposalId)
@@ -192,17 +209,54 @@ export const useProposal = (proposalId: string) => {
     const mock = {}
 
     return { ...result, ...mock }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [...calls, votingStartDate, isVotingStartDateLoading, votingEndDate, isVotingEndDateLoading, totalVotes])
+  }, [
+    proposalVoteEvents.userVote,
+    proposalVoteEvents.hasUserVoted,
+    proposalVotes.data?.forVotes,
+    proposalVotes.data?.againstVotes,
+    proposalVotes.data?.abstainVotes,
+    proposalVotes.isLoading,
+    totalVotes,
+    scaleVot3Amount,
+    proposalCreatedEvent.data,
+    proposalCreatedEvent.isLoading,
+    proposalDeposits?.data,
+    proposalDeposits.isLoading,
+    proposalUserDeposit?.data,
+    proposalUserDeposit.isLoading,
+    proposalDepositEvent.supportingUserCount,
+    proposalDepositEvent.isLoading,
+    proposalSnapshotVotingPower.data,
+    proposalSnapshotVotingPower.isLoading,
+    proposalSnapshotVot3.data,
+    proposalSnapshotVot3.isLoading,
+    proposalQuorum.data?.scaled,
+    proposalQuorum.isLoading,
+    proposalId,
+    proposalMetadata.data?.title,
+    proposalMetadata.data?.shortDescription,
+    proposalMetadata.isLoading,
+    roundIdVoteStart,
+    proposalQueuedEvent?.data,
+    proposalExecutedEvent?.data,
+    votingStartDate,
+    isVotingStartDateLoading,
+    votingEndDate,
+    isVotingEndDateLoading,
+    isDepositReached.data,
+    isDepositReached.isLoading,
+    proposalState.data,
+    proposalState.isLoading,
+    isQuorumReached.data,
+    isQuorumReached.isLoading,
+  ])
 
-  const error = useMemo(
-    () => calls.find(call => call.error)?.error || null,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [...calls],
-  )
+  const error = useMemo(() => calls.find(call => call.error)?.error || null, [calls])
   if (error) {
     console.error("error", error)
   }
+
+  console.log("pippo")
 
   return {
     proposal,
