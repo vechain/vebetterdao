@@ -1,9 +1,10 @@
 import { Button, Card, CardBody, Grid, GridItem, HStack, Heading, Stack, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
-import { useCallback, useState } from "react"
+import { useCallback, useLayoutEffect, useState } from "react"
 import { CheckableCard, CheckableCardProps } from "@/components"
 import { useProposalFormStore } from "@/store/useProposalFormStore"
 import { useTranslation } from "react-i18next"
+import { useNewProposalPageGuard } from "../../form/hooks/useNewProposalPageGuard"
 
 const Steps: (Omit<CheckableCardProps, "checked" | "onChange"> & {
   route: string
@@ -25,9 +26,12 @@ const Steps: (Omit<CheckableCardProps, "checked" | "onChange"> & {
 ]
 export const NewProposalTypePageContent = () => {
   const { t } = useTranslation()
-  const { clearData } = useProposalFormStore()
-  const [selectedRoute, setSelectedRoute] = useState<string>(Steps[0]?.route as string)
   const router = useRouter()
+  const pageGuardResult = useNewProposalPageGuard()
+
+  const { clearData } = useProposalFormStore()
+
+  const [selectedRoute, setSelectedRoute] = useState<string>(Steps[0]?.route as string)
   const onChange = useCallback(
     (route: string) => () => {
       setSelectedRoute(route)
@@ -45,6 +49,16 @@ export const NewProposalTypePageContent = () => {
   const goBack = useCallback(() => {
     router.back()
   }, [router])
+
+  //redirect the user to the beginning of the form if the required data is missing
+  // this happens in case the user tries to access this page directly
+  useLayoutEffect(() => {
+    if (!pageGuardResult.isVisitAuthorized) {
+      router.push(pageGuardResult.redirectPath ?? "/proposals")
+    }
+  }, [pageGuardResult, router])
+
+  if (!pageGuardResult.isVisitAuthorized) return null
 
   return (
     <Grid

@@ -1,7 +1,9 @@
-import { Box, Card, CardBody, HStack, Heading, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Card, CardBody, HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import { Control, FieldArrayWithId, FieldError, FieldErrors, UseFormRegister } from "react-hook-form"
 import { GenerateFunctionToCallParamsInput } from "@/components"
 import { FormData } from "./NewProposalForm"
+import { useTranslation } from "react-i18next"
+import { FaPlus } from "react-icons/fa6"
 
 type Props = {
   field: FieldArrayWithId<FormData, "actions", "id">
@@ -10,6 +12,7 @@ type Props = {
   control: Control<FormData, any>
   errors?: FieldErrors<FormData>
   isDisabled?: boolean
+  onAddAnotherTransactionClick?: () => void
 }
 
 export const ExecutableFunctionCard: React.FC<Props> = ({
@@ -19,7 +22,9 @@ export const ExecutableFunctionCard: React.FC<Props> = ({
   register,
   control,
   isDisabled = false,
+  onAddAnotherTransactionClick,
 }) => {
+  const { t } = useTranslation()
   return (
     <Card w="full" variant="filled">
       <CardBody py={4}>
@@ -74,6 +79,17 @@ export const ExecutableFunctionCard: React.FC<Props> = ({
               )
             })}
           </VStack>
+          {!!onAddAnotherTransactionClick && (
+            <Button
+              size="sm"
+              onClick={onAddAnotherTransactionClick}
+              variant="primarySubtle"
+              alignSelf={"flex-start"}
+              rounded="full"
+              leftIcon={<FaPlus />}>
+              {t("Add another transaction")}
+            </Button>
+          )}
         </VStack>
       </CardBody>
     </Card>

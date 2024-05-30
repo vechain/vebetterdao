@@ -2,7 +2,8 @@ import { Button, Card, CardBody, Grid, GridItem, HStack, Heading, Stack, Text, V
 import { useRouter } from "next/navigation"
 import { StepCard, StepCardProps } from "@/components/StepCard"
 import { useTranslation } from "react-i18next"
-import { useCallback } from "react"
+import { useCallback, useLayoutEffect } from "react"
+import { useNewProposalPageGuard } from "../form/hooks/useNewProposalPageGuard"
 
 const Steps: StepCardProps[] = [
   {
@@ -35,6 +36,7 @@ const Steps: StepCardProps[] = [
 export const NewProposalPageContent = () => {
   const { t } = useTranslation()
   const router = useRouter()
+  const pageGuardResult = useNewProposalPageGuard()
 
   const onContinue = useCallback(() => {
     router.push("/proposals/new/type")
@@ -43,6 +45,16 @@ export const NewProposalPageContent = () => {
   const goBack = useCallback(() => {
     router.back()
   }, [router])
+
+  //redirect the user to the beginning of the form if the required data is missing
+  // this happens in case the user tries to access this page directly
+  useLayoutEffect(() => {
+    if (!pageGuardResult.isVisitAuthorized) {
+      router.push(pageGuardResult.redirectPath ?? "/proposals")
+    }
+  }, [pageGuardResult, router])
+
+  if (!pageGuardResult.isVisitAuthorized) return null
 
   return (
     <Grid

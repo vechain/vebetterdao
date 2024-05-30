@@ -36,6 +36,7 @@ type Props = {
   renderDescription?: boolean
   renderMarkdownDescription?: boolean
   renderActions?: boolean
+  canAddAnotherTransaction?: boolean
 }
 
 /**
@@ -51,6 +52,7 @@ export const NewProposalForm: React.FC<Props> = ({
   renderDescription = true,
   renderMarkdownDescription = false,
   renderActions = true,
+  canAddAnotherTransaction = true,
 }) => {
   const { t } = useTranslation()
   const { actions, setData, title, shortDescription, markdownDescription } = useProposalFormStore()
@@ -64,7 +66,7 @@ export const NewProposalForm: React.FC<Props> = ({
   })
 
   const { errors } = formState
-  const { fields } = useFieldArray({
+  const { fields, insert } = useFieldArray({
     control, // control props comes from useForm (optional: if you are using FormContext)
     name: "actions", // unique name for your Field Array
   })
@@ -192,19 +194,33 @@ export const NewProposalForm: React.FC<Props> = ({
       </VStack>
 
       {renderActions && (
-        <VStack spacing={4} align="flex-start" w="full" mt={4}>
+        <VStack spacing={8} align="flex-start" w="full" mt={12}>
           <Heading size="md">{t("Executable functions")}</Heading>
-          {fields?.map((field, index) => (
-            <ExecutableFunctionCard
-              key={field.id}
-              field={field}
-              index={index}
-              register={register}
-              control={control}
-              errors={errors}
-              isDisabled={isDisabled}
-            />
-          ))}
+          {fields?.map((field, index) => {
+            const onAddAnotherTransactionClick = () => {
+              insert(index + 1, {
+                name: field.name,
+                icon: field.icon,
+                description: field.description,
+                params: field.params,
+                abiDefinition: field.abiDefinition,
+                contractAddress: field.contractAddress,
+                calldata: undefined,
+              })
+            }
+            return (
+              <ExecutableFunctionCard
+                key={field.id}
+                field={field}
+                index={index}
+                register={register}
+                control={control}
+                errors={errors}
+                isDisabled={isDisabled}
+                {...(canAddAnotherTransaction && { onAddAnotherTransactionClick: onAddAnotherTransactionClick })}
+              />
+            )
+          })}
         </VStack>
       )}
     </form>
