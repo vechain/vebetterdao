@@ -7,7 +7,7 @@ import { airdropB3tr } from "../helpers/airdrop"
 export const setupLocalEnvironment = async (b3tr: B3TR, xAllocationVoting: XAllocationVoting, emissions: Emissions) => {
   const start = performance.now()
   console.log("Setup local environment")
-  const accounts = getTestKeys(12)
+  const accounts = getTestKeys(14)
 
   // Define specific accounts
   const admin = accounts[0]
