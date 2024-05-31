@@ -3,6 +3,7 @@ import { ProposalOverview } from "./ProposalOverview"
 import { ProposalContentAndActions } from "./ProposalContentAndActions/ProposalContentAndActions"
 import { ProposalState, useProposalCreatedEvent, useProposalState } from "@/api"
 import { ProposalCommunitySupport } from "./ProposalCommunitySupport"
+import { ProposalWithdrawDeposit } from "./ProposalWithdrawDeposit"
 
 type Props = {
   proposalId: string
@@ -24,8 +25,9 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
         <GridItem colSpan={[3, 3, 2]} gap={8}>
           <ProposalContentAndActions proposal={proposal} />
         </GridItem>
-
-        <GridItem colSpan={[3, 3, 1]}></GridItem>
+        <GridItem colSpan={[3, 3, 1]}>
+          <ProposalWithdrawDeposit />
+        </GridItem>
       </Grid>
     </VStack>
   )

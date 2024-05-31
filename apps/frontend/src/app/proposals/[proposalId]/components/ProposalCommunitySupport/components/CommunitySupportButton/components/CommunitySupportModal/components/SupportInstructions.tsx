@@ -23,14 +23,7 @@ export const SupportInstructions = ({ goToNextStep }: { goToNextStep: () => void
       <Text fontWeight={600} fontSize={"16px"}>
         {t("You will be able to get those tokens back when the round is over.")}
       </Text>
-      <Button
-        onClick={goToNextStep}
-        w="full"
-        bgColor={"#004CFC"}
-        color={"#FFFFFF"}
-        rounded={"full"}
-        fontSize={"16px"}
-        fontWeight={500}>
+      <Button onClick={goToNextStep} w="full" variant="primaryAction">
         {t("Continue")}
       </Button>
     </VStack>

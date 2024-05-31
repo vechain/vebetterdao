@@ -9,14 +9,7 @@ export const CommunitySupportButton = () => {
   const { t } = useTranslation()
   return (
     <>
-      <Button
-        onClick={onOpen}
-        bgColor={proposal.isDepositReached ? "#E1E1E1" : "#004CFC"}
-        disabled={proposal.isDepositReached}
-        color={"#FFFFFF"}
-        rounded={"full"}
-        fontSize={"16px"}
-        fontWeight={500}>
+      <Button onClick={onOpen} isDisabled={proposal.isDepositReached} variant="primaryAction">
         {t("Support this proposal")}
       </Button>
       <CommunitySupportModal isOpen={isOpen} onClose={onClose} />

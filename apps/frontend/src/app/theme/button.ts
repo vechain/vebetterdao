@@ -14,6 +14,20 @@ export const ButtonStyle: ComponentStyleConfig = {
         bg: "rgba(224, 233, 254, 0.8)",
       },
     },
+    primaryAction: {
+      rounded: "full",
+      fontSize: "16px",
+      fontWeight: 500,
+      px: "24px",
+      color: "#FFFFFF",
+      bgColor: "#004CFC",
+      _hover: {
+        bg: "#0035b1",
+        _disabled: {
+          bg: "#004CFC",
+        },
+      },
+    },
   },
   // default values for 'size', 'variant' and 'colorScheme'
   defaultProps: {
