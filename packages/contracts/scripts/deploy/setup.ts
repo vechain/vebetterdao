@@ -7,7 +7,7 @@ import { airdropB3tr } from "../helpers/airdrop"
 export const setupLocalEnvironment = async (b3tr: B3TR, xAllocationVoting: XAllocationVoting, emissions: Emissions) => {
   const start = performance.now()
   console.log("Setup local environment")
-  const accounts = getTestKeys(12)
+  const accounts = getTestKeys(14)
 
   // Define specific accounts
   const admin = accounts[0]
@@ -34,6 +34,14 @@ export const setupLocalEnvironment = async (b3tr: B3TR, xAllocationVoting: XAllo
     {
       address: accounts[11].address,
       name: "Green Ambassador Challenge",
+    },
+    {
+      address: accounts[12].address,
+      name: "GreenCart",
+    },
+    {
+      address: accounts[13].address,
+      name: "eVearn",
     },
   ]
 
