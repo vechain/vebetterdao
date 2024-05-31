@@ -35,6 +35,14 @@ export const setupLocalEnvironment = async (b3tr: B3TR, xAllocationVoting: XAllo
       address: accounts[11].address,
       name: "Green Ambassador Challenge",
     },
+    {
+      address: accounts[12].address,
+      name: "GreenCart",
+    },
+    {
+      address: accounts[13].address,
+      name: "eVearn",
+    },
   ]
 
   // Bootstrap emissions
