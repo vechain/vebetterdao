@@ -32,9 +32,6 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Unit Tests
-        run: yarn test
-
       - name: Check for Solidity changes
         uses: dorny/paths-filter@v3
         id: contract_changes
@@ -42,6 +39,14 @@ jobs:
           filters: |
             src:
               - 'packages/contracts/contracts/**'
+
+      - name: Global Unit Tests
+        if: steps.contract_changes.outputs.src == 'true'
+        run: yarn test
+
+      - name: Frontend Unit Tests
+        if: steps.contract_changes.outputs.src == 'false'
+        run: yarn test --filter=frontend
 
       - name: Run Slither
         uses: crytic/slither-action@v0.3.1
