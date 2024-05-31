@@ -32,6 +32,6 @@ export function createTestnetConfig() {
 
     NFT_BADGE_BASE_URI: "ipfs://bafybeiahr3qobzujfkxi64o6wrigkmdagrvgfa566rqqth6jm5nq7vf24y/", // IPFS base URI for the NFT Badge
 
-    XAPP_BASE_URI: "ipfs://bafybeigsqjh4m3fmy7f7ahpt7uxzfsmcoctjrbxt6kxnejhtnmcn55t2c4/",
+    XAPP_BASE_URI: "ipfs://bafybeicru5kgofbao6oayich4saiskyxowya7fti777rlgie4vq2q356se/",
   })
 }
