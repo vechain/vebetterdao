@@ -1,5 +1,6 @@
 import { AppConfig } from "."
 const config: AppConfig = {
+  environment: "solo-staging",
   basePath: "https://b3tr-frontend.vercel.app",
   b3trContractAddress: "0x6bDA17ff06b3Bf9867B284fBF69F5BaC282e3810",
   vot3ContractAddress: "0x780f463764fd674b9257918F9F11e370233E08b1",

@@ -29,14 +29,13 @@ export const Navbar: React.FC = () => {
           (route.name === "Admin" ? isAdmin : true)
         )
       }),
-    [allocationRoundsEvents, account, isAdmin],
+    [allocationRoundsEvents, isAdmin],
   )
 
   const parsedRoutesToRender = useMemo(() => {
     if (routesToRender.length === 1 && routesToRender[0]?.name === "Dashboard") return []
     return routesToRender
   }, [routesToRender])
-
 
   const bg = useColorModeValue("#F7F7F7", "#131313")
   return (
