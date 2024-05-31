@@ -6,7 +6,7 @@ import { CommunitySupportButton } from "./components/CommunitySupportButton"
 import { ProposalState, useCurrentProposal } from "@/api"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
-const compactFormatter = getCompactFormatter()
+const compactFormatter = getCompactFormatter(2)
 
 export const ProposalCommunitySupport = () => {
   const { proposal } = useCurrentProposal()

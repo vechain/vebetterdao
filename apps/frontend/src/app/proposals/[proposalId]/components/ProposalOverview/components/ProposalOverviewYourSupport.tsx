@@ -4,7 +4,7 @@ import { UilArrowUpRight } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 
-const compactFormatter = getCompactFormatter()
+const compactFormatter = getCompactFormatter(2)
 
 export const ProposalOverviewYourSupport = () => {
   const { proposal } = useCurrentProposal()

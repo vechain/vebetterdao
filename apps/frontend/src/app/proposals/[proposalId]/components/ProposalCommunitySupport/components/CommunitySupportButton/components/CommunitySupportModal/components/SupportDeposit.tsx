@@ -7,7 +7,7 @@ import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
-const compactFormatter = getCompactFormatter()
+const compactFormatter = getCompactFormatter(2)
 
 export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => void }) => {
   const { t } = useTranslation()

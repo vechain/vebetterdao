@@ -3,7 +3,7 @@ import { Box, HStack, Image, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 
-const compactFormatter = getCompactFormatter()
+const compactFormatter = getCompactFormatter(2)
 
 export const ProposalQuorumStatus = () => {
   const { t } = useTranslation()

@@ -42,7 +42,7 @@ const votes = [
   },
 ]
 
-const compactFormatter = getCompactFormatter()
+const compactFormatter = getCompactFormatter(2)
 
 export const ProposalVote = () => {
   const { proposal } = useCurrentProposal()
