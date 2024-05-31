@@ -6,11 +6,13 @@ import { useProposalFormStore } from "@/store/useProposalFormStore"
 import { useCanProposalStartInNextRound, useCurrentAllocationsRoundId } from "@/api"
 import dayjs from "dayjs"
 import { SelectedRoundRadioCard } from "./SelectedRoundRadioCard"
+import { useTranslation } from "react-i18next"
 
 const roundsToRender = 3
 
 export const NewProposalRoundPageContent = () => {
   const router = useRouter()
+  const { t } = useTranslation()
 
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: canStartInNextRound, isLoading: isCanStartInNextRoundLoading } = useCanProposalStartInNextRound()
@@ -48,14 +50,15 @@ export const NewProposalRoundPageContent = () => {
     <Card>
       <CardBody py={8}>
         <VStack spacing={8} align="flex-start">
-          <Heading size="lg">Select a voting session date</Heading>
+          <Heading size="lg">{t("Select a voting session date")}</Heading>
           <Text fontSize="md">
-            Choose the{" "}
+            {t("Choose the")}{" "}
             <Text as="span" fontWeight={600}>
-              weekly round{" "}
+              {t("weekly round")}{" "}
             </Text>
-            during which your proposal will be considered for voting. Weekly rounds occur regularly on this platform
-            along with the allocations.
+            {t(
+              "during which your proposal will be considered for voting. Weekly rounds occur regularly on this platform along with the allocations.",
+            )}
           </Text>
 
           {rounds.length === 0
@@ -79,7 +82,7 @@ export const NewProposalRoundPageContent = () => {
 
           <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
             <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
-              Go back
+              {t("Go back")}
             </Button>
             <Button
               rounded="full"
@@ -87,7 +90,7 @@ export const NewProposalRoundPageContent = () => {
               size="lg"
               onClick={onContinue}
               isDisabled={!votingStartRoundId}>
-              Continue
+              {t("Continue")}
             </Button>
           </HStack>
         </VStack>

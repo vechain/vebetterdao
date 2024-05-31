@@ -1,4 +1,4 @@
-export * from "./governance"
+export * from "./GovernanceFeaturedFunctions"
 export * from "./links"
 export * from "./animation"
 

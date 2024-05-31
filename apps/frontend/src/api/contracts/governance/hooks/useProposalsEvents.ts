@@ -60,6 +60,15 @@ export type ProposalVoteEvent = {
   blockMeta: Connex.Thor.Filter.WithMeta["meta"]
 }
 
+export type ProposalVoteEvent = {
+  account: string
+  proposalId: string
+  support: string
+  weight: string
+  power: string
+  reason: string
+}
+
 export const getProposalsEvents = async (thor: Connex.Thor) => {
   const proposalCreatedAbi = b3trGovernorAbi.find(abi => abi.name === "ProposalCreated")
   if (!proposalCreatedAbi) throw new Error("ProposalCreated event not found")
@@ -117,8 +126,6 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
   ]
 
   const events = await getAllEvents({ thor, filterCriteria })
-
-  console.log({ events })
 
   /**
    * Decode the events to get the data we are interested in (i.e the proposals)
@@ -194,6 +201,18 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
           power: decoded[4],
           reason: decoded[5],
           blockMeta: event.meta,
+        })
+        break
+      }
+      case proposalVoteEvent.signature: {
+        const decoded = proposalDepositEvent.decode(event.data, event.topics)
+        decodedVoteProposalEvents.push({
+          account: decoded[0],
+          proposalId: decoded[1],
+          support: decoded[2],
+          weight: decoded[3],
+          power: decoded[4],
+          reason: decoded[5],
         })
         break
       }

@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation"
 import { useCallback, useState } from "react"
 import { CheckableCard, CheckableCardProps } from "@/components"
 import { useProposalFormStore } from "@/store/useProposalFormStore"
+import { useTranslation } from "react-i18next"
 
 const Steps: (Omit<CheckableCardProps, "checked" | "onChange"> & {
   route: string
@@ -23,6 +24,7 @@ const Steps: (Omit<CheckableCardProps, "checked" | "onChange"> & {
   },
 ]
 export const NewProposalTypePageContent = () => {
+  const { t } = useTranslation()
   const { clearData } = useProposalFormStore()
   const [selectedRoute, setSelectedRoute] = useState<string>(Steps[0]?.route as string)
   const router = useRouter()
@@ -30,7 +32,7 @@ export const NewProposalTypePageContent = () => {
     (route: string) => () => {
       setSelectedRoute(route)
     },
-    [router],
+    [],
   )
 
   const onContinue = useCallback(() => {
@@ -54,7 +56,7 @@ export const NewProposalTypePageContent = () => {
         <Card>
           <CardBody py={8}>
             <VStack spacing={8} align="flex-start">
-              <Heading size="lg">Select proposal type</Heading>
+              <Heading size="lg">{t("Select proposal type")}</Heading>
               <Stack direction={["column", "column", "row"]} w="full" spacing={4}>
                 {Steps.map((step, index) => (
                   <CheckableCard
@@ -70,10 +72,10 @@ export const NewProposalTypePageContent = () => {
               </Stack>
               <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
                 <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
-                  Go back
+                  {t("Go back")}
                 </Button>
                 <Button rounded="full" colorScheme="primary" size="lg" onClick={onContinue}>
-                  Continue
+                  {t("Continue")}
                 </Button>
               </HStack>
             </VStack>

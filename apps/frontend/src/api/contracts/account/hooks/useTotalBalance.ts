@@ -32,5 +32,5 @@ export const useTotalBalance = (address?: string) => {
       scaled,
       formatted,
     }
-  }, [b3trBalance, vot3Balance])
+  }, [b3trBalance, vot3Balance, tokenDetails])
 }

@@ -6,7 +6,6 @@ import {
   getVotesQueryKey,
   getB3TrTokenDetailsQueryKey,
 } from "@/api"
-import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback, useMemo } from "react"
@@ -37,7 +36,6 @@ export const useConvertVot3 = ({
 }: useMintB3trProps): UseSendTransactionReturnValue => {
   const { thor } = useConnex()
   const { account } = useWallet()
-  const toast = useToast()
   const queryClient = useQueryClient()
 
   const { data: tokenDetails } = useB3trTokenDetails()
@@ -98,7 +96,7 @@ export const useConvertVot3 = ({
     }
 
     onSuccess?.()
-  }, [invalidateCache, queryClient, toast, onSuccess, account, amount])
+  }, [invalidateCache, queryClient, onSuccess, account])
 
   const result = useSendTransaction({
     signerAccount: account,

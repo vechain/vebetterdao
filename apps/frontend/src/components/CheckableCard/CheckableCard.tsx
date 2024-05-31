@@ -21,6 +21,7 @@ export type CheckableCardProps = {
   description: string
   cardProps?: CardProps
   stackProps?: StackProps
+  inputType?: "checkbox" | "radio"
 }
 export const CheckableCard: React.FC<CheckableCardProps> = ({
   checked,
@@ -30,6 +31,7 @@ export const CheckableCard: React.FC<CheckableCardProps> = ({
   description,
   cardProps,
   stackProps,
+  inputType = "radio",
 }) => {
   return (
     <Card
@@ -52,7 +54,11 @@ export const CheckableCard: React.FC<CheckableCardProps> = ({
         <Stack spacing={4} align={"flex-start"} {...stackProps}>
           <HStack justify={"space-between"} w="full" alignItems={"flex-start"}>
             <Image src={imageSrc} boxSize={32} alt={`Checkable card image for ${title}`} />
-            <Radio size="lg" isChecked={checked} onChange={e => onChange(e.target.checked)} rounded={"full"} />
+            {inputType === "checkbox" ? (
+              <Checkbox size="lg" isChecked={checked} onChange={e => onChange(e.target.checked)} rounded={"full"} />
+            ) : (
+              <Radio size="lg" isChecked={checked} onChange={e => onChange(e.target.checked)} rounded={"full"} />
+            )}
           </HStack>
           <Box>
             <Heading size="md">{title}</Heading>

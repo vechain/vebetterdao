@@ -15,6 +15,7 @@ export const WalletNotConnectedOverlay = ({ description = "Connect your wallet" 
       zIndex={1}
       data-testid="wallet-not-connected-overlay">
       <Image
+        alt="wallet-not-connected-background-bottom"
         src="/images/not_connected_wallet_bottom_layer.png"
         pos={"absolute"}
         bottom={0}
@@ -24,6 +25,7 @@ export const WalletNotConnectedOverlay = ({ description = "Connect your wallet" 
         w="full"
       />
       <Image
+        alt="wallet-not-connected-background-top"
         src="/images/not_connected_wallet_top_layer.png"
         pos={"absolute"}
         top={0}

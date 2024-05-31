@@ -5,8 +5,10 @@ import { FormData, NewProposalForm } from "./NewProposalForm"
 import { abi } from "thor-devkit"
 import { useProposalFormStore } from "@/store/useProposalFormStore"
 import { ethers } from "ethers"
+import { useTranslation } from "react-i18next"
 
 export const NewProposalFormDetailsPageContent: React.FC = () => {
+  const { t } = useTranslation()
   const router = useRouter()
   const { setData } = useProposalFormStore()
 
@@ -46,15 +48,15 @@ export const NewProposalFormDetailsPageContent: React.FC = () => {
     <Card w="full">
       <CardBody py={8}>
         <VStack spacing={8} align="flex-start">
-          <Heading size="lg">What is your proposal about?</Heading>
-          <Heading size="md">Basic information</Heading>
+          <Heading size="lg">{t("What is your proposal about?")}</Heading>
+          <Heading size="md">{t("Basic information")}</Heading>
           <NewProposalForm onSubmit={onSubmit} formId="new-proposal-form" />
           <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
             <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
-              Go back
+              {t("Go back")}
             </Button>
             <Button rounded="full" colorScheme="primary" size="lg" type="submit" form="new-proposal-form">
-              Continue
+              {t("Continue")}
             </Button>
           </HStack>
         </VStack>

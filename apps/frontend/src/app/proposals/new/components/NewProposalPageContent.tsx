@@ -1,6 +1,8 @@
 import { Button, Card, CardBody, Grid, GridItem, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { StepCard, StepCardProps } from "@/components/StepCard"
+import { useTranslation } from "react-i18next"
+import { useCallback } from "react"
 
 const Steps: StepCardProps[] = [
   {
@@ -31,10 +33,17 @@ const Steps: StepCardProps[] = [
   },
 ]
 export const NewProposalPageContent = () => {
+  const { t } = useTranslation()
   const router = useRouter()
-  const onContinueClick = () => {
+
+  const onContinue = useCallback(() => {
     router.push("/proposals/new/type")
-  }
+  }, [router])
+
+  const goBack = useCallback(() => {
+    router.back()
+  }, [router])
+
   return (
     <Grid
       templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(4, 1fr)"]}
@@ -45,11 +54,11 @@ export const NewProposalPageContent = () => {
         <Card>
           <CardBody>
             <VStack spacing={8} align="flex-start">
-              <Heading size="lg">Create a new proposal</Heading>
+              <Heading size="lg">{t("Create a new proposal")}</Heading>
               <Text fontSize={"lg"}>
-                Proposals represent your ideas as a valued member of the DAO community, aimed at enhancing or modifying
-                aspects of the ecosystem. Each proposal undergoes a voting process, and upon approval, is brought to
-                life.
+                {t(
+                  "Proposals represent your ideas as a valued member of the DAO community, aimed at enhancing or modifying aspects of the ecosystem. Each proposal undergoes a voting process, and upon approval, is brought to life.",
+                )}
               </Text>
               <Stack direction={["column"]} w="full" spacing={4}>
                 {Steps.map(step => (
@@ -66,11 +75,11 @@ export const NewProposalPageContent = () => {
               </Stack>
               <Stack direction={["column", "column", "row"]} w="full" justify={"space-between"} spacing={8}>
                 <HStack justify={"flex-end"} spacing={4} flex={1}>
-                  <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg">
-                    More info
+                  <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
+                    {t("Go back")}
                   </Button>
-                  <Button rounded="full" colorScheme="primary" size="lg" onClick={onContinueClick}>
-                    Continue
+                  <Button rounded="full" colorScheme="primary" size="lg" onClick={onContinue}>
+                    {t("Continue")}
                   </Button>
                 </HStack>
               </Stack>

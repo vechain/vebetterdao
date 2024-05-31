@@ -448,10 +448,20 @@ describe("X-Allocation Voting", function () {
 
     describe("Voting threshold", function () {
       it("can update voting threshold through governance", async function () {
-        const { owner, xAllocationVoting, governorQuorumFractionLib, governorDescriptionValidatorLib } =
-          await getOrDeployContractInstances({
-            forceDeploy: true,
-          })
+        const {
+          owner,
+          xAllocationVoting,
+          governorClockLogicLib,
+          governorConfiguratorLib,
+          governorDepositLogicLib,
+          governorFunctionRestrictionsLogicLib,
+          governorProposalLogicLib,
+          governorQuorumLogicLib,
+          governorStateLogicLib,
+          governorVotesLogicLib,
+        } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
         const newThreshold = 10n
         await createProposalAndExecuteIt(
@@ -460,8 +470,14 @@ describe("X-Allocation Voting", function () {
           xAllocationVoting,
           await ethers.getContractFactory("B3TRGovernor", {
             libraries: {
-              GovernorDescriptionValidator: await governorDescriptionValidatorLib.getAddress(),
-              GovernorQuorumFraction: await governorQuorumFractionLib.getAddress(),
+              GovernorClockLogic: await governorClockLogicLib.getAddress(),
+              GovernorConfigurator: await governorConfiguratorLib.getAddress(),
+              GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
+              GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
+              GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
+              GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
+              GovernorStateLogic: await governorStateLogicLib.getAddress(),
+              GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
             },
           }),
           "Update Voting Threshold",
