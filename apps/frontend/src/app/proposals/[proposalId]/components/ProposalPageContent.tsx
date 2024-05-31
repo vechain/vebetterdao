@@ -5,6 +5,7 @@ import { useProposalCreatedEvent } from "@/api"
 import { ProposalCommunitySupport } from "./ProposalCommunitySupport"
 import { ProposalWithdrawDeposit } from "./ProposalWithdrawDeposit"
 import { ProposalSessionSection } from "./ProposalSessionSection"
+import { CancelProposalSection } from "./CancelProposalSection/CancelProposalSection"
 
 type Props = {
   proposalId: string
@@ -29,6 +30,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
           <VStack align="stretch" gap={8}>
             <ProposalWithdrawDeposit />
             <ProposalSessionSection />
+            <CancelProposalSection />
           </VStack>
         </GridItem>
       </Grid>

@@ -28,6 +28,48 @@ export const ButtonStyle: ComponentStyleConfig = {
         },
       },
     },
+    primaryGhost: {
+      rounded: "full",
+      fontSize: "16px",
+      fontWeight: 500,
+      px: "24px",
+      color: "#004CFC",
+      bgColor: "transparent",
+      _hover: {
+        bg: "#004CFC22",
+        _disabled: {
+          bg: "transparent",
+        },
+      },
+    },
+    dangerFilled: {
+      rounded: "full",
+      fontSize: "16px",
+      fontWeight: 500,
+      px: "24px",
+      color: "#FFFFFF",
+      bgColor: "#D23F63",
+      _hover: {
+        bg: "#cd1e49",
+        _disabled: {
+          bg: "#D23F63",
+        },
+      },
+    },
+    dangerFilledTonal: {
+      rounded: "full",
+      fontSize: "16px",
+      fontWeight: 500,
+      px: "24px",
+      color: "#D23F63",
+      bgColor: "#FCEEF1",
+      _hover: {
+        bg: "#feccd7",
+        _disabled: {
+          bg: "#FCEEF1",
+        },
+      },
+    },
   },
   // default values for 'size', 'variant' and 'colorScheme'
   defaultProps: {
