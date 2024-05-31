@@ -101,7 +101,7 @@ export const GmNFT = () => {
           alignContent={"center"}
           alignItems={"center"}
           pt={{ base: 14, md: 20 }}
-          px={{ base: 4, md: 20 }}>
+          px={{ base: 12, md: 20 }}>
           <VStack alignItems={"center"}>
             <Text
               alignSelf={"center"}
