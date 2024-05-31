@@ -45,6 +45,15 @@ export type ProposalDepositEvent = {
   amount: string
 }
 
+export type ProposalVoteEvent = {
+  account: string
+  proposalId: string
+  support: string
+  weight: string
+  power: string
+  reason: string
+}
+
 export const getProposalsEvents = async (thor: Connex.Thor) => {
   const proposalCreatedAbi = b3trGovernorAbi.find(abi => abi.name === "ProposalCreated")
   if (!proposalCreatedAbi) throw new Error("ProposalCreated event not found")
@@ -65,6 +74,10 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
   const proposalDepositAbi = b3trGovernorAbi.find(abi => abi.name === "ProposalDeposit")
   if (!proposalDepositAbi) throw new Error("ProposalDeposit event not found")
   const proposalDepositEvent = new abi.Event(proposalDepositAbi as abi.Event.Definition)
+
+  const proposalVoteAbi = b3trGovernorAbi.find(abi => abi.name === "VoteCast")
+  if (!proposalVoteAbi) throw new Error("ProposalVote event not found")
+  const proposalVoteEvent = new abi.Event(proposalVoteAbi as abi.Event.Definition)
 
   /**
    * Filter criteria to get the events from the governor contract that we are interested in
@@ -91,6 +104,10 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
       address: GOVERNANCE_CONTRACT,
       topic0: proposalDepositEvent.signature,
     },
+    {
+      address: GOVERNANCE_CONTRACT,
+      topic0: proposalVoteEvent.signature,
+    },
   ]
 
   const events = await getAllEvents({ thor, filterCriteria })
@@ -103,6 +120,7 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
   const decodedExecutedProposalEvents: ProposalExecutedEvent[] = []
   const decodedQueuedProposalEvents: ProposalQueuedEvent[] = []
   const decodedDepositProposalEvents: ProposalDepositEvent[] = []
+  const decodedVoteProposalEvents: ProposalVoteEvent[] = []
 
   //   TODO: runtime validation with zod ?
   events.forEach(event => {
@@ -153,6 +171,18 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
         })
         break
       }
+      case proposalVoteEvent.signature: {
+        const decoded = proposalDepositEvent.decode(event.data, event.topics)
+        decodedVoteProposalEvents.push({
+          account: decoded[0],
+          proposalId: decoded[1],
+          support: decoded[2],
+          weight: decoded[3],
+          power: decoded[4],
+          reason: decoded[5],
+        })
+        break
+      }
       default: {
         throw new Error("Unknown event")
       }
@@ -165,6 +195,7 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
     executed: decodedExecutedProposalEvents,
     queued: decodedQueuedProposalEvents,
     deposits: decodedDepositProposalEvents,
+    votes: decodedVoteProposalEvents,
   }
 }
 
