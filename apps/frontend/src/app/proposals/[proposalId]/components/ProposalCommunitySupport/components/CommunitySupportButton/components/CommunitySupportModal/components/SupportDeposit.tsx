@@ -26,12 +26,16 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
     [vot3Balance?.scaled],
   )
 
-  const handleSubmit = useCallback(() => {
-    onSubmit(amount)
-  }, [amount, onSubmit])
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      onSubmit(amount)
+      e.preventDefault()
+    },
+    [amount, onSubmit],
+  )
 
   return (
-    <VStack gap={6} alignItems={"stretch"}>
+    <VStack gap={6} alignItems={"stretch"} as="form" onSubmit={handleSubmit}>
       <Text fontSize={"28px"} fontWeight={700}>
         {t("Support this proposal with VOT3")}
       </Text>
@@ -87,7 +91,7 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
               <Arm color={"#004CFC"} size={"36"} />
             </Flex>
             <Text fontSize={"28px"} color={"#252525"} fontWeight={400}>
-              {proposal.communityDeposits}
+              {compactFormatter.format(Number(proposal.communityDeposits))}
             </Text>
             <Text fontSize={"20px"} fontWeight={500} color={"#6A6A6A"}>
               {t("/")}
@@ -126,15 +130,7 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
       <Text fontWeight={600} fontSize={"14px"}>
         {t("You will be able to claim your tokens back when the voting round ends.")}
       </Text>
-      <Button
-        onClick={handleSubmit}
-        isDisabled={!Number(amount)}
-        w="full"
-        bgColor={"#004CFC"}
-        color={"#FFFFFF"}
-        rounded={"full"}
-        fontSize={"16px"}
-        fontWeight={500}>
+      <Button isDisabled={!Number(amount)} w="full" variant="primaryAction" type="submit">
         {t("Deposit VOT3")}
       </Button>
     </VStack>
