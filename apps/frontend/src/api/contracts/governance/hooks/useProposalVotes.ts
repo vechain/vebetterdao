@@ -36,12 +36,12 @@ export const getProposalVotesQuerykey = (proposalId: string) => ["proposalVotes"
  * Hook to get the proposal votes from the governor contract (i.e the number of votes for, against and abstain)
  * @returns the proposal votes {@link ProposalVotes}
  */
-export const useProposalVotes = (proposalId: string) => {
+export const useProposalVotes = (proposalId: string, enabled = true) => {
   const { thor } = useConnex()
 
   return useQuery({
     queryKey: getProposalVotesQuerykey(proposalId),
     queryFn: async () => await getProposalVotes(thor, proposalId),
-    enabled: !!thor,
+    enabled: !!thor && enabled,
   })
 }

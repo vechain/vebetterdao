@@ -5,40 +5,12 @@ import { CustomModalContent } from "@/components"
 import { SupportDeposit } from "./components/SupportDeposit"
 import { TransactionModal } from "@/components/TransactionModal"
 import { useProposalVot3Deposit } from "@/hooks/useProposalVot3Deposit"
-import { getProposalUserDepositQueryKey, useCurrentProposal } from "@/api"
-import { useQueryClient } from "@tanstack/react-query"
-import { useWallet } from "@vechain/dapp-kit-react"
-import { getProposalDepositQueryKey } from "@/api/contracts/governance/hooks/useGetProposalDeposit"
-import { getIsDepositReachedQueryKey } from "@/api/contracts/governance/hooks/useIsDepositReached"
+import { useCurrentProposal } from "@/api"
 
 export const CommunitySupportModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const { proposal } = useCurrentProposal()
   const [step, setStep] = useState(0)
-  const { account } = useWallet()
-  const queryClient = useQueryClient()
-
-  const depositMutation = useProposalVot3Deposit({
-    onSuccess: async () => {
-      await queryClient.cancelQueries({
-        queryKey: getProposalUserDepositQueryKey(proposal.id, account ?? ""),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getProposalUserDepositQueryKey(proposal.id, account ?? ""),
-      })
-      await queryClient.cancelQueries({
-        queryKey: getProposalDepositQueryKey(proposal.id),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getProposalDepositQueryKey(proposal.id),
-      })
-      await queryClient.cancelQueries({
-        queryKey: getIsDepositReachedQueryKey(proposal.id),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getIsDepositReachedQueryKey(proposal.id),
-      })
-    },
-  })
+  const depositMutation = useProposalVot3Deposit({ proposalId: proposal.id })
 
   const handleClose = useCallback(() => {
     depositMutation.resetStatus()
