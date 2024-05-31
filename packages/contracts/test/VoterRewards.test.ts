@@ -867,7 +867,7 @@ describe("VoterRewards", () => {
       // GM NFT token mint and upgrade
       await galaxyMember.connect(voter1).freeMint()
 
-      await upgradeNFTtoLevel(1, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
+      await upgradeNFTtoLevel(0, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
 
       expect(await galaxyMember.getHighestLevel(voter1.address)).to.equal(5)
 
@@ -998,7 +998,7 @@ describe("VoterRewards", () => {
       // GM NFT token mint and upgrade
       await galaxyMember.connect(voter1).freeMint()
 
-      await upgradeNFTtoLevel(1, 2, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 2
+      await upgradeNFTtoLevel(0, 2, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 2
 
       expect(await galaxyMember.getHighestLevel(voter1.address)).to.equal(2)
 
@@ -1122,19 +1122,19 @@ describe("VoterRewards", () => {
       // GM NFT token mint and upgrade
       await galaxyMember.connect(voter1).freeMint()
 
-      await upgradeNFTtoLevel(1, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
+      await upgradeNFTtoLevel(0, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
 
       expect(await galaxyMember.getHighestLevel(voter1.address)).to.equal(5)
 
       await galaxyMember.connect(voter2).freeMint()
 
-      await upgradeNFTtoLevel(2, 10, galaxyMember, b3tr, voter2, minterAccount) // Upgrading to level 10
+      await upgradeNFTtoLevel(1, 10, galaxyMember, b3tr, voter2, minterAccount) // Upgrading to level 10
 
       expect(await galaxyMember.getHighestLevel(voter2.address)).to.equal(10)
 
       await galaxyMember.connect(voter3).freeMint()
 
-      await upgradeNFTtoLevel(3, 2, galaxyMember, b3tr, voter3, minterAccount) // Upgrading to level 2
+      await upgradeNFTtoLevel(2, 2, galaxyMember, b3tr, voter3, minterAccount) // Upgrading to level 2
 
       expect(await galaxyMember.getHighestLevel(voter3.address)).to.equal(2)
 
@@ -1282,7 +1282,7 @@ describe("VoterRewards", () => {
       // GM NFT token mint and upgrade
       await galaxyMember.connect(voter1).freeMint()
 
-      await upgradeNFTtoLevel(1, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
+      await upgradeNFTtoLevel(0, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
 
       expect(await galaxyMember.getHighestLevel(voter1.address)).to.equal(5)
 
@@ -1297,7 +1297,7 @@ describe("VoterRewards", () => {
       await waitForNextBlock()
 
       // Transfer GM NFT to another account
-      await galaxyMember.connect(voter1).transferFrom(voter1.address, voter2.address, 1)
+      await galaxyMember.connect(voter1).transferFrom(voter1.address, voter2.address, 0)
 
       expect(await galaxyMember.getHighestLevel(voter2.address)).to.equal(5)
 
@@ -1411,12 +1411,12 @@ describe("VoterRewards", () => {
       // GM NFT token mint and upgrade
       await galaxyMember.connect(voter1).freeMint()
 
-      await upgradeNFTtoLevel(1, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
+      await upgradeNFTtoLevel(0, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
 
       expect(await galaxyMember.getHighestLevel(voter1.address)).to.equal(5)
 
       // Send GM NFT to another account
-      await galaxyMember.connect(voter1).transferFrom(voter1.address, voter2.address, 1)
+      await galaxyMember.connect(voter1).transferFrom(voter1.address, voter2.address, 0)
 
       expect(await galaxyMember.getHighestLevel(voter2.address)).to.equal(5)
 
@@ -1748,7 +1748,7 @@ describe("VoterRewards", () => {
       // GM NFT token mint and upgrade
       await galaxyMember.connect(voter1).freeMint()
 
-      await upgradeNFTtoLevel(1, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
+      await upgradeNFTtoLevel(0, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
 
       tx = await createProposal(b3tr, B3trContract, proposar, description + "1", functionToCall, [])
       proposalId = await getProposalIdFromTx(tx)
@@ -1868,7 +1868,7 @@ describe("VoterRewards", () => {
       // Upgrading GM NFT
       await galaxyMember.connect(voter1).freeMint()
 
-      await upgradeNFTtoLevel(1, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
+      await upgradeNFTtoLevel(0, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
 
       expect(await galaxyMember.getHighestLevel(voter1.address)).to.equal(5)
 
