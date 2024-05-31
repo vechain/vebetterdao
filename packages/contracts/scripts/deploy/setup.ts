@@ -1,11 +1,11 @@
 import { B3TR, Emissions, Treasury, X2EarnApps } from "../../typechain-types"
-import { SeedStrategy, getSeedAccounts, getTestKey, getTestKeys } from "../helpers/seedAccounts"
+import { SeedStrategy, getSeedAccounts, getTestKeys } from "../helpers/seedAccounts"
 import { bootstrapEmissions } from "../helpers/emissions"
 import { addXDapps } from "../helpers/xApp"
 import { airdropB3trFromTreasury, airdropB3trPercentage } from "../helpers/airdrop"
 import { isE2E, shouldRunSimulation } from "@repo/config/contracts"
 
-const accounts = getTestKeys(12)
+const accounts = getTestKeys(13)
 
 const APPS = [
   {
@@ -16,7 +16,7 @@ const APPS = [
   {
     address: accounts[7].address,
     name: "Mugshot",
-    metadataURI: "bafkreicglvjxjy2yxruwpmu6czm5th76bauu5phfhnlf2oxbyc66fdrzkm",
+    metadataURI: "bafkreidaleehj2euzdmpystzaux5aandfwnhyzgfjkujebbixek7edyyzu",
   },
   {
     address: accounts[9].address,
@@ -37,6 +37,11 @@ const APPS = [
     address: accounts[11].address,
     name: "GreenCart",
     metadataURI: "bafkreie6gdx7xugiemmubpfb6r5c4bdwfjucjtmb43mk2fhemyx3x3kvnu",
+  },
+  {
+    address: accounts[12].address,
+    name: "eVearn",
+    metadataURI: "bafkreigty6soh4wn5wzv6vfgt6bozxriwe23v4c7cyxuja65y4knn6cmqe",
   },
 ]
 
