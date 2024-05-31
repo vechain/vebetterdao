@@ -35,12 +35,13 @@ export const useProposal = (proposalId: string) => {
   const proposalSnapshot = useProposalSnapshot(proposalId)
   const proposalSnapshotBlock = useMemo(() => Number(proposalSnapshot.data), [proposalSnapshot.data])
   const isDepositReached = useIsDepositReached(proposalId)
-  const isProposalActive = useMemo(() => proposalState?.data !== ProposalState.Pending, [proposalState?.data])
-  const isQuorumReached = useIsProposalQuorumReached(proposalId, isProposalActive)
-  const proposalVotes = useProposalVotes(proposalId, isProposalActive)
-  const proposalSnapshotVotingPower = useProposalSnapshotVotingPower(proposalSnapshotBlock, isProposalActive)
-  const proposalSnapshotVot3 = useVot3PastSupply(proposalSnapshotBlock, isProposalActive)
+  const isProposalActive = useMemo(() => proposalState?.data === ProposalState.Active, [proposalState?.data])
+  const isProposalNotPending = useMemo(() => proposalState?.data !== ProposalState.Pending, [proposalState?.data])
   const proposalQuorum = useProposalQuorum(proposalSnapshotBlock, isProposalActive)
+  const isQuorumReached = useIsProposalQuorumReached(proposalId, isProposalActive)
+  const proposalSnapshotVotingPower = useProposalSnapshotVotingPower(proposalSnapshotBlock, isProposalActive)
+  const proposalVotes = useProposalVotes(proposalId, isProposalNotPending)
+  const proposalSnapshotVot3 = useVot3PastSupply(proposalSnapshotBlock, isProposalNotPending)
   const vot3Token = useVot3TokenDetails()
   const roundIdVoteStart = useMemo(
     () => proposalCreatedEvent.data?.roundIdVoteStart,
