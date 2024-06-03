@@ -1,4 +1,5 @@
 import { Box, HStack, Text, VStack } from "@chakra-ui/react"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -9,6 +10,9 @@ type Props = {
   color: string
   icon: ReactElement
 }
+
+const compactFormatter = getCompactFormatter(0)
+
 export const ProposalVotesProgressBar = ({ text, votes, percentage, color, icon }: Props) => {
   const { t } = useTranslation()
   return (
@@ -23,7 +27,7 @@ export const ProposalVotesProgressBar = ({ text, votes, percentage, color, icon 
             {votes}
           </Text>
           <Text color={color} fontSize="12px">
-            {t("({{percentage}}%)", { percentage })}
+            {t("({{percentage}}%)", { percentage: compactFormatter.format(Number(percentage)) })}
           </Text>
         </HStack>
       </HStack>

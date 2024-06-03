@@ -28,7 +28,7 @@ export const ProposalVoteComment = ({ vote }: { vote: ProposalVoteEvent }) => {
       ({
         [VoteType.VOTE_AGAINST]: "#FFFBFB",
         [VoteType.VOTE_FOR]: "#F2FFE4",
-        [VoteType.ABSTAIN]: "#B5952555",
+        [VoteType.ABSTAIN]: "#B5952511",
       })[voteType],
     [voteType],
   )

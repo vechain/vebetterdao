@@ -23,9 +23,9 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
       <Grid templateColumns="repeat(3, 1fr)" gap={[8, 8, 8]} w="full">
         <GridItem colSpan={[3, 3, 2]} gap={8}>
           <VStack align="stretch" gap={8}>
-            <ProposalVoteCommentList />
             <ProposalCommunitySupport />
             <ProposalContentAndActions proposal={proposal} />
+            <ProposalVoteCommentList />
           </VStack>
         </GridItem>
         <GridItem colSpan={[3, 3, 1]}>

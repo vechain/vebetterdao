@@ -41,7 +41,7 @@ export const useProposal = (proposalId: string) => {
   const isQuorumReached = useIsProposalQuorumReached(proposalId, isProposalActive)
   const proposalSnapshotVotingPower = useProposalSnapshotVotingPower(proposalSnapshotBlock, isProposalActive)
   const proposalVotes = useProposalVotes(proposalId, isProposalNotPending)
-  const proposalSnapshotVot3 = useVot3PastSupply(proposalSnapshotBlock, isProposalNotPending)
+  const proposalSnapshotVot3 = useVot3PastSupply(proposalSnapshotBlock, isProposalActive)
   const vot3Token = useVot3TokenDetails()
   const roundIdVoteStart = useMemo(
     () => proposalCreatedEvent.data?.roundIdVoteStart,
@@ -53,14 +53,6 @@ export const useProposal = (proposalId: string) => {
     }
     return toIPFSURL(proposalCreatedEvent.data?.description)
   }, [proposalCreatedEvent.data?.description])
-  const totalVotes = useMemo(() => {
-    if (!proposalVotes.data) return 0
-    return (
-      Number(proposalVotes.data.forVotes) +
-      Number(proposalVotes.data.againstVotes) +
-      Number(proposalVotes.data.abstainVotes)
-    )
-  }, [proposalVotes.data])
 
   const proposalMetadata = useIpfsMetadata<ProposalMetadata>(metadataUri)
 
@@ -112,12 +104,14 @@ export const useProposal = (proposalId: string) => {
     const votes = proposalVoteEvents.votes
     const votesWithComment = proposalVoteEvents.votesWithComment
     const hasUserVoted = proposalVoteEvents.hasUserVoted
+    const totalVot3UsedInVotes = Number(scaleVot3Amount(proposalVoteEvents.totalVot3UsedInVotes))
+    const totalVotingPowerUsedInVotes = Number(scaleVot3Amount(proposalVoteEvents.totalVotingPowerUsedInVotes))
     const forVotes = Number(proposalVotes.data?.forVotes || "0")
     const againstVotes = Number(proposalVotes.data?.againstVotes || "0")
     const abstainVotes = Number(proposalVotes.data?.abstainVotes || "0")
-    const forPercentage = (totalVotes ? forVotes / totalVotes : 0) * 100
-    const againstPercentage = (totalVotes ? againstVotes / totalVotes : 0) * 100
-    const abstainPercentage = (totalVotes ? abstainVotes / totalVotes : 0) * 100
+    const forPercentage = (totalVotingPowerUsedInVotes ? forVotes / totalVotingPowerUsedInVotes : 0) * 100
+    const againstPercentage = (totalVotingPowerUsedInVotes ? againstVotes / totalVotingPowerUsedInVotes : 0) * 100
+    const abstainPercentage = (totalVotingPowerUsedInVotes ? abstainVotes / totalVotingPowerUsedInVotes : 0) * 100
     const depositThreshold = scaleVot3Amount(proposalCreatedEvent.data?.depositThreshold)
     const communityDeposits = scaleVot3Amount(proposalDeposits?.data)
     const communityDepositPercentage = Number(communityDeposits) / Number(depositThreshold)
@@ -127,17 +121,16 @@ export const useProposal = (proposalId: string) => {
     const othersSupport = Number(communityDeposits) - Number(userSupport)
     const othersSupportPercentage = othersSupport / Number(depositThreshold)
     const othersSupportChartPercentage =
-      communityDepositPercentage > 0 ? (othersSupport / Number(communityDeposits)) * 100 : othersSupportPercentage * 100
+      communityDepositPercentage > 1 ? (othersSupport / Number(communityDeposits)) * 100 : othersSupportPercentage * 100
     const hasUserSupported = Number(userSupport) > 0
     const supportingUserCount = proposalDepositEvent.supportingUserCount
     const othersSupportUserCount = hasUserSupported
       ? Math.max(Number(supportingUserCount) - 1, 0)
       : Number(supportingUserCount)
     const userVotingPowerOnSnapshot = scaleVot3Amount(proposalSnapshotVotingPower.data)
-    const userVot3OnSnapshot = proposalSnapshotVot3.data
-    const quorumPercentage = totalVotes ? totalVotes / Number(proposalQuorum.data?.scaled) : 0
+    const userVot3OnSnapshot = proposalSnapshotVot3.data || 0
+    const quorumPercentage = totalVot3UsedInVotes ? totalVot3UsedInVotes / Number(proposalQuorum.data?.scaled) : 0
     const quorumChartPercentage = Math.min(quorumPercentage || 0, 1) * 100
-
     const result = {
       id: proposalId,
       title: proposalMetadata.data?.title || "",
@@ -183,10 +176,11 @@ export const useProposal = (proposalId: string) => {
       othersSupportUserCount,
       state: proposalState.data,
       isStateLoading: proposalState.isLoading,
+      totalVot3UsedInVotes,
+      totalVotingPowerUsedInVotes,
       forVotes,
       againstVotes,
       abstainVotes,
-      totalVotes,
       forPercentage,
       againstPercentage,
       abstainPercentage,
@@ -201,7 +195,7 @@ export const useProposal = (proposalId: string) => {
       isVotesLoading: proposalVotes.isLoading,
       isQuorumReached: isQuorumReached.data,
       isQuorumReachedLoading: isQuorumReached.isLoading,
-      quorum: proposalQuorum.data?.scaled,
+      quorum: proposalQuorum.data?.scaled || 0,
       isQuorumLoading: proposalQuorum.isLoading,
       quorumPercentage,
       quorumChartPercentage,
@@ -213,7 +207,6 @@ export const useProposal = (proposalId: string) => {
   }, [
     proposalVoteEvents,
     proposalVotes,
-    totalVotes,
     scaleVot3Amount,
     proposalCreatedEvent,
     proposalDeposits,

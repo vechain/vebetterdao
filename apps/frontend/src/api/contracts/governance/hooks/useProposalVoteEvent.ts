@@ -15,12 +15,15 @@ export const useProposalVoteEvent = (proposalId: string) => {
     () => events.data?.votes?.filter(event => event.proposalId === proposalId),
     [events.data?.votes, proposalId],
   )
+  const totalVot3UsedInVotes = useMemo(() => votes?.reduce((acc, event) => acc + Number(event.weight), 0), [votes])
+  const totalVotingPowerUsedInVotes = useMemo(
+    () => votes?.reduce((acc, event) => acc + Number(event.power), 0),
+    [votes],
+  )
   const votesWithComment = useMemo(() => votes?.filter(event => !!event.reason), [votes])
   const userVote = useMemo(() => votes?.find(event => compareAddresses(event.account, account || "")), [account, votes])
 
   const hasUserVoted = !!userVote
-
-  console.log("votes", votes)
 
   const proposalVoteEvent = useMemo(
     () => ({
@@ -28,10 +31,21 @@ export const useProposalVoteEvent = (proposalId: string) => {
       userVote,
       votesWithComment,
       votes,
+      totalVot3UsedInVotes,
+      totalVotingPowerUsedInVotes,
       isLoading: events.isLoading,
       error: events.error,
     }),
-    [events.error, events.isLoading, hasUserVoted, userVote, votes, votesWithComment],
+    [
+      events.error,
+      events.isLoading,
+      hasUserVoted,
+      totalVot3UsedInVotes,
+      totalVotingPowerUsedInVotes,
+      userVote,
+      votes,
+      votesWithComment,
+    ],
   )
   return proposalVoteEvent
 }

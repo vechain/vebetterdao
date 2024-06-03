@@ -20,7 +20,7 @@ export const ProposalQuorumStatus = () => {
         <HStack gap={2}>
           <Image h="20px" w="20px" src="/images/vot3-token.png" alt="vot3-token" />
           <Text fontSize="24px" fontWeight={700}>
-            {compactFormatter.format(Number(proposal.totalVotes))}
+            {compactFormatter.format(Number(proposal.totalVot3UsedInVotes))}
           </Text>
         </HStack>
         <Text fontWeight={400} fontSize={"14px"} color="#004CFC">
