@@ -62,8 +62,6 @@ export const NewProposalPageDiscussionContent = () => {
     router.back()
   }, [router])
 
-  console.log("errors", errors)
-
   return (
     <Card w="full">
       <CardBody py={8}>
