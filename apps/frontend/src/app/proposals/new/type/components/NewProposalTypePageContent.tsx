@@ -34,7 +34,6 @@ export const NewProposalTypePageContent = () => {
 
   const { clearData } = useProposalFormStore()
   const [selectedRoute, setSelectedRoute] = useState<string>(Steps(t)[0]?.route as string)
-  const router = useRouter()
   const onChange = useCallback(
     (route: string) => () => {
       setSelectedRoute(route)
