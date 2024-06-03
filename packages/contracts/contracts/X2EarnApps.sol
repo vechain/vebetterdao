@@ -26,7 +26,7 @@ pragma solidity ^0.8.20;
 import { X2EarnAppsUpgradeable } from "./x-2-earn-apps/X2EarnAppsUpgradeable.sol";
 import { AdministrationUpgradeable } from "./x-2-earn-apps/modules/AdministrationUpgradeable.sol";
 import { AppsStorageUpgradeable } from "./x-2-earn-apps/modules/AppsStorageUpgradeable.sol";
-import { SettingsUpgradeable } from "./x-2-earn-apps/modules/SettingsUpgradeable.sol";
+import { ContractSettingsUpgradeable } from "./x-2-earn-apps/modules/ContractSettingsUpgradeable.sol";
 import { VoteEligibilityUpgradeable } from "./x-2-earn-apps/modules/VoteEligibilityUpgradeable.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -45,7 +45,7 @@ contract X2EarnApps is
   Initializable,
   X2EarnAppsUpgradeable,
   AdministrationUpgradeable,
-  SettingsUpgradeable,
+  ContractSettingsUpgradeable,
   VoteEligibilityUpgradeable,
   AppsStorageUpgradeable,
   AccessControlUpgradeable,
@@ -74,7 +74,7 @@ contract X2EarnApps is
     __X2EarnApps_init();
     __Administration_init();
     __AppsStorage_init();
-    __Settings_init(_baseURI);
+    __ContractSettings_init(_baseURI);
     __VoteEligibility_init();
     __UUPSUpgradeable_init();
     __AccessControl_init();
