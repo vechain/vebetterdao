@@ -2932,15 +2932,6 @@ describe("Governor and TimeLock", function () {
         let userBalance = await vot3.balanceOf(user.address)
         let userPercentage = (userBalance * 100n) / totalSupply
 
-        console.log(
-          "User balance: ",
-          ethers.formatEther(userBalance.toString()),
-          "Total supply: ",
-          ethers.formatEther(totalSupply.toString()),
-          "User percentage: ",
-          userPercentage.toString(),
-        )
-
         return userPercentage
       }
 
