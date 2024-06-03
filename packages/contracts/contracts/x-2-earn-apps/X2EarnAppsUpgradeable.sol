@@ -26,6 +26,7 @@ pragma solidity ^0.8.20;
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { X2EarnAppsDataTypes } from "../libraries/X2EarnAppsDataTypes.sol";
 
 /**
  * @title X2EarnAppsUpgradeable
@@ -136,7 +137,6 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   }
 
   // ---------- Getters ---------- //
-
   /**
    * @dev Clock used for flagging checkpoints or to retrieve the current block number. Can be overridden to implement timestamp based
    * checkpoints (and voting), in which case {CLOCK_MODE} should be overridden as well to match.
@@ -184,6 +184,16 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
    * @inheritdoc IX2EarnApps
    */
   function baseURI() public view virtual returns (string memory);
+
+  /**
+   * @inheritdoc IX2EarnApps
+   */
+  function appReceiverAddress(bytes32 appId) public view virtual returns (address);
+
+  /**
+   * @dev Function to get the number of apps.
+   */
+  function appsCount() public view virtual returns (uint256);
 
   /**
    * @dev Function to set the voting Eligibility of an app.
@@ -234,6 +244,11 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
     string memory appName,
     string memory metadataURI
   ) internal virtual;
+
+  /**
+   * @dev Function to get the app data by its id.
+   */
+  function _getAppStorage(bytes32 appId) internal view virtual returns (X2EarnAppsDataTypes.App memory);
 
   /**
    * @dev Function that should revert when `msg.sender` is not authorized to add an app. Called by

@@ -23,9 +23,9 @@
 
 pragma solidity ^0.8.20;
 
-import { X2EarnAppsDataTypes } from "../../libraries/X2EarnAppsDataTypes.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
+import { X2EarnAppsDataTypes } from "../../libraries/X2EarnAppsDataTypes.sol";
 
 /**
  * @title AppsStorageUpgradeable
@@ -93,10 +93,11 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
     }
 
     // Store the new app
-    $._apps[id] = X2EarnAppsDataTypes.App(id, receiverAddress, appName, metadataURI, block.timestamp);
+    $._apps[id] = X2EarnAppsDataTypes.App(id, appName, metadataURI, block.timestamp);
     $._appIds.push(id);
     _setAppAdmin(id, admin);
     _setVotingEligibility(id, true);
+    _updateAppReceiverAddress(id, receiverAddress);
 
     emit AppAdded(id, receiverAddress, appName, true);
   }
@@ -121,24 +122,17 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev Update the address where the x2earn app receives allocation funds
+   * @dev Get the app data saved in storage
    *
-   * @param appId the hashed name of the app
-   * @param newReceiverAddress the address of the new receiver
+   * @param appId the if of the app
    */
-  function _updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) internal virtual override {
-    if (newReceiverAddress == address(0)) {
-      revert X2EarnInvalidAddress(newReceiverAddress);
-    }
-
+  function _getAppStorage(bytes32 appId) internal view override returns (X2EarnAppsDataTypes.App memory) {
     if (!appExists(appId)) {
       revert X2EarnNonexistentApp(appId);
     }
 
     AppsStorageStorage storage $ = _getAppsStorageStorage();
-    $._apps[appId].receiverAddress = newReceiverAddress;
-
-    emit AppReceiverAddressUpdated(appId, $._apps[appId].receiverAddress, newReceiverAddress);
+    return $._apps[appId];
   }
 
   // ---------- Getters ---------- //
@@ -148,44 +142,46 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   function appExists(bytes32 appId) public view override returns (bool) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
 
-    return $._apps[appId].receiverAddress != address(0);
+    return $._apps[appId].createdAtTimestamp != 0;
   }
 
   /**
    * @dev See {IX2EarnApps-app}.
+   *
+   * @param appId the id of the app
    */
-  function app(bytes32 appId) public view virtual returns (X2EarnAppsDataTypes.App memory) {
-    if (!appExists(appId)) {
-      revert X2EarnNonexistentApp(appId);
-    }
+  function app(bytes32 appId) public view virtual override returns (X2EarnAppsDataTypes.AppWithDetails memory) {
+    X2EarnAppsDataTypes.App memory _app = _getAppStorage(appId);
 
-    AppsStorageStorage storage $ = _getAppsStorageStorage();
-    return $._apps[appId];
+    return
+      X2EarnAppsDataTypes.AppWithDetails(
+        _app.id,
+        appReceiverAddress(appId),
+        _app.name,
+        _app.metadataURI,
+        _app.createdAtTimestamp
+      );
   }
 
   /**
    * @dev Get all apps
    */
-  function apps() public view returns (X2EarnAppsDataTypes.App[] memory) {
+  function apps() public view returns (X2EarnAppsDataTypes.AppWithDetails[] memory) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
 
-    X2EarnAppsDataTypes.App[] memory allApps = new X2EarnAppsDataTypes.App[]($._appIds.length);
+    X2EarnAppsDataTypes.AppWithDetails[] memory allApps = new X2EarnAppsDataTypes.AppWithDetails[]($._appIds.length);
     uint256 length = $._appIds.length;
     for (uint i = 0; i < length; i++) {
-      allApps[i] = $._apps[$._appIds[i]];
+      X2EarnAppsDataTypes.App memory _app = $._apps[$._appIds[i]];
+      allApps[i] = X2EarnAppsDataTypes.AppWithDetails(
+        _app.id,
+        appReceiverAddress(_app.id),
+        _app.name,
+        _app.metadataURI,
+        _app.createdAtTimestamp
+      );
     }
     return allApps;
-  }
-
-  /**
-   * @dev Get the receiver address of the app
-   *
-   * @param appId the hashed name of the app
-   */
-  function appReceiverAddress(bytes32 appId) public view virtual returns (address) {
-    AppsStorageStorage storage $ = _getAppsStorageStorage();
-
-    return $._apps[appId].receiverAddress;
   }
 
   /**
@@ -201,5 +197,13 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
     AppsStorageStorage storage $ = _getAppsStorageStorage();
 
     return string(abi.encodePacked(baseURI(), $._apps[appId].metadataURI));
+  }
+
+  /**
+   * @dev Get the amount of apps
+   */
+  function appsCount() public view override returns (uint256) {
+    AppsStorageStorage storage $ = _getAppsStorageStorage();
+    return $._appIds.length;
   }
 }

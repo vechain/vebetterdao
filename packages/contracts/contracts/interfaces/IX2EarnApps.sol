@@ -113,7 +113,7 @@ interface IX2EarnApps {
    *
    * @param appId the id of the app
    */
-  function app(bytes32 appId) external view returns (X2EarnAppsDataTypes.App memory);
+  function app(bytes32 appId) external view returns (X2EarnAppsDataTypes.AppWithDetails memory);
 
   /**
    * @dev Add a new moderator to the app.

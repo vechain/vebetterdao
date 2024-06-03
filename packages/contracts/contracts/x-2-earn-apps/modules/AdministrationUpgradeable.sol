@@ -29,18 +29,20 @@ import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
 /**
  * @title AdministrationUpgradeable
  * @dev Contract module that provides the administration functionalities of the x2earn apps.
- * Each app has an admin and a list of moderators that can manage the app.
- * The admin can add/remove moderators and change the admin address.
- * Those roles can be used to manage the app and its metadata.
- * The admin can also set reward distributors for the app, which are the addresses that can
- * call the distribute method on the X2EarnRewardsPool contract to emit rewards.
+ * Each app has an admin and a list of moderators that can manage the app:
+ * - Admin can add/remove moderators, change the admin address, update the receiver address,
+ * add/remove reward distributor addresses.
+ * - Moderators can manage the app metadata
+ *
+ * This contract also handles the storage of the percentage and address that receives part of the allocation funds.
  */
 abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradeable {
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.Administration
   struct AdministrationStorage {
     mapping(bytes32 appId => address[]) _moderators;
     mapping(bytes32 appId => address) _admin;
-    mapping(bytes32 appId => address[]) _rewardDistributors;
+    mapping(bytes32 appId => address[]) _rewardDistributors; // addresses that can distribute rewards from X2EarnRewardsPool
+    mapping(bytes32 appId => address) _receiverAddress;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnApps.Administration")) - 1)) & ~bytes32(uint256(0xff))
@@ -185,6 +187,28 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
     }
   }
 
+  /**
+   * @dev Update the address where the x2earn app receives allocation funds
+   *
+   * @param appId the hashed name of the app
+   * @param newReceiverAddress the address of the new receiver
+   */
+  function _updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) internal virtual override {
+    if (newReceiverAddress == address(0)) {
+      revert X2EarnInvalidAddress(newReceiverAddress);
+    }
+
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+
+    AdministrationStorage storage $ = _getAdministrationStorage();
+    address oldReceiverAddress = $._receiverAddress[appId];
+    $._receiverAddress[appId] = newReceiverAddress;
+
+    emit AppReceiverAddressUpdated(appId, oldReceiverAddress, newReceiverAddress);
+  }
+
   // ---------- Getters ---------- //
 
   /**
@@ -236,6 +260,17 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
     }
 
     return false;
+  }
+
+  /**
+   * @dev Get the receiver address of the app
+   *
+   * @param appId the hashed name of the app
+   */
+  function appReceiverAddress(bytes32 appId) public view override returns (address) {
+    AdministrationStorage storage $ = _getAdministrationStorage();
+
+    return $._receiverAddress[appId];
   }
 
   /**
