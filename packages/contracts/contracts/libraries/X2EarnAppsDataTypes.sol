@@ -14,5 +14,9 @@ library X2EarnAppsDataTypes {
     string name;
     string metadataURI;
     uint256 createdAtTimestamp;
+    address admin;
+    address[] moderators;
+    uint256 receiverAllocationPercentage;
+    bool appAvailableForAllocationVoting;
   }
 }

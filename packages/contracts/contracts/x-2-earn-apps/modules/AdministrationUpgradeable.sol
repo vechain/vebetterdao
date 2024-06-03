@@ -30,11 +30,9 @@ import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
  * @title AdministrationUpgradeable
  * @dev Contract module that provides the administration functionalities of the x2earn apps.
  * Each app has an admin and a list of moderators that can manage the app:
- * - Admin can add/remove moderators, change the admin address, update the receiver address,
- * add/remove reward distributor addresses.
+ * - Admin can add/remove moderators, change the admin address, update the receiver address and allocation percentage,
+ * add/remove reward distributor addresses, and update the metadata URI
  * - Moderators can manage the app metadata
- *
- * This contract also handles the storage of the percentage and address that receives part of the allocation funds.
  */
 abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradeable {
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.Administration
@@ -43,6 +41,7 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
     mapping(bytes32 appId => address) _admin;
     mapping(bytes32 appId => address[]) _rewardDistributors; // addresses that can distribute rewards from X2EarnRewardsPool
     mapping(bytes32 appId => address) _receiverAddress;
+    mapping(bytes32 appId => uint256) _receiverAllocationPercentage; // percentage of the allocation funds that the receiver address gets
     mapping(bytes32 appId => string) _metadataURI;
   }
 
@@ -230,6 +229,27 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
     emit AppMetadataURIUpdated(appId, oldMetadataURI, newMetadataURI);
   }
 
+  /**
+   * @dev Update the allocation percentage of the receiver address
+   *
+   * @param appId the app id
+   * @param newAllocationPercentage the new allocation percentage
+   */
+  function _updateReceiverAllocationPercentage(
+    bytes32 appId,
+    uint256 newAllocationPercentage
+  ) internal virtual override {
+    if (newAllocationPercentage > 100) {
+      revert X2EarnInvalidAllocationPercentage(newAllocationPercentage);
+    }
+
+    AdministrationStorage storage $ = _getAdministrationStorage();
+    uint256 oldAllocationPercentage = $._receiverAllocationPercentage[appId];
+    $._receiverAllocationPercentage[appId] = newAllocationPercentage;
+
+    emit ReceiverAllocationPercentageUpdated(appId, oldAllocationPercentage, newAllocationPercentage);
+  }
+
   // ---------- Getters ---------- //
 
   /**
@@ -247,7 +267,7 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
   /**
    * @dev See {IX2EarnApps-appAdmin}
    */
-  function appAdmin(bytes32 appId) public view returns (address) {
+  function appAdmin(bytes32 appId) public view override returns (address) {
     AdministrationStorage storage $ = _getAdministrationStorage();
 
     return $._admin[appId];
@@ -258,7 +278,7 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
    *
    * @param appId the hashed name of the app
    */
-  function appModerators(bytes32 appId) public view returns (address[] memory) {
+  function appModerators(bytes32 appId) public view override returns (address[] memory) {
     AdministrationStorage storage $ = _getAdministrationStorage();
 
     return $._moderators[appId];
@@ -292,6 +312,17 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
     AdministrationStorage storage $ = _getAdministrationStorage();
 
     return $._receiverAddress[appId];
+  }
+
+  /**
+   * @dev Function to get the percentage of the allocation of the receiver address each round.
+   *
+   * @param appId the app id
+   */
+  function receiverAllocationPercentage(bytes32 appId) public view override returns (uint256) {
+    AdministrationStorage storage $ = _getAdministrationStorage();
+
+    return $._receiverAllocationPercentage[appId];
   }
 
   /**

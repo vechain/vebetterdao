@@ -40,6 +40,11 @@ interface IX2EarnApps {
   error ERC5805FutureLookup(uint256 timepoint, uint48 clock);
 
   /**
+   * @dev The `percentage` is not valid.
+   */
+  error X2EarnInvalidAllocationPercentage(uint256 percentage);
+
+  /**
    * @dev Event fired when a new app is added.
    */
   event AppAdded(bytes32 indexed id, address addr, string name, bool appAvailableForAllocationVoting);
@@ -88,6 +93,11 @@ interface IX2EarnApps {
    * @dev Event fired when the base URI is updated.
    */
   event BaseURIUpdated(string oldBaseURI, string newBaseURI);
+
+  /**
+   * @dev Event fired when the receiver allocation percentage is updated.
+   */
+  event ReceiverAllocationPercentageUpdated(bytes32 indexed appId, uint256 oldPercentage, uint256 newPercentage);
 
   /**
    * @dev Generates the hash of the app name to be used as the app id.

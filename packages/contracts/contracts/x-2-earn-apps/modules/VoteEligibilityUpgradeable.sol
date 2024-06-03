@@ -164,7 +164,7 @@ abstract contract VoteEligibilityUpgradeable is Initializable, X2EarnAppsUpgrade
    *
    * @param appId the hashed name of the app
    */
-  function isEligibleNow(bytes32 appId) public view returns (bool) {
+  function isEligibleNow(bytes32 appId) public view override returns (bool) {
     if (!appExists(appId)) {
       return false;
     }

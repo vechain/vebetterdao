@@ -141,7 +141,11 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
         appReceiverAddress(appId),
         _app.name,
         metadataURI(appId),
-        _app.createdAtTimestamp
+        _app.createdAtTimestamp,
+        appAdmin(_app.id),
+        appModerators(_app.id),
+        receiverAllocationPercentage(_app.id),
+        isEligibleNow(_app.id)
       );
   }
 
@@ -160,7 +164,11 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
         appReceiverAddress(_app.id),
         _app.name,
         metadataURI(_app.id),
-        _app.createdAtTimestamp
+        _app.createdAtTimestamp,
+        appAdmin(_app.id),
+        appModerators(_app.id),
+        receiverAllocationPercentage(_app.id),
+        isEligibleNow(_app.id)
       );
     }
     return allApps;

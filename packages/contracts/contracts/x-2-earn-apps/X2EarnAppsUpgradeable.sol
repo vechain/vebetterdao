@@ -136,6 +136,15 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
     _setVotingEligibility(_appId, _isEligible);
   }
 
+  /**
+   * @dev Update the allocation percentage of the receiver address
+   */
+  function updateReceiverAllocationPercentage(bytes32 appId, uint256 percentage) public virtual {
+    _authorizeAppManagement(appId);
+
+    _updateReceiverAllocationPercentage(appId, percentage);
+  }
+
   // ---------- Getters ---------- //
 
   /**
@@ -205,6 +214,21 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   function appReceiverAddress(bytes32 appId) public view virtual returns (address);
 
   /**
+   * @dev See {IX2EarnApps-appAdmin}
+   */
+  function appAdmin(bytes32 appId) public view virtual returns (address);
+
+  /**
+   * @dev Function to get the percentage of the allocation of the receiver address each round.
+   */
+  function receiverAllocationPercentage(bytes32 appId) public view virtual returns (uint256);
+
+  /**
+   * @dev Returns the list of moderators of the app
+   */
+  function appModerators(bytes32 appId) public view virtual returns (address[] memory);
+
+  /**
    * @dev Function to get the number of apps.
    */
   function appsCount() public view virtual returns (uint256);
@@ -213,6 +237,11 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
    * @dev Function to get the metadataURI of an app.
    */
   function metadataURI(bytes32 appId) public view virtual returns (string memory);
+
+  /**
+   * @dev Returns true if an app is eligible for voting in the current block.
+   */
+  function isEligibleNow(bytes32 appId) public view virtual returns (bool);
 
   /**
    * @dev Function to set the voting Eligibility of an app.
@@ -270,6 +299,11 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   function _getAppStorage(bytes32 appId) internal view virtual returns (X2EarnAppsDataTypes.App memory);
 
   /**
+   * @dev Update the allocation percentage of the receiver address
+   */
+  function _updateReceiverAllocationPercentage(bytes32 appId, uint256 percentage) internal virtual;
+
+  /**
    * @dev Function that should revert when `msg.sender` is not authorized to add an app. Called by
    * {addApp}.
    */
@@ -277,7 +311,8 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
 
   /**
    * @dev Function that should revert when `msg.sender` is not authorized to sensible updates to an app. Called by
-   * {addAppModerator}, {removeAppModerator}, {setAppAdminAddress}, {updateAppReceiverAddress}.
+   * {addAppModerator}, {removeAppModerator}, {setAppAdminAddress}, {updateAppReceiverAddress}, {updateAppMetadata},
+   * {addRewardDistributor}, {removeRewardDistributor}, {updateReceiverAllocationPercentage}.
    */
   function _authorizeAppManagement(bytes32 appId) internal virtual;
 
