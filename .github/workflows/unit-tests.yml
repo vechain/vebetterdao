@@ -40,22 +40,6 @@ jobs:
             src:
               - apps/frontend/**'
 
-      - name: Frontend Unit Tests
-        if: steps.frontend_changes.outputs.src == 'true'
-        run: yarn test --filter=frontend
-
-      - name: Check for Backend changes
-        uses: dorny/paths-filter@v3
-        id: backend_changes
-        with:
-          filters: |
-            src:
-              - apps/backend/**'
-
-      - name: Backend Unit Tests
-        if: steps.backend_changes.outputs.src == 'true'
-        run: yarn test --filter=backend
-
       - name: Check for Solidity changes
         uses: dorny/paths-filter@v3
         id: contract_changes
@@ -66,7 +50,7 @@ jobs:
 
       - name: Contracts Unit Tests
         if: steps.contract_changes.outputs.src == 'true'
-        run: yarn test --filter=contracts
+        run: yarn test
 
       - name: Run Slither
         uses: crytic/slither-action@v0.3.1
@@ -91,6 +75,22 @@ jobs:
             const body = process.env.REPORT
             await script({ github, context, header, body })
 
+      - name: Frontend Unit Tests
+        if: steps.frontend_changes.outputs.src == 'true'  && steps.contract_changes.outputs.src == 'false'
+        run: yarn test --filter=frontend
+
+      - name: Check for Backend changes
+        uses: dorny/paths-filter@v3
+        id: backend_changes
+        with:
+          filters: |
+            src:
+              - apps/backend/**'
+
+      - name: Backend Unit Tests
+        if: steps.backend_changes.outputs.src == 'true'  && steps.contract_changes.outputs.src == 'false'
+        run: yarn test --filter=backend
+
       - name: Check for Utils changes
         uses: dorny/paths-filter@v3
         id: utils_changes
@@ -100,7 +100,7 @@ jobs:
               - 'packages/utils/**'
 
       - name: Utils Unit Tests
-        if: steps.utils_changes.outputs.src == 'true'
+        if: steps.utils_changes.outputs.src == 'true' && steps.contract_changes.outputs.src == 'false'
         run: yarn test --filter=utils
 
       - name: Check for Lambda changes
@@ -112,5 +112,5 @@ jobs:
               - 'packages/lambda/**'
 
       - name: Lambda Unit Tests
-        if: steps.lambda_changes.outputs.src == 'true'
+        if: steps.lambda_changes.outputs.src == 'true' && steps.contract_changes.outputs.src == 'false'
         run: yarn test --filter=lambda
