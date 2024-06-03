@@ -43,6 +43,7 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
     mapping(bytes32 appId => address) _admin;
     mapping(bytes32 appId => address[]) _rewardDistributors; // addresses that can distribute rewards from X2EarnRewardsPool
     mapping(bytes32 appId => address) _receiverAddress;
+    mapping(bytes32 appId => string) _metadataURI;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnApps.Administration")) - 1)) & ~bytes32(uint256(0xff))
@@ -209,6 +210,26 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
     emit AppReceiverAddressUpdated(appId, oldReceiverAddress, newReceiverAddress);
   }
 
+  /**
+   * @dev Update the metadata URI of the app
+   *
+   * @param appId the hashed name of the app
+   * @param newMetadataURI the metadata URI of the app
+   *
+   * Emits a {AppMetadataURIUpdated} event.
+   */
+  function _updateAppMetadata(bytes32 appId, string memory newMetadataURI) internal virtual override {
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+
+    AdministrationStorage storage $ = _getAdministrationStorage();
+    string memory oldMetadataURI = $._metadataURI[appId];
+    $._metadataURI[appId] = newMetadataURI;
+
+    emit AppMetadataURIUpdated(appId, oldMetadataURI, newMetadataURI);
+  }
+
   // ---------- Getters ---------- //
 
   /**
@@ -301,5 +322,16 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
     }
 
     return false;
+  }
+
+  /**
+   * @dev Get the metadata URI of the app
+   *
+   * @param appId the app id
+   */
+  function metadataURI(bytes32 appId) public view override returns (string memory) {
+    AdministrationStorage storage $ = _getAdministrationStorage();
+
+    return $._metadataURI[appId];
   }
 }

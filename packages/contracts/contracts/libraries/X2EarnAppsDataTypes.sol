@@ -5,7 +5,6 @@ library X2EarnAppsDataTypes {
   struct App {
     bytes32 id;
     string name;
-    string metadataURI;
     uint256 createdAtTimestamp;
   }
 

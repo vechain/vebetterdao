@@ -59,11 +59,11 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
     address receiverAddress,
     address admin,
     string memory appName,
-    string memory metadataURI
+    string memory appMetadataURI
   ) public virtual {
     _authorizeAddApp();
 
-    _addApp(receiverAddress, admin, appName, metadataURI);
+    _addApp(receiverAddress, admin, appName, appMetadataURI);
   }
 
   /**
@@ -78,10 +78,10 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   /**
    * @dev See {IX2EarnApps-updateAppMetadata}.
    */
-  function updateAppMetadata(bytes32 appId, string memory metadataURI) public virtual {
+  function updateAppMetadata(bytes32 appId, string memory newMetadataURI) public virtual {
     _authorizeAppMetadataUpdate(appId);
 
-    _updateAppMetadata(appId, metadataURI);
+    _updateAppMetadata(appId, newMetadataURI);
   }
 
   /**
@@ -137,6 +137,20 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   }
 
   // ---------- Getters ---------- //
+
+  /**
+   * @dev Get the baseURI and metadata URI of the app concatenated
+   *
+   * @param appId the hashed name of the app
+   */
+  function appURI(bytes32 appId) public view returns (string memory) {
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+
+    return string(abi.encodePacked(baseURI(), metadataURI(appId)));
+  }
+
   /**
    * @dev Clock used for flagging checkpoints or to retrieve the current block number. Can be overridden to implement timestamp based
    * checkpoints (and voting), in which case {CLOCK_MODE} should be overridden as well to match.
@@ -194,6 +208,11 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
    * @dev Function to get the number of apps.
    */
   function appsCount() public view virtual returns (uint256);
+
+  /**
+   * @dev Function to get the metadataURI of an app.
+   */
+  function metadataURI(bytes32 appId) public view virtual returns (string memory);
 
   /**
    * @dev Function to set the voting Eligibility of an app.

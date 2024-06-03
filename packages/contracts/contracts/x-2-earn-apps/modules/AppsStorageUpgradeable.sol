@@ -93,32 +93,14 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
     }
 
     // Store the new app
-    $._apps[id] = X2EarnAppsDataTypes.App(id, appName, metadataURI, block.timestamp);
+    $._apps[id] = X2EarnAppsDataTypes.App(id, appName, block.timestamp);
     $._appIds.push(id);
     _setAppAdmin(id, admin);
     _setVotingEligibility(id, true);
     _updateAppReceiverAddress(id, receiverAddress);
+    _updateAppMetadata(id, metadataURI);
 
     emit AppAdded(id, receiverAddress, appName, true);
-  }
-
-  /**
-   * @dev Update the metadata URI of the app
-   *
-   * @param appId the hashed name of the app
-   * @param metadataURI the metadata URI of the app
-   *
-   * Emits a {AppMetadataURIUpdated} event.
-   */
-  function _updateAppMetadata(bytes32 appId, string memory metadataURI) internal virtual override {
-    if (!appExists(appId)) {
-      revert X2EarnNonexistentApp(appId);
-    }
-
-    AppsStorageStorage storage $ = _getAppsStorageStorage();
-    $._apps[appId].metadataURI = metadataURI;
-
-    emit AppMetadataURIUpdated(appId, $._apps[appId].metadataURI, metadataURI);
   }
 
   /**
@@ -158,7 +140,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
         _app.id,
         appReceiverAddress(appId),
         _app.name,
-        _app.metadataURI,
+        metadataURI(appId),
         _app.createdAtTimestamp
       );
   }
@@ -177,26 +159,11 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
         _app.id,
         appReceiverAddress(_app.id),
         _app.name,
-        _app.metadataURI,
+        metadataURI(_app.id),
         _app.createdAtTimestamp
       );
     }
     return allApps;
-  }
-
-  /**
-   * @dev Get the baseURI and metadata URI of the app concatenated
-   *
-   * @param appId the hashed name of the app
-   */
-  function appURI(bytes32 appId) public view returns (string memory) {
-    if (!appExists(appId)) {
-      revert X2EarnNonexistentApp(appId);
-    }
-
-    AppsStorageStorage storage $ = _getAppsStorageStorage();
-
-    return string(abi.encodePacked(baseURI(), $._apps[appId].metadataURI));
   }
 
   /**
