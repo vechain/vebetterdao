@@ -25,6 +25,7 @@ import { ProposalYourVote } from "./components/ProposalYourVote"
 import { useIpfsMetadata } from "@/api/ipfs"
 import { toIPFSURL } from "@/utils"
 import { useTranslation } from "react-i18next"
+import { CastProposalVoteButton } from "./components/CastProposalVoteButton"
 
 export const ProposalOverview = () => {
   const { proposal } = useCurrentProposal()
@@ -92,6 +93,7 @@ export const ProposalOverview = () => {
                   w="40px">
                   <UilShareAlt size="20px" />
                 </IconButton>
+                <CastProposalVoteButton />
               </HStack>
             </VStack>
           </VStack>
