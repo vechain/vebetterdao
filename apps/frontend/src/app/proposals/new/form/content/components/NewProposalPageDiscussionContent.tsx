@@ -1,7 +1,19 @@
 import "@uiw/react-md-editor/markdown-editor.css"
 import "@uiw/react-markdown-preview/markdown.css"
 
-import { Box, Button, Card, CardBody, HStack, Heading, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Card,
+  CardBody,
+  FormControl,
+  FormErrorMessage,
+  FormHelperText,
+  HStack,
+  Heading,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { ChangeEvent, useCallback } from "react"
 import { useProposalFormStore } from "@/store/useProposalFormStore"
@@ -10,8 +22,17 @@ import dynamic from "next/dynamic"
 import { ContextStore } from "@uiw/react-md-editor"
 import rehypeSanitize from "rehype-sanitize"
 import { useTranslation } from "react-i18next"
+import { useAutomaticUpdateProposalTemplate } from "../../../hooks/useAutomaticUpdateProposalTemplate"
+import { Controller, useForm } from "react-hook-form"
+import { FiCornerLeftDown } from "react-icons/fi"
+import { validateProposalTemplate } from "@/constants"
+import { validate } from "uuid"
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false })
+
+type FormData = {
+  markdownDescription: string
+}
 
 export const NewProposalPageDiscussionContent = () => {
   const { t } = useTranslation()
@@ -19,47 +40,83 @@ export const NewProposalPageDiscussionContent = () => {
 
   const { markdownDescription, setData } = useProposalFormStore()
 
-  const onChange = useCallback(
-    (value?: string, _event?: ChangeEvent<HTMLTextAreaElement>, _state?: ContextStore) => {
-      setData({ markdownDescription: value })
+  //automatic update the proposal template based on the form data
+  useAutomaticUpdateProposalTemplate()
+
+  const { control, formState, handleSubmit } = useForm<FormData>({
+    defaultValues: {
+      markdownDescription,
     },
-    [setData],
+  })
+
+  const { errors } = formState
+
+  const onSubmit = useCallback(
+    (data: FormData) => {
+      setData({ markdownDescription: data.markdownDescription })
+      router.push("/proposals/new/form/preview")
+    },
+    [setData, router],
   )
   const goBack = useCallback(() => {
     router.back()
   }, [router])
 
-  const onContinue = useCallback(() => {
-    router.push("/proposals/new/form/preview")
-  }, [router])
+  console.log("errors", errors)
 
   return (
     <Card w="full">
       <CardBody py={8}>
-        <VStack spacing={8} align="flex-start">
+        <VStack spacing={8} align="flex-start" as="form" onSubmit={handleSubmit(onSubmit)}>
           <Heading size="lg">{t("Share more about your idea")}</Heading>
           <Text fontSize="md" color="gray.500">
             {t(
               "Providing more information will help the community understand the purpose of your proposal and make informed voting decisions. Include details such as motivation, a detailed description, or any other relevant information.",
             )}
           </Text>
-
-          <Box w="full" h={500}>
-            <MDEditor
-              value={markdownDescription}
-              onChange={onChange}
-              height={"100%"}
-              previewOptions={{
-                rehypePlugins: [[rehypeSanitize]],
-              }}
-            />
-          </Box>
+          <FormControl isInvalid={!!errors.markdownDescription}>
+            <Box w="full" h={500}>
+              <Controller
+                name="markdownDescription"
+                control={control}
+                rules={{
+                  validate: value => {
+                    const errors = validateProposalTemplate(value)
+                    if (!errors.length) return true
+                    let errorMessage = "One or more placeholders have not been replaced: "
+                    errors.forEach((error, index) => {
+                      errorMessage += error
+                      if (index < errors.length - 1) errorMessage += ", "
+                    })
+                    return errorMessage
+                  },
+                }}
+                render={({ field }) => (
+                  <MDEditor
+                    value={field.value}
+                    onChange={field.onChange}
+                    height={"100%"}
+                    previewOptions={{
+                      rehypePlugins: [[rehypeSanitize]],
+                    }}
+                  />
+                )}
+              />
+            </Box>
+            {errors.markdownDescription ? (
+              <FormErrorMessage>{errors.markdownDescription.message}</FormErrorMessage>
+            ) : (
+              <FormHelperText color="gray.500" fontSize="sm">
+                Make sure to replace all the placeholders with your own content.
+              </FormHelperText>
+            )}
+          </FormControl>
 
           <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
             <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
               {t("Go back")}
             </Button>
-            <Button rounded="full" colorScheme="primary" size="lg" onClick={onContinue}>
+            <Button rounded="full" colorScheme="primary" size="lg" type="submit">
               {t("Continue")}
             </Button>
           </HStack>

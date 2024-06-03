@@ -5,23 +5,26 @@ import { CheckableCard, CheckableCardProps } from "@/components"
 import { useProposalFormStore } from "@/store/useProposalFormStore"
 import { useTranslation } from "react-i18next"
 import { useNewProposalPageGuard } from "../../form/hooks/useNewProposalPageGuard"
+import { TFunction } from "i18next"
 
-const Steps: (Omit<CheckableCardProps, "checked" | "onChange"> & {
+const Steps: (t: TFunction<"translation", undefined>) => (Omit<CheckableCardProps, "checked" | "onChange"> & {
   route: string
-})[] = [
+})[] = t => [
   {
     route: "/proposals/new/form/functions",
     imageSrc: "/images/blockchain.svg",
-    title: "Perform actions or changes",
-    description:
+    title: t("Perform actions or changes"),
+    description: t(
       "These proposals involve specific changes upon successful voting, aiming to implement concrete actions or modifications within the ecosystem.",
+    ),
   },
   {
     route: "/proposals/new/form/discussion",
     imageSrc: "/images/people.svg",
-    title: "General proposal",
-    description:
-      "If the desired outcome cannot be achieved by callid smart contract functions, then please describe what change idea you would like to propose",
+    title: t("General proposal"),
+    description: t(
+      "If the desired outcome cannot be achieved by calling smart contract functions, then please describe what change idea you would like to propose",
+    ),
   },
 ]
 export const NewProposalTypePageContent = () => {
@@ -30,8 +33,8 @@ export const NewProposalTypePageContent = () => {
   const pageGuardResult = useNewProposalPageGuard()
 
   const { clearData } = useProposalFormStore()
-
-  const [selectedRoute, setSelectedRoute] = useState<string>(Steps[0]?.route as string)
+  const [selectedRoute, setSelectedRoute] = useState<string>(Steps(t)[0]?.route as string)
+  const router = useRouter()
   const onChange = useCallback(
     (route: string) => () => {
       setSelectedRoute(route)
@@ -72,7 +75,7 @@ export const NewProposalTypePageContent = () => {
             <VStack spacing={8} align="flex-start">
               <Heading size="lg">{t("Select proposal type")}</Heading>
               <Stack direction={["column", "column", "row"]} w="full" spacing={4}>
-                {Steps.map((step, index) => (
+                {Steps(t).map((step, index) => (
                   <CheckableCard
                     {...step}
                     cardProps={{
