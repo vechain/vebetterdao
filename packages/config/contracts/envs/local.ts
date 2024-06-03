@@ -56,7 +56,7 @@ export function createLocalConfig() {
 
     INITIAL_X_ALLOCATION: BigInt("66666666666666666666666"), // 1M/15 rounded down -> 1/15th of the total supply for pilot show
 
-    GM_NFT_BASE_URI: "ipfs://bafybeiahr3qobzujfkxi64o6wrigkmdagrvgfa566rqqth6jm5nq7vf24y/", // IPFS base URI for the GM NFT
+    GM_NFT_BASE_URI: "ipfs://bafybeidngidiqpenmmvnnmxtnxar3stxtnltpknt5tg7jbgt4dkfhkcxha/", // IPFS base URI for the GM NFT
 
     /*
       Level => B3TR Required
