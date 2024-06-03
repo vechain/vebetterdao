@@ -25,10 +25,13 @@ import { useForm } from "react-hook-form"
 import { useCreateProposal, useUploadProposalMetadata } from "@/hooks"
 import { TransactionModal } from "@/components/TransactionModal"
 import { useTranslation } from "react-i18next"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
 type FormData = {
   amount: number
 }
+
+const compactFormatter = getCompactFormatter(2)
 
 export const NewProposalFundAndPublishPageContent = () => {
   const router = useRouter()
@@ -136,7 +139,8 @@ export const NewProposalFundAndPublishPageContent = () => {
               <Text fontSize="md" color="gray.500">
                 Your proposal will need support from the community to become active. Users who like your proposal and
                 want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will
-                need a total of {threshold} V3 to become active. You can also contribute with your own V3.
+                need a total of {compactFormatter.format(Number(threshold))} VOT3 to become active. You can also
+                contribute with your own VOT3.
               </Text>
               <VStack spacing={2} align="flex-start" w="full">
                 <Heading size="md">How much VOT3 do you want to lock to fund this proposal?</Heading>
@@ -172,7 +176,7 @@ export const NewProposalFundAndPublishPageContent = () => {
                     <Skeleton isLoaded={!thresholdLoading}>
                       <InputRightElement w="auto">
                         <Heading size={["sm", "sm", "lg"]} color="gray.500" fontWeight={400}>
-                          {`/ ${threshold}`}
+                          {`/ ${compactFormatter.format(Number(threshold))}`}
                         </Heading>
                       </InputRightElement>
                     </Skeleton>
