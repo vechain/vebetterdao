@@ -12,6 +12,7 @@ export const ProposalSessionVot3 = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { data } = useVot3Balance(account || "")
+  console.log("proposal.userVot3OnSnapshot", proposal.userVot3OnSnapshot)
   return (
     <HStack p="16px" rounded="12px" bg="#FAFAFA" justify={"space-between"}>
       <VStack align="stretch" gap={0}>

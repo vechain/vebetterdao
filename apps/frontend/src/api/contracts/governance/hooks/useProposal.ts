@@ -134,7 +134,7 @@ export const useProposal = (proposalId: string) => {
       ? Math.max(Number(supportingUserCount) - 1, 0)
       : Number(supportingUserCount)
     const userVotingPowerOnSnapshot = scaleVot3Amount(proposalSnapshotVotingPower.data)
-    const userVot3OnSnapshot = scaleVot3Amount(proposalSnapshotVot3.data)
+    const userVot3OnSnapshot = proposalSnapshotVot3.data
     const quorumPercentage = totalVotes ? totalVotes / Number(proposalQuorum.data?.scaled) : 0
     const quorumChartPercentage = Math.min(quorumPercentage || 0, 1) * 100
 

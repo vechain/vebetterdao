@@ -580,7 +580,7 @@ describe("Galaxy Member", () => {
       expect(await galaxyMember.connect(otherAccount).freeMint()).not.to.be.reverted
 
       expect(await galaxyMember.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 NFT
-      expect(await galaxyMember.ownerOf(1)).to.equal(await otherAccount.getAddress()) // Owner of the first NFT is the otherAccount
+      expect(await galaxyMember.ownerOf(0)).to.equal(await otherAccount.getAddress()) // Owner of the first NFT is the otherAccount
       expect(await galaxyMember.totalSupply()).to.equal(1) // Total supply is 1
     })
 
@@ -613,7 +613,7 @@ describe("Galaxy Member", () => {
       await galaxyMember.connect(voter).freeMint()
 
       expect(await galaxyMember.balanceOf(await voter.getAddress())).to.equal(1) // Other account has 1 NFT
-      expect(await galaxyMember.ownerOf(1)).to.equal(await voter.getAddress()) // Owner of the first NFT is the otherAccount
+      expect(await galaxyMember.ownerOf(0)).to.equal(await voter.getAddress()) // Owner of the first NFT is the otherAccount
       expect(await galaxyMember.totalSupply()).to.equal(1) // Total supply is 1
       expect(await galaxyMember.getHighestLevel(voter)).to.equal(1) // Level 0
     })
@@ -695,7 +695,7 @@ describe("Galaxy Member", () => {
       expect(await galaxyMember.numCheckpoints(await otherAccount.getAddress())).to.equal(1) // Other account has 1 checkpoint
 
       expect(await galaxyMember.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 NFT
-      expect(await galaxyMember.ownerOf(1)).to.equal(await otherAccount.getAddress()) // Owner of the first NFT is the otherAccount
+      expect(await galaxyMember.ownerOf(0)).to.equal(await otherAccount.getAddress()) // Owner of the first NFT is the otherAccount
       expect(await galaxyMember.totalSupply()).to.equal(1) // Total supply is 1
 
       expect(await galaxyMember.getHighestLevel(otherAccount)).to.equal(1) // Level 1
@@ -706,10 +706,10 @@ describe("Galaxy Member", () => {
       await expect(galaxyMember.getPastHighestLevel(await otherAccount.getAddress(), receipt.blockNumber + 1)).to.be
         .reverted // Should revert if block number is in the future
 
-      expect(await galaxyMember.tokenByIndex(0)).to.equal(1) // Token ID of the first NFT is 1
-      expect(await galaxyMember.tokenOfOwnerByIndex(await otherAccount.getAddress(), 0)).to.equal(1) // Token ID of the first NFT owned by otherAccount is 1
+      expect(await galaxyMember.tokenByIndex(0)).to.equal(0) // Token ID of the first NFT is 1
+      expect(await galaxyMember.tokenOfOwnerByIndex(await otherAccount.getAddress(), 0)).to.equal(0) // Token ID of the first NFT owned by otherAccount is 1
 
-      expect(await galaxyMember.tokenURI(1)).to.equal(`${config.GM_NFT_BASE_URI}1`) // Token URI of the first NFT is the "base URI/level"
+      expect(await galaxyMember.tokenURI(0)).to.equal(`${config.GM_NFT_BASE_URI}1`) // Token URI of the first NFT is the "base URI/level"
     })
 
     it("Should be able to free mint multiple NFTs", async () => {
@@ -753,19 +753,19 @@ describe("Galaxy Member", () => {
       expect(await galaxyMember.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 NFT
       expect(await galaxyMember.balanceOf(await owner.getAddress())).to.equal(1) // Owner has 1 NFT
 
-      expect(await galaxyMember.ownerOf(1)).to.equal(await otherAccount.getAddress()) // Owner of the first NFT is the otherAccount
-      expect(await galaxyMember.ownerOf(2)).to.equal(await owner.getAddress()) // Owner of the second NFT is the owner
+      expect(await galaxyMember.ownerOf(0)).to.equal(await otherAccount.getAddress()) // Owner of the first NFT is the otherAccount
+      expect(await galaxyMember.ownerOf(1)).to.equal(await owner.getAddress()) // Owner of the second NFT is the owner
 
       expect(await galaxyMember.totalSupply()).to.equal(2) // Total supply is 2
 
+      expect(await galaxyMember.levelOf(0)).to.equal(1) // Level 1
       expect(await galaxyMember.levelOf(1)).to.equal(1) // Level 1
-      expect(await galaxyMember.levelOf(2)).to.equal(1) // Level 1
 
-      expect(await galaxyMember.tokenByIndex(0)).to.equal(1) // Token ID of the first NFT is 1
-      expect(await galaxyMember.tokenByIndex(1)).to.equal(2) // Token ID of the second NFT is 2
+      expect(await galaxyMember.tokenByIndex(0)).to.equal(0) // Token ID of the first NFT is 1
+      expect(await galaxyMember.tokenByIndex(1)).to.equal(1) // Token ID of the second NFT is 2
 
-      expect(await galaxyMember.tokenOfOwnerByIndex(await otherAccount.getAddress(), 0)).to.equal(1) // Token ID of the first NFT owned by otherAccount is 1
-      expect(await galaxyMember.tokenOfOwnerByIndex(await owner.getAddress(), 0)).to.equal(2) // Token ID of the first NFT owned by owner is 1
+      expect(await galaxyMember.tokenOfOwnerByIndex(await otherAccount.getAddress(), 0)).to.equal(0) // Token ID of the first NFT owned by otherAccount is 1
+      expect(await galaxyMember.tokenOfOwnerByIndex(await owner.getAddress(), 0)).to.equal(1) // Token ID of the first NFT owned by owner is 1
 
       expect(await galaxyMember.getHighestLevel(otherAccount)).to.equal(1) // Level 1
       expect(await galaxyMember.getHighestLevel(owner)).to.equal(1) // Level 1
@@ -806,7 +806,7 @@ describe("Galaxy Member", () => {
 
       expect(await galaxyMember.getHighestLevel(owner)).to.equal(1) // Level 1
 
-      await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1)
+      await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 0)
 
       expect(await galaxyMember.getHighestLevel(owner)).to.equal(0) // Level 0 (no NFT)
 
@@ -817,19 +817,19 @@ describe("Galaxy Member", () => {
       expect(await galaxyMember.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 NFT
       expect(await galaxyMember.balanceOf(await owner.getAddress())).to.equal(1) // Owner has 1 NFT
 
-      expect(await galaxyMember.ownerOf(1)).to.equal(await otherAccount.getAddress()) // Owner of the first NFT is the otherAccount
-      expect(await galaxyMember.ownerOf(2)).to.equal(await owner.getAddress()) // Owner of the second NFT is the owner
+      expect(await galaxyMember.ownerOf(0)).to.equal(await otherAccount.getAddress()) // Owner of the first NFT is the otherAccount
+      expect(await galaxyMember.ownerOf(1)).to.equal(await owner.getAddress()) // Owner of the second NFT is the owner
 
       expect(await galaxyMember.totalSupply()).to.equal(2) // Total supply is 2
 
+      expect(await galaxyMember.levelOf(0)).to.equal(1) // Level 1
       expect(await galaxyMember.levelOf(1)).to.equal(1) // Level 1
-      expect(await galaxyMember.levelOf(2)).to.equal(1) // Level 1
 
-      expect(await galaxyMember.tokenByIndex(0)).to.equal(1) // Token ID of the first NFT is 1
-      expect(await galaxyMember.tokenByIndex(1)).to.equal(2) // Token ID of the second NFT is 2
+      expect(await galaxyMember.tokenByIndex(0)).to.equal(0) // Token ID of the first NFT is 1
+      expect(await galaxyMember.tokenByIndex(1)).to.equal(1) // Token ID of the second NFT is 2
 
-      expect(await galaxyMember.tokenOfOwnerByIndex(await otherAccount.getAddress(), 0)).to.equal(1) // Token ID of the first NFT owned by otherAccount is 1
-      expect(await galaxyMember.tokenOfOwnerByIndex(await owner.getAddress(), 0)).to.equal(2) // Token ID of the first NFT owned by owner is 1
+      expect(await galaxyMember.tokenOfOwnerByIndex(await otherAccount.getAddress(), 0)).to.equal(0) // Token ID of the first NFT owned by otherAccount is 1
+      expect(await galaxyMember.tokenOfOwnerByIndex(await owner.getAddress(), 0)).to.equal(1) // Token ID of the first NFT owned by owner is 1
     })
 
     it("Should return empty string for tokenURI of token that doesn't exist", async () => {
@@ -879,11 +879,11 @@ describe("Galaxy Member", () => {
 
       expect(await galaxyMember.balanceOf(await otherAccount.getAddress())).to.equal(1) // Owner has 1 NFT
 
-      expect(await galaxyMember.ownerOf(1)).to.equal(await otherAccount.getAddress()) // Owner of the first NFT is the otherAccount
+      expect(await galaxyMember.ownerOf(0)).to.equal(await otherAccount.getAddress()) // Owner of the first NFT is the otherAccount
 
       expect(await galaxyMember.totalSupply()).to.equal(1) // Total supply is 1
 
-      expect(await galaxyMember.levelOf(1)).to.equal(1) // Level 1
+      expect(await galaxyMember.levelOf(0)).to.equal(1) // Level 1
 
       expect(await galaxyMember.getHighestLevel(otherAccount)).to.equal(1) // Level 1
     })
@@ -903,20 +903,20 @@ describe("Galaxy Member", () => {
 
       await galaxyMember.connect(owner).freeMint()
 
-      await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1)
+      await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 0)
 
       expect(await galaxyMember.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 NFT
       expect(await galaxyMember.balanceOf(await owner.getAddress())).to.equal(0) // Owner has 0 NFTs
 
-      expect(await galaxyMember.ownerOf(1)).to.equal(await otherAccount.getAddress()) // Owner of the first NFT is the otherAccount
+      expect(await galaxyMember.ownerOf(0)).to.equal(await otherAccount.getAddress()) // Owner of the first NFT is the otherAccount
 
       expect(await galaxyMember.totalSupply()).to.equal(1) // Total supply is 1
 
-      expect(await galaxyMember.levelOf(1)).to.equal(1) // Level 1
+      expect(await galaxyMember.levelOf(0)).to.equal(1) // Level 1
 
-      expect(await galaxyMember.tokenByIndex(0)).to.equal(1) // Token ID of the first NFT is 1
+      expect(await galaxyMember.tokenByIndex(0)).to.equal(0) // Token ID of the first NFT is 1
 
-      expect(await galaxyMember.tokenOfOwnerByIndex(await otherAccount.getAddress(), 0)).to.equal(1) // Token ID of the first NFT owned by otherAccount is 1
+      expect(await galaxyMember.tokenOfOwnerByIndex(await otherAccount.getAddress(), 0)).to.equal(0) // Token ID of the first NFT owned by otherAccount is 1
     })
 
     it("Should not be able to transfer a NFT if transfers are paused", async () => {
@@ -935,12 +935,12 @@ describe("Galaxy Member", () => {
       await galaxyMember.connect(owner).pause()
 
       await catchRevert(
-        galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1),
+        galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 0),
       )
 
       await galaxyMember.connect(owner).unpause()
 
-      await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1)
+      await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 0)
     })
 
     it("Should be able to receive a GM NFT from another account if you already have one", async () => {
@@ -959,7 +959,7 @@ describe("Galaxy Member", () => {
 
       await galaxyMember.connect(owner).freeMint()
 
-      await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 2)
+      await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1)
 
       expect(await galaxyMember.balanceOf(await otherAccount.getAddress())).to.equal(2) // Other account has 2 tokens
     })
@@ -997,7 +997,7 @@ describe("Galaxy Member", () => {
       expect(decodedEvents?.[0]?.args?.[1]).to.equal(0) // Previous level
       expect(decodedEvents?.[0]?.args?.[2]).to.equal(1) // New level
 
-      tx = await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1)
+      tx = await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 0)
 
       receipt = await tx.wait()
 
@@ -1037,7 +1037,7 @@ describe("Galaxy Member", () => {
 
       tx = await galaxyMember
         .connect(otherAccount)
-        .transferFrom(await otherAccount.getAddress(), await otherAccounts[0].getAddress(), 1)
+        .transferFrom(await otherAccount.getAddress(), await otherAccounts[0].getAddress(), 0)
 
       receipt = await tx.wait()
 
@@ -1075,10 +1075,10 @@ describe("Galaxy Member", () => {
 
       await galaxyMember.connect(owner).freeMint()
 
-      await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await owner.getAddress(), 1)
+      await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await owner.getAddress(), 0)
 
       expect(await galaxyMember.balanceOf(await owner.getAddress())).to.equal(1) // Owner has 1 NFT
-      expect(await galaxyMember.ownerOf(1)).to.equal(await owner.getAddress()) // Owner of the first NFT is the owner
+      expect(await galaxyMember.ownerOf(0)).to.equal(await owner.getAddress()) // Owner of the first NFT is the owner
       expect(await galaxyMember.totalSupply()).to.equal(1) // Total supply is 1
     })
 
@@ -1097,14 +1097,14 @@ describe("Galaxy Member", () => {
 
       await galaxyMember.connect(owner).freeMint()
 
-      await galaxyMember.transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 2)
+      await galaxyMember.transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1)
 
-      await galaxyMember.connect(owner).burn(1)
+      await galaxyMember.connect(owner).burn(0)
 
       expect(await galaxyMember.balanceOf(await owner.getAddress())).to.equal(0) // Owner has 0 NFTs
       expect(await galaxyMember.totalSupply()).to.equal(1) // Total supply is 0
 
-      await expect(galaxyMember.connect(owner).burn(2)).to.be.reverted // Owner cannot burn a token he doesn't own
+      await expect(galaxyMember.connect(owner).burn(1)).to.be.reverted // Owner cannot burn a token he doesn't own
     })
   })
 
@@ -1131,7 +1131,7 @@ describe("Galaxy Member", () => {
 
       await galaxyMember.connect(owner).freeMint()
 
-      tx = await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1)
+      tx = await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 0)
 
       receipt = await tx.wait()
 
@@ -1147,7 +1147,7 @@ describe("Galaxy Member", () => {
         await galaxyMember.getPastHighestLevel(await otherAccount.getAddress(), receipt?.blockNumber - 1),
       ).to.equal(0) // Level 0 in the past
 
-      await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 2)
+      await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1)
 
       expect(await galaxyMember.balanceOf(await otherAccount.getAddress())).to.equal(2) // Other account has 2 NFTs
 
@@ -1192,7 +1192,7 @@ describe("Galaxy Member", () => {
 
       tx = await galaxyMember
         .connect(otherAccount)
-        .transferFrom(await otherAccount.getAddress(), await owner.getAddress(), 1)
+        .transferFrom(await otherAccount.getAddress(), await owner.getAddress(), 0)
 
       receipt = await tx.wait()
 
@@ -1268,9 +1268,9 @@ describe("Galaxy Member", () => {
       await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
       await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
 
-      await galaxyMember.connect(owner).freeMint() // Token id 1
+      await galaxyMember.connect(owner).freeMint() // Token id 0
 
-      await catchRevert(galaxyMember.connect(owner).upgrade(1)) // Insufficient B3TR to upgrade
+      await catchRevert(galaxyMember.connect(owner).upgrade(0)) // Insufficient B3TR to upgrade
 
       await b3tr.connect(minterAccount).mint(owner, ethers.parseEther("10000")) // Get some 10,000 B3TR required to upgrade to level 2
 
@@ -1278,17 +1278,17 @@ describe("Galaxy Member", () => {
 
       const balanceOfTreasuryBefore = await b3tr.balanceOf(await treasury.getAddress())
 
-      await galaxyMember.connect(owner).upgrade(1) // Upgrade token id 1 to level 2
+      await galaxyMember.connect(owner).upgrade(0) // Upgrade token id 1 to level 2
 
       const balanceOfTreasuryAfter = await b3tr.balanceOf(await treasury.getAddress())
 
       expect(balanceOfTreasuryAfter - balanceOfTreasuryBefore).to.equal(ethers.parseEther("10000")) // 10,000 B3TR should be transferred to the treasury pool
 
-      expect(await galaxyMember.levelOf(1)).to.equal(2) // Level 2
+      expect(await galaxyMember.levelOf(0)).to.equal(2) // Level 2
 
       expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(2) // Level 2
 
-      await expect(upgradeNFTtoLevel(1, 3, galaxyMember, b3tr, owner, minterAccount)).to.be.reverted // Level 3 is not available
+      await expect(upgradeNFTtoLevel(0, 3, galaxyMember, b3tr, owner, minterAccount)).to.be.reverted // Level 3 is not available
 
       await expect(galaxyMember.connect(otherAccount).setMaxLevel(3)).to.be.reverted // Only owner can set max level
 
@@ -1296,7 +1296,7 @@ describe("Galaxy Member", () => {
 
       await galaxyMember.connect(owner).setMaxLevel(3)
 
-      await upgradeNFTtoLevel(1, 3, galaxyMember, b3tr, owner, minterAccount) // Now we can upgrade to level 3
+      await upgradeNFTtoLevel(0, 3, galaxyMember, b3tr, owner, minterAccount) // Now we can upgrade to level 3
     })
 
     it("Should be able to transfer a token with level greater than 1", async () => {
@@ -1340,13 +1340,13 @@ describe("Galaxy Member", () => {
 
       await b3tr.connect(owner).approve(await galaxyMember.getAddress(), ethers.parseEther("10000")) // We need to approve the galaxyMember contract to transfer the B3TR required to upgrade from the owner's account
 
-      await galaxyMember.connect(owner).upgrade(1) // Upgrade token id 1 to level 2
+      await galaxyMember.connect(owner).upgrade(0) // Upgrade token id 0 to level 2
 
-      expect(await galaxyMember.levelOf(1)).to.equal(2) // Level 2
+      expect(await galaxyMember.levelOf(0)).to.equal(2) // Level 2
 
       let tx = await galaxyMember
         .connect(owner)
-        .transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1)
+        .transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 0)
 
       let receipt = await tx.wait()
 
@@ -1374,12 +1374,12 @@ describe("Galaxy Member", () => {
       expect(await galaxyMember.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 token
       expect(await galaxyMember.balanceOf(await owner.getAddress())).to.equal(0) // Owner has 0 tokens
 
-      expect(await galaxyMember.levelOf(1)).to.equal(2) // Level 2
+      expect(await galaxyMember.levelOf(0)).to.equal(2) // Level 2
 
       expect(await galaxyMember.getHighestLevel(await otherAccount.getAddress())).to.equal(2) // Level 2
       expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(0) // Level 0
 
-      expect(await galaxyMember.getNextLevel(1)).to.equal(3) // Next level is 3
+      expect(await galaxyMember.getNextLevel(0)).to.equal(3) // Next level is 3
     })
 
     it("Should not be able to upgrade if contract is paused", async () => {
@@ -1418,15 +1418,15 @@ describe("Galaxy Member", () => {
 
       await galaxyMember.connect(owner).freeMint() // Token id 1
 
-      await upgradeNFTtoLevel(1, 2, galaxyMember, b3tr, owner, minterAccount)
+      await upgradeNFTtoLevel(0, 2, galaxyMember, b3tr, owner, minterAccount)
 
       await galaxyMember.connect(owner).pause()
 
-      await catchRevert(galaxyMember.connect(owner).upgrade(1))
+      await catchRevert(galaxyMember.connect(owner).upgrade(0))
 
       await galaxyMember.connect(owner).unpause()
 
-      await upgradeNFTtoLevel(1, 3, galaxyMember, b3tr, owner, minterAccount)
+      await upgradeNFTtoLevel(0, 3, galaxyMember, b3tr, owner, minterAccount)
     })
 
     it("Should not be able to upgrade if allowance is not set", async () => {
@@ -1507,21 +1507,21 @@ describe("Galaxy Member", () => {
     await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
     await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
 
-    await galaxyMember.connect(owner).freeMint() // Token id 1
+    await galaxyMember.connect(owner).freeMint() // Token id 0
 
-    expect(await galaxyMember.levelOf(1)).to.equal(1) // Level 1
-    expect(await galaxyMember.ownerOf(1)).to.equal(await owner.getAddress()) // Owner of the first NFT is the owner
+    expect(await galaxyMember.levelOf(0)).to.equal(1) // Level 1
+    expect(await galaxyMember.ownerOf(0)).to.equal(await owner.getAddress()) // Owner of the first NFT is the owner
 
-    await upgradeNFTtoLevel(1, 10, galaxyMember, b3tr, owner, minterAccount)
+    await upgradeNFTtoLevel(0, 10, galaxyMember, b3tr, owner, minterAccount)
 
-    expect(await galaxyMember.levelOf(1)).to.equal(10) // Level 10
+    expect(await galaxyMember.levelOf(0)).to.equal(10) // Level 10
 
     expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(10) // Level 10
 
     // Transfer the token to another account
-    await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1)
+    await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 0)
 
-    expect(await galaxyMember.levelOf(1)).to.equal(10) // Level 10
+    expect(await galaxyMember.levelOf(0)).to.equal(10) // Level 10
     expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(0) // Level 0
 
     expect(await galaxyMember.getHighestLevel(await otherAccount.getAddress())).to.equal(10) // Level 10
@@ -1563,13 +1563,13 @@ describe("Galaxy Member", () => {
     await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
     await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
 
-    await galaxyMember.connect(owner).freeMint() // Token id 1
+    await galaxyMember.connect(owner).freeMint() // Token id 0
 
     await b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("10000")) // Get some 10,000 B3TR required to upgrade to level 2
 
     await b3tr.connect(otherAccount).approve(await galaxyMember.getAddress(), ethers.parseEther("10000")) // We need to approve the galaxyMember contract to transfer the B3TR required to upgrade from the owner's account
 
-    await catchRevert(galaxyMember.connect(otherAccount).upgrade(1)) // Should not be able to upgrade token not owned
+    await catchRevert(galaxyMember.connect(otherAccount).upgrade(0)) // Should not be able to upgrade token not owned
   })
 
   it("Should not be able to upgrade above max level", async () => {
@@ -1607,12 +1607,12 @@ describe("Galaxy Member", () => {
     await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
     await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
 
-    await galaxyMember.connect(owner).freeMint() // Token id 1
+    await galaxyMember.connect(owner).freeMint() // Token id 0
 
-    await upgradeNFTtoLevel(1, 10, galaxyMember, b3tr, owner, minterAccount)
+    await upgradeNFTtoLevel(0, 10, galaxyMember, b3tr, owner, minterAccount)
 
     // Should not be able to upgrade above max level
-    await catchRevert(galaxyMember.connect(owner).upgrade(1))
+    await catchRevert(galaxyMember.connect(owner).upgrade(0))
   })
 
   it("Should correctly track highest level owned", async () => {
@@ -1651,14 +1651,14 @@ describe("Galaxy Member", () => {
     await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
     await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
 
+    await galaxyMember.connect(owner).freeMint() // Token id 0
     await galaxyMember.connect(owner).freeMint() // Token id 1
     await galaxyMember.connect(owner).freeMint() // Token id 2
     await galaxyMember.connect(owner).freeMint() // Token id 3
     await galaxyMember.connect(owner).freeMint() // Token id 4
-    await galaxyMember.connect(owner).freeMint() // Token id 5
 
-    expect(await galaxyMember.levelOf(1)).to.equal(1) // Level 1
-    expect(await galaxyMember.ownerOf(1)).to.equal(await owner.getAddress()) // Owner of the first NFT is the owner
+    expect(await galaxyMember.levelOf(0)).to.equal(1) // Level 1
+    expect(await galaxyMember.ownerOf(0)).to.equal(await owner.getAddress()) // Owner of the first NFT is the owner
 
     /*
       Tokens owned:
@@ -1668,11 +1668,11 @@ describe("Galaxy Member", () => {
       Level 3: 1 token
       Level 1: 1 token
     */
-    await upgradeNFTtoLevel(3, 4, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 3 to level 4
-    await upgradeNFTtoLevel(4, 3, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 4 to level 3
+    await upgradeNFTtoLevel(2, 4, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 2 to level 4
+    await upgradeNFTtoLevel(3, 3, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 3 to level 3
+    await upgradeNFTtoLevel(0, 5, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 0 to level 5
+    await upgradeNFTtoLevel(4, 1, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 4 to level 1
     await upgradeNFTtoLevel(1, 5, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 1 to level 5
-    await upgradeNFTtoLevel(5, 1, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 5 to level 1
-    await upgradeNFTtoLevel(2, 5, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 2 to level 5
 
     /*
       Transfer token ID 5 of level 1 to other account
@@ -1682,7 +1682,7 @@ describe("Galaxy Member", () => {
       Level 4: 1
       Level 3: 1
     */
-    await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 5)
+    await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 4)
 
     expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(5) // Owner has highest level of 5
 
@@ -1697,7 +1697,7 @@ describe("Galaxy Member", () => {
       Level 3: 1
       Level 1: 2
     */
-    await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1)
+    await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 0)
 
     expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(5) // Owner still has the highest level of 5
 
@@ -1711,7 +1711,7 @@ describe("Galaxy Member", () => {
       Level 3: 1
       Level 1: 1
     */
-    await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 2)
+    await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1)
 
     expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(4) // Owner now has the highest level of 4
 
@@ -1723,7 +1723,7 @@ describe("Galaxy Member", () => {
       Tokens owned remaining:
       Level 3: 1
     */
-    await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 3)
+    await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 2)
 
     expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(3) // Owner now has the highest level of 3
 
@@ -1734,7 +1734,7 @@ describe("Galaxy Member", () => {
 
       Tokens owned remaining: None
     */
-    await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 4)
+    await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 3)
 
     expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(0) // Owner now has no tokens so the highest level is 0 (no Level)
 
@@ -1776,14 +1776,14 @@ describe("Galaxy Member", () => {
     await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
     await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
 
+    await galaxyMember.connect(owner).freeMint() // Token id 0
     await galaxyMember.connect(owner).freeMint() // Token id 1
     await galaxyMember.connect(owner).freeMint() // Token id 2
     await galaxyMember.connect(owner).freeMint() // Token id 3
     await galaxyMember.connect(owner).freeMint() // Token id 4
-    await galaxyMember.connect(owner).freeMint() // Token id 5
 
-    expect(await galaxyMember.levelOf(1)).to.equal(1) // Level 1
-    expect(await galaxyMember.ownerOf(1)).to.equal(await owner.getAddress()) // Owner of the first NFT is the owner
+    expect(await galaxyMember.levelOf(0)).to.equal(1) // Level 1
+    expect(await galaxyMember.ownerOf(0)).to.equal(await owner.getAddress()) // Owner of the first NFT is the owner
 
     /*
       Tokens owned:
@@ -1793,11 +1793,11 @@ describe("Galaxy Member", () => {
       Level 3: 1 token
       Level 1: 1 token
     */
-    await upgradeNFTtoLevel(3, 4, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 3 to level 4
-    await upgradeNFTtoLevel(4, 3, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 4 to level 3
+    await upgradeNFTtoLevel(2, 4, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 2 to level 4
+    await upgradeNFTtoLevel(3, 3, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 3 to level 3
+    await upgradeNFTtoLevel(0, 5, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 0 to level 5
+    await upgradeNFTtoLevel(4, 1, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 4 to level 1
     await upgradeNFTtoLevel(1, 5, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 1 to level 5
-    await upgradeNFTtoLevel(5, 1, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 5 to level 1
-    await upgradeNFTtoLevel(2, 5, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 2 to level 5
 
     await galaxyMember.connect(owner).selectHighestLevel() // Select the highest level owned
 
