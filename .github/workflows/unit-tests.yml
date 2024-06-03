@@ -32,21 +32,41 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Check for Frontend changes
+        uses: dorny/paths-filter@v3
+        id: frontend_changes
+        with:
+          filters: |
+            src:
+              - apps/frontend/**'
+
+      - name: Frontend Unit Tests
+        if: steps.frontend_changes.outputs.src == 'true'
+        run: yarn test --filter=frontend
+
+      - name: Check for Backend changes
+        uses: dorny/paths-filter@v3
+        id: backend_changes
+        with:
+          filters: |
+            src:
+              - apps/backend/**'
+
+      - name: Backend Unit Tests
+        if: steps.backend_changes.outputs.src == 'true'
+        run: yarn test --filter=backend
+
       - name: Check for Solidity changes
         uses: dorny/paths-filter@v3
         id: contract_changes
         with:
           filters: |
             src:
-              - 'packages/contracts/contracts/**'
+              - 'packages/contracts/**'
 
-      - name: Global Unit Tests
+      - name: Contracts Unit Tests
         if: steps.contract_changes.outputs.src == 'true'
-        run: yarn test
-
-      - name: Frontend Unit Tests
-        if: steps.contract_changes.outputs.src == 'false'
-        run: yarn test --filter=frontend
+        run: yarn test --filter=contracts
 
       - name: Run Slither
         uses: crytic/slither-action@v0.3.1
@@ -70,3 +90,27 @@ jobs:
             const header = '# Slither report'
             const body = process.env.REPORT
             await script({ github, context, header, body })
+
+      - name: Check for Utils changes
+        uses: dorny/paths-filter@v3
+        id: utils_changes
+        with:
+          filters: |
+            src:
+              - 'packages/utils/**'
+
+      - name: Utils Unit Tests
+        if: steps.utils_changes.outputs.src == 'true'
+        run: yarn test --filter=utils
+
+      - name: Check for Lambda changes
+        uses: dorny/paths-filter@v3
+        id: lambda_changes
+        with:
+          filters: |
+            src:
+              - 'packages/lambda/**'
+
+      - name: Lambda Unit Tests
+        if: steps.lambda_changes.outputs.src == 'true'
+        run: yarn test --filter=lambda
