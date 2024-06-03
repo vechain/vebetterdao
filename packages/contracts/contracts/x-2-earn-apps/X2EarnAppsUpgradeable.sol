@@ -110,6 +110,27 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
     _removeAppModerator(appId, moderator);
   }
 
+  /**
+   * @dev See {IX2EarnApps-addRewardDistributor}.
+   */
+  function addRewardDistributor(bytes32 appId, address distributor) public virtual {
+    _authorizeAppManagement(appId);
+
+    _addRewardDistributor(appId, distributor);
+  }
+
+  /**
+   * @dev See {IX2EarnApps-removeRewardDistributor}.
+   */
+  function removeRewardDistributor(bytes32 appId, address distributor) public virtual {
+    _authorizeAppManagement(appId);
+
+    _removeRewardDistributor(appId, distributor);
+  }
+
+  /**
+   * @dev See {IX2EarnApps-setVotingEligibility}.
+   */
   function setVotingEligibility(bytes32 _appId, bool _isEligible) public virtual override {
     _setVotingEligibility(_appId, _isEligible);
   }
@@ -193,6 +214,16 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
    * @dev Function to remove a moderator from the app.
    */
   function _removeAppModerator(bytes32 appId, address moderator) internal virtual;
+
+  /**
+   * @dev Function to add a reward distributor to the app.
+   */
+  function _addRewardDistributor(bytes32 appId, address distributor) internal virtual;
+
+  /**
+   * @dev Function to remove a reward distributor from the app.
+   */
+  function _removeRewardDistributor(bytes32 appId, address distributor) internal virtual;
 
   /**
    * @dev Save app in storage.

@@ -60,6 +60,16 @@ interface IX2EarnApps {
   event ModeratorRemovedFromApp(bytes32 indexed appId, address moderator);
 
   /**
+   * @dev Event fired when the admin adds a new reward distributor to the app.
+   */
+  event RewardDistributorAddedToApp(bytes32 indexed appId, address distributorAddress);
+
+  /**
+   * @dev Event fired when the admin removes a reward distributor from the app.
+   */
+  event RewardDistributorRemovedFromApp(bytes32 indexed appId, address distributorAddress);
+
+  /**
    * @dev Event fired when the admin of an app changes.
    */
   event AppAdminUpdated(bytes32 indexed appId, address oldAdmin, address newAdmin);
@@ -158,6 +168,34 @@ interface IX2EarnApps {
    * @param appId the id of the app
    */
   function appReceiverAddress(bytes32 appId) external view returns (address);
+
+  /**
+   * @dev Add a new reward distributor to the app.
+   *
+   * @param appId the id of the app
+   * @param distributorAddress the address of the reward distributor
+   *
+   * Emits a {RewardDistributorAddedToApp} event.
+   */
+  function addRewardDistributor(bytes32 appId, address distributorAddress) external;
+
+  /**
+   * @dev Remove a reward distributor from the app.
+   *
+   * @param appId the id of the app
+   * @param distributorAddress the address of the reward distributor
+   *
+   * Emits a {RewardDistributorRemovedFromApp} event.
+   */
+  function removeRewardDistributor(bytes32 appId, address distributorAddress) external;
+
+  /**
+   * @dev Returns true if an account is a reward distributor of the app
+   *
+   * @param appId the id of the app
+   * @param distributorAddress the address of the account
+   */
+  function isRewardDistributor(bytes32 appId, address distributorAddress) external view returns (bool);
 
   /**
    * @dev Update the metadata URI of the app.

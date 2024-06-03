@@ -32,12 +32,15 @@ import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
  * Each app has an admin and a list of moderators that can manage the app.
  * The admin can add/remove moderators and change the admin address.
  * Those roles can be used to manage the app and its metadata.
+ * The admin can also set reward distributors for the app, which are the addresses that can
+ * call the distribute method on the X2EarnRewardsPool contract to emit rewards.
  */
 abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradeable {
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.Administration
   struct AdministrationStorage {
     mapping(bytes32 appId => address[]) _moderators;
     mapping(bytes32 appId => address) _admin;
+    mapping(bytes32 appId => address[]) _rewardDistributors;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnApps.Administration")) - 1)) & ~bytes32(uint256(0xff))
@@ -132,6 +135,56 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
     }
   }
 
+  /**
+   * @dev Internal function to add a reward distributor to the app
+   *
+   * @param appId the hashed name of the app
+   * @param distributor the address of the reward distributor
+   */
+  function _addRewardDistributor(bytes32 appId, address distributor) internal virtual override {
+    if (distributor == address(0)) {
+      revert X2EarnInvalidAddress(distributor);
+    }
+
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+
+    AdministrationStorage storage $ = _getAdministrationStorage();
+
+    $._rewardDistributors[appId].push(distributor);
+
+    emit RewardDistributorAddedToApp(appId, distributor);
+  }
+
+  /**
+   * @dev Internal function to remove a reward distributor from the app
+   *
+   * @param appId the hashed name of the app
+   * @param distributor the address of the reward distributor
+   */
+  function _removeRewardDistributor(bytes32 appId, address distributor) internal virtual override {
+    if (distributor == address(0)) {
+      revert X2EarnInvalidAddress(distributor);
+    }
+
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+
+    AdministrationStorage storage $ = _getAdministrationStorage();
+
+    address[] storage distributors = $._rewardDistributors[appId];
+    for (uint256 i = 0; i < distributors.length; i++) {
+      if (distributors[i] == distributor) {
+        distributors[i] = distributors[distributors.length - 1];
+        distributors.pop();
+        emit RewardDistributorRemovedFromApp(appId, distributor);
+        break;
+      }
+    }
+  }
+
   // ---------- Getters ---------- //
 
   /**
@@ -178,6 +231,36 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
     address[] memory moderators = $._moderators[appId];
     for (uint256 i = 0; i < moderators.length; i++) {
       if (moderators[i] == account) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * @dev Returns the list of reward distributors of the app
+   *
+   * @param appId the hashed name of the app
+   */
+  function appRewardDistributors(bytes32 appId) public view returns (address[] memory) {
+    AdministrationStorage storage $ = _getAdministrationStorage();
+
+    return $._rewardDistributors[appId];
+  }
+
+  /**
+   * @dev Returns true if an account is a reward distributor of the app
+   *
+   * @param appId the hashed name of the app
+   * @param account the address of the account
+   */
+  function isRewardDistributor(bytes32 appId, address account) public view returns (bool) {
+    AdministrationStorage storage $ = _getAdministrationStorage();
+
+    address[] memory distributors = $._rewardDistributors[appId];
+    for (uint256 i = 0; i < distributors.length; i++) {
+      if (distributors[i] == account) {
         return true;
       }
     }
