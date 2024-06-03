@@ -6,6 +6,7 @@ import { ProposalCommunitySupport } from "./ProposalCommunitySupport"
 import { ProposalWithdrawDeposit } from "./ProposalWithdrawDeposit"
 import { ProposalSessionSection } from "./ProposalSessionSection"
 import { CancelProposalSection } from "./CancelProposalSection/CancelProposalSection"
+import { ProposalVoteCommentList } from "./ProposalVoteCommentList"
 
 type Props = {
   proposalId: string
@@ -22,6 +23,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
       <Grid templateColumns="repeat(3, 1fr)" gap={[8, 8, 8]} w="full">
         <GridItem colSpan={[3, 3, 2]} gap={8}>
           <VStack align="stretch" gap={8}>
+            <ProposalVoteCommentList />
             <ProposalCommunitySupport />
             <ProposalContentAndActions proposal={proposal} />
           </VStack>

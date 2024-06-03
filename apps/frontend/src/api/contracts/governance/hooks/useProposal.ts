@@ -109,6 +109,8 @@ export const useProposal = (proposalId: string) => {
 
   const proposal = useMemo(() => {
     const userVote = proposalVoteEvents.userVote
+    const votes = proposalVoteEvents.votes
+    const votesWithComment = proposalVoteEvents.votesWithComment
     const hasUserVoted = proposalVoteEvents.hasUserVoted
     const forVotes = Number(proposalVotes.data?.forVotes || "0")
     const againstVotes = Number(proposalVotes.data?.againstVotes || "0")
@@ -188,6 +190,8 @@ export const useProposal = (proposalId: string) => {
       forPercentage,
       againstPercentage,
       abstainPercentage,
+      votes,
+      votesWithComment,
       userVote,
       hasUserVoted,
       userVotingPowerOnSnapshot,
