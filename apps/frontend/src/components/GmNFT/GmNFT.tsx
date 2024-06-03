@@ -26,6 +26,7 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { motion } from "framer-motion"
 import { RiArrowRightSLine } from "react-icons/ri"
 import { coinFlipAnimation, pulseAnimation } from "@/constants"
+import { NFTWithRings } from "./components"
 
 // Convert Button to a motion component
 const MotionImage = motion(Image)
@@ -90,22 +91,60 @@ export const GmNFT = () => {
       )
 
     return (
-      <ModalContent w={"auto"} rounded="2xl" data-testid="gmnft-modal">
-        <ModalCloseButton data-testid="gmnft-modal-close" />
-        <ModalBody display={"flex"} alignContent={"center"} alignItems={"center"} pt={12} px={6}>
+      <ModalContent
+        rounded="2xl"
+        data-testid="gmnft-modal"
+        bgGradient={"radial-gradient(76.36% 85.35% at 50.12% 27.48%, #304828 0%, #01091B 100%)"}>
+        <ModalCloseButton color={"white"} />
+        <ModalBody
+          display={"flex"}
+          alignContent={"center"}
+          alignItems={"center"}
+          pt={{ base: 14, md: 20 }}
+          px={{ base: 12, md: 20 }}>
           <VStack alignItems={"center"}>
-            <Image src={imageData?.image} maxW={"auto"} rounded="3xl" alt={`GM Earth NFT #${tokenID}`} />
-            <Heading alignSelf={"center"} size={"lg"} mt={4} textAlign={"center"} data-testid={"gmnft-token-id"}>
+            <Text
+              alignSelf={"center"}
+              size={"lg"}
+              mb={{ base: 4, md: 8 }}
+              textAlign={"center"}
+              data-testid={"gmnft-token-id"}
+              color={"white"}
+              fontSize={28}
+              fontWeight={700}>
+              VeBetterDAO <br /> Governance
+            </Text>
+
+            <NFTWithRings image={imageData?.image} tokenID={tokenID} />
+            <Text
+              alignSelf={"center"}
+              size={"lg"}
+              mt={{ base: 4, md: 8 }}
+              textAlign={"center"}
+              data-testid={"gmnft-token-id"}
+              color={"white"}
+              fontSize={24}
+              fontWeight={600}>
+              GM Earth
+            </Text>
+            <Text
+              alignSelf={"center"}
+              size={"lg"}
+              textAlign={"center"}
+              data-testid={"gmnft-token-id"}
+              color={"white"}
+              fontSize={16}
+              fontWeight={500}>
               #{tokenID}
-            </Heading>
+            </Text>
           </VStack>
         </ModalBody>
-        <ModalFooter justifyContent={"center"}>
+        <ModalFooter justifyContent={"center"} pb={{ base: 14, md: 20 }}>
           <ShareButtons descriptionEncoded="As%20a%20Voter%20in%20VeBetterDAO%2C%20I%E2%80%99ve%20just%20minted%20my%20GM%20Earth%20NFT.%20%F0%9F%8C%8D%0A%0AGet%20yours%20here%20%F0%9F%91%89%20%20https%3A%2F%2Fgovernance.vebetterdao.org%2F%0A%0A%23GalaxyMember%20%23VeBetterDAO" />
         </ModalFooter>
       </ModalContent>
     )
-  }, [isLoadingNFT, imageData, isClaimLoading, showLoader, isTxReceiptLoading, tokenID])
+  }, [showLoader, isClaimLoading, isLoadingNFT, isTxReceiptLoading, imageData?.image, tokenID])
 
   return (
     <>
@@ -160,22 +199,25 @@ export const GmNFT = () => {
                 <HStack
                   w="full"
                   color={"#1e1e1e"}
-                  bg={`secondary.${nftCardColor}`}
+                  bg={`#F8F8F8`}
                   borderRadius="8px"
-                  borderColor={`secondary.${nftCardBorderColor}`}
+                  borderColor={`#D5D5D5`}
                   borderWidth={1}
                   spacing={4}
                   pr={4}
                   pl={2}
                   onClick={onOpen}
-                  cursor={"pointer"}
-                  _hover={{
-                    bgColor: `secondary.${nftOwnedColorCard}`,
-                    transition: "all 0.3s ease-in-out",
-                  }}>
+                  cursor={"pointer"}>
                   <HStack w="full" justifyContent={"start"}>
-                    <Box p={4}>
-                      <Image {...pulseAnimation} src={imageData?.image} maxH="120px" borderRadius={16} />
+                    <Box
+                      p={2}
+                      bgGradient={
+                        "radial-gradient(113.65% 122.7% at 52.87% 0%, #BDF87C 45.8%, #4575E1 70.4%, #004CFC 88.37%)"
+                      }
+                      borderRadius={16}
+                      m={2}
+                      boxShadow={"0px 2.773px 9.473px -2.079px #0019A0"}>
+                      <Image src={imageData?.image} maxH="100px" borderRadius={16} />
                     </Box>
 
                     <Text fontWeight={600} lineHeight="22px" fontSize={{ base: "18px", md: "20px" }}>
