@@ -3,33 +3,35 @@ import { useRouter } from "next/navigation"
 import { StepCard, StepCardProps } from "@/components/StepCard"
 import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
+import { TFunction } from "i18next"
 
-const Steps: StepCardProps[] = [
+const Steps: (t: TFunction<"translation", undefined>) => StepCardProps[] = t => [
   {
     stepImageSrc: "/images/sign.svg",
     stepNumber: 1,
-    stepTitle: "Creation",
-    stepDescription: "Craft your proposal by outlining the information and functions to be executed.",
+    stepTitle: t("Creation"),
+    stepDescription: t("Craft your proposal by outlining the information and functions to be executed."),
   },
   {
     stepImageSrc: "/images/handshake.svg",
     stepNumber: 2,
-    stepTitle: "Look for support",
-    stepDescription: "In order for your proposal to be voted on, it will have to have the support of the community.",
+    stepTitle: t("Look for support"),
+    stepDescription: t("In order for your proposal to be voted on, it will have to have the support of the community."),
   },
 
   {
     stepImageSrc: "/images/vote.svg",
     stepNumber: 3,
-    stepTitle: "Voting",
-    stepDescription:
+    stepTitle: t("Voting"),
+    stepDescription: t(
       "If your proposal gets funded before the voting session starts, the community will vote to decide if they support or reject your idea.",
+    ),
   },
   {
     stepImageSrc: "/images/arrow-right.svg",
     stepNumber: 4,
-    stepTitle: "Execution",
-    stepDescription: "If your proposal receives enough votes, it will be executed.",
+    stepTitle: t("Execution"),
+    stepDescription: t("If your proposal receives enough votes, it will be executed."),
   },
 ]
 export const NewProposalPageContent = () => {
@@ -61,7 +63,7 @@ export const NewProposalPageContent = () => {
                 )}
               </Text>
               <Stack direction={["column"]} w="full" spacing={4}>
-                {Steps.map(step => (
+                {Steps(t).map(step => (
                   <StepCard
                     {...step}
                     key={step.stepNumber}

@@ -5,7 +5,7 @@ import { useProposalFormStore } from "@/store/useProposalFormStore"
 import { AnalyticsUtils } from "@/utils"
 import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
-import { useRouter } from "next/router"
+import { useRouter } from "next/navigation"
 import { useEffect, useLayoutEffect, useMemo } from "react"
 
 const NewProposalRoundPageContent = dynamic(

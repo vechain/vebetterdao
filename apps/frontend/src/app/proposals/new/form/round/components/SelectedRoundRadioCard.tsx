@@ -2,8 +2,8 @@ import { RoundCreated, useAllocationsRoundsEvents, useCurrentBlock, useVotingPer
 import { Card, VStack, HStack, Heading, Radio, Box, Skeleton, Text } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import dayjs from "dayjs"
-import { round } from "lodash"
 import { useMemo } from "react"
+import { useTranslation } from "react-i18next"
 
 const blockTime = getConfig().network.blockTime
 
@@ -14,8 +14,9 @@ type Props = {
   renderSkeleton?: boolean
 }
 export const SelectedRoundRadioCard: React.FC<Props> = ({ roundId, selected, onSelect, renderSkeleton }) => {
-  const { data: allocationRoundEvents, isLoading: allocationRoundsEventsLoading } = useAllocationsRoundsEvents()
-  const { data: votingPeriod, isLoading: votingPeriodLoading } = useVotingPeriod()
+  const { t } = useTranslation()
+  const { data: allocationRoundEvents } = useAllocationsRoundsEvents()
+  const { data: votingPeriod } = useVotingPeriod()
 
   const { data: currentBlock } = useCurrentBlock()
 
@@ -67,11 +68,15 @@ export const SelectedRoundRadioCard: React.FC<Props> = ({ roundId, selected, onS
         <HStack justify="space-between" w="full">
           <VStack spacing={2} align="flex-start">
             <Skeleton isLoaded={!renderSkeleton}>
-              <Heading size="md">Round #{roundId}</Heading>
+              <Heading size="md">
+                {t("Round #{{round}}", {
+                  round: roundId,
+                })}
+              </Heading>
             </Skeleton>
             <Skeleton isLoaded={!isEstimatedStartTimeLoading}>
               <Text fontSize="md" as="span" display={"inline-flex"} gap={1}>
-                Starts on
+                {t("Starts on")}
                 <Text fontWeight="600">{estimatedStartTime?.format("MMM D")}</Text>
               </Text>
             </Skeleton>
