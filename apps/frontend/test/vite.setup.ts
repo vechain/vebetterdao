@@ -4,6 +4,8 @@ import ResizeObserver from "resize-observer-polyfill"
 import { loadEnvConfig } from "@next/env"
 import { cleanup } from "@testing-library/react"
 
+const adminAddress = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa"
+
 Object.defineProperty(window, "matchMedia", {
   writable: true,
   value: vi.fn().mockImplementation(query => ({
@@ -43,6 +45,17 @@ vi.mock("next/navigation", async () => {
       // get: vi.fn(),
     })),
     usePathname: vi.fn(),
+  }
+})
+
+//mock dappkit
+vi.mock("@vechain/dapp-kit-react", async importOriginal => {
+  const mod = await importOriginal<typeof import("@vechain/dapp-kit-react")>()
+  return {
+    ...mod,
+    useWallet: () => ({
+      account: adminAddress,
+    }),
   }
 })
 
