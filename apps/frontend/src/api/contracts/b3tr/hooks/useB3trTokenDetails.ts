@@ -29,7 +29,6 @@ export const getB3trTokenDetails = async (thor: Connex.Thor): Promise<TokenDetai
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
-  console.log("tokenDetails", res.decoded)
   return {
     name: res.decoded[0],
     symbol: res.decoded[1],
