@@ -1,8 +1,10 @@
-import { describe, expect } from "vitest"
-import NewproposalPage from "./page"
+import { describe, expect, it } from "vitest"
+import NewproposalContentPage from "./page"
 import { fireEvent, render, screen, waitFor } from "../../../../../../test"
 import * as router from "next/navigation"
 import * as dappKit from "@vechain/dapp-kit-react"
+import FormProposalLayout from "../layout"
+import { mockedUsePathname } from "../../../../../../test/vite.setup"
 
 const mockRouterPush = vi.fn()
 const mockBack = vi.fn()
@@ -13,33 +15,47 @@ vi.spyOn(router, "useRouter").mockReturnValue({
   back: mockBack,
 })
 
+vi.spyOn(router, "usePathname").mockImplementation(() => "/proposals/new/form/content")
+
 describe("NewProposalContent", async () => {
   it("redirects to /proposals if no account connected", async () => {
     //@ts-ignore
     vi.spyOn(dappKit, "useWallet").mockReturnValueOnce({
       account: null,
     })
-    render(<NewproposalPage />)
+    const x = render(
+      <FormProposalLayout>
+        <NewproposalContentPage />
+      </FormProposalLayout>,
+    )
+    x.debug()
     await waitFor(() => expect(mockRouterPush).toHaveBeenCalledWith("/proposals"))
   }) // redirects to /proposals if no account connected
 
   it("should render correctly", async () => {
-    render(<NewproposalPage />)
-    await screen.findByTestId("new-proposal-page")
-    await screen.findByText("Create a new proposal")
-    await screen.findByText(
-      "Proposals represent your ideas as a valued member of the DAO community, aimed at enhancing or modifying aspects of the ecosystem. Each proposal undergoes a voting process, and upon approval, is brought to life.",
+    render(
+      <FormProposalLayout>
+        <NewproposalContentPage />
+      </FormProposalLayout>,
     )
-    await screen.findByText("Creation")
-    await screen.findByText("Look for support")
-    await screen.findByText("Voting")
-    await screen.findByText("Execution")
+    await screen.findByTestId("new-proposal-content-page")
+    await screen.findByText("Share more about your idea")
+    await screen.findByText(
+      "Providing more information will help the community understand the purpose of your proposal and make informed voting decisions. Include details such as motivation, a detailed description, or any other relevant information.",
+    )
+    await screen.findByText("Make sure to replace all the placeholders with your own content.")
 
     const goBack = await screen.findByTestId("go-back")
     const continueButton = await screen.findByTestId("continue")
     fireEvent.click(goBack)
     expect(mockBack).toHaveBeenCalled()
     fireEvent.click(continueButton)
-    expect(mockRouterPush).toHaveBeenCalledWith("/proposals/new/type")
+
+    const formError = await screen.findByTestId("form-error-message")
+    expect(formError).toBeInTheDocument()
+
+    expect(
+      screen.queryByText("Make sure to replace all the placeholders with your own content."),
+    ).not.toBeInTheDocument()
   }) // should render correctly
 }) // NewProposal

@@ -15,18 +15,15 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
-import { ChangeEvent, useCallback } from "react"
+import { useCallback } from "react"
 import { useProposalFormStore } from "@/store/useProposalFormStore"
 import dynamic from "next/dynamic"
 
-import { ContextStore } from "@uiw/react-md-editor"
 import rehypeSanitize from "rehype-sanitize"
 import { useTranslation } from "react-i18next"
 import { useAutomaticUpdateProposalTemplate } from "../../../hooks/useAutomaticUpdateProposalTemplate"
 import { Controller, useForm } from "react-hook-form"
-import { FiCornerLeftDown } from "react-icons/fi"
 import { validateProposalTemplate } from "@/constants"
-import { validate } from "uuid"
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false })
 
@@ -63,7 +60,7 @@ export const NewProposalPageDiscussionContent = () => {
   }, [router])
 
   return (
-    <Card w="full">
+    <Card w="full" data-testid="new-proposal-content-page">
       <CardBody py={8}>
         <VStack spacing={8} align="flex-start" as="form" onSubmit={handleSubmit(onSubmit)}>
           <Heading size="lg">{t("Share more about your idea")}</Heading>
@@ -91,6 +88,7 @@ export const NewProposalPageDiscussionContent = () => {
                 }}
                 render={({ field }) => (
                   <MDEditor
+                    data-testid="markdown-description-input"
                     value={field.value}
                     onChange={field.onChange}
                     height={"100%"}
@@ -102,19 +100,25 @@ export const NewProposalPageDiscussionContent = () => {
               />
             </Box>
             {errors.markdownDescription ? (
-              <FormErrorMessage>{errors.markdownDescription.message}</FormErrorMessage>
+              <FormErrorMessage data-testid="form-error-message">{errors.markdownDescription.message}</FormErrorMessage>
             ) : (
               <FormHelperText color="gray.500" fontSize="sm">
-                Make sure to replace all the placeholders with your own content.
+                {t("Make sure to replace all the placeholders with your own content.")}
               </FormHelperText>
             )}
           </FormControl>
 
           <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
-            <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
+            <Button
+              data-testid="go-back"
+              rounded="full"
+              variant={"primarySubtle"}
+              colorScheme="primary"
+              size="lg"
+              onClick={goBack}>
               {t("Go back")}
             </Button>
-            <Button rounded="full" colorScheme="primary" size="lg" type="submit">
+            <Button data-testid="continue" rounded="full" colorScheme="primary" size="lg" type="submit">
               {t("Continue")}
             </Button>
           </HStack>

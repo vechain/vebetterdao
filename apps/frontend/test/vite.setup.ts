@@ -4,6 +4,7 @@ import ResizeObserver from "resize-observer-polyfill"
 import { loadEnvConfig } from "@next/env"
 import { cleanup } from "@testing-library/react"
 
+import "../src/i18n"
 const adminAddress = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa"
 
 Object.defineProperty(window, "matchMedia", {
@@ -33,6 +34,7 @@ vi.mock("next/dynamic", async () => {
   }
 })
 
+export const mockedUsePathname = vi.fn()
 vi.mock("next/navigation", async () => {
   const actual = await vi.importActual("next/navigation")
   return {
@@ -44,7 +46,7 @@ vi.mock("next/navigation", async () => {
     useSearchParams: vi.fn(() => ({
       // get: vi.fn(),
     })),
-    usePathname: vi.fn(),
+    usePathname: mockedUsePathname,
   }
 })
 

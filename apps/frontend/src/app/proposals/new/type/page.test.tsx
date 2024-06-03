@@ -1,6 +1,6 @@
 import { describe, expect, vi } from "vitest"
 import NewproposalPage from "./page"
-import { fireEvent, render, renderHook, screen, waitFor, within } from "../../../../../test"
+import { fireEvent, render, renderHook, screen, waitFor } from "../../../../../test"
 import * as router from "next/navigation"
 import * as dappKit from "@vechain/dapp-kit-react"
 import { Steps } from "./components/NewProposalTypePageContent"
@@ -27,7 +27,6 @@ describe("NewProposalType", async () => {
 
   it("should render correctly", async () => {
     const x = render(<NewproposalPage />)
-    x.debug()
     await screen.findByTestId("new-proposal-type-page")
     await screen.findByText("Select proposal type")
 

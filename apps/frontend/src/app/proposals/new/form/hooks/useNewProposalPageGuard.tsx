@@ -10,6 +10,7 @@ import { useMemo } from "react"
  */
 export const useNewProposalPageGuard = () => {
   const pathname = usePathname()
+  console.log("pathname", pathname)
   const { account } = useWallet()
   const { title, shortDescription, markdownDescription, actions, votingStartRoundId } = useProposalFormStore()
 
