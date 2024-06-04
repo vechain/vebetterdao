@@ -70,10 +70,10 @@ export const setupLocalEnvironment = async (
   const seedAccounts = getSeedAccounts(SeedStrategy.FIXED, 5, 0)
   await airdropB3trFromTreasury(treasuryAddress, admin, seedAccounts)
 
-  if (!shouldRunSimulation() && !isE2E()) {
-    const firstAccount = seedAccounts[0]
-    await airdropB3trPercentage(treasuryAddress, admin, firstAccount, 10, b3tr) // 10% of total supply
-  }
+  // if (!shouldRunSimulation() && !isE2E()) {
+  //   const firstAccount = seedAccounts[0]
+  //   await airdropB3trPercentage(treasuryAddress, admin, firstAccount, 10, b3tr) // 10% of total supply
+  // }
 
   const end = new Date(performance.now() - start)
   console.log(`Setup complete in ${end.getMinutes()}m ${end.getSeconds()}s`)

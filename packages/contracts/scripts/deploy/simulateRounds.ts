@@ -57,7 +57,7 @@ export const simulateRounds = async (
   // Convert B3TR for VOT3
   await convertB3trForVot3(b3tr, vot3, seedAccounts)
 
-  for (let i = 1; i < 15; i++) {
+  for (let i = 1; i < 634; i++) {
     await distributeEmissions(emissionsContract, admin)
     const roundId = parseInt((await xAllocationVoting.currentRoundId()).toString())
     console.log(`Casting random votes to xDapps for round ${roundId}...`)
