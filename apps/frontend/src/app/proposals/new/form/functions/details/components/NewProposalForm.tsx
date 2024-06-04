@@ -5,12 +5,11 @@ import { useForm, useFieldArray, Controller } from "react-hook-form"
 import { abi } from "thor-devkit"
 import { ExecutableFunctionCard } from "./ExecutableFunctionCard"
 import { ProposalFormStoreState, useProposalFormStore } from "@/store/useProposalFormStore"
-import MDEditor from "@uiw/react-md-editor"
-import rehypeSanitize from "rehype-sanitize"
 import { FunctionParamsField } from "@/components"
 import { ethers } from "ethers"
-import { t } from "i18next"
 import { useTranslation } from "react-i18next"
+import MDEditor from "@uiw/react-md-editor"
+import rehypeSanitize from "rehype-sanitize"
 
 export type FormData = {
   title: string
@@ -19,6 +18,16 @@ export type FormData = {
   markdownDescription: string
 }
 
+/**
+ * This component is a form to create a new proposal
+ * @param onSubmit - function to call when the form is submitted
+ * @param isDisabled - if the form should be disabled
+ * @param formId - the form id
+ * @param renderTitle - if the title field should be rendered
+ * @param renderDescription - if the description field should be rendered
+ * @param renderMarkdownDescription - if the markdown description field should be rendered
+ * @param renderActions - if the actions field should be rendered
+ */
 type Props = {
   onSubmit?: (data: FormData) => void
   isDisabled?: boolean
@@ -27,11 +36,12 @@ type Props = {
   renderDescription?: boolean
   renderMarkdownDescription?: boolean
   renderActions?: boolean
+  canAddAnotherTransaction?: boolean
 }
 
 /**
  * This component read/write from/to useFormStore and renders a form to create a new proposal
- * @param param0
+ * @param see {@link Props}
  * @returns
  */
 export const NewProposalForm: React.FC<Props> = ({
@@ -42,6 +52,7 @@ export const NewProposalForm: React.FC<Props> = ({
   renderDescription = true,
   renderMarkdownDescription = false,
   renderActions = true,
+  canAddAnotherTransaction = true,
 }) => {
   const { t } = useTranslation()
   const { actions, setData, title, shortDescription, markdownDescription } = useProposalFormStore()
@@ -55,12 +66,12 @@ export const NewProposalForm: React.FC<Props> = ({
   })
 
   const { errors } = formState
-  const { fields } = useFieldArray({
+  const { fields, insert, remove } = useFieldArray({
     control, // control props comes from useForm (optional: if you are using FormContext)
     name: "actions", // unique name for your Field Array
   })
 
-  //parse actions from store and set them in the form, decoding calldata inf available
+  //parse actions from store and set them in the form, decoding calldata if available
   useEffect(() => {
     const formActions = actions.map(action => {
       const _abi = new abi.Function(action.abiDefinition)
@@ -183,19 +194,36 @@ export const NewProposalForm: React.FC<Props> = ({
       </VStack>
 
       {renderActions && (
-        <VStack spacing={4} align="flex-start" w="full" mt={4}>
+        <VStack spacing={8} align="flex-start" w="full" mt={12}>
           <Heading size="md">{t("Executable functions")}</Heading>
-          {fields?.map((field, index) => (
-            <ExecutableFunctionCard
-              key={field.id}
-              field={field}
-              index={index}
-              register={register}
-              control={control}
-              errors={errors}
-              isDisabled={isDisabled}
-            />
-          ))}
+          {fields?.map((field, index) => {
+            const onAddAnotherTransactionClick = () => {
+              insert(index + 1, {
+                name: field.name,
+                icon: field.icon,
+                description: field.description,
+                params: field.params,
+                abiDefinition: field.abiDefinition,
+                contractAddress: field.contractAddress,
+                calldata: undefined,
+              })
+            }
+
+            const wasAddedLater = fields.filter((_field, i) => _field.name === field.name && i < index).length > 0
+            return (
+              <ExecutableFunctionCard
+                key={field.id}
+                field={field}
+                index={index}
+                register={register}
+                control={control}
+                errors={errors}
+                isDisabled={isDisabled}
+                {...(canAddAnotherTransaction && { onAddAnotherTransactionClick: onAddAnotherTransactionClick })}
+                {...(wasAddedLater && { onRemoveTransactionClick: () => remove(index) })}
+              />
+            )
+          })}
         </VStack>
       )}
     </form>

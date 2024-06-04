@@ -3,7 +3,7 @@
 import { MotionVStack } from "@/components"
 import { AnalyticsUtils } from "@/utils"
 import { Button, Card, CardBody, Divider, HStack, Heading, VStack } from "@chakra-ui/react"
-import { useCallback, useEffect, useLayoutEffect, useMemo } from "react"
+import { useCallback, useEffect } from "react"
 import MarkdownPreview from "@uiw/react-markdown-preview"
 import { useProposalFormStore } from "@/store/useProposalFormStore"
 import { NewProposalForm } from "../functions/details/components/NewProposalForm"
@@ -13,19 +13,7 @@ import { useTranslation } from "react-i18next"
 export default function NewProposalPage() {
   const router = useRouter()
   const { t } = useTranslation()
-  const { actions, markdownDescription, title, shortDescription } = useProposalFormStore()
-
-  //redirect the user to the beginning of the form if the required data is missing
-  // this happens in case the user tries to access this page directly
-  const isVisitAuthorized = useMemo(
-    () => !!title && !!shortDescription && !!markdownDescription,
-    [title, shortDescription, markdownDescription],
-  )
-  useLayoutEffect(() => {
-    if (!isVisitAuthorized) {
-      router.push("/proposals/new")
-    }
-  }, [isVisitAuthorized, router])
+  const { actions, markdownDescription } = useProposalFormStore()
 
   const onContinue = useCallback(() => {
     router.push("/proposals/new/form/round")
@@ -39,8 +27,6 @@ export default function NewProposalPage() {
     AnalyticsUtils.trackPage("NewProposal/preview")
   }, [])
 
-  if (!isVisitAuthorized) return null
-
   return (
     <MotionVStack>
       <Card w="full">
@@ -53,7 +39,14 @@ export default function NewProposalPage() {
                 padding: "1rem",
               }}
             />
-            {!!actions.length && <NewProposalForm renderTitle={false} renderDescription={false} isDisabled={true} />}
+            {!!actions.length && (
+              <NewProposalForm
+                renderTitle={false}
+                renderDescription={false}
+                isDisabled={true}
+                canAddAnotherTransaction={false}
+              />
+            )}
             <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
               <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
                 {t("Go back")}
