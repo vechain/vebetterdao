@@ -12,6 +12,8 @@ import * as HexUtils from "../HexUtils"
 export const compareAddresses = (address1?: string, address2?: string): boolean => {
   if (!address1 || !address2) return false
 
+  console.log("")
+
   if (address2 === address1) {
     return true
   }

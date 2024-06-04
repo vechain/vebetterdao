@@ -32,8 +32,6 @@ export const getEvents = async ({
   from = 0,
   filterCriteria,
 }: GetEventsProps): Promise<Connex.Thor.Filter.Row<"event">[]> => {
-  console.log("")
-
   return await thor
     .filter("event", filterCriteria)
     .range({
