@@ -180,6 +180,13 @@ interface IX2EarnApps {
   function appReceiverAddress(bytes32 appId) external view returns (address);
 
   /**
+   * @dev Function to get the percentage of the allocation of the receiver address each round.
+   *
+   * @param appId the app id
+   */
+  function receiverAllocationPercentage(bytes32 appId) external view returns (uint256);
+
+  /**
    * @dev Add a new reward distributor to the app.
    *
    * @param appId the id of the app

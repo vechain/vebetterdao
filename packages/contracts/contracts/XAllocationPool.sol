@@ -65,7 +65,8 @@ contract XAllocationPool is
     IB3TR b3tr;
     ITreasury treasury;
     IX2EarnApps x2EarnApps;
-    mapping(bytes32 => mapping(uint256 => bool)) claimedRewards;
+    mapping(bytes32 appId => mapping(uint256 => bool)) claimedRewards; // Mapping to store the claimed rewards for each app in each round
+    mapping(bytes32 appId => uint256) availableFunds; // Funds that the app can use to reward users
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationPool")) - 1)) & ~bytes32(uint256(0xff))
@@ -184,8 +185,11 @@ contract XAllocationPool is
 
   /**
    * @dev Claim the rewards for an app in a given round.
-   * Anyone can call this function. Round must be valid and app must exist.
+   * The rewards are calculated based on the share of votes the app received.
+   * A percentage of the total reward is sent to the wallet of the team, while the remaining
+   * remains in the contract to be distributed to the users of the app.
    * Unallocated rewards for each app will be sent to the VeBetterDAO treasury.
+   * Anyone can call this function. Round must be valid and app must exist.
    *
    * @param roundId The round ID from XAllocationVoting contract for which to claim the rewards.
    * @param appId The ID of the app from X2EarnApps contract for which to claim the rewards.
@@ -197,19 +201,23 @@ contract XAllocationPool is
     require(!xAllocationVoting().isActive(roundId), "XAllocationPool: round not ended yet");
     require($.x2EarnApps.appExists(appId), "XAllocationPool: app does not exist");
 
-    (uint256 amountToClaim, uint256 unallocatedAmount) = claimableAmount(roundId, appId);
+    (
+      uint256 amountToClaim,
+      uint256 unallocatedAmount,
+      uint256 teamAllocationsAmount,
+      uint256 rewardsAllocationAmount
+    ) = claimableAmount(roundId, appId);
+
     require(amountToClaim > 0, "XAllocationPool: no rewards available for this app");
 
-    // update the claimedRewards mapping
     $.claimedRewards[appId][roundId] = true;
 
-    address receiverAddress = $.x2EarnApps.appReceiverAddress(appId);
-
     //check that contract has enough funds to pay the reward
-    require($.b3tr.balanceOf(address(this)) >= (amountToClaim + unallocatedAmount), "Insufficient funds");
+    require($.b3tr.balanceOf(address(this)) >= (teamAllocationsAmount + unallocatedAmount), "Insufficient funds");
 
-    // Transfer the rewards to the caller
-    require($.b3tr.transfer(receiverAddress, amountToClaim), "Allocation transfer failed");
+    // Transfer the rewards to the team
+    address receiverAddress = $.x2EarnApps.appReceiverAddress(appId);
+    require($.b3tr.transfer(receiverAddress, teamAllocationsAmount), "Allocation transfer to app failed");
 
     // Transfer the unallocated rewards to the treasury
     if (unallocatedAmount > 0) {
@@ -219,8 +227,48 @@ contract XAllocationPool is
       );
     }
 
+    //Increase the total available funds that the app can use to reward users
+    $.availableFunds[appId] += rewardsAllocationAmount;
+
     // emit event
-    emit AllocationRewardsClaimed(appId, roundId, amountToClaim, receiverAddress, msg.sender, unallocatedAmount);
+    emit AllocationRewardsClaimed(
+      appId,
+      roundId,
+      teamAllocationsAmount,
+      receiverAddress,
+      msg.sender,
+      unallocatedAmount,
+      rewardsAllocationAmount
+    );
+  }
+
+  /**
+   * @dev Function used by x2earn apps to reward users that performed sustainable actions.
+   *
+   * @param appId the app id that is emitting the reward
+   * @param amount the amount of B3TR token the user is rewarded with
+   * @param receiver the address of the user that performed the sustainable action and is rewarded
+   * @param proof a JSON file uploaded on IPFS by the app that adds information on the type of action that was performed
+   */
+  function emitReward(bytes32 appId, uint256 amount, address receiver, string memory proof) public nonReentrant {
+    require(x2EarnApps().appExists(appId), "XAllocationPool: app does not exist");
+
+    require(x2EarnApps().isRewardDistributor(appId, msg.sender), "XAllocationPool: not a reward distributor");
+
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+
+    // check if the app has enough available funds to reward users
+    require($.availableFunds[appId] >= amount, "XAllocationPool: app has insufficient funds");
+
+    // check if the contract has enough funds
+    require($.b3tr.balanceOf(address(this)) >= amount, "XAllocationPool: insufficient funds on contract");
+
+    // transfer the rewards to the receiver
+    $.availableFunds[appId] -= amount;
+    require(b3tr().transfer(receiver, amount), "Allocation transfer to app failed");
+
+    // emit event
+    emit RewardEmitted(msg.sender, appId, amount, receiver, proof);
   }
 
   // ---------- Internal and private ---------- //
@@ -257,6 +305,28 @@ contract XAllocationPool is
     return rewardAmount;
   }
 
+  /**
+   * @dev Calculate the amount of B3TR that should be sent to the team
+   * and the amount that should be reserved to reward users.
+   *
+   * @param appId the app id
+   * @param totalRoundEarnings full amount of B3TR available for allocation to the app
+   * @return teamAllocationAmount amount of B3TR that will be sent to the team
+   * @return rewardsAllocationAmount amount of B3TR reserved to reward users
+   */
+  function _calculateTeamAllocation(
+    bytes32 appId,
+    uint256 totalRoundEarnings
+  ) internal view returns (uint256, uint256) {
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    uint256 teamAllocationPercentage = $.x2EarnApps.receiverAllocationPercentage(appId);
+
+    uint256 teamAllocationAmount = (totalRoundEarnings * teamAllocationPercentage) / 100;
+    uint256 rewardsAllocationAmount = totalRoundEarnings - teamAllocationAmount;
+
+    return (teamAllocationAmount, rewardsAllocationAmount);
+  }
+
   // ---------- Getters ---------- //
 
   /**
@@ -264,11 +334,15 @@ contract XAllocationPool is
    *
    * @param roundId The round ID for which to calculate the amount available for allocation.
    * @param appId The ID of the app for which to calculate the amount available for allocation.
+   * @return totalAmount The total amount of $B3TR available for allocation to the app.
+   * @return unallocatedAmount The amount of $B3TR that was not allocated, and will be sent to the treasury.
+   * @return teamAllocationAmount The amount of $B3TR that will be sent to the team.
+   * @return rewardsAllocationAmount The amount of $B3TR reserved to reward users.
    */
-  function claimableAmount(uint256 roundId, bytes32 appId) public view returns (uint256, uint256) {
+  function claimableAmount(uint256 roundId, bytes32 appId) public view returns (uint256, uint256, uint256, uint256) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     if ($.claimedRewards[appId][roundId] || xAllocationVoting().isActive(roundId)) {
-      return (0, 0);
+      return (0, 0, 0, 0);
     }
 
     return roundEarnings(roundId, appId);
@@ -287,17 +361,19 @@ contract XAllocationPool is
    * @param roundId The round ID for which to calculate the amount available for allocation.
    * @param appId The ID of the app for which to calculate the amount available for allocation.
    *
-   * @return appShare The percentage of the total votes the app received.
-   * @return unallocatedShare The percentage of the total votes that were not allocated to the app.
+   * @return totalAmount The total amount of $B3TR available for allocation to the app.
+   * @return unallocatedAmount The amount of $B3TR that was not allocated, and will be sent to the treasury.
+   * @return teamAllocationAmount The amount of $B3TR that will be sent to the team.
+   * @return rewardsAllocationAmount The amount of $B3TR reserved to reward users.
    */
-  function roundEarnings(uint256 roundId, bytes32 appId) public view returns (uint256, uint256) {
+  function roundEarnings(uint256 roundId, bytes32 appId) public view returns (uint256, uint256, uint256, uint256) {
     IXAllocationVotingGovernor _xAllocationVoting = xAllocationVoting();
 
     require(_xAllocationVoting != IXAllocationVotingGovernor(address(0)), "XAllocationVotingGovernor contract not set");
 
     // if app did not participate in the round, return 0
     if (!_xAllocationVoting.isEligibleForVote(appId, roundId)) {
-      return (0, 0);
+      return (0, 0, 0, 0);
     }
 
     uint256 lastSucceededRoundId;
@@ -319,7 +395,17 @@ contract XAllocationPool is
       unallocatedAmount = _rewardAmount(roundId, unallocatedShare);
     }
 
-    return (baseAllocationPerApp + variableAllocationForApp, unallocatedAmount);
+    (uint256 teamAllocationAmount, uint256 rewardsAllocationAmount) = _calculateTeamAllocation(
+      appId,
+      baseAllocationPerApp + variableAllocationForApp
+    );
+
+    return (
+      baseAllocationPerApp + variableAllocationForApp,
+      unallocatedAmount,
+      teamAllocationAmount,
+      rewardsAllocationAmount
+    );
   }
 
   /**
@@ -336,7 +422,7 @@ contract XAllocationPool is
 
     uint256 roundId = _xAllocationVoting.currentRoundId();
 
-    (uint256 earnings, ) = roundEarnings(roundId, appId);
+    (uint256 earnings, , , ) = roundEarnings(roundId, appId);
     return earnings;
   }
 
@@ -344,6 +430,8 @@ contract XAllocationPool is
    * @dev Calculate the minimum amount of $B3TR that will be distributed to each qualified X Application in a given round.
    * `baseAllocationPercentage`% of allocations will be on average distributed to each qualified X Application as the base
    * part of the allocation (so all the x-apps in the ecosystem will receive a minimum amount of $B3TR).
+   *
+   * @param roundId The round ID for which to calculate the amount available for allocation.
    */
   function baseAllocationAmount(uint256 roundId) public view returns (uint256) {
     IXAllocationVotingGovernor _xAllocationVoting = xAllocationVoting();
@@ -367,6 +455,8 @@ contract XAllocationPool is
    *
    * @param roundId The round ID for which to calculate the amount of votes received in percentage.
    * @param appId The ID of the app.
+   * @return appShare The percentage of votes received by the app.
+   * @return unallocatedShare The amount of votes that were not allocated, and will be sent to the treasury.
    */
   function getAppShares(uint256 roundId, bytes32 appId) public view returns (uint256, uint256) {
     IXAllocationVotingGovernor _xAllocationVoting = xAllocationVoting();
@@ -401,6 +491,16 @@ contract XAllocationPool is
 
     // This number is scaled and should be divided by 100 to get the actual percentage on the FE
     return (appShare, unallocatedShare);
+  }
+
+  /**
+   * @dev Returns the amount of funds available for an app to reward users.
+   *
+   * @param appId The ID of the app.
+   */
+  function availableFunds(bytes32 appId) public view returns (uint256) {
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+    return $.availableFunds[appId];
   }
 
   /**
@@ -476,9 +576,8 @@ contract XAllocationPool is
   }
 
   /**
-   * @notice Returns the version of the contract
-   * @dev Version of the governor instance (used in building the ERC712 domain separator). Default: "1"
-   * @return sting The version of the contract
+   * @dev Returns the version of the contract
+   * @return string The version of the contract
    */
   function version() public pure virtual returns (string memory) {
     return "1";
