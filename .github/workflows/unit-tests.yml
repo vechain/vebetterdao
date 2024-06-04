@@ -40,13 +40,21 @@ jobs:
             src:
               - 'apps/frontend/**'
 
-      - name: Check for Solidity changes
+      - name: Check for Contracts changes
         uses: dorny/paths-filter@v3
         id: contract_changes
         with:
           filters: |
             src:
               - 'packages/contracts/**'
+
+      - name: Check for Solidity changes
+        uses: dorny/paths-filter@v3
+        id: solidity_changes
+        with:
+          filters: |
+            src:
+              - 'packages/contracts/contracts/**'
 
       - name: Check for Utils changes
         uses: dorny/paths-filter@v3
@@ -94,7 +102,7 @@ jobs:
       - name: Run Slither
         uses: crytic/slither-action@v0.3.1
         id: slither
-        if: steps.contract_changes.outputs.src == 'true'
+        if: steps.solidity_changes.outputs.src == 'true'
         with:
           ignore-compile: true
           target: "packages/contracts/"
@@ -104,7 +112,7 @@ jobs:
 
       - name: Create/update checklist as PR comment
         uses: actions/github-script@v7
-        if: github.event_name == 'pull_request' && steps.contract_changes.outputs.src == 'true'
+        if: github.event_name == 'pull_request' && steps.solidity_changes.outputs.src == 'true'
         env:
           REPORT: ${{ steps.slither.outputs.stdout }}
         with:
