@@ -1,3 +1,4 @@
+import { VECHAIN_DEFAULT_MNEMONIC } from "@vechain/hardhat-vechain"
 import { unitsUtils, addressUtils, mnemonic } from "@vechain/sdk-core"
 
 export type TestPk = {
@@ -17,7 +18,7 @@ export enum SeedStrategy {
   LINEAR,
 }
 
-const PHRASE = "denial kitchen pet squirrel other broom bar gas better priority spoil cross".split(" ")
+const PHRASE = (process.env.MNEMONIC || VECHAIN_DEFAULT_MNEMONIC).split(" ")
 
 export const TEST_DERIVATION_PATH = "m"
 
