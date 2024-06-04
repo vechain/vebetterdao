@@ -4,7 +4,7 @@ import { useEffect, useCallback } from "react"
 import { useForm, useFieldArray, Controller } from "react-hook-form"
 import { abi } from "thor-devkit"
 import { ExecutableFunctionCard } from "./ExecutableFunctionCard"
-import { ProposalFormStoreState, useProposalFormStore } from "@/store/useProposalFormStore"
+import { ProposalFormStoreState, useProposalFormStore } from "@/store"
 import { FunctionParamsField } from "@/components"
 import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
@@ -134,6 +134,7 @@ export const NewProposalForm: React.FC<Props> = ({
   return (
     <form
       onSubmit={handleSubmit(onFormSubmit)}
+      data-testid="new-proposal-form"
       id={formId}
       style={{
         width: "100%",

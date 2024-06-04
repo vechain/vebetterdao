@@ -1,4 +1,4 @@
-import { useProposalFormStore } from "@/store/useProposalFormStore"
+import { useProposalFormStore } from "@/store"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { usePathname } from "next/navigation"
 import { useMemo } from "react"

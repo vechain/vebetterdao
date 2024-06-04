@@ -5,7 +5,7 @@ import { AnalyticsUtils } from "@/utils"
 import { Button, Card, CardBody, Divider, HStack, Heading, VStack } from "@chakra-ui/react"
 import { useCallback, useEffect } from "react"
 import MarkdownPreview from "@uiw/react-markdown-preview"
-import { useProposalFormStore } from "@/store/useProposalFormStore"
+import { useProposalFormStore } from "@/store"
 import { NewProposalForm } from "../functions/details/components/NewProposalForm"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
@@ -28,12 +28,13 @@ export default function NewProposalPage() {
   }, [])
 
   return (
-    <MotionVStack>
+    <MotionVStack data-testid="new-proposal-preview-page">
       <Card w="full">
         <CardBody py={8}>
           <VStack spacing={8} align="flex-start" divider={<Divider />}>
             <Heading size="lg">{t("Check your proposal before publishing")}</Heading>
             <MarkdownPreview
+              data-testid="proposal-markdown-description-preview"
               source={markdownDescription}
               style={{
                 padding: "1rem",
@@ -48,10 +49,16 @@ export default function NewProposalPage() {
               />
             )}
             <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
-              <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
+              <Button
+                data-testid="go-back"
+                rounded="full"
+                variant={"primarySubtle"}
+                colorScheme="primary"
+                size="lg"
+                onClick={goBack}>
                 {t("Go back")}
               </Button>
-              <Button rounded="full" colorScheme="primary" size="lg" onClick={onContinue}>
+              <Button data-testid="continue" rounded="full" colorScheme="primary" size="lg" onClick={onContinue}>
                 {t("Continue")}
               </Button>
             </HStack>
