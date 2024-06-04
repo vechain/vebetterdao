@@ -14,7 +14,5 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: [resolve(__dirname, "test/vite.setup.ts")],
-    root: resolve(__dirname, "test"),
-    include: ["../**/*.test.ts", "../**/*.test.tsx"],
   },
 })

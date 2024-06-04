@@ -5,7 +5,7 @@ import * as router from "next/navigation"
 import * as dappKit from "@vechain/dapp-kit-react"
 import * as store from "@/store"
 import FormProposalLayout from "../layout"
-import { transferAction } from "../../../../../../test/__mocks__/Actions"
+import { transferAction } from "../../../../../../__mocks__/Actions"
 
 const mockRouterPush = vi.fn()
 const mockBack = vi.fn()
