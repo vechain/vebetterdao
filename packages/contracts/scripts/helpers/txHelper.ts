@@ -1,8 +1,9 @@
-import { TransactionHandler, networkInfo, type TransactionClause, type TransactionBody } from "@vechain/sdk-core"
+import { TransactionHandler, type TransactionClause, type TransactionBody } from "@vechain/sdk-core"
 import { HttpClient, ThorClient } from "@vechain/sdk-network"
 
 const thorNetwork = new HttpClient("http://localhost:8669")
 const thorClient = new ThorClient(thorNetwork)
+let chainTag: number
 
 export const getBestBlockRef = async (): Promise<string> => {
   const blockRef = await thorClient.blocks.getBestBlockRef()
@@ -12,6 +13,21 @@ export const getBestBlockRef = async (): Promise<string> => {
   }
 
   return blockRef
+}
+
+export const getChainTag = async (): Promise<number> => {
+  if (chainTag) {
+    return chainTag
+  }
+
+  const genesisBlock = await thorClient.blocks.getGenesisBlock()
+
+  if (!genesisBlock) {
+    throw new Error("Genesis block not found")
+  }
+
+  chainTag = Number(`0x${genesisBlock.id.slice(64)}`)
+  return chainTag
 }
 
 export const buildTxBody = async (
@@ -32,7 +48,7 @@ export const buildTxBody = async (
   }
 
   const body: TransactionBody = {
-    chainTag: networkInfo.solo.chainTag,
+    chainTag: await getChainTag(),
     blockRef: await getBestBlockRef(),
     expiration,
     clauses,
