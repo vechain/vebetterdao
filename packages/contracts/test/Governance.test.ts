@@ -2906,7 +2906,7 @@ describe("Governor and TimeLock", function () {
       expect(decodedLogs?.args[5]).to.eql(reason)
     })
 
-    it("Succeeded state is calculated correctly", async () => {
+    it("Failed state is calculated correctly", async () => {
       const config = createLocalConfig()
       // set deposit threshold to 0 so we can avoid depositing for proposals
       config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 0
@@ -2976,17 +2976,46 @@ describe("Governor and TimeLock", function () {
       expect(isQuorumReached).to.equal(true)
 
       await voterRewards.claimReward(cycleId, voter.address)
+    })
 
-      // Scenario 4: quorum is 4%, user votes for with enough VOT3 to reach quorum -> proposal should be succeeded
-      tx = await createProposal(b3tr, B3trContract, otherAccount, "scenario 4", functionToCall, [])
+    it("Succeeded state is calculated correctly", async () => {
+      const config = createLocalConfig()
+      // set deposit threshold to 0 so we can avoid depositing for proposals
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 0
+      const { governor, otherAccounts, b3tr, B3trContract, otherAccount, vot3 } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      const voter = otherAccounts[0]
+      const voter2 = otherAccounts[1]
+      await getVot3Tokens(voter, "1000")
+      await getVot3Tokens(voter2, "1")
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      //@ts-ignore
+      expect(await governor.quorumNumerator()).to.equal(4n)
+
+      const checkUserSupplyPercentage = async (user: HardhatEthersSigner) => {
+        let totalSupply = await vot3.totalSupply()
+        let userBalance = await vot3.balanceOf(user.address)
+        let userPercentage = (userBalance * 100n) / totalSupply
+
+        return userPercentage
+      }
+
+      // Scenario: quorum is 4%, user votes for with enough VOT3 to reach quorum -> proposal should be succeeded
+      const tx = await createProposal(b3tr, B3trContract, otherAccount, "scenario 4", functionToCall, [])
       proposalId = await getProposalIdFromTx(tx)
       await waitForProposalToBeActive(proposalId)
       expect(await checkUserSupplyPercentage(voter)).to.be.greaterThan(4) // check that user own 4% of the total VOT3 supply
       await governor.connect(voter).castVote(proposalId, 1) // vote for
       await waitForVotingPeriodToEnd(proposalId)
-      proposalState = await governor.state(proposalId)
+      const proposalState = await governor.state(proposalId)
       expect(proposalState.toString()).to.eql("4") // succeeded
-      isQuorumReached = await governor.quorumReached(proposalId)
+      const isQuorumReached = await governor.quorumReached(proposalId)
       expect(isQuorumReached).to.equal(true)
     })
   })
