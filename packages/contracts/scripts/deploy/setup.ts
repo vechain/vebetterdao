@@ -41,7 +41,7 @@ export const setupLocalEnvironment = async (b3tr: B3TR, xAllocationVoting: XAllo
     },
     {
       address: accounts[13].address,
-      name: "eVearn",
+      name: "EVearn",
     },
   ]
 
