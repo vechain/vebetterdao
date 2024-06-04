@@ -8,6 +8,8 @@ solo-up: #@ Start Thor solo
 	docker compose -f packages/contracts/docker-compose.yaml up -d --wait thor-solo
 solo-down: #@ Stop Thor solo
 	docker compose -f packages/contracts/docker-compose.yaml down
+solo-clean: #@ Clean Thor solo
+	docker compose -f packages/contracts/docker-compose.yaml down -v --remove-orphans
 
 # Database
 DB_COMMAND=docker compose -f packages/database/docker-compose-mongo.yaml

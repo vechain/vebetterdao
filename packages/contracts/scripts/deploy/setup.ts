@@ -40,8 +40,8 @@ const APPS = [
   },
   {
     address: accounts[12].address,
-    name: "eVearn",
-    metadataURI: "bafkreigty6soh4wn5wzv6vfgt6bozxriwe23v4c7cyxuja65y4knn6cmqe",
+    name: "EVearn",
+    metadataURI: "bafkreif5m23ikv6jphvjciv5uwtq3eqchinh5m5jexdo7atgxyf62az65y",
   },
 ]
 
