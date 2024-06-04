@@ -38,7 +38,7 @@ jobs:
         with:
           filters: |
             src:
-              - apps/frontend/**'
+              - 'apps/frontend/**'
 
       - name: Check for Solidity changes
         uses: dorny/paths-filter@v3
@@ -62,7 +62,7 @@ jobs:
         with:
           filters: |
             src:
-              - apps/backend/**'
+              - 'apps/backend/**'
 
       - name: Check for Lambda changes
         uses: dorny/paths-filter@v3
