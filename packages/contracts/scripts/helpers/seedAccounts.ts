@@ -1,3 +1,4 @@
+import { VECHAIN_DEFAULT_MNEMONIC } from "@vechain/hardhat-vechain"
 import { unitsUtils, addressUtils, mnemonic } from "@vechain/sdk-core"
 
 export type TestPk = {
@@ -17,11 +18,7 @@ export enum SeedStrategy {
   LINEAR,
 }
 
-if (!process.env.MNEMONIC) {
-  throw new Error("MNEMONIC env var not set")
-}
-
-const PHRASE = process.env.MNEMONIC.split(" ")
+const PHRASE = (process.env.MNEMONIC || VECHAIN_DEFAULT_MNEMONIC).split(" ")
 
 export const TEST_DERIVATION_PATH = "m"
 
