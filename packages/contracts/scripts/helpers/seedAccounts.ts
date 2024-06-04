@@ -17,7 +17,11 @@ export enum SeedStrategy {
   LINEAR,
 }
 
-const PHRASE = "denial kitchen pet squirrel other broom bar gas better priority spoil cross".split(" ")
+if (!process.env.MNEMONIC) {
+  throw new Error("MNEMONIC env var not set")
+}
+
+const PHRASE = process.env.MNEMONIC.split(" ")
 
 export const TEST_DERIVATION_PATH = "m"
 
