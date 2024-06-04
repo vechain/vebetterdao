@@ -87,7 +87,7 @@ yarn contracts:deploy:solo-staging
 
 ## Simulating rounds
 
-It is possible to simulate x-app voting rounds. Simply run a clean version of the app using `make solo-down && make solo-up && yarn dev:simulation`. The simulation will only work against thor solo in your local environment.
+It is possible to simulate x-app voting rounds. Simply run a clean version of the app using `make solo-clean && make solo-up && yarn dev:simulation`. The simulation will only work against thor solo in your local environment.
 
 The simulation will airdrop `B3TR` and `VTHO` to a number of accounts and then simulate all of the voting rounds. After each voting round, emissions will be distributed and voter rewards claimed. For our test accounts we will swap all B3TR for VOT3 and vote on x-apps using a random formula.
 
