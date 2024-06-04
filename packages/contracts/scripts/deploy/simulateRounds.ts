@@ -75,7 +75,12 @@ export const simulateRounds = async (
     console.log(`Casting random votes to xDapps for round ${roundId}...`)
     await castVotesToXDapps(vot3, xAllocationVoting, seedAccounts, roundId, xDapps)
     await waitForRoundToEnd(roundId, xAllocationVoting)
-    await claimVoterRewards(voterRewards, roundId, admin, seedAccounts)
+    await claimVoterRewards(
+      voterRewards,
+      roundId,
+      admin,
+      seedAccounts.filter(() => Math.random() < 0.75),
+    )
 
     // Swap for VOT3
     await swapB3trForVot3(b3tr, vot3, seedAccounts)

@@ -10,7 +10,7 @@ services:
       [
         "/bin/sh",
         "-c",
-        "apk update && apk upgrade && apk add curl && thor solo --on-demand --data-dir /data/thor --api-addr 0.0.0.0:8669 --api-cors '*' --verbosity 3",
+        "apk update && apk upgrade && apk add curl && thor solo --on-demand --persist --data-dir /data/thor --api-addr 0.0.0.0:8669 --api-cors '*' --verbosity 3",
       ]
     ports:
       - "8669:8669"
@@ -18,20 +18,26 @@ services:
       test: curl --fail 0.0.0.0:8669/blocks/0 || exit 1
       interval: "2s"
       retries: 30
+    volumes:
+      - thor-data:/data/thor
     networks:
       - vechain-thor
 
-  insight:
-    image: thor-insights
-    hostname: insight
-    container_name: insight
-    environment:
-      - VUE_APP_SOLO_URL=http://localhost:8669
-    ports:
-      - "8181:80"
-    networks:
-      - vechain-thor
+  # insight:
+  #   image: thor-insights
+  #   hostname: insight
+  #   container_name: insight
+  #   environment:
+  #     - VUE_APP_SOLO_URL=http://localhost:8669
+  #   ports:
+  #     - "8181:80"
+  #   networks:
+  #     - vechain-thor
 networks:
   vechain-thor:
     driver: bridge
     name: vechain-thor
+volumes:
+  thor-data:
+    driver: local
+    name: thor-data
