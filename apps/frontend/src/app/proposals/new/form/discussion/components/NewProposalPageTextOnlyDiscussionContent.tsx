@@ -28,7 +28,7 @@ export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
   )
 
   return (
-    <Card w="full">
+    <Card w="full" data-testid="new-proposal-textonly-page">
       <CardBody py={8}>
         <VStack spacing={8} align="flex-start">
           <Heading size="lg">{t("General proposal")}</Heading>
@@ -48,10 +48,22 @@ export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
       </CardBody>
       <CardFooter>
         <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
-          <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
+          <Button
+            data-testid="go-back"
+            rounded="full"
+            variant={"primarySubtle"}
+            colorScheme="primary"
+            size="lg"
+            onClick={goBack}>
             {t("Go back")}
           </Button>
-          <Button rounded="full" colorScheme="primary" size="lg" type="submit" form="new-proposal-form">
+          <Button
+            data-testid="continue"
+            rounded="full"
+            colorScheme="primary"
+            size="lg"
+            type="submit"
+            form="new-proposal-form">
             {t("Continue")}
           </Button>
         </HStack>

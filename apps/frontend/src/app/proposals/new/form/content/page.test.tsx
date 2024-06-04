@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest"
 import NewproposalContentPage from "./page"
-import { fireEvent, render, screen, waitFor } from "../../../../../../test"
+import { fireEvent, render, screen, waitFor, within } from "../../../../../../test"
 import * as router from "next/navigation"
 import * as dappKit from "@vechain/dapp-kit-react"
 import FormProposalLayout from "../layout"
-import { mockedUsePathname } from "../../../../../../test/vite.setup"
+import { GovernanceProposalTemplate, removePlaceholders } from "@/constants"
 
 const mockRouterPush = vi.fn()
 const mockBack = vi.fn()
@@ -28,11 +28,11 @@ describe("NewProposalContent", async () => {
         <NewproposalContentPage />
       </FormProposalLayout>,
     )
-    x.debug()
+
     await waitFor(() => expect(mockRouterPush).toHaveBeenCalledWith("/proposals"))
   }) // redirects to /proposals if no account connected
 
-  it("should render correctly", async () => {
+  it("form errors - should render correctly", async () => {
     render(
       <FormProposalLayout>
         <NewproposalContentPage />
@@ -57,5 +57,32 @@ describe("NewProposalContent", async () => {
     expect(
       screen.queryByText("Make sure to replace all the placeholders with your own content."),
     ).not.toBeInTheDocument()
-  }) // should render correctly
+  }) // form errors - should render correctly
+
+  it("form ok - should navigate to the correct page", async () => {
+    render(
+      <FormProposalLayout>
+        <NewproposalContentPage />
+      </FormProposalLayout>,
+    )
+
+    const templateWithoutPlaceholders = removePlaceholders(GovernanceProposalTemplate)
+
+    const inputBox = await screen.findByTestId("markdown-description-input", undefined, { timeout: 2000 })
+    const input = within(inputBox).getByRole("textbox")
+    fireEvent.change(input, { target: { value: templateWithoutPlaceholders } })
+
+    await waitFor(() => {
+      expect(input).toHaveValue(templateWithoutPlaceholders)
+    })
+
+    const continueButton = await screen.findByTestId("continue")
+    fireEvent.click(continueButton)
+
+    await waitFor(() => {
+      expect(screen.queryByTestId("form-error-message")).not.toBeInTheDocument()
+      expect(screen.queryByText("Make sure to replace all the placeholders with your own content.")).toBeInTheDocument()
+      expect(mockRouterPush).toHaveBeenCalledWith("/proposals/new/form/preview")
+    })
+  }) // form errors - should render correctly
 }) // NewProposal
