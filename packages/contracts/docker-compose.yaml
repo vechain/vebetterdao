@@ -23,16 +23,16 @@ services:
     networks:
       - vechain-thor
 
-  insight:
-    image: thor-insights
-    hostname: insight
-    container_name: insight
-    environment:
-      - VUE_APP_SOLO_URL=http://localhost:8669
-    ports:
-      - "8181:80"
-    networks:
-      - vechain-thor
+  # insight:
+  #   image: thor-insights
+  #   hostname: insight
+  #   container_name: insight
+  #   environment:
+  #     - VUE_APP_SOLO_URL=http://localhost:8669
+  #   ports:
+  #     - "8181:80"
+  #   networks:
+  #     - vechain-thor
 networks:
   vechain-thor:
     driver: bridge
