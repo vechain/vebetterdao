@@ -19,6 +19,7 @@ import { useCanProposalStartInNextRound, useCurrentAllocationsRoundId } from "@/
 import dayjs from "dayjs"
 import { SelectedRoundRadioCard } from "./SelectedRoundRadioCard"
 import { useTranslation } from "react-i18next"
+import { isUndefined } from "lodash"
 
 const roundsToRender = 3
 
@@ -48,7 +49,7 @@ export const NewProposalRoundPageContent = () => {
   }, [router])
 
   const rounds = useMemo(() => {
-    if (!currentRoundId || !canStartInNextRound) return []
+    if (!currentRoundId || isUndefined(canStartInNextRound)) return []
     return Array.from({ length: roundsToRender }, (_, index) => {
       const roundId = canStartInNextRound ? Number(currentRoundId) + index + 1 : Number(currentRoundId) + index + 2
       return {

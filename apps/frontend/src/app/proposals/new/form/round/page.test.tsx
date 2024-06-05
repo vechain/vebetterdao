@@ -219,8 +219,9 @@ describe("NewProposalRound", async () => {
 
     // can start in next round
     let error = "No currentRoundId available"
+    let currentRoundId = "1"
     //@ts-ignore
-    spyOncurrentRoundId.mockReturnValueOnce({ data: "1", isLoading: false })
+    spyOncurrentRoundId.mockReturnValueOnce({ data: currentRoundId, isLoading: false })
     //@ts-ignore
     spyCanStartInNextRound.mockReturnValueOnce({ data: true, isLoading: false })
 
@@ -234,6 +235,10 @@ describe("NewProposalRound", async () => {
     expect(screen.queryAllByTestId("round-radio-card-skeleton")).toHaveLength(0)
     expect(screen.queryByText("No rounds available")).not.toBeInTheDocument()
 
+    for (let i = 0; i < Number(currentRoundId); i++) {
+      await screen.findByText(`Round #${i + 2}`)
+    }
+
     let continueButton = await screen.findByTestId("continue")
 
     expect(continueButton).toBeDisabled()
@@ -242,5 +247,27 @@ describe("NewProposalRound", async () => {
 
     fireEvent.click(continueButton)
     await waitFor(() => expect(mockRouterPush).toHaveBeenCalledWith("/proposals/new/form/fund-and-publish"))
+
+    // can not start in next round
+    vi.clearAllMocks()
+    //@ts-ignore
+    spyOncurrentRoundId.mockReturnValueOnce({ data: currentRoundId, isLoading: false })
+    //@ts-ignore
+    spyCanStartInNextRound.mockReturnValueOnce({ data: false, isLoading: false })
+    page.rerender(<NewProposalRoundPage />)
+
+    expect(screen.queryAllByTestId("round-radio-card")).toHaveLength(3)
+    expect(screen.queryAllByTestId("round-radio-card-skeleton")).toHaveLength(0)
+    expect(screen.queryByText("No rounds available")).not.toBeInTheDocument()
+
+    for (let i = 0; i < Number(currentRoundId); i++) {
+      await screen.findByText(`Round #${i + 3}`)
+    }
+
+    continueButton = await screen.findByTestId("continue")
+
+    fireEvent.click(screen.getAllByTestId("round-radio-card")[0] as Element)
+
+    fireEvent.click(continueButton)
   }) // loading - should render correctly
 }) // NewProposal
