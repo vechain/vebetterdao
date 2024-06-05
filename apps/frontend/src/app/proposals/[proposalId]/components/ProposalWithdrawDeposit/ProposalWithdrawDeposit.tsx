@@ -39,7 +39,6 @@ export const ProposalWithdrawDeposit = () => {
         txId={withdrawMutation.txReceipt?.meta.txID ?? withdrawMutation.sendTransactionTx?.txid}
       />
       {proposal.state !== ProposalState.Pending &&
-        proposal.state !== ProposalState.Active &&
         Number(proposal.userSupport) > 0 && (
           <Card border={`1px solid #004CFC`} rounded="16px" p="24px" boxShadow={"0px 0px 16px 0px #004CFC59"}>
             <VStack alignItems={"stretch"} gap={6} as="form" onSubmit={withdraw}>
@@ -49,7 +48,7 @@ export const ProposalWithdrawDeposit = () => {
                 </Heading>
                 <UilInfoCircle size="24px" color={"#004CFC"} />
               </HStack>
-              <Text fontSize={"14px"}>{t("This round is ended, claim your tokens back.")}</Text>
+              <Text fontSize={"14px"}>{t("This round has started, claim your tokens back.")}</Text>
               <VStack alignItems={"stretch"} gap={4}>
                 <HStack alignItems={"baseline"} justify={"space-between"}>
                   <HStack alignItems={"baseline"}>

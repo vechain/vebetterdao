@@ -135,7 +135,7 @@
   "You will be able to claim your tokens back when the voting round ends.": "You will be able to claim your tokens back when the voting round ends.",
   "Support this proposal": "Support this proposal",
   "This proposal needs to get enough support for the community to be voted on Round {{round}}.": "This proposal needs to get enough support for the community to be voted on Round {{round}}.",
-  "This round is ended, claim your tokens back.": "This round is ended, claim your tokens back.",
+  "This round has started, claim your tokens back.": "This round has started, claim your tokens back.",
   "From {{users}} users {{vot3}} V3.": "From {{users}} users {{vot3}} V3.",
   "From you {{vot3}} V3.": "From you {{vot3}} V3.",
   "/": "/",
