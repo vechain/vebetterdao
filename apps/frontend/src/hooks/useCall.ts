@@ -35,7 +35,7 @@ export const useCall = <T extends Interface>({
   contractAddress,
   method,
   args = [],
-  keyArgs = [],
+  keyArgs,
   enabled = true,
   mapResponse,
 }: UseCallParams<T>) => {
@@ -81,6 +81,6 @@ export type GetCallKeyParams = {
   keyArgs?: any[]
 }
 
-export const getCallKey = ({ method, keyArgs }: GetCallKeyParams) => {
-  return [method, ...(keyArgs || [])]
+export const getCallKey = ({ method, keyArgs = [] }: GetCallKeyParams) => {
+  return [method, ...keyArgs]
 }

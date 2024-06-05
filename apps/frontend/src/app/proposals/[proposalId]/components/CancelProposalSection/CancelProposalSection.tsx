@@ -51,6 +51,10 @@ export const CancelProposalSection = () => {
     return null
   }
 
+  if (proposal.state !== ProposalState.Pending) {
+    return null
+  }
+
   return (
     <Card variant="baseWithBorder">
       <CardBody>

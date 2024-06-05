@@ -11,9 +11,17 @@ import { compareAddresses } from "@repo/utils/AddressUtils"
 export const useProposalVoteEvent = (proposalId: string) => {
   const { account } = useWallet()
   const events = useProposalsEvents()
-  const userVote = events.data?.votes?.find(
-    event => event.proposalId === proposalId && compareAddresses(event.account, account || ""),
+  const votes = useMemo(
+    () => events.data?.votes?.filter(event => event.proposalId === proposalId),
+    [events.data?.votes, proposalId],
   )
+  const totalVot3UsedInVotes = useMemo(() => votes?.reduce((acc, event) => acc + Number(event.weight), 0), [votes])
+  const totalVotingPowerUsedInVotes = useMemo(
+    () => votes?.reduce((acc, event) => acc + Number(event.power), 0),
+    [votes],
+  )
+  const votesWithComment = useMemo(() => votes?.filter(event => !!event.reason), [votes])
+  const userVote = useMemo(() => votes?.find(event => compareAddresses(event.account, account || "")), [account, votes])
 
   const hasUserVoted = !!userVote
 
@@ -21,11 +29,23 @@ export const useProposalVoteEvent = (proposalId: string) => {
     () => ({
       hasUserVoted,
       userVote,
-      votes: events.data?.votes?.find(event => event.proposalId === proposalId),
+      votesWithComment,
+      votes,
+      totalVot3UsedInVotes,
+      totalVotingPowerUsedInVotes,
       isLoading: events.isLoading,
       error: events.error,
     }),
-    [events, hasUserVoted, proposalId, userVote],
+    [
+      events.error,
+      events.isLoading,
+      hasUserVoted,
+      totalVot3UsedInVotes,
+      totalVotingPowerUsedInVotes,
+      userVote,
+      votes,
+      votesWithComment,
+    ],
   )
   return proposalVoteEvent
 }

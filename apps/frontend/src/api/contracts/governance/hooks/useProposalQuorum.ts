@@ -29,7 +29,7 @@ export const getProposalQuorum = async (
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
   const original = res.decoded[0]
-  const scaled = FormattingUtils.scaleNumberDown(original, 18)
+  const scaled = FormattingUtils.scaleNumberDown(original, 18, 18)
   const formatted = scaled === "0" ? "0" : FormattingUtils.humanNumber(scaled)
 
   return {

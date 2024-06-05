@@ -16,7 +16,12 @@ export const ProposalWithdrawDeposit = () => {
   const withdrawMutation = useWithdrawDeposit({
     proposalId: proposal.id,
   })
-  const { isOpen, onClose: handleClose, onOpen } = useDisclosure()
+  const { isOpen, onClose, onOpen } = useDisclosure()
+
+  const handleClose = useCallback(() => {
+    onClose()
+    withdrawMutation.resetStatus()
+  }, [onClose, withdrawMutation])
   const withdraw = useCallback(
     (e: React.FormEvent) => {
       onOpen()

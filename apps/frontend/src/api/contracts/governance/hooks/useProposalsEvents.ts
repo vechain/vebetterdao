@@ -183,7 +183,8 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
         break
       }
       case proposalVoteEvent.signature: {
-        const decoded = proposalDepositEvent.decode(event.data, event.topics)
+        const decoded = proposalVoteEvent.decode(event.data, event.topics)
+
         decodedVoteProposalEvents.push({
           account: decoded[0],
           proposalId: decoded[1],

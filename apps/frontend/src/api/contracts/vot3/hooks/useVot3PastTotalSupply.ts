@@ -21,7 +21,7 @@ export const getVot3PastTotalSupply = async (thor: Connex.Thor, timepoint?: numb
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
-  return FormattingUtils.scaleNumberDown(res.decoded[0], 18)
+  return FormattingUtils.scaleNumberDown(res.decoded[0], 18, 18)
 }
 
 export const getVot3PastTotalSupplyQueryKey = (timepoint?: number | string) => ["vot3", "supplyAt", timepoint]
