@@ -55,7 +55,7 @@ export const FunctionsPageContent = () => {
     (data: SelectedFunction) => () => {
       setSubmitError(null)
       setData({
-        actions: [...(actions ?? []), data],
+        actions: [...actions, data],
       })
     },
     [actions, setData],

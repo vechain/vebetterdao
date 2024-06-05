@@ -25,7 +25,7 @@ vi.spyOn(router, "useRouter").mockReturnValue({
 
 vi.spyOn(router, "usePathname").mockImplementation(() => "/proposals/new/form/functions")
 
-const checkCardContractsRendered = async (env: EnvConfig, clickFunctions = false) => {
+const checkCardContractsRendered = async (env: EnvConfig, clickFunctions = false, doubleClickFunctions = false) => {
   render(
     <FormProposalLayout>
       <NewProposalFunctions />
@@ -56,11 +56,13 @@ const checkCardContractsRendered = async (env: EnvConfig, clickFunctions = false
         expect(screen.queryByTestId(`checkable-card__${func.name}`)).not.toBeInTheDocument()
         const functionCard = screen.queryByTestId(`function-card__${contract.name}_${func.name}`)
         clickFunctions && fireEvent.click(functionCard as Element)
+        doubleClickFunctions && fireEvent.click(functionCard as Element)
         expect(functionCard).toBeInTheDocument()
       } else {
         const functionCard = screen.queryByTestId(`checkable-card__${func.name}`)
         expect(functionCard).toBeInTheDocument()
         clickFunctions && fireEvent.click(functionCard as Element)
+        doubleClickFunctions && fireEvent.click(functionCard as Element)
         expect(screen.queryByTestId(`function-card__${contract.name}_${func.name}`)).not.toBeInTheDocument()
       }
     }
@@ -69,7 +71,7 @@ const checkCardContractsRendered = async (env: EnvConfig, clickFunctions = false
   const continueButton = await screen.findByTestId("continue")
   fireEvent.click(continueButton)
   await waitFor(() => {
-    if (!clickFunctions) {
+    if (!clickFunctions || doubleClickFunctions) {
       expect(mockRouterPush).not.toHaveBeenCalled()
       expect(screen.queryByText("Please select at least one function")).toBeInTheDocument()
     } else {
@@ -99,54 +101,43 @@ describe("NewProposalDiscussion", async () => {
     await waitFor(() => expect(mockRouterPush).toHaveBeenCalledWith("/proposals"))
   }) // redirects to /proposals if no account connected
 
-  it("solo-staging - should render correctly - error when no function selected", async () => {
-    vi.stubEnv("NEXT_PUBLIC_APP_ENV", "solo-staging")
+  describe("solo-staging", () => {
+    it("no functions selected - clicks continue - error is showed", async () => {
+      vi.stubEnv("NEXT_PUBLIC_APP_ENV", "solo-staging")
 
-    render(
-      <FormProposalLayout>
-        <NewProposalFunctions />
-      </FormProposalLayout>,
-    )
-    await screen.findByTestId("dev__select_env")
+      await checkCardContractsRendered("solo-staging")
+    }) // no functions selected - clicks continue - error is showed
 
-    await screen.findByText("What is your proposal about?")
-    await screen.findByText(
-      "Proposals are based on smart contracts that will be executed. Select the action that you proposal will trigger if succeed in the voting session.",
-    )
+    it("all functions selected - clicks continue - error is showed", async () => {
+      vi.stubEnv("NEXT_PUBLIC_APP_ENV", "solo-staging")
 
-    expect(screen.queryByText("Please select at least one function")).not.toBeInTheDocument()
-    const goBackButton = await screen.findByTestId("go-back")
-    fireEvent.click(goBackButton)
-    expect(mockBack).toHaveBeenCalled()
+      await checkCardContractsRendered("solo-staging", true)
+    }) // all functions selected - clicks continue - error is showed
 
-    const continueButton = await screen.findByTestId("continue")
-    fireEvent.click(continueButton)
-    await waitFor(() => {
-      expect(mockRouterPush).not.toHaveBeenCalled()
-      expect(screen.queryByText("Please select at least one function")).toBeInTheDocument()
-    })
-  }) // solo-staging should render correctly - error when no function selected
-  it("solo-staging - correct functions listed - error when no functions selected", async () => {
-    vi.stubEnv("NEXT_PUBLIC_APP_ENV", "solo-staging")
+    it("add and remove all functions - clicks continue - error is showed", async () => {
+      vi.stubEnv("NEXT_PUBLIC_APP_ENV", "solo-staging")
 
-    await checkCardContractsRendered("solo-staging")
-  }) // solo-staging should render correctly - error when no function selected
+      await checkCardContractsRendered("solo-staging", true, true)
+    }) //add and remove all functions - clicks continue - error is showed
+  }) //solo-staging
 
-  it("solo-staging - correct functions listed - go to next page correctly", async () => {
-    vi.stubEnv("NEXT_PUBLIC_APP_ENV", "solo-staging")
+  describe("testnet", () => {
+    it("no functions selected - clicks continue - error is showed", async () => {
+      vi.stubEnv("NEXT_PUBLIC_APP_ENV", "testnet")
 
-    await checkCardContractsRendered("solo-staging", true)
-  }) // solo-staging should render correctly - error when no function selected
+      await checkCardContractsRendered("testnet")
+    }) // no functions selected - clicks continue - error is showed
 
-  it("testnet - correct functions listed - error when no functions selected", async () => {
-    vi.stubEnv("NEXT_PUBLIC_APP_ENV", "testnet")
+    it("all functions selected - clicks continue - error is showed", async () => {
+      vi.stubEnv("NEXT_PUBLIC_APP_ENV", "testnet")
 
-    await checkCardContractsRendered("testnet")
-  }) // solo-staging should render correctly - error when no function selected
+      await checkCardContractsRendered("testnet", true)
+    }) //all functions selected - clicks continue - error is showed
 
-  it("testnet - correct functions listed - go to next page correctly", async () => {
-    vi.stubEnv("NEXT_PUBLIC_APP_ENV", "testnet")
+    it("add and remove all functions - clicks continue - error is showed", async () => {
+      vi.stubEnv("NEXT_PUBLIC_APP_ENV", "testnet")
 
-    await checkCardContractsRendered("testnet", true)
-  }) // solo-staging should render correctly - error when no function selected
+      await checkCardContractsRendered("testnet", true, true)
+    }) //add and remove all functions - clicks continue - error is showed
+  }) //testnet
 })
