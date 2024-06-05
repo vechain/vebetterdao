@@ -51,7 +51,7 @@ export const CheckableCard: React.FC<CheckableCardProps> = ({
       }}
       onClick={() => onChange(!checked)}
       {...cardProps}>
-      <CardBody>
+      <CardBody data-testid="checkable-card__body">
         <Stack spacing={4} align={"flex-start"} {...stackProps}>
           <HStack justify={"space-between"} w="full" alignItems={"flex-start"}>
             <Image src={imageSrc} boxSize={32} alt={`Checkable card image for ${title}`} />

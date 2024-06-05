@@ -5,7 +5,6 @@ import * as router from "next/navigation"
 import * as dappKit from "@vechain/dapp-kit-react"
 import * as store from "@/store"
 import FormProposalLayout from "../layout"
-import { transferAction } from "../../../../../../__mocks__/Actions"
 import * as hooks from "@/api"
 
 const mockRouterPush = vi.fn()
@@ -109,7 +108,7 @@ describe("NewProposalRound", async () => {
     //   "during which your proposal will be considered for voting. Weekly rounds occur regularly on this platform along with the allocations.",
     // )
     const goBack = await screen.findByTestId("go-back")
-    const continueButton = await screen.findByTestId("continue")
+    await screen.findByTestId("continue")
     fireEvent.click(goBack)
     expect(mockBack).toHaveBeenCalled()
   }) // common elements - should render correctly
@@ -218,7 +217,6 @@ describe("NewProposalRound", async () => {
     })
 
     // can start in next round
-    let error = "No currentRoundId available"
     let currentRoundId = "1"
     //@ts-ignore
     spyOncurrentRoundId.mockReturnValueOnce({ data: currentRoundId, isLoading: false })

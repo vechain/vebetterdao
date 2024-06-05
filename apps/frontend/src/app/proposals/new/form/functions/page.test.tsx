@@ -1,0 +1,152 @@
+import { fireEvent, render, waitFor } from "@testing-library/react"
+import NewProposalFunctions from "./page"
+import FormProposalLayout from "../layout"
+import * as store from "@/store"
+import * as router from "next/navigation"
+import * as dappKit from "@vechain/dapp-kit-react"
+import { screen } from "../../../../../../test"
+import { getEnvWhitelistedContractsWithFunctions } from "@/constants"
+import { vi } from "vitest"
+import { EnvConfig } from "@repo/config/contracts"
+const spyOnUseProposalFormStore = vi.spyOn(store, "useProposalFormStore")
+
+/**
+ * Check for the existence of the functions listed in the dev contracts
+ */
+
+const mockRouterPush = vi.fn()
+const mockBack = vi.fn()
+//@ts-ignore
+vi.spyOn(router, "useRouter").mockReturnValue({
+  push: mockRouterPush,
+  replace: vi.fn(),
+  back: mockBack,
+})
+
+vi.spyOn(router, "usePathname").mockImplementation(() => "/proposals/new/form/functions")
+
+const checkCardContractsRendered = async (env: EnvConfig, clickFunctions = false) => {
+  render(
+    <FormProposalLayout>
+      <NewProposalFunctions />
+    </FormProposalLayout>,
+  )
+  if (env !== "testnet") {
+    await screen.findByTestId("dev__select_env")
+  } else {
+    expect(screen.queryByTestId("dev__select_env")).not.toBeInTheDocument()
+  }
+
+  await screen.findByText("What is your proposal about?")
+  await screen.findByText(
+    "Proposals are based on smart contracts that will be executed. Select the action that you proposal will trigger if succeed in the voting session.",
+  )
+
+  expect(screen.queryByText("Please select at least one function")).not.toBeInTheDocument()
+  const goBackButton = await screen.findByTestId("go-back")
+  fireEvent.click(goBackButton)
+  expect(mockBack).toHaveBeenCalled()
+
+  const contractsWithFunctionsToRender = getEnvWhitelistedContractsWithFunctions(env)
+  const functionsNumber = contractsWithFunctionsToRender.reduce((acc, contract) => acc + contract.functions.length, 0)
+  // list of functions
+  for (const contract of contractsWithFunctionsToRender) {
+    for (const func of contract.functions) {
+      if (functionsNumber > 3) {
+        expect(screen.queryByTestId(`checkable-card__${func.name}`)).not.toBeInTheDocument()
+        const functionCard = screen.queryByTestId(`function-card__${contract.name}_${func.name}`)
+        clickFunctions && fireEvent.click(functionCard as Element)
+        expect(functionCard).toBeInTheDocument()
+      } else {
+        const functionCard = screen.queryByTestId(`checkable-card__${func.name}`)
+        expect(functionCard).toBeInTheDocument()
+        clickFunctions && fireEvent.click(functionCard as Element)
+        expect(screen.queryByTestId(`function-card__${contract.name}_${func.name}`)).not.toBeInTheDocument()
+      }
+    }
+  }
+
+  const continueButton = await screen.findByTestId("continue")
+  fireEvent.click(continueButton)
+  await waitFor(() => {
+    if (!clickFunctions) {
+      expect(mockRouterPush).not.toHaveBeenCalled()
+      expect(screen.queryByText("Please select at least one function")).toBeInTheDocument()
+    } else {
+      expect(mockRouterPush).toHaveBeenCalledWith("/proposals/new/form/functions/details")
+      expect(screen.queryByText("Please select at least one function")).not.toBeInTheDocument()
+    }
+  })
+}
+
+describe("NewProposalDiscussion", async () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    spyOnUseProposalFormStore.mockClear()
+  })
+
+  it("redirects to /proposals if no account connected", async () => {
+    //@ts-ignore
+    vi.spyOn(dappKit, "useWallet").mockReturnValueOnce({
+      account: null,
+    })
+    render(
+      <FormProposalLayout>
+        <NewProposalFunctions />
+      </FormProposalLayout>,
+    )
+
+    await waitFor(() => expect(mockRouterPush).toHaveBeenCalledWith("/proposals"))
+  }) // redirects to /proposals if no account connected
+
+  it("solo-staging - should render correctly - error when no function selected", async () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_ENV", "solo-staging")
+
+    render(
+      <FormProposalLayout>
+        <NewProposalFunctions />
+      </FormProposalLayout>,
+    )
+    await screen.findByTestId("dev__select_env")
+
+    await screen.findByText("What is your proposal about?")
+    await screen.findByText(
+      "Proposals are based on smart contracts that will be executed. Select the action that you proposal will trigger if succeed in the voting session.",
+    )
+
+    expect(screen.queryByText("Please select at least one function")).not.toBeInTheDocument()
+    const goBackButton = await screen.findByTestId("go-back")
+    fireEvent.click(goBackButton)
+    expect(mockBack).toHaveBeenCalled()
+
+    const continueButton = await screen.findByTestId("continue")
+    fireEvent.click(continueButton)
+    await waitFor(() => {
+      expect(mockRouterPush).not.toHaveBeenCalled()
+      expect(screen.queryByText("Please select at least one function")).toBeInTheDocument()
+    })
+  }) // solo-staging should render correctly - error when no function selected
+  it("solo-staging - correct functions listed - error when no functions selected", async () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_ENV", "solo-staging")
+
+    await checkCardContractsRendered("solo-staging")
+  }) // solo-staging should render correctly - error when no function selected
+
+  it("solo-staging - correct functions listed - go to next page correctly", async () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_ENV", "solo-staging")
+
+    await checkCardContractsRendered("solo-staging", true)
+  }) // solo-staging should render correctly - error when no function selected
+
+  it("testnet - correct functions listed - error when no functions selected", async () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_ENV", "testnet")
+
+    await checkCardContractsRendered("testnet")
+  }) // solo-staging should render correctly - error when no function selected
+
+  it("testnet - correct functions listed - go to next page correctly", async () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_ENV", "testnet")
+
+    await checkCardContractsRendered("testnet", true)
+  }) // solo-staging should render correctly - error when no function selected
+})
