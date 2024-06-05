@@ -1,6 +1,15 @@
 import { Box, Text } from "@chakra-ui/react"
+import { ReactNode } from "react"
 
-export const TimelineItem = ({ title, description }: { title: string; description?: string }) => {
+export const TimelineItem = ({
+  title,
+  description,
+  actionButton = null,
+}: {
+  title: string
+  description?: string
+  actionButton?: ReactNode
+}) => {
   return (
     <Box flexShrink="0" px={"8px"}>
       <Text>{title}</Text>
@@ -9,6 +18,7 @@ export const TimelineItem = ({ title, description }: { title: string; descriptio
           {description}
         </Text>
       )}
+      {actionButton}
     </Box>
   )
 }

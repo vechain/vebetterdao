@@ -15,9 +15,18 @@ import { TimelineItem } from "./components/TimelineItem"
 import { ProposalCreatedTimelineItem } from "./components/ProposalCreatedTimelineItem"
 import { ProposalState, useCurrentProposal } from "@/api"
 import dayjs from "dayjs"
+import { useWallet } from "@vechain/dapp-kit-react"
+import { useAccountPermissions } from "@/api/contracts/account"
+import { ProposalQueueButton } from "./components/ProposalQueueButton"
+import { ProposalExecuteButton } from "./components/ProposalExecuteButton"
 
 export const ProposalTimeline = () => {
   const { proposal } = useCurrentProposal()
+  const { account } = useWallet()
+  const { isProposalExecutor } = useAccountPermissions(account || "")
+
+  const showQueueButton = proposal.state === ProposalState.Succeeded && isProposalExecutor
+  const showExecuteButton = proposal.state === ProposalState.Queued && isProposalExecutor
   const steps = useMemo(
     () => [
       <ProposalCreatedTimelineItem key={0} />,
@@ -36,16 +45,25 @@ export const ProposalTimeline = () => {
         key={4}
         title={t("Proposal on queue")}
         description={proposal.proposalQueuedDate ? dayjs(proposal.proposalQueuedDate).format("MMM D, YYYY") : ""}
+        actionButton={showQueueButton && <ProposalQueueButton />}
       />,
       <TimelineItem
         key={5}
         title={t("Proposal executed")}
         description={proposal.proposalExecutedDate ? dayjs(proposal.proposalExecutedDate).format("MMM D, YYYY") : ""}
+        actionButton={showExecuteButton && <ProposalExecuteButton />}
       />,
     ],
-    [proposal],
+    [
+      proposal.proposalExecutedDate,
+      proposal.proposalQueuedDate,
+      proposal.votingEndDate,
+      proposal.votingStartDate,
+      showExecuteButton,
+      showQueueButton,
+    ],
   )
-  const currentStep = useMemo(() => {
+  const activeStep = useMemo(() => {
     if (proposal.state === ProposalState.Pending) {
       return proposal.isDepositReached ? 1 : 0
     }
@@ -55,6 +73,8 @@ export const ProposalTimeline = () => {
     if (
       proposal.state === ProposalState.Canceled ||
       proposal.state === ProposalState.Defeated ||
+      proposal.state === ProposalState.DepositNotMet ||
+      proposal.state === ProposalState.Expired ||
       proposal.state === ProposalState.Succeeded
     ) {
       return 3
@@ -65,12 +85,8 @@ export const ProposalTimeline = () => {
     if (proposal.state === ProposalState.Executed) {
       return 5
     }
+    return 0
   }, [proposal.isDepositReached, proposal.state])
-
-  const { activeStep } = useSteps({
-    index: currentStep,
-    count: steps.length,
-  })
 
   return (
     <VStack align="stretch" gap={6}>
