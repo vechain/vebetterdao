@@ -70,7 +70,7 @@ abstract contract VoteEligibilityUpgradeable is Initializable, X2EarnAppsUpgrade
   /**
    * @dev See {IX2EarnApps-setVotingEligibility}.
    */
-  function setVotingEligibility(bytes32 appId, bool canBeVoted) public virtual {
+  function setVotingEligibility(bytes32 appId, bool canBeVoted) public virtual override {
     _setVotingEligibility(appId, canBeVoted);
   }
 

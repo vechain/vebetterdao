@@ -69,56 +69,56 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
   /**
    * @dev See {IX2EarnApps-setAppAdmin}.
    */
-  function setAppAdmin(bytes32 appId, address newAdmin) public virtual {
+  function setAppAdmin(bytes32 appId, address newAdmin) public virtual override {
     _setAppAdmin(appId, newAdmin);
   }
 
   /**
    * @dev See {IX2EarnApps-addAppModerator}.
    */
-  function addAppModerator(bytes32 appId, address moderator) public virtual {
+  function addAppModerator(bytes32 appId, address moderator) public virtual override {
     _addAppModerator(appId, moderator);
   }
 
   /**
    * @dev See {IX2EarnApps-removeAppModerator}.
    */
-  function removeAppModerator(bytes32 appId, address moderator) public virtual {
+  function removeAppModerator(bytes32 appId, address moderator) public virtual override {
     _removeAppModerator(appId, moderator);
   }
 
   /**
    * @dev See {IX2EarnApps-addRewardDistributor}.
    */
-  function addRewardDistributor(bytes32 appId, address distributor) public virtual {
+  function addRewardDistributor(bytes32 appId, address distributor) public virtual override {
     _addRewardDistributor(appId, distributor);
   }
 
   /**
    * @dev See {IX2EarnApps-removeRewardDistributor}.
    */
-  function removeRewardDistributor(bytes32 appId, address distributor) public virtual {
+  function removeRewardDistributor(bytes32 appId, address distributor) public virtual override {
     _removeRewardDistributor(appId, distributor);
   }
 
   /**
    * @dev See {IX2EarnApps-updateAppReceiverAddress}.
    */
-  function updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) public virtual {
+  function updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) public virtual override {
     _updateAppReceiverAddress(appId, newReceiverAddress);
   }
 
   /**
    * @dev See {IX2EarnApps-updateReceiverAllocationPercentage}.
    */
-  function updateReceiverAllocationPercentage(bytes32 appId, uint256 percentage) public virtual {
+  function updateReceiverAllocationPercentage(bytes32 appId, uint256 percentage) public virtual override {
     _updateReceiverAllocationPercentage(appId, percentage);
   }
 
   /**
    * @dev See {IX2EarnApps-updateAppMetadata}.
    */
-  function updateAppMetadata(bytes32 appId, string memory newMetadataURI) public virtual {
+  function updateAppMetadata(bytes32 appId, string memory newMetadataURI) public virtual override {
     _updateAppMetadata(appId, newMetadataURI);
   }
 

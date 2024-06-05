@@ -31,7 +31,6 @@ import { VoteEligibilityUpgradeable } from "./x-2-earn-apps/modules/VoteEligibil
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
 
 /**
  * @title X2EarnApps
@@ -145,7 +144,7 @@ contract X2EarnApps is
   function setVotingEligibility(
     bytes32 _appId,
     bool _isEligible
-  ) public override(IX2EarnApps, VoteEligibilityUpgradeable) onlyRole(GOVERNANCE_ROLE) {
+  ) public override(VoteEligibilityUpgradeable, X2EarnAppsUpgradeable) onlyRole(GOVERNANCE_ROLE) {
     super.setVotingEligibility(_appId, _isEligible);
   }
 
@@ -157,7 +156,7 @@ contract X2EarnApps is
     address _admin,
     string memory _appName,
     string memory _appMetadataURI
-  ) public override(AppsStorageUpgradeable, IX2EarnApps) onlyRole(GOVERNANCE_ROLE) {
+  ) public override(AppsStorageUpgradeable, X2EarnAppsUpgradeable) onlyRole(GOVERNANCE_ROLE) {
     super.addApp(_receiverAddress, _admin, _appName, _appMetadataURI);
   }
 
@@ -167,7 +166,7 @@ contract X2EarnApps is
   function setAppAdmin(
     bytes32 _appId,
     address _newAdmin
-  ) public override(AdministrationUpgradeable, IX2EarnApps) onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
+  ) public override(AdministrationUpgradeable, X2EarnAppsUpgradeable) onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     super.setAppAdmin(_appId, _newAdmin);
   }
 
@@ -177,7 +176,7 @@ contract X2EarnApps is
   function updateAppReceiverAddress(
     bytes32 _appId,
     address _newReceiverAddress
-  ) public override(AdministrationUpgradeable, IX2EarnApps) onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
+  ) public override(AdministrationUpgradeable, X2EarnAppsUpgradeable) onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     super.updateAppReceiverAddress(_appId, _newReceiverAddress);
   }
 
@@ -187,7 +186,7 @@ contract X2EarnApps is
   function updateReceiverAllocationPercentage(
     bytes32 _appId,
     uint256 _percentage
-  ) public override(AdministrationUpgradeable, IX2EarnApps) onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
+  ) public override(AdministrationUpgradeable, X2EarnAppsUpgradeable) onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     super.updateReceiverAllocationPercentage(_appId, _percentage);
   }
 
@@ -197,7 +196,7 @@ contract X2EarnApps is
   function addAppModerator(
     bytes32 _appId,
     address _moderator
-  ) public override(AdministrationUpgradeable, IX2EarnApps) onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
+  ) public override(AdministrationUpgradeable, X2EarnAppsUpgradeable) onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     super.addAppModerator(_appId, _moderator);
   }
 
@@ -207,7 +206,7 @@ contract X2EarnApps is
   function removeAppModerator(
     bytes32 _appId,
     address _moderator
-  ) public override(AdministrationUpgradeable, IX2EarnApps) onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
+  ) public override(AdministrationUpgradeable, X2EarnAppsUpgradeable) onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     super.removeAppModerator(_appId, _moderator);
   }
 
@@ -217,7 +216,7 @@ contract X2EarnApps is
   function addRewardDistributor(
     bytes32 _appId,
     address _distributor
-  ) public override(AdministrationUpgradeable, IX2EarnApps) onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
+  ) public override(AdministrationUpgradeable, X2EarnAppsUpgradeable) onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     super.addRewardDistributor(_appId, _distributor);
   }
 
@@ -227,7 +226,7 @@ contract X2EarnApps is
   function removeRewardDistributor(
     bytes32 _appId,
     address _distributor
-  ) public override(AdministrationUpgradeable, IX2EarnApps) onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
+  ) public override(AdministrationUpgradeable, X2EarnAppsUpgradeable) onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     super.removeRewardDistributor(_appId, _distributor);
   }
 
@@ -237,7 +236,11 @@ contract X2EarnApps is
   function updateAppMetadata(
     bytes32 _appId,
     string memory _newMetadataURI
-  ) public override(AdministrationUpgradeable, IX2EarnApps) onlyRoleAndAppAdminOrModerator(DEFAULT_ADMIN_ROLE, _appId) {
+  )
+    public
+    override(AdministrationUpgradeable, X2EarnAppsUpgradeable)
+    onlyRoleAndAppAdminOrModerator(DEFAULT_ADMIN_ROLE, _appId)
+  {
     super.updateAppMetadata(_appId, _newMetadataURI);
   }
 }
