@@ -36,6 +36,7 @@ import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
  * @dev This contract is used by x2Earn apps to reward users that performed sustainable actions.
  * The XAllocationPool contract or other contracts/users can deposit funds into this contract by specifying the app
  * that can access the funds.
+ * The contract is upgradable through the UUPS proxy pattern and UPGRADER_ROLE can authorize the upgrade.
  */
 contract X2EarnRewardsPool is
   IX2EarnRewardsPool,
@@ -89,43 +90,6 @@ contract X2EarnRewardsPool is
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyRole(UPGRADER_ROLE) {}
 
-  // ---------- Getters ---------- //
-
-  /**
-   * @dev Returns the amount of funds available for an app to reward users.
-   *
-   * @param appId The ID of the app.
-   */
-  function availableFunds(bytes32 appId) public view returns (uint256) {
-    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    return $.availableFunds[appId];
-  }
-
-  /**
-   * @dev Retrieves the current version of the contract.
-   *
-   * @return The version of the contract.
-   */
-  function version() public pure virtual returns (string memory) {
-    return "1";
-  }
-
-  /**
-   * @dev Retrieves the B3TR token contract.
-   */
-  function b3tr() public view returns (IB3TR) {
-    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    return $.b3tr;
-  }
-
-  /**
-   * @dev Retrieves the X2EarnApps contract.
-   */
-  function x2EarnApps() public view returns (IX2EarnApps) {
-    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    return $.x2EarnApps;
-  }
-
   // ---------- Setters ---------- //
 
   function deposit(uint256 amount, bytes32 appId) public returns (bool) {
@@ -174,6 +138,53 @@ contract X2EarnRewardsPool is
     emit RewardEmitted(msg.sender, appId, amount, receiver, proof);
   }
 
+  /**
+   * @dev Sets the X2EarnApps contract address.
+   *
+   * @param _x2EarnApps the new X2EarnApps contract
+   */
+  function setX2EarnApps(IX2EarnApps _x2EarnApps) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    $.x2EarnApps = _x2EarnApps;
+  }
+
   //TODO?
   // function withdrawWithReason(uint256 amount, bytes32 appId, string memory reason) public nonReentrant;
+
+  // ---------- Getters ---------- //
+
+  /**
+   * @dev Returns the amount of funds available for an app to reward users.
+   *
+   * @param appId The ID of the app.
+   */
+  function availableFunds(bytes32 appId) public view returns (uint256) {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    return $.availableFunds[appId];
+  }
+
+  /**
+   * @dev Retrieves the current version of the contract.
+   *
+   * @return The version of the contract.
+   */
+  function version() public pure virtual returns (string memory) {
+    return "1";
+  }
+
+  /**
+   * @dev Retrieves the B3TR token contract.
+   */
+  function b3tr() public view returns (IB3TR) {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    return $.b3tr;
+  }
+
+  /**
+   * @dev Retrieves the X2EarnApps contract.
+   */
+  function x2EarnApps() public view returns (IX2EarnApps) {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    return $.x2EarnApps;
+  }
 }

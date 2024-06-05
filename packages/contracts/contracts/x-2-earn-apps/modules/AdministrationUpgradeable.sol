@@ -37,8 +37,8 @@ import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
 abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradeable {
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.Administration
   struct AdministrationStorage {
-    mapping(bytes32 appId => address[]) _moderators;
     mapping(bytes32 appId => address) _admin;
+    mapping(bytes32 appId => address[]) _moderators;
     mapping(bytes32 appId => address[]) _rewardDistributors; // addresses that can distribute rewards from X2EarnRewardsPool
     mapping(bytes32 appId => address) _receiverAddress;
     mapping(bytes32 appId => uint256) _receiverAllocationPercentage; // percentage of the allocation funds that the receiver address gets
