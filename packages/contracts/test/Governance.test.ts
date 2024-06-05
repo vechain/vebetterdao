@@ -3926,6 +3926,10 @@ describe("Governor and TimeLock", function () {
       await governor.connect(sponser).withdraw(proposalId, sponser.address, { gasLimit: 10_000_000 })
       expect(await governor.getUserDeposit(proposalId, sponser)).to.eql(0n)
 
+      expect(ethers.parseEther("1000")).to.eql(await vot3.balanceOf(await governor.getAddress()))
+
+      await governor.connect(proposer).withdraw(proposalId, proposer.address, { gasLimit: 10_000_000 })
+      expect(await governor.getUserDeposit(proposalId, proposer)).to.eql(0n)
       expect(0n).to.eql(await vot3.balanceOf(await governor.getAddress()))
     })
 
@@ -3993,6 +3997,10 @@ describe("Governor and TimeLock", function () {
       await governor.connect(sponser).withdraw(proposalId, sponser.address, { gasLimit: 10_000_000 })
       expect(await governor.getUserDeposit(proposalId, sponser)).to.eql(0n)
 
+      expect(ethers.parseEther("1000")).to.eql(await vot3.balanceOf(await governor.getAddress()))
+
+      await governor.connect(proposer).withdraw(proposalId, proposer.address, { gasLimit: 10_000_000 })
+      expect(await governor.getUserDeposit(proposalId, proposer)).to.eql(0n)
       expect(0n).to.eql(await vot3.balanceOf(await governor.getAddress()))
     })
 
@@ -4430,6 +4438,7 @@ describe("Governor and TimeLock", function () {
         .reverted
     })
   })
+
   describe("Libraries", function () {
     let governor: B3TRGovernor
 
