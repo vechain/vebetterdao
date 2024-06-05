@@ -1,4 +1,6 @@
 {
+  "No rounds available": "No rounds available",
+  "Emissions have propably not started yet": "Emissions have propably not started yet",
   "Make sure to replace all the placeholders with your own content.": "Make sure to replace all the placeholders with your own content.",
   "Add another transaction": "Add another transaction",
   "Starts on": "Starts on",
@@ -28,7 +30,7 @@
   "Step {{number}}": "Step {{number}}",
   "Choose the": "Choose the",
   "weekly round": "weekly round",
-  "during which your proposal will be considered for voting. Weekly rounds occur regularly on this platform along with the allocations.": "during which your proposal will be considered for voting. Weekly rounds occur regularly on this platform",
+  "during which your proposal will be considered for voting. Weekly rounds occur regularly on this platform along with the allocations.": "during which your proposal will be considered for voting. Weekly rounds occur regularly on this platform along with the allocations.",
   "Select a voting session date": "Select a voting session date",
   "Check your proposal before publishing": "Check your proposal before publishing",
   "The maximum amount is {{threshold}}": "The maximum amount is {{threshold}}",

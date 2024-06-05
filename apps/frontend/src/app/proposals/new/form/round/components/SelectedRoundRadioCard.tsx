@@ -50,6 +50,7 @@ export const SelectedRoundRadioCard: React.FC<Props> = ({ roundId, selected, onS
 
   return (
     <Card
+      data-testid={renderSkeleton ? "round-radio-card-skeleton" : "round-radio-card"}
       w="full"
       onClick={onSelect}
       {...(!renderSkeleton && { cursor: "pointer" })}

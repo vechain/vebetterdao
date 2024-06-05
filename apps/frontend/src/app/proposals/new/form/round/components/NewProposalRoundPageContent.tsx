@@ -1,4 +1,16 @@
-import { Button, Card, CardBody, HStack, Heading, Text, VStack } from "@chakra-ui/react"
+import {
+  Alert,
+  AlertDescription,
+  AlertIcon,
+  AlertTitle,
+  Button,
+  Card,
+  CardBody,
+  HStack,
+  Heading,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { useProposalFormStore } from "@/store/useProposalFormStore"
@@ -14,8 +26,16 @@ export const NewProposalRoundPageContent = () => {
   const router = useRouter()
   const { t } = useTranslation()
 
-  const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  const { data: canStartInNextRound, isLoading: isCanStartInNextRoundLoading } = useCanProposalStartInNextRound()
+  const {
+    data: currentRoundId,
+    isLoading: isCurrentRoundIdLoading,
+    error: currentRoundIdError,
+  } = useCurrentAllocationsRoundId()
+  const {
+    data: canStartInNextRound,
+    isLoading: isCanStartInNextRoundLoading,
+    error: canStartInNextRoundError,
+  } = useCanProposalStartInNextRound()
 
   const { votingStartRoundId, setData } = useProposalFormStore()
 
@@ -28,7 +48,7 @@ export const NewProposalRoundPageContent = () => {
   }, [router])
 
   const rounds = useMemo(() => {
-    if (!currentRoundId || isCanStartInNextRoundLoading) return []
+    if (!currentRoundId || !canStartInNextRound) return []
     return Array.from({ length: roundsToRender }, (_, index) => {
       const roundId = canStartInNextRound ? Number(currentRoundId) + index + 1 : Number(currentRoundId) + index + 2
       return {
@@ -37,7 +57,7 @@ export const NewProposalRoundPageContent = () => {
         canStart: canStartInNextRound,
       }
     })
-  }, [currentRoundId, canStartInNextRound, isCanStartInNextRoundLoading])
+  }, [currentRoundId, canStartInNextRound])
 
   const onSelectRound = useCallback(
     (roundId: number) => () => {
@@ -45,6 +65,8 @@ export const NewProposalRoundPageContent = () => {
     },
     [setData],
   )
+
+  const isLoading = isCurrentRoundIdLoading || isCanStartInNextRoundLoading
 
   return (
     <Card>
@@ -61,30 +83,49 @@ export const NewProposalRoundPageContent = () => {
             )}
           </Text>
 
-          {rounds.length === 0
-            ? [...Array(roundsToRender).keys()].map(index => (
-                <SelectedRoundRadioCard
-                  key={index}
-                  roundId={index}
-                  selected={false}
-                  onSelect={() => {}}
-                  renderSkeleton={true}
-                />
-              ))
-            : rounds.map(round => (
-                <SelectedRoundRadioCard
-                  key={round.id}
-                  roundId={round.id}
-                  selected={round.id === votingStartRoundId}
-                  onSelect={onSelectRound(round.id)}
-                />
-              ))}
+          {isLoading ? (
+            [...Array(roundsToRender).keys()].map(index => (
+              <SelectedRoundRadioCard
+                key={index}
+                roundId={index}
+                selected={false}
+                onSelect={() => {}}
+                renderSkeleton={true}
+              />
+            ))
+          ) : rounds.length === 0 ? (
+            <Alert status="error" borderRadius={"lg"}>
+              <AlertIcon />
+              <AlertTitle>{t("No rounds available")}</AlertTitle>
+              <AlertDescription>
+                {currentRoundIdError?.message ??
+                  canStartInNextRoundError?.message ??
+                  t("Emissions have propably not started yet")}
+              </AlertDescription>
+            </Alert>
+          ) : (
+            rounds.map(round => (
+              <SelectedRoundRadioCard
+                key={round.id}
+                roundId={round.id}
+                selected={round.id === votingStartRoundId}
+                onSelect={onSelectRound(round.id)}
+              />
+            ))
+          )}
 
           <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
-            <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
+            <Button
+              data-testid="go-back"
+              rounded="full"
+              variant={"primarySubtle"}
+              colorScheme="primary"
+              size="lg"
+              onClick={goBack}>
               {t("Go back")}
             </Button>
             <Button
+              data-testid="continue"
               rounded="full"
               colorScheme="primary"
               size="lg"
