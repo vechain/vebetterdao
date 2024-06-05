@@ -1387,6 +1387,8 @@ describe("X-Allocation Voting", function () {
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
+      await x2EarnApps.updateReceiverAllocationPercentage(app1, 100)
+
       await getVot3Tokens(otherAccount, "1000")
 
       await emissions.connect(minterAccount).start()
@@ -1411,7 +1413,12 @@ describe("X-Allocation Voting", function () {
       expect(appShares).to.eql([0n, 0n])
 
       let appEarnings = await xAllocationPool.roundEarnings(roundId, app1)
-      expect(appEarnings).to.eql([await xAllocationPool.baseAllocationAmount(roundId), 0n])
+      expect(appEarnings).to.eql([
+        await xAllocationPool.baseAllocationAmount(roundId),
+        0n,
+        await xAllocationPool.baseAllocationAmount(roundId),
+        0n,
+      ])
     })
 
     it("I should be able to vote only for apps available in the allocation round", async function () {
