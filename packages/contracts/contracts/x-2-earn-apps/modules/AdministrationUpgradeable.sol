@@ -29,10 +29,11 @@ import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
 /**
  * @title AdministrationUpgradeable
  * @dev Contract module that provides the administration functionalities of the x2earn apps.
- * Each app has an admin and a list of moderators that can manage the app:
- * - Admin can add/remove moderators, change the admin address, update the receiver address and allocation percentage,
- * add/remove reward distributor addresses, and update the metadata URI
- * - Moderators can manage the app metadata
+ * Each app has one admin and can have many moderators, the use of those should be definied by the contract inheriting this module.
+ * Each app has a metadataURI that returns the information of the app.
+ * The receiver address is the address belonging to the team that receives the allocation funds each round.
+ * The receiver allocation percentage is the percentage of the allocation funds that the team reserves for themself.
+ * The reward distributors are the addresses that can distribute rewards from the X2EarnRewardsPool.
  */
 abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradeable {
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.Administration
