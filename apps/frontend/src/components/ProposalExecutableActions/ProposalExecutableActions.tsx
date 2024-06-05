@@ -9,12 +9,14 @@ import { ExecutableFunctionCard } from "@/app/proposals/new/form/functions/detai
 
 // This is to reuse the same components of the form. This is a read-only version of the form
 import { FormData as NewProposalFormData } from "@/app/proposals/new/form/functions/details/components/NewProposalForm"
+import { useTranslation } from "react-i18next"
 
 type Props = {
   actions: ProposalFormAction[]
 }
 
 export const ProposalExecutableActions: React.FC<Props> = ({ actions }) => {
+  const { t } = useTranslation()
   // This is to reuse the same components of the form. This is a read-only version of the form
   const { register, control, setValue } = useForm<NewProposalFormData>()
 
@@ -54,7 +56,7 @@ export const ProposalExecutableActions: React.FC<Props> = ({ actions }) => {
 
   return (
     <VStack spacing={4} align="flex-start" w="full" mt={4}>
-      <Heading size="md">Executable functions</Heading>
+      <Heading size="md">{t("Executable functions")}</Heading>
       {fields?.map((field, index) => (
         <ExecutableFunctionCard
           key={field.id}

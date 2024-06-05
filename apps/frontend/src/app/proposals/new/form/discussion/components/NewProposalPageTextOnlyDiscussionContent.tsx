@@ -1,4 +1,4 @@
-import { Card, CardBody, VStack, Heading, HStack, Button, CardFooter } from "@chakra-ui/react"
+import { Card, CardBody, VStack, Heading, HStack, Button, CardFooter, Text } from "@chakra-ui/react"
 import { FormData, NewProposalForm } from "../../functions/details/components/NewProposalForm"
 import { useCallback } from "react"
 import { useRouter } from "next/navigation"
@@ -20,10 +20,9 @@ export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
       setData({
         title: data.title,
         shortDescription: data.description,
-        markdownDescription: data.markdownDescription,
         actions: [],
       })
-      router.push("/proposals/new/form/preview")
+      router.push("/proposals/new/form/content")
     },
     [setData, router],
   )
@@ -32,12 +31,17 @@ export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
     <Card w="full">
       <CardBody py={8}>
         <VStack spacing={8} align="flex-start">
-          <Heading size="lg">{t("Text only proposal")}</Heading>
+          <Heading size="lg">{t("General proposal")}</Heading>
+          <Text fontSize="md" color="gray.500">
+            {t(
+              "Choose a title a short description for your proposal. You will be able to provide more details in the next step.",
+            )}
+          </Text>
 
           <NewProposalForm
             formId="new-proposal-form"
             renderActions={false}
-            renderMarkdownDescription={true}
+            renderMarkdownDescription={false}
             onSubmit={onSubmit}
           />
         </VStack>

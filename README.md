@@ -83,6 +83,12 @@ If you need to start again you can stop the frontend from running and restart th
 make solo-down
 ```
 
+Thor solo will persist it's state to a volume. To clear this state run:
+
+```
+make solo-clean
+```
+
 ```
 make solo-up
 ```
@@ -157,6 +163,12 @@ Stop it by running:
 
 make solo-down
 
+```
+
+Thor solo will persist it's state to a volume. To clear this state run:
+
+```
+make solo-clean
 ```
 
 Each environment has its own configuration file under `./packages/config/contracts/envs` folder:
