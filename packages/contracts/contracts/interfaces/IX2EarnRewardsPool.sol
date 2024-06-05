@@ -21,7 +21,7 @@ interface IX2EarnRewardsPool {
    * @param receiver The address of the user that received the reward
    * @param proof A JSON file uploaded on IPFS by the app that adds information on the type of action that was performed
    */
-  event RewardEmitted(
+  event RewardDistributed(
     address indexed distributor,
     bytes32 indexed appId,
     uint256 amount,
@@ -59,5 +59,5 @@ interface IX2EarnRewardsPool {
    * @param receiver the address of the user that performed the sustainable action and is rewarded
    * @param proof a JSON file uploaded on IPFS by the app that adds information on the type of action that was performed
    */
-  function emitReward(bytes32 appId, uint256 amount, address receiver, string memory proof) external;
+  function distributeReward(bytes32 appId, uint256 amount, address receiver, string memory proof) external;
 }

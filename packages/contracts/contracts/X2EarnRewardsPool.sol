@@ -117,7 +117,7 @@ contract X2EarnRewardsPool is
    * @param receiver the address of the user that performed the sustainable action and is rewarded
    * @param proof a JSON file uploaded on IPFS by the app that adds information on the type of action that was performed
    */
-  function emitReward(bytes32 appId, uint256 amount, address receiver, string memory proof) public nonReentrant {
+  function distributeReward(bytes32 appId, uint256 amount, address receiver, string memory proof) public nonReentrant {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
 
     require($.x2EarnApps.appExists(appId), "XAllocationPool: app does not exist");
@@ -135,7 +135,7 @@ contract X2EarnRewardsPool is
     require($.b3tr.transfer(receiver, amount), "Allocation transfer to app failed");
 
     // emit event
-    emit RewardEmitted(msg.sender, appId, amount, receiver, proof);
+    emit RewardDistributed(msg.sender, appId, amount, receiver, proof);
   }
 
   /**
