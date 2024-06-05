@@ -65,189 +65,61 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
   function __Administration_init_unchained() internal onlyInitializing {}
 
   // ---------- Setters ---------- //
+
   /**
-   * @dev Internal function to set the admin address of the app
-   *
-   * @param appId the hashed name of the app
-   * @param newAdmin the address of the new admin
+   * @dev See {IX2EarnApps-setAppAdmin}.
    */
-  function _setAppAdmin(bytes32 appId, address newAdmin) internal virtual override {
-    if (!appExists(appId)) {
-      revert X2EarnNonexistentApp(appId);
-    }
-
-    if (newAdmin == address(0)) {
-      revert X2EarnInvalidAddress(newAdmin);
-    }
-
-    AdministrationStorage storage $ = _getAdministrationStorage();
-
-    emit AppAdminUpdated(appId, $._admin[appId], newAdmin);
-
-    $._admin[appId] = newAdmin;
+  function setAppAdmin(bytes32 appId, address newAdmin) public virtual {
+    _setAppAdmin(appId, newAdmin);
   }
 
   /**
-   * @dev Internal function to add a moderator to the app
-   *
-   * @param appId the hashed name of the app
-   * @param moderator the address of the moderator
+   * @dev See {IX2EarnApps-addAppModerator}.
    */
-  function _addAppModerator(bytes32 appId, address moderator) internal virtual override {
-    if (moderator == address(0)) {
-      revert X2EarnInvalidAddress(moderator);
-    }
-
-    if (!appExists(appId)) {
-      revert X2EarnNonexistentApp(appId);
-    }
-
-    AdministrationStorage storage $ = _getAdministrationStorage();
-
-    $._moderators[appId].push(moderator);
-
-    emit ModeratorAddedToApp(appId, moderator);
+  function addAppModerator(bytes32 appId, address moderator) public virtual {
+    _addAppModerator(appId, moderator);
   }
 
   /**
-   * @dev Internal function to remove a moderator from the app
-   *
-   * @param appId the hashed name of the app
-   * @param moderator the address of the moderator
+   * @dev See {IX2EarnApps-removeAppModerator}.
    */
-  function _removeAppModerator(bytes32 appId, address moderator) internal virtual override {
-    if (moderator == address(0)) {
-      revert X2EarnInvalidAddress(moderator);
-    }
-
-    if (!appExists(appId)) {
-      revert X2EarnNonexistentApp(appId);
-    }
-
-    AdministrationStorage storage $ = _getAdministrationStorage();
-
-    address[] storage moderators = $._moderators[appId];
-    for (uint256 i = 0; i < moderators.length; i++) {
-      if (moderators[i] == moderator) {
-        moderators[i] = moderators[moderators.length - 1];
-        moderators.pop();
-        emit ModeratorRemovedFromApp(appId, moderator);
-        break;
-      }
-    }
+  function removeAppModerator(bytes32 appId, address moderator) public virtual {
+    _removeAppModerator(appId, moderator);
   }
 
   /**
-   * @dev Internal function to add a reward distributor to the app
-   *
-   * @param appId the hashed name of the app
-   * @param distributor the address of the reward distributor
+   * @dev See {IX2EarnApps-addRewardDistributor}.
    */
-  function _addRewardDistributor(bytes32 appId, address distributor) internal virtual override {
-    if (distributor == address(0)) {
-      revert X2EarnInvalidAddress(distributor);
-    }
-
-    if (!appExists(appId)) {
-      revert X2EarnNonexistentApp(appId);
-    }
-
-    AdministrationStorage storage $ = _getAdministrationStorage();
-
-    $._rewardDistributors[appId].push(distributor);
-
-    emit RewardDistributorAddedToApp(appId, distributor);
+  function addRewardDistributor(bytes32 appId, address distributor) public virtual {
+    _addRewardDistributor(appId, distributor);
   }
 
   /**
-   * @dev Internal function to remove a reward distributor from the app
-   *
-   * @param appId the hashed name of the app
-   * @param distributor the address of the reward distributor
+   * @dev See {IX2EarnApps-removeRewardDistributor}.
    */
-  function _removeRewardDistributor(bytes32 appId, address distributor) internal virtual override {
-    if (distributor == address(0)) {
-      revert X2EarnInvalidAddress(distributor);
-    }
-
-    if (!appExists(appId)) {
-      revert X2EarnNonexistentApp(appId);
-    }
-
-    AdministrationStorage storage $ = _getAdministrationStorage();
-
-    address[] storage distributors = $._rewardDistributors[appId];
-    for (uint256 i = 0; i < distributors.length; i++) {
-      if (distributors[i] == distributor) {
-        distributors[i] = distributors[distributors.length - 1];
-        distributors.pop();
-        emit RewardDistributorRemovedFromApp(appId, distributor);
-        break;
-      }
-    }
+  function removeRewardDistributor(bytes32 appId, address distributor) public virtual {
+    _removeRewardDistributor(appId, distributor);
   }
 
   /**
-   * @dev Update the address where the x2earn app receives allocation funds
-   *
-   * @param appId the hashed name of the app
-   * @param newReceiverAddress the address of the new receiver
+   * @dev See {IX2EarnApps-updateAppReceiverAddress}.
    */
-  function _updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) internal virtual override {
-    if (newReceiverAddress == address(0)) {
-      revert X2EarnInvalidAddress(newReceiverAddress);
-    }
-
-    if (!appExists(appId)) {
-      revert X2EarnNonexistentApp(appId);
-    }
-
-    AdministrationStorage storage $ = _getAdministrationStorage();
-    address oldReceiverAddress = $._receiverAddress[appId];
-    $._receiverAddress[appId] = newReceiverAddress;
-
-    emit AppReceiverAddressUpdated(appId, oldReceiverAddress, newReceiverAddress);
+  function updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) public virtual {
+    _updateAppReceiverAddress(appId, newReceiverAddress);
   }
 
   /**
-   * @dev Update the metadata URI of the app
-   *
-   * @param appId the hashed name of the app
-   * @param newMetadataURI the metadata URI of the app
-   *
-   * Emits a {AppMetadataURIUpdated} event.
+   * @dev See {IX2EarnApps-updateReceiverAllocationPercentage}.
    */
-  function _updateAppMetadata(bytes32 appId, string memory newMetadataURI) internal virtual override {
-    if (!appExists(appId)) {
-      revert X2EarnNonexistentApp(appId);
-    }
-
-    AdministrationStorage storage $ = _getAdministrationStorage();
-    string memory oldMetadataURI = $._metadataURI[appId];
-    $._metadataURI[appId] = newMetadataURI;
-
-    emit AppMetadataURIUpdated(appId, oldMetadataURI, newMetadataURI);
+  function updateReceiverAllocationPercentage(bytes32 appId, uint256 percentage) public virtual {
+    _updateReceiverAllocationPercentage(appId, percentage);
   }
 
   /**
-   * @dev Update the allocation percentage of the receiver address
-   *
-   * @param appId the app id
-   * @param newAllocationPercentage the new allocation percentage
+   * @dev See {IX2EarnApps-updateAppMetadata}.
    */
-  function _updateReceiverAllocationPercentage(
-    bytes32 appId,
-    uint256 newAllocationPercentage
-  ) internal virtual override {
-    if (newAllocationPercentage > 100) {
-      revert X2EarnInvalidAllocationPercentage(newAllocationPercentage);
-    }
-
-    AdministrationStorage storage $ = _getAdministrationStorage();
-    uint256 oldAllocationPercentage = $._receiverAllocationPercentage[appId];
-    $._receiverAllocationPercentage[appId] = newAllocationPercentage;
-
-    emit ReceiverAllocationPercentageUpdated(appId, oldAllocationPercentage, newAllocationPercentage);
+  function updateAppMetadata(bytes32 appId, string memory newMetadataURI) public virtual {
+    _updateAppMetadata(appId, newMetadataURI);
   }
 
   // ---------- Getters ---------- //
@@ -364,5 +236,191 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
     AdministrationStorage storage $ = _getAdministrationStorage();
 
     return $._metadataURI[appId];
+  }
+
+  // ---------- Internal ---------- //
+  /**
+   * @dev Internal function to set the admin address of the app
+   *
+   * @param appId the hashed name of the app
+   * @param newAdmin the address of the new admin
+   */
+  function _setAppAdmin(bytes32 appId, address newAdmin) internal override {
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+
+    if (newAdmin == address(0)) {
+      revert X2EarnInvalidAddress(newAdmin);
+    }
+
+    AdministrationStorage storage $ = _getAdministrationStorage();
+
+    emit AppAdminUpdated(appId, $._admin[appId], newAdmin);
+
+    $._admin[appId] = newAdmin;
+  }
+
+  /**
+   * @dev Internal function to add a moderator to the app
+   *
+   * @param appId the hashed name of the app
+   * @param moderator the address of the moderator
+   */
+  function _addAppModerator(bytes32 appId, address moderator) internal {
+    if (moderator == address(0)) {
+      revert X2EarnInvalidAddress(moderator);
+    }
+
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+
+    AdministrationStorage storage $ = _getAdministrationStorage();
+
+    $._moderators[appId].push(moderator);
+
+    emit ModeratorAddedToApp(appId, moderator);
+  }
+
+  /**
+   * @dev Internal function to remove a moderator from the app
+   *
+   * @param appId the hashed name of the app
+   * @param moderator the address of the moderator
+   */
+  function _removeAppModerator(bytes32 appId, address moderator) internal {
+    if (moderator == address(0)) {
+      revert X2EarnInvalidAddress(moderator);
+    }
+
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+
+    AdministrationStorage storage $ = _getAdministrationStorage();
+
+    address[] storage moderators = $._moderators[appId];
+    for (uint256 i = 0; i < moderators.length; i++) {
+      if (moderators[i] == moderator) {
+        moderators[i] = moderators[moderators.length - 1];
+        moderators.pop();
+        emit ModeratorRemovedFromApp(appId, moderator);
+        break;
+      }
+    }
+  }
+
+  /**
+   * @dev Internal function to add a reward distributor to the app
+   *
+   * @param appId the hashed name of the app
+   * @param distributor the address of the reward distributor
+   */
+  function _addRewardDistributor(bytes32 appId, address distributor) internal {
+    if (distributor == address(0)) {
+      revert X2EarnInvalidAddress(distributor);
+    }
+
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+
+    AdministrationStorage storage $ = _getAdministrationStorage();
+
+    $._rewardDistributors[appId].push(distributor);
+
+    emit RewardDistributorAddedToApp(appId, distributor);
+  }
+
+  /**
+   * @dev Internal function to remove a reward distributor from the app
+   *
+   * @param appId the hashed name of the app
+   * @param distributor the address of the reward distributor
+   */
+  function _removeRewardDistributor(bytes32 appId, address distributor) internal {
+    if (distributor == address(0)) {
+      revert X2EarnInvalidAddress(distributor);
+    }
+
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+
+    AdministrationStorage storage $ = _getAdministrationStorage();
+
+    address[] storage distributors = $._rewardDistributors[appId];
+    for (uint256 i = 0; i < distributors.length; i++) {
+      if (distributors[i] == distributor) {
+        distributors[i] = distributors[distributors.length - 1];
+        distributors.pop();
+        emit RewardDistributorRemovedFromApp(appId, distributor);
+        break;
+      }
+    }
+  }
+
+  /**
+   * @dev Update the address where the x2earn app receives allocation funds
+   *
+   * @param appId the hashed name of the app
+   * @param newReceiverAddress the address of the new receiver
+   */
+  function _updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) internal override {
+    if (newReceiverAddress == address(0)) {
+      revert X2EarnInvalidAddress(newReceiverAddress);
+    }
+
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+
+    AdministrationStorage storage $ = _getAdministrationStorage();
+    address oldReceiverAddress = $._receiverAddress[appId];
+    $._receiverAddress[appId] = newReceiverAddress;
+
+    emit AppReceiverAddressUpdated(appId, oldReceiverAddress, newReceiverAddress);
+  }
+
+  /**
+   * @dev Update the metadata URI of the app
+   *
+   * @param appId the hashed name of the app
+   * @param newMetadataURI the metadata URI of the app
+   *
+   * Emits a {AppMetadataURIUpdated} event.
+   */
+  function _updateAppMetadata(bytes32 appId, string memory newMetadataURI) internal override {
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+
+    AdministrationStorage storage $ = _getAdministrationStorage();
+    string memory oldMetadataURI = $._metadataURI[appId];
+    $._metadataURI[appId] = newMetadataURI;
+
+    emit AppMetadataURIUpdated(appId, oldMetadataURI, newMetadataURI);
+  }
+
+  /**
+   * @dev Update the allocation percentage of the receiver address
+   *
+   * @param appId the app id
+   * @param newAllocationPercentage the new allocation percentage
+   */
+  function _updateReceiverAllocationPercentage(
+    bytes32 appId,
+    uint256 newAllocationPercentage
+  ) internal virtual override {
+    if (newAllocationPercentage > 100) {
+      revert X2EarnInvalidAllocationPercentage(newAllocationPercentage);
+    }
+
+    AdministrationStorage storage $ = _getAdministrationStorage();
+    uint256 oldAllocationPercentage = $._receiverAllocationPercentage[appId];
+    $._receiverAllocationPercentage[appId] = newAllocationPercentage;
+
+    emit ReceiverAllocationPercentageUpdated(appId, oldAllocationPercentage, newAllocationPercentage);
   }
 }

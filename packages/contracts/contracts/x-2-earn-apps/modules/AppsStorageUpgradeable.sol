@@ -60,61 +60,18 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
 
   function __AppsStorage_init_unchained() internal onlyInitializing {}
 
-  // ---------- Internal ---------- //
+  // ---------- Setters ---------- //
 
   /**
-   * @dev Internal function that should add an app. Called by {addApp}.
-   *
-   * @param receiverAddress the address where the app should receive allocation funds
-   * @param admin the address of the admin
-   * @param appName the name of the app
-   * @param metadataURI the metadata URI of the app
-   *
-   * Emits a {AppAdded} event.
+   * @dev See {IX2EarnApps-addApp}.
    */
-  function _addApp(
+  function addApp(
     address receiverAddress,
     address admin,
     string memory appName,
-    string memory metadataURI
-  ) internal virtual override {
-    if (receiverAddress == address(0)) {
-      revert X2EarnInvalidAddress(receiverAddress);
-    }
-    if (admin == address(0)) {
-      revert X2EarnInvalidAddress(admin);
-    }
-
-    AppsStorageStorage storage $ = _getAppsStorageStorage();
-    bytes32 id = hashAppName(appName);
-
-    if (appExists(id)) {
-      revert X2EarnAppAlreadyExists(id);
-    }
-
-    // Store the new app
-    $._apps[id] = X2EarnAppsDataTypes.App(id, appName, block.timestamp);
-    $._appIds.push(id);
-    _setAppAdmin(id, admin);
-    _setVotingEligibility(id, true);
-    _updateAppReceiverAddress(id, receiverAddress);
-    _updateAppMetadata(id, metadataURI);
-
-    emit AppAdded(id, receiverAddress, appName, true);
-  }
-
-  /**
-   * @dev Get the app data saved in storage
-   *
-   * @param appId the if of the app
-   */
-  function _getAppStorage(bytes32 appId) internal view override returns (X2EarnAppsDataTypes.App memory) {
-    if (!appExists(appId)) {
-      revert X2EarnNonexistentApp(appId);
-    }
-
-    AppsStorageStorage storage $ = _getAppsStorageStorage();
-    return $._apps[appId];
+    string memory appMetadataURI
+  ) public virtual {
+    _addApp(receiverAddress, admin, appName, appMetadataURI);
   }
 
   // ---------- Getters ---------- //
@@ -175,10 +132,62 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev Get the amount of apps
+   * @dev See {IX2EarnApps-appsCount}.
    */
-  function appsCount() public view override returns (uint256) {
+  function appsCount() public view returns (uint256) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
     return $._appIds.length;
+  }
+
+  // ---------- Internal ---------- //
+
+  /**
+   * @dev Internal function that should add an app. Called by {addApp}.
+   *
+   * @param receiverAddress the address where the app should receive allocation funds
+   * @param admin the address of the admin
+   * @param appName the name of the app
+   * @param metadataURI the metadata URI of the app
+   *
+   * Emits a {AppAdded} event.
+   */
+  function _addApp(address receiverAddress, address admin, string memory appName, string memory metadataURI) internal {
+    if (receiverAddress == address(0)) {
+      revert X2EarnInvalidAddress(receiverAddress);
+    }
+    if (admin == address(0)) {
+      revert X2EarnInvalidAddress(admin);
+    }
+
+    AppsStorageStorage storage $ = _getAppsStorageStorage();
+    bytes32 id = hashAppName(appName);
+
+    if (appExists(id)) {
+      revert X2EarnAppAlreadyExists(id);
+    }
+
+    // Store the new app
+    $._apps[id] = X2EarnAppsDataTypes.App(id, appName, block.timestamp);
+    $._appIds.push(id);
+    _setAppAdmin(id, admin);
+    _setVotingEligibility(id, true);
+    _updateAppReceiverAddress(id, receiverAddress);
+    _updateAppMetadata(id, metadataURI);
+
+    emit AppAdded(id, receiverAddress, appName, true);
+  }
+
+  /**
+   * @dev Get the app data saved in storage
+   *
+   * @param appId the if of the app
+   */
+  function _getAppStorage(bytes32 appId) internal view returns (X2EarnAppsDataTypes.App memory) {
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+
+    AppsStorageStorage storage $ = _getAppsStorageStorage();
+    return $._apps[appId];
   }
 }

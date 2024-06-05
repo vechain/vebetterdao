@@ -72,6 +72,17 @@ abstract contract ContractSettingsUpgradeable is Initializable, X2EarnAppsUpgrad
     _setBaseURI(baseURI_);
   }
 
+  // ---------- Getters ---------- //
+
+  /**
+   * @dev See {IX2EarnApps-baseURI}.
+   */
+  function baseURI() public view virtual override returns (string memory) {
+    ContractSettingsStorage storage $ = _getContractSettingsStorage();
+
+    return $._baseURI;
+  }
+
   // ---------- Internal ---------- //
 
   /**
@@ -87,16 +98,5 @@ abstract contract ContractSettingsUpgradeable is Initializable, X2EarnAppsUpgrad
     emit BaseURIUpdated($._baseURI, baseURI_);
 
     $._baseURI = baseURI_;
-  }
-
-  // ---------- Getters ---------- //
-
-  /**
-   * @dev See {IX2EarnApps-baseURI}.
-   */
-  function baseURI() public view virtual override returns (string memory) {
-    ContractSettingsStorage storage $ = _getContractSettingsStorage();
-
-    return $._baseURI;
   }
 }

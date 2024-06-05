@@ -33,12 +33,10 @@ import { X2EarnAppsDataTypes } from "../libraries/X2EarnAppsDataTypes.sol";
  * @dev Core of x-2-earn applications management, designed to be extended through various modules.
  *
  * This contract is abstract and requires several functions to be implemented in various modules:
- * - a module to handle the storage of the apps and implement {_addApp}, {appExists}, {_updateAppMetadata}, and {_updateAppReceiverAddress} functions
- * - a module to handle the voting Eligibility of the apps and implement {_setVotingEligibility} and {isEligible} functions
- * - a module to handle the authorization to addresses to perform app management and implement {_setAppAdmin}, {_addAppModerator}, {_removeAppModerator} functions
- * - a module to handle the settings of the apps and implement {baseURI} function
- *
- * The inheriting contract should also implement the authorization functions {_authorizeAddApp}, {_authorizeAppManagement}, and {_authorizeAppMetadataUpdate}.
+ * - a module to handle the storage of the apps
+ * - a module to handle the voting Eligibility of the apps and implement {_setVotingEligibility}, {isEligible} and {isEligibleNow} functions
+ * - a module to handle the administration of the app (handle moderators, admin, metadata, receiver address and percentage)
+ * - a module to handle the settings of the contract and implement {baseURI} function
  */
 abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   /**
@@ -49,101 +47,6 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   }
 
   function __X2EarnApps_init_unchained() internal onlyInitializing {}
-
-  // ---------- Setters ---------- //
-
-  /**
-   * @dev See {IX2EarnApps-addApp}.
-   */
-  function addApp(
-    address receiverAddress,
-    address admin,
-    string memory appName,
-    string memory appMetadataURI
-  ) public virtual {
-    _authorizeAddApp();
-
-    _addApp(receiverAddress, admin, appName, appMetadataURI);
-  }
-
-  /**
-   * @dev See {IX2EarnApps-updateAppReceiverAddress}.
-   */
-  function updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) public virtual {
-    _authorizeAppManagement(appId);
-
-    _updateAppReceiverAddress(appId, newReceiverAddress);
-  }
-
-  /**
-   * @dev See {IX2EarnApps-updateAppMetadata}.
-   */
-  function updateAppMetadata(bytes32 appId, string memory newMetadataURI) public virtual {
-    _authorizeAppMetadataUpdate(appId);
-
-    _updateAppMetadata(appId, newMetadataURI);
-  }
-
-  /**
-   * @dev See {IX2EarnApps-setAppAdmin}.
-   */
-  function setAppAdmin(bytes32 appId, address newAdmin) public virtual {
-    _authorizeAppManagement(appId);
-
-    _setAppAdmin(appId, newAdmin);
-  }
-
-  /**
-   * @dev See {IX2EarnApps-addAppModerator}.
-   */
-  function addAppModerator(bytes32 appId, address moderator) public virtual {
-    _authorizeAppManagement(appId);
-
-    _addAppModerator(appId, moderator);
-  }
-
-  /**
-   * @dev See {IX2EarnApps-removeAppModerator}.
-   */
-  function removeAppModerator(bytes32 appId, address moderator) public virtual {
-    _authorizeAppManagement(appId);
-
-    _removeAppModerator(appId, moderator);
-  }
-
-  /**
-   * @dev See {IX2EarnApps-addRewardDistributor}.
-   */
-  function addRewardDistributor(bytes32 appId, address distributor) public virtual {
-    _authorizeAppManagement(appId);
-
-    _addRewardDistributor(appId, distributor);
-  }
-
-  /**
-   * @dev See {IX2EarnApps-removeRewardDistributor}.
-   */
-  function removeRewardDistributor(bytes32 appId, address distributor) public virtual {
-    _authorizeAppManagement(appId);
-
-    _removeRewardDistributor(appId, distributor);
-  }
-
-  /**
-   * @dev See {IX2EarnApps-setVotingEligibility}.
-   */
-  function setVotingEligibility(bytes32 _appId, bool _isEligible) public virtual override {
-    _setVotingEligibility(_appId, _isEligible);
-  }
-
-  /**
-   * @dev Update the allocation percentage of the receiver address
-   */
-  function updateReceiverAllocationPercentage(bytes32 appId, uint256 percentage) public virtual {
-    _authorizeAppManagement(appId);
-
-    _updateReceiverAllocationPercentage(appId, percentage);
-  }
 
   // ---------- Getters ---------- //
 
@@ -187,15 +90,6 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
     return keccak256(abi.encodePacked(appName));
   }
 
-  /**
-   * @notice Returns the version of the contract
-   * @dev This should be updated every time a new version of implementation is deployed
-   * @return sting The version of the contract
-   */
-  function version() public pure virtual returns (string memory) {
-    return "1";
-  }
-
   // --- To be implemented by the inheriting contract --- //
 
   /**
@@ -219,7 +113,7 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   function appAdmin(bytes32 appId) public view virtual returns (address);
 
   /**
-   * @dev Function to get the percentage of the allocation of the receiver address each round.
+   * @dev See {IX2EarnApps-receiverAllocationPercentage}
    */
   function receiverAllocationPercentage(bytes32 appId) public view virtual returns (uint256);
 
@@ -227,11 +121,6 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
    * @dev Returns the list of moderators of the app
    */
   function appModerators(bytes32 appId) public view virtual returns (address[] memory);
-
-  /**
-   * @dev Function to get the number of apps.
-   */
-  function appsCount() public view virtual returns (uint256);
 
   /**
    * @dev Function to get the metadataURI of an app.
@@ -264,61 +153,7 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   function _updateAppMetadata(bytes32 appId, string memory metadataURI) internal virtual;
 
   /**
-   * @dev Function to add a moderator to the app.
-   */
-  function _addAppModerator(bytes32 appId, address moderator) internal virtual;
-
-  /**
-   * @dev Function to remove a moderator from the app.
-   */
-  function _removeAppModerator(bytes32 appId, address moderator) internal virtual;
-
-  /**
-   * @dev Function to add a reward distributor to the app.
-   */
-  function _addRewardDistributor(bytes32 appId, address distributor) internal virtual;
-
-  /**
-   * @dev Function to remove a reward distributor from the app.
-   */
-  function _removeRewardDistributor(bytes32 appId, address distributor) internal virtual;
-
-  /**
-   * @dev Save app in storage.
-   */
-  function _addApp(
-    address receiverAddress,
-    address admin,
-    string memory appName,
-    string memory metadataURI
-  ) internal virtual;
-
-  /**
-   * @dev Function to get the app data by its id.
-   */
-  function _getAppStorage(bytes32 appId) internal view virtual returns (X2EarnAppsDataTypes.App memory);
-
-  /**
    * @dev Update the allocation percentage of the receiver address
    */
   function _updateReceiverAllocationPercentage(bytes32 appId, uint256 percentage) internal virtual;
-
-  /**
-   * @dev Function that should revert when `msg.sender` is not authorized to add an app. Called by
-   * {addApp}.
-   */
-  function _authorizeAddApp() internal virtual;
-
-  /**
-   * @dev Function that should revert when `msg.sender` is not authorized to sensible updates to an app. Called by
-   * {addAppModerator}, {removeAppModerator}, {setAppAdminAddress}, {updateAppReceiverAddress}, {updateAppMetadata},
-   * {addRewardDistributor}, {removeRewardDistributor}, {updateReceiverAllocationPercentage}.
-   */
-  function _authorizeAppManagement(bytes32 appId) internal virtual;
-
-  /**
-   * @dev Function that should revert when `msg.sender` is not authorized to update the app. Called by
-   * {updateAppMetadata}.
-   */
-  function _authorizeAppMetadataUpdate(bytes32 appId) internal virtual;
 }

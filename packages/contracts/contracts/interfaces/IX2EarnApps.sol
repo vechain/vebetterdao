@@ -126,6 +126,11 @@ interface IX2EarnApps {
   function app(bytes32 appId) external view returns (X2EarnAppsDataTypes.AppWithDetails memory);
 
   /**
+   * @dev Function to get the number of apps.
+   */
+  function appsCount() external view returns (uint256);
+
+  /**
    * @dev Add a new moderator to the app.
    *
    * @param appId the id of the app
@@ -185,6 +190,14 @@ interface IX2EarnApps {
    * @param appId the app id
    */
   function receiverAllocationPercentage(bytes32 appId) external view returns (uint256);
+
+  /**
+   * @dev Update the allocation percentage of the receiver address
+   *
+   * @param appId the id of the app
+   * @param percentage the new percentage of the allocation
+   */
+  function updateReceiverAllocationPercentage(bytes32 appId, uint256 percentage) external;
 
   /**
    * @dev Add a new reward distributor to the app.

@@ -31,6 +31,7 @@ import { VoteEligibilityUpgradeable } from "./x-2-earn-apps/modules/VoteEligibil
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
 
 /**
  * @title X2EarnApps
@@ -87,7 +88,50 @@ contract X2EarnApps is
     _grantRole(GOVERNANCE_ROLE, _governor);
   }
 
+  // ---------- Modifiers ------------ //
+
+  /**
+   * @dev Modifier to restrict access to only the admin role and the app admin role.
+   * @param appId the app ID
+   */
+  modifier onlyRoleAndAppAdmin(bytes32 role, bytes32 appId) {
+    if (!hasRole(role, msg.sender) && !isAppAdmin(appId, msg.sender)) {
+      revert X2EarnUnauthorizedUser(msg.sender);
+    }
+    _;
+  }
+
+  /**
+   * @dev Modifier to restrict access to only the admin role, the app admin role and the app moderator role.
+   * @param appId the app ID
+   */
+  modifier onlyRoleAndAppAdminOrModerator(bytes32 role, bytes32 appId) {
+    if (!hasRole(role, msg.sender) && !isAppAdmin(appId, msg.sender) && !isAppModerator(appId, msg.sender)) {
+      revert X2EarnUnauthorizedUser(msg.sender);
+    }
+    _;
+  }
+
+  // ---------- Authorizations ------------ //
+
+  /**
+   * @dev See {UUPSUpgradeable-_authorizeUpgrade}
+   */
+  function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
+
+  // ---------- Getters ------------ //
+
+  /**
+   * @notice Returns the version of the contract
+   * @dev This should be updated every time a new version of implementation is deployed
+   * @return sting The version of the contract
+   */
+  function version() public pure virtual returns (string memory) {
+    return "1";
+  }
+
   // ---------- Overrides ------------ //
+
   /**
    * @dev See {IX2EarnApps-setBaseURI}.
    */
@@ -98,43 +142,102 @@ contract X2EarnApps is
   /**
    * @dev See {IX2EarnApps-setVotingEligibility}.
    */
-  function setVotingEligibility(bytes32 _appId, bool _isEligible) public override onlyRole(GOVERNANCE_ROLE) {
+  function setVotingEligibility(
+    bytes32 _appId,
+    bool _isEligible
+  ) public override(IX2EarnApps, VoteEligibilityUpgradeable) onlyRole(GOVERNANCE_ROLE) {
     super.setVotingEligibility(_appId, _isEligible);
   }
 
-  // ---------- Authorizations ------------ //
-
   /**
-   * @dev See {UUPSUpgradeable-_authorizeUpgrade}
+   * @dev See {IX2EarnApps-addApp}.
    */
-  function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
-
-  /**
-   * @dev See {X2EarnAppsUpgradeable-_authorizeAppMetadataUpdate}
-   */
-  function _authorizeAppMetadataUpdate(bytes32 appId) internal view override {
-    if (
-      !hasRole(DEFAULT_ADMIN_ROLE, msg.sender) && !isAppModerator(appId, msg.sender) && !isAppAdmin(appId, msg.sender)
-    ) {
-      revert X2EarnUnauthorizedUser(msg.sender);
-    }
+  function addApp(
+    address _receiverAddress,
+    address _admin,
+    string memory _appName,
+    string memory _appMetadataURI
+  ) public override(AppsStorageUpgradeable, IX2EarnApps) onlyRole(GOVERNANCE_ROLE) {
+    super.addApp(_receiverAddress, _admin, _appName, _appMetadataURI);
   }
 
   /**
-   * @dev See {X2EarnAppsUpgradeable-_authorizeAppManagement}
+   * @dev See {IX2EarnApps-setAppAdmin}.
    */
-  function _authorizeAppManagement(bytes32 appId) internal view override {
-    if (!hasRole(DEFAULT_ADMIN_ROLE, msg.sender) && !isAppAdmin(appId, msg.sender)) {
-      revert X2EarnUnauthorizedUser(msg.sender);
-    }
+  function setAppAdmin(
+    bytes32 _appId,
+    address _newAdmin
+  ) public override(AdministrationUpgradeable, IX2EarnApps) onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
+    super.setAppAdmin(_appId, _newAdmin);
   }
 
   /**
-   * @dev See {X2EarnAppsUpgradeable-_authorizeAddApp}
+   * @dev See {IX2EarnApps-updateAppReceiverAddress}.
    */
-  function _authorizeAddApp() internal view override {
-    if (!hasRole(GOVERNANCE_ROLE, msg.sender)) {
-      revert X2EarnUnauthorizedUser(msg.sender);
-    }
+  function updateAppReceiverAddress(
+    bytes32 _appId,
+    address _newReceiverAddress
+  ) public override(AdministrationUpgradeable, IX2EarnApps) onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
+    super.updateAppReceiverAddress(_appId, _newReceiverAddress);
+  }
+
+  /**
+   * @dev See {IX2EarnApps-updateReceiverAllocationPercentage}.
+   */
+  function updateReceiverAllocationPercentage(
+    bytes32 _appId,
+    uint256 _percentage
+  ) public override(AdministrationUpgradeable, IX2EarnApps) onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
+    super.updateReceiverAllocationPercentage(_appId, _percentage);
+  }
+
+  /**
+   * @dev See {IX2EarnApps-addAppModerator}.
+   */
+  function addAppModerator(
+    bytes32 _appId,
+    address _moderator
+  ) public override(AdministrationUpgradeable, IX2EarnApps) onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
+    super.addAppModerator(_appId, _moderator);
+  }
+
+  /**
+   * @dev See {IX2EarnApps-removeAppModerator}.
+   */
+  function removeAppModerator(
+    bytes32 _appId,
+    address _moderator
+  ) public override(AdministrationUpgradeable, IX2EarnApps) onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
+    super.removeAppModerator(_appId, _moderator);
+  }
+
+  /**
+   * @dev See {IX2EarnApps-addRewardDistributor}.
+   */
+  function addRewardDistributor(
+    bytes32 _appId,
+    address _distributor
+  ) public override(AdministrationUpgradeable, IX2EarnApps) onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
+    super.addRewardDistributor(_appId, _distributor);
+  }
+
+  /**
+   * @dev See {IX2EarnApps-removeRewardDistributor}.
+   */
+  function removeRewardDistributor(
+    bytes32 _appId,
+    address _distributor
+  ) public override(AdministrationUpgradeable, IX2EarnApps) onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
+    super.removeRewardDistributor(_appId, _distributor);
+  }
+
+  /**
+   * @dev See {IX2EarnApps-updateAppMetadata}.
+   */
+  function updateAppMetadata(
+    bytes32 _appId,
+    string memory _newMetadataURI
+  ) public override(AdministrationUpgradeable, IX2EarnApps) onlyRoleAndAppAdminOrModerator(DEFAULT_ADMIN_ROLE, _appId) {
+    super.updateAppMetadata(_appId, _newMetadataURI);
   }
 }

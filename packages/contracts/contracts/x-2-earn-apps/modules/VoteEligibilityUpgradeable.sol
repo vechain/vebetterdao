@@ -65,10 +65,68 @@ abstract contract VoteEligibilityUpgradeable is Initializable, X2EarnAppsUpgrade
 
   function __VoteEligibility_init_unchained() internal onlyInitializing {}
 
+  // ---------- Setters ---------- //
+
+  /**
+   * @dev See {IX2EarnApps-setVotingEligibility}.
+   */
+  function setVotingEligibility(bytes32 appId, bool canBeVoted) public virtual {
+    _setVotingEligibility(appId, canBeVoted);
+  }
+
+  // ---------- Getters ---------- //
+
+  /**
+   * @dev All apps that are currently eligible for voting in x-allocation rounds
+   */
+  function allEligibleApps() public view returns (bytes32[] memory) {
+    VoteEligibilityStorage storage $ = _getVoteEligibilityStorage();
+
+    return $._eligibleApps;
+  }
+
+  /**
+   * @dev Returns true if an app is eligible for voting in a specific timepoint.
+   *
+   * @param appId the hashed name of the app
+   * @param timepoint the timepoint when the app should be checked for Eligibility
+   */
+  function isEligible(bytes32 appId, uint256 timepoint) public view override returns (bool) {
+    if (!appExists(appId)) {
+      return false;
+    }
+
+    VoteEligibilityStorage storage $ = _getVoteEligibilityStorage();
+
+    uint48 currentTimepoint = clock();
+    if (timepoint > currentTimepoint) {
+      revert ERC5805FutureLookup(timepoint, currentTimepoint);
+    }
+
+    return $._isAppEligibleCheckpoints[appId].upperLookupRecent(SafeCast.toUint48(timepoint)) == 1;
+  }
+
+  /**
+   * @dev Returns true if an app is eligible for voting in the current block.
+   *
+   * @param appId the hashed name of the app
+   */
+  function isEligibleNow(bytes32 appId) public view override returns (bool) {
+    if (!appExists(appId)) {
+      return false;
+    }
+
+    VoteEligibilityStorage storage $ = _getVoteEligibilityStorage();
+
+    return $._isAppEligibleCheckpoints[appId].latest() == 1;
+  }
+
+  // ---------- Internal ---------- //
+
   /**
    * @dev Update the app availability for voting checkpoint.
    */
-  function _setVotingEligibility(bytes32 appId, bool canBeVoted) internal virtual override {
+  function _setVotingEligibility(bytes32 appId, bool canBeVoted) internal override {
     if (!appExists(appId)) {
       revert X2EarnNonexistentApp(appId);
     }
@@ -127,50 +185,5 @@ abstract contract VoteEligibilityUpgradeable is Initializable, X2EarnAppsUpgrade
    */
   function _pushCheckpoint(Checkpoints.Trace208 storage store, uint208 delta) private returns (uint208, uint208) {
     return store.push(clock(), delta);
-  }
-
-  /**
-   * @dev All apps that are currently eligible for voting in x-allocation rounds
-   */
-  function allEligibleApps() public view returns (bytes32[] memory) {
-    VoteEligibilityStorage storage $ = _getVoteEligibilityStorage();
-
-    return $._eligibleApps;
-  }
-
-  /**
-   * @dev Returns true if an app is eligible for voting in a specific timepoint.
-   *
-   * @param appId the hashed name of the app
-   * @param timepoint the timepoint when the app should be checked for Eligibility
-   */
-  function isEligible(bytes32 appId, uint256 timepoint) public view override returns (bool) {
-    if (!appExists(appId)) {
-      return false;
-    }
-
-    VoteEligibilityStorage storage $ = _getVoteEligibilityStorage();
-
-    uint48 currentTimepoint = clock();
-    if (timepoint > currentTimepoint) {
-      revert ERC5805FutureLookup(timepoint, currentTimepoint);
-    }
-
-    return $._isAppEligibleCheckpoints[appId].upperLookupRecent(SafeCast.toUint48(timepoint)) == 1;
-  }
-
-  /**
-   * @dev Returns true if an app is eligible for voting in the current block.
-   *
-   * @param appId the hashed name of the app
-   */
-  function isEligibleNow(bytes32 appId) public view override returns (bool) {
-    if (!appExists(appId)) {
-      return false;
-    }
-
-    VoteEligibilityStorage storage $ = _getVoteEligibilityStorage();
-
-    return $._isAppEligibleCheckpoints[appId].latest() == 1;
   }
 }
