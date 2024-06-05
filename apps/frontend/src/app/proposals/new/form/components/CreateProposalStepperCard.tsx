@@ -16,8 +16,10 @@ import {
   Stepper,
   useSteps,
 } from "@chakra-ui/react"
+import { TFunction } from "i18next"
 import { usePathname } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 type CreateProposalStep = {
   key: string
@@ -26,29 +28,31 @@ type CreateProposalStep = {
   pathnames?: string[]
 }
 
-const FunctionTypeSteps: CreateProposalStep[] = [
-  { key: "creationMethod", title: "Creation method" },
-  { key: "proposalTopic", title: "Proposal topic", pathnames: ["/proposals/new/form/functions"] },
+const FunctionTypeSteps: (t: TFunction<"translation", undefined>) => CreateProposalStep[] = t => [
+  { key: "creationMethod", title: t("Creation method") },
+  { key: "proposalTopic", title: t("Proposal topic"), pathnames: ["/proposals/new/form/functions"] },
   {
     key: "basicsAndFunctions",
-    title: "Proposal basics and functions",
+    title: t("Proposal basics and functions"),
     pathnames: ["/proposals/new/form/functions/details"],
   },
-  { key: "details", title: "Proposal details", pathnames: ["/proposals/new/form/content"] },
-  { key: "preview", title: "Preview", pathnames: ["/proposals/new/form/preview"] },
-  { key: "round", title: "Round", pathnames: ["/proposals/new/form/round"] },
-  { key: "fundingAndPublish", title: "Funding and publish!", pathnames: ["/proposals/new/form/fund-and-publish"] },
+  { key: "details", title: t("Proposal details"), pathnames: ["/proposals/new/form/content"] },
+  { key: "preview", title: t("Preview"), pathnames: ["/proposals/new/form/preview"] },
+  { key: "round", title: t("Round"), pathnames: ["/proposals/new/form/round"] },
+  { key: "fundingAndPublish", title: t("Funding and publish!"), pathnames: ["/proposals/new/form/fund-and-publish"] },
 ]
 
-const DiscussionTypeSteps: CreateProposalStep[] = [
-  { key: "creationMethod", title: "Creation method" },
-  { key: "details", title: "Proposal details", pathnames: ["/proposals/new/form/content"] },
-  { key: "preview", title: "Preview", pathnames: ["/proposals/new/form/preview"] },
-  { key: "round", title: "Round", pathnames: ["/proposals/new/form/round"] },
-  { key: "fundingAndPublish", title: "Funding and publish!", pathnames: ["/proposals/new/form/fund-and-publish"] },
+const DiscussionTypeSteps: (t: TFunction<"translation", undefined>) => CreateProposalStep[] = t => [
+  { key: "creationMethod", title: t("Creation method") },
+  { key: "details", title: t("Proposal basics"), pathnames: ["/proposals/new/form/discussion"] },
+  { key: "details", title: t("Proposal details"), pathnames: ["/proposals/new/form/content"] },
+  { key: "preview", title: t("Preview"), pathnames: ["/proposals/new/form/preview"] },
+  { key: "round", title: t("Round"), pathnames: ["/proposals/new/form/round"] },
+  { key: "fundingAndPublish", title: t("Funding and publish!"), pathnames: ["/proposals/new/form/fund-and-publish"] },
 ]
 
 export const CreateProposalStepperCard = () => {
+  const { t } = useTranslation()
   const pathname = usePathname()
   const { actions } = useProposalFormStore()
   const [steps, setSteps] = useState<CreateProposalStep[]>([])
@@ -71,9 +75,9 @@ export const CreateProposalStepperCard = () => {
     const isInFunctionsPage = pathname.includes("/proposals/new/form/functions")
     const hasActions = actions.length > 0
 
-    if (isInFunctionsPage || hasActions) setSteps(FunctionTypeSteps)
-    else setSteps(DiscussionTypeSteps)
-  }, [actions, pathname])
+    if (isInFunctionsPage || hasActions) setSteps(FunctionTypeSteps(t))
+    else setSteps(DiscussionTypeSteps(t))
+  }, [actions, pathname, t])
 
   const height = useMemo(() => {
     return steps.length * 60
@@ -82,7 +86,7 @@ export const CreateProposalStepperCard = () => {
   return (
     <Card>
       <CardHeader>
-        <Heading size="md">Progress</Heading>
+        <Heading size="md">{t("Progress")}</Heading>
       </CardHeader>
       <CardBody>
         <Stepper
