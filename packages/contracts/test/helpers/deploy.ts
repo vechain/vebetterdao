@@ -22,6 +22,7 @@ import {
   GovernorQuorumLogic,
   GovernorStateLogic,
   GovernorVotesLogic,
+  X2EarnRewardsPool,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy } from "../../scripts/helpers"
@@ -40,6 +41,7 @@ interface DeployInstance {
   emissions: Emissions
   voterRewards: VoterRewards
   treasury: Treasury
+  x2EarnRewardsPool: X2EarnRewardsPool
   owner: HardhatEthersSigner
   otherAccount: HardhatEthersSigner
   minterAccount: HardhatEthersSigner
@@ -205,6 +207,14 @@ export const getOrDeployContractInstances = async ({
     owner.address,
   ])) as X2EarnApps
 
+  // Deploy X2EarnRewardsPool
+  const x2EarnRewardsPool = (await deployProxy("X2EarnRewardsPool", [
+    owner.address,
+    owner.address,
+    await b3tr.getAddress(),
+    await x2EarnApps.getAddress(),
+  ])) as X2EarnRewardsPool
+
   // Deploy XAllocationPool
   const xAllocationPool = (await deployProxy("XAllocationPool", [
     owner.address,
@@ -213,6 +223,7 @@ export const getOrDeployContractInstances = async ({
     await b3tr.getAddress(),
     await treasury.getAddress(),
     await x2EarnApps.getAddress(),
+    await x2EarnRewardsPool.getAddress(),
   ])) as XAllocationPool
 
   const X_ALLOCATIONS_ADDRESS = await xAllocationPool.getAddress()
@@ -394,6 +405,7 @@ export const getOrDeployContractInstances = async ({
     timelockAdmin,
     otherAccounts,
     treasury,
+    x2EarnRewardsPool,
     governorClockLogicLib: GovernorClockLogicLib,
     governorConfiguratorLib: GovernorConfiguratorLib,
     governorDepositLogicLib: GovernorDepositLogicLib,

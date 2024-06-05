@@ -26,23 +26,6 @@ interface IXAllocationPool {
   );
 
   /**
-   * @dev Event emitted when a reward is emitted by an app.
-   *
-   * @param distributor The address that triggered this action
-   * @param appId The ID of the app for which the reward was emitted
-   * @param amount The amount of $B3TR sent to the user
-   * @param receiver The address of the user that received the reward
-   * @param proof A JSON file uploaded on IPFS by the app that adds information on the type of action that was performed
-   */
-  event RewardEmitted(
-    address indexed distributor,
-    bytes32 indexed appId,
-    uint256 amount,
-    address receiver,
-    string proof
-  );
-
-  /**
    * @dev Fetches the id of the current round and calculates the earnings.
    * Usually when calling this function round is active, and the results should be treated as real time estimation and not final results.
    * If round ends and a new round did not start yet, then the results can be considered final.
@@ -111,23 +94,6 @@ interface IXAllocationPool {
    * @param roundId The round ID
    */
   function getMaxAppAllocation(uint256 roundId) external view returns (uint256);
-
-  /**
-   * @dev Gets the amount of funds available for an app to reward users.
-   *
-   * @param appId The ID of the app.
-   */
-  function availableFunds(bytes32 appId) external view returns (uint256);
-
-  /**
-   * @dev Function used by x2earn apps to reward users that performed sustainable actions.
-   *
-   * @param appId the app id that is emitting the reward
-   * @param amount the amount of B3TR token the user is rewarded with
-   * @param receiver the address of the user that performed the sustainable action and is rewarded
-   * @param proof a JSON file uploaded on IPFS by the app that adds information on the type of action that was performed
-   */
-  function emitReward(bytes32 appId, uint256 amount, address receiver, string memory proof) external;
 
   /**
    * @dev Returns the version of the contract

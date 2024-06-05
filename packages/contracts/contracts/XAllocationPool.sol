@@ -36,6 +36,7 @@ import { IB3TR } from "./interfaces/IB3TR.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
+import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
 
 /**
  * @title XAllocationPool
@@ -65,8 +66,8 @@ contract XAllocationPool is
     IB3TR b3tr;
     ITreasury treasury;
     IX2EarnApps x2EarnApps;
+    IX2EarnRewardsPool x2EarnRewardsPool;
     mapping(bytes32 appId => mapping(uint256 => bool)) claimedRewards; // Mapping to store the claimed rewards for each app in each round
-    mapping(bytes32 appId => uint256) availableFunds; // Funds that the app can use to reward users
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationPool")) - 1)) & ~bytes32(uint256(0xff))
@@ -93,6 +94,7 @@ contract XAllocationPool is
    * @param _b3trAddress The address of the B3TR token.
    * @param _treasury The address of the VeBetterDAO treasury.
    * @param _x2EarnApps The address of the x2EarnApps contract.
+   * @param _x2EarnRewardsPool The address of the x2EarnRewardsPool contract.
    */
   function initialize(
     address _admin,
@@ -100,11 +102,13 @@ contract XAllocationPool is
     address contractsAddressManager,
     address _b3trAddress,
     address _treasury,
-    address _x2EarnApps
+    address _x2EarnApps,
+    address _x2EarnRewardsPool
   ) public initializer {
     require(_b3trAddress != address(0), "XAllocationPool: new b3tr is the zero address");
     require(_treasury != address(0), "XAllocationPool: new treasury is the zero address");
     require(_x2EarnApps != address(0), "XAllocationPool: new x2EarnApps is the zero address");
+    require(_x2EarnRewardsPool != address(0), "XAllocationPool: new x2EarnRewardsPool is the zero address");
 
     __AccessControl_init();
     __ReentrancyGuard_init();
@@ -114,6 +118,7 @@ contract XAllocationPool is
     $.b3tr = IB3TR(_b3trAddress);
     $.treasury = ITreasury(_treasury);
     $.x2EarnApps = IX2EarnApps(_x2EarnApps);
+    $.x2EarnRewardsPool = IX2EarnRewardsPool(_x2EarnRewardsPool);
 
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     _grantRole(UPGRADER_ROLE, upgrader);
@@ -219,6 +224,16 @@ contract XAllocationPool is
     address receiverAddress = $.x2EarnApps.appReceiverAddress(appId);
     require($.b3tr.transfer(receiverAddress, teamAllocationsAmount), "Allocation transfer to app failed");
 
+    // Deposit the remaining rewards to the X2EarnRewardsPool contract
+    require(
+      $.b3tr.approve(address($.x2EarnRewardsPool), rewardsAllocationAmount),
+      "Approval of rewards allocation failed"
+    );
+    require(
+      $.x2EarnRewardsPool.deposit(rewardsAllocationAmount, appId),
+      "Deposit of rewards allocation to x2EarnRewardsPool failed"
+    );
+
     // Transfer the unallocated rewards to the treasury
     if (unallocatedAmount > 0) {
       require(
@@ -226,9 +241,6 @@ contract XAllocationPool is
         "Transfer of unallocated rewards to treasury failed"
       );
     }
-
-    //Increase the total available funds that the app can use to reward users
-    $.availableFunds[appId] += rewardsAllocationAmount;
 
     // emit event
     emit AllocationRewardsClaimed(
@@ -240,35 +252,6 @@ contract XAllocationPool is
       unallocatedAmount,
       rewardsAllocationAmount
     );
-  }
-
-  /**
-   * @dev Function used by x2earn apps to reward users that performed sustainable actions.
-   *
-   * @param appId the app id that is emitting the reward
-   * @param amount the amount of B3TR token the user is rewarded with
-   * @param receiver the address of the user that performed the sustainable action and is rewarded
-   * @param proof a JSON file uploaded on IPFS by the app that adds information on the type of action that was performed
-   */
-  function emitReward(bytes32 appId, uint256 amount, address receiver, string memory proof) public nonReentrant {
-    require(x2EarnApps().appExists(appId), "XAllocationPool: app does not exist");
-
-    require(x2EarnApps().isRewardDistributor(appId, msg.sender), "XAllocationPool: not a reward distributor");
-
-    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
-
-    // check if the app has enough available funds to reward users
-    require($.availableFunds[appId] >= amount, "XAllocationPool: app has insufficient funds");
-
-    // check if the contract has enough funds
-    require($.b3tr.balanceOf(address(this)) >= amount, "XAllocationPool: insufficient funds on contract");
-
-    // transfer the rewards to the receiver
-    $.availableFunds[appId] -= amount;
-    require(b3tr().transfer(receiver, amount), "Allocation transfer to app failed");
-
-    // emit event
-    emit RewardEmitted(msg.sender, appId, amount, receiver, proof);
   }
 
   // ---------- Internal and private ---------- //
@@ -491,16 +474,6 @@ contract XAllocationPool is
 
     // This number is scaled and should be divided by 100 to get the actual percentage on the FE
     return (appShare, unallocatedShare);
-  }
-
-  /**
-   * @dev Returns the amount of funds available for an app to reward users.
-   *
-   * @param appId The ID of the app.
-   */
-  function availableFunds(bytes32 appId) public view returns (uint256) {
-    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
-    return $.availableFunds[appId];
   }
 
   /**

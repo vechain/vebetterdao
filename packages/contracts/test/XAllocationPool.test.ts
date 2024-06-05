@@ -128,6 +128,7 @@ describe("X-Allocation Pool", async function () {
           ZERO_ADDRESS,
           await treasury.getAddress(),
           await x2EarnApps.getAddress(),
+          owner.address,
         ]),
       ).to.be.reverted
 
@@ -139,6 +140,7 @@ describe("X-Allocation Pool", async function () {
           await b3tr.getAddress(),
           ZERO_ADDRESS,
           await x2EarnApps.getAddress(),
+          owner.address,
         ]),
       ).to.be.reverted
 
@@ -150,6 +152,7 @@ describe("X-Allocation Pool", async function () {
           await b3tr.getAddress(),
           await treasury.getAddress(),
           ZERO_ADDRESS,
+          owner.address,
         ]),
       ).to.be.reverted
     })
@@ -158,6 +161,7 @@ describe("X-Allocation Pool", async function () {
       const { xAllocationPool, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       await catchRevert(
         xAllocationPool.initialize(
+          owner.address,
           owner.address,
           owner.address,
           owner.address,
@@ -266,7 +270,7 @@ describe("X-Allocation Pool", async function () {
       })
 
       it("Cannot calculate emissions amount if emissions contract is not set", async function () {
-        const { owner, b3tr, treasury, x2EarnApps } = await getOrDeployContractInstances({
+        const { owner, b3tr, treasury, x2EarnApps, x2EarnRewardsPool } = await getOrDeployContractInstances({
           forceDeploy: false,
         })
 
@@ -278,6 +282,7 @@ describe("X-Allocation Pool", async function () {
           await b3tr.getAddress(),
           await treasury.getAddress(),
           await x2EarnApps.getAddress(),
+          await x2EarnRewardsPool.getAddress(),
         ])) as XAllocationPool
 
         await xAllocationPool.setXAllocationVotingAddress(owner.address)
@@ -334,7 +339,7 @@ describe("X-Allocation Pool", async function () {
       })
 
       it("Cannot call getAppShares or baseAllocationAmount if xAllocationVoting is not set", async function () {
-        const { owner, b3tr, treasury, x2EarnApps } = await getOrDeployContractInstances({
+        const { owner, b3tr, treasury, x2EarnApps, x2EarnRewardsPool } = await getOrDeployContractInstances({
           forceDeploy: false,
         })
 
@@ -346,6 +351,7 @@ describe("X-Allocation Pool", async function () {
           await b3tr.getAddress(),
           await treasury.getAddress(),
           await x2EarnApps.getAddress(),
+          await x2EarnRewardsPool.getAddress(),
         ])) as XAllocationPool
 
         expect(await xAllocationPool.xAllocationVoting()).to.eql(ZERO_ADDRESS)

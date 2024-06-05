@@ -11,6 +11,7 @@ import {
   XAllocationPool,
   Treasury,
   X2EarnApps,
+  X2EarnRewardsPool,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -152,6 +153,14 @@ export async function deployAll(config: ContractsConfig) {
   ])) as X2EarnApps
   console.log(`X2EarnApps deployed at ${await x2EarnApps.getAddress()}`)
 
+  const x2EarnRewardsPool = (await deployProxy("X2EarnRewardsPool", [
+    config.CONTRACTS_ADMIN_ADDRESS, // admin
+    config.CONTRACTS_ADMIN_ADDRESS, // upgrader
+    await b3tr.getAddress(),
+    await x2EarnApps.getAddress(),
+  ])) as X2EarnRewardsPool
+  console.log(`X2EarnRewardsPool deployed at ${await x2EarnRewardsPool.getAddress()}`)
+
   const xAllocationPool = (await deployProxy("XAllocationPool", [
     TEMP_ADMIN, // admin
     config.CONTRACTS_ADMIN_ADDRESS, // upgrader
@@ -159,6 +168,7 @@ export async function deployAll(config: ContractsConfig) {
     await b3tr.getAddress(),
     await treasury.getAddress(),
     await x2EarnApps.getAddress(),
+    await x2EarnRewardsPool.getAddress(),
   ])) as XAllocationPool
   console.log(`XAllocationPool deployed at ${await xAllocationPool.getAddress()}`)
 
@@ -253,7 +263,7 @@ export async function deployAll(config: ContractsConfig) {
         pauser: config.CONTRACTS_ADMIN_ADDRESS,
         contractsAddressManager: config.CONTRACTS_ADMIN_ADDRESS,
         proposalExecutor: config.CONTRACTS_ADMIN_ADDRESS,
-        governorFunctionSettingsRoleAddress: TEMP_ADMIN
+        governorFunctionSettingsRoleAddress: TEMP_ADMIN,
       },
     ],
     {
@@ -544,6 +554,21 @@ export async function deployAll(config: ContractsConfig) {
       config.CONTRACTS_ADMIN_ADDRESS,
       TEMP_ADMIN,
       await voterRewards.CONTRACTS_ADDRESS_MANAGER_ROLE(),
+    )
+
+    // X2EarnRewardsPool
+    await validateContractRole(
+      x2EarnRewardsPool,
+      config.CONTRACTS_ADMIN_ADDRESS,
+      TEMP_ADMIN,
+      await x2EarnRewardsPool.DEFAULT_ADMIN_ROLE(),
+    )
+
+    await validateContractRole(
+      x2EarnRewardsPool,
+      config.CONTRACTS_ADMIN_ADDRESS,
+      TEMP_ADMIN,
+      await x2EarnRewardsPool.UPGRADER_ROLE(),
     )
 
     // XAllocationPool
@@ -944,6 +969,7 @@ const validateContractRole = async (
     | Treasury
     | TimeLock
     | B3TRGovernor
+    | X2EarnRewardsPool
     | X2EarnApps,
   expectedAddress: string,
   tempAdmin: string,
