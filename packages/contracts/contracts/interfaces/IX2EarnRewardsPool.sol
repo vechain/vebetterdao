@@ -4,6 +4,15 @@ pragma solidity ^0.8.20;
 
 interface IX2EarnRewardsPool {
   /**
+   * @dev Event emitted when a new deposit is made into the rewards pool.
+   *
+   * @param appId The ID of the app for which the deposit was made.
+   * @param amount The amount of $B3TR deposited.
+   * @param depositor The address of the user that deposited the funds.
+   */
+  event NewDeposit(bytes32 indexed appId, uint256 amount, address indexed depositor);
+
+  /**
    * @dev Event emitted when a reward is emitted by an app.
    *
    * @param distributor The address that triggered this action
@@ -16,7 +25,7 @@ interface IX2EarnRewardsPool {
     address indexed distributor,
     bytes32 indexed appId,
     uint256 amount,
-    address receiver,
+    address indexed receiver,
     string proof
   );
 

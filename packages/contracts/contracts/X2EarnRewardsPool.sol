@@ -140,6 +140,8 @@ contract X2EarnRewardsPool is
     // increase available amount for the app
     $.availableFunds[appId] += amount;
 
+    emit NewDeposit(appId, amount, msg.sender);
+
     return true;
   }
 
@@ -171,4 +173,7 @@ contract X2EarnRewardsPool is
     // emit event
     emit RewardEmitted(msg.sender, appId, amount, receiver, proof);
   }
+
+  //TODO?
+  // function withdrawWithReason(uint256 amount, bytes32 appId, string memory reason) public nonReentrant;
 }
