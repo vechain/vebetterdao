@@ -1,6 +1,6 @@
 services:
   thor-solo:
-    image: vechain/thor:v2.1.1
+    image: vechain/thor:v2.1.2
     hostname: thor-solo
     container_name: thor-solo
     user: root
