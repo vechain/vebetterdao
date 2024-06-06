@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react"
+import { useMemo } from "react"
 import { useProposalCreatedEvent } from "./useProposalCreatedEvent"
 import { ProposalState, useProposalState } from "./useProposalState"
 import { useProposalVotes } from "./useProposalVotes"
@@ -10,8 +10,7 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { useIsDepositReached } from "./useIsDepositReached"
 import { useIsProposalQuorumReached } from "./useIsProposalQuorumReached"
 import { useProposalDepositEvent } from "./useProposalDepositEvent"
-import { scaleNumberDown } from "@repo/utils/FormattingUtils"
-import { useVot3PastSupply, useVot3TokenDetails } from "../../vot3"
+import { useVot3PastSupply } from "../../vot3"
 import { useProposalVoteEvent } from "./useProposalVoteEvent"
 import { useProposalSnapshotVotingPower } from "./useProposalSnapshotVotingPower"
 import { useProposalSnapshot } from "./useProposalSnapshot"
@@ -21,6 +20,7 @@ import { ProposalMetadata } from "./useProposalsEvents"
 import { useProposalQuorum } from "./useProposalQuorum"
 import { useProposalQueuedEvent } from "./useProposalQueuedEvent"
 import { useProposalExecutedEvent } from "./useProposalExecutedEvent"
+import { useScaleVot3Amount } from "@/hooks"
 
 export const useProposal = (proposalId: string) => {
   const { account } = useWallet()
@@ -30,7 +30,6 @@ export const useProposal = (proposalId: string) => {
   const proposalQueuedEvent = useProposalQueuedEvent(proposalId)
   const proposalExecutedEvent = useProposalExecutedEvent(proposalId)
   const proposalDepositEvent = useProposalDepositEvent(proposalId)
-  const proposalDeposits = useProposalDeposits(proposalId)
   const proposalUserDeposit = useProposalUserDeposit(proposalId, account || "")
   const proposalSnapshot = useProposalSnapshot(proposalId)
   const proposalSnapshotBlock = useMemo(() => Number(proposalSnapshot.data), [proposalSnapshot.data])
@@ -42,7 +41,6 @@ export const useProposal = (proposalId: string) => {
   const proposalSnapshotVotingPower = useProposalSnapshotVotingPower(proposalSnapshotBlock, isProposalActive)
   const proposalVotes = useProposalVotes(proposalId, isProposalNotPending)
   const proposalSnapshotVot3 = useVot3PastSupply(proposalSnapshotBlock, isProposalActive)
-  const vot3Token = useVot3TokenDetails()
   const roundIdVoteStart = useMemo(
     () => proposalCreatedEvent.data?.roundIdVoteStart,
     [proposalCreatedEvent.data?.roundIdVoteStart],
@@ -53,6 +51,7 @@ export const useProposal = (proposalId: string) => {
     }
     return toIPFSURL(proposalCreatedEvent.data?.description)
   }, [proposalCreatedEvent.data?.description])
+  const scaleVot3Amount = useScaleVot3Amount()
 
   const proposalMetadata = useIpfsMetadata<ProposalMetadata>(metadataUri)
 
@@ -63,7 +62,6 @@ export const useProposal = (proposalId: string) => {
       proposalVoteEvents,
       proposalCreatedEvent,
       proposalDepositEvent,
-      proposalDeposits,
       proposalUserDeposit,
       isDepositReached,
       isQuorumReached,
@@ -78,7 +76,6 @@ export const useProposal = (proposalId: string) => {
       proposalVoteEvents,
       proposalCreatedEvent,
       proposalDepositEvent,
-      proposalDeposits,
       proposalUserDeposit,
       isDepositReached,
       isQuorumReached,
@@ -91,13 +88,6 @@ export const useProposal = (proposalId: string) => {
 
   const { votingStartDate, isVotingStartDateLoading, votingEndDate, isVotingEndDateLoading } =
     useProposalVoteDates(proposalId)
-
-  const scaleVot3Amount = useCallback(
-    (amount?: string | number) => {
-      return scaleNumberDown(amount || 0, vot3Token.data?.decimals || 18, vot3Token.data?.decimals || 18)
-    },
-    [vot3Token.data?.decimals],
-  )
 
   const proposal = useMemo(() => {
     const userVote = proposalVoteEvents.userVote
@@ -112,21 +102,21 @@ export const useProposal = (proposalId: string) => {
     const forPercentage = (totalVotingPowerUsedInVotes ? forVotes / totalVotingPowerUsedInVotes : 0) * 100
     const againstPercentage = (totalVotingPowerUsedInVotes ? againstVotes / totalVotingPowerUsedInVotes : 0) * 100
     const abstainPercentage = (totalVotingPowerUsedInVotes ? abstainVotes / totalVotingPowerUsedInVotes : 0) * 100
-    const depositThreshold = scaleVot3Amount(proposalCreatedEvent.data?.depositThreshold)
-    const communityDeposits = scaleVot3Amount(proposalDeposits?.data)
-    const communityDepositPercentage = Number(communityDeposits) / Number(depositThreshold)
+    const depositThreshold = Number(scaleVot3Amount(proposalCreatedEvent.data?.depositThreshold))
+    const communityDeposits = proposalDepositEvent.communityDeposits
+    const communityDepositPercentage = communityDeposits / depositThreshold
     const communityDepositChartPercentage = Math.min(communityDepositPercentage || 0, 1) * 100
-    const userSupport = scaleVot3Amount(proposalUserDeposit?.data)
-    const userSupportPercentage = Number(userSupport) / Number(communityDeposits)
-    const othersSupport = Number(communityDeposits) - Number(userSupport)
-    const othersSupportPercentage = othersSupport / Number(depositThreshold)
+    const userSupportLeft = Number(scaleVot3Amount(proposalUserDeposit?.data))
+    const isUserSupportLeft = userSupportLeft > 0
+    const userSupport = proposalDepositEvent.userSupport
+    const userSupportPercentage = userSupport / communityDeposits
+    const othersSupport = proposalDepositEvent.othersSupport
+    const othersSupportPercentage = othersSupport / depositThreshold
     const othersSupportChartPercentage =
-      communityDepositPercentage > 1 ? (othersSupport / Number(communityDeposits)) * 100 : othersSupportPercentage * 100
-    const hasUserSupported = Number(userSupport) > 0
+      communityDepositPercentage > 1 ? (othersSupport / communityDeposits) * 100 : othersSupportPercentage * 100
+    const hasUserSupported = proposalDepositEvent.hasUserSupported
     const supportingUserCount = proposalDepositEvent.supportingUserCount
-    const othersSupportUserCount = hasUserSupported
-      ? Math.max(Number(supportingUserCount) - 1, 0)
-      : Number(supportingUserCount)
+    const othersSupportUserCount = proposalDepositEvent.othersSupportUserCount
     const userVotingPowerOnSnapshot = scaleVot3Amount(proposalSnapshotVotingPower.data)
     const userVot3OnSnapshot = proposalSnapshotVot3.data || 0
     const quorumPercentage = totalVot3UsedInVotes ? totalVot3UsedInVotes / Number(proposalQuorum.data?.scaled) : 0
@@ -157,17 +147,18 @@ export const useProposal = (proposalId: string) => {
       depositThreshold,
       isDepositThresholdLoading: proposalCreatedEvent.isLoading,
       communityDeposits,
-      isCommunityDepositsLoading: proposalDeposits.isLoading,
+      isCommunityDepositsLoading: proposalDepositEvent.isLoading,
       communityDepositPercentage,
       communityDepositChartPercentage,
-      isCommunityDepositPercentageLoading: proposalDeposits.isLoading || proposalCreatedEvent.isLoading,
+      isCommunityDepositPercentageLoading: proposalDepositEvent.isLoading || proposalCreatedEvent.isLoading,
       isDepositReached: isDepositReached.data,
       isDepositReachedLoading: isDepositReached.isLoading,
+      isUserSupportLeft,
       userSupport,
       isYourSupportLoading: proposalUserDeposit.isLoading,
       userSupportPercentage,
       othersSupport,
-      isOthersSupportLoading: proposalDeposits.isLoading || proposalUserDeposit.isLoading,
+      isOthersSupportLoading: proposalDepositEvent.isLoading || proposalUserDeposit.isLoading,
       othersSupportPercentage,
       othersSupportChartPercentage,
       supportingUserCount,
@@ -209,7 +200,6 @@ export const useProposal = (proposalId: string) => {
     proposalVotes,
     scaleVot3Amount,
     proposalCreatedEvent,
-    proposalDeposits,
     proposalUserDeposit,
     proposalDepositEvent,
     proposalSnapshotVotingPower,

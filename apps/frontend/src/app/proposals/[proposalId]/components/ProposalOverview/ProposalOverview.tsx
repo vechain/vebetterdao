@@ -61,21 +61,23 @@ export const ProposalOverview = () => {
             <VStack alignItems={"stretch"}>
               <Divider color="#D5D5D5" />
               <HStack justify={"space-between"} flexWrap={"wrap"}>
-                <VStack alignItems={"stretch"}>
-                  <Text fontWeight={"400"} color="#6A6A6A">
-                    {t("Created by")}
-                  </Text>
-                  <Skeleton isLoaded={!proposal.isProposerLoading}>
-                    <HStack>
-                      <AddressIcon address={proposal.proposer} rounded="full" h="20px" w="20px" />
-                      <Text color="#252525">{humanAddress(proposal.proposer, 7, 5)}</Text>
-                    </HStack>
-                  </Skeleton>
-                </VStack>
-                <ProposalYourVote />
-                <ProposalOverviewTime />
-                <ProposalOverviewCommunitySupport />
-                <ProposalOverviewYourSupport />
+                <HStack justify={"flex-start"} flexWrap={"wrap"} gap={8}>
+                  <VStack alignItems={"stretch"}>
+                    <Text fontWeight={"400"} color="#6A6A6A">
+                      {t("Created by")}
+                    </Text>
+                    <Skeleton isLoaded={!proposal.isProposerLoading}>
+                      <HStack>
+                        <AddressIcon address={proposal.proposer} rounded="full" h="20px" w="20px" />
+                        <Text color="#252525">{humanAddress(proposal.proposer, 7, 5)}</Text>
+                      </HStack>
+                    </Skeleton>
+                  </VStack>
+                  <ProposalYourVote />
+                  <ProposalOverviewTime />
+                  <ProposalOverviewCommunitySupport />
+                  <ProposalOverviewYourSupport />
+                </HStack>
                 <IconButton
                   isDisabled={proposal.isStateLoading}
                   aria-label="share"

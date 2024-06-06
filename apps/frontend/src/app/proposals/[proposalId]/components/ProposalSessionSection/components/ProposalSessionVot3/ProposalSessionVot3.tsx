@@ -1,6 +1,5 @@
 import { ProposalState, useCurrentProposal, useVot3Balance } from "@/api"
 import { HStack, Text, VStack } from "@chakra-ui/react"
-import { UilArrowUpRight } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useTranslation } from "react-i18next"
@@ -21,7 +20,6 @@ export const ProposalSessionVot3 = () => {
             <Text color="#004CFC" fontWeight={600}>
               {compactFormatter.format(Number(proposal.userVot3OnSnapshot))}
             </Text>
-            <UilArrowUpRight size="16px" color="#004CFC" />
           </HStack>
           <Text color="#6A6A6A" fontSize="12px">
             {t("Votes at snapshot")}
