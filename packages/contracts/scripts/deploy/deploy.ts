@@ -403,7 +403,7 @@ export async function deployAll(config: ContractsConfig) {
   if (network.name === "vechain_testnet") {
     await setupTestEnvironment(emissions, x2EarnApps)
   } else if (network.name === "vechain_solo") {
-    await setupLocalEnvironment(emissions, treasury, x2EarnApps, b3tr)
+    await setupLocalEnvironment(emissions, treasury, x2EarnApps)
   }
 
   // ---------- Run Simulation ---------- //
