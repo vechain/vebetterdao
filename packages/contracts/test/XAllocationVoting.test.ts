@@ -613,7 +613,7 @@ describe("X-Allocation Voting", function () {
           forceDeploy: true,
         })
         await bootstrapAndStartEmissions()
-        await getVot3Tokens(otherAccount, "1000")
+        await getVot3Tokens(otherAccount, "30000")
         const cycleDuration = await emissions.cycleDuration()
 
         // Now we can create a proposal
@@ -641,7 +641,7 @@ describe("X-Allocation Voting", function () {
         await waitForProposalToBeActive(proposalId)
         await governor.connect(otherAccount).castVote(proposalId, 1)
         await waitForVotingPeriodToEnd(proposalId)
-        expect(await governor.state(proposalId)).to.eql(4n) // succeded
+        expect(await governor.state(proposalId)).to.eql(4n) // succeeded
 
         await governor.queue([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash)
         expect(await governor.state(proposalId)).to.eql(5n)
@@ -680,7 +680,7 @@ describe("X-Allocation Voting", function () {
           forceDeploy: true,
         })
         await bootstrapAndStartEmissions()
-        await getVot3Tokens(otherAccount, "1000")
+        await getVot3Tokens(otherAccount, "30000")
         const cycleDuration = await emissions.cycleDuration()
         const beforeVotingPeriod = await xAllocationVoting.votingPeriod()
 
