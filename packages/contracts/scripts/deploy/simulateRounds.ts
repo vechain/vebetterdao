@@ -2,7 +2,7 @@ import { B3TR, Emissions, Treasury, VOT3, VoterRewards, XAllocationVoting } from
 import { moveBlocks } from "../../test/helpers"
 import { SeedStrategy, getSeedAccounts, getTestKeys } from "../helpers/seedAccounts"
 import { distributeEmissions, startEmissions } from "../helpers/emissions"
-import { airdropB3trFromTreasury, airdropVTHO } from "../helpers/airdrop"
+import { airdropB3trFromTreasury, airdropVTHO, transferErc20 } from "../helpers/airdrop"
 import { convertB3trForVot3 } from "../helpers/swap"
 import { castVotesToXDapps } from "../helpers/xApp"
 import { claimVoterRewards } from "../helpers/voterRewards"
@@ -28,12 +28,16 @@ export const simulateRounds = async (
 
   // Define specific accounts
   const admin = accounts[0]
+  const migrationAccount = accounts[9]
 
   // Airdrop VTHO
   await airdropVTHO(seedAccounts, accounts[8])
 
   // Airdrop B3TR from Treasury
   const treasuryAddress = await treasury.getAddress()
+  //// Top the treasury up with tokens from the migration account
+  const bal = await b3tr.balanceOf(migrationAccount.address)
+  await transferErc20(await b3tr.getAddress(), migrationAccount, treasuryAddress, bal)
   await airdropB3trFromTreasury(treasuryAddress, admin, seedAccounts)
 
   // Convert B3TR for VOT3

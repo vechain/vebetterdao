@@ -34,6 +34,19 @@ export const airdropVTHO = async (accounts: SeedAccount[], signingAcct: TestPk) 
 }
 
 /**
+ * Transfer ERC20 tokens
+ */
+export const transferErc20 = async (tokenAddress: string, sender: TestPk, recipient: string, amount: bigint) => {
+  const clauses: TransactionClause[] = []
+
+  clauses.push(clauseBuilder.transferToken(tokenAddress, recipient, amount))
+
+  const body: TransactionBody = await buildTxBody(clauses, sender.address, 32)
+
+  await signAndSendTx(body, sender.pk)
+}
+
+/**
  *  Airdrop B3TR from treasury to a list of accounts
  */
 export const airdropB3trFromTreasury = async (treasuryAddress: string, admin: TestPk, accounts: SeedAccount[]) => {
