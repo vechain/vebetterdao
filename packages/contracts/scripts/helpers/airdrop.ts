@@ -73,7 +73,7 @@ export const airdropB3trPercentage = async (
   percentage: number,
   b3tr: B3TR,
 ) => {
-  console.log(`Airdropping ${percentage}% of B3TR supply to ${account}...`)
+  console.log(`Airdropping ${percentage}% of B3TR supply to ${account.key.address}...`)
 
   const b3trSupply: bigint = await b3tr.totalSupply()
 
