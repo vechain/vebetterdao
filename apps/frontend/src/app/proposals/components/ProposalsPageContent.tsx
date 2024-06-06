@@ -1,5 +1,5 @@
 import { useProposalsEvents, useActiveProposals, useIncomingProposals, usePastProposals, useCurrentBlock } from "@/api"
-import { ProposalCard } from "@/components"
+import { ProposalCard, ProposalInfoCard } from "@/components"
 import {
   VStack,
   HStack,
@@ -23,6 +23,11 @@ import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { FaPlus, FaScroll } from "react-icons/fa6"
 
+export enum PROPOSAL_TYPE {
+  ACTIVE,
+  PAST,
+  INCOMING,
+}
 export const ProposalsPageContent = () => {
   const router = useRouter()
   const { t } = useTranslation()
@@ -66,8 +71,10 @@ export const ProposalsPageContent = () => {
       )
     }
     return (
-      <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
-        {activeProposals?.map(proposal => <ProposalCard proposal={proposal} key={proposal.proposalId} />)}
+      <Grid w="full">
+        {activeProposals?.map(proposal => (
+          <ProposalInfoCard type={PROPOSAL_TYPE.ACTIVE} proposal={proposal} key={proposal.proposalId} />
+        ))}
       </Grid>
     )
   }, [activeProposals, activeProposalsError, activeProposalsLoading, t])
@@ -101,8 +108,10 @@ export const ProposalsPageContent = () => {
       )
     }
     return (
-      <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
-        {incomingProposals?.map(proposal => <ProposalCard proposal={proposal} key={proposal.proposalId} />)}
+      <Grid w="full">
+        {incomingProposals?.map(proposal => (
+          <ProposalInfoCard type={PROPOSAL_TYPE.INCOMING} proposal={proposal} key={proposal.proposalId} />
+        ))}
       </Grid>
     )
   }, [incomingProposals, incomingProposalsError, incomingProposalsLoading, t])
@@ -140,8 +149,10 @@ export const ProposalsPageContent = () => {
       )
     }
     return (
-      <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
-        {pastProposals?.map(proposal => <ProposalCard proposal={proposal} key={proposal.proposalId} />)}
+      <Grid w="full">
+        {pastProposals?.map(proposal => (
+          <ProposalInfoCard type={PROPOSAL_TYPE.PAST} proposal={proposal} key={proposal.proposalId} />
+        ))}
       </Grid>
     )
   }, [pastProposals, pastProposalsError, pastProposalsLoading, t])
