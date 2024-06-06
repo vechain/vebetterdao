@@ -64,7 +64,7 @@ export const AppDetailCard = ({ appId, showEditButton = true }: Props) => {
           <AppCardOptionsMobileModal
             isOpen={isMobileOptionsOpen}
             onClose={closeMobileOptions}
-            receiverAddress={xApp.receiverAddress}
+            teamWalletAddress={xApp.teamWalletAddress}
             externalUrl={appMetadata?.external_url}
             isLoading={appMetadataLoading}
             xAppId={xApp.id}
@@ -74,7 +74,7 @@ export const AppDetailCard = ({ appId, showEditButton = true }: Props) => {
     }
     return (
       <AppCardOptionsDesktopMenu
-        receiverAddress={xApp.receiverAddress}
+        teamWalletAddress={xApp.teamWalletAddress}
         externalUrl={appMetadata?.external_url}
         isLoading={appMetadataLoading}
         xAppId={xApp.id}

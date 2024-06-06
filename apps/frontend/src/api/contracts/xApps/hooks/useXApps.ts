@@ -8,14 +8,14 @@ import { X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
 /**
  * xApp type
  * @property id  the xApp id
- * @property receiverAddress  the xApp address
+ * @property teamWalletAddress  the xApp address
  * @property name  the xApp name
  * @property metadataURI  the xApp metadata URI
  * @property createdAtTimestamp timestamp when xApp was addded
  */
 export type XApp = {
   id: string
-  receiverAddress: string
+  teamWalletAddress: string
   name: string
   metadataURI: string
   createdAtTimestamp: number
@@ -35,7 +35,7 @@ export const getXApps = async (thor: Connex.Thor): Promise<XApp[]> => {
   const apps = res.decoded[0]
   return apps.map((app: any) => ({
     id: app[0],
-    receiverAddress: app[1],
+    teamWalletAddress: app[1],
     name: app[2],
     metadataURI: app[3],
     createdAtTimestamp: app[4],

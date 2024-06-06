@@ -74,7 +74,7 @@ export const AppCard = ({ xApp }: Props) => {
                     aria-label="Open app options"
                   />
                   <AppCardOptionsMobileModal
-                    receiverAddress={xApp.receiverAddress}
+                    teamWalletAddress={xApp.teamWalletAddress}
                     externalUrl={appMetadata?.external_url}
                     isLoading={appMetadataLoading}
                     isOpen={isMobileOptionsOpen}
@@ -85,7 +85,7 @@ export const AppCard = ({ xApp }: Props) => {
                 </>
               ) : (
                 <AppCardOptionsDesktopMenu
-                  receiverAddress={xApp.receiverAddress}
+                  teamWalletAddress={xApp.teamWalletAddress}
                   externalUrl={appMetadata?.external_url}
                   isLoading={appMetadataLoading}
                   xAppId={xApp.id}

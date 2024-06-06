@@ -18,7 +18,7 @@ vi.mock("@vechain/dapp-kit-react", async importOriginal => {
 const mockedApp: hooks.XApp = {
   id: "1",
   name: "Round 1",
-  receiverAddress: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",
+  teamWalletAddress: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",
   createdAtTimestamp: 16347455,
   metadataURI: "ipfs://QmQmQmQmQmQmQmQmQmQmQmQmQmQmQm",
 }

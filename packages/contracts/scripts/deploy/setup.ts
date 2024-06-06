@@ -14,32 +14,32 @@ const APPS = [
     metadataURI: "bafkreigk7faih4jmdee4ritah6564jqpfn5s2gl4dcsvii7woijy5ls7ca",
   },
   {
-    address: accounts[7].address,
+    address: accounts[6].address,
     name: "Mugshot",
     metadataURI: "bafkreidaleehj2euzdmpystzaux5aandfwnhyzgfjkujebbixek7edyyzu",
   },
   {
-    address: accounts[9].address,
+    address: accounts[6].address,
     name: "Cleanify",
     metadataURI: "bafkreicw6g34t3th63z7hq3o4xkay6dkrei5ny5evyrlclw53gfz6o6lgu",
   },
   {
-    address: accounts[10].address,
+    address: accounts[6].address,
     name: "Non Fungible Book Club (NFBC)",
     metadataURI: "bafkreicdcol6afcsfb4efxmjzqsuonukn54jixmfqmfsirhw4wujvxfpxy",
   },
   {
-    address: accounts[11].address,
+    address: accounts[6].address,
     name: "Green Ambassador Challenge",
     metadataURI: "bafkreigrwjowwwcmdd7bdm3yqsquu77ufeqcao6mjbd2fednwo5qfmtldi",
   },
   {
-    address: accounts[11].address,
+    address: accounts[6].address,
     name: "GreenCart",
     metadataURI: "bafkreie6gdx7xugiemmubpfb6r5c4bdwfjucjtmb43mk2fhemyx3x3kvnu",
   },
   {
-    address: accounts[12].address,
+    address: accounts[6].address,
     name: "eVearn",
     metadataURI: "bafkreigty6soh4wn5wzv6vfgt6bozxriwe23v4c7cyxuja65y4knn6cmqe",
   },

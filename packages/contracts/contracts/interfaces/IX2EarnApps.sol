@@ -82,7 +82,7 @@ interface IX2EarnApps {
   /**
    * @dev Event fired when the address where the x2earn app receives allocation funds is changed.
    */
-  event AppReceiverAddressUpdated(bytes32 indexed appId, address oldReceiverAddress, address newReceiverAddress);
+  event TeamWalletAddressUpdated(bytes32 indexed appId, address oldTeamWalletAddress, address newTeamWalletAddress);
 
   /**
    * @dev Event fired when the metadata URI of the app is changed.
@@ -95,9 +95,9 @@ interface IX2EarnApps {
   event BaseURIUpdated(string oldBaseURI, string newBaseURI);
 
   /**
-   * @dev Event fired when the receiver allocation percentage is updated.
+   * @dev Event fired when the team allocation percentage is updated.
    */
-  event ReceiverAllocationPercentageUpdated(bytes32 indexed appId, uint256 oldPercentage, uint256 newPercentage);
+  event TeamAllocationPercentageUpdated(bytes32 indexed appId, uint256 oldPercentage, uint256 newPercentage);
 
   /**
    * @dev Generates the hash of the app name to be used as the app id.
@@ -109,14 +109,14 @@ interface IX2EarnApps {
   /**
    * @dev Add a new app to the x2earn apps.
    *
-   * @param receiverAddress the address where the app should receive allocation funds
+   * @param teamWalletAddress the address where the app should receive allocation funds
    * @param admin the address of the admin that will be able to manage the app and perform all administration actions
    * @param appName the name of the app
    * @param metadataURI the metadata URI of the app
    *
    * Emits a {AppAdded} event.
    */
-  function addApp(address receiverAddress, address admin, string memory appName, string memory metadataURI) external;
+  function addApp(address teamWalletAddress, address admin, string memory appName, string memory metadataURI) external;
 
   /**
    * @dev Get the app data by its id.
@@ -171,33 +171,33 @@ interface IX2EarnApps {
    * @dev Update the address where the x2earn app receives allocation funds.
    *
    * @param appId the id of the app
-   * @param newReceiverAddress the new address where the app should receive allocation funds
+   * @param newTeamWalletAddress the new address where the app should receive allocation funds
    *
-   * Emits a {AppReceiverAddressUpdated} event.
+   * Emits a {TeamWalletAddressUpdated} event.
    */
-  function updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) external;
+  function updateTeamWalletAddress(bytes32 appId, address newTeamWalletAddress) external;
 
   /**
    * @dev Get the address where the x2earn app receives allocation funds.
    *
    * @param appId the id of the app
    */
-  function appReceiverAddress(bytes32 appId) external view returns (address);
+  function teamWalletAddress(bytes32 appId) external view returns (address);
 
   /**
-   * @dev Function to get the percentage of the allocation of the receiver address each round.
+   * @dev Function to get the percentage of the allocation sent to the team address each round.
    *
    * @param appId the app id
    */
-  function receiverAllocationPercentage(bytes32 appId) external view returns (uint256);
+  function teamAllocationPercentage(bytes32 appId) external view returns (uint256);
 
   /**
-   * @dev Update the allocation percentage of the receiver address
+   * @dev Update the allocation percentage to be sent to the team
    *
    * @param appId the id of the app
    * @param percentage the new percentage of the allocation
    */
-  function updateReceiverAllocationPercentage(bytes32 appId, uint256 percentage) external;
+  function updateTeamAllocationPercentage(bytes32 appId, uint256 percentage) external;
 
   /**
    * @dev Add a new reward distributor to the app.

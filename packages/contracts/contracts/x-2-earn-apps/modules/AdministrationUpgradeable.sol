@@ -31,8 +31,8 @@ import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
  * @dev Contract module that provides the administration functionalities of the x2earn apps.
  * Each app has one admin and can have many moderators, the use of those should be definied by the contract inheriting this module.
  * Each app has a metadataURI that returns the information of the app.
- * The receiver address is the address belonging to the team that receives the allocation funds each round.
- * The receiver allocation percentage is the percentage of the allocation funds that the team reserves for themself.
+ * The team wallet address is the address that receives the allocation funds each round.
+ * The team allocation percentage is the percentage funds sent to the team at each distribution of allocation rewards.
  * The reward distributors are the addresses that can distribute rewards from the X2EarnRewardsPool.
  */
 abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradeable {
@@ -41,8 +41,8 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
     mapping(bytes32 appId => address) _admin;
     mapping(bytes32 appId => address[]) _moderators;
     mapping(bytes32 appId => address[]) _rewardDistributors; // addresses that can distribute rewards from X2EarnRewardsPool
-    mapping(bytes32 appId => address) _receiverAddress;
-    mapping(bytes32 appId => uint256) _receiverAllocationPercentage; // percentage of the allocation funds that the receiver address gets
+    mapping(bytes32 appId => address) _teamWalletAddress;
+    mapping(bytes32 appId => uint256) _teamAllocationPercentage;
     mapping(bytes32 appId => string) _metadataURI;
   }
 
@@ -119,25 +119,25 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
   }
 
   /**
-   * @dev Get the receiver address of the app
+   * @dev Get the address where the x2earn app receives allocation funds
    *
    * @param appId the hashed name of the app
    */
-  function appReceiverAddress(bytes32 appId) public view override returns (address) {
+  function teamWalletAddress(bytes32 appId) public view override returns (address) {
     AdministrationStorage storage $ = _getAdministrationStorage();
 
-    return $._receiverAddress[appId];
+    return $._teamWalletAddress[appId];
   }
 
   /**
-   * @dev Function to get the percentage of the allocation of the receiver address each round.
+   * @dev Function to get the percentage of the allocation reserved for the team
    *
    * @param appId the app id
    */
-  function receiverAllocationPercentage(bytes32 appId) public view override returns (uint256) {
+  function teamAllocationPercentage(bytes32 appId) public view override returns (uint256) {
     AdministrationStorage storage $ = _getAdministrationStorage();
 
-    return $._receiverAllocationPercentage[appId];
+    return $._teamAllocationPercentage[appId];
   }
 
   /**
@@ -308,11 +308,11 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
    * @dev Update the address where the x2earn app receives allocation funds
    *
    * @param appId the hashed name of the app
-   * @param newReceiverAddress the address of the new receiver
+   * @param newTeamWalletAddress the address of the new wallet where the team will receive the funds
    */
-  function _updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) internal override {
-    if (newReceiverAddress == address(0)) {
-      revert X2EarnInvalidAddress(newReceiverAddress);
+  function _updateTeamWalletAddress(bytes32 appId, address newTeamWalletAddress) internal override {
+    if (newTeamWalletAddress == address(0)) {
+      revert X2EarnInvalidAddress(newTeamWalletAddress);
     }
 
     if (!appExists(appId)) {
@@ -320,10 +320,10 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
     }
 
     AdministrationStorage storage $ = _getAdministrationStorage();
-    address oldReceiverAddress = $._receiverAddress[appId];
-    $._receiverAddress[appId] = newReceiverAddress;
+    address oldTeamWalletAddress = $._teamWalletAddress[appId];
+    $._teamWalletAddress[appId] = newTeamWalletAddress;
 
-    emit AppReceiverAddressUpdated(appId, oldReceiverAddress, newReceiverAddress);
+    emit TeamWalletAddressUpdated(appId, oldTeamWalletAddress, newTeamWalletAddress);
   }
 
   /**
@@ -347,23 +347,20 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
   }
 
   /**
-   * @dev Update the allocation percentage of the receiver address
+   * @dev Update the allocation percentage to reserve for the team
    *
    * @param appId the app id
    * @param newAllocationPercentage the new allocation percentage
    */
-  function _updateReceiverAllocationPercentage(
-    bytes32 appId,
-    uint256 newAllocationPercentage
-  ) internal virtual override {
+  function _updateTeamAllocationPercentage(bytes32 appId, uint256 newAllocationPercentage) internal virtual override {
     if (newAllocationPercentage > 100) {
       revert X2EarnInvalidAllocationPercentage(newAllocationPercentage);
     }
 
     AdministrationStorage storage $ = _getAdministrationStorage();
-    uint256 oldAllocationPercentage = $._receiverAllocationPercentage[appId];
-    $._receiverAllocationPercentage[appId] = newAllocationPercentage;
+    uint256 oldAllocationPercentage = $._teamAllocationPercentage[appId];
+    $._teamAllocationPercentage[appId] = newAllocationPercentage;
 
-    emit ReceiverAllocationPercentageUpdated(appId, oldAllocationPercentage, newAllocationPercentage);
+    emit TeamAllocationPercentageUpdated(appId, oldAllocationPercentage, newAllocationPercentage);
   }
 }

@@ -149,12 +149,12 @@ contract X2EarnApps is
    * @dev See {IX2EarnApps-addApp}.
    */
   function addApp(
-    address _receiverAddress,
+    address _teamWalletAddress,
     address _admin,
     string memory _appName,
     string memory _appMetadataURI
   ) public onlyRole(GOVERNANCE_ROLE) {
-    _addApp(_receiverAddress, _admin, _appName, _appMetadataURI);
+    _addApp(_teamWalletAddress, _admin, _appName, _appMetadataURI);
   }
 
   /**
@@ -165,23 +165,23 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev See {IX2EarnApps-updateAppReceiverAddress}.
+   * @dev See {IX2EarnApps-updateTeamWalletAddress}.
    */
-  function updateAppReceiverAddress(
+  function updateTeamWalletAddress(
     bytes32 _appId,
     address _newReceiverAddress
   ) public onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
-    _updateAppReceiverAddress(_appId, _newReceiverAddress);
+    _updateTeamWalletAddress(_appId, _newReceiverAddress);
   }
 
   /**
-   * @dev See {IX2EarnApps-updateReceiverAllocationPercentage}.
+   * @dev See {IX2EarnApps-updateTeamAllocationPercentage}.
    */
-  function updateReceiverAllocationPercentage(
+  function updateTeamAllocationPercentage(
     bytes32 _appId,
     uint256 _percentage
   ) public onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
-    _updateReceiverAllocationPercentage(_appId, _percentage);
+    _updateTeamAllocationPercentage(_appId, _percentage);
   }
 
   /**

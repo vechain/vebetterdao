@@ -31,7 +31,7 @@ export const EditAppPageContent = ({ appId }: Props) => {
         logo: metadata?.logo,
         banner: metadata?.banner,
         projectUrl: metadata?.external_url,
-        receiverAddress: appData?.receiverAddress,
+        teamWalletAddress: appData?.teamWalletAddress,
       },
     })
 
@@ -76,12 +76,12 @@ export const EditAppPageContent = ({ appId }: Props) => {
 
       updateAppMetadataMutation.sendTransaction({
         metadataUri,
-        ...(compareAddresses(data.receiverAddress, appData?.receiverAddress)
+        ...(compareAddresses(data.teamWalletAddress, appData?.teamWalletAddress)
           ? {}
-          : { receiverAddress: data.receiverAddress }),
+          : { teamWalletAddress: data.teamWalletAddress }),
       })
     },
-    [onMetadataUpload, updateAppMetadataMutation, appData?.receiverAddress, metadata, onConfirmationOpen],
+    [onMetadataUpload, updateAppMetadataMutation, appData?.teamWalletAddress, metadata, onConfirmationOpen],
   )
 
   const onTryAgain = useCallback(() => {

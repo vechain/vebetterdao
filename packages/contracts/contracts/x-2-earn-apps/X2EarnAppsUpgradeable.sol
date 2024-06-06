@@ -35,7 +35,7 @@ import { X2EarnAppsDataTypes } from "../libraries/X2EarnAppsDataTypes.sol";
  * This contract is abstract and requires several functions to be implemented in various modules:
  * - a module to handle the storage of the apps
  * - a module to handle the voting eligibility of the apps
- * - a module to handle the administration of the app (handle moderators, admin, metadata, receiver address and percentage)
+ * - a module to handle the administration of the app (handle moderators, admin, metadata, team address and percentage)
  * - a module to handle the settings of the contract
  */
 abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
@@ -105,7 +105,7 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   /**
    * @inheritdoc IX2EarnApps
    */
-  function appReceiverAddress(bytes32 appId) public view virtual returns (address);
+  function teamWalletAddress(bytes32 appId) public view virtual returns (address);
 
   /**
    * @dev See {IX2EarnApps-appAdmin}
@@ -113,9 +113,9 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   function appAdmin(bytes32 appId) public view virtual returns (address);
 
   /**
-   * @dev See {IX2EarnApps-receiverAllocationPercentage}
+   * @dev See {IX2EarnApps-teamAllocationPercentage}
    */
-  function receiverAllocationPercentage(bytes32 appId) public view virtual returns (uint256);
+  function teamAllocationPercentage(bytes32 appId) public view virtual returns (uint256);
 
   /**
    * @dev Returns the list of moderators of the app
@@ -143,9 +143,9 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   function _setAppAdmin(bytes32 appId, address admin) internal virtual;
 
   /**
-   * @dev Function to update the receiver address of the app.
+   * @dev Function to update the team wallet address.
    */
-  function _updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) internal virtual;
+  function _updateTeamWalletAddress(bytes32 appId, address newTeamWalletAddress) internal virtual;
 
   /**
    * @dev Function to update the metadata URI of the app.
@@ -153,7 +153,7 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   function _updateAppMetadata(bytes32 appId, string memory metadataURI) internal virtual;
 
   /**
-   * @dev Update the allocation percentage of the receiver address
+   * @dev Update the allocation percentage of the team.
    */
-  function _updateReceiverAllocationPercentage(bytes32 appId, uint256 percentage) internal virtual;
+  function _updateTeamAllocationPercentage(bytes32 appId, uint256 percentage) internal virtual;
 }

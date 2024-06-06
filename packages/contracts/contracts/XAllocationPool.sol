@@ -43,7 +43,7 @@ import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
  * @notice This contract is the receiver and distributor of weekly B3TR emissions for x2earn apps.
  * Funds can be claimed by the X2Earn apps at the end of each allocation round
  * @dev Interacts with the Emissions contract to get the amount of B3TR available for distribution in each round,
- * and the x2EarnApps contract to check app existence and receiver address.
+ * and the x2EarnApps contract to check app existence and the app's team wallet address.
  * The contract is using AccessControl to handle roles for upgrading the contract and external contract addresses.
  */
 contract XAllocationPool is
@@ -221,8 +221,8 @@ contract XAllocationPool is
     require($.b3tr.balanceOf(address(this)) >= (teamAllocationsAmount + unallocatedAmount), "Insufficient funds");
 
     // Transfer the rewards to the team
-    address receiverAddress = $.x2EarnApps.appReceiverAddress(appId);
-    require($.b3tr.transfer(receiverAddress, teamAllocationsAmount), "Allocation transfer to app failed");
+    address teamWalletAddress = $.x2EarnApps.teamWalletAddress(appId);
+    require($.b3tr.transfer(teamWalletAddress, teamAllocationsAmount), "Allocation transfer to app failed");
 
     // Deposit the remaining rewards to the X2EarnRewardsPool contract
     require(
@@ -247,7 +247,7 @@ contract XAllocationPool is
       appId,
       roundId,
       teamAllocationsAmount,
-      receiverAddress,
+      teamWalletAddress,
       msg.sender,
       unallocatedAmount,
       rewardsAllocationAmount
@@ -302,7 +302,7 @@ contract XAllocationPool is
     uint256 totalRoundEarnings
   ) internal view returns (uint256, uint256) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
-    uint256 teamAllocationPercentage = $.x2EarnApps.receiverAllocationPercentage(appId);
+    uint256 teamAllocationPercentage = $.x2EarnApps.teamAllocationPercentage(appId);
 
     uint256 teamAllocationAmount = (totalRoundEarnings * teamAllocationPercentage) / 100;
     uint256 rewardsAllocationAmount = totalRoundEarnings - teamAllocationAmount;

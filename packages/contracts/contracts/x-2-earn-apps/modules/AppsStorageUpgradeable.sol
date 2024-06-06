@@ -30,7 +30,7 @@ import { X2EarnAppsDataTypes } from "../../libraries/X2EarnAppsDataTypes.sol";
 /**
  * @title AppsStorageUpgradeable
  * @dev Contract to manage the x2earn apps storage.
- * Through this contract, the x2earn apps can be added, retrieved, indexed, and managed (update metadata and receiver address).
+ * Through this contract, the x2earn apps can be added, retrieved and indexed.
  */
 abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable {
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.AppsStorage
@@ -81,13 +81,13 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
     return
       X2EarnAppsDataTypes.AppWithDetails(
         _app.id,
-        appReceiverAddress(appId),
+        teamWalletAddress(appId),
         _app.name,
         metadataURI(appId),
         _app.createdAtTimestamp,
         appAdmin(_app.id),
         appModerators(_app.id),
-        receiverAllocationPercentage(_app.id),
+        teamAllocationPercentage(_app.id),
         isEligibleNow(_app.id)
       );
   }
@@ -104,13 +104,13 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
       X2EarnAppsDataTypes.App memory _app = $._apps[$._appIds[i]];
       allApps[i] = X2EarnAppsDataTypes.AppWithDetails(
         _app.id,
-        appReceiverAddress(_app.id),
+        teamWalletAddress(_app.id),
         _app.name,
         metadataURI(_app.id),
         _app.createdAtTimestamp,
         appAdmin(_app.id),
         appModerators(_app.id),
-        receiverAllocationPercentage(_app.id),
+        teamAllocationPercentage(_app.id),
         isEligibleNow(_app.id)
       );
     }
@@ -130,16 +130,21 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   /**
    * @dev Internal function that should add an app. Called by {addApp}.
    *
-   * @param receiverAddress the address where the app should receive allocation funds
+   * @param teamWalletAddress the address where the app should receive allocation funds
    * @param admin the address of the admin
    * @param appName the name of the app
    * @param metadataURI the metadata URI of the app
    *
    * Emits a {AppAdded} event.
    */
-  function _addApp(address receiverAddress, address admin, string memory appName, string memory metadataURI) internal {
-    if (receiverAddress == address(0)) {
-      revert X2EarnInvalidAddress(receiverAddress);
+  function _addApp(
+    address teamWalletAddress,
+    address admin,
+    string memory appName,
+    string memory metadataURI
+  ) internal {
+    if (teamWalletAddress == address(0)) {
+      revert X2EarnInvalidAddress(teamWalletAddress);
     }
     if (admin == address(0)) {
       revert X2EarnInvalidAddress(admin);
@@ -157,10 +162,10 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
     $._appIds.push(id);
     _setAppAdmin(id, admin);
     _setVotingEligibility(id, true);
-    _updateAppReceiverAddress(id, receiverAddress);
+    _updateTeamWalletAddress(id, teamWalletAddress);
     _updateAppMetadata(id, metadataURI);
 
-    emit AppAdded(id, receiverAddress, appName, true);
+    emit AppAdded(id, teamWalletAddress, appName, true);
   }
 
   /**

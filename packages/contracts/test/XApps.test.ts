@@ -182,7 +182,7 @@ describe("X-Apps", function () {
       expect(admin).to.eql(otherAccounts[1].address)
     }).timeout(18000000)
 
-    it("Should be able to fetch app receiver address", async function () {
+    it("Should be able to fetch app team wallet address", async function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -196,13 +196,13 @@ describe("X-Apps", function () {
         .connect(owner)
         .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app #2", "metadataURI")
 
-      const app1ReceiverAddress = await x2EarnApps.appReceiverAddress(app1Id)
-      const app2ReceiverAddress = await x2EarnApps.appReceiverAddress(app2Id)
+      const app1ReceiverAddress = await x2EarnApps.teamWalletAddress(app1Id)
+      const app2ReceiverAddress = await x2EarnApps.teamWalletAddress(app2Id)
       expect(app1ReceiverAddress).to.eql(otherAccounts[2].address)
       expect(app2ReceiverAddress).to.eql(otherAccounts[3].address)
     })
 
-    it("Cannot add an app that has ZERO address as the receiver", async function () {
+    it("Cannot add an app that has ZERO address as the team wallet address", async function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -234,7 +234,7 @@ describe("X-Apps", function () {
 
       const app = await x2EarnApps.app(app1Id)
       expect(app.id).to.eql(app1Id)
-      expect(app.receiverAddress).to.eql(otherAccounts[0].address)
+      expect(app.teamWalletAddress).to.eql(otherAccounts[0].address)
       expect(app.name).to.eql("My app")
       expect(app.metadataURI).to.eql("metadataURI")
     })
@@ -658,45 +658,45 @@ describe("X-Apps", function () {
     })
   })
 
-  describe("Receiver address", function () {
-    it("Should be able to fetch app receiver address", async function () {
+  describe("Team wallet address", function () {
+    it("Should be able to fetch app team wallet address", async function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
-      const appReceiverAddress = await x2EarnApps.appReceiverAddress(app1Id)
-      expect(appReceiverAddress).to.eql(otherAccounts[0].address)
+      const teamWalletAddress = await x2EarnApps.teamWalletAddress(app1Id)
+      expect(teamWalletAddress).to.eql(otherAccounts[0].address)
     })
 
-    it("Governance admin role can update the receiver address of an app", async function () {
+    it("Governance admin role can update the team wallet address of an app", async function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
-      const appReceiverAddress1 = await x2EarnApps.appReceiverAddress(app1Id)
+      const appReceiverAddress1 = await x2EarnApps.teamWalletAddress(app1Id)
 
       const adminRole = await x2EarnApps.DEFAULT_ADMIN_ROLE()
       const isAdmin = await x2EarnApps.hasRole(adminRole, owner.address)
       expect(isAdmin).to.be.true
 
-      await x2EarnApps.connect(owner).updateAppReceiverAddress(app1Id, otherAccounts[1].address)
+      await x2EarnApps.connect(owner).updateTeamWalletAddress(app1Id, otherAccounts[1].address)
 
-      const appReceiverAddress2 = await x2EarnApps.appReceiverAddress(app1Id)
+      const appReceiverAddress2 = await x2EarnApps.teamWalletAddress(app1Id)
       expect(appReceiverAddress2).to.eql(otherAccounts[1].address)
       expect(appReceiverAddress1).to.not.eql(appReceiverAddress2)
     })
 
-    it("App admin can update the receiver address of an app", async function () {
+    it("App admin can update the team wallet address of an app", async function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       const appAdmin = otherAccounts[9]
       await x2EarnApps.connect(owner).addApp(otherAccounts[0].address, appAdmin.address, "My app", "metadataURI")
 
-      const appReceiverAddress1 = await x2EarnApps.appReceiverAddress(app1Id)
+      const appReceiverAddress1 = await x2EarnApps.teamWalletAddress(app1Id)
 
       const adminRole = await x2EarnApps.DEFAULT_ADMIN_ROLE()
       const isAdmin = await x2EarnApps.hasRole(adminRole, appAdmin.address)
@@ -704,21 +704,21 @@ describe("X-Apps", function () {
 
       expect(await x2EarnApps.isAppAdmin(app1Id, appAdmin.address)).to.be.true
 
-      await x2EarnApps.connect(appAdmin).updateAppReceiverAddress(app1Id, otherAccounts[1].address)
+      await x2EarnApps.connect(appAdmin).updateTeamWalletAddress(app1Id, otherAccounts[1].address)
 
-      const appReceiverAddress2 = await x2EarnApps.appReceiverAddress(app1Id)
+      const appReceiverAddress2 = await x2EarnApps.teamWalletAddress(app1Id)
       expect(appReceiverAddress2).to.eql(otherAccounts[1].address)
       expect(appReceiverAddress1).to.not.eql(appReceiverAddress2)
     })
 
-    it("Moderators cannot update the receiver address of an app", async function () {
+    it("Moderators cannot update the team wallet address of an app", async function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
-      const appReceiverAddress1 = await x2EarnApps.appReceiverAddress(app1Id)
+      const appReceiverAddress1 = await x2EarnApps.teamWalletAddress(app1Id)
 
       const adminRole = await x2EarnApps.DEFAULT_ADMIN_ROLE()
       const isAdmin = await x2EarnApps.hasRole(adminRole, owner.address)
@@ -729,21 +729,21 @@ describe("X-Apps", function () {
       const isModerator = await x2EarnApps.isAppModerator(app1Id, otherAccounts[1].address)
       expect(isModerator).to.be.true
 
-      await expect(x2EarnApps.connect(otherAccounts[1]).updateAppReceiverAddress(app1Id, otherAccounts[1].address)).to
-        .be.rejected
+      await expect(x2EarnApps.connect(otherAccounts[1]).updateTeamWalletAddress(app1Id, otherAccounts[1].address)).to.be
+        .rejected
 
-      const appReceiverAddress2 = await x2EarnApps.appReceiverAddress(app1Id)
+      const appReceiverAddress2 = await x2EarnApps.teamWalletAddress(app1Id)
       expect(appReceiverAddress2).to.eql(appReceiverAddress1)
     })
 
-    it("Moderators cannot update the receiver address of an app", async function () {
+    it("Moderators cannot update the team wallet address of an app", async function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
-      const appReceiverAddress1 = await x2EarnApps.appReceiverAddress(app1Id)
+      const appReceiverAddress1 = await x2EarnApps.teamWalletAddress(app1Id)
 
       const adminRole = await x2EarnApps.DEFAULT_ADMIN_ROLE()
       const isAdmin = await x2EarnApps.hasRole(adminRole, owner.address)
@@ -754,49 +754,49 @@ describe("X-Apps", function () {
       const isModerator = await x2EarnApps.isAppModerator(app1Id, otherAccounts[1].address)
       expect(isModerator).to.be.true
 
-      await expect(x2EarnApps.connect(otherAccounts[1]).updateAppReceiverAddress(app1Id, otherAccounts[1].address)).to
-        .be.rejected
+      await expect(x2EarnApps.connect(otherAccounts[1]).updateTeamWalletAddress(app1Id, otherAccounts[1].address)).to.be
+        .rejected
 
-      const appReceiverAddress2 = await x2EarnApps.appReceiverAddress(app1Id)
+      const appReceiverAddress2 = await x2EarnApps.teamWalletAddress(app1Id)
       expect(appReceiverAddress2).to.eql(appReceiverAddress1)
     })
 
-    it("Non-admin cannot update the receiver address of an app", async function () {
+    it("Non-admin cannot update the team wallet address of an app", async function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
-      const appReceiverAddress1 = await x2EarnApps.appReceiverAddress(app1Id)
+      const appReceiverAddress1 = await x2EarnApps.teamWalletAddress(app1Id)
 
       const adminRole = await x2EarnApps.DEFAULT_ADMIN_ROLE()
       const isAdmin = await x2EarnApps.hasRole(adminRole, otherAccounts[1].address)
       expect(isAdmin).to.be.false
 
-      await expect(x2EarnApps.connect(otherAccounts[1]).updateAppReceiverAddress(app1Id, otherAccounts[1].address)).to
-        .be.rejected
+      await expect(x2EarnApps.connect(otherAccounts[1]).updateTeamWalletAddress(app1Id, otherAccounts[1].address)).to.be
+        .rejected
 
-      const appReceiverAddress2 = await x2EarnApps.appReceiverAddress(app1Id)
+      const appReceiverAddress2 = await x2EarnApps.teamWalletAddress(app1Id)
       expect(appReceiverAddress2).to.eql(appReceiverAddress1)
     })
 
-    it("Cannot update the receiver address of a non-existing app", async function () {
+    it("Cannot update the team wallet address of a non-existing app", async function () {
       const { x2EarnApps, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
-      const newReceiverAddress = ethers.Wallet.createRandom().address
+      const newTeamWalletAddress = ethers.Wallet.createRandom().address
 
-      await expect(x2EarnApps.connect(owner).updateAppReceiverAddress(app1Id, newReceiverAddress)).to.be.rejected
+      await expect(x2EarnApps.connect(owner).updateTeamWalletAddress(app1Id, newTeamWalletAddress)).to.be.rejected
     })
 
-    it("Receiver address cannot be updated to ZERO address", async function () {
+    it("Team wallet address cannot be updated to ZERO address", async function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
-      await catchRevert(x2EarnApps.connect(otherAccounts[0]).updateAppReceiverAddress(app1Id, ZERO_ADDRESS))
+      await catchRevert(x2EarnApps.connect(otherAccounts[0]).updateTeamWalletAddress(app1Id, ZERO_ADDRESS))
     })
   })
 

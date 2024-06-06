@@ -10,13 +10,13 @@ library X2EarnAppsDataTypes {
 
   struct AppWithDetails {
     bytes32 id;
-    address receiverAddress;
+    address teamWalletAddress;
     string name;
     string metadataURI;
     uint256 createdAtTimestamp;
     address admin;
     address[] moderators;
-    uint256 receiverAllocationPercentage;
+    uint256 teamAllocationPercentage;
     bool appAvailableForAllocationVoting;
   }
 }
