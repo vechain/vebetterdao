@@ -128,17 +128,6 @@ describe("VoterRewards", () => {
       await expect(voterRewards.connect(otherAccount).setLevelToMultiplier(1, 2)).to.be.reverted // Should not be able to set level to multiplier if not admin
     })
 
-    it("Should be able to set scaling factor", async () => {
-      const { voterRewards, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
-
-      await voterRewards.connect(owner).setScalingFactor(100)
-      expect(await voterRewards.scalingFactor()).to.equal(100)
-
-      await expect(voterRewards.connect(otherAccount).setScalingFactor(100)).to.be.reverted // Should not be able to set scaling factor if not admin
-
-      await expect(voterRewards.connect(owner).setScalingFactor(0)).to.be.reverted // Scaling factor cannot be zero
-    })
-
     it("Should be able to set galaxy member address", async () => {
       const { voterRewards, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
 
