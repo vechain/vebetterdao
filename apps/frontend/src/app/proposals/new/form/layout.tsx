@@ -12,6 +12,8 @@ export default function FormProposalLayout({ children }: Readonly<Props>) {
   const router = useRouter()
   const pageGuardResult = useNewProposalPageGuard()
 
+  console.log(pageGuardResult)
+
   //   redirect the user to the beginning of the form if the required data is missing
   //   this happens in case the user tries to access this page directly
   useLayoutEffect(() => {
