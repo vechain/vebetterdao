@@ -40,8 +40,8 @@ const APPS = [
   },
   {
     address: accounts[6].address,
-    name: "eVearn",
-    metadataURI: "bafkreigty6soh4wn5wzv6vfgt6bozxriwe23v4c7cyxuja65y4knn6cmqe",
+    name: "EVearn",
+    metadataURI: "bafkreif5m23ikv6jphvjciv5uwtq3eqchinh5m5jexdo7atgxyf62az65y",
   },
 ]
 
@@ -72,7 +72,7 @@ export const setupLocalEnvironment = async (
 
   if (!shouldRunSimulation() && !isE2E()) {
     const firstAccount = seedAccounts[0]
-    await airdropB3trPercentage(treasuryAddress, admin, firstAccount, 10, b3tr) // 10% of total supply
+    await airdropB3trPercentage(treasuryAddress, admin, firstAccount, 30, b3tr) // 30% of total supply
   }
 
   const end = new Date(performance.now() - start)
