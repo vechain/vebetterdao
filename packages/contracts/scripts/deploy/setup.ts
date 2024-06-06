@@ -72,7 +72,7 @@ export const setupLocalEnvironment = async (
 
   if (!shouldRunSimulation() && !isE2E()) {
     const firstAccount = seedAccounts[0]
-    await airdropB3trPercentage(treasuryAddress, admin, firstAccount, 10, b3tr) // 10% of total supply
+    await airdropB3trPercentage(treasuryAddress, admin, firstAccount, 30, b3tr) // 30% of total supply
   }
 
   const end = new Date(performance.now() - start)
