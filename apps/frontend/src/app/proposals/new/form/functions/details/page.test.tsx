@@ -3,10 +3,11 @@ import FormProposalLayout from "../../layout"
 import * as store from "@/store"
 import * as router from "next/navigation"
 import * as dappKit from "@vechain/dapp-kit-react"
-import { screen, fireEvent, render, waitFor } from "../../../../../../../test"
+import { fireEvent, render, waitFor } from "../../../../../../../test"
 import { vi } from "vitest"
 import { transferAction } from "../../../../../../../__mocks__/Actions"
 import { address } from "../../../../../../../__mocks__"
+import { screen } from "@testing-library/react"
 const spyOnUseProposalFormStore = vi.spyOn(store, "useProposalFormStore")
 
 /**
@@ -97,7 +98,7 @@ describe("NewProposalFunctionsDetails", async () => {
       ],
       setData: mockSetData,
     })
-    const component = render(
+    render(
       <FormProposalLayout>
         <NewProposalFunctionsDetails />
       </FormProposalLayout>,
@@ -176,7 +177,7 @@ describe("NewProposalFunctionsDetails", async () => {
       actions: [transferAction],
       setData: mockSetData,
     })
-    const component = render(
+    render(
       <FormProposalLayout>
         <NewProposalFunctionsDetails />
       </FormProposalLayout>,
