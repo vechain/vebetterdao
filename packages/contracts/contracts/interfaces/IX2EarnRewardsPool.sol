@@ -2,6 +2,12 @@
 
 pragma solidity ^0.8.20;
 
+/**
+ * @title IX2EarnRewardsPool
+ * @dev Interface designed to be used by a contract that allows x2Earn apps to reward users that performed sustainable actions.
+ * Funds can be deposited into this contract by specifying the app id that can access the funds.
+ * Admins of x2EarnApps can withdraw funds from the rewards pool, whihc are sent to the team wallet.
+ */
 interface IX2EarnRewardsPool {
   /**
    * @dev Event emitted when a new deposit is made into the rewards pool.
@@ -11,6 +17,23 @@ interface IX2EarnRewardsPool {
    * @param depositor The address of the user that deposited the funds.
    */
   event NewDeposit(bytes32 indexed appId, uint256 amount, address indexed depositor);
+
+  /**
+   * @dev Event emitted when a team withdraws funds from the rewards pool.
+   *
+   * @param appId The ID of the app for which the withdrawal was made.
+   * @param amount The amount of $B3TR withdrawn.
+   * @param teamWallet The address of the team wallet that received the funds.
+   * @param withdrawer The address of the user that withdrew the funds.
+   * @param reason The reason for the withdrawal.
+   */
+  event TeamWithdrawal(
+    bytes32 indexed appId,
+    uint256 amount,
+    address indexed teamWallet,
+    address withdrawer,
+    string reason
+  );
 
   /**
    * @dev Event emitted when a reward is emitted by an app.

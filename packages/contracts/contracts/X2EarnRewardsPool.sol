@@ -36,6 +36,7 @@ import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
  * @dev This contract is used by x2Earn apps to reward users that performed sustainable actions.
  * The XAllocationPool contract or other contracts/users can deposit funds into this contract by specifying the app
  * that can access the funds.
+ * Admins of x2EarnApps can withdraw funds from the rewards pool, whihc are sent to the team wallet.
  * The contract is upgradable through the UUPS proxy pattern and UPGRADER_ROLE can authorize the upgrade.
  */
 contract X2EarnRewardsPool is
@@ -120,19 +121,19 @@ contract X2EarnRewardsPool is
   function distributeReward(bytes32 appId, uint256 amount, address receiver, string memory proof) public nonReentrant {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
 
-    require($.x2EarnApps.appExists(appId), "XAllocationPool: app does not exist");
+    require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
 
-    require($.x2EarnApps.isRewardDistributor(appId, msg.sender), "XAllocationPool: not a reward distributor");
+    require($.x2EarnApps.isRewardDistributor(appId, msg.sender), "X2EarnRewardsPool: not a reward distributor");
 
     // check if the app has enough available funds to reward users
-    require($.availableFunds[appId] >= amount, "XAllocationPool: app has insufficient funds");
+    require($.availableFunds[appId] >= amount, "X2EarnRewardsPool: app has insufficient funds");
 
     // check if the contract has enough funds
-    require($.b3tr.balanceOf(address(this)) >= amount, "XAllocationPool: insufficient funds on contract");
+    require($.b3tr.balanceOf(address(this)) >= amount, "X2EarnRewardsPool: insufficient funds on contract");
 
     // transfer the rewards to the receiver
     $.availableFunds[appId] -= amount;
-    require($.b3tr.transfer(receiver, amount), "Allocation transfer to app failed");
+    require($.b3tr.transfer(receiver, amount), "X2EarnRewardsPool: Allocation transfer to app failed");
 
     // emit event
     emit RewardDistributed(msg.sender, appId, amount, receiver, proof);
@@ -148,8 +149,34 @@ contract X2EarnRewardsPool is
     $.x2EarnApps = _x2EarnApps;
   }
 
-  //TODO?
-  // function withdrawWithReason(uint256 amount, bytes32 appId, string memory reason) public nonReentrant;
+  /**
+   * @dev Function used by x2earn apps to withdraw funds from the rewards pool.
+   *
+   * @param appId The ID of the app.
+   * @param amount The amount of $B3TR to withdraw.
+   */
+  function withdraw(bytes32 appId, uint256 amount, string memory reason) public nonReentrant {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+
+    require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
+
+    require($.x2EarnApps.isAppAdmin(appId, msg.sender), "X2EarnRewardsPool: not a reward distributor");
+
+    // check if the app has enough available funds to withdraw
+    require($.availableFunds[appId] >= amount, "X2EarnRewardsPool: app has insufficient funds");
+
+    // check if the contract has enough funds
+    require($.b3tr.balanceOf(address(this)) >= amount, "X2EarnRewardsPool: insufficient funds on contract");
+
+    // Get the team wallet address
+    address teamWalletAddress = $.x2EarnApps.teamWalletAddress(appId);
+
+    // transfer the rewards to the team wallet
+    $.availableFunds[appId] -= amount;
+    require($.b3tr.transfer(teamWalletAddress, amount), "X2EarnRewardsPool: Allocation transfer to app failed");
+
+    emit TeamWithdrawal(appId, amount, teamWalletAddress, msg.sender, reason);
+  }
 
   // ---------- Getters ---------- //
 

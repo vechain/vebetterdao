@@ -168,6 +168,14 @@ interface IX2EarnApps {
   function appAdmin(bytes32 appId) external view returns (address);
 
   /**
+   * @dev Check if an account is the admin of the app
+   *
+   * @param appId the hashed name of the app
+   * @param account the address of the account
+   */
+  function isAppAdmin(bytes32 appId, address account) external view returns (bool);
+
+  /**
    * @dev Update the address where the x2earn app receives allocation funds.
    *
    * @param appId the id of the app
