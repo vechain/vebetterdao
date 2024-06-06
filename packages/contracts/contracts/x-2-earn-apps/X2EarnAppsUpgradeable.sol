@@ -95,61 +95,6 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   /**
    * @inheritdoc IX2EarnApps
    */
-  function setVotingEligibility(bytes32 appId, bool isEligible) public virtual;
-
-  /**
-   * @inheritdoc IX2EarnApps
-   */
-  function addApp(
-    address receiverAddress,
-    address admin,
-    string memory appName,
-    string memory appMetadataURI
-  ) public virtual;
-
-  /**
-   * @inheritdoc IX2EarnApps
-   */
-  function setAppAdmin(bytes32 appId, address newAdmin) public virtual;
-
-  /**
-   * @inheritdoc IX2EarnApps
-   */
-  function updateAppReceiverAddress(bytes32 appId, address newReceiverAddress) public virtual;
-
-  /**
-   * @inheritdoc IX2EarnApps
-   */
-  function updateReceiverAllocationPercentage(bytes32 appId, uint256 percentage) public virtual;
-
-  /**
-   * @inheritdoc IX2EarnApps
-   */
-  function addAppModerator(bytes32 appId, address moderator) public virtual;
-
-  /**
-   * @inheritdoc IX2EarnApps
-   */
-  function removeAppModerator(bytes32 appId, address moderator) public virtual;
-
-  /**
-   * @inheritdoc IX2EarnApps
-   */
-  function addRewardDistributor(bytes32 appId, address distributor) public virtual;
-
-  /**
-   * @inheritdoc IX2EarnApps
-   */
-  function removeRewardDistributor(bytes32 appId, address distributor) public virtual;
-
-  /**
-   * @inheritdoc IX2EarnApps
-   */
-  function updateAppMetadata(bytes32 appId, string memory newMetadataURI) public virtual;
-
-  /**
-   * @inheritdoc IX2EarnApps
-   */
   function appExists(bytes32 appId) public view virtual returns (bool);
 
   /**

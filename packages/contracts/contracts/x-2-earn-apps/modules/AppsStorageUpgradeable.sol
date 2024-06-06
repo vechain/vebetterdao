@@ -60,20 +60,6 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
 
   function __AppsStorage_init_unchained() internal onlyInitializing {}
 
-  // ---------- Setters ---------- //
-
-  /**
-   * @dev See {IX2EarnApps-addApp}.
-   */
-  function addApp(
-    address receiverAddress,
-    address admin,
-    string memory appName,
-    string memory appMetadataURI
-  ) public virtual override {
-    _addApp(receiverAddress, admin, appName, appMetadataURI);
-  }
-
   // ---------- Getters ---------- //
   /**
    * @dev See {IX2EarnApps-appExists}.
