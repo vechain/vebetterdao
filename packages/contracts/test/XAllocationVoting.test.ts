@@ -298,7 +298,7 @@ describe("X-Allocation Voting", function () {
   })
 
   describe("Settings", function () {
-    describe("General settigns", function () {
+    describe("General settings", function () {
       it("Contract should not be able to receive ether", async function () {
         const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: false })
 
