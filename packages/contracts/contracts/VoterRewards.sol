@@ -63,6 +63,9 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
   /// @notice The role that can set the addresses of the contracts used by the VoterRewards contract.
   bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
 
+  /// @notice The scaling factor for the rewards calculation.
+  uint256 public constant scalingFactor = 1e6;
+
   /// @custom:storage-location erc7201:b3tr.storage.VoterRewards
   struct VoterRewardsStorage {
     IGalaxyMember galaxyMember;
@@ -74,7 +77,6 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
     mapping(uint256 => uint256) cycleToTotal;
     // cycle => voter => total weighted votes for the voter in the cycle
     mapping(uint256 => mapping(address => uint256)) cycleToVoterToTotal;
-    uint256 scalingFactor;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.VoterRewards")) - 1)) & ~bytes32(uint256(0xff))
@@ -141,7 +143,6 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
     $.galaxyMember = IGalaxyMember(_galaxyMember);
     $.b3tr = IB3TR(_b3tr);
     $.emissions = IEmissions(_emissions);
-    $.scalingFactor = 1e6;
 
     // Set the level to multiplier mapping.
     for (uint256 i = 0; i < levels.length; i++) {
@@ -254,11 +255,11 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
     require(emissionsAmount > 0, "VoterRewards: emissionsAmount must be greater than 0");
 
     // Scale up the numerator before division to improve precision
-    uint256 scaledNumerator = total * emissionsAmount * $.scalingFactor; // Scale by a factor of scalingFactor for precision
+    uint256 scaledNumerator = total * emissionsAmount * scalingFactor; // Scale by a factor of scalingFactor for precision
     uint256 reward = scaledNumerator / totalCycle;
 
     // Scale down the reward to the original scale
-    return reward / $.scalingFactor;
+    return reward / scalingFactor;
   }
 
   /// @notice Get the total reward-weighted votes for a user in a specific cycle.
@@ -293,12 +294,6 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
   function emissions() public view returns (IEmissions) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
     return $.emissions;
-  }
-
-  /// @notice Get the scaling factor for the rewards calculation.
-  function scalingFactor() public view returns (uint256) {
-    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
-    return $.scalingFactor;
   }
 
   /// @notice Get the B3TR token contract.
@@ -336,15 +331,6 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
 
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
     $.emissions = IEmissions(_emissions);
-  }
-
-  /// @notice Set the scaling factor for the rewards calculation.
-  /// @param newScalingFactor - The new scaling factor.
-  function setScalingFactor(uint256 newScalingFactor) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(newScalingFactor > 0, "VoterRewards: Scaling factor must be greater than 0");
-
-    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
-    $.scalingFactor = newScalingFactor;
   }
 
   /// @notice Returns the version of the contract
