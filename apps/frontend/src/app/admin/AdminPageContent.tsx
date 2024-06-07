@@ -42,6 +42,8 @@ export const AdminPageContent = () => {
     AnalyticsUtils.trackPage("Admin")
   }, [])
 
+  console.log("unit tests are freezed")
+
   const { account } = useWallet()
   const { isAdminOfB3tr, isAdminOfEmissions, isAdminOfXAllocationVoting, isAdminOfVot3, isAdminOfB3trBadge, isAdmin } =
     useAccountPermissions(account ?? "")
