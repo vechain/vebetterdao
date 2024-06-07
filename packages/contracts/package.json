@@ -43,6 +43,7 @@
     "@types/mocha": ">=9.1.0",
     "@vechain/hardhat-ethers": "^0.1.4",
     "@vechain/hardhat-vechain": "^0.1.4",
+    "@vechain/sdk-hardhat-plugin": "^1.0.0-beta.11",
     "@vechain/sdk-network": "1.0.0-beta.5",
     "@vechain/sdk-wallet": "^1.0.0-beta.3",
     "@vechain/web3-providers-connex": "^1.1.2",
