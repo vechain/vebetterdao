@@ -37,14 +37,21 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
     () => Number(amount) + proposal.communityDeposits,
     [amount, proposal.communityDeposits],
   )
+
   const communityDepositsForecastPercentage = useMemo(() => {
+    if (proposal.depositThreshold === 0) return 0
+    return (communityDepositsForecast / proposal.depositThreshold) * 100
+  }, [communityDepositsForecast, proposal.depositThreshold])
+
+  const communityDepositsForecastChartPercentage = useMemo(() => {
     if (proposal.depositThreshold === 0) return 0
     if (communityDepositsForecast > proposal.depositThreshold) {
       return 100
     }
     return (communityDepositsForecast / proposal.depositThreshold) * 100
   }, [communityDepositsForecast, proposal.depositThreshold])
-  const communityDepositsPercentage = useMemo(() => {
+
+  const communityDepositsChartPercentage = useMemo(() => {
     if (proposal.depositThreshold === 0) return 0
     if (communityDepositsForecast > proposal.depositThreshold) {
       return (proposal.communityDeposits / communityDepositsForecast) * 100
@@ -129,7 +136,7 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
             bg={"#004CFC"}
             h="10px"
             rounded="full"
-            w={`${communityDepositsForecastPercentage}%`}
+            w={`${communityDepositsForecastChartPercentage}%`}
             position="absolute"
             top={0}
             left={0}
@@ -138,7 +145,7 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
             bg={"#77A0FF"}
             h="10px"
             rounded="full"
-            w={`${communityDepositsPercentage}%`}
+            w={`${communityDepositsChartPercentage}%`}
             position="absolute"
             top={0}
             left={0}
