@@ -31,6 +31,8 @@ export const useAutomaticUpdateProposalTemplate = () => {
     if (shortDescription) updatedMarkdown = updatedMarkdown.replace(SUMMARY_PLACEHOLDER, shortDescription)
 
     updatedMarkdown = updatedMarkdown.replace(DATE_PLACEHOLDER, dayjs().format("MMMM D, YYYY"))
+
     setData({ markdownDescription: updatedMarkdown })
+    console.log("markdownUpdated", updatedMarkdown)
   }, [title, shortDescription, setData, actions, account])
 }

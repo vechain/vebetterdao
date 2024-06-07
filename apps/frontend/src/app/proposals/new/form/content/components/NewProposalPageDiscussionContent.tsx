@@ -15,7 +15,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
-import { useCallback } from "react"
+import { useCallback, useEffect } from "react"
 import { useProposalFormStore } from "@/store/useProposalFormStore"
 import dynamic from "next/dynamic"
 
@@ -40,11 +40,19 @@ export const NewProposalPageDiscussionContent = () => {
   //automatic update the proposal template based on the form data
   useAutomaticUpdateProposalTemplate()
 
-  const { control, formState, handleSubmit } = useForm<FormData>({
+  const { control, formState, handleSubmit, setValue } = useForm<FormData>({
     defaultValues: {
       markdownDescription,
     },
   })
+
+  //detect changes by useAutomaticUpdateProposalTemplate and update the form
+  useEffect(() => {
+    return () => {
+      if (!markdownDescription) return
+      setValue("markdownDescription", markdownDescription)
+    }
+  }, [setValue, markdownDescription])
 
   const { errors } = formState
 
