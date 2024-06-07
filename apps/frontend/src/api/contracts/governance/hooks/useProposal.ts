@@ -15,6 +15,7 @@ import { useVot3PastSupply, useVot3TokenDetails } from "../../vot3"
 import { useProposalVoteEvent } from "./useProposalVoteEvent"
 import { useProposalSnapshotVotingPower } from "./useProposalSnapshotVotingPower"
 import { useProposalSnapshot } from "./useProposalSnapshot"
+import { useGetVotesOnBlock } from "./useVotesOnBlock"
 
 export const useProposal = (proposalId: string) => {
   const { account } = useWallet()
@@ -35,7 +36,7 @@ export const useProposal = (proposalId: string) => {
   const isQuorumReached = useIsProposalQuorumReached(proposalId, isProposalActive)
   const proposalVotes = useProposalVotes(proposalId, isProposalActive)
   const proposalSnapshotVotingPower = useProposalSnapshotVotingPower(proposalSnapshotBlock, isProposalActive)
-  const proposalSnapshotVot3 = useVot3PastSupply(proposalSnapshotBlock, isProposalActive)
+  const proposalSnapshotVot3 = useGetVotesOnBlock(proposalSnapshotBlock, account ?? undefined, isProposalActive)
   const vot3Token = useVot3TokenDetails()
   const roundIdVoteStart = useMemo(() => {
     return proposalCreatedEvent.data?.roundIdVoteStart
@@ -91,7 +92,7 @@ export const useProposal = (proposalId: string) => {
       ? Math.max(Number(supportingUserCount) - 1, 0)
       : Number(supportingUserCount)
     const userVotingPowerOnSnapshot = scaleVot3Amount(proposalSnapshotVotingPower.data)
-    const userVot3OnSnapshot = scaleVot3Amount(proposalSnapshotVot3.data)
+    const userVot3OnSnapshot = proposalSnapshotVot3.data?.scaled ?? "0"
 
     const result = {
       id: proposalId,
