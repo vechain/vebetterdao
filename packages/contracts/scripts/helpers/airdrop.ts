@@ -34,6 +34,19 @@ export const airdropVTHO = async (accounts: SeedAccount[], signingAcct: TestPk) 
 }
 
 /**
+ * Transfer ERC20 tokens
+ */
+export const transferErc20 = async (tokenAddress: string, sender: TestPk, recipient: string, amount: bigint) => {
+  const clauses: TransactionClause[] = []
+
+  clauses.push(clauseBuilder.transferToken(tokenAddress, recipient, amount))
+
+  const body: TransactionBody = await buildTxBody(clauses, sender.address, 32)
+
+  await signAndSendTx(body, sender.pk)
+}
+
+/**
  *  Airdrop B3TR from treasury to a list of accounts
  */
 export const airdropB3trFromTreasury = async (treasuryAddress: string, admin: TestPk, accounts: SeedAccount[]) => {
@@ -61,34 +74,4 @@ export const airdropB3trFromTreasury = async (treasuryAddress: string, admin: Te
     }
     await signAndSendTx(body, admin.pk)
   }
-}
-
-/**
- * Airdrop a percentage of B3TR supply to a specific account
- */
-export const airdropB3trPercentage = async (
-  treasuryAddress: string,
-  admin: TestPk,
-  account: SeedAccount,
-  percentage: number,
-  b3tr: B3TR,
-) => {
-  console.log(`Airdropping ${percentage}% of B3TR supply to ${account.key.address}...`)
-
-  const b3trSupply: bigint = await b3tr.totalSupply()
-
-  const amount = (b3trSupply * BigInt(percentage)) / BigInt(100)
-
-  const clause: TransactionClause = clauseBuilder.functionInteraction(
-    treasuryAddress,
-    coder.createInterface(JSON.stringify(Treasury__factory.abi)).getFunction("transferB3TR") as FunctionFragment,
-    [account.key.address, amount],
-  )
-
-  const body: TransactionBody = await buildTxBody([clause], admin.address, 32)
-
-  if (!admin.pk) {
-    throw new Error("Account does not have a private key")
-  }
-  await signAndSendTx(body, admin.pk)
 }
