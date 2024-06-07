@@ -7,6 +7,8 @@ import { governanceAvailableContracts } from "@/constants"
 import { ethers } from "ethers"
 import { B3TRGovernor__factory, VOT3__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
+import { evalManifestWithRetries } from "next/dist/server/load-components"
+import { isZero } from "@repo/utils/FormattingUtils"
 export type AvailableContractAbis = (typeof governanceAvailableContracts)[number]["abi"]["abi"][number]
 
 const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
@@ -81,14 +83,20 @@ export const useCreateProposal = ({
         contractsAddress: string[]
         calldatas: string[]
       }
+      const clauses: EnhancedClause[] = []
       const parsedDepositAmount = ethers.parseEther(depositAmount).toString()
 
-      const approveClause: EnhancedClause = {
-        to: getConfig().vot3ContractAddress,
-        value: 0,
-        data: vot3Interface.encodeFunctionData("approve", [GOVERNANCE_CONTRACT, parsedDepositAmount]),
-        comment: `Approve ${GOVERNANCE_CONTRACT} to transfer ${depositAmount} VOT3`,
-        abi: JSON.parse(JSON.stringify(vot3Interface.getFunction("approve"))),
+      console.log("depositAmount", depositAmount)
+      console.log("parsedDepositAmount", parsedDepositAmount)
+      if (!isZero(depositAmount)) {
+        const approveClause: EnhancedClause = {
+          to: getConfig().vot3ContractAddress,
+          value: 0,
+          data: vot3Interface.encodeFunctionData("approve", [GOVERNANCE_CONTRACT, parsedDepositAmount]),
+          comment: `Approve ${GOVERNANCE_CONTRACT} to transfer ${depositAmount} VOT3`,
+          abi: JSON.parse(JSON.stringify(vot3Interface.getFunction("approve"))),
+        }
+        clauses.push(approveClause)
       }
 
       const targetsAndCalldata = actions.reduce<ReducedActions>(
@@ -114,8 +122,9 @@ export const useCreateProposal = ({
         comment: `Create new proposal for round ${startRoundId} with description: ${description}`,
         abi: JSON.parse(JSON.stringify(b3trGovernorInterface.getFunction("propose"))),
       }
+      clauses.push(createProposalClause)
 
-      return [approveClause, createProposalClause]
+      return clauses
     },
     [account],
   )

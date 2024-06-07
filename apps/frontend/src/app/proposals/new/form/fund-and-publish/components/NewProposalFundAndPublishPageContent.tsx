@@ -136,7 +136,7 @@ export const NewProposalFundAndPublishPageContent = () => {
         <CardBody py={8}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <VStack spacing={8} align="flex-start">
-              <Heading size="lg">({t("Support and publish")})</Heading>
+              <Heading size="lg">{t("Support and publish")}</Heading>
               <Text fontSize="md" color="gray.500">
                 {t(
                   "Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of {{amount}} VOT3 to become active. You can also contribute with your own VOT3.",
