@@ -1,54 +1,38 @@
 import { ProposalState, useCurrentProposal } from "@/api"
 import { Arm } from "@/components/Icons/Arm"
-import { TransactionModal } from "@/components/TransactionModal"
-import { useWithdrawDeposit } from "@/hooks/useWithdrawDeposit"
-import { Box, Button, Card, Circle, Flex, HStack, Heading, Text, VStack, useDisclosure } from "@chakra-ui/react"
+import { Box, Card, Circle, Flex, HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
+import { ProposalWithdrawButton } from "../ProposalWithdrawButton"
 
-const compactFormatter = getCompactFormatter()
+const compactFormatter = getCompactFormatter(2)
 
 export const ProposalWithdrawDeposit = () => {
   const { proposal } = useCurrentProposal()
   const { t } = useTranslation()
-  const withdrawMutation = useWithdrawDeposit({
-    proposalId: proposal.id,
-  })
-  const { isOpen, onClose: handleClose, onOpen } = useDisclosure()
-  const withdraw = useCallback(
-    (e: React.FormEvent) => {
-      onOpen()
-      withdrawMutation.sendTransaction({})
-      e.preventDefault()
-    },
-    [onOpen, withdrawMutation],
-  )
+
   return (
     <>
-      <TransactionModal
-        isOpen={isOpen}
-        onClose={handleClose}
-        successTitle={"Deposit Withdraw Completed!"}
-        status={withdrawMutation.error ? "error" : withdrawMutation.status}
-        errorDescription={withdrawMutation.error?.reason}
-        errorTitle={withdrawMutation.error ? "Error Withdrawing" : undefined}
-        pendingTitle="Withdrawing..."
-        showExplorerButton
-        txId={withdrawMutation.txReceipt?.meta.txID ?? withdrawMutation.sendTransactionTx?.txid}
-      />
       {proposal.state !== ProposalState.Pending &&
-        Number(proposal.userSupport) > 0 && (
-          <Card border={`1px solid #004CFC`} rounded="16px" p="24px" boxShadow={"0px 0px 16px 0px #004CFC59"}>
-            <VStack alignItems={"stretch"} gap={6} as="form" onSubmit={withdraw}>
+        proposal.userSupport != 0 && (
+          <Card
+            border={`1px solid ${proposal.isUserSupportLeft ? "#004CFC" : "#D5D5D5"}`}
+            rounded="16px"
+            p="24px"
+            boxShadow={proposal.isUserSupportLeft ? "0px 0px 16px 0px #004CFC59" : undefined}>
+            <VStack alignItems={"stretch"} gap={6}>
               <HStack justify="space-between">
                 <Heading fontSize={"24px"} fontWeight={700}>
                   {t("Community Support")}
                 </Heading>
                 <UilInfoCircle size="24px" color={"#004CFC"} />
               </HStack>
-              <Text fontSize={"14px"}>{t("This round has started, claim your tokens back.")}</Text>
+              <Text fontSize={"14px"}>
+                {t(
+                  proposal.isUserSupportLeft ? "This round is ended, claim your tokens back." : "This round is ended.",
+                )}
+              </Text>
               <VStack alignItems={"stretch"} gap={4}>
                 <HStack alignItems={"baseline"} justify={"space-between"}>
                   <HStack alignItems={"baseline"}>
@@ -109,9 +93,7 @@ export const ProposalWithdrawDeposit = () => {
                   </HStack>
                 </VStack>
               </VStack>
-              <Button type="submit" variant="primaryAction">
-                {t("Claim your tokens back")}
-              </Button>
+              {proposal.isUserSupportLeft && <ProposalWithdrawButton />}
             </VStack>
           </Card>
         )}

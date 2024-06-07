@@ -3,11 +3,11 @@ import { Arm } from "@/components/Icons/Arm"
 import { filterAmountInput } from "@/utils"
 import { Box, Button, Divider, Flex, HStack, Image, Input, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { useCallback, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
-const compactFormatter = getCompactFormatter()
+const compactFormatter = getCompactFormatter(2)
 
 export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => void }) => {
   const { t } = useTranslation()
@@ -33,6 +33,31 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
     },
     [amount, onSubmit],
   )
+  const communityDepositsForecast = useMemo(
+    () => Number(amount) + proposal.communityDeposits,
+    [amount, proposal.communityDeposits],
+  )
+
+  const communityDepositsForecastPercentage = useMemo(() => {
+    if (proposal.depositThreshold === 0) return 0
+    return (communityDepositsForecast / proposal.depositThreshold) * 100
+  }, [communityDepositsForecast, proposal.depositThreshold])
+
+  const communityDepositsForecastChartPercentage = useMemo(() => {
+    if (proposal.depositThreshold === 0) return 0
+    if (communityDepositsForecast > proposal.depositThreshold) {
+      return 100
+    }
+    return (communityDepositsForecast / proposal.depositThreshold) * 100
+  }, [communityDepositsForecast, proposal.depositThreshold])
+
+  const communityDepositsChartPercentage = useMemo(() => {
+    if (proposal.depositThreshold === 0) return 0
+    if (communityDepositsForecast > proposal.depositThreshold) {
+      return (proposal.communityDeposits / communityDepositsForecast) * 100
+    }
+    return (proposal.communityDeposits / proposal.depositThreshold) * 100
+  }, [communityDepositsForecast, proposal.communityDeposits, proposal.depositThreshold])
 
   return (
     <VStack gap={6} alignItems={"stretch"} as="form" onSubmit={handleSubmit}>
@@ -83,7 +108,7 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
       </VStack>
       <VStack alignItems={"stretch"}>
         <Text fontSize={"14px"} color="#6A6A6A">
-          {t("Current proposal support")}
+          {t("Forecasted proposal support")}
         </Text>
         <HStack alignItems={"baseline"} justify={"space-between"}>
           <HStack alignItems={"baseline"}>
@@ -91,7 +116,7 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
               <Arm color={"#004CFC"} size={"36"} />
             </Flex>
             <Text fontSize={"28px"} color={"#252525"} fontWeight={400}>
-              {compactFormatter.format(Number(proposal.communityDeposits))}
+              {compactFormatter.format(communityDepositsForecast)}
             </Text>
             <Text fontSize={"20px"} fontWeight={500} color={"#6A6A6A"}>
               {t("/")}
@@ -101,7 +126,7 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
             </Text>
           </HStack>
           <Text fontSize={"14px"} fontWeight={400} color={"#6A6A6A"}>
-            {compactFormatter.format(proposal.communityDepositPercentage * 100)}
+            {compactFormatter.format(communityDepositsForecastPercentage)}
             {t("%")}
           </Text>
         </HStack>
@@ -111,7 +136,7 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
             bg={"#004CFC"}
             h="10px"
             rounded="full"
-            w={`${proposal.communityDepositChartPercentage}%`}
+            w={`${communityDepositsForecastChartPercentage}%`}
             position="absolute"
             top={0}
             left={0}
@@ -120,7 +145,7 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
             bg={"#77A0FF"}
             h="10px"
             rounded="full"
-            w={`${proposal.othersSupportChartPercentage}%`}
+            w={`${communityDepositsChartPercentage}%`}
             position="absolute"
             top={0}
             left={0}
