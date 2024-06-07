@@ -36,12 +36,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.cache/hardhat-nodejs
-          key: ${{ runner.os }}-solc-${{ hashFiles('./packages/contracts/hardhat.config.js') }}
+          key: ${{ runner.os }}-solc-${{ hashFiles('./packages/contracts/hardhat.config.ts') }}
           restore-keys: |
             ${{ runner.os }}-solc-
-
-      - name: Debug - Print hardhat.config.js hash
-        run: echo $(shasum -a 256 ./packages/contracts/hardhat.config.js)
 
       - name: Check for Frontend changes
         uses: dorny/paths-filter@v3
