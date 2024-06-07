@@ -27,6 +27,8 @@ export type TransactionModalProps = {
   b3trBalanceAfterSwap?: string
   vot3BalanceAfterSwap?: string
   isSwap?: boolean
+  b3trBalance?: string
+  vot3Balance?: string
 }
 
 export const TransactionModal = ({
@@ -47,6 +49,8 @@ export const TransactionModal = ({
   isSwap,
   b3trBalanceAfterSwap,
   vot3BalanceAfterSwap,
+  b3trBalance,
+  vot3Balance,
 }: TransactionModalProps) => {
   const modalContent = useMemo(() => {
     if (status === "uploadingMetadata") return <UploadingMetadataModalContent />
@@ -73,11 +77,11 @@ export const TransactionModal = ({
           txId={txId}
         />
       )
-    if (status === "success")
+    if (status === "success") {
       return isSwap ? (
         <SuccessConvertModalContent
-          b3trBalanceAfter={b3trBalanceAfterSwap}
-          vot3BalanceAfter={vot3BalanceAfterSwap}
+          b3trBalanceAfter={b3trBalance}
+          vot3BalanceAfter={vot3Balance}
           txId={txId}
           onClose={onClose}
         />
@@ -90,6 +94,7 @@ export const TransactionModal = ({
           txId={txId}
         />
       )
+    }
     return null
   }, [
     status,
@@ -104,6 +109,8 @@ export const TransactionModal = ({
     errorDescription,
     showTryAgainButton,
     onTryAgain,
+    b3trBalance,
+    vot3Balance,
     onClose,
     successTitle,
     showSocialButtons,
