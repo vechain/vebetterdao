@@ -32,6 +32,14 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Cache Solidity compilers
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/hardhat-nodejs
+          key: ${{ runner.os }}-solc-${{ hashFiles('**/hardhat.config.js') }}
+          restore-keys: |
+            ${{ runner.os }}-solc-
+
       - name: Check for Frontend changes
         uses: dorny/paths-filter@v3
         id: frontend_changes
