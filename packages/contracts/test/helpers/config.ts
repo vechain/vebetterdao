@@ -4,7 +4,7 @@ export function createTestConfig() {
   return defineConfig({
     NEXT_PUBLIC_APP_ENV: "local",
 
-    B3TR_CAP: 1_000_000_000, // 1B
+    B3TR_CAP: 1_000_243_154, // 1B
     B3TR_GOVERNOR_QUORUM_PERCENTAGE: 4, // 4 -> Need 4% of voters to pass
     TIMELOCK_MIN_DELAY: 30, //after a vote passes, you have 5 min before you can vote queue the proposal
     B3TR_GOVERNOR_DEPOSIT_THRESHOLD: 2, // 2% of total B3TR supply needed to be deposited to create a proposal
@@ -86,5 +86,9 @@ export function createTestConfig() {
     TREASURY_TRANSFER_LIMIT_B3TR: BigInt("1000000000000000000"), // 1 B3TR
     TREASURY_TRANSFER_LIMIT_VTHO: BigInt("1000000000000000000"), // 1 VTHO
     TREASURY_TRANSFER_LIMIT_VOT3: BigInt("1000000000000000000"), // 1 VOT3
+
+    // Migration
+    MIGRATION_ADDRESS: "0x865306084235Bf804c8Bba8a8d56890940ca8F0b", // 10th account from mnemonic of solo network
+    MIGRATION_AMOUNT: BigInt("3750000000000000000000000"), // 3.75 million B3TR tokens from pilot show
   })
 }

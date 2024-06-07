@@ -599,7 +599,7 @@ describe("Galaxy Member", () => {
       await catchRevert(galaxyMember.connect(voter).freeMint())
 
       // we do it here but will use in the next test
-      await getVot3Tokens(voter, "1000")
+      await getVot3Tokens(voter, "30000")
 
       // Now we can create a new proposal
       const tx = await createProposal(b3tr, B3trContract, otherAccount, "", "tokenDetails", [])
@@ -633,7 +633,7 @@ describe("Galaxy Member", () => {
       await catchRevert(galaxyMember.connect(voter).freeMint())
 
       // we do it here but will use in the next test
-      await getVot3Tokens(voter, "1000")
+      await getVot3Tokens(voter, "30000")
 
       // Now we can create a new proposal
       const tx = await createProposal(b3tr, B3trContract, otherAccount, "", "tokenDetails", [])
