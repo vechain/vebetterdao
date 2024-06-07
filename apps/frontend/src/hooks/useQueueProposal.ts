@@ -10,6 +10,12 @@ const GovernorInterface = B3TRGovernor__factory.createInterface()
 
 type Props = { proposalId: string; onSuccess?: () => void }
 
+/**
+ * Hook to queue a proposal
+ * @param proposalId  the proposal id to queue
+ * @param onSuccess  the callback to call after the proposal is queued
+ * @returns the queue transaction
+ */
 export const useQueueProposal = ({ proposalId, onSuccess }: Props) => {
   const proposalCreatedEvent = useProposalCreatedEvent(proposalId)
 

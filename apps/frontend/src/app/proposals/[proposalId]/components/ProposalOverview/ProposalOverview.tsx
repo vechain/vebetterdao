@@ -78,17 +78,19 @@ export const ProposalOverview = () => {
                   <ProposalOverviewCommunitySupport />
                   <ProposalOverviewYourSupport />
                 </HStack>
-                <IconButton
-                  isDisabled={proposal.isStateLoading}
-                  aria-label="share"
-                  rounded="full"
-                  bgColor="#E0E9FE"
-                  color="#004CFC"
-                  h="40px"
-                  w="40px">
-                  <UilShareAlt size="20px" />
-                </IconButton>
-                <CastProposalVoteButton />
+                <HStack justify={"flex-end"} flexWrap={"wrap"} gap={4}>
+                  <IconButton
+                    isDisabled={proposal.isStateLoading}
+                    aria-label="share"
+                    rounded="full"
+                    bgColor="#E0E9FE"
+                    color="#004CFC"
+                    h="40px"
+                    w="40px">
+                    <UilShareAlt size="20px" />
+                  </IconButton>
+                  <CastProposalVoteButton />
+                </HStack>
               </HStack>
             </VStack>
           </VStack>

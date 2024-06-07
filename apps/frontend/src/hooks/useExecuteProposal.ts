@@ -10,6 +10,12 @@ const GovernorInterface = B3TRGovernor__factory.createInterface()
 
 type Props = { proposalId: string; onSuccess?: () => void }
 
+/**
+ * Hook to execute a proposal
+ * @param proposalId  the proposal id to execute
+ * @param onSuccess  the callback to call after the proposal is executed
+ * @returns the execute transaction
+ */
 export const useExecuteProposal = ({ proposalId, onSuccess }: Props) => {
   const proposalCreatedEvent = useProposalCreatedEvent(proposalId)
 

@@ -20,6 +20,7 @@ import {
 } from "@chakra-ui/react"
 import { UilInfoCircle, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useWallet } from "@vechain/dapp-kit-react"
 import { useRouter } from "next/navigation"
 import { FormEvent, useCallback, useLayoutEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -51,8 +52,9 @@ export const ProposalVote = () => {
   const [comment, setComment] = useState("")
   const { isOpen, onClose, onOpen } = useDisclosure()
   const router = useRouter()
+  const { account } = useWallet()
 
-  const isPageNotAllowed = proposal.state !== ProposalState.Active || proposal.hasUserVoted
+  const isPageNotAllowed = proposal.state !== ProposalState.Active || proposal.hasUserVoted || !account
 
   useLayoutEffect(() => {
     if (isPageNotAllowed) {

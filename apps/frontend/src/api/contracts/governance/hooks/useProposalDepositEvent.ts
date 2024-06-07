@@ -4,6 +4,11 @@ import { useScaleVot3Amount } from "@/hooks"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 
+/**
+ * Hook to get the proposal deposit event
+ * @param proposalId  the proposal id to get the deposit event for
+ * @returns the deposit event for the proposal
+ */
 export const useProposalDepositEvent = (proposalId: string) => {
   const scaleVot3Amount = useScaleVot3Amount()
   const { account } = useWallet()
