@@ -15,8 +15,7 @@ export const ProposalWithdrawDeposit = () => {
   return (
     <>
       {proposal.state !== ProposalState.Pending &&
-        proposal.state !== ProposalState.Active &&
-        proposal.state !== ProposalState.DepositNotMet && (
+        proposal.userSupport != 0 && (
           <Card
             border={`1px solid ${proposal.isUserSupportLeft ? "#004CFC" : "#D5D5D5"}`}
             rounded="16px"
