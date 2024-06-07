@@ -3874,7 +3874,71 @@ describe("Governor and TimeLock", function () {
       expect(0n).to.eql(await vot3.balanceOf(await governor.getAddress()))
     })
 
-    it("Deposits cannot be withdrawn when proposal is pending or active", async () => {
+    it("Deposits can be withdrawn when proposal is active", async () => {
+      const config = createLocalConfig()
+      const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3 } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
+
+      const proposer = otherAccounts[0]
+      await getVot3Tokens(proposer, "1000")
+      // grant approval to the governor contract
+      await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // get enough to pay the deposit
+      const sponser = otherAccounts[1]
+      const depositAmount = await governor.depositThreshold()
+      const depositAmountToPay = (Number(ethers.formatEther(depositAmount)) * 1.2).toString()
+      await getVot3Tokens(sponser, depositAmountToPay.toString())
+      // grant approval to the governor contract
+      await vot3.connect(sponser).approve(await governor.getAddress(), ethers.parseEther(depositAmountToPay))
+
+      // Now we can create a new proposal
+      const address = await b3tr.getAddress()
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
+      const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
+
+      // Create a proposal with a deposit of 1000 VOT3
+      const tx = await governor
+        .connect(proposer)
+        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("1000"), {
+          gasLimit: 10_000_000,
+        })
+
+      const proposalId = await getProposalIdFromTx(tx, true)
+
+      expect(await governor.getUserDeposit(proposalId, proposer)).to.eql(ethers.parseEther("1000"))
+
+      // sponser contributes to the deposit
+      await governor
+        .connect(sponser)
+        .deposit(ethers.parseEther(depositAmountToPay), proposalId, { gasLimit: 10_000_000 })
+
+      expect(await governor.getUserDeposit(proposalId, sponser)).to.eql(ethers.parseEther(depositAmountToPay))
+
+      expect(await governor.state(proposalId)).to.eql(0n) // pending
+
+      await waitForProposalToBeActive(proposalId)
+      // proposal should be in active state as deposit was met
+      expect(await governor.state(proposalId)).to.eql(1n) // active
+
+      // deposits can be withdrawn when proposal is active
+      await governor.connect(sponser).withdraw(proposalId, sponser.address, { gasLimit: 10_000_000 })
+      expect(await governor.getUserDeposit(proposalId, sponser)).to.eql(0n)
+
+      expect(ethers.parseEther("1000")).to.eql(await vot3.balanceOf(await governor.getAddress()))
+
+      await governor.connect(proposer).withdraw(proposalId, proposer.address, { gasLimit: 10_000_000 })
+      expect(await governor.getUserDeposit(proposalId, proposer)).to.eql(0n)
+      expect(0n).to.eql(await vot3.balanceOf(await governor.getAddress()))
+    })
+
+    it("Deposits cannot be withdrawn when proposal is pending", async () => {
       const config = createLocalConfig()
       const { b3tr, otherAccounts, governor, B3trContract, xAllocationVoting, vot3 } =
         await getOrDeployContractInstances({
@@ -3934,26 +3998,14 @@ describe("Governor and TimeLock", function () {
       // proposal should be in active state as deposit was met
       expect(await governor.state(proposalId)).to.eql(1n) // active
 
-      // deposits cannot be withdrawn when proposal is active
-      await expect(governor.connect(proposer).withdraw(proposalId, proposer.address, { gasLimit: 10_000_000 })).to.be
-        .reverted
-
-      await expect(governor.connect(sponser).withdraw(proposalId, sponser.address, { gasLimit: 10_000_000 })).to.be
-        .reverted
-
-      // wait for voting period to end
-      await waitForVotingPeriodToEnd(proposalId)
-
-      expect(ethers.parseEther(`${Number(depositAmountToPay) + 1000}`)).to.eql(
-        await vot3.balanceOf(await governor.getAddress()),
-      )
-
-      await governor.connect(proposer).withdraw(proposalId, proposer.address, { gasLimit: 10_000_000 })
-      expect(await governor.getUserDeposit(proposalId, proposer)).to.eql(0n)
-
+      // deposits can be withdrawn when proposal is active
       await governor.connect(sponser).withdraw(proposalId, sponser.address, { gasLimit: 10_000_000 })
       expect(await governor.getUserDeposit(proposalId, sponser)).to.eql(0n)
 
+      expect(ethers.parseEther("1000")).to.eql(await vot3.balanceOf(await governor.getAddress()))
+
+      await governor.connect(proposer).withdraw(proposalId, proposer.address, { gasLimit: 10_000_000 })
+      expect(await governor.getUserDeposit(proposalId, proposer)).to.eql(0n)
       expect(0n).to.eql(await vot3.balanceOf(await governor.getAddress()))
     })
 
@@ -4391,6 +4443,7 @@ describe("Governor and TimeLock", function () {
         .reverted
     })
   })
+
   describe("Libraries", function () {
     let governor: B3TRGovernor
 
