@@ -29,7 +29,7 @@ export const getProposalQuorum = async (
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
   const original = res.decoded[0]
-  const scaled = FormattingUtils.scaleNumberDown(original, 18)
+  const scaled = FormattingUtils.scaleNumberDown(original, 18, 18)
   const formatted = scaled === "0" ? "0" : FormattingUtils.humanNumber(scaled)
 
   return {
@@ -45,12 +45,12 @@ export const getProposalQuorumQueryKey = (blockNumber?: string | number) => ["pr
  * @param blockNumber  the block number to check (proposal.voteStart)
  * @returns  the quorum at the given block number
  */
-export const useProposalQuorum = (blockNumber?: string | number) => {
+export const useProposalQuorum = (blockNumber?: string | number, enabled = false) => {
   const { thor } = useConnex()
 
   return useQuery({
     queryKey: getProposalQuorumQueryKey(blockNumber),
     queryFn: async () => await getProposalQuorum(thor, blockNumber),
-    enabled: !!thor && !!blockNumber,
+    enabled: !!thor && !!blockNumber && enabled,
   })
 }
