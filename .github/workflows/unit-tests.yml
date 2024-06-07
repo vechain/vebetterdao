@@ -36,12 +36,12 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.cache/hardhat-nodejs
-          key: ${{ runner.os }}-solc-${{ hashFiles('packages/contracts/hardhat.config.js') }}
+          key: ${{ runner.os }}-solc-${{ hashFiles('./packages/contracts/hardhat.config.js') }}
           restore-keys: |
             ${{ runner.os }}-solc-
 
       - name: Debug - Print hardhat.config.js hash
-        run: echo $(shasum -a 256 packages/contracts/hardhat.config.js)
+        run: echo $(shasum -a 256 ./packages/contracts/hardhat.config.js)
 
       - name: Check for Frontend changes
         uses: dorny/paths-filter@v3
@@ -86,7 +86,7 @@ jobs:
       # Run global unit tests if any of the following changes are detected
       - name: Global Unit Tests
         if: steps.contract_changes.outputs.src == 'true' || steps.utils_changes.outputs.src == 'true'
-        run: (cd packages/contracts && yarn test)
+        run: yarn test
 
       # Otherwise, run specific unit tests based on the changes detected
       - name: Frontend Unit Tests
