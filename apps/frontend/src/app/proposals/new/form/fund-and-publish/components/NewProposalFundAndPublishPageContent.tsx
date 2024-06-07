@@ -3,6 +3,7 @@ import {
   Card,
   CardBody,
   FormControl,
+  FormErrorMessage,
   FormHelperText,
   HStack,
   Heading,
@@ -17,7 +18,7 @@ import {
 } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
-import { useProposalFormStore } from "@/store/useProposalFormStore"
+import { useProposalFormStore } from "@/store"
 import { VOT3Icon } from "@/components"
 import { useDepositThreshold, useVot3Balance } from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"
@@ -135,17 +136,17 @@ export const NewProposalFundAndPublishPageContent = () => {
         <CardBody py={8}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <VStack spacing={8} align="flex-start">
-              <Heading size="lg">Community support</Heading>
+              <Heading size="lg">({t("Support and publish")})</Heading>
               <Text fontSize="md" color="gray.500">
-                Your proposal will need support from the community to become active. Users who like your proposal and
-                want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will
-                need a total of {compactFormatter.format(Number(threshold))} VOT3 to become active. You can also
-                contribute with your own VOT3.
+                {t(
+                  "Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of {{amount}} VOT3 to become active. You can also contribute with your own VOT3.",
+                  { amount: compactFormatter.format(Number(threshold)) },
+                )}
               </Text>
               <VStack spacing={2} align="flex-start" w="full">
-                <Heading size="md">How much VOT3 do you want to lock to fund this proposal?</Heading>
+                <Heading size="md">{t("Would you like to contribute to your proposal with some tokens?")}</Heading>
                 <Text fontSize="sm" color="gray.500">
-                  Your VOT3 will be unlocked when the voting session ends.
+                  {t("You can claim back your tokens once the voting period is over.")}
                 </Text>
 
                 <FormControl isInvalid={!!errors.amount}>
@@ -154,6 +155,7 @@ export const NewProposalFundAndPublishPageContent = () => {
                       <VOT3Icon colorVariant="dark" />
                     </InputLeftElement>
                     <Input
+                      data-testid="vot3-amount-input"
                       {...register("amount", {
                         required: t("This field is required"),
                         max: {
@@ -183,20 +185,32 @@ export const NewProposalFundAndPublishPageContent = () => {
                   </InputGroup>
                   <Skeleton isLoaded={!balanceLoading}>
                     {errors.amount ? (
-                      <FormHelperText color="red.500">{errors.amount.message}</FormHelperText>
+                      <FormErrorMessage data-testid="amount-input-error-message">
+                        {errors.amount.message}
+                      </FormErrorMessage>
                     ) : (
-                      <FormHelperText>Your current VOT3 balance is {balance?.formatted}</FormHelperText>
+                      <FormHelperText>
+                        {t("Your current VOT3 balance is {{amount}}", {
+                          amount: balance?.formatted,
+                        })}
+                      </FormHelperText>
                     )}
                   </Skeleton>
                 </FormControl>
               </VStack>
 
               <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
-                <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
+                <Button
+                  data-testid="go-back"
+                  rounded="full"
+                  variant={"primarySubtle"}
+                  colorScheme="primary"
+                  size="lg"
+                  onClick={goBack}>
                   {t("Go back")}
                 </Button>
-                <Button rounded="full" colorScheme="primary" size="lg" type="submit">
-                  Fund and publish
+                <Button data-testid="continue" rounded="full" colorScheme="primary" size="lg" type="submit">
+                  {t("Support and publish")}
                 </Button>
               </HStack>
             </VStack>

@@ -1,4 +1,9 @@
 {
+  "Your current VOT3 balance is {{amount}}": "Your current VOT3 balance is {{amount}}",
+  "Support and publish": "Support and publish",
+  "Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of {{amount}} VOT3 to become active. You can also contribute with your own VOT3.": "Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of {{amount}} VOT3 to become active. You can also contribute with your own VOT3.",
+  "Would you like to contribute to your proposal with some tokens?": "Would you like to contribute to your proposal with some tokens?",
+  "You can claim back your tokens once the voting period is over.": "You can claim back your tokens once the voting period is over.",
   "No rounds available": "No rounds available",
   "Emissions have propably not started yet": "Emissions have propably not started yet",
   "Make sure to replace all the placeholders with your own content.": "Make sure to replace all the placeholders with your own content.",

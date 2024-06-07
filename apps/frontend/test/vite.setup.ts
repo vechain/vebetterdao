@@ -5,6 +5,7 @@ import { loadEnvConfig } from "@next/env"
 import { cleanup } from "@testing-library/react"
 
 import "../src/i18n"
+import { useConnex } from "@vechain/dapp-kit-react"
 const adminAddress = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa"
 
 vi.mock("zustand")
@@ -59,6 +60,23 @@ vi.mock("@vechain/dapp-kit-react", async importOriginal => {
     ...mod,
     useWallet: () => ({
       account: adminAddress,
+    }),
+    useConnex: () => ({
+      connex: {
+        thor: {
+          block: {
+            get: vi.fn(),
+          },
+        },
+      },
+      vendor: {
+        sign: () => ({
+          signer: () => ({
+            request: vi.fn(),
+          }),
+          request: vi.fn(),
+        }),
+      },
     }),
   }
 })
