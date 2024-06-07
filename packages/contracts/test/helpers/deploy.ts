@@ -224,7 +224,7 @@ export const getOrDeployContractInstances = async ({
       admin: owner.address,
       upgrader: owner.address,
       b3trAddress: await b3tr.getAddress(),
-      destinations: [X_ALLOCATIONS_ADDRESS, VOTE_2_EARN_ADDRESS, await treasury.getAddress()],
+      destinations: [X_ALLOCATIONS_ADDRESS, VOTE_2_EARN_ADDRESS, await treasury.getAddress(), config.MIGRATION_ADDRESS],
       initialXAppAllocation: config.INITIAL_X_ALLOCATION,
       cycleDuration: config.EMISSIONS_CYCLE_DURATION,
       decaySettings: [
@@ -235,6 +235,7 @@ export const getOrDeployContractInstances = async ({
       ],
       treasuryPercentage: config.EMISSIONS_TREASURY_PERCENTAGE,
       maxVote2EarnDecay: config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
+      migrationAmount: config.MIGRATION_AMOUNT,
     },
   ])) as Emissions
 
