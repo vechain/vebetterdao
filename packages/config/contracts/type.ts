@@ -41,4 +41,8 @@ export type ContractsConfig = {
   TREASURY_TRANSFER_LIMIT_B3TR: bigint
   TREASURY_TRANSFER_LIMIT_VTHO: bigint
   TREASURY_TRANSFER_LIMIT_VOT3: bigint
+
+  // Migration
+  MIGRATION_ADDRESS: string
+  MIGRATION_AMOUNT: bigint
 }
