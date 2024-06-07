@@ -1,8 +1,8 @@
 import { useTokenColors } from "@/hooks"
-import { Button, Divider, HStack, Input, Stack, Text, VStack } from "@chakra-ui/react"
+import { Button, Divider, HStack, Input, Stack, Text, VStack, Image } from "@chakra-ui/react"
 import { useCallback, useEffect, useMemo } from "react"
 import { Controller, UseFormReturn } from "react-hook-form"
-import { B3TRIcon, VOT3Icon } from "../Icons"
+import { VOT3Icon } from "../Icons"
 import { useB3trBalance, useVot3Balance } from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { motion } from "framer-motion"
@@ -41,15 +41,6 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
   const vot3BalanceScaled = useMemo(() => {
     return vot3Balance?.scaled ?? "0"
   }, [vot3Balance?.scaled])
-
-  const vot3BalanceText = useMemo(() => {
-    const vot3Balance = Number(vot3BalanceScaled)
-
-    if (vot3Balance === 0) return "0"
-
-    if (vot3Balance < 0.0001) return `< 0.${"0".repeat(DECIMAL_PLACES - 1)}1`
-    return compactFormatter.format(vot3Balance)
-  }, [vot3BalanceScaled])
 
   const maxBalance = useMemo(
     () => (isB3trToVot3 ? b3trBalanceScaled : vot3BalanceScaled),
@@ -94,6 +85,7 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
   )
 
   const { control, setValue } = formData
+
   const amountInput = useMemo(() => {
     return (
       <Controller
@@ -103,7 +95,7 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
           <Input
             h="50px"
             placeholder="0"
-            fontSize="40px"
+            fontSize={{ base: 30, md: 36 }}
             fontWeight={700}
             type="text"
             value={value}
@@ -124,56 +116,41 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
 
   const maxButton = useMemo(
     () => (
-      <Button
-        onClick={() => setValue("amount", maxBalance)}
-        size="xs"
-        color={"white"}
-        rounded={"full"}
-        bgColor="primary.400">
-        Max
+      <Button onClick={() => setValue("amount", maxBalance)} variant={"secondary"}>
+        <Text fontSize={14} fontWeight={500}>
+          Convert all
+        </Text>
       </Button>
     ),
     [maxBalance, setValue],
   )
 
   return (
-    <motion.div initial="initial" animate="animate" variants={containerVariants}>
+    <motion.div initial="initial" animate="animate" variants={containerVariants} style={{ width: "100%" }}>
       <Stack direction={isB3trToVot3 ? "column" : "column-reverse"}>
         <motion.div layout transition={layoutTransition}>
           <VStack
-            bgGradient={b3trBgGradient}
-            py={6}
-            px={6}
+            py={3}
             h="full"
             w="full"
-            borderRadius={"2xl"}
             align="flex-start"
-            spacing={12}>
+            spacing={12}
+            borderBottomWidth={2}
+            borderColor={"rgba(213, 213, 213, 1)"}>
             <HStack align={"stretch"} justify={"stretch"} spacing={4} w="full">
-              <Divider
-                orientation="vertical"
-                variant="thick"
-                w="4px"
-                bgColor={b3trDividerColor}
-                h="auto"
-                borderRadius="7px"
-              />
               <VStack justify="stretch" flex={1} gap={1}>
                 <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
-                  <Text>{isB3trToVot3 ? "Send" : "Receive"}</Text>
-                  <VStack gap={0} alignItems={"flex-end"}>
-                    <Text fontSize="10px">B3TR Balance</Text>
-                    <HStack gap={1}>
-                      <Text fontSize="14px" fontWeight={500}>
-                        {b3trBalanceText}
-                      </Text>
-                      <B3TRIcon h={"15px"} w={"15px"} />
-                    </HStack>
-                  </VStack>
+                  <Text fontSize={14} fontWeight={400}>
+                    {isB3trToVot3 ? "You'll convert" : "You'll receive"}
+                  </Text>
                 </HStack>
                 <HStack w="full">
                   <HStack flex={1}>
-                    <B3TRIcon h={"32px"} w={"32px"} />
+                    <Image
+                      src="/images/logo/b3tr_logo_dark.svg"
+                      boxSize={{ base: "30px", md: "36px" }}
+                      alt="B3TR Icon"
+                    />
                     {amountInput}
                   </HStack>
                   {isB3trToVot3 && Number(maxBalance) !== Number(amount) && maxButton}
@@ -184,39 +161,27 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
         </motion.div>
         <motion.div layout transition={layoutTransition}>
           <VStack
-            bgGradient={vot3BgGradient}
-            py={6}
-            px={6}
+            py={3}
             h="full"
             w="full"
-            borderRadius={"2xl"}
             align="flex-start"
-            spacing={12}>
+            spacing={12}
+            borderBottomWidth={2}
+            borderColor={"rgba(213, 213, 213, 1)"}>
             <HStack align={"stretch"} justify={"stretch"} spacing={4} w="full">
-              <Divider
-                orientation="vertical"
-                variant="thick"
-                w="4px"
-                bgColor={vot3dividerAlpha}
-                h="auto"
-                borderRadius="7px"
-              />
               <VStack justify="stretch" flex={1} gap={1}>
                 <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
-                  <Text>{isB3trToVot3 ? "Receive" : "Send"}</Text>
-                  <VStack gap={0} alignItems={"flex-end"}>
-                    <Text fontSize="10px">VOT3 Balance</Text>
-                    <HStack gap={1}>
-                      <Text fontSize="14px" fontWeight={500}>
-                        {vot3BalanceText}
-                      </Text>
-                      <VOT3Icon h={"15px"} w={"15px"} />
-                    </HStack>
-                  </VStack>
+                  <Text fontSize={14} fontWeight={400}>
+                    {isB3trToVot3 ? "You'll receive" : "You'll convert"}
+                  </Text>
                 </HStack>
                 <HStack w="full">
                   <HStack flex={1}>
-                    <VOT3Icon h={"32px"} w={"32px"} />
+                    <Image
+                      src="/images/logo/vot3_logo_dark.svg"
+                      boxSize={{ base: "30px", md: "36px" }}
+                      alt="B3TR Icon"
+                    />
                     {amountInput}
                   </HStack>
                   {!isB3trToVot3 && Number(maxBalance) !== Number(amount) && maxButton}
