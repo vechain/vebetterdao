@@ -2906,6 +2906,119 @@ describe("Governor and TimeLock", function () {
       // reason
       expect(decodedLogs?.args[5]).to.eql(reason)
     })
+
+    it("Failed state is calculated correctly", async () => {
+      const config = createLocalConfig()
+      // set deposit threshold to 0 so we can avoid depositing for proposals
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 0
+      const { governor, otherAccounts, b3tr, B3trContract, otherAccount, vot3, voterRewards, emissions } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
+
+      const voter = otherAccounts[0]
+      const voter2 = otherAccounts[1]
+      await getVot3Tokens(voter, "1000")
+      await getVot3Tokens(voter2, "1")
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      //@ts-ignore
+      expect(await governor.quorumNumerator()).to.equal(4n)
+
+      const checkUserSupplyPercentage = async (user: HardhatEthersSigner) => {
+        let totalSupply = await vot3.totalSupply()
+        let userBalance = await vot3.balanceOf(user.address)
+        let userPercentage = (userBalance * 100n) / totalSupply
+
+        return userPercentage
+      }
+
+      // Scenario 1: quorum is 4%, user votes against with enough VOT3 to reach quorum -> proposal should be defeated
+      let tx = await createProposal(b3tr, B3trContract, otherAccount, "scenario 1", functionToCall, [])
+      proposalId = await getProposalIdFromTx(tx)
+      await waitForProposalToBeActive(proposalId)
+      let cycleId = await emissions.getCurrentCycle()
+      expect(await checkUserSupplyPercentage(voter)).to.be.greaterThan(4) // check that user owns 4% of the total VOT3 supply
+      await governor.connect(voter).castVote(proposalId, 0) // vote against
+      await waitForVotingPeriodToEnd(proposalId)
+      let proposalState = await governor.state(proposalId)
+      expect(proposalState.toString()).to.eql("3") // defeated
+      let isQuorumReached = await governor.quorumReached(proposalId)
+      expect(isQuorumReached).to.equal(true)
+
+      await voterRewards.claimReward(cycleId, voter.address)
+
+      // Scenario 2: quorum is 4%, user2 votes for but not with enough VOT3 to reach quorum -> proposal should be defeated
+      tx = await createProposal(b3tr, B3trContract, otherAccount, "scenario 2", functionToCall, [])
+      proposalId = await getProposalIdFromTx(tx)
+      await waitForProposalToBeActive(proposalId)
+      expect(await checkUserSupplyPercentage(voter2)).to.not.be.greaterThan(4) // check that user2 does not own 4% of the total VOT3 supply
+      await governor.connect(voter2).castVote(proposalId, 1) // vote for
+      await waitForVotingPeriodToEnd(proposalId)
+      proposalState = await governor.state(proposalId)
+      expect(proposalState.toString()).to.eql("3") // defeated
+      isQuorumReached = await governor.quorumReached(proposalId)
+      expect(isQuorumReached).to.equal(false)
+
+      // Scenario 3: quorum is 4%, user votes abstain with enough VOT3 to reach quorum -> proposal should be defeated since !(for > against)
+      tx = await createProposal(b3tr, B3trContract, otherAccount, "scenario 3", functionToCall, [])
+      proposalId = await getProposalIdFromTx(tx)
+      await waitForProposalToBeActive(proposalId)
+      cycleId = await emissions.getCurrentCycle()
+      expect(await checkUserSupplyPercentage(voter)).to.be.greaterThan(4) // check that user own 4% of the total VOT3 supply
+      await governor.connect(voter).castVote(proposalId, 2) // vote abstain
+      await waitForVotingPeriodToEnd(proposalId)
+      proposalState = await governor.state(proposalId)
+      expect(proposalState.toString()).to.eql("3") // defeated
+      isQuorumReached = await governor.quorumReached(proposalId)
+      expect(isQuorumReached).to.equal(true)
+
+      await voterRewards.claimReward(cycleId, voter.address)
+    })
+
+    it("Succeeded state is calculated correctly", async () => {
+      const config = createLocalConfig()
+      // set deposit threshold to 0 so we can avoid depositing for proposals
+      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 0
+      const { governor, otherAccounts, b3tr, B3trContract, otherAccount, vot3 } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      const voter = otherAccounts[0]
+      const voter2 = otherAccounts[1]
+      await getVot3Tokens(voter, "1000")
+      await getVot3Tokens(voter2, "1")
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      //@ts-ignore
+      expect(await governor.quorumNumerator()).to.equal(4n)
+
+      const checkUserSupplyPercentage = async (user: HardhatEthersSigner) => {
+        let totalSupply = await vot3.totalSupply()
+        let userBalance = await vot3.balanceOf(user.address)
+        let userPercentage = (userBalance * 100n) / totalSupply
+
+        return userPercentage
+      }
+
+      // Scenario: quorum is 4%, user votes for with enough VOT3 to reach quorum -> proposal should be succeeded
+      const tx = await createProposal(b3tr, B3trContract, otherAccount, "scenario 4", functionToCall, [])
+      proposalId = await getProposalIdFromTx(tx)
+      await waitForProposalToBeActive(proposalId)
+      expect(await checkUserSupplyPercentage(voter)).to.be.greaterThan(4) // check that user own 4% of the total VOT3 supply
+      await governor.connect(voter).castVote(proposalId, 1) // vote for
+      await waitForVotingPeriodToEnd(proposalId)
+      const proposalState = await governor.state(proposalId)
+      expect(proposalState.toString()).to.eql("4") // succeeded
+      const isQuorumReached = await governor.quorumReached(proposalId)
+      expect(isQuorumReached).to.equal(true)
+    })
   })
 
   describe("Proposal Execution", function () {
