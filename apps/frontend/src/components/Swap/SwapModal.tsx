@@ -174,8 +174,8 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
   const renderCardContent = useCallback(() => {
     return isB3trToVot3 !== undefined ? (
       <form onSubmit={formData.handleSubmit(handleConvertB3tr)}>
-        <ModalCloseButton top={4} right={4} />
-        <VStack align={"flex-start"} maxW={"590px"} p={{ base: 0, md: 4 }}>
+        <ModalCloseButton top={{ base: 5, md: 6 }} right={4} />
+        <VStack align={"flex-start"} maxW={"590px"} px={{ base: 0, md: 4 }}>
           <HStack>
             <IoArrowBackOutline onClick={handleGoBack} size={20} cursor={"pointer"} />
             <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
@@ -226,7 +226,7 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
       </form>
     ) : (
       <form onSubmit={formData.handleSubmit(handleConvertB3tr)}>
-        <ModalCloseButton top={5} right={4} />
+        <ModalCloseButton top={{ base: 5, md: 6 }} right={4} />
         <VStack align={"flex-start"}>
           <Text fontSize={{ base: 18, md: 24 }} fontWeight={700}>
             Convert tokens
@@ -275,6 +275,8 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
         isSwap
         b3trBalanceAfterSwap={b3trBalanceAfterSwap}
         vot3BalanceAfterSwap={vot3BalanceAfterSwap}
+        b3trBalance={b3trBalanceScaled}
+        vot3Balance={vot3BalanceScaled}
       />
     )
 
