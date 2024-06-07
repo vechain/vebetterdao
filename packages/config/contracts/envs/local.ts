@@ -4,7 +4,7 @@ export function createLocalConfig() {
   return defineConfig({
     NEXT_PUBLIC_APP_ENV: "local",
 
-    B3TR_CAP: 3_750_000, // 3_750_000 -> 3.75 million B3TR tokens for pilot show
+    B3TR_CAP: 1_000_243_154, // Allows for 643 cycles
     B3TR_GOVERNOR_QUORUM_PERCENTAGE: 4, // 4 -> Need 4% of voters to pass
     TIMELOCK_MIN_DELAY: 0, //time to wait before you can execute a queued proposal, 0 for immediate execution
     B3TR_GOVERNOR_DEPOSIT_THRESHOLD: 2, // Percentage of total B3TR supply needed to be deposited to create a proposal
@@ -38,11 +38,11 @@ export function createLocalConfig() {
     },
 
     EMISSIONS_CYCLE_DURATION: 24, // 24 blocks - 4 minutes.
-    EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE: 4, // 4% decay every cycle
-    EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE: 20, // 20% decay every cycle
-    EMISSIONS_X_ALLOCATION_DECAY_PERIOD: 999999, // should never decay in pilot show
-    EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD: 999999, // should never decay in pilot show
-    EMISSIONS_TREASURY_PERCENTAGE: 8750, // 87.5% of the emissions go to the treasury during pilot show
+    EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE: 4, // 4% decay every x-allocation decay period
+    EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE: 20, // 20% decay every vote 2 earn decay period
+    EMISSIONS_X_ALLOCATION_DECAY_PERIOD: 12, // every 12 cycles
+    EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD: 50, // every 50 cycles
+    EMISSIONS_TREASURY_PERCENTAGE: 2500, // 25% of the emissions go to the treasury
     EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE: 80,
 
     X_ALLOCATION_VOTING_QUORUM_PERCENTAGE: 40, // 40 -> Need 40% of total supply to succeed
@@ -54,7 +54,7 @@ export function createLocalConfig() {
     CONTRACTS_ADMIN_ADDRESS: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa", //1st account from mnemonic of solo network
     VOTE_2_EARN_POOL_ADDRESS: "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68", //2nd account from mnemonic of solo network
 
-    INITIAL_X_ALLOCATION: BigInt("66666666666666666666666"), // 1M/15 rounded down -> 1/15th of the total supply for pilot show
+    INITIAL_X_ALLOCATION: BigInt("2000000000000000000000000"), // 2M B3TR
 
     GM_NFT_BASE_URI: "ipfs://bafybeidngidiqpenmmvnnmxtnxar3stxtnltpknt5tg7jbgt4dkfhkcxha/", // IPFS base URI for the GM NFT
 
@@ -109,5 +109,9 @@ export function createLocalConfig() {
     TREASURY_TRANSFER_LIMIT_B3TR: BigInt("500000000000000000000000"), // 50,000 B3TR
     TREASURY_TRANSFER_LIMIT_VTHO: BigInt("3000000000000000000000000"), // 3,000,000 VTHO
     TREASURY_TRANSFER_LIMIT_VOT3: BigInt("500000000000000000000000"), // 50,000 VOT3
+
+    // Migration
+    MIGRATION_ADDRESS: "0x865306084235Bf804c8Bba8a8d56890940ca8F0b", // 10th account from mnemonic of solo network
+    MIGRATION_AMOUNT: BigInt("3750000000000000000000000"), // 3.75 million B3TR tokens from pilot show
   })
 }
