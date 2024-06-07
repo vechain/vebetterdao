@@ -19,6 +19,7 @@ import {
   bootstrapEmissions,
   ZERO_ADDRESS,
   waitForQueuedProposalToBeReady,
+  waitForNextCycle,
 } from "./helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it } from "mocha"
@@ -3640,6 +3641,10 @@ describe("Governor and TimeLock", function () {
       expect(await governor.proposalDepositReached(proposalId)).to.eql(false)
 
       await waitForProposalToBeActive(proposalId)
+      expect(await governor.state(proposalId)).to.eql(8n) // deposit not met
+
+      await waitForNextCycle()
+
       expect(await governor.state(proposalId)).to.eql(8n) // deposit not met
     })
 
