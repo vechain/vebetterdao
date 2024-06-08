@@ -1,4 +1,4 @@
-import { getProposalEvents, getProposalUserDepositQueryKey, useVot3TokenDetails } from "@/api"
+import { getProposalEvents, getProposalUserDepositQueryKey } from "@/api"
 import { UseSendTransactionReturnValue } from "./useSendTransaction"
 import { useCallback, useMemo } from "react"
 import { useWallet } from "@vechain/dapp-kit-react"
@@ -38,32 +38,28 @@ export const useProposalVot3Deposit = ({
   onSuccess,
 }: UseProposalVot3DepositProps): UseProposalVot3DepositReturnValue => {
   const { account } = useWallet()
-  const { data: tokenDetails } = useVot3TokenDetails()
 
-  const clauseBuilder = useCallback(
-    ({ amount, proposalId }: { amount: string | number; proposalId: string }) => {
-      const contractAmount = removingExcessDecimals(amount)
-      const amountWithDecimals = ethers.parseEther(contractAmount).toString()
+  const clauseBuilder = useCallback(({ amount, proposalId }: { amount: string | number; proposalId: string }) => {
+    const contractAmount = removingExcessDecimals(amount)
+    const amountWithDecimals = ethers.parseEther(contractAmount).toString()
 
-      return [
-        buildClause({
-          contractInterface: Vot3Interface,
-          to: VOT3_CONTRACT,
-          method: "approve",
-          args: [GOVERNANCE_CONTRACT, amountWithDecimals],
-          comment: `Approve to transfer ${amount} VOT3`,
-        }),
-        buildClause({
-          contractInterface: GovernorInterface,
-          to: GOVERNANCE_CONTRACT,
-          method: "deposit",
-          args: [amountWithDecimals, proposalId],
-          comment: `${amountWithDecimals} Vot3 deposited to proposal ${proposalId}`,
-        }),
-      ]
-    },
-    [tokenDetails],
-  )
+    return [
+      buildClause({
+        contractInterface: Vot3Interface,
+        to: VOT3_CONTRACT,
+        method: "approve",
+        args: [GOVERNANCE_CONTRACT, amountWithDecimals],
+        comment: `Approve to transfer ${amount} VOT3`,
+      }),
+      buildClause({
+        contractInterface: GovernorInterface,
+        to: GOVERNANCE_CONTRACT,
+        method: "deposit",
+        args: [amountWithDecimals, proposalId],
+        comment: `${amountWithDecimals} Vot3 deposited to proposal ${proposalId}`,
+      }),
+    ]
+  }, [])
 
   const refetchQueryKeys = useMemo(
     () => [

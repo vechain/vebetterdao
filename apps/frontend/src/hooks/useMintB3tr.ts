@@ -1,4 +1,4 @@
-import { getB3TrTokenDetailsQueryKey, getB3TrBalanceQueryKey, buildMintB3trTx, useB3trTokenDetails } from "@/api"
+import { getB3TrTokenDetailsQueryKey, getB3TrBalanceQueryKey, buildMintB3trTx } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
@@ -33,16 +33,13 @@ export const useMintB3tr = ({
   const toast = useToast()
   const queryClient = useQueryClient()
 
-  const { data: tokenDetails } = useB3trTokenDetails()
-
   const buildClauses = useCallback(() => {
     if (!address) throw new Error("address is required")
     if (!amount) throw new Error("amount is required")
-    if (!tokenDetails) throw new Error("tokenDetails is required")
 
     const clauses = buildMintB3trTx(thor, address, amount)
     return [clauses]
-  }, [thor, address, amount, tokenDetails])
+  }, [thor, address, amount])
 
   //Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {

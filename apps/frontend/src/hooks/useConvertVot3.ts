@@ -1,6 +1,5 @@
 import {
   getB3TrBalanceQueryKey,
-  useB3trTokenDetails,
   getVot3BalanceQueryKey,
   buildConvertVot3Tx,
   getVotesQueryKey,
