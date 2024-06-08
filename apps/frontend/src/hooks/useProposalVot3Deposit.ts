@@ -1,4 +1,4 @@
-import { getProposalUserDepositQueryKey, useVot3TokenDetails } from "@/api"
+import { getProposalEvents, getProposalUserDepositQueryKey, useVot3TokenDetails } from "@/api"
 import { UseSendTransactionReturnValue } from "./useSendTransaction"
 import { useCallback, useMemo } from "react"
 import { useWallet } from "@vechain/dapp-kit-react"
@@ -74,6 +74,7 @@ export const useProposalVot3Deposit = ({
       getProposalUserDepositQueryKey(proposalId, account ?? ""),
       getProposalDepositQueryKey(proposalId),
       getIsDepositReachedQueryKey(proposalId),
+      getProposalEvents(),
     ],
     [account, proposalId],
   )

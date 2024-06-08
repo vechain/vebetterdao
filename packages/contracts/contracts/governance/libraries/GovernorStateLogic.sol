@@ -133,12 +133,12 @@ library GovernorStateLogic {
     uint256 currentTimepoint = GovernorClockLogic.clock(self);
     uint256 deadline = GovernorProposalLogic._proposalDeadline(self, proposalId);
 
+    if (!GovernorDepositLogic.proposalDepositReached(self, proposalId)) {
+      return GovernorTypes.ProposalState.DepositNotMet;
+    }
+
     if (deadline >= currentTimepoint) {
-      if (GovernorDepositLogic.proposalDepositReached(self, proposalId)) {
-        return GovernorTypes.ProposalState.Active;
-      } else {
-        return GovernorTypes.ProposalState.DepositNotMet;
-      }
+      return GovernorTypes.ProposalState.Active;
     } else if (
       !GovernorQuorumLogic.quorumReached(self, proposalId) || !GovernorVotesLogic.voteSucceeded(self, proposalId)
     ) {

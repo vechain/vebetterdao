@@ -197,7 +197,12 @@ export async function deployAll(config: ContractsConfig) {
       admin: TEMP_ADMIN,
       upgrader: config.CONTRACTS_ADMIN_ADDRESS,
       b3trAddress: await b3tr.getAddress(),
-      destinations: [await xAllocationPool.getAddress(), config.VOTE_2_EARN_POOL_ADDRESS, await treasury.getAddress()],
+      destinations: [
+        await xAllocationPool.getAddress(),
+        config.VOTE_2_EARN_POOL_ADDRESS,
+        await treasury.getAddress(),
+        config.MIGRATION_ADDRESS,
+      ],
       initialXAppAllocation: config.INITIAL_X_ALLOCATION,
       cycleDuration: config.EMISSIONS_CYCLE_DURATION,
       decaySettings: [
@@ -208,6 +213,7 @@ export async function deployAll(config: ContractsConfig) {
       ],
       treasuryPercentage: config.EMISSIONS_TREASURY_PERCENTAGE,
       maxVote2EarnDecay: config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
+      migrationAmount: config.MIGRATION_AMOUNT,
     },
   ])) as Emissions
   console.log(`Emissions deployed at ${await emissions.getAddress()}`)
@@ -407,7 +413,7 @@ export async function deployAll(config: ContractsConfig) {
   if (network.name === "vechain_testnet") {
     await setupTestEnvironment(emissions, x2EarnApps)
   } else if (network.name === "vechain_solo") {
-    await setupLocalEnvironment(emissions, treasury, x2EarnApps, b3tr)
+    await setupLocalEnvironment(emissions, treasury, x2EarnApps)
   }
 
   // ---------- Run Simulation ---------- //

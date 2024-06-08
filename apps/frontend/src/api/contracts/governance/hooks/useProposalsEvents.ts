@@ -24,25 +24,30 @@ export type ProposalCreatedEvent = {
   description: string
   roundIdVoteStart: string
   depositThreshold: string
+  blockMeta: Connex.Thor.Filter.WithMeta["meta"]
 }
 
 export type ProposalCanceledEvent = {
   proposalId: string
+  blockMeta: Connex.Thor.Filter.WithMeta["meta"]
 }
 
 export type ProposalExecutedEvent = {
   proposalId: string
+  blockMeta: Connex.Thor.Filter.WithMeta["meta"]
 }
 
 export type ProposalQueuedEvent = {
   proposalId: string
   etaSeconds: string
+  blockMeta: Connex.Thor.Filter.WithMeta["meta"]
 }
 
 export type ProposalDepositEvent = {
   depositor: string
   proposalId: string
   amount: string
+  blockMeta: Connex.Thor.Filter.WithMeta["meta"]
 }
 
 export type ProposalVoteEvent = {
@@ -52,6 +57,7 @@ export type ProposalVoteEvent = {
   weight: string
   power: string
   reason: string
+  blockMeta: Connex.Thor.Filter.WithMeta["meta"]
 }
 
 export const getProposalsEvents = async (thor: Connex.Thor) => {
@@ -137,6 +143,7 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
           description: decoded[6],
           roundIdVoteStart: decoded[7],
           depositThreshold: decoded[8],
+          blockMeta: event.meta,
         })
         break
       }
@@ -144,6 +151,7 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
         const decoded = proposalCanceledEvent.decode(event.data, event.topics)
         decodedCanceledProposalEvents.push({
           proposalId: decoded[0],
+          blockMeta: event.meta,
         })
         break
       }
@@ -151,6 +159,7 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
         const decoded = proposalExecutedEvent.decode(event.data, event.topics)
         decodedExecutedProposalEvents.push({
           proposalId: decoded[0],
+          blockMeta: event.meta,
         })
         break
       }
@@ -159,6 +168,7 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
         decodedQueuedProposalEvents.push({
           proposalId: decoded[0],
           etaSeconds: decoded[1],
+          blockMeta: event.meta,
         })
         break
       }
@@ -168,11 +178,13 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
           depositor: decoded[0],
           proposalId: decoded[1],
           amount: decoded[2],
+          blockMeta: event.meta,
         })
         break
       }
       case proposalVoteEvent.signature: {
-        const decoded = proposalDepositEvent.decode(event.data, event.topics)
+        const decoded = proposalVoteEvent.decode(event.data, event.topics)
+
         decodedVoteProposalEvents.push({
           account: decoded[0],
           proposalId: decoded[1],
@@ -180,6 +192,7 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
           weight: decoded[3],
           power: decoded[4],
           reason: decoded[5],
+          blockMeta: event.meta,
         })
         break
       }

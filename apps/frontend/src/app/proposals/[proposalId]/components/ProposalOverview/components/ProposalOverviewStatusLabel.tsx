@@ -1,7 +1,7 @@
 import { ProposalState, useCurrentProposal } from "@/api"
 import { Arm } from "@/components/Icons/Arm"
 import { Circle, HStack, Text } from "@chakra-ui/react"
-import { UilCheck, UilClockEight, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
+import { UilBan, UilCheck, UilClockEight, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 
 export const ProposalOverviewStatusLabel = () => {
@@ -11,41 +11,36 @@ export const ProposalOverviewStatusLabel = () => {
   switch (proposal.state) {
     case ProposalState.Succeeded:
       return (
-        <HStack>
-          <Arm color="#6DCB09" />
+        <HStack bg="#E9FDF1" rounded={"12px"} px="10px" py="2px">
+          <UilCheck color="#6DCB09" size="20px" />
           <Text fontWeight={"600"} color="#6DCB09">
             {t("Approved")}
           </Text>
         </HStack>
       )
     case ProposalState.Canceled:
-      return (
-        <Text fontWeight={"600"} color="#D23F63">
-          {t("Canceled")}
-        </Text>
-      )
     case ProposalState.DepositNotMet:
       return (
-        <HStack>
-          <Arm color="#D23F63" />
+        <HStack bg="#FCEEF1" py="4px" px="10px" rounded="12px">
+          <UilBan color="#D23F63" size="20px" />
           <Text fontWeight={"600"} color="#D23F63">
-            {t("Canceled due lack of support")}
+            {t("Canceled")}
           </Text>
         </HStack>
       )
     case ProposalState.Pending:
       if (proposal.isDepositReached) {
         return (
-          <HStack>
+          <HStack bg="#E0E9FE" py="4px" px="10px" rounded="12px">
             <UilClockEight color="#004CFC" size="20px" />
             <Text fontWeight={"600"} color="#004CFC">
-              {t("Waiting for the round to start")}
+              {t("Upcoming voting")}
             </Text>
           </HStack>
         )
       }
       return (
-        <HStack>
+        <HStack bg="#FFF3E5" py="4px" px="10px" rounded="12px">
           <Arm />
           <Text fontWeight={"600"} color="#F29B32">
             {t("Looking for support")}
@@ -55,9 +50,9 @@ export const ProposalOverviewStatusLabel = () => {
 
     case ProposalState.Active:
       return (
-        <HStack alignSelf={"flex-start"}>
+        <HStack alignSelf={"flex-start"} bg="#CDFF9F" rounded="12px" px="10px" py="4px">
           <Circle size="8px" bg="#F50000" />
-          <Text fontWeight={600} color="#6DCB09">
+          <Text fontWeight={600} color="#3A6F00">
             {t("Active now!")}
           </Text>
         </HStack>
@@ -65,7 +60,7 @@ export const ProposalOverviewStatusLabel = () => {
 
     case ProposalState.Defeated:
       return (
-        <HStack>
+        <HStack bg="#F8F8F8" rounded={"12px"} px="10px" py="2px">
           <UilThumbsDown color="#D23F63" size="20px" />
           <Text fontWeight={"600"} color="#D23F63">
             {t("Ended and rejected")}
@@ -83,9 +78,9 @@ export const ProposalOverviewStatusLabel = () => {
       )
     case ProposalState.Executed:
       return (
-        <HStack rounded={"12px"} bgColor={"#E9FDF1"} px="10px" py="2px">
-          <UilCheck color="#38BF66" size="20px" />
-          <Text fontWeight={"600"} color="#38BF66">
+        <HStack bg="#E9FDF1" rounded={"12px"} px="10px" py="2px">
+          <UilCheck color="#6DCB09" size="20px" />
+          <Text fontWeight={"600"} color="#6DCB09">
             {t("Ended and executed")}
           </Text>
         </HStack>

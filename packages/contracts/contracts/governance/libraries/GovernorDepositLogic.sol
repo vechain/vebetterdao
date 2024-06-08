@@ -87,8 +87,7 @@ library GovernorDepositLogic {
       self,
       proposalId,
       GovernorStateLogic.ALL_PROPOSAL_STATES_BITMAP ^
-        GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Pending) ^
-        GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Active)
+        GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Pending)
     );
 
     if (amount == 0) {
