@@ -59,7 +59,7 @@ export const ProposalShareButton = () => {
               <ModalCloseButton top={4} right={4} />
               <VStack align={"center"} p={6}>
                 <Heading size="md">{"Share proposal"}</Heading>
-                <Box my="-30px">
+                <Box my="10px">
                   <Lottie
                     style={{
                       pointerEvents: "none",
@@ -69,8 +69,8 @@ export const ProposalShareButton = () => {
                       autoplay: true,
                       animationData: loadingAnimation,
                     }}
-                    height={250}
-                    width={250}
+                    height={200}
+                    width={200}
                   />
                 </Box>
                 <ShareButtons
