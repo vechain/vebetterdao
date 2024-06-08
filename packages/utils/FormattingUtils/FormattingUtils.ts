@@ -47,52 +47,6 @@ export const scaleNumberUp = (
   }
 }
 
-/**
- * Scale the number down by the specified number of decimal places
- * @param val - the value to scale down (a number or string representation of a number)
- * @param scaleDecimal - the number of decimals to scale down by
- * @param roundDecimal - the number of decimals to round the result to
- * @param roundingStrategy - what strategy to use when rounding. Based on the strategies defined in `bignumber.js`. Default strategy is ROUND_HALF_UP
- * @returns the scaled up result as a string
- */
-export const scaleNumberDown = (
-  val: BigNumber.Value,
-  scaleDecimal: number,
-  roundDecimal = 0,
-  roundingStrategy: RoundingMode = BigNumber.ROUND_HALF_UP,
-): string => {
-  try {
-    if (scaleDecimal === 0) return new BigNumber(val).toFixed()
-    if (scaleDecimal < 0) throw Error("Decimal value must be greater than or equal to 0")
-
-    const valBn = new BigNumber(val)
-    if (valBn.isNaN()) throw Error("The value provided is NaN.")
-
-    const amount = valBn.dividedBy(new BigNumber(10).pow(scaleDecimal))
-
-    if (scaleDecimal === roundDecimal) return amount.toFixed()
-
-    return amount.toFixed(roundDecimal, roundingStrategy)
-  } catch (e) {
-    console.error("scaleNumberDown", e)
-    throw e
-    // throw VeWorldErrors.internal(`Failed to scale number down (${val})`, e)
-  }
-}
-
-/**
- * Convert token balance to fiat balance
- * @param balance - raw token balance
- * @param rate - exchange rate
- * @param decimals - the number of decimals for token
- * @returns the formatted time
- */
-export const convertToFiatBalance = (balance: string, rate: number, decimals: number, roundDecimals: number = 2) => {
-  const fiatBalance = new BigNumber(balance).multipliedBy(rate)
-
-  return scaleNumberDown(fiatBalance, decimals, roundDecimals, BigNumber.ROUND_DOWN)
-}
-
 export type DateType = "short" | "full" | "long" | "medium" | undefined
 
 /**

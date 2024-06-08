@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
-import { FormattingUtils } from "@repo/utils"
 import { XAllocationPool__factory } from "@repo/contracts"
 import { queryClient } from "@/api/QueryProvider"
 import { getRoundXApps, getRoundXAppsQueryKey } from "../../xApps"
+import { ethers } from "ethers"
 
 const XALLOCATIONPOOL_CONTRACT = getConfig().xAllocationPoolContractAddress
 
@@ -31,7 +31,7 @@ export const getXAppRoundEarnings = async (
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
-  return { amount: FormattingUtils.scaleNumberDown(res.decoded["0"], 18), appId: xAppId }
+  return { amount: ethers.formatEther(res.decoded["0"]), appId: xAppId }
 }
 
 export const getXAppRoundEarningsQueryKey = (roundId: string, xAppId?: string) => [
