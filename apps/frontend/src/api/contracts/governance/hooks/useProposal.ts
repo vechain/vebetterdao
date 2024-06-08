@@ -92,19 +92,21 @@ export const useProposal = (proposalId: string) => {
     const votes = proposalVoteEvents.votes
     const votesWithComment = proposalVoteEvents.votesWithComment
     const hasUserVoted = proposalVoteEvents.hasUserVoted
-    const totalVot3UsedInVotes = Number(ethers.formatEther(proposalVoteEvents.totalVot3UsedInVotes || 0))
-    const totalVotingPowerUsedInVotes = Number(ethers.formatEther(proposalVoteEvents.totalVotingPowerUsedInVotes || 0))
+    const totalVot3UsedInVotes = Number(ethers.formatEther(BigInt(proposalVoteEvents.totalVot3UsedInVotes || 0)))
+    const totalVotingPowerUsedInVotes = Number(
+      ethers.formatEther(BigInt(proposalVoteEvents.totalVotingPowerUsedInVotes || 0)),
+    )
     const forVotes = Number(proposalVotes.data?.forVotes || "0")
     const againstVotes = Number(proposalVotes.data?.againstVotes || "0")
     const abstainVotes = Number(proposalVotes.data?.abstainVotes || "0")
     const forPercentage = (totalVotingPowerUsedInVotes ? forVotes / totalVotingPowerUsedInVotes : 0) * 100
     const againstPercentage = (totalVotingPowerUsedInVotes ? againstVotes / totalVotingPowerUsedInVotes : 0) * 100
     const abstainPercentage = (totalVotingPowerUsedInVotes ? abstainVotes / totalVotingPowerUsedInVotes : 0) * 100
-    const depositThreshold = Number(ethers.formatEther(proposalCreatedEvent.data?.depositThreshold || 0))
+    const depositThreshold = Number(ethers.formatEther(BigInt(proposalCreatedEvent.data?.depositThreshold || 0)))
     const communityDeposits = proposalDepositEvent.communityDeposits
     const communityDepositPercentage = communityDeposits / depositThreshold
     const communityDepositChartPercentage = Math.min(communityDepositPercentage || 0, 1) * 100
-    const userSupportLeft = Number(ethers.formatEther(proposalUserDeposit?.data || 0))
+    const userSupportLeft = Number(ethers.formatEther(BigInt(proposalUserDeposit?.data || 0)))
     const isUserSupportLeft = userSupportLeft > 0
     const userSupport = proposalDepositEvent.userSupport
     const userSupportPercentage = userSupport / communityDeposits

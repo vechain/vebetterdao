@@ -5,11 +5,11 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
 import { removingExcessDecimals } from "@/utils/MathUtils"
 import { B3TRGovernor__factory, VOT3__factory } from "@repo/contracts"
-import { scaleNumberUp } from "@repo/utils/FormattingUtils"
 import { buildClause } from "@/utils/buildClause"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getProposalDepositQueryKey } from "@/api/contracts/governance/hooks/useGetProposalDeposit"
 import { getIsDepositReachedQueryKey } from "@/api/contracts/governance/hooks/useIsDepositReached"
+import { ethers } from "ethers"
 
 const config = getConfig()
 
@@ -42,12 +42,8 @@ export const useProposalVot3Deposit = ({
 
   const clauseBuilder = useCallback(
     ({ amount, proposalId }: { amount: string | number; proposalId: string }) => {
-      const contractAmount = removingExcessDecimals(amount, tokenDetails?.decimals)
-      const amountWithDecimals = scaleNumberUp(
-        contractAmount,
-        tokenDetails?.decimals || 18,
-        tokenDetails?.decimals || 18,
-      )
+      const contractAmount = removingExcessDecimals(amount)
+      const amountWithDecimals = ethers.parseEther(contractAmount).toString()
 
       return [
         buildClause({

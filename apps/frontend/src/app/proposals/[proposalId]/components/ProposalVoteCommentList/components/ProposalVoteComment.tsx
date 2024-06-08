@@ -53,7 +53,7 @@ export const ProposalVoteComment = ({ vote }: { vote: ProposalVoteEvent }) => {
     [t, voteType],
   )
 
-  const votePower = ethers.formatEther(vote.power || 0)
+  const votePower = ethers.formatEther(BigInt(vote.power || 0))
 
   return (
     <Card key={vote.account} p={"24px"} borderRadius={"6px"} bg={bgColor} borderColor={borderColor}>

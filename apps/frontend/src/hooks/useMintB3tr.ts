@@ -40,7 +40,7 @@ export const useMintB3tr = ({
     if (!amount) throw new Error("amount is required")
     if (!tokenDetails) throw new Error("tokenDetails is required")
 
-    const clauses = buildMintB3trTx(thor, address, amount, tokenDetails.decimals)
+    const clauses = buildMintB3trTx(thor, address, amount)
     return [clauses]
   }, [thor, address, amount, tokenDetails])
 

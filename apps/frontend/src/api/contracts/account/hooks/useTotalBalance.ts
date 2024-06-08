@@ -24,7 +24,7 @@ export const useTotalBalance = (address?: string) => {
     }
 
     const original = Number(b3trBalance.original) + Number(vot3Balance.original)
-    const scaled = ethers.formatEther(original)
+    const scaled = ethers.formatEther(BigInt(original))
     const formatted = scaled === "0" ? "0" : FormattingUtils.humanNumber(scaled)
 
     return {

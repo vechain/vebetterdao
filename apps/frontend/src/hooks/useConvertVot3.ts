@@ -38,15 +38,13 @@ export const useConvertVot3 = ({
   const { account } = useWallet()
   const queryClient = useQueryClient()
 
-  const { data: tokenDetails } = useB3trTokenDetails()
-  const contractAmount = useMemo(() => removingExcessDecimals(amount, tokenDetails?.decimals), [amount, tokenDetails])
+  const contractAmount = useMemo(() => removingExcessDecimals(amount), [amount])
 
   const buildClauses = useCallback(() => {
     if (!contractAmount) throw new Error("amount is required")
-    if (!tokenDetails) throw new Error("tokenDetails is required")
-    const convertVot3Clause = buildConvertVot3Tx(thor, contractAmount, tokenDetails.decimals)
+    const convertVot3Clause = buildConvertVot3Tx(thor, contractAmount)
     return [convertVot3Clause]
-  }, [thor, contractAmount, tokenDetails])
+  }, [thor, contractAmount])
 
   //Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {

@@ -1,6 +1,5 @@
 import {
   getB3TrBalanceQueryKey,
-  useB3trTokenDetails,
   buildConvertB3trTx,
   getVot3BalanceQueryKey,
   getVotesQueryKey,
@@ -39,16 +38,14 @@ export const useConvertB3tr = ({
   const { account } = useWallet()
   const queryClient = useQueryClient()
 
-  const { data: tokenDetails } = useB3trTokenDetails()
-  const contractAmount = useMemo(() => removingExcessDecimals(amount, tokenDetails?.decimals), [amount, tokenDetails])
+  const contractAmount = useMemo(() => removingExcessDecimals(amount), [amount])
 
   const buildClauses = useCallback(() => {
     if (!contractAmount) throw new Error("amount is required")
-    if (!tokenDetails) throw new Error("tokenDetails is required")
-    const approveClause = buildB3trApprovesTx(thor, contractAmount, config.vot3ContractAddress, tokenDetails.decimals)
-    const convertB3trClause = buildConvertB3trTx(thor, contractAmount, tokenDetails.decimals)
+    const approveClause = buildB3trApprovesTx(thor, contractAmount, config.vot3ContractAddress)
+    const convertB3trClause = buildConvertB3trTx(thor, contractAmount)
     return [approveClause, convertB3trClause]
-  }, [thor, tokenDetails, contractAmount])
+  }, [thor, contractAmount])
 
   //Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {

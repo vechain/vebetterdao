@@ -8,48 +8,9 @@ import {
   isZero,
   limitChars,
   removeUrlProtocolAndPath,
-  scaleNumberUp,
   validateStringPercentages,
 } from "./FormattingUtils"
 import { BigNumber } from "bignumber.js"
-
-describe("scaleNumberUp - positive testing", () => {
-  it("scale up by 2 decimals", () => {
-    expect(scaleNumberUp(5, 2)).toEqual("500")
-  })
-
-  it("scale up by 10 decimals", () => {
-    expect(scaleNumberUp(6, 10)).toEqual("60000000000")
-  })
-
-  it("scale up by 0", () => {
-    expect(scaleNumberUp(500, 0)).toBe("500")
-  })
-
-  it("scale up by 16 decimals", () => {
-    expect(scaleNumberUp("7", 16)).toEqual("70000000000000000")
-  })
-})
-
-describe("scaleNumberUp - negative testing", () => {
-  const originalError = console.error
-  beforeAll(() => {
-    // mute the errors in the console
-    console.error = vi.fn()
-  })
-  afterAll(() => {
-    // unmute the errors
-    console.error = originalError
-  })
-
-  it("scale up by a negative number", () => {
-    expect(() => scaleNumberUp(5, -1)).toThrow()
-  })
-
-  it("scale up an invalid number", () => {
-    expect(() => scaleNumberUp("notanumber", 10)).toThrow()
-  })
-})
 
 describe("humanNumber", () => {
   it("should return correct decimals", () => {
