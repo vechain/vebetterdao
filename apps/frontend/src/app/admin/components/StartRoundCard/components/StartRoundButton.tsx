@@ -31,7 +31,7 @@ export const StartRoundButton = () => {
   const handleSubmit = useCallback(() => {
     onOpen()
     sendTransaction(undefined)
-  }, [sendTransaction])
+  }, [onOpen, sendTransaction])
 
   if (parseInt(currentRoundId ?? "0") < 1) return null
 

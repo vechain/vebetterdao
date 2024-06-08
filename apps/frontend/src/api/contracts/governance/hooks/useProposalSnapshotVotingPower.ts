@@ -27,6 +27,6 @@ export const useProposalSnapshotVotingPower = (roundId?: number, enabled = true)
     contractAddress: GOVERNANCE_CONTRACT,
     method: "getQuadraticVotingPower",
     args: [account, roundId],
-    enabled: !!roundId && enabled,
+    enabled: !!roundId && !!account && enabled,
   })
 }

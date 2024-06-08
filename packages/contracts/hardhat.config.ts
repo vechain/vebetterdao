@@ -9,6 +9,7 @@ import "hardhat-ignore-warnings"
 import { getConfig } from "@repo/config"
 import "solidity-coverage"
 import "solidity-docgen"
+import { EnvConfig } from "@repo/config/contracts"
 
 const config: HardhatUserConfig = {
   solidity: "0.8.20",
@@ -22,7 +23,7 @@ const getEnvMnemonic = () => {
 
 const getSoloUrl = () => {
   const url = process.env.NEXT_PUBLIC_APP_ENV
-    ? getConfig(process.env.NEXT_PUBLIC_APP_ENV).network.urls[0]
+    ? getConfig(process.env.NEXT_PUBLIC_APP_ENV as EnvConfig).network.urls[0]
     : VECHAIN_URL_SOLO
   return url
 }

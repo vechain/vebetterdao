@@ -169,7 +169,7 @@ describe("B3TR Token", function () {
       const operatorRole = await b3tr.MINTER_ROLE()
 
       await b3tr.grantRole(operatorRole, owner)
-      await expect(b3tr.mint(otherAccount, ethers.parseEther("1000000001"))).to.be.reverted
+      await expect(b3tr.mint(otherAccount, ethers.parseEther("1000243155"))).to.be.reverted
     })
 
     it("can be minted up to max supply", async function () {

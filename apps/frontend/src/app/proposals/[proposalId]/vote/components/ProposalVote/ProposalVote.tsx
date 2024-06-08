@@ -1,4 +1,4 @@
-import { useCurrentProposal } from "@/api"
+import { ProposalState, useCurrentProposal } from "@/api"
 import { AbstainedIcon, VoteIcon } from "@/components"
 import { TransactionModal } from "@/components/TransactionModal"
 import { useProposalCastVote } from "@/hooks/useProposalCastVote"
@@ -20,8 +20,9 @@ import {
 } from "@chakra-ui/react"
 import { UilInfoCircle, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useWallet } from "@vechain/dapp-kit-react"
 import { useRouter } from "next/navigation"
-import { FormEvent, useCallback, useState } from "react"
+import { FormEvent, useCallback, useLayoutEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 const votes = [
@@ -42,7 +43,7 @@ const votes = [
   },
 ]
 
-const compactFormatter = getCompactFormatter()
+const compactFormatter = getCompactFormatter(2)
 
 export const ProposalVote = () => {
   const { proposal } = useCurrentProposal()
@@ -51,6 +52,15 @@ export const ProposalVote = () => {
   const [comment, setComment] = useState("")
   const { isOpen, onClose, onOpen } = useDisclosure()
   const router = useRouter()
+  const { account } = useWallet()
+
+  const isPageNotAllowed = proposal.state !== ProposalState.Active || proposal.hasUserVoted || !account
+
+  useLayoutEffect(() => {
+    if (isPageNotAllowed) {
+      router.replace(`/proposals/${proposal.id}`)
+    }
+  }, [isPageNotAllowed, proposal.id, router])
 
   const handleSetSelectedVote = useCallback(
     (value: string) => () => {
@@ -82,6 +92,10 @@ export const ProposalVote = () => {
     },
     [castVoteMutation, comment, onOpen, proposal.id, selectedVote],
   )
+
+  if (isPageNotAllowed) {
+    return null
+  }
 
   return (
     <Card border="1px solid #D5D5D5" rounded="16px" p="56px" w="full">
