@@ -51,7 +51,7 @@ export const CancelProposalSection = () => {
     return null
   }
 
-  if (proposal.state !== ProposalState.Pending) {
+  if (proposal.state !== ProposalState.Pending || !compareAddresses(proposal.proposer, account || "")) {
     return null
   }
 

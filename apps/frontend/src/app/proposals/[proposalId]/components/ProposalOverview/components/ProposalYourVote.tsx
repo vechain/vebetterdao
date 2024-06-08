@@ -1,6 +1,6 @@
 import { VoteType, useCurrentProposal } from "@/api"
 import { HStack, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
-import { UilArrowUpRight, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
+import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 
 export const ProposalYourVote = () => {
@@ -20,10 +20,7 @@ export const ProposalYourVote = () => {
               <Text color="#252525" fontWeight={600}>
                 {t("You voted")}
               </Text>
-              <Text color="#38BF66" fontWeight={600}>
-                {t("For")}
-              </Text>
-              <UilArrowUpRight size="20px" color="#004CFC" />
+              <Text fontWeight={600}>{t("For")}</Text>
             </HStack>
           </Skeleton>
         </VStack>
@@ -40,10 +37,7 @@ export const ProposalYourVote = () => {
               <Text color="#252525" fontWeight={600}>
                 {t("You voted")}
               </Text>
-              <Text color="#D23F63" fontWeight={600}>
-                {t("Against")}
-              </Text>
-              <UilArrowUpRight size="20px" color="#004CFC" />
+              <Text fontWeight={600}>{t("Against")}</Text>
             </HStack>
           </Skeleton>
         </VStack>
@@ -60,10 +54,7 @@ export const ProposalYourVote = () => {
               <Text color="#252525" fontWeight={600}>
                 {t("You voted")}
               </Text>
-              <Text color="#B59525" fontWeight={600}>
-                {t("Abstain")}
-              </Text>
-              <UilArrowUpRight size="20px" color="#004CFC" />
+              <Text fontWeight={600}>{t("Abstain")}</Text>
             </HStack>
           </Skeleton>
         </VStack>

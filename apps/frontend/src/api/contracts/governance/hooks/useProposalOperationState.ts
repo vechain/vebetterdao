@@ -22,6 +22,11 @@ export const getProposalOperationTimestampQueryKey = (operationId: string) => {
   getCallKey({ method: "getTimestamp", keyArgs: [operationId] })
 }
 
+/**
+ * Hook to get the state of a proposal operation (i.e. Waiting, Ready, Done)
+ * @param proposalId  the proposal id to get the operation state for
+ * @returns the proposal operation state
+ */
 export const useProposalOperationState = (proposalId?: string, enabled = true) => {
   const proposalOperationIdCall = useProposalOperationId(proposalId)
   const proposalOperationStateCall = useCall({

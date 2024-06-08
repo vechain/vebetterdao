@@ -10,7 +10,7 @@ type Props = {
   icon: ReactElement
 }
 
-const compactFormatter = getCompactFormatter(0)
+const compactFormatter = getCompactFormatter(2)
 
 export const ProposalVotesProgressBar = ({ text, percentage, color, icon }: Props) => {
   const { t } = useTranslation()

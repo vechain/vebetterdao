@@ -8,7 +8,6 @@ import { t } from "i18next"
 import { useCallback, useEffect, useState } from "react"
 
 export const ProposalExecuteButton = () => {
-  // eslint-disable-next-line no-unused-vars
   const [_, setSeconds] = useState(0)
   const { proposal } = useCurrentProposal()
   const executeMutation = useExecuteProposal({ proposalId: proposal.id })

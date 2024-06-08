@@ -1,14 +1,4 @@
-import {
-  Circle,
-  Heading,
-  Step,
-  StepIndicator,
-  StepSeparator,
-  StepStatus,
-  Stepper,
-  VStack,
-  useSteps,
-} from "@chakra-ui/react"
+import { Circle, Heading, Step, StepIndicator, StepSeparator, StepStatus, Stepper, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import { useMemo } from "react"
 import { TimelineItem } from "./components/TimelineItem"
@@ -67,13 +57,15 @@ export const ProposalTimeline = () => {
     if (proposal.state === ProposalState.Pending) {
       return proposal.isDepositReached ? 1 : 0
     }
+    if (proposal.state === ProposalState.DepositNotMet) {
+      return 0
+    }
     if (proposal.state === ProposalState.Active) {
       return 2
     }
     if (
       proposal.state === ProposalState.Canceled ||
       proposal.state === ProposalState.Defeated ||
-      proposal.state === ProposalState.DepositNotMet ||
       proposal.state === ProposalState.Expired ||
       proposal.state === ProposalState.Succeeded
     ) {
