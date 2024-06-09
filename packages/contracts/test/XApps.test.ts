@@ -1022,6 +1022,40 @@ describe("X-Apps", function () {
       await expect(x2EarnApps.connect(otherAccounts[0]).removeAppModerator(app1Id, otherAccounts[0].address)).to.be
         .rejected
     })
+
+    it("Removing a moderator from an app does not affect other moderators of the app", async function () {
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+      await x2EarnApps.connect(owner).addAppModerator(app1Id, otherAccounts[1].address)
+      await x2EarnApps.connect(owner).addAppModerator(app1Id, otherAccounts[2].address)
+
+      let isModerator = await x2EarnApps.isAppModerator(app1Id, otherAccounts[1].address)
+      expect(isModerator).to.be.true
+
+      isModerator = await x2EarnApps.isAppModerator(app1Id, otherAccounts[2].address)
+      expect(isModerator).to.be.true
+
+      await x2EarnApps.connect(owner).removeAppModerator(app1Id, otherAccounts[1].address)
+
+      isModerator = await x2EarnApps.isAppModerator(app1Id, otherAccounts[1].address)
+      expect(isModerator).to.be.false
+
+      isModerator = await x2EarnApps.isAppModerator(app1Id, otherAccounts[2].address)
+      expect(isModerator).to.be.true
+    })
+
+    it("An error is thrown when trying to remove a non existing moderator from an app", async function () {
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+
+      await expect(x2EarnApps.connect(owner).removeAppModerator(app1Id, otherAccounts[1].address)).to.be.rejected
+    })
   })
 
   describe("Reward distributors", function () {
@@ -1078,6 +1112,52 @@ describe("X-Apps", function () {
         .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       await expect(x2EarnApps.connect(otherAccounts[0]).addRewardDistributor(app1Id, ZERO_ADDRESS)).to.be.rejected
+    })
+
+    it("Cannot remove ZERO_ADDRESS as a reward distributor of an app", async function () {
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = await x2EarnApps.hashAppName("My app")
+
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+
+      await expect(x2EarnApps.connect(otherAccounts[0]).removeRewardDistributor(app1Id, ZERO_ADDRESS)).to.be.rejected
+    })
+
+    it("Cannot remove a non existing reward distributor from an app", async function () {
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = await x2EarnApps.hashAppName("My app")
+
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+
+      await expect(x2EarnApps.connect(owner).removeRewardDistributor(app1Id, otherAccounts[1].address)).to.be.rejected
+    })
+
+    it("When having more than one distributor, updating one address won't affect the others", async function () {
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = await x2EarnApps.hashAppName("My app")
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+      await x2EarnApps.connect(owner).addRewardDistributor(app1Id, otherAccounts[1].address)
+      await x2EarnApps.connect(owner).addRewardDistributor(app1Id, otherAccounts[2].address)
+
+      let isDistributor = await x2EarnApps.isRewardDistributor(app1Id, otherAccounts[1].address)
+      expect(isDistributor).to.be.true
+
+      isDistributor = await x2EarnApps.isRewardDistributor(app1Id, otherAccounts[2].address)
+      expect(isDistributor).to.be.true
+
+      await x2EarnApps.connect(owner).removeRewardDistributor(app1Id, otherAccounts[1].address)
+
+      isDistributor = await x2EarnApps.isRewardDistributor(app1Id, otherAccounts[1].address)
+      expect(isDistributor).to.be.false
+
+      isDistributor = await x2EarnApps.isRewardDistributor(app1Id, otherAccounts[2].address)
+      expect(isDistributor).to.be.true
     })
 
     it("Can correctly fetch all reward distributors of an app", async function () {

@@ -50,6 +50,11 @@ interface IX2EarnApps {
   error X2EarnNonexistentRewardDistributor(bytes32 appId, address distributorAddress);
 
   /**
+   * @dev The `moderator` is not valid.
+   */
+  error X2EarnNonexistentModerator(bytes32 appId, address moderator);
+
+  /**
    * @dev Event fired when a new app is added.
    */
   event AppAdded(bytes32 indexed id, address addr, string name, bool appAvailableForAllocationVoting);

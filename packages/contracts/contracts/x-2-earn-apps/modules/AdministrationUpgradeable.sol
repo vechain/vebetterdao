@@ -233,6 +233,10 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
    * @param moderator the address of the moderator
    */
   function _removeAppModerator(bytes32 appId, address moderator) internal {
+    if (!isAppModerator(appId, moderator)) {
+      revert X2EarnNonexistentModerator(appId, moderator);
+    }
+
     if (moderator == address(0)) {
       revert X2EarnInvalidAddress(moderator);
     }
