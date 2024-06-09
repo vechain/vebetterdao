@@ -33,6 +33,7 @@ const containerVariants = {
 export const ProposalShareButton = () => {
   const { onOpen, isOpen, onClose } = useDisclosure()
   const { proposal } = useCurrentProposal()
+
   return (
     <>
       <IconButton
@@ -71,6 +72,7 @@ export const ProposalShareButton = () => {
                     }}
                     height={200}
                     width={200}
+                    speed={0.5}
                   />
                 </Box>
                 <ShareButtons
