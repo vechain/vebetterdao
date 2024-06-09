@@ -68,6 +68,15 @@ interface IX2EarnRewardsPool {
   function deposit(uint256 amount, bytes32 appId) external returns (bool);
 
   /**
+   * @dev Function used by x2earn apps to withdraw funds from the rewards pool.
+   *
+   * @param appId The ID of the app.
+   * @param amount The amount of $B3TR to withdraw.
+   * @param reason The reason for the withdrawal.
+   */
+  function withdraw(bytes32 appId, uint256 amount, string memory reason) external;
+
+  /**
    * @dev Gets the amount of funds available for an app to reward users.
    *
    * @param appId The ID of the app.
