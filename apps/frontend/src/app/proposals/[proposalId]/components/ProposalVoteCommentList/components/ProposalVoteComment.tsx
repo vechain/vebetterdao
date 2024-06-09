@@ -1,10 +1,11 @@
 import { ProposalVoteEvent, VoteType } from "@/api"
 import { AddressIcon } from "@/components/AddressIcon"
 import { Card, Divider, HStack, Text, VStack } from "@chakra-ui/react"
-import { getCompactFormatter, humanAddress, scaleNumberDown } from "@repo/utils/FormattingUtils"
+import { getCompactFormatter, humanAddress } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { ethers } from "ethers"
 
 const compactFormatter = getCompactFormatter(2)
 
@@ -52,7 +53,7 @@ export const ProposalVoteComment = ({ vote }: { vote: ProposalVoteEvent }) => {
     [t, voteType],
   )
 
-  const votePower = useMemo(() => scaleNumberDown(Number(vote.power || 0), 18, 18), [vote.power])
+  const votePower = ethers.formatEther(BigInt(vote.power || 0))
 
   return (
     <Card key={vote.account} p={"24px"} borderRadius={"6px"} bg={bgColor} borderColor={borderColor}>

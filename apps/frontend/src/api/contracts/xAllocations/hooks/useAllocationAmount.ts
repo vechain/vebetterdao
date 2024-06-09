@@ -1,9 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
-
 import { getConfig } from "@repo/config"
-import { FormattingUtils } from "@repo/utils"
 import { Emissions__factory } from "@repo/contracts"
+import { ethers } from "ethers"
 
 const EMISSION_CONTRACT = getConfig().emissionsContractAddress
 
@@ -44,9 +43,9 @@ export const getAllocationAmount = async (
   if (voteXAllocations.vmError) return Promise.reject(new Error(voteXAllocations.vmError))
 
   return {
-    treasury: FormattingUtils.scaleNumberDown(resTreasury.decoded[0], 18),
-    voteX2Earn: FormattingUtils.scaleNumberDown(resVoteX2Earn.decoded[0], 18),
-    voteXAllocations: FormattingUtils.scaleNumberDown(voteXAllocations.decoded[0], 18),
+    treasury: ethers.formatEther(resTreasury.decoded[0]),
+    voteX2Earn: ethers.formatEther(resVoteX2Earn.decoded[0]),
+    voteXAllocations: ethers.formatEther(voteXAllocations.decoded[0]),
   }
 }
 
