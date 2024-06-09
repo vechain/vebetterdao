@@ -235,7 +235,7 @@ describe("X-Apps", function () {
         .addApp(otherAccounts[1].address, otherAccounts[1].address, "My app #2", "metadataURI")
 
       const appsCount = await x2EarnApps.appsCount()
-      expect(appsCount).to.eql(2)
+      expect(appsCount).to.eql(2n)
     })
 
     it("Can retrieve app by id", async function () {
@@ -1118,7 +1118,7 @@ describe("X-Apps", function () {
         .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       const teamAllocationPercentage = await x2EarnApps.teamAllocationPercentage(app1Id)
-      expect(teamAllocationPercentage).to.eql(100)
+      expect(teamAllocationPercentage).to.eql(100n)
     })
 
     it("Admin can update the team allocation percentage of an app", async function () {
@@ -1130,12 +1130,12 @@ describe("X-Apps", function () {
       await x2EarnApps.connect(owner).setTeamAllocationPercentage(app1Id, 50)
 
       let teamAllocationPercentage = await x2EarnApps.teamAllocationPercentage(app1Id)
-      expect(teamAllocationPercentage).to.eql(50)
+      expect(teamAllocationPercentage).to.eql(50n)
 
       await x2EarnApps.connect(owner).setTeamAllocationPercentage(app1Id, 60)
 
       teamAllocationPercentage = await x2EarnApps.teamAllocationPercentage(app1Id)
-      expect(teamAllocationPercentage).to.eql(60)
+      expect(teamAllocationPercentage).to.eql(60n)
     })
 
     it("Admin can remove the team allocation percentage of an app by setting it to 0", async function () {
@@ -1147,14 +1147,14 @@ describe("X-Apps", function () {
       await x2EarnApps.connect(owner).setTeamAllocationPercentage(app1Id, 50)
 
       let teamAllocationPercentage = await x2EarnApps.teamAllocationPercentage(app1Id)
-      expect(teamAllocationPercentage).to.eql
+      expect(teamAllocationPercentage).to.eql(50n)
     })
 
     it("Cannot update the team allocation percentage of a non-existing app", async function () {
       const { x2EarnApps, owner } = await getOrDeployContractInstances({ forceDeploy: true })
-      const app1Id = await x2EarnApps.hashAppName("My app")
+      const appId = await x2EarnApps.hashAppName("non-existing app")
 
-      await expect(x2EarnApps.connect(owner).setTeamAllocationPercentage(app1Id, 50)).to.be.rejected
+      await expect(x2EarnApps.connect(owner).setTeamAllocationPercentage(appId, 50)).to.be.rejected
     })
 
     it("Cannot update the team allocation percentage of an app to more than 100", async function () {
@@ -1197,7 +1197,7 @@ describe("X-Apps", function () {
       await x2EarnApps.connect(owner).setTeamAllocationPercentage(app1Id, 50)
 
       let teamAllocationPercentage = await x2EarnApps.teamAllocationPercentage(app1Id)
-      expect(teamAllocationPercentage).to.eql(50)
+      expect(teamAllocationPercentage).to.eql(50n)
     })
   })
 })
