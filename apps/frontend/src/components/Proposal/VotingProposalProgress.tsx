@@ -1,10 +1,10 @@
 import React from "react"
 import { useProposalDepositEvent } from "@/api/contracts/governance/hooks/useProposalDepositEvent"
-import { useScaleVot3Amount } from "@/hooks"
 import { useIsDepositReached } from "@/api/contracts/governance/hooks/useIsDepositReached"
 import { useProposalCreatedEvent } from "@/api"
 import { Box, Flex, HStack, Text } from "@chakra-ui/react"
 import { UilBan, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
+import { ethers } from "ethers"
 
 type ProposalVotesProps = {
   abstainVotes: string
@@ -25,10 +25,9 @@ interface VotingProposalProgressProps {
 const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposalId, proposalVotes, quorum }) => {
   if (!proposalVotes) return null
   const proposalDepositEvent = useProposalDepositEvent(proposalId)
-  const scaleVot3Amount = useScaleVot3Amount()
   const isDepositReached = useIsDepositReached(proposalId)
   const proposalCreatedEvent = useProposalCreatedEvent(proposalId)
-  const depositThreshold = Number(scaleVot3Amount(proposalCreatedEvent.data?.depositThreshold))
+  const depositThreshold = Number(ethers.formatEther(BigInt(proposalCreatedEvent.data?.depositThreshold || 0)))
   const communityDeposits = proposalDepositEvent.communityDeposits
   const communityDepositPercentage = communityDeposits / depositThreshold
   const supportingUserCount = proposalDepositEvent.supportingUserCount
