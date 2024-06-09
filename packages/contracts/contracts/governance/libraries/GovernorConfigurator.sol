@@ -153,15 +153,4 @@ library GovernorConfigurator {
   function getMinVotingDelay(GovernorStorageTypes.GovernorStorage storage self) internal view returns (uint256) {
     return self.minVotingDelay;
   }
-
-  /**
-   * @notice Returns the deposit threshold percentage.
-   * @param self The storage reference for the GovernorStorage.
-   * @return The current deposit threshold percentage.
-   */
-  function getDepositThresholdPercentage(
-    GovernorStorageTypes.GovernorStorage storage self
-  ) internal view returns (uint256) {
-    return self.depositThresholdPercentage;
-  }
 }
