@@ -862,7 +862,7 @@ describe("X-Apps", function () {
       expect(moderators).to.eql([])
     })
 
-    it("Governance admin role can add a moderator to an app", async function () {
+    it("DEFAULT_ADMIN_ROLE can add a moderator to an app", async function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await x2EarnApps
@@ -879,7 +879,7 @@ describe("X-Apps", function () {
       expect(isModerator).to.be.true
     })
 
-    it("Governance admin role can remove a moderator from an app", async function () {
+    it("DEFAULT_ADMIN_ROLE can remove a moderator from an app", async function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await x2EarnApps
@@ -1005,6 +1005,22 @@ describe("X-Apps", function () {
         .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       await expect(x2EarnApps.connect(otherAccounts[0]).removeAppModerator(app1Id, ZERO_ADDRESS)).to.be.rejected
+    })
+
+    it("Non admin or user without DEFAULT_ADMIN_ROLE cannot add a moderator to an app", async function () {
+      const { x2EarnApps, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+
+      await expect(x2EarnApps.connect(otherAccounts[0]).addAppModerator(app1Id, otherAccounts[0].address)).to.be
+        .rejected
+    })
+
+    it("Non admin or user without DEFAULT_ADMIN_ROLE cannot remove a moderator from an app", async function () {
+      const { x2EarnApps, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+
+      await expect(x2EarnApps.connect(otherAccounts[0]).removeAppModerator(app1Id, otherAccounts[0].address)).to.be
+        .rejected
     })
   })
 
