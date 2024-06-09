@@ -353,6 +353,10 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
    * @param newAllocationPercentage the new allocation percentage
    */
   function _setTeamAllocationPercentage(bytes32 appId, uint256 newAllocationPercentage) internal virtual override {
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+
     if (newAllocationPercentage > 100) {
       revert X2EarnInvalidAllocationPercentage(newAllocationPercentage);
     }
