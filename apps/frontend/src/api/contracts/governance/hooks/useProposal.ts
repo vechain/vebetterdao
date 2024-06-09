@@ -3,7 +3,6 @@ import { useProposalCreatedEvent } from "./useProposalCreatedEvent"
 import { ProposalState, useProposalState } from "./useProposalState"
 import { useProposalVotes } from "./useProposalVotes"
 import { useParams } from "next/navigation"
-import { useProposalDeposits } from "./useGetProposalDeposit"
 import { useProposalVoteDates } from "./useProposalVoteDates"
 import { useProposalUserDeposit } from "./useProposalUserDeposit"
 import { useWallet } from "@vechain/dapp-kit-react"
@@ -20,7 +19,7 @@ import { ProposalMetadata } from "./useProposalsEvents"
 import { useProposalQuorum } from "./useProposalQuorum"
 import { useProposalQueuedEvent } from "./useProposalQueuedEvent"
 import { useProposalExecutedEvent } from "./useProposalExecutedEvent"
-import { useScaleVot3Amount } from "@/hooks"
+import { ethers } from "ethers"
 
 export const useProposal = (proposalId: string) => {
   const { account } = useWallet()
@@ -51,7 +50,6 @@ export const useProposal = (proposalId: string) => {
     }
     return toIPFSURL(proposalCreatedEvent.data?.description)
   }, [proposalCreatedEvent.data?.description])
-  const scaleVot3Amount = useScaleVot3Amount()
 
   const proposalMetadata = useIpfsMetadata<ProposalMetadata>(metadataUri)
 
@@ -94,19 +92,21 @@ export const useProposal = (proposalId: string) => {
     const votes = proposalVoteEvents.votes
     const votesWithComment = proposalVoteEvents.votesWithComment
     const hasUserVoted = proposalVoteEvents.hasUserVoted
-    const totalVot3UsedInVotes = Number(scaleVot3Amount(proposalVoteEvents.totalVot3UsedInVotes))
-    const totalVotingPowerUsedInVotes = Number(scaleVot3Amount(proposalVoteEvents.totalVotingPowerUsedInVotes))
+    const totalVot3UsedInVotes = Number(ethers.formatEther(BigInt(proposalVoteEvents.totalVot3UsedInVotes || 0)))
+    const totalVotingPowerUsedInVotes = Number(
+      ethers.formatEther(BigInt(proposalVoteEvents.totalVotingPowerUsedInVotes || 0)),
+    )
     const forVotes = Number(proposalVotes.data?.forVotes || "0")
     const againstVotes = Number(proposalVotes.data?.againstVotes || "0")
     const abstainVotes = Number(proposalVotes.data?.abstainVotes || "0")
     const forPercentage = (totalVotingPowerUsedInVotes ? forVotes / totalVotingPowerUsedInVotes : 0) * 100
     const againstPercentage = (totalVotingPowerUsedInVotes ? againstVotes / totalVotingPowerUsedInVotes : 0) * 100
     const abstainPercentage = (totalVotingPowerUsedInVotes ? abstainVotes / totalVotingPowerUsedInVotes : 0) * 100
-    const depositThreshold = Number(scaleVot3Amount(proposalCreatedEvent.data?.depositThreshold))
+    const depositThreshold = Number(ethers.formatEther(BigInt(proposalCreatedEvent.data?.depositThreshold || 0)))
     const communityDeposits = proposalDepositEvent.communityDeposits
     const communityDepositPercentage = communityDeposits / depositThreshold
     const communityDepositChartPercentage = Math.min(communityDepositPercentage || 0, 1) * 100
-    const userSupportLeft = Number(scaleVot3Amount(proposalUserDeposit?.data))
+    const userSupportLeft = Number(ethers.formatEther(BigInt(proposalUserDeposit?.data || 0)))
     const isUserSupportLeft = userSupportLeft > 0
     const userSupport = proposalDepositEvent.userSupport
     const userSupportPercentage = userSupport / communityDeposits
@@ -117,7 +117,7 @@ export const useProposal = (proposalId: string) => {
     const hasUserSupported = proposalDepositEvent.hasUserSupported
     const supportingUserCount = proposalDepositEvent.supportingUserCount
     const othersSupportUserCount = proposalDepositEvent.othersSupportUserCount
-    const userVotingPowerOnSnapshot = scaleVot3Amount(proposalSnapshotVotingPower.data)
+    const userVotingPowerOnSnapshot = ethers.formatEther(proposalSnapshotVotingPower.data || 0)
     const userVot3OnSnapshot = proposalSnapshotVot3.data || 0
     const quorumPercentage = totalVot3UsedInVotes ? totalVot3UsedInVotes / Number(proposalQuorum.data?.scaled) : 0
     const quorumChartPercentage = Math.min(quorumPercentage || 0, 1) * 100
@@ -198,7 +198,6 @@ export const useProposal = (proposalId: string) => {
   }, [
     proposalVoteEvents,
     proposalVotes,
-    scaleVot3Amount,
     proposalCreatedEvent,
     proposalUserDeposit,
     proposalDepositEvent,

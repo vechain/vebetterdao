@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
-
 import { getConfig } from "@repo/config"
 import { FormattingUtils } from "@repo/utils"
 import { Vot3ContractJson } from "@repo/contracts"
+import { ethers } from "ethers"
+
 const vot3Abi = Vot3ContractJson.abi
 
 const config = getConfig()
@@ -31,7 +32,7 @@ export const getVotes = async (
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
   const original = res.decoded[0]
-  const scaled = FormattingUtils.scaleNumberDown(original, 18)
+  const scaled = ethers.formatEther(original)
   const formatted = scaled === "0" ? "0" : FormattingUtils.humanNumber(scaled)
 
   return {

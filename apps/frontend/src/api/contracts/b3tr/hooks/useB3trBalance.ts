@@ -2,8 +2,9 @@ import { FormattingUtils } from "@repo/utils"
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
-import { useB3trTokenDetails } from "./useB3trTokenDetails"
 import { B3trContractJson } from "@repo/contracts"
+import { ethers } from "ethers"
+
 const b3trAbi = B3trContractJson.abi
 
 const B3TR_CONTRACT = getConfig().b3trContractAddress
@@ -21,11 +22,7 @@ export type TokenBalance = {
  * @param scaleDecimals  The decimals of the token. Defaults to 18
  * @returns Balance of the token in the form of {@link TokenBalance} (original, scaled down and formatted)
  */
-export const getB3trBalance = async (
-  thor: Connex.Thor,
-  address?: string,
-  scaleDecimals: number = 18,
-): Promise<TokenBalance> => {
+export const getB3trBalance = async (thor: Connex.Thor, address?: string): Promise<TokenBalance> => {
   if (!address) return Promise.reject(new Error("Address not provided"))
   const functionAbi = b3trAbi.find(e => e.name === "balanceOf")
   if (!functionAbi) return Promise.reject(new Error("Function abi not found for balanceOf"))
@@ -34,7 +31,7 @@ export const getB3trBalance = async (
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
   const original = res.decoded[0]
-  const scaled = FormattingUtils.scaleNumberDown(original, scaleDecimals, scaleDecimals)
+  const scaled = ethers.formatEther(original)
   const formatted = scaled === "0" ? "0" : FormattingUtils.humanNumber(scaled)
 
   return {
@@ -47,11 +44,10 @@ export const getB3trBalance = async (
 export const getB3TrBalanceQueryKey = (address?: string) => ["balance", "b3tr", address]
 export const useB3trBalance = (address?: string) => {
   const { thor } = useConnex()
-  const { data: tokenDetails } = useB3trTokenDetails()
 
   return useQuery({
     queryKey: getB3TrBalanceQueryKey(address),
-    queryFn: () => getB3trBalance(thor, address, tokenDetails?.decimals),
-    enabled: !!address && !!tokenDetails?.decimals,
+    queryFn: () => getB3trBalance(thor, address),
+    enabled: !!address,
   })
 }
