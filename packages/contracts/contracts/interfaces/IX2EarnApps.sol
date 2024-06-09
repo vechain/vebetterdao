@@ -45,6 +45,11 @@ interface IX2EarnApps {
   error X2EarnInvalidAllocationPercentage(uint256 percentage);
 
   /**
+   * @dev The `distributorAddress` is not valid.
+   */
+  error X2EarnNonexistentRewardDistributor(bytes32 appId, address distributorAddress);
+
+  /**
    * @dev Event fired when a new app is added.
    */
   event AppAdded(bytes32 indexed id, address addr, string name, bool appAvailableForAllocationVoting);

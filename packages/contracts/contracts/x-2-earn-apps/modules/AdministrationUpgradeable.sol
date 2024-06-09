@@ -283,6 +283,10 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
    * @param distributor the address of the reward distributor
    */
   function _removeRewardDistributor(bytes32 appId, address distributor) internal {
+    if (!isRewardDistributor(appId, distributor)) {
+      revert X2EarnNonexistentRewardDistributor(appId, distributor);
+    }
+
     if (distributor == address(0)) {
       revert X2EarnInvalidAddress(distributor);
     }
