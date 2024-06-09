@@ -39,7 +39,7 @@ import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/ac
  * @dev The contract is using AccessControl to handle the admin and upgrader roles.
  * Only users with the DEFAULT_ADMIN_ROLE can add new apps, set the base URI and set the voting eligibility for an app.
  * Admins can also control the app metadata and management.
- * Each app has a set of admins and moderators (built without using AccessControl) that can manage the app metadata and management.
+ * Each app has a set of admins and moderators that can manage the app and settings.
  */
 contract X2EarnApps is
   Initializable,
@@ -132,10 +132,14 @@ contract X2EarnApps is
   // ---------- Overrides ------------ //
 
   /**
-   * @dev See {IX2EarnApps-setBaseURI}.
+   * @dev Update the base URI to retrieve the metadata of the x2earn apps
+   *
+   * @param _baseURI the base URI for the contract
+   *
+   * Emits a {BaseURIUpdated} event.
    */
-  function setBaseURI(string memory _baseURI) public override onlyRole(DEFAULT_ADMIN_ROLE) {
-    super.setBaseURI(_baseURI);
+  function setBaseURI(string memory _baseURI) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    _setBaseURI(_baseURI);
   }
 
   /**

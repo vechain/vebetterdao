@@ -59,19 +59,6 @@ abstract contract ContractSettingsUpgradeable is Initializable, X2EarnAppsUpgrad
     $._baseURI = baseURI_;
   }
 
-  // ---------- Setters ---------- //
-
-  /**
-   * @dev Update the base URI to retrieve the metadata of the x2earn apps
-   *
-   * @param baseURI_ the base URI for the contract
-   *
-   * Emits a {BaseURIUpdated} event.
-   */
-  function setBaseURI(string memory baseURI_) public virtual {
-    _setBaseURI(baseURI_);
-  }
-
   // ---------- Getters ---------- //
 
   /**
