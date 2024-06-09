@@ -167,6 +167,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
     _setVotingEligibility(id, true);
     _updateTeamWalletAddress(id, teamWalletAddress);
     _updateAppMetadata(id, metadataURI);
+    _setTeamAllocationPercentage(id, 100);
 
     emit AppAdded(id, teamWalletAddress, appName, true);
   }
