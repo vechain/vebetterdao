@@ -233,16 +233,16 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
    * @param moderator the address of the moderator
    */
   function _removeAppModerator(bytes32 appId, address moderator) internal {
-    if (!isAppModerator(appId, moderator)) {
-      revert X2EarnNonexistentModerator(appId, moderator);
-    }
-
     if (moderator == address(0)) {
       revert X2EarnInvalidAddress(moderator);
     }
 
     if (!appExists(appId)) {
       revert X2EarnNonexistentApp(appId);
+    }
+
+    if (!isAppModerator(appId, moderator)) {
+      revert X2EarnNonexistentModerator(appId, moderator);
     }
 
     AdministrationStorage storage $ = _getAdministrationStorage();
@@ -287,16 +287,16 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
    * @param distributor the address of the reward distributor
    */
   function _removeRewardDistributor(bytes32 appId, address distributor) internal {
-    if (!isRewardDistributor(appId, distributor)) {
-      revert X2EarnNonexistentRewardDistributor(appId, distributor);
-    }
-
     if (distributor == address(0)) {
       revert X2EarnInvalidAddress(distributor);
     }
 
     if (!appExists(appId)) {
       revert X2EarnNonexistentApp(appId);
+    }
+
+    if (!isRewardDistributor(appId, distributor)) {
+      revert X2EarnNonexistentRewardDistributor(appId, distributor);
     }
 
     AdministrationStorage storage $ = _getAdministrationStorage();
