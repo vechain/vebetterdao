@@ -579,6 +579,29 @@ describe("Governor and TimeLock", function () {
       expect(updatedThreshold).to.not.eql(newThreshold)
     })
 
+    it("Cannot update proposal threshold to more than 100%", async function () {
+      const { governor, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const newThreshold = 101n
+
+      await catchRevert(
+        createProposalAndExecuteIt(
+          owner,
+          owner,
+          governor,
+          b3trGovernorFactory,
+          "Update Deposit Threshold",
+          "setDepositThresholdPercentage",
+          [newThreshold],
+        ),
+      )
+
+      const updatedThreshold = await governor.depositThresholdPercentage()
+      expect(updatedThreshold).to.not.eql(newThreshold)
+    })
+
     it("can update voting threshold through governance", async function () {
       const { governor, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -630,6 +653,15 @@ describe("Governor and TimeLock", function () {
 
       const updatedDelay = await governor.minVotingDelay()
       expect(updatedDelay).to.eql(newDelay)
+    })
+
+    it("Can fetch min voting delay", async function () {
+      const { governor } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const delay = await governor.minVotingDelay()
+      expect(delay).to.eql(1n)
     })
 
     it("only governance can update min voting delay", async function () {

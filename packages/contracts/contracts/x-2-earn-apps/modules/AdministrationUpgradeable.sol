@@ -145,7 +145,7 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
    *
    * @param appId the hashed name of the app
    */
-  function appRewardDistributors(bytes32 appId) public view returns (address[] memory) {
+  function rewardDistributors(bytes32 appId) public view returns (address[] memory) {
     AdministrationStorage storage $ = _getAdministrationStorage();
 
     return $._rewardDistributors[appId];
