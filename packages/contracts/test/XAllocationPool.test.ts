@@ -470,10 +470,6 @@ describe("X-Allocation Pool", async function () {
         await x2EarnApps.connect(owner).addApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
         await x2EarnApps.connect(owner).addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
 
-        // Set allocation percentage for the team to 100%
-        await x2EarnApps.connect(otherAccounts[3]).updateTeamAllocationPercentage(app1Id, 100)
-        await x2EarnApps.connect(otherAccounts[4]).updateTeamAllocationPercentage(app2Id, 100)
-
         // Bootstrap emissions
         await bootstrapEmissions()
 
@@ -530,10 +526,6 @@ describe("X-Allocation Pool", async function () {
         await x2EarnApps.connect(owner).addApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
         await x2EarnApps.connect(owner).addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
 
-        // Set allocation percentage for the team to 100%
-        await x2EarnApps.connect(otherAccounts[3]).updateTeamAllocationPercentage(app1Id, 100)
-        await x2EarnApps.connect(otherAccounts[4]).updateTeamAllocationPercentage(app2Id, 100)
-
         // Bootstrap emissions
         await bootstrapEmissions()
 
@@ -557,7 +549,7 @@ describe("X-Allocation Pool", async function () {
         const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
         const app3ReceiverAddress = otherAccounts[4].address
         await x2EarnApps.connect(owner).addApp(app3ReceiverAddress, app3ReceiverAddress, "My app #3", "metadataURI")
-        await x2EarnApps.connect(otherAccounts[4]).updateTeamAllocationPercentage(app3Id, 100)
+        await x2EarnApps.connect(otherAccounts[4]).setTeamAllocationPercentage(app3Id, 100)
         await moveToCycle(3)
         const round2 = parseInt((await xAllocationVoting.currentRoundId()).toString())
         expect(round2).to.eql(2)
@@ -1104,8 +1096,8 @@ describe("X-Allocation Pool", async function () {
         await x2EarnApps.connect(owner).addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
 
         // Set allocation percentage for the team to 100%
-        await x2EarnApps.connect(otherAccounts[3]).updateTeamAllocationPercentage(app1Id, 100)
-        await x2EarnApps.connect(otherAccounts[4]).updateTeamAllocationPercentage(app2Id, 100)
+        await x2EarnApps.connect(otherAccounts[3]).setTeamAllocationPercentage(app1Id, 100)
+        await x2EarnApps.connect(otherAccounts[4]).setTeamAllocationPercentage(app2Id, 100)
 
         // Bootstrap emissions
         await bootstrapEmissions()
@@ -1214,8 +1206,8 @@ describe("X-Allocation Pool", async function () {
         await x2EarnApps.connect(owner).addApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
 
         // Set allocation percentage for the team to 100%
-        await x2EarnApps.connect(otherAccounts[3]).updateTeamAllocationPercentage(app1Id, 100)
-        await x2EarnApps.connect(otherAccounts[4]).updateTeamAllocationPercentage(app2Id, 100)
+        await x2EarnApps.connect(otherAccounts[3]).setTeamAllocationPercentage(app1Id, 100)
+        await x2EarnApps.connect(otherAccounts[4]).setTeamAllocationPercentage(app2Id, 100)
 
         // Bootstrap emissions
         await bootstrapEmissions()
@@ -1438,8 +1430,8 @@ describe("X-Allocation Pool", async function () {
           .addApp(otherAccounts[7].address, otherAccounts[7].address, "My app #2", "metadataURI")
 
         // Set allocation percentage for the team to 100%
-        await x2EarnApps.connect(otherAccounts[6]).updateTeamAllocationPercentage(app1Id, 100)
-        await x2EarnApps.connect(otherAccounts[7]).updateTeamAllocationPercentage(app2Id, 100)
+        await x2EarnApps.connect(otherAccounts[6]).setTeamAllocationPercentage(app1Id, 100)
+        await x2EarnApps.connect(otherAccounts[7]).setTeamAllocationPercentage(app2Id, 100)
 
         // Bootstrap emissions
         await bootstrapEmissions()

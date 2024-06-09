@@ -205,7 +205,7 @@ interface IX2EarnApps {
    * @param appId the id of the app
    * @param percentage the new percentage of the allocation
    */
-  function updateTeamAllocationPercentage(bytes32 appId, uint256 percentage) external;
+  function setTeamAllocationPercentage(bytes32 appId, uint256 percentage) external;
 
   /**
    * @dev Add a new reward distributor to the app.

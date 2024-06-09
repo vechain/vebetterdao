@@ -155,5 +155,5 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   /**
    * @dev Update the allocation percentage of the team.
    */
-  function _updateTeamAllocationPercentage(bytes32 appId, uint256 percentage) internal virtual;
+  function _setTeamAllocationPercentage(bytes32 appId, uint256 percentage) internal virtual;
 }

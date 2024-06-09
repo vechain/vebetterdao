@@ -1387,7 +1387,7 @@ describe("X-Allocation Voting", function () {
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
-      await x2EarnApps.updateTeamAllocationPercentage(app1, 100)
+      await x2EarnApps.setTeamAllocationPercentage(app1, 100)
 
       await getVot3Tokens(otherAccount, "1000")
 

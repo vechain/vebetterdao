@@ -179,13 +179,13 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev See {IX2EarnApps-updateTeamAllocationPercentage}.
+   * @dev See {IX2EarnApps-setTeamAllocationPercentage}.
    */
-  function updateTeamAllocationPercentage(
+  function setTeamAllocationPercentage(
     bytes32 _appId,
     uint256 _percentage
   ) public onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
-    _updateTeamAllocationPercentage(_appId, _percentage);
+    _setTeamAllocationPercentage(_appId, _percentage);
   }
 
   /**
