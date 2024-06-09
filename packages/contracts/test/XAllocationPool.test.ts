@@ -155,6 +155,18 @@ describe("X-Allocation Pool", async function () {
           owner.address,
         ]),
       ).to.be.reverted
+
+      await expect(
+        deployProxy("XAllocationPool", [
+          owner.address,
+          owner.address,
+          owner.address,
+          await b3tr.getAddress(),
+          await treasury.getAddress(),
+          owner.address,
+          ZERO_ADDRESS,
+        ]),
+      ).to.be.reverted
     })
 
     it("Cannot initilize twice", async function () {
@@ -1984,6 +1996,22 @@ describe("X-Allocation Pool", async function () {
         expect(app2app2Earnings[0]).to.eql(5993n)
         expect(app3app3Earnings[0]).to.eql(2861n)
       })
+    })
+  })
+
+  describe("Rewards claiming", async function () {
+    it("Should fail if not enough balance on contract", async function () {
+      const { xAllocationPool, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const round1 = 1
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+
+      await xAllocationPool.connect(otherAccounts[3]).claim(round1, app1Id)
+      expect(await xAllocationPool.claimed(round1, app1Id)).to.eql(true)
+
+      await catchRevert(xAllocationPool.connect(otherAccounts[3]).claim(round1, app1Id))
     })
   })
 })

@@ -210,7 +210,7 @@ contract XAllocationPool is
       uint256 amountToClaim,
       uint256 unallocatedAmount,
       uint256 teamAllocationsAmount,
-      uint256 rewardsAllocationAmount
+      uint256 x2EarnRewardsPoolAmount
     ) = claimableAmount(roundId, appId);
 
     require(amountToClaim > 0, "XAllocationPool: no rewards available for this app");
@@ -218,27 +218,33 @@ contract XAllocationPool is
     $.claimedRewards[appId][roundId] = true;
 
     //check that contract has enough funds to pay the reward
-    require($.b3tr.balanceOf(address(this)) >= (teamAllocationsAmount + unallocatedAmount), "Insufficient funds");
+    require(
+      $.b3tr.balanceOf(address(this)) >= (teamAllocationsAmount + x2EarnRewardsPoolAmount + unallocatedAmount),
+      "XAllocationPool: Insufficient funds on contract"
+    );
 
     // Transfer the rewards to the team
     address teamWalletAddress = $.x2EarnApps.teamWalletAddress(appId);
-    require($.b3tr.transfer(teamWalletAddress, teamAllocationsAmount), "Allocation transfer to app failed");
+    require(
+      $.b3tr.transfer(teamWalletAddress, teamAllocationsAmount),
+      "XAllocationPool: transfer to team wallet failed"
+    );
 
     // Deposit the remaining rewards to the X2EarnRewardsPool contract
     require(
-      $.b3tr.approve(address($.x2EarnRewardsPool), rewardsAllocationAmount),
-      "Approval of rewards allocation failed"
+      $.b3tr.approve(address($.x2EarnRewardsPool), x2EarnRewardsPoolAmount),
+      "XAllocationPool: Approval of B3TR token to x2EarnRewardsPool failed"
     );
     require(
-      $.x2EarnRewardsPool.deposit(rewardsAllocationAmount, appId),
-      "Deposit of rewards allocation to x2EarnRewardsPool failed"
+      $.x2EarnRewardsPool.deposit(x2EarnRewardsPoolAmount, appId),
+      "XAllocationPool: Deposit of rewards allocation to x2EarnRewardsPool failed"
     );
 
     // Transfer the unallocated rewards to the treasury
     if (unallocatedAmount > 0) {
       require(
         $.b3tr.transfer(address($.treasury), unallocatedAmount),
-        "Transfer of unallocated rewards to treasury failed"
+        "XAllocationPool: Transfer of unallocated rewards to treasury failed"
       );
     }
 
@@ -250,7 +256,7 @@ contract XAllocationPool is
       teamWalletAddress,
       msg.sender,
       unallocatedAmount,
-      rewardsAllocationAmount
+      x2EarnRewardsPoolAmount
     );
   }
 
@@ -295,7 +301,7 @@ contract XAllocationPool is
    * @param appId the app id
    * @param totalRoundEarnings full amount of B3TR available for allocation to the app
    * @return teamAllocationAmount amount of B3TR that will be sent to the team
-   * @return rewardsAllocationAmount amount of B3TR reserved to reward users
+   * @return x2EarnRewardsPoolAmount amount of B3TR reserved to reward users
    */
   function _calculateTeamAllocation(
     bytes32 appId,
@@ -305,9 +311,9 @@ contract XAllocationPool is
     uint256 teamAllocationPercentage = $.x2EarnApps.teamAllocationPercentage(appId);
 
     uint256 teamAllocationAmount = (totalRoundEarnings * teamAllocationPercentage) / 100;
-    uint256 rewardsAllocationAmount = totalRoundEarnings - teamAllocationAmount;
+    uint256 x2EarnRewardsPoolAmount = totalRoundEarnings - teamAllocationAmount;
 
-    return (teamAllocationAmount, rewardsAllocationAmount);
+    return (teamAllocationAmount, x2EarnRewardsPoolAmount);
   }
 
   // ---------- Getters ---------- //
@@ -320,7 +326,7 @@ contract XAllocationPool is
    * @return totalAmount The total amount of $B3TR available for allocation to the app.
    * @return unallocatedAmount The amount of $B3TR that was not allocated, and will be sent to the treasury.
    * @return teamAllocationAmount The amount of $B3TR that will be sent to the team.
-   * @return rewardsAllocationAmount The amount of $B3TR reserved to reward users.
+   * @return x2EarnRewardsPoolAmount The amount of $B3TR reserved to reward users.
    */
   function claimableAmount(uint256 roundId, bytes32 appId) public view returns (uint256, uint256, uint256, uint256) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
@@ -347,7 +353,7 @@ contract XAllocationPool is
    * @return totalAmount The total amount of $B3TR available for allocation to the app.
    * @return unallocatedAmount The amount of $B3TR that was not allocated, and will be sent to the treasury.
    * @return teamAllocationAmount The amount of $B3TR that will be sent to the team.
-   * @return rewardsAllocationAmount The amount of $B3TR reserved to reward users.
+   * @return x2EarnRewardsPoolAmount The amount of $B3TR reserved to reward users.
    */
   function roundEarnings(uint256 roundId, bytes32 appId) public view returns (uint256, uint256, uint256, uint256) {
     IXAllocationVotingGovernor _xAllocationVoting = xAllocationVoting();
@@ -378,7 +384,7 @@ contract XAllocationPool is
       unallocatedAmount = _rewardAmount(roundId, unallocatedShare);
     }
 
-    (uint256 teamAllocationAmount, uint256 rewardsAllocationAmount) = _calculateTeamAllocation(
+    (uint256 teamAllocationAmount, uint256 x2EarnRewardsPoolAmount) = _calculateTeamAllocation(
       appId,
       baseAllocationPerApp + variableAllocationForApp
     );
@@ -387,7 +393,7 @@ contract XAllocationPool is
       baseAllocationPerApp + variableAllocationForApp,
       unallocatedAmount,
       teamAllocationAmount,
-      rewardsAllocationAmount
+      x2EarnRewardsPoolAmount
     );
   }
 
