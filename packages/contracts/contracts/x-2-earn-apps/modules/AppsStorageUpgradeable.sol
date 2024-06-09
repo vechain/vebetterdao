@@ -128,7 +128,10 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   // ---------- Internal ---------- //
 
   /**
-   * @dev Internal function that should add an app. Called by {addApp}.
+   * @dev Create app.
+   * The id of the app is the hash of the app name.
+   * Will be eligible for voting by default from the next round and
+   * the team allocation percentage will be 100%,
    *
    * @param teamWalletAddress the address where the app should receive allocation funds
    * @param admin the address of the admin
