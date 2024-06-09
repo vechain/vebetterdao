@@ -75,11 +75,11 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
    *
    * @param appId the id of the app
    */
-  function app(bytes32 appId) public view virtual override returns (X2EarnAppsDataTypes.AppWithDetails memory) {
+  function app(bytes32 appId) public view virtual override returns (X2EarnAppsDataTypes.AppReturnType memory) {
     X2EarnAppsDataTypes.App memory _app = _getAppStorage(appId);
 
     return
-      X2EarnAppsDataTypes.AppWithDetails(
+      X2EarnAppsDataTypes.AppReturnType(
         _app.id,
         teamWalletAddress(appId),
         _app.name,
@@ -95,14 +95,14 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   /**
    * @dev Get all apps
    */
-  function apps() public view returns (X2EarnAppsDataTypes.AppWithDetails[] memory) {
+  function apps() public view returns (X2EarnAppsDataTypes.AppReturnType[] memory) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
 
-    X2EarnAppsDataTypes.AppWithDetails[] memory allApps = new X2EarnAppsDataTypes.AppWithDetails[]($._appIds.length);
+    X2EarnAppsDataTypes.AppReturnType[] memory allApps = new X2EarnAppsDataTypes.AppReturnType[]($._appIds.length);
     uint256 length = $._appIds.length;
     for (uint i = 0; i < length; i++) {
       X2EarnAppsDataTypes.App memory _app = $._apps[$._appIds[i]];
-      allApps[i] = X2EarnAppsDataTypes.AppWithDetails(
+      allApps[i] = X2EarnAppsDataTypes.AppReturnType(
         _app.id,
         teamWalletAddress(_app.id),
         _app.name,

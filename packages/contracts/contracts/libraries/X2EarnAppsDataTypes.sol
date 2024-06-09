@@ -8,7 +8,7 @@ library X2EarnAppsDataTypes {
     uint256 createdAtTimestamp;
   }
 
-  struct AppWithDetails {
+  struct AppReturnType {
     bytes32 id;
     address teamWalletAddress;
     string name;

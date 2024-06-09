@@ -123,7 +123,7 @@ interface IX2EarnApps {
    *
    * @param appId the id of the app
    */
-  function app(bytes32 appId) external view returns (X2EarnAppsDataTypes.AppWithDetails memory);
+  function app(bytes32 appId) external view returns (X2EarnAppsDataTypes.AppReturnType memory);
 
   /**
    * @dev Function to get the number of apps.
