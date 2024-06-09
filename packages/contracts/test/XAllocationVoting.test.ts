@@ -1831,6 +1831,19 @@ describe("X-Allocation Voting", function () {
   })
 
   describe("Allocation Voting finalization", function () {
+    it("Cannot finalize active round", async function () {
+      const { xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      let round1 = await startNewAllocationRound()
+
+      await catchRevert(xAllocationVoting.finalizeRound(round1))
+
+      let isFinalized = await xAllocationVoting.isFinalized(round1)
+      expect(isFinalized).to.eql(false)
+    })
+
     it("Previous round is finalized correctly when a new one starts", async function () {
       const { xAllocationVoting } = await getOrDeployContractInstances({
         forceDeploy: true,
