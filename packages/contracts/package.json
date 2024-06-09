@@ -15,7 +15,7 @@
     "generate-b3tr-badge-metadata": "npx hardhat run scripts/metadata/B3TRBadgeNFTs/generate.ts",
     "upload-b3tr-badge-metadata": "yarn generate-b3tr-badge-metadata && npx hardhat run scripts/metadata/B3TRBadgeNFTs/upload.ts",
     "generate-xapp-metadata": "npx hardhat run scripts/metadata/xApps/generate.ts",
-    "upload-xapp-metadata": "yarn generate-xapp-metadata && npx hardhat run scripts/metadata/xApps/upload.ts",
+    "upload-xapp-metadata": "npx hardhat run scripts/metadata/xApps/upload.ts",
     "start-solo": "docker compose up -d",
     "stop-solo": "docker compose down",
     "clean": "rm -rf dist artifacts node_modules",
