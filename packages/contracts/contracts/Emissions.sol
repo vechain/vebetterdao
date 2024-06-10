@@ -56,7 +56,8 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
     address admin;
     address upgrader;
     address b3trAddress;
-    address[3] destinations;
+    address[4] destinations;
+    uint256 migrationAmount;
     uint256 initialXAppAllocation;
     uint256 cycleDuration;
     uint256[4] decaySettings;
@@ -74,6 +75,9 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
     address _xAllocations;
     address _vote2Earn;
     address _treasury;
+    // Migration
+    address _migration;
+    uint256 _migrationAmount;
     // ----------- Cycle attributes ----------- //
     uint256 nextCycle; // Next cycle number
     uint256 cycleDuration; // Duration of a cycle in blocks
@@ -119,15 +123,16 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   ///  - admin: Address with administrative rights
   ///  - upgrader: Address authorized to upgrade the contract
   ///  - b3trAddress: Contract address of the B3TR token
-  ///  - destinations: Array of addresses for emissions allocations: [XAllocations, Vote2Earn, Treasury]
+  ///  - destinations: Array of addresses for emissions allocations: [XAllocations, Vote2Earn, Treasury, Migration]
   ///  - initialXAppAllocation: Initial amount of tokens allocated for XAllocations
   ///  - cycleDuration: Duration of each emission cycle in blocks
   ///  - decaySettings: Array with decay rates and periods [XAllocations Decay Rate, Vote2Earn Decay Rate, XAllocations Decay Period, Vote2Earn Decay Period]
   ///  - treasuryPercentage: Percentage of total emissions allocated to the treasury
   ///  - maxVote2EarnDecay: Maximum allowable decay rate for Vote2Earn allocations to ensure sustainability
+  ///  - migrationAmount: Amount of tokens seed the migration account with
   function initialize(InitializationData memory data) public initializer {
     // Assertions
-    require(data.destinations.length == 3, "Emissions: Invalid destinations input length. Expected 3.");
+    require(data.destinations.length == 4, "Emissions: Invalid destinations input length. Expected 4.");
     require(data.initialXAppAllocation > 0, "Emissions: Initial xApp allocation must be greater than 0");
     require(data.cycleDuration > 0, "Emissions: Cycle duration must be greater than 0");
     require(data.decaySettings.length == 4, "Emissions: Invalid decay settings input length. Expected 4.");
@@ -163,6 +168,10 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
     $._xAllocations = data.destinations[0];
     $._vote2Earn = data.destinations[1];
     $._treasury = data.destinations[2];
+
+    // Migration
+    $._migration = data.destinations[3];
+    $._migrationAmount = data.migrationAmount;
 
     // Set cycle duration
     $.cycleDuration = data.cycleDuration;
@@ -206,10 +215,11 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
 
     // Mint initial allocations
     $.emissions[$.nextCycle] = Emission($.initialXAppAllocation, initialVote2EarnAllocation, initialTreasuryAllocation);
-    $.totalEmissions += $.initialXAppAllocation + initialVote2EarnAllocation + initialTreasuryAllocation;
+    $.totalEmissions += $.initialXAppAllocation + initialVote2EarnAllocation + initialTreasuryAllocation + $._migrationAmount;
     $.b3tr.mint($._xAllocations, $.initialXAppAllocation);
     $.b3tr.mint($._vote2Earn, initialVote2EarnAllocation);
     $.b3tr.mint($._treasury, initialTreasuryAllocation);
+    $.b3tr.mint($._migration, $._migrationAmount);
 
     emit EmissionDistributed(
       $.nextCycle,

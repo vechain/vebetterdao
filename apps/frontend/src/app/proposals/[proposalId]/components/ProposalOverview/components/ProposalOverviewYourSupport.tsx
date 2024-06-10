@@ -1,10 +1,9 @@
 import { ProposalState, useCurrentProposal } from "@/api"
 import { HStack, Image, Text, VStack } from "@chakra-ui/react"
-import { UilArrowUpRight } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 
-const compactFormatter = getCompactFormatter()
+const compactFormatter = getCompactFormatter(2)
 
 export const ProposalOverviewYourSupport = () => {
   const { proposal } = useCurrentProposal()
@@ -25,7 +24,6 @@ export const ProposalOverviewYourSupport = () => {
               {compactFormatter.format(Number(proposal.userSupport))}
             </Text>
             <Text color="#252525">{t("V3")}</Text>
-            <UilArrowUpRight size="20px" color="#004CFC" />
           </HStack>
         </VStack>
       )

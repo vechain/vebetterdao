@@ -475,7 +475,7 @@ describe("X-Apps", function () {
       await bootstrapEmissions()
 
       const voter = otherAccounts[0]
-      await getVot3Tokens(voter, "1000")
+      await getVot3Tokens(voter, "30000")
 
       const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
 
