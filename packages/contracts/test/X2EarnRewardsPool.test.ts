@@ -137,6 +137,71 @@ describe("X2EarnRewardsPool", function () {
 
       await catchRevert(x2EarnRewardsPool.connect(otherAccount).setX2EarnApps(await otherAccount.getAddress()))
     })
+
+    it("Can't send VET to the contract", async function () {
+      const { x2EarnRewardsPool, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await expect(
+        owner.sendTransaction({
+          to: await x2EarnRewardsPool.getAddress(),
+          value: ethers.parseEther("1.0"), // Sends exactly 1.0 ether
+        }),
+      ).to.be.reverted
+
+      const balance = await ethers.provider.getBalance(await x2EarnRewardsPool.getAddress())
+      expect(balance).to.equal(0n)
+    })
+
+    it("Can't send ERC721 to the contract", async function () {
+      const { myErc721, x2EarnRewardsPool, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        deployMocks: true,
+      })
+
+      if (!myErc721) throw new Error("No ERC721 contract")
+
+      await myErc721.connect(owner).safeMint(owner.address, 1)
+
+      // @ts-ignore
+      await expect(myErc721.connect(owner).safeTransferFrom(owner.address, await x2EarnRewardsPool.getAddress(), 1)).to
+        .be.rejected
+    })
+
+    it("Cannot send ERC1155 to the contract", async function () {
+      const { myErc1155, x2EarnRewardsPool, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        deployMocks: true,
+      })
+
+      if (!myErc1155) throw new Error("No ERC1155 contract")
+
+      await myErc1155.connect(owner).mint(owner.address, 1, 1, "0x")
+
+      // @ts-ignore
+      await expect(
+        myErc1155.connect(owner).safeTransferFrom(owner.address, await x2EarnRewardsPool.getAddress(), 1, 1, "0x"),
+      ).to.be.rejected
+    })
+
+    it("Cannot batch send ERC1155 to the contract", async function () {
+      const { myErc1155, x2EarnRewardsPool, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        deployMocks: true,
+      })
+
+      if (!myErc1155) throw new Error("No ERC1155 contract")
+
+      await myErc1155.connect(owner).mint(owner.address, 1, 1, "0x")
+
+      // @ts-ignore
+      await expect(
+        myErc1155
+          .connect(owner)
+          .safeBatchTransferFrom(owner.address, await x2EarnRewardsPool.getAddress(), [1], [1], "0x"),
+      ).to.be.rejected
+    })
   })
 
   // deposit

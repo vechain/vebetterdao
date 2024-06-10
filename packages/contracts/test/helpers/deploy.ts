@@ -23,6 +23,8 @@ import {
   GovernorStateLogic,
   GovernorVotesLogic,
   X2EarnRewardsPool,
+  MyERC721,
+  MyERC1155,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy } from "../../scripts/helpers"
@@ -57,6 +59,8 @@ interface DeployInstance {
   governorQuorumLogicLib: GovernorQuorumLogic
   governorStateLogicLib: GovernorStateLogic
   governorVotesLogicLib: GovernorVotesLogic
+  myErc721: MyERC721 | undefined
+  myErc1155: MyERC1155 | undefined
 }
 
 export const NFT_NAME = "GalaxyMember"
@@ -73,6 +77,7 @@ export const getOrDeployContractInstances = async ({
   config = createLocalConfig(),
   maxMintableLevel = DEFAULT_MAX_MINTABLE_LEVEL,
   bootstrapAndStartEmissions = false,
+  deployMocks = false,
 }) => {
   if (!forceDeploy && cachedDeployInstance !== undefined) {
     return cachedDeployInstance
@@ -395,6 +400,18 @@ export const getOrDeployContractInstances = async ({
     await callBootstrapAndStartEmissions()
   }
 
+  // deploy Mocks
+  let myErc1155, myErc721
+  if (deployMocks) {
+    const MyERC721 = await ethers.getContractFactory("MyERC721")
+    myErc721 = await MyERC721.deploy(owner.address)
+    await myErc721.waitForDeployment()
+
+    const MyERC1155 = await ethers.getContractFactory("MyERC1155")
+    myErc1155 = await MyERC1155.deploy(owner.address)
+    await myErc1155.waitForDeployment()
+  }
+
   cachedDeployInstance = {
     B3trContract,
     b3tr,
@@ -423,6 +440,8 @@ export const getOrDeployContractInstances = async ({
     governorQuorumLogicLib: GovernorQuorumLogicLib,
     governorStateLogicLib: GovernorStateLogicLib,
     governorVotesLogicLib: GovernorVotesLogicLib,
+    myErc721: myErc721,
+    myErc1155: myErc1155,
   }
   return cachedDeployInstance
 }

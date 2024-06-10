@@ -2383,7 +2383,7 @@ describe("Governor and TimeLock", function () {
       const proposalId = await getProposalIdFromTx(tx)
 
       const creator = await governor.proposalProposer(proposalId)
-      expect(creator).to.eql(await owner.getAddress())
+      expect(creator).to.eql(owner.address)
     })
   })
 

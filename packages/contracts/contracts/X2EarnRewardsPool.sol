@@ -30,6 +30,8 @@ import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/
 import { IB3TR } from "./interfaces/IB3TR.sol";
 import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
 import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
+import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
+import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 /**
  * @title X2EarnRewardsPool
@@ -204,5 +206,43 @@ contract X2EarnRewardsPool is
   function x2EarnApps() public view returns (IX2EarnApps) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     return $.x2EarnApps;
+  }
+
+  // ---------- Callbacks ---------- //
+
+  /**
+   * @dev Transfers of VET to this contract are not allowed.
+   */
+  receive() external payable virtual {
+    revert("X2EarnRewardsPool: contract does not accept VET");
+  }
+
+  /**
+   * @dev Transfers of ERC721 tokens to this contract are not allowed.
+   *
+   * @notice supported only when safeTransferFrom is used
+   */
+  function onERC721Received(address, address, uint256, bytes memory) public virtual returns (bytes4) {
+    revert("X2EarnRewardsPool: contract does not accept ERC721 tokens");
+  }
+
+  /**
+   * @dev Transfers of ERC1155 tokens to this contract are not allowed.
+   */
+  function onERC1155Received(address, address, uint256, uint256, bytes memory) public virtual returns (bytes4) {
+    revert("X2EarnRewardsPool: contract does not accept ERC1155 tokens");
+  }
+
+  /**
+   * @dev Transfers of ERC1155 tokens to this contract are not allowed.
+   */
+  function onERC1155BatchReceived(
+    address,
+    address,
+    uint256[] memory,
+    uint256[] memory,
+    bytes memory
+  ) public virtual returns (bytes4) {
+    revert("X2EarnRewardsPool: contract does not accept ERC1155 tokens");
   }
 }

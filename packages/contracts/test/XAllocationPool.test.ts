@@ -1635,6 +1635,51 @@ describe("X-Allocation Pool", async function () {
           xAllocationPool.connect(otherAccounts[6]).claim(round1, ethers.keccak256(ethers.toUtf8Bytes("My app #2"))),
         )
       })
+
+      it("Should fail if not enough balance on contract", async function () {
+        const { xAllocationPool, otherAccounts, x2EarnApps, xAllocationVoting, b3tr, emissions, owner, minterAccount } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
+
+        // Bootstrap emissions
+        await bootstrapEmissions()
+
+        await getVot3Tokens(otherAccounts[3], "10000")
+
+        //Add apps
+        const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+        const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
+        await x2EarnApps.addApp(otherAccounts[3].address, otherAccounts[3].address, "My app", "metadataURI")
+        await x2EarnApps.addApp(otherAccounts[4].address, otherAccounts[4].address, "My app #2", "metadataURI")
+
+        // simulate first round
+        await emissions.connect(minterAccount).start()
+        await xAllocationVoting
+          .connect(otherAccounts[3])
+          .castVote(1, [app1Id, app2Id], [ethers.parseEther("100"), ethers.parseEther("900")])
+        await waitForRoundToEnd(1)
+
+        await xAllocationPool.claim(1, app1Id)
+        await xAllocationPool.claim(1, app2Id)
+
+        //Start allocation round without passing throug emissions contract
+        expect(await xAllocationVoting.hasRole(await xAllocationVoting.ROUND_STARTER_ROLE(), owner.address)).to.eql(
+          true,
+        )
+
+        await xAllocationVoting.connect(owner).startNewRound()
+        const roundId = await xAllocationVoting.currentRoundId()
+
+        // vote
+        await xAllocationVoting.connect(otherAccounts[3]).castVote(roundId, [app1Id], [ethers.parseEther("100")])
+
+        await waitForRoundToEnd(roundId)
+
+        expect(await b3tr.balanceOf(await xAllocationPool.getAddress())).to.eql(0n)
+
+        await catchRevert(xAllocationPool.connect(otherAccounts[3]).claim(roundId, app1Id))
+      })
     })
 
     describe("Unallocated funds", async function () {
@@ -1996,49 +2041,6 @@ describe("X-Allocation Pool", async function () {
         expect(app2app2Earnings[0]).to.eql(5993n)
         expect(app3app3Earnings[0]).to.eql(2861n)
       })
-    })
-
-    it("Should fail if not enough balance on contract", async function () {
-      const { xAllocationPool, otherAccounts, x2EarnApps, xAllocationVoting, b3tr, emissions, owner, minterAccount } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
-
-      // Bootstrap emissions
-      await bootstrapEmissions()
-
-      await getVot3Tokens(otherAccounts[3], "10000")
-
-      //Add apps
-      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
-      const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
-      await x2EarnApps.addApp(otherAccounts[3].address, otherAccounts[3].address, "My app", "metadataURI")
-      await x2EarnApps.addApp(otherAccounts[4].address, otherAccounts[4].address, "My app #2", "metadataURI")
-
-      // simulate first round
-      await emissions.connect(minterAccount).start()
-      await xAllocationVoting
-        .connect(otherAccounts[3])
-        .castVote(1, [app1Id, app2Id], [ethers.parseEther("100"), ethers.parseEther("900")])
-      await waitForRoundToEnd(1)
-
-      await xAllocationPool.claim(1, app1Id)
-      await xAllocationPool.claim(1, app2Id)
-
-      //Start allocation round without passing throug emissions contract
-      expect(await xAllocationVoting.hasRole(await xAllocationVoting.ROUND_STARTER_ROLE(), owner.address)).to.eql(true)
-
-      await xAllocationVoting.connect(owner).startNewRound()
-      const roundId = await xAllocationVoting.currentRoundId()
-
-      // vote
-      await xAllocationVoting.connect(otherAccounts[3]).castVote(roundId, [app1Id], [ethers.parseEther("100")])
-
-      await waitForRoundToEnd(roundId)
-
-      expect(await b3tr.balanceOf(await xAllocationPool.getAddress())).to.eql(0n)
-
-      await catchRevert(xAllocationPool.connect(otherAccounts[3]).claim(roundId, app1Id))
     })
   })
 })
