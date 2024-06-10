@@ -1184,6 +1184,70 @@ describe("Governor and TimeLock", function () {
         )
       })
     })
+
+    describe("Fallbacks", async function () {
+      it("Can't send VET to the contract", async function () {
+        const { governor, owner } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+        await expect(
+          owner.sendTransaction({
+            to: await governor.getAddress(),
+            value: ethers.parseEther("1.0"), // Sends exactly 1.0 ether
+          }),
+        ).to.be.reverted
+
+        const balance = await ethers.provider.getBalance(await governor.getAddress())
+        expect(balance).to.equal(0n)
+      })
+
+      it("Can't send ERC721 to the contract", async function () {
+        const { myErc721, governor, owner } = await getOrDeployContractInstances({
+          forceDeploy: true,
+          deployMocks: true,
+        })
+
+        if (!myErc721) throw new Error("No ERC721 contract")
+
+        await myErc721.connect(owner).safeMint(owner.address, 1)
+
+        // @ts-ignore
+        await expect(myErc721.connect(owner).safeTransferFrom(owner.address, await governor.getAddress(), 1)).to.be
+          .rejected
+      })
+
+      it("Cannot send ERC1155 to the contract", async function () {
+        const { myErc1155, governor, owner } = await getOrDeployContractInstances({
+          forceDeploy: true,
+          deployMocks: true,
+        })
+
+        if (!myErc1155) throw new Error("No ERC1155 contract")
+
+        await myErc1155.connect(owner).mint(owner.address, 1, 1, "0x")
+
+        // @ts-ignore
+        await expect(myErc1155.connect(owner).safeTransferFrom(owner.address, await governor.getAddress(), 1, 1, "0x"))
+          .to.be.rejected
+      })
+
+      it("Cannot batch send ERC1155 to the contract", async function () {
+        const { myErc1155, governor, owner } = await getOrDeployContractInstances({
+          forceDeploy: true,
+          deployMocks: true,
+        })
+
+        if (!myErc1155) throw new Error("No ERC1155 contract")
+
+        await myErc1155.connect(owner).mint(owner.address, 1, 1, "0x")
+
+        // @ts-ignore
+        await expect(
+          myErc1155.connect(owner).safeBatchTransferFrom(owner.address, await governor.getAddress(), [1], [1], "0x"),
+        ).to.be.rejected
+      })
+    })
   })
 
   describe("Proposal Creation", function () {
