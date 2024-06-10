@@ -24,10 +24,13 @@ import { ProposalOverviewCommunitySupport } from "./components/ProposalOverviewC
 import { ProposalYourVote } from "./components/ProposalYourVote"
 import { useTranslation } from "react-i18next"
 import { CastProposalVoteButton } from "./components/CastProposalVoteButton"
+import { compareAddresses } from "@repo/utils/AddressUtils"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 export const ProposalOverview = () => {
   const { proposal } = useCurrentProposal()
   const { t } = useTranslation()
+  const { account } = useWallet()
 
   return (
     <Card variant="baseWithBorder">
@@ -69,7 +72,11 @@ export const ProposalOverview = () => {
                     <Skeleton isLoaded={!proposal.isProposerLoading}>
                       <HStack>
                         <AddressIcon address={proposal.proposer} rounded="full" h="20px" w="20px" />
-                        <Text color="#252525">{humanAddress(proposal.proposer, 7, 5)}</Text>
+                        {compareAddresses(proposal.proposer, account || "") ? (
+                          <Text color="#252525">{t("You")}</Text>
+                        ) : (
+                          <Text color="#252525">{humanAddress(proposal.proposer, 4, 6)}</Text>
+                        )}
                       </HStack>
                     </Skeleton>
                   </VStack>

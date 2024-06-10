@@ -23,7 +23,6 @@ export const ProposalOverviewYourSupport = () => {
             <Text color="#252525" fontWeight={600}>
               {compactFormatter.format(Number(proposal.userSupport))}
             </Text>
-            <Text color="#252525">{t("V3")}</Text>
           </HStack>
         </VStack>
       )

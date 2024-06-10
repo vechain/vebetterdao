@@ -15,10 +15,14 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
   const [amount, setAmount] = useState("")
   const { account } = useWallet()
   const { data: vot3Balance } = useVot3Balance(account ?? undefined)
+  const missingSupport = useMemo(
+    () => proposal.depositThreshold - proposal.communityDeposits,
+    [proposal.communityDeposits, proposal.depositThreshold],
+  )
 
   const depositMax = useCallback(() => {
-    setAmount(vot3Balance?.scaled ?? "")
-  }, [vot3Balance])
+    setAmount(Math.min(Number(vot3Balance?.scaled ?? 0), missingSupport || 0).toString())
+  }, [vot3Balance, missingSupport])
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) =>

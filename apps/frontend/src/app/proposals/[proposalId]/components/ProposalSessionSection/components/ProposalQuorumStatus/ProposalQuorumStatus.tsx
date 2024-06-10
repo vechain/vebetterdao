@@ -55,7 +55,7 @@ export const ProposalQuorumStatus = () => {
       </Box>
       <HStack>
         <Text color="#252525" fontWeight={600} fontSize={"14px"}>
-          {`${compactFormatter.format(Number(proposal.quorum))} V3`}
+          {`${compactFormatter.format(Number(proposal.quorum))} VOT3`}
         </Text>
         <Text color="#6A6A6A" fontWeight={400} fontSize={"14px"}>
           {t("needed for quorum")}

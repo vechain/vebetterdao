@@ -22,9 +22,11 @@ export const CommunitySupportButton = () => {
 
   return (
     <>
-      <Button onClick={handleClick} isDisabled={proposal.isDepositReached} variant="primaryAction">
-        {t("Support this proposal")}
-      </Button>
+      {!proposal.isDepositReached && (
+        <Button onClick={handleClick} variant="primaryAction">
+          {t("Support this proposal")}
+        </Button>
+      )}
       <CommunitySupportModal isOpen={isOpen} onClose={onClose} />
     </>
   )
