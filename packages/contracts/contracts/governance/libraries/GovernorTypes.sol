@@ -106,7 +106,6 @@ library GovernorTypes {
     Defeated,
     Succeeded,
     Queued,
-    Expired,
     Executed,
     DepositNotMet
   }

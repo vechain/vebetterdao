@@ -23,18 +23,6 @@ import { GovernorTypes } from "../governance/libraries/GovernorTypes.sol";
  * - Added depositThreshold() to get the minimum required deposit for a proposal and removed proposalThreshold
  */
 interface IB3TRGovernor is IERC165, IERC6372 {
-  enum ProposalState {
-    Pending,
-    Active,
-    Canceled,
-    Defeated,
-    Succeeded,
-    Queued,
-    Expired,
-    Executed,
-    DepositNotMet
-  }
-
   /**
    * @dev Empty proposal or a mismatch between the parameters length for a proposal call.
    */
@@ -85,7 +73,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    *
    * See {Governor-_encodeStateBitmap}.
    */
-  error GovernorUnexpectedProposalState(uint256 proposalId, ProposalState current, bytes32 expectedStates);
+  error GovernorUnexpectedProposalState(uint256 proposalId, GovernorTypes.ProposalState current, bytes32 expectedStates);
 
   /**
    * @dev The voting period set is not a valid period.
