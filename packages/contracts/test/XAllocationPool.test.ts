@@ -1423,10 +1423,19 @@ describe("X-Allocation Pool", async function () {
       })
 
       it("User should be able to check his available earnings to claim", async function () {
-        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, emissions, b3tr, minterAccount, x2EarnApps } =
-          await getOrDeployContractInstances({
-            forceDeploy: true,
-          })
+        const {
+          xAllocationVoting,
+          otherAccounts,
+          owner,
+          xAllocationPool,
+          emissions,
+          b3tr,
+          minterAccount,
+          x2EarnApps,
+          x2EarnRewardsPool,
+        } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
         const voter1 = otherAccounts[1]
         await getVot3Tokens(voter1, "1000")
@@ -1452,6 +1461,9 @@ describe("X-Allocation Pool", async function () {
 
         const round1 = await xAllocationVoting.currentRoundId()
 
+        await x2EarnApps.setTeamAllocationPercentage(app1Id, 40)
+        const teamAllocationPercentage = await x2EarnApps.teamAllocationPercentage(app1Id)
+
         // Vote
         await xAllocationVoting
           .connect(voter1)
@@ -1468,6 +1480,14 @@ describe("X-Allocation Pool", async function () {
         const expectedEarnings = await xAllocationPool.roundEarnings(round1, app1Id)
         expect(claimableAmount[0]).to.eql(expectedEarnings[0])
 
+        // expect that the total amount is divided correctly in 2 parts:
+        // 1. allocation reserved for the team
+        // 1. allocation reserved for rewards
+
+        const expectedTeamAmount = (teamAllocationPercentage * expectedEarnings[0]) / 100n
+
+        expect(expectedTeamAmount).to.eql(expectedEarnings[2])
+
         let userBalance = await b3tr.balanceOf(otherAccounts[6].address)
 
         expect(userBalance).to.eql(0n)
@@ -1476,7 +1496,10 @@ describe("X-Allocation Pool", async function () {
 
         // balance of user should be equal to expected earnings
         userBalance = await b3tr.balanceOf(otherAccounts[6].address)
-        expect(userBalance).to.eql(claimableAmount[0])
+        expect(userBalance).to.eql(expectedTeamAmount)
+
+        // the rest should be inside X2EarnRewardsPool
+        expect(await x2EarnRewardsPool.availableFunds(app1Id)).to.eql(expectedEarnings[3])
 
         // claimable amount should be 0
         const claimableAmountAfterClaim = await xAllocationPool.claimableAmount(round1, app1Id)
