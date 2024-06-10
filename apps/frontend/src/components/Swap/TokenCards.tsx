@@ -3,7 +3,7 @@ import { Button, Divider, HStack, Input, Stack, Text, VStack, Image } from "@cha
 import { useCallback, useEffect, useMemo } from "react"
 import { Controller, UseFormReturn } from "react-hook-form"
 import { VOT3Icon } from "../Icons"
-import { useB3trBalance, useVot3Balance } from "@/api"
+import { TokenBalance, useB3trBalance, useVot3Balance } from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { motion } from "framer-motion"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
@@ -17,9 +17,17 @@ type Props = {
   amount: string
   isB3trToVot3: boolean
   formData: UseFormReturn<{ amount: string }>
+  swappableVot3Balance?: TokenBalance
+  isVOT3BalanceMoreThanStakedB3TR?: boolean
 }
 
-export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
+export const TokenCards = ({
+  isB3trToVot3,
+  formData,
+  amount,
+  swappableVot3Balance,
+  isVOT3BalanceMoreThanStakedB3TR,
+}: Props) => {
   const { b3trBgGradient, vot3BgGradient, b3trDividerColor, vot3dividerAlpha } = useTokenColors()
   const { account } = useWallet()
 
@@ -39,8 +47,10 @@ export const TokenCards = ({ isB3trToVot3, formData, amount }: Props) => {
   }, [b3trBalanceScaled])
 
   const vot3BalanceScaled = useMemo(() => {
-    return vot3Balance?.scaled ?? "0"
-  }, [vot3Balance?.scaled])
+    if (!vot3Balance || !swappableVot3Balance) return "0"
+
+    return isVOT3BalanceMoreThanStakedB3TR ? swappableVot3Balance.scaled : vot3Balance.scaled
+  }, [isVOT3BalanceMoreThanStakedB3TR, swappableVot3Balance, vot3Balance])
 
   const maxBalance = useMemo(
     () => (isB3trToVot3 ? b3trBalanceScaled : vot3BalanceScaled),

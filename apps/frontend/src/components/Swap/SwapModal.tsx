@@ -5,7 +5,6 @@ import {
   CardBody,
   Flex,
   HStack,
-  Heading,
   Text,
   VStack,
   Modal,
@@ -23,7 +22,7 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { TokenInfoCard } from "./components"
 import { IoArrowBackOutline } from "react-icons/io5"
 import { BalanceInfo } from "./components"
-import { useB3trBalance, useVot3Balance } from "@/api"
+import { useB3trBalance, useB3trConverted, useVot3Balance } from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { BaseTooltip } from "../BaseTooltip"
 import { FiInfo } from "react-icons/fi"
@@ -56,6 +55,7 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
 
   const { data: b3trBalance } = useB3trBalance(account ?? undefined)
   const { data: vot3Balance } = useVot3Balance(account ?? undefined)
+  const { data: swappableVot3Balance } = useB3trConverted(account ?? undefined)
 
   const b3trBalanceScaled = useMemo(() => {
     return b3trBalance?.scaled ?? "0"
@@ -64,6 +64,12 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
   const vot3BalanceScaled = useMemo(() => {
     return vot3Balance?.scaled ?? "0"
   }, [vot3Balance?.scaled])
+
+  const isVOT3BalanceMoreThanStakedB3TR = useMemo(() => {
+    if (!swappableVot3Balance || !vot3Balance) return true
+
+    return BigInt(vot3Balance.original) > BigInt(swappableVot3Balance.original)
+  }, [swappableVot3Balance, vot3Balance])
 
   const formData = useForm<{ amount: string }>({
     defaultValues: {
@@ -196,7 +202,13 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
             <BalanceInfo isB3TR={false} balanceScaled={vot3BalanceScaled} />
           </Flex>
 
-          <TokenCards amount={amount} formData={formData} isB3trToVot3={isB3trToVot3} />
+          <TokenCards
+            amount={amount}
+            formData={formData}
+            isB3trToVot3={isB3trToVot3}
+            swappableVot3Balance={swappableVot3Balance}
+            isVOT3BalanceMoreThanStakedB3TR={isVOT3BalanceMoreThanStakedB3TR}
+          />
 
           <Button
             mt={2}
@@ -279,8 +291,6 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
         vot3Balance={vot3BalanceScaled}
       />
     )
-
-  console.log({ b3trBalanceAfterSwap, vot3BalanceAfterSwap })
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} trapFocus={true} isCentered={true}>
