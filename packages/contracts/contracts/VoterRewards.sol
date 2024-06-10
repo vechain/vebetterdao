@@ -64,7 +64,7 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
   bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
 
   /// @notice The scaling factor for the rewards calculation.
-  uint256 public constant scalingFactor = 1e6;
+  uint256 public constant SCALING_FACTOR = 1e6;
 
   /// @custom:storage-location erc7201:b3tr.storage.VoterRewards
   struct VoterRewardsStorage {
@@ -255,11 +255,11 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
     require(emissionsAmount > 0, "VoterRewards: emissionsAmount must be greater than 0");
 
     // Scale up the numerator before division to improve precision
-    uint256 scaledNumerator = total * emissionsAmount * scalingFactor; // Scale by a factor of scalingFactor for precision
+    uint256 scaledNumerator = total * emissionsAmount * SCALING_FACTOR; // Scale by a factor of SCALING_FACTOR for precision
     uint256 reward = scaledNumerator / totalCycle;
 
     // Scale down the reward to the original scale
-    return reward / scalingFactor;
+    return reward / SCALING_FACTOR;
   }
 
   /// @notice Get the total reward-weighted votes for a user in a specific cycle.

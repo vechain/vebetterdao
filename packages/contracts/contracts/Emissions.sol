@@ -41,7 +41,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
   // Scaling factor to handle decimal places
-  uint256 public constant scalingFactor = 1e6;
+  uint256 public constant SCALING_FACTOR = 1e6;
 
   /// @notice Emission struct to store the emission details for a cycle
   struct Emission {
@@ -89,7 +89,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
     uint256 xAllocationsDecayPeriod; // Decay period for xAllocations in number of cycles
     uint256 vote2EarnDecayPeriod; // Decay period for vote2Earn in number of cycles
     // ----------- Emissions ----------- //
-    uint256 initialXAppAllocation; // Initial emissions for xAllocations scaled with scalingFactor
+    uint256 initialXAppAllocation; // Initial emissions for xAllocations scaled with SCALING_FACTOR
     uint256 treasuryPercentage; // Percentage of total allocation for treasury (in percentage)
     uint256 lastEmissionBlock; // Block number for last emissions
     mapping(uint256 => Emission) emissions; // Past emissions for each distributed cycle
@@ -288,13 +288,13 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
     }
 
     // Get emissions from the previous cycle
-    uint256 lastCycleEmissions = $.emissions[$.nextCycle - 1].xAllocations * scalingFactor;
+    uint256 lastCycleEmissions = $.emissions[$.nextCycle - 1].xAllocations * SCALING_FACTOR;
 
     // Check if we need to decay again by getting the modulus
     if (($.nextCycle - 1) % $.xAllocationsDecayPeriod == 0) {
       lastCycleEmissions = (lastCycleEmissions * (100 - $.xAllocationsDecay)) / 100;
     }
-    return lastCycleEmissions / scalingFactor;
+    return lastCycleEmissions / SCALING_FACTOR;
   }
 
   /// @notice Calculates the number of decay periods that have passed since the start of the emissions
@@ -332,11 +332,11 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   function _calculateVote2EarnAmount() internal view returns (uint256) {
     uint256 percentageToDecay = _calculateVote2EarnDecayPercentage();
 
-    uint256 scaledXAllocation = _calculateNextXAllocation() * scalingFactor;
+    uint256 scaledXAllocation = _calculateNextXAllocation() * SCALING_FACTOR;
 
     uint256 vote2EarnScaled = (scaledXAllocation * (100 - percentageToDecay)) / 100;
 
-    return vote2EarnScaled / scalingFactor;
+    return vote2EarnScaled / SCALING_FACTOR;
   }
 
   /// @notice Calculates the token allocation for the Treasury based on the total allocations to XAllocations and Vote2Earn
@@ -344,10 +344,10 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   /// @return unit256 The calculated number of tokens for the Treasury for the next cycle
   function _calculateTreasuryAmount() internal view returns (uint256) {
     EmissionsStorage storage $ = _getEmissionsStorage();
-    uint256 scaledAllocations = (_calculateNextXAllocation() + _calculateVote2EarnAmount()) * scalingFactor;
+    uint256 scaledAllocations = (_calculateNextXAllocation() + _calculateVote2EarnAmount()) * SCALING_FACTOR;
     uint256 treasuryAmount = (scaledAllocations * $.treasuryPercentage) / 10000;
 
-    return treasuryAmount / scalingFactor;
+    return treasuryAmount / SCALING_FACTOR;
   }
 
   // ----------- Getters ----------- //
