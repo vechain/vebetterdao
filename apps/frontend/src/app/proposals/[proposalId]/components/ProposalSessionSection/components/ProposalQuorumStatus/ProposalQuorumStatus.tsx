@@ -1,4 +1,5 @@
-import { ProposalState, useCurrentProposal } from "@/api"
+import { ProposalState } from "@/api"
+import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
 import { Box, HStack, Image, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo } from "react"
@@ -8,7 +9,7 @@ const compactFormatter = getCompactFormatter(2)
 
 export const ProposalQuorumStatus = () => {
   const { t } = useTranslation()
-  const { proposal } = useCurrentProposal()
+  const { proposal } = useProposalDetail()
 
   const stateColor = useMemo(() => {
     if (proposal.state === ProposalState.DepositNotMet) {

@@ -14,7 +14,6 @@ import {
 } from "@chakra-ui/react"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { AddressIcon } from "@/components/AddressIcon"
-import { useCurrentProposal } from "@/api"
 import { ProposalOverviewVotes } from "./components/ProposalOverviewVotes"
 import { UilShareAlt } from "@iconscout/react-unicons"
 import { ProposalOverviewTime } from "./components/ProposalOverviewTime"
@@ -26,9 +25,10 @@ import { useTranslation } from "react-i18next"
 import { CastProposalVoteButton } from "./components/CastProposalVoteButton"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/dapp-kit-react"
+import { useProposalDetail } from "../../hooks"
 
 export const ProposalOverview = () => {
-  const { proposal } = useCurrentProposal()
+  const { proposal } = useProposalDetail()
   const { t } = useTranslation()
   const { account } = useWallet()
 

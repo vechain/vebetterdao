@@ -1,10 +1,11 @@
-import { ProposalState, useCurrentProposal } from "@/api"
+import { ProposalState } from "@/api"
+import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
 import { HStack, Text } from "@chakra-ui/react"
 import { UilExclamationCircle } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 
 export const ProposalVotesResults = () => {
-  const { proposal } = useCurrentProposal()
+  const { proposal } = useProposalDetail()
   const { t } = useTranslation()
 
   switch (proposal.state) {

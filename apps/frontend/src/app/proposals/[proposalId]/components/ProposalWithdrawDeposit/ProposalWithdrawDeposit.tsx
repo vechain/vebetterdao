@@ -1,15 +1,16 @@
-import { ProposalState, useCurrentProposal } from "@/api"
+import { ProposalState } from "@/api"
 import { Arm } from "@/components/Icons/Arm"
 import { Box, Card, Circle, Flex, HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 import { ProposalWithdrawButton } from "../ProposalWithdrawButton"
+import { useProposalDetail } from "../../hooks"
 
 const compactFormatter = getCompactFormatter(2)
 
 export const ProposalWithdrawDeposit = () => {
-  const { proposal } = useCurrentProposal()
+  const { proposal } = useProposalDetail()
   const { t } = useTranslation()
 
   return (

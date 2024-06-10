@@ -1,4 +1,4 @@
-import { ProposalState, useCurrentProposal } from "@/api"
+import { ProposalState } from "@/api"
 import { TransactionModal } from "@/components/TransactionModal"
 import { useCancelProposal } from "@/hooks/useCancelProposal"
 import {
@@ -20,11 +20,12 @@ import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
+import { useProposalDetail } from "../../hooks"
 
 export const CancelProposalSection = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const { proposal } = useCurrentProposal()
+  const { proposal } = useProposalDetail()
   const confirmationModal = useDisclosure()
   const transactionModal = useDisclosure()
 

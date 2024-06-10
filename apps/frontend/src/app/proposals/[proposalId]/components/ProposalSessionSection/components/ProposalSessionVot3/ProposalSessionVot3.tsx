@@ -1,4 +1,5 @@
-import { ProposalState, useCurrentProposal, useVot3Balance } from "@/api"
+import { ProposalState, useVot3Balance } from "@/api"
+import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
 import { HStack, Image, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/dapp-kit-react"
@@ -7,7 +8,7 @@ import { useTranslation } from "react-i18next"
 const compactFormatter = getCompactFormatter(2)
 
 export const ProposalSessionVot3 = () => {
-  const { proposal } = useCurrentProposal()
+  const { proposal } = useProposalDetail()
   const { t } = useTranslation()
   const { account } = useWallet()
   const { data } = useVot3Balance(account || "")

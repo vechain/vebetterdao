@@ -1,12 +1,12 @@
-import { useCurrentProposal } from "@/api"
 import { TransactionModal } from "@/components/TransactionModal"
 import { useWithdrawDeposit } from "@/hooks/useWithdrawDeposit"
 import { Button, useDisclosure } from "@chakra-ui/react"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
+import { useProposalDetail } from "../../hooks"
 
 export const ProposalWithdrawButton = () => {
-  const { proposal } = useCurrentProposal()
+  const { proposal } = useProposalDetail()
   const { t } = useTranslation()
   const withdrawMutation = useWithdrawDeposit({
     proposalId: proposal.id,

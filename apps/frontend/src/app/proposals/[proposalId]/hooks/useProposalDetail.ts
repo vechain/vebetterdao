@@ -1,27 +1,30 @@
 import { useMemo } from "react"
-import { useProposalCreatedEvent } from "./useProposalCreatedEvent"
-import { ProposalState, useProposalState } from "./useProposalState"
-import { useProposalVotes } from "./useProposalVotes"
 import { useParams } from "next/navigation"
-import { useProposalVoteDates } from "./useProposalVoteDates"
-import { useProposalUserDeposit } from "./useProposalUserDeposit"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { useIsDepositReached } from "./useIsDepositReached"
-import { useIsProposalQuorumReached } from "./useIsProposalQuorumReached"
-import { useProposalDepositEvent } from "./useProposalDepositEvent"
-import { useProposalVoteEvent } from "./useProposalVoteEvent"
-import { useProposalSnapshotVotingPower } from "./useProposalSnapshotVotingPower"
-import { useProposalSnapshot } from "./useProposalSnapshot"
-import { useGetVotesOnBlock } from "./useVotesOnBlock"
 import { toIPFSURL } from "@/utils"
 import { useIpfsMetadata } from "@/api/ipfs"
-import { ProposalMetadata } from "./useProposalsEvents"
-import { useProposalQuorum } from "./useProposalQuorum"
-import { useProposalQueuedEvent } from "./useProposalQueuedEvent"
-import { useProposalExecutedEvent } from "./useProposalExecutedEvent"
+import {
+  useProposalCreatedEvent,
+  ProposalState,
+  useProposalState,
+  useProposalVotes,
+  useProposalVoteDates,
+  useProposalUserDeposit,
+  useIsDepositReached,
+  useIsProposalQuorumReached,
+  useProposalDepositEvent,
+  useProposalVoteEvent,
+  useProposalSnapshotVotingPower,
+  useProposalSnapshot,
+  useGetVotesOnBlock,
+  ProposalMetadata,
+  useProposalQuorum,
+  useProposalQueuedEvent,
+  useProposalExecutedEvent,
+} from "@/api"
 import { ethers } from "ethers"
 
-export const useProposal = (proposalId: string) => {
+export const useProposalDetailById = (proposalId: string) => {
   const { account } = useWallet()
   const proposalState = useProposalState(proposalId)
   const proposalVoteEvents = useProposalVoteEvent(proposalId)
@@ -228,7 +231,7 @@ export const useProposal = (proposalId: string) => {
   }
 }
 
-export const useCurrentProposal = () => {
+export const useProposalDetail = () => {
   const { proposalId } = useParams<{ proposalId: string }>()
-  return useProposal(proposalId)
+  return useProposalDetailById(proposalId)
 }

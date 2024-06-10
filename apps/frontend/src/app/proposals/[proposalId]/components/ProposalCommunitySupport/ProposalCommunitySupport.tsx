@@ -3,15 +3,16 @@ import { Box, Card, Circle, Flex, HStack, Heading, Text, VStack } from "@chakra-
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { CommunitySupportButton } from "./components/CommunitySupportButton"
-import { ProposalState, useCurrentProposal } from "@/api"
+import { ProposalState } from "@/api"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo } from "react"
 import { ProposalWithdrawButton } from "../ProposalWithdrawButton"
+import { useProposalDetail } from "../../hooks"
 
 const compactFormatter = getCompactFormatter(2)
 
 export const ProposalCommunitySupport = () => {
-  const { proposal } = useCurrentProposal()
+  const { proposal } = useProposalDetail()
   const { t } = useTranslation()
 
   const isDepositNotMet = proposal.state === ProposalState.DepositNotMet
