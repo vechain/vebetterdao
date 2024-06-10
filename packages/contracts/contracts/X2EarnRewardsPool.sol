@@ -208,7 +208,7 @@ contract X2EarnRewardsPool is
     return $.x2EarnApps;
   }
 
-  // ---------- Callbacks ---------- //
+  // ---------- Fallbacks ---------- //
 
   /**
    * @dev Transfers of VET to this contract are not allowed.
