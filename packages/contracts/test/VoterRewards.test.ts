@@ -107,7 +107,7 @@ describe("VoterRewards", () => {
     it("Should return correct scaling factor", async () => {
       const { voterRewards } = await getOrDeployContractInstances({ forceDeploy: true })
 
-      expect(await voterRewards.scalingFactor()).to.equal(10 ** 6)
+      expect(await voterRewards.SCALING_FACTOR()).to.equal(10 ** 6)
     })
 
     it("Should return correct b3tr address", async () => {

@@ -200,7 +200,7 @@ describe("Emissions", () => {
         forceDeploy: true,
       })
 
-      expect(await emissions.scalingFactor()).to.equal(10 ** 6)
+      expect(await emissions.SCALING_FACTOR()).to.equal(10 ** 6)
     })
 
     it("Should be able to change cycle duration", async () => {
