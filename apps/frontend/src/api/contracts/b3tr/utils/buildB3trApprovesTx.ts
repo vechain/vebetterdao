@@ -1,6 +1,8 @@
 import { getConfig } from "@repo/config"
 import { AddressUtils, FormattingUtils } from "@repo/utils"
 import { B3trContractJson } from "@repo/contracts"
+import { ethers } from "ethers"
+
 const b3trAbi = B3trContractJson.abi
 
 const config = getConfig()
@@ -19,7 +21,6 @@ export const buildB3trApprovesTx = (
   thor: Connex.Thor,
   amount: string | number,
   spender: string,
-  decimals = 18,
 ): Connex.Vendor.TxMessage[0] => {
   const functionAbi = b3trAbi.find(e => e.name === "approve")
   if (!functionAbi) throw new Error("Function abi not found for mint")
@@ -28,7 +29,7 @@ export const buildB3trApprovesTx = (
 
   const formattedAmount = FormattingUtils.humanNumber(amount ?? 0, amount)
   const formattedAddress = FormattingUtils.humanAddress(spender)
-  const amountWithDecimals = FormattingUtils.scaleNumberUp(amount, decimals, decimals)
+  const amountWithDecimals = ethers.parseEther(amount.toString()).toString()
 
   const clause = thor.account(B3TR_CONTRACT).method(functionAbi).asClause(spender, amountWithDecimals)
 

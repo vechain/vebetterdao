@@ -58,7 +58,7 @@ export const cardTheme = defineMultiStyleConfig({
   },
   baseStyle: {
     container: {
-      borderRadius: "12px",
+      borderRadius: "16px",
     },
   },
 })
