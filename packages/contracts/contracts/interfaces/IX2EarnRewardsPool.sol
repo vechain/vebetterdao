@@ -38,18 +38,18 @@ interface IX2EarnRewardsPool {
   /**
    * @dev Event emitted when a reward is emitted by an app.
    *
-   * @param distributor The address that triggered this action
-   * @param appId The ID of the app for which the reward was emitted
-   * @param amount The amount of $B3TR sent to the user
-   * @param receiver The address of the user that received the reward
-   * @param proof A JSON file uploaded on IPFS by the app that adds information on the type of action that was performed
+   * @param amount The amount of $B3TR rewarded.
+   * @param appId The ID of the app that emitted the reward.
+   * @param receiver The address of the user that received the reward.
+   * @param proof The proof of the sustainable action that was performed.
+   * @param distributor The address of the user that distributed the reward.
    */
   event RewardDistributed(
-    address indexed distributor,
-    bytes32 indexed appId,
     uint256 amount,
+    bytes32 indexed appId,
     address indexed receiver,
-    string proof
+    string proof,
+    address indexed distributor
   );
 
   /**

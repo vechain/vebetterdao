@@ -160,7 +160,7 @@ contract X2EarnRewardsPool is
     require($.b3tr.transfer(receiver, amount), "X2EarnRewardsPool: Allocation transfer to app failed");
 
     // emit event
-    emit RewardDistributed(msg.sender, appId, amount, receiver, proof);
+    emit RewardDistributed(amount, appId, receiver, proof, msg.sender);
   }
 
   /**
