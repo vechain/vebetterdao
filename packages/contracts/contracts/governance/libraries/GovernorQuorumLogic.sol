@@ -83,6 +83,19 @@ library GovernorQuorumLogic {
   }
 
   /**
+   * @notice Checks if the quorum has been reached for a proposal.
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposalId The ID of the proposal.
+   * @return True if the quorum has been reached, false otherwise.
+   */
+  function isQuorumReached(
+    GovernorStorageTypes.GovernorStorage storage self,
+    uint256 proposalId
+  ) external view returns (bool) {
+    return quorumReached(self, proposalId);
+  }
+
+  /**
    * @notice Returns the quorum for a specific timepoint.
    * @param self The storage reference for the GovernorStorage.
    * @param timepoint The specific timepoint.
