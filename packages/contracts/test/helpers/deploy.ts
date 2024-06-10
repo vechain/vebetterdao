@@ -27,6 +27,7 @@ import {
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy } from "../../scripts/helpers"
 import { setWhitelistedFunctions } from "../../scripts/deploy/deploy"
+import { bootstrapAndStartEmissions as callBootstrapAndStartEmissions } from "./common"
 
 interface DeployInstance {
   B3trContract: ContractFactory
@@ -71,6 +72,7 @@ export const getOrDeployContractInstances = async ({
   forceDeploy = false,
   config = createLocalConfig(),
   maxMintableLevel = DEFAULT_MAX_MINTABLE_LEVEL,
+  bootstrapAndStartEmissions = false,
 }) => {
   if (!forceDeploy && cachedDeployInstance !== undefined) {
     return cachedDeployInstance
@@ -387,6 +389,11 @@ export const getOrDeployContractInstances = async ({
     .connect(owner)
     .grantRole(roundStarterRole, owner.address)
     .then(async tx => await tx.wait())
+
+  // Bootstrap and start emissions
+  if (bootstrapAndStartEmissions) {
+    await callBootstrapAndStartEmissions()
+  }
 
   cachedDeployInstance = {
     B3trContract,

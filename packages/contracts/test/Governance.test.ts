@@ -3218,7 +3218,7 @@ describe("Governor and TimeLock", function () {
       await catchRevert(governor.execute([b3trAddress], [0], [encodedFunctionCall], descriptionHash))
     })
 
-    it.only("can correctly queue proposal if vote succeeded", async function () {
+    it("can correctly queue proposal if vote succeeded", async function () {
       const {
         governor,
         b3tr,

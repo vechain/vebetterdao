@@ -108,7 +108,7 @@ contract X2EarnRewardsPool is
     // increase available amount for the app
     $.availableFunds[appId] += amount;
 
-    emit NewDeposit(appId, amount, msg.sender);
+    emit NewDeposit(amount, appId, msg.sender);
 
     return true;
   }
@@ -116,7 +116,7 @@ contract X2EarnRewardsPool is
   /**
    * @dev See {IX2EarnRewardsPool-withdraw}
    */
-  function withdraw(bytes32 appId, uint256 amount, string memory reason) public nonReentrant {
+  function withdraw(uint256 amount, bytes32 appId, string memory reason) public nonReentrant {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
 
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
@@ -136,7 +136,7 @@ contract X2EarnRewardsPool is
     $.availableFunds[appId] -= amount;
     require($.b3tr.transfer(teamWalletAddress, amount), "X2EarnRewardsPool: Allocation transfer to app failed");
 
-    emit TeamWithdrawal(appId, amount, teamWalletAddress, msg.sender, reason);
+    emit TeamWithdrawal(amount, appId, teamWalletAddress, msg.sender, reason);
   }
 
   /**

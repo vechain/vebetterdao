@@ -12,24 +12,24 @@ interface IX2EarnRewardsPool {
   /**
    * @dev Event emitted when a new deposit is made into the rewards pool.
    *
-   * @param appId The ID of the app for which the deposit was made.
    * @param amount The amount of $B3TR deposited.
+   * @param appId The ID of the app for which the deposit was made.
    * @param depositor The address of the user that deposited the funds.
    */
-  event NewDeposit(bytes32 indexed appId, uint256 amount, address indexed depositor);
+  event NewDeposit(uint256 amount, bytes32 indexed appId, address indexed depositor);
 
   /**
    * @dev Event emitted when a team withdraws funds from the rewards pool.
    *
-   * @param appId The ID of the app for which the withdrawal was made.
    * @param amount The amount of $B3TR withdrawn.
+   * @param appId The ID of the app for which the withdrawal was made.
    * @param teamWallet The address of the team wallet that received the funds.
    * @param withdrawer The address of the user that withdrew the funds.
    * @param reason The reason for the withdrawal.
    */
   event TeamWithdrawal(
-    bytes32 indexed appId,
     uint256 amount,
+    bytes32 indexed appId,
     address indexed teamWallet,
     address withdrawer,
     string reason
@@ -70,11 +70,11 @@ interface IX2EarnRewardsPool {
   /**
    * @dev Function used by x2earn apps to withdraw funds from the rewards pool.
    *
-   * @param appId The ID of the app.
    * @param amount The amount of $B3TR to withdraw.
+   * @param appId The ID of the app.
    * @param reason The reason for the withdrawal.
    */
-  function withdraw(bytes32 appId, uint256 amount, string memory reason) external;
+  function withdraw(uint256 amount, bytes32 appId, string memory reason) external;
 
   /**
    * @dev Gets the amount of funds available for an app to reward users.
