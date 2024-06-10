@@ -7,15 +7,19 @@ import {
   IconButton,
   useDisclosure,
   Box,
+  Text,
+  HStack,
 } from "@chakra-ui/react"
 import Lottie from "react-lottie"
 import loadingAnimation from "./loading.json"
 import { motion } from "framer-motion"
-import { ShareButtons } from "@/components/ShareButtons"
 import { CustomModalContent } from "@/components"
 import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
-import { UilShareAlt } from "@iconscout/react-unicons"
+import { UilCheckCircle, UilLink, UilShareAlt } from "@iconscout/react-unicons"
 import { useCurrentProposal } from "@/api"
+import { useTranslation } from "react-i18next"
+import { ShareButtonsBlue } from "@/components/ShareButtonsBlue"
+import { useCallback, useState } from "react"
 
 const containerVariants = {
   initial: {
@@ -33,6 +37,15 @@ const containerVariants = {
 export const ProposalShareButton = () => {
   const { onOpen, isOpen, onClose } = useDisclosure()
   const { proposal } = useCurrentProposal()
+  const { t } = useTranslation()
+  const [showCopiedLink, setShowCopiedLink] = useState(false)
+  const handleCopyLink = useCallback(async () => {
+    await navigator.clipboard.writeText(location.href)
+    setShowCopiedLink(true)
+    setTimeout(() => {
+      setShowCopiedLink(false)
+    }, 2000)
+  }, [])
 
   return (
     <>
@@ -51,22 +64,22 @@ export const ProposalShareButton = () => {
         onClose={onClose}
         trapFocus={false}
         closeOnOverlayClick={status !== "waitingConfirmation" && status !== "pending"}
-        isCentered={true}>
+        isCentered={true}
+        size={"xl"}>
         <ModalOverlay />
         <CustomModalContent>
           <ModalAnimation>
             <ModalCloseButton top={4} right={4} />
             <motion.div initial="initial" animate="animate" variants={containerVariants}>
               <ModalCloseButton top={4} right={4} />
-              <VStack align={"center"} p={6}>
-                <Heading size="md">{"Share proposal"}</Heading>
+              <VStack align={"center"} p={8} gap={8}>
                 <Box my="10px">
                   <Lottie
                     style={{
                       pointerEvents: "none",
                     }}
                     options={{
-                      loop: true,
+                      loop: false,
                       autoplay: true,
                       animationData: loadingAnimation,
                     }}
@@ -75,11 +88,37 @@ export const ProposalShareButton = () => {
                     speed={0.5}
                   />
                 </Box>
-                <ShareButtons
+                <VStack>
+                  <Heading fontSize="28px" fontWeight={700}>
+                    {t("Share this proposal")}
+                  </Heading>
+                  <Text fontSize="16px" fontWeight={400} color="#6A6A6A" textAlign={"center"}>
+                    {t("Share the proposal on social media and invite people to vote")}
+                  </Text>
+                </VStack>
+                <ShareButtonsBlue
                   descriptionEncoded={encodeURIComponent(
                     `🌱 Amazing #VeBetterDAO proposal:\n\n${proposal.title}\n\nCheck it out: https://governance.vebetterdao.org/proposals/${proposal.id}\n\n💫 #VeBetterDAO #Vechain`,
                   )}
                 />
+                {showCopiedLink ? (
+                  <HStack color="#6DCB09">
+                    <UilCheckCircle size="20px" />
+                    <Text fontSize="18px" fontWeight={500}>
+                      {t("Copied!")}
+                    </Text>
+                  </HStack>
+                ) : (
+                  <HStack
+                    _hover={{ textDecoration: "underline", cursor: "pointer" }}
+                    color="#004CFC"
+                    onClick={handleCopyLink}>
+                    <UilLink size="18px" />
+                    <Text fontSize="18px" fontWeight={500}>
+                      {t("Copy link to proposal")}
+                    </Text>
+                  </HStack>
+                )}
               </VStack>
             </motion.div>
           </ModalAnimation>
