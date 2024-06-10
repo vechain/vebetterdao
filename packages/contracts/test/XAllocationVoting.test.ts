@@ -118,36 +118,35 @@ describe("X-Allocation Voting", function () {
     })
 
     it("Clock returns block number if token does not implement clock function", async function () {
-      const { xAllocationVoting } = await getOrDeployContractInstances({
-        forceDeploy: false,
-      })
+      const { xAllocationVoting, timeLock, voterRewards, emissions, otherAccounts, x2EarnApps, b3tr } =
+        await getOrDeployContractInstances({
+          forceDeploy: false,
+        })
 
-      expect(await xAllocationVoting.clock()).to.eql(await ethers.provider.getBlockNumber())
+      let clock = await xAllocationVoting.clock()
 
-      // deploy a new xAllocationVoting and set B3TR as a token (which does not implement clock)
-      const { b3tr } = await getOrDeployContractInstances({
-        forceDeploy: false,
-      })
+      expect(parseInt(clock.toString())).to.eql(await ethers.provider.getBlockNumber())
 
       const xAllocationVotingWithB3TR = (await deployProxy("XAllocationVoting", [
         {
           vot3Token: await b3tr.getAddress(),
           quorumPercentage: 1,
-          initialVotingPeriod: 1,
-          timeLock: ZERO_ADDRESS,
-          voterRewards: ZERO_ADDRESS,
-          emissions: ZERO_ADDRESS,
-          admins: [ZERO_ADDRESS],
-          upgrader: ZERO_ADDRESS,
-          contractsAddressManager: ZERO_ADDRESS,
-          x2EarnAppsAddress: ZERO_ADDRESS,
+          initialVotingPeriod: 2,
+          timeLock: await timeLock.getAddress(),
+          voterRewards: await voterRewards.getAddress(),
+          emissions: await emissions.getAddress(),
+          admins: [await timeLock.getAddress(), otherAccounts[2].address, otherAccounts[2].address],
+          upgrader: otherAccounts[2].address,
+          contractsAddressManager: otherAccounts[2].address,
+          x2EarnAppsAddress: await x2EarnApps.getAddress(),
           baseAllocationPercentage: 2,
           appSharesCap: 2,
           votingThreshold: BigInt(1),
         },
       ])) as XAllocationVoting
 
-      expect(await xAllocationVotingWithB3TR.clock()).to.eql(await ethers.provider.getBlockNumber())
+      clock = await xAllocationVotingWithB3TR.clock()
+      expect(parseInt(clock.toString())).to.eql(await ethers.provider.getBlockNumber())
 
       //CLOKC_MODE should return "mode=blocknumber&from=default"
       expect(await xAllocationVotingWithB3TR.CLOCK_MODE()).to.eql("mode=blocknumber&from=default")
