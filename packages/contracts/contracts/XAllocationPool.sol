@@ -328,7 +328,19 @@ contract XAllocationPool is
    * @return teamAllocationAmount The amount of $B3TR that will be sent to the team.
    * @return x2EarnRewardsPoolAmount The amount of $B3TR reserved to reward users.
    */
-  function claimableAmount(uint256 roundId, bytes32 appId) public view returns (uint256, uint256, uint256, uint256) {
+  function claimableAmount(
+    uint256 roundId,
+    bytes32 appId
+  )
+    public
+    view
+    returns (
+      uint256 totalAmount,
+      uint256 unallocatedAmount,
+      uint256 teamAllocationAmount,
+      uint256 x2EarnRewardsPoolAmount
+    )
+  {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     if ($.claimedRewards[appId][roundId] || xAllocationVoting().isActive(roundId)) {
       return (0, 0, 0, 0);
@@ -355,7 +367,19 @@ contract XAllocationPool is
    * @return teamAllocationAmount The amount of $B3TR that will be sent to the team.
    * @return x2EarnRewardsPoolAmount The amount of $B3TR reserved to reward users.
    */
-  function roundEarnings(uint256 roundId, bytes32 appId) public view returns (uint256, uint256, uint256, uint256) {
+  function roundEarnings(
+    uint256 roundId,
+    bytes32 appId
+  )
+    public
+    view
+    returns (
+      uint256 totalAmount,
+      uint256 unallocatedAmount,
+      uint256 teamAllocationAmount,
+      uint256 x2EarnRewardsPoolAmount
+    )
+  {
     IXAllocationVotingGovernor _xAllocationVoting = xAllocationVoting();
 
     require(_xAllocationVoting != IXAllocationVotingGovernor(address(0)), "XAllocationVotingGovernor contract not set");
@@ -379,22 +403,16 @@ contract XAllocationPool is
     (uint256 appShare, uint256 unallocatedShare) = getAppShares(lastSucceededRoundId, appId);
     uint256 baseAllocationPerApp = baseAllocationAmount(roundId);
     uint256 variableAllocationForApp = _rewardAmount(roundId, appShare);
-    uint256 unallocatedAmount = 0;
+    unallocatedAmount = 0;
     if (unallocatedShare > 0) {
       unallocatedAmount = _rewardAmount(roundId, unallocatedShare);
     }
 
-    (uint256 teamAllocationAmount, uint256 x2EarnRewardsPoolAmount) = _calculateTeamAllocation(
-      appId,
-      baseAllocationPerApp + variableAllocationForApp
-    );
+    totalAmount = baseAllocationPerApp + variableAllocationForApp;
 
-    return (
-      baseAllocationPerApp + variableAllocationForApp,
-      unallocatedAmount,
-      teamAllocationAmount,
-      x2EarnRewardsPoolAmount
-    );
+    (teamAllocationAmount, x2EarnRewardsPoolAmount) = _calculateTeamAllocation(appId, totalAmount);
+
+    return (totalAmount, unallocatedAmount, teamAllocationAmount, x2EarnRewardsPoolAmount);
   }
 
   /**

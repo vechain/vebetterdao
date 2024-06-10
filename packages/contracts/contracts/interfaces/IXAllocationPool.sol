@@ -50,9 +50,20 @@ interface IXAllocationPool {
    * @return totalAmount The total amount of $B3TR available for allocation to the app.
    * @return unallocatedAmount The amount of $B3TR that was not allocated, and will be sent to the treasury.
    * @return teamAllocationAmount The amount of $B3TR that will be sent to the team.
-   * @return rewardsAllocationAmount The amount of $B3TR reserved to reward users.
+   * @return x2EarnRewardsPoolAmount The amount of $B3TR reserved to reward users.
    */
-  function roundEarnings(uint256 roundId, bytes32 appId) external view returns (uint256, uint256, uint256, uint256);
+  function roundEarnings(
+    uint256 roundId,
+    bytes32 appId
+  )
+    external
+    view
+    returns (
+      uint256 totalAmount,
+      uint256 unallocatedAmount,
+      uint256 teamAllocationAmount,
+      uint256 x2EarnRewardsPoolAmount
+    );
 
   /**
    * @dev Get how much an app can claim for a given round.
@@ -64,7 +75,18 @@ interface IXAllocationPool {
    * @return teamAllocationAmount The amount of $B3TR that will be sent to the team.
    * @return x2EarnRewardsPoolAmount The amount of $B3TR reserved to reward users.
    */
-  function claimableAmount(uint256 roundId, bytes32 appId) external view returns (uint256, uint256, uint256, uint256);
+  function claimableAmount(
+    uint256 roundId,
+    bytes32 appId
+  )
+    external
+    view
+    returns (
+      uint256 totalAmount,
+      uint256 unallocatedAmount,
+      uint256 teamAllocationAmount,
+      uint256 x2EarnRewardsPoolAmount
+    );
 
   /**
    * @dev Returns the scaled quadratic funding percentage of votes for a given app in a given round.
