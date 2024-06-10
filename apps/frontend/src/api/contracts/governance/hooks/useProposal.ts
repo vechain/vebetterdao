@@ -9,10 +9,10 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { useIsDepositReached } from "./useIsDepositReached"
 import { useIsProposalQuorumReached } from "./useIsProposalQuorumReached"
 import { useProposalDepositEvent } from "./useProposalDepositEvent"
-import { useVot3PastSupply } from "../../vot3"
 import { useProposalVoteEvent } from "./useProposalVoteEvent"
 import { useProposalSnapshotVotingPower } from "./useProposalSnapshotVotingPower"
 import { useProposalSnapshot } from "./useProposalSnapshot"
+import { useGetVotesOnBlock } from "./useVotesOnBlock"
 import { toIPFSURL } from "@/utils"
 import { useIpfsMetadata } from "@/api/ipfs"
 import { ProposalMetadata } from "./useProposalsEvents"
@@ -39,7 +39,7 @@ export const useProposal = (proposalId: string) => {
   const isQuorumReached = useIsProposalQuorumReached(proposalId, isProposalActive)
   const proposalSnapshotVotingPower = useProposalSnapshotVotingPower(proposalSnapshotBlock, isProposalActive)
   const proposalVotes = useProposalVotes(proposalId, isProposalNotPending)
-  const proposalSnapshotVot3 = useVot3PastSupply(proposalSnapshotBlock, isProposalActive)
+  const proposalSnapshotVot3 = useGetVotesOnBlock(proposalSnapshotBlock, account ?? undefined, isProposalActive)
   const roundIdVoteStart = useMemo(
     () => proposalCreatedEvent.data?.roundIdVoteStart,
     [proposalCreatedEvent.data?.roundIdVoteStart],
@@ -118,7 +118,7 @@ export const useProposal = (proposalId: string) => {
     const supportingUserCount = proposalDepositEvent.supportingUserCount
     const othersSupportUserCount = proposalDepositEvent.othersSupportUserCount
     const userVotingPowerOnSnapshot = ethers.formatEther(proposalSnapshotVotingPower.data || 0)
-    const userVot3OnSnapshot = proposalSnapshotVot3.data || 0
+    const userVot3OnSnapshot = proposalSnapshotVot3.data?.scaled ?? "0"
     const quorumPercentage = totalVot3UsedInVotes ? totalVot3UsedInVotes / Number(proposalQuorum.data?.scaled) : 0
     const quorumChartPercentage = Math.min(quorumPercentage || 0, 1) * 100
     const result = {
