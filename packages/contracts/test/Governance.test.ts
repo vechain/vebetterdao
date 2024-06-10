@@ -32,9 +32,10 @@ describe("Governor and TimeLock", function () {
   describe("Governor deployment", function () {
     it("Should set constructors correctly", async function () {
       const config = createLocalConfig()
-      const { governor, vot3, owner, timeLock, xAllocationVoting, voterRewards } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { governor, vot3, b3tr, owner, timeLock, xAllocationVoting, voterRewards } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       await bootstrapAndStartEmissions()
 
@@ -87,6 +88,10 @@ describe("Governor and TimeLock", function () {
       // should be unpaused
       const paused = await governor.paused()
       expect(paused).to.be.false
+
+      // b3tr address is set correctly
+      const b3trAddress = await governor.b3tr()
+      expect(b3trAddress).to.eql(await b3tr.getAddress())
     })
 
     it("Should be able to upgrade the governor contract through governance", async function () {
@@ -426,6 +431,19 @@ describe("Governor and TimeLock", function () {
 
       const updatedAddress = await governor.timelock()
       expect(updatedAddress).to.eql(newAddress)
+    })
+
+    it("Should not be able to update the timelock if not governance", async function () {
+      const { governor, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const newAddress = ethers.Wallet.createRandom().address
+
+      await catchRevert(governor.connect(otherAccount).updateTimelock(newAddress))
+
+      const updatedAddress = await governor.timelock()
+      expect(updatedAddress).to.not.eql(newAddress)
     })
 
     it("should be able to update the xAllocationVoting address through governance", async function () {
@@ -911,6 +929,28 @@ describe("Governor and TimeLock", function () {
 
       const updatedQuorum = await governor["quorumNumerator()"]()
       expect(updatedQuorum).to.eql(newQuorum)
+    })
+
+    it("Should not be ablet to update the quorum percentage if not governance", async function () {
+      const { governor, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const newQuorum = 10n
+      await catchRevert(
+        createProposalAndExecuteIt(
+          otherAccount,
+          otherAccount,
+          governor,
+          b3trGovernorFactory,
+          "Update Quorum Percentage",
+          "updateQuorumNumerator",
+          [newQuorum],
+        ),
+      )
+
+      const updatedQuorum = await governor["quorumNumerator()"]()
+      expect(updatedQuorum).to.not.eql(newQuorum)
     })
 
     it("Should not be able to set a quorum numerator higher than the denominator", async function () {
@@ -2327,6 +2367,24 @@ describe("Governor and TimeLock", function () {
           ),
       ).to.be.reverted
     })
+
+    it("Can fetch proposal creator", async () => {
+      const { governor, B3trContract, b3tr, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+      const functionToCall = "tokenDetails"
+      const description = "Get token details"
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // Now we can create a proposal
+      const tx = await createProposal(b3tr, B3trContract, owner, description, functionToCall, [])
+      const proposalId = await getProposalIdFromTx(tx)
+
+      const creator = await governor.proposalProposer(proposalId)
+      expect(creator).to.eql(await owner.getAddress())
+    })
   })
 
   // the tests described in this section cannot be run in isolation, but need to run in cascade
@@ -3160,7 +3218,7 @@ describe("Governor and TimeLock", function () {
       await catchRevert(governor.execute([b3trAddress], [0], [encodedFunctionCall], descriptionHash))
     })
 
-    it("can correctly queue proposal if vote succeeded", async function () {
+    it.only("can correctly queue proposal if vote succeeded", async function () {
       const {
         governor,
         b3tr,
@@ -3196,6 +3254,10 @@ describe("Governor and TimeLock", function () {
       let proposalState = await governor.state(proposalId)
       expect(proposalState.toString()).to.eql("4") // succeded
 
+      // can fetch eta
+      let eta = await governor.proposalEta(proposalId)
+      expect(eta).to.eql(0n)
+
       // queue it
       const b3trAddress = await b3tr.getAddress()
       const encodedFunctionCall = B3trContract.interface.encodeFunctionData(functionToCall, [])
@@ -3206,6 +3268,10 @@ describe("Governor and TimeLock", function () {
       // proposal should be in queued state
       proposalState = await governor.state(proposalId)
       expect(proposalState.toString()).to.eql("5")
+
+      // can fetch eta
+      eta = await governor.proposalEta(proposalId)
+      expect(eta).to.be.gt(0n)
     })
 
     // this test needs the previous one to be run first
