@@ -84,7 +84,7 @@ export const CancelProposalSection = () => {
               <VStack align="stretch" gap={0}>
                 <Text fontSize={"14px"}>
                   {t(
-                    "Are you completely sure to cancel this proposal? All the support provided by the community will be lost.",
+                    "Are you completely sure to cancel this proposal? Community support will be returned, and you cannot recover this proposal.",
                   )}
                 </Text>
                 <Text fontWeight={600} fontSize={"14px"}>
