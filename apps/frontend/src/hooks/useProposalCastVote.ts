@@ -2,7 +2,7 @@ import { useCallback, useMemo } from "react"
 import { B3TRGovernor__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
-import { getProposalVotesQuerykey } from "@/api"
+import { getProposalEvents, getProposalVotesQuerykey } from "@/api"
 import { buildClause } from "@/utils/buildClause"
 import { getIsProposalQuorumReachedQueryKey } from "@/api/contracts/governance/hooks/useIsProposalQuorumReached"
 
@@ -37,7 +37,7 @@ export const useProposalCastVote = ({ proposalId, onSuccess }: Props) => {
   }, [])
 
   const refetchQueryKeys = useMemo(
-    () => [getProposalVotesQuerykey(proposalId), getIsProposalQuorumReachedQueryKey(proposalId)],
+    () => [getProposalVotesQuerykey(proposalId), getIsProposalQuorumReachedQueryKey(proposalId), getProposalEvents()],
     [proposalId],
   )
 

@@ -31,7 +31,7 @@ export const ProposalVotesResults = () => {
     case ProposalState.Canceled:
       return (
         <HStack gap={1}>
-          <Text fontSize="14px">{t("The proposal is being")}</Text>
+          <Text fontSize="14px">{t("The proposal was")}</Text>
           <Text fontSize="14px" color="#D23F63">
             {t("canceled")}
           </Text>

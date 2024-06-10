@@ -40,7 +40,7 @@ export async function generateB3trAllocations(config: ContractsConfig, path?: st
   const xAllocations: Allocation[] = []
 
   const b3trCap = ethers.parseEther(config.B3TR_CAP.toString())
-  let b3trSupply: bigint = BigInt(0)
+  let b3trSupply: bigint = config.MIGRATION_AMOUNT
   let cycle: number = 1
   let lastCycleEmissions: bigint | undefined = undefined
 

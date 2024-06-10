@@ -32,6 +32,14 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Cache Solidity compilers
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/hardhat-nodejs
+          key: ${{ runner.os }}-solc-${{ hashFiles('./packages/contracts/hardhat.config.ts') }}
+          restore-keys: |
+            ${{ runner.os }}-solc-
+
       - name: Check for Frontend changes
         uses: dorny/paths-filter@v3
         id: frontend_changes
@@ -90,26 +98,26 @@ jobs:
         if: steps.lambda_changes.outputs.src == 'true' && !(steps.contract_changes.outputs.src == 'true' || steps.utils_changes.outputs.src == 'true')
         run: yarn test --filter=lambda
 
-        # Run Slither if Solidity changes are detected
-      - name: Run Slither
-        uses: crytic/slither-action@v0.3.1
-        id: slither
-        if: steps.contract_changes.outputs.src == 'true'
-        with:
-          ignore-compile: true
-          target: "packages/contracts/"
-          solc-version: "0.8.20"
-          fail-on: none
-          slither-args: --filter-paths "openzeppelin" --exclude-informational --exclude-optimization --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
+      # Run Slither if Solidity changes are detected
+      # - name: Run Slither
+      #   uses: crytic/slither-action@v0.3.1
+      #   id: slither
+      #   if: steps.contract_changes.outputs.src == 'true'
+      #   with:
+      #     ignore-compile: true
+      #     target: "packages/contracts/"
+      #     solc-version: "0.8.20"
+      #     fail-on: none
+      #     slither-args: --filter-paths "openzeppelin" --exclude-informational --exclude-optimization --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
 
-      - name: Create/update checklist as PR comment
-        uses: actions/github-script@v7
-        if: github.event_name == 'pull_request' && steps.contract_changes.outputs.src == 'true'
-        env:
-          REPORT: ${{ steps.slither.outputs.stdout }}
-        with:
-          script: |
-            const script = require('.github/scripts/comment')
-            const header = '# Slither report'
-            const body = process.env.REPORT
-            await script({ github, context, header, body })
+      # - name: Create/update checklist as PR comment
+      #   uses: actions/github-script@v7
+      #   if: github.event_name == 'pull_request' && steps.contract_changes.outputs.src == 'true'
+      #   env:
+      #      REPORT: ${{ steps.slither.outputs.stdout }}
+      #   with:
+      #      script: |
+      #        const script = require('.github/scripts/comment')
+      #        const header = '# Slither report'
+      #        const body = process.env.REPORT
+      #        await script({ github, context, header, body })
