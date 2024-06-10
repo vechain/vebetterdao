@@ -167,7 +167,7 @@ describe("Governor and TimeLock", function () {
       expect(await governor.state(proposalId)).to.eql(5n)
 
       await governor.execute([await governor.getAddress()], [0], [encodedFunctionCall], descriptionHash)
-      expect(await governor.state(proposalId)).to.eql(7n)
+      expect(await governor.state(proposalId)).to.eql(6n)
 
       await governor.connect(owner).withdraw(proposalId, owner.address)
       await vot3.connect(owner).approve(await governor.getAddress(), ethers.parseEther("1000"))
@@ -210,7 +210,7 @@ describe("Governor and TimeLock", function () {
 
       expect(newProposalId).to.exist
       // expect data of previous contract to be untouched
-      expect(await governor.state(proposalId)).to.eql(7n)
+      expect(await governor.state(proposalId)).to.eql(6n)
       expect(await governor.quorumReached(proposalId)).to.eql(true)
     })
 
@@ -289,7 +289,7 @@ describe("Governor and TimeLock", function () {
       expect(await governor.state(proposalId)).to.eql(5n)
 
       await governor.execute([await governor.getAddress()], [0], [encodedFunctionCall], descriptionHash)
-      expect(await governor.state(proposalId)).to.eql(7n)
+      expect(await governor.state(proposalId)).to.eql(6n)
 
       await governor.connect(owner).withdraw(proposalId, owner.address)
       await vot3.connect(owner).approve(await governor.getAddress(), ethers.parseEther("1000"))
@@ -1671,7 +1671,7 @@ describe("Governor and TimeLock", function () {
 
       // Can still execute even if there is nothing to execute
       await governor.execute([], [], [], descriptionHash)
-      expect(await governor.state(proposalId)).to.eql(7n)
+      expect(await governor.state(proposalId)).to.eql(6n)
     })
 
     it("Can create a proposal with no deposit", async () => {
@@ -3230,7 +3230,7 @@ describe("Governor and TimeLock", function () {
 
       // proposal should be in executed state
       proposalState = await governor.state(proposalId)
-      expect(proposalState.toString()).to.eql("7")
+      expect(proposalState.toString()).to.eql("6")
     })
 
     it("cannot execute proposal twice", async function () {
@@ -3284,7 +3284,7 @@ describe("Governor and TimeLock", function () {
 
       // proposal should be in executed state
       proposalState = await governor.state(proposalId)
-      expect(proposalState.toString()).to.eql("7")
+      expect(proposalState.toString()).to.eql("6")
 
       // try to execute again
       await catchRevert(governor.execute([b3trAddress], [0], [encodedFunctionCall], descriptionHash))
@@ -3356,7 +3356,7 @@ describe("Governor and TimeLock", function () {
 
       // proposal should be in executed state
       proposalState = await governor.state(proposalId)
-      expect(proposalState.toString()).to.eql("7")
+      expect(proposalState.toString()).to.eql("6")
     })
 
     it("If PROPOSAL_EXECUTOR_ROLE is set to ZERO_ADDRESS then anyone can execute proposals", async function () {
@@ -3425,7 +3425,7 @@ describe("Governor and TimeLock", function () {
 
       // proposal should be in executed state
       proposalState = await governor.state(proposalId)
-      expect(proposalState.toString()).to.eql("7")
+      expect(proposalState.toString()).to.eql("6")
     })
 
     it("Cannot execute prpopsal directly from TimeLock", async function () {
@@ -3580,7 +3580,7 @@ describe("Governor and TimeLock", function () {
 
       // proposal should be in executed state
       proposalState = await governor.state(proposalId)
-      expect(proposalState.toString()).to.eql("7")
+      expect(proposalState.toString()).to.eql("6")
     })
   })
 
@@ -3754,11 +3754,11 @@ describe("Governor and TimeLock", function () {
       expect(await governor.proposalDepositReached(proposalId)).to.eql(false)
 
       await waitForProposalToBeActive(proposalId)
-      expect(await governor.state(proposalId)).to.eql(8n) // deposit not met
+      expect(await governor.state(proposalId)).to.eql(7n) // deposit not met
 
       await waitForNextCycle()
 
-      expect(await governor.state(proposalId)).to.eql(8n) // deposit not met
+      expect(await governor.state(proposalId)).to.eql(7n) // deposit not met
     })
 
     it("Sponsers can contribute to deposit total", async () => {
