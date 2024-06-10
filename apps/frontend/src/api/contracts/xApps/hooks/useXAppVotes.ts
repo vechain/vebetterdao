@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
-import { FormattingUtils } from "@repo/utils"
 import { XAllocationVoting__factory } from "@repo/contracts"
+import { ethers } from "ethers"
 
 const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
 
@@ -19,7 +19,7 @@ export const getXAppVotes = async (thor: Connex.Thor, xAppId: string, roundId: s
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
-  return FormattingUtils.scaleNumberDown(res.decoded[0], 18, 18)
+  return ethers.formatEther(res.decoded[0])
 }
 
 export const getXAppVotesQueryKey = (xAppId?: string, roundId?: string) => [
