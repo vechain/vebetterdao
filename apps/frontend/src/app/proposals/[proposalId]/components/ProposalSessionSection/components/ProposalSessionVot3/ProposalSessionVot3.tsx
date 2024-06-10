@@ -16,14 +16,15 @@ export const ProposalSessionVot3 = () => {
   return (
     <HStack p="16px" rounded="12px" bg="#FAFAFA" justify={"space-between"}>
       {proposal.state !== ProposalState.Pending && (
-        <VStack align="stretch" gap={0}>
+        <VStack align="stretch" gap={1}>
           <HStack>
-            <Text color="#004CFC" fontWeight={600}>
+            <Image h="20px" w="20px" src="/images/vot3-token.png" alt="vot3-token" />
+            <Text color="#252525" fontWeight={600}>
               {compactFormatter.format(Number(proposal.userVot3OnSnapshot))}
             </Text>
           </HStack>
           <Text color="#6A6A6A" fontSize="12px">
-            {t("Votes at snapshot")}
+            {t("VOT3 at snapshot")}
           </Text>
         </VStack>
       )}
@@ -35,7 +36,7 @@ export const ProposalSessionVot3 = () => {
           </Text>
         </HStack>
         <Text color="#6A6A6A" fontSize="12px">
-          {t("Your VOT3 tokens")}
+          {t("Current VOT3")}
         </Text>
       </VStack>
     </HStack>
