@@ -37,7 +37,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
 
   const totalAmount = useMemo(() => {
     if (!roundAmount) return 0
-    return BigInt(roundAmount.voteXAllocations)
+    return roundAmount.voteXAllocations
   }, [roundAmount])
 
   const onRoundClick = () => {
@@ -117,7 +117,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
                     <Text color="red.500">{roundAmountError.message}</Text>
                   ) : (
                     <Box textAlign={"end"} color={cardTextColor}>
-                      <Heading size="lg">{compactFormatter.format(totalAmount)}</Heading>
+                      <Heading size="lg">{compactFormatter.format(Number(totalAmount))}</Heading>
                       <Text fontSize={"md"}>total allocation</Text>
                     </Box>
                   )}

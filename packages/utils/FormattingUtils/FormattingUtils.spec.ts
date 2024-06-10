@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
 import { vi } from "vitest"
 import {
-  convertToFiatBalance,
   formatAlias,
   humanAddress,
   humanNumber,
@@ -9,97 +8,9 @@ import {
   isZero,
   limitChars,
   removeUrlProtocolAndPath,
-  scaleNumberDown,
-  scaleNumberUp,
   validateStringPercentages,
 } from "./FormattingUtils"
 import { BigNumber } from "bignumber.js"
-
-describe("scaleNumberUp - positive testing", () => {
-  it("scale up by 2 decimals", () => {
-    expect(scaleNumberUp(5, 2)).toEqual("500")
-  })
-
-  it("scale up by 10 decimals", () => {
-    expect(scaleNumberUp(6, 10)).toEqual("60000000000")
-  })
-
-  it("scale up by 0", () => {
-    expect(scaleNumberUp(500, 0)).toBe("500")
-  })
-
-  it("scale up by 16 decimals", () => {
-    expect(scaleNumberUp("7", 16)).toEqual("70000000000000000")
-  })
-})
-
-describe("scaleNumberUp - negative testing", () => {
-  const originalError = console.error
-  beforeAll(() => {
-    // mute the errors in the console
-    console.error = vi.fn()
-  })
-  afterAll(() => {
-    // unmute the errors
-    console.error = originalError
-  })
-
-  it("scale up by a negative number", () => {
-    expect(() => scaleNumberUp(5, -1)).toThrow()
-  })
-
-  it("scale up an invalid number", () => {
-    expect(() => scaleNumberUp("notanumber", 10)).toThrow()
-  })
-})
-
-describe("scaleNumberDown - positive testing", () => {
-  it("scale down by 2 decimals", () => {
-    expect(scaleNumberDown(500, 2)).toEqual("5")
-  })
-
-  it("scale down by 0", () => {
-    expect(scaleNumberDown(500, 0)).toBe("500")
-  })
-
-  it("scale down by 10 decimals", () => {
-    expect(scaleNumberDown("60000000000", 10)).toEqual("6")
-  })
-
-  it("scale down by 16 decimals", () => {
-    expect(scaleNumberDown("70000000000000000", 16)).toEqual("7")
-  })
-})
-
-describe("scaleNumberDown - negative testing", () => {
-  const originalError = console.error
-  beforeAll(() => {
-    // mute the errors in the console
-    console.error = vi.fn()
-  })
-  afterAll(() => {
-    // unmute the errors
-    console.error = originalError
-  })
-
-  it("scale down by a negative number", () => {
-    expect(() => scaleNumberDown(500, -1)).toThrow()
-  })
-
-  it("scale down an invalid number", () => {
-    expect(() => scaleNumberDown("notanumber", 10)).toThrow()
-  })
-
-  it("scale down by too many decimals", () => {
-    expect(scaleNumberDown("600", 10)).toEqual("0")
-  })
-})
-
-describe("convertToFiatBalance", () => {
-  it("should return correctly", () => {
-    expect(convertToFiatBalance("100.001", 10, 2)).toBe("10.0001")
-  })
-})
 
 describe("humanNumber", () => {
   it("should return correct decimals", () => {

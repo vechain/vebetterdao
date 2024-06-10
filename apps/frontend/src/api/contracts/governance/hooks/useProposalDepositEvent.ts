@@ -1,16 +1,14 @@
 import { useMemo } from "react"
 import { useProposalsEvents } from "./useProposalsEvents"
-import { useScaleVot3Amount } from "@/hooks"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
-
+import { ethers } from "ethers"
 /**
  * Hook to get the proposal deposit event
  * @param proposalId  the proposal id to get the deposit event for
  * @returns the deposit event for the proposal
  */
 export const useProposalDepositEvent = (proposalId: string) => {
-  const scaleVot3Amount = useScaleVot3Amount()
   const { account } = useWallet()
   const events = useProposalsEvents()
 
@@ -25,15 +23,15 @@ export const useProposalDepositEvent = (proposalId: string) => {
   )
   const communityDeposits = useMemo(() => {
     const deposits = proposalDeposits.reduce((acc, deposit) => acc + Number(deposit.amount), 0)
-    return Number(scaleVot3Amount(deposits))
-  }, [proposalDeposits, scaleVot3Amount])
+    return Number(ethers.formatEther(BigInt(deposits || 0)))
+  }, [proposalDeposits])
 
   const userSupport = useMemo(() => {
     const deposits = proposalDeposits
       .filter(deposit => compareAddresses(deposit.depositor, account || ""))
       .reduce((acc, deposit) => acc + Number(deposit.amount), 0)
-    return Number(scaleVot3Amount(deposits))
-  }, [account, proposalDeposits, scaleVot3Amount])
+    return Number(ethers.formatEther(BigInt(deposits || 0)))
+  }, [account, proposalDeposits])
 
   const othersDeposits = useMemo(
     () => proposalDeposits.filter(deposit => !compareAddresses(deposit.depositor, account || "")),
@@ -41,8 +39,8 @@ export const useProposalDepositEvent = (proposalId: string) => {
   )
   const othersSupport = useMemo(() => {
     const deposits = othersDeposits.reduce((acc, deposit) => acc + Number(deposit.amount), 0)
-    return Number(scaleVot3Amount(deposits))
-  }, [othersDeposits, scaleVot3Amount])
+    return Number(ethers.formatEther(BigInt(deposits || 0)))
+  }, [othersDeposits])
 
   const othersSupportUserCount = useMemo(() => {
     return [...new Set(othersDeposits.map(deposit => deposit.depositor))].length

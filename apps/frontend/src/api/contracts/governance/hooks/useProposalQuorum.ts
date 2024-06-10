@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
-
 import { getConfig } from "@repo/config"
 import { FormattingUtils } from "@repo/utils"
 import { B3TRGovernorJson } from "@repo/contracts"
+import { ethers } from "ethers"
+
 const b3trGovernorAbi = B3TRGovernorJson.abi
 const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
 
@@ -29,7 +30,7 @@ export const getProposalQuorum = async (
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
   const original = res.decoded[0]
-  const scaled = FormattingUtils.scaleNumberDown(original, 18, 18)
+  const scaled = ethers.formatEther(original)
   const formatted = scaled === "0" ? "0" : FormattingUtils.humanNumber(scaled)
 
   return {
