@@ -99,18 +99,20 @@ export const AllocationRoundBreakdownChart = ({ roundId }: Props) => {
         </VStack>
         <VStack w="full" spacing={4}>
           {baseAmountsInfo.map((info, index) => (
-            <HStack w="full" spacing={1} color="#252525" key={index}>
-              <DotSymbol size={4} color={info.color} />
-              <Text ml={1} fontSize="md" fontWeight={600}>
-                {compactFormatter.format(Number(info.amount))}
-              </Text>
-              <Text fontSize="md">
-                {t("({{percentage}}%) as {{label}}", {
-                  percentage: info.percentage,
-                  label: info.label,
-                })}
-              </Text>
-            </HStack>
+            <Skeleton isLoaded={!roundAmountLoading} key={index} w="full">
+              <HStack w="full" spacing={1} color="#252525">
+                <DotSymbol size={4} color={info.color} />
+                <Text ml={1} fontSize="md" fontWeight={600}>
+                  {compactFormatter.format(Number(info.amount))}
+                </Text>
+                <Text fontSize="md">
+                  {t("({{percentage}}%) as {{label}}", {
+                    percentage: info.percentage,
+                    label: info.label,
+                  })}
+                </Text>
+              </HStack>
+            </Skeleton>
           ))}
         </VStack>
       </CardBody>
