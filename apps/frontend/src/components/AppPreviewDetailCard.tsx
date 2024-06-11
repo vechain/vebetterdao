@@ -1,4 +1,4 @@
-import { AppSocialUrls } from "@/app/apps/[appId]/components/AppSocialUrls"
+import { AppSocialUrls } from "@/app/apps/[appId]/components_old/AppSocialUrls"
 import { AppCardOptionsDesktopMenu } from "@/app/apps/components/AppCardOptionsDesktopMenu"
 import { AppCardOptionsMobileModal } from "@/app/apps/components/AppCardOptionsMobileModal"
 import { CreateEditAppFormData } from "@/components/CreateEditAppForm"
