@@ -8,11 +8,11 @@ export const getAccountBalance = async (thor: Connex.Thor, address?: string) => 
   const account = await thor.account(address).get()
 
   const originalBalance = account.balance
-  const scaled = FormattingUtils.scaleNumberDown(originalBalance, 18, 18)
+  const scaled = ethers.formatEther(originalBalance)
   const formatted = scaled === "0" ? "0" : FormattingUtils.humanNumber(scaled)
 
   const originalEnergy = account.energy
-  const energyScaled = FormattingUtils.scaleNumberDown(originalEnergy, 18, 18)
+  const energyScaled = ethers.formatEther(originalEnergy)
   const energyFormatted = energyScaled === "0" ? "0" : FormattingUtils.humanNumber(energyScaled)
 
   return {

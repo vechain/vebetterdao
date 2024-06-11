@@ -235,7 +235,7 @@ export const createProposalAndExecuteIt = async (
 
   // load votes
   // console.log("Loading votes");
-  await getVot3Tokens(voter, "1000")
+  await getVot3Tokens(voter, "30000")
   await waitForNextBlock()
 
   // create a new proposal
@@ -294,7 +294,7 @@ export const createProposalWithMultipleFunctionsAndExecuteIt = async (
 
   // load votes
   // console.log("Loading votes");
-  await getVot3Tokens(voter, "1000")
+  await getVot3Tokens(voter, "30000")
   await waitForNextBlock()
 
   if (!roundId) {
@@ -324,6 +324,7 @@ export const createProposalWithMultipleFunctionsAndExecuteIt = async (
     description,
     functionsToCall,
     args,
+    roundId,
   )
 
   const proposalId = await getProposalIdFromTx(tx)

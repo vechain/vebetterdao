@@ -1,9 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
-
 import { getConfig } from "@repo/config"
 import { XAllocationPool__factory } from "@repo/contracts"
-import { FormattingUtils } from "@repo/utils"
+import { ethers } from "ethers"
 
 const XALLOCATIONPOOLCONTRACT = getConfig().xAllocationPoolContractAddress
 
@@ -21,7 +20,7 @@ export const getAllocationBaseAmount = async (thor: Connex.Thor, roundId?: strin
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
-  return FormattingUtils.scaleNumberDown(res.decoded[0], 18)
+  return ethers.formatEther(res.decoded[0])
 }
 
 export const getAllocationBaseAmountQueryKey = (roundId?: string) => ["allocationRound", roundId, "baseAmount"]

@@ -302,3 +302,9 @@ yarn contracts:generate-docs
 ```
 
 The documentation will be generated in the `docs` folder inside `./packages/contracts`, and it's generated based on the @natspec tags in the contracts.
+
+## Slither Issue
+Note that slither does not seem to be working with the repo as-is 🤷, resulting in an enum type not found error:
+```
+slither.solc_parsing.exceptions.ParsingError: Type not found struct Checkpoints.Trace208
+```

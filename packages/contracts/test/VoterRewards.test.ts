@@ -107,7 +107,7 @@ describe("VoterRewards", () => {
     it("Should return correct scaling factor", async () => {
       const { voterRewards } = await getOrDeployContractInstances({ forceDeploy: true })
 
-      expect(await voterRewards.scalingFactor()).to.equal(10 ** 6)
+      expect(await voterRewards.SCALING_FACTOR()).to.equal(10 ** 6)
     })
 
     it("Should return correct b3tr address", async () => {
@@ -126,17 +126,6 @@ describe("VoterRewards", () => {
       await expect(voterRewards.connect(owner).setLevelToMultiplier(1, 0)).to.be.reverted // Multiplier cannot be zero
 
       await expect(voterRewards.connect(otherAccount).setLevelToMultiplier(1, 2)).to.be.reverted // Should not be able to set level to multiplier if not admin
-    })
-
-    it("Should be able to set scaling factor", async () => {
-      const { voterRewards, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
-
-      await voterRewards.connect(owner).setScalingFactor(100)
-      expect(await voterRewards.scalingFactor()).to.equal(100)
-
-      await expect(voterRewards.connect(otherAccount).setScalingFactor(100)).to.be.reverted // Should not be able to set scaling factor if not admin
-
-      await expect(voterRewards.connect(owner).setScalingFactor(0)).to.be.reverted // Scaling factor cannot be zero
     })
 
     it("Should be able to set galaxy member address", async () => {
@@ -549,7 +538,7 @@ describe("VoterRewards", () => {
 
       expect(rewardClaimedEvent?.args?.[0]).to.equal(1) // Cycle
       expect(rewardClaimedEvent?.args?.[1]).to.equal(otherAccount.address) // Voter
-      expect(rewardClaimedEvent?.args?.[2]).to.equal(23228465533886600374276n) // Reward
+      expect(rewardClaimedEvent?.args?.[2]).to.equal(696853966016598011228309n) // Reward
 
       await voterRewards.connect(voter2).claimReward(1, voter2.address)
       await voterRewards.connect(voter3).claimReward(1, voter3.address)
@@ -856,9 +845,9 @@ describe("VoterRewards", () => {
       )
 
       // Rewards to be claimed are the same for all voters:
-      expect(await voterRewards.getReward(1, voter1.address)).to.equal(22222222222222222222222n)
-      expect(await voterRewards.getReward(1, voter2.address)).to.equal(22222222222222222222222n)
-      expect(await voterRewards.getReward(1, voter3.address)).to.equal(22222222222222222222222n)
+      expect(await voterRewards.getReward(1, voter1.address)).to.equal(666666666666666666666666n)
+      expect(await voterRewards.getReward(1, voter2.address)).to.equal(666666666666666666666666n)
+      expect(await voterRewards.getReward(1, voter3.address)).to.equal(666666666666666666666666n)
 
       await waitForRoundToEnd(Number(roundId))
 
@@ -899,9 +888,9 @@ describe("VoterRewards", () => {
       )
 
       // Rewards to be claimed are now NOT the same for all voters because voter1 has a higher level NFT:
-      expect(await voterRewards.getReward(2, voter1.address)).to.equal(33333333333333333333333n) // Double voting rewards multiplier so it's like he voted 2000 (out of 4000 total votes) => 50% of the rewards
-      expect(await voterRewards.getReward(2, voter2.address)).to.equal(16666666666666666666666n)
-      expect(await voterRewards.getReward(2, voter3.address)).to.equal(16666666666666666666666n)
+      expect(await voterRewards.getReward(2, voter1.address)).to.equal(1000000000000000000000000n) // Double voting rewards multiplier so it's like he voted 2000 (out of 4000 total votes) => 50% of the rewards
+      expect(await voterRewards.getReward(2, voter2.address)).to.equal(500000000000000000000000n)
+      expect(await voterRewards.getReward(2, voter3.address)).to.equal(500000000000000000000000n)
     })
 
     it("Should not increase voting rewards if user upgrades after x allocation round snapshot", async () => {
@@ -984,9 +973,9 @@ describe("VoterRewards", () => {
       )
 
       // Rewards to be claimed are the same for all voters:
-      expect(await voterRewards.getReward(1, voter1.address)).to.equal(22222222222222222222222n)
-      expect(await voterRewards.getReward(1, voter2.address)).to.equal(22222222222222222222222n)
-      expect(await voterRewards.getReward(1, voter3.address)).to.equal(22222222222222222222222n)
+      expect(await voterRewards.getReward(1, voter1.address)).to.equal(666666666666666666666666n)
+      expect(await voterRewards.getReward(1, voter2.address)).to.equal(666666666666666666666666n)
+      expect(await voterRewards.getReward(1, voter3.address)).to.equal(666666666666666666666666n)
 
       await waitForRoundToEnd(Number(roundId))
 
@@ -1025,9 +1014,9 @@ describe("VoterRewards", () => {
       )
 
       // Rewards to be claimed are now NOT the same for all voters because voter1 has a higher level NFT:
-      expect(await voterRewards.getReward(2, voter1.address)).to.equal(22222222222222222222222n)
-      expect(await voterRewards.getReward(2, voter2.address)).to.equal(22222222222222222222222n)
-      expect(await voterRewards.getReward(2, voter3.address)).to.equal(22222222222222222222222n)
+      expect(await voterRewards.getReward(2, voter1.address)).to.equal(666666666666666666666666n)
+      expect(await voterRewards.getReward(2, voter2.address)).to.equal(666666666666666666666666n)
+      expect(await voterRewards.getReward(2, voter3.address)).to.equal(666666666666666666666666n)
     })
 
     it("Should calculate rewards correctly if users have different levels of NFTs", async () => {
@@ -1619,8 +1608,8 @@ describe("VoterRewards", () => {
 
       await waitForNextCycle()
 
-      expect(await voterRewards.getReward(cycle, voter1.address)).to.equal(33333333333333333333333n) // 50% of the rewards
-      expect(await voterRewards.getReward(cycle, voter2.address)).to.equal(33333333333333333333333n) // 50% of the rewards
+      expect(await voterRewards.getReward(cycle, voter1.address)).to.equal(1000000000000000000000000n) // 50% of the rewards
+      expect(await voterRewards.getReward(cycle, voter2.address)).to.equal(1000000000000000000000000n) // 50% of the rewards
 
       expect(await voterRewards.cycleToTotal(cycle)).to.equal(ethers.parseEther("63.245553202")) // Total reward weighted votes
     })
