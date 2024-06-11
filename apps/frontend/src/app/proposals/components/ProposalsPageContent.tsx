@@ -1,5 +1,12 @@
-import { useProposalsEvents, useActiveProposals, useIncomingProposals, usePastProposals, useCurrentBlock } from "@/api"
-import { ProposalCard, ProposalInfoCard } from "@/components"
+import {
+  useProposalsEvents,
+  useActiveProposals,
+  useIncomingProposals,
+  usePastProposals,
+  useCurrentBlock,
+  ProposalState,
+} from "@/api"
+import { ProposalInfoCard } from "@/components"
 import {
   VStack,
   HStack,
@@ -23,11 +30,6 @@ import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { FaPlus, FaScroll } from "react-icons/fa6"
 
-export enum PROPOSAL_TYPE {
-  ACTIVE,
-  PAST,
-  INCOMING,
-}
 export const ProposalsPageContent = () => {
   const router = useRouter()
   const { t } = useTranslation()
@@ -73,7 +75,7 @@ export const ProposalsPageContent = () => {
     return (
       <Grid w="full">
         {activeProposals?.map(proposal => (
-          <ProposalInfoCard type={PROPOSAL_TYPE.ACTIVE} proposal={proposal} key={proposal.proposalId} />
+          <ProposalInfoCard type={ProposalState.Active} proposal={proposal} key={proposal.proposalId} />
         ))}
       </Grid>
     )
@@ -110,7 +112,7 @@ export const ProposalsPageContent = () => {
     return (
       <Grid w="full">
         {incomingProposals?.map(proposal => (
-          <ProposalInfoCard type={PROPOSAL_TYPE.INCOMING} proposal={proposal} key={proposal.proposalId} />
+          <ProposalInfoCard type={ProposalState.Pending} proposal={proposal} key={proposal.proposalId} />
         ))}
       </Grid>
     )
@@ -151,7 +153,7 @@ export const ProposalsPageContent = () => {
     return (
       <Grid w="full">
         {pastProposals?.map(proposal => (
-          <ProposalInfoCard type={PROPOSAL_TYPE.PAST} proposal={proposal} key={proposal.proposalId} />
+          <ProposalInfoCard type={ProposalState.Expired} proposal={proposal} key={proposal.proposalId} />
         ))}
       </Grid>
     )
