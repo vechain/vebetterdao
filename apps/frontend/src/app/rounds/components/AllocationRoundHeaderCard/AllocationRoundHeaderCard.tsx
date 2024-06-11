@@ -1,12 +1,11 @@
 import {
-  RoundState,
   useAllocationsRound,
   useAllocationsRoundState,
   useHasVotedInRound,
   useRoundXApps,
   useUserVotesInRound,
 } from "@/api"
-import { AllocationStateBadge } from "@/components"
+import { AllocationStateBadge, VOT3Icon } from "@/components"
 import {
   Box,
   Button,
@@ -23,7 +22,7 @@ import {
 } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { useMemo, useState } from "react"
+import { useMemo } from "react"
 import { FaClock } from "react-icons/fa6"
 import { MdHowToVote } from "react-icons/md"
 import { PiSquaresFourFill } from "react-icons/pi"
@@ -101,10 +100,12 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                 spacing={[4, 4, 12]}
                 align={["flex-start", "flex-start", "center"]}>
                 <Box>
-                  <Text color="#6A6A6A" fontSize={["lg", "lg", "md"]} fontWeight={400}>
-                    {isFinished ? t("Finished") : t("Finishes in")}
-                  </Text>
-                  <Skeleton isLoaded={!isLoading}>
+                  <Skeleton isLoaded={!roundStateLoading}>
+                    <Text color="#6A6A6A" fontSize={["lg", "lg", "md"]} fontWeight={400}>
+                      {isFinished ? t("Finished") : t("Finishes in")}
+                    </Text>
+                  </Skeleton>
+                  <Skeleton isLoaded={!isLoading && !roundStateLoading}>
                     <HStack spacing={2}>
                       <Icon as={FaClock} boxSize={4} color={"#252525"} />
                       <Text fontSize={["lg", "lg", "md"]} color={"#252525"} fontWeight={400}>
@@ -132,7 +133,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                   </Text>
                   <Skeleton isLoaded={!hasVotedLoading && !userVotesLoading}>
                     <HStack spacing={2}>
-                      <Icon as={hasVoted ? FaVoteYea : MdHowToVote} boxSize={4} color={"#252525"} />
+                      <Icon as={hasVoted ? VOT3Icon : MdHowToVote} boxSize={4} color={"#252525"} />
                       <Text fontSize={["lg", "lg", "md"]} color={"#252525"} fontWeight={400}>
                         {hasVoted ? compactFormatter.format(totalVotesCast) : "You have not voted"}
                       </Text>
