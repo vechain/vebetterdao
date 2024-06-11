@@ -24,7 +24,7 @@ import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployProxy } from "../scripts/helpers"
 import { GalaxyMember } from "../typechain-types"
 
-describe.only("Galaxy Member", () => {
+describe("Galaxy Member", () => {
   describe("Contract parameters", () => {
     it("Should have correct parameters set on deployment", async () => {
       const { galaxyMember, owner } = await getOrDeployContractInstances({ forceDeploy: true })
@@ -393,7 +393,7 @@ describe.only("Galaxy Member", () => {
       await participateInAllocationVoting(otherAccount)
 
       await galaxyMember.connect(otherAccount).freeMint()
-      
+
       // Upgrade to level 2
       await upgradeNFTtoLevel(0, 2, galaxyMember, b3tr, otherAccount, minterAccount)
 
