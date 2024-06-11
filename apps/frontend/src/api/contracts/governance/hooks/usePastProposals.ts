@@ -6,8 +6,8 @@ import { getProposalDeadline, getProposalDeadlineQueryKey } from "./useProposalD
 
 const getPastProposalsQueryKey = () => ["proposals", "past"]
 /**
- *  Hook to get the past proposals using on-chain events (i.e the proposals expired, canceled, queued or executed)
- * @returns  the past proposals events (i.e the proposals expired, canceled, queued or executed)
+ *  Hook to get the past proposals using on-chain events (i.e the proposals canceled, queued or executed)
+ * @returns  the past proposals events (i.e the proposals canceled, queued or executed)
  */
 export const usePastProposals = () => {
   const queryClient = useQueryClient()
