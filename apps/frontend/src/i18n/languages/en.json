@@ -73,6 +73,7 @@
   "Cancel this proposal": "Cancel this proposal",
   "canceled": "canceled",
   "Canceled": "Canceled",
+  "Rejected": "Rejected",
   "Cast your vote": "Cast your vote",
   "Check your proposal before publishing": "Check your proposal before publishing",
   "Choose the": "Choose the",
@@ -177,5 +178,14 @@
   "Your vote": "Your vote",
   "{{percentage}}%": "{{percentage}}%",
   "{{proposals}} proposals created from the beginning": "{{proposals}} proposals created from the beginning",
-  "{{time}} ago": "{{time}} ago"
+  "{{time}} ago": "{{time}} ago",
+  "You voted for": "You voted for",
+  "Waiting for votes": "Waiting for votes..",
+  "Proposal is being": "Proposal is being",
+  "Quorum needed": "Quorum needed",
+  "Votes casted": "Votes casted",
+  "by": "by",
+  "users": "users",
+  "No vote yet": "No vote yet",
+  "days": "days"
 }
