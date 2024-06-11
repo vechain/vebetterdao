@@ -47,7 +47,6 @@ import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Rec
 import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 /**
@@ -70,7 +69,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  * @dev The contract is upgradeable and uses the UUPS pattern. All logic is stored in libraries.
  */
 contract B3TRGovernor is
-  Initializable,
   IB3TRGovernor,
   GovernorStorage,
   AccessControlUpgradeable,
@@ -113,7 +111,8 @@ contract B3TRGovernor is
    */
   modifier onlyRoleOrGovernance(bytes32 role) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    if (!hasRole(role, _msgSender())) GovernorGovernanceLogic.checkGovernance($, _msgSender(), _msgData(), address(this));
+    if (!hasRole(role, _msgSender()))
+      GovernorGovernanceLogic.checkGovernance($, _msgSender(), _msgData(), address(this));
     _;
   }
 
@@ -182,7 +181,7 @@ contract B3TRGovernor is
   /**
    * @notice Function to know if a proposal is executable or not.
    * If the proposal was created without any targets, values, or calldatas, it is not executable.
-   * to check if the proposal is executable. 
+   * to check if the proposal is executable.
    * @dev If no calldatas or targets then it's not executable, otherwise it will check if the governance can execute transactions or not.
    * @param proposalId The id of the proposal
    * @return bool True if the proposal needs queuing, false otherwise

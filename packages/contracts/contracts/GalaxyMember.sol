@@ -38,14 +38,12 @@ import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
 import { IB3TRGovernor } from "./interfaces/IB3TRGovernor.sol";
 import { IB3TR } from "./interfaces/IB3TR.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 /// @title GalaxyMember NFT Contract
 /// @dev Extends ERC721 Non-Fungible Token Standard basic implementation with upgradeable pattern, burnable, pausable, and access control functionalities.
 /// @notice This contract manages the unique assets owned by users within the Galaxy Member ecosystem.
 contract GalaxyMember is
-  Initializable,
   ERC721Upgradeable,
   ERC721EnumerableUpgradeable,
   ERC721PausableUpgradeable,

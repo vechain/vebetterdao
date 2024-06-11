@@ -28,7 +28,6 @@ import { AdministrationUpgradeable } from "./x-2-earn-apps/modules/Administratio
 import { AppsStorageUpgradeable } from "./x-2-earn-apps/modules/AppsStorageUpgradeable.sol";
 import { SettingsUpgradeable } from "./x-2-earn-apps/modules/SettingsUpgradeable.sol";
 import { VoteEligibilityUpgradeable } from "./x-2-earn-apps/modules/VoteEligibilityUpgradeable.sol";
-import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
@@ -42,7 +41,6 @@ import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/ac
  * Each app has a set of admins and moderators (built without using AccessControl) that can manage the app metadata and management.
  */
 contract X2EarnApps is
-  Initializable,
   X2EarnAppsUpgradeable,
   AdministrationUpgradeable,
   SettingsUpgradeable,
