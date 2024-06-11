@@ -173,6 +173,11 @@ contract GalaxyMember is
       $._b3trToUpgradeToLevel[i + 2] = data.b3trToUpgradeToLevel[i]; // First Level that requires B3TR is level 2
     }
 
+    // First Level that requires B3TR is level 2
+    for (uint8 i = 2; i <= data.maxLevel; i++) {
+      require($._b3trToUpgradeToLevel[i] > 0, "Galaxy Member: B3TR to upgrade must be set for all levels unlocked"); // All levels unlocked must have a B3TR requirement
+    }
+
     $.b3tr = IB3TR(data.b3tr);
     $.treasury = data.treasury;
 
@@ -375,6 +380,12 @@ contract GalaxyMember is
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
     require(level > $.MAX_LEVEL, "Galaxy Member: Max level must be greater than the current max level");
+
+    // Require all levels til the new max level to have a B3TR requirement
+    for (uint256 i = 2; i <= level; i++) {
+      // First Level that requires B3TR is level 2
+      require($._b3trToUpgradeToLevel[i] > 0, "Galaxy Member: B3TR to upgrade must be set for all levels unlocked");
+    }
 
     $.MAX_LEVEL = level;
   }
