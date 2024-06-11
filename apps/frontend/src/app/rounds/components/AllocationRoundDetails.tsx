@@ -4,16 +4,20 @@ import {
   useAllocationsRound,
   useHasVotedInRound,
   useMaxAllocationAmount,
+  useRoundXApps,
+  useUserVotesInRound,
 } from "@/api"
-import { B3TRIcon } from "@/components"
+import { AllocationStateBadge, B3TRIcon } from "@/components"
 import {
   Box,
   Button,
   Card,
   CardBody,
+  Divider,
   Grid,
   HStack,
   Heading,
+  Icon,
   Skeleton,
   Stack,
   Text,
@@ -23,6 +27,12 @@ import {
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
+import { FaClock } from "react-icons/fa6"
+import { MdHowToVote } from "react-icons/md"
+import { PiSquaresFourFill } from "react-icons/pi"
+import { ethers } from "ethers"
+import { FaVoteYea } from "react-icons/fa"
+import { useTranslation } from "react-i18next"
 
 const compactFormatter = getCompactFormatter()
 type Props = {
@@ -30,92 +40,53 @@ type Props = {
 }
 
 export const AllocationRoundDetails = ({ roundId }: Props) => {
+  const { t } = useTranslation()
   const { account } = useWallet()
   const { data, isLoading } = useAllocationsRound(roundId)
 
   const { data: roundAmount, isLoading: roundAmountLoading, error: roundAmountError } = useAllocationAmount(roundId)
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
+  const { data: userVotes, isLoading: userVotesLoading } = useUserVotesInRound(roundId, account ?? undefined)
   const { data: baseAmount, isLoading: baseAmountLoading, error: baseAmountError } = useAllocationBaseAmount(roundId)
+
+  const totalVotesCast = useMemo(() => {
+    return userVotes?.voteWeights.reduce((acc, curr) => acc + Number(ethers.formatEther(curr)), 0) ?? 0
+  }, [userVotes?.voteWeights])
   const {
     data: maxDAppAllocation,
     isLoading: maxDAppAllocationLoading,
     error: maxDAppAllocationError,
   } = useMaxAllocationAmount(roundId)
 
-  const isVotingConcluded = data?.voteEndTimestamp?.isBefore()
+  const { data: roundApps, isLoading: roundAppsLoading } = useRoundXApps(roundId)
 
   const bgGradient = useColorModeValue("500", "300")
 
   const remainingTime = useMemo(() => {
-    if (isVotingConcluded) return `Voting ended ${data?.voteEndTimestamp?.fromNow()}`
-    return `Voting ends ${data?.voteEndTimestamp?.fromNow()}`
-  }, [isVotingConcluded, data?.voteEndTimestamp])
+    return `${data?.voteEndTimestamp?.fromNow(true)}`
+  }, [data?.voteEndTimestamp])
 
-  const renderVoteStatusMessage = useMemo(() => {
-    if (!isVotingConcluded) {
-      if (hasVoted)
-        return (
-          <VStack spacing={1} align="flex-start" flex={1}>
-            <Button as="a" href="#user-votes" colorScheme="primary" size={["md"]}>
-              Round is active
-            </Button>
-            <Text fontSize={"md"} color={`primary.${bgGradient}`} fontWeight={600}>
-              You have voted successfully!
-            </Text>
-          </VStack>
-        )
-      return (
-        <VStack spacing={1} align="flex-start" flex={1}>
-          <Button as="a" href="#user-votes" colorScheme="primary" size={["md"]}>
-            Round is active
-          </Button>
-          <Text fontSize={"md"} color={`primary.${bgGradient}`} fontWeight={600}>
-            You have not cast your vote yet.
-          </Text>
-        </VStack>
-      )
-    }
-    if (hasVoted)
-      return (
-        <VStack spacing={1} align="flex-start" flex={1}>
-          <Button as="a" href="#user-votes" colorScheme="green" size={["md"]}>
-            Voting concluded
-          </Button>
-          <Text fontSize={"md"} color="green" fontWeight={600}>
-            Your vote has been cast successfully!
-          </Text>
-        </VStack>
-      )
-    return (
-      <VStack spacing={1} align="flex-start" flex={1}>
-        <Button as="a" href="#user-votes" colorScheme="orange" size={["md"]}>
-          Voting concluded
-        </Button>
-        <Text fontSize={"md"} color={`orange.${bgGradient}`} fontWeight={600}>
-          You did not cast your vote.
-        </Text>
-      </VStack>
-    )
-  }, [hasVoted, isVotingConcluded, bgGradient])
   return (
-    <Card w="full" borderRadius={"3xl"}>
+    <Card w="full" borderRadius={"3xl"} variant={"baseWithBorder"}>
       <CardBody>
-        <Stack direction={["column", "row"]} justify="space-between" spacing={[12, 12, 40]}>
-          <VStack spacing={4} align="flex-start" flex={1}>
-            <Skeleton isLoaded={!isLoading}>
-              <HStack spacing={1} align={"center"}>
-                <Heading
-                  size={["sm", "md"]}
-                  color={isVotingConcluded ? `orange.${bgGradient}` : `primary.${bgGradient}`}>
-                  {remainingTime}
+        <Stack direction={["column", "row"]} justify="space-between" spacing={12} w="full">
+          <VStack spacing={4} align="flex-start" flex={2}>
+            <VStack spacing={2} align="flex-start">
+              <Skeleton isLoaded={!isLoading}>
+                <Text color="#6A6A6A" fontSize={["md"]} textTransform={"uppercase"} fontWeight={600}>
+                  {t("Round #{{round}}", {
+                    round: data?.roundId,
+                  })}
+                </Text>
+              </Skeleton>
+              <Skeleton isLoaded={!isLoading}>
+                <Heading size={["lg", "xl"]} data-testid="round-title">
+                  {t("Allocations")}
                 </Heading>
-              </HStack>
-            </Skeleton>
-            <Skeleton isLoaded={!isLoading}>
-              <Heading size={["lg", "xl"]} data-testid="round-title">
-                Allocations | Round #{data?.roundId}
-              </Heading>
-            </Skeleton>
+              </Skeleton>
+              <AllocationStateBadge roundId={roundId} />
+            </VStack>
+
             <Skeleton isLoaded={!isLoading}>
               <Text color="gray.500" fontSize={["sm", "md"]}>
                 {
@@ -123,13 +94,69 @@ export const AllocationRoundDetails = ({ roundId }: Props) => {
                 }
               </Text>
             </Skeleton>
-            {!!account && (
-              <Skeleton isLoaded={!hasVotedLoading} mt={2}>
-                {renderVoteStatusMessage}
-              </Skeleton>
-            )}
+            <Divider color={"#D5D5D5"} />
+            <Stack
+              direction={["column", "column", "row"]}
+              w="full"
+              justify={["flex-start", "flex-start", "space-between"]}
+              spacing={8}>
+              <Stack
+                direction={["column", "column", "row"]}
+                spacing={[4, 4, 12]}
+                align={["flex-start", "flex-start", "center"]}>
+                <Box>
+                  <Text color="#6A6A6A" fontSize={["lg", "lg", "md"]} fontWeight={400}>
+                    {t("Finishes in")}
+                  </Text>
+                  <Skeleton isLoaded={!isLoading}>
+                    <HStack spacing={2}>
+                      <Icon as={FaClock} boxSize={4} color={"#252525"} />
+                      <Text fontSize={["lg", "lg", "md"]} color={"#252525"} fontWeight={400}>
+                        {remainingTime}
+                      </Text>
+                    </HStack>
+                  </Skeleton>
+                </Box>
+                <Box>
+                  <Text color="#6A6A6A" fontSize={["lg", "lg", "md"]} fontWeight={400}>
+                    {t("Participating")}
+                  </Text>
+                  <Skeleton isLoaded={!roundAppsLoading}>
+                    <HStack spacing={2}>
+                      <Icon as={PiSquaresFourFill} boxSize={4} color={"#252525"} />
+                      <Text fontSize={["lg", "lg", "md"]} color={"#252525"} fontWeight={400}>
+                        {t("{{apps}} apps", { apps: roundApps?.length ?? 0 })}
+                      </Text>
+                    </HStack>
+                  </Skeleton>
+                </Box>
+                <Box>
+                  <Text color="#6A6A6A" fontSize={["lg", "lg", "md"]} fontWeight={400}>
+                    {t("Your vote")}
+                  </Text>
+                  <Skeleton isLoaded={!hasVotedLoading && !userVotesLoading}>
+                    <HStack spacing={2}>
+                      <Icon as={hasVoted ? FaVoteYea : MdHowToVote} boxSize={4} color={"#252525"} />
+                      <Text fontSize={["lg", "lg", "md"]} color={"#252525"} fontWeight={400}>
+                        {hasVoted ? getCompactFormatter(2).format(totalVotesCast) : "You have not voted"}
+                      </Text>
+                    </HStack>
+                  </Skeleton>
+                </Box>
+              </Stack>
+              <Button
+                variant={"primaryAction"}
+                as="a"
+                href="#user-votes"
+                size={"lg"}
+                colorScheme={"primary"}
+                w={["full", "auto"]}
+                leftIcon={<Icon as={MdHowToVote} boxSize={4} />}>
+                {t("Cast your vote")}
+              </Button>
+            </Stack>
           </VStack>
-          <VStack flex={0.8}>
+          <VStack flex={1}>
             <VStack
               color={"white"}
               bgColor={`primary.${bgGradient}`}

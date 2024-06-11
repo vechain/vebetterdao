@@ -1,4 +1,9 @@
 {
+  "{{apps}} apps": "{{apps}} apps",
+  "Allocations": "Allocations",
+  "Finishes in": "Finishes in",
+  "Participating": "Participating",
+  "Your vote": "Your vote",
   " will be determined by the amount of VOT3 you had at the time of the snapshot.": " will be determined by the amount of VOT3 you had at the time of the snapshot.",
   "Add another transaction": "Add another transaction",
   "Starts on": "Starts on",
