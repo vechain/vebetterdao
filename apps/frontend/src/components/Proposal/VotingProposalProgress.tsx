@@ -1,32 +1,27 @@
 import React from "react"
 import { useProposalDepositEvent } from "@/api/contracts/governance/hooks/useProposalDepositEvent"
 import { useIsDepositReached } from "@/api/contracts/governance/hooks/useIsDepositReached"
-import { useProposalCreatedEvent } from "@/api"
-import { Box, Flex, HStack, Text } from "@chakra-ui/react"
+import { useProposalCreatedEvent, useProposalQuorum, useProposalSnapshot, useProposalVotes } from "@/api"
+import { Box, Card, CardBody, Flex, HStack, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { UilBan, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
-
-type ProposalVotesProps = {
-  abstainVotes: string
-  forVotes: string
-  againstVotes: string
-}
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
 interface VotingProposalProgressProps {
   proposalId: string
-  proposalVotes: ProposalVotesProps
-  quorum?: {
-    original: string
-    scaled: string
-    formatted: string
-  }
 }
 
-const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposalId, proposalVotes, quorum }) => {
+const compactFormatter = getCompactFormatter()
+
+const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposalId }) => {
+  const { data: proposalSnapshotBlock, isLoading: snapshotBlockloading } = useProposalSnapshot(proposalId)
+  const { data: quorum, isLoading: quorumLoading } = useProposalQuorum(proposalSnapshotBlock, true)
   const proposalDepositEvent = useProposalDepositEvent(proposalId)
   const isDepositReached = useIsDepositReached(proposalId)
   const proposalCreatedEvent = useProposalCreatedEvent(proposalId)
+  const { data: proposalVotes, isLoading: proposalVotesLoading } = useProposalVotes(proposalId)
+
   const depositThreshold = Number(ethers.formatEther(BigInt(proposalCreatedEvent.data?.depositThreshold || 0)))
   const communityDeposits = proposalDepositEvent.communityDeposits
   const communityDepositPercentage = communityDeposits / depositThreshold
@@ -43,7 +38,7 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
   const getProposalData = () => {
     if (isDepositReached) {
       return (
-        <>
+        <VStack spacing={2} align="flex-start">
           <Text fontSize="md" fontWeight="bold">
             {totalVotes === 0 ? t("Waiting for votes") : t("Proposal is being")}
             <Text as="span" color="green.500">
@@ -76,30 +71,45 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
             />
           </Box>
 
-          <Flex mt={2}>
+          <HStack spacing={4} mt={2} w="full">
             <HStack spacing={2}>
               <UilThumbsUp width={18} height={18} color="#38BF66" />
-              <Text fontSize="sm" fontWeight="700" color="#38BF66">
-                {forPercentage}%
-              </Text>
+              <Skeleton isLoaded={!proposalVotesLoading}>
+                <Text fontSize="sm" fontWeight="700" color="#38BF66">
+                  {forPercentage}%
+                </Text>
+              </Skeleton>
               <UilThumbsDown width={18} height={18} color="#D23F63" />
-              <Text fontSize="sm" color="#D23F63" fontWeight="700">
-                {againstPercentage}%
-              </Text>
+              <Skeleton isLoaded={!proposalVotesLoading}>
+                <Text fontSize="sm" color="#D23F63" fontWeight="700">
+                  {againstPercentage}%
+                </Text>
+              </Skeleton>
               <UilBan width={18} height={18} color="#B59525" />
-              <Text fontSize="sm" color="#B59525" fontWeight="700">
-                {abstainPercentage}%
-              </Text>
+              <Skeleton isLoaded={!proposalVotesLoading}>
+                <Text fontSize="sm" color="#B59525" fontWeight="700">
+                  {abstainPercentage}%
+                </Text>
+              </Skeleton>
             </HStack>
-          </Flex>
-          <Text fontSize="xs" mt={2}>
-            {quorum?.original} {t("Quorum needed")} | {totalVotes} {t("Votes casted")}
-          </Text>
-        </>
+          </HStack>
+          <HStack spacing={1}>
+            <Skeleton isLoaded={!quorumLoading && !proposalVotesLoading}>
+              <Text fontSize="xs" mt={2} color="#6A6A6A">
+                {compactFormatter.format(Number(quorum?.scaled))} {t("Quorum needed")} |{" "}
+              </Text>
+            </Skeleton>
+            <Skeleton isLoaded={!proposalVotesLoading}>
+              <Text fontSize="xs" mt={2} color="#6A6A6A">
+                {compactFormatter.format(totalVotes)} {t("Votes casted")}
+              </Text>
+            </Skeleton>
+          </HStack>
+        </VStack>
       )
     } else {
       return (
-        <>
+        <VStack spacing={2} align="flex-start">
           <Flex justifyContent={"space-between"}>
             <Text fontSize={"sm"} fontWeight={600}>
               {t("Looking for support")}
@@ -130,15 +140,15 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
           <Text fontSize="xs" color={"#6A6A6A"} mt={2}>
             {t("by")} {supportingUserCount} {t("users")}
           </Text>
-        </>
+        </VStack>
       )
     }
   }
 
   return (
-    <Box w="400px" border="1px solid #D5D5D5" borderRadius="12px" p="16px" bg="#F8F8F8">
-      {getProposalData()}
-    </Box>
+    <Card variant="filledWithBorder" w="full">
+      <CardBody>{getProposalData()}</CardBody>
+    </Card>
   )
 }
 

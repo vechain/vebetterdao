@@ -24,6 +24,7 @@ import {
   Skeleton,
   Spinner,
   Button,
+  GridItem,
 } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
@@ -73,10 +74,15 @@ export const ProposalsPageContent = () => {
       )
     }
     return (
-      <Grid w="full">
-        {activeProposals?.map(proposal => (
-          <ProposalInfoCard type={ProposalState.Active} proposal={proposal} key={proposal.proposalId} />
-        ))}
+      <Grid templateColumns={["repeat(1, 1fr)", "repeat(4, 1fr)"]} gap={6} w="full">
+        <GridItem colSpan={3}>
+          <VStack spacing={4} align="flex-start">
+            {activeProposals?.map(proposal => (
+              <ProposalInfoCard type={ProposalState.Active} proposal={proposal} key={proposal.proposalId} />
+            ))}
+          </VStack>
+        </GridItem>
+        <GridItem colSpan={1} />
       </Grid>
     )
   }, [activeProposals, activeProposalsError, activeProposalsLoading, t])
@@ -110,10 +116,15 @@ export const ProposalsPageContent = () => {
       )
     }
     return (
-      <Grid w="full">
-        {incomingProposals?.map(proposal => (
-          <ProposalInfoCard type={ProposalState.Pending} proposal={proposal} key={proposal.proposalId} />
-        ))}
+      <Grid templateColumns={["repeat(1, 1fr)", "repeat(4, 1fr)"]} gap={6} w="full">
+        <GridItem colSpan={3}>
+          <VStack spacing={4} align="flex-start">
+            {incomingProposals?.map(proposal => (
+              <ProposalInfoCard type={ProposalState.Pending} proposal={proposal} key={proposal.proposalId} />
+            ))}
+          </VStack>
+        </GridItem>
+        <GridItem colSpan={1} />
       </Grid>
     )
   }, [incomingProposals, incomingProposalsError, incomingProposalsLoading, t])
@@ -151,10 +162,15 @@ export const ProposalsPageContent = () => {
       )
     }
     return (
-      <Grid w="full">
-        {pastProposals?.map(proposal => (
-          <ProposalInfoCard type={ProposalState.Expired} proposal={proposal} key={proposal.proposalId} />
-        ))}
+      <Grid templateColumns={["repeat(1, 1fr)", "repeat(4, 1fr)"]} gap={6} w="full">
+        <GridItem colSpan={3}>
+          <VStack spacing={4} align="flex-start">
+            {pastProposals?.map(proposal => (
+              <ProposalInfoCard type={ProposalState.Expired} proposal={proposal} key={proposal.proposalId} />
+            ))}
+          </VStack>
+        </GridItem>
+        <GridItem colSpan={1} />
       </Grid>
     )
   }, [pastProposals, pastProposalsError, pastProposalsLoading, t])
