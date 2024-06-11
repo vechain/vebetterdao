@@ -120,6 +120,8 @@ contract Treasury is
   ) public initializer {
     TreasuryStorage storage $ = _getTreasuryStorage();
 
+    require(_b3tr != address(0), "Treasury: B3TR address cannot be zero");
+    require(_vot3 != address(0), "Treasury: VOT3 address cannot be zero");
     $.B3TR = _b3tr;
     $.VOT3 = _vot3;
 
@@ -134,6 +136,10 @@ contract Treasury is
     $.transferLimit[$.VOT3] = _transferLimitVOT3;
     $.transferLimit[VTHO] = _transferLimitVTHO;
 
+    require(_admin != address(0), "Treasury: admin address cannot be zero");
+    require(_timeLock != address(0), "Treasury: timeLock address cannot be zero");
+    require(_proxyAdmin != address(0), "Treasury: proxyAdmin address cannot be zero");
+    require(_pauser != address(0), "Treasury: pauser address cannot be zero");
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     _grantRole(GOVERNANCE_ROLE, _timeLock);
     _grantRole(UPGRADER_ROLE, _proxyAdmin);
