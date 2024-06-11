@@ -86,8 +86,6 @@ export const useCreateProposal = ({
       const clauses: EnhancedClause[] = []
       const parsedDepositAmount = ethers.parseEther(depositAmount).toString()
 
-      console.log("depositAmount", depositAmount)
-      console.log("parsedDepositAmount", parsedDepositAmount)
       if (!isZero(depositAmount)) {
         const approveClause: EnhancedClause = {
           to: getConfig().vot3ContractAddress,

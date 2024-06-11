@@ -86,7 +86,7 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
           {...inputProps}
         />
         <FormErrorMessage data-testid={`generated-function-to-call-${index}-error`}>
-          {error && error.message?.toString()}
+          {error?.message?.toString()}
         </FormErrorMessage>
       </FormControl>
     )
@@ -107,7 +107,7 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
           {...inputProps}
         />
         <FormErrorMessage data-testid={`generated-function-to-call-${index}-error`}>
-          {error && error.message?.toString()}
+          {error?.message?.toString()}
         </FormErrorMessage>
       </FormControl>
     )
@@ -128,7 +128,7 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
           {...inputProps}
         />
         <FormErrorMessage data-testid={`generated-function-to-call-${index}-error`}>
-          {error && error.message?.toString()}
+          {error?.message?.toString()}
         </FormErrorMessage>
       </FormControl>
     )
@@ -153,7 +153,7 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
           )}
         />
         <FormErrorMessage data-testid={`generated-function-to-call-${index}-error`}>
-          {error && error.message?.toString()}
+          {error?.message?.toString()}
         </FormErrorMessage>
       </FormControl>
     )
@@ -170,7 +170,7 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
         {...inputProps}
       />
       <FormErrorMessage data-testid={`generated-function-to-call-${index}-error`}>
-        {error && error.message?.toString()}
+        {error?.message?.toString()}
       </FormErrorMessage>
     </FormControl>
   )
