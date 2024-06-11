@@ -110,6 +110,10 @@ contract XAllocationVoting is
    * @param data The initialization data
    */
   function initialize(InitializationData memory data) public initializer {
+    require(address(data.vot3Token) != address(0), "XAllocationVoting: invalid VOT3 token address");
+    require(address(data.voterRewards) != address(0), "XAllocationVoting: invalid VoterRewards address");
+    require(address(data.emissions) != address(0), "XAllocationVoting: invalid Emissions address");
+    
     __XAllocationVotingGovernor_init("XAllocationVoting");
     __ExternalContracts_init(data.x2EarnAppsAddress, data.emissions, data.voterRewards);
     __VotingSettings_init(data.initialVotingPeriod);
@@ -123,9 +127,13 @@ contract XAllocationVoting is
     __UUPSUpgradeable_init();
 
     for (uint256 i = 0; i < data.admins.length; i++) {
+      require(data.admins[i] != address(0), "XAllocationVoting: invalid admin address");
       _grantRole(DEFAULT_ADMIN_ROLE, data.admins[i]);
     }
 
+    require(data.upgrader != address(0), "XAllocationVoting: invalid upgrader address");
+    require(data.timeLock != address(0), "XAllocationVoting: invalid timeLock address");
+    require(data.contractsAddressManager != address(0), "XAllocationVoting: invalid contractsAddressManager address");
     _grantRole(UPGRADER_ROLE, data.upgrader);
     _grantRole(GOVERNANCE_ROLE, data.timeLock);
     _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, data.contractsAddressManager);
