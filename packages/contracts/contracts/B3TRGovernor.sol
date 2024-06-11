@@ -466,7 +466,7 @@ contract B3TRGovernor is
    * @param account The address of the account
    * @return bool True if the account has voted, false otherwise
    */
-  function hasVoted(uint256 proposalId, address account) external view override returns (bool) {
+  function hasVoted(uint256 proposalId, address account) external view returns (bool) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return GovernorVotesLogic.hasVoted($, proposalId, account);
   }
@@ -577,7 +577,7 @@ contract B3TRGovernor is
    * @notice The voter rewards contract.
    * @return IVoterRewards The voter rewards contract
    */
-  function voterRewards() external view override returns (IVoterRewards) {
+  function voterRewards() external view returns (IVoterRewards) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return $.voterRewards;
   }
@@ -586,7 +586,7 @@ contract B3TRGovernor is
    * @notice The XAllocationVotingGovernor contract.
    * @return IXAllocationVotingGovernor The XAllocationVotingGovernor contract
    */
-  function xAllocationVoting() external view override returns (IXAllocationVotingGovernor) {
+  function xAllocationVoting() external view returns (IXAllocationVotingGovernor) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return $.xAllocationVoting;
   }
@@ -595,7 +595,7 @@ contract B3TRGovernor is
    * @notice See {B3TRGovernor-b3tr}.
    * @return IB3TR The B3TR contract
    */
-  function b3tr() external view override returns (IB3TR) {
+  function b3tr() external view returns (IB3TR) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return $.b3tr;
   }
