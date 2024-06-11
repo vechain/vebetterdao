@@ -33,9 +33,6 @@ import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 /// @title GovernorVotesLogic
 /// @notice Library for handling voting logic in the Governor contract.
 library GovernorVotesLogic {
-  using GovernorProposalLogic for GovernorStorageTypes.GovernorStorage;
-  using GovernorConfigurator for GovernorStorageTypes.GovernorStorage;
-
   /// @dev Thrown when a vote has already been cast by the voter.
   /// @param voter The address of the voter who already cast a vote.
   error GovernorAlreadyCastVote(address voter);

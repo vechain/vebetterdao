@@ -200,7 +200,7 @@ describe("Emissions", () => {
         forceDeploy: true,
       })
 
-      expect(await emissions.scalingFactor()).to.equal(10 ** 6)
+      expect(await emissions.SCALING_FACTOR()).to.equal(10 ** 6)
     })
 
     it("Should be able to change cycle duration", async () => {
@@ -243,20 +243,6 @@ describe("Emissions", () => {
       await expect(emissions.connect(otherAccount).setVote2EarnDecayPeriod(1000)).to.be.reverted // Not admin
 
       await expect(emissions.connect(owner).setVote2EarnDecayPeriod(0)).to.be.reverted // At least 1 block
-    })
-
-    it("Should be able to change scaling factor", async () => {
-      const { emissions, owner, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      await emissions.connect(owner).setScalingFactor(1000)
-
-      expect(await emissions.scalingFactor()).to.equal(1000)
-
-      await expect(emissions.connect(otherAccount).setScalingFactor(1000)).to.be.reverted // Not admin
-
-      await expect(emissions.connect(owner).setScalingFactor(0)).to.be.reverted // At least 1
     })
 
     it("Should be able to change x allocations voting governor", async () => {
