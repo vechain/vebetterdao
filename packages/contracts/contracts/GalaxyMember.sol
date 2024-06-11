@@ -166,17 +166,25 @@ contract GalaxyMember is
 
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
-    $.MAX_LEVEL = data.maxLevel;
     $._baseTokenURI = data.baseTokenURI;
 
     for (uint8 i = 0; i < data.b3trToUpgradeToLevel.length; i++) {
       $._b3trToUpgradeToLevel[i + 2] = data.b3trToUpgradeToLevel[i]; // First Level that requires B3TR is level 2
     }
 
+    require(data.b3trToUpgradeToLevel.length + 2 == data.maxLevel, "Galaxy Member: B3TR levels do not match max level");
+    $.MAX_LEVEL = data.maxLevel;
+
     $.b3tr = IB3TR(data.b3tr);
     $.treasury = data.treasury;
 
     $.isPublicMintingPaused = false;
+
+    require(data.admin != address(0), "Galaxy Member: Admin address cannot be the zero address");
+    require(data.upgrader != address(0), "Galaxy Member: Upgrader address cannot be the zero address");
+    require(data.pauser != address(0), "Galaxy Member: Pauser address cannot be the zero address");
+    require(data.minter != address(0), "Galaxy Member: Minter address cannot be the zero address");
+    require(data.contractsAddressManager != address(0), "Galaxy Member: Contracts Address Manager address cannot be the zero address");
 
     _grantRole(DEFAULT_ADMIN_ROLE, data.admin);
     _grantRole(UPGRADER_ROLE, data.upgrader);
