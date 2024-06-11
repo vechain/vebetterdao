@@ -21,7 +21,7 @@
 //                                   ##############
 //                                   #########
 
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
