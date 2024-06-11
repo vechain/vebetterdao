@@ -15,6 +15,7 @@ import { useProposalVoteDates } from "@/api/contracts/governance/hooks/usePropos
 import VotingProposalProgress from "@/components/Proposal/VotingProposalProgress"
 import VotingProposalInfo from "@/components/Proposal/VotingProposalInfo"
 import StatusBadge from "@/components/Proposal/StatusBadge"
+import { useTranslation } from "react-i18next"
 
 type Props = {
   proposal: ProposalCreatedEvent
@@ -29,6 +30,7 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposal, type }) => {
   const { data: proposalVotes } = useProposalVotes(proposalId)
   const { votingStartDate, votingEndDate } = useProposalVoteDates(proposalId)
 
+  const { t } = useTranslation()
   return (
     <Card maxW="840px" backgroundColor="#FFFFFF" variant={"baseWithBorder"} my={4} gap={2}>
       <CardHeader>
@@ -36,7 +38,7 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposal, type }) => {
           <StatusBadge type={type} />
           <Flex alignItems="right" gap={2}>
             <Text fontSize="16px" fontWeight="600" color="#6A6A6A">
-              ROUND #{roundIdVoteStart}
+              {t("ROUND")} #{roundIdVoteStart}
             </Text>
             <Text color="#979797" fontWeight="400">
               ({parseDate(votingStartDate)} - {parseDate(votingEndDate)})
@@ -49,7 +51,7 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposal, type }) => {
           {proposalMetadata.data?.title}
         </Text>
         <Flex alignItems="space-between">
-          <VotingProposalProgress proposalVotes={proposalVotes} quorum={quorum} proposalId={proposalId} />
+          <VotingProposalProgress proposalVotes={proposalVotes!} quorum={quorum} proposalId={proposalId} />
           <VotingProposalInfo
             votingStartDate={votingStartDate}
             votingEndDate={votingEndDate}

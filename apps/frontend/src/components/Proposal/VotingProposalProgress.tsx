@@ -5,6 +5,7 @@ import { useProposalCreatedEvent } from "@/api"
 import { Box, Flex, HStack, Text } from "@chakra-ui/react"
 import { UilBan, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { ethers } from "ethers"
+import { useTranslation } from "react-i18next"
 
 type ProposalVotesProps = {
   abstainVotes: string
@@ -14,7 +15,7 @@ type ProposalVotesProps = {
 
 interface VotingProposalProgressProps {
   proposalId: string
-  proposalVotes?: ProposalVotesProps
+  proposalVotes: ProposalVotesProps
   quorum?: {
     original: string
     scaled: string
@@ -23,7 +24,6 @@ interface VotingProposalProgressProps {
 }
 
 const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposalId, proposalVotes, quorum }) => {
-  if (!proposalVotes) return null
   const proposalDepositEvent = useProposalDepositEvent(proposalId)
   const isDepositReached = useIsDepositReached(proposalId)
   const proposalCreatedEvent = useProposalCreatedEvent(proposalId)
@@ -31,27 +31,28 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
   const communityDeposits = proposalDepositEvent.communityDeposits
   const communityDepositPercentage = communityDeposits / depositThreshold
   const supportingUserCount = proposalDepositEvent.supportingUserCount
-  console.log(communityDepositPercentage)
 
-  const { abstainVotes, forVotes, againstVotes } = proposalVotes
+  const { abstainVotes, forVotes, againstVotes } = proposalVotes ?? undefined
   const totalVotes = Number(abstainVotes) + Number(againstVotes) + Number(forVotes)
   const forPercentage = (Number(forVotes) / totalVotes) * 100 || 0
   const againstPercentage = (Number(againstVotes) / totalVotes) * 100 || 0
   const abstainPercentage = (Number(abstainVotes) / totalVotes) * 100 || 0
+
+  const { t } = useTranslation()
 
   const getProposalData = () => {
     if (isDepositReached) {
       return (
         <>
           <Text fontSize="md" fontWeight="bold">
-            {totalVotes === 0 ? "Waiting for votes.." : "Proposal is being "}
+            {totalVotes === 0 ? t("Waiting for votes") : t("Proposal is being")}
             <Text as="span" color="green.500">
               {totalVotes > 0 &&
                 (forPercentage > againstPercentage && forPercentage > abstainPercentage
-                  ? "approved"
+                  ? t("Approved")
                   : againstPercentage > forPercentage && againstPercentage > abstainPercentage
-                    ? "rejected"
-                    : "abstain")}
+                    ? t("Rejected")
+                    : t("Abstain"))}
             </Text>
           </Text>
           <Box position="relative" height="10px" width="100%" mt={2} bg="gray.200" borderRadius="md">
@@ -91,7 +92,7 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
             </HStack>
           </Flex>
           <Text fontSize="xs" mt={2}>
-            {quorum?.original} Quorum needed | {totalVotes} votes casted
+            {quorum?.original} {t("Quorum needed")} | {totalVotes} {t("Votes casted")}
           </Text>
         </>
       )
@@ -100,7 +101,7 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
         <>
           <Flex justifyContent={"space-between"}>
             <Text fontSize={"sm"} fontWeight={600}>
-              Looking for support
+              {t("Looking for support")}
             </Text>
             <Text fontSize={"sm"} fontWeight={600} color={"#004CFC"}>
               {communityDepositPercentage}%
@@ -126,7 +127,7 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
             </HStack>
           </Flex>
           <Text fontSize="xs" color={"#6A6A6A"} mt={2}>
-            by {supportingUserCount} users
+            {t("by")} {supportingUserCount} {t("users")}
           </Text>
         </>
       )
