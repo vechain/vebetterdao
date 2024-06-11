@@ -47,7 +47,6 @@ const fillGeneratedInput = async (index: number, inputType: string) => {
 }
 describe("NewProposalFunctionsDetails", async () => {
   beforeEach(() => {
-    vi.clearAllMocks()
     mockRouterPush.mockClear()
     spyOnUseProposalFormStore.mockClear()
   })
