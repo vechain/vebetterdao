@@ -32,11 +32,11 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
   const communityDepositPercentage = communityDeposits / depositThreshold
   const supportingUserCount = proposalDepositEvent.supportingUserCount
 
-  const { abstainVotes, forVotes, againstVotes } = proposalVotes ?? undefined
-  const totalVotes = Number(abstainVotes) + Number(againstVotes) + Number(forVotes)
-  const forPercentage = (Number(forVotes) / totalVotes) * 100 || 0
-  const againstPercentage = (Number(againstVotes) / totalVotes) * 100 || 0
-  const abstainPercentage = (Number(abstainVotes) / totalVotes) * 100 || 0
+  const totalVotes =
+    Number(proposalVotes.abstainVotes) + Number(proposalVotes.againstVotes) + Number(proposalVotes.forVotes)
+  const forPercentage = (Number(proposalVotes.forVotes) / totalVotes) * 100 || 0
+  const againstPercentage = (Number(proposalVotes.againstVotes) / totalVotes) * 100 || 0
+  const abstainPercentage = (Number(proposalVotes.abstainVotes) / totalVotes) * 100 || 0
 
   const { t } = useTranslation()
 

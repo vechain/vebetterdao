@@ -42,7 +42,7 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposal, type }) => {
   }, [router, proposal])
 
   return (
-    <Card maxW="840px" backgroundColor="#FFFFFF" variant={"baseWithBorder"} my={4} gap={2}>
+    <Card maxW={["full", "full", "80%"]} backgroundColor="#FFFFFF" variant={"baseWithBorder"} my={4} gap={2}>
       <CardHeader>
         <Flex justifyContent="space-between" alignItems="center">
           <StatusBadge type={type} />
