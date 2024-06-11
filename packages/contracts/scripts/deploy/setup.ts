@@ -20,28 +20,32 @@ export const setupLocalEnvironment = async (b3tr: B3TR, xAllocationVoting: XAllo
       name: "Vyvo",
     },
     {
-      address: accounts[7].address,
+      address: accounts[6].address,
       name: "Mugshot",
     },
     {
-      address: accounts[9].address,
+      address: accounts[6].address,
       name: "Cleanify",
     },
     {
-      address: accounts[10].address,
+      address: accounts[6].address,
       name: "Non Fungible Book Club (NFBC)",
     },
     {
-      address: accounts[11].address,
+      address: accounts[6].address,
       name: "Green Ambassador Challenge",
     },
     {
-      address: accounts[12].address,
+      address: accounts[6].address,
       name: "GreenCart",
     },
     {
-      address: accounts[13].address,
+      address: accounts[6].address,
       name: "EVearn",
+    },
+    {
+      address: accounts[6].address,
+      name: "Oily",
     },
   ]
 
