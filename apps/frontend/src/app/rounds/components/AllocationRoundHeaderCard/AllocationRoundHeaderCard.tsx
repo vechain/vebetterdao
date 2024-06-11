@@ -1,4 +1,11 @@
-import { useAllocationsRound, useHasVotedInRound, useRoundXApps, useUserVotesInRound } from "@/api"
+import {
+  RoundState,
+  useAllocationsRound,
+  useAllocationsRoundState,
+  useHasVotedInRound,
+  useRoundXApps,
+  useUserVotesInRound,
+} from "@/api"
 import { AllocationStateBadge } from "@/components"
 import {
   Box,
@@ -16,7 +23,7 @@ import {
 } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { FaClock } from "react-icons/fa6"
 import { MdHowToVote } from "react-icons/md"
 import { PiSquaresFourFill } from "react-icons/pi"
@@ -44,9 +51,16 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
 
   const { data: roundApps, isLoading: roundAppsLoading } = useRoundXApps(roundId)
 
+  const { data: roundState, isLoading: roundStateLoading } = useAllocationsRoundState(roundId)
+
+  const isFinished = useMemo(() => {
+    return roundState !== 0
+  }, [roundState])
   const remainingTime = useMemo(() => {
+    // remove prefix/suffix
+    if (isFinished) return `${data?.voteEndTimestamp?.fromNow()}`
     return `${data?.voteEndTimestamp?.fromNow(true)}`
-  }, [data?.voteEndTimestamp])
+  }, [data?.voteEndTimestamp, isFinished])
 
   return (
     <Card w="full" borderRadius={"3xl"} variant={"baseWithBorder"}>
@@ -88,7 +102,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                 align={["flex-start", "flex-start", "center"]}>
                 <Box>
                   <Text color="#6A6A6A" fontSize={["lg", "lg", "md"]} fontWeight={400}>
-                    {t("Finishes in")}
+                    {isFinished ? t("Finished") : t("Finishes in")}
                   </Text>
                   <Skeleton isLoaded={!isLoading}>
                     <HStack spacing={2}>
