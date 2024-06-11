@@ -3,11 +3,11 @@ import FormProposalLayout from "../../layout"
 import * as store from "@/store"
 import * as router from "next/navigation"
 import * as dappKit from "@vechain/dapp-kit-react"
-import { fireEvent, render, waitFor } from "../../../../../../../test"
+import { fireEvent, render, waitFor, screen } from "../../../../../../../test"
 import { vi } from "vitest"
 import { transferAction } from "../../../../../../../__mocks__/Actions"
 import { address } from "../../../../../../../__mocks__"
-import { screen } from "@testing-library/react"
+
 const spyOnUseProposalFormStore = vi.spyOn(store, "useProposalFormStore")
 
 /**
@@ -46,11 +46,6 @@ const fillGeneratedInput = async (index: number, inputType: string) => {
   expect(input).toHaveValue("0x123")
 }
 describe("NewProposalFunctionsDetails", async () => {
-  beforeEach(() => {
-    mockRouterPush.mockClear()
-    spyOnUseProposalFormStore.mockClear()
-  })
-
   it("redirects to /proposals if no account connected", async () => {
     //@ts-ignore
     vi.spyOn(dappKit, "useWallet").mockReturnValueOnce({
