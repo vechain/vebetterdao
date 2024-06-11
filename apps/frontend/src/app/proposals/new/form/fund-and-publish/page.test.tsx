@@ -177,7 +177,7 @@ describe("NewProposalFundAndPublish", async () => {
       </FormProposalLayout>,
     )
 
-    await screen.findByText("Support and publish")
+    expect(await screen.findAllByText("Support and publish")).toHaveLength(2)
     await screen.findByText("Would you like to contribute to your proposal with some tokens?")
     await screen.findByText("You can claim back your tokens once the voting period is over.")
 
@@ -225,7 +225,7 @@ describe("NewProposalFundAndPublish", async () => {
 
     x.debug()
 
-    await screen.findByText("Support and publish")
+    expect(await screen.findAllByText("Support and publish")).toHaveLength(2)
     await screen.findByText("Would you like to contribute to your proposal with some tokens?")
     await screen.findByText("You can claim back your tokens once the voting period is over.")
 
