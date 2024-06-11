@@ -114,6 +114,9 @@ contract XAllocationPool is
     $.treasury = ITreasury(_treasury);
     $.x2EarnApps = IX2EarnApps(_x2EarnApps);
 
+    require(_admin != address(0), "XAllocationPool: new admin is the zero address");
+    require(upgrader != address(0), "XAllocationPool: new upgrader is the zero address");
+    require(contractsAddressManager != address(0), "XAllocationPool: new contractsAddressManager is the zero address");
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     _grantRole(UPGRADER_ROLE, upgrader);
     _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, contractsAddressManager);
