@@ -39,6 +39,10 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
   /// @notice Role for addresses that can upgrade the contract
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+  /// @notice The role that can set external contracts addresses
+  bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
+  /// @notice Role for addresses that can update the decay settings
+  bytes32 public constant DECAY_SETTINGS_MANAGER_ROLE = keccak256("DECAY_SETTINGS_MANAGER_ROLE");
 
   // Scaling factor to handle decimal places
   uint256 public constant SCALING_FACTOR = 1e6;
@@ -55,6 +59,8 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
     address minter;
     address admin;
     address upgrader;
+    address contractsAddressManager;
+    address decaySettingsManager;
     address b3trAddress;
     address[4] destinations;
     uint256 migrationAmount;
@@ -195,6 +201,8 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
     _grantRole(DEFAULT_ADMIN_ROLE, data.admin);
     _grantRole(MINTER_ROLE, data.minter);
     _grantRole(UPGRADER_ROLE, data.upgrader);
+    _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, data.contractsAddressManager);
+    _grantRole(DECAY_SETTINGS_MANAGER_ROLE, data.decaySettingsManager);
   }
 
   /// @notice Authorized upgrading of the contract implementation
@@ -215,7 +223,11 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
 
     // Mint initial allocations
     $.emissions[$.nextCycle] = Emission($.initialXAppAllocation, initialVote2EarnAllocation, initialTreasuryAllocation);
-    $.totalEmissions += $.initialXAppAllocation + initialVote2EarnAllocation + initialTreasuryAllocation + $._migrationAmount;
+    $.totalEmissions +=
+      $.initialXAppAllocation +
+      initialVote2EarnAllocation +
+      initialTreasuryAllocation +
+      $._migrationAmount;
     $.b3tr.mint($._xAllocations, $.initialXAppAllocation);
     $.b3tr.mint($._vote2Earn, initialVote2EarnAllocation);
     $.b3tr.mint($._treasury, initialTreasuryAllocation);
@@ -546,7 +558,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   /// @notice Sets the address for XAllocations
   /// @dev Requires admin privileges and a non-zero address
   /// @param xAllocationAddress The new address to set for XAllocations
-  function setXallocationsAddress(address xAllocationAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setXallocationsAddress(address xAllocationAddress) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(xAllocationAddress != address(0), "Emissions: xAllocationAddress cannot be the zero address");
     EmissionsStorage storage $ = _getEmissionsStorage();
     $._xAllocations = xAllocationAddress;
@@ -555,7 +567,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   /// @notice Sets the address for Vote2Earn allocations
   /// @dev Requires admin privileges and a non-zero address
   /// @param vote2EarnAddress The new address to set for Vote2Earn
-  function setVote2EarnAddress(address vote2EarnAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setVote2EarnAddress(address vote2EarnAddress) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(vote2EarnAddress != address(0), "Emissions: vote2EarnAddress cannot be the zero address");
     EmissionsStorage storage $ = _getEmissionsStorage();
     $._vote2Earn = vote2EarnAddress;
@@ -564,7 +576,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   /// @notice Sets the address for the Treasury
   /// @dev Requires admin privileges and a non-zero address
   /// @param treasuryAddress The new address to set for the Treasury
-  function setTreasuryAddress(address treasuryAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setTreasuryAddress(address treasuryAddress) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(treasuryAddress != address(0), "Emissions: treasuryAddress cannot be the zero address");
     EmissionsStorage storage $ = _getEmissionsStorage();
     $._treasury = treasuryAddress;
@@ -573,7 +585,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   /// @notice Sets the duration of each emission cycle
   /// @dev Requires admin privileges and a duration greater than 0
   /// @param _cycleDuration The duration of the cycle in blocks
-  function setCycleDuration(uint256 _cycleDuration) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setCycleDuration(uint256 _cycleDuration) public onlyRole(DECAY_SETTINGS_MANAGER_ROLE) {
     require(_cycleDuration > 0, "Emissions: Cycle duration must be greater than 0");
     EmissionsStorage storage $ = _getEmissionsStorage();
     $.cycleDuration = _cycleDuration;
@@ -582,7 +594,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   /// @notice Sets the decay rate for XAllocations
   /// @dev Requires admin privileges
   /// @param _decay Decay rate as a percentage
-  function setXAllocationsDecay(uint256 _decay) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setXAllocationsDecay(uint256 _decay) public onlyRole(DECAY_SETTINGS_MANAGER_ROLE) {
     require(_decay <= 100, "Emissions: xAllocations decay must be between 0 and 100");
     EmissionsStorage storage $ = _getEmissionsStorage();
     $.xAllocationsDecay = _decay;
@@ -591,7 +603,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   /// @notice Sets the decay rate for Vote2Earn allocations
   /// @dev Requires admin privileges
   /// @param _decay Decay rate as a percentage
-  function setVote2EarnDecay(uint256 _decay) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setVote2EarnDecay(uint256 _decay) public onlyRole(DECAY_SETTINGS_MANAGER_ROLE) {
     require(_decay <= 100, "Emissions: vote2Earn decay must be between 0 and 100");
     EmissionsStorage storage $ = _getEmissionsStorage();
     $.vote2EarnDecay = _decay;
@@ -600,7 +612,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   /// @notice Sets the number of cycles after which the XAllocations decay rate is applied
   /// @dev Requires admin privileges and a period greater than 0
   /// @param _period Number of cycles
-  function setXAllocationsDecayPeriod(uint256 _period) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setXAllocationsDecayPeriod(uint256 _period) public onlyRole(DECAY_SETTINGS_MANAGER_ROLE) {
     require(_period > 0, "Emissions: xAllocations decay period must be greater than 0");
     EmissionsStorage storage $ = _getEmissionsStorage();
     $.xAllocationsDecayPeriod = _period;
@@ -609,7 +621,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   /// @notice Sets the number of cycles after which the Vote2Earn decay rate is applied
   /// @dev Requires admin privileges and a period greater than 0
   /// @param _period Number of cycles
-  function setVote2EarnDecayPeriod(uint256 _period) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setVote2EarnDecayPeriod(uint256 _period) public onlyRole(DECAY_SETTINGS_MANAGER_ROLE) {
     require(_period > 0, "Emissions: vote2Earn decay period must be greater than 0");
     EmissionsStorage storage $ = _getEmissionsStorage();
     $.vote2EarnDecayPeriod = _period;
@@ -619,7 +631,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   /// @dev The treasury percentage is a value between 0 and 10000, scaled by 100 to allow fractional percentages (87.5% for example)
   /// @dev Requires admin privileges
   /// @param _percentage Treasury percentage (scaled by 100)
-  function setTreasuryPercentage(uint256 _percentage) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setTreasuryPercentage(uint256 _percentage) public onlyRole(DECAY_SETTINGS_MANAGER_ROLE) {
     require(_percentage <= 10000, "Emissions: Treasury percentage must be between 0 and 10000");
     EmissionsStorage storage $ = _getEmissionsStorage();
     $.treasuryPercentage = _percentage;
@@ -628,7 +640,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   /// @notice Sets the maximum decay rate for Vote2Earn allocations
   /// @dev Requires admin privileges and a decay rate between 0 and 100
   /// @param _maxVote2EarnDecay Maximum decay rate as a percentage
-  function setMaxVote2EarnDecay(uint256 _maxVote2EarnDecay) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setMaxVote2EarnDecay(uint256 _maxVote2EarnDecay) public onlyRole(DECAY_SETTINGS_MANAGER_ROLE) {
     require(_maxVote2EarnDecay <= 100, "Emissions: Max vote2Earn decay must be between 0 and 100");
     EmissionsStorage storage $ = _getEmissionsStorage();
     $.maxVote2EarnDecay = _maxVote2EarnDecay;
@@ -638,7 +650,9 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   /// @dev Requires that the voting period of the governor is less than the cycle duration
   /// @dev Requires admin privileges and a non-zero address
   /// @param _xAllocationsGovernor The new XAllocations Governor address
-  function setXAllocationsGovernorAddress(address _xAllocationsGovernor) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setXAllocationsGovernorAddress(
+    address _xAllocationsGovernor
+  ) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(_xAllocationsGovernor != address(0), "Emissions: _xAllocationsGovernor cannot be the zero address");
     require(
       IXAllocationVotingGovernor(_xAllocationsGovernor).votingPeriod() < cycleDuration(),
