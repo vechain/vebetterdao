@@ -190,7 +190,7 @@ contract XAllocationPool is
    * @param roundId The round ID from XAllocationVoting contract for which to claim the rewards.
    * @param appId The ID of the app from X2EarnApps contract for which to claim the rewards.
    */
-  function claim(uint256 roundId, bytes32 appId) public nonReentrant {
+  function claim(uint256 roundId, bytes32 appId) external nonReentrant {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
 
     require(!$.claimedRewards[appId][roundId], "XAllocationPool: rewards already claimed for this app and round");
@@ -409,7 +409,7 @@ contract XAllocationPool is
    * @param roundId The round ID for which to check if the app has claimed the rewards.
    * @param appId The ID of the app.
    */
-  function claimed(uint256 roundId, bytes32 appId) public view returns (bool) {
+  function claimed(uint256 roundId, bytes32 appId) external view returns (bool) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     return $.claimedRewards[appId][roundId];
   }
