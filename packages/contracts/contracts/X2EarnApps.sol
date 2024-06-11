@@ -83,6 +83,8 @@ contract X2EarnApps is
       _grantRole(DEFAULT_ADMIN_ROLE, _admins[i]);
     }
 
+    require(_upgrader != address(0), "X2EarnApps: invalid upgrader address");
+    require(_governor != address(0), "X2EarnApps: invalid governor address");
     _grantRole(UPGRADER_ROLE, _upgrader);
     _grantRole(GOVERNANCE_ROLE, _governor);
   }
