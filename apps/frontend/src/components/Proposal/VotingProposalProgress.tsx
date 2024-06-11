@@ -47,12 +47,13 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
           <Text fontSize="md" fontWeight="bold">
             {totalVotes === 0 ? t("Waiting for votes") : t("Proposal is being")}
             <Text as="span" color="green.500">
+              {" "}
               {totalVotes > 0 &&
                 (forPercentage > againstPercentage && forPercentage > abstainPercentage
-                  ? t("Approved")
+                  ? t("Approved").toLowerCase()
                   : againstPercentage > forPercentage && againstPercentage > abstainPercentage
-                    ? t("Rejected")
-                    : t("Abstain"))}
+                    ? t("Rejected").toLowerCase()
+                    : t("Abstain").toLowerCase())}
             </Text>
           </Text>
           <Box position="relative" height="10px" width="100%" mt={2} bg="gray.200" borderRadius="md">

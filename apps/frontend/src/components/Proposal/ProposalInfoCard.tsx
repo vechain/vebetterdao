@@ -1,5 +1,5 @@
 import { Text, Flex, Button, Card, CardHeader, CardBody } from "@chakra-ui/react"
-import React from "react"
+import React, { useCallback } from "react"
 import { UilAngleRight } from "@iconscout/react-unicons"
 import {
   ProposalCreatedEvent,
@@ -16,6 +16,8 @@ import VotingProposalProgress from "@/components/Proposal/VotingProposalProgress
 import VotingProposalInfo from "@/components/Proposal/VotingProposalInfo"
 import StatusBadge from "@/components/Proposal/StatusBadge"
 import { useTranslation } from "react-i18next"
+import { useRouter } from "next/navigation"
+import { useProposalVoteEvent } from "@/api/contracts/governance/hooks/useProposalVoteEvent"
 
 type Props = {
   proposal: ProposalCreatedEvent
@@ -29,8 +31,16 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposal, type }) => {
   const { data: quorum } = useProposalQuorum(proposalSnapshotBlock)
   const { data: proposalVotes } = useProposalVotes(proposalId)
   const { votingStartDate, votingEndDate } = useProposalVoteDates(proposalId)
+  const { userVote } = useProposalVoteEvent(proposalId)
+
+  const router = useRouter()
 
   const { t } = useTranslation()
+
+  const goToProposal = useCallback(() => {
+    router.push(`/proposals/${proposalId}`)
+  }, [router, proposal])
+
   return (
     <Card maxW="840px" backgroundColor="#FFFFFF" variant={"baseWithBorder"} my={4} gap={2}>
       <CardHeader>
@@ -55,10 +65,11 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposal, type }) => {
           <VotingProposalInfo
             votingStartDate={votingStartDate}
             votingEndDate={votingEndDate}
-            proposalId={proposal.proposalId}
+            proposalId={proposalId}
+            userVote={userVote}
           />
           <Flex flex="auto" alignItems="flex-end" justifyContent="right">
-            <Button borderRadius="56px" width={50} height={50}>
+            <Button onClick={goToProposal} borderRadius="56px" width={50} height={50}>
               <UilAngleRight fontSize="md" width={24} height={24} color="#F29B32" />
             </Button>
           </Flex>
