@@ -430,7 +430,7 @@ contract GalaxyMember is
 
   /// @notice Gets the highest level owned by the owner
   /// @param owner The address of the owner
-  function getHighestLevel(address owner) external view returns (uint256) {
+  function getHighestLevel(address owner) public view returns (uint256) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $._selectedLevelCheckpoints[owner].latest();
   }
@@ -506,7 +506,7 @@ contract GalaxyMember is
   }
 
   /// @dev Clock used for flagging checkpoints. Can be overridden to implement timestamp based checkpoints (and voting), in which case {CLOCK_MODE} should be overridden as well to match.
-  function clock() external view virtual returns (uint48) {
+  function clock() public view virtual returns (uint48) {
     return Time.blockNumber();
   }
 
