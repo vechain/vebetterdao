@@ -27,9 +27,8 @@ import { FaClock } from "react-icons/fa6"
 import { MdHowToVote } from "react-icons/md"
 import { PiSquaresFourFill } from "react-icons/pi"
 import { ethers } from "ethers"
-import { FaVoteYea } from "react-icons/fa"
 import { useTranslation } from "react-i18next"
-import { AllocationRoundDistributedChart } from "./AllocationRoundDistributedChart"
+import { AllocationRoundBreakdownChart } from "./AllocationRoundBreakdownChart"
 
 const compactFormatter = getCompactFormatter(2)
 type Props = {
@@ -154,7 +153,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
             </Stack>
           </VStack>
           <VStack flex={1}>
-            <AllocationRoundDistributedChart roundId={roundId} />
+            <AllocationRoundBreakdownChart roundId={roundId} />
           </VStack>
         </Stack>
       </CardBody>
