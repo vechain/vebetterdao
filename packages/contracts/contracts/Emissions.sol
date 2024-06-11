@@ -155,6 +155,14 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
       "Emissions: Max vote2Earn decay must be between 0 and 100"
     );
 
+    require(data.destinations[0] != address(0), "Emissions: XAllocations destination cannot be zero address");
+    require(data.destinations[1] != address(0), "Emissions: Vote2Earn destination cannot be zero address");
+    require(data.destinations[2] != address(0), "Emissions: Treasury destination cannot be zero address");
+
+    require(data.admin != address(0), "Emissions: Admin address cannot be zero address");
+    require(data.minter != address(0), "Emissions: Minter address cannot be zero address");
+    require(data.upgrader != address(0), "Emissions: Upgrader address cannot be zero address");
+
     __AccessControl_init();
     __ReentrancyGuard_init();
     __UUPSUpgradeable_init();
