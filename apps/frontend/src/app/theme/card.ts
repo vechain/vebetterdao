@@ -19,7 +19,18 @@ const variants = {
   filled: (props: StyleFunctionProps) =>
     definePartsStyle({
       container: {
+        bg: props.colorMode === "dark" ? "#2D2D2F" : "#F8F8F8",
+      },
+      body: {
+        padding: "24px",
+      },
+    }),
+  filledWithBorder: (props: StyleFunctionProps) =>
+    definePartsStyle({
+      container: {
         bg: props.colorMode === "dark" ? "#2D2D2F" : "#FAFAFA",
+        borderWidth: "1px",
+        borderColor: props.colorMode === "dark" ? "#D5D5D5" : "#D5D5D5",
       },
       body: {
         padding: "24px",

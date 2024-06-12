@@ -80,15 +80,15 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
   }, [votes, roundQuorum])
 
   const isQuorumFailed = useMemo(() => {
-    return roundInfo?.state === "1"
+    return roundInfo?.state === 1
   }, [roundInfo?.state])
 
   const isQuorumReached = useMemo(() => {
-    return roundInfo?.state === "2" || Number(votes) >= Number(roundQuorum)
+    return roundInfo?.state === 2 || Number(votes) >= Number(roundQuorum)
   }, [roundInfo?.state, votes, roundQuorum])
 
   const isRoundActive = useMemo(() => {
-    return roundInfo?.state === "0"
+    return roundInfo?.state === 0
   }, [roundInfo?.state])
 
   const quorumProgressColor = useMemo(() => {
@@ -126,7 +126,9 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
             </Text>
             <Skeleton isLoaded={!votesLoading}>
               <HStack spacing={2}>
-                <Heading size="lg" data-testid="total-votes" >{compactFormatter.format(Number(votes))}</Heading>
+                <Heading size="lg" data-testid="total-votes">
+                  {compactFormatter.format(Number(votes))}
+                </Heading>
                 <VOT3Icon boxSize={6} />
               </HStack>
             </Skeleton>

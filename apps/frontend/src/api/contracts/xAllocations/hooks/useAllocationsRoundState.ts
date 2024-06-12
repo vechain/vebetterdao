@@ -3,13 +3,16 @@ import { useConnex } from "@vechain/dapp-kit-react"
 
 import { getConfig } from "@repo/config"
 import { XAllocationVotingGovernorJson } from "@repo/contracts"
+import { XAllocationVoting__factory } from "@repo/contracts/typechain-types"
+
+const xAllocationInterface = XAllocationVoting__factory.createInterface()
 
 const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
 
 export const RoundState = {
-  "0": "Active",
-  "1": "Quorum failed",
-  "2": "Succeeded",
+  0: "Active",
+  1: "Failed",
+  2: "Succeeded",
 }
 /**
  *
@@ -23,13 +26,12 @@ export const getAllocationsRoundState = async (
   roundId?: string,
 ): Promise<keyof typeof RoundState> => {
   if (!roundId) return Promise.reject(new Error("roundId is required"))
-  const allocationRoundStateAbi = XAllocationVotingGovernorJson.abi.find(abi => abi.name === "state")
-  if (!allocationRoundStateAbi) throw new Error("state function not found")
-  const res = await thor.account(XALLOCATIONVOTING_CONTRACT).method(allocationRoundStateAbi).call(roundId)
+  const fragment = xAllocationInterface.getFunction("state").format("json")
+  const res = await thor.account(XALLOCATIONVOTING_CONTRACT).method(JSON.parse(fragment)).call(roundId)
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
-  return res.decoded[0]
+  return Number(res.decoded[0]) as keyof typeof RoundState
 }
 
 export const getAllocationsRoundStateQueryKey = (roundId?: string) => ["allocationsRoundState", roundId]
