@@ -21,5 +21,5 @@ export function getContractsConfig() {
 }
 
 export function shouldRunSimulation() {
-  return process.env.NEXT_PUBLIC_APP_ENV == "local" && process.env.RUN_SIMULATION === "true"
+  return process.env.RUN_SIMULATION === "true"
 }
