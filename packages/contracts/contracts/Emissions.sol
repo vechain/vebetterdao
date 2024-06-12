@@ -160,8 +160,6 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
     require(data.destinations[2] != address(0), "Emissions: Treasury destination cannot be zero address");
 
     require(data.admin != address(0), "Emissions: Admin address cannot be zero address");
-    require(data.minter != address(0), "Emissions: Minter address cannot be zero address");
-    require(data.upgrader != address(0), "Emissions: Upgrader address cannot be zero address");
 
     __AccessControl_init();
     __ReentrancyGuard_init();

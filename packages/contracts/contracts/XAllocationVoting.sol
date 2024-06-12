@@ -131,9 +131,6 @@ contract XAllocationVoting is
       _grantRole(DEFAULT_ADMIN_ROLE, data.admins[i]);
     }
 
-    require(data.upgrader != address(0), "XAllocationVoting: invalid upgrader address");
-    require(data.timeLock != address(0), "XAllocationVoting: invalid timeLock address");
-    require(data.contractsAddressManager != address(0), "XAllocationVoting: invalid contractsAddressManager address");
     _grantRole(UPGRADER_ROLE, data.upgrader);
     _grantRole(GOVERNANCE_ROLE, data.timeLock);
     _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, data.contractsAddressManager);

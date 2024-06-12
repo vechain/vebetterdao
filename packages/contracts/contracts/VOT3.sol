@@ -91,8 +91,6 @@ contract VOT3 is
     VOT3Storage storage $ = _getVOT3Storage();
 
     require(_admin != address(0), "VOT3: Admin address cannot be 0");
-    require(_upgrader != address(0), "VOT3: Upgrader address cannot be 0");
-    require(_pauser != address(0), "VOT3: Pauser address cannot be 0");
     // Grant the contract deployer the default admin role and the UPGRADER_ROLE
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     _grantRole(UPGRADER_ROLE, _upgrader);

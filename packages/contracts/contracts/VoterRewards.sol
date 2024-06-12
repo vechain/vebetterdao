@@ -150,8 +150,6 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
     }
 
     require(admin != address(0), "VoterRewards: admin cannot be the zero address");
-    require(upgrader != address(0), "VoterRewards: upgrader cannot be the zero address");
-    require(contractsAddressManager != address(0), "VoterRewards: contractsAddressManager cannot be the zero address");
     _grantRole(DEFAULT_ADMIN_ROLE, admin);
     _grantRole(UPGRADER_ROLE, upgrader);
     _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, contractsAddressManager);

@@ -80,11 +80,10 @@ contract X2EarnApps is
     __AccessControl_init();
 
     for (uint256 i = 0; i < _admins.length; i++) {
+      require(_admins[i] != address(0), "X2EarnApps: admin address cannot be zero");
       _grantRole(DEFAULT_ADMIN_ROLE, _admins[i]);
     }
 
-    require(_upgrader != address(0), "X2EarnApps: invalid upgrader address");
-    require(_governor != address(0), "X2EarnApps: invalid governor address");
     _grantRole(UPGRADER_ROLE, _upgrader);
     _grantRole(GOVERNANCE_ROLE, _governor);
   }

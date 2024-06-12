@@ -181,11 +181,6 @@ contract GalaxyMember is
     $.isPublicMintingPaused = false;
 
     require(data.admin != address(0), "Galaxy Member: Admin address cannot be the zero address");
-    require(data.upgrader != address(0), "Galaxy Member: Upgrader address cannot be the zero address");
-    require(data.pauser != address(0), "Galaxy Member: Pauser address cannot be the zero address");
-    require(data.minter != address(0), "Galaxy Member: Minter address cannot be the zero address");
-    require(data.contractsAddressManager != address(0), "Galaxy Member: Contracts Address Manager address cannot be the zero address");
-
     _grantRole(DEFAULT_ADMIN_ROLE, data.admin);
     _grantRole(UPGRADER_ROLE, data.upgrader);
     _grantRole(PAUSER_ROLE, data.pauser);
