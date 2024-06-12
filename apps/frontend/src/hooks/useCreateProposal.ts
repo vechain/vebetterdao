@@ -115,8 +115,6 @@ export const useCreateProposal = ({
         abi: JSON.parse(JSON.stringify(b3trGovernorInterface.getFunction("propose"))),
       }
 
-      console.log("ok")
-
       return [approveClause, createProposalClause]
     },
     [account],

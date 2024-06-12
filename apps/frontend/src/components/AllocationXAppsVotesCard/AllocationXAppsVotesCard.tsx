@@ -51,12 +51,12 @@ export const AllocationXAppsVotesCard = ({ roundId, maxRanks = 8 }: Props) => {
     <Card flex={1} h="full" w="full">
       <CardHeader>
         <HStack justify={"space-between"} w="full">
-          <Heading size="md">{roundInfo.isCurrent && roundInfo.state === "0" ? "Real-Time data" : "Votes"}</Heading>
+          <Heading size="md">{roundInfo.isCurrent && roundInfo.state === 0 ? "Real-Time data" : "Votes"}</Heading>
         </HStack>
       </CardHeader>
       <CardBody>
         <VStack spacing={8} align={"flex-start"} w="full">
-          {roundInfo.state === "1" && (
+          {roundInfo.state === 1 && (
             <Alert status="error" borderRadius={"2xl"}>
               <AlertIcon />
               <Box>
