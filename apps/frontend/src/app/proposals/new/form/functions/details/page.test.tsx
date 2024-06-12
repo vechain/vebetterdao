@@ -6,7 +6,7 @@ import * as dappKit from "@vechain/dapp-kit-react"
 import { fireEvent, render, waitFor, screen } from "../../../../../../../test"
 import { vi } from "vitest"
 import { transferAction } from "../../../../../../../__mocks__/Actions"
-import { address } from "../../../../../../../__mocks__"
+import { address } from "../../../../../../../__mocks__" 
 
 const spyOnUseProposalFormStore = vi.spyOn(store, "useProposalFormStore")
 
@@ -102,6 +102,7 @@ describe("NewProposalFunctionsDetails", async () => {
     it("renders correctly - show error on submit", async () => {
       render(<NewProposalFunctionsDetails />)
 
+      await vi.dynamicImportSettled()
       await screen.findByText("What is your proposal about?")
       await screen.findByText("Basic information")
       const continueButton = await screen.findByTestId("continue")
