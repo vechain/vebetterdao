@@ -9,7 +9,6 @@ import { Card, CardBody, Box, Stack, Text, HStack, Skeleton } from "@chakra-ui/r
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import { useMemo } from "react"
-import { i } from "vitest/dist/reporters-P7C2ytIv"
 
 const compactFormatter = getCompactFormatter()
 
