@@ -1,12 +1,23 @@
+import { getConfig } from "@repo/config"
 import { TransactionHandler, type TransactionClause, type TransactionBody } from "@vechain/sdk-core"
 import { HttpClient, ThorClient } from "@vechain/sdk-network"
 
-const thorNetwork = new HttpClient("http://localhost:8669")
-const thorClient = new ThorClient(thorNetwork)
+let thorClient: ThorClient
 let chainTag: number
 
+export const getThorClient = (): ThorClient => {
+  if (thorClient) {
+    return thorClient
+  }
+
+  const thorNetwork = new HttpClient(getConfig().nodeUrl)
+  console.log(`Creating thor client for ${getConfig().nodeUrl} ${thorNetwork.baseURL}`)
+  thorClient = new ThorClient(thorNetwork)
+  return thorClient
+}
+
 export const getBestBlockRef = async (): Promise<string> => {
-  const blockRef = await thorClient.blocks.getBestBlockRef()
+  const blockRef = await getThorClient().blocks.getBestBlockRef()
 
   if (!blockRef) {
     throw new Error("Block ref not found")
@@ -20,7 +31,7 @@ export const getChainTag = async (): Promise<number> => {
     return chainTag
   }
 
-  const genesisBlock = await thorClient.blocks.getGenesisBlock()
+  const genesisBlock = await getThorClient().blocks.getGenesisBlock()
 
   if (!genesisBlock) {
     throw new Error("Genesis block not found")
@@ -38,7 +49,7 @@ export const buildTxBody = async (
 ): Promise<TransactionBody> => {
   if (!gas) {
     // Get gas estimate
-    const gasResult = await thorClient.gas.estimateGas(clauses, senderAddress)
+    const gasResult = await getThorClient().gas.estimateGas(clauses, senderAddress)
 
     if (gasResult.reverted) {
       throw new Error(`Gas estimation failed: ${gasResult.revertReasons}`)
@@ -64,7 +75,8 @@ export const buildTxBody = async (
 export const signAndSendTx = async (body: TransactionBody, pk: Uint8Array) => {
   const signedTx = TransactionHandler.sign(body, Buffer.from(pk))
 
-  const sendTransactionResult = await thorClient.transactions.sendTransaction(signedTx)
+  const client = getThorClient()
+  const sendTransactionResult = await client.transactions.sendTransaction(signedTx)
 
   const txReceipt = await thorClient.transactions.waitForTransaction(sendTransactionResult.id)
 
