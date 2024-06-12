@@ -45,6 +45,7 @@ contract B3TR is ERC20Capped, ERC20Pausable, AccessControl {
     address _pauser,
     uint256 _cap
   ) ERC20("B3TR", "B3TR") ERC20Capped(_cap * 1e18) {
+    require(_admin != address(0), "B3TR: admin address cannot be zero");
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     _grantRole(MINTER_ROLE, _defaultMinter);
     _grantRole(PAUSER_ROLE, _pauser);
