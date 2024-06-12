@@ -106,6 +106,9 @@ contract GalaxyMember is
   /// @dev Emitted when a token is upgraded.
   event Upgraded(uint256 indexed tokenId, uint256 oldLevel, uint256 newLevel);
 
+  /// @dev Emitted when the max level is updated.
+  event MaxLevelUpdated(uint256 oldLevel, uint256 newLevel);
+
   /// @notice Modifier to check if public minting is not paused
   modifier whenPublicMintingNotPaused() {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
@@ -169,12 +172,12 @@ contract GalaxyMember is
     $.MAX_LEVEL = data.maxLevel;
     $._baseTokenURI = data.baseTokenURI;
 
-    for (uint8 i = 0; i < data.b3trToUpgradeToLevel.length; i++) {
+    for (uint256 i = 0; i < data.b3trToUpgradeToLevel.length; i++) {
       $._b3trToUpgradeToLevel[i + 2] = data.b3trToUpgradeToLevel[i]; // First Level that requires B3TR is level 2
     }
 
     // First Level that requires B3TR is level 2
-    for (uint8 i = 2; i <= data.maxLevel; i++) {
+    for (uint256 i = 2; i <= data.maxLevel; i++) {
       require($._b3trToUpgradeToLevel[i] > 0, "Galaxy Member: B3TR to upgrade must be set for all levels unlocked"); // All levels unlocked must have a B3TR requirement
     }
 
@@ -381,13 +384,16 @@ contract GalaxyMember is
 
     require(level > $.MAX_LEVEL, "Galaxy Member: Max level must be greater than the current max level");
 
-    // Require all levels til the new max level to have a B3TR requirement
+    // First Level that requires B3TR is level 2
     for (uint256 i = 2; i <= level; i++) {
-      // First Level that requires B3TR is level 2
-      require($._b3trToUpgradeToLevel[i] > 0, "Galaxy Member: B3TR to upgrade must be set for all levels unlocked");
+      require($._b3trToUpgradeToLevel[i] > 0, "Galaxy Member: B3TR to upgrade must be set for all levels unlocked"); // Require all levels til the new max level to have a B3TR requirement
     }
 
+    uint256 oldLevel = $.MAX_LEVEL;
+
     $.MAX_LEVEL = level;
+
+    emit MaxLevelUpdated(oldLevel, level);
   }
 
   /// @notice Sets the XAllocationVotingGovernor contract address
@@ -424,7 +430,7 @@ contract GalaxyMember is
   /// @param b3trToUpgradeToLevel Mapping of B3TR requirements per level
   function setB3TRtoUpgradeToLevel(uint256[] memory b3trToUpgradeToLevel) public onlyRole(DEFAULT_ADMIN_ROLE) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
-    for (uint8 i = 0; i < b3trToUpgradeToLevel.length; i++) {
+    for (uint256 i = 0; i < b3trToUpgradeToLevel.length; i++) {
       $._b3trToUpgradeToLevel[i + 2] = b3trToUpgradeToLevel[i]; // First Level that requires B3TR is level 2
     }
   }
