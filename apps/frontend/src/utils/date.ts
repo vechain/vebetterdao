@@ -44,3 +44,13 @@ export const timestampToTimeLeft = (endDate: number, startDate: number = new Dat
   }
   return dayjsObject.format("s[s]")
 }
+
+/**
+ * Parses a date (provided as a Unix timestamp) and formats it to a human-readable string.
+ * The formatted date string will be in the format "D MMM", where "D" is the day of the month
+ * and "MMM" is the abbreviated month name.
+ *
+ * @param {number} date - The date represented as a Unix timestamp (milliseconds since epoch).
+ * @returns {string} - The formatted date string in "D MMM" format.
+ */
+export const parseDate = (date: number): string => dayjs(date).format("D MMM")
