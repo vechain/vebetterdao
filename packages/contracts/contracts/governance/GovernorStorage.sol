@@ -54,14 +54,23 @@ contract GovernorStorage is Initializable {
     GovernorTypes.InitializationData memory initializationData,
     string memory governorName
   ) internal onlyInitializing {
-    // Set the governor time lock storage
     GovernorStorageTypes.GovernorStorage storage governorStorage = getGovernorStorage();
+
+    // Validate and set the governor time lock storage
+    require(address(initializationData.timelock) != address(0), "B3TRGovernor: timelock address cannot be zero");
     governorStorage.timelock = initializationData.timelock;
 
     // Set the governor function restrictions storage
     governorStorage.isFunctionRestrictionEnabled = initializationData.isFunctionRestrictionEnabled;
 
-    // Set the governor external contracts storage
+    // Validate and set the governor external contracts storage
+    require(
+      address(initializationData.b3tr) != address(0) &&
+        address(initializationData.vot3Token) != address(0) &&
+        address(initializationData.xAllocationVoting) != address(0) &&
+        address(initializationData.voterRewards) != address(0),
+      "B3TRGovernor: external contract address cannot be zero"
+    );
     governorStorage.voterRewards = initializationData.voterRewards;
     governorStorage.xAllocationVoting = initializationData.xAllocationVoting;
     governorStorage.b3tr = initializationData.b3tr;
