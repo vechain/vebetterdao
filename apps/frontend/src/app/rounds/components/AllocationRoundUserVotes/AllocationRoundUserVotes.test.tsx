@@ -79,6 +79,9 @@ describe("AllocationRoundUserVotes", () => {
     describe("voting active", () => {
       const totalVotes = "100"
       const randomAppsExcludedId = APPS.filter(() => Math.random() > 0.5).map(app => app.id)
+      if (randomAppsExcludedId.length === APPS.length) {
+        randomAppsExcludedId.pop()
+      }
       const appsVoted = APPS.filter(app => !randomAppsExcludedId.includes(app.id))
       beforeEach(() => {
         // tell vitest we use mocked time
