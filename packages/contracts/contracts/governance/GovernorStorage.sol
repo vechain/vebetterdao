@@ -64,12 +64,15 @@ contract GovernorStorage is Initializable {
     governorStorage.isFunctionRestrictionEnabled = initializationData.isFunctionRestrictionEnabled;
 
     // Validate and set the governor external contracts storage
+    require(address(initializationData.b3tr) != address(0), "B3TRGovernor: B3TR address cannot be zero");
+    require(address(initializationData.vot3Token) != address(0), "B3TRGovernor: Vot3 address cannot be zero");
     require(
-      address(initializationData.b3tr) != address(0) &&
-        address(initializationData.vot3Token) != address(0) &&
-        address(initializationData.xAllocationVoting) != address(0) &&
-        address(initializationData.voterRewards) != address(0),
-      "B3TRGovernor: external contract address cannot be zero"
+      address(initializationData.xAllocationVoting) != address(0),
+      "B3TRGovernor: xAllocationVoting address cannot be zero"
+    );
+    require(
+      address(initializationData.voterRewards) != address(0),
+      "B3TRGovernor: voterRewards address cannot be zero"
     );
     governorStorage.voterRewards = initializationData.voterRewards;
     governorStorage.xAllocationVoting = initializationData.xAllocationVoting;

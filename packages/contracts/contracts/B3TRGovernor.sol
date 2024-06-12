@@ -113,7 +113,8 @@ contract B3TRGovernor is
    */
   modifier onlyRoleOrGovernance(bytes32 role) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    if (!hasRole(role, _msgSender())) GovernorGovernanceLogic.checkGovernance($, _msgSender(), _msgData(), address(this));
+    if (!hasRole(role, _msgSender()))
+      GovernorGovernanceLogic.checkGovernance($, _msgSender(), _msgData(), address(this));
     _;
   }
 
@@ -146,6 +147,8 @@ contract B3TRGovernor is
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     GovernorQuorumLogic.updateQuorumNumerator($, data.quorumPercentage);
 
+    // Validate and set the governor external contracts storage
+    require(address(rolesData.governorAdmin) != address(0), "B3TRGovernor: governor admin address cannot be zero");
     _grantRole(DEFAULT_ADMIN_ROLE, rolesData.governorAdmin);
     _grantRole(GOVERNOR_FUNCTIONS_SETTINGS_ROLE, rolesData.governorFunctionSettingsRoleAddress);
     _grantRole(PAUSER_ROLE, rolesData.pauser);
@@ -182,7 +185,7 @@ contract B3TRGovernor is
   /**
    * @notice Function to know if a proposal is executable or not.
    * If the proposal was created without any targets, values, or calldatas, it is not executable.
-   * to check if the proposal is executable. 
+   * to check if the proposal is executable.
    * @dev If no calldatas or targets then it's not executable, otherwise it will check if the governance can execute transactions or not.
    * @param proposalId The id of the proposal
    * @return bool True if the proposal needs queuing, false otherwise
