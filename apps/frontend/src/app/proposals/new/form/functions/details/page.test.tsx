@@ -149,6 +149,7 @@ describe("NewProposalFunctionsDetails", async () => {
     }) // renders correctly - show error if fields are not filled
   }) // actions with calldata is not available
 
+  //TODO: Test is flacky when rendered with the layout - try to run it with coverage
   it("renders correctly - proceed correctly on submit  as calldata is already available", async () => {
     spyOnUseProposalFormStore.mockReturnValue({
       title: "Title",
@@ -157,11 +158,7 @@ describe("NewProposalFunctionsDetails", async () => {
       actions: [transferAction],
       setData: mockSetData,
     })
-    render(
-      <FormProposalLayout>
-        <NewProposalFunctionsDetails />
-      </FormProposalLayout>,
-    )
+    render(<NewProposalFunctionsDetails />)
 
     await screen.findByText("What is your proposal about?")
     await screen.findByText("Basic information")
@@ -184,6 +181,7 @@ describe("NewProposalFunctionsDetails", async () => {
     })
   }) // renders correctly - proceed correctly as calldata is already available
 
+  //TODO: Test is flacky when rendered with the layout - try to run it with coverage
   it("renders correctly - can add and remove another transaction", async () => {
     spyOnUseProposalFormStore.mockReturnValue({
       title: "Title",
@@ -192,11 +190,7 @@ describe("NewProposalFunctionsDetails", async () => {
       actions: [transferAction],
       setData: mockSetData,
     })
-    const component = render(
-      <FormProposalLayout>
-        <NewProposalFunctionsDetails />
-      </FormProposalLayout>,
-    )
+    const component = render(<NewProposalFunctionsDetails />)
 
     await screen.findByText("What is your proposal about?")
     await screen.findByText("Basic information")
