@@ -6,7 +6,7 @@ import * as dappKit from "@vechain/dapp-kit-react"
 import { fireEvent, render, waitFor, screen } from "../../../../../../../test"
 import { vi } from "vitest"
 import { transferAction } from "../../../../../../../__mocks__/Actions"
-import { address } from "../../../../../../../__mocks__" 
+import { address } from "../../../../../../../__mocks__"
 
 const spyOnUseProposalFormStore = vi.spyOn(store, "useProposalFormStore")
 
@@ -124,7 +124,11 @@ describe("NewProposalFunctionsDetails", async () => {
 
     //TODO: Test is flacky when rendered with the layout - try to run it with coverage
     it("renders correctly - can proceed if inputs are filled", async () => {
-      render(<NewProposalFunctionsDetails />)
+      render(
+        <FormProposalLayout>
+          <NewProposalFunctionsDetails />
+        </FormProposalLayout>,
+      )
 
       await vi.dynamicImportSettled()
       await screen.findByText("What is your proposal about?")
@@ -160,7 +164,11 @@ describe("NewProposalFunctionsDetails", async () => {
       actions: [transferAction],
       setData: mockSetData,
     })
-    render(<NewProposalFunctionsDetails />)
+    render(
+      <FormProposalLayout>
+        <NewProposalFunctionsDetails />
+      </FormProposalLayout>,
+    )
 
     await vi.dynamicImportSettled()
     await screen.findByText("What is your proposal about?")
@@ -193,7 +201,11 @@ describe("NewProposalFunctionsDetails", async () => {
       actions: [transferAction],
       setData: mockSetData,
     })
-    const component = render(<NewProposalFunctionsDetails />)
+    render(
+      <FormProposalLayout>
+        <NewProposalFunctionsDetails />
+      </FormProposalLayout>,
+    )
     await vi.dynamicImportSettled()
     await screen.findByText("What is your proposal about?")
     await screen.findByText("Basic information")

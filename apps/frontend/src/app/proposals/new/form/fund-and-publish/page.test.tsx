@@ -217,13 +217,11 @@ describe("NewProposalFundAndPublish", async () => {
       isLoading: true,
     })
 
-    const x = render(
+    render(
       <FormProposalLayout>
         <NewProposalFundAndPublish />
       </FormProposalLayout>,
     )
-
-    x.debug()
 
     expect(await screen.findAllByText("Support and publish")).toHaveLength(2)
     await screen.findByText("Would you like to contribute to your proposal with some tokens?")
@@ -251,13 +249,11 @@ describe("NewProposalFundAndPublish", async () => {
       votingStartRoundId: 1,
     })
 
-    const x = render(
+    render(
       <FormProposalLayout>
         <NewProposalFundAndPublish />
       </FormProposalLayout>,
     )
-
-    x.debug()
 
     const vot3Input = await screen.findByTestId("vot3-amount-input")
 
