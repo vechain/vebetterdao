@@ -77,8 +77,6 @@ contract B3TRGovernor is
   UUPSUpgradeable,
   PausableUpgradeable
 {
-  using GovernorGovernanceLogic for GovernorStorageTypes.GovernorStorage;
-
   /// @notice The role that can whitelist allowed functions in the propose function
   bytes32 public constant GOVERNOR_FUNCTIONS_SETTINGS_ROLE = keccak256("GOVERNOR_FUNCTIONS_SETTINGS_ROLE");
   /// @notice The role that can pause the contract
@@ -105,7 +103,7 @@ contract B3TRGovernor is
    */
   modifier onlyGovernance() {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    $.checkGovernance(_msgSender(), _msgData(), address(this));
+    GovernorGovernanceLogic.checkGovernance($, _msgSender(), _msgData(), address(this));
     _;
   }
 
@@ -115,7 +113,7 @@ contract B3TRGovernor is
    */
   modifier onlyRoleOrGovernance(bytes32 role) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    if (!hasRole(role, _msgSender())) $.checkGovernance(_msgSender(), _msgData(), address(this));
+    if (!hasRole(role, _msgSender())) GovernorGovernanceLogic.checkGovernance($, _msgSender(), _msgData(), address(this));
     _;
   }
 
@@ -160,7 +158,7 @@ contract B3TRGovernor is
    */
   receive() external payable virtual {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    if ($.executor() != address(this)) {
+    if (GovernorGovernanceLogic.executor($) != address(this)) {
       revert GovernorDisabledDeposit();
     }
   }
@@ -903,7 +901,7 @@ contract B3TRGovernor is
    */
   function onERC1155Received(address, address, uint256, uint256, bytes memory) public virtual returns (bytes4) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    if ($.executor() != address(this)) {
+    if (GovernorGovernanceLogic.executor($) != address(this)) {
       revert GovernorDisabledDeposit();
     }
     return this.onERC1155Received.selector;
@@ -916,7 +914,7 @@ contract B3TRGovernor is
    */
   function onERC721Received(address, address, uint256, bytes memory) public virtual returns (bytes4) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    if ($.executor() != address(this)) {
+    if (GovernorGovernanceLogic.executor($) != address(this)) {
       revert GovernorDisabledDeposit();
     }
     return this.onERC721Received.selector;
@@ -935,7 +933,7 @@ contract B3TRGovernor is
     bytes memory
   ) public virtual returns (bytes4) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    if ($.executor() != address(this)) {
+    if (GovernorGovernanceLogic.executor($) != address(this)) {
       revert GovernorDisabledDeposit();
     }
     return this.onERC1155BatchReceived.selector;
