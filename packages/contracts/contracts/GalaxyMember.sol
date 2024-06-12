@@ -150,7 +150,7 @@ contract GalaxyMember is
   /// @notice Initializes a new GalaxyMember contract
   /// @dev Sets initial values for all relevant contract properties and state variables.
   /// @custom:oz-upgrades-unsafe-allow constructor
-  function initialize(InitializationData memory data) public initializer {
+  function initialize(InitializationData memory data) external initializer {
     require(data.maxLevel > 0, "Galaxy Member: Max level must be greater than 0");
     require(bytes(data.baseTokenURI).length > 0, "Galaxy Member: Base URI must be set");
     require(data.b3tr != address(0), "Galaxy Member: B3TR token address cannot be the zero address");
@@ -193,19 +193,19 @@ contract GalaxyMember is
   /// @notice Pauses the Galaxy Member contract
   /// @dev pausing the contract will prevent minting, upgrading, and transferring of tokens
   /// @dev Only callable by the pauser role
-  function pause() public onlyRole(PAUSER_ROLE) {
+  function pause() external onlyRole(PAUSER_ROLE) {
     _pause();
   }
 
   /// @notice Unpauses the Galaxy Member contract
   /// @dev Only callable by the pauser role
-  function unpause() public onlyRole(PAUSER_ROLE) {
+  function unpause() external onlyRole(PAUSER_ROLE) {
     _unpause();
   }
 
   /// @notice Allows a user to freely mint a token if they have participated in governance
   /// @dev Mints a token with level 1 and ensures that the public minting is not paused
-  function freeMint() public whenPublicMintingNotPaused {
+  function freeMint() external whenPublicMintingNotPaused {
     require(participatedInGovernance(msg.sender), "Galaxy Member: User has not participated in governance");
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
@@ -220,7 +220,7 @@ contract GalaxyMember is
   /// @dev Only callable by the minter role
   /// @dev Can be used to mint when public minting is paused
   /// @param to Address to mint the token to
-  function mint(address to) public onlyRole(MINTER_ROLE) {
+  function mint(address to) external onlyRole(MINTER_ROLE) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
     uint256 tokenId = $._nextTokenId;
@@ -233,7 +233,7 @@ contract GalaxyMember is
   /// @notice Upgrades a token to the next level
   /// @dev Requires the owner to have enough B3TR tokens and sufficient allowance for the contract to use them
   /// @param tokenId Token ID to upgrade
-  function upgrade(uint256 tokenId) public nonReentrant whenNotPaused {
+  function upgrade(uint256 tokenId) external nonReentrant whenNotPaused {
     require(ownerOf(tokenId) == msg.sender, "Galaxy Member: you must own the Token to upgrade it");
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
@@ -267,7 +267,7 @@ contract GalaxyMember is
   }
 
   /// @notice Automatically selects the highest level token owned by the caller for voting rewards
-  function selectHighestLevel() public {
+  function selectHighestLevel() external {
     _selectHighestLevel(msg.sender);
   }
 
@@ -371,7 +371,7 @@ contract GalaxyMember is
 
   /// @notice Sets the maximum level that tokens can be minted or upgraded to
   /// @dev Only callable by the admin role
-  function setMaxLevel(uint256 level) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setMaxLevel(uint256 level) external onlyRole(DEFAULT_ADMIN_ROLE) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
     require(level > $.MAX_LEVEL, "Galaxy Member: Max level must be greater than the current max level");
@@ -384,7 +384,7 @@ contract GalaxyMember is
   /// @param _xAllocationsGovernor XAllocationVotingGovernor contract address
   function setXAllocationsGovernorAddress(
     address _xAllocationsGovernor
-  ) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+  ) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(_xAllocationsGovernor != address(0), "Galaxy Member: _xAllocationsGovernor cannot be the zero address");
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     $.xAllocationsGovernor = IXAllocationVotingGovernor(_xAllocationsGovernor);
@@ -393,7 +393,7 @@ contract GalaxyMember is
   /// @notice Sets the B3TRGovernor contract address
   /// @dev Only callable by the contractsAddressManager role
   /// @param _b3trGovernor B3TRGovernor contract address
-  function setB3trGovernorAddress(address _b3trGovernor) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+  function setB3trGovernorAddress(address _b3trGovernor) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(_b3trGovernor != address(0), "Galaxy Member: _b3trGovernor cannot be the zero address");
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     $.b3trGovernor = IB3TRGovernor(payable(_b3trGovernor));
@@ -402,7 +402,7 @@ contract GalaxyMember is
   /// @notice Sets the base URI for computing the tokenURI
   /// @dev Only callable by the admin role
   /// @param baseTokenURI Base URI for the Token
-  function setBaseURI(string memory baseTokenURI) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setBaseURI(string memory baseTokenURI) external onlyRole(DEFAULT_ADMIN_ROLE) {
     require(bytes(baseTokenURI).length > 0, "Galaxy Member: Base URI must be set");
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     $._baseTokenURI = baseTokenURI;
@@ -411,7 +411,7 @@ contract GalaxyMember is
   /// @notice Sets the amount of B3TR required to upgrade to each level
   /// @dev Only callable by the admin role
   /// @param b3trToUpgradeToLevel Mapping of B3TR requirements per level
-  function setB3TRtoUpgradeToLevel(uint256[] memory b3trToUpgradeToLevel) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setB3TRtoUpgradeToLevel(uint256[] memory b3trToUpgradeToLevel) external onlyRole(DEFAULT_ADMIN_ROLE) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     for (uint8 i = 0; i < b3trToUpgradeToLevel.length; i++) {
       $._b3trToUpgradeToLevel[i + 2] = b3trToUpgradeToLevel[i]; // First Level that requires B3TR is level 2
@@ -421,7 +421,7 @@ contract GalaxyMember is
   /// @notice Pauses public minting
   /// @dev Only callable by the admin role
   /// @param isPaused Flag to pause or unpause public minting
-  function setIsPublicMintingPaused(bool isPaused) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setIsPublicMintingPaused(bool isPaused) external onlyRole(DEFAULT_ADMIN_ROLE) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     $.isPublicMintingPaused = isPaused;
   }
@@ -439,7 +439,7 @@ contract GalaxyMember is
   /// @dev Reverts if the timepoint is in the future
   /// @param owner The address of the owner
   /// @param timepoint The timepoint to check
-  function getPastHighestLevel(address owner, uint256 timepoint) public view returns (uint256) {
+  function getPastHighestLevel(address owner, uint256 timepoint) external view returns (uint256) {
     uint48 currentTimepoint = clock();
     if (timepoint >= currentTimepoint) {
       revert ERC5805FutureLookup(timepoint, currentTimepoint);
@@ -486,21 +486,21 @@ contract GalaxyMember is
 
   /// @notice Gets the B3TR required to upgrade to a specific level
   /// @param level Level to upgrade to
-  function getB3TRtoUpgradeToLevel(uint256 level) public view returns (uint256) {
+  function getB3TRtoUpgradeToLevel(uint256 level) external view returns (uint256) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $._b3trToUpgradeToLevel[level];
   }
 
   /// @notice Gets the next level of the token
   /// @param tokenId Token ID to check
-  function getNextLevel(uint256 tokenId) public view returns (uint256) {
+  function getNextLevel(uint256 tokenId) external view returns (uint256) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $.levelOf[tokenId] + 1;
   }
 
   /// @notice Gets the B3TR required to upgrade to the next level of the token
   /// @param tokenId Token ID to check
-  function getB3TRtoUpgrade(uint256 tokenId) public view returns (uint256) {
+  function getB3TRtoUpgrade(uint256 tokenId) external view returns (uint256) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $._b3trToUpgradeToLevel[$.levelOf[tokenId] + 1];
   }
@@ -512,7 +512,7 @@ contract GalaxyMember is
 
   /// @dev Machine-readable description of the clock as specified in EIP-6372.
   // solhint-disable-next-line func-name-mixedcase
-  function CLOCK_MODE() public view virtual returns (string memory) {
+  function CLOCK_MODE() external view virtual returns (string memory) {
     // Check that the clock was not modified
     if (clock() != Time.blockNumber()) {
       revert ERC6372InconsistentClock();
@@ -530,37 +530,37 @@ contract GalaxyMember is
   }
 
   /// @notice Gets the xAllocationsGovernor contract address
-  function xAllocationsGovernor() public view returns (IXAllocationVotingGovernor) {
+  function xAllocationsGovernor() external view returns (IXAllocationVotingGovernor) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $.xAllocationsGovernor;
   }
 
   /// @notice Gets the b3trGovernor contract address
-  function b3trGovernor() public view returns (IB3TRGovernor) {
+  function b3trGovernor() external view returns (IB3TRGovernor) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $.b3trGovernor;
   }
 
   /// @notice Gets the B3TR token contract address
-  function b3tr() public view returns (IB3TR) {
+  function b3tr() external view returns (IB3TR) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $.b3tr;
   }
 
   /// @notice Gets the treasury contract address
-  function treasury() public view returns (address) {
+  function treasury() external view returns (address) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $.treasury;
   }
 
   /// @notice Gets the maximum level that tokens can be minted or upgraded to
-  function MAX_LEVEL() public view returns (uint256) {
+  function MAX_LEVEL() external view returns (uint256) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $.MAX_LEVEL;
   }
 
   /// @notice Gets the level of the token
-  function levelOf(uint256 tokenId) public view returns (uint256) {
+  function levelOf(uint256 tokenId) external view returns (uint256) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $.levelOf[tokenId];
   }
@@ -568,7 +568,7 @@ contract GalaxyMember is
   /// @notice Retrieves the current version of the contract
   /// @dev This function is used to identify the version of the contract and should be updated in each new version
   /// @return string The version of the contract
-  function version() public pure virtual returns (string memory) {
+  function version() external pure virtual returns (string memory) {
     return "1";
   }
 
