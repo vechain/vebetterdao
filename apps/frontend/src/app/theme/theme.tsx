@@ -5,6 +5,7 @@ import "@fontsource-variable/instrument-sans"
 import "@fontsource-variable/inter"
 import { ButtonStyle } from "./button"
 import { StepperStyle } from "./stepper"
+import { IconButtonStyle } from "./iconButton"
 
 const themeConfig = {
   //@ts-ignore

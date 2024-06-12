@@ -186,5 +186,15 @@
   "by": "by",
   "users": "users",
   "No vote yet": "No vote yet",
-  "days": "days"
+  "days": "days",
+  "Cancel": "Cancel",
+  "Save changes": "Save changes",
+  "Project URL": "Project URL",
+  "Social media links": "Social media links",
+  "Add your x.com link": "Add your x.com link",
+  "Add your discord link": "Add your discord link",
+  "Add your telegram link": "Add your telegram link",
+  "Add your youtube link": "Add your youtube link",
+  "Add your medium link": "Add your medium link",
+  "Invalid url": "Invalid url"
 }

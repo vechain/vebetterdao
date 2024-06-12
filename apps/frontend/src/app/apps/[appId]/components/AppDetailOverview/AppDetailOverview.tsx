@@ -1,4 +1,4 @@
-import { useAppAdmin, useXApp, useXAppMetadata } from "@/api"
+import { useXApp, useXAppMetadata } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { Button, Card, CardBody, Flex, HStack, Heading, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useParams } from "next/navigation"
@@ -10,6 +10,7 @@ import { UilArrowUpRight } from "@iconscout/react-unicons"
 import { useCallback } from "react"
 import { AppDetailSocials } from "./components/AppDetailSocials"
 import { AppDetailAllocationInfo } from "./components/AppDetailAllocationInfo"
+import { EditAppPageButton } from "./components/EditAppPageButton"
 
 export const AppDetailOverview = () => {
   const { appId } = useParams<{ appId: string }>()
@@ -68,12 +69,15 @@ export const AppDetailOverview = () => {
                   </Text>
                 </VStack>
               </HStack>
-              <Button
-                variant={"primaryAction"}
-                rightIcon={<UilArrowUpRight color="#FFFFFF" size={"16px"} />}
-                onClick={goToWebsite}>
-                {t("Go to Website")}
-              </Button>
+              <HStack>
+                <EditAppPageButton />
+                <Button
+                  variant={"primaryAction"}
+                  rightIcon={<UilArrowUpRight color="#FFFFFF" size={"16px"} />}
+                  onClick={goToWebsite}>
+                  {t("Go to Website")}
+                </Button>
+              </HStack>
             </HStack>
           </VStack>
           <AppDetailAllocationInfo />
