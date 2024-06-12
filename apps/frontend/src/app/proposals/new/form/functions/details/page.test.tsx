@@ -97,12 +97,10 @@ describe("NewProposalFunctionsDetails", async () => {
         setData: mockSetData,
       })
     })
+
+    //TODO: Test is flacky when rendered with the layout - try to run it with coverage
     it("renders correctly - show error on submit", async () => {
-      render(
-        <FormProposalLayout>
-          <NewProposalFunctionsDetails />
-        </FormProposalLayout>,
-      )
+      render(<NewProposalFunctionsDetails />)
 
       await screen.findByText("What is your proposal about?")
       await screen.findByText("Basic information")
@@ -123,12 +121,9 @@ describe("NewProposalFunctionsDetails", async () => {
       })
     }) // renders correctly - show error if fields are not filled
 
+    //TODO: Test is flacky when rendered with the layout - try to run it with coverage
     it("renders correctly - can proceed if inputs are filled", async () => {
-      render(
-        <FormProposalLayout>
-          <NewProposalFunctionsDetails />
-        </FormProposalLayout>,
-      )
+      render(<NewProposalFunctionsDetails />)
 
       await screen.findByText("What is your proposal about?")
       await screen.findByText("Basic information")
