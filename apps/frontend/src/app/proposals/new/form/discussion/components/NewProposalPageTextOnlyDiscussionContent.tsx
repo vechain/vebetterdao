@@ -2,7 +2,7 @@ import { Card, CardBody, VStack, Heading, HStack, Button, CardFooter, Text } fro
 import { FormData, NewProposalForm } from "../../functions/details/components/NewProposalForm"
 import { useCallback } from "react"
 import { useRouter } from "next/navigation"
-import { useProposalFormStore } from "@/store/useProposalFormStore"
+import { useProposalFormStore } from "@/store"
 import { useTranslation } from "react-i18next"
 
 export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {

@@ -13,7 +13,7 @@ import {
 } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
-import { useProposalFormStore } from "@/store/useProposalFormStore"
+import { useProposalFormStore } from "@/store"
 
 import { useCanProposalStartInNextRound, useCurrentAllocationsRoundId } from "@/api"
 import dayjs from "dayjs"

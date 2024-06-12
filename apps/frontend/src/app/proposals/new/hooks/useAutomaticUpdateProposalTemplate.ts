@@ -7,7 +7,7 @@ import {
   TEXT_ONLY_PLACEHOLDER,
   TITLE_PLACEHOLDER,
 } from "@/constants"
-import { useProposalFormStore } from "@/store/useProposalFormStore"
+import { useProposalFormStore } from "@/store"
 import { useWallet } from "@vechain/dapp-kit-react"
 import dayjs from "dayjs"
 import { useEffect } from "react"

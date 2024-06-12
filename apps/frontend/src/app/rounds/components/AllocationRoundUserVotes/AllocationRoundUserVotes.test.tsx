@@ -508,7 +508,7 @@ describe("AllocationRoundUserVotes", () => {
         expect(screen.queryByTestId("split-evenly")).not.toBeInTheDocument()
         expect(screen.queryByTestId("cast-vote-button")).not.toBeInTheDocument()
 
-        for (const app of appsVoted) {
+        for (const app of APPS) {
           const isExcluded = randomAppsExcludedId.includes(app.id)
           if (!isExcluded) {
             // inputs

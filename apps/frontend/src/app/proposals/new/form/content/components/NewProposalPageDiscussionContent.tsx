@@ -16,7 +16,7 @@ import {
 } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useEffect } from "react"
-import { useProposalFormStore } from "@/store/useProposalFormStore"
+import { useProposalFormStore } from "@/store"
 import dynamic from "next/dynamic"
 
 import rehypeSanitize from "rehype-sanitize"

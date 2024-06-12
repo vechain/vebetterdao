@@ -3,7 +3,7 @@ import { useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { FormData, NewProposalForm } from "./NewProposalForm"
 import { abi } from "thor-devkit"
-import { useProposalFormStore } from "@/store/useProposalFormStore"
+import { useProposalFormStore } from "@/store"
 import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
 

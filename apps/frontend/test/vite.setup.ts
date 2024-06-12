@@ -5,7 +5,7 @@ import { loadEnvConfig } from "@next/env"
 import { cleanup } from "@testing-library/react"
 
 import "../src/i18n"
-import { useConnex } from "@vechain/dapp-kit-react"
+
 const adminAddress = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa"
 
 vi.mock("zustand")

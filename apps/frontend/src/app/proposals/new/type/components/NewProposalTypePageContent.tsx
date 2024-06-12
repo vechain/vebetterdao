@@ -2,7 +2,7 @@ import { Button, Card, CardBody, Grid, GridItem, HStack, Heading, Stack, VStack 
 import { useRouter } from "next/navigation"
 import { useCallback, useLayoutEffect, useState } from "react"
 import { CheckableCard, CheckableCardProps } from "@/components"
-import { useProposalFormStore } from "@/store/useProposalFormStore"
+import { useProposalFormStore } from "@/store"
 import { useTranslation } from "react-i18next"
 import { useNewProposalPageGuard } from "../../form/hooks/useNewProposalPageGuard"
 import { TFunction } from "i18next"

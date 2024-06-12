@@ -16,6 +16,7 @@ const spyOnUseProposalFormStore = vi.spyOn(store, "useProposalFormStore")
 
 const mockRouterPush = vi.fn()
 const mockBack = vi.fn()
+const mockSetData = vi.fn()
 //@ts-ignore
 vi.spyOn(router, "useRouter").mockReturnValue({
   push: mockRouterPush,
@@ -46,6 +47,9 @@ const fillGeneratedInput = async (index: number, inputType: string) => {
   expect(input).toHaveValue("0x123")
 }
 describe("NewProposalFunctionsDetails", async () => {
+  beforeEach(() => {
+    spyOnUseProposalFormStore.mockClear()
+  }) // beforeEach
   it("redirects to /proposals if no account connected", async () => {
     //@ts-ignore
     vi.spyOn(dappKit, "useWallet").mockReturnValueOnce({
@@ -69,7 +73,7 @@ describe("NewProposalFunctionsDetails", async () => {
       markdownDescription: "fffd",
       actions: [],
     })
-    const component = render(
+    render(
       <FormProposalLayout>
         <NewProposalFunctionsDetails />
       </FormProposalLayout>,
@@ -78,93 +82,79 @@ describe("NewProposalFunctionsDetails", async () => {
     mockRouterPush.mockClear()
   }) // redirects to /proposals/new if one of the required fields is not available
 
-  it("renders correctly - show error on submit as calldata is not available", async () => {
-    const mockSetData = vi.fn()
-    spyOnUseProposalFormStore.mockReturnValue({
-      title: "Title",
-      shortDescription: "Description",
-      markdownDescription: "fffd",
-      actions: [
-        {
-          ...transferAction,
-          calldata: undefined,
-        },
-      ],
-      setData: mockSetData,
+  describe("actions with calldata not available", () => {
+    beforeEach(() => {
+      spyOnUseProposalFormStore.mockReturnValue({
+        title: "Title",
+        shortDescription: "Description",
+        markdownDescription: "fffd",
+        actions: [
+          {
+            ...transferAction,
+            calldata: undefined,
+          },
+        ],
+        setData: mockSetData,
+      })
     })
-    render(
-      <FormProposalLayout>
-        <NewProposalFunctionsDetails />
-      </FormProposalLayout>,
-    )
+    it("renders correctly - show error on submit", async () => {
+      render(
+        <FormProposalLayout>
+          <NewProposalFunctionsDetails />
+        </FormProposalLayout>,
+      )
 
-    await screen.findByText("What is your proposal about?")
-    await screen.findByText("Basic information")
-    const continueButton = await screen.findByTestId("continue")
-    const goBack = await screen.findByTestId("go-back")
+      await screen.findByText("What is your proposal about?")
+      await screen.findByText("Basic information")
+      const continueButton = await screen.findByTestId("continue")
+      const goBack = await screen.findByTestId("go-back")
 
-    await screen.findByTestId("proposal-actions-container")
-    await screen.findByText("Executable functions")
-    const field = await screen.findByTestId(
-      `executable-card-${0}-${transferAction.contractAddress}-${transferAction.name}`,
-    )
-    expect(screen.queryByTestId(`generated-function-to-call-${0}-error`)).not.toBeInTheDocument()
-    fireEvent.click(goBack)
-    expect(mockBack).toHaveBeenCalled()
+      await screen.findByTestId("proposal-actions-container")
+      await screen.findByText("Executable functions")
+      await screen.findByTestId(`executable-card-${0}-${transferAction.contractAddress}-${transferAction.name}`)
+      expect(screen.queryByTestId(`generated-function-to-call-${0}-error`)).not.toBeInTheDocument()
+      fireEvent.click(goBack)
+      expect(mockBack).toHaveBeenCalled()
 
-    fireEvent.click(continueButton)
-    await waitFor(() => {
-      expect(mockRouterPush).not.toHaveBeenCalled()
-      expect(screen.queryByTestId(`generated-function-to-call-${0}-error`)).toBeInTheDocument()
-    })
-  }) // renders correctly - show error if fields are not filled
+      fireEvent.click(continueButton)
+      await waitFor(() => {
+        expect(mockRouterPush).not.toHaveBeenCalled()
+        expect(screen.queryByTestId(`generated-function-to-call-${0}-error`)).toBeInTheDocument()
+      })
+    }) // renders correctly - show error if fields are not filled
 
-  //TODO: flacky for some reason
-  //   it("renders correctly - can proceed if inputs are filled when calldata in not available", async () => {
-  //     const mockSetData = vi.fn()
-  //     spyOnUseProposalFormStore.mockReturnValue({
-  //       title: "Title",
-  //       shortDescription: "Description",
-  //       markdownDescription: "fffd",
-  //       actions: [
-  //         {
-  //           ...transferAction,
-  //           calldata: undefined,
-  //         },
-  //       ],
-  //       setData: mockSetData,
-  //     })
-  //     render(
-  //       <FormProposalLayout>
-  //         <NewProposalFunctionsDetails />
-  //       </FormProposalLayout>,
-  //     )
+    it("renders correctly - can proceed if inputs are filled", async () => {
+      render(
+        <FormProposalLayout>
+          <NewProposalFunctionsDetails />
+        </FormProposalLayout>,
+      )
 
-  //     await screen.findByText("What is your proposal about?")
-  //     await screen.findByText("Basic information")
-  //     const continueButton = await screen.findByTestId("continue")
+      await screen.findByText("What is your proposal about?")
+      await screen.findByText("Basic information")
+      const continueButton = await screen.findByTestId("continue")
 
-  //     await screen.findByTestId("proposal-actions-container")
-  //     await screen.findByText("Executable functions")
-  //     const field = await screen.findByTestId(
-  //       `executable-card-${0}-${transferAction.contractAddress}-${transferAction.name}`,
-  //     )
-  //     for (const [index, input] of transferAction.abiDefinition.inputs.entries()) {
-  //       await fillGeneratedInput(index, input.type)
-  //     }
-  //     fireEvent.click(continueButton)
-  //     for (const [index, input] of transferAction.abiDefinition.inputs.entries()) {
-  //       await waitFor(() => {
-  //         expect(screen.queryByTestId(`generated-function-to-call-${index}-error`)).not.toBeInTheDocument()
-  //       })
-  //     }
-  //     await waitFor(() => {
-  //       expect(mockRouterPush).toHaveBeenCalledWith("/proposals/new/form/content")
-  //     })
-  //   }) // renders correctly - show error if fields are not filled
+      await screen.findByTestId("proposal-actions-container")
+      await screen.findByText("Executable functions")
+      const field = await screen.findByTestId(
+        `executable-card-${0}-${transferAction.contractAddress}-${transferAction.name}`,
+      )
+      for (const [index, input] of transferAction.abiDefinition.inputs.entries()) {
+        await fillGeneratedInput(index, input.type)
+      }
+      fireEvent.click(continueButton)
+      for (const [index, input] of transferAction.abiDefinition.inputs.entries()) {
+        await waitFor(() => {
+          expect(screen.queryByTestId(`generated-function-to-call-${index}-error`)).not.toBeInTheDocument()
+        })
+      }
+      await waitFor(() => {
+        expect(mockRouterPush).toHaveBeenCalledWith("/proposals/new/form/content")
+      })
+    }) // renders correctly - show error if fields are not filled
+  }) // actions with calldata is not available
 
   it("renders correctly - proceed correctly on submit  as calldata is already available", async () => {
-    const mockSetData = vi.fn()
     spyOnUseProposalFormStore.mockReturnValue({
       title: "Title",
       shortDescription: "Description",
@@ -200,7 +190,6 @@ describe("NewProposalFunctionsDetails", async () => {
   }) // renders correctly - proceed correctly as calldata is already available
 
   it("renders correctly - can add and remove another transaction", async () => {
-    const mockSetData = vi.fn()
     spyOnUseProposalFormStore.mockReturnValue({
       title: "Title",
       shortDescription: "Description",
@@ -237,11 +226,11 @@ describe("NewProposalFunctionsDetails", async () => {
       expect(
         screen.queryByTestId(`executable-card-${1}-${transferAction.contractAddress}-${transferAction.name}`),
       ).toBeInTheDocument()
-      const removeTx = await screen.findByTestId(
-        `executable-card-${1}-${transferAction.contractAddress}-${transferAction.name}__remove-tx`,
-      )
-      fireEvent.click(removeTx)
     })
+    const removeTx = await screen.findByTestId(
+      `executable-card-${1}-${transferAction.contractAddress}-${transferAction.name}__remove-tx`,
+    )
+    fireEvent.click(removeTx)
 
     await waitFor(async () => {
       expect(

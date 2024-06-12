@@ -1,5 +1,5 @@
 import { DotSymbol } from "@/components"
-import { useProposalFormStore } from "@/store/useProposalFormStore"
+import { useProposalFormStore } from "@/store"
 import {
   Box,
   Card,

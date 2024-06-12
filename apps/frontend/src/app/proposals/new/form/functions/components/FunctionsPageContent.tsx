@@ -13,7 +13,7 @@ import {
   Stack,
 } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
-import { useProposalFormStore } from "@/store/useProposalFormStore"
+import { useProposalFormStore } from "@/store"
 import { getEnvWhitelistedContractsWithFunctions } from "@/constants"
 import { useRouter } from "next/navigation"
 
