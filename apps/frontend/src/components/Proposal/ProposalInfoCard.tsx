@@ -25,14 +25,7 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposal, type }) => {
   const { t } = useTranslation()
 
   return (
-    <Card
-      flex={1}
-      w="full"
-      maxW={["full", "full", "85%", "80%"]}
-      backgroundColor="#FFFFFF"
-      variant={"baseWithBorder"}
-      my={4}
-      gap={2}>
+    <Card flex={1} w="full" maxW={["full", "full", "85%", "80%"]} variant={"baseWithBorder"} my={4} gap={2}>
       <CardHeader>
         <Flex justifyContent="space-between" alignItems="center">
           <StatusBadge type={type} />

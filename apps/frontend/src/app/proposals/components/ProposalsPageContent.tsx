@@ -8,6 +8,15 @@ import {
 } from "@/api"
 import { ProposalInfoCard } from "@/components"
 import {
+  useProposalsEvents,
+  useActiveProposals,
+  useIncomingProposals,
+  usePastProposals,
+  useCurrentBlock,
+  ProposalState,
+} from "@/api"
+import { ProposalInfoCard } from "@/components"
+import {
   VStack,
   HStack,
   Icon,
@@ -25,6 +34,8 @@ import {
   Spinner,
   Button,
   GridItem,
+  GridItem,
+  VStack,
 } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
