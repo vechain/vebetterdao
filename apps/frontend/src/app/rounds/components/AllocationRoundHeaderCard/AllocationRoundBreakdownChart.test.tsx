@@ -8,8 +8,8 @@ describe("AllocationRoundBreakdownChart", () => {
     //@ts-ignore
     spyOnUseAllocationAmount.mockReturnValueOnce({ data: undefined, isLoading: true })
     const screen = render(<AllocationRoundBreakdownChart roundId="1" />)
+    await screen.findByTestId("allocation-round-breakdown-chart")
     await screen.findByText("Total allocation to distribute") //should render the loading text
-    screen.debug()
   }) //loading - should render correctly
 
   it("not loading with data - should render correctly", async () => {
@@ -23,7 +23,7 @@ describe("AllocationRoundBreakdownChart", () => {
       isLoading: false,
     })
     const screen = render(<AllocationRoundBreakdownChart roundId="1" />)
+    await screen.findByTestId("allocation-round-breakdown-chart")
     await screen.findByText("Total allocation to distribute") //should render the loading text
-    screen.debug()
   }) //not loading with data - should render correctly
 }) //AllocationRoundBreakdownChart

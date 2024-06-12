@@ -59,7 +59,7 @@ export const AllocationRoundBreakdownChart = ({ roundId }: Props) => {
   }, [baseAmountsPercentage, roundAmount, treasuryColor, votingRewardsColor, appsColor])
 
   return (
-    <Card variant="filled" w="full" flex={1}>
+    <Card variant="filled" w="full" flex={1} data-testid="allocation-round-breakdown-chart">
       <CardBody as={VStack} justify={"space-between"}>
         <Box w="full">
           <HStack spacing={2} align="center">

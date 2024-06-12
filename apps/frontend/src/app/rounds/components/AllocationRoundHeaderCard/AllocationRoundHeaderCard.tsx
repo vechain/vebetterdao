@@ -61,23 +61,19 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
   }, [data?.voteEndTimestamp, isFinished])
 
   return (
-    <Card w="full" borderRadius={"3xl"} variant={"baseWithBorder"}>
+    <Card w="full" borderRadius={"3xl"} variant={"baseWithBorder"} data-testid="allocation-round-header-card">
       <CardBody>
         <Stack direction={["column", "row"]} justify="space-between" spacing={12} w="full" alignItems={"stretch"}>
           <VStack spacing={4} align="flex-start" flex={2}>
             <VStack spacing={2} align="flex-start">
-              <Skeleton isLoaded={!isLoading}>
-                <Text color="#6A6A6A" fontSize={["md"]} textTransform={"uppercase"} fontWeight={600}>
-                  {t("Round #{{round}}", {
-                    round: data?.roundId,
-                  })}
-                </Text>
-              </Skeleton>
-              <Skeleton isLoaded={!isLoading}>
-                <Heading size={["lg", "xl"]} data-testid="round-title">
-                  {t("Allocations")}
-                </Heading>
-              </Skeleton>
+              <Text color="#6A6A6A" fontSize={["md"]} textTransform={"uppercase"} fontWeight={600}>
+                {t("Round #{{round}}", {
+                  round: roundId,
+                })}
+              </Text>
+              <Heading size={["lg", "xl"]} data-testid="round-title">
+                {t("Allocations")}
+              </Heading>
               <AllocationStateBadge roundId={roundId} />
             </VStack>
 
@@ -126,30 +122,35 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                     </HStack>
                   </Skeleton>
                 </Box>
-                <Box>
-                  <Text color="#6A6A6A" fontSize={["lg", "lg", "md"]} fontWeight={400}>
-                    {t("Your vote")}
-                  </Text>
-                  <Skeleton isLoaded={!hasVotedLoading && !userVotesLoading}>
-                    <HStack spacing={2}>
-                      <Icon as={hasVoted ? VOT3Icon : MdHowToVote} boxSize={4} color={"#252525"} />
-                      <Text fontSize={["lg", "lg", "md"]} color={"#252525"} fontWeight={400}>
-                        {hasVoted ? compactFormatter.format(totalVotesCast) : "You have not voted"}
-                      </Text>
-                    </HStack>
-                  </Skeleton>
-                </Box>
+                {!!account && (
+                  <Box data-testid="your-vote-box">
+                    <Text color="#6A6A6A" fontSize={["lg", "lg", "md"]} fontWeight={400}>
+                      {t("Your vote")}
+                    </Text>
+                    <Skeleton isLoaded={!hasVotedLoading && !userVotesLoading}>
+                      <HStack spacing={2}>
+                        <Icon as={hasVoted ? VOT3Icon : MdHowToVote} boxSize={4} color={"#252525"} />
+                        <Text fontSize={["lg", "lg", "md"]} color={"#252525"} fontWeight={400}>
+                          {hasVoted ? compactFormatter.format(totalVotesCast) : "You have not voted"}
+                        </Text>
+                      </HStack>
+                    </Skeleton>
+                  </Box>
+                )}
               </Stack>
-              <Button
-                variant={"primaryAction"}
-                as="a"
-                href="#user-votes"
-                size={"lg"}
-                colorScheme={"primary"}
-                w={["full", "auto"]}
-                leftIcon={<Icon as={MdHowToVote} boxSize={4} />}>
-                {t("Cast your vote")}
-              </Button>
+              {!!account && !hasVoted && !isFinished && (
+                <Button
+                  data-testid="cast-your-vote-button"
+                  variant={"primaryAction"}
+                  as="a"
+                  href="#user-votes"
+                  size={"lg"}
+                  colorScheme={"primary"}
+                  w={["full", "auto"]}
+                  leftIcon={<Icon as={MdHowToVote} boxSize={4} />}>
+                  {t("Cast your vote")}
+                </Button>
+              )}
             </Stack>
           </VStack>
           <VStack flex={1}>
