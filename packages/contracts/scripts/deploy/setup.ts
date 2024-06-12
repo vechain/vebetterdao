@@ -3,6 +3,7 @@ import { SeedStrategy, getTestKeys, getSeedAccounts } from "../helpers/seedAccou
 import { bootstrapEmissions } from "../helpers/emissions"
 import { App, addXDapps } from "../helpers/xApp"
 import { airdropB3tr } from "../helpers/airdrop"
+import { shouldRunSimulation } from "@repo/config/contracts"
 
 export const setupLocalEnvironment = async (b3tr: B3TR, xAllocationVoting: XAllocationVoting, emissions: Emissions) => {
   const start = performance.now()
@@ -53,9 +54,11 @@ export const setupLocalEnvironment = async (b3tr: B3TR, xAllocationVoting: XAllo
   const xAllocAddress = await xAllocationVoting.getAddress()
   await addXDapps(xAllocAddress, admin, APPS)
 
-  // Seed the first 5 accounts with some tokens
-  const seedAccounts = getSeedAccounts(SeedStrategy.FIXED, 5, 0)
-  await airdropB3tr(treasury, await b3tr.getAddress(), seedAccounts)
+  // Seed the first 5 accounts with some tokens (only run if not simulating rounds)
+  if (!shouldRunSimulation()) {
+    const seedAccounts = getSeedAccounts(SeedStrategy.FIXED, 5, 0)
+    await airdropB3tr(treasury, await b3tr.getAddress(), seedAccounts)
+  }
 
   const end = performance.now()
   console.log(`Setup complete in ${end - start}ms`)
