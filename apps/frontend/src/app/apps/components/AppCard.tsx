@@ -1,7 +1,19 @@
 import { XApp, useXAppMetadata } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
-import { Card, CardBody, VStack, HStack, Skeleton, IconButton, Image, Text, Box, useDisclosure } from "@chakra-ui/react"
+import {
+  Card,
+  CardBody,
+  VStack,
+  HStack,
+  Skeleton,
+  IconButton,
+  Image,
+  Text,
+  Box,
+  useDisclosure,
+  CardFooter,
+} from "@chakra-ui/react"
 import { FaEllipsisVertical } from "react-icons/fa6"
 import { AppCardInnerDetails } from "./AppCardInnerDetails"
 import { useBreakpoints } from "@/hooks"
@@ -28,7 +40,7 @@ export const AppCard = ({ xApp }: Props) => {
 
   return (
     <Card variant={"baseWithBorder"} w="full">
-      <Box w="full" position={"relative"} h={100}>
+      <Box w="full" position={"relative"} h={200}>
         <Skeleton w="full" h="full" isLoaded={!isBannerLoading}>
           <Image
             alt={`Banner for ${appMetadata?.name}`}
@@ -99,9 +111,11 @@ export const AppCard = ({ xApp }: Props) => {
               </Text>
             </Skeleton>
           </VStack>
-          <AppCardInnerDetails xApp={xApp} />
         </VStack>
       </CardBody>
+      <CardFooter>
+        <AppCardInnerDetails xApp={xApp} />
+      </CardFooter>
     </Card>
   )
 }
