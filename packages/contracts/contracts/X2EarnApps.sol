@@ -75,7 +75,7 @@ contract X2EarnApps is
     address[] memory _admins,
     address _upgrader,
     address _governor
-  ) public initializer {
+  ) external initializer {
     __X2EarnApps_init();
     __Administration_init();
     __AppsStorage_init();

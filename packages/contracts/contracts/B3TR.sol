@@ -52,13 +52,13 @@ contract B3TR is ERC20Capped, ERC20Pausable, AccessControl {
 
   /// @notice Pauses all token transfers and minting actions
   /// @dev Accessible only by accounts with the default admin role
-  function pause() public onlyRole(PAUSER_ROLE) {
+  function pause() external onlyRole(PAUSER_ROLE) {
     _pause();
   }
 
   /// @notice Resumes all token transfers and minting actions
   /// @dev Accessible only by accounts with the default admin role
-  function unpause() public onlyRole(PAUSER_ROLE) {
+  function unpause() external onlyRole(PAUSER_ROLE) {
     _unpause();
   }
 

@@ -46,7 +46,7 @@ contract TimeLock is Initializable, TimelockControllerUpgradeable, UUPSUpgradeab
     address[] memory executors,
     address admin,
     address upgrader
-  ) public initializer {
+  ) external initializer {
     __TimelockController_init(minDelay, proposers, executors, admin);
     __UUPSUpgradeable_init();
 

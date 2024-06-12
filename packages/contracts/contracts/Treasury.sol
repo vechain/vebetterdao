@@ -163,7 +163,7 @@ contract Treasury is
   /// @dev Only governance can transfer VTHO when the contract is not paused
   /// @param _to Recipient of the VTHO
   /// @param _value Amount of VTHO to transfer
-  function transferVTHO(address _to, uint256 _value) public onlyGovernanceWhenNotPaused {
+  function transferVTHO(address _to, uint256 _value) external onlyGovernanceWhenNotPaused {
     TreasuryStorage storage $ = _getTreasuryStorage();
 
     require($.transferLimit[VTHO] >= _value, "Treasury: transfer limit exceeded");
@@ -178,7 +178,7 @@ contract Treasury is
   /// @dev Only governance can transfer B3TR when the contract is not paused
   /// @param _to Recipient of the B3TR
   /// @param _value Amount of B3TR to transfer
-  function transferB3TR(address _to, uint256 _value) public onlyGovernanceWhenNotPaused {
+  function transferB3TR(address _to, uint256 _value) external onlyGovernanceWhenNotPaused {
     TreasuryStorage storage $ = _getTreasuryStorage();
 
     require($.transferLimit[$.B3TR] >= _value, "Treasury: transfer limit exceeded");
@@ -192,7 +192,7 @@ contract Treasury is
   /// @dev Only governance can transfer VOT3 when the contract is not paused
   /// @param _to Recipient of the VOT3
   /// @param _value Amount of VOT3 to transfer
-  function transferVOT3(address _to, uint256 _value) public onlyGovernanceWhenNotPaused {
+  function transferVOT3(address _to, uint256 _value) external onlyGovernanceWhenNotPaused {
     TreasuryStorage storage $ = _getTreasuryStorage();
 
     require($.transferLimit[$.VOT3] >= _value, "Treasury: transfer limit exceeded");
@@ -206,7 +206,7 @@ contract Treasury is
   /// @dev Only governance can transfer VET when the contract is not paused
   /// @param _to Recipient of the VET
   /// @param _value Amount of VET to transfer
-  function transferVET(address _to, uint256 _value) public onlyGovernanceWhenNotPaused nonReentrant {
+  function transferVET(address _to, uint256 _value) external onlyGovernanceWhenNotPaused nonReentrant {
     TreasuryStorage storage $ = _getTreasuryStorage();
 
     require($.transferLimitVET >= _value, "Treasury: transfer limit exceeded");
@@ -221,7 +221,7 @@ contract Treasury is
   /// @param _token The ERC20 token to transfer
   /// @param _to Recipient of the ERC20 token
   /// @param _value Amount of the ERC20 token to transfer
-  function transferTokens(address _token, address _to, uint256 _value) public onlyGovernanceWhenNotPaused {
+  function transferTokens(address _token, address _to, uint256 _value) external onlyGovernanceWhenNotPaused {
     TreasuryStorage storage $ = _getTreasuryStorage();
 
     require($.transferLimit[_token] >= _value, "Treasury: transfer limit exceeded");
@@ -236,7 +236,7 @@ contract Treasury is
   /// @param _nft The ERC721 token to transfer
   /// @param _to Recipient of the ERC721 token
   /// @param _tokenId The id of the ERC721 token to transfer
-  function transferNFT(address _nft, address _to, uint256 _tokenId) public onlyGovernanceWhenNotPaused {
+  function transferNFT(address _nft, address _to, uint256 _tokenId) external onlyGovernanceWhenNotPaused {
     IERC721 nft = IERC721(_nft);
     require(nft.ownerOf(_tokenId) == address(this), "Treasury: dao does not own the NFT");
     nft.safeTransferFrom(address(this), _to, _tokenId);
@@ -245,7 +245,7 @@ contract Treasury is
   /// @notice Converts a specified amount of B3TR to VOT3
   /// @dev Only governance can convert B3TR when the contract is not paused
   /// @param _b3trAmount Amount of B3TR to convert
-  function convertB3TR(uint256 _b3trAmount) public onlyGovernanceWhenNotPaused {
+  function convertB3TR(uint256 _b3trAmount) external onlyGovernanceWhenNotPaused {
     IERC20 b3tr = _getERC20Contract(b3trAddress());
     IVOT3 vot3 = IVOT3(vot3Address());
     require(b3tr.balanceOf(address(this)) >= _b3trAmount, "Treasury: insufficient B3TR balance");
@@ -256,7 +256,7 @@ contract Treasury is
   /// @notice Converts a specified amount of VOT3 to B3TR
   /// @dev Only governance can convert VOT3 when the contract is not paused
   /// @param _vot3Amount Amount of VOT3 to convert
-  function convertVOT3(uint256 _vot3Amount) public onlyGovernanceWhenNotPaused {
+  function convertVOT3(uint256 _vot3Amount) external onlyGovernanceWhenNotPaused {
     IVOT3 vot3 = IVOT3(vot3Address());
     require(vot3.convertedB3trOf(address(this)) >= _vot3Amount, "Treasury: insufficient B3TR converted");
     vot3.convertToB3TR(_vot3Amount);
@@ -266,14 +266,14 @@ contract Treasury is
 
   /// @notice Sets the transfer limit for VET
   /// @param _transferLimitVET The new transfer limit for VET
-  function setTransferLimitVET(uint256 _transferLimitVET) public onlyAdminOrGovernance {
+  function setTransferLimitVET(uint256 _transferLimitVET) external onlyAdminOrGovernance {
     TreasuryStorage storage $ = _getTreasuryStorage();
     $.transferLimitVET = _transferLimitVET;
   }
 
   /// @notice Sets the transfer limit for any token
   /// @param _token The token to set the transfer limit for
-  function setTransferLimitToken(address _token, uint256 _transferLimit) public onlyAdminOrGovernance {
+  function setTransferLimitToken(address _token, uint256 _transferLimit) external onlyAdminOrGovernance {
     TreasuryStorage storage $ = _getTreasuryStorage();
     $.transferLimit[_token] = _transferLimit;
   }
@@ -281,44 +281,44 @@ contract Treasury is
   // ---------- Getters ---------- //
 
   /// @notice Retrieves the balance of VTHO held by the contract
-  function getVTHOBalance() public view returns (uint256) {
+  function getVTHOBalance() external view returns (uint256) {
     IERC20 vtho = _getERC20Contract(VTHO);
     return vtho.balanceOf(address(this));
   }
 
   /// @notice Retrieves the balance of B3TR held by the contract
-  function getB3TRBalance() public view returns (uint256) {
+  function getB3TRBalance() external view returns (uint256) {
     IERC20 b3tr = _getERC20Contract(b3trAddress());
     return b3tr.balanceOf(address(this));
   }
 
   /// @notice Retrieves the balance of VOT3 held by the contract
-  function getVOT3Balance() public view returns (uint256) {
+  function getVOT3Balance() external view returns (uint256) {
     IERC20 vot3 = _getERC20Contract(vot3Address());
     return vot3.balanceOf(address(this));
   }
 
   /// @notice Retrieves the balance of VET held by the contract
-  function getVETBalance() public view returns (uint256) {
+  function getVETBalance() external view returns (uint256) {
     return address(this).balance;
   }
 
   /// @notice Retrieves the balance of any ERC20 token held by the contract
   /// @param _token The ERC20 token to check balance for
-  function getTokenBalance(address _token) public view returns (uint256) {
+  function getTokenBalance(address _token) external view returns (uint256) {
     IERC20 token = _getERC20Contract(_token);
     return token.balanceOf(address(this));
   }
 
   /// @notice Retrieves the balance of any ERC721 token held by the contract
   /// @param _nft The ERC721 token to check balance for
-  function getCollectionNFTBalance(address _nft) public view returns (uint256) {
+  function getCollectionNFTBalance(address _nft) external view returns (uint256) {
     IERC721 nft = IERC721(_nft);
     return nft.balanceOf(address(this));
   }
 
   /// @notice Retrieves the current version of the contract
-  function version() public pure virtual returns (string memory) {
+  function version() external pure virtual returns (string memory) {
     return "1";
   }
 
@@ -334,12 +334,12 @@ contract Treasury is
     return $.VOT3;
   }
 
-  function getTransferLimitVET() public view returns (uint256) {
+  function getTransferLimitVET() external view returns (uint256) {
     TreasuryStorage storage $ = _getTreasuryStorage();
     return $.transferLimitVET;
   }
 
-  function getTransferLimitToken(address _token) public view returns (uint256) {
+  function getTransferLimitToken(address _token) external view returns (uint256) {
     TreasuryStorage storage $ = _getTreasuryStorage();
     return $.transferLimit[_token];
   }

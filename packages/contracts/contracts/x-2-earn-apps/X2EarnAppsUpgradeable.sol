@@ -128,7 +128,7 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
    * @dev Machine-readable description of the clock as specified in EIP-6372.
    */
   // solhint-disable-next-line func-name-mixedcase
-  function CLOCK_MODE() public view virtual returns (string memory) {
+  function CLOCK_MODE() external view virtual returns (string memory) {
     // Check that the clock was not modified
     if (clock() != Time.blockNumber()) {
       revert ERC6372InconsistentClock();
