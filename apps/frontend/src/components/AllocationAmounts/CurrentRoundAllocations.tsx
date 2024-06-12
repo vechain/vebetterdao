@@ -56,7 +56,7 @@ export const CurrentRoundAllocations = ({ roundId }: Props) => {
 
     const totalAmount = data.reduce((acc, app) => acc + Number(app.amount), 0)
 
-    return BigInt(roundAmount.voteXAllocations) - BigInt(totalAmount)
+    return Number(roundAmount.voteXAllocations) - Number(totalAmount)
   }, [roundAmount, data])
 
   const isUnallocatedLoading = roundAmountLoading || xAppsClaimableAmounts.some(query => query.isLoading)
@@ -66,7 +66,7 @@ export const CurrentRoundAllocations = ({ roundId }: Props) => {
       <CardHeader>
         <HStack justify={"space-between"} w="full">
           <Heading size="md">Round #{roundId} allocations </Heading>
-          {round?.state === "0" && (
+          {round?.state === 0 && (
             <BaseTooltip text={"Round is still active, final results could change if quorum is not reached"}>
               <Tag colorScheme="inherit" size={"lg"} style={{ cursor: "default" }}>
                 <HStack spacing={1} align={"center"}>
@@ -92,7 +92,7 @@ export const CurrentRoundAllocations = ({ roundId }: Props) => {
             <HStack alignItems={"baseline"} spacing={1}>
               <Skeleton isLoaded={!isUnallocatedLoading}>
                 <Text size="md" fontWeight={"600"} lineHeight={"16px"}>
-                  {compactFormatter.format(Number(unallocatedAmount))}
+                  {compactFormatter.format(unallocatedAmount)}
                 </Text>
               </Skeleton>
               <Text fontSize={"2xs"} fontWeight={"700"} lineHeight={"16x"}>

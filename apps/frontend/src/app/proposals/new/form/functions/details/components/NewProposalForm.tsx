@@ -5,10 +5,11 @@ import { useForm, useFieldArray, Controller } from "react-hook-form"
 import { abi } from "thor-devkit"
 import { ExecutableFunctionCard } from "./ExecutableFunctionCard"
 import { ProposalFormStoreState, useProposalFormStore } from "@/store/useProposalFormStore"
-import MDEditor from "@uiw/react-md-editor"
-import rehypeSanitize from "rehype-sanitize"
 import { FunctionParamsField } from "@/components"
 import { ethers } from "ethers"
+import { useTranslation } from "react-i18next"
+import MDEditor from "@uiw/react-md-editor"
+import rehypeSanitize from "rehype-sanitize"
 
 export type FormData = {
   title: string
@@ -17,6 +18,16 @@ export type FormData = {
   markdownDescription: string
 }
 
+/**
+ * This component is a form to create a new proposal
+ * @param onSubmit - function to call when the form is submitted
+ * @param isDisabled - if the form should be disabled
+ * @param formId - the form id
+ * @param renderTitle - if the title field should be rendered
+ * @param renderDescription - if the description field should be rendered
+ * @param renderMarkdownDescription - if the markdown description field should be rendered
+ * @param renderActions - if the actions field should be rendered
+ */
 type Props = {
   onSubmit?: (data: FormData) => void
   isDisabled?: boolean
@@ -25,7 +36,14 @@ type Props = {
   renderDescription?: boolean
   renderMarkdownDescription?: boolean
   renderActions?: boolean
+  canAddAnotherTransaction?: boolean
 }
+
+/**
+ * This component read/write from/to useFormStore and renders a form to create a new proposal
+ * @param see {@link Props}
+ * @returns
+ */
 export const NewProposalForm: React.FC<Props> = ({
   onSubmit,
   isDisabled = false,
@@ -34,17 +52,26 @@ export const NewProposalForm: React.FC<Props> = ({
   renderDescription = true,
   renderMarkdownDescription = false,
   renderActions = true,
+  canAddAnotherTransaction = true,
 }) => {
+  const { t } = useTranslation()
   const { actions, setData, title, shortDescription, markdownDescription } = useProposalFormStore()
-  const { handleSubmit, register, control, formState, setValue } = useForm<FormData>()
+  const { handleSubmit, register, control, formState, setValue } = useForm<FormData>({
+    defaultValues: {
+      title: title ?? "",
+      description: shortDescription ?? "",
+      actions: [],
+      markdownDescription: markdownDescription ?? "",
+    },
+  })
 
   const { errors } = formState
-  const { fields } = useFieldArray({
+  const { fields, insert, remove } = useFieldArray({
     control, // control props comes from useForm (optional: if you are using FormContext)
     name: "actions", // unique name for your Field Array
   })
 
-  //parse actions from store and set them in the form, decoding calldata inf available
+  //parse actions from store and set them in the form, decoding calldata if available
   useEffect(() => {
     const formActions = actions.map(action => {
       const _abi = new abi.Function(action.abiDefinition)
@@ -74,7 +101,7 @@ export const NewProposalForm: React.FC<Props> = ({
     setValue("title", title ?? "")
     setValue("description", shortDescription ?? "")
     setValue("markdownDescription", markdownDescription ?? "")
-  }, [actions, title, shortDescription, setValue])
+  }, [actions, title, shortDescription, setValue, markdownDescription])
 
   const onFormSubmit = useCallback(
     (data: FormData) => {
@@ -114,12 +141,12 @@ export const NewProposalForm: React.FC<Props> = ({
       <VStack spacing={8} align="flex-start" w="full">
         {renderTitle && (
           <FormControl isInvalid={!!errors.title}>
-            <FormLabel>Proposal title</FormLabel>
+            <FormLabel>{t("Proposal title")}</FormLabel>
             <Input
               isDisabled={isDisabled}
-              placeholder="Enter proposal title"
+              placeholder={t("Enter proposal title")}
               {...register("title", {
-                required: "This field is required",
+                required: t("This field is required"),
               })}
             />
             {errors.title && <FormErrorMessage>{errors.title.message}</FormErrorMessage>}
@@ -127,12 +154,12 @@ export const NewProposalForm: React.FC<Props> = ({
         )}
         {renderDescription && (
           <FormControl isInvalid={!!errors.description}>
-            <FormLabel>Proposal description</FormLabel>
+            <FormLabel>{t("Proposal description")}</FormLabel>
             <Textarea
               isDisabled={isDisabled}
-              placeholder="Enter proposal description"
+              placeholder={t("Enter proposal description")}
               {...register("description", {
-                required: "This field is required",
+                required: t("This field is required"),
               })}
             />
             {errors.description && <FormErrorMessage>{errors.description.message}</FormErrorMessage>}
@@ -141,7 +168,7 @@ export const NewProposalForm: React.FC<Props> = ({
         {renderMarkdownDescription && (
           <FormControl w="full" mt={4} maxH={400} h={400} isInvalid={!!errors.markdownDescription}>
             <FormLabel>
-              <Heading size="md">Your proposal</Heading>
+              <Heading size="md">{t("Your proposal")}</Heading>
             </FormLabel>
             <Controller
               name="markdownDescription"
@@ -153,7 +180,7 @@ export const NewProposalForm: React.FC<Props> = ({
                   }}
                   {...field}
                   height={"100%"}
-                  value={markdownDescription}
+                  value={field.value}
                   onChange={field.onChange}
                   previewOptions={{
                     rehypePlugins: [[rehypeSanitize]],
@@ -167,19 +194,36 @@ export const NewProposalForm: React.FC<Props> = ({
       </VStack>
 
       {renderActions && (
-        <VStack spacing={4} align="flex-start" w="full" mt={4}>
-          <Heading size="md">Executable functions</Heading>
-          {fields?.map((field, index) => (
-            <ExecutableFunctionCard
-              key={field.id}
-              field={field}
-              index={index}
-              register={register}
-              control={control}
-              errors={errors}
-              isDisabled={isDisabled}
-            />
-          ))}
+        <VStack spacing={8} align="flex-start" w="full" mt={12}>
+          <Heading size="md">{t("Executable functions")}</Heading>
+          {fields?.map((field, index) => {
+            const onAddAnotherTransactionClick = () => {
+              insert(index + 1, {
+                name: field.name,
+                icon: field.icon,
+                description: field.description,
+                params: field.params,
+                abiDefinition: field.abiDefinition,
+                contractAddress: field.contractAddress,
+                calldata: undefined,
+              })
+            }
+
+            const wasAddedLater = fields.filter((_field, i) => _field.name === field.name && i < index).length > 0
+            return (
+              <ExecutableFunctionCard
+                key={field.id}
+                field={field}
+                index={index}
+                register={register}
+                control={control}
+                errors={errors}
+                isDisabled={isDisabled}
+                {...(canAddAnotherTransaction && { onAddAnotherTransactionClick: onAddAnotherTransactionClick })}
+                {...(wasAddedLater && { onRemoveTransactionClick: () => remove(index) })}
+              />
+            )
+          })}
         </VStack>
       )}
     </form>

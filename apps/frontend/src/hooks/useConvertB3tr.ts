@@ -1,19 +1,16 @@
 import {
   getB3TrBalanceQueryKey,
-  useB3trTokenDetails,
   buildConvertB3trTx,
   getVot3BalanceQueryKey,
   getVotesQueryKey,
   buildB3trApprovesTx,
   getB3TrTokenDetailsQueryKey,
 } from "@/api"
-import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback, useMemo } from "react"
 import { useConnex, useWallet } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
-import BigNumber from "bignumber.js"
 import { removingExcessDecimals } from "@/utils/MathUtils"
 
 const config = getConfig()
@@ -39,19 +36,16 @@ export const useConvertB3tr = ({
 }: useMintB3trProps): UseSendTransactionReturnValue => {
   const { thor } = useConnex()
   const { account } = useWallet()
-  const toast = useToast()
   const queryClient = useQueryClient()
 
-  const { data: tokenDetails } = useB3trTokenDetails()
-  const contractAmount = useMemo(() => removingExcessDecimals(amount, tokenDetails?.decimals), [amount, tokenDetails])
+  const contractAmount = useMemo(() => removingExcessDecimals(amount), [amount])
 
   const buildClauses = useCallback(() => {
     if (!contractAmount) throw new Error("amount is required")
-    if (!tokenDetails) throw new Error("tokenDetails is required")
-    const approveClause = buildB3trApprovesTx(thor, contractAmount, config.vot3ContractAddress, tokenDetails.decimals)
-    const convertB3trClause = buildConvertB3trTx(thor, contractAmount, tokenDetails.decimals)
+    const approveClause = buildB3trApprovesTx(thor, contractAmount, config.vot3ContractAddress)
+    const convertB3trClause = buildConvertB3trTx(thor, contractAmount)
     return [approveClause, convertB3trClause]
-  }, [thor, tokenDetails, contractAmount])
+  }, [thor, contractAmount])
 
   //Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {
@@ -101,7 +95,7 @@ export const useConvertB3tr = ({
     }
 
     onSuccess?.()
-  }, [invalidateCache, queryClient, toast, onSuccess, account, amount])
+  }, [invalidateCache, queryClient, onSuccess, account])
 
   const result = useSendTransaction({
     signerAccount: account,

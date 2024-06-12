@@ -1,8 +1,6 @@
 import { Card, CardBody, VStack, Image, Heading, Button, background } from "@chakra-ui/react"
 import { FaPlus } from "react-icons/fa6"
 import { useRouter } from "next/navigation"
-import image from "next/image"
-import { url } from "inspector"
 
 export const AddNewAppCard = () => {
   const router = useRouter()
@@ -21,7 +19,7 @@ export const AddNewAppCard = () => {
       }}>
       <CardBody>
         <VStack spacing={8} align="center" h="full" justify={"center"} mx={[16, 24, 32]} textAlign={"center"}>
-          <Image src="/images/hand-plant.svg" boxSize={32} />
+          <Image src="/images/hand-plant.svg" boxSize={32} alt="Add new App image" />
           <Heading size="md">Do you have a dApp to join the VeBetter DAO ecosystem?</Heading>
           <Button colorScheme="blue" onClick={navigateToAppDetail} rounded={"full"} leftIcon={<FaPlus />}>
             Apply now

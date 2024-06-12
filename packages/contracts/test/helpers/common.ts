@@ -8,7 +8,7 @@ import { clauseBuilder } from "@vechain/sdk-core"
 import { type TransactionClause, type TransactionBody } from "@vechain/sdk-core"
 import { ZERO_ADDRESS } from "./const"
 import { buildTxBody, signAndSendTx } from "../../scripts/helpers/txHelper"
-import { getAccounts } from "../../scripts/helpers/seedAccounts"
+import { getTestKeys } from "../../scripts/helpers/seedAccounts"
 
 export const waitForNextBlock = async () => {
   if (network.name === "hardhat") {
@@ -20,14 +20,14 @@ export const waitForNextBlock = async () => {
   const clauses: TransactionClause[] = []
   clauses.push(clauseBuilder.transferVET(ZERO_ADDRESS, BigInt(1)))
 
-  const accounts = getAccounts(3)
+  const accounts = getTestKeys(3)
   const signer = accounts[2]
 
   const body: TransactionBody = await buildTxBody(clauses, signer.address, 32, 10_000_000)
 
-  if (!signer.privateKey) throw new Error("No private key")
+  if (!signer.pk) throw new Error("No private key")
 
-  return await signAndSendTx(body, signer.privateKey)
+  return await signAndSendTx(body, signer.pk)
 }
 
 export const moveBlocks = async (blocks: number) => {
@@ -235,7 +235,7 @@ export const createProposalAndExecuteIt = async (
 
   // load votes
   // console.log("Loading votes");
-  await getVot3Tokens(voter, "1000")
+  await getVot3Tokens(voter, "30000")
   await waitForNextBlock()
 
   // create a new proposal
@@ -294,7 +294,7 @@ export const createProposalWithMultipleFunctionsAndExecuteIt = async (
 
   // load votes
   // console.log("Loading votes");
-  await getVot3Tokens(voter, "1000")
+  await getVot3Tokens(voter, "30000")
   await waitForNextBlock()
 
   if (!roundId) {
@@ -324,6 +324,7 @@ export const createProposalWithMultipleFunctionsAndExecuteIt = async (
     description,
     functionsToCall,
     args,
+    roundId,
   )
 
   const proposalId = await getProposalIdFromTx(tx)

@@ -1,40 +1,58 @@
-import { Card, CardBody, VStack, Heading, HStack, Button, CardFooter } from "@chakra-ui/react"
-import { NewProposalForm } from "../../functions/details/components/NewProposalForm"
+import { Card, CardBody, VStack, Heading, HStack, Button, CardFooter, Text } from "@chakra-ui/react"
+import { FormData, NewProposalForm } from "../../functions/details/components/NewProposalForm"
 import { useCallback } from "react"
 import { useRouter } from "next/navigation"
+import { useProposalFormStore } from "@/store/useProposalFormStore"
+import { useTranslation } from "react-i18next"
 
 export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
   const router = useRouter()
+
+  const { t } = useTranslation()
+  const { setData } = useProposalFormStore()
 
   const goBack = useCallback(() => {
     router.back()
   }, [router])
 
-  const onContinue = useCallback(() => {
-    router.push("/proposals/new/form/preview")
-  }, [router])
+  const onSubmit = useCallback(
+    (data: FormData) => {
+      setData({
+        title: data.title,
+        shortDescription: data.description,
+        actions: [],
+      })
+      router.push("/proposals/new/form/content")
+    },
+    [setData, router],
+  )
 
   return (
     <Card w="full">
       <CardBody py={8}>
         <VStack spacing={8} align="flex-start">
-          <Heading size="lg">Text only proposal</Heading>
+          <Heading size="lg">{t("General proposal")}</Heading>
+          <Text fontSize="md" color="gray.500">
+            {t(
+              "Choose a title a short description for your proposal. You will be able to provide more details in the next step.",
+            )}
+          </Text>
 
           <NewProposalForm
-            onSubmit={onContinue}
             formId="new-proposal-form"
             renderActions={false}
-            renderMarkdownDescription={true}
+            renderMarkdownDescription={false}
+            onSubmit={onSubmit}
           />
         </VStack>
       </CardBody>
       <CardFooter>
         <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
           <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
-            Go back
+            {t("Go back")}
           </Button>
           <Button rounded="full" colorScheme="primary" size="lg" type="submit" form="new-proposal-form">
-            Continue
+            {t("Continue")}
           </Button>
         </HStack>
       </CardFooter>

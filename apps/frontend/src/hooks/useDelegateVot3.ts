@@ -1,4 +1,4 @@
-import { useB3trTokenDetails, buildDelegateVot3Tx, getVotesQueryKey } from "@/api"
+import { buildDelegateVot3Tx, getVotesQueryKey } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
@@ -30,11 +30,8 @@ export const useDelegateVot3 = ({
   const toast = useToast()
   const queryClient = useQueryClient()
 
-  const { data: tokenDetails } = useB3trTokenDetails()
-
   const buildClauses = useCallback(() => {
     if (!address) throw new Error("address is required")
-    if (!tokenDetails) throw new Error("tokenDetails is required")
 
     const clauses = buildDelegateVot3Tx(thor, address)
     return [clauses]

@@ -1,13 +1,26 @@
 # B3TR Monorepo
 
 ```
- _______    _______  ___________  _______
-|   _  "\  /" __   )("     _   ")/"      \
-(. |_)  :)(__/ _) ./ )__/  \\__/|:        |
-|:     \/     /  //     \\_ /   |_____/   )
-(|  _  \\  __ \_ \\     |.  |    //      /
-|: |_)  :)(: \__) :\    \:  |   |:  __   \
-(_______/  \_______)     \__|   |__|  \___)
+                                      #######
+                                 ################
+                               ####################
+                             ###########   #########
+                            #########      #########
+          #######          #########       #########
+          #########       #########      ##########
+           ##########     ########     ####################
+            ##########   #########  #########################
+              ################### ############################
+               #################  ##########          ########
+                 ##############      ###              ########
+                  ############                       #########
+                    ##########                     ##########
+                     ########                    ###########
+                       ###                    ############
+                                          ##############
+                                    #################
+                                   ##############
+                                   #########
 ```
 
 B3TR monorepo intended to contain everything around dapps, contracts, utils and in general everything needed to setup and deploy the B3TR ecosystem
@@ -68,6 +81,12 @@ If you need to start again you can stop the frontend from running and restart th
 
 ```
 make solo-down
+```
+
+Thor solo will persist it's state to a volume. To clear this state run:
+
+```
+make solo-clean
 ```
 
 ```
@@ -144,6 +163,12 @@ Stop it by running:
 
 make solo-down
 
+```
+
+Thor solo will persist it's state to a volume. To clear this state run:
+
+```
+make solo-clean
 ```
 
 Each environment has its own configuration file under `./packages/config/contracts/envs` folder:
@@ -277,3 +302,9 @@ yarn contracts:generate-docs
 ```
 
 The documentation will be generated in the `docs` folder inside `./packages/contracts`, and it's generated based on the @natspec tags in the contracts.
+
+## Slither Issue
+Note that slither does not seem to be working with the repo as-is 🤷, resulting in an enum type not found error:
+```
+slither.solc_parsing.exceptions.ParsingError: Type not found struct Checkpoints.Trace208
+```

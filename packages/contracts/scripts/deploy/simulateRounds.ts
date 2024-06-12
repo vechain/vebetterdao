@@ -1,8 +1,8 @@
 import { B3TR, Emissions, Treasury, VOT3, VoterRewards, XAllocationVoting } from "../../typechain-types"
 import { moveBlocks } from "../../test/helpers"
-import { SeedStrategy, getAccounts, getSeedAccounts } from "../helpers/seedAccounts"
+import { SeedStrategy, getSeedAccounts, getTestKeys } from "../helpers/seedAccounts"
 import { distributeEmissions, startEmissions } from "../helpers/emissions"
-import { airdropB3trFromTreasury, airdropVTHO } from "../helpers/airdrop"
+import { airdropB3trFromTreasury, airdropVTHO, transferErc20 } from "../helpers/airdrop"
 import { convertB3trForVot3 } from "../helpers/swap"
 import { castVotesToXDapps } from "../helpers/xApp"
 import { claimVoterRewards } from "../helpers/voterRewards"
@@ -23,17 +23,21 @@ export const simulateRounds = async (
   const start = performance.now()
   console.log("Running simulation...")
 
-  const accounts = getAccounts(10)
+  const accounts = getTestKeys(10)
   const seedAccounts = getSeedAccounts(SEED_STRATEGY, NUM_USERS_TO_SEED, ACCT_OFFSET)
 
   // Define specific accounts
   const admin = accounts[0]
+  const migrationAccount = accounts[9]
 
   // Airdrop VTHO
   await airdropVTHO(seedAccounts, accounts[8])
 
   // Airdrop B3TR from Treasury
   const treasuryAddress = await treasury.getAddress()
+  //// Top the treasury up with tokens from the migration account
+  const bal = await b3tr.balanceOf(migrationAccount.address)
+  await transferErc20(await b3tr.getAddress(), migrationAccount, treasuryAddress, bal)
   await airdropB3trFromTreasury(treasuryAddress, admin, seedAccounts)
 
   // Convert B3TR for VOT3
@@ -57,7 +61,7 @@ export const simulateRounds = async (
   // Convert B3TR for VOT3
   await convertB3trForVot3(b3tr, vot3, seedAccounts)
 
-  for (let i = 1; i < 15; i++) {
+  for (let i = 1; i < 634; i++) {
     await distributeEmissions(emissionsContract, admin)
     const roundId = parseInt((await xAllocationVoting.currentRoundId()).toString())
     console.log(`Casting random votes to xDapps for round ${roundId}...`)

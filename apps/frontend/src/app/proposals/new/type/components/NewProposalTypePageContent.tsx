@@ -1,36 +1,44 @@
 import { Button, Card, CardBody, Grid, GridItem, HStack, Heading, Stack, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
-import { useCallback, useState } from "react"
+import { useCallback, useLayoutEffect, useState } from "react"
 import { CheckableCard, CheckableCardProps } from "@/components"
 import { useProposalFormStore } from "@/store/useProposalFormStore"
+import { useTranslation } from "react-i18next"
+import { useNewProposalPageGuard } from "../../form/hooks/useNewProposalPageGuard"
+import { TFunction } from "i18next"
 
-const Steps: (Omit<CheckableCardProps, "checked" | "onChange"> & {
+const Steps: (t: TFunction<"translation", undefined>) => (Omit<CheckableCardProps, "checked" | "onChange"> & {
   route: string
-})[] = [
+})[] = t => [
   {
     route: "/proposals/new/form/functions",
     imageSrc: "/images/blockchain.svg",
-    title: "Perform actions or changes",
-    description:
+    title: t("Perform actions or changes"),
+    description: t(
       "These proposals involve specific changes upon successful voting, aiming to implement concrete actions or modifications within the ecosystem.",
+    ),
   },
   {
     route: "/proposals/new/form/discussion",
     imageSrc: "/images/people.svg",
-    title: "General proposal",
-    description:
-      "If the desired outcome cannot be achieved by callid smart contract functions, then please describe what change idea you would like to propose",
+    title: t("General proposal"),
+    description: t(
+      "If the desired outcome cannot be achieved by calling smart contract functions, then please describe what change idea you would like to propose",
+    ),
   },
 ]
 export const NewProposalTypePageContent = () => {
-  const { clearData } = useProposalFormStore()
-  const [selectedRoute, setSelectedRoute] = useState<string>(Steps[0]?.route as string)
+  const { t } = useTranslation()
   const router = useRouter()
+  const pageGuardResult = useNewProposalPageGuard()
+
+  const { clearData } = useProposalFormStore()
+  const [selectedRoute, setSelectedRoute] = useState<string>(Steps(t)[0]?.route as string)
   const onChange = useCallback(
     (route: string) => () => {
       setSelectedRoute(route)
     },
-    [router],
+    [],
   )
 
   const onContinue = useCallback(() => {
@@ -44,6 +52,16 @@ export const NewProposalTypePageContent = () => {
     router.back()
   }, [router])
 
+  //redirect the user to the beginning of the form if the required data is missing
+  // this happens in case the user tries to access this page directly
+  useLayoutEffect(() => {
+    if (!pageGuardResult.isVisitAuthorized) {
+      router.push(pageGuardResult.redirectPath ?? "/proposals")
+    }
+  }, [pageGuardResult, router])
+
+  if (!pageGuardResult.isVisitAuthorized) return null
+
   return (
     <Grid
       templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(4, 1fr)"]}
@@ -54,9 +72,9 @@ export const NewProposalTypePageContent = () => {
         <Card>
           <CardBody py={8}>
             <VStack spacing={8} align="flex-start">
-              <Heading size="lg">Select proposal type</Heading>
+              <Heading size="lg">{t("Select proposal type")}</Heading>
               <Stack direction={["column", "column", "row"]} w="full" spacing={4}>
-                {Steps.map((step, index) => (
+                {Steps(t).map((step, index) => (
                   <CheckableCard
                     {...step}
                     cardProps={{
@@ -70,10 +88,10 @@ export const NewProposalTypePageContent = () => {
               </Stack>
               <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
                 <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
-                  Go back
+                  {t("Go back")}
                 </Button>
                 <Button rounded="full" colorScheme="primary" size="lg" onClick={onContinue}>
-                  Continue
+                  {t("Continue")}
                 </Button>
               </HStack>
             </VStack>

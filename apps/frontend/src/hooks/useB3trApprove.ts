@@ -1,4 +1,4 @@
-import { useB3trTokenDetails, buildB3trApprovesTx } from "@/api"
+import { buildB3trApprovesTx } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
@@ -25,15 +25,13 @@ export const useB3trApprove = ({
   const { account } = useWallet()
   const toast = useToast()
   const queryClient = useQueryClient()
-  const { data: tokenDetails } = useB3trTokenDetails()
 
   const buildClauses = useCallback(() => {
     if (amount === undefined) throw new Error("amount is required")
-    if (!tokenDetails) throw new Error("tokenDetails is required")
 
-    const approveClause = buildB3trApprovesTx(thor, amount, spender, tokenDetails.decimals)
+    const approveClause = buildB3trApprovesTx(thor, amount, spender)
     return [approveClause]
-  }, [thor, amount, tokenDetails, spender])
+  }, [thor, amount, spender])
 
   //Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {
@@ -58,7 +56,7 @@ export const useB3trApprove = ({
       isClosable: true,
     })
     onSuccess?.()
-  }, [invalidateCache, toast, onSuccess, account, amount, spender])
+  }, [invalidateCache, toast, onSuccess, account, amount, spender, queryClient])
 
   const result = useSendTransaction({
     signerAccount: account,

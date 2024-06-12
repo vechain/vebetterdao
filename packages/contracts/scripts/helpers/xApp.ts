@@ -1,14 +1,7 @@
 import { VOT3, X2EarnApps__factory, XAllocationVoting, XAllocationVoting__factory } from "../../typechain-types"
-import {
-  clauseBuilder,
-  type TransactionClause,
-  type TransactionBody,
-  coder,
-  FunctionFragment,
-  type IHDNode,
-} from "@vechain/sdk-core"
+import { clauseBuilder, type TransactionClause, type TransactionBody, coder, FunctionFragment } from "@vechain/sdk-core"
 import { buildTxBody, signAndSendTx } from "./txHelper"
-import { SeedAccount } from "./seedAccounts"
+import { SeedAccount, TestPk } from "./seedAccounts"
 import { chunk } from "./chunk"
 
 export type App = {
@@ -17,7 +10,7 @@ export type App = {
   metadataURI: string
 }
 
-export const addXDapps = async (contractAddress: string, account: IHDNode, apps: App[]) => {
+export const addXDapps = async (contractAddress: string, account: TestPk, apps: App[]) => {
   console.log("Adding x-apps...")
 
   const appChunks = chunk(apps, 50)
@@ -37,11 +30,11 @@ export const addXDapps = async (contractAddress: string, account: IHDNode, apps:
 
     const body: TransactionBody = await buildTxBody(clauses, account.address, 32)
 
-    if (!account.privateKey) {
+    if (!account.pk) {
       throw new Error("Account does not have a private key")
     }
 
-    await signAndSendTx(body, account.privateKey)
+    await signAndSendTx(body, account.pk)
   }
 }
 
@@ -60,7 +53,7 @@ export const castVotesToXDapps = async (
     await Promise.all(
       chunk.map(async account => {
         const clauses: TransactionClause[] = []
-        const votePower = BigInt(await vot3.balanceOf(account.address))
+        const votePower = BigInt(await vot3.balanceOf(account.key.address))
 
         const splits: { app: string; weight: bigint }[] = []
 
@@ -82,9 +75,9 @@ export const castVotesToXDapps = async (
             [roundId, splits.map(split => split.app), splits.map(split => split.weight)],
           ),
         )
-        const body: TransactionBody = await buildTxBody(clauses, account.address, 32, 250_000 * splits.length)
+        const body: TransactionBody = await buildTxBody(clauses, account.key.address, 32, 250_000 * splits.length)
 
-        await signAndSendTx(body, account.privateKey)
+        await signAndSendTx(body, account.key.pk)
       }),
     )
   }

@@ -9,6 +9,7 @@ import { Card, CardBody, Box, Stack, Text, HStack, Skeleton } from "@chakra-ui/r
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import { useMemo } from "react"
+import { i } from "vitest/dist/reporters-P7C2ytIv"
 
 const compactFormatter = getCompactFormatter()
 
@@ -20,7 +21,7 @@ export const AppCardInnerDetails = ({ xApp }: Props) => {
 
   // Generate roundIds from 1 to currentRoundId or previous round if current round is not active
   const roundIds = useMemo(() => {
-    return Array.from({ length: Number(currentRoundId) - (currentRound.state === "0" ? 1 : 0) }, (_, i) =>
+    return Array.from({ length: Number(currentRoundId) - (currentRound.state === 0 ? 1 : 0) }, (_, i) =>
       (i + 1).toString(),
     )
   }, [currentRoundId, currentRound])

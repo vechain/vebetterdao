@@ -1,8 +1,9 @@
 import { getConfig } from "@repo/config"
-import { FormattingUtils } from "@repo/utils"
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 import { B3trContractJson } from "@repo/contracts"
+import { ethers } from "ethers"
+
 const b3trAbi = B3trContractJson.abi
 
 const config = getConfig()
@@ -33,8 +34,8 @@ export const getB3trTokenDetails = async (thor: Connex.Thor): Promise<TokenDetai
     name: res.decoded[0],
     symbol: res.decoded[1],
     decimals: res.decoded[2],
-    circulatingSupply: FormattingUtils.scaleNumberDown(res.decoded[3], res.decoded[2]),
-    totalSupply: FormattingUtils.scaleNumberDown(res.decoded[4], res.decoded[2]),
+    circulatingSupply: ethers.formatEther(res.decoded[3]),
+    totalSupply: ethers.formatEther(res.decoded[4]),
   }
 }
 

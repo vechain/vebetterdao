@@ -43,12 +43,12 @@ export const AllocationRoundsList: React.FC<Props> = ({
   const { data: currentRound } = useAllocationsRound(currentRoundId)
 
   const isCurrentRoundActive = useMemo(() => {
-    return currentRound?.state === "0"
+    return currentRound?.state === 0
   }, [currentRound])
 
   const loadMore = useCallback(() => {
     setTotalRoundsToShow(prev => prev + maxRoundsToShow)
-  }, [totalRoundsToShow])
+  }, [maxRoundsToShow])
 
   const renderRounds = useMemo(() => {
     return invertedCreatedRounds?.slice(0, totalRoundsToShow)?.map((round, i) => {
@@ -92,7 +92,19 @@ export const AllocationRoundsList: React.FC<Props> = ({
         </VStack>
       </VStack>
     )
-  }, [allocationRoundEventsError, isCurrentRoundActive, totalRoundsToShow, invertedCreatedRounds, renderInsideCard])
+  }, [
+    maxRoundsToShow,
+    allocationRoundEventsError,
+    totalRoundsToShow,
+    invertedCreatedRounds,
+    renderInsideCard,
+    headingSize,
+    showViewAll,
+    showLoadMore,
+    loadMore,
+    renderRounds,
+    router,
+  ])
 
   return (
     <>

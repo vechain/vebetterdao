@@ -22,20 +22,25 @@ import { VOT3Icon } from "@/components"
 import { useDepositThreshold, useVot3Balance } from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useForm } from "react-hook-form"
-import { useCreateProposal } from "@/hooks"
+import { useCreateProposal, useUploadProposalMetadata } from "@/hooks"
 import { TransactionModal } from "@/components/TransactionModal"
+import { useTranslation } from "react-i18next"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
 type FormData = {
   amount: number
 }
 
+const compactFormatter = getCompactFormatter(2)
+
 export const NewProposalFundAndPublishPageContent = () => {
   const router = useRouter()
 
+  const { t } = useTranslation()
   const { account } = useWallet()
   const { data: balance, isLoading: balanceLoading } = useVot3Balance(account ?? undefined)
   const { data: threshold, isLoading: thresholdLoading } = useDepositThreshold()
-  const { setData, markdownDescription, actions, votingStartRoundId, shortDescription } = useProposalFormStore()
+  const { setData, title, shortDescription, markdownDescription, actions, votingStartRoundId } = useProposalFormStore()
 
   const { register, handleSubmit, formState } = useForm<FormData>({
     defaultValues: {
@@ -55,10 +60,15 @@ export const NewProposalFundAndPublishPageContent = () => {
 
   const createProposalMutation = useCreateProposal({ onSuccess })
 
+  const { onMetadataUpload, metadataUploadError, metadataUploading } = useUploadProposalMetadata()
+
   const onSubmit = useCallback(
-    (data: FormData) => {
+    async (data: FormData) => {
       createProposalMutation.resetStatus()
       onConfirmationOpen()
+      if (!title || !shortDescription || !markdownDescription) throw new Error("Missing data")
+      const metadataUri = await onMetadataUpload({ title, shortDescription, markdownDescription })
+      if (!metadataUri) return
       setData({ depositAmount: data.amount })
       if (!votingStartRoundId || !actions || !shortDescription) throw new Error("Missing data")
 
@@ -69,18 +79,28 @@ export const NewProposalFundAndPublishPageContent = () => {
           contractAddress: action.contractAddress,
           calldata: action.calldata as string,
         })),
-        description: shortDescription,
+        description: metadataUri,
         startRoundId: votingStartRoundId,
         depositAmount: data.amount.toString(),
       })
     },
-    [setData, onConfirmationOpen, createProposalMutation, shortDescription, actions, votingStartRoundId],
+    [
+      setData,
+      onConfirmationOpen,
+      createProposalMutation,
+      title,
+      shortDescription,
+      markdownDescription,
+      actions,
+      votingStartRoundId,
+      onMetadataUpload,
+    ],
   )
 
   const onTryAgain = useCallback(() => {
     createProposalMutation.resetStatus()
     handleSubmit(onSubmit)()
-  }, [createProposalMutation, handleSubmit])
+  }, [createProposalMutation, handleSubmit, onSubmit])
 
   return (
     <>
@@ -89,9 +109,21 @@ export const NewProposalFundAndPublishPageContent = () => {
         onClose={onConfirmationClose}
         confirmationTitle="Create a proposal"
         successTitle="Proposal created!"
-        status={createProposalMutation.error ? "error" : createProposalMutation.status}
-        errorDescription={createProposalMutation.error?.reason}
-        errorTitle={createProposalMutation.error ? "Error creating proposal" : undefined}
+        status={
+          metadataUploading
+            ? "uploadingMetadata"
+            : createProposalMutation.error || metadataUploadError
+              ? "error"
+              : createProposalMutation.status
+        }
+        errorDescription={metadataUploadError?.message ?? createProposalMutation.error?.reason}
+        errorTitle={
+          metadataUploadError
+            ? "Error uploading metadata"
+            : createProposalMutation.error
+              ? "Error updating app details"
+              : undefined
+        }
         showTryAgainButton={true}
         onTryAgain={onTryAgain}
         pendingTitle="Creating proposal..."
@@ -103,10 +135,12 @@ export const NewProposalFundAndPublishPageContent = () => {
         <CardBody py={8}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <VStack spacing={8} align="flex-start">
-              <Heading size="lg">Lock VOT3 to fund your proposal</Heading>
+              <Heading size="lg">Community support</Heading>
               <Text fontSize="md" color="gray.500">
-                Your proposal will need at least {balance?.formatted} VOT3 to become active. You can take this VOT3 from
-                your wallet, or wait until other users fund your proposal.
+                Your proposal will need support from the community to become active. Users who like your proposal and
+                want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will
+                need a total of {compactFormatter.format(Number(threshold))} VOT3 to become active. You can also
+                contribute with your own VOT3.
               </Text>
               <VStack spacing={2} align="flex-start" w="full">
                 <Heading size="md">How much VOT3 do you want to lock to fund this proposal?</Heading>
@@ -121,25 +155,28 @@ export const NewProposalFundAndPublishPageContent = () => {
                     </InputLeftElement>
                     <Input
                       {...register("amount", {
-                        required: "This field is required",
-                        max: { value: threshold ?? 0, message: `The maximum amount is ${threshold}` },
+                        required: t("This field is required"),
+                        max: {
+                          value: threshold ?? 0,
+                          message: t("The maximum amount is {{threshold}}", { threshold: threshold }),
+                        },
                         validate: value => {
                           if (value > Number(balance?.scaled)) {
-                            return "Insufficient balance"
+                            return t("Insufficient balance")
                           }
                         },
                       })}
                       ml={2}
                       w="full"
                       variant="flushed"
-                      placeholder="Enter the amount of VOT3"
+                      placeholder={t("Enter the amount of VOT3")}
                       fontSize={["xl", "xl", "3xl"]}
                       fontFamily={"Instrument Sans Variable"}
                     />
                     <Skeleton isLoaded={!thresholdLoading}>
                       <InputRightElement w="auto">
                         <Heading size={["sm", "sm", "lg"]} color="gray.500" fontWeight={400}>
-                          {`/ ${threshold}`}
+                          {`/ ${compactFormatter.format(Number(threshold))}`}
                         </Heading>
                       </InputRightElement>
                     </Skeleton>
@@ -156,7 +193,7 @@ export const NewProposalFundAndPublishPageContent = () => {
 
               <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
                 <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
-                  Go back
+                  {t("Go back")}
                 </Button>
                 <Button rounded="full" colorScheme="primary" size="lg" type="submit">
                   Fund and publish

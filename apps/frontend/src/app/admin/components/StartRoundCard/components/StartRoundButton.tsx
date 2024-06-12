@@ -8,7 +8,7 @@ export const StartRoundButton = () => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: currentRound } = useAllocationsRound(currentRoundId)
   const isCurrentRoundActive = useMemo(() => {
-    return currentRound?.state === "0"
+    return currentRound?.state === 0
   }, [currentRound])
   const { isOpen, onClose, onOpen } = useDisclosure()
   const {
@@ -31,7 +31,7 @@ export const StartRoundButton = () => {
   const handleSubmit = useCallback(() => {
     onOpen()
     sendTransaction(undefined)
-  }, [sendTransaction])
+  }, [onOpen, sendTransaction])
 
   if (parseInt(currentRoundId ?? "0") < 1) return null
 

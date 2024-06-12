@@ -38,7 +38,7 @@ export const ShareButtons = ({
   facebookHashtag?: string
 }) => {
   return (
-    <HStack gap={2}>
+    <HStack gap={4}>
       <BouncingAnimation>
         <Link href={`${TWITTER_INJECT}${descriptionEncoded}`} isExternal>
           <Box bg={"lightgrey"} p={2} borderRadius={"full"}>

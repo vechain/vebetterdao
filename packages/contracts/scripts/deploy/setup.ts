@@ -1,11 +1,10 @@
-import { B3TR, Emissions, Treasury, X2EarnApps } from "../../typechain-types"
-import { SeedStrategy, getAccounts, getSeedAccounts } from "../helpers/seedAccounts"
+import { Emissions, Treasury, X2EarnApps } from "../../typechain-types"
+import { SeedStrategy, getSeedAccounts, getTestKeys } from "../helpers/seedAccounts"
 import { bootstrapEmissions } from "../helpers/emissions"
 import { addXDapps } from "../helpers/xApp"
-import { airdropB3trFromTreasury, airdropB3trPercentage } from "../helpers/airdrop"
-import { isE2E, shouldRunSimulation } from "@repo/config/contracts"
+import { airdropB3trFromTreasury } from "../helpers/airdrop"
 
-const accounts = getAccounts(12)
+const accounts = getTestKeys(13)
 
 const APPS = [
   {
@@ -16,7 +15,7 @@ const APPS = [
   {
     address: accounts[7].address,
     name: "Mugshot",
-    metadataURI: "bafkreicglvjxjy2yxruwpmu6czm5th76bauu5phfhnlf2oxbyc66fdrzkm",
+    metadataURI: "bafkreidaleehj2euzdmpystzaux5aandfwnhyzgfjkujebbixek7edyyzu",
   },
   {
     address: accounts[9].address,
@@ -38,14 +37,14 @@ const APPS = [
     name: "GreenCart",
     metadataURI: "bafkreie6gdx7xugiemmubpfb6r5c4bdwfjucjtmb43mk2fhemyx3x3kvnu",
   },
+  {
+    address: accounts[12].address,
+    name: "EVearn",
+    metadataURI: "bafkreif5m23ikv6jphvjciv5uwtq3eqchinh5m5jexdo7atgxyf62az65y",
+  },
 ]
 
-export const setupLocalEnvironment = async (
-  emissions: Emissions,
-  treasury: Treasury,
-  x2EarnApps: X2EarnApps,
-  b3tr: B3TR,
-) => {
+export const setupLocalEnvironment = async (emissions: Emissions, treasury: Treasury, x2EarnApps: X2EarnApps) => {
   const start = performance.now()
   console.log("================ Setup local environment ================")
 
@@ -65,11 +64,6 @@ export const setupLocalEnvironment = async (
   const seedAccounts = getSeedAccounts(SeedStrategy.FIXED, 5, 0)
   await airdropB3trFromTreasury(treasuryAddress, admin, seedAccounts)
 
-  if (!shouldRunSimulation() && !isE2E()) {
-    const firstAccount = seedAccounts[0]
-    await airdropB3trPercentage(treasuryAddress, admin, firstAccount, 10, b3tr) // 10% of total supply
-  }
-
   const end = new Date(performance.now() - start)
   console.log(`Setup complete in ${end.getMinutes()}m ${end.getSeconds()}s`)
 }
@@ -78,14 +72,13 @@ export const setupTestEnvironment = async (emissions: Emissions, x2EarnApps: X2E
   console.log("================ Setup Testnet environment ================")
   const start = performance.now()
 
-  const accounts = getAccounts(10)
   const admin = accounts[0]
 
   // Bootstrap emissions
   const emissionsContract = await emissions.getAddress()
   await bootstrapEmissions(emissionsContract, admin)
 
-  //   Add x-apps to the XAllocationPool
+  // Add x-apps to the XAllocationPool
   console.log("Adding x-apps...")
 
   // Add x-apps to the XAllocationPool

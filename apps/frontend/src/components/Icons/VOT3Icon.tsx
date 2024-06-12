@@ -17,5 +17,5 @@ export const VOT3Icon: React.FC<Props> = ({ colorVariant, ...props }) => {
   const logo = useColorModeValue(paths.light, paths.dark)
   const logoVariant = colorVariant ? paths[colorVariant] : logo
 
-  return <Image src={logoVariant} {...props} />
+  return <Image src={logoVariant} alt="vot3-icon" {...props} />
 }

@@ -10,6 +10,16 @@ import { useIpfsMetadata } from "@/api/ipfs/hooks/useIpfsMetadata"
  * @returns The NFT image
  */
 
+export type NFTMetadata = {
+  name: string
+  description: string
+  image: string
+  attributes: {
+    trait_type: string
+    value: string
+  }[]
+}
+
 export const useNFTImage = () => {
   const { account } = useWallet()
   const {
@@ -31,7 +41,7 @@ export const useNFTImage = () => {
     isLoading: isLoadingMetadata,
     isError: isErrorMetadata,
     error: errorMetadata,
-  } = useIpfsMetadata(metadataURI ?? null)
+  } = useIpfsMetadata<NFTMetadata>(metadataURI)
 
   const {
     data: imageData,

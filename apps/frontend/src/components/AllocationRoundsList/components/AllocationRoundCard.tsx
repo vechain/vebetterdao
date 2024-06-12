@@ -37,15 +37,15 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
 
   const totalAmount = useMemo(() => {
     if (!roundAmount) return 0
-    return BigInt(roundAmount.voteXAllocations)
+    return roundAmount.voteXAllocations
   }, [roundAmount])
 
   const onRoundClick = () => {
     router.push(`/rounds/${round.roundId}`)
   }
   const isActive = useMemo(() => {
-    return allocationRound?.state === "0" && allocationRound?.voteEndTimestamp?.isAfter()
-  }, [allocationRound, allocationRound?.state])
+    return allocationRound?.state === 0 && allocationRound?.voteEndTimestamp?.isAfter()
+  }, [allocationRound])
 
   const cardActiveBackgroundColor = useColorModeValue("secondary.50", "secondary.100")
   const cardActiveBorderColor = useColorModeValue("secondary.400", "secondary.700")
@@ -76,12 +76,17 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
         }),
         cursor: "pointer",
         transition: "all 0.2s ease-in-out",
-      }} data-testid={"round-#" + round.roundId + "-card"}>
+      }}
+      data-testid={"round-#" + round.roundId + "-card"}>
       <CardBody>
         <HStack justify={"space-between"} w="full">
           <Stack w="full" spacing={1}>
             <HStack spacing={2} w="fit-content" justify="space-between">
-              <AllocationRoundStateTag state={allocationRound.state} size="md" data-testid={"round-#" + round.roundId + "-status"} />
+              <AllocationRoundStateTag
+                state={allocationRound.state}
+                size="md"
+                data-testid={"round-#" + round.roundId + "-status"}
+              />
               <Show above="sm">
                 <DotSymbol color={"gray"} size={1} />
                 <Text fontWeight={"400"} color={"gray"}>
@@ -112,13 +117,18 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
                     <Text color="red.500">{roundAmountError.message}</Text>
                   ) : (
                     <Box textAlign={"end"} color={cardTextColor}>
-                      <Heading size="lg">{compactFormatter.format(totalAmount)}</Heading>
+                      <Heading size="lg">{compactFormatter.format(Number(totalAmount))}</Heading>
                       <Text fontSize={"md"}>total allocation</Text>
                     </Box>
                   )}
                 </Skeleton>
               </Box>
-              <Icon as={FaAngleRight} boxSize={6} color={cardTextColor} data-testid={"round-#" + round.roundId + "-link"}/>
+              <Icon
+                as={FaAngleRight}
+                boxSize={6}
+                color={cardTextColor}
+                data-testid={"round-#" + round.roundId + "-link"}
+              />
             </HStack>
           </Stack>
         </HStack>

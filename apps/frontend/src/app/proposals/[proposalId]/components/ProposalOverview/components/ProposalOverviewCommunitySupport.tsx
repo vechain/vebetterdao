@@ -2,11 +2,13 @@ import { ProposalState, useCurrentProposal } from "@/api"
 import { Arm } from "@/components/Icons/Arm"
 import { HStack, Text, VStack } from "@chakra-ui/react"
 import { useMemo } from "react"
+import { useTranslation } from "react-i18next"
 
 export const ProposalOverviewCommunitySupport = () => {
   const { proposal } = useCurrentProposal()
+  const { t } = useTranslation()
 
-  const arcIconColor = useMemo(() => {
+  const armIconColor = useMemo(() => {
     if (proposal.state === ProposalState.DepositNotMet) {
       return "#D23F63"
     }
@@ -21,11 +23,13 @@ export const ProposalOverviewCommunitySupport = () => {
       return (
         <VStack alignItems={"stretch"}>
           <Text fontWeight={"400"} color="#6A6A6A">
-            Community support
+            {t("Community support")}
           </Text>
           <HStack>
-            <Arm color={arcIconColor} />
-            <Text color="#252525">{Math.floor(proposal.communityDepositPercentage)}%</Text>
+            <Arm color={armIconColor} />
+            <Text color="#252525">
+              {t("{{percentage}}%", { percentage: Math.floor(proposal.communityDepositPercentage * 100) })}
+            </Text>
           </HStack>
         </VStack>
       )

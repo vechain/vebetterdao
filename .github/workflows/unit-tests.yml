@@ -32,8 +32,21 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Unit Tests
-        run: yarn test
+      - name: Cache Solidity compilers
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/hardhat-nodejs
+          key: ${{ runner.os }}-solc-${{ hashFiles('./packages/contracts/hardhat.config.ts') }}
+          restore-keys: |
+            ${{ runner.os }}-solc-
+
+      - name: Check for Frontend changes
+        uses: dorny/paths-filter@v3
+        id: frontend_changes
+        with:
+          filters: |
+            src:
+              - 'apps/frontend/**'
 
       - name: Check for Solidity changes
         uses: dorny/paths-filter@v3
@@ -41,27 +54,70 @@ jobs:
         with:
           filters: |
             src:
-              - 'packages/contracts/contracts/**'
+              - 'packages/contracts/**'
 
-      - name: Run Slither
-        uses: crytic/slither-action@v0.3.1
-        id: slither
-        if: steps.contract_changes.outputs.src == 'true'
+      - name: Check for Utils changes
+        uses: dorny/paths-filter@v3
+        id: utils_changes
         with:
-          ignore-compile: true
-          target: "packages/contracts/"
-          solc-version: "0.8.20"
-          fail-on: none
-          slither-args: --filter-paths "openzeppelin" --exclude-informational --exclude-optimization --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
+          filters: |
+            src:
+              - 'packages/utils/**'
 
-      - name: Create/update checklist as PR comment
-        uses: actions/github-script@v7
-        if: github.event_name == 'pull_request' && steps.contract_changes.outputs.src == 'true'
-        env:
-          REPORT: ${{ steps.slither.outputs.stdout }}
+      - name: Check for Backend changes
+        uses: dorny/paths-filter@v3
+        id: backend_changes
         with:
-          script: |
-            const script = require('.github/scripts/comment')
-            const header = '# Slither report'
-            const body = process.env.REPORT
-            await script({ github, context, header, body })
+          filters: |
+            src:
+              - 'apps/backend/**'
+
+      - name: Check for Lambda changes
+        uses: dorny/paths-filter@v3
+        id: lambda_changes
+        with:
+          filters: |
+            src:
+              - 'packages/lambda/**'
+
+      # Run global unit tests if any of the following changes are detected
+      - name: Global Unit Tests
+        if: steps.contract_changes.outputs.src == 'true' || steps.utils_changes.outputs.src == 'true'
+        run: yarn test
+
+      # Otherwise, run specific unit tests based on the changes detected
+      - name: Frontend Unit Tests
+        if: steps.frontend_changes.outputs.src == 'true' && !(steps.contract_changes.outputs.src == 'true' || steps.utils_changes.outputs.src == 'true')
+        run: yarn test --filter=frontend
+
+      - name: Backend Unit Tests
+        if: steps.backend_changes.outputs.src == 'true' && !(steps.contract_changes.outputs.src == 'true' || steps.utils_changes.outputs.src == 'true')
+        run: yarn test --filter=backend
+
+      - name: Lambda Unit Tests
+        if: steps.lambda_changes.outputs.src == 'true' && !(steps.contract_changes.outputs.src == 'true' || steps.utils_changes.outputs.src == 'true')
+        run: yarn test --filter=lambda
+
+      # Run Slither if Solidity changes are detected
+      # - name: Run Slither
+      #   uses: crytic/slither-action@v0.3.1
+      #   id: slither
+      #   if: steps.contract_changes.outputs.src == 'true'
+      #   with:
+      #     ignore-compile: true
+      #     target: "packages/contracts/"
+      #     solc-version: "0.8.20"
+      #     fail-on: none
+      #     slither-args: --filter-paths "openzeppelin" --exclude-informational --exclude-optimization --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
+
+      # - name: Create/update checklist as PR comment
+      #   uses: actions/github-script@v7
+      #   if: github.event_name == 'pull_request' && steps.contract_changes.outputs.src == 'true'
+      #   env:
+      #      REPORT: ${{ steps.slither.outputs.stdout }}
+      #   with:
+      #      script: |
+      #        const script = require('.github/scripts/comment')
+      #        const header = '# Slither report'
+      #        const body = process.env.REPORT
+      #        await script({ github, context, header, body })

@@ -1,4 +1,5 @@
-export * from "./governance"
+export * from "./GovernanceFeaturedFunctions"
+export * from "./GovernanceProposalTemplate"
 export * from "./links"
 export * from "./animation"
 

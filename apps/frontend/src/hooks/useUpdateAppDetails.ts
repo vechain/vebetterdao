@@ -1,9 +1,8 @@
 import { getXAppMetadataQueryKey, getXAppsQueryKey } from "@/api"
-import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
-import { useConnex, useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/dapp-kit-react"
 import { X2EarnApps__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 
@@ -34,9 +33,7 @@ export const useUpdateAppDetails = ({
   onSuccess,
   invalidateCache = true,
 }: useUpdateAppDetailsProps): useUpdateAppMetadataReturnValue => {
-  const { thor } = useConnex()
   const { account } = useWallet()
-  const toast = useToast()
   const queryClient = useQueryClient()
 
   const buildClauses = useCallback(
@@ -64,7 +61,7 @@ export const useUpdateAppDetails = ({
 
       return clauses
     },
-    [thor, appId],
+    [appId],
   )
 
   //Refetch queries to update ui after the tx is confirmed
@@ -85,7 +82,7 @@ export const useUpdateAppDetails = ({
     }
 
     onSuccess?.()
-  }, [invalidateCache, queryClient, toast, onSuccess, appId])
+  }, [invalidateCache, queryClient, onSuccess, appId])
 
   const result = useSendTransaction({
     signerAccount: account,

@@ -56,30 +56,33 @@ export const EditAppPageContent = ({ appId }: Props) => {
     appId,
     onSuccess: goToAppDetail,
   })
-  const onSubmit = async (data: CreateEditAppFormData) => {
-    updateAppMetadataMutation.resetStatus()
-    onConfirmationOpen()
+  const onSubmit = useCallback(
+    async (data: CreateEditAppFormData) => {
+      updateAppMetadataMutation.resetStatus()
+      onConfirmationOpen()
 
-    const metadataUri = await onMetadataUpload({
-      name: data.name,
-      description: data.description,
-      logo: data.logo,
-      banner: data.banner,
-      external_url: data.projectUrl,
-      screenshots: metadata?.screenshots ?? [],
-      app_urls: metadata?.app_urls ?? [],
-      social_urls: metadata?.social_urls ?? [],
-    })
-    if (!metadataUri) return
-    console.log("metadataUri", metadataUri)
+      const metadataUri = await onMetadataUpload({
+        name: data.name,
+        description: data.description,
+        logo: data.logo,
+        banner: data.banner,
+        external_url: data.projectUrl,
+        screenshots: metadata?.screenshots ?? [],
+        app_urls: metadata?.app_urls ?? [],
+        social_urls: metadata?.social_urls ?? [],
+      })
+      if (!metadataUri) return
+      console.log("metadataUri", metadataUri)
 
-    updateAppMetadataMutation.sendTransaction({
-      metadataUri,
-      ...(compareAddresses(data.receiverAddress, appData?.receiverAddress)
-        ? {}
-        : { receiverAddress: data.receiverAddress }),
-    })
-  }
+      updateAppMetadataMutation.sendTransaction({
+        metadataUri,
+        ...(compareAddresses(data.receiverAddress, appData?.receiverAddress)
+          ? {}
+          : { receiverAddress: data.receiverAddress }),
+      })
+    },
+    [onMetadataUpload, updateAppMetadataMutation, appData?.receiverAddress, metadata, onConfirmationOpen],
+  )
 
   const onTryAgain = useCallback(() => {
     updateAppMetadataMutation.resetStatus()
@@ -93,7 +96,7 @@ export const EditAppPageContent = ({ appId }: Props) => {
     if (!account || !appModerators || !xAppAdmin) return false
     if (compareAddresses(xAppAdmin, account)) return true
     return appModerators.some(mod => compareAddresses(mod, account))
-  }, [account, appModerators, appData?.receiverAddress, xAppAdmin])
+  }, [account, appModerators, xAppAdmin])
 
   useEffect(() => {
     if (!isAllowedToEditAddress) {
