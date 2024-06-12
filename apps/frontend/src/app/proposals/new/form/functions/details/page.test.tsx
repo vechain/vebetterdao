@@ -126,6 +126,7 @@ describe("NewProposalFunctionsDetails", async () => {
     it("renders correctly - can proceed if inputs are filled", async () => {
       render(<NewProposalFunctionsDetails />)
 
+      await vi.dynamicImportSettled()
       await screen.findByText("What is your proposal about?")
       await screen.findByText("Basic information")
       const continueButton = await screen.findByTestId("continue")
@@ -161,6 +162,7 @@ describe("NewProposalFunctionsDetails", async () => {
     })
     render(<NewProposalFunctionsDetails />)
 
+    await vi.dynamicImportSettled()
     await screen.findByText("What is your proposal about?")
     await screen.findByText("Basic information")
     const continueButton = await screen.findByTestId("continue")
@@ -192,7 +194,7 @@ describe("NewProposalFunctionsDetails", async () => {
       setData: mockSetData,
     })
     const component = render(<NewProposalFunctionsDetails />)
-
+    await vi.dynamicImportSettled()
     await screen.findByText("What is your proposal about?")
     await screen.findByText("Basic information")
     const continueButton = await screen.findByTestId("continue")
