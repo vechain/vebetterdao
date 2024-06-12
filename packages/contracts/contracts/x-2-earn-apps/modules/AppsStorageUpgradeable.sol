@@ -131,7 +131,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @dev Create app.
    * The id of the app is the hash of the app name.
    * Will be eligible for voting by default from the next round and
-   * the team allocation percentage will be 100%,
+   * the team allocation percentage will be 0%.
    *
    * @param teamWalletAddress the address where the app should receive allocation funds
    * @param admin the address of the admin
@@ -167,7 +167,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
     _setVotingEligibility(id, true);
     _updateTeamWalletAddress(id, teamWalletAddress);
     _updateAppMetadata(id, metadataURI);
-    _setTeamAllocationPercentage(id, 100);
+    _setTeamAllocationPercentage(id, 0);
 
     emit AppAdded(id, teamWalletAddress, appName, true);
   }
