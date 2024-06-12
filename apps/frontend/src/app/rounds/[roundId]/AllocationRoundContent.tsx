@@ -2,7 +2,7 @@
 
 import { Box, Spinner, Stack, VStack } from "@chakra-ui/react"
 import { AllocationRoundNavbar } from "../components/AllocationRoundNavbar"
-import { AllocationRoundDetails } from "../components/AllocationRoundDetails"
+import { AllocationRoundHeaderCard } from "../components/AllocationRoundHeaderCard/AllocationRoundHeaderCard"
 import { AllocationXAppsVotesCard } from "@/components"
 import { AllocationRoundSessionInfoCard } from "../components/AllocationRoundSessionInfoCard"
 import { AllocationRoundUserVotes } from "../components/AllocationRoundUserVotes/AllocationRoundUserVotes"
@@ -32,7 +32,7 @@ export const AllocationRoundContent = ({ params }: Readonly<Props>) => {
   return (
     <VStack w="full" spacing={8} data-testid={`allocation-${params.roundId}-page`}>
       <AllocationRoundNavbar roundId={params.roundId} />
-      <AllocationRoundDetails roundId={params.roundId} />
+      <AllocationRoundHeaderCard roundId={params.roundId} />
       <Stack
         direction={["column-reverse", "column-reverse", "row"]}
         w="full"
