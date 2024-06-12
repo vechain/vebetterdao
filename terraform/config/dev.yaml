@@ -15,8 +15,8 @@ secret_arn:   arn:aws:secretsmanager:eu-west-1:211125319139:secret:dev/datadog_k
 
 #thor solo settings
 image_tag: dev-latest
-cpu: 256
-memory: 2048
+cpu: 1024
+memory: 4096
 max_capacity: 2
 region : eu-west-1
 
