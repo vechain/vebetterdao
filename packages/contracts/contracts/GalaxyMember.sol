@@ -172,7 +172,6 @@ contract GalaxyMember is
       $._b3trToUpgradeToLevel[i + 2] = data.b3trToUpgradeToLevel[i]; // First Level that requires B3TR is level 2
     }
 
-    require(data.b3trToUpgradeToLevel.length + 2 == data.maxLevel, "Galaxy Member: B3TR levels do not match max level");
     $.MAX_LEVEL = data.maxLevel;
 
     $.b3tr = IB3TR(data.b3tr);
