@@ -98,14 +98,14 @@ contract X2EarnRewardsPool is
   /**
    * @dev See {IX2EarnRewardsPool-deposit}
    */
-  function deposit(uint256 amount, bytes32 appId) public returns (bool) {
+  function deposit(uint256 amount, bytes32 appId) external returns (bool) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
 
     // check that app exists
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
 
     // transfer tokens to this contract
-    $.b3tr.transferFrom(msg.sender, address(this), amount);
+    require($.b3tr.transferFrom(msg.sender, address(this), amount), "X2EarnRewardsPool: deposit transfer failed");
 
     // increase available amount for the app
     $.availableFunds[appId] += amount;
@@ -118,7 +118,7 @@ contract X2EarnRewardsPool is
   /**
    * @dev See {IX2EarnRewardsPool-withdraw}
    */
-  function withdraw(uint256 amount, bytes32 appId, string memory reason) public nonReentrant {
+  function withdraw(uint256 amount, bytes32 appId, string memory reason) external nonReentrant {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
 
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");

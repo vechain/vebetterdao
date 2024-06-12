@@ -98,8 +98,9 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   function apps() public view returns (X2EarnAppsDataTypes.AppReturnType[] memory) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
 
-    X2EarnAppsDataTypes.AppReturnType[] memory allApps = new X2EarnAppsDataTypes.AppReturnType[]($._appIds.length);
     uint256 length = $._appIds.length;
+    X2EarnAppsDataTypes.AppReturnType[] memory allApps = new X2EarnAppsDataTypes.AppReturnType[](length);
+
     for (uint i = 0; i < length; i++) {
       X2EarnAppsDataTypes.App memory _app = $._apps[$._appIds[i]];
       allApps[i] = X2EarnAppsDataTypes.AppReturnType(
