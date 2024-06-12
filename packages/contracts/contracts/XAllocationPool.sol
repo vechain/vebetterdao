@@ -135,7 +135,7 @@ contract XAllocationPool is
   /**
    * @dev Set the address of the XAllocationVotingGovernor contract.
    */
-  function setXAllocationVotingAddress(address xAllocationVoting_) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+  function setXAllocationVotingAddress(address xAllocationVoting_) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(xAllocationVoting_ != address(0), "XAllocationPool: new xAllocationVoting is the zero address");
 
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
@@ -147,7 +147,7 @@ contract XAllocationPool is
   /**
    * @dev Set the address of the emissions contract.
    */
-  function setEmissionsAddress(address emissions_) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+  function setEmissionsAddress(address emissions_) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(emissions_ != address(0), "XAllocationPool: new emissions is the zero address");
 
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
@@ -159,7 +159,7 @@ contract XAllocationPool is
   /**
    * @dev Set the address of the treasury contract.
    */
-  function setTreasuryAddress(address treasury_) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+  function setTreasuryAddress(address treasury_) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(treasury_ != address(0), "XAllocationPool: new treasury is the zero address");
 
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
@@ -171,7 +171,7 @@ contract XAllocationPool is
   /**
    * @dev Set the address of the x2EarnApps contract.
    */
-  function setX2EarnAppsAddress(address x2EarnApps_) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+  function setX2EarnAppsAddress(address x2EarnApps_) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(x2EarnApps_ != address(0), "XAllocationPool: new x2EarnApps is the zero address");
 
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
@@ -188,7 +188,7 @@ contract XAllocationPool is
    * @param roundId The round ID from XAllocationVoting contract for which to claim the rewards.
    * @param appId The ID of the app from X2EarnApps contract for which to claim the rewards.
    */
-  function claim(uint256 roundId, bytes32 appId) public nonReentrant {
+  function claim(uint256 roundId, bytes32 appId) external nonReentrant {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
 
     require(!$.claimedRewards[appId][roundId], "XAllocationPool: rewards already claimed for this app and round");
@@ -407,7 +407,7 @@ contract XAllocationPool is
    * @param roundId The round ID for which to check if the app has claimed the rewards.
    * @param appId The ID of the app.
    */
-  function claimed(uint256 roundId, bytes32 appId) public view returns (bool) {
+  function claimed(uint256 roundId, bytes32 appId) external view returns (bool) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     return $.claimedRewards[appId][roundId];
   }
@@ -427,7 +427,7 @@ contract XAllocationPool is
    *
    * @param roundId The round ID
    */
-  function getMaxAppAllocation(uint256 roundId) public view returns (uint256) {
+  function getMaxAppAllocation(uint256 roundId) external view returns (uint256) {
     uint256 roundBaseAllocationAmount = baseAllocationAmount(roundId);
     uint256 maxAppShares = _rewardAmount(roundId, scaledAppSharesCap(roundId));
     return roundBaseAllocationAmount + maxAppShares;
@@ -452,7 +452,7 @@ contract XAllocationPool is
   /**
    * @dev Returns the emissions contract.
    */
-  function treasury() public view returns (ITreasury) {
+  function treasury() external view returns (ITreasury) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     return $.treasury;
   }
@@ -460,7 +460,7 @@ contract XAllocationPool is
   /**
    * @dev Returns the b3tr contract.
    */
-  function b3tr() public view returns (IB3TR) {
+  function b3tr() external view returns (IB3TR) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     return $.b3tr;
   }
@@ -468,7 +468,7 @@ contract XAllocationPool is
   /**
    * @dev Returns the x2EarnApp contract.
    */
-  function x2EarnApps() public view returns (IX2EarnApps) {
+  function x2EarnApps() external view returns (IX2EarnApps) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     return $.x2EarnApps;
   }
@@ -478,7 +478,7 @@ contract XAllocationPool is
    * @dev Version of the governor instance (used in building the ERC712 domain separator). Default: "1"
    * @return sting The version of the contract
    */
-  function version() public pure virtual returns (string memory) {
+  function version() external pure virtual returns (string memory) {
     return "1";
   }
 }

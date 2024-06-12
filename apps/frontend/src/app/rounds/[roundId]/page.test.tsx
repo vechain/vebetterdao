@@ -7,7 +7,7 @@ import * as hooks from "@/api/contracts/xAllocations"
 test("Allocations", async () => {
   //@ts-ignore
   vi.spyOn(hooks, "useAllocationsRoundState").mockReturnValue({
-    data: "1",
+    data: 0,
     isLoading: false,
     isError: false,
   })
@@ -21,4 +21,5 @@ test("Allocations", async () => {
     />,
   )
   expect(await screen.findByTestId(`allocation-${roundId}-page`)).toBeInTheDocument()
+  expect(await screen.findByTestId(`allocation-round-header-card`)).toBeInTheDocument()
 })

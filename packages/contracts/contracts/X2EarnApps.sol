@@ -54,6 +54,11 @@ contract X2EarnApps is
   /// @notice The role that can manage the contract settings.
   bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
 
+  /// @custom:oz-upgrades-unsafe-allow constructor
+  constructor() {
+    _disableInitializers();
+  }
+
   /**
    * @notice Initialize the contract
    * @param _baseURI the base URI for the contract
@@ -68,7 +73,7 @@ contract X2EarnApps is
     address[] memory _admins,
     address _upgrader,
     address _governor
-  ) public initializer {
+  ) external initializer {
     __X2EarnApps_init();
     __Administration_init();
     __AppsStorage_init();

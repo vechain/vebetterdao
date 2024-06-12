@@ -136,7 +136,7 @@ contract B3TRGovernor is
   function initialize(
     GovernorTypes.InitializationData memory data,
     GovernorTypes.InitializationRolesData memory rolesData
-  ) public initializer {
+  ) external initializer {
     __GovernorStorage_init(data, "B3TRGovernor");
     __AccessControl_init();
     __UUPSUpgradeable_init();
@@ -465,7 +465,7 @@ contract B3TRGovernor is
    * @param account The address of the account
    * @return bool True if the account has voted, false otherwise
    */
-  function hasVoted(uint256 proposalId, address account) external view override returns (bool) {
+  function hasVoted(uint256 proposalId, address account) external view returns (bool) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return GovernorVotesLogic.hasVoted($, proposalId, account);
   }
@@ -516,7 +516,7 @@ contract B3TRGovernor is
    * @param user The address of the user.
    * @return uint256 The amount of tokens deposited by the user
    */
-  function getUserDeposit(uint256 proposalId, address user) public view returns (uint256) {
+  function getUserDeposit(uint256 proposalId, address user) external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return GovernorDepositLogic.getUserDeposit($, proposalId, user);
   }
@@ -525,7 +525,7 @@ contract B3TRGovernor is
    * @notice See {IB3TRGovernor-name}.
    * @return string The name of the governor
    */
-  function name() public view virtual returns (string memory) {
+  function name() external view returns (string memory) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return $.name;
   }
@@ -534,7 +534,7 @@ contract B3TRGovernor is
    * @notice See {IB3TRGovernor-version}.
    * @return string The version of the governor
    */
-  function version() public view virtual returns (string memory) {
+  function version() external pure returns (string memory) {
     return "1";
   }
 
@@ -576,7 +576,7 @@ contract B3TRGovernor is
    * @notice The voter rewards contract.
    * @return IVoterRewards The voter rewards contract
    */
-  function voterRewards() public view override returns (IVoterRewards) {
+  function voterRewards() external view returns (IVoterRewards) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return $.voterRewards;
   }
@@ -585,7 +585,7 @@ contract B3TRGovernor is
    * @notice The XAllocationVotingGovernor contract.
    * @return IXAllocationVotingGovernor The XAllocationVotingGovernor contract
    */
-  function xAllocationVoting() public view override returns (IXAllocationVotingGovernor) {
+  function xAllocationVoting() external view returns (IXAllocationVotingGovernor) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return $.xAllocationVoting;
   }
@@ -594,7 +594,7 @@ contract B3TRGovernor is
    * @notice See {B3TRGovernor-b3tr}.
    * @return IB3TR The B3TR contract
    */
-  function b3tr() public view override returns (IB3TR) {
+  function b3tr() external view returns (IB3TR) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return $.b3tr;
   }
@@ -603,7 +603,7 @@ contract B3TRGovernor is
    * @notice Public accessor to check the address of the timelock
    * @return address The address of the timelock
    */
-  function timelock() public view virtual returns (address) {
+  function timelock() external view virtual returns (address) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return address($.timelock);
   }
@@ -613,14 +613,14 @@ contract B3TRGovernor is
   /**
    * @notice Pause the contract
    */
-  function pause() public onlyRole(PAUSER_ROLE) {
+  function pause() external onlyRole(PAUSER_ROLE) {
     _pause();
   }
 
   /**
    * @notice Unpause the contract
    */
-  function unpause() public onlyRole(PAUSER_ROLE) {
+  function unpause() external onlyRole(PAUSER_ROLE) {
     _unpause();
   }
 
@@ -642,7 +642,7 @@ contract B3TRGovernor is
     string memory description,
     uint256 startRoundId,
     uint256 depositAmount
-  ) public whenNotPaused returns (uint256) {
+  ) external whenNotPaused returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return GovernorProposalLogic.propose($, targets, values, calldatas, description, startRoundId, depositAmount);
   }
@@ -661,7 +661,7 @@ contract B3TRGovernor is
     uint256[] memory values,
     bytes[] memory calldatas,
     bytes32 descriptionHash
-  ) public override whenNotPaused returns (uint256) {
+  ) external whenNotPaused returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return GovernorProposalLogic.queue($, address(this), targets, values, calldatas, descriptionHash);
   }
@@ -680,7 +680,7 @@ contract B3TRGovernor is
     uint256[] memory values,
     bytes[] memory calldatas,
     bytes32 descriptionHash
-  ) public payable override whenNotPaused onlyRoleOrOpenRole(PROPOSAL_EXECUTOR_ROLE) returns (uint256) {
+  ) external payable whenNotPaused onlyRoleOrOpenRole(PROPOSAL_EXECUTOR_ROLE) returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return GovernorProposalLogic.execute($, address(this), targets, values, calldatas, descriptionHash);
   }
@@ -698,7 +698,7 @@ contract B3TRGovernor is
     uint256[] memory values,
     bytes[] memory calldatas,
     bytes32 descriptionHash
-  ) public virtual override returns (uint256) {
+  ) external returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return
       GovernorProposalLogic.cancel(
@@ -718,7 +718,7 @@ contract B3TRGovernor is
    * @param support The support value (0 = against, 1 = for, 2 = abstain)
    * @return uint256 The voting power
    */
-  function castVote(uint256 proposalId, uint8 support) public returns (uint256) {
+  function castVote(uint256 proposalId, uint8 support) external returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return GovernorVotesLogic.castVote($, proposalId, _msgSender(), support, "");
   }
@@ -730,7 +730,7 @@ contract B3TRGovernor is
    * @param reason The reason for the vote
    * @return uint256 The voting power
    */
-  function castVoteWithReason(uint256 proposalId, uint8 support, string calldata reason) public returns (uint256) {
+  function castVoteWithReason(uint256 proposalId, uint8 support, string calldata reason) external returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return GovernorVotesLogic.castVote($, proposalId, _msgSender(), support, reason);
   }

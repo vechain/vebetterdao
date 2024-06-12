@@ -72,7 +72,7 @@ export const BulkClaimXAppsAllocations = () => {
   // Validate roundId input
   const isRoundValid = useMemo(() => {
     if (currentRoundId === undefined || !currentRound) return false
-    if (roundId === parseInt(currentRoundId) && currentRound.state === "0") return false
+    if (roundId === parseInt(currentRoundId) && currentRound.state === 0) return false
     if (roundId > parseInt(currentRoundId) || roundId === 0) return false
 
     return true
