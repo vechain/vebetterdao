@@ -76,7 +76,7 @@ export const ProposalsPageContent = () => {
     return (
       <Grid templateColumns={["repeat(1, 1fr)", "repeat(4, 1fr)"]} gap={6} w="full">
         <GridItem colSpan={3}>
-          <VStack spacing={4} align="flex-start" w="full">
+          <VStack spacing={6} align="flex-start" w="full">
             {activeProposals?.map(proposal => (
               <ProposalInfoCard type={ProposalState.Active} proposal={proposal} key={proposal.proposalId} />
             ))}
@@ -118,7 +118,7 @@ export const ProposalsPageContent = () => {
     return (
       <Grid templateColumns={["repeat(1, 1fr)", "repeat(4, 1fr)"]} gap={6} w="full">
         <GridItem colSpan={3}>
-          <VStack spacing={4} align="flex-start" w="full">
+          <VStack spacing={6} align="flex-start" w="full">
             {incomingProposals?.map(proposal => (
               <ProposalInfoCard type={ProposalState.Pending} proposal={proposal} key={proposal.proposalId} />
             ))}
@@ -164,7 +164,7 @@ export const ProposalsPageContent = () => {
     return (
       <Grid templateColumns={["repeat(1, 1fr)", "repeat(4, 1fr)"]} gap={6} w="full">
         <GridItem colSpan={3}>
-          <VStack spacing={4} align="flex-start" w="full">
+          <VStack spacing={6} align="flex-start" w="full">
             {pastProposals?.map(proposal => (
               <ProposalInfoCard type={ProposalState.Expired} proposal={proposal} key={proposal.proposalId} />
             ))}
