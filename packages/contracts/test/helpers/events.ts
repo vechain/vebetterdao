@@ -1,5 +1,5 @@
 import { BaseContract, ContractTransactionReceipt } from "ethers"
-import { Emissions, GalaxyMember, Treasury, XAllocationVoting } from "../../typechain-types"
+import { B3TRGovernor, Emissions, GalaxyMember, Treasury, XAllocationVoting } from "../../typechain-types"
 import { getOrDeployContractInstances } from "./deploy"
 
 export const filterEventsByName = (events: any[], eventName: string) => {
@@ -21,7 +21,7 @@ export const decodeEvent = (event: any, contract: BaseContract) => {
 
 export const getEventName = (
   receipt: ContractTransactionReceipt | null,
-  contract: Emissions | GalaxyMember | Treasury,
+  contract: Emissions | GalaxyMember | Treasury | B3TRGovernor,
 ) => {
   const event = receipt?.logs[0]
 
