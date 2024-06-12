@@ -18,7 +18,7 @@ export const AllocationRoundsContent = () => {
           <AllocationRoundsList maxRoundsToShow={8} showLoadMore showViewAll={false} />
         </HStack>
         <VStack spacing={4} flex={2.5} position={["static", "static", "sticky"]} top={100} right={0}>
-          {currentRoundId && currentRound && currentRound.state === "0" && (
+          {currentRoundId && currentRound && currentRound.state === 0 && (
             <CurrentRoundAllocations key={currentRoundId} roundId={currentRoundId} />
           )}
           <TotalAllocations />
