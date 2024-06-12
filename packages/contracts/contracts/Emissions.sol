@@ -43,12 +43,31 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   // Scaling factor to handle decimal places
   uint256 public constant SCALING_FACTOR = 1e6;
 
-  /// @notice Emission struct to store the emission details for a cycle
-  struct Emission {
-    uint256 xAllocations;
-    uint256 vote2Earn;
-    uint256 treasury;
-  }
+  // ---------------- Events ---------------- //
+  /// @notice Emitted when emissions are distributed for a cycle
+  event EmissionDistributed(uint256 indexed cycle, uint256 xAllocations, uint256 vote2Earn, uint256 treasury);
+  /// @notice Emitted when XAllocations address is updated
+  event XAllocationsAddressUpdated(address indexed newAddress, address indexed oldAddress);
+  /// @notice Emitted when Vote2Earn address is updated
+  event Vote2EarnAddressUpdated(address indexed newAddress, address indexed oldAddress);
+  /// @notice Emitted when XAllocationsGovernor address is updated
+  event XAllocationsGovernorAddressUpdated(address indexed newAddress, address indexed oldAddress);
+  /// @notice Emitted when Treasury address is updated
+  event TreasuryAddressUpdated(address indexed newAddress, address indexed oldAddress);
+  /// @notice Emitted when the emission cycle duration is updated
+  event EmissionCycleDurationUpdated(uint256 indexed newDuration, uint256 indexed oldDuration);
+  /// @notice Emitted when the xAllocations decay rate is updated
+  event XAllocationsDecayUpdated(uint256 indexed newDecay, uint256 indexed oldDecay);
+  /// @notice Emitted when the vote2Earn decay rate is updated
+  event Vote2EarnDecayUpdated(uint256 indexed newDecay, uint256 indexed oldDecay);
+  /// @notice Emitted when the vote2Earn decay period is updated
+  event Vote2EarnDecayPeriodUpdated(uint256 indexed newPeriod, uint256 indexed oldPeriod);
+  /// @notice Emitted when the max vote2Earn decay rate is updated
+  event MaxVote2EarnDecayUpdated(uint256 indexed newDecay, uint256 indexed oldDecay);
+  /// @notice Emitted when the xAllocations decay period is updated
+  event XAllocationsDecayPeriodUpdated(uint256 indexed newPeriod, uint256 indexed oldPeriod);
+  /// @notice Emitted when the treasury percentage is updated
+  event TreasuryPercentageUpdated(uint256 indexed newPercentage, uint256 indexed oldPercentage);
 
   /// @notice Initialization data for the Emissions contract
   struct InitializationData {
@@ -63,6 +82,12 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
     uint256[4] decaySettings;
     uint256 treasuryPercentage;
     uint256 maxVote2EarnDecay;
+  }
+
+  struct Emission {
+    uint256 xAllocations;
+    uint256 vote2Earn;
+    uint256 treasury;
   }
 
   /// @notice Storage structure for the Emissions contract
@@ -107,9 +132,6 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
       $.slot := EmissionsStorageLocation
     }
   }
-
-  /// @notice Emitted when emissions are distributed for a cycle
-  event EmissionDistributed(uint256 indexed cycle, uint256 xAllocations, uint256 vote2Earn, uint256 treasury);
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
@@ -553,6 +575,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   function setXallocationsAddress(address xAllocationAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
     require(xAllocationAddress != address(0), "Emissions: xAllocationAddress cannot be the zero address");
     EmissionsStorage storage $ = _getEmissionsStorage();
+    emit XAllocationsAddressUpdated(xAllocationAddress, $._xAllocations);
     $._xAllocations = xAllocationAddress;
   }
 
@@ -562,6 +585,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   function setVote2EarnAddress(address vote2EarnAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
     require(vote2EarnAddress != address(0), "Emissions: vote2EarnAddress cannot be the zero address");
     EmissionsStorage storage $ = _getEmissionsStorage();
+    emit Vote2EarnAddressUpdated(vote2EarnAddress, $._vote2Earn);
     $._vote2Earn = vote2EarnAddress;
   }
 
@@ -571,6 +595,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   function setTreasuryAddress(address treasuryAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
     require(treasuryAddress != address(0), "Emissions: treasuryAddress cannot be the zero address");
     EmissionsStorage storage $ = _getEmissionsStorage();
+    emit TreasuryAddressUpdated(treasuryAddress, $._treasury);
     $._treasury = treasuryAddress;
   }
 
@@ -580,6 +605,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   function setCycleDuration(uint256 _cycleDuration) external onlyRole(DEFAULT_ADMIN_ROLE) {
     require(_cycleDuration > 0, "Emissions: Cycle duration must be greater than 0");
     EmissionsStorage storage $ = _getEmissionsStorage();
+    emit EmissionCycleDurationUpdated(_cycleDuration, $.cycleDuration);
     $.cycleDuration = _cycleDuration;
   }
 
@@ -589,6 +615,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   function setXAllocationsDecay(uint256 _decay) external onlyRole(DEFAULT_ADMIN_ROLE) {
     require(_decay <= 100, "Emissions: xAllocations decay must be between 0 and 100");
     EmissionsStorage storage $ = _getEmissionsStorage();
+    emit XAllocationsDecayUpdated(_decay, $.xAllocationsDecay);
     $.xAllocationsDecay = _decay;
   }
 
@@ -598,6 +625,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   function setVote2EarnDecay(uint256 _decay) external onlyRole(DEFAULT_ADMIN_ROLE) {
     require(_decay <= 100, "Emissions: vote2Earn decay must be between 0 and 100");
     EmissionsStorage storage $ = _getEmissionsStorage();
+    emit Vote2EarnDecayUpdated(_decay, $.vote2EarnDecay);
     $.vote2EarnDecay = _decay;
   }
 
@@ -607,6 +635,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   function setXAllocationsDecayPeriod(uint256 _period) external onlyRole(DEFAULT_ADMIN_ROLE) {
     require(_period > 0, "Emissions: xAllocations decay period must be greater than 0");
     EmissionsStorage storage $ = _getEmissionsStorage();
+    emit XAllocationsDecayPeriodUpdated(_period, $.xAllocationsDecayPeriod);
     $.xAllocationsDecayPeriod = _period;
   }
 
@@ -616,6 +645,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   function setVote2EarnDecayPeriod(uint256 _period) external onlyRole(DEFAULT_ADMIN_ROLE) {
     require(_period > 0, "Emissions: vote2Earn decay period must be greater than 0");
     EmissionsStorage storage $ = _getEmissionsStorage();
+    emit Vote2EarnDecayPeriodUpdated(_period, $.vote2EarnDecayPeriod);
     $.vote2EarnDecayPeriod = _period;
   }
 
@@ -626,6 +656,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   function setTreasuryPercentage(uint256 _percentage) external onlyRole(DEFAULT_ADMIN_ROLE) {
     require(_percentage <= 10000, "Emissions: Treasury percentage must be between 0 and 10000");
     EmissionsStorage storage $ = _getEmissionsStorage();
+    emit TreasuryPercentageUpdated(_percentage, $.treasuryPercentage);
     $.treasuryPercentage = _percentage;
   }
 
@@ -635,6 +666,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
   function setMaxVote2EarnDecay(uint256 _maxVote2EarnDecay) external onlyRole(DEFAULT_ADMIN_ROLE) {
     require(_maxVote2EarnDecay <= 100, "Emissions: Max vote2Earn decay must be between 0 and 100");
     EmissionsStorage storage $ = _getEmissionsStorage();
+    emit MaxVote2EarnDecayUpdated(_maxVote2EarnDecay, $.maxVote2EarnDecay);
     $.maxVote2EarnDecay = _maxVote2EarnDecay;
   }
 
@@ -650,6 +682,7 @@ contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUp
     );
 
     EmissionsStorage storage $ = _getEmissionsStorage();
+    emit XAllocationsGovernorAddressUpdated(_xAllocationsGovernor, address($.xAllocationsGovernor));
     $.xAllocationsGovernor = IXAllocationVotingGovernor(_xAllocationsGovernor);
   }
 }
