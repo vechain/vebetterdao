@@ -43,7 +43,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
   const { data: currentRound } = useAllocationsRound(currentRoundId)
 
   const isCurrentRoundActive = useMemo(() => {
-    return currentRound?.state === "0"
+    return currentRound?.state === 0
   }, [currentRound])
 
   const loadMore = useCallback(() => {
