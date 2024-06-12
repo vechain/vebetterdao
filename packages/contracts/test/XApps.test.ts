@@ -1343,7 +1343,7 @@ describe("X-Apps", function () {
       expect(teamWalletBalanceBefore).to.eql(0n)
 
       const x2EarnRewardsPoolBalanceBefore = await b3tr.balanceOf(await x2EarnRewardsPool.getAddress())
-      const appEarnings = await xAllocationPool.roundEarnings(roundId, app1Id)
+      let appEarnings = await xAllocationPool.roundEarnings(roundId, app1Id)
 
       // admin claims for app
       await xAllocationPool.connect(owner).claim(roundId, app1Id)
@@ -1354,26 +1354,36 @@ describe("X-Apps", function () {
       expect(teamWalletBalanceAfter).to.eql(0n)
       expect(x2EarnRewardsPoolBalanceAfter).to.eql(x2EarnRewardsPoolBalanceBefore + appEarnings[0])
 
+      // admin should be able to withdraw the funds
+      await x2EarnRewardsPool.connect(otherAccounts[0]).withdraw(appEarnings[0], app1Id, "")
+      const x2EarnRewardsPoolBalanceAfterWithdraw = await b3tr.balanceOf(await x2EarnRewardsPool.getAddress())
+      expect(x2EarnRewardsPoolBalanceAfterWithdraw).to.eql(x2EarnRewardsPoolBalanceAfter - appEarnings[0])
+      const teamWalletBalanceAfterWithdraw = await b3tr.balanceOf(teamWalletAddress)
+      expect(teamWalletBalanceAfterWithdraw).to.eql(appEarnings[0])
+
       // now we start a new round and the app can change the team allocation percentage
       await startNewAllocationRound()
       roundId = await xAllocationVoting.currentRoundId()
       await xAllocationVoting.connect(voter).castVote(roundId, [app1Id], [ethers.parseEther("1")])
       await x2EarnApps.connect(owner).setTeamAllocationPercentage(app1Id, 30)
-      await waitForCurrentRoundToEnd()
-
       teamAllocationPercentage = await x2EarnApps.teamAllocationPercentage(app1Id)
       expect(teamAllocationPercentage).to.eql(30n)
+      await waitForCurrentRoundToEnd()
+
+      appEarnings = await xAllocationPool.roundEarnings(roundId, app1Id)
 
       // admin claims for app
       await xAllocationPool.connect(owner).claim(roundId, app1Id)
 
       // now the team wallet should have received some funds
       const teamWalletBalanceAfter2 = await b3tr.balanceOf(teamWalletAddress)
-      expect(teamWalletBalanceAfter2).to.eql((appEarnings[0] * 30n) / 100n)
+      expect(teamWalletBalanceAfter2).to.eql(teamWalletBalanceAfterWithdraw + (appEarnings[0] * 30n) / 100n)
 
       // 70% of funds should have been sent to the x2EarnRewardsPool contract
       const x2EarnRewardsPoolBalanceAfter2 = await b3tr.balanceOf(await x2EarnRewardsPool.getAddress())
-      expect(x2EarnRewardsPoolBalanceAfter2).to.eql(x2EarnRewardsPoolBalanceAfter + (appEarnings[0] * 70n) / 100n)
+      expect(x2EarnRewardsPoolBalanceAfter2).to.eql(
+        x2EarnRewardsPoolBalanceAfterWithdraw + (appEarnings[0] * 70n) / 100n,
+      )
 
       // admin of app can deposit back the funds to the x2EarnRewardsPool
       await b3tr.connect(otherAccounts[0]).approve(await x2EarnRewardsPool.getAddress(), teamWalletBalanceAfter2)
