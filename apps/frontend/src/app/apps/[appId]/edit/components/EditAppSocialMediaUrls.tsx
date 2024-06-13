@@ -2,9 +2,10 @@ import { FormControl, FormErrorMessage, Input, InputGroup, InputLeftElement, Tex
 import { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { RiDiscordFill, RiMediumFill, RiTelegramFill, RiTwitterXFill, RiYoutubeFill } from "react-icons/ri"
-import { EditAppForm } from "../EditAppPageModal"
+import { EditAppForm } from "./AppEditPageContent"
 import { useCurrentAppMetadata } from "@/app/apps/[appId]/hooks"
 import { useMemo } from "react"
+import { URL_REGEX } from "@/constants"
 
 type Props = {
   form: UseFormReturn<EditAppForm, any, undefined>
@@ -13,8 +14,6 @@ type Props = {
 const findUrlByName = (urls: { name: string; url: string }[] | undefined, name: string) => {
   return urls?.find(url => url.name === name)?.url || ""
 }
-
-const URL_REGEX = new RegExp("^(https?://)[-a-zA-Z0-9@:%._+~#=]{2,256}.[a-zA-Z]{2,}([-a-zA-Z0-9@:%_+.~#?&//=]*)$")
 
 export const EditAppSocialMediaUrls = ({ form }: Props) => {
   const { t } = useTranslation()

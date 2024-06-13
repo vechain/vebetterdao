@@ -16,7 +16,7 @@ export const useAppAllocations = (appId: string) => {
       }) || []
   const totalAllocationReceived = appAllocations.reduce((acc, curr) => acc + Number(curr.scaledAmount), 0)
   const lastRoundAllocationReceived = Number(appAllocations[appAllocations.length - 1]?.scaledAmount) || 0
-  const averageAllocationReceived = totalAllocationReceived / appAllocations.length
+  const averageAllocationReceived = appAllocations.length ? totalAllocationReceived / appAllocations.length : 0
 
   return {
     data,
