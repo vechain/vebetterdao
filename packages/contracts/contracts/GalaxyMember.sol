@@ -187,14 +187,12 @@ contract GalaxyMember is
     $.MAX_LEVEL = data.maxLevel;
     $._baseTokenURI = data.baseTokenURI;
 
-    for (uint8 i = 0; i < data.b3trToUpgradeToLevel.length; i++) {
+    for (uint8 i; i < data.b3trToUpgradeToLevel.length; i++) {
       $._b3trToUpgradeToLevel[i + 2] = data.b3trToUpgradeToLevel[i]; // First Level that requires B3TR is level 2
     }
 
     $.b3tr = IB3TR(data.b3tr);
     $.treasury = data.treasury;
-
-    $.isPublicMintingPaused = false;
 
     _grantRole(DEFAULT_ADMIN_ROLE, data.admin);
     _grantRole(UPGRADER_ROLE, data.upgrader);
