@@ -44,7 +44,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
     router.push(`/rounds/${round.roundId}`)
   }
   const isActive = useMemo(() => {
-    return allocationRound?.state === "0" && allocationRound?.voteEndTimestamp?.isAfter()
+    return allocationRound?.state === 0 && allocationRound?.voteEndTimestamp?.isAfter()
   }, [allocationRound])
 
   const cardActiveBackgroundColor = useColorModeValue("secondary.50", "secondary.100")

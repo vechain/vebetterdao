@@ -19,9 +19,7 @@ export const useVotingRewards = (currentRoundId?: string, voter?: string) => {
 
   // Get array from 1 to currentRoundId - 1 (if currentRoundId is still active)
   const rounds = useMemo(() => {
-    return Array.from({ length: parseInt(currentRoundId ?? "0") - (state === "0" ? 1 : 0) }, (_, i) =>
-      (i + 1).toString(),
-    )
+    return Array.from({ length: parseInt(currentRoundId ?? "0") - (state === 0 ? 1 : 0) }, (_, i) => (i + 1).toString())
   }, [currentRoundId, state])
 
   return useQueries({
