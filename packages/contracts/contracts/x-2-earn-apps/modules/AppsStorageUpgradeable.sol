@@ -192,6 +192,15 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
+   * @dev Get the total count of apps
+   * @return The total number of apps
+   */
+  function getAppsCount() external view returns (uint256) {
+    AppsStorageStorage storage $ = _getAppsStorageStorage();
+    return $._appIds.length;
+  }
+
+  /**
    * @dev Get the receiver address of the app
    *
    * @param appId the hashed name of the app
