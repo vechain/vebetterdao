@@ -20,7 +20,7 @@ export const AllocationRoundStateTag = ({ state, renderInTag, ...props }: Props)
       <Skeleton isLoaded={!!state}>
         <Tag colorScheme={"gray"} {...props}>
           <HStack spacing={1} align={"center"}>
-            {state === "0" && <DotSymbol color={`${colorScheme}.${colorShade}`} />}
+            {state === 0 && <DotSymbol color={`${colorScheme}.${colorShade}`} />}
             <Text color={`${colorScheme}.${colorShade}`} fontWeight={"500"} fontSize="medium" {...props}>
               {state ? RoundState[state] : "Unknown"}
             </Text>
@@ -31,7 +31,7 @@ export const AllocationRoundStateTag = ({ state, renderInTag, ...props }: Props)
   return (
     <Skeleton isLoaded={!!state}>
       <HStack spacing={1} align={"center"}>
-        {state === "0" && <DotSymbol color={`${colorScheme}.${colorShade}`} />}
+        {state === 0 && <DotSymbol color={`${colorScheme}.${colorShade}`} />}
         <Text color={`${colorScheme}.${colorShade}`} fontWeight={"500"} fontSize="medium" {...props}>
           {state ? RoundState[state] : "Unknown"}
         </Text>

@@ -109,7 +109,7 @@ contract XAllocationVoting is
    * @notice Initialize the contract
    * @param data The initialization data
    */
-  function initialize(InitializationData memory data) public initializer {
+  function initialize(InitializationData memory data) external initializer {
     __XAllocationVotingGovernor_init("XAllocationVoting");
     __ExternalContracts_init(data.x2EarnAppsAddress, data.emissions, data.voterRewards);
     __VotingSettings_init(data.initialVotingPeriod);
@@ -135,21 +135,21 @@ contract XAllocationVoting is
   /**
    * @dev Set the address of the X2EarnApps contract
    */
-  function setX2EarnAppsAddress(IX2EarnApps newX2EarnApps) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+  function setX2EarnAppsAddress(IX2EarnApps newX2EarnApps) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     _setX2EarnApps(newX2EarnApps);
   }
 
   /**
    * @dev Set the address of the Emissions contract
    */
-  function setEmissionsAddress(IEmissions newEmissions) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+  function setEmissionsAddress(IEmissions newEmissions) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     _setEmissions(newEmissions);
   }
 
   /**
    * @dev Set the address of the VoterRewards contract
    */
-  function setVoterRewardsAddress(IVoterRewards newVoterRewards) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+  function setVoterRewardsAddress(IVoterRewards newVoterRewards) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     _setVoterRewards(newVoterRewards);
   }
 
@@ -204,7 +204,7 @@ contract XAllocationVoting is
   /**
    * Returns the quorum for a given round
    */
-  function roundQuorum(uint256 roundId) public view returns (uint256) {
+  function roundQuorum(uint256 roundId) external view returns (uint256) {
     return quorum(roundSnapshot(roundId));
   }
 

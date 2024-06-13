@@ -1,5 +1,12 @@
-import { useProposalsEvents, useActiveProposals, useIncomingProposals, usePastProposals, useCurrentBlock } from "@/api"
-import { ProposalCard } from "@/components"
+import {
+  useProposalsEvents,
+  useActiveProposals,
+  useIncomingProposals,
+  usePastProposals,
+  useCurrentBlock,
+  ProposalState,
+} from "@/api"
+import { ProposalInfoCard } from "@/components"
 import {
   VStack,
   HStack,
@@ -17,6 +24,7 @@ import {
   Skeleton,
   Spinner,
   Button,
+  GridItem,
 } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
@@ -66,8 +74,15 @@ export const ProposalsPageContent = () => {
       )
     }
     return (
-      <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
-        {activeProposals?.map(proposal => <ProposalCard proposal={proposal} key={proposal.proposalId} />)}
+      <Grid templateColumns={["repeat(1, 1fr)", "repeat(4, 1fr)"]} gap={6} w="full">
+        <GridItem colSpan={3}>
+          <VStack spacing={6} align="flex-start" w="full">
+            {activeProposals?.map(proposal => (
+              <ProposalInfoCard type={ProposalState.Active} proposal={proposal} key={proposal.proposalId} />
+            ))}
+          </VStack>
+        </GridItem>
+        <GridItem colSpan={1} />
       </Grid>
     )
   }, [activeProposals, activeProposalsError, activeProposalsLoading, t])
@@ -101,8 +116,15 @@ export const ProposalsPageContent = () => {
       )
     }
     return (
-      <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
-        {incomingProposals?.map(proposal => <ProposalCard proposal={proposal} key={proposal.proposalId} />)}
+      <Grid templateColumns={["repeat(1, 1fr)", "repeat(4, 1fr)"]} gap={6} w="full">
+        <GridItem colSpan={3}>
+          <VStack spacing={6} align="flex-start" w="full">
+            {incomingProposals?.map(proposal => (
+              <ProposalInfoCard type={ProposalState.Pending} proposal={proposal} key={proposal.proposalId} />
+            ))}
+          </VStack>
+        </GridItem>
+        <GridItem colSpan={1} />
       </Grid>
     )
   }, [incomingProposals, incomingProposalsError, incomingProposalsLoading, t])
@@ -140,8 +162,15 @@ export const ProposalsPageContent = () => {
       )
     }
     return (
-      <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
-        {pastProposals?.map(proposal => <ProposalCard proposal={proposal} key={proposal.proposalId} />)}
+      <Grid templateColumns={["repeat(1, 1fr)", "repeat(4, 1fr)"]} gap={6} w="full">
+        <GridItem colSpan={3}>
+          <VStack spacing={6} align="flex-start" w="full">
+            {pastProposals?.map(proposal => (
+              <ProposalInfoCard type={ProposalState.Expired} proposal={proposal} key={proposal.proposalId} />
+            ))}
+          </VStack>
+        </GridItem>
+        <GridItem colSpan={1} />
       </Grid>
     )
   }, [pastProposals, pastProposalsError, pastProposalsLoading, t])
