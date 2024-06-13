@@ -176,6 +176,11 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   event TimelockChange(address oldTimelock, address newTimelock);
 
   /**
+   * @dev Emitted when a function is whitelisted or restricted by the governor.
+   */
+  event FunctionWhitelisted(address indexed target, bytes4 indexed functionSelector, bool isWhitelisted);
+
+  /**
    * @dev Emitted when a vote is cast without params.
    *
    * Note: `support` values should be seen as buckets. Their interpretation depends on the voting module used.

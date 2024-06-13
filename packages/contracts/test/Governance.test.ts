@@ -20,6 +20,7 @@ import {
   ZERO_ADDRESS,
   waitForQueuedProposalToBeReady,
   waitForNextCycle,
+  getEventName,
 } from "./helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it } from "mocha"
@@ -181,7 +182,11 @@ describe("Governor and TimeLock", function () {
       // Check that the new implementation works
       const newGovernor = Contract.attach(await governor.getAddress()) as B3TRGovernor
 
-      await newGovernor.connect(owner).setWhitelistFunction(b3tr, funcSig, true) // whitelist the function for b3tr contract
+      const tx1 = await newGovernor.connect(owner).setWhitelistFunction(b3tr, funcSig, true) // whitelist the function for b3tr contract
+      const receipt = await tx1.wait()
+
+      const name = getEventName(receipt, newGovernor)
+      expect(name).to.eql("FunctionWhitelisted")
 
       // start new round
       await emissions.distribute()
