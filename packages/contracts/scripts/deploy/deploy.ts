@@ -185,6 +185,8 @@ export async function deployAll(config: ContractsConfig) {
       minter: TEMP_ADMIN,
       admin: TEMP_ADMIN,
       upgrader: config.CONTRACTS_ADMIN_ADDRESS,
+      contractsAddressManager: TEMP_ADMIN,
+      decaySettingsManager: TEMP_ADMIN,
       b3trAddress: await b3tr.getAddress(),
       destinations: [
         await xAllocationPool.getAddress(),
@@ -430,6 +432,8 @@ export async function deployAll(config: ContractsConfig) {
 
     await transferMinterRole(emissions, deployer, deployer.address, config.CONTRACTS_ADMIN_ADDRESS)
     await transferAdminRole(emissions, deployer, config.CONTRACTS_ADMIN_ADDRESS)
+    await transferContractsAddressManagerRole(emissions, deployer, config.CONTRACTS_ADMIN_ADDRESS)
+    await transferDecaySettingsManagerRole(emissions, deployer, config.CONTRACTS_ADMIN_ADDRESS)
 
     await transferAdminRole(voterRewards, deployer, config.CONTRACTS_ADMIN_ADDRESS)
 
@@ -516,6 +520,18 @@ export async function deployAll(config: ContractsConfig) {
       config.CONTRACTS_ADMIN_ADDRESS,
       TEMP_ADMIN,
       await emissions.DEFAULT_ADMIN_ROLE(),
+    )
+    await validateContractRole(
+      emissions,
+      config.CONTRACTS_ADMIN_ADDRESS,
+      TEMP_ADMIN,
+      await emissions.CONTRACTS_ADDRESS_MANAGER_ROLE(),
+    )
+    await validateContractRole(
+      emissions,
+      config.CONTRACTS_ADMIN_ADDRESS,
+      TEMP_ADMIN,
+      await emissions.DECAY_SETTINGS_MANAGER_ROLE(),
     )
     await validateContractRole(emissions, config.CONTRACTS_ADMIN_ADDRESS, TEMP_ADMIN, await emissions.UPGRADER_ROLE())
 
@@ -827,7 +843,7 @@ const transferGovernanceRole = async (
 }
 
 const transferContractsAddressManagerRole = async (
-  contract: GalaxyMember | XAllocationPool | XAllocationVoting,
+  contract: GalaxyMember | XAllocationPool | XAllocationVoting | Emissions,
   admin: HardhatEthersSigner,
   newAddress: string,
 ) => {
@@ -850,6 +866,32 @@ const transferContractsAddressManagerRole = async (
   if (!newRoleSet || !oldRoleRemoved) throw new Error("Role not set correctly on " + (await contract.getAddress()))
 
   console.log("Contract Address Manager Role transferred successfully on " + (await contract.getAddress()))
+}
+
+const transferDecaySettingsManagerRole = async (
+  contract: Emissions,
+  admin: HardhatEthersSigner,
+  newAddress: string,
+) => {
+  if (admin.address === newAddress) throw new Error("Role not transferred. New address is the same as old address")
+
+  const decaySettingsManagerRole = await contract.DECAY_SETTINGS_MANAGER_ROLE()
+
+  await contract
+    .connect(admin)
+    .grantRole(decaySettingsManagerRole, newAddress)
+    .then(async tx => await tx.wait())
+  await contract
+    .connect(admin)
+    .renounceRole(decaySettingsManagerRole, admin.address)
+    .then(async tx => await tx.wait())
+
+  const newRoleSet = await contract.hasRole(decaySettingsManagerRole, newAddress)
+  const oldRoleRemoved = !(await contract.hasRole(decaySettingsManagerRole, admin.address))
+
+  if (!newRoleSet || !oldRoleRemoved) throw new Error("Role not set correctly on " + (await contract.getAddress()))
+
+  console.log("Decay Settings Manager Role transferred successfully on " + (await contract.getAddress()))
 }
 
 const transferGovernorFunctionSettingsRole = async (
