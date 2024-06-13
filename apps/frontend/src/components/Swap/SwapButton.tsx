@@ -1,5 +1,5 @@
 import { useB3trBalance, useVot3Balance } from "@/api"
-import { Button, useDisclosure } from "@chakra-ui/react"
+import { Button, useDisclosure, Text } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { FaRepeat } from "react-icons/fa6"
 import { SwapModal } from "./SwapModal"
@@ -26,14 +26,10 @@ export const SwapButton: React.FC<Props> = ({ isIconButton = false }) => {
           <FaRepeat />
         </Button>
       ) : (
-        <Button
-          size="sm"
-          isDisabled={buttonDisabled}
-          onClick={onOpen}
-          leftIcon={<FaRepeat />}
-          colorScheme="primary"
-          borderRadius={"full"}>
-          Swap
+        <Button isDisabled={buttonDisabled} onClick={onOpen} borderRadius={"full"} variant={"primaryAction"} w="full">
+          <Text fontSize={16} fontStyle={"normal"} fontWeight={500}>
+            Convert tokens
+          </Text>
         </Button>
       )}
     </>
