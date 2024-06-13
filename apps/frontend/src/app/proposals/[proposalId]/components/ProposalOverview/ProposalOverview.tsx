@@ -5,7 +5,6 @@ import {
   Flex,
   HStack,
   Heading,
-  IconButton,
   Skeleton,
   SkeletonText,
   Spacer,
@@ -16,7 +15,6 @@ import { humanAddress } from "@repo/utils/FormattingUtils"
 import { AddressIcon } from "@/components/AddressIcon"
 import { useCurrentProposal } from "@/api"
 import { ProposalOverviewVotes } from "./components/ProposalOverviewVotes"
-import { UilShareAlt } from "@iconscout/react-unicons"
 import { ProposalOverviewTime } from "./components/ProposalOverviewTime"
 import { ProposalOverviewStatusLabel } from "./components/ProposalOverviewStatusLabel"
 import { ProposalOverviewYourSupport } from "./components/ProposalOverviewYourSupport"
@@ -24,6 +22,7 @@ import { ProposalOverviewCommunitySupport } from "./components/ProposalOverviewC
 import { ProposalYourVote } from "./components/ProposalYourVote"
 import { useTranslation } from "react-i18next"
 import { CastProposalVoteButton } from "./components/CastProposalVoteButton"
+import { ProposalShareButton } from "./components/ProposalShareButton"
 
 export const ProposalOverview = () => {
   const { proposal } = useCurrentProposal()
@@ -79,16 +78,7 @@ export const ProposalOverview = () => {
                   <ProposalOverviewYourSupport />
                 </HStack>
                 <HStack justify={"flex-end"} flexWrap={"wrap"} gap={4}>
-                  <IconButton
-                    isDisabled={proposal.isStateLoading}
-                    aria-label="share"
-                    rounded="full"
-                    bgColor="#E0E9FE"
-                    color="#004CFC"
-                    h="40px"
-                    w="40px">
-                    <UilShareAlt size="20px" />
-                  </IconButton>
+                  <ProposalShareButton />
                   <CastProposalVoteButton />
                 </HStack>
               </HStack>

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Forked from OpenZeppelin Contracts (last updated v5.0.0) (governance/IGovernor.sol)
 
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
 import { IERC165 } from "@openzeppelin/contracts/interfaces/IERC165.sol";
 import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
@@ -186,6 +186,11 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @dev Emitted when the timelock controller used for proposal execution is modified.
    */
   event TimelockChange(address oldTimelock, address newTimelock);
+
+  /**
+   * @dev Emitted when a function is whitelisted or restricted by the governor.
+   */
+  event FunctionWhitelisted(address indexed target, bytes4 indexed functionSelector, bool isWhitelisted);
 
   /**
    * @dev Emitted when a vote is cast without params.

@@ -21,7 +21,7 @@
 //                                   ##############
 //                                   #########
 
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
@@ -103,6 +103,21 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
   /// @param reward - The amount of B3TR reward claimed by the voter.
   event RewardClaimed(uint256 indexed cycle, address indexed voter, uint256 reward);
 
+  /// @notice Emitted when the Galaxy Member contract address is set.
+  /// @param newAddress - The address of the new Galaxy Member contract.
+  /// @param oldAddress - The address of the old Galaxy Member contract.
+  event GalaxyMemberAddressUpdated(address indexed newAddress, address indexed oldAddress);
+
+  /// @notice Emitted when the Emissions contract address is set.
+  /// @param newAddress - The address of the new Emissions contract.
+  /// @param oldAddress - The address of the old Emissions contract.
+  event EmissionsAddressUpdated(address indexed newAddress, address indexed oldAddress);
+
+  /// @notice Emitted when the level to multiplier mapping is set.
+  /// @param level - The level of the Galaxy Member NFT.
+  /// @param multiplier - The percentage multiplier for the level of the Galaxy Member NFT.
+  event LevelToMultiplierSet(uint256 indexed level, uint256 multiplier);
+
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
@@ -126,7 +141,7 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
     address _b3tr,
     uint256[] memory levels,
     uint256[] memory multipliers
-  ) public initializer {
+  ) external initializer {
     require(_galaxyMember != address(0), "VoterRewards: _galaxyMember cannot be the zero address");
     require(_emissions != address(0), "VoterRewards: emissions cannot be the zero address");
     require(_b3tr != address(0), "VoterRewards: _b3tr cannot be the zero address");
@@ -170,7 +185,7 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
     address voter,
     uint256 votes,
     uint256 votePower
-  ) public onlyRole(VOTE_REGISTRAR_ROLE) {
+  ) external onlyRole(VOTE_REGISTRAR_ROLE) {
     // If votePower is zero, exit the function to avoid unnecessary computations.
     if (votePower == 0) {
       return;
@@ -212,7 +227,7 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
   /// @dev The rewards are claimed based on the reward-weighted votes of the user in the cycle.
   /// @param cycle - The cycle in which the rewards are claimed.
   /// @param voter - The address of the voter.
-  function claimReward(uint256 cycle, address voter) public nonReentrant {
+  function claimReward(uint256 cycle, address voter) external nonReentrant {
     require(cycle > 0, "VoterRewards: cycle must be greater than 0");
     require(voter != address(0), "VoterRewards: voter cannot be the zero address");
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
@@ -265,39 +280,39 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
   /// @notice Get the total reward-weighted votes for a user in a specific cycle.
   /// @param cycle - The cycle in which the rewards are claimed.
   /// @param voter - The address of the voter.
-  function cycleToVoterToTotal(uint256 cycle, address voter) public view returns (uint256) {
+  function cycleToVoterToTotal(uint256 cycle, address voter) external view returns (uint256) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
     return $.cycleToVoterToTotal[cycle][voter];
   }
 
   /// @notice Get the total reward-weighted votes in a specific cycle.
   /// @param cycle - The cycle in which the rewards are claimed.
-  function cycleToTotal(uint256 cycle) public view returns (uint256) {
+  function cycleToTotal(uint256 cycle) external view returns (uint256) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
     return $.cycleToTotal[cycle];
   }
 
   /// @notice Get the reward multiplier for a specific level of the Galaxy Member NFT.
   /// @param level - The level of the Galaxy Member NFT.
-  function levelToMultiplier(uint256 level) public view returns (uint256) {
+  function levelToMultiplier(uint256 level) external view returns (uint256) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
     return $.levelToMultiplier[level];
   }
 
   /// @notice Get the Galaxy Member contract.
-  function galaxyMember() public view returns (IGalaxyMember) {
+  function galaxyMember() external view returns (IGalaxyMember) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
     return $.galaxyMember;
   }
 
   /// @notice Get the Emissions contract.
-  function emissions() public view returns (IEmissions) {
+  function emissions() external view returns (IEmissions) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
     return $.emissions;
   }
 
   /// @notice Get the B3TR token contract.
-  function b3tr() public view returns (IB3TR) {
+  function b3tr() external view returns (IB3TR) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
     return $.b3tr;
   }
@@ -306,37 +321,45 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
 
   /// @notice Set the Galaxy Member contract.
   /// @param _galaxyMember - The address of the Galaxy Member contract.
-  function setGalaxyMember(address _galaxyMember) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+  function setGalaxyMember(address _galaxyMember) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(_galaxyMember != address(0), "VoterRewards: _galaxyMember cannot be the zero address");
 
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+
+    emit GalaxyMemberAddressUpdated(_galaxyMember, address($.galaxyMember));
+
     $.galaxyMember = IGalaxyMember(_galaxyMember);
   }
 
   /// @notice Set the Galaxy Member level to multiplier mapping.
   /// @param level - The level of the Galaxy Member NFT.
   /// @param multiplier - The percentage multiplier for the level of the Galaxy Member NFT.
-  function setLevelToMultiplier(uint256 level, uint256 multiplier) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setLevelToMultiplier(uint256 level, uint256 multiplier) external onlyRole(DEFAULT_ADMIN_ROLE) {
     require(level > 0, "VoterRewards: level must be greater than 0");
     require(multiplier > 0, "VoterRewards: multiplier must be greater than 0");
 
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
     $.levelToMultiplier[level] = multiplier;
+
+    emit LevelToMultiplierSet(level, multiplier);
   }
 
   /// @notice Set the Emmissions contract.
   /// @param _emissions - The address of the emissions contract.
-  function setEmissions(address _emissions) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+  function setEmissions(address _emissions) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(_emissions != address(0), "VoterRewards: emissions cannot be the zero address");
 
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+
+    emit EmissionsAddressUpdated(_emissions, address($.emissions));
+
     $.emissions = IEmissions(_emissions);
   }
 
   /// @notice Returns the version of the contract
   /// @dev This should be updated every time a new version of implementation is deployed
   /// @return string The version of the contract
-  function version() public pure virtual returns (string memory) {
+  function version() external pure virtual returns (string memory) {
     return "1";
   }
 }

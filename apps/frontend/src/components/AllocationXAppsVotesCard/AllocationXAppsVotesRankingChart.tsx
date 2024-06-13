@@ -100,12 +100,16 @@ const VotesHorizontalBar = ({
             </Skeleton>
             <Skeleton isLoaded={!roundStateLoading} textAlign={"right"}>
               <Text fontSize={["xs", "sm"]} fontWeight={"300"}>
-                {roundState === "0" ? "To receive" : "Received"}
+                {roundState === 0 ? "To receive" : "Received"}
               </Text>
             </Skeleton>
           </VStack>
           <VStack spacing={0} align="flex-end">
-            <Heading size={["sm", "md"]} fontWeight={"700"} color="green.500" data-testid={appMetadata?.name + "-total-votes"}>
+            <Heading
+              size={["sm", "md"]}
+              fontWeight={"700"}
+              color="green.500"
+              data-testid={appMetadata?.name + "-total-votes"}>
               {compactFormatter.format(Number(data.votes))}
             </Heading>
 

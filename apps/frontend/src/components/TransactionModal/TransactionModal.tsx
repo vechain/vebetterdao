@@ -6,6 +6,8 @@ import { SuccessModalContent } from "./SuccessModalContent"
 import { Modal, ModalOverlay } from "@chakra-ui/react"
 import { CustomModalContent } from "@/components/CustomModalContent"
 import { UploadingMetadataModalContent } from ".//UploadingMetadataModalContent"
+import { ConfirmationConvertModalContent } from "./ConfirmationConvertModalContent"
+import { SuccessConvertModalContent } from "./SuccessConvertModalContent"
 
 export type TransactionModalProps = {
   isOpen: boolean
@@ -22,6 +24,11 @@ export type TransactionModalProps = {
   onTryAgain?: () => void
   showExplorerButton?: boolean
   txId?: string
+  b3trBalanceAfterSwap?: string
+  vot3BalanceAfterSwap?: string
+  isSwap?: boolean
+  b3trBalance?: string
+  vot3Balance?: string
 }
 
 export const TransactionModal = ({
@@ -39,11 +46,24 @@ export const TransactionModal = ({
   onTryAgain,
   showExplorerButton,
   txId,
+  isSwap,
+  b3trBalanceAfterSwap,
+  vot3BalanceAfterSwap,
+  b3trBalance,
+  vot3Balance,
 }: TransactionModalProps) => {
   const modalContent = useMemo(() => {
     if (status === "uploadingMetadata") return <UploadingMetadataModalContent />
 
-    if (status === "pending") return <ConfirmationModalContent title={confirmationTitle} />
+    if (status === "pending")
+      return isSwap ? (
+        <ConfirmationConvertModalContent
+          b3trBalanceAfter={b3trBalanceAfterSwap}
+          vot3BalanceAfter={vot3BalanceAfterSwap}
+        />
+      ) : (
+        <ConfirmationModalContent title={confirmationTitle} />
+      )
     if (status === "waitingConfirmation")
       return <LoadingModalContent title={pendingTitle} showExplorerButton={showExplorerButton} txId={txId} />
     if (status === "error")
@@ -57,8 +77,15 @@ export const TransactionModal = ({
           txId={txId}
         />
       )
-    if (status === "success")
-      return (
+    if (status === "success") {
+      return isSwap ? (
+        <SuccessConvertModalContent
+          b3trBalanceAfter={b3trBalance}
+          vot3BalanceAfter={vot3Balance}
+          txId={txId}
+          onClose={onClose}
+        />
+      ) : (
         <SuccessModalContent
           title={successTitle}
           showSocialButtons={showSocialButtons}
@@ -67,9 +94,13 @@ export const TransactionModal = ({
           txId={txId}
         />
       )
+    }
     return null
   }, [
     status,
+    isSwap,
+    b3trBalanceAfterSwap,
+    vot3BalanceAfterSwap,
     confirmationTitle,
     pendingTitle,
     showExplorerButton,
@@ -78,6 +109,9 @@ export const TransactionModal = ({
     errorDescription,
     showTryAgainButton,
     onTryAgain,
+    b3trBalance,
+    vot3Balance,
+    onClose,
     successTitle,
     showSocialButtons,
     socialDescriptionEncoded,
@@ -92,7 +126,9 @@ export const TransactionModal = ({
       closeOnOverlayClick={status !== "waitingConfirmation" && status !== "pending"}
       isCentered={true}>
       <ModalOverlay />
-      <CustomModalContent>{modalContent}</CustomModalContent>
+      <CustomModalContent maxW={"590px"} minH={"300px"}>
+        {modalContent}
+      </CustomModalContent>
     </Modal>
   )
 }

@@ -21,7 +21,7 @@
 //                                   ##############
 //                                   #########
 
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
 import { GovernorStorageTypes } from "./GovernorStorageTypes.sol";
 
@@ -36,6 +36,12 @@ library GovernorFunctionRestrictionsLogic {
   /// @notice Error message for when a function selector is invalid.
   /// @param selector The function selector that is invalid.
   error GovernorFunctionInvalidSelector(bytes selector);
+
+  /// @notice Emitted when a function is whitelisted by the governor.
+  /// @param target The address of the contract.
+  /// @param functionSelector The function selector.
+  /// @param isWhitelisted Boolean indicating if the function is whitelisted.
+  event FunctionWhitelisted(address indexed target, bytes4 indexed functionSelector, bool isWhitelisted);
 
   // --------------- SETTERS ---------------
   /**
@@ -53,6 +59,7 @@ library GovernorFunctionRestrictionsLogic {
     bool isWhitelisted
   ) public {
     self.whitelistedFunctions[target][functionSelector] = isWhitelisted;
+    emit FunctionWhitelisted(target, functionSelector, isWhitelisted);
   }
 
   /**
