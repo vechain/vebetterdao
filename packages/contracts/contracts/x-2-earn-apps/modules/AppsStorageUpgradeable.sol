@@ -164,15 +164,15 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev Get a paginated list of apps
-   * @param startIndex The starting index of the pagination
-   * @param count The number of items to return
+   * @dev See {IX2EarnApps-app}.
    */
-  function apps(uint startIndex, uint count) public view returns (X2EarnAppsDataTypes.App[] memory) {
+  function apps(uint startIndex, uint count) external view returns (X2EarnAppsDataTypes.App[] memory) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
 
     uint256 length = $._appIds.length;
-    require(startIndex < length, "Invalid start index");
+    if (length <= startIndex) {
+      revert X2EarnInvalidStartIndex();
+    }
 
     // Calculate the end index
     uint256 endIndex = startIndex + count;
@@ -192,10 +192,9 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev Get the total count of apps
-   * @return The total number of apps
+   * @dev See {IX2EarnApps-app}.
    */
-  function getAppsCount() external view returns (uint256) {
+  function appCount() external view returns (uint256) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
     return $._appIds.length;
   }
