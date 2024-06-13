@@ -7,6 +7,7 @@ import {
   bootstrapAndStartEmissions,
   bootstrapEmissions,
   participateInAllocationVoting,
+  ZERO_ADDRESS,
 } from "./helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it, before } from "mocha"
@@ -47,6 +48,74 @@ describe("Treasury", () => {
     const operatorRole = await b3tr.MINTER_ROLE()
     await b3tr.grantRole(operatorRole, owner)
     await b3tr.mint(await treasuryProxy.getAddress(), ethers.parseEther("20"))
+  })
+  describe("Initilization", () => {
+    it("Should revert if B3TR is set to zero address in initilisation", async () => {
+      const config = createLocalConfig()
+      const { owner, vot3 } = await getOrDeployContractInstances({
+        forceDeploy: false,
+        config,
+      })
+
+      await expect(
+        deployProxy("Treasury", [
+          ZERO_ADDRESS,
+          await vot3.getAddress(),
+          owner.address,
+          owner.address,
+          owner.address,
+          owner.address,
+          config.TREASURY_TRANSFER_LIMIT_VET,
+          config.TREASURY_TRANSFER_LIMIT_B3TR,
+          config.TREASURY_TRANSFER_LIMIT_VOT3,
+          config.TREASURY_TRANSFER_LIMIT_VTHO,
+        ]),
+      ).to.be.reverted
+    })
+    it("Should revert if VOT3 is set to zero address in initilisation", async () => {
+      const config = createLocalConfig()
+      const { owner, b3tr } = await getOrDeployContractInstances({
+        forceDeploy: false,
+        config,
+      })
+
+      await expect(
+        deployProxy("Treasury", [
+          await b3tr.getAddress(),
+          ZERO_ADDRESS,
+          owner.address,
+          owner.address,
+          owner.address,
+          owner.address,
+          config.TREASURY_TRANSFER_LIMIT_VET,
+          config.TREASURY_TRANSFER_LIMIT_B3TR,
+          config.TREASURY_TRANSFER_LIMIT_VOT3,
+          config.TREASURY_TRANSFER_LIMIT_VTHO,
+        ]),
+      ).to.be.reverted
+    })
+    it("Should revert if admin is set to zero address in initilisation", async () => {
+      const config = createLocalConfig()
+      const { owner, vot3, b3tr } = await getOrDeployContractInstances({
+        forceDeploy: false,
+        config,
+      })
+
+      await expect(
+        deployProxy("Treasury", [
+          await b3tr.getAddress(),
+          await vot3.getAddress(),
+          owner.address,
+          ZERO_ADDRESS,
+          owner.address,
+          owner.address,
+          config.TREASURY_TRANSFER_LIMIT_VET,
+          config.TREASURY_TRANSFER_LIMIT_B3TR,
+          config.TREASURY_TRANSFER_LIMIT_VOT3,
+          config.TREASURY_TRANSFER_LIMIT_VTHO,
+        ]),
+      ).to.be.reverted
+    })
   })
   describe("Tokens", () => {
     describe("VTHO", () => {
