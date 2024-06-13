@@ -194,36 +194,38 @@ export const NewProposalForm: React.FC<Props> = ({
       </VStack>
 
       {renderActions && (
-        <VStack spacing={8} align="flex-start" w="full" mt={12}>
+        <VStack spacing={4} align="flex-start" w="full" mt={12}>
           <Heading size="md">{t("Executable functions")}</Heading>
-          {fields?.map((field, index) => {
-            const onAddAnotherTransactionClick = () => {
-              insert(index + 1, {
-                name: field.name,
-                icon: field.icon,
-                description: field.description,
-                params: field.params,
-                abiDefinition: field.abiDefinition,
-                contractAddress: field.contractAddress,
-                calldata: undefined,
-              })
-            }
+          <VStack spacing={8} align="flex-start" w="full">
+            {fields?.map((field, index) => {
+              const onAddAnotherTransactionClick = () => {
+                insert(index + 1, {
+                  name: field.name,
+                  icon: field.icon,
+                  description: field.description,
+                  params: field.params,
+                  abiDefinition: field.abiDefinition,
+                  contractAddress: field.contractAddress,
+                  calldata: undefined,
+                })
+              }
 
-            const wasAddedLater = fields.filter((_field, i) => _field.name === field.name && i < index).length > 0
-            return (
-              <ExecutableFunctionCard
-                key={field.id}
-                field={field}
-                index={index}
-                register={register}
-                control={control}
-                errors={errors}
-                isDisabled={isDisabled}
-                {...(canAddAnotherTransaction && { onAddAnotherTransactionClick: onAddAnotherTransactionClick })}
-                {...(wasAddedLater && { onRemoveTransactionClick: () => remove(index) })}
-              />
-            )
-          })}
+              const wasAddedLater = fields.filter((_field, i) => _field.name === field.name && i < index).length > 0
+              return (
+                <ExecutableFunctionCard
+                  key={field.id}
+                  field={field}
+                  index={index}
+                  register={register}
+                  control={control}
+                  errors={errors}
+                  isDisabled={isDisabled}
+                  {...(canAddAnotherTransaction && { onAddAnotherTransactionClick: onAddAnotherTransactionClick })}
+                  {...(wasAddedLater && { onRemoveTransactionClick: () => remove(index) })}
+                />
+              )
+            })}
+          </VStack>
         </VStack>
       )}
     </form>

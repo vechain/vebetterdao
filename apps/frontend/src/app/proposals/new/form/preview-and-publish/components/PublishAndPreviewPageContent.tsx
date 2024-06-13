@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next"
 import { useCreateProposal, useUploadProposalMetadata } from "@/hooks"
 import { TransactionModal } from "@/components/TransactionModal"
 import { useForm } from "react-hook-form"
+import { SelectedRoundRadioCard } from "../../round/components/SelectedRoundRadioCard"
 
 export const PublishAndPreviewPageContent = () => {
   const router = useRouter()
@@ -116,6 +117,20 @@ export const PublishAndPreviewPageContent = () => {
                 canAddAnotherTransaction={false}
               />
             )}
+
+            <VStack spacing={4} align="flex-start" w="full">
+              <Heading size="md">{t("Voting session")}</Heading>
+              {votingStartRoundId && (
+                <SelectedRoundRadioCard
+                  roundId={votingStartRoundId}
+                  selected={false}
+                  isSelectable={false}
+                  cardProps={{
+                    bg: "#E5EEFF",
+                  }}
+                />
+              )}
+            </VStack>
             <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
               <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
                 {t("Go back")}
