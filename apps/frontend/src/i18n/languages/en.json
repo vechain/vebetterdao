@@ -1,7 +1,6 @@
 {
   "({{percentage}}%) as {{label}}": "({{percentage}}%) as {{label}}",
   "Total allocation to distribute": "Total allocation to distribute",
-  "Finished": "Finished",
   "To be distributed": "To be distributed",
   "B3TR to distribute between apps": "B3TR to distribute between apps",
   "{{apps}} apps": "{{apps}} apps",
@@ -47,6 +46,10 @@
   "Vote for no": "Vote for no",
   "Vote for yes": "Vote for yes",
   "Voting power": "Voting power",
+  "Share this proposal": "Share this proposal",
+  "Copy link to proposal": "Copy link to proposal",
+  "Copied!": "Copied!",
+  "Share the proposal on social media and invite people to vote": "Share the proposal on social media and invite people to vote",
   "Executable in {{timestamp}}": "Executable in {{timestamp}}",
   "VOT3": "VOT3",
   "Are you completely sure to cancel this proposal? All the support provided by the community will be lost.": "Are you completely sure to cancel this proposal? All the support provided by the community will be lost.",
