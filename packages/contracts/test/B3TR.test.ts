@@ -29,7 +29,7 @@ describe("B3TR Token", function () {
       const { b3tr } = await getOrDeployContractInstances({ forceDeploy: false, config })
 
       const cap = await b3tr.cap()
-      expect(cap).to.eql(ethers.parseEther("1000000000"))
+      expect(cap).to.eql(ethers.parseEther("1000243154"))
     })
 
     it("admin role is set correctly upon deploy", async function () {
@@ -178,10 +178,10 @@ describe("B3TR Token", function () {
       const operatorRole = await b3tr.MINTER_ROLE()
 
       await b3tr.grantRole(operatorRole, owner)
-      await expect(b3tr.mint(otherAccount, ethers.parseEther("1000000000"))).not.to.be.reverted
+      await expect(b3tr.mint(otherAccount, ethers.parseEther("1000243154"))).not.to.be.reverted
 
       const balance = await b3tr.balanceOf(otherAccount)
-      expect(String(balance)).to.eql(ethers.parseEther("1000000000").toString())
+      expect(String(balance)).to.eql(ethers.parseEther("1000243154").toString())
     })
   })
 
