@@ -12,7 +12,7 @@ export const AddNewAppCard = () => {
   // }
 
   const openGrantPage = () => {
-    window.open("https://vechain.org/grants/", "_blank")
+    window.open("https://vechain.org/grants/", "_blank", "noopener noreferrer")
   }
 
   return (

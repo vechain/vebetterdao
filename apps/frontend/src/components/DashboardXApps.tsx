@@ -91,7 +91,7 @@ const DashboardXAppCard = ({ xApp }: { xApp: XApp }) => {
                 aria-label="Go to App"
                 fontSize="20px"
                 disabled={isAppMetadataError}
-                onClick={() => window.open(appMetadata?.external_url, "_blank")}
+                onClick={() => window.open(appMetadata?.external_url, "_blank", "noopener noreferrer")}
                 color={buttonIconColor}
                 icon={<FiArrowUpRight />}
               />
