@@ -35,8 +35,8 @@ contract B3TR is ERC20Capped, ERC20Pausable, AccessControl {
   bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
   /// @notice The maximum amount of B3TR tokens that can be minted
-  uint256 private constant B3TR_CAP = 1000000000;
-
+  uint256 private constant B3TR_CAP = 1000243154;
+  
   /// @dev Initializes the contract with specified cap, token details, and admin roles
   /// @param _admin The address that will be granted the default admin role
   /// @param _defaultMinter The address that will be granted the minter role initially
