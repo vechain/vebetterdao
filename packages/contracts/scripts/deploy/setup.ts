@@ -24,13 +24,8 @@ const APPS = [
   },
   {
     address: accounts[6].address,
-    name: "Vyvo",
-    metadataURI: "bafkreigk7faih4jmdee4ritah6564jqpfn5s2gl4dcsvii7woijy5ls7ca",
-  },
-  {
-    address: accounts[6].address,
-    name: "EVearn",
-    metadataURI: "bafkreif5m23ikv6jphvjciv5uwtq3eqchinh5m5jexdo7atgxyf62az65y",
+    name: "Green Ambassador Challenge",
+    metadataURI: "bafkreigrwjowwwcmdd7bdm3yqsquu77ufeqcao6mjbd2fednwo5qfmtldi",
   },
   {
     address: accounts[6].address,
@@ -39,9 +34,15 @@ const APPS = [
   },
   {
     address: accounts[6].address,
-    name: "Green Ambassador Challenge",
-    metadataURI: "bafkreigrwjowwwcmdd7bdm3yqsquu77ufeqcao6mjbd2fednwo5qfmtldi",
+    name: "Vyvo",
+    metadataURI: "bafkreigk7faih4jmdee4ritah6564jqpfn5s2gl4dcsvii7woijy5ls7ca",
   },
+  {
+    address: accounts[6].address,
+    name: "EVearn",
+    metadataURI: "bafkreif5m23ikv6jphvjciv5uwtq3eqchinh5m5jexdo7atgxyf62az65y",
+  },
+
   {
     address: accounts[6].address,
     name: "Non Fungible Book Club (NFBC)",
