@@ -92,47 +92,6 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
         <Text fontSize={"14px"} color="#6A6A6A">
           {t("Forecasted proposal support")}
         </Text>
-        {/* <HStack alignItems={"baseline"} justify={"space-between"}>
-          <HStack alignItems={"baseline"}>
-            <Flex position="relative" top="7px" display={"inline-flex"}>
-              <Arm color={"#004CFC"} size={"36"} />
-            </Flex>
-            <Text fontSize={"28px"} color={"#252525"} fontWeight={400}>
-              {compactFormatter.format(communityDepositsForecast)}
-            </Text>
-            <Text fontSize={"20px"} fontWeight={500} color={"#6A6A6A"}>
-              {t("/")}
-            </Text>
-            <Text fontSize={"20px"} fontWeight={500} color={"#6A6A6A"}>
-              {compactFormatter.format(Number(proposal.depositThreshold))}
-            </Text>
-          </HStack>
-          <Text fontSize={"14px"} fontWeight={400} color={"#6A6A6A"}>
-            {compactFormatter.format(communityDepositsForecastPercentage)}
-            {t("%")}
-          </Text>
-        </HStack>
-        <Box position="relative">
-          <Box bg="#D5D5D5" h="10px" rounded="full" />
-          <Box
-            bg={"#004CFC"}
-            h="10px"
-            rounded="full"
-            w={`${communityDepositsForecastChartPercentage}%`}
-            position="absolute"
-            top={0}
-            left={0}
-          />
-          <Box
-            bg={"#77A0FF"}
-            h="10px"
-            rounded="full"
-            w={`${communityDepositsChartPercentage}%`}
-            position="absolute"
-            top={0}
-            left={0}
-          />
-        </Box> */}
         <ProposalSupportProgressChart
           depositThreshold={proposal.depositThreshold}
           userDeposits={userDepositsForecasted}
