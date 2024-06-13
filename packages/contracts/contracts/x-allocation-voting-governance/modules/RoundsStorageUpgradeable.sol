@@ -184,7 +184,7 @@ abstract contract RoundsStorageUpgradeable is Initializable, XAllocationVotingGo
     X2EarnAppsDataTypes.App[] memory allApps = new X2EarnAppsDataTypes.App[](appsInRound.length);
 
     uint256 length = appsInRound.length;
-    for (uint i = 0; i < length; i++) {
+    for (uint i; i < length; i++) {
       allApps[i] = x2EarnApps().app(appsInRound[i]);
     }
     return allApps;

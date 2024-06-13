@@ -158,7 +158,7 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     $.emissions = IEmissions(_emissions);
 
     // Set the level to multiplier mapping.
-    for (uint256 i = 0; i < levels.length; i++) {
+    for (uint256 i; i < levels.length; i++) {
       $.levelToMultiplier[levels[i]] = multipliers[i];
     }
 

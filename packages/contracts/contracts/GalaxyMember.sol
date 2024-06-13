@@ -194,8 +194,6 @@ contract GalaxyMember is
     $.b3tr = IB3TR(data.b3tr);
     $.treasury = data.treasury;
 
-    $.isPublicMintingPaused = false;
-
     _grantRole(DEFAULT_ADMIN_ROLE, data.admin);
     _grantRole(UPGRADER_ROLE, data.upgrader);
     _grantRole(PAUSER_ROLE, data.pauser);
