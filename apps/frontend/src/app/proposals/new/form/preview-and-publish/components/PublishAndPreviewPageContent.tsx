@@ -98,7 +98,7 @@ export const PublishAndPreviewPageContent = () => {
           metadataUploadError
             ? "Error uploading metadata"
             : createProposalMutation.error
-              ? "Error updating app details"
+              ? "Error uploading proposal metadata"
               : undefined
         }
         showTryAgainButton={true}
