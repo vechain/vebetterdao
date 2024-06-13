@@ -39,7 +39,13 @@ export const AppCard = ({ xApp }: Props) => {
   }
 
   return (
-    <Card variant={"baseWithBorder"} w="full">
+    <Card
+      variant={"baseWithBorder"}
+      w="full"
+      onClick={navigateToAppDetail}
+      _hover={{
+        cursor: "pointer",
+      }}>
       <Box w="full" position={"relative"} h={200}>
         <Skeleton w="full" h="full" isLoaded={!isBannerLoading}>
           <Image
@@ -49,23 +55,10 @@ export const AppCard = ({ xApp }: Props) => {
             h={"full"}
             objectFit={"cover"}
             borderTopRadius={"md"}
-            onClick={navigateToAppDetail}
-            _hover={{
-              cursor: "pointer",
-            }}
           />
         </Skeleton>
         <Skeleton isLoaded={!isLogoLoading} alignContent={"start"} pos={"absolute"} bottom={-7} left={5}>
-          <Image
-            src={logo?.image ?? notFoundImage}
-            alt={"logo"}
-            boxSize={14}
-            borderRadius="9px"
-            onClick={navigateToAppDetail}
-            _hover={{
-              cursor: "pointer",
-            }}
-          />
+          <Image src={logo?.image ?? notFoundImage} alt={"logo"} boxSize={14} borderRadius="9px" />
         </Skeleton>
       </Box>
       <CardBody mt={5}>
@@ -82,8 +75,11 @@ export const AppCard = ({ xApp }: Props) => {
                   <IconButton
                     isRound={true}
                     icon={<FaEllipsisVertical />}
-                    onClick={openMobileOptions}
                     aria-label="Open app options"
+                    onClick={e => {
+                      e.stopPropagation()
+                      openMobileOptions()
+                    }}
                   />
                   <AppCardOptionsMobileModal
                     receiverAddress={xApp.receiverAddress}

@@ -47,8 +47,21 @@ export const AppCardOptionsDesktopMenu = ({
 
   return (
     <Menu>
-      <MenuButton as={IconButton} isRound={true} icon={<FaEllipsisVertical />} />
-      <MenuList>
+      <MenuButton
+        as={IconButton}
+        isRound={true}
+        icon={<FaEllipsisVertical />}
+        _hover={{
+          cursor: "default",
+        }}
+        onClick={e => {
+          e.stopPropagation()
+        }}
+      />
+      <MenuList
+        onClick={e => {
+          e.stopPropagation()
+        }}>
         <Skeleton isLoaded={!isLoading}>
           {showViewDetails && (
             <MenuItem onClick={navigateToAppDetail} icon={<FaRegImage />}>
