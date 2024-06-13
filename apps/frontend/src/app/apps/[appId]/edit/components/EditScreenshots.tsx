@@ -1,9 +1,10 @@
-import { Button, HStack, Heading, Input, VStack } from "@chakra-ui/react"
-import { UseFormReturn } from "react-hook-form"
+import { Box, Button, Container, HStack, Heading, IconButton, Image, Input, VStack, useToast } from "@chakra-ui/react"
+import { Controller, UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { EditAppForm } from "../EditAppPageModal"
-import { useCallback, useRef } from "react"
-import { UilUpload } from "@iconscout/react-unicons"
+import { ChangeEvent, useCallback, useEffect, useRef } from "react"
+import { UilTrash, UilUpload } from "@iconscout/react-unicons"
+import { EditAppForm } from "./AppEditPageContent"
+import { imageListCompression } from "@/utils/imageListCompression"
 
 type Props = {
   form: UseFormReturn<EditAppForm, any, undefined>
@@ -15,9 +16,37 @@ export const EditScreenshots = ({ form }: Props) => {
   const handleUpload = useCallback(() => {
     inputFile.current?.click()
   }, [])
-  const onDrop = useCallback(e => {
-    console.log(e.target.files)
-  }, [])
+  const screenshots = form.watch("screenshots")
+  const toast = useToast()
+  console.log(screenshots)
+
+  const fileToBase64 = async (file: File): Promise<string> =>
+    new Promise(resolve => {
+      const reader = new FileReader()
+      reader.onloadend = () => resolve(reader.result as string)
+      reader.readAsDataURL(file)
+    })
+
+  const handleImageUpload = useCallback(
+    async (e: ChangeEvent<HTMLInputElement>) => {
+      try {
+        const files = Array.from(e.target.files || [])
+        const compressedFiles = await imageListCompression(files)
+        const base64Files = await Promise.all(compressedFiles.map(fileToBase64))
+        form.setValue("screenshots", [...screenshots, ...base64Files])
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "An error occurred while uploading the images",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        })
+        console.error(error)
+      }
+    },
+    [form, screenshots, toast],
+  )
 
   return (
     <VStack align="stretch" gap={6}>
@@ -28,8 +57,48 @@ export const EditScreenshots = ({ form }: Props) => {
         <Button variant="primaryAction" onClick={handleUpload} leftIcon={<UilUpload size="16px" />}>
           {t("Upload new screenshots")}
         </Button>
-        <Input type="file" ref={inputFile} display="none" onChange={onDrop} />
+        <Controller
+          name="screenshots"
+          render={() => (
+            <Input type="file" ref={inputFile} display="none" multiple accept="image/*" onChange={handleImageUpload} />
+          )}
+          control={form.control}
+        />
       </HStack>
+      <Box overflowX="auto" gap={4} whiteSpace={"nowrap"}>
+        {screenshots.map((screenshot, index) => (
+          <Box
+            key={index}
+            w="auto"
+            maxW="700px"
+            h="400px"
+            borderRadius="8px"
+            overflow="hidden"
+            display={"inline-block"}
+            mx={2}
+            position="relative">
+            <Image src={screenshot} alt={`Screenshot ${index + 1}`} w="full" h="full" objectFit="cover" />
+            <IconButton
+              rounded="full"
+              color="#D23F63"
+              bgColor="#FCEEF1"
+              _hover={{ bgColor: "#FCEEF1DD" }}
+              aria-label="Delete screenshot"
+              icon={<UilTrash size="24px" />}
+              position="absolute"
+              top={2}
+              right={2}
+              colorScheme="red"
+              onClick={() => {
+                form.setValue(
+                  "screenshots",
+                  screenshots.filter((_, i) => i !== index),
+                )
+              }}
+            />
+          </Box>
+        ))}
+      </Box>
     </VStack>
   )
 }

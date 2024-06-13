@@ -23,6 +23,7 @@ import { EditAppSocialMediaUrls } from "./EditAppSocialMediaUrls"
 import { EditTeamXProfiles } from "./EditTeamXProfiles"
 import { EditScreenshots } from "./EditScreenshots"
 import { useParams, useRouter } from "next/navigation"
+import { bojak } from "./image"
 
 export type EditAppForm = {
   name: string
@@ -34,6 +35,7 @@ export type EditAppForm = {
   youtubeUrl: string
   mediumUrl: string
   adminTwitterAccount: string
+  screenshots: string[]
 }
 
 export const AppEditPageContent = () => {
@@ -41,11 +43,14 @@ export const AppEditPageContent = () => {
   const { appMetadata } = useCurrentAppMetadata()
   const { logo, isLogoLoading } = useCurrentAppLogo()
 
-  const form = useForm<EditAppForm>()
+  const form = useForm<EditAppForm>({
+    defaultValues: {
+      screenshots: appMetadata?.screenshots,
+    },
+  })
   const {
     register,
     handleSubmit,
-    reset: resetForm,
     formState: { errors },
   } = form
 
@@ -64,7 +69,7 @@ export const AppEditPageContent = () => {
       <Stack flexDirection={["column", "row"]} justify={"space-between"}>
         <HStack gap={4}>
           <Skeleton isLoaded={!isLogoLoading} alignContent={"start"} flexBasis={"64px"}>
-            <Image src={logo?.image ?? notFoundImage} alt={"logo"} maxWidth="none" w="64px" borderRadius="16px" />
+            <Image src={logo ?? notFoundImage} alt={"logo"} maxWidth="none" w="64px" borderRadius="16px" />
           </Skeleton>
           <FormControl isInvalid={!!errors.name}>
             <Input

@@ -10,10 +10,10 @@ import { useCurrentAppMetadata } from "./useCurrentAppMetadata"
  */
 export const useCurrentAppLogo = () => {
   const { appMetadata, appMetadataLoading } = useCurrentAppMetadata()
-  const { data: logo, isLoading: isLogoLoading, error: isLogoError } = useIpfsImage(appMetadata?.logo)
+  const { data, isLoading: isLogoLoading, error: isLogoError } = useIpfsImage(appMetadata?.logo)
 
   return {
-    logo,
+    logo: data?.image,
     isLogoLoading: isLogoLoading || appMetadataLoading,
     isLogoError,
   }
