@@ -495,6 +495,10 @@ describe("X-Allocation Pool", async function () {
 
         // ENDED SEEDING DATA
 
+        // Send 100% to the team instead of x2EarnRewardsPool
+        await x2EarnApps.connect(owner).setTeamAllocationPercentage(app1Id, 100)
+        await x2EarnApps.connect(owner).setTeamAllocationPercentage(app2Id, 100)
+
         // CLAIMING
         const baseAllocationAmount = await xAllocationPool.baseAllocationAmount(round1)
 
