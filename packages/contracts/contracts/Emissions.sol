@@ -602,8 +602,13 @@ contract Emissions is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPS
   /// @dev Requires admin privileges and a duration greater than 0
   /// @param _cycleDuration The duration of the cycle in blocks
   function setCycleDuration(uint256 _cycleDuration) external onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(_cycleDuration > 0, "Emissions: Cycle duration must be greater than 0");
     EmissionsStorage storage $ = _getEmissionsStorage();
+
+    require(_cycleDuration > 0, "Emissions: Cycle duration must be greater than 0");
+    require(
+      IXAllocationVotingGovernor($.xAllocationsGovernor).votingPeriod() < _cycleDuration,
+      "Emissions: Voting period must be less than cycle duration"
+    );
     emit EmissionCycleDurationUpdated(_cycleDuration, $.cycleDuration);
     $.cycleDuration = _cycleDuration;
   }
