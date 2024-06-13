@@ -42,7 +42,6 @@ const APPS = [
     name: "EVearn",
     metadataURI: "bafkreif5m23ikv6jphvjciv5uwtq3eqchinh5m5jexdo7atgxyf62az65y",
   },
-
   {
     address: accounts[6].address,
     name: "Non Fungible Book Club (NFBC)",
