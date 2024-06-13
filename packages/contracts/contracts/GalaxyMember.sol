@@ -158,6 +158,7 @@ contract GalaxyMember is
     require(bytes(data.baseTokenURI).length > 0, "Galaxy Member: Base URI must be set");
     require(data.b3tr != address(0), "Galaxy Member: B3TR token address cannot be the zero address");
     require(data.treasury != address(0), "Galaxy Member: Treasury address cannot be the zero address");
+    require(data.b3trToUpgradeToLevel.length >= data.maxLevel - 1, "Galaxy Member: B3TR to upgrade must be set for all unlocked levels");
 
     __ERC721_init(data.name, data.symbol);
     __ERC721Enumerable_init();
@@ -173,12 +174,8 @@ contract GalaxyMember is
     $._baseTokenURI = data.baseTokenURI;
 
     for (uint256 i = 0; i < data.b3trToUpgradeToLevel.length; i++) {
+      require(data.b3trToUpgradeToLevel[i] > 0, "Galaxy Member: B3TR to upgrade must be greater than 0");
       $._b3trToUpgradeToLevel[i + 2] = data.b3trToUpgradeToLevel[i]; // First Level that requires B3TR is level 2
-    }
-
-    // First Level that requires B3TR is level 2
-    for (uint256 i = 2; i <= data.maxLevel; i++) {
-      require($._b3trToUpgradeToLevel[i] > 0, "Galaxy Member: B3TR to upgrade must be set for all levels unlocked"); // All levels unlocked must have a B3TR requirement
     }
 
     $.b3tr = IB3TR(data.b3tr);
