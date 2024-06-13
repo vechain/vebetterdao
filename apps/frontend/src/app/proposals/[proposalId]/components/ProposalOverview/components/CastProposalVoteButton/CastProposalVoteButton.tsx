@@ -1,4 +1,5 @@
-import { ProposalState, useCurrentProposal } from "@/api"
+import { ProposalState } from "@/api"
+import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
 import { VoteIcon } from "@/components"
 import { Button } from "@chakra-ui/react"
 import { useWallet, useWalletModal } from "@vechain/dapp-kit-react"
@@ -7,7 +8,7 @@ import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
 export const CastProposalVoteButton = () => {
-  const { proposal } = useCurrentProposal()
+  const { proposal } = useProposalDetail()
   const { t } = useTranslation()
   const router = useRouter()
   const { account } = useWallet()

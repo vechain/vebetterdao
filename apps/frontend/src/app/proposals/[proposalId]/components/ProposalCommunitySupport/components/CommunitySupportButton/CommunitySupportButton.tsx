@@ -1,15 +1,15 @@
 import { Button, useDisclosure } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { CommunitySupportModal } from "./components/CommunitySupportModal"
-import { useCurrentProposal } from "@/api"
 import { useCallback } from "react"
 import { useWallet, useWalletModal } from "@vechain/dapp-kit-react"
+import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
 
 export const CommunitySupportButton = () => {
   const { account } = useWallet()
   const { open: openConnectModal } = useWalletModal()
   const { isOpen, onClose, onOpen } = useDisclosure()
-  const { proposal } = useCurrentProposal()
+  const { proposal } = useProposalDetail()
   const { t } = useTranslation()
 
   const handleClick = useCallback(() => {
@@ -22,9 +22,11 @@ export const CommunitySupportButton = () => {
 
   return (
     <>
-      <Button onClick={handleClick} isDisabled={proposal.isDepositReached} variant="primaryAction">
-        {t("Support this proposal")}
-      </Button>
+      {!proposal.isDepositReached && (
+        <Button onClick={handleClick} variant="primaryAction">
+          {t("Support this proposal")}
+        </Button>
+      )}
       <CommunitySupportModal isOpen={isOpen} onClose={onClose} />
     </>
   )

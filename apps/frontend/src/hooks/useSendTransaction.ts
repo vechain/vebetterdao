@@ -1,7 +1,7 @@
 import { useTxReceipt } from "@/api"
 import { UseMutateFunction, useMutation } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 
 /**
  * ready: the user has not clicked on the button yet
@@ -124,6 +124,7 @@ export const useSendTransaction = ({
     data: sendTransactionTx,
     isPending: sendTransactionPending,
     error: sendTransactionError,
+    reset: resetSendTransaction,
   } = useMutation({
     mutationFn: sendTransactionAdapter,
     onError: error => {
@@ -163,51 +164,70 @@ export const useSendTransaction = ({
    * TODO: In case of errors, call the callback
    */
 
-  // worfklow status is one of "ready" | "pending" | "waitingConfirmation" | "success" | "error"
-  // this cannot be a derived value since we need offer the possibility to reset the status
-  const [status, setStatus] = useState<TransactionStatus>("ready")
+  const status = useMemo(() => {
+    if (sendTransactionPending) return "pending"
+
+    if (sendTransactionError) {
+      return "error"
+    }
+
+    if (sendTransactionTx?.txid) {
+      if (isTxReceiptLoading) return "waitingConfirmation"
+      if (txReceiptError) {
+        return "error"
+      }
+      if (txReceipt) {
+        if (txReceipt.reverted) {
+          return "error"
+        }
+        return "success"
+      }
+    }
+
+    return "ready"
+  }, [
+    isTxReceiptLoading,
+    sendTransactionError,
+    sendTransactionPending,
+    sendTransactionTx?.txid,
+    txReceipt,
+    txReceiptError,
+  ])
 
   useEffect(() => {
-    if (sendTransactionPending) return setStatus("pending")
-
-    if (isTxReceiptLoading) return setStatus("waitingConfirmation")
-
     if (sendTransactionError) {
       setError({
         type: "SendTransactionError",
         reason: sendTransactionError.message,
       })
-      return setStatus("error")
     }
 
-    if (txReceiptError) {
-      setStatus("error")
-      setError({
-        type: "TxReceiptError",
-        reason: txReceiptError.message,
-      })
-      return
-    }
-
-    if (txReceipt) {
-      if (txReceipt.reverted) {
-        ;(async () => {
-          const revertReason = await explainTxRevertReason(txReceipt)
-          setError({
-            type: "RevertReasonError",
-            reason: revertReason?.[0]?.revertReason ?? "Transaction reverted",
-          })
-          setStatus("error")
-        })()
-
+    if (sendTransactionTx?.txid) {
+      if (txReceiptError) {
+        setError({
+          type: "TxReceiptError",
+          reason: txReceiptError.message,
+        })
         return
       }
-      setStatus("success")
-      onTxConfirmed?.()
-      return
-    }
 
-    return setStatus("ready")
+      if (txReceipt) {
+        if (txReceipt.reverted) {
+          // TODO: move this code to a separated query
+          ;(async () => {
+            const revertReason = await explainTxRevertReason(txReceipt)
+            setError({
+              type: "RevertReasonError",
+              reason: revertReason?.[0]?.revertReason ?? "Transaction reverted",
+            })
+          })()
+
+          return
+        }
+        onTxConfirmed?.()
+        return
+      }
+    }
   }, [
     sendTransactionPending,
     isTxReceiptLoading,
@@ -216,12 +236,13 @@ export const useSendTransaction = ({
     txReceipt,
     onTxConfirmed,
     explainTxRevertReason,
+    sendTransactionTx?.txid,
   ])
 
   const resetStatus = useCallback(() => {
-    setStatus("ready")
+    resetSendTransaction()
     setError(undefined)
-  }, [])
+  }, [resetSendTransaction])
 
   return {
     sendTransaction: runSendTransaction,

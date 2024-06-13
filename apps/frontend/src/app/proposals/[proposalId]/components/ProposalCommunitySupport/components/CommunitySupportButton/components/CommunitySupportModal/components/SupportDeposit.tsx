@@ -1,4 +1,4 @@
-import { useCurrentProposal, useVot3Balance } from "@/api"
+import { useVot3Balance } from "@/api"
 import { Arm } from "@/components/Icons/Arm"
 import { filterAmountInput } from "@/utils"
 import { Box, Button, Divider, Flex, HStack, Image, Input, Text, VStack } from "@chakra-ui/react"
@@ -6,19 +6,24 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
 
 const compactFormatter = getCompactFormatter(2)
 
 export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => void }) => {
   const { t } = useTranslation()
-  const { proposal } = useCurrentProposal()
+  const { proposal } = useProposalDetail()
   const [amount, setAmount] = useState("")
   const { account } = useWallet()
   const { data: vot3Balance } = useVot3Balance(account ?? undefined)
+  const missingSupport = useMemo(
+    () => proposal.depositThreshold - proposal.communityDeposits,
+    [proposal.communityDeposits, proposal.depositThreshold],
+  )
 
   const depositMax = useCallback(() => {
-    setAmount(vot3Balance?.scaled ?? "")
-  }, [vot3Balance])
+    setAmount(Math.min(Number(vot3Balance?.scaled ?? 0), missingSupport || 0).toString())
+  }, [vot3Balance, missingSupport])
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) =>

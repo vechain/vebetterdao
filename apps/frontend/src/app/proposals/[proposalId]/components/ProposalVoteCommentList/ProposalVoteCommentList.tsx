@@ -1,12 +1,13 @@
-import { ProposalVoteEvent, useCurrentProposal } from "@/api"
+import { ProposalVoteEvent } from "@/api"
 import { Card, CardBody, Heading, Spinner, Text, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import { ProposalVoteComment } from "./components/ProposalVoteComment"
 import InfiniteScroll from "react-infinite-scroll-component"
 import { useCallback, useState } from "react"
+import { useProposalDetail } from "../../hooks"
 
 export const ProposalVoteCommentList = () => {
-  const { proposal } = useCurrentProposal()
+  const { proposal } = useProposalDetail()
 
   const [visibleComments, setVisibleComments] = useState<ProposalVoteEvent[]>([])
 
