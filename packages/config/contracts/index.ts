@@ -2,6 +2,7 @@ export * from "./type"
 
 import { createLocalConfig } from "./envs/local"
 import { createSoloStagingConfig } from "./envs/soloStaging"
+import { createTestnetConfig } from "./envs/testnet"
 import { createE2EConfig } from "./envs/e2e"
 
 export const EnvConfigValues = ["local", "e2e", "solo-staging", "testnet"] as const
@@ -15,6 +16,8 @@ export function getContractsConfig(env: EnvConfig) {
       return createE2EConfig()
     case "solo-staging":
       return createSoloStagingConfig()
+    case "testnet":
+      return createTestnetConfig()
 
     default:
       throw new Error(`Invalid ENV "${env}"`)

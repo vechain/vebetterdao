@@ -2,13 +2,15 @@ import { Card, HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { CommunitySupportButton } from "./components/CommunitySupportButton"
-import { ProposalState, useCurrentProposal } from "@/api"
+import { ProposalState } from "@/api"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo } from "react"
 import { ProposalWithdrawButton } from "../ProposalWithdrawButton"
+import { useProposalDetail } from "../../hooks"
 import { ProposalSupportProgressChart } from "@/components/ProposalSupportProgressChart/ProposalSupportProgressChart"
 
 export const ProposalCommunitySupport = () => {
-  const { proposal } = useCurrentProposal()
+  const { proposal } = useProposalDetail()
   const { t } = useTranslation()
 
   const isDepositNotMet = proposal.state === ProposalState.DepositNotMet

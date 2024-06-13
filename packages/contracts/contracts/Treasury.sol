@@ -21,12 +21,11 @@
 //                                   ##############
 //                                   #########
 
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
@@ -39,7 +38,6 @@ import "./interfaces/IVOT3.sol";
 /// @notice This contract is designed to manage all assets owned by the VeBetter DAO
 contract Treasury is
   IERC721Receiver,
-  Initializable,
   AccessControlUpgradeable,
   PausableUpgradeable,
   ReentrancyGuardUpgradeable,

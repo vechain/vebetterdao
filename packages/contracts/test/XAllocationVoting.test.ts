@@ -258,7 +258,7 @@ describe("X-Allocation Voting", function () {
       expect(await governor.state(proposalId)).to.eql(5n)
 
       await governor.execute([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash)
-      expect(await governor.state(proposalId)).to.eql(7n)
+      expect(await governor.state(proposalId)).to.eql(6n)
 
       const newImplAddress = await getImplementationAddress(ethers.provider, await xAllocationVoting.getAddress())
       expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
@@ -647,7 +647,7 @@ describe("X-Allocation Voting", function () {
         expect(await governor.state(proposalId)).to.eql(5n)
 
         await governor.execute([await xAllocationVoting.getAddress()], [0], [encodedFunctionCall], descriptionHash)
-        expect(await governor.state(proposalId)).to.eql(7n)
+        expect(await governor.state(proposalId)).to.eql(6n)
 
         const votingPeriod = await xAllocationVoting.votingPeriod()
         expect(votingPeriod).to.eql(cycleDuration - 1n)
