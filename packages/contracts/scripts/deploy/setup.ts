@@ -20,7 +20,7 @@ const APPS = [
   {
     address: accounts[6].address,
     name: "GreenCart",
-    metadataURI: "bafkreie6gdx7xugiemmubpfb6r5c4bdwfjucjtmb43mk2fhemyx3x3kvnu",
+    metadataURI: "bafkreihw2ugdn6roakmyg3xt4opbt2knitoc32skp3gt2iuvgkqksk2jla",
   },
   {
     address: accounts[6].address,
