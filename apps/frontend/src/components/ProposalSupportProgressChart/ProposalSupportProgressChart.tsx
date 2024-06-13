@@ -18,6 +18,14 @@ type Props = {
 }
 /**
  * Renders the proposal support progress chart
+ * @param {Props} props
+ * @param {boolean} props.isDepositThresholdReached - Whether the deposit threshold is reached
+ * @param {boolean} props.isFailedDueToDeposit - Whether the proposal failed due to deposit
+ * @param {number} props.depositThreshold - The deposit threshold
+ * @param {number} props.userDeposits - The user deposits
+ * @param {number} props.othersDeposits - The others deposits
+ * @param {number} props.otherDepositsUsersCount - The other deposits users count
+ * @param {boolean} props.renderVotesDistributionLabel - Whether to render the votes distribution label
  * @returns  JSX.Element
  */
 export const ProposalSupportProgressChart = ({
