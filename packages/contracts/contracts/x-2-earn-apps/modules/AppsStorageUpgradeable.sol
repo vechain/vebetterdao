@@ -164,9 +164,9 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev Get all apps
+   * @dev See {IX2EarnApps-apps}.
    */
-  function apps() public view returns (X2EarnAppsDataTypes.App[] memory) {
+  function apps() external view returns (X2EarnAppsDataTypes.App[] memory) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
 
     X2EarnAppsDataTypes.App[] memory allApps = new X2EarnAppsDataTypes.App[]($._appIds.length);
@@ -175,6 +175,42 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
       allApps[i] = $._apps[$._appIds[i]];
     }
     return allApps;
+  }
+
+  /**
+   * @dev See {IX2EarnApps-getPaginatedApps}.
+   */
+  function getPaginatedApps(uint startIndex, uint count) external view returns (X2EarnAppsDataTypes.App[] memory) {
+    AppsStorageStorage storage $ = _getAppsStorageStorage();
+
+    uint256 length = $._appIds.length;
+    if (length <= startIndex) {
+      revert X2EarnInvalidStartIndex();
+    }
+
+    // Calculate the end index
+    uint256 endIndex = startIndex + count;
+    if (endIndex > length) {
+      endIndex = length;
+    }
+
+    // Create an array to hold the paginated apps
+    X2EarnAppsDataTypes.App[] memory paginatedApps = new X2EarnAppsDataTypes.App[](endIndex - startIndex);
+
+    // Populate the paginated array
+    for (uint i = startIndex; i < endIndex; i++) {
+      paginatedApps[i - startIndex] = $._apps[$._appIds[i]];
+    }
+
+    return paginatedApps;
+  }
+
+  /**
+   * @dev See {IX2EarnApps-appCount}.
+   */
+  function appCount() external view returns (uint256) {
+    AppsStorageStorage storage $ = _getAppsStorageStorage();
+    return $._appIds.length;
   }
 
   /**

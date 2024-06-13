@@ -583,6 +583,8 @@ describe("Emissions", () => {
           minter: minterAccount.address,
           admin: owner.address,
           upgrader: owner.address,
+          contractsAddressManager: owner.address,
+          decaySettingsManager: owner.address,
           b3trAddress: await b3tr.getAddress(),
           destinations: [
             await xAllocationPool.getAddress(),
@@ -618,6 +620,8 @@ describe("Emissions", () => {
             minter: minterAccount.address,
             admin: owner.address,
             upgrader: owner.address,
+            contractsAddressManager: owner.address,
+            decaySettingsManager: owner.address,
             b3trAddress: await b3tr.getAddress(),
             destinations: [
               await xAllocationPool.getAddress(),
@@ -654,6 +658,8 @@ describe("Emissions", () => {
             minter: minterAccount.address,
             admin: owner.address,
             upgrader: owner.address,
+            contractsAddressManager: owner.address,
+            decaySettingsManager: owner.address,
             b3trAddress: await b3tr.getAddress(),
             destinations: [
               await xAllocationPool.getAddress(),
@@ -690,6 +696,8 @@ describe("Emissions", () => {
             minter: minterAccount.address,
             admin: owner.address,
             upgrader: owner.address,
+            contractsAddressManager: owner.address,
+            decaySettingsManager: owner.address,
             b3trAddress: await b3tr.getAddress(),
             destinations: [
               await xAllocationPool.getAddress(),
@@ -726,6 +734,8 @@ describe("Emissions", () => {
             minter: minterAccount.address,
             admin: owner.address,
             upgrader: owner.address,
+            contractsAddressManager: owner.address,
+            decaySettingsManager: owner.address,
             b3trAddress: await b3tr.getAddress(),
             destinations: [
               await xAllocationPool.getAddress(),
@@ -762,6 +772,8 @@ describe("Emissions", () => {
             minter: minterAccount.address,
             admin: owner.address,
             upgrader: owner.address,
+            contractsAddressManager: owner.address,
+            decaySettingsManager: owner.address,
             b3trAddress: await b3tr.getAddress(),
             destinations: [
               await xAllocationPool.getAddress(),
@@ -798,6 +810,8 @@ describe("Emissions", () => {
             minter: minterAccount.address,
             admin: owner.address,
             upgrader: owner.address,
+            contractsAddressManager: owner.address,
+            decaySettingsManager: owner.address,
             b3trAddress: await b3tr.getAddress(),
             destinations: [
               await xAllocationPool.getAddress(),
@@ -834,6 +848,8 @@ describe("Emissions", () => {
             minter: minterAccount.address,
             admin: owner.address,
             upgrader: owner.address,
+            contractsAddressManager: owner.address,
+            decaySettingsManager: owner.address,
             b3trAddress: await b3tr.getAddress(),
             destinations: [
               await xAllocationPool.getAddress(),
@@ -870,6 +886,8 @@ describe("Emissions", () => {
             minter: minterAccount.address,
             admin: owner.address,
             upgrader: owner.address,
+            contractsAddressManager: owner.address,
+            decaySettingsManager: owner.address,
             b3trAddress: await b3tr.getAddress(),
             destinations: [
               await xAllocationPool.getAddress(),

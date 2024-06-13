@@ -1,7 +1,19 @@
 import { XApp, useXAppMetadata } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
-import { Card, CardBody, VStack, HStack, Skeleton, IconButton, Image, Text, Box, useDisclosure } from "@chakra-ui/react"
+import {
+  Card,
+  CardBody,
+  VStack,
+  HStack,
+  Skeleton,
+  IconButton,
+  Image,
+  Text,
+  Box,
+  useDisclosure,
+  CardFooter,
+} from "@chakra-ui/react"
 import { FaEllipsisVertical } from "react-icons/fa6"
 import { AppCardInnerDetails } from "./AppCardInnerDetails"
 import { useBreakpoints } from "@/hooks"
@@ -27,8 +39,14 @@ export const AppCard = ({ xApp }: Props) => {
   }
 
   return (
-    <Card variant={"baseWithBorder"} w="full">
-      <Box w="full" position={"relative"} h={100}>
+    <Card
+      variant={"baseWithBorder"}
+      w="full"
+      onClick={navigateToAppDetail}
+      _hover={{
+        cursor: "pointer",
+      }}>
+      <Box w="full" position={"relative"} h={200}>
         <Skeleton w="full" h="full" isLoaded={!isBannerLoading}>
           <Image
             alt={`Banner for ${appMetadata?.name}`}
@@ -37,23 +55,10 @@ export const AppCard = ({ xApp }: Props) => {
             h={"full"}
             objectFit={"cover"}
             borderTopRadius={"md"}
-            onClick={navigateToAppDetail}
-            _hover={{
-              cursor: "pointer",
-            }}
           />
         </Skeleton>
         <Skeleton isLoaded={!isLogoLoading} alignContent={"start"} pos={"absolute"} bottom={-7} left={5}>
-          <Image
-            src={logo?.image ?? notFoundImage}
-            alt={"logo"}
-            boxSize={14}
-            borderRadius="9px"
-            onClick={navigateToAppDetail}
-            _hover={{
-              cursor: "pointer",
-            }}
-          />
+          <Image src={logo?.image ?? notFoundImage} alt={"logo"} boxSize={14} borderRadius="9px" />
         </Skeleton>
       </Box>
       <CardBody mt={5}>
@@ -70,8 +75,11 @@ export const AppCard = ({ xApp }: Props) => {
                   <IconButton
                     isRound={true}
                     icon={<FaEllipsisVertical />}
-                    onClick={openMobileOptions}
                     aria-label="Open app options"
+                    onClick={e => {
+                      e.stopPropagation()
+                      openMobileOptions()
+                    }}
                   />
                   <AppCardOptionsMobileModal
                     receiverAddress={xApp.receiverAddress}
@@ -99,9 +107,11 @@ export const AppCard = ({ xApp }: Props) => {
               </Text>
             </Skeleton>
           </VStack>
-          <AppCardInnerDetails xApp={xApp} />
         </VStack>
       </CardBody>
+      <CardFooter>
+        <AppCardInnerDetails xApp={xApp} />
+      </CardFooter>
     </Card>
   )
 }

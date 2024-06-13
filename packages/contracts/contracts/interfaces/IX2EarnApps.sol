@@ -35,6 +35,11 @@ interface IX2EarnApps {
   error X2EarnUnauthorizedUser(address user);
 
   /**
+   * @dev Invalid start index for get apps pagination
+   */
+  error X2EarnInvalidStartIndex();
+
+  /**
    * @dev Lookup to future votes is not available.
    */
   error ERC5805FutureLookup(uint256 timepoint, uint48 clock);
@@ -104,6 +109,24 @@ interface IX2EarnApps {
    * @param appId the id of the app
    */
   function app(bytes32 appId) external view returns (X2EarnAppsDataTypes.App memory);
+
+  /**
+   * @dev Get a paginated list of apps
+   * @param startIndex The starting index of the pagination
+   * @param count The number of items to return
+   */
+  function getPaginatedApps(uint startIndex, uint count) external view returns (X2EarnAppsDataTypes.App[] memory);
+
+  /**
+   * @dev Get all apps
+   */
+  function apps() external view returns (X2EarnAppsDataTypes.App[] memory);
+
+  /**
+   * @dev Get the total count of apps
+   * @return The total number of apps
+   */
+  function appCount() external view returns (uint256);
 
   /**
    * @dev Add a new moderator to the app.
