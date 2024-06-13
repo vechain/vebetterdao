@@ -1,4 +1,13 @@
 {
+  "({{percentage}}%) as {{label}}": "({{percentage}}%) as {{label}}",
+  "Total allocation to distribute": "Total allocation to distribute",
+  "Finished": "Finished",
+  "To be distributed": "To be distributed",
+  "B3TR to distribute between apps": "B3TR to distribute between apps",
+  "{{apps}} apps": "{{apps}} apps",
+  "Allocations": "Allocations",
+  "Finishes in": "Finishes in",
+  "Participating": "Participating",
   " will be determined by the amount of VOT3 you had at the time of the snapshot.": " will be determined by the amount of VOT3 you had at the time of the snapshot.",
   "Add another transaction": "Add another transaction",
   "Starts on": "Starts on",
