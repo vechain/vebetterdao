@@ -1,6 +1,7 @@
 import { BaseContract, Interface } from "ethers"
 import { ethers } from "hardhat"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
+import { AddressUtils } from "@repo/utils"
 
 export const deployProxy = async (
   contractName: string,
@@ -24,7 +25,7 @@ export const deployProxy = async (
   await proxy.waitForDeployment()
 
   const newImplementationAddress = await getImplementationAddress(ethers.provider, await proxy.getAddress())
-  if (newImplementationAddress !== (await implementation.getAddress())) {
+  if (!AddressUtils.compareAddresses(newImplementationAddress, await implementation.getAddress())) {
     throw new Error(
       `The implementation address is not the one expected: ${newImplementationAddress} !== ${await implementation.getAddress()}`,
     )
