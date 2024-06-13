@@ -67,7 +67,6 @@ export const ProposalTimeline = () => {
     if (
       proposal.state === ProposalState.Canceled ||
       proposal.state === ProposalState.Defeated ||
-      proposal.state === ProposalState.Expired ||
       proposal.state === ProposalState.Succeeded
     ) {
       return 3
