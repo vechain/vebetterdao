@@ -21,7 +21,7 @@
 //                                   ##############
 //                                   #########
 
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
 import { X2EarnAppsDataTypes } from "../../libraries/X2EarnAppsDataTypes.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -171,7 +171,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
 
     X2EarnAppsDataTypes.App[] memory allApps = new X2EarnAppsDataTypes.App[]($._appIds.length);
     uint256 length = $._appIds.length;
-    for (uint i = 0; i < length; i++) {
+    for (uint i; i < length; i++) {
       allApps[i] = $._apps[$._appIds[i]];
     }
     return allApps;

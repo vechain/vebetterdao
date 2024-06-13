@@ -20,11 +20,22 @@ export const ButtonStyle: ComponentStyleConfig = {
       fontWeight: 500,
       px: "24px",
       color: "#FFFFFF",
-      bgColor: "#004CFC",
+      bgColor: "rgba(0, 76, 252, 1)",
       _hover: {
-        bg: "#0035b1",
+        bg: "#0038b5",
         _disabled: {
-          bg: "#004CFC",
+          bg: "rgba(0, 76, 252, 0.7)",
+        },
+      },
+    },
+    secondary: {
+      rounded: "full",
+      color: "rgba(0, 76, 252, 1)",
+      bgColor: "rgba(224, 233, 254, 1)",
+      _hover: {
+        bg: "#7b818e",
+        _disabled: {
+          bg: "rgba(224, 233, 254, 0.7)",
         },
       },
     },

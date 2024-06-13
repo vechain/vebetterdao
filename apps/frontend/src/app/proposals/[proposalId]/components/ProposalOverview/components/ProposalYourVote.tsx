@@ -1,10 +1,11 @@
-import { VoteType, useCurrentProposal } from "@/api"
+import { VoteType } from "@/api"
 import { HStack, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
+import { useProposalDetail } from "../../../hooks"
 
 export const ProposalYourVote = () => {
-  const { proposal } = useCurrentProposal()
+  const { proposal } = useProposalDetail()
   const { t } = useTranslation()
 
   switch (Number(proposal.userVote?.support)) {

@@ -3,6 +3,7 @@ import {
   ZERO_ADDRESS,
   bootstrapEmissions,
   catchRevert,
+  getEventName,
   getOrDeployContractInstances,
   moveToCycle,
   waitForBlock,
@@ -241,7 +242,11 @@ describe("Emissions", () => {
 
       await expect(emissions.connect(owner).setXallocationsAddress(ZERO_ADDRESS)).to.be.reverted
 
-      await emissions.connect(owner).setXallocationsAddress(otherAccounts[3].address)
+      const tx = await emissions.connect(owner).setXallocationsAddress(otherAccounts[3].address)
+      const receipt = await tx.wait()
+
+      const eventName = getEventName(receipt, emissions)
+      expect(eventName).to.equal("XAllocationsAddressUpdated")
 
       expect(await emissions.xAllocations()).to.equal(otherAccounts[3].address)
     })
@@ -255,7 +260,11 @@ describe("Emissions", () => {
 
       await expect(emissions.connect(otherAccount).setVote2EarnAddress(otherAccounts[3].address)).to.be.reverted // Not admin
 
-      await emissions.connect(owner).setVote2EarnAddress(otherAccounts[3].address)
+      const tx = await emissions.connect(owner).setVote2EarnAddress(otherAccounts[3].address)
+      const receipt = await tx.wait()
+
+      const eventName = getEventName(receipt, emissions)
+      expect(eventName).to.equal("Vote2EarnAddressUpdated")
 
       expect(await emissions.vote2Earn()).to.equal(otherAccounts[3].address)
     })
@@ -269,7 +278,11 @@ describe("Emissions", () => {
 
       await expect(emissions.connect(otherAccount).setTreasuryAddress(otherAccounts[3].address)).to.be.reverted // Not admin
 
-      await emissions.connect(owner).setTreasuryAddress(otherAccounts[3].address)
+      const tx = await emissions.connect(owner).setTreasuryAddress(otherAccounts[3].address)
+      const receipt = await tx.wait()
+
+      const eventName = getEventName(receipt, emissions)
+      expect(eventName).to.equal("TreasuryAddressUpdated")
 
       expect(await emissions.treasury()).to.equal(otherAccounts[3].address)
     })
@@ -296,7 +309,11 @@ describe("Emissions", () => {
       }
       await emissions.connect(owner).setTreasuryPercentage(10000)
       await emissions.connect(owner).setTreasuryPercentage(0)
-      await emissions.connect(owner).setTreasuryPercentage(550)
+      const tx = await emissions.connect(owner).setTreasuryPercentage(550)
+      const receipt = await tx.wait()
+
+      const eventName = getEventName(receipt, emissions)
+      expect(eventName).to.equal("TreasuryPercentageUpdated")
 
       await expect(emissions.connect(otherAccount).setTreasuryPercentage(55)).to.be.reverted // Not admin
     })
@@ -315,7 +332,11 @@ describe("Emissions", () => {
       }
       await emissions.connect(owner).setMaxVote2EarnDecay(100)
       await emissions.connect(owner).setMaxVote2EarnDecay(0)
-      await emissions.connect(owner).setMaxVote2EarnDecay(55)
+      const tx = await emissions.connect(owner).setMaxVote2EarnDecay(55)
+      const receipt = await tx.wait()
+
+      const eventName = getEventName(receipt, emissions)
+      expect(eventName).to.equal("MaxVote2EarnDecayUpdated")
 
       await expect(emissions.connect(otherAccount).setMaxVote2EarnDecay(55)).to.be.reverted // Not admin
     })
@@ -334,7 +355,11 @@ describe("Emissions", () => {
       }
       await emissions.connect(owner).setVote2EarnDecay(100)
       await emissions.connect(owner).setVote2EarnDecay(0)
-      await emissions.connect(owner).setVote2EarnDecay(55)
+      const tx = await emissions.connect(owner).setVote2EarnDecay(55)
+      const receipt = await tx.wait()
+
+      const eventName = getEventName(receipt, emissions)
+      expect(eventName).to.equal("Vote2EarnDecayUpdated")
 
       await expect(emissions.connect(otherAccount).setVote2EarnDecay(55)).to.be.reverted // Not admin
     })
@@ -353,7 +378,11 @@ describe("Emissions", () => {
       }
       await emissions.connect(owner).setXAllocationsDecay(100)
       await emissions.connect(owner).setXAllocationsDecay(0)
-      await emissions.connect(owner).setXAllocationsDecay(55)
+      const tx = await emissions.connect(owner).setXAllocationsDecay(55)
+      const receipt = await tx.wait()
+
+      const eventName = getEventName(receipt, emissions)
+      expect(eventName).to.equal("XAllocationsDecayUpdated")
 
       await expect(emissions.connect(otherAccount).setXAllocationsDecay(55)).to.be.reverted // Not admin
     })
@@ -387,7 +416,11 @@ describe("Emissions", () => {
         forceDeploy: true,
       })
 
-      await emissions.connect(owner).setCycleDuration(1000)
+      const tx = await emissions.connect(owner).setCycleDuration(1000)
+      const receipt = await tx.wait()
+
+      const eventName = getEventName(receipt, emissions)
+      expect(eventName).to.equal("EmissionCycleDurationUpdated")
 
       expect(await emissions.cycleDuration()).to.equal(1000)
 
@@ -401,7 +434,11 @@ describe("Emissions", () => {
         forceDeploy: true,
       })
 
-      await emissions.connect(owner).setXAllocationsDecayPeriod(1000)
+      const tx = await emissions.connect(owner).setXAllocationsDecayPeriod(1000)
+      const receipt = await tx.wait()
+
+      const eventName = getEventName(receipt, emissions)
+      expect(eventName).to.equal("XAllocationsDecayPeriodUpdated")
 
       expect(await emissions.xAllocationsDecayPeriod()).to.equal(1000)
 
@@ -415,7 +452,11 @@ describe("Emissions", () => {
         forceDeploy: true,
       })
 
-      await emissions.connect(owner).setVote2EarnDecayPeriod(1000)
+      const tx = await emissions.connect(owner).setVote2EarnDecayPeriod(1000)
+      const receipt = await tx.wait()
+
+      const eventName = getEventName(receipt, emissions)
+      expect(eventName).to.equal("Vote2EarnDecayPeriodUpdated")
 
       expect(await emissions.vote2EarnDecayPeriod()).to.equal(1000)
 

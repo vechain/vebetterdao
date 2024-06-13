@@ -3,15 +3,16 @@ import { t } from "i18next"
 import { useMemo } from "react"
 import { TimelineItem } from "./components/TimelineItem"
 import { ProposalCreatedTimelineItem } from "./components/ProposalCreatedTimelineItem"
-import { ProposalState, useCurrentProposal } from "@/api"
+import { ProposalState } from "@/api"
 import dayjs from "dayjs"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useAccountPermissions } from "@/api/contracts/account"
 import { ProposalQueueButton } from "./components/ProposalQueueButton"
 import { ProposalExecuteButton } from "./components/ProposalExecuteButton"
+import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
 
 export const ProposalTimeline = () => {
-  const { proposal } = useCurrentProposal()
+  const { proposal } = useProposalDetail()
   const { account } = useWallet()
   const { isProposalExecutor } = useAccountPermissions(account || "")
 
@@ -66,7 +67,6 @@ export const ProposalTimeline = () => {
     if (
       proposal.state === ProposalState.Canceled ||
       proposal.state === ProposalState.Defeated ||
-      proposal.state === ProposalState.Expired ||
       proposal.state === ProposalState.Succeeded
     ) {
       return 3
