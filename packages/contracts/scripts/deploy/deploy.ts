@@ -526,12 +526,6 @@ export async function deployAll(config: ContractsConfig) {
       emissions,
       config.CONTRACTS_ADMIN_ADDRESS,
       TEMP_ADMIN,
-      await emissions.DEFAULT_ADMIN_ROLE(),
-    )
-    await validateContractRole(
-      emissions,
-      config.CONTRACTS_ADMIN_ADDRESS,
-      TEMP_ADMIN,
       await emissions.CONTRACTS_ADDRESS_MANAGER_ROLE(),
     )
     await validateContractRole(
