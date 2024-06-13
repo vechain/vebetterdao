@@ -164,17 +164,31 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev Get all apps
+   * @dev Get a paginated list of apps
+   * @param startIndex The starting index of the pagination
+   * @param count The number of items to return
    */
-  function apps() public view returns (X2EarnAppsDataTypes.App[] memory) {
+  function apps(uint startIndex, uint count) public view returns (X2EarnAppsDataTypes.App[] memory) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
 
-    X2EarnAppsDataTypes.App[] memory allApps = new X2EarnAppsDataTypes.App[]($._appIds.length);
     uint256 length = $._appIds.length;
-    for (uint i = 0; i < length; i++) {
-      allApps[i] = $._apps[$._appIds[i]];
+    require(startIndex < length, "Invalid start index");
+
+    // Calculate the end index
+    uint256 endIndex = startIndex + count;
+    if (endIndex > length) {
+      endIndex = length;
     }
-    return allApps;
+
+    // Create an array to hold the paginated apps
+    X2EarnAppsDataTypes.App[] memory paginatedApps = new X2EarnAppsDataTypes.App[](endIndex - startIndex);
+
+    // Populate the paginated array
+    for (uint i = startIndex; i < endIndex; i++) {
+      paginatedApps[i - startIndex] = $._apps[$._appIds[i]];
+    }
+
+    return paginatedApps;
   }
 
   /**
