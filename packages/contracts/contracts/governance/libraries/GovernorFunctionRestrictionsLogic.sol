@@ -37,6 +37,12 @@ library GovernorFunctionRestrictionsLogic {
   /// @param selector The function selector that is invalid.
   error GovernorFunctionInvalidSelector(bytes selector);
 
+  /// @notice Emitted when a function is whitelisted by the governor.
+  /// @param target The address of the contract.
+  /// @param functionSelector The function selector.
+  /// @param isWhitelisted Boolean indicating if the function is whitelisted.
+  event FunctionWhitelisted(address indexed target, bytes4 indexed functionSelector, bool isWhitelisted);
+
   // --------------- SETTERS ---------------
   /**
    * @notice Set the whitelist status of a function for proposals.
@@ -53,6 +59,7 @@ library GovernorFunctionRestrictionsLogic {
     bool isWhitelisted
   ) public {
     self.whitelistedFunctions[target][functionSelector] = isWhitelisted;
+    emit FunctionWhitelisted(target, functionSelector, isWhitelisted);
   }
 
   /**

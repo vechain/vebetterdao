@@ -64,6 +64,12 @@ contract Treasury is
     uint256 transferLimitVET; // Transfer limit for VET
   }
 
+  /// @notice Emitted when transfer limit for a token is updated
+  event TransferLimitUpdated(address indexed token, uint256 limit);
+
+  /// @notice Emitted when transfer limit for VET is updated
+  event TransferLimitVETUpdated(uint256 limit);
+
   /// @dev The slot for Treasury storage in contract storage
   /// keccak256(abi.encode(uint256(keccak256("b3tr.storage.Treasury")) - 1)) & ~bytes32(uint256(0xff))
   bytes32 private constant TreasuryStorageLocation = 0xe0cc5742fa27b7db7d28941bcd9e29ed370469b1c96f6a96a9544ba871b50f00;
@@ -269,6 +275,7 @@ contract Treasury is
   function setTransferLimitVET(uint256 _transferLimitVET) external onlyAdminOrGovernance {
     TreasuryStorage storage $ = _getTreasuryStorage();
     $.transferLimitVET = _transferLimitVET;
+    emit TransferLimitVETUpdated(_transferLimitVET);
   }
 
   /// @notice Sets the transfer limit for any token
@@ -276,6 +283,7 @@ contract Treasury is
   function setTransferLimitToken(address _token, uint256 _transferLimit) external onlyAdminOrGovernance {
     TreasuryStorage storage $ = _getTreasuryStorage();
     $.transferLimit[_token] = _transferLimit;
+    emit TransferLimitUpdated(_token, _transferLimit);
   }
 
   // ---------- Getters ---------- //

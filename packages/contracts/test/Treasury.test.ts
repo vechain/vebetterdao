@@ -1,19 +1,20 @@
 import { ethers, network } from "hardhat"
 import { expect } from "chai"
 import {
-  getOrDeployContractInstances,
-  catchRevert,
   createProposalAndExecuteIt,
   bootstrapAndStartEmissions,
   bootstrapEmissions,
   participateInAllocationVoting,
-} from "./helpers"
+} from "./helpers/common"
+import { getOrDeployContractInstances } from "./helpers/deploy"
+import { catchRevert } from "./helpers/exceptions"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it, before } from "mocha"
 import { fundTreasuryVET, fundTreasuryVTHO } from "./helpers/fundTreasury"
 import { B3TR, B3TRGovernor, Treasury, Treasury__factory } from "../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy } from "../scripts/helpers"
+import { getEventName } from "./helpers/events"
 
 describe("Treasury", () => {
   let treasuryProxy: Treasury
@@ -91,8 +92,13 @@ describe("Treasury", () => {
       it("Should revert if transfer exceeds limit", async () => {
         await catchRevert(treasuryProxy.transferVET(otherAccount.address, ethers.parseEther("2")))
       })
-      it("Should be able to set transfer limit", async () => {
-        await treasuryProxy.connect(owner).setTransferLimitVET(ethers.parseEther("2"))
+      it("Should be able to set transfer limit for VET", async () => {
+        const tx = await treasuryProxy.connect(owner).setTransferLimitVET(ethers.parseEther("2"))
+        const receipt = await tx.wait()
+
+        const name = getEventName(receipt, treasuryProxy)
+        expect(name).to.eql("TransferLimitVETUpdated")
+
         expect(await treasuryProxy.getTransferLimitVET()).to.eql(ethers.parseEther("2"))
         await treasuryProxy.transferVET(otherAccount.address, ethers.parseEther("2"))
         expect(await treasuryProxy.getVETBalance()).to.eql(ethers.parseEther("7"))
@@ -195,7 +201,13 @@ describe("Treasury", () => {
       })
       it("Should be able to set transfer limit", async () => {
         await treasuryProxy.convertB3TR(ethers.parseEther("10"))
-        await treasuryProxy.connect(owner).setTransferLimitToken(await vot3.getAddress(), ethers.parseEther("2"))
+        const tx = await treasuryProxy
+          .connect(owner)
+          .setTransferLimitToken(await vot3.getAddress(), ethers.parseEther("2"))
+        const receipt = await tx.wait()
+
+        const name = getEventName(receipt, treasuryProxy)
+        expect(name).to.eql("TransferLimitUpdated")
         expect(await treasuryProxy.getTransferLimitToken(await vot3.getAddress())).to.eql(ethers.parseEther("2"))
         await treasuryProxy.transferVOT3(otherAccount.address, ethers.parseEther("2"))
         expect(await treasuryProxy.getVOT3Balance()).to.eql(ethers.parseEther("12"))

@@ -38,6 +38,12 @@ interface IVoterRewards {
 
   event VoteRegistered(uint256 indexed cycle, address indexed voter, uint256 votes, uint256 rewardWeightedVote);
 
+  event GalaxyMemberAddressUpdated(address indexed newAddress, address indexed oldAddress);
+
+  event EmissionsAddressUpdated(address indexed newAddress, address indexed oldAddress);
+
+  event LevelToMultiplierSet(uint256 indexed level, uint256 multiplier);
+
   function DEFAULT_ADMIN_ROLE() external view returns (bytes32);
 
   function UPGRADER_ROLE() external view returns (bytes32);

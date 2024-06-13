@@ -83,6 +83,18 @@ interface IGalaxyMember {
 
   event Upgraded(uint256 indexed tokenId, uint256 oldLevel, uint256 newLevel);
 
+  event MaxLevelUpdated(uint256 oldLevel, uint256 indexed newLevel);
+
+  event XAllocationsGovernorAddressUpdated(address indexed newAddress, address indexed oldAddress);
+
+  event B3trGovernorAddressUpdated(address indexed newAddress, address indexed oldAddress);
+
+  event BaseURIUpdated(string indexed newBaseURI, string indexed oldBaseURI);
+
+  event B3TRtoUpgradeToLevelUpdated(uint256[] indexed b3trToUpgradeToLevel);
+
+  event PublicMintingPaused(bool isPaused);
+
   function CLOCK_MODE() external view returns (string memory);
 
   function DEFAULT_ADMIN_ROLE() external view returns (bytes32);
