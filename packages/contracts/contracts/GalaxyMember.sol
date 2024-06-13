@@ -104,6 +104,24 @@ contract GalaxyMember is
   /// @dev Emitted when a token is upgraded.
   event Upgraded(uint256 indexed tokenId, uint256 oldLevel, uint256 newLevel);
 
+  /// @dev Emitted when max level is updated.
+  event MaxLevelUpdated(uint256 oldLevel, uint256 indexed newLevel);
+
+  /// @dev Emitted when XAllocationVotingGovernor contract address is updated
+  event XAllocationsGovernorAddressUpdated(address indexed newAddress, address indexed oldAddress);
+
+  /// @dev Emitted when B3TRGovernor contract address is updated
+  event B3trGovernorAddressUpdated(address indexed newAddress, address indexed oldAddress);
+
+  /// @dev Emitted when base URI is updated
+  event BaseURIUpdated(string indexed newBaseURI, string indexed oldBaseURI);
+
+  /// @dev Emitted when B3TR required to upgrade to each level is updated
+  event B3TRtoUpgradeToLevelUpdated(uint256[] indexed b3trToUpgradeToLevel);
+
+  /// @dev Emitted when public minting is paused
+  event PublicMintingPaused(bool isPaused);
+
   /// @notice Modifier to check if public minting is not paused
   modifier whenPublicMintingNotPaused() {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
@@ -374,6 +392,7 @@ contract GalaxyMember is
 
     require(level > $.MAX_LEVEL, "Galaxy Member: Max level must be greater than the current max level");
 
+    emit MaxLevelUpdated($.MAX_LEVEL, level);
     $.MAX_LEVEL = level;
   }
 
@@ -385,6 +404,8 @@ contract GalaxyMember is
   ) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(_xAllocationsGovernor != address(0), "Galaxy Member: _xAllocationsGovernor cannot be the zero address");
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
+
+    emit XAllocationsGovernorAddressUpdated(_xAllocationsGovernor, address($.xAllocationsGovernor));
     $.xAllocationsGovernor = IXAllocationVotingGovernor(_xAllocationsGovernor);
   }
 
@@ -394,6 +415,8 @@ contract GalaxyMember is
   function setB3trGovernorAddress(address _b3trGovernor) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(_b3trGovernor != address(0), "Galaxy Member: _b3trGovernor cannot be the zero address");
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
+
+    emit B3trGovernorAddressUpdated(_b3trGovernor, address($.b3trGovernor));
     $.b3trGovernor = IB3TRGovernor(payable(_b3trGovernor));
   }
 
@@ -403,6 +426,7 @@ contract GalaxyMember is
   function setBaseURI(string memory baseTokenURI) external onlyRole(DEFAULT_ADMIN_ROLE) {
     require(bytes(baseTokenURI).length > 0, "Galaxy Member: Base URI must be set");
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
+    emit BaseURIUpdated(baseTokenURI, $._baseTokenURI);
     $._baseTokenURI = baseTokenURI;
   }
 
@@ -414,6 +438,7 @@ contract GalaxyMember is
     for (uint8 i = 0; i < b3trToUpgradeToLevel.length; i++) {
       $._b3trToUpgradeToLevel[i + 2] = b3trToUpgradeToLevel[i]; // First Level that requires B3TR is level 2
     }
+    emit B3TRtoUpgradeToLevelUpdated(b3trToUpgradeToLevel);
   }
 
   /// @notice Pauses public minting
@@ -421,6 +446,7 @@ contract GalaxyMember is
   /// @param isPaused Flag to pause or unpause public minting
   function setIsPublicMintingPaused(bool isPaused) external onlyRole(DEFAULT_ADMIN_ROLE) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
+    emit PublicMintingPaused(isPaused);
     $.isPublicMintingPaused = isPaused;
   }
 

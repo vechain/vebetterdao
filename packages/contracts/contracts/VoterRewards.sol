@@ -101,6 +101,21 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   /// @param reward - The amount of B3TR reward claimed by the voter.
   event RewardClaimed(uint256 indexed cycle, address indexed voter, uint256 reward);
 
+  /// @notice Emitted when the Galaxy Member contract address is set.
+  /// @param newAddress - The address of the new Galaxy Member contract.
+  /// @param oldAddress - The address of the old Galaxy Member contract.
+  event GalaxyMemberAddressUpdated(address indexed newAddress, address indexed oldAddress);
+
+  /// @notice Emitted when the Emissions contract address is set.
+  /// @param newAddress - The address of the new Emissions contract.
+  /// @param oldAddress - The address of the old Emissions contract.
+  event EmissionsAddressUpdated(address indexed newAddress, address indexed oldAddress);
+
+  /// @notice Emitted when the level to multiplier mapping is set.
+  /// @param level - The level of the Galaxy Member NFT.
+  /// @param multiplier - The percentage multiplier for the level of the Galaxy Member NFT.
+  event LevelToMultiplierSet(uint256 indexed level, uint256 multiplier);
+
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
@@ -308,6 +323,9 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     require(_galaxyMember != address(0), "VoterRewards: _galaxyMember cannot be the zero address");
 
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+
+    emit GalaxyMemberAddressUpdated(_galaxyMember, address($.galaxyMember));
+
     $.galaxyMember = IGalaxyMember(_galaxyMember);
   }
 
@@ -320,6 +338,8 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
 
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
     $.levelToMultiplier[level] = multiplier;
+
+    emit LevelToMultiplierSet(level, multiplier);
   }
 
   /// @notice Set the Emmissions contract.
@@ -328,6 +348,9 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     require(_emissions != address(0), "VoterRewards: emissions cannot be the zero address");
 
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+
+    emit EmissionsAddressUpdated(_emissions, address($.emissions));
+
     $.emissions = IEmissions(_emissions);
   }
 
