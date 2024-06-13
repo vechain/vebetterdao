@@ -5,17 +5,19 @@ import {
   useXAppRoundEarnings,
   useXAppTotalEarnings,
 } from "@/api"
-import { Card, CardBody, Box, Stack, Text, HStack, Skeleton, Grid, GridItem } from "@chakra-ui/react"
+import { Card, CardBody, Box, Text, HStack, Skeleton, Grid, GridItem } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import { useMemo } from "react"
-import { i } from "vitest/dist/reporters-P7C2ytIv"
+import { useTranslation } from "react-i18next"
 
 const compactFormatter = getCompactFormatter()
 
 type Props = { xApp: XApp }
 
 export const AppCardInnerDetails = ({ xApp }: Props) => {
+  const { t } = useTranslation()
+
   const { data: currentRoundId, isLoading: currentRoundIdLoading } = useCurrentAllocationsRoundId()
   const { data: currentRound } = useAllocationsRound(currentRoundId?.toString() ?? "")
 
@@ -42,34 +44,34 @@ export const AppCardInnerDetails = ({ xApp }: Props) => {
         <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
           <Box>
             <Text fontSize="md" color="gray.500">
-              Member since
+              {t("Member since")}
             </Text>
             <Text fontSize="sm">{dayjs.unix(xApp.createdAtTimestamp).format("MMMM D, YYYY")}</Text>
           </Box>
           <Box>
             <Text fontSize="md" color="gray.500">
-              Accumulated
+              {t("Accumulated")}
             </Text>
             <HStack spacing={1} fontWeight={500} align={"flex-end"}>
               <Skeleton isLoaded={!isAmountsLoading}>
                 <Text fontSize="sm">{compactFormatter.format(totalAmount ?? 0)}</Text>
               </Skeleton>
               <Text fontSize="sm" fontWeight={400}>
-                B3TR
+                {t("B3TR")}
               </Text>
             </HStack>
           </Box>
           <GridItem colSpan={2}>
             <Box>
               <Text fontSize="md" color="gray.500">
-                Previous allocation
+                {t("Previous allocation")}
               </Text>
               <HStack spacing={1} fontWeight={500} align={"flex-end"}>
                 <Skeleton isLoaded={!currentRoundIdLoading && !prevRoundEarningLoading}>
                   <Text fontSize="sm">{compactFormatter.format(Number(prevRoundEarning?.amount ?? 0))}</Text>
                 </Skeleton>
                 <Text fontSize="sm" fontWeight={400}>
-                  B3TR
+                  {t("B3TR")}
                 </Text>
               </HStack>
             </Box>

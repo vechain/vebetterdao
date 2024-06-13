@@ -1,13 +1,15 @@
-import { Card, CardBody, VStack, Image, Heading, Button, background } from "@chakra-ui/react"
+import { Card, CardBody, VStack, Image, Heading, Button } from "@chakra-ui/react"
 import { FaPlus } from "react-icons/fa6"
 import { useRouter } from "next/navigation"
+import { useTranslation } from "react-i18next"
 
 export const AddNewAppCard = () => {
-  const router = useRouter()
+  const { t } = useTranslation()
 
-  const navigateToAppDetail = () => {
-    router.push(`/apps/new`)
-  }
+  // const router = useRouter()
+  // const navigateToAppDetail = () => {
+  //   router.push(`/apps/new`)
+  // }
 
   const openGrantPage = () => {
     window.open("https://vechain.org/grants/", "_blank")
@@ -25,9 +27,9 @@ export const AddNewAppCard = () => {
       <CardBody>
         <VStack spacing={8} align="center" h="full" justify={"center"} textAlign={"center"}>
           <Image src="/images/hand-plant.svg" boxSize={32} alt="Add new App image" />
-          <Heading size="md">Do you have a dApp to join the VeBetter DAO ecosystem?</Heading>
+          <Heading size="md">{t("Do you have a dApp to join the VeBetter DAO ecosystem?")}</Heading>
           <Button colorScheme="blue" onClick={openGrantPage} rounded={"full"} leftIcon={<FaPlus />}>
-            Apply now
+            {t("Apply now")}
           </Button>
         </VStack>
       </CardBody>
