@@ -84,7 +84,7 @@ contract X2EarnApps is
     __UUPSUpgradeable_init();
     __AccessControl_init();
 
-    for (uint256 i = 0; i < _admins.length; i++) {
+    for (uint256 i; i < _admins.length; i++) {
       _grantRole(DEFAULT_ADMIN_ROLE, _admins[i]);
     }
 
