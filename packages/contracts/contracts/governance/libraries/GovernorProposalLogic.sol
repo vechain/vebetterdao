@@ -382,7 +382,7 @@ library GovernorProposalLogic {
 
   /**
    * @notice Cancels a proposal.
-   * @dev Cancels a proposal in any state other than Canceled, Expired, or Executed.
+   * @dev Cancels a proposal in any state other than Canceled or Executed.
    * @param self The storage reference for the GovernorStorage.
    * @param targets The addresses of the contracts to call.
    * @param values The values to send to the contracts.
@@ -410,7 +410,6 @@ library GovernorProposalLogic {
       proposalId,
       GovernorStateLogic.ALL_PROPOSAL_STATES_BITMAP ^
         GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Canceled) ^
-        GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Expired) ^
         GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Executed)
     );
 

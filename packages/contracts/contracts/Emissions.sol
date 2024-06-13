@@ -27,14 +27,13 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import "./interfaces/IB3TR.sol";
 import "./interfaces/IXAllocationVotingGovernor.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 /// @title Emissions Distribution Contract
 /// @dev Manages the periodic distribution of B3TR tokens to XAllocation, Vote2Earn, and Treasury allocations.
 /// @dev This contract leverages openzeppelin's AccessControl, ReentrancyGuard, and UUPSUpgradeable libraries for access control, reentrancy protection, and upgradability.
 /// @notice This contract is responsible for the scheduled distribution of emissions based on predefined cycles and decay settings.
-contract Emissions is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
+contract Emissions is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
   /// @notice Role for addresses allowed to mint new tokens
   bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
   /// @notice Role for addresses that can upgrade the contract

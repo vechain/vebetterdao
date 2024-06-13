@@ -1,4 +1,4 @@
-import { ProposalState, useCurrentProposal } from "@/api"
+import { ProposalState } from "@/api"
 import { AbstainedIcon, VoteIcon } from "@/components"
 import { TransactionModal } from "@/components/TransactionModal"
 import { useProposalCastVote } from "@/hooks/useProposalCastVote"
@@ -24,6 +24,10 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { useRouter } from "next/navigation"
 import { FormEvent, useCallback, useLayoutEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { useProposalDetail } from "../../../hooks"
+import Link from "next/link"
+
+const QUADRATIC_DOCS_URL = "https://vechain-foundation-san-marino.gitbook.io/vebetter-dao/governance#quadratic-voting"
 
 const votes = [
   {
@@ -46,7 +50,7 @@ const votes = [
 const compactFormatter = getCompactFormatter(2)
 
 export const ProposalVote = () => {
-  const { proposal } = useCurrentProposal()
+  const { proposal } = useProposalDetail()
   const { t } = useTranslation()
   const [selectedVote, setSelectedVote] = useState("1")
   const [comment, setComment] = useState("")
@@ -150,9 +154,11 @@ export const ProposalVote = () => {
                       "To aim for the equality and quality of the voting process, we use quadratic voting coso, which divide your total amount of VOT3 for the square root.",
                     )}
                   </Text>
-                  <Text fontSize={"14px"} fontWeight={400} as="span" textDecoration={"underline"} color="#004CFC">
-                    {t("Learn more")}
-                  </Text>
+                  <Link href={QUADRATIC_DOCS_URL} target="_blank">
+                    <Text fontSize={"14px"} fontWeight={400} as="span" textDecoration={"underline"} color="#004CFC">
+                      {t("Learn more")}
+                    </Text>
+                  </Link>
                 </VStack>
               </HStack>
             </VStack>

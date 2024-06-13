@@ -1,4 +1,4 @@
-import { EnhancedClause } from "@/hooks/useSendTransaction_"
+import { EnhancedClause } from "@/hooks/useSendTransaction"
 import { Interface } from "ethers"
 
 // Define a type to infer method names from the function definition

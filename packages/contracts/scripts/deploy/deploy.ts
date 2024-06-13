@@ -110,7 +110,6 @@ export async function deployAll(config: ContractsConfig) {
     TEMP_ADMIN,
     TEMP_ADMIN, // Minter
     config.CONTRACTS_ADMIN_ADDRESS, // Pauser
-    config.B3TR_CAP,
   )
 
   const vot3 = (await deployProxy("VOT3", [
@@ -877,9 +876,9 @@ const transferGovernorFunctionSettingsRole = async (
   console.log("Governor Function Settings Role transferred successfully on " + (await contract.getAddress()))
 }
 
-async function deployB3trToken(admin: string, minter: string, pauser: string, cap: number): Promise<B3TR> {
+async function deployB3trToken(admin: string, minter: string, pauser: string): Promise<B3TR> {
   const B3trContract = await ethers.getContractFactory("B3TR") // Use the global variable
-  const contract = await B3trContract.deploy(admin, minter, pauser, cap)
+  const contract = await B3trContract.deploy(admin, minter, pauser)
 
   await contract.waitForDeployment()
 

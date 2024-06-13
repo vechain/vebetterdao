@@ -29,15 +29,6 @@ const StatusBadge: React.FC<Props> = ({ type }) => {
             text="Upcoming Voting"
           />
         )
-      case ProposalState.Expired:
-        return (
-          <ProposalBadge
-            bgColor="#E0E9FE"
-            textColor="#004CFC"
-            icon={<UilThumbsUp color="#F29B32" width="16px" height="16px" />}
-            text="Ended"
-          />
-        )
       default:
         return null
     }

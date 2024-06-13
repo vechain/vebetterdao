@@ -1,4 +1,4 @@
-import { ProposalState, useCurrentProposal } from "@/api"
+import { ProposalState } from "@/api"
 import { timestampToTimeLeft } from "@/utils"
 import { Box, Flex, Image, Text, VStack } from "@chakra-ui/react"
 import { ProposalVotesProgressBar } from "./components/ProposalVotesProgressBar"
@@ -7,9 +7,10 @@ import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { ExclamationTriangle } from "@/components"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
 
 export const ProposalOverviewVotes = () => {
-  const { proposal } = useCurrentProposal()
+  const { proposal } = useProposalDetail()
   const { t } = useTranslation()
 
   const [_, setSeconds] = useState(0)

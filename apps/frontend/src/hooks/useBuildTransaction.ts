@@ -1,5 +1,5 @@
 import { useCallback } from "react"
-import { EnhancedClause, useSendTransactionNew } from "./useSendTransaction_"
+import { EnhancedClause, useSendTransaction } from "./useSendTransaction"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useQueryClient } from "@tanstack/react-query"
 
@@ -16,7 +16,7 @@ export type BuildTransactionProps<ClausesParams> = {
  * @param refetchQueryKeys - An optional array of query keys to refetch after the transaction is sent.
  * @param invalidateCache - A flag indicating whether to invalidate the cache and refetch queries after the transaction is sent.
  * @param onSuccess - An optional callback function to be called after the transaction is successfully sent.
- * @returns An object containing the result of the `useSendTransactionNew` hook and a `sendTransaction` function.
+ * @returns An object containing the result of the `useSendTransaction` hook and a `sendTransaction` function.
  */
 export const useBuildTransaction = <ClausesParams>({
   clauseBuilder,
@@ -46,7 +46,7 @@ export const useBuildTransaction = <ClausesParams>({
     onSuccess?.()
   }, [invalidateCache, onSuccess, queryClient, refetchQueryKeys])
 
-  const result = useSendTransactionNew({
+  const result = useSendTransaction({
     signerAccount: account,
     onTxConfirmed: handleOnSuccess,
   })
