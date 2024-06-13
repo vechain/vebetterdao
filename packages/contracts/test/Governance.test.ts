@@ -432,6 +432,296 @@ describe("Governor and TimeLock", function () {
         ),
       ).to.be.reverted
     })
+
+    it("Should revert if the governor timelock is set to the zero address during initilization", async function () {
+      const config = createLocalConfig()
+      const {
+        b3tr,
+        owner,
+        vot3,
+        xAllocationVoting,
+        voterRewards,
+        governorClockLogicLib,
+        governorConfiguratorLib,
+        governorDepositLogicLib,
+        governorFunctionRestrictionsLogicLib,
+        governorProposalLogicLib,
+        governorQuorumLogicLib,
+        governorStateLogicLib,
+        governorVotesLogicLib,
+      } = await getOrDeployContractInstances({
+        forceDeploy: false,
+      })
+
+      await expect(
+        deployProxy(
+          "B3TRGovernor",
+          [
+            {
+              vot3Token: await vot3.getAddress(),
+              timelock: ZERO_ADDRESS,
+              xAllocationVoting: await xAllocationVoting.getAddress(),
+              b3tr: await b3tr.getAddress(),
+              quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
+              initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD, // deposit threshold
+              initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
+              initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD, // voting threshold
+              voterRewards: await voterRewards.getAddress(),
+              isFunctionRestrictionEnabled: true,
+            },
+            {
+              governorAdmin: owner.address,
+              pauser: owner.address,
+              contractsAddressManager: owner.address,
+              proposalExecutor: owner.address,
+              governorFunctionSettingsRoleAddress: owner.address,
+            },
+          ],
+          {
+            GovernorClockLogic: await governorClockLogicLib.getAddress(),
+            GovernorConfigurator: await governorConfiguratorLib.getAddress(),
+            GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
+            GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
+            GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
+            GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
+            GovernorStateLogic: await governorStateLogicLib.getAddress(),
+            GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+          },
+        ),
+      ).to.be.reverted
+    })
+
+    it("Should revert if the B3TR address is set to the zero address during initilization", async function () {
+      const config = createLocalConfig()
+      const {
+        owner,
+        vot3,
+        timeLock,
+        xAllocationVoting,
+        voterRewards,
+        governorClockLogicLib,
+        governorConfiguratorLib,
+        governorDepositLogicLib,
+        governorFunctionRestrictionsLogicLib,
+        governorProposalLogicLib,
+        governorQuorumLogicLib,
+        governorStateLogicLib,
+        governorVotesLogicLib,
+      } = await getOrDeployContractInstances({
+        forceDeploy: false,
+      })
+
+      await expect(
+        deployProxy(
+          "B3TRGovernor",
+          [
+            {
+              vot3Token: await vot3.getAddress(),
+              timelock: await timeLock.getAddress(),
+              xAllocationVoting: await xAllocationVoting.getAddress(),
+              b3tr: ZERO_ADDRESS,
+              quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
+              initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD, // deposit threshold
+              initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
+              initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD, // voting threshold
+              voterRewards: await voterRewards.getAddress(),
+              isFunctionRestrictionEnabled: true,
+            },
+            {
+              governorAdmin: owner.address,
+              pauser: owner.address,
+              contractsAddressManager: owner.address,
+              proposalExecutor: owner.address,
+              governorFunctionSettingsRoleAddress: owner.address,
+            },
+          ],
+          {
+            GovernorClockLogic: await governorClockLogicLib.getAddress(),
+            GovernorConfigurator: await governorConfiguratorLib.getAddress(),
+            GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
+            GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
+            GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
+            GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
+            GovernorStateLogic: await governorStateLogicLib.getAddress(),
+            GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+          },
+        ),
+      ).to.be.reverted
+    })
+
+    it("Should revert if the VOT3 address is set to the zero address during initilization", async function () {
+      const config = createLocalConfig()
+      const {
+        b3tr,
+        owner,
+        timeLock,
+        xAllocationVoting,
+        voterRewards,
+        governorClockLogicLib,
+        governorConfiguratorLib,
+        governorDepositLogicLib,
+        governorFunctionRestrictionsLogicLib,
+        governorProposalLogicLib,
+        governorQuorumLogicLib,
+        governorStateLogicLib,
+        governorVotesLogicLib,
+      } = await getOrDeployContractInstances({
+        forceDeploy: false,
+      })
+
+      await expect(
+        deployProxy(
+          "B3TRGovernor",
+          [
+            {
+              vot3Token: ZERO_ADDRESS,
+              timelock: await timeLock.getAddress(),
+              xAllocationVoting: await xAllocationVoting.getAddress(),
+              b3tr: await b3tr.getAddress(),
+              quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
+              initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD, // deposit threshold
+              initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
+              initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD, // voting threshold
+              voterRewards: await voterRewards.getAddress(),
+              isFunctionRestrictionEnabled: true,
+            },
+            {
+              governorAdmin: owner.address,
+              pauser: owner.address,
+              contractsAddressManager: owner.address,
+              proposalExecutor: owner.address,
+              governorFunctionSettingsRoleAddress: owner.address,
+            },
+          ],
+          {
+            GovernorClockLogic: await governorClockLogicLib.getAddress(),
+            GovernorConfigurator: await governorConfiguratorLib.getAddress(),
+            GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
+            GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
+            GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
+            GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
+            GovernorStateLogic: await governorStateLogicLib.getAddress(),
+            GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+          },
+        ),
+      ).to.be.reverted
+    })
+
+    it("Should revert if the xAllocationVoting address is set to the zero address during initilization", async function () {
+      const config = createLocalConfig()
+      const {
+        b3tr,
+        owner,
+        vot3,
+        timeLock,
+        voterRewards,
+        governorClockLogicLib,
+        governorConfiguratorLib,
+        governorDepositLogicLib,
+        governorFunctionRestrictionsLogicLib,
+        governorProposalLogicLib,
+        governorQuorumLogicLib,
+        governorStateLogicLib,
+        governorVotesLogicLib,
+      } = await getOrDeployContractInstances({
+        forceDeploy: false,
+      })
+
+      await expect(
+        deployProxy(
+          "B3TRGovernor",
+          [
+            {
+              vot3Token: await vot3.getAddress(),
+              timelock: await timeLock.getAddress(),
+              xAllocationVoting: ZERO_ADDRESS,
+              b3tr: await b3tr.getAddress(),
+              quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
+              initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD, // deposit threshold
+              initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
+              initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD, // voting threshold
+              voterRewards: await voterRewards.getAddress(),
+              isFunctionRestrictionEnabled: true,
+            },
+            {
+              governorAdmin: owner.address,
+              pauser: owner.address,
+              contractsAddressManager: owner.address,
+              proposalExecutor: owner.address,
+              governorFunctionSettingsRoleAddress: owner.address,
+            },
+          ],
+          {
+            GovernorClockLogic: await governorClockLogicLib.getAddress(),
+            GovernorConfigurator: await governorConfiguratorLib.getAddress(),
+            GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
+            GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
+            GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
+            GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
+            GovernorStateLogic: await governorStateLogicLib.getAddress(),
+            GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+          },
+        ),
+      ).to.be.reverted
+    })
+
+    it("Should revert if the voterRewards address is set to the zero address during initilization", async function () {
+      const config = createLocalConfig()
+      const {
+        b3tr,
+        owner,
+        vot3,
+        timeLock,
+        xAllocationVoting,
+        governorClockLogicLib,
+        governorConfiguratorLib,
+        governorDepositLogicLib,
+        governorFunctionRestrictionsLogicLib,
+        governorProposalLogicLib,
+        governorQuorumLogicLib,
+        governorStateLogicLib,
+        governorVotesLogicLib,
+      } = await getOrDeployContractInstances({
+        forceDeploy: false,
+      })
+
+      await expect(
+        deployProxy(
+          "B3TRGovernor",
+          [
+            {
+              vot3Token: await vot3.getAddress(),
+              timelock: await timeLock.getAddress(),
+              xAllocationVoting: await xAllocationVoting.getAddress(),
+              b3tr: await b3tr.getAddress(),
+              quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
+              initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD, // deposit threshold
+              initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
+              initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD, // voting threshold
+              voterRewards: ZERO_ADDRESS,
+              isFunctionRestrictionEnabled: true,
+            },
+            {
+              governorAdmin: owner.address,
+              pauser: owner.address,
+              contractsAddressManager: owner.address,
+              proposalExecutor: owner.address,
+              governorFunctionSettingsRoleAddress: owner.address,
+            },
+          ],
+          {
+            GovernorClockLogic: await governorClockLogicLib.getAddress(),
+            GovernorConfigurator: await governorConfiguratorLib.getAddress(),
+            GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
+            GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
+            GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
+            GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
+            GovernorStateLogic: await governorStateLogicLib.getAddress(),
+            GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+          },
+        ),
+      ).to.be.reverted
+    })
   })
 
   describe("Governor settings", function () {
@@ -586,6 +876,32 @@ describe("Governor and TimeLock", function () {
 
       const updatedAddress = await governor.voterRewards()
       expect(updatedAddress).to.eql(newAddress)
+    })
+
+    it("Updating voterRewards address to zero address will revert", async function () {
+      const { governor, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await expect(governor.connect(owner).setVoterRewards(ZERO_ADDRESS)).to.be.reverted
+    })
+
+
+    it("Updating xAllocationVoting address to zero address will revert", async function () {
+      const { governor, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await expect(governor.connect(owner).setXAllocationVoting(ZERO_ADDRESS)).to.be.reverted
+    })
+
+
+    it("Updating timelock address to zero address will revert", async function () {
+      const { governor, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await expect(governor.connect(owner).updateTimelock(ZERO_ADDRESS)).to.be.reverted
     })
 
     it("only governance or CONTRACTS_ADDRESS_MANAGER_ROLE can update voterRewards address", async function () {
@@ -914,6 +1230,14 @@ describe("Governor and TimeLock", function () {
           [await owner.getAddress()],
         ),
       ).to.be.reverted
+    })
+
+    it("Should revert if the target address is the zero address", async () => {
+      const { governor, owner } = await getOrDeployContractInstances({
+        forceDeploy: false,
+      })
+      const funcSig = governor.interface.getFunction("updateQuorumNumerator")?.selector
+      await expect(governor.connect(owner).setWhitelistFunction(ZERO_ADDRESS, funcSig, true)).to.be.reverted
     })
 
     it("Should be able to update the quorum percentage through governance", async function () {
