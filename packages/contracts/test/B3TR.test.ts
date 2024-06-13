@@ -55,7 +55,7 @@ describe("B3TR Token", function () {
     it("should revert if default admin set to zero address on initilisation", async function () {
       const { owner, minterAccount } = await getOrDeployContractInstances({ forceDeploy: false })
       const B3trContract = await ethers.getContractFactory("B3TR")
-      await expect(B3trContract.deploy(ethers.ZeroAddress, minterAccount, owner, 100n)).to.be.reverted
+      await expect(B3trContract.deploy(ethers.ZeroAddress, minterAccount, owner)).to.be.reverted
     })
   })
 
