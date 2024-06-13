@@ -30,7 +30,7 @@ const APPS = [
   {
     address: accounts[6].address,
     name: "Oily",
-    metadataURI: "bafkreifn4k4iubtrqthjgotzmd5vgxlfguwcsx5z34wvrpuh6ubx34sljm",
+    metadataURI: "bafkreifdcybquzd2dligett53f7zd2lt642jjkiij5gs3c3vukpdlwwdly",
   },
   {
     address: accounts[6].address,
