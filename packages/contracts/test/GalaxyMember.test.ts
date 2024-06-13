@@ -7,6 +7,7 @@ import {
   bootstrapEmissions,
   catchRevert,
   createProposal,
+  getEventName,
   getOrDeployContractInstances,
   getProposalIdFromTx,
   getVot3Tokens,
@@ -46,7 +47,11 @@ describe("Galaxy Member", () => {
       expect(await galaxyMember.hasRole(await galaxyMember.CONTRACTS_ADDRESS_MANAGER_ROLE(), owner.address)).to.equal(
         true,
       )
-      await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+      const tx = await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+      const receipt = await tx.wait()
+
+      const name = getEventName(receipt, galaxyMember)
+      expect(name).to.equal("XAllocationsGovernorAddressUpdated")
 
       expect(await galaxyMember.xAllocationsGovernor()).to.equal(await xAllocationVoting.getAddress())
 
@@ -67,7 +72,11 @@ describe("Galaxy Member", () => {
       expect(await galaxyMember.hasRole(await galaxyMember.CONTRACTS_ADDRESS_MANAGER_ROLE(), owner.address)).to.equal(
         true,
       )
-      await galaxyMember.connect(owner).setB3trGovernorAddress(await xAllocationVoting.getAddress())
+      const tx = await galaxyMember.connect(owner).setB3trGovernorAddress(await xAllocationVoting.getAddress())
+      const receipt = await tx.wait()
+
+      const name = getEventName(receipt, galaxyMember)
+      expect(name).to.equal("B3trGovernorAddressUpdated")
 
       expect(await galaxyMember.b3trGovernor()).to.equal(await xAllocationVoting.getAddress())
 
@@ -108,9 +117,15 @@ describe("Galaxy Member", () => {
 
     it("Should have base URI set correctly", async () => {
       const config = createLocalConfig()
-      const { galaxyMember } = await getOrDeployContractInstances({ forceDeploy: true, config })
+      const { galaxyMember, owner } = await getOrDeployContractInstances({ forceDeploy: true, config })
 
       expect(await galaxyMember.baseURI()).to.equal(config.GM_NFT_BASE_URI)
+
+      const tx = await galaxyMember.connect(owner).setBaseURI("https://newbaseuri.com/")
+      const receipt = await tx.wait()
+
+      const name = getEventName(receipt, galaxyMember)
+      expect(name).to.equal("BaseURIUpdated")
     })
 
     it("Only pauser role should be able to pause and unpause the contract", async () => {
@@ -149,7 +164,7 @@ describe("Galaxy Member", () => {
     it("Should be able to update b3tr required to upgrade if admin", async () => {
       const { galaxyMember, owner } = await getOrDeployContractInstances({ forceDeploy: false })
 
-      await galaxyMember
+      const tx = await galaxyMember
         .connect(owner)
         .setB3TRtoUpgradeToLevel([
           10000000000000000000001n,
@@ -162,6 +177,10 @@ describe("Galaxy Member", () => {
           5000000000000000000000001n,
           25000000000000000000000001n,
         ])
+      const receipt = await tx.wait()
+
+      const name = getEventName(receipt, galaxyMember)
+      expect(name).to.equal("B3TRtoUpgradeToLevelUpdated")
 
       expect(await galaxyMember.getB3TRtoUpgradeToLevel(2)).to.equal(10000000000000000000001n)
       expect(await galaxyMember.getB3TRtoUpgradeToLevel(3)).to.equal(25000000000000000000001n)
@@ -920,7 +939,11 @@ describe("Galaxy Member", () => {
       // participation in governance is a requirement for minting
       await participateInAllocationVoting(otherAccount)
 
-      await galaxyMember.connect(owner).setIsPublicMintingPaused(true)
+      const tx = await galaxyMember.connect(owner).setIsPublicMintingPaused(true)
+      const receipt = await tx.wait()
+
+      const name = getEventName(receipt, galaxyMember)
+      expect(name).to.equal("PublicMintingPaused")
 
       await expect(galaxyMember.connect(otherAccount).freeMint()).to.be.reverted
 
@@ -1365,7 +1388,11 @@ describe("Galaxy Member", () => {
 
       await expect(galaxyMember.connect(owner).setMaxLevel(2)).to.be.reverted // Max level must be greater than current level
 
-      await galaxyMember.connect(owner).setMaxLevel(3)
+      const tx = await galaxyMember.connect(owner).setMaxLevel(3)
+      const receipt = await tx.wait()
+
+      const name = getEventName(receipt, galaxyMember)
+      expect(name).to.equal("MaxLevelUpdated")
 
       await upgradeNFTtoLevel(0, 3, galaxyMember, b3tr, owner, minterAccount) // Now we can upgrade to level 3
     })
