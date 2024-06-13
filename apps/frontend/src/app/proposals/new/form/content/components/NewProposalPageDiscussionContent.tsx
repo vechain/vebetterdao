@@ -15,18 +15,15 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
-import { ChangeEvent, useCallback } from "react"
+import { useCallback } from "react"
 import { useProposalFormStore } from "@/store/useProposalFormStore"
 import dynamic from "next/dynamic"
 
-import { ContextStore } from "@uiw/react-md-editor"
 import rehypeSanitize from "rehype-sanitize"
 import { useTranslation } from "react-i18next"
 import { useAutomaticUpdateProposalTemplate } from "../../../hooks/useAutomaticUpdateProposalTemplate"
 import { Controller, useForm } from "react-hook-form"
-import { FiCornerLeftDown } from "react-icons/fi"
 import { validateProposalTemplate } from "@/constants"
-import { validate } from "uuid"
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false })
 
@@ -54,7 +51,7 @@ export const NewProposalPageDiscussionContent = () => {
   const onSubmit = useCallback(
     (data: FormData) => {
       setData({ markdownDescription: data.markdownDescription })
-      router.push("/proposals/new/form/preview")
+      router.push("/proposals/new/form/round")
     },
     [setData, router],
   )
@@ -79,6 +76,7 @@ export const NewProposalPageDiscussionContent = () => {
                 control={control}
                 rules={{
                   validate: value => {
+                    if (!value) return t("Description cannot be empty.")
                     const errors = validateProposalTemplate(value)
                     if (!errors.length) return true
                     let errorMessage = "One or more placeholders have not been replaced: "
@@ -105,7 +103,7 @@ export const NewProposalPageDiscussionContent = () => {
               <FormErrorMessage>{errors.markdownDescription.message}</FormErrorMessage>
             ) : (
               <FormHelperText color="gray.500" fontSize="sm">
-                Make sure to replace all the placeholders with your own content.
+                {t("Make sure to replace all the placeholders with your own content.")}
               </FormHelperText>
             )}
           </FormControl>
