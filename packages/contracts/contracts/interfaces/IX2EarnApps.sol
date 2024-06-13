@@ -115,7 +115,12 @@ interface IX2EarnApps {
    * @param startIndex The starting index of the pagination
    * @param count The number of items to return
    */
-  function apps(uint startIndex, uint count) external view returns (X2EarnAppsDataTypes.App[] memory);
+  function getPaginatedApps(uint startIndex, uint count) external view returns (X2EarnAppsDataTypes.App[] memory);
+
+  /**
+   * @dev Get all apps
+   */
+  function apps() external view returns (X2EarnAppsDataTypes.App[] memory);
 
   /**
    * @dev Get the total count of apps

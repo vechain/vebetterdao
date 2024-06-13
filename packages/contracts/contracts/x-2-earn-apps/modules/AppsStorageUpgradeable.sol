@@ -164,9 +164,23 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev See {IX2EarnApps-app}.
+   * @dev See {IX2EarnApps-apps}.
    */
-  function apps(uint startIndex, uint count) external view returns (X2EarnAppsDataTypes.App[] memory) {
+  function apps() external view returns (X2EarnAppsDataTypes.App[] memory) {
+    AppsStorageStorage storage $ = _getAppsStorageStorage();
+
+    X2EarnAppsDataTypes.App[] memory allApps = new X2EarnAppsDataTypes.App[]($._appIds.length);
+    uint256 length = $._appIds.length;
+    for (uint i = 0; i < length; i++) {
+      allApps[i] = $._apps[$._appIds[i]];
+    }
+    return allApps;
+  }
+
+  /**
+   * @dev See {IX2EarnApps-getPaginatedApps}.
+   */
+  function getPaginatedApps(uint startIndex, uint count) external view returns (X2EarnAppsDataTypes.App[] memory) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
 
     uint256 length = $._appIds.length;
@@ -192,7 +206,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev See {IX2EarnApps-app}.
+   * @dev See {IX2EarnApps-appCount}.
    */
   function appCount() external view returns (uint256) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
