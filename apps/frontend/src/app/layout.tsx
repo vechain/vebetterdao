@@ -91,7 +91,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <Navbar />
             <Flex flex={1}>
               <Container
-                mt={10}
+                mt={{ base: 6, md: 10 }}
                 mb={[20, 20, 40]}
                 maxW={"container.xl"}
                 display={"flex"}
