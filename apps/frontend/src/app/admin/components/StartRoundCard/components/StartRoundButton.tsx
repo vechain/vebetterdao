@@ -8,7 +8,7 @@ export const StartRoundButton = () => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: currentRound } = useAllocationsRound(currentRoundId)
   const isCurrentRoundActive = useMemo(() => {
-    return currentRound?.state === "0"
+    return currentRound?.state === 0
   }, [currentRound])
   const { isOpen, onClose, onOpen } = useDisclosure()
   const {
