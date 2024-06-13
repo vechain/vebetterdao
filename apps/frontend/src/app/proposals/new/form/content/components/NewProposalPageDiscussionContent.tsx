@@ -54,7 +54,7 @@ export const NewProposalPageDiscussionContent = () => {
   const onSubmit = useCallback(
     (data: FormData) => {
       setData({ markdownDescription: data.markdownDescription })
-      router.push("/proposals/new/form/preview")
+      router.push("/proposals/new/form/round")
     },
     [setData, router],
   )

@@ -1,7 +1,9 @@
 {
+  "Publish": "Publish",
+  "Preview and publish": "Preview and publish",
+  "Support": "Support",
   "({{percentage}}%) as {{label}}": "({{percentage}}%) as {{label}}",
   "Total allocation to distribute": "Total allocation to distribute",
-  "Finished": "Finished",
   "To be distributed": "To be distributed",
   "B3TR to distribute between apps": "B3TR to distribute between apps",
   "{{apps}} apps": "{{apps}} apps",
