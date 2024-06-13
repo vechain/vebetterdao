@@ -122,26 +122,37 @@ contract Treasury is
     uint256 _transferLimitVOT3,
     uint256 _transferLimitVTHO
   ) public initializer {
-    TreasuryStorage storage $ = _getTreasuryStorage();
-
-    $.B3TR = _b3tr;
-    $.VOT3 = _vot3;
+    _validateAddresses(_b3tr, _vot3);
 
     __UUPSUpgradeable_init();
     __AccessControl_init();
     __Pausable_init();
     __ReentrancyGuard_init();
 
-    $.transferLimitVET = _transferLimitVET;
+    _setLimits(_transferLimitVET, _transferLimitB3TR, _transferLimitVOT3, _transferLimitVTHO);
 
-    $.transferLimit[$.B3TR] = _transferLimitB3TR;
-    $.transferLimit[$.VOT3] = _transferLimitVOT3;
-    $.transferLimit[VTHO] = _transferLimitVTHO;
-
+    require(_admin != address(0), "Treasury: admin address cannot be zero");
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     _grantRole(GOVERNANCE_ROLE, _timeLock);
     _grantRole(UPGRADER_ROLE, _proxyAdmin);
     _grantRole(PAUSER_ROLE, _pauser);
+  }
+
+  function _validateAddresses(address _b3tr, address _vot3) private {
+    require(_b3tr != address(0), "Treasury: B3TR address cannot be zero");
+    require(_vot3 != address(0), "Treasury: VOT3 address cannot be zero");
+
+    TreasuryStorage storage $ = _getTreasuryStorage();
+    $.B3TR = _b3tr;
+    $.VOT3 = _vot3;
+  }
+
+  function _setLimits(uint256 _transferLimitVET, uint256 _transferLimitB3TR, uint256 _transferLimitVOT3, uint256 _transferLimitVTHO) private {
+    TreasuryStorage storage $ = _getTreasuryStorage();
+    $.transferLimitVET = _transferLimitVET;
+    $.transferLimit[$.B3TR] = _transferLimitB3TR;
+    $.transferLimit[$.VOT3] = _transferLimitVOT3;
+    $.transferLimit[VTHO] = _transferLimitVTHO;
   }
 
   /// @notice Allows the contract to receive VET directly

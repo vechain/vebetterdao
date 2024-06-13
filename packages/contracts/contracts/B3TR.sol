@@ -36,7 +36,7 @@ contract B3TR is ERC20Capped, ERC20Pausable, AccessControl {
 
   /// @notice The maximum amount of B3TR tokens that can be minted
   uint256 private constant B3TR_CAP = 1000243154;
-  
+
   /// @dev Initializes the contract with specified cap, token details, and admin roles
   /// @param _admin The address that will be granted the default admin role
   /// @param _defaultMinter The address that will be granted the minter role initially
@@ -46,6 +46,7 @@ contract B3TR is ERC20Capped, ERC20Pausable, AccessControl {
     address _defaultMinter,
     address _pauser
   ) ERC20("B3TR", "B3TR") ERC20Capped(B3TR_CAP * 1e18) {
+    require(_admin != address(0), "B3TR: admin address cannot be zero");
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     _grantRole(MINTER_ROLE, _defaultMinter);
     _grantRole(PAUSER_ROLE, _pauser);

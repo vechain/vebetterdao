@@ -87,10 +87,14 @@ contract VOT3 is
     __Nonces_init();
 
     VOT3Storage storage $ = _getVOT3Storage();
+
+    require(_admin != address(0), "VOT3: Admin address cannot be 0");
     // Grant the contract deployer the default admin role and the UPGRADER_ROLE
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     _grantRole(UPGRADER_ROLE, _upgrader);
     _grantRole(PAUSER_ROLE, _pauser);
+
+    require(_b3tr != address(0), "VOT3: B3TR address cannot be 0");
     $.b3tr = IERC20(_b3tr);
   }
 

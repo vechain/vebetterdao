@@ -83,6 +83,7 @@ contract X2EarnApps is
     __AccessControl_init();
 
     for (uint256 i; i < _admins.length; i++) {
+      require(_admins[i] != address(0), "X2EarnApps: admin address cannot be zero");
       _grantRole(DEFAULT_ADMIN_ROLE, _admins[i]);
     }
 

@@ -51,6 +51,12 @@ describe("B3TR Token", function () {
       // test that operator role is not set for other accounts
       expect(await b3tr.hasRole(operatorRole, otherAccount)).to.eql(false)
     })
+
+    it("should revert if default admin set to zero address on initilisation", async function () {
+      const { owner, minterAccount } = await getOrDeployContractInstances({ forceDeploy: false })
+      const B3trContract = await ethers.getContractFactory("B3TR")
+      await expect(B3trContract.deploy(ethers.ZeroAddress, minterAccount, owner)).to.be.reverted
+    })
   })
 
   describe("Access Control", function () {

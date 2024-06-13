@@ -58,6 +58,7 @@ library GovernorFunctionRestrictionsLogic {
     bytes4 functionSelector,
     bool isWhitelisted
   ) public {
+    require(target != address(0), "GovernorFunctionRestrictionsLogic: target is the zero address");
     self.whitelistedFunctions[target][functionSelector] = isWhitelisted;
     emit FunctionWhitelisted(target, functionSelector, isWhitelisted);
   }

@@ -124,6 +124,114 @@ describe("X-Allocation Voting", function () {
 
       expect(await xAllocationVoting.voterRewards()).to.eql(await voterRewards.getAddress())
     })
+
+    it("Should revert if VOT3 is set to zero address in initilisation", async () => {
+      const config = createLocalConfig()
+      const { owner, x2EarnApps, timeLock, emissions, voterRewards } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      await expect(
+        deployProxy("XAllocationVoting", [
+          {
+            vot3Token: ZERO_ADDRESS,
+            quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE, // quorum percentage
+            initialVotingPeriod: config.EMISSIONS_CYCLE_DURATION - 1, // X Alloc voting period
+            timeLock: await timeLock.getAddress(),
+            voterRewards: await voterRewards.getAddress(),
+            emissions: await emissions.getAddress(),
+            admins: [await timeLock.getAddress(), owner.address],
+            upgrader: owner.address,
+            contractsAddressManager: owner.address,
+            x2EarnAppsAddress: await x2EarnApps.getAddress(),
+            baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
+            appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
+            votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
+          },
+        ])).to.be.reverted
+    })
+
+    it("Should revert if VoterRewards is set to zero address in initilisation", async () => {
+      const config = createLocalConfig()
+      const { owner, x2EarnApps, timeLock, emissions, vot3 } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      await expect(
+        deployProxy("XAllocationVoting", [
+          {
+            vot3Token: await vot3.getAddress(),
+            quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE, // quorum percentage
+            initialVotingPeriod: config.EMISSIONS_CYCLE_DURATION - 1, // X Alloc voting period
+            timeLock: await timeLock.getAddress(),
+            voterRewards: ZERO_ADDRESS,
+            emissions: await emissions.getAddress(),
+            admins: [await timeLock.getAddress(), owner.address],
+            upgrader: owner.address,
+            contractsAddressManager: owner.address,
+            x2EarnAppsAddress: await x2EarnApps.getAddress(),
+            baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
+            appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
+            votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
+          },
+        ])).to.be.reverted
+    })
+
+    it("Should revert if Emissions is set to zero address in initilisation", async () => {
+      const config = createLocalConfig()
+      const { owner, x2EarnApps, timeLock, vot3, voterRewards } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      await expect(
+        deployProxy("XAllocationVoting", [
+          {
+            vot3Token: await vot3.getAddress(),
+            quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE, // quorum percentage
+            initialVotingPeriod: config.EMISSIONS_CYCLE_DURATION - 1, // X Alloc voting period
+            timeLock: await timeLock.getAddress(),
+            voterRewards: await voterRewards.getAddress(),
+            emissions: ZERO_ADDRESS,
+            admins: [await timeLock.getAddress(), owner.address],
+            upgrader: owner.address,
+            contractsAddressManager: owner.address,
+            x2EarnAppsAddress: await x2EarnApps.getAddress(),
+            baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
+            appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
+            votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
+          },
+        ])).to.be.reverted
+    })
+
+    it("Should revert if an admin is set to zero address in initilisation", async () => {
+      const config = createLocalConfig()
+      const { owner, x2EarnApps, timeLock, vot3, voterRewards, emissions } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      await expect(
+        deployProxy("XAllocationVoting", [
+          {
+            vot3Token: await vot3.getAddress(),
+            quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE, // quorum percentage
+            initialVotingPeriod: config.EMISSIONS_CYCLE_DURATION - 1, // X Alloc voting period
+            timeLock: await timeLock.getAddress(),
+            voterRewards: await voterRewards.getAddress(),
+            emissions: await emissions.getAddress(),
+            admins: [await timeLock.getAddress(), ZERO_ADDRESS],
+            upgrader: owner.address,
+            contractsAddressManager: owner.address,
+            x2EarnAppsAddress: await x2EarnApps.getAddress(),
+            baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
+            appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
+            votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
+          },
+        ])).to.be.reverted
+    })
   })
 
   describe("Contract upgradeablity", () => {

@@ -56,6 +56,195 @@ describe("Emissions", () => {
       expect(await emissions.treasuryPercentage()).to.equal(config.EMISSIONS_TREASURY_PERCENTAGE)
     })
 
+    it("Should revert if Treasury is set to zero address in initilisation", async () => {
+      const config = createLocalConfig()
+      const { owner, b3tr, minterAccount, xAllocationPool, voterRewards } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      await expect(
+        deployProxy("Emissions", [
+          {
+            minter: minterAccount.address,
+            admin: owner.address,
+            upgrader: owner.address,
+            contractsAddressManager: owner.address,
+            decaySettingsManager: owner.address,
+            b3trAddress: await b3tr.getAddress(),
+            destinations: [
+              await xAllocationPool.getAddress(),
+              await voterRewards.getAddress(),
+              ZERO_ADDRESS,
+              config.MIGRATION_ADDRESS,
+            ],
+            initialXAppAllocation: config.INITIAL_X_ALLOCATION,
+            cycleDuration: config.EMISSIONS_CYCLE_DURATION,
+            decaySettings: [
+              config.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE,
+              config.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE,
+              config.EMISSIONS_X_ALLOCATION_DECAY_PERIOD,
+              config.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD,
+            ],
+            treasuryPercentage: config.EMISSIONS_TREASURY_PERCENTAGE,
+            maxVote2EarnDecay: config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
+            migrationAmount: config.MIGRATION_AMOUNT,
+          },
+        ]),
+      ).to.be.reverted
+    })
+
+    it("Should revert if XAllocations is set to zero address in initilisation", async () => {
+      const config = createLocalConfig()
+      const { owner, b3tr, minterAccount, voterRewards, treasury } = await getOrDeployContractInstances({
+        forceDeploy: false,
+      })
+
+      await expect(
+        deployProxy("Emissions", [
+          {
+            minter: minterAccount.address,
+            admin: owner.address,
+            upgrader: owner.address,
+            contractsAddressManager: owner.address,
+            decaySettingsManager: owner.address,
+            b3trAddress: await b3tr.getAddress(),
+            destinations: [
+              ZERO_ADDRESS,
+              await voterRewards.getAddress(),
+              await treasury.getAddress(),
+              config.MIGRATION_ADDRESS,
+            ],
+            initialXAppAllocation: config.INITIAL_X_ALLOCATION,
+            cycleDuration: config.EMISSIONS_CYCLE_DURATION,
+            decaySettings: [
+              config.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE,
+              config.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE,
+              config.EMISSIONS_X_ALLOCATION_DECAY_PERIOD,
+              config.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD,
+            ],
+            treasuryPercentage: config.EMISSIONS_TREASURY_PERCENTAGE,
+            maxVote2EarnDecay: config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
+            migrationAmount: config.MIGRATION_AMOUNT,
+          },
+        ]),
+      ).to.be.reverted
+    })
+
+    it("Should revert if vote2Earn is set to zero address in initilisation", async () => {
+      const config = createLocalConfig()
+      const { owner, b3tr, minterAccount, xAllocationPool, treasury } = await getOrDeployContractInstances({
+        forceDeploy: false,
+      })
+
+      await expect(
+        deployProxy("Emissions", [
+          {
+            minter: minterAccount.address,
+            admin: owner.address,
+            upgrader: owner.address,
+            contractsAddressManager: owner.address,
+            decaySettingsManager: owner.address,
+            b3trAddress: await b3tr.getAddress(),
+            destinations: [
+              await xAllocationPool.getAddress(),
+              ZERO_ADDRESS,
+              await treasury.getAddress(),
+              config.MIGRATION_ADDRESS,
+            ],
+            initialXAppAllocation: config.INITIAL_X_ALLOCATION,
+            cycleDuration: config.EMISSIONS_CYCLE_DURATION,
+            decaySettings: [
+              config.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE,
+              config.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE,
+              config.EMISSIONS_X_ALLOCATION_DECAY_PERIOD,
+              config.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD,
+            ],
+            treasuryPercentage: config.EMISSIONS_TREASURY_PERCENTAGE,
+            maxVote2EarnDecay: config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
+            migrationAmount: config.MIGRATION_AMOUNT,
+          },
+        ]),
+      ).to.be.reverted
+    })
+
+    it("Should revert if admin is set to zero address in initilisation", async () => {
+      const config = createLocalConfig()
+      const { owner, b3tr, minterAccount, xAllocationPool, treasury, voterRewards } =
+        await getOrDeployContractInstances({
+          forceDeploy: false,
+        })
+
+      await expect(
+        deployProxy("Emissions", [
+          {
+            minter: minterAccount.address,
+            admin: ZERO_ADDRESS,
+            upgrader: owner.address,
+            contractsAddressManager: owner.address,
+            decaySettingsManager: owner.address,
+            b3trAddress: await b3tr.getAddress(),
+            destinations: [
+              await xAllocationPool.getAddress(),
+              await voterRewards.getAddress(),
+              await treasury.getAddress(),
+              config.MIGRATION_ADDRESS,
+            ],
+            initialXAppAllocation: config.INITIAL_X_ALLOCATION,
+            cycleDuration: config.EMISSIONS_CYCLE_DURATION,
+            decaySettings: [
+              config.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE,
+              config.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE,
+              config.EMISSIONS_X_ALLOCATION_DECAY_PERIOD,
+              config.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD,
+            ],
+            treasuryPercentage: config.EMISSIONS_TREASURY_PERCENTAGE,
+            maxVote2EarnDecay: config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
+            migrationAmount: config.MIGRATION_AMOUNT,
+          },
+        ]),
+      ).to.be.reverted
+    })
+
+    it("Should revert if Treasury is set to zero address in initilisation", async () => {
+      const config = createLocalConfig()
+      const { owner, b3tr, minterAccount, xAllocationPool, voterRewards, treasury } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
+
+      await expect(
+        deployProxy("Emissions", [
+          {
+            minter: minterAccount.address,
+            admin: owner.address,
+            upgrader: owner.address,
+            contractsAddressManager: owner.address,
+            decaySettingsManager: owner.address,
+            b3trAddress: await b3tr.getAddress(),
+            destinations: [
+              await xAllocationPool.getAddress(),
+              await voterRewards.getAddress(),
+              ZERO_ADDRESS,
+              config.MIGRATION_ADDRESS,
+            ],
+            initialXAppAllocation: config.INITIAL_X_ALLOCATION,
+            cycleDuration: config.EMISSIONS_CYCLE_DURATION,
+            decaySettings: [
+              config.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE,
+              config.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE,
+              config.EMISSIONS_X_ALLOCATION_DECAY_PERIOD,
+              config.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD,
+            ],
+            treasuryPercentage: config.EMISSIONS_TREASURY_PERCENTAGE,
+            maxVote2EarnDecay: config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
+            migrationAmount: config.MIGRATION_AMOUNT,
+          },
+        ]),
+      ).to.be.reverted
+    })
+
     it("Should be able to change the X allocations address", async () => {
       const { emissions, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,

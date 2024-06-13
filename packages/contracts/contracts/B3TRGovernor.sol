@@ -145,6 +145,8 @@ contract B3TRGovernor is
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     GovernorQuorumLogic.updateQuorumNumerator($, data.quorumPercentage);
 
+    // Validate and set the governor external contracts storage
+    require(address(rolesData.governorAdmin) != address(0), "B3TRGovernor: governor admin address cannot be zero");
     _grantRole(DEFAULT_ADMIN_ROLE, rolesData.governorAdmin);
     _grantRole(GOVERNOR_FUNCTIONS_SETTINGS_ROLE, rolesData.governorFunctionSettingsRoleAddress);
     _grantRole(PAUSER_ROLE, rolesData.pauser);
