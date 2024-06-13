@@ -314,7 +314,7 @@ contract XAllocationPool is
     (uint256 appShare, uint256 unallocatedShare) = getAppShares(lastSucceededRoundId, appId);
     uint256 baseAllocationPerApp = baseAllocationAmount(roundId);
     uint256 variableAllocationForApp = _rewardAmount(roundId, appShare);
-    uint256 unallocatedAmount = 0;
+    uint256 unallocatedAmount;
     if (unallocatedShare > 0) {
       unallocatedAmount = _rewardAmount(roundId, unallocatedShare);
     }
@@ -389,7 +389,7 @@ contract XAllocationPool is
     uint256 appShare = (appVotesQFValue * PERCENTAGE_PRECISION_SCALING_FACTOR) / totalVotesQF;
 
     // This is the amount unallocated if appShare is greater than max cap, this will be sent to treasury
-    uint256 unallocatedShare = 0;
+    uint256 unallocatedShare;
 
     // Cap the app share to the maximum variable allocation percentage so even if an app has 80 votes out of 100,
     // it will still get only a max of `appSharesCap` percentage of the available funds
