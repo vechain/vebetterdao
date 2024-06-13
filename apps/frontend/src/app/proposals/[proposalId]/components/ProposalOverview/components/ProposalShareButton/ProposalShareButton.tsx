@@ -98,7 +98,7 @@ export const ProposalShareButton = () => {
                 </VStack>
                 <ShareButtonsBlue
                   descriptionEncoded={encodeURIComponent(
-                    `🌱 Amazing #VeBetterDAO proposal:\n\n${proposal.title}\n\nCheck it out: https://governance.vebetterdao.org/proposals/${proposal.id}\n\n💫 #VeBetterDAO #Vechain`,
+                    `📢 Proposal alert! Check it out on #VeBetterDao and join me in building a sustainable future 🌱🔗\n\nVote now: https://governance.vebetterdao.org/proposals/${proposal.id}\n\n💫 #VeBetterDAO #Vechain`,
                   )}
                 />
                 {showCopiedLink ? (
