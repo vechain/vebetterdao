@@ -1,10 +1,11 @@
 import { FormattingUtils } from "@repo/utils"
-import { UseQueryResult, useQuery } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
 import { useB3trTokenDetails } from "./useB3trTokenDetails"
 import { VOT3__factory } from "@repo/contracts/typechain-types"
 import { TokenBalance } from "./useB3trBalance"
+import { ethers } from "ethers"
 
 const VOT3_CONTRACT = getConfig().vot3ContractAddress
 
@@ -32,7 +33,7 @@ export const getB3trConverted = async (
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
   const original = res.decoded[0]
-  const scaled = FormattingUtils.scaleNumberDown(original, scaleDecimals, scaleDecimals)
+  const scaled = ethers.formatEther(original)
   const formatted = scaled === "0" ? "0" : FormattingUtils.humanNumber(scaled)
 
   return {
