@@ -12,7 +12,6 @@ const compactFormatter = getCompactFormatter(2)
 export const ProposalWithdrawDeposit = () => {
   const { proposal } = useProposalDetail()
   const { t } = useTranslation()
-
   return (
     <>
       {proposal.state !== ProposalState.Pending && proposal.userSupport != 0 && (
