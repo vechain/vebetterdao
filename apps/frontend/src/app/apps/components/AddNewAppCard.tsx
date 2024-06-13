@@ -9,6 +9,10 @@ export const AddNewAppCard = () => {
     router.push(`/apps/new`)
   }
 
+  const openGrantPage = () => {
+    window.open("https://vechain.org/grants/", "_blank")
+  }
+
   return (
     <Card
       variant={"baseWithBorder"}
@@ -22,7 +26,7 @@ export const AddNewAppCard = () => {
         <VStack spacing={8} align="center" h="full" justify={"center"} textAlign={"center"}>
           <Image src="/images/hand-plant.svg" boxSize={32} alt="Add new App image" />
           <Heading size="md">Do you have a dApp to join the VeBetter DAO ecosystem?</Heading>
-          <Button colorScheme="blue" onClick={navigateToAppDetail} rounded={"full"} leftIcon={<FaPlus />}>
+          <Button colorScheme="blue" onClick={openGrantPage} rounded={"full"} leftIcon={<FaPlus />}>
             Apply now
           </Button>
         </VStack>
