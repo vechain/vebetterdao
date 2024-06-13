@@ -448,6 +448,7 @@ contract GalaxyMember is
   function setB3TRtoUpgradeToLevel(uint256[] memory b3trToUpgradeToLevel) external onlyRole(DEFAULT_ADMIN_ROLE) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     for (uint256 i = 0; i < b3trToUpgradeToLevel.length; i++) {
+      require(b3trToUpgradeToLevel[i] > 0, "Galaxy Member: B3TR to upgrade must be greater than 0");
       $._b3trToUpgradeToLevel[i + 2] = b3trToUpgradeToLevel[i]; // First Level that requires B3TR is level 2
     }
     emit B3TRtoUpgradeToLevelUpdated(b3trToUpgradeToLevel);
