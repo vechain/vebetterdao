@@ -42,6 +42,11 @@ const APPS = [
     name: "EVearn",
     metadataURI: "bafkreif5m23ikv6jphvjciv5uwtq3eqchinh5m5jexdo7atgxyf62az65y",
   },
+  {
+    address: accounts[6].address,
+    name: "Oily",
+    metadataURI: "bafkreifn4k4iubtrqthjgotzmd5vgxlfguwcsx5z34wvrpuh6ubx34sljm",
+  },
 ]
 
 export const setupLocalEnvironment = async (emissions: Emissions, treasury: Treasury, x2EarnApps: X2EarnApps) => {
