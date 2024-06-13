@@ -38,14 +38,12 @@ import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
 import { IB3TRGovernor } from "./interfaces/IB3TRGovernor.sol";
 import { IB3TR } from "./interfaces/IB3TR.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 /// @title GalaxyMember NFT Contract
 /// @dev Extends ERC721 Non-Fungible Token Standard basic implementation with upgradeable pattern, burnable, pausable, and access control functionalities.
 /// @notice This contract manages the unique assets owned by users within the Galaxy Member ecosystem.
 contract GalaxyMember is
-  Initializable,
   ERC721Upgradeable,
   ERC721EnumerableUpgradeable,
   ERC721PausableUpgradeable,
@@ -106,8 +104,8 @@ contract GalaxyMember is
   /// @dev Emitted when a token is upgraded.
   event Upgraded(uint256 indexed tokenId, uint256 oldLevel, uint256 newLevel);
 
-  /// @dev Emitted when max level is updated.
-  event MaxLevelUpdated(uint256 oldLevel, uint256 indexed newLevel);
+  /// @dev Emitted when the max level is updated.
+  event MaxLevelUpdated(uint256 oldLevel, uint256 newLevel);
 
   /// @dev Emitted when XAllocationVotingGovernor contract address is updated
   event XAllocationsGovernorAddressUpdated(address indexed newAddress, address indexed oldAddress);
@@ -173,6 +171,7 @@ contract GalaxyMember is
     require(bytes(data.baseTokenURI).length > 0, "Galaxy Member: Base URI must be set");
     require(data.b3tr != address(0), "Galaxy Member: B3TR token address cannot be the zero address");
     require(data.treasury != address(0), "Galaxy Member: Treasury address cannot be the zero address");
+    require(data.b3trToUpgradeToLevel.length >= data.maxLevel - 1, "Galaxy Member: B3TR to upgrade must be set for all unlocked levels");
 
     __ERC721_init(data.name, data.symbol);
     __ERC721Enumerable_init();
@@ -187,7 +186,8 @@ contract GalaxyMember is
     $.MAX_LEVEL = data.maxLevel;
     $._baseTokenURI = data.baseTokenURI;
 
-    for (uint8 i = 0; i < data.b3trToUpgradeToLevel.length; i++) {
+    for (uint256 i = 0; i < data.b3trToUpgradeToLevel.length; i++) {
+      require(data.b3trToUpgradeToLevel[i] > 0, "Galaxy Member: B3TR to upgrade must be greater than 0");
       $._b3trToUpgradeToLevel[i + 2] = data.b3trToUpgradeToLevel[i]; // First Level that requires B3TR is level 2
     }
 
@@ -394,8 +394,16 @@ contract GalaxyMember is
 
     require(level > $.MAX_LEVEL, "Galaxy Member: Max level must be greater than the current max level");
 
-    emit MaxLevelUpdated($.MAX_LEVEL, level);
+    // First Level that requires B3TR is level 2
+    for (uint256 i = 2; i <= level; i++) {
+      require($._b3trToUpgradeToLevel[i] > 0, "Galaxy Member: B3TR to upgrade must be set for all levels unlocked"); // Require all levels til the new max level to have a B3TR requirement
+    }
+
+    uint256 oldLevel = $.MAX_LEVEL;
+
     $.MAX_LEVEL = level;
+
+    emit MaxLevelUpdated(oldLevel, level);
   }
 
   /// @notice Sets the XAllocationVotingGovernor contract address
@@ -437,7 +445,8 @@ contract GalaxyMember is
   /// @param b3trToUpgradeToLevel Mapping of B3TR requirements per level
   function setB3TRtoUpgradeToLevel(uint256[] memory b3trToUpgradeToLevel) external onlyRole(DEFAULT_ADMIN_ROLE) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
-    for (uint8 i = 0; i < b3trToUpgradeToLevel.length; i++) {
+    for (uint256 i = 0; i < b3trToUpgradeToLevel.length; i++) {
+      require(b3trToUpgradeToLevel[i] > 0, "Galaxy Member: B3TR to upgrade must be greater than 0");
       $._b3trToUpgradeToLevel[i + 2] = b3trToUpgradeToLevel[i]; // First Level that requires B3TR is level 2
     }
     emit B3TRtoUpgradeToLevelUpdated(b3trToUpgradeToLevel);

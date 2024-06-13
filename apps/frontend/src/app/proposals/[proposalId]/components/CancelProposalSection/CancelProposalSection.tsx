@@ -1,4 +1,4 @@
-import { ProposalState, useCurrentProposal } from "@/api"
+import { ProposalState } from "@/api"
 import { TransactionModal } from "@/components/TransactionModal"
 import { useCancelProposal } from "@/hooks/useCancelProposal"
 import {
@@ -20,11 +20,12 @@ import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
+import { useProposalDetail } from "../../hooks"
 
 export const CancelProposalSection = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const { proposal } = useCurrentProposal()
+  const { proposal } = useProposalDetail()
   const confirmationModal = useDisclosure()
   const transactionModal = useDisclosure()
 
@@ -83,7 +84,7 @@ export const CancelProposalSection = () => {
               <VStack align="stretch" gap={0}>
                 <Text fontSize={"14px"}>
                   {t(
-                    "Are you completely sure to cancel this proposal? All the support provided by the community will be lost.",
+                    "Are you completely sure to cancel this proposal? Community support will be returned, and you cannot recover this proposal.",
                   )}
                 </Text>
                 <Text fontWeight={600} fontSize={"14px"}>

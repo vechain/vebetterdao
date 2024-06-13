@@ -1,15 +1,16 @@
-import { ProposalState, useCurrentProposal } from "@/api"
+import { ProposalState } from "@/api"
 import { Arm } from "@/components/Icons/Arm"
 import { Box, Card, Circle, Flex, HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 import { ProposalWithdrawButton } from "../ProposalWithdrawButton"
+import { useProposalDetail } from "../../hooks"
 
 const compactFormatter = getCompactFormatter(2)
 
 export const ProposalWithdrawDeposit = () => {
-  const { proposal } = useCurrentProposal()
+  const { proposal } = useProposalDetail()
   const { t } = useTranslation()
   return (
     <>
@@ -75,8 +76,8 @@ export const ProposalWithdrawDeposit = () => {
                 <HStack>
                   <Circle size="12px" bg={"#77A0FF"} />
                   <Text fontSize="14px" fontWeight={400}>
-                    {t("From {{users}} users {{vot3}} V3.", {
-                      vot3: proposal.othersSupport || 0,
+                    {t("From {{users}} users {{vot3}} VOT3.", {
+                      vot3: compactFormatter.format(proposal.othersSupport || 0),
                       users: compactFormatter.format(Number(proposal.othersSupportUserCount)),
                     })}
                   </Text>
@@ -84,7 +85,7 @@ export const ProposalWithdrawDeposit = () => {
                 <HStack>
                   <Circle size="12px" bg={"#004CFC"} />
                   <Text fontSize="14px" fontWeight={400}>
-                    {t("From you {{vot3}} V3.", { vot3: compactFormatter.format(Number(proposal.userSupport)) })}
+                    {t("From you {{vot3}} VOT3.", { vot3: compactFormatter.format(Number(proposal.userSupport)) })}
                   </Text>
                 </HStack>
               </VStack>

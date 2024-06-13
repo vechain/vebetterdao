@@ -16,10 +16,10 @@ import { motion } from "framer-motion"
 import { CustomModalContent } from "@/components"
 import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
 import { UilCheckCircle, UilLink, UilShareAlt } from "@iconscout/react-unicons"
-import { useCurrentProposal } from "@/api"
 import { useTranslation } from "react-i18next"
 import { ShareButtonsBlue } from "@/components/ShareButtonsBlue"
 import { useCallback, useState } from "react"
+import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
 
 const containerVariants = {
   initial: {
@@ -36,7 +36,7 @@ const containerVariants = {
 
 export const ProposalShareButton = () => {
   const { onOpen, isOpen, onClose } = useDisclosure()
-  const { proposal } = useCurrentProposal()
+  const { proposal } = useProposalDetail()
   const { t } = useTranslation()
   const [showCopiedLink, setShowCopiedLink] = useState(false)
   const handleCopyLink = useCallback(async () => {
