@@ -250,6 +250,14 @@ describe("Emissions", () => {
       await expect(emissions.connect(owner).setCycleDuration(0)).to.be.reverted // At least 1 block
     })
 
+    it("Should revert if cycle period is set less than voting period", async () => {
+      const { emissions, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await expect(emissions.connect(owner).setCycleDuration(10)).to.be.reverted
+    })
+
     it("Should be able to change x allocations decay period", async () => {
       const { emissions, owner, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
