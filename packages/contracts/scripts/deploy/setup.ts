@@ -9,36 +9,26 @@ const accounts = getTestKeys(13)
 const APPS = [
   {
     address: accounts[6].address,
-    name: "Vyvo",
-    metadataURI: "bafkreigk7faih4jmdee4ritah6564jqpfn5s2gl4dcsvii7woijy5ls7ca",
-  },
-  {
-    address: accounts[7].address,
-    name: "Mugshot",
-    metadataURI: "bafkreidaleehj2euzdmpystzaux5aandfwnhyzgfjkujebbixek7edyyzu",
-  },
-  {
-    address: accounts[9].address,
     name: "Cleanify",
     metadataURI: "bafkreicw6g34t3th63z7hq3o4xkay6dkrei5ny5evyrlclw53gfz6o6lgu",
   },
   {
-    address: accounts[10].address,
-    name: "Non Fungible Book Club (NFBC)",
-    metadataURI: "bafkreicdcol6afcsfb4efxmjzqsuonukn54jixmfqmfsirhw4wujvxfpxy",
+    address: accounts[6].address,
+    name: "Mugshot",
+    metadataURI: "bafkreih6y5pq5cq4q3fe6apr46ccwho7s7wga2zrwjxdkf2cdohgaexaey",
   },
   {
-    address: accounts[11].address,
-    name: "Green Ambassador Challenge",
-    metadataURI: "bafkreigrwjowwwcmdd7bdm3yqsquu77ufeqcao6mjbd2fednwo5qfmtldi",
-  },
-  {
-    address: accounts[11].address,
+    address: accounts[6].address,
     name: "GreenCart",
     metadataURI: "bafkreie6gdx7xugiemmubpfb6r5c4bdwfjucjtmb43mk2fhemyx3x3kvnu",
   },
   {
-    address: accounts[12].address,
+    address: accounts[6].address,
+    name: "Vyvo",
+    metadataURI: "bafkreigk7faih4jmdee4ritah6564jqpfn5s2gl4dcsvii7woijy5ls7ca",
+  },
+  {
+    address: accounts[6].address,
     name: "EVearn",
     metadataURI: "bafkreif5m23ikv6jphvjciv5uwtq3eqchinh5m5jexdo7atgxyf62az65y",
   },
@@ -46,6 +36,16 @@ const APPS = [
     address: accounts[6].address,
     name: "Oily",
     metadataURI: "bafkreifn4k4iubtrqthjgotzmd5vgxlfguwcsx5z34wvrpuh6ubx34sljm",
+  },
+  {
+    address: accounts[6].address,
+    name: "Green Ambassador Challenge",
+    metadataURI: "bafkreigrwjowwwcmdd7bdm3yqsquu77ufeqcao6mjbd2fednwo5qfmtldi",
+  },
+  {
+    address: accounts[6].address,
+    name: "Non Fungible Book Club (NFBC)",
+    metadataURI: "bafkreicdcol6afcsfb4efxmjzqsuonukn54jixmfqmfsirhw4wujvxfpxy",
   },
 ]
 
