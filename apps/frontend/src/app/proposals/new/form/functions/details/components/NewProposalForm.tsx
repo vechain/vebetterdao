@@ -29,7 +29,7 @@ export type FormData = {
  * @param renderActions - if the actions field should be rendered
  */
 type Props = {
-  onSubmit?: (data: FormData) => void
+  onSubmit?: (_data: FormData) => void
   isDisabled?: boolean
   formId?: string
   renderTitle?: boolean

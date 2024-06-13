@@ -62,7 +62,7 @@ export const SelectedRoundRadioCard: React.FC<Props> = ({
       w="full"
       onClick={onSelect}
       {...(!renderSkeleton && isSelectable && { cursor: "pointer" })}
-      {...((renderSkeleton || isSelectable) && { pointerEvents: "none" })}
+      {...((renderSkeleton || !isSelectable) && { pointerEvents: "none" })}
       borderWidth={1}
       borderColor={selected ? "primary.active" : "gray.200"}
       borderRadius="xl"

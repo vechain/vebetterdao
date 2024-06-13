@@ -37,11 +37,11 @@ export const NewProposalSupportPageContent = () => {
   const { account } = useWallet()
   const { data: balance, isLoading: balanceLoading } = useVot3Balance(account ?? undefined)
   const { data: threshold, isLoading: thresholdLoading } = useDepositThreshold()
-  const { setData } = useProposalFormStore()
+  const { setData, depositAmount } = useProposalFormStore()
 
   const { register, handleSubmit, formState } = useForm<FormData>({
     defaultValues: {
-      amount: 0,
+      amount: depositAmount ?? 0,
     },
   })
 

@@ -1,7 +1,7 @@
 "use client"
 
 import { Button, Card, CardBody, Divider, HStack, Heading, VStack, useDisclosure } from "@chakra-ui/react"
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 import MarkdownPreview from "@uiw/react-markdown-preview"
 import { useProposalFormStore } from "@/store/useProposalFormStore"
 import { NewProposalForm } from "../../functions/details/components/NewProposalForm"
@@ -11,12 +11,16 @@ import { useCreateProposal, useUploadProposalMetadata } from "@/hooks"
 import { TransactionModal } from "@/components/TransactionModal"
 import { useForm } from "react-hook-form"
 import { SelectedRoundRadioCard } from "../../round/components/SelectedRoundRadioCard"
+import { ProposalSupportProgressChart } from "@/components/ProposalSupportProgressChart/ProposalSupportProgressChart"
+import { useDepositThreshold } from "@/api"
 
 export const PublishAndPreviewPageContent = () => {
   const router = useRouter()
   const { t } = useTranslation()
   const { actions, markdownDescription, title, shortDescription, votingStartRoundId, depositAmount } =
     useProposalFormStore()
+
+  const { data: threshold, isLoading: thresholdLoading } = useDepositThreshold()
 
   const { handleSubmit } = useForm()
 
@@ -31,6 +35,11 @@ export const PublishAndPreviewPageContent = () => {
   const createProposalMutation = useCreateProposal({ onSuccess })
 
   const { onMetadataUpload, metadataUploadError, metadataUploading } = useUploadProposalMetadata()
+
+  const isDepositReached = useMemo(
+    () => !!depositAmount && !!threshold && depositAmount >= Number(threshold),
+    [depositAmount, threshold],
+  )
 
   const onSubmit = useCallback(async () => {
     createProposalMutation.resetStatus()
@@ -131,6 +140,22 @@ export const PublishAndPreviewPageContent = () => {
                 />
               )}
             </VStack>
+
+            <VStack spacing={4} align="flex-start" w="full">
+              <Heading size="md">{t("Community support")}</Heading>
+              {depositAmount && threshold && (
+                <ProposalSupportProgressChart
+                  isDepositThresholdReached={isDepositReached}
+                  isFailedDueToDeposit={false}
+                  depositThreshold={Number(threshold)}
+                  userDeposits={Number(depositAmount)}
+                  othersDeposits={0}
+                  otherDepositsUsersCount={0}
+                  renderVotesDistributionLabel={false}
+                />
+              )}
+            </VStack>
+
             <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
               <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
                 {t("Go back")}

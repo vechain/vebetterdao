@@ -77,6 +77,8 @@ export const NewProposalRoundPageContent = () => {
                   roundId={round.id}
                   selected={round.id === votingStartRoundId}
                   onSelect={onSelectRound(round.id)}
+                  isSelectable={true}
+                  renderSkeleton={false}
                 />
               ))}
 
