@@ -8,21 +8,21 @@ const Steps: StepCardProps[] = [
     stepNumber: 1,
     stepTitle: "Mods approval",
     stepDescription:
-      "Submit your dApp for review. Our moderators will assess its functionality and compliance with our guidelines.",
+      "Submit your app for review. Our moderators will assess its functionality and compliance with our guidelines.",
   },
   {
     stepImageSrc: "/images/handshake.svg",
     stepNumber: 2,
     stepTitle: "Endorsement",
     stepDescription:
-      "X Node Holders will use their NFTs to endorse your dApp. Once it reaches 100 points, it becomes eligible for allocations.",
+      "X Node Holders will use their NFTs to endorse your app. Once it reaches 100 points, it becomes eligible for allocations.",
   },
   {
     stepImageSrc: "/images/vote.svg",
     stepNumber: 3,
     stepTitle: "Allocation voting",
     stepDescription:
-      "The allocation rounds determine the resources and support your dApp receives from the ecosystem community.",
+      "The allocation rounds determine the resources and support your app receives from the ecosystem community.",
   },
 ]
 export const NewAppPageContent = () => {
@@ -42,7 +42,7 @@ export const NewAppPageContent = () => {
             <VStack spacing={8} align="flex-start">
               <Heading size="lg">Create a new app</Heading>
               <Text>
-                Welcome to our platform where you can unleash your creativity and build dApps! Before your dApp can go
+                Welcome to our platform where you can unleash your creativity and build dApps! Before your app can go
                 live, it will undergo a thorough review process by our moderators. Here's how it works:
               </Text>
               <Stack direction={["column", "column", "row"]} w="full" spacing={4}>
