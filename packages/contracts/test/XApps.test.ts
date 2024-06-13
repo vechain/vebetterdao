@@ -249,7 +249,7 @@ describe("X-Apps", function () {
         .connect(owner)
         .addApp(otherAccounts[1].address, otherAccounts[1].address, "My app #2", "metadataURI")
 
-      const apps = await x2EarnApps.apps(0, 2)
+      const apps = await x2EarnApps.apps()
       expect(apps.length).to.eql(2)
     })
 
@@ -269,15 +269,15 @@ describe("X-Apps", function () {
         .connect(owner)
         .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app #4", "metadataURI")
 
-      const apps1 = await x2EarnApps.apps(0, 2)
+      const apps1 = await x2EarnApps.getPaginatedApps(0, 2)
       expect(apps1.length).to.eql(2)
 
-      const apps2 = await x2EarnApps.apps(2, 5)
+      const apps2 = await x2EarnApps.getPaginatedApps(2, 5)
       expect(apps2.length).to.eql(2)
 
       expect(apps1).to.not.eql(apps2)
 
-      const allApps = await x2EarnApps.apps(0, 4)
+      const allApps = await x2EarnApps.getPaginatedApps(0, 4)
       expect(allApps).to.eql([...apps1, ...apps2])
     })
 
@@ -300,10 +300,10 @@ describe("X-Apps", function () {
       const count = await x2EarnApps.appCount()
       expect(count).to.eql(4n)
 
-      const apps = await x2EarnApps.apps(0, 4)
+      const apps = await x2EarnApps.getPaginatedApps(0, 4)
       expect(apps.length).to.eql(4)
 
-      await expect(x2EarnApps.apps(4, 4)).to.revertedWithCustomError(x2EarnApps, "X2EarnInvalidStartIndex")
+      await expect(x2EarnApps.getPaginatedApps(4, 4)).to.revertedWithCustomError(x2EarnApps, "X2EarnInvalidStartIndex")
     })
 
     it("Can index up to 1300 apps", async function () {
