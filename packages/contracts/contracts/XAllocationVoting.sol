@@ -122,7 +122,7 @@ contract XAllocationVoting is
     __AccessControl_init();
     __UUPSUpgradeable_init();
 
-    for (uint256 i = 0; i < data.admins.length; i++) {
+    for (uint256 i; i < data.admins.length; i++) {
       _grantRole(DEFAULT_ADMIN_ROLE, data.admins[i]);
     }
 
