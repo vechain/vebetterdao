@@ -74,7 +74,7 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     // cycle => total weighted votes in the cycle
     mapping(uint256 => uint256) cycleToTotal;
     // cycle => voter => total weighted votes for the voter in the cycle
-    mapping(uint256 => mapping(address => uint256)) cycleToVoterToTotal;
+    mapping(uint256 cycle => mapping(address voter => uint256 total)) cycleToVoterToTotal;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.VoterRewards")) - 1)) & ~bytes32(uint256(0xff))
