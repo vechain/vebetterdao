@@ -361,7 +361,7 @@ library GovernorProposalLogic {
 
     // before execute: register governance call in queue.
     if (GovernorGovernanceLogic.executor(self) != contractAddress) {
-      for (uint256 i = 0; i < targets.length; ++i) {
+      for (uint256 i; i < targets.length; ++i) {
         if (targets[i] == address(this)) {
           self.governanceCall.pushBack(keccak256(calldatas[i]));
         }
@@ -747,7 +747,7 @@ library GovernorProposalLogic {
     }
 
     // Parse the 40 characters following the marker as uint160
-    uint160 recovered = 0;
+    uint160 recovered;
     for (uint256 i = len - 40; i < len; ++i) {
       (bool isHex, uint8 value) = tryHexToUint(bytes(description)[i]);
       // If any of the characters is not a hex digit, ignore the suffix entirely
