@@ -26,7 +26,7 @@ export function createLocalConfig() {
         "setDepositThresholdPercentage",
         "setVotingThreshold",
       ],
-      Treasury: ["transferVET"],
+      Treasury: ["transferVET", "transferB3TR"],
       XAllocationVoting: [
         "upgradeToAndCall",
         "updateQuorumNumerator",
