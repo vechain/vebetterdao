@@ -226,6 +226,13 @@ contract X2EarnRewardsPool is
   }
 
   /**
+   * @dev Contract does not accept calls/data.
+   */
+  fallback() external payable {
+    revert("X2EarnRewardsPool: contract does not accept calls/data");
+  }
+
+  /**
    * @dev Transfers of ERC721 tokens to this contract are not allowed.
    *
    * @notice supported only when safeTransferFrom is used

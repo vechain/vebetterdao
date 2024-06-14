@@ -55,6 +55,7 @@ describe("X2EarnRewardsPool", function () {
         x2EarnRewardsPool.initialize(
           await owner.getAddress(),
           await owner.getAddress(),
+          await owner.getAddress(),
           await b3tr.getAddress(),
           await x2EarnApps.getAddress(),
         ),
@@ -208,6 +209,17 @@ describe("X2EarnRewardsPool", function () {
           .connect(owner)
           .safeBatchTransferFrom(owner.address, await x2EarnRewardsPool.getAddress(), [1], [1], "0x"),
       ).to.be.rejected
+    })
+
+    it("should revert when calling fallback function with call data", async function () {
+      const { x2EarnRewardsPool, owner } = await getOrDeployContractInstances({
+        forceDeploy: false,
+      })
+      owner.sendTransaction({
+        to: await x2EarnRewardsPool.getAddress(),
+        value: ethers.parseEther("0"),
+        data: "0x1234", // some data
+      })
     })
   })
 
