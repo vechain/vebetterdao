@@ -1,4 +1,4 @@
-import NewProposalFundAndPublish from "./page"
+import NewProposalSupport from "./page"
 import FormProposalLayout from "../layout"
 import * as store from "@/store"
 import * as router from "next/navigation"
@@ -24,19 +24,18 @@ vi.spyOn(router, "useRouter").mockReturnValue({
   back: mockBack,
 })
 
-vi.spyOn(router, "usePathname").mockImplementation(() => "/proposals/new/form/fund-and-publish")
+vi.spyOn(router, "usePathname").mockImplementation(() => "/proposals/new/form/support")
 const spyOnVot3Balance = vi.spyOn(apiHooks, "useVot3Balance")
 const spyOnThreshold = vi.spyOn(apiHooks, "useDepositThreshold")
 
-const spyOnUseMetadataUpload = vi.spyOn(hooks, "useUploadProposalMetadata")
 const spyOnUseReceipt = vi.spyOn(apiHooks, "useTxReceipt")
 
 const compactFormatter = getCompactFormatter(2)
 
 const vot3Amount = "100"
 const threshold = "1000"
-const mockOnMetadataUpload = vi.fn()
-describe("NewProposalFundAndPublish", async () => {
+
+describe("NewProposalSupport", async () => {
   beforeEach(() => {
     // vi.clearAllMocks()
     mockRouterPush.mockClear()
@@ -55,11 +54,6 @@ describe("NewProposalFundAndPublish", async () => {
     spyOnThreshold.mockReturnValue({
       data: threshold,
       isLoading: false,
-    })
-    spyOnUseMetadataUpload.mockReturnValue({
-      onMetadataUpload: mockOnMetadataUpload.mockReturnValue("123"),
-      metadataUploadError: undefined,
-      metadataUploading: false,
     })
 
     //@ts-ignore
@@ -91,7 +85,7 @@ describe("NewProposalFundAndPublish", async () => {
     })
     render(
       <FormProposalLayout>
-        <NewProposalFundAndPublish />
+        <NewProposalSupport />
       </FormProposalLayout>,
     )
 
@@ -104,11 +98,11 @@ describe("NewProposalFundAndPublish", async () => {
       title: "",
       shortDescription: "Description",
       markdownDescription: "fffd",
-      votingStartRoundId: 1,
+      votingStartRoundId: undefined,
     })
     const page = render(
       <FormProposalLayout>
-        <NewProposalFundAndPublish />
+        <NewProposalSupport />
       </FormProposalLayout>,
     )
     await waitFor(() => expect(mockRouterPush).toHaveBeenCalledWith("/proposals/new"))
@@ -120,11 +114,11 @@ describe("NewProposalFundAndPublish", async () => {
       shortDescription: "",
       markdownDescription: "fffd",
       actions: [],
-      votingStartRoundId: 1,
+      votingStartRoundId: undefined,
     })
     page.rerender(
       <FormProposalLayout>
-        <NewProposalFundAndPublish />
+        <NewProposalSupport />
       </FormProposalLayout>,
     )
     await waitFor(() => expect(mockRouterPush).toHaveBeenCalledWith("/proposals/new"))
@@ -136,26 +130,11 @@ describe("NewProposalFundAndPublish", async () => {
       shortDescription: "fffff",
       markdownDescription: "",
       actions: [],
-      votingStartRoundId: 1,
-    })
-    page.rerender(
-      <FormProposalLayout>
-        <NewProposalFundAndPublish />
-      </FormProposalLayout>,
-    )
-    await waitFor(() => expect(mockRouterPush).toHaveBeenCalledWith("/proposals/new"))
-    mockRouterPush.mockClear()
-
-    //no votingRoundId
-    spyOnUseProposalFormStore.mockReturnValueOnce({
-      title: "ffff",
-      shortDescription: "fff",
-      markdownDescription: "fffd",
       votingStartRoundId: undefined,
     })
     page.rerender(
       <FormProposalLayout>
-        <NewProposalFundAndPublish />
+        <NewProposalSupport />
       </FormProposalLayout>,
     )
     await waitFor(() => expect(mockRouterPush).toHaveBeenCalledWith("/proposals/new"))
@@ -168,22 +147,21 @@ describe("NewProposalFundAndPublish", async () => {
       shortDescription: "fff",
       markdownDescription: "fffd",
       actions: [],
-      votingStartRoundId: 1,
+      votingStartRoundId: undefined,
     })
 
     const x = render(
       <FormProposalLayout>
-        <NewProposalFundAndPublish />
+        <NewProposalSupport />
       </FormProposalLayout>,
     )
 
-    expect(await screen.findAllByText("Support and publish")).toHaveLength(2)
-    await screen.findByText("Would you like to contribute to your proposal with some tokens?")
-    await screen.findByText("You can claim back your tokens once the voting period is over.")
-
+    await screen.findByText("Community support")
     await screen.findByText(
       `Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of ${compactFormatter.format(Number(threshold))} VOT3 to become active. You can also contribute with your own VOT3.`,
     )
+    await screen.findByText("How much VOT3 do you want to lock to fund this proposal?")
+    await screen.findByText("Your VOT3 will be unlocked when the voting session ends.")
 
     await screen.findByText(`Your current VOT3 balance is ${compactFormatter.format(Number(vot3Amount))}`)
     await screen.findByText(`/ ${compactFormatter.format(Number(threshold))}`)
@@ -219,17 +197,17 @@ describe("NewProposalFundAndPublish", async () => {
 
     render(
       <FormProposalLayout>
-        <NewProposalFundAndPublish />
+        <NewProposalSupport />
       </FormProposalLayout>,
     )
 
-    expect(await screen.findAllByText("Support and publish")).toHaveLength(2)
-    await screen.findByText("Would you like to contribute to your proposal with some tokens?")
-    await screen.findByText("You can claim back your tokens once the voting period is over.")
-
+    await screen.findByText("Community support")
     await screen.findByText(
       `Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of NaN VOT3 to become active. You can also contribute with your own VOT3.`,
     )
+    await screen.findByText("How much VOT3 do you want to lock to fund this proposal?")
+
+    await screen.findByText("Your VOT3 will be unlocked when the voting session ends.")
     await screen.findByText(`Your current VOT3 balance is`)
     await screen.findByText(`/ NaN`)
 
@@ -251,7 +229,7 @@ describe("NewProposalFundAndPublish", async () => {
 
     render(
       <FormProposalLayout>
-        <NewProposalFundAndPublish />
+        <NewProposalSupport />
       </FormProposalLayout>,
     )
 
@@ -296,11 +274,12 @@ describe("NewProposalFundAndPublish", async () => {
 
     const x = render(
       <FormProposalLayout>
-        <NewProposalFundAndPublish />
+        <NewProposalSupport />
       </FormProposalLayout>,
     )
 
     const vot3Input = await screen.findByTestId("vot3-amount-input")
+    expect(vot3Input).toHaveValue("0")
 
     const continueButton = await screen.findByTestId("continue")
 
@@ -309,12 +288,7 @@ describe("NewProposalFundAndPublish", async () => {
       const errorMessage = screen.queryByTestId("amount-input-error-message")
       expect(errorMessage).not.toBeInTheDocument()
       expect(mockSetData).toHaveBeenCalledWith({ depositAmount: 0 })
-      expect(mockOnMetadataUpload).toHaveBeenCalledWith({
-        title: "ffff",
-        shortDescription: "fff",
-        markdownDescription: "fffd",
-      })
-      await waitFor(() => expect(mockRouterPush).toHaveBeenCalledWith("/proposals"))
+      expect(mockRouterPush).toHaveBeenCalledWith("/proposals/new/form/preview-and-publish")
     })
   }) // renders correctly - form errors
 })

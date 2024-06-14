@@ -108,7 +108,7 @@ export const PublishAndPreviewPageContent = () => {
         showExplorerButton
       />
 
-      <Card w="full">
+      <Card w="full" data-testid="new-proposal-preview-page">
         <CardBody py={8}>
           <VStack spacing={8} align="flex-start" divider={<Divider />}>
             <Heading size="lg">{t("Check your proposal before publishing")}</Heading>

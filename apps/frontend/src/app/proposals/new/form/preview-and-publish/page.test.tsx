@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest"
-import NewProposalPreviewPage from "./page"
+import NewProposalPreviewAndPublishPage from "./page"
 import { fireEvent, render, screen, waitFor } from "../../../../../../test"
 import * as router from "next/navigation"
 import * as dappKit from "@vechain/dapp-kit-react"
 import * as store from "@/store"
+import * as hooks from "@/hooks"
 import FormProposalLayout from "../layout"
 import { transferAction } from "../../../../../../__mocks__/Actions"
 
@@ -16,11 +17,19 @@ vi.spyOn(router, "useRouter").mockReturnValue({
   back: mockBack,
 })
 
+const mockOnMetadataUpload = vi.fn()
+const spyOnUseMetadataUpload = vi.spyOn(hooks, "useUploadProposalMetadata")
+spyOnUseMetadataUpload.mockReturnValue({
+  onMetadataUpload: mockOnMetadataUpload.mockReturnValue("123"),
+  metadataUploadError: undefined,
+  metadataUploading: false,
+})
+
 vi.spyOn(router, "usePathname").mockImplementation(() => "/proposals/new/form/preview")
 
 const spyOnUseProposalFormStore = vi.spyOn(store, "useProposalFormStore")
 
-describe("NewProposalDiscussion", async () => {
+describe("NewProposalPreviewAndPublish", async () => {
   beforeEach(() => {
     vi.clearAllMocks()
     spyOnUseProposalFormStore.mockClear()
@@ -33,7 +42,7 @@ describe("NewProposalDiscussion", async () => {
     })
     const x = render(
       <FormProposalLayout>
-        <NewProposalPreviewPage />
+        <NewProposalPreviewAndPublishPage />
       </FormProposalLayout>,
     )
 
@@ -50,7 +59,7 @@ describe("NewProposalDiscussion", async () => {
     })
     const component = render(
       <FormProposalLayout>
-        <NewProposalPreviewPage />
+        <NewProposalPreviewAndPublishPage />
       </FormProposalLayout>,
     )
     await waitFor(() => expect(mockRouterPush).toHaveBeenCalledWith("/proposals/new"))
@@ -65,7 +74,7 @@ describe("NewProposalDiscussion", async () => {
 
     component.rerender(
       <FormProposalLayout>
-        <NewProposalPreviewPage />
+        <NewProposalPreviewAndPublishPage />
       </FormProposalLayout>,
     )
     await waitFor(() => expect(mockRouterPush).toHaveBeenCalledWith("/proposals/new"))
@@ -79,7 +88,7 @@ describe("NewProposalDiscussion", async () => {
 
     component.rerender(
       <FormProposalLayout>
-        <NewProposalPreviewPage />
+        <NewProposalPreviewAndPublishPage />
       </FormProposalLayout>,
     )
     await waitFor(() => expect(mockRouterPush).toHaveBeenCalledWith("/proposals/new"))
@@ -96,7 +105,7 @@ describe("NewProposalDiscussion", async () => {
 
     render(
       <FormProposalLayout>
-        <NewProposalPreviewPage />
+        <NewProposalPreviewAndPublishPage />
       </FormProposalLayout>,
     )
     await screen.findByTestId("new-proposal-preview-page")
@@ -114,6 +123,11 @@ describe("NewProposalDiscussion", async () => {
     fireEvent.click(goBack)
     expect(mockBack).toHaveBeenCalled()
     fireEvent.click(continueButton)
+    expect(mockOnMetadataUpload).toHaveBeenCalledWith({
+      title: "Titles",
+      shortDescription: "Short descriptions",
+      markdownDescription: markdown,
+    })
     expect(mockRouterPush).toHaveBeenCalledWith("/proposals/new/form/round")
   }) // should render correctly - no actions
 
@@ -128,7 +142,7 @@ describe("NewProposalDiscussion", async () => {
 
     render(
       <FormProposalLayout>
-        <NewProposalPreviewPage />
+        <NewProposalPreviewAndPublishPage />
       </FormProposalLayout>,
     )
     await screen.findByTestId("new-proposal-preview-page")
@@ -147,6 +161,13 @@ describe("NewProposalDiscussion", async () => {
     fireEvent.click(goBack)
     expect(mockBack).toHaveBeenCalled()
     fireEvent.click(continueButton)
-    expect(mockRouterPush).toHaveBeenCalledWith("/proposals/new/form/round")
+    await waitFor(() => {
+      expect(mockOnMetadataUpload).toHaveBeenCalledWith({
+        title: "Titles",
+        shortDescription: "Short descriptions",
+        markdownDescription: markdown,
+      })
+      expect(mockRouterPush).toHaveBeenCalledWith("/proposals/new/form/round")
+    })
   }) // should render correctly - no actions
 }) // NewProposal

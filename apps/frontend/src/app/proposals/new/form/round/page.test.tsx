@@ -244,7 +244,7 @@ describe("NewProposalRound", async () => {
     fireEvent.click(screen.getAllByTestId("round-radio-card")[0] as Element)
 
     fireEvent.click(continueButton)
-    await waitFor(() => expect(mockRouterPush).toHaveBeenCalledWith("/proposals/new/form/fund-and-publish"))
+    await waitFor(() => expect(mockRouterPush).toHaveBeenCalledWith("/proposals/new/form/support"))
 
     // can not start in next round
     vi.clearAllMocks()
