@@ -21,7 +21,7 @@
 //                                   ##############
 //                                   #########
 
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
@@ -29,7 +29,6 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUp
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/NoncesUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 
@@ -37,7 +36,6 @@ import "@openzeppelin/contracts/utils/math/Math.sol";
 /// @dev Extends ERC20 Fungible Token Standard basic implementation with upgradeability, pausability, ability for gasless transactions and governance capabilities.
 /// @notice This contract governs the issuance and management of VOT3 tokens, which are the tokens used for voting in the VeBetter DAO Ecosystem.
 contract VOT3 is
-  Initializable,
   ERC20Upgradeable,
   ERC20PausableUpgradeable,
   AccessControlUpgradeable,
@@ -89,10 +87,14 @@ contract VOT3 is
     __Nonces_init();
 
     VOT3Storage storage $ = _getVOT3Storage();
+
+    require(_admin != address(0), "VOT3: Admin address cannot be 0");
     // Grant the contract deployer the default admin role and the UPGRADER_ROLE
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     _grantRole(UPGRADER_ROLE, _upgrader);
     _grantRole(PAUSER_ROLE, _pauser);
+
+    require(_b3tr != address(0), "VOT3: B3TR address cannot be 0");
     $.b3tr = IERC20(_b3tr);
   }
 

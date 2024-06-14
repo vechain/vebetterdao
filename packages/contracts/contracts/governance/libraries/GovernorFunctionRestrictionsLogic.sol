@@ -21,7 +21,7 @@
 //                                   ##############
 //                                   #########
 
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
 import { GovernorStorageTypes } from "./GovernorStorageTypes.sol";
 
@@ -58,6 +58,7 @@ library GovernorFunctionRestrictionsLogic {
     bytes4 functionSelector,
     bool isWhitelisted
   ) public {
+    require(target != address(0), "GovernorFunctionRestrictionsLogic: target is the zero address");
     self.whitelistedFunctions[target][functionSelector] = isWhitelisted;
     emit FunctionWhitelisted(target, functionSelector, isWhitelisted);
   }
@@ -76,7 +77,7 @@ library GovernorFunctionRestrictionsLogic {
     bytes4[] memory functionSelectors,
     bool isWhitelisted
   ) external {
-    for (uint256 i = 0; i < functionSelectors.length; i++) {
+    for (uint256 i; i < functionSelectors.length; i++) {
       setWhitelistFunction(self, target, functionSelectors[i], isWhitelisted);
     }
   }
@@ -121,7 +122,7 @@ library GovernorFunctionRestrictionsLogic {
     bytes[] memory calldatas
   ) internal view {
     if (self.isFunctionRestrictionEnabled) {
-      for (uint256 i = 0; i < targets.length; i++) {
+      for (uint256 i; i < targets.length; i++) {
         bytes4 functionSelector = extractFunctionSelector(calldatas[i]);
         if (!self.whitelistedFunctions[targets[i]][functionSelector]) {
           revert GovernorRestrictedFunction(functionSelector);

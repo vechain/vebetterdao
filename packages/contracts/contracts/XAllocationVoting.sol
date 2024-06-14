@@ -21,7 +21,7 @@
 //                                   ##############
 //                                   #########
 
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
 import "./x-allocation-voting-governance/XAllocationVotingGovernor.sol";
 import "./x-allocation-voting-governance/modules/RoundVotesCountingUpgradeable.sol";
@@ -33,7 +33,6 @@ import "./x-allocation-voting-governance/modules/RoundFinalizationUpgradeable.so
 import "./x-allocation-voting-governance/modules/RoundsStorageUpgradeable.sol";
 import "./x-allocation-voting-governance/modules/ExternalContractsUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 /**
@@ -46,7 +45,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  * @dev The contract is using AccessControl to handle roles for admin, governance, and round-starting operations.
  */
 contract XAllocationVoting is
-  Initializable,
   XAllocationVotingGovernor,
   VotingSettingsUpgradeable,
   RoundVotesCountingUpgradeable,
@@ -109,7 +107,11 @@ contract XAllocationVoting is
    * @notice Initialize the contract
    * @param data The initialization data
    */
-  function initialize(InitializationData memory data) external initializer {
+  function initialize(InitializationData memory data) public initializer {
+    require(address(data.vot3Token) != address(0), "XAllocationVoting: invalid VOT3 token address");
+    require(address(data.voterRewards) != address(0), "XAllocationVoting: invalid VoterRewards address");
+    require(address(data.emissions) != address(0), "XAllocationVoting: invalid Emissions address");
+    
     __XAllocationVotingGovernor_init("XAllocationVoting");
     __ExternalContracts_init(data.x2EarnAppsAddress, data.emissions, data.voterRewards);
     __VotingSettings_init(data.initialVotingPeriod);
@@ -122,7 +124,8 @@ contract XAllocationVoting is
     __AccessControl_init();
     __UUPSUpgradeable_init();
 
-    for (uint256 i = 0; i < data.admins.length; i++) {
+    for (uint256 i; i < data.admins.length; i++) {
+      require(data.admins[i] != address(0), "XAllocationVoting: invalid admin address");
       _grantRole(DEFAULT_ADMIN_ROLE, data.admins[i]);
     }
 

@@ -1,11 +1,12 @@
-import { ProposalState, useCurrentProposal } from "@/api"
+import { ProposalState } from "@/api"
 import { timestampToTimeLeftCompact } from "@/utils"
 import { HStack, Text, VStack } from "@chakra-ui/react"
 import { UilClockEight } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
+import { useProposalDetail } from "../../../hooks"
 
 export const ProposalOverviewTime = () => {
-  const { proposal } = useCurrentProposal()
+  const { proposal } = useProposalDetail()
   const { t } = useTranslation()
 
   if (proposal.isStateLoading) return null

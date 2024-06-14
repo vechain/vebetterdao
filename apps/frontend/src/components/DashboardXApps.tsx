@@ -18,12 +18,14 @@ import {
 } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
+import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
 
 type Props = {
   maxApps?: number
 }
 export const DashboardXApps = ({ maxApps = 8 }: Props) => {
+  const { t } = useTranslation()
   const { data: xApps } = useXApps()
 
   const slicedXApps = useMemo(() => xApps?.slice(0, maxApps), [xApps, maxApps])
@@ -34,10 +36,10 @@ export const DashboardXApps = ({ maxApps = 8 }: Props) => {
     <Card>
       <CardHeader>
         <HStack w="full" justify={"space-between"}>
-          <Heading size="md">Explore Apps</Heading>
+          <Heading size="md">{t("Explore Apps")}</Heading>
           {slicedXApps && slicedXApps.length > maxApps && (
             <Button variant="link" colorScheme="blue" rightIcon={<FiArrowUpRight />}>
-              See all
+              {t("See all")}
             </Button>
           )}
         </HStack>
@@ -91,7 +93,7 @@ const DashboardXAppCard = ({ xApp }: { xApp: XApp }) => {
                 aria-label="Go to App"
                 fontSize="20px"
                 disabled={isAppMetadataError}
-                onClick={() => window.open(appMetadata?.external_url, "_blank")}
+                onClick={() => window.open(appMetadata?.external_url, "_blank", "noopener noreferrer")}
                 color={buttonIconColor}
                 icon={<FiArrowUpRight />}
               />

@@ -1,12 +1,13 @@
-import { ProposalState, useCurrentProposal } from "@/api"
+import { ProposalState } from "@/api"
 import { HStack, Image, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
+import { useProposalDetail } from "../../../hooks"
 
 const compactFormatter = getCompactFormatter(2)
 
 export const ProposalOverviewYourSupport = () => {
-  const { proposal } = useCurrentProposal()
+  const { proposal } = useProposalDetail()
   const { t } = useTranslation()
 
   switch (proposal.state) {
@@ -23,7 +24,6 @@ export const ProposalOverviewYourSupport = () => {
             <Text color="#252525" fontWeight={600}>
               {compactFormatter.format(Number(proposal.userSupport))}
             </Text>
-            <Text color="#252525">{t("V3")}</Text>
           </HStack>
         </VStack>
       )

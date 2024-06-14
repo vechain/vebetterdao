@@ -4,7 +4,6 @@ export function createLocalConfig() {
   return defineConfig({
     NEXT_PUBLIC_APP_ENV: "local",
 
-    B3TR_CAP: 1_000_243_154, // Allows for 643 cycles
     B3TR_GOVERNOR_QUORUM_PERCENTAGE: 4, // 4 -> Need 4% of voters to pass
     TIMELOCK_MIN_DELAY: 0, //time to wait before you can execute a queued proposal, 0 for immediate execution
     B3TR_GOVERNOR_DEPOSIT_THRESHOLD: 2, // Percentage of total B3TR supply needed to be deposited to create a proposal

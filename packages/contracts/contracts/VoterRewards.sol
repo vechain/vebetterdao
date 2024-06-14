@@ -21,7 +21,7 @@
 //                                   ##############
 //                                   #########
 
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
@@ -30,7 +30,6 @@ import "./interfaces/IB3TRGovernor.sol";
 import "./interfaces/IXAllocationVotingGovernor.sol";
 import "./interfaces/IEmissions.sol";
 import "./interfaces/IB3TR.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 /**
@@ -44,7 +43,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  * - upgradeable using UUPSUpgradeable.
  * - using AccessControl to handle the admin and upgrader roles.
  * - using ReentrancyGuard to prevent reentrancy attacks.
- * - using Initializable to initialize the contract.
  * - following the ERC-7201 standard for storage layout.
  *
  * Roles:
@@ -53,7 +51,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  * - VOTE_REGISTRAR_ROLE: The role that can register votes for rewards calculation.
  * - CONTRACTS_ADDRESS_MANAGER_ROLE: The role that can set the addresses of the contracts used by the VoterRewards contract.
  */
-contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
+contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
   /// @notice The role that can register votes for rewards calculation.
   bytes32 public constant VOTE_REGISTRAR_ROLE = keccak256("VOTE_REGISTRAR_ROLE");
 
@@ -76,7 +74,7 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
     // cycle => total weighted votes in the cycle
     mapping(uint256 => uint256) cycleToTotal;
     // cycle => voter => total weighted votes for the voter in the cycle
-    mapping(uint256 => mapping(address => uint256)) cycleToVoterToTotal;
+    mapping(uint256 cycle => mapping(address voter => uint256 total)) cycleToVoterToTotal;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.VoterRewards")) - 1)) & ~bytes32(uint256(0xff))
@@ -160,10 +158,11 @@ contract VoterRewards is Initializable, AccessControlUpgradeable, ReentrancyGuar
     $.emissions = IEmissions(_emissions);
 
     // Set the level to multiplier mapping.
-    for (uint256 i = 0; i < levels.length; i++) {
+    for (uint256 i; i < levels.length; i++) {
       $.levelToMultiplier[levels[i]] = multipliers[i];
     }
 
+    require(admin != address(0), "VoterRewards: admin cannot be the zero address");
     _grantRole(DEFAULT_ADMIN_ROLE, admin);
     _grantRole(UPGRADER_ROLE, upgrader);
     _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, contractsAddressManager);
