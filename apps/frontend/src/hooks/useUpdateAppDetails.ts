@@ -1,4 +1,4 @@
-import { getXAppMetadataQueryKey, getXAppsQueryKey } from "@/api"
+import { getXAppsQueryKey } from "@/api"
 import { useQueryClient } from "@tanstack/react-query"
 import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
@@ -73,16 +73,10 @@ export const useUpdateAppDetails = ({
       await queryClient.refetchQueries({
         queryKey: getXAppsQueryKey(),
       })
-      await queryClient.cancelQueries({
-        queryKey: getXAppMetadataQueryKey(appId),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getXAppMetadataQueryKey(appId),
-      })
     }
 
     onSuccess?.()
-  }, [invalidateCache, queryClient, onSuccess, appId])
+  }, [invalidateCache, queryClient, onSuccess])
 
   const result = useSendTransaction({
     signerAccount: account,

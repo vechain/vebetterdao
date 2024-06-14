@@ -6,8 +6,8 @@ import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
-const AppEditPageContent = dynamic(
-  () => import("./components/AppEditPageContent").then(mod => mod.AppEditPageContent),
+const EditAppPageContent = dynamic(
+  () => import("./components/EditAppPageContent").then(mod => mod.EditAppPageContent),
   {
     ssr: false,
     loading: () => (
@@ -30,7 +30,7 @@ export default function AppEdit({ params }: Readonly<Props>) {
 
   return (
     <MotionVStack w="full">
-      <AppEditPageContent />
+      <EditAppPageContent />
     </MotionVStack>
   )
 }

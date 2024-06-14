@@ -1,6 +1,4 @@
-import { useAppModerators, useXApp } from "@/api"
 import { Button, Card, CardBody, Flex, HStack, Heading, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
-import { useParams } from "next/navigation"
 import { notFoundImage } from "@/constants"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
@@ -10,21 +8,15 @@ import { useCallback } from "react"
 import { AppDetailSocials } from "./components/AppDetailSocials"
 import { AppDetailAllocationInfo } from "./components/AppDetailAllocationInfo"
 import { EditAppPageButton } from "./components/EditAppPageButton"
-import { useCurrentAppAdmin, useCurrentAppBanner, useCurrentAppLogo, useCurrentAppMetadata } from "../../hooks"
+import { useCurrentAppBanner, useCurrentAppLogo, useCurrentAppMetadata } from "../../hooks"
+import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 
 export const AppDetailOverview = () => {
-  const { appId } = useParams<{ appId: string }>()
   const { t } = useTranslation()
-  const { data: xApp } = useXApp(appId)
+  const { app } = useCurrentAppInfo()
   const { appMetadata, appMetadataLoading, appMetadataError } = useCurrentAppMetadata()
   const { logo, isLogoLoading } = useCurrentAppLogo()
   const { banner, isBannerLoading } = useCurrentAppBanner()
-  const { admin } = useCurrentAppAdmin()
-  const { data } = useAppModerators(appId)
-  console.log("appMetadata", appMetadata)
-  console.log("xApp", xApp)
-  console.log("admin", admin)
-  console.log("moderators", data)
 
   const goToWebsite = useCallback(() => {
     if (appMetadata?.external_url) {
@@ -74,7 +66,7 @@ export const AppDetailOverview = () => {
                       {t("Receiver address")}
                     </Text>
                     <Text fontSize={"16px"} fontWeight={400}>
-                      {humanAddress(xApp?.receiverAddress || "", 4, 6)}
+                      {humanAddress(app?.receiverAddress || "", 4, 6)}
                     </Text>
                   </VStack>
                   <VStack>
@@ -82,7 +74,7 @@ export const AppDetailOverview = () => {
                       {t("Member since")}
                     </Text>
                     <Text fontSize={"16px"} fontWeight={400}>
-                      {dayjs((xApp?.createdAtTimestamp || 0) * 1000).format("D MMM, YYYY")}
+                      {dayjs((app?.createdAtTimestamp || 0) * 1000).format("D MMM, YYYY")}
                     </Text>
                   </VStack>
                 </HStack>

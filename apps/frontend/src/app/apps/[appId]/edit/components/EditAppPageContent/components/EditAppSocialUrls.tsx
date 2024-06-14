@@ -1,8 +1,9 @@
 import { FormControl, FormErrorMessage, Input, InputGroup, InputLeftElement, Text, VStack } from "@chakra-ui/react"
 import { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { RiDiscordFill, RiMediumFill, RiTelegramFill, RiTwitterXFill, RiYoutubeFill } from "react-icons/ri"
-import { EditAppForm } from "./AppEditPageContent"
+import { RiTwitterXFill } from "react-icons/ri"
+import { FaDiscord, FaMedium, FaTelegram, FaYoutube } from "react-icons/fa6"
+import { EditAppForm } from ".."
 import { useCurrentAppMetadata } from "@/app/apps/[appId]/hooks"
 import { useMemo } from "react"
 import { URL_REGEX } from "@/constants"
@@ -15,7 +16,7 @@ const findUrlByName = (urls: { name: string; url: string }[] | undefined, name: 
   return urls?.find(url => url.name === name)?.url || ""
 }
 
-export const EditAppSocialMediaUrls = ({ form }: Props) => {
+export const EditAppSocialUrls = ({ form }: Props) => {
   const { t } = useTranslation()
   const {
     register,
@@ -25,7 +26,7 @@ export const EditAppSocialMediaUrls = ({ form }: Props) => {
   const twitterUrl = findUrlByName(appMetadata?.social_urls, "Twitter")
   const discordUrl = findUrlByName(appMetadata?.social_urls, "Discord")
   const telegramUrl = findUrlByName(appMetadata?.social_urls, "Telegram")
-  const youtubeUrl = findUrlByName(appMetadata?.social_urls, "YouTube")
+  const youtubeUrl = findUrlByName(appMetadata?.social_urls, "Youtube")
   const mediumUrl = findUrlByName(appMetadata?.social_urls, "Medium")
 
   const inputData = useMemo(() => {
@@ -42,28 +43,28 @@ export const EditAppSocialMediaUrls = ({ form }: Props) => {
         url: discordUrl,
         error: errors.discordUrl,
         placeholder: t(`Add your discord link`),
-        icon: <RiDiscordFill color="#7289DA" />,
+        icon: <FaDiscord color="#7289DA" />,
       },
       {
         inputKey: "telegramUrl",
         url: telegramUrl,
         error: errors.telegramUrl,
         placeholder: t(`Add your telegram link`),
-        icon: <RiTelegramFill color="#0088CC" />,
+        icon: <FaTelegram color="#0088CC" />,
       },
       {
         inputKey: "youtubeUrl",
         url: youtubeUrl,
         error: errors.youtubeUrl,
         placeholder: t(`Add your youtube link`),
-        icon: <RiYoutubeFill color="#FF0000" />,
+        icon: <FaYoutube color="#FF0000" />,
       },
       {
         inputKey: "mediumUrl",
         url: mediumUrl,
         error: errors.mediumUrl,
         placeholder: t(`Add your medium link`),
-        icon: <RiMediumFill />,
+        icon: <FaMedium />,
       },
     ]
   }, [

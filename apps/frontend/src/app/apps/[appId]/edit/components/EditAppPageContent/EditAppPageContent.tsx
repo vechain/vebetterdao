@@ -16,14 +16,18 @@ import { useTranslation } from "react-i18next"
 import { useForm } from "react-hook-form"
 import { useCallback } from "react"
 import { UilCheck } from "@iconscout/react-unicons"
-import { EditAppSocialMediaUrls } from "./EditAppSocialMediaUrls"
-import { EditScreenshots } from "./EditScreenshots"
+import { EditAppSocialUrls } from "./components/EditAppSocialUrls"
+import { EditScreenshots } from "./components/EditScreenshots"
 import { useParams, useRouter } from "next/navigation"
-import { EditAppLogo } from "./EditAppLogo"
-import { useCurrentAppBanner, useCurrentAppLogo, useCurrentAppMetadata } from "../../hooks"
-import { EditAppBanner } from "./EditAppBanner"
+import { EditAppLogo } from "./components/EditAppLogo"
+import { useCurrentAppBanner, useCurrentAppLogo, useCurrentAppMetadata } from "../../../hooks"
+import { EditAppBanner } from "./components/EditAppBanner"
 import { useUpdateAppDetails, useUploadAppMetadata } from "@/hooks"
 import { TransactionModal } from "@/components/TransactionModal"
+import { useCurrentAppScreenshots } from "../../../hooks/useCurrentAppScreenshots"
+import { useQueryClient } from "@tanstack/react-query"
+import { getXAppMetadataQueryKey } from "@/api"
+import { useCurrentAppInfo } from "../../../hooks/useCurrentAppInfo"
 
 export type EditAppForm = {
   name: string
@@ -39,15 +43,17 @@ export type EditAppForm = {
   bannerImage: string
 }
 
-export const AppEditPageContent = () => {
+export const EditAppPageContent = () => {
   const { t } = useTranslation()
   const { appMetadata } = useCurrentAppMetadata()
   const { logo } = useCurrentAppLogo()
   const { banner } = useCurrentAppBanner()
+  const { screenshots } = useCurrentAppScreenshots()
+  const { app } = useCurrentAppInfo()
 
   const form = useForm<EditAppForm>({
     defaultValues: {
-      screenshots: appMetadata?.screenshots,
+      screenshots: screenshots,
       logoImage: logo,
       bannerImage: banner,
     },
@@ -60,24 +66,66 @@ export const AppEditPageContent = () => {
 
   const { appId } = useParams()
   const router = useRouter()
+
   const goBack = useCallback(() => {
     router.push(`/apps/${appId}`)
   }, [appId, router])
+
   const { onMetadataUpload, metadataUploadError, metadataUploading } = useUploadAppMetadata()
+
+  const queryClient = useQueryClient()
 
   const updateAppMetadataMutation = useUpdateAppDetails({
     appId: appId as string,
-    onSuccess: () => {
+    onSuccess: async () => {
+      await queryClient.cancelQueries({
+        queryKey: getXAppMetadataQueryKey(app?.metadataURI),
+      })
+      await queryClient.refetchQueries({
+        queryKey: getXAppMetadataQueryKey(app?.metadataURI),
+      })
       updateAppMetadataMutation.resetStatus()
-      // goBack()
+      goBack()
     },
   })
   const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
 
   const onSubmit = useCallback(
     async (data: EditAppForm) => {
-      console.log(data)
+      updateAppMetadataMutation.resetStatus()
       onConfirmationOpen()
+
+      const socialUrls = []
+      if (data.twitterUrl) {
+        socialUrls.push({
+          name: "Twitter",
+          url: data.twitterUrl,
+        })
+      }
+      if (data.discordUrl) {
+        socialUrls.push({
+          name: "Discord",
+          url: data.discordUrl,
+        })
+      }
+      if (data.telegramUrl) {
+        socialUrls.push({
+          name: "Telegram",
+          url: data.telegramUrl,
+        })
+      }
+      if (data.youtubeUrl) {
+        socialUrls.push({
+          name: "Youtube",
+          url: data.youtubeUrl,
+        })
+      }
+      if (data.mediumUrl) {
+        socialUrls.push({
+          name: "Medium",
+          url: data.mediumUrl,
+        })
+      }
 
       const metadataUri = await onMetadataUpload({
         name: data.name,
@@ -86,36 +134,33 @@ export const AppEditPageContent = () => {
         banner: data.bannerImage,
         external_url: data.external_url,
         screenshots: data.screenshots ?? [],
-        app_urls: [], // add app urls
-        social_urls: [],
+        app_urls: [],
+        social_urls: socialUrls,
       })
       if (!metadataUri) return
-      console.log("metadataUri", metadataUri)
 
-      // TODO: add receiver address
-      // updateAppMetadataMutation.sendTransaction({
-      //   metadataUri,
-      //   ...(compareAddresses(data.receiverAddress, appData?.receiverAddress)
-      //     ? {}
-      //     : { receiverAddress: data.receiverAddress }),
-      // })
       updateAppMetadataMutation.sendTransaction({
         metadataUri,
       })
     },
     [onConfirmationOpen, onMetadataUpload, updateAppMetadataMutation],
   )
-  const onTryAgain = useCallback(() => {
-    updateAppMetadataMutation.resetStatus()
+
+  const handleClose = useCallback(() => {
     onConfirmationClose()
+    updateAppMetadataMutation.resetStatus()
+  }, [onConfirmationClose, updateAppMetadataMutation])
+
+  const onTryAgain = useCallback(() => {
+    handleClose()
     handleSubmit(onSubmit)()
-  }, [onConfirmationClose, updateAppMetadataMutation, handleSubmit, onSubmit])
+  }, [handleClose, handleSubmit, onSubmit])
 
   return (
     <>
       <TransactionModal
         isOpen={isConfirmationOpen}
-        onClose={onConfirmationClose}
+        onClose={handleClose}
         confirmationTitle="Update App details"
         successTitle="App details updated!"
         status={
@@ -199,7 +244,7 @@ export const AppEditPageContent = () => {
               <FormErrorMessage fontSize={"12px"}>{errors?.description?.message || ""}</FormErrorMessage>
             </FormControl>
           </VStack>
-          <EditAppSocialMediaUrls form={form} />
+          <EditAppSocialUrls form={form} />
         </Stack>
         <Divider />
         <EditScreenshots form={form} />

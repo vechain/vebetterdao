@@ -3,7 +3,7 @@ import { Controller, UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { ChangeEvent, useCallback, useRef } from "react"
 import { UilTrash, UilUpload } from "@iconscout/react-unicons"
-import { EditAppForm } from "./AppEditPageContent"
+import { EditAppForm } from ".."
 import { imageListCompression } from "@/utils/imageListCompression"
 import { blobToBase64 } from "@/utils/BlobUtils"
 
