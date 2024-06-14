@@ -27,6 +27,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import "./interfaces/IB3TR.sol";
 import "./interfaces/IXAllocationVotingGovernor.sol";
+import "./interfaces/B£
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 /// @title Emissions Distribution Contract
@@ -612,8 +613,6 @@ contract Emissions is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPS
   function setCycleDuration(uint256 _cycleDuration) public onlyRole(DECAY_SETTINGS_MANAGER_ROLE) {
     require(_cycleDuration > 0, "Emissions: Cycle duration must be greater than 0");
     EmissionsStorage storage $ = _getEmissionsStorage();
-
-    require(_cycleDuration > 0, "Emissions: Cycle duration must be greater than 0");
     require(
       IXAllocationVotingGovernor($.xAllocationsGovernor).votingPeriod() < _cycleDuration,
       "Emissions: Voting period must be less than cycle duration"
