@@ -45,12 +45,7 @@ import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
  * and the x2EarnApps contract to check app existence and the app's team wallet address.
  * The contract is using AccessControl to handle roles for upgrading the contract and external contract addresses.
  */
-contract XAllocationPool is
-  IXAllocationPool,
-  AccessControlUpgradeable,
-  ReentrancyGuardUpgradeable,
-  UUPSUpgradeable
-{
+contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
   uint256 public constant PERCENTAGE_PRECISION_SCALING_FACTOR = 1e4;
   /// @notice The role that can upgrade the contract.
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
@@ -402,7 +397,6 @@ contract XAllocationPool is
     (uint256 appShare, uint256 unallocatedShare) = getAppShares(lastSucceededRoundId, appId);
     uint256 baseAllocationPerApp = baseAllocationAmount(roundId);
     uint256 variableAllocationForApp = _rewardAmount(roundId, appShare);
-    uint256 unallocatedAmount;
     if (unallocatedShare > 0) {
       unallocatedAmount = _rewardAmount(roundId, unallocatedShare);
     }
