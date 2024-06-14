@@ -53,6 +53,7 @@ export const PublishAndPreviewPageContent = () => {
 
     const isSomeCalldataEmpty = actions.some(action => !action.calldata)
     if (isSomeCalldataEmpty) throw new Error("Missing calldata for some actions")
+
     createProposalMutation.sendTransaction({
       actions: actions.map(action => ({
         contractAddress: action.contractAddress,
@@ -143,7 +144,7 @@ export const PublishAndPreviewPageContent = () => {
 
             <VStack spacing={4} align="flex-start" w="full">
               <Heading size="md">{t("Community support")}</Heading>
-              {depositAmount && threshold && (
+              {depositAmount !== undefined && threshold && (
                 <ProposalSupportProgressChart
                   isDepositThresholdReached={isDepositReached}
                   isFailedDueToDeposit={false}

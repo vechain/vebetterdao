@@ -28,8 +28,6 @@ vi.spyOn(router, "usePathname").mockImplementation(() => "/proposals/new/form/su
 const spyOnVot3Balance = vi.spyOn(apiHooks, "useVot3Balance")
 const spyOnThreshold = vi.spyOn(apiHooks, "useDepositThreshold")
 
-const spyOnUseReceipt = vi.spyOn(apiHooks, "useTxReceipt")
-
 const compactFormatter = getCompactFormatter(2)
 
 const vot3Amount = "100"
@@ -53,27 +51,6 @@ describe("NewProposalSupport", async () => {
     //@ts-ignore
     spyOnThreshold.mockReturnValue({
       data: threshold,
-      isLoading: false,
-    })
-
-    //@ts-ignore
-    spyOnUseReceipt.mockReturnValue({
-      //@ts-ignore
-      data: {
-        reverted: false,
-        gasUsed: 1000,
-        gasPayer: "0x123",
-        paid: "100",
-        reward: "100",
-        outputs: [],
-        meta: {
-          blockID: "123",
-          blockNumber: 1,
-          blockTimestamp: 1,
-          txID: "123",
-          txOrigin: "0x123",
-        },
-      },
       isLoading: false,
     })
   })

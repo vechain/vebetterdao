@@ -120,6 +120,7 @@ export const TransactionModal = ({
 
   return (
     <Modal
+      data-testid="transaction-modal"
       isOpen={isOpen}
       onClose={onClose}
       trapFocus={false}

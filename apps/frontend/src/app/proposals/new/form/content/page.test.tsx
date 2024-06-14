@@ -23,7 +23,7 @@ describe("NewProposalContent", async () => {
     vi.spyOn(dappKit, "useWallet").mockReturnValueOnce({
       account: null,
     })
-    const x = render(
+    render(
       <FormProposalLayout>
         <NewproposalContentPage />
       </FormProposalLayout>,

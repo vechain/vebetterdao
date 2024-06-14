@@ -5,6 +5,7 @@ import * as router from "next/navigation"
 import * as dappKit from "@vechain/dapp-kit-react"
 import * as store from "@/store"
 import * as hooks from "@/hooks"
+import * as apiHooks from "@/api"
 import FormProposalLayout from "../layout"
 import { transferAction } from "../../../../../../__mocks__/Actions"
 
@@ -19,28 +20,57 @@ vi.spyOn(router, "useRouter").mockReturnValue({
 
 const mockOnMetadataUpload = vi.fn()
 const spyOnUseMetadataUpload = vi.spyOn(hooks, "useUploadProposalMetadata")
-spyOnUseMetadataUpload.mockReturnValue({
-  onMetadataUpload: mockOnMetadataUpload.mockReturnValue("123"),
-  metadataUploadError: undefined,
-  metadataUploading: false,
-})
 
 vi.spyOn(router, "usePathname").mockImplementation(() => "/proposals/new/form/preview-and-publish")
 
 const spyOnUseProposalFormStore = vi.spyOn(store, "useProposalFormStore")
+const spyOnuseCreateProposal = vi.spyOn(hooks, "useCreateProposal")
+
+const mockSendTransaction = vi.fn()
+
+const threshold = "1000"
+
+const spyOnThreshold = vi.spyOn(apiHooks, "useDepositThreshold")
 
 describe("NewProposalPreviewAndPublish", async () => {
   beforeEach(() => {
     vi.clearAllMocks()
     spyOnUseProposalFormStore.mockClear()
-  })
+
+    spyOnUseMetadataUpload.mockReturnValue({
+      onMetadataUpload: mockOnMetadataUpload.mockReturnValue("123"),
+      metadataUploadError: undefined,
+      metadataUploading: false,
+    })
+
+    //@ts-ignore
+    spyOnThreshold.mockReturnValue({
+      data: threshold,
+      isLoading: false,
+    })
+
+    //@ts-ignore
+    spyOnuseCreateProposal.mockReturnValue({
+      isTxReceiptLoading: false,
+      txReceipt: null,
+      txReceiptError: null,
+      sendTransaction: mockSendTransaction,
+      sendTransactionError: null,
+      sendTransactionPending: false,
+      sendTransactionTx: null,
+      resetStatus: vi.fn(),
+      status: "pending",
+      error: undefined,
+    })
+  }) // beforeEach
 
   it("redirects to /proposals if no account connected", async () => {
     //@ts-ignore
     vi.spyOn(dappKit, "useWallet").mockReturnValueOnce({
       account: null,
     })
-    const x = render(
+
+    render(
       <FormProposalLayout>
         <NewProposalPreviewAndPublishPage />
       </FormProposalLayout>,
@@ -142,7 +172,7 @@ describe("NewProposalPreviewAndPublish", async () => {
     spyOnUseProposalFormStore.mockClear()
   }) // redirects to /proposals/new if one of the required fields is not available
 
-  it("should render correctly - no actions", async () => {
+  it("should render correctly - no actions - sendTransaction called with the correct data", async () => {
     const markdown = "Markdown test placeholder"
     spyOnUseProposalFormStore.mockReturnValue({
       title: "Titles",
@@ -158,6 +188,7 @@ describe("NewProposalPreviewAndPublish", async () => {
         <NewProposalPreviewAndPublishPage />
       </FormProposalLayout>,
     )
+    await vi.dynamicImportSettled()
     await screen.findByTestId("new-proposal-preview-page")
     await screen.findByText("Check your proposal before publishing")
 
@@ -165,6 +196,10 @@ describe("NewProposalPreviewAndPublish", async () => {
     expect(screen.queryByTestId("proposal-title-input")).not.toBeInTheDocument()
     expect(screen.queryByTestId("proposal-description-input")).not.toBeInTheDocument()
     expect(screen.queryByTestId("new-proposal-form")).not.toBeInTheDocument()
+    expect(screen.queryByTestId("transaction-modal")).not.toBeInTheDocument()
+
+    expect(screen.queryByTestId("proposal-support-progress-chart")).toBeInTheDocument()
+    expect(screen.queryByTestId("round-radio-card")).toBeInTheDocument()
 
     await screen.findByText(markdown)
 
@@ -173,21 +208,32 @@ describe("NewProposalPreviewAndPublish", async () => {
     fireEvent.click(goBack)
     expect(mockBack).toHaveBeenCalled()
     fireEvent.click(publishButton)
-    expect(mockOnMetadataUpload).toHaveBeenCalledWith({
-      title: "Titles",
-      shortDescription: "Short descriptions",
-      markdownDescription: markdown,
+
+    await waitFor(() => {
+      expect(mockOnMetadataUpload).toHaveBeenCalledWith({
+        title: "Titles",
+        shortDescription: "Short descriptions",
+        markdownDescription: markdown,
+      })
+      expect(mockSendTransaction).toHaveBeenCalledWith({
+        actions: [],
+        description: "123",
+        startRoundId: 1,
+        depositAmount: "0",
+      })
+      //   expect(screen.queryByTestId("transaction-modal")).toBeInTheDocument()
     })
-    expect(mockRouterPush).toHaveBeenCalledWith("/proposals/new/form/round")
   }) // should render correctly - no actions
 
-  it("should render correctly - actions", async () => {
+  it("should render correctly - actions - sendTransaction called with correct data", async () => {
     const markdown = "Markdown test placeholder"
     spyOnUseProposalFormStore.mockReturnValue({
       title: "Titles",
       shortDescription: "Short descriptions",
       markdownDescription: markdown,
       actions: [transferAction],
+      votingStartRoundId: 1,
+      depositAmount: 0,
     })
 
     render(
@@ -195,6 +241,7 @@ describe("NewProposalPreviewAndPublish", async () => {
         <NewProposalPreviewAndPublishPage />
       </FormProposalLayout>,
     )
+    await vi.dynamicImportSettled()
     await screen.findByTestId("new-proposal-preview-page")
     await screen.findByText("Check your proposal before publishing")
 
@@ -204,6 +251,10 @@ describe("NewProposalPreviewAndPublish", async () => {
     expect(screen.queryByTestId("new-proposal-form")).toBeInTheDocument()
     expect(screen.queryByTestId("proposal-actions-container")).toBeInTheDocument()
 
+    expect(screen.queryByTestId("transaction-modal")).not.toBeInTheDocument()
+    expect(screen.queryByTestId("proposal-support-progress-chart")).toBeInTheDocument()
+    expect(screen.queryByTestId("round-radio-card")).toBeInTheDocument()
+
     await screen.findByText(markdown)
 
     const goBack = await screen.findByTestId("go-back")
@@ -211,13 +262,24 @@ describe("NewProposalPreviewAndPublish", async () => {
     fireEvent.click(goBack)
     expect(mockBack).toHaveBeenCalled()
     fireEvent.click(publishButton)
+
     await waitFor(() => {
       expect(mockOnMetadataUpload).toHaveBeenCalledWith({
         title: "Titles",
         shortDescription: "Short descriptions",
         markdownDescription: markdown,
       })
-      expect(mockRouterPush).toHaveBeenCalledWith("/proposals/new/form/round")
+      expect(mockSendTransaction).toHaveBeenCalledWith({
+        actions: [transferAction].map(action => ({
+          contractAddress: action.contractAddress,
+          calldata: action.calldata as string,
+        })),
+        description: "123",
+        startRoundId: 1,
+        depositAmount: "0",
+      })
+
+      //   expect(screen.queryByTestId("transaction-modal")).toBeInTheDocument()
     })
   }) // should render correctly - no actions
 }) // NewProposal
