@@ -186,7 +186,7 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
     AdministrationStorage storage $ = _getAdministrationStorage();
 
     address[] storage distributors = $._rewardDistributors[appId];
-    for (uint256 i = 0; i < distributors.length; i++) {
+    for (uint256 i; i < distributors.length; i++) {
       if (distributors[i] == distributor) {
         distributors[i] = distributors[distributors.length - 1];
         distributors.pop();
@@ -356,7 +356,7 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
     AdministrationStorage storage $ = _getAdministrationStorage();
 
     address[] memory distributors = $._rewardDistributors[appId];
-    for (uint256 i = 0; i < distributors.length; i++) {
+    for (uint256 i; i < distributors.length; i++) {
       if (distributors[i] == account) {
         return true;
       }
