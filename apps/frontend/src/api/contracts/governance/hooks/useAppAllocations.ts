@@ -2,6 +2,12 @@ import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useAllocationPoolEvents } from "../../xAllocationPool"
 import { ethers } from "ethers"
 
+/**
+ * Fetches all allocation pool events
+ * @param {Connex.Thor} thor
+ * @returns {Promise<{ claimedRewards: AllocationRewardsClaimed[] >}
+ */
+
 export const useAppAllocations = (appId: string) => {
   const { data, error, isLoading } = useAllocationPoolEvents()
   const appAllocations =

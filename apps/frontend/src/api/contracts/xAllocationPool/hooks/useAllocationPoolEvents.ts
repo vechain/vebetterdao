@@ -17,6 +17,12 @@ export type AllocationRewardsClaimed = {
   rewardsAllocationAmount: string
 }
 
+/**
+ * Fetches all allocation pool events
+ * @param {Connex.Thor} thor
+ * @returns {Promise<{ claimedRewards: AllocationRewardsClaimed[] >}
+ */
+
 export const getAllocationPoolEvents = async (thor: Connex.Thor) => {
   const allocationRewardsClaimedAbi = XAllocationPoolJson.abi.find(abi => abi.name === "AllocationRewardsClaimed")
   if (!allocationRewardsClaimedAbi) throw new Error("AllocationRewardsClaimed event not found")
@@ -62,6 +68,10 @@ export const getAllocationPoolEvents = async (thor: Connex.Thor) => {
 
 export const getAllocationPoolEventsQueryKey = () => ["useAllocationPoolEvents"]
 
+/**
+ * Fetches all allocation pool events
+ * @returns {QueryObserverResult<{ claimedRewards: AllocationRewardsClaimed[] >}
+ */
 export const useAllocationPoolEvents = () => {
   const { thor } = useConnex()
 
