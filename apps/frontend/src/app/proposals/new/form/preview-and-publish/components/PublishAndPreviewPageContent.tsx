@@ -3,7 +3,7 @@
 import { Button, Card, CardBody, Divider, HStack, Heading, VStack, useDisclosure } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import MarkdownPreview from "@uiw/react-markdown-preview"
-import { useProposalFormStore } from "@/store/useProposalFormStore"
+import { useProposalFormStore } from "@/store"
 import { NewProposalForm } from "../../functions/details/components/NewProposalForm"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
@@ -157,10 +157,16 @@ export const PublishAndPreviewPageContent = () => {
             </VStack>
 
             <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
-              <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
+              <Button
+                data-testid="go-back"
+                rounded="full"
+                variant={"primarySubtle"}
+                colorScheme="primary"
+                size="lg"
+                onClick={goBack}>
                 {t("Go back")}
               </Button>
-              <Button rounded="full" colorScheme="primary" size="lg" onClick={onSubmit}>
+              <Button data-testid="publish" rounded="full" colorScheme="primary" size="lg" onClick={onSubmit}>
                 {t("Publish")}
               </Button>
             </HStack>

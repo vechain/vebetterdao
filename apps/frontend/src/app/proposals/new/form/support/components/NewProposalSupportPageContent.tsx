@@ -17,7 +17,7 @@ import {
 } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
-import { useProposalFormStore } from "@/store/useProposalFormStore"
+import { useProposalFormStore } from "@/store"
 import { VOT3Icon } from "@/components"
 import { useDepositThreshold, useVot3Balance } from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"

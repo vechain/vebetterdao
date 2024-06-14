@@ -25,7 +25,7 @@ spyOnUseMetadataUpload.mockReturnValue({
   metadataUploading: false,
 })
 
-vi.spyOn(router, "usePathname").mockImplementation(() => "/proposals/new/form/preview")
+vi.spyOn(router, "usePathname").mockImplementation(() => "/proposals/new/form/preview-and-publish")
 
 const spyOnUseProposalFormStore = vi.spyOn(store, "useProposalFormStore")
 
@@ -56,6 +56,8 @@ describe("NewProposalPreviewAndPublish", async () => {
       title: "",
       shortDescription: "Description",
       markdownDescription: "fffd",
+      votingStartRoundId: 1,
+      depositAmount: 0,
     })
     const component = render(
       <FormProposalLayout>
@@ -65,11 +67,33 @@ describe("NewProposalPreviewAndPublish", async () => {
     await waitFor(() => expect(mockRouterPush).toHaveBeenCalledWith("/proposals/new"))
     mockRouterPush.mockClear()
 
+    //no short
     spyOnUseProposalFormStore.mockClear()
     spyOnUseProposalFormStore.mockReturnValueOnce({
       title: "Title",
       shortDescription: "",
       markdownDescription: "fffd",
+      votingStartRoundId: 1,
+      depositAmount: 0,
+    })
+
+    component.rerender(
+      <FormProposalLayout>
+        <NewProposalPreviewAndPublishPage />
+      </FormProposalLayout>,
+    )
+
+    await waitFor(() => expect(mockRouterPush).toHaveBeenCalledWith("/proposals/new"))
+    mockRouterPush.mockClear()
+    spyOnUseProposalFormStore.mockClear()
+
+    //no markdown
+    spyOnUseProposalFormStore.mockReturnValueOnce({
+      title: "Title",
+      shortDescription: "shortDescription",
+      markdownDescription: "",
+      votingStartRoundId: 1,
+      depositAmount: 0,
     })
 
     component.rerender(
@@ -80,10 +104,14 @@ describe("NewProposalPreviewAndPublish", async () => {
     await waitFor(() => expect(mockRouterPush).toHaveBeenCalledWith("/proposals/new"))
     mockRouterPush.mockClear()
     spyOnUseProposalFormStore.mockClear()
+
+    //no votingStartRoundId
     spyOnUseProposalFormStore.mockReturnValueOnce({
       title: "Title",
       shortDescription: "shortDescription",
       markdownDescription: "",
+      votingStartRoundId: undefined,
+      depositAmount: 0,
     })
 
     component.rerender(
@@ -92,6 +120,26 @@ describe("NewProposalPreviewAndPublish", async () => {
       </FormProposalLayout>,
     )
     await waitFor(() => expect(mockRouterPush).toHaveBeenCalledWith("/proposals/new"))
+    mockRouterPush.mockClear()
+    spyOnUseProposalFormStore.mockClear()
+
+    //no depositAmount
+    spyOnUseProposalFormStore.mockReturnValueOnce({
+      title: "Title",
+      shortDescription: "shortDescription",
+      markdownDescription: "",
+      votingStartRoundId: 1,
+      depositAmount: undefined,
+    })
+
+    component.rerender(
+      <FormProposalLayout>
+        <NewProposalPreviewAndPublishPage />
+      </FormProposalLayout>,
+    )
+    await waitFor(() => expect(mockRouterPush).toHaveBeenCalledWith("/proposals/new"))
+    mockRouterPush.mockClear()
+    spyOnUseProposalFormStore.mockClear()
   }) // redirects to /proposals/new if one of the required fields is not available
 
   it("should render correctly - no actions", async () => {
@@ -101,6 +149,8 @@ describe("NewProposalPreviewAndPublish", async () => {
       shortDescription: "Short descriptions",
       markdownDescription: markdown,
       actions: [],
+      votingStartRoundId: 1,
+      depositAmount: 0,
     })
 
     render(
@@ -119,10 +169,10 @@ describe("NewProposalPreviewAndPublish", async () => {
     await screen.findByText(markdown)
 
     const goBack = await screen.findByTestId("go-back")
-    const continueButton = await screen.findByTestId("continue")
+    const publishButton = await screen.findByTestId("publish")
     fireEvent.click(goBack)
     expect(mockBack).toHaveBeenCalled()
-    fireEvent.click(continueButton)
+    fireEvent.click(publishButton)
     expect(mockOnMetadataUpload).toHaveBeenCalledWith({
       title: "Titles",
       shortDescription: "Short descriptions",
@@ -157,10 +207,10 @@ describe("NewProposalPreviewAndPublish", async () => {
     await screen.findByText(markdown)
 
     const goBack = await screen.findByTestId("go-back")
-    const continueButton = await screen.findByTestId("continue")
+    const publishButton = await screen.findByTestId("publish")
     fireEvent.click(goBack)
     expect(mockBack).toHaveBeenCalled()
-    fireEvent.click(continueButton)
+    fireEvent.click(publishButton)
     await waitFor(() => {
       expect(mockOnMetadataUpload).toHaveBeenCalledWith({
         title: "Titles",

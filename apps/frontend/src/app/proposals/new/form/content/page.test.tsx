@@ -82,7 +82,7 @@ describe("NewProposalContent", async () => {
     await waitFor(() => {
       expect(screen.queryByTestId("form-error-message")).not.toBeInTheDocument()
       expect(screen.queryByText("Make sure to replace all the placeholders with your own content.")).toBeInTheDocument()
-      expect(mockRouterPush).toHaveBeenCalledWith("/proposals/new/form/preview")
+      expect(mockRouterPush).toHaveBeenCalledWith("/proposals/new/form/round")
     })
   }) // form errors - should render correctly
 }) // NewProposal
