@@ -6,7 +6,7 @@ export const imageCompressionOptions: CompressOptions = {
   useWebWorker: true,
 }
 
-const handleImageCompression = async (file: File): Promise<File> => {
+export const handleImageCompression = async (file: File): Promise<File> => {
   console.log(`originalFile size ${file.size / 1024 / 1024} MB`)
 
   console.log("Mime: ", file.type)

@@ -1,4 +1,4 @@
-import { useXApp } from "@/api"
+import { useAppModerators, useXApp } from "@/api"
 import { Button, Card, CardBody, Flex, HStack, Heading, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useParams } from "next/navigation"
 import { notFoundImage } from "@/constants"
@@ -10,7 +10,7 @@ import { useCallback } from "react"
 import { AppDetailSocials } from "./components/AppDetailSocials"
 import { AppDetailAllocationInfo } from "./components/AppDetailAllocationInfo"
 import { EditAppPageButton } from "./components/EditAppPageButton"
-import { useCurrentAppBanner, useCurrentAppLogo, useCurrentAppMetadata } from "../../hooks"
+import { useCurrentAppAdmin, useCurrentAppBanner, useCurrentAppLogo, useCurrentAppMetadata } from "../../hooks"
 
 export const AppDetailOverview = () => {
   const { appId } = useParams<{ appId: string }>()
@@ -19,8 +19,12 @@ export const AppDetailOverview = () => {
   const { appMetadata, appMetadataLoading, appMetadataError } = useCurrentAppMetadata()
   const { logo, isLogoLoading } = useCurrentAppLogo()
   const { banner, isBannerLoading } = useCurrentAppBanner()
+  const { admin } = useCurrentAppAdmin()
+  const { data } = useAppModerators(appId)
   console.log("appMetadata", appMetadata)
   console.log("xApp", xApp)
+  console.log("admin", admin)
+  console.log("moderators", data)
 
   const goToWebsite = useCallback(() => {
     if (appMetadata?.external_url) {

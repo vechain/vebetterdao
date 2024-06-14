@@ -1,10 +1,11 @@
-import { Box, Button, Container, HStack, Heading, IconButton, Image, Input, VStack, useToast } from "@chakra-ui/react"
+import { Box, Button, HStack, Heading, IconButton, Image, Input, VStack, useToast } from "@chakra-ui/react"
 import { Controller, UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { ChangeEvent, useCallback, useEffect, useRef } from "react"
+import { ChangeEvent, useCallback, useRef } from "react"
 import { UilTrash, UilUpload } from "@iconscout/react-unicons"
 import { EditAppForm } from "./AppEditPageContent"
 import { imageListCompression } from "@/utils/imageListCompression"
+import { blobToBase64 } from "@/utils/BlobUtils"
 
 type Props = {
   form: UseFormReturn<EditAppForm, any, undefined>
@@ -18,21 +19,13 @@ export const EditScreenshots = ({ form }: Props) => {
   }, [])
   const screenshots = form.watch("screenshots")
   const toast = useToast()
-  console.log(screenshots)
-
-  const fileToBase64 = async (file: File): Promise<string> =>
-    new Promise(resolve => {
-      const reader = new FileReader()
-      reader.onloadend = () => resolve(reader.result as string)
-      reader.readAsDataURL(file)
-    })
 
   const handleImageUpload = useCallback(
     async (e: ChangeEvent<HTMLInputElement>) => {
       try {
         const files = Array.from(e.target.files || [])
         const compressedFiles = await imageListCompression(files)
-        const base64Files = await Promise.all(compressedFiles.map(fileToBase64))
+        const base64Files = await Promise.all(compressedFiles.map(blobToBase64))
         form.setValue("screenshots", [...screenshots, ...base64Files])
       } catch (error) {
         toast({
