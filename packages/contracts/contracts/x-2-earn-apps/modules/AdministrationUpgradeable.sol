@@ -21,7 +21,7 @@
 //                                   ##############
 //                                   #########
 
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
@@ -122,7 +122,7 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
     AdministrationStorage storage $ = _getAdministrationStorage();
 
     address[] storage moderators = $._moderators[appId];
-    for (uint256 i = 0; i < moderators.length; i++) {
+    for (uint256 i; i < moderators.length; i++) {
       if (moderators[i] == moderator) {
         moderators[i] = moderators[moderators.length - 1];
         moderators.pop();
@@ -176,7 +176,7 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
     AdministrationStorage storage $ = _getAdministrationStorage();
 
     address[] memory moderators = $._moderators[appId];
-    for (uint256 i = 0; i < moderators.length; i++) {
+    for (uint256 i; i < moderators.length; i++) {
       if (moderators[i] == account) {
         return true;
       }

@@ -21,7 +21,7 @@
 //                                   ##############
 //                                   #########
 
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
 import { XAllocationVotingGovernor } from "../XAllocationVotingGovernor.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -184,7 +184,7 @@ abstract contract RoundsStorageUpgradeable is Initializable, XAllocationVotingGo
     X2EarnAppsDataTypes.App[] memory allApps = new X2EarnAppsDataTypes.App[](appsInRound.length);
 
     uint256 length = appsInRound.length;
-    for (uint i = 0; i < length; i++) {
+    for (uint i; i < length; i++) {
       allApps[i] = x2EarnApps().app(appsInRound[i]);
     }
     return allApps;

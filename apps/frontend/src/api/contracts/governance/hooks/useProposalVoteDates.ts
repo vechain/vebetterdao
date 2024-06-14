@@ -1,5 +1,4 @@
 import { useCurrentBlock } from "@/api/blockchain"
-import { useProposalCreatedEvent } from "./useProposalCreatedEvent"
 import { useMemo } from "react"
 import { getConfig } from "@repo/config"
 import dayjs from "dayjs"

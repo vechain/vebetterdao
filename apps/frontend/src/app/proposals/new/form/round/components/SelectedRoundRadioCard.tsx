@@ -1,5 +1,5 @@
 import { RoundCreated, useAllocationsRoundsEvents, useCurrentBlock, useVotingPeriod } from "@/api"
-import { Card, VStack, HStack, Heading, Radio, Box, Skeleton, Text } from "@chakra-ui/react"
+import { Card, VStack, HStack, Heading, Radio, Skeleton, Text, CardProps } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import dayjs from "dayjs"
 import { useMemo } from "react"
@@ -10,10 +10,19 @@ const blockTime = getConfig().network.blockTime
 type Props = {
   roundId: number | string
   selected: boolean
-  onSelect: () => void
+  onSelect?: () => void
   renderSkeleton?: boolean
+  isSelectable?: boolean
+  cardProps?: CardProps
 }
-export const SelectedRoundRadioCard: React.FC<Props> = ({ roundId, selected, onSelect, renderSkeleton }) => {
+export const SelectedRoundRadioCard: React.FC<Props> = ({
+  roundId,
+  selected,
+  onSelect,
+  renderSkeleton,
+  isSelectable = true,
+  cardProps = {},
+}) => {
   const { t } = useTranslation()
   const { data: allocationRoundEvents } = useAllocationsRoundsEvents()
   const { data: votingPeriod } = useVotingPeriod()
@@ -53,8 +62,8 @@ export const SelectedRoundRadioCard: React.FC<Props> = ({ roundId, selected, onS
       data-testid={renderSkeleton ? "round-radio-card-skeleton" : "round-radio-card"}
       w="full"
       onClick={onSelect}
-      {...(!renderSkeleton && { cursor: "pointer" })}
-      {...(renderSkeleton && { pointerEvents: "none" })}
+      {...(!renderSkeleton && isSelectable && { cursor: "pointer" })}
+      {...((renderSkeleton || !isSelectable) && { pointerEvents: "none" })}
       borderWidth={1}
       borderColor={selected ? "primary.active" : "gray.200"}
       borderRadius="xl"
@@ -62,9 +71,11 @@ export const SelectedRoundRadioCard: React.FC<Props> = ({ roundId, selected, onS
         boxShadow: "0px 0px 16px 0px rgba(0, 76, 252, 0.35)",
       })}
       p={6}
-      {...(!renderSkeleton && {
-        _hover: { borderColor: "primary.active", transition: "border-color 0.2s" },
-      })}>
+      {...(!renderSkeleton &&
+        isSelectable && {
+          _hover: { borderColor: "primary.active", transition: "border-color 0.2s" },
+        })}
+      {...cardProps}>
       <VStack spacing={4} align="flex-start">
         <HStack justify="space-between" w="full">
           <VStack spacing={2} align="flex-start">
@@ -82,7 +93,7 @@ export const SelectedRoundRadioCard: React.FC<Props> = ({ roundId, selected, onS
               </Text>
             </Skeleton>
           </VStack>
-          <Radio isChecked={selected} isDisabled={renderSkeleton} />
+          {isSelectable && <Radio isChecked={selected} isDisabled={renderSkeleton} />}
         </HStack>
       </VStack>
     </Card>

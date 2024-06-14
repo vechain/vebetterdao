@@ -59,7 +59,7 @@ export const NewProposalPageDiscussionContent = () => {
   const onSubmit = useCallback(
     (data: FormData) => {
       setData({ markdownDescription: data.markdownDescription })
-      router.push("/proposals/new/form/preview")
+      router.push("/proposals/new/form/round")
     },
     [setData, router],
   )
@@ -84,6 +84,7 @@ export const NewProposalPageDiscussionContent = () => {
                 control={control}
                 rules={{
                   validate: value => {
+                    if (!value) return t("Description cannot be empty.")
                     const errors = validateProposalTemplate(value)
                     if (!errors.length) return true
                     let errorMessage = "One or more placeholders have not been replaced: "

@@ -161,18 +161,6 @@ export const ProposalsPageContent = () => {
         </Box>
       )
     }
-    return (
-      <Grid templateColumns={["repeat(1, 1fr)", "repeat(4, 1fr)"]} gap={6} w="full">
-        <GridItem colSpan={3}>
-          <VStack spacing={6} align="flex-start" w="full">
-            {pastProposals?.map(proposal => (
-              <ProposalInfoCard type={ProposalState.Expired} proposal={proposal} key={proposal.proposalId} />
-            ))}
-          </VStack>
-        </GridItem>
-        <GridItem colSpan={1} />
-      </Grid>
-    )
   }, [pastProposals, pastProposalsError, pastProposalsLoading, t])
 
   return (

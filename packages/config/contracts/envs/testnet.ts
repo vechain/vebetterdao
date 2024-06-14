@@ -1,5 +1,4 @@
 import { defineConfig } from "../defineConfig"
-
 export function createTestnetConfig() {
   return defineConfig({
     NEXT_PUBLIC_APP_ENV: "testnet",
@@ -19,7 +18,6 @@ export function createTestnetConfig() {
     B3TR_GOVERNOR_WHITELISTED_METHODS: {
       Treasury: ["transferB3TR"],
     },
-
     EMISSIONS_CYCLE_DURATION: 60480, // blocks - 60480 blocks - 1 week.
     EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE: 4, // 4% decay every cycle
     EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE: 20, // 20% decay every cycle
@@ -27,23 +25,16 @@ export function createTestnetConfig() {
     EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD: 999999, // should never decay in pilot show
     EMISSIONS_TREASURY_PERCENTAGE: 8750, // 87.5% of the emissions go to the treasury during pilot show
     EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE: 80,
-
     X_ALLOCATION_VOTING_QUORUM_PERCENTAGE: 40, // 40 -> Need 40% of total supply to succeed
     X_ALLOCATION_VOTING_VOTING_THRESHOLD: BigInt("1000000000000000000"), // 1 vote
-
     X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE: 30, // % of tokens from each round that are equally distributed to all apps
     X_ALLOCATION_POOL_APP_SHARES_MAX_CAP: 20, // max % votes an app can receive in a round
-
     CONTRACTS_ADMIN_ADDRESS: "0xE3D511ce183D3C53813BEA223Fe1E51BB9fF14a4",
     VOTE_2_EARN_POOL_ADDRESS: "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68", //temporarily pointing to trasury, then updated in the deploy script to point to the voterReward contract
-
     INITIAL_X_ALLOCATION: BigInt("66666666666666666666666"), // 1M/15 rounded down -> 1/15th of the total supply for pilot show
-
     GM_NFT_BASE_URI: "ipfs://bafybeiahr3qobzujfkxi64o6wrigkmdagrvgfa566rqqth6jm5nq7vf24y/", // IPFS base URI for the GM NFT
-
     /*
       Level => B3TR Required
-  
       2 (Moon) => 10,000 B3TR
       3 (Mercury) => 25,000 B3TR
       4 (Venus) => 50,000 B3TR
@@ -65,12 +56,9 @@ export function createTestnetConfig() {
       5000000000000000000000000n,
       25000000000000000000000000n,
     ],
-
     VOTER_REWARDS_LEVELS: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-
     /*
       Level => Percentage Multiplier
-  
       2 (Moon) => 10% (1.1x)
       3 (Mercury) => 20% (1.2x)
       4 (Venus) => 50% (1.5x)
@@ -82,9 +70,7 @@ export function createTestnetConfig() {
       10 (Galaxy) => 2400% (25x)
     */
     VOTER_REWARDS_MULTIPLIER: [0, 10, 20, 50, 100, 150, 200, 400, 900, 2400],
-
     XAPP_BASE_URI: "ipfs://",
-
     /*
       Token transfer limits. These values are not final and are for testing purposes only.
     */

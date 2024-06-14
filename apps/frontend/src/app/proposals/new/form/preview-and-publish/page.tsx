@@ -6,9 +6,8 @@ import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
-const NewProposalFundAndPublishPageContent = dynamic(
-  () =>
-    import("./components/NewProposalFundAndPublishPageContent").then(mod => mod.NewProposalFundAndPublishPageContent),
+const PublishAndPreviewPageContent = dynamic(
+  () => import("./components/PublishAndPreviewPageContent").then(mod => mod.PublishAndPreviewPageContent),
   {
     ssr: false,
     loading: () => (
@@ -21,12 +20,12 @@ const NewProposalFundAndPublishPageContent = dynamic(
 
 export default function NewProposalFundAndPublishPage() {
   useEffect(() => {
-    AnalyticsUtils.trackPage("NewProposal/fund-and-publish")
+    AnalyticsUtils.trackPage("NewProposal/preview")
   }, [])
 
   return (
     <MotionVStack>
-      <NewProposalFundAndPublishPageContent />
+      <PublishAndPreviewPageContent />
     </MotionVStack>
   )
 }

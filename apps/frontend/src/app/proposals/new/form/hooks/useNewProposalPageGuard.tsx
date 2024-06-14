@@ -11,7 +11,8 @@ import { useMemo } from "react"
 export const useNewProposalPageGuard = () => {
   const pathname = usePathname()
   const { account } = useWallet()
-  const { title, shortDescription, markdownDescription, actions, votingStartRoundId } = useProposalFormStore()
+  const { title, shortDescription, markdownDescription, actions, votingStartRoundId, depositAmount } =
+    useProposalFormStore()
 
   const isVisitAuthorized = useMemo(() => {
     if (!account) return false
@@ -20,14 +21,16 @@ export const useNewProposalPageGuard = () => {
         return !!actions.length
       case "/proposals/new/form/round":
         return !!title && !!shortDescription && !!markdownDescription
-      case "/proposals/new/form/preview":
+      case "/proposals/new/form/support":
         return !!title && !!shortDescription && !!markdownDescription
-      case "/proposals/new/form/fund-and-publish":
-        return !!title && !!shortDescription && !!markdownDescription && !!votingStartRoundId
+      case "/proposals/new/form/preview-and-publish":
+        return (
+          !!title && !!shortDescription && !!markdownDescription && !!votingStartRoundId && depositAmount !== undefined
+        )
       default:
         return true
     }
-  }, [title, shortDescription, markdownDescription, account, pathname, actions, votingStartRoundId])
+  }, [title, shortDescription, markdownDescription, account, pathname, actions, votingStartRoundId, depositAmount])
 
   const redirectPath = useMemo(() => {
     if (!account) return "/proposals"

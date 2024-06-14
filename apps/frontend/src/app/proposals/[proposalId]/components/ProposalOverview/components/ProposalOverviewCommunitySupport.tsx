@@ -1,11 +1,12 @@
-import { ProposalState, useCurrentProposal } from "@/api"
+import { ProposalState } from "@/api"
 import { Arm } from "@/components/Icons/Arm"
 import { HStack, Text, VStack } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { useProposalDetail } from "../../../hooks"
 
 export const ProposalOverviewCommunitySupport = () => {
-  const { proposal } = useCurrentProposal()
+  const { proposal } = useProposalDetail()
   const { t } = useTranslation()
 
   const armIconColor = useMemo(() => {
