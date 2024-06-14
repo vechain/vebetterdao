@@ -60,6 +60,67 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
 
   function __AppsStorage_init_unchained() internal onlyInitializing {}
 
+  // ---------- Internal ---------- //
+
+  /**
+   * @dev Create app.
+   * The id of the app is the hash of the app name.
+   * Will be eligible for voting by default from the next round and
+   * the team allocation percentage will be 0%.
+   *
+   * @param teamWalletAddress the address where the app should receive allocation funds
+   * @param admin the address of the admin
+   * @param appName the name of the app
+   * @param metadataURI the metadata URI of the app
+   *
+   * Emits a {AppAdded} event.
+   */
+  function _addApp(
+    address teamWalletAddress,
+    address admin,
+    string memory appName,
+    string memory metadataURI
+  ) internal {
+    if (teamWalletAddress == address(0)) {
+      revert X2EarnInvalidAddress(teamWalletAddress);
+    }
+    if (admin == address(0)) {
+      revert X2EarnInvalidAddress(admin);
+    }
+
+    AppsStorageStorage storage $ = _getAppsStorageStorage();
+    bytes32 id = hashAppName(appName);
+
+    if (appExists(id)) {
+      revert X2EarnAppAlreadyExists(id);
+    }
+
+    // Store the new app
+    $._apps[id] = X2EarnAppsDataTypes.App(id, appName, block.timestamp);
+    $._appIds.push(id);
+    _setAppAdmin(id, admin);
+    _setVotingEligibility(id, true);
+    _updateTeamWalletAddress(id, teamWalletAddress);
+    _updateAppMetadata(id, metadataURI);
+    _setTeamAllocationPercentage(id, 0);
+
+    emit AppAdded(id, teamWalletAddress, appName, true);
+  }
+
+  /**
+   * @dev Get the app data saved in storage
+   *
+   * @param appId the if of the app
+   */
+  function _getAppStorage(bytes32 appId) internal view returns (X2EarnAppsDataTypes.App memory) {
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+
+    AppsStorageStorage storage $ = _getAppsStorageStorage();
+    return $._apps[appId];
+  }
+
   // ---------- Getters ---------- //
   /**
    * @dev See {IX2EarnApps-appExists}.
@@ -124,66 +185,5 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   function appsCount() public view returns (uint256) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
     return $._appIds.length;
-  }
-
-  // ---------- Internal ---------- //
-
-  /**
-   * @dev Create app.
-   * The id of the app is the hash of the app name.
-   * Will be eligible for voting by default from the next round and
-   * the team allocation percentage will be 0%.
-   *
-   * @param teamWalletAddress the address where the app should receive allocation funds
-   * @param admin the address of the admin
-   * @param appName the name of the app
-   * @param metadataURI the metadata URI of the app
-   *
-   * Emits a {AppAdded} event.
-   */
-  function _addApp(
-    address teamWalletAddress,
-    address admin,
-    string memory appName,
-    string memory metadataURI
-  ) internal {
-    if (teamWalletAddress == address(0)) {
-      revert X2EarnInvalidAddress(teamWalletAddress);
-    }
-    if (admin == address(0)) {
-      revert X2EarnInvalidAddress(admin);
-    }
-
-    AppsStorageStorage storage $ = _getAppsStorageStorage();
-    bytes32 id = hashAppName(appName);
-
-    if (appExists(id)) {
-      revert X2EarnAppAlreadyExists(id);
-    }
-
-    // Store the new app
-    $._apps[id] = X2EarnAppsDataTypes.App(id, appName, block.timestamp);
-    $._appIds.push(id);
-    _setAppAdmin(id, admin);
-    _setVotingEligibility(id, true);
-    _updateTeamWalletAddress(id, teamWalletAddress);
-    _updateAppMetadata(id, metadataURI);
-    _setTeamAllocationPercentage(id, 0);
-
-    emit AppAdded(id, teamWalletAddress, appName, true);
-  }
-
-  /**
-   * @dev Get the app data saved in storage
-   *
-   * @param appId the if of the app
-   */
-  function _getAppStorage(bytes32 appId) internal view returns (X2EarnAppsDataTypes.App memory) {
-    if (!appExists(appId)) {
-      revert X2EarnNonexistentApp(appId);
-    }
-
-    AppsStorageStorage storage $ = _getAppsStorageStorage();
-    return $._apps[appId];
   }
 }

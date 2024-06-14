@@ -65,122 +65,6 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
 
   function __Administration_init_unchained() internal onlyInitializing {}
 
-  // ---------- Getters ---------- //
-
-  /**
-   * @dev Check if an account is the admin of the app
-   *
-   * @param appId the hashed name of the app
-   * @param account the address of the account
-   */
-  function isAppAdmin(bytes32 appId, address account) public view returns (bool) {
-    AdministrationStorage storage $ = _getAdministrationStorage();
-
-    return $._admin[appId] == account;
-  }
-
-  /**
-   * @dev See {IX2EarnApps-appAdmin}
-   */
-  function appAdmin(bytes32 appId) public view override returns (address) {
-    AdministrationStorage storage $ = _getAdministrationStorage();
-
-    return $._admin[appId];
-  }
-
-  /**
-   * @dev Returns the list of moderators of the app
-   *
-   * @param appId the hashed name of the app
-   */
-  function appModerators(bytes32 appId) public view override returns (address[] memory) {
-    AdministrationStorage storage $ = _getAdministrationStorage();
-
-    return $._moderators[appId];
-  }
-
-  /**
-   * @dev Returns true if an account is moderator of the app
-   *
-   * @param appId the hashed name of the app
-   * @param account the address of the account
-   */
-  function isAppModerator(bytes32 appId, address account) public view returns (bool) {
-    AdministrationStorage storage $ = _getAdministrationStorage();
-
-    address[] memory moderators = $._moderators[appId];
-    for (uint256 i = 0; i < moderators.length; i++) {
-      if (moderators[i] == account) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  /**
-   * @dev Get the address where the x2earn app receives allocation funds
-   *
-   * @param appId the hashed name of the app
-   */
-  function teamWalletAddress(bytes32 appId) public view override returns (address) {
-    AdministrationStorage storage $ = _getAdministrationStorage();
-
-    return $._teamWalletAddress[appId];
-  }
-
-  /**
-   * @dev Function to get the percentage of the allocation reserved for the team
-   *
-   * @param appId the app id
-   */
-  function teamAllocationPercentage(bytes32 appId) public view override returns (uint256) {
-    AdministrationStorage storage $ = _getAdministrationStorage();
-
-    return $._teamAllocationPercentage[appId];
-  }
-
-  /**
-   * @dev Returns the list of reward distributors of the app
-   *
-   * @param appId the hashed name of the app
-   */
-  function rewardDistributors(bytes32 appId) public view returns (address[] memory) {
-    AdministrationStorage storage $ = _getAdministrationStorage();
-
-    return $._rewardDistributors[appId];
-  }
-
-  /**
-   * @dev Returns true if an account is a reward distributor of the app
-   *
-   * @param appId the hashed name of the app
-   * @param account the address of the account
-   */
-  function isRewardDistributor(bytes32 appId, address account) public view returns (bool) {
-    AdministrationStorage storage $ = _getAdministrationStorage();
-
-    address[] memory distributors = $._rewardDistributors[appId];
-    for (uint256 i = 0; i < distributors.length; i++) {
-      if (distributors[i] == account) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  /**
-   * @dev Get the metadata URI of the app
-   *
-   * @param appId the app id
-   */
-  function metadataURI(bytes32 appId) public view override returns (string memory) {
-    AdministrationStorage storage $ = _getAdministrationStorage();
-
-    return $._metadataURI[appId];
-  }
-
   // ---------- Internal ---------- //
   /**
    * @dev Internal function to set the admin address of the app
@@ -374,5 +258,121 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
     $._teamAllocationPercentage[appId] = newAllocationPercentage;
 
     emit TeamAllocationPercentageUpdated(appId, oldAllocationPercentage, newAllocationPercentage);
+  }
+
+  // ---------- Getters ---------- //
+
+  /**
+   * @dev Check if an account is the admin of the app
+   *
+   * @param appId the hashed name of the app
+   * @param account the address of the account
+   */
+  function isAppAdmin(bytes32 appId, address account) public view returns (bool) {
+    AdministrationStorage storage $ = _getAdministrationStorage();
+
+    return $._admin[appId] == account;
+  }
+
+  /**
+   * @dev See {IX2EarnApps-appAdmin}
+   */
+  function appAdmin(bytes32 appId) public view override returns (address) {
+    AdministrationStorage storage $ = _getAdministrationStorage();
+
+    return $._admin[appId];
+  }
+
+  /**
+   * @dev Returns the list of moderators of the app
+   *
+   * @param appId the hashed name of the app
+   */
+  function appModerators(bytes32 appId) public view override returns (address[] memory) {
+    AdministrationStorage storage $ = _getAdministrationStorage();
+
+    return $._moderators[appId];
+  }
+
+  /**
+   * @dev Returns true if an account is moderator of the app
+   *
+   * @param appId the hashed name of the app
+   * @param account the address of the account
+   */
+  function isAppModerator(bytes32 appId, address account) public view returns (bool) {
+    AdministrationStorage storage $ = _getAdministrationStorage();
+
+    address[] memory moderators = $._moderators[appId];
+    for (uint256 i = 0; i < moderators.length; i++) {
+      if (moderators[i] == account) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * @dev Get the address where the x2earn app receives allocation funds
+   *
+   * @param appId the hashed name of the app
+   */
+  function teamWalletAddress(bytes32 appId) public view override returns (address) {
+    AdministrationStorage storage $ = _getAdministrationStorage();
+
+    return $._teamWalletAddress[appId];
+  }
+
+  /**
+   * @dev Function to get the percentage of the allocation reserved for the team
+   *
+   * @param appId the app id
+   */
+  function teamAllocationPercentage(bytes32 appId) public view override returns (uint256) {
+    AdministrationStorage storage $ = _getAdministrationStorage();
+
+    return $._teamAllocationPercentage[appId];
+  }
+
+  /**
+   * @dev Returns the list of reward distributors of the app
+   *
+   * @param appId the hashed name of the app
+   */
+  function rewardDistributors(bytes32 appId) public view returns (address[] memory) {
+    AdministrationStorage storage $ = _getAdministrationStorage();
+
+    return $._rewardDistributors[appId];
+  }
+
+  /**
+   * @dev Returns true if an account is a reward distributor of the app
+   *
+   * @param appId the hashed name of the app
+   * @param account the address of the account
+   */
+  function isRewardDistributor(bytes32 appId, address account) public view returns (bool) {
+    AdministrationStorage storage $ = _getAdministrationStorage();
+
+    address[] memory distributors = $._rewardDistributors[appId];
+    for (uint256 i = 0; i < distributors.length; i++) {
+      if (distributors[i] == account) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * @dev Get the metadata URI of the app
+   *
+   * @param appId the app id
+   */
+  function metadataURI(bytes32 appId) public view override returns (string memory) {
+    AdministrationStorage storage $ = _getAdministrationStorage();
+
+    return $._metadataURI[appId];
   }
 }
