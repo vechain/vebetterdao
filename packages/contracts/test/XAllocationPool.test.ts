@@ -40,7 +40,7 @@ describe("X-Allocation Pool", async function () {
 
     it("Should revert if admin is set to zero address in initilisation", async () => {
       const config = createLocalConfig()
-      const { owner, b3tr, treasury, x2EarnApps } = await getOrDeployContractInstances({
+      const { owner, b3tr, treasury, x2EarnApps, x2EarnRewardsPool } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
@@ -53,6 +53,7 @@ describe("X-Allocation Pool", async function () {
           await b3tr.getAddress(),
           await treasury.getAddress(),
           await x2EarnApps.getAddress(),
+          await x2EarnRewardsPool.getAddress(),
         ]),
       ).to.be.reverted
     })

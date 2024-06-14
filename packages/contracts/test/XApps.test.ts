@@ -311,7 +311,7 @@ describe("X-Apps", function () {
         .connect(owner)
         .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app #4", "metadataURI")
 
-      const count = await x2EarnApps.appCount()
+      const count = await x2EarnApps.appsCount()
       expect(count).to.eql(4n)
 
       const apps = await x2EarnApps.getPaginatedApps(0, 4)
