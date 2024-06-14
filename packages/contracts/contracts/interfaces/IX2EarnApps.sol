@@ -155,7 +155,7 @@ interface IX2EarnApps {
   /**
    * @dev Get all apps
    */
-  function apps() external view returns (X2EarnAppsDataTypes.App[] memory);
+  function apps() external view returns (X2EarnAppsDataTypes.AppReturnType[] memory);
 
   /**
    * @dev Get the total count of apps

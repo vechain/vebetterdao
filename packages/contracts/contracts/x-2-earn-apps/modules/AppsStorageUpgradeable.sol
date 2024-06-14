@@ -208,9 +208,9 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev See {IX2EarnApps-appCount}.
+   * @dev See {IX2EarnApps-appsCount}.
    */
-  function appCount() external view returns (uint256) {
+  function appsCount() external view returns (uint256) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
     return $._appIds.length;
   }
