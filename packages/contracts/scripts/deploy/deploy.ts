@@ -155,6 +155,7 @@ export async function deployAll(config: ContractsConfig) {
 
   const x2EarnRewardsPool = (await deployProxy("X2EarnRewardsPool", [
     config.CONTRACTS_ADMIN_ADDRESS, // admin
+    config.CONTRACTS_ADMIN_ADDRESS, // contracts address manager
     config.CONTRACTS_ADMIN_ADDRESS, // upgrader
     await b3tr.getAddress(),
     await x2EarnApps.getAddress(),
@@ -568,6 +569,13 @@ export async function deployAll(config: ContractsConfig) {
       config.CONTRACTS_ADMIN_ADDRESS,
       TEMP_ADMIN,
       await x2EarnRewardsPool.DEFAULT_ADMIN_ROLE(),
+    )
+
+    await validateContractRole(
+      x2EarnRewardsPool,
+      config.CONTRACTS_ADMIN_ADDRESS,
+      TEMP_ADMIN,
+      await x2EarnRewardsPool.CONTRACTS_ADDRESS_MANAGER_ROLE(),
     )
 
     await validateContractRole(

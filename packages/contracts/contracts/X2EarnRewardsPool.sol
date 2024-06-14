@@ -49,6 +49,7 @@ contract X2EarnRewardsPool is
   ReentrancyGuardUpgradeable
 {
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+  bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
@@ -72,7 +73,13 @@ contract X2EarnRewardsPool is
     }
   }
 
-  function initialize(address _admin, address _upgrader, IB3TR _b3tr, IX2EarnApps _x2EarnApps) public initializer {
+  function initialize(
+    address _admin,
+    address _contractsManagerAdmin,
+    address _upgrader,
+    IB3TR _b3tr,
+    IX2EarnApps _x2EarnApps
+  ) public initializer {
     require(_admin != address(0), "X2EarnRewardsPool: admin is the zero address");
     require(_upgrader != address(0), "X2EarnRewardsPool: upgrader is the zero address");
     require(address(_b3tr) != address(0), "X2EarnRewardsPool: b3tr is the zero address");
@@ -83,6 +90,7 @@ contract X2EarnRewardsPool is
 
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     _grantRole(UPGRADER_ROLE, _upgrader);
+    _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, _contractsManagerAdmin);
 
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     $.b3tr = _b3tr;
@@ -170,7 +178,7 @@ contract X2EarnRewardsPool is
    *
    * @param _x2EarnApps the new X2EarnApps contract
    */
-  function setX2EarnApps(IX2EarnApps _x2EarnApps) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setX2EarnApps(IX2EarnApps _x2EarnApps) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     $.x2EarnApps = _x2EarnApps;
   }

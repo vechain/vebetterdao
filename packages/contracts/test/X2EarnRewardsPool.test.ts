@@ -120,20 +120,27 @@ describe("X2EarnRewardsPool", function () {
 
   // settings
   describe("Settings", function () {
-    it("DEFAULT_ADMIN_ROLE can set new x2EarnApps", async function () {
+    it("CONTRACTS_ADDRESS_MANAGER_ROLE can set new x2EarnApps", async function () {
       const { x2EarnRewardsPool, owner, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
+      expect(
+        await x2EarnRewardsPool.hasRole(await x2EarnRewardsPool.CONTRACTS_ADDRESS_MANAGER_ROLE(), owner.address),
+      ).to.eql(true)
       await x2EarnRewardsPool.connect(owner).setX2EarnApps(await otherAccount.getAddress())
 
       expect(await x2EarnRewardsPool.x2EarnApps()).to.equal(await otherAccount.getAddress())
     })
 
-    it("Only DEFAULT_ADMIN_ROLE can set new x2EarnApps", async function () {
+    it("Only CONTRACTS_ADDRESS_MANAGER_ROLE can set new x2EarnApps", async function () {
       const { x2EarnRewardsPool, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
+
+      expect(
+        await x2EarnRewardsPool.hasRole(await x2EarnRewardsPool.CONTRACTS_ADDRESS_MANAGER_ROLE(), otherAccount.address),
+      ).to.eql(false)
 
       await catchRevert(x2EarnRewardsPool.connect(otherAccount).setX2EarnApps(await otherAccount.getAddress()))
     })

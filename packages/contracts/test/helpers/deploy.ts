@@ -218,6 +218,7 @@ export const getOrDeployContractInstances = async ({
   const x2EarnRewardsPool = (await deployProxy("X2EarnRewardsPool", [
     owner.address,
     owner.address,
+    owner.address,
     await b3tr.getAddress(),
     await x2EarnApps.getAddress(),
   ])) as X2EarnRewardsPool
