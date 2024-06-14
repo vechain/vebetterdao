@@ -1,6 +1,6 @@
 import { XApp } from "@/api"
 
-const address = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa"
+export const address = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa"
 
 export const APPS: XApp[] = [
   {

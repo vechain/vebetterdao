@@ -3,7 +3,7 @@ import { useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { FormData, NewProposalForm } from "./NewProposalForm"
 import { abi } from "thor-devkit"
-import { useProposalFormStore } from "@/store/useProposalFormStore"
+import { useProposalFormStore } from "@/store"
 import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
 
@@ -45,17 +45,29 @@ export const NewProposalFormDetailsPageContent: React.FC = () => {
   )
 
   return (
-    <Card w="full">
+    <Card w="full" data-testid="new-proposal-form">
       <CardBody py={8}>
         <VStack spacing={8} align="flex-start">
           <Heading size="lg">{t("What is your proposal about?")}</Heading>
           <Heading size="md">{t("Basic information")}</Heading>
           <NewProposalForm onSubmit={onSubmit} formId="new-proposal-form" />
           <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
-            <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
+            <Button
+              data-testid="go-back"
+              rounded="full"
+              variant={"primarySubtle"}
+              colorScheme="primary"
+              size="lg"
+              onClick={goBack}>
               {t("Go back")}
             </Button>
-            <Button rounded="full" colorScheme="primary" size="lg" type="submit" form="new-proposal-form">
+            <Button
+              data-testid="continue"
+              rounded="full"
+              colorScheme="primary"
+              size="lg"
+              type="submit"
+              form="new-proposal-form">
               {t("Continue")}
             </Button>
           </HStack>

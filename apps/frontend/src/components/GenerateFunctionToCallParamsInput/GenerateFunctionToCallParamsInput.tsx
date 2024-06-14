@@ -76,6 +76,7 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
       <FormControl isInvalid={!!error}>
         <FormLabel {...formLabelProps}>{label}</FormLabel>
         <Input
+          data-testid={`generated-function-to-call-${index}`}
           type="text"
           placeholder="Insert value..."
           {...register(`actions.${actionIndex}.params.${index}.value`, {
@@ -84,7 +85,9 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
           })}
           {...inputProps}
         />
-        <FormErrorMessage>{error && error.message?.toString()}</FormErrorMessage>
+        <FormErrorMessage data-testid={`generated-function-to-call-${index}-error`}>
+          {error?.message?.toString()}
+        </FormErrorMessage>
       </FormControl>
     )
   }
@@ -94,6 +97,7 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
       <FormControl isInvalid={!!error}>
         <FormLabel {...formLabelProps}>{label}</FormLabel>
         <Input
+          data-testid={`generated-function-to-call-${index}`}
           type="text"
           placeholder="Insert value..."
           {...register(`actions.${actionIndex}.params.${index}.value`, {
@@ -102,7 +106,9 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
           })}
           {...inputProps}
         />
-        <FormErrorMessage>{error && error.message?.toString()}</FormErrorMessage>
+        <FormErrorMessage data-testid={`generated-function-to-call-${index}-error`}>
+          {error?.message?.toString()}
+        </FormErrorMessage>
       </FormControl>
     )
   }
@@ -111,6 +117,7 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
       <FormControl isInvalid={!!error}>
         <FormLabel {...formLabelProps}>{label}</FormLabel>
         <Input
+          data-testid={`generated-function-to-call-${index}`}
           type="number"
           placeholder="Insert value..."
           {...register(`actions.${actionIndex}.params.${index}.value`, {
@@ -120,7 +127,9 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
           })}
           {...inputProps}
         />
-        <FormErrorMessage>{error && error.message?.toString()}</FormErrorMessage>
+        <FormErrorMessage data-testid={`generated-function-to-call-${index}-error`}>
+          {error?.message?.toString()}
+        </FormErrorMessage>
       </FormControl>
     )
   }
@@ -143,7 +152,9 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
             </Select>
           )}
         />
-        <FormErrorMessage>{error && error.message?.toString()}</FormErrorMessage>
+        <FormErrorMessage data-testid={`generated-function-to-call-${index}-error`}>
+          {error?.message?.toString()}
+        </FormErrorMessage>
       </FormControl>
     )
   }
@@ -152,12 +163,15 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
     <FormControl isInvalid={!!error}>
       <FormLabel {...formLabelProps}>{label}</FormLabel>
       <Input
+        data-testid={`generated-function-to-call-${index}`}
         type="text"
         placeholder="Insert value..."
         {...register(`actions.${actionIndex}.params.${index}.value`, { required: "Field is required" })}
         {...inputProps}
       />
-      <FormErrorMessage>{error && error.message?.toString()}</FormErrorMessage>
+      <FormErrorMessage data-testid={`generated-function-to-call-${index}-error`}>
+        {error?.message?.toString()}
+      </FormErrorMessage>
     </FormControl>
   )
 }

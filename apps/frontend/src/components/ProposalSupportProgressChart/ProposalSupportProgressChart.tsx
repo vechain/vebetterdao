@@ -66,7 +66,7 @@ export const ProposalSupportProgressChart = ({
   const othersDepositsPercentage = useMemo(() => othersDeposits / depositThreshold, [othersDeposits, depositThreshold])
 
   return (
-    <VStack alignItems={"stretch"} spacing={3} w="full">
+    <VStack alignItems={"stretch"} spacing={3} w="full" data-testid="proposal-support-progress-chart">
       <HStack alignItems={"baseline"} justify={"space-between"}>
         <HStack alignItems={"baseline"}>
           <Flex position="relative" top="7px" display={"inline-flex"}>

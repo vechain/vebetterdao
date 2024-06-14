@@ -15,8 +15,8 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
-import { useCallback } from "react"
-import { useProposalFormStore } from "@/store/useProposalFormStore"
+import { useCallback, useEffect } from "react"
+import { useProposalFormStore } from "@/store"
 import dynamic from "next/dynamic"
 
 import rehypeSanitize from "rehype-sanitize"
@@ -40,11 +40,19 @@ export const NewProposalPageDiscussionContent = () => {
   //automatic update the proposal template based on the form data
   useAutomaticUpdateProposalTemplate()
 
-  const { control, formState, handleSubmit } = useForm<FormData>({
+  const { control, formState, handleSubmit, setValue } = useForm<FormData>({
     defaultValues: {
       markdownDescription,
     },
   })
+
+  //detect changes by useAutomaticUpdateProposalTemplate and update the form
+  useEffect(() => {
+    return () => {
+      if (!markdownDescription) return
+      setValue("markdownDescription", markdownDescription)
+    }
+  }, [setValue, markdownDescription])
 
   const { errors } = formState
 
@@ -60,7 +68,7 @@ export const NewProposalPageDiscussionContent = () => {
   }, [router])
 
   return (
-    <Card w="full">
+    <Card w="full" data-testid="new-proposal-content-page">
       <CardBody py={8}>
         <VStack spacing={8} align="flex-start" as="form" onSubmit={handleSubmit(onSubmit)}>
           <Heading size="lg">{t("Share more about your idea")}</Heading>
@@ -89,6 +97,7 @@ export const NewProposalPageDiscussionContent = () => {
                 }}
                 render={({ field }) => (
                   <MDEditor
+                    data-testid="markdown-description-input"
                     value={field.value}
                     onChange={field.onChange}
                     height={"100%"}
@@ -100,7 +109,7 @@ export const NewProposalPageDiscussionContent = () => {
               />
             </Box>
             {errors.markdownDescription ? (
-              <FormErrorMessage>{errors.markdownDescription.message}</FormErrorMessage>
+              <FormErrorMessage data-testid="form-error-message">{errors.markdownDescription.message}</FormErrorMessage>
             ) : (
               <FormHelperText color="gray.500" fontSize="sm">
                 {t("Make sure to replace all the placeholders with your own content.")}
@@ -109,10 +118,16 @@ export const NewProposalPageDiscussionContent = () => {
           </FormControl>
 
           <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
-            <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
+            <Button
+              data-testid="go-back"
+              rounded="full"
+              variant={"primarySubtle"}
+              colorScheme="primary"
+              size="lg"
+              onClick={goBack}>
               {t("Go back")}
             </Button>
-            <Button rounded="full" colorScheme="primary" size="lg" type="submit">
+            <Button data-testid="continue" rounded="full" colorScheme="primary" size="lg" type="submit">
               {t("Continue")}
             </Button>
           </HStack>

@@ -4,16 +4,6 @@ import { render, screen } from "../../../../../test"
 import * as hooks from "@/api/contracts/xApps"
 
 const adminAddress = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa"
-//mock dappkit
-vi.mock("@vechain/dapp-kit-react", async importOriginal => {
-  const mod = await importOriginal<typeof import("@vechain/dapp-kit-react")>()
-  return {
-    ...mod,
-    useWallet: () => ({
-      account: adminAddress,
-    }),
-  }
-})
 
 const mockedApp: hooks.XApp = {
   id: "1",

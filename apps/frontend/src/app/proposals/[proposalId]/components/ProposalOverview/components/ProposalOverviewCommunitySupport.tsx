@@ -24,7 +24,7 @@ export const ProposalOverviewCommunitySupport = () => {
       return (
         <VStack alignItems={"stretch"}>
           <Text fontWeight={"400"} color="#6A6A6A">
-            {t("Community support")}
+            {t("Community Support")}
           </Text>
           <HStack>
             <Arm color={armIconColor} />

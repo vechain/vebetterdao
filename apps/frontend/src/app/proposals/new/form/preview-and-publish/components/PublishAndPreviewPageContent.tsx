@@ -3,7 +3,7 @@
 import { Button, Card, CardBody, Divider, HStack, Heading, VStack, useDisclosure } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import MarkdownPreview from "@uiw/react-markdown-preview"
-import { useProposalFormStore } from "@/store/useProposalFormStore"
+import { useProposalFormStore } from "@/store"
 import { NewProposalForm } from "../../functions/details/components/NewProposalForm"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
@@ -53,6 +53,7 @@ export const PublishAndPreviewPageContent = () => {
 
     const isSomeCalldataEmpty = actions.some(action => !action.calldata)
     if (isSomeCalldataEmpty) throw new Error("Missing calldata for some actions")
+
     createProposalMutation.sendTransaction({
       actions: actions.map(action => ({
         contractAddress: action.contractAddress,
@@ -108,7 +109,7 @@ export const PublishAndPreviewPageContent = () => {
         showExplorerButton
       />
 
-      <Card w="full">
+      <Card w="full" data-testid="new-proposal-preview-page">
         <CardBody py={8}>
           <VStack spacing={8} align="flex-start" divider={<Divider />}>
             <Heading size="lg">{t("Check your proposal before publishing")}</Heading>
@@ -143,7 +144,7 @@ export const PublishAndPreviewPageContent = () => {
 
             <VStack spacing={4} align="flex-start" w="full">
               <Heading size="md">{t("Community support")}</Heading>
-              {depositAmount && threshold && (
+              {depositAmount !== undefined && threshold && (
                 <ProposalSupportProgressChart
                   isDepositThresholdReached={isDepositReached}
                   isFailedDueToDeposit={false}
@@ -157,10 +158,16 @@ export const PublishAndPreviewPageContent = () => {
             </VStack>
 
             <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
-              <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
+              <Button
+                data-testid="go-back"
+                rounded="full"
+                variant={"primarySubtle"}
+                colorScheme="primary"
+                size="lg"
+                onClick={goBack}>
                 {t("Go back")}
               </Button>
-              <Button rounded="full" colorScheme="primary" size="lg" onClick={onSubmit}>
+              <Button data-testid="publish" rounded="full" colorScheme="primary" size="lg" onClick={onSubmit}>
                 {t("Publish")}
               </Button>
             </HStack>

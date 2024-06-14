@@ -36,7 +36,7 @@ import { FaChevronRight } from "react-icons/fa6"
 import { useRouter } from "next/navigation"
 import { useIpfsMetadata } from "@/api/ipfs"
 import { toIPFSURL } from "@/utils"
-import { ProposalFormAction } from "@/store/useProposalFormStore"
+import { ProposalFormAction } from "@/store"
 import dayjs from "dayjs"
 import { ProposalExecutableActions } from "./ProposalExecutableActions"
 
