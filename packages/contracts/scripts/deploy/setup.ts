@@ -6,6 +6,7 @@ import { airdropB3trFromTreasury } from "../helpers/airdrop"
 
 const accounts = getTestKeys(13)
 
+// WARNING: when deploying to production change the address to real team wallet address
 const APPS = [
   {
     address: accounts[6].address,

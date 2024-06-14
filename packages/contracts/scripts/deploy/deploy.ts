@@ -415,6 +415,7 @@ export async function deployAll(config: ContractsConfig) {
   // ---------- Setup Contracts ---------- //
   // Notice: admin account allowed to perform actions is retrieved again inside the setup functions
   if (network.name === "vechain_testnet") {
+    // WARNING: when deploying to production change the address to real team wallet address inside setupTestEnvironment
     await setupTestEnvironment(emissions, x2EarnApps)
   } else if (network.name === "vechain_solo") {
     await setupLocalEnvironment(emissions, treasury, x2EarnApps)
