@@ -37,18 +37,18 @@ const FunctionTypeSteps: (t: TFunction<"translation", undefined>) => CreatePropo
     pathnames: ["/proposals/new/form/functions/details"],
   },
   { key: "details", title: t("Proposal details"), pathnames: ["/proposals/new/form/content"] },
-  { key: "preview", title: t("Preview"), pathnames: ["/proposals/new/form/preview"] },
   { key: "round", title: t("Round"), pathnames: ["/proposals/new/form/round"] },
-  { key: "fundingAndPublish", title: t("Funding and publish!"), pathnames: ["/proposals/new/form/fund-and-publish"] },
+  { key: "support", title: t("Support"), pathnames: ["/proposals/new/form/support"] },
+  { key: "preview", title: t("Preview and publish"), pathnames: ["/proposals/new/form/preview-and-publish"] },
 ]
 
 const DiscussionTypeSteps: (t: TFunction<"translation", undefined>) => CreateProposalStep[] = t => [
   { key: "creationMethod", title: t("Creation method") },
   { key: "details", title: t("Proposal basics"), pathnames: ["/proposals/new/form/discussion"] },
   { key: "details", title: t("Proposal details"), pathnames: ["/proposals/new/form/content"] },
-  { key: "preview", title: t("Preview"), pathnames: ["/proposals/new/form/preview"] },
   { key: "round", title: t("Round"), pathnames: ["/proposals/new/form/round"] },
-  { key: "fundingAndPublish", title: t("Funding and publish!"), pathnames: ["/proposals/new/form/fund-and-publish"] },
+  { key: "support", title: t("Support"), pathnames: ["/proposals/new/form/support"] },
+  { key: "preview", title: t("Preview and publish"), pathnames: ["/proposals/new/form/preview-and-publish"] },
 ]
 
 export const CreateProposalStepperCard = () => {

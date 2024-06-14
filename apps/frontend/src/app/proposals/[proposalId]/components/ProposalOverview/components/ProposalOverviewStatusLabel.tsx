@@ -1,11 +1,12 @@
-import { ProposalState, useCurrentProposal } from "@/api"
+import { ProposalState } from "@/api"
 import { Arm } from "@/components/Icons/Arm"
 import { Circle, HStack, Text } from "@chakra-ui/react"
 import { UilBan, UilCheck, UilClockEight, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
+import { useProposalDetail } from "../../../hooks"
 
 export const ProposalOverviewStatusLabel = () => {
-  const { proposal } = useCurrentProposal()
+  const { proposal } = useProposalDetail()
   const { t } = useTranslation()
 
   switch (proposal.state) {

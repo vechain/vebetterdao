@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
 import { X2EarnAppsDataTypes } from "../libraries/X2EarnAppsDataTypes.sol";
 
@@ -33,6 +33,11 @@ interface IX2EarnApps {
    * @dev The user is not authorized to perform the action.
    */
   error X2EarnUnauthorizedUser(address user);
+
+  /**
+   * @dev Invalid start index for get apps pagination
+   */
+  error X2EarnInvalidStartIndex();
 
   /**
    * @dev Lookup to future votes is not available.
@@ -139,6 +144,24 @@ interface IX2EarnApps {
    * @dev Function to get the number of apps.
    */
   function appsCount() external view returns (uint256);
+
+  /**
+   * @dev Get a paginated list of apps
+   * @param startIndex The starting index of the pagination
+   * @param count The number of items to return
+   */
+  function getPaginatedApps(uint startIndex, uint count) external view returns (X2EarnAppsDataTypes.App[] memory);
+
+  /**
+   * @dev Get all apps
+   */
+  function apps() external view returns (X2EarnAppsDataTypes.App[] memory);
+
+  /**
+   * @dev Get the total count of apps
+   * @return The total number of apps
+   */
+  function appCount() external view returns (uint256);
 
   /**
    * @dev Add a new moderator to the app.

@@ -1,4 +1,5 @@
-import { ProposalState, useCurrentProposal } from "@/api"
+import { ProposalState } from "@/api"
+import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
 import {
   Accordion,
   AccordionButton,
@@ -15,7 +16,7 @@ import { useTranslation } from "react-i18next"
 
 export const ProposalCreatedTimelineItem = () => {
   const { t } = useTranslation()
-  const { proposal } = useCurrentProposal()
+  const { proposal } = useProposalDetail()
   const activeColor = "#004CFC"
   const inactiveColor = "#E1E1E1"
   return (

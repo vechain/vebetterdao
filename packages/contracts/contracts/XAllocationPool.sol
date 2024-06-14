@@ -21,7 +21,7 @@
 //                                   ##############
 //                                   #########
 
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
 import { IXAllocationPool } from "./interfaces/IXAllocationPool.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
@@ -33,7 +33,6 @@ import { ITreasury } from "./interfaces/ITreasury.sol";
 import { IEmissions } from "./interfaces/IEmissions.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { IB3TR } from "./interfaces/IB3TR.sol";
-import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
 import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
@@ -47,7 +46,6 @@ import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
  * The contract is using AccessControl to handle roles for upgrading the contract and external contract addresses.
  */
 contract XAllocationPool is
-  Initializable,
   IXAllocationPool,
   AccessControlUpgradeable,
   ReentrancyGuardUpgradeable,
@@ -120,6 +118,7 @@ contract XAllocationPool is
     $.x2EarnApps = IX2EarnApps(_x2EarnApps);
     $.x2EarnRewardsPool = IX2EarnRewardsPool(_x2EarnRewardsPool);
 
+    require(_admin != address(0), "XAllocationPool: new admin is the zero address");
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     _grantRole(UPGRADER_ROLE, upgrader);
     _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, contractsAddressManager);
@@ -403,7 +402,7 @@ contract XAllocationPool is
     (uint256 appShare, uint256 unallocatedShare) = getAppShares(lastSucceededRoundId, appId);
     uint256 baseAllocationPerApp = baseAllocationAmount(roundId);
     uint256 variableAllocationForApp = _rewardAmount(roundId, appShare);
-    unallocatedAmount = 0;
+    uint256 unallocatedAmount;
     if (unallocatedShare > 0) {
       unallocatedAmount = _rewardAmount(roundId, unallocatedShare);
     }
@@ -486,7 +485,7 @@ contract XAllocationPool is
     uint256 appShare = (appVotesQFValue * PERCENTAGE_PRECISION_SCALING_FACTOR) / totalVotesQF;
 
     // This is the amount unallocated if appShare is greater than max cap, this will be sent to treasury
-    uint256 unallocatedShare = 0;
+    uint256 unallocatedShare;
 
     // Cap the app share to the maximum variable allocation percentage so even if an app has 80 votes out of 100,
     // it will still get only a max of `appSharesCap` percentage of the available funds

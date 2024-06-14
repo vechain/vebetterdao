@@ -267,6 +267,59 @@ describe("X-Apps", function () {
       expect(apps.length).to.eql(2)
     })
 
+    it("Can paginate apps", async function () {
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[1].address, otherAccounts[1].address, "My app #2", "metadataURI")
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[2].address, otherAccounts[2].address, "My app #3", "metadataURI")
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app #4", "metadataURI")
+
+      const apps1 = await x2EarnApps.getPaginatedApps(0, 2)
+      expect(apps1.length).to.eql(2)
+
+      const apps2 = await x2EarnApps.getPaginatedApps(2, 5)
+      expect(apps2.length).to.eql(2)
+
+      expect(apps1).to.not.eql(apps2)
+
+      const allApps = await x2EarnApps.getPaginatedApps(0, 4)
+      expect(allApps).to.eql([...apps1, ...apps2])
+    })
+
+    it("Can get number of apps", async function () {
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[1].address, otherAccounts[1].address, "My app #2", "metadataURI")
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[2].address, otherAccounts[2].address, "My app #3", "metadataURI")
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app #4", "metadataURI")
+
+      const count = await x2EarnApps.appCount()
+      expect(count).to.eql(4n)
+
+      const apps = await x2EarnApps.getPaginatedApps(0, 4)
+      expect(apps.length).to.eql(4)
+
+      await expect(x2EarnApps.getPaginatedApps(4, 4)).to.revertedWithCustomError(x2EarnApps, "X2EarnInvalidStartIndex")
+    })
+
     it("Can index up to 1300 apps", async function () {
       console.log("Test is disabled because it takes a bit too long to run")
       // const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })

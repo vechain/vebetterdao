@@ -1,24 +1,27 @@
-import { useCurrentProposal, useVot3Balance } from "@/api"
-import { Arm } from "@/components/Icons/Arm"
+import { useVot3Balance } from "@/api"
 import { filterAmountInput } from "@/utils"
-import { Box, Button, Divider, Flex, HStack, Image, Input, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Divider, HStack, Image, Input, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
 
-const compactFormatter = getCompactFormatter(2)
+import { ProposalSupportProgressChart } from "@/components/ProposalSupportProgressChart/ProposalSupportProgressChart"
 
 export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => void }) => {
   const { t } = useTranslation()
-  const { proposal } = useCurrentProposal()
+  const { proposal } = useProposalDetail()
   const [amount, setAmount] = useState("")
   const { account } = useWallet()
   const { data: vot3Balance } = useVot3Balance(account ?? undefined)
+  const missingSupport = useMemo(
+    () => proposal.depositThreshold - proposal.communityDeposits,
+    [proposal.communityDeposits, proposal.depositThreshold],
+  )
 
   const depositMax = useCallback(() => {
-    setAmount(vot3Balance?.scaled ?? "")
-  }, [vot3Balance])
+    setAmount(Math.min(Number(vot3Balance?.scaled ?? 0), missingSupport || 0).toString())
+  }, [vot3Balance, missingSupport])
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -33,31 +36,15 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
     },
     [amount, onSubmit],
   )
-  const communityDepositsForecast = useMemo(
+  const userDepositsForecasted = useMemo(
     () => Number(amount) + proposal.communityDeposits,
     [amount, proposal.communityDeposits],
   )
 
-  const communityDepositsForecastPercentage = useMemo(() => {
-    if (proposal.depositThreshold === 0) return 0
-    return (communityDepositsForecast / proposal.depositThreshold) * 100
-  }, [communityDepositsForecast, proposal.depositThreshold])
-
-  const communityDepositsForecastChartPercentage = useMemo(() => {
-    if (proposal.depositThreshold === 0) return 0
-    if (communityDepositsForecast > proposal.depositThreshold) {
-      return 100
-    }
-    return (communityDepositsForecast / proposal.depositThreshold) * 100
-  }, [communityDepositsForecast, proposal.depositThreshold])
-
-  const communityDepositsChartPercentage = useMemo(() => {
-    if (proposal.depositThreshold === 0) return 0
-    if (communityDepositsForecast > proposal.depositThreshold) {
-      return (proposal.communityDeposits / communityDepositsForecast) * 100
-    }
-    return (proposal.communityDeposits / proposal.depositThreshold) * 100
-  }, [communityDepositsForecast, proposal.communityDeposits, proposal.depositThreshold])
+  const isDepositThresholdReached = useMemo(
+    () => userDepositsForecasted >= proposal.depositThreshold,
+    [userDepositsForecasted, proposal.depositThreshold],
+  )
 
   return (
     <VStack gap={6} alignItems={"stretch"} as="form" onSubmit={handleSubmit}>
@@ -110,47 +97,15 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
         <Text fontSize={"14px"} color="#6A6A6A">
           {t("Forecasted proposal support")}
         </Text>
-        <HStack alignItems={"baseline"} justify={"space-between"}>
-          <HStack alignItems={"baseline"}>
-            <Flex position="relative" top="7px" display={"inline-flex"}>
-              <Arm color={"#004CFC"} size={"36"} />
-            </Flex>
-            <Text fontSize={"28px"} color={"#252525"} fontWeight={400}>
-              {compactFormatter.format(communityDepositsForecast)}
-            </Text>
-            <Text fontSize={"20px"} fontWeight={500} color={"#6A6A6A"}>
-              {t("/")}
-            </Text>
-            <Text fontSize={"20px"} fontWeight={500} color={"#6A6A6A"}>
-              {compactFormatter.format(Number(proposal.depositThreshold))}
-            </Text>
-          </HStack>
-          <Text fontSize={"14px"} fontWeight={400} color={"#6A6A6A"}>
-            {compactFormatter.format(communityDepositsForecastPercentage)}
-            {t("%")}
-          </Text>
-        </HStack>
-        <Box position="relative">
-          <Box bg="#D5D5D5" h="10px" rounded="full" />
-          <Box
-            bg={"#004CFC"}
-            h="10px"
-            rounded="full"
-            w={`${communityDepositsForecastChartPercentage}%`}
-            position="absolute"
-            top={0}
-            left={0}
-          />
-          <Box
-            bg={"#77A0FF"}
-            h="10px"
-            rounded="full"
-            w={`${communityDepositsChartPercentage}%`}
-            position="absolute"
-            top={0}
-            left={0}
-          />
-        </Box>
+        <ProposalSupportProgressChart
+          depositThreshold={proposal.depositThreshold}
+          userDeposits={userDepositsForecasted}
+          othersDeposits={proposal.othersSupport}
+          otherDepositsUsersCount={0}
+          renderVotesDistributionLabel={false}
+          isFailedDueToDeposit={false}
+          isDepositThresholdReached={isDepositThresholdReached}
+        />
       </VStack>
       <Text fontWeight={600} fontSize={"14px"}>
         {t("You will be able to claim your tokens back when the voting round ends.")}

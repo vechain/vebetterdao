@@ -1,4 +1,4 @@
-import { useCurrentProposal } from "@/api"
+import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
 import { TransactionModal } from "@/components/TransactionModal"
 import { useQueueProposal } from "@/hooks/useQueueProposal"
 import { Button, useDisclosure } from "@chakra-ui/react"
@@ -6,7 +6,7 @@ import { t } from "i18next"
 import { useCallback } from "react"
 
 export const ProposalQueueButton = () => {
-  const { proposal } = useCurrentProposal()
+  const { proposal } = useProposalDetail()
   const queueMutation = useQueueProposal({ proposalId: proposal.id })
   const { isOpen, onClose, onOpen } = useDisclosure()
   const queueProposal = useCallback(() => {

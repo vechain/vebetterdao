@@ -10,8 +10,9 @@ import {
   Link,
 } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
+import { useTranslation } from "react-i18next"
 import { FaExternalLinkAlt } from "react-icons/fa"
-import { FaEllipsisVertical, FaCheck, FaCopy, FaFileImage, FaRegImage } from "react-icons/fa6"
+import { FaEllipsisVertical, FaCheck, FaCopy, FaRegImage } from "react-icons/fa6"
 
 type Props = {
   teamWalletAddress: string
@@ -27,7 +28,8 @@ export const AppCardOptionsDesktopMenu = ({
   xAppId,
   showViewDetails = false,
 }: Props) => {
-  const { onCopy, hasCopied } = useClipboard(teamWalletAddress)
+  const { t } = useTranslation()
+  const { onCopy, hasCopied } = useClipboard(receiverAddress)
 
   const toast = useToast()
   const handleOnCopy = () => {
@@ -47,12 +49,25 @@ export const AppCardOptionsDesktopMenu = ({
 
   return (
     <Menu>
-      <MenuButton as={IconButton} isRound={true} icon={<FaEllipsisVertical />} />
-      <MenuList>
+      <MenuButton
+        as={IconButton}
+        isRound={true}
+        icon={<FaEllipsisVertical />}
+        _hover={{
+          cursor: "default",
+        }}
+        onClick={e => {
+          e.stopPropagation()
+        }}
+      />
+      <MenuList
+        onClick={e => {
+          e.stopPropagation()
+        }}>
         <Skeleton isLoaded={!isLoading}>
           {showViewDetails && (
             <MenuItem onClick={navigateToAppDetail} icon={<FaRegImage />}>
-              View details
+              {t("View details")}
             </MenuItem>
           )}
           <MenuItem
@@ -66,7 +81,7 @@ export const AppCardOptionsDesktopMenu = ({
           </MenuItem>
         </Skeleton>
         <MenuItem onClick={handleOnCopy} icon={hasCopied ? <FaCheck /> : <FaCopy />}>
-          Copy team wallet address
+          {t("Copy receiver address")}
         </MenuItem>
       </MenuList>
     </Menu>

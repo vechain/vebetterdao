@@ -1,5 +1,5 @@
-import { useCurrentProposal } from "@/api"
 import { useProposalOperationState } from "@/api/contracts/governance/hooks/useProposalOperationState"
+import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
 import { TransactionModal } from "@/components/TransactionModal"
 import { useExecuteProposal } from "@/hooks/useExecuteProposal"
 import { timestampToTimeLeft } from "@/utils"
@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from "react"
 
 export const ProposalExecuteButton = () => {
   const [_, setSeconds] = useState(0)
-  const { proposal } = useCurrentProposal()
+  const { proposal } = useProposalDetail()
   const executeMutation = useExecuteProposal({ proposalId: proposal.id })
   const { isOpen, onClose, onOpen } = useDisclosure()
   const executeProposal = useCallback(() => {

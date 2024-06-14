@@ -37,6 +37,25 @@ describe("X-Allocation Pool", async function () {
       expect(await xAllocationPool.hasRole(DEFAULT_ADMIN_ROLE, owner.address)).to.eql(true)
       expect(await xAllocationPool.hasRole(UPGRADER_ROLE, owner.address)).to.eql(true)
     })
+
+    it("Should revert if admin is set to zero address in initilisation", async () => {
+      const config = createLocalConfig()
+      const { owner, b3tr, treasury, x2EarnApps } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      await expect(
+        deployProxy("XAllocationPool", [
+          ZERO_ADDRESS,
+          owner.address,
+          owner.address,
+          await b3tr.getAddress(),
+          await treasury.getAddress(),
+          await x2EarnApps.getAddress(),
+        ]),
+      ).to.be.reverted
+    })
   })
 
   describe("Contract upgradeablity", () => {

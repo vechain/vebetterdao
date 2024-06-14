@@ -155,7 +155,7 @@ export const getOrDeployContractInstances = async ({
   // ---------------------- Deploy Contracts ----------------------
   // Deploy B3TR
   const B3trContract = await ethers.getContractFactory("B3TR")
-  const b3tr = await B3trContract.deploy(owner, minterAccount, owner, config.B3TR_CAP)
+  const b3tr = await B3trContract.deploy(owner, minterAccount, owner)
 
   // Deploy VOT3
   const vot3 = (await deployProxy("VOT3", [
@@ -242,6 +242,8 @@ export const getOrDeployContractInstances = async ({
       minter: minterAccount.address,
       admin: owner.address,
       upgrader: owner.address,
+      contractsAddressManager: owner.address,
+      decaySettingsManager: owner.address,
       b3trAddress: await b3tr.getAddress(),
       destinations: [X_ALLOCATIONS_ADDRESS, VOTE_2_EARN_ADDRESS, await treasury.getAddress(), config.MIGRATION_ADDRESS],
       initialXAppAllocation: config.INITIAL_X_ALLOCATION,
