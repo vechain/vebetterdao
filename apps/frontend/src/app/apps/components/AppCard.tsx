@@ -45,7 +45,8 @@ export const AppCard = ({ xApp }: Props) => {
       onClick={navigateToAppDetail}
       _hover={{
         cursor: "pointer",
-        backgroundColor: "gray.50",
+        bgGradient:
+          "radial-gradient(76.36% 85.35% at 50.12% 27.48%, rgba(230, 252, 207, 0.82) 38.14%, rgba(194, 212, 254, 0.82) 100%), #7DF000",
       }}>
       <Box w="full" position={"relative"} h={200}>
         <Skeleton w="full" h="full" isLoaded={!isBannerLoading}>
