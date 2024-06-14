@@ -319,7 +319,7 @@ export async function deployAll(config: ContractsConfig) {
     },
   }
 
-  await setWhitelistedFunctions(contractAddresses, config, governor, deployer, libraries) // Set whitelisted functions for governor proposals
+  await setWhitelistedFunctions(contractAddresses, config, governor, deployer, libraries, true) // Set whitelisted functions for governor proposals
 
   // ---------- Configure contract roles for setup ---------- //
 
@@ -985,8 +985,10 @@ export const setWhitelistedFunctions = async (
   governor: B3TRGovernor,
   admin: HardhatEthersSigner,
   libraries: Record<string, Record<string, string>>,
+  logOutput = false,
 ) => {
-  console.log("================ Setting whitelisted functions in B3TRGovernor contract =================")
+  if (logOutput)
+    console.log("================ Setting whitelisted functions in B3TRGovernor contract =================")
 
   const { B3TR_GOVERNOR_WHITELISTED_METHODS } = config
 
@@ -1013,9 +1015,7 @@ export const setWhitelistedFunctions = async (
         .setWhitelistFunctions(contractAddresses[contract], whitelistFunctionSelectors, true)
         .then(async tx => await tx.wait())
 
-      console.log("Functions whitelisted in B3TRGovernor contract")
-    } else {
-      console.log("No functions to whitelist in B3TRGovernor contract")
+      if (logOutput) console.log(`Whitelisted functions set for ${contract} in B3TRGovernor contract`)
     }
   }
 }
