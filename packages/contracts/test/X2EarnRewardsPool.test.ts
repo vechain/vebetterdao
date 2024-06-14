@@ -5,7 +5,7 @@ import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployProxy } from "../scripts/helpers"
 
-describe("X2EarnRewardsPool", function () {
+describe.only("X2EarnRewardsPool", function () {
   // deployment
   describe("Deployment", function () {
     it("Cannot deploy contract with zero address", async function () {
@@ -13,17 +13,25 @@ describe("X2EarnRewardsPool", function () {
         forceDeploy: false,
       })
 
-      await expect(deployProxy("X2EarnRewardsPool", [owner.address, owner.address, owner.address, ZERO_ADDRESS])).to.be
-        .reverted
+      await expect(
+        deployProxy("X2EarnRewardsPool", [owner.address, owner.address, owner.address, owner.address, ZERO_ADDRESS]),
+      ).to.be.reverted
 
-      await expect(deployProxy("X2EarnRewardsPool", [owner.address, owner.address, ZERO_ADDRESS, owner.address])).to.be
-        .reverted
+      await expect(
+        deployProxy("X2EarnRewardsPool", [owner.address, owner.address, owner.address, ZERO_ADDRESS, owner.address]),
+      ).to.be.reverted
 
-      await expect(deployProxy("X2EarnRewardsPool", [owner.address, ZERO_ADDRESS, owner.address, owner.address])).to.be
-        .reverted
+      await expect(
+        deployProxy("X2EarnRewardsPool", [owner.address, owner.address, ZERO_ADDRESS, owner.address, owner.address]),
+      ).to.be.reverted
 
-      await expect(deployProxy("X2EarnRewardsPool", [ZERO_ADDRESS, owner.address, owner.address, owner.address])).to.be
-        .reverted
+      await expect(
+        deployProxy("X2EarnRewardsPool", [owner.address, ZERO_ADDRESS, owner.address, owner.address, owner.address]),
+      ).to.be.reverted
+
+      await expect(
+        deployProxy("X2EarnRewardsPool", [ZERO_ADDRESS, owner.address, owner.address, owner.address, owner.address]),
+      ).to.be.reverted
     })
 
     it("Should deploy the contract", async function () {

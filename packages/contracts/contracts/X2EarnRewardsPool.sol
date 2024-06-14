@@ -81,6 +81,7 @@ contract X2EarnRewardsPool is
     IX2EarnApps _x2EarnApps
   ) public initializer {
     require(_admin != address(0), "X2EarnRewardsPool: admin is the zero address");
+    require(_contractsManagerAdmin != address(0), "X2EarnRewardsPool: contracts manager admin is the zero address");
     require(_upgrader != address(0), "X2EarnRewardsPool: upgrader is the zero address");
     require(address(_b3tr) != address(0), "X2EarnRewardsPool: b3tr is the zero address");
     require(address(_x2EarnApps) != address(0), "X2EarnRewardsPool: x2EarnApps is the zero address");
