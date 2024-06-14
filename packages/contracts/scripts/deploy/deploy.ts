@@ -33,6 +33,8 @@ export async function deployAll(config: ContractsConfig) {
   )
   const [deployer] = await ethers.getSigners()
 
+  console.log(`================  Address used to deploy: ${deployer.address} ================`)
+
   // We use a temporary admin to deploy and initialize contracts then transfer role to the real admin
   // Also we have many roles in our contracts but we currently use one wallet for all roles
   const TEMP_ADMIN = network.name === "vechain_solo" ? config.CONTRACTS_ADMIN_ADDRESS : deployer.address
@@ -983,6 +985,8 @@ export const setWhitelistedFunctions = async (
   admin: HardhatEthersSigner,
   libraries: Record<string, Record<string, string>>,
 ) => {
+  console.log("================ Setting whitelisted functions in B3TRGovernor contract =================")
+
   const { B3TR_GOVERNOR_WHITELISTED_METHODS } = config
 
   for (const [contract, functions] of Object.entries(B3TR_GOVERNOR_WHITELISTED_METHODS)) {
@@ -1007,6 +1011,10 @@ export const setWhitelistedFunctions = async (
         .connect(admin)
         .setWhitelistFunctions(contractAddresses[contract], whitelistFunctionSelectors, true)
         .then(async tx => await tx.wait())
+
+      console.log("Functions whitelisted in B3TRGovernor contract")
+    } else {
+      console.log("No functions to whitelist in B3TRGovernor contract")
     }
   }
 }
