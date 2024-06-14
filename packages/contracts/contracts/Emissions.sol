@@ -27,7 +27,6 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import "./interfaces/IB3TR.sol";
 import "./interfaces/IXAllocationVotingGovernor.sol";
-import "./interfaces/B£
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 /// @title Emissions Distribution Contract
