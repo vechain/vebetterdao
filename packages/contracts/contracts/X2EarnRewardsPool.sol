@@ -112,11 +112,11 @@ contract X2EarnRewardsPool is
     // check that app exists
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
 
-    // transfer tokens to this contract
-    require($.b3tr.transferFrom(msg.sender, address(this), amount), "X2EarnRewardsPool: deposit transfer failed");
-
     // increase available amount for the app
     $.availableFunds[appId] += amount;
+
+    // transfer tokens to this contract
+    require($.b3tr.transferFrom(msg.sender, address(this), amount), "X2EarnRewardsPool: deposit transfer failed");
 
     emit NewDeposit(amount, appId, msg.sender);
 
