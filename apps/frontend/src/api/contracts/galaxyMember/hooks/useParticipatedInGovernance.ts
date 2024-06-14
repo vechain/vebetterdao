@@ -5,7 +5,7 @@ import { GalaxyMember__factory } from "@repo/contracts"
 
 const GALAXY_MEMBER_CONTRACT = getConfig().galaxyMemberContractAddress
 
-export const getParticipatedInGovernance = async (thor: Connex.Thor, address: null | string) => {
+export const getParticipatedInGovernance = async (thor: Connex.Thor, address: null | string): Promise<boolean> => {
   if (!address) return Promise.reject(new Error("Address not provided"))
 
   const functionFragment = GalaxyMember__factory.createInterface()
@@ -15,7 +15,7 @@ export const getParticipatedInGovernance = async (thor: Connex.Thor, address: nu
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
-  return res.decoded[0]
+  return res.decoded[0] as boolean
 }
 
 export const getParticipatedInGovernanceQueryKey = (address: null | string) => [
