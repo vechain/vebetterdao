@@ -29,7 +29,7 @@ export const AppCardOptionsDesktopMenu = ({
   showViewDetails = false,
 }: Props) => {
   const { t } = useTranslation()
-  const { onCopy, hasCopied } = useClipboard(receiverAddress)
+  const { onCopy, hasCopied } = useClipboard(teamWalletAddress)
 
   const toast = useToast()
   const handleOnCopy = () => {
@@ -81,7 +81,7 @@ export const AppCardOptionsDesktopMenu = ({
           </MenuItem>
         </Skeleton>
         <MenuItem onClick={handleOnCopy} icon={hasCopied ? <FaCheck /> : <FaCopy />}>
-          {t("Copy receiver address")}
+          {t("Copy team walelt address")}
         </MenuItem>
       </MenuList>
     </Menu>
