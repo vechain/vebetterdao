@@ -158,12 +158,6 @@ interface IX2EarnApps {
   function apps() external view returns (X2EarnAppsDataTypes.AppReturnType[] memory);
 
   /**
-   * @dev Get the total count of apps
-   * @return The total number of apps
-   */
-  function appCount() external view returns (uint256);
-
-  /**
    * @dev Add a new moderator to the app.
    *
    * @param appId the id of the app
