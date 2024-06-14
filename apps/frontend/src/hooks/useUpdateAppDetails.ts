@@ -10,7 +10,7 @@ const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
 
 type useUpdateAppDetailsProps = {
   appId: string
-  onSuccess?: () => void
+  onSuccess?: () => Promise<void> | void
   invalidateCache?: boolean
   onSuccessMessageTitle?: string
 }
