@@ -35,6 +35,7 @@ export const CheckableCard: React.FC<CheckableCardProps> = ({
 }) => {
   return (
     <Card
+      data-testid={`checkable-card__${title}`}
       variant="baseWithBorder"
       rounded={"3xl"}
       borderColor={checked ? "primary.500" : "inherit"}
@@ -50,14 +51,26 @@ export const CheckableCard: React.FC<CheckableCardProps> = ({
       }}
       onClick={() => onChange(!checked)}
       {...cardProps}>
-      <CardBody>
+      <CardBody data-testid="checkable-card__body">
         <Stack spacing={4} align={"flex-start"} {...stackProps}>
           <HStack justify={"space-between"} w="full" alignItems={"flex-start"}>
             <Image src={imageSrc} boxSize={32} alt={`Checkable card image for ${title}`} />
             {inputType === "checkbox" ? (
-              <Checkbox size="lg" isChecked={checked} onChange={e => onChange(e.target.checked)} rounded={"full"} />
+              <Checkbox
+                size="lg"
+                data-testid={`checkable-card__${title}__checkbox`}
+                isChecked={checked}
+                onChange={e => onChange(e.target.checked)}
+                rounded={"full"}
+              />
             ) : (
-              <Radio size="lg" isChecked={checked} onChange={e => onChange(e.target.checked)} rounded={"full"} />
+              <Radio
+                size="lg"
+                data-testid={`checkable-card__${title}__radio`}
+                isChecked={checked}
+                onChange={e => onChange(e.target.checked)}
+                rounded={"full"}
+              />
             )}
           </HStack>
           <Box>

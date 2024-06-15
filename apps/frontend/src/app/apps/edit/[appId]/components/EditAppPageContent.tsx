@@ -72,7 +72,6 @@ export const EditAppPageContent = ({ appId }: Props) => {
         social_urls: metadata?.social_urls ?? [],
       })
       if (!metadataUri) return
-      console.log("metadataUri", metadataUri)
 
       updateAppMetadataMutation.sendTransaction({
         metadataUri,

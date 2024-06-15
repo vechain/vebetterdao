@@ -127,3 +127,26 @@ export const validateProposalTemplate = (template: string): string[] => {
   }
   return errors
 }
+
+/**
+ *  Removes all placeholders from a proposal template
+ */
+export const removePlaceholders = (template: string): string => {
+  return template
+    .replace(TITLE_PLACEHOLDER, "")
+    .replace(SUMMARY_PLACEHOLDER, "")
+    .replace(ONCHAIN_ACTION_PLACEHOLDER, "")
+    .replace(TEXT_ONLY_PLACEHOLDER, "")
+    .replace(MOTIVATION_PLACEHOLDER, "")
+    .replace(DETAILED_SPECIFICATION_PLACEHOLDER, "")
+    .replace(GOALS_PLACEHOLDER, "")
+    .replace(RISKS_PLACEHOLDER, "")
+    .replace(SUCCESS_METRICS_PLACEHOLDER, "")
+    .replace(COMMUNITY_ENGAGEMENT_PLACEHOLDER, "")
+    .replace(CONCLUSION_PLACEHOLDER, "")
+    .replace(REFERENCES_PLACEHOLDER, "")
+    .replace(NAME_PLACEHOLDER, "")
+    .replace(CONTACT_INFORMATION_PLACEHOLDER, "")
+    .replace(ADDRESS_PLACEHOLDER, "")
+    .replace(DATE_PLACEHOLDER, "")
+}

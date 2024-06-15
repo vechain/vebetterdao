@@ -29,7 +29,7 @@ export const ExecutableFunctionCard: React.FC<Props> = ({
 }) => {
   const { t } = useTranslation()
   return (
-    <Card w="full" variant="filled">
+    <Card w="full" variant="filled" data-testid={`executable-card-${index}-${field.contractAddress}-${field.name}`}>
       <CardBody py={4}>
         <VStack spacing={4} align="flex-start">
           <HStack justify="space-between" w="full">
@@ -54,6 +54,7 @@ export const ExecutableFunctionCard: React.FC<Props> = ({
             </HStack>
             {!!onRemoveTransactionClick && (
               <IconButton
+                data-testid={`executable-card-${index}-${field.contractAddress}-${field.name}__remove-tx`}
                 color={"red.500"}
                 aria-label="Remove action"
                 icon={<FiTrash />}
@@ -95,6 +96,7 @@ export const ExecutableFunctionCard: React.FC<Props> = ({
           </VStack>
           {!!onAddAnotherTransactionClick && (
             <Button
+              data-testid={`executable-card-${index}-${field.contractAddress}-${field.name}__add-another-tx`}
               size="sm"
               onClick={onAddAnotherTransactionClick}
               variant="primarySubtle"

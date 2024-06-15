@@ -3,6 +3,7 @@ import {
   Card,
   CardBody,
   FormControl,
+  FormErrorMessage,
   FormHelperText,
   HStack,
   Heading,
@@ -16,7 +17,7 @@ import {
 } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
-import { useProposalFormStore } from "@/store/useProposalFormStore"
+import { useProposalFormStore } from "@/store"
 import { VOT3Icon } from "@/components"
 import { useDepositThreshold, useVot3Balance } from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"
@@ -83,12 +84,14 @@ export const NewProposalSupportPageContent = () => {
                     <VOT3Icon colorVariant="dark" />
                   </InputLeftElement>
                   <Input
+                    data-testid="vot3-amount-input"
                     {...register("amount", {
                       required: t("This field is required"),
                       max: {
                         value: threshold ?? 0,
                         message: t("The maximum amount is {{threshold}}", { threshold: threshold }),
                       },
+                      valueAsNumber: true,
                       validate: value => {
                         if (value > Number(balance?.scaled)) {
                           return t("Insufficient balance")
@@ -112,7 +115,9 @@ export const NewProposalSupportPageContent = () => {
                 </InputGroup>
                 <Skeleton isLoaded={!balanceLoading}>
                   {errors.amount ? (
-                    <FormHelperText color="red.500">{errors.amount.message}</FormHelperText>
+                    <FormErrorMessage color="red.500" data-testid="amount-input-error-message">
+                      {errors.amount.message}
+                    </FormErrorMessage>
                   ) : (
                     <FormHelperText>Your current VOT3 balance is {balance?.formatted}</FormHelperText>
                   )}
@@ -121,10 +126,16 @@ export const NewProposalSupportPageContent = () => {
             </VStack>
 
             <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
-              <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
+              <Button
+                data-testid="go-back"
+                rounded="full"
+                variant={"primarySubtle"}
+                colorScheme="primary"
+                size="lg"
+                onClick={goBack}>
                 {t("Go back")}
               </Button>
-              <Button rounded="full" colorScheme="primary" size="lg" type="submit">
+              <Button data-testid="continue" rounded="full" colorScheme="primary" size="lg" type="submit">
                 {t("Continue")}
               </Button>
             </HStack>

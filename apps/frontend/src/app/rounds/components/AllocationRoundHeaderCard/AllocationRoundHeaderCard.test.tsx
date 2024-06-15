@@ -3,7 +3,7 @@ import { AllocationRoundHeaderCard } from "./AllocationRoundHeaderCard"
 import * as apiHooks from "../../../../api"
 import * as dappKit from "@vechain/dapp-kit-react"
 import dayjs from "dayjs"
-import { APPS } from "../../../../../test/mocks/Apps"
+import { APPS } from "../../../../../__mocks__/Apps"
 import { ethers } from "ethers"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
