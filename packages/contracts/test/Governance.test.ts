@@ -909,7 +909,6 @@ describe("Governor and TimeLock", function () {
       await expect(governor.connect(owner).setVoterRewards(ZERO_ADDRESS)).to.be.reverted
     })
 
-
     it("Updating xAllocationVoting address to zero address will revert", async function () {
       const { governor, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -917,7 +916,6 @@ describe("Governor and TimeLock", function () {
 
       await expect(governor.connect(owner).setXAllocationVoting(ZERO_ADDRESS)).to.be.reverted
     })
-
 
     it("Updating timelock address to zero address will revert", async function () {
       const { governor, owner } = await getOrDeployContractInstances({
@@ -1617,7 +1615,7 @@ describe("Governor and TimeLock", function () {
 
         // @ts-ignore
         await expect(myErc1155.connect(owner).safeTransferFrom(owner.address, await governor.getAddress(), 1, 1, "0x"))
-          .to.be.rejected
+          .to.be.reverted
       })
 
       it("Cannot batch send ERC1155 to the contract", async function () {
@@ -1628,12 +1626,15 @@ describe("Governor and TimeLock", function () {
 
         if (!myErc1155) throw new Error("No ERC1155 contract")
 
-        await myErc1155.connect(owner).mint(owner.address, 1, 1, "0x")
+        await myErc1155.connect(owner).mint(owner.address, 1, 2, "0x")
+        await myErc1155.connect(owner).mint(owner.address, 2, 2, "0x")
 
         // @ts-ignore
         await expect(
-          myErc1155.connect(owner).safeBatchTransferFrom(owner.address, await governor.getAddress(), [1], [1], "0x"),
-        ).to.be.rejected
+          myErc1155
+            .connect(owner)
+            .safeBatchTransferFrom(owner.address, await governor.getAddress(), [1, 2], [2, 2], "0x"),
+        ).to.be.reverted
       })
     })
   })
