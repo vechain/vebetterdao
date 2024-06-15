@@ -610,7 +610,7 @@ describe("X-Apps", function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       const newAdminAddress = ethers.Wallet.createRandom().address
 
-      await expect(x2EarnApps.connect(owner).setAppAdmin(app1Id, newAdminAddress)).to.be.rejected
+      await expect(x2EarnApps.connect(owner).setAppAdmin(app1Id, newAdminAddress)).to.be.reverted
     })
 
     it("Cannot set the admin address of an app to ZERO address", async function () {
@@ -736,7 +736,7 @@ describe("X-Apps", function () {
       await x2EarnApps.connect(owner).addApp(otherAccounts[0].address, appAdmin.address, "My app", oldMetadataURI)
 
       const newMetadataURI = "metadataURI2"
-      await expect(x2EarnApps.connect(unauthorizedUser).updateAppMetadata(app1Id, newMetadataURI)).to.be.rejected
+      await expect(x2EarnApps.connect(unauthorizedUser).updateAppMetadata(app1Id, newMetadataURI)).to.be.reverted
 
       const appURI = await x2EarnApps.appURI(app1Id)
       expect(appURI).to.eql((await x2EarnApps.baseURI()) + oldMetadataURI)
@@ -747,14 +747,14 @@ describe("X-Apps", function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       const newMetadataURI = "metadataURI2"
 
-      await expect(x2EarnApps.connect(owner).updateAppMetadata(app1Id, newMetadataURI)).to.be.rejected
+      await expect(x2EarnApps.connect(owner).updateAppMetadata(app1Id, newMetadataURI)).to.be.reverted
     })
 
     it("Cannot get app uri of non existing app", async function () {
       const { x2EarnApps } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
 
-      await expect(x2EarnApps.appURI(app1Id)).to.be.rejected
+      await expect(x2EarnApps.appURI(app1Id)).to.be.reverted
     })
   })
 
@@ -886,7 +886,7 @@ describe("X-Apps", function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       const newTeamWalletAddress = ethers.Wallet.createRandom().address
 
-      await expect(x2EarnApps.connect(owner).updateTeamWalletAddress(app1Id, newTeamWalletAddress)).to.be.rejected
+      await expect(x2EarnApps.connect(owner).updateTeamWalletAddress(app1Id, newTeamWalletAddress)).to.be.reverted
     })
 
     it("Team wallet address cannot be updated to ZERO address", async function () {
@@ -1028,14 +1028,14 @@ describe("X-Apps", function () {
       const { x2EarnApps, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
 
-      await expect(x2EarnApps.connect(owner).addAppModerator(app1Id, owner.address)).to.be.rejected
+      await expect(x2EarnApps.connect(owner).addAppModerator(app1Id, owner.address)).to.be.reverted
     })
 
     it("Cannot remove a moderator from a non-existing app", async function () {
       const { x2EarnApps, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
 
-      await expect(x2EarnApps.connect(owner).removeAppModerator(app1Id, owner.address)).to.be.rejected
+      await expect(x2EarnApps.connect(owner).removeAppModerator(app1Id, owner.address)).to.be.reverted
     })
 
     it("Cannot add ZERO_ADDRESS as a moderator of an app", async function () {
@@ -1046,7 +1046,7 @@ describe("X-Apps", function () {
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
-      await expect(x2EarnApps.connect(otherAccounts[0]).addAppModerator(app1Id, ZERO_ADDRESS)).to.be.rejected
+      await expect(x2EarnApps.connect(otherAccounts[0]).addAppModerator(app1Id, ZERO_ADDRESS)).to.be.reverted
     })
 
     it("Cannot remove ZERO_ADDRESS as a moderator of an app", async function () {
@@ -1057,7 +1057,7 @@ describe("X-Apps", function () {
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
-      await expect(x2EarnApps.connect(otherAccounts[0]).removeAppModerator(app1Id, ZERO_ADDRESS)).to.be.rejected
+      await expect(x2EarnApps.connect(otherAccounts[0]).removeAppModerator(app1Id, ZERO_ADDRESS)).to.be.reverted
     })
 
     it("Non admin or user without DEFAULT_ADMIN_ROLE cannot add a moderator to an app", async function () {
@@ -1107,7 +1107,7 @@ describe("X-Apps", function () {
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
-      await expect(x2EarnApps.connect(owner).removeAppModerator(app1Id, otherAccounts[1].address)).to.be.rejected
+      await expect(x2EarnApps.connect(owner).removeAppModerator(app1Id, otherAccounts[1].address)).to.be.reverted
     })
 
     it("Cannot remove a moderator with ZERO_ADDRESS from an app", async function () {
@@ -1117,14 +1117,14 @@ describe("X-Apps", function () {
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
-      await expect(x2EarnApps.connect(owner).removeAppModerator(app1Id, ZERO_ADDRESS)).to.be.rejected
+      await expect(x2EarnApps.connect(owner).removeAppModerator(app1Id, ZERO_ADDRESS)).to.be.reverted
     })
 
     it("Cannot remove moderator of non existing app", async function () {
       const { x2EarnApps, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
 
-      await expect(x2EarnApps.connect(owner).removeAppModerator(app1Id, owner.address)).to.be.rejected
+      await expect(x2EarnApps.connect(owner).removeAppModerator(app1Id, owner.address)).to.be.reverted
     })
   })
 
@@ -1163,14 +1163,14 @@ describe("X-Apps", function () {
       const { x2EarnApps, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = await x2EarnApps.hashAppName("My app")
 
-      await expect(x2EarnApps.connect(owner).addRewardDistributor(app1Id, owner.address)).to.be.rejected
+      await expect(x2EarnApps.connect(owner).addRewardDistributor(app1Id, owner.address)).to.be.reverted
     })
 
     it("Cannot remove a reward distributor from a non-existing app", async function () {
       const { x2EarnApps, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = await x2EarnApps.hashAppName("My app")
 
-      await expect(x2EarnApps.connect(owner).removeRewardDistributor(app1Id, owner.address)).to.be.rejected
+      await expect(x2EarnApps.connect(owner).removeRewardDistributor(app1Id, owner.address)).to.be.reverted
     })
 
     it("Cannot add ZERO_ADDRESS as a reward distributor of an app", async function () {
@@ -1181,7 +1181,7 @@ describe("X-Apps", function () {
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
-      await expect(x2EarnApps.connect(otherAccounts[0]).addRewardDistributor(app1Id, ZERO_ADDRESS)).to.be.rejected
+      await expect(x2EarnApps.connect(otherAccounts[0]).addRewardDistributor(app1Id, ZERO_ADDRESS)).to.be.reverted
     })
 
     it("Cannot remove ZERO_ADDRESS as a reward distributor of an app", async function () {
@@ -1192,7 +1192,7 @@ describe("X-Apps", function () {
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
-      await expect(x2EarnApps.connect(otherAccounts[0]).removeRewardDistributor(app1Id, ZERO_ADDRESS)).to.be.rejected
+      await expect(x2EarnApps.connect(otherAccounts[0]).removeRewardDistributor(app1Id, ZERO_ADDRESS)).to.be.reverted
     })
 
     it("Cannot remove a non existing reward distributor from an app", async function () {
@@ -1203,7 +1203,7 @@ describe("X-Apps", function () {
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
-      await expect(x2EarnApps.connect(owner).removeRewardDistributor(app1Id, otherAccounts[1].address)).to.be.rejected
+      await expect(x2EarnApps.connect(owner).removeRewardDistributor(app1Id, otherAccounts[1].address)).to.be.reverted
     })
 
     it("When having more than one distributor, updating one address won't affect the others", async function () {
@@ -1320,7 +1320,7 @@ describe("X-Apps", function () {
       const { x2EarnApps, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const appId = await x2EarnApps.hashAppName("non-existing app")
 
-      await expect(x2EarnApps.connect(owner).setTeamAllocationPercentage(appId, 50)).to.be.rejected
+      await expect(x2EarnApps.connect(owner).setTeamAllocationPercentage(appId, 50)).to.be.reverted
     })
 
     it("Cannot update the team allocation percentage of an app to more than 100", async function () {
@@ -1330,7 +1330,7 @@ describe("X-Apps", function () {
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
-      await expect(x2EarnApps.connect(owner).setTeamAllocationPercentage(app1Id, 101)).to.be.rejected
+      await expect(x2EarnApps.connect(owner).setTeamAllocationPercentage(app1Id, 101)).to.be.reverted
     })
 
     it("Cannot update the team allocation percentage of an app to less than 0", async function () {
@@ -1340,14 +1340,14 @@ describe("X-Apps", function () {
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
-      await expect(x2EarnApps.connect(owner).setTeamAllocationPercentage(app1Id, -1)).to.be.rejected
+      await expect(x2EarnApps.connect(owner).setTeamAllocationPercentage(app1Id, -1)).to.be.reverted
     })
 
     it("Non-admin cannot update the team allocation percentage of an app", async function () {
       const { x2EarnApps, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = await x2EarnApps.hashAppName("My app")
 
-      await expect(x2EarnApps.connect(otherAccounts[0]).setTeamAllocationPercentage(app1Id, 50)).to.be.rejected
+      await expect(x2EarnApps.connect(otherAccounts[0]).setTeamAllocationPercentage(app1Id, 50)).to.be.reverted
     })
 
     it("Userr with DEFAULT_ADMIN_ROLE can update the team allocation percentage of an app", async function () {
