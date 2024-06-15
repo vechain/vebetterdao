@@ -45,7 +45,7 @@ export const getXAppMetadata = async (uri: string): Promise<XAppMetadata> => {
   return metadata.data
 }
 
-export const getXAppMetadataQueryKey = (xAppId?: string) => ["xApps", xAppId, "metadata"]
+export const getXAppMetadataQueryKey = (metadataURI?: string) => ["xApps", metadataURI, "metadata"]
 
 /**
  * Hook to fetch the metadata of an xApp from the xApps metadata base uri
@@ -58,7 +58,7 @@ export const useXAppMetadata = (xAppId?: string) => {
   const { data: xApp } = useXApp(xAppId ?? "")
 
   return useQuery({
-    queryKey: getXAppMetadataQueryKey(xAppId),
+    queryKey: getXAppMetadataQueryKey(xApp?.metadataURI || ""),
     queryFn: async () => (!(!baseUri && xApp) ? await getXAppMetadata(`${baseUri}${xApp?.metadataURI}`) : null),
     enabled: !!thor && !!baseUri && !!xApp,
   })
