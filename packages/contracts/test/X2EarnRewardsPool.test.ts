@@ -457,6 +457,29 @@ describe("X2EarnRewardsPool", function () {
         x2EarnRewardsPool.connect(owner).withdraw(ethers.parseEther("101"), await x2EarnApps.hashAppName("My app"), ""),
       )
     })
+
+    it("Should not allow to withdraw more than available funds", async function () {
+      const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccount, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          bootstrapAndStartEmissions: true,
+        })
+
+      const teamWallet = otherAccount
+
+      const amount = ethers.parseEther("100")
+
+      await b3tr.connect(minterAccount).mint(owner.address, amount)
+
+      await x2EarnApps.addApp(teamWallet.address, owner.address, "My app", "metadataURI")
+
+      await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
+      await x2EarnRewardsPool.connect(owner).deposit(amount, await x2EarnApps.hashAppName("My app"))
+
+      await catchRevert(
+        x2EarnRewardsPool.connect(owner).withdraw(ethers.parseEther("101"), await x2EarnApps.hashAppName("My app"), ""),
+      )
+    })
   })
   // distributeRewards
   describe("Distribute rewards", async function () {
@@ -625,6 +648,31 @@ describe("X2EarnRewardsPool", function () {
       await catchRevert(
         x2EarnRewardsPool.connect(teamWallet).distributeReward(appId, ethers.parseEther("101"), user.address, ""),
       )
+    })
+
+    it("Cannot distribute more than available funds", async function () {
+      const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccounts, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          bootstrapAndStartEmissions: true,
+        })
+
+      const teamWallet = otherAccounts[10]
+      const user = otherAccounts[11]
+      const amount = ethers.parseEther("100")
+
+      await b3tr.connect(minterAccount).mint(owner.address, amount)
+
+      await x2EarnApps.addApp(teamWallet.address, owner.address, "My app", "metadataURI")
+      const appId = await x2EarnApps.hashAppName("My app")
+      await x2EarnApps.addRewardDistributor(appId, teamWallet.address)
+
+      await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
+      await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
+
+      await expect(
+        x2EarnRewardsPool.connect(teamWallet).distributeReward(appId, ethers.parseEther("101"), user.address, ""),
+      ).to.be.reverted
     })
   })
 })
