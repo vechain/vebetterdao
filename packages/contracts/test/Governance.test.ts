@@ -5217,8 +5217,6 @@ describe("Governor and TimeLock", function () {
       )
 
       const receipt = await executionTx.wait()
-      console.log(receipt)
-
       if (!receipt) throw new Error("No receipt")
 
       expect(receipt.status).to.eql(1)
