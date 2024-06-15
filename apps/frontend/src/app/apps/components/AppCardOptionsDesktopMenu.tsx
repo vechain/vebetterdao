@@ -81,7 +81,7 @@ export const AppCardOptionsDesktopMenu = ({
           </MenuItem>
         </Skeleton>
         <MenuItem onClick={handleOnCopy} icon={hasCopied ? <FaCheck /> : <FaCopy />}>
-          {t("Copy team walelt address")}
+          {t("Copy team wallet address")}
         </MenuItem>
       </MenuList>
     </Menu>
