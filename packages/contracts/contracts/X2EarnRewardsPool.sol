@@ -248,4 +248,17 @@ contract X2EarnRewardsPool is
   function onERC1155Received(address, address, uint256, uint256, bytes memory) public virtual returns (bytes4) {
     revert("X2EarnRewardsPool: contract does not accept ERC1155 tokens");
   }
+
+  /**
+   * @dev Transfers of ERC1155 tokens to this contract are not allowed.
+   */
+  function onERC1155BatchReceived(
+    address,
+    address,
+    uint256[] memory,
+    uint256[] memory,
+    bytes memory
+  ) public virtual returns (bytes4) {
+    revert("X2EarnRewardsPool: contract does not accept batch transfers of ERC1155 tokens");
+  }
 }
