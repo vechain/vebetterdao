@@ -734,6 +734,7 @@ export async function deployAll(config: ContractsConfig) {
     galaxyMemberContractAddress: await galaxyMember.getAddress(),
     treasuryContractAddress: await treasury.getAddress(),
     x2EarnAppsContractAddress: await x2EarnApps.getAddress(),
+    x2EarnRewardsPoolContractAddress: await x2EarnRewardsPool.getAddress(),
   })
 
   const end = new Date(performance.now() - start)
@@ -751,6 +752,7 @@ export async function deployAll(config: ContractsConfig) {
     voterRewards: voterRewards,
     treasury: treasury,
     x2EarnApps: x2EarnApps,
+    x2EarnRewardsPool: x2EarnRewardsPool,
   }
   // close the script
 }

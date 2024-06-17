@@ -19,6 +19,7 @@ export type AppConfig = {
   galaxyMemberContractAddress: string
   treasuryContractAddress: string
   x2EarnAppsContractAddress: string
+  x2EarnRewardsPoolContractAddress: string
   nodeUrl: string
   network: Network
 }
