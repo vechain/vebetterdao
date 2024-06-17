@@ -393,6 +393,11 @@ describe("Treasury", () => {
           treasuryProxy.transferERC1155Tokens(await erc1155.getAddress(), owner.address, 1, 1, new Uint8Array(0)),
         )
       })
+      it("should be able to recieve a batch of ERC1155 tokens", async () => {
+        await erc1155.connect(owner).mintBatch(await treasuryProxy.getAddress(), [2, 3], [2, 3], new Uint8Array(0))
+        expect(await treasuryProxy.getERC1155TokenBalance(await erc1155.getAddress(), 2)).to.eql(2n)
+        expect(await treasuryProxy.getERC1155TokenBalance(await erc1155.getAddress(), 3)).to.eql(3n)
+      })
     })
   })
   describe("UUPS", () => {
