@@ -82,6 +82,11 @@ export const ContractsDetails = () => {
           "CONTRACTS_ADDRESS_MANAGER_ROLE",
         ]}
       />
+      <ContractDetailsCard
+        title="X2EarnRewardsPool"
+        address={config.x2EarnRewardsPoolContractAddress}
+        roles={["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "CONTRACTS_ADDRESS_MANAGER_ROLE"]}
+      />
     </Grid>
   )
 }

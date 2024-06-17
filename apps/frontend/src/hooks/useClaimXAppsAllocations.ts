@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
 import { useConnex, useWallet } from "@vechain/dapp-kit-react"
+import { getConfig } from "@repo/config"
 
 type useClaimAllocationsProps = {
   roundId: string
@@ -34,6 +35,7 @@ export const useClaimXAppsAllocations = ({
   const { account } = useWallet()
   const toast = useToast()
   const queryClient = useQueryClient()
+  const config = getConfig()
 
   const buildClauses = useCallback(
     (roundId: string, appIds: string[]) => {
@@ -62,6 +64,14 @@ export const useClaimXAppsAllocations = ({
       await queryClient.refetchQueries({
         queryKey: getB3TrBalanceQueryKey(account ?? ""),
       })
+
+      await queryClient.cancelQueries({
+        queryKey: getB3TrBalanceQueryKey(config.x2EarnRewardsPoolContractAddress),
+      })
+
+      await queryClient.refetchQueries({
+        queryKey: getB3TrBalanceQueryKey(config.x2EarnRewardsPoolContractAddress),
+      })
     }
 
     toast({
@@ -73,7 +83,7 @@ export const useClaimXAppsAllocations = ({
       isClosable: true,
     })
     onSuccess?.()
-  }, [account, invalidateCache, onSuccess, queryClient, appIds, roundId, toast])
+  }, [account, invalidateCache, onSuccess, queryClient, appIds, roundId, toast, config])
 
   const result = useSendTransaction({
     signerAccount: account,
