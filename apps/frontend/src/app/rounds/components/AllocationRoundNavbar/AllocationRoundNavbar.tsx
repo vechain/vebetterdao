@@ -63,7 +63,13 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
 
   if (isDesktop)
     return (
-      <HStack w={clientWidth} align="center" bgColor={bgColor} mt={-10} py={3}>
+      <HStack
+        w={clientWidth}
+        align="center"
+        bgColor={bgColor}
+        mt={-10}
+        py={3}
+        data-testid={`allocation-round-${roundId}-nav-desktop`}>
         <Container
           maxW={"container.xl"}
           display={"flex"}
@@ -73,6 +79,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
           flexDirection={"row"}
           px={20}>
           <Button
+            data-testid="prev-round-button"
             color={prevButtonDisabled ? "#757575" : "#004CFC"}
             size="sm"
             variant={"ghost"}
@@ -104,6 +111,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
             <AllocationRoundStateTag state={data?.state} size="md" renderInTag={true} variant={"subtle"} />
           </Stack>
           <Button
+            data-testid="next-round-button"
             variant={"ghost"}
             size="sm"
             color={nextButtonDisabled ? "#757575" : "#004CFC"}
@@ -118,8 +126,16 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
     )
 
   return (
-    <HStack w="100vw" justify={"space-between"} align="center" bgColor={bgColor} px={4} py={2}>
+    <HStack
+      w="100vw"
+      justify={"space-between"}
+      align="center"
+      bgColor={bgColor}
+      px={4}
+      py={2}
+      data-testid={`allocation-round-${roundId}-nav-mobile`}>
       <IconButton
+        data-testid="prev-round-button"
         color={prevButtonDisabled ? "#757575" : "#004CFC"}
         variant={"ghost"}
         icon={<FaArrowLeft />}
@@ -131,7 +147,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
         <HStack spacing={4}>
           <Skeleton isLoaded={!isLoading}>
             <Heading size="md">
-              {t("#{{round}} round", {
+              {t("Round #{{round}}", {
                 round: data?.roundId ?? 0,
               })}
             </Heading>
@@ -150,6 +166,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
         </HStack>
       </VStack>
       <IconButton
+        data-testid="next-round-button"
         color={nextButtonDisabled ? "#757575" : "#004CFC"}
         variant={"ghost"}
         icon={<FaArrowRight />}
