@@ -1,5 +1,4 @@
 import { buildB3trApprovesTx } from "@/api"
-import { useToast } from "@chakra-ui/react"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
 import { useConnex, useWallet } from "@vechain/dapp-kit-react"
@@ -23,7 +22,6 @@ export const useB3trApprove = ({
 }: useB3trApproveProps): UseSendTransactionReturnValue => {
   const { thor } = useConnex()
   const { account } = useWallet()
-  const toast = useToast()
   const queryClient = useQueryClient()
 
   const buildClauses = useCallback(() => {
@@ -47,16 +45,8 @@ export const useB3trApprove = ({
       })
     }
 
-    toast({
-      title: "B3TR tokens approved succesfully",
-      description: `You have approved ${formattedAmount} B3TR to be spent by ${spender}`,
-      status: "success",
-      position: "bottom-left",
-      duration: 5000,
-      isClosable: true,
-    })
     onSuccess?.()
-  }, [invalidateCache, toast, onSuccess, account, amount, spender, queryClient])
+  }, [invalidateCache, onSuccess, account, amount, spender, queryClient])
 
   const result = useSendTransaction({
     signerAccount: account,
