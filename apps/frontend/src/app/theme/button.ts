@@ -8,8 +8,12 @@ export const ButtonStyle: ComponentStyleConfig = {
   // styles for different visual variants ("outline", "solid")
   variants: {
     primarySubtle: {
-      bg: "rgba(224, 233, 254, 1)",
-      color: "primary.500",
+      rounded: "full",
+      fontSize: "16px",
+      fontWeight: 500,
+      px: "24px",
+      bgColor: "#E0E9FE",
+      color: "#004CFC",
       _hover: {
         bg: "rgba(224, 233, 254, 0.8)",
       },

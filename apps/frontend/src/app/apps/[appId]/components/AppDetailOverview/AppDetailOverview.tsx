@@ -10,6 +10,7 @@ import { EditAppPageButton } from "./components/EditAppPageButton"
 import { useCurrentAppBanner, useCurrentAppLogo, useCurrentAppMetadata } from "../../hooks"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 import { AppReceiverAddress } from "./components/AppReceiverAddress"
+import { AdminAppPageButton } from "./components/AdminAppPageButton"
 
 export const AppDetailOverview = () => {
   const { t } = useTranslation()
@@ -73,6 +74,7 @@ export const AppDetailOverview = () => {
                 </HStack>
                 <HStack>
                   <EditAppPageButton />
+                  <AdminAppPageButton />
                   <Button
                     variant={"primaryAction"}
                     rightIcon={<UilArrowUpRight color="#FFFFFF" size={"16px"} />}
