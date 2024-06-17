@@ -1,4 +1,7 @@
 {
+  "#{{round}} round": "#{{round}} round",
+  "Previous round": "Previous round",
+  "Next round": "Next round",
   "Community support": "Community support",
   "You": "You",
   "Description cannot be empty.": "Description cannot be empty.",
