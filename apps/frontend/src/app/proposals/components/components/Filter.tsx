@@ -13,38 +13,32 @@ export const Filter = () => {
   const [selectedFilter, setSelectedFilter] = useState<string>()
   const [selectedFilterOptions, setSelectedFilterOptions] = useState<string[]>()
   const [selectedOption, setSelectedOption] = useState<string>()
-  const [showSelectedFilterOptions, setShowSelectedFilterOptions] = useState(false)
+  /*   const [showSelectedFilterOptions, setShowSelectedFilterOptions] = useState(false) */
 
-  const handleFilterClick = useCallback(
-    (filter: string) => {
-      if (filters[filter]?.length === 0) {
-        setSelectedFilter(filter)
-        setShowSelectedFilterOptions(false)
-        setSelectedFilterOptions(undefined)
-      } else {
-        setShowSelectedFilterOptions(!showSelectedFilterOptions)
-        setSelectedFilter(filter)
-        setSelectedFilterOptions(filters[filter])
-      }
-    },
-    [showSelectedFilterOptions],
-  )
+  const handleFilterClick = useCallback((filter: string) => {
+    if (filters[filter]?.length === 0) {
+      setSelectedFilter(filter)
+      setSelectedFilterOptions(undefined)
+    } else {
+      setSelectedFilter(filter)
+      setSelectedFilterOptions(filters[filter])
+    }
+  }, [])
 
   const handleOptionClick = useCallback((option: string) => {
     setSelectedOption(option)
-    setShowSelectedFilterOptions(false)
+    setSelectedFilterOptions(undefined)
   }, [])
 
   const handleClearFilter = useCallback(() => {
     setSelectedFilter(undefined)
     setSelectedOption(undefined)
     setSelectedFilterOptions(undefined)
-    setShowSelectedFilterOptions(false)
   }, [])
 
   return (
     <>
-      {!selectedFilter && !showSelectedFilterOptions && (
+      {!selectedFilter && !selectedFilterOptions && (
         <HStack
           spacing={2}
           overflowX={{ base: "scroll", md: "hidden" }}
@@ -65,8 +59,8 @@ export const Filter = () => {
               py={3}
               borderRadius={78}
               key={filter}
-              bg={selectedFilter === filter && !showSelectedFilterOptions ? "black" : "white"}
-              color={selectedFilter === filter && !showSelectedFilterOptions ? "white" : "black"}
+              bg={"white"}
+              color={"black"}
               onClick={() => handleFilterClick(filter)}
               borderWidth={1}
               borderColor={"#EFEFEF"}
@@ -80,7 +74,7 @@ export const Filter = () => {
           ))}
         </HStack>
       )}
-      {showSelectedFilterOptions && (
+      {selectedFilterOptions && (
         <HStack spacing={2}>
           <Box p={3} bg={"white"} borderRadius={"full"} borderWidth={1} borderColor={"#EFEFEF"}>
             <MdClose size={18} onClick={handleClearFilter} cursor={"pointer"} />
@@ -121,7 +115,7 @@ export const Filter = () => {
           </HStack>
         </HStack>
       )}
-      {selectedFilter && !showSelectedFilterOptions && (
+      {selectedFilter && !selectedFilterOptions && (
         <HStack spacing={2}>
           <Box p={3} bg={"white"} borderRadius={"full"} borderWidth={1} borderColor={"#EFEFEF"}>
             <MdClose size={18} onClick={handleClearFilter} cursor={"pointer"} />
