@@ -3,7 +3,7 @@ import * as apiHooks from "../../../../api"
 import * as dappkit from "@vechain/dapp-kit-react"
 import * as hooks from "../../../../hooks"
 import { AllocationRoundUserVotes } from "./AllocationRoundUserVotes"
-import { APPS } from "../../../../../test/mocks/Apps"
+import { APPS } from "../../../../../__mocks__/Apps"
 import dayjs from "dayjs"
 import { ethers } from "ethers"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
@@ -79,6 +79,9 @@ describe("AllocationRoundUserVotes", () => {
     describe("voting active", () => {
       const totalVotes = "100"
       const randomAppsExcludedId = APPS.filter(() => Math.random() > 0.5).map(app => app.id)
+      if (randomAppsExcludedId.length === APPS.length) {
+        randomAppsExcludedId.pop()
+      }
       const appsVoted = APPS.filter(app => !randomAppsExcludedId.includes(app.id))
       beforeEach(() => {
         // tell vitest we use mocked time
@@ -95,7 +98,7 @@ describe("AllocationRoundUserVotes", () => {
             voteStart: "1",
             voteEnd: "2",
             roundId: "1",
-            state: "1",
+            state: 1,
           },
           isLoading: false,
           isError: false,
@@ -413,7 +416,7 @@ describe("AllocationRoundUserVotes", () => {
             voteStart: "1",
             voteEnd: "2",
             roundId: "1",
-            state: "1",
+            state: 1,
           },
           isLoading: false,
           isError: false,
@@ -508,7 +511,7 @@ describe("AllocationRoundUserVotes", () => {
         expect(screen.queryByTestId("split-evenly")).not.toBeInTheDocument()
         expect(screen.queryByTestId("cast-vote-button")).not.toBeInTheDocument()
 
-        for (const app of appsVoted) {
+        for (const app of APPS) {
           const isExcluded = randomAppsExcludedId.includes(app.id)
           if (!isExcluded) {
             // inputs

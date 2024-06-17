@@ -16,7 +16,7 @@ import {
 import { getConfig, getContractsConfig } from "@repo/config"
 import { abi } from "thor-devkit"
 import { JsonContractType, resolveAbiFunctionFromCalldata } from "@repo/utils/ContractUtils"
-import { ProposalFormAction } from "@/store/useProposalFormStore"
+import { ProposalFormAction } from "@/store"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { EnvConfig } from "@repo/config/contracts"
 

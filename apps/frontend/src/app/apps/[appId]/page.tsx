@@ -30,7 +30,7 @@ export default function AppDetail({ params }: Readonly<Props>) {
 
   return (
     <MotionVStack>
-      <AppDetailPageContent appId={params.appId} />
+      <AppDetailPageContent />
     </MotionVStack>
   )
 }

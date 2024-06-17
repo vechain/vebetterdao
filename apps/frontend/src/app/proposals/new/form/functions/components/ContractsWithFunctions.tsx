@@ -28,9 +28,9 @@ export const ContractsWithFunctions: React.FC<Props> = ({
   handleRemoveFunction,
 }) => {
   if (contractsWithFunctionsToRender.length === 1) {
-    const functions = contractsWithFunctionsToRender[0]!.functions
-    if (functions.length <= 3) {
-      const gridSize = functionsNumberGridSizeMapping[functions.length as keyof typeof functionsNumberGridSizeMapping]
+    const functionsNumber = contractsWithFunctionsToRender.reduce((acc, contract) => acc + contract.functions.length, 0)
+    if (functionsNumber <= 3) {
+      const gridSize = functionsNumberGridSizeMapping[functionsNumber as keyof typeof functionsNumberGridSizeMapping]
 
       return (
         <Grid templateColumns={["repeat(1, 1fr)", `repeat(${gridSize}, 1fr)`]} gap={[4, 4, 8]} w="full">
@@ -88,6 +88,7 @@ export const ContractsWithFunctions: React.FC<Props> = ({
           const isSelected = isSelectedIndex !== -1
           return (
             <Card
+              data-testid={`function-card__${contract.name}_${func.name}`}
               borderRadius={"xl"}
               w="full"
               variant="baseWithBorder"

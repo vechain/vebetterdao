@@ -1,4 +1,4 @@
-import { AppSocialUrls } from "@/app/apps/[appId]/components/AppSocialUrls"
+import { AppDetailSocials } from "@/app/apps/[appId]/components/AppDetailOverview/components/AppDetailSocials"
 import { AppCardOptionsDesktopMenu } from "@/app/apps/components/AppCardOptionsDesktopMenu"
 import { AppCardOptionsMobileModal } from "@/app/apps/components/AppCardOptionsMobileModal"
 import { CreateEditAppFormData } from "@/components/CreateEditAppForm"
@@ -88,7 +88,7 @@ export const AppPreviewDetailCard = ({
           <Skeleton isLoaded={!appMetadataLoading} w={["full", "70%"]}>
             <Text fontSize={"md"}>{app?.description ?? appMetadataError?.message ?? "Error loading description"}</Text>
           </Skeleton>
-          <AppSocialUrls socialUrls={[]} />
+          <AppDetailSocials socialUrls={[]} />
         </VStack>
       </CardBody>
     </Card>
