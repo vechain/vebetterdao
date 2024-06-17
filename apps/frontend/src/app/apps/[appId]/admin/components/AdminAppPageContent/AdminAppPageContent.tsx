@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation"
 
 export type AdminAppForm = {
   adminAddress: string
-  allocationReceiverAddress: string
+  teamWalletAddress: string
   moderators: string[]
 }
 
@@ -24,10 +24,14 @@ export const AdminAppPageContent = () => {
     form.reset()
   }, [form, router])
 
+  const onSubmit = useCallback((data: AdminAppForm) => {
+    console.log(data)
+  }, [])
+
   return (
     <Card variant="baseWithBorder" w="full">
       <CardBody>
-        <VStack gap="48px" align="stretch">
+        <VStack gap="48px" align="stretch" as="form" onSubmit={form.handleSubmit(onSubmit)}>
           <Heading fontSize={"36px"} fontWeight={700}>
             {t("{{app}} settings", { app: appMetadata?.name })}
           </Heading>
