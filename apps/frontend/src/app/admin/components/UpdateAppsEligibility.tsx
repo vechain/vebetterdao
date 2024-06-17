@@ -1,4 +1,5 @@
 import { useAppsEligibleInNextRound, useXApps } from "@/api"
+import { TransactionModal } from "@/components/TransactionModal"
 import { useSetVotingEligibility } from "@/hooks"
 import {
   VStack,
@@ -12,8 +13,9 @@ import {
   Switch,
   HStack,
   Divider,
+  useDisclosure,
 } from "@chakra-ui/react"
-import { useMemo } from "react"
+import { useCallback, useMemo } from "react"
 
 export const UpdateAppsEligibility = () => {
   const { data: eligibleAppsIds } = useAppsEligibleInNextRound()
@@ -47,18 +49,38 @@ export const UpdateAppsEligibility = () => {
 }
 
 const AppEligibility = ({ id, name, isEligible }: { id: string; name: string; isEligible: boolean }) => {
-  const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useSetVotingEligibility({
+  const { isOpen, onClose, onOpen } = useDisclosure()
+  const {
+    sendTransaction,
+    resetStatus,
+    isTxReceiptLoading,
+    sendTransactionPending,
+    status,
+    error,
+    txReceipt,
+    sendTransactionTx,
+  } = useSetVotingEligibility({
     appId: id,
     isEligible: !isEligible,
     appName: name,
     invalidateCache: true,
   })
 
-  const handleEligibilityChange = (event: { preventDefault: () => void }) => {
-    event.preventDefault()
+  const handleEligibilityChange = useCallback(
+    (event?: { preventDefault: () => void }) => {
+      if (event) event.preventDefault()
 
-    sendTransaction(undefined)
-  }
+      sendTransaction(undefined)
+      onOpen()
+    },
+    [sendTransaction, onOpen],
+  )
+
+  const handleClose = useCallback(() => {
+    resetStatus()
+    onClose()
+  }, [resetStatus, onClose])
+
   return (
     <VStack>
       <HStack w={"full"} justifyContent={"space-between"}>
@@ -70,6 +92,23 @@ const AppEligibility = ({ id, name, isEligible }: { id: string; name: string; is
         />
       </HStack>
       <Divider />
+      <TransactionModal
+        isOpen={isOpen}
+        onClose={handleClose}
+        status={error ? "error" : status}
+        successTitle={
+          isEligible ? `${name} will be eligible from next round` : `${name} will not be eligible from next round`
+        }
+        onTryAgain={handleEligibilityChange}
+        showTryAgainButton
+        showExplorerButton
+        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        pendingTitle={
+          isEligible ? `Enabling voting eligibility for ${name}...` : `Disabling voting eligibility for ${name}...`
+        }
+        errorTitle={"Error changing eligibility"}
+        errorDescription={error?.reason}
+      />
     </VStack>
   )
 }
