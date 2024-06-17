@@ -18,12 +18,16 @@ export const useUploadAppMetadata = () => {
       let logo = metadata.logo
       let banner = metadata.banner
 
-      const ipfsLogoUri = await NFTStorageUtils.nftStorageClient.storeBlob(
-        await base64UrlToFile(logo, "logo.jpeg", "image/jpeg"),
-      )
-      const ipfsBannerUri = await NFTStorageUtils.nftStorageClient.storeBlob(
-        await base64UrlToFile(banner, "banner.jpeg", "image/jpeg"),
-      )
+      // TODO: remove .jpeg extension?
+      const [ipfsLogoUri, ipfsBannerUri, ...scrennshotUrls] = await Promise.all([
+        NFTStorageUtils.nftStorageClient.storeBlob(await base64UrlToFile(logo, "logo.jpeg", "image/jpeg")),
+        NFTStorageUtils.nftStorageClient.storeBlob(await base64UrlToFile(banner, "banner.jpeg", "image/jpeg")),
+        ...metadata.screenshots.map(async screenshot =>
+          NFTStorageUtils.nftStorageClient.storeBlob(
+            await base64UrlToFile(screenshot, "screenshot.jpeg", "image/jpeg"),
+          ),
+        ),
+      ])
 
       const data = new Blob(
         [
@@ -31,6 +35,7 @@ export const useUploadAppMetadata = () => {
             ...metadata,
             logo: toIPFSURL(ipfsLogoUri),
             banner: toIPFSURL(ipfsBannerUri),
+            screenshots: scrennshotUrls.map((uri: string) => toIPFSURL(uri)),
           }),
         ],
         {
