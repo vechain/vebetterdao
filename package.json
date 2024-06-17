@@ -37,8 +37,8 @@
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
     "dotenv-cli": "latest",
-    "prettier": "^3.2.5",
-    "turbo": "^1.13.1"
+    "prettier": "^3.3.0",
+    "turbo": "^1.13.3"
   },
   "engines": {
     "node": ">=18"

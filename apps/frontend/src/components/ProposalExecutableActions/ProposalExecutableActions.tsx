@@ -3,7 +3,7 @@ import { VStack, Heading } from "@chakra-ui/react"
 import { useEffect } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { abi } from "thor-devkit"
-import { ProposalFormAction } from "@/store/useProposalFormStore"
+import { ProposalFormAction } from "@/store"
 import { ethers } from "ethers"
 import { ExecutableFunctionCard } from "@/app/proposals/new/form/functions/details/components/ExecutableFunctionCard"
 
