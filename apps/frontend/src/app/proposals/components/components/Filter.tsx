@@ -13,7 +13,6 @@ export const Filter = () => {
   const [selectedFilter, setSelectedFilter] = useState<string>()
   const [selectedFilterOptions, setSelectedFilterOptions] = useState<string[]>()
   const [selectedOption, setSelectedOption] = useState<string>()
-  /*   const [showSelectedFilterOptions, setShowSelectedFilterOptions] = useState(false) */
 
   const handleFilterClick = useCallback((filter: string) => {
     if (filters[filter]?.length === 0) {
