@@ -20,7 +20,7 @@ import { useRouter } from "next/navigation"
 export type Props = {
   isOpen: boolean
   onClose: () => void
-  receiverAddress: string
+  teamWalletAddress: string
   xAppId?: string
   externalUrl?: string
   isLoading?: boolean
@@ -30,20 +30,20 @@ export type Props = {
 export const AppCardOptionsMobileModal = ({
   isOpen,
   onClose,
-  receiverAddress,
+  teamWalletAddress,
   externalUrl,
   isLoading,
   xAppId,
   showViewDetails = false,
 }: Props) => {
-  const { onCopy } = useClipboard(receiverAddress)
+  const { onCopy } = useClipboard(teamWalletAddress)
 
   const toast = useToast()
   const handleOnCopy = () => {
     onCopy()
     onClose()
     toast({
-      title: "App receiver address copied",
+      title: "Team wallet address copied",
       status: "success",
       duration: 3000,
       isClosable: true,
@@ -83,7 +83,7 @@ export const AppCardOptionsMobileModal = ({
               variant={"solid"}
               onClick={handleOnCopy}
               leftIcon={<FaCopy />}>
-              Copy receiver address
+              Copy team wallet address
             </Button>
             <Skeleton isLoaded={!isLoading} w="full">
               <Button
