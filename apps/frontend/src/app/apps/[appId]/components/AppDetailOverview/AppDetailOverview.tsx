@@ -1,6 +1,5 @@
 import { Button, Card, CardBody, Flex, HStack, Heading, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { notFoundImage } from "@/constants"
-import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 import dayjs from "dayjs"
 import { UilArrowUpRight } from "@iconscout/react-unicons"
@@ -10,6 +9,7 @@ import { AppDetailAllocationInfo } from "./components/AppDetailAllocationInfo"
 import { EditAppPageButton } from "./components/EditAppPageButton"
 import { useCurrentAppBanner, useCurrentAppLogo, useCurrentAppMetadata } from "../../hooks"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
+import { AppReceiverAddress } from "./components/AppReceiverAddress"
 
 export const AppDetailOverview = () => {
   const { t } = useTranslation()
@@ -61,14 +61,7 @@ export const AppDetailOverview = () => {
               </Skeleton>
               <HStack justify={"space-between"}>
                 <HStack gap={10}>
-                  <VStack>
-                    <Text fontSize={"14px"} fontWeight={400} color="#6A6A6A">
-                      {t("Team wallet address")}
-                    </Text>
-                    <Text fontSize={"16px"} fontWeight={400}>
-                      {humanAddress(app?.teamWalletAddress || "", 4, 6)}
-                    </Text>
-                  </VStack>
+                  <AppReceiverAddress />
                   <VStack>
                     <Text fontSize={"14px"} fontWeight={400} color="#6A6A6A">
                       {t("Member since")}

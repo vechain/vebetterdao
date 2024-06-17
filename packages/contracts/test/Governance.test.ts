@@ -5336,4 +5336,70 @@ describe("Governor and TimeLock", function () {
       })
     })
   })
+
+  describe("Relay", function () {
+    it("Should be able to relay a transaction", async () => {
+      const config = createLocalConfig()
+      const {
+        governor,
+        owner,
+        governorClockLogicLib,
+        governorConfiguratorLib,
+        governorDepositLogicLib,
+        governorFunctionRestrictionsLogicLib,
+        governorProposalLogicLib,
+        governorQuorumLogicLib,
+        governorStateLogicLib,
+        governorVotesLogicLib,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      // whitelist relay function
+      const funcSig = governor.interface.getFunction("relay")?.selector
+      await governor.connect(owner).setWhitelistFunction(await governor.getAddress(), funcSig, true)
+
+      const executionTx = await createProposalAndExecuteIt(
+        owner,
+        owner,
+        governor,
+        await ethers.getContractFactory("B3TRGovernor", {
+          libraries: {
+            GovernorClockLogic: await governorClockLogicLib.getAddress(),
+            GovernorConfigurator: await governorConfiguratorLib.getAddress(),
+            GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
+            GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
+            GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
+            GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
+            GovernorStateLogic: await governorStateLogicLib.getAddress(),
+            GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+          },
+        }),
+        "Relay transaction",
+        "relay",
+        [owner.address, 0, "0x"],
+      )
+
+      const receipt = await executionTx.wait()
+      if (!receipt) throw new Error("No receipt")
+
+      expect(receipt.status).to.eql(1)
+    })
+
+    it("Only governance can relay a transaction", async () => {
+      const config = createLocalConfig()
+      const { governor, owner, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      // whitelist relay function
+      const funcSig = governor.interface.getFunction("relay")?.selector
+      await governor.connect(owner).setWhitelistFunction(await governor.getAddress(), funcSig, true)
+
+      await expect(governor.connect(otherAccounts[0]).relay(owner.address, 0, "0x", { gasLimit: 10_000_000 })).to.be
+        .reverted
+    })
+  })
 })
