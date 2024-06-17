@@ -1,5 +1,4 @@
 import { RoundReward, buildClaimRewardsTx, getB3TrBalanceQueryKey, getRoundRewardQueryKey } from "@/api"
-import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
