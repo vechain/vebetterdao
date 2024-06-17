@@ -12,17 +12,17 @@ export const AppReceiverAddress = () => {
   const [showCopiedLink, setShowCopiedLink] = useState(false)
 
   const handleCopyLink = useCallback(async () => {
-    await navigator.clipboard.writeText(app?.receiverAddress || "")
+    await navigator.clipboard.writeText(app?.teamWalletAddress || "")
     setShowCopiedLink(true)
     setTimeout(() => {
       setShowCopiedLink(false)
     }, 2000)
-  }, [app?.receiverAddress])
+  }, [app?.teamWalletAddress])
 
   return (
     <VStack align={"stretch"}>
       <Text fontSize={"14px"} fontWeight={400} color="#6A6A6A">
-        {t("Receiver address")}
+        {t("Team wallet address")}
       </Text>
       <HStack>
         {showCopiedLink ? (
@@ -31,7 +31,7 @@ export const AppReceiverAddress = () => {
           <UilCopy size={"18px"} color="#6A6A6A" onClick={handleCopyLink} cursor="pointer" />
         )}
         <Text fontSize={"14px"} fontWeight={400}>
-          {humanAddress(app?.receiverAddress || "", 4, 6)}
+          {humanAddress(app?.teamWalletAddress || "", 4, 6)}
         </Text>
       </HStack>
     </VStack>

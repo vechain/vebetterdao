@@ -14,6 +14,7 @@ const config: AppConfig = {
   galaxyMemberContractAddress: "0xa9aC49C030c1148b95F056E86f2531f8F3d5bf27",
   x2EarnAppsContractAddress: "",
   treasuryContractAddress: "",
+  x2EarnRewardsPoolContractAddress: "",
   nodeUrl: "https://testnet.vechain.org",
   network: {
     id: "testnet",

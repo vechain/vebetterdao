@@ -23,7 +23,7 @@ export const getRoundXApps = async (thor: ThorClient, roundId: string): Promise<
 
   return apps.map((app: any) => ({
     id: app[0],
-    receiverAddress: app[1],
+    teamWalletAddress: app[1],
     name: app[2],
     createdAt: app[3],
   }))

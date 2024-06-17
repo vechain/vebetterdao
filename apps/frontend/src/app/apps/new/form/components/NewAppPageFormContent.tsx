@@ -26,7 +26,7 @@ export const NewAppPageFormContent = () => {
         logo: "/images/dapp_icon_placeholder.svg",
         banner: "/images/dapp_banner_placeholder.svg",
         projectUrl: "",
-        receiverAddress: "",
+        teamWalletAddress: "",
       },
     })
 
@@ -56,9 +56,9 @@ export const NewAppPageFormContent = () => {
 
     // updateAppMetadataMutation.sendTransaction({
     //   metadataUri,
-    //   ...(compareAddresses(data.receiverAddress, appData?.receiverAddress)
+    //   ...(compareAddresses(data.teamWalletAddress, appData?.teamWalletAddress)
     //     ? {}
-    //     : { receiverAddress: data.receiverAddress }),
+    //     : { teamWalletAddress: data.teamWalletAddress }),
     // })
   }
 

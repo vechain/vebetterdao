@@ -17,7 +17,7 @@ type Props = {
   onSuccessMessageTitle?: string
 }
 /**
- * Admin can update the receiver address for a specific xApp
+ * Admin can update the team wallet address for a specific xApp
  *
  * @param onSuccess callback to run when the upgrade is successful
  * @param invalidateCache boolean to indicate if the related react-query cache should be updated (default: true)
@@ -38,9 +38,9 @@ export const useUpdateXAppReceiverAddress = ({
       {
         to: getConfig().x2EarnAppsContractAddress,
         value: 0,
-        data: X2EarnAppsInterface.encodeFunctionData("updateAppReceiverAddress", [appId, newAddress]),
-        comment: "Update xApp receiver address to " + newAddress,
-        abi: JSON.parse(JSON.stringify(X2EarnAppsInterface.getFunction("updateAppReceiverAddress"))),
+        data: X2EarnAppsInterface.encodeFunctionData("updateTeamWalletAddress", [appId, newAddress]),
+        comment: "Update xApp team wallet address to " + newAddress,
+        abi: JSON.parse(JSON.stringify(X2EarnAppsInterface.getFunction("updateTeamWalletAddress"))),
       },
     ]
 
@@ -56,8 +56,8 @@ export const useUpdateXAppReceiverAddress = ({
     }
 
     toast({
-      title: "XApp receiver address updated successfully",
-      description: `A new address ${newAddress} has been set as receiver for the selected xApp.`,
+      title: "XApp team wallet address updated successfully",
+      description: `A new address ${newAddress} has been set as the team wallet for the selected xApp.`,
       status: "success",
       position: "bottom-left",
       duration: 5000,

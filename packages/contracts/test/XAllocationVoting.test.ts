@@ -117,6 +117,41 @@ describe("X-Allocation Voting", function () {
       expect(await xAllocationVoting.CLOCK_MODE()).to.eql(await vot3.CLOCK_MODE())
     })
 
+    it("Clock returns block number if token does not implement clock function", async function () {
+      const { xAllocationVoting, timeLock, voterRewards, emissions, otherAccounts, x2EarnApps, b3tr } =
+        await getOrDeployContractInstances({
+          forceDeploy: false,
+        })
+
+      let clock = await xAllocationVoting.clock()
+
+      expect(parseInt(clock.toString())).to.eql(await ethers.provider.getBlockNumber())
+
+      const xAllocationVotingWithB3TR = (await deployProxy("XAllocationVoting", [
+        {
+          vot3Token: await b3tr.getAddress(),
+          quorumPercentage: 1,
+          initialVotingPeriod: 2,
+          timeLock: await timeLock.getAddress(),
+          voterRewards: await voterRewards.getAddress(),
+          emissions: await emissions.getAddress(),
+          admins: [await timeLock.getAddress(), otherAccounts[2].address, otherAccounts[2].address],
+          upgrader: otherAccounts[2].address,
+          contractsAddressManager: otherAccounts[2].address,
+          x2EarnAppsAddress: await x2EarnApps.getAddress(),
+          baseAllocationPercentage: 2,
+          appSharesCap: 2,
+          votingThreshold: BigInt(1),
+        },
+      ])) as XAllocationVoting
+
+      clock = await xAllocationVotingWithB3TR.clock()
+      expect(parseInt(clock.toString())).to.eql(await ethers.provider.getBlockNumber())
+
+      //CLOKC_MODE should return "mode=blocknumber&from=default"
+      expect(await xAllocationVotingWithB3TR.CLOCK_MODE()).to.eql("mode=blocknumber&from=default")
+    })
+
     it("Voter rewards address is set correctly", async function () {
       const { xAllocationVoting, voterRewards } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -1495,6 +1530,8 @@ describe("X-Allocation Voting", function () {
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
+      await x2EarnApps.setTeamAllocationPercentage(app1, 100)
+
       await getVot3Tokens(otherAccount, "1000")
 
       await emissions.connect(minterAccount).start()
@@ -1519,7 +1556,12 @@ describe("X-Allocation Voting", function () {
       expect(appShares).to.eql([0n, 0n])
 
       let appEarnings = await xAllocationPool.roundEarnings(roundId, app1)
-      expect(appEarnings).to.eql([await xAllocationPool.baseAllocationAmount(roundId), 0n])
+      expect(appEarnings).to.eql([
+        await xAllocationPool.baseAllocationAmount(roundId),
+        0n,
+        await xAllocationPool.baseAllocationAmount(roundId),
+        0n,
+      ])
     })
 
     it("I should be able to vote only for apps available in the allocation round", async function () {
@@ -1896,6 +1938,19 @@ describe("X-Allocation Voting", function () {
   })
 
   describe("Allocation Voting finalization", function () {
+    it("Cannot finalize active round", async function () {
+      const { xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      let round1 = await startNewAllocationRound()
+
+      await catchRevert(xAllocationVoting.finalizeRound(round1))
+
+      let isFinalized = await xAllocationVoting.isFinalized(round1)
+      expect(isFinalized).to.eql(false)
+    })
+
     it("Previous round is finalized correctly when a new one starts", async function () {
       const { xAllocationVoting } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -2031,6 +2086,30 @@ describe("X-Allocation Voting", function () {
 
       let isFinalized = await xAllocationVoting.isFinalized(round1)
       expect(isFinalized).to.eql(false)
+    })
+
+    it("Finalizing a failed round should point to the latest succeeded round", async function () {
+      const { xAllocationVoting, emissions, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // we need to mint some token otherwise there is no quorum to reach
+      await getVot3Tokens(otherAccount, "1000")
+
+      // first round always succeeds
+      await bootstrapAndStartEmissions()
+      await waitForCurrentRoundToEnd()
+
+      // start and end new round
+      await emissions.distribute()
+      await waitForCurrentRoundToEnd()
+
+      // start round 3, it should finalize round 2
+      await emissions.distribute()
+
+      expect(await xAllocationVoting.state(2)).to.eql(1n) // quorum failed
+      expect(await xAllocationVoting.isFinalized(2)).to.eql(true)
+      expect(await xAllocationVoting.latestSucceededRoundId(2)).to.eql(1n)
     })
   })
 
