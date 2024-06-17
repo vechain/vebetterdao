@@ -732,6 +732,14 @@ describe("Governor and TimeLock", function () {
         ),
       ).to.be.reverted
     })
+
+    it("Should not support invalid interface", async function () {
+      const { governor } = await getOrDeployContractInstances({
+        forceDeploy: false,
+      })
+
+      expect(await governor.depositThresholdPercentage()).to.eql(2n)
+    })
   })
 
   describe("Governor settings", function () {
