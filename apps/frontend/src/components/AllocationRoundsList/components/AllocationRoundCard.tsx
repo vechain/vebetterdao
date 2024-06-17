@@ -39,7 +39,9 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
 
   const totalAmount = useMemo(() => {
     if (!roundAmount) return 0
-    return BigInt(roundAmount.voteXAllocations)
+    return Number.isSafeInteger(roundAmount.voteXAllocations)
+      ? BigInt(roundAmount.voteXAllocations)
+      : Number(roundAmount.voteXAllocations)
   }, [roundAmount])
 
   const onRoundClick = () => {
