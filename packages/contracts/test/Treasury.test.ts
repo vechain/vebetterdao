@@ -11,7 +11,7 @@ import { catchRevert } from "./helpers/exceptions"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it, before } from "mocha"
 import { fundTreasuryVET, fundTreasuryVTHO } from "./helpers/fundTreasury"
-import { B3TR, B3TRGovernor, Treasury, Treasury__factory } from "../typechain-types"
+import { B3TR, B3TRGovernor, MyERC1155, Treasury, Treasury__factory } from "../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy } from "../scripts/helpers"
 import { getEventName } from "./helpers/events"
@@ -363,6 +363,35 @@ describe("Treasury", () => {
       })
       it("should revert if not enough balance", async () => {
         await catchRevert(treasuryProxy.transferNFT(await galaxyMember.getAddress(), otherAccount.address, 1))
+      })
+    })
+    describe("ERC1155", () => {
+      let erc1155: MyERC1155
+      before(async () => {
+        const erc1155ContractFactory = await ethers.getContractFactory("MyERC1155")
+        erc1155 = await erc1155ContractFactory.deploy(owner.address)
+      })
+      it("should transfer ERC1155", async () => {
+        await erc1155.connect(owner).mint(await treasuryProxy.getAddress(), 1, 1, new Uint8Array(0))
+        expect(await treasuryProxy.getERC1155TokenBalance(await erc1155.getAddress(), 1)).to.eql(1n)
+
+        await treasuryProxy.transferERC1155Tokens(await erc1155.getAddress(), owner.address, 1, 1, new Uint8Array(0))
+
+        expect(await treasuryProxy.getERC1155TokenBalance(await erc1155.getAddress(), 1)).to.eql(0n)
+
+        expect(await erc1155.balanceOf(owner.address, 1)).to.eql(1n)
+      })
+      it("should revert if not called by GOVERNANCE_ROLE", async () => {
+        await catchRevert(
+          treasuryProxy
+            .connect(otherAccount)
+            .transferERC1155Tokens(await erc1155.getAddress(), owner.address, 1, 1, new Uint8Array(0)),
+        )
+      })
+      it("should revert if not enough balance", async () => {
+        await catchRevert(
+          treasuryProxy.transferERC1155Tokens(await erc1155.getAddress(), owner.address, 1, 1, new Uint8Array(0)),
+        )
       })
     })
   })
