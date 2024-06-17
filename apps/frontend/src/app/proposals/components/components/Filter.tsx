@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import { HStack, Box, Text } from "@chakra-ui/react"
 import { MdClose } from "react-icons/md"
 
@@ -15,29 +15,32 @@ export const Filter = () => {
   const [selectedOption, setSelectedOption] = useState<string>()
   const [showSelectedFilterOptions, setShowSelectedFilterOptions] = useState(false)
 
-  const handleFilterClick = (filter: string) => {
-    if (filters[filter]?.length === 0) {
-      setSelectedFilter(filter)
-      setShowSelectedFilterOptions(false)
-      setSelectedFilterOptions(undefined)
-    } else {
-      setShowSelectedFilterOptions(!showSelectedFilterOptions)
-      setSelectedFilter(filter)
-      setSelectedFilterOptions(filters[filter])
-    }
-  }
+  const handleFilterClick = useCallback(
+    (filter: string) => {
+      if (filters[filter]?.length === 0) {
+        setSelectedFilter(filter)
+        setShowSelectedFilterOptions(false)
+        setSelectedFilterOptions(undefined)
+      } else {
+        setShowSelectedFilterOptions(!showSelectedFilterOptions)
+        setSelectedFilter(filter)
+        setSelectedFilterOptions(filters[filter])
+      }
+    },
+    [showSelectedFilterOptions],
+  )
 
-  const handleOptionClick = (option: string) => {
+  const handleOptionClick = useCallback((option: string) => {
     setSelectedOption(option)
     setShowSelectedFilterOptions(false)
-  }
+  }, [])
 
-  const handleClearFilter = () => {
+  const handleClearFilter = useCallback(() => {
     setSelectedFilter(undefined)
     setSelectedOption(undefined)
     setSelectedFilterOptions(undefined)
     setShowSelectedFilterOptions(false)
-  }
+  }, [])
 
   return (
     <>
