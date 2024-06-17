@@ -4,7 +4,7 @@ import { getConfig } from "@repo/config"
 import { useEffect, useRef, useState } from "react"
 
 const isTestnetPhase = ["test", "solo", "custom"].includes(getConfig().network.type)
-const text = "Alpha Testnet Last Round"
+const text = "Testnet Phase Finished, Claim your rewards"
 const MotionHStack = motion(HStack)
 export const AlphaTestnetBanner = () => {
   const textsNumber = 50
