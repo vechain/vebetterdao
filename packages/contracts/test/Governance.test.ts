@@ -736,7 +736,6 @@ describe("Governor and TimeLock", function () {
       expect(await governor.depositThresholdPercentage()).to.eql(2n)
     })
   })
-  })
 
   describe("Governor settings", function () {
     let b3trGovernorFactory: B3TRGovernor__factory
