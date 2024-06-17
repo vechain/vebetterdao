@@ -1,5 +1,4 @@
 import { getCurrentAllocationsRoundIdQueryKey, getAllocationsRoundsEventsQueryKey, currentBlockQueryKey } from "@/api"
-import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
@@ -25,7 +24,6 @@ export const useStartEmission = ({
   invalidateCache = true,
 }: useStartEmissionsProps): UseSendTransactionReturnValue => {
   const { account } = useWallet()
-  const toast = useToast()
   const queryClient = useQueryClient()
 
   const buildClauses = useCallback(() => {
@@ -67,16 +65,8 @@ export const useStartEmission = ({
       })
     }
 
-    toast({
-      title: "Emissions started successfully",
-      description: `Emissions distributed and first round started.`,
-      status: "success",
-      position: "bottom-left",
-      duration: 5000,
-      isClosable: true,
-    })
     onSuccess?.()
-  }, [invalidateCache, queryClient, toast, onSuccess])
+  }, [invalidateCache, queryClient, onSuccess])
 
   const result = useSendTransaction({
     signerAccount: account,
