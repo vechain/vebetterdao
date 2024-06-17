@@ -2,7 +2,6 @@ import { buildB3trApprovesTx } from "@/api"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
 import { useConnex, useWallet } from "@vechain/dapp-kit-react"
-import { FormattingUtils } from "@repo/utils"
 import { getB3TrAllowanceQueryKey } from "@/api/contracts/b3tr/hooks/useB3trAllowance"
 import { useQueryClient } from "@tanstack/react-query"
 
@@ -33,8 +32,6 @@ export const useB3trApprove = ({
 
   //Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {
-    const formattedAmount = FormattingUtils.humanNumber(amount ?? 0, amount)
-
     if (invalidateCache) {
       await queryClient.cancelQueries({
         queryKey: getB3TrAllowanceQueryKey(account ?? undefined, spender),
@@ -46,7 +43,7 @@ export const useB3trApprove = ({
     }
 
     onSuccess?.()
-  }, [invalidateCache, onSuccess, account, amount, spender, queryClient])
+  }, [invalidateCache, onSuccess, account, spender, queryClient])
 
   const result = useSendTransaction({
     signerAccount: account,
