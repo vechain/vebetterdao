@@ -25,6 +25,7 @@ pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -32,12 +33,14 @@ import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol
 import "./interfaces/IERC20.sol";
 import "./interfaces/IERC721.sol";
 import "./interfaces/IVOT3.sol";
+import "./interfaces/IERC1155.sol";
 
 /// @title Treasury Contract for VeBetter DAO
 /// @dev This contract handles the receiving and transferring of assets, leveraging upgradeable, pausable, and access control features.
 /// @notice This contract is designed to manage all assets owned by the VeBetter DAO
 contract Treasury is
   IERC721Receiver,
+  IERC1155Receiver,
   AccessControlUpgradeable,
   PausableUpgradeable,
   ReentrancyGuardUpgradeable,
@@ -147,7 +150,12 @@ contract Treasury is
     $.VOT3 = _vot3;
   }
 
-  function _setLimits(uint256 _transferLimitVET, uint256 _transferLimitB3TR, uint256 _transferLimitVOT3, uint256 _transferLimitVTHO) private {
+  function _setLimits(
+    uint256 _transferLimitVET,
+    uint256 _transferLimitB3TR,
+    uint256 _transferLimitVOT3,
+    uint256 _transferLimitVTHO
+  ) private {
     TreasuryStorage storage $ = _getTreasuryStorage();
     $.transferLimitVET = _transferLimitVET;
     $.transferLimit[$.B3TR] = _transferLimitB3TR;
@@ -253,8 +261,27 @@ contract Treasury is
   /// @param _tokenId The id of the ERC721 token to transfer
   function transferNFT(address _nft, address _to, uint256 _tokenId) external onlyGovernanceWhenNotPaused {
     IERC721 nft = IERC721(_nft);
-    require(nft.ownerOf(_tokenId) == address(this), "Treasury: dao does not own the NFT");
+    require(nft.ownerOf(_tokenId) == address(this), "Treasury: DAO does not own the NFT");
     nft.safeTransferFrom(address(this), _to, _tokenId);
+  }
+
+  /// @notice Transfers an ERC1155 token to a specified address
+  /// @dev Only governance can transfer ERC1155 tokens when the contract is not paused
+  /// @param _tokenAddress The ERC1155 token to transfer
+  /// @param _to Recipient of the ERC1155 token
+  /// @param _id The id of the ERC1155 token to transfer
+  /// @param _value The amount of token ERC1155 token to transfer
+  /// @param _data Additional data with no specified format
+  function transferERC1155Tokens(
+    address _tokenAddress,
+    address _to,
+    uint256 _id,
+    uint256 _value,
+    bytes calldata _data
+  ) external onlyGovernanceWhenNotPaused nonReentrant {
+    IERC1155 erc1155 = IERC1155(_tokenAddress);
+    require(erc1155.balanceOf(address(this), _id) > 0, "Treasury: DAO does not own this ERC1155 token");
+    erc1155.safeTransferFrom(address(this), _to, _id, _value, _data);
   }
 
   /// @notice Converts a specified amount of B3TR to VOT3
@@ -334,6 +361,14 @@ contract Treasury is
     return nft.balanceOf(address(this));
   }
 
+  /// @notice Retrieves the balance of any ERC1155 token held by the contract
+  /// @param _token The ERC1155 token to check balance for
+  /// @param _id The id of the ERC1155 token
+  function getERC1155TokenBalance(address _token, uint256 _id) external view returns (uint256) {
+    IERC1155 erc1155 = IERC1155(_token);
+    return erc1155.balanceOf(address(this), _id);
+  }
+
   /// @notice Retrieves the current version of the contract
   function version() external pure virtual returns (string memory) {
     return "1";
@@ -369,9 +404,27 @@ contract Treasury is
   }
 
   // ---------- Overrides ---------- //
-  // @dev See {IERC721Receiver-onERC721Received}.
+  /// @dev See {IERC721Receiver-onERC721Received}.
   function onERC721Received(address, address, uint256, bytes calldata) external pure override returns (bytes4) {
     return this.onERC721Received.selector;
+  }
+
+  /// @dev See {IERC1155Receiver-onERC1155Received}.
+  /// @return bytes4 The selector of the function
+  function onERC1155Received(address, address, uint256, uint256, bytes memory) public virtual returns (bytes4) {
+    return this.onERC1155Received.selector;
+  }
+
+  /// @notice See {IERC1155Receiver-onERC1155BatchReceived}.
+  /// @return bytes4 The selector of the function
+  function onERC1155BatchReceived(
+    address,
+    address,
+    uint256[] memory,
+    uint256[] memory,
+    bytes memory
+  ) public virtual returns (bytes4) {
+    return this.onERC1155BatchReceived.selector;
   }
 
   // @dev See {UUPSUpgradeable-_authorizeUpgrade}.
