@@ -57,6 +57,20 @@ export const ButtonStyle: ComponentStyleConfig = {
         },
       },
     },
+    dangerGhost: {
+      rounded: "full",
+      fontSize: "16px",
+      fontWeight: 500,
+      px: "24px",
+      color: "#D23F63",
+      bgColor: "transparent",
+      _hover: {
+        bg: "#D23F6322",
+        _disabled: {
+          bg: "transparent",
+        },
+      },
+    },
     dangerFilled: {
       rounded: "full",
       fontSize: "16px",

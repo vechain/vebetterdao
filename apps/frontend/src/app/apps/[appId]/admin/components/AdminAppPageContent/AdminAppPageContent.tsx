@@ -1,5 +1,5 @@
 import { Button, Card, CardBody, Divider, HStack, Heading, VStack } from "@chakra-ui/react"
-import { useCurrentAppMetadata } from "../../../hooks"
+import { useCurrentAppMetadata, useCurrentAppModerators } from "../../../hooks"
 import { useTranslation } from "react-i18next"
 import { EditAppModerators } from "./components/EditAppModerators"
 import { EditAppAddresses } from "./components/EditAppAddresses"
@@ -15,8 +15,13 @@ export type AdminAppForm = {
 
 export const AdminAppPageContent = () => {
   const { appMetadata } = useCurrentAppMetadata()
+  const { moderators } = useCurrentAppModerators()
   const { t } = useTranslation()
-  const form = useForm<AdminAppForm>()
+  const form = useForm<AdminAppForm>({
+    defaultValues: {
+      moderators,
+    },
+  })
   const router = useRouter()
 
   const goBack = useCallback(() => {
@@ -35,7 +40,7 @@ export const AdminAppPageContent = () => {
           <Heading fontSize={"36px"} fontWeight={700}>
             {t("{{app}} settings", { app: appMetadata?.name })}
           </Heading>
-          <EditAppModerators />
+          <EditAppModerators form={form} />
           <Divider />
           <EditAppAddresses form={form} />
           <HStack justify={"space-between"} mt={8}>

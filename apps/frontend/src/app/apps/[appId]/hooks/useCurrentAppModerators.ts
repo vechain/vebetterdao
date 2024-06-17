@@ -10,7 +10,7 @@ export const useCurrentAppModerators = () => {
   const { data: moderators, isLoading, error } = useAppModerators(appId)
 
   return {
-    moderators,
+    moderators: moderators || [],
     isLoading,
     error,
   }
