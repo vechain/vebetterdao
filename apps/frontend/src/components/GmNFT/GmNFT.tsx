@@ -200,6 +200,10 @@ export const GmNFT = () => {
                   w="full"
                   color={"#1e1e1e"}
                   bg={`#F8F8F8`}
+                  _hover={{
+                    bgGradient:
+                      "radial-gradient(76.36% 85.35% at 50.12% 27.48%, rgba(230, 252, 207, 0.82) 38.14%, rgba(194, 212, 254, 0.82) 100%), #7DF000",
+                  }}
                   borderRadius="8px"
                   borderColor={`#D5D5D5`}
                   borderWidth={1}

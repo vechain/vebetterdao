@@ -15,27 +15,27 @@ import { FaExternalLinkAlt } from "react-icons/fa"
 import { FaEllipsisVertical, FaCheck, FaCopy, FaRegImage } from "react-icons/fa6"
 
 type Props = {
-  receiverAddress: string
+  teamWalletAddress: string
   externalUrl?: string
   isLoading?: boolean
   showViewDetails?: boolean
   xAppId?: string
 }
 export const AppCardOptionsDesktopMenu = ({
-  receiverAddress,
+  teamWalletAddress,
   externalUrl,
   isLoading = false,
   xAppId,
   showViewDetails = false,
 }: Props) => {
   const { t } = useTranslation()
-  const { onCopy, hasCopied } = useClipboard(receiverAddress)
+  const { onCopy, hasCopied } = useClipboard(teamWalletAddress)
 
   const toast = useToast()
   const handleOnCopy = () => {
     onCopy()
     toast({
-      title: "App receiver address copied",
+      title: "Team wallet address copied",
       status: "success",
       duration: 3000,
       isClosable: true,
@@ -81,7 +81,7 @@ export const AppCardOptionsDesktopMenu = ({
           </MenuItem>
         </Skeleton>
         <MenuItem onClick={handleOnCopy} icon={hasCopied ? <FaCheck /> : <FaCopy />}>
-          {t("Copy receiver address")}
+          {t("Copy team wallet address")}
         </MenuItem>
       </MenuList>
     </Menu>

@@ -1,4 +1,4 @@
-import { getXAppMetadataQueryKey, getXAppsQueryKey } from "@/api"
+import { getXAppsQueryKey } from "@/api"
 import { useQueryClient } from "@tanstack/react-query"
 import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
@@ -10,14 +10,14 @@ const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
 
 type useUpdateAppDetailsProps = {
   appId: string
-  onSuccess?: () => void
+  onSuccess?: () => Promise<void> | void
   invalidateCache?: boolean
   onSuccessMessageTitle?: string
 }
 
 type BuildClausesProps = {
   metadataUri: string
-  receiverAddress?: string
+  teamWalletAddress?: string
 }
 type useUpdateAppMetadataReturnValue = {
   sendTransaction: (data: BuildClausesProps) => Promise<void>
@@ -37,7 +37,7 @@ export const useUpdateAppDetails = ({
   const queryClient = useQueryClient()
 
   const buildClauses = useCallback(
-    ({ metadataUri, receiverAddress }: BuildClausesProps) => {
+    ({ metadataUri, teamWalletAddress }: BuildClausesProps) => {
       const clauses: EnhancedClause[] = [
         {
           to: getConfig().x2EarnAppsContractAddress,
@@ -46,14 +46,14 @@ export const useUpdateAppDetails = ({
           comment: "Update app metadata",
           abi: JSON.parse(JSON.stringify(X2EarnAppsInterface.getFunction("updateAppMetadata"))),
         },
-        ...(receiverAddress
+        ...(teamWalletAddress
           ? [
               {
                 to: getConfig().x2EarnAppsContractAddress,
                 value: 0,
-                data: X2EarnAppsInterface.encodeFunctionData("updateAppReceiverAddress", [appId, receiverAddress]),
-                comment: "Update app receiver address",
-                abi: JSON.parse(JSON.stringify(X2EarnAppsInterface.getFunction("updateAppReceiverAddress"))),
+                data: X2EarnAppsInterface.encodeFunctionData("updateTeamWalletAddress", [appId, teamWalletAddress]),
+                comment: "Update team wallet address",
+                abi: JSON.parse(JSON.stringify(X2EarnAppsInterface.getFunction("updateTeamWalletAddress"))),
               },
             ]
           : []),
@@ -73,16 +73,10 @@ export const useUpdateAppDetails = ({
       await queryClient.refetchQueries({
         queryKey: getXAppsQueryKey(),
       })
-      await queryClient.cancelQueries({
-        queryKey: getXAppMetadataQueryKey(appId),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getXAppMetadataQueryKey(appId),
-      })
     }
 
     onSuccess?.()
-  }, [invalidateCache, queryClient, onSuccess, appId])
+  }, [invalidateCache, queryClient, onSuccess])
 
   const result = useSendTransaction({
     signerAccount: account,
