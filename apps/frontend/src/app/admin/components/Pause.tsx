@@ -142,7 +142,7 @@ export const Pause: React.FC = () => {
       <Button
         colorScheme={`${isB3TRGovernorPaused ? "blue" : "red"}`}
         onClick={handleToggleB3TRGovernorPause}
-        isLoading={isToggleGalaxyMemberPausedLoading}>
+        isLoading={isB3TRGovernorPausedLoading}>
         {isB3TRGovernorPaused ? "Unpause B3TRGovernor" : "Pause B3TRGovernor"}
       </Button>
       <Text>
