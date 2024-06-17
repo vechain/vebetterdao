@@ -2,8 +2,6 @@ import { useState } from "react"
 import { HStack, Box, Text } from "@chakra-ui/react"
 import { MdClose } from "react-icons/md"
 
-/* const filters = ["State", "In this round", "Looking for support", "Upcoming voting"]
-const executedFilters = ["Active", "Canceled", "Defeated", "Succeeded", "Queued", "Executed", "Deposit not met"] */
 const filters: { [key: string]: string[] } = {
   State: ["Active", "Canceled", "Defeated", "Succeeded", "Queued", "Executed", "Deposit not met"],
   "In this round": [],
