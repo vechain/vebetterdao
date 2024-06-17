@@ -4,7 +4,7 @@ import { useEffect, useCallback } from "react"
 import { useForm, useFieldArray, Controller } from "react-hook-form"
 import { abi } from "thor-devkit"
 import { ExecutableFunctionCard } from "./ExecutableFunctionCard"
-import { ProposalFormStoreState, useProposalFormStore } from "@/store/useProposalFormStore"
+import { ProposalFormStoreState, useProposalFormStore } from "@/store"
 import { FunctionParamsField } from "@/components"
 import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
@@ -134,6 +134,7 @@ export const NewProposalForm: React.FC<Props> = ({
   return (
     <form
       onSubmit={handleSubmit(onFormSubmit)}
+      data-testid="new-proposal-form"
       id={formId}
       style={{
         width: "100%",
@@ -143,26 +144,36 @@ export const NewProposalForm: React.FC<Props> = ({
           <FormControl isInvalid={!!errors.title}>
             <FormLabel>{t("Proposal title")}</FormLabel>
             <Input
+              data-testid="proposal-title-input"
               isDisabled={isDisabled}
               placeholder={t("Enter proposal title")}
               {...register("title", {
                 required: t("This field is required"),
               })}
             />
-            {errors.title && <FormErrorMessage>{errors.title.message}</FormErrorMessage>}
+            {errors.title && (
+              <FormErrorMessage data-testid="newproposal-form-title-error-message">
+                {errors.title.message}
+              </FormErrorMessage>
+            )}
           </FormControl>
         )}
         {renderDescription && (
           <FormControl isInvalid={!!errors.description}>
             <FormLabel>{t("Proposal description")}</FormLabel>
             <Textarea
+              data-testid="proposal-description-input"
               isDisabled={isDisabled}
               placeholder={t("Enter proposal description")}
               {...register("description", {
                 required: t("This field is required"),
               })}
             />
-            {errors.description && <FormErrorMessage>{errors.description.message}</FormErrorMessage>}
+            {errors.description && (
+              <FormErrorMessage data-testid="newproposal-form-description-error-message">
+                {errors.description.message}
+              </FormErrorMessage>
+            )}
           </FormControl>
         )}
         {renderMarkdownDescription && (
@@ -171,6 +182,7 @@ export const NewProposalForm: React.FC<Props> = ({
               <Heading size="md">{t("Your proposal")}</Heading>
             </FormLabel>
             <Controller
+              data-testid="proposal-markdown-description-input"
               name="markdownDescription"
               control={control}
               render={({ field }) => (
@@ -188,13 +200,17 @@ export const NewProposalForm: React.FC<Props> = ({
                 />
               )}
             />
-            {errors.markdownDescription && <FormErrorMessage>{errors.markdownDescription.message}</FormErrorMessage>}
+            {errors.markdownDescription && (
+              <FormErrorMessage data-testid="newproposal-form-markdown-error-message">
+                {errors.markdownDescription.message}
+              </FormErrorMessage>
+            )}
           </FormControl>
         )}
       </VStack>
 
       {renderActions && (
-        <VStack spacing={4} align="flex-start" w="full" mt={12}>
+        <VStack spacing={4} align="flex-start" w="full" mt={12} data-testid="proposal-actions-container">
           <Heading size="md">{t("Executable functions")}</Heading>
           <VStack spacing={8} align="flex-start" w="full">
             {fields?.map((field, index) => {

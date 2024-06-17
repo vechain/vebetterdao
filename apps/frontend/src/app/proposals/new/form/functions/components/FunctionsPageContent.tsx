@@ -13,7 +13,7 @@ import {
   Stack,
 } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
-import { useProposalFormStore } from "@/store/useProposalFormStore"
+import { useProposalFormStore } from "@/store"
 import { getEnvWhitelistedContractsWithFunctions } from "@/constants"
 import { useRouter } from "next/navigation"
 
@@ -22,11 +22,10 @@ import { useTranslation } from "react-i18next"
 import { EnvConfig, EnvConfigValues } from "@repo/config/contracts"
 import { ContractsWithFunctions, SelectedFunction } from "./ContractsWithFunctions"
 
-const env = getConfig().environment
-
 const devEnvs: EnvConfig[] = ["local", "e2e", "solo-staging"]
 
 export const FunctionsPageContent = () => {
+  const env = getConfig().environment
   const { t } = useTranslation()
   const { actions, setData } = useProposalFormStore()
 
@@ -56,7 +55,7 @@ export const FunctionsPageContent = () => {
     (data: SelectedFunction) => () => {
       setSubmitError(null)
       setData({
-        actions: [...(actions ?? []), data],
+        actions: [...actions, data],
       })
     },
     [actions, setData],
@@ -79,7 +78,7 @@ export const FunctionsPageContent = () => {
             <Stack direction={["column", "row"]} w="full" justify={"space-between"}>
               <Heading size="lg">{t("What is your proposal about?")}</Heading>
               {devEnvs.includes(env) && (
-                <FormControl w="auto">
+                <FormControl w="auto" data-testid="dev__select_env">
                   <FormLabel>{t("Dev: Choose an environment")}</FormLabel>
                   <Select
                     placeholder={t("Select an environment")}
@@ -112,10 +111,16 @@ export const FunctionsPageContent = () => {
               {submitError}
             </Text>
             <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
-              <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
+              <Button
+                data-testid="go-back"
+                rounded="full"
+                variant={"primarySubtle"}
+                colorScheme="primary"
+                size="lg"
+                onClick={goBack}>
                 {t("Go back")}
               </Button>
-              <Button rounded="full" colorScheme="primary" size="lg" onClick={onContinue}>
+              <Button data-testid="continue" rounded="full" colorScheme="primary" size="lg" onClick={onContinue}>
                 {t("Continue")}
               </Button>
             </HStack>

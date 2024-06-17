@@ -81,6 +81,18 @@ export const ButtonStyle: ComponentStyleConfig = {
         },
       },
     },
+    // ICON BUTTON VARIANTS
+    // this is strange but seems like icon buttons take the variant from the button
+    primaryIconButton: {
+      rounded: "full",
+      bgColor: "#E0E9FE",
+      color: "#004CFC",
+      h: "40px",
+      w: "40px",
+      _hover: {
+        bg: "#E0E9FEAA",
+      },
+    },
   },
   // default values for 'size', 'variant' and 'colorScheme'
   defaultProps: {

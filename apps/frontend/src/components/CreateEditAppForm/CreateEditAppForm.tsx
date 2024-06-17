@@ -66,7 +66,7 @@ export type CreateEditAppFormData = {
   logo: string
   banner: string
   projectUrl: string
-  receiverAddress: string
+  teamWalletAddress: string
 }
 
 type Props = {
@@ -167,21 +167,21 @@ export const CreateEditAppForm = ({
             />
             {errors.projectUrl && <FormErrorMessage>{errors.projectUrl.message}</FormErrorMessage>}
           </FormControl>
-          <FormControl isInvalid={!!errors.receiverAddress}>
-            <FormLabel>Wallet address</FormLabel>
+          <FormControl isInvalid={!!errors.teamWalletAddress}>
+            <FormLabel>Team wallet address</FormLabel>
             <InputGroup>
               <InputLeftElement pointerEvents="none">
-                <AddressIcon borderRadius={"full"} boxSize={6} address={watch("receiverAddress")} />
+                <AddressIcon borderRadius={"full"} boxSize={6} address={watch("teamWalletAddress")} />
               </InputLeftElement>
               <Input
                 isDisabled={isReceiverAddressDisabled}
                 rounded={"xl"}
-                {...register("receiverAddress", {
+                {...register("teamWalletAddress", {
                   validate: value => isValid(value) || "Invalid address",
                 })}
               />
             </InputGroup>
-            {errors.receiverAddress && <FormErrorMessage>{errors.receiverAddress.message}</FormErrorMessage>}
+            {errors.teamWalletAddress && <FormErrorMessage>{errors.teamWalletAddress.message}</FormErrorMessage>}
           </FormControl>
           <Stack direction={["column", "row"]} w="full" justify={"space-between"} align={"flex-start"} spacing={4}>
             <Controller

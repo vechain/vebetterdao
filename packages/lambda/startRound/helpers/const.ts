@@ -642,7 +642,7 @@ const X_ALLOCATIONS_ABI_TESTNET = [
           },
           {
             internalType: "address",
-            name: "receiverAddress",
+            name: "teamWalletAddress",
             type: "address",
           },
           {
@@ -683,7 +683,7 @@ const X_ALLOCATIONS_ABI_TESTNET = [
           },
           {
             internalType: "address",
-            name: "receiverAddress",
+            name: "teamWalletAddress",
             type: "address",
           },
           {
@@ -818,7 +818,7 @@ const X_ALLOCATIONS_ABI_TESTNET = [
           },
           {
             internalType: "address",
-            name: "receiverAddress",
+            name: "teamWalletAddress",
             type: "address",
           },
           {
@@ -1500,11 +1500,11 @@ const X_ALLOCATIONS_ABI_TESTNET = [
       },
       {
         internalType: "address",
-        name: "newReceiverAddress",
+        name: "newTeamWalletAddress",
         type: "address",
       },
     ],
-    name: "updateAppReceiverAddress",
+    name: "updateTeamWalletAddress",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",

@@ -177,13 +177,13 @@ abstract contract RoundsStorageUpgradeable is Initializable, XAllocationVotingGo
    *
    * This function could not be efficient with a large number of apps
    */
-  function getAppsOfRound(uint256 roundId) public view returns (X2EarnAppsDataTypes.App[] memory) {
+  function getAppsOfRound(uint256 roundId) public view returns (X2EarnAppsDataTypes.AppReturnType[] memory) {
     RoundsStorageStorage storage $ = _getRoundsStorageStorage();
 
     bytes32[] memory appsInRound = $._appsEligibleForVoting[roundId];
-    X2EarnAppsDataTypes.App[] memory allApps = new X2EarnAppsDataTypes.App[](appsInRound.length);
-
     uint256 length = appsInRound.length;
+    X2EarnAppsDataTypes.AppReturnType[] memory allApps = new X2EarnAppsDataTypes.AppReturnType[](length);
+
     for (uint i; i < length; i++) {
       allApps[i] = x2EarnApps().app(appsInRound[i]);
     }

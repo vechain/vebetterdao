@@ -425,7 +425,7 @@ contract B3TRGovernor is
    */
   function quorumReached(uint256 proposalId) external view returns (bool) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return GovernorQuorumLogic.quorumReached($, proposalId);
+    return GovernorQuorumLogic.isQuorumReached($, proposalId);
   }
 
   /**

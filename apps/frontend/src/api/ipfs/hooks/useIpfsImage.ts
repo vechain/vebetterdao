@@ -1,5 +1,5 @@
 import { convertUriToUrl, resolveMediaTypeFromMimeType } from "@/utils"
-import { useQuery } from "@tanstack/react-query"
+import { useQueries, useQuery } from "@tanstack/react-query"
 
 import axios from "axios"
 import { NFTMediaType } from "@/types"
@@ -72,5 +72,22 @@ export const useIpfsImage = (imageIpfsUri?: null | string) => {
     queryFn: () => getIpfsImage(imageIpfsUri!),
     enabled: !!imageIpfsUri,
     staleTime: Infinity,
+  })
+}
+
+/**
+ * Custom hook to fetch a list of IPFS images.
+ *
+ * @param imageIpfsUriList - An array of IPFS URIs for the images.
+ * @returns An array of queries for each IPFS image URI.
+ */
+export const useIpfsImageList = (imageIpfsUriList: string[]) => {
+  return useQueries({
+    queries: imageIpfsUriList.map(imageIpfsUri => ({
+      queryKey: getIpfsImageQueryKey(imageIpfsUri),
+      queryFn: () => getIpfsImage(imageIpfsUri),
+      enabled: !!imageIpfsUri,
+      staleTime: Infinity,
+    })),
   })
 }

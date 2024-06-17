@@ -18,7 +18,7 @@ const NewProposalFormDetailsPageContent = dynamic(
   },
 )
 
-export default function NewAppPageForm() {
+export default function NewProposalFormDetailsPage() {
   useEffect(() => {
     AnalyticsUtils.trackPage("NewProposalFormDetailsPage")
   }, [])

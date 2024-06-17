@@ -41,7 +41,7 @@ export const UpdateReceiverAddress = () => {
     if (appId === undefined) return ""
 
     const app = xApps?.find(item => item.id === appId)
-    return app?.receiverAddress
+    return app?.teamWalletAddress
   }, [appId, xApps])
 
   const isValidAddress = useMemo(() => {
@@ -53,7 +53,7 @@ export const UpdateReceiverAddress = () => {
   return (
     <Card w={"full"}>
       <CardHeader>
-        <Heading size="lg">Update Receiver Address</Heading>
+        <Heading size="lg">Update Team Wallet Address</Heading>
       </CardHeader>
       <CardBody>
         <VStack spacing={8} alignItems={"start"} w="full">

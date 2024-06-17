@@ -11,6 +11,7 @@ import {
   XAllocationPool,
   Treasury,
   X2EarnApps,
+  X2EarnRewardsPool,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -31,6 +32,8 @@ export async function deployAll(config: ContractsConfig) {
     `================  Deploying contracts on ${network.name} (${networkConfig.url}) with ${config.NEXT_PUBLIC_APP_ENV} configurations ================`,
   )
   const [deployer] = await ethers.getSigners()
+
+  console.log(`================  Address used to deploy: ${deployer.address} ================`)
 
   // We use a temporary admin to deploy and initialize contracts then transfer role to the real admin
   // Also we have many roles in our contracts but we currently use one wallet for all roles
@@ -151,6 +154,15 @@ export async function deployAll(config: ContractsConfig) {
   ])) as X2EarnApps
   console.log(`X2EarnApps deployed at ${await x2EarnApps.getAddress()}`)
 
+  const x2EarnRewardsPool = (await deployProxy("X2EarnRewardsPool", [
+    config.CONTRACTS_ADMIN_ADDRESS, // admin
+    config.CONTRACTS_ADMIN_ADDRESS, // contracts address manager
+    config.CONTRACTS_ADMIN_ADDRESS, // upgrader
+    await b3tr.getAddress(),
+    await x2EarnApps.getAddress(),
+  ])) as X2EarnRewardsPool
+  console.log(`X2EarnRewardsPool deployed at ${await x2EarnRewardsPool.getAddress()}`)
+
   const xAllocationPool = (await deployProxy("XAllocationPool", [
     TEMP_ADMIN, // admin
     config.CONTRACTS_ADMIN_ADDRESS, // upgrader
@@ -158,6 +170,7 @@ export async function deployAll(config: ContractsConfig) {
     await b3tr.getAddress(),
     await treasury.getAddress(),
     await x2EarnApps.getAddress(),
+    await x2EarnRewardsPool.getAddress(),
   ])) as XAllocationPool
   console.log(`XAllocationPool deployed at ${await xAllocationPool.getAddress()}`)
 
@@ -306,7 +319,7 @@ export async function deployAll(config: ContractsConfig) {
     },
   }
 
-  await setWhitelistedFunctions(contractAddresses, config, governor, deployer, libraries) // Set whitelisted functions for governor proposals
+  await setWhitelistedFunctions(contractAddresses, config, governor, deployer, libraries, true) // Set whitelisted functions for governor proposals
 
   // ---------- Configure contract roles for setup ---------- //
 
@@ -402,6 +415,7 @@ export async function deployAll(config: ContractsConfig) {
   // ---------- Setup Contracts ---------- //
   // Notice: admin account allowed to perform actions is retrieved again inside the setup functions
   if (network.name === "vechain_testnet") {
+    // WARNING: when deploying to production change the address to real team wallet address inside setupTestEnvironment
     await setupTestEnvironment(emissions, x2EarnApps)
   } else if (network.name === "vechain_solo") {
     await setupLocalEnvironment(emissions, treasury, x2EarnApps)
@@ -567,6 +581,28 @@ export async function deployAll(config: ContractsConfig) {
       await voterRewards.CONTRACTS_ADDRESS_MANAGER_ROLE(),
     )
 
+    // X2EarnRewardsPool
+    await validateContractRole(
+      x2EarnRewardsPool,
+      config.CONTRACTS_ADMIN_ADDRESS,
+      TEMP_ADMIN,
+      await x2EarnRewardsPool.DEFAULT_ADMIN_ROLE(),
+    )
+
+    await validateContractRole(
+      x2EarnRewardsPool,
+      config.CONTRACTS_ADMIN_ADDRESS,
+      TEMP_ADMIN,
+      await x2EarnRewardsPool.CONTRACTS_ADDRESS_MANAGER_ROLE(),
+    )
+
+    await validateContractRole(
+      x2EarnRewardsPool,
+      config.CONTRACTS_ADMIN_ADDRESS,
+      TEMP_ADMIN,
+      await x2EarnRewardsPool.UPGRADER_ROLE(),
+    )
+
     // XAllocationPool
     await validateContractRole(
       xAllocationPool,
@@ -698,6 +734,7 @@ export async function deployAll(config: ContractsConfig) {
     galaxyMemberContractAddress: await galaxyMember.getAddress(),
     treasuryContractAddress: await treasury.getAddress(),
     x2EarnAppsContractAddress: await x2EarnApps.getAddress(),
+    x2EarnRewardsPoolContractAddress: await x2EarnRewardsPool.getAddress(),
   })
 
   const end = new Date(performance.now() - start)
@@ -715,6 +752,7 @@ export async function deployAll(config: ContractsConfig) {
     voterRewards: voterRewards,
     treasury: treasury,
     x2EarnApps: x2EarnApps,
+    x2EarnRewardsPool: x2EarnRewardsPool,
   }
   // close the script
 }
@@ -949,7 +987,11 @@ export const setWhitelistedFunctions = async (
   governor: B3TRGovernor,
   admin: HardhatEthersSigner,
   libraries: Record<string, Record<string, string>>,
+  logOutput = false,
 ) => {
+  if (logOutput)
+    console.log("================ Setting whitelisted functions in B3TRGovernor contract =================")
+
   const { B3TR_GOVERNOR_WHITELISTED_METHODS } = config
 
   for (const [contract, functions] of Object.entries(B3TR_GOVERNOR_WHITELISTED_METHODS)) {
@@ -974,6 +1016,8 @@ export const setWhitelistedFunctions = async (
         .connect(admin)
         .setWhitelistFunctions(contractAddresses[contract], whitelistFunctionSelectors, true)
         .then(async tx => await tx.wait())
+
+      if (logOutput) console.log(`Whitelisted functions set for ${contract} in B3TRGovernor contract`)
     }
   }
 }
@@ -991,6 +1035,7 @@ const validateContractRole = async (
     | Treasury
     | TimeLock
     | B3TRGovernor
+    | X2EarnRewardsPool
     | X2EarnApps,
   expectedAddress: string,
   tempAdmin: string,

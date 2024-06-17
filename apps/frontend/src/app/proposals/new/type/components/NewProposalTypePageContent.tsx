@@ -2,12 +2,12 @@ import { Button, Card, CardBody, Grid, GridItem, HStack, Heading, Stack, VStack 
 import { useRouter } from "next/navigation"
 import { useCallback, useLayoutEffect, useState } from "react"
 import { CheckableCard, CheckableCardProps } from "@/components"
-import { useProposalFormStore } from "@/store/useProposalFormStore"
+import { useProposalFormStore } from "@/store"
 import { useTranslation } from "react-i18next"
 import { useNewProposalPageGuard } from "../../form/hooks/useNewProposalPageGuard"
 import { TFunction } from "i18next"
 
-const Steps: (t: TFunction<"translation", undefined>) => (Omit<CheckableCardProps, "checked" | "onChange"> & {
+export const Steps: (t: TFunction<"translation", undefined>) => (Omit<CheckableCardProps, "checked" | "onChange"> & {
   route: string
 })[] = t => [
   {
@@ -67,7 +67,7 @@ export const NewProposalTypePageContent = () => {
       templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(4, 1fr)"]}
       gap={6}
       w="full"
-      data-testid="new-app">
+      data-testid="new-proposal-type-page">
       <GridItem colSpan={3}>
         <Card>
           <CardBody py={8}>
@@ -87,10 +87,16 @@ export const NewProposalTypePageContent = () => {
                 ))}
               </Stack>
               <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
-                <Button rounded="full" variant={"primarySubtle"} colorScheme="primary" size="lg" onClick={goBack}>
+                <Button
+                  data-testid="go-back"
+                  rounded="full"
+                  variant={"primarySubtle"}
+                  colorScheme="primary"
+                  size="lg"
+                  onClick={goBack}>
                   {t("Go back")}
                 </Button>
-                <Button rounded="full" colorScheme="primary" size="lg" onClick={onContinue}>
+                <Button data-testid="continue" rounded="full" colorScheme="primary" size="lg" onClick={onContinue}>
                   {t("Continue")}
                 </Button>
               </HStack>
