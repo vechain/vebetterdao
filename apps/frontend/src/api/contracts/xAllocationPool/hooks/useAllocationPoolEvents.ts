@@ -10,11 +10,12 @@ const XALLOCATION_POLL_CONTRACT = getConfig().xAllocationPoolContractAddress
 export type AllocationRewardsClaimed = {
   appId: string
   roundId: string
-  amount: string
+  totalAmount: string
   recipient: string
   caller: string
   unallocatedAmount: string
-  rewardsAllocationAmount: string
+  teamAllocationAmount: string
+  x2EarnRewardsPoolAmount: string
 }
 
 /**
@@ -46,11 +47,12 @@ export const getAllocationPoolEvents = async (thor: Connex.Thor) => {
         decodedAllocationRewardsClaimedEvents.push({
           appId: decoded[0],
           roundId: decoded[1],
-          amount: decoded[2],
+          totalAmount: decoded[2],
           recipient: decoded[3],
           caller: decoded[4],
           unallocatedAmount: decoded[5],
-          rewardsAllocationAmount: decoded[6],
+          teamAllocationAmount: decoded[6],
+          x2EarnRewardsPoolAmount: decoded[6],
         })
         break
       }
