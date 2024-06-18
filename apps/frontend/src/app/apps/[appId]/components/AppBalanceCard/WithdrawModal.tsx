@@ -61,12 +61,14 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
     return availableB3trToWithdraw?.scaled ?? "0"
   }, [availableB3trToWithdraw?.scaled])
 
-  const formData = useForm<{ amount: string }>({
+  const formData = useForm<{ amount: string; reason: string }>({
     defaultValues: {
       amount: "",
+      reason: "",
     },
   })
   const { watch, setValue, control } = formData
+  const reason = watch("reason")
   const amount = watch("amount")
   const invalidAmount = useMemo(() => Number(amount) === 0 || isNaN(Number(amount)), [amount])
 
@@ -93,7 +95,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
   const { sendTransaction, resetStatus, status, error, txReceipt, sendTransactionTx } = useWithdrawAppBalance({
     appId,
     amount,
-    reason: "",
+    reason,
   })
 
   const handleWithdraw = useCallback(() => {
@@ -105,6 +107,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
     resetStatus()
     onClose()
     setValue("amount", "")
+    setValue("reason", "")
   }, [resetStatus, onClose, setValue])
 
   const maxButton = useMemo(
@@ -139,6 +142,27 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
       />
     )
   }, [filterAmount, control])
+
+  const reasonInput = useMemo(() => {
+    return (
+      <Controller
+        name="reason"
+        control={control}
+        render={({ field: { onChange, value } }) => (
+          <Input
+            h="50px"
+            placeholder={"How will the funds be used?"}
+            fontSize={14}
+            fontWeight={400}
+            type="text"
+            value={value}
+            onChange={e => onChange(e.target.value)}
+            variant="unstyled"
+          />
+        )}
+      />
+    )
+  }, [control])
 
   const renderCardContent = useCallback(() => {
     return (
@@ -196,6 +220,28 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
                       </HStack>
                       {Number(availableB3trToWithdrawScaled) !== Number(amount) && maxButton}
                     </HStack>
+                  </VStack>
+                </HStack>
+              </VStack>
+            </motion.div>
+
+            <motion.div layout transition={layoutTransition}>
+              <VStack
+                py={3}
+                h="full"
+                w="full"
+                align="flex-start"
+                spacing={12}
+                borderBottomWidth={2}
+                borderColor={"rgba(213, 213, 213, 1)"}>
+                <HStack align={"stretch"} justify={"stretch"} spacing={4} w="full">
+                  <VStack justify="stretch" flex={1} gap={1}>
+                    <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
+                      <Text fontSize={14} fontWeight={400}>
+                        {t("Withdraw reason")}
+                      </Text>
+                    </HStack>
+                    <HStack w="full">{reasonInput}</HStack>
                   </VStack>
                 </HStack>
               </VStack>
