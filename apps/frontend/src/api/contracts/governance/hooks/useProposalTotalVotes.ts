@@ -27,6 +27,6 @@ export const useProposalTotalVotes = (proposalId?: string) => {
     method: "proposalTotalVotes",
     args: [proposalId],
     enabled: !!proposalId,
-    mapResponse: res => ethers.formatEther(res),
+    mapResponse: res => ethers.formatEther(res.decoded[0]),
   })
 }
