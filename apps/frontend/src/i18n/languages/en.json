@@ -247,5 +247,9 @@
   "B3TR": "B3TR",
   "See all": "See all",
   "App balance": "App balance",
-  "Withdraw": "Withdraw"
+  "Withdraw": "Withdraw",
+  "Withdraw now": "Withdraw now",
+  "Withdraw all": "Withdraw all",
+  "Withdraw from your balance": "Withdraw from your balance",
+  "Send your app’s funds received from allocations to your team wallet address.": "Send your app’s funds received from allocations to your team wallet address."
 }
