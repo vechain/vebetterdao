@@ -24,6 +24,7 @@ import { useAppBalance } from "@/api/contracts/x2EarnRewardsPool"
 import { TeamWalletAddress } from "./components/TeamWalletAddress"
 import { IoWalletOutline } from "react-icons/io5"
 import { FormattingUtils } from "@repo/utils"
+import { PercentageSelectorButtons } from "./components/PercentageSelctorButtons"
 
 export type Props = {
   appId: string
@@ -110,17 +111,6 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
     setValue("reason", "")
   }, [resetStatus, onClose, setValue])
 
-  const maxButton = useMemo(
-    () => (
-      <Button onClick={() => setValue("amount", availableB3trToWithdrawScaled)} variant={"secondary"}>
-        <Text fontSize={14} fontWeight={500}>
-          {t("Withdraw all")}
-        </Text>
-      </Button>
-    ),
-    [availableB3trToWithdrawScaled, setValue, t],
-  )
-
   const amountInput = useMemo(() => {
     return (
       <Controller
@@ -206,20 +196,10 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
                   <VStack justify="stretch" flex={1} gap={1}>
                     <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
                       <Text fontSize={14} fontWeight={400}>
-                        {t("You'll withdraw")}
+                        {t("Withdraw reason")}
                       </Text>
                     </HStack>
-                    <HStack w="full">
-                      <HStack flex={1}>
-                        <Image
-                          src="/images/logo/b3tr_logo_dark.svg"
-                          boxSize={{ base: "30px", md: "36px" }}
-                          alt="B3TR Icon"
-                        />
-                        {amountInput}
-                      </HStack>
-                      {Number(availableB3trToWithdrawScaled) !== Number(amount) && maxButton}
-                    </HStack>
+                    <HStack w="full">{reasonInput}</HStack>
                   </VStack>
                 </HStack>
               </VStack>
@@ -238,15 +218,24 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
                   <VStack justify="stretch" flex={1} gap={1}>
                     <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
                       <Text fontSize={14} fontWeight={400}>
-                        {t("Withdraw reason")}
+                        {t("You'll withdraw")}
                       </Text>
                     </HStack>
-                    <HStack w="full">{reasonInput}</HStack>
+                    <HStack w="full">
+                      <Image
+                        src="/images/logo/b3tr_logo_dark.svg"
+                        boxSize={{ base: "30px", md: "36px" }}
+                        alt="B3TR Icon"
+                      />
+                      {amountInput}
+                    </HStack>
                   </VStack>
                 </HStack>
               </VStack>
             </motion.div>
           </motion.div>
+
+          <PercentageSelectorButtons availableAmount={availableB3trToWithdrawScaled} setValue={setValue} />
 
           <TeamWalletAddress teamWalletAddress={teamWalletAddress} />
 
@@ -270,12 +259,11 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
     invalidAmount,
     availableB3trToWithdrawScaled,
     t,
-    maxButton,
     amountInput,
-    amount,
     isBalanceLoading,
     teamWalletAddress,
     reasonInput,
+    setValue,
   ])
 
   if (status !== "ready")

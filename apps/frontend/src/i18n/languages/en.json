@@ -261,5 +261,9 @@
   "You withdrew": "You withdrew",
   "Current B3TR Balance": "Current B3TR Balance",
   "Total B3TR Balance": "Total B3TR Balance",
-  "Withdraw reason": "Withdraw reason"
+  "Withdraw reason": "Withdraw reason",
+  "10%": "10%",
+  "25%": "25%",
+  "50%": "50%",
+  "75%": "75%"
 }
