@@ -275,6 +275,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
     amount,
     isBalanceLoading,
     teamWalletAddress,
+    reasonInput,
   ])
 
   if (status !== "ready")
