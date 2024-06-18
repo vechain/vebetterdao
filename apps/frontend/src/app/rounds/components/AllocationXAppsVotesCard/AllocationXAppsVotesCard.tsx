@@ -13,21 +13,16 @@ import {
   HStack,
   Heading,
   Icon,
-  Skeleton,
   Spinner,
   Stack,
-  Text,
   VStack,
 } from "@chakra-ui/react"
 import { useAllocationVoters, useAllocationsRound, useRoundXApps, useXAppsVotes } from "@/api"
 import { backdropBlurAnimation } from "@/app/theme"
 import { AllocationXAppsVotesRankingChart } from "./AllocationXAppsVotesRankingChart"
 import { FaArrowRight } from "react-icons/fa6"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 import { AllocationXAppsDistributionChart } from "./AllocationXAppsDistributionChart"
-
-const compactFormatter = getCompactFormatter()
 
 type Props = {
   roundId: string
@@ -60,7 +55,7 @@ export const AllocationXAppsVotesCard = ({ roundId, maxRanks = 8 }: Props) => {
         </HStack>
       </CardHeader>
       <CardBody>
-        <VStack spacing={8} align={"flex-start"} w="full">
+        <VStack spacing={12} align={"flex-start"} w="full">
           {roundInfo.state === 1 && (
             <Alert status="error" borderRadius={"2xl"}>
               <AlertIcon />
@@ -117,33 +112,6 @@ export const AllocationXAppsVotesCard = ({ roundId, maxRanks = 8 }: Props) => {
           justify={"space-between"}
           w="full"
           align={["flex-start", "center"]}>
-          <Stack
-            direction={["column", "row"]}
-            spacing={[8, 20]}
-            align={["flex-start", "center"]}
-            justify={"flex-start"}
-            w="full">
-            <VStack align={["flex-start"]} spacing={0}>
-              <Skeleton isLoaded={!xAppsLoading}>
-                <Heading size={["xl"]} color={"primary.500"}>
-                  {xApps?.length}
-                </Heading>
-              </Skeleton>
-              <Text fontSize="lg" fontWeight={400}>
-                Apps
-              </Text>
-            </VStack>
-            <VStack align={["flex-start"]} spacing={0}>
-              <Skeleton isLoaded={!votersLoading}>
-                <Heading size={["xl"]} color={"primary.500"} data-testid="total-voters">
-                  {compactFormatter.format(Number(voters))}
-                </Heading>
-              </Skeleton>
-              <Text fontSize="lg" fontWeight={400}>
-                Voters
-              </Text>
-            </VStack>
-          </Stack>
           {/* TODO: Implement this */}
           {isMoreThanMaxRanks && (
             <Button

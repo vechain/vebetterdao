@@ -97,7 +97,7 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
   console.log("baseAmountsInfo", baseAmountsInfo)
 
   return (
-    <VStack w="full" flex={1} data-testid="allocation-round-xapps-votes-breakdown-chart" spacing={8}>
+    <VStack w="full" flex={1} data-testid="allocation-round-xapps-votes-breakdown-chart" spacing={6}>
       <HStack w="full" justify="space-between">
         <VStack spacing={1} align="flex-start">
           <HStack spacing={2} align="center">
