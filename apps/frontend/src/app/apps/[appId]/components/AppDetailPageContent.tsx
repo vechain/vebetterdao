@@ -1,4 +1,4 @@
-import { HStack, VStack } from "@chakra-ui/react"
+import { Grid, GridItem, VStack } from "@chakra-ui/react"
 import { AppDetailOverview } from "./AppDetailOverview"
 import { AppScreenshots } from "./AppScreenshots"
 import { AppDetailsSidebar } from "./AppDetailSidebar"
@@ -8,13 +8,15 @@ export const AppDetailPageContent = () => {
     <VStack w="full" alignItems="stretch" gap={8}>
       <AppDetailOverview />
 
-      <HStack w="full" alignItems="stretch" gap={8}>
-        <VStack flex={5} justifyContent="stretch" alignItems={"stretch"} spacing={4}>
+      <Grid templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(6, 1fr)"]} gap={8} w="full">
+        <GridItem colSpan={[1, 4]}>
           <AppScreenshots />
-        </VStack>
+        </GridItem>
 
-        <AppDetailsSidebar />
-      </HStack>
+        <GridItem colSpan={[1, 2]}>
+          <AppDetailsSidebar />
+        </GridItem>
+      </Grid>
     </VStack>
   )
 }
