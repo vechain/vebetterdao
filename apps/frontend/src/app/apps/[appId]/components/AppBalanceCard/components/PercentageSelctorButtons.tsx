@@ -3,6 +3,7 @@ import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import BigNumber from "bignumber.js"
 import { UseFormSetValue } from "react-hook-form"
+import { useBreakpoints } from "@/hooks"
 
 type PercentageSelectorButtonsProps = {
   availableAmount: string
@@ -11,6 +12,7 @@ type PercentageSelectorButtonsProps = {
 
 export const PercentageSelectorButtons: React.FC<PercentageSelectorButtonsProps> = ({ availableAmount, setValue }) => {
   const { t } = useTranslation()
+  const { isMobile } = useBreakpoints()
 
   const tenPercentButton = useMemo(
     () => (
@@ -76,11 +78,11 @@ export const PercentageSelectorButtons: React.FC<PercentageSelectorButtonsProps>
     () => (
       <Button onClick={() => setValue("amount", availableAmount)} variant={"secondary"} w={"full"} h={"30px"}>
         <Text fontSize={14} fontWeight={400}>
-          {t("Withdraw all")}
+          {isMobile ? t("100%") : t("Withdraw all")}
         </Text>
       </Button>
     ),
-    [availableAmount, setValue, t],
+    [availableAmount, setValue, t, isMobile],
   )
 
   return (
