@@ -1,5 +1,5 @@
 import { CustomModalContent, ExclamationTriangle } from "@/components"
-import { Button, Divider, Heading, Modal, ModalBody, ModalOverlay, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Divider, HStack, Heading, Modal, ModalBody, ModalOverlay, Text, VStack } from "@chakra-ui/react"
 import { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { AdminAppForm } from "../AdminAppPageContent"
@@ -7,6 +7,7 @@ import { useCurrentAppAdmin } from "@/app/apps/[appId]/hooks"
 import { useCallback } from "react"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useCurrentAppInfo } from "@/app/apps/[appId]/hooks/useCurrentAppInfo"
+import { UilInfoCircle } from "@iconscout/react-unicons"
 
 type Props = {
   onClose: () => void
@@ -69,6 +70,19 @@ export const UpdateConfirmationModal = ({
                   <Text fontWeight={600}>{t("NEW admin address")}</Text>
                   <Text fontSize={"14px"}>{humanAddress(form.getValues("adminAddress"), 6, 4)}</Text>
                 </VStack>
+                <HStack rounded="16px" bg="#FCEEF1" p="16px 12px" color="#D23F63">
+                  <Box>
+                    <UilInfoCircle color="#D23F63" size="36px" />
+                  </Box>
+                  <Box display={"inline-block"}>
+                    <Text as="span" fontSize="14px" fontWeight={600}>
+                      {t("You will not be able to manage the dApp anymore.")}
+                    </Text>
+                    <Text as="span" fontSize="14px">
+                      {t("This change is applied when the new address logs in.")}
+                    </Text>
+                  </Box>
+                </HStack>
               </VStack>
             )}
 

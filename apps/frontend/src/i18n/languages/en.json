@@ -59,6 +59,8 @@
   "Preview": "Preview",
   "Remove": "Remove",
   "Edit": "Edit",
+  "You will not be able to manage the dApp anymore.": "You will not be able to manage the dApp anymore.",
+  "This change is applied when the new address logs in.": "This change is applied when the new address logs in.",
   "Just to be sure, you’re updating:": "Just to be sure, you’re updating:",
   "OLD team wallet address": "OLD team wallet address",
   "NEW team wallet address": "NEW team wallet address",
