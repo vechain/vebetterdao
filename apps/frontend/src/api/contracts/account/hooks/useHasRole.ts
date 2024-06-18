@@ -19,6 +19,10 @@ export const CONTRACTS_ADDRESS_MANAGER_ROLE = ethers.solidityPackedKeccak256(
   ["string"],
   ["CONTRACTS_ADDRESS_MANAGER_ROLE"],
 )
+export const DECAY_SETTINGS_MANAGER_ROLE = ethers.solidityPackedKeccak256(
+  ["string"],
+  ["DECAY_SETTINGS_MANAGER_ROLE"],
+)
 export const Proposer = ethers.solidityPackedKeccak256(["string"], ["Proposer"])
 export const Executor = ethers.solidityPackedKeccak256(["string"], ["Executor"])
 export const ROUND_STARTER_ROLE = ethers.solidityPackedKeccak256(["string"], ["ROUND_STARTER_ROLE"])
