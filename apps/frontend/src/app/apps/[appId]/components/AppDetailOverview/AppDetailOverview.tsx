@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, Flex, HStack, Heading, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Button, Card, CardBody, Flex, HStack, Heading, Image, Show, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { notFoundImage } from "@/constants"
 import { useTranslation } from "react-i18next"
 import dayjs from "dayjs"
@@ -59,8 +59,11 @@ export const AppDetailOverview = () => {
                   {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
                 </Text>
               </Skeleton>
-              <HStack justify={"space-between"}>
-                <HStack gap={10}>
+              <Flex flexDirection={{ base: "column", md: "row" }} justify={"space-between"} align={"center"}>
+                <HStack
+                  gap={10}
+                  w={{ base: "full", md: "auto" }}
+                  justifyContent={{ base: "space-between", md: "flex-start" }}>
                   <AppReceiverAddress />
                   <VStack>
                     <Text fontSize={"14px"} fontWeight={400} color="#6A6A6A">
@@ -71,16 +74,21 @@ export const AppDetailOverview = () => {
                     </Text>
                   </VStack>
                 </HStack>
-                <HStack>
-                  <EditAppPageButton />
+                <HStack justifyContent={{ base: "space-between", md: "flex-end" }} w={"full"} mt={{ base: 4, md: 0 }}>
+                  <Show above="sm">
+                    <EditAppPageButton />
+                  </Show>
                   <Button
                     variant={"primaryAction"}
                     rightIcon={<UilArrowUpRight color="#FFFFFF" size={"16px"} />}
                     onClick={goToWebsite}>
                     {t("Go to Website")}
                   </Button>
+                  <Show below="sm">
+                    <EditAppPageButton />
+                  </Show>
                 </HStack>
-              </HStack>
+              </Flex>
             </VStack>
             <AppDetailAllocationInfo />
           </Flex>
