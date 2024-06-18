@@ -2,6 +2,8 @@ import { VStack, Text, Image, HStack } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
+import loadingAnimation from "./loading.json"
+import Lottie from "react-lottie"
 
 export type ConfirmationAppWithdrawModalContentProps = {
   b3trBalanceAfter?: string
@@ -18,7 +20,18 @@ export const ConfirmationAppWithdrawModalContent = ({
 
   return (
     <VStack align={"center"} p={6} gap={2}>
-      <Image src="/images/b3trvot3-tokens.png" boxSize={"200px"} alt="B3TR and VOT3 Tokens" />
+      <Lottie
+        style={{
+          pointerEvents: "none",
+        }}
+        options={{
+          loop: true,
+          autoplay: true,
+          animationData: loadingAnimation,
+        }}
+        height={200}
+        width={200}
+      />
 
       <Text style={{ fontFamily: "Instrument Sans, sans-serif" }} fontSize={28} fontWeight={700}>
         {t("Waiting for confirmation")}
