@@ -9,7 +9,7 @@ export const AppDetailsSidebar = () => {
   const { app } = useCurrentAppInfo()
   const { data: appAdmin } = useAppAdmin(app?.id ?? "")
 
-  const isAppAdmin = appAdmin === account
+  const isAppAdmin = appAdmin?.toUpperCase() === account?.toUpperCase()
 
   return (
     <VStack spacing={4} flex={2} position="relative">
