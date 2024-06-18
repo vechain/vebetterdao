@@ -6,6 +6,7 @@ import { useBuildTransaction } from "./useBuildTransaction"
 import { getAppBalanceQueryKey } from "@/api/contracts/x2EarnRewardsPool"
 import { ethers } from "ethers"
 import { removingExcessDecimals } from "@/utils/MathUtils"
+import { useXApp } from "@/api"
 
 const config = getConfig()
 
@@ -31,6 +32,7 @@ type UseWithdrawAppBalanceProps = {
  */
 export const useWithdrawAppBalance = ({ appId, amount, reason, onSuccess }: UseWithdrawAppBalanceProps) => {
   const contractAmount = useMemo(() => removingExcessDecimals(amount), [amount])
+  const { data: app } = useXApp(appId)
 
   const clauseBuilder = useCallback(() => {
     return [
@@ -39,10 +41,10 @@ export const useWithdrawAppBalance = ({ appId, amount, reason, onSuccess }: UseW
         to: X2EARN_REWARDS_POOL_CONTRACT,
         method: "withdraw",
         args: [ethers.parseEther(contractAmount.toString()).toString(), appId, reason],
-        comment: `withdraw ${amount} B3TR from x2Earn rewards pool for app ${appId} with reason ${reason}`,
+        comment: `Withdraw ${amount} B3TR from the ${app?.name} rewards pool with reason "${reason}"`,
       }),
     ]
-  }, [appId, contractAmount, amount, reason])
+  }, [appId, contractAmount, amount, reason, app])
 
   const refetchQueryKeys = useMemo(() => [getAppBalanceQueryKey(appId)], [appId])
 
