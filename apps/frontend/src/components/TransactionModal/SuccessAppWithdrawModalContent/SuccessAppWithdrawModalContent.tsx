@@ -2,6 +2,7 @@ import { VStack, Text, Image, HStack, Flex, Button, Link } from "@chakra-ui/reac
 import { getConfig } from "@repo/config"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { motion } from "framer-motion"
+import { useTranslation } from "react-i18next"
 import { MdArrowOutward } from "react-icons/md"
 
 export type SuccessAppWithdrawModalContentProps = {
@@ -40,6 +41,8 @@ export const SuccessAppWithdrawModalContent = ({
   txId,
   onClose,
 }: SuccessAppWithdrawModalContentProps) => {
+  const { t } = useTranslation()
+
   return (
     <VStack align={"center"} p={8} gap={2}>
       <MotionImage
@@ -51,7 +54,7 @@ export const SuccessAppWithdrawModalContent = ({
         animate="animate"
       />
       <Text style={{ fontFamily: "Instrument Sans, sans-serif" }} fontSize={28} fontWeight={700}>
-        Withdrawal complete!
+        {t("Withdrawal complete!")}
       </Text>
 
       <Flex w={"full"} justifyContent={"center"} mt={6}>
@@ -63,7 +66,7 @@ export const SuccessAppWithdrawModalContent = ({
           style={{ textDecoration: "none" }}>
           <HStack alignSelf={"center"}>
             <Text fontSize={14} fontWeight={500} color={"rgba(0, 76, 252, 1)"}>
-              See transaction information
+              {t("See transaction information")}
             </Text>
             <MdArrowOutward size={20} color={"rgba(0, 76, 252, 1)"} />
           </HStack>
@@ -74,7 +77,7 @@ export const SuccessAppWithdrawModalContent = ({
         {Number(b3trWithdrawAmount) >= 0 && (
           <HStack w="full" bg={"#F8F8F8"} borderRadius={8} p={4} justifyContent={"space-between"}>
             <Text fontSize={16} fontWeight={400}>
-              You withdrew
+              {t("You withdrew")}
             </Text>
 
             <HStack>
@@ -88,7 +91,7 @@ export const SuccessAppWithdrawModalContent = ({
         {Number(b3trBalanceAfter) >= 0 && (
           <HStack w="full" bg={"#F8F8F8"} borderRadius={8} p={4} justifyContent={"space-between"}>
             <Text fontSize={16} fontWeight={400}>
-              Your new B3TR balance
+              {t("Your new B3TR balance")}
             </Text>
 
             <HStack>
@@ -109,7 +112,7 @@ export const SuccessAppWithdrawModalContent = ({
         size={{ base: "md", md: "lg" }}
         w={{ base: "full", md: "auto" }}
         onClick={onClose}>
-        Continue
+        {t("Continue")}
       </Button>
     </VStack>
   )

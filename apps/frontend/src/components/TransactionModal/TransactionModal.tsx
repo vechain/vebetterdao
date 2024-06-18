@@ -145,6 +145,7 @@ export const TransactionModal = ({
     successTitle,
     showSocialButtons,
     socialDescriptionEncoded,
+    b3trWithdrawAmount,
   ])
   if (!modalContent) return null
 

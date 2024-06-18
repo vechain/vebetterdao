@@ -1,6 +1,7 @@
 import { VStack, Text, Image, HStack } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useTranslation } from "react-i18next"
 
 export type ConfirmationAppWithdrawModalContentProps = {
   b3trBalanceAfter?: string
@@ -13,21 +14,23 @@ export const ConfirmationAppWithdrawModalContent = ({
   b3trBalanceAfter,
   b3trWithdrawAmount,
 }: ConfirmationAppWithdrawModalContentProps) => {
+  const { t } = useTranslation()
+
   return (
     <VStack align={"center"} p={6} gap={2}>
       <Image src="/images/b3trvot3-tokens.png" boxSize={"200px"} alt="B3TR and VOT3 Tokens" />
 
       <Text style={{ fontFamily: "Instrument Sans, sans-serif" }} fontSize={28} fontWeight={700}>
-        Waiting for confirmation
+        {t("Waiting for confirmation")}
       </Text>
       <Text fontSize={16} fontWeight={400} textAlign={"center"}>
-        Confirm the operation in your wallet to complete it
+        {t("Confirm the operation in your wallet to complete it")}
       </Text>
       <VStack w="full" mt={8}>
         {Number(b3trWithdrawAmount) >= 0 && (
           <HStack w="full" bg={"#F8F8F8"} borderRadius={8} p={4} justifyContent={"space-between"}>
             <Text fontSize={16} fontWeight={400}>
-              You'll withdraw
+              {t("You'll withdraw")}
             </Text>
 
             <HStack>
@@ -41,7 +44,7 @@ export const ConfirmationAppWithdrawModalContent = ({
         {Number(b3trBalanceAfter) >= 0 && (
           <HStack w="full" bg={"#F8F8F8"} borderRadius={8} p={4} justifyContent={"space-between"}>
             <Text fontSize={16} fontWeight={400}>
-              Your new B3TR balance
+              {t("Your new B3TR balance")}
             </Text>
 
             <HStack>
