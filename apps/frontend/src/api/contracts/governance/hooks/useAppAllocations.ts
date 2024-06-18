@@ -17,7 +17,7 @@ export const useAppAllocations = (appId: string) => {
       .map(allocation => {
         return {
           ...allocation,
-          scaledAmount: ethers.formatEther(allocation.amount),
+          scaledAmount: ethers.formatEther(allocation.totalAmount),
         }
       }) || []
   const totalAllocationReceived = appAllocations.reduce((acc, curr) => acc + Number(curr.scaledAmount), 0)

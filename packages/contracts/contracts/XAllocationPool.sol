@@ -246,10 +246,11 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
     emit AllocationRewardsClaimed(
       appId,
       roundId,
-      teamAllocationsAmount,
+      amountToClaim,
       teamWalletAddress,
       msg.sender,
       unallocatedAmount,
+      teamAllocationsAmount,
       x2EarnRewardsPoolAmount
     );
   }

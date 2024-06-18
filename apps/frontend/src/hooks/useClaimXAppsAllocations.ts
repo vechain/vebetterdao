@@ -1,14 +1,15 @@
 import { buildClaimXAppAllocationTx, getB3TrBalanceQueryKey, getHasXAppClaimedQueryKey } from "@/api"
-import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
 import { useConnex, useWallet } from "@vechain/dapp-kit-react"
+import { getConfig } from "@repo/config"
 
 type useClaimAllocationsProps = {
   roundId: string
   appIds: string[]
   onSuccess?: () => void
+  onFailure?: () => void
   invalidateCache?: boolean
   onSuccessMessageTitle?: string
 }
@@ -28,12 +29,13 @@ export const useClaimXAppsAllocations = ({
   roundId,
   appIds,
   onSuccess,
+  onFailure,
   invalidateCache = true,
 }: useClaimAllocationsProps): useBClaimXAppsAllocationsReturnValue => {
   const { thor } = useConnex()
   const { account } = useWallet()
-  const toast = useToast()
   const queryClient = useQueryClient()
+  const config = getConfig()
 
   const buildClauses = useCallback(
     (roundId: string, appIds: string[]) => {
@@ -62,22 +64,23 @@ export const useClaimXAppsAllocations = ({
       await queryClient.refetchQueries({
         queryKey: getB3TrBalanceQueryKey(account ?? ""),
       })
+
+      await queryClient.cancelQueries({
+        queryKey: getB3TrBalanceQueryKey(config.x2EarnRewardsPoolContractAddress),
+      })
+
+      await queryClient.refetchQueries({
+        queryKey: getB3TrBalanceQueryKey(config.x2EarnRewardsPoolContractAddress),
+      })
     }
 
-    toast({
-      title: "Allocations claimed",
-      description: `You have successfully claimed allocation for the xApps of round #${roundId}.`,
-      status: "success",
-      position: "bottom-left",
-      duration: 5000,
-      isClosable: true,
-    })
     onSuccess?.()
-  }, [account, invalidateCache, onSuccess, queryClient, appIds, roundId, toast])
+  }, [account, invalidateCache, onSuccess, queryClient, appIds, roundId, config])
 
   const result = useSendTransaction({
     signerAccount: account,
     onTxConfirmed: handleOnSuccess,
+    onTxFailedOrCancelled: onFailure,
   })
 
   const onMutate = useCallback(async () => {

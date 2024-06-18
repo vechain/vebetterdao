@@ -5,6 +5,8 @@ import {
   useXAppRoundEarnings,
   useXApps,
 } from "@/api"
+import { CustomModalContent } from "@/components"
+import { SuccessModalContent } from "@/components/TransactionModal/SuccessModalContent"
 import { useClaimXAppsAllocations } from "@/hooks"
 import {
   VStack,
@@ -27,13 +29,25 @@ import {
   Card,
   CardHeader,
   CardBody,
+  useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalBody,
+  Image,
 } from "@chakra-ui/react"
-import { useMemo, useState } from "react"
+import { motion } from "framer-motion"
+import { useCallback, useMemo, useState } from "react"
+import { coinFlipAnimation } from "@/constants"
+import { useTranslation } from "react-i18next"
+
+// Convert Button to a motion component
+const MotionImage = motion(Image)
 
 export const ClaimXAppAllocations = () => {
   const [appId, setAppId] = useState<string | undefined>()
   const [roundId, setRoundId] = useState<number>(1)
-
+  const { isOpen, onClose, onOpen } = useDisclosure()
+  const { t } = useTranslation()
   const { data: xApps } = useXApps()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: currentRound } = useAllocationsRound(currentRoundId?.toString() ?? "")
@@ -41,16 +55,33 @@ export const ClaimXAppAllocations = () => {
 
   const { data: claimedResponse } = useHasXAppClaimed(roundId?.toString() ?? "", appId ?? "")
 
-  const { sendTransaction, isTxReceiptLoading, sendTransactionPending } = useClaimXAppsAllocations({
+  const {
+    sendTransaction,
+    resetStatus,
+    isTxReceiptLoading,
+    sendTransactionPending,
+    status,
+    txReceipt,
+    sendTransactionTx,
+  } = useClaimXAppsAllocations({
     roundId: roundId?.toString() ?? "",
     appIds: appId ? [appId] : [],
   })
   const isLoading = isTxReceiptLoading || sendTransactionPending
 
-  const handleSubmit = (event: { preventDefault: () => void }) => {
-    event.preventDefault()
-    sendTransaction()
-  }
+  const handleSubmit = useCallback(
+    (event: { preventDefault: () => void }) => {
+      event.preventDefault()
+      sendTransaction()
+      onOpen()
+    },
+    [sendTransaction, onOpen],
+  )
+
+  const handleClose = useCallback(() => {
+    resetStatus()
+    onClose()
+  }, [resetStatus, onClose])
 
   const isRoundValid = useMemo(() => {
     if (currentRoundId === undefined || !currentRound) return false
@@ -62,93 +93,136 @@ export const ClaimXAppAllocations = () => {
 
   const isFormValid = useMemo(() => isRoundValid && appId !== undefined && appId !== "", [appId, isRoundValid])
 
+  const modalContent = useMemo(() => {
+    if (status === "success") {
+      return (
+        <SuccessModalContent
+          title={"Allocations claimed"}
+          showExplorerButton
+          txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        />
+      )
+    }
+
+    if (isLoading)
+      return (
+        <ModalBody py={6} px={12}>
+          <VStack alignItems={"center"}>
+            <MotionImage {...coinFlipAnimation} src="/images/b3tr-token-3d.png" maxH="250px" />
+            {sendTransactionPending /* sendTransactionPending */ && (
+              <Text fontWeight={400} lineHeight="22px" fontSize={{ base: "16px", md: "16px" }} align={"center"}>
+                {t("Please confirm the transaction in your wallet")}
+              </Text>
+            )}
+            {isTxReceiptLoading && (
+              <Text fontWeight={400} lineHeight="22px" fontSize={{ base: "16px", md: "16px" }}>
+                {t("Almost there...")}
+              </Text>
+            )}
+          </VStack>{" "}
+        </ModalBody>
+      )
+  }, [status, isLoading, isTxReceiptLoading, sendTransactionPending, txReceipt, sendTransactionTx, t])
+
   return (
-    <Card w={"full"}>
-      <CardHeader>
-        <Heading size="lg">Allocation claiming</Heading>
-      </CardHeader>
-      <CardBody>
-        <VStack flex={1} align="flex-start" spacing={8}>
-          <VStack align={"start"}>
-            <Text>Last round id: {currentRoundId}</Text>
-          </VStack>
-          <form onSubmit={handleSubmit}>
-            <VStack spacing={4} alignItems={"start"}>
-              <HStack w={"full"}>
-                <FormControl isRequired>
-                  <FormLabel>
-                    <strong>{"App"}</strong>
-                  </FormLabel>
-                  <Select
-                    placeholder="Select app"
-                    isDisabled={isLoading}
-                    onChange={e => setAppId(e.target.value)}
-                    value={appId}>
-                    {xApps?.map(item => {
-                      return (
-                        <option key={item.id} value={item.id}>
-                          {item.name + " - id: " + item.id}
-                        </option>
-                      )
-                    })}
-                  </Select>
-                </FormControl>
-
-                <FormControl isRequired isInvalid={!isRoundValid}>
-                  <FormLabel>
-                    <strong>{"Round #"}</strong>
-                  </FormLabel>
-                  <NumberInput
-                    min={0}
-                    value={roundId}
-                    isDisabled={isLoading}
-                    onChange={value => setRoundId(parseInt(value))}>
-                    <NumberInputField />
-                    <NumberInputStepper>
-                      <NumberIncrementStepper />
-                      <NumberDecrementStepper />
-                    </NumberInputStepper>
-                  </NumberInput>
-                  <FormErrorMessage>{"Invalid round"}</FormErrorMessage>
-                </FormControl>
-              </HStack>
-
-              <FormControl>
-                <FormLabel>
-                  <strong>{"Reserved amount"}</strong>
-                </FormLabel>
-
-                <InputGroup>
-                  <Input
-                    placeholder="Reserved allocation"
-                    type="number"
-                    value={claimableAmountResponse?.amount ?? ""}
-                    disabled={true}
-                  />
-                  <InputRightAddon
-                    pointerEvents="none"
-                    pl={1}
-                    pr={1}
-                    ml={0}
-                    backgroundColor={"transparent"}
-                    borderColor={"inherit"}
-                    borderLeft={"none"}>
-                    B3TR
-                  </InputRightAddon>
-                </InputGroup>
-              </FormControl>
-
-              <Button
-                isDisabled={!isFormValid || claimedResponse?.claimed}
-                colorScheme="blue"
-                type="submit"
-                isLoading={isLoading}>
-                {claimedResponse?.claimed ? "Already claimed" : "Claim"}
-              </Button>
+    <>
+      <Card w={"full"}>
+        <CardHeader>
+          <Heading size="lg">Allocation claiming</Heading>
+        </CardHeader>
+        <CardBody>
+          <VStack flex={1} align="flex-start" spacing={8}>
+            <VStack align={"start"}>
+              <Text>Last round id: {currentRoundId}</Text>
             </VStack>
-          </form>
-        </VStack>
-      </CardBody>
-    </Card>
+            <form onSubmit={handleSubmit}>
+              <VStack spacing={4} alignItems={"start"}>
+                <HStack w={"full"}>
+                  <FormControl isRequired>
+                    <FormLabel>
+                      <strong>{"App"}</strong>
+                    </FormLabel>
+                    <Select
+                      placeholder="Select app"
+                      isDisabled={isLoading}
+                      onChange={e => setAppId(e.target.value)}
+                      value={appId}>
+                      {xApps?.map(item => {
+                        return (
+                          <option key={item.id} value={item.id}>
+                            {item.name + " - id: " + item.id}
+                          </option>
+                        )
+                      })}
+                    </Select>
+                  </FormControl>
+
+                  <FormControl isRequired isInvalid={!isRoundValid}>
+                    <FormLabel>
+                      <strong>{"Round #"}</strong>
+                    </FormLabel>
+                    <NumberInput
+                      min={0}
+                      value={roundId}
+                      isDisabled={isLoading}
+                      onChange={value => setRoundId(parseInt(value))}>
+                      <NumberInputField />
+                      <NumberInputStepper>
+                        <NumberIncrementStepper />
+                        <NumberDecrementStepper />
+                      </NumberInputStepper>
+                    </NumberInput>
+                    <FormErrorMessage>{"Invalid round"}</FormErrorMessage>
+                  </FormControl>
+                </HStack>
+
+                <FormControl>
+                  <FormLabel>
+                    <strong>{"Reserved amount"}</strong>
+                  </FormLabel>
+
+                  <InputGroup>
+                    <Input
+                      placeholder="Reserved allocation"
+                      type="number"
+                      value={claimableAmountResponse?.amount ?? ""}
+                      disabled={true}
+                    />
+                    <InputRightAddon
+                      pointerEvents="none"
+                      pl={1}
+                      pr={1}
+                      ml={0}
+                      backgroundColor={"transparent"}
+                      borderColor={"inherit"}
+                      borderLeft={"none"}>
+                      B3TR
+                    </InputRightAddon>
+                  </InputGroup>
+                </FormControl>
+
+                <Button
+                  isDisabled={!isFormValid || claimedResponse?.claimed}
+                  colorScheme="blue"
+                  type="submit"
+                  isLoading={isLoading}>
+                  {claimedResponse?.claimed ? "Already claimed" : "Claim"}
+                </Button>
+              </VStack>
+            </form>
+          </VStack>
+        </CardBody>
+      </Card>
+
+      <Modal
+        isOpen={isOpen}
+        onClose={handleClose}
+        trapFocus={true}
+        isCentered={true}
+        closeOnOverlayClick={status !== "waitingConfirmation" && status !== "pending"}>
+        <ModalOverlay />
+        <CustomModalContent>{modalContent}</CustomModalContent>
+      </Modal>
+    </>
   )
 }

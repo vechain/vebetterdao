@@ -1,4 +1,4 @@
-import { getXAppMetadata, getXAppMetadataQueryKey, useAllocationsRound, useGetVotesOnBlock } from "@/api"
+import { getXAppMetadata, getXAppMetadataQueryKey, useAllocationsRound, useGetVotesOnBlock, useXApps } from "@/api"
 import { getIpfsImage, getIpfsImageQueryKey } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
 import { Box, Card, CardBody, HStack, Heading, Icon, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
@@ -8,6 +8,7 @@ import { FaInfoCircle } from "react-icons/fa"
 import BigNumber from "bignumber.js"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { FormData } from "../AllocationRoundUserVotes"
+import { useMemo } from "react"
 
 type Props = {
   roundId: string
@@ -18,6 +19,7 @@ const compactFormatter = getCompactFormatter()
 
 export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
   const { account } = useWallet()
+  const { data: x2EarnApps } = useXApps()
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(roundId)
   const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
     Number(roundInfo.voteStart),
@@ -42,11 +44,17 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
     return voteValue
   }
 
+  const votedX2EarnApps = useMemo(() => {
+    if (!votes || !x2EarnApps) return []
+
+    return x2EarnApps.filter(app => votes.some(vote => vote.appId === app.id))
+  }, [x2EarnApps, votes])
+
   const appsMetadata = useQueries({
-    queries: votes.map(vote => ({
-      queryKey: getXAppMetadataQueryKey(vote.appId),
+    queries: votedX2EarnApps.map(app => ({
+      queryKey: getXAppMetadataQueryKey(app.metadataURI),
       queryFn: async () => {
-        return await getXAppMetadata(vote.appId)
+        return await getXAppMetadata(app.metadataURI)
       },
     })),
   })
