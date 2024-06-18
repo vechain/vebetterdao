@@ -15,34 +15,42 @@ import { AdminAppForm } from "../../AdminAppPageContent"
 import { useCurrentAppAdmin } from "@/app/apps/[appId]/hooks"
 import { useCurrentAppInfo } from "@/app/apps/[appId]/hooks/useCurrentAppInfo"
 import { isValid } from "@repo/utils/AddressUtils"
-import { useCallback, useState } from "react"
+import { useCallback } from "react"
 import { ModalEditTeamWalletAddress } from "./components/ModalEditTeamWalletAddress"
 import { UilPen } from "@iconscout/react-unicons"
 import { ModalEditAdminAddress } from "./components/ModalEditAdminAddress"
 
 type Props = {
   form: UseFormReturn<AdminAppForm>
+  editAdminAddress: boolean
+  setEditAdminAddress: (value: boolean) => void
+  editTeamWalletAddress: boolean
+  setEditTeamWalletAddress: (value: boolean) => void
 }
 
-export const EditAppAddresses = ({ form }: Props) => {
+export const EditAppAddresses = ({
+  form,
+  editAdminAddress,
+  setEditAdminAddress,
+  editTeamWalletAddress,
+  setEditTeamWalletAddress,
+}: Props) => {
   const { t } = useTranslation()
   const { admin } = useCurrentAppAdmin()
   const { app } = useCurrentAppInfo()
   const { errors } = form.formState
-  const [editAdminAddress, setEditAdminAddress] = useState(false)
-  const [editTeamWalletAddress, setEditTeamWalletAddress] = useState(false)
 
   const modalEditAdminAddress = useDisclosure()
   const handleEditAdminAddress = useCallback(() => {
     modalEditAdminAddress.onClose()
     setEditAdminAddress(true)
-  }, [modalEditAdminAddress])
+  }, [modalEditAdminAddress, setEditAdminAddress])
 
   const modalEditTeamWalletAddress = useDisclosure()
   const handleEditTeamWalletAddress = useCallback(() => {
     modalEditTeamWalletAddress.onClose()
     setEditTeamWalletAddress(true)
-  }, [modalEditTeamWalletAddress])
+  }, [modalEditTeamWalletAddress, setEditTeamWalletAddress])
 
   return (
     <VStack align="stretch" gap="32px">
