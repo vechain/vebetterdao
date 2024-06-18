@@ -25,7 +25,8 @@ export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery, isEnded }
     if (quorumQuery.data === undefined || currentVotesQuery.data === undefined) {
       return 0
     }
-    return Number(currentVotesQuery.data) / Number(quorumQuery.data)
+    const quorumPercentage = (Number(currentVotesQuery.data) / Number(quorumQuery.data)) * 100
+    return Math.min(quorumPercentage, 100)
   }, [quorumQuery.data, currentVotesQuery.data])
 
   const stateColor = useMemo(() => {
@@ -51,7 +52,7 @@ export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery, isEnded }
         </HStack>
         <Skeleton isLoaded={!quorumQuery.isLoading && !currentVotesQuery.isLoading}>
           <Text fontWeight={400} fontSize={"14px"} color={stateColor}>
-            {compactFormatter.format(Number(votesToQuorumPercentage * 100))}
+            {compactFormatter.format(Number(votesToQuorumPercentage))}
             {t("%")}
           </Text>
         </Skeleton>

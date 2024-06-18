@@ -25,7 +25,7 @@ export const ProposalSessionVot3 = ({ votesAtSnapshotQuery, userVotesAtSnapshotQ
           </Skeleton>
         </HStack>
         <Text color="#6A6A6A" fontSize="12px">
-          {t("VOT3 at snapshot")}
+          {t("Votes at snapshot")}
         </Text>
       </VStack>
       {/* )} */}
@@ -39,7 +39,7 @@ export const ProposalSessionVot3 = ({ votesAtSnapshotQuery, userVotesAtSnapshotQ
           </Skeleton>
         </HStack>
         <Text color="#6A6A6A" fontSize="12px">
-          {t("Current VOT3")}
+          {t("Your votes at snapshot")}
         </Text>
       </VStack>
     </HStack>
