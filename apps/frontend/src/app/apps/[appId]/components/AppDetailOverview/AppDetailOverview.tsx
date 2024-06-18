@@ -74,7 +74,10 @@ export const AppDetailOverview = () => {
                     </Text>
                   </VStack>
                 </HStack>
-                <HStack justifyContent={{ base: "space-between", md: "flex-end" }} w={"full"} mt={{ base: 4, md: 0 }}>
+                <HStack
+                  justifyContent={{ base: "space-between", md: "flex-end" }}
+                  w={{ base: "full", md: "auto" }}
+                  mt={{ base: 4, md: 0 }}>
                   <Show above="sm">
                     <EditAppPageButton />
                   </Show>
