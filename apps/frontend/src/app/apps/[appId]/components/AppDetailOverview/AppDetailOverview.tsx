@@ -36,7 +36,7 @@ export const AppDetailOverview = () => {
               w={"full"}
               objectFit={"cover"}
               objectPosition="center"
-              h="220px"
+              h={{ base: "180px", md: "220px" }}
             />
           </Skeleton>
           <Flex gap="48px" flexDir={["column", "column", "row"]}>
