@@ -57,8 +57,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
   const { t } = useTranslation()
 
   const { data: availableB3trToWithdraw, isLoading: isBalanceLoading } = useAppBalance(appId)
-
-  const b3trBalanceScaled = useMemo(() => {
+  const availableB3trToWithdrawScaled = useMemo(() => {
     return availableB3trToWithdraw?.scaled ?? "0"
   }, [availableB3trToWithdraw?.scaled])
 
@@ -70,6 +69,26 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
   const { watch, setValue, control } = formData
   const amount = watch("amount")
   const invalidAmount = useMemo(() => Number(amount) === 0 || isNaN(Number(amount)), [amount])
+
+  const b3trBalanceAfterSwap = useMemo(() => {
+    return new BigNumber(availableB3trToWithdrawScaled).minus(amount).toString()
+  }, [availableB3trToWithdrawScaled, amount])
+
+  const filterAmount = useCallback(
+    (text: string) => {
+      const filteredAmount = text
+        .replace(",", ".") // Replace comma with dot
+        .replace(/[^\d\\.]/g, "") // Filter out non-numeric characters except for decimal separator
+        .replace(/\.(?=.*\.)/g, "") // Filter out duplicate decimal separators
+        .replace(/(\.\d{18})\d+/, "$1") // remove digits after 18th decimal
+
+      if (Number(filteredAmount) > Number(availableB3trToWithdrawScaled)) {
+        return availableB3trToWithdrawScaled
+      }
+      return filteredAmount
+    },
+    [availableB3trToWithdrawScaled],
+  )
 
   const { sendTransaction, resetStatus, status, error, txReceipt, sendTransactionTx } = useWithdrawAppBalance({
     appId,
@@ -88,35 +107,15 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
     setValue("amount", "")
   }, [resetStatus, onClose, setValue])
 
-  const b3trBalanceAfterSwap = useMemo(() => {
-    return new BigNumber(b3trBalanceScaled).minus(amount).toString()
-  }, [b3trBalanceScaled, amount])
-
-  const filterAmount = useCallback(
-    (text: string) => {
-      const filteredAmount = text
-        .replace(",", ".") // Replace comma with dot
-        .replace(/[^\d\\.]/g, "") // Filter out non-numeric characters except for decimal separator
-        .replace(/\.(?=.*\.)/g, "") // Filter out duplicate decimal separators
-        .replace(/(\.\d{18})\d+/, "$1") // remove digits after 18th decimal
-
-      if (Number(filteredAmount) > Number(b3trBalanceScaled)) {
-        return b3trBalanceScaled
-      }
-      return filteredAmount
-    },
-    [b3trBalanceScaled],
-  )
-
   const maxButton = useMemo(
     () => (
-      <Button onClick={() => setValue("amount", b3trBalanceScaled)} variant={"secondary"}>
+      <Button onClick={() => setValue("amount", availableB3trToWithdrawScaled)} variant={"secondary"}>
         <Text fontSize={14} fontWeight={500}>
           {t("Withdraw all")}
         </Text>
       </Button>
     ),
-    [b3trBalanceScaled, setValue, t],
+    [availableB3trToWithdrawScaled, setValue, t],
   )
 
   const amountInput = useMemo(() => {
@@ -159,7 +158,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
             <HStack>
               <Skeleton isLoaded={!isBalanceLoading}>
                 <Text fontSize={{ base: "2xl", md: "xl" }} fontWeight={"500"}>
-                  {FormattingUtils.humanNumber(Number(b3trBalanceScaled))}
+                  {FormattingUtils.humanNumber(Number(availableB3trToWithdrawScaled))}
                 </Text>
               </Skeleton>
             </HStack>
@@ -195,7 +194,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
                         />
                         {amountInput}
                       </HStack>
-                      {Number(b3trBalanceScaled) !== Number(amount) && maxButton}
+                      {Number(availableB3trToWithdrawScaled) !== Number(amount) && maxButton}
                     </HStack>
                   </VStack>
                 </HStack>
@@ -223,7 +222,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
     formData,
     handleWithdraw,
     invalidAmount,
-    b3trBalanceScaled,
+    availableB3trToWithdrawScaled,
     t,
     maxButton,
     amountInput,
@@ -249,7 +248,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
         txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
         b3trWithdrawAmount={amount}
         b3trBalanceAfterSwap={b3trBalanceAfterSwap}
-        b3trBalance={b3trBalanceScaled}
+        b3trBalance={availableB3trToWithdrawScaled}
       />
     )
 
