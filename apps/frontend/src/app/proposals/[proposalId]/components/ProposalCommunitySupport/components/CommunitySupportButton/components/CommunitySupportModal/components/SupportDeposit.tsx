@@ -36,11 +36,9 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
     },
     [amount, onSubmit],
   )
-  const userDepositsForecasted = useMemo(
-    () => Number(amount) + proposal.communityDeposits,
-    [amount, proposal.communityDeposits],
-  )
+  const userDepositsForecasted = useMemo(() => Number(amount) + proposal.userSupport, [amount, proposal.userSupport])
 
+  console.log("")
   const isDepositThresholdReached = useMemo(
     () => userDepositsForecasted >= proposal.depositThreshold,
     [userDepositsForecasted, proposal.depositThreshold],

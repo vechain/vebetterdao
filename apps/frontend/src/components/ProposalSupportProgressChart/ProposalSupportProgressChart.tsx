@@ -59,11 +59,20 @@ export const ProposalSupportProgressChart = ({
 
   const totalDeposits = useMemo(() => userDeposits + othersDeposits, [userDeposits, othersDeposits])
 
-  const totalDepositsPercentage = useMemo(() => totalDeposits / depositThreshold, [totalDeposits, depositThreshold])
+  const totalDepositsPercentage = useMemo(
+    () => getSafeScaledPercentage(totalDeposits / depositThreshold),
+    [totalDeposits, depositThreshold],
+  )
 
-  const userDepositsPercentage = useMemo(() => userDeposits / depositThreshold, [userDeposits, depositThreshold])
+  const userDepositsPercentage = useMemo(
+    () => getSafeScaledPercentage(userDeposits / depositThreshold),
+    [userDeposits, depositThreshold],
+  )
 
-  const othersDepositsPercentage = useMemo(() => othersDeposits / depositThreshold, [othersDeposits, depositThreshold])
+  const othersDepositsPercentage = useMemo(
+    () => getSafeScaledPercentage(othersDeposits / depositThreshold),
+    [othersDeposits, depositThreshold],
+  )
 
   return (
     <VStack alignItems={"stretch"} spacing={3} w="full" data-testid="proposal-support-progress-chart">
@@ -83,7 +92,7 @@ export const ProposalSupportProgressChart = ({
           </Text>
         </HStack>
         <Text fontSize={"18px"} fontWeight={400} color={"#6A6A6A"}>
-          {compactFormatter.format(getSafeScaledPercentage(totalDepositsPercentage))}
+          {compactFormatter.format(totalDepositsPercentage)}
           {t("%")}
         </Text>
       </HStack>
@@ -92,8 +101,9 @@ export const ProposalSupportProgressChart = ({
         <Box
           bg={yourDepositColor}
           h="10px"
-          rounded="full"
-          w={`${getSafeScaledPercentage(userDepositsPercentage)}%`}
+          roundedLeft={"full"}
+          roundedRight={userDepositsPercentage === 100 ? "full" : 0}
+          w={`${userDepositsPercentage}%`}
           position="absolute"
           top={0}
           left={0}
@@ -101,11 +111,12 @@ export const ProposalSupportProgressChart = ({
         <Box
           bg={othersDepositColor}
           h="10px"
-          rounded="full"
-          w={`${getSafeScaledPercentage(othersDepositsPercentage)}%`}
+          roundedLeft={userDepositsPercentage === 0 ? "full" : 0}
+          roundedRight={"full"}
+          w={`${othersDepositsPercentage}%`}
           position="absolute"
           top={0}
-          left={0}
+          left={`${userDepositsPercentage}%`}
         />
       </Box>
       {renderVotesDistributionLabel && (
