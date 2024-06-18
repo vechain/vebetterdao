@@ -24,6 +24,8 @@ import { backdropBlurAnimation } from "@/app/theme"
 import { AllocationXAppsVotesRankingChart } from "./AllocationXAppsVotesRankingChart"
 import { FaArrowRight } from "react-icons/fa6"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useTranslation } from "react-i18next"
+import { AllocationXAppsDistributionChart } from "./AllocationXAppsDistributionChart"
 
 const compactFormatter = getCompactFormatter()
 
@@ -33,6 +35,7 @@ type Props = {
 }
 
 export const AllocationXAppsVotesCard = ({ roundId, maxRanks = 8 }: Props) => {
+  const { t } = useTranslation()
   const { data: xApps, isLoading: xAppsLoading } = useRoundXApps(roundId)
 
   const xAppsVotes = useXAppsVotes(xApps?.map(app => app.id) ?? [], roundId)
@@ -47,11 +50,13 @@ export const AllocationXAppsVotesCard = ({ roundId, maxRanks = 8 }: Props) => {
 
   const isMoreThanMaxRanks = xAppsVotes.length > maxRanks
 
+  const title = roundInfo.isCurrent && roundInfo.state === 0 ? t("Real time votes") : t("Votes")
+
   return (
-    <Card flex={1} h="full" w="full">
+    <Card flex={1} h="full" w="full" variant={"baseWithBorder"}>
       <CardHeader>
         <HStack justify={"space-between"} w="full">
-          <Heading size="md">{roundInfo.isCurrent && roundInfo.state === 0 ? "Real-Time data" : "Votes"}</Heading>
+          <Heading size="md">{title}</Heading>
         </HStack>
       </CardHeader>
       <CardBody>
@@ -60,13 +65,14 @@ export const AllocationXAppsVotesCard = ({ roundId, maxRanks = 8 }: Props) => {
             <Alert status="error" borderRadius={"2xl"}>
               <AlertIcon />
               <Box>
-                <AlertTitle>Quorum was not reached for this round</AlertTitle>
+                <AlertTitle>{t("Quorum was not reached for this round")}</AlertTitle>
                 <AlertDescription>
-                  B3TR allocation will be distributed according to the votes of the previous round
+                  {t("B3TR allocation will be distributed according to the votes of the previous round")}
                 </AlertDescription>
               </Box>
             </Alert>
           )}
+          <AllocationXAppsDistributionChart roundId={roundId} />
           <AllocationXAppsVotesRankingChart roundId={roundId} maxRanks={maxRanks} />
         </VStack>
       </CardBody>

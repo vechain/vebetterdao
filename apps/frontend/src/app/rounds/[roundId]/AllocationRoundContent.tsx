@@ -3,12 +3,12 @@
 import { Box, Spinner, Stack, VStack } from "@chakra-ui/react"
 import { AllocationRoundNavbar } from "../components/AllocationRoundNavbar"
 import { AllocationRoundHeaderCard } from "../components/AllocationRoundHeaderCard/AllocationRoundHeaderCard"
-import { AllocationXAppsVotesCard } from "@/components"
 import { AllocationRoundSessionInfoCard } from "../components/AllocationRoundSessionInfoCard"
 import { AllocationRoundUserVotes } from "../components/AllocationRoundUserVotes/AllocationRoundUserVotes"
 import { useAllocationsRoundState } from "@/api"
 import { useLayoutEffect } from "react"
 import { redirect } from "next/navigation"
+import { AllocationXAppsVotesCard } from "../components/AllocationXAppsVotesCard"
 
 type Props = {
   params: {

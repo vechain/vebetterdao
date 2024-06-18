@@ -10,7 +10,7 @@ import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
 import { Box, HStack, Heading, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useMemo } from "react"
-import { B3TRIcon } from "../Icons"
+import { B3TRIcon } from "@/components/Icons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
 type Props = {
