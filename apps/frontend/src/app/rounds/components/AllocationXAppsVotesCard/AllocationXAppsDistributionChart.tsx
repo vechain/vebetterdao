@@ -2,12 +2,13 @@ import {
   useAllocationAmount,
   useAllocationBaseAmount,
   useAllocationVoters,
+  useMaxAllocationAmount,
   useMultipleXAppRoundEarnings,
   useRoundXApps,
   useXAppsVotes,
 } from "@/api"
 import { B3TRIcon, DotSymbol } from "@/components"
-import { VStack, HStack, Heading, useColorModeValue, Text, Box, CardBody, Card, Skeleton } from "@chakra-ui/react"
+import { VStack, HStack, Heading, useColorModeValue, Text, Box, Skeleton } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -24,6 +25,7 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
   const { data: roundAmount, isLoading: roundAmountLoading } = useAllocationAmount(roundId)
 
   const { data: baseAmount, isLoading: baseAmountLoading } = useAllocationBaseAmount(roundId)
+  const { data: maxAmount, isLoading: maxAmountLoading } = useMaxAllocationAmount(roundId)
 
   const { data: xApps, isLoading: xAppsLoading } = useRoundXApps(roundId)
 
@@ -38,6 +40,12 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
     return Number(roundAmount.voteXAllocations)
   }, [roundAmount])
 
+  // the total baseAmount distributed in the round
+  const totalBaseAmount = useMemo(() => {
+    if (!baseAmount || !xApps?.length) return 0
+    return Number(baseAmount) * xApps?.length
+  }, [baseAmount, xApps])
+
   // the total amount of B3TR distributed in the round only votes
   const totalEarningsWithoutBase = useMemo(() => {
     if (!forecastedEarningsQueries || !baseAmount) return 0
@@ -50,10 +58,10 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
   //the percentage of the total amount of B3TR distrivuted in the round between the base and votes
   const baseAmountsPercentage = useMemo(() => {
     return {
-      baseAmount: getSafeScaledPercentage(Number(baseAmount) / totalDistributed),
+      baseAmount: getSafeScaledPercentage(Number(totalBaseAmount) / totalDistributed),
       votesAmount: getSafeScaledPercentage(Number(totalEarningsWithoutBase) / totalDistributed),
     }
-  }, [baseAmount, totalEarningsWithoutBase, totalDistributed])
+  }, [totalBaseAmount, totalEarningsWithoutBase, totalDistributed])
 
   const votingRewardsColor = useColorModeValue("#225EED", "#225EED")
   const appsColor = useColorModeValue("#5FA5F9", "#5FA5F9")
@@ -61,19 +69,32 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
   const baseAmountsInfo = useMemo(() => {
     return [
       {
-        amount: baseAmount,
+        amount: totalBaseAmount,
+        isLoading: baseAmountLoading || xAppsLoading,
         percentage: baseAmountsPercentage.baseAmount,
         color: votingRewardsColor,
         label: "base allocation",
       },
       {
         amount: totalEarningsWithoutBase,
+        isLoading: baseAmountLoading || forecastedEarningsQueries.some(query => query.isLoading),
         percentage: baseAmountsPercentage.votesAmount,
         color: appsColor,
         label: "votes allocation",
       },
     ]
-  }, [baseAmountsPercentage, totalEarningsWithoutBase, appsColor, votingRewardsColor, baseAmount])
+  }, [
+    appsColor,
+    votingRewardsColor,
+    baseAmountLoading,
+    xAppsLoading,
+    totalBaseAmount,
+    baseAmountsPercentage,
+    totalEarningsWithoutBase,
+    forecastedEarningsQueries,
+  ])
+
+  console.log("baseAmountsInfo", baseAmountsInfo)
 
   return (
     <VStack w="full" flex={1} data-testid="allocation-round-xapps-votes-breakdown-chart" spacing={8}>
@@ -113,9 +134,9 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
             </Text>
           </VStack>
           <VStack spacing={1} align="flex-end">
-            <Skeleton isLoaded={!votersLoading}>
+            <Skeleton isLoaded={!maxAmountLoading}>
               <Text fontWeight={600} fontSize={"16px"} color="#252525">
-                {compactFormatter.format(Number(voters ?? 0))}
+                {compactFormatter.format(Number(maxAmount ?? 0))}
               </Text>
             </Skeleton>
             <Text fontSize="14px" color="#6A6A6A" fontWeight={400}>
@@ -151,7 +172,7 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
       </VStack>
       <HStack w="full" spacing={8}>
         {baseAmountsInfo.map((info, index) => (
-          <Skeleton isLoaded={!roundAmountLoading} key={index}>
+          <Skeleton isLoaded={!info.isLoading} key={index}>
             <HStack w="full" spacing={1} color="#252525">
               <DotSymbol size={4} color={info.color} />
               <Text ml={1} fontSize="md" fontWeight={600}>
