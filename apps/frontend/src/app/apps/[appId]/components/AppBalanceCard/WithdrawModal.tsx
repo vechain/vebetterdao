@@ -290,7 +290,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
         onTryAgain={handleWithdraw}
         pendingTitle="Withdrawing..."
         showExplorerButton
-        isWithdraw
+        isAppWithdraw
         txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
         b3trWithdrawAmount={amount}
         b3trBalanceAfterSwap={b3trBalanceAfterSwap}

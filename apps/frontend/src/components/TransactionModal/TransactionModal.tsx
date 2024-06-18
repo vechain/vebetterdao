@@ -30,7 +30,7 @@ export type TransactionModalProps = {
   vot3BalanceAfterSwap?: string
   b3trWithdrawAmount?: string
   isSwap?: boolean
-  isWithdraw?: boolean
+  isAppWithdraw?: boolean
   b3trBalance?: string
   vot3Balance?: string
 }
@@ -51,7 +51,7 @@ export const TransactionModal = ({
   showExplorerButton,
   txId,
   isSwap,
-  isWithdraw,
+  isAppWithdraw,
   b3trBalanceAfterSwap,
   vot3BalanceAfterSwap,
   b3trWithdrawAmount,
@@ -70,7 +70,7 @@ export const TransactionModal = ({
           />
         )
 
-      if (isWithdraw)
+      if (isAppWithdraw)
         return (
           <ConfirmationAppWithdrawModalContent
             b3trBalanceAfter={b3trBalanceAfterSwap}
@@ -104,7 +104,7 @@ export const TransactionModal = ({
           />
         )
 
-      if (isWithdraw)
+      if (isAppWithdraw)
         return (
           <SuccessAppWithdrawModalContent
             b3trBalanceAfter={b3trBalance}
@@ -128,7 +128,7 @@ export const TransactionModal = ({
   }, [
     status,
     isSwap,
-    isWithdraw,
+    isAppWithdraw,
     b3trBalanceAfterSwap,
     vot3BalanceAfterSwap,
     confirmationTitle,
