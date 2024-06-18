@@ -8,18 +8,23 @@ import {
   Heading,
   Icon,
   Image,
+  Skeleton,
   Text,
   VStack,
 } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 import { IoWalletOutline } from "react-icons/io5"
+import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
+import { useAppBalance } from "@/api/contracts/x2EarnRewardsPool"
 
 const compactFormatter = getCompactFormatter(4)
+const b3trLogo = "/images/logo/b3tr_logo_dark.svg"
 
 export const AppBalanceCard = () => {
   const { t } = useTranslation()
-  const b3trLogo = "/images/logo/b3tr_logo_dark.svg"
+  const { app } = useCurrentAppInfo()
+  const { data: balance, isLoading: isBalanceLoading } = useAppBalance(app?.id ?? "")
 
   return (
     <Card w={"full"} variant="baseWithBorder">
@@ -33,14 +38,16 @@ export const AppBalanceCard = () => {
           </Text>
           <HStack>
             <Image src={b3trLogo} boxSize={"30px"} alt="B3TR Icon" />
-            <Heading size={{ base: "2xl", md: "xl" }}>{compactFormatter.format(Number("2222"))}</Heading>
+            <Skeleton isLoaded={!isBalanceLoading}>
+              <Heading size={{ base: "2xl", md: "xl" }}>{compactFormatter.format(Number(balance))}</Heading>
+            </Skeleton>
           </HStack>
         </VStack>
       </CardBody>
       <CardFooter>
         <Button
           mt={2}
-          //   isDisabled={totalRewards?.eq(0)}
+          isDisabled={balance === "0.0" || !balance || isBalanceLoading}
           //   isLoading={isRewardsLoading || isClaimRewardsLoading}
           //   onClick={handleClaim}
           colorScheme="primary"
