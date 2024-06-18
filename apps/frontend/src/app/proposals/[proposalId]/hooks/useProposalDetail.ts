@@ -43,6 +43,7 @@ export const useProposalDetailById = (proposalId: string) => {
   const proposalSnapshotVotingPower = useProposalSnapshotVotingPower(proposalSnapshotBlock, isProposalActive)
   const proposalVotes = useProposalVotes(proposalId, isProposalNotPending)
   const proposalSnapshotVot3 = useGetVotesOnBlock(proposalSnapshotBlock, account ?? undefined, isProposalActive)
+
   const roundIdVoteStart = useMemo(
     () => proposalCreatedEvent.data?.roundIdVoteStart,
     [proposalCreatedEvent.data?.roundIdVoteStart],
@@ -87,8 +88,14 @@ export const useProposalDetailById = (proposalId: string) => {
     ],
   )
 
-  const { votingStartDate, isVotingStartDateLoading, votingEndDate, isVotingEndDateLoading } =
-    useProposalVoteDates(proposalId)
+  const {
+    votingStartDate,
+    votingStartBlock,
+    isVotingStartDateLoading,
+    votingEndBlock,
+    votingEndDate,
+    isVotingEndDateLoading,
+  } = useProposalVoteDates(proposalId)
 
   const proposal = useMemo(() => {
     const userVote = proposalVoteEvents.userVote
@@ -186,6 +193,7 @@ export const useProposalDetailById = (proposalId: string) => {
       isUserVotingPowerOnSnapshotLoading: proposalSnapshotVotingPower.isLoading,
       userVot3OnSnapshot,
       isUserVot3OnSnapshotLoading: proposalSnapshotVot3.isLoading,
+      snapshotVotesQuery: proposalSnapshotVot3,
       isVotesLoading: proposalVotes.isLoading,
       isQuorumReached: isQuorumReached.data,
       isQuorumReachedLoading: isQuorumReached.isLoading,
@@ -194,6 +202,9 @@ export const useProposalDetailById = (proposalId: string) => {
       isQuorumLoading: proposalQuorum.isLoading,
       quorumPercentage,
       quorumChartPercentage,
+      votingStartBlock,
+      votingEndBlock,
+      proposalVotesQuery: proposalVotes,
     }
 
     const mock = {}
@@ -220,6 +231,8 @@ export const useProposalDetailById = (proposalId: string) => {
     isDepositReached,
     proposalState,
     isQuorumReached,
+    votingStartBlock,
+    votingEndBlock,
   ])
 
   const error = useMemo(() => calls.find(call => call.error)?.error || null, [calls])

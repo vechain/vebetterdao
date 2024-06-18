@@ -30,7 +30,7 @@ export const getProposalQuorumQueryKey = (blockNumber?: string | number) => ["pr
  * @param blockNumber  the block number to check (proposal.voteStart)
  * @returns  the quorum at the given block number (with decimals removed)
  */
-export const useProposalQuorum = (blockNumber?: string | number, enabled = false) => {
+export const useProposalQuorum = (blockNumber?: string | number, enabled = true) => {
   const { thor } = useConnex()
 
   return useQuery({
