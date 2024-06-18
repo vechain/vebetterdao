@@ -1,4 +1,3 @@
-"use-client"
 import {
   Button,
   Card,
@@ -72,16 +71,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
   const amount = watch("amount")
   const invalidAmount = useMemo(() => Number(amount) === 0 || isNaN(Number(amount)), [amount])
 
-  const {
-    sendTransaction,
-    resetStatus,
-    isTxReceiptLoading,
-    sendTransactionPending,
-    status,
-    error,
-    txReceipt,
-    sendTransactionTx,
-  } = useWithdrawAppBalance({
+  const { sendTransaction, resetStatus, status, error, txReceipt, sendTransactionTx } = useWithdrawAppBalance({
     appId,
     amount,
     reason: "",
@@ -175,7 +165,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
             </HStack>
 
             <Text fontSize="12px" fontWeight="400" opacity={0.7}>
-              {"Current B3TR Balance"}
+              {t("Current B3TR Balance")}
             </Text>
           </VStack>
 
@@ -193,7 +183,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
                   <VStack justify="stretch" flex={1} gap={1}>
                     <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
                       <Text fontSize={14} fontWeight={400}>
-                        {"You'll withdraw"}
+                        {t("You'll withdraw")}
                       </Text>
                     </HStack>
                     <HStack w="full">
@@ -237,12 +227,9 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
     t,
     maxButton,
     amountInput,
-    availableB3trToWithdraw,
     amount,
     isBalanceLoading,
     teamWalletAddress,
-
-    // vot3BalanceScaled,
   ])
 
   if (status !== "ready")
