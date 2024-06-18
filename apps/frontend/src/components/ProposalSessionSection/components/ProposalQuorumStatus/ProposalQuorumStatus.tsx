@@ -1,4 +1,5 @@
 import { Box, HStack, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { UilTimes, UilCheck } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { UseQueryResult } from "@tanstack/react-query"
 import { useMemo } from "react"
@@ -36,6 +37,8 @@ export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery, isEnded }
     return "#004CFC"
   }, [isQuorumReached, isEnded])
 
+  const isEndedAndQuorumNotReached = isEnded && !isQuorumReached
+
   return (
     <VStack align="stretch">
       <Text color="#6A6A6A" fontWeight={400} fontSize={"14px"}>
@@ -51,10 +54,14 @@ export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery, isEnded }
           </Skeleton>
         </HStack>
         <Skeleton isLoaded={!quorumQuery.isLoading && !currentVotesQuery.isLoading}>
-          <Text fontWeight={400} fontSize={"14px"} color={stateColor}>
-            {compactFormatter.format(Number(votesToQuorumPercentage))}
-            {t("%")}
-          </Text>
+          <HStack spacing={1} align="center">
+            {isEndedAndQuorumNotReached && <UilTimes size="16px" color={stateColor} />}
+            {isQuorumReached && <UilCheck size="16px" color={stateColor} />}
+            <Text fontWeight={400} fontSize={"14px"} color={stateColor}>
+              {compactFormatter.format(Number(votesToQuorumPercentage))}
+              {t("%")}
+            </Text>
+          </HStack>
         </Skeleton>
       </HStack>
       <Box position="relative">

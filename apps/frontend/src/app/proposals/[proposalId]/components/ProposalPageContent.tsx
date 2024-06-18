@@ -4,11 +4,11 @@ import { ProposalContentAndActions } from "./ProposalContentAndActions"
 import { ProposalState, useProposalCreatedEvent, useProposalTotalVotes, useVot3PastSupply } from "@/api"
 import { ProposalCommunitySupport } from "./ProposalCommunitySupport"
 import { ProposalWithdrawDeposit } from "./ProposalWithdrawDeposit"
-import { ProposalSessionSection } from "../../../../components/ProposalSessionSection"
 import { CancelProposalSection } from "./CancelProposalSection/CancelProposalSection"
 import { ProposalVoteCommentList } from "./ProposalVoteCommentList"
 import { ProposalCanceledAlert } from "./ProposalCanceledAlert"
 import { useProposalDetail } from "../hooks"
+import { ProposalSessionSection } from "@/components/ProposalSessionSection"
 import { ProposalTimeline } from "@/components/ProposalSessionSection/components/ProposalTimeline"
 
 type Props = {
@@ -22,6 +22,8 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
   const votesAtSnapshotQuery = useVot3PastSupply(proposal.votingStartBlock)
 
   const totalVotesQuery = useProposalTotalVotes(proposalId)
+
+  const isEnded = proposal.state === ProposalState.DepositNotMet
 
   if (!proposalCreatedEvent) return null
 
@@ -44,7 +46,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
               quorumQuery={proposal.quorumQuery}
               votesAtSnapshotQuery={votesAtSnapshotQuery}
               userVotesAtSnapshotQuery={proposal.snapshotVotesQuery}
-              isEnded={false}
+              isEnded={isEnded}
               currentVotesQuery={totalVotesQuery}
               renderTimeline={<ProposalTimeline />}
             />
