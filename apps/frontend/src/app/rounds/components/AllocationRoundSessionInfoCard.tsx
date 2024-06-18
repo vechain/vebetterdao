@@ -114,7 +114,7 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
   }, [isQuorumFailed, isQuorumReached, quorumReachedTextInfoColor])
 
   return (
-    <Card w="full">
+    <Card w="full" variant={"baseWithBorder"}>
       <CardHeader>
         <Heading size="md">Session info</Heading>
       </CardHeader>

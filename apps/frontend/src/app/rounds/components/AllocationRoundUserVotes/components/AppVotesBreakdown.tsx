@@ -69,7 +69,7 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
           <HStack justify={"space-between"} align="flex-end" w="full">
             <Box>
               <Skeleton isLoaded={!roundInfoLoading && !votesAtSnapshotLoading}>
-                <Heading size="2xl">{compactFormatter.format(Number(votesAtSnapshot?.scaled) ?? 0)}</Heading>
+                <Heading size="2xl">{compactFormatter.format(Number(votesAtSnapshot) ?? 0)}</Heading>
               </Skeleton>
               <Text fontSize={"md"} textTransform={"uppercase"}>
                 Your Voting Power

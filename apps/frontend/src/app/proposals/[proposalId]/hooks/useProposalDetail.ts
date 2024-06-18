@@ -121,8 +121,8 @@ export const useProposalDetailById = (proposalId: string) => {
     const supportingUserCount = proposalDepositEvent.supportingUserCount
     const othersSupportUserCount = proposalDepositEvent.othersSupportUserCount
     const userVotingPowerOnSnapshot = ethers.formatEther(proposalSnapshotVotingPower.data || 0)
-    const userVot3OnSnapshot = proposalSnapshotVot3.data?.scaled ?? "0"
-    const quorumPercentage = totalVot3UsedInVotes ? totalVot3UsedInVotes / Number(proposalQuorum.data?.scaled) : 0
+    const userVot3OnSnapshot = proposalSnapshotVot3.data ?? "0"
+    const quorumPercentage = totalVot3UsedInVotes ? totalVot3UsedInVotes / Number(proposalQuorum.data) : 0
     const quorumChartPercentage = Math.min(quorumPercentage || 0, 1) * 100
     const result = {
       id: proposalId,
@@ -189,7 +189,8 @@ export const useProposalDetailById = (proposalId: string) => {
       isVotesLoading: proposalVotes.isLoading,
       isQuorumReached: isQuorumReached.data,
       isQuorumReachedLoading: isQuorumReached.isLoading,
-      quorum: proposalQuorum.data?.scaled || 0,
+      quorum: proposalQuorum.data || 0,
+      quorumQuery: proposalQuorum,
       isQuorumLoading: proposalQuorum.isLoading,
       quorumPercentage,
       quorumChartPercentage,
