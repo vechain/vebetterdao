@@ -259,5 +259,6 @@
   "Withdrawal complete!": "Withdrawal complete!",
   "See transaction information": "See transaction information",
   "You withdrew": "You withdrew",
-  "Current B3TR Balance": "Current B3TR Balance"
+  "Current B3TR Balance": "Current B3TR Balance",
+  "Total B3TR Balance": "Total B3TR Balance"
 }

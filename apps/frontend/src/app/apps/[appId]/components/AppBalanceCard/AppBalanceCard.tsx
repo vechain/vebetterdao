@@ -21,7 +21,6 @@ import { useAppBalance } from "@/api/contracts/x2EarnRewardsPool"
 import { WithdrawModal } from "./WithdrawModal"
 
 const compactFormatter = getCompactFormatter(4)
-const b3trLogo = "/images/logo/b3tr_logo_dark.svg"
 
 export const AppBalanceCard = () => {
   const { t } = useTranslation()
@@ -38,10 +37,10 @@ export const AppBalanceCard = () => {
         <CardBody py={0}>
           <VStack bg={"#E5EEFF"} py={{ base: 3, md: 4 }} px={6} h="full" w="full" borderRadius={"2xl"} align="start">
             <Text fontSize="12px" fontWeight="400">
-              {"Total B3TR Balance"}
+              {t("Total B3TR Balance")}
             </Text>
             <HStack>
-              <Image src={b3trLogo} boxSize={"30px"} alt="B3TR Icon" />
+              <Image src={"/images/logo/b3tr_logo_dark.svg"} boxSize={"30px"} alt="B3TR Icon" />
               <Skeleton isLoaded={!isBalanceLoading}>
                 <Heading size={{ base: "2xl", md: "xl" }}>{compactFormatter.format(Number(balance?.scaled))}</Heading>
               </Skeleton>
