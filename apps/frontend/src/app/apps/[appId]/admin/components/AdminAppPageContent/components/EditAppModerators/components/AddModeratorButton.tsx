@@ -8,12 +8,13 @@ import {
   Modal,
   ModalBody,
   ModalCloseButton,
+  ModalOverlay,
   Text,
   VStack,
   useDisclosure,
 } from "@chakra-ui/react"
 import { UilPlus, UilUser } from "@iconscout/react-unicons"
-import { isValid } from "@repo/utils/AddressUtils"
+import { compareAddresses, isValid } from "@repo/utils/AddressUtils"
 import { useCallback } from "react"
 import { UseFormReturn, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -40,9 +41,15 @@ export const AddModeratorButton = ({ editAdminForm }: Props) => {
     [addressForm, editAdminForm, onClose],
   )
 
+  const handleClose = useCallback(() => {
+    addressForm.reset()
+    onClose()
+  }, [addressForm, onClose])
+
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal isOpen={isOpen} onClose={handleClose}>
+        <ModalOverlay />
         <CustomModalContent>
           <ModalCloseButton />
           <ModalBody p={"40px"}>
@@ -58,7 +65,13 @@ export const AddModeratorButton = ({ editAdminForm }: Props) => {
                         value: true,
                         message: t("Address required"),
                       },
-                      validate: value => isValid(value) || t("Invalid address"),
+                      validate: {
+                        validAddress: value => isValid(value) || t("Invalid address"),
+                        alreadyPresent: value =>
+                          !editAdminForm
+                            .getValues("moderators")
+                            .some(moderator => compareAddresses(moderator, value)) || t("Moderator already present"),
+                      },
                     })}></Input>
                   <FormErrorMessage>{errors.moderatorAddress?.message}</FormErrorMessage>
                 </FormControl>
