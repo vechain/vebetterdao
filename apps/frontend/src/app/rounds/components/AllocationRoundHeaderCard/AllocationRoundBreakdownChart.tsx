@@ -1,8 +1,19 @@
 import { useAllocationAmount } from "@/api"
 import { B3TRIcon, DotSymbol } from "@/components"
-import { VStack, HStack, Heading, useColorModeValue, Text, Box, CardBody, Card, Skeleton } from "@chakra-ui/react"
+import {
+  VStack,
+  HStack,
+  Heading,
+  useColorModeValue,
+  Text,
+  Box,
+  CardBody,
+  Card,
+  Skeleton,
+  useMediaQuery,
+} from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useMemo } from "react"
+import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
 const compactFormatter = getCompactFormatter(2)
@@ -12,6 +23,7 @@ type Props = {
 }
 export const AllocationRoundBreakdownChart = ({ roundId }: Props) => {
   const { t } = useTranslation()
+  const [isDesktop] = useMediaQuery("(min-width: 800px)")
 
   //TODO: Handle error
   const { data: roundAmount, isLoading: roundAmountLoading } = useAllocationAmount(roundId)
@@ -58,66 +70,84 @@ export const AllocationRoundBreakdownChart = ({ roundId }: Props) => {
     ]
   }, [baseAmountsPercentage, roundAmount, treasuryColor, votingRewardsColor, appsColor])
 
+  // Wrapper component to handle different layouts
+  const Wrapper = useCallback(
+    ({ children }: { children: React.ReactNode }) => {
+      if (isDesktop)
+        return (
+          <Card variant="filled" w="full" flex={1} data-testid="allocation-round-breakdown-chart">
+            <CardBody as={VStack} justify={"space-between"}>
+              {children}
+            </CardBody>
+          </Card>
+        )
+      return (
+        <VStack w="full" flex={1} data-testid="allocation-round-breakdown-chart" spacing={6}>
+          {children}
+        </VStack>
+      )
+    },
+    [isDesktop],
+  )
+
   return (
-    <Card variant="filled" w="full" flex={1} data-testid="allocation-round-breakdown-chart">
-      <CardBody as={VStack} justify={"space-between"}>
-        <Box w="full">
-          <HStack spacing={3} align="center">
-            <B3TRIcon boxSize="36px" colorVariant="dark" />
-            <Skeleton isLoaded={!roundAmountLoading}>
-              <Heading fontSize="36px" fontWeight={700}>
-                {compactFormatter.format(totalDistributed)}
-              </Heading>
-            </Skeleton>
-          </HStack>
-          <Text fontSize="md" color="#6A6A6A">
-            {t("Total allocation to distribute")}
-          </Text>
-        </Box>
-
-        <VStack spacing={2} color={"#6194F5"} w="full">
-          <Skeleton isLoaded={!roundAmountLoading} position="relative" w="full">
-            <Box bg="#D5D5D5" h="8px" rounded="full" />
-            {baseAmountsInfo.map((info, index) => {
-              const left = baseAmountsInfo.slice(0, index).reduce((acc, curr) => acc + curr.percentage, 0)
-
-              const borderRadiusLeft = index === 0 ? "full" : "none"
-              const borderRadiusRight = index === baseAmountsInfo.length - 1 ? "full" : "none"
-              return (
-                <Box
-                  key={index}
-                  bg={info.color}
-                  h="8px"
-                  borderLeftRadius={borderRadiusLeft}
-                  borderRightRadius={borderRadiusRight}
-                  left={`${left}%`}
-                  w={`${info.percentage}%`}
-                  position="absolute"
-                  top={0}
-                />
-              )
-            })}
+    <Wrapper>
+      <Box w="full">
+        <HStack spacing={3} align="center">
+          <B3TRIcon boxSize="36px" colorVariant="dark" />
+          <Skeleton isLoaded={!roundAmountLoading}>
+            <Heading fontSize="36px" fontWeight={700}>
+              {compactFormatter.format(totalDistributed)}
+            </Heading>
           </Skeleton>
-        </VStack>
-        <VStack w="full" spacing={4}>
-          {baseAmountsInfo.map((info, index) => (
-            <Skeleton isLoaded={!roundAmountLoading} key={index} w="full">
-              <HStack w="full" spacing={1} color="#252525">
-                <DotSymbol size={4} color={info.color} />
-                <Text ml={1} fontSize="md" fontWeight={600}>
-                  {compactFormatter.format(Number(info.amount))}
-                </Text>
-                <Text fontSize="md">
-                  {t("({{percentage}}%) as {{label}}", {
-                    percentage: info.percentage.toLocaleString("en", { minimumFractionDigits: 2 }),
-                    label: info.label,
-                  })}
-                </Text>
-              </HStack>
-            </Skeleton>
-          ))}
-        </VStack>
-      </CardBody>
-    </Card>
+        </HStack>
+        <Text fontSize="md" color="#6A6A6A">
+          {t("Total allocation to distribute")}
+        </Text>
+      </Box>
+
+      <VStack spacing={2} color={"#6194F5"} w="full">
+        <Skeleton isLoaded={!roundAmountLoading} position="relative" w="full">
+          <Box bg="#D5D5D5" h="8px" rounded="full" />
+          {baseAmountsInfo.map((info, index) => {
+            const left = baseAmountsInfo.slice(0, index).reduce((acc, curr) => acc + curr.percentage, 0)
+
+            const borderRadiusLeft = index === 0 ? "full" : "none"
+            const borderRadiusRight = index === baseAmountsInfo.length - 1 ? "full" : "none"
+            return (
+              <Box
+                key={index}
+                bg={info.color}
+                h="8px"
+                borderLeftRadius={borderRadiusLeft}
+                borderRightRadius={borderRadiusRight}
+                left={`${left}%`}
+                w={`${info.percentage}%`}
+                position="absolute"
+                top={0}
+              />
+            )
+          })}
+        </Skeleton>
+      </VStack>
+      <VStack w="full" spacing={4}>
+        {baseAmountsInfo.map((info, index) => (
+          <Skeleton isLoaded={!roundAmountLoading} key={index} w="full">
+            <HStack w="full" spacing={1} color="#252525">
+              <DotSymbol size={4} color={info.color} />
+              <Text ml={1} fontSize="md" fontWeight={600}>
+                {compactFormatter.format(Number(info.amount))}
+              </Text>
+              <Text fontSize="md">
+                {t("({{percentage}}%) as {{label}}", {
+                  percentage: info.percentage.toLocaleString("en", { minimumFractionDigits: 2 }),
+                  label: info.label,
+                })}
+              </Text>
+            </HStack>
+          </Skeleton>
+        ))}
+      </VStack>
+    </Wrapper>
   )
 }
