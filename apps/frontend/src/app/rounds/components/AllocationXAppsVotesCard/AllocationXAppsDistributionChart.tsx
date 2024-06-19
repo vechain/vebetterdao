@@ -5,11 +5,9 @@ import {
   useMaxAllocationAmount,
   useMultipleXAppRoundEarnings,
   useRoundXApps,
-  useXAppsVotes,
 } from "@/api"
 import { B3TRIcon, DotSymbol } from "@/components"
 import { VStack, Heading, useColorModeValue, Text, Box, Skeleton, Stack, HStack } from "@chakra-ui/react"
-import { FormattingUtils } from "@repo/utils"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -29,8 +27,6 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
   const { data: maxAmount, isLoading: maxAmountLoading } = useMaxAllocationAmount(roundId)
 
   const { data: xApps, isLoading: xAppsLoading } = useRoundXApps(roundId)
-
-  const xAppsVotes = useXAppsVotes(xApps?.map(app => app.id) ?? [], roundId)
 
   const forecastedEarningsQueries = useMultipleXAppRoundEarnings(roundId, xApps?.map(app => app.id) ?? [])
 
@@ -95,13 +91,11 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
     forecastedEarningsQueries,
   ])
 
-  console.log("baseAmountsInfo", baseAmountsInfo)
-
   return (
     <VStack w="full" flex={1} data-testid="allocation-round-xapps-votes-breakdown-chart" spacing={6}>
       <Stack w="full" justify="space-between" direction={["column", "column", "row"]} spacing={8}>
         <VStack spacing={1} align="flex-start">
-          <HStack spacing={2} align="center">
+          <HStack spacing={3} align="center">
             <B3TRIcon boxSize="28px" colorVariant="dark" />
             <Skeleton isLoaded={!roundAmountLoading}>
               <Heading fontSize="28px" fontWeight={700}>
@@ -116,31 +110,31 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
         <HStack spacing={8} align="center" w={["full", "full", "auto"]} justify={"space-between"}>
           <VStack spacing={0} align={["flex-start", "flex-start", "flex-end"]}>
             <Skeleton isLoaded={!votersLoading}>
-              <Text fontWeight={600} fontSize={"20px"} color="#252525">
+              <Text fontWeight={600} fontSize={"18px"} color="#252525">
                 {compactFormatter.format(Number(voters ?? 0))}
               </Text>
             </Skeleton>
-            <Text fontSize="16px" color="#6A6A6A" fontWeight={400}>
+            <Text fontSize="14px" color="#6A6A6A" fontWeight={400}>
               {t("Voters")}
             </Text>
           </VStack>
           <VStack spacing={0} align={["flex-start", "flex-start", "flex-end"]}>
             <Skeleton isLoaded={!xAppsLoading}>
-              <Text fontWeight={600} fontSize={"20px"} color="#252525">
+              <Text fontWeight={600} fontSize={"18px"} color="#252525">
                 {compactFormatter.format(Number(xApps?.length ?? 0))}
               </Text>
             </Skeleton>
-            <Text fontSize="16px" color="#6A6A6A" fontWeight={400}>
+            <Text fontSize="14px" color="#6A6A6A" fontWeight={400}>
               {t("Apps")}
             </Text>
           </VStack>
           <VStack spacing={0} align={["flex-start", "flex-start", "flex-end"]}>
             <Skeleton isLoaded={!maxAmountLoading}>
-              <Text fontWeight={600} fontSize={"20px"} color="#252525">
+              <Text fontWeight={600} fontSize={"18px"} color="#252525">
                 {compactFormatter.format(Number(maxAmount ?? 0))}
               </Text>
             </Skeleton>
-            <Text fontSize="16px" color="#6A6A6A" fontWeight={400}>
+            <Text fontSize="14px" color="#6A6A6A" fontWeight={400}>
               {t("Max app allocation")}
             </Text>
           </VStack>

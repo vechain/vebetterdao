@@ -62,10 +62,12 @@ export const AllocationRoundBreakdownChart = ({ roundId }: Props) => {
     <Card variant="filled" w="full" flex={1} data-testid="allocation-round-breakdown-chart">
       <CardBody as={VStack} justify={"space-between"}>
         <Box w="full">
-          <HStack spacing={2} align="center">
-            <B3TRIcon boxSize="40px" colorVariant="dark" />
+          <HStack spacing={3} align="center">
+            <B3TRIcon boxSize="36px" colorVariant="dark" />
             <Skeleton isLoaded={!roundAmountLoading}>
-              <Heading size="xl">{compactFormatter.format(totalDistributed)}</Heading>
+              <Heading fontSize="36px" fontWeight={700}>
+                {compactFormatter.format(totalDistributed)}
+              </Heading>
             </Skeleton>
           </HStack>
           <Text fontSize="md" color="#6A6A6A">
