@@ -79,8 +79,6 @@ export const usePauseContract = ({ contract, contractName, onSuccess, invalidate
 
   const contractInterface = useMemo(() => getInterface(contract), [contract])
 
-  console.log(JSON.stringify(contractInterface.getFunction("pause")))
-
   const buildPauseClause = useCallback(() => {
     const clauses: EnhancedClause[] = [
       {

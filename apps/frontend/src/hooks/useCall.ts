@@ -16,7 +16,7 @@ export type UseCallParams<T extends Interface> = {
   args?: unknown[] // Optional arguments for the method
   keyArgs?: unknown[] // Optional key arguments for the query key
   enabled?: boolean // Whether the query should be enabled
-  mapResponse?: (res: any) => any // Optional functon to map the response
+  mapResponse?: (_res: Connex.VM.Output & Connex.Thor.Account.WithDecoded) => any // Optional functon to map the response
 }
 
 /**

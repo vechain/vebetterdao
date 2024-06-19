@@ -1,44 +1,56 @@
-import { useAllocationRoundQuorum, useAllocationVotes, useAllocationsRound, useVot3PastSupply } from "@/api"
-import { DotSymbol, VOT3Icon } from "@/components"
+import {
+  useAllocationRoundQuorum,
+  useAllocationVotes,
+  useAllocationsRound,
+  useGetVotesOnBlock,
+  useVot3PastSupply,
+} from "@/api"
+import { ProposalSessionSection } from "@/components/ProposalSessionSection"
 import {
   Box,
-  Card,
-  CardBody,
-  CardHeader,
-  HStack,
-  Heading,
-  Icon,
-  Progress,
-  Skeleton,
+  Circle,
   Step,
   StepDescription,
-  StepIcon,
   StepIndicator,
   StepSeparator,
   StepStatus,
   StepTitle,
   Stepper,
-  Text,
-  VStack,
-  useColorModeValue,
   useSteps,
 } from "@chakra-ui/react"
-import { getCompactFormatter, humanNumber } from "@repo/utils/FormattingUtils"
+import { useWallet } from "@vechain/dapp-kit-react"
 import { useEffect, useMemo } from "react"
-import { FaClock } from "react-icons/fa6"
 
 type Props = {
   roundId: string
 }
 
-const compactFormatter = getCompactFormatter(2)
-
 export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
+  const { account } = useWallet()
   const { data: roundInfo } = useAllocationsRound(roundId)
-  const { data: votes, isLoading: votesLoading } = useAllocationVotes(roundId)
-  const { data: roundQuorum, isLoading: quorumLoading } = useAllocationRoundQuorum(roundId)
-  const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useVot3PastSupply(roundInfo.voteStart)
+  const currentVotesQuery = useAllocationVotes(roundId)
+  const quorumQuery = useAllocationRoundQuorum(roundId)
+  const votesAtSnapshotQuery = useVot3PastSupply(roundInfo.voteStart)
+  const userVotesAtSnapshotQuery = useGetVotesOnBlock(Number(roundInfo.voteStart), account ?? "")
 
+  const isRoundActive = useMemo(() => {
+    return roundInfo?.state === 0
+  }, [roundInfo?.state])
+
+  return (
+    <ProposalSessionSection
+      quorumQuery={quorumQuery}
+      votesAtSnapshotQuery={votesAtSnapshotQuery}
+      currentVotesQuery={currentVotesQuery}
+      userVotesAtSnapshotQuery={userVotesAtSnapshotQuery}
+      isEnded={!isRoundActive}
+      renderTimeline={<AllocationRoundTimeline roundId={roundId} />}
+    />
+  )
+}
+
+const AllocationRoundTimeline = ({ roundId }: Props) => {
+  const { data: roundInfo } = useAllocationsRound(roundId)
   const steps = useMemo(
     () => [
       { title: "Voting session started", description: roundInfo?.voteStartTimestamp?.format("MMMM D hh:mm A") },
@@ -55,8 +67,6 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
     index: 1,
     count: steps.length,
   })
-
-  const quorumReachedTextInfoColor = useColorModeValue("secondary.800", "secondary.700")
 
   useEffect(() => {
     if (roundInfo) {
@@ -75,132 +85,30 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
     }
   }, [roundInfo, setActiveStep])
 
-  const quorumPercentage = useMemo(() => {
-    return (Number(votes) / Number(roundQuorum)) * 100
-  }, [votes, roundQuorum])
-
-  const isQuorumFailed = useMemo(() => {
-    return roundInfo?.state === 1
-  }, [roundInfo?.state])
-
-  const isQuorumReached = useMemo(() => {
-    return roundInfo?.state === 2 || Number(votes) >= Number(roundQuorum)
-  }, [roundInfo?.state, votes, roundQuorum])
-
-  const isRoundActive = useMemo(() => {
-    return roundInfo?.state === 0
-  }, [roundInfo?.state])
-
-  const quorumProgressColor = useMemo(() => {
-    // Quorum Failed
-    if (isQuorumFailed) return "red"
-
-    // Quorum Met
-    if (isQuorumReached) return "secondary"
-
-    return "primary"
-  }, [isQuorumFailed, isQuorumReached])
-
-  const quorumInfoText = useMemo(() => {
-    if (isQuorumFailed) return "Quorum failed"
-    if (isQuorumReached) return "Quorum reached"
-    return "Quorum needed"
-  }, [isQuorumFailed, isQuorumReached])
-
-  const quorumInfoTextColor = useMemo(() => {
-    if (isQuorumFailed) return "red"
-    if (isQuorumReached) return quorumReachedTextInfoColor
-    return "primary"
-  }, [isQuorumFailed, isQuorumReached, quorumReachedTextInfoColor])
-
   return (
-    <Card w="full">
-      <CardHeader>
-        <Heading size="md">Session info</Heading>
-      </CardHeader>
-      <CardBody>
-        <VStack w="full" justify={"space-between"} spacing={4} align="flex-start">
-          <Box w="full">
-            <Text fontSize={"sm"} fontWeight="400">
-              {isRoundActive ? "Real-time" : "Total"} votes
-            </Text>
-            <Skeleton isLoaded={!votesLoading}>
-              <HStack spacing={2}>
-                <Heading size="lg" data-testid="total-votes">
-                  {compactFormatter.format(Number(votes))}
-                </Heading>
-                <VOT3Icon boxSize={6} />
-              </HStack>
-            </Skeleton>
-            <Skeleton isLoaded={!quorumLoading}>
-              <Progress
-                mt={3}
-                h={2.5}
-                hasStripe={isRoundActive}
-                value={quorumPercentage}
-                colorScheme={quorumProgressColor}
-                size="sm"
-                borderRadius={"full"}
-              />
-            </Skeleton>
-            <HStack justify="space-between" w="full" mt={1}>
-              <Text fontSize={"sm"} fontWeight="400" color={quorumInfoTextColor}>
-                {quorumInfoText}
-              </Text>
+    <Stepper
+      size="sm"
+      index={activeStep}
+      orientation="vertical"
+      colorScheme="primary"
+      gap="0"
+      height="200px"
+      mt={4}
+      variant="primaryVertical">
+      {steps.map((step, index) => (
+        <Step key={index}>
+          <StepIndicator>
+            <StepStatus complete={<Circle bg="#004CFC" size={"30%"} />} active={<Circle bg="#004CFC" size={"60%"} />} />
+          </StepIndicator>
 
-              {!isQuorumReached && (
-                <HStack spacing={2}>
-                  <Icon as={FaClock} fontSize={"sm"} fontWeight={"thin"} color={isQuorumFailed ? "red" : "inherit"} />
-                  <Skeleton isLoaded={!quorumLoading}>
-                    <Text fontSize={"sm"} fontWeight={"600"} color={isQuorumFailed ? "red" : "inherit"}>
-                      {humanNumber(roundQuorum ?? "0", roundQuorum)}
-                    </Text>
-                  </Skeleton>
-                </HStack>
-              )}
-            </HStack>
+          <Box flexShrink="0">
+            <StepTitle>{step.title}</StepTitle>
+            <StepDescription>{step.description}</StepDescription>
           </Box>
 
-          <HStack w="full" justify="space-between" align="center">
-            <Text fontSize={"sm"} fontWeight="400">
-              Votes at snapshot
-            </Text>
-            <Skeleton isLoaded={!votesAtSnapshotLoading}>
-              <Text fontWeight={"600"} color="primary.500">
-                {humanNumber(votesAtSnapshot ?? "0", votes)}
-              </Text>
-            </Skeleton>
-          </HStack>
-
-          <Stepper
-            size="sm"
-            index={activeStep}
-            orientation="vertical"
-            colorScheme="primary"
-            gap="0"
-            height="200px"
-            mt={4}>
-            {steps.map((step, index) => (
-              <Step key={index}>
-                <StepIndicator>
-                  <StepStatus
-                    complete={<StepIcon />}
-                    incomplete={<></>}
-                    active={<DotSymbol color="primary.500" size={3} />}
-                  />
-                </StepIndicator>
-
-                <Box flexShrink="0">
-                  <StepTitle>{step.title}</StepTitle>
-                  <StepDescription>{step.description}</StepDescription>
-                </Box>
-
-                <StepSeparator />
-              </Step>
-            ))}
-          </Stepper>
-        </VStack>
-      </CardBody>
-    </Card>
+          <StepSeparator />
+        </Step>
+      ))}
+    </Stepper>
   )
 }
