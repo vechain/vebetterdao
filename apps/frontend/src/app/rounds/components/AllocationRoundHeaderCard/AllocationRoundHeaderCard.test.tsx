@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from "../../../../../test"
 import { AllocationRoundHeaderCard } from "./AllocationRoundHeaderCard"
 import * as apiHooks from "../../../../api"
 import * as dappKit from "@vechain/dapp-kit-react"
+import * as router from "next/navigation"
 import dayjs from "dayjs"
 import { APPS } from "../../../../../__mocks__/Apps"
 import { ethers } from "ethers"
@@ -12,6 +13,15 @@ const spyOnUserAllocationRoundState = vi.spyOn(apiHooks, "useAllocationsRoundSta
 const spyOnHasVotedInRound = vi.spyOn(apiHooks, "useHasVotedInRound")
 const spyOnUserVotesInRound = vi.spyOn(apiHooks, "useUserVotesInRound")
 const spyOnRoundXApps = vi.spyOn(apiHooks, "useRoundXApps")
+
+const mockRouterPush = vi.fn()
+const mockBack = vi.fn()
+//@ts-ignore
+vi.spyOn(router, "useRouter").mockReturnValue({
+  push: mockRouterPush,
+  replace: vi.fn(),
+  back: mockBack,
+})
 
 type TestPageRenderParams = {
   roundId: string
@@ -49,7 +59,7 @@ const testPageRender = async ({
   if (shouldRenderCastButton) {
     const castButton = await screen.findByTestId(`cast-your-vote-button`)
     fireEvent.click(castButton)
-    //TODO: check router called after vote flow refactor
+    expect(mockRouterPush).toHaveBeenCalledWith(`/rounds/${roundId}/vote`)
   } else {
     expect(screen.queryByTestId(`cast-your-vote-button`)).not.toBeInTheDocument()
   }
