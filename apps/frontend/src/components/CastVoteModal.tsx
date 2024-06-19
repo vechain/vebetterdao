@@ -27,7 +27,6 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { FormEvent, useCallback, useState } from "react"
 import { MdHowToVote } from "react-icons/md"
 import { FaThumbsDown, FaThumbsUp } from "react-icons/fa6"
-import { humanAddress } from "@repo/utils/FormattingUtils"
 import { TransactionModal } from "./TransactionModal"
 
 type Props = {
@@ -133,7 +132,7 @@ const CastVoteModalContent: React.FC<CastVoteModalFormContentProps> = ({ onVote,
                 <HStack spacing={2} justify={"center"}>
                   <Icon as={MdHowToVote} fontSize={"2xl"} />
                   <Heading as="h1" size="lg">
-                    {votes?.formatted ?? "0"}
+                    {votes ?? "0"}
                   </Heading>
                 </HStack>
                 <Skeleton isLoaded={!proposalSnapshotBlockLoading}>
