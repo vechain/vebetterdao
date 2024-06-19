@@ -332,7 +332,7 @@ export async function deployAll(config: ContractsConfig) {
   )) as B3TRGovernor
 
   const date = new Date(performance.now() - start)
-  console.log(`Contracts deployed in ${date.getMinutes()}m ${date.getSeconds()}s`)
+  console.log(`================  Contracts deployed in ${date.getMinutes()}m ${date.getSeconds()}s `)
 
   const contractAddresses: Record<string, string> = {
     B3TR: await b3tr.getAddress(),
@@ -771,6 +771,10 @@ export async function deployAll(config: ContractsConfig) {
 
     console.log("Roles validated successfully!")
   }
+
+  console.log("================================================================================")
+  console.log("Deployment completed successfully!")
+  console.log("================================================================================")
 
   console.log("Libraries", libraries)
   console.log("Contracts", contractAddresses)
