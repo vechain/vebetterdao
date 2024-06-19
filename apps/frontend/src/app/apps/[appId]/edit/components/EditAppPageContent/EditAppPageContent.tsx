@@ -36,6 +36,8 @@ import { getXAppMetadataQueryKey } from "@/api"
 import { useCurrentAppInfo } from "../../../hooks/useCurrentAppInfo"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
+import { useSocialUrls } from "./hooks/useSocialUrls"
+import { useIsFormChanged } from "./hooks/useIsFormChanged"
 
 export type EditAppForm = {
   name: string
@@ -51,6 +53,10 @@ export type EditAppForm = {
   bannerImage: string
 }
 
+const findUrlByName = (urls: { name: string; url: string }[] | undefined, name: string) => {
+  return urls?.find(url => url.name === name)?.url || ""
+}
+
 export const EditAppPageContent = () => {
   const { t } = useTranslation()
   const { appMetadata } = useCurrentAppMetadata()
@@ -64,6 +70,14 @@ export const EditAppPageContent = () => {
       screenshots: screenshots,
       logoImage: logo,
       bannerImage: banner,
+      name: appMetadata?.name || "",
+      external_url: appMetadata?.external_url || "",
+      description: appMetadata?.description || "",
+      twitterUrl: findUrlByName(appMetadata?.social_urls, "Twitter"),
+      discordUrl: findUrlByName(appMetadata?.social_urls, "Discord"),
+      telegramUrl: findUrlByName(appMetadata?.social_urls, "Telegram"),
+      youtubeUrl: findUrlByName(appMetadata?.social_urls, "Youtube"),
+      mediumUrl: findUrlByName(appMetadata?.social_urls, "Medium"),
     },
   })
   const {
@@ -98,42 +112,13 @@ export const EditAppPageContent = () => {
   })
   const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
 
+  const socialUrls = useSocialUrls(form)
   const onSubmit = useCallback(
     async (data: EditAppForm) => {
       updateAppMetadataMutation.resetStatus()
       onConfirmationOpen()
 
-      const socialUrls = []
-      if (data.twitterUrl) {
-        socialUrls.push({
-          name: "Twitter",
-          url: data.twitterUrl,
-        })
-      }
-      if (data.discordUrl) {
-        socialUrls.push({
-          name: "Discord",
-          url: data.discordUrl,
-        })
-      }
-      if (data.telegramUrl) {
-        socialUrls.push({
-          name: "Telegram",
-          url: data.telegramUrl,
-        })
-      }
-      if (data.youtubeUrl) {
-        socialUrls.push({
-          name: "Youtube",
-          url: data.youtubeUrl,
-        })
-      }
-      if (data.mediumUrl) {
-        socialUrls.push({
-          name: "Medium",
-          url: data.mediumUrl,
-        })
-      }
+      console.log("socialUrls", socialUrls)
 
       const metadataUri = await onMetadataUpload({
         name: data.name,
@@ -151,7 +136,7 @@ export const EditAppPageContent = () => {
         metadataUri,
       })
     },
-    [onConfirmationOpen, onMetadataUpload, updateAppMetadataMutation],
+    [onConfirmationOpen, onMetadataUpload, socialUrls, updateAppMetadataMutation],
   )
 
   const handleClose = useCallback(() => {
@@ -173,6 +158,8 @@ export const EditAppPageContent = () => {
     if (moderators?.find(moderator => compareAddresses(account || "", moderator))) return true
     return false
   }, [account, admin, moderators])
+
+  const isFormChanged = useIsFormChanged(form)
 
   useEffect(() => {
     if (!allowedToEditApp) {
@@ -236,7 +223,11 @@ export const EditAppPageContent = () => {
             <Button variant="primaryGhost" onClick={goBack}>
               {t("Cancel")}
             </Button>
-            <Button variant="primaryAction" type="submit" leftIcon={<UilCheck size="16px" />}>
+            <Button
+              variant="primaryAction"
+              type="submit"
+              leftIcon={<UilCheck size="16px" />}
+              isDisabled={!isFormChanged}>
               {t("Save changes")}
             </Button>
           </HStack>
