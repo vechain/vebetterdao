@@ -107,7 +107,7 @@ export const AllocationRoundBreakdownChart = ({ roundId }: Props) => {
                 </Text>
                 <Text fontSize="md">
                   {t("({{percentage}}%) as {{label}}", {
-                    percentage: info.percentage,
+                    percentage: info.percentage.toLocaleString("en", { minimumFractionDigits: 2 }),
                     label: info.label,
                   })}
                 </Text>
