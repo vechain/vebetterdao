@@ -1,4 +1,4 @@
-import { RoundCreated, useAllocationAmount, useAllocationsRound } from "@/api"
+import { RoundCreated, useAllocationAmount, useAllocationsRound, useAllocationsRoundState } from "@/api"
 import {
   Box,
   Card,
@@ -88,7 +88,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
                 roundId={round.roundId}
                 data-testid={"round-#" + round.roundId + "-status"}
                 renderBadge={false}
-                renderIcon={false}
+                renderIcon={isActive}
               />
               <Show above="sm">
                 <DotSymbol color={"gray"} size={1} />

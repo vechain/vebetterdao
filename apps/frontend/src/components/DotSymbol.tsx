@@ -32,7 +32,8 @@ export const DotSymbol: React.FC<Props> = ({ color = "inherit", size = 1.5, puls
         borderColor={color}
         w={Number(size) * scaledPulse}
         h={Number(size) * scaledPulse}
-        animation={`${pulseKeyFrames} 1.5s infinite`}
+        //TODO: this works but off-center the ring
+        // animation={`${pulseKeyFrames} 1.5s infinite`}
       />
     </Box>
   )
