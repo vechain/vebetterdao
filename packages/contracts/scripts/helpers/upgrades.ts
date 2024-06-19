@@ -7,7 +7,7 @@ export const deployProxy = async (
   contractName: string,
   args: any[],
   libraries: { [libraryName: string]: string } = {},
-  showLogs: boolean = false,
+  logOutput: boolean = false,
 ): Promise<BaseContract> => {
   // Deploy the implementation contract
   const Contract = await ethers.getContractFactory(contractName, {
@@ -15,7 +15,7 @@ export const deployProxy = async (
   })
   const implementation = await Contract.deploy()
   await implementation.waitForDeployment()
-  showLogs && console.log(`${contractName} impl.: ${await implementation.getAddress()}`)
+  logOutput && console.log(`${contractName} impl.: ${await implementation.getAddress()}`)
 
   // Deploy the proxy contract, link it to the implementation and call the initializer
   const proxyFactory = await ethers.getContractFactory("B3TRProxy")
@@ -24,7 +24,7 @@ export const deployProxy = async (
     getInitializerData(Contract.interface, args),
   )
   await proxy.waitForDeployment()
-  showLogs && console.log(`${contractName} proxy: ${await proxy.getAddress()}`)
+  logOutput && console.log(`${contractName} proxy: ${await proxy.getAddress()}`)
 
   const newImplementationAddress = await getImplementationAddress(ethers.provider, await proxy.getAddress())
   if (!AddressUtils.compareAddresses(newImplementationAddress, await implementation.getAddress())) {
