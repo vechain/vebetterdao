@@ -8,6 +8,8 @@ import { CustomModalContent } from "@/components/CustomModalContent"
 import { UploadingMetadataModalContent } from ".//UploadingMetadataModalContent"
 import { ConfirmationConvertModalContent } from "./ConfirmationConvertModalContent"
 import { SuccessConvertModalContent } from "./SuccessConvertModalContent"
+import { ConfirmationAppWithdrawModalContent } from "./ConfirmationAppWithdrawModalContent"
+import { SuccessAppWithdrawModalContent } from "./SuccessAppWithdrawModalContent"
 
 export type TransactionModalProps = {
   isOpen: boolean
@@ -26,7 +28,9 @@ export type TransactionModalProps = {
   txId?: string
   b3trBalanceAfterSwap?: string
   vot3BalanceAfterSwap?: string
+  b3trWithdrawAmount?: string
   isSwap?: boolean
+  isAppWithdraw?: boolean
   b3trBalance?: string
   vot3Balance?: string
 }
@@ -47,23 +51,35 @@ export const TransactionModal = ({
   showExplorerButton,
   txId,
   isSwap,
+  isAppWithdraw,
   b3trBalanceAfterSwap,
   vot3BalanceAfterSwap,
+  b3trWithdrawAmount,
   b3trBalance,
   vot3Balance,
 }: TransactionModalProps) => {
   const modalContent = useMemo(() => {
     if (status === "uploadingMetadata") return <UploadingMetadataModalContent />
 
-    if (status === "pending")
-      return isSwap ? (
-        <ConfirmationConvertModalContent
-          b3trBalanceAfter={b3trBalanceAfterSwap}
-          vot3BalanceAfter={vot3BalanceAfterSwap}
-        />
-      ) : (
-        <ConfirmationModalContent title={confirmationTitle} />
-      )
+    if (status === "pending") {
+      if (isSwap)
+        return (
+          <ConfirmationConvertModalContent
+            b3trBalanceAfter={b3trBalanceAfterSwap}
+            vot3BalanceAfter={vot3BalanceAfterSwap}
+          />
+        )
+
+      if (isAppWithdraw)
+        return (
+          <ConfirmationAppWithdrawModalContent
+            b3trBalanceAfter={b3trBalanceAfterSwap}
+            b3trWithdrawAmount={b3trWithdrawAmount}
+          />
+        )
+
+      return <ConfirmationModalContent title={confirmationTitle} />
+    }
     if (status === "waitingConfirmation")
       return <LoadingModalContent title={pendingTitle} showExplorerButton={showExplorerButton} txId={txId} />
     if (status === "error")
@@ -78,14 +94,27 @@ export const TransactionModal = ({
         />
       )
     if (status === "success") {
-      return isSwap ? (
-        <SuccessConvertModalContent
-          b3trBalanceAfter={b3trBalance}
-          vot3BalanceAfter={vot3Balance}
-          txId={txId}
-          onClose={onClose}
-        />
-      ) : (
+      if (isSwap)
+        return (
+          <SuccessConvertModalContent
+            b3trBalanceAfter={b3trBalance}
+            vot3BalanceAfter={vot3Balance}
+            txId={txId}
+            onClose={onClose}
+          />
+        )
+
+      if (isAppWithdraw)
+        return (
+          <SuccessAppWithdrawModalContent
+            b3trBalanceAfter={b3trBalance}
+            b3trWithdrawAmount={b3trWithdrawAmount}
+            txId={txId}
+            onClose={onClose}
+          />
+        )
+
+      return (
         <SuccessModalContent
           title={successTitle}
           showSocialButtons={showSocialButtons}
@@ -99,6 +128,7 @@ export const TransactionModal = ({
   }, [
     status,
     isSwap,
+    isAppWithdraw,
     b3trBalanceAfterSwap,
     vot3BalanceAfterSwap,
     confirmationTitle,
@@ -115,6 +145,7 @@ export const TransactionModal = ({
     successTitle,
     showSocialButtons,
     socialDescriptionEncoded,
+    b3trWithdrawAmount,
   ])
   if (!modalContent) return null
 
