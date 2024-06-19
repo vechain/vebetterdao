@@ -45,6 +45,7 @@ export const AppCard = ({ xApp }: Props) => {
       onClick={navigateToAppDetail}
       _hover={{
         cursor: "pointer",
+        backgroundColor: "gray.50",
       }}>
       <Box w="full" position={"relative"} h={200}>
         <Skeleton w="full" h="full" isLoaded={!isBannerLoading}>

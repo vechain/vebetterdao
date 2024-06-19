@@ -41,7 +41,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     account ?? undefined,
   )
 
-  const hasNoVotes = !votesAtSnapshot?.scaled || votesAtSnapshot.scaled === "0"
+  const hasNoVotes = !votesAtSnapshot || votesAtSnapshot === "0"
 
   const { data: castVotesEvent } = useUserVotesInRound(roundId, account ?? undefined)
 
@@ -78,11 +78,11 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
   const watchVotes = watch("votes")
 
   const parsedCastVotesPercentages: FormData["votes"] = useMemo(() => {
-    if (castVotesEvent?.appsIds && votesAtSnapshot?.scaled) {
+    if (castVotesEvent?.appsIds && votesAtSnapshot) {
       return castVotesEvent.appsIds.map((id, index) => {
         const rawValue = scaledDivision(
           Number(ethers.formatEther(castVotesEvent.voteWeights[index] as string)) * 100,
-          Number(votesAtSnapshot.scaled),
+          Number(votesAtSnapshot),
         )
         return {
           appId: id,
@@ -108,7 +108,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     (data: FormData) => {
       if (!votesAtSnapshot) throw new Error("Votes at snapshot not found")
       const appVotesPercentagesToValue: CastAllocationVotesProps = data.votes.map(vote => {
-        const rawValue = scaledDivision(Number(vote.rawValue) * Number(votesAtSnapshot.scaled), 100)
+        const rawValue = scaledDivision(Number(vote.rawValue) * Number(votesAtSnapshot), 100)
         return {
           appId: vote.appId,
           votes: rawValue,
@@ -225,7 +225,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
                   const xApp = xApps?.find(xApp => xApp.id === field.appId)
                   return (
                     <SelectAppVotesInput
-                      totalVotesAvailable={votesAtSnapshot?.scaled}
+                      totalVotesAvailable={votesAtSnapshot}
                       isDisabled={isFormDisabled}
                       control={control}
                       getValues={getValues}

@@ -1,14 +1,15 @@
 import { Grid, GridItem, VStack } from "@chakra-ui/react"
 import { ProposalOverview } from "./ProposalOverview"
 import { ProposalContentAndActions } from "./ProposalContentAndActions"
-import { ProposalState, useProposalCreatedEvent } from "@/api"
+import { ProposalState, useProposalCreatedEvent, useProposalTotalVotes, useVot3PastSupply } from "@/api"
 import { ProposalCommunitySupport } from "./ProposalCommunitySupport"
 import { ProposalWithdrawDeposit } from "./ProposalWithdrawDeposit"
-import { ProposalSessionSection } from "./ProposalSessionSection"
 import { CancelProposalSection } from "./CancelProposalSection/CancelProposalSection"
 import { ProposalVoteCommentList } from "./ProposalVoteCommentList"
 import { ProposalCanceledAlert } from "./ProposalCanceledAlert"
 import { useProposalDetail } from "../hooks"
+import { ProposalSessionSection } from "@/components/ProposalSessionSection"
+import { ProposalTimeline } from "@/components/ProposalSessionSection/components/ProposalTimeline"
 
 type Props = {
   proposalId: string
@@ -17,6 +18,12 @@ type Props = {
 export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
   const { data: proposalCreatedEvent } = useProposalCreatedEvent(proposalId)
   const { proposal } = useProposalDetail()
+
+  const votesAtSnapshotQuery = useVot3PastSupply(proposal.votingStartBlock)
+
+  const totalVotesQuery = useProposalTotalVotes(proposalId)
+
+  const isEnded = proposal.state === ProposalState.DepositNotMet
 
   if (!proposalCreatedEvent) return null
 
@@ -35,7 +42,14 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
         <GridItem colSpan={[3, 3, 1]}>
           <VStack align="stretch" gap={8}>
             {proposal.isUserSupportLeft && <ProposalWithdrawDeposit />}
-            <ProposalSessionSection />
+            <ProposalSessionSection
+              quorumQuery={proposal.quorumQuery}
+              votesAtSnapshotQuery={votesAtSnapshotQuery}
+              userVotesAtSnapshotQuery={proposal.snapshotVotesQuery}
+              isEnded={isEnded}
+              currentVotesQuery={totalVotesQuery}
+              renderTimeline={<ProposalTimeline />}
+            />
             {!proposal.isUserSupportLeft && <ProposalWithdrawDeposit />}
             <CancelProposalSection />
           </VStack>

@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 
 import { getConfig } from "@repo/config"
-import { XAllocationVotingGovernorJson } from "@repo/contracts"
 import { XAllocationVoting__factory } from "@repo/contracts/typechain-types"
 
 const xAllocationInterface = XAllocationVoting__factory.createInterface()

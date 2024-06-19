@@ -16,10 +16,12 @@ import {
 } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa6"
 
 export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
   const router = useRouter()
+  const { t } = useTranslation()
   const { data, isLoading } = useAllocationsRound(roundId)
   const [isDesktop] = useMediaQuery("(min-width: 800px)")
 
@@ -38,30 +40,36 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
     router.push(`/rounds/${nextRound}`)
   }
 
-  const bgColor = data.isCurrent ? "#B2F26C" : "rgba(233, 233, 233, 1)"
+  const bgColor = data.isCurrent ? "#B1F16C" : "#E1E1E1"
 
   // State to store the client width
-  const [clientWidth, setClientWidth] = useState(document.body.clientWidth);
+  const [clientWidth, setClientWidth] = useState(document.body.clientWidth)
 
   // Effect to update the clientWidth state on window resize
   useEffect(() => {
     const updateWidth = () => {
-      setClientWidth(document.body.clientWidth);
-    };
+      setClientWidth(document.body.clientWidth)
+    }
 
     // Set initial width
-    updateWidth();
+    updateWidth()
 
     // Add window resize event listener
-    window.addEventListener('resize', updateWidth);
+    window.addEventListener("resize", updateWidth)
 
     // Clean up listener on component unmount
-    return () => window.removeEventListener('resize', updateWidth);
-  }, []);
+    return () => window.removeEventListener("resize", updateWidth)
+  }, [])
 
   if (isDesktop)
     return (
-      <HStack w={clientWidth} align="center" bgColor={bgColor} mt={-10} py={3}>
+      <HStack
+        w={clientWidth}
+        align="center"
+        bgColor={bgColor}
+        mt={-10}
+        py={3}
+        data-testid={`allocation-round-${roundId}-nav-desktop`}>
         <Container
           maxW={"container.xl"}
           display={"flex"}
@@ -71,18 +79,24 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
           flexDirection={"row"}
           px={20}>
           <Button
+            data-testid="prev-round-button"
+            color={prevButtonDisabled ? "#757575" : "#004CFC"}
             size="sm"
             variant={"ghost"}
             aria-label="Go to previous round"
             isDisabled={prevButtonDisabled}
             onClick={goToPreviousRound}
             leftIcon={<FaArrowLeft />}>
-            Previous round
+            {t("Previous round")}
           </Button>
 
           <Stack direction={["column", "column", "row"]} spacing={4} align={"center"}>
             <Skeleton isLoaded={!isLoading}>
-              <Heading size="md">Round #{data?.roundId}</Heading>
+              <Heading size="md">
+                {t("Round #{{round}}", {
+                  round: data?.roundId,
+                })}
+              </Heading>
             </Skeleton>
             <Box w={1.5} h={1.5} borderRadius={"full"} bg="gray" />
             <HStack spacing={2} align={"center"}>
@@ -97,21 +111,32 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
             <AllocationRoundStateTag state={data?.state} size="md" renderInTag={true} variant={"subtle"} />
           </Stack>
           <Button
+            data-testid="next-round-button"
             variant={"ghost"}
             size="sm"
+            color={nextButtonDisabled ? "#757575" : "#004CFC"}
             aria-label="Go to next round"
             isDisabled={nextButtonDisabled}
             onClick={goToNextRound}
             rightIcon={<FaArrowRight />}>
-            Next round
+            {t("Next round")}
           </Button>
         </Container>
       </HStack>
     )
 
   return (
-    <HStack w="100vw" justify={"space-between"} align="center" bgColor={bgColor} px={4} py={2}>
+    <HStack
+      w="100vw"
+      justify={"space-between"}
+      align="center"
+      bgColor={bgColor}
+      px={4}
+      py={2}
+      data-testid={`allocation-round-${roundId}-nav-mobile`}>
       <IconButton
+        data-testid="prev-round-button"
+        color={prevButtonDisabled ? "#757575" : "#004CFC"}
         variant={"ghost"}
         icon={<FaArrowLeft />}
         isDisabled={prevButtonDisabled}
@@ -121,7 +146,11 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
       <VStack w="full">
         <HStack spacing={4}>
           <Skeleton isLoaded={!isLoading}>
-            <Heading size="md">#{data?.roundId} round</Heading>
+            <Heading size="md">
+              {t("Round #{{round}}", {
+                round: data?.roundId ?? 0,
+              })}
+            </Heading>
           </Skeleton>
           <AllocationRoundStateTag state={data?.state} size="md" renderInTag={true} variant={"subtle"} />
         </HStack>
@@ -137,6 +166,8 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
         </HStack>
       </VStack>
       <IconButton
+        data-testid="next-round-button"
+        color={nextButtonDisabled ? "#757575" : "#004CFC"}
         variant={"ghost"}
         icon={<FaArrowRight />}
         aria-label="Go to next round"

@@ -9,19 +9,21 @@ interface IXAllocationPool {
    *
    * @param appId The ID of the app for which the rewards were claimed.
    * @param roundId The round ID for which the rewards were claimed.
-   * @param amount The amount of $B3TR sent to the team.
+   * @param totalAmount The total amount of $B3TR available for allocation to the app.
    * @param recipient The address of the recipient of the rewards sent to the team.
    * @param caller The address that triggered this operation.
    * @param unallocatedAmount The amount of $B3TR that was not allocated, and were sent to the treasury.
+   * @param teamAllocationAmount The amount of $B3TR sent to the team.
    * @param rewardsAllocationAmount The amount of $B3TR left in the cotnract and reserved to reward users.
    */
   event AllocationRewardsClaimed(
     bytes32 indexed appId,
     uint256 roundId,
-    uint256 amount,
+    uint256 totalAmount,
     address indexed recipient,
     address caller,
     uint256 unallocatedAmount,
+    uint256 teamAllocationAmount,
     uint256 rewardsAllocationAmount
   );
 
