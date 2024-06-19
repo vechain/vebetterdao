@@ -96,7 +96,7 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
           <HStack spacing={1}>
             <Skeleton isLoaded={!quorumLoading && !proposalVotesLoading && !snapshotBlockloading}>
               <Text fontSize="xs" mt={2} color="#6A6A6A">
-                {compactFormatter.format(Number(quorum?.scaled))} {t("Quorum needed")} |{" "}
+                {compactFormatter.format(Number(quorum))} {t("Quorum needed")} |{" "}
               </Text>
             </Skeleton>
             <Skeleton isLoaded={!proposalVotesLoading}>

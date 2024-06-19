@@ -106,11 +106,7 @@ describe("AllocationRoundUserVotes", () => {
 
         //@ts-ignore
         vi.spyOn(apiHooks, "useGetVotesOnBlock").mockReturnValue({
-          data: {
-            formatted: totalVotes,
-            original: ethers.parseEther(totalVotes).toString(),
-            scaled: totalVotes,
-          },
+          data: totalVotes,
           isLoading: false,
           isError: false,
         })
@@ -172,11 +168,7 @@ describe("AllocationRoundUserVotes", () => {
         it("no votes to cast - should render correctly", async () => {
           //@ts-ignore
           vi.spyOn(apiHooks, "useGetVotesOnBlock").mockReturnValue({
-            data: {
-              formatted: "0",
-              original: "0",
-              scaled: "0",
-            },
+            data: "0",
             isLoading: false,
             isError: false,
           })
@@ -424,11 +416,7 @@ describe("AllocationRoundUserVotes", () => {
 
         //@ts-ignore
         vi.spyOn(apiHooks, "useGetVotesOnBlock").mockReturnValue({
-          data: {
-            formatted: totalVotes,
-            original: ethers.parseEther(totalVotes).toString(),
-            scaled: totalVotes,
-          },
+          data: totalVotes,
           isLoading: false,
           isError: false,
         })

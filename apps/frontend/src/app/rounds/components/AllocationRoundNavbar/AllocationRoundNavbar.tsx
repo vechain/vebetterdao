@@ -40,7 +40,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
     router.push(`/rounds/${nextRound}`)
   }
 
-  const bgColor = data.isCurrent ? "#B1F16C" : "#E0E9FE"
+  const bgColor = data.isCurrent ? "#B1F16C" : "#E1E1E1"
 
   // State to store the client width
   const [clientWidth, setClientWidth] = useState(document.body.clientWidth)
