@@ -1,5 +1,5 @@
 import { useAllocationsRound } from "@/api"
-import { AllocationRoundStateTag } from "@/components/AllocationRoundsList/AllocationRoundStateTag"
+import { AllocationStateBadge } from "@/components"
 import {
   HStack,
   Button,
@@ -108,7 +108,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
                 <Text>{!isLoading ? data?.voteEndTimestamp?.format("D MMMM") : "8 February"}</Text>
               </Skeleton>
             </HStack>
-            <AllocationRoundStateTag state={data?.state} size="md" renderInTag={true} variant={"subtle"} />
+            <AllocationStateBadge renderBadge={false} roundId={roundId} />
           </Stack>
           <Button
             data-testid="next-round-button"
@@ -152,7 +152,13 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
               })}
             </Heading>
           </Skeleton>
-          <AllocationRoundStateTag state={data?.state} size="md" renderInTag={true} variant={"subtle"} />
+          <AllocationStateBadge
+            roundId={roundId}
+            renderIcon={false}
+            textProps={{
+              fontSize: "12px",
+            }}
+          />
         </HStack>
 
         <HStack spacing={2} align={"center"}>

@@ -14,10 +14,11 @@ import {
 } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { FaAngleRight } from "react-icons/fa6"
-import { AllocationRoundStateTag } from "../AllocationRoundStateTag"
 import { DotSymbol } from "@/components/DotSymbol"
 import { useMemo } from "react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { AllocationStateBadge } from "@/components/AllocationStateBadge"
+import { useTranslation } from "react-i18next"
 
 type Props = {
   round: RoundCreated
@@ -26,6 +27,7 @@ type Props = {
 const compactFormatter = getCompactFormatter()
 
 export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
+  const { t } = useTranslation()
   const router = useRouter()
 
   const { data: allocationRound } = useAllocationsRound(round.roundId)
@@ -82,10 +84,11 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
         <HStack justify={"space-between"} w="full">
           <Stack w="full" spacing={1}>
             <HStack spacing={2} w="fit-content" justify="space-between">
-              <AllocationRoundStateTag
-                state={allocationRound.state}
-                size="md"
+              <AllocationStateBadge
+                roundId={round.roundId}
                 data-testid={"round-#" + round.roundId + "-status"}
+                renderBadge={false}
+                renderIcon={false}
               />
               <Show above="sm">
                 <DotSymbol color={"gray"} size={1} />
@@ -99,7 +102,9 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
 
             <HStack mt={0.5} w="full" justify="space-between" color={cardTextColor}>
               <Heading as="h3" size="md">
-                Round #{round.roundId}
+                {t("Round #{{round}}", {
+                  round: round.roundId,
+                })}
               </Heading>
             </HStack>
             <HStack w="fit-content" justify="space-between" fontSize={"sm"} color={cardTextColor}>
@@ -118,7 +123,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
                   ) : (
                     <Box textAlign={"end"} color={cardTextColor}>
                       <Heading size="lg">{compactFormatter.format(Number(totalAmount))}</Heading>
-                      <Text fontSize={"md"}>total allocation</Text>
+                      <Text fontSize={"md"}>{t("total allocation")}</Text>
                     </Box>
                   )}
                 </Skeleton>
