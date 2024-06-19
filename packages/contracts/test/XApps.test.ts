@@ -100,6 +100,13 @@ describe("X-Apps", function () {
       expect(updatedURI).to.eql("ipfs2://")
       expect(updatedURI).to.not.eql(initialURI)
     })
+
+    it("Limit of 100 moderators and distributors is set", async function () {
+      const { x2EarnApps } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      expect(await x2EarnApps.MAX_MODERATORS()).to.eql(100n)
+      expect(await x2EarnApps.MAX_REWARD_DISTRIBUTORS()).to.eql(100n)
+    })
   })
 
   describe("Add apps", function () {
@@ -1126,6 +1133,34 @@ describe("X-Apps", function () {
 
       await expect(x2EarnApps.connect(owner).removeAppModerator(app1Id, owner.address)).to.be.rejected
     })
+
+    it("Cannot have exceed the maximum number of moderators for an app", async function () {
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      const appAdmin = otherAccounts[9]
+      await x2EarnApps.connect(owner).addApp(otherAccounts[0].address, appAdmin.address, "My app", "metadataURI")
+
+      const limit = await x2EarnApps.MAX_MODERATORS()
+
+      const addModeratorPromises = []
+      for (let i = 1; i <= limit; i++) {
+        const randomWallet = ethers.Wallet.createRandom()
+        addModeratorPromises.push(x2EarnApps.connect(appAdmin).addAppModerator(app1Id, randomWallet.address))
+      }
+
+      // Wait for all addAppModerator transactions to complete
+      await Promise.all(addModeratorPromises)
+
+      await expect(x2EarnApps.connect(appAdmin).addAppModerator(app1Id, otherAccounts[10].address)).to.be.rejected
+
+      // check that having 100 moderators do not affect the app
+      const moderators = await x2EarnApps.appModerators(app1Id)
+      expect(moderators.length).to.eql(100)
+
+      // check that the last moderator is not the one that failed
+      expect(moderators[99]).to.not.eql(otherAccounts[10].address)
+      expect(await x2EarnApps.isAppModerator(app1Id, otherAccounts[10].address)).to.be.false
+    })
   })
 
   describe("Reward distributors", function () {
@@ -1272,6 +1307,33 @@ describe("X-Apps", function () {
 
       await expect(x2EarnApps.connect(otherAccounts[0]).removeRewardDistributor(app1Id, otherAccounts[1].address)).to.be
         .rejected
+    })
+
+    it("Cannot have exceed the maximum number of reward distributors for an app", async function () {
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const limit = await x2EarnApps.MAX_REWARD_DISTRIBUTORS()
+      const app1Id = await x2EarnApps.hashAppName("My app")
+      const appAdmin = otherAccounts[9]
+      await x2EarnApps.connect(owner).addApp(otherAccounts[0].address, appAdmin.address, "My app", "metadataURI")
+
+      const addDistributorPromises = []
+      for (let i = 1; i <= limit; i++) {
+        const randomWallet = ethers.Wallet.createRandom()
+        addDistributorPromises.push(x2EarnApps.connect(appAdmin).addRewardDistributor(app1Id, randomWallet.address))
+      }
+
+      // Wait for all addRewardDistributor transactions to complete
+      await Promise.all(addDistributorPromises)
+
+      await expect(x2EarnApps.connect(appAdmin).addRewardDistributor(app1Id, otherAccounts[10].address)).to.be.rejected
+
+      // check that having 100 distributors do not affect the app
+      const distributors = await x2EarnApps.rewardDistributors(app1Id)
+      expect(distributors.length).to.eql(100)
+
+      // check that the last distributor is not the one that failed
+      expect(distributors[99]).to.not.eql(otherAccounts[10].address)
+      expect(await x2EarnApps.isRewardDistributor(app1Id, otherAccounts[10].address)).to.be.false
     })
   })
 
