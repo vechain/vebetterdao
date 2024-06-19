@@ -15,7 +15,7 @@ import {
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
-import { setupLocalEnvironment, setupTestEnvironment } from "./setup"
+import { setupLocalEnvironment, setupMainnetEnvironment, setupTestEnvironment } from "./setup"
 import { simulateRounds } from "./simulateRounds"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { deployProxy, saveContractsToFile } from "../helpers"
@@ -29,19 +29,21 @@ export async function deployAll(config: ContractsConfig) {
   const start = performance.now()
   const networkConfig = network.config as HttpNetworkConfig
   console.log(
-    `================  Deploying contracts on ${network.name} (${networkConfig.url}) with ${config.NEXT_PUBLIC_APP_ENV} configurations ================`,
+    `================  Deploying contracts on ${network.name} (${networkConfig.url}) with ${config.NEXT_PUBLIC_APP_ENV} configurations `,
   )
   const [deployer] = await ethers.getSigners()
 
-  console.log(`================  Address used to deploy: ${deployer.address} ================`)
+  console.log(`================  Address used to deploy: ${deployer.address}`)
 
   // We use a temporary admin to deploy and initialize contracts then transfer role to the real admin
   // Also we have many roles in our contracts but we currently use one wallet for all roles
   const TEMP_ADMIN = network.name === "vechain_solo" ? config.CONTRACTS_ADMIN_ADDRESS : deployer.address
+  console.log("================================================================================")
   console.log("Temporary admin set to ", TEMP_ADMIN)
-
+  console.log("Final admin will be set to ", config.CONTRACTS_ADMIN_ADDRESS)
+  console.log("================================================================================")
   // ---------- Contracts Deployment ---------- //
-
+  console.log(`================  Contracts Deployment Initiated `)
   // ---------------------- Deploy Libraries ----------------------
   // Deploy Governor Clock Logic
   const GovernorClockLogic = await ethers.getContractFactory("GovernorClockLogic")
@@ -366,7 +368,7 @@ export async function deployAll(config: ContractsConfig) {
 
   // ---------- Configure contract roles for setup ---------- //
 
-  console.log("================ Configuring contract roles for setup =================")
+  console.log("================ Configuring contract roles for setup")
 
   // TODO: Uncomment this line to pause public minting of GM NFTs when deploying to Mainnet
   // await galaxyMember.connect(admin).setIsPublicMintingPaused(true)
@@ -457,11 +459,16 @@ export async function deployAll(config: ContractsConfig) {
 
   // ---------- Setup Contracts ---------- //
   // Notice: admin account allowed to perform actions is retrieved again inside the setup functions
-  if (network.name === "vechain_testnet") {
-    // WARNING: when deploying to production change the address to real team wallet address inside setupTestEnvironment
-    await setupTestEnvironment(emissions, x2EarnApps)
-  } else if (network.name === "vechain_solo") {
-    await setupLocalEnvironment(emissions, treasury, x2EarnApps)
+  switch (network.name) {
+    case "vechain_mainnet":
+      await setupMainnetEnvironment(emissions, x2EarnApps)
+      break
+    case "vechain_testnet":
+      await setupTestEnvironment(emissions, x2EarnApps)
+      break
+    case "vechain_solo":
+      await setupLocalEnvironment(emissions, treasury, x2EarnApps)
+      break
   }
 
   // ---------- Run Simulation ---------- //
@@ -471,9 +478,9 @@ export async function deployAll(config: ContractsConfig) {
 
   // ---------- Role updates ---------- //
   // Do not update roles on solo network since we are already using the predifined address and it would just increase dev time
-  if (network.name === "vechain_testnet") {
-    console.log("================ Updating contract roles after setup ================ ")
-    console.log("New admin address", config.CONTRACTS_ADMIN_ADDRESS)
+  if (network.name === "vechain_testnet" || network.name === "vechain_mainnet") {
+    console.log("================ Updating contract roles after setup ")
+    console.log("New admin address: ", config.CONTRACTS_ADMIN_ADDRESS)
 
     // we will need to have  an admin that triggers the minting function to execute the mainnet migration
     await b3tr
@@ -488,9 +495,9 @@ export async function deployAll(config: ContractsConfig) {
     await transferAdminRole(galaxyMember, deployer, config.CONTRACTS_ADMIN_ADDRESS)
 
     await transferMinterRole(emissions, deployer, deployer.address, config.CONTRACTS_ADMIN_ADDRESS)
-    await transferAdminRole(emissions, deployer, config.CONTRACTS_ADMIN_ADDRESS)
     await transferContractsAddressManagerRole(emissions, deployer, config.CONTRACTS_ADMIN_ADDRESS)
     await transferDecaySettingsManagerRole(emissions, deployer, config.CONTRACTS_ADMIN_ADDRESS)
+    await transferAdminRole(emissions, deployer, config.CONTRACTS_ADMIN_ADDRESS)
 
     await transferAdminRole(voterRewards, deployer, config.CONTRACTS_ADMIN_ADDRESS)
 
@@ -518,7 +525,7 @@ export async function deployAll(config: ContractsConfig) {
 
     console.log("Roles updated successfully!")
 
-    console.log("================ Validating roles ================ ")
+    console.log("================ Validating roles")
     // B3TR
     await validateContractRole(b3tr, await emissions.getAddress(), TEMP_ADMIN, await b3tr.MINTER_ROLE())
     await validateContractRole(b3tr, config.CONTRACTS_ADMIN_ADDRESS, TEMP_ADMIN, await b3tr.MINTER_ROLE())
@@ -1021,8 +1028,7 @@ export const setWhitelistedFunctions = async (
   libraries: Record<string, Record<string, string>>,
   logOutput = false,
 ) => {
-  if (logOutput)
-    console.log("================ Setting whitelisted functions in B3TRGovernor contract =================")
+  if (logOutput) console.log("================ Setting whitelisted functions in B3TRGovernor contract")
 
   const { B3TR_GOVERNOR_WHITELISTED_METHODS } = config
 
