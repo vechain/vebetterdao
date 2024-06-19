@@ -7,7 +7,6 @@ import { ethers } from "ethers"
 import BigNumber from "bignumber.js"
 import { scaledDivision } from "@/utils/MathUtils"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { UilArrowUp } from "@iconscout/react-unicons"
 import { t } from "i18next"
 import { FiArrowUpRight } from "react-icons/fi"
 import { Trans } from "react-i18next"
@@ -66,24 +65,6 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     return []
   }, [castVotesEvent, votesAtSnapshot])
 
-  const renderSubHeader = useMemo(() => {
-    if (isVotingConcluded)
-      return (
-        <Text fontSize="md" fontWeight="400" mt={4}>
-          {hasVoted
-            ? "Voting is concluded. See below the distribution of your voting power among the apps."
-            : "Voting is concluded. You can no longer cast your vote. No votes were cast."}
-        </Text>
-      )
-    return (
-      <Text fontSize="md" fontWeight="400" mt={4}>
-        {hasVoted
-          ? "You have already cast your vote. See below the distribution of your voting power among the apps."
-          : "Distribute your voting power among your selected apps to help them receive more B3TR allocation."}
-      </Text>
-    )
-  }, [hasVoted, isVotingConcluded])
-
   if (!hasVoted) return null
 
   return (
@@ -103,15 +84,14 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
               </Button>
             </HStack>
 
-            <Text fontSize="md" fontWeight="400">
-              {t("{{amount}} distributed among {{apps}}", {
-                amount: compactFormatter.format(totalVotesCast ?? 0),
-                apps: totalAppsVoted,
-                interpolation: { escapeValue: true },
-              })}
+            <Text fontSize="16px" fontWeight="400">
+              <Trans
+                i18nKey={"{{amount}} distributed among {{apps}} apps"}
+                values={{ amount: compactFormatter.format(totalVotesCast ?? 0), apps: totalAppsVoted }}
+                t={t}
+              />
             </Text>
           </VStack>
-          <Skeleton isLoaded={!hasVotedLoading}>{renderSubHeader}</Skeleton>
           <AppVotesBreakdown votes={parsedCastVotesPercentages} roundId={roundId} />
         </VStack>
       </CardBody>

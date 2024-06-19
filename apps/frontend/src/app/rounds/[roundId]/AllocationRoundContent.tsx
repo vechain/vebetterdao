@@ -6,17 +6,19 @@ import { AllocationRoundHeaderCard } from "../components/AllocationRoundHeaderCa
 import { AllocationXAppsVotesCard } from "@/components"
 import { AllocationRoundSessionInfoCard } from "../components/AllocationRoundSessionInfoCard"
 import { AllocationRoundUserVotes } from "../components/AllocationRoundUserVotes/AllocationRoundUserVotes"
-import { useAllocationsRoundState } from "@/api"
+import { useAllocationsRoundState, useHasVotedInRound } from "@/api"
 import { useLayoutEffect } from "react"
 import { redirect } from "next/navigation"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 type Props = {
-  params: {
-    roundId: string
-  }
+  roundId: string
 }
-export const AllocationRoundContent = ({ params }: Readonly<Props>) => {
-  const currentAllocationState = useAllocationsRoundState(params.roundId)
+export const AllocationRoundContent = ({ roundId }: Readonly<Props>) => {
+  const { account } = useWallet()
+
+  const currentAllocationState = useAllocationsRoundState(roundId)
+  const { data: hasVoted } = useHasVotedInRound(roundId, account ?? undefined)
 
   useLayoutEffect(() => {
     if (currentAllocationState.error) redirect("/")
@@ -29,19 +31,20 @@ export const AllocationRoundContent = ({ params }: Readonly<Props>) => {
       </VStack>
     )
   if (currentAllocationState.error) return null
+
   return (
-    <VStack w="full" spacing={8} data-testid={`allocation-${params.roundId}-page`}>
-      <AllocationRoundNavbar roundId={params.roundId} />
-      <AllocationRoundHeaderCard roundId={params.roundId} />
+    <VStack w="full" spacing={8} data-testid={`allocation-${roundId}-page`}>
+      <AllocationRoundNavbar roundId={roundId} />
+      <AllocationRoundHeaderCard roundId={roundId} />
       <Grid templateColumns="repeat(3, 1fr)" gap={[8, 8, 8]} w="full" alignItems={"flex-start"}>
         <GridItem colSpan={[3, 3, 2]} w="full">
           <VStack spacing={8} w="full">
-            <AllocationRoundUserVotes roundId={params.roundId} />
-            <AllocationXAppsVotesCard roundId={params.roundId} />
+            {hasVoted && <AllocationRoundUserVotes roundId={roundId} />}
+            <AllocationXAppsVotesCard roundId={roundId} />
           </VStack>
         </GridItem>
         <GridItem colSpan={[3, 3, 1]} w="full" pos={"sticky"} top={24} left={0} alignSelf={"start"}>
-          <AllocationRoundSessionInfoCard roundId={params.roundId} />
+          <AllocationRoundSessionInfoCard roundId={roundId} />
         </GridItem>
       </Grid>
     </VStack>

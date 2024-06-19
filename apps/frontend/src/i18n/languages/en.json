@@ -1,5 +1,5 @@
 {
-  "{{amount}} distributed among {{apps}}": "<strong>{{amount}}</strong> distributed among <strong>{{apps}}</strong>",
+  "{{amount}} distributed among {{apps}} apps": "<strong>{{amount}}</strong> distributed among <strong>{{apps}}</strong> apps",
   "Quorum information will be available once the round starts.": "Quorum information will be available once the round starts.",
   "#{{round}} round": "#{{round}} round",
   "Previous round": "Previous round",
