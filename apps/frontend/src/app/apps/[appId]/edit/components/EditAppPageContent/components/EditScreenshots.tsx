@@ -56,7 +56,7 @@ export const EditScreenshots = ({ form }: Props) => {
           onClick={handleUpload}
           leftIcon={<UilUpload size="16px" />}
           isLoading={loadingScreenshot}>
-          {t("Upload new screenshots")}
+          {t("Upload")}
         </Button>
         <Controller
           name="screenshots"

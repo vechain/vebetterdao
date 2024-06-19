@@ -213,7 +213,10 @@ export const EditAppPageContent = () => {
         showExplorerButton
       />
       <VStack alignItems={"stretch"} gap={8} as="form" onSubmit={handleSubmit(onSubmit)} w="full">
-        <Stack flexDirection={["column", "row"]} justify={"space-between"}>
+        <Stack
+          flexDirection={["column", "row"]}
+          justify={["flex-start", "space-between"]}
+          align={["flex-start", "center"]}>
           <HStack gap={4}>
             <EditAppLogo form={form} />
             <FormControl isInvalid={!!errors.name}>
@@ -229,7 +232,7 @@ export const EditAppPageContent = () => {
               <FormErrorMessage fontSize={"12px"}>{errors?.name?.message || ""}</FormErrorMessage>
             </FormControl>
           </HStack>
-          <HStack>
+          <HStack flexDir={["row-reverse", "row"]} mt={[2, 0]}>
             <Button variant="primaryGhost" onClick={goBack}>
               {t("Cancel")}
             </Button>
