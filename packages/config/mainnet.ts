@@ -3,7 +3,7 @@ const config: AppConfig = {
   environment: "mainnet",
   basePath: "https://governance.vebetterdao.org",
   mixPanelProjectToken: "949d49f83d7168260973a1c170f1f28d",
-  b3trContractAddress: "0x7351B907366D89A15dfb2a082f62d88cCfE3EB6F",
+  b3trContractAddress: "",
   vot3ContractAddress: "",
   b3trGovernorAddress: "",
   timelockContractAddress: "",
