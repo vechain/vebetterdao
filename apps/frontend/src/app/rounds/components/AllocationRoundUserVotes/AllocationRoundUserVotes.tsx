@@ -45,8 +45,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
 
   const totalAppsVoted = useMemo(() => castVotesEvent?.appsIds.length, [castVotesEvent])
 
-  const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
-  const isVotingConcluded = roundInfo?.voteEndTimestamp?.isBefore()
+  const { data: hasVoted } = useHasVotedInRound(roundId, account ?? undefined)
 
   const parsedCastVotesPercentages: FormData["votes"] = useMemo(() => {
     if (castVotesEvent?.appsIds && votesAtSnapshot) {
@@ -78,7 +77,9 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
         <VStack flex={1} w="full" spacing={8} align={"flex-start"}>
           <VStack spacing={2} align="flex-start" w="full">
             <HStack w="full" justify="space-between">
-              <Heading size="md">{t("Your vote")}</Heading>
+              <Heading fontSize="24px" fontWeight={700}>
+                {t("Your vote")}
+              </Heading>
               <Button variant="link" colorScheme="primary" rightIcon={<FiArrowUpRight />}>
                 {t("See all")}
               </Button>
