@@ -1,6 +1,6 @@
 import { XApp, useXAppMetadata } from "@/api"
 import { Control, Controller, FieldArrayWithId, FieldErrors, UseFormGetValues } from "react-hook-form"
-import { FormData } from "../AllocationRoundUserVotes"
+import { FormData } from "../../../components/AllocationRoundUserVotes/AllocationRoundUserVotes"
 import {
   Box,
   Card,
