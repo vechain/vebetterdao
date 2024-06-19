@@ -168,7 +168,7 @@ describe("AllocationRoundUserVotes", () => {
         it("no votes to cast - should render correctly", async () => {
           //@ts-ignore
           vi.spyOn(apiHooks, "useGetVotesOnBlock").mockReturnValue({
-            data: totalVotes,
+            data: "0",
             isLoading: false,
             isError: false,
           })
