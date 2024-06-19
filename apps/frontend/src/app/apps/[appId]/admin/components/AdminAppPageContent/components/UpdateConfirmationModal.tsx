@@ -1,5 +1,18 @@
 import { CustomModalContent, ExclamationTriangle } from "@/components"
-import { Box, Button, Divider, HStack, Heading, Modal, ModalBody, ModalOverlay, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Divider,
+  HStack,
+  Heading,
+  Modal,
+  ModalBody,
+  ModalOverlay,
+  Show,
+  Text,
+  VStack,
+  useBreakpointValue,
+} from "@chakra-ui/react"
 import { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { AdminAppForm } from "../AdminAppPageContent"
@@ -33,27 +46,45 @@ export const UpdateConfirmationModal = ({
     onSubmit()
     onClose()
   }, [onClose, onSubmit])
+
+  const oldTeamWalletAddress = useBreakpointValue({
+    base: humanAddress(app?.teamWalletAddress || "", 6, 4),
+    sm: humanAddress(app?.teamWalletAddress || "", 10, 12),
+  })
+  const newTeamWalletAddress = useBreakpointValue({
+    base: humanAddress(form.getValues("teamWalletAddress"), 6, 4),
+    sm: humanAddress(form.getValues("teamWalletAddress"), 10, 12),
+  })
+
+  const oldAdminAddress = useBreakpointValue({
+    base: humanAddress(admin || "", 6, 4),
+    sm: humanAddress(admin || "", 10, 12),
+  })
+  const newAdminAddress = useBreakpointValue({
+    base: humanAddress(form.getValues("adminAddress"), 6, 4),
+    sm: humanAddress(form.getValues("adminAddress"), 10, 12),
+  })
   return (
     <Modal isOpen={isOpen} onClose={onClose} size={"xl"}>
       <ModalOverlay />
       <CustomModalContent>
-        <ModalBody p={"40px"}>
+        <ModalBody px="40px" py="20px">
           <VStack align="center" gap="20px">
-            <ExclamationTriangle color="#D23F63" size={230} />
-            <Heading fontSize="28px" fontWeight={700}>
+            <ExclamationTriangle color="#D23F63" size={useBreakpointValue({ base: 100, sm: 180 })} />
+            <Heading fontSize={["22px", "28px"]} fontWeight={700} textAlign={"center"}>
               {t("Just to be sure, you’re updating:")}
             </Heading>
             {isTeamWalletAddressChanged && (
               <VStack align="stretch" gap={4} alignSelf={"stretch"}>
                 <VStack align="stretch">
-                  <Text fontWeight={600}>{t("OLD team wallet address")}</Text>
-                  <Text fontSize={"14px"} textDecorationLine={"line-through"} color={"#979797"}>
-                    {humanAddress(app?.teamWalletAddress || "", 6, 4)}
-                  </Text>
-                </VStack>
-                <VStack align="stretch">
-                  <Text fontWeight={600}>{t("NEW team wallet address")}</Text>
-                  <Text fontSize={"14px"}>{humanAddress(form.getValues("teamWalletAddress"), 6, 4)}</Text>
+                  <Text fontWeight={600}>{t("Team wallet address")}</Text>
+                  <HStack>
+                    <Text fontSize={"14px"} textDecorationLine={"line-through"} color={"#979797"}>
+                      {oldTeamWalletAddress}
+                    </Text>
+                    <Text>{t("→")}</Text>
+                    <Text fontSize={"14px"}>{newTeamWalletAddress}</Text>
+                  </HStack>
                 </VStack>
               </VStack>
             )}
@@ -61,14 +92,14 @@ export const UpdateConfirmationModal = ({
             {isAdminAddressChanged && (
               <VStack align="stretch" gap={4} alignSelf={"stretch"}>
                 <VStack align="stretch">
-                  <Text fontWeight={600}>{t("OLD admin address")}</Text>
-                  <Text fontSize={"14px"} textDecorationLine={"line-through"} color={"#979797"}>
-                    {humanAddress(admin || "", 6, 4)}
-                  </Text>
-                </VStack>
-                <VStack align="stretch">
-                  <Text fontWeight={600}>{t("NEW admin address")}</Text>
-                  <Text fontSize={"14px"}>{humanAddress(form.getValues("adminAddress"), 6, 4)}</Text>
+                  <Text fontWeight={600}>{t("Admin address")}</Text>
+                  <HStack>
+                    <Text fontSize={"14px"} textDecorationLine={"line-through"} color={"#979797"}>
+                      {oldAdminAddress}
+                    </Text>
+                    <Text>{t("→")}</Text>
+                    <Text fontSize={"14px"}>{newAdminAddress}</Text>
+                  </HStack>
                 </VStack>
                 <HStack rounded="16px" bg="#FCEEF1" p="16px 12px" color="#D23F63">
                   <Box>
@@ -78,9 +109,11 @@ export const UpdateConfirmationModal = ({
                     <Text as="span" fontSize="14px" fontWeight={600}>
                       {t("You will not be able to manage the dApp anymore.")}
                     </Text>
-                    <Text as="span" fontSize="14px">
-                      {t("This change is applied when the new address logs in.")}
-                    </Text>
+                    <Show above="sm">
+                      <Text as="span" fontSize="14px">
+                        {t("This change is applied when the new address logs in.")}
+                      </Text>
+                    </Show>
                   </Box>
                 </HStack>
               </VStack>

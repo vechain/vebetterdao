@@ -4,13 +4,14 @@ import { useTranslation } from "react-i18next"
 import { EditAppModerators } from "./components/EditAppModerators"
 import { EditAppAddresses } from "./components/EditAppAddresses"
 import { useForm } from "react-hook-form"
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { UpdateConfirmationModal } from "./components/UpdateConfirmationModal"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useCurrentAppInfo } from "../../../hooks/useCurrentAppInfo"
 import { useUpdateAppAdminInfo } from "@/hooks/useUpdateAppAdminInfo"
 import { TransactionModal } from "@/components/TransactionModal"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 export type AdminAppForm = {
   adminAddress: string
@@ -108,6 +109,20 @@ export const AdminAppPageContent = () => {
     handleClose()
     form.handleSubmit(onSubmit)()
   }, [form, handleClose, onSubmit])
+
+  const { account } = useWallet()
+
+  const allowedToEditAdminInfo = compareAddresses(account || "", admin)
+
+  useEffect(() => {
+    if (!allowedToEditAdminInfo) {
+      router.push(`/apps/${app?.id}`)
+    }
+  }, [allowedToEditAdminInfo, app?.id, router])
+
+  if (!allowedToEditAdminInfo) {
+    return null
+  }
 
   return (
     <>

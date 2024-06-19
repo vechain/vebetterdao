@@ -75,6 +75,10 @@ export const EditAppAddresses = ({
               <InputRightElement width="auto">
                 <Button
                   variant="primaryGhost"
+                  bg="#FFFFFF"
+                  borderY="1px solid #f4f6f9"
+                  borderRight="1px solid #f4f6f9"
+                  borderLeftRadius={0}
                   onClick={modalEditTeamWalletAddress.onOpen}
                   leftIcon={<UilPen size="16px" />}
                   rounded="8px"
@@ -105,6 +109,10 @@ export const EditAppAddresses = ({
               <InputRightElement width="auto">
                 <Button
                   variant="primaryGhost"
+                  bg="#FFFFFF"
+                  borderY="1px solid #f4f6f9"
+                  borderRight="1px solid #f4f6f9"
+                  borderLeftRadius={0}
                   onClick={modalEditAdminAddress.onOpen}
                   leftIcon={<UilPen size="16px" />}
                   rounded="8px"

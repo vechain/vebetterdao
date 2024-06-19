@@ -14,13 +14,19 @@ import {
 import { URL_REGEX } from "@/constants"
 import { useTranslation } from "react-i18next"
 import { useForm } from "react-hook-form"
-import { useCallback } from "react"
+import { useCallback, useEffect, useMemo } from "react"
 import { UilCheck } from "@iconscout/react-unicons"
 import { EditAppSocialUrls } from "./components/EditAppSocialUrls"
 import { EditScreenshots } from "./components/EditScreenshots"
 import { useParams, useRouter } from "next/navigation"
 import { EditAppLogo } from "./components/EditAppLogo"
-import { useCurrentAppBanner, useCurrentAppLogo, useCurrentAppMetadata } from "../../../hooks"
+import {
+  useCurrentAppAdmin,
+  useCurrentAppBanner,
+  useCurrentAppLogo,
+  useCurrentAppMetadata,
+  useCurrentAppModerators,
+} from "../../../hooks"
 import { EditAppBanner } from "./components/EditAppBanner"
 import { useUpdateAppDetails, useUploadAppMetadata } from "@/hooks"
 import { TransactionModal } from "@/components/TransactionModal"
@@ -28,6 +34,8 @@ import { useCurrentAppScreenshots } from "../../../hooks/useCurrentAppScreenshot
 import { useQueryClient } from "@tanstack/react-query"
 import { getXAppMetadataQueryKey } from "@/api"
 import { useCurrentAppInfo } from "../../../hooks/useCurrentAppInfo"
+import { useWallet } from "@vechain/dapp-kit-react"
+import { compareAddresses } from "@repo/utils/AddressUtils"
 
 export type EditAppForm = {
   name: string
@@ -155,6 +163,26 @@ export const EditAppPageContent = () => {
     handleClose()
     handleSubmit(onSubmit)()
   }, [handleClose, handleSubmit, onSubmit])
+
+  const { account } = useWallet()
+  const { moderators } = useCurrentAppModerators()
+  const { admin } = useCurrentAppAdmin()
+
+  const allowedToEditApp = useMemo(() => {
+    if (compareAddresses(account || "", admin)) return true
+    if (moderators?.find(moderator => compareAddresses(account || "", moderator))) return true
+    return false
+  }, [account, admin, moderators])
+
+  useEffect(() => {
+    if (!allowedToEditApp) {
+      router.push(`/apps/${app?.id}`)
+    }
+  }, [allowedToEditApp, app?.id, router])
+
+  if (!allowedToEditApp) {
+    return null
+  }
 
   return (
     <>

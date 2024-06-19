@@ -1,5 +1,15 @@
 import { CustomModalContent, ExclamationTriangle } from "@/components"
-import { Box, Button, Heading, Modal, ModalBody, ModalOverlay, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Heading,
+  Modal,
+  ModalBody,
+  ModalOverlay,
+  Text,
+  VStack,
+  useBreakpointValue,
+} from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
 type Props = {
@@ -16,8 +26,8 @@ export const ModalEditAdminAddress = ({ handleEditAdminAddress, onClose, isOpen 
       <CustomModalContent>
         <ModalBody p={"40px"}>
           <VStack align="center" gap="20px">
-            <ExclamationTriangle color="#D23F63" size={230} />
-            <Heading fontSize="28px" fontWeight={700}>
+            <ExclamationTriangle color="#D23F63" size={useBreakpointValue({ base: 150, sm: 230 })} />
+            <Heading fontSize={["22px", "28px"]} fontWeight={700} textAlign={"center"}>
               {t("Change admin address")}
             </Heading>
             <Box textAlign={"center"}>
