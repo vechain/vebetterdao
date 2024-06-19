@@ -23,7 +23,22 @@ export const AllocationStateBadge = ({
   if (isLoading)
     return (
       <Skeleton>
-        <Badge text="loading" />
+        <Badge
+          text="loading"
+          containerProps={
+            renderBadge
+              ? {
+                  bgColor: "#F8F8F8",
+                  ...containerProps,
+                }
+              : {
+                  px: 0,
+                  py: 0,
+                  ...containerProps,
+                }
+          }
+          icon={renderIcon ? <DotSymbol size={4} color={"#D23F63"} /> : undefined}
+        />
       </Skeleton>
     )
   if (error || data === undefined)
