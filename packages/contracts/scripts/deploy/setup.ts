@@ -59,7 +59,7 @@ const APPS = [
 
 export const setupLocalEnvironment = async (emissions: Emissions, treasury: Treasury, x2EarnApps: X2EarnApps) => {
   const start = performance.now()
-  console.log("================ Setup local environment ================")
+  console.log("================ Setup local environment")
 
   // Define specific accounts
   const admin = accounts[0]
@@ -82,7 +82,7 @@ export const setupLocalEnvironment = async (emissions: Emissions, treasury: Trea
 }
 
 export const setupTestEnvironment = async (emissions: Emissions, x2EarnApps: X2EarnApps) => {
-  console.log("================ Setup Testnet environment ================")
+  console.log("================ Setup Testnet environment")
   const start = performance.now()
 
   const admin = accounts[0]
