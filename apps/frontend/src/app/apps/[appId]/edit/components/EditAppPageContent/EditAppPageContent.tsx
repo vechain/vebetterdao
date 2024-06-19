@@ -240,7 +240,7 @@ export const EditAppPageContent = () => {
         </Stack>
         <EditAppBanner form={form} />
         <Stack flexDirection={["column", "row"]} gap={[20, 6]} align={"flex-start"}>
-          <VStack align={"stretch"} flex={3} gap={8}>
+          <VStack align={"stretch"} flex={3} gap={8} w="full">
             <VStack align={"stretch"} gap={4}>
               <Text fontSize={"14px"} fontWeight={400} color="#6A6A6A">
                 {t("Project URL")}
