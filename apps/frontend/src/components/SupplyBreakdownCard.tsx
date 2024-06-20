@@ -1,17 +1,5 @@
 import { useB3trBalance, useB3trTokenDetails } from "@/api"
-import {
-  Box,
-  Card,
-  CardBody,
-  CardHeader,
-  HStack,
-  Heading,
-  Icon,
-  Skeleton,
-  Text,
-  VStack,
-  useColorModeValue,
-} from "@chakra-ui/react"
+import { Box, Card, CardBody, CardHeader, HStack, Heading, Icon, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { useMemo } from "react"
 import BigNumber from "bignumber.js"
@@ -19,14 +7,13 @@ import { getConfig } from "@repo/config"
 import { motion } from "framer-motion"
 import { BaseTooltip } from "./BaseTooltip"
 import { FiInfo } from "react-icons/fi"
+import { useTranslation } from "react-i18next"
 
 export const SupplyBreakdownCard = () => {
+  const { t } = useTranslation()
+
   const { data: b3trTokenDetails } = useB3trTokenDetails()
   const { data: vot3ContractB3trBalance } = useB3trBalance(getConfig().vot3ContractAddress)
-
-  const greenColor = useColorModeValue("green.500", "green.200")
-  const primaryColor = useColorModeValue("primary.500", "primary.200")
-  const grayColor = useColorModeValue("gray.500", "gray.200")
 
   const data = useMemo(() => {
     if (!b3trTokenDetails) return undefined
@@ -56,17 +43,15 @@ export const SupplyBreakdownCard = () => {
         name: "B3TR in circulation",
         value: b3trCirculatingSupply,
         percentage: b3trCirculatingSupplyPercentage,
-        color: primaryColor,
       },
       vot3CirculatingSupply: {
         name: "VOT3 in circulation",
         value: vot3CirculatingSupply,
         percentage: vot3CirculatingSupplyPercentage,
-        color: greenColor,
       },
-      b3trLeft: { name: "Locked B3TR", value: b3trLeft, percentage: b3trLeftPercentage, color: grayColor },
+      b3trLeft: { name: "Locked B3TR", value: b3trLeft, percentage: b3trLeftPercentage },
     }
-  }, [b3trTokenDetails, primaryColor, grayColor, greenColor, vot3ContractB3trBalance?.scaled])
+  }, [b3trTokenDetails, vot3ContractB3trBalance?.scaled])
 
   const formattedB3trCirculatingSupply = useMemo(() => {
     return FormattingUtils.humanNumber(data?.b3trCirculatingSupply.value ?? 0)
@@ -90,7 +75,7 @@ export const SupplyBreakdownCard = () => {
     <Card>
       <CardHeader>
         <HStack w="full" justify={"space-between"}>
-          <Heading size="md">Supply breakdown</Heading>
+          <Heading size="md">{t("Supply breakdown")}</Heading>
           <BaseTooltip
             text={`Total tokens distributed: ${formattedTotalTokensDistributed} of ${FormattingUtils.humanNumber(b3trTokenDetails?.totalSupply ?? 0)} B3TR`}>
             <span>
@@ -104,7 +89,7 @@ export const SupplyBreakdownCard = () => {
           <HStack spacing={16}>
             <VStack spacing={1} align="flex-start">
               <Text size="sm" fontWeight="400">
-                B3TR in circulation
+                {t("B3TR in circulation")}
               </Text>
               <Skeleton isLoaded={!!data}>
                 <Heading size="lg" color={"#004CFC"}>
@@ -114,7 +99,7 @@ export const SupplyBreakdownCard = () => {
             </VStack>
             <VStack spacing={1} align="flex-start">
               <Text size="sm" fontWeight="400">
-                VOT3 in circulation
+                {t("VOT3 in circulation")}
               </Text>
               <Skeleton isLoaded={!!data}>
                 <Heading size="lg" color={"#38BF66"}>
@@ -124,7 +109,7 @@ export const SupplyBreakdownCard = () => {
             </VStack>
             <VStack spacing={1} align="flex-start">
               <Text size="sm" fontWeight="400">
-                Locked B3TR
+                {t("Locked B3TR")}
               </Text>
               <Skeleton isLoaded={!!data}>
                 <Heading size="lg" color={"#979797"}>

@@ -269,5 +269,9 @@
   "75%": "75%",
   "100%": "100%",
   "Please confirm the transaction in your wallet": "Please confirm the transaction in your wallet",
-  "Almost there...": "Almost there..."
+  "Almost there...": "Almost there...",
+  "Supply breakdown": "Supply breakdown",
+  "B3TR in circulation": "B3TR in circulation",
+  "VOT3 in circulation": "VOT3 in circulation",
+  "Locked B3TR": "Locked B3TR"
 }
