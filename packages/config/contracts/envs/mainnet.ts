@@ -3,7 +3,7 @@ export function createMainnetConfig() {
   return defineConfig({
     NEXT_PUBLIC_APP_ENV: "mainnet",
 
-    MIGRATION_ADDRESS: "0x",
+    MIGRATION_ADDRESS: "0xdd6c4a8282e35f18829374b436cb5260d8eb718c",
     MIGRATION_AMOUNT: BigInt("3750000000000000000000000"), // 3.75 million B3TR tokens from pilot show
 
     B3TR_GOVERNOR_QUORUM_PERCENTAGE: 51, //Need 51% of voters to pass
