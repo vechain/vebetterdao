@@ -1,5 +1,5 @@
 import { useB3trBalance, useB3trTokenDetails } from "@/api"
-import { Box, Card, CardBody, CardHeader, HStack, Heading, Icon, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Box, Card, CardBody, CardHeader, Grid, HStack, Heading, Icon, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { useMemo } from "react"
 import BigNumber from "bignumber.js"
@@ -86,7 +86,7 @@ export const SupplyBreakdownCard = () => {
       </CardHeader>
       <CardBody>
         <VStack spacing={4} align="flex-start">
-          <HStack spacing={16}>
+          <Grid templateColumns={["repeat(2, 1fr)", "repeat(3, 1fr)"]} gap={6} w="full">
             <VStack spacing={1} align="flex-start">
               <Text size="sm" fontWeight="400">
                 {t("B3TR in circulation")}
@@ -117,7 +117,7 @@ export const SupplyBreakdownCard = () => {
                 </Heading>
               </Skeleton>
             </VStack>
-          </HStack>
+          </Grid>
           {!data ? (
             <Skeleton h={10} w="full" />
           ) : (
