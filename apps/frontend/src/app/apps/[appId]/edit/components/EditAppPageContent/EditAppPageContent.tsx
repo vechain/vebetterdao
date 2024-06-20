@@ -14,13 +14,19 @@ import {
 import { URL_REGEX } from "@/constants"
 import { useTranslation } from "react-i18next"
 import { useForm } from "react-hook-form"
-import { useCallback } from "react"
+import { useCallback, useEffect, useMemo } from "react"
 import { UilCheck } from "@iconscout/react-unicons"
 import { EditAppSocialUrls } from "./components/EditAppSocialUrls"
 import { EditScreenshots } from "./components/EditScreenshots"
 import { useParams, useRouter } from "next/navigation"
 import { EditAppLogo } from "./components/EditAppLogo"
-import { useCurrentAppBanner, useCurrentAppLogo, useCurrentAppMetadata } from "../../../hooks"
+import {
+  useCurrentAppAdmin,
+  useCurrentAppBanner,
+  useCurrentAppLogo,
+  useCurrentAppMetadata,
+  useCurrentAppModerators,
+} from "../../../hooks"
 import { EditAppBanner } from "./components/EditAppBanner"
 import { useUpdateAppDetails, useUploadAppMetadata } from "@/hooks"
 import { TransactionModal } from "@/components/TransactionModal"
@@ -28,6 +34,10 @@ import { useCurrentAppScreenshots } from "../../../hooks/useCurrentAppScreenshot
 import { useQueryClient } from "@tanstack/react-query"
 import { getXAppMetadataQueryKey } from "@/api"
 import { useCurrentAppInfo } from "../../../hooks/useCurrentAppInfo"
+import { useWallet } from "@vechain/dapp-kit-react"
+import { compareAddresses } from "@repo/utils/AddressUtils"
+import { useSocialUrls } from "./hooks/useSocialUrls"
+import { useIsFormChanged } from "./hooks/useIsFormChanged"
 
 export type EditAppForm = {
   name: string
@@ -43,6 +53,10 @@ export type EditAppForm = {
   bannerImage: string
 }
 
+const findUrlByName = (urls: { name: string; url: string }[] | undefined, name: string) => {
+  return urls?.find(url => url.name === name)?.url || ""
+}
+
 export const EditAppPageContent = () => {
   const { t } = useTranslation()
   const { appMetadata } = useCurrentAppMetadata()
@@ -56,6 +70,14 @@ export const EditAppPageContent = () => {
       screenshots: screenshots,
       logoImage: logo,
       bannerImage: banner,
+      name: appMetadata?.name || "",
+      external_url: appMetadata?.external_url || "",
+      description: appMetadata?.description || "",
+      twitterUrl: findUrlByName(appMetadata?.social_urls, "Twitter"),
+      discordUrl: findUrlByName(appMetadata?.social_urls, "Discord"),
+      telegramUrl: findUrlByName(appMetadata?.social_urls, "Telegram"),
+      youtubeUrl: findUrlByName(appMetadata?.social_urls, "Youtube"),
+      mediumUrl: findUrlByName(appMetadata?.social_urls, "Medium"),
     },
   })
   const {
@@ -90,42 +112,13 @@ export const EditAppPageContent = () => {
   })
   const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
 
+  const socialUrls = useSocialUrls(form)
   const onSubmit = useCallback(
     async (data: EditAppForm) => {
       updateAppMetadataMutation.resetStatus()
       onConfirmationOpen()
 
-      const socialUrls = []
-      if (data.twitterUrl) {
-        socialUrls.push({
-          name: "Twitter",
-          url: data.twitterUrl,
-        })
-      }
-      if (data.discordUrl) {
-        socialUrls.push({
-          name: "Discord",
-          url: data.discordUrl,
-        })
-      }
-      if (data.telegramUrl) {
-        socialUrls.push({
-          name: "Telegram",
-          url: data.telegramUrl,
-        })
-      }
-      if (data.youtubeUrl) {
-        socialUrls.push({
-          name: "Youtube",
-          url: data.youtubeUrl,
-        })
-      }
-      if (data.mediumUrl) {
-        socialUrls.push({
-          name: "Medium",
-          url: data.mediumUrl,
-        })
-      }
+      console.log("socialUrls", socialUrls)
 
       const metadataUri = await onMetadataUpload({
         name: data.name,
@@ -143,7 +136,7 @@ export const EditAppPageContent = () => {
         metadataUri,
       })
     },
-    [onConfirmationOpen, onMetadataUpload, updateAppMetadataMutation],
+    [onConfirmationOpen, onMetadataUpload, socialUrls, updateAppMetadataMutation],
   )
 
   const handleClose = useCallback(() => {
@@ -155,6 +148,28 @@ export const EditAppPageContent = () => {
     handleClose()
     handleSubmit(onSubmit)()
   }, [handleClose, handleSubmit, onSubmit])
+
+  const { account } = useWallet()
+  const { moderators } = useCurrentAppModerators()
+  const { admin } = useCurrentAppAdmin()
+
+  const allowedToEditApp = useMemo(() => {
+    if (compareAddresses(account || "", admin)) return true
+    if (moderators?.find(moderator => compareAddresses(account || "", moderator))) return true
+    return false
+  }, [account, admin, moderators])
+
+  const isFormChanged = useIsFormChanged(form)
+
+  useEffect(() => {
+    if (!allowedToEditApp) {
+      router.push(`/apps/${app?.id}`)
+    }
+  }, [allowedToEditApp, app?.id, router])
+
+  if (!allowedToEditApp) {
+    return null
+  }
 
   return (
     <>
@@ -185,7 +200,10 @@ export const EditAppPageContent = () => {
         showExplorerButton
       />
       <VStack alignItems={"stretch"} gap={8} as="form" onSubmit={handleSubmit(onSubmit)} w="full">
-        <Stack flexDirection={["column", "row"]} justify={"space-between"}>
+        <Stack
+          flexDirection={["column", "row"]}
+          justify={["flex-start", "space-between"]}
+          align={["flex-start", "center"]}>
           <HStack gap={4}>
             <EditAppLogo form={form} />
             <FormControl isInvalid={!!errors.name}>
@@ -201,18 +219,22 @@ export const EditAppPageContent = () => {
               <FormErrorMessage fontSize={"12px"}>{errors?.name?.message || ""}</FormErrorMessage>
             </FormControl>
           </HStack>
-          <HStack>
+          <HStack flexDir={["row-reverse", "row"]} mt={[2, 0]}>
             <Button variant="primaryGhost" onClick={goBack}>
               {t("Cancel")}
             </Button>
-            <Button variant="primaryAction" type="submit" leftIcon={<UilCheck size="16px" />}>
+            <Button
+              variant="primaryAction"
+              type="submit"
+              leftIcon={<UilCheck size="16px" />}
+              isDisabled={!isFormChanged}>
               {t("Save changes")}
             </Button>
           </HStack>
         </Stack>
         <EditAppBanner form={form} />
         <Stack flexDirection={["column", "row"]} gap={[20, 6]} align={"flex-start"}>
-          <VStack align={"stretch"} flex={3} gap={8}>
+          <VStack align={"stretch"} flex={3} gap={8} w="full">
             <VStack align={"stretch"} gap={4}>
               <Text fontSize={"14px"} fontWeight={400} color="#6A6A6A">
                 {t("Project URL")}

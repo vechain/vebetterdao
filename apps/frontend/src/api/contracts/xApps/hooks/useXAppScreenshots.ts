@@ -13,7 +13,7 @@ import { useXAppMetadata } from "./useXAppMetadata"
 export const useXAppScreenshots = (xAppId?: string) => {
   const { data: appMetadata, isLoading: appMetadataLoading } = useXAppMetadata(xAppId)
   const screenshotsQuery = useIpfsImageList(appMetadata?.screenshots ?? [])
-  const screenshots = screenshotsQuery.map(query => query.data?.image)
+  const screenshots = screenshotsQuery.map(query => query.data?.image || "")
   const isScreenshotLoading = appMetadataLoading || screenshotsQuery.some(query => query.isLoading)
   const screenshotError = screenshotsQuery.find(query => query.error)?.error
 
