@@ -1,14 +1,5 @@
 import { useTokenColors } from "@/hooks"
-import {
-  Slider,
-  SliderFilledTrack,
-  SliderProps,
-  SliderThumb,
-  SliderTrack,
-  Tooltip,
-  useColorModeValue,
-  useToken,
-} from "@chakra-ui/react"
+import { Slider, SliderFilledTrack, SliderProps, SliderThumb, SliderTrack, Tooltip } from "@chakra-ui/react"
 import { useState } from "react"
 
 type Props = SliderProps & { tooltipLabel?: string }
