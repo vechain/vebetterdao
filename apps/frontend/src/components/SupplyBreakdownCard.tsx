@@ -80,12 +80,19 @@ export const SupplyBreakdownCard = () => {
     return FormattingUtils.humanNumber(data?.b3trLeft.value ?? 0)
   }, [data])
 
+  const formattedTotalTokensDistributed = useMemo(() => {
+    const b3tr = data?.b3trCirculatingSupply.value ?? 0
+    const vot3 = data?.vot3CirculatingSupply.value ?? 0
+    return FormattingUtils.humanNumber(b3tr + vot3)
+  }, [data])
+
   return (
     <Card>
       <CardHeader>
         <HStack w="full" justify={"space-between"}>
           <Heading size="md">Supply breakdown</Heading>
-          <BaseTooltip text={"B3TR Total Value Locked (TVL) equals the amount of VOT3 circulating."}>
+          <BaseTooltip
+            text={`Total tokens distributed: ${formattedTotalTokensDistributed} of ${FormattingUtils.humanNumber(b3trTokenDetails?.totalSupply ?? 0)} B3TR`}>
             <span>
               <Icon as={FiInfo} color="rgba(0, 76, 252, 1)" position={"relative"} />
             </span>
