@@ -39,7 +39,6 @@ export const Filter = () => {
 
   const handleOptionClick = useCallback(
     (option: StateFilter) => {
-      console.log(option)
       setSelectedOption(option)
       setSelectedFilterOptions(undefined)
       setSelectedFilter(option)
