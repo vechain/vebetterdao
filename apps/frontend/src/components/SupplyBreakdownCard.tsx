@@ -1,5 +1,5 @@
 import { useB3trBalance, useB3trTokenDetails } from "@/api"
-import { Box, Card, CardBody, CardHeader, Grid, HStack, Heading, Icon, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Box, Card, CardBody, CardHeader, HStack, Heading, Icon, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { useMemo } from "react"
 import BigNumber from "bignumber.js"
@@ -58,19 +58,13 @@ export const SupplyBreakdownCard = () => {
     return FormattingUtils.humanNumber(data?.vot3CirculatingSupply.value ?? 0)
   }, [data])
 
-  const formattedTotalTokensDistributed = useMemo(() => {
-    const b3tr = data?.b3trCirculatingSupply.value ?? 0
-    const vot3 = data?.vot3CirculatingSupply.value ?? 0
-    return FormattingUtils.humanNumber(b3tr + vot3)
-  }, [data])
-
   return (
     <Card>
       <CardHeader>
         <HStack w="full" justify={"space-between"}>
           <Heading size="md">{t("Supply breakdown")}</Heading>
           <BaseTooltip
-            text={`Total tokens distributed: ${formattedTotalTokensDistributed} of ${FormattingUtils.humanNumber(b3trTokenDetails?.totalSupply ?? 0)} B3TR`}>
+            text={`B3TR tokens are generated weekly and distributed to x2earn apps, the DAO Treasury and to the VotingRewards contract.`}>
             <span>
               <Icon as={FiInfo} color="rgba(0, 76, 252, 1)" position={"relative"} />
             </span>
@@ -79,7 +73,7 @@ export const SupplyBreakdownCard = () => {
       </CardHeader>
       <CardBody>
         <VStack spacing={4} align="flex-start">
-          <Grid templateColumns={["repeat(2, 1fr)", "repeat(3, 1fr)"]} gap={6} w="full">
+          <HStack spacing={16}>
             <VStack spacing={1} align="flex-start">
               <Text size="sm" fontWeight="400">
                 {t("B3TR in circulation")}
@@ -100,7 +94,7 @@ export const SupplyBreakdownCard = () => {
                 </Heading>
               </Skeleton>
             </VStack>
-          </Grid>
+          </HStack>
           {!data ? (
             <Skeleton h={10} w="full" />
           ) : (
@@ -118,6 +112,7 @@ export const SupplyBreakdownCard = () => {
                     duration: 0.25,
                   },
                 }}
+                zIndex={2}
                 w={data.b3trCirculatingSupply.percentage}
                 h={"full"}
                 bg={" linear-gradient(to bottom, #004CFC , #447CFF)"}
@@ -131,11 +126,13 @@ export const SupplyBreakdownCard = () => {
                 }}
                 animate={{
                   opacity: 1,
-                  width: `${data.vot3CirculatingSupply.percentage}%`,
+                  width: `${data.vot3CirculatingSupply.percentage + 2}%`, // +2% to fill the css gap
                   transition: {
                     duration: 0.25,
                   },
                 }}
+                zIndex={1}
+                marginLeft={"-2%"} // -2% to create an overlap effect
                 w={data.vot3CirculatingSupply.percentage}
                 h={"full"}
                 bg={" linear-gradient(to bottom, #84E718 , #A0F04A)"}
