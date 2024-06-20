@@ -1,0 +1,45 @@
+import { Heading, Text, VStack } from "@chakra-ui/react"
+import { UseFormReturn } from "react-hook-form"
+import { useTranslation } from "react-i18next"
+import { AdminAppForm } from "../../AdminAppPageContent"
+import { AddModeratorButton } from "./components/AddModeratorButton"
+import { useCallback } from "react"
+import { ModeratorItem } from "./components/ModeratorItem"
+
+interface Props {
+  form: UseFormReturn<AdminAppForm>
+}
+export const EditAppModerators = ({ form }: Props) => {
+  const { t } = useTranslation()
+  const moderators = form.watch("moderators")
+
+  const handleDeleteModerator = useCallback(
+    (index: number) => () =>
+      form.setValue(
+        "moderators",
+        moderators.filter((_, i) => i !== index),
+      ),
+    [form, moderators],
+  )
+
+  return (
+    <VStack align="stretch">
+      <Heading fontSize={"24px"} fontWeight={700}>
+        {t("Moderators")}
+      </Heading>
+      <Text color="#6A6A6A">
+        {moderators?.length
+          ? t("These users will be able to update dApp information and feed news.")
+          : t(
+              "Your dApp's page doesn't have moderators yet. Add someone to assist you in handling the information on the page and the feed.",
+            )}
+      </Text>
+      <VStack align="stretch" spacing={4} my={4} gap={4}>
+        {moderators?.map((moderator, index) => (
+          <ModeratorItem key={moderator} moderator={moderator} handleDeleteModerator={handleDeleteModerator(index)} />
+        ))}
+      </VStack>
+      <AddModeratorButton editAdminForm={form} />
+    </VStack>
+  )
+}
