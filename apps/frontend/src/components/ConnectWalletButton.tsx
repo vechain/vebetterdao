@@ -18,7 +18,12 @@ export const ConnectWalletButton = ({ responsiveVariant }: Props) => {
     if (shouldRenderDesktop)
       return (
         <Fade in={true}>
-          <Button onClick={open} colorScheme="primary" size="md" leftIcon={<FaWallet />} data-testid="connect-wallet">
+          <Button
+            onClick={open}
+            variant={"primaryAction"}
+            size="md"
+            leftIcon={<FaWallet />}
+            data-testid="connect-wallet">
             Connect Wallet
           </Button>
         </Fade>
@@ -26,7 +31,7 @@ export const ConnectWalletButton = ({ responsiveVariant }: Props) => {
     else
       return (
         <Fade in={true}>
-          <IconButton onClick={open} icon={<FaWallet />} aria-label="Connect wallet" colorScheme="primary" />
+          <IconButton onClick={open} icon={<FaWallet />} aria-label="Connect wallet" variant={"primaryAction"} />
         </Fade>
       )
 
