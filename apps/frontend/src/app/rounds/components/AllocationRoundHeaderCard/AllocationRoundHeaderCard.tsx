@@ -29,6 +29,7 @@ import { PiSquaresFourFill } from "react-icons/pi"
 import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
 import { AllocationRoundBreakdownChart } from "./AllocationRoundBreakdownChart"
+import { useRouter } from "next/navigation"
 
 const compactFormatter = getCompactFormatter(2)
 type Props = {
@@ -37,6 +38,7 @@ type Props = {
 
 export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
   const { t } = useTranslation()
+  const router = useRouter()
   const { account } = useWallet()
   const { data, isLoading } = useAllocationsRound(roundId)
 
@@ -142,8 +144,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                 <Button
                   data-testid="cast-your-vote-button"
                   variant={"primaryAction"}
-                  as="a"
-                  href="#user-votes"
+                  onClick={() => router.push(`/rounds/${roundId}/vote`)}
                   size={"lg"}
                   colorScheme={"primary"}
                   w={["full", "auto"]}

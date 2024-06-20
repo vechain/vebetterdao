@@ -1,4 +1,5 @@
 {
+  "{{amount}} distributed among {{apps}} apps": "<strong>{{amount}}</strong> distributed among <strong>{{apps}}</strong> apps",
   "Apps": "Apps",
   "Voters": "Voters",
   "Max app allocation": "Max app allocation",
