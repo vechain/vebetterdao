@@ -5,9 +5,11 @@ import { GovernanceFeaturedContractsWithFunctions, getActionsFromTargetsAndCalld
 import { ProposalFormAction } from "@/store"
 import { toIPFSURL } from "@/utils"
 import { Card, CardBody, Heading, Alert, AlertIcon, AlertDescription, AlertTitle, Box, VStack } from "@chakra-ui/react"
-import MarkdownPreview from "@uiw/react-markdown-preview"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+
+import "@uiw/react-md-editor/markdown-editor.css"
+import MDEditor from "@uiw/react-md-editor"
 
 type Props = {
   proposal: ProposalCreatedEvent
@@ -41,10 +43,9 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
       <CardBody py={8}>
         <VStack spacing={8} align="flex-start">
           <Heading size="lg">{t("About the proposal")}</Heading>
-          <MarkdownPreview
+          <MDEditor.Markdown
             source={metadata?.data?.markdownDescription}
             style={{
-              padding: "1rem",
               width: "100%",
             }}
           />
