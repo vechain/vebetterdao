@@ -16,25 +16,23 @@ export const SupplyBreakdownCard = () => {
   const { data: vot3ContractB3trBalance } = useB3trBalance(getConfig().vot3ContractAddress)
 
   const data = useMemo(() => {
-    if (!b3trTokenDetails) return undefined
+    if (!b3trTokenDetails || !vot3ContractB3trBalance) return undefined
 
-    const b3trCirculatingSupply = new BigNumber(b3trTokenDetails.circulatingSupply).toNumber()
+    const b3trCirculatingSupply = new BigNumber(b3trTokenDetails.circulatingSupply)
+      .minus(vot3ContractB3trBalance?.scaled ?? 0)
+      .toNumber()
 
     const vot3CirculatingSupply = new BigNumber(vot3ContractB3trBalance?.scaled ?? 0).toNumber()
 
-    const b3trLeft = new BigNumber(b3trTokenDetails.totalSupply).minus(b3trCirculatingSupply).toNumber()
+    const totalCirculatingSupply = new BigNumber(b3trTokenDetails.circulatingSupply).toNumber()
 
     const b3trCirculatingSupplyPercentage = new BigNumber(b3trCirculatingSupply)
-      .dividedBy(b3trTokenDetails.totalSupply)
-      .multipliedBy(100)
-      .toNumber()
-    const b3trLeftPercentage = new BigNumber(b3trLeft)
-      .dividedBy(b3trTokenDetails.totalSupply)
+      .dividedBy(totalCirculatingSupply)
       .multipliedBy(100)
       .toNumber()
 
     const vot3CirculatingSupplyPercentage = new BigNumber(vot3CirculatingSupply)
-      .dividedBy(b3trTokenDetails.totalSupply)
+      .dividedBy(totalCirculatingSupply)
       .multipliedBy(100)
       .toNumber()
 
@@ -49,9 +47,8 @@ export const SupplyBreakdownCard = () => {
         value: vot3CirculatingSupply,
         percentage: vot3CirculatingSupplyPercentage,
       },
-      b3trLeft: { name: "Locked B3TR", value: b3trLeft, percentage: b3trLeftPercentage },
     }
-  }, [b3trTokenDetails, vot3ContractB3trBalance?.scaled])
+  }, [b3trTokenDetails, vot3ContractB3trBalance])
 
   const formattedB3trCirculatingSupply = useMemo(() => {
     return FormattingUtils.humanNumber(data?.b3trCirculatingSupply.value ?? 0)
@@ -59,10 +56,6 @@ export const SupplyBreakdownCard = () => {
 
   const formattedVot3CirculatingSupply = useMemo(() => {
     return FormattingUtils.humanNumber(data?.vot3CirculatingSupply.value ?? 0)
-  }, [data])
-
-  const formattedB3trLeft = useMemo(() => {
-    return FormattingUtils.humanNumber(data?.b3trLeft.value ?? 0)
   }, [data])
 
   const formattedTotalTokensDistributed = useMemo(() => {
@@ -107,16 +100,6 @@ export const SupplyBreakdownCard = () => {
                 </Heading>
               </Skeleton>
             </VStack>
-            <VStack spacing={1} align="flex-start">
-              <Text size="sm" fontWeight="400">
-                {t("Locked B3TR")}
-              </Text>
-              <Skeleton isLoaded={!!data}>
-                <Heading size="lg" color={"#979797"}>
-                  {formattedB3trLeft}
-                </Heading>
-              </Skeleton>
-            </VStack>
           </Grid>
           {!data ? (
             <Skeleton h={10} w="full" />
@@ -156,24 +139,6 @@ export const SupplyBreakdownCard = () => {
                 w={data.vot3CirculatingSupply.percentage}
                 h={"full"}
                 bg={" linear-gradient(to bottom, #84E718 , #A0F04A)"}
-                borderRadius={"md"}
-              />
-              <Box
-                as={motion.div}
-                initial={{
-                  width: 0,
-                  opacity: 0,
-                }}
-                animate={{
-                  opacity: 1,
-                  width: `${data.b3trLeft.percentage}%`,
-                  transition: {
-                    duration: 0.25,
-                  },
-                }}
-                w={data.b3trLeft.percentage}
-                h={"full"}
-                bg={" linear-gradient(to bottom, #9F9F9F , #B7B7B7)"}
                 borderRadius={"md"}
               />
             </HStack>
