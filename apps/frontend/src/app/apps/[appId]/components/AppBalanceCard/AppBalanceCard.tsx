@@ -52,7 +52,7 @@ export const AppBalanceCard = () => {
             mt={2}
             isDisabled={balance?.scaled === "0.0" || !balance || isBalanceLoading}
             onClick={onOpen}
-            colorScheme="primary"
+            variant={"primaryAction"}
             borderRadius={"full"}
             w={"full"}>
             <Icon as={IoWalletOutline} mr={2} />

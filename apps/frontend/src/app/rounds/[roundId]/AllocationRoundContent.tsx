@@ -3,12 +3,12 @@
 import { Grid, GridItem, Spinner, VStack } from "@chakra-ui/react"
 import { AllocationRoundNavbar } from "../components/AllocationRoundNavbar"
 import { AllocationRoundHeaderCard } from "../components/AllocationRoundHeaderCard/AllocationRoundHeaderCard"
-import { AllocationXAppsVotesCard } from "@/components"
 import { AllocationRoundSessionInfoCard } from "../components/AllocationRoundSessionInfoCard"
 import { AllocationRoundUserVotes } from "../components/AllocationRoundUserVotes/AllocationRoundUserVotes"
 import { useAllocationsRoundState, useHasVotedInRound } from "@/api"
 import { useLayoutEffect } from "react"
 import { redirect } from "next/navigation"
+import { AllocationXAppsVotesCard } from "../components/AllocationXAppsVotesCard"
 import { useWallet } from "@vechain/dapp-kit-react"
 
 type Props = {

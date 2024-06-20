@@ -163,10 +163,10 @@ export const VoterRewards: React.FC = () => {
               isDisabled={totalRewards?.eq(0)}
               isLoading={isRewardsLoading || isClaimRewardsLoading}
               onClick={handleClaim}
-              colorScheme="primary"
+              variant={"primaryAction"}
               borderRadius={"full"}
               w={"full"}>
-              Claim
+              Claim reward
             </Button>
           </VStack>
         </CardBody>

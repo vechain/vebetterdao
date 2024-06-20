@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query"
+import { useQueries, useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
 import { XAllocationPool__factory } from "@repo/contracts"
@@ -64,5 +64,31 @@ export const useXAppRoundEarnings = (roundId: string, xAppId: string) => {
       return await getXAppRoundEarnings(thor, roundId, xAppId)
     },
     enabled: !!thor && !!roundId && !!xAppId,
+  })
+}
+
+/**
+ *  Get the amount of $B3TR every xApp earned from an allocation round
+ * @param roundId  the round id
+ * @param xAppIds  the xApp ids
+ * @returns  the amount of $B3TR every xApp earned from an allocation round
+ */
+export const useMultipleXAppRoundEarnings = (roundId: string, xAppIds: string[]) => {
+  const { thor } = useConnex()
+  return useQueries({
+    queries: xAppIds.map(xAppId => ({
+      queryKey: getXAppRoundEarningsQueryKey(roundId, xAppId),
+      queryFn: async () => {
+        const data = await queryClient.ensureQueryData({
+          queryFn: () => getRoundXApps(thor, roundId),
+          queryKey: getRoundXAppsQueryKey(roundId),
+        })
+        const isXAppInRound = data.some(app => app.id === xAppId)
+        if (!isXAppInRound) return { amount: "0", xAppId }
+
+        return await getXAppRoundEarnings(thor, roundId, xAppId)
+      },
+      enabled: !!thor && !!roundId && !!xAppId,
+    })),
   })
 }
