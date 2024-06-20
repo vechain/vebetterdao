@@ -11,6 +11,7 @@ import {
   FormHelperText,
   HStack,
   Heading,
+  Stack,
   Text,
   VStack,
   useMediaQuery,
@@ -23,7 +24,8 @@ import dynamic from "next/dynamic"
 import rehypeSanitize from "rehype-sanitize"
 import { useTranslation } from "react-i18next"
 import { Controller, useForm } from "react-hook-form"
-import { validateProposalTemplate } from "@/constants"
+import { updateMarkdownTemplatePlaceholders, validateProposalTemplate } from "@/constants"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false })
 
@@ -34,10 +36,11 @@ type FormData = {
 export const NewProposalPageDiscussionContent = () => {
   const { t } = useTranslation()
   const router = useRouter()
+  const { account } = useWallet()
 
-  const { markdownDescription, setData } = useProposalFormStore()
+  const { title, shortDescription, markdownDescription, actions, setData } = useProposalFormStore()
 
-  const { control, formState, handleSubmit } = useForm<FormData>({
+  const { control, formState, handleSubmit, setValue } = useForm<FormData>({
     defaultValues: {
       markdownDescription,
     },
@@ -57,6 +60,17 @@ export const NewProposalPageDiscussionContent = () => {
   const goBack = useCallback(() => {
     router.back()
   }, [router])
+
+  const resetMarkdownToDefault = useCallback(() => {
+    const defaultMarkdown = updateMarkdownTemplatePlaceholders({
+      account,
+      title,
+      shortDescription,
+      actionsLength: actions.length,
+    })
+    setValue("markdownDescription", defaultMarkdown)
+    setData({ markdownDescription: defaultMarkdown })
+  }, [setData, setValue, account, title, shortDescription, actions])
 
   return (
     <Card w="full" data-testid="new-proposal-content-page">
@@ -100,13 +114,25 @@ export const NewProposalPageDiscussionContent = () => {
                 )}
               />
             </Box>
-            {errors.markdownDescription ? (
-              <FormErrorMessage data-testid="form-error-message">{errors.markdownDescription.message}</FormErrorMessage>
-            ) : (
-              <FormHelperText color="gray.500" fontSize="sm">
-                {t("Make sure to replace all the placeholders with your own content.")}
-              </FormHelperText>
-            )}
+            <Stack
+              direction={["column", "column", "row"]}
+              w="full"
+              justify={"space-between"}
+              align={["flex-start", "flex-start", "center"]}
+              spacing={2}>
+              {errors.markdownDescription ? (
+                <FormErrorMessage data-testid="form-error-message">
+                  {errors.markdownDescription.message}
+                </FormErrorMessage>
+              ) : (
+                <FormHelperText color="gray.500" fontSize="sm">
+                  {t("Make sure to replace all the placeholders with your own content.")}
+                </FormHelperText>
+              )}
+              <Button data-testid="reset-markdown" variant={"primaryLink"} onClick={resetMarkdownToDefault}>
+                {t("Reset to default")}
+              </Button>
+            </Stack>
           </FormControl>
 
           <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>

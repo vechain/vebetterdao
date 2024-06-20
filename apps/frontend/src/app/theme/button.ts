@@ -18,6 +18,19 @@ export const ButtonStyle: ComponentStyleConfig = {
         bg: "rgba(224, 233, 254, 0.8)",
       },
     },
+    primaryLink: {
+      px: 0,
+      py: 0,
+      fontSize: "16px",
+      fontWeight: 500,
+      color: "rgba(0, 76, 252, 1)",
+      _hover: {
+        color: "#0038b5",
+        _disabled: {
+          color: "rgba(0, 76, 252, 0.7)",
+        },
+      },
+    },
     primaryAction: {
       rounded: "full",
       fontSize: "16px",
