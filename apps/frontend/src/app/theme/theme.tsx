@@ -53,6 +53,17 @@ const themeConfig = {
   },
 }
 
+export const pulseKeyFrames = (scaledPulse = 1.5) => keyframes`
+        0% {
+    transform: scale(1, 1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(${scaledPulse} ${scaledPulse});
+    opacity: 0;
+  }
+    `
+
 export const backdropBlurKeyframes = (startingBlur: string = "0px", endingBlur: string = "20px") => keyframes`
     0% {
         backdrop-filter: blur(${startingBlur});

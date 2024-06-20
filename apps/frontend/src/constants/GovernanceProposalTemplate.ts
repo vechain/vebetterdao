@@ -1,3 +1,5 @@
+import dayjs from "dayjs"
+
 export const TITLE_PLACEHOLDER = "[TITLE_PLACEHOLDER]"
 export const SUMMARY_PLACEHOLDER = "[SUMMARY_PLACEHOLDER]"
 export const ONCHAIN_ACTION_PLACEHOLDER = "[ONCHAIN_ACTION_PLACEHOLDER]"
@@ -68,8 +70,46 @@ ${REFERENCES_PLACEHOLDER}
 
 **Date:**  
 ${DATE_PLACEHOLDER}
-
 `
+
+/**
+ *  Updates the placeholders in the markdown template with the provided data
+ * @param markdownTemplate  The markdown template to update - defaults to GovernanceProposalTemplate
+ * @param actionsLength  The length of the actions array
+ * @param account  The account address
+ * @param title  The title of the proposal
+ * @param shortDescription  The short description of the proposal
+ * @returns  The updated markdown template
+ */
+
+type UpdateMarkdownTemplatePlaceholdersParams = {
+  markdownTemplate?: string
+  actionsLength?: number
+  account?: string | null
+  title?: string
+  shortDescription?: string
+}
+export const updateMarkdownTemplatePlaceholders = ({
+  markdownTemplate,
+  actionsLength = 0,
+  account,
+  title,
+  shortDescription,
+}: UpdateMarkdownTemplatePlaceholdersParams) => {
+  let updatedMarkdown = markdownTemplate ?? GovernanceProposalTemplate
+
+  updatedMarkdown = updatedMarkdown.replace(ONCHAIN_ACTION_PLACEHOLDER, actionsLength ? "X" : " ")
+  updatedMarkdown = updatedMarkdown.replace(TEXT_ONLY_PLACEHOLDER, actionsLength ? " " : "X")
+  if (account) {
+    updatedMarkdown = updatedMarkdown.replace(ADDRESS_PLACEHOLDER, account)
+  }
+  if (title) updatedMarkdown = updatedMarkdown.replace(TITLE_PLACEHOLDER, title)
+  if (shortDescription) updatedMarkdown = updatedMarkdown.replace(SUMMARY_PLACEHOLDER, shortDescription)
+
+  updatedMarkdown = updatedMarkdown.replace(DATE_PLACEHOLDER, dayjs().format("MMMM D, YYYY"))
+
+  return updatedMarkdown
+}
 
 /**
  *  Validates a proposal template to ensure that all required placeholders are not present
