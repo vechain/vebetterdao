@@ -1,5 +1,5 @@
 import { useAccountBalance, useB3trBalance, useVot3Balance } from "@/api"
-import { Button, Card, CardBody, Grid, GridItem, Heading, Image, Text, VStack } from "@chakra-ui/react"
+import { Button, Card, CardBody, Grid, GridItem, Heading, Image, Link, Text, VStack } from "@chakra-ui/react"
 import { useMemo } from "react"
 import BigNumber from "bignumber.js"
 import { useWallet } from "@vechain/dapp-kit-react"
@@ -13,10 +13,6 @@ export const LowOnVthoCard: React.FC = () => {
   const { data: balance, isLoading: balanceLoading } = useAccountBalance(account ?? undefined)
   const { data: b3trBalance } = useB3trBalance(account ?? undefined)
   const { data: vot3Balance } = useVot3Balance(account ?? undefined)
-
-  const redirectToGetVTHO = () => {
-    window.open("https://www.coinbase.com/en/how-to-buy/vethor-token", "_blank", "noopener noreferrer")
-  }
 
   const ownsTokens = useMemo(() => {
     if (!b3trBalance || !vot3Balance) return false
@@ -65,14 +61,11 @@ export const LowOnVthoCard: React.FC = () => {
                 {labels?.body} <b>{t("Get more VTHO to get the best experience in the platform.")}</b>
               </Text>
 
-              <Button
-                mt={2}
-                variant={"primaryAction"}
-                borderRadius={"full"}
-                rightIcon={<FiArrowUpRight />}
-                onClick={redirectToGetVTHO}>
-                {t("Get more VTHO")}
-              </Button>
+              <Link href={"https://www.coinbase.com/en/how-to-buy/vethor-token"} isExternal>
+                <Button mt={2} variant={"primaryAction"} borderRadius={"full"} rightIcon={<FiArrowUpRight />}>
+                  {t("Get more VTHO")}
+                </Button>
+              </Link>
             </VStack>
           </GridItem>
         </Grid>
