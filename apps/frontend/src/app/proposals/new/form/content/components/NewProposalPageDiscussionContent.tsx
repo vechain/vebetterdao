@@ -13,6 +13,7 @@ import {
   Heading,
   Text,
   VStack,
+  useMediaQuery,
 } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
@@ -41,6 +42,8 @@ export const NewProposalPageDiscussionContent = () => {
       markdownDescription,
     },
   })
+
+  const [isDesktop] = useMediaQuery("(min-width: 800px)")
 
   const { errors } = formState
 
@@ -85,6 +88,7 @@ export const NewProposalPageDiscussionContent = () => {
                 }}
                 render={({ field }) => (
                   <MDEditor
+                    preview={isDesktop ? "live" : "edit"}
                     data-testid="markdown-description-input"
                     value={field.value}
                     onChange={field.onChange}
