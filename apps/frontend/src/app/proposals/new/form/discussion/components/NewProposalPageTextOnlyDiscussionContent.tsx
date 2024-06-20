@@ -4,8 +4,11 @@ import { useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { useProposalFormStore } from "@/store"
 import { useTranslation } from "react-i18next"
+import { updateMarkdownTemplatePlaceholders } from "@/constants"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
+  const { account } = useWallet()
   const router = useRouter()
 
   const { t } = useTranslation()
@@ -17,14 +20,21 @@ export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
 
   const onSubmit = useCallback(
     (data: FormData) => {
+      const markdownDescription = updateMarkdownTemplatePlaceholders({
+        title: data.title,
+        shortDescription: data.description,
+        account,
+      })
       setData({
         title: data.title,
         shortDescription: data.description,
+        markdownDescription,
         actions: [],
       })
+
       router.push("/proposals/new/form/content")
     },
-    [setData, router],
+    [setData, router, account],
   )
 
   return (

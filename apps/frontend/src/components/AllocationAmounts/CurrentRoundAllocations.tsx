@@ -14,16 +14,15 @@ import {
   Skeleton,
   Spinner,
   Stack,
-  Tag,
   Text,
 } from "@chakra-ui/react"
 import { useAllocationAmount, useAllocationsRound, useRoundXApps, useRoundEarnings } from "@/api"
 import { useMemo } from "react"
 import { backdropBlurAnimation } from "@/app/theme"
 import { BaseTooltip } from "../BaseTooltip"
-import { DotSymbol } from "../DotSymbol"
 import { AppAmount } from "./components/AppAmount"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { AllocationStateBadge } from "../AllocationStateBadge"
 
 type Props = {
   roundId: string
@@ -68,12 +67,7 @@ export const CurrentRoundAllocations = ({ roundId }: Props) => {
           <Heading size="md">Round #{roundId} allocations </Heading>
           {round?.state === 0 && (
             <BaseTooltip text={"Round is still active, final results could change if quorum is not reached"}>
-              <Tag colorScheme="inherit" size={"lg"} style={{ cursor: "default" }}>
-                <HStack spacing={1} align={"center"}>
-                  <DotSymbol color="secondary.500" />
-                  <Text fontSize={"sm"}>Active</Text>
-                </HStack>
-              </Tag>
+              <AllocationStateBadge roundId={roundId} renderBadge={false} />
             </BaseTooltip>
           )}
         </HStack>
