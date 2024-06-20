@@ -4,25 +4,21 @@ import {
   AlertIcon,
   AlertTitle,
   Box,
-  Button,
   Card,
   CardBody,
-  CardFooter,
   CardHeader,
   Flex,
   HStack,
   Heading,
-  Icon,
   Spinner,
-  Stack,
   VStack,
 } from "@chakra-ui/react"
-import { useAllocationVoters, useAllocationsRound, useRoundXApps, useXAppsVotes } from "@/api"
+import { useAllocationsRound, useRoundXApps, useXAppsVotes } from "@/api"
 import { backdropBlurAnimation } from "@/app/theme"
 import { AllocationXAppsVotesRankingChart } from "./AllocationXAppsVotesRankingChart"
-import { FaArrowRight } from "react-icons/fa6"
 import { useTranslation } from "react-i18next"
 import { AllocationXAppsDistributionChart } from "./AllocationXAppsDistributionChart"
+import { UilInfoCircle } from "@iconscout/react-unicons"
 
 type Props = {
   roundId: string
@@ -34,7 +30,6 @@ export const AllocationXAppsVotesCard = ({ roundId, maxRanks = 8 }: Props) => {
   const { data: xApps, isLoading: xAppsLoading } = useRoundXApps(roundId)
 
   const xAppsVotes = useXAppsVotes(xApps?.map(app => app.id) ?? [], roundId)
-  const { data: voters, isLoading: votersLoading } = useAllocationVoters(roundId)
 
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(roundId)
 
@@ -43,32 +38,34 @@ export const AllocationXAppsVotesCard = ({ roundId, maxRanks = 8 }: Props) => {
 
   const isLoading = isVotesLoading || roundInfoLoading
 
-  const isMoreThanMaxRanks = xAppsVotes.length > maxRanks
-
   const title = roundInfo.isCurrent && roundInfo.state === 0 ? t("Real time votes") : t("Votes")
 
   return (
     <Card flex={1} h="full" w="full" variant={"baseWithBorder"}>
       <CardHeader>
         <HStack justify={"space-between"} w="full">
-          <Heading size="md">{title}</Heading>
+          <Heading fontSize="24px" fontWeight={700}>
+            {title}
+          </Heading>
         </HStack>
       </CardHeader>
       <CardBody>
         <VStack spacing={12} align={"flex-start"} w="full">
           {roundInfo.state === 1 && (
-            <Alert status="error" borderRadius={"2xl"}>
-              <AlertIcon />
+            <Alert status="error" borderRadius="16px" border={"1px solid #D23F63"} bg="#FCEEF1">
+              <UilInfoCircle size={"36px"} color="#D23F63" />
               <Box>
-                <AlertTitle>{t("Quorum was not reached for this round")}</AlertTitle>
-                <AlertDescription>
+                <AlertTitle color="#D23F63" ml={2} fontSize="14px" fontWeight={600}>
+                  {t("Quorum was not reached for this round")}
+                </AlertTitle>
+                <AlertDescription color="#D23F63" ml={2} fontSize="14px">
                   {t("B3TR allocation will be distributed according to the votes of the previous round")}
                 </AlertDescription>
               </Box>
             </Alert>
           )}
           <AllocationXAppsDistributionChart roundId={roundId} />
-          <AllocationXAppsVotesRankingChart roundId={roundId} maxRanks={maxRanks} />
+          <AllocationXAppsVotesRankingChart roundId={roundId} />
         </VStack>
       </CardBody>
       {(isLoading || error) && (
@@ -105,33 +102,6 @@ export const AllocationXAppsVotesCard = ({ roundId, maxRanks = 8 }: Props) => {
           ) : null}
         </Flex>
       )}
-      <CardFooter>
-        <Stack
-          direction={["column", "row"]}
-          spacing={8}
-          justify={"space-between"}
-          w="full"
-          align={["flex-start", "center"]}>
-          {/* TODO: Implement this */}
-          {isMoreThanMaxRanks && (
-            <Button
-              variant={"link"}
-              colorScheme="primary"
-              size="lg"
-              rightIcon={
-                <Icon
-                  as={FaArrowRight}
-                  style={{
-                    transition: "all 0.2s ease-in-out",
-                    transform: "rotate(-45deg)",
-                  }}
-                />
-              }>
-              View all
-            </Button>
-          )}
-        </Stack>
-      </CardFooter>
     </Card>
   )
 }
