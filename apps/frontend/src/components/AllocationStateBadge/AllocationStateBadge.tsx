@@ -2,31 +2,66 @@ import { useAllocationsRoundState } from "@/api"
 import { HStack, Icon, Skeleton, StackProps, Text, TextProps } from "@chakra-ui/react"
 import { ReactNode } from "react"
 import { DotSymbol } from "../DotSymbol"
-import { FaThumbsDown, FaThumbsUp } from "react-icons/fa6"
+import { FaThumbsUp } from "react-icons/fa6"
 
 type Props = {
   roundId: string
+  renderIcon?: boolean
+  renderBadge?: boolean
+  textProps?: TextProps
+  containerProps?: StackProps
 }
-export const AllocationStateBadge = ({ roundId }: Props) => {
+export const AllocationStateBadge = ({
+  roundId,
+  renderBadge = true,
+  renderIcon = true,
+  textProps = {},
+  containerProps = {},
+}: Props) => {
   const { data, isLoading, error } = useAllocationsRoundState(roundId)
 
   if (isLoading)
     return (
       <Skeleton>
-        <Badge text="loading" />
+        <Badge
+          text="loading"
+          containerProps={
+            renderBadge
+              ? {
+                  bgColor: "#F8F8F8",
+                  ...containerProps,
+                }
+              : {
+                  px: 0,
+                  py: 0,
+                  ...containerProps,
+                }
+          }
+          icon={renderIcon ? <DotSymbol size={4} color={"#D23F63"} /> : undefined}
+        />
       </Skeleton>
     )
-  if (error)
+  if (error || data === undefined)
     return (
       <Badge
         textProps={{
           color: "#D23F63",
+          ...textProps,
         }}
-        containerProps={{
-          bgColor: "#F8F8F8",
-        }}
+        containerProps={
+          renderBadge
+            ? {
+                bgColor: "#F8F8F8",
+                ...containerProps,
+              }
+            : {
+                px: 0,
+                py: 0,
+                ...containerProps,
+              }
+        }
         text="Error getting state"
-        icon={<DotSymbol size={4} color={"#D23F63"} />}
+        icon={renderIcon ? <DotSymbol size={4} color={"#D23F63"} /> : undefined}
       />
     )
 
@@ -35,38 +70,45 @@ export const AllocationStateBadge = ({ roundId }: Props) => {
       <Badge
         textProps={{
           color: "#3A6F00",
+          ...textProps,
         }}
-        containerProps={{
-          bgColor: "#CDFF9F",
-        }}
+        containerProps={
+          renderBadge
+            ? {
+                bgColor: "#CDFF9F",
+                ...containerProps,
+              }
+            : {
+                px: 0,
+                py: 0,
+                ...containerProps,
+              }
+        }
         text="Active now"
-        icon={<DotSymbol size={2} color={"#3A6F00"} />}
+        icon={renderIcon ? <DotSymbol pulse size={2} color={"#3A6F00"} /> : undefined}
       />
     )
-  if (data === 1)
-    return (
-      <Badge
-        textProps={{
-          color: "#D23F63",
-        }}
-        containerProps={{
-          bgColor: "#F8F8F8",
-        }}
-        text="Ended and rejected"
-        icon={<Icon as={FaThumbsDown} boxSize={4} color={"#D23F63"} />}
-      />
-    )
-  if (data === 2)
+  if ([1, 2].includes(data))
     return (
       <Badge
         textProps={{
           color: "#004CFC",
+          ...textProps,
         }}
-        containerProps={{
-          bgColor: "#EBF1FE",
-        }}
-        text="Ended and queued"
-        icon={<Icon as={FaThumbsUp} boxSize={4} color={"#004CFC"} />}
+        containerProps={
+          renderBadge
+            ? {
+                bgColor: "#EBF1FE",
+                ...containerProps,
+              }
+            : {
+                px: 0,
+                py: 0,
+                ...containerProps,
+              }
+        }
+        text="Concluded"
+        icon={renderIcon ? <Icon as={FaThumbsUp} boxSize={4} color={"#004CFC"} /> : undefined}
       />
     )
 }
