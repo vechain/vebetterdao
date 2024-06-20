@@ -17,8 +17,8 @@ import { useMemo } from "react"
 import BigNumber from "bignumber.js"
 import { getConfig } from "@repo/config"
 import { motion } from "framer-motion"
-import { FaCircleInfo } from "react-icons/fa6"
 import { BaseTooltip } from "./BaseTooltip"
+import { FiInfo } from "react-icons/fi"
 
 export const SupplyBreakdownCard = () => {
   const { data: b3trTokenDetails } = useB3trTokenDetails()
@@ -26,65 +26,58 @@ export const SupplyBreakdownCard = () => {
 
   const greenColor = useColorModeValue("green.500", "green.200")
   const primaryColor = useColorModeValue("primary.500", "primary.200")
-
   const grayColor = useColorModeValue("gray.500", "gray.200")
 
   const data = useMemo(() => {
     if (!b3trTokenDetails) return undefined
 
-    const circulatingSupply = new BigNumber(b3trTokenDetails.circulatingSupply).toNumber()
-    const notInCirculationSupply = new BigNumber(b3trTokenDetails.totalSupply).minus(circulatingSupply).toNumber()
+    const b3trCirculatingSupply = new BigNumber(b3trTokenDetails.circulatingSupply).toNumber()
 
-    const circulatingSupplyPercentage = new BigNumber(circulatingSupply)
+    const vot3CirculatingSupply = new BigNumber(vot3ContractB3trBalance?.scaled ?? 0).toNumber()
+
+    const b3trLeft = new BigNumber(b3trTokenDetails.totalSupply).minus(b3trCirculatingSupply).toNumber()
+
+    const b3trCirculatingSupplyPercentage = new BigNumber(b3trCirculatingSupply)
       .dividedBy(b3trTokenDetails.totalSupply)
       .multipliedBy(100)
       .toNumber()
-    const notInCirculationSupplyPercentage = new BigNumber(notInCirculationSupply)
-      .dividedBy(b3trTokenDetails.totalSupply)
-      .multipliedBy(100)
-      .toNumber()
-
-    const lockedB3tr = new BigNumber(vot3ContractB3trBalance?.scaled ?? 0).toNumber()
-    const lockedB3trPercentage = new BigNumber(lockedB3tr)
+    const b3trLeftPercentage = new BigNumber(b3trLeft)
       .dividedBy(b3trTokenDetails.totalSupply)
       .multipliedBy(100)
       .toNumber()
 
-    const notLockedB3tr = new BigNumber(b3trTokenDetails.circulatingSupply).minus(lockedB3tr).toNumber()
-    const notLockedB3trPercentage = new BigNumber(notLockedB3tr)
+    const vot3CirculatingSupplyPercentage = new BigNumber(vot3CirculatingSupply)
       .dividedBy(b3trTokenDetails.totalSupply)
       .multipliedBy(100)
       .toNumber()
 
     return {
-      free: { name: "Free", value: notLockedB3tr, percentage: notLockedB3trPercentage, color: primaryColor },
-      locked: { name: "Locked", value: lockedB3tr, percentage: lockedB3trPercentage, color: greenColor },
-      notInCirculation: {
-        name: "Not in circulation",
-        value: notInCirculationSupply,
-        percentage: notInCirculationSupplyPercentage,
-        color: grayColor,
-      },
-      circulating: {
-        name: "Circulating",
-        value: circulatingSupply,
-        percentage: circulatingSupplyPercentage,
+      b3trCirculatingSupply: {
+        name: "B3TR in circulation",
+        value: b3trCirculatingSupply,
+        percentage: b3trCirculatingSupplyPercentage,
         color: primaryColor,
       },
+      vot3CirculatingSupply: {
+        name: "VOT3 in circulation",
+        value: vot3CirculatingSupply,
+        percentage: vot3CirculatingSupplyPercentage,
+        color: greenColor,
+      },
+      b3trLeft: { name: "Locked B3TR", value: b3trLeft, percentage: b3trLeftPercentage, color: grayColor },
     }
-  }, [b3trTokenDetails, vot3ContractB3trBalance, primaryColor, grayColor, greenColor])
+  }, [b3trTokenDetails, primaryColor, grayColor, greenColor, vot3ContractB3trBalance?.scaled])
 
-  const tvlRatioPercentage = useMemo(() => {
-    if (!data) return 0
-    return new BigNumber(data.locked.value).dividedBy(data.circulating.value).toNumber() * 100
+  const formattedB3trCirculatingSupply = useMemo(() => {
+    return FormattingUtils.humanNumber(data?.b3trCirculatingSupply.value ?? 0)
   }, [data])
 
-  const formattedCirculatingSupply = useMemo(() => {
-    return FormattingUtils.humanNumber(data?.circulating.value ?? 0)
+  const formattedVot3CirculatingSupply = useMemo(() => {
+    return FormattingUtils.humanNumber(data?.vot3CirculatingSupply.value ?? 0)
   }, [data])
 
-  const formattedTotalValueLocked = useMemo(() => {
-    return FormattingUtils.humanNumber(data?.locked.value ?? 0)
+  const formattedB3trLeft = useMemo(() => {
+    return FormattingUtils.humanNumber(data?.b3trLeft.value ?? 0)
   }, [data])
 
   return (
@@ -94,106 +87,105 @@ export const SupplyBreakdownCard = () => {
           <Heading size="md">Supply breakdown</Heading>
           <BaseTooltip text={"B3TR Total Value Locked (TVL) equals the amount of VOT3 circulating."}>
             <span>
-              <Icon as={FaCircleInfo} position={"relative"} />
+              <Icon as={FiInfo} color="rgba(0, 76, 252, 1)" position={"relative"} />
             </span>
           </BaseTooltip>
         </HStack>
       </CardHeader>
       <CardBody>
         <VStack spacing={4} align="flex-start">
-          <VStack spacing={1} align="flex-start">
-            <Text size="sm" fontWeight="400">
-              B3TR in circulation
-            </Text>
-            <Skeleton isLoaded={!!data}>
-              <Heading size="xl" color={primaryColor}>
-                {formattedCirculatingSupply}
-              </Heading>
-            </Skeleton>
-          </VStack>
-          {!data ? (
-            <Skeleton h={10} w="full" />
-          ) : (
-            <HStack spacing={1} w="full" h={5}>
-              <Box
-                as={motion.div}
-                initial={{
-                  width: 0,
-                  opacity: 0,
-                }}
-                animate={{
-                  opacity: 1,
-                  width: `${data.free.percentage}%`,
-                  transition: {
-                    duration: 0.25,
-                  },
-                }}
-                w={data.free.percentage}
-                h={"full"}
-                bg={primaryColor}
-                borderRadius={"md"}
-              />
-              <Box
-                as={motion.div}
-                initial={{
-                  width: 0,
-                  opacity: 0,
-                }}
-                animate={{
-                  opacity: 1,
-                  width: `${data.locked.percentage}%`,
-                  transition: {
-                    duration: 0.25,
-                  },
-                }}
-                w={data.locked.percentage}
-                h={"full"}
-                bg={greenColor}
-                borderRadius={"md"}
-              />
-              <Box
-                as={motion.div}
-                initial={{
-                  width: 0,
-                  opacity: 0,
-                }}
-                animate={{
-                  opacity: 1,
-                  width: `${data.notInCirculation.percentage}%`,
-                  transition: {
-                    duration: 0.25,
-                  },
-                }}
-                w={data.notInCirculation.percentage}
-                h={"full"}
-                bg={grayColor}
-                borderRadius={"md"}
-              />
-            </HStack>
-          )}
-
           <HStack spacing={16}>
             <VStack spacing={1} align="flex-start">
               <Text size="sm" fontWeight="400">
-                Total Value Locked
+                B3TR in circulation
               </Text>
               <Skeleton isLoaded={!!data}>
-                <Heading size="lg" color={greenColor}>
-                  {formattedTotalValueLocked}
+                <Heading size="lg" color={"#004CFC"}>
+                  {formattedB3trCirculatingSupply}
                 </Heading>
               </Skeleton>
             </VStack>
             <VStack spacing={1} align="flex-start">
               <Text size="sm" fontWeight="400">
-                TVL Ratio
+                VOT3 in circulation
               </Text>
               <Skeleton isLoaded={!!data}>
-                <Heading size="lg" color={greenColor}>
-                  {tvlRatioPercentage.toFixed(2)}%
+                <Heading size="lg" color={"#38BF66"}>
+                  {formattedVot3CirculatingSupply}
+                </Heading>
+              </Skeleton>
+            </VStack>
+            <VStack spacing={1} align="flex-start">
+              <Text size="sm" fontWeight="400">
+                Locked B3TR
+              </Text>
+              <Skeleton isLoaded={!!data}>
+                <Heading size="lg" color={"#979797"}>
+                  {formattedB3trLeft}
                 </Heading>
               </Skeleton>
             </VStack>
           </HStack>
+          {!data ? (
+            <Skeleton h={10} w="full" />
+          ) : (
+            <HStack spacing={0} w="full" h={10} p={1} backgroundColor={"#F3F3F3"} borderRadius={"md"}>
+              <Box
+                as={motion.div}
+                initial={{
+                  width: 0,
+                  opacity: 0,
+                }}
+                animate={{
+                  opacity: 1,
+                  width: `${data.b3trCirculatingSupply.percentage}%`,
+                  transition: {
+                    duration: 0.25,
+                  },
+                }}
+                w={data.b3trCirculatingSupply.percentage}
+                h={"full"}
+                bg={" linear-gradient(to bottom, #004CFC , #447CFF)"}
+                borderRadius={"md"}
+              />
+              <Box
+                as={motion.div}
+                initial={{
+                  width: 0,
+                  opacity: 0,
+                }}
+                animate={{
+                  opacity: 1,
+                  width: `${data.vot3CirculatingSupply.percentage}%`,
+                  transition: {
+                    duration: 0.25,
+                  },
+                }}
+                w={data.vot3CirculatingSupply.percentage}
+                h={"full"}
+                bg={" linear-gradient(to bottom, #84E718 , #A0F04A)"}
+                borderRadius={"md"}
+              />
+              <Box
+                as={motion.div}
+                initial={{
+                  width: 0,
+                  opacity: 0,
+                }}
+                animate={{
+                  opacity: 1,
+                  width: `${data.b3trLeft.percentage}%`,
+                  transition: {
+                    duration: 0.25,
+                  },
+                }}
+                w={data.b3trLeft.percentage}
+                h={"full"}
+                bg={" linear-gradient(to bottom, #9F9F9F , #B7B7B7)"}
+                borderRadius={"md"}
+              />
+            </HStack>
+          )}
         </VStack>
       </CardBody>
     </Card>
