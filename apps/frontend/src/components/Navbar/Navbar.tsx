@@ -10,7 +10,7 @@ import { Routes } from "./Routes"
 
 export const Navbar: React.FC = () => {
   // ssr-friendly media query with fallback
-  const [isDesktop] = useMediaQuery("(min-width: 992px)", {
+  const [isDesktop] = useMediaQuery("(min-width: 800px)", {
     ssr: true,
     fallback: false, // return false on the server, and re-evaluate on the client side
   })
