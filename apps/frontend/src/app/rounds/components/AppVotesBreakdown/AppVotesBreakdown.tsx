@@ -1,30 +1,21 @@
-import { getXAppMetadata, getXAppMetadataQueryKey, useAllocationsRound, useGetVotesOnBlock, useXApps } from "@/api"
+import { getXAppMetadata, getXAppMetadataQueryKey, useXApps } from "@/api"
 import { getIpfsImage, getIpfsImageQueryKey } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
-import { Box, Card, CardBody, HStack, Heading, Icon, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Box, HStack, Image, Skeleton, Spinner, Text, VStack } from "@chakra-ui/react"
 import { useQueries } from "@tanstack/react-query"
-import { useWallet } from "@vechain/dapp-kit-react"
-import { FaInfoCircle } from "react-icons/fa"
-import BigNumber from "bignumber.js"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { FormData } from "../AllocationRoundUserVotes/AllocationRoundUserVotes"
 import { useMemo } from "react"
 
-type Props = {
-  roundId: string
-  votes: FormData["votes"]
+export type AppVotesBreakdownProps = {
+  votes: {
+    appId: string
+    value: string
+    rawValue: number
+  }[]
+  isLoading?: boolean
 }
 
-const compactFormatter = getCompactFormatter()
-
-export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
-  const { account } = useWallet()
+export const AppVotesBreakdown = ({ votes, isLoading }: AppVotesBreakdownProps) => {
   const { data: x2EarnApps } = useXApps()
-  const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(roundId)
-  const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
-    Number(roundInfo.voteStart),
-    account ?? undefined,
-  )
   const totalVotes = (() => {
     const rawValue = votes.reduce((acc, vote) => acc + (Number(vote.rawValue) || 0), 0)
     if (rawValue >= 99.99 && rawValue < 100) return 100
@@ -70,73 +61,49 @@ export const AppVotesBreakdown = ({ roundId, votes }: Props) => {
   })
 
   const selectedVotes = votes.filter(vote => Number(vote.value) > 0)
+
+  if (isLoading) return <Spinner />
   return (
-    <Card variant="filled" w="full">
-      <CardBody>
-        <VStack w="full" spacing={8}>
-          <HStack justify={"space-between"} align="flex-end" w="full">
-            <Box>
-              <Skeleton isLoaded={!roundInfoLoading && !votesAtSnapshotLoading}>
-                <Heading size="2xl">{compactFormatter.format(Number(votesAtSnapshot) ?? 0)}</Heading>
-              </Skeleton>
-              <Text fontSize={"md"} textTransform={"uppercase"}>
-                Your Voting Power
-              </Text>
-            </Box>
-            <Text fontSize="sm" fontWeight="medium" color={isOverDistributed ? "orange" : "gray"}>
-              {new BigNumber(totalVotes).toFixed(2, BigNumber.ROUND_DOWN)}% distributed
-            </Text>
-          </HStack>
-          <VStack w="full" h={24} spacing={0}>
-            <HStack w="full" borderRadius={"xl"} bg="gray" h={5} spacing={0}>
-              {selectedVotes.map((vote, index) => (
-                <Box
-                  transition={"all 0.5s linear"}
-                  {...((index === 0 || totalVotes === Number(vote.value)) && { borderLeftRadius: "xl" })}
-                  {...((index === selectedVotes.length - 1 || Number(vote.value) === totalVotes) &&
-                    isCompletedAllocated && { borderRightRadius: "xl" })}
-                  key={`${vote.appId}-track`}
-                  w={`${getLineWidth(Number(vote.value))}%`}
-                  bg={getLinesColor(index)}
-                  h="full"
+    <VStack w="full" h={24} spacing={0}>
+      <HStack w="full" borderRadius={"xl"} bg="gray" h={5} spacing={0}>
+        {selectedVotes.map((vote, index) => (
+          <Box
+            transition={"all 0.5s linear"}
+            {...((index === 0 || totalVotes === Number(vote.value)) && { borderLeftRadius: "xl" })}
+            {...((index === selectedVotes.length - 1 || Number(vote.value) === totalVotes) &&
+              isCompletedAllocated && { borderRightRadius: "xl" })}
+            key={`${vote.appId}-track`}
+            w={`${getLineWidth(Number(vote.value))}%`}
+            bg={getLinesColor(index)}
+            h="full"
+          />
+        ))}
+      </HStack>
+      <HStack w="full" h={"full"}>
+        {votes.map((vote, index) =>
+          Number(vote.value) > 0 ? (
+            <VStack
+              key={`${vote.appId}-line`}
+              w={`${getLineWidth(Number(vote.value))}%`}
+              h={"full"}
+              spacing={0}
+              align="center">
+              <Box w="3px" h={"full"} bg={getLinesColor(index)} />
+              <Skeleton isLoaded={!logos[index]?.isLoading}>
+                <Image
+                  src={logos[index]?.data?.image ?? notFoundImage}
+                  alt={appsMetadata[index]?.data?.name}
+                  boxSize={[6, 6, 8]}
+                  borderRadius="9px"
                 />
-              ))}
-            </HStack>
-            <HStack w="full" h={"full"}>
-              {votes.map((vote, index) =>
-                Number(vote.value) > 0 ? (
-                  <VStack
-                    key={`${vote.appId}-line`}
-                    w={`${getLineWidth(Number(vote.value))}%`}
-                    h={"full"}
-                    spacing={0}
-                    align="center">
-                    <Box w="3px" h={"full"} bg={getLinesColor(index)} />
-                    <Skeleton isLoaded={!logos[index]?.isLoading}>
-                      <Image
-                        src={logos[index]?.data?.image ?? notFoundImage}
-                        alt={appsMetadata[index]?.data?.name}
-                        boxSize={[6, 6, 8]}
-                        borderRadius="9px"
-                      />
-                    </Skeleton>
-                    <Text fontSize="sm" mt={1} data-testid={`app-${vote.appId}-vote-${vote.value}`}>
-                      {vote.value}%
-                    </Text>
-                  </VStack>
-                ) : null,
-              )}
-            </HStack>
-          </VStack>
-          <HStack w="full" spacing={2}>
-            <Icon as={FaInfoCircle} color="gray" />
-            <Text fontSize="sm" color="gray">
-              This amount was snapshotted at the moment the proposal was created. If you got more VOT3 after that, you
-              will use it on the next proposals.
-            </Text>
-          </HStack>
-        </VStack>
-      </CardBody>
-    </Card>
+              </Skeleton>
+              <Text fontSize="sm" mt={1} data-testid={`app-${vote.appId}-vote-${vote.value}`}>
+                {vote.value}%
+              </Text>
+            </VStack>
+          ) : null,
+        )}
+      </HStack>
+    </VStack>
   )
 }

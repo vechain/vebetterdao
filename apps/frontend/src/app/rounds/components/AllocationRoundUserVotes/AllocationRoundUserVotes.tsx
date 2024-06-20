@@ -1,7 +1,7 @@
-import { useAllocationsRound, useGetVotesOnBlock, useHasVotedInRound, useRoundXApps, useUserVotesInRound } from "@/api"
-import { Box, Button, Card, CardBody, HStack, Heading, Skeleton, Stack, Text, VStack } from "@chakra-ui/react"
+import { useAllocationsRound, useGetVotesOnBlock, useHasVotedInRound, useUserVotesInRound } from "@/api"
+import { Button, Card, CardBody, HStack, Heading, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useMemo } from "react"
-import { AppVotesBreakdown } from "../AppVotesBreakdown/AppVotesBreakdown"
+import { AppVotesBreakdown, AppVotesBreakdownProps } from "../AppVotesBreakdown/AppVotesBreakdown"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { ethers } from "ethers"
 import BigNumber from "bignumber.js"
@@ -15,20 +15,10 @@ type Props = {
   roundId: string
 }
 
-export type FormData = {
-  votes: {
-    appId: string
-    value: string
-    rawValue: number
-  }[]
-}
-
 const compactFormatter = getCompactFormatter(2)
 
 export const AllocationRoundUserVotes = ({ roundId }: Props) => {
   const { account } = useWallet()
-
-  const { data: xApps } = useRoundXApps(roundId)
 
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(roundId)
   const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
@@ -36,7 +26,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     account ?? undefined,
   )
 
-  const { data: castVotesEvent } = useUserVotesInRound(roundId, account ?? undefined)
+  const { data: castVotesEvent, isLoading: castVotesEventLoading } = useUserVotesInRound(roundId, account ?? undefined)
 
   const totalVotesCast = useMemo(
     () => castVotesEvent?.voteWeights.reduce((acc, vote) => acc + Number(ethers.formatEther(vote)), 0),
@@ -47,7 +37,7 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
 
   const { data: hasVoted } = useHasVotedInRound(roundId, account ?? undefined)
 
-  const parsedCastVotesPercentages: FormData["votes"] = useMemo(() => {
+  const parsedCastVotesPercentages: AppVotesBreakdownProps["votes"] = useMemo(() => {
     if (castVotesEvent?.appsIds && votesAtSnapshot) {
       return castVotesEvent.appsIds.map((id, index) => {
         const rawValue = scaledDivision(
@@ -63,6 +53,8 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
     }
     return []
   }, [castVotesEvent, votesAtSnapshot])
+
+  const breakdownLoading = roundInfoLoading || votesAtSnapshotLoading || castVotesEventLoading
 
   if (!hasVoted) return null
 
@@ -84,16 +76,17 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
                 {t("See all")}
               </Button>
             </HStack>
-
-            <Text fontSize="16px" fontWeight="400">
-              <Trans
-                i18nKey={"{{amount}} distributed among {{apps}} apps"}
-                values={{ amount: compactFormatter.format(totalVotesCast ?? 0), apps: totalAppsVoted }}
-                t={t}
-              />
-            </Text>
+            <Skeleton isLoaded={!castVotesEventLoading}>
+              <Text fontSize="16px" fontWeight="400">
+                <Trans
+                  i18nKey={"{{amount}} distributed among {{apps}} apps"}
+                  values={{ amount: compactFormatter.format(totalVotesCast ?? 0), apps: totalAppsVoted }}
+                  t={t}
+                />
+              </Text>
+            </Skeleton>
           </VStack>
-          <AppVotesBreakdown votes={parsedCastVotesPercentages} roundId={roundId} />
+          <AppVotesBreakdown votes={parsedCastVotesPercentages} isLoading={breakdownLoading} />
         </VStack>
       </CardBody>
     </Card>
