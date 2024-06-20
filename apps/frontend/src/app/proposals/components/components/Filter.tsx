@@ -20,7 +20,7 @@ const filters: Record<ProposalFilter, string[]> = {
 }
 
 export const Filter = () => {
-  const { selectedFilter, setSelectedFilter } = useProposalFilter()
+  const { selectedFilter, setSelectedFilter, clearFilter } = useProposalFilter()
 
   const [selectedFilterOptions, setSelectedFilterOptions] = useState<string[]>()
   const [selectedOption, setSelectedOption] = useState<string>()
@@ -48,10 +48,10 @@ export const Filter = () => {
   )
 
   const handleClearFilter = useCallback(() => {
-    setSelectedFilter(undefined)
+    clearFilter()
     setSelectedOption(undefined)
     setSelectedFilterOptions(undefined)
-  }, [setSelectedFilter])
+  }, [clearFilter])
 
   return (
     <>
