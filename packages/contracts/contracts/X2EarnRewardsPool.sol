@@ -153,7 +153,12 @@ contract X2EarnRewardsPool is
   /**
    * @dev See {IX2EarnRewardsPool-distributeReward}
    */
-  function distributeReward(bytes32 appId, uint256 amount, address receiver, string memory proof) public nonReentrant {
+  function distributeReward(
+    bytes32 appId,
+    uint256 amount,
+    address receiver,
+    string memory proof
+  ) external nonReentrant {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
 
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
@@ -179,7 +184,7 @@ contract X2EarnRewardsPool is
    *
    * @param _x2EarnApps the new X2EarnApps contract
    */
-  function setX2EarnApps(IX2EarnApps _x2EarnApps) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+  function setX2EarnApps(IX2EarnApps _x2EarnApps) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     $.x2EarnApps = _x2EarnApps;
   }
@@ -189,7 +194,7 @@ contract X2EarnRewardsPool is
   /**
    * @dev See {IX2EarnRewardsPool-availableFunds}
    */
-  function availableFunds(bytes32 appId) public view returns (uint256) {
+  function availableFunds(bytes32 appId) external view returns (uint256) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     return $.availableFunds[appId];
   }
@@ -197,14 +202,14 @@ contract X2EarnRewardsPool is
   /**
    * @dev See {IX2EarnRewardsPool-version}
    */
-  function version() public pure virtual returns (string memory) {
+  function version() external pure virtual returns (string memory) {
     return "1";
   }
 
   /**
    * @dev Retrieves the B3TR token contract.
    */
-  function b3tr() public view returns (IB3TR) {
+  function b3tr() external view returns (IB3TR) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     return $.b3tr;
   }
@@ -212,7 +217,7 @@ contract X2EarnRewardsPool is
   /**
    * @dev Retrieves the X2EarnApps contract.
    */
-  function x2EarnApps() public view returns (IX2EarnApps) {
+  function x2EarnApps() external view returns (IX2EarnApps) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     return $.x2EarnApps;
   }

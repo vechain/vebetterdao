@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract MyERC721 is ERC721, Ownable {
   constructor(address initialOwner) ERC721("MyToken", "MTK") Ownable(initialOwner) {}
 
-  function safeMint(address to, uint256 tokenId) public onlyOwner {
+  function safeMint(address to, uint256 tokenId) external onlyOwner {
     _safeMint(to, tokenId);
   }
 }
