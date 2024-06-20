@@ -4,7 +4,6 @@
     "react/no-children-prop": "warn",
     "react/no-unescaped-entities": "warn",
     "react/display-name": "off",
-    "react/jsx-no-literals": "warn",
-    "no-unused-vars": ["warn", { "args": "after-used", "destructuredArrayIgnorePattern": "^_" }]
+    "react/jsx-no-literals": "warn"
   }
 }

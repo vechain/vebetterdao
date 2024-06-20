@@ -37,7 +37,7 @@ export const useUpdateAppDetails = ({
   const queryClient = useQueryClient()
 
   const buildClauses = useCallback(
-    ({ metadataUri, teamWalletAddress }: BuildClausesProps) => {
+    ({ metadataUri }: BuildClausesProps) => {
       const clauses: EnhancedClause[] = [
         {
           to: getConfig().x2EarnAppsContractAddress,
@@ -46,17 +46,6 @@ export const useUpdateAppDetails = ({
           comment: "Update app metadata",
           abi: JSON.parse(JSON.stringify(X2EarnAppsInterface.getFunction("updateAppMetadata"))),
         },
-        ...(teamWalletAddress
-          ? [
-              {
-                to: getConfig().x2EarnAppsContractAddress,
-                value: 0,
-                data: X2EarnAppsInterface.encodeFunctionData("updateTeamWalletAddress", [appId, teamWalletAddress]),
-                comment: "Update team wallet address",
-                abi: JSON.parse(JSON.stringify(X2EarnAppsInterface.getFunction("updateTeamWalletAddress"))),
-              },
-            ]
-          : []),
       ]
 
       return clauses

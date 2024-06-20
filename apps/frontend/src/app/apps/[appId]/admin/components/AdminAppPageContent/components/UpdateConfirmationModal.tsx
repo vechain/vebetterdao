@@ -107,7 +107,7 @@ export const UpdateConfirmationModal = ({
                   </Box>
                   <Box display={"inline-block"}>
                     <Text as="span" fontSize="14px" fontWeight={600}>
-                      {t("You will not be able to manage the dApp anymore.")}
+                      {t("You will not be able to manage the app anymore.")}
                     </Text>
                     <Show above="sm">
                       <Text as="span" fontSize="14px">

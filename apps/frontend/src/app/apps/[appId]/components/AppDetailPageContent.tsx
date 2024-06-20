@@ -2,6 +2,7 @@ import { Grid, GridItem, VStack } from "@chakra-ui/react"
 import { AppDetailOverview } from "./AppDetailOverview"
 import { AppScreenshots } from "./AppScreenshots"
 import { AppDetailsSidebar } from "./AppDetailSidebar"
+import { AppTweets } from "./AppTweets"
 
 export const AppDetailPageContent = () => {
   return (
@@ -10,7 +11,10 @@ export const AppDetailPageContent = () => {
 
       <Grid templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(6, 1fr)"]} gap={8} w="full">
         <GridItem colSpan={[1, 4]}>
-          <AppScreenshots />
+          <VStack align="stretch" gap={8}>
+            <AppScreenshots />
+            <AppTweets />
+          </VStack>
         </GridItem>
 
         <GridItem colSpan={[1, 2]}>

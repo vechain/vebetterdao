@@ -14,19 +14,13 @@ import {
 import { URL_REGEX } from "@/constants"
 import { useTranslation } from "react-i18next"
 import { useForm } from "react-hook-form"
-import { useCallback, useEffect, useMemo } from "react"
+import { useCallback, useEffect } from "react"
 import { UilCheck } from "@iconscout/react-unicons"
 import { EditAppSocialUrls } from "./components/EditAppSocialUrls"
 import { EditScreenshots } from "./components/EditScreenshots"
 import { useParams, useRouter } from "next/navigation"
 import { EditAppLogo } from "./components/EditAppLogo"
-import {
-  useCurrentAppAdmin,
-  useCurrentAppBanner,
-  useCurrentAppLogo,
-  useCurrentAppMetadata,
-  useCurrentAppModerators,
-} from "../../../hooks"
+import { useCurrentAppBanner, useCurrentAppLogo, useCurrentAppMetadata, useCurrentAppRole } from "../../../hooks"
 import { EditAppBanner } from "./components/EditAppBanner"
 import { useUpdateAppDetails, useUploadAppMetadata } from "@/hooks"
 import { TransactionModal } from "@/components/TransactionModal"
@@ -34,8 +28,6 @@ import { useCurrentAppScreenshots } from "../../../hooks/useCurrentAppScreenshot
 import { useQueryClient } from "@tanstack/react-query"
 import { getXAppMetadataQueryKey } from "@/api"
 import { useCurrentAppInfo } from "../../../hooks/useCurrentAppInfo"
-import { useWallet } from "@vechain/dapp-kit-react"
-import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useSocialUrls } from "./hooks/useSocialUrls"
 import { useIsFormChanged } from "./hooks/useIsFormChanged"
 
@@ -118,8 +110,6 @@ export const EditAppPageContent = () => {
       updateAppMetadataMutation.resetStatus()
       onConfirmationOpen()
 
-      console.log("socialUrls", socialUrls)
-
       const metadataUri = await onMetadataUpload({
         name: data.name,
         description: data.description,
@@ -129,6 +119,7 @@ export const EditAppPageContent = () => {
         screenshots: data.screenshots ?? [],
         app_urls: [],
         social_urls: socialUrls,
+        tweets: appMetadata?.tweets ?? [],
       })
       if (!metadataUri) return
 
@@ -136,7 +127,7 @@ export const EditAppPageContent = () => {
         metadataUri,
       })
     },
-    [onConfirmationOpen, onMetadataUpload, socialUrls, updateAppMetadataMutation],
+    [appMetadata?.tweets, onConfirmationOpen, onMetadataUpload, socialUrls, updateAppMetadataMutation],
   )
 
   const handleClose = useCallback(() => {
@@ -149,25 +140,16 @@ export const EditAppPageContent = () => {
     handleSubmit(onSubmit)()
   }, [handleClose, handleSubmit, onSubmit])
 
-  const { account } = useWallet()
-  const { moderators } = useCurrentAppModerators()
-  const { admin } = useCurrentAppAdmin()
-
-  const allowedToEditApp = useMemo(() => {
-    if (compareAddresses(account || "", admin)) return true
-    if (moderators?.find(moderator => compareAddresses(account || "", moderator))) return true
-    return false
-  }, [account, admin, moderators])
-
   const isFormChanged = useIsFormChanged(form)
+  const { isAdminOrModerator } = useCurrentAppRole()
 
   useEffect(() => {
-    if (!allowedToEditApp) {
+    if (!isAdminOrModerator) {
       router.push(`/apps/${app?.id}`)
     }
-  }, [allowedToEditApp, app?.id, router])
+  }, [isAdminOrModerator, app?.id, router])
 
-  if (!allowedToEditApp) {
+  if (!isAdminOrModerator) {
     return null
   }
 

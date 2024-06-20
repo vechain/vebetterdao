@@ -51,6 +51,7 @@
     "react-infinite-scroll-component": "^6.1.0",
     "react-lottie": "^1.2.4",
     "react-markdown": "^9.0.1",
+    "react-tweet": "^3.2.1",
     "recharts": "^2.12.3",
     "rehype-sanitize": "^6.0.0",
     "thor-devkit": "^2.0.9",
