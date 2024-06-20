@@ -18,7 +18,7 @@ type Props = {
   roundId: string
 }
 
-export type FormData = {
+export type CastAllocationVoteFormData = {
   votes: {
     appId: string
     value: string
@@ -62,7 +62,7 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
     handleSubmit,
     getValues,
     formState: { errors },
-  } = useForm<FormData>({ defaultValues: { votes: [] } })
+  } = useForm<CastAllocationVoteFormData>({ defaultValues: { votes: [] } })
   const { fields, update, replace } = useFieldArray({
     control,
     name: "votes", // unique name for your Field Array
@@ -77,7 +77,7 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
 
   const watchVotes = watch("votes")
 
-  const parsedCastVotesPercentages: FormData["votes"] = useMemo(() => {
+  const parsedCastVotesPercentages: CastAllocationVoteFormData["votes"] = useMemo(() => {
     if (castVotesEvent?.appsIds && votesAtSnapshot) {
       return castVotesEvent.appsIds.map((id, index) => {
         const rawValue = scaledDivision(
@@ -105,7 +105,7 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
   }, [xApps, replace, parsedCastVotesPercentages])
 
   const onSubmit = useCallback(
-    (data: FormData) => {
+    (data: CastAllocationVoteFormData) => {
       if (!votesAtSnapshot) throw new Error("Votes at snapshot not found")
       const appVotesPercentagesToValue: CastAllocationVotesProps = data.votes.map(vote => {
         const rawValue = scaledDivision(Number(vote.rawValue) * Number(votesAtSnapshot), 100)
@@ -191,7 +191,7 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
               <Skeleton isLoaded={!hasVotedLoading}>{renderHeader}</Skeleton>
               <Skeleton isLoaded={!hasVotedLoading}>{renderSubHeader}</Skeleton>
             </Box>
-            <AppVotesBreakdown votes={watchVotes} roundId={roundId} />
+            <AppVotesBreakdown votes={watchVotes} />
           </VStack>
           <form
             onSubmit={handleSubmit(onSubmit)}
