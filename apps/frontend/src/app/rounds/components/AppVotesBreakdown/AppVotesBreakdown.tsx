@@ -4,6 +4,7 @@ import { notFoundImage } from "@/constants"
 import { Box, HStack, Image, Skeleton, Spinner, Text, VStack } from "@chakra-ui/react"
 import { useQueries } from "@tanstack/react-query"
 import { useMemo } from "react"
+import { useTranslation } from "react-i18next"
 
 export type AppVotesBreakdownProps = {
   votes: {
@@ -15,6 +16,7 @@ export type AppVotesBreakdownProps = {
 }
 
 export const AppVotesBreakdown = ({ votes, isLoading }: AppVotesBreakdownProps) => {
+  const { t } = useTranslation()
   const { data: x2EarnApps } = useXApps()
   const totalVotes = (() => {
     const rawValue = votes.reduce((acc, vote) => acc + (Number(vote.rawValue) || 0), 0)
@@ -98,7 +100,7 @@ export const AppVotesBreakdown = ({ votes, isLoading }: AppVotesBreakdownProps) 
                 />
               </Skeleton>
               <Text fontSize="sm" mt={1} data-testid={`app-${vote.appId}-vote-${vote.value}`}>
-                {vote.value}%
+                {t("{{percentage}}%", { percentage: vote.value })}
               </Text>
             </VStack>
           ) : null,
