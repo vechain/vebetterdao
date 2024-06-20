@@ -197,10 +197,29 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
             }}
             w={"full"}
             gap={4}
-            mt={{ base: 2, md: 4 }}>
+            mt={{ base: 2, md: 4 }}
+            // hide if below 667px height
+            css={
+              !isB3trToVot3 &&
+              isVOT3BalanceMoreThanStakedB3TR && {
+                "@media (max-height: 667px)": {
+                  display: "none",
+                },
+              }
+            }>
             <BalanceInfo isB3TR={true} balanceScaled={b3trBalanceScaled} />
             <BalanceInfo isB3TR={false} balanceScaled={vot3BalanceScaled} />
           </Flex>
+
+          {!isB3trToVot3 && isVOT3BalanceMoreThanStakedB3TR && (
+            <HStack px={4} py={3} bg={"#F8F8F8"} borderRadius={8} mt={2}>
+              <FiInfo size={36} color="#6a6a6a" />
+              <Text fontSize={{ base: 14 }} fontWeight={400}>
+                The maximum amount of VOT3 you can convert is <b>{swappableVot3Balance?.formatted}</b>. You can’t
+                convert VOT3 that <b>someone else transferred to you.</b>
+              </Text>
+            </HStack>
+          )}
 
           <TokenCards
             amount={amount}
@@ -221,7 +240,7 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
             <Text fontSize={{ base: 14, md: 18 }}>Convert now</Text>
           </Button>
 
-          <BaseTooltip
+          {/* <BaseTooltip
             text={
               "B3TR and VOT3 tokens convert 1:1. You can convert back to B3TR based on your total converted VOT3 tokens."
             }>
@@ -233,7 +252,7 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
                 </Text>
               </HStack>
             </Flex>
-          </BaseTooltip>
+          </BaseTooltip> */}
         </VStack>
       </form>
     ) : (
