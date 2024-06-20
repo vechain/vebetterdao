@@ -37,7 +37,7 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
             w={["full", "full", "auto"]}
             leftIcon={<Icon as={route.icon} />}
             key={route.name}
-            variant={isSelected ? "solid" : "ghost"}
+            variant={isSelected ? "primaryAction" : "ghost"}
             onClick={onClick}>
             {route.name}
           </Button>

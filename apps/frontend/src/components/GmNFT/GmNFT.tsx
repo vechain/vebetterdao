@@ -176,10 +176,9 @@ export const GmNFT = () => {
                   isLoading={isClaimLoading}
                   onClick={handleFreeMint}
                   color="white"
-                  bgColor={`primary.${buttonColor}`}
+                  variant={"primaryAction"}
                   borderRadius={"full"}
-                  w={"full"}
-                  _hover={{ bgColor: `primary.${nftToClaimColorCard}` }}>
+                  w={"full"}>
                   Mint now
                 </Button>
               </VStack>
