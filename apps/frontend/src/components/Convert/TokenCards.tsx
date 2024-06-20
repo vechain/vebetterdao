@@ -28,7 +28,6 @@ export const TokenCards = ({
   swappableVot3Balance,
   isVOT3BalanceMoreThanStakedB3TR,
 }: Props) => {
-  const { b3trBgGradient, vot3BgGradient, b3trDividerColor, vot3dividerAlpha } = useTokenColors()
   const { account } = useWallet()
 
   const { data: b3trBalance } = useB3trBalance(account ?? undefined)
@@ -36,15 +35,6 @@ export const TokenCards = ({
   const b3trBalanceScaled = useMemo(() => {
     return b3trBalance?.scaled ?? "0"
   }, [b3trBalance?.scaled])
-
-  const b3trBalanceText = useMemo(() => {
-    const b3trBalance = Number(b3trBalanceScaled)
-
-    if (b3trBalance === 0) return "0"
-
-    if (b3trBalance < 0.0001) return `< 0.${"0".repeat(DECIMAL_PLACES - 1)}1`
-    return compactFormatter.format(b3trBalance)
-  }, [b3trBalanceScaled])
 
   const vot3BalanceScaled = useMemo(() => {
     if (!vot3Balance || !swappableVot3Balance) return "0"

@@ -22,7 +22,7 @@ import {
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
 import { B3TRIcon, VOT3Icon } from "../Icons"
-import { SwapButton } from "../Swap/SwapButton"
+import { ConvertButton } from "../Convert/ConvertButton"
 import { useTokenColors } from "@/hooks"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { BalanceInfo } from "./components"
@@ -91,7 +91,7 @@ export const BalanceCard: React.FC<Props> = () => {
           </Box>
 
           <HStack justify={"space-between"} w="full" mt={4}>
-            <Flex w={"full"}>{isLoading ? <Spinner size="sm" /> : <SwapButton />}</Flex>
+            <Flex w={"full"}>{isLoading ? <Spinner size="sm" /> : <ConvertButton />}</Flex>
           </HStack>
         </VStack>
       </CardBody>
