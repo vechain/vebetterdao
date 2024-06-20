@@ -38,10 +38,14 @@ export const Filter = () => {
   )
 
   const handleOptionClick = useCallback(
-    (option: StateFilter) => {
+    (option: string) => {
       setSelectedOption(option)
       setSelectedFilterOptions(undefined)
-      setSelectedFilter(option)
+
+      if (Object.values(StateFilter).includes(option as StateFilter)) {
+        setSelectedFilter(option as StateFilter)
+        return
+      }
     },
     [setSelectedFilter],
   )
@@ -117,7 +121,7 @@ export const Filter = () => {
                 key={optionKey}
                 bg={"white"}
                 color={"black"}
-                onClick={() => handleOptionClick(optionKey as StateFilter)}
+                onClick={() => handleOptionClick(optionKey)}
                 borderWidth={1}
                 borderColor={"#EFEFEF"}
                 _hover={{
