@@ -1,13 +1,17 @@
 import { useAccountBalance } from "@/api"
-import { Button, Card, CardBody, Heading, Image, Text, VStack } from "@chakra-ui/react"
+import { Button, Card, CardBody, HStack, Heading, Image, Text, VStack } from "@chakra-ui/react"
 import { useMemo } from "react"
 import BigNumber from "bignumber.js"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { FiArrowUpRight } from "react-icons/fi"
 import { useTranslation } from "react-i18next"
 
+export type LowOnVthoCardProps = {
+  variant?: "banner" | "card"
+}
+
 const minVtho = 5
-export const LowOnVthoCard = () => {
+export const LowOnVthoCard: React.FC<LowOnVthoCardProps> = ({ variant = "banner" }) => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { data: balance, isLoading: balanceLoading } = useAccountBalance(account ?? undefined)
@@ -36,33 +40,69 @@ export const LowOnVthoCard = () => {
 
   if (!account || balanceLoading || !isLowOnVtho) return null
 
-  return (
-    <Card
-      borderColor={"#F29B32"}
-      backgroundColor={"#FFF3E5"}
-      variant={"baseWithBorder"}
-      boxShadow={"0px 0px 5px #F29B32"}>
-      <CardBody>
-        <VStack spacing={4} w="full" justifyContent={"start"} alignItems={"start"}>
-          <Image src="/images/alert.svg" boxSize={16} alt="alert-icon" />
-          <Heading size="md" fontWeight={"800"}>
-            {labels?.heading}
-          </Heading>
+  if (variant === "banner") {
+    return (
+      <Card
+        borderColor={"#F29B32"}
+        backgroundColor={"#FFF3E5"}
+        variant={"baseWithBorder"}
+        boxShadow={"0px 0px 5px #F29B32"}>
+        <CardBody>
+          <HStack spacing={10} w="full" justifyContent={"start"} alignItems={"center"}>
+            <Image src="/images/alert.svg" m={5} boxSize={28} alt="alert-icon" />
+            <VStack spacing={4} w="full" justifyContent={"start"} alignItems={"start"}>
+              <Heading size="md" fontWeight={"800"}>
+                {labels?.heading}
+              </Heading>
 
-          <Text size="sm">
-            {labels?.body} <b>{t("Get more VTHO to get the best experience in the platform.")}</b>
-          </Text>
+              <Text size="sm">
+                {labels?.body} <b>{t("Get more VTHO to get the best experience in the platform.")}</b>
+              </Text>
 
-          <Button
-            mt={2}
-            variant={"primaryAction"}
-            borderRadius={"full"}
-            rightIcon={<FiArrowUpRight />}
-            onClick={redirectToGetVTHO}>
-            {t("Get more VTHO")}
-          </Button>
-        </VStack>
-      </CardBody>
-    </Card>
-  )
+              <Button
+                mt={2}
+                variant={"primaryAction"}
+                borderRadius={"full"}
+                rightIcon={<FiArrowUpRight />}
+                onClick={redirectToGetVTHO}>
+                {t("Get more VTHO")}
+              </Button>
+            </VStack>
+          </HStack>
+        </CardBody>
+      </Card>
+    )
+  }
+
+  if (variant === "card") {
+    return (
+      <Card
+        borderColor={"#F29B32"}
+        backgroundColor={"#FFF3E5"}
+        variant={"baseWithBorder"}
+        boxShadow={"0px 0px 5px #F29B32"}>
+        <CardBody>
+          <VStack spacing={4} w="full" justifyContent={"start"} alignItems={"start"}>
+            <Image src="/images/alert.svg" boxSize={16} alt="alert-icon" />
+            <Heading size="md" fontWeight={"800"}>
+              {labels?.heading}
+            </Heading>
+
+            <Text size="sm">
+              {labels?.body} <b>{t("Get more VTHO to get the best experience in the platform.")}</b>
+            </Text>
+
+            <Button
+              mt={2}
+              variant={"primaryAction"}
+              borderRadius={"full"}
+              rightIcon={<FiArrowUpRight />}
+              onClick={redirectToGetVTHO}>
+              {t("Get more VTHO")}
+            </Button>
+          </VStack>
+        </CardBody>
+      </Card>
+    )
+  }
 }

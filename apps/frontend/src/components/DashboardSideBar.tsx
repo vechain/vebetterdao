@@ -12,7 +12,7 @@ export const DashboardSideBar = () => {
     <VStack spacing={4} flex={2.5} position="relative">
       {!account && <WalletNotConnectedOverlay description="Connect your wallet to check your balance" />}
       <BalanceCard />
-      <LowOnVthoCard />
+      <LowOnVthoCard variant={"card"} />
       <VoterRewards />
       <GmNFT />
     </VStack>
