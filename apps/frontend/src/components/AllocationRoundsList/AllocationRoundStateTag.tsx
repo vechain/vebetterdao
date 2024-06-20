@@ -1,5 +1,5 @@
 import { RoundState } from "@/api"
-import { HStack, Skeleton, Tag, TagProps, Text, useColorModeValue } from "@chakra-ui/react"
+import { HStack, Skeleton, Tag, TagProps, Text } from "@chakra-ui/react"
 import { DotSymbol } from "../DotSymbol"
 
 type Props = {
@@ -7,11 +7,10 @@ type Props = {
   renderInTag?: boolean
 } & TagProps
 export const AllocationRoundStateTag = ({ state, renderInTag, ...props }: Props) => {
-  const colorShade = useColorModeValue("600", "300")
   const colorScheme = {
-    "0": "primary",
-    "1": "red",
-    "2": "green",
+    "0": "#3A6F00",
+    "1": "#D23F63",
+    "2": "#004CFC",
     "-1": "gray",
   }[state ?? "-1"]
 
@@ -22,8 +21,8 @@ export const AllocationRoundStateTag = ({ state, renderInTag, ...props }: Props)
       <Skeleton isLoaded={isStateReady}>
         <Tag colorScheme={"gray"} {...props}>
           <HStack spacing={1} align={"center"}>
-            {state === 0 && <DotSymbol color={`${colorScheme}.${colorShade}`} />}
-            <Text color={`${colorScheme}.${colorShade}`} fontWeight={"500"} fontSize="medium" {...props}>
+            {state === 0 && <DotSymbol color={`${colorScheme}`} />}
+            <Text color={`${colorScheme}`} fontWeight={"500"} fontSize="medium" {...props}>
               {isStateReady ? RoundState[state] : "Unknown"}
             </Text>
           </HStack>
@@ -33,8 +32,8 @@ export const AllocationRoundStateTag = ({ state, renderInTag, ...props }: Props)
   return (
     <Skeleton isLoaded={isStateReady}>
       <HStack spacing={1} align={"center"}>
-        {state === 0 && <DotSymbol color={`${colorScheme}.${colorShade}`} />}
-        <Text color={`${colorScheme}.${colorShade}`} fontWeight={"500"} fontSize="medium" {...props}>
+        {state === 0 && <DotSymbol color={`${colorScheme}`} />}
+        <Text color={`${colorScheme}`} fontWeight={"500"} fontSize="medium" {...props}>
           {isStateReady ? RoundState[state] : "Unknown"}
         </Text>
       </HStack>

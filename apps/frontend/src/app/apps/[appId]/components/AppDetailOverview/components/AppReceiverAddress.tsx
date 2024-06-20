@@ -1,4 +1,4 @@
-import { HStack, IconButton, Text, VStack } from "@chakra-ui/react"
+import { HStack, Text, VStack } from "@chakra-ui/react"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 import { useCurrentAppInfo } from "../../../hooks/useCurrentAppInfo"

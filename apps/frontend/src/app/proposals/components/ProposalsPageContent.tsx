@@ -10,7 +10,6 @@ import { ProposalInfoCard } from "@/components"
 import {
   VStack,
   HStack,
-  Icon,
   Heading,
   Tabs,
   TabList,
@@ -29,7 +28,8 @@ import {
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { FaPlus, FaScroll } from "react-icons/fa6"
+import { FaPlus } from "react-icons/fa6"
+import { Filter } from "./components"
 
 export const ProposalsPageContent = () => {
   const router = useRouter()
@@ -168,7 +168,6 @@ export const ProposalsPageContent = () => {
       <HStack spacing={4} w="full" justify={"space-between"} alignItems={"center"}>
         <Box>
           <HStack spacing={3} alignItems={"center"}>
-            <Icon as={FaScroll} fontSize={"3xl"} />
             <Heading as="h1" size="xl">
               {t("Proposals")}
             </Heading>
@@ -190,6 +189,7 @@ export const ProposalsPageContent = () => {
           </Text>
         </Box>
       </HStack>
+      <Filter />
       <Tabs position="relative" variant="unstyled" w="full">
         <TabList>
           <Tab>{t("Active ({{proposals}})", { proposals: activeProposals?.length ?? 0 })}</Tab>

@@ -78,10 +78,8 @@ export const ProposalVoteComment = ({ vote }: { vote: ProposalVoteEvent }) => {
             </HStack>
           </VStack>
           <HStack align={"center"}>
-            <AddressIcon address={vote.account} w="48px" h="48px" rounded="full" />
-            <Text color={textColor} fontSize={"14px"}>
-              {humanAddress(vote.account, 7, 4)}
-            </Text>
+            <AddressIcon address={vote.account} boxSize={4} rounded={"full"} />
+            <Text fontWeight={"400"}>{humanAddress(vote.account, 4, 6)}</Text>
           </HStack>
         </HStack>
       </VStack>
