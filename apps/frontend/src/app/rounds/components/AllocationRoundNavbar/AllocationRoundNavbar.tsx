@@ -1,5 +1,5 @@
-import { useAllocationsRound } from "@/api"
-import { AllocationRoundStateTag } from "@/components/AllocationRoundsList/AllocationRoundStateTag"
+import { useAllocationsRound, useAllocationsRoundState } from "@/api"
+import { AllocationStateBadge } from "@/components"
 import {
   HStack,
   Button,
@@ -31,6 +31,9 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
     const prevRoud = Number(data?.roundId) - 1
     router.push(`/rounds/${prevRoud}`)
   }
+
+  const { data: state } = useAllocationsRoundState(roundId)
+  const isActive = state === 0
 
   const nextButtonDisabled = !data.roundId || data.isCurrent
 
@@ -108,7 +111,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
                 <Text>{!isLoading ? data?.voteEndTimestamp?.format("D MMMM") : "8 February"}</Text>
               </Skeleton>
             </HStack>
-            <AllocationRoundStateTag state={data?.state} size="md" renderInTag={true} variant={"subtle"} />
+            <AllocationStateBadge roundId={roundId} renderIcon={isActive} />
           </Stack>
           <Button
             data-testid="next-round-button"
@@ -152,7 +155,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
               })}
             </Heading>
           </Skeleton>
-          <AllocationRoundStateTag state={data?.state} size="md" renderInTag={true} variant={"subtle"} />
+          <AllocationStateBadge roundId={roundId} renderIcon={isActive} />
         </HStack>
 
         <HStack spacing={2} align={"center"}>
