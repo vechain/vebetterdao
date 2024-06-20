@@ -1,5 +1,5 @@
-export const ExclamationTriangle = ({ color = "#F29B32" }: { color?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="88" height="88" viewBox="0 0 88 88" fill="none">
+export const ExclamationTriangle = ({ color = "#F29B32", size = "88" }: { color?: string; size?: number | string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 88 88" fill="none">
     <path
       d="M44.6543 56.9751H42.0094C39.9763 56.9751 38.3281 58.6233 38.3281 60.6564V63.3013C38.3281 65.3345 39.9763 66.9827 42.0094 66.9827H44.6543C46.6875 66.9827 48.3357 65.3345 48.3357 63.3013V60.6564C48.3357 58.6233 46.6875 56.9751 44.6543 56.9751Z"
       stroke={color}
