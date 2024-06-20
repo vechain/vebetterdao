@@ -48,7 +48,7 @@ const zoomInVariants = {
   },
 }
 
-export const SwapModal = ({ isOpen, onClose }: Props) => {
+export const ConvertModal = ({ isOpen, onClose }: Props) => {
   const [isB3trToVot3, setIsB3trToVot3] = useState<boolean>()
 
   const { account } = useWallet()
@@ -264,6 +264,8 @@ export const SwapModal = ({ isOpen, onClose }: Props) => {
     handleGoBack,
     invalidAmount,
     isB3trToVot3,
+    isVOT3BalanceMoreThanStakedB3TR,
+    swappableVot3Balance,
     vot3BalanceScaled,
   ])
 
