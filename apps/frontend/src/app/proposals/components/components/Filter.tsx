@@ -1,39 +1,57 @@
 import { useCallback, useState } from "react"
 import { HStack, Box, Text } from "@chakra-ui/react"
 import { MdClose } from "react-icons/md"
+import { ProposalFilter, StateFilter } from "./types"
+import { useProposalFilter } from "@/store"
 
-const filters: { [key: string]: string[] } = {
-  State: ["Active", "Canceled", "Defeated", "Succeeded", "Queued", "Executed", "Deposit not met"],
-  "In this round": [],
-  "Looking for support": [],
-  "Upcoming voting": [],
+const filters: Record<ProposalFilter, string[]> = {
+  [ProposalFilter.State]: [
+    StateFilter.Active,
+    StateFilter.Canceled,
+    StateFilter.Defeated,
+    StateFilter.Succeeded,
+    StateFilter.Queued,
+    StateFilter.Executed,
+    StateFilter.DepositNotMet,
+  ],
+  [ProposalFilter.InThisRound]: [],
+  [ProposalFilter.LookingForSupport]: [],
+  [ProposalFilter.UpcomingVoting]: [],
 }
 
 export const Filter = () => {
-  const [selectedFilter, setSelectedFilter] = useState<string>()
+  const { selectedFilter, setSelectedFilter } = useProposalFilter()
+
   const [selectedFilterOptions, setSelectedFilterOptions] = useState<string[]>()
   const [selectedOption, setSelectedOption] = useState<string>()
 
-  const handleFilterClick = useCallback((filter: string) => {
-    if (filters[filter]?.length === 0) {
-      setSelectedFilter(filter)
-      setSelectedFilterOptions(undefined)
-    } else {
-      setSelectedFilter(filter)
-      setSelectedFilterOptions(filters[filter])
-    }
-  }, [])
+  const handleFilterClick = useCallback(
+    (filter: ProposalFilter) => {
+      if (filters[filter]?.length === 0) {
+        setSelectedFilter(filter)
+        setSelectedFilterOptions(undefined)
+      } else {
+        setSelectedFilterOptions(filters[filter])
+      }
+    },
+    [setSelectedFilter],
+  )
 
-  const handleOptionClick = useCallback((option: string) => {
-    setSelectedOption(option)
-    setSelectedFilterOptions(undefined)
-  }, [])
+  const handleOptionClick = useCallback(
+    (option: StateFilter) => {
+      console.log(option)
+      setSelectedOption(option)
+      setSelectedFilterOptions(undefined)
+      setSelectedFilter(option)
+    },
+    [setSelectedFilter],
+  )
 
   const handleClearFilter = useCallback(() => {
     setSelectedFilter(undefined)
     setSelectedOption(undefined)
     setSelectedFilterOptions(undefined)
-  }, [])
+  }, [setSelectedFilter])
 
   return (
     <>
@@ -51,23 +69,23 @@ export const Filter = () => {
             scrollbarWidth: "none",
             msOverflowStyle: "none",
           }}>
-          {Object.keys(filters).map(filter => (
+          {Object.keys(filters).map(filterKey => (
             <Box
               cursor={"pointer"}
               px={4}
               py={3}
               borderRadius={78}
-              key={filter}
+              key={filterKey}
               bg={"white"}
               color={"black"}
-              onClick={() => handleFilterClick(filter)}
+              onClick={() => handleFilterClick(filterKey as ProposalFilter)}
               borderWidth={1}
               borderColor={"#EFEFEF"}
               _hover={{
                 bg: "#EFEFEF",
               }}>
               <Text fontSize={14} fontWeight={600} whiteSpace={"nowrap"}>
-                {filter}
+                {filterKey}
               </Text>
             </Box>
           ))}
@@ -91,23 +109,23 @@ export const Filter = () => {
               msOverflowStyle: "none",
             }}
             maxW={{ base: "350px", md: "100%" }}>
-            {selectedFilterOptions?.map(option => (
+            {selectedFilterOptions?.map(optionKey => (
               <Box
                 cursor={"pointer"}
                 px={4}
                 py={3}
                 borderRadius={78}
-                key={option}
+                key={optionKey}
                 bg={"white"}
                 color={"black"}
-                onClick={() => handleOptionClick(option)}
+                onClick={() => handleOptionClick(optionKey as StateFilter)}
                 borderWidth={1}
                 borderColor={"#EFEFEF"}
                 _hover={{
                   bg: "#EFEFEF",
                 }}>
                 <Text fontSize={14} fontWeight={600} whiteSpace={"nowrap"}>
-                  {option}
+                  {optionKey}
                 </Text>
               </Box>
             ))}
