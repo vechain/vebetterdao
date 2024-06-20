@@ -25,9 +25,9 @@ export const Navbar: React.FC = () => {
       Routes.filter(route => {
         return (
           route.isVisible &&
-          (route.name === "Allocations" ? (allocationRoundsEvents?.created?.length ?? 0) > 0 : true) &&
+          (route.name === "Allocations" ? !!allocationRoundsEvents?.created?.length : true) &&
           (route.name === "Admin" ? isAdmin : true) &&
-          (route.name === "Proposals" ? (allocationRoundsEvents?.created?.length ?? 0) > 0 : true)
+          (route.name === "Proposals" ? !!allocationRoundsEvents?.created?.length : true)
         )
       }),
     [allocationRoundsEvents, isAdmin],
