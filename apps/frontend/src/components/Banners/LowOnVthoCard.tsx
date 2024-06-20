@@ -1,4 +1,4 @@
-import { useAccountBalance } from "@/api"
+import { useAccountBalance, useB3trBalance, useVot3Balance } from "@/api"
 import { Button, Card, CardBody, Grid, GridItem, Heading, Image, Text, VStack } from "@chakra-ui/react"
 import { useMemo } from "react"
 import BigNumber from "bignumber.js"
@@ -11,10 +11,18 @@ export const LowOnVthoCard: React.FC = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { data: balance, isLoading: balanceLoading } = useAccountBalance(account ?? undefined)
+  const { data: b3trBalance } = useB3trBalance(account ?? undefined)
+  const { data: vot3Balance } = useVot3Balance(account ?? undefined)
 
   const redirectToGetVTHO = () => {
     window.open("https://www.coinbase.com/en/how-to-buy/vethor-token", "_blank", "noopener noreferrer")
   }
+
+  const ownsTokens = useMemo(() => {
+    if (!b3trBalance || !vot3Balance) return false
+
+    return b3trBalance.original !== "0" || vot3Balance.original !== "0"
+  }, [b3trBalance, vot3Balance])
 
   const isLowOnVtho = useMemo(() => {
     return Number(balance?.energy.scaled) < minVtho
@@ -34,7 +42,7 @@ export const LowOnVthoCard: React.FC = () => {
     }
   }, [balance])
 
-  if (!account || balanceLoading || !isLowOnVtho) return null
+  if (!account || balanceLoading || !isLowOnVtho || !ownsTokens) return null
 
   return (
     <Card
