@@ -118,6 +118,7 @@ export const PublishAndPreviewPageContent = () => {
               source={markdownDescription}
               style={{
                 width: "100%",
+                wordBreak: "break-word",
               }}
             />
             {!!actions.length && (

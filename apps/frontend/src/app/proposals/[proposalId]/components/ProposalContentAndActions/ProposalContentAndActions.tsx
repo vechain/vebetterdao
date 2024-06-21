@@ -47,6 +47,7 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
             source={metadata?.data?.markdownDescription}
             style={{
               width: "100%",
+              wordBreak: "break-word",
             }}
           />
           {proposalDecodeError && (
