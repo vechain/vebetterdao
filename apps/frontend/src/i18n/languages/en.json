@@ -1,4 +1,7 @@
 {
+  "Assign percentages": "Assign percentages",
+  "Select Apps": "Select Apps",
+  "Review and confirm": "Review and confirm",
   "Reset to default": "Reset to default",
   "{{amount}} distributed among {{apps}} apps": "<strong>{{amount}}</strong> distributed among <strong>{{apps}}</strong> apps",
   "Apps": "Apps",
