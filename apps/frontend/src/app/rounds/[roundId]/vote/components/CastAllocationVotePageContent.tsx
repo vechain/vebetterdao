@@ -1,6 +1,13 @@
-import { useAllocationsRound, useGetVotesOnBlock, useHasVotedInRound, useRoundXApps, useUserVotesInRound } from "@/api"
+import {
+  useAllocationsRound,
+  useAllocationsRoundState,
+  useGetVotesOnBlock,
+  useHasVotedInRound,
+  useRoundXApps,
+  useUserVotesInRound,
+} from "@/api"
 import { Box, Button, Card, CardBody, Heading, Skeleton, Stack, Text, VStack, useDisclosure } from "@chakra-ui/react"
-import { useCallback, useEffect, useMemo } from "react"
+import { useCallback, useEffect, useLayoutEffect, useMemo } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { SelectAppVotesInput } from "./SelectAppVotesInput"
 import { AppVotesBreakdown } from "../../../components/AppVotesBreakdown/AppVotesBreakdown"
@@ -13,6 +20,7 @@ import BigNumber from "bignumber.js"
 import { WalletNotConnectedOverlay } from "@/components"
 import { scaledDivision } from "@/utils/MathUtils"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useRouter } from "next/navigation"
 
 type Props = {
   roundId: string
@@ -30,7 +38,9 @@ const compactFormatter = getCompactFormatter(2)
 
 export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
   const { account } = useWallet()
+  const router = useRouter()
 
+  const { data: state, isLoading: isStateLoading } = useAllocationsRoundState(roundId)
   const { data: xApps } = useRoundXApps(roundId)
 
   const castAllocationVotes = useCastAllocationVotes({ roundId })
@@ -51,7 +61,7 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
   )
 
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
-  const isVotingConcluded = roundInfo?.voteEndTimestamp?.isBefore()
+  const isVotingConcluded = roundInfo?.voteEndTimestamp?.isBefore() && [1, 2].includes(state ?? 0)
 
   const isFormDisabled =
     hasVoted || isVotingConcluded || roundInfoLoading || votesAtSnapshotLoading || hasVotedLoading || hasNoVotes
@@ -176,6 +186,19 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
       </Text>
     )
   }, [hasVoted, isVotingConcluded])
+
+  const shouldSeeThePage = useMemo(() => {
+    return !hasVoted && !isVotingConcluded
+  }, [isVotingConcluded, hasVoted])
+
+  //redirect to round page if user already voted or voting is concluded
+  useLayoutEffect(() => {
+    if (!shouldSeeThePage) {
+      router.push(`/rounds/${roundId}`)
+    }
+  }, [shouldSeeThePage, roundId, router])
+
+  if (!shouldSeeThePage) return null
 
   return (
     <Card w="full" id="user-votes" maxH={[!account ? "600px" : "auto", "auto"]} overflowY={"hidden"}>
