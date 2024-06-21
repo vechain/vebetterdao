@@ -14,11 +14,16 @@ import {
 import { UilSearch } from "@iconscout/react-unicons"
 import { UseQueryResult } from "@tanstack/react-query"
 import { useCallback, useMemo, useState } from "react"
+import { AppSelectableCard } from "./AppSelectableCard"
 
 type Props = {
   selectedApps: CastVoteData[]
-  onSelectedAppsChange: (selectedApps: CastVoteData[]) => void
+  onSelectedAppsChange: (_selectedApps: CastVoteData[]) => void
   xAppsQuery: UseQueryResult<XApp[], Error>
+}
+
+const searchApp = (app: XApp, query: string) => {
+  return app.name.toLowerCase().includes(query.toLowerCase())
 }
 export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xAppsQuery }: Props) => {
   const [appsToSearch, setAppsToSearch] = useState("")
@@ -56,6 +61,21 @@ export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xAppsQ
           Select all
         </Checkbox>
       </HStack>
+      <VStack w="full" spacing={4}>
+        {xAppsQuery.data
+          ?.filter(xApp => searchApp(xApp, appsToSearch))
+          .map(xApp => {
+            const isSelected = selectedApps.some(selectedApp => selectedApp.appId === xApp.id)
+            const onSelect = () => {
+              if (isSelected) {
+                onSelectedAppsChange(selectedApps.filter(selectedApp => selectedApp.appId !== xApp.id))
+              } else {
+                onSelectedAppsChange([...selectedApps, { appId: xApp.id, votePercentage: 0 }])
+              }
+            }
+            return <AppSelectableCard key={xApp.id} app={xApp} isSelected={isSelected} onSelect={onSelect} />
+          })}
+      </VStack>
     </VStack>
   )
 }
