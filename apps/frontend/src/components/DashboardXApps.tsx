@@ -1,5 +1,4 @@
 import { XApp, useXAppMetadata, useXApps } from "@/api"
-import { useAppAllocations } from "@/api/contracts/governance/hooks/useAppAllocations"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
 import {
@@ -14,10 +13,8 @@ import {
   VStack,
   Grid,
   useColorModeValue,
-  IconButton,
   Button,
 } from "@chakra-ui/react"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -26,8 +23,6 @@ import { FiArrowUpRight } from "react-icons/fi"
 type Props = {
   maxApps?: number
 }
-
-const compactFormatter = getCompactFormatter(0)
 
 export const DashboardXApps = ({ maxApps = 4 }: Props) => {
   const { t } = useTranslation()
@@ -78,17 +73,10 @@ export const DashboardXApps = ({ maxApps = 4 }: Props) => {
 
 const DashboardXAppCard = ({ xApp }: { xApp: XApp }) => {
   const { t } = useTranslation()
-  const {
-    data: appMetadata,
-    isLoading: appMetadataLoading,
-    isError: isAppMetadataError,
-    error: appMetadataError,
-  } = useXAppMetadata(xApp.id)
+  const { data: appMetadata, isLoading: appMetadataLoading, error: appMetadataError } = useXAppMetadata(xApp.id)
   const router = useRouter()
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
-  const { totalAllocationReceived, lastRoundAllocationReceived } = useAppAllocations(xApp.id)
 
-  const buttonIconColor = useColorModeValue("primary.500", "white")
   const nonActiveBackgroundColor = useColorModeValue("rgba(166, 217, 110, 0.12)", "rgba(166, 217, 110, 0.12)")
   const cardBackgroundColor = useColorModeValue("#F7F7F7", "#131313")
   const navigateToAppDetail = useCallback(() => {
@@ -107,7 +95,7 @@ const DashboardXAppCard = ({ xApp }: { xApp: XApp }) => {
       }}>
       <CardBody>
         <VStack alignItems={"start"} justify={"flex-start"} spacing={6}>
-          <HStack spacing={3} justifyContent={"start"} w={"full"} alignItems={"start"}>
+          <HStack spacing={3} justifyContent={"start"} w={"full"} alignItems={"center"}>
             <Skeleton isLoaded={!isLogoLoading} alignContent={"start"}>
               <Image src={logo?.image ?? notFoundImage} alt={"logo"} maxW={"40px"} borderRadius="9px" />
             </Skeleton>
@@ -116,57 +104,16 @@ const DashboardXAppCard = ({ xApp }: { xApp: XApp }) => {
               <Skeleton isLoaded={!appMetadataLoading} justifyContent={"end"}>
                 <Heading size={"sm"}>{appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}</Heading>
               </Skeleton>
-              <Skeleton isLoaded={!appMetadataLoading} justifyContent={"end"}>
-                <Text fontSize={"sm"} color={"gray.500"}>
-                  {appMetadata?.description.slice(0, 25) + "..." ??
-                    appMetadataError?.message ??
-                    "Error loading description"}
-                </Text>
-              </Skeleton>
             </VStack>
           </HStack>
 
           <HStack spacing={3} justifyContent={"space-between"} w={"full"} alignItems={"start"}>
-            <HStack spacing={6} justifyContent={"start"} w={"full"} alignItems={"start"}>
-              <VStack alignItems={"stretch"} gap={0}>
-                <HStack>
-                  <Image h="20px" w="20px" src="/images/b3tr-token.png" alt="vot3-token" />
-                  <Text fontSize={"lg"} fontWeight={600}>
-                    {compactFormatter.format(lastRoundAllocationReceived)}
-                  </Text>
-                </HStack>
-                <Text color="#6A6A6A" fontSize="xs">
-                  {t("Last allocation")}
-                </Text>
-              </VStack>
-
-              <VStack alignItems={"stretch"} gap={0}>
-                <HStack>
-                  <Image h="20px" w="20px" src="/images/b3tr-token.png" alt="vot3-token" />
-                  <Text fontSize={"lg"} fontWeight={600}>
-                    {compactFormatter.format(totalAllocationReceived)}
-                  </Text>
-                </HStack>
-                <Text color="#6A6A6A" fontSize="xs">
-                  {t("Accumulated")}
-                </Text>
-              </VStack>
-            </HStack>
-
             <Skeleton isLoaded={!appMetadataLoading} justifyContent={"end"}>
-              <IconButton
-                isRound={true}
-                variant="solid"
-                aria-label="Go to App"
-                fontSize="20px"
-                disabled={isAppMetadataError}
-                onClick={e => {
-                  e.stopPropagation()
-                  window.open(appMetadata?.external_url, "_blank", "noopener noreferrer")
-                }}
-                color={buttonIconColor}
-                icon={<FiArrowUpRight />}
-              />
+              <Text fontSize={"sm"} color={"gray.500"}>
+                {appMetadata?.description.slice(0, 150) + "..." ??
+                  appMetadataError?.message ??
+                  "Error loading description"}
+              </Text>
             </Skeleton>
           </HStack>
         </VStack>
