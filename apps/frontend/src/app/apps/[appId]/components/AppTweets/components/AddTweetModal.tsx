@@ -1,5 +1,5 @@
 import { useTweet } from "@/api/twitter/hooks/useTweets"
-import { CustomModalContent, TransactionModal } from "@/components"
+import { CustomModalContent } from "@/components"
 import {
   Button,
   FormControl,
@@ -24,30 +24,29 @@ import { RiTwitterXFill } from "react-icons/ri"
 import { EmbeddedTweet, TweetSkeleton } from "react-tweet"
 import "./tweetStyle.css"
 import { useUpdateAppDetails, useUploadAppMetadata } from "@/hooks"
-import { useQueryClient } from "@tanstack/react-query"
-import { getXAppMetadataQueryKey } from "@/api"
-import { useCurrentAppInfo } from "../../../hooks/useCurrentAppInfo"
 import { useCurrentAppMetadata } from "../../../hooks"
-import { useUploadAndUpdateAppDetails } from "../../../hooks/useUploadAndUpdateAppDetails"
+import { useParams } from "next/navigation"
+import { UpdateAppMetadataTransactionModal } from "../../UpdateAppMetadataTransactionModal"
 
 type Props = {
-  modal: ReturnType<typeof useDisclosure>
+  newTweetModal: ReturnType<typeof useDisclosure>
 }
 
 type TweetForm = {
   tweetUrl: string
 }
 
-export const AddTweetModal = ({ modal }: Props) => {
+export const AddTweetModal = ({ newTweetModal }: Props) => {
   const { t } = useTranslation()
   const form = useForm<TweetForm>()
   const { errors } = form.formState
   const { appMetadata } = useCurrentAppMetadata()
+  const { appId } = useParams<{ appId: string }>()
 
   const handleClose = useCallback(() => {
     form.reset()
-    modal.onClose()
-  }, [form, modal])
+    newTweetModal.onClose()
+  }, [form, newTweetModal])
 
   const tweetUrl = form.watch("tweetUrl")
 
@@ -59,9 +58,14 @@ export const AddTweetModal = ({ modal }: Props) => {
 
   const { data: tweet, isLoading: isTweetLoading, error: tweetError } = useTweet(tweetId ?? undefined)
 
-  const { updateAppDetailsMutation, uploadMetadataMutation } = useUploadAndUpdateAppDetails({
-    onSuccess: handleClose,
+  const updateAppDetailsMutation = useUpdateAppDetails({
+    appId,
+    onSuccess: async () => {
+      handleClose()
+    },
   })
+
+  const uploadMetadataMutation = useUploadAppMetadata()
 
   const onSubmit = useCallback(
     async (data: TweetForm) => {
@@ -92,36 +96,17 @@ export const AddTweetModal = ({ modal }: Props) => {
 
   if (uploadMetadataMutation.metadataUploading || updateAppDetailsMutation.status !== "ready") {
     return (
-      <TransactionModal
-        isOpen={modal.isOpen}
-        onClose={handleClose}
-        confirmationTitle="Update App details"
-        successTitle="App details updated!"
-        status={
-          uploadMetadataMutation.metadataUploading
-            ? "uploadingMetadata"
-            : updateAppDetailsMutation.error || uploadMetadataMutation.metadataUploadError
-              ? "error"
-              : updateAppDetailsMutation.status
-        }
-        errorDescription={uploadMetadataMutation.metadataUploadError?.message ?? updateAppDetailsMutation.error?.reason}
-        errorTitle={
-          uploadMetadataMutation.metadataUploadError
-            ? "Error uploading metadata"
-            : updateAppDetailsMutation.error
-              ? "Error updating app details"
-              : undefined
-        }
-        showTryAgainButton={true}
+      <UpdateAppMetadataTransactionModal
+        transactionModal={newTweetModal}
+        handleClose={handleClose}
+        uploadMetadataMutation={uploadMetadataMutation}
+        updateAppDetailsMutation={updateAppDetailsMutation}
         onTryAgain={onTryAgain}
-        pendingTitle="Updating app details..."
-        txId={updateAppDetailsMutation.txReceipt?.meta.txID}
-        showExplorerButton
       />
     )
   }
   return (
-    <Modal isOpen={modal.isOpen} onClose={handleClose} size="2xl" trapFocus={false}>
+    <Modal isOpen={newTweetModal.isOpen} onClose={handleClose} size="2xl" trapFocus={false}>
       <ModalOverlay />
       <CustomModalContent>
         <ModalCloseButton />
@@ -167,7 +152,7 @@ export const AddTweetModal = ({ modal }: Props) => {
               <Button variant="primaryAction" type="submit">
                 {t("Save and show on feed")}
               </Button>
-              <Button variant="primaryGhost" onClick={modal.onClose}>
+              <Button variant="primaryGhost" onClick={newTweetModal.onClose}>
                 {t("Maybe later")}
               </Button>
             </VStack>

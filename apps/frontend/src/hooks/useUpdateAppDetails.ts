@@ -1,10 +1,11 @@
-import { getXAppsQueryKey } from "@/api"
+import { getXAppMetadataQueryKey, getXAppsQueryKey } from "@/api"
 import { useQueryClient } from "@tanstack/react-query"
 import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { X2EarnApps__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
+import { useCurrentAppInfo } from "@/app/apps/[appId]/hooks/useCurrentAppInfo"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
 
@@ -35,6 +36,7 @@ export const useUpdateAppDetails = ({
 }: useUpdateAppDetailsProps): useUpdateAppMetadataReturnValue => {
   const { account } = useWallet()
   const queryClient = useQueryClient()
+  const { app } = useCurrentAppInfo()
 
   const buildClauses = useCallback(
     ({ metadataUri }: BuildClausesProps) => {
@@ -62,10 +64,16 @@ export const useUpdateAppDetails = ({
       await queryClient.refetchQueries({
         queryKey: getXAppsQueryKey(),
       })
+      await queryClient.cancelQueries({
+        queryKey: getXAppMetadataQueryKey(app?.metadataURI),
+      })
+      await queryClient.refetchQueries({
+        queryKey: getXAppMetadataQueryKey(app?.metadataURI),
+      })
     }
 
     onSuccess?.()
-  }, [invalidateCache, queryClient, onSuccess])
+  }, [invalidateCache, onSuccess, queryClient, app?.metadataURI])
 
   const result = useSendTransaction({
     signerAccount: account,

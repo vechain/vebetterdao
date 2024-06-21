@@ -22,14 +22,12 @@ import { useParams, useRouter } from "next/navigation"
 import { EditAppLogo } from "./components/EditAppLogo"
 import { useCurrentAppBanner, useCurrentAppLogo, useCurrentAppMetadata, useCurrentAppRole } from "../../../hooks"
 import { EditAppBanner } from "./components/EditAppBanner"
-import { useUpdateAppDetails, useUploadAppMetadata } from "@/hooks"
-import { TransactionModal } from "@/components/TransactionModal"
 import { useCurrentAppScreenshots } from "../../../hooks/useCurrentAppScreenshots"
-import { useQueryClient } from "@tanstack/react-query"
-import { getXAppMetadataQueryKey } from "@/api"
 import { useCurrentAppInfo } from "../../../hooks/useCurrentAppInfo"
 import { useSocialUrls } from "./hooks/useSocialUrls"
 import { useIsFormChanged } from "./hooks/useIsFormChanged"
+import { useUpdateAppDetails, useUploadAppMetadata } from "@/hooks"
+import { UpdateAppMetadataTransactionModal } from "../../../components/UpdateAppMetadataTransactionModal"
 
 export type EditAppForm = {
   name: string
@@ -56,6 +54,10 @@ export const EditAppPageContent = () => {
   const { banner } = useCurrentAppBanner()
   const { screenshots } = useCurrentAppScreenshots()
   const { app } = useCurrentAppInfo()
+  const router = useRouter()
+  const transactionModal = useDisclosure()
+  const { isAdminOrModerator } = useCurrentAppRole()
+  const { appId } = useParams<{ appId: string }>()
 
   const form = useForm<EditAppForm>({
     defaultValues: {
@@ -77,40 +79,26 @@ export const EditAppPageContent = () => {
     handleSubmit,
     formState: { errors },
   } = form
+  const socialUrls = useSocialUrls(form)
+  const isFormChanged = useIsFormChanged(form)
 
-  const { appId } = useParams()
-  const router = useRouter()
-
-  const goBack = useCallback(() => {
+  const goToAppPage = useCallback(() => {
     router.push(`/apps/${appId}`)
   }, [appId, router])
 
-  const { onMetadataUpload, metadataUploadError, metadataUploading } = useUploadAppMetadata()
-
-  const queryClient = useQueryClient()
-
-  const updateAppMetadataMutation = useUpdateAppDetails({
-    appId: appId as string,
-    onSuccess: async () => {
-      await queryClient.cancelQueries({
-        queryKey: getXAppMetadataQueryKey(app?.metadataURI),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getXAppMetadataQueryKey(app?.metadataURI),
-      })
-      updateAppMetadataMutation.resetStatus()
-      goBack()
-    },
+  const updateAppDetailsMutation = useUpdateAppDetails({
+    appId,
+    onSuccess: goToAppPage,
   })
-  const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
 
-  const socialUrls = useSocialUrls(form)
+  const uploadMetadataMutation = useUploadAppMetadata()
+
   const onSubmit = useCallback(
     async (data: EditAppForm) => {
-      updateAppMetadataMutation.resetStatus()
-      onConfirmationOpen()
+      updateAppDetailsMutation.resetStatus()
+      transactionModal.onOpen()
 
-      const metadataUri = await onMetadataUpload({
+      const metadataUri = await uploadMetadataMutation.onMetadataUpload({
         name: data.name,
         description: data.description,
         logo: data.logoImage,
@@ -123,25 +111,22 @@ export const EditAppPageContent = () => {
       })
       if (!metadataUri) return
 
-      updateAppMetadataMutation.sendTransaction({
+      updateAppDetailsMutation.sendTransaction({
         metadataUri,
       })
     },
-    [appMetadata?.tweets, onConfirmationOpen, onMetadataUpload, socialUrls, updateAppMetadataMutation],
+    [updateAppDetailsMutation, transactionModal, uploadMetadataMutation, socialUrls, appMetadata?.tweets],
   )
 
   const handleClose = useCallback(() => {
-    onConfirmationClose()
-    updateAppMetadataMutation.resetStatus()
-  }, [onConfirmationClose, updateAppMetadataMutation])
+    transactionModal.onClose()
+    updateAppDetailsMutation.resetStatus()
+  }, [transactionModal, updateAppDetailsMutation])
 
   const onTryAgain = useCallback(() => {
     handleClose()
     handleSubmit(onSubmit)()
   }, [handleClose, handleSubmit, onSubmit])
-
-  const isFormChanged = useIsFormChanged(form)
-  const { isAdminOrModerator } = useCurrentAppRole()
 
   useEffect(() => {
     if (!isAdminOrModerator) {
@@ -155,31 +140,12 @@ export const EditAppPageContent = () => {
 
   return (
     <>
-      <TransactionModal
-        isOpen={isConfirmationOpen}
-        onClose={handleClose}
-        confirmationTitle="Update App details"
-        successTitle="App details updated!"
-        status={
-          metadataUploading
-            ? "uploadingMetadata"
-            : updateAppMetadataMutation.error || metadataUploadError
-              ? "error"
-              : updateAppMetadataMutation.status
-        }
-        errorDescription={metadataUploadError?.message ?? updateAppMetadataMutation.error?.reason}
-        errorTitle={
-          metadataUploadError
-            ? "Error uploading metadata"
-            : updateAppMetadataMutation.error
-              ? "Error updating app details"
-              : undefined
-        }
-        showTryAgainButton={true}
+      <UpdateAppMetadataTransactionModal
+        transactionModal={transactionModal}
+        handleClose={handleClose}
+        uploadMetadataMutation={uploadMetadataMutation}
+        updateAppDetailsMutation={updateAppDetailsMutation}
         onTryAgain={onTryAgain}
-        pendingTitle="Updating app details..."
-        txId={updateAppMetadataMutation.txReceipt?.meta.txID}
-        showExplorerButton
       />
       <VStack alignItems={"stretch"} gap={8} as="form" onSubmit={handleSubmit(onSubmit)} w="full">
         <Stack
@@ -202,7 +168,7 @@ export const EditAppPageContent = () => {
             </FormControl>
           </HStack>
           <HStack flexDir={["row-reverse", "row"]} mt={[2, 0]}>
-            <Button variant="primaryGhost" onClick={goBack}>
+            <Button variant="primaryGhost" onClick={goToAppPage}>
               {t("Cancel")}
             </Button>
             <Button
