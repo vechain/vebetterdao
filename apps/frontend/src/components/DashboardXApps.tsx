@@ -90,12 +90,14 @@ const DashboardXAppCard = ({ xApp }: { xApp: XApp }) => {
 
   const buttonIconColor = useColorModeValue("primary.500", "white")
   const nonActiveBackgroundColor = useColorModeValue("rgba(166, 217, 110, 0.12)", "rgba(166, 217, 110, 0.12)")
+  const cardBackgroundColor = useColorModeValue("#F7F7F7", "#131313")
   const navigateToAppDetail = useCallback(() => {
     router.push(`/apps/${xApp.id}`)
   }, [router, xApp.id])
   return (
     <Card
       variant={"baseWithBorder"}
+      backgroundColor={cardBackgroundColor}
       onClick={navigateToAppDetail}
       _hover={{
         bg: nonActiveBackgroundColor,
