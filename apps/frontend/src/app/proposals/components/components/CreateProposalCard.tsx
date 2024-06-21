@@ -1,4 +1,4 @@
-import { Box, VStack, Image, Text, Button } from "@chakra-ui/react"
+import { Box, Image, Text, Button } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
@@ -8,7 +8,7 @@ export const CreateProposalCard = () => {
 
   const { t } = useTranslation()
 
-  const onNewCLick = useCallback(() => {
+  const onNewClick = useCallback(() => {
     router.push("/proposals/new")
   }, [router])
 
@@ -23,7 +23,7 @@ export const CreateProposalCard = () => {
           "Have an idea for something that could improve the experience in VeBetterDAO? Create a proposal and let the community vote to make it happen!",
         )}
       </Text>
-      <Button onClick={onNewCLick} w={"full"} variant={"primaryAction"} mt={5}>
+      <Button onClick={onNewClick} w={"full"} variant={"primaryAction"} mt={5}>
         {t("Create proposal")}
       </Button>
     </Box>

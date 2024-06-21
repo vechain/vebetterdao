@@ -8,7 +8,7 @@ export const NoProposalsCard = () => {
 
   const { t } = useTranslation()
 
-  const onNewCLick = useCallback(() => {
+  const onNewClick = useCallback(() => {
     router.push("/proposals/new")
   }, [router])
 
@@ -42,7 +42,7 @@ export const NoProposalsCard = () => {
           Have an idea for something that could improve the experience in VeBetterDAO?{" "}
           <b style={{ color: "black" }}>Create a proposal</b> and let the community vote to make it happen!
         </Text>
-        <Button onClick={onNewCLick} variant={"primaryAction"} alignSelf={"flex-start"} mt={4} mb={2}>
+        <Button onClick={onNewClick} variant={"primaryAction"} alignSelf={"flex-start"} mt={4} mb={2}>
           {t("Create proposal")}
         </Button>
       </VStack>
