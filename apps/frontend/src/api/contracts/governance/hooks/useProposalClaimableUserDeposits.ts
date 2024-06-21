@@ -3,8 +3,9 @@ import { useConnex } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
 import { ProposalCreatedEvent } from "./useProposalsEvents"
 import { getProposalUserDeposit } from "./useProposalUserDeposit"
-import { ProposalState, getProposalState } from "./useProposalState"
+import { ProposalState, getProposalState, getProposalStateQueryKey } from "./useProposalState"
 import { ProposalDeposit } from "../utils"
+import { queryClient } from "@/api/QueryProvider"
 
 /**
  * Returns a key used for deposit queries in the context of a proposal.
@@ -32,7 +33,7 @@ export const getProposalDepositKey = (proposalId: string, userAddress: string) =
  * state is not pending.
  *
  * @param proposals - An array of `ProposalCreatedEvent` representing the proposals to be queried.
- * @param userAddress - The Ethereum address of the user whose deposits are to be fetched.
+ * @param userAddress - The address of the user whose deposits are to be fetched.
  * @returns An array of results from the `useQueries` function, each corresponding to a proposal's deposit data.
  */
 export const useProposalClaimableUserDeposits = (proposals: ProposalCreatedEvent[], userAddress: string) => {
@@ -46,7 +47,10 @@ export const useProposalClaimableUserDeposits = (proposals: ProposalCreatedEvent
     queries: proposalIds.map(proposalId => ({
       queryKey: getProposalDepositKey(proposalId, userAddress),
       queryFn: async () => {
-        const state = await getProposalState(thor, proposalId)
+        const state = await queryClient.ensureQueryData({
+          queryKey: getProposalStateQueryKey(proposalId),
+          queryFn: () => getProposalState(thor, proposalId),
+        })
 
         if (state === ProposalState.Pending) return { proposalId, deposit: "0" } as ProposalDeposit
 
