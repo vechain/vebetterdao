@@ -160,7 +160,12 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
               You voted
               <b
                 style={{
-                  color: getVoteType === "For" ? "rgba(56, 191, 102, 1)" : "rgba(210, 63, 99, 1)",
+                  color:
+                    getVoteType === "For"
+                      ? "rgba(56, 191, 102, 1)"
+                      : getVoteType === "Abstain"
+                        ? "rgba(181, 149, 37, 1)"
+                        : "rgba(210, 63, 99, 1)",
                   marginLeft: 2,
                 }}>
                 {getVoteType}
