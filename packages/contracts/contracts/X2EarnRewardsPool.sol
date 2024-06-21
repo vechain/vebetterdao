@@ -184,6 +184,8 @@ contract X2EarnRewardsPool is
    * @param _x2EarnApps the new X2EarnApps contract
    */
   function setX2EarnApps(IX2EarnApps _x2EarnApps) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+    require(address(_x2EarnApps) != address(0), "X2EarnRewardsPool: x2EarnApps is the zero address");
+
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     $.x2EarnApps = _x2EarnApps;
   }
