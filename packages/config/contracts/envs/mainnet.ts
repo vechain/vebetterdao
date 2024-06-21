@@ -36,7 +36,7 @@ export function createMainnetConfig() {
     CONTRACTS_ADMIN_ADDRESS: "0xE3D511ce183D3C53813BEA223Fe1E51BB9fF14a4",
     VOTE_2_EARN_POOL_ADDRESS: "0xE3D511ce183D3C53813BEA223Fe1E51BB9fF14a4", //temporarily pointing to CONTRACTS_ADMIN_ADDRESS, then updated in the deploy script to point to the voterReward contract
 
-    GM_NFT_BASE_URI: "ipfs://bafybeidngidiqpenmmvnnmxtnxar3stxtnltpknt5tg7jbgt4dkfhkcxha/", // IPFS base URI for the GM NFT
+    GM_NFT_BASE_URI: "ipfs://bafybeienna2npuyliqaqsrxziu4texyginznh5ewxcvlvlqcxfyw7ef52q/metadata/", // IPFS base URI for the GM NFT
     /*
       Level => B3TR Required
       2 (Moon) => 10,000 B3TR
