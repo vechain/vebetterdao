@@ -21,9 +21,8 @@
 //                                   ##############
 //                                   #########
 
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
-import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
@@ -43,7 +42,6 @@ import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Rec
  */
 contract X2EarnRewardsPool is
   IX2EarnRewardsPool,
-  Initializable,
   UUPSUpgradeable,
   AccessControlUpgradeable,
   ReentrancyGuardUpgradeable
@@ -79,7 +77,7 @@ contract X2EarnRewardsPool is
     address _upgrader,
     IB3TR _b3tr,
     IX2EarnApps _x2EarnApps
-  ) public initializer {
+  ) external initializer {
     require(_admin != address(0), "X2EarnRewardsPool: admin is the zero address");
     require(_contractsManagerAdmin != address(0), "X2EarnRewardsPool: contracts manager admin is the zero address");
     require(_upgrader != address(0), "X2EarnRewardsPool: upgrader is the zero address");
@@ -88,6 +86,7 @@ contract X2EarnRewardsPool is
 
     __UUPSUpgradeable_init();
     __AccessControl_init();
+    __ReentrancyGuard_init();
 
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     _grantRole(UPGRADER_ROLE, _upgrader);
@@ -153,7 +152,12 @@ contract X2EarnRewardsPool is
   /**
    * @dev See {IX2EarnRewardsPool-distributeReward}
    */
-  function distributeReward(bytes32 appId, uint256 amount, address receiver, string memory proof) public nonReentrant {
+  function distributeReward(
+    bytes32 appId,
+    uint256 amount,
+    address receiver,
+    string memory proof
+  ) external nonReentrant {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
 
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
@@ -179,7 +183,7 @@ contract X2EarnRewardsPool is
    *
    * @param _x2EarnApps the new X2EarnApps contract
    */
-  function setX2EarnApps(IX2EarnApps _x2EarnApps) public onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+  function setX2EarnApps(IX2EarnApps _x2EarnApps) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     $.x2EarnApps = _x2EarnApps;
   }
@@ -189,7 +193,7 @@ contract X2EarnRewardsPool is
   /**
    * @dev See {IX2EarnRewardsPool-availableFunds}
    */
-  function availableFunds(bytes32 appId) public view returns (uint256) {
+  function availableFunds(bytes32 appId) external view returns (uint256) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     return $.availableFunds[appId];
   }
@@ -197,14 +201,14 @@ contract X2EarnRewardsPool is
   /**
    * @dev See {IX2EarnRewardsPool-version}
    */
-  function version() public pure virtual returns (string memory) {
+  function version() external pure virtual returns (string memory) {
     return "1";
   }
 
   /**
    * @dev Retrieves the B3TR token contract.
    */
-  function b3tr() public view returns (IB3TR) {
+  function b3tr() external view returns (IB3TR) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     return $.b3tr;
   }
@@ -212,7 +216,7 @@ contract X2EarnRewardsPool is
   /**
    * @dev Retrieves the X2EarnApps contract.
    */
-  function x2EarnApps() public view returns (IX2EarnApps) {
+  function x2EarnApps() external view returns (IX2EarnApps) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     return $.x2EarnApps;
   }

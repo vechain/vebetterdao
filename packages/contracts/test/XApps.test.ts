@@ -327,18 +327,31 @@ describe("X-Apps", function () {
       await expect(x2EarnApps.getPaginatedApps(4, 4)).to.revertedWithCustomError(x2EarnApps, "X2EarnInvalidStartIndex")
     })
 
-    it("Can index up to 1300 apps", async function () {
-      console.log("Test is disabled because it takes a bit too long to run")
-      // const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+    it("Can fetch up to 1000 apps without pagination", async function () {
+      const { x2EarnApps, otherAccounts, owner, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
-      // for (let i = 0; i < 1300; i++) {
-      //   await x2EarnApps
-      //     .connect(owner)
-      //     .addApp(otherAccounts[1].address, otherAccounts[1].address, "My app" + i, "metadataURI")
-      // }
+      const limit = 1000
 
-      // const apps = await x2EarnApps.apps()
-      // expect(apps.length).to.eql(1300)
+      let addAppsPromises = []
+      for (let i = 1; i <= limit; i++) {
+        addAppsPromises.push(
+          x2EarnApps
+            .connect(owner)
+            .addApp(otherAccounts[1].address, otherAccounts[1].address, "My app" + i, "metadataURI"),
+        )
+      }
+
+      await Promise.all(addAppsPromises)
+
+      const apps = await x2EarnApps.apps()
+      expect(apps.length).to.eql(limit)
+
+      // check that can correctly fetch apps in round
+      await startNewAllocationRound()
+      const appsInRound = await xAllocationVoting.getAppsOfRound(1)
+      expect(appsInRound.length).to.eql(limit)
     })
   })
 
