@@ -72,6 +72,9 @@ export const ProposalsPageContent = () => {
           </Show>
         </HStack>
       </VStack>
+      {/*  <Box alignSelf={"flex-start"}> TODO: https://github.com/vechain/b3tr/issues/1061
+        <Filter />
+      </Box> */}
       <Show below="sm">
         {userTotalDeposits > 0 && (
           <Box mb={2} mt={3}>
