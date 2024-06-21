@@ -1,5 +1,4 @@
 import { VStack, Text, Image, HStack } from "@chakra-ui/react"
-import { FormattingUtils } from "@repo/utils"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 import loadingAnimation from "./loading.json"
@@ -49,7 +48,7 @@ export const ConfirmationAppWithdrawModalContent = ({
             <HStack>
               <Image src={"/images/logo/b3tr_logo_dark.svg"} boxSize={"20px"} alt="B3TR Icon" />
               <Text fontSize={20} fontWeight={700} style={{ fontFamily: "Instrument Sans, sans-serif" }}>
-                {FormattingUtils.humanNumber(Number(b3trWithdrawAmount))}
+                {compactFormatter.format(Number(b3trWithdrawAmount))}
               </Text>
             </HStack>
           </HStack>
@@ -57,7 +56,7 @@ export const ConfirmationAppWithdrawModalContent = ({
         {Number(b3trBalanceAfter) >= 0 && (
           <HStack w="full" bg={"#F8F8F8"} borderRadius={8} p={4} justifyContent={"space-between"}>
             <Text fontSize={16} fontWeight={400}>
-              {t("Your new B3TR balance")}
+              {t("Your app new B3TR balance")}
             </Text>
 
             <HStack>
