@@ -37,7 +37,8 @@ export const DashboardXApps = ({ maxApps = 4 }: Props) => {
   const randomXApps = useMemo(() => {
     if (!xApps) return []
 
-    return xApps.sort(() => 0.5 - Math.random())
+    // clone xApps array and shuffle it
+    return [...xApps].sort(() => Math.random() - 0.5)
   }, [xApps])
 
   const slicedXApps = useMemo(() => randomXApps?.slice(0, maxApps), [randomXApps, maxApps])
