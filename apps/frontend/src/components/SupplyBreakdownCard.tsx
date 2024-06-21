@@ -89,7 +89,7 @@ export const SupplyBreakdownCard = () => {
                 {t("VOT3 in circulation")}
               </Text>
               <Skeleton isLoaded={!!data}>
-                <Heading size="lg" color={"#38BF66"}>
+                <Heading size="lg" color={"#3DBA67"}>
                   {formattedVot3CirculatingSupply}
                 </Heading>
               </Skeleton>
