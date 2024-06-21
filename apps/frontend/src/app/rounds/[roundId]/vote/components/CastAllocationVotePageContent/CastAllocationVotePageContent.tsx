@@ -10,6 +10,9 @@ import { useMemo } from "react"
 import { useCastAllocationVotes } from "@/hooks"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useRouter } from "next/navigation"
+import { useTranslation } from "react-i18next"
+import { useCastAllocationFormStore } from "@/store"
+import { SearchAndSelectApps } from "./components/SearchAndSelectApps"
 
 type Props = {
   roundId: string
@@ -24,11 +27,14 @@ export type CastAllocationVoteFormData = {
 }
 
 export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
+  const { t } = useTranslation()
   const { account } = useWallet()
+
   const router = useRouter()
 
+  const { data, setData } = useCastAllocationFormStore()
   const { data: state, isLoading: isStateLoading } = useAllocationsRoundState(roundId)
-  const { data: xApps } = useRoundXApps(roundId)
+  const xAppsQuery = useRoundXApps(roundId)
 
   const castAllocationVotes = useCastAllocationVotes({ roundId })
 
@@ -59,7 +65,7 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
   return (
     <Card w="full" id="user-votes" maxH={[!account ? "600px" : "auto", "auto"]} overflowY={"hidden"}>
       <CardBody>
-        <VStack w="full" spacing={8}>
+        <VStack w="full" spacing={8} align={"flex-start"}>
           <Heading fontSize={"36px"} fontWeight={700}>
             Select the apps you want to vote
           </Heading>
@@ -67,6 +73,8 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
             The apps you vote will receive a B3TR allocation to distribute among its users as rewards for completing
             sustainable actions. Select your favorite apps to add them to your vote.
           </Text>
+
+          <SearchAndSelectApps selectedApps={data} onSelectedAppsChange={setData} xAppsQuery={xAppsQuery} />
         </VStack>
       </CardBody>
     </Card>

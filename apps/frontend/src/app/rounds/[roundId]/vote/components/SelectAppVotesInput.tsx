@@ -18,7 +18,7 @@ import {
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
 import { scaledDivision } from "@/utils/MathUtils"
-import { CastAllocationVoteFormData } from "./CastAllocationVotePageContent"
+import { CastAllocationVoteFormData } from "./CastAllocationVotePageContent/CastAllocationVotePageContent"
 import BigNumber from "bignumber.js"
 
 type Props = {

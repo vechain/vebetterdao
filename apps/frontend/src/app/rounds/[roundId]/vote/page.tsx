@@ -7,7 +7,10 @@ import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
 const CastAllocationVotePageContent = dynamic(
-  () => import("./components/CastAllocationVotePageContent").then(mod => mod.CastAllocationPageVoteContent),
+  () =>
+    import("./components/CastAllocationVotePageContent/CastAllocationVotePageContent").then(
+      mod => mod.CastAllocationPageVoteContent,
+    ),
   {
     ssr: false,
     loading: () => (
