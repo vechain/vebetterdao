@@ -175,14 +175,19 @@ abstract contract RoundsStorageUpgradeable is Initializable, XAllocationVotingGo
   /**
    * @dev Get all the apps in the form of {App} eligible for voting in a round
    *
-   * This function could not be efficient with a large number of apps
+   * @notice This function could not be efficient with a large number of apps, in that case, use {getAppIdsOfRound}
+   * and then call {IX2EarnApps-app} for each app id
    */
-  function getAppsOfRound(uint256 roundId) public view returns (X2EarnAppsDataTypes.AppReturnType[] memory) {
+  function getAppsOfRound(
+    uint256 roundId
+  ) external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory) {
     RoundsStorageStorage storage $ = _getRoundsStorageStorage();
 
     bytes32[] memory appsInRound = $._appsEligibleForVoting[roundId];
     uint256 length = appsInRound.length;
-    X2EarnAppsDataTypes.AppReturnType[] memory allApps = new X2EarnAppsDataTypes.AppReturnType[](length);
+    X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory allApps = new X2EarnAppsDataTypes.AppWithDetailsReturnType[](
+      length
+    );
 
     for (uint i; i < length; i++) {
       allApps[i] = x2EarnApps().app(appsInRound[i]);
