@@ -64,11 +64,11 @@ export const NewProposalTypePageContent = () => {
 
   return (
     <Grid
-      templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(4, 1fr)"]}
+      templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(3, 1fr)"]}
       gap={6}
       w="full"
       data-testid="new-proposal-type-page">
-      <GridItem colSpan={3}>
+      <GridItem colSpan={2}>
         <Card>
           <CardBody py={8}>
             <VStack spacing={8} align="flex-start">

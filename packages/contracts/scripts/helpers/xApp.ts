@@ -5,7 +5,8 @@ import { SeedAccount, TestPk } from "./seedAccounts"
 import { chunk } from "./chunk"
 
 export type App = {
-  address: string
+  admin: string
+  teamWalletAddress: string
   name: string
   metadataURI: string
 }
@@ -23,7 +24,7 @@ export const addXDapps = async (contractAddress: string, account: TestPk, apps: 
         clauseBuilder.functionInteraction(
           contractAddress,
           coder.createInterface(JSON.stringify(X2EarnApps__factory.abi)).getFunction("addApp") as FunctionFragment,
-          [app.address, app.address, app.name, app.metadataURI],
+          [app.teamWalletAddress, app.admin, app.name, app.metadataURI],
         ),
       )
     })
