@@ -32,6 +32,7 @@ const levelNames = ["VeBetterDAO Galaxy Member"]
 const description = "GM Earth is a community of people who participated in voting for the governance of VeBetter DAO."
 
 const METADATA_PATH = path.join(__dirname, "../../../metadata/galaxyMember/metadata")
+const IMAGE_ZIP_PATH = path.join(__dirname, "../../../metadata/galaxyMember/images.zip")
 const IMAGE_PATH = path.join(__dirname, "../../../metadata/galaxyMember/images")
 
 // NFT Storage
@@ -61,14 +62,13 @@ function convertAttributes(attributes: Record<string, string | number>): Attribu
 function generateMetadata(
   name: string,
   description: string,
-  imagesCID: string,
   attributes: Record<string, string | number>,
-  image: File,
+  image: string
 ): Metadata {
   return {
     name,
     description,
-    image: toIPFSURL(imagesCID, image.name),
+    image: image,
     attributes: convertAttributes(attributes),
   }
 }
@@ -78,7 +78,7 @@ function generateMetadata(
  * @param metadata - The `Metadata` object to save.
  */
 async function saveMetadataToFile(metadata: Metadata, fileName: string): Promise<void> {
-  await fs.writeFile(`${METADATA_PATH}/${fileName}`, JSON.stringify(metadata, null, 2))
+  await fs.writeFile(`${METADATA_PATH}/${fileName}.json`, JSON.stringify(metadata, null, 2))
   console.log(`Metadata saved to ${METADATA_PATH}/${fileName}`)
 }
 
@@ -92,13 +92,14 @@ async function generateAndSaveMetadata(): Promise<void> {
     }
 
     // 1. Upload images to IPFS and get URL
-    const [imagesIpfsUrl, images] = await uploadDirectoryToIPFS(IMAGE_PATH, NFT_STORAGE_KEY, levelAttributes.length)
+    const [imagesIpfsUrl, images, folderName] = await uploadDirectoryToIPFS(IMAGE_ZIP_PATH, IMAGE_PATH)
 
-    console.log("Galaxy Member Images IPFS URL:", toIPFSURL(imagesIpfsUrl))
+    console.log("Galaxy Member Images IPFS URL:", toIPFSURL(imagesIpfsUrl, undefined ,folderName))
 
     // 2. Generate metadata for each level
     for (let i = 0; i < levelAttributes.length; i++) {
-      const metadata = generateMetadata(levelNames[i], description, imagesIpfsUrl, levelAttributes[i], images[i])
+      const image  = toIPFSURL(imagesIpfsUrl, images[i].name, folderName)
+      const metadata = generateMetadata(levelNames[i], description, levelAttributes[i], image)
       await saveMetadataToFile(metadata, String(i + 1))
     }
   } catch (error) {
