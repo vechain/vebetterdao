@@ -1,14 +1,13 @@
-import { DotSymbol } from "@/components"
 import { useProposalFormStore } from "@/store"
 import {
   Box,
   Card,
   CardBody,
   CardHeader,
+  Circle,
   Heading,
   Step,
   StepDescription,
-  StepIcon,
   StepIndicator,
   StepSeparator,
   StepStatus,
@@ -90,6 +89,7 @@ export const CreateProposalStepperCard = () => {
       </CardHeader>
       <CardBody>
         <Stepper
+          variant={"primaryVertical"}
           size="sm"
           index={activeStep}
           orientation="vertical"
@@ -101,9 +101,8 @@ export const CreateProposalStepperCard = () => {
             <Step key={index}>
               <StepIndicator>
                 <StepStatus
-                  complete={<StepIcon />}
-                  incomplete={<></>}
-                  active={<DotSymbol color="primary.500" size={3} />}
+                  complete={<Circle bg="#004CFC" size={"30%"} />}
+                  active={<Circle bg="#004CFC" size={"60%"} />}
                 />
               </StepIndicator>
 

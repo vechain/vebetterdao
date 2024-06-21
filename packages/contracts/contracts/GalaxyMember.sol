@@ -488,7 +488,7 @@ contract GalaxyMember is
 
   /// @notice Gets the selected level of the owner
   /// @param account The address of the account to check
-  function numCheckpoints(address account) public view returns (uint32) {
+  function numCheckpoints(address account) external view returns (uint32) {
     return _numCheckpoints(account);
   }
 

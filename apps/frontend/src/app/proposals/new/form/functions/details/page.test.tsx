@@ -39,7 +39,7 @@ const fillGeneratedInput = async (index: number, inputType: string) => {
       return
     case "uint256":
       fireEvent.change(input, { target: { value: 10 } })
-      expect(input).toHaveValue(10)
+      expect(input).toHaveValue("10")
       return
   }
 

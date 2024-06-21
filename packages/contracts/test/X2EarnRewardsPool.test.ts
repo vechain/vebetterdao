@@ -154,6 +154,14 @@ describe("X2EarnRewardsPool", function () {
       await catchRevert(x2EarnRewardsPool.connect(otherAccount).setX2EarnApps(await otherAccount.getAddress()))
     })
 
+    it("New x2EarnApps address cannot be the zero address", async function () {
+      const { x2EarnRewardsPool, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await catchRevert(x2EarnRewardsPool.connect(owner).setX2EarnApps(ZERO_ADDRESS))
+    })
+
     it("Can't send VET to the contract", async function () {
       const { x2EarnRewardsPool, owner } = await getOrDeployContractInstances({
         forceDeploy: true,

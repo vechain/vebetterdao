@@ -1,4 +1,5 @@
 {
+  "Reset to default": "Reset to default",
   "{{amount}} distributed among {{apps}} apps": "<strong>{{amount}}</strong> distributed among <strong>{{apps}}</strong> apps",
   "Apps": "Apps",
   "Voters": "Voters",
@@ -325,6 +326,12 @@
   "100%": "100%",
   "Please confirm the transaction in your wallet": "Please confirm the transaction in your wallet",
   "Almost there...": "Almost there...",
+  "Supply breakdown": "Supply breakdown",
+  "B3TR in circulation": "B3TR in circulation",
+  "VOT3 in circulation": "VOT3 in circulation",
+  "Locked B3TR": "Locked B3TR",
   "Get more VTHO to get the best experience in the platform.": "Get more VTHO to get the best experience in the platform.",
-  "Get more VTHO": "Get more VTHO"
+  "Get more VTHO": "Get more VTHO",
+  "App ID": "App ID",
+  "Governance": "Governance"
 }
