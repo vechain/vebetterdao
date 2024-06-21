@@ -169,7 +169,7 @@ export const ProposalsPageContent = () => {
         <Box>
           <HStack spacing={3} alignItems={"center"}>
             <Heading as="h1" size="xl">
-              {t("Proposals")}
+              {t("Governance")}
             </Heading>
           </HStack>
           <Skeleton isLoaded={!proposalsEventsLoading}>

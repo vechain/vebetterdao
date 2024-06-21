@@ -119,9 +119,9 @@ export const GovernanceFeaturedContractsWithFunctions: GovernanceFeaturedContrac
     contract: { abi: TreasuryContractJson, address: config.treasuryContractAddress },
     functions: [
       {
-        name: "Transfer B3TR",
+        name: "Transfer B3TR from treasury",
         icon: "/images/arrow-right.svg",
-        description: "Transfer B3TR tokens to a recipient",
+        description: "Transfer treasury B3TR tokens to a recipient",
         abiDefinition: (() => {
           const transferB3trDefinition = getFunctionDefinitionFromAbi(TreasuryContractJson, "transferB3TR")
           return {
