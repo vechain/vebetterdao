@@ -16,7 +16,7 @@ const filters: Record<ProposalFilter, string[]> = {
   ],
   [ProposalFilter.InThisRound]: [],
   [ProposalFilter.LookingForSupport]: [],
-  [ProposalFilter.UpcomingVoting]: [],
+  [ProposalFilter.UpcomingVoting]: [], // Pending
 }
 
 export const Filter = () => {
