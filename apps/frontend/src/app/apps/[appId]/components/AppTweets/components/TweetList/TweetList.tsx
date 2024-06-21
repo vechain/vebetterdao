@@ -22,7 +22,7 @@ export const TweetList = ({ editMode, tweetsToRemove, removeTweet }: Props) => {
     [metadataTweets, tweetsToRemove],
   )
 
-  const [visibleTweetIds, setVisibleTweetIds] = useState<string[]>([])
+  const [visibleTweetIds, setVisibleTweetIds] = useState<string[]>(metadataTweets?.slice(0, STEP))
 
   const filteredTweetId = useMemo(() => {
     return visibleTweetIds.filter(tweet => !tweetsToRemove.includes(tweet)).filter(Boolean) as string[]

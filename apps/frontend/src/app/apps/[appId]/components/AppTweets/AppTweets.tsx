@@ -1,4 +1,4 @@
-import { Button, HStack, Heading, VStack, useDisclosure } from "@chakra-ui/react"
+import { Button, Card, CardBody, HStack, Heading, VStack, useDisclosure } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { AddTweetModal } from "./components/AddTweetModal"
@@ -9,6 +9,7 @@ import { UilCheckCircle, UilPen, UilPlus, UilTimes } from "@iconscout/react-unic
 import { useUpdateAppDetails, useUploadAppMetadata } from "@/hooks"
 import { useParams } from "next/navigation"
 import { UpdateAppMetadataTransactionModal } from "../UpdateAppMetadataTransactionModal"
+import { OkHandIcon } from "@/components"
 
 export const AppTweets = () => {
   const [editMode, setEditMode] = useState(false)
@@ -80,10 +81,6 @@ export const AppTweets = () => {
 
   const isListEmpty = metadataTweets.length === 0
 
-  if (isListEmpty && !isAdminOrModerator) {
-    return null
-  }
-
   return (
     <>
       <UpdateAppMetadataTransactionModal
@@ -138,7 +135,20 @@ export const AppTweets = () => {
             </>
           )}
         </HStack>
-        <TweetList editMode={editMode} tweetsToRemove={tweetsToRemove} removeTweet={removeTweet} />
+        {isListEmpty ? (
+          <Card w="full">
+            <CardBody>
+              <VStack align={"center"} justify={"center"} w="full" minH="200px">
+                <OkHandIcon color="#757575" />
+                <Heading fontSize={"20px"} fontWeight={500} textAlign={"center"}>
+                  {t("App will add updates here.")}
+                </Heading>
+              </VStack>
+            </CardBody>
+          </Card>
+        ) : (
+          <TweetList editMode={editMode} tweetsToRemove={tweetsToRemove} removeTweet={removeTweet} />
+        )}
       </VStack>
     </>
   )

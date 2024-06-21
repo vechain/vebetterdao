@@ -9,5 +9,11 @@ export const AppDetailsSidebar = () => {
   const { app } = useCurrentAppInfo()
   const { data: isAppAdmin } = useIsAppAdmin(app?.id ?? "", account ?? "")
 
-  return <VStack>{isAppAdmin && <AppBalanceCard />}</VStack>
+  return (
+    isAppAdmin && (
+      <VStack flex={1.5}>
+        <AppBalanceCard />
+      </VStack>
+    )
+  )
 }
