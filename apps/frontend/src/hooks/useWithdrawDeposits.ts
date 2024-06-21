@@ -48,7 +48,6 @@ export const useWithdrawDeposits = ({
 
     const clauses = buildClaimDepositsTx(proposalDeposits, account ?? "")
 
-    console.log({ clauses })
     return clauses
   }, [account, proposalDeposits])
 
