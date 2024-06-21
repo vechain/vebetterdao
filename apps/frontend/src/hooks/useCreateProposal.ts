@@ -7,7 +7,6 @@ import { governanceAvailableContracts } from "@/constants"
 import { ethers } from "ethers"
 import { B3TRGovernor__factory, VOT3__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
-import { evalManifestWithRetries } from "next/dist/server/load-components"
 import { isZero } from "@repo/utils/FormattingUtils"
 export type AvailableContractAbis = (typeof governanceAvailableContracts)[number]["abi"]["abi"][number]
 
