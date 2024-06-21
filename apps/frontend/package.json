@@ -30,7 +30,6 @@
     "@tanstack/react-query": "^5.28.12",
     "@tanstack/react-query-devtools": "^5.20.5",
     "@tanstack/react-query-persist-client": "^5.28.12",
-    "@uiw/react-markdown-preview": "^5.1.1",
     "@uiw/react-md-editor": "^4.0.4",
     "@vechain/dapp-kit-react": "^1.0.12",
     "axios": "^1.6.8",

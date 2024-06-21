@@ -81,17 +81,20 @@ export const NewProposalForm: React.FC<Props> = ({
       } catch (e) {
         console.error("Error decoding call data", e)
       }
+
       return {
         ...action,
         params: action.abiDefinition.inputs.map(param => {
+          const parsedParam = (() => {
+            if (!decoded[param.name]) return undefined
+            if (param.requiresEthParse) return ethers.formatEther(decoded[param.name])
+            return decoded[param.name]
+          })()
+
           return {
             name: param.name,
             type: param.type,
-            value: decoded[param.name]
-              ? param.requiresEthParse
-                ? ethers.formatEther(decoded[param.name])
-                : decoded[param.name]
-              : undefined,
+            value: parsedParam,
             requiresEthParse: param.requiresEthParse,
           }
         }),
