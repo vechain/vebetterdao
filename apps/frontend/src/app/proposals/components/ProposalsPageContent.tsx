@@ -44,10 +44,6 @@ export const ProposalsPageContent = () => {
     }, BigInt(0))
   }, [userProposalDeposits])
 
-  console.log({ userProposalDeposits, userTotalDeposits })
-
-  console.log({ proposals: proposalsEvents?.created })
-
   const onNewCLick = useCallback(() => {
     router.push("/proposals/new")
   }, [router])

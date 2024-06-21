@@ -10,8 +10,8 @@ import {
   useProposalVoteEvent,
   useProposalVotes,
 } from "@/api"
-import { Box, Card, CardBody,  HStack,  Text, VStack } from "@chakra-ui/react"
-import {  UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
+import { Box, Card, CardBody, HStack, Text, VStack } from "@chakra-ui/react"
+import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
@@ -57,8 +57,6 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
 
   const isPending = useMemo(() => proposalState === ProposalState.Pending, [proposalState])
   const isSupportNotMet = useMemo(() => proposalState === ProposalState.DepositNotMet, [proposalState])
-
-  console.log(isPending)
 
   const isForGreaterThanAgainst = forPercentage > againstAndAbstainPercentage
 
