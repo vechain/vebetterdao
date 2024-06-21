@@ -14,7 +14,7 @@ import {
   Icon,
 } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
-import { useBreakpoints, useWithdrawAppBalance } from "@/hooks"
+import { useWithdrawAppBalance } from "@/hooks"
 import { Controller, useForm } from "react-hook-form"
 import { TransactionModal, CustomModalContent } from "@/components"
 import BigNumber from "bignumber.js"
@@ -56,7 +56,6 @@ const layoutTransition = {
 
 export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
-  const { isMobile } = useBreakpoints()
 
   const { data: availableB3trToWithdraw, isLoading: isBalanceLoading } = useAppBalance(appId)
   const availableB3trToWithdrawScaled = useMemo(() => {
@@ -159,7 +158,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
     return (
       <form onSubmit={formData.handleSubmit(handleWithdraw)}>
         <ModalCloseButton top={{ base: 5, md: 6 }} right={4} />
-        <VStack align={"flex-start"} maxW={isMobile ? "350px" : "590px"} px={{ base: 0, md: 4 }}>
+        <VStack align={"flex-start"} maxW={["450px", "590px"]} px={{ base: 0, md: 4 }}>
           <HStack>
             <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
               {t("Withdraw from your balance")}
