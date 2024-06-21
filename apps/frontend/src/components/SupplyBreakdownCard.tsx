@@ -98,7 +98,7 @@ export const SupplyBreakdownCard = () => {
           {!data ? (
             <Skeleton h={10} w="full" />
           ) : (
-            <HStack spacing={0} w="full" h={10} p={1} backgroundColor={"#F3F3F3"} borderRadius={"md"}>
+            <HStack spacing={1} w="full" h={5}>
               <Box
                 as={motion.div}
                 initial={{
@@ -126,13 +126,12 @@ export const SupplyBreakdownCard = () => {
                 }}
                 animate={{
                   opacity: 1,
-                  width: `${data.vot3CirculatingSupply.percentage + 2}%`, // +2% to fill the css gap
+                  width: `${data.vot3CirculatingSupply.percentage}%`,
                   transition: {
                     duration: 0.25,
                   },
                 }}
                 zIndex={1}
-                marginLeft={"-2%"} // -2% to create an overlap effect
                 w={data.vot3CirculatingSupply.percentage}
                 h={"full"}
                 bg={" linear-gradient(to bottom, #84E718 , #A0F04A)"}
