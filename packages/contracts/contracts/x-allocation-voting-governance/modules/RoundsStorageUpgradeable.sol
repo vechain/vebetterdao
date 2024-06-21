@@ -113,7 +113,7 @@ abstract contract RoundsStorageUpgradeable is Initializable, XAllocationVotingGo
   /**
    * @dev Get the data of a round
    */
-  function getRound(uint256 roundId) public view returns (RoundCore memory) {
+  function getRound(uint256 roundId) external view returns (RoundCore memory) {
     RoundsStorageStorage storage $ = _getRoundsStorageStorage();
     return $._rounds[roundId];
   }
