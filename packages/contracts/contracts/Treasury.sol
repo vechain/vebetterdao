@@ -124,7 +124,7 @@ contract Treasury is
     uint256 _transferLimitB3TR,
     uint256 _transferLimitVOT3,
     uint256 _transferLimitVTHO
-  ) public initializer {
+  ) external initializer {
     _validateAddresses(_b3tr, _vot3);
 
     __UUPSUpgradeable_init();
@@ -172,13 +172,13 @@ contract Treasury is
   /// @notice Pauses the Treasury contract
   /// @dev Pausing the contract will prevent all transfers and staking operations
   /// @dev Only admin with pauser role can pause the contract
-  function pause() public onlyRole(PAUSER_ROLE) {
+  function pause() external onlyRole(PAUSER_ROLE) {
     _pause();
   }
 
   /// @notice Unpauses the Treasury contract allowing normal operations
   /// @dev Only admin with pauser role can unpause the contract
-  function unpause() public onlyRole(PAUSER_ROLE) {
+  function unpause() external onlyRole(PAUSER_ROLE) {
     _unpause();
   }
 

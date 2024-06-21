@@ -1,6 +1,5 @@
 import { XApp, useXAppMetadata } from "@/api"
 import { Control, Controller, FieldArrayWithId, FieldErrors, UseFormGetValues } from "react-hook-form"
-import { FormData } from "../AllocationRoundUserVotes"
 import {
   Box,
   Card,
@@ -18,19 +17,19 @@ import {
 } from "@chakra-ui/react"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
-import { CastAllocationVotesProps } from "@/hooks"
-import BigNumber from "bignumber.js"
 import { scaledDivision } from "@/utils/MathUtils"
+import { CastAllocationVoteFormData } from "./CastAllocationVotePageContent"
+import BigNumber from "bignumber.js"
 
 type Props = {
   control: Control<{
-    votes: FormData["votes"]
+    votes: CastAllocationVoteFormData["votes"]
   }>
-  getValues: UseFormGetValues<FormData>
+  getValues: UseFormGetValues<CastAllocationVoteFormData>
   index: number
   xApp?: XApp
-  field: FieldArrayWithId<FormData, "votes", "id">
-  errors: FieldErrors<FormData>
+  field: FieldArrayWithId<CastAllocationVoteFormData, "votes", "id">
+  errors: FieldErrors<CastAllocationVoteFormData>
   isDisabled?: boolean
   totalVotesAvailable?: string
 }

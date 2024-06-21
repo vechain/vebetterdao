@@ -60,6 +60,16 @@ interface IX2EarnApps {
   error X2EarnNonexistentModerator(bytes32 appId, address moderator);
 
   /**
+   * @dev The maximum number of moderators has been reached.
+   */
+  error X2EarnMaxModeratorsReached(bytes32 appId);
+
+  /**
+   * @dev The maximum number of reward distributors has been reached.
+   */
+  error X2EarnMaxRewardDistributorsReached(bytes32 appId);
+
+  /**
    * @dev Event fired when a new app is added.
    */
   event AppAdded(bytes32 indexed id, address addr, string name, bool appAvailableForAllocationVoting);
@@ -138,7 +148,7 @@ interface IX2EarnApps {
    *
    * @param appId the id of the app
    */
-  function app(bytes32 appId) external view returns (X2EarnAppsDataTypes.AppReturnType memory);
+  function app(bytes32 appId) external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType memory);
 
   /**
    * @dev Function to get the number of apps.
@@ -155,7 +165,7 @@ interface IX2EarnApps {
   /**
    * @dev Get all apps
    */
-  function apps() external view returns (X2EarnAppsDataTypes.AppReturnType[] memory);
+  function apps() external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory);
 
   /**
    * @dev Add a new moderator to the app.

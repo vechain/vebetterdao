@@ -136,43 +136,44 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
    *
    * @param appId the id of the app
    */
-  function app(bytes32 appId) public view virtual override returns (X2EarnAppsDataTypes.AppReturnType memory) {
+  function app(
+    bytes32 appId
+  ) public view virtual override returns (X2EarnAppsDataTypes.AppWithDetailsReturnType memory) {
     X2EarnAppsDataTypes.App memory _app = _getAppStorage(appId);
 
     return
-      X2EarnAppsDataTypes.AppReturnType(
+      X2EarnAppsDataTypes.AppWithDetailsReturnType(
         _app.id,
         teamWalletAddress(appId),
         _app.name,
         metadataURI(appId),
         _app.createdAtTimestamp,
-        appAdmin(_app.id),
-        appModerators(_app.id),
-        teamAllocationPercentage(_app.id),
         isEligibleNow(_app.id)
       );
   }
 
   /**
    * @dev See {IX2EarnApps-apps}.
+   *
+   * @notice This function could not be efficient with a large number of apps, in that case, use {IX2EarnApps-getPaginatedApps}
+   * and then call {IX2EarnApps-app} for each app id
    */
-  function apps() external view returns (X2EarnAppsDataTypes.AppReturnType[] memory) {
+  function apps() external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
 
     uint256 length = $._appIds.length;
-    X2EarnAppsDataTypes.AppReturnType[] memory allApps = new X2EarnAppsDataTypes.AppReturnType[](length);
+    X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory allApps = new X2EarnAppsDataTypes.AppWithDetailsReturnType[](
+      length
+    );
 
     for (uint i = 0; i < length; i++) {
       X2EarnAppsDataTypes.App memory _app = $._apps[$._appIds[i]];
-      allApps[i] = X2EarnAppsDataTypes.AppReturnType(
+      allApps[i] = X2EarnAppsDataTypes.AppWithDetailsReturnType(
         _app.id,
         teamWalletAddress(_app.id),
         _app.name,
         metadataURI(_app.id),
         _app.createdAtTimestamp,
-        appAdmin(_app.id),
-        appModerators(_app.id),
-        teamAllocationPercentage(_app.id),
         isEligibleNow(_app.id)
       );
     }

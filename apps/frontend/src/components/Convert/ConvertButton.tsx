@@ -2,11 +2,11 @@ import { useB3trBalance, useVot3Balance } from "@/api"
 import { Button, useDisclosure, Text } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { FaRepeat } from "react-icons/fa6"
-import { SwapModal } from "./SwapModal"
+import { ConvertModal } from "./ConvertModal"
 
 type Props = { isIconButton?: boolean }
 
-export const SwapButton: React.FC<Props> = ({ isIconButton = false }) => {
+export const ConvertButton: React.FC<Props> = ({ isIconButton = false }) => {
   const { account } = useWallet()
   const { data: balance, isLoading: isBalanceLoading } = useB3trBalance(account ?? undefined)
   const { data: vot3Balance, isLoading: isVot3BalanceLoading } = useVot3Balance(account ?? undefined)
@@ -20,7 +20,7 @@ export const SwapButton: React.FC<Props> = ({ isIconButton = false }) => {
 
   return (
     <>
-      <SwapModal isOpen={isOpen} onClose={onClose} />
+      <ConvertModal isOpen={isOpen} onClose={onClose} />
       {isIconButton ? (
         <Button isDisabled={buttonDisabled} onClick={onOpen}>
           <FaRepeat />

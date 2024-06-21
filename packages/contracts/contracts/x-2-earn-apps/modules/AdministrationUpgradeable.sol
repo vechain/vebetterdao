@@ -36,6 +36,9 @@ import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
  * The reward distributors are the addresses that can distribute rewards from the X2EarnRewardsPool.
  */
 abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradeable {
+  uint256 public constant MAX_MODERATORS = 100;
+  uint256 public constant MAX_REWARD_DISTRIBUTORS = 100;
+
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.Administration
   struct AdministrationStorage {
     mapping(bytes32 appId => address) _admin;
@@ -105,6 +108,10 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
 
     AdministrationStorage storage $ = _getAdministrationStorage();
 
+    if ($._moderators[appId].length >= MAX_MODERATORS) {
+      revert X2EarnMaxModeratorsReached(appId);
+    }
+
     $._moderators[appId].push(moderator);
 
     emit ModeratorAddedToApp(appId, moderator);
@@ -158,6 +165,10 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
     }
 
     AdministrationStorage storage $ = _getAdministrationStorage();
+
+    if ($._rewardDistributors[appId].length >= MAX_REWARD_DISTRIBUTORS) {
+      revert X2EarnMaxRewardDistributorsReached(appId);
+    }
 
     $._rewardDistributors[appId].push(distributor);
 
