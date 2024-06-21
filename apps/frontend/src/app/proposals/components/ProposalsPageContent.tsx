@@ -82,7 +82,7 @@ export const ProposalsPageContent = () => {
       <HStack w={"full"} gap={8} mt={3}>
         <VStack flex={allProposals.length !== 0 ? 4.5 : 7} data-testid="proposals" alignSelf={"flex-start"} gap={4}>
           {allProposals.map(proposal => (
-            <ProposalInfoCard proposal={proposal} key={proposal.proposalId} allCreatedProposals={allProposals} />
+            <ProposalInfoCard proposal={proposal} key={proposal.proposalId} />
           ))}
           {allProposals.length === 0 && <NoProposalsCard />}
         </VStack>
