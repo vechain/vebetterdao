@@ -5,6 +5,8 @@ type Props = {
 export const ConfirmCastAllocationVotePageContent = ({ roundId }: Readonly<Props>) => {
   // const { isOpen, onClose, onOpen } = useDisclosure()
 
+  //   const castAllocationVotes = useCastAllocationVotes({ roundId })
+
   // const handleClose = useCallback(() => {
   //   castAllocationVotes.resetStatus()
   //   onClose()

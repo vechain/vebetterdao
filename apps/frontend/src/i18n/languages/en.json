@@ -1,4 +1,10 @@
 {
+  "Select at least one app to continue": "Select at least one app to continue",
+  "{{amount}} selected apps": "<strong>{{amount}}</strong> selected apps",
+  "Select the apps you want to vote": "Select the apps you want to vote",
+  "The apps you vote will receive a B3TR allocation to distribute among its users as rewards for completing sustainable actions. Select your favorite apps to add them to your vote.": "The apps you vote will receive a B3TR allocation to distribute among its users as rewards for completing sustainable actions. Select your favorite apps to add them to your vote.",
+  "{{amount}} participating apps": "{{amount}} participating apps",
+  "Select all": "Select all",
   "Your V0T3 balance": "Your V0T3 balance",
   "VOT3 balance at snapshot": "VOT3 balance at snapshot",
   "We use the quadratic formula to calculate the results": "We use the quadratic formula to calculate the results",

@@ -15,6 +15,7 @@ import { UilSearch } from "@iconscout/react-unicons"
 import { UseQueryResult } from "@tanstack/react-query"
 import { useCallback, useMemo, useState } from "react"
 import { AppSelectableCard } from "./AppSelectableCard"
+import { useTranslation } from "react-i18next"
 
 type Props = {
   selectedApps: CastVoteData[]
@@ -26,6 +27,7 @@ const searchApp = (app: XApp, query: string) => {
   return app.name.toLowerCase().includes(query.toLowerCase())
 }
 export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xAppsQuery }: Props) => {
+  const { t } = useTranslation()
   const [appsToSearch, setAppsToSearch] = useState("")
 
   const onCheckboxChange = useCallback(
@@ -54,11 +56,11 @@ export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xAppsQ
       <HStack w="full" spacing={4} justify={"space-between"}>
         <Skeleton isLoaded={!xAppsQuery.isLoading}>
           <Heading fontSize={"24px"} fontWeight={700}>
-            {xAppsQuery.data?.length} participating apps
+            {t("{{amount}} participating apps", { amount: xAppsQuery.data?.length ?? "0" })}
           </Heading>
         </Skeleton>
         <Checkbox colorScheme="primary" onChange={onCheckboxChange} isChecked={isSelectAllChecked}>
-          Select all
+          {t("Select all")}
         </Checkbox>
       </HStack>
       <VStack w="full" spacing={4}>
