@@ -88,6 +88,7 @@ contract X2EarnRewardsPool is
 
     __UUPSUpgradeable_init();
     __AccessControl_init();
+    __ReentrancyGuard_init();
 
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     _grantRole(UPGRADER_ROLE, _upgrader);
