@@ -209,13 +209,8 @@ describe("X2EarnRewardsPool", function () {
 
       if (!myErc1155) throw new Error("No ERC1155 contract")
 
-      await myErc1155.connect(owner).mint(owner.address, 1, 1, "0x")
-
-      // @ts-ignore
       await expect(
-        myErc1155
-          .connect(owner)
-          .safeBatchTransferFrom(owner.address, await x2EarnRewardsPool.getAddress(), [1], [1], "0x"),
+        myErc1155.connect(owner).mintBatch(await x2EarnRewardsPool.getAddress(), [2, 3], [2, 3], new Uint8Array(0)),
       ).to.be.rejected
     })
 
