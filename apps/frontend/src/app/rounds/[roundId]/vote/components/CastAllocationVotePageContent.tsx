@@ -192,13 +192,13 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
   }, [isVotingConcluded, hasVoted])
 
   //redirect to round page if user already voted or voting is concluded
-  useLayoutEffect(() => {
-    if (!shouldSeeThePage) {
-      router.push(`/rounds/${roundId}`)
-    }
-  }, [shouldSeeThePage, roundId, router])
+  //   useLayoutEffect(() => {
+  //     if (!shouldSeeThePage) {
+  //       router.push(`/rounds/${roundId}`)
+  //     }
+  //   }, [shouldSeeThePage, roundId, router])
 
-  if (!shouldSeeThePage) return null
+  //   if (!shouldSeeThePage) return null
 
   return (
     <Card w="full" id="user-votes" maxH={[!account ? "600px" : "auto", "auto"]} overflowY={"hidden"}>

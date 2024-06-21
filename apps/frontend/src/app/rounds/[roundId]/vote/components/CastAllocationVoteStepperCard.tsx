@@ -24,9 +24,9 @@ export const CastAllocationVoteStepperCard = () => {
 
   const Steps = useMemo(
     () => [
-      { key: "selectApps", title: t("Select Apps") },
-      { key: "AssignPercentages", title: t("Assign percentages"), pathnames: ["/proposals/new/form/discussion"] },
-      { key: "reviewAndConfirm", title: t("Review and confirm"), pathnames: ["/proposals/new/form/content"] },
+      { key: "selectApps", title: t("Select Apps"), pathnames: ["/vote"] },
+      { key: "AssignPercentages", title: t("Assign percentages"), pathnames: ["/vote/percentages"] },
+      { key: "reviewAndConfirm", title: t("Review and confirm"), pathnames: ["/confirm"] },
     ],
     [t],
   )
@@ -49,9 +49,11 @@ export const CastAllocationVoteStepperCard = () => {
   }, [Steps])
 
   return (
-    <Card>
+    <Card variant={"baseWithBorder"} w="full">
       <CardHeader>
-        <Heading size="md">{t("Progress")}</Heading>
+        <Heading fontSize="24px" fontWeight={700}>
+          {t("Progress")}
+        </Heading>
       </CardHeader>
       <CardBody>
         <Stepper
