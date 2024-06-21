@@ -1,5 +1,5 @@
 import fs from "fs/promises"
-import { toIPFSURL, uploadDirectoryToIPFS } from "../../helpers"
+import { copyImages, toIPFSURL, uploadDirectoryToIPFS, zipFolder } from "../../helpers"
 import path from "path"
 import { ethers } from "ethers"
 
@@ -28,18 +28,11 @@ const SRC_JSON_PATH = path.join(__dirname, `../../../metadata/xApps/src/json`)
 const MEDIA_PATH = path.join(__dirname, "../../../metadata/xApps/src/media")
 const OUTPUT_PATH = path.join(__dirname, `../../../metadata/xApps/output`)
 
-// NFT Storage
-const NFT_STORAGE_KEY = process.env.NEXT_PUBLIC_NFT_STORAGE_KEY ?? ""
-
 /**
  * Main function to generate and save x-apps metadata.
  */
 async function generateAndSaveMetadata(): Promise<void> {
   try {
-    if (!NFT_STORAGE_KEY) {
-      throw new Error("NFT_STORAGE_KEY is not set")
-    }
-
     // get metadata templates from the source directory
     const files = await fs.readdir(SRC_JSON_PATH)
 
@@ -58,23 +51,31 @@ async function generateAndSaveMetadata(): Promise<void> {
 }
 
 const generateMetadata = async (file: string): Promise<XAppMetadata> => {
-  console.log(`Processing ${file}`)
-
   const metadata: XAppMetadata = JSON.parse(await fs.readFile(path.join(SRC_JSON_PATH, file), "utf-8"))
   const filename = path.parse(file).name
 
   await validateMediaFiles(filename)
+  // Copy images to a new directory called images so that we can zip them
+  copyImages(`${MEDIA_PATH}/${filename}`, `${MEDIA_PATH}/images`)
+  // Zip the images directory
+  await zipFolder(`${MEDIA_PATH}/images`, `${MEDIA_PATH}/images.zip`);
 
-  const media = await uploadDirectoryToIPFS(`${MEDIA_PATH}/${filename}`, NFT_STORAGE_KEY)
+  const [imagesIpfsUrl] = await uploadDirectoryToIPFS(`${MEDIA_PATH}/images.zip`, `${MEDIA_PATH}/${filename}`)
 
-  metadata.banner = toIPFSURL(media[0], "banner.png")
-  metadata.logo = toIPFSURL(media[0], "logo.png")
+  metadata.banner = toIPFSURL(imagesIpfsUrl, "banner.png", 'images')
+  metadata.logo = toIPFSURL(imagesIpfsUrl, "logo.png", 'images')
 
   return metadata
 }
 
 const validateMediaFiles = async (filename: string) => {
-  const media = await fs.readdir(`${MEDIA_PATH}/${filename}`)
+  let media = await fs.readdir(`${MEDIA_PATH}/${filename}`)
+
+   // Check and remove .DS_STORE files if they exist
+   if (media.includes('.DS_Store')) {
+    await fs.unlink(`${MEDIA_PATH}/${filename}/.DS_Store`); // This deletes the .DS_Store file
+    media = media.filter(file => file !== '.DS_Store'); // Update the media list
+  }
 
   // media must contain 2 files: a logo and a banner
   if (media.length !== 2) {
@@ -93,7 +94,7 @@ const validateMediaFiles = async (filename: string) => {
  * @param metadata - The `XAppMetadata` object to save.
  */
 async function saveMetadataToFile(metadata: XAppMetadata, fileName: string): Promise<void> {
-  await fs.writeFile(`${OUTPUT_PATH}/${fileName}`, JSON.stringify(metadata, null, 2))
+  await fs.writeFile(`${OUTPUT_PATH}/${fileName}.json`, JSON.stringify(metadata, null, 2))
   console.log(`Metadata saved to ${OUTPUT_PATH}/${fileName}`)
 }
 
