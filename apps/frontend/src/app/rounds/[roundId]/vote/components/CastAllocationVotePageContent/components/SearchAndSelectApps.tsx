@@ -18,8 +18,8 @@ import { AppSelectableCard } from "./AppSelectableCard"
 import { useTranslation } from "react-i18next"
 
 type Props = {
-  selectedApps: CastVoteData[]
-  onSelectedAppsChange: (_selectedApps: CastVoteData[]) => void
+  selectedApps: CastVoteData
+  onSelectedAppsChange: (_selectedApps: CastVoteData) => void
   xAppsQuery: UseQueryResult<XApp[], Error>
 }
 
@@ -34,7 +34,7 @@ export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xAppsQ
     (e: React.ChangeEvent<HTMLInputElement>) => {
       if (!xAppsQuery.data) return
       if (e.target.checked)
-        return onSelectedAppsChange(xAppsQuery.data.map(xApp => ({ appId: xApp.id, votePercentage: 0 })))
+        return onSelectedAppsChange(xAppsQuery.data.map(xApp => ({ appId: xApp.id, value: 0, rawValue: 0 })))
       return onSelectedAppsChange([])
     },
     [onSelectedAppsChange, xAppsQuery],
@@ -72,7 +72,7 @@ export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xAppsQ
               if (isSelected) {
                 onSelectedAppsChange(selectedApps.filter(selectedApp => selectedApp.appId !== xApp.id))
               } else {
-                onSelectedAppsChange([...selectedApps, { appId: xApp.id, votePercentage: 0 }])
+                onSelectedAppsChange([...selectedApps, { appId: xApp.id, value: 0, rawValue: 0 }])
               }
             }
             return <AppSelectableCard key={xApp.id} app={xApp} isSelected={isSelected} onSelect={onSelect} />

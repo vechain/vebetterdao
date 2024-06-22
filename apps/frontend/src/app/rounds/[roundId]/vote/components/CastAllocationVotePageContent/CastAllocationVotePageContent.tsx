@@ -17,14 +17,6 @@ type Props = {
   roundId: string
 }
 
-export type CastAllocationVoteFormData = {
-  votes: {
-    appId: string
-    value: string
-    rawValue: number
-  }[]
-}
-
 export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
@@ -49,7 +41,7 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
   const [onContinueError, setOnContinueError] = useState<string | null>(null)
 
   const handleOnSelectedAppsChange = useCallback(
-    (data: CastVoteData[]) => {
+    (data: CastVoteData) => {
       setOnContinueError(null)
       onSelectedAppsChange(data)
     },

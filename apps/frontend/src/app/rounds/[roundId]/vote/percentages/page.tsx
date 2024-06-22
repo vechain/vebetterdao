@@ -33,7 +33,7 @@ export default function CastAllocationVotePercentagesPage({ params }: Readonly<P
 
   return (
     <MotionVStack>
-      <CastAllocationVotePercentagesPageContent />
+      <CastAllocationVotePercentagesPageContent roundId={params.roundId} />
     </MotionVStack>
   )
 }
