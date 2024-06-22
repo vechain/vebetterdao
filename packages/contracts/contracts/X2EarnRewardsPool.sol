@@ -131,7 +131,10 @@ contract X2EarnRewardsPool is
 
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
 
-    require($.x2EarnApps.isAppAdmin(appId, msg.sender), "X2EarnRewardsPool: not an app admin");
+    require(
+      $.x2EarnApps.isAppAdmin(appId, msg.sender) || $.x2EarnApps.isRewardDistributor(appId, msg.sender),
+      "X2EarnRewardsPool: not an app admin nor a reward distributor"
+    );
 
     // check if the app has enough available funds to withdraw
     require($.availableFunds[appId] >= amount, "X2EarnRewardsPool: app has insufficient funds");
