@@ -91,7 +91,7 @@ export const SuccessAppWithdrawModalContent = ({
         {Number(b3trBalanceAfter) >= 0 && (
           <HStack w="full" bg={"#F8F8F8"} borderRadius={8} p={4} justifyContent={"space-between"}>
             <Text fontSize={16} fontWeight={400}>
-              {t("Your new B3TR balance")}
+              {t("Your app new B3TR balance")}
             </Text>
 
             <HStack>
