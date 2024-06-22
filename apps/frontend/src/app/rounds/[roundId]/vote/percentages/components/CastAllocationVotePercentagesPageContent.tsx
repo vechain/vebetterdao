@@ -1,6 +1,6 @@
 import { useAllocationsRound, useAllocationsRoundState, useGetVotesOnBlock, useHasVotedInRound } from "@/api"
 import { Button, Card, CardBody, Checkbox, HStack, Heading, Skeleton, Text, VStack } from "@chakra-ui/react"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useMemo } from "react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useRouter } from "next/navigation"
 import { Trans, useTranslation } from "react-i18next"
@@ -42,7 +42,7 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
   const isVotingConcluded = roundInfo?.voteEndTimestamp?.isBefore() && [1, 2].includes(state ?? 0)
 
-  const [onContinueError, setOnContinueError] = useState<string | null>(null)
+  console.log("castAllocationForm", castAllocationForm)
 
   //   const splitEvenly = () => {
   //     const totalAppsToVote = xApps?.length ?? 0
@@ -61,7 +61,7 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
   const onContinue = useCallback(
     (data: CastAllocationVoteFormData) => {
       onVotesChange(data.votes)
-      router.push(`/rounds/${roundId}/vote/percentages`)
+      router.push(`/rounds/${roundId}/vote/confirm`)
     },
     [router, roundId, onVotesChange],
   )
@@ -127,17 +127,6 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
           </VStack>
 
           <HStack w="full" spacing={4} justify={"space-between"}>
-            {/* <Text fontSize={"16px"} fontWeight={400} color="#6A6A6A">
-              {onContinueError ? (
-                <Text fontSize={"16px"} fontWeight={600} color="#C84968">
-                  {onContinueError}
-                </Text>
-              ) : (
-                <Text fontSize={"16px"} fontWeight={400} color="#252525">
-                  <Trans i18nKey={"{{amount}} selected apps"} values={{ amount: selectedApps?.length ?? 0 }} t={t} />
-                </Text>
-              )}
-            </Text> */}
             <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
               <Button
                 data-testid="go-back"
