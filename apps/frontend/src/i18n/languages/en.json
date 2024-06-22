@@ -1,4 +1,6 @@
 {
+  "Review and confirm": "Review and confirm",
+  "Make sure that the apps you selected and the distribution percentages are right. If something’s wrong, you can go back and modify it.": "Make sure that the apps you selected and the distribution percentages are right. If something’s wrong, you can go back and modify it.",
   "Assign percentage of VOT3 to the apps": "Assign percentage of VOT3 to the apps",
   "Select at least one app to continue": "Select at least one app to continue",
   "{{amount}} selected apps": "<strong>{{amount}}</strong> selected apps",
@@ -12,7 +14,6 @@
   "To aim for the equality of the voting process, we use quadratic voting, which divide your total amount of VOT3 for the square root.": "To aim for the equality of the voting process, we use quadratic voting, which divide your total amount of VOT3 for the square root.",
   "Assign percentages": "Assign percentages",
   "Select Apps": "Select Apps",
-  "Review and confirm": "Review and confirm",
   "Reset to default": "Reset to default",
   "{{amount}} distributed among {{apps}} apps": "<strong>{{amount}}</strong> distributed among <strong>{{apps}}</strong> apps",
   "Apps": "Apps",
