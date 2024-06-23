@@ -1,19 +1,35 @@
 import { useAllocationsRound, useAllocationsRoundState, useGetVotesOnBlock, useHasVotedInRound } from "@/api"
-import { Button, Card, CardBody, HStack, Heading, Text, VStack, useDisclosure } from "@chakra-ui/react"
+import {
+  Button,
+  Card,
+  CardBody,
+  HStack,
+  Heading,
+  Skeleton,
+  Text,
+  VStack,
+  useDisclosure,
+  useMediaQuery,
+} from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useRouter } from "next/navigation"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { useCastAllocationFormStore } from "@/store"
 import { AppVotesBreakdown } from "@/app/rounds/components/AppVotesBreakdown/AppVotesBreakdown"
 import { TransactionModal } from "@/components"
 import { useCastAllocationVotes, CastAllocationVotesProps } from "@/hooks"
 import { scaledDivision } from "@/utils/MathUtils"
+import { FiArrowUpRight } from "react-icons/fi"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
 type Props = {
   roundId: string
 }
+
+const compactFormatter = getCompactFormatter(2)
 export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
+  const [isDesktop] = useMediaQuery("(min-width: 800px)")
   const { t } = useTranslation()
   const { account } = useWallet()
 
@@ -43,6 +59,10 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
     castAllocationVotes.resetStatus()
     onClose()
   }, [castAllocationVotes, onClose])
+
+  const totalVotesToCast = useMemo(() => {
+    return (votes.reduce((acc, vote) => acc + Number(vote.rawValue), 0) * Number(votesAtSnapshot)) / 100
+  }, [votes, votesAtSnapshot])
 
   const onContinue = useCallback(() => {
     if (!votesAtSnapshot) throw new Error("Votes at snapshot not found")
@@ -109,7 +129,30 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
                 "Make sure that the apps you selected and the distribution percentages are right. If something’s wrong, you can go back and modify it.",
               )}
             </Text>
-            <AppVotesBreakdown votes={votes} />
+            <YourVoteCardWrapper>
+              <VStack flex={1} w="full" spacing={8} align={"flex-start"}>
+                <VStack spacing={2} align="flex-start" w="full">
+                  <HStack w="full" justify="space-between">
+                    <Heading fontSize="24px" fontWeight={700}>
+                      {t("Your vote")}
+                    </Heading>
+                    <Button variant="link" colorScheme="primary" rightIcon={<FiArrowUpRight />}>
+                      {t("See all")}
+                    </Button>
+                  </HStack>
+                  <Skeleton isLoaded={!votesAtSnapshotLoading}>
+                    <Text fontSize="16px" fontWeight="400">
+                      <Trans
+                        i18nKey={"{{amount}} distributed among {{apps}} apps"}
+                        values={{ amount: compactFormatter.format(totalVotesToCast ?? 0), apps: votes.length }}
+                        t={t}
+                      />
+                    </Text>
+                  </Skeleton>
+                </VStack>
+                <AppVotesBreakdown votes={votes} />
+              </VStack>
+            </YourVoteCardWrapper>
 
             <HStack w="full" spacing={4} justify={"space-between"}>
               <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
@@ -138,4 +181,16 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
       </Card>
     </>
   )
+}
+
+const YourVoteCardWrapper = ({ children }: { children: React.ReactNode }) => {
+  const [isDesktop] = useMediaQuery("(min-width: 800px)")
+
+  if (isDesktop)
+    return (
+      <Card w="full" variant={"filled"}>
+        <CardBody>{children}</CardBody>
+      </Card>
+    )
+  return children
 }

@@ -9,7 +9,6 @@ import { SelectAppVotesInput, CastAllocationVoteFormData } from "./SelectAppVote
 import { useFieldArray, useForm } from "react-hook-form"
 import { scaledDivision } from "@/utils/MathUtils"
 import BigNumber from "bignumber.js"
-import { replace } from "lodash"
 
 type Props = {
   roundId: string
