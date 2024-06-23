@@ -1,4 +1,3 @@
-import fsPromises from "fs/promises"
 import path from "path"
 import fs from "fs"
 import FormData from "form-data"
@@ -13,13 +12,13 @@ import archiver from "archiver"
  * @throws An error if the directory does not exist.
  */
 async function readFilesFromDirectory(dirPath: string): Promise<File[]> {
-  const entries = await fsPromises.readdir(dirPath, { withFileTypes: true })
+  const entries = await fs.promises.readdir(dirPath, { withFileTypes: true })
   const files: File[] = []
 
   for (const entry of entries) {
     if (entry.isFile()) {
       const filePath = path.join(dirPath, entry.name)
-      const content = await fsPromises.readFile(filePath)
+      const content = await fs.promises.readFile(filePath)
       const mimeType = "image/png" // TODO: Get the MIME type from the file
       const file: File = new File([content], entry.name, { type: mimeType })
       files.push(file)
