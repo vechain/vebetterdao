@@ -1,6 +1,7 @@
 import {
   useAllocationsRound,
   useAllocationsRoundState,
+  useGetVotesOnBlock,
   useHasVotedInRound,
   useRoundXApps,
   useUserVotesInRound,
@@ -22,7 +23,7 @@ import {
 } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { useMemo } from "react"
+import { useCallback, useMemo } from "react"
 import { FaClock } from "react-icons/fa6"
 import { MdHowToVote } from "react-icons/md"
 import { PiSquaresFourFill } from "react-icons/pi"
@@ -30,6 +31,7 @@ import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
 import { AllocationRoundBreakdownChart } from "./AllocationRoundBreakdownChart"
 import { useRouter } from "next/navigation"
+import { t } from "i18next"
 
 const compactFormatter = getCompactFormatter(2)
 type Props = {
@@ -45,6 +47,11 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
   const { data: userVotes, isLoading: userVotesLoading } = useUserVotesInRound(roundId, account ?? undefined)
 
+  const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
+    Number(data.voteStart),
+    account ?? undefined,
+  )
+
   const totalVotesCast = useMemo(() => {
     return userVotes?.voteWeights.reduce((acc, curr) => acc + Number(ethers.formatEther(curr)), 0) ?? 0
   }, [userVotes?.voteWeights])
@@ -53,14 +60,34 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
 
   const { data: roundState, isLoading: roundStateLoading } = useAllocationsRoundState(roundId)
 
+  const hasVotesAtSnapshot = useMemo(() => {
+    return Number(votesAtSnapshot) > 0
+  }, [votesAtSnapshot])
+
   const isFinished = useMemo(() => {
-    return roundState !== 0
+    return roundState !== undefined && roundState !== 0
   }, [roundState])
   const remainingTime = useMemo(() => {
     // remove prefix/suffix
     if (isFinished) return `${data?.voteEndTimestamp?.fromNow()}`
     return `${data?.voteEndTimestamp?.fromNow(true)}`
   }, [data?.voteEndTimestamp, isFinished])
+
+  const navigateToVote = useCallback(() => {
+    router.push(`/rounds/${roundId}/vote`)
+  }, [router, roundId])
+
+  const shouldSeeVoteButton = useMemo(() => {
+    return !isFinished && !!account && hasVoted === false && hasVotesAtSnapshot
+  }, [isFinished, account, hasVoted, hasVotesAtSnapshot])
+
+  const yourVoteText = useMemo(() => {
+    if (hasVoted) return compactFormatter.format(totalVotesCast)
+    if (isFinished) return "You have not voted"
+    if (hasVotesAtSnapshot) return "You have not voted"
+
+    return "No votes to cast"
+  }, [hasVoted, hasVotesAtSnapshot, totalVotesCast, isFinished])
 
   return (
     <Card w="full" borderRadius={"3xl"} variant={"baseWithBorder"} data-testid="allocation-round-header-card">
@@ -129,22 +156,22 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                     <Text color="#6A6A6A" fontSize={["lg", "lg", "md"]} fontWeight={400}>
                       {t("Your vote")}
                     </Text>
-                    <Skeleton isLoaded={!hasVotedLoading && !userVotesLoading}>
+                    <Skeleton isLoaded={!hasVotedLoading && !userVotesLoading && !votesAtSnapshotLoading}>
                       <HStack spacing={2}>
                         <Icon as={hasVoted ? VOT3Icon : MdHowToVote} boxSize={4} color={"#252525"} />
                         <Text fontSize={["lg", "lg", "md"]} color={"#252525"} fontWeight={400}>
-                          {hasVoted ? compactFormatter.format(totalVotesCast) : "You have not voted"}
+                          {yourVoteText}
                         </Text>
                       </HStack>
                     </Skeleton>
                   </Box>
                 )}
               </Stack>
-              {!!account && !hasVoted && !isFinished && (
+              {shouldSeeVoteButton && (
                 <Button
                   data-testid="cast-your-vote-button"
                   variant={"primaryAction"}
-                  onClick={() => router.push(`/rounds/${roundId}/vote`)}
+                  onClick={navigateToVote}
                   size={"lg"}
                   colorScheme={"primary"}
                   w={["full", "auto"]}
