@@ -29,13 +29,12 @@ type Props = {
 
 const compactFormatter = getCompactFormatter(2)
 export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
-  const [isDesktop] = useMediaQuery("(min-width: 800px)")
   const { t } = useTranslation()
   const { account } = useWallet()
 
   const router = useRouter()
 
-  const { data: votes, setData: onVotesChange } = useCastAllocationFormStore()
+  const { data: votes } = useCastAllocationFormStore()
   const { data: state, isLoading: isStateLoading } = useAllocationsRoundState(roundId)
 
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(roundId)

@@ -14,19 +14,22 @@ import {
   Stepper,
   useSteps,
 } from "@chakra-ui/react"
-import { usePathname } from "next/navigation"
+import { useParams, usePathname } from "next/navigation"
 import { useEffect, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
 export const CastAllocationVoteStepperCard = () => {
   const { t } = useTranslation()
   const pathname = usePathname()
+  const params = useParams()
+
+  console.log("params", params, "pathname", pathname)
 
   const Steps = useMemo(
     () => [
-      { key: "selectApps", title: t("Select Apps"), pathnames: ["/vote"] },
-      { key: "AssignPercentages", title: t("Assign percentages"), pathnames: ["/vote/percentages"] },
-      { key: "reviewAndConfirm", title: t("Review and confirm"), pathnames: ["/confirm"] },
+      { key: "selectApps", title: t("Select Apps"), pathnames: ["/rounds/:roundId/vote"] },
+      { key: "AssignPercentages", title: t("Assign percentages"), pathnames: ["/rounds/:roundId/vote/percentages"] },
+      { key: "reviewAndConfirm", title: t("Review and confirm"), pathnames: ["/rounds/:roundId/vote/confirm"] },
     ],
     [t],
   )
@@ -38,11 +41,15 @@ export const CastAllocationVoteStepperCard = () => {
 
   //set active step based on the current pathname
   useEffect(() => {
-    const step = Steps.find(step => step.pathnames?.includes(pathname))
+    const pathPattern = Object.keys(params).reduce(
+      (acc, key) => acc.replace(params[key] as string, `:${key}`),
+      pathname,
+    )
+    const step = Steps.find(step => step.pathnames?.includes(pathPattern))
     if (step) {
       setActiveStep(Steps.indexOf(step))
     }
-  }, [pathname, setActiveStep, Steps])
+  }, [pathname, params, setActiveStep, Steps])
 
   const height = useMemo(() => {
     return Steps.length * 60
