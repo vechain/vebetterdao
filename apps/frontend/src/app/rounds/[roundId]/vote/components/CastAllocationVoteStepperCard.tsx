@@ -23,8 +23,6 @@ export const CastAllocationVoteStepperCard = () => {
   const pathname = usePathname()
   const params = useParams()
 
-  console.log("params", params, "pathname", pathname)
-
   const Steps = useMemo(
     () => [
       { key: "selectApps", title: t("Select Apps"), pathnames: ["/rounds/:roundId/vote"] },

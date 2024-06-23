@@ -129,27 +129,32 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
             })}
           </VStack>
 
-          <HStack w="full" spacing={4} justify={"space-between"}>
-            <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
-              <Button
-                data-testid="go-back"
-                rounded="full"
-                variant={"primarySubtle"}
-                colorScheme="primary"
-                size="lg"
-                onClick={goBack}>
-                {t("Go back")}
-              </Button>
-              <Button
-                form="cast-allocation-vote-form"
-                data-testid="continue"
-                rounded="full"
-                colorScheme="primary"
-                size="lg"
-                type="submit">
-                {t("Continue")}
-              </Button>
-            </HStack>
+          <HStack
+            alignSelf={"flex-end"}
+            justify={["space-between", "space-between", "flex-end"]}
+            spacing={4}
+            flex={1}
+            w={["full", "full", "auto"]}>
+            <Button
+              flex={1}
+              data-testid="go-back"
+              rounded="full"
+              variant={"primarySubtle"}
+              colorScheme="primary"
+              size="lg"
+              onClick={goBack}>
+              {t("Go back")}
+            </Button>
+            <Button
+              flex={1}
+              form="cast-allocation-vote-form"
+              data-testid="continue"
+              rounded="full"
+              colorScheme="primary"
+              size="lg"
+              type="submit">
+              {t("Continue")}
+            </Button>
           </HStack>
         </VStack>
       </CardBody>

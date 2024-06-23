@@ -6,6 +6,7 @@ import {
   HStack,
   Heading,
   Skeleton,
+  Stack,
   Text,
   VStack,
   useDisclosure,
@@ -153,9 +154,28 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
               </VStack>
             </YourVoteCardWrapper>
 
-            <HStack w="full" spacing={4} justify={"space-between"}>
-              <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
+            <Stack
+              direction={["column", "column", "row"]}
+              w="full"
+              spacing={4}
+              justify={"space-between"}
+              align={["center", "center", "flex-start"]}>
+              <Text
+                fontSize={"16px"}
+                fontWeight={600}
+                color="#F29B32"
+                textAlign={["center", "center", "left"]}
+                flex={1}>
+                <Trans i18nKey={"Once your vote has been casted, you will not be able to revert it."} t={t} />
+              </Text>
+              <HStack
+                alignSelf={"flex-end"}
+                justify={["space-between", "space-between", "flex-end"]}
+                spacing={4}
+                flex={1}
+                w={["full", "full", "auto"]}>
                 <Button
+                  flex={1}
                   data-testid="go-back"
                   rounded="full"
                   variant={"primarySubtle"}
@@ -165,16 +185,17 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
                   {t("Go back")}
                 </Button>
                 <Button
+                  flex={1}
                   form="cast-allocation-vote-form"
                   data-testid="continue"
                   rounded="full"
                   colorScheme="primary"
                   size="lg"
                   onClick={onContinue}>
-                  {t("Continue")}
+                  {t("Cast your vote")}
                 </Button>
               </HStack>
-            </HStack>
+            </Stack>
           </VStack>
         </CardBody>
       </Card>

@@ -16,6 +16,7 @@ import { UseQueryResult } from "@tanstack/react-query"
 import { useCallback, useMemo, useState } from "react"
 import { AppSelectableCard } from "./AppSelectableCard"
 import { useTranslation } from "react-i18next"
+import { NoAppsCard } from "./NoAppsCard"
 
 type Props = {
   selectedApps: CastVoteData
@@ -26,6 +27,7 @@ type Props = {
 const searchApp = (app: XApp, query: string) => {
   return app.name.toLowerCase().includes(query.toLowerCase())
 }
+
 export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xAppsQuery }: Props) => {
   const { t } = useTranslation()
   const [appsToSearch, setAppsToSearch] = useState("")
@@ -45,6 +47,11 @@ export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xAppsQ
     return selectedApps.length === xAppsQuery.data.length
   }, [selectedApps, xAppsQuery.data])
 
+  const filteredApps = useMemo(() => {
+    if (!xAppsQuery.data) return []
+    return xAppsQuery.data.filter(xApp => searchApp(xApp, appsToSearch))
+  }, [appsToSearch, xAppsQuery.data])
+
   return (
     <VStack w="full" spacing={6}>
       <InputGroup>
@@ -55,18 +62,19 @@ export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xAppsQ
       </InputGroup>
       <HStack w="full" spacing={4} justify={"space-between"}>
         <Skeleton isLoaded={!xAppsQuery.isLoading}>
-          <Heading fontSize={"24px"} fontWeight={700}>
+          <Heading fontSize={"20px"} fontWeight={700}>
             {t("{{amount}} participating apps", { amount: xAppsQuery.data?.length ?? "0" })}
           </Heading>
         </Skeleton>
-        <Checkbox colorScheme="primary" onChange={onCheckboxChange} isChecked={isSelectAllChecked}>
+        <Checkbox colorScheme="primary" onChange={onCheckboxChange} isChecked={isSelectAllChecked} size="lg">
           {t("Select all")}
         </Checkbox>
       </HStack>
       <VStack w="full" spacing={4}>
-        {xAppsQuery.data
-          ?.filter(xApp => searchApp(xApp, appsToSearch))
-          .map(xApp => {
+        {!filteredApps.length ? (
+          <NoAppsCard onShowAllApps={() => setAppsToSearch("")} />
+        ) : (
+          filteredApps.map(xApp => {
             const isSelected = selectedApps.some(selectedApp => selectedApp.appId === xApp.id)
             const onSelect = () => {
               if (isSelected) {
@@ -76,7 +84,8 @@ export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xAppsQ
               }
             }
             return <AppSelectableCard key={xApp.id} app={xApp} isSelected={isSelected} onSelect={onSelect} />
-          })}
+          })
+        )}
       </VStack>
     </VStack>
   )

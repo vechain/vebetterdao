@@ -5,7 +5,7 @@ import {
   useHasVotedInRound,
   useRoundXApps,
 } from "@/api"
-import { Button, Card, CardBody, HStack, Heading, Text, VStack } from "@chakra-ui/react"
+import { Button, Card, CardBody, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useRouter } from "next/navigation"
@@ -89,33 +89,47 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
             xAppsQuery={xAppsQuery}
           />
 
-          <HStack w="full" spacing={4} justify={"space-between"}>
-            <Text fontSize={"16px"} fontWeight={400} color="#6A6A6A">
-              {onContinueError ? (
-                <Text fontSize={"16px"} fontWeight={600} color="#C84968">
-                  {onContinueError}
-                </Text>
-              ) : (
-                <Text fontSize={"16px"} fontWeight={400} color="#252525">
-                  <Trans i18nKey={"{{amount}} selected apps"} values={{ amount: selectedApps?.length ?? 0 }} t={t} />
-                </Text>
-              )}
-            </Text>
-            <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
+          <Stack
+            direction={["column", "column", "row"]}
+            w="full"
+            spacing={4}
+            justify={"space-between"}
+            align={["center", "center", "flex-start"]}>
+            {onContinueError ? (
+              <Text fontSize={"16px"} fontWeight={600} color="#C84968">
+                {onContinueError}
+              </Text>
+            ) : (
+              <Text fontSize={"16px"} fontWeight={400} color="#252525">
+                <Trans i18nKey={"{{amount}} selected apps"} values={{ amount: selectedApps?.length ?? 0 }} t={t} />
+              </Text>
+            )}
+            <HStack
+              alignSelf={"flex-end"}
+              justify={["space-between", "space-between", "flex-end"]}
+              spacing={4}
+              w={["full", "full", "auto"]}>
               <Button
                 data-testid="go-back"
                 rounded="full"
                 variant={"primarySubtle"}
                 colorScheme="primary"
                 size="lg"
+                flex={1}
                 onClick={goBack}>
                 {t("Go back")}
               </Button>
-              <Button data-testid="continue" rounded="full" colorScheme="primary" size="lg" onClick={onContinue}>
+              <Button
+                flex={1}
+                data-testid="continue"
+                rounded="full"
+                colorScheme="primary"
+                size="lg"
+                onClick={onContinue}>
                 {t("Continue")}
               </Button>
             </HStack>
-          </HStack>
+          </Stack>
         </VStack>
       </CardBody>
     </Card>
