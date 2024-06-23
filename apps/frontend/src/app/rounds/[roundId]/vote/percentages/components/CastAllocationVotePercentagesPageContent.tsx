@@ -9,6 +9,7 @@ import { SelectAppVotesInput, CastAllocationVoteFormData } from "./SelectAppVote
 import { useFieldArray, useForm } from "react-hook-form"
 import { scaledDivision } from "@/utils/MathUtils"
 import BigNumber from "bignumber.js"
+import { replace } from "lodash"
 
 type Props = {
   roundId: string
@@ -28,14 +29,16 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
     account ?? undefined,
   )
 
-  const castAllocationForm = useForm<CastAllocationVoteFormData>({
+  const { formState, control, handleSubmit, getValues } = useForm<CastAllocationVoteFormData>({
     defaultValues: {
       votes,
     },
   })
 
-  const castAllocationFormArray = useFieldArray({
-    control: castAllocationForm.control,
+  const { errors } = formState
+
+  const { fields, replace } = useFieldArray({
+    control,
     name: "votes",
   })
 
@@ -56,10 +59,8 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
       const parsedRawValue = index === randomAppIndex ? rawValue + remainingPercentage : rawValue
       return { appId: vote.appId, value: votesPerApp, rawValue: parsedRawValue }
     })
-    // console.log("updatedVotes", updatedVotes)
-    // castAllocationForm.setValue("votes", updatedVotes, { shouldValidate: true })
-    castAllocationFormArray.replace(updatedVotes)
-  }, [votes, castAllocationFormArray])
+    replace(updatedVotes)
+  }, [votes, replace])
 
   const onContinue = useCallback(
     (data: CastAllocationVoteFormData) => {
@@ -112,17 +113,17 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
             w="full"
             spacing={8}
             align={"flex-start"}
-            onSubmit={castAllocationForm.handleSubmit(onContinue)}>
-            {castAllocationFormArray.fields.map((field, index) => {
+            onSubmit={handleSubmit(onContinue)}>
+            {fields.map((field, index) => {
               return (
                 <SelectAppVotesInput
-                  key={field.appId}
+                  key={field.id}
                   appId={field.appId}
                   field={field}
                   index={index}
-                  control={castAllocationForm.control}
-                  errors={castAllocationForm.formState.errors}
-                  getValues={castAllocationForm.getValues}
+                  control={control}
+                  errors={errors}
+                  getValues={getValues}
                   totalVotesAvailable={votesAtSnapshot}
                 />
               )

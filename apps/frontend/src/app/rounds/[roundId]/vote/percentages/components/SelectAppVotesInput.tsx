@@ -18,6 +18,7 @@ import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
 import { scaledDivision } from "@/utils/MathUtils"
 import BigNumber from "bignumber.js"
+import { t } from "i18next"
 
 const estimateVotes = (value: number | string, totalVotesAvailable: number | string) => {
   return scaledDivision(Number(value) * Number(totalVotesAvailable), 100)
@@ -76,7 +77,7 @@ export const SelectAppVotesInput = ({
           {appMetadata?.name}
         </Heading>
       </HStack>
-      <Box flex={[1, 1, 0.5]}>
+      <Box flex={[1, 1, 0.5]} w="full">
         <Controller
           control={control}
           name={`votes.${index}`}
@@ -125,7 +126,9 @@ export const SelectAppVotesInput = ({
                     }}
                     isDisabled={isDisabled}
                   />
-                  <InputRightElement>%</InputRightElement>
+                  <InputRightElement fontWeight={400} color="#6A6A6A" fontSize={"16px"}>
+                    {t("%")}
+                  </InputRightElement>
                 </InputGroup>
                 {value && totalVotesAvailable && !errors.votes?.[index] ? (
                   <FormHelperText
@@ -133,9 +136,12 @@ export const SelectAppVotesInput = ({
                     fontWeight={400}
                     fontSize={"16px"}
                     color="#6A6A6A">
-                    =~{" "}
-                    {new BigNumber(estimateVotes(value.rawValue, totalVotesAvailable)).toFixed(2, BigNumber.ROUND_DOWN)}{" "}
-                    votes
+                    {t("=~ {{value}} votes", {
+                      value: new BigNumber(estimateVotes(value.rawValue, totalVotesAvailable)).toFixed(
+                        2,
+                        BigNumber.ROUND_DOWN,
+                      ),
+                    })}
                   </FormHelperText>
                 ) : (
                   <FormErrorMessage data-testid={`${appMetadata?.name}-vote-error`}>

@@ -118,8 +118,6 @@ export const EditAppPageContent = () => {
       updateAppMetadataMutation.resetStatus()
       onConfirmationOpen()
 
-      console.log("socialUrls", socialUrls)
-
       const metadataUri = await onMetadataUpload({
         name: data.name,
         description: data.description,
