@@ -10,10 +10,6 @@ async function uploadDirectoryToIPFS(pathToUpload: string, path: string): Promis
           }
       });
 
-      // Log the response status and data
-      console.log('Response status:', response.status);
-      console.log('Response data:', response.data);
-
       // Extract the IPFS hash from the response
       const ipfsHash = response.data.IpfsHash;
       console.log('IPFS Hash:', ipfsHash);
