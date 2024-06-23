@@ -1,5 +1,5 @@
 import { useAllocationsRound, useAllocationsRoundState, useGetVotesOnBlock, useHasVotedInRound } from "@/api"
-import { Button, Card, CardBody, Checkbox, HStack, Heading, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Button, Card, CardBody, HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useRouter } from "next/navigation"
@@ -7,6 +7,8 @@ import { Trans, useTranslation } from "react-i18next"
 import { useCastAllocationFormStore } from "@/store"
 import { SelectAppVotesInput, CastAllocationVoteFormData } from "./SelectAppVotesInput"
 import { useFieldArray, useForm } from "react-hook-form"
+import { scaledDivision } from "@/utils/MathUtils"
+import BigNumber from "bignumber.js"
 
 type Props = {
   roundId: string
@@ -42,21 +44,22 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
   const isVotingConcluded = roundInfo?.voteEndTimestamp?.isBefore() && [1, 2].includes(state ?? 0)
 
-  console.log("castAllocationForm", castAllocationForm)
+  const splitEvenly = useCallback(() => {
+    const totalAppsToVote = votes.length
+    const rawValue = scaledDivision(100, totalAppsToVote)
+    const remainingPercentage = 100 - rawValue * totalAppsToVote
+    const votesPerApp = new BigNumber(rawValue).toFixed(2, BigNumber.ROUND_HALF_DOWN)
 
-  //   const splitEvenly = () => {
-  //     const totalAppsToVote = xApps?.length ?? 0
-  //     const rawValue = scaledDivision(100, totalAppsToVote)
-  //     const remainingPercentage = 100 - rawValue * totalAppsToVote
-  //     const votesPerApp = new BigNumber(rawValue).toFixed(2, BigNumber.ROUND_HALF_DOWN)
-
-  //     // in case the division is not exact, we add the remaining percentage to a random app
-  //     const randomAppIndex = Math.floor(Math.random() * totalAppsToVote)
-  //     xApps?.forEach((xApp, index) => {
-  //       const parsedRawValue = index === randomAppIndex ? rawValue + remainingPercentage : rawValue
-  //       update(index, { appId: xApp.id, value: votesPerApp, rawValue: parsedRawValue })
-  //     })
-  //   }
+    // in case the division is not exact, we add the remaining percentage to a random app
+    const randomAppIndex = Math.floor(Math.random() * totalAppsToVote)
+    const updatedVotes = votes.map((vote, index) => {
+      const parsedRawValue = index === randomAppIndex ? rawValue + remainingPercentage : rawValue
+      return { appId: vote.appId, value: votesPerApp, rawValue: parsedRawValue }
+    })
+    // console.log("updatedVotes", updatedVotes)
+    // castAllocationForm.setValue("votes", updatedVotes, { shouldValidate: true })
+    castAllocationFormArray.replace(updatedVotes)
+  }, [votes, castAllocationFormArray])
 
   const onContinue = useCallback(
     (data: CastAllocationVoteFormData) => {
@@ -99,9 +102,9 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
             <Heading fontSize={"20px"} fontWeight={700}>
               <Trans i18nKey={"{{amount}} selected apps"} values={{ amount: votes.length }} t={t} />
             </Heading>
-            {/* <Checkbox colorScheme="primary" onChange={onCheckboxChange} isChecked={isSelectAllChecked}>
-              {t("Select all")}
-            </Checkbox> */}
+            <Button variant={"primaryLink"} onClick={splitEvenly}>
+              {t("Split evenly")}
+            </Button>
           </HStack>
           <VStack
             id="cast-allocation-vote-form"

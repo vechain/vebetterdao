@@ -94,6 +94,10 @@ export const SelectAppVotesInput = ({
               <FormControl isInvalid={!!errors.votes?.[index]} isDisabled={isDisabled}>
                 <InputGroup>
                   <Input
+                    borderRadius={"12px"}
+                    borderWidth={1}
+                    borderColor={"#D5D5D5"}
+                    bg="#FFFFFF"
                     data-testid={`${appMetadata?.name}-vote-input`}
                     w="full"
                     placeholder="0"
@@ -124,7 +128,11 @@ export const SelectAppVotesInput = ({
                   <InputRightElement>%</InputRightElement>
                 </InputGroup>
                 {value && totalVotesAvailable && !errors.votes?.[index] ? (
-                  <FormHelperText data-testid={`${appMetadata?.name}-vote-estimated-votes`}>
+                  <FormHelperText
+                    data-testid={`${appMetadata?.name}-vote-estimated-votes`}
+                    fontWeight={400}
+                    fontSize={"16px"}
+                    color="#6A6A6A">
                     =~{" "}
                     {new BigNumber(estimateVotes(value.rawValue, totalVotesAvailable)).toFixed(2, BigNumber.ROUND_DOWN)}{" "}
                     votes
