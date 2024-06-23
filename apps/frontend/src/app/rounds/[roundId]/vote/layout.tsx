@@ -18,7 +18,7 @@ export default function CastAllocationVoteLayout({ children, params }: Readonly<
       data-testid="cast-allocation-vote-layout">
       <GridItem colSpan={[1, 1, 2]}>{children}</GridItem>
       <GridItem colSpan={1}>
-        <VStack spacing={8} align="flex-start" w="full">
+        <VStack spacing={8} align="flex-start" w="full" pos={"sticky"} top={24} left={0}>
           <CastAllocationVoteStepperCard />
           <YourVoteBalanceCard roundId={params.roundId} />
         </VStack>
