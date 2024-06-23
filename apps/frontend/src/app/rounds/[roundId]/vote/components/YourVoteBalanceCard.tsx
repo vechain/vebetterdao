@@ -1,7 +1,8 @@
-import { useAllocationsRound, useVot3PastSupply } from "@/api"
+import { useAllocationsRound, useGetVotesOnBlock } from "@/api"
 import { VOT3Icon } from "@/components"
 import { Card, CardBody, VStack, Heading, Box, HStack, Skeleton, Text } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useWallet } from "@vechain/dapp-kit-react"
 import { useTranslation } from "react-i18next"
 
 const compactFormatter = getCompactFormatter(2)
@@ -10,9 +11,13 @@ type Props = {
 }
 
 export const YourVoteBalanceCard = ({ roundId }: Props) => {
+  const { account } = useWallet()
   const { t } = useTranslation()
   const { data: roundInfo } = useAllocationsRound(roundId)
-  const votesAtSnapshotQuery = useVot3PastSupply(roundInfo.voteStart)
+  const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
+    Number(roundInfo.voteStart),
+    account ?? undefined,
+  )
 
   return (
     <Card variant={"baseWithBorder"} w="full">
@@ -24,9 +29,9 @@ export const YourVoteBalanceCard = ({ roundId }: Props) => {
           <Box>
             <HStack spacing={2}>
               <VOT3Icon boxSize={"24px"} colorVariant="dark" />
-              <Skeleton isLoaded={!votesAtSnapshotQuery.isLoading}>
+              <Skeleton isLoaded={!votesAtSnapshotLoading}>
                 <Heading fontSize="28px" fontWeight={700}>
-                  {compactFormatter.format(Number(votesAtSnapshotQuery.data) ?? 0)}
+                  {compactFormatter.format(Number(votesAtSnapshot) ?? 0)}
                 </Heading>
               </Skeleton>
             </HStack>
