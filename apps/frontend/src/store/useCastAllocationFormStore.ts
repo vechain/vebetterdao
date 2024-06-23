@@ -3,7 +3,7 @@ import { create } from "zustand"
 import { devtools, persist } from "zustand/middleware"
 
 export type CastVoteData = CastAllocationVoteFormData["votes"]
-export type ProposalFormStoreState = {
+export type CastAllocationFormStoreState = {
   data: CastVoteData
   setData: (_data: CastVoteData) => void
   clearData: () => void
@@ -12,7 +12,7 @@ export type ProposalFormStoreState = {
 /**
  * Store for the multi-step proposal form data
  */
-export const useCastAllocationFormStore = create<ProposalFormStoreState>()(
+export const useCastAllocationFormStore = create<CastAllocationFormStoreState>()(
   devtools(
     persist(
       (set, get) => ({
