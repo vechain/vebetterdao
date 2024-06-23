@@ -22,8 +22,8 @@ export const YourVoteBalanceCard = ({ roundId }: Props) => {
             {t("Your V0T3 balance")}
           </Heading>
           <Box>
-            <HStack spacing={1}>
-              <VOT3Icon boxSize={"28px"} colorVariant="light" />
+            <HStack spacing={2}>
+              <VOT3Icon boxSize={"24px"} colorVariant="dark" />
               <Skeleton isLoaded={!votesAtSnapshotQuery.isLoading}>
                 <Heading fontSize="28px" fontWeight={700}>
                   {compactFormatter.format(Number(votesAtSnapshotQuery.data) ?? 0)}
