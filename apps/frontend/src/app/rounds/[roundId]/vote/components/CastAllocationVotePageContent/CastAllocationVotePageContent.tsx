@@ -6,7 +6,7 @@ import {
   useRoundXApps,
 } from "@/api"
 import { Button, Card, CardBody, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useLayoutEffect, useMemo, useState } from "react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useRouter } from "next/navigation"
 import { Trans, useTranslation } from "react-i18next"
@@ -24,10 +24,10 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
   const router = useRouter()
 
   const { data: selectedApps, setData: onSelectedAppsChange } = useCastAllocationFormStore()
-  const { data: state, isLoading: isStateLoading } = useAllocationsRoundState(roundId)
+  const { data: state, isLoading: stateLoading } = useAllocationsRoundState(roundId)
   const xAppsQuery = useRoundXApps(roundId)
 
-  const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(roundId)
+  const { data: roundInfo } = useAllocationsRound(roundId)
   const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
     Number(roundInfo.voteStart),
     account ?? undefined,
@@ -36,7 +36,7 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
   const hasNoVotes = !votesAtSnapshot || votesAtSnapshot === "0"
 
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
-  const isVotingConcluded = roundInfo?.voteEndTimestamp?.isBefore() && [1, 2].includes(state ?? 0)
+  const isVotingConcluded = [1, 2].includes(state ?? 0)
 
   const [onContinueError, setOnContinueError] = useState<string | null>(null)
 
@@ -58,17 +58,21 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
   }, [router])
 
   const shouldSeeThePage = useMemo(() => {
-    return !hasVoted && !isVotingConcluded
-  }, [isVotingConcluded, hasVoted])
+    return {
+      value: !hasVoted && !isVotingConcluded && !hasNoVotes,
+      loading: hasVotedLoading || stateLoading || votesAtSnapshotLoading,
+    }
+  }, [hasVotedLoading, hasVoted, isVotingConcluded, hasNoVotes, stateLoading, votesAtSnapshotLoading])
 
-  //redirect to round page if user already voted or voting is concluded
-  //   useLayoutEffect(() => {
-  //     if (!shouldSeeThePage) {
-  //       router.push(`/rounds/${roundId}`)
-  //     }
-  //   }, [shouldSeeThePage, roundId, router])
+  //   redirect to round page if user already voted or voting is concluded
+  useLayoutEffect(() => {
+    if (shouldSeeThePage.loading) return
+    if (!shouldSeeThePage.value) {
+      router.push(`/rounds/${roundId}`)
+    }
+  }, [shouldSeeThePage, roundId, router])
 
-  //   if (!shouldSeeThePage) return null
+  if (!shouldSeeThePage) return null
 
   return (
     <Card w="full">

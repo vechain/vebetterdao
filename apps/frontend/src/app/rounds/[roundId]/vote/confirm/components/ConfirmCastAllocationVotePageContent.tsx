@@ -12,7 +12,7 @@ import {
   useDisclosure,
   useMediaQuery,
 } from "@chakra-ui/react"
-import { useCallback, useMemo } from "react"
+import { useCallback, useLayoutEffect, useMemo } from "react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useRouter } from "next/navigation"
 import { Trans, useTranslation } from "react-i18next"
@@ -36,9 +36,9 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
   const router = useRouter()
 
   const { data: votes } = useCastAllocationFormStore()
-  const { data: state, isLoading: isStateLoading } = useAllocationsRoundState(roundId)
+  const { data: state } = useAllocationsRoundState(roundId)
 
-  const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(roundId)
+  const { data: roundInfo, isLoading: stateLoading } = useAllocationsRound(roundId)
   const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
     Number(roundInfo.voteStart),
     account ?? undefined,
@@ -88,17 +88,21 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
   }, [router])
 
   const shouldSeeThePage = useMemo(() => {
-    return !hasVoted && !isVotingConcluded
-  }, [isVotingConcluded, hasVoted])
+    return {
+      value: !hasVoted && !isVotingConcluded && !hasNoVotes && votes.length > 0,
+      loading: hasVotedLoading || stateLoading || votesAtSnapshotLoading,
+    }
+  }, [hasVotedLoading, hasVoted, isVotingConcluded, hasNoVotes, stateLoading, votesAtSnapshotLoading, votes])
 
-  //redirect to round page if user already voted or voting is concluded
-  //   useLayoutEffect(() => {
-  //     if (!shouldSeeThePage) {
-  //       router.push(`/rounds/${roundId}`)
-  //     }
-  //   }, [shouldSeeThePage, roundId, router])
+  //   redirect to round page if user already voted or voting is concluded
+  useLayoutEffect(() => {
+    if (shouldSeeThePage.loading) return
+    if (!shouldSeeThePage.value) {
+      router.push(`/rounds/${roundId}`)
+    }
+  }, [shouldSeeThePage, roundId, router])
 
-  //   if (!shouldSeeThePage) return null
+  if (!shouldSeeThePage) return null
 
   return (
     <>
