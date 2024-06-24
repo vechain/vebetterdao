@@ -38,7 +38,7 @@ export const ModeratorItem = ({ moderator, handleDeleteModerator }: Props) => {
                 {t("Delete {{address}} as moderator?", { address: humanAddress(moderator, 4, 4) })}
               </Heading>
               <Text color="#6A6A6A" textAlign={"center"}>
-                {t("The user will not be able to access the dApp edition mode anymore.")}
+                {t("The user will not be able to access the app edition mode anymore.")}
               </Text>
               <VStack align="center" gap="20px" mt="20px">
                 <Button variant="primaryAction" onClick={onClose}>
