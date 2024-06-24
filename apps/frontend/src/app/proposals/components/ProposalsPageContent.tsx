@@ -6,12 +6,12 @@ import {
   useProposalClaimableUserDeposits,
 } from "@/api"
 import { ProposalInfoCard } from "@/components"
-import { VStack, HStack, Heading, Box, Button, Show } from "@chakra-ui/react"
+import { VStack, HStack, Heading, Box, Button, Show, Spinner } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { ClaimDeposits, CreateProposalCard, Filter, NoProposalsCard } from "./components"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet, useWalletModal } from "@vechain/dapp-kit-react"
 
 export const ProposalsPageContent = () => {
   const router = useRouter()
@@ -25,6 +25,7 @@ export const ProposalsPageContent = () => {
   } = useIncomingProposals()
   const { data: pastProposals, error: pastProposalsError, isLoading: pastProposalsLoading } = usePastProposals()
   const { account } = useWallet()
+  const { open } = useWalletModal()
 
   const allProposals = useMemo(() => {
     if (!proposalsEvents) return []
@@ -45,8 +46,20 @@ export const ProposalsPageContent = () => {
   }, [userProposalDeposits])
 
   const onNewCLick = useCallback(() => {
+    if (!account) {
+      open()
+      return
+    }
+
     router.push("/proposals/new")
-  }, [router])
+  }, [account, open, router])
+
+  if (proposalsEventsLoading)
+    return (
+      <VStack w="full" spacing={12} h="80vh" justify="center">
+        <Spinner size={"lg"} />
+      </VStack>
+    )
 
   return (
     <VStack w={"full"}>
@@ -83,7 +96,7 @@ export const ProposalsPageContent = () => {
           {allProposals.map(proposal => (
             <ProposalInfoCard proposal={proposal} key={proposal.proposalId} />
           ))}
-          {allProposals.length === 0 && <NoProposalsCard />}
+          {allProposals.length === 0 && !proposalsEventsLoading && <NoProposalsCard />}
         </VStack>
         <Show above="sm">
           <VStack flex={2} alignSelf="flex-start" spacing={6}>

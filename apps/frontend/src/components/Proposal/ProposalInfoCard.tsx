@@ -70,7 +70,7 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposal }) => {
         </Show>
         <HStack justifyContent="space-between" alignItems="center" w={"full"}>
           <Skeleton
-            isLoaded={false /* proposalMetadata.data !== undefined */}
+            isLoaded={proposalMetadata.data !== undefined}
             minH={"20px"}
             flex={2.5}
             maxW={{ base: "300px", md: "full" }}>
@@ -98,7 +98,7 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposal }) => {
       <CardBody py={2} mb={4}>
         <Flex w="full" justifyContent={"space-between"} flexDir={{ base: "column", md: "row" }}>
           <SkeletonText
-            isLoaded={false /* proposalMetadata.data !== undefined */}
+            isLoaded={proposalMetadata.data !== undefined}
             minH={"90px"}
             minW={"300px"}
             noOfLines={3}
