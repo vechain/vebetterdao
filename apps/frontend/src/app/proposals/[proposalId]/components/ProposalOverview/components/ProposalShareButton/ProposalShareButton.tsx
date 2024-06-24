@@ -56,6 +56,7 @@ export const ProposalShareButton = () => {
         color="#004CFC"
         h="40px"
         w="40px"
+        mt={["20px", "0px"]}
         onClick={onOpen}>
         <UilShareAlt size="20px" />
       </IconButton>

@@ -71,7 +71,7 @@ export const ProposalCommunitySupport = () => {
             )}
           </>
         ) : (
-          <HStack alignItems={"flex-end"} justify={"space-between"}>
+          <HStack alignItems={"flex-end"} justify={"space-between"} flexWrap={"wrap"}>
             <Text fontSize="14px" fontWeight={600}>
               {t("You will be able to claim your tokens back when the voting round ends.")}
             </Text>
