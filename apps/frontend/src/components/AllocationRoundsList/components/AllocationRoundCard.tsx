@@ -69,9 +69,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
       })}
       onClick={onRoundClick}
       _hover={{
-        ...(!isActive && {
-          bg: nonActiveBackgroundColor,
-        }),
+        bg: isActive ? cardActiveBackgroundColor : nonActiveBackgroundColor,
         cursor: "pointer",
         transition: "all 0.2s ease-in-out",
       }}
@@ -87,8 +85,8 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
                 renderIcon={isActive}
               />
               <Show above="sm">
-                <DotSymbol color={"gray"} size={1} />
-                <Text fontWeight={"400"} color={"gray"}>
+                <DotSymbol color={"#6A6A6A"} size={"4px"} />
+                <Text fontWeight={400} color={"#6A6A6A"} fontSize={"14px"}>
                   {isActive
                     ? `ends ${allocationRound.voteEndTimestamp?.fromNow()}`
                     : `${allocationRound.voteStartTimestamp?.fromNow()}`}
@@ -97,13 +95,13 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
             </HStack>
 
             <HStack mt={0.5} w="full" justify="space-between" color={cardTextColor}>
-              <Heading as="h3" size="md">
+              <Heading as="h3" fontSize="20px" fontWeight={700}>
                 {t("Round #{{round}}", {
                   round: round.roundId,
                 })}
               </Heading>
             </HStack>
-            <HStack w="fit-content" justify="space-between" fontSize={"sm"} color={cardTextColor}>
+            <HStack w="fit-content" justify="space-between" fontSize={"12px"} fontWeight={400} color={cardTextColor}>
               <Text>
                 {allocationRound.voteStartTimestamp?.format("MMM D")} {" - "}
                 {allocationRound.voteEndTimestamp?.format("MMM D")}
