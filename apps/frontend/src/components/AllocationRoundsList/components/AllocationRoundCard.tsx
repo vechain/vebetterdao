@@ -20,6 +20,7 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { AllocationStateBadge } from "@/components/AllocationStateBadge"
 import { useTranslation } from "react-i18next"
 import { B3TRIcon } from "@/components/Icons"
+import { AllocationRoundParticipatingXApps } from "./AllocationRoundParticipatingXApps"
 
 type Props = {
   round: RoundCreated
@@ -76,7 +77,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
       data-testid={"round-#" + round.roundId + "-card"}>
       <CardBody>
         <HStack justify={"space-between"} w="full">
-          <Stack w="full" spacing={1}>
+          <Stack w="full" spacing={1} flex={2}>
             <HStack spacing={2} w="fit-content" justify="space-between">
               <AllocationStateBadge
                 roundId={round.roundId}
@@ -108,8 +109,8 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
               </Text>
             </HStack>
           </Stack>
-          <Stack w={"auto"}>
-            <HStack spacing={4} justify="space-between">
+          <HStack spacing={4} justify="flex-end" flex={1}>
+            <Stack direction={["column", "column", "row"]} spacing={4} align={["flex-end", "flex-end", "center"]}>
               <Box width={"max-content"} justifyContent={"end"}>
                 <Skeleton isLoaded={!roundAmountLoading}>
                   {roundAmountError ? (
@@ -129,14 +130,16 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
                   )}
                 </Skeleton>
               </Box>
-              <Icon
-                as={FaAngleRight}
-                boxSize={"24px"}
-                color={cardTextColor}
-                data-testid={"round-#" + round.roundId + "-link"}
-              />
-            </HStack>
-          </Stack>
+
+              <AllocationRoundParticipatingXApps roundId={round.roundId} />
+            </Stack>
+            <Icon
+              as={FaAngleRight}
+              boxSize={"24px"}
+              color={cardTextColor}
+              data-testid={"round-#" + round.roundId + "-link"}
+            />
+          </HStack>
         </HStack>
       </CardBody>
     </Card>
