@@ -1,0 +1,5 @@
+.react-tweet-theme[class*="tweet-container_root"] {
+  max-width: none;
+  margin: 0;
+  margin-top: 8px;
+}
