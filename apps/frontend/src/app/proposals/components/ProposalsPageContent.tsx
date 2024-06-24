@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { ClaimDeposits, CreateProposalCard, Filter, NoProposalsCard } from "./components"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet, useWalletModal } from "@vechain/dapp-kit-react"
 
 export const ProposalsPageContent = () => {
   const router = useRouter()
@@ -25,6 +25,7 @@ export const ProposalsPageContent = () => {
   } = useIncomingProposals()
   const { data: pastProposals, error: pastProposalsError, isLoading: pastProposalsLoading } = usePastProposals()
   const { account } = useWallet()
+  const { open } = useWalletModal()
 
   const allProposals = useMemo(() => {
     if (!proposalsEvents) return []
@@ -45,8 +46,13 @@ export const ProposalsPageContent = () => {
   }, [userProposalDeposits])
 
   const onNewCLick = useCallback(() => {
+    if (!account) {
+      open()
+      return
+    }
+
     router.push("/proposals/new")
-  }, [router])
+  }, [account, open, router])
 
   return (
     <VStack w={"full"}>
