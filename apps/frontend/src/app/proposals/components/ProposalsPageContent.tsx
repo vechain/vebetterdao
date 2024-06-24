@@ -6,7 +6,7 @@ import {
   useProposalClaimableUserDeposits,
 } from "@/api"
 import { ProposalInfoCard } from "@/components"
-import { VStack, HStack, Heading, Box, Button, Show } from "@chakra-ui/react"
+import { VStack, HStack, Heading, Box, Button, Show, Spinner } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -53,6 +53,13 @@ export const ProposalsPageContent = () => {
 
     router.push("/proposals/new")
   }, [account, open, router])
+
+  if (proposalsEventsLoading)
+    return (
+      <VStack w="full" spacing={12} h="80vh" justify="center">
+        <Spinner size={"lg"} />
+      </VStack>
+    )
 
   return (
     <VStack w={"full"}>
