@@ -1,5 +1,5 @@
 import { useAllocationsRound, useGetVotesOnBlock, useHasVotedInRound, useUserVotesInRound } from "@/api"
-import { Button, Card, CardBody, HStack, Heading, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Button, Card, CardBody, HStack, Heading, Skeleton, Text, VStack, useDisclosure } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { AppVotesBreakdown, AppVotesBreakdownProps } from "../AppVotesBreakdown/AppVotesBreakdown"
 import { useWallet } from "@vechain/dapp-kit-react"
@@ -10,6 +10,7 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { t } from "i18next"
 import { FiArrowUpRight } from "react-icons/fi"
 import { Trans } from "react-i18next"
+import { SeeVoteDetailsModal } from "./SeeVoteDetailsModal"
 
 type Props = {
   roundId: string
@@ -26,6 +27,8 @@ const compactFormatter = getCompactFormatter(2)
  */
 export const AllocationRoundUserVotes = ({ roundId, minPercentageToNotMerge }: Props) => {
   const { account } = useWallet()
+
+  const seeAllModal = useDisclosure()
 
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(roundId)
   const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
@@ -66,33 +69,48 @@ export const AllocationRoundUserVotes = ({ roundId, minPercentageToNotMerge }: P
   if (!hasVoted) return null
 
   return (
-    <Card
-      w="full"
-      id="user-votes"
-      maxH={[!account ? "600px" : "auto", "auto"]}
-      overflowY={"hidden"}
-      variant="baseWithBorder">
-      <CardBody>
-        <VStack flex={1} w="full" spacing={8} align={"flex-start"}>
-          <VStack spacing={2} align="flex-start" w="full">
-            <HStack w="full" justify="space-between">
-              <Heading fontSize="24px" fontWeight={700}>
-                {t("Your vote")}
-              </Heading>
-              <Button variant="link" colorScheme="primary" rightIcon={<FiArrowUpRight />}>
-                {t("See all")}
-              </Button>
-            </HStack>
-            <Skeleton isLoaded={!castVotesEventLoading}>
-              <Text fontSize="16px" fontWeight="400">
-                <Trans
-                  i18nKey={"{{amount}} distributed among {{apps}} apps"}
-                  values={{ amount: compactFormatter.format(totalVotesCast ?? 0), apps: totalAppsVoted }}
-                  t={t}
-                />
-              </Text>
-            </Skeleton>
+    <>
+      <SeeVoteDetailsModal
+        roundId={roundId}
+        votes={parsedCastVotesPercentages}
+        isOpen={seeAllModal.isOpen}
+        onClose={seeAllModal.onClose}
+      />
+
+      <Card
+        w="full"
+        id="user-votes"
+        maxH={[!account ? "600px" : "auto", "auto"]}
+        overflowY={"hidden"}
+        variant="baseWithBorder">
+        <CardBody>
+          <VStack flex={1} w="full" spacing={8} align={"flex-start"}>
+            <VStack spacing={2} align="flex-start" w="full">
+              <HStack w="full" justify="space-between">
+                <Heading fontSize="24px" fontWeight={700}>
+                  {t("Your vote")}
+                </Heading>
+                <Button
+                  variant="link"
+                  colorScheme="primary"
+                  rightIcon={<FiArrowUpRight />}
+                  onClick={seeAllModal.onOpen}>
+                  {t("See details")}
+                </Button>
+              </HStack>
+              <Skeleton isLoaded={!castVotesEventLoading}>
+                <Text fontSize="16px" fontWeight="400">
+                  <Trans
+                    i18nKey={"{{amount}} distributed among {{apps}} apps"}
+                    values={{ amount: compactFormatter.format(totalVotesCast ?? 0), apps: totalAppsVoted }}
+                    t={t}
+                  />
+                </Text>
+              </Skeleton>
+            </VStack>
+            <AppVotesBreakdown votes={parsedCastVotesPercentages} isLoading={breakdownLoading} />
           </VStack>
+<<<<<<< Updated upstream
           <AppVotesBreakdown
             votes={parsedCastVotesPercentages}
             isLoading={breakdownLoading}
@@ -101,5 +119,10 @@ export const AllocationRoundUserVotes = ({ roundId, minPercentageToNotMerge }: P
         </VStack>
       </CardBody>
     </Card>
+=======
+        </CardBody>
+      </Card>
+    </>
+>>>>>>> Stashed changes
   )
 }

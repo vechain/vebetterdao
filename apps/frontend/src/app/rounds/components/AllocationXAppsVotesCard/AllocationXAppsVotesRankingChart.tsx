@@ -57,7 +57,7 @@ export const AllocationXAppsVotesRankingChart = ({ roundId }: Props) => {
   )
 }
 
-const VotesHorizontalBar = ({
+export const VotesHorizontalBar = ({
   data,
   index,
   roundId,
