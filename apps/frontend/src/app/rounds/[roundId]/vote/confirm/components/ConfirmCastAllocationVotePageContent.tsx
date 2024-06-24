@@ -9,8 +9,8 @@ import {
   Stack,
   Text,
   VStack,
+  useBreakpointValue,
   useDisclosure,
-  useMediaQuery,
 } from "@chakra-ui/react"
 import { useCallback, useLayoutEffect, useMemo } from "react"
 import { useWallet } from "@vechain/dapp-kit-react"
@@ -208,13 +208,12 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
 }
 
 const YourVoteCardWrapper = ({ children }: { children: React.ReactNode }) => {
-  const [isDesktop] = useMediaQuery("(min-width: 800px)")
-
-  if (isDesktop)
-    return (
+  return useBreakpointValue({
+    base: children,
+    lg: (
       <Card w="full" variant={"filled"}>
         <CardBody>{children}</CardBody>
       </Card>
-    )
-  return children
+    ),
+  })
 }

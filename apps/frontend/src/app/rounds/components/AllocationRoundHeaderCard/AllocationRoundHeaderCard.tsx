@@ -83,11 +83,10 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
 
   const yourVoteText = useMemo(() => {
     if (hasVoted) return compactFormatter.format(totalVotesCast)
-    if (isFinished) return "You have not voted"
-    if (hasVotesAtSnapshot) return "You have not voted"
+    if (isFinished || hasVotesAtSnapshot) return t("You have not voted")
 
-    return "No votes to cast"
-  }, [hasVoted, hasVotesAtSnapshot, totalVotesCast, isFinished])
+    return t("No votes to cast")
+  }, [hasVoted, hasVotesAtSnapshot, totalVotesCast, isFinished, t])
 
   return (
     <Card w="full" borderRadius={"3xl"} variant={"baseWithBorder"} data-testid="allocation-round-header-card">

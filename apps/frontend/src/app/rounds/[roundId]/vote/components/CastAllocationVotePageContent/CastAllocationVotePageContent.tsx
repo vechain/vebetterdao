@@ -49,7 +49,7 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
   )
 
   const onContinue = useCallback(() => {
-    if (!selectedApps || selectedApps.length === 0) return setOnContinueError(t("Select at least one app to continue"))
+    if (!selectedApps.length) return setOnContinueError(t("Select at least one app to continue"))
     router.push(`/rounds/${roundId}/vote/percentages`)
   }, [router, roundId, selectedApps, t])
 
