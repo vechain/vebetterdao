@@ -12,7 +12,7 @@ interface Attribute {
 
 /**
  * Interface for the NFT metadata.
- * @see [NFT Metadata Standards](https://docs.opensea.io/docs/metadata-standards)
+ * @see NFT Metadata Standards](https://docs.opensea.io/docs/metadata-standards)
  */
 interface Metadata {
   name: string
@@ -34,9 +34,6 @@ const description = "GM Earth is a community of people who participated in votin
 const METADATA_PATH = path.join(__dirname, "../../../metadata/galaxyMember/metadata")
 const IMAGE_ZIP_PATH = path.join(__dirname, "../../../metadata/galaxyMember/images.zip")
 const IMAGE_PATH = path.join(__dirname, "../../../metadata/galaxyMember/images")
-
-// NFT Storage
-const NFT_STORAGE_KEY = process.env.NEXT_PUBLIC_NFT_STORAGE_KEY ?? ""
 
 /**
  * Converts a record of attributes into an array of `Attribute` objects.
@@ -87,10 +84,6 @@ async function saveMetadataToFile(metadata: Metadata, fileName: string): Promise
  */
 async function generateAndSaveMetadata(): Promise<void> {
   try {
-    if (!NFT_STORAGE_KEY) {
-      throw new Error("NFT_STORAGE_KEY is not set")
-    }
-
     // 1. Upload images to IPFS and get URL
     const [imagesIpfsUrl, images, folderName] = await uploadDirectoryToIPFS(IMAGE_ZIP_PATH, IMAGE_PATH)
 

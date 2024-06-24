@@ -1,8 +1,5 @@
 import { getFolderName, toIPFSURL, uploadDirectoryToIPFS, zipFolder } from "."
 
-// NFT Storage
-const NFT_STORAGE_KEY = process.env.NEXT_PUBLIC_NFT_STORAGE_KEY ?? ""
-
 export async function uploadMetadataToIpfs(METADATA_PATH: string): Promise<void> {
   try {
       // Zip the directory and get the path to the zip file
