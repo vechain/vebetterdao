@@ -13,11 +13,18 @@ import { Trans } from "react-i18next"
 
 type Props = {
   roundId: string
+  minPercentageToNotMerge?: number
 }
 
 const compactFormatter = getCompactFormatter(2)
 
-export const AllocationRoundUserVotes = ({ roundId }: Props) => {
+/**
+ * This component displays the user's votes in the current round.
+ * It shows the total votes cast by the user and the breakdown of votes among the apps.
+ * @param roundId The round id
+ * @param minPercentageToNotMerge The minimum percentage to not merge the app into "Rest" - default is 15
+ */
+export const AllocationRoundUserVotes = ({ roundId, minPercentageToNotMerge }: Props) => {
   const { account } = useWallet()
 
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(roundId)
@@ -86,7 +93,11 @@ export const AllocationRoundUserVotes = ({ roundId }: Props) => {
               </Text>
             </Skeleton>
           </VStack>
-          <AppVotesBreakdown votes={parsedCastVotesPercentages} isLoading={breakdownLoading} />
+          <AppVotesBreakdown
+            votes={parsedCastVotesPercentages}
+            isLoading={breakdownLoading}
+            minPercentageToNotMerge={minPercentageToNotMerge}
+          />
         </VStack>
       </CardBody>
     </Card>
