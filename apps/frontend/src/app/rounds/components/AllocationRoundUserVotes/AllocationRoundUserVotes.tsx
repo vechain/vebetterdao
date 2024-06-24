@@ -110,19 +110,8 @@ export const AllocationRoundUserVotes = ({ roundId, minPercentageToNotMerge }: P
             </VStack>
             <AppVotesBreakdown votes={parsedCastVotesPercentages} isLoading={breakdownLoading} />
           </VStack>
-<<<<<<< Updated upstream
-          <AppVotesBreakdown
-            votes={parsedCastVotesPercentages}
-            isLoading={breakdownLoading}
-            minPercentageToNotMerge={minPercentageToNotMerge}
-          />
-        </VStack>
-      </CardBody>
-    </Card>
-=======
         </CardBody>
       </Card>
     </>
->>>>>>> Stashed changes
   )
 }
