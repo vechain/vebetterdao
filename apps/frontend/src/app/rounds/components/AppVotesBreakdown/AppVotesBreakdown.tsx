@@ -6,7 +6,6 @@ import { useQueries } from "@tanstack/react-query"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import BigNumber from "bignumber.js"
-import { t } from "i18next"
 
 export type AppVotesBreakdownProps = {
   votes: {
@@ -79,19 +78,20 @@ export const AppVotesBreakdown = ({ votes, isLoading, minPercentageToNotMerge = 
   })[] = useMemo(() => {
     const selectedVotes = votes.filter(vote => Number(vote.value) > 0)
     const appsToMerge = selectedVotes.filter(vote => Number(vote.value) < minPercentageToNotMerge)
-    const notMergedVotes = selectedVotes.filter(vote => Number(vote.value) >= minPercentageToNotMerge)
 
-    console.log("appsToMerge", appsToMerge)
-
-    const mergedVotesValue = appsToMerge.reduce((acc, vote) => acc + vote.rawValue, 0)
-    const restVote = {
-      appId: "rest",
-      isRest: true,
-      restNumber: appsToMerge.length,
-      value: new BigNumber(mergedVotesValue).toFixed(2, BigNumber.ROUND_HALF_DOWN),
-      rawValue: mergedVotesValue,
+    if (appsToMerge.length > 1) {
+      const notMergedVotes = selectedVotes.filter(vote => Number(vote.value) >= minPercentageToNotMerge)
+      const mergedVotesValue = appsToMerge.reduce((acc, vote) => acc + vote.rawValue, 0)
+      const restVote = {
+        appId: "rest",
+        isRest: true,
+        restNumber: appsToMerge.length,
+        value: new BigNumber(mergedVotesValue).toFixed(2, BigNumber.ROUND_HALF_DOWN),
+        rawValue: mergedVotesValue,
+      }
+      return [...notMergedVotes, restVote]
     }
-    return appsToMerge.length > 0 ? [...notMergedVotes, restVote] : notMergedVotes
+    return selectedVotes
   }, [votes, minPercentageToNotMerge])
 
   if (isLoading) return <Spinner />
