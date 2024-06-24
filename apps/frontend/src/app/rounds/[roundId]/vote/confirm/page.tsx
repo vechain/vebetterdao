@@ -6,11 +6,9 @@ import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
-const CastAllocationVotePageContent = dynamic(
+const ConfirmCastAllocationVotePageContent = dynamic(
   () =>
-    import("./components/CastAllocationVotePageContent/CastAllocationVotePageContent").then(
-      mod => mod.CastAllocationPageVoteContent,
-    ),
+    import("./components/ConfirmCastAllocationVotePageContent").then(mod => mod.ConfirmCastAllocationVotePageContent),
   {
     ssr: false,
     loading: () => (
@@ -28,12 +26,12 @@ type Props = {
 
 export default function CastAllocationVotePage({ params }: Readonly<Props>) {
   useEffect(() => {
-    AnalyticsUtils.trackPage(`Round/${params.roundId}/vote`)
+    AnalyticsUtils.trackPage(`Round/${params.roundId}/vote/confirm`)
   }, [params.roundId])
 
   return (
     <MotionVStack>
-      <CastAllocationVotePageContent roundId={params.roundId} />
+      <ConfirmCastAllocationVotePageContent roundId={params.roundId} />
     </MotionVStack>
   )
 }
