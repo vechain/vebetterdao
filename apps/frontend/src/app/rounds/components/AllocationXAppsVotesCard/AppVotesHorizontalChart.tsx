@@ -7,7 +7,7 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 
 type AppVotesData = {
-  votes: string
+  votes: string | number
   app: string
 }
 

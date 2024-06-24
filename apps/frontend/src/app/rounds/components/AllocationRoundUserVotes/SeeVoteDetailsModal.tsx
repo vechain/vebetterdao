@@ -9,7 +9,7 @@ type Props = {
   roundId: string
   votes: {
     appId: string
-    value: string
+    value: string | number
     rawValue: number
   }[]
   isOpen: boolean
