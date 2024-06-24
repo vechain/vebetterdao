@@ -1,6 +1,6 @@
 import { CustomModalContent } from "@/components"
 import { Heading, Modal, ModalOverlay, Text, VStack } from "@chakra-ui/react"
-import { VotesHorizontalBar } from "../AllocationXAppsVotesCard/AllocationXAppsVotesRankingChart"
+import { AppVotesHorizontalChart } from "../AllocationXAppsVotesCard/AppVotesHorizontalChart"
 import { Trans, useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo } from "react"
@@ -41,7 +41,7 @@ export const SeeVoteDetailsModal = ({ roundId, votes, isOpen, onClose }: Props) 
           </Text>
           <VStack spacing={6} mt={2} w="full" align="flex-start">
             {sortedVotes.map((vote, index) => (
-              <VotesHorizontalBar
+              <AppVotesHorizontalChart
                 key={index}
                 roundId={roundId}
                 data={{ votes: vote.value, app: vote.appId }}
