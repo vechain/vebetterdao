@@ -29,7 +29,7 @@ export const MainnetTimer = () => {
       })}
       backgroundSize={"cover"}
       bgPos={["right", "center"]}
-      p="60px"
+      p={["40px", "60px"]}
       rounded="12px"
       color="#252525"
       fontSize="16px"
