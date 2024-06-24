@@ -43,7 +43,7 @@ export const AppDetailOverview = () => {
           </Skeleton>
           <Flex gap="48px" flexDir={["column", "column", "row"]}>
             <VStack alignItems={"stretch"} flex={3} justify={"space-between"} gap={8}>
-              <HStack justify={"space-between"}>
+              <HStack justify={"space-between"} flexWrap={"wrap"}>
                 <HStack gap={4}>
                   <Skeleton isLoaded={!isLogoLoading} alignContent={"start"}>
                     <Image src={logo ?? notFoundImage} alt={"logo"} boxSize={"64px"} borderRadius="16px" />

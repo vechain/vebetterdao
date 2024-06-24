@@ -32,7 +32,7 @@ export const ModalEditTeamWalletAddress = ({ handleEditTeamWalletAddress, onClos
             </Heading>
             <Box textAlign={"center"}>
               <Text as="span" color="#6A6A6A">
-                {t("This address is where all allocation funds are transferred. ")}
+                {t("This address is where allocation funds are transferred. ")}
               </Text>
               <Text as="span" fontWeight={600} color="#6A6A6A">
                 {t("Are you absolutely sure you want to edit it?")}
