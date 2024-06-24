@@ -49,14 +49,14 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
   const splitEvenly = useCallback(() => {
     const totalAppsToVote = votes.length
     const rawValue = scaledDivision(100, totalAppsToVote)
-    const remainingPercentage = 100 - rawValue * totalAppsToVote
+    // const remainingPercentage = 100 - rawValue * totalAppsToVote
     const votesPerApp = new BigNumber(rawValue).toFixed(2, BigNumber.ROUND_HALF_DOWN)
 
     // in case the division is not exact, we add the remaining percentage to a random app
-    const randomAppIndex = Math.floor(Math.random() * totalAppsToVote)
-    const updatedVotes = votes.map((vote, index) => {
-      const parsedRawValue = index === randomAppIndex ? rawValue + remainingPercentage : rawValue
-      return { appId: vote.appId, value: votesPerApp, rawValue: parsedRawValue }
+    // const randomAppIndex = Math.floor(Math.random() * totalAppsToVote)
+    const updatedVotes = votes.map(vote => {
+      //   const parsedRawValue = index === randomAppIndex ? rawValue + remainingPercentage : rawValue
+      return { appId: vote.appId, value: votesPerApp, rawValue }
     })
     replace(updatedVotes)
   }, [votes, replace])
