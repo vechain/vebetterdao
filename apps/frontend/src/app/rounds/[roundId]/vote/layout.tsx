@@ -1,7 +1,6 @@
 "use client"
-import { Grid, GridItem, VStack } from "@chakra-ui/react"
-import { CastAllocationVoteStepperCard } from "./components/CastAllocationVoteStepperCard"
-import { YourVoteBalanceCard } from "./components/YourVoteBalanceCard"
+import { Grid, GridItem, Spinner, VStack } from "@chakra-ui/react"
+import dynamic from "next/dynamic"
 
 type Props = {
   children: React.ReactNode
@@ -9,6 +8,31 @@ type Props = {
     roundId: string
   }
 }
+
+const CastAllocationVoteStepperCard = dynamic(
+  () => import("./components/CastAllocationVoteStepperCard").then(mod => mod.CastAllocationVoteStepperCard),
+  {
+    ssr: false,
+    loading: () => (
+      <VStack w="full" spacing={12} h="80vh" justify="center">
+        <Spinner size={"lg"} />
+      </VStack>
+    ),
+  },
+)
+
+const YourVoteBalanceCard = dynamic(
+  () => import("./components/YourVoteBalanceCard").then(mod => mod.YourVoteBalanceCard),
+  {
+    ssr: false,
+    loading: () => (
+      <VStack w="full" spacing={12} h="80vh" justify="center">
+        <Spinner size={"lg"} />
+      </VStack>
+    ),
+  },
+)
+
 export default function CastAllocationVoteLayout({ children, params }: Readonly<Props>) {
   return (
     <Grid

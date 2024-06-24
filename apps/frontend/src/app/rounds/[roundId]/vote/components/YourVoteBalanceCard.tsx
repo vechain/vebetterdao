@@ -31,7 +31,7 @@ export const YourVoteBalanceCard = ({ roundId }: Props) => {
               <VOT3Icon boxSize={"24px"} colorVariant="dark" />
               <Skeleton isLoaded={!votesAtSnapshotLoading}>
                 <Heading fontSize="28px" fontWeight={700}>
-                  {compactFormatter.format(Number(votesAtSnapshot) ?? 0)}
+                  {compactFormatter.format(Number(votesAtSnapshot))}
                 </Heading>
               </Skeleton>
             </HStack>
