@@ -1,9 +1,9 @@
-import { HStack, Stack, Text, VStack, useBreakpoint, useBreakpointValue } from "@chakra-ui/react"
+import { HStack, Stack, Text, VStack, useBreakpointValue } from "@chakra-ui/react"
 import dayjs from "dayjs"
 import padStart from "lodash/padStart"
 import { useEffect, useState } from "react"
 
-const mainnetLaunch = dayjs("2024-06-28")
+const mainnetLaunch = dayjs.tz("2024-06-28", "America/Los_Angeles")
 
 export const MainnetTimer = () => {
   const [_, setTime] = useState(0)
@@ -29,7 +29,7 @@ export const MainnetTimer = () => {
       })}
       backgroundSize={"cover"}
       bgPos={["right", "center"]}
-      p={["40px", "60px"]}
+      p={["20px", "60px"]}
       rounded="12px"
       color="#252525"
       fontSize="16px"
