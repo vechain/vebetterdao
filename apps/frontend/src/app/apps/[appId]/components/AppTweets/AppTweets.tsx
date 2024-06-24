@@ -22,12 +22,9 @@ export const AppTweets = () => {
   const { t } = useTranslation()
   const { appId } = useParams<{ appId: string }>()
 
-  const removeTweet = useCallback(
-    (tweetId: string) => {
-      setTweetsToRemove([...tweetsToRemove, tweetId])
-    },
-    [tweetsToRemove],
-  )
+  const removeTweet = useCallback((tweetId: string) => {
+    setTweetsToRemove(prev => [...prev, tweetId])
+  }, [])
 
   const handleEdit = useCallback(() => {
     setEditMode(true)
