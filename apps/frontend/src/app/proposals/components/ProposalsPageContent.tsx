@@ -83,7 +83,7 @@ export const ProposalsPageContent = () => {
           {allProposals.map(proposal => (
             <ProposalInfoCard proposal={proposal} key={proposal.proposalId} />
           ))}
-          {allProposals.length === 0 && <NoProposalsCard />}
+          {allProposals.length === 0 && !proposalsEventsLoading && <NoProposalsCard />}
         </VStack>
         <Show above="sm">
           <VStack flex={2} alignSelf="flex-start" spacing={6}>
