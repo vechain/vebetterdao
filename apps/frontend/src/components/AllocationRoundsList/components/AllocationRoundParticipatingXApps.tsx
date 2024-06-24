@@ -1,19 +1,20 @@
 import { useAllocationsRoundState, useRoundXApps } from "@/api"
 import { AppImage } from "@/components/AppImage/AppImage"
-import { Flex, HStack, Text, useBreakpointValue } from "@chakra-ui/react"
-import { t } from "i18next"
+import { Flex, HStack, Skeleton, Text, useBreakpointValue } from "@chakra-ui/react"
+import { useTranslation } from "react-i18next"
 
 type Props = {
   roundId: string
   maxAppsToShow?: number
 }
 export const AllocationRoundParticipatingXApps: React.FC<Props> = ({ roundId, maxAppsToShow = 4 }) => {
+  const { t } = useTranslation()
   const boxSize = useBreakpointValue({ base: 28, lg: 36 })
   const marginleft = (boxSize ?? 36) / 3
   const borderRadius = (boxSize ?? 36) / 4
   const { data: xApps, isLoading: xAppsLoading } = useRoundXApps(roundId)
 
-  const { data: state } = useAllocationsRoundState(roundId)
+  const { data: state, isLoading: stateLoading } = useAllocationsRoundState(roundId)
   const appsToRender = xApps?.slice(0, maxAppsToShow)
   const remainingApps = (xApps?.length ?? 0) - maxAppsToShow
 
@@ -24,6 +25,16 @@ export const AllocationRoundParticipatingXApps: React.FC<Props> = ({ roundId, ma
   // if we have more than 5 apps, the 5th bacame a card with the number of apps that are not shown
   // if we have less than 5 apps, we show them all
   // if we have no apps, we render nothing
+
+  if (xAppsLoading || stateLoading)
+    return (
+      <HStack spacing={0}>
+        {Array.from({ length: maxAppsToShow }).map((_, index) => (
+          <Skeleton key={index} boxSize={`${boxSize}px`} borderRadius={`${borderRadius}px`} />
+        ))}
+      </HStack>
+    )
+
   if (xApps?.length) {
     return (
       <HStack spacing={0}>

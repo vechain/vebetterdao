@@ -62,6 +62,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
   return (
     <Card
       variant={"baseWithBorder"}
+      borderRadius={"24px"}
       w="full"
       {...(isActive && {
         bg: cardActiveBackgroundColor,
@@ -75,7 +76,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
         transition: "all 0.2s ease-in-out",
       }}
       data-testid={"round-#" + round.roundId + "-card"}>
-      <CardBody>
+      <CardBody py="20px">
         <HStack justify={"space-between"} w="full">
           <Stack w="full" spacing={1} flex={2}>
             <HStack spacing={2} w="fit-content" justify="space-between">
