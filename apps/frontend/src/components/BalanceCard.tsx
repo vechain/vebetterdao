@@ -20,7 +20,6 @@ import {
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
 import { B3TRIcon, VOT3Icon } from "./Icons"
-import { SwapButton } from "./Swap/SwapButton"
 import { useTokenColors } from "@/hooks"
 import { BaseTooltip } from "./BaseTooltip"
 import { FaCircleInfo } from "react-icons/fa6"
@@ -154,7 +153,7 @@ export const BalanceCard: React.FC<Props> = () => {
               <Text fontSize={"xs"}>Tokens will be migrated 1:1 from testnet to mainnet</Text>
             </VStack>
 
-            <Flex>{isLoading ? <Spinner size="sm" /> : <SwapButton />}</Flex>
+            {/* <Flex>{isLoading ? <Spinner size="sm" /> : <SwapButton />}</Flex> */}
           </HStack>
 
           <Show below="sm">
