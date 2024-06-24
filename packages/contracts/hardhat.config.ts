@@ -77,7 +77,7 @@ module.exports = {
       url: VECHAIN_URL_MAINNET,
       accounts: {
         mnemonic: getEnvMnemonic(),
-        count: 1,
+        count: 20,
         path: "m/44'/818'/0'/0",
       },
       restful: true,

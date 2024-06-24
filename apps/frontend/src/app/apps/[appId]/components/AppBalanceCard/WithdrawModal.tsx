@@ -12,9 +12,10 @@ import {
   Image,
   Skeleton,
   Icon,
+  Select,
 } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
-import { useBreakpoints, useWithdrawAppBalance } from "@/hooks"
+import { useWithdrawAppBalance } from "@/hooks"
 import { Controller, useForm } from "react-hook-form"
 import { TransactionModal, CustomModalContent } from "@/components"
 import BigNumber from "bignumber.js"
@@ -56,7 +57,6 @@ const layoutTransition = {
 
 export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
-  const { isMobile } = useBreakpoints()
 
   const { data: availableB3trToWithdraw, isLoading: isBalanceLoading } = useAppBalance(appId)
   const availableB3trToWithdrawScaled = useMemo(() => {
@@ -139,27 +139,25 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
       <Controller
         name="reason"
         control={control}
-        render={({ field: { onChange, value } }) => (
-          <Input
-            h="50px"
-            placeholder={"How will the funds be used?"}
-            fontSize={14}
-            fontWeight={400}
-            type="text"
-            value={value}
-            onChange={e => onChange(e.target.value)}
-            variant="unstyled"
-          />
+        render={({ field: { onChange } }) => (
+          <Select placeholder="Select a withdraw reason" onChange={e => onChange(e.target.value)}>
+            <option value="Team allocation share">{t("Team allocation share")}</option>
+            <option value="Marketing">{t("Marketing")}</option>
+            <option value="Development">{t("Development")}</option>
+            <option value="Reward distribution">{t("Reward distribution")}</option>
+            <option value="Community airdrop">{t("Community airdrop")}</option>
+            <option value="Reason not specified">{t("Other")}</option>
+          </Select>
         )}
       />
     )
-  }, [control])
+  }, [control, t])
 
   const renderCardContent = useCallback(() => {
     return (
       <form onSubmit={formData.handleSubmit(handleWithdraw)}>
         <ModalCloseButton top={{ base: 5, md: 6 }} right={4} />
-        <VStack align={"flex-start"} maxW={isMobile ? "350px" : "590px"} px={{ base: 0, md: 4 }}>
+        <VStack align={"flex-start"} maxW={["450px", "590px"]} px={{ base: 0, md: 4 }}>
           <HStack>
             <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
               {t("Withdraw from your balance")}
@@ -185,16 +183,9 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
 
           <motion.div initial="initial" animate="animate" variants={containerVariants} style={{ width: "100%" }}>
             <motion.div layout transition={layoutTransition}>
-              <VStack
-                py={3}
-                h="full"
-                w="full"
-                align="flex-start"
-                spacing={12}
-                borderBottomWidth={2}
-                borderColor={"rgba(213, 213, 213, 1)"}>
+              <VStack py={3} h="full" w="full" align="flex-start" spacing={12}>
                 <HStack align={"stretch"} justify={"stretch"} spacing={4} w="full">
-                  <VStack justify="stretch" flex={1} gap={1}>
+                  <VStack justify="stretch" flex={1} gap={2}>
                     <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
                       <Text fontSize={14} fontWeight={400}>
                         {t("Withdraw reason")}
@@ -246,7 +237,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
             variant={"primaryAction"}
             w={"full"}
             rounded={"full"}
-            isDisabled={invalidAmount}
+            isDisabled={invalidAmount || reason.length === 0}
             size={"lg"}>
             <Icon as={IoWalletOutline} mr={2} />
             <Text fontSize={{ base: 14, md: 18 }}>{t("Withdraw now")}</Text>
@@ -264,6 +255,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
     isBalanceLoading,
     teamWalletAddress,
     reasonInput,
+    reason,
     setValue,
   ])
 
