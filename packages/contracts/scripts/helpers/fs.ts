@@ -29,10 +29,10 @@ async function readFilesFromDirectory(dirPath: string): Promise<File[]> {
 }
 
 function formData(path: string): FormData {
-// Create a form data instance
-const form = new FormData();
-form.append('file', fs.createReadStream(path));
-return form;
+  // Create a form data instance
+  const form = new FormData();
+  form.append('file', fs.createReadStream(path));
+  return form;
 }
 
 function getFolderName(folderPath: string): string {
