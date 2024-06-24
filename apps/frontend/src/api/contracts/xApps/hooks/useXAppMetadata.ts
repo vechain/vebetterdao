@@ -31,6 +31,7 @@ export type XAppMetadata = {
     code: string
     url: string
   }[]
+  tweets: string[]
 }
 /**
  *
