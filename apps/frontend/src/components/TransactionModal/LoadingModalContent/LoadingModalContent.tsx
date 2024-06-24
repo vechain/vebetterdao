@@ -4,6 +4,7 @@ import loadingAnimation from "./loading.json"
 import { ReactNode } from "react"
 import { ModalAnimation } from "../ModalAnimation"
 import { getConfig } from "@repo/config"
+import { useTranslation } from "react-i18next"
 
 export type LoadingModalContentProps = {
   title?: ReactNode
@@ -16,6 +17,7 @@ export const LoadingModalContent = ({
   showExplorerButton,
   txId,
 }: LoadingModalContentProps) => {
+  const { t } = useTranslation()
   return (
     <ModalAnimation>
       <VStack align={"center"} p={6}>
@@ -39,7 +41,7 @@ export const LoadingModalContent = ({
             color="gray.500"
             fontSize={"14px"}
             textDecoration={"underline"}>
-            View it on the explorer
+            {t("View it on the explorer")}
           </Link>
         )}
       </VStack>
