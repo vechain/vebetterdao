@@ -41,7 +41,7 @@ export const DashboardXApps = ({ maxApps = 4 }: Props) => {
   if (!slicedXApps?.length) return null
 
   return (
-    <Card>
+    <Card variant="baseWithBorder">
       <CardHeader>
         <VStack w="full" justify={"flex-start"} align={"start"}>
           <HStack w="full" justify={"space-between"}>

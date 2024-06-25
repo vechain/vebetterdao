@@ -91,7 +91,7 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
   if (!shouldSeeThePage) return null
 
   return (
-    <Card w="full">
+    <Card w="full" variant="baseWithBorder">
       <CardBody>
         <VStack w="full" spacing={8} align={"flex-start"}>
           <Heading fontSize={"36px"} fontWeight={700}>
