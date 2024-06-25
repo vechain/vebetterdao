@@ -47,13 +47,26 @@ export const AllocationRoundUserVotes = ({ roundId, minPercentageToNotMerge }: P
 
   const { data: hasVoted } = useHasVotedInRound(roundId, account ?? undefined)
 
+  const parsedCastVotes: AppVotesBreakdownProps["votes"] = useMemo(() => {
+    if (castVotesEvent?.appsIds && votesAtSnapshot) {
+      return castVotesEvent.appsIds.map((id, index) => {
+        const parsedVotes = Number(ethers.formatEther(castVotesEvent.voteWeights[index] as string))
+
+        return {
+          appId: id,
+          value: parsedVotes,
+          rawValue: parsedVotes,
+        }
+      })
+    }
+    return []
+  }, [castVotesEvent, votesAtSnapshot])
+
   const parsedCastVotesPercentages: AppVotesBreakdownProps["votes"] = useMemo(() => {
     if (castVotesEvent?.appsIds && votesAtSnapshot) {
       return castVotesEvent.appsIds.map((id, index) => {
-        const rawValue = scaledDivision(
-          Number(ethers.formatEther(castVotesEvent.voteWeights[index] as string)) * 100,
-          Number(votesAtSnapshot),
-        )
+        const parsedVotes = Number(ethers.formatEther(castVotesEvent.voteWeights[index] as string))
+        const rawValue = scaledDivision(parsedVotes * 100, Number(votesAtSnapshot))
         return {
           appId: id,
           value: new BigNumber(rawValue).toFixed(2, BigNumber.ROUND_HALF_DOWN),
@@ -72,7 +85,7 @@ export const AllocationRoundUserVotes = ({ roundId, minPercentageToNotMerge }: P
     <>
       <SeeVoteDetailsModal
         roundId={roundId}
-        votes={parsedCastVotesPercentages}
+        votes={parsedCastVotes}
         isOpen={seeAllModal.isOpen}
         onClose={seeAllModal.onClose}
       />

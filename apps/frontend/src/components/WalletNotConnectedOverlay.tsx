@@ -12,7 +12,7 @@ export const WalletNotConnectedOverlay = ({ description = "Connect your wallet" 
       w={"100%"}
       align="center"
       justify="center"
-      zIndex={1}
+      zIndex={3}
       data-testid="wallet-not-connected-overlay">
       <Image
         alt="wallet-not-connected-background-bottom"
