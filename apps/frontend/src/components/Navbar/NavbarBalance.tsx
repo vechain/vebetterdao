@@ -28,7 +28,7 @@ export const NavbarBalance = () => {
           <HStack gap={1} bg="#004CFC" borderLeftRadius="full" p={padding} pr="0">
             <Image h={iconHeight} w={iconHeight} src="/images/b3tr-token.png" alt="b3tr-token" />
             <Text color="#FFFFFF" fontSize={fontSize} fontWeight={600}>
-              {compactFormatter.format(Number(b3trBalance?.scaled) ?? 0)}
+              {compactFormatter.format(Number(b3trBalance?.scaled ?? 0))}
             </Text>
           </HStack>
           <Image
@@ -44,7 +44,7 @@ export const NavbarBalance = () => {
           <HStack gap={1} bg="#B1F16C" borderRightRadius="full" p={padding} pl="0">
             <Image h={iconHeight} w={iconHeight} src="/images/vot3-token.png" alt="vot3-token" />
             <Text color="#000000" fontSize={fontSize} fontWeight={600}>
-              {compactFormatter.format(Number(vot3Balance?.scaled) ?? 0)}
+              {compactFormatter.format(Number(vot3Balance?.scaled ?? 0))}
             </Text>
           </HStack>
         </HStack>
