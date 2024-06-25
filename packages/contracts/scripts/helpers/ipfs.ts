@@ -6,25 +6,25 @@ const IPFS_PINNING_SERVICE = process.env.NEXT_PUBLIC_IPFS_PINNING_SERVICE ?? ""
 
 async function uploadDirectoryToIPFS(pathToUpload: string, path: string): Promise<[string, File[], string]> {
   try {
-      const form = formData(pathToUpload);
-      const response = await axios.post(IPFS_PINNING_SERVICE, form, {
-          headers: {
-              ...form.getHeaders()
-          }
-      });
+    const form = formData(pathToUpload)
+    const response = await axios.post(IPFS_PINNING_SERVICE, form, {
+      headers: {
+        ...form.getHeaders(),
+      },
+    })
 
-      // Extract the IPFS hash from the response
-      const ipfsHash = response.data.IpfsHash;
-      console.log('IPFS Hash:', ipfsHash);
+    // Extract the IPFS hash from the response
+    const ipfsHash = response.data.IpfsHash
+    console.log("IPFS Hash:", ipfsHash)
 
-      const files = await readFilesFromDirectory(path)
-      const folderName = getFolderName(path)
+    const files = await readFilesFromDirectory(path)
+    const folderName = getFolderName(path)
 
-      // Return the IPFS hash
-      return [ipfsHash, files, folderName];
+    // Return the IPFS hash
+    return [ipfsHash, files, folderName]
   } catch (error) {
-      console.error('Error uploading file:', error);
-      throw new Error('Failed to upload directory to IPFS');
+    console.error("Error uploading file:", error)
+    throw new Error("Failed to upload directory to IPFS")
   }
 }
 
@@ -36,14 +36,14 @@ async function uploadDirectoryToIPFS(pathToUpload: string, path: string): Promis
  * @returns The IPFS URL in the format 'ipfs://{cid}/{folderName}/{fileName}'.
  */
 function toIPFSURL(cid: string, fileName?: string, folderName?: string): string {
-  let url = `ipfs://${cid}`;
+  let url = `ipfs://${cid}`
   if (folderName) {
-      url += `/${folderName}`;
+    url += `/${folderName}`
   }
   if (fileName) {
-      url += `/${fileName}`;
+    url += `/${fileName}`
   }
-  return url;
+  return url
 }
 
 export { uploadDirectoryToIPFS, toIPFSURL }

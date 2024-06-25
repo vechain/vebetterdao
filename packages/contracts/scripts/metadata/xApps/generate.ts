@@ -58,12 +58,12 @@ const generateMetadata = async (file: string): Promise<XAppMetadata> => {
   // Copy images to a new directory called images so that we can zip them
   copyImages(`${MEDIA_PATH}/${filename}`, `${MEDIA_PATH}/media`)
   // Zip the images directory
-  await zipFolder(`${MEDIA_PATH}/media`, `${MEDIA_PATH}/media.zip`);
+  await zipFolder(`${MEDIA_PATH}/media`, `${MEDIA_PATH}/media.zip`)
 
   const [imagesIpfsUrl] = await uploadDirectoryToIPFS(`${MEDIA_PATH}/media.zip`, `${MEDIA_PATH}/${filename}`)
 
-  metadata.banner = toIPFSURL(imagesIpfsUrl, "banner.png", 'media')
-  metadata.logo = toIPFSURL(imagesIpfsUrl, "logo.png", 'media')
+  metadata.banner = toIPFSURL(imagesIpfsUrl, "banner.png", "media")
+  metadata.logo = toIPFSURL(imagesIpfsUrl, "logo.png", "media")
 
   return metadata
 }
@@ -71,10 +71,10 @@ const generateMetadata = async (file: string): Promise<XAppMetadata> => {
 const validateMediaFiles = async (filename: string) => {
   let media = await fs.readdir(`${MEDIA_PATH}/${filename}`)
 
-   // Check and remove .DS_STORE files if they exist
-   if (media.includes('.DS_Store')) {
-    await fs.unlink(`${MEDIA_PATH}/${filename}/.DS_Store`); // This deletes the .DS_Store file
-    media = media.filter(file => file !== '.DS_Store'); // Update the media list
+  // Check and remove .DS_STORE files if they exist
+  if (media.includes(".DS_Store")) {
+    await fs.unlink(`${MEDIA_PATH}/${filename}/.DS_Store`) // This deletes the .DS_Store file
+    media = media.filter(file => file !== ".DS_Store") // Update the media list
   }
 
   // media must contain 2 files: a logo and a banner

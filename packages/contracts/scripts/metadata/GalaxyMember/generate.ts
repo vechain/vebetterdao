@@ -60,7 +60,7 @@ function generateMetadata(
   name: string,
   description: string,
   attributes: Record<string, string | number>,
-  image: string
+  image: string,
 ): Metadata {
   return {
     name,
@@ -90,11 +90,11 @@ async function generateAndSaveMetadata(): Promise<void> {
     // 2. Upload images to IPFS and get URL
     const [imagesIpfsUrl, images, folderName] = await uploadDirectoryToIPFS(IMAGE_ZIP_PATH, IMAGE_PATH)
 
-    console.log("Galaxy Member Images IPFS URL:", toIPFSURL(imagesIpfsUrl, undefined ,folderName))
+    console.log("Galaxy Member Images IPFS URL:", toIPFSURL(imagesIpfsUrl, undefined, folderName))
 
     // 3. Generate metadata for each level
     for (let i = 0; i < levelAttributes.length; i++) {
-      const image  = toIPFSURL(imagesIpfsUrl, images[i].name, folderName)
+      const image = toIPFSURL(imagesIpfsUrl, images[i].name, folderName)
       const metadata = generateMetadata(levelNames[i], description, levelAttributes[i], image)
       await saveMetadataToFile(metadata, String(i + 1))
     }

@@ -8,7 +8,7 @@ const uploadToIpfs = async () => {
   // upload all files in output folder to IPFS
   const entries = await readFilesFromDirectory(OUTPUT_PATH)
   for (const entry of entries) {
-    if(entry.name === "images.zip") continue
+    if (entry.name === "images.zip") continue
     const file = await fs.readFile(OUTPUT_PATH + "/" + entry.name, "utf8")
     const [metadataIpfsUrl] = await uploadDirectoryToIPFS(OUTPUT_PATH + "/" + entry.name, OUTPUT_PATH)
 
