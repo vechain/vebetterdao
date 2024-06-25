@@ -56,14 +56,14 @@ const generateMetadata = async (file: string): Promise<XAppMetadata> => {
 
   await validateMediaFiles(filename)
   // Copy images to a new directory called images so that we can zip them
-  copyImages(`${MEDIA_PATH}/${filename}`, `${MEDIA_PATH}/images`)
+  copyImages(`${MEDIA_PATH}/${filename}`, `${MEDIA_PATH}/media`)
   // Zip the images directory
-  await zipFolder(`${MEDIA_PATH}/images`, `${MEDIA_PATH}/images.zip`);
+  await zipFolder(`${MEDIA_PATH}/media`, `${MEDIA_PATH}/media.zip`);
 
-  const [imagesIpfsUrl] = await uploadDirectoryToIPFS(`${MEDIA_PATH}/images.zip`, `${MEDIA_PATH}/${filename}`)
+  const [imagesIpfsUrl] = await uploadDirectoryToIPFS(`${MEDIA_PATH}/media.zip`, `${MEDIA_PATH}/${filename}`)
 
-  metadata.banner = toIPFSURL(imagesIpfsUrl, "banner.png", 'images')
-  metadata.logo = toIPFSURL(imagesIpfsUrl, "logo.png", 'images')
+  metadata.banner = toIPFSURL(imagesIpfsUrl, "banner.png", 'media')
+  metadata.logo = toIPFSURL(imagesIpfsUrl, "logo.png", 'media')
 
   return metadata
 }

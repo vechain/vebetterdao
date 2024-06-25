@@ -2,7 +2,7 @@ import { getFolderName, toIPFSURL, uploadDirectoryToIPFS, zipFolder } from "."
 
 export async function uploadMetadataToIpfs(METADATA_PATH: string): Promise<void> {
   try {
-      // Zip the directory and get the path to the zip file
+    // Zip the directory and get the path to the zip file
     await zipFolder(METADATA_PATH, `${METADATA_PATH}.zip`);
     const [metadataIpfsUrl] = await uploadDirectoryToIPFS(`${METADATA_PATH}.zip`, METADATA_PATH)
 
