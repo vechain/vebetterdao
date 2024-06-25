@@ -35,14 +35,16 @@ export const TotalAllocations = () => {
       </CardHeader>
       <CardBody>
         <Stack spacing={5} w={"full"}>
-          {sortedTotalEarnings?.map(data => (
-            <AppAmount
-              key={data?.appId}
-              xAppId={data?.appId}
-              amount={data?.amount}
-              isLoading={isTotalEarningsLoading}
-            />
-          ))}
+          {isTotalEarningsLoading
+            ? xApps?.map(app => <AppAmount key={app.id} xAppId={app.id} isLoading={isTotalEarningsLoading} />)
+            : sortedTotalEarnings?.map(data => (
+                <AppAmount
+                  key={data?.appId}
+                  xAppId={data?.appId}
+                  amount={data?.amount}
+                  isLoading={isTotalEarningsLoading}
+                />
+              ))}
         </Stack>
       </CardBody>
     </Card>
