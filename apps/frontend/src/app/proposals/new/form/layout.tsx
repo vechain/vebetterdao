@@ -1,5 +1,5 @@
 "use client"
-import { Grid, GridItem, VStack } from "@chakra-ui/react"
+import { Grid, GridItem } from "@chakra-ui/react"
 import { CreateProposalStepperCard } from "./components/CreateProposalStepperCard"
 import { useNewProposalPageGuard } from "./hooks/useNewProposalPageGuard"
 import { useLayoutEffect } from "react"
