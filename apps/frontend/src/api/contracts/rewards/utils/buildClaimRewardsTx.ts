@@ -1,8 +1,5 @@
 import { EnhancedClause } from "@/hooks"
-import { getConfig } from "@repo/config"
-import { VoterRewards__factory } from "@repo/contracts"
-
-const voterRewardsInterface = VoterRewards__factory.createInterface()
+import { buildClaimRoundReward } from "./buildClaimRoundReward"
 
 /**
  * Interface for the reward for a round.
@@ -30,13 +27,7 @@ export const buildClaimRewardsTx = (
   for (const round of roundRewards) {
     if (!round.rewards || Number(round.rewards) <= 0) continue
 
-    const clause: EnhancedClause = {
-      to: getConfig().voterRewardsContractAddress,
-      value: 0,
-      data: voterRewardsInterface.encodeFunctionData("claimReward", [round.roundId, address]),
-      comment: `Claim rewards for round ${round.roundId}`,
-      abi: JSON.parse(JSON.stringify(voterRewardsInterface.getFunction("claimReward"))),
-    }
+    const clause: EnhancedClause = buildClaimRoundReward(round.roundId, address)
 
     clauses.push(clause)
   }
