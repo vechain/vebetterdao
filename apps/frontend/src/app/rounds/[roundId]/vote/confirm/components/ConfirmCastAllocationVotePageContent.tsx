@@ -122,7 +122,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
         txId={castAllocationVotes.txReceipt?.meta.txID ?? castAllocationVotes.sendTransactionTx?.txid}
       />
 
-      <Card w="full">
+      <Card w="full" variant={"baseWithBorder"}>
         <CardBody>
           <VStack w="full" spacing={8} align={"flex-start"}>
             <Heading fontSize={"36px"} fontWeight={700}>

@@ -72,7 +72,7 @@ export const NewProposalPageDiscussionContent = () => {
   }, [setData, setValue, account, title, shortDescription, actions])
 
   return (
-    <Card w="full" data-testid="new-proposal-content-page">
+    <Card w="full" variant="baseWithBorder" data-testid="new-proposal-content-page">
       <CardBody py={8}>
         <VStack spacing={8} align="flex-start" as="form" onSubmit={handleSubmit(onSubmit)}>
           <Heading size="lg">{t("Share more about your idea")}</Heading>

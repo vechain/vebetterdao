@@ -188,7 +188,7 @@ export const GmNFT = () => {
       )}
 
       {isOwned && (
-        <Card w="full">
+        <Card w="full" variant="baseWithBorder">
           <CardBody>
             <VStack spacing={4} align="flex-start" w={"full"}>
               <HStack justifyContent={"space-between"} w="full">
