@@ -13,7 +13,7 @@ type useClaimRewardsProps = {
   onSuccessMessageTitle?: string
 }
 
-type useClaimRewardsReturnValue = {
+export type useClaimRewardsReturnValue = {
   sendTransaction: () => Promise<void>
 } & Omit<UseSendTransactionReturnValue, "sendTransaction">
 
