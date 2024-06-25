@@ -65,7 +65,7 @@ export const NewProposalPageContent = () => {
       w="full"
       data-testid="new-proposal-page">
       <GridItem colSpan={2}>
-        <Card>
+        <Card variant="baseWithBorder">
           <CardBody>
             <VStack spacing={8} align="flex-start">
               <Heading size="lg">{t("Create a new proposal")}</Heading>
@@ -89,16 +89,10 @@ export const NewProposalPageContent = () => {
               </Stack>
               <Stack direction={["column", "column", "row"]} w="full" justify={"space-between"} spacing={8}>
                 <HStack justify={"flex-end"} spacing={4} flex={1}>
-                  <Button
-                    data-testid="go-back"
-                    rounded="full"
-                    variant={"primarySubtle"}
-                    colorScheme="primary"
-                    size="lg"
-                    onClick={goBack}>
+                  <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
                     {t("Go back")}
                   </Button>
-                  <Button data-testid="continue" rounded="full" colorScheme="primary" size="lg" onClick={onContinue}>
+                  <Button data-testid="continue" variant="primaryAction" onClick={onContinue}>
                     {t("Continue")}
                   </Button>
                 </HStack>

@@ -12,11 +12,12 @@ import {
   Heading,
   VStack,
 } from "@chakra-ui/react"
-import { useAllocationsRound, useAllocationsRoundsEvents, useCurrentAllocationsRoundId } from "@/api"
+import { useAllocationsRoundsEvents } from "@/api"
 import { AllocationRoundCard } from "./components/AllocationRoundCard"
 import { useCallback, useMemo, useState } from "react"
 import { FiArrowUpRight } from "react-icons/fi"
 import { useRouter } from "next/navigation"
+import { useTranslation } from "react-i18next"
 
 type Props = {
   maxRoundsToShow?: number
@@ -32,6 +33,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
   showViewAll = true,
   renderInsideCard = false,
 }) => {
+  const { t } = useTranslation()
   const router = useRouter()
 
   const [totalRoundsToShow, setTotalRoundsToShow] = useState<number>(maxRoundsToShow)
@@ -39,19 +41,12 @@ export const AllocationRoundsList: React.FC<Props> = ({
   const { data: allocationRoundsEvents, error: allocationRoundEventsError } = useAllocationsRoundsEvents()
   const invertedCreatedRounds = allocationRoundsEvents?.created.slice().reverse()
 
-  const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  const { data: currentRound } = useAllocationsRound(currentRoundId)
-
-  const isCurrentRoundActive = useMemo(() => {
-    return currentRound?.state === 0
-  }, [currentRound])
-
   const loadMore = useCallback(() => {
     setTotalRoundsToShow(prev => prev + maxRoundsToShow)
   }, [maxRoundsToShow])
 
   const renderRounds = useMemo(() => {
-    return invertedCreatedRounds?.slice(0, totalRoundsToShow)?.map((round, i) => {
+    return invertedCreatedRounds?.slice(0, totalRoundsToShow)?.map(round => {
       return <AllocationRoundCard round={round} key={round.roundId} />
     })
   }, [totalRoundsToShow, invertedCreatedRounds])
@@ -61,14 +56,14 @@ export const AllocationRoundsList: React.FC<Props> = ({
       <VStack spacing={8} w="full" align={"flex-start"}>
         {!renderInsideCard && (
           <HStack w="full" justify="space-between" alignItems={"baseline"}>
-            <Heading size={headingSize}>Allocation Rounds</Heading>
+            <Heading size={headingSize}>{t("Allocations")}</Heading>
             {invertedCreatedRounds && invertedCreatedRounds.length > maxRoundsToShow && showViewAll && (
               <Button
                 variant="link"
                 colorScheme="primary"
                 rightIcon={<FiArrowUpRight />}
                 onClick={() => router.push("/rounds")}>
-                See all rounds
+                {t("See all rounds")}
               </Button>
             )}
           </HStack>
@@ -104,22 +99,23 @@ export const AllocationRoundsList: React.FC<Props> = ({
     loadMore,
     renderRounds,
     router,
+    t,
   ])
 
   return (
     <>
       {renderInsideCard ? (
-        <Card w="full">
+        <Card w="full" variant="baseWithBorder">
           <CardHeader>
             <HStack w="full" justify="space-between" alignItems={"baseline"}>
-              <Heading size={headingSize}>Allocation Rounds</Heading>
+              <Heading size={headingSize}>{t("Allocations")}</Heading>
               {invertedCreatedRounds && invertedCreatedRounds.length > maxRoundsToShow && showViewAll && (
                 <Button
                   variant="link"
                   colorScheme="primary"
                   rightIcon={<FiArrowUpRight />}
                   onClick={() => router.push("/rounds")}>
-                  See all rounds
+                  {t("See all rounds")}
                 </Button>
               )}
             </HStack>

@@ -75,7 +75,7 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
   if (!shouldSeeThePage) return null
 
   return (
-    <Card w="full">
+    <Card w="full" variant="baseWithBorder">
       <CardBody>
         <VStack w="full" spacing={8} align={"flex-start"}>
           <Heading fontSize={"36px"} fontWeight={700}>
@@ -113,23 +113,10 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
               justify={["space-between", "space-between", "flex-end"]}
               spacing={4}
               w={["full", "full", "auto"]}>
-              <Button
-                data-testid="go-back"
-                rounded="full"
-                variant={"primarySubtle"}
-                colorScheme="primary"
-                size="lg"
-                flex={1}
-                onClick={goBack}>
+              <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
                 {t("Go back")}
               </Button>
-              <Button
-                flex={1}
-                data-testid="continue"
-                rounded="full"
-                colorScheme="primary"
-                size="lg"
-                onClick={onContinue}>
+              <Button data-testid="continue" variant="primaryAction" onClick={onContinue}>
                 {t("Continue")}
               </Button>
             </HStack>

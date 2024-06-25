@@ -31,7 +31,6 @@ import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
 import { AllocationRoundBreakdownChart } from "./AllocationRoundBreakdownChart"
 import { useRouter } from "next/navigation"
-import { t } from "i18next"
 
 const compactFormatter = getCompactFormatter(2)
 type Props = {
@@ -157,7 +156,11 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                     </Text>
                     <Skeleton isLoaded={!hasVotedLoading && !userVotesLoading && !votesAtSnapshotLoading}>
                       <HStack spacing={2}>
-                        <Icon as={hasVoted ? VOT3Icon : MdHowToVote} boxSize={4} color={"#252525"} />
+                        {hasVoted ? (
+                          <VOT3Icon boxSize={4} colorVariant="dark" />
+                        ) : (
+                          <Icon as={MdHowToVote} boxSize={4} color={"#252525"} />
+                        )}
                         <Text fontSize={["lg", "lg", "md"]} color={"#252525"} fontWeight={400}>
                           {yourVoteText}
                         </Text>

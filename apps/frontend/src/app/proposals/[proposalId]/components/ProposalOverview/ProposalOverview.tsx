@@ -5,6 +5,7 @@ import {
   Flex,
   HStack,
   Heading,
+  Show,
   Skeleton,
   SkeletonText,
   Spacer,
@@ -37,15 +38,20 @@ export const ProposalOverview = () => {
         <Flex gap="48px" flexDir={["column", "column", "row"]}>
           <VStack gap={"20px"} alignItems={"stretch"} flex={3} justify={"space-between"}>
             <VStack alignItems={"stretch"}>
-              <HStack gap={1}>
-                <Text fontWeight={"600"} color="#6A6A6A">
-                  {t("ROUND")}
-                </Text>
-                <Skeleton isLoaded={!proposal.isRoundIdVoteStartLoading} display={"inline-flex"} ml={1}>
+              <HStack justify={"space-between"}>
+                <HStack gap={1}>
                   <Text fontWeight={"600"} color="#6A6A6A">
-                    {t(`#{{round}}`, { round: proposal.roundIdVoteStart })}
+                    {t("ROUND")}
                   </Text>
-                </Skeleton>
+                  <Skeleton isLoaded={!proposal.isRoundIdVoteStartLoading} display={"inline-flex"} ml={1}>
+                    <Text fontWeight={"600"} color="#6A6A6A">
+                      {t(`#{{round}}`, { round: proposal.roundIdVoteStart })}
+                    </Text>
+                  </Skeleton>
+                </HStack>
+                <Show below="md">
+                  <ProposalShareButton />
+                </Show>
               </HStack>
               <Skeleton isLoaded={!proposal.isTitleLoading}>
                 <Heading fontWeight={700} fontSize="36px" color="#252525">
@@ -63,7 +69,7 @@ export const ProposalOverview = () => {
             <VStack alignItems={"stretch"}>
               <Divider color="#D5D5D5" />
               <HStack justify={"space-between"} flexWrap={"wrap"}>
-                <HStack justify={"flex-start"} flexWrap={"wrap"} gap={8}>
+                <HStack justify={{ base: "space-between", md: "flex-start" }} flexWrap={"wrap"} gap={8}>
                   <VStack alignItems={"stretch"}>
                     <Text fontWeight={"400"} color="#6A6A6A">
                       {t("Created by")}
@@ -85,7 +91,9 @@ export const ProposalOverview = () => {
                   <ProposalOverviewYourSupport />
                 </HStack>
                 <HStack justify={"flex-end"} flexWrap={"wrap"} gap={4}>
-                  <ProposalShareButton />
+                  <Show above="md">
+                    <ProposalShareButton />
+                  </Show>
                   <CastProposalVoteButton />
                 </HStack>
               </HStack>

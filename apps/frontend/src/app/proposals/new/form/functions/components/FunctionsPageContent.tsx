@@ -71,7 +71,7 @@ export const FunctionsPageContent = () => {
   )
 
   return (
-    <Card w="full">
+    <Card w="full" variant="baseWithBorder">
       <CardBody py={8}>
         <VStack spacing={8} align="flex-start">
           <Box>
@@ -111,16 +111,10 @@ export const FunctionsPageContent = () => {
               {submitError}
             </Text>
             <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
-              <Button
-                data-testid="go-back"
-                rounded="full"
-                variant={"primarySubtle"}
-                colorScheme="primary"
-                size="lg"
-                onClick={goBack}>
+              <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
                 {t("Go back")}
               </Button>
-              <Button data-testid="continue" rounded="full" colorScheme="primary" size="lg" onClick={onContinue}>
+              <Button data-testid="continue" variant="primaryAction" onClick={onContinue}>
                 {t("Continue")}
               </Button>
             </HStack>

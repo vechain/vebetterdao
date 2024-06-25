@@ -110,7 +110,7 @@ export const PublishAndPreviewPageContent = () => {
         showExplorerButton
       />
 
-      <Card w="full" data-testid="new-proposal-preview-page">
+      <Card w="full" data-testid="new-proposal-preview-page" variant="baseWithBorder">
         <CardBody py={8}>
           <VStack spacing={8} align="flex-start" divider={<Divider />}>
             <Heading size="lg">{t("Check your proposal before publishing")}</Heading>
@@ -160,16 +160,10 @@ export const PublishAndPreviewPageContent = () => {
             </VStack>
 
             <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
-              <Button
-                data-testid="go-back"
-                rounded="full"
-                variant={"primarySubtle"}
-                colorScheme="primary"
-                size="lg"
-                onClick={goBack}>
+              <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
                 {t("Go back")}
               </Button>
-              <Button data-testid="publish" rounded="full" colorScheme="primary" size="lg" onClick={onSubmit}>
+              <Button data-testid="publish" variant="primaryAction" onClick={onSubmit}>
                 {t("Publish")}
               </Button>
             </HStack>

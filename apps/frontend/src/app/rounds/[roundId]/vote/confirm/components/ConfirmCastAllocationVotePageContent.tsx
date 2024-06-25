@@ -23,6 +23,7 @@ import { useCastAllocationVotes, CastAllocationVotesProps } from "@/hooks"
 import { scaledDivision } from "@/utils/MathUtils"
 import { FiArrowUpRight } from "react-icons/fi"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { SeeVoteDetailsModal } from "@/app/rounds/components/AllocationRoundUserVotes/SeeVoteDetailsModal"
 
 type Props = {
   roundId: string
@@ -49,7 +50,9 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
   const isVotingConcluded = roundInfo?.voteEndTimestamp?.isBefore() && [1, 2].includes(state ?? 0)
 
-  const { isOpen, onClose, onOpen } = useDisclosure()
+  const transactionModal = useDisclosure()
+
+  const seeAllModal = useDisclosure()
 
   const onSuccess = useCallback(() => router.push(`/rounds/${roundId}`), [router, roundId])
 
@@ -57,8 +60,8 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
 
   const handleClose = useCallback(() => {
     castAllocationVotes.resetStatus()
-    onClose()
-  }, [castAllocationVotes, onClose])
+    transactionModal.onClose()
+  }, [castAllocationVotes, transactionModal])
 
   const totalVotesToCast = useMemo(() => {
     return (votes.reduce((acc, vote) => acc + Number(vote.rawValue), 0) * Number(votesAtSnapshot)) / 100
@@ -74,9 +77,9 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
       }
     })
 
-    onOpen()
+    transactionModal.onOpen()
     castAllocationVotes.sendTransaction(appVotesPercentagesToValue)
-  }, [castAllocationVotes, onOpen, votesAtSnapshot, votes])
+  }, [castAllocationVotes, transactionModal, votesAtSnapshot, votes])
 
   const onTryAgain = useCallback(() => {
     castAllocationVotes.resetStatus()
@@ -106,8 +109,9 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
 
   return (
     <>
+      <SeeVoteDetailsModal roundId={roundId} votes={votes} isOpen={seeAllModal.isOpen} onClose={seeAllModal.onClose} />
       <TransactionModal
-        isOpen={isOpen}
+        isOpen={transactionModal.isOpen}
         onClose={handleClose}
         status={castAllocationVotes.error ? "error" : castAllocationVotes.status}
         confirmationTitle={"Confirm Vote"}
@@ -122,7 +126,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
         txId={castAllocationVotes.txReceipt?.meta.txID ?? castAllocationVotes.sendTransactionTx?.txid}
       />
 
-      <Card w="full">
+      <Card w="full" variant={"baseWithBorder"}>
         <CardBody>
           <VStack w="full" spacing={8} align={"flex-start"}>
             <Heading fontSize={"36px"} fontWeight={700}>
@@ -140,8 +144,12 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
                     <Heading fontSize="24px" fontWeight={700}>
                       {t("Your vote")}
                     </Heading>
-                    <Button variant="link" colorScheme="primary" rightIcon={<FiArrowUpRight />}>
-                      {t("See all")}
+                    <Button
+                      variant="link"
+                      colorScheme="primary"
+                      onClick={seeAllModal.onOpen}
+                      rightIcon={<FiArrowUpRight />}>
+                      {t("See details")}
                     </Button>
                   </HStack>
                   <Skeleton isLoaded={!votesAtSnapshotLoading}>
@@ -178,23 +186,14 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
                 spacing={4}
                 flex={1}
                 w={["full", "full", "auto"]}>
-                <Button
-                  flex={1}
-                  data-testid="go-back"
-                  rounded="full"
-                  variant={"primarySubtle"}
-                  colorScheme="primary"
-                  size="lg"
-                  onClick={goBack}>
+                <Button data-testid="go-back" flex={1} variant="primarySubtle" onClick={goBack}>
                   {t("Go back")}
                 </Button>
                 <Button
-                  flex={1}
                   form="cast-allocation-vote-form"
                   data-testid="continue"
-                  rounded="full"
-                  colorScheme="primary"
-                  size="lg"
+                  flex={1}
+                  variant="primaryAction"
                   onClick={onContinue}>
                   {t("Cast your vote")}
                 </Button>
