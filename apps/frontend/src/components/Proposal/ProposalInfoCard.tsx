@@ -120,7 +120,7 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposal }) => {
           </Box>
           <HStack cursor={"pointer"}>
             <Text fontWeight={500} color="rgba(0, 76, 252, 1)" fontSize={16}>
-              See proposal
+              {t("See proposal")}
             </Text>
             <MdArrowOutward color="rgba(0, 76, 252, 1)" size={16} />
           </HStack>

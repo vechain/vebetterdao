@@ -61,7 +61,7 @@ export const NewProposalSupportPageContent = () => {
   )
 
   return (
-    <Card>
+    <Card variant="baseWithBorder">
       <CardBody py={8}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <VStack spacing={8} align="flex-start">

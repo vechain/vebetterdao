@@ -1,10 +1,13 @@
-import { Box, Card, CardBody, CardHeader, Heading, Stack } from "@chakra-ui/react"
-import { useAllocationsRound, useCurrentAllocationsRoundId, useXAppTotalEarnings, useXApps } from "@/api"
+import { Card, CardBody, CardHeader, Heading, Stack } from "@chakra-ui/react"
+import { useAllocationsRound, useCurrentAllocationsRoundId, useXApps, useXAppsTotalEarnings } from "@/api"
 import { useMemo } from "react"
 import { AppAmount } from "./components/AppAmount"
+import { useTranslation } from "react-i18next"
 
 export const TotalAllocations = () => {
+  const { t } = useTranslation()
   const { data: xApps } = useXApps()
+
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: currentRound } = useAllocationsRound(currentRoundId?.toString() ?? "")
 
@@ -14,26 +17,36 @@ export const TotalAllocations = () => {
       (i + 1).toString(),
     )
   }, [currentRoundId, currentRound])
+  const totalEarningsQuery = useXAppsTotalEarnings(xApps?.map(app => app.id) ?? [], roundIds)
+
+  const isTotalEarningsLoading = totalEarningsQuery.some(query => query.isLoading)
+
+  const sortedTotalEarnings = useMemo(() => {
+    return totalEarningsQuery
+      .filter(query => query.isSuccess)
+      .map(query => query.data)
+      .sort((a, b) => Number(b?.amount) - Number(a?.amount))
+  }, [totalEarningsQuery])
 
   return (
-    <Card flex={1} h="full" w="full">
+    <Card flex={1} h="full" w="full" variant="baseWithBorder">
       <CardHeader>
-        <Heading size="md">Total Allocations</Heading>
+        <Heading size="md">{t("Most voted apps")}</Heading>
       </CardHeader>
       <CardBody>
-        <Box flex={1} />
         <Stack spacing={5} w={"full"}>
-          {xApps?.map(app => <AppTotalAmounts key={app.id} xAppId={app.id} roundIds={roundIds} />)}
+          {isTotalEarningsLoading
+            ? xApps?.map(app => <AppAmount key={app.id} xAppId={app.id} isLoading={isTotalEarningsLoading} />)
+            : sortedTotalEarnings?.map(data => (
+                <AppAmount
+                  key={data?.appId}
+                  xAppId={data?.appId}
+                  amount={data?.amount}
+                  isLoading={isTotalEarningsLoading}
+                />
+              ))}
         </Stack>
       </CardBody>
     </Card>
   )
-}
-
-const AppTotalAmounts = ({ xAppId, roundIds }: { xAppId: string; roundIds: string[] }) => {
-  const amounts = useXAppTotalEarnings(roundIds, xAppId)
-
-  const totalAmount = amounts.reduce((acc, amount) => acc + Number(amount.data?.amount), 0)
-
-  return <AppAmount xAppId={xAppId} amount={totalAmount.toString()} />
 }

@@ -65,7 +65,7 @@ export const NewProposalPageContent = () => {
       w="full"
       data-testid="new-proposal-page">
       <GridItem colSpan={2}>
-        <Card>
+        <Card variant="baseWithBorder">
           <CardBody>
             <VStack spacing={8} align="flex-start">
               <Heading size="lg">{t("Create a new proposal")}</Heading>

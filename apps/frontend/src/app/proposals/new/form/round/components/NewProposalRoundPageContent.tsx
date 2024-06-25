@@ -70,7 +70,7 @@ export const NewProposalRoundPageContent = () => {
   const isLoading = isCurrentRoundIdLoading || isCanStartInNextRoundLoading
 
   return (
-    <Card>
+    <Card variant="baseWithBorder">
       <CardBody py={8}>
         <VStack spacing={8} align="flex-start">
           <Heading size="lg">{t("Select a voting session date")}</Heading>

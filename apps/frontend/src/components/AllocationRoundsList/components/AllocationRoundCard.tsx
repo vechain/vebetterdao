@@ -1,4 +1,4 @@
-import { RoundCreated, useAllocationAmount, useAllocationsRound, useAllocationsRoundState } from "@/api"
+import { RoundCreated, useAllocationAmount, useAllocationsRound } from "@/api"
 import {
   Box,
   Card,
@@ -19,6 +19,8 @@ import { useMemo } from "react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { AllocationStateBadge } from "@/components/AllocationStateBadge"
 import { useTranslation } from "react-i18next"
+import { B3TRIcon } from "@/components/Icons"
+import { AllocationRoundParticipatingXApps } from "./AllocationRoundParticipatingXApps"
 
 type Props = {
   round: RoundCreated
@@ -39,7 +41,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
 
   const totalAmount = useMemo(() => {
     if (!roundAmount) return 0
-    return roundAmount.voteXAllocations
+    return Object.values(roundAmount).reduce((acc, amount) => acc + Number(amount), 0)
   }, [roundAmount])
 
   const onRoundClick = () => {
@@ -49,19 +51,18 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
     return allocationRound?.state === 0 && allocationRound?.voteEndTimestamp?.isAfter()
   }, [allocationRound])
 
-  const cardActiveBackgroundColor = useColorModeValue("secondary.50", "secondary.100")
-  const cardActiveBorderColor = useColorModeValue("secondary.400", "secondary.700")
+  const cardActiveBackgroundColor = "#E9FDF1"
+  const cardActiveBorderColor = "#3DBA67"
 
   const cardTextColor = isActive ? "black" : "inherit"
-
-  const activeHoverBorderColor = useColorModeValue("secondary.500", "secondary.200")
 
   //TODO: dark mode support
   const nonActiveBackgroundColor = useColorModeValue("rgba(166, 217, 110, 0.12)", "rgba(166, 217, 110, 0.12)")
 
   return (
     <Card
-      borderRadius={"3xl"}
+      variant={"baseWithBorder"}
+      borderRadius={"24px"}
       w="full"
       {...(isActive && {
         bg: cardActiveBackgroundColor,
@@ -70,19 +71,14 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
       })}
       onClick={onRoundClick}
       _hover={{
-        ...(isActive && {
-          borderColor: activeHoverBorderColor,
-        }),
-        ...(!isActive && {
-          bg: nonActiveBackgroundColor,
-        }),
+        bg: isActive ? cardActiveBackgroundColor : nonActiveBackgroundColor,
         cursor: "pointer",
         transition: "all 0.2s ease-in-out",
       }}
       data-testid={"round-#" + round.roundId + "-card"}>
-      <CardBody>
+      <CardBody py="20px">
         <HStack justify={"space-between"} w="full">
-          <Stack w="full" spacing={1}>
+          <Stack w="full" spacing={1} flex={2}>
             <HStack spacing={2} w="fit-content" justify="space-between">
               <AllocationStateBadge
                 roundId={round.roundId}
@@ -91,8 +87,8 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
                 renderIcon={isActive}
               />
               <Show above="sm">
-                <DotSymbol color={"gray"} size={1} />
-                <Text fontWeight={"400"} color={"gray"}>
+                <DotSymbol color={"#6A6A6A"} size={"4px"} />
+                <Text fontWeight={400} color={"#6A6A6A"} fontSize={"14px"}>
                   {isActive
                     ? `ends ${allocationRound.voteEndTimestamp?.fromNow()}`
                     : `${allocationRound.voteStartTimestamp?.fromNow()}`}
@@ -101,41 +97,50 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
             </HStack>
 
             <HStack mt={0.5} w="full" justify="space-between" color={cardTextColor}>
-              <Heading as="h3" size="md">
+              <Heading as="h3" fontSize="20px" fontWeight={700}>
                 {t("Round #{{round}}", {
                   round: round.roundId,
                 })}
               </Heading>
             </HStack>
-            <HStack w="fit-content" justify="space-between" fontSize={"sm"} color={cardTextColor}>
+            <HStack w="fit-content" justify="space-between" fontSize={"12px"} fontWeight={400} color={cardTextColor}>
               <Text>
                 {allocationRound.voteStartTimestamp?.format("MMM D")} {" - "}
                 {allocationRound.voteEndTimestamp?.format("MMM D")}
               </Text>
             </HStack>
           </Stack>
-          <Stack w={"auto"}>
-            <HStack spacing={2} justify="space-between">
+          <HStack spacing={4} justify="flex-end" flex={1}>
+            <Stack direction={["column", "column", "row"]} spacing={4} align={["flex-end", "flex-end", "center"]}>
               <Box width={"max-content"} justifyContent={"end"}>
                 <Skeleton isLoaded={!roundAmountLoading}>
                   {roundAmountError ? (
                     <Text color="red.500">{roundAmountError.message}</Text>
                   ) : (
                     <Box textAlign={"end"} color={cardTextColor}>
-                      <Heading size="lg">{compactFormatter.format(Number(totalAmount))}</Heading>
-                      <Text fontSize={"md"}>{t("total allocation")}</Text>
+                      <HStack spacing={1}>
+                        <Heading fontSize="24px" fontWeight={700}>
+                          {compactFormatter.format(Number(totalAmount))}
+                        </Heading>
+                        <B3TRIcon boxSize={"20px"} colorVariant="dark" />
+                      </HStack>
+                      <Text fontSize={"14px"} fontWeight={400}>
+                        {t("total allocation")}
+                      </Text>
                     </Box>
                   )}
                 </Skeleton>
               </Box>
-              <Icon
-                as={FaAngleRight}
-                boxSize={6}
-                color={cardTextColor}
-                data-testid={"round-#" + round.roundId + "-link"}
-              />
-            </HStack>
-          </Stack>
+
+              <AllocationRoundParticipatingXApps roundId={round.roundId} />
+            </Stack>
+            <Icon
+              as={FaAngleRight}
+              boxSize={"24px"}
+              color={cardTextColor}
+              data-testid={"round-#" + round.roundId + "-link"}
+            />
+          </HStack>
         </HStack>
       </CardBody>
     </Card>
