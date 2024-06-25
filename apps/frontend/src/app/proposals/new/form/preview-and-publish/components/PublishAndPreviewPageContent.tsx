@@ -160,16 +160,10 @@ export const PublishAndPreviewPageContent = () => {
             </VStack>
 
             <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
-              <Button
-                data-testid="go-back"
-                rounded="full"
-                variant={"primarySubtle"}
-                colorScheme="primary"
-                size="lg"
-                onClick={goBack}>
+              <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
                 {t("Go back")}
               </Button>
-              <Button data-testid="publish" rounded="full" colorScheme="primary" size="lg" onClick={onSubmit}>
+              <Button data-testid="publish" variant="primaryAction" onClick={onSubmit}>
                 {t("Publish")}
               </Button>
             </HStack>
