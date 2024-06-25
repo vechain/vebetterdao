@@ -105,7 +105,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
   return (
     <>
       {renderInsideCard ? (
-        <Card w="full">
+        <Card w="full" variant="baseWithBorder">
           <CardHeader>
             <HStack w="full" justify="space-between" alignItems={"baseline"}>
               <Heading size={headingSize}>{t("Allocations")}</Heading>
