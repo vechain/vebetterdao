@@ -1,6 +1,6 @@
 "use client"
 
-import { Grid, GridItem, Spinner, VStack } from "@chakra-ui/react"
+import { Grid, GridItem, Spinner, VStack, useBreakpointValue } from "@chakra-ui/react"
 import { AllocationRoundNavbar } from "../components/AllocationRoundNavbar"
 import { AllocationRoundHeaderCard } from "../components/AllocationRoundHeaderCard/AllocationRoundHeaderCard"
 import { AllocationRoundSessionInfoCard } from "../components/AllocationRoundSessionInfoCard"
@@ -16,6 +16,18 @@ type Props = {
 }
 export const AllocationRoundContent = ({ roundId }: Readonly<Props>) => {
   const { account } = useWallet()
+
+  const userVoteMinPercentageToNotMerge = useBreakpointValue(
+    {
+      base: 25,
+      lg: 12.5,
+    },
+    {
+      // Breakpoint to use when mediaqueries cannot be used, such as in server-side rendering
+      // (Defaults to 'base')
+      fallback: "base",
+    },
+  )
 
   const currentAllocationState = useAllocationsRoundState(roundId)
   const { data: hasVoted } = useHasVotedInRound(roundId, account ?? undefined)
@@ -39,7 +51,9 @@ export const AllocationRoundContent = ({ roundId }: Readonly<Props>) => {
       <Grid templateColumns="repeat(3, 1fr)" gap={[8, 8, 8]} w="full" alignItems={"flex-start"}>
         <GridItem colSpan={[3, 3, 2]} w="full">
           <VStack spacing={8} w="full">
-            {hasVoted && <AllocationRoundUserVotes roundId={roundId} />}
+            {hasVoted && (
+              <AllocationRoundUserVotes roundId={roundId} minPercentageToNotMerge={userVoteMinPercentageToNotMerge} />
+            )}
             <AllocationXAppsVotesCard roundId={roundId} />
           </VStack>
         </GridItem>
