@@ -39,7 +39,7 @@ export const ButtonStyle: ComponentStyleConfig = {
       color: "#FFFFFF",
       bgColor: "rgba(0, 76, 252, 1)",
       _hover: {
-        bg: "#0038b5",
+        bg: "rgba(0, 76, 252, 0.9)",
         _disabled: {
           bg: "rgba(0, 76, 252, 0.7)",
         },

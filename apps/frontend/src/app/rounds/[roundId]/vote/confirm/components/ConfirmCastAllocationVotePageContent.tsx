@@ -178,23 +178,14 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
                 spacing={4}
                 flex={1}
                 w={["full", "full", "auto"]}>
-                <Button
-                  flex={1}
-                  data-testid="go-back"
-                  rounded="full"
-                  variant={"primarySubtle"}
-                  colorScheme="primary"
-                  size="lg"
-                  onClick={goBack}>
+                <Button data-testid="go-back" flex={1} variant="primarySubtle" onClick={goBack}>
                   {t("Go back")}
                 </Button>
                 <Button
-                  flex={1}
                   form="cast-allocation-vote-form"
                   data-testid="continue"
-                  rounded="full"
-                  colorScheme="primary"
-                  size="lg"
+                  flex={1}
+                  variant="primaryAction"
                   onClick={onContinue}>
                   {t("Cast your vote")}
                 </Button>

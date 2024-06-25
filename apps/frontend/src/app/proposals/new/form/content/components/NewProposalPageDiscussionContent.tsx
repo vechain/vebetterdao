@@ -135,16 +135,10 @@ export const NewProposalPageDiscussionContent = () => {
           </FormControl>
 
           <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
-            <Button
-              data-testid="go-back"
-              rounded="full"
-              variant={"primarySubtle"}
-              colorScheme="primary"
-              size="lg"
-              onClick={goBack}>
+            <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
               {t("Go back")}
             </Button>
-            <Button data-testid="continue" rounded="full" colorScheme="primary" size="lg" type="submit">
+            <Button data-testid="continue" variant="primaryAction" type="submit">
               {t("Continue")}
             </Button>
           </HStack>
