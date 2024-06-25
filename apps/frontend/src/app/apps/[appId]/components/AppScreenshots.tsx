@@ -1,4 +1,4 @@
-import { Box, Card, CardBody, Heading, Image, VStack } from "@chakra-ui/react"
+import { Card, CardBody, Flex, Heading, Image, VStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useCurrentAppScreenshots } from "../hooks/useCurrentAppScreenshots"
 
@@ -16,22 +16,20 @@ export const AppScreenshots = () => {
           <Heading fontSize="24px" fontWeight="700">
             {t("Screenshots")}
           </Heading>
-          <Box overflowX="auto" gap={4} whiteSpace={"nowrap"}>
+          <Flex overflowX="auto" gap={4}>
             {screenshots.map((screenshot, index) => (
-              <Box
-                key={index}
-                w="auto"
-                maxW="700px"
-                h="400px"
-                borderRadius="8px"
-                overflow="hidden"
-                display={"inline-block"}
-                mr={4}
-                position="relative">
-                <Image src={screenshot} alt={`Screenshot ${index + 1}`} w="full" h="full" objectFit="cover" />
-              </Box>
+              <Flex key={index} w="auto" h="400px" borderRadius="8px" display={"inline-block"} position="relative">
+                <Image
+                  src={screenshot}
+                  alt={`Screenshot ${index + 1}`}
+                  w="auto"
+                  h="full"
+                  maxW="none"
+                  objectFit="cover"
+                />
+              </Flex>
             ))}
-          </Box>
+          </Flex>
         </VStack>
       </CardBody>
     </Card>

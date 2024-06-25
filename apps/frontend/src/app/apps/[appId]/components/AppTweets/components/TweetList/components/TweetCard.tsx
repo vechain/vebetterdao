@@ -33,7 +33,7 @@ export const TweetCard = ({ tweetQuery, editMode, removeTweet }: Props) => {
     <motion.div {...animation}>
       <VStack align="stretch">
         {tweet && !isTweetLoading ? <EmbeddedTweet key={tweet.id_str} tweet={tweet} /> : <TweetSkeleton />}
-        {!isTweetLoading && (
+        {!isTweetLoading && editMode && (
           <IconButton
             rounded="full"
             color="#D23F63"

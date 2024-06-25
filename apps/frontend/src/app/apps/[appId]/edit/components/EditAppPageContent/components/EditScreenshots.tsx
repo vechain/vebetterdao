@@ -72,14 +72,14 @@ export const EditScreenshots = ({ form }: Props) => {
           <Box
             key={index}
             w="auto"
-            maxW="700px"
+            maxW="none"
             h="400px"
             borderRadius="8px"
             overflow="hidden"
             display={"inline-block"}
             mx={2}
             position="relative">
-            <Image src={screenshot} alt={`Screenshot ${index + 1}`} w="full" h="full" objectFit="cover" />
+            <Image src={screenshot} alt={`Screenshot ${index + 1}`} h="full" objectFit="cover" maxW="none" />
             <IconButton
               rounded="full"
               color="#D23F63"

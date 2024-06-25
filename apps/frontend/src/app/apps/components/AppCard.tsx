@@ -64,7 +64,7 @@ export const AppCard = ({ xApp }: Props) => {
       </Box>
       <CardBody mt={5}>
         <VStack alignItems={"start"} justify={"flex-start"}>
-          <VStack spacing={1} align="flex-start">
+          <VStack spacing={1} align="flex-start" w="full">
             <HStack spacing={1} justifyContent={"space-between"} align="center" w={"full"}>
               <Skeleton isLoaded={!appMetadataLoading}>
                 <Text fontWeight={"600"} size={"xs"}>
