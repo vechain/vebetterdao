@@ -1,58 +1,68 @@
 import { useCallback, useState } from "react"
 import { XAppMetadata } from "@/api"
-import { base64UrlToFile } from "@/utils/BlobUtils"
-import { NFTStorageUtils } from "@repo/utils"
-import { toIPFSURL } from "@/utils"
+import { base64ToBlob } from "@/utils/BlobUtils"
+import JSZip from "jszip";
+import { uploadBlobToIPFS} from "@/utils"
 
 /**
- *  Uploads app metadata to IPFS
+ * Uploads app metadata to IPFS
  * @returns metadataUploading, metadataUploadError, onMetadataUpload
  */
 export const useUploadAppMetadata = () => {
-  const [metadataUploading, setMetadataUploading] = useState(false)
-  const [metadataUploadError, setMetadataUploadError] = useState<Error>()
+  const [metadataUploading, setMetadataUploading] = useState(false);
+  const [metadataUploadError, setMetadataUploadError] = useState<Error>();
 
   const onMetadataUpload = useCallback(async (metadata: XAppMetadata) => {
     try {
-      setMetadataUploading(true)
-      let logo = metadata.logo
-      let banner = metadata.banner
+      setMetadataUploading(true);
+      const zip = new JSZip();
 
-      // TODO: remove .jpeg extension?
-      const [ipfsLogoUri, ipfsBannerUri, ...scrennshotUrls] = await Promise.all([
-        NFTStorageUtils.nftStorageClient.storeBlob(await base64UrlToFile(logo, "logo.jpeg", "image/jpeg")),
-        NFTStorageUtils.nftStorageClient.storeBlob(await base64UrlToFile(banner, "banner.jpeg", "image/jpeg")),
-        ...metadata.screenshots.map(async screenshot =>
-          NFTStorageUtils.nftStorageClient.storeBlob(
-            await base64UrlToFile(screenshot, "screenshot.jpeg", "image/jpeg"),
-          ),
-        ),
-      ])
+      // Create a 'media' folder inside the zip
+      const mediaFolder = zip.folder("media") as JSZip;
 
-      const data = new Blob(
-        [
-          JSON.stringify({
-            ...metadata,
-            logo: toIPFSURL(ipfsLogoUri),
-            banner: toIPFSURL(ipfsBannerUri),
-            screenshots: scrennshotUrls.map((uri: string) => toIPFSURL(uri)),
-          }),
-        ],
-        {
-          type: "application/json",
-        },
-      )
-      const metadataUri = await NFTStorageUtils.nftStorageClient.storeBlob(data)
-      setMetadataUploading(false)
-      return metadataUri
+      // Convert base64 images to Blob and add to 'media' folder in the zip
+      const logoBlob = base64ToBlob(metadata.logo.split(',')[1] ?? "", "image/jpeg");
+      const bannerBlob = base64ToBlob(metadata.banner.split(',')[1] ?? "", "image/jpeg");
+      mediaFolder.file("logo.jpeg", logoBlob);
+      mediaFolder.file("banner.jpeg", bannerBlob);
+
+      for (let i = 0; i < metadata.screenshots.length; i++) {
+        const screenshot = metadata.screenshots[i];
+        if (screenshot) {
+          const screenshotData = screenshot.split(',')[1] ?? "";
+          const screenshotBlob = base64ToBlob(screenshotData, "image/jpeg");
+          mediaFolder.file(`screenshot${i + 1}.jpeg`, screenshotBlob);
+        }
+      }
+
+      // Generate zip Blob
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+
+      // Upload zip to IPFS
+      const imagesCid = await uploadBlobToIPFS(zipBlob, "media.zip");
+
+      // Prepare metadata object with updated URLs pointing inside the 'media' folder
+      const updatedMetadata = {
+        ...metadata,
+        logo: `ipfs://${imagesCid}/media/logo.jpeg`,
+        banner: `ipfs://${imagesCid}/media/banner.jpeg`,
+        screenshots: metadata.screenshots.map((_, index) => `ipfs://${imagesCid}/media/screenshot${index + 1}.jpeg`),
+      };
+
+      // Generate metadata Blob
+      const metadataBlob = new Blob([JSON.stringify(updatedMetadata)], { type: "application/json" });
+      const metadataUri = await uploadBlobToIPFS(metadataBlob, "metadata.json");
+
+      setMetadataUploading(false);
+      return metadataUri;
     } catch (error) {
-      console.error("Error uploading metadata", error)
-      setMetadataUploadError(error as Error)
-      return undefined
+      console.error("Error uploading metadata", error);
+      setMetadataUploadError(error as Error);
+      return undefined;
     } finally {
-      setMetadataUploading(false)
+      setMetadataUploading(false);
     }
-  }, [])
+  }, []);
 
-  return { onMetadataUpload, metadataUploading, metadataUploadError }
-}
+  return { onMetadataUpload, metadataUploading, metadataUploadError };
+};
