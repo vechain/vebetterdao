@@ -83,7 +83,7 @@ export const BalanceCard: React.FC<Props> = () => {
   )
 
   return (
-    <Card w="full">
+    <Card w="full" variant="baseWithBorder">
       <CardBody>
         <VStack spacing={4} align="flex-start" w={"full"}>
           <Box w={"full"} color={"black"} flexDirection={{ base: "column", md: "row" }}>

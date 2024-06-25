@@ -149,7 +149,7 @@ export const GmNFT = () => {
   return (
     <>
       {isNFTClaimable && (
-        <Card w="full">
+        <Card w="full" variant={"baseWithBorder"}>
           <CardBody>
             <VStack spacing={4} align="flex-start" w={"full"}>
               <Heading size="md">Galaxy Member</Heading>

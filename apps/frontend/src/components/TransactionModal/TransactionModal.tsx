@@ -10,6 +10,7 @@ import { ConfirmationConvertModalContent } from "./ConfirmationConvertModalConte
 import { SuccessConvertModalContent } from "./SuccessConvertModalContent"
 import { ConfirmationAppWithdrawModalContent } from "./ConfirmationAppWithdrawModalContent"
 import { SuccessAppWithdrawModalContent } from "./SuccessAppWithdrawModalContent"
+import { CoinsFlipModalContent } from "./CoinsFlipModalContent/CoinsFlipModalContent"
 
 export type TransactionModalProps = {
   isOpen: boolean
@@ -30,6 +31,7 @@ export type TransactionModalProps = {
   vot3BalanceAfterSwap?: string
   b3trWithdrawAmount?: string
   isSwap?: boolean
+  isClaimingRewards?: boolean
   isAppWithdraw?: boolean
   b3trBalance?: string
   vot3Balance?: string
@@ -51,6 +53,7 @@ export const TransactionModal = ({
   showExplorerButton,
   txId,
   isSwap,
+  isClaimingRewards,
   isAppWithdraw,
   b3trBalanceAfterSwap,
   vot3BalanceAfterSwap,
@@ -62,6 +65,7 @@ export const TransactionModal = ({
     if (status === "uploadingMetadata") return <UploadingMetadataModalContent />
 
     if (status === "pending") {
+      if (isClaimingRewards) return <CoinsFlipModalContent />
       if (isSwap)
         return (
           <ConfirmationConvertModalContent
@@ -128,6 +132,7 @@ export const TransactionModal = ({
   }, [
     status,
     isSwap,
+    isClaimingRewards,
     isAppWithdraw,
     b3trBalanceAfterSwap,
     vot3BalanceAfterSwap,
