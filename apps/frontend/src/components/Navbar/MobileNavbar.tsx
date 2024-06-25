@@ -11,12 +11,14 @@ import {
   IconButton,
   VStack,
   useDisclosure,
+  useMediaQuery,
 } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { FaBars } from "react-icons/fa"
 import { NavbarMenu } from "./NavbarMenu"
 import { NavbarLogo } from "./NavbarLogo"
 import { Route } from "./Routes"
+import { NavbarBalance } from "./NavbarBalance"
 
 const ConnectWalletButton = dynamic(
   () => import("@/components/ConnectWalletButton").then(mod => mod.ConnectWalletButton),
@@ -48,14 +50,26 @@ type Props = {
 }
 export const MobileNavBar: React.FC<Props> = ({ routesToRender }) => {
   const { isOpen: isMenuOpen, onClose: closeMenu, onOpen: openMenu } = useDisclosure()
+  const [isBalanceVisible] = useMediaQuery("(min-width: 600px)", {
+    ssr: true,
+    fallback: false, // return false on the server, and re-evaluate on the client side
+  })
 
   return (
     <>
       <NavbarLogo />
+      {isBalanceVisible && <NavbarBalance />}
       <HStack gap={2}>
         <ConnectWalletButton />
         {!!routesToRender.length && (
-          <IconButton onClick={openMenu} icon={<Icon as={FaBars} />} aria-label="Open menu" />
+          <IconButton
+            onClick={openMenu}
+            border={"1px solid #EEEEEE"}
+            bg={"rgba(255, 255, 255, 0.50)"}
+            rounded="6px"
+            icon={<Icon as={FaBars} />}
+            aria-label="Open menu"
+          />
         )}
       </HStack>
       {!!routesToRender.length && (

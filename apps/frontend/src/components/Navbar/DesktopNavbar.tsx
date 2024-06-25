@@ -1,8 +1,9 @@
-import { HStack } from "@chakra-ui/react"
+import { HStack, useMediaQuery } from "@chakra-ui/react"
 import { NavbarLogo } from "./NavbarLogo"
 import { NavbarMenu } from "./NavbarMenu"
 import dynamic from "next/dynamic"
 import { Route } from "./Routes"
+import { NavbarBalance } from "./NavbarBalance"
 
 const ConnectWalletButton = dynamic(
   () => import("@/components/ConnectWalletButton").then(mod => mod.ConnectWalletButton),
@@ -13,6 +14,7 @@ type Props = {
   routesToRender: Route[]
 }
 export const DesktopNavBar: React.FC<Props> = ({ routesToRender }) => {
+  const [isLargerThan1250] = useMediaQuery("(min-width: 1250px)")
   return (
     <>
       <HStack flex={1} justifyContent={"start"}>
@@ -35,6 +37,7 @@ export const DesktopNavBar: React.FC<Props> = ({ routesToRender }) => {
       )}
       <HStack flex={1} spacing={4} justifyContent={"end"}>
         {/* <ThemeSwitcher /> */}
+        {isLargerThan1250 && <NavbarBalance />}
         <ConnectWalletButton />
       </HStack>
     </>
