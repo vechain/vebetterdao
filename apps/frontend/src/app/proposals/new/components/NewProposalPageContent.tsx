@@ -60,12 +60,12 @@ export const NewProposalPageContent = () => {
 
   return (
     <Grid
-      templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(4, 1fr)"]}
+      templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(3, 1fr)"]}
       gap={6}
       w="full"
       data-testid="new-proposal-page">
-      <GridItem colSpan={3}>
-        <Card>
+      <GridItem colSpan={2}>
+        <Card variant="baseWithBorder">
           <CardBody>
             <VStack spacing={8} align="flex-start">
               <Heading size="lg">{t("Create a new proposal")}</Heading>

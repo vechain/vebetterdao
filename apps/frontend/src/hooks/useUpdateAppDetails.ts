@@ -1,10 +1,11 @@
-import { getXAppsQueryKey } from "@/api"
+import { getXAppMetadataQueryKey, getXAppsQueryKey } from "@/api"
 import { useQueryClient } from "@tanstack/react-query"
 import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { X2EarnApps__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
+import { useCurrentAppInfo } from "@/app/apps/[appId]/hooks/useCurrentAppInfo"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
 
@@ -35,9 +36,10 @@ export const useUpdateAppDetails = ({
 }: useUpdateAppDetailsProps): useUpdateAppMetadataReturnValue => {
   const { account } = useWallet()
   const queryClient = useQueryClient()
+  const { app } = useCurrentAppInfo()
 
   const buildClauses = useCallback(
-    ({ metadataUri, teamWalletAddress }: BuildClausesProps) => {
+    ({ metadataUri }: BuildClausesProps) => {
       const clauses: EnhancedClause[] = [
         {
           to: getConfig().x2EarnAppsContractAddress,
@@ -46,17 +48,6 @@ export const useUpdateAppDetails = ({
           comment: "Update app metadata",
           abi: JSON.parse(JSON.stringify(X2EarnAppsInterface.getFunction("updateAppMetadata"))),
         },
-        ...(teamWalletAddress
-          ? [
-              {
-                to: getConfig().x2EarnAppsContractAddress,
-                value: 0,
-                data: X2EarnAppsInterface.encodeFunctionData("updateTeamWalletAddress", [appId, teamWalletAddress]),
-                comment: "Update team wallet address",
-                abi: JSON.parse(JSON.stringify(X2EarnAppsInterface.getFunction("updateTeamWalletAddress"))),
-              },
-            ]
-          : []),
       ]
 
       return clauses
@@ -73,10 +64,16 @@ export const useUpdateAppDetails = ({
       await queryClient.refetchQueries({
         queryKey: getXAppsQueryKey(),
       })
+      await queryClient.cancelQueries({
+        queryKey: getXAppMetadataQueryKey(app?.metadataURI),
+      })
+      await queryClient.refetchQueries({
+        queryKey: getXAppMetadataQueryKey(app?.metadataURI),
+      })
     }
 
     onSuccess?.()
-  }, [invalidateCache, queryClient, onSuccess])
+  }, [invalidateCache, onSuccess, queryClient, app?.metadataURI])
 
   const result = useSendTransaction({
     signerAccount: account,

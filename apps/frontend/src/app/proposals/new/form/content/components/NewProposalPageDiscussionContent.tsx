@@ -1,5 +1,4 @@
 import "@uiw/react-md-editor/markdown-editor.css"
-import "@uiw/react-markdown-preview/markdown.css"
 
 import {
   Box,
@@ -11,19 +10,21 @@ import {
   FormHelperText,
   HStack,
   Heading,
+  Stack,
   Text,
   VStack,
+  useMediaQuery,
 } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
-import { useCallback, useEffect } from "react"
+import { useCallback } from "react"
 import { useProposalFormStore } from "@/store"
 import dynamic from "next/dynamic"
 
 import rehypeSanitize from "rehype-sanitize"
 import { useTranslation } from "react-i18next"
-import { useAutomaticUpdateProposalTemplate } from "../../../hooks/useAutomaticUpdateProposalTemplate"
 import { Controller, useForm } from "react-hook-form"
-import { validateProposalTemplate } from "@/constants"
+import { updateMarkdownTemplatePlaceholders, validateProposalTemplate } from "@/constants"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false })
 
@@ -34,11 +35,9 @@ type FormData = {
 export const NewProposalPageDiscussionContent = () => {
   const { t } = useTranslation()
   const router = useRouter()
+  const { account } = useWallet()
 
-  const { markdownDescription, setData } = useProposalFormStore()
-
-  //automatic update the proposal template based on the form data
-  useAutomaticUpdateProposalTemplate()
+  const { title, shortDescription, markdownDescription, actions, setData } = useProposalFormStore()
 
   const { control, formState, handleSubmit, setValue } = useForm<FormData>({
     defaultValues: {
@@ -46,13 +45,7 @@ export const NewProposalPageDiscussionContent = () => {
     },
   })
 
-  //detect changes by useAutomaticUpdateProposalTemplate and update the form
-  useEffect(() => {
-    return () => {
-      if (!markdownDescription) return
-      setValue("markdownDescription", markdownDescription)
-    }
-  }, [setValue, markdownDescription])
+  const [isDesktop] = useMediaQuery("(min-width: 800px)")
 
   const { errors } = formState
 
@@ -67,8 +60,19 @@ export const NewProposalPageDiscussionContent = () => {
     router.back()
   }, [router])
 
+  const resetMarkdownToDefault = useCallback(() => {
+    const defaultMarkdown = updateMarkdownTemplatePlaceholders({
+      account,
+      title,
+      shortDescription,
+      actionsLength: actions.length,
+    })
+    setValue("markdownDescription", defaultMarkdown)
+    setData({ markdownDescription: defaultMarkdown })
+  }, [setData, setValue, account, title, shortDescription, actions])
+
   return (
-    <Card w="full" data-testid="new-proposal-content-page">
+    <Card w="full" variant="baseWithBorder" data-testid="new-proposal-content-page">
       <CardBody py={8}>
         <VStack spacing={8} align="flex-start" as="form" onSubmit={handleSubmit(onSubmit)}>
           <Heading size="lg">{t("Share more about your idea")}</Heading>
@@ -97,6 +101,7 @@ export const NewProposalPageDiscussionContent = () => {
                 }}
                 render={({ field }) => (
                   <MDEditor
+                    preview={isDesktop ? "live" : "edit"}
                     data-testid="markdown-description-input"
                     value={field.value}
                     onChange={field.onChange}
@@ -108,13 +113,25 @@ export const NewProposalPageDiscussionContent = () => {
                 )}
               />
             </Box>
-            {errors.markdownDescription ? (
-              <FormErrorMessage data-testid="form-error-message">{errors.markdownDescription.message}</FormErrorMessage>
-            ) : (
-              <FormHelperText color="gray.500" fontSize="sm">
-                {t("Make sure to replace all the placeholders with your own content.")}
-              </FormHelperText>
-            )}
+            <Stack
+              direction={["column", "column", "row"]}
+              w="full"
+              justify={"space-between"}
+              align={["flex-start", "flex-start", "center"]}
+              spacing={2}>
+              {errors.markdownDescription ? (
+                <FormErrorMessage data-testid="form-error-message">
+                  {errors.markdownDescription.message}
+                </FormErrorMessage>
+              ) : (
+                <FormHelperText color="gray.500" fontSize="sm">
+                  {t("Make sure to replace all the placeholders with your own content.")}
+                </FormHelperText>
+              )}
+              <Button data-testid="reset-markdown" variant={"primaryLink"} onClick={resetMarkdownToDefault}>
+                {t("Reset to default")}
+              </Button>
+            </Stack>
           </FormControl>
 
           <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>

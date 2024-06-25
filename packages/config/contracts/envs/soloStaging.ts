@@ -1,5 +1,3 @@
-import { VOT3 } from "./../../../contracts/typechain-types/contracts/VOT3"
-import { GalaxyMember } from "./../../../contracts/typechain-types/contracts/GalaxyMember"
 import { defineConfig } from "../defineConfig"
 
 export function createSoloStagingConfig() {
@@ -56,7 +54,7 @@ export function createSoloStagingConfig() {
 
     INITIAL_X_ALLOCATION: BigInt("2000000000000000000000000"), // 2M B3TR
 
-    GM_NFT_BASE_URI: "ipfs://bafybeidngidiqpenmmvnnmxtnxar3stxtnltpknt5tg7jbgt4dkfhkcxha/", // IPFS base URI for the GM NFT
+    GM_NFT_BASE_URI: "ipfs://bafybeienna2npuyliqaqsrxziu4texyginznh5ewxcvlvlqcxfyw7ef52q/metadata/", // IPFS base URI for the GM NFT
 
     /*
       Level => B3TR Required
@@ -106,7 +104,7 @@ export function createSoloStagingConfig() {
       Token transfer limits. These values are not final and are for testing purposes only.
     */
     TREASURY_TRANSFER_LIMIT_VET: BigInt("200000000000000000000000"), // 200,000 VET
-    TREASURY_TRANSFER_LIMIT_B3TR: BigInt("500000000000000000000000"), // 50,000 B3TR
+    TREASURY_TRANSFER_LIMIT_B3TR: BigInt("200000000000000000000000"), // 200,000 B3TR
     TREASURY_TRANSFER_LIMIT_VTHO: BigInt("3000000000000000000000000"), // 3,000,000 VTHO
     TREASURY_TRANSFER_LIMIT_VOT3: BigInt("500000000000000000000000"), // 50,000 VOT3
 

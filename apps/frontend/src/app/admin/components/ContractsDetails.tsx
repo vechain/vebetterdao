@@ -34,7 +34,7 @@ export const ContractsDetails = () => {
       <ContractDetailsCard
         title="Emissions"
         address={config.emissionsContractAddress}
-        roles={["DEFAULT_ADMIN_ROLE", "MINTER_ROLE", "UPGRADER_ROLE"]}
+        roles={["DEFAULT_ADMIN_ROLE", "MINTER_ROLE", "UPGRADER_ROLE", "CONTRACTS_ADDRESS_MANAGER_ROLE", "DECAY_SETTINGS_MANAGER_ROLE"]}
       />
       <ContractDetailsCard
         title="GalaxyMember"

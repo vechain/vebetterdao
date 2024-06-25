@@ -10,6 +10,8 @@ import { EditAppPageButton } from "./components/EditAppPageButton"
 import { useCurrentAppBanner, useCurrentAppLogo, useCurrentAppMetadata } from "../../hooks"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 import { AppReceiverAddress } from "./components/AppReceiverAddress"
+import { AdminAppPageButton } from "./components/AdminAppPageButton"
+import { AppID } from "./components/AppID"
 
 export const AppDetailOverview = () => {
   const { t } = useTranslation()
@@ -41,7 +43,7 @@ export const AppDetailOverview = () => {
           </Skeleton>
           <Flex gap="48px" flexDir={["column", "column", "row"]}>
             <VStack alignItems={"stretch"} flex={3} justify={"space-between"} gap={8}>
-              <HStack justify={"space-between"}>
+              <HStack justify={"space-between"} flexWrap={"wrap"}>
                 <HStack gap={4}>
                   <Skeleton isLoaded={!isLogoLoading} alignContent={"start"}>
                     <Image src={logo ?? notFoundImage} alt={"logo"} boxSize={"64px"} borderRadius="16px" />
@@ -65,6 +67,7 @@ export const AppDetailOverview = () => {
                   w={{ base: "full", md: "auto" }}
                   justifyContent={{ base: "space-between", md: "flex-start" }}>
                   <AppReceiverAddress />
+                  <AppID />
                   <VStack>
                     <Text fontSize={"14px"} fontWeight={400} color="#6A6A6A">
                       {t("Member since")}
@@ -80,6 +83,7 @@ export const AppDetailOverview = () => {
                   mt={{ base: 4, md: 0 }}>
                   <Show above="sm">
                     <EditAppPageButton />
+                    <AdminAppPageButton />
                   </Show>
                   <Button
                     variant={"primaryAction"}
@@ -89,6 +93,7 @@ export const AppDetailOverview = () => {
                   </Button>
                   <Show below="sm">
                     <EditAppPageButton />
+                    <AdminAppPageButton />
                   </Show>
                 </HStack>
               </Flex>

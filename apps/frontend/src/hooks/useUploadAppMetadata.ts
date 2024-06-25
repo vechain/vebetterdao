@@ -12,7 +12,7 @@ export const useUploadAppMetadata = () => {
   const [metadataUploading, setMetadataUploading] = useState(false);
   const [metadataUploadError, setMetadataUploadError] = useState<Error>();
 
-  const onMetadataUpload = useCallback(async (metadata: XAppMetadata) => {
+  const onMetadataUpload = useCallback(async (metadata: XAppMetadata, transformImages = true) => {
     try {
       setMetadataUploading(true);
       const zip = new JSZip();

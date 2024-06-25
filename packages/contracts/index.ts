@@ -11,6 +11,7 @@ import XAllocationVotingGovernorJson from "./artifacts/contracts/x-allocation-vo
 import TreasuryContractJson from "./artifacts/contracts/Treasury.sol/Treasury.json"
 import X2EarnAppsJson from "./artifacts/contracts/X2EarnApps.sol/X2EarnApps.json"
 import TreasuryJson from "./artifacts/contracts/Treasury.sol/Treasury.json"
+import X2EarnRewardsPoolJson from "./artifacts/contracts/X2EarnRewardsPool.sol/X2EarnRewardsPool.json"
 
 export {
   VOT3__factory,
@@ -25,6 +26,7 @@ export {
   XAllocationVotingGovernor__factory,
   X2EarnApps__factory,
   Treasury__factory,
+  X2EarnRewardsPool__factory,
 } from "./typechain-types"
 
 export {
@@ -41,4 +43,5 @@ export {
   TreasuryContractJson,
   X2EarnAppsJson,
   TreasuryJson,
+  X2EarnRewardsPoolJson,
 }

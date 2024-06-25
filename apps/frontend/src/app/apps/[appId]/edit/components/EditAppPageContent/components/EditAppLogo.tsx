@@ -1,6 +1,6 @@
 import { UseFormReturn } from "react-hook-form"
 import { EditAppForm } from ".."
-import { Box, Flex, Image, Input, useToast } from "@chakra-ui/react"
+import { Box, Circle, Flex, IconButton, Image, Input, useToast } from "@chakra-ui/react"
 import { notFoundImage } from "@/constants"
 import { useCallback, useRef } from "react"
 import { UilPen } from "@iconscout/react-unicons"
@@ -69,7 +69,9 @@ export const EditAppLogo = ({ form }: Props) => {
           cursor={"pointer"}
           _hover={{ bg: "#00000033" }}
           onClick={handleClickEdit}>
-          <UilPen color="#FFFFFF" />
+          <Circle bg={"#00000033"} size={"30px"}>
+            <UilPen color="#FFFFFF" size={"18px"} />
+          </Circle>
         </Flex>
       </Box>
     </Flex>

@@ -71,7 +71,7 @@ export const FunctionsPageContent = () => {
   )
 
   return (
-    <Card w="full">
+    <Card w="full" variant="baseWithBorder">
       <CardBody py={8}>
         <VStack spacing={8} align="flex-start">
           <Box>

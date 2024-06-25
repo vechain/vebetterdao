@@ -14,20 +14,20 @@ import {
 import { URL_REGEX } from "@/constants"
 import { useTranslation } from "react-i18next"
 import { useForm } from "react-hook-form"
-import { useCallback } from "react"
+import { useCallback, useEffect } from "react"
 import { UilCheck } from "@iconscout/react-unicons"
 import { EditAppSocialUrls } from "./components/EditAppSocialUrls"
 import { EditScreenshots } from "./components/EditScreenshots"
 import { useParams, useRouter } from "next/navigation"
 import { EditAppLogo } from "./components/EditAppLogo"
-import { useCurrentAppBanner, useCurrentAppLogo, useCurrentAppMetadata } from "../../../hooks"
+import { useCurrentAppBanner, useCurrentAppLogo, useCurrentAppMetadata, useCurrentAppRole } from "../../../hooks"
 import { EditAppBanner } from "./components/EditAppBanner"
-import { useUpdateAppDetails, useUploadAppMetadata } from "@/hooks"
-import { TransactionModal } from "@/components/TransactionModal"
 import { useCurrentAppScreenshots } from "../../../hooks/useCurrentAppScreenshots"
-import { useQueryClient } from "@tanstack/react-query"
-import { getXAppMetadataQueryKey } from "@/api"
 import { useCurrentAppInfo } from "../../../hooks/useCurrentAppInfo"
+import { useSocialUrls } from "./hooks/useSocialUrls"
+import { useIsFormChanged } from "./hooks/useIsFormChanged"
+import { useUpdateAppDetails, useUploadAppMetadata } from "@/hooks"
+import { UpdateAppMetadataTransactionModal } from "../../../components/UpdateAppMetadataTransactionModal"
 
 export type EditAppForm = {
   name: string
@@ -43,6 +43,10 @@ export type EditAppForm = {
   bannerImage: string
 }
 
+const findUrlByName = (urls: { name: string; url: string }[] | undefined, name: string) => {
+  return urls?.find(url => url.name === name)?.url || ""
+}
+
 export const EditAppPageContent = () => {
   const { t } = useTranslation()
   const { appMetadata } = useCurrentAppMetadata()
@@ -50,12 +54,24 @@ export const EditAppPageContent = () => {
   const { banner } = useCurrentAppBanner()
   const { screenshots } = useCurrentAppScreenshots()
   const { app } = useCurrentAppInfo()
+  const router = useRouter()
+  const transactionModal = useDisclosure()
+  const { isAdminOrModerator } = useCurrentAppRole()
+  const { appId } = useParams<{ appId: string }>()
 
   const form = useForm<EditAppForm>({
     defaultValues: {
       screenshots: screenshots,
       logoImage: logo,
       bannerImage: banner,
+      name: appMetadata?.name || "",
+      external_url: appMetadata?.external_url || "",
+      description: appMetadata?.description || "",
+      twitterUrl: findUrlByName(appMetadata?.social_urls, "Twitter"),
+      discordUrl: findUrlByName(appMetadata?.social_urls, "Discord"),
+      telegramUrl: findUrlByName(appMetadata?.social_urls, "Telegram"),
+      youtubeUrl: findUrlByName(appMetadata?.social_urls, "Youtube"),
+      mediumUrl: findUrlByName(appMetadata?.social_urls, "Medium"),
     },
   })
   const {
@@ -63,71 +79,26 @@ export const EditAppPageContent = () => {
     handleSubmit,
     formState: { errors },
   } = form
+  const socialUrls = useSocialUrls(form)
+  const isFormChanged = useIsFormChanged(form)
 
-  const { appId } = useParams()
-  const router = useRouter()
-
-  const goBack = useCallback(() => {
+  const goToAppPage = useCallback(() => {
     router.push(`/apps/${appId}`)
   }, [appId, router])
 
-  const { onMetadataUpload, metadataUploadError, metadataUploading } = useUploadAppMetadata()
-
-  const queryClient = useQueryClient()
-
-  const updateAppMetadataMutation = useUpdateAppDetails({
-    appId: appId as string,
-    onSuccess: async () => {
-      await queryClient.cancelQueries({
-        queryKey: getXAppMetadataQueryKey(app?.metadataURI),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getXAppMetadataQueryKey(app?.metadataURI),
-      })
-      updateAppMetadataMutation.resetStatus()
-      goBack()
-    },
+  const updateAppDetailsMutation = useUpdateAppDetails({
+    appId,
+    onSuccess: goToAppPage,
   })
-  const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
+
+  const uploadMetadataMutation = useUploadAppMetadata()
 
   const onSubmit = useCallback(
     async (data: EditAppForm) => {
-      updateAppMetadataMutation.resetStatus()
-      onConfirmationOpen()
+      updateAppDetailsMutation.resetStatus()
+      transactionModal.onOpen()
 
-      const socialUrls = []
-      if (data.twitterUrl) {
-        socialUrls.push({
-          name: "Twitter",
-          url: data.twitterUrl,
-        })
-      }
-      if (data.discordUrl) {
-        socialUrls.push({
-          name: "Discord",
-          url: data.discordUrl,
-        })
-      }
-      if (data.telegramUrl) {
-        socialUrls.push({
-          name: "Telegram",
-          url: data.telegramUrl,
-        })
-      }
-      if (data.youtubeUrl) {
-        socialUrls.push({
-          name: "Youtube",
-          url: data.youtubeUrl,
-        })
-      }
-      if (data.mediumUrl) {
-        socialUrls.push({
-          name: "Medium",
-          url: data.mediumUrl,
-        })
-      }
-
-      const metadataUri = await onMetadataUpload({
+      const metadataUri = await uploadMetadataMutation.onMetadataUpload({
         name: data.name,
         description: data.description,
         logo: data.logoImage,
@@ -136,56 +107,51 @@ export const EditAppPageContent = () => {
         screenshots: data.screenshots ?? [],
         app_urls: [],
         social_urls: socialUrls,
+        tweets: appMetadata?.tweets ?? [],
       })
       if (!metadataUri) return
 
-      updateAppMetadataMutation.sendTransaction({
+      updateAppDetailsMutation.sendTransaction({
         metadataUri,
       })
     },
-    [onConfirmationOpen, onMetadataUpload, updateAppMetadataMutation],
+    [updateAppDetailsMutation, transactionModal, uploadMetadataMutation, socialUrls, appMetadata?.tweets],
   )
 
   const handleClose = useCallback(() => {
-    onConfirmationClose()
-    updateAppMetadataMutation.resetStatus()
-  }, [onConfirmationClose, updateAppMetadataMutation])
+    transactionModal.onClose()
+    updateAppDetailsMutation.resetStatus()
+  }, [transactionModal, updateAppDetailsMutation])
 
   const onTryAgain = useCallback(() => {
     handleClose()
     handleSubmit(onSubmit)()
   }, [handleClose, handleSubmit, onSubmit])
 
+  useEffect(() => {
+    if (!isAdminOrModerator) {
+      router.push(`/apps/${app?.id}`)
+    }
+  }, [isAdminOrModerator, app?.id, router])
+
+  if (!isAdminOrModerator) {
+    return null
+  }
+
   return (
     <>
-      <TransactionModal
-        isOpen={isConfirmationOpen}
-        onClose={handleClose}
-        confirmationTitle="Update App details"
-        successTitle="App details updated!"
-        status={
-          metadataUploading
-            ? "uploadingMetadata"
-            : updateAppMetadataMutation.error || metadataUploadError
-              ? "error"
-              : updateAppMetadataMutation.status
-        }
-        errorDescription={metadataUploadError?.message ?? updateAppMetadataMutation.error?.reason}
-        errorTitle={
-          metadataUploadError
-            ? "Error uploading metadata"
-            : updateAppMetadataMutation.error
-              ? "Error updating app details"
-              : undefined
-        }
-        showTryAgainButton={true}
+      <UpdateAppMetadataTransactionModal
+        transactionModal={transactionModal}
+        handleClose={handleClose}
+        uploadMetadataMutation={uploadMetadataMutation}
+        updateAppDetailsMutation={updateAppDetailsMutation}
         onTryAgain={onTryAgain}
-        pendingTitle="Updating app details..."
-        txId={updateAppMetadataMutation.txReceipt?.meta.txID}
-        showExplorerButton
       />
       <VStack alignItems={"stretch"} gap={8} as="form" onSubmit={handleSubmit(onSubmit)} w="full">
-        <Stack flexDirection={["column", "row"]} justify={"space-between"}>
+        <Stack
+          flexDirection={["column", "row"]}
+          justify={["flex-start", "space-between"]}
+          align={["flex-start", "center"]}>
           <HStack gap={4}>
             <EditAppLogo form={form} />
             <FormControl isInvalid={!!errors.name}>
@@ -201,18 +167,22 @@ export const EditAppPageContent = () => {
               <FormErrorMessage fontSize={"12px"}>{errors?.name?.message || ""}</FormErrorMessage>
             </FormControl>
           </HStack>
-          <HStack>
-            <Button variant="primaryGhost" onClick={goBack}>
+          <HStack flexDir={["row-reverse", "row"]} mt={[2, 0]}>
+            <Button variant="primaryGhost" onClick={goToAppPage}>
               {t("Cancel")}
             </Button>
-            <Button variant="primaryAction" type="submit" leftIcon={<UilCheck size="16px" />}>
+            <Button
+              variant="primaryAction"
+              type="submit"
+              leftIcon={<UilCheck size="16px" />}
+              isDisabled={!isFormChanged}>
               {t("Save changes")}
             </Button>
           </HStack>
         </Stack>
         <EditAppBanner form={form} />
         <Stack flexDirection={["column", "row"]} gap={[20, 6]} align={"flex-start"}>
-          <VStack align={"stretch"} flex={3} gap={8}>
+          <VStack align={"stretch"} flex={3} gap={8} w="full">
             <VStack align={"stretch"} gap={4}>
               <Text fontSize={"14px"} fontWeight={400} color="#6A6A6A">
                 {t("Project URL")}

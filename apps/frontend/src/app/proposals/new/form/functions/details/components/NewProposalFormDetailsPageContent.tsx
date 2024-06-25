@@ -6,8 +6,11 @@ import { abi } from "thor-devkit"
 import { useProposalFormStore } from "@/store"
 import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
+import { updateMarkdownTemplatePlaceholders } from "@/constants"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 export const NewProposalFormDetailsPageContent: React.FC = () => {
+  const { account } = useWallet()
   const { t } = useTranslation()
   const router = useRouter()
   const { setData } = useProposalFormStore()
@@ -18,9 +21,16 @@ export const NewProposalFormDetailsPageContent: React.FC = () => {
 
   const onSubmit = useCallback(
     (data: FormData) => {
+      const markdownDescription = updateMarkdownTemplatePlaceholders({
+        title: data.title,
+        shortDescription: data.description,
+        actionsLength: data.actions.length,
+        account,
+      })
       setData({
         title: data.title,
         shortDescription: data.description,
+        markdownDescription,
         actions: data.actions.map(action => {
           const _abi = new abi.Function(action.abiDefinition)
           return {
@@ -39,13 +49,14 @@ export const NewProposalFormDetailsPageContent: React.FC = () => {
           }
         }),
       })
+
       router.push("/proposals/new/form/content")
     },
-    [setData, router],
+    [setData, router, account],
   )
 
   return (
-    <Card w="full" data-testid="new-proposal-form">
+    <Card w="full" data-testid="new-proposal-form" variant="baseWithBorder">
       <CardBody py={8}>
         <VStack spacing={8} align="flex-start">
           <Heading size="lg">{t("What is your proposal about?")}</Heading>

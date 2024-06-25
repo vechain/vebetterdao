@@ -30,7 +30,7 @@ export default function Round({ params }: Readonly<Props>) {
 
   return (
     <MotionVStack>
-      <AllocationRoundContent params={params} />
+      <AllocationRoundContent roundId={params.roundId} />
     </MotionVStack>
   )
 }

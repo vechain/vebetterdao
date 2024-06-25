@@ -29,6 +29,11 @@
       "persistent": true,
       "dependsOn": ["^setup-contracts:testnet"]
     },
+    "dev:mainnet": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^setup-contracts:mainnet"]
+    },
     "setup-contracts": {
       "cache": false,
       "persistent": true,
@@ -39,6 +44,11 @@
       "persistent": true,
       "dependsOn": ["^compile", "@repo/contracts#check-contracts-deployment:testnet"]
     },
+    "setup-contracts:mainnet": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^compile", "@repo/contracts#check-contracts-deployment:mainnet"]
+    },
     "@repo/config#check-or-generate-local-config": {
       "cache": false
     },
@@ -47,6 +57,10 @@
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
     "@repo/contracts#check-contracts-deployment:testnet": {
+      "cache": false,
+      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
+    },
+    "@repo/contracts#check-contracts-deployment:mainnet": {
       "cache": false,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
@@ -62,6 +76,9 @@
     },
     "deploy:testnet": {
       "dependsOn": ["^deploy:testnet"]
+    },
+    "deploy:mainnet": {
+      "dependsOn": ["^deploy:mainnet"]
     },
     "start-round:testnet": {
       "dependsOn": ["@repo/config#check-or-generate-local-config"],

@@ -6,7 +6,6 @@ import {
   getRoundXAppsQueryKey,
   getAllocationAmountQueryKey,
 } from "@/api"
-import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"

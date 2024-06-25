@@ -12,7 +12,7 @@ const ProposalBadge: React.FC<BadgeComponentProps> = ({ bgColor, textColor, icon
   <Box backgroundColor={bgColor} borderRadius="full" px={3} py={1}>
     <HStack spacing={2}>
       {icon}
-      <Text fontWeight="600" lineHeight="19.6px" fontSize="14px" color={textColor}>
+      <Text fontWeight="600" lineHeight="19.6px" fontSize={{ base: "12px", md: "14px" }} color={textColor}>
         {text}
       </Text>
     </HStack>

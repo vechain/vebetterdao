@@ -13,7 +13,6 @@ import {
   VStack,
   Grid,
   useColorModeValue,
-  IconButton,
   Button,
 } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
@@ -24,25 +23,44 @@ import { FiArrowUpRight } from "react-icons/fi"
 type Props = {
   maxApps?: number
 }
-export const DashboardXApps = ({ maxApps = 8 }: Props) => {
+
+export const DashboardXApps = ({ maxApps = 4 }: Props) => {
   const { t } = useTranslation()
   const { data: xApps } = useXApps()
+  const router = useRouter()
 
-  const slicedXApps = useMemo(() => xApps?.slice(0, maxApps), [xApps, maxApps])
+  const randomXApps = useMemo(() => {
+    if (!xApps) return []
+
+    // clone xApps array and shuffle it
+    return [...xApps].sort(() => Math.random() - 0.5)
+  }, [xApps])
+
+  const slicedXApps = useMemo(() => randomXApps?.slice(0, maxApps), [randomXApps, maxApps])
 
   if (!slicedXApps?.length) return null
 
   return (
-    <Card>
+    <Card variant="baseWithBorder">
       <CardHeader>
-        <HStack w="full" justify={"space-between"}>
-          <Heading size="md">{t("Explore Apps")}</Heading>
-          {slicedXApps && slicedXApps.length > maxApps && (
-            <Button variant="link" colorScheme="blue" rightIcon={<FiArrowUpRight />}>
-              {t("See all")}
-            </Button>
-          )}
-        </HStack>
+        <VStack w="full" justify={"flex-start"} align={"start"}>
+          <HStack w="full" justify={"space-between"}>
+            <Heading size="md">{t("Explore Apps")}</Heading>
+            {xApps && xApps.length > maxApps && (
+              <Button
+                variant="link"
+                colorScheme="primary"
+                rightIcon={<FiArrowUpRight />}
+                onClick={() => router.push("/apps")}>
+                {t("See all")}
+              </Button>
+            )}
+          </HStack>
+
+          <Text fontSize={"md"} color={"gray.500"}>
+            {t("Use our apps to complete sustainable actions and earn token rewards.")}
+          </Text>
+        </VStack>
       </CardHeader>
       <CardBody>
         <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
@@ -54,76 +72,50 @@ export const DashboardXApps = ({ maxApps = 8 }: Props) => {
 }
 
 const DashboardXAppCard = ({ xApp }: { xApp: XApp }) => {
-  const {
-    data: appMetadata,
-    isLoading: appMetadataLoading,
-    isError: isAppMetadataError,
-    error: appMetadataError,
-  } = useXAppMetadata(xApp.id)
+  const { t } = useTranslation()
+  const { data: appMetadata, isLoading: appMetadataLoading, error: appMetadataError } = useXAppMetadata(xApp.id)
   const router = useRouter()
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
 
-  const buttonIconColor = useColorModeValue("primary.500", "white")
-
+  const nonActiveBackgroundColor = useColorModeValue("rgba(166, 217, 110, 0.12)", "rgba(166, 217, 110, 0.12)")
+  const cardBackgroundColor = useColorModeValue("#F7F7F7", "#131313")
   const navigateToAppDetail = useCallback(() => {
     router.push(`/apps/${xApp.id}`)
   }, [router, xApp.id])
   return (
-    <Card variant={"baseWithBorder"}>
+    <Card
+      variant={"baseWithBorder"}
+      backgroundColor={cardBackgroundColor}
+      onClick={navigateToAppDetail}
+      _hover={{
+        bg: nonActiveBackgroundColor,
+
+        cursor: "pointer",
+        transition: "all 0.2s ease-in-out",
+      }}>
       <CardBody>
-        <VStack alignItems={"start"} justify={"flex-start"}>
-          <HStack spacing={1} justifyContent={"space-between"} w={"full"}>
+        <VStack alignItems={"start"} justify={"flex-start"} spacing={6}>
+          <HStack spacing={3} justifyContent={"start"} w={"full"} alignItems={"center"}>
             <Skeleton isLoaded={!isLogoLoading} alignContent={"start"}>
-              <Image
-                src={logo?.image ?? notFoundImage}
-                alt={"logo"}
-                boxSize={10}
-                borderRadius="9px"
-                _hover={{
-                  cursor: "pointer",
-                }}
-                onClick={navigateToAppDetail}
-              />
+              <Image src={logo?.image ?? notFoundImage} alt={"logo"} maxW={"40px"} borderRadius="9px" />
             </Skeleton>
 
-            <Skeleton isLoaded={!appMetadataLoading} justifyContent={"end"}>
-              <IconButton
-                isRound={true}
-                variant="solid"
-                aria-label="Go to App"
-                fontSize="20px"
-                disabled={isAppMetadataError}
-                onClick={() => window.open(appMetadata?.external_url, "_blank", "noopener noreferrer")}
-                color={buttonIconColor}
-                icon={<FiArrowUpRight />}
-              />
-            </Skeleton>
+            <VStack spacing={1} align="flex-start" w={"fit-content"}>
+              <Skeleton isLoaded={!appMetadataLoading} justifyContent={"end"}>
+                <Heading size={"sm"}>{appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}</Heading>
+              </Skeleton>
+            </VStack>
           </HStack>
 
-          <VStack spacing={1} align="flex-start">
-            <Skeleton isLoaded={!appMetadataLoading}>
-              <Text
-                fontWeight={"600"}
-                size={"xs"}
-                _hover={{
-                  cursor: "pointer",
-                }}
-                onClick={navigateToAppDetail}>
-                {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
+          <HStack spacing={3} justifyContent={"space-between"} w={"full"} alignItems={"start"}>
+            <Skeleton isLoaded={!appMetadataLoading} justifyContent={"end"}>
+              <Text fontSize={"sm"} color={"gray.500"}>
+                {appMetadata?.description.slice(0, 150) + "..." ??
+                  appMetadataError?.message ??
+                  "Error loading description"}
               </Text>
             </Skeleton>
-            <Skeleton isLoaded={!appMetadataLoading}>
-              <Text
-                fontSize={"sm"}
-                color={"gray.500"}
-                _hover={{
-                  cursor: "pointer",
-                }}
-                onClick={navigateToAppDetail}>
-                {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
-              </Text>
-            </Skeleton>
-          </VStack>
+          </HStack>
         </VStack>
       </CardBody>
     </Card>

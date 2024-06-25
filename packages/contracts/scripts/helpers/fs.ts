@@ -1,5 +1,5 @@
-import path from "path"
 import fs from "fs"
+import path from "path"
 import FormData from "form-data"
 import archiver from "archiver"
 
@@ -79,4 +79,30 @@ async function zipFolder(sourceDir: string, outPath: fs.PathLike): Promise<void>
       archive.finalize();
   });
 }
-export { readFilesFromDirectory, formData, getFolderName, zipFolder, copyImages }
+
+/**
+ * Save the deployed contracts addresses to a file.
+ * @param contracts - The deployed contracts
+ * @param libraries - The deployed libraries
+ */
+async function saveContractsToFile(
+  contracts: Record<string, string>,
+  libraries: {
+    B3TRGovernor: Record<string, string>
+  },
+): Promise<void> {
+  const OUTPUT_PATH = path.join(__dirname, `../../deploy_output`)
+
+  // Reset the output directory
+  if (fs.existsSync(OUTPUT_PATH)) {
+    fs.rmSync(OUTPUT_PATH, { recursive: true })
+  }
+  // Ensure the output directory exists
+  fs.mkdirSync(OUTPUT_PATH)
+
+  await fs.promises.writeFile(`${OUTPUT_PATH}/contracts.txt`, JSON.stringify(contracts, null, 2))
+  await fs.promises.writeFile(`${OUTPUT_PATH}/libraries.txt`, JSON.stringify(libraries, null, 2))
+  console.log(`Contracts and libraries addresses saved to ${OUTPUT_PATH}`)
+}
+
+export { readFilesFromDirectory, formData, getFolderName, zipFolder, copyImages, saveContractsToFile }

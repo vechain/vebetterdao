@@ -118,12 +118,16 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
         <FormLabel {...formLabelProps}>{label}</FormLabel>
         <Input
           data-testid={`generated-function-to-call-${index}`}
-          type="number"
+          type="text"
           placeholder="Insert value..."
           {...register(`actions.${actionIndex}.params.${index}.value`, {
             required: "Field is required",
             valueAsNumber: true,
-            validate: value => value >= 0 || "Value must be greater than or equal to 0",
+            validate: value => {
+              const isValidNumber = !isNaN(value)
+              if (!isValidNumber) return "Invalid number"
+              return value >= 0 || "Value must be greater than or equal to 0"
+            },
           })}
           {...inputProps}
         />

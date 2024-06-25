@@ -11,31 +11,25 @@ import {
   Box,
   Image,
   useDisclosure,
-  ModalOverlay,
-  ModalBody,
-  Modal,
+  Skeleton,
 } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import React, { useCallback, useMemo } from "react"
 import BigNumber from "bignumber.js"
 import { useClaimRewards } from "@/hooks/useClaimRewards"
 import { TbGift } from "react-icons/tb"
-import { coinFlipAnimation } from "@/constants"
-import { motion } from "framer-motion"
 import { B3TRIcon } from "../Icons"
-import { SuccessModalContent } from "../TransactionModal/SuccessModalContent"
-import { CustomModalContent } from "../CustomModalContent"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { TransactionModal } from "../TransactionModal"
+import { Trans, useTranslation } from "react-i18next"
 
 const DECIMAL_PLACES = 4
 
 // Maximum precision of 4 decimals. Must also round down
 const compactFormatter = getCompactFormatter(DECIMAL_PLACES)
 
-// Convert Button to a motion component
-const MotionImage = motion(Image)
-
 export const VoterRewards: React.FC = () => {
+  const { t } = useTranslation()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { account } = useWallet()
 
@@ -73,114 +67,92 @@ export const VoterRewards: React.FC = () => {
 
   const isRewardsLoading = rewardsPerRound?.some(reward => reward.isLoading) // Loading rewards to claim
 
-  const {
-    sendTransaction,
-    resetStatus,
-    isTxReceiptLoading,
-    sendTransactionPending,
-    status,
-    txReceipt,
-    sendTransactionTx,
-  } = useClaimRewards({
+  const claimRewardsMutation = useClaimRewards({
     roundRewards,
   })
 
   const handleClaim = useCallback(() => {
-    sendTransaction()
+    claimRewardsMutation.sendTransaction()
     onOpen()
-  }, [sendTransaction, onOpen])
+  }, [claimRewardsMutation, onOpen])
 
-  const isClaimRewardsLoading = isTxReceiptLoading || sendTransactionPending
+  const isClaimRewardsLoading = claimRewardsMutation.isTxReceiptLoading || claimRewardsMutation.sendTransactionPending
 
   const handleClose = useCallback(() => {
-    resetStatus()
+    claimRewardsMutation.resetStatus()
     onClose()
-  }, [resetStatus, onClose])
+  }, [claimRewardsMutation, onClose])
 
-  const modalContent = useMemo(() => {
-    if (status === "success") {
-      return (
-        <SuccessModalContent
-          title={"Rewards Claimed!"}
-          showSocialButtons
-          socialDescriptionEncoded="%F0%9F%8E%89%20Just%20claimed%20my%20%24B3TR%20rewards%20for%20voting%20in%20the%20%23VeBetterDAO%21%20%0A%0AJoin%20us%20and%20have%20your%20say%20in%20the%20future%20of%20sustainability%20at%20https%3A%2F%2Fvebetterdao.org.%20%0A%0A%23VeBetterDAO%20%23Vechain"
-          showExplorerButton
-          txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
-        />
-      )
-    }
-
-    if (isClaimRewardsLoading)
-      return (
-        <ModalBody py={6} px={12}>
-          <VStack alignItems={"center"}>
-            <MotionImage {...coinFlipAnimation} src="/images/b3tr-token-3d.png" maxH="250px" />
-            {sendTransactionPending /* sendTransactionPending */ && (
-              <Text fontWeight={400} lineHeight="22px" fontSize={{ base: "16px", md: "16px" }} align={"center"}>
-                Please confirm the transaction in your wallet
-              </Text>
-            )}
-            {isTxReceiptLoading && (
-              <Text fontWeight={400} lineHeight="22px" fontSize={{ base: "16px", md: "16px" }}>
-                Almost there...
-              </Text>
-            )}
-          </VStack>{" "}
-        </ModalBody>
-      )
-  }, [status, isClaimRewardsLoading, isTxReceiptLoading, sendTransactionPending, txReceipt, sendTransactionTx])
+  const onTryAgain = useCallback(() => {
+    claimRewardsMutation.resetStatus()
+    handleClaim()
+  }, [claimRewardsMutation, handleClaim])
 
   if (allocationRoundsEvents?.created.length === 0) return null
 
   return (
     <>
-      <Card w="full">
-        <Image src="/images/voter-rewards-bg.svg" position={"absolute"} zIndex={0} alt="voter-rewards-background" />
-        <CardBody p={6}>
+      <TransactionModal
+        isOpen={isOpen}
+        onClose={handleClose}
+        successTitle={"Rewards claimed!"}
+        status={claimRewardsMutation.error ? "error" : claimRewardsMutation.status}
+        errorDescription={claimRewardsMutation.error?.reason}
+        errorTitle={claimRewardsMutation.error ? "Error claiming" : undefined}
+        showTryAgainButton
+        onTryAgain={onTryAgain}
+        pendingTitle="Claiming rewards..."
+        showSocialButtons
+        socialDescriptionEncoded="%F0%9F%8E%89%20Just%20claimed%20my%20%24B3TR%20rewards%20for%20voting%20in%20the%20%23VeBetterDAO%21%20%0A%0AJoin%20us%20and%20have%20your%20say%20in%20the%20future%20of%20sustainability%20at%20https%3A%2F%2Fvebetterdao.org.%20%0A%0A%23VeBetterDAO%20%23Vechain"
+        showExplorerButton
+        txId={claimRewardsMutation.txReceipt?.meta.txID ?? claimRewardsMutation.sendTransactionTx?.txid}
+        isClaimingRewards
+      />
+      <Card w="full" variant="baseWithBorder" overflow={"hidden"}>
+        <CardBody p={6} pos="relative">
+          <Image
+            transform={{ rotate: "180deg" }}
+            src="/images/voter-rewards-bg.svg"
+            alt="Rewards background"
+            pos="absolute"
+            right={"-18%"}
+            top={0}
+            zIndex={1}
+            boxSize={"full"}
+            w="full"
+          />
           <VStack spacing={4} w="full" align={"flex-start"}>
-            <HStack w="full" justify={"space-between"}>
-              <Box bgColor={`secondary.${iconBgColor}`} p={4} borderRadius={32} color={`secondary.${iconColor}`}>
-                <TbGift size={22} />
-              </Box>
-            </HStack>
+            <B3TRIcon boxSize={"56px"} colorVariant="dark" zIndex={2} />
 
-            <Box>
-              <Heading size="md">Voting Rewards</Heading>
-              <Text fontSize={14} mt={1}>
-                Participate for a better future and get rewarded.
+            <Box zIndex={2} w="60%">
+              <Heading fontSize="24px" zIndex={2}>
+                {t("Voting rewards")}
+              </Heading>
+              <Text fontSize={"18px"} fontWeight={400} color={"#6A6A6A"} mt={1} zIndex={2}>
+                <Trans
+                  i18nKey="You have {{value}} B3TR rewards pending claim."
+                  t={t}
+                  values={{
+                    value: compactFormatter.format(Number(totalRewardsFormatted)),
+                  }}
+                />
               </Text>
             </Box>
 
-            <HStack w="full" spacing={4}>
-              <Heading size={{ base: "2xl", md: "xl" }} test-dataid="voting-rewards">
-                {compactFormatter.format(Number(totalRewardsFormatted))}
-              </Heading>
-              <B3TRIcon boxSize="auto" />
-            </HStack>
-
             <Button
+              zIndex={2}
               mt={2}
               isDisabled={totalRewards?.eq(0)}
-              isLoading={isRewardsLoading || isClaimRewardsLoading}
+              isLoading={isClaimRewardsLoading}
               onClick={handleClaim}
-              colorScheme="primary"
+              variant={"primaryAction"}
               borderRadius={"full"}
               w={"full"}>
-              Claim
+              {t("Claim rewards")}
             </Button>
           </VStack>
         </CardBody>
       </Card>
-
-      <Modal
-        isOpen={isOpen}
-        onClose={handleClose}
-        trapFocus={true}
-        isCentered={true}
-        closeOnOverlayClick={status !== "waitingConfirmation" && status !== "pending"}>
-        <ModalOverlay />
-        <CustomModalContent>{modalContent}</CustomModalContent>
-      </Modal>
     </>
   )
 }

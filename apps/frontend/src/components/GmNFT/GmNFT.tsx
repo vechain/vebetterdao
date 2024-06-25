@@ -149,7 +149,7 @@ export const GmNFT = () => {
   return (
     <>
       {isNFTClaimable && (
-        <Card w="full">
+        <Card w="full" variant={"baseWithBorder"}>
           <CardBody>
             <VStack spacing={4} align="flex-start" w={"full"}>
               <Heading size="md">Galaxy Member</Heading>
@@ -176,10 +176,9 @@ export const GmNFT = () => {
                   isLoading={isClaimLoading}
                   onClick={handleFreeMint}
                   color="white"
-                  bgColor={`primary.${buttonColor}`}
+                  variant={"primaryAction"}
                   borderRadius={"full"}
-                  w={"full"}
-                  _hover={{ bgColor: `primary.${nftToClaimColorCard}` }}>
+                  w={"full"}>
                   Mint now
                 </Button>
               </VStack>
@@ -189,7 +188,7 @@ export const GmNFT = () => {
       )}
 
       {isOwned && (
-        <Card w="full">
+        <Card w="full" variant="baseWithBorder">
           <CardBody>
             <VStack spacing={4} align="flex-start" w={"full"}>
               <HStack justifyContent={"space-between"} w="full">

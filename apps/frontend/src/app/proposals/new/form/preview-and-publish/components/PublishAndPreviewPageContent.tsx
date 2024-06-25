@@ -1,8 +1,9 @@
 "use client"
 
+import MDEditor from "@uiw/react-md-editor"
+import "@uiw/react-md-editor/markdown-editor.css"
 import { Button, Card, CardBody, Divider, HStack, Heading, VStack, useDisclosure } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
-import MarkdownPreview from "@uiw/react-markdown-preview"
 import { useProposalFormStore } from "@/store"
 import { NewProposalForm } from "../../functions/details/components/NewProposalForm"
 import { useRouter } from "next/navigation"
@@ -20,7 +21,7 @@ export const PublishAndPreviewPageContent = () => {
   const { actions, markdownDescription, title, shortDescription, votingStartRoundId, depositAmount } =
     useProposalFormStore()
 
-  const { data: threshold, isLoading: thresholdLoading } = useDepositThreshold()
+  const { data: threshold } = useDepositThreshold()
 
   const { handleSubmit } = useForm()
 
@@ -109,14 +110,15 @@ export const PublishAndPreviewPageContent = () => {
         showExplorerButton
       />
 
-      <Card w="full" data-testid="new-proposal-preview-page">
+      <Card w="full" data-testid="new-proposal-preview-page" variant="baseWithBorder">
         <CardBody py={8}>
           <VStack spacing={8} align="flex-start" divider={<Divider />}>
             <Heading size="lg">{t("Check your proposal before publishing")}</Heading>
-            <MarkdownPreview
+            <MDEditor.Markdown
               source={markdownDescription}
               style={{
-                padding: "1rem",
+                width: "100%",
+                wordBreak: "break-word",
               }}
             />
             {!!actions.length && (

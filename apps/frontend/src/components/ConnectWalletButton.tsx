@@ -10,7 +10,7 @@ type Props = {
 export const ConnectWalletButton = ({ responsiveVariant }: Props) => {
   const { account } = useWallet()
   const { open } = useWalletModal()
-  const [isDesktop] = useMediaQuery("(min-width: 800px)")
+  const [isDesktop] = useMediaQuery("(min-width: 1060px)")
 
   const shouldRenderDesktop = responsiveVariant === "desktop" || (!responsiveVariant && isDesktop)
 
@@ -18,7 +18,12 @@ export const ConnectWalletButton = ({ responsiveVariant }: Props) => {
     if (shouldRenderDesktop)
       return (
         <Fade in={true}>
-          <Button onClick={open} colorScheme="primary" size="md" leftIcon={<FaWallet />} data-testid="connect-wallet">
+          <Button
+            onClick={open}
+            variant={"primaryAction"}
+            size="md"
+            leftIcon={<FaWallet />}
+            data-testid="connect-wallet">
             Connect Wallet
           </Button>
         </Fade>
@@ -26,16 +31,22 @@ export const ConnectWalletButton = ({ responsiveVariant }: Props) => {
     else
       return (
         <Fade in={true}>
-          <IconButton onClick={open} icon={<FaWallet />} aria-label="Connect wallet" colorScheme="primary" />
+          <IconButton
+            onClick={open}
+            icon={<FaWallet />}
+            aria-label="Connect wallet"
+            variant={"primaryAction"}
+            borderRadius={"md"}
+          />
         </Fade>
       )
 
   if (shouldRenderDesktop)
     return (
       <Fade in={true}>
-        <Button onClick={open} rounded={"full"} color="black" size="md" bg="rgba(235, 236, 252, 1)">
+        <Button onClick={open} rounded={"full"} size="md" variant={"ghost"}>
           <HStack spacing={2}>
-            <AddressIcon address={account} boxSize={4} rounded={"full"} />
+            <AddressIcon address={account} boxSize={"28px"} rounded={"full"} />
             <Text fontWeight={"400"}>{humanAddress(account, 4, 6)}</Text>
           </HStack>
         </Button>
@@ -45,8 +56,9 @@ export const ConnectWalletButton = ({ responsiveVariant }: Props) => {
     <Fade in={true}>
       <IconButton
         onClick={open}
-        bg="rgba(235, 236, 252, 1)"
         rounded={"md"}
+        border={"1px solid #EEEEEE"}
+        bg={"rgba(255, 255, 255, 0.50)"}
         icon={<AddressIcon address={account} boxSize={6} rounded={"full"} />}
         aria-label="Connect wallet"
       />

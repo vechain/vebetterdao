@@ -1,5 +1,5 @@
 "use client"
-import { Box, Container, useColorModeValue, useMediaQuery } from "@chakra-ui/react"
+import { Box, HStack, useColorModeValue, useMediaQuery } from "@chakra-ui/react"
 import { MobileNavBar } from "./MobileNavbar"
 import { DesktopNavBar } from "./DesktopNavbar"
 import { useAllocationsRoundsEvents } from "@/api"
@@ -10,7 +10,7 @@ import { Routes } from "./Routes"
 
 export const Navbar: React.FC = () => {
   // ssr-friendly media query with fallback
-  const [isDesktop] = useMediaQuery("(min-width: 992px)", {
+  const [isDesktop] = useMediaQuery("(min-width: 1060px)", {
     ssr: true,
     fallback: false, // return false on the server, and re-evaluate on the client side
   })
@@ -25,8 +25,9 @@ export const Navbar: React.FC = () => {
       Routes.filter(route => {
         return (
           route.isVisible &&
-          (route.name === "Allocations" ? (allocationRoundsEvents?.created?.length ?? 0) > 0 : true) &&
-          (route.name === "Admin" ? isAdmin : true)
+          (route.name === "Allocations" ? !!allocationRoundsEvents?.created?.length : true) &&
+          (route.name === "Admin" ? isAdmin : true) &&
+          (route.name === "Governance" ? !!allocationRoundsEvents?.created?.length : true)
         )
       }),
     [allocationRoundsEvents, isAdmin],
@@ -39,20 +40,14 @@ export const Navbar: React.FC = () => {
 
   const bg = useColorModeValue("#F7F7F7", "#131313")
   return (
-    <Box bg={bg} px={0} position={"sticky"} top={0} zIndex={10} py={4} h={"auto"} w={"full"}>
-      <Container
-        w="full"
-        display="flex"
-        flexDirection="row"
-        justifyContent="space-between"
-        alignItems={"center"}
-        maxW="container.xl">
+    <Box bg={bg} px={0} position={"sticky"} top={0} zIndex={10} h={"auto"} w={"full"}>
+      <HStack justify={"space-between"} p={isDesktop ? "16px 48px" : "8px 20px"} borderBottom="1px solid #EEEEEE">
         {isDesktop ? (
           <DesktopNavBar routesToRender={parsedRoutesToRender} />
         ) : (
           <MobileNavBar routesToRender={parsedRoutesToRender} />
         )}
-      </Container>
+      </HStack>
     </Box>
   )
 }

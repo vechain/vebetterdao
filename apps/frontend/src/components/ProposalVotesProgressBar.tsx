@@ -52,7 +52,7 @@ export const ProposalVotesProgressBar: React.FC<Props> = ({ proposal }) => {
   }, [proposalVotes])
 
   const quorumProgress = useMemo(() => {
-    const compactQuorum = compactFormatter.format(Number(quorum?.scaled))
+    const compactQuorum = compactFormatter.format(Number(quorum))
     const isLoaded = !quorumLoading && !proposalVotesLoading
     const totalVotes =
       Number(proposalVotes?.forVotes) + Number(proposalVotes?.againstVotes) + Number(proposalVotes?.abstainVotes)
@@ -71,7 +71,7 @@ export const ProposalVotesProgressBar: React.FC<Props> = ({ proposal }) => {
           Quorum available {estimatedStartTime}
         </Heading>
       )
-    if (totalVotes > Number(quorum?.scaled)) {
+    if (totalVotes > Number(quorum)) {
       return (
         <Heading size="xs" color="green.500" textAlign={"center"}>
           Quorum reached
