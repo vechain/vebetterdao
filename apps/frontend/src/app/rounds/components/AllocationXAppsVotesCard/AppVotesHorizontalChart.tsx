@@ -2,7 +2,7 @@ import { useXAppMetadata, useAllocationsRoundState, useXAppRoundEarnings } from 
 import { useIpfsImage } from "@/api/ipfs"
 import { B3TRIcon } from "@/components"
 import { notFoundImage } from "@/constants"
-import { VStack, HStack, Skeleton, Heading, Box, Image, Text } from "@chakra-ui/react"
+import { VStack, HStack, Skeleton, Heading, Box, Image, Text, Show } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 
@@ -17,12 +17,22 @@ type Props = {
   roundId: string
   totalVotes?: string
   showReceived?: boolean
+  maxAllocation?: number | string
+  renderMaxAllocation?: boolean
 }
 
 // Maximum precision of 2 decimals. Must also round down
 const compactFormatter = getCompactFormatter(2)
 
-export const AppVotesHorizontalChart = ({ data, index, roundId, totalVotes, showReceived = false }: Props) => {
+export const AppVotesHorizontalChart = ({
+  data,
+  index,
+  roundId,
+  totalVotes,
+  showReceived = false,
+  maxAllocation,
+  renderMaxAllocation = false,
+}: Props) => {
   const { t } = useTranslation()
   const { data: appMetadata } = useXAppMetadata(data.app)
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
@@ -36,10 +46,13 @@ export const AppVotesHorizontalChart = ({ data, index, roundId, totalVotes, show
   const baseProgressColor = "rgba(208, 248, 164, 1)"
   const trackProgressColor = "rgba(154, 222, 78, 1)"
 
+  const showMaxAllocation =
+    renderMaxAllocation && maxAllocation && Number(forecastedEarnings?.amount) >= Number(maxAllocation)
+
   return (
     <VStack spacing={4} align={"flex-start"} w="full">
       <HStack justify={"space-between"} w="full">
-        <HStack spacing={3} align={"center"} justify={"flex-start"} flex={1}>
+        <HStack spacing={3} align={"center"} justify={"flex-start"}>
           <Skeleton isLoaded={!isLogoLoading} boxSize={["24px", "28px", "32px"]}>
             <Image src={logo?.image ?? notFoundImage} w="full" borderRadius="9px" alt={appMetadata?.name} />
           </Skeleton>
@@ -47,6 +60,15 @@ export const AppVotesHorizontalChart = ({ data, index, roundId, totalVotes, show
             {appMetadata?.name}
           </Heading>
         </HStack>
+        {showMaxAllocation && (
+          <Show above="lg">
+            <Box py={"4px"} px="8px" borderRadius={"64px"} bg="#E9FDF1">
+              <Text color={"#3DBA67"} fontSize={["12px", "14px"]} fontWeight={600}>
+                {t("Max allocation reached!")}
+              </Text>
+            </Box>
+          </Show>
+        )}
         <HStack spacing={[4, 8]} align={"center"} justify={"flex-start"} alignSelf={"flex-end"}>
           {showReceived && (
             <VStack spacing={0} align="flex-end">
