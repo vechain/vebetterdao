@@ -1,10 +1,13 @@
 import { formData, readFilesFromDirectory, getFolderName } from "./fs"
 import axios from "axios"
 
+// The IPFS pinning service to use
+const IPFS_PINNING_SERVICE = process.env.NEXT_PUBLIC_IPFS_PINNING_SERVICE ?? ""
+
 async function uploadDirectoryToIPFS(pathToUpload: string, path: string): Promise<[string, File[], string]> {
   try {
       const form = formData(pathToUpload);
-      const response = await axios.post('https://api.gateway-proxy.vechain.org/api/v1/pinning/pinFileToIPFS', form, {
+      const response = await axios.post(IPFS_PINNING_SERVICE, form, {
           headers: {
               ...form.getHeaders()
           }
