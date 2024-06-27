@@ -31,13 +31,7 @@ export const NavbarBalance = () => {
               {compactFormatter.format(Number(b3trBalance?.scaled ?? 0))}
             </Text>
           </HStack>
-          <Image
-            h={cardHeight}
-            src="/images/balance-ending-right.png"
-            alt="balance-ending-right"
-            mt="-0.5px"
-            ml="-1px"
-          />
+          <Image h={cardHeight} src="/images/balance-ending-right.png" alt="balance-ending-right" ml="-1px" />
         </HStack>
         <HStack gap={0} align="flex-start" h={cardHeight}>
           <Image h={cardHeight} src="/images/balance-ending-left.png" alt="balance-ending-left" />
