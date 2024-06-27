@@ -1,45 +1,49 @@
-import { NFTStorage } from "nft.storage"
-import { readFilesFromDirectory } from "./fs"
+import { formData, readFilesFromDirectory, getFolderName } from "./fs"
+import axios from "axios"
 
-/**
- * Uploads a directory to IPFS using NFT.Storage.
- *
- * @param path - The path to the directory to upload.
- * @param nftStorageKey - The NFT.Storage API key.
- * @param lengthCheck - The number of files to check for in the directory.
- *
- * @returns A promise that resolves to the CID of the uploaded directory and the array of `File` objects.
- *
- * @throws An error if the number of files in the directory does not match the length check.
- */
-async function uploadDirectoryToIPFS(
-  path: string,
-  nftStorageKey: string,
-  lengthCheck?: number,
-): Promise<[string, File[]]> {
-  const nftStorageClient = new NFTStorage({
-    token: nftStorageKey,
-  })
+// The IPFS pinning service to use
+const IPFS_PINNING_SERVICE = process.env.NEXT_PUBLIC_IPFS_PINNING_SERVICE ?? ""
 
-  const files = await readFilesFromDirectory(path)
+async function uploadDirectoryToIPFS(pathToUpload: string, path: string): Promise<[string, File[], string]> {
+  try {
+    const form = formData(pathToUpload)
+    const response = await axios.post(IPFS_PINNING_SERVICE, form, {
+      headers: {
+        ...form.getHeaders(),
+      },
+    })
 
-  if (lengthCheck && files.length !== lengthCheck) {
-    throw new Error("Number of images does not match number of levels")
+    // Extract the IPFS hash from the response
+    const ipfsHash = response.data.IpfsHash
+    console.log("IPFS Hash:", ipfsHash)
+
+    const files = await readFilesFromDirectory(path)
+    const folderName = getFolderName(path)
+
+    // Return the IPFS hash
+    return [ipfsHash, files, folderName]
+  } catch (error) {
+    console.error("Error uploading file:", error)
+    throw new Error("Failed to upload directory to IPFS")
   }
-
-  return [await nftStorageClient.storeDirectory(files), files]
 }
 
 /**
- * Converts a CID to an IPFS native URL.
- *
- * @param cid - The CID to convert.
- * @param fileName - The name of the file to append to the URL.
- *
- * @returns The IPFS URL in the format `ipfs://${cid}/${fileName}`.
+ * Constructs an IPFS URL using a CID, and optionally a folder name and a file name.
+ * @param cid - The CID to convert into an IPFS URL.
+ * @param fileName - The name of the file to append to the URL. Optional.
+ * @param folderName - The name of the folder to append to the URL. Optional.
+ * @returns The IPFS URL in the format 'ipfs://{cid}/{folderName}/{fileName}'.
  */
-function toIPFSURL(cid: string, fileName?: string): string {
-  return `ipfs://${cid}/${fileName ?? ""}`
+function toIPFSURL(cid: string, fileName?: string, folderName?: string): string {
+  let url = `ipfs://${cid}`
+  if (folderName) {
+    url += `/${folderName}`
+  }
+  if (fileName) {
+    url += `/${fileName}`
+  }
+  return url
 }
 
 export { uploadDirectoryToIPFS, toIPFSURL }

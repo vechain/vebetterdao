@@ -1,5 +1,5 @@
 import fs from "fs/promises"
-import { toIPFSURL, uploadDirectoryToIPFS } from "../../helpers"
+import { toIPFSURL, uploadDirectoryToIPFS, zipFolder } from "../../helpers"
 import path from "path"
 
 /**
@@ -12,7 +12,7 @@ interface Attribute {
 
 /**
  * Interface for the NFT metadata.
- * @see [NFT Metadata Standards](https://docs.opensea.io/docs/metadata-standards)
+ * @see NFT Metadata Standards](https://docs.opensea.io/docs/metadata-standards)
  */
 interface Metadata {
   name: string
@@ -32,10 +32,8 @@ const levelNames = ["VeBetterDAO Galaxy Member"]
 const description = "GM Earth is a community of people who participated in voting for the governance of VeBetter DAO."
 
 const METADATA_PATH = path.join(__dirname, "../../../metadata/galaxyMember/metadata")
+const IMAGE_ZIP_PATH = path.join(__dirname, "../../../metadata/galaxyMember/images.zip")
 const IMAGE_PATH = path.join(__dirname, "../../../metadata/galaxyMember/images")
-
-// NFT Storage
-const NFT_STORAGE_KEY = process.env.NEXT_PUBLIC_NFT_STORAGE_KEY ?? ""
 
 /**
  * Converts a record of attributes into an array of `Attribute` objects.
@@ -61,14 +59,13 @@ function convertAttributes(attributes: Record<string, string | number>): Attribu
 function generateMetadata(
   name: string,
   description: string,
-  imagesCID: string,
   attributes: Record<string, string | number>,
-  image: File,
+  image: string,
 ): Metadata {
   return {
     name,
     description,
-    image: toIPFSURL(imagesCID, image.name),
+    image: image,
     attributes: convertAttributes(attributes),
   }
 }
@@ -78,7 +75,7 @@ function generateMetadata(
  * @param metadata - The `Metadata` object to save.
  */
 async function saveMetadataToFile(metadata: Metadata, fileName: string): Promise<void> {
-  await fs.writeFile(`${METADATA_PATH}/${fileName}`, JSON.stringify(metadata, null, 2))
+  await fs.writeFile(`${METADATA_PATH}/${fileName}.json`, JSON.stringify(metadata, null, 2))
   console.log(`Metadata saved to ${METADATA_PATH}/${fileName}`)
 }
 
@@ -87,18 +84,18 @@ async function saveMetadataToFile(metadata: Metadata, fileName: string): Promise
  */
 async function generateAndSaveMetadata(): Promise<void> {
   try {
-    if (!NFT_STORAGE_KEY) {
-      throw new Error("NFT_STORAGE_KEY is not set")
-    }
+    // 1. Ensure the zip folder exists
+    await zipFolder(IMAGE_PATH, IMAGE_ZIP_PATH)
 
-    // 1. Upload images to IPFS and get URL
-    const [imagesIpfsUrl, images] = await uploadDirectoryToIPFS(IMAGE_PATH, NFT_STORAGE_KEY, levelAttributes.length)
+    // 2. Upload images to IPFS and get URL
+    const [imagesIpfsUrl, images, folderName] = await uploadDirectoryToIPFS(IMAGE_ZIP_PATH, IMAGE_PATH)
 
-    console.log("Galaxy Member Images IPFS URL:", toIPFSURL(imagesIpfsUrl))
+    console.log("Galaxy Member Images IPFS URL:", toIPFSURL(imagesIpfsUrl, undefined, folderName))
 
-    // 2. Generate metadata for each level
+    // 3. Generate metadata for each level
     for (let i = 0; i < levelAttributes.length; i++) {
-      const metadata = generateMetadata(levelNames[i], description, imagesIpfsUrl, levelAttributes[i], images[i])
+      const image = toIPFSURL(imagesIpfsUrl, images[i].name, folderName)
+      const metadata = generateMetadata(levelNames[i], description, levelAttributes[i], image)
       await saveMetadataToFile(metadata, String(i + 1))
     }
   } catch (error) {
