@@ -1,20 +1,34 @@
 import { HStack, Stack, Text, VStack, useBreakpointValue } from "@chakra-ui/react"
 import dayjs from "dayjs"
+import duration from "dayjs/plugin/duration"
+import utc from "dayjs/plugin/utc"
+import timezone from "dayjs/plugin/timezone"
 import padStart from "lodash/padStart"
 import { useEffect, useState } from "react"
 
-const mainnetLaunch = dayjs.tz("2024-06-28", "America/Los_Angeles")
+dayjs.extend(duration)
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
+const mainnetLaunch = dayjs.tz("2024-06-28T00:00:00", "Europe/Dublin")
 
 export const MainnetTimer = () => {
-  const [_, setTime] = useState(0)
+  const [timeLeft, setTimeLeft] = useState(getTimeLeft())
 
-  const days = padStart(mainnetLaunch.diff(dayjs(), "days").toString(), 2, "0")
-  const hours = padStart((mainnetLaunch.diff(dayjs(), "hours") % 24).toString(), 2, "0")
-  const minutes = padStart((mainnetLaunch.diff(dayjs(), "minutes") % 60).toString(), 2, "0")
+  function getTimeLeft() {
+    const now = dayjs()
+    const duration = dayjs.duration(mainnetLaunch.diff(now))
+
+    const days = padStart(duration.days().toString(), 2, "0")
+    const hours = padStart(duration.hours().toString(), 2, "0")
+    const minutes = padStart(duration.minutes().toString(), 2, "0")
+
+    return { days, hours, minutes }
+  }
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setTime(prev => prev + 1)
+      setTimeLeft(getTimeLeft())
     }, 30000)
 
     return () => clearInterval(interval)
@@ -49,7 +63,7 @@ export const MainnetTimer = () => {
         <HStack>
           <VStack>
             <Text rounded="13px" p="28px 18px" bg="#FFFFFF" fontSize="28px" fontWeight={700}>
-              {days}
+              {timeLeft.days}
             </Text>
             <Text fontSize="16px" fontWeight="600" textAlign={"center"}>
               {"DAYS"}
@@ -57,7 +71,7 @@ export const MainnetTimer = () => {
           </VStack>
           <VStack>
             <Text rounded="13px" p="28px 18px" bg="#FFFFFF" fontSize="28px" fontWeight={700}>
-              {hours}
+              {timeLeft.hours}
             </Text>
             <Text fontSize="16px" fontWeight="600" textAlign={"center"}>
               {"HOURS"}
@@ -65,7 +79,7 @@ export const MainnetTimer = () => {
           </VStack>
           <VStack>
             <Text rounded="13px" p="28px 18px" bg="#FFFFFF" fontSize="28px" fontWeight={700}>
-              {minutes}
+              {timeLeft.minutes}
             </Text>
             <Text fontSize="16px" fontWeight="600" textAlign={"center"}>
               {"MINS"}
