@@ -3,7 +3,7 @@ import { HStack, Image, Skeleton, Text, useMediaQuery } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/dapp-kit-react"
 
-const compactFormatter = getCompactFormatter(0)
+const compactFormatter = getCompactFormatter(1)
 
 export const NavbarBalance = () => {
   const { account } = useWallet()
