@@ -21,7 +21,7 @@ export const convertUriToUrl = (uri: string) => {
 
       // Check cache for IPFS document
 
-      return `https://api.gateway-proxy.vechain.org/api/v1/content/${uriWithoutProtocol}`
+      return `https://api.gateway-proxy.vechain.org/ipfs/${uriWithoutProtocol}`
     case "ar":
       return `https://arweave.net/${uriWithoutProtocol}`
     default:
