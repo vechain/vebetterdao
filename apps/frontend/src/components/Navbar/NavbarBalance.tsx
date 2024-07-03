@@ -3,7 +3,7 @@ import { HStack, Image, Skeleton, Text, useMediaQuery } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/dapp-kit-react"
 
-const compactFormatter = getCompactFormatter(0)
+const compactFormatter = getCompactFormatter(1)
 
 export const NavbarBalance = () => {
   const { account } = useWallet()
@@ -23,7 +23,7 @@ export const NavbarBalance = () => {
 
   return (
     <Skeleton isLoaded={!b3trBalanceLoading && !vot3BalanceLoading}>
-      <HStack flexBasis="200px" w="200px" gap={0} h={cardHeight} pl={5}>
+      <HStack flexBasis="250px" gap={0} h={cardHeight} pl={5}>
         <HStack gap={0} align="flex-start">
           <HStack gap={1} bg="#004CFC" borderLeftRadius="full" p={padding} pr="0">
             <Image h={iconHeight} w={iconHeight} src="/images/b3tr-token.png" alt="b3tr-token" />
