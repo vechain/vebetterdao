@@ -1,4 +1,4 @@
-import { useAllocationVotes, useMaxAllocationAmount, useRoundXApps, useXAppsVotes } from "@/api"
+import { useAllocationVotesQf, useMaxAllocationAmount, useRoundXApps, useXAppsVotesQf } from "@/api"
 import { Spinner, VStack } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { AppVotesHorizontalChart } from "./AppVotesHorizontalChart"
@@ -12,9 +12,9 @@ export const AllocationXAppsVotesRankingChart = ({ roundId }: Props) => {
 
   const { data: maxAllocation } = useMaxAllocationAmount(roundId)
 
-  const xAppsVotes = useXAppsVotes(xApps?.map(app => app.id) ?? [], roundId)
+  const xAppsVotes = useXAppsVotesQf(xApps?.map(app => app.id) ?? [], roundId)
 
-  const { data: votes } = useAllocationVotes(roundId)
+  const { data: votes } = useAllocationVotesQf(roundId)
 
   const sortedData = useMemo(
     () =>

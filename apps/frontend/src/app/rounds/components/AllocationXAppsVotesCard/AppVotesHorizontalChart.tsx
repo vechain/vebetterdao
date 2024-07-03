@@ -43,6 +43,8 @@ export const AppVotesHorizontalChart = ({
 
   const votesPercentage = Number(totalVotes) === 0 ? 0 : (Number(data.votes) / Number(totalVotes)) * 100
 
+  console.log({ votes: data.votes, totalVotes })
+
   const baseProgressColor = "rgba(208, 248, 164, 1)"
   const trackProgressColor = "rgba(154, 222, 78, 1)"
 
