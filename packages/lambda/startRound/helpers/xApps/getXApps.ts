@@ -1,8 +1,8 @@
 import { ThorClient } from "@vechain/sdk-network"
-import { xallocationsVotingABI } from "../const"
-import testnetConfig from "@repo/config/testnet"
+import mainnetConfig from "@repo/config/mainnet"
 import { FunctionFragment, coder } from "@vechain/sdk-core"
 import { XApp } from "../types"
+import { X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
 
 /**
  * Retrieves the xApps for the specified round.
@@ -12,8 +12,8 @@ import { XApp } from "../types"
  */
 export const getRoundXApps = async (thor: ThorClient, roundId: string): Promise<XApp[]> => {
   const res = await thor.contracts.executeContractCall(
-    testnetConfig.xAllocationVotingContractAddress,
-    coder.createInterface(xallocationsVotingABI).getFunction("getRoundAppsWithDetails") as FunctionFragment,
+    mainnetConfig.x2EarnAppsContractAddress,
+    X2EarnApps.createInterface().getFunction("apps") as FunctionFragment,
     [roundId],
   )
 

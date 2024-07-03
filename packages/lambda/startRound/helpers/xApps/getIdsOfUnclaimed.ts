@@ -2,8 +2,8 @@ import { FunctionFragment } from "ethers"
 import { XApp } from "../types"
 import testnetConfig from "@repo/config/testnet"
 import { ThorClient } from "@vechain/sdk-network"
-import { xallocationsPoolABI } from "../const"
 import { coder } from "@vechain/sdk-core"
+import { XAllocationPool__factory as XAllocationPool } from "@repo/contracts"
 
 /**
  * Retrieves the IDs of the xApps that have not yet claimed their rewards for the specified round.
@@ -18,7 +18,7 @@ export const getIdsOfUnclaimed = async (thor: ThorClient, xapps: XApp[], roundId
   for (const xapp of xapps) {
     const res = await thor.contracts.executeContractCall(
       testnetConfig.xAllocationPoolContractAddress,
-      coder.createInterface(xallocationsPoolABI).getFunction("claimed") as FunctionFragment,
+      XAllocationPool.createInterface().getFunction("claimed") as FunctionFragment,
       [roundId, xapp.id],
     )
 

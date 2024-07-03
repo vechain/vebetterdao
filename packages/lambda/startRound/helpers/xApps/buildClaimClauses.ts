@@ -1,6 +1,6 @@
-import testnetConfig from "@repo/config/testnet"
-import { xallocationsPoolABI } from "../const"
+import mainnetConfig from "@repo/config/mainnet"
 import { FunctionFragment, clauseBuilder, coder } from "@vechain/sdk-core"
+import { XAllocationPool__factory as XAllocationPool } from "@repo/contracts"
 
 /**
  * Builds the claim clauses for the specified xApps and round.
@@ -11,8 +11,8 @@ import { FunctionFragment, clauseBuilder, coder } from "@vechain/sdk-core"
 export const buildClaimClauses = (xappIds: string[], roundId: string) => {
   const clauses = xappIds.map(xappId =>
     clauseBuilder.functionInteraction(
-      testnetConfig.xAllocationPoolContractAddress,
-      coder.createInterface(xallocationsPoolABI).getFunction("claim") as FunctionFragment,
+      mainnetConfig.xAllocationPoolContractAddress,
+      XAllocationPool.createInterface().getFunction("claim") as FunctionFragment,
       [roundId, xappId],
     ),
   )
