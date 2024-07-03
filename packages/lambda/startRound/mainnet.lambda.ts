@@ -1,6 +1,6 @@
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda"
 import { HttpClient, ThorClient } from "@vechain/sdk-network"
-import testnetConfig from "@repo/config/testnet"
+import mainnetConfig from "@repo/config/mainnet"
 import { EmissionsContractJson } from "@repo/contracts"
 import { FunctionFragment } from "ethers"
 import { addressUtils, clauseBuilder, coder } from "@vechain/sdk-core"
@@ -10,12 +10,10 @@ import { getIdsOfUnclaimed } from "./helpers/xApps"
 import { getSecret } from "./helpers/secret"
 import { waitForRoundStart } from "./helpers/emissions"
 import { publishMessage } from "./helpers/slack"
-
-// Serialize the ABI of the Emissions contract for use in contract interaction
-const emissionsABI = JSON.stringify(EmissionsContractJson.abi)
+import { Emissions__factory as Emissions } from "@repo/contracts"
 
 // Define the URL for the Vechain testnet
-const nodeURL = "https://testnet.vechain.org/"
+const nodeURL = "https://mainnet.vechain.org/"
 
 const client = new SecretsManagerClient({
   region: "eu-north-1",
@@ -35,8 +33,8 @@ async function distributeEmissions(thor: ThorClient) {
 
   // Prepare the contract function call with necessary parameters
   const clause = clauseBuilder.functionInteraction(
-    testnetConfig.emissionsContractAddress,
-    coder.createInterface(emissionsABI).getFunction("distribute") as FunctionFragment,
+    mainnetConfig.emissionsContractAddress,
+    Emissions.createInterface().getFunction("distribute") as FunctionFragment,
     [],
   )
 
@@ -83,8 +81,8 @@ async function distributeXAllocations(thor: ThorClient) {
 
   // Get the current round number from the Emissions contract
   const currentRound = await thor.contracts.executeContractCall(
-    testnetConfig.emissionsContractAddress,
-    coder.createInterface(emissionsABI).getFunction("getCurrentCycle") as FunctionFragment,
+    mainnetConfig.emissionsContractAddress,
+    Emissions.createInterface().getFunction("getCurrentCycle") as FunctionFragment,
     [],
   )
 
