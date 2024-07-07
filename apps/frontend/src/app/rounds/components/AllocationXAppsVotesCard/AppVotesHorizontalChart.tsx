@@ -107,7 +107,7 @@ export const AppVotesHorizontalChart = ({
         </Box>
         {showMaxAllocation && (
           <Text color={"#3DBA67"} fontSize={["12px", "14px"]} fontWeight={600} alignSelf={"flex-end"}>
-            {t("Max reached!")}
+            {t("Max allocation reached!")}
           </Text>
         )}
       </VStack>
