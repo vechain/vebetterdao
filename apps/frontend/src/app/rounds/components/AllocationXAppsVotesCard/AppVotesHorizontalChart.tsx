@@ -92,7 +92,7 @@ export const AppVotesHorizontalChart = ({
           )}
         </HStack>
       </HStack>
-      <VStack spacing={0} w="full">
+      <VStack spacing={1} w="full">
         <Box w="full" h={2} bg={baseProgressColor} borderRadius={"xl"} pos="relative">
           <Box pos="absolute" w={`${votesPercentage}%`} h={2} bg={trackProgressColor} borderRadius={"xl"} />
           <Box
