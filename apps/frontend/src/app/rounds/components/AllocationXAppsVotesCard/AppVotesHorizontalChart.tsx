@@ -2,7 +2,7 @@ import { useXAppMetadata, useAllocationsRoundState, useXAppRoundEarnings } from 
 import { useIpfsImage } from "@/api/ipfs"
 import { B3TRIcon } from "@/components"
 import { notFoundImage } from "@/constants"
-import { VStack, HStack, Skeleton, Heading, Box, Image, Text, Show } from "@chakra-ui/react"
+import { VStack, HStack, Skeleton, Heading, Box, Image, Text } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 
@@ -18,6 +18,7 @@ type Props = {
   totalVotes?: string
   showReceived?: boolean
   maxAllocation?: number | string
+  maxAllocationPercentage?: number
   renderMaxAllocation?: boolean
 }
 
@@ -31,6 +32,7 @@ export const AppVotesHorizontalChart = ({
   totalVotes,
   showReceived = false,
   maxAllocation,
+  maxAllocationPercentage,
   renderMaxAllocation = false,
 }: Props) => {
   const { t } = useTranslation()
@@ -43,8 +45,6 @@ export const AppVotesHorizontalChart = ({
 
   const votesPercentage = Number(totalVotes) === 0 ? 0 : (Number(data.votes) / Number(totalVotes)) * 100
 
-  console.log({ votes: data.votes, totalVotes })
-
   const baseProgressColor = "rgba(208, 248, 164, 1)"
   const trackProgressColor = "rgba(154, 222, 78, 1)"
 
@@ -53,24 +53,25 @@ export const AppVotesHorizontalChart = ({
 
   return (
     <VStack spacing={4} align={"flex-start"} w="full">
-      <HStack justify={"space-between"} w="full">
+      <HStack justify={"space-between"} w="full" align="center">
         <HStack spacing={3} align={"center"} justify={"flex-start"}>
-          <Skeleton isLoaded={!isLogoLoading} boxSize={["24px", "28px", "32px"]}>
+          <Skeleton isLoaded={!isLogoLoading} boxSize={["32px", "32px", "32px"]}>
             <Image src={logo?.image ?? notFoundImage} w="full" borderRadius="9px" alt={appMetadata?.name} />
           </Skeleton>
-          <Heading fontSize={["16px"]} fontWeight={600}>
-            {appMetadata?.name}
-          </Heading>
+          <VStack spacing={0} align={"flex-start"}>
+            <Heading fontSize={["16px"]} fontWeight={600}>
+              {appMetadata?.name}
+            </Heading>
+            <VStack spacing={0} align={"flex-start"} justify={"flex-start"}>
+              <Heading size={["16px"]} fontWeight={600} color="#6DCB09">
+                {t("{{percentage}}%", {
+                  percentage: votesPercentage.toLocaleString("en", { minimumFractionDigits: 2 }),
+                })}
+              </Heading>
+            </VStack>
+          </VStack>
         </HStack>
-        {showMaxAllocation && (
-          <Show above="lg">
-            <Box py={"4px"} px="8px" borderRadius={"64px"} bg="#E9FDF1">
-              <Text color={"#3DBA67"} fontSize={["12px", "14px"]} fontWeight={600}>
-                {t("Max allocation reached!")}
-              </Text>
-            </Box>
-          </Show>
-        )}
+
         <HStack spacing={[4, 8]} align={"center"} justify={"flex-start"} alignSelf={"flex-end"}>
           {showReceived && (
             <VStack spacing={0} align="flex-end">
@@ -89,23 +90,27 @@ export const AppVotesHorizontalChart = ({
               </Skeleton>
             </VStack>
           )}
-          <VStack spacing={0} align="flex-end">
-            <Heading size={["16px"]} fontWeight={600} color="#6DCB09">
-              {t("{{percentage}}%", {
-                percentage: votesPercentage.toLocaleString("en", { minimumFractionDigits: 2 }),
-              })}
-            </Heading>
-            <Text fontSize={["12px"]} fontWeight={400} color="#6A6A6A" data-testid={appMetadata?.name + "-total-votes"}>
-              {t("{{value}} votes", {
-                value: compactFormatter.format(Number(data.votes)),
-              })}
-            </Text>
-          </VStack>
         </HStack>
       </HStack>
-      <Box w="full" h={2} bg={baseProgressColor} borderRadius={"xl"}>
-        <Box w={`${votesPercentage}%`} h={2} bg={trackProgressColor} borderRadius={"xl"} />
-      </Box>
+      <VStack spacing={0} w="full">
+        <Box w="full" h={2} bg={baseProgressColor} borderRadius={"xl"} pos="relative">
+          <Box pos="absolute" w={`${votesPercentage}%`} h={2} bg={trackProgressColor} borderRadius={"xl"} />
+          <Box
+            pos="absolute"
+            left={`${maxAllocationPercentage}%`}
+            top={0}
+            h="full"
+            w="1px"
+            bg={showMaxAllocation ? baseProgressColor : trackProgressColor}
+            borderRadius={"xl"}
+          />
+        </Box>
+        {showMaxAllocation && (
+          <Text color={"#3DBA67"} fontSize={["12px", "14px"]} fontWeight={600} alignSelf={"flex-end"}>
+            {t("Max reached!")}
+          </Text>
+        )}
+      </VStack>
     </VStack>
   )
 }
