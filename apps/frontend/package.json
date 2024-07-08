@@ -27,6 +27,7 @@
     "@repo/constants": "*",
     "@repo/contracts": "*",
     "@repo/utils": "*",
+    "@svgr/webpack": "^8.1.0",
     "@tanstack/query-sync-storage-persister": "^5.28.12",
     "@tanstack/react-query": "^5.28.12",
     "@tanstack/react-query-devtools": "^5.20.5",
