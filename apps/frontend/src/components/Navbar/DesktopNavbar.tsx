@@ -4,6 +4,7 @@ import { NavbarMenu } from "./NavbarMenu"
 import dynamic from "next/dynamic"
 import { Route } from "./Routes"
 import { NavbarBalance } from "./NavbarBalance"
+import { LanguageSelector } from "./LanguageSelector"
 
 const ConnectWalletButton = dynamic(
   () => import("@/components/ConnectWalletButton").then(mod => mod.ConnectWalletButton),
@@ -38,6 +39,7 @@ export const DesktopNavBar: React.FC<Props> = ({ routesToRender }) => {
       <HStack flex={1} spacing={4} justifyContent={"end"}>
         {/* <ThemeSwitcher /> */}
         {isLargerThan1250 && <NavbarBalance />}
+        <LanguageSelector />
         <ConnectWalletButton />
       </HStack>
     </>
