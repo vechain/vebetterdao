@@ -1,8 +1,6 @@
 import { FunctionFragment } from "ethers"
-import { XApp } from "../types"
-import testnetConfig from "@repo/config/testnet"
+import mainnetConfig from "@repo/config/mainnet"
 import { ThorClient } from "@vechain/sdk-network"
-import { coder } from "@vechain/sdk-core"
 import { XAllocationPool__factory as XAllocationPool } from "@repo/contracts"
 
 /**
@@ -18,9 +16,9 @@ export const getIdsOfUnclaimed = async (thor: ThorClient, xapps: string[], round
 
   for (const xappId of xapps) {
     const res = await thor.contracts.executeContractCall(
-      testnetConfig.xAllocationPoolContractAddress,
+      mainnetConfig.xAllocationPoolContractAddress,
       XAllocationPool.createInterface().getFunction("claimed") as FunctionFragment,
-      [roundId, xappId],
+      [Number(roundId), xappId],
     )
 
     if (res.vmError) return Promise.reject(new Error(res.vmError))

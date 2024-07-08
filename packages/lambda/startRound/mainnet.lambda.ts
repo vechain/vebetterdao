@@ -1,7 +1,6 @@
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda"
 import { HttpClient, ThorClient } from "@vechain/sdk-network"
 import mainnetConfig from "@repo/config/mainnet"
-import { EmissionsContractJson } from "@repo/contracts"
 import { FunctionFragment } from "ethers"
 import { addressUtils, clauseBuilder, coder } from "@vechain/sdk-core"
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager"
@@ -198,7 +197,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
     console.log("Error starting the round:", error)
 
     // Publish an error message to the Slack channel
-    await publishMessage(client, "C06BLEJE5SA", `:alert: Error starting the round: ${error}`)
+    await publishMessage(client, "C06BLEJE5SA", `:alert: Error starting round or distributing allocations: ${error}`)
 
     return {
       statusCode: 500,
