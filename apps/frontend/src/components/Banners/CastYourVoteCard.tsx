@@ -6,7 +6,7 @@ import {
   Grid,
   GridItem,
   Heading,
-  Show,
+  Image,
   Text,
   useBreakpointValue,
   VStack,
@@ -24,10 +24,7 @@ export const CastYourVoteCard: React.FC = () => {
   const { account } = useWallet()
   const { data: roundId } = useCurrentAllocationsRoundId()
   const { data: roundDetail } = useAllocationsRound(roundId)
-  const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
-    Number(roundDetail.voteStart),
-    account ?? undefined,
-  )
+  const { data: votesAtSnapshot } = useGetVotesOnBlock(Number(roundDetail.voteStart), account ?? undefined)
 
   const lottieSize = useBreakpointValue(
     {
@@ -56,21 +53,31 @@ export const CastYourVoteCard: React.FC = () => {
   if (!account || hasVotedLoading || hasVotingError || hasVoted || !hasVotes) return null
 
   return (
-    <Card borderColor={"#B1F16C"} backgroundColor={"#B1F16C"} variant={"baseWithBorder"}>
-      <CardBody>
+    <Card borderColor={"#B1F16C"} backgroundColor={"#B1F16C"} variant={"baseWithBorder"} overflow={"hidden"}>
+      <CardBody p={6} pos="relative">
+        <Image
+          transform={{ rotate: "180deg" }}
+          src="/images/cast-vote-card-bg.svg"
+          alt="Rewards background"
+          pos="absolute"
+          right={"-18%"}
+          top={["-36%", "-36%", 0]}
+          boxSize={"full"}
+          w="full"
+        />
         <Grid templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(3, 1fr)"]} gap={[4, 10]} w="full">
           <GridItem colSpan={2} order={[2, 2, 1]}>
             <VStack spacing={4} w="full" justifyContent={"start"} alignItems={"start"}>
-              <Heading fontSize="16px" fontWeight={"700"} textTransform={"uppercase"} color="primary.500">
+              <Heading fontSize="16px" fontWeight={"700"} textTransform={"uppercase"} color="primary.500" zIndex={1}>
                 {t("Round #{{round}}", {
                   round: roundId,
                 })}
               </Heading>
-              <Heading fontSize={["24px", "24px", "36px"]} fontWeight={"700"}>
+              <Heading fontSize={["24px", "24px", "36px"]} fontWeight={"700"} zIndex={1}>
                 {t("Time to cast your vote and earn rewards!")}
               </Heading>
 
-              <Text fontSize={["16px"]} fontWeight={400}>
+              <Text fontSize={["16px"]} fontWeight={400} zIndex={1}>
                 {t(
                   "The Allocation round #{{roundId}} is active! Vote for your favorite apps to help them get more B3TR and earn rewards for participating.",
                   {
@@ -80,6 +87,7 @@ export const CastYourVoteCard: React.FC = () => {
               </Text>
 
               <Button
+                zIndex={1}
                 mt={2}
                 variant={"primaryAction"}
                 borderRadius={"full"}
