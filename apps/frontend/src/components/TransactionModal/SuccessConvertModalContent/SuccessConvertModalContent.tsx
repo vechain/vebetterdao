@@ -2,6 +2,7 @@ import { VStack, Text, Image, HStack, Flex, Button, Link } from "@chakra-ui/reac
 import { getConfig } from "@repo/config"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { motion } from "framer-motion"
+import { useTranslation } from "react-i18next"
 import { MdArrowOutward } from "react-icons/md"
 
 export type ConfirmationModalContentProps = {
@@ -40,6 +41,7 @@ export const SuccessConvertModalContent = ({
   txId,
   onClose,
 }: ConfirmationModalContentProps) => {
+  const { t } = useTranslation()
   return (
     <VStack align={"center"} p={8} gap={2}>
       <MotionImage
@@ -51,16 +53,16 @@ export const SuccessConvertModalContent = ({
         animate="animate"
       />
       <Text style={{ fontFamily: "Instrument Sans, sans-serif" }} fontSize={28} fontWeight={700}>
-        Conversion complete!
+        {t("Conversion complete!")}
       </Text>
       <Text fontSize={16} fontWeight={400} textAlign={"center"}>
-        Your token balance has been updated
+        {t("Your token balance has been updated")}
       </Text>
       <VStack w="full" mt={8}>
         {Number(b3trBalanceAfter) >= 0 && (
           <HStack w="full" bg={"#F8F8F8"} borderRadius={8} p={4} justifyContent={"space-between"}>
             <Text fontSize={16} fontWeight={400}>
-              Your new B3TR balance
+              {t("Your new B3TR balance")}
             </Text>
 
             <HStack>
@@ -74,7 +76,7 @@ export const SuccessConvertModalContent = ({
         {Number(vot3BalanceAfter) >= 0 && (
           <HStack w="full" bg={"#F8F8F8"} borderRadius={8} p={4} justifyContent={"space-between"}>
             <Text fontSize={16} fontWeight={400}>
-              Your new VOT3 balance
+              {t("Your new VOT3 balance")}
             </Text>
 
             <HStack>
@@ -95,7 +97,7 @@ export const SuccessConvertModalContent = ({
           style={{ textDecoration: "none" }}>
           <HStack alignSelf={"center"}>
             <Text fontSize={14} fontWeight={500} color={"rgba(0, 76, 252, 1)"}>
-              See transaction information
+              {t("See transaction information")}
             </Text>
             <MdArrowOutward size={20} color={"rgba(0, 76, 252, 1)"} />
           </HStack>
@@ -109,7 +111,7 @@ export const SuccessConvertModalContent = ({
         size={{ base: "md", md: "lg" }}
         w={{ base: "full", md: "auto" }}
         onClick={onClose}>
-        Continue
+        {t("Continue")}
       </Button>
     </VStack>
   )

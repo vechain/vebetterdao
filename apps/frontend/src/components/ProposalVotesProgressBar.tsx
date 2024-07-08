@@ -4,6 +4,7 @@ import { getConfig } from "@repo/config"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import { useMemo } from "react"
+import { useTranslation } from "react-i18next"
 import { FaThumbsDown, FaThumbsUp } from "react-icons/fa6"
 const blockTime = getConfig().network.blockTime
 const compactFormatter = getCompactFormatter()
@@ -13,11 +14,8 @@ type Props = {
 }
 
 export const ProposalVotesProgressBar: React.FC<Props> = ({ proposal }) => {
-  const {
-    data: proposalVotes,
-    error: proposalVotesError,
-    isLoading: proposalVotesLoading,
-  } = useProposalVotes(proposal.proposalId)
+  const { t } = useTranslation()
+  const { data: proposalVotes, isLoading: proposalVotesLoading } = useProposalVotes(proposal.proposalId)
   const { data: proposalSnapshotBlock } = useProposalSnapshot(proposal.proposalId)
   const { data: quorum, isLoading: quorumLoading } = useProposalQuorum(proposalSnapshotBlock)
   const { data: currentBlock } = useCurrentBlock()
@@ -60,7 +58,7 @@ export const ProposalVotesProgressBar: React.FC<Props> = ({ proposal }) => {
       return (
         <Skeleton>
           <Heading size="sm" color="gray.500" textAlign={"center"}>
-            100k votes needed to reach quorum
+            {t("100k votes needed to reach quorum")}
           </Heading>
         </Skeleton>
       )
@@ -68,22 +66,32 @@ export const ProposalVotesProgressBar: React.FC<Props> = ({ proposal }) => {
     if (isIncoming)
       return (
         <Heading size="xs" color="gray.500" textAlign={"center"}>
-          Quorum available {estimatedStartTime}
+          {t("Quorum available")} {estimatedStartTime}
         </Heading>
       )
     if (totalVotes > Number(quorum)) {
       return (
         <Heading size="xs" color="green.500" textAlign={"center"}>
-          Quorum reached
+          {t("Quorum reached")}
         </Heading>
       )
     }
     return (
       <Heading size="xs" color="orange.500" textAlign={"center"}>
-        {compactQuorum} votes needed to reach quorum
+        {compactQuorum} {t("votes needed to reach quorum")}
       </Heading>
     )
-  }, [proposalVotes, quorum, proposalVotesLoading, quorumLoading, isIncoming, estimatedStartTime])
+  }, [
+    quorum,
+    quorumLoading,
+    proposalVotesLoading,
+    proposalVotes?.forVotes,
+    proposalVotes?.againstVotes,
+    proposalVotes?.abstainVotes,
+    t,
+    isIncoming,
+    estimatedStartTime,
+  ])
 
   return (
     <Box w="80%" alignSelf={"center"}>
@@ -105,7 +113,7 @@ export const ProposalVotesProgressBar: React.FC<Props> = ({ proposal }) => {
         </HStack>
       </HStack>
       <Text fontSize="sm" color="gray.500" textAlign={"center"}>
-        {compactFormatter.format(Number(proposalVotes?.abstainVotes))} preferred to abastain
+        {compactFormatter.format(Number(proposalVotes?.abstainVotes))} {t("preferred to abastain")}
       </Text>
     </Box>
   )

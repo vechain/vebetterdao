@@ -28,6 +28,7 @@ import { FormEvent, useCallback, useState } from "react"
 import { MdHowToVote } from "react-icons/md"
 import { FaThumbsDown, FaThumbsUp } from "react-icons/fa6"
 import { TransactionModal } from "./TransactionModal"
+import { useTranslation } from "react-i18next"
 
 type Props = {
   isOpen: boolean
@@ -102,7 +103,7 @@ const CastVoteModalContent: React.FC<CastVoteModalFormContentProps> = ({ onVote,
   const { data: votes } = useGetVotesOnBlock(Number(proposalSnapshotBlock), account ?? undefined)
   const [selectedVote, setSelectedVote] = useState<VoteType>(VoteType.VOTE_FOR)
   const [reason, setReason] = useState<string>("")
-
+  const { t } = useTranslation()
   const isDisabled = selectedVote === undefined
 
   const onSubmit = (e: FormEvent<HTMLElement>) => {
@@ -118,7 +119,7 @@ const CastVoteModalContent: React.FC<CastVoteModalFormContentProps> = ({ onVote,
 
   return (
     <form onSubmit={onSubmit}>
-      <ModalHeader>Cast your vote</ModalHeader>
+      <ModalHeader>{t("Cast your vote")}</ModalHeader>
 
       <ModalCloseButton />
       <ModalBody>
@@ -126,7 +127,7 @@ const CastVoteModalContent: React.FC<CastVoteModalFormContentProps> = ({ onVote,
           <Card px={2} py={4}>
             <VStack spacing={4} alignItems="center" justify="center">
               <Heading as="h3" size="sm">
-                Your voting power
+                {t("Your voting power")}
               </Heading>
               <Box>
                 <HStack spacing={2} justify={"center"}>
@@ -136,11 +137,14 @@ const CastVoteModalContent: React.FC<CastVoteModalFormContentProps> = ({ onVote,
                   </Heading>
                 </HStack>
                 <Skeleton isLoaded={!proposalSnapshotBlockLoading}>
-                  <Text fontSize="xs">Votes snapshotted at block #{proposalSnapshotBlock}</Text>
+                  <Text fontSize="xs">
+                    {t("Votes snapshotted at block #")}
+                    {proposalSnapshotBlock}
+                  </Text>
                 </Skeleton>
               </Box>
               <Text fontSize="sm" fontWeight={"thin"}>
-                You can get more votes by staking more B3TR
+                {t("You can get more votes by staking more B3TR")}
               </Text>
             </VStack>
           </Card>
@@ -157,25 +161,25 @@ const CastVoteModalContent: React.FC<CastVoteModalFormContentProps> = ({ onVote,
             ))}
           </VStack>
           <Text fontSize="sm" color="gray.500" textAlign={"center"}>
-            You can also{" "}
+            {t("You can also")}{" "}
             <Button
               variant={"link"}
               onClick={() => setSelectedVote(VoteType.ABSTAIN)}
               colorScheme={selectedVote === VoteType.ABSTAIN ? "blue" : "gray"}>
-              abstain
+              {t("abstain")}
             </Button>
           </Text>
           <FormControl>
-            <FormLabel>Reason (optional)</FormLabel>
+            <FormLabel>{t("Reason (optional)")}</FormLabel>
             <Textarea value={reason} onChange={e => setReason(e.target.value)} />
-            <FormHelperText>Explain why you are voting this way</FormHelperText>
+            <FormHelperText>{t("Explain why you are voting this way")}</FormHelperText>
           </FormControl>
         </VStack>
       </ModalBody>
 
       <ModalFooter>
         <Button type="submit" isDisabled={isDisabled}>
-          Cast your vote
+          {t("Cast your vote")}
         </Button>
       </ModalFooter>
     </form>

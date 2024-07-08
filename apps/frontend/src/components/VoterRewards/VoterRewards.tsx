@@ -1,23 +1,9 @@
 import { useAllocationsRoundsEvents, useCurrentAllocationsRoundId, useVotingRewards } from "@/api"
-import {
-  Card,
-  CardBody,
-  HStack,
-  Heading,
-  VStack,
-  Text,
-  Button,
-  useColorModeValue,
-  Box,
-  Image,
-  useDisclosure,
-  Skeleton,
-} from "@chakra-ui/react"
+import { Card, CardBody, Heading, VStack, Text, Button, Box, Image, useDisclosure } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import React, { useCallback, useMemo } from "react"
 import BigNumber from "bignumber.js"
 import { useClaimRewards } from "@/hooks/useClaimRewards"
-import { TbGift } from "react-icons/tb"
 import { B3TRIcon } from "../Icons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { TransactionModal } from "../TransactionModal"
@@ -37,10 +23,6 @@ export const VoterRewards: React.FC = () => {
   const { data: allocationRoundsEvents } = useAllocationsRoundsEvents()
 
   const { isOpen, onClose, onOpen } = useDisclosure()
-
-  const iconColor = useColorModeValue("800", "900")
-
-  const iconBgColor = useColorModeValue("200", "300")
 
   const roundRewards = useMemo(() => {
     if (!rewardsPerRound) return []
@@ -64,8 +46,6 @@ export const VoterRewards: React.FC = () => {
 
     return totalRewards.decimalPlaces(DECIMAL_PLACES, BigNumber.ROUND_DOWN).toString()
   }, [totalRewards])
-
-  const isRewardsLoading = rewardsPerRound?.some(reward => reward.isLoading) // Loading rewards to claim
 
   const claimRewardsMutation = useClaimRewards({
     roundRewards,

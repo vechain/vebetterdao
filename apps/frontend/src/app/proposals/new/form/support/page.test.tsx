@@ -127,7 +127,7 @@ describe("NewProposalSupport", async () => {
       votingStartRoundId: undefined,
     })
 
-    const x = render(
+    render(
       <FormProposalLayout>
         <NewProposalSupport />
       </FormProposalLayout>,
@@ -144,7 +144,7 @@ describe("NewProposalSupport", async () => {
     await screen.findByText(`/ ${compactFormatter.format(Number(threshold))}`)
 
     const goBack = await screen.findByTestId("go-back")
-    const continueButton = await screen.findByTestId("continue")
+    await screen.findByTestId("continue")
 
     fireEvent.click(goBack)
     expect(mockBack).toHaveBeenCalled()
@@ -189,7 +189,7 @@ describe("NewProposalSupport", async () => {
     await screen.findByText(`/ NaN`)
 
     const goBack = await screen.findByTestId("go-back")
-    const continueButton = await screen.findByTestId("continue")
+    await screen.findByTestId("continue")
 
     fireEvent.click(goBack)
     expect(mockBack).toHaveBeenCalled()
@@ -249,7 +249,7 @@ describe("NewProposalSupport", async () => {
       setData: mockSetData,
     })
 
-    const x = render(
+    render(
       <FormProposalLayout>
         <NewProposalSupport />
       </FormProposalLayout>,

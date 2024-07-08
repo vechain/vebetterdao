@@ -122,7 +122,6 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
                 <SelectAppVotesInput
                   key={field.id}
                   appId={field.appId}
-                  field={field}
                   index={index}
                   control={control}
                   errors={errors}

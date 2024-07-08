@@ -22,12 +22,11 @@ import { UilInfoCircle } from "@iconscout/react-unicons"
 
 type Props = {
   roundId: string
-  maxRanks?: number
 }
 
-export const AllocationXAppsVotesCard = ({ roundId, maxRanks = 8 }: Props) => {
+export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
   const { t } = useTranslation()
-  const { data: xApps, isLoading: xAppsLoading } = useRoundXApps(roundId)
+  const { data: xApps } = useRoundXApps(roundId)
 
   const xAppsVotes = useXAppsVotes(xApps?.map(app => app.id) ?? [], roundId)
 
@@ -93,7 +92,7 @@ export const AllocationXAppsVotesCard = ({ roundId, maxRanks = 8 }: Props) => {
               borderRadius={"xl"}>
               <AlertIcon boxSize="40px" mr={0} />
               <AlertTitle mt={4} mb={1} fontSize="lg">
-                Error loading votes
+                {t("Error loading votes")}
               </AlertTitle>
               <AlertDescription maxWidth="sm">
                 {error.message || "An error occurred while loading the votes"}

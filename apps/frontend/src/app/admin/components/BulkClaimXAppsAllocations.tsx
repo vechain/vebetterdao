@@ -145,14 +145,20 @@ export const BulkClaimXAppsAllocations = () => {
     <>
       <Card w={"full"}>
         <CardHeader>
-          <Heading size="lg">Bulk allocation claiming</Heading>
+          <Heading size="lg">{t("Bulk allocation claiming")}</Heading>
         </CardHeader>
         <CardBody>
           <VStack spacing={8} alignItems={"start"} flex={1} w="full">
             <VStack align={"start"}>
               <VStack spacing={0} align={"start"}>
-                <Text> Total apps: {xApps?.length}</Text>
-                <Text> Remaing apps that needs claiming: {xAppsLeft?.length}</Text>
+                <Text>
+                  {" "}
+                  {t("Total apps:")} {xApps?.length}
+                </Text>
+                <Text>
+                  {" "}
+                  {t("Remaing apps that needs claiming:")} {xAppsLeft?.length}
+                </Text>
               </VStack>
             </VStack>
             <form
@@ -193,7 +199,7 @@ export const BulkClaimXAppsAllocations = () => {
                       backgroundColor={"transparent"}
                       borderColor={"inherit"}
                       borderLeft={"none"}>
-                      B3TR
+                      {t("B3TR")}
                     </InputRightAddon>
                   </InputGroup>
                 </FormControl>
@@ -212,7 +218,7 @@ export const BulkClaimXAppsAllocations = () => {
                       backgroundColor={"transparent"}
                       borderColor={"inherit"}
                       borderLeft={"none"}>
-                      B3TR
+                      {t("B3TR")}
                     </InputRightAddon>
                   </InputGroup>
                 </FormControl>

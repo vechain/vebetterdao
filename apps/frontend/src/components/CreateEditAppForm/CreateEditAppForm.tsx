@@ -35,6 +35,7 @@ import { useCallback } from "react"
 import { notFoundImage } from "@/constants"
 import { useDropzone } from "react-dropzone"
 import { blobToBase64 } from "@/utils/BlobUtils"
+import { useTranslation } from "react-i18next"
 
 // Validate image uploads with size and type
 const validateImageUpload = async (
@@ -94,6 +95,7 @@ export const CreateEditAppForm = ({
   clearErrors,
   isReceiverAddressDisabled = false,
 }: Props) => {
+  const { t } = useTranslation()
   // handle image uploads with validation
   const onDrop = useCallback(
     (image: "logo" | "banner") => async (acceptedFiles: File[]) => {
@@ -127,7 +129,7 @@ export const CreateEditAppForm = ({
       <CardBody>
         <VStack spacing={8} w="full">
           <FormControl isInvalid={!!errors.name}>
-            <FormLabel>Name</FormLabel>
+            <FormLabel>{t("Name")}</FormLabel>
             <Input
               rounded={"xl"}
               {...register("name", {
@@ -137,7 +139,7 @@ export const CreateEditAppForm = ({
             {errors.name && <FormErrorMessage>{errors.name.message}</FormErrorMessage>}
           </FormControl>
           <FormControl isInvalid={!!errors.description}>
-            <FormLabel>Description</FormLabel>
+            <FormLabel>{t("Description")}</FormLabel>
             <Textarea
               rounded={"xl"}
               {...register("description", {
@@ -148,7 +150,7 @@ export const CreateEditAppForm = ({
             {errors.description && <FormErrorMessage>{errors.description.message}</FormErrorMessage>}
           </FormControl>
           <FormControl isInvalid={!!errors.projectUrl}>
-            <FormLabel>Project URL</FormLabel>
+            <FormLabel>{t("Project URL")}</FormLabel>
             <Input
               rounded={"xl"}
               {...register("projectUrl", {
@@ -168,7 +170,7 @@ export const CreateEditAppForm = ({
             {errors.projectUrl && <FormErrorMessage>{errors.projectUrl.message}</FormErrorMessage>}
           </FormControl>
           <FormControl isInvalid={!!errors.teamWalletAddress}>
-            <FormLabel>Team wallet address</FormLabel>
+            <FormLabel>{t("Team wallet address")}</FormLabel>
             <InputGroup>
               <InputLeftElement pointerEvents="none">
                 <AddressIcon borderRadius={"full"} boxSize={6} address={watch("teamWalletAddress")} />
@@ -198,7 +200,7 @@ export const CreateEditAppForm = ({
               }}
               render={({ field: { value } }) => (
                 <FormControl isInvalid={!!errors.logo}>
-                  <FormLabel>Logo</FormLabel>
+                  <FormLabel>{t("Logo")}</FormLabel>
                   <VStack w="full" align="flex-start">
                     <Image
                       alignSelf={"center"}
@@ -214,7 +216,7 @@ export const CreateEditAppForm = ({
                     {errors.logo ? (
                       <FormErrorMessage>{errors.logo.message}</FormErrorMessage>
                     ) : (
-                      <FormHelperText>Recommended size: 96x96px</FormHelperText>
+                      <FormHelperText>{t("Recommended size: 96x96px")}</FormHelperText>
                     )}
                     <UploadFileButton mt={4} alignSelf={"flex-end"} onDrop={onDrop("logo")} />
                   </VStack>
@@ -235,7 +237,7 @@ export const CreateEditAppForm = ({
               }}
               render={({ field: { value } }) => (
                 <FormControl isInvalid={!!errors.banner}>
-                  <FormLabel>Banner</FormLabel>
+                  <FormLabel>{t("Banner")}</FormLabel>
                   <VStack w="full" align={"flex-start"}>
                     <Image
                       alignSelf={"center"}
@@ -251,7 +253,7 @@ export const CreateEditAppForm = ({
                     {errors.banner ? (
                       <FormErrorMessage>{errors.banner.message}</FormErrorMessage>
                     ) : (
-                      <FormHelperText>Recommended size: 150x200px</FormHelperText>
+                      <FormHelperText>{t("Recommended size: 150x200px")}</FormHelperText>
                     )}
                     <UploadFileButton mt={4} alignSelf={"flex-end"} onDrop={onDrop("banner")} />
                   </VStack>

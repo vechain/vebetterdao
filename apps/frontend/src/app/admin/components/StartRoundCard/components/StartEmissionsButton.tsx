@@ -3,11 +3,12 @@ import { TransactionModal } from "@/components/TransactionModal"
 import { useStartEmission } from "@/hooks"
 import { HStack, Button, useDisclosure } from "@chakra-ui/react"
 import { useCallback } from "react"
+import { useTranslation } from "react-i18next"
 
 export const StartEmissionsButton = () => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { isOpen, onClose, onOpen } = useDisclosure()
-
+  const { t } = useTranslation()
   const {
     sendTransaction,
     resetStatus,
@@ -40,7 +41,7 @@ export const StartEmissionsButton = () => {
         colorScheme="blue"
         onClick={handleStartEmissions}
         isLoading={loading}>
-        Start emissions
+        {t("Start emissions")}
       </Button>
 
       <TransactionModal

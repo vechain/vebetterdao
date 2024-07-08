@@ -39,8 +39,9 @@ export const NoProposalsCard = () => {
           {t("No Proposals Found")}
         </Text>
         <Text fontSize={16} fontWeight={400} mt={2} color={"#6A6A6A"}>
-          Have an idea for something that could improve the experience in VeBetterDAO?{" "}
-          <b style={{ color: "black" }}>Create a proposal</b> and let the community vote to make it happen!
+          {t("Have an idea for something that could improve the experience in VeBetterDAO? ")}
+          <b style={{ color: "black" }}>{t("Create a proposal")}</b>
+          {t(" and let the community vote to make it happen!")}
         </Text>
         <Button onClick={onNewClick} variant={"primaryAction"} alignSelf={"flex-start"} mt={4} mb={2}>
           {t("Create proposal")}

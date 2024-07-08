@@ -72,7 +72,6 @@ export const DashboardXApps = ({ maxApps = 4 }: Props) => {
 }
 
 const DashboardXAppCard = ({ xApp }: { xApp: XApp }) => {
-  const { t } = useTranslation()
   const { data: appMetadata, isLoading: appMetadataLoading, error: appMetadataError } = useXAppMetadata(xApp.id)
   const router = useRouter()
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)

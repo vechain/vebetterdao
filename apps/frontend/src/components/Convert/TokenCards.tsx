@@ -1,17 +1,10 @@
-import { useTokenColors } from "@/hooks"
-import { Button, Divider, HStack, Input, Stack, Text, VStack, Image } from "@chakra-ui/react"
+import { Button, HStack, Input, Stack, Text, VStack, Image } from "@chakra-ui/react"
 import { useCallback, useEffect, useMemo } from "react"
 import { Controller, UseFormReturn } from "react-hook-form"
-import { VOT3Icon } from "../Icons"
 import { TokenBalance, useB3trBalance, useVot3Balance } from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { motion } from "framer-motion"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-
-const DECIMAL_PLACES = 4
-
-// Maximum precision of 4 decimals. Must also round down
-const compactFormatter = getCompactFormatter(DECIMAL_PLACES)
+import { useTranslation } from "react-i18next"
 
 type Props = {
   amount: string
@@ -114,15 +107,17 @@ export const TokenCards = ({
     setValue("amount", filterAmount(amount))
   }, [isB3trToVot3, amount, filterAmount, setValue])
 
+  const { t } = useTranslation()
+
   const maxButton = useMemo(
     () => (
       <Button onClick={() => setValue("amount", maxBalance)} variant={"secondary"}>
         <Text fontSize={14} fontWeight={500}>
-          Convert all
+          {t("Convert all")}
         </Text>
       </Button>
     ),
-    [maxBalance, setValue],
+    [maxBalance, setValue, t],
   )
 
   return (

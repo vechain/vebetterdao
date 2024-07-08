@@ -26,6 +26,7 @@ import {
 import { AddressUtils } from "@repo/utils"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useCallback, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 export const B3trAllowance = () => {
   const { account } = useWallet()
@@ -35,6 +36,7 @@ export const B3trAllowance = () => {
   const [amount, setAmount] = useState<number>(0)
   const [spenderFieldIsDirty, setSpenderFieldIsDirty] = useState<boolean>(false)
   const [amountFieldIsDirty, setAmountFieldIsDirty] = useState<boolean>(false)
+  const { t } = useTranslation()
 
   const { data: allowedAmount, isLoading: allowedAmountLoading } = useB3trAllowance(account ?? undefined, spender)
   const allowedAmountScaled = useMemo(() => {
@@ -88,8 +90,8 @@ export const B3trAllowance = () => {
     <>
       <Card w={"full"}>
         <CardHeader>
-          <Heading size="lg">B3TR Token Allowance</Heading>
-          <Text fontSize="sm">Allow an external address to spend your B3TR tokens.</Text>
+          <Heading size="lg">{t("B3TR Token Allowance")}</Heading>
+          <Text fontSize="sm">{t("Allow an external address to spend your B3TR tokens.")}</Text>
         </CardHeader>
         <CardBody>
           <form onSubmit={handleSubmit}>
@@ -109,7 +111,7 @@ export const B3trAllowance = () => {
                       backgroundColor={"transparent"}
                       borderColor={"inherit"}
                       borderLeft={"none"}>
-                      B3TR
+                      {t("B3TR")}
                     </InputRightAddon>
                   </InputGroup>
                 </FormControl>
@@ -175,13 +177,13 @@ export const B3trAllowance = () => {
                       backgroundColor={"transparent"}
                       borderColor={"inherit"}
                       borderLeft={"none"}>
-                      B3TR
+                      {t("B3TR")}
                     </InputRightAddon>
                   </InputGroup>
                 </FormControl>
               </HStack>
               <Button isDisabled={!isFormValid} colorScheme="blue" type="submit" isLoading={isLoading}>
-                Allow
+                {t("Allow")}
               </Button>
             </VStack>
           </form>

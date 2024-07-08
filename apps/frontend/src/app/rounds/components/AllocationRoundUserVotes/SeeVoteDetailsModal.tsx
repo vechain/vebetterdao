@@ -45,7 +45,6 @@ export const SeeVoteDetailsModal = ({ roundId, votes, isOpen, onClose }: Props) 
                 key={index}
                 roundId={roundId}
                 data={{ votes: vote.value, app: vote.appId }}
-                index={index}
                 totalVotes={totalVotesCast.toString()}
               />
             ))}

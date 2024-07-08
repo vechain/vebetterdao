@@ -23,7 +23,7 @@ export type ProposalFormStoreState = {
 export const useProposalFormStore = create<ProposalFormStoreState>()(
   devtools(
     persist(
-      (set, get) => ({
+      set => ({
         title: undefined,
         shortDescription: undefined,
         markdownDescription: GovernanceProposalTemplate,

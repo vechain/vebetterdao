@@ -3,6 +3,7 @@ import { Button, useDisclosure, Text } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { FaRepeat } from "react-icons/fa6"
 import { ConvertModal } from "./ConvertModal"
+import { useTranslation } from "react-i18next"
 
 type Props = { isIconButton?: boolean }
 
@@ -17,6 +18,7 @@ export const ConvertButton: React.FC<Props> = ({ isIconButton = false }) => {
   const buttonDisabled = isLoading || hasNoBalance
 
   const { isOpen, onClose, onOpen } = useDisclosure()
+  const { t } = useTranslation()
 
   return (
     <>
@@ -28,7 +30,7 @@ export const ConvertButton: React.FC<Props> = ({ isIconButton = false }) => {
       ) : (
         <Button isDisabled={buttonDisabled} onClick={onOpen} borderRadius={"full"} variant={"primaryAction"} w="full">
           <Text fontSize={16} fontStyle={"normal"} fontWeight={500}>
-            Convert tokens
+            {t("Convert tokens")}
           </Text>
         </Button>
       )}

@@ -1,23 +1,10 @@
-import { useAppModerators, useXApp, useXAppMetadata } from "@/api"
-import { useIpfsImage } from "@/api/ipfs"
 import { CreateEditAppForm, CreateEditAppFormData } from "@/components/CreateEditAppForm"
-import { TransactionModal } from "@/components/TransactionModal"
-import { useUpdateAppDetails } from "@/hooks"
-import { useUploadAppMetadata } from "@/hooks/useUploadAppMetadata"
-import { VStack, Button, Grid, GridItem, Heading, useDisclosure } from "@chakra-ui/react"
-import { compareAddresses } from "@repo/utils/AddressUtils"
-import { useRouter } from "next/navigation"
-import { useCallback, useEffect, useMemo } from "react"
+import { VStack, Grid, GridItem, Heading } from "@chakra-ui/react"
 import { useForm } from "react-hook-form"
-import { FaArrowLeft } from "react-icons/fa6"
 import { AppPreviewDetailCard } from "@/components/AppPreviewDetailCard"
-import { useWallet } from "@vechain/dapp-kit-react"
-import { blobToBase64, downloadBlob } from "@/utils/BlobUtils"
+import { useTranslation } from "react-i18next"
 
 export const NewAppPageFormContent = () => {
-  const { account } = useWallet()
-  const router = useRouter()
-
   const { register, setValue, setError, formState, watch, handleSubmit, clearErrors, control } =
     useForm<CreateEditAppFormData>({
       defaultValues: {
@@ -31,6 +18,7 @@ export const NewAppPageFormContent = () => {
     })
 
   const { errors } = formState
+  const { t } = useTranslation()
 
   //   const { onMetadataUpload, metadataUploadError, metadataUploading } = useUploadAppMetadata()
 
@@ -112,7 +100,7 @@ export const NewAppPageFormContent = () => {
         </GridItem>
         <GridItem colSpan={[3, 3, 1]} minH={0} minW={0}>
           <VStack spacing={4} w="full" align={"flex-start"} position="sticky" top={100} right={0}>
-            <Heading size="md">App preview</Heading>
+            <Heading size="md">{t("App preview")}</Heading>
             <AppPreviewDetailCard app={watch()} />
           </VStack>
         </GridItem>

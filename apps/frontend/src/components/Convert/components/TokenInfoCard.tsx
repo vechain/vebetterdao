@@ -1,5 +1,6 @@
 import { VStack, Image, Text, Button } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
+import { useTranslation } from "react-i18next"
 
 type Props = {
   isB3TRToVOT3: boolean
@@ -7,6 +8,7 @@ type Props = {
 }
 
 export const TokenInfoCard: React.FC<Props> = ({ isB3TRToVOT3, setIsB3TRToVOT3 }) => {
+  const { t } = useTranslation()
   const bgColor = useMemo(() => {
     return isB3TRToVOT3 ? "rgba(177, 241, 108, 1)" : "rgba(12, 37, 88, 1)"
   }, [isB3TRToVOT3])
@@ -18,15 +20,16 @@ export const TokenInfoCard: React.FC<Props> = ({ isB3TRToVOT3, setIsB3TRToVOT3 }
   const description = useMemo(() => {
     return isB3TRToVOT3 ? (
       <Text fontSize={{ base: 14, md: 16 }} fontWeight={400}>
-        The more VOT3 in your balance, the more <b>voting power</b> you’ll have. Use it to vote on proposals and
-        allocation rounds.
+        {t(
+          "The more VOT3 in your balance, the more <b>voting power</b> you’ll have. Use it to vote on proposals and allocation rounds.",
+        )}
       </Text>
     ) : (
       <Text fontSize={{ base: 14, md: 16 }} fontWeight={400}>
-        B3TR are the tokens that you earn through the dApps and by participating on the voting sessions.
+        {t("B3TR are the tokens that you earn through the dApps and by participating on the voting sessions.")}
       </Text>
     )
-  }, [isB3TRToVOT3])
+  }, [isB3TRToVOT3, t])
 
   const color = useMemo(() => {
     return isB3TRToVOT3 ? "#252525" : "#ffffff"

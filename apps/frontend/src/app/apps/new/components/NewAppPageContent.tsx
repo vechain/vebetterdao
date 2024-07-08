@@ -1,6 +1,7 @@
 import { StepCardProps, StepCard } from "@/components/StepCard"
 import { Button, Card, CardBody, Grid, GridItem, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
+import { useTranslation } from "react-i18next"
 
 const Steps: StepCardProps[] = [
   {
@@ -26,6 +27,7 @@ const Steps: StepCardProps[] = [
   },
 ]
 export const NewAppPageContent = () => {
+  const { t } = useTranslation()
   const router = useRouter()
   const onContinueClick = () => {
     router.push("/apps/new/form")
@@ -40,10 +42,11 @@ export const NewAppPageContent = () => {
         <Card>
           <CardBody>
             <VStack spacing={8} align="flex-start">
-              <Heading size="lg">Create a new app</Heading>
+              <Heading size="lg">{t("Create a new app")}</Heading>
               <Text>
-                Welcome to our platform where you can unleash your creativity and build dApps! Before your app can go
-                live, it will undergo a thorough review process by our moderators. Here's how it works:
+                {t(
+                  "Welcome to our platform where you can unleash your creativity and build dApps! Before your app can go live, it will undergo a thorough review process by our moderators. Here's how it works:",
+                )}
               </Text>
               <Stack direction={["column", "column", "row"]} w="full" spacing={4}>
                 {Steps.map(step => (
@@ -52,10 +55,10 @@ export const NewAppPageContent = () => {
               </Stack>
               <HStack alignSelf={"flex-end"} spacing={4}>
                 <Button rounded="full" variant={"outline"} colorScheme="primary" size="lg">
-                  More info
+                  {t("More info")}
                 </Button>
                 <Button rounded="full" colorScheme="primary" size="lg" onClick={onContinueClick}>
-                  Continue
+                  {t("Continue")}
                 </Button>
               </HStack>
             </VStack>

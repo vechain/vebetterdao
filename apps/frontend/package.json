@@ -79,6 +79,7 @@
     "jsdom": "^24.1.0",
     "resize-observer-polyfill": "^1.5.1",
     "typescript": "^5",
+    "typescript-eslint": "^7.15.0",
     "vite-tsconfig-paths": "^4.3.2",
     "vitest": "^1.6.0",
     "vitest-canvas-mock": "^0.3.3"

@@ -13,7 +13,6 @@ type AppVotesData = {
 
 type Props = {
   data: AppVotesData
-  index: number
   roundId: string
   totalVotes?: string
   showReceived?: boolean
@@ -26,7 +25,6 @@ const compactFormatter = getCompactFormatter(2)
 
 export const AppVotesHorizontalChart = ({
   data,
-  index,
   roundId,
   totalVotes,
   showReceived = false,

@@ -5,6 +5,7 @@ import { ReactNode } from "react"
 import { ModalAnimation } from "../ModalAnimation"
 import { motion } from "framer-motion"
 import { getConfig } from "@repo/config"
+import { useTranslation } from "react-i18next"
 
 export type UnknownModalContentProps = {
   title?: ReactNode
@@ -19,6 +20,7 @@ export const UnknownModalContent = ({
   txId,
   showExplorerButton,
 }: UnknownModalContentProps) => {
+  const { t } = useTranslation()
   return (
     <ModalAnimation>
       <ModalCloseButton top={4} right={4} />
@@ -59,7 +61,7 @@ export const UnknownModalContent = ({
               color="gray.500"
               fontSize={"14px"}
               textDecoration={"underline"}>
-              View it on the explorer
+              {t("View it on the explorer")}
             </Link>
           )}
         </VStack>

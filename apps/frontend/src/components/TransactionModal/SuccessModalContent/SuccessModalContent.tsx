@@ -6,6 +6,7 @@ import { ReactNode } from "react"
 import { ModalAnimation } from "../ModalAnimation"
 import { motion } from "framer-motion"
 import { getConfig } from "@repo/config"
+import { useTranslation } from "react-i18next"
 
 export type SuccessModalContentProps = {
   title?: ReactNode
@@ -31,6 +32,7 @@ export const SuccessModalContent = ({
   showExplorerButton = false,
   txId,
 }: SuccessModalContentProps) => {
+  const { t } = useTranslation()
   return (
     <ModalAnimation>
       <ModalCloseButton top={4} right={4} />
@@ -65,12 +67,12 @@ export const SuccessModalContent = ({
             color="gray.500"
             fontSize={"14px"}
             textDecoration={"underline"}>
-            View it on the explorer
+            {t("View it on the explorer")}
           </Link>
         )}
         {showSocialButtons && (
           <VStack>
-            <Text fontSize="sm">Share your success on social media</Text>
+            <Text fontSize="sm">{t("Share your success on social media")}</Text>
             <ShareButtons descriptionEncoded={socialDescriptionEncoded} />
           </VStack>
         )}

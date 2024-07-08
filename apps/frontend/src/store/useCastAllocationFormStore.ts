@@ -15,7 +15,7 @@ export type CastAllocationFormStoreState = {
 export const useCastAllocationFormStore = create<CastAllocationFormStoreState>()(
   devtools(
     persist(
-      (set, get) => ({
+      set => ({
         data: [],
         setData: (data: CastVoteData) =>
           set({

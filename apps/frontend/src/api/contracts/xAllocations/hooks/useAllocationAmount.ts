@@ -19,14 +19,7 @@ type AllocationAmount = {
  * @param roundId  the roundId the get the amount for
  * @returns the allocation amount for a given roundId see {@link AllocationAmount}
  */
-export const getAllocationAmount = async (
-  thor: Connex.Thor,
-  roundId?: string,
-): Promise<{
-  treasury: string
-  voteX2Earn: string
-  voteXAllocations: string
-}> => {
+export const getAllocationAmount = async (thor: Connex.Thor, roundId?: string): Promise<AllocationAmount> => {
   const emissionsInterface = Emissions__factory.createInterface()
   const functionFragmentTreasuryAmount = emissionsInterface.getFunction("getTreasuryAmount").format("json")
   const functionFragmentVoteX2EarnAmount = emissionsInterface.getFunction("getVote2EarnAmount").format("json")

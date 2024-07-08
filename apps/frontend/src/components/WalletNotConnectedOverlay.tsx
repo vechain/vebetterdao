@@ -1,8 +1,10 @@
 import { Flex, VStack, Heading, Image, Text, Box } from "@chakra-ui/react"
 import { TwoFingersIcon } from "./Icons"
 import { ConnectWalletButton } from "./ConnectWalletButton"
+import { useTranslation } from "react-i18next"
 
 export const WalletNotConnectedOverlay = ({ description = "Connect your wallet" }: { description?: string }) => {
+  const { t } = useTranslation()
   return (
     <Flex
       borderRadius={"lg"}
@@ -37,7 +39,7 @@ export const WalletNotConnectedOverlay = ({ description = "Connect your wallet" 
         <TwoFingersIcon boxSize={20} />
         <Box>
           <Heading fontSize="xl" textAlign={"center"} color="white">
-            Wallet not connected
+            {t("Wallet not connected")}
           </Heading>
           <Text mt={2} textAlign={"center"} fontSize="md" fontWeight={"400"} color="white">
             {description}

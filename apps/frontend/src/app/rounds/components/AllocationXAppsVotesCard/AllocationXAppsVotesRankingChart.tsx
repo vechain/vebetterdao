@@ -38,7 +38,6 @@ export const AllocationXAppsVotesRankingChart = ({ roundId }: Props) => {
         <AppVotesHorizontalChart
           key={index}
           data={app}
-          index={index}
           totalVotes={votes}
           roundId={roundId}
           showReceived={true}

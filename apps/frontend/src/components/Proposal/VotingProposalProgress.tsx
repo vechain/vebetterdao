@@ -1,21 +1,11 @@
 import React, { useMemo } from "react"
 import { useProposalDepositEvent } from "@/api/contracts/governance/hooks/useProposalDepositEvent"
 import { useIsDepositReached } from "@/api/contracts/governance/hooks/useIsDepositReached"
-import {
-  ProposalState,
-  useIsProposalQuorumReached,
-  useProposalCreatedEvent,
-  useProposalQuorum,
-  useProposalSnapshot,
-  useProposalVoteEvent,
-  useProposalVotes,
-} from "@/api"
+import { ProposalState, useProposalCreatedEvent, useProposalVoteEvent, useProposalVotes } from "@/api"
 import { Box, Card, CardBody, HStack, Text, VStack } from "@chakra-ui/react"
 import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useWallet } from "@vechain/dapp-kit-react"
 import { FaRegHeart } from "react-icons/fa6"
 
 interface VotingProposalProgressProps {
@@ -23,17 +13,11 @@ interface VotingProposalProgressProps {
   proposalState: ProposalState
 }
 
-const compactFormatter = getCompactFormatter()
-
 const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposalId, proposalState }) => {
-  const { data: proposalSnapshotBlock, isLoading: snapshotBlockloading } = useProposalSnapshot(proposalId)
-  const { data: quorum, isLoading: quorumLoading } = useProposalQuorum(proposalSnapshotBlock, true)
   const proposalDepositEvent = useProposalDepositEvent(proposalId)
   const isDepositReached = useIsDepositReached(proposalId)
   const proposalCreatedEvent = useProposalCreatedEvent(proposalId)
-  const isQuorumReached = useIsProposalQuorumReached(proposalId)
-  const { data: proposalVotes, isLoading: proposalVotesLoading } = useProposalVotes(proposalId)
-  const { account } = useWallet()
+  const { data: proposalVotes } = useProposalVotes(proposalId)
   const { hasUserVoted, userVote } = useProposalVoteEvent(proposalId)
 
   const hasUserDeposited = useMemo(() => {
@@ -45,13 +29,10 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
   const depositThreshold = Number(ethers.formatEther(BigInt(proposalCreatedEvent.data?.depositThreshold || 0)))
   const communityDeposits = proposalDepositEvent.communityDeposits
   const communityDepositPercentage = (communityDeposits / depositThreshold) * 100
-  const supportingUserCount = proposalDepositEvent.supportingUserCount
 
   const totalVotes =
     Number(proposalVotes?.abstainVotes) + Number(proposalVotes?.againstVotes) + Number(proposalVotes?.forVotes)
   const forPercentage = (Number(proposalVotes?.forVotes) / totalVotes) * 100 || 0
-  const againstPercentage = (Number(proposalVotes?.againstVotes) / totalVotes) * 100 || 0
-  const abstainPercentage = (Number(proposalVotes?.abstainVotes) / totalVotes) * 100 || 0
 
   const againstAndAbstainPercentage = Number(totalVotes) > 0 ? 100 - forPercentage : 0
 
@@ -104,7 +85,7 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
                 color={
                   isDepositFulfilled ? "rgba(0, 76, 252, 1)" : isPending === false ? "rgba(210, 63, 99, 1)" : "#F29B32"
                 }>
-                {isDepositFulfilled ? 100 : communityDepositPercentage.toFixed(0)} %
+                {isDepositFulfilled ? 100 : communityDepositPercentage.toFixed(0)} {t("%")}
               </Text>
             </HStack>
           </HStack>
@@ -120,11 +101,12 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
           </Box>
           {hasUserDeposited === true ? (
             <Text fontSize={12} color={"#6A6A6A"} fontWeight={400} mt={1}>
-              You <b>Supported</b>
+              {t("You ")}
+              <b>{t("Supported")}</b>
             </Text>
           ) : (
             <Text fontSize={12} color={"#6A6A6A"} fontWeight={400} mt={1}>
-              You haven't supported
+              {t("You haven't supported")}
             </Text>
           )}
         </VStack>
@@ -136,13 +118,13 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
             <HStack>
               <UilThumbsUp width={18} height={18} color="rgba(56, 191, 102, 1)" />
               <Text fontSize={16} fontWeight={600} color={"rgba(56, 191, 102, 1)"}>
-                {forPercentage.toFixed(0)} %
+                {forPercentage.toFixed(0)} {t("%")}
               </Text>
             </HStack>
             <HStack>
               <UilThumbsDown width={18} height={18} color="rgba(210, 63, 99, 1)" />
               <Text fontSize={16} fontWeight={600} color={"rgba(210, 63, 99, 1)"}>
-                {againstAndAbstainPercentage.toFixed(0)} %
+                {againstAndAbstainPercentage.toFixed(0)} {t("%")}
               </Text>
             </HStack>
           </HStack>
@@ -157,7 +139,7 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
           </Box>
           {hasUserVoted === true ? (
             <Text fontSize={12} color={"#6A6A6A"} fontWeight={400} mt={1}>
-              You voted
+              {t("You voted")}
               <b
                 style={{
                   color:
@@ -173,7 +155,7 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
             </Text>
           ) : (
             <Text fontSize={12} color={"#6A6A6A"} fontWeight={400} mt={1}>
-              You haven't voted
+              {t("You haven't voted")}
             </Text>
           )}
         </VStack>

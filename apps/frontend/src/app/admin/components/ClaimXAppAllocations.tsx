@@ -128,12 +128,14 @@ export const ClaimXAppAllocations = () => {
     <>
       <Card w={"full"}>
         <CardHeader>
-          <Heading size="lg">Allocation claiming</Heading>
+          <Heading size="lg">{t("Allocation claiming")}</Heading>
         </CardHeader>
         <CardBody>
           <VStack flex={1} align="flex-start" spacing={8}>
             <VStack align={"start"}>
-              <Text>Last round id: {currentRoundId}</Text>
+              <Text>
+                {t("Last round id:")} {currentRoundId}
+              </Text>
             </VStack>
             <form onSubmit={handleSubmit}>
               <VStack spacing={4} alignItems={"start"}>
@@ -196,7 +198,7 @@ export const ClaimXAppAllocations = () => {
                       backgroundColor={"transparent"}
                       borderColor={"inherit"}
                       borderLeft={"none"}>
-                      B3TR
+                      {t("B3TR")}
                     </InputRightAddon>
                   </InputGroup>
                 </FormControl>

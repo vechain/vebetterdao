@@ -6,8 +6,10 @@ import { Button, HStack, VStack, Text, Show, Card, CardHeader, Heading, CardBody
 import { getConfig } from "@repo/config"
 import { useWallet } from "@vechain/dapp-kit-react"
 import React, { useCallback } from "react"
+import { useTranslation } from "react-i18next"
 
 export const Pause: React.FC = () => {
+  const { t } = useTranslation()
   const { account } = useWallet()
   const { isAdminOfB3tr, isAdminOfGalaxyMember, isAdminOfVot3, isAdminOfB3TRGovernor } = useAccountPermissions(
     account ?? "",
@@ -109,7 +111,7 @@ export const Pause: React.FC = () => {
         isLoading={isToggleB3trPausedLoading}>
         {isB3trPaused ? "Unpause B3TR" : "Pause B3TR"}
       </Button>
-      <Text>Pausing disables: Transfers, Minting, New Emissions, Swaps</Text>
+      <Text>{t("Pausing disables: Transfers, Minting, New Emissions, Swaps")}</Text>
     </>
   )
 
@@ -121,7 +123,7 @@ export const Pause: React.FC = () => {
         isLoading={isToggleVot3PausedLoading}>
         {isVot3Paused ? "Unpause VOT3" : "Pause VOT3"}
       </Button>
-      <Text>Pausing disables: Transfers, Minting, Swaps, Delegation of voting power</Text>
+      <Text>{t("Pausing disables: Transfers, Minting, Swaps, Delegation of voting power")}</Text>
     </>
   )
 
@@ -133,7 +135,7 @@ export const Pause: React.FC = () => {
         isLoading={isToggleGalaxyMemberPausedLoading}>
         {isGalaxyMemberPaused ? "Unpause Galaxy Member" : "Pause Galaxy Member"}
       </Button>
-      <Text>Pausing disables: Transfers, Minting</Text>
+      <Text>{t("Pausing disables: Transfers, Minting")}</Text>
     </>
   )
 
@@ -146,7 +148,9 @@ export const Pause: React.FC = () => {
         {isB3TRGovernorPaused ? "Unpause B3TRGovernor" : "Pause B3TRGovernor"}
       </Button>
       <Text>
-        Pausing disables: Proposal creation, queuing and execution (from B3TRContract, still available from Timelock)
+        {t(
+          "Pausing disables: Proposal creation, queuing and execution (from B3TRContract, still available from Timelock)",
+        )}
       </Text>
     </>
   )
@@ -154,7 +158,7 @@ export const Pause: React.FC = () => {
   return (
     <Card w={"full"}>
       <CardHeader>
-        <Heading size="lg">Pausing</Heading>
+        <Heading size="lg">{t("Pausing")}</Heading>
       </CardHeader>
       <CardBody>
         <VStack spacing={6} align={"flex-start"}>

@@ -2,7 +2,7 @@ import { buildClaimXAppAllocationTx, getB3TrBalanceQueryKey, getHasXAppClaimedQu
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
-import { useConnex, useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
 
 type useClaimAllocationsProps = {
@@ -32,18 +32,14 @@ export const useClaimXAppsAllocations = ({
   onFailure,
   invalidateCache = true,
 }: useClaimAllocationsProps): useBClaimXAppsAllocationsReturnValue => {
-  const { thor } = useConnex()
   const { account } = useWallet()
   const queryClient = useQueryClient()
   const config = getConfig()
 
-  const buildClauses = useCallback(
-    (roundId: string, appIds: string[]) => {
-      const clauses = buildClaimXAppAllocationTx(thor, roundId, appIds)
-      return clauses
-    },
-    [thor],
-  )
+  const buildClauses = useCallback((roundId: string, appIds: string[]) => {
+    const clauses = buildClaimXAppAllocationTx(roundId, appIds)
+    return clauses
+  }, [])
 
   // Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {

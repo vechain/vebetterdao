@@ -5,7 +5,7 @@ import { ReactNode } from "react"
 import { ModalAnimation } from "../ModalAnimation"
 import { motion } from "framer-motion"
 import { getConfig } from "@repo/config"
-import { FaLink } from "react-icons/fa6"
+import { useTranslation } from "react-i18next"
 
 export type ErrorModalContentProps = {
   title?: ReactNode
@@ -24,6 +24,7 @@ export const ErrorModalContent = ({
   showExplorerButton,
   txId,
 }: ErrorModalContentProps) => {
+  const { t } = useTranslation()
   return (
     <ModalAnimation>
       <ModalCloseButton top={4} right={4} />
@@ -60,12 +61,12 @@ export const ErrorModalContent = ({
               color="gray.500"
               fontSize={"14px"}
               textDecoration={"underline"}>
-              View it on the explorer
+              {t("View it on the explorer")}
             </Link>
           )}
           {showTryAgainButton && (
             <Button variant={"outline"} onClick={onTryAgain}>
-              Try again
+              {t("Try again")}
             </Button>
           )}
         </VStack>

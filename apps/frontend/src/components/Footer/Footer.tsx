@@ -5,8 +5,10 @@ import { DiscordButton } from "./components/DiscordButton"
 import { TelegramButton } from "./components/TelegramButton"
 import { Socials } from "./components/Socials"
 import { PRIVACY_POLICY_LINK, TERMS_AND_CONDITIONS_LINK } from "@/constants"
+import { useTranslation } from "react-i18next"
 
 export const Footer: React.FC = () => {
+  const { t } = useTranslation()
   const desktopContent = (
     <VStack>
       <HStack justifyContent={"space-between"} w="full" spacing={4} my={4}>
@@ -27,17 +29,17 @@ export const Footer: React.FC = () => {
       </HStack>
       <HStack justifyContent={"space-between"} w="full" borderTopColor={"#3e3c3a"} borderTopWidth={1} py={8}>
         <Text fontWeight={400} fontSize="14px" lineHeight="17px" color="#8c8c8c">
-          2024 VeBetterDAO. All rights reserved.
+          {t("2024 VeBetterDAO. All rights reserved.")}
         </Text>
         <HStack spacing={4}>
           <Link href={PRIVACY_POLICY_LINK} isExternal>
             <Text fontWeight={400} fontSize="14px" lineHeight="17px" color="#8c8c8c" as="u" cursor={"pointer"}>
-              Privacy & Policy
+              {t("Privacy & Policy")}
             </Text>
           </Link>
           <Link href={TERMS_AND_CONDITIONS_LINK} isExternal>
             <Text fontWeight={400} fontSize="14px" lineHeight="17px" color="#8c8c8c" as="u" cursor={"pointer"}>
-              Terms & Conditions
+              {t("Terms & Conditions")}
             </Text>
           </Link>
         </HStack>
@@ -70,16 +72,16 @@ export const Footer: React.FC = () => {
       <VStack borderTopColor={"#3e3c3a"} borderTopWidth={1} py={8}>
         <Link href={PRIVACY_POLICY_LINK} isExternal>
           <Text fontWeight={400} fontSize="14px" lineHeight="17px" color="#8c8c8c" as="u" cursor={"pointer"}>
-            Privacy & Policy
+            {t("Privacy & Policy")}
           </Text>
         </Link>
         <Link href={TERMS_AND_CONDITIONS_LINK} isExternal>
           <Text fontWeight={400} fontSize="14px" lineHeight="17px" color="#8c8c8c" as="u" cursor={"pointer"}>
-            Terms & Conditions
+            {t("Terms & Conditions")}
           </Text>
         </Link>
         <Text fontWeight={400} fontSize="14px" lineHeight="17px" color="#8c8c8c" mt={6}>
-          2024 VeBetterDAO. All rights reserved.
+          {t("2024 VeBetterDAO. All rights reserved.")}
         </Text>
       </VStack>
     </VStack>

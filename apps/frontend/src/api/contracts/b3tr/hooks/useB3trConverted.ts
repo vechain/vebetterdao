@@ -2,7 +2,6 @@ import { FormattingUtils } from "@repo/utils"
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
-import { useB3trTokenDetails } from "./useB3trTokenDetails"
 import { VOT3__factory } from "@repo/contracts/typechain-types"
 import { TokenBalance } from "./useB3trBalance"
 import { ethers } from "ethers"
@@ -20,11 +19,7 @@ const VOT3_CONTRACT = getConfig().vot3ContractAddress
  *
  * @throws {Error} If the address is not provided or if there is a VM error.
  */
-export const getB3trConverted = async (
-  thor: Connex.Thor,
-  address?: string,
-  scaleDecimals: number = 18,
-): Promise<TokenBalance> => {
+export const getB3trConverted = async (thor: Connex.Thor, address?: string): Promise<TokenBalance> => {
   if (!address) return Promise.reject(new Error("Address not provided"))
 
   const functionFragment = VOT3__factory.createInterface().getFunction("convertedB3trOf").format("json")
@@ -61,11 +56,10 @@ export const getConvertedB3TRQueryKey = (address?: string) => ["converted", "b3t
  */
 export const useB3trConverted = (address?: string) => {
   const { thor } = useConnex()
-  const { data: tokenDetails } = useB3trTokenDetails()
 
   return useQuery({
     queryKey: getConvertedB3TRQueryKey(address),
-    queryFn: () => getB3trConverted(thor, address, tokenDetails?.decimals),
-    enabled: !!address && !!tokenDetails?.decimals,
+    queryFn: () => getB3trConverted(thor, address),
+    enabled: !!address,
   })
 }

@@ -26,7 +26,7 @@ describe("NewProposalType", async () => {
   }) // redirects to /proposals if no account connected
 
   it("should render correctly", async () => {
-    const x = render(<NewproposalPage />)
+    render(<NewproposalPage />)
     await screen.findByTestId("new-proposal-type-page")
     await screen.findByText("Select proposal type")
 

@@ -7,12 +7,13 @@ import dayjs from "dayjs"
 
 import relativeTime from "dayjs/plugin/relativeTime"
 import duration from "dayjs/plugin/duration"
-import { AlphaTestnetBanner, Footer } from "@/components"
+import { Footer } from "@/components"
 import dynamic from "next/dynamic"
 import { AnalyticsUtils } from "@/utils"
 import { getConfig } from "@repo/config"
 import "@/i18n"
 import { useEffect } from "react"
+import { t } from "i18next"
 
 dayjs.extend(relativeTime)
 dayjs.extend(duration)
@@ -50,7 +51,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         scrollBehavior: "smooth",
       }}>
       <head>
-        <title>VeBetterDAO</title>
+        <title>{t("VeBetterDAO")}</title>
         <meta name="description" content="Vote for your favourite sustainability Apps in VeBetterDAO’s governance." />
         <link rel="icon" href="/images/favicon.png" />
         <link rel="apple-touch-icon" sizes="57x57" href="/images/favicon.png" />

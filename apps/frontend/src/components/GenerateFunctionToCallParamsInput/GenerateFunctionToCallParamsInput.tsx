@@ -12,6 +12,7 @@ import { Control, Controller, FieldError, FieldErrorsImpl, Merge, UseFormRegiste
 import { AddressUtils } from "@repo/utils"
 import { useMemo } from "react"
 import { FormData as ProposalFunctionFormData } from "@/app/proposals/new/form/functions/details/components/NewProposalForm"
+import { useTranslation } from "react-i18next"
 
 /**
  * Represent a single parameter of the function to call in the smart contract
@@ -51,6 +52,7 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
   humanizeLabels = true,
   control,
 }) => {
+  const { t } = useTranslation()
   const label = useMemo(() => {
     //TODO: handle this with humanName field in the featured fucntion param itself
     if (humanizeLabels) {
@@ -151,8 +153,8 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
               value={field.value}
               onChange={e => field.onChange(e.target.value === "true" ? 1 : 0)}
               {...selectProps}>
-              <option value="true">True</option>
-              <option value="false">False</option>
+              <option value="true">{t("True")}</option>
+              <option value="false">{t("False")}</option>
             </Select>
           )}
         />
