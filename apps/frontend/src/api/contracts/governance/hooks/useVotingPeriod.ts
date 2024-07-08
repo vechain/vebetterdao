@@ -3,7 +3,7 @@ import { useConnex } from "@vechain/dapp-kit-react"
 
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
-import { ethers } from "ethers"
+
 const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
 
 const governorInterface = B3TRGovernor__factory.createInterface()
