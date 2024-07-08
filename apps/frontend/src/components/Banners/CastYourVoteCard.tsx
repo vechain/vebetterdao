@@ -1,9 +1,22 @@
 import { useAllocationsRound, useCurrentAllocationsRoundId, useGetVotesOnBlock, useHasVotedInRound } from "@/api"
-import { Button, Card, CardBody, Grid, GridItem, Heading, Image, Show, Text, VStack } from "@chakra-ui/react"
+import {
+  Button,
+  Card,
+  CardBody,
+  Grid,
+  GridItem,
+  Heading,
+  Show,
+  Text,
+  useBreakpointValue,
+  VStack,
+} from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { FiArrowUpRight } from "react-icons/fi"
 import { useTranslation } from "react-i18next"
 import { useRouter } from "next/navigation"
+import Lottie from "react-lottie"
+import voteAnimation from "../../../public/animations/vote.json"
 
 export const CastYourVoteCard: React.FC = () => {
   const router = useRouter()
@@ -14,6 +27,18 @@ export const CastYourVoteCard: React.FC = () => {
   const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
     Number(roundDetail.voteStart),
     account ?? undefined,
+  )
+
+  const lottieSize = useBreakpointValue(
+    {
+      base: "109px",
+      lg: "219px",
+    },
+    {
+      // Breakpoint to use when mediaqueries cannot be used, such as in server-side rendering
+      // (Defaults to 'base')
+      fallback: "base",
+    },
   )
 
   const {
@@ -34,7 +59,7 @@ export const CastYourVoteCard: React.FC = () => {
     <Card borderColor={"#B1F16C"} backgroundColor={"#B1F16C"} variant={"baseWithBorder"}>
       <CardBody>
         <Grid templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(3, 1fr)"]} gap={[4, 10]} w="full">
-          <GridItem colSpan={2}>
+          <GridItem colSpan={2} order={[2, 2, 1]}>
             <VStack spacing={4} w="full" justifyContent={"start"} alignItems={"start"}>
               <Heading fontSize="16px" fontWeight={"700"} textTransform={"uppercase"} color="primary.500">
                 {t("Round #{{round}}", {
@@ -64,11 +89,21 @@ export const CastYourVoteCard: React.FC = () => {
               </Button>
             </VStack>
           </GridItem>
-          <Show above="lg">
-            <GridItem colSpan={1} alignContent={["start", "center"]} justifySelf={["start", "center"]}>
-              <Image src="/images/VoteAnimation.svg" boxSize={"219px"} alt="vote-icon" />
-            </GridItem>
-          </Show>
+
+          <GridItem colSpan={1} order={[1, 1, 2]} alignContent={["start", "center"]} justifySelf={["start", "center"]}>
+            <Lottie
+              style={{
+                pointerEvents: "none",
+              }}
+              options={{
+                loop: true,
+                autoplay: true,
+                animationData: voteAnimation,
+              }}
+              height={lottieSize}
+              width={lottieSize}
+            />
+          </GridItem>
         </Grid>
       </CardBody>
     </Card>
