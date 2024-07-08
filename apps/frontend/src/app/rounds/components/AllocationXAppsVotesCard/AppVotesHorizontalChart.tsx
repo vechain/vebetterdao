@@ -1,10 +1,13 @@
-import { useXAppMetadata, useAllocationsRoundState, useXAppRoundEarnings } from "@/api"
+import { useXAppMetadata, useAllocationsRoundState, useXAppRoundEarnings, useVotesInRound } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { B3TRIcon } from "@/components"
 import { notFoundImage } from "@/constants"
 import { VStack, HStack, Skeleton, Heading, Box, Image, Text } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { ethers } from "ethers"
+import { compareAddresses } from "@repo/utils/AddressUtils"
 
 type AppVotesData = {
   votes: string | number
@@ -43,6 +46,18 @@ export const AppVotesHorizontalChart = ({
 
   const { data: forecastedEarnings, isLoading: forecastedEarningsLoading } = useXAppRoundEarnings(roundId, data.app)
 
+  const { data: roundVotes, isLoading: roundVotesLoading } = useVotesInRound(roundId)
+
+  const appVoters = useMemo(() => {
+    return (
+      roundVotes?.filter(vote => {
+        const appIndex = vote.appsIds.findIndex(appId => compareAddresses(appId, data.app))
+        if (appIndex === -1) return false
+        return Number(ethers.formatEther(vote.voteWeights[appIndex] as string)) > 0
+      }).length ?? 0
+    )
+  }, [roundVotes, data.app])
+
   const votesPercentage = Number(totalVotes) === 0 ? 0 : (Number(data.votes) / Number(totalVotes)) * 100
 
   const baseProgressColor = "rgba(208, 248, 164, 1)"
@@ -55,7 +70,7 @@ export const AppVotesHorizontalChart = ({
     <VStack spacing={4} align={"flex-start"} w="full">
       <HStack justify={"space-between"} w="full" align="center">
         <HStack spacing={3} align={"center"} justify={"flex-start"}>
-          <Skeleton isLoaded={!isLogoLoading} boxSize={["32px", "32px", "32px"]}>
+          <Skeleton isLoaded={!isLogoLoading} boxSize={["48px", "48px", "48px"]}>
             <Image src={logo?.image ?? notFoundImage} w="full" borderRadius="9px" alt={appMetadata?.name} />
           </Skeleton>
           <VStack spacing={0} align={"flex-start"}>
@@ -68,13 +83,18 @@ export const AppVotesHorizontalChart = ({
                   percentage: votesPercentage.toLocaleString("en", { minimumFractionDigits: 2 }),
                 })}
               </Heading>
+              <Skeleton isLoaded={!roundVotesLoading}>
+                <Text fontSize={["12px"]} fontWeight={400} color="#6A6A6A">
+                  {`${appVoters} voters`}
+                </Text>
+              </Skeleton>
             </VStack>
           </VStack>
         </HStack>
 
-        <HStack spacing={[4, 8]} align={"center"} justify={"flex-start"} alignSelf={"flex-end"}>
+        <HStack spacing={[4, 8]} align={"center"} justify={"flex-start"}>
           {showReceived && (
-            <VStack spacing={0} align="flex-end">
+            <VStack spacing={0} align={["flex-end"]}>
               <Skeleton isLoaded={!forecastedEarningsLoading}>
                 <HStack spacing={1} align={"center"} justify={"flex-start"} w="full">
                   <Heading size={["14px", "16px"]} fontWeight={600} color="#252525">
