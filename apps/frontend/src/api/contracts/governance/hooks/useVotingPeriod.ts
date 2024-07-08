@@ -17,7 +17,8 @@ export const getVotingPeriod = async (thor: Connex.Thor): Promise<string> => {
   const res = await thor.account(GOVERNANCE_CONTRACT).method(JSON.parse(functionFragment)).call()
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
-  return ethers.formatEther(res.decoded[0])
+
+  return res.decoded[0]
 }
 
 export const getVotingPeriodQueryKey = () => ["VOTING_PERIOD"]
