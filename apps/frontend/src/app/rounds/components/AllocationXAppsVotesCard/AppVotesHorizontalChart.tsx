@@ -1,10 +1,13 @@
-import { useXAppMetadata, useAllocationsRoundState, useXAppRoundEarnings } from "@/api"
+import { useXAppMetadata, useAllocationsRoundState, useXAppRoundEarnings, useVotesInRound } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { B3TRIcon } from "@/components"
 import { notFoundImage } from "@/constants"
-import { VStack, HStack, Skeleton, Heading, Box, Image, Text, Show } from "@chakra-ui/react"
+import { VStack, HStack, Skeleton, Heading, Box, Image, Text } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { ethers } from "ethers"
+import { compareAddresses } from "@repo/utils/AddressUtils"
 
 type AppVotesData = {
   votes: string | number
@@ -18,6 +21,7 @@ type Props = {
   totalVotes?: string
   showReceived?: boolean
   maxAllocation?: number | string
+  maxAllocationPercentage?: number
   renderMaxAllocation?: boolean
 }
 
@@ -31,6 +35,7 @@ export const AppVotesHorizontalChart = ({
   totalVotes,
   showReceived = false,
   maxAllocation,
+  maxAllocationPercentage,
   renderMaxAllocation = false,
 }: Props) => {
   const { t } = useTranslation()
@@ -40,6 +45,18 @@ export const AppVotesHorizontalChart = ({
   const { data: roundState, isLoading: roundStateLoading } = useAllocationsRoundState(roundId)
 
   const { data: forecastedEarnings, isLoading: forecastedEarningsLoading } = useXAppRoundEarnings(roundId, data.app)
+
+  const { data: roundVotes, isLoading: roundVotesLoading } = useVotesInRound(roundId)
+
+  const appVoters = useMemo(() => {
+    return (
+      roundVotes?.filter(vote => {
+        const appIndex = vote.appsIds.findIndex(appId => compareAddresses(appId, data.app))
+        if (appIndex === -1) return false
+        return Number(ethers.formatEther(vote.voteWeights[appIndex] as string)) > 0
+      }).length ?? 0
+    )
+  }, [roundVotes, data.app])
 
   const votesPercentage = Number(totalVotes) === 0 ? 0 : (Number(data.votes) / Number(totalVotes)) * 100
 
@@ -51,27 +68,33 @@ export const AppVotesHorizontalChart = ({
 
   return (
     <VStack spacing={4} align={"flex-start"} w="full">
-      <HStack justify={"space-between"} w="full">
+      <HStack justify={"space-between"} w="full" align="center">
         <HStack spacing={3} align={"center"} justify={"flex-start"}>
-          <Skeleton isLoaded={!isLogoLoading} boxSize={["24px", "28px", "32px"]}>
+          <Skeleton isLoaded={!isLogoLoading} boxSize={["48px", "48px", "48px"]}>
             <Image src={logo?.image ?? notFoundImage} w="full" borderRadius="9px" alt={appMetadata?.name} />
           </Skeleton>
-          <Heading fontSize={["16px"]} fontWeight={600}>
-            {appMetadata?.name}
-          </Heading>
+          <VStack spacing={0} align={"flex-start"}>
+            <Heading fontSize={["16px"]} fontWeight={600}>
+              {appMetadata?.name}
+            </Heading>
+            <VStack spacing={0} align={"flex-start"} justify={"flex-start"}>
+              <Heading size={["16px"]} fontWeight={600} color="#6DCB09">
+                {t("{{percentage}}%", {
+                  percentage: votesPercentage.toLocaleString("en", { minimumFractionDigits: 2 }),
+                })}
+              </Heading>
+              <Skeleton isLoaded={!roundVotesLoading}>
+                <Text fontSize={["12px"]} fontWeight={400} color="#6A6A6A">
+                  {`${appVoters} voters`}
+                </Text>
+              </Skeleton>
+            </VStack>
+          </VStack>
         </HStack>
-        {showMaxAllocation && (
-          <Show above="lg">
-            <Box py={"4px"} px="8px" borderRadius={"64px"} bg="#E9FDF1">
-              <Text color={"#3DBA67"} fontSize={["12px", "14px"]} fontWeight={600}>
-                {t("Max allocation reached!")}
-              </Text>
-            </Box>
-          </Show>
-        )}
-        <HStack spacing={[4, 8]} align={"center"} justify={"flex-start"} alignSelf={"flex-end"}>
+
+        <HStack spacing={[4, 8]} align={"center"} justify={"flex-start"}>
           {showReceived && (
-            <VStack spacing={0} align="flex-end">
+            <VStack spacing={0} align={["flex-end"]}>
               <Skeleton isLoaded={!forecastedEarningsLoading}>
                 <HStack spacing={1} align={"center"} justify={"flex-start"} w="full">
                   <Heading size={["14px", "16px"]} fontWeight={600} color="#252525">
@@ -87,23 +110,27 @@ export const AppVotesHorizontalChart = ({
               </Skeleton>
             </VStack>
           )}
-          <VStack spacing={0} align="flex-end">
-            <Heading size={["16px"]} fontWeight={600} color="#6DCB09">
-              {t("{{percentage}}%", {
-                percentage: votesPercentage.toLocaleString("en", { minimumFractionDigits: 2 }),
-              })}
-            </Heading>
-            <Text fontSize={["12px"]} fontWeight={400} color="#6A6A6A" data-testid={appMetadata?.name + "-total-votes"}>
-              {t("{{value}} votes", {
-                value: compactFormatter.format(Number(data.votes)),
-              })}
-            </Text>
-          </VStack>
         </HStack>
       </HStack>
-      <Box w="full" h={2} bg={baseProgressColor} borderRadius={"xl"}>
-        <Box w={`${votesPercentage}%`} h={2} bg={trackProgressColor} borderRadius={"xl"} />
-      </Box>
+      <VStack spacing={1} w="full">
+        <Box w="full" h={2} bg={baseProgressColor} borderRadius={"xl"} pos="relative">
+          <Box pos="absolute" w={`${votesPercentage}%`} h={2} bg={trackProgressColor} borderRadius={"xl"} />
+          <Box
+            pos="absolute"
+            left={`${maxAllocationPercentage}%`}
+            top={0}
+            h="full"
+            w="1px"
+            bg={showMaxAllocation ? baseProgressColor : trackProgressColor}
+            borderRadius={"xl"}
+          />
+        </Box>
+        {showMaxAllocation && (
+          <Text color={"#3DBA67"} fontSize={["12px", "14px"]} fontWeight={600} alignSelf={"flex-end"}>
+            {t("Max allocation reached!")}
+          </Text>
+        )}
+      </VStack>
     </VStack>
   )
 }
