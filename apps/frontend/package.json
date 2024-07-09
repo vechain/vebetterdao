@@ -14,7 +14,7 @@
     "test:watch": "vitest watch",
     "test:coverage:fe": "vitest run --coverage",
     "clean": "rm -rf .next node_modules dist",
-    "release": "release-it minor --no-npm"
+    "release": "release-it minor --changelog --ci"
   },
   "release-it": {
     "git": {
