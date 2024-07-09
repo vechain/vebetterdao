@@ -22,11 +22,16 @@ export const useUploadAppMetadata = () => {
         // Create a 'media' folder inside the zip
         const mediaFolder = zip.folder("media") as JSZip
 
-        // Convert base64 images to Blob and add to 'media' folder in the zip
-        const logoBlob = base64ToBlob(metadata.logo.split(",")[1] ?? "", "image/jpeg")
-        const bannerBlob = base64ToBlob(metadata.banner.split(",")[1] ?? "", "image/jpeg")
-        mediaFolder.file("logo.jpeg", logoBlob)
-        mediaFolder.file("banner.jpeg", bannerBlob)
+        // Convert base64 images to Blob and add to 'media' folder in the zip if they are defined
+        if (metadata.logo) {
+          const logoBlob = base64ToBlob(metadata.logo.split(",")[1] ?? "", "image/jpeg")
+          mediaFolder.file("logo.jpeg", logoBlob)
+        }
+
+        if (metadata.banner) {
+          const bannerBlob = base64ToBlob(metadata.banner.split(",")[1] ?? "", "image/jpeg")
+          mediaFolder.file("banner.jpeg", bannerBlob)
+        }
 
         for (let i = 0; i < metadata.screenshots.length; i++) {
           const screenshot = metadata.screenshots[i]
@@ -46,8 +51,8 @@ export const useUploadAppMetadata = () => {
         // Prepare metadata object with updated URLs pointing inside the 'media' folder
         const updatedMetadata = {
           ...metadata,
-          logo: `ipfs://${imagesCid}/media/logo.jpeg`,
-          banner: `ipfs://${imagesCid}/media/banner.jpeg`,
+          logo: metadata.logo ? `ipfs://${imagesCid}/media/logo.jpeg` : metadata.logo,
+          banner: metadata.banner ? `ipfs://${imagesCid}/media/banner.jpeg` : metadata.banner,
           screenshots: metadata.screenshots.map((_, index) => `ipfs://${imagesCid}/media/screenshot${index + 1}.jpeg`),
         }
 
@@ -60,8 +65,6 @@ export const useUploadAppMetadata = () => {
         const metadataUri = await uploadBlobToIPFS(metadataBlob, "metadata.json")
         return metadataUri
       }
-
-      setMetadataUploading(false)
     } catch (error) {
       console.error("Error uploading metadata", error)
       setMetadataUploadError(error as Error)
