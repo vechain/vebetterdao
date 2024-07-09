@@ -51,5 +51,8 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "publishConfig": {
+    "registry": "https://registry.yarnpkg.com"
+  }
 }
