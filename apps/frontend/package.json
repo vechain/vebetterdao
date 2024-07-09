@@ -21,6 +21,9 @@
       "requireCleanWorkingDir": false,
       "npm.publish": false,
       "npm": false
+    },
+    "publishConfig": {
+      "registry": "https://registry.yarnpkg.com"
     }
   },
   "dependencies": {
