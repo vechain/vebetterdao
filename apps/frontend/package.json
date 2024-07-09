@@ -13,7 +13,8 @@
     "test": "vitest run",
     "test:watch": "vitest watch",
     "test:coverage:fe": "vitest run --coverage",
-    "clean": "rm -rf .next node_modules dist"
+    "clean": "rm -rf .next node_modules dist",
+    "generate-translations": "npx ts-node ./src/scripts/generateTranslations.ts"
   },
   "dependencies": {
     "@chakra-ui/next-js": "^2.2.0",
@@ -44,6 +45,7 @@
     "mixpanel-browser": "^2.49.0",
     "next": "14.2.3",
     "next-remove-imports": "^1.0.12",
+    "openai": "^4.52.4",
     "react": "^18",
     "react-dom": "^18",
     "react-dropzone": "^14.2.3",

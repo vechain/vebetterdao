@@ -1,21 +1,31 @@
+import { languages } from "@/i18n"
+import { useLanguage } from "@/store/useLanguage"
 import { Box, Select } from "@chakra-ui/react"
 import { useCallback } from "react"
-import { useTranslation } from "react-i18next"
 
 export const LanguageSelector: React.FC = () => {
-  const { t, i18n } = useTranslation()
+  const { setLanguage, language } = useLanguage()
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       const locale = e.target.value
-      i18n.changeLanguage(locale)
+      setLanguage(locale)
     },
-    [i18n],
+    [setLanguage],
   )
   return (
     <Box>
-      <Select size="sm" variant="filled" defaultValue="en" onChange={handleChange}>
-        <option value="en">{t("🇬🇧")}</option>
-        <option value="it">{t("🇮🇹")}</option>
+      <Select
+        variant="filled"
+        defaultValue={language}
+        onChange={handleChange}
+        rounded={"16px"}
+        border={"1px solid #EEEEEE"}
+        bg={"rgba(255, 255, 255, 0.50)"}>
+        {languages.map(language => (
+          <option key={language.code} value={language.code}>
+            {language.flag} {language.name}
+          </option>
+        ))}
       </Select>
     </Box>
   )

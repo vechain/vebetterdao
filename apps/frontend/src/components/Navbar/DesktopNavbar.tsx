@@ -15,7 +15,8 @@ type Props = {
   routesToRender: Route[]
 }
 export const DesktopNavBar: React.FC<Props> = ({ routesToRender }) => {
-  const [isLargerThan1250] = useMediaQuery("(min-width: 1250px)")
+  const [isLargerThan2000] = useMediaQuery("(min-width: 2000px)")
+  const [isLargerThan1590] = useMediaQuery("(min-width: 1590px)")
   return (
     <>
       <HStack flex={1} justifyContent={"start"}>
@@ -38,8 +39,8 @@ export const DesktopNavBar: React.FC<Props> = ({ routesToRender }) => {
       )}
       <HStack flex={1} spacing={4} justifyContent={"end"}>
         {/* <ThemeSwitcher /> */}
-        {isLargerThan1250 && <NavbarBalance />}
-        <LanguageSelector />
+        {isLargerThan2000 && <NavbarBalance />}
+        {isLargerThan1590 && <LanguageSelector />}
         <ConnectWalletButton />
       </HStack>
     </>
