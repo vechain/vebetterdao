@@ -26,9 +26,7 @@
     "//#solo-up": {
       "cache": false
     },
-    "release": {
-      "cache": false
-    },
+    "release": {},
     "dev": {
       "cache": false,
       "dependsOn": ["^setup-contracts"]
