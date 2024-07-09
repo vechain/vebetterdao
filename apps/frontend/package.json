@@ -21,10 +21,10 @@
       "requireCleanWorkingDir": false,
       "npm.publish": false,
       "npm": false
-    },
-    "publishConfig": {
-      "registry": "https://registry.yarnpkg.com"
     }
+  },
+  "publishConfig": {
+    "registry": "https://registry.yarnpkg.com"
   },
   "dependencies": {
     "@chakra-ui/next-js": "^2.2.0",
