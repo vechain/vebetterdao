@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation"
 import { Trans, useTranslation } from "react-i18next"
 import { CastVoteData, useCastAllocationFormStore } from "@/store"
 import { SearchAndSelectApps } from "./components/SearchAndSelectApps"
+import { ResponsiveCard } from "@/components"
 
 type Props = {
   roundId: string
@@ -75,54 +76,52 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
   if (!shouldSeeThePage) return null
 
   return (
-    <Card w="full" variant="baseWithBorder">
-      <CardBody>
-        <VStack w="full" spacing={8} align={"flex-start"}>
-          <Heading fontSize={"36px"} fontWeight={700}>
-            {t("Select the apps you want to vote")}
-          </Heading>
-          <Text fontSize={"16px"} fontWeight={400} color="#6A6A6A">
-            {t(
-              "The apps you vote will receive a B3TR allocation to distribute among its users as rewards for completing sustainable actions. Select your favorite apps to add them to your vote.",
-            )}
-          </Text>
+    <ResponsiveCard>
+      <VStack w="full" spacing={8} align={"flex-start"}>
+        <Heading fontSize={["24px", "24px", "36px"]} fontWeight={700}>
+          {t("Select the apps you want to vote")}
+        </Heading>
+        <Text fontSize={"16px"} fontWeight={400} color="#6A6A6A">
+          {t(
+            "The apps you vote will receive a B3TR allocation to distribute among its users as rewards for completing sustainable actions. Select your favorite apps to add them to your vote.",
+          )}
+        </Text>
 
-          <SearchAndSelectApps
-            selectedApps={selectedApps}
-            onSelectedAppsChange={handleOnSelectedAppsChange}
-            xAppsQuery={xAppsQuery}
-          />
+        <SearchAndSelectApps
+          selectedApps={selectedApps}
+          onSelectedAppsChange={handleOnSelectedAppsChange}
+          xAppsQuery={xAppsQuery}
+        />
 
-          <Stack
-            direction={["column", "column", "row"]}
-            w="full"
+        <Stack
+          direction={["column", "column", "row"]}
+          w="full"
+          spacing={4}
+          justify={"space-between"}
+          align={["center", "center", "flex-start"]}>
+          {onContinueError ? (
+            <Text fontSize={"16px"} fontWeight={600} color="#C84968">
+              {onContinueError}
+            </Text>
+          ) : (
+            <Text fontSize={"16px"} fontWeight={400} color="#252525">
+              <Trans i18nKey={"{{amount}} selected apps"} values={{ amount: selectedApps?.length ?? 0 }} t={t} />
+            </Text>
+          )}
+          <HStack
+            alignSelf={"flex-end"}
+            justify={["space-between", "space-between", "flex-end"]}
             spacing={4}
-            justify={"space-between"}
-            align={["center", "center", "flex-start"]}>
-            {onContinueError ? (
-              <Text fontSize={"16px"} fontWeight={600} color="#C84968">
-                {onContinueError}
-              </Text>
-            ) : (
-              <Text fontSize={"16px"} fontWeight={400} color="#252525">
-                <Trans i18nKey={"{{amount}} selected apps"} values={{ amount: selectedApps?.length ?? 0 }} t={t} />
-              </Text>
-            )}
-            <HStack
-              alignSelf={"flex-end"}
-              justify={["space-between", "space-between", "flex-end"]}
-              spacing={4}
-              w={["full", "full", "auto"]}>
-              <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
-                {t("Go back")}
-              </Button>
-              <Button data-testid="continue" variant="primaryAction" onClick={onContinue}>
-                {t("Continue")}
-              </Button>
-            </HStack>
-          </Stack>
-        </VStack>
-      </CardBody>
-    </Card>
+            w={["full", "full", "auto"]}>
+            <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
+              {t("Go back")}
+            </Button>
+            <Button data-testid="continue" variant="primaryAction" onClick={onContinue}>
+              {t("Continue")}
+            </Button>
+          </HStack>
+        </Stack>
+      </VStack>
+    </ResponsiveCard>
   )
 }
