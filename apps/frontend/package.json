@@ -14,17 +14,9 @@
     "test:watch": "vitest watch",
     "test:coverage:fe": "vitest run --coverage",
     "clean": "rm -rf .next node_modules dist",
-    "release": "release-it minor --ci"
+    "release": "release-it minor --no --ci"
   },
-  "release-it": {
-    "git": {
-      "requireCleanWorkingDir": false
-    },
-    "npm": {
-      "publish": false
-    },
-    "non-interactive": true
-  },
+  "release-it": {},
   "dependencies": {
     "@chakra-ui/next-js": "^2.2.0",
     "@chakra-ui/react": "^2.8.2",
