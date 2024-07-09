@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -13,7 +13,8 @@
     "test": "vitest run",
     "test:watch": "vitest watch",
     "test:coverage:fe": "vitest run --coverage",
-    "clean": "rm -rf .next node_modules dist"
+    "clean": "rm -rf .next node_modules dist",
+    "release": "release-it"
   },
   "dependencies": {
     "@chakra-ui/next-js": "^2.2.0",
@@ -56,6 +57,7 @@
     "react-tweet": "^3.2.1",
     "recharts": "^2.12.3",
     "rehype-sanitize": "^6.0.0",
+    "release-it": "^17.5.0",
     "thor-devkit": "^2.0.9",
     "uuid": "^9.0.1",
     "zustand": "^4.5.2"
