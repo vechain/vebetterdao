@@ -18,7 +18,9 @@
   },
   "release-it": {
     "git": {
-      "requireCleanWorkingDir": false
+      "requireCleanWorkingDir": false,
+      "npm.publish": false,
+      "npm": false
     }
   },
   "dependencies": {
