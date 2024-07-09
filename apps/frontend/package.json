@@ -14,17 +14,15 @@
     "test:watch": "vitest watch",
     "test:coverage:fe": "vitest run --coverage",
     "clean": "rm -rf .next node_modules dist",
-    "release": "release-it minor"
+    "release": "release-it minor --no-npm"
   },
   "release-it": {
     "git": {
-      "requireCleanWorkingDir": false,
-      "npm.publish": false,
-      "npm": false
+      "requireCleanWorkingDir": false
+    },
+    "npm": {
+      "publish": false
     }
-  },
-  "publishConfig": {
-    "registry": "https://registry.yarnpkg.com"
   },
   "dependencies": {
     "@chakra-ui/next-js": "^2.2.0",
