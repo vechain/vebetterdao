@@ -1,5 +1,5 @@
 import { useXAppMetadata } from "@/api"
-import { Control, Controller, FieldArrayWithId, FieldErrors, UseFormGetValues } from "react-hook-form"
+import { Control, Controller, FieldErrors, UseFormGetValues } from "react-hook-form"
 import {
   Box,
   FormControl,
@@ -39,7 +39,6 @@ type Props = {
   getValues: UseFormGetValues<CastAllocationVoteFormData>
   index: number
   appId: string
-  field: FieldArrayWithId<CastAllocationVoteFormData, "votes", "id">
   errors: FieldErrors<CastAllocationVoteFormData>
   isDisabled?: boolean
   totalVotesAvailable?: string
@@ -50,7 +49,6 @@ export const SelectAppVotesInput = ({
   getValues,
   index,
   appId,
-  field,
   errors,
   isDisabled = false,
   totalVotesAvailable,

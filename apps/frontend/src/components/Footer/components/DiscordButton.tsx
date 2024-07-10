@@ -1,5 +1,6 @@
 import { DISCORD_URL } from "@/constants"
 import { Button, Link, Text } from "@chakra-ui/react"
+import { useTranslation } from "react-i18next"
 import { FaDiscord } from "react-icons/fa6"
 
 type Props = {
@@ -7,6 +8,7 @@ type Props = {
 }
 
 export const DiscordButton: React.FC<Props> = ({ isFullWidth }) => {
+  const { t } = useTranslation()
   return (
     <Link href={DISCORD_URL} isExternal w={isFullWidth ? "full" : undefined}>
       <Button
@@ -17,7 +19,7 @@ export const DiscordButton: React.FC<Props> = ({ isFullWidth }) => {
         borderRadius={22}
         w={isFullWidth ? "full" : undefined}>
         <Text fontWeight={500} fontSize="16px" lineHeight="19px">
-          Join Discord Community
+          {t("Join Discord Community")}
         </Text>
       </Button>
     </Link>

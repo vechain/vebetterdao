@@ -10,6 +10,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { TransactionStatus } from "@/hooks"
+import { useTranslation } from "react-i18next"
 
 type Props = {
   description: ReactNode
@@ -28,6 +29,7 @@ export const ConfirmTransactionModalContent: React.FC<Props> = ({
   onSuccess,
   onSuccessTimeout = 1500,
 }) => {
+  const { t } = useTranslation()
   const statusComponent = useMemo(() => {
     switch (status) {
       case "pending":
@@ -43,9 +45,9 @@ export const ConfirmTransactionModalContent: React.FC<Props> = ({
             height="150px">
             <AlertIcon boxSize="40px" mr={0} />
             <AlertTitle mt={4} mb={1} fontSize="lg">
-              Waiting for confirmation
+              {t("Waiting for confirmation")}
             </AlertTitle>
-            <AlertDescription maxWidth="sm">Please confirm the transaction in your wallet.</AlertDescription>
+            <AlertDescription maxWidth="sm">{t("Please confirm the transaction in your wallet.")}</AlertDescription>
           </Alert>
         )
       case "waitingConfirmation":
@@ -61,10 +63,10 @@ export const ConfirmTransactionModalContent: React.FC<Props> = ({
             height="150px">
             <AlertIcon boxSize="40px" mr={0} />
             <AlertTitle mt={4} mb={1} fontSize="lg">
-              Waiting for confirmation
+              {t("Waiting for confirmation")}
             </AlertTitle>
             <AlertDescription maxWidth="sm">
-              We are waiting for your transaction to be confirmed. This may take a few seconds.
+              {t("We are waiting for your transaction to be confirmed. This may take a few seconds.")}
             </AlertDescription>
           </Alert>
         )
@@ -81,10 +83,10 @@ export const ConfirmTransactionModalContent: React.FC<Props> = ({
             height="150px">
             <AlertIcon boxSize="40px" mr={0} />
             <AlertTitle mt={4} mb={1} fontSize="lg">
-              Transaction successful!
+              {t("Transaction successful!")}
             </AlertTitle>
             <AlertDescription maxWidth="sm">
-              The transaction has been confirmed. This window will close in a few seconds.
+              {t("The transaction has been confirmed. This window will close in a few seconds.")}
             </AlertDescription>
           </Alert>
         )
@@ -102,7 +104,7 @@ export const ConfirmTransactionModalContent: React.FC<Props> = ({
               height="150px">
               <AlertIcon boxSize="40px" mr={0} />
               <AlertTitle mt={4} mb={1} fontSize="lg">
-                Something went wrong!
+                {t("Something went wrong!")}
               </AlertTitle>
               <AlertDescription maxWidth="sm">
                 {error ?? "There was an error with your transaction. Please try again."}
@@ -110,13 +112,13 @@ export const ConfirmTransactionModalContent: React.FC<Props> = ({
             </Alert>
             {onTryAgain && (
               <Button onClick={onTryAgain} variant="link">
-                Try again
+                {t("Try again")}
               </Button>
             )}
           </>
         )
     }
-  }, [status, error, onTryAgain])
+  }, [status, t, error, onTryAgain])
 
   //close modal after 3 seconds
   useEffect(() => {

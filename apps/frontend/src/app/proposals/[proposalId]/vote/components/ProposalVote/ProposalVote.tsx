@@ -133,7 +133,7 @@ export const ProposalVote = () => {
                 <Divider />
               </HStack>
               <HStack alignItems={"baseline"}>
-                <VoteIcon size={36} color="#004CFC" />
+                <VoteIcon boxSize={36} color="#004CFC" />
                 <Text fontSize={"48px"} fontWeight={700} color="#004CFC">
                   {compactFormatter.format(Number(proposal.userVotingPowerOnSnapshot || 0))}
                 </Text>

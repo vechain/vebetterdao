@@ -1,5 +1,6 @@
 import { TELEGRAM_URL } from "@/constants"
 import { Button, Link, Text } from "@chakra-ui/react"
+import { useTranslation } from "react-i18next"
 import { FaTelegram } from "react-icons/fa6"
 
 type Props = {
@@ -7,6 +8,7 @@ type Props = {
 }
 
 export const TelegramButton: React.FC<Props> = ({ isFullWidth }) => {
+  const { t } = useTranslation()
   return (
     <Link href={TELEGRAM_URL} isExternal w={isFullWidth ? "full" : undefined}>
       <Button
@@ -17,7 +19,7 @@ export const TelegramButton: React.FC<Props> = ({ isFullWidth }) => {
         borderRadius={22}
         w={isFullWidth ? "full" : undefined}>
         <Text fontWeight={500} fontSize="16px" lineHeight="19px">
-          Join Telegram
+          {t("Join Telegram")}
         </Text>
       </Button>
     </Link>

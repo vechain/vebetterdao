@@ -1,4 +1,3 @@
-import { pulseKeyFrames } from "@/app/theme"
 import { Box } from "@chakra-ui/react"
 
 type Props = {

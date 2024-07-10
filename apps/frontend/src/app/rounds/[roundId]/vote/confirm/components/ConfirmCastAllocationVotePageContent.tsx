@@ -178,7 +178,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
                 color="#F29B32"
                 textAlign={["center", "center", "left"]}
                 flex={1}>
-                <Trans i18nKey={"Once your vote has been casted, you will not be able to revert it."} t={t} />
+                <Trans i18nKey={"Once your vote has been cast, you will not be able to revert it."} t={t} />
               </Text>
               <HStack
                 alignSelf={"flex-end"}
