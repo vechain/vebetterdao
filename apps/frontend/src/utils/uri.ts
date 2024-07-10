@@ -1,3 +1,4 @@
+import axios from "axios"
 import { validateIpfsUri } from "./ipfs"
 
 /**
@@ -7,7 +8,7 @@ import { validateIpfsUri } from "./ipfs"
  *
  * @param uri
  */
-export const convertUriToUrl = (uri: string) => {
+export const convertUriToUrl = (uri: string, newIPFS: boolean = false) => {
   // if it is a data uri just return it
   if (uri.startsWith("data:")) return uri
   const splitUri = uri?.split("://")
@@ -18,10 +19,10 @@ export const convertUriToUrl = (uri: string) => {
   switch (protocol) {
     case "ipfs":
       if (!validateIpfsUri(uri)) throw new Error(`Invalid IPFS URI ${uri}`)
-
       // Check cache for IPFS document
-
-      return `https://api.gateway-proxy.vechain.org/ipfs/${uriWithoutProtocol}`
+      // TODO: Remove if else statement when IPFS service has migrated to new query request. 
+      if (newIPFS) return `https://api.gateway-proxy.vechain.org/ipfs?path=${uriWithoutProtocol}`
+      else return `https://api.gateway-proxy.vechain.org/ipfs/${uriWithoutProtocol}`
     case "ar":
       return `https://arweave.net/${uriWithoutProtocol}`
     default:
