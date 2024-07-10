@@ -1,36 +1,35 @@
 import { writeFileSync } from "fs"
 import en from "../i18n/languages/en.json"
-import { OpenAIHelper } from "./OpenAiUtils"
-import OpenAI from "openai"
+import { OpenAIHelper } from "../utils/OpenAiUtils"
 import { forEach } from "lodash"
 import { languages } from "../i18n"
 
 const languagesToGenerate = languages.filter(language => language.code !== "en")
 
 const askChatGpt = async (prompt: string) => {
-  const openaiHelper = new OpenAIHelper(
-    new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY as string,
-      dangerouslyAllowBrowser: true,
-    }),
-  )
-  const response = await openaiHelper.askChatGPT({
+  const openaiHelper = new OpenAIHelper({
+    apiKey: process.env.OPENAI_API_KEY as string,
+    dangerouslyAllowBrowser: true,
+  })
+  const { data } = await openaiHelper.askChatGPT({
     prompt,
   })
-  const jsonString = openaiHelper.getResponseJSONString(response)
-  return openaiHelper.parseChatGPTJSONString<{ [key: string]: string }>(jsonString)
+  return data
 }
 
 interface KeyValueObject {
   [key: string]: string
 }
 
-const splitObjectIntoBatches = (data: KeyValueObject, batchSize: number = 20): KeyValueObject[] => {
+// we need to split the object into batches because the OpenAI API has a limit per request
+const BATCH_SIZE = 15
+
+const splitObjectIntoBatches = (data: KeyValueObject): KeyValueObject[] => {
   const entries = Object.entries(data)
   const batches: KeyValueObject[] = []
 
-  for (let i = 0; i < entries.length; i += batchSize) {
-    const batchEntries = entries.slice(i, i + batchSize)
+  for (let i = 0; i < entries.length; i += BATCH_SIZE) {
+    const batchEntries = entries.slice(i, i + BATCH_SIZE)
     const batchObject: KeyValueObject = Object.fromEntries(batchEntries)
     batches.push(batchObject)
   }
@@ -55,7 +54,8 @@ const generateTranslations = async () => {
     console.log(`Generating translations for ${language.name}`)
     const batches = splitObjectIntoBatches(en)
     const translations: KeyValueObject = {}
-    const promises = batches.map(async batch => {
+    const promises = batches.map(async (batch, index) => {
+      console.log(`Generating translations for batch ${index + 1} for language "${language.name}"`)
       return askChatGpt(generatePrompt(language.name, batch))
     })
     const results = await Promise.all(promises)
