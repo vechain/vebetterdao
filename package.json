@@ -17,6 +17,7 @@
     "dev:mainnet": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -e .env -- turbo dev:mainnet --",
     "dev:e2e": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=e2e -- turbo dev --",
     "lint": "turbo lint",
+    "frontend:lint": "turbo run lint --filter=frontend",
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "contracts:compile": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run compile --filter=contracts",
@@ -35,12 +36,15 @@
     "contracts:generate-docs": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run generate-docs --filter=contracts",
     "solo-up": "make solo-up",
     "playwright:e2e": "dotenv -v NEXT_PUBLIC_APP_ENV=e2e -- turbo run playwright:e2e",
-    "generate-translations": "dotenv -e .env -- turbo generate-translations"
+    "generate-translations": "dotenv -e .env -- turbo generate-translations",
+    "prepare": "husky install"
   },
   "devDependencies": {
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
     "dotenv-cli": "latest",
+    "husky": "^8.0.0",
+    "lint-staged": "^15.2.7",
     "prettier": "^3.3.0",
     "turbo": "^1.13.3"
   },

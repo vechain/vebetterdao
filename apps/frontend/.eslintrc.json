@@ -3,13 +3,13 @@
   "parser": "@typescript-eslint/parser",
   "plugins": ["@typescript-eslint"],
   "rules": {
+    "react/display-name": "off",
+    "import/no-anonymous-default-export": "off",
     "react/no-children-prop": "warn",
     "react/no-unescaped-entities": "warn",
-    "react/display-name": "off",
-    "react/jsx-no-literals": "warn",
-    "import/no-anonymous-default-export": "off",
+    "react/jsx-no-literals": "error",
     "@typescript-eslint/no-unused-vars": [
-      "warn",
+      "error",
       {
         "args": "all",
         "argsIgnorePattern": "^_",
