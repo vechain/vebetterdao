@@ -3,6 +3,7 @@
 import { useScript } from "@/hooks/useScript"
 
 import React from "react"
+import "./FreshDeskWidget.css"
 
 const runBeforeInit = (widgetId: number | string) => () => {
   window.fwSettings = {
