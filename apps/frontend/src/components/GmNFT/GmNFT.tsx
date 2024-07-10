@@ -27,6 +27,7 @@ import { motion } from "framer-motion"
 import { RiArrowRightSLine } from "react-icons/ri"
 import { coinFlipAnimation, pulseAnimation } from "@/constants"
 import { NFTWithRings } from "./components"
+import { CustomModalContent } from "../CustomModalContent"
 import { useTranslation } from "react-i18next"
 
 // Convert Button to a motion component
@@ -68,23 +69,19 @@ export const GmNFT = () => {
   const modalContent = useMemo(() => {
     if (showLoader)
       return (
-        <ModalContent rounded="2xl" w="auto">
-          <ModalBody py={6} px={12}>
-            <VStack alignItems={"center"}>
-              <MotionImage {...coinFlipAnimation} src="/images/gm-nft-placeholder.png" maxW="250px" />
-              {isClaimLoading /* isClaimLoading */ && (
-                <Text fontWeight={400} lineHeight="22px" fontSize={{ base: "16px", md: "16px" }} align={"center"}>
-                  {t("Please confirm the transaction in your wallet")}
-                </Text>
-              )}
-              {(isLoadingNFT || isTxReceiptLoading) && (
-                <Text fontWeight={400} lineHeight="22px" fontSize={{ base: "16px", md: "16px" }}>
-                  {t("Almost there...")}
-                </Text>
-              )}
-            </VStack>{" "}
-          </ModalBody>
-        </ModalContent>
+        <VStack alignItems={"center"} py={6} px={12}>
+          <MotionImage {...coinFlipAnimation} src="/images/gm-nft-placeholder.png" maxW="250px" />
+          {isClaimLoading /* isClaimLoading */ && (
+            <Text fontWeight={400} lineHeight="22px" fontSize={{ base: "16px", md: "16px" }} align={"center"}>
+              {t("Please confirm the transaction in your wallet")}
+            </Text>
+          )}
+          {(isLoadingNFT || isTxReceiptLoading) && (
+            <Text fontWeight={400} lineHeight="22px" fontSize={{ base: "16px", md: "16px" }}>
+              {t("Almost there...")}
+            </Text>
+          )}
+        </VStack>
       )
 
     return (
@@ -236,9 +233,13 @@ export const GmNFT = () => {
         </Card>
       )}
 
-      <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
+      <Modal isOpen={isOpen} onClose={onClose} trapFocus={false} isCentered={true}>
         <ModalOverlay />
-        {modalContent}
+        <CustomModalContent w={"auto"} maxW={"container.md"}>
+          <Card rounded={20}>
+            <CardBody>{modalContent}</CardBody>
+          </Card>
+        </CustomModalContent>
       </Modal>
     </>
   )

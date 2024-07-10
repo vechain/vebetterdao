@@ -28,7 +28,7 @@ export const CastProposalVoteButton = () => {
 
   if (proposal.state === ProposalState.Active && !proposal.hasUserVoted) {
     return (
-      <Button leftIcon={<VoteIcon />} onClick={handleClick} variant="primaryAction">
+      <Button leftIcon={<VoteIcon boxSize={"16px"} color="white" />} onClick={handleClick} variant="primaryAction">
         {t("Cast your vote")}
       </Button>
     )
