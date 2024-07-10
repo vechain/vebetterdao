@@ -18,9 +18,12 @@ export const LanguageSelector: React.FC = () => {
         variant="filled"
         defaultValue={language}
         onChange={handleChange}
-        rounded={"16px"}
+        rounded={"full"}
         border={"1px solid #EEEEEE"}
-        bg={"rgba(255, 255, 255, 0.50)"}>
+        bg={"#FFFFFF"}
+        _focusVisible={{
+          bg: "#FFFFFF",
+        }}>
         {languages.map(language => (
           <option key={language.code} value={language.code}>
             {language.flag} {language.name}

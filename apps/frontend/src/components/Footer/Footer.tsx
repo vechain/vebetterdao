@@ -7,6 +7,7 @@ import { FreshDeskButton } from "./components/FreshDeskButton"
 import { Socials } from "./components/Socials"
 import { PRIVACY_POLICY_LINK, TERMS_AND_CONDITIONS_LINK } from "@/constants"
 import { useTranslation } from "react-i18next"
+import { LanguageSelector } from "./components/LanguageSelector"
 
 export const Footer: React.FC = () => {
   const { t } = useTranslation()
@@ -27,6 +28,7 @@ export const Footer: React.FC = () => {
           <DiscordButton />
           <TelegramButton />
           <FreshDeskButton />
+          <LanguageSelector />
         </VStack>
       </HStack>
       <HStack justifyContent={"space-between"} w="full" borderTopColor={"#3e3c3a"} borderTopWidth={1} py={8}>
@@ -67,6 +69,7 @@ export const Footer: React.FC = () => {
           <DiscordButton />
           <TelegramButton />
           <FreshDeskButton />
+          <LanguageSelector />
           <Box mt={6}>
             <Socials />
           </Box>

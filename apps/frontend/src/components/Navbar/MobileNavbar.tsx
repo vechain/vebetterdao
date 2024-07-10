@@ -19,7 +19,6 @@ import { NavbarMenu } from "./NavbarMenu"
 import { NavbarLogo } from "./NavbarLogo"
 import { Route } from "./Routes"
 import { NavbarBalance } from "./NavbarBalance"
-import { LanguageSelector } from "./LanguageSelector"
 
 const ConnectWalletButton = dynamic(
   () => import("@/components/ConnectWalletButton").then(mod => mod.ConnectWalletButton),
@@ -53,15 +52,11 @@ export const MobileNavBar: React.FC<Props> = ({ routesToRender }) => {
   const { isOpen: isMenuOpen, onClose: closeMenu, onOpen: openMenu } = useDisclosure()
 
   const [isLargerThan500] = useMediaQuery("(min-width: 500px)")
-  const [isLargerThan600] = useMediaQuery("(min-width: 600px)")
 
   return (
     <>
       <NavbarLogo />
-      <HStack>
-        {isLargerThan500 && <NavbarBalance />}
-        {isLargerThan600 && <LanguageSelector />}
-      </HStack>
+      <HStack>{isLargerThan500 && <NavbarBalance />}</HStack>
       <HStack gap={2}>
         <ConnectWalletButton />
         {!!routesToRender.length && (

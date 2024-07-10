@@ -4,7 +4,6 @@ import { NavbarMenu } from "./NavbarMenu"
 import dynamic from "next/dynamic"
 import { Route } from "./Routes"
 import { NavbarBalance } from "./NavbarBalance"
-import { LanguageSelector } from "./LanguageSelector"
 
 const ConnectWalletButton = dynamic(
   () => import("@/components/ConnectWalletButton").then(mod => mod.ConnectWalletButton),
@@ -15,8 +14,7 @@ type Props = {
   routesToRender: Route[]
 }
 export const DesktopNavBar: React.FC<Props> = ({ routesToRender }) => {
-  const [isLargerThan2000] = useMediaQuery("(min-width: 2000px)")
-  const [isLargerThan1590] = useMediaQuery("(min-width: 1590px)")
+  const [isLargerThan1800] = useMediaQuery("(min-width: 2000px)")
   return (
     <>
       <HStack flex={1} justifyContent={"start"}>
@@ -39,8 +37,7 @@ export const DesktopNavBar: React.FC<Props> = ({ routesToRender }) => {
       )}
       <HStack flex={1} spacing={4} justifyContent={"end"}>
         {/* <ThemeSwitcher /> */}
-        {isLargerThan2000 && <NavbarBalance />}
-        {isLargerThan1590 && <LanguageSelector />}
+        {isLargerThan1800 && <NavbarBalance />}
         <ConnectWalletButton />
       </HStack>
     </>
