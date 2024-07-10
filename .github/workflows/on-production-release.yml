@@ -46,9 +46,10 @@ jobs:
           else
             echo "::set-output name=tag::no-tag"
           fi
-        
+
       - name: Log Tag Version
-        run: echo "Tag version: ${{ steps.git-tag.outputs.tag }}"
+        run: |
+          echo "Tag version: ${{ steps.git-tag.outputs.tag }}"
 
       - name: Ensure the manifest version matches the tag version
         if: ${{ steps.package-version.outputs.prop != github.ref_name }}
