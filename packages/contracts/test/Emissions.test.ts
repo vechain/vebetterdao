@@ -208,11 +208,10 @@ describe("Emissions", () => {
 
     it("Should revert if Treasury is set to zero address in initilisation", async () => {
       const config = createLocalConfig()
-      const { owner, b3tr, minterAccount, xAllocationPool, voterRewards, treasury } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-          config,
-        })
+      const { owner, b3tr, minterAccount, xAllocationPool, voterRewards } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
 
       await expect(
         deployProxy("Emissions", [
