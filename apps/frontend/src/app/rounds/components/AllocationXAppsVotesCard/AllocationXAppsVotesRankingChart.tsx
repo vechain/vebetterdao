@@ -1,4 +1,11 @@
-import { useAllocationVotes, useMaxAllocationAmount, useRoundXApps, useXAppsVotes } from "@/api"
+import {
+  useAllocationAmount,
+  useAllocationBaseAmount,
+  useAllocationVotesQf,
+  useMaxAllocationAmount,
+  useRoundXApps,
+  useXAppsVotesQf,
+} from "@/api"
 import { Spinner, VStack } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { AppVotesHorizontalChart } from "./AppVotesHorizontalChart"
@@ -11,10 +18,20 @@ export const AllocationXAppsVotesRankingChart = ({ roundId }: Props) => {
   const { data: xApps, isLoading: xAppsLoading } = useRoundXApps(roundId)
 
   const { data: maxAllocation } = useMaxAllocationAmount(roundId)
+  const { data: allocationAmount } = useAllocationAmount(roundId)
+  const { data: baseAmount, isLoading: baseAmountLoading } = useAllocationBaseAmount(roundId)
 
-  const xAppsVotes = useXAppsVotes(xApps?.map(app => app.id) ?? [], roundId)
+  const xAppsVotes = useXAppsVotesQf(xApps?.map(app => app.id) ?? [], roundId)
 
-  const { data: votes } = useAllocationVotes(roundId)
+  const { data: votes } = useAllocationVotesQf(roundId)
+
+  const maxAllocationPercentage = useMemo(() => {
+    const maxAmountWithVotes = Number(maxAllocation) - Number(baseAmount)
+    const totalVotesAllocation = Number(allocationAmount?.voteXAllocations) - Number(baseAmount) * (xApps?.length ?? 0)
+    const maxAllocationPercentage = (maxAmountWithVotes / totalVotesAllocation) * 100
+
+    return maxAllocationPercentage
+  }, [maxAllocation, baseAmount, allocationAmount, xApps])
 
   const sortedData = useMemo(
     () =>
@@ -43,6 +60,7 @@ export const AllocationXAppsVotesRankingChart = ({ roundId }: Props) => {
           roundId={roundId}
           showReceived={true}
           maxAllocation={maxAllocation}
+          maxAllocationPercentage={maxAllocationPercentage}
           renderMaxAllocation={true}
         />
       ))}

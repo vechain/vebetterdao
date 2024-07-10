@@ -1,0 +1,4 @@
+/* Hide the default "Help" button */
+#launcher-frame {
+    display: none;
+  }

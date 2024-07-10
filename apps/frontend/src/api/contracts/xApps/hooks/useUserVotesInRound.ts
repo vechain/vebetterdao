@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
-import { abi } from "thor-devkit"
+import { abi, address } from "thor-devkit"
 import { getAllEvents } from "@/api/blockchain"
 import { getConfig } from "@repo/config"
 import { XAllocationVoting__factory } from "@repo/contracts"
@@ -20,8 +20,8 @@ export const getUserVotesInRound = async (
   thor: Connex.Thor,
   roundId?: string,
   address?: string,
-): Promise<AllocationVoteCastEvent | null> => {
-  if (!roundId || !address) throw new Error("roundId and address are required")
+): Promise<AllocationVoteCastEvent[]> => {
+  if (!roundId) throw new Error("roundId is required")
   const eventFragment = XAllocationVotingInterface.getEvent("AllocationVoteCast").format("json")
   const allocationVoteCast = new abi.Event(JSON.parse(eventFragment) as abi.Event.Definition)
 
@@ -68,10 +68,7 @@ export const getUserVotesInRound = async (
     }
   })
 
-  if (decodedAllocatedVoteEvents.length > 1) throw new Error("More than one event found")
-  if (decodedAllocatedVoteEvents.length === 0) throw new Error("No event found")
-
-  return decodedAllocatedVoteEvents[0] ?? null
+  return decodedAllocatedVoteEvents
 }
 
 export const getUserVotesInRoundQueryKey = (roundId?: string, address?: string) => [
@@ -82,15 +79,35 @@ export const getUserVotesInRoundQueryKey = (roundId?: string, address?: string) 
 ]
 
 /**
- *  Hook to get the allocation rounds events from the xAllocationVoting contract (i.e the proposals created)
- * @returns  the allocation rounds events (i.e the proposals created)
+ *  Hook to get the user votes in a given round from the xAllocationVoting contract
+ * @returns the user votes in a given round from the xAllocationVoting contract
  */
 export const useUserVotesInRound = (roundId?: string, address?: string) => {
   const { thor } = useConnex()
 
   return useQuery({
     queryKey: getUserVotesInRoundQueryKey(roundId, address),
-    queryFn: async () => await getUserVotesInRound(thor, roundId, address),
+    queryFn: async () => {
+      const votes = await getUserVotesInRound(thor, roundId, address)
+      if (votes.length > 1) throw new Error("More than one event found")
+      if (votes.length === 0) throw new Error("No event found")
+      return votes[0]
+    },
+    enabled: !!thor && !!thor.status.head.number && !!roundId && !!address,
+  })
+}
+
+/**
+ *  Hook to get the allocation rounds events from the xAllocationVoting contract (i.e the proposals created)
+ * @returns  the allocation rounds events (i.e the proposals created)
+ */
+export const useVotesInRound = (roundId?: string) => {
+  const { thor } = useConnex()
+
+  return useQuery({
+    queryKey: getUserVotesInRoundQueryKey(roundId),
+    queryFn: async () => await getUserVotesInRound(thor, roundId),
+
     enabled: !!thor && !!thor.status.head.number && !!roundId && !!address,
   })
 }

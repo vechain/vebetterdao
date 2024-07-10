@@ -3,6 +3,7 @@ import { VStack, Text, Container, HStack, Box, Show, Link, Flex } from "@chakra-
 import { BeBetterVeBetterIcon } from "../Icons"
 import { DiscordButton } from "./components/DiscordButton"
 import { TelegramButton } from "./components/TelegramButton"
+import { FreshDeskButton } from "./components/FreshDeskButton"
 import { Socials } from "./components/Socials"
 import { PRIVACY_POLICY_LINK, TERMS_AND_CONDITIONS_LINK } from "@/constants"
 
@@ -23,6 +24,7 @@ export const Footer: React.FC = () => {
         <VStack spacing={4} alignItems={"flex-end"}>
           <DiscordButton />
           <TelegramButton />
+          <FreshDeskButton />
         </VStack>
       </HStack>
       <HStack justifyContent={"space-between"} w="full" borderTopColor={"#3e3c3a"} borderTopWidth={1} py={8}>
@@ -62,6 +64,7 @@ export const Footer: React.FC = () => {
         <VStack spacing={4} alignItems={"center"}>
           <DiscordButton />
           <TelegramButton />
+          <FreshDeskButton />
           <Box mt={6}>
             <Socials />
           </Box>

@@ -13,7 +13,7 @@ import {
   Spinner,
   VStack,
 } from "@chakra-ui/react"
-import { useAllocationsRound, useRoundXApps, useXAppsVotes } from "@/api"
+import { useAllocationsRound, useRoundXApps, useXAppsVotesQf } from "@/api"
 import { backdropBlurAnimation } from "@/app/theme"
 import { AllocationXAppsVotesRankingChart } from "./AllocationXAppsVotesRankingChart"
 import { useTranslation } from "react-i18next"
@@ -29,7 +29,7 @@ export const AllocationXAppsVotesCard = ({ roundId, maxRanks = 8 }: Props) => {
   const { t } = useTranslation()
   const { data: xApps, isLoading: xAppsLoading } = useRoundXApps(roundId)
 
-  const xAppsVotes = useXAppsVotes(xApps?.map(app => app.id) ?? [], roundId)
+  const xAppsVotes = useXAppsVotesQf(xApps?.map(app => app.id) ?? [], roundId)
 
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(roundId)
 
