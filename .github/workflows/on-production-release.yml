@@ -34,6 +34,19 @@ jobs:
           path: "apps/frontend/package.json"
           prop_path: "version"
 
+      - name: Log Version Information
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const core = require('@actions/core');
+            const packageVersion = '${{ steps.package-version.outputs.prop }}';
+            const tagVersion = '${{ github.ref_name }}';
+            core.info(`Package version: ${packageVersion}`);
+            core.info(`Tag version: ${tagVersion}`);
+            if (packageVersion !== tagVersion) {
+              core.setFailed('The version in the package must match the tag.');
+            }
+
       - name: Ensure the manifest version matches the tag version
         if: ${{ steps.package-version.outputs.prop != github.ref_name }}
         uses: actions/github-script@v6
