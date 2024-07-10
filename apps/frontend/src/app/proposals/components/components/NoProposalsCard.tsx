@@ -1,16 +1,24 @@
 import { Box, VStack, Image, Text, Button } from "@chakra-ui/react"
+import { useWallet, useWalletModal } from "@vechain/dapp-kit-react"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
 export const NoProposalsCard = () => {
   const router = useRouter()
+  const { account } = useWallet()
+  const { open } = useWalletModal()
 
   const { t } = useTranslation()
 
   const onNewClick = useCallback(() => {
+    if (!account) {
+      open()
+      return
+    }
+
     router.push("/proposals/new")
-  }, [router])
+  }, [account, open, router])
 
   return (
     <Box
