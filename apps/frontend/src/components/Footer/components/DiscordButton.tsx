@@ -2,15 +2,20 @@ import { DISCORD_URL } from "@/constants"
 import { Button, Link, Text } from "@chakra-ui/react"
 import { FaDiscord } from "react-icons/fa6"
 
-export const DiscordButton: React.FC = () => {
+type Props = {
+  isFullWidth?: boolean
+}
+
+export const DiscordButton: React.FC<Props> = ({ isFullWidth }) => {
   return (
-    <Link href={DISCORD_URL} isExternal>
+    <Link href={DISCORD_URL} isExternal w={isFullWidth ? "full" : undefined}>
       <Button
         leftIcon={<FaDiscord size={24} />}
         textColor={"white"}
         bgColor={`#5865f2`}
         _hover={{ bg: "#3f4b9c" }}
-        borderRadius={22}>
+        borderRadius={22}
+        w={isFullWidth ? "full" : undefined}>
         <Text fontWeight={500} fontSize="16px" lineHeight="19px">
           Join Discord Community
         </Text>
