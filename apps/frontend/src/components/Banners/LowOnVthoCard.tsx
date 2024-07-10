@@ -53,11 +53,11 @@ export const LowOnVthoCard: React.FC = () => {
           </GridItem>
           <GridItem colSpan={3}>
             <VStack spacing={4} w="full" justifyContent={"start"} alignItems={"start"}>
-              <Heading size="md" fontWeight={"800"}>
+              <Heading fontSize={"24px"} fontWeight={"700"}>
                 {labels?.heading}
               </Heading>
 
-              <Text size="sm">
+              <Text fontSize={"16px"} fontWeight={400}>
                 {labels?.body} <b>{t("Get more VTHO to get the best experience in the platform.")}</b>
               </Text>
 
