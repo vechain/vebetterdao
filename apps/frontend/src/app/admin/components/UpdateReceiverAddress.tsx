@@ -18,13 +18,14 @@ import {
 } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
 import { useCallback, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 export const UpdateReceiverAddress = () => {
   const [appId, setAppId] = useState<string | undefined>()
   const [newAddress, setNewAddress] = useState("")
   const [newAddressFieldIsDirty, setNewAddressFieldIsDirty] = useState(false)
   const { isOpen, onClose, onOpen } = useDisclosure()
-
+  const { t } = useTranslation()
   const { data: xApps } = useXApps()
 
   const {
@@ -75,7 +76,7 @@ export const UpdateReceiverAddress = () => {
     <>
       <Card w={"full"}>
         <CardHeader>
-          <Heading size="lg">Update Team Wallet Address</Heading>
+          <Heading size="lg">{t("Update Team Wallet Address")}</Heading>
         </CardHeader>
         <CardBody>
           <VStack spacing={8} alignItems={"start"} w="full">
@@ -132,7 +133,7 @@ export const UpdateReceiverAddress = () => {
                 </FormControl>
 
                 <Button isDisabled={!isFormValid} colorScheme="blue" type="submit" isLoading={isLoading}>
-                  Save
+                  {t("Save")}
                 </Button>
               </VStack>
             </form>

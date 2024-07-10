@@ -137,14 +137,12 @@ describe("NewProposalFunctionsDetails", async () => {
 
       await screen.findByTestId("proposal-actions-container")
       await screen.findByText("Executable functions")
-      const field = await screen.findByTestId(
-        `executable-card-${0}-${transferAction.contractAddress}-${transferAction.name}`,
-      )
+      await screen.findByTestId(`executable-card-${0}-${transferAction.contractAddress}-${transferAction.name}`)
       for (const [index, input] of transferAction.abiDefinition.inputs.entries()) {
         await fillGeneratedInput(index, input.type)
       }
       fireEvent.click(continueButton)
-      for (const [index, input] of transferAction.abiDefinition.inputs.entries()) {
+      for (const [index] of transferAction.abiDefinition.inputs.entries()) {
         await waitFor(() => {
           expect(screen.queryByTestId(`generated-function-to-call-${index}-error`)).not.toBeInTheDocument()
         })
@@ -178,9 +176,7 @@ describe("NewProposalFunctionsDetails", async () => {
 
     await screen.findByTestId("proposal-actions-container")
     await screen.findByText("Executable functions")
-    const field = await screen.findByTestId(
-      `executable-card-${0}-${transferAction.contractAddress}-${transferAction.name}`,
-    )
+    await screen.findByTestId(`executable-card-${0}-${transferAction.contractAddress}-${transferAction.name}`)
     expect(screen.queryByTestId(`generated-function-to-call-${0}-error`)).not.toBeInTheDocument()
     fireEvent.click(goBack)
     expect(mockBack).toHaveBeenCalled()
@@ -210,13 +206,11 @@ describe("NewProposalFunctionsDetails", async () => {
     await screen.findByText("What is your proposal about?")
     await screen.findByText("Basic information")
     const continueButton = await screen.findByTestId("continue")
-    const goBack = await screen.findByTestId("go-back")
+    await screen.findByTestId("go-back")
 
     await screen.findByTestId("proposal-actions-container")
     await screen.findByText("Executable functions")
-    const field = await screen.findByTestId(
-      `executable-card-${0}-${transferAction.contractAddress}-${transferAction.name}`,
-    )
+    await screen.findByTestId(`executable-card-${0}-${transferAction.contractAddress}-${transferAction.name}`)
     expect(
       screen.queryByTestId(`executable-card-${1}-${transferAction.contractAddress}-${transferAction.name}`),
     ).not.toBeInTheDocument()

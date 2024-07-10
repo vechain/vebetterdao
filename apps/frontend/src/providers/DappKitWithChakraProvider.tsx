@@ -1,4 +1,3 @@
-import { useToken } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { type WalletConnectOptions } from "@vechain/dapp-kit-react"
 import dynamic from "next/dynamic"
@@ -36,7 +35,6 @@ export const DappKitWithChakraProvider = ({ children }: { children: React.ReactN
   //     setSelectedTheme(isDark ? darkTheme : lightTheme)
   //   }, [isDark])
 
-  const [primary500] = useToken("colors", ["primary.500"])
   //   TODO: dark mode support
   return (
     <DAppKitProvider

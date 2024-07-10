@@ -28,15 +28,7 @@ const BouncingAnimation = ({ children }: { children: React.ReactNode }) => (
   </motion.div>
 )
 
-export const ShareButtons = ({
-  descriptionEncoded,
-  url = window.location.href,
-  facebookHashtag,
-}: {
-  descriptionEncoded: string
-  url?: string
-  facebookHashtag?: string
-}) => {
+export const ShareButtons = ({ descriptionEncoded }: { descriptionEncoded: string }) => {
   return (
     <HStack gap={4}>
       <BouncingAnimation>

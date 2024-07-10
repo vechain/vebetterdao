@@ -1,8 +1,10 @@
 import { DISCORD_URL } from "@/constants"
 import { Button, Link, Text } from "@chakra-ui/react"
+import { useTranslation } from "react-i18next"
 import { FaDiscord } from "react-icons/fa6"
 
 export const DiscordButton: React.FC = () => {
+  const { t } = useTranslation()
   return (
     <Link href={DISCORD_URL} isExternal>
       <Button
@@ -12,7 +14,7 @@ export const DiscordButton: React.FC = () => {
         _hover={{ bg: "#3f4b9c" }}
         borderRadius={22}>
         <Text fontWeight={500} fontSize="16px" lineHeight="19px">
-          Join Discord Community
+          {t("Join Discord Community")}
         </Text>
       </Button>
     </Link>

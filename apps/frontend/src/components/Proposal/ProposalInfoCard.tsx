@@ -62,7 +62,7 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposal }) => {
             </Text>
             <HStack flexDir={{ base: "column", md: "row" }} alignItems="end">
               <Text color="#979797" fontWeight="400">
-                {parseDate(votingStartDate)} - {parseDate(votingEndDate)}
+                {parseDate(votingStartDate)} {t("-")} {parseDate(votingEndDate)}
               </Text>
               <Text color="#979797" fontWeight="400"></Text>
             </HStack>
@@ -87,7 +87,7 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposal }) => {
               </Text>
               <HStack flexDir={{ base: "column", md: "row" }} alignItems="end">
                 <Text color="#979797" fontWeight="400">
-                  {parseDate(votingStartDate)} - {parseDate(votingEndDate)}
+                  {parseDate(votingStartDate)} {t("-")} {parseDate(votingEndDate)}
                 </Text>
                 <Text color="#979797" fontWeight="400"></Text>
               </HStack>
