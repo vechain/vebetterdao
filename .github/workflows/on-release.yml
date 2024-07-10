@@ -26,17 +26,6 @@ jobs:
           path: "apps/frontend/package.json"
           prop_path: "version"
 
-      - name: Echo the version in package.json
-        run: echo ${{steps.package-version.outputs.prop}}
-
-      - name: Get Git Tag
-        id: git-tag
-        run: echo "::set-output name=tag::$(git describe --tags 2>/dev/null || echo 'no-tag')"
-
-      - name: Log Tag Version
-        run: |
-          echo "Tag version: ${{ steps.git-tag.outputs.tag }}"
-
       - name: Ensure the package.json version matches the tag version
         if: ${{ steps.package-version.outputs.prop != github.ref_name }}
         uses: actions/github-script@v6
