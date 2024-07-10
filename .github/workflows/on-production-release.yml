@@ -39,7 +39,7 @@ jobs:
 
       - name: Get Git Tag
         id: git-tag
-        run: echo "::set-output name=tag::$(git describe --tags --exact-match 2>/dev/null || echo 'no-tag')"
+        run: echo "::set-output name=tag::$(git describe --tags 2>/dev/null || echo 'no-tag')"
 
       - name: Log Tag Version
         run: |
