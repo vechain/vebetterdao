@@ -34,8 +34,12 @@ jobs:
           path: "apps/frontend/package.json"
           prop_path: "version"
 
-      - run: echo ${{steps.package-version.outputs.prop}}
-      - run: echo ${{github.ref_name}}
+      - name: Echo the version in package.json
+        run: echo ${{steps.package-version.outputs.prop}}
+
+      - name: Get Git Tag
+        id: git-tag
+        run: echo "::set-output name=tag::$(git describe --tags --exact-match 2>/dev/null || echo 'no-tag')"
 
       - name: Ensure the manifest version matches the tag version
         if: ${{ steps.package-version.outputs.prop != github.ref_name }}
