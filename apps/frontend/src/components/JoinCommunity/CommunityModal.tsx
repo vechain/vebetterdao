@@ -44,16 +44,15 @@ export const CommunityModal = ({ isOpen, onClose }: Props) => {
           align={"flex-start"}
           maxW={"590px"}
           minW={{ base: "90vw", md: "350px" }}
-          px={4}
           spacing={2}
           mt={6}>
-          <motion.div variants={itemVariants}>
+          <motion.div variants={itemVariants} style={{ width: "100%" }}>
             <DiscordButton isFullWidth />
           </motion.div>
-          <motion.div variants={itemVariants}>
+          <motion.div variants={itemVariants} style={{ width: "100%" }}>
             <TelegramButton isFullWidth />
           </motion.div>
-          <motion.div variants={itemVariants}>
+          <motion.div variants={itemVariants} style={{ width: "100%" }}>
             <FreshDeskButton isFullWidth />
           </motion.div>
         </MotionVStack>
