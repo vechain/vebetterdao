@@ -101,13 +101,13 @@ export const useUserVotesInRound = (roundId?: string, address?: string) => {
  *  Hook to get the allocation rounds events from the xAllocationVoting contract (i.e the proposals created)
  * @returns  the allocation rounds events (i.e the proposals created)
  */
-export const useVotesInRound = (roundId?: string) => {
+export const useVotesInRound = (roundId?: string, enabled = true) => {
   const { thor } = useConnex()
 
   return useQuery({
     queryKey: getUserVotesInRoundQueryKey(roundId),
     queryFn: async () => await getUserVotesInRound(thor, roundId),
 
-    enabled: !!thor && !!thor.status.head.number && !!roundId && !!address,
+    enabled: !!thor && !!thor.status.head.number && !!roundId && enabled,
   })
 }

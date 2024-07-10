@@ -62,6 +62,7 @@ export const AllocationXAppsVotesRankingChart = ({ roundId }: Props) => {
           maxAllocation={maxAllocation}
           maxAllocationPercentage={maxAllocationPercentage}
           renderMaxAllocation={true}
+          showTotalVoters={true}
         />
       ))}
     </VStack>
