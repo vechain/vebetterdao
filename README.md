@@ -128,6 +128,17 @@ This command relies on a turbo pipeline which:
 
 It also does not require the solo node to be running locally, as it will point to the staging environment.
 
+## Frontend App deployment
+
+The frontend app is deployed using Vercel. The deployment is triggered automatically when a new Release is created on the main branch (please look at the [Release](https://github.com/vechain/b3tr/releases) section).
+
+In order to successfully deploy the frontend app, the following steps need to be followed:
+
+1. Create a pr where the version in the `apps/frontend/package.json` file is updated. It should be a patch version bump, unless there are breaking changes, in which case it should be a minor or major version bump. The version should be in the format `x.x.x`, where `x` is a number.
+2. Once the pr is merged, create a new release on the main branch with the same version as the one in the pr.
+
+This will trigger the deployment of the frontend app to Vercel through the `on-release` workflow.
+
 ## Smart contracts
 
 Contracts can be found inside `./packages/contracts` folder.
@@ -311,9 +322,10 @@ To regenerate the i18n translation files run:
 yarn generate-translations
 ```
 
-
 ## Slither Issue
+
 Note that slither does not seem to be working with the repo as-is 🤷, resulting in an enum type not found error:
+
 ```
 slither.solc_parsing.exceptions.ParsingError: Type not found struct Checkpoints.Trace208
 ```
