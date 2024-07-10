@@ -1,7 +1,7 @@
 import { convertUriToUrl, resolveMediaTypeFromMimeType } from "@/utils"
 import { useQueries, useQuery } from "@tanstack/react-query"
 
-import axios from "axios"
+import axios, { AxiosResponse } from "axios"
 import { NFTMediaType } from "@/types"
 
 export interface IpfsImage {
@@ -18,11 +18,18 @@ export const MAX_IMAGE_SIZE = 1024 * 1024 * 10 // 10MB
  */
 export const getIpfsImage = async (uri?: string): Promise<IpfsImage> => {
   if (!uri) throw new Error("IPFS URI is required")
-
-  const response = await axios.get(convertUriToUrl(uri), {
-    responseType: "blob",
-    maxContentLength: MAX_IMAGE_SIZE,
-  })
+  let response: AxiosResponse<any, any>
+  try {
+    response = await axios.get(convertUriToUrl(uri), {
+      responseType: "blob",
+      maxContentLength: MAX_IMAGE_SIZE,
+    })
+  } catch (error: any) {
+    response = await axios.get(convertUriToUrl(uri, true), {
+      responseType: "blob",
+      maxContentLength: MAX_IMAGE_SIZE,
+    })
+  }
 
   // Check if the MIME type is allowed
   const allowedMimeTypes = [

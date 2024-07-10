@@ -39,9 +39,17 @@ export type XAppMetadata = {
  * @returns  The metadata of the xApp see {@link XAppMetadata}
  */
 export const getXAppMetadata = async (uri: string): Promise<XAppMetadata> => {
-  const metadata = await axios.get<XAppMetadata>(convertUriToUrl(uri), {
-    timeout: 20000,
-  })
+  let metadata
+  // TODO: Remove try catch when new IPFS service query is deployed.
+  try {
+    metadata = await axios.get<XAppMetadata>(convertUriToUrl(uri), {
+      timeout: 20000,
+    })
+  } catch (error: any) {
+    metadata = await axios.get<XAppMetadata>(convertUriToUrl(uri, true), {
+      timeout: 20000,
+    })
+  }
 
   return metadata.data
 }

@@ -11,8 +11,14 @@ import { convertUriToUrl } from "@/utils/uri"
 export const getIpfsMetadata = async <T>(uri?: string, parseJson = false): Promise<T> => {
   if (!uri) throw new Error("No URI provided")
   const newUri = convertUriToUrl(uri)
-  const metadata = await axios.get<string>(newUri)
-
+  let metadata
+  // TODO: Remove try catch when new IPFS service query is deployed.
+  try {
+    metadata = await axios.get<string>(newUri)
+  } catch (error: any) {
+    const newUri = convertUriToUrl(uri, true)
+    metadata = await axios.get<string>(newUri)
+  }
   if (parseJson) return JSON.parse(metadata.data)
 
   return metadata.data as unknown as T
