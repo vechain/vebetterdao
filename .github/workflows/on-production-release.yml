@@ -1,6 +1,6 @@
 # This workflow is triggered when a pull request is merged into the main branch:
 # It will check that the version in the package.json matches the tag name
-# It will then deploy the project to the production environment on Vercel
+# It will then deploy the project to the production environment on Vercel only if the version matches the tag
 # It will create a GitHub release with the release notes
 name: Vercel Production Deployment
 env:
