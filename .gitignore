@@ -161,3 +161,4 @@ packages/e2e/screenshots/
 lib-cov
 coverage
 !**/integrations/coverage
+.vercel
