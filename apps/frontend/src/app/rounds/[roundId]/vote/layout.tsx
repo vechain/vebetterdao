@@ -1,6 +1,6 @@
 "use client"
 import { useBreakpoints } from "@/hooks"
-import { Grid, GridItem, Spinner, VStack } from "@chakra-ui/react"
+import { Divider, Grid, GridItem, Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 
 type Props = {
@@ -41,6 +41,7 @@ export default function CastAllocationVoteLayout({ children, params }: Readonly<
       <VStack spacing={8} align="flex-start" w="full" mt={4}>
         <CastAllocationVoteStepperCard />
         <YourVoteBalanceCard roundId={params.roundId} />
+        <Divider py={0} borderColor="#D5D5D5" />
         {children}
       </VStack>
     )
