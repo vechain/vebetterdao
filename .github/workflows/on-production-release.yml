@@ -39,13 +39,7 @@ jobs:
 
       - name: Get Git Tag
         id: git-tag
-        run: |
-          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
-            TAG_NAME=${GITHUB_REF#refs/tags/}
-            echo "::set-output name=tag::${TAG_NAME}"
-          else
-            echo "::set-output name=tag::no-tag"
-          fi
+        run: echo "::set-output name=tag::$(git describe --tags --exact-match 2>/dev/null || echo 'no-tag')"
 
       - name: Log Tag Version
         run: |
