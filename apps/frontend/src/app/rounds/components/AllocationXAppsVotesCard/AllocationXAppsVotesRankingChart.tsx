@@ -19,7 +19,7 @@ export const AllocationXAppsVotesRankingChart = ({ roundId }: Props) => {
 
   const { data: maxAllocation } = useMaxAllocationAmount(roundId)
   const { data: allocationAmount } = useAllocationAmount(roundId)
-  const { data: baseAmount, isLoading: baseAmountLoading } = useAllocationBaseAmount(roundId)
+  const { data: baseAmount } = useAllocationBaseAmount(roundId)
 
   const xAppsVotes = useXAppsVotesQf(xApps?.map(app => app.id) ?? [], roundId)
 
