@@ -6,15 +6,19 @@ name: Vercel Production Deployment
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+# on:
+#   # Only run this workflow if the pull request against main was merged
+#   pull_request:
+#     branches:
+#       - main
+#     types: [closed]
 on:
-  # Only run this workflow if the pull request against main was merged
-  pull_request:
+  push:
     branches:
-      - main
-    types: [closed]
+      - feat/production-deploy-strategy
 jobs:
   Deploy-Production:
-    if: github.event.pull_request.merged == true
+    # if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
