@@ -39,7 +39,16 @@ jobs:
 
       - name: Get Git Tag
         id: git-tag
-        run: echo "::set-output name=tag::$(git describe --tags --exact-match 2>/dev/null || echo 'no-tag')"
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            TAG_NAME=${GITHUB_REF#refs/tags/}
+            echo "::set-output name=tag::${TAG_NAME}"
+          else
+            echo "::set-output name=tag::no-tag"
+          fi
+        
+      - name: Log Tag Version
+        run: echo "Tag version: ${{ steps.git-tag.outputs.tag }}"
 
       - name: Ensure the manifest version matches the tag version
         if: ${{ steps.package-version.outputs.prop != github.ref_name }}
