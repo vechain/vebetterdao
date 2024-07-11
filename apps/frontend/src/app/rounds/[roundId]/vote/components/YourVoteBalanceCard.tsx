@@ -1,7 +1,7 @@
 import { useAllocationsRound, useGetVotesOnBlock } from "@/api"
 import { ResponsiveCard, VOT3Icon } from "@/components"
 import { useBreakpoints } from "@/hooks"
-import { VStack, Heading, Box, HStack, Skeleton, Text, Card, CardBody } from "@chakra-ui/react"
+import { VStack, Heading, Box, HStack, Skeleton, Text } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useTranslation } from "react-i18next"
