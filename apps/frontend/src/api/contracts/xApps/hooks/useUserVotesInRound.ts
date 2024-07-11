@@ -75,7 +75,7 @@ export const getUserVotesInRoundQueryKey = (roundId?: string, address?: string) 
   "allocationsRound",
   roundId,
   "userVotes",
-  address,
+  ...(address ? [address] : []),
 ]
 
 /**
