@@ -1,5 +1,8 @@
 import { validateIpfsUri } from "./ipfs"
 
+// The IPFS read service to use
+const IPFS_FETCH_SERVICE = process.env.NEXT_PUBLIC_IPFS_FETCHING_SERVICE ?? ""
+
 /**
  * Convert a URI to a URL
  * We support both IPFS and Arweave URIs. Both should be converted to their https gateway URLs.
@@ -21,7 +24,7 @@ export const convertUriToUrl = (uri: string) => {
 
       // Check cache for IPFS document
 
-      return `https://api.gateway-proxy.vechain.org/ipfs/${uriWithoutProtocol}`
+      return `${IPFS_FETCH_SERVICE}/${uriWithoutProtocol}`
     case "ar":
       return `https://arweave.net/${uriWithoutProtocol}`
     default:
