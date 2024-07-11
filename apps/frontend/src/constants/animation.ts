@@ -25,33 +25,32 @@ export const flipAnimation = {
 }
 
 export const coinFlipAnimation = {
-    animate: {
-      rotateY: [0, 180, 360], // Complete flip
-      translateY: [0, -100, 0], // Jump up and down
-      scale: [1, 1.2, 1], // Slightly grow in the middle of the jump
-      transition: {
-        rotateY: {
-          repeat: Infinity,
-          repeatType: "loop",
-          duration: 1.2,
-          ease: "easeInOut",
-        },
-        translateY: {
-          repeat: Infinity,
-          repeatType: "loop",
-          duration: 1.2,
-          ease: "easeInOut",
-          times: [0, 0.5, 1], // Ensures the jump is in the middle of the flip
-        },
-        scale: {
-          repeat: Infinity,
-          repeatType: "loop",
-          duration: 1.2,
-          ease: "easeInOut",
-          times: [0, 0.5, 1], // Scale up at the peak of the jump
-        },
-        delay: 0.5, // Pause before repeating the animation
+  animate: {
+    rotateY: [0, 180, 360], // Complete flip
+    translateY: [0, -100, 0], // Jump up and down
+    scale: [1, 1.2, 1], // Slightly grow in the middle of the jump
+    transition: {
+      rotateY: {
+        repeat: Infinity,
+        repeatType: "loop",
+        duration: 1.2,
+        ease: "easeInOut",
       },
+      translateY: {
+        repeat: Infinity,
+        repeatType: "loop",
+        duration: 1.2,
+        ease: "easeInOut",
+        times: [0, 0.5, 1], // Ensures the jump is in the middle of the flip
+      },
+      scale: {
+        repeat: Infinity,
+        repeatType: "loop",
+        duration: 1.2,
+        ease: "easeInOut",
+        times: [0, 0.5, 1], // Scale up at the peak of the jump
+      },
+      delay: 0.5, // Pause before repeating the animation
     },
-  };
-  
+  },
+}

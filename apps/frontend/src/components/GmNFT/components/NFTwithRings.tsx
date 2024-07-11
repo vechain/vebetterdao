@@ -15,7 +15,15 @@ export const NFTWithRings = ({ image, tokenID }: Props) => {
       p={7}
       rounded={34}
       position={"relative"}>
-      <AnimatedStar size={20} duration={8} scaleMin={1} scaleMax={1.5} moveAmplitudeX={20} moveAmplitudeY={10} top={"30%"} />
+      <AnimatedStar
+        size={20}
+        duration={8}
+        scaleMin={1}
+        scaleMax={1.5}
+        moveAmplitudeX={20}
+        moveAmplitudeY={10}
+        top={"30%"}
+      />
       <AnimatedStar
         size={10}
         duration={6}
