@@ -90,7 +90,6 @@ describe("VoterRewards", () => {
       ).to.be.reverted
     })
 
-
     it("Should revert if admin is set to zero address in initilisation", async () => {
       const config = createLocalConfig()
       const { owner, b3tr, galaxyMember, emissions } = await getOrDeployContractInstances({

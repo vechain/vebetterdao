@@ -7,29 +7,24 @@ import { useState, useEffect } from "react"
  * @param beforeInitScript  a function to call before init the script
  * @returns  the loaded state of the script
  */
-export const useScript = (
-    url: string,
-    isAsync = true,
-    runBeforeInit?: () => void,
-    runAfterInit?: () => void,
-) => {
-    const [loaded, setLoaded] = useState(false)
+export const useScript = (url: string, isAsync = true, runBeforeInit?: () => void, runAfterInit?: () => void) => {
+  const [loaded, setLoaded] = useState(false)
 
-    useEffect(() => {
-        runBeforeInit?.()
-        const script = document.createElement("script")
-        script.src = url
-        script.addEventListener("load", () => setLoaded(true))
-        script.defer = true
-        script.async = isAsync
+  useEffect(() => {
+    runBeforeInit?.()
+    const script = document.createElement("script")
+    script.src = url
+    script.addEventListener("load", () => setLoaded(true))
+    script.defer = true
+    script.async = isAsync
 
-        document.head.appendChild(script)
+    document.head.appendChild(script)
 
-        runAfterInit?.()
-        return () => {
-            document.head.removeChild(script)
-        }
-    }, [url, isAsync, runBeforeInit, runAfterInit])
+    runAfterInit?.()
+    return () => {
+      document.head.removeChild(script)
+    }
+  }, [url, isAsync, runBeforeInit, runAfterInit])
 
-    return { loaded }
+  return { loaded }
 }

@@ -4,9 +4,8 @@ import ProposalBadge from "@/components/Proposal/ProposalBadge"
 import { FaRegHeart } from "react-icons/fa"
 import { MdHowToVote } from "react-icons/md"
 import { PiThumbsDownBold, PiThumbsUpBold } from "react-icons/pi"
-import { FaCheck } from "react-icons/fa6";
-import { IoBan } from "react-icons/io5";
-
+import { FaCheck } from "react-icons/fa6"
+import { IoBan } from "react-icons/io5"
 
 type Props = {
   type: ProposalState

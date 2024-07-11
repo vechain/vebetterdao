@@ -1,13 +1,13 @@
 {
-  "extends": "next",
+  "root": true,
+  "extends": ["@repo/eslint-config/library.js"],
   "parser": "@typescript-eslint/parser",
   "plugins": ["@typescript-eslint"],
+  "parserOptions": {
+    "project": true
+  },
   "rules": {
-    "react/display-name": "off",
-    "import/no-anonymous-default-export": "off",
-    "react/no-children-prop": "warn",
-    "react/no-unescaped-entities": "warn",
-    "react/jsx-no-literals": "error",
+    "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": [
       "error",
       {
