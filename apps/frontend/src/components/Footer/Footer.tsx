@@ -8,6 +8,7 @@ import { Socials } from "./components/Socials"
 import { PRIVACY_POLICY_LINK, TERMS_AND_CONDITIONS_LINK } from "@/constants"
 import { useTranslation } from "react-i18next"
 import { LanguageSelector } from "./components/LanguageSelector"
+import { DocumentationButton } from "./components/DocumentationButton"
 
 export const Footer: React.FC = () => {
   const { t } = useTranslation()
@@ -27,7 +28,10 @@ export const Footer: React.FC = () => {
         <VStack spacing={4} alignItems={"flex-end"}>
           <DiscordButton />
           <TelegramButton />
-          <FreshDeskButton />
+          <HStack spacing={4}>
+            <DocumentationButton />
+            <FreshDeskButton />
+          </HStack>
           <LanguageSelector />
         </VStack>
       </HStack>
@@ -68,6 +72,7 @@ export const Footer: React.FC = () => {
         <VStack spacing={4} alignItems={"center"}>
           <DiscordButton />
           <TelegramButton />
+          <DocumentationButton />
           <FreshDeskButton />
           <LanguageSelector />
           <Box mt={6}>
