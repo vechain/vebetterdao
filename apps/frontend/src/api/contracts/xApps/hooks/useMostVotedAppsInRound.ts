@@ -21,6 +21,7 @@ export const useMostVotedAppsInRound = (roundId: string) => {
   const { data: xApps } = useRoundXApps(roundId ?? "")
 
   const xAppsVotes = useXAppsVotesQf(xApps?.map(app => app.id) ?? [], roundId)
+  const queriesLoading = xAppsVotes.some(query => query.isLoading)
 
   return useQuery({
     queryKey: getMostVotedAppsInRoundQueryKey(roundId),
@@ -33,6 +34,6 @@ export const useMostVotedAppsInRound = (roundId: string) => {
         }))
         .sort((a, b) => Number(b.votes) - Number(a.votes))
     },
-    enabled: !!roundId && !!xApps && !!xAppsVotes,
+    enabled: !queriesLoading && !!roundId && !!xApps && !!xAppsVotes,
   })
 }
