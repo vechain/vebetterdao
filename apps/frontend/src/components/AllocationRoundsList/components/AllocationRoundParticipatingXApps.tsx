@@ -12,6 +12,8 @@ export const AllocationRoundParticipatingXApps: React.FC<Props> = ({ roundId, ma
   const boxSize = useBreakpointValue({ base: 28, lg: 36 })
   const marginleft = (boxSize ?? 36) / 3
   const borderRadius = (boxSize ?? 36) / 4
+
+  // Apps are listed based on the rank in the round
   const { data: xApps, isLoading: isLoadingXApps } = useMostVotedAppsInRound(roundId)
 
   const { data: state, isLoading: stateLoading } = useAllocationsRoundState(roundId)
@@ -44,8 +46,8 @@ export const AllocationRoundParticipatingXApps: React.FC<Props> = ({ roundId, ma
           const ml = index > 0 ? `-${marginleft}px` : "0"
           return (
             <AppImage
-              key={xApp.details.id}
-              appId={xApp.details.id}
+              key={xApp.id}
+              appId={xApp.id}
               boxSize={`${boxSize}px`}
               borderRadius={`${borderRadius}px`}
               ml={ml}

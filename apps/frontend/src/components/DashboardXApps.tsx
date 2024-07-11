@@ -24,11 +24,11 @@ type Props = {
   maxApps?: number
 }
 
-// Apps are listed based on the votes they received in the previous round
 export const DashboardXApps = ({ maxApps = 4 }: Props) => {
   const { t } = useTranslation()
   const router = useRouter()
 
+  // Apps are listed based on the votes they received in the previous round
   const { data: previousRoundId } = usePreviousAllocationRoundId()
   const { data: xApps } = useMostVotedAppsInRound(previousRoundId ?? "")
   const slicedXApps = useMemo(() => xApps?.slice(0, maxApps), [xApps, maxApps])
@@ -59,7 +59,7 @@ export const DashboardXApps = ({ maxApps = 4 }: Props) => {
       </CardHeader>
       <CardBody>
         <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
-          {slicedXApps?.map(xApp => <DashboardXAppCard key={xApp.app} xApp={xApp.details} />)}
+          {slicedXApps?.map(xApp => <DashboardXAppCard key={xApp.id} xApp={xApp.app} />)}
         </Grid>
       </CardBody>
     </Card>

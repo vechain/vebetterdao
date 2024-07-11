@@ -3,6 +3,12 @@ import { useXAppsVotesQf } from "./useXAppsVotesQf"
 import { XApp } from "./useXApps"
 import { useQuery } from "@tanstack/react-query"
 
+type MostVotedAppsInRoundReturnType = {
+  votes: string
+  id: string
+  app: XApp
+}
+
 export const getMostVotedAppsInRoundQueryKey = (roundId: string) => ["MOST_VOTED_APPS_IN_ROUND", roundId]
 
 /**
@@ -18,12 +24,12 @@ export const useMostVotedAppsInRound = (roundId: string) => {
 
   return useQuery({
     queryKey: getMostVotedAppsInRoundQueryKey(roundId),
-    queryFn: async () => {
+    queryFn: async (): Promise<MostVotedAppsInRoundReturnType[]> => {
       return xAppsVotes
         .map(app => ({
           votes: app.data?.votes ?? "0",
-          app: xApps?.find(xa => xa.id === app.data?.app)?.id ?? "",
-          details: xApps?.find(xa => xa.id === app.data?.app) ?? ({} as XApp),
+          id: xApps?.find(xa => xa.id === app.data?.app)?.id ?? "",
+          app: xApps?.find(xa => xa.id === app.data?.app) ?? ({} as XApp),
         }))
         .sort((a, b) => Number(b.votes) - Number(a.votes))
     },

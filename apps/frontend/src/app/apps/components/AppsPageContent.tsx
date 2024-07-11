@@ -8,6 +8,7 @@ import { FaPlus } from "react-icons/fa6"
 export const AppsPageContent = () => {
   const { t } = useTranslation()
 
+  // Apps are listed based on the votes they received in the previous round
   const { data: previousRoundId, isLoading: isLoadingPreviousRoundId } = usePreviousAllocationRoundId()
   const { data: xApps, isLoading: isLoadingXApps } = useMostVotedAppsInRound(previousRoundId ?? "")
 
@@ -36,7 +37,7 @@ export const AppsPageContent = () => {
         </Button>
       </HStack>
       <Grid templateColumns={["repeat(1, 1fr)", "repeat(3, 1fr)"]} gap={6} w="full">
-        {xApps?.map(xApp => <AppCard key={xApp.app} xApp={xApp.details} />)}
+        {xApps?.map(xApp => <AppCard key={xApp.id} xApp={xApp.app} />)}
 
         <AddNewAppCard />
       </Grid>
