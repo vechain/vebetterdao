@@ -39,9 +39,8 @@ export default function CastAllocationVoteLayout({ children, params }: Readonly<
   if (isMobile)
     return (
       <VStack spacing={8} align="flex-start" w="full" mt={4}>
-        <CastAllocationVoteStepperCard />
         <YourVoteBalanceCard roundId={params.roundId} />
-        <Divider py={0} borderColor="#D5D5D5" />
+        <CastAllocationVoteStepperCard />
         {children}
       </VStack>
     )
