@@ -15,7 +15,7 @@ export const usePreviousAllocationRoundId = () => {
     queryKey: getPreviousAllocationRoundId(),
     queryFn: async () => {
       if (!currentRoundId) return "1" // default to 1
-      if (Number(currentRoundId) === 1) return currentRoundId
+      if (Number(currentRoundId) <= 1) return currentRoundId
       return (Number(currentRoundId) - 1).toString()
     },
     enabled: !!currentRoundId,

@@ -1,6 +1,6 @@
 import { useRoundXApps } from "./useRoundXApps"
 import { useXAppsVotesQf } from "./useXAppsVotesQf"
-import { XApp } from "./useXApps"
+import { XApp, useXApps } from "./useXApps"
 import { useQuery } from "@tanstack/react-query"
 
 type MostVotedAppsInRoundReturnType = {
@@ -18,9 +18,14 @@ export const getMostVotedAppsInRoundQueryKey = (roundId: string) => ["MOST_VOTED
  * @returns a sorted array of the most voted apps in the round
  */
 export const useMostVotedAppsInRound = (roundId: string) => {
-  const { data: xApps } = useRoundXApps(roundId ?? "")
+  const { data: roundXApps } = useRoundXApps(roundId ?? "")
 
-  const xAppsVotes = useXAppsVotesQf(xApps?.map(app => app.id) ?? [], roundId)
+  // Notice: this trick is used because when starting the project in the local environment,
+  // the roundId is "0" and the roundXApps is undefined, which will cause the app to not render apps info.
+  const { data: allXApps } = useXApps()
+  const apps = roundId === "0" ? allXApps : roundXApps
+
+  const xAppsVotes = useXAppsVotesQf(apps?.map(app => app.id) ?? [], roundId)
   const queriesLoading = xAppsVotes.some(query => query.isLoading)
 
   return useQuery({
@@ -29,11 +34,11 @@ export const useMostVotedAppsInRound = (roundId: string) => {
       return xAppsVotes
         .map(app => ({
           votes: app.data?.votes ?? "0",
-          id: xApps?.find(xa => xa.id === app.data?.app)?.id ?? "",
-          app: xApps?.find(xa => xa.id === app.data?.app) ?? ({} as XApp),
+          id: apps?.find(xa => xa.id === app.data?.app)?.id ?? "",
+          app: apps?.find(xa => xa.id === app.data?.app) ?? ({} as XApp),
         }))
         .sort((a, b) => Number(b.votes) - Number(a.votes))
     },
-    enabled: !queriesLoading && !!roundId && !!xApps && !!xAppsVotes,
+    enabled: !queriesLoading && !!roundId && !!apps && !!xAppsVotes,
   })
 }
