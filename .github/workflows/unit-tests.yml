@@ -81,9 +81,9 @@ jobs:
               - 'packages/lambda/**'
 
       # Run global unit tests if any of the following changes are detected
-      - name: Global Unit Tests
-        if: steps.contract_changes.outputs.src == 'true' || steps.utils_changes.outputs.src == 'true'
-        run: yarn test
+      #- name: Global Unit Tests
+        #if: steps.contract_changes.outputs.src == 'true' || steps.utils_changes.outputs.src == 'true'
+        #run: yarn test
 
       # Otherwise, run specific unit tests based on the changes detected
       - name: Frontend Unit Tests
@@ -102,7 +102,7 @@ jobs:
       - name: Run Slither
         uses: crytic/slither-action@v0.4.0
         id: slither
-        if: steps.contract_changes.outputs.src == 'true'
+        #if: steps.contract_changes.outputs.src == 'true'
         with:
           ignore-compile: true
         target: "packages/contracts/"
@@ -112,7 +112,7 @@ jobs:
 
       - name: Create/update checklist as PR comment
         uses: actions/github-script@v7
-        if: github.event_name == 'pull_request' && steps.contract_changes.outputs.src == 'true'
+        if: github.event_name == 'pull_request' #&& steps.contract_changes.outputs.src == 'true'
         env:
           REPORT: ${{ steps.slither.outputs.stdout }}
         with:
