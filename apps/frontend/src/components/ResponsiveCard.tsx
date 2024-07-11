@@ -1,5 +1,4 @@
 import { Box, Card, CardBody, CardProps, useBreakpointValue } from "@chakra-ui/react"
-import { useState, useEffect } from "react"
 
 type Props = {
   children: React.ReactNode
@@ -17,25 +16,6 @@ export const ResponsiveCard = ({ children, cardProps = {}, mobileStrategy = "non
     md: true,
     lg: true,
   })
-
-  // State to store the client width
-  const [clientWidth, setClientWidth] = useState(document.body.clientWidth)
-
-  // Effect to update the clientWidth state on window resize
-  useEffect(() => {
-    const updateWidth = () => {
-      setClientWidth(document.body.clientWidth)
-    }
-
-    // Set initial width
-    updateWidth()
-
-    // Add window resize event listener
-    window.addEventListener("resize", updateWidth)
-
-    // Clean up listener on component unmount
-    return () => window.removeEventListener("resize", updateWidth)
-  }, [])
 
   if (shouldRenderInCard) {
     return (

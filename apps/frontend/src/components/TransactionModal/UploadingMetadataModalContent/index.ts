@@ -1,1 +1,1 @@
-export * from "./UploadingMetadataModalContent";
+export * from "./UploadingMetadataModalContent"

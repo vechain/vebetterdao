@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
-import { abi, address } from "thor-devkit"
+import { abi } from "thor-devkit"
 import { getAllEvents } from "@/api/blockchain"
 import { getConfig } from "@repo/config"
 import { XAllocationVoting__factory } from "@repo/contracts"
@@ -97,17 +97,19 @@ export const useUserVotesInRound = (roundId?: string, address?: string) => {
   })
 }
 
+export const getVotesInRoundQueryKey = (roundId?: string) => ["allocationsRound", roundId, "totalVotes"]
+
 /**
  *  Hook to get the allocation rounds events from the xAllocationVoting contract (i.e the proposals created)
  * @returns  the allocation rounds events (i.e the proposals created)
  */
-export const useVotesInRound = (roundId?: string) => {
+export const useVotesInRound = (roundId?: string, enabled = true) => {
   const { thor } = useConnex()
 
   return useQuery({
-    queryKey: getUserVotesInRoundQueryKey(roundId),
+    queryKey: getVotesInRoundQueryKey(roundId),
     queryFn: async () => await getUserVotesInRound(thor, roundId),
 
-    enabled: !!thor && !!thor.status.head.number && !!roundId && !!address,
+    enabled: !!thor && !!thor.status.head.number && !!roundId && enabled,
   })
 }

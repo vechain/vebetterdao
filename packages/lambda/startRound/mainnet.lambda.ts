@@ -15,7 +15,7 @@ import { Emissions__factory as Emissions } from "@repo/contracts"
 const nodeURL = "https://mainnet.vechain.org/"
 
 const client = new SecretsManagerClient({
-  region: "eu-north-1",
+  region: "eu-west-1",
 })
 
 /**

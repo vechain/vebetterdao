@@ -1,7 +1,6 @@
 "use client"
-import { ResponsiveCard } from "@/components"
 import { useBreakpoints } from "@/hooks"
-import { Card, CardBody, Grid, GridItem, Spinner, VStack } from "@chakra-ui/react"
+import { Grid, GridItem, Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 
 type Props = {

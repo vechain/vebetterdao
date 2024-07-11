@@ -1,5 +1,6 @@
 import { VStack, Text, Image, HStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useTranslation } from "react-i18next"
 
 export type ConfirmationModalContentProps = {
   b3trBalanceAfter?: string
@@ -12,6 +13,7 @@ export const ConfirmationConvertModalContent = ({
   b3trBalanceAfter,
   vot3BalanceAfter,
 }: ConfirmationModalContentProps) => {
+  const { t } = useTranslation()
   return (
     <VStack align={"center"} p={6} gap={2}>
       <Image src="/images/b3trvot3-tokens.png" boxSize={"200px"} alt="B3TR and VOT3 Tokens" />
@@ -28,16 +30,16 @@ export const ConfirmationConvertModalContent = ({
         width={200}
       /> */}
       <Text style={{ fontFamily: "Instrument Sans, sans-serif" }} fontSize={28} fontWeight={700}>
-        Waiting for confirmation
+        {t("Waiting for confirmation")}
       </Text>
       <Text fontSize={16} fontWeight={400} textAlign={"center"}>
-        Confirm the operation in your wallet to complete the convertion
+        {t("Confirm the operation in your wallet to complete the convertion")}
       </Text>
       <VStack w="full" mt={8}>
         {Number(b3trBalanceAfter) >= 0 && (
           <HStack w="full" bg={"#F8F8F8"} borderRadius={8} p={4} justifyContent={"space-between"}>
             <Text fontSize={16} fontWeight={400}>
-              Your new B3TR balance
+              {t("Your new B3TR balance")}
             </Text>
 
             <HStack>
@@ -51,7 +53,7 @@ export const ConfirmationConvertModalContent = ({
         {Number(vot3BalanceAfter) >= 0 && (
           <HStack w="full" bg={"#F8F8F8"} borderRadius={8} p={4} justifyContent={"space-between"}>
             <Text fontSize={16} fontWeight={400}>
-              Your new VOT3 balance
+              {t("Your new VOT3 balance")}
             </Text>
 
             <HStack>

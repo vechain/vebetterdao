@@ -73,7 +73,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
             <Alert status="error">
               <AlertIcon />
               <Box>
-                <AlertTitle>Error loading allocation rounds</AlertTitle>
+                <AlertTitle>{t("Error loading allocation rounds")}</AlertTitle>
                 <AlertDescription>{allocationRoundEventsError.message}</AlertDescription>
               </Box>
             </Alert>
@@ -81,7 +81,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
           {renderRounds}
           {invertedCreatedRounds && invertedCreatedRounds.length > totalRoundsToShow && showLoadMore && (
             <Button variant="link" colorScheme="blue" onClick={loadMore}>
-              Load more
+              {t("Load more")}
             </Button>
           )}
         </VStack>

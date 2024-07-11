@@ -10,7 +10,7 @@ interface State {
 export const useSelectedTheme = create<State>()(
   devtools(
     persist(
-      (set, get) => ({
+      set => ({
         selectedTheme: lightTheme,
         setSelectedTheme: (selectedTheme: Record<string, unknown>) => set({ selectedTheme }),
       }),

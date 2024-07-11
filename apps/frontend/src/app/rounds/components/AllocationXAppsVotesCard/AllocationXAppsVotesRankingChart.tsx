@@ -19,7 +19,7 @@ export const AllocationXAppsVotesRankingChart = ({ roundId }: Props) => {
 
   const { data: maxAllocation } = useMaxAllocationAmount(roundId)
   const { data: allocationAmount } = useAllocationAmount(roundId)
-  const { data: baseAmount, isLoading: baseAmountLoading } = useAllocationBaseAmount(roundId)
+  const { data: baseAmount } = useAllocationBaseAmount(roundId)
 
   const xAppsVotes = useXAppsVotesQf(xApps?.map(app => app.id) ?? [], roundId)
 
@@ -55,13 +55,13 @@ export const AllocationXAppsVotesRankingChart = ({ roundId }: Props) => {
         <AppVotesHorizontalChart
           key={index}
           data={app}
-          index={index}
           totalVotes={votes}
           roundId={roundId}
           showReceived={true}
           maxAllocation={maxAllocation}
           maxAllocationPercentage={maxAllocationPercentage}
           renderMaxAllocation={true}
+          showTotalVoters={true}
         />
       ))}
     </VStack>

@@ -16,13 +16,13 @@ type AppVotesData = {
 
 type Props = {
   data: AppVotesData
-  index: number
   roundId: string
   totalVotes?: string
   showReceived?: boolean
   maxAllocation?: number | string
   maxAllocationPercentage?: number
   renderMaxAllocation?: boolean
+  showTotalVoters?: boolean
 }
 
 // Maximum precision of 2 decimals. Must also round down
@@ -30,13 +30,13 @@ const compactFormatter = getCompactFormatter(2)
 
 export const AppVotesHorizontalChart = ({
   data,
-  index,
   roundId,
   totalVotes,
   showReceived = false,
   maxAllocation,
   maxAllocationPercentage,
   renderMaxAllocation = false,
+  showTotalVoters = false,
 }: Props) => {
   const { t } = useTranslation()
   const { data: appMetadata } = useXAppMetadata(data.app)
@@ -46,7 +46,7 @@ export const AppVotesHorizontalChart = ({
 
   const { data: forecastedEarnings, isLoading: forecastedEarningsLoading } = useXAppRoundEarnings(roundId, data.app)
 
-  const { data: roundVotes, isLoading: roundVotesLoading } = useVotesInRound(roundId)
+  const { data: roundVotes, isLoading: roundVotesLoading } = useVotesInRound(roundId, showTotalVoters)
 
   const appVoters = useMemo(() => {
     return (
@@ -83,11 +83,13 @@ export const AppVotesHorizontalChart = ({
                   percentage: votesPercentage.toLocaleString("en", { minimumFractionDigits: 2 }),
                 })}
               </Heading>
-              <Skeleton isLoaded={!roundVotesLoading}>
-                <Text fontSize={["12px"]} fontWeight={400} color="#6A6A6A">
-                  {`${appVoters} voters`}
-                </Text>
-              </Skeleton>
+              {showTotalVoters && (
+                <Skeleton isLoaded={!roundVotesLoading}>
+                  <Text fontSize={["12px"]} fontWeight={400} color="#6A6A6A">
+                    {`${appVoters} voters`}
+                  </Text>
+                </Skeleton>
+              )}
             </VStack>
           </VStack>
         </HStack>

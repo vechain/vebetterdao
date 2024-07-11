@@ -1,29 +1,16 @@
-import {
-  useProposalsEvents,
-  useActiveProposals,
-  useIncomingProposals,
-  usePastProposals,
-  useProposalClaimableUserDeposits,
-} from "@/api"
-import { ProposalInfoCard } from "@/components"
+import { useProposalsEvents, useProposalClaimableUserDeposits } from "@/api"
+import { ProposalInfoCard, JoinCommunity } from "@/components"
 import { VStack, HStack, Heading, Box, Button, Show, Spinner } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { ClaimDeposits, CreateProposalCard, Filter, NoProposalsCard } from "./components"
+import { ClaimDeposits, CreateProposalCard, NoProposalsCard } from "./components"
 import { useWallet, useWalletModal } from "@vechain/dapp-kit-react"
 
 export const ProposalsPageContent = () => {
   const router = useRouter()
   const { t } = useTranslation()
-  const { data: proposalsEvents, error: proposalsEventsError, isLoading: proposalsEventsLoading } = useProposalsEvents()
-  const { data: activeProposals, error: activeProposalsError, isLoading: activeProposalsLoading } = useActiveProposals()
-  const {
-    data: incomingProposals,
-    error: incomingProposalsError,
-    isLoading: incomingProposalsLoading,
-  } = useIncomingProposals()
-  const { data: pastProposals, error: pastProposalsError, isLoading: pastProposalsLoading } = usePastProposals()
+  const { data: proposalsEvents, isLoading: proposalsEventsLoading } = useProposalsEvents()
   const { account } = useWallet()
   const { open } = useWalletModal()
 
@@ -92,7 +79,7 @@ export const ProposalsPageContent = () => {
         )}
       </Show>
       <HStack w={"full"} gap={8} mt={3}>
-        <VStack flex={allProposals.length !== 0 ? 4.5 : 7} data-testid="proposals" alignSelf={"flex-start"} gap={4}>
+        <VStack flex={4.5} data-testid="proposals" alignSelf={"flex-start"} gap={4}>
           {allProposals.map(proposal => (
             <ProposalInfoCard proposal={proposal} key={proposal.proposalId} />
           ))}
@@ -104,9 +91,15 @@ export const ProposalsPageContent = () => {
               <ClaimDeposits claimableDeposits={userTotalDeposits} userProposalDeposits={userProposalDeposits} />
             )}
             {allProposals.length > 0 && <CreateProposalCard />}
+            <JoinCommunity />
           </VStack>
         </Show>
       </HStack>
+      <Show below="sm">
+        <Box mt={2} w={"full"}>
+          <JoinCommunity />
+        </Box>
+      </Show>
     </VStack>
   )
 }
