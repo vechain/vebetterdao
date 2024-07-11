@@ -5,14 +5,15 @@ import {
   useHasVotedInRound,
   useRoundXApps,
 } from "@/api"
-import { Button, Card, CardBody, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react"
+import { Heading, Text, VStack } from "@chakra-ui/react"
 import { useCallback, useLayoutEffect, useMemo, useState } from "react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useRouter } from "next/navigation"
 import { Trans, useTranslation } from "react-i18next"
-import { CastVoteData, useCastAllocationFormStore } from "@/store"
+import { CastAllocationVoteFormData, useCastAllocationFormStore } from "@/store"
 import { SearchAndSelectApps } from "./components/SearchAndSelectApps"
 import { ResponsiveCard } from "@/components"
+import { CastAllocationControlsBottomBar } from "../CastAllocationControlsBottomBar"
 
 type Props = {
   roundId: string
@@ -42,7 +43,7 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
   const [onContinueError, setOnContinueError] = useState<string | null>(null)
 
   const handleOnSelectedAppsChange = useCallback(
-    (data: CastVoteData) => {
+    (data: CastAllocationVoteFormData[]) => {
       setOnContinueError(null)
       onSelectedAppsChange(data)
     },
@@ -53,10 +54,6 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
     if (!selectedApps.length) return setOnContinueError(t("Select at least one app to continue"))
     router.push(`/rounds/${roundId}/vote/percentages`)
   }, [router, roundId, selectedApps, t])
-
-  const goBack = useCallback(() => {
-    router.back()
-  }, [router])
 
   const shouldSeeThePage = useMemo(() => {
     return {
@@ -93,34 +90,20 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
           xAppsQuery={xAppsQuery}
         />
 
-        <Stack
-          direction={["column", "column", "row"]}
-          w="full"
-          spacing={4}
-          justify={"space-between"}
-          align={["center", "center", "flex-start"]}>
-          {onContinueError ? (
-            <Text fontSize={"16px"} fontWeight={600} color="#C84968">
-              {onContinueError}
-            </Text>
-          ) : (
-            <Text fontSize={"16px"} fontWeight={400} color="#252525">
-              <Trans i18nKey={"{{amount}} selected apps"} values={{ amount: selectedApps?.length ?? 0 }} t={t} />
-            </Text>
-          )}
-          <HStack
-            alignSelf={"flex-end"}
-            justify={["space-between", "space-between", "flex-end"]}
-            spacing={4}
-            w={["full", "full", "auto"]}>
-            <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
-              {t("Go back")}
-            </Button>
-            <Button data-testid="continue" variant="primaryAction" onClick={onContinue}>
-              {t("Continue")}
-            </Button>
-          </HStack>
-        </Stack>
+        <CastAllocationControlsBottomBar
+          onContinue={onContinue}
+          helperText={
+            onContinueError ? (
+              <Text fontSize={"16px"} fontWeight={600} color="#C84968">
+                {onContinueError}
+              </Text>
+            ) : (
+              <Text fontSize={"16px"} fontWeight={400} color="#252525">
+                <Trans i18nKey={"{{amount}} selected apps"} values={{ amount: selectedApps?.length ?? 0 }} t={t} />
+              </Text>
+            )
+          }
+        />
       </VStack>
     </ResponsiveCard>
   )

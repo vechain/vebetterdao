@@ -1,0 +1,59 @@
+import { Stack, HStack, Button } from "@chakra-ui/react"
+import { UilArrowLeft, UilArrowRight } from "@iconscout/react-unicons"
+import { t } from "i18next"
+import { useRouter } from "next/navigation"
+
+type Props = {
+  onContinue: () => void
+  helperText?: React.ReactNode
+}
+export const CastAllocationControlsBottomBar = ({ onContinue, helperText }: Props) => {
+  const router = useRouter()
+  return (
+    <Stack
+      direction={["column", "column", "row"]}
+      w="full"
+      spacing={4}
+      justify={"space-between"}
+      align={"center"}
+      pos="fixed"
+      bottom={0}
+      left={0}
+      p={"16px"}
+      bg="#FFFFFF"
+      zIndex={2}
+      boxShadow={"0px -8px 16px 0px #00000014"}>
+      {helperText}
+      <HStack
+        alignSelf={"flex-end"}
+        justify={["space-between", "space-between", "flex-end"]}
+        spacing={4}
+        w={["full", "full", "auto"]}>
+        <Button
+          //   borderRadius={"md"}
+          leftIcon={<UilArrowLeft />}
+          fontSize="18px"
+          data-testid="go-back"
+          variant="primarySubtle"
+          onClick={router.back}
+          //   flex={1}
+          py="16px"
+          px="32px">
+          {t("Go back")}
+        </Button>
+        <Button
+          //   borderRadius={"md"}
+          rightIcon={<UilArrowRight />}
+          fontSize="18px"
+          data-testid="continue"
+          variant="primaryAction"
+          onClick={onContinue}
+          //   flex={1}
+          py="16px"
+          px="32px">
+          {t("Continue")}
+        </Button>
+      </HStack>
+    </Stack>
+  )
+}

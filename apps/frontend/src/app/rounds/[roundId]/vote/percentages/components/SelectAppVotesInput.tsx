@@ -96,7 +96,7 @@ export const SelectAppVotesInput = ({ onChange, vote, isDisabled = false, totalV
               {t("%")}
             </InputRightElement>
           </InputGroup>
-          {vote.value && totalVotesAvailable && !error ? (
+          {totalVotesAvailable && !error ? (
             <FormHelperText
               data-testid={`${appMetadata?.name}-vote-estimated-votes`}
               fontWeight={400}

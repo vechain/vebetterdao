@@ -1,17 +1,5 @@
 import { useAllocationsRound, useAllocationsRoundState, useGetVotesOnBlock, useHasVotedInRound } from "@/api"
-import {
-  Button,
-  Card,
-  CardBody,
-  HStack,
-  Heading,
-  Skeleton,
-  Stack,
-  Text,
-  VStack,
-  useBreakpointValue,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Button, HStack, Heading, Skeleton, Text, VStack, useDisclosure } from "@chakra-ui/react"
 import { useCallback, useLayoutEffect, useMemo } from "react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useRouter } from "next/navigation"
@@ -24,6 +12,7 @@ import { scaledDivision } from "@/utils/MathUtils"
 import { FiArrowUpRight } from "react-icons/fi"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { SeeVoteDetailsModal } from "@/app/rounds/components/AllocationRoundUserVotes/SeeVoteDetailsModal"
+import { CastAllocationControlsBottomBar } from "../../components/CastAllocationControlsBottomBar"
 
 type Props = {
   roundId: string
@@ -86,10 +75,6 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
     onContinue()
   }, [castAllocationVotes, onContinue])
 
-  const goBack = useCallback(() => {
-    router.back()
-  }, [router])
-
   const shouldSeeThePage = useMemo(() => {
     return {
       value: !hasVoted && !isVotingConcluded && !hasNoVotes && votes.length > 0,
@@ -136,7 +121,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
               "Make sure that the apps you selected and the distribution percentages are right. If something’s wrong, you can go back and modify it.",
             )}
           </Text>
-          <YourVoteCardWrapper>
+          <ResponsiveCard cardProps={{ variant: "filled" }}>
             <VStack flex={1} w="full" spacing={8} align={"flex-start"}>
               <VStack spacing={2} align="flex-start" w="full">
                 <HStack w="full" justify="space-between">
@@ -163,49 +148,18 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
               </VStack>
               <AppVotesBreakdown votes={votes} />
             </VStack>
-          </YourVoteCardWrapper>
+          </ResponsiveCard>
 
-          <Stack
-            direction={["column", "column", "row"]}
-            w="full"
-            spacing={4}
-            justify={"space-between"}
-            align={["center", "center", "flex-start"]}>
-            <Text fontSize={"16px"} fontWeight={600} color="#F29B32" textAlign={["center", "center", "left"]} flex={1}>
-              <Trans i18nKey={"Once your vote has been cast, you will not be able to revert it."} t={t} />
-            </Text>
-            <HStack
-              alignSelf={"flex-end"}
-              justify={["space-between", "space-between", "flex-end"]}
-              spacing={4}
-              flex={1}
-              w={["full", "full", "auto"]}>
-              <Button data-testid="go-back" flex={1} variant="primarySubtle" onClick={goBack}>
-                {t("Go back")}
-              </Button>
-              <Button
-                form="cast-allocation-vote-form"
-                data-testid="continue"
-                flex={1}
-                variant="primaryAction"
-                onClick={onContinue}>
-                {t("Cast your vote")}
-              </Button>
-            </HStack>
-          </Stack>
+          <CastAllocationControlsBottomBar
+            onContinue={onContinue}
+            helperText={
+              <Text fontSize={"16px"} fontWeight={400} color={"#F29B32"} textAlign={["center", "center", "left"]}>
+                <Trans i18nKey={"Once your vote has been cast, you will not be able to revert it."} t={t} />
+              </Text>
+            }
+          />
         </VStack>
       </ResponsiveCard>
     </>
   )
-}
-
-const YourVoteCardWrapper = ({ children }: { children: React.ReactNode }) => {
-  return useBreakpointValue({
-    base: children,
-    lg: (
-      <Card w="full" variant={"filled"}>
-        <CardBody>{children}</CardBody>
-      </Card>
-    ),
-  })
 }

@@ -9,6 +9,7 @@ import { SelectAppVotesInput } from "./SelectAppVotesInput"
 import { scaledDivision } from "@/utils/MathUtils"
 import BigNumber from "bignumber.js"
 import { ResponsiveCard } from "@/components"
+import { CastAllocationControlsBottomBar } from "../../components/CastAllocationControlsBottomBar"
 
 type Props = {
   roundId: string
@@ -32,6 +33,12 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
 
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
   const isVotingConcluded = roundInfo?.voteEndTimestamp?.isBefore() && [1, 2].includes(state ?? 0)
+
+  const percentageDistributed = useMemo(() => {
+    return votes.reduce((acc, vote) => acc + Number(vote.rawValue), 0)
+  }, [votes])
+
+  const isFullyDistributed = percentageDistributed === 100
 
   const onAppVotesChange = useCallback(
     (index: number) => (data: CastAllocationVoteFormData) => {
@@ -70,10 +77,6 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
     if (error) return
     router.push(`/rounds/${roundId}/vote/confirm`)
   }, [router, roundId, error])
-
-  const goBack = useCallback(() => {
-    router.back()
-  }, [router])
 
   const shouldSeeThePage = useMemo(() => {
     return {
@@ -125,24 +128,24 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
           })}
         </VStack>
 
-        <HStack
-          alignSelf={"flex-end"}
-          justify={["space-between", "space-between", "flex-end"]}
-          spacing={4}
-          flex={1}
-          w={["full", "full", "auto"]}>
-          <Button data-testid="go-back" flex={1} variant="primarySubtle" onClick={goBack}>
-            {t("Go back")}
-          </Button>
-          <Button
-            form="cast-allocation-vote-form"
-            data-testid="continue"
-            flex={1}
-            variant="primaryAction"
-            onClick={onContinue}>
-            {t("Cast your vote")}
-          </Button>
-        </HStack>
+        <CastAllocationControlsBottomBar
+          onContinue={onContinue}
+          helperText={
+            error ? (
+              <Text fontSize={"16px"} fontWeight={600} color="#C84968">
+                {error}
+              </Text>
+            ) : (
+              <Text fontSize={"16px"} fontWeight={400} color={isFullyDistributed ? "#3DBA67" : "#252525"}>
+                <Trans
+                  i18nKey={"{{amount}}% distributed"}
+                  values={{ amount: percentageDistributed.toFixed(2) }}
+                  t={t}
+                />
+              </Text>
+            )
+          }
+        />
       </VStack>
     </ResponsiveCard>
   )

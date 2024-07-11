@@ -1,5 +1,5 @@
 {
-  "{{amount}}% distributed": "{{amount}}% distributed",
+  "{{amount}}% distributed": "<strong>{{amount}}</strong>% distributed",
   "Max allocation reached!": "Max allocation reached!",
   "See details": "See details",
   "Your votes": "Your votes",
