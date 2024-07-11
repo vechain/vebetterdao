@@ -1,4 +1,4 @@
-import { XApp, useXAppMetadata, useXApps } from "@/api"
+import { XApp, useMostVotedAppsInRound, usePreviousAllocationRoundId, useXAppMetadata } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
 import {
@@ -24,19 +24,14 @@ type Props = {
   maxApps?: number
 }
 
+// Apps are listed based on the votes they received in the previous round
 export const DashboardXApps = ({ maxApps = 4 }: Props) => {
   const { t } = useTranslation()
-  const { data: xApps } = useXApps()
   const router = useRouter()
 
-  const randomXApps = useMemo(() => {
-    if (!xApps) return []
-
-    // clone xApps array and shuffle it
-    return [...xApps].sort(() => Math.random() - 0.5)
-  }, [xApps])
-
-  const slicedXApps = useMemo(() => randomXApps?.slice(0, maxApps), [randomXApps, maxApps])
+  const { data: previousRoundId } = usePreviousAllocationRoundId()
+  const { data: xApps } = useMostVotedAppsInRound(previousRoundId ?? "")
+  const slicedXApps = useMemo(() => xApps?.slice(0, maxApps), [xApps, maxApps])
 
   if (!slicedXApps?.length) return null
 
@@ -46,7 +41,7 @@ export const DashboardXApps = ({ maxApps = 4 }: Props) => {
         <VStack w="full" justify={"flex-start"} align={"start"}>
           <HStack w="full" justify={"space-between"}>
             <Heading size="md">{t("Explore Apps")}</Heading>
-            {xApps && xApps.length > maxApps && (
+            {!!xApps && xApps.length > maxApps && (
               <Button
                 variant="link"
                 colorScheme="primary"
@@ -64,7 +59,7 @@ export const DashboardXApps = ({ maxApps = 4 }: Props) => {
       </CardHeader>
       <CardBody>
         <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
-          {slicedXApps?.map(xApp => <DashboardXAppCard key={xApp.id} xApp={xApp} />)}
+          {slicedXApps?.map(xApp => <DashboardXAppCard key={xApp.app} xApp={xApp.details} />)}
         </Grid>
       </CardBody>
     </Card>
