@@ -30,27 +30,28 @@ export const CastAllocationControlsBottomBar = ({ onContinue, helperText }: Prop
         spacing={4}
         w={["full", "full", "auto"]}>
         <Button
-          //   borderRadius={"md"}
+          borderRadius={"16px"}
+          flex={1}
+          size="lg"
           leftIcon={<UilArrowLeft />}
-          fontSize="18px"
           data-testid="go-back"
           variant="primarySubtle"
           onClick={router.back}
           //   flex={1}
-          py="16px"
-          px="32px">
+        >
           {t("Go back")}
         </Button>
         <Button
-          //   borderRadius={"md"}
+          flex={1}
+          borderRadius={"16px"}
+          size="lg"
           rightIcon={<UilArrowRight />}
           fontSize="18px"
           data-testid="continue"
           variant="primaryAction"
           onClick={onContinue}
           //   flex={1}
-          py="16px"
-          px="32px">
+        >
           {t("Continue")}
         </Button>
       </HStack>

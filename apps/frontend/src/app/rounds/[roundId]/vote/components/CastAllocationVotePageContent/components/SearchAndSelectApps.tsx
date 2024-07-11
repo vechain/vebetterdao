@@ -1,5 +1,5 @@
 import { XApp } from "@/api"
-import { CastVoteData } from "@/store"
+import { CastAllocationVoteFormData } from "@/store"
 import {
   VStack,
   InputGroup,
@@ -19,8 +19,8 @@ import { useTranslation } from "react-i18next"
 import { NoAppsCard } from "./NoAppsCard"
 
 type Props = {
-  selectedApps: CastVoteData
-  onSelectedAppsChange: (_selectedApps: CastVoteData) => void
+  selectedApps: CastAllocationVoteFormData[]
+  onSelectedAppsChange: (_selectedApps: CastAllocationVoteFormData[]) => void
   xAppsQuery: UseQueryResult<XApp[], Error>
 }
 
