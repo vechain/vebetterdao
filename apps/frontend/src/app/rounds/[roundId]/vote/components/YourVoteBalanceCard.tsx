@@ -24,7 +24,7 @@ export const YourVoteBalanceCard = ({ roundId }: Props) => {
   return (
     <ResponsiveCard>
       <VStack spacing={8} align="flex-start">
-        {!isDesktop && (
+        {isDesktop && (
           <Heading fontSize="24px" fontWeight={700}>
             {t("Your V0T3 balance")}
           </Heading>

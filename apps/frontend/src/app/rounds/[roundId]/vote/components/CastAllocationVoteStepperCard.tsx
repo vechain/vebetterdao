@@ -67,13 +67,16 @@ export const CastAllocationVoteStepperCard = () => {
           index={activeStep}
           orientation={isDesktop ? "vertical" : "horizontal"}
           variant="primaryVertical"
+          gap={0}
           height={isDesktop ? height : "auto"}>
           {Steps.map((step, index) => (
             <Step
               key={index}
-              style={{
-                gap: 0,
-              }}>
+              {...(!isDesktop && {
+                style: {
+                  gap: 0,
+                },
+              })}>
               <StepIndicator>
                 <StepStatus
                   complete={<Circle bg="#004CFC" size={"30%"} />}
@@ -88,9 +91,11 @@ export const CastAllocationVoteStepperCard = () => {
               )}
 
               <StepSeparator
-                style={{
-                  marginInlineStart: 0,
-                }}
+                {...(!isDesktop && {
+                  style: {
+                    marginInlineStart: 0,
+                  },
+                })}
               />
             </Step>
           ))}
