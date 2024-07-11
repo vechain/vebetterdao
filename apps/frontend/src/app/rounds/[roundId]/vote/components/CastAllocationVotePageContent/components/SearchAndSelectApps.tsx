@@ -58,7 +58,12 @@ export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xAppsQ
         <InputLeftElement>
           <Icon as={UilSearch} boxSize={"24px"} color="#6A6A6A" />
         </InputLeftElement>
-        <Input placeholder="Search for an app" value={appsToSearch} onChange={e => setAppsToSearch(e.target.value)} />
+        <Input
+          placeholder="Search for an app"
+          value={appsToSearch}
+          onChange={e => setAppsToSearch(e.target.value)}
+          fontSize={"16px"}
+        />
       </InputGroup>
       <HStack w="full" spacing={4} justify={"space-between"}>
         <Skeleton isLoaded={!xAppsQuery.isLoading}>

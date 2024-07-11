@@ -1,12 +1,11 @@
 import { useAllocationsRound, useAllocationsRoundState, useGetVotesOnBlock, useHasVotedInRound } from "@/api"
-import { Button, Card, CardBody, HStack, Heading, Text, VStack } from "@chakra-ui/react"
+import { Button, HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import { useCallback, useLayoutEffect, useMemo } from "react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useRouter } from "next/navigation"
 import { Trans, useTranslation } from "react-i18next"
-import { useCastAllocationFormStore } from "@/store"
-import { SelectAppVotesInput, CastAllocationVoteFormData } from "./SelectAppVotesInput"
-import { useFieldArray, useForm } from "react-hook-form"
+import { CastAllocationVoteFormData, useCastAllocationFormStore } from "@/store"
+import { SelectAppVotesInput } from "./SelectAppVotesInput"
 import { scaledDivision } from "@/utils/MathUtils"
 import BigNumber from "bignumber.js"
 import { ResponsiveCard } from "@/components"
@@ -29,23 +28,23 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
     account ?? undefined,
   )
 
-  const { formState, control, handleSubmit, getValues } = useForm<CastAllocationVoteFormData>({
-    defaultValues: {
-      votes,
-    },
-  })
-
-  const { errors } = formState
-
-  const { fields, replace } = useFieldArray({
-    control,
-    name: "votes",
-  })
-
   const hasNoVotes = !votesAtSnapshot || votesAtSnapshot === "0"
 
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
   const isVotingConcluded = roundInfo?.voteEndTimestamp?.isBefore() && [1, 2].includes(state ?? 0)
+
+  const onAppVotesChange = useCallback(
+    (index: number) => (data: CastAllocationVoteFormData) => {
+      const updatedVotes = votes.map((vote, i) => {
+        if (i === index) {
+          return data
+        }
+        return vote
+      })
+      onVotesChange(updatedVotes)
+    },
+    [votes, onVotesChange],
+  )
 
   const splitEvenly = useCallback(() => {
     const totalAppsToVote = votes.length
@@ -59,16 +58,18 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
       //   const parsedRawValue = index === randomAppIndex ? rawValue + remainingPercentage : rawValue
       return { appId: vote.appId, value: votesPerApp, rawValue }
     })
-    replace(updatedVotes)
-  }, [votes, replace])
+    onVotesChange(updatedVotes)
+  }, [votes, onVotesChange])
 
-  const onContinue = useCallback(
-    (data: CastAllocationVoteFormData) => {
-      onVotesChange(data.votes)
-      router.push(`/rounds/${roundId}/vote/confirm`)
-    },
-    [router, roundId, onVotesChange],
-  )
+  const error = useMemo(() => {
+    const totalVotes = votes.reduce((acc, vote) => acc + Number(vote.rawValue), 0)
+    if (totalVotes > 100) return "Total votes exceed 100"
+  }, [votes])
+
+  const onContinue = useCallback(() => {
+    if (error) return
+    router.push(`/rounds/${roundId}/vote/confirm`)
+  }, [router, roundId, error])
 
   const goBack = useCallback(() => {
     router.back()
@@ -110,23 +111,14 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
             {t("Split evenly")}
           </Button>
         </HStack>
-        <VStack
-          id="cast-allocation-vote-form"
-          as="form"
-          w="full"
-          spacing={8}
-          align={"flex-start"}
-          onSubmit={handleSubmit(onContinue)}>
-          {fields.map((field, index) => {
+        <VStack w="full" spacing={8} align={"flex-start"}>
+          {votes.map((vote, index) => {
             return (
               <SelectAppVotesInput
-                key={field.id}
-                appId={field.appId}
-                field={field}
-                index={index}
-                control={control}
-                errors={errors}
-                getValues={getValues}
+                onChange={onAppVotesChange(index)}
+                key={vote.appId}
+                error={error}
+                vote={vote}
                 totalVotesAvailable={votesAtSnapshot}
               />
             )
@@ -147,7 +139,7 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
             data-testid="continue"
             flex={1}
             variant="primaryAction"
-            type="submit">
+            onClick={onContinue}>
             {t("Cast your vote")}
           </Button>
         </HStack>
