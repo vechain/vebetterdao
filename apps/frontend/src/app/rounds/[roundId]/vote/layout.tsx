@@ -1,4 +1,5 @@
 "use client"
+import { ResponsiveCard } from "@/components"
 import { useBreakpoints } from "@/hooks"
 import { Card, CardBody, Grid, GridItem, Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
@@ -40,15 +41,11 @@ export default function CastAllocationVoteLayout({ children, params }: Readonly<
     return (
       <VStack spacing={8} align="flex-start" w="full" mt={4}>
         <YourVoteBalanceCard roundId={params.roundId} />
-        <Card w="full" variant="baseWithBorder">
-          <CardBody>
-            <VStack spacing={8} align="flex-start" w="full">
-              <CastAllocationVoteStepperCard />
+        <VStack spacing={8} align="flex-start" w="full">
+          <CastAllocationVoteStepperCard />
 
-              {children}
-            </VStack>
-          </CardBody>
-        </Card>
+          {children}
+        </VStack>
       </VStack>
     )
 
