@@ -310,11 +310,3 @@ To regenerate the i18n translation files run:
 ```
 yarn generate-translations
 ```
-
-## Slither Issue
-
-Note that slither does not seem to be working with the repo as-is 🤷, resulting in an enum type not found error:
-
-```
-slither.solc_parsing.exceptions.ParsingError: Type not found struct Checkpoints.Trace208
-```
