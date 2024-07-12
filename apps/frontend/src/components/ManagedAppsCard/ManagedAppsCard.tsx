@@ -8,6 +8,10 @@ export const ManagedAppsCard = () => {
   const { data: xApps } = useXApps()
   const appsRoles = useGetAppAdministrationRole(xApps?.map(xApp => xApp.id) || [])
 
+  const hasManagedApps = appsRoles.some(role => role.data?.isAdmin || role.data?.isModerator)
+
+  if (!hasManagedApps) return null
+
   return (
     <Card w="full" variant="baseWithBorder">
       <CardBody>
