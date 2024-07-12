@@ -1,7 +1,7 @@
 import { getXAppMetadata, getXAppMetadataQueryKey, useXApps } from "@/api"
 import { getIpfsImage, getIpfsImageQueryKey } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
-import { CastVoteData } from "@/store"
+import { CastAllocationVoteFormData } from "@/store"
 import { Box, Flex, HStack, Image, Skeleton, Spinner, Text, VStack } from "@chakra-ui/react"
 import { useQueries } from "@tanstack/react-query"
 import { useMemo } from "react"
@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next"
 import BigNumber from "bignumber.js"
 
 export type AppVotesBreakdownProps = {
-  votes: CastVoteData
+  votes: CastAllocationVoteFormData[]
   isLoading?: boolean
   minPercentageToNotMerge?: number
 }

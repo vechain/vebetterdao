@@ -1,5 +1,5 @@
 import { XApp } from "@/api"
-import { CastVoteData } from "@/store"
+import { CastAllocationVoteFormData } from "@/store"
 import {
   VStack,
   InputGroup,
@@ -19,8 +19,8 @@ import { useTranslation } from "react-i18next"
 import { NoAppsCard } from "./NoAppsCard"
 
 type Props = {
-  selectedApps: CastVoteData
-  onSelectedAppsChange: (_selectedApps: CastVoteData) => void
+  selectedApps: CastAllocationVoteFormData[]
+  onSelectedAppsChange: (_selectedApps: CastAllocationVoteFormData[]) => void
   xAppsQuery: UseQueryResult<XApp[], Error>
 }
 
@@ -54,11 +54,16 @@ export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xAppsQ
 
   return (
     <VStack w="full" spacing={6}>
-      <InputGroup>
+      <InputGroup size={"lg"}>
         <InputLeftElement>
           <Icon as={UilSearch} boxSize={"24px"} color="#6A6A6A" />
         </InputLeftElement>
-        <Input placeholder="Search for an app" value={appsToSearch} onChange={e => setAppsToSearch(e.target.value)} />
+        <Input
+          placeholder="Search for an app"
+          value={appsToSearch}
+          onChange={e => setAppsToSearch(e.target.value)}
+          fontSize={"16px"}
+        />
       </InputGroup>
       <HStack w="full" spacing={4} justify={"space-between"}>
         <Skeleton isLoaded={!xAppsQuery.isLoading}>
