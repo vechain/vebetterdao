@@ -101,7 +101,7 @@ jobs:
       # Compile contracts before running Slither
       - name: Compile contracts
         if: steps.contract_changes.outputs.src == 'true'
-        run: npx hardhat compile
+        run: yarn contracts:compile
 
       # Run Slither if Solidity changes are detected
       - name: Run Slither
