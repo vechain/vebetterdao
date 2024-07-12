@@ -1,8 +1,6 @@
 import axios from "axios"
 import FormData from "form-data"
-
-// The IPFS pinning service to use
-const IPFS_PINNING_SERVICE = process.env.NEXT_PUBLIC_IPFS_PINNING_SERVICE ?? ""
+import { getConfig } from "@repo/config"
 
 /**
  * Validate IPFS URI strings. An example of a valid IPFS URI is:
@@ -39,7 +37,7 @@ export async function uploadBlobToIPFS(blob: Blob, filename: string): Promise<st
   try {
       const form = new FormData();
       form.append('file', blob, filename);
-      const response = await axios.post(IPFS_PINNING_SERVICE, form);
+      const response = await axios.post(getConfig().ipfsPinningService, form);
 
       // Extract the IPFS hash from the response
       const ipfsHash = response.data.IpfsHash;
