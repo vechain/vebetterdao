@@ -38,9 +38,7 @@ export const CastAllocationControlsBottomBar = ({ onContinue, helperText }: Prop
           leftIcon={<UilArrowLeft />}
           data-testid="go-back"
           variant="primarySubtle"
-          onClick={router.back}
-          //   flex={1}
-        >
+          onClick={router.back}>
           {t("Go back")}
         </Button>
         <Button
@@ -51,9 +49,7 @@ export const CastAllocationControlsBottomBar = ({ onContinue, helperText }: Prop
           fontSize="18px"
           data-testid="continue"
           variant="primaryAction"
-          onClick={onContinue}
-          //   flex={1}
-        >
+          onClick={onContinue}>
           {t("Continue")}
         </Button>
       </HStack>
