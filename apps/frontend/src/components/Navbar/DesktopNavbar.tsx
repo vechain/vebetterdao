@@ -14,7 +14,7 @@ type Props = {
   routesToRender: Route[]
 }
 export const DesktopNavBar: React.FC<Props> = ({ routesToRender }) => {
-  const [isLargerThan1800] = useMediaQuery("(min-width: 2000px)")
+  const [isLargerThan1800] = useMediaQuery("(min-width: 1800px)")
   return (
     <>
       <HStack flex={1} justifyContent={"start"}>
