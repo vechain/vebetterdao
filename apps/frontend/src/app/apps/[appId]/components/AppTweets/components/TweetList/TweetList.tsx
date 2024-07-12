@@ -1,41 +1,28 @@
 import { useTweets } from "@/api/twitter/hooks/useTweets"
 import { useCurrentAppMetadata } from "@/app/apps/[appId]/hooks"
 import { Spinner, VStack } from "@chakra-ui/react"
-import { useCallback, useMemo, useState } from "react"
+import { Dispatch, SetStateAction, useCallback, useMemo, useState } from "react"
 import InfiniteScroll from "react-infinite-scroll-component"
 import { TweetCard } from "./components/TweetCard"
 
 type Props = {
   editMode: boolean
-  tweetsToRemove: string[]
-  removeTweet: (tweet: string) => void
+  tweets: string[]
+  setTweets: Dispatch<SetStateAction<string[]>>
 }
 
 const STEP = 10
 
-export const TweetList = ({ editMode, tweetsToRemove, removeTweet }: Props) => {
+export const TweetList = ({ editMode, tweets, setTweets }: Props) => {
   const { appMetadata, appMetadataLoading } = useCurrentAppMetadata()
+  const [visibleTweetCursor, setVisibleTweetCursor] = useState(STEP)
+  const visibleTweetIds = useMemo(() => tweets.slice(0, visibleTweetCursor), [tweets, visibleTweetCursor])
 
-  const metadataTweets = useMemo(() => appMetadata?.tweets?.filter(Boolean) ?? [], [appMetadata?.tweets])
-  const filteredMetadataTweets = useMemo(
-    () => metadataTweets.filter(tweet => !tweetsToRemove.includes(tweet)),
-    [metadataTweets, tweetsToRemove],
-  )
-
-  const [visibleTweetIds, setVisibleTweetIds] = useState<string[]>(metadataTweets?.slice(0, STEP))
-
-  const filteredTweetId = useMemo(() => {
-    return visibleTweetIds.filter(tweet => !tweetsToRemove.includes(tweet)).filter(Boolean) as string[]
-  }, [tweetsToRemove, visibleTweetIds])
-
-  const visibleTweets = useTweets(filteredTweetId)
+  const visibleTweets = useTweets(visibleTweetIds)
 
   const loadData = useCallback(() => {
-    setVisibleTweetIds(prev => [
-      ...prev,
-      ...(metadataTweets?.slice(visibleTweets.length, visibleTweets.length + STEP) ?? []),
-    ])
-  }, [metadataTweets, visibleTweets.length])
+    setVisibleTweetCursor(prev => prev + STEP)
+  }, [])
 
   if (!appMetadata) {
     return null
@@ -46,13 +33,20 @@ export const TweetList = ({ editMode, tweetsToRemove, removeTweet }: Props) => {
   }
   return (
     <InfiniteScroll
-      dataLength={filteredMetadataTweets.length}
+      dataLength={tweets.length}
       next={loadData}
-      hasMore={visibleTweets.length < filteredMetadataTweets.length}
+      hasMore={visibleTweets.length < tweets.length}
       loader={<Spinner size="md" alignSelf={"center"} />}>
-      <VStack alignItems="stretch" p={3}>
+      <VStack alignItems="stretch" py={3} gap={4}>
         {visibleTweets?.map((tweetQuery, index) => (
-          <TweetCard key={index} tweetQuery={tweetQuery} editMode={editMode} removeTweet={removeTweet} />
+          <TweetCard
+            key={index}
+            tweetQuery={tweetQuery}
+            editMode={editMode}
+            index={index}
+            setTweets={setTweets}
+            tweets={tweets}
+          />
         ))}
       </VStack>
     </InfiniteScroll>
