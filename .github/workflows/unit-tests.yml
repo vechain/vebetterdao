@@ -26,8 +26,8 @@ jobs:
       - name: Use Node v20
         uses: actions/setup-node@v3
         with:
-          node-version-file: .nvmrc
-          cache: "yarn"
+          node-version: '20'
+          cache: 'yarn'
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
@@ -98,7 +98,12 @@ jobs:
         if: steps.lambda_changes.outputs.src == 'true' && !(steps.contract_changes.outputs.src == 'true' || steps.utils_changes.outputs.src == 'true')
         run: yarn test --filter=lambda
 
-        # Run Slither if Solidity changes are detected
+      # Compile contracts before running Slither
+      - name: Compile contracts
+        if: steps.contract_changes.outputs.src == 'true'
+        run: npx hardhat compile
+
+      # Run Slither if Solidity changes are detected
       - name: Run Slither
         uses: crytic/slither-action@v0.4.0
         id: slither
