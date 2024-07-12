@@ -75,7 +75,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 
         {/* Twitter Metadata */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta property="twitter:url" content="%VITE_BASE_URL%" />
         <meta name="twitter:title" content="VeBetterDAO" />
         <meta
           name="twitter:description"

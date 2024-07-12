@@ -1,5 +1,6 @@
 import { useBreakpoints } from "@/hooks"
 import { Grid, GridItem, Spinner, VStack } from "@chakra-ui/react"
+import { getConfig } from "@repo/config"
 import { Metadata, ResolvingMetadata } from "next"
 import dynamic from "next/dynamic"
 
@@ -21,8 +22,15 @@ export async function generateMetadata({ params }: Props, _parent: ResolvingMeta
 
   return {
     title: `Round ${id} - VeBetterDAO`,
+    description: `Cast your vote for round ${id} on VeBetterDAO and earn rewards!`,
     openGraph: {
       description: `Cast your vote for round ${id} on VeBetterDAO and earn rewards!`,
+    },
+    twitter: {
+      title: `Round ${id} - VeBetterDAO`,
+      description: `Cast your vote for round ${id} on VeBetterDAO and earn rewards!`,
+      card: "summary_large_image",
+      site: getConfig().basePath,
     },
   }
 }
