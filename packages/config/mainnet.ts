@@ -2,6 +2,8 @@ import { AppConfig } from "."
 const config: AppConfig = {
   environment: "mainnet",
   basePath: "https://governance.vebetterdao.org",
+  ipfsPinningService: "https://api.gateway-proxy.vechain.org/api/v1/pinning/pinFileToIPFS",
+  ipfsFetchingService: "https://api.gateway-proxy.vechain.org/ipfs",
   mixPanelProjectToken: "ca73190b6b9b4673f8f1e09bc9f4d8b6",
   b3trContractAddress: "0x5ef79995FE8a89e0812330E4378eB2660ceDe699",
   vot3ContractAddress: "0x76Ca782B59C74d088C7D2Cce2f211BC00836c602",

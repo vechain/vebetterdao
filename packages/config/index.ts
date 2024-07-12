@@ -8,6 +8,8 @@ import { Network } from "@repo/constants"
 export type AppConfig = {
   environment: EnvConfig
   basePath?: string
+  ipfsPinningService: string
+  ipfsFetchingService: string
   mixPanelProjectToken?: string
   b3trContractAddress: string
   vot3ContractAddress: string
