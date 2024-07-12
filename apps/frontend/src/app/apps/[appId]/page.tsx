@@ -1,22 +1,58 @@
-"use client"
+import { ResolvingMetadata, Metadata } from "next"
+import { getConfig } from "@repo/config"
+import { AppDetailPage } from "./AppDetailPage"
+import { getNodeJsConnex } from "@/utils"
 
-import { MotionVStack } from "@/components"
-import { AnalyticsUtils } from "@/utils"
-import { Spinner, VStack } from "@chakra-ui/react"
-import dynamic from "next/dynamic"
-import { useEffect } from "react"
+//Need precise import to avoid having dapp-kit imported and indexed somewhere
+import { getXApps } from "@/api/contracts/xApps/getXApps"
+import { getXAppMetadata } from "@/api/contracts/xApps/getXAppMetadata"
 
-const AppDetailPageContent = dynamic(
-  () => import("./components/AppDetailPageContent").then(mod => mod.AppDetailPageContent),
-  {
-    ssr: false,
-    loading: () => (
-      <VStack w="full" spacing={12} h="80vh" justify="center">
-        <Spinner size={"lg"} />
-      </VStack>
-    ),
-  },
-)
+import { compareAddresses } from "@repo/utils/AddressUtils"
+import { getXAppsMetadataBaseUri } from "@/api/contracts/xApps/getXAppsMetadataBaseUri"
+import { getIpfsMetadata } from "@/api/ipfs"
+
+export async function generateMetadata({ params }: Props, _parent: ResolvingMetadata): Promise<Metadata> {
+  // read route params
+  const id = params.appId
+
+  // optionally access and extend (rather than replace) parent metadata
+  //   const previousImages = (await parent).openGraph?.images || []
+
+  console.log("Generating metadata for round", id)
+
+  const connex = await getNodeJsConnex()
+
+  const xApps = await getXApps(connex.thor)
+
+  const app = xApps.find(app => compareAddresses(app.id, id))
+
+  if (!app) throw new Error(`App ${id} not found`)
+
+  const baseUri = await getXAppsMetadataBaseUri(connex.thor)
+
+  const metadata = await getXAppMetadata(`${baseUri}${app.metadataURI}`)
+
+  if (!metadata) return {}
+
+  const bannerImage = await getIpfsMetadata<string>(metadata.banner, false)
+
+  return {
+    title: `${metadata.name} - VeBetterDAO`,
+    description: `${metadata.name} is part of VeBetterDAO! ${metadata.description}`,
+    openGraph: {
+      description: metadata.description,
+      images: [bannerImage],
+    },
+    twitter: {
+      title: `${metadata.name} - VeBetterDAO`,
+      description: `${metadata.name} is part of VeBetterDAO! ${metadata.description}`,
+      images: [bannerImage],
+      card: "summary_large_image",
+      site: getConfig().basePath,
+    },
+  }
+}
+
 type Props = {
   params: {
     appId: string
@@ -24,13 +60,5 @@ type Props = {
 }
 
 export default function AppDetail({ params }: Readonly<Props>) {
-  useEffect(() => {
-    AnalyticsUtils.trackPage(`App/${params.appId}`)
-  }, [params.appId])
-
-  return (
-    <MotionVStack>
-      <AppDetailPageContent />
-    </MotionVStack>
-  )
+  return <AppDetailPage params={params} />
 }
