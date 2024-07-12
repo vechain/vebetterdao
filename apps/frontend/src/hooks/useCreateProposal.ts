@@ -31,6 +31,11 @@ export type useCreateProposalProps = {
   onSuccess?: () => void
 }
 
+export type ReducedActions = {
+  contractsAddress: string[]
+  calldatas: string[]
+}
+
 type BuildClausesProps = {
   description: string
   actions: ProposalAction[]
@@ -78,10 +83,7 @@ export const useCreateProposal = ({
   const buildClauses = useCallback(
     ({ description, actions, startRoundId, depositAmount }: BuildClausesProps) => {
       if (!account) throw new Error("Account is required")
-      type ReducedActions = {
-        contractsAddress: string[]
-        calldatas: string[]
-      }
+
       const clauses: EnhancedClause[] = []
       const parsedDepositAmount = ethers.parseEther(depositAmount).toString()
 
