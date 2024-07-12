@@ -3,7 +3,7 @@ import { Card, CardBody, HStack, Heading, VStack } from "@chakra-ui/react"
 import { AppDetails } from "./components/AppDetails"
 import { useTranslation } from "react-i18next"
 
-export const DashboardManagedAppsCard = () => {
+export const ManagedAppsCard = () => {
   const { t } = useTranslation()
   const { data: xApps } = useXApps()
   const appsRoles = useGetAppAdministrationRole(xApps?.map(xApp => xApp.id) || [])

@@ -4,7 +4,7 @@ import { GmNFT } from "./GmNFT"
 import { VoterRewards } from "./VoterRewards"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { WalletNotConnectedOverlay } from "./WalletNotConnectedOverlay"
-import { DashboardManagedAppsCard } from "./DashboardManagedAppsCard"
+import { ManagedAppsCard } from "./ManagedAppsCard"
 
 export const DashboardSideBar = () => {
   const { account } = useWallet()
@@ -14,7 +14,7 @@ export const DashboardSideBar = () => {
       <BalanceCard />
       <VoterRewards />
       <GmNFT />
-      <DashboardManagedAppsCard />
+      <ManagedAppsCard />
     </VStack>
   )
 }
