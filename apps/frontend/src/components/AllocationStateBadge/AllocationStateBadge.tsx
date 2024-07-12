@@ -1,6 +1,6 @@
-import { useAllocationsRoundState } from "@/api"
+import { useAllocationsRound, useAllocationsRoundState } from "@/api"
 import { HStack, Icon, Skeleton, StackProps, Text, TextProps } from "@chakra-ui/react"
-import { ReactNode } from "react"
+import { ReactNode, useMemo } from "react"
 import { DotSymbol } from "../DotSymbol"
 import { FaThumbsUp } from "react-icons/fa6"
 
@@ -19,6 +19,10 @@ export const AllocationStateBadge = ({
   containerProps = {},
 }: Props) => {
   const { data, isLoading, error } = useAllocationsRoundState(roundId)
+  const { data: allocationRound } = useAllocationsRound(roundId)
+  const isActive = useMemo(() => {
+    return allocationRound?.state === 0 && allocationRound?.voteEndTimestamp?.isAfter()
+  }, [allocationRound])
 
   if (isLoading)
     return (
@@ -65,7 +69,7 @@ export const AllocationStateBadge = ({
       />
     )
 
-  if (data === 0)
+  if (isActive)
     return (
       <Badge
         textProps={{
@@ -88,7 +92,7 @@ export const AllocationStateBadge = ({
         icon={renderIcon ? <DotSymbol pulse size={2} color={"#3A6F00"} /> : undefined}
       />
     )
-  if ([1, 2].includes(data))
+  if (!isActive)
     return (
       <Badge
         textProps={{
