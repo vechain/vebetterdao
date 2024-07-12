@@ -66,8 +66,8 @@ export const LatestAllocationDetails = ({ appId }: { appId: string }) => {
 
         <VStack align="self-start" color={percentageChange >= 0 ? "#3DBA67" : "#C84968"} fontSize="14px" spacing={0}>
           <Text>
-            {percentageChange >= 0 ? "+" : "-"}
-            {percentageChange > 0 ? percentageChange.toFixed(2) : 0}
+            {percentageChange >= 0 ? "+" : ""}
+            {percentageChange.toString().slice(0, 4)}
             {"% than "}
           </Text>
           <Text>{t("previous round")}</Text>

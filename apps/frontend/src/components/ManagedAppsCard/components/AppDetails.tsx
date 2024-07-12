@@ -1,4 +1,4 @@
-import { XApp, useXAppMetadata } from "@/api"
+import { useXAppMetadata } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
 import { HStack, Heading, IconButton, Image, Skeleton, VStack } from "@chakra-ui/react"
@@ -9,26 +9,24 @@ import { LatestAllocationDetails } from "./LatestAllocationDetails"
 import { RoleDetails } from "./RoleDetails"
 
 type Props = {
-  app: XApp
+  appId: string
   isAdmin: boolean
   isModerator: boolean
 }
 
-export const AppDetails = ({ app, isAdmin, isModerator }: Props) => {
+export const AppDetails = ({ appId, isAdmin, isModerator }: Props) => {
   const router = useRouter()
   const {
     data: appMetadata,
     isLoading: appMetadataLoading,
     isError: isAppMetadataError,
     error: appMetadataError,
-  } = useXAppMetadata(app.id)
+  } = useXAppMetadata(appId)
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
 
-  console.log(isModerator)
-
   const navigateToAppDetail = useCallback(() => {
-    router.push(`/apps/${app.id}`)
-  }, [router, app.id])
+    router.push(`/apps/${appId}`)
+  }, [router, appId])
 
   return (
     <VStack alignItems={"start"} justify={"flex-start"} w={"full"} spacing={4}>
@@ -57,7 +55,7 @@ export const AppDetails = ({ app, isAdmin, isModerator }: Props) => {
         </Skeleton>
       </HStack>
 
-      <LatestAllocationDetails appId={app.id} />
+      <LatestAllocationDetails appId={appId} />
       <RoleDetails isAdmin={isAdmin} isModerator={isModerator} />
     </VStack>
   )
