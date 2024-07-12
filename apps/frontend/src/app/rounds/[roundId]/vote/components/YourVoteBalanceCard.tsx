@@ -1,3 +1,4 @@
+"use client"
 import { useAllocationsRound, useGetVotesOnBlock } from "@/api"
 import { VOT3Icon } from "@/components"
 import { Card, CardBody, VStack, Heading, Box, HStack, Skeleton, Text } from "@chakra-ui/react"

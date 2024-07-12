@@ -1,11 +1,28 @@
-"use client"
 import { Grid, GridItem, Spinner, VStack } from "@chakra-ui/react"
+import { Metadata, ResolvingMetadata } from "next"
 import dynamic from "next/dynamic"
 
 type Props = {
   children: React.ReactNode
   params: {
     roundId: string
+  }
+}
+
+export async function generateMetadata({ params }: Props, _parent: ResolvingMetadata): Promise<Metadata> {
+  // read route params
+  const id = params.roundId
+
+  // optionally access and extend (rather than replace) parent metadata
+  //   const previousImages = (await parent).openGraph?.images || []
+
+  console.log("Generating metadata for round", id)
+
+  return {
+    title: `Round ${id} - VeBetterDAO`,
+    openGraph: {
+      description: `Cast your vote for round ${id} on VeBetterDAO and earn rewards!`,
+    },
   }
 }
 

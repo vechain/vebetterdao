@@ -1,3 +1,4 @@
+"use client"
 import { useAllocationsRound, useAllocationsRoundState, useGetVotesOnBlock, useHasVotedInRound } from "@/api"
 import { Button, Card, CardBody, HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import { useCallback, useLayoutEffect, useMemo } from "react"

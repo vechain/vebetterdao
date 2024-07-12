@@ -1,3 +1,4 @@
+"use client"
 import { DotSymbol } from "@/components"
 import {
   Box,
