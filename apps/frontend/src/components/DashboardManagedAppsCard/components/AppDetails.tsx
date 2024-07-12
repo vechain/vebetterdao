@@ -5,6 +5,9 @@ import { HStack, Heading, IconButton, Image, Skeleton, VStack } from "@chakra-ui
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { FiArrowUpRight } from "react-icons/fi"
+import { LatestAllocationDetails } from "./LatestAllocationDetails"
+import { RoleDetails } from "./RoleDetails"
+
 type Props = {
   app: XApp
   isAdmin: boolean
@@ -28,7 +31,7 @@ export const AppDetails = ({ app, isAdmin, isModerator }: Props) => {
   }, [router, app.id])
 
   return (
-    <VStack alignItems={"start"} justify={"flex-start"} w={"full"}>
+    <VStack alignItems={"start"} justify={"flex-start"} w={"full"} spacing={4}>
       <HStack spacing={1} justifyContent={"space-between"} w={"full"}>
         <HStack>
           <Skeleton isLoaded={!isLogoLoading} alignContent={"start"}>
@@ -53,9 +56,9 @@ export const AppDetails = ({ app, isAdmin, isModerator }: Props) => {
           />
         </Skeleton>
       </HStack>
-      <HStack alignItems={"self-start"} spacing={3}>
-        <Heading size="sm">{isAdmin ? "Admin" : "Moderator"}</Heading>
-      </HStack>
+
+      <LatestAllocationDetails appId={app.id} />
+      <RoleDetails isAdmin={isAdmin} isModerator={isModerator} />
     </VStack>
   )
 }

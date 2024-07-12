@@ -13,8 +13,8 @@ export const DashboardSideBar = () => {
       {!account && <WalletNotConnectedOverlay description="Connect your wallet to check your balance" />}
       <BalanceCard />
       <VoterRewards />
-      <DashboardManagedAppsCard />
       <GmNFT />
+      <DashboardManagedAppsCard />
     </VStack>
   )
 }
