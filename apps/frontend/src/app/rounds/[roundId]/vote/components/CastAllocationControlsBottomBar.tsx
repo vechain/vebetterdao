@@ -1,4 +1,4 @@
-import { Stack, HStack, Button } from "@chakra-ui/react"
+import { Stack, HStack, Button, useMediaQuery } from "@chakra-ui/react"
 import { UilArrowLeft, UilArrowRight } from "@iconscout/react-unicons"
 import { t } from "i18next"
 import { useRouter } from "next/navigation"
@@ -9,6 +9,7 @@ type Props = {
 }
 export const CastAllocationControlsBottomBar = ({ onContinue, helperText }: Props) => {
   const router = useRouter()
+  const [isLargerThan1200] = useMediaQuery("(min-width: 1200px)")
   return (
     <Stack
       direction={["column", "column", "row"]}
@@ -19,7 +20,8 @@ export const CastAllocationControlsBottomBar = ({ onContinue, helperText }: Prop
       pos="fixed"
       bottom={0}
       left={0}
-      p={"16px"}
+      py={"16px"}
+      px={isLargerThan1200 ? "48px" : "20px"}
       bg="#FFFFFF"
       zIndex={2}
       boxShadow={"0px -8px 16px 0px #00000014"}>

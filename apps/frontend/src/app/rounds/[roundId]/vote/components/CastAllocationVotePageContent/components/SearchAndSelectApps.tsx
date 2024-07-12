@@ -54,7 +54,7 @@ export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xAppsQ
 
   return (
     <VStack w="full" spacing={6}>
-      <InputGroup>
+      <InputGroup size={"lg"}>
         <InputLeftElement>
           <Icon as={UilSearch} boxSize={"24px"} color="#6A6A6A" />
         </InputLeftElement>
