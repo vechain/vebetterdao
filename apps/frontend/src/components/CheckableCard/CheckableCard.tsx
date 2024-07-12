@@ -57,6 +57,7 @@ export const CheckableCard: React.FC<CheckableCardProps> = ({
             <Image src={imageSrc} boxSize={32} alt={`Checkable card image for ${title}`} />
             {inputType === "checkbox" ? (
               <Checkbox
+                pointerEvents={"none"}
                 size="lg"
                 data-testid={`checkable-card__${title}__checkbox`}
                 isChecked={checked}
