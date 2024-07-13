@@ -4,12 +4,15 @@ import { FaWallet } from "react-icons/fa6"
 import { AddressIcon } from "./AddressIcon"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
+import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
 
 type Props = {
   responsiveVariant?: "desktop" | "mobile"
 }
 export const ConnectWalletButton = ({ responsiveVariant }: Props) => {
   const { account } = useWallet()
+  const { name } = useWalletName(account)
+
   const { open } = useWalletModal()
   const [isDesktop] = useMediaQuery("(min-width: 1060px)")
   const { t } = useTranslation()
@@ -49,7 +52,7 @@ export const ConnectWalletButton = ({ responsiveVariant }: Props) => {
         <Button onClick={open} rounded={"full"} size="md" variant={"ghost"}>
           <HStack spacing={2}>
             <AddressIcon address={account} boxSize={"28px"} rounded={"full"} />
-            <Text fontWeight={"400"}>{humanAddress(account, 4, 6)}</Text>
+            <Text fontWeight={"400"}>{name || humanAddress(account, 4, 6)}</Text>
           </HStack>
         </Button>
       </Fade>
