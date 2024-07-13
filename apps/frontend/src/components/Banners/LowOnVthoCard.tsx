@@ -1,4 +1,4 @@
-import { useAccountBalance, useB3trBalance, useVot3Balance } from "@/api"
+import { getAccountBalanceQueryKey, useAccountBalance, useB3trBalance, useVot3Balance } from "@/api"
 import { Button, Card, CardBody, Grid, GridItem, Heading, Image, Text, VStack } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import BigNumber from "bignumber.js"
@@ -6,6 +6,7 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { FiArrowUpRight } from "react-icons/fi"
 import { useTranslation } from "react-i18next"
 import { Transak, TransakConfig } from "@transak/transak-sdk"
+import { useQueryClient } from "@tanstack/react-query"
 
 const isProduction = process.env.NODE_ENV === "production"
 export const apiKey = process.env.NEXT_PUBLIC_TRANSAK_API_KEY ?? ""
@@ -13,6 +14,7 @@ export const apiKey = process.env.NEXT_PUBLIC_TRANSAK_API_KEY ?? ""
 const minVtho = 5
 export const LowOnVthoCard: React.FC = () => {
   const { t } = useTranslation()
+  const queryClient = useQueryClient()
   const { account } = useWallet()
   const { data: balance, isLoading: balanceLoading } = useAccountBalance(account ?? undefined)
   const { data: b3trBalance } = useB3trBalance(account ?? undefined)
@@ -69,11 +71,22 @@ export const LowOnVthoCard: React.FC = () => {
     transak.init()
 
     // Listen to all the events
-    Transak.on("*", () => {
+    // We could also listen to specific events like "TRANSACTION_SUCCESSFUL",
+    // but the action we make is the same for all events (just to close the widget and refetch balance)
+    Transak.on("*", async () => {
+      // Close the widget
       transak.close()
-      // TODO:refresh user balance
+
+      // Refresh user balance
+      await queryClient.cancelQueries({
+        queryKey: getAccountBalanceQueryKey(account ?? undefined),
+      })
+
+      await queryClient.refetchQueries({
+        queryKey: getAccountBalanceQueryKey(account ?? undefined),
+      })
     })
-  }, [transakConfig])
+  }, [transakConfig, account, queryClient])
 
   const handleOnPress = () => {
     initTransak()
