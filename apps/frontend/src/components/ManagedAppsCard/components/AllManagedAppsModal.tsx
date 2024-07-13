@@ -1,7 +1,15 @@
 import { AppAdministrationRole } from "@/api"
 import { AppDetails } from "./AppDetails"
-import { Heading, Modal, ModalBody, ModalCloseButton, ModalHeader, ModalOverlay, VStack } from "@chakra-ui/react"
-import { CustomModalContent } from "@/components/CustomModalContent"
+import {
+  Heading,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+  ModalOverlay,
+  VStack,
+} from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
 type Props = {
@@ -16,7 +24,7 @@ export const AllManagedAppsModal = ({ userAppRoles, isOpen, onClose }: Props) =>
     <Modal isOpen={isOpen} onClose={onClose} size={"xl"} trapFocus={true} isCentered={true} closeOnOverlayClick={true}>
       <ModalOverlay />
 
-      <CustomModalContent>
+      <ModalContent>
         <ModalHeader>
           <Heading size="lg">{t("Managed apps")}</Heading>
         </ModalHeader>
@@ -38,7 +46,7 @@ export const AllManagedAppsModal = ({ userAppRoles, isOpen, onClose }: Props) =>
             })}
           </VStack>
         </ModalBody>
-      </CustomModalContent>
+      </ModalContent>
     </Modal>
   )
 }
