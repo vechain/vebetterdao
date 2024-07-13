@@ -26,7 +26,13 @@ export const AllManagedAppsModal = ({ userAppRoles, isOpen, onClose }: Props) =>
             {userAppRoles.map((role, index) => {
               if (role.isAdmin || role.isModerator) {
                 return (
-                  <AppDetails appId={role.appId} isAdmin={role.isAdmin} isModerator={role.isModerator} key={index} />
+                  <AppDetails
+                    appId={role.appId}
+                    isAdmin={role.isAdmin}
+                    isModerator={role.isModerator}
+                    key={index}
+                    showDivider={true}
+                  />
                 )
               }
             })}

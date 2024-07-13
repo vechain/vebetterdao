@@ -1,7 +1,7 @@
 import { useXAppMetadata } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
-import { HStack, Heading, IconButton, Image, Skeleton, VStack } from "@chakra-ui/react"
+import { Divider, HStack, Heading, IconButton, Image, Skeleton, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { FiArrowUpRight } from "react-icons/fi"
@@ -12,9 +12,10 @@ type Props = {
   appId: string
   isAdmin: boolean
   isModerator: boolean
+  showDivider?: boolean
 }
 
-export const AppDetails = ({ appId, isAdmin, isModerator }: Props) => {
+export const AppDetails = ({ appId, isAdmin, isModerator, showDivider = false }: Props) => {
   const router = useRouter()
   const {
     data: appMetadata,
@@ -57,6 +58,8 @@ export const AppDetails = ({ appId, isAdmin, isModerator }: Props) => {
 
       <LatestAllocationDetails appId={appId} />
       <RoleDetails isAdmin={isAdmin} isModerator={isModerator} />
+
+      {showDivider && <Divider w={"full"} />}
     </VStack>
   )
 }
