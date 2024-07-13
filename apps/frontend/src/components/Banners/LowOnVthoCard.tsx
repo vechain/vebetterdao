@@ -70,11 +70,24 @@ export const LowOnVthoCard: React.FC = () => {
     const transak = new Transak(transakConfig)
     transak.init()
 
-    // Listen to all the events
-    // We could also listen to specific events like "TRANSACTION_SUCCESSFUL",
-    // but the action we make is the same for all events (just to close the widget and refetch balance)
-    Transak.on("*", async () => {
-      // Close the widget
+    // This will trigger when the user closed the widget
+    Transak.on(Transak.EVENTS.TRANSAK_WIDGET_CLOSE, () => {
+      transak.close()
+    })
+
+    Transak.on(Transak.EVENTS.TRANSAK_ORDER_FAILED, () => {
+      transak.close()
+    })
+
+    Transak.on(Transak.EVENTS.TRANSAK_ORDER_CANCELLED, () => {
+      transak.close()
+    })
+
+    /*
+     * This will trigger when the user marks payment is made
+     * You can close/navigate away at this event
+     */
+    Transak.on(Transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, async () => {
       transak.close()
 
       // Refresh user balance
