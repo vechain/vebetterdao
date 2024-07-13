@@ -19,7 +19,6 @@ import { useCallback } from "react"
 import { ModalEditTeamWalletAddress } from "./components/ModalEditTeamWalletAddress"
 import { UilPen } from "@iconscout/react-unicons"
 import { ModalEditAdminAddress } from "./components/ModalEditAdminAddress"
-import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
 
 type Props = {
   form: UseFormReturn<AdminAppForm>
@@ -40,8 +39,6 @@ export const EditAppAddresses = ({
   const { admin } = useCurrentAppAdmin()
   const { app } = useCurrentAppInfo()
   const { errors } = form.formState
-  const { name } = useWalletName(form.watch("teamWalletAddress"))
-  // const { name: name2 } = useWalletName(editTeamWalletAddress)
 
   const modalEditAdminAddress = useDisclosure()
   const handleEditAdminAddress = useCallback(() => {
@@ -79,7 +76,6 @@ export const EditAppAddresses = ({
               defaultValue={app?.teamWalletAddress}></Input>
             {!editTeamWalletAddress && (
               <InputRightElement width="auto">
-                <Text>{name}</Text>
                 <Button
                   variant="primaryGhost"
                   bg="#FFFFFF"
@@ -121,7 +117,6 @@ export const EditAppAddresses = ({
               defaultValue={admin}></Input>
             {!editAdminAddress && (
               <InputRightElement width="auto">
-                <Text>{name}</Text>
                 <Button
                   variant="primaryGhost"
                   bg="#FFFFFF"
