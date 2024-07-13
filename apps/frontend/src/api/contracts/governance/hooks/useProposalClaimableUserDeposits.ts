@@ -1,11 +1,11 @@
 import { useQueries } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
-import { ProposalCreatedEvent } from "./useProposalsEvents"
 import { getProposalUserDeposit } from "./useProposalUserDeposit"
 import { ProposalState, getProposalState, getProposalStateQueryKey } from "./useProposalState"
 import { ProposalDeposit } from "../utils"
 import { queryClient } from "@/api/QueryProvider"
+import { ProposalCreatedEvent } from "../getProposalsEvents"
 
 /**
  * Returns a key used for deposit queries in the context of a proposal.
