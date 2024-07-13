@@ -87,15 +87,15 @@ export const LowOnVthoCard: React.FC = () => {
      * This will trigger when the user marks payment is made
      * You can close/navigate away at this event
      */
-    Transak.on(Transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, async () => {
+    Transak.on(Transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, () => {
       transak.close()
 
       // Refresh user balance
-      await queryClient.cancelQueries({
+      queryClient.cancelQueries({
         queryKey: getAccountBalanceQueryKey(account ?? undefined),
       })
 
-      await queryClient.refetchQueries({
+      queryClient.refetchQueries({
         queryKey: getAccountBalanceQueryKey(account ?? undefined),
       })
     })
