@@ -7,6 +7,9 @@ import { FiArrowUpRight } from "react-icons/fi"
 import { useTranslation } from "react-i18next"
 import { Transak, TransakConfig } from "@transak/transak-sdk"
 
+const isProduction = process.env.NODE_ENV === "production"
+export const apiKey = process.env.NEXT_PUBLIC_TRANSAK_API_KEY ?? ""
+
 const minVtho = 5
 export const LowOnVthoCard: React.FC = () => {
   const { t } = useTranslation()
@@ -39,10 +42,9 @@ export const LowOnVthoCard: React.FC = () => {
     }
   }, [balance])
 
-  // Transak
   const transakConfig: TransakConfig = useMemo(
     () => ({
-      apiKey: "c864513e-2de0-4382-8597-16b419d75f6e",
+      apiKey,
       walletAddress: account ?? "",
       productsAvailed: "BUY",
       networks: "vechain",
@@ -55,9 +57,9 @@ export const LowOnVthoCard: React.FC = () => {
       defaultCryptoCurrency: "VTHO",
       backgroundColors: "#ffffff",
       colorMode: "LIGHT",
-      themeColor: "28008c",
+      themeColor: "#28008c",
       hideMenu: true,
-      environment: Transak.ENVIRONMENTS.STAGING,
+      environment: isProduction ? Transak.ENVIRONMENTS.PRODUCTION : Transak.ENVIRONMENTS.STAGING,
     }),
     [account],
   )
@@ -66,30 +68,10 @@ export const LowOnVthoCard: React.FC = () => {
     const transak = new Transak(transakConfig)
     transak.init()
 
-    // This will trigger when the user closed the widget
-    Transak.on(Transak.EVENTS.TRANSAK_WIDGET_CLOSE, () => {
+    // Listen to all the events
+    Transak.on("*", () => {
       transak.close()
-      // onClose()
-      // navigate(ROUTES.BUY_TOKEN_EXIT)
-    })
-
-    /*
-     * This will trigger when the user marks payment is made
-     * You can close/navigate away at this event
-     */
-    Transak.on(Transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, () => {
-      transak.close()
-      // navigate(ROUTES.BUY_TOKEN_SUCCESS)
-    })
-
-    Transak.on(Transak.EVENTS.TRANSAK_ORDER_FAILED, () => {
-      // navigate(ROUTES.BUY_TOKEN_ERROR)
-      transak.close()
-    })
-
-    Transak.on(Transak.EVENTS.TRANSAK_ORDER_CANCELLED, () => {
-      transak.close()
-      // navigate(ROUTES.BUY_TOKEN_EXIT)
+      // TODO:refresh user balance
     })
   }, [transakConfig])
 
