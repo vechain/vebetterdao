@@ -59,7 +59,7 @@ export const LowOnVthoCard: React.FC = () => {
       defaultCryptoCurrency: "VTHO",
       backgroundColors: "#ffffff",
       colorMode: "LIGHT",
-      themeColor: "#28008c",
+      themeColor: "#004cfc",
       hideMenu: true,
       environment: isProduction ? Transak.ENVIRONMENTS.PRODUCTION : Transak.ENVIRONMENTS.STAGING,
     }),
