@@ -58,7 +58,10 @@ export const EditAppAddresses = ({
         {t("Sensitive parameters")}
       </Text>
       <VStack align="stretch">
-        <Text fontSize="14px">{t("Allocation team address")}</Text>
+        <Text fontSize="md" fontWeight={"800"}>
+          {t("Treasury address")}
+        </Text>
+        <Text fontSize="sm">{t("B3TR tokens will be sent to this address when withdrawing allocation tokens.")}</Text>
         <FormControl isInvalid={!!errors.teamWalletAddress}>
           <InputGroup>
             <Input
@@ -92,7 +95,14 @@ export const EditAppAddresses = ({
         </FormControl>
       </VStack>
       <VStack align="stretch">
-        <Text fontSize="14px">{t("Admin address")}</Text>
+        <Text fontSize="md" fontWeight={"800"}>
+          {t("Admin address")}
+        </Text>
+        <Text fontSize="sm">
+          {t(
+            "This address has control over the app and can perform sensitive operations, as updating treasury, distributor, and moderators addresses or transfer ownership.",
+          )}
+        </Text>
         <FormControl isInvalid={!!errors.adminAddress}>
           <InputGroup>
             <Input
