@@ -1,10 +1,11 @@
 import { useAccountBalance, useB3trBalance, useVot3Balance } from "@/api"
-import { Button, Card, CardBody, Grid, GridItem, Heading, Image, Link, Text, VStack } from "@chakra-ui/react"
-import { useMemo } from "react"
+import { Button, Card, CardBody, Grid, GridItem, Heading, Image, Text, VStack } from "@chakra-ui/react"
+import { useCallback, useMemo } from "react"
 import BigNumber from "bignumber.js"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { FiArrowUpRight } from "react-icons/fi"
 import { useTranslation } from "react-i18next"
+import { Transak, TransakConfig } from "@transak/transak-sdk"
 
 const minVtho = 5
 export const LowOnVthoCard: React.FC = () => {
@@ -38,6 +39,64 @@ export const LowOnVthoCard: React.FC = () => {
     }
   }, [balance])
 
+  // Transak
+  const transakConfig: TransakConfig = useMemo(
+    () => ({
+      apiKey: "c864513e-2de0-4382-8597-16b419d75f6e",
+      walletAddress: account ?? "",
+      productsAvailed: "BUY",
+      networks: "vechain",
+      paymentMethod: "credit_debit_card",
+      disablePaymentMethods: "gbp_bank_transfer,inr_bank_transfer,sepa_bank_transfer,apple_pay,google_pay",
+      disableWalletAddressForm: true,
+      defaultFiatCurrency: "USD",
+      defaultFiatAmount: 5,
+      defaultNetwork: "vechain",
+      defaultCryptoCurrency: "VTHO",
+      backgroundColors: "#ffffff",
+      colorMode: "LIGHT",
+      themeColor: "28008c",
+      hideMenu: true,
+      environment: Transak.ENVIRONMENTS.STAGING,
+    }),
+    [account],
+  )
+
+  const initTransak = useCallback(() => {
+    const transak = new Transak(transakConfig)
+    transak.init()
+
+    // This will trigger when the user closed the widget
+    Transak.on(Transak.EVENTS.TRANSAK_WIDGET_CLOSE, () => {
+      transak.close()
+      // onClose()
+      // navigate(ROUTES.BUY_TOKEN_EXIT)
+    })
+
+    /*
+     * This will trigger when the user marks payment is made
+     * You can close/navigate away at this event
+     */
+    Transak.on(Transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, () => {
+      transak.close()
+      // navigate(ROUTES.BUY_TOKEN_SUCCESS)
+    })
+
+    Transak.on(Transak.EVENTS.TRANSAK_ORDER_FAILED, () => {
+      // navigate(ROUTES.BUY_TOKEN_ERROR)
+      transak.close()
+    })
+
+    Transak.on(Transak.EVENTS.TRANSAK_ORDER_CANCELLED, () => {
+      transak.close()
+      // navigate(ROUTES.BUY_TOKEN_EXIT)
+    })
+  }, [transakConfig])
+
+  const handleOnPress = () => {
+    initTransak()
+  }
+
   if (!account || balanceLoading || !isLowOnVtho || !ownsTokens) return null
 
   return (
@@ -61,11 +120,14 @@ export const LowOnVthoCard: React.FC = () => {
                 {labels?.body} <b>{t("Get more VTHO to get the best experience in the platform.")}</b>
               </Text>
 
-              <Link href={"https://transak.com/buy/vtho"} isExternal>
-                <Button mt={2} variant={"primaryAction"} borderRadius={"full"} rightIcon={<FiArrowUpRight />}>
-                  {t("Get more VTHO")}
-                </Button>
-              </Link>
+              <Button
+                onClick={handleOnPress}
+                mt={2}
+                colorScheme="blue"
+                borderRadius={"full"}
+                rightIcon={<FiArrowUpRight />}>
+                {t("Get more VTHO")}
+              </Button>
             </VStack>
           </GridItem>
         </Grid>
