@@ -61,7 +61,7 @@ export const LowOnVthoCard: React.FC = () => {
                 {labels?.body} <b>{t("Get more VTHO to get the best experience in the platform.")}</b>
               </Text>
 
-              <Link href={"https://www.coinbase.com/en/how-to-buy/vethor-token"} isExternal>
+              <Link href={"https://transak.com/buy/vtho"} isExternal>
                 <Button mt={2} variant={"primaryAction"} borderRadius={"full"} rightIcon={<FiArrowUpRight />}>
                   {t("Get more VTHO")}
                 </Button>
