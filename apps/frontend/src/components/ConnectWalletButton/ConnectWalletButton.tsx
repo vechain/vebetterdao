@@ -1,17 +1,28 @@
-import { Button, Fade, HStack, IconButton, Text, useMediaQuery } from "@chakra-ui/react"
+import { Button, Fade, IconButton, Spinner, VStack, useMediaQuery } from "@chakra-ui/react"
 import { useWallet, useWalletModal } from "@vechain/dapp-kit-react"
 import { FaWallet } from "react-icons/fa6"
-import { AddressIcon } from "./AddressIcon"
-import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
-import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
+import { AddressIcon } from "../AddressIcon"
+import dynamic from "next/dynamic"
+
+const DesktopConenctedUserButton = dynamic(
+  () => import("./components/DesktopConenctedUserButton").then(mod => mod.DesktopConenctedUserButton),
+  {
+    ssr: false,
+    loading: () => (
+      <VStack w="full" spacing={12} h="80vh" justify="center">
+        <Spinner size={"lg"} />
+      </VStack>
+    ),
+  },
+)
 
 type Props = {
   responsiveVariant?: "desktop" | "mobile"
 }
+
 export const ConnectWalletButton = ({ responsiveVariant }: Props) => {
   const { account } = useWallet()
-  const { name } = useWalletName(account)
 
   const { open } = useWalletModal()
   const [isDesktop] = useMediaQuery("(min-width: 1060px)")
@@ -46,17 +57,8 @@ export const ConnectWalletButton = ({ responsiveVariant }: Props) => {
         </Fade>
       )
 
-  if (shouldRenderDesktop)
-    return (
-      <Fade in={true}>
-        <Button onClick={open} rounded={"full"} size="md" variant={"ghost"}>
-          <HStack spacing={2}>
-            <AddressIcon address={account} boxSize={"28px"} rounded={"full"} />
-            <Text fontWeight={"400"}>{name || humanAddress(account, 4, 6)}</Text>
-          </HStack>
-        </Button>
-      </Fade>
-    )
+  if (shouldRenderDesktop) return <DesktopConenctedUserButton account={account} />
+
   return (
     <Fade in={true}>
       <IconButton
