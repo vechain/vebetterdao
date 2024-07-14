@@ -1,7 +1,6 @@
 import { ThorClient } from "@vechain/sdk-network"
 import mainnetConfig from "@repo/config/mainnet"
-import { FunctionFragment, coder } from "@vechain/sdk-core"
-import { XApp } from "../types"
+import { FunctionFragment } from "@vechain/sdk-core"
 import { XAllocationVoting__factory as XAllocationVoting } from "@repo/contracts"
 
 /**
@@ -14,7 +13,7 @@ import { XAllocationVoting__factory as XAllocationVoting } from "@repo/contracts
 export const getRoundXApps = async (thor: ThorClient, roundId: string): Promise<string[]> => {
   const res = await thor.contracts.executeContractCall(
     mainnetConfig.xAllocationVotingContractAddress,
-    XAllocationVoting.createInterface().getFunction("getAppIdsOfRound") as FunctionFragment,
+    XAllocationVoting.createInterface().getFunction("getAppIdsOfRound"),
     [Number(roundId)],
   )
 

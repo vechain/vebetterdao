@@ -1,7 +1,8 @@
 import { useRoundXApps } from "./useRoundXApps"
 import { useXAppsVotesQf } from "./useXAppsVotesQf"
-import { XApp, useXApps } from "./useXApps"
+import { useXApps } from "./useXApps"
 import { useQuery } from "@tanstack/react-query"
+import { XApp } from "../getXApps"
 
 type MostVotedAppsInRoundReturnType = {
   votes: string

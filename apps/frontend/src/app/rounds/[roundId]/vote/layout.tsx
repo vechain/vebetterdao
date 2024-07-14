@@ -1,6 +1,6 @@
 "use client"
 import { useBreakpoints } from "@/hooks"
-import { Grid, GridItem, Spinner, VStack } from "@chakra-ui/react"
+import { VStack, Spinner, Grid, GridItem } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 
 type Props = {
