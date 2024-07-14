@@ -57,13 +57,15 @@ export const LowOnVthoCard: React.FC = () => {
       defaultFiatAmount: 5,
       defaultNetwork: "vechain",
       defaultCryptoCurrency: "VTHO",
+      cryptoCurrencyList: "VTHO",
       backgroundColors: "#ffffff",
       colorMode: "LIGHT",
       themeColor: "#004cfc",
       hideMenu: true,
       environment: isProduction ? Transak.ENVIRONMENTS.PRODUCTION : Transak.ENVIRONMENTS.STAGING,
+      exchangeScreenTitle: t("Get more VTHO"),
     }),
-    [account],
+    [account, t],
   )
 
   const initTransak = useCallback(() => {
