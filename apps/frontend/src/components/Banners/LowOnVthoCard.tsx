@@ -1,4 +1,4 @@
-import { getAccountBalanceQueryKey, useAccountBalance, useB3trBalance, useVot3Balance } from "@/api"
+import { useAccountBalance, useB3trBalance, useVot3Balance } from "@/api"
 import { Button, Card, CardBody, Grid, GridItem, Heading, Image, Text, VStack } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import BigNumber from "bignumber.js"
@@ -6,7 +6,6 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { FiArrowUpRight } from "react-icons/fi"
 import { useTranslation } from "react-i18next"
 import { Transak, TransakConfig } from "@transak/transak-sdk"
-import { useQueryClient } from "@tanstack/react-query"
 
 const isProduction = process.env.NODE_ENV === "production"
 export const apiKey = process.env.NEXT_PUBLIC_TRANSAK_API_KEY ?? ""
@@ -14,7 +13,6 @@ export const apiKey = process.env.NEXT_PUBLIC_TRANSAK_API_KEY ?? ""
 const minVtho = 5
 export const LowOnVthoCard: React.FC = () => {
   const { t } = useTranslation()
-  const queryClient = useQueryClient()
   const { account } = useWallet()
   const { data: balance, isLoading: balanceLoading } = useAccountBalance(account ?? undefined)
   const { data: b3trBalance } = useB3trBalance(account ?? undefined)
@@ -69,37 +67,7 @@ export const LowOnVthoCard: React.FC = () => {
   const initTransak = useCallback(() => {
     const transak = new Transak(transakConfig)
     transak.init()
-
-    // This will trigger when the user closed the widget
-    Transak.on(Transak.EVENTS.TRANSAK_WIDGET_CLOSE, () => {
-      transak.close()
-    })
-
-    Transak.on(Transak.EVENTS.TRANSAK_ORDER_FAILED, () => {
-      transak.close()
-    })
-
-    Transak.on(Transak.EVENTS.TRANSAK_ORDER_CANCELLED, () => {
-      transak.close()
-    })
-
-    /*
-     * This will trigger when the user marks payment is made
-     * You can close/navigate away at this event
-     */
-    Transak.on(Transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, () => {
-      transak.close()
-
-      // Refresh user balance
-      queryClient.cancelQueries({
-        queryKey: getAccountBalanceQueryKey(account ?? undefined),
-      })
-
-      queryClient.refetchQueries({
-        queryKey: getAccountBalanceQueryKey(account ?? undefined),
-      })
-    })
-  }, [transakConfig, account, queryClient])
+  }, [transakConfig])
 
   const handleOnPress = () => {
     initTransak()
