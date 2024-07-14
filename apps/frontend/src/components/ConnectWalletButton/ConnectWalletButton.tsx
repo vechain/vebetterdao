@@ -5,8 +5,8 @@ import { useTranslation } from "react-i18next"
 import { AddressIcon } from "../AddressIcon"
 import dynamic from "next/dynamic"
 
-const DesktopConenctedUserButton = dynamic(
-  () => import("./components/DesktopConenctedUserButton").then(mod => mod.DesktopConenctedUserButton),
+const DesktopConnectedUserButton = dynamic(
+  () => import("./components/DesktopConnectedUserButton").then(mod => mod.DesktopConnectedUserButton),
   {
     ssr: false,
     loading: () => (
@@ -57,7 +57,7 @@ export const ConnectWalletButton = ({ responsiveVariant }: Props) => {
         </Fade>
       )
 
-  if (shouldRenderDesktop) return <DesktopConenctedUserButton account={account} />
+  if (shouldRenderDesktop) return <DesktopConnectedUserButton account={account} />
 
   return (
     <Fade in={true}>

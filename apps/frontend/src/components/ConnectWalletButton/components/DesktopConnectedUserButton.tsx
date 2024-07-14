@@ -8,7 +8,7 @@ type Props = {
   account: string
 }
 
-export const DesktopConenctedUserButton = ({ account }: Props) => {
+export const DesktopConnectedUserButton = ({ account }: Props) => {
   const { name } = useWalletName(account)
   const { open } = useWalletModal()
 
