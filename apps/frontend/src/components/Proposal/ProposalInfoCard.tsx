@@ -11,7 +11,7 @@ import {
   Show,
   Skeleton,
 } from "@chakra-ui/react"
-import React, { useCallback } from "react"
+import React, { useCallback, useMemo } from "react"
 import { ProposalCreatedEvent, ProposalMetadata, ProposalState, useIsDepositReached, useProposalState } from "@/api"
 import { useIpfsMetadata } from "@/api/ipfs"
 import { parseDate, toIPFSURL } from "@/utils"
@@ -43,6 +43,13 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposal }) => {
   const goToProposal = useCallback(() => {
     router.push(`/proposals/${proposalId}`)
   }, [router, proposalId])
+
+  const descriptionText = useMemo(() => {
+    if (proposalMetadata.data) {
+      return proposalMetadata.data.shortDescription.length > 200 ? `${proposalMetadata.data.shortDescription.slice(0, 200)}...` : proposalMetadata.data.shortDescription
+    }
+    return ""
+  }, [proposalMetadata.data])
 
   return (
     <Card
@@ -106,7 +113,7 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposal }) => {
             mr={{ base: 0, md: 10 }}
             alignSelf={"flex-start"}>
             <Text fontSize={16} fontWeight={400} noOfLines={3}>
-              {proposalMetadata.data?.shortDescription}
+              {descriptionText}
             </Text>
           </SkeletonText>
 
