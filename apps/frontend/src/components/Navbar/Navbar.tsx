@@ -10,10 +10,7 @@ import { Routes } from "./Routes"
 
 export const Navbar: React.FC = () => {
   // ssr-friendly media query with fallback
-  const [isDesktop] = useMediaQuery("(min-width: 1060px)", {
-    ssr: true,
-    fallback: false, // return false on the server, and re-evaluate on the client side
-  })
+  const [isLargerThan1200] = useMediaQuery("(min-width: 1200px)")
 
   const { account } = useWallet()
   const { data: allocationRoundsEvents } = useAllocationsRoundsEvents()
@@ -41,8 +38,11 @@ export const Navbar: React.FC = () => {
   const bg = useColorModeValue("#F7F7F7", "#131313")
   return (
     <Box bg={bg} px={0} position={"sticky"} top={0} zIndex={10} h={"auto"} w={"full"}>
-      <HStack justify={"space-between"} p={isDesktop ? "16px 48px" : "8px 20px"} borderBottom="1px solid #EEEEEE">
-        {isDesktop ? (
+      <HStack
+        justify={"space-between"}
+        p={isLargerThan1200 ? "16px 48px" : "8px 20px"}
+        borderBottom="1px solid #EEEEEE">
+        {isLargerThan1200 ? (
           <DesktopNavBar routesToRender={parsedRoutesToRender} />
         ) : (
           <MobileNavBar routesToRender={parsedRoutesToRender} />

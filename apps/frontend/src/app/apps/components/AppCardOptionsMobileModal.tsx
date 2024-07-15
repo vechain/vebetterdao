@@ -16,6 +16,7 @@ import { FaCopy, FaRegImage } from "react-icons/fa6"
 import { CustomModalContent } from "@/components/CustomModalContent"
 import { FaExternalLinkAlt } from "react-icons/fa"
 import { useRouter } from "next/navigation"
+import { useTranslation } from "react-i18next"
 
 export type Props = {
   isOpen: boolean
@@ -37,7 +38,7 @@ export const AppCardOptionsMobileModal = ({
   showViewDetails = false,
 }: Props) => {
   const { onCopy } = useClipboard(teamWalletAddress)
-
+  const { t } = useTranslation()
   const toast = useToast()
   const handleOnCopy = () => {
     onCopy()
@@ -60,7 +61,7 @@ export const AppCardOptionsMobileModal = ({
       <ModalOverlay />
       <CustomModalContent>
         <ModalHeader>
-          Options
+          {t("Options")}
           <ModalCloseButton />
         </ModalHeader>
         <ModalBody>
@@ -73,7 +74,7 @@ export const AppCardOptionsMobileModal = ({
                 variant={"solid"}
                 onClick={navigateToAppDetail}
                 leftIcon={<FaRegImage />}>
-                View details
+                {t("View details")}
               </Button>
             )}
             <Button
@@ -83,7 +84,7 @@ export const AppCardOptionsMobileModal = ({
               variant={"solid"}
               onClick={handleOnCopy}
               leftIcon={<FaCopy />}>
-              Copy team wallet address
+              {t("Copy team wallet address")}
             </Button>
             <Skeleton isLoaded={!isLoading} w="full">
               <Button

@@ -1,4 +1,4 @@
-import { Button, HStack, HTMLChakraProps, Text, useClipboard, Icon, ButtonProps } from "@chakra-ui/react"
+import { Button, HStack, Text, useClipboard, Icon, ButtonProps } from "@chakra-ui/react"
 import React, { useEffect } from "react"
 import { AddressIcon } from "./AddressIcon"
 import { humanAddress } from "@repo/utils/FormattingUtils"

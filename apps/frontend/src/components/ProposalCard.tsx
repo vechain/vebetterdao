@@ -39,6 +39,7 @@ import { toIPFSURL } from "@/utils"
 import { ProposalFormAction } from "@/store"
 import dayjs from "dayjs"
 import { ProposalExecutableActions } from "./ProposalExecutableActions"
+import { useTranslation } from "react-i18next"
 
 const config = getConfig()
 const blockTime = config.network.blockTime
@@ -48,12 +49,11 @@ type Props = {
 export const ProposalCard: React.FC<Props> = ({ proposal }) => {
   const { data: state } = useProposalState(proposal.proposalId)
   const { data: currentBlock } = useCurrentBlock()
-  const { data: proposalSnapshotBlock, isLoading: proposalSnapshotBlockLoading } = useProposalSnapshot(
-    proposal.proposalId,
-  )
+  const { data: proposalSnapshotBlock } = useProposalSnapshot(proposal.proposalId)
   const { data: proposalDeadlineBlock, isLoading: proposalDeadlineBlockLoading } = useProposalDeadline(
     proposal.proposalId,
   )
+  const { t } = useTranslation()
 
   const proposalMetadata = useIpfsMetadata<ProposalMetadata>(toIPFSURL(proposal.description))
 
@@ -152,11 +152,11 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
       <CardBody>
         <VStack spacing={4} w="full" align="flex-start">
           <HStack w="full" justify="space-between">
-            <Tag colorScheme="blue">Governance</Tag>
+            <Tag colorScheme="blue">{t("Governance")}</Tag>
             <Tag colorScheme={proposalStateTagColor}>{state !== undefined ? ProposalState[state] : "N/A"}</Tag>
           </HStack>
           <HStack justify={"space-between"} w="full">
-            <Heading size="sm"> Proposer</Heading>
+            <Heading size="sm">{t("Proposer")}</Heading>
             <AddressButton address={proposal.proposer} buttonSize="xs" addressFontSize="xs" />
           </HStack>
           <Box>
@@ -182,7 +182,7 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
             <Alert status="error" borderRadius={"lg"}>
               <AlertIcon />
               <Box>
-                <AlertTitle>Error decoding the proposal calldatas</AlertTitle>
+                <AlertTitle>{t("Error decoding the proposal calldatas")}</AlertTitle>
                 <AlertDescription>{proposalDecodeError}</AlertDescription>
               </Box>
             </Alert>
@@ -203,7 +203,8 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
                 </Skeleton>
                 <Skeleton isLoaded={!proposalDeadlineBlockLoading}>
                   <Text fontWeight={"normal"} fontSize={"sm"}>
-                    At block #{proposalDeadlineBlock}
+                    {t("At block #")}
+                    {proposalDeadlineBlock}
                   </Text>
                 </Skeleton>
               </Box>
@@ -211,14 +212,15 @@ export const ProposalCard: React.FC<Props> = ({ proposal }) => {
               <Box>
                 <Skeleton isLoaded={!!estimatedStartTime}>
                   <Heading as="h4" size="sm" color="orange">
-                    {"Starts"} in round #{proposal.roundIdVoteStart}
+                    {"Starts"} {t("in round #")}
+                    {proposal.roundIdVoteStart}
                   </Heading>
                 </Skeleton>
               </Box>
             )}
             <CastVoteButton proposal={proposal} />
             <Button size="sm" colorScheme="blue" rounded={"full"} rightIcon={<FaChevronRight />} onClick={goToProposal}>
-              See More
+              {t("See More")}
             </Button>
           </HStack>
         </VStack>

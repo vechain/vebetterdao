@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { TransactionHandler, networkInfo, type TransactionClause, type TransactionBody } from "@vechain/sdk-core"
+import { TransactionHandler, type TransactionClause, type TransactionBody } from "@vechain/sdk-core"
 import { HttpClient, ThorClient } from "@vechain/sdk-network"
 
 const thorNetwork = new HttpClient(getConfig().nodeUrl)

@@ -1,6 +1,6 @@
 import { UseFormReturn } from "react-hook-form"
 import { EditAppForm } from ".."
-import { Box, Circle, Flex, IconButton, Image, Input, useToast } from "@chakra-ui/react"
+import { Box, Circle, Flex, Image, Input, useToast } from "@chakra-ui/react"
 import { notFoundImage } from "@/constants"
 import { useCallback, useRef } from "react"
 import { UilPen } from "@iconscout/react-unicons"

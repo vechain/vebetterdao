@@ -50,15 +50,13 @@ type Props = {
 }
 export const MobileNavBar: React.FC<Props> = ({ routesToRender }) => {
   const { isOpen: isMenuOpen, onClose: closeMenu, onOpen: openMenu } = useDisclosure()
-  const [isBalanceVisible] = useMediaQuery("(min-width: 600px)", {
-    ssr: true,
-    fallback: false, // return false on the server, and re-evaluate on the client side
-  })
+
+  const [isLargerThan500] = useMediaQuery("(min-width: 500px)")
 
   return (
     <>
       <NavbarLogo />
-      {isBalanceVisible && <NavbarBalance />}
+      <HStack>{isLargerThan500 && <NavbarBalance />}</HStack>
       <HStack gap={2}>
         <ConnectWalletButton />
         {!!routesToRender.length && (

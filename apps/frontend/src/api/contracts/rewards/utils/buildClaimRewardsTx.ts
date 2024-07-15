@@ -20,11 +20,7 @@ export interface RoundReward {
  * @param {string} address - The address of the voter.
  * @returns {Connex.Vendor.TxMessage} A Connex.Vendor.TxMessage object representing the transaction.
  */
-export const buildClaimRewardsTx = (
-  thor: Connex.Thor,
-  roundRewards: RoundReward[],
-  address: string,
-): Connex.Vendor.TxMessage => {
+export const buildClaimRewardsTx = (roundRewards: RoundReward[], address: string): Connex.Vendor.TxMessage => {
   const clauses = []
 
   for (const round of roundRewards) {

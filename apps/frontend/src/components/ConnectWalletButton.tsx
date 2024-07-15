@@ -3,6 +3,7 @@ import { useWallet, useWalletModal } from "@vechain/dapp-kit-react"
 import { FaWallet } from "react-icons/fa6"
 import { AddressIcon } from "./AddressIcon"
 import { humanAddress } from "@repo/utils/FormattingUtils"
+import { useTranslation } from "react-i18next"
 
 type Props = {
   responsiveVariant?: "desktop" | "mobile"
@@ -11,6 +12,7 @@ export const ConnectWalletButton = ({ responsiveVariant }: Props) => {
   const { account } = useWallet()
   const { open } = useWalletModal()
   const [isDesktop] = useMediaQuery("(min-width: 1060px)")
+  const { t } = useTranslation()
 
   const shouldRenderDesktop = responsiveVariant === "desktop" || (!responsiveVariant && isDesktop)
 
@@ -24,7 +26,7 @@ export const ConnectWalletButton = ({ responsiveVariant }: Props) => {
             size="md"
             leftIcon={<FaWallet />}
             data-testid="connect-wallet">
-            Connect Wallet
+            {t("Connect Wallet")}
           </Button>
         </Fade>
       )

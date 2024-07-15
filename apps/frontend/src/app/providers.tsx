@@ -10,10 +10,21 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 
 import { DappKitWithChakraProvider } from "@/providers/DappKitWithChakraProvider"
 import { lightTheme } from "./theme"
+import { useLanguage } from "@/store/useLanguage"
+import { useEffect } from "react"
+import { useTranslation } from "react-i18next"
 
 export function Providers({ children }: { children: React.ReactNode }) {
   //TODO: Reenable this to enable dark mode
   //   const { selectedTheme } = useSelectedTheme()
+
+  const { i18n } = useTranslation()
+  const { language } = useLanguage()
+
+  useEffect(() => {
+    i18n.changeLanguage(language)
+  }, [i18n, language])
+
   return (
     <CacheProvider>
       <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>

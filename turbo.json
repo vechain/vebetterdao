@@ -2,7 +2,13 @@
   "$schema": "https://turbo.build/schema.json",
   "globalDotEnv": [".env"],
   "globalDependencies": ["**/.env.*local"],
-  "globalEnv": ["NEXT_PUBLIC_APP_ENV", "MNEMONIC", "NEXT_PUBLIC_IPFS_PINNING_SERVICE", "IS_TEST_COVERAGE", "RUN_SIMULATION"],
+  "globalEnv": [
+    "NEXT_PUBLIC_APP_ENV",
+    "MNEMONIC",
+    "NEXT_PUBLIC_IPFS_PINNING_SERVICE",
+    "IS_TEST_COVERAGE",
+    "RUN_SIMULATION"
+  ],
   "pipeline": {
     "install": {
       "dependsOn": ["@repo/contracts#install", "^compile"]
@@ -15,7 +21,7 @@
       "outputs": [".next/**", "!.next/cache/**"]
     },
     "lint": {
-      "dependsOn": ["^lint"]
+      "cache": false
     },
     "//#solo-up": {
       "cache": false
@@ -131,6 +137,9 @@
       "cache": false
     },
     "generate-docs": {
+      "cache": false
+    },
+    "generate-translations": {
       "cache": false
     }
   }

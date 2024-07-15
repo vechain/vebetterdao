@@ -13,7 +13,8 @@
     "test": "vitest run",
     "test:watch": "vitest watch",
     "test:coverage:fe": "vitest run --coverage",
-    "clean": "rm -rf .next node_modules dist"
+    "clean": "rm -rf .next node_modules dist",
+    "generate-translations": "npx ts-node ./src/scripts/generateTranslations.ts"
   },
   "dependencies": {
     "@chakra-ui/next-js": "^2.2.0",
@@ -45,6 +46,7 @@
     "mixpanel-browser": "^2.49.0",
     "next": "14.2.3",
     "next-remove-imports": "^1.0.12",
+    "openai": "^4.52.4",
     "react": "^18",
     "react-dom": "^18",
     "react-dropzone": "^14.2.3",
@@ -80,6 +82,7 @@
     "jsdom": "^24.1.0",
     "resize-observer-polyfill": "^1.5.1",
     "typescript": "^5",
+    "typescript-eslint": "^7.15.0",
     "vite-tsconfig-paths": "^4.3.2",
     "vitest": "^1.6.0",
     "vitest-canvas-mock": "^0.3.3"
