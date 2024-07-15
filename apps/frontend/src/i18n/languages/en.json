@@ -506,7 +506,7 @@
   "Join": "Join",
   "Treasury address": "Treasury address",
   "This address has control over the app and can perform sensitive operations, as updating treasury, distributor, and moderators addresses or transfer ownership.": "This address has control over the app and can perform sensitive operations, as updating treasury, distributor, and moderators addresses or transfer ownership.",
-  "B3TR tokens will be sent to this address when withdrawing allocations.": "B3TR tokens will be sent to this address when withdrawing allocations."
+  "B3TR tokens will be sent to this address when withdrawing allocations.": "B3TR tokens will be sent to this address when withdrawing allocations.",
   "Managed apps": "Managed apps",
   "Role": "Role",
   "Latest allocation": "Latest allocation",
