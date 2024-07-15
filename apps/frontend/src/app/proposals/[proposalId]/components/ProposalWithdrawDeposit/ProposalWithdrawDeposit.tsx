@@ -1,11 +1,11 @@
 import { ProposalState } from "@/api"
-import { Arm } from "@/components/Icons/Arm"
 import { Box, Card, Circle, Flex, HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 import { ProposalWithdrawButton } from "../ProposalWithdrawButton"
 import { useProposalDetail } from "../../hooks"
+import { FaRegHeart } from "react-icons/fa6"
 
 const compactFormatter = getCompactFormatter(2)
 
@@ -34,7 +34,7 @@ export const ProposalWithdrawDeposit = () => {
               <HStack alignItems={"baseline"} justify={"space-between"}>
                 <HStack alignItems={"baseline"}>
                   <Flex position="relative" top="7px" display={"inline-flex"}>
-                    <Arm color={"#004CFC"} size={"36"} />
+                    <FaRegHeart color={"#004CFC"} size={"36"} />
                   </Flex>
                   <Text fontSize={"28px"} color={"#252525"} fontWeight={700}>
                     {compactFormatter.format(Number(proposal.communityDeposits))}

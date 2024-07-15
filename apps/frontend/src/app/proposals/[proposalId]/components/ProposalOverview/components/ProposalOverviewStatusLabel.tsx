@@ -1,9 +1,9 @@
 import { ProposalState } from "@/api"
-import { Arm } from "@/components/Icons/Arm"
 import { Circle, HStack, Text } from "@chakra-ui/react"
 import { UilBan, UilCheck, UilClockEight, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { useProposalDetail } from "../../../hooks"
+import { FaRegHeart } from "react-icons/fa6"
 
 export const ProposalOverviewStatusLabel = () => {
   const { proposal } = useProposalDetail()
@@ -42,7 +42,7 @@ export const ProposalOverviewStatusLabel = () => {
       }
       return (
         <HStack bg="#FFF3E5" py="4px" px="10px" rounded="12px">
-          <Arm />
+          <FaRegHeart color="#F29B32" width="16px" height="16px" />
           <Text fontWeight={"600"} color="#F29B32">
             {t("Looking for support")}
           </Text>
