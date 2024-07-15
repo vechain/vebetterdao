@@ -1,12 +1,11 @@
 import { useXAppMetadata } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
-import { Divider, HStack, Heading, IconButton, Image, Skeleton, VStack } from "@chakra-ui/react"
+import { Divider, HStack, Heading, IconButton, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 import { FiArrowUpRight } from "react-icons/fi"
 import { LatestAllocationDetails } from "./LatestAllocationDetails"
-import { RoleDetails } from "./RoleDetails"
 
 type Props = {
   appId: string
@@ -25,6 +24,16 @@ export const AppDetails = ({ appId, isAdmin, isModerator, showDivider = false }:
   } = useXAppMetadata(appId)
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
 
+  const role = useMemo(() => {
+    if (isAdmin) {
+      return "Admin"
+    } else if (isModerator) {
+      return "Moderator"
+    } else {
+      return "Error"
+    }
+  }, [isAdmin, isModerator])
+
   const navigateToAppDetail = useCallback(() => {
     router.push(`/apps/${appId}`)
   }, [router, appId])
@@ -39,6 +48,9 @@ export const AppDetails = ({ appId, isAdmin, isModerator, showDivider = false }:
 
           <Skeleton isLoaded={!appMetadataLoading} justifyContent={"end"}>
             <Heading size={"sm"}>{appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}</Heading>
+            <Text fontSize={"sm"} fontWeight={"300"} color={"#6A6A6A"}>
+              {role}
+            </Text>
           </Skeleton>
         </HStack>
 
@@ -57,7 +69,6 @@ export const AppDetails = ({ appId, isAdmin, isModerator, showDivider = false }:
       </HStack>
 
       <LatestAllocationDetails appId={appId} />
-      <RoleDetails isAdmin={isAdmin} isModerator={isModerator} />
 
       {showDivider && <Divider w={"full"} />}
     </VStack>
