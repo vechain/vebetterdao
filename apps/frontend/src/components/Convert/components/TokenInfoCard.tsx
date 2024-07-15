@@ -20,9 +20,9 @@ export const TokenInfoCard: React.FC<Props> = ({ isB3TRToVOT3, setIsB3TRToVOT3 }
   const description = useMemo(() => {
     return isB3TRToVOT3 ? (
       <Text fontSize={{ base: 14, md: 16 }} fontWeight={400}>
-        {t(
-          "The more VOT3 in your balance, the more <b>voting power</b> you’ll have. Use it to vote on proposals and allocation rounds.",
-        )}
+        {t("The more VOT3 in your balance, the more ")}
+        <b>{t("voting power")}</b>
+        {t(" you’ll have. Use it to vote on proposals and allocation rounds.")}
       </Text>
     ) : (
       <Text fontSize={{ base: 14, md: 16 }} fontWeight={400}>
