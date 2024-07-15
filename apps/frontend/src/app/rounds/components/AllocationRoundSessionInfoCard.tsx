@@ -19,6 +19,7 @@ import {
   useSteps,
 } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
+import { t } from "i18next"
 import { useEffect, useMemo } from "react"
 
 type Props = {
@@ -53,10 +54,10 @@ const AllocationRoundTimeline = ({ roundId }: Props) => {
   const { data: roundInfo } = useAllocationsRound(roundId)
   const steps = useMemo(
     () => [
-      { title: "Voting session started", description: roundInfo?.voteStartTimestamp?.format("MMMM D hh:mm A") },
-      { title: "Voting session finished", description: roundInfo?.voteEndTimestamp?.format("MMMM D hh:mm A") },
+      { title: t("Voting session started"), description: roundInfo?.voteStartTimestamp?.format("MMMM D hh:mm A") },
+      { title: t("Voting session finished"), description: roundInfo?.voteEndTimestamp?.format("MMMM D hh:mm A") },
       {
-        title: "Voting rewards are claimable",
+        title: t("Voting rewards are claimable"),
         description: "",
       },
     ],

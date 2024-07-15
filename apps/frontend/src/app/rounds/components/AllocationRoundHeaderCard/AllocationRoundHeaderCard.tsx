@@ -106,9 +106,9 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
 
             <Skeleton isLoaded={!isLoading}>
               <Text color="gray.500" fontSize={["sm", "md"]}>
-                {
-                  "Vote for your preferred app to determine funding from the Apps allocation budget. More votes mean more funding. Plus, earn rewards from the Voting Rewards allocation by voting in this round. This allocation process repeats every week."
-                }
+                {t(
+                  "Vote for your preferred app to determine funding from the Apps allocation budget. More votes mean more funding. Plus, earn rewards from the Voting Rewards allocation by voting in this round. This allocation process repeats every week.",
+                )}
               </Text>
             </Skeleton>
             <Divider color={"#D5D5D5"} />

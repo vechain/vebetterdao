@@ -30,11 +30,11 @@ export const ProposalWithdrawButton = () => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        successTitle={"Deposit Withdraw Completed!"}
+        successTitle={t("Deposit Withdraw Completed!")}
         status={withdrawMutation.error ? "error" : withdrawMutation.status}
         errorDescription={withdrawMutation.error?.reason}
-        errorTitle={withdrawMutation.error ? "Error Withdrawing" : undefined}
-        pendingTitle="Withdrawing..."
+        errorTitle={withdrawMutation.error ? t("Error Withdrawing") : undefined}
+        pendingTitle={t("Withdrawing...")}
         showExplorerButton
         txId={withdrawMutation.txReceipt?.meta.txID ?? withdrawMutation.sendTransactionTx?.txid}
       />

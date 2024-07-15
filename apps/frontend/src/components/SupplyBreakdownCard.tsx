@@ -64,7 +64,9 @@ export const SupplyBreakdownCard = () => {
         <HStack w="full" justify={"space-between"}>
           <Heading size="md">{t("Supply breakdown")}</Heading>
           <BaseTooltip
-            text={`B3TR tokens are generated weekly and distributed to x2earn apps, the DAO Treasury and to the VotingRewards contract.`}>
+            text={t(
+              `B3TR tokens are generated weekly and distributed to x2earn apps, the DAO Treasury and to the VotingRewards contract.`,
+            )}>
             <span>
               <Icon as={FiInfo} color="rgba(0, 76, 252, 1)" position={"relative"} />
             </span>
