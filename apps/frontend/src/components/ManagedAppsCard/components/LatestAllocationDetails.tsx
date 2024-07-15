@@ -56,7 +56,7 @@ export const LatestAllocationDetails = ({ appId }: { appId: string }) => {
         alignItems={"center"}>
         <VStack align="self-start">
           <HStack>
-            <Image h="36px" w="36px" src="/images/b3tr-token.png" alt="b3tr-token" />
+            <Image h="24px" w="24px" src="/images/b3tr-token.png" alt="b3tr-token" />
             <Heading fontSize="24px">{compactFormatter.format(lastRoundAllocationReceived)}</Heading>
           </HStack>
           <Text fontSize={"sm"} color={"gray.500"}>
