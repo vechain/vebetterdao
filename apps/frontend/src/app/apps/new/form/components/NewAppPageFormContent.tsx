@@ -13,7 +13,8 @@ export const NewAppPageFormContent = () => {
         logo: "/images/dapp_icon_placeholder.svg",
         banner: "/images/dapp_banner_placeholder.svg",
         projectUrl: "",
-        teamWalletAddress: "",
+        adminAddress: "",
+        treasuryAddress: "",
       },
     })
 

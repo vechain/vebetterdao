@@ -67,7 +67,8 @@ export type CreateEditAppFormData = {
   logo: string
   banner: string
   projectUrl: string
-  teamWalletAddress: string
+  adminAddress: string
+  treasuryAddress: string
 }
 
 type Props = {
@@ -169,21 +170,37 @@ export const CreateEditAppForm = ({
             />
             {errors.projectUrl && <FormErrorMessage>{errors.projectUrl.message}</FormErrorMessage>}
           </FormControl>
-          <FormControl isInvalid={!!errors.teamWalletAddress}>
-            <FormLabel>{t("Team wallet address")}</FormLabel>
+          <FormControl isInvalid={!!errors.adminAddress}>
+            <FormLabel>{t("Admin address")}</FormLabel>
             <InputGroup>
               <InputLeftElement pointerEvents="none">
-                <AddressIcon borderRadius={"full"} boxSize={6} address={watch("teamWalletAddress")} />
+                <AddressIcon borderRadius={"full"} boxSize={6} address={watch("adminAddress")} />
               </InputLeftElement>
               <Input
                 isDisabled={isReceiverAddressDisabled}
                 rounded={"xl"}
-                {...register("teamWalletAddress", {
+                {...register("adminAddress", {
                   validate: value => isValid(value) || "Invalid address",
                 })}
               />
             </InputGroup>
-            {errors.teamWalletAddress && <FormErrorMessage>{errors.teamWalletAddress.message}</FormErrorMessage>}
+            {errors.adminAddress && <FormErrorMessage>{errors.adminAddress.message}</FormErrorMessage>}
+          </FormControl>
+          <FormControl isInvalid={!!errors.treasuryAddress}>
+            <FormLabel>{t("Treasury address")}</FormLabel>
+            <InputGroup>
+              <InputLeftElement pointerEvents="none">
+                <AddressIcon borderRadius={"full"} boxSize={6} address={watch("treasuryAddress")} />
+              </InputLeftElement>
+              <Input
+                isDisabled={isReceiverAddressDisabled}
+                rounded={"xl"}
+                {...register("treasuryAddress", {
+                  validate: value => isValid(value) || "Invalid address",
+                })}
+              />
+            </InputGroup>
+            {errors.treasuryAddress && <FormErrorMessage>{errors.treasuryAddress.message}</FormErrorMessage>}
           </FormControl>
           <Stack direction={["column", "row"]} w="full" justify={"space-between"} align={"flex-start"} spacing={4}>
             <Controller
