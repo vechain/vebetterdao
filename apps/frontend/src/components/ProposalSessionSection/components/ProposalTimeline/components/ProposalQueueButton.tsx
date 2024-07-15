@@ -25,11 +25,11 @@ export const ProposalQueueButton = () => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        successTitle={"Queue proposal completed!"}
+        successTitle={t("Queue proposal completed!")}
         status={queueMutation.error ? "error" : queueMutation.status}
         errorDescription={queueMutation.error?.reason}
-        errorTitle={queueMutation.error ? "Error queueing proposal" : undefined}
-        pendingTitle="Queueing..."
+        errorTitle={queueMutation.error ? t("Error queueing proposal") : undefined}
+        pendingTitle={t("Queueing...")}
         showExplorerButton
         txId={queueMutation.txReceipt?.meta.txID ?? queueMutation.sendTransactionTx?.txid}
       />

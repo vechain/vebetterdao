@@ -81,11 +81,11 @@ export const ClaimDeposits = ({ claimableDeposits, userProposalDeposits }: Props
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        successTitle={"Deposits Withdraw Completed!"}
+        successTitle={t("Deposits Withdraw Completed!")}
         status={error ? "error" : status}
         errorDescription={error?.reason}
-        errorTitle={error ? "Error Withdrawing" : undefined}
-        pendingTitle="Withdrawing..."
+        errorTitle={error ? t("Error Withdrawing") : undefined}
+        pendingTitle={t("Withdrawing...")}
         showExplorerButton
         txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
       />

@@ -38,6 +38,7 @@ type Props = {
 }
 
 export const CastVoteModal: React.FC<Props> = ({ isOpen, onOpen, onClose, proposal }) => {
+  const { t } = useTranslation()
   const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
   const onSuccess = useCallback(() => {
     onClose()
@@ -67,14 +68,14 @@ export const CastVoteModal: React.FC<Props> = ({ isOpen, onOpen, onClose, propos
       <TransactionModal
         isOpen={isConfirmationOpen}
         onClose={onConfirmationClose}
-        confirmationTitle="Cast your vote"
-        successTitle="Vote casted!"
+        confirmationTitle={t("Cast your vote")}
+        successTitle={t("Vote cast!")}
         status={castVoteMutation.error ? "error" : castVoteMutation.status}
         errorDescription={castVoteMutation.error?.reason}
-        errorTitle={castVoteMutation.error ? "Error creating proposal" : undefined}
+        errorTitle={castVoteMutation.error ? t("Error creating proposal") : undefined}
         showTryAgainButton={true}
         onTryAgain={onTryAgain}
-        pendingTitle="Casting vote..."
+        pendingTitle={t("Casting vote...")}
         txId={castVoteMutation.txReceipt?.meta.txID}
         showExplorerButton
       />

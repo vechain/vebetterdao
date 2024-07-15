@@ -101,8 +101,8 @@ export const PublishAndPreviewPageContent = () => {
       <TransactionModal
         isOpen={isConfirmationOpen}
         onClose={onConfirmationClose}
-        confirmationTitle="Create a proposal"
-        successTitle="Proposal created!"
+        confirmationTitle={t("Create a proposal")}
+        successTitle={t("Proposal created!")}
         status={
           metadataUploading
             ? "uploadingMetadata"
@@ -113,14 +113,14 @@ export const PublishAndPreviewPageContent = () => {
         errorDescription={metadataUploadError?.message ?? createProposalMutation.error?.reason}
         errorTitle={
           metadataUploadError
-            ? "Error uploading metadata"
+            ? t("Error uploading metadata")
             : createProposalMutation.error
-              ? "Error uploading proposal metadata"
+              ? t("Error uploading proposal metadata")
               : undefined
         }
         showTryAgainButton={true}
         onTryAgain={onTryAgain}
-        pendingTitle="Creating proposal..."
+        pendingTitle={t("Creating proposal...")}
         txId={createProposalMutation.txReceipt?.meta.txID}
         showExplorerButton
       />
