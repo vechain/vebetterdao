@@ -1,4 +1,4 @@
-import { useAllocationsRoundState, useRoundXApps } from "@/api"
+import { useAllocationsRoundState, useMostVotedAppsInRound } from "@/api"
 import { AppImage } from "@/components/AppImage/AppImage"
 import { Flex, HStack, Skeleton, Text, useBreakpointValue } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
@@ -12,10 +12,14 @@ export const AllocationRoundParticipatingXApps: React.FC<Props> = ({ roundId, ma
   const boxSize = useBreakpointValue({ base: 28, lg: 36 })
   const marginleft = (boxSize ?? 36) / 3
   const borderRadius = (boxSize ?? 36) / 4
-  const { data: xApps, isLoading: xAppsLoading } = useRoundXApps(roundId)
+
+  // Apps are listed based on the rank in the round
+  const { data: xApps, isLoading: isLoadingXApps } = useMostVotedAppsInRound(roundId)
 
   const { data: state, isLoading: stateLoading } = useAllocationsRoundState(roundId)
+
   const appsToRender = xApps?.slice(0, maxAppsToShow)
+
   const remainingApps = (xApps?.length ?? 0) - maxAppsToShow
 
   const otherAppsBoxColor = state === 0 ? "#C9EAA3" : "#D4D6FF"
@@ -26,7 +30,7 @@ export const AllocationRoundParticipatingXApps: React.FC<Props> = ({ roundId, ma
   // if we have less than 5 apps, we show them all
   // if we have no apps, we render nothing
 
-  if (xAppsLoading || stateLoading)
+  if (isLoadingXApps || stateLoading)
     return (
       <HStack spacing={0}>
         {Array.from({ length: maxAppsToShow }).map((_, index) => (

@@ -1,3 +1,4 @@
+"use client"
 import { useTxReceipt } from "@/api"
 import { UseMutateFunction, useMutation } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"

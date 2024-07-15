@@ -1,5 +1,6 @@
 "use client"
-import { Grid, GridItem, Spinner, VStack } from "@chakra-ui/react"
+import { useBreakpoints } from "@/hooks"
+import { VStack, Spinner, Grid, GridItem } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 
 type Props = {
@@ -34,6 +35,19 @@ const YourVoteBalanceCard = dynamic(
 )
 
 export default function CastAllocationVoteLayout({ children, params }: Readonly<Props>) {
+  const { isMobile } = useBreakpoints()
+  if (isMobile)
+    return (
+      <VStack spacing={8} align="flex-start" mt={4} bg="#FFF" w="100vw" p={6}>
+        <YourVoteBalanceCard roundId={params.roundId} />
+        <VStack spacing={8} align="flex-start" w="full">
+          <CastAllocationVoteStepperCard />
+
+          {children}
+        </VStack>
+      </VStack>
+    )
+
   return (
     <Grid
       templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(3, 1fr)"]}

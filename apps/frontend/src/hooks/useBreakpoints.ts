@@ -1,3 +1,4 @@
+"use client"
 import { useMediaQuery, useTheme } from "@chakra-ui/react"
 
 export const useBreakpoints = () => {

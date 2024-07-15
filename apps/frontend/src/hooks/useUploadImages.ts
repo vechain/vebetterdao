@@ -1,3 +1,4 @@
+"use client"
 import { useState, useCallback, useEffect } from "react"
 import imageCompression, { Options as CompressOptions } from "browser-image-compression"
 import dayjs, { Dayjs } from "dayjs"

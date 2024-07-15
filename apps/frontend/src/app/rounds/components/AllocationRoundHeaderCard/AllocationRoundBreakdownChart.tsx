@@ -53,22 +53,22 @@ export const AllocationRoundBreakdownChart = ({ roundId }: Props) => {
         amount: roundAmount?.treasury,
         percentage: baseAmountsPercentage.treasury,
         color: treasuryColor,
-        label: "treasury",
+        label: t("treasury"),
       },
       {
         amount: roundAmount?.voteXAllocations,
         percentage: baseAmountsPercentage.voteXAllocations,
         color: votingRewardsColor,
-        label: "voting rewards",
+        label: t("voting rewards"),
       },
       {
         amount: roundAmount?.voteXAllocations,
         percentage: baseAmountsPercentage.voteX2Earn,
         color: appsColor,
-        label: "app rewards",
+        label: t("app rewards"),
       },
     ]
-  }, [baseAmountsPercentage, roundAmount, treasuryColor, votingRewardsColor, appsColor])
+  }, [baseAmountsPercentage, roundAmount, treasuryColor, votingRewardsColor, appsColor, t])
 
   // Wrapper component to handle different layouts
   const Wrapper = useCallback(

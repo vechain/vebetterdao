@@ -1,3 +1,4 @@
+"use client"
 import { useXApp } from "@/api"
 import { useParams } from "next/navigation"
 

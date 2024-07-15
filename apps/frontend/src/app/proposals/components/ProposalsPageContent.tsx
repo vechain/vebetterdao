@@ -79,7 +79,12 @@ export const ProposalsPageContent = () => {
         )}
       </Show>
       <HStack w={"full"} gap={8} mt={3}>
-        <VStack flex={4.5} data-testid="proposals" alignSelf={"flex-start"} gap={4}>
+        <VStack
+          flex={{ base: undefined, md: 4.5 }}
+          data-testid="proposals"
+          alignSelf={"flex-start"}
+          gap={4}
+          w={{ base: "full", md: undefined }}>
           {allProposals.map(proposal => (
             <ProposalInfoCard proposal={proposal} key={proposal.proposalId} />
           ))}

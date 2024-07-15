@@ -6,8 +6,10 @@ import { SupportDeposit } from "./components/SupportDeposit"
 import { TransactionModal } from "@/components/TransactionModal"
 import { useProposalVot3Deposit } from "@/hooks/useProposalVot3Deposit"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
+import { useTranslation } from "react-i18next"
 
 export const CommunitySupportModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const { t } = useTranslation()
   const { proposal } = useProposalDetail()
   const [step, setStep] = useState(0)
   const depositMutation = useProposalVot3Deposit({ proposalId: proposal.id })
@@ -43,11 +45,11 @@ export const CommunitySupportModal = ({ isOpen, onClose }: { isOpen: boolean; on
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        successTitle={"Deposit Completed!"}
+        successTitle={t("Deposit Completed!")}
         status={depositMutation.error ? "error" : depositMutation.status}
         errorDescription={depositMutation.error?.reason}
-        errorTitle={depositMutation.error ? "Error Depositing" : undefined}
-        pendingTitle="Depositing..."
+        errorTitle={depositMutation.error ? t("Error Depositing") : undefined}
+        pendingTitle={t("Depositing...")}
         showSocialButtons
         socialDescriptionEncoded={encodeURIComponent(
           "🔄 Just supported a proposal on #VeBetterDAO! \n\n🌱 Explore and join us at https://vebetterdao.org.\n\n#VeBetterDAO #Vechain",

@@ -86,7 +86,7 @@ export const AppVotesHorizontalChart = ({
               {showTotalVoters && (
                 <Skeleton isLoaded={!roundVotesLoading}>
                   <Text fontSize={["12px"]} fontWeight={400} color="#6A6A6A">
-                    {`${appVoters} voters`}
+                    {`${appVoters} ${t("voters")}`}
                   </Text>
                 </Skeleton>
               )}
@@ -107,7 +107,7 @@ export const AppVotesHorizontalChart = ({
               </Skeleton>
               <Skeleton isLoaded={!roundStateLoading} textAlign={"right"}>
                 <Text fontSize={["12px", "14px"]} fontWeight={"400"} color="#6A6A6A">
-                  {roundState === 0 ? "To receive" : "Received"}
+                  {roundState === 0 ? t("To receive") : t("Received")}
                 </Text>
               </Skeleton>
             </VStack>
