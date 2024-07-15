@@ -4,19 +4,21 @@ import { AppCard } from "./AppCard"
 import { AddNewAppCard } from "./AddNewAppCard"
 import { useTranslation } from "react-i18next"
 import { FaPlus } from "react-icons/fa6"
+import { useRouter } from "next/navigation"
 
 export const AppsPageContent = () => {
   const { t } = useTranslation()
+
+  const router = useRouter()
+  const navigateToAppDetail = () => {
+    router.push(`/apps/new`)
+  }
 
   // Apps are listed based on the votes they received in the previous round
   const { data: previousRoundId, isLoading: isLoadingPreviousRoundId } = usePreviousAllocationRoundId()
   const { data: xApps, isLoading: isLoadingXApps } = useMostVotedAppsInRound(previousRoundId ?? "")
 
   const isLoading = isLoadingPreviousRoundId || isLoadingXApps
-
-  const openGrantPage = () => {
-    window.open("https://vechain.org/grants/", "_blank", "noopener noreferrer")
-  }
 
   if (isLoading)
     return (
@@ -32,7 +34,7 @@ export const AppsPageContent = () => {
     <VStack spacing={8} data-testid="apps-page">
       <HStack w="full" justify={"space-between"}>
         <Heading size="md">{t("Explore Apps")}</Heading>
-        <Button variant="primaryAction" onClick={openGrantPage} leftIcon={<FaPlus />}>
+        <Button variant="primaryAction" onClick={navigateToAppDetail} leftIcon={<FaPlus />}>
           {t("Apply now")}
         </Button>
       </HStack>
