@@ -47,7 +47,7 @@ export const AppDetails = ({ appId, isAdmin, isModerator, showDivider = false }:
             isRound={true}
             variant="solid"
             aria-label="Go to App"
-            fontSize="20px"
+            fontSize="22px"
             disabled={isAppMetadataError}
             onClick={navigateToAppDetail}
             color={"primary.500"}
