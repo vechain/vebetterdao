@@ -525,5 +525,12 @@
   "Swapping...": "Swapping...",
   "You'll convert": "You'll convert",
   "You'll receive": "You'll receive",
-  "B3TR tokens are generated weekly and distributed to x2earn apps, the DAO Treasury and to the VotingRewards contract.": "B3TR tokens are generated weekly and distributed to x2earn apps, the DAO Treasury and to the VotingRewards contract."
+  "B3TR tokens are generated weekly and distributed to x2earn apps, the DAO Treasury and to the VotingRewards contract.": "B3TR tokens are generated weekly and distributed to x2earn apps, the DAO Treasury and to the VotingRewards contract.",
+  "loading": "loading",
+  "Error getting state": "Error getting state",
+  "Active now": "Active now",
+  "Concluded": "Concluded",
+  "Go to the App": "Go to the App",
+  "No App link available": "No App link available",
+  "Team wallet address copied": "Team wallet address copied"
 }
