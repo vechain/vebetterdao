@@ -6,5 +6,6 @@ export * from "./media"
 export * from "./ipfs"
 export * from "./date"
 export * from "./filterAmountInput"
+export * from "./getNodeJsConnex"
 
 export { AddressUtils, AnalyticsUtils, HexUtils }

@@ -1,3 +1,4 @@
+"use client"
 import {
   useAllocationsRound,
   useAllocationsRoundState,
