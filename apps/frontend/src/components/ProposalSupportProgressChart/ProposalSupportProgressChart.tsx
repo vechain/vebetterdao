@@ -1,8 +1,8 @@
 import { Box, Circle, Flex, HStack, Text, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
-import { Arm } from "../Icons/Arm"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo } from "react"
+import { FaRegHeart } from "react-icons/fa6"
 const compactFormatter = getCompactFormatter(2)
 
 const getSafeScaledPercentage = (percentage: number) => Math.min(percentage, 1) * 100
@@ -79,7 +79,7 @@ export const ProposalSupportProgressChart = ({
       <HStack alignItems={"baseline"} justify={"space-between"}>
         <HStack alignItems={"baseline"}>
           <Flex position="relative" top="7px" display={"inline-flex"}>
-            <Arm color={yourDepositColor} size={"36"} />
+            <FaRegHeart color={yourDepositColor} size={"36"} />
           </Flex>
           <Text fontSize={"28px"} color={"#252525"} fontWeight={700}>
             {compactFormatter.format(totalDeposits)}

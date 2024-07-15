@@ -307,8 +307,8 @@
   "What is community support?": "What is community support?",
   "What is your proposal about?": "What is your proposal about?",
   "You voted": "You voted",
-  "You will be able to claim your tokens back when the voting round ends.": "You will be able to claim your tokens back when the voting round ends.",
-  "You will be able to get those tokens back when the round is over.": "You will be able to get those tokens back when the round is over.",
+  "You can claim your tokens back when the proposal voting round starts.": "You can claim your tokens back when the proposal voting round starts.",
+  "You can claim your tokens back when the proposal voting round starts.": "You can claim your tokens back when the proposal voting round starts.",
   "Your ": "Your ",
   "Your contribution": "Your contribution",
   "Your proposal": "Your proposal",
@@ -502,5 +502,6 @@
   "Help": "Help",
   "Seeking Guidance or Advice?": "Seeking Guidance or Advice?",
   "Join Our Community!": "Join Our Community!",
-  "Join": "Join"
+  "Join": "Join",
+  "You will not be able to vote on this proposal with the tokens used for support.": "You will not be able to vote on this proposal with the tokens used for support."
 }
