@@ -1,15 +1,15 @@
 import { ProposalState } from "@/api"
-import { Arm } from "@/components/Icons/Arm"
 import { HStack, Text, VStack } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { useProposalDetail } from "../../../hooks"
+import { FaRegHeart } from "react-icons/fa6"
 
 export const ProposalOverviewCommunitySupport = () => {
   const { proposal } = useProposalDetail()
   const { t } = useTranslation()
 
-  const armIconColor = useMemo(() => {
+  const supportIconColor = useMemo(() => {
     if (proposal.state === ProposalState.DepositNotMet) {
       return "#D23F63"
     }
@@ -27,7 +27,7 @@ export const ProposalOverviewCommunitySupport = () => {
             {t("Community Support")}
           </Text>
           <HStack>
-            <Arm color={armIconColor} />
+            <FaRegHeart color={supportIconColor} />
             <Text color="#252525">
               {t("{{percentage}}%", { percentage: Math.floor(proposal.communityDepositPercentage * 100) })}
             </Text>
