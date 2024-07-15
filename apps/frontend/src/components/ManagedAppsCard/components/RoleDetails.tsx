@@ -16,7 +16,7 @@ export const RoleDetails = ({ isAdmin, isModerator }: { isAdmin: boolean; isMode
   }, [isAdmin, isModerator])
 
   return (
-    <VStack bg={`#F8F8F8`} py={6} px={3} h="full" w="full" borderRadius={"2xl"} align="flex-start">
+    <VStack bg={`#F8F8F8`} py={6} px={3} h="full" w="full" borderRadius={"2xl"} align="flex-start" spacing={0}>
       <Heading fontSize="24px">{role}</Heading>
       <Text fontSize={"sm"} color={"gray.500"}>
         {t("Role")}

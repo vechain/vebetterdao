@@ -54,7 +54,7 @@ export const LatestAllocationDetails = ({ appId }: { appId: string }) => {
         borderRadius={"2xl"}
         justify={"space-between"}
         alignItems={"center"}>
-        <VStack align="self-start">
+        <VStack align="self-start" spacing={0}>
           <HStack>
             <Image h="24px" w="24px" src="/images/b3tr-token.png" alt="b3tr-token" />
             <Heading fontSize="24px">{compactFormatter.format(lastRoundAllocationReceived)}</Heading>
