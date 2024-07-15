@@ -1,5 +1,5 @@
 import { useProposalsEvents, useProposalClaimableUserDeposits } from "@/api"
-import { ProposalInfoCard } from "@/components"
+import { ProposalInfoCard, JoinCommunity } from "@/components"
 import { VStack, HStack, Heading, Box, Button, Show, Spinner } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
@@ -79,7 +79,7 @@ export const ProposalsPageContent = () => {
         )}
       </Show>
       <HStack w={"full"} gap={8} mt={3}>
-        <VStack flex={allProposals.length !== 0 ? 4.5 : 7} data-testid="proposals" alignSelf={"flex-start"} gap={4}>
+        <VStack flex={4.5} data-testid="proposals" alignSelf={"flex-start"} gap={4}>
           {allProposals.map(proposal => (
             <ProposalInfoCard proposal={proposal} key={proposal.proposalId} />
           ))}
@@ -91,9 +91,15 @@ export const ProposalsPageContent = () => {
               <ClaimDeposits claimableDeposits={userTotalDeposits} userProposalDeposits={userProposalDeposits} />
             )}
             {allProposals.length > 0 && <CreateProposalCard />}
+            <JoinCommunity />
           </VStack>
         </Show>
       </HStack>
+      <Show below="sm">
+        <Box mt={2} w={"full"}>
+          <JoinCommunity />
+        </Box>
+      </Show>
     </VStack>
   )
 }

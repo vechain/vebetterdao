@@ -2,6 +2,7 @@ import { expect, test, describe } from "vitest"
 import Apps from "./page"
 import { render, screen } from "../../../test"
 import * as hooks from "@/api/contracts/xApps"
+import * as allocationHooks from "@/api/contracts/xAllocations"
 
 describe("Apps", () => {
   test("XApps available - Renders correctly", async () => {
@@ -20,12 +21,52 @@ describe("Apps", () => {
       isError: false,
     })
 
+    //@ts-ignore
+    vi.spyOn(allocationHooks, "usePreviousAllocationRoundId").mockReturnValue({
+      data: "1",
+      isLoading: false,
+      isError: false,
+    })
+
+    //@ts-ignore
+    vi.spyOn(hooks, "useMostVotedAppsInRound").mockReturnValue({
+      data: [
+        {
+          id: "1",
+          votes: "16347455",
+          app: {
+            id: "1",
+            name: "GreenCart",
+            teamWalletAddress: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",
+            createdAtTimestamp: 16347455,
+            metadataURI: "ipfs://QmQmQmQmQmQmQmQmQmQmQmQmQmQmQm",
+          },
+        },
+      ],
+      isLoading: false,
+      isError: false,
+    })
+
     render(<Apps />)
     expect(await screen.findByTestId("apps-page")).toBeInTheDocument()
   })
   test("isLoading - Renders correctly", async () => {
     //@ts-ignore
     vi.spyOn(hooks, "useXApps").mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isError: false,
+    })
+
+    //@ts-ignore
+    vi.spyOn(allocationHooks, "usePreviousAllocationRoundId").mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isError: false,
+    })
+
+    //@ts-ignore
+    vi.spyOn(hooks, "useMostVotedAppsInRound").mockReturnValue({
       data: undefined,
       isLoading: true,
       isError: false,
@@ -38,6 +79,20 @@ describe("Apps", () => {
   test("no dapps - Renders correctly", async () => {
     //@ts-ignore
     vi.spyOn(hooks, "useXApps").mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: false,
+    })
+
+    //@ts-ignore
+    vi.spyOn(allocationHooks, "usePreviousAllocationRoundId").mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: false,
+    })
+
+    //@ts-ignore
+    vi.spyOn(hooks, "useMostVotedAppsInRound").mockReturnValue({
       data: undefined,
       isLoading: false,
       isError: false,

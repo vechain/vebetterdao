@@ -1,3 +1,4 @@
+"use client"
 import { useCallback, useState } from "react"
 import { XAppMetadata } from "@/api"
 import { base64ToBlob } from "@/utils/BlobUtils"

@@ -13,6 +13,7 @@ import { UpdateReceiverAddress } from "./components/UpdateReceiverAddress"
 import { StartRoundCard } from "./components/StartRoundCard/StartRoundCard"
 import { ContractsDetails } from "./components/ContractsDetails"
 import { UpdateAppsEligibility } from "./components/UpdateAppsEligibility"
+import { useCurrentAllocationsRoundId } from "@/api"
 
 export const AdminPageContent = () => {
   useEffect(() => {
@@ -22,6 +23,8 @@ export const AdminPageContent = () => {
   const { account } = useWallet()
   const { isAdminOfX2EarnApps, isAdminOfVot3, isAdminOfB3tr, isAdminOfGalaxyMember, isAdminOfB3TRGovernor } =
     useAccountPermissions(account ?? "")
+
+  const { data: currentRoundId } = useCurrentAllocationsRoundId()
 
   const canSeePauseTab = isAdminOfB3tr || isAdminOfGalaxyMember || isAdminOfVot3 || isAdminOfB3TRGovernor
 
@@ -37,7 +40,7 @@ export const AdminPageContent = () => {
             },
           }}>
           <Tab>{"Emissions"}</Tab>
-          <Tab>{"Allocation Rewards"}</Tab>
+          {Number(currentRoundId) > 0 && <Tab>{"Allocation Rewards"}</Tab>}
           {isAdminOfX2EarnApps && <Tab>{"X2Earn Apps"}</Tab>}
           <Tab>{"Utils"}</Tab>
           <Tab>{"Contracts"}</Tab>
@@ -52,13 +55,14 @@ export const AdminPageContent = () => {
             </Grid>
           </TabPanel>
 
-          <TabPanel>
-            <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
-              <ClaimXAppAllocations />
-              <BulkClaimXAppsAllocations />
-            </Grid>
-          </TabPanel>
-
+          {Number(currentRoundId) > 0 && (
+            <TabPanel>
+              <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
+                <ClaimXAppAllocations />
+                <BulkClaimXAppsAllocations />
+              </Grid>
+            </TabPanel>
+          )}
           {isAdminOfX2EarnApps && (
             <TabPanel>
               <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">

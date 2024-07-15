@@ -1,4 +1,4 @@
-import { B3TR, Treasury__factory } from "../../typechain-types"
+import { Treasury__factory } from "../../typechain-types"
 import {
   clauseBuilder,
   type TransactionClause,
