@@ -45,7 +45,7 @@ export const ProposalCommunitySupport = () => {
           <Heading fontSize={"24px"} fontWeight={700}>
             {t("Community Support")}
           </Heading>
-          <BaseTooltip text={t("You will not be able to vote on this proposal with the tokens used for the support.")}>
+          <BaseTooltip text={t("You will not be able to vote on this proposal with the tokens used for support.")}>
             <span>
               <UilInfoCircle size="24px" color={"#004CFC"} />
             </span>
