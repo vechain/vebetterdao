@@ -437,6 +437,7 @@
   "See transaction information": "See transaction information",
   "You withdrew": "You withdrew",
   "Current B3TR Balance": "Current B3TR Balance",
+  "Current VOT3 Balance": "Current VOT3 Balance",
   "Total B3TR Balance": "Total B3TR Balance",
   "Total VOT3 Balance": "Total VOT3 Balance",
   "Withdraw reason": "Withdraw reason",
@@ -512,5 +513,17 @@
   "Latest allocation": "Latest allocation",
   "previous round": "previous round",
   "Your NFTs": "Your NFTs",
-  "You will not be able to vote on this proposal with the tokens used for support.": "You will not be able to vote on this proposal with the tokens used for support."
+  "You will not be able to vote on this proposal with the tokens used for support.": "You will not be able to vote on this proposal with the tokens used for support.",
+  "Turn your B3TR into VOT3": "Turn your B3TR into VOT3",
+  "Turn B3TR into VOT3": "Turn B3TR into VOT3",
+  "Turn VOT3 into B3TR": "Turn VOT3 into B3TR",
+  "Turn your VOT3 into B3TR": "Turn your VOT3 into B3TR",
+  "Get VOT3": "Get VOT3",
+  "Get B3TR": "Get B3TR",
+  "Swap Completed!": "Swap Completed!",
+  "Error swapping": "Error swapping",
+  "Swapping...": "Swapping...",
+  "You'll convert": "You'll convert",
+  "You'll receive": "You'll receive",
+  "B3TR tokens are generated weekly and distributed to x2earn apps, the DAO Treasury and to the VotingRewards contract.": "B3TR tokens are generated weekly and distributed to x2earn apps, the DAO Treasury and to the VotingRewards contract."
 }
