@@ -5,11 +5,10 @@ export function createTestnetConfig() {
     MIGRATION_ADDRESS: "0x",
     // @ts-ignore
     MIGRATION_AMOUNT: "0",
-    B3TR_CAP: 3_750_000, // 3_750_000 -> 3.75 million B3TR tokens for pilot show
     B3TR_GOVERNOR_QUORUM_PERCENTAGE: 4, // 4 -> Need 4% of voters to pass
     TIMELOCK_MIN_DELAY: 30, // time to wait before you can execute a queued proposal, 0 for immediate execution
     B3TR_GOVERNOR_DEPOSIT_THRESHOLD: 2, // Percentage of total B3TR supply needed to be deposited to create a proposal
-    B3TR_GOVERNOR_MIN_VOTING_DELAY: 25920, // 3 days
+    B3TR_GOVERNOR_MIN_VOTING_DELAY: 60, // 10 minutes
     B3TR_GOVERNOR_VOTING_THRESHOLD: BigInt("1000000000000000000"), // 1 vote
     /*
       For ambiguous functions (functions with same name), the function signature is used to differentiate them
@@ -18,12 +17,12 @@ export function createTestnetConfig() {
     B3TR_GOVERNOR_WHITELISTED_METHODS: {
       Treasury: ["transferB3TR"],
     },
-    EMISSIONS_CYCLE_DURATION: 60480, // blocks - 60480 blocks - 1 week.
-    EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE: 4, // 4% decay every cycle
-    EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE: 20, // 20% decay every cycle
-    EMISSIONS_X_ALLOCATION_DECAY_PERIOD: 999999, // should never decay in pilot show
-    EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD: 999999, // should never decay in pilot show
-    EMISSIONS_TREASURY_PERCENTAGE: 8750, // 87.5% of the emissions go to the treasury during pilot show
+    EMISSIONS_CYCLE_DURATION: 60, // blocks - 10 minutes.
+    EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE: 4, // 4% decay every x-allocation decay period
+    EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE: 20, // 20% decay every vote 2 earn decay period
+    EMISSIONS_X_ALLOCATION_DECAY_PERIOD: 12, // every 12 cycles
+    EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD: 50, // every 50 cycles
+    EMISSIONS_TREASURY_PERCENTAGE: 2500, // 25% of the emissions go to the treasury
     EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE: 80,
     X_ALLOCATION_VOTING_QUORUM_PERCENTAGE: 40, // 40 -> Need 40% of total supply to succeed
     X_ALLOCATION_VOTING_VOTING_THRESHOLD: BigInt("1000000000000000000"), // 1 vote
