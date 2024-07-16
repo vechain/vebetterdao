@@ -4,7 +4,7 @@ import { getConfig } from "@repo/config"
 import { useEffect, useRef, useState } from "react"
 
 const isTestnetPhase = ["test", "solo", "custom"].includes(getConfig().network.type)
-const text = "Alpha Testnet Phase"
+const text = "Testnet Environment"
 const MotionHStack = motion(HStack)
 export const AlphaTestnetBanner = () => {
   const textsNumber = 50
