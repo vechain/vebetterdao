@@ -12,6 +12,7 @@ import {
   Treasury,
   X2EarnApps,
   X2EarnRewardsPool,
+  B3TRFaucet,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -331,6 +332,13 @@ export async function deployAll(config: ContractsConfig) {
     true,
   )) as B3TRGovernor
 
+  const b3trFaucet = (await deployProxy(
+    "B3TRFaucet",
+    [await b3tr.getAddress(), 100, 5, TEMP_ADMIN],
+    undefined,
+    true,
+  )) as B3TRFaucet
+
   const date = new Date(performance.now() - start)
   console.log(`================  Contracts deployed in ${date.getMinutes()}m ${date.getSeconds()}s `)
 
@@ -347,6 +355,7 @@ export async function deployAll(config: ContractsConfig) {
     X2EarnRewardsPool: await x2EarnRewardsPool.getAddress(),
     XAllocationPool: await xAllocationPool.getAddress(),
     XAllocationVoting: await xAllocationVoting.getAddress(),
+    B3TRFaucet: await b3trFaucet.getAddress(),
   }
 
   const libraries: {
@@ -464,10 +473,10 @@ export async function deployAll(config: ContractsConfig) {
       await setupMainnetEnvironment(emissions, x2EarnApps)
       break
     case "vechain_testnet":
-      await setupTestEnvironment(emissions, x2EarnApps)
+      await setupTestEnvironment(emissions, treasury)
       break
     case "vechain_solo":
-      await setupLocalEnvironment(emissions, treasury, x2EarnApps)
+      await setupTestEnvironment(emissions, treasury) // load testnet env on solo network
       break
   }
 
@@ -796,6 +805,7 @@ export async function deployAll(config: ContractsConfig) {
     treasury: treasury,
     x2EarnApps: x2EarnApps,
     x2EarnRewardsPool: x2EarnRewardsPool,
+    b3trFaucet: b3trFaucet,
   }
   // close the script
 }

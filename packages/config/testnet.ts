@@ -15,6 +15,7 @@ const config: AppConfig = {
   x2EarnAppsContractAddress: "",
   treasuryContractAddress: "",
   x2EarnRewardsPoolContractAddress: "",
+  b3trFaucetAddress: "",
   nodeUrl: "https://testnet.vechain.org",
   network: {
     id: "testnet",
