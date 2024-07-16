@@ -486,8 +486,8 @@ export async function deployAll(config: ContractsConfig) {
   }
 
   // ---------- Role updates ---------- //
-  // Do not update roles on solo network since we are already using the predifined address and it would just increase dev time
-  if (network.name === "vechain_testnet" || network.name === "vechain_mainnet") {
+  // Do not update roles on solo network or testnet network since we are already using the predifined address and it would just increase dev time
+  if (network.name === "vechain_mainnet") {
     console.log("================ Updating contract roles after setup ")
     console.log("New admin address: ", config.CONTRACTS_ADMIN_ADDRESS)
 
