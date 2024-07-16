@@ -1,8 +1,8 @@
 import { AppConfig } from "."
 const config: AppConfig = {
   environment: "testnet",
-  basePath: "https://governance.vebetterdao.org",
-  mixPanelProjectToken: "949d49f83d7168260973a1c170f1f28d",
+  basePath: "https://dev.testnet.governance.vebetterdao.org",
+  mixPanelProjectToken: "e03f4f5f6a753dae2dac30a69dfe21f7",
   b3trContractAddress: "0xaC0CA2a5148E15EF913F9f5Cf8Eb3cf763f5a43f",
   vot3ContractAddress: "0x9dF69AD8fF89063869E04164A11579c0a8532e84",
   b3trGovernorAddress: "0x102A7B7f771d904034471431b2F67e661f1bAB1e",
