@@ -31,7 +31,7 @@ export function createTestnetConfig() {
     CONTRACTS_ADMIN_ADDRESS: "0x259FE5d98891740E1CdBd6d8E61031D70f3De319",
     VOTE_2_EARN_POOL_ADDRESS: "0x259FE5d98891740E1CdBd6d8E61031D70f3De319", //temporarily pointing to trasury, then updated in the deploy script to point to the voterReward contract
     INITIAL_X_ALLOCATION: BigInt("66666666666666666666666"), // 1M/15 rounded down -> 1/15th of the total supply for pilot show
-    GM_NFT_BASE_URI: "ipfs://bafybeiahr3qobzujfkxi64o6wrigkmdagrvgfa566rqqth6jm5nq7vf24y/", // IPFS base URI for the GM NFT
+    GM_NFT_BASE_URI: "ipfs://bafybeienna2npuyliqaqsrxziu4texyginznh5ewxcvlvlqcxfyw7ef52q/metadata/", // IPFS base URI for the GM NFT
     /*
       Level => B3TR Required
       2 (Moon) => 10,000 B3TR
