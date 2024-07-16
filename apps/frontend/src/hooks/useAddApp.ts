@@ -1,38 +1,40 @@
 import { useCallback, useMemo } from "react"
-import { getConfig } from "@repo/config"
 import { X2EarnApps__factory } from "@repo/contracts"
+import { getConfig } from "@repo/config"
 import { buildClause } from "@/utils/buildClause"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getXAppsQueryKey } from "@/api"
 
-const config = getConfig()
-
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
-const X2EARNAPPS_CONTRACT = config.x2EarnAppsContractAddress
 
-type UseAddAppProps = {
-  treasuryAddress: string
-  adminAddress: string
-  name: string
-  metadataURI: string
-  onSuccess?: () => void
+type Props = { onSuccess?: () => void }
+
+type ClausesProps = {
+  adminAddress?: string
+  treasuryAddress?: string
+  name?: string
+  metadataURI?: string
 }
 
 /**
  * Custom hook for adding app
  */
-export const useAddApp = ({ treasuryAddress, adminAddress, name, metadataURI, onSuccess }: UseAddAppProps) => {
-  const clauseBuilder = useCallback(() => {
-    return [
+export const useAddApp = ({ onSuccess }: Props) => {
+  const clauseBuilder = useCallback(({ adminAddress, treasuryAddress, name, metadataURI }: ClausesProps) => {
+    const clauses = []
+
+    clauses.push(
       buildClause({
+        to: getConfig().x2EarnAppsContractAddress,
         contractInterface: X2EarnAppsInterface,
-        to: X2EARNAPPS_CONTRACT,
         method: "addApp",
         args: [treasuryAddress, adminAddress, name, metadataURI],
         comment: `Add app ${name} with treasury address ${treasuryAddress} and admin address ${adminAddress}`,
       }),
-    ]
-  }, [treasuryAddress, adminAddress, name, metadataURI])
+    )
+
+    return clauses
+  }, [])
 
   const refetchQueryKeys = useMemo(() => [getXAppsQueryKey()], [])
 

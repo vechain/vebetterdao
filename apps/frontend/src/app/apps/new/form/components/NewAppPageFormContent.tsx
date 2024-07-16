@@ -3,11 +3,12 @@ import { VStack, Grid, GridItem, Heading, useDisclosure } from "@chakra-ui/react
 import { useForm } from "react-hook-form"
 import { AppPreviewDetailCard } from "@/components/AppPreviewDetailCard"
 import { useTranslation } from "react-i18next"
-// import { useUploadAppMetadata } from "@/hooks"
-// import { useCallback } from "react"
+import { useAddApp, useUploadAppMetadata } from "@/hooks"
+import { useCallback } from "react"
+import { TransactionModal } from "@/components"
 
 export const NewAppPageFormContent = () => {
-  const { register, setValue, setError, formState, watch, handleSubmit, clearErrors, control } =
+  const { register, setValue, setError, formState, watch, handleSubmit, clearErrors, control, reset } =
     useForm<CreateEditAppFormData>({
       defaultValues: {
         name: "",
@@ -23,68 +24,82 @@ export const NewAppPageFormContent = () => {
   const { errors } = formState
   const { t } = useTranslation()
 
-  // const { onMetadataUpload, metadataUploadError, metadataUploading } = useUploadAppMetadata()
+  const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
 
-  const {
-    // isOpen: isConfirmationOpen,
-    onOpen: onConfirmationOpen,
-    // onClose: onConfirmationClose
-  } = useDisclosure()
-  const onSubmit = async (data: CreateEditAppFormData) => {
-    onConfirmationOpen()
+  const addAppMutation = useAddApp({
+    onSuccess: () => {
+      onConfirmationClose()
+      reset()
+      addAppMutation.resetStatus()
+    },
+  })
 
-    //TODO: integrate dapp creation contract logic
-    alert(`form submitted \n ${JSON.stringify(data)}`)
+  const uploadMetadataMutation = useUploadAppMetadata()
 
-    //   const metadataUri = await onMetadataUpload({
-    //     name: data.name,
-    //     description: data.description,
-    //     external_url: data.projectUrl,
-    //     logo: data.logo,
-    //     banner: data.banner,
-    //     screenshots: [],
-    //     social_urls: [],
-    //     app_urls: [],
-    //     tweets: [],
-    //   })
+  const handleClose = useCallback(() => {
+    onConfirmationClose()
+  }, [onConfirmationClose])
 
-    //   if (!metadataUri) return
-    //   console.log("metadataUri", metadataUri)
-  }
+  const onSubmit = useCallback(
+    async (data: CreateEditAppFormData) => {
+      onConfirmationOpen()
 
-  // const onTryAgain = useCallback(() => {
-  //   onConfirmationClose()
-  //   onConfirmationOpen()
-  // }, [onConfirmationClose, onConfirmationOpen])
+      const metadataUri = await uploadMetadataMutation.onMetadataUpload({
+        name: data.name,
+        description: data.description,
+        external_url: data.projectUrl,
+        logo: data.logo,
+        banner: data.banner,
+        screenshots: [],
+        social_urls: [],
+        app_urls: [],
+        tweets: [],
+      })
+
+      if (!metadataUri) return
+
+      addAppMutation.sendTransaction({
+        adminAddress: data.adminAddress,
+        treasuryAddress: data.treasuryAddress,
+        name: data.name,
+        metadataURI: metadataUri,
+      })
+    },
+    [uploadMetadataMutation, addAppMutation, onConfirmationOpen],
+  )
+
+  const onTryAgain = useCallback(() => {
+    onSubmit(watch())
+  }, [onSubmit, watch])
 
   return (
     <>
-      {/* <TransactionModal
+      <TransactionModal
         isOpen={isConfirmationOpen}
-        onClose={onConfirmationClose}
-        confirmationTitle="Update App details"
-        successTitle="App details updated!"
+        onClose={handleClose}
+        confirmationTitle="Add app"
+        successTitle="App added!"
         status={
-          metadataUploading
+          uploadMetadataMutation.metadataUploading
             ? "uploadingMetadata"
-            : addAppMutation.error || metadataUploadError
+            : addAppMutation.error || uploadMetadataMutation.metadataUploadError
               ? "error"
               : addAppMutation.status
         }
-        errorDescription={metadataUploadError?.message ?? addAppMutation.error?.reason}
+        errorDescription={uploadMetadataMutation.metadataUploadError?.message ?? addAppMutation.error?.reason}
         errorTitle={
-          metadataUploadError
+          uploadMetadataMutation.metadataUploadError
             ? "Error uploading metadata"
             : addAppMutation.error
-              ? "Error updating app details"
+              ? "Error adding app"
               : undefined
         }
         showTryAgainButton={true}
         onTryAgain={onTryAgain}
-        pendingTitle="Updating app details..."
+        pendingTitle="Adding app..."
         txId={addAppMutation.txReceipt?.meta.txID}
-        showExplorerButton={true}
-      /> */}
+        showExplorerButton
+      />
 
       <Grid templateColumns="repeat(3, 1fr)" gap={[4, 4, 8]} w="full" data-testid={`new-app-form`}>
         <GridItem colSpan={[3, 3, 2]}>
