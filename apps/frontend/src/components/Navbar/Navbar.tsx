@@ -3,7 +3,6 @@ import { Box, HStack, useColorModeValue, useMediaQuery } from "@chakra-ui/react"
 import { MobileNavBar } from "./MobileNavbar"
 import { DesktopNavBar } from "./DesktopNavbar"
 import { useAllocationsRoundsEvents } from "@/api"
-import { useAccountPermissions } from "@/api/contracts/account"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
 import { Routes } from "./Routes"
@@ -14,7 +13,6 @@ export const Navbar: React.FC = () => {
 
   const { account } = useWallet()
   const { data: allocationRoundsEvents } = useAllocationsRoundsEvents()
-  const { isAdmin } = useAccountPermissions(account ?? "")
 
   // Filter routes based on user's role and if there are any allocation rounds
   const routesToRender = useMemo(
@@ -23,11 +21,11 @@ export const Navbar: React.FC = () => {
         return (
           route.isVisible &&
           (route.name === "Allocations" ? !!allocationRoundsEvents?.created?.length : true) &&
-          (route.name === "Admin" ? isAdmin : true) &&
+          (route.name === "Admin" ? !!account : true) &&
           (route.name === "Governance" ? !!allocationRoundsEvents?.created?.length : true)
         )
       }),
-    [allocationRoundsEvents, isAdmin],
+    [allocationRoundsEvents, account],
   )
 
   const parsedRoutesToRender = useMemo(() => {

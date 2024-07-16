@@ -120,4 +120,12 @@ contract B3TRFaucet is Initializable, OwnableUpgradeable, UUPSUpgradeable {
    * @param newImplementation The address of the new contract implementation.
    */
   function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+
+  /**
+   * @dev Returns the version of the contract.
+   * @return The version of the contract.
+   */
+  function version() public pure virtual returns (string memory) {
+    return "1";
+  }
 }
