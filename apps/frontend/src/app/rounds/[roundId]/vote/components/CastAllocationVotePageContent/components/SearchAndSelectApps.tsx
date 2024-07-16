@@ -17,6 +17,7 @@ import { useCallback, useMemo, useState } from "react"
 import { AppSelectableCard } from "./AppSelectableCard"
 import { useTranslation } from "react-i18next"
 import { NoAppsCard } from "./NoAppsCard"
+import { splitEvenly } from "../../../utils/splitEvenly"
 
 type Props = {
   selectedApps: CastAllocationVoteFormData[]
@@ -83,9 +84,13 @@ export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xAppsQ
             const isSelected = selectedApps.some(selectedApp => selectedApp.appId === xApp.id)
             const onSelect = () => {
               if (isSelected) {
-                onSelectedAppsChange(selectedApps.filter(selectedApp => selectedApp.appId !== xApp.id))
+                const newApps = selectedApps.filter(selectedApp => selectedApp.appId !== xApp.id)
+                const newAppsWithPercentages = newApps.map(app => ({ ...app, ...splitEvenly(newApps.length) }))
+                onSelectedAppsChange(newAppsWithPercentages)
               } else {
-                onSelectedAppsChange([...selectedApps, { appId: xApp.id, value: 0, rawValue: 0 }])
+                const newApps = [...selectedApps, { appId: xApp.id, value: 0, rawValue: 0 }]
+                const newAppsWithPercentages = newApps.map(app => ({ ...app, ...splitEvenly(newApps.length) }))
+                onSelectedAppsChange(newAppsWithPercentages)
               }
             }
             return <AppSelectableCard key={xApp.id} app={xApp} isSelected={isSelected} onSelect={onSelect} />
