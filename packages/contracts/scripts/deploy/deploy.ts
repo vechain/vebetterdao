@@ -334,7 +334,7 @@ export async function deployAll(config: ContractsConfig) {
 
   const b3trFaucet = (await deployProxy(
     "B3TRFaucet",
-    [await b3tr.getAddress(), 100, 5, TEMP_ADMIN],
+    [await b3tr.getAddress(), ethers.parseEther("100"), 5, TEMP_ADMIN],
     undefined,
     true,
   )) as B3TRFaucet

@@ -6,8 +6,6 @@ import { B3TRFaucet__factory } from "@repo/contracts"
 const B3TRFAUCET_CONTRACT = getConfig().b3trFaucetAddress
 
 export const getRemainingClaims = async (thor: Connex.Thor, account?: string): Promise<string> => {
-  console.log("getRemainingClaims", account)
-
   if (!account) return Promise.reject(new Error("No account provided"))
 
   const faucetInterface = B3TRFaucet__factory.createInterface()

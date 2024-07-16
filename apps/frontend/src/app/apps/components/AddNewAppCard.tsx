@@ -25,7 +25,7 @@ export const AddNewAppCard = () => {
           <Image src="/images/hand-plant.svg" boxSize={32} alt="Add new App image" />
           <Heading size="md">{t("Do you have an app to join the VeBetter DAO ecosystem?")}</Heading>
           <Button variant="primaryAction" onClick={navigateToAppDetail} leftIcon={<FaPlus />}>
-            {t("Apply now")}
+            {t("Add now")}
           </Button>
         </VStack>
       </CardBody>

@@ -35,7 +35,7 @@ export const AppsPageContent = () => {
       <HStack w="full" justify={"space-between"}>
         <Heading size="md">{t("Explore Apps")}</Heading>
         <Button variant="primaryAction" onClick={navigateToAppDetail} leftIcon={<FaPlus />}>
-          {t("Apply now")}
+          {t("Add now")}
         </Button>
       </HStack>
       <Grid templateColumns={["repeat(1, 1fr)", "repeat(3, 1fr)"]} gap={6} w="full">
