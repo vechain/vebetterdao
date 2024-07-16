@@ -473,10 +473,10 @@ export async function deployAll(config: ContractsConfig) {
       await setupMainnetEnvironment(emissions, x2EarnApps)
       break
     case "vechain_testnet":
-      await setupTestEnvironment(emissions, treasury)
+      await setupTestEnvironment(emissions, treasury, b3trFaucet, b3tr)
       break
     case "vechain_solo":
-      await setupTestEnvironment(emissions, treasury) // load testnet env on solo network
+      await setupTestEnvironment(emissions, treasury, b3trFaucet, b3tr) // load testnet env on solo network
       break
   }
 
