@@ -116,6 +116,16 @@ contract B3TRFaucet is Initializable, OwnableUpgradeable, UUPSUpgradeable {
   }
 
   /**
+   * @dev Returns the remaining claims for the user for the day.
+   * @param user The address of the user.
+   * @return The remaining claims for the user for the day.
+   */
+  function remainingClaimsForToday(address user) external view returns (uint256) {
+    ClaimInfo storage userClaimInfo = claims[user];
+    return maxClaimsPerDay - userClaimInfo.claimsToday;
+  }
+
+  /**
    * @dev Authorizes the contract upgrade. Only the owner can authorize upgrades.
    * @param newImplementation The address of the new contract implementation.
    */
