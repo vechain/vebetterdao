@@ -4,11 +4,15 @@ import { useForm } from "react-hook-form"
 import { AppPreviewDetailCard } from "@/components/AppPreviewDetailCard"
 import { useTranslation } from "react-i18next"
 import { useAddApp, useUploadAppMetadata } from "@/hooks"
-import { useCallback } from "react"
+import { useCallback, useState } from "react"
 import { TransactionModal } from "@/components"
+import { useRouter } from "next/navigation"
+import { ethers } from "ethers"
 
 export const NewAppPageFormContent = () => {
-  const { register, setValue, setError, formState, watch, handleSubmit, clearErrors, control, reset } =
+  const [appId, setAppId] = useState<string | null>(null)
+
+  const { register, setValue, setError, formState, watch, handleSubmit, clearErrors, control } =
     useForm<CreateEditAppFormData>({
       defaultValues: {
         name: "",
@@ -23,14 +27,14 @@ export const NewAppPageFormContent = () => {
 
   const { errors } = formState
   const { t } = useTranslation()
+  const router = useRouter()
 
   const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
 
   const addAppMutation = useAddApp({
     onSuccess: () => {
-      onConfirmationClose()
-      reset()
-      addAppMutation.resetStatus()
+      // go to app page
+      router.push(`/apps/${appId}`)
     },
   })
 
@@ -57,6 +61,8 @@ export const NewAppPageFormContent = () => {
       })
 
       if (!metadataUri) return
+
+      setAppId(ethers.keccak256(ethers.toUtf8Bytes(data.name)))
 
       addAppMutation.sendTransaction({
         adminAddress: data.adminAddress,
