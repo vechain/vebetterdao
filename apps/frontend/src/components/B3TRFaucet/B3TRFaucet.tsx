@@ -1,5 +1,4 @@
 import { Button, Card, CardBody, HStack, Heading, Text, VStack } from "@chakra-ui/react"
-import { FaPlus } from "react-icons/fa6"
 import { BalanceInfo } from "../BalanceCard"
 
 export const B3TRFaucet = () => {
@@ -20,7 +19,7 @@ export const B3TRFaucet = () => {
           <VStack spacing={8} w="full" align="flex-start" justify={"stretch"}>
             <Text fontSize={"14px"}>{"You can still claim 3 times today."}</Text>
             <BalanceInfo isB3TR balanceScaled={b3trBalance} />
-            <Button variant="primaryAction" onClick={claimB3TR} leftIcon={<FaPlus />}>
+            <Button w={"full"} variant="primaryAction" onClick={claimB3TR}>
               {"Claim B3TR"}
             </Button>
           </VStack>
