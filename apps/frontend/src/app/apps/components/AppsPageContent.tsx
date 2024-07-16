@@ -27,7 +27,7 @@ export const AppsPageContent = () => {
       </VStack>
     )
 
-  if (!xApps?.length) return null
+  if (!xApps?.length) return <AddNewAppCard />
 
   //TODO: Pagination, search, filters
   return (

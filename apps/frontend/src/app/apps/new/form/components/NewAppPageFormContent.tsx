@@ -1,8 +1,10 @@
 import { CreateEditAppForm, CreateEditAppFormData } from "@/components/CreateEditAppForm"
-import { VStack, Grid, GridItem, Heading } from "@chakra-ui/react"
+import { VStack, Grid, GridItem, Heading, useDisclosure } from "@chakra-ui/react"
 import { useForm } from "react-hook-form"
 import { AppPreviewDetailCard } from "@/components/AppPreviewDetailCard"
 import { useTranslation } from "react-i18next"
+// import { useUploadAppMetadata } from "@/hooks"
+// import { useCallback } from "react"
 
 export const NewAppPageFormContent = () => {
   const { register, setValue, setError, formState, watch, handleSubmit, clearErrors, control } =
@@ -21,40 +23,39 @@ export const NewAppPageFormContent = () => {
   const { errors } = formState
   const { t } = useTranslation()
 
-  //   const { onMetadataUpload, metadataUploadError, metadataUploading } = useUploadAppMetadata()
+  // const { onMetadataUpload, metadataUploadError, metadataUploading } = useUploadAppMetadata()
 
-  //   const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
+  const {
+    // isOpen: isConfirmationOpen,
+    onOpen: onConfirmationOpen,
+    // onClose: onConfirmationClose
+  } = useDisclosure()
   const onSubmit = async (data: CreateEditAppFormData) => {
-    // onConfirmationOpen()
+    onConfirmationOpen()
 
     //TODO: integrate dapp creation contract logic
     alert(`form submitted \n ${JSON.stringify(data)}`)
 
-    // const metadataUri = await onMetadataUpload({
-    //   name: data.name,
-    //   description: data.description,
-    //   logo: data.logo,
-    //   banner: data.banner,
-    //   external_url: data.projectUrl,
-    //   screenshots: metadata?.screenshots ?? [],
-    //   app_urls: metadata?.app_urls ?? [],
-    //   social_urls: metadata?.social_urls ?? [],
-    // })
-    // if (!metadataUri) return
-    // console.log("metadataUri", metadataUri)
+    //   const metadataUri = await onMetadataUpload({
+    //     name: data.name,
+    //     description: data.description,
+    //     external_url: data.projectUrl,
+    //     logo: data.logo,
+    //     banner: data.banner,
+    //     screenshots: [],
+    //     social_urls: [],
+    //     app_urls: [],
+    //     tweets: [],
+    //   })
 
-    // updateAppMetadataMutation.sendTransaction({
-    //   metadataUri,
-    //   ...(compareAddresses(data.teamWalletAddress, appData?.teamWalletAddress)
-    //     ? {}
-    //     : { teamWalletAddress: data.teamWalletAddress }),
-    // })
+    //   if (!metadataUri) return
+    //   console.log("metadataUri", metadataUri)
   }
 
-  //   const onTryAgain = useCallback(() => {
-  //     onConfirmationClose()
-  //     onConfirmationOpen()
-  //   }, [onConfirmationClose, onConfirmationOpen])
+  // const onTryAgain = useCallback(() => {
+  //   onConfirmationClose()
+  //   onConfirmationOpen()
+  // }, [onConfirmationClose, onConfirmationOpen])
 
   return (
     <>
@@ -66,22 +67,22 @@ export const NewAppPageFormContent = () => {
         status={
           metadataUploading
             ? "uploadingMetadata"
-            : updateAppMetadataMutation.error || metadataUploadError
+            : addAppMutation.error || metadataUploadError
               ? "error"
-              : updateAppMetadataMutation.status
+              : addAppMutation.status
         }
-        errorDescription={metadataUploadError?.message ?? updateAppMetadataMutation.error?.reason}
+        errorDescription={metadataUploadError?.message ?? addAppMutation.error?.reason}
         errorTitle={
           metadataUploadError
             ? "Error uploading metadata"
-            : updateAppMetadataMutation.error
+            : addAppMutation.error
               ? "Error updating app details"
               : undefined
         }
         showTryAgainButton={true}
         onTryAgain={onTryAgain}
         pendingTitle="Updating app details..."
-        txId={updateAppMetadataMutation.txReceipt?.meta.txID}
+        txId={addAppMutation.txReceipt?.meta.txID}
         showExplorerButton={true}
       /> */}
 
