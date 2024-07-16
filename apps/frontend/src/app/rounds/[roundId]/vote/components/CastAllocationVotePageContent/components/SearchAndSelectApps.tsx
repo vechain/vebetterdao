@@ -36,8 +36,10 @@ export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xAppsQ
   const onCheckboxChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       if (!xAppsQuery.data) return
-      if (e.target.checked)
-        return onSelectedAppsChange(xAppsQuery.data.map(xApp => ({ appId: xApp.id, value: 0, rawValue: 0 })))
+      if (e.target.checked) {
+        const data = xAppsQuery.data.map(xApp => ({ appId: xApp.id, ...splitEvenly(xAppsQuery.data.length) }))
+        return onSelectedAppsChange(data)
+      }
       return onSelectedAppsChange([])
     },
     [onSelectedAppsChange, xAppsQuery],
