@@ -81,7 +81,7 @@ export const setupLocalEnvironment = async (emissions: Emissions, treasury: Trea
   console.log(`Setup complete in ${end.getMinutes()}m ${end.getSeconds()}s`)
 }
 
-export const setupTestEnvironment = async (emissions: Emissions, x2EarnApps: X2EarnApps) => {
+export const setupTestEnvironment = async (emissions: Emissions, treasury: Treasury) => {
   console.log("================ Setup Testnet environment")
   const start = performance.now()
 
@@ -91,13 +91,10 @@ export const setupTestEnvironment = async (emissions: Emissions, x2EarnApps: X2E
   const emissionsContract = await emissions.getAddress()
   await bootstrapEmissions(emissionsContract, admin)
 
-  // Add x-apps to the XAllocationPool
-  console.log("Adding x-apps...")
-
-  // Add x-apps to the XAllocationPool
-  const x2EarnAppsAddress = await x2EarnApps.getAddress()
-  await addXDapps(x2EarnAppsAddress, admin, APPS)
-  console.log("x-apps added")
+  // Seed the first 5 accounts with some tokens
+  const treasuryAddress = await treasury.getAddress()
+  const seedAccounts = getSeedAccounts(SeedStrategy.FIXED, 5, 0)
+  await airdropB3trFromTreasury(treasuryAddress, admin, seedAccounts)
 
   const end = performance.now()
   console.log(`Setup complete in ${end - start}ms`)
