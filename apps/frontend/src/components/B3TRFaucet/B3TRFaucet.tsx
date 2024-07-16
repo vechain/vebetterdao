@@ -42,7 +42,7 @@ export const B3TRFaucet = () => {
               <Text fontSize={"14px"}>{`You can still claim ${remainingClaims} times today.`}</Text>
             </Skeleton>
             <BalanceInfo isB3TR balanceScaled={b3trBalance?.scaled ?? ""} />
-            <Button w={"full"} variant="primaryAction" onClick={claimB3TR} disabled={remainingClaims === "0"}>
+            <Button w={"full"} variant="primaryAction" onClick={claimB3TR} isDisabled={remainingClaims === "0"}>
               {"Claim B3TR"}
             </Button>
           </VStack>
