@@ -75,6 +75,27 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
     return $._apps[appId];
   }
 
+  /**
+   * @dev Add app.
+   * Will be eligible for voting by default from the next round and
+   * the team allocation percentage will be 0%.
+   *
+   * @param appId the id of the app
+   * @param info the app info
+   *
+   * Emits a {AppAdded} event.
+   */
+  function _addApp(bytes32 appId, X2EarnAppsDataTypes.App info) internal {
+    AppsStorageStorage storage $ = _getAppsStorageStorage();
+
+    // Store the new app
+    $._apps[id] = X2EarnAppsDataTypes.App(id, appName, block.timestamp);
+    $._appIds.push(id);
+    _setVotingEligibility(id, true);
+
+    emit AppAdded(id, teamWalletAddress, appName, true);
+  }
+
   // ---------- Getters ---------- //
   /**
    * @dev See {IX2EarnApps-appExists}.
