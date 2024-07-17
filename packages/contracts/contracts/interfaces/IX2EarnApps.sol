@@ -120,6 +120,11 @@ interface IX2EarnApps {
   event BaseURIUpdated(string oldBaseURI, string newBaseURI);
 
   /**
+   * @dev Event fired when the grace period duration is updated.
+   */
+  event GracePeriodUpdated(string oldGracePeriod, string newGracePeriod);
+
+  /**
    * @dev Event fired when the team allocation percentage is updated.
    */
   event TeamAllocationPercentageUpdated(bytes32 indexed appId, uint256 oldPercentage, uint256 newPercentage);
