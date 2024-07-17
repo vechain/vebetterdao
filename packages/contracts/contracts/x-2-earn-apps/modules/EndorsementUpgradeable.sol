@@ -73,7 +73,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    *
    * Emits a {AppAdded} event.
    */
-  function _addApp(
+  function _registerApp(
     address teamWalletAddress,
     address admin,
     string memory appName,
@@ -100,7 +100,6 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     // Store the new app
     $.pendingEndorsements[id] = X2EarnAppsDataTypes.App(id, appName, block.timestamp);
     _setAppAdmin(id, admin);
-    _setVotingEligibility(id, true);
     _updateTeamWalletAddress(id, teamWalletAddress);
     _updateAppMetadata(id, metadataURI);
     _setTeamAllocationPercentage(id, 0);
@@ -141,7 +140,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev See {IX2EarnApps-appExists}.
+   * @dev See {IX2EarnApps-appPendingEndorsment}.
    */
   function appPendingEndorsment(bytes32 appId) public view override returns (bool) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
