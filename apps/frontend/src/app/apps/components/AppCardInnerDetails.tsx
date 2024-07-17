@@ -23,9 +23,7 @@ export const AppCardInnerDetails = ({ xApp }: Props) => {
 
   // Generate roundIds from 1 to currentRoundId or previous round if current round is not active
   const roundIds = useMemo(() => {
-    return Array.from({ length: Number(currentRoundId) - (currentRound.state === 0 ? 1 : 0) }, (_, i) =>
-      (i + 1).toString(),
-    )
+    return Array.from({ length: Number(currentRoundId) - (currentRound.state === 0 ? 1 : 0) }, (_, i) => i + 1)
   }, [currentRoundId, currentRound])
 
   const previousRoundId = useMemo(() => {
