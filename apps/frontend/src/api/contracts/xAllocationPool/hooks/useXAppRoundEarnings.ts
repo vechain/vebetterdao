@@ -60,7 +60,7 @@ export const useXAppRoundEarnings = (roundId: string, xAppId: string) => {
       })
 
       const isXAppInRound = data.some(app => app.id === xAppId)
-      console.log("isInRound", isXAppInRound)
+
       if (!isXAppInRound) return { amount: "0", xAppId }
 
       return await getXAppRoundEarnings(thor, roundId, xAppId)
