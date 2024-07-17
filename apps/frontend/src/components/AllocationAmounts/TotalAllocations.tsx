@@ -1,5 +1,5 @@
 import { Card, CardBody, CardHeader, Heading, Stack } from "@chakra-ui/react"
-import { useAllocationsRound, useCurrentAllocationsRoundId, useXApps, useXAppsTotalEarnings } from "@/api"
+import { useAllocationsRound, useCurrentAllocationsRoundId, useXApps, useMultipleXAppsTotalEarnings } from "@/api"
 import { useMemo } from "react"
 import { AppAmount } from "./components/AppAmount"
 import { useTranslation } from "react-i18next"
@@ -16,9 +16,9 @@ export const TotalAllocations = () => {
     return Array.from({ length: Number(currentRoundId) - (currentRound.state === 0 ? 1 : 0) }, (_, i) => i + 1)
   }, [currentRoundId, currentRound])
 
-  const { data: totalEarningsPerApp, isLoading: isTotalEarningsPerAppLoading } = useXAppsTotalEarnings(
-    xApps?.map(app => app.id) ?? [],
+  const { data: totalEarningsPerApp, isLoading: isTotalEarningsPerAppLoading } = useMultipleXAppsTotalEarnings(
     roundIds,
+    xApps?.map(app => app.id) ?? [],
   )
 
   const sortedTotalEarnings = useMemo(() => {
