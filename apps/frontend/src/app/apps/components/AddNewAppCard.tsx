@@ -2,13 +2,19 @@ import { Card, CardBody, VStack, Image, Heading, Button } from "@chakra-ui/react
 import { FaPlus } from "react-icons/fa6"
 import { useTranslation } from "react-i18next"
 import { useRouter } from "next/navigation"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 export const AddNewAppCard = () => {
   const { t } = useTranslation()
+  const { account } = useWallet()
 
   const router = useRouter()
   const navigateToAppDetail = () => {
     router.push(`/apps/new`)
+  }
+
+  if (!account) {
+    return null
   }
 
   return (
