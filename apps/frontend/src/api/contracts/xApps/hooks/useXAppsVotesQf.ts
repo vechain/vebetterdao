@@ -45,7 +45,7 @@ export const useXAppsVotesQf = (apps: string[], roundId: string) => {
 
         return {
           app: apps[index] as string,
-          votes: r.reverted ? 0 : (decoded[0] ** 2).toString(),
+          votes: r.reverted ? "0" : (decoded[0] ** 2).toString(),
         }
       })
       return votes
