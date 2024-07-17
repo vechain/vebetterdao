@@ -46,7 +46,10 @@ export const useXAppTotalEarnings = (roundIds: number[], appId: string) => {
         const decoded = roundEarningsAbi.decode(r.data)
         const parsedAmount = ethers.formatEther(decoded[0])
         // Update the cache with the new amount
-        queryClient.setQueryData(getXAppRoundEarningsQueryKey(roundIds[index] as number, appId), parsedAmount)
+        queryClient.setQueryData(getXAppRoundEarningsQueryKey(roundIds[index] as number, appId), {
+          amount: parsedAmount,
+          appId,
+        })
         return parsedAmount
       })
 
