@@ -34,9 +34,7 @@ export const AppCardInnerDetails = ({ xApp }: Props) => {
 
   const { data: prevRoundEarning, isLoading: prevRoundEarningLoading } = useXAppRoundEarnings(previousRoundId, xApp.id)
 
-  const amounts = useXAppTotalEarnings(roundIds, xApp.id)
-  const isAmountsLoading = amounts.some(amount => amount.isLoading)
-  const totalAmount = amounts.reduce((acc, amount) => acc + Number(amount.data?.amount), 0)
+  const { data: totalEarnings, isLoading: totalEarningsLoading } = useXAppTotalEarnings(roundIds, xApp.id)
 
   return (
     <Card variant={"filled"} w="full" rounded={"xl"}>
@@ -53,8 +51,8 @@ export const AppCardInnerDetails = ({ xApp }: Props) => {
               {t("Accumulated")}
             </Text>
             <HStack spacing={1} fontWeight={500} align={"flex-end"}>
-              <Skeleton isLoaded={!isAmountsLoading}>
-                <Text fontSize="sm">{compactFormatter.format(totalAmount ?? 0)}</Text>
+              <Skeleton isLoaded={!totalEarningsLoading}>
+                <Text fontSize="sm">{compactFormatter.format(totalEarnings ?? 0)}</Text>
               </Skeleton>
               <Text fontSize="sm" fontWeight={400}>
                 {t("B3TR")}

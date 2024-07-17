@@ -34,10 +34,10 @@ export const getXAppRoundEarnings = async (
   return { amount: ethers.formatEther(res.decoded["0"]), appId: xAppId }
 }
 
-export const getXAppRoundEarningsQueryKey = (roundId: string, xAppId?: string) => [
+export const getXAppRoundEarningsQueryKey = (roundId: string | number, xAppId?: string) => [
   "roundEarnings",
   "roundId",
-  roundId,
+  Number(roundId),
   "appId",
   ...(xAppId ? [xAppId] : []),
 ]
