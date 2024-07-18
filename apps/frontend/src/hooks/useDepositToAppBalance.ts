@@ -1,0 +1,64 @@
+import { useCallback, useMemo } from "react"
+import { getConfig } from "@repo/config"
+import { X2EarnRewardsPool__factory, B3TR__factory } from "@repo/contracts"
+import { buildClause } from "@/utils/buildClause"
+import { useBuildTransaction } from "./useBuildTransaction"
+import { getAppBalanceQueryKey } from "@/api/contracts/x2EarnRewardsPool"
+import { ethers } from "ethers"
+import { removingExcessDecimals } from "@/utils/MathUtils"
+import { useXApp } from "@/api"
+
+const config = getConfig()
+
+const X2EarnRewardsPoolInterface = X2EarnRewardsPool__factory.createInterface()
+const X2EARN_REWARDS_POOL_CONTRACT = config.x2EarnRewardsPoolContractAddress
+
+const B3TRInterface = B3TR__factory.createInterface()
+const B3TR_CONTRACT = config.b3trContractAddress
+
+type UseDepositToAppBalanceProps = {
+  appId: string
+  amount: string
+  onSuccess?: () => void
+}
+
+/**
+ * Custom hook for depositing B3TR to the x2Earn rewards pool.
+ *
+ * @param {Object} props - The hook props.
+ * @param {string} props.appId - The ID of the app.
+ * @param {string} props.amount - The amount of B3TR to deposit.
+ * @param {Function} [props.onSuccess] - Optional callback function to be called on successful deposit.
+ * @returns {Object} - The result of the hook.
+ */
+export const useDepositToAppBalance = ({ appId, amount, onSuccess }: UseDepositToAppBalanceProps) => {
+  const contractAmount = useMemo(() => removingExcessDecimals(amount), [amount])
+  const { data: app } = useXApp(appId)
+
+  const clauseBuilder = useCallback(() => {
+    return [
+      buildClause({
+        contractInterface: B3TRInterface,
+        to: B3TR_CONTRACT,
+        method: "approve",
+        args: [X2EARN_REWARDS_POOL_CONTRACT, ethers.parseEther(contractAmount.toString()).toString()],
+        comment: `Approve to transfer ${amount} B3TR to the ${app?.name} rewards pool`,
+      }),
+      buildClause({
+        contractInterface: X2EarnRewardsPoolInterface,
+        to: X2EARN_REWARDS_POOL_CONTRACT,
+        method: "deposit",
+        args: [ethers.parseEther(contractAmount.toString()).toString(), appId],
+        comment: `Deposit ${amount} B3TR to the ${app?.name} rewards pool`,
+      }),
+    ]
+  }, [appId, contractAmount, amount, app])
+
+  const refetchQueryKeys = useMemo(() => [getAppBalanceQueryKey(appId)], [appId])
+
+  return useBuildTransaction({
+    clauseBuilder,
+    refetchQueryKeys,
+    onSuccess,
+  })
+}
