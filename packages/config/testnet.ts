@@ -1,4 +1,5 @@
 import { AppConfig } from "."
+import { IPFS_FETCHING_SERVICE_DEV, IPFS_PINNING_SERVICE_DEV } from "@repo/constants"
 const config: AppConfig = {
   environment: "testnet",
   basePath: "https://dev.testnet.governance.vebetterdao.org",

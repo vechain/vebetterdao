@@ -26,8 +26,8 @@ export const getXAppVotesQf = async (thor: Connex.Thor, roundId: string, xAppId:
  *  Returns the query key for fetching the number of quadratic funding votes for a given app in a roundId.
  * @param roundId  the roundId the get the votes for
  */
-export const getXAppVotesQfQueryKey = (roundId: number | string, appId: string) =>
-  getCallKey({ method: "getAppVotesQF", keyArgs: [roundId, appId] })
+export const getXAppVotesQfQueryKey = (roundId: number | string, appId?: string) =>
+  getCallKey({ method: "getAppVotesQF", keyArgs: [roundId, ...(appId ? [appId] : [])] })
 
 /**
  *  Hook to get the number of quadratic funding votes for a given app in a roundId

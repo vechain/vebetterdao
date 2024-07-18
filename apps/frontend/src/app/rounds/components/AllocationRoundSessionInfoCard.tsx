@@ -16,11 +16,10 @@ import {
   StepStatus,
   StepTitle,
   Stepper,
-  useSteps,
 } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { t } from "i18next"
-import { useEffect, useMemo } from "react"
+import { useMemo } from "react"
 
 type Props = {
   roundId: string
@@ -52,39 +51,38 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
 
 const AllocationRoundTimeline = ({ roundId }: Props) => {
   const { data: roundInfo } = useAllocationsRound(roundId)
+
+  const activeStep = useMemo(() => {
+    const stateNumber = Number(roundInfo.state)
+    switch (stateNumber) {
+      case 0:
+        return 1
+      case 1:
+        return 3
+      case 2:
+        return 3
+      default:
+        return 0
+    }
+  }, [roundInfo])
+
   const steps = useMemo(
     () => [
-      { title: t("Voting session started"), description: roundInfo?.voteStartTimestamp?.format("MMMM D hh:mm A") },
-      { title: t("Voting session finished"), description: roundInfo?.voteEndTimestamp?.format("MMMM D hh:mm A") },
+      {
+        title: activeStep > 0 ? t("Voting session started") : t("Voting session starts"),
+        description: roundInfo?.voteStartTimestamp?.format("MMMM D hh:mm A"),
+      },
+      {
+        title: activeStep > 1 ? t("Voting session ended") : t("Voting session ends"),
+        description: roundInfo?.voteEndTimestamp?.format("MMMM D hh:mm A"),
+      },
       {
         title: t("Voting rewards are claimable"),
         description: "",
       },
     ],
-    [roundInfo],
+    [roundInfo, activeStep],
   )
-
-  const { activeStep, setActiveStep } = useSteps({
-    index: 1,
-    count: steps.length,
-  })
-
-  useEffect(() => {
-    if (roundInfo) {
-      const stateNumber = Number(roundInfo.state)
-      switch (stateNumber) {
-        case 0:
-          setActiveStep(1)
-          break
-        case 1:
-          setActiveStep(3)
-          break
-        case 2:
-          setActiveStep(3)
-          break
-      }
-    }
-  }, [roundInfo, setActiveStep])
 
   return (
     <Stepper

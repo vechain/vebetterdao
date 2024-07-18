@@ -1,5 +1,6 @@
 {
   "{{amount}}% distributed": "<strong>{{amount}}</strong>% distributed",
+
   "See round": "See round",
   "The Allocation round #{{roundId}} is active! Vote for your favorite apps to help them get more B3TR and earn rewards for participating.": "The Allocation round #{{roundId}} is active! Vote for your favorite apps to help them get more B3TR and earn rewards for participating.",
   "Time to cast your vote and earn rewards!": "Time to cast your vote and earn rewards!",
@@ -134,6 +135,7 @@
   "NEW admin address": "NEW admin address",
   "Moderator already present": "Moderator already present",
   "Delete {{address}} as moderator?": "Delete {{address}} as moderator?",
+  "Delete {{address}} as reward distributor?": "Delete {{address}} as reward distributor?",
   "The user will not be able to access the app edition mode anymore.": "The user will not be able to access the app edition mode anymore.",
   "Yes, remove": "Yes, remove",
   "Change admin address": "Change admin address",
@@ -300,9 +302,10 @@
   "Votes at snapshot": "Votes at snapshot",
   "voting power": "voting power",
   "VOTING POWER": "VOTING POWER",
-  "Voting session ended": "Voting session ended",
   "Voting session started": "Voting session started",
-  "Voting session finished": "Voting session finished",
+  "Voting session ended": "Voting session ended",
+  "Voting session starts": "Voting session starts",
+  "Voting session ends": "Voting session ends",
   "Voting rewards are claimable": "Voting rewards are claimable",
   "Upcoming voting": "Upcoming voting",
   "Waiting for the round to start": "Waiting for the round to start",
@@ -590,5 +593,12 @@
   "Votes for": "Votes for",
   "Abstained": "Abstained",
   "Welcome to our testnet environment. Follow the steps below to create your app and join the VeBetterDAO ecosystem.": "Welcome to our testnet environment. Follow the steps below to create your app and join the VeBetterDAO ecosystem.",
+  "Reward distributors": "Reward distributors",
+  "These addresses will be able to distribute rewards to users using your app balance and withdraw funds from the app.": "These addresses will be able to distribute rewards to users using your app balance and withdraw funds from the app.",
+  "This address won't be able to distribute rewards anymore.": "This address won't be able to distribute rewards anymore.",
+  "Add a new reward distributor": "Add a new reward distributor",
+  "Contract or wallet address": "Contract or wallet address",
+  "Rewards distributor already present": "Rewards distributor already present",
+  "Add distributor": "Add distributor",
   "Add now": "Add now"
 }
