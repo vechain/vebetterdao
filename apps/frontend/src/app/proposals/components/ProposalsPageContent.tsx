@@ -18,7 +18,11 @@ export const ProposalsPageContent = () => {
     if (!proposalsEvents) return []
 
     const sortedProposals = proposalsEvents.created.sort((a, b) => {
-      return Number(b.roundIdVoteStart) - Number(a.roundIdVoteStart)
+      // sort first by roundId, then by timestamp
+      const aRoundID = Number(a.roundIdVoteStart)
+      const bRoundID = Number(b.roundIdVoteStart)
+      if (aRoundID !== bRoundID) return bRoundID - aRoundID
+      return b.blockMeta.blockTimestamp - a.blockMeta.blockTimestamp
     })
 
     return sortedProposals
