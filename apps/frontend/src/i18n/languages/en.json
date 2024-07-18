@@ -135,6 +135,7 @@
   "NEW admin address": "NEW admin address",
   "Moderator already present": "Moderator already present",
   "Delete {{address}} as moderator?": "Delete {{address}} as moderator?",
+  "Delete {{address}} as reward distributor?": "Delete {{address}} as reward distributor?",
   "The user will not be able to access the app edition mode anymore.": "The user will not be able to access the app edition mode anymore.",
   "Yes, remove": "Yes, remove",
   "Change admin address": "Change admin address",
@@ -590,5 +591,12 @@
   "Error claiming": "Error claiming",
   "Claiming rewards...": "Claiming rewards...",
   "Votes for": "Votes for",
-  "Abstained": "Abstained"
+  "Abstained": "Abstained",
+  "Reward distributors": "Reward distributors",
+  "These addresses will be able to distribute rewards to users using your app balance and withdraw funds from the app.": "These addresses will be able to distribute rewards to users using your app balance and withdraw funds from the app.",
+  "This address won't be able to distribute rewards anymore.": "This address won't be able to distribute rewards anymore.",
+  "Add a new reward distributor": "Add a new reward distributor",
+  "Contract or wallet address": "Contract or wallet address",
+  "Rewards distributor already present": "Rewards distributor already present",
+  "Add distributor": "Add distributor"
 }

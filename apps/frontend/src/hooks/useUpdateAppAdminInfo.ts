@@ -15,6 +15,8 @@ type ClausesProps = {
   teamWalletAddress?: string
   moderatorsToBeAdded?: string[]
   moderatorsToBeRemoved?: string[]
+  distributorsToBeAdded?: string[]
+  distributorsToBeRemoved?: string[]
 }
 
 /**
@@ -25,7 +27,15 @@ type ClausesProps = {
 
 export const useUpdateAppAdminInfo = ({ appId, onSuccess }: Props) => {
   const clauseBuilder = useCallback(
-    ({ appId, adminAddress, teamWalletAddress, moderatorsToBeAdded, moderatorsToBeRemoved }: ClausesProps) => {
+    ({
+      appId,
+      adminAddress,
+      teamWalletAddress,
+      moderatorsToBeAdded,
+      moderatorsToBeRemoved,
+      distributorsToBeAdded,
+      distributorsToBeRemoved,
+    }: ClausesProps) => {
       const clauses = []
 
       if (moderatorsToBeAdded?.length) {
@@ -51,6 +61,34 @@ export const useUpdateAppAdminInfo = ({ appId, onSuccess }: Props) => {
               method: "removeAppModerator",
               args: [appId, moderator],
               comment: "remove moderator",
+            }),
+          )
+        })
+      }
+
+      if (distributorsToBeAdded?.length) {
+        distributorsToBeAdded.map(distributor => {
+          clauses.push(
+            buildClause({
+              to: getConfig().x2EarnAppsContractAddress,
+              contractInterface: X2EarnAppsInterface,
+              method: "addRewardDistributor",
+              args: [appId, distributor],
+              comment: "add reward distributor",
+            }),
+          )
+        })
+      }
+
+      if (distributorsToBeRemoved?.length) {
+        distributorsToBeRemoved.map(distributor => {
+          clauses.push(
+            buildClause({
+              to: getConfig().x2EarnAppsContractAddress,
+              contractInterface: X2EarnAppsInterface,
+              method: "removeRewardDistributor",
+              args: [appId, distributor],
+              comment: "remove reward distributor",
             }),
           )
         })
