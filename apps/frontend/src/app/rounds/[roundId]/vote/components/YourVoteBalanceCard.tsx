@@ -1,3 +1,4 @@
+"use client"
 import { useAllocationsRound, useGetVotesOnBlock } from "@/api"
 import { ResponsiveCard, VOT3Icon } from "@/components"
 import { useBreakpoints } from "@/hooks"

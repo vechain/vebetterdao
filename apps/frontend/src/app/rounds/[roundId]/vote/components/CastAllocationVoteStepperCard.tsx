@@ -1,3 +1,4 @@
+"use client"
 import { ResponsiveCard } from "@/components"
 import { useBreakpoints } from "@/hooks"
 import {

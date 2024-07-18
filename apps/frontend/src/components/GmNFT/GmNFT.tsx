@@ -187,7 +187,7 @@ export const GmNFT = () => {
           <CardBody>
             <VStack spacing={4} align="flex-start" w={"full"}>
               <HStack justifyContent={"space-between"} w="full">
-                <Heading size="md">{t("Galaxy Member")}</Heading>
+                <Heading fontSize="24px">{t("Galaxy Member")}</Heading>
               </HStack>
               <VStack spacing={8} w="full">
                 <HStack

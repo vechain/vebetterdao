@@ -3,7 +3,7 @@
 import MDEditor from "@uiw/react-md-editor"
 import "@uiw/react-md-editor/markdown-editor.css"
 import { Button, Card, CardBody, Divider, HStack, Heading, VStack, useDisclosure } from "@chakra-ui/react"
-import { useCallback, useMemo } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useProposalFormStore } from "@/store"
 import { NewProposalForm } from "../../functions/details/components/NewProposalForm"
 import { useRouter } from "next/navigation"
@@ -13,13 +13,15 @@ import { TransactionModal } from "@/components/TransactionModal"
 import { useForm } from "react-hook-form"
 import { SelectedRoundRadioCard } from "../../round/components/SelectedRoundRadioCard"
 import { ProposalSupportProgressChart } from "@/components/ProposalSupportProgressChart/ProposalSupportProgressChart"
-import { useDepositThreshold } from "@/api"
+import { useDepositThreshold, useHashProposal } from "@/api"
+import { ethers } from "ethers"
 
 export const PublishAndPreviewPageContent = () => {
   const router = useRouter()
   const { t } = useTranslation()
   const { actions, markdownDescription, title, shortDescription, votingStartRoundId, depositAmount } =
     useProposalFormStore()
+  const [proposalDescriptionUriHash, setProposalDescriptionUriHash] = useState<string | undefined>(undefined)
 
   const { data: threshold } = useDepositThreshold()
 
@@ -31,7 +33,17 @@ export const PublishAndPreviewPageContent = () => {
 
   const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
 
-  const onSuccess = useCallback(() => router.push("/proposals"), [router])
+  // We call the hashProposal function to precalculate the proposal id
+  // so we can redirect the user to the proposal page after the tx is confirmed
+  const { data: expectedProposalId } = useHashProposal(
+    actions.map(action => ({
+      contractAddress: action.contractAddress,
+      calldata: action.calldata as string,
+    })),
+    proposalDescriptionUriHash ?? "",
+  )
+
+  const onSuccess = useCallback(() => router.push(`/proposals/${expectedProposalId}`), [router, expectedProposalId])
 
   const createProposalMutation = useCreateProposal({ onSuccess })
 
@@ -49,6 +61,9 @@ export const PublishAndPreviewPageContent = () => {
       throw new Error("Missing data")
     const metadataUri = await onMetadataUpload({ title, shortDescription, markdownDescription })
     if (!metadataUri) return
+
+    // We hash the metadata uri, which will be used by the useHashProposal hook to calculate the proposal id
+    setProposalDescriptionUriHash(ethers.keccak256(ethers.toUtf8Bytes(metadataUri)))
 
     if (!votingStartRoundId || !actions || !shortDescription) throw new Error("Missing data")
 
@@ -86,8 +101,8 @@ export const PublishAndPreviewPageContent = () => {
       <TransactionModal
         isOpen={isConfirmationOpen}
         onClose={onConfirmationClose}
-        confirmationTitle="Create a proposal"
-        successTitle="Proposal created!"
+        confirmationTitle={t("Create a proposal")}
+        successTitle={t("Proposal created!")}
         status={
           metadataUploading
             ? "uploadingMetadata"
@@ -98,14 +113,14 @@ export const PublishAndPreviewPageContent = () => {
         errorDescription={metadataUploadError?.message ?? createProposalMutation.error?.reason}
         errorTitle={
           metadataUploadError
-            ? "Error uploading metadata"
+            ? t("Error uploading metadata")
             : createProposalMutation.error
-              ? "Error uploading proposal metadata"
+              ? t("Error uploading proposal metadata")
               : undefined
         }
         showTryAgainButton={true}
         onTryAgain={onTryAgain}
-        pendingTitle="Creating proposal..."
+        pendingTitle={t("Creating proposal...")}
         txId={createProposalMutation.txReceipt?.meta.txID}
         showExplorerButton
       />
