@@ -3,6 +3,8 @@ import { IPFS_FETCHING_SERVICE_DEV, IPFS_PINNING_SERVICE_DEV } from "@repo/const
 const config: AppConfig = {
   environment: "testnet",
   basePath: "https://dev.testnet.governance.vebetterdao.org",
+  ipfsPinningService: IPFS_PINNING_SERVICE_DEV,
+  ipfsFetchingService: IPFS_FETCHING_SERVICE_DEV,
   mixPanelProjectToken: "e03f4f5f6a753dae2dac30a69dfe21f7",
   b3trContractAddress: "0xbf64cf86894Ee0877C4e7d03936e35Ee8D8b864F",
   vot3ContractAddress: "0xa704c45971995467696EE9544Da77DD42Bc9706E",

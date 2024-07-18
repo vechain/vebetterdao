@@ -1,9 +1,11 @@
 import { AppConfig } from "."
+import { IPFS_FETCHING_SERVICE_DEV, IPFS_PINNING_SERVICE_DEV } from "@repo/constants"
+
 const config: AppConfig = {
   environment: "solo-staging",
   basePath: "https://b3tr-frontend.vercel.app",
-  ipfsPinningService: "https://api.dev.gateway-proxy.vechain.org/api/v1/pinning/pinFileToIPFS",
-  ipfsFetchingService: "https://api.dev.gateway-proxy.vechain.org/ipfs",
+  ipfsPinningService: IPFS_PINNING_SERVICE_DEV,
+  ipfsFetchingService: IPFS_FETCHING_SERVICE_DEV,
   b3trContractAddress: "0x3727518b5616D2f5541A4229EA1d38e54BBCd550",
   vot3ContractAddress: "0x32C07f940B66Dc932392D581F53fa586B7A23EcE",
   b3trGovernorAddress: "0xCFdc059f65669796351E4c07d15bB75A416cd060",
