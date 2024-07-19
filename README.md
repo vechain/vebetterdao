@@ -128,6 +128,14 @@ This command relies on a turbo pipeline which:
 
 It also does not require the solo node to be running locally, as it will point to the staging environment.
 
+## Dev Testnet environment
+
+The dev testnet environment is a testnet that is used for testing purposes by developers that want to join VeBetterDAO.
+It is not the "testnet" environment used the first time we deployed, but a new one that is used for testing purposes.
+This environment is more focused on developer ux and needs (eg: faster voting rounds, a B3TR faucet, all can see settings, priority is given to the developer's needs).
+
+To deploy changes to this environment you will need to checkout the `dev-testnet` branch and push your changes there. Go to Vercel to execute the deployment.
+
 ## Frontend App deployment
 
 The frontend app is deployed using Vercel. The deployment is triggered automatically when a new Release is created on the main branch (please look at the [Release](https://github.com/vechain/b3tr/releases) section).
