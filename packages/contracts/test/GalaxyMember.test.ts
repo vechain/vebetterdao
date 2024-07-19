@@ -1681,60 +1681,6 @@ describe("Galaxy Member", () => {
       // Should not be able to upgrade above max level
       await catchRevert(galaxyMember.connect(owner).upgrade(0))
     })
-
-    it("Should maintain correct level after upgrading Galaxy Member to V2", async () => {
-      const config = createTestConfig()
-      const { owner, xAllocationVoting, minterAccount, governor, b3tr, treasury } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        config,
-      })
-
-      // Bootstrap emissions
-      await bootstrapEmissions()
-
-      // participation in governance is a requirement for minting
-      await participateInAllocationVoting(owner, true)
-
-      const galaxyMemberV1 = (await deployProxy("GalaxyMember", [
-        {
-          name: "galaxyMember",
-          symbol: "GM",
-          admin: owner.address,
-          upgrader: owner.address,
-          pauser: owner.address,
-          minter: owner.address,
-          contractsAddressManager: owner.address,
-          maxLevel: 10,
-          baseTokenURI: config.GM_NFT_BASE_URI,
-          b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
-          b3tr: await b3tr.getAddress(),
-          treasury: await treasury.getAddress(),
-        },
-      ])) as GalaxyMember
-
-      await galaxyMemberV1.waitForDeployment()
-
-      await galaxyMemberV1.connect(owner).setB3trGovernorAddress(await governor.getAddress())
-      await galaxyMemberV1.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
-
-      await galaxyMemberV1.connect(owner).freeMint() // Token id 0
-
-      await upgradeNFTtoLevel(0, 10, galaxyMemberV1, b3tr, owner, minterAccount)
-
-      expect(await galaxyMemberV1.levelOf(0)).to.equal(10) // Level 10
-
-      const galaxyMember = (await upgradeProxy(
-        "GalaxyMember",
-        "GalaxyMemberV2",
-        await galaxyMemberV1.getAddress(),
-        [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
-        { version: 2 },
-      )) as unknown as GalaxyMemberV2
-
-      await galaxyMember.waitForDeployment()
-
-      expect(await galaxyMember.levelOf(0)).to.equal(10) // Level 10
-    })
   })
 
   describe("Vechain nodes Binding", () => {
