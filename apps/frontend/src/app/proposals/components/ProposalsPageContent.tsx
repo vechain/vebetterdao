@@ -81,7 +81,7 @@ export const ProposalsPageContent = () => {
           {filteredProposals.length === 0 && !isLoading && <NoProposalsCard />}
         </VStack>
         <Show above="sm">
-          <VStack flex={2} alignSelf="flex-start" spacing={6}>
+          <VStack flex={2} alignSelf="flex-start" spacing={6} position={"sticky"} top={24}>
             {userTotalDeposits > 0 && (
               <ClaimDeposits claimableDeposits={userTotalDeposits} userProposalDeposits={userProposalDeposits} />
             )}
