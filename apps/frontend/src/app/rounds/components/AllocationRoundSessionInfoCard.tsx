@@ -37,12 +37,17 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
     return roundInfo?.state === 0
   }, [roundInfo?.state])
 
+  const isUpcoming = useMemo(() => {
+    return !isRoundActive && !quorumQuery.isLoading && !quorumQuery.data
+  }, [quorumQuery, isRoundActive])
+
   return (
     <ProposalSessionSection
       quorumQuery={quorumQuery}
       votesAtSnapshotQuery={votesAtSnapshotQuery}
       currentVotesQuery={currentVotesQuery}
       userVotesAtSnapshotQuery={userVotesAtSnapshotQuery}
+      renderQuroum={isUpcoming ? "upcoming" : "active"}
       isEnded={!isRoundActive}
       renderTimeline={<AllocationRoundTimeline roundId={roundId} />}
     />
