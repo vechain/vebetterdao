@@ -1,6 +1,5 @@
 {
   "{{amount}}% distributed": "<strong>{{amount}}</strong>% distributed",
-
   "See round": "See round",
   "The Allocation round #{{roundId}} is active! Vote for your favorite apps to help them get more B3TR and earn rewards for participating.": "The Allocation round #{{roundId}} is active! Vote for your favorite apps to help them get more B3TR and earn rewards for participating.",
   "Time to cast your vote and earn rewards!": "Time to cast your vote and earn rewards!",
@@ -591,7 +590,6 @@
   "Error claiming": "Error claiming",
   "Claiming rewards...": "Claiming rewards...",
   "Votes for": "Votes for",
-  "Add distributor": "Add distributor",
   "Abstained": "Abstained",
   "Welcome to our testnet environment. Follow the steps below to create your app and join the VeBetterDAO ecosystem.": "Welcome to our testnet environment. Follow the steps below to create your app and join the VeBetterDAO ecosystem.",
   "Deposit all": "Deposit all",
