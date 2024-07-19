@@ -24,6 +24,8 @@ export const useFilteredProposals = () => {
     if (!proposalsEvents) return []
 
     switch (selectedFilter) {
+      case ProposalFilter.InThisRound:
+        return proposalsEvents.created.filter((_proposal, index) => checkProposalState(index, ProposalState.Active))
       case StateFilter.Active:
         return proposalsEvents.created.filter((_proposal, index) => checkProposalState(index, ProposalState.Active))
       case StateFilter.Canceled:
