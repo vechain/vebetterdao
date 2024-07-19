@@ -1,4 +1,4 @@
-import { useProposalsEvents, useProposalClaimableUserDeposits } from "@/api"
+import { useProposalClaimableUserDeposits } from "@/api"
 import { ProposalInfoCard, JoinCommunity } from "@/components"
 import { VStack, HStack, Heading, Box, Button, Show, Spinner } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
@@ -6,6 +6,7 @@ import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { ClaimDeposits, CreateProposalCard, ProposalsFilters, NoProposalsCard } from "./components"
 import { useWallet, useWalletModal } from "@vechain/dapp-kit-react"
+import { useFilteredProposals } from "../hooks/useFilteredProposals"
 
 export const ProposalsPageContent = () => {
   const { account } = useWallet()
@@ -13,24 +14,9 @@ export const ProposalsPageContent = () => {
   const router = useRouter()
   const { t } = useTranslation()
 
-  const { data: proposalsEvents, isLoading: proposalsEventsLoading } = useProposalsEvents()
-  const {} = useProposalFilters()
+  const { proposals, isLoading } = useFilteredProposals()
 
-  const allProposals = useMemo(() => {
-    if (!proposalsEvents) return []
-
-    const sortedProposals = proposalsEvents.created.sort((a, b) => {
-      // sort first by roundId, then by timestamp
-      const aRoundID = Number(a.roundIdVoteStart)
-      const bRoundID = Number(b.roundIdVoteStart)
-      if (aRoundID !== bRoundID) return bRoundID - aRoundID
-      return b.blockMeta.blockTimestamp - a.blockMeta.blockTimestamp
-    })
-
-    return sortedProposals
-  }, [proposalsEvents])
-
-  const userProposalDeposits = useProposalClaimableUserDeposits(allProposals, account ?? "")
+  const userProposalDeposits = useProposalClaimableUserDeposits(account ?? "")
 
   const userTotalDeposits = useMemo(() => {
     return userProposalDeposits.reduce((acc, deposit) => {
@@ -47,7 +33,7 @@ export const ProposalsPageContent = () => {
     router.push("/proposals/new")
   }, [account, open, router])
 
-  if (proposalsEventsLoading)
+  if (isLoading)
     return (
       <VStack w="full" spacing={12} h="80vh" justify="center">
         <Spinner size={"lg"} />
@@ -66,7 +52,7 @@ export const ProposalsPageContent = () => {
             </HStack>
           </Box>
           <Show below="sm">
-            {allProposals.length > 0 && (
+            {proposals.length > 0 && (
               <Button onClick={onNewCLick} variant={"primaryAction"}>
                 {t("Create proposal")}
               </Button>
@@ -89,17 +75,17 @@ export const ProposalsPageContent = () => {
           alignSelf={"flex-start"}
           gap={4}
           w={{ base: "full", md: undefined }}>
-          {allProposals.map(proposal => (
+          {proposals.map(proposal => (
             <ProposalInfoCard proposal={proposal} key={proposal.proposalId} />
           ))}
-          {allProposals.length === 0 && !proposalsEventsLoading && <NoProposalsCard />}
+          {proposals.length === 0 && !isLoading && <NoProposalsCard />}
         </VStack>
         <Show above="sm">
           <VStack flex={2} alignSelf="flex-start" spacing={6}>
             {userTotalDeposits > 0 && (
               <ClaimDeposits claimableDeposits={userTotalDeposits} userProposalDeposits={userProposalDeposits} />
             )}
-            {allProposals.length > 0 && <CreateProposalCard />}
+            {proposals.length > 0 && <CreateProposalCard />}
             <JoinCommunity />
           </VStack>
         </Show>

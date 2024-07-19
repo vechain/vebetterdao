@@ -5,7 +5,7 @@ import { getProposalUserDeposit } from "./useProposalUserDeposit"
 import { ProposalState, getProposalState, getProposalStateQueryKey } from "./useProposalState"
 import { ProposalDeposit } from "../utils"
 import { queryClient } from "@/api/QueryProvider"
-import { ProposalCreatedEvent } from "../getProposalsEvents"
+import { useProposalsEvents } from "./useProposalsEvents"
 
 /**
  * Returns a key used for deposit queries in the context of a proposal.
@@ -32,15 +32,15 @@ export const getProposalDepositKey = (proposalId: string, userAddress: string) =
  * details that are claimable by the specified user. Deposits can only be claimed if the proposal
  * state is not pending.
  *
- * @param proposals - An array of `ProposalCreatedEvent` representing the proposals to be queried.
  * @param userAddress - The address of the user whose deposits are to be fetched.
  * @returns An array of results from the `useQueries` function, each corresponding to a proposal's deposit data.
  */
-export const useProposalClaimableUserDeposits = (proposals: ProposalCreatedEvent[], userAddress: string) => {
+export const useProposalClaimableUserDeposits = (userAddress: string) => {
   const { thor } = useConnex()
+  const { data: proposals } = useProposalsEvents()
 
   const proposalIds = useMemo(() => {
-    return proposals.map(proposal => proposal.proposalId)
+    return proposals?.created.map(proposal => proposal.proposalId) ?? []
   }, [proposals])
 
   return useQueries({
