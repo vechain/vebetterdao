@@ -8,8 +8,8 @@ import { CustomModalContent } from "@/components/CustomModalContent"
 import { UploadingMetadataModalContent } from ".//UploadingMetadataModalContent"
 import { ConfirmationConvertModalContent } from "./ConfirmationConvertModalContent"
 import { SuccessConvertModalContent } from "./SuccessConvertModalContent"
-import { ConfirmationAppWithdrawModalContent } from "./ConfirmationAppWithdrawModalContent"
-import { SuccessAppWithdrawModalContent } from "./SuccessAppWithdrawModalContent"
+import { ConfirmationAppBalanceModalContent } from "./ConfirmationAppBalanceModalContent"
+import { SuccessAppBalanceModalContent } from "./SuccessAppBalanceModalContent"
 import { CoinsFlipModalContent } from "./CoinsFlipModalContent/CoinsFlipModalContent"
 
 export type TransactionModalProps = {
@@ -29,10 +29,11 @@ export type TransactionModalProps = {
   txId?: string
   b3trBalanceAfterSwap?: string
   vot3BalanceAfterSwap?: string
-  b3trWithdrawAmount?: string
+  b3trAmount?: string
   isSwap?: boolean
   isClaimingRewards?: boolean
   isAppWithdraw?: boolean
+  isAppDeposit?: boolean
   b3trBalance?: string
   vot3Balance?: string
 }
@@ -55,9 +56,10 @@ export const TransactionModal = ({
   isSwap,
   isClaimingRewards,
   isAppWithdraw,
+  isAppDeposit,
   b3trBalanceAfterSwap,
   vot3BalanceAfterSwap,
-  b3trWithdrawAmount,
+  b3trAmount,
   b3trBalance,
   vot3Balance,
 }: TransactionModalProps) => {
@@ -74,11 +76,12 @@ export const TransactionModal = ({
           />
         )
 
-      if (isAppWithdraw)
+      if (isAppWithdraw || isAppDeposit)
         return (
-          <ConfirmationAppWithdrawModalContent
+          <ConfirmationAppBalanceModalContent
             b3trBalanceAfter={b3trBalanceAfterSwap}
-            b3trWithdrawAmount={b3trWithdrawAmount}
+            b3trAmount={b3trAmount}
+            isDeposit={isAppDeposit}
           />
         )
 
@@ -108,11 +111,12 @@ export const TransactionModal = ({
           />
         )
 
-      if (isAppWithdraw)
+      if (isAppWithdraw || isAppDeposit)
         return (
-          <SuccessAppWithdrawModalContent
+          <SuccessAppBalanceModalContent
             b3trBalanceAfter={b3trBalance}
-            b3trWithdrawAmount={b3trWithdrawAmount}
+            b3trAmount={b3trAmount}
+            isDeposit={isAppDeposit}
             txId={txId}
             onClose={onClose}
           />
@@ -150,7 +154,8 @@ export const TransactionModal = ({
     successTitle,
     showSocialButtons,
     socialDescriptionEncoded,
-    b3trWithdrawAmount,
+    b3trAmount,
+    isAppDeposit,
   ])
   if (!modalContent) return null
 

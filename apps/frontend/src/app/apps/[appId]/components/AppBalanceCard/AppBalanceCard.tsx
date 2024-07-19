@@ -15,16 +15,18 @@ import {
 } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
-import { IoWalletOutline } from "react-icons/io5"
+import { IoAddCircleOutline, IoWalletOutline } from "react-icons/io5"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 import { useAppBalance } from "@/api/contracts/x2EarnRewardsPool"
 import { WithdrawModal } from "./WithdrawModal"
+import { DepositModal } from "./DepositModal"
 
 const compactFormatter = getCompactFormatter(4)
 
 export const AppBalanceCard = () => {
   const { t } = useTranslation()
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { isOpen: isOpenWithdraw, onOpen: onOpenWithdraw, onClose: onCloseWithdraw } = useDisclosure()
+  const { isOpen: isOpenDeposit, onOpen: onOpenDeposit, onClose: onCloseDeposit } = useDisclosure()
   const { app } = useCurrentAppInfo()
   const { data: balance, isLoading: isBalanceLoading } = useAppBalance(app?.id ?? "")
 
@@ -48,21 +50,35 @@ export const AppBalanceCard = () => {
           </VStack>
         </CardBody>
         <CardFooter>
-          <Button
-            mt={2}
-            isDisabled={balance?.scaled === "0.0" || !balance || isBalanceLoading}
-            onClick={onOpen}
-            variant={"primaryAction"}
-            borderRadius={"full"}
-            w={"full"}>
-            <Icon as={IoWalletOutline} mr={2} />
-            {t("Withdraw")}
-          </Button>
+          <VStack spacing={2} w={"full"}>
+            <Button mt={2} onClick={onOpenDeposit} variant={"primaryAction"} borderRadius={"full"} w={"full"}>
+              <Icon as={IoAddCircleOutline} mr={2} />
+              {t("Deposit")}
+            </Button>
+            <Button
+              mt={2}
+              isDisabled={balance?.scaled === "0.0" || !balance || isBalanceLoading}
+              onClick={onOpenWithdraw}
+              variant={"primaryAction"}
+              borderRadius={"full"}
+              w={"full"}>
+              <Icon as={IoWalletOutline} mr={2} />
+              {t("Withdraw")}
+            </Button>
+          </VStack>
         </CardFooter>
       </Card>
 
       {app && (
-        <WithdrawModal appId={app.id} teamWalletAddress={app?.teamWalletAddress} isOpen={isOpen} onClose={onClose} />
+        <>
+          <DepositModal appId={app.id} isOpen={isOpenDeposit} onClose={onCloseDeposit} />
+          <WithdrawModal
+            appId={app.id}
+            teamWalletAddress={app?.teamWalletAddress}
+            isOpen={isOpenWithdraw}
+            onClose={onCloseWithdraw}
+          />
+        </>
       )}
     </>
   )

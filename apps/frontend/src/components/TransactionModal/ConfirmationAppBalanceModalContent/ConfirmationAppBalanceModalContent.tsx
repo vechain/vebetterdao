@@ -4,17 +4,19 @@ import { useTranslation } from "react-i18next"
 import loadingAnimation from "./loading.json"
 import Lottie from "react-lottie"
 
-export type ConfirmationAppWithdrawModalContentProps = {
+export type ConfirmationAppBalanceModalContentProps = {
   b3trBalanceAfter?: string
-  b3trWithdrawAmount?: string
+  b3trAmount?: string
+  isDeposit?: boolean
 }
 
 const compactFormatter = getCompactFormatter(6)
 
-export const ConfirmationAppWithdrawModalContent = ({
+export const ConfirmationAppBalanceModalContent = ({
   b3trBalanceAfter,
-  b3trWithdrawAmount,
-}: ConfirmationAppWithdrawModalContentProps) => {
+  b3trAmount,
+  isDeposit,
+}: ConfirmationAppBalanceModalContentProps) => {
   const { t } = useTranslation()
 
   return (
@@ -39,16 +41,16 @@ export const ConfirmationAppWithdrawModalContent = ({
         {t("Confirm the operation in your wallet to complete it")}
       </Text>
       <VStack w="full" mt={8}>
-        {Number(b3trWithdrawAmount) >= 0 && (
+        {Number(b3trAmount) >= 0 && (
           <HStack w="full" bg={"#F8F8F8"} borderRadius={8} p={4} justifyContent={"space-between"}>
             <Text fontSize={16} fontWeight={400}>
-              {t("You'll withdraw")}
+              {isDeposit ? t("You'll deposit") : t("You'll withdraw")}
             </Text>
 
             <HStack>
               <Image src={"/images/logo/b3tr_logo_dark.svg"} boxSize={"20px"} alt="B3TR Icon" />
               <Text fontSize={20} fontWeight={700} style={{ fontFamily: "Instrument Sans, sans-serif" }}>
-                {compactFormatter.format(Number(b3trWithdrawAmount))}
+                {compactFormatter.format(Number(b3trAmount))}
               </Text>
             </HStack>
           </HStack>
