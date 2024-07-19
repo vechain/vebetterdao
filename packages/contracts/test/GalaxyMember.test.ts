@@ -3,6 +3,7 @@ import {
   NFT_NAME,
   NFT_SYMBOL,
   ZERO_ADDRESS,
+  addNodeToken,
   bootstrapAndStartEmissions,
   bootstrapEmissions,
   catchRevert,
@@ -22,8 +23,9 @@ import { ethers } from "hardhat"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { createTestConfig } from "./helpers/config"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
-import { deployProxy } from "../scripts/helpers"
-import { GalaxyMember } from "../typechain-types"
+import { deployProxy, upgradeProxy } from "../scripts/helpers"
+import { GalaxyMember, GalaxyMemberV2 } from "../typechain-types"
+import { time } from "@nomicfoundation/hardhat-network-helpers"
 
 describe("Galaxy Member", () => {
   describe("Contract parameters", () => {
@@ -207,12 +209,6 @@ describe("Galaxy Member", () => {
       await expect(galaxyMember.connect(owner).setBaseURI("")).to.be.reverted // base uri cannot be empty
     })
 
-    it("CLOCK_MODE should be set to blockNumber", async () => {
-      const { galaxyMember } = await getOrDeployContractInstances({ forceDeploy: true })
-
-      expect(await galaxyMember.CLOCK_MODE()).to.equal("mode=blocknumber&from=default")
-    })
-
     it("Should have b3tr and treasury addresses set correctly", async () => {
       const { galaxyMember, b3tr, treasury } = await getOrDeployContractInstances({ forceDeploy: true })
 
@@ -224,6 +220,25 @@ describe("Galaxy Member", () => {
       const { galaxyMember } = await getOrDeployContractInstances({ forceDeploy: true })
 
       expect(await galaxyMember.supportsInterface("0x01ffc9a7")).to.equal(true) // ERC165
+    })
+
+    it("Should have Vechain Nodes Manager role correctly set", async () => {
+      const { galaxyMember, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      expect(await galaxyMember.hasRole(await galaxyMember.NODES_MANAGER_ROLE(), owner.address)).to.eql(true)
+    })
+
+    it("Should have correct node to free level mapping", async () => {
+      const { galaxyMember } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      expect(await galaxyMember.getNodeToFreeLevel(0)).to.equal(1) // Level 1 Free Upgrade for None
+      expect(await galaxyMember.getNodeToFreeLevel(1)).to.equal(2) // Level 2 Free Upgrade for Strength
+      expect(await galaxyMember.getNodeToFreeLevel(2)).to.equal(4) // Level 4 Free Upgrade for Thunder
+      expect(await galaxyMember.getNodeToFreeLevel(3)).to.equal(6) // Level 6 Free Upgrade for Mjolnir
+      expect(await galaxyMember.getNodeToFreeLevel(4)).to.equal(2) // Level 2 Free Upgrade for VeThorX
+      expect(await galaxyMember.getNodeToFreeLevel(5)).to.equal(4) // Level 4 Free Upgrade for StrengthX
+      expect(await galaxyMember.getNodeToFreeLevel(6)).to.equal(6) // Level 6 Free Upgrade for ThunderX
+      expect(await galaxyMember.getNodeToFreeLevel(7)).to.equal(7) // Level 7 Free Upgrade for MjolnirX
     })
   })
 
@@ -305,26 +320,13 @@ describe("Galaxy Member", () => {
 
     it("Shouldn't be able to initialize the contract if already initialized", async function () {
       const config = createLocalConfig()
-      const { galaxyMember, owner, b3tr, treasury } = await getOrDeployContractInstances({
+      const { galaxyMember, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
 
       await expect(
-        galaxyMember.connect(owner).initialize({
-          name: NFT_NAME,
-          symbol: NFT_SYMBOL,
-          admin: owner.address,
-          upgrader: owner.address,
-          pauser: owner.address,
-          minter: owner.address,
-          contractsAddressManager: owner.address,
-          maxLevel: 1,
-          baseTokenURI: config.GM_NFT_BASE_URI,
-          b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
-          b3tr: await b3tr.getAddress(),
-          treasury: await treasury.getAddress(),
-        }),
+        galaxyMember.connect(owner).initializeV2(owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL),
       ).to.be.reverted
     })
 
@@ -512,7 +514,7 @@ describe("Galaxy Member", () => {
         forceDeploy: true,
       })
 
-      expect(await galaxyMember.version()).to.equal("1")
+      expect(await galaxyMember.version()).to.equal("2")
     })
   })
 
@@ -705,7 +707,7 @@ describe("Galaxy Member", () => {
       expect(await galaxyMember.balanceOf(await voter.getAddress())).to.equal(1) // Other account has 1 NFT
       expect(await galaxyMember.ownerOf(0)).to.equal(await voter.getAddress()) // Owner of the first NFT is the otherAccount
       expect(await galaxyMember.totalSupply()).to.equal(1) // Total supply is 1
-      expect(await galaxyMember.getHighestLevel(voter)).to.equal(1) // Level 0
+      expect(await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(await voter.getAddress()))).to.equal(1) // Level 0
     })
 
     it("User can free mint if he participated both in B3TR Governance and in x-allocation voting", async () => {
@@ -773,28 +775,20 @@ describe("Galaxy Member", () => {
 
       expect(decodedEvents?.length).to.equal(2)
 
-      expect(decodedEvents?.[0]?.name).to.equal("SelectedLevel")
-      expect(decodedEvents?.[0]?.args?.[0]).to.equal(await otherAccount.getAddress())
-      expect(decodedEvents?.[0]?.args?.[1]).to.equal(0)
-      expect(decodedEvents?.[0]?.args?.[2]).to.equal(1)
+      expect(decodedEvents?.[0]?.name).to.equal("Transfer")
+      expect(decodedEvents?.[0]?.args?.[0]).to.equal(ZERO_ADDRESS)
+      expect(decodedEvents?.[0]?.args?.[1]).to.equal(await otherAccount.getAddress())
 
-      expect(decodedEvents?.[1]?.name).to.equal("Transfer")
-      expect(decodedEvents?.[1]?.args?.[0]).to.equal(ZERO_ADDRESS)
-      expect(decodedEvents?.[1]?.args?.[1]).to.equal(await otherAccount.getAddress())
-
-      expect(await galaxyMember.numCheckpoints(await otherAccount.getAddress())).to.equal(1) // Other account has 1 checkpoint
+      expect(decodedEvents?.[1]?.name).to.equal("Selected")
+      expect(decodedEvents?.[1]?.args?.[0]).to.equal(await otherAccount.getAddress())
+      expect(decodedEvents?.[1]?.args?.[1]).to.equal(0)
 
       expect(await galaxyMember.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 NFT
       expect(await galaxyMember.ownerOf(0)).to.equal(await otherAccount.getAddress()) // Owner of the first NFT is the otherAccount
       expect(await galaxyMember.totalSupply()).to.equal(1) // Total supply is 1
 
-      expect(await galaxyMember.getHighestLevel(otherAccount)).to.equal(1) // Level 1
-      expect(await galaxyMember.getPastHighestLevel(await otherAccount.getAddress(), receipt.blockNumber - 1)).to.equal(
-        0,
-      ) // Level 0 in the past
-
-      await expect(galaxyMember.getPastHighestLevel(await otherAccount.getAddress(), receipt.blockNumber + 1)).to.be
-        .reverted // Should revert if block number is in the future
+      expect(await galaxyMember.levelOf(0)).to.equal(1) // Level 1
+      expect(await galaxyMember.getSelectedTokenId(await otherAccount.getAddress())).to.equal(0) // Selected token ID is 0
 
       expect(await galaxyMember.tokenByIndex(0)).to.equal(0) // Token ID of the first NFT is 1
       expect(await galaxyMember.tokenOfOwnerByIndex(await otherAccount.getAddress(), 0)).to.equal(0) // Token ID of the first NFT owned by otherAccount is 1
@@ -819,7 +813,7 @@ describe("Galaxy Member", () => {
 
       expect(await galaxyMember.balanceOf(await otherAccount.getAddress())).to.equal(2) // Other account has 2 NFTs
 
-      expect(await galaxyMember.getHighestLevel(otherAccount)).to.equal(1) // Level 1
+      expect(await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(otherAccount))).to.equal(1) // Level 1
     })
 
     it("Should handle multiple mints from different accounts correctly", async () => {
@@ -857,8 +851,8 @@ describe("Galaxy Member", () => {
       expect(await galaxyMember.tokenOfOwnerByIndex(await otherAccount.getAddress(), 0)).to.equal(0) // Token ID of the first NFT owned by otherAccount is 1
       expect(await galaxyMember.tokenOfOwnerByIndex(await owner.getAddress(), 0)).to.equal(1) // Token ID of the first NFT owned by owner is 1
 
-      expect(await galaxyMember.getHighestLevel(otherAccount)).to.equal(1) // Level 1
-      expect(await galaxyMember.getHighestLevel(owner)).to.equal(1) // Level 1
+      expect(await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(otherAccount))).to.equal(1)
+      expect(await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(owner))).to.equal(1)
     })
 
     it("Cannot mint if contract is paused", async () => {
@@ -894,15 +888,15 @@ describe("Galaxy Member", () => {
 
       await galaxyMember.connect(owner).freeMint()
 
-      expect(await galaxyMember.getHighestLevel(owner)).to.equal(1) // Level 1
+      expect(await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(owner))).to.equal(1)
 
       await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 0)
 
-      expect(await galaxyMember.getHighestLevel(owner)).to.equal(0) // Level 0 (no NFT)
+      expect(await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(owner))).to.equal(1) // was expect(await galaxyMember.getHighestLevel(owner)).to.equal(0) // Level 0 (no NFT)
 
       await galaxyMember.connect(owner).freeMint()
 
-      expect(await galaxyMember.getHighestLevel(owner)).to.equal(1) // Level 1
+      expect(await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(owner))).to.equal(1)
 
       expect(await galaxyMember.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 NFT
       expect(await galaxyMember.balanceOf(await owner.getAddress())).to.equal(1) // Owner has 1 NFT
@@ -950,36 +944,6 @@ describe("Galaxy Member", () => {
       await galaxyMember.connect(owner).setIsPublicMintingPaused(false)
 
       await galaxyMember.connect(otherAccount).freeMint()
-    })
-
-    it("Should be able to mint with minter role if public minting is paused", async () => {
-      const { galaxyMember, otherAccount, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      // Bootstrap emissions
-      await bootstrapEmissions()
-
-      // participation in governance is a requirement for minting
-      await participateInAllocationVoting(otherAccount)
-
-      await galaxyMember.connect(owner).setIsPublicMintingPaused(true)
-
-      expect(await galaxyMember.hasRole(await galaxyMember.MINTER_ROLE(), owner.address)).to.equal(true)
-      await galaxyMember.connect(owner).mint(await otherAccount.getAddress())
-
-      expect(await galaxyMember.hasRole(await galaxyMember.MINTER_ROLE(), otherAccount.address)).to.equal(false)
-      await expect(galaxyMember.connect(otherAccount).freeMint()).to.be.reverted // Other account cannot mint as he is not admin
-
-      expect(await galaxyMember.balanceOf(await otherAccount.getAddress())).to.equal(1) // Owner has 1 NFT
-
-      expect(await galaxyMember.ownerOf(0)).to.equal(await otherAccount.getAddress()) // Owner of the first NFT is the otherAccount
-
-      expect(await galaxyMember.totalSupply()).to.equal(1) // Total supply is 1
-
-      expect(await galaxyMember.levelOf(0)).to.equal(1) // Level 1
-
-      expect(await galaxyMember.getHighestLevel(otherAccount)).to.equal(1) // Level 1
     })
   })
 
@@ -1086,10 +1050,9 @@ describe("Galaxy Member", () => {
 
       expect(decodedEvents?.length).to.equal(2)
 
-      expect(decodedEvents?.[0]?.name).to.equal("SelectedLevel")
-      expect(decodedEvents?.[0]?.args?.[0]).to.equal(await owner.getAddress())
-      expect(decodedEvents?.[0]?.args?.[1]).to.equal(0) // Previous level
-      expect(decodedEvents?.[0]?.args?.[2]).to.equal(1) // New level
+      expect(decodedEvents?.[1]?.name).to.equal("Selected")
+      expect(decodedEvents?.[1]?.args?.[0]).to.equal(await owner.getAddress())
+      expect(decodedEvents?.[1]?.args?.[1]).to.equal(0)
 
       tx = await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 0)
 
@@ -1106,28 +1069,19 @@ describe("Galaxy Member", () => {
         })
       })
 
-      expect(decodedEvents?.length).to.equal(3)
+      expect(decodedEvents?.length).to.equal(2)
 
-      expect(decodedEvents?.[0]?.name).to.equal("SelectedLevel")
-      expect(decodedEvents?.[0]?.args?.[0]).to.equal(await owner.getAddress())
-      expect(decodedEvents?.[0]?.args?.[1]).to.equal(1) // Previous level
-      expect(decodedEvents?.[0]?.args?.[2]).to.equal(0) // New level
-
-      expect(decodedEvents?.[1]?.name).to.equal("SelectedLevel")
+      expect(decodedEvents?.[1]?.name).to.equal("Selected")
       expect(decodedEvents?.[1]?.args?.[0]).to.equal(await otherAccount.getAddress())
-      expect(decodedEvents?.[1]?.args?.[1]).to.equal(0) // Previous level
-      expect(decodedEvents?.[1]?.args?.[2]).to.equal(1) // New level
+      expect(decodedEvents?.[1]?.args?.[1]).to.equal(0)
 
       expect(await galaxyMember.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 NFT
       expect(await galaxyMember.balanceOf(await owner.getAddress())).to.equal(0) // Owner has 0 NFTs
 
-      expect(await galaxyMember.getHighestLevel(await otherAccount.getAddress())).to.equal(1) // Level 1
-      expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(0) // Level 0
-
-      expect(await galaxyMember.getPastHighestLevel(await otherAccount.getAddress(), receipt.blockNumber - 1)).to.equal(
-        0,
-      ) // Level 0 in the past
-      expect(await galaxyMember.getPastHighestLevel(await owner.getAddress(), receipt.blockNumber - 1)).to.equal(1) // Level 1 in the past
+      expect(
+        await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(await otherAccount.getAddress())),
+      ).to.equal(1) // Level 1
+      expect(await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(await owner.getAddress()))).to.equal(1) // Level 1
 
       tx = await galaxyMember
         .connect(otherAccount)
@@ -1141,21 +1095,15 @@ describe("Galaxy Member", () => {
       expect(await galaxyMember.balanceOf(await otherAccounts[0].getAddress())).to.equal(1) // Other account has 1 NFT
       expect(await galaxyMember.balanceOf(await owner.getAddress())).to.equal(0) // Owner has 0 NFTs
 
-      expect(await galaxyMember.getHighestLevel(await otherAccount.getAddress())).to.equal(0) // Level 0
-      expect(await galaxyMember.getHighestLevel(await otherAccounts[0].getAddress())).to.equal(1) // Level 1
-      expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(0) // Level 0
-
-      expect(await galaxyMember.getPastHighestLevel(await otherAccount.getAddress(), receipt.blockNumber - 1)).to.equal(
-        1,
-      ) // Level 1 in the past
       expect(
-        await galaxyMember.getPastHighestLevel(await otherAccounts[0].getAddress(), receipt.blockNumber - 1),
-      ).to.equal(0) // Level 0 in the past
-      expect(await galaxyMember.getPastHighestLevel(await owner.getAddress(), receipt.blockNumber - 1)).to.equal(0) // Level 0 in the past
+        await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(await otherAccount.getAddress())),
+      ).to.equal(1) // Level 1
+      expect(
+        await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(await otherAccounts[0].getAddress())),
+      ).to.equal(1) // Level 1
+      expect(await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(await owner.getAddress()))).to.equal(1) // Level 1
     })
-  })
 
-  describe("Transferring", () => {
     it("Should be able to send GM NFT to same account", async () => {
       const { galaxyMember, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -1202,7 +1150,7 @@ describe("Galaxy Member", () => {
     })
   })
 
-  describe("Level Selection", () => {
+  describe("Token Selection", () => {
     it("Should not select level 0 if I still have a token when transferring out", async () => {
       const { galaxyMember, otherAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -1220,8 +1168,7 @@ describe("Galaxy Member", () => {
 
       if (!receipt?.blockNumber) throw new Error("No receipt block number")
 
-      expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(1) // Level 1
-      expect(await galaxyMember.getPastHighestLevel(await owner.getAddress(), receipt.blockNumber - 1)).to.equal(0) // Level 0 in the past
+      expect(await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(await owner.getAddress()))).to.equal(1) // Level 1
 
       await galaxyMember.connect(owner).freeMint()
 
@@ -1234,20 +1181,20 @@ describe("Galaxy Member", () => {
       expect(await galaxyMember.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 NFT
       expect(await galaxyMember.balanceOf(await owner.getAddress())).to.equal(1) // Owner has 1 NFT
 
-      expect(await galaxyMember.getHighestLevel(await otherAccount.getAddress())).to.equal(1) // Level 1
-      expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(1) // Level 1 (because owner still has a token)
-
       expect(
-        await galaxyMember.getPastHighestLevel(await otherAccount.getAddress(), receipt?.blockNumber - 1),
-      ).to.equal(0) // Level 0 in the past
+        await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(await otherAccount.getAddress())),
+      ).to.equal(1) // Level 1
+      expect(await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(await owner.getAddress()))).to.equal(1) // Level 1
 
       await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1)
 
       expect(await galaxyMember.balanceOf(await otherAccount.getAddress())).to.equal(2) // Other account has 2 NFTs
 
-      expect(await galaxyMember.getHighestLevel(await otherAccount.getAddress())).to.equal(1) // Level 1
+      expect(
+        await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(await otherAccount.getAddress())),
+      ).to.equal(1) // Level 1
 
-      expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(0) // Level 0 (because owner doesn't have any tokens now)
+      expect(await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(await owner.getAddress()))).to.equal(1) // Level 1
     })
 
     it("Should select level of token received from another account if I don't have any tokens", async () => {
@@ -1267,8 +1214,6 @@ describe("Galaxy Member", () => {
 
       if (!receipt?.blockNumber) throw new Error("No receipt block number")
 
-      const blockOfMint = receipt.blockNumber
-
       // Check for Selected and SelectedLevel events
       let events = receipt?.logs
 
@@ -1279,10 +1224,9 @@ describe("Galaxy Member", () => {
         })
       })
 
-      expect(decodedEvents?.[0]?.name).to.equal("SelectedLevel")
-      expect(decodedEvents?.[0]?.args?.[0]).to.equal(await otherAccount.getAddress())
-      expect(decodedEvents?.[0]?.args?.[1]).to.equal(0) // Previous level
-      expect(decodedEvents?.[0]?.args?.[2]).to.equal(1) // New level
+      expect(decodedEvents?.[1]?.name).to.equal("Selected")
+      expect(decodedEvents?.[1]?.args?.[0]).to.equal(await otherAccount.getAddress())
+      expect(decodedEvents?.[1]?.args?.[1]).to.equal(0)
 
       tx = await galaxyMember
         .connect(otherAccount)
@@ -1302,37 +1246,25 @@ describe("Galaxy Member", () => {
         })
       })
 
-      expect(decodedEvents?.[0]?.name).to.equal("SelectedLevel")
-      expect(decodedEvents?.[0]?.args?.[0]).to.equal(await otherAccount.getAddress())
-      expect(decodedEvents?.[0]?.args?.[1]).to.equal(1) // Previous level
-      expect(decodedEvents?.[0]?.args?.[2]).to.equal(0) // New level
-
-      expect(decodedEvents?.[1]?.name).to.equal("SelectedLevel")
+      expect(decodedEvents?.[1]?.name).to.equal("Selected")
       expect(decodedEvents?.[1]?.args?.[0]).to.equal(await owner.getAddress())
-      expect(decodedEvents?.[1]?.args?.[1]).to.equal(0) // Previous level
-      expect(decodedEvents?.[1]?.args?.[2]).to.equal(1) // New level
+      expect(decodedEvents?.[1]?.args?.[1]).to.equal(0)
 
       expect(await galaxyMember.balanceOf(await otherAccount.getAddress())).to.equal(0) // Other account has 0 tokens
       expect(await galaxyMember.balanceOf(await owner.getAddress())).to.equal(1) // Owner has 1 token
 
-      expect(await galaxyMember.getHighestLevel(await otherAccount.getAddress())).to.equal(0) // Level 0
-      expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(1) // Level 1
-
-      const checkpoint = await galaxyMember.checkpoints(await otherAccount.getAddress(), 0)
-
-      // Checkpointed at block of mint with level 1
-      expect(checkpoint[0]).to.equal(blockOfMint)
-      expect(checkpoint[1]).to.equal(1)
+      expect(
+        await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(await otherAccount.getAddress())),
+      ).to.equal(1) // Level 1
+      expect(await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(await owner.getAddress()))).to.equal(1) // Level 1
     })
   })
 
   describe("Upgrading", () => {
     it("Should be able to upgrade a level 1 token to a level 2 token", async () => {
-      const config = createLocalConfig()
-      const { owner, xAllocationVoting, b3tr, minterAccount, governor, treasury, otherAccount } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const { owner, b3tr, minterAccount, treasury, otherAccount, galaxyMember } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -1340,27 +1272,7 @@ describe("Galaxy Member", () => {
       // participation in governance is a requirement for minting
       await participateInAllocationVoting(owner, true)
 
-      const galaxyMember = (await deployProxy("GalaxyMember", [
-        {
-          name: "galaxyMember",
-          symbol: "GM",
-          admin: owner.address,
-          upgrader: owner.address,
-          pauser: owner.address,
-          minter: owner.address,
-          contractsAddressManager: owner.address,
-          maxLevel: 2,
-          baseTokenURI: config.GM_NFT_BASE_URI,
-          b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
-          b3tr: await b3tr.getAddress(),
-          treasury: await treasury.getAddress(),
-        },
-      ])) as GalaxyMember
-
-      await galaxyMember.waitForDeployment()
-
-      await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
-      await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+      await galaxyMember.connect(owner).setMaxLevel(2)
 
       await galaxyMember.connect(owner).freeMint() // Token id 0
 
@@ -1372,6 +1284,8 @@ describe("Galaxy Member", () => {
 
       const balanceOfTreasuryBefore = await b3tr.balanceOf(await treasury.getAddress())
 
+      expect(await galaxyMember.levelOf(0)).to.equal(1) // Level 1
+
       await galaxyMember.connect(owner).upgrade(0) // Upgrade token id 1 to level 2
 
       const balanceOfTreasuryAfter = await b3tr.balanceOf(await treasury.getAddress())
@@ -1379,8 +1293,6 @@ describe("Galaxy Member", () => {
       expect(balanceOfTreasuryAfter - balanceOfTreasuryBefore).to.equal(ethers.parseEther("10000")) // 10,000 B3TR should be transferred to the treasury pool
 
       expect(await galaxyMember.levelOf(0)).to.equal(2) // Level 2
-
-      expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(2) // Level 2
 
       await expect(upgradeNFTtoLevel(0, 3, galaxyMember, b3tr, owner, minterAccount)).to.be.reverted // Level 3 is not available
 
@@ -1394,7 +1306,13 @@ describe("Galaxy Member", () => {
       const name = getEventName(receipt, galaxyMember)
       expect(name).to.equal("MaxLevelUpdated")
 
-      await upgradeNFTtoLevel(0, 3, galaxyMember, b3tr, owner, minterAccount) // Now we can upgrade to level 3
+      await b3tr.connect(minterAccount).mint(owner, await galaxyMember.getB3TRtoUpgradeToLevel(3))
+
+      await b3tr.connect(owner).approve(await galaxyMember.getAddress(), await galaxyMember.getB3TRtoUpgradeToLevel(3))
+
+      await galaxyMember.connect(owner).upgrade(0) // Upgrade token id 1 to level 3
+
+      expect(await galaxyMember.levelOf(0)).to.equal(3) // Level 3
     })
 
     it("Should be able to transfer a token with level greater than 1", async () => {
@@ -1410,7 +1328,7 @@ describe("Galaxy Member", () => {
       // participation in governance is a requirement for minting
       await participateInAllocationVoting(owner, true)
 
-      const galaxyMember = (await deployProxy("GalaxyMember", [
+      const galaxyMemberV1 = (await deployProxy("GalaxyMember", [
         {
           name: "galaxyMember",
           symbol: "GM",
@@ -1427,10 +1345,22 @@ describe("Galaxy Member", () => {
         },
       ])) as GalaxyMember
 
+      const galaxyMember = (await upgradeProxy(
+        "GalaxyMember",
+        "GalaxyMemberV2",
+        await galaxyMemberV1.getAddress(),
+        [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
+        { version: 2 },
+      )) as unknown as GalaxyMemberV2
+
       await galaxyMember.waitForDeployment()
 
       await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
       await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+
+      await galaxyMember.connect(owner).freeMint() // Token id 0
+
+      await galaxyMember.connect(owner).burn(0)
 
       await galaxyMember.connect(owner).freeMint() // Token id 1
 
@@ -1438,13 +1368,13 @@ describe("Galaxy Member", () => {
 
       await b3tr.connect(owner).approve(await galaxyMember.getAddress(), ethers.parseEther("10000")) // We need to approve the galaxyMember contract to transfer the B3TR required to upgrade from the owner's account
 
-      await galaxyMember.connect(owner).upgrade(0) // Upgrade token id 0 to level 2
+      await galaxyMember.connect(owner).upgrade(1) // Upgrade token id 0 to level 2
 
-      expect(await galaxyMember.levelOf(0)).to.equal(2) // Level 2
+      expect(await galaxyMember.levelOf(1)).to.equal(2) // Level 2
 
       let tx = await galaxyMember
         .connect(owner)
-        .transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 0)
+        .transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1)
 
       let receipt = await tx.wait()
 
@@ -1459,25 +1389,19 @@ describe("Galaxy Member", () => {
         })
       })
 
-      expect(decodedEvents?.[0]?.name).to.equal("SelectedLevel")
-      expect(decodedEvents?.[0]?.args?.[0]).to.equal(await owner.getAddress())
-      expect(decodedEvents?.[0]?.args?.[1]).to.equal(2) // Previous level
-      expect(decodedEvents?.[0]?.args?.[2]).to.equal(0) // New level
-
-      expect(decodedEvents?.[1]?.name).to.equal("SelectedLevel")
+      expect(decodedEvents?.[1]?.name).to.equal("Selected")
       expect(decodedEvents?.[1]?.args?.[0]).to.equal(await otherAccount.getAddress())
-      expect(decodedEvents?.[1]?.args?.[1]).to.equal(0) // Previous level
-      expect(decodedEvents?.[1]?.args?.[2]).to.equal(2) // New level
+      expect(decodedEvents?.[1]?.args?.[1]).to.equal(1) // Previous level
 
       expect(await galaxyMember.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 token
       expect(await galaxyMember.balanceOf(await owner.getAddress())).to.equal(0) // Owner has 0 tokens
 
-      expect(await galaxyMember.levelOf(0)).to.equal(2) // Level 2
+      expect(await galaxyMember.levelOf(1)).to.equal(2) // Level 2
 
-      expect(await galaxyMember.getHighestLevel(await otherAccount.getAddress())).to.equal(2) // Level 2
-      expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(0) // Level 0
-
-      expect(await galaxyMember.getNextLevel(0)).to.equal(3) // Next level is 3
+      expect(
+        await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(await otherAccount.getAddress())),
+      ).to.equal(2)
+      expect(await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(await owner.getAddress()))).to.equal(1) // Level 1
     })
 
     it("Should not be able to upgrade if contract is paused", async () => {
@@ -1492,7 +1416,7 @@ describe("Galaxy Member", () => {
       // participation in governance is a requirement for minting
       await participateInAllocationVoting(owner, true)
 
-      const galaxyMember = (await deployProxy("GalaxyMember", [
+      const galaxyMemberV1 = (await deployProxy("GalaxyMember", [
         {
           name: "galaxyMember",
           symbol: "GM",
@@ -1501,13 +1425,21 @@ describe("Galaxy Member", () => {
           pauser: owner.address,
           minter: owner.address,
           contractsAddressManager: owner.address,
-          maxLevel: 10,
+          maxLevel: 3,
           baseTokenURI: config.GM_NFT_BASE_URI,
           b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
           b3tr: await b3tr.getAddress(),
           treasury: await treasury.getAddress(),
         },
       ])) as GalaxyMember
+
+      const galaxyMember = (await upgradeProxy(
+        "GalaxyMember",
+        "GalaxyMemberV2",
+        await galaxyMemberV1.getAddress(),
+        [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
+        { version: 2 },
+      )) as unknown as GalaxyMemberV2
 
       await galaxyMember.waitForDeployment()
 
@@ -1539,7 +1471,58 @@ describe("Galaxy Member", () => {
       // participation in governance is a requirement for minting
       await participateInAllocationVoting(owner, true)
 
-      const galaxyMember = (await deployProxy("GalaxyMember", [
+      const galaxyMemberV1 = (await deployProxy("GalaxyMember", [
+        {
+          name: "galaxyMember",
+          symbol: "GM",
+          admin: owner.address,
+          upgrader: owner.address,
+          pauser: owner.address,
+          minter: owner.address,
+          contractsAddressManager: owner.address,
+          maxLevel: 2,
+          baseTokenURI: config.GM_NFT_BASE_URI,
+          b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+          b3tr: await b3tr.getAddress(),
+          treasury: await treasury.getAddress(),
+        },
+      ])) as GalaxyMember
+
+      const galaxyMember = (await upgradeProxy(
+        "GalaxyMember",
+        "GalaxyMemberV2",
+        await galaxyMemberV1.getAddress(),
+        [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
+        { version: 2 },
+      )) as unknown as GalaxyMemberV2
+
+      await galaxyMember.waitForDeployment()
+
+      await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+      await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+
+      await galaxyMember.connect(owner).freeMint() // Token id 1
+
+      await b3tr.connect(minterAccount).mint(owner, ethers.parseEther("10000")) // Get some 10,000 B3TR required to upgrade to level 2
+
+      await catchRevert(galaxyMember.connect(owner).upgrade(1)) // Allowance not set
+    })
+
+    it("Should be able to upgrade to level 10", async () => {
+      const config = createTestConfig()
+      const { owner, xAllocationVoting, minterAccount, governor, b3tr, otherAccount, treasury } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(owner, true)
+
+      const galaxyMemberV1 = (await deployProxy("GalaxyMember", [
         {
           name: "galaxyMember",
           symbol: "GM",
@@ -1556,349 +1539,703 @@ describe("Galaxy Member", () => {
         },
       ])) as GalaxyMember
 
+      const galaxyMember = (await upgradeProxy(
+        "GalaxyMember",
+        "GalaxyMemberV2",
+        await galaxyMemberV1.getAddress(),
+        [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
+        { version: 2 },
+      )) as unknown as GalaxyMemberV2
+
       await galaxyMember.waitForDeployment()
 
       await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
       await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
 
+      await galaxyMember.connect(owner).freeMint() // Token id 0
+
+      await galaxyMember.connect(owner).burn(0)
+
       await galaxyMember.connect(owner).freeMint() // Token id 1
 
-      await b3tr.connect(minterAccount).mint(owner, ethers.parseEther("10000")) // Get some 10,000 B3TR required to upgrade to level 2
+      expect(await galaxyMember.levelOf(1)).to.equal(1) // Level 1
+      expect(await galaxyMember.ownerOf(1)).to.equal(await owner.getAddress()) // Owner of the first NFT is the owner
 
-      await catchRevert(galaxyMember.connect(owner).upgrade(1)) // Allowance not set
+      await upgradeNFTtoLevel(1, 10, galaxyMember, b3tr, owner, minterAccount)
+
+      expect(await galaxyMember.levelOf(1)).to.equal(10) // Level 10
+
+      expect(await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(await owner.getAddress()))).to.equal(10)
+
+      // Transfer the token to another account
+      await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1)
+
+      expect(await galaxyMember.levelOf(1)).to.equal(10) // Level 10
+      expect(await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(await owner.getAddress()))).to.equal(1)
+
+      expect(
+        await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(await otherAccount.getAddress())),
+      ).to.equal(10)
     })
-  })
 
-  it("Should be able to upgrade to level 10", async () => {
-    const config = createTestConfig()
-    const { owner, xAllocationVoting, minterAccount, governor, b3tr, otherAccount, treasury } =
-      await getOrDeployContractInstances({
+    it("Should not be able to upgrade token not owned", async () => {
+      const config = createTestConfig()
+      const { owner, xAllocationVoting, minterAccount, governor, b3tr, otherAccount, treasury } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(owner, true)
+
+      const galaxyMemberV1 = (await deployProxy("GalaxyMember", [
+        {
+          name: "galaxyMember",
+          symbol: "GM",
+          admin: owner.address,
+          upgrader: owner.address,
+          pauser: owner.address,
+          minter: owner.address,
+          contractsAddressManager: owner.address,
+          maxLevel: 10,
+          baseTokenURI: config.GM_NFT_BASE_URI,
+          b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+          b3tr: await b3tr.getAddress(),
+          treasury: await treasury.getAddress(),
+        },
+      ])) as GalaxyMember
+
+      const galaxyMember = (await upgradeProxy(
+        "GalaxyMember",
+        "GalaxyMemberV2",
+        await galaxyMemberV1.getAddress(),
+        [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
+        { version: 2 },
+      )) as unknown as GalaxyMemberV2
+
+      await galaxyMember.waitForDeployment()
+
+      await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+      await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+
+      await galaxyMember.connect(owner).freeMint() // Token id 0
+
+      await b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("10000")) // Get some 10,000 B3TR required to upgrade to level 2
+
+      await b3tr.connect(otherAccount).approve(await galaxyMember.getAddress(), ethers.parseEther("10000")) // We need to approve the galaxyMember contract to transfer the B3TR required to upgrade from the owner's account
+
+      await catchRevert(galaxyMember.connect(otherAccount).upgrade(0)) // Should not be able to upgrade token not owned
+    })
+
+    it("Should not be able to upgrade above max level", async () => {
+      const config = createTestConfig()
+      const { owner, xAllocationVoting, minterAccount, governor, b3tr, treasury } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
 
-    // Bootstrap emissions
-    await bootstrapEmissions()
+      // Bootstrap emissions
+      await bootstrapEmissions()
 
-    // participation in governance is a requirement for minting
-    await participateInAllocationVoting(owner, true)
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(owner, true)
 
-    const galaxyMember = (await deployProxy("GalaxyMember", [
-      {
-        name: "galaxyMember",
-        symbol: "GM",
-        admin: owner.address,
-        upgrader: owner.address,
-        pauser: owner.address,
-        minter: owner.address,
-        contractsAddressManager: owner.address,
-        maxLevel: 10,
-        baseTokenURI: config.GM_NFT_BASE_URI,
-        b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
-        b3tr: await b3tr.getAddress(),
-        treasury: await treasury.getAddress(),
-      },
-    ])) as GalaxyMember
+      const galaxyMemberV1 = (await deployProxy("GalaxyMember", [
+        {
+          name: "galaxyMember",
+          symbol: "GM",
+          admin: owner.address,
+          upgrader: owner.address,
+          pauser: owner.address,
+          minter: owner.address,
+          contractsAddressManager: owner.address,
+          maxLevel: 10,
+          baseTokenURI: config.GM_NFT_BASE_URI,
+          b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+          b3tr: await b3tr.getAddress(),
+          treasury: await treasury.getAddress(),
+        },
+      ])) as GalaxyMember
 
-    await galaxyMember.waitForDeployment()
+      const galaxyMember = (await upgradeProxy(
+        "GalaxyMember",
+        "GalaxyMemberV2",
+        await galaxyMemberV1.getAddress(),
+        [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
+        { version: 2 },
+      )) as unknown as GalaxyMemberV2
 
-    await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
-    await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+      await galaxyMember.waitForDeployment()
 
-    await galaxyMember.connect(owner).freeMint() // Token id 0
+      await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+      await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
 
-    expect(await galaxyMember.levelOf(0)).to.equal(1) // Level 1
-    expect(await galaxyMember.ownerOf(0)).to.equal(await owner.getAddress()) // Owner of the first NFT is the owner
+      await galaxyMember.connect(owner).freeMint() // Token id 0
 
-    await upgradeNFTtoLevel(0, 10, galaxyMember, b3tr, owner, minterAccount)
+      await upgradeNFTtoLevel(0, 10, galaxyMember, b3tr, owner, minterAccount)
 
-    expect(await galaxyMember.levelOf(0)).to.equal(10) // Level 10
+      // Should not be able to upgrade above max level
+      await catchRevert(galaxyMember.connect(owner).upgrade(0))
+    })
 
-    expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(10) // Level 10
-
-    // Transfer the token to another account
-    await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 0)
-
-    expect(await galaxyMember.levelOf(0)).to.equal(10) // Level 10
-    expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(0) // Level 0
-
-    expect(await galaxyMember.getHighestLevel(await otherAccount.getAddress())).to.equal(10) // Level 10
-  })
-
-  it("Should not be able to upgrade token not owned", async () => {
-    const config = createTestConfig()
-    const { owner, xAllocationVoting, minterAccount, governor, b3tr, otherAccount, treasury } =
-      await getOrDeployContractInstances({
+    it("Should maintain correct level after upgrading Galaxy Member to V2", async () => {
+      const config = createTestConfig()
+      const { owner, xAllocationVoting, minterAccount, governor, b3tr, treasury } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
 
-    // Bootstrap emissions
-    await bootstrapEmissions()
+      // Bootstrap emissions
+      await bootstrapEmissions()
 
-    // participation in governance is a requirement for minting
-    await participateInAllocationVoting(owner, true)
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(owner, true)
 
-    const galaxyMember = (await deployProxy("GalaxyMember", [
-      {
-        name: "galaxyMember",
-        symbol: "GM",
-        admin: owner.address,
-        upgrader: owner.address,
-        pauser: owner.address,
-        minter: owner.address,
-        contractsAddressManager: owner.address,
-        maxLevel: 10,
-        baseTokenURI: config.GM_NFT_BASE_URI,
-        b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
-        b3tr: await b3tr.getAddress(),
-        treasury: await treasury.getAddress(),
-      },
-    ])) as GalaxyMember
+      const galaxyMemberV1 = (await deployProxy("GalaxyMember", [
+        {
+          name: "galaxyMember",
+          symbol: "GM",
+          admin: owner.address,
+          upgrader: owner.address,
+          pauser: owner.address,
+          minter: owner.address,
+          contractsAddressManager: owner.address,
+          maxLevel: 10,
+          baseTokenURI: config.GM_NFT_BASE_URI,
+          b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+          b3tr: await b3tr.getAddress(),
+          treasury: await treasury.getAddress(),
+        },
+      ])) as GalaxyMember
 
-    await galaxyMember.waitForDeployment()
+      await galaxyMemberV1.waitForDeployment()
 
-    await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
-    await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+      await galaxyMemberV1.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+      await galaxyMemberV1.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
 
-    await galaxyMember.connect(owner).freeMint() // Token id 0
+      await galaxyMemberV1.connect(owner).freeMint() // Token id 0
 
-    await b3tr.connect(minterAccount).mint(otherAccount, ethers.parseEther("10000")) // Get some 10,000 B3TR required to upgrade to level 2
+      await upgradeNFTtoLevel(0, 10, galaxyMemberV1, b3tr, owner, minterAccount)
 
-    await b3tr.connect(otherAccount).approve(await galaxyMember.getAddress(), ethers.parseEther("10000")) // We need to approve the galaxyMember contract to transfer the B3TR required to upgrade from the owner's account
+      expect(await galaxyMemberV1.levelOf(0)).to.equal(10) // Level 10
 
-    await catchRevert(galaxyMember.connect(otherAccount).upgrade(0)) // Should not be able to upgrade token not owned
-  })
+      const galaxyMember = (await upgradeProxy(
+        "GalaxyMember",
+        "GalaxyMemberV2",
+        await galaxyMemberV1.getAddress(),
+        [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
+        { version: 2 },
+      )) as unknown as GalaxyMemberV2
 
-  it("Should not be able to upgrade above max level", async () => {
-    const config = createTestConfig()
-    const { owner, xAllocationVoting, minterAccount, governor, b3tr, treasury } = await getOrDeployContractInstances({
-      forceDeploy: true,
-      config,
+      await galaxyMember.waitForDeployment()
+
+      expect(await galaxyMember.levelOf(0)).to.equal(10) // Level 10
     })
-
-    // Bootstrap emissions
-    await bootstrapEmissions()
-
-    // participation in governance is a requirement for minting
-    await participateInAllocationVoting(owner, true)
-
-    const galaxyMember = (await deployProxy("GalaxyMember", [
-      {
-        name: "galaxyMember",
-        symbol: "GM",
-        admin: owner.address,
-        upgrader: owner.address,
-        pauser: owner.address,
-        minter: owner.address,
-        contractsAddressManager: owner.address,
-        maxLevel: 10,
-        baseTokenURI: config.GM_NFT_BASE_URI,
-        b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
-        b3tr: await b3tr.getAddress(),
-        treasury: await treasury.getAddress(),
-      },
-    ])) as GalaxyMember
-
-    await galaxyMember.waitForDeployment()
-
-    await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
-    await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
-
-    await galaxyMember.connect(owner).freeMint() // Token id 0
-
-    await upgradeNFTtoLevel(0, 10, galaxyMember, b3tr, owner, minterAccount)
-
-    // Should not be able to upgrade above max level
-    await catchRevert(galaxyMember.connect(owner).upgrade(0))
   })
 
-  it("Should correctly track highest level owned", async () => {
-    const config = createTestConfig()
-    const { owner, xAllocationVoting, minterAccount, governor, b3tr, otherAccount, treasury } =
-      await getOrDeployContractInstances({
+  describe("Vechain nodes Binding", () => {
+    it("Should be able to attach a Strength Vechain Node to a GM NFT", async () => {
+      const { owner, vechainNodesMock, galaxyMember, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
-        config,
+        deployMocks: true,
       })
 
-    // Bootstrap emissions
-    await bootstrapEmissions()
+      if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
 
-    // participation in governance is a requirement for minting
-    await participateInAllocationVoting(owner, true)
+      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
-    const galaxyMember = (await deployProxy("GalaxyMember", [
-      {
-        name: "galaxyMember",
-        symbol: "GM",
-        admin: owner.address,
-        upgrader: owner.address,
-        pauser: owner.address,
-        minter: owner.address,
-        contractsAddressManager: owner.address,
-        maxLevel: 10,
-        baseTokenURI: config.GM_NFT_BASE_URI,
-        b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
-        b3tr: await b3tr.getAddress(),
-        treasury: await treasury.getAddress(),
-      },
-    ])) as GalaxyMember
+      const nodeMetadata = await addNodeToken(1, otherAccount) // Mint new Strength Economy Node (Level 1) to other account
 
-    await galaxyMember.waitForDeployment()
+      const tokenId = await vechainNodesMock.ownerToId(otherAccount.address)
+      expect(await vechainNodesMock.getMetadata(tokenId)).to.deep.equal(nodeMetadata)
 
-    await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
-    await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+      expect(await galaxyMember.getNodeLevelOf(1)).to.equal(1) // The Mock Vechain Node is Strength Economy Node which is Level 1
 
-    await galaxyMember.connect(owner).freeMint() // Token id 0
-    await galaxyMember.connect(owner).freeMint() // Token id 1
-    await galaxyMember.connect(owner).freeMint() // Token id 2
-    await galaxyMember.connect(owner).freeMint() // Token id 3
-    await galaxyMember.connect(owner).freeMint() // Token id 4
+      await participateInAllocationVoting(otherAccount)
 
-    expect(await galaxyMember.levelOf(0)).to.equal(1) // Level 1
-    expect(await galaxyMember.ownerOf(0)).to.equal(await owner.getAddress()) // Owner of the first NFT is the owner
+      await galaxyMember.connect(otherAccount).freeMint()
 
-    /*
-      Tokens owned:
+      expect(await galaxyMember.levelOf(0)).to.equal(1) // Level 1
+      expect(await galaxyMember.ownerOf(0)).to.equal(await otherAccount.getAddress()) // Owner of the first NFT is the owner
 
-      Level 5: 2 tokens
-      Level 4: 1 token
-      Level 3: 1 token
-      Level 1: 1 token
-    */
-    await upgradeNFTtoLevel(2, 4, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 2 to level 4
-    await upgradeNFTtoLevel(3, 3, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 3 to level 3
-    await upgradeNFTtoLevel(0, 5, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 0 to level 5
-    await upgradeNFTtoLevel(4, 1, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 4 to level 1
-    await upgradeNFTtoLevel(1, 5, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 1 to level 5
+      expect(await galaxyMember.getNodeToFreeLevel(1)).to.equal(2) // Strength Economy Node attached to GM NFT => Level 2
 
-    /*
-      Transfer token ID 5 of level 1 to other account
+      // Attach Strength Economy Node (token ID 1) to GM NFT (token ID 0)
+      await galaxyMember.connect(otherAccount).attachNode(1, 0)
 
-      Tokens owned remaining:
-      Level 5: 2
-      Level 4: 1
-      Level 3: 1
-    */
-    await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 4)
+      expect(await galaxyMember.getNodeIdAttached(0)).to.equal(1) // Strength Economy Node (token ID 1) attached to GM NFT (token ID 0)
 
-    expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(5) // Owner has highest level of 5
+      expect(await galaxyMember.MAX_LEVEL()).to.equal(1) // GM NFT MAX_LEVEL is 1
 
-    expect(await galaxyMember.getHighestLevel(await otherAccount.getAddress())).to.equal(1) // Other account now has the highest level of 1
+      // Strength Economy Node should be attached to GM NFT => Level 2
+      expect(await galaxyMember.levelOf(0)).to.equal(1) // Level 1 because MAX_LEVEL is 1
 
-    /*
-      Transfer token ID 1 of level 5 to other account
+      // Update GM MAX_LEVEL to 5
+      await galaxyMember.connect(owner).setMaxLevel(5)
 
-      Tokens owned remaining:
-      Level 5: 1
-      Level 4: 1
-      Level 3: 1
-      Level 1: 2
-    */
-    await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 0)
-
-    expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(5) // Owner still has the highest level of 5
-
-    expect(await galaxyMember.getHighestLevel(await otherAccount.getAddress())).to.equal(5) // Other account now has the highest level of 5
-
-    /*
-      Transfer token ID 2 of level 5 to other account
-
-      Tokens owned remaining:
-      Level 4: 1
-      Level 3: 1
-      Level 1: 1
-    */
-    await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1)
-
-    expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(4) // Owner now has the highest level of 4
-
-    expect(await galaxyMember.getHighestLevel(await otherAccount.getAddress())).to.equal(5) // Other account retains the highest level of 5
-
-    /*
-      Transfer token ID 3 of level 4 to other account
-
-      Tokens owned remaining:
-      Level 3: 1
-    */
-    await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 2)
-
-    expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(3) // Owner now has the highest level of 3
-
-    expect(await galaxyMember.getHighestLevel(await otherAccount.getAddress())).to.equal(5) // Other account retains the highest level of 5
-
-    /*
-      Transfer token ID 4 of level 3 to other account
-
-      Tokens owned remaining: None
-    */
-    await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 3)
-
-    expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(0) // Owner now has no tokens so the highest level is 0 (no Level)
-
-    expect(await galaxyMember.getHighestLevel(await otherAccount.getAddress())).to.equal(5) // Other account retains the highest level of 5
-  })
-
-  it("Should be able to select the highest level owned manually", async () => {
-    const config = createTestConfig()
-    const { owner, xAllocationVoting, minterAccount, governor, b3tr, treasury } = await getOrDeployContractInstances({
-      forceDeploy: true,
-      config,
+      // Now GM NFT Level should be the highest possible for Strength Economy Node => Level 2
+      expect(await galaxyMember.levelOf(0)).to.equal(2) // Level 2
     })
 
-    // Bootstrap emissions
-    await bootstrapEmissions()
+    it("Should track all Vechain Nodes attached to GM NFTs correctly", async () => {
+      const { vechainNodesMock, galaxyMember, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        deployMocks: true,
+      })
 
-    // participation in governance is a requirement for minting
-    await participateInAllocationVoting(owner, true)
+      if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
 
-    const galaxyMember = (await deployProxy("GalaxyMember", [
-      {
-        name: "galaxyMember",
-        symbol: "GM",
-        admin: owner.address,
-        upgrader: owner.address,
-        pauser: owner.address,
-        minter: owner.address,
-        contractsAddressManager: owner.address,
-        maxLevel: 10,
-        baseTokenURI: config.GM_NFT_BASE_URI,
-        b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
-        b3tr: await b3tr.getAddress(),
-        treasury: await treasury.getAddress(),
-      },
-    ])) as GalaxyMember
+      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
-    await galaxyMember.waitForDeployment()
+      await addNodeToken(1, otherAccount) // Mint Mock Strength Economy Node (Level 1)
 
-    await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
-    await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+      await participateInAllocationVoting(otherAccount)
 
-    await galaxyMember.connect(owner).freeMint() // Token id 0
-    await galaxyMember.connect(owner).freeMint() // Token id 1
-    await galaxyMember.connect(owner).freeMint() // Token id 2
-    await galaxyMember.connect(owner).freeMint() // Token id 3
-    await galaxyMember.connect(owner).freeMint() // Token id 4
+      await galaxyMember.connect(otherAccount).freeMint()
 
-    expect(await galaxyMember.levelOf(0)).to.equal(1) // Level 1
-    expect(await galaxyMember.ownerOf(0)).to.equal(await owner.getAddress()) // Owner of the first NFT is the owner
+      expect(await galaxyMember.levelOf(0)).to.equal(1) // Level 1
+      expect(await galaxyMember.ownerOf(0)).to.equal(await otherAccount.getAddress()) // Owner of the first NFT is the owner
 
-    /*
-      Tokens owned:
+      expect(await galaxyMember.getNodeToFreeLevel(1)).to.equal(2) // Strength Economy Node attached to GM NFT => Level 2
+      expect(await galaxyMember.getNodeToFreeLevel(2)).to.equal(4) // Thunder Economy Node attached to GM NFT => Level 3
+      expect(await galaxyMember.getNodeToFreeLevel(3)).to.equal(6) // Mjolnir Economy Node attached to GM NFT => Level 4
+      expect(await galaxyMember.getNodeToFreeLevel(4)).to.equal(2) // VethorX X Node attached to GM NFT => Level 2
+      expect(await galaxyMember.getNodeToFreeLevel(5)).to.equal(4) // StrengthX X Node attached to GM NFT => Level 4
+      expect(await galaxyMember.getNodeToFreeLevel(6)).to.equal(6) // ThunderX X Node attached to GM NFT => Level 6
+      expect(await galaxyMember.getNodeToFreeLevel(7)).to.equal(7) // MjolnirX X Node attached to GM NFT => Level 7
 
-      Level 5: 2 tokens
-      Level 4: 1 token
-      Level 3: 1 token
-      Level 1: 1 token
-    */
-    await upgradeNFTtoLevel(2, 4, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 2 to level 4
-    await upgradeNFTtoLevel(3, 3, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 3 to level 3
-    await upgradeNFTtoLevel(0, 5, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 0 to level 5
-    await upgradeNFTtoLevel(4, 1, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 4 to level 1
-    await upgradeNFTtoLevel(1, 5, galaxyMember, b3tr, owner, minterAccount) // Upgrade token id 1 to level 5
+      await galaxyMember.setMaxLevel(10)
 
-    await galaxyMember.connect(owner).selectHighestLevel() // Select the highest level owned
+      // Attach Strength Economy Node (token ID 1) to GM NFT (token ID 0)
+      await galaxyMember.connect(otherAccount).attachNode(1, 0)
 
-    expect(await galaxyMember.getHighestLevel(await owner.getAddress())).to.equal(5) // Owner has the highest level of 5
+      expect(await galaxyMember.levelOf(0)).to.equal(2) // Level 2
+
+      // Attach Thunder Economy Node (token ID 1) to GM NFT (token ID 0)
+      await galaxyMember.connect(otherAccount).detachNode(1, 0)
+
+      await vechainNodesMock.upgradeTo(1, 2)
+
+      await galaxyMember.connect(otherAccount).attachNode(1, 0)
+
+      expect(await galaxyMember.levelOf(0)).to.equal(4) // Level 4
+
+      // Attach Mjolnir Economy Node (token ID 1) to GM NFT (token ID 0)
+      await galaxyMember.connect(otherAccount).detachNode(1, 0)
+
+      await vechainNodesMock.upgradeTo(1, 3)
+
+      await galaxyMember.connect(otherAccount).attachNode(1, 0)
+
+      expect(await galaxyMember.levelOf(0)).to.equal(6) // Level 6
+
+      // Attach VethorX X Node (token ID 1) to GM NFT (token ID 0)
+      await galaxyMember.connect(otherAccount).detachNode(1, 0)
+
+      await vechainNodesMock.upgradeTo(1, 4)
+
+      await galaxyMember.connect(otherAccount).attachNode(1, 0)
+
+      expect(await galaxyMember.levelOf(0)).to.equal(2) // Level 2
+
+      // Attach StrengthX X Node (token ID 1) to GM NFT (token ID 0)
+      await galaxyMember.connect(otherAccount).detachNode(1, 0)
+
+      await vechainNodesMock.upgradeTo(1, 5)
+
+      await galaxyMember.connect(otherAccount).attachNode(1, 0)
+
+      expect(await galaxyMember.levelOf(0)).to.equal(4) // Level 4
+
+      // Attach ThunderX X Node (token ID 1) to GM NFT (token ID 0)
+      await galaxyMember.connect(otherAccount).detachNode(1, 0)
+
+      await vechainNodesMock.upgradeTo(1, 6)
+
+      await galaxyMember.connect(otherAccount).attachNode(1, 0)
+
+      expect(await galaxyMember.levelOf(0)).to.equal(6) // Level 6
+
+      // Attach MjolnirX X Node (token ID 1) to GM NFT (token ID 0)
+      await galaxyMember.connect(otherAccount).detachNode(1, 0)
+
+      await vechainNodesMock.upgradeTo(1, 7)
+
+      await galaxyMember.connect(otherAccount).attachNode(1, 0)
+
+      expect(await galaxyMember.levelOf(0)).to.equal(7) // Level 7
+    })
+
+    it("Should not be able to attach a Vechain Node to a GM NFT if not the owner", async () => {
+      const { owner, vechainNodesMock, galaxyMember, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        deployMocks: true,
+      })
+
+      if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+      // Mint Mock Strength Economy Node (Level 1)
+      const nodeMetadata1 = await addNodeToken(1, otherAccount)
+
+      expect(await vechainNodesMock.idToOwner(1)).to.equal(await otherAccount.getAddress())
+
+      expect(await vechainNodesMock.getMetadata(1)).to.deep.equal(nodeMetadata1)
+
+      expect(await galaxyMember.getNodeLevelOf(1)).to.equal(1) // The Mock Vechain Node is Strength Economy Node which is Level 1
+
+      await participateInAllocationVoting(otherAccount)
+
+      await galaxyMember.connect(otherAccount).freeMint()
+
+      expect(await galaxyMember.levelOf(0)).to.equal(1) // Level 1
+      expect(await galaxyMember.ownerOf(0)).to.equal(await otherAccount.getAddress()) // Owner of the first NFT is the owner
+
+      await expect(galaxyMember.connect(owner).attachNode(1, 0)).to.be.reverted // Should not be able to attach a node if not the owner
+    })
+
+    it("Should not be able to attach a Vechain Node to a GM NFT if not the owner of the node", async () => {
+      const { owner, vechainNodesMock, galaxyMember, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        deployMocks: true,
+      })
+
+      if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+      // Mint Mock Strength Economy Node (Level 1)
+      const nodeMetadata = await addNodeToken(1, owner)
+
+      expect(await vechainNodesMock.idToOwner(1)).to.equal(await owner.getAddress())
+
+      expect(await vechainNodesMock.getMetadata(1)).to.deep.equal(nodeMetadata)
+
+      expect(await galaxyMember.getNodeLevelOf(1)).to.equal(1) // The Mock Vechain Node is Strength Economy Node which is Level 1
+
+      await participateInAllocationVoting(owner)
+
+      await galaxyMember.connect(owner).freeMint()
+
+      expect(await galaxyMember.levelOf(0)).to.equal(1) // Level 1
+      expect(await galaxyMember.ownerOf(0)).to.equal(await owner.getAddress()) // Owner of the first NFT is the owner
+
+      await expect(galaxyMember.connect(otherAccount).attachNode(1, 0)).to.be.reverted // Should not be able to attach a node if not the owner of the node
+    })
+
+    it("Should be able to detach GM NFT from node after transfering the node", async () => {
+      const { owner, vechainNodesMock, galaxyMember, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        deployMocks: true,
+      })
+
+      if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+      // Mint Mock Strength Economy Node (Level 1)
+      const nodeMetadata = await addNodeToken(1, owner)
+
+      expect(await vechainNodesMock.idToOwner(1)).to.equal(await owner.getAddress())
+
+      expect(await vechainNodesMock.getMetadata(1)).to.deep.equal(nodeMetadata)
+
+      expect(await galaxyMember.getNodeLevelOf(1)).to.equal(1) // The Mock Vechain Node is Strength Economy Node which is Level 1
+
+      await participateInAllocationVoting(owner)
+
+      await galaxyMember.connect(owner).freeMint()
+
+      expect(await galaxyMember.levelOf(0)).to.equal(1) // Level 1
+      expect(await galaxyMember.ownerOf(0)).to.equal(await owner.getAddress()) // Owner of the first NFT is the owner
+
+      expect(await galaxyMember.getNodeToFreeLevel(1)).to.equal(2) // Strength Economy Node attached to GM NFT => Level 2
+
+      await galaxyMember.setMaxLevel(2)
+
+      // Attach Strength Economy Node (token ID 1) to GM NFT (token ID 0)
+      await galaxyMember.connect(owner).attachNode(1, 0)
+
+      expect(await galaxyMember.levelOf(0)).to.equal(2) // Level 2
+
+      expect(await galaxyMember.getNodeIdAttached(0)).to.equal(1) // Strength Economy Node (token ID 1) attached to GM NFT (token
+
+      // Skip ahead 1 day to be able to transfer node
+      await time.setNextBlockTimestamp((await time.latest()) + 86400)
+
+      // Transfer Strength Economy Node to other account
+      await vechainNodesMock.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1)
+
+      expect(await vechainNodesMock.idToOwner(1)).to.equal(await otherAccount.getAddress())
+
+      expect(await galaxyMember.getNodeIdAttached(0)).to.equal(1) // Strength Economy Node (token ID 1) still attached to GM NFT (token ID 0)
+
+      await galaxyMember.connect(otherAccount).detachNode(1, 0)
+
+      expect(await galaxyMember.levelOf(0)).to.equal(1) // GM NFT Level is now 1 as no X Node is attached
+    })
+
+    it("Should be able to upgrade GM NFT attached to Vechain node", async () => {
+      const { owner, vechainNodesMock, galaxyMember, b3tr, minterAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        deployMocks: true,
+      })
+
+      if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+      // Mint Mock Strength Economy Node (Level 1)
+      await addNodeToken(1, owner)
+
+      await participateInAllocationVoting(owner)
+
+      await galaxyMember.connect(owner).freeMint()
+
+      await galaxyMember.setMaxLevel(10)
+
+      expect(await galaxyMember.getB3TRrequiredToUpgrade(2)).to.equal(await galaxyMember.getB3TRrequiredToUpgrade(0))
+
+      await b3tr.connect(minterAccount).mint(owner, await galaxyMember.getB3TRrequiredToUpgrade(0))
+
+      await b3tr.connect(owner).approve(await galaxyMember.getAddress(), await galaxyMember.getB3TRrequiredToUpgrade(0))
+
+      await galaxyMember.connect(owner).upgrade(0) // Upgrade token id 1 to level 2
+
+      expect(await galaxyMember.levelOf(0)).to.equal(2) // Level 2
+
+      /*
+        Current state:
+
+        - Token ID 0 has received 10,000 B3TR to upgrade to level 2
+        - Token ID 0 has NO vechain node attached
+      */
+
+      // Attach Strength Economy Node (token ID 1) to GM NFT (token ID 0)
+      await galaxyMember.connect(owner).attachNode(1, 0)
+
+      expect(await galaxyMember.levelOf(0)).to.equal(2) // Level remains 2 because Strength Economy Node is allows for Level 2 for Free but now b3tr to upgrade to level 3 is less as we've already donated 10,000 B3TR
+
+      /*
+        Current state:
+
+        - Token ID 0 has received 10,000 B3TR to upgrade to level 2
+        - Token ID 0 has Strength Economy Node attached
+        - Token ID requires 15,000 B3TR to upgrade to level 3 instead of 25,000 B3TR as Strength Economy Node allows for Level 2 for Free and we've already donated 10,000 B3TR
+      */
+      expect(await galaxyMember.getB3TRrequiredToUpgrade(0)).to.equal(
+        (await galaxyMember.getB3TRtoUpgradeToLevel(3)) - (await galaxyMember.getB3TRdonated(0)),
+      )
+
+      await b3tr.connect(minterAccount).mint(owner, await galaxyMember.getB3TRrequiredToUpgrade(0))
+
+      await b3tr.connect(owner).approve(await galaxyMember.getAddress(), await galaxyMember.getB3TRrequiredToUpgrade(0))
+
+      await galaxyMember.connect(owner).upgrade(0) // Upgrade token id 1 to level 2
+
+      expect(await galaxyMember.levelOf(0)).to.equal(3) // Level 3
+
+      await galaxyMember.detachNode(1, 0)
+
+      /*
+        Current state:
+
+        - Token ID 0 has received 25,000 total B3TR
+        - Token ID 0 has NO vechain node attached
+        - Token ID 0 needs 10,000 B3TR to upgrade to level 3 as we've already donated 25,000 B3TR = 25,000 - 10,000 brings to Level 2 and have 15,000 left to upgrade to Level 3. Level 3 requires 25,000 B3TR so 25,000 - 15,000 = 10,000 B3TR required to upgrade to Level 3
+      */
+
+      expect(await galaxyMember.levelOf(0)).to.equal(2) // Level 2 as we've detached the Strength Economy Node but we've already donated 25,000 B3TR
+
+      expect(await galaxyMember.getB3TRdonated(0)).to.equal(ethers.parseEther("25000"))
+
+      expect(await galaxyMember.getB3TRrequiredToUpgrade(0)).to.equal(ethers.parseEther("10000"))
+    })
+
+    it("Should correctly track B3TR required for upgrades when attaching and detaching nodes", async () => {
+      const { vechainNodesMock, galaxyMember, otherAccount, b3tr, minterAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        deployMocks: true,
+      })
+
+      if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+      await addNodeToken(1, otherAccount) // Mint Mock Strength Economy Node (Level 1)
+
+      await participateInAllocationVoting(otherAccount)
+
+      await galaxyMember.connect(otherAccount).freeMint()
+
+      await galaxyMember.setMaxLevel(10)
+
+      expect(await galaxyMember.levelOf(0)).to.equal(1) // Level 1
+
+      expect(await vechainNodesMock.ownerToId(otherAccount.address)).to.equal(1)
+      expect(await vechainNodesMock.idToOwner(1)).to.equal(otherAccount.address)
+
+      await vechainNodesMock.upgradeTo(1, 7)
+
+      // Attach Mjolnir X Node (token ID 1) to GM NFT (token ID 0)
+      await galaxyMember.connect(otherAccount).attachNode(1, 0)
+
+      expect(await galaxyMember.levelOf(0)).to.equal(7) // Level 7
+
+      await b3tr.connect(minterAccount).mint(otherAccount, await galaxyMember.getB3TRrequiredToUpgrade(0))
+
+      await b3tr
+        .connect(otherAccount)
+        .approve(await galaxyMember.getAddress(), await galaxyMember.getB3TRrequiredToUpgrade(0))
+
+      await galaxyMember.connect(otherAccount).upgrade(0) // Upgrade token id 1 to level 8 by donating 2,500,000 B3TR
+
+      expect(await galaxyMember.levelOf(0)).to.equal(8) // Level 8
+
+      // Detach Mjolnir X Node (token ID 1) from GM NFT (token ID 0)
+      await galaxyMember.connect(otherAccount).detachNode(1, 0)
+
+      /*
+        Current state:
+
+        - Token ID 0 has received 2,500,000 B3TR
+        - Token ID 0 has NO vechain node attached
+        - Token ID Level is level 7 with 1,565,000 B3TR left that can be used to upgrade to Level 8 => 2,500,000 - 1,565,000 = 935,000 B3TR required to upgrade to Level 8
+      */
+      expect(await galaxyMember.levelOf(0)).to.equal(7) // Level 7
+
+      expect(await galaxyMember.getB3TRrequiredToUpgrade(0)).to.equal(ethers.parseEther("935000"))
+
+      await b3tr.connect(minterAccount).mint(otherAccount, await galaxyMember.getB3TRrequiredToUpgrade(0))
+
+      await b3tr
+        .connect(otherAccount)
+        .approve(await galaxyMember.getAddress(), await galaxyMember.getB3TRrequiredToUpgrade(0))
+
+      await galaxyMember.connect(otherAccount).upgrade(0) // Upgrade token id 1 to level 8 by donating 935,000 B3TR
+
+      expect(await galaxyMember.levelOf(0)).to.equal(8) // Level 8
+    })
+
+    it("Should not be able to transfer GM NFT attached to Vechain node", async () => {
+      const { owner, vechainNodesMock, galaxyMember, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        deployMocks: true,
+      })
+
+      if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+      // Mint Mock Strength Economy Node (Level 1)
+      await addNodeToken(1, owner)
+
+      await participateInAllocationVoting(owner)
+
+      await galaxyMember.connect(owner).freeMint()
+
+      await galaxyMember.setMaxLevel(10)
+
+      expect(await galaxyMember.levelOf(0)).to.equal(1) // Level 1
+
+      // Attach Strength Economy Node (token ID 1) to GM NFT (token ID 0)
+      await galaxyMember.connect(owner).attachNode(1, 0)
+
+      expect(await galaxyMember.levelOf(0)).to.equal(2) // Level 2
+
+      await expect(galaxyMember.connect(owner).transferFrom(owner.address, otherAccount.address, 0)).to.be.revertedWith(
+        "GalaxyMember: token attached to a node, detach before transfer",
+      )
+    })
+
+    it("Should reset level if node attached doesn't exist anymore", async () => {
+      const { owner, vechainNodesMock, galaxyMember } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        deployMocks: true,
+      })
+
+      if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+      // Mint Mock Strength Economy Node (Level 1)
+      await addNodeToken(1, owner)
+
+      await participateInAllocationVoting(owner)
+
+      await galaxyMember.connect(owner).freeMint()
+
+      await galaxyMember.setMaxLevel(10)
+
+      expect(await galaxyMember.levelOf(0)).to.equal(1) // Level 1
+
+      // Attach Strength Economy Node (token ID 1) to GM NFT (token ID 0)
+      await galaxyMember.connect(owner).attachNode(1, 0)
+
+      expect(await galaxyMember.levelOf(0)).to.equal(2) // Level 2
+
+      // Fast forward 4 hours
+      await time.setNextBlockTimestamp((await time.latest()) + 4 * 60 * 60)
+
+      await vechainNodesMock.downgradeTo(1, 0) // Burn Strength Economy Node
+
+      expect(await vechainNodesMock.idToOwner(1)).to.equal(ethers.ZeroAddress)
+
+      expect(await galaxyMember.levelOf(0)).to.equal(1) // Level 1
+
+      // I can attach another node
+      await addNodeToken(2, owner)
+
+      await expect(galaxyMember.connect(owner).attachNode(2, 0)).to.be.revertedWith(
+        "GalaxyMember: token already attached to a node",
+      )
+
+      await galaxyMember.connect(owner).detachNode(await galaxyMember.getNodeIdAttached(0), 0)
+
+      await galaxyMember.connect(owner).attachNode(2, 0)
+
+      expect(await galaxyMember.levelOf(0)).to.equal(4) // Level 4
+    })
+
+    it("User can select a different GM NFT owned", async () => {
+      const { owner, vechainNodesMock, galaxyMember } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        deployMocks: true,
+      })
+
+      if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+      // Mint Mock Strength Economy Node (Level 1)
+      await addNodeToken(1, owner)
+
+      await participateInAllocationVoting(owner)
+
+      await galaxyMember.connect(owner).freeMint()
+
+      await galaxyMember.setMaxLevel(10)
+
+      expect(await galaxyMember.levelOf(0)).to.equal(1) // Level 1
+
+      await galaxyMember.connect(owner).freeMint()
+
+      // Attach Strength Economy Node (token ID 1) to GM NFT (token ID 0)
+      await galaxyMember.connect(owner).attachNode(1, 1)
+
+      expect(await galaxyMember.levelOf(1)).to.equal(2) // Level 1
+      expect(await galaxyMember.levelOf(0)).to.equal(1) // Level 1
+
+      expect(await galaxyMember.getSelectedTokenId(await owner.getAddress())).to.equal(0) // Owner has selected token ID 0 automatically as it was the first token owned
+
+      await galaxyMember.select(1)
+
+      expect(await galaxyMember.getSelectedTokenId(await owner.getAddress())).to.equal(1) // Owner has selected token ID 1
+    })
   })
 })
