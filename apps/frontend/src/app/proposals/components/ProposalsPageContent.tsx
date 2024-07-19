@@ -14,7 +14,7 @@ export const ProposalsPageContent = () => {
   const router = useRouter()
   const { t } = useTranslation()
 
-  const { proposals, isLoading } = useFilteredProposals()
+  const { filteredProposals, isLoading } = useFilteredProposals()
 
   const userProposalDeposits = useProposalClaimableUserDeposits(account ?? "")
 
@@ -52,7 +52,7 @@ export const ProposalsPageContent = () => {
             </HStack>
           </Box>
           <Show below="sm">
-            {proposals.length > 0 && (
+            {filteredProposals.length > 0 && (
               <Button onClick={onNewCLick} variant={"primaryAction"}>
                 {t("Create proposal")}
               </Button>
@@ -75,17 +75,17 @@ export const ProposalsPageContent = () => {
           alignSelf={"flex-start"}
           gap={4}
           w={{ base: "full", md: undefined }}>
-          {proposals.map(proposal => (
+          {filteredProposals.map(proposal => (
             <ProposalInfoCard proposal={proposal} key={proposal.proposalId} />
           ))}
-          {proposals.length === 0 && !isLoading && <NoProposalsCard />}
+          {filteredProposals.length === 0 && !isLoading && <NoProposalsCard />}
         </VStack>
         <Show above="sm">
           <VStack flex={2} alignSelf="flex-start" spacing={6}>
             {userTotalDeposits > 0 && (
               <ClaimDeposits claimableDeposits={userTotalDeposits} userProposalDeposits={userProposalDeposits} />
             )}
-            {proposals.length > 0 && <CreateProposalCard />}
+            {filteredProposals.length > 0 && <CreateProposalCard />}
             <JoinCommunity />
           </VStack>
         </Show>

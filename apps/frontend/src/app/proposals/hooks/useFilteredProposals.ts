@@ -1,6 +1,6 @@
-import { useProposalsEvents } from "@/api"
+import { ProposalState, useAllProposalsState, useProposalsEvents } from "@/api"
 import { useProposalFilters } from "@/store"
-import { useMemo } from "react"
+import { useCallback, useMemo } from "react"
 import { StateFilter } from "../components"
 
 /**
@@ -8,37 +8,43 @@ import { StateFilter } from "../components"
  */
 export const useFilteredProposals = () => {
   const { data: proposalsEvents, isLoading: proposalsEventsLoading } = useProposalsEvents()
+  const { data: allProposalsState } = useAllProposalsState()
   const { selectedFilter } = useProposalFilters()
+
+  const checkProposalState = useCallback(
+    (proposalIndex: number, state: number) => {
+      if (!allProposalsState) return false
+      return allProposalsState[proposalIndex]?.state === state
+    },
+    [allProposalsState],
+  )
 
   const filteredProposals = useMemo(() => {
     console.log("filter", selectedFilter)
     if (!proposalsEvents) return []
 
     switch (selectedFilter) {
-      // case StateFilter.Active:
-      //     return proposalsEvents.
+      case StateFilter.Active:
+        return proposalsEvents.created.filter((_proposal, index) => checkProposalState(index, ProposalState.Active))
       case StateFilter.Canceled:
-        return proposalsEvents.created.filter(proposal =>
-          proposalsEvents.canceled.some(canceledProposal => canceledProposal.proposalId === proposal.proposalId),
+        return proposalsEvents.created.filter((_proposal, index) => checkProposalState(index, ProposalState.Canceled))
+      case StateFilter.Succeeded:
+        return proposalsEvents.created.filter((_proposal, index) => checkProposalState(index, ProposalState.Succeeded))
+      case StateFilter.Defeated:
+        return proposalsEvents.created.filter((_proposal, index) => checkProposalState(index, ProposalState.Defeated))
+      case StateFilter.DepositNotMet:
+        return proposalsEvents.created.filter((_proposal, index) =>
+          checkProposalState(index, ProposalState.DepositNotMet),
         )
-      // case StateFilter.Defeated:
-      //     return proposalsEvents.defeated
-      // case StateFilter.DepositNotMet:
-      //     return proposalsEvents.succeeded
       case StateFilter.Queued:
-        return proposalsEvents.created.filter(proposal =>
-          proposalsEvents.queued.some(queuedProposal => queuedProposal.proposalId === proposal.proposalId),
-        )
+        return proposalsEvents.created.filter((_proposal, index) => checkProposalState(index, ProposalState.Queued))
       case StateFilter.Executed:
-        return proposalsEvents.created.filter(proposal =>
-          proposalsEvents.executed.some(executedProposal => executedProposal.proposalId === proposal.proposalId),
-        )
-      //   case StateFilter.Succeeded:
-      //       return proposalsEvents.depositNotMet
+        return proposalsEvents.created.filter((_proposal, index) => checkProposalState(index, ProposalState.Executed))
+
       default:
         return proposalsEvents.created
     }
-  }, [proposalsEvents, selectedFilter])
+  }, [proposalsEvents, selectedFilter, checkProposalState])
 
   const allProposals = useMemo(() => {
     if (!filteredProposals) return []
@@ -58,5 +64,5 @@ export const useFilteredProposals = () => {
     return proposalsEventsLoading
   }, [proposalsEventsLoading])
 
-  return { proposals: allProposals, isLoading }
+  return { filteredProposals: allProposals, isLoading, allProposals: proposalsEvents?.created ?? [] }
 }
