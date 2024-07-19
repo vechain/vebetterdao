@@ -8,6 +8,7 @@ export const deployProxy = async (
   args: any[],
   libraries: { [libraryName: string]: string } = {},
   logOutput: boolean = false,
+  version?: number,
 ): Promise<BaseContract> => {
   // Deploy the implementation contract
   const Contract = await ethers.getContractFactory(contractName, {
@@ -21,7 +22,7 @@ export const deployProxy = async (
   const proxyFactory = await ethers.getContractFactory("B3TRProxy")
   const proxy = await proxyFactory.deploy(
     await implementation.getAddress(),
-    getInitializerData(Contract.interface, args),
+    getInitializerData(Contract.interface, args, version),
   )
   await proxy.waitForDeployment()
   logOutput && console.log(`${contractName} proxy: ${await proxy.getAddress()}`)
@@ -42,9 +43,12 @@ export const upgradeProxy = async (
   newVersionContractName: string,
   proxyAddress: string,
   args: any[] = [],
+  options?: { version?: number; libraries?: { [libraryName: string]: string } },
 ): Promise<BaseContract> => {
   // Deploy the implementation contract
-  const Contract = await ethers.getContractFactory(newVersionContractName)
+  const Contract = await ethers.getContractFactory(newVersionContractName, {
+    libraries: options?.libraries,
+  })
   const implementation = await Contract.deploy()
   await implementation.waitForDeployment()
 
@@ -52,7 +56,7 @@ export const upgradeProxy = async (
 
   const tx = await currentImplementationContract.upgradeToAndCall(
     await implementation.getAddress(),
-    args.length > 0 ? getInitializerData(Contract.interface, args) : "0x",
+    args.length > 0 ? getInitializerData(Contract.interface, args, options?.version) : "0x",
   )
   await tx.wait()
 
@@ -66,8 +70,9 @@ export const upgradeProxy = async (
   return Contract.attach(proxyAddress)
 }
 
-export function getInitializerData(contractInterface: Interface, args: any[]) {
-  const initializer = "initialize"
+export function getInitializerData(contractInterface: Interface, args: any[], version?: number) {
+  const initializer = `initialize${version ? `V${version}` : ""}`
+
   const fragment = contractInterface.getFunction(initializer)
   if (!fragment) {
     throw new Error(`Contract initializer not found`)
