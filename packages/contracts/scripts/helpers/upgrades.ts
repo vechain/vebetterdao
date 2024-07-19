@@ -71,7 +71,7 @@ export const upgradeProxy = async (
 }
 
 export function getInitializerData(contractInterface: Interface, args: any[], version?: number) {
-  const initializer = `initialize${version ? `V${version}` : ""}`
+  const initializer = version ? `initializeV${version}` : "initialize"
 
   const fragment = contractInterface.getFunction(initializer)
   if (!fragment) {
