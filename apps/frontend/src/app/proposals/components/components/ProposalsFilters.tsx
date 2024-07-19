@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react"
-import { HStack, Box, Text } from "@chakra-ui/react"
+import { HStack, Box, Text, StackProps, IconButton, Button } from "@chakra-ui/react"
 import { MdClose } from "react-icons/md"
 import { ProposalFilter, StateFilter } from "./types"
 import { useProposalFilter } from "@/store"
@@ -19,11 +19,14 @@ const filters: Record<ProposalFilter, string[]> = {
   [ProposalFilter.UpcomingVoting]: [], // Pending
 }
 
-export const Filter = () => {
+type Props = StackProps
+export const ProposalsFilters = (props: Props) => {
   const { selectedFilter, setSelectedFilter, clearFilter } = useProposalFilter()
 
   const [selectedFilterOptions, setSelectedFilterOptions] = useState<string[]>()
-  const [selectedOption, setSelectedOption] = useState<string>()
+
+  //TODO: DO we need the selectedOption state?
+  const [_selectedOption, setSelectedOption] = useState<string>()
 
   const handleFilterClick = useCallback(
     (filter: ProposalFilter) => {
@@ -63,7 +66,7 @@ export const Filter = () => {
           spacing={2}
           overflowX={{ base: "scroll", md: "hidden" }}
           overflowY={"hidden"}
-          maxW={{ base: "380px", md: "100%" }}
+          w="full"
           // Remove scrollbar
           css={{
             "&::-webkit-scrollbar": {
@@ -71,10 +74,14 @@ export const Filter = () => {
             },
             scrollbarWidth: "none",
             msOverflowStyle: "none",
-          }}>
+          }}
+          {...props}>
           {Object.keys(filters).map(filterKey => (
-            <Box
-              cursor={"pointer"}
+            <Button
+              lineHeight="inherit"
+              h="auto"
+              minW={"auto"}
+              variant="ghost"
               px={4}
               py={3}
               borderRadius={78}
@@ -90,15 +97,26 @@ export const Filter = () => {
               <Text fontSize={14} fontWeight={600} whiteSpace={"nowrap"}>
                 {filterKey}
               </Text>
-            </Box>
+            </Button>
           ))}
         </HStack>
       )}
       {selectedFilterOptions && (
-        <HStack spacing={2}>
-          <Box p={3} bg={"white"} borderRadius={"full"} borderWidth={1} borderColor={"#EFEFEF"}>
-            <MdClose size={18} onClick={handleClearFilter} cursor={"pointer"} />
-          </Box>
+        <HStack spacing={2} w="full" align={"center"}>
+          <IconButton
+            lineHeight="inherit"
+            h="auto"
+            minW={"auto"}
+            variant={"ghost"}
+            aria-label="Clear filter"
+            p={3}
+            bg={"white"}
+            borderRadius={"full"}
+            borderWidth={1}
+            borderColor={"#EFEFEF"}
+            onClick={handleClearFilter}
+            icon={<MdClose size={18} />}
+          />
 
           <HStack
             overflowX={{ base: "scroll", md: "hidden" }}
@@ -113,8 +131,11 @@ export const Filter = () => {
             }}
             maxW={{ base: "350px", md: "100%" }}>
             {selectedFilterOptions?.map(optionKey => (
-              <Box
-                cursor={"pointer"}
+              <Button
+                lineHeight="inherit"
+                h="auto"
+                minW={"auto"}
+                variant={"ghost"}
                 px={4}
                 py={3}
                 borderRadius={78}
@@ -130,29 +151,40 @@ export const Filter = () => {
                 <Text fontSize={14} fontWeight={600} whiteSpace={"nowrap"}>
                   {optionKey}
                 </Text>
-              </Box>
+              </Button>
             ))}
           </HStack>
         </HStack>
       )}
-      {selectedFilter && !selectedFilterOptions && (
-        <HStack spacing={2}>
-          <Box p={3} bg={"white"} borderRadius={"full"} borderWidth={1} borderColor={"#EFEFEF"}>
-            <MdClose size={18} onClick={handleClearFilter} cursor={"pointer"} />
-          </Box>
+      {selectedFilter && !selectedFilterOptions?.length && (
+        <HStack spacing={2} w="full">
+          <IconButton
+            h="auto"
+            minW={"auto"}
+            lineHeight="inherit"
+            variant={"ghost"}
+            aria-label="Clear filter"
+            p={3}
+            bg={"white"}
+            borderRadius={"full"}
+            borderWidth={1}
+            borderColor={"#EFEFEF"}
+            onClick={handleClearFilter}
+            icon={<MdClose size={18} />}
+          />
           <HStack spacing={0} borderWidth={1} borderColor={"#EFEFEF"} borderRadius={78}>
             <Box px={4} py={3} borderRadius={78} bg={"black"} color={"white"}>
               <Text fontSize={14} fontWeight={600} whiteSpace={"nowrap"}>
                 {selectedFilter}
               </Text>
             </Box>
-            {selectedOption && (
+            {/* {selectedOption && (
               <Box px={4} py={3} borderRadius={78} color={"black"}>
                 <Text fontSize={14} fontWeight={600} whiteSpace={"nowrap"}>
                   {selectedOption}
                 </Text>
               </Box>
-            )}
+            )} */}
           </HStack>
         </HStack>
       )}

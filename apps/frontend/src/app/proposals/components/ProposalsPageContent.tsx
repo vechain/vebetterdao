@@ -4,7 +4,7 @@ import { VStack, HStack, Heading, Box, Button, Show, Spinner } from "@chakra-ui/
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { ClaimDeposits, CreateProposalCard, NoProposalsCard } from "./components"
+import { ClaimDeposits, CreateProposalCard, ProposalsFilters, NoProposalsCard } from "./components"
 import { useWallet, useWalletModal } from "@vechain/dapp-kit-react"
 
 export const ProposalsPageContent = () => {
@@ -72,9 +72,7 @@ export const ProposalsPageContent = () => {
           </Show>
         </HStack>
       </VStack>
-      {/*  <Box alignSelf={"flex-start"}> TODO: https://github.com/vechain/b3tr/issues/1061
-        <Filter />
-      </Box> */}
+      <ProposalsFilters alignSelf={"flex-start"} w="full" />
       <Show below="sm">
         {userTotalDeposits > 0 && (
           <Box mb={2} mt={3}>
