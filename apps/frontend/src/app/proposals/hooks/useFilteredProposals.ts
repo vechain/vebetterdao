@@ -8,8 +8,9 @@ import { ProposalFilter, StateFilter } from "../components"
  */
 export const useFilteredProposals = () => {
   const { data: proposalsEvents, isLoading: proposalsEventsLoading } = useProposalsEvents()
-  const { data: allProposalsState } = useAllProposalsState()
-  const { data: allProposalsDepositReached } = useAllProposalsDepositReached()
+  const { data: allProposalsState, isLoading: allProposalsStateLoading } = useAllProposalsState()
+  const { data: allProposalsDepositReached, isLoading: allProposalsDepositReachedLoading } =
+    useAllProposalsDepositReached()
   const { selectedFilter } = useProposalFilters()
 
   const checkProposalState = useCallback(
@@ -73,8 +74,8 @@ export const useFilteredProposals = () => {
   }, [filteredProposals])
 
   const isLoading = useMemo(() => {
-    return proposalsEventsLoading
-  }, [proposalsEventsLoading])
+    return proposalsEventsLoading || allProposalsStateLoading || allProposalsDepositReachedLoading
+  }, [proposalsEventsLoading, allProposalsStateLoading, allProposalsDepositReachedLoading])
 
   return { filteredProposals: sortedFilteredProposals, isLoading, allProposals: proposalsEvents?.created ?? [] }
 }
