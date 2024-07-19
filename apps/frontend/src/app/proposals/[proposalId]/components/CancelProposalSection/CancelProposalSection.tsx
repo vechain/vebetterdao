@@ -107,7 +107,7 @@ export const CancelProposalSection = () => {
         isOpen={transactionModal.isOpen}
         onClose={handleCloseTransactionModal}
         status={cancelProposalMutation.error ? "error" : cancelProposalMutation.status}
-        successTitle={t("Proposal cancelled!")}
+        successTitle={t("Proposal canceled!")}
         onTryAgain={handleCancelProposal}
         showTryAgainButton
         showExplorerButton

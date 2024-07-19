@@ -8,7 +8,7 @@ export const ProposalCanceledAlert = () => {
     <Alert status="error" borderRadius="16px" border={"1px solid #D23F63"} bg="#FCEEF1">
       <UilInfoCircle size={"36px"} color="#D23F63" />
       <AlertTitle color="#D23F63" ml={2} fontSize="14px">
-        {t("This proposal has been cancelled by the creator or VeBetter and can no longer be supported.")}
+        {t("This proposal has been canceled by the creator or VeBetter and can no longer be supported.")}
       </AlertTitle>
     </Alert>
   )
