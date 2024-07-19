@@ -19,6 +19,8 @@ export const ProposalTimeline = () => {
   const showQueueButton = proposal.state === ProposalState.Succeeded && isProposalExecutor
   const showExecuteButton = proposal.state === ProposalState.Queued && isProposalExecutor
 
+  const isCanceled = useMemo(() => proposal.state === ProposalState.Canceled, [proposal.state])
+
   const activeStep = useMemo(() => {
     if (proposal.state === ProposalState.Pending) {
       return proposal.isDepositReached ? 1 : 0
@@ -46,49 +48,68 @@ export const ProposalTimeline = () => {
   }, [proposal.isDepositReached, proposal.state])
 
   const steps = useMemo(
-    () => [
-      <ProposalCreatedTimelineItem key={0} />,
-      <TimelineItem key={1} title={t("Waiting for the round to start")} />,
-      <TimelineItem
-        key={2}
-        title={activeStep >= 2 ? t("Voting session started") : t("Voting session starts")}
-        description={dayjs(proposal.votingStartDate).format("MMM D, YYYY")}
-      />,
-      <TimelineItem
-        key={3}
-        title={activeStep > 3 ? t("Voting session ended") : t("Voting session ends")}
-        description={dayjs(proposal.votingEndDate).format("MMM D, YYYY")}
-      />,
-      <TimelineItem
-        key={4}
-        title={t("Proposal on queue")}
-        description={proposal.proposalQueuedDate ? dayjs(proposal.proposalQueuedDate).format("MMM D, YYYY") : ""}
-        actionButton={showQueueButton && <ProposalQueueButton />}
-      />,
-      <TimelineItem
-        key={5}
-        title={t("Proposal executed")}
-        description={proposal.proposalExecutedDate ? dayjs(proposal.proposalExecutedDate).format("MMM D, YYYY") : ""}
-        actionButton={showExecuteButton && <ProposalExecuteButton />}
-      />,
-    ],
+    () =>
+      isCanceled
+        ? [
+            <ProposalCreatedTimelineItem key={0} />,
+            <TimelineItem key={1} title={t("Waiting for the round to start")} />,
+            <TimelineItem
+              key={3}
+              title={t("Proposal canceled!")}
+              description={proposal.proposalCanceledDate?.format("MMM D, YYYY")}
+            />,
+          ]
+        : [
+            <ProposalCreatedTimelineItem key={0} />,
+            <TimelineItem key={1} title={t("Waiting for the round to start")} />,
+            <TimelineItem
+              key={2}
+              title={activeStep >= 2 ? t("Voting session started") : t("Voting session starts")}
+              description={dayjs(proposal.votingStartDate).format("MMM D, YYYY")}
+            />,
+            <TimelineItem
+              key={3}
+              title={activeStep > 3 ? t("Voting session ended") : t("Voting session ends")}
+              description={dayjs(proposal.votingEndDate).format("MMM D, YYYY")}
+            />,
+            <TimelineItem
+              key={4}
+              title={t("Proposal on queue")}
+              description={proposal.proposalQueuedDate ? dayjs(proposal.proposalQueuedDate).format("MMM D, YYYY") : ""}
+              actionButton={showQueueButton && <ProposalQueueButton />}
+            />,
+            <TimelineItem
+              key={5}
+              title={t("Proposal executed")}
+              description={
+                proposal.proposalExecutedDate ? dayjs(proposal.proposalExecutedDate).format("MMM D, YYYY") : ""
+              }
+              actionButton={showExecuteButton && <ProposalExecuteButton />}
+            />,
+          ],
     [
       proposal.proposalExecutedDate,
+      proposal.proposalCanceledDate,
       proposal.proposalQueuedDate,
       proposal.votingEndDate,
       proposal.votingStartDate,
       showExecuteButton,
       showQueueButton,
       activeStep,
+      isCanceled,
     ],
   )
+
+  const height = useMemo(() => {
+    return steps.length * 80
+  }, [steps])
 
   return (
     <VStack align="stretch" gap={6}>
       <Heading fontSize={"20px"} fontWeight={700}>
         {t("Timeline")}
       </Heading>
-      <Stepper index={activeStep} orientation="vertical" height="400px" gap="0" variant="primaryVertical">
+      <Stepper index={activeStep} orientation="vertical" height={height} gap="0" variant="primaryVertical">
         {steps.map((step, index) => (
           <Step key={index} style={{ width: "100%" }}>
             <StepIndicator>
