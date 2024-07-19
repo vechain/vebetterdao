@@ -1,7 +1,7 @@
-import { ProposalState, useAllProposalsState, useProposalsEvents } from "@/api"
+import { ProposalState, useAllProposalsState, useProposalsEvents, useAllProposalsDepositReached } from "@/api"
 import { useProposalFilters } from "@/store"
 import { useCallback, useMemo } from "react"
-import { StateFilter } from "../components"
+import { ProposalFilter, StateFilter } from "../components"
 
 /**
  * Reacting to the changes in the useFiltersProposals store, this hook returns the filtered proposals.
@@ -9,6 +9,7 @@ import { StateFilter } from "../components"
 export const useFilteredProposals = () => {
   const { data: proposalsEvents, isLoading: proposalsEventsLoading } = useProposalsEvents()
   const { data: allProposalsState } = useAllProposalsState()
+  const { data: allProposalsDepositReached } = useAllProposalsDepositReached()
   const { selectedFilter } = useProposalFilters()
 
   const checkProposalState = useCallback(
@@ -20,7 +21,6 @@ export const useFilteredProposals = () => {
   )
 
   const filteredProposals = useMemo(() => {
-    console.log("filter", selectedFilter)
     if (!proposalsEvents) return []
 
     switch (selectedFilter) {
@@ -40,13 +40,23 @@ export const useFilteredProposals = () => {
         return proposalsEvents.created.filter((_proposal, index) => checkProposalState(index, ProposalState.Queued))
       case StateFilter.Executed:
         return proposalsEvents.created.filter((_proposal, index) => checkProposalState(index, ProposalState.Executed))
+      case ProposalFilter.LookingForSupport:
+        return proposalsEvents.created.filter(
+          (_proposal, index) =>
+            checkProposalState(index, ProposalState.Pending) && !allProposalsDepositReached?.[index]?.depositReached,
+        )
+      case ProposalFilter.UpcomingVoting:
+        return proposalsEvents.created.filter(
+          (_proposal, index) =>
+            checkProposalState(index, ProposalState.Pending) && allProposalsDepositReached?.[index]?.depositReached,
+        )
 
       default:
         return proposalsEvents.created
     }
-  }, [proposalsEvents, selectedFilter, checkProposalState])
+  }, [proposalsEvents, selectedFilter, checkProposalState, allProposalsDepositReached])
 
-  const allProposals = useMemo(() => {
+  const sortedFilteredProposals = useMemo(() => {
     if (!filteredProposals) return []
 
     const sortedProposals = filteredProposals.sort((a, b) => {
@@ -64,5 +74,5 @@ export const useFilteredProposals = () => {
     return proposalsEventsLoading
   }, [proposalsEventsLoading])
 
-  return { filteredProposals: allProposals, isLoading, allProposals: proposalsEvents?.created ?? [] }
+  return { filteredProposals: sortedFilteredProposals, isLoading, allProposals: proposalsEvents?.created ?? [] }
 }
