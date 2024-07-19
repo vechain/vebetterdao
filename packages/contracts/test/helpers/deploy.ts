@@ -25,9 +25,12 @@ import {
   X2EarnRewardsPool,
   MyERC721,
   MyERC1155,
+  GalaxyMemberV2,
+  VoterRewardsV2,
+  TokenAuction,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
-import { deployProxy } from "../../scripts/helpers"
+import { deployProxy, upgradeProxy } from "../../scripts/helpers"
 import { setWhitelistedFunctions } from "../../scripts/deploy/deploy"
 import { bootstrapAndStartEmissions as callBootstrapAndStartEmissions } from "./common"
 
@@ -37,12 +40,12 @@ interface DeployInstance {
   vot3: VOT3
   timeLock: TimeLock
   governor: B3TRGovernor
-  galaxyMember: GalaxyMember
+  galaxyMember: GalaxyMemberV2
   x2EarnApps: X2EarnApps
   xAllocationVoting: XAllocationVoting
   xAllocationPool: XAllocationPool
   emissions: Emissions
-  voterRewards: VoterRewards
+  voterRewards: VoterRewardsV2
   treasury: Treasury
   x2EarnRewardsPool: X2EarnRewardsPool
   owner: HardhatEthersSigner
@@ -61,6 +64,7 @@ interface DeployInstance {
   governorVotesLogicLib: GovernorVotesLogic
   myErc721: MyERC721 | undefined
   myErc1155: MyERC1155 | undefined
+  vechainNodesMock: TokenAuction | undefined
 }
 
 export const NFT_NAME = "GalaxyMember"
@@ -206,6 +210,14 @@ export const getOrDeployContractInstances = async ({
     },
   ])) as GalaxyMember
 
+  const galaxyMemberV2 = (await upgradeProxy(
+    "GalaxyMember",
+    "GalaxyMemberV2",
+    await galaxyMember.getAddress(),
+    [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
+    { version: 2 },
+  )) as unknown as GalaxyMemberV2
+
   // Deploy X2EarnApps
   const x2EarnApps = (await deployProxy("X2EarnApps", [
     "ipfs://",
@@ -265,14 +277,18 @@ export const getOrDeployContractInstances = async ({
     owner.address, // upgrader
     owner.address, // contractsAddressManager
     await emissions.getAddress(),
-    await galaxyMember.getAddress(),
+    await galaxyMemberV2.getAddress(),
     await b3tr.getAddress(),
     levels,
     multipliers,
   ])) as VoterRewards
 
+  const voterRewardsV2 = (await upgradeProxy("VoterRewards", "VoterRewardsV2", await voterRewards.getAddress(), [], {
+    version: 2,
+  })) as VoterRewardsV2
+
   // Set vote 2 earn (VoterRewards deployed contract) address in emissions
-  await emissions.connect(owner).setVote2EarnAddress(await voterRewards.getAddress())
+  await emissions.connect(owner).setVote2EarnAddress(await voterRewardsV2.getAddress())
 
   // Deploy XAllocationVoting
   const xAllocationVoting = (await deployProxy("XAllocationVoting", [
@@ -331,11 +347,11 @@ export const getOrDeployContractInstances = async ({
 
   const contractAddresses: Record<string, string> = {
     B3TR: await b3tr.getAddress(),
-    VoterRewards: await voterRewards.getAddress(),
+    VoterRewards: await voterRewardsV2.getAddress(),
     Treasury: await treasury.getAddress(),
     XAllocationVoting: await xAllocationVoting.getAddress(),
     Emissions: await emissions.getAddress(),
-    GalaxyMember: await galaxyMember.getAddress(),
+    GalaxyMember: await galaxyMemberV2.getAddress(),
     TimeLock: await timeLock.getAddress(),
     VOT3: await vot3.getAddress(),
     XAllocationPool: await xAllocationPool.getAddress(),
@@ -367,15 +383,15 @@ export const getOrDeployContractInstances = async ({
   await timeLock.connect(timelockAdmin).grantRole(CANCELLER_ROLE, await governor.getAddress())
 
   // Set xAllocationVoting and Governor address in GalaxyMember
-  await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
-  await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
+  await galaxyMemberV2.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+  await galaxyMemberV2.connect(owner).setB3trGovernorAddress(await governor.getAddress())
 
   // Grant Vote registrar role to XAllocationVoting
-  await voterRewards
+  await voterRewardsV2
     .connect(owner)
-    .grantRole(await voterRewards.VOTE_REGISTRAR_ROLE(), await xAllocationVoting.getAddress())
+    .grantRole(await voterRewardsV2.VOTE_REGISTRAR_ROLE(), await xAllocationVoting.getAddress())
   // Grant Vote registrar role to Governor
-  await voterRewards.connect(owner).grantRole(await voterRewards.VOTE_REGISTRAR_ROLE(), await governor.getAddress())
+  await voterRewardsV2.connect(owner).grantRole(await voterRewardsV2.VOTE_REGISTRAR_ROLE(), await governor.getAddress())
 
   // Grant admin role to voter rewards for registering x allocation voting
   await xAllocationVoting.connect(owner).grantRole(await xAllocationVoting.DEFAULT_ADMIN_ROLE(), emissions.getAddress())
@@ -404,7 +420,7 @@ export const getOrDeployContractInstances = async ({
   }
 
   // deploy Mocks
-  let myErc1155, myErc721
+  let myErc1155, myErc721, vechainNodesMock
   if (deployMocks) {
     const MyERC721 = await ethers.getContractFactory("MyERC721")
     myErc721 = await MyERC721.deploy(owner.address)
@@ -413,6 +429,20 @@ export const getOrDeployContractInstances = async ({
     const MyERC1155 = await ethers.getContractFactory("MyERC1155")
     myErc1155 = await MyERC1155.deploy(owner.address)
     await myErc1155.waitForDeployment()
+
+    const TokenAuctionLock = await ethers.getContractFactory("TokenAuction")
+    vechainNodesMock = await TokenAuctionLock.deploy()
+    await vechainNodesMock.waitForDeployment()
+
+    const ClockAuctionLock = await ethers.getContractFactory("ClockAuction")
+    const clockAuctionContract = await ClockAuctionLock.deploy(
+      await vechainNodesMock.getAddress(),
+      await owner.getAddress(),
+    )
+
+    await vechainNodesMock.setSaleAuctionAddress(await clockAuctionContract.getAddress())
+
+    await vechainNodesMock.addOperator(await owner.getAddress())
   }
 
   cachedDeployInstance = {
@@ -421,12 +451,12 @@ export const getOrDeployContractInstances = async ({
     vot3,
     timeLock,
     governor,
-    galaxyMember,
+    galaxyMember: galaxyMemberV2,
     x2EarnApps,
     xAllocationVoting,
     xAllocationPool,
     emissions,
-    voterRewards,
+    voterRewards: voterRewardsV2,
     owner,
     otherAccount,
     minterAccount,
@@ -445,6 +475,7 @@ export const getOrDeployContractInstances = async ({
     governorVotesLogicLib: GovernorVotesLogicLib,
     myErc721: myErc721,
     myErc1155: myErc1155,
+    vechainNodesMock: vechainNodesMock,
   }
   return cachedDeployInstance
 }
