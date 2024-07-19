@@ -43,6 +43,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 /// @notice This contract manages the unique assets owned by users within the Galaxy Member ecosystem.
 /// @dev Differences from V1:
 /// - Added Vechain Nodes contract to attach and detach nodes to tokens
+/// - Added NODES_MANAGER_ROLE to manage Vechain Nodes Contract address and free upgrade levels
 /// - Added free upgrade levels for each Vechain node level
 /// - Removed automatic highest level owned selection
 /// - Added dynamic level fetching of the token based on the attached Vechain node and B3TR donated for upgrading
