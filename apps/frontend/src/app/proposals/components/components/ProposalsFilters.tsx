@@ -2,7 +2,7 @@ import { useCallback, useState } from "react"
 import { HStack, Box, Text, StackProps, IconButton, Button } from "@chakra-ui/react"
 import { MdClose } from "react-icons/md"
 import { ProposalFilter, StateFilter } from "./types"
-import { useProposalFilter } from "@/store"
+import { useProposalFilters } from "@/store"
 
 const filters: Record<ProposalFilter, string[]> = {
   [ProposalFilter.State]: [
@@ -21,7 +21,7 @@ const filters: Record<ProposalFilter, string[]> = {
 
 type Props = StackProps
 export const ProposalsFilters = (props: Props) => {
-  const { selectedFilter, setSelectedFilter, clearFilter } = useProposalFilter()
+  const { selectedFilter, setSelectedFilter, clearFilter } = useProposalFilters()
 
   const [selectedFilterOptions, setSelectedFilterOptions] = useState<string[]>()
 

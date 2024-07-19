@@ -8,11 +8,13 @@ import { ClaimDeposits, CreateProposalCard, ProposalsFilters, NoProposalsCard } 
 import { useWallet, useWalletModal } from "@vechain/dapp-kit-react"
 
 export const ProposalsPageContent = () => {
-  const router = useRouter()
-  const { t } = useTranslation()
-  const { data: proposalsEvents, isLoading: proposalsEventsLoading } = useProposalsEvents()
   const { account } = useWallet()
   const { open } = useWalletModal()
+  const router = useRouter()
+  const { t } = useTranslation()
+
+  const { data: proposalsEvents, isLoading: proposalsEventsLoading } = useProposalsEvents()
+  const {} = useProposalFilters()
 
   const allProposals = useMemo(() => {
     if (!proposalsEvents) return []

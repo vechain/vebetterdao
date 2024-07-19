@@ -8,7 +8,7 @@ interface ProposalFilterStoreState {
   clearFilter: () => void
 }
 
-export const useProposalFilter = create<ProposalFilterStoreState>(set => ({
+export const useProposalFilters = create<ProposalFilterStoreState>(set => ({
   selectedFilter: undefined,
   setSelectedFilter: filter => set({ selectedFilter: filter }),
   clearFilter: () => set({ selectedFilter: undefined }),
