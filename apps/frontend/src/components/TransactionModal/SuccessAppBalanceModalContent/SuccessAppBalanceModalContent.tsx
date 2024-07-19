@@ -5,9 +5,10 @@ import { motion } from "framer-motion"
 import { useTranslation } from "react-i18next"
 import { MdArrowOutward } from "react-icons/md"
 
-export type SuccessAppWithdrawModalContentProps = {
-  b3trWithdrawAmount?: string
+export type SuccessAppBalanceModalContentContentProps = {
+  b3trAmount?: string
   b3trBalanceAfter?: string
+  isDeposit?: boolean
   txId?: string
   onClose: () => void
 }
@@ -35,12 +36,13 @@ const okHandVariants = {
 
 const MotionImage = motion(Image)
 
-export const SuccessAppWithdrawModalContent = ({
+export const SuccessAppBalanceModalContent = ({
   b3trBalanceAfter,
-  b3trWithdrawAmount,
+  b3trAmount,
+  isDeposit,
   txId,
   onClose,
-}: SuccessAppWithdrawModalContentProps) => {
+}: SuccessAppBalanceModalContentContentProps) => {
   const { t } = useTranslation()
 
   return (
@@ -54,7 +56,7 @@ export const SuccessAppWithdrawModalContent = ({
         animate="animate"
       />
       <Text style={{ fontFamily: "Instrument Sans, sans-serif" }} fontSize={28} fontWeight={700}>
-        {t("Withdrawal complete!")}
+        {isDeposit ? t("Deposit complete!") : t("Withdrawal complete!")}
       </Text>
 
       <Flex w={"full"} justifyContent={"center"} mt={6}>
@@ -74,16 +76,16 @@ export const SuccessAppWithdrawModalContent = ({
       </Flex>
 
       <VStack w="full" mt={8}>
-        {Number(b3trWithdrawAmount) >= 0 && (
+        {Number(b3trAmount) >= 0 && (
           <HStack w="full" bg={"#F8F8F8"} borderRadius={8} p={4} justifyContent={"space-between"}>
             <Text fontSize={16} fontWeight={400}>
-              {t("You withdrew")}
+              {isDeposit ? t("You deposited") : t("You withdrew")}
             </Text>
 
             <HStack>
               <Image src={"/images/logo/b3tr_logo_dark.svg"} boxSize={"20px"} alt="B3TR Icon" />
               <Text fontSize={20} fontWeight={700} style={{ fontFamily: "Instrument Sans, sans-serif" }}>
-                {compactFormatter.format(Number(b3trWithdrawAmount))}
+                {compactFormatter.format(Number(b3trAmount))}
               </Text>
             </HStack>
           </HStack>
