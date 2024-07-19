@@ -48,6 +48,8 @@ export const AppVotesHorizontalChart = ({
 
   const { data: roundVotes, isLoading: roundVotesLoading } = useVotesInRound(roundId, showTotalVoters)
 
+  const votersLoading = roundVotesLoading || roundVotes === undefined
+
   const appVoters = useMemo(() => {
     return (
       roundVotes?.filter(vote => {
@@ -84,7 +86,7 @@ export const AppVotesHorizontalChart = ({
                 })}
               </Heading>
               {showTotalVoters && (
-                <Skeleton isLoaded={!roundVotesLoading}>
+                <Skeleton isLoaded={!votersLoading}>
                   <Text fontSize={["12px"]} fontWeight={400} color="#6A6A6A">
                     {`${appVoters} ${t("voters")}`}
                   </Text>

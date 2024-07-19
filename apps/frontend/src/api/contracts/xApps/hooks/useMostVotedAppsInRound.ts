@@ -26,20 +26,20 @@ export const useMostVotedAppsInRound = (roundId: string) => {
   const { data: allXApps } = useXApps()
   const apps = roundId === "0" ? allXApps : roundXApps
 
-  const xAppsVotes = useXAppsVotesQf(apps?.map(app => app.id) ?? [], roundId)
-  const queriesLoading = xAppsVotes.some(query => query.isLoading)
+  const { data: xAppsVotes, isLoading: xAppsVotesLoading } = useXAppsVotesQf(apps?.map(app => app.id) ?? [], roundId)
 
   return useQuery({
     queryKey: getMostVotedAppsInRoundQueryKey(roundId),
     queryFn: async (): Promise<MostVotedAppsInRoundReturnType[]> => {
+      if (!xAppsVotes || !apps) return []
       return xAppsVotes
-        .map(app => ({
-          votes: app.data?.votes ?? "0",
-          id: apps?.find(xa => xa.id === app.data?.app)?.id ?? "",
-          app: apps?.find(xa => xa.id === app.data?.app) ?? ({} as XApp),
+        .map(appVotes => ({
+          votes: appVotes.votes ?? "0",
+          id: apps?.find(xa => xa.id === appVotes.app)?.id ?? "",
+          app: apps?.find(xa => xa.id === appVotes.app) ?? ({} as XApp),
         }))
         .sort((a, b) => Number(b.votes) - Number(a.votes))
     },
-    enabled: !queriesLoading && !!roundId && !!apps && !!xAppsVotes,
+    enabled: !xAppsVotesLoading && !!roundId && !!apps && !!xAppsVotes,
   })
 }
