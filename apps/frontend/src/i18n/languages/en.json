@@ -135,6 +135,7 @@
   "NEW admin address": "NEW admin address",
   "Moderator already present": "Moderator already present",
   "Delete {{address}} as moderator?": "Delete {{address}} as moderator?",
+  "Delete {{address}} as reward distributor?": "Delete {{address}} as reward distributor?",
   "The user will not be able to access the app edition mode anymore.": "The user will not be able to access the app edition mode anymore.",
   "Yes, remove": "Yes, remove",
   "Change admin address": "Change admin address",
@@ -372,7 +373,7 @@
   "Transaction successful!": "Transaction successful!",
   "The transaction has been confirmed. This window will close in a few seconds.": "The transaction has been confirmed. This window will close in a few seconds.",
   "Something went wrong!": "Something went wrong!",
-  " you’ll have. Use it to vote on proposals and allocation rounds.": " you’ll have. Use it to vote on proposals and",
+  " you’ll have. Use it to vote on proposals and allocation rounds.": " you’ll have. Use it to vote on proposals and allocation rounds.",
   "allocation rounds.": "allocation rounds.",
   "The maximum amount of VOT3 you can convert is ": "The maximum amount of VOT3 you can convert is ",
   ". You can’t": ". You can’t",
@@ -601,5 +602,12 @@
   "App current B3TR Balance": "App current B3TR Balance",
   "Send B3TR tokens from the connected account to the app, and use them for rewards distribution.": "Send B3TR tokens from the connected account to the app, and use them for rewards distribution.",
   "Deposit B3TR to your app": "Deposit B3TR to your app",
-  "Deposit": "Deposit"
+  "Deposit": "Deposit",
+  "Reward distributors": "Reward distributors",
+  "These addresses will be able to distribute rewards to users using your app balance and withdraw funds from the app.": "These addresses will be able to distribute rewards to users using your app balance and withdraw funds from the app.",
+  "This address won't be able to distribute rewards anymore.": "This address won't be able to distribute rewards anymore.",
+  "Add a new reward distributor": "Add a new reward distributor",
+  "Contract or wallet address": "Contract or wallet address",
+  "Rewards distributor already present": "Rewards distributor already present",
+  "Add distributor": "Add distributor"
 }
