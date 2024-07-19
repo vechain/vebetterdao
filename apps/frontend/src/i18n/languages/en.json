@@ -590,5 +590,16 @@
   "Error claiming": "Error claiming",
   "Claiming rewards...": "Claiming rewards...",
   "Votes for": "Votes for",
-  "Abstained": "Abstained"
+  "Abstained": "Abstained",
+  "Deposit all": "Deposit all",
+  "Deposit now": "Deposit now",
+  "You'll deposit": "You'll deposit",
+  "Deposit complete!": "Deposit complete!",
+  "You deposited": "You deposited",
+  "Deposit completed!": "Deposit completed!",
+  "Error depositing": "Error depositing",
+  "App current B3TR Balance": "App current B3TR Balance",
+  "Send B3TR tokens from the connected account to the app, and use them for rewards distribution.": "Send B3TR tokens from the connected account to the app, and use them for rewards distribution.",
+  "Deposit B3TR to your app": "Deposit B3TR to your app",
+  "Deposit": "Deposit"
 }

@@ -12,24 +12,23 @@ import {
   Image,
   Skeleton,
   Icon,
-  Select,
 } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
-import { useWithdrawAppBalance } from "@/hooks"
+import { useDepositToAppBalance } from "@/hooks"
 import { Controller, useForm } from "react-hook-form"
 import { TransactionModal, CustomModalContent } from "@/components"
 import BigNumber from "bignumber.js"
 import { useTranslation } from "react-i18next"
 import { motion } from "framer-motion"
 import { useAppBalance } from "@/api/contracts/x2EarnRewardsPool"
-import { TeamWalletAddress } from "./components/TeamWalletAddress"
-import { IoWalletOutline } from "react-icons/io5"
+import { IoAddCircleOutline } from "react-icons/io5"
 import { FormattingUtils } from "@repo/utils"
-import { WithdrawPercentageSelectorButtons } from "./components/WithdrawPercentageSelectorButtons"
+import { useB3trBalance } from "@/api"
+import { useWallet } from "@vechain/dapp-kit-react"
+import { DepositPercentageSelectorButtons } from "./components/DepositPercentageSelectorButtons"
 
 export type Props = {
   appId: string
-  teamWalletAddress: string
   isOpen: boolean
   onClose: () => void
 }
@@ -55,28 +54,34 @@ const layoutTransition = {
   damping: 24,
 }
 
-export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Props) => {
+export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
+  const { account } = useWallet()
 
-  const { data: availableB3trToWithdraw, isLoading: isBalanceLoading } = useAppBalance(appId)
-  const availableB3trToWithdrawScaled = useMemo(() => {
-    return availableB3trToWithdraw?.scaled ?? "0"
-  }, [availableB3trToWithdraw?.scaled])
+  const { data: availableBalanceToDeposit } = useB3trBalance(account ?? "")
 
-  const formData = useForm<{ amount: string; reason: string }>({
+  const { data: appBalance, isLoading: isAppBalanceLoading } = useAppBalance(appId)
+
+  const appBalanceScaled = useMemo(() => {
+    return appBalance?.scaled ?? "0"
+  }, [appBalance?.scaled])
+
+  const availableB3trToDepositScaled = useMemo(() => {
+    return availableBalanceToDeposit?.scaled ?? "0"
+  }, [availableBalanceToDeposit?.scaled])
+
+  const formData = useForm<{ amount: string }>({
     defaultValues: {
       amount: "",
-      reason: "",
     },
   })
   const { watch, setValue, control } = formData
-  const reason = watch("reason")
   const amount = watch("amount")
   const invalidAmount = useMemo(() => Number(amount) === 0 || isNaN(Number(amount)), [amount])
 
-  const b3trBalanceAfterSwap = useMemo(() => {
-    return new BigNumber(availableB3trToWithdrawScaled).minus(amount).toString()
-  }, [availableB3trToWithdrawScaled, amount])
+  const appBalanceAfterSwap = useMemo(() => {
+    return new BigNumber(appBalanceScaled).plus(amount).toString()
+  }, [appBalanceScaled, amount])
 
   const filterAmount = useCallback(
     (text: string) => {
@@ -86,18 +91,17 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
         .replace(/\.(?=.*\.)/g, "") // Filter out duplicate decimal separators
         .replace(/(\.\d{18})\d+/, "$1") // remove digits after 18th decimal
 
-      if (Number(filteredAmount) > Number(availableB3trToWithdrawScaled)) {
-        return availableB3trToWithdrawScaled
+      if (Number(filteredAmount) > Number(availableB3trToDepositScaled)) {
+        return availableB3trToDepositScaled
       }
       return filteredAmount
     },
-    [availableB3trToWithdrawScaled],
+    [availableB3trToDepositScaled],
   )
 
-  const { sendTransaction, resetStatus, status, error, txReceipt, sendTransactionTx } = useWithdrawAppBalance({
+  const { sendTransaction, resetStatus, status, error, txReceipt, sendTransactionTx } = useDepositToAppBalance({
     appId,
     amount,
-    reason,
   })
 
   const handleWithdraw = useCallback(() => {
@@ -109,7 +113,6 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
     resetStatus()
     onClose()
     setValue("amount", "")
-    setValue("reason", "")
   }, [resetStatus, onClose, setValue])
 
   const amountInput = useMemo(() => {
@@ -134,25 +137,6 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
     )
   }, [filterAmount, control])
 
-  const reasonInput = useMemo(() => {
-    return (
-      <Controller
-        name="reason"
-        control={control}
-        render={({ field: { onChange } }) => (
-          <Select placeholder="Select a withdraw reason" onChange={e => onChange(e.target.value)}>
-            <option value="Team allocation share">{t("Team allocation share")}</option>
-            <option value="Marketing">{t("Marketing")}</option>
-            <option value="Development">{t("Development")}</option>
-            <option value="Reward distribution">{t("Reward distribution")}</option>
-            <option value="Community airdrop">{t("Community airdrop")}</option>
-            <option value="Reason not specified">{t("Other")}</option>
-          </Select>
-        )}
-      />
-    )
-  }, [control, t])
-
   const renderCardContent = useCallback(() => {
     return (
       <form onSubmit={formData.handleSubmit(handleWithdraw)}>
@@ -160,43 +144,28 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
         <VStack align={"flex-start"} maxW={["450px", "590px"]} px={{ base: 0, md: 4 }}>
           <HStack>
             <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
-              {t("Withdraw from your balance")}
+              {t("Deposit B3TR to your app")}
             </Text>
           </HStack>
           <Text fontSize={{ base: 14, md: 16 }} fontWeight={400} opacity={0.7}>
-            {t("Send your app’s funds received from allocations to your team wallet address.")}
+            {t("Send B3TR tokens from the connected account to the app, and use them for rewards distribution.")}
           </Text>
 
           <VStack bg={"#E5EEFF"} py={{ base: 3, md: 4 }} px={6} h="full" w="full" borderRadius={"2xl"}>
             <HStack>
-              <Skeleton isLoaded={!isBalanceLoading}>
+              <Skeleton isLoaded={!isAppBalanceLoading}>
                 <Text fontSize={{ base: "2xl", md: "xl" }} fontWeight={"500"}>
-                  {FormattingUtils.humanNumber(Number(availableB3trToWithdrawScaled))}
+                  {FormattingUtils.humanNumber(Number(appBalanceScaled))}
                 </Text>
               </Skeleton>
             </HStack>
 
             <Text fontSize="12px" fontWeight="400" opacity={0.7}>
-              {t("Current B3TR Balance")}
+              {t("App current B3TR Balance")}
             </Text>
           </VStack>
 
           <motion.div initial="initial" animate="animate" variants={containerVariants} style={{ width: "100%" }}>
-            <motion.div layout transition={layoutTransition}>
-              <VStack py={3} h="full" w="full" align="flex-start" spacing={12}>
-                <HStack align={"stretch"} justify={"stretch"} spacing={4} w="full">
-                  <VStack justify="stretch" flex={1} gap={2}>
-                    <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
-                      <Text fontSize={14} fontWeight={400}>
-                        {t("Withdraw reason")}
-                      </Text>
-                    </HStack>
-                    <HStack w="full">{reasonInput}</HStack>
-                  </VStack>
-                </HStack>
-              </VStack>
-            </motion.div>
-
             <motion.div layout transition={layoutTransition}>
               <VStack
                 py={3}
@@ -210,7 +179,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
                   <VStack justify="stretch" flex={1} gap={1}>
                     <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
                       <Text fontSize={14} fontWeight={400}>
-                        {t("You'll withdraw")}
+                        {t("You'll deposit")}
                       </Text>
                     </HStack>
                     <HStack w="full">
@@ -227,9 +196,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
             </motion.div>
           </motion.div>
 
-          <WithdrawPercentageSelectorButtons availableAmount={availableB3trToWithdrawScaled} setValue={setValue} />
-
-          <TeamWalletAddress teamWalletAddress={teamWalletAddress} />
+          <DepositPercentageSelectorButtons availableAmount={availableB3trToDepositScaled} setValue={setValue} />
 
           <Button
             mt={2}
@@ -237,10 +204,10 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
             variant={"primaryAction"}
             w={"full"}
             rounded={"full"}
-            isDisabled={invalidAmount || reason.length === 0}
+            isDisabled={invalidAmount}
             size={"lg"}>
-            <Icon as={IoWalletOutline} mr={2} />
-            <Text fontSize={{ base: 14, md: 18 }}>{t("Withdraw now")}</Text>
+            <Icon as={IoAddCircleOutline} mr={2} />
+            <Text fontSize={{ base: 14, md: 18 }}>{t("Deposit now")}</Text>
           </Button>
         </VStack>
       </form>
@@ -249,14 +216,12 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
     formData,
     handleWithdraw,
     invalidAmount,
-    availableB3trToWithdrawScaled,
+    availableB3trToDepositScaled,
     t,
     amountInput,
-    isBalanceLoading,
-    teamWalletAddress,
-    reasonInput,
-    reason,
     setValue,
+    appBalanceScaled,
+    isAppBalanceLoading,
   ])
 
   if (status !== "ready")
@@ -264,19 +229,19 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        successTitle={t("Withdraw completed!")}
+        successTitle={t("Deposit completed!")}
         status={error ? "error" : status}
         errorDescription={error?.reason}
-        errorTitle={error ? t("Error withdrawing") : undefined}
+        errorTitle={error ? t("Error depositing") : undefined}
         showTryAgainButton
         onTryAgain={handleWithdraw}
-        pendingTitle={t("Withdrawing...")}
+        pendingTitle={t("Depositing...")}
         showExplorerButton
-        isAppWithdraw
+        isAppDeposit
         txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
         b3trAmount={amount}
-        b3trBalanceAfterSwap={b3trBalanceAfterSwap}
-        b3trBalance={availableB3trToWithdrawScaled}
+        b3trBalanceAfterSwap={appBalanceAfterSwap}
+        b3trBalance={appBalanceScaled}
       />
     )
 
