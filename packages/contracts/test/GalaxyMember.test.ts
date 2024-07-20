@@ -1148,6 +1148,85 @@ describe("Galaxy Member", () => {
 
       await expect(galaxyMember.connect(owner).burn(1)).to.be.reverted // Owner cannot burn a token he doesn't own
     })
+
+    it("Should be able to transfer NFT approved on behalf of owner", async () => {
+      const { galaxyMember, owner, otherAccount, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(owner)
+
+      await galaxyMember.connect(owner).freeMint()
+
+      await galaxyMember.connect(owner).burn(0)
+
+      await galaxyMember.connect(owner).freeMint()
+
+      await galaxyMember.connect(owner).approve(await otherAccount.getAddress(), 1)
+
+      await galaxyMember
+        .connect(otherAccount)
+        .transferFrom(await owner.getAddress(), await otherAccounts[0].getAddress(), 1)
+
+      expect(await galaxyMember.getSelectedTokenId(await owner.getAddress())).to.equal(0) // No selected token
+
+      expect(await galaxyMember.balanceOf(await otherAccounts[0].getAddress())).to.equal(1) // Other accounts [0] has 1 NFT
+      expect(await galaxyMember.balanceOf(await owner.getAddress())).to.equal(0) // Owner has 0 NFTs
+
+      expect(await galaxyMember.ownerOf(1)).to.equal(await otherAccounts[0].getAddress()) // Owner of the first NFT is the otherAccounts[0]
+
+      expect(await galaxyMember.totalSupply()).to.equal(1) // Total supply is 1
+
+      expect(await galaxyMember.levelOf(1)).to.equal(1) // Level 1
+
+      expect(await galaxyMember.tokenByIndex(0)).to.equal(1) // Token ID of the first NFT is 1
+
+      expect(await galaxyMember.tokenOfOwnerByIndex(await otherAccounts[0].getAddress(), 0)).to.equal(1) // Token ID of the first NFT owned by otherAccounts[0] is 1
+
+      // Now let's mint two other NFTs and transfer one, asserting that the next one is selected
+      await galaxyMember.connect(owner).freeMint() // Token id 2
+      await galaxyMember.connect(owner).freeMint() // Token id 3ù
+      await galaxyMember.connect(owner).burn(3)
+      await galaxyMember.connect(owner).freeMint() // Token id 4
+
+      await galaxyMember.connect(owner).approve(await otherAccount.getAddress(), 2)
+
+      expect(await galaxyMember.getSelectedTokenId(await owner.getAddress())).to.equal(2) // Selected token is 2
+
+      await galaxyMember
+        .connect(otherAccount)
+        .transferFrom(await owner.getAddress(), await otherAccounts[0].getAddress(), 2)
+
+      expect(await galaxyMember.getSelectedTokenId(await owner.getAddress())).to.equal(4) // Selected token is 4 (next one). Token 3 was burnt
+
+      await galaxyMember.connect(owner).approve(await otherAccount.getAddress(), 4)
+
+      await galaxyMember
+        .connect(otherAccount)
+        .transferFrom(await owner.getAddress(), await otherAccounts[0].getAddress(), 4)
+
+      expect(await galaxyMember.getSelectedTokenId(await owner.getAddress())).to.equal(0) // Selected token is 0
+
+      expect(await galaxyMember.balanceOf(await otherAccounts[0].getAddress())).to.equal(3) // Other accounts [0] has 3 NFTs
+
+      // Can transfer to self
+      await galaxyMember
+        .connect(otherAccounts[0])
+        .transferFrom(await otherAccounts[0].getAddress(), await otherAccounts[0].getAddress(), 1)
+
+      // Can transfer to self through approval
+      await galaxyMember.connect(otherAccounts[0]).approve(await owner.getAddress(), 1)
+      await galaxyMember
+        .connect(owner)
+        .transferFrom(await otherAccounts[0].getAddress(), await otherAccounts[0].getAddress(), 1)
+
+      expect(await galaxyMember.balanceOf(await otherAccounts[0].getAddress())).to.equal(3) // Other accounts [0] has 3 NFTs
+      expect(await galaxyMember.getSelectedTokenId(await otherAccounts[0].getAddress())).to.equal(1) // Nothing changed from the transfers to self, selected token is still 1
+    })
   })
 
   describe("Token Selection", () => {
