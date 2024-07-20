@@ -608,23 +608,25 @@ contract GalaxyMemberV2 is
   {
     require(getNodeIdAttached(tokenId) == 0, "GalaxyMember: token attached to a node, detach before transfer");
 
-    address from = super._update(to, tokenId, auth);
+    address _previousOwner = super._update(to, tokenId, auth);
 
     // If the owner has no tokens, don't select any token
-    if (auth != address(0) && balanceOf(auth) == 0) {
-      delete _getGalaxyMemberStorageV2()._selectedTokenID[auth];
+    if (_previousOwner != address(0) && balanceOf(_previousOwner) == 0) {
+      delete _getGalaxyMemberStorageV2()._selectedTokenID[_previousOwner];
     }
 
     // If the owner transfers out the selected token, select the first token he owns
-    if (auth != address(0) && getSelectedTokenId(auth) == tokenId && balanceOf(auth) > 0) {
-      _select(auth, tokenOfOwnerByIndex(auth, 0));
+    if (
+      _previousOwner != address(0) && getSelectedTokenId(_previousOwner) == tokenId && balanceOf(_previousOwner) > 0
+    ) {
+      _select(_previousOwner, tokenOfOwnerByIndex(_previousOwner, 0));
     }
 
     if (to != address(0) && balanceOf(to) == 1) {
       _select(to, tokenOfOwnerByIndex(to, 0));
     }
 
-    return from;
+    return _previousOwner;
   }
 
   /// @dev Overrides the _increaseBalance for ERC721Upgradeable and ERC721EnumerableUpgradeable
