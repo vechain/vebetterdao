@@ -17,6 +17,9 @@ import { AppConfig } from "."
   "x2EarnAppsContractAddress": "0xfe6504649E3f443bf6108Fd7aa83960397383327",
   "x2EarnRewardsPoolContractAddress": "0xB9e8bfE2030e58785846F10122741331A1F178ad",
   "mixPanelProjectToken": "e03f4f5f6a753dae2dac30a69dfe21f7",
+  "datadogApplicationId": "3b19a7c7-f03e-4c05-a83b-3b65d2ed489a",
+  "datadogClientToken": "pubee6e38c5c006c10df697133757276b99",
+  "datadogEnv": "solo-staging",
   "nodeUrl": "https://thor-solo.dev.b3tr.vechain.org",
   "network": {
     "id": "solo-staging",

@@ -25,6 +25,9 @@ export type AppConfig = {
   x2EarnRewardsPoolContractAddress: string
   nodeUrl: string
   network: Network
+  datadogApplicationId: string
+  datadogClientToken: string
+  datadogEnv?: string
 }
 
 export const getConfig = (env?: EnvConfig): AppConfig => {

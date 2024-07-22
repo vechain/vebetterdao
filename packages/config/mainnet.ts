@@ -18,6 +18,9 @@ const config: AppConfig = {
   treasuryContractAddress: "0xD5903BCc66e439c753e525F8AF2FeC7be2429593",
   x2EarnAppsContractAddress: "0x8392B7CCc763dB03b47afcD8E8f5e24F9cf0554D",
   x2EarnRewardsPoolContractAddress: "0x6Bee7DDab6c99d5B2Af0554EaEA484CE18F52631",
+  datadogApplicationId: "3b19a7c7-f03e-4c05-a83b-3b65d2ed489a",
+  datadogClientToken: "pubee6e38c5c006c10df697133757276b99",
+  datadogEnv: "mainnet",
   nodeUrl: "https://mainnet.vechain.org",
   network: {
     id: "main",
