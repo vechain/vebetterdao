@@ -284,7 +284,7 @@
   "This round is ended.": "Denna runda är slut.",
   "This proposal won’t reach enough support and it was canceled.": "Detta förslag kommer inte att få tillräckligt stöd och det annullerades.",
   "Timeline": "Tidslinje",
-  "To aim for the equality and quality of the voting process, we use quadratic voting coso, which divide your total amount of VOT3 for the square root.": "För att sikta på jämlikhet och kvalitet i röstningsprocessen använder vi kvadratisk röstning coso, som delar din totala mängd VOT3 med kvadratroten.",
+  "To aim for the equality and quality of the voting process, we use quadratic voting, which divide your total amount of VOT3 for the square root.": "För att sikta på jämlikhet och kvalitet i röstningsprocessen använder vi kvadratisk röstning coso, som delar din totala mängd VOT3 med kvadratroten.",
   "V3": "V3",
   "Name must be at least 3 characters": "Namnet måste vara minst 3 tecken",
   "Description must be at least 20 characters": "Beskrivningen måste vara minst 20 tecken",
