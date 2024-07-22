@@ -1,20 +1,22 @@
+// SPDX-License-Identifier: MIT
+
 // Copyright (c) 2018 The VeChainThor developers
 
 // Distributed under the GNU Lesser General Public License v3.0 software license, see the accompanying
 // file LICENSE or <https://www.gnu.org/licenses/lgpl-3.0.html>
 
-pragma solidity ^0.4.24;
+pragma solidity ^0.8.20;
 
 import "./XAccessControl.sol";
 import "./auction/ClockAuction.sol";
 
-contract IEnergy {
-    function transfer(address _to, uint256 _amount) external;
+abstract contract IEnergy {
+    function transfer(address _to, uint256 _amount) external virtual;
 }
 
 contract ThunderFactory is XAccessControl {
 
-    IEnergy constant Energy = IEnergy(uint160(bytes6("Energy")));
+    IEnergy constant Energy = IEnergy(0x0000000000000000000000000000456E65726779);
 
     /// @dev The address of the ClockAuction contract that handles sales of xtoken
     ClockAuction public saleAuction;
@@ -82,7 +84,7 @@ contract ThunderFactory is XAccessControl {
     event LevelChanged(uint256 indexed _tokenId, address indexed _owner, strengthLevel _fromLevel, strengthLevel _toLevel);
     event AuctionCancelled(uint256 indexed _auctionId, uint256 indexed _tokenId);
     
-    constructor() public {
+    constructor() {
         // the index of valid tokens should start from 1
         tokens.push(Token(0, 0, false, strengthLevel.None, 0));
         
@@ -153,7 +155,7 @@ contract ThunderFactory is XAccessControl {
         require(msg.sender.balance >= strengthParams[uint8(_toLvl)].minBalance, "insufficient balance");
 
         token.onUpgrade = true;
-        token.updatedAt = uint64(now);
+        token.updatedAt = uint64(block.timestamp);
         
         emit NewUpgradeApply(_tokenId, msg.sender, _toLvl, uint64(block.timestamp), uint64(block.number));
     }
@@ -176,7 +178,7 @@ contract ThunderFactory is XAccessControl {
             _destroy(_tokenId);
         } else {
             token.onUpgrade = false;
-            token.updatedAt = uint64(now);
+            token.updatedAt = uint64(block.timestamp);
         }
 
         emit CancelUpgrade(_tokenId, _owner);
@@ -220,7 +222,7 @@ contract ThunderFactory is XAccessControl {
             _exist(_tokenId)
             && !tokens[_tokenId].onUpgrade
             && !blackList[idToOwner[_tokenId]] // token not in black list
-            && now > (tokens[_tokenId].lastTransferTime + transferCooldown);
+            && block.timestamp > (tokens[_tokenId].lastTransferTime + transferCooldown);
     }
 
     /// Admin Methods
@@ -258,7 +260,7 @@ contract ThunderFactory is XAccessControl {
         onlyOperator
     {
         require(tokens[_tokenId].level > _toLvl, "invalid level");
-        require(now > (tokens[_tokenId].lastTransferTime + leadTime), "cannot downgrade token");
+        require(block.timestamp > (tokens[_tokenId].lastTransferTime + leadTime), "cannot downgrade token");
 
         if (saleAuction.isOnAuction(_tokenId)) {
             _cancelAuction(_tokenId);
@@ -271,7 +273,7 @@ contract ThunderFactory is XAccessControl {
     }
 
     /// @dev Adds a new token and stores it. This method should be called 
-    ///      when the input data is known to be valid and will generate a Transfer event.
+    ///      when the input data is block.timestampn to be valid and will generate a Transfer event.
     function addToken(address _addr, strengthLevel _lvl, bool _onUpgrade, uint64 _applyUpgradeTime, uint64 _applyUpgradeBlockno)
         external
         onlyOperator
@@ -305,16 +307,17 @@ contract ThunderFactory is XAccessControl {
     /// Internal Methods
 
     function _add(address _owner, strengthLevel _lvl, bool _onUpgrade)
-        internal
-        returns(uint256)
+    internal
+    returns(uint256)
     {
-        Token memory _token = Token(uint64(now), uint64(now), _onUpgrade, _lvl, uint64(now));
-        uint256 _newTokenId = tokens.push(_token) - 1;
+        Token memory _token = Token(uint64(block.timestamp), uint64(block.timestamp), _onUpgrade, _lvl, uint64(block.timestamp));
+        tokens.push(_token); // Push the token to the array
+        uint256 _newTokenId = tokens.length - 1; // Get the index of the new token, which is the length of the array minus one
 
         ownerToId[_owner] = _newTokenId;
         idToOwner[_newTokenId] = _owner;
 
-        emit Transfer(0, _owner, _newTokenId);
+        emit Transfer(address(0), _owner, _newTokenId); // Emit a Transfer event indicating a new token creation
 
         return _newTokenId;
     }
@@ -327,7 +330,7 @@ contract ThunderFactory is XAccessControl {
         delete ownerToId[_owner];
         delete tokens[_tokenId];
         // 
-        emit Transfer(_owner, 0, _tokenId);
+        emit Transfer(_owner, address(0), _tokenId);
     }
 
     function _levelChange(uint256 _tokenId, strengthLevel _toLvl)
@@ -341,7 +344,7 @@ contract ThunderFactory is XAccessControl {
             _destroy(_tokenId);
         } else {
             token.level = _toLvl;
-            token.updatedAt = uint64(now);
+            token.updatedAt = uint64(block.timestamp);
         }
 
         // Update token counter

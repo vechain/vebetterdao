@@ -1,9 +1,11 @@
+// SPDX-License-Identifier: MIT
+
 // Copyright (c) 2018 The VeChainThor developers
 
 // Distributed under the GNU Lesser General Public License v3.0 software license, see the accompanying
 // file LICENSE or <https://www.gnu.org/licenses/lgpl-3.0.html>
 
-pragma solidity ^0.4.24;
+pragma solidity ^0.8.20;
 
 import "../utility/Pausable.sol";
 import "../utility/SafeMath.sol";
@@ -14,7 +16,7 @@ contract ClockAuctionBase is Pausable {
 
     struct Auction {
         uint256 auctionId;
-        address seller;
+        address payable seller;
         uint128 startingPrice;
         uint128 endingPrice;
         uint64 duration;
@@ -30,7 +32,7 @@ contract ClockAuctionBase is Pausable {
     IVIP181 public VIP181;
 
     // The address of storing service fee
-    address public feePool;
+    address payable public feePool;
     uint8 public feePercnt = 0; // 0%
 
     // Mapping from tokenId to auction struct
@@ -42,7 +44,7 @@ contract ClockAuctionBase is Pausable {
     event FeePoolAddressUpdated(address _newFeePoolAddr);
     event FeePercentUpdated(uint8 _newPercent);
 
-    function setFeePoolAddress(address _newFeePoolAddr)
+    function setFeePoolAddress(address payable _newFeePoolAddr)
         public
         onlyOwner
     {
@@ -70,7 +72,7 @@ contract ClockAuctionBase is Pausable {
         uint128 _endingPrice,
         uint64 _duration,
         uint64 _startedAt,
-        address _seller
+        address payable _seller
     )
         internal
     {
@@ -87,7 +89,7 @@ contract ClockAuctionBase is Pausable {
     }
 
     /// @dev Computes the price and transfers winnings. Does NOT transfer ownership of token.
-    function _bid(address _buyer, uint256 _tokenId, uint256 _bidAmount)
+    function _bid(address payable _buyer, uint256 _tokenId, uint256 _bidAmount)
         internal
         returns (uint256)
     {
@@ -97,7 +99,7 @@ contract ClockAuctionBase is Pausable {
         uint256 price = _currentPrice(auction);
         require(_bidAmount >= price, "purchase failed");
 
-        address _seller = auction.seller;
+        address payable _seller = auction.seller;
 
         // Remove auction before sending the fees to the sender to avoid the reentrancy attack.
         _cancelAuction(_tokenId);
@@ -137,7 +139,7 @@ contract ClockAuctionBase is Pausable {
         view
         returns (uint256)
     {
-        uint64 secondsPassed = uint64(now) - _auction.startedAt;
+        uint64 secondsPassed = uint64(block.timestamp) - _auction.startedAt;
 
         if (secondsPassed >= _auction.duration) {
             // auction has expired then return the end price.
@@ -146,13 +148,13 @@ contract ClockAuctionBase is Pausable {
 
         // Count the times of price-change.
         // The price of auction will change per 300s
-        int256 changeTimes = (int256(secondsPassed) - 1) / 300;
+        uint256 changeTimes = (uint256(secondsPassed) - 1) / 300;
         // The total price-change times 
-        int256 totalTimes = (int256(_auction.duration) - 1) / 300;
+        uint256 totalTimes = (uint256(_auction.duration) - 1) / 300;
         // The amount of every change
-        int256 perTimesChange = (int256(_auction.endingPrice) - int256(_auction.startingPrice)) / totalTimes;
+        uint256 perTimesChange = (uint256(_auction.endingPrice) - uint256(_auction.startingPrice)) / totalTimes;
     
-        return uint256(int256(_auction.startingPrice) + changeTimes * perTimesChange);
+        return uint256(uint256(_auction.startingPrice) + changeTimes * perTimesChange);
     }
 
 }

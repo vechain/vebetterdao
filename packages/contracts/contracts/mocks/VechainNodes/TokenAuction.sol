@@ -1,9 +1,11 @@
+// SPDX-License-Identifier: MIT
+
 // Copyright (c) 2018 The VeChainThor developers
 
 // Distributed under the GNU Lesser General Public License v3.0 software license, see the accompanying
 // file LICENSE or <https://www.gnu.org/licenses/lgpl-3.0.html>
 
-pragma solidity ^0.4.24;
+pragma solidity ^0.8.20;
 
 import "./XOwnership.sol";
 import "./auction/ClockAuction.sol";
@@ -60,7 +62,7 @@ contract TokenAuction is XOwnership {
         require(!tokens[_tokenId].onUpgrade, "cancel upgrading first");
 
         // Does some ownership trickery to create auctions in one tx.
-        _approve(_tokenId, saleAuction);
+        _approve(_tokenId, address(saleAuction));
 
         auctionCount = auctionCount.add(1);
         // If token is already on any auction, this will throw
@@ -70,7 +72,7 @@ contract TokenAuction is XOwnership {
             _startingPrice,
             _endingPrice,
             _duration,
-            uint64(now),
+            uint64(block.timestamp),
             msg.sender
         );
 
@@ -98,7 +100,7 @@ contract TokenAuction is XOwnership {
         require(!tokens[_tokenId].onUpgrade, "cancel upgrading first");
 
         // Does some ownership trickery to create auctions in one tx.
-        _approve(_tokenId, saleAuction);
+        _approve(_tokenId, address(saleAuction));
 
         auctionCount = auctionCount.add(1);
         
@@ -109,7 +111,7 @@ contract TokenAuction is XOwnership {
             _price,
             _price,
             _duration,
-            uint64(now),
+            uint64(block.timestamp),
             msg.sender
         );
 
@@ -136,7 +138,7 @@ contract TokenAuction is XOwnership {
         (uint256 _autionId, address _seller,,,,) = saleAuction.getAuction(_tokenId);
 
         // Will throw if the bid fails
-        uint256 _price = saleAuction.bid.value(msg.value)(msg.sender, _tokenId);
+        uint256 _price = saleAuction.bid{value: msg.value}(msg.sender, _tokenId);
 
         emit AuctionSuccessful(_autionId, _tokenId, _seller, msg.sender, _price);
     }

@@ -1,9 +1,11 @@
+// SPDX-License-Identifier: MIT
+
 // Copyright (c) 2018 The VeChainThor developers
 
 // Distributed under the GNU Lesser General Public License v3.0 software license, see the accompanying
 // file LICENSE or <https://www.gnu.org/licenses/lgpl-3.0.html>
 
-pragma solidity ^0.4.24;
+pragma solidity ^0.8.20;
 
 import "./ClockAuctionBase.sol";
 
@@ -16,12 +18,12 @@ contract ClockAuction is ClockAuctionBase {
     ///      and verifies the owner cut is in the valid range.
     /// @param _nftAddress - address of a deployed contract implementing
     ///                      the Nonfungible Interface.
-    constructor(address _nftAddress, address _feePool) public {
+    constructor(address _nftAddress, address _feePool) {
         require(_nftAddress != address(0), "invalid address");
         require(_feePool != address(0), "invalid address");
         VIP181 = IVIP181(_nftAddress);
 
-        feePool = _feePool;
+        feePool = payable(_feePool);
     }
 
     /// @dev Creates and begins a new auction.
@@ -54,7 +56,7 @@ contract ClockAuction is ClockAuctionBase {
         // remove expired auction first if exist
         _cancelAuction(_tokenId);
         // add new auction
-        _addAuction(_auctionId, _tokenId, _startingPrice, _endingPrice, _duration, _startedAt, _seller);
+        _addAuction(_auctionId, _tokenId, _startingPrice, _endingPrice, _duration, _startedAt, payable(_seller));
     }
 
     /// @dev Bids on an open auction, completing the auction and transferring
@@ -73,11 +75,11 @@ contract ClockAuction is ClockAuctionBase {
         if(hasWhiteList(_tokenId)) {
             require(inWhiteList(_tokenId, _buyer), "blocked");
         }
-
+    
         Auction storage auction = tokenIdToAuction[_tokenId];
-        address _seller = auction.seller;
+        address payable _seller = payable(auction.seller);
         // _bid will throw if the bid or funds transfer fails
-        uint256 _price = _bid(_buyer, _tokenId, msg.value);
+        uint256 _price = _bid(payable(_buyer), _tokenId, msg.value);
         
         VIP181.transferFrom(_seller, _buyer, _tokenId);
         return _price;
@@ -135,7 +137,7 @@ contract ClockAuction is ClockAuctionBase {
         returns (bool)
     {
         Auction storage _auction = tokenIdToAuction[_tokenId];
-        return _auction.startedAt > 0 && _auction.startedAt <= now && now < (_auction.startedAt + _auction.duration);
+        return _auction.startedAt > 0 && _auction.startedAt <= block.timestamp && block.timestamp < (_auction.startedAt + _auction.duration);
     }
 
     /// @dev Returns the current price of an auction.

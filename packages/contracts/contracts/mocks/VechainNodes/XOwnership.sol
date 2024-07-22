@@ -1,9 +1,11 @@
+// SPDX-License-Identifier: MIT
+
 // Copyright (c) 2018 The VeChainThor developers
 
 // Distributed under the GNU Lesser General Public License v3.0 software license, see the accompanying
 // file LICENSE or <https://www.gnu.org/licenses/lgpl-3.0.html>
 
-pragma solidity ^0.4.24;
+pragma solidity ^0.8.20;
 
 import "./utility/Strings.sol";
 import "./utility/SafeMath.sol";
@@ -23,7 +25,7 @@ contract XOwnership is ThunderFactory, IVIP181Basic, SupportsInterface {
 
     string internal tokenMetadataBaseURI = "";
 
-    constructor() public {
+    constructor() {
         // register the supported interfaces to conform to VIP181 via ERC165
         _registerInterface(InterfaceId_VIP181);
         _registerInterface(InterfaceId_VIP181Metadata);
@@ -32,7 +34,7 @@ contract XOwnership is ThunderFactory, IVIP181Basic, SupportsInterface {
     function tokenURI(uint256 _tokenId)
         external
         view
-        returns (string)
+        returns (string memory)
     {
         return Strings.strConcat(tokenMetadataBaseURI, Strings.uint2str(_tokenId));
     }
@@ -42,6 +44,7 @@ contract XOwnership is ThunderFactory, IVIP181Basic, SupportsInterface {
     /// @return uint256 representing the amount owned by the passed address
     function balanceOf(address _owner)
         public
+        override
         view
         returns (uint256)
     {
@@ -54,6 +57,7 @@ contract XOwnership is ThunderFactory, IVIP181Basic, SupportsInterface {
     /// @return owner address currently marked as the owner of the given token ID
     function ownerOf(uint256 _tokenId)
         public
+        override
         view
         returns (address)
     {
@@ -68,7 +72,7 @@ contract XOwnership is ThunderFactory, IVIP181Basic, SupportsInterface {
         return uint256(normalTokenCount + xTokenCount);
     }
 
-    function setTokenMetadataBaseURI(string _newBaseURI)
+    function setTokenMetadataBaseURI(string memory _newBaseURI)
         external
         onlyOwner
     {
@@ -83,6 +87,7 @@ contract XOwnership is ThunderFactory, IVIP181Basic, SupportsInterface {
     /// @param _tokenId uint256 ID of the token to be approved
     function approve(address _to, uint256 _tokenId)
         public
+        override
         whenNotPaused
     {
         address _owner = ownerOf(_tokenId);
@@ -97,6 +102,7 @@ contract XOwnership is ThunderFactory, IVIP181Basic, SupportsInterface {
     /// @return address currently approved for the given token ID
     function getApproved(uint256 _tokenId)
         public
+        override
         view
         returns (address)
     {
@@ -127,6 +133,7 @@ contract XOwnership is ThunderFactory, IVIP181Basic, SupportsInterface {
     /// @param _tokenId uint256 ID of the token to be transferred
     function transferFrom(address _from, address _to, uint256 _tokenId)
         public
+        override
         whenNotPaused
     {
         require(_to != address(0), "invalid address");
@@ -183,8 +190,8 @@ contract XOwnership is ThunderFactory, IVIP181Basic, SupportsInterface {
         require(!_isContract(_to), "_to mustn't a contract");
 
         // update the token info and cooldown the token
-        tokens[_tokenId].updatedAt = uint64(now);
-        tokens[_tokenId].lastTransferTime = uint64(now);
+        tokens[_tokenId].updatedAt = uint64(block.timestamp);
+        tokens[_tokenId].lastTransferTime = uint64(block.timestamp);
 
         // transfer ownership
         delete ownerToId[_from];
