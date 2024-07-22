@@ -81,19 +81,65 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
    * the team allocation percentage will be 0%.
    *
    * @param appId the id of the app
-   * @param info the app info
    *
    * Emits a {AppAdded} event.
    */
-  function _addApp(bytes32 appId, X2EarnAppsDataTypes.App memory info) internal {
+  function _addApp(bytes32 appId) internal virtual override {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
 
+    X2EarnAppsDataTypes.App memory _app = _getAppStorage(appId);
+
     // Store the new app
-    $._apps[appId] = info;
     $._appIds.push(appId);
     _setVotingEligibility(appId, true);
 
-    emit AppAdded(appId, teamWalletAddress(appId), info.name, true);
+    emit AppAdded(appId, teamWalletAddress(appId), _app.name, true);
+  }
+
+  /**
+   * @dev Create app.
+   * The id of the app is the hash of the app name.
+   * Will be pending endorsement.
+   *
+   * @param teamWalletAddress the address where the app should receive allocation funds
+   * @param admin the address of the admin
+   * @param appName the name of the app
+   * @param metadataURI the metadata URI of the app
+   *
+   * Emits a {AppPendingEndorsment} event.
+   */
+  function _registerApp(
+    address teamWalletAddress,
+    address admin,
+    string memory appName,
+    string memory metadataURI
+  ) internal {
+    if (teamWalletAddress == address(0)) {
+      revert X2EarnInvalidAddress(teamWalletAddress);
+    }
+    if (admin == address(0)) {
+      revert X2EarnInvalidAddress(admin);
+    }
+
+    bytes32 id = hashAppName(appName);
+
+    if (appExists(id)) {
+      revert X2EarnAppAlreadyExists(id);
+    }
+
+    if (appPendingEndorsment(id)) {
+      revert X2EarnAppAlreadyExists(id);
+    }
+
+    AppsStorageStorage storage $ = _getAppsStorageStorage();
+
+    // Store the new app
+    $._apps[id] = X2EarnAppsDataTypes.App(id, appName, block.timestamp);
+    _setAppAdmin(id, admin);
+    _updateTeamWalletAddress(id, teamWalletAddress);
+    _updateAppMetadata(id, metadataURI);
+    _setTeamAllocationPercentage(id, 0);
+    _setEndorsementStatus(id, false);
   }
 
   // ---------- Getters ---------- //
