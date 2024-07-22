@@ -32,15 +32,15 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.Endorsment
   struct EndorsementStorage {
     mapping(bytes32 appId => X2EarnAppsDataTypes.App apps) appsPendingEndorsements; // The pending endorsements for each app
-
-    uint245 gracePeriod; // The cooldown period for the endorsement in cycles
+    mapping(bytes32 appId => address[] endorsers) appEndorsers; // Mapping to the endorsers of an app
+    uint256 gracePeriod; // The grace period for the endorsement in cycles
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnApps.Endorsement")) - 1)) & ~bytes32(uint256(0xff))
   bytes32 private constant EndorsementStorageLocation =
     0x83b9a7e51f394efa93107c3888716138908bbbe611dfc86afa3639a826441100;
 
-  function _getEndorsementStorage() internal pure returns (ContractSettingsStorage storage $) {
+  function _getEndorsementStorage() internal pure returns (EndorsementStorage storage $) {
     assembly {
       $.slot := EndorsementStorageLocation
     }
@@ -63,15 +63,14 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   /**
    * @dev Create app.
    * The id of the app is the hash of the app name.
-   * Will be eligible for voting by default from the next round and
-   * the team allocation percentage will be 0%.
+   * Will be pending endorsement.
    *
    * @param teamWalletAddress the address where the app should receive allocation funds
    * @param admin the address of the admin
    * @param appName the name of the app
    * @param metadataURI the metadata URI of the app
    *
-   * Emits a {AppAdded} event.
+   * Emits a {AppPendingEndorsment} event.
    */
   function _registerApp(
     address teamWalletAddress,
@@ -98,34 +97,28 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     }
 
     // Store the new app
-    $.pendingEndorsements[id] = X2EarnAppsDataTypes.App(id, appName, block.timestamp);
+    $.appsPendingEndorsements[id] = X2EarnAppsDataTypes.App(id, appName, block.timestamp);
     _setAppAdmin(id, admin);
     _updateTeamWalletAddress(id, teamWalletAddress);
     _updateAppMetadata(id, metadataURI);
     _setTeamAllocationPercentage(id, 0);
 
-    emit AppPendingEndorsment(id, teamWalletAddress, appName, true);
+    emit AppPendingEndorsment(id, teamWalletAddress, appName);
   }
 
   /**
    * @dev Internal function to update the grace period.
    *
-   * @param gracePeriod The new grace period.
+   * @param _gracePeriod The new grace period.
    *
    * Emits a {GracePeriodUpdated} event.
    */
-  function _setGracePeriod(uint256 gracePeriod) internal {
+  function _setGracePeriod(uint256 _gracePeriod) internal {
     EndorsementStorage storage $ = _getEndorsementStorage();
 
-    emit GracePeriodUpdated($.gracePeriod, gracePeriod);
+    emit GracePeriodUpdated($.gracePeriod, _gracePeriod);
 
-    $.gracePeriod = gracePeriod;
-  }
-
-  function _addAppForEndorsement(bytes32 appId, X2EarnAppsDataTypes.App memory app) internal {
-    EndorsementStorage storage $ = _getEndorsementStorage();
-
-    $.appsPendingEndorsements[appId] = app;
+    $.gracePeriod = _gracePeriod;
   }
 
   // ---------- Getters ---------- //
@@ -133,8 +126,8 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   /**
    * @dev See {IX2EarnApps-gracePeriod}.
    */
-  function gracePeriod() public view virtual override returns (string memory) {
-    ContractSettingsStorage storage $ = _getContractSettingsStorage();
+  function gracePeriod() public view virtual override returns (uint256) {
+    EndorsementStorage storage $ = _getEndorsementStorage();
 
     return $.gracePeriod;
   }
@@ -143,7 +136,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @dev See {IX2EarnApps-appPendingEndorsment}.
    */
   function appPendingEndorsment(bytes32 appId) public view override returns (bool) {
-    AppsStorageStorage storage $ = _getAppsStorageStorage();
+    EndorsementStorage storage $ = _getEndorsementStorage();
 
     return $.appsPendingEndorsements[appId].createdAtTimestamp != 0;
   }

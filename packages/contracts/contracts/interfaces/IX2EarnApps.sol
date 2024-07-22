@@ -122,7 +122,12 @@ interface IX2EarnApps {
   /**
    * @dev Event fired when the grace period duration is updated.
    */
-  event GracePeriodUpdated(string oldGracePeriod, string newGracePeriod);
+  event GracePeriodUpdated(uint256 oldGracePeriod, uint256 newGracePeriod);
+
+  /**
+   * @dev Event fired when a new XApp is registered on VeBetter DAO and pending for endorsement.
+   */
+  event AppPendingEndorsment(bytes32 indexed id, address teamAddress, string name);
 
   /**
    * @dev Event fired when the team allocation percentage is updated.
@@ -135,18 +140,6 @@ interface IX2EarnApps {
    * @param name the name of the app
    */
   function hashAppName(string memory name) external pure returns (bytes32);
-
-  /**
-   * @dev Add a new app to the x2earn apps.
-   *
-   * @param teamWalletAddress the address where the app should receive allocation funds
-   * @param admin the address of the admin that will be able to manage the app and perform all administration actions
-   * @param appName the name of the app
-   * @param metadataURI the metadata URI of the app
-   *
-   * Emits a {AppAdded} event.
-   */
-  function addApp(address teamWalletAddress, address admin, string memory appName, string memory metadataURI) external;
 
   /**
    * @dev Get the app data by its id.
@@ -322,6 +315,16 @@ interface IX2EarnApps {
    * @dev return the base URI for the contract
    */
   function baseURI() external view returns (string memory);
+
+  /**
+   * @dev return the grace period for an XApp to find new endorsers after the previous one was removed.
+   */
+  function gracePeriod() external view returns (uint256);
+
+  /**
+   * @dev return true if an app is pending for endorsement.
+   */
+  function appPendingEndorsment(bytes32 appId) external view returns (bool);
 
   /**
    * @notice Get the version of the contract.

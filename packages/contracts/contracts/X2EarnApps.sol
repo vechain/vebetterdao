@@ -28,6 +28,7 @@ import { AdministrationUpgradeable } from "./x-2-earn-apps/modules/Administratio
 import { AppsStorageUpgradeable } from "./x-2-earn-apps/modules/AppsStorageUpgradeable.sol";
 import { ContractSettingsUpgradeable } from "./x-2-earn-apps/modules/ContractSettingsUpgradeable.sol";
 import { VoteEligibilityUpgradeable } from "./x-2-earn-apps/modules/VoteEligibilityUpgradeable.sol";
+import { EndorsementUpgradeable } from "./x-2-earn-apps/modules/EndorsementUpgradeable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
@@ -46,6 +47,7 @@ contract X2EarnApps is
   ContractSettingsUpgradeable,
   VoteEligibilityUpgradeable,
   AppsStorageUpgradeable,
+  EndorsementUpgradeable,
   AccessControlUpgradeable,
   UUPSUpgradeable
 {
@@ -62,6 +64,7 @@ contract X2EarnApps is
   /**
    * @notice Initialize the contract
    * @param _baseURI the base URI for the contract
+   * @param _gracePeriod the grace period to be reendorsed
    * @param _admins the addresses of the admins
    * @param _upgrader the address of the upgrader
    * @param _governor the address that will be granted the governance role
@@ -70,6 +73,7 @@ contract X2EarnApps is
    */
   function initialize(
     string memory _baseURI,
+    uint256 _gracePeriod,
     address[] memory _admins,
     address _upgrader,
     address _governor
@@ -79,6 +83,7 @@ contract X2EarnApps is
     __AppsStorage_init();
     __ContractSettings_init(_baseURI);
     __VoteEligibility_init();
+    __Endorsement_init(_gracePeriod);
     __UUPSUpgradeable_init();
     __AccessControl_init();
 
@@ -154,15 +159,15 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev See {IX2EarnApps-addApp}.
+   * @dev See {IX2EarnApps-registerApp}.
    */
-  function addApp(
+  function registerApp(
     address _teamWalletAddress,
     address _admin,
     string memory _appName,
     string memory _appMetadataURI
-  ) public onlyRole(GOVERNANCE_ROLE) {
-    _addApp(_teamWalletAddress, _admin, _appName, _appMetadataURI);
+  ) external {
+    _registerApp(_teamWalletAddress, _admin, _appName, _appMetadataURI);
   }
 
   /**

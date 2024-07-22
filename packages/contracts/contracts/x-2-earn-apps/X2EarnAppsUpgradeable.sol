@@ -105,6 +105,16 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   /**
    * @inheritdoc IX2EarnApps
    */
+  function gracePeriod() public view virtual returns (uint256);
+
+  /**
+   * @inheritdoc IX2EarnApps
+   */
+  function appPendingEndorsment(bytes32 appId) public view virtual returns (bool);
+
+  /**
+   * @inheritdoc IX2EarnApps
+   */
   function teamWalletAddress(bytes32 appId) public view virtual returns (address);
 
   /**

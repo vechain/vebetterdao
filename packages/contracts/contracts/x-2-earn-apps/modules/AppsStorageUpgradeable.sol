@@ -85,15 +85,15 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
    *
    * Emits a {AppAdded} event.
    */
-  function _addApp(bytes32 appId, X2EarnAppsDataTypes.App info) internal {
+  function _addApp(bytes32 appId, X2EarnAppsDataTypes.App memory info) internal {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
 
     // Store the new app
-    $._apps[id] = X2EarnAppsDataTypes.App(id, appName, block.timestamp);
-    $._appIds.push(id);
-    _setVotingEligibility(id, true);
+    $._apps[appId] = info;
+    $._appIds.push(appId);
+    _setVotingEligibility(appId, true);
 
-    emit AppAdded(id, teamWalletAddress, appName, true);
+    emit AppAdded(appId, teamWalletAddress(appId), info.name, true);
   }
 
   // ---------- Getters ---------- //
