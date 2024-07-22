@@ -105,11 +105,6 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   /**
    * @inheritdoc IX2EarnApps
    */
-  function gracePeriod() public view virtual returns (uint256);
-
-  /**
-   * @inheritdoc IX2EarnApps
-   */
   function appPendingEndorsment(bytes32 appId) public view virtual returns (bool);
 
   /**
@@ -166,4 +161,14 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
    * @dev Update the allocation percentage of the team.
    */
   function _setTeamAllocationPercentage(bytes32 appId, uint256 percentage) internal virtual;
+
+  /**
+   * @dev Function to set the endorsement status of an app.
+   */
+  function _setEndorsementStatus(bytes32 appId, bool status) internal virtual;
+
+  /**
+   * @dev Function to add app to the list of apps in VeBetterDAO ecosystem.
+    */
+  function _addApp(bytes32 appId) internal virtual;
 }
