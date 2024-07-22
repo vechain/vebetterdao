@@ -30,8 +30,8 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
   const communityDeposits = proposalDepositEvent.communityDeposits
   const communityDepositPercentage = (communityDeposits / depositThreshold) * 100
 
-  const totalVotes =
-    Number(proposalVotes?.abstainVotes) + Number(proposalVotes?.againstVotes) + Number(proposalVotes?.forVotes)
+  const totalVotes = Number(proposalVotes?.againstVotes) + Number(proposalVotes?.forVotes) // Abstain votes are not counted when showing the progress bar
+
   const forPercentage = (Number(proposalVotes?.forVotes) / totalVotes) * 100 || 0
 
   const againstAndAbstainPercentage = Number(totalVotes) > 0 ? 100 - forPercentage : 0
