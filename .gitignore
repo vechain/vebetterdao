@@ -162,3 +162,6 @@ lib-cov
 coverage
 !**/integrations/coverage
 .vercel
+
+**/media/media
+**/media/media.zip

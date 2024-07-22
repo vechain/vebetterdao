@@ -284,7 +284,7 @@
   "This round is ended.": "यह राउंड समाप्त हो गया है।",
   "This proposal won’t reach enough support and it was canceled.": "इस प्रस्ताव को पर्याप्त समर्थन नहीं मिलेगा और इसे रद्द कर दिया गया।",
   "Timeline": "समयरेखा",
-  "To aim for the equality and quality of the voting process, we use quadratic voting coso, which divide your total amount of VOT3 for the square root.": "मतदान प्रक्रिया की समानता और गुणवत्ता के लिए, हम यथार्थवादी मतदान विधि का उपयोग करते हैं, जो आपकी कुल VOT3 राशि को वर्गमूल से विभाजित करता है।",
+  "To aim for the equality and quality of the voting process, we use quadratic voting, which divide your total amount of VOT3 for the square root.": "मतदान प्रक्रिया की समानता और गुणवत्ता के लिए, हम यथार्थवादी मतदान विधि का उपयोग करते हैं, जो आपकी कुल VOT3 राशि को वर्गमूल से विभाजित करता है।",
   "V3": "वी3",
   "Name must be at least 3 characters": "नाम कम से कम 3 अक्षरों का होना चाहिए",
   "Description must be at least 20 characters": "विवरण कम से कम 20 अक्षरों का होना चाहिए",
