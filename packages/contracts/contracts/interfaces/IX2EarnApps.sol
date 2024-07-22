@@ -125,14 +125,19 @@ interface IX2EarnApps {
   event GracePeriodUpdated(uint256 oldGracePeriod, uint256 newGracePeriod);
 
   /**
-   * @dev Event fired when a new XApp is registered on VeBetter DAO and pending for endorsement.
+   * @dev Event fired when the app endorsement status is updated.
    */
-  event AppPendingEndorsment(bytes32 indexed id, address teamAddress, string name);
+  event AppEndorsementStatusUpdated(bytes32 indexed appId, bool endorsed);
 
   /**
    * @dev Event fired when the team allocation percentage is updated.
    */
   event TeamAllocationPercentageUpdated(bytes32 indexed appId, uint256 oldPercentage, uint256 newPercentage);
+
+  /**
+   * @dev Event fired when an app is endorsed or unendorsed by a node.
+   */
+  event AppEndorsed(bytes32 indexed id, address teamAddress, bool endorsed);
 
   /**
    * @dev Generates the hash of the app name to be used as the app id.
