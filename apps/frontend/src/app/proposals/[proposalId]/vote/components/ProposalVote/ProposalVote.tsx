@@ -132,11 +132,9 @@ export const ProposalVote = () => {
                   </Text>
                 </Stack>
                 <HStack w="full" justify="center">
-                  <Divider />
-                  <Text fontSize={"12px"} flex={1}>
-                    {t("equal to")}
-                  </Text>
-                  <Divider />
+                  <Divider flex={0.8} />
+                  <Text fontSize={"12px"}>{t("equal to")}</Text>
+                  <Divider flex={0.8} />
                 </HStack>
                 <Stack
                   spacing={[0, 0, 2]}
