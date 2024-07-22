@@ -14,6 +14,7 @@ import { getConfig } from "@repo/config"
 import "@/i18n"
 import { useEffect } from "react"
 import { t } from "i18next"
+import { datadogRum } from '@datadog/browser-rum';
 
 dayjs.extend(relativeTime)
 dayjs.extend(duration)
@@ -27,6 +28,24 @@ const FreshDeskWidget = dynamic(() => import("@/components/FreshDeskWidget").the
 
 //TODO: Is there a better place to initialise mixpanel? next/script?
 typeof window != "undefined" && mixpanelToken && AnalyticsUtils.initialise()
+
+datadogRum.init({
+    applicationId: '3b19a7c7-f03e-4c05-a83b-3b65d2ed489a',
+    clientToken: 'pubee6e38c5c006c10df697133757276b99',
+    // `site` refers to the Datadog site parameter of your organization
+    // see https://docs.datadoghq.com/getting_started/site/
+    site: 'datadoghq.eu',
+    service: 'b3tr',
+    env: 'staging',
+    // Specify a version number to identify the deployed version of your application in Datadog
+    // version: '1.0.0', 
+    sessionSampleRate: 100,
+    sessionReplaySampleRate: 20,
+    trackUserInteractions: true,
+    trackResources: true,
+    trackLongTasks: true,
+    defaultPrivacyLevel: 'mask-user-input',
+});
 
 // workaround for "@iconscout/react-unicons
 const error = console.error

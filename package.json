@@ -44,7 +44,8 @@
     "dotenv-cli": "latest",
     "husky": "^8.0.0",
     "prettier": "^3.3.0",
-    "turbo": "^1.13.3"
+    "turbo": "^1.13.3",
+    "@datadog/browser-rum": "^5.23.0"
   },
   "engines": {
     "node": ">=18"
