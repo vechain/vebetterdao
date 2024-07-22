@@ -33,6 +33,7 @@ typeof window != "undefined" && mixpanelToken && AnalyticsUtils.initialise()
 
 const datadog_app_token = getConfig().datadogApplicationId
 const datadog_client_token =  getConfig().datadogClientToken
+const datadog_env =  getConfig().datadogClientToken
 
 datadogRum.init({
     applicationId: datadog_app_token,
@@ -41,7 +42,7 @@ datadogRum.init({
     // see https://docs.datadoghq.com/getting_started/site/
     site: 'datadoghq.eu',
     service: 'b3tr',
-    env: 'b3tr',
+    env: datadog_env,
     // Specify a version number to identify the deployed version of your application in Datadog
     // version: '1.0.0', 
     sessionSampleRate: 100,
