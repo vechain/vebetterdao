@@ -284,7 +284,7 @@
   "This round is ended.": "此轮已结束。",
   "This proposal won’t reach enough support and it was canceled.": "此提案不会获得足够的支持，已取消。",
   "Timeline": "时间线",
-  "To aim for the equality and quality of the voting process, we use quadratic voting coso, which divide your total amount of VOT3 for the square root.": "为了实现投票过程的平等和质量，我们使用二次投票法，将您的VOT3总数除以平方根。",
+  "To aim for the equality and quality of the voting process, we use quadratic voting, which divide your total amount of VOT3 for the square root.": "为了实现投票过程的平等和质量，我们使用二次投票法，将您的VOT3总数除以平方根。",
   "V3": "V3",
   "Name must be at least 3 characters": "名称必须至少3个字符",
   "Description must be at least 20 characters": "描述必须至少20个字符",
