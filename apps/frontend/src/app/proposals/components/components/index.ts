@@ -1,4 +1,4 @@
-export * from "./Filter"
+export * from "./ProposalsFilters"
 export * from "./types"
 export * from "./CreateProposalCard"
 export * from "./ClaimDeposits"

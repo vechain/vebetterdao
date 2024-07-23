@@ -1,14 +1,20 @@
-import { useAccountBalance, useB3trBalance, useVot3Balance } from "@/api"
-import { Button, Card, CardBody, Grid, GridItem, Heading, Image, Link, Text, VStack } from "@chakra-ui/react"
-import { useMemo } from "react"
+import { getAccountBalanceQueryKey, useAccountBalance, useB3trBalance, useVot3Balance } from "@/api"
+import { Button, Card, CardBody, Grid, GridItem, Heading, Image, Text, VStack } from "@chakra-ui/react"
+import { useCallback, useMemo } from "react"
 import BigNumber from "bignumber.js"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { FiArrowUpRight } from "react-icons/fi"
 import { useTranslation } from "react-i18next"
+import { Transak, TransakConfig } from "@transak/transak-sdk"
+import { useQueryClient } from "@tanstack/react-query"
+
+const isProduction = process.env.NODE_ENV === "production"
+export const apiKey = process.env.NEXT_PUBLIC_TRANSAK_API_KEY ?? ""
 
 const minVtho = 5
 export const LowOnVthoCard: React.FC = () => {
   const { t } = useTranslation()
+  const queryClient = useQueryClient()
   const { account } = useWallet()
   const { data: balance, isLoading: balanceLoading } = useAccountBalance(account ?? undefined)
   const { data: b3trBalance } = useB3trBalance(account ?? undefined)
@@ -38,6 +44,51 @@ export const LowOnVthoCard: React.FC = () => {
     }
   }, [balance])
 
+  const transakConfig: TransakConfig = useMemo(
+    () => ({
+      apiKey,
+      walletAddress: account ?? "",
+      productsAvailed: "BUY",
+      networks: "vechain",
+      paymentMethod: "credit_debit_card",
+      disablePaymentMethods: "gbp_bank_transfer,inr_bank_transfer,sepa_bank_transfer,apple_pay,google_pay",
+      disableWalletAddressForm: true,
+      defaultFiatCurrency: "USD",
+      defaultFiatAmount: 5,
+      defaultNetwork: "vechain",
+      defaultCryptoCurrency: "VTHO",
+      cryptoCurrencyList: "VTHO",
+      backgroundColors: "#ffffff",
+      colorMode: "LIGHT",
+      themeColor: "#004cfc",
+      hideMenu: true,
+      environment: isProduction ? Transak.ENVIRONMENTS.PRODUCTION : Transak.ENVIRONMENTS.STAGING,
+      exchangeScreenTitle: t("Get more VTHO"),
+    }),
+    [account, t],
+  )
+
+  const initTransak = useCallback(() => {
+    const transak = new Transak(transakConfig)
+    transak.init()
+
+    // This will trigger when the user closed the widget
+    Transak.on(Transak.EVENTS.TRANSAK_WIDGET_CLOSE, () => {
+      // Refresh user balance
+      queryClient.cancelQueries({
+        queryKey: getAccountBalanceQueryKey(account ?? undefined),
+      })
+
+      queryClient.refetchQueries({
+        queryKey: getAccountBalanceQueryKey(account ?? undefined),
+      })
+    })
+  }, [transakConfig, account, queryClient])
+
+  const handleOnPress = () => {
+    initTransak()
+  }
+
   if (!account || balanceLoading || !isLowOnVtho || !ownsTokens) return null
 
   return (
@@ -61,11 +112,14 @@ export const LowOnVthoCard: React.FC = () => {
                 {labels?.body} <b>{t("Get more VTHO to get the best experience in the platform.")}</b>
               </Text>
 
-              <Link href={"https://www.coinbase.com/en/how-to-buy/vethor-token"} isExternal>
-                <Button mt={2} variant={"primaryAction"} borderRadius={"full"} rightIcon={<FiArrowUpRight />}>
-                  {t("Get more VTHO")}
-                </Button>
-              </Link>
+              <Button
+                onClick={handleOnPress}
+                mt={2}
+                colorScheme="blue"
+                borderRadius={"full"}
+                rightIcon={<FiArrowUpRight />}>
+                {t("Get more VTHO")}
+              </Button>
             </VStack>
           </GridItem>
         </Grid>
