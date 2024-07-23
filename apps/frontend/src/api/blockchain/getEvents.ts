@@ -1,6 +1,3 @@
-import { getConfig } from "@repo/config"
-
-const appConfig = getConfig()
 /**
  * Params for getEvents function
  * @param thor the thor client
@@ -67,10 +64,10 @@ export const getAllEvents = async ({
   let offset = 0
 
   // thor.block("best").get() is not working, have to use the node directly
-  const bestBlock = await fetch(`${appConfig.nodeUrl}/blocks/best`)
-  const bestBlockJson = (await bestBlock.json()) as Connex.Thor.Block
+  //   const bestBlock = await fetch(`${appConfig.nodeUrl}/blocks/best`)
+  //   const bestBlockJson = (await bestBlock.json()) as Connex.Thor.Block
 
-  to = to || bestBlockJson?.number
+  to = to ?? Number.MAX_SAFE_INTEGER
 
   //return from the function only when we get all the events
   while (true) {
