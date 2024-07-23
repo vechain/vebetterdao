@@ -10,6 +10,22 @@ import { X2EarnAppsDataTypes } from "../libraries/X2EarnAppsDataTypes.sol";
  */
 interface IX2EarnApps {
   /**
+   * @dev The strength level of each node.
+   */
+  enum NodeStrengthLevel {
+    None,
+    // Normal Token
+    Strength,
+    Thunder,
+    Mjolnir,
+    // X Token
+    VeThorX,
+    StrengthX,
+    ThunderX,
+    MjolnirX
+  }
+
+  /**
    * @dev The clock was incorrectly modified.
    */
   error ERC6372InconsistentClock();
@@ -23,6 +39,26 @@ interface IX2EarnApps {
    * @dev The `addr` is not valid (eg: is the ZERO ADDRESS).
    */
   error X2EarnInvalidAddress(address addr);
+
+  /**
+   * @dev The caller is already an endorser.
+   */
+  error X2EarnAlreadyEndorser();
+
+  /**
+   * @dev The caller is not a node holder.
+   */
+  error X2EarnNonNodeHolder();
+
+  /**
+   * @dev The caller is not an endorser.
+   */
+  error X2EarnNonEndorser();
+
+  /**
+   * @dev The `appId` is already endorsed.
+   */
+  error X2EarnAppAlreadyEndorsed(bytes32 appId);
 
   /**
    * @dev An app with the specified `appId` already exists.
@@ -276,6 +312,19 @@ interface IX2EarnApps {
   function isRewardDistributor(bytes32 appId, address distributorAddress) external view returns (bool);
 
   /**
+   * @notice Checks endorsements for a given app and updates its voting eligibility based on the endorsements' scores.
+   *
+   * @dev This function is intended to be called by a cron job prior to the start of each voting round.
+   * If the app has less than 100 points, the grace period elasped is checked.
+   * If the grace period elapsed by the app is greater than the threshold grace period, the app is marked as not eligible for voting.
+   * If an endorser has lost its node status (level 0), it is removed from the endorsers list.
+   *
+   * @param appId The unique identifier of the app being checked.
+   * @return True if the app is eligible for voting.
+   */
+  function checkEndorsement(bytes32 appId) external returns (bool);
+
+  /**
    * @dev Update the metadata URI of the app.
    *
    * @param appId the id of the app
@@ -330,6 +379,39 @@ interface IX2EarnApps {
    * @dev return true if an app is pending for endorsement.
    */
   function appPendingEndorsment(bytes32 appId) external view returns (bool);
+
+  /**
+   * @notice Gets the ids of all apps that are looking for endorsement.
+   * @return the ids of the apps that are pending for endorsement
+   */
+  function appIdsPendingEndorsement() external view returns (bytes32[] memory);
+
+  /**
+   * @notice Gets the information about all apps that are looking for endorsement.
+   * @return the information about the apps that are pending for endorsement
+   */
+  function appsPendingEndorsement() external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory);
+
+  /**
+   * @dev Get the endorsement score of an app.
+   *
+   * @param appId the id of the app
+   */
+  function getScore(bytes32 appId) external returns (uint256);
+
+  /**
+   * @dev Get the endorsers of an app.
+   *
+   * @param appId the id of the app
+   */
+  function getEndorsers(bytes32 appId) external view returns (address[] memory);
+
+  /**
+   * @dev Get the endorsersment score of an individual.
+   *
+   * @param user the address of the user
+   */
+  function getNodeEndorsementScore(address user) external view returns (uint256);
 
   /**
    * @notice Get the version of the contract.
