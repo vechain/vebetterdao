@@ -1,3 +1,6 @@
+import { getConfig } from "@repo/config"
+
+const appConfig = getConfig()
 /**
  * Params for getEvents function
  * @param thor the thor client
@@ -15,6 +18,7 @@ export type GetEventsProps = {
   offset?: number
   limit?: number
   from?: number
+  to?: number
   filterCriteria: Connex.Thor.Filter.Criteria<"event">[]
 }
 /**
@@ -30,13 +34,14 @@ export const getEvents = async ({
   offset = 0,
   limit = 256,
   from = 0,
+  to = thor.status.head.number,
   filterCriteria,
 }: GetEventsProps): Promise<Connex.Thor.Filter.Row<"event">[]> => {
   return await thor
     .filter("event", filterCriteria)
     .range({
       from,
-      to: thor.status.head.number,
+      to,
       unit: "block",
     })
     .order(order)
@@ -55,16 +60,25 @@ export const getAllEvents = async ({
   thor,
   order = "asc",
   from = 0,
+  to,
   filterCriteria,
 }: Omit<GetEventsProps, "offset" | "limit">) => {
   const allEvents: Connex.Thor.Filter.Row<"event", {}>[] = []
   let offset = 0
+
+  // thor.block("best").get() is not working, have to use the node directly
+  const bestBlock = await fetch(`${appConfig.nodeUrl}/blocks/best`)
+  const bestBlockJson = (await bestBlock.json()) as Connex.Thor.Block
+
+  to = to || bestBlockJson?.number
+
   //return from the function only when we get all the events
   while (true) {
     const events = await getEvents({
       thor,
       filterCriteria,
       from,
+      to,
       limit: 256,
       order,
       offset,
